@@ -18,9 +18,9 @@ namespace Pinder.Core.Stats
         {
             { StatType.Charm,         StatType.SelfAwareness },
             { StatType.Rizz,          StatType.Wit           },
-            { StatType.Honesty,       StatType.SelfAwareness },
+            { StatType.Honesty,       StatType.Chaos         },
             { StatType.Chaos,         StatType.Charm         },
-            { StatType.Wit,           StatType.Wit           },
+            { StatType.Wit,           StatType.Rizz          },
             { StatType.SelfAwareness, StatType.Honesty       }
         };
 
@@ -79,7 +79,7 @@ namespace Pinder.Core.Stats
         public int GetDefenceDC(StatType attackingStat)
         {
             StatType defenceStat = DefenceTable[attackingStat];
-            return 10 + GetEffective(defenceStat);
+            return 13 + GetEffective(defenceStat);
         }
     }
 }
