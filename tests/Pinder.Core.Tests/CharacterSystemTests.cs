@@ -242,6 +242,18 @@ namespace Pinder.Core.Tests
         // -----------------------------------------------------------------------
 
         [Fact]
+        public void InterestMeter_MaxIs25()
+        {
+            Assert.Equal(25, InterestMeter.Max);
+        }
+
+        [Fact]
+        public void InterestMeter_StartingValueIs10()
+        {
+            Assert.Equal(10, InterestMeter.StartingValue);
+        }
+
+        [Fact]
         public void InterestMeter_StartsAt10()
         {
             var meter = new InterestMeter();
@@ -285,7 +297,7 @@ namespace Pinder.Core.Tests
             var dice = new FixedDice(50); // neutral roll
 
             int delayLow  = profile.ComputeDelay(0,  dice);
-            int delayHigh = profile.ComputeDelay(20, dice);
+            int delayHigh = profile.ComputeDelay(InterestMeter.Max, dice);
 
             Assert.True(delayHigh < delayLow,
                 $"High interest ({delayHigh}) should produce shorter delay than low ({delayLow})");
@@ -297,7 +309,7 @@ namespace Pinder.Core.Tests
             var profile = new TimingProfile(0, 0f, 0f, "neutral");
             var dice = new FixedDice(1);
 
-            int delay = profile.ComputeDelay(20, dice);
+            int delay = profile.ComputeDelay(InterestMeter.Max, dice);
             Assert.True(delay >= 1);
         }
     }

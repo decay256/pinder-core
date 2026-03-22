@@ -119,7 +119,7 @@ namespace Pinder.Core.Tests
         {
             var attacker = MakeStats();
             var defender = MakeStats();
-            // Roll 0 not possible, but with -1 modifier: roll 10 + (-1) = 9 vs DC 20
+            // Roll 0 not possible, but with -1 modifier: roll 9 + (-1) + 0 = 8 vs DC 20
             var baseStats = new Dictionary<StatType, int>
             {
                 { StatType.Charm, -1 }, { StatType.Rizz, 0 }, { StatType.Honesty, 0 },

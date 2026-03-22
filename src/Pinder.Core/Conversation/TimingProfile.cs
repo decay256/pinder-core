@@ -33,8 +33,8 @@ namespace Pinder.Core.Conversation
         /// Compute the actual reply delay in minutes for a given interest level.
         ///
         /// Formula:
-        ///   1. Interest reduction: at interest=20, subtract 50 % of base delay.
-        ///      adjusted = BaseDelay * (1 – 0.5 * interestLevel / 20)
+        ///   1. Interest reduction: at interest=Max, subtract 50 % of base delay.
+        ///      adjusted = BaseDelay * (1 – 0.5 * interestLevel / Max)
         ///   2. Variance: roll d100, map [1,100] → [1 – VM*0.5, 1 + VM*0.5], multiply adjusted.
         ///   3. Floor at 1 minute.
         /// </summary>
@@ -43,10 +43,10 @@ namespace Pinder.Core.Conversation
             if (dice == null) throw new ArgumentNullException(nameof(dice));
 
             // Clamp interest to valid range
-            int interest = Math.Max(0, Math.Min(20, interestLevel));
+            int interest = Math.Max(0, Math.Min(InterestMeter.Max, interestLevel));
 
             // Step 1 – interest reduction
-            float interestFraction = interest / 20.0f;
+            float interestFraction = interest / (float)InterestMeter.Max;
             float adjusted         = BaseDelayMinutes * (1.0f - 0.5f * interestFraction);
 
             // Step 2 – variance
