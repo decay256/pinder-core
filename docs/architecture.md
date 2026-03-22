@@ -56,7 +56,7 @@ Every numeric constant or structural table in the engine traces back to a rules 
 
 | Rules Section | Rule Value | C# Location | C# Constant/Expression |
 |---|---|---|---|
-| §3 Defence pairings | Charm↔SelfAwareness, Rizz↔Wit, Honesty↔Chaos (bijection) | `Stats/StatBlock.cs` | `StatBlock.DefenceTable` |
+| §3 Defence pairings | Charm→SA, Rizz→Wit, Honesty→Chaos, Chaos→Charm, Wit→Rizz, SA→Honesty (each stat appears once as attacker, once as defender) | `Stats/StatBlock.cs` | `StatBlock.DefenceTable` |
 | §3 Base DC | 13 | `Stats/StatBlock.cs` | `StatBlock.GetDefenceDC()` — hardcoded `13 +` |
 | §5 Fail tiers | Nat1→Legendary, miss 1–2→Fumble, 3–5→Misfire, 6–9→TropeTrap, 10+→Catastrophe | `Rolls/RollEngine.cs` | Boundary checks in `Resolve()` method |
 | §5 Fail tier enum | None, Fumble, Misfire, TropeTrap, Catastrophe, Legendary | `Rolls/FailureTier.cs` | `FailureTier` enum |
@@ -77,7 +77,13 @@ Every numeric constant or structural table in the engine traces back to a rules 
 ### Drift Detection
 
 1. **Automated**: `tests/Pinder.Core.Tests/RulesConstantsTests.cs` asserts every value in the sync table above. If a rule changes and code is updated without updating the test (or vice versa), CI fails.
-2. **Manual checklist** when `rules-v3.md` changes:
+2. **Quick grep patterns** to find hardcoded rule values in C#:
+   - Base DC: `grep -rn "13 +" src/Pinder.Core/Stats/`
+   - Interest bounds: `grep -rn "Max\|Min\|StartingValue" src/Pinder.Core/Conversation/`
+   - XP thresholds: `grep -rn "XpThresholds" src/Pinder.Core/Progression/`
+   - Shadow penalty divisor: `grep -rn "/ 3" src/Pinder.Core/Stats/`
+   - Failure tier boundaries: `grep -rn "miss\|<= 2\|<= 5\|<= 9" src/Pinder.Core/Rolls/`
+3. **Manual checklist** when `rules-v3.md` changes:
    - Open this sync table
    - For each changed section, find the C# location
    - Update the constant/logic
