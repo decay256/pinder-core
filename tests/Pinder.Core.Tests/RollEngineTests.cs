@@ -49,7 +49,7 @@ namespace Pinder.Core.Tests
         public void Nat20_IsAlwaysSuccess()
         {
             var attacker = MakeStats(charm: -5);  // terrible modifier
-            var defender = MakeStats(selfAwareness: 10); // DC 20
+            var defender = MakeStats(selfAwareness: 10); // DC 23 (13 + SA mod 10)
             var result = RollEngine.Resolve(
                 StatType.Charm, attacker, defender, new TrapState(), 1,
                 new EmptyTrapRegistry(), new FixedDice(20));
@@ -63,7 +63,7 @@ namespace Pinder.Core.Tests
         public void Nat1_IsLegendaryFail()
         {
             var attacker = MakeStats(charm: 10); // great modifier
-            var defender = MakeStats();           // DC 10
+            var defender = MakeStats();           // DC 13 (13 + all stats 0)
             var result = RollEngine.Resolve(
                 StatType.Charm, attacker, defender, new TrapState(), 1,
                 new EmptyTrapRegistry(), new FixedDice(1));
@@ -119,7 +119,7 @@ namespace Pinder.Core.Tests
         {
             var attacker = MakeStats();
             var defender = MakeStats();
-            // Roll 0 not possible, but with -1 modifier: roll 10 + (-1) = 9 vs DC 20
+            // Roll 0 not possible, but with -1 modifier: roll 10 + (-1) = 9 vs DC 13
             var baseStats = new Dictionary<StatType, int>
             {
                 { StatType.Charm, -1 }, { StatType.Rizz, 0 }, { StatType.Honesty, 0 },
