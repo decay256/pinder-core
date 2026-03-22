@@ -49,7 +49,7 @@ namespace Pinder.Core.Tests
         public void Nat20_IsAlwaysSuccess()
         {
             var attacker = MakeStats(charm: -5);  // terrible modifier
-            var defender = MakeStats(selfAwareness: 10); // DC 20
+            var defender = MakeStats(selfAwareness: 10); // DC 23 (13 + SA mod 10)
             var result = RollEngine.Resolve(
                 StatType.Charm, attacker, defender, new TrapState(), 1,
                 new EmptyTrapRegistry(), new FixedDice(20));
@@ -63,7 +63,7 @@ namespace Pinder.Core.Tests
         public void Nat1_IsLegendaryFail()
         {
             var attacker = MakeStats(charm: 10); // great modifier
-            var defender = MakeStats();           // DC 10
+            var defender = MakeStats();           // DC 13 (13 + all stats 0)
             var result = RollEngine.Resolve(
                 StatType.Charm, attacker, defender, new TrapState(), 1,
                 new EmptyTrapRegistry(), new FixedDice(1));
@@ -76,14 +76,14 @@ namespace Pinder.Core.Tests
         [Fact]
         public void MissByOne_IsFumble()
         {
-            // DC = 10 + 0 = 10. Roll 8 + 0 + 0 = 8. Miss by 2 → Fumble
+            // DC = 13 + 0 = 13. Roll 11 + 0 + 0 = 11. Miss by 2 → Fumble
             var attacker = MakeStats();
             var defender = MakeStats();
             var result = RollEngine.Resolve(
                 StatType.Charm, attacker, defender, new TrapState(), 1,
-                new EmptyTrapRegistry(), new FixedDice(8));
+                new EmptyTrapRegistry(), new FixedDice(11));
 
-            Assert.Equal(10, result.DC);
+            Assert.Equal(13, result.DC);
             Assert.Equal(2, result.MissMargin);
             Assert.Equal(FailureTier.Fumble, result.Tier);
         }
@@ -93,10 +93,10 @@ namespace Pinder.Core.Tests
         {
             var attacker = MakeStats();
             var defender = MakeStats();
-            // Roll 5: total 5, DC 10, miss 5 → Misfire
+            // Roll 8: total 8, DC 13, miss 5 → Misfire
             var result = RollEngine.Resolve(
                 StatType.Charm, attacker, defender, new TrapState(), 1,
-                new EmptyTrapRegistry(), new FixedDice(5));
+                new EmptyTrapRegistry(), new FixedDice(8));
 
             Assert.Equal(FailureTier.Misfire, result.Tier);
         }
@@ -106,10 +106,10 @@ namespace Pinder.Core.Tests
         {
             var attacker = MakeStats();
             var defender = MakeStats();
-            // Roll 3: total 3, DC 10, miss 7 → TropeTrap
+            // Roll 6: total 6, DC 13, miss 7 → TropeTrap
             var result = RollEngine.Resolve(
                 StatType.Charm, attacker, defender, new TrapState(), 1,
-                new EmptyTrapRegistry(), new FixedDice(3));
+                new EmptyTrapRegistry(), new FixedDice(6));
 
             Assert.Equal(FailureTier.TropeTrap, result.Tier);
         }
@@ -119,6 +119,7 @@ namespace Pinder.Core.Tests
         {
             var attacker = MakeStats();
             var defender = MakeStats();
+            // Roll 0 not possible, but with -1 modifier: roll 10 + (-1) = 9 vs DC 13
             // Roll 0 not possible, but with -1 modifier: roll 9 + (-1) + 0 = 8 vs DC 20
             var baseStats = new Dictionary<StatType, int>
             {
@@ -132,8 +133,8 @@ namespace Pinder.Core.Tests
                 { ShadowStatType.Dread, 0 }, { ShadowStatType.Overthinking, 0 }
             };
             var weakAttacker = new StatBlock(baseStats, shadowStats);
-            var strongDefender = MakeStats(selfAwareness: 10); // DC 20
-            // Roll 9 - 1 + 0 = 8, vs DC 20, miss 12 → Catastrophe
+            var strongDefender = MakeStats(selfAwareness: 10); // DC 23
+            // Roll 9 - 1 + 0 = 8, vs DC 23, miss 15 → Catastrophe
             var result = RollEngine.Resolve(
                 StatType.Charm, weakAttacker, strongDefender, new TrapState(), 1,
                 new EmptyTrapRegistry(), new FixedDice(9));
@@ -190,12 +191,12 @@ namespace Pinder.Core.Tests
         [Fact]
         public void LevelBonus_AppliesToRoll()
         {
-            // Level 5 → bonus +2. Roll 9 + 0 + 2 = 11 vs DC 10 → success
+            // Level 5 → bonus +2. Roll 12 + 0 + 2 = 14 vs DC 13 → success
             var attacker = MakeStats();
             var defender = MakeStats();
             var result = RollEngine.Resolve(
                 StatType.Charm, attacker, defender, new TrapState(), 5,
-                new EmptyTrapRegistry(), new FixedDice(9));
+                new EmptyTrapRegistry(), new FixedDice(12));
 
             Assert.True(result.IsSuccess);
             Assert.Equal(2, result.LevelBonus);

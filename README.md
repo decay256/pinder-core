@@ -18,7 +18,7 @@ Targets **netstandard2.0** with **C# 8.0**. No external dependencies. Drop the `
 
 ```
 d20 + statModifier + levelBonus >= DC
-DC = 10 + opponent's defending stat modifier
+DC = 13 + opponent's defending stat modifier
 ```
 
 Fail tiers (miss margin = DC − roll):
