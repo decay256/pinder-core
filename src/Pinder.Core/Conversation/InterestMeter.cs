@@ -3,12 +3,12 @@ using System;
 namespace Pinder.Core.Conversation
 {
     /// <summary>
-    /// Tracks the opponent's interest level (0–20) during a conversation.
+    /// Tracks the opponent's interest level (0–25) during a conversation.
     /// Starts at 10. Clamped to [Min, Max] on every Apply call.
     /// </summary>
     public sealed class InterestMeter
     {
-        public const int Max           = 20;
+        public const int Max           = 25;
         public const int Min           = 0;
         public const int StartingValue = 10;
 
