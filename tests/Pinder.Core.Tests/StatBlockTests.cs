@@ -34,7 +34,7 @@ namespace Pinder.Core.Tests
         // --- Defence pairing tests (rules v3.4) ---
 
         [Fact]
-        public void DefenceTable_HonestyMapsToChoas()
+        public void DefenceTable_HonestyMapsToChaos()
         {
             Assert.Equal(StatType.Chaos, StatBlock.DefenceTable[StatType.Honesty]);
         }
