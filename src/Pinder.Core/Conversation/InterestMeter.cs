@@ -30,5 +30,39 @@ namespace Pinder.Core.Conversation
 
         /// <summary>True when interest has hit zero.</summary>
         public bool IsZero => Current <= Min;
+
+        /// <summary>
+        /// Returns the current interest state based on rules v3.4 §6 boundaries:
+        /// 0 = Unmatched, 1–4 = Bored, 5–15 = Interested,
+        /// 16–20 = VeryIntoIt, 21–24 = AlmostThere, 25 = DateSecured.
+        /// </summary>
+        public InterestState GetState()
+        {
+            if (Current <= 0)  return InterestState.Unmatched;
+            if (Current <= 4)  return InterestState.Bored;
+            if (Current <= 15) return InterestState.Interested;
+            if (Current <= 20) return InterestState.VeryIntoIt;
+            if (Current <= 24) return InterestState.AlmostThere;
+            return InterestState.DateSecured;
+        }
+
+        /// <summary>
+        /// True when the current interest state grants advantage (VeryIntoIt or AlmostThere).
+        /// Rules v3.4 §6.
+        /// </summary>
+        public bool GrantsAdvantage
+        {
+            get
+            {
+                var state = GetState();
+                return state == InterestState.VeryIntoIt || state == InterestState.AlmostThere;
+            }
+        }
+
+        /// <summary>
+        /// True when the current interest state grants disadvantage (Bored).
+        /// Rules v3.4 §6.
+        /// </summary>
+        public bool GrantsDisadvantage => GetState() == InterestState.Bored;
     }
 }
