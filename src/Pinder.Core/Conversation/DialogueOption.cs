@@ -1,0 +1,39 @@
+using Pinder.Core.Stats;
+
+namespace Pinder.Core.Conversation
+{
+    /// <summary>
+    /// A single dialogue option presented to the player during their turn.
+    /// </summary>
+    public sealed class DialogueOption
+    {
+        /// <summary>The stat used for this option's roll.</summary>
+        public StatType Stat { get; }
+
+        /// <summary>The intended message text before degradation.</summary>
+        public string IntendedText { get; }
+
+        /// <summary>Turn number for callback bonus, if applicable.</summary>
+        public int? CallbackTurnNumber { get; }
+
+        /// <summary>Name of the combo being completed, if any.</summary>
+        public string? ComboName { get; }
+
+        /// <summary>Whether this option has a tell bonus.</summary>
+        public bool HasTellBonus { get; }
+
+        public DialogueOption(
+            StatType stat,
+            string intendedText,
+            int? callbackTurnNumber = null,
+            string? comboName = null,
+            bool hasTellBonus = false)
+        {
+            Stat = stat;
+            IntendedText = intendedText ?? throw new System.ArgumentNullException(nameof(intendedText));
+            CallbackTurnNumber = callbackTurnNumber;
+            ComboName = comboName;
+            HasTellBonus = hasTellBonus;
+        }
+    }
+}

@@ -1,0 +1,58 @@
+using System.Threading.Tasks;
+using Pinder.Core.Interfaces;
+using Pinder.Core.Rolls;
+using Pinder.Core.Stats;
+
+namespace Pinder.Core.Conversation
+{
+    /// <summary>
+    /// A no-op LLM adapter that returns hardcoded placeholder responses.
+    /// Used for unit testing and standalone runs without an actual LLM provider.
+    /// </summary>
+    public sealed class NullLlmAdapter : ILlmAdapter
+    {
+        /// <summary>
+        /// Returns 4 generic dialogue options, one per stat family
+        /// (Charm, Honesty, Wit, Chaos).
+        /// </summary>
+        public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context)
+        {
+            var options = new[]
+            {
+                new DialogueOption(StatType.Charm, "Hey, you come here often?"),
+                new DialogueOption(StatType.Honesty, "I have to be real with you..."),
+                new DialogueOption(StatType.Wit, "Did you know that penguins propose with pebbles?"),
+                new DialogueOption(StatType.Chaos, "I once ate a whole pizza in a bouncy castle.")
+            };
+            return Task.FromResult(options);
+        }
+
+        /// <summary>
+        /// Echoes the intended text with a failure tier prefix.
+        /// Format: "[{tier}] {intendedText}" for failures, or the intended text as-is for success.
+        /// </summary>
+        public Task<string> DeliverMessageAsync(DeliveryContext context)
+        {
+            string message = context.Outcome == FailureTier.None
+                ? context.ChosenOption.IntendedText
+                : $"[{context.Outcome}] {context.ChosenOption.IntendedText}";
+            return Task.FromResult(message);
+        }
+
+        /// <summary>
+        /// Returns a minimal placeholder response: "...".
+        /// </summary>
+        public Task<string> GetOpponentResponseAsync(OpponentContext context)
+        {
+            return Task.FromResult("...");
+        }
+
+        /// <summary>
+        /// Always returns null (no narrative beat).
+        /// </summary>
+        public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context)
+        {
+            return Task.FromResult<string?>(null);
+        }
+    }
+}

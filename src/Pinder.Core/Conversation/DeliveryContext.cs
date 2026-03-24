@@ -1,0 +1,59 @@
+using System.Collections.Generic;
+using Pinder.Core.Rolls;
+
+namespace Pinder.Core.Conversation
+{
+    /// <summary>
+    /// Context passed to the LLM when delivering a chosen dialogue option.
+    /// Includes outcome information for degradation.
+    /// </summary>
+    public sealed class DeliveryContext
+    {
+        /// <summary>Assembled system prompt for the player character.</summary>
+        public string PlayerPrompt { get; }
+
+        /// <summary>Assembled system prompt for the opponent character.</summary>
+        public string OpponentPrompt { get; }
+
+        /// <summary>Conversation history as (sender, text) pairs in order.</summary>
+        public IReadOnlyList<(string Sender, string Text)> ConversationHistory { get; }
+
+        /// <summary>The opponent's last message, or empty if first turn.</summary>
+        public string OpponentLastMessage { get; }
+
+        /// <summary>The dialogue option the player chose.</summary>
+        public DialogueOption ChosenOption { get; }
+
+        /// <summary>
+        /// The failure tier of the roll outcome.
+        /// None means success; any other value means failure at that tier.
+        /// </summary>
+        public FailureTier Outcome { get; }
+
+        /// <summary>How much the roll beat the DC by (for success grading). Negative or zero on failure.</summary>
+        public int BeatDcBy { get; }
+
+        /// <summary>Active trap LLM instructions (full taint text, not just names).</summary>
+        public IReadOnlyList<string> ActiveTraps { get; }
+
+        public DeliveryContext(
+            string playerPrompt,
+            string opponentPrompt,
+            IReadOnlyList<(string Sender, string Text)> conversationHistory,
+            string opponentLastMessage,
+            DialogueOption chosenOption,
+            FailureTier outcome,
+            int beatDcBy,
+            IReadOnlyList<string> activeTraps)
+        {
+            PlayerPrompt = playerPrompt ?? throw new System.ArgumentNullException(nameof(playerPrompt));
+            OpponentPrompt = opponentPrompt ?? throw new System.ArgumentNullException(nameof(opponentPrompt));
+            ConversationHistory = conversationHistory ?? throw new System.ArgumentNullException(nameof(conversationHistory));
+            OpponentLastMessage = opponentLastMessage ?? throw new System.ArgumentNullException(nameof(opponentLastMessage));
+            ChosenOption = chosenOption ?? throw new System.ArgumentNullException(nameof(chosenOption));
+            Outcome = outcome;
+            BeatDcBy = beatDcBy;
+            ActiveTraps = activeTraps ?? throw new System.ArgumentNullException(nameof(activeTraps));
+        }
+    }
+}
