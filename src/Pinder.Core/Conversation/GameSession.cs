@@ -105,8 +105,9 @@ namespace Pinder.Core.Conversation
             _currentHasAdvantage = hasAdvantage;
             _currentHasDisadvantage = hasDisadvantage;
 
-            // Get trap names for context
+            // Get trap names and LLM instructions for context
             var activeTrapNames = GetActiveTrapNames();
+            var activeTrapInstructions = GetActiveTrapInstructions();
 
             // Build dialogue context
             var context = new DialogueContext(
@@ -115,7 +116,8 @@ namespace Pinder.Core.Conversation
                 conversationHistory: _history.AsReadOnly(),
                 opponentLastMessage: GetLastOpponentMessage(),
                 activeTraps: activeTrapNames,
-                currentInterest: _interest.Current);
+                currentInterest: _interest.Current,
+                activeTrapInstructions: activeTrapInstructions);
 
             // Get dialogue options from LLM
             var options = await _llm.GetDialogueOptionsAsync(context).ConfigureAwait(false);
@@ -195,9 +197,8 @@ namespace Pinder.Core.Conversation
             _traps.AdvanceTurn();
 
             // 7. Deliver message via LLM
-            var activeTrapInstructions = _traps.AllActive
-                .Select(t => t.Definition.LlmInstruction)
-                .ToList();
+            var deliveryTrapNames = GetActiveTrapNames();
+            var deliveryTrapInstructions = GetActiveTrapInstructions();
 
             int beatDcBy = rollResult.IsSuccess ? rollResult.Total - rollResult.DC : 0;
 
@@ -209,7 +210,8 @@ namespace Pinder.Core.Conversation
                 chosenOption: chosenOption,
                 outcome: rollResult.Tier,
                 beatDcBy: beatDcBy,
-                activeTraps: activeTrapInstructions);
+                activeTraps: deliveryTrapNames,
+                activeTrapInstructions: deliveryTrapInstructions);
 
             string deliveredMessage = await _llm.DeliverMessageAsync(deliveryContext).ConfigureAwait(false);
 
@@ -233,6 +235,8 @@ namespace Pinder.Core.Conversation
             double responseDelayMinutes = _opponent.Timing.ComputeDelay(_interest.Current, _dice);
 
             // 11. Generate opponent response
+            var opponentTrapInstructions = GetActiveTrapInstructions();
+
             var opponentContext = new OpponentContext(
                 playerPrompt: _player.AssembledSystemPrompt,
                 opponentPrompt: _opponent.AssembledSystemPrompt,
@@ -243,7 +247,8 @@ namespace Pinder.Core.Conversation
                 playerDeliveredMessage: deliveredMessage,
                 interestBefore: interestBefore,
                 interestAfter: interestAfter,
-                responseDelayMinutes: responseDelayMinutes);
+                responseDelayMinutes: responseDelayMinutes,
+                activeTrapInstructions: opponentTrapInstructions);
 
             var opponentResponse = await _llm.GetOpponentResponseAsync(opponentContext).ConfigureAwait(false);
             string opponentMessage = opponentResponse.MessageText;
@@ -330,6 +335,19 @@ namespace Pinder.Core.Conversation
             return _traps.AllActive
                 .Select(t => t.Definition.Id)
                 .ToList();
+        }
+
+        /// <summary>
+        /// Collects the LLM instruction text from all currently active traps.
+        /// Returns null if no traps are active (avoids empty array allocation).
+        /// </summary>
+        private string[]? GetActiveTrapInstructions()
+        {
+            var instructions = _traps.AllActive
+                .Select(t => t.Definition.LlmInstruction)
+                .Where(s => !string.IsNullOrEmpty(s))
+                .ToArray();
+            return instructions.Length > 0 ? instructions : null;
         }
     }
 }

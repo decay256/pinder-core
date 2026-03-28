@@ -26,6 +26,12 @@ namespace Pinder.Core.Interfaces
     {
         /// <summary>Returns the trap definition for a stat, or null if none defined.</summary>
         TrapDefinition? GetTrap(StatType stat);
+
+        /// <summary>
+        /// Returns the LLM instruction (prompt taint text) for the trap on the given stat,
+        /// or null if no trap is defined for that stat.
+        /// </summary>
+        string? GetLlmInstruction(StatType stat);
     }
 
     /// <summary>
