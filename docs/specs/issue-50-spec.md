@@ -327,7 +327,7 @@ TurnResult.TellReadMessage = "📖 You read the moment. +2 bonus."
 | Multiple tells in sequence (opponent sends tell every turn) | Each new tell overwrites the previous one. Only the most recent tell is active. |
 | First turn (no prior opponent response) | `_activeTell` is null; no tell bonus possible. |
 | Nat 20 with tell bonus | `rollBonus: 2` is added to total. Nat 20 is already auto-success; the +2 increases the "beat DC by" margin, potentially yielding a higher `SuccessScale` tier. |
-| Nat 1 with tell bonus | Nat 1 is auto-failure (Legendary tier). The tell bonus does not override natural 1 auto-fail. Tell is still consumed. `TellReadBonus` should be 0 (bonus did not help). |
+| Nat 1 with tell bonus | Nat 1 is auto-failure (Legendary tier). The tell bonus does not override natural 1 auto-fail. Tell is still consumed. `TellReadBonus = 2` because the player correctly read the tell (picked the matching stat); the `rollBonus: 2` was passed to `RollEngine.Resolve` but Nat 1 auto-fail takes precedence. `TellReadMessage` is set. This is consistent with the "tell matches but roll still fails" case — the tell was read, the bonus was applied, the outcome was just too bad. |
 | Tell stat matches but roll still fails after +2 | `TellReadBonus = 2`, `TellReadMessage` is set. The bonus was applied but wasn't enough. (The tell was "read" even if the roll failed — the player picked the right stat.) |
 | `DialogueOption.HasTellBonus` is true but player picks a different option | The non-selected option's `HasTellBonus` flag is irrelevant. Only the chosen option's stat is compared to the tell. |
 
