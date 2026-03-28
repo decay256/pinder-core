@@ -278,6 +278,8 @@ ConsumeEnergy(1) → false, DailyEnergy → 0
 | `AdvanceTo` | `target < Now` | `ArgumentOutOfRangeException` | `"target must not be in the past"` |
 | `ConsumeEnergy` | `amount <= 0` | `ArgumentOutOfRangeException` | `"amount must be positive"` |
 
+| Constructor | `dice` is `null` | `ArgumentNullException` | `"dice"` |
+
 No other methods throw. `GetTimeOfDay()` and `GetHorninessModifier()` are pure derivations that always succeed.
 
 ---
