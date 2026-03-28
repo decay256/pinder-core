@@ -171,6 +171,201 @@ When a rules document changes:
 
 ---
 
+## Sprint 5: RPG Rules Complete — Architecture Briefing
+
+### Architecture Overview
+
+This sprint completes the RPG rule system by implementing all remaining §5–§15 mechanics. The existing architecture is **extended, not restructured**: `GameSession` remains the single orchestrator, `RollEngine` stays stateless, and new gameplay mechanics are implemented as **small, stateless evaluator classes** that `GameSession` calls at the appropriate point in the turn lifecycle.
+
+**What's new in this sprint:**
+
+1. **Wave 0 Prerequisites** (#139) — Infrastructure additions that unblock all feature work: `SessionShadowTracker` (mutable shadow layer wrapping immutable `StatBlock`), `IGameClock` interface, `RollEngine` extensions (fixed-DC rolls, external bonus pass-through, DC adjustment), `GameSessionConfig`, `InterestMeter(int)` overload, `TrapState.HasActive`.
+
+2. **GameClock** (#54) — Production implementation of `IGameClock`. Simulated game time with time-of-day Horniness modifier and daily energy system.
+
+3. **Read/Recover/Wait actions** (#43) — Three new turn action methods on `GameSession` (alongside existing `ResolveTurnAsync` for Speak).
+
+4. **Shadow growth** (#44) — `ShadowGrowthEvaluator` stateless class + `SessionCounters` tracking class. Called after every roll to check the §7 growth table.
+
+5. **Shadow thresholds** (#45) — `ShadowThresholdEvaluator` stateless class. Computes disadvantage, option suppression, and forced-stat effects from shadow values ≥6/12/18.
+
+6. **Combo system** (#46) — `ComboDetector` stateless class. Detects stat-sequence combos for interest bonuses.
+
+7. **Callback bonus** (#47) — `CallbackEvaluator` stateless class. Computes hidden interest bonus for topic callbacks.
+
+8. **XP tracking** (#48) — `XpLedger` accumulator class in `Progression/`. Records XP events per session.
+
+9. **Weakness windows** (#49) — Integration of existing `WeaknessWindow` type into `GameSession` turn flow. DC reduction on next turn.
+
+10. **Tells** (#50) — Integration of existing `Tell` type into `GameSession` turn flow. Hidden +2 roll bonus.
+
+11. **Horniness-forced Rizz** (#51) — Post-processing logic in `StartTurnAsync` that forces Rizz options when Horniness is high.
+
+12. **Player response delay** (#55) — `PlayerResponseDelayEvaluator` stateless pure function. Maps delay duration + opponent personality to interest penalty.
+
+13. **ConversationRegistry** (#56) — Multi-session manager. Schedules opponent replies, fast-forwards game clock, propagates cross-chat shadow bleed events.
+
+14. **QA review** (#38) — Audit pass on existing tests. Ships last.
+
+### Key Architectural Pattern: Stateless Evaluators
+
+Most new mechanics follow the same pattern:
+- **Stateless evaluator class** with `static` methods (no instance state)
+- Takes turn context as parameters, returns a result
+- `GameSession` calls the evaluator at the right point in the turn lifecycle
+- `GameSession` applies the result to its owned mutable state
+
+This keeps each mechanic isolated and independently testable. An implementer can build `ComboDetector` without knowing anything about `ShadowGrowthEvaluator`.
+
+### Updated Data Flow (Sprint 5)
+
+```
+Host creates GameSession(player, opponent, llm, dice, trapRegistry, config?)
+  → config provides: IGameClock?, SessionShadowTracker? (player/opponent), StartingInterest?
+  → session owns: InterestMeter, TrapState, XpLedger, SessionCounters, history, momentum, turn counter
+  → session stores: pendingTell, pendingWeaknessWindow, tripleComboBonus
+
+Per turn:
+  1. StartTurnAsync()
+     → check end conditions (interest 0/25, ghost trigger)
+     → ShadowThresholdEvaluator: get disadvantage/suppressed stats
+     → compute Horniness level (shadow + clock modifier)
+     → build DialogueContext with thresholds, horniness, callback opportunities
+     → ILlmAdapter.GetDialogueOptionsAsync()
+     → ComboDetector.PreviewCombos() → annotate options with combo names
+     → annotate options with tell bonus, weakness window
+     → post-process: Horniness-forced Rizz replacement
+     → return TurnStart
+
+  2a. ResolveTurnAsync(optionIndex) [Speak action]
+     → validate → RollEngine.Resolve() with adv/disadv + dcAdjustment (weakness) + externalBonus (tell/callback/triple)
+     → SuccessScale or FailureScale → interest delta
+     → RiskTierBonus → additional interest delta
+     → ComboDetector.Detect() → combo interest bonus
+     → CallbackEvaluator.GetBonus() → callback interest bonus
+     → momentum bonus
+     → InterestMeter.Apply(total delta)
+     → ShadowGrowthEvaluator.EvaluateAfterRoll() → apply shadow growth
+     → XpLedger.Record() → record XP
+     → trap advance → LLM deliver → opponent response
+     → store pendingTell, pendingWeaknessWindow from opponent response
+     → update SessionCounters
+     → return TurnResult
+
+  2b. ReadAsync() / RecoverAsync() / WaitAsync()
+     → RollEngine.ResolveFixedDC (Read/Recover) or no roll (Wait)
+     → apply specific effects (reveal interest, clear traps, -1 interest)
+     → shadow growth (Overthinking on Read/Recover fail)
+     → XP recording
+     → return specific result type
+
+ConversationRegistry (host-level, above GameSession):
+  → Register sessions → ScheduleOpponentReply → FastForward (advance clock, check ghosts, apply decay)
+  → ApplyCrossChatEvent → propagate shadow bleed across sessions
+```
+
+### Components Being Extended
+
+| Component | What's added |
+|---|---|
+| `GameSession` | ReadAsync, RecoverAsync, WaitAsync; integration of all evaluators; config-based construction |
+| `RollEngine` | ResolveFixedDC overload; externalBonus/dcAdjustment params |
+| `RollResult` | IsSuccess now uses FinalTotal |
+| `InterestMeter` | Constructor overload with custom starting value |
+| `TrapState` | HasActive property |
+| `DialogueOption` | HasWeaknessWindow, IsHorninessForced fields |
+
+### New Components
+
+| Component | Location | Owner |
+|---|---|---|
+| `SessionShadowTracker` | `Stats/` | Mutable shadow tracking per session |
+| `IGameClock` | `Interfaces/` | Time/energy interface |
+| `GameClock` | `Conversation/` | Production clock impl |
+| `TimeOfDay` | `Conversation/` | Enum |
+| `GameSessionConfig` | `Conversation/` | Optional config for GameSession |
+| `ShadowGrowthEvaluator` | `Conversation/` | §7 growth table logic |
+| `ShadowThresholdEvaluator` | `Stats/` | §7 threshold effects |
+| `SessionCounters` | `Conversation/` | Per-session tracking state |
+| `ComboDetector` | `Conversation/` | §15 combo detection |
+| `ComboDefinition` | `Conversation/` | Combo data model |
+| `CallbackEvaluator` | `Conversation/` | §15 callback bonus |
+| `XpLedger` | `Progression/` | XP accumulation |
+| `XpEvent` | `Progression/` | XP event data model |
+| `PlayerResponseDelayEvaluator` | `Conversation/` | Delay penalty logic |
+| `DelayPenalty` | `Conversation/` | Delay result model |
+| `ConversationRegistry` | `Conversation/` | Multi-session manager |
+| `ConversationEntry` | `Conversation/` | Registry entry |
+| `ConversationLifecycle` | `Conversation/` | Entry state enum |
+| `CrossChatEvent` | `Conversation/` | Cross-chat event enum |
+| `ReadResult` | `Conversation/` | Read action result |
+| `RecoverResult` | `Conversation/` | Recover action result |
+| `WaitResult` | `Conversation/` | Wait action result |
+
+### Implicit Assumptions for Implementers
+
+1. **netstandard2.0 + LangVersion 8.0**: No `record` types. Use `sealed class` with readonly properties. `Task<T>` available.
+2. **Zero NuGet dependencies**: Do not add packages.
+3. **Nullable reference types enabled**: Use `?` annotations correctly.
+4. **All new evaluator classes are `static`**: No instance state. Takes input, returns output.
+5. **`SessionShadowTracker` wraps StatBlock — never modify StatBlock directly**: `StatBlock._shadow` is private readonly.
+6. **`RollResult.IsSuccess` uses `FinalTotal`**: External bonuses (tell, callback, triple) affect success/failure determination.
+7. **`GameSessionConfig` is optional**: When null, behavior is identical to existing constructor. Feature code must null-check config fields.
+8. **Existing 254 tests must continue passing**: All changes are additive. Default parameters preserve backward compatibility.
+
+### Implementation Order (dependency chain)
+
+```
+Wave 0: #139 (SessionShadowTracker, IGameClock, RollEngine extensions, GameSessionConfig)
+  ↓
+Tier 1 (parallel, no inter-dependencies):
+  #54 GameClock (implements IGameClock)
+  #48 XpLedger (standalone accumulator)
+  #46 ComboDetector (standalone evaluator)
+  #47 CallbackEvaluator (standalone evaluator)
+  #55 PlayerResponseDelayEvaluator (standalone evaluator)
+  ↓
+Tier 2 (depends on Wave 0 only):
+  #43 Read/Recover/Wait (needs ResolveFixedDC, TrapState.HasActive)
+  #44 Shadow growth (needs SessionShadowTracker)
+  #49 Weakness windows (needs RollEngine dcAdjustment)
+  #50 Tells (needs RollResult.AddExternalBonus — already merged #135)
+  ↓
+Tier 3 (depends on Tier 2):
+  #45 Shadow thresholds (needs #44 shadow growth)
+  ↓
+Tier 4 (depends on Tier 3 + #54):
+  #51 Horniness-forced Rizz (needs #45 + #54)
+  #56 ConversationRegistry (needs #54 + #44 + #55)
+  ↓
+Final:
+  #38 QA review (runs last, audits everything)
+```
+
+### Rules-to-Code Sync Additions
+
+| Rules Section | Rule Value | C# Location | C# Constant/Expression |
+|---|---|---|---|
+| §7 Shadow growth table | See growth table above | `Conversation/ShadowGrowthEvaluator.cs` | Static evaluation methods |
+| §7 Shadow thresholds | 6/12/18 | `Stats/ShadowThresholdEvaluator.cs` | `GetThresholdLevel()` |
+| §8 Read DC | 12 | `Conversation/GameSession.cs` | `ResolveFixedDC(..., 12, ...)` |
+| §8 Recover DC | 12 | `Conversation/GameSession.cs` | `ResolveFixedDC(..., 12, ...)` |
+| §8 Wait interest | -1 | `Conversation/GameSession.cs` | `WaitAsync()` → `Apply(-1)` |
+| §10 XP sources | See XP table | `Progression/XpLedger.cs` | `Record()` calls in GameSession |
+| §15 Combo table | 8 combos | `Conversation/ComboDetector.cs` | Static combo definitions |
+| §15 Callback bonus | +1/+2/+3 | `Conversation/CallbackEvaluator.cs` | `GetBonus()` |
+| §15 Tell bonus | +2 | `Conversation/GameSession.cs` | `AddExternalBonus(2)` |
+| §15 Weakness window DC reduction | -2 | `Conversation/GameSession.cs` | `dcAdjustment: 2` |
+| §15 Horniness thresholds | 6/12/18 | `Conversation/GameSession.cs` | Threshold checks in `StartTurnAsync` |
+| §async-time TimeOfDay hours | See table | `Conversation/GameClock.cs` | `GetTimeOfDay()` |
+| §async-time Horniness modifier | -2/0/+1/+3/+5 | `Conversation/GameClock.cs` | `GetHorninessModifier()` |
+| §async-time Energy | 15–20/day | `Conversation/GameClock.cs` | `dice.Roll(6) + 14` |
+| §async-time Delay penalty | See table | `Conversation/PlayerResponseDelayEvaluator.cs` | `Evaluate()` |
+| §async-time Ghost trigger | Interest ≤4, 24h silence | `Conversation/ConversationRegistry.cs` | `FastForward()` |
+| §async-time Fizzle trigger | Interest 5–9, 24h silence | `Conversation/ConversationRegistry.cs` | `FastForward()` |
+
+---
+
 ## Component Boundaries
 
 ### Stats (`Pinder.Core.Stats`)
@@ -215,5 +410,5 @@ When a rules document changes:
 
 ### Interfaces (`Pinder.Core.Interfaces`)
 - **Owns**: Abstraction contracts for injection points
-- **Public API**: `IDiceRoller`, `IFailurePool`, `ITrapRegistry`, `IItemRepository`, `IAnatomyRepository`, `ILlmAdapter`
-- **Does NOT own**: Any implementation (except `NullLlmAdapter` for testing)
+- **Public API**: `IDiceRoller`, `IFailurePool`, `ITrapRegistry`, `IItemRepository`, `IAnatomyRepository`, `ILlmAdapter`, `IGameClock`
+- **Does NOT own**: Any implementation (except `NullLlmAdapter` for testing, `FixedGameClock` in test project)
