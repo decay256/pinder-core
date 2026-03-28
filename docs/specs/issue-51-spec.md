@@ -9,7 +9,7 @@
 
 ## 1. Overview
 
-When a player character's Horniness shadow stat is high, it forces Rizz-stat dialogue options into the option list — whether the player wants them or not. At Horniness ≥ 6, at least one option becomes a forced Rizz option marked with 🔥. At Horniness ≥ 12, one option is *always* Rizz regardless of what the LLM returned. At Horniness ≥ 18, *all* options become Rizz. Horniness is rolled fresh each conversation (`dice.Roll(10)`) and modified by time-of-day from `GameClock`.
+When a player character's Horniness is high, it forces Rizz-stat dialogue options into the option list — whether the player wants them or not. At Horniness ≥ 6, at least one option becomes a forced Rizz option marked with 🔥. At Horniness ≥ 12, one option is *always* Rizz regardless of what the LLM returned. At Horniness ≥ 18, *all* options become Rizz. Horniness is computed once per conversation as `dice.Roll(10) + time-of-day modifier + shadow stat Horniness`.
 
 ---
 
@@ -17,17 +17,20 @@ When a player character's Horniness shadow stat is high, it forces Rizz-stat dia
 
 ### Roll at Session Start
 
-At `GameSession` construction time, the player's Horniness level for this conversation is determined:
+At `GameSession` construction time, the player's Horniness level for this conversation is determined by combining a fresh 1d10 roll, a time-of-day modifier, and the character's accumulated shadow stat Horniness:
 
 ```
-horninessBase = dice.Roll(10)          // 1d10 → range 1–10
-timeModifier  = gameClock.GetHorninessModifier()  // -2 / 0 / +1 / +3 / +5
-horniness     = horninessBase + timeModifier
+horninessBase   = dice.Roll(10)                               // 1d10 → range 1–10
+timeModifier    = gameClock.GetHorninessModifier()             // -2 / 0 / +1 / +3 / +5
+shadowHorniness = player.Stats.GetShadowValue(ShadowStatType.Horniness)  // 0+
+horniness       = horninessBase + timeModifier + shadowHorniness
 ```
 
-The resulting `horniness` value is clamped to a minimum of 0 (no upper clamp — values above 10 are valid and expected with time-of-day modifiers). This value is stored as a `private readonly int _horniness` field on `GameSession` and does **not** change during the conversation.
+The resulting `horniness` value is clamped to a minimum of 0 (no upper clamp — values above 10 are valid and expected). This value is stored as a `private readonly int _horniness` field on `GameSession` and does **not** change during the conversation.
 
-**Note on shadow stat Horniness:** The `ShadowStatType.Horniness` exists in the stat system as the shadow pair of `StatType.Rizz`. However, per the architecture doc and issue #44 edge cases, Horniness is *rolled fresh each conversation* (1d10 + time modifier), not grown by events. The shadow stat value from `StatBlock` is **not** used for this mechanic. The per-session rolled value is the sole input.
+**Why shadow stat Horniness is included:** The maximum natural roll is 10, and the maximum time-of-day modifier is +5 (AfterTwoAm), giving a natural cap of 15. Threshold 3 (Overwhelming, ≥18) is therefore unreachable without shadow stat contribution. Per #45 (shadow thresholds), Horniness at 12/18 is explicitly defined as a shadow threshold effect. Including the shadow stat value ensures all three thresholds are reachable and aligns with the PO's stated dependency on #45.
+
+**Note:** The fresh 1d10 roll adds per-session variance so that even characters with low shadow Horniness may occasionally hit threshold 1 (≥6), while characters with high shadow Horniness reliably reach higher thresholds.
 
 ### Threshold Levels
 
@@ -58,6 +61,7 @@ public GameSession(
 
 - `gameClock`: Non-null. Used at construction to compute `GetHorninessModifier()`. Stored if needed for other time features, but Horniness is computed once at construction.
 - Throws `ArgumentNullException` if `gameClock` is null.
+- Horniness is computed as: `dice.Roll(10) + gameClock.GetHorninessModifier() + player.Stats.GetShadowValue(ShadowStatType.Horniness)`, clamped to min 0.
 
 **Alternative (if IGameClock is not yet available):** Accept `int horninessModifier` as a constructor parameter instead, with the host responsible for calling `gameClock.GetHorninessModifier()` before constructing the session.
 
@@ -194,9 +198,7 @@ Last option replaced. `options[3].Stat == StatType.Rizz`, `options[3].IsHornines
 
 ### Example 4: Horniness = 20 (All Rizz)
 
-**Setup:** `dice.Roll(10)` returns 10, `gameClock.GetHorninessModifier()` returns +5 (AfterTwoAm). Horniness = 15. Wait — that's only 15. Let's say `Roll(10)` returns 10 + modifier +5 = 15? No, needs ≥18. Let's say `Roll(10)` returns 8, modifier +5 = 13. Still not 18. Use: `Roll(10)` returns 10, modifier +5 = 15. Hmm. To hit 18 with 1d10+modifier: 10+5=15 max with AfterTwoAm. The maximum natural Horniness is 15. Threshold 3 (≥18) would require additional shadow stat contribution.
-
-**Correction:** The issue says "Horniness rolled at session start: `dice.Roll(10)` + time-of-day modifier." With max roll 10 and max modifier +5, the natural max is 15. To reach ≥18, the shadow stat Horniness from `CharacterState`/`StatBlock` must contribute. See section 6 (Edge Cases) for how to handle this. For this example, assume shadow Horniness contribution brings the total to 20.
+**Setup:** `dice.Roll(10)` returns 8, `gameClock.GetHorninessModifier()` returns +5 (AfterTwoAm), shadow Horniness = 7. Total Horniness = 8 + 5 + 7 = 20. Threshold 3 (Overwhelming).
 
 **LLM returns:**
 ```
@@ -231,7 +233,7 @@ var context = new DialogueContext(
 
 ### AC1: Horniness Rolled at Session Start and Stored in `GameSession`
 
-- On `GameSession` construction, Horniness is computed: `dice.Roll(10) + gameClock.GetHorninessModifier()`.
+- On `GameSession` construction, Horniness is computed: `dice.Roll(10) + gameClock.GetHorninessModifier() + player.Stats.GetShadowValue(ShadowStatType.Horniness)`.
 - The value is clamped to a minimum of 0.
 - The value is stored as `_horniness` (private, readonly) and does not change during the session.
 - Accessible for testing via `GameStateSnapshot` or a read-only property if needed.
@@ -285,8 +287,8 @@ Tests must verify:
 | LLM returns fewer than 4 options | `ApplyHorninessOverrides` operates on whatever array length is returned. At threshold 3, replaces all N options. At threshold 1–2, replaces last option if no Rizz exists. If array is empty, returns empty (no crash). |
 | LLM returns multiple Rizz options organically | At threshold 1–2, no replacement needed (Rizz already present). None are marked `IsHorninessForced` since they were organic. |
 | Forced Rizz option is selected by player | Rolls against `StatType.Rizz` as normal. The `IsHorninessForced` flag is informational for the UI only — no mechanical difference in the roll. |
-| Reaching ≥18 threshold | With 1d10 (max 10) + max modifier (+5 AfterTwoAm) = 15 max natural. To reach 18, either: (a) the shadow stat Horniness from `CharacterState` adds to the roll, or (b) other game effects increase it. **Recommended:** Include shadow Horniness in the formula: `horniness = dice.Roll(10) + timeModifier + (characterState.GetShadowDelta(ShadowStatType.Horniness) / 3)` or use the raw shadow value. The issue text says "Horniness ≥ 12 and ≥ 18 is a shadow threshold effect" (comment from PO referencing #45). **Resolution:** Defer to #45's `ShadowThresholdEvaluator.GetThresholdLevel(ShadowStatType.Horniness)` which returns 0/1/2/3 based on the shadow stat value. Use the **higher** of the two threshold levels (rolled vs. shadow-based). |
-| Interaction with shadow threshold #45 | Issue #45 defines shadow thresholds at 6/12/18 for all shadow stats including Horniness. The Horniness shadow threshold effects from #45's table match exactly what #51 implements. **Integration:** `GameSession` should take the max of rolled Horniness threshold level and shadow-stat Horniness threshold level to determine the effective threshold. This ensures both freshly-rolled Horniness and accumulated shadow Horniness contribute. |
+| Reaching ≥18 threshold | With 1d10 (max 10) + max time modifier (+5 AfterTwoAm) = 15 without shadow stat. Shadow Horniness is added to the formula (see Section 2), so a character with shadow Horniness ≥ 3 and a max roll can reach 18. Characters with high shadow Horniness reliably reach threshold 3. |
+| Interaction with shadow threshold #45 | Issue #45 defines shadow thresholds at 6/12/18 for all shadow stats including Horniness. For this mechanic, shadow Horniness is included directly in the Horniness formula (Section 2) as an additive term, not via `ShadowThresholdEvaluator`. The thresholds in Section 2's table (6/12/18) align with #45's threshold levels, ensuring consistency. |
 | Interaction with Denial ≥ 18 (no Honesty options) | If both Horniness ≥ 18 and Denial ≥ 18 apply, Horniness wins — all options become Rizz. Denial's "no Honesty" restriction is moot since all options are already overridden. |
 | Interaction with Fixation ≥ 18 (forced same stat) | If Fixation ≥ 18 forces the same stat as last turn, and Horniness ≥ 18 forces all Rizz: if last turn was Rizz, both are satisfied. If last turn was Charm, conflict arises. **Recommended:** Horniness ≥ 18 takes priority (all Rizz). Fixation's forced-stat is overridden. |
 | `GameSession` constructor backward compatibility | Adding `IGameClock` (or `int horninessModifier`) to the constructor is a **breaking change**. All existing tests and call sites must be updated. Consider an overload that defaults Horniness to 0 for backward compat during prototype phase. |
@@ -317,7 +319,7 @@ Tests must verify:
 | `Pinder.Core.Interfaces.IDiceRoller` | Internal | Exists | Used for `dice.Roll(10)` at session start. |
 | `Pinder.Core.Interfaces.IGameClock` | Internal | From #54 | Used for `GetHorninessModifier()`. |
 | `Pinder.Core.Stats.StatType` | Internal | Exists | `StatType.Rizz` used for forced options. |
-| `Pinder.Core.Stats.ShadowStatType` | Internal | Exists | `ShadowStatType.Horniness` — referenced but not directly used (shadow threshold evaluation is delegated to #45). |
+| `Pinder.Core.Stats.ShadowStatType` | Internal | Exists | `ShadowStatType.Horniness` — used directly in the Horniness formula at session start (shadow value is added to the 1d10 roll + time modifier). |
 
 ---
 
@@ -327,5 +329,5 @@ Tests must verify:
 |------|--------|-------------|
 | `src/Pinder.Core/Conversation/DialogueOption.cs` | **Modify** | Add `bool IsHorninessForced` property and optional constructor parameter. |
 | `src/Pinder.Core/Conversation/DialogueContext.cs` | **Modify** | Add `int HorninessLevel` and `bool RequiresRizzOption` properties and constructor parameters. |
-| `src/Pinder.Core/Conversation/GameSession.cs` | **Modify** | Add `_horniness` field computed at construction. Add `IGameClock` constructor parameter. Add `ApplyHorninessOverrides` private method. Call it in `StartTurnAsync` after LLM returns options. Pass Horniness info in `DialogueContext`. |
+| `src/Pinder.Core/Conversation/GameSession.cs` | **Modify** | Add `_horniness` field computed at construction from `dice.Roll(10) + timeModifier + shadowHorniness`. Add `IGameClock` constructor parameter. Add `ApplyHorninessOverrides` private method. Call it in `StartTurnAsync` after LLM returns options. Pass Horniness info in `DialogueContext`. |
 | `src/Pinder.Core/Conversation/GameStateSnapshot.cs` | **Modify** (optional) | Add `int Horniness` property for UI/test observability. |
