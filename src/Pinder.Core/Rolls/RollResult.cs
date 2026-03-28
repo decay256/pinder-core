@@ -50,6 +50,12 @@ namespace Pinder.Core.Rolls
         /// </summary>
         public TrapDefinition? ActivatedTrap { get; }
 
+        /// <summary>
+        /// Risk tier derived from the "need" value (dc - statMod - levelBonus).
+        /// Safe (≤5), Medium (6–10), Hard (11–15), Bold (≥16).
+        /// </summary>
+        public RiskTier RiskTier { get; }
+
         /// <summary>By how much the roll missed the DC. 0 on success.</summary>
         public int MissMargin => IsSuccess ? 0 : DC - Total;
 
@@ -77,6 +83,20 @@ namespace Pinder.Core.Rolls
             IsSuccess      = IsNatTwenty || (!IsNatOne && Total >= dc);
             Tier           = IsSuccess ? FailureTier.None : tier;
             ActivatedTrap  = activatedTrap;
+            RiskTier       = ComputeRiskTier(dc, statModifier, levelBonus);
+        }
+
+        /// <summary>
+        /// Compute risk tier from the "need" value: dc - (statMod + levelBonus).
+        /// </summary>
+        private static RiskTier ComputeRiskTier(int dc, int statModifier, int levelBonus)
+        {
+            int need = dc - (statModifier + levelBonus);
+
+            if (need <= 5)  return RiskTier.Safe;
+            if (need <= 10) return RiskTier.Medium;
+            if (need <= 15) return RiskTier.Hard;
+            return RiskTier.Bold;
         }
 
         public override string ToString() =>
