@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Pinder.Core.Stats;
 
 namespace Pinder.Core.Conversation
 {
@@ -37,6 +38,12 @@ namespace Pinder.Core.Conversation
         /// <summary>Opponent's simulated response delay in minutes (from timing profile).</summary>
         public double ResponseDelayMinutes { get; }
 
+        /// <summary>Shadow stat thresholds for the player, or null if not applicable.</summary>
+        public Dictionary<ShadowStatType, int>? ShadowThresholds { get; }
+
+        /// <summary>Full trap taint instructions for active traps, or null if none.</summary>
+        public string[]? ActiveTrapInstructions { get; }
+
         public OpponentContext(
             string playerPrompt,
             string opponentPrompt,
@@ -47,7 +54,9 @@ namespace Pinder.Core.Conversation
             string playerDeliveredMessage,
             int interestBefore,
             int interestAfter,
-            double responseDelayMinutes)
+            double responseDelayMinutes,
+            Dictionary<ShadowStatType, int>? shadowThresholds = null,
+            string[]? activeTrapInstructions = null)
         {
             PlayerPrompt = playerPrompt ?? throw new System.ArgumentNullException(nameof(playerPrompt));
             OpponentPrompt = opponentPrompt ?? throw new System.ArgumentNullException(nameof(opponentPrompt));
@@ -59,6 +68,8 @@ namespace Pinder.Core.Conversation
             InterestBefore = interestBefore;
             InterestAfter = interestAfter;
             ResponseDelayMinutes = responseDelayMinutes;
+            ShadowThresholds = shadowThresholds;
+            ActiveTrapInstructions = activeTrapInstructions;
         }
     }
 }

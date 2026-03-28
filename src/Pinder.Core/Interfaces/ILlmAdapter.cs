@@ -22,8 +22,9 @@ namespace Pinder.Core.Interfaces
 
         /// <summary>
         /// Generate the opponent's response to the player's delivered message.
+        /// Returns an OpponentResponse containing the message text and optional gameplay signals.
         /// </summary>
-        Task<string> GetOpponentResponseAsync(OpponentContext context);
+        Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context);
 
         /// <summary>
         /// Generate a narrative beat when interest crosses a threshold.
