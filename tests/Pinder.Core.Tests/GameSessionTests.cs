@@ -43,6 +43,7 @@ namespace Pinder.Core.Tests
     public sealed class NullTrapRegistry : ITrapRegistry
     {
         public TrapDefinition? GetTrap(StatType stat) => null;
+        public string? GetLlmInstruction(StatType stat) => null;
     }
 
     public class FailureScaleTests
