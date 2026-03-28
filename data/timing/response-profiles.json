@@ -1,0 +1,23 @@
+[
+  {
+    "id": "eager-texter",
+    "baseDelayMinutes": 3,
+    "varianceMultiplier": 0.4,
+    "drySpellProbability": 0.05,
+    "readReceipt": "shows"
+  },
+  {
+    "id": "playing-it-cool",
+    "baseDelayMinutes": 15,
+    "varianceMultiplier": 0.6,
+    "drySpellProbability": 0.1,
+    "readReceipt": "hides"
+  },
+  {
+    "id": "average-responder",
+    "baseDelayMinutes": 10,
+    "varianceMultiplier": 0.5,
+    "drySpellProbability": 0.0,
+    "readReceipt": "neutral"
+  }
+]
