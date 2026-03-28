@@ -20,6 +20,7 @@ namespace Pinder.Core.Tests
         private class EmptyTrapRegistry : ITrapRegistry
         {
             public TrapDefinition? GetTrap(StatType stat) => null;
+            public string? GetLlmInstruction(StatType stat) => null;
         }
 
         private static StatBlock MakeStats(int charm = 0, int selfAwareness = 0, int madness = 0)

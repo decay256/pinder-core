@@ -34,7 +34,7 @@ namespace Pinder.Core.Conversation
         /// <summary>How much the roll beat the DC by (for success grading). Negative or zero on failure.</summary>
         public int BeatDcBy { get; }
 
-        /// <summary>Active trap LLM instructions (full taint text, not just names).</summary>
+        /// <summary>Names/IDs of currently active traps (for taint injection).</summary>
         public IReadOnlyList<string> ActiveTraps { get; }
 
         /// <summary>Shadow stat thresholds for the player, or null if not applicable.</summary>
