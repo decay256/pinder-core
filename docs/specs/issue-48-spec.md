@@ -390,7 +390,71 @@ No new exception types are introduced. Existing `GameEndedException`, `InvalidOp
 
 ---
 
-## 12. Dependencies
+## 12. Cross-Spec API Conflict Acknowledgment
+
+Issues #46, #49, and #50 (all in the same sprint) introduce changes to shared API surfaces that overlap. This section documents the conflicts and clarifies how issue #48 should be implemented regardless of resolution order.
+
+### 12.1 `OpponentResponse` Class — Conflicting Shapes (#49 vs #50)
+
+Issue #49 (Weakness Windows) and Issue #50 (Tell Detection) both independently define an `OpponentResponse` class to replace the `Task<string>` return type of `ILlmAdapter.GetOpponentResponseAsync`:
+
+| Property | Issue #49 Definition | Issue #50 Definition |
+|----------|---------------------|---------------------|
+| Text property | `string Message` | `string Text` |
+| Optional payload | `WeaknessWindow? Window` | `Tell? DetectedTell` |
+| Constructor | `OpponentResponse(string message, WeaknessWindow? window = null)` | `OpponentResponse(string text, Tell? detectedTell = null)` |
+
+**Merged API recommendation:** The final `OpponentResponse` class should carry **both** optional payloads and use a single consistent property name for the text. Suggested merged shape:
+
+```csharp
+public sealed class OpponentResponse
+{
+    public string Text { get; }
+    public WeaknessWindow? Window { get; }
+    public Tell? DetectedTell { get; }
+
+    public OpponentResponse(string text, WeaknessWindow? window = null, Tell? detectedTell = null);
+}
+```
+
+**Impact on issue #48:** None. XP tracking does not read from `OpponentResponse`. This conflict is documented here for implementer awareness only.
+
+### 12.2 `RollEngine.Resolve` — Conflicting New Parameters (#46, #49, #50)
+
+Three issues each propose adding a different optional parameter to `RollEngine.Resolve`:
+
+| Issue | Proposed Parameter | Purpose |
+|-------|--------------------|---------|
+| #46 (Stat Combos) | `int bonusModifier = 0` | +1 roll bonus from The Triple combo |
+| #49 (Weakness Windows) | `int dcModifier = 0` | DC reduction from exploiting weakness |
+| #50 (Tell Detection) | `int rollBonus = 0` | +2 roll bonus from reading a tell |
+
+**Merged API recommendation:** All three should be added as distinct optional parameters in a single merged signature:
+
+```csharp
+public static RollResult Resolve(
+    StatBlock attacker,
+    StatBlock defender,
+    StatType stat,
+    IDiceRoller dice,
+    bool advantage = false,
+    bool disadvantage = false,
+    TrapState? attackerTraps = null,
+    ITrapRegistry? trapRegistry = null,
+    IFailurePool? failurePool = null,
+    int rollBonus = 0,      // From #46 (combo) and #50 (tell) — additive bonuses to roll total
+    int dcModifier = 0)     // From #49 (weakness window) — subtracted from DC
+```
+
+Note that #46's `bonusModifier` (+1 from combo) and #50's `rollBonus` (+2 from tell) serve the same mechanical purpose: they are additive bonuses to the roll total. They should be **combined into a single `rollBonus` parameter**, with the caller summing applicable bonuses before passing (e.g., `rollBonus: comboBonus + tellBonus`). The `dcModifier` from #49 is mechanically different (it lowers the DC) and remains a separate parameter.
+
+**Impact on issue #48:** XP tier determination uses `RollResult.DC` (the DC value stored in the roll result). The `dcModifier` from #49 lowers the effective DC before comparison but the stored `RollResult.DC` should reflect the **effective** (post-modifier) DC. This means XP tiers are determined by the DC the player *actually faced*, which is correct: if a weakness window reduced DC from 18 to 16, the player earns mid-tier (10 XP), not high-tier (15 XP). The `rollBonus` parameters (#46, #50) do not affect DC and therefore have no effect on XP tier determination.
+
+**Implementer note:** When implementing issue #48, use `rollResult.DC` as-is for XP tier calculation. If #49 is also implemented, ensure `RollResult.DC` stores the effective (post-dcModifier) DC. If #49 is not yet merged when #48 is implemented, this is a no-op — the existing `RollResult.DC` is already the effective DC.
+
+---
+
+## 13. Dependencies
 
 ### Internal (same repo)
 
@@ -403,6 +467,9 @@ No new exception types are introduced. Existing `GameEndedException`, `InvalidOp
 | Issue #42 (RiskTier) | Dependency — `RollResult.DC` must be available (already is). Risk tier does NOT affect XP amounts. |
 | Issue #43 (Read/Recover/Wait) | Dependency — `RecoverAsync` success path must record trap recovery XP. `ReadAsync` and `Wait` do NOT record XP. |
 | Issue #44 (Shadow growth / `CharacterState`) | Dependency — `GameSession` may use `CharacterState` by this point; XP tracking is additive and does not interact with shadow growth. |
+| Issue #46 (Stat Combos) | Co-sprint — adds `rollBonus`/`bonusModifier` to `RollEngine.Resolve`. Does not affect XP calculation. See §12.2. |
+| Issue #49 (Weakness Windows) | Co-sprint — adds `dcModifier` to `RollEngine.Resolve` and introduces `OpponentResponse`. `dcModifier` may affect effective DC used for XP tier. See §12.2. |
+| Issue #50 (Tell Detection) | Co-sprint — adds `rollBonus` to `RollEngine.Resolve` and introduces `OpponentResponse`. Does not affect XP calculation. See §12.1 and §12.2. |
 
 ### External
 
@@ -410,7 +477,7 @@ None. Zero NuGet dependencies.
 
 ---
 
-## 13. Integration Notes
+## 14. Integration Notes
 
 ### XP is Session-Scoped, Not Persistent
 
