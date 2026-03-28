@@ -163,6 +163,7 @@ namespace Pinder.Core.Conversation
             if (rollResult.IsSuccess)
             {
                 interestDelta = SuccessScale.GetInterestDelta(rollResult);
+                interestDelta += RiskTierBonus.GetInterestBonus(rollResult);
             }
             else
             {

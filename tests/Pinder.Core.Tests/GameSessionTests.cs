@@ -148,8 +148,9 @@ namespace Pinder.Core.Tests
 
             var result1 = await session.ResolveTurnAsync(0); // Charm
             Assert.True(result1.Roll.IsSuccess);
-            Assert.Equal(1, result1.InterestDelta); // beat by 2 → +1, no momentum at streak=1
-            Assert.Equal(11, result1.StateAfter.Interest);
+            // beat by 2 → SuccessScale +1, need=13 → Hard → RiskTierBonus +1, no momentum at streak=1
+            Assert.Equal(2, result1.InterestDelta);
+            Assert.Equal(12, result1.StateAfter.Interest);
             Assert.False(result1.IsGameOver);
             Assert.Equal(1, result1.StateAfter.TurnNumber);
 
@@ -157,17 +158,17 @@ namespace Pinder.Core.Tests
             var start2 = await session.StartTurnAsync();
             var result2 = await session.ResolveTurnAsync(0);
             Assert.True(result2.Roll.IsSuccess);
-            Assert.Equal(1, result2.InterestDelta); // streak=2, no bonus yet
-            Assert.Equal(12, result2.StateAfter.Interest);
+            Assert.Equal(2, result2.InterestDelta); // streak=2, no momentum; SuccessScale +1 + RiskTier +1
+            Assert.Equal(14, result2.StateAfter.Interest);
             Assert.Equal(2, result2.StateAfter.TurnNumber);
 
             // Turn 3
             var start3 = await session.StartTurnAsync();
             var result3 = await session.ResolveTurnAsync(0);
             Assert.True(result3.Roll.IsSuccess);
-            // streak=3 → +2 momentum bonus, so delta = 1 + 2 = 3
-            Assert.Equal(3, result3.InterestDelta);
-            Assert.Equal(15, result3.StateAfter.Interest);
+            // streak=3 → +2 momentum bonus, SuccessScale +1, RiskTier +1, so delta = 1 + 1 + 2 = 4
+            Assert.Equal(4, result3.InterestDelta);
+            Assert.Equal(18, result3.StateAfter.Interest);
             Assert.Equal(3, result3.StateAfter.TurnNumber);
         }
 
@@ -259,22 +260,29 @@ namespace Pinder.Core.Tests
         public async Task MomentumBonus_AppliedCorrectly()
         {
             // 5 consecutive successes with roll=15, each beating DC by 2 → +1 base
-            // streak 1: +0, streak 2: +0, streak 3: +2, streak 4: +2, streak 5: +3
-            // Interest progression: 10→11→12→15→18→22
-            // At turn 5 start, interest=18 (VeryIntoIt) → advantage → 2x d20
+            // need = 15-(2+0) = 13 → Hard → +1 risk tier bonus per success
+            // streak 1: +1 base +1 risk +0 momentum = 2
+            // streak 2: +1 base +1 risk +0 momentum = 2
+            // streak 3: +1 base +1 risk +2 momentum = 4
+            // streak 4: +1 base +1 risk +2 momentum = 4 (advantage from VeryIntoIt)
+            // streak 5: +1 base +1 risk +3 momentum = 5 (advantage from AlmostThere, clamped to 25)
+            // Interest progression: 10→12→14→18→22→25 (clamped)
+            // At turn 4 start, interest=18 (VeryIntoIt) → advantage → 2x d20
+            // At turn 5 start, interest=22 (AlmostThere) → advantage → 2x d20
             var dice = new FixedDice(
-                15, 50,      // Turn 1: d20, d100 (timing)
-                15, 50,      // Turn 2: d20, d100
-                15, 50,      // Turn 3: d20, d100. After: 15 (Interested)
-                15, 50,      // Turn 4: d20, d100. After: 18 (VeryIntoIt)
-                15, 15, 50   // Turn 5: 2x d20 (advantage), d100
+                15, 50,        // Turn 1: d20, d100 (timing)
+                15, 50,        // Turn 2: d20, d100
+                15, 50,        // Turn 3: d20, d100. After: 18 (VeryIntoIt)
+                15, 15, 50,    // Turn 4: 2x d20 (advantage), d100. After: 22 (AlmostThere)
+                15, 15, 50     // Turn 5: 2x d20 (advantage), d100. After: 25 (clamped)
             );
 
             var session = new GameSession(
                 MakeProfile("P"), MakeProfile("O"),
                 new NullLlmAdapter(), dice, new NullTrapRegistry());
 
-            int[] expectedDeltas = { 1, 1, 3, 3, 4 }; // +1 base, momentum 0,0,+2,+2,+3
+            // Note: interest is clamped to 25, so effective delta at turn 5 may be less
+            int[] expectedDeltas = { 2, 2, 4, 4, 5 };
             int expectedInterest = 10;
 
             for (int i = 0; i < 5; i++)
@@ -283,6 +291,7 @@ namespace Pinder.Core.Tests
                 var result = await session.ResolveTurnAsync(0);
                 Assert.Equal(expectedDeltas[i], result.InterestDelta);
                 expectedInterest += expectedDeltas[i];
+                if (expectedInterest > 25) expectedInterest = 25; // clamp
                 Assert.Equal(expectedInterest, result.StateAfter.Interest);
             }
         }
