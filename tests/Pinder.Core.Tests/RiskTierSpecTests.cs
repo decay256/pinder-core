@@ -408,26 +408,42 @@ namespace Pinder.Core.Tests
             Assert.Equal(12, result.StateAfter.Interest); // 10 + 2
         }
 
-        // What: GameSession with Safe roll has no risk bonus contribution
+        // What: GameSession with Safe-tier roll has no risk bonus contribution
         // Mutation: would catch if GameSession applies bonus to Safe tier
         [Fact]
         public async Task Integration_GameSession_SafeSuccess_NoRiskBonus()
         {
-            // Player stats all=5, opponent stats all=2
-            // DC = 13 + 2 = 15, need = 15 - (5 + 0) = 10 → Medium (not Safe for stats=5)
-            // Use higher stats to get Safe: stats=6 → need = 15 - (6+0) = 9 → still Medium
-            // Actually need dc - (statMod+levelBonus) ≤ 5. With stats=2 and dc=15, need=13=Hard.
-            // To get Safe: need stats where need ≤ 5. E.g. stat=10 → need=15-10=5. But stats capped.
-            // Alternative: use level bonus. Level doesn't affect DC computation.
-            // Let's use the fact that roll result can be created directly for the unit test.
-            // For GameSession integration, the DC is computed from opponent. With opponent stats=2, DC=15.
-            // Player stats=2, levelBonus=0, need=13 → always Hard with default profiles.
-            // Can't easily get Safe in GameSession without changing stats. Skip to verify
-            // the difference is visible — Hard gives +1 bonus vs what SuccessScale alone would give.
-            // This is already tested above; the GameSession hard test suffices.
+            // Player stats all=6, level=9 (levelBonus=+4), opponent stats all=2
+            // DC = 13 (base) + 2 (opponent defence mod) = 15
+            // need = 15 - (6 + 4) = 5 → Safe
+            // Roll d20=15 → total = 15 + 6 + 4 = 25, beats DC 15 by 10 → SuccessScale +3
+            // RiskTierBonus = 0 (Safe) → total interest delta = +3
+            // Starting interest 10 → 13
+            var dice = new FixedDice(15, 50);  // d20=15, d100=50 (timing)
+            var player = MakeProfile("Player", allStats: 6, level: 9);
+            var opponent = MakeProfile("Opponent");
+            var session = new GameSession(player, opponent, new NullLlmAdapter(), dice, new NullTrapRegistry());
 
-            // Instead, test a failure in GameSession to verify no bonus is applied
-            var dice = new FixedDice(5, 50); // d20=5 → total=7 < 15 → failure
+            await session.StartTurnAsync();
+            var result = await session.ResolveTurnAsync(0);
+
+            Assert.True(result.Roll.IsSuccess);
+            Assert.Equal(RiskTier.Safe, result.Roll.RiskTier);
+            // Safe tier: no risk bonus. Delta should be SuccessScale only (+3 for margin 10).
+            Assert.Equal(3, result.InterestDelta);
+            Assert.Equal(13, result.StateAfter.Interest); // 10 + 3
+        }
+
+        // What: GameSession failure path has no risk bonus regardless of tier
+        // Mutation: would catch if failure path incorrectly adds risk bonus
+        [Fact]
+        public async Task Integration_GameSession_Failure_NoRiskBonus()
+        {
+            // Player stats all=2, level=1, opponent stats all=2
+            // DC = 15, need = 13 → Hard tier, but roll fails
+            // d20=5 → total = 5+2+0 = 7 < 15 → failure
+            // No risk bonus on failure; only failure scale applies
+            var dice = new FixedDice(5, 50); // d20=5, d100=50 (timing)
             var player = MakeProfile("Player");
             var opponent = MakeProfile("Opponent");
             var session = new GameSession(player, opponent, new NullLlmAdapter(), dice, new NullTrapRegistry());
@@ -444,14 +460,14 @@ namespace Pinder.Core.Tests
         // Helpers
         // ============================================================
 
-        private static CharacterProfile MakeProfile(string name, int allStats = 2)
+        private static CharacterProfile MakeProfile(string name, int allStats = 2, int level = 1)
         {
             return new CharacterProfile(
                 stats: TestHelpers.MakeStatBlock(allStats),
                 assembledSystemPrompt: $"You are {name}.",
                 displayName: name,
                 timing: new TimingProfile(5, 0.0f, 0.0f, "neutral"),
-                level: 1);
+                level: level);
         }
     }
 }
