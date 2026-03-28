@@ -26,8 +26,26 @@ namespace Pinder.Core.Rolls
         /// <summary>Level bonus applied.</summary>
         public int LevelBonus { get; }
 
-        /// <summary>Total: UsedDieRoll + StatModifier + LevelBonus.</summary>
+        /// <summary>
+        /// Base total: UsedDieRoll + StatModifier + LevelBonus.
+        /// Does not include external bonuses (callbacks, tells, combos, momentum).
+        /// </summary>
         public int Total { get; }
+
+        /// <summary>
+        /// Additional bonus applied outside RollEngine (callback distance, tell read, combo, momentum).
+        /// Defaults to 0. Set after construction by the caller that knows the context.
+        /// </summary>
+        public int ExternalBonus { get; private set; }
+
+        /// <summary>
+        /// True total including ExternalBonus. Use this for final success/fail determination
+        /// when external bonuses have been applied.
+        /// </summary>
+        public int FinalTotal => Total + ExternalBonus;
+
+        /// <summary>Apply an external bonus (callback, tell, combo, momentum). Additive.</summary>
+        public void AddExternalBonus(int bonus) { ExternalBonus += bonus; }
 
         /// <summary>DC that had to be beaten.</summary>
         public int DC { get; }
