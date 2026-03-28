@@ -143,7 +143,9 @@ namespace Pinder.Core.Tests
             var result = await _adapter.GetOpponentResponseAsync(ctx);
 
             Assert.NotNull(result);
-            Assert.Equal("...", result);
+            Assert.Equal("...", result.MessageText);
+            Assert.Null(result.DetectedTell);
+            Assert.Null(result.WeaknessWindow);
         }
 
         // --- GetInterestChangeBeatAsync ---

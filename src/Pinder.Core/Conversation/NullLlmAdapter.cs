@@ -40,11 +40,11 @@ namespace Pinder.Core.Conversation
         }
 
         /// <summary>
-        /// Returns a minimal placeholder response: "...".
+        /// Returns a minimal placeholder OpponentResponse with "..." text and no signals.
         /// </summary>
-        public Task<string> GetOpponentResponseAsync(OpponentContext context)
+        public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context)
         {
-            return Task.FromResult("...");
+            return Task.FromResult(new OpponentResponse("..."));
         }
 
         /// <summary>

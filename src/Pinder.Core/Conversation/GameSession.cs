@@ -244,7 +244,8 @@ namespace Pinder.Core.Conversation
                 interestAfter: interestAfter,
                 responseDelayMinutes: responseDelayMinutes);
 
-            string opponentMessage = await _llm.GetOpponentResponseAsync(opponentContext).ConfigureAwait(false);
+            var opponentResponse = await _llm.GetOpponentResponseAsync(opponentContext).ConfigureAwait(false);
+            string opponentMessage = opponentResponse.MessageText;
 
             // 12. Append opponent message to history
             _history.Add((_opponent.DisplayName, opponentMessage));

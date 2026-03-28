@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Pinder.Core.Rolls;
+using Pinder.Core.Stats;
 
 namespace Pinder.Core.Conversation
 {
@@ -36,6 +37,12 @@ namespace Pinder.Core.Conversation
         /// <summary>Active trap LLM instructions (full taint text, not just names).</summary>
         public IReadOnlyList<string> ActiveTraps { get; }
 
+        /// <summary>Shadow stat thresholds for the player, or null if not applicable.</summary>
+        public Dictionary<ShadowStatType, int>? ShadowThresholds { get; }
+
+        /// <summary>Full trap taint instructions for active traps, or null if none.</summary>
+        public string[]? ActiveTrapInstructions { get; }
+
         public DeliveryContext(
             string playerPrompt,
             string opponentPrompt,
@@ -44,7 +51,9 @@ namespace Pinder.Core.Conversation
             DialogueOption chosenOption,
             FailureTier outcome,
             int beatDcBy,
-            IReadOnlyList<string> activeTraps)
+            IReadOnlyList<string> activeTraps,
+            Dictionary<ShadowStatType, int>? shadowThresholds = null,
+            string[]? activeTrapInstructions = null)
         {
             PlayerPrompt = playerPrompt ?? throw new System.ArgumentNullException(nameof(playerPrompt));
             OpponentPrompt = opponentPrompt ?? throw new System.ArgumentNullException(nameof(opponentPrompt));
@@ -54,6 +63,8 @@ namespace Pinder.Core.Conversation
             Outcome = outcome;
             BeatDcBy = beatDcBy;
             ActiveTraps = activeTraps ?? throw new System.ArgumentNullException(nameof(activeTraps));
+            ShadowThresholds = shadowThresholds;
+            ActiveTrapInstructions = activeTrapInstructions;
         }
     }
 }
