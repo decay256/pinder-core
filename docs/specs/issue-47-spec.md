@@ -2,14 +2,14 @@
 
 ## Overview
 
-When a player selects a dialogue option that references a topic introduced earlier in the conversation, they receive a hidden **interest delta bonus** based on how far back that topic was introduced. This implements Rules v3.4 §15. On a successful roll, the callback bonus is added to the interest delta (alongside the base success delta, risk bonus, and momentum bonus) — it does **not** modify the d20 roll itself or affect whether the roll succeeds or fails. The bonus is invisible to the player (not reflected in displayed UI) and stacks additively with other interest bonuses (e.g. risk tier bonus from #42).
+When a player selects a dialogue option that references a topic introduced earlier in the conversation, they receive a hidden roll bonus based on how far back that topic was introduced. This implements Rules v3.4 §15. The bonus is invisible to the player (not reflected in displayed success percentages) and stacks with other bonuses (e.g. risk tier bonus from #42).
 
 ## Key Concepts
 
 - **Conversation Topic**: A named topic (e.g. `"fear-of-commitment"`, `"cheese-obsession"`) paired with the turn number it was first introduced.
 - **Callback**: A dialogue option that references a previously introduced topic. The LLM flags this by setting `DialogueOption.CallbackTurnNumber` to the turn the topic was introduced.
 - **Callback Distance**: `currentTurn - CallbackTurnNumber`. Determines the bonus magnitude.
-- **Hidden Bonus**: The callback bonus is added to the **interest delta** (not the d20 roll total). It increases how much interest the player gains on a successful roll, but does not affect whether the roll succeeds or fails. It is not shown to the player in UI.
+- **Hidden Bonus**: The callback bonus is added to the roll total but is NOT shown to the player in UI probability calculations.
 
 ## New Type: `ConversationTopic`
 
@@ -210,7 +210,7 @@ Turn 5: Player picks option with CallbackTurnNumber = null
 - The constructor accepts this parameter and validates it is not null.
 - `GameSession.StartTurnAsync` passes the current topic list when constructing `DialogueContext`.
 
-### AC3: `DialogueOption.CallbackTurnNumber` respected in interest delta calculation
+### AC3: `DialogueOption.CallbackTurnNumber` respected in roll bonus calculation
 - `GameSession.ResolveTurnAsync` checks `chosenOption.CallbackTurnNumber`.
 - If non-null and the roll is a success, computes the callback bonus via `CallbackBonus.Compute`.
 - The bonus is added to `interestDelta`.
