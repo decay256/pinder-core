@@ -61,11 +61,13 @@ Must be a `sealed class` (not a `record` — C# 8.0 / netstandard2.0 constraint)
 ```csharp
 public ConversationEntry(
     GameSession session,
+    DateTimeOffset lastInteractionAt,
     DateTimeOffset? pendingReplyAt = null,
     ConversationLifecycle status = ConversationLifecycle.Active)
 ```
 
 - `session` — the `GameSession` this entry wraps. Must not be null; throw `ArgumentNullException` if null.
+- `lastInteractionAt` — the timestamp of the most recent interaction in this conversation. Used as the baseline for silence duration calculations in ghost/fizzle/decay checks. Typically set to `clock.Now` when creating the entry.
 - `pendingReplyAt` — nullable. When non-null, the game-clock timestamp at which the opponent's reply is expected to arrive.
 - `status` — defaults to `Active`.
 
@@ -76,6 +78,7 @@ public ConversationEntry(
 | `Session` | `GameSession` | No (get-only) | The wrapped game session |
 | `PendingReplyAt` | `DateTimeOffset?` | Yes (get/set) | Timestamp of next expected opponent reply, or null if none pending |
 | `Status` | `ConversationLifecycle` | Yes (get/set) | Current lifecycle state of this conversation |
+| `LastInteractionAt` | `DateTimeOffset` | Yes (get/set) | Timestamp of the most recent player or opponent interaction in this conversation. Used to compute silence duration for ghost/fizzle/decay checks when `PendingReplyAt` is null. Must be updated by `ScheduleOpponentReply` (set to `clock.Now` when a reply is scheduled) and by `FastForward` when an entry's reply is delivered (set to the delivery time). Initialized to `clock.Now` at the time the entry is added to the registry, or passed via the constructor. |
 
 ### 2.4 `ConversationRegistry` (sealed class)
 
@@ -117,6 +120,7 @@ public void ScheduleOpponentReply(GameSession session, double delayMinutes)
 
 - Looks up the `ConversationEntry` whose `Session` matches the provided `session` (reference equality).
 - Sets `PendingReplyAt` to `clock.Now + TimeSpan.FromMinutes(delayMinutes)`.
+- Sets `LastInteractionAt` to `clock.Now` (the player just acted).
 - Throws `ArgumentNullException` if `session` is null.
 - Throws `InvalidOperationException` with message `"Session not found in registry."` if no matching entry exists.
 - Throws `ArgumentOutOfRangeException` if `delayMinutes` is negative or zero.
@@ -136,10 +140,10 @@ public ConversationEntry? FastForward()
 
 2. **Advance clock.** Call `clock.AdvanceTo(earliest.PendingReplyAt.Value)` to move the game clock forward.
 
-3. **Clear the delivered entry's pending timestamp.** Set `earliest.PendingReplyAt = null`.
+3. **Clear the delivered entry's pending timestamp.** Set `earliest.PendingReplyAt = null`. Set `earliest.LastInteractionAt = clock.Now` (the delivery time).
 
 4. **Check ghost triggers on all OTHER active entries.** For each entry where `Status == Active` and the entry is not the one being delivered:
-   - Compute silence duration: `clock.Now - entry.PendingReplyAt` (or use the last interaction time if `PendingReplyAt` is null — see Edge Cases).
+   - Compute silence duration: if `entry.PendingReplyAt` is non-null, use `clock.Now - entry.PendingReplyAt.Value`; otherwise use `clock.Now - entry.LastInteractionAt`.
    - **Ghost condition:** The entry's session has interest ≤ 4 (i.e., `entry.Session` interest meter `Current <= 4`) AND silence ≥ 24 hours (1440 minutes of game time).
      - Set `entry.Status = ConversationLifecycle.Ghosted`.
      - Apply Dread +1 **globally** — increment `ShadowStatType.Dread` by 1 on all active sessions' shadow trackers (see §5 on shadow modification).
@@ -147,7 +151,8 @@ public ConversationEntry? FastForward()
      - Set `entry.Status = ConversationLifecycle.Fizzled`.
      - No shadow penalty.
 
-5. **Apply interest decay on paused/idle conversations.** For each entry where `Status == Active` and the entry is not the one being delivered:
+5. **Apply interest decay on paused/idle conversations.** For each entry where `Status == Active` and the entry is not the one being delivered (and not ghosted/fizzled in step 4):
+   - Compute silence duration using the same logic as step 4: `clock.Now - entry.PendingReplyAt.Value` if pending, otherwise `clock.Now - entry.LastInteractionAt`.
    - Compute days of silence (as a whole number, floored): `floor(silenceDuration.TotalDays)`.
    - Apply `InterestMeter.Apply(-1 * daysOfSilence)` — i.e., −1 interest per full day of silence.
    - Interest decay is applied **after** ghost/fizzle checks (a conversation that was just ghosted or fizzled does not also receive decay).
@@ -181,13 +186,15 @@ public void ApplyCrossChatEvent(CrossChatEvent chatEvent)
 **Notes on `Nat1Catastrophe` bleed:**
 - Madness +1 applies to the **next** conversation only — not all active ones. The registry must track that one pending Madness bleed is outstanding. When the next `ScheduleOpponentReply` or `FastForward` targets a different session, apply the +1 Madness to that session's shadow tracker and clear the pending bleed.
 
-### 3.5 `GetActiveEntries() → IReadOnlyList<ConversationEntry>`
+### 3.5 `GetAllEntries() → IReadOnlyList<ConversationEntry>`
 
-Returns all entries currently in the registry (all statuses).
+Returns all entries currently in the registry (all statuses, including terminal).
 
 ```csharp
-public IReadOnlyList<ConversationEntry> GetActiveEntries()
+public IReadOnlyList<ConversationEntry> GetAllEntries()
 ```
+
+**Note:** Despite the previous draft using the name `GetActiveEntries`, this method returns entries of **all** statuses. It is renamed to `GetAllEntries` to avoid confusion. Use `GetByStatus(ConversationLifecycle.Active)` to retrieve only active entries.
 
 ### 3.6 `GetByStatus(ConversationLifecycle status) → IReadOnlyList<ConversationEntry>`
 
@@ -219,7 +226,7 @@ public IReadOnlyList<ConversationEntry> GetByStatus(ConversationLifecycle status
 ### Example 2: Ghost Trigger
 
 **Setup:**
-- Registry has 2 entries: Session A (pending reply at T+26h), Session B (no pending reply, interest = 3, last interaction was at T+0).
+- Registry has 2 entries: Session A (pending reply at T+26h), Session B (no pending reply, interest = 3, `LastInteractionAt` = T+0).
 - Clock is at T+0.
 
 **Call:** `registry.FastForward()`
@@ -227,7 +234,7 @@ public IReadOnlyList<ConversationEntry> GetByStatus(ConversationLifecycle status
 **Result:**
 - Clock advances to T+26h.
 - Session A is delivered (PendingReplyAt cleared).
-- Session B: interest = 3 (≤ 4), silence = 26h (≥ 24h) → **Ghosted**.
+- Session B: `PendingReplyAt` is null, so silence = `clock.Now - LastInteractionAt` = T+26h − T+0 = 26h. Interest = 3 (≤ 4), silence = 26h (≥ 24h) → **Ghosted**.
 - Session B status set to `ConversationLifecycle.Ghosted`.
 - Dread +1 applied globally to all active sessions' shadow trackers.
 
@@ -245,7 +252,7 @@ public IReadOnlyList<ConversationEntry> GetByStatus(ConversationLifecycle status
 ### Example 4: Interest Decay
 
 **Setup:**
-- Registry has 2 entries: Session A (pending reply at T+72h), Session B (active, last interaction at T+0, interest = 12).
+- Registry has 2 entries: Session A (pending reply at T+72h), Session B (active, `LastInteractionAt` = T+0, no pending reply, interest = 12).
 - Clock at T+0.
 
 **Call:** `registry.FastForward()`
@@ -253,7 +260,7 @@ public IReadOnlyList<ConversationEntry> GetByStatus(ConversationLifecycle status
 **Result:**
 - Clock advances to T+72h.
 - Session A delivered.
-- Session B silence = 72h = 3 full days → interest decay of −3. Interest goes from 12 to 9.
+- Session B: `PendingReplyAt` is null, so silence = `clock.Now - LastInteractionAt` = T+72h − T+0 = 72h = 3 full days → interest decay of −3. Interest goes from 12 to 9.
 
 ### Example 5: Energy Depletion
 
@@ -368,6 +375,7 @@ public IReadOnlyList<ConversationEntry> GetByStatus(ConversationLifecycle status
 | `ScheduleOpponentReply(session, -5)` | `ArgumentOutOfRangeException` | `"delayMinutes"` |
 | `ScheduleOpponentReply(non-active, ...)` | `InvalidOperationException` | `"Cannot schedule reply for non-active conversation."` |
 | `ConversationEntry(null, ...)` | `ArgumentNullException` | `"session"` |
+| `ConversationEntry(session, default(DateTimeOffset))` | _(valid — DateTimeOffset.MinValue is accepted)_ | — |
 
 ---
 
