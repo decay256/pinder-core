@@ -4,96 +4,132 @@
 
 Pinder.Core is a **pure C# (.NET Standard 2.0) RPG engine** for a comedy dating game where players are sentient penises on a Tinder-like app. It has **zero external dependencies** and is designed to drop into Unity or any .NET host.
 
-The engine is **stateless at the roll level** — all state is passed in via parameters. State management (whose turn, what happened last) lives in the host (Unity game loop). The engine owns only the math and the data models.
+The engine is **stateless at the roll level** — all state is passed in via parameters. `GameSession` is the sole stateful orchestrator that owns a single conversation's mutable state and sequences calls to stateless components and injected interfaces.
 
 ### Module Map
 
 ```
 Pinder.Core/
 ├── Stats/          — StatType, ShadowStatType, StatBlock (stat pairs, shadow penalties, DC calc)
-├── Rolls/          — RollEngine (stateless), RollResult, FailureTier, SuccessScale, FailureScale
+├── Rolls/          — RollEngine (stateless), RollResult, FailureTier, SuccessScale, FailureScale, RiskTier, RiskTierBonus
 ├── Traps/          — TrapDefinition, TrapState, ActiveTrap (trap lifecycle)
-├── Progression/    — LevelTable (XP thresholds, level bonuses, build points, item slots)
-├── Conversation/   — InterestMeter (0–25 interest tracker), InterestState, TimingProfile, GameSession
+├── Progression/    — LevelTable (XP thresholds, level bonuses, build points, item slots), XpLedger (NEW)
+├── Conversation/   — InterestMeter, InterestState, TimingProfile, GameSession, GameClock (NEW), ComboTracker (NEW), PlayerResponseDelayEvaluator (NEW), ConversationRegistry (NEW)
 ├── Characters/     — CharacterAssembler, FragmentCollection, CharacterProfile, ItemDefinition, AnatomyTierDefinition, TimingModifier
 ├── Prompts/        — PromptBuilder (assembles LLM system prompt from fragments + traps)
-├── Interfaces/     — IDiceRoller, IFailurePool, ITrapRegistry, IItemRepository, IAnatomyRepository, ILlmAdapter
-└── Data/           — JsonItemRepository, JsonAnatomyRepository, JsonParser (hand-rolled JSON parser)
+├── Interfaces/     — IDiceRoller, IFailurePool, ITrapRegistry, IItemRepository, IAnatomyRepository, ILlmAdapter, IGameClock (NEW)
+└── Data/           — JsonItemRepository, JsonAnatomyRepository, JsonParser, JsonTrapRepository, JsonTimingRepository
 ```
 
-### Data Flow (full turn — NEW as of Sprint 6)
+### Data Flow (full turn — updated for Sprint 7)
 
 ```
-Host creates GameSession(player, opponent, llm, dice, trapRegistry)
-  → session owns InterestMeter, TrapState, history, turn counter
+Host creates GameSession(player, opponent, llm, dice, trapRegistry, config)
+  config includes: IGameClock?, SessionShadowTracker?
+  → session owns InterestMeter, TrapState, history, turn counter, ComboTracker, XpLedger, topic list
 
 Per turn:
   1. StartTurnAsync()
-     → check end conditions → determine adv/disadv from interest state + traps
-     → call ILlmAdapter.GetDialogueOptionsAsync() → return TurnStart with options
+     → check end conditions (interest 0/25, ghost)
+     → evaluate shadow thresholds (via SessionShadowTracker) → disadvantage flags, option constraints
+     → compute horniness level (shadow + time-of-day modifier)
+     → determine adv/disadv from interest state + traps + shadow thresholds
+     → check active weakness window → modify DC context
+     → build DialogueContext with thresholds, horniness, callbacks, weakness, tells
+     → call ILlmAdapter.GetDialogueOptionsAsync() → post-process for horniness forcing
+     → return TurnStart with options
 
   2. ResolveTurnAsync(optionIndex)
-     → validate index → RollEngine.Resolve() with adv/disadv
-     → SuccessScale.GetInterestDelta() or FailureScale.GetInterestDelta() → interest delta
-     → update momentum streak → activate trap if TropeTrap+ tier
-     → InterestMeter.Apply(delta)
-     → ILlmAdapter.DeliverMessageAsync() → player text (post-degradation)
-     → check interest threshold crossing → ILlmAdapter.GetInterestChangeBeatAsync() if crossed
-     → ILlmAdapter.GetOpponentResponseAsync() → opponent reply
-     → append both to history → increment turn → return TurnResult
+     → compute externalBonus (tell +2, callback +1/+2/+3, The Triple +1)
+     → RollEngine.Resolve() with adv/disadv + externalBonus
+     → SuccessScale/FailureScale → interest delta
+     → ComboTracker.CheckCombo() → combo interest bonus
+     → CallbackBonus (interest delta addition on success)
+     → Momentum streak → interest bonus
+     → InterestMeter.Apply(total delta)
+     → XpLedger.Record(xp event)
+     → SessionShadowTracker.Apply(growth events) → evaluate triggers
+     → ILlmAdapter.DeliverMessageAsync() → player text
+     → ILlmAdapter.GetInterestChangeBeatAsync() if threshold crossed
+     → ILlmAdapter.GetOpponentResponseAsync() → opponent reply with Tell? + WeaknessWindow?
+     → store Tell + WeaknessWindow for next turn
+     → return TurnResult (with shadow events, combo, callback, tell, xp)
+
+  3. ReadAsync() / RecoverAsync() / Wait()
+     → fixed-DC roll (DC 12) or skip
+     → interest/trap effects
+     → shadow growth on failure
+     → XP recording
 ```
 
 ### Key Design Patterns
-- **Stateless engine**: `RollEngine` is a static class. All mutable state (traps, interest) is owned by the caller.
-- **Interface-driven injection**: Dice, failure pools, trap registries, item/anatomy repos, LLM adapters are all interfaces — Unity provides ScriptableObject impls, standalone uses JSON repos / null adapters.
-- **Fragment assembly**: Character identity is built by summing stat modifiers and concatenating text fragments from items + anatomy tiers → `FragmentCollection` → `PromptBuilder`.
-- **No external dependencies**: Custom `JsonParser` avoids NuGet dependency for Unity compat.
-- **GameSession as orchestrator**: `GameSession` is the first stateful component in the engine. It owns a single conversation's mutable state and sequences calls to stateless components (RollEngine, SuccessScale, FailureScale) and injected interfaces (ILlmAdapter, IDiceRoller, ITrapRegistry).
+- **Stateless engine**: `RollEngine` is a static class. All mutable state is owned by `GameSession` or caller.
+- **Interface-driven injection**: Dice, failure pools, trap registries, item/anatomy repos, LLM adapters, game clock are all interfaces.
+- **Fragment assembly**: Character identity built by summing stat modifiers and concatenating text fragments.
+- **No external dependencies**: Custom `JsonParser` avoids NuGet for Unity compat.
+- **GameSession as orchestrator**: Owns a single conversation's mutable state. Delegates to stateless components and injected interfaces.
+- **SessionShadowTracker as mutable shadow layer**: Wraps immutable `StatBlock`, provides mutable shadow tracking without breaking RollEngine's snapshot contract.
 
 ---
 
-## Sprint 6: Game Session + LLM Adapter — Architecture Briefing
+## Sprint 7: RPG Rules Complete (Continuation) — Architecture Briefing
 
 ### What's changing
 
-**Previous architecture**: The engine was a collection of stateless utilities and data models. The host (Unity) was responsible for orchestrating the game loop: calling RollEngine, tracking interest, managing traps, calling the LLM. The engine had no concept of a "turn" or a "session."
+**Previous architecture (Sprint 6)**: GameSession orchestrates Speak turns with roll → interest delta → momentum → trap → deliver → opponent response. Shadow stats are immutable on `StatBlock`. No concept of game clock, combos, callbacks, tells, weakness windows, XP, or shadow growth. All these features had stub types (Tell, WeaknessWindow, CallbackOpportunity) and TurnResult fields added in prior PRs but no wiring.
 
-**New architecture**: Two new components are introduced:
+**New architecture**: This sprint wires up the remaining RPG mechanics. The key structural changes are:
 
-1. **`ILlmAdapter`** (Issue #26) — An interface in `Pinder.Core.Interfaces` that abstracts all LLM interactions. Four async methods: get dialogue options, deliver message, get opponent response, get interest change narrative beat. Plus context types that carry exactly the data the LLM needs. Plus `NullLlmAdapter` for testing.
+#### Wave 0: Prerequisites (MUST ship first as #130)
 
-2. **`GameSession`** (Issue #27) — A stateful orchestrator in `Pinder.Core.Conversation` that runs a single Pinder conversation end-to-end. It owns `InterestMeter`, `TrapState`, conversation history, momentum streak, and turn count. It sequences: options → roll → interest delta → trap → deliver → opponent response. It is the first class in the engine that holds mutable state across method calls.
+Three infrastructure pieces that multiple features depend on:
 
-**What is NOT changing**: Stats, Rolls, Traps, Progression, Characters, Prompts, Data modules remain untouched. `RollEngine` stays stateless. `InterestMeter` stays a simple value tracker.
+1. **`SessionShadowTracker`** — New class in `Pinder.Core.Stats`. Wraps a `StatBlock` reference + a mutable `Dictionary<ShadowStatType, int>` of deltas. Provides `GetEffectiveShadow(ShadowStatType)` (base + delta) and `ApplyGrowth(ShadowStatType, int amount)`. Does NOT modify `StatBlock._shadow`. Used by #43, #44, #45, #51.
 
-### New dependency: `FailureScale`
+2. **`IGameClock` interface** — New interface in `Pinder.Core.Interfaces`. Provides `Now`, `Advance()`, `GetTimeOfDay()`, `GetHorninessModifier()`, energy tracking. `GameClock` implementation in `Pinder.Core.Conversation`. `FixedGameClock` test helper. Used by #54, #51, #55, #56.
 
-Issue #28 identified that failure interest deltas are unspecified. For prototype maturity, we introduce `FailureScale` (companion to `SuccessScale`) with conservative defaults:
+3. **`RollEngine` extensions** — Add `ResolveFixedDC()` overload for Read/Recover (DC 12, no opponent stat block needed). Add `externalBonus` parameter to existing `Resolve()`. Used by #43, #46, #47, #50.
 
-| FailureTier | Interest Delta |
-|-------------|---------------|
-| Fumble | -1 |
-| Misfire | -2 |
-| TropeTrap | -3 |
-| Catastrophe | -4 |
-| Legendary (Nat 1) | -5 |
+4. **`GameSessionConfig`** — Optional config class passed to `GameSession` constructor to carry optional dependencies (`IGameClock?`, `SessionShadowTracker?`) without breaking the existing constructor signature. Backward-compatible: existing tests pass null config.
 
-These values are placeholder defaults. The PO can adjust them later. The implementation should use the same pattern as `SuccessScale` — a static method that takes a `RollResult` and returns an `int`.
+#### Wave 1: Independent features (can be built in parallel after Wave 0)
 
-### Descoped from this sprint
+- **#52 Trap taint injection** — Already merged (PR #122/#123). Complete.
+- **#54 GameClock** — `IGameClock` + `GameClock` + `TimeOfDay` + `FixedGameClock`. Self-contained after Wave 0 defines the interface.
+- **#43 Read/Recover/Wait** — Three new methods on `GameSession`. Uses `ResolveFixedDC`, `SessionShadowTracker`.
+- **#46 ComboTracker** — New class in `Conversation/`. Pure logic, no external deps beyond stat history.
+- **#47 Callback bonus** — Topic tracking in `GameSession`, interest delta addition.
+- **#49 Weakness windows** — Store `WeaknessWindow` from opponent response, apply DC reduction next turn.
+- **#50 Tells** — Store `Tell` from opponent response, apply +2 via `externalBonus`.
+- **#55 PlayerResponseDelay** — Pure function `(TimeSpan, StatBlock, InterestState) → DelayPenalty`. Zero deps.
+- **#48 XP tracking** — `XpLedger` class + wiring in `GameSession.ResolveTurnAsync`.
 
-Per vision concerns #29 and #30:
-- **Shadow growth triggers** (#29): Explicitly descoped. `GameSession.ResolveTurnAsync` should NOT implement shadow growth. No stub, no TODO — it's a future issue.
-- **Hard/Bold risk bonus** (#30): Explicitly descoped. Interest delta = `SuccessScale` or `FailureScale` output only. No risk bonus modifier.
+#### Wave 2: Depends on Wave 1 features
 
-### Implicit assumptions for implementers
+- **#44 Shadow growth events** — Depends on #43 (Read/Recover for Overthinking triggers), #130 (`SessionShadowTracker`). Wires growth triggers into `GameSession`.
+- **#45 Shadow thresholds** — Depends on #44 (shadow values must be mutable). Evaluates threshold effects on gameplay.
+- **#51 Horniness-forced Rizz** — Depends on #45 (Horniness shadow threshold levels), #54 (`IGameClock.GetHorninessModifier()`).
+- **#56 ConversationRegistry** — Depends on #54 (`IGameClock`), #44 (shadow bleed). Multi-session manager. Most complex piece.
 
-1. **netstandard2.0 + LangVersion 8.0**: No `record` types (C# 9+). Use `sealed class` with readonly properties and constructor. `Task<T>` is available via `System.Threading.Tasks`.
-2. **Zero NuGet dependencies**: Do not add any packages.
-3. **Nullable reference types are enabled**: Use `?` annotations correctly.
-4. **`RollEngine.Resolve` mutates `TrapState`**: When a TropeTrap tier activates, the method calls `attackerTraps.Activate()`. `GameSession` must pass its owned `TrapState` and expect mutation.
-5. **`InterestMeter` already has `GetState()`, `GrantsAdvantage`, `GrantsDisadvantage`**: These were added in Issue #6 (merged).
-6. **`SuccessScale` already exists**: Returns +1/+2/+3/+4 for successes, 0 for failures. Located in `Rolls/SuccessScale.cs`.
+#### Wave 3: QA
+
+- **#38 QA review** — Runs last after all features land.
+
+### What is NOT changing
+- `StatBlock` remains immutable. Shadow mutation goes through `SessionShadowTracker`.
+- `RollEngine.Resolve()` signature gains one optional parameter (`externalBonus = 0`) — backward compatible.
+- `InterestMeter` gains one constructor overload `(int startingValue)` — backward compatible.
+- All existing 254 tests continue to pass.
+
+### Arch concern: GameSession god object (#87)
+
+GameSession is accumulating responsibilities. This sprint adds Read/Recover/Wait, combo checking, callback tracking, tell/weakness storage, shadow growth, horniness option forcing, and XP recording. For **prototype maturity** this is acceptable — the priority is getting mechanics working. For MVP, GameSession should be refactored into:
+- `TurnOrchestrator` (sequences the turn)
+- `BonusCalculator` (external bonuses: combo, callback, tell, weakness)
+- `ShadowGrowthProcessor` (evaluates growth triggers)
+- `OptionPostProcessor` (horniness forcing, option filtering)
+
+This refactoring is explicitly NOT in scope for this sprint. File as future work.
 
 ---
 
@@ -103,117 +139,96 @@ Per vision concerns #29 and #30:
 
 | Layer | Location | Authority |
 |-------|----------|-----------|
-| Game rules | `design/systems/rules-v3.md` (external repo) | **Authoritative** — all mechanical values originate here |
-| Content data | `design/settings/` (external repo) | Authoritative for items, anatomy, traps content |
+| Game rules | `design/systems/rules-v3.md` (external repo) | **Authoritative** |
+| Content data | `design/settings/` (external repo) | Authoritative for items, anatomy, traps |
 | C# engine | `src/Pinder.Core/` (this repo) | **Derived** — must match rules exactly |
 
 ### Constant Sync Table
 
-Every numeric constant or structural table in the engine traces back to a rules section. When a rule changes, this table tells you exactly which C# code to update.
-
 | Rules Section | Rule Value | C# Location | C# Constant/Expression |
 |---|---|---|---|
-| §3 Defence pairings | Charm→SA, Rizz→Wit, Honesty→Chaos, Chaos→Charm, Wit→Rizz, SA→Honesty (each stat appears once as attacker, once as defender) | `Stats/StatBlock.cs` | `StatBlock.DefenceTable` |
+| §3 Defence pairings | Charm→SA, Rizz→Wit, Honesty→Chaos, Chaos→Charm, Wit→Rizz, SA→Honesty | `Stats/StatBlock.cs` | `StatBlock.DefenceTable` |
 | §3 Base DC | 13 | `Stats/StatBlock.cs` | `StatBlock.GetDefenceDC()` — hardcoded `13 +` |
-| §5 Fail tiers | Nat1→Legendary, miss 1–2→Fumble, 3–5→Misfire, 6–9→TropeTrap, 10+→Catastrophe | `Rolls/RollEngine.cs` | Boundary checks in `Resolve()` method |
-| §5 Fail tier enum | None, Fumble, Misfire, TropeTrap, Catastrophe, Legendary | `Rolls/FailureTier.cs` | `FailureTier` enum |
+| §5 Fail tiers | Nat1→Legendary, miss 1–2→Fumble, 3–5→Misfire, 6–9→TropeTrap, 10+→Catastrophe | `Rolls/RollEngine.cs` | Boundary checks in `Resolve()` |
 | §5 Success scale | Beat DC by 1–4→+1, 5–9→+2, 10+→+3, Nat20→+4 | `Rolls/SuccessScale.cs` | `SuccessScale.GetInterestDelta()` |
-| §5 Failure scale | Fumble→-1, Misfire→-2, TropeTrap→-3, Catastrophe→-4, Legendary→-5 | `Rolls/FailureScale.cs` | `FailureScale.GetInterestDelta()` — **NEW (prototype defaults)** |
-| §6 Interest range | 0–25 | `Conversation/InterestMeter.cs` | `InterestMeter.Max = 25`, `InterestMeter.Min = 0` |
-| §6 Starting interest | 10 | `Conversation/InterestMeter.cs` | `InterestMeter.StartingValue = 10` |
+| §5 Failure scale | Fumble→-1, Misfire→-2, TropeTrap→-3, Catastrophe→-4, Legendary→-5 | `Rolls/FailureScale.cs` | `FailureScale.GetInterestDelta()` |
+| §5 Risk tier bonus | Hard→+1, Bold→+2 | `Rolls/RiskTierBonus.cs` | `RiskTierBonus.GetInterestBonus()` |
+| §6 Interest range | 0–25 | `Conversation/InterestMeter.cs` | `Max = 25`, `Min = 0` |
+| §6 Starting interest | 10 (or 8 if Dread ≥18) | `Conversation/InterestMeter.cs` | `StartingValue = 10`, new overload |
 | §6 Interest states | Unmatched(0), Bored(1–4), Interested(5–15), VeryIntoIt(16–20), AlmostThere(21–24), DateSecured(25) | `Conversation/InterestMeter.cs` | `GetState()`, `InterestState` enum |
-| §6 Advantage from interest | VeryIntoIt/AlmostThere → advantage; Bored → disadvantage | `Conversation/InterestMeter.cs` | `GrantsAdvantage`/`GrantsDisadvantage` |
-| §10 XP thresholds | L1=0, L2=50, L3=150, L4=300, L5=500, L6=750, L7=1100, L8=1500, L9=2000, L10=2750, L11=3500 | `Progression/LevelTable.cs` | `XpThresholds` array |
-| §10 Level bonuses | L1–2=+0, L3–4=+1, L5–6=+2, L7–8=+3, L9–10=+4, L11=+5 | `Progression/LevelTable.cs` | `LevelBonuses` array, `GetBonus()` |
-| §10 Build points | L1=0(12 at creation), L2–3=2, L4=2, L5–6=3, L7=3, L8=4, L9=4, L10=5, L11=0(prestige) | `Progression/LevelTable.cs` | `BuildPointsGranted` array, `CreationBudget = 12` |
-| §10 Item slots | L1–2=2, L3–4=3, L5–6=4, L7–8=5, L9–11=6 | `Progression/LevelTable.cs` | `ItemSlots` array |
-| §10 Stat caps | Creation cap = 4, Base cap = 6 | `Progression/LevelTable.cs` | `CreationStatCap = 4`, `BaseStatCap = 6` |
-| §8 Shadow pairs | Charm↔Madness, Rizz↔Horniness, Honesty↔Denial, Chaos↔Fixation, Wit↔Dread, SA↔Overthinking | `Stats/StatBlock.cs` | `StatBlock.ShadowPairs` |
-| §8 Shadow penalty | -1 per 3 shadow points | `Stats/StatBlock.cs` | `GetEffective()` — `shadowVal / 3` |
-| §7 Trap effects | Disadvantage, StatPenalty, OpponentDCIncrease | `Traps/TrapDefinition.cs` | `TrapEffect` enum |
-| Momentum | 3-streak→+2, 4-streak→+2, 5+→+3, reset on fail | `Conversation/GameSession.cs` | Momentum logic in `ResolveTurnAsync` — **NEW** |
-| Ghost trigger | Bored state → 25% chance per turn (dice.Roll(4)==1) | `Conversation/GameSession.cs` | Ghost check in `StartTurnAsync` — **NEW** |
+| §6 Adv/disadv | VeryIntoIt/AlmostThere → advantage; Bored → disadvantage | `Conversation/InterestMeter.cs` | `GrantsAdvantage`/`GrantsDisadvantage` |
+| §7 Shadow pairs | Charm↔Madness, Rizz↔Horniness, Honesty↔Denial, Chaos↔Fixation, Wit↔Dread, SA↔Overthinking | `Stats/StatBlock.cs` | `StatBlock.ShadowPairs` |
+| §7 Shadow penalty | -1 per 3 shadow points | `Stats/StatBlock.cs` | `GetEffective()` — `shadowVal / 3` |
+| §7 Shadow thresholds | 6=T1, 12=T2, 18+=T3 | `Stats/ShadowThresholdEvaluator.cs` | **NEW** |
+| §7 Shadow growth triggers | See #44 growth table | `Conversation/ShadowGrowthProcessor.cs` | **NEW** |
+| §8 Read/Recover/Wait | DC 12, SA stat, effects | `Conversation/GameSession.cs` | `ReadAsync()`, `RecoverAsync()`, `Wait()` — **NEW** |
+| §8 Shadow penalty | -1 per 3 shadow points | `Stats/StatBlock.cs` | `GetEffective()` |
+| §10 XP sources | Success 5/10/15, Fail 2, Nat20 25, Nat1 10, DateSecured 50, Recovery 15, Complete 5 | `Progression/XpLedger.cs` | **NEW** |
+| §10 XP thresholds | L1=0…L11=3500 | `Progression/LevelTable.cs` | `XpThresholds` |
+| §10 Level bonuses | L1–2=+0…L11=+5 | `Progression/LevelTable.cs` | `LevelBonuses` |
+| §15 Combos | 8 combo sequences + bonuses | `Conversation/ComboTracker.cs` | **NEW** |
+| §15 Callbacks | 2 turns→+1, 4+→+2, opener→+3 (interest delta bonus) | `Conversation/GameSession.cs` | Callback logic — **NEW** |
+| §15 Tells | +2 roll bonus on matching stat | `Conversation/GameSession.cs` | Tell logic — **NEW** |
+| §15 Weakness windows | DC −2/−3 for one turn | `Conversation/GameSession.cs` | Weakness logic — **NEW** |
+| §15 Horniness | ≥6 one Rizz, ≥12 forced Rizz, ≥18 all Rizz | `Conversation/GameSession.cs` | Horniness option logic — **NEW** |
+| Momentum | 3-streak→+2, 4→+2, 5+→+3 | `Conversation/GameSession.cs` | `GetMomentumBonus()` |
+| Ghost trigger | Bored → 25% per turn | `Conversation/GameSession.cs` | Ghost check in `StartTurnAsync` |
+| §async-time Horniness mod | Morning −2, Afternoon +0, Evening +1, LateNight +3, After2AM +5 | `Conversation/GameClock.cs` | **NEW** |
+| §async-time Delay penalty | <1min 0, 1–15min 0, 15–60min −1 (if ≥16), 1–6h −2, 6–24h −3, 24+h −5 | `Conversation/PlayerResponseDelayEvaluator.cs` | **NEW** |
 
-### Drift Detection
-
-1. **Automated**: `tests/Pinder.Core.Tests/RulesConstantsTests.cs` asserts every value in the sync table above. If a rule changes and code is updated without updating the test (or vice versa), CI fails.
-2. **Quick grep patterns** to find hardcoded rule values in C#:
-   - Base DC: `grep -rn "13 +" src/Pinder.Core/Stats/`
-   - Interest bounds: `grep -rn "Max\|Min\|StartingValue" src/Pinder.Core/Conversation/`
-   - XP thresholds: `grep -rn "XpThresholds" src/Pinder.Core/Progression/`
-   - Shadow penalty divisor: `grep -rn "/ 3" src/Pinder.Core/Stats/`
-   - Failure tier boundaries: `grep -rn "miss\|<= 2\|<= 5\|<= 9" src/Pinder.Core/Rolls/`
-3. **Manual checklist** when `rules-v3.md` changes:
-   - Open this sync table
-   - For each changed section, find the C# location
-   - Update the constant/logic
-   - Update the test assertion
-   - Run `dotnet test`
-
-### Sync Process
-
-When a rules document changes:
-
-1. **Identify affected rows** in the sync table above
-2. **Update C# constants** at the listed file/location
-3. **Update tests** in `RulesConstantsTests.cs` to match new expected values
-4. **Run `dotnet test`** — all tests must pass
-5. **Update this sync table** if new constants were added or locations changed
-6. **Commit** with message: `sync: update <section> constants to rules v<version>`
-
-### Known Gaps (as of Sprint 6)
+### Known Gaps (as of Sprint 7)
 
 | Gap | Rules Section | Status |
 |-----|--------------|--------|
-| Shadow growth triggers | §8 | Descoped from Sprint 6 per #29 — needs PO-defined trigger rules |
-| Hard/Bold risk bonus | unspecified | Descoped from Sprint 6 per #30 — needs PO definition |
-| Failure scale values are prototype defaults | §5 | Filed as #28 — PO should confirm or adjust the -1/-2/-3/-4/-5 scale |
+| Failure scale values are prototype defaults | §5 | PO should confirm -1/-2/-3/-4/-5 |
+| Energy system daily amount (15–20) | §async-time | Defined in #54 but PO should confirm range |
+| ConversationRegistry cross-chat events | §async-time | Complex; may need future refinement |
 
 ---
 
 ## Component Boundaries
 
 ### Stats (`Pinder.Core.Stats`)
-- **Owns**: Stat types, shadow stat types, stat block with effective modifier calculation, defence table, DC calculation
-- **Public API**: `StatType` enum, `ShadowStatType` enum, `StatBlock` class
+- **Owns**: Stat types, shadow stat types, stat block with effective modifier calculation, defence table, DC calculation, shadow threshold evaluation
+- **Public API**: `StatType` enum, `ShadowStatType` enum, `StatBlock` class, `SessionShadowTracker` (NEW), `ShadowThresholdEvaluator` (NEW)
 - **Does NOT own**: Roll resolution, interest tracking, character assembly
 
 ### Rolls (`Pinder.Core.Rolls`)
-- **Owns**: d20 roll resolution, failure tier determination, advantage/disadvantage logic, trap activation during rolls, success scale, failure scale
-- **Public API**: `RollEngine.Resolve()`, `RollResult`, `FailureTier`, `SuccessScale`, `FailureScale`
+- **Owns**: d20 roll resolution, failure tier determination, advantage/disadvantage logic, trap activation during rolls, success/failure scales, risk tier
+- **Public API**: `RollEngine.Resolve()`, `RollEngine.ResolveFixedDC()` (NEW), `RollResult`, `FailureTier`, `SuccessScale`, `FailureScale`, `RiskTier`, `RiskTierBonus`
 - **Does NOT own**: Interest tracking, stat storage, trap definitions, game session orchestration
 
 ### Traps (`Pinder.Core.Traps`)
-- **Owns**: Trap data model, active trap tracking, turn countdown, trap clearing
+- **Owns**: Trap data model, active trap tracking, turn countdown
 - **Public API**: `TrapDefinition`, `TrapState`, `ActiveTrap`, `TrapEffect`
-- **Does NOT own**: Trap activation logic (that's in RollEngine), trap content (loaded from JSON)
+- **Does NOT own**: Trap activation logic (RollEngine), trap content (Data/)
 
 ### Conversation (`Pinder.Core.Conversation`)
-- **Owns**: Interest meter (value tracking, clamping, state derivation), timing profile (reply delay computation), game session orchestration
-- **Public API**: `InterestMeter`, `InterestState`, `TimingProfile`, `GameSession`, `TurnStart`, `TurnResult`, `GameStateSnapshot`, `GameOutcome`
-- **Does NOT own**: Roll math (delegates to RollEngine), LLM communication (delegates to ILlmAdapter), character assembly
+- **Owns**: Interest meter, timing, game session orchestration, combo tracking, game clock, response delay evaluation, conversation registry
+- **Public API**: `InterestMeter`, `InterestState`, `TimingProfile`, `GameSession`, `TurnStart`, `TurnResult`, `GameStateSnapshot`, `GameOutcome`, `GameClock` (NEW), `IGameClock` (in Interfaces), `ComboTracker` (NEW), `PlayerResponseDelayEvaluator` (NEW), `ConversationRegistry` (NEW), `ConversationEntry` (NEW), `ReadResult` (NEW), `RecoverResult` (NEW)
+- **Does NOT own**: Roll math, LLM communication, character assembly
 
 ### Progression (`Pinder.Core.Progression`)
-- **Owns**: XP→level resolution, level bonus, build points, item slot counts, failure pool tier
-- **Public API**: `LevelTable` (static), `FailurePoolTier`
-- **Does NOT own**: XP tracking (that's the host), character creation validation
+- **Owns**: XP→level resolution, level bonus, build points, item slot counts, XP tracking
+- **Public API**: `LevelTable`, `FailurePoolTier`, `XpLedger` (NEW)
+- **Does NOT own**: XP source determination (that's GameSession)
 
 ### Characters (`Pinder.Core.Characters`)
-- **Owns**: Item/anatomy data models, fragment assembly pipeline, archetype ranking, character profile
+- **Owns**: Item/anatomy data models, fragment assembly, character profile
 - **Public API**: `CharacterAssembler`, `FragmentCollection`, `CharacterProfile`, `ItemDefinition`, `AnatomyTierDefinition`, `TimingModifier`
-- **Does NOT own**: Item loading (that's Data/), prompt generation (that's Prompts/)
+- **Does NOT own**: Item loading (Data/), prompt generation (Prompts/)
 
 ### Prompts (`Pinder.Core.Prompts`)
 - **Owns**: System prompt string construction from fragments + traps
 - **Public API**: `PromptBuilder.BuildSystemPrompt()`
-- **Does NOT own**: LLM calling, fragment assembly, trap state management
+- **Does NOT own**: LLM calling, fragment assembly, trap state
 
 ### Data (`Pinder.Core.Data`)
-- **Owns**: JSON parsing, item/anatomy deserialization
-- **Public API**: `JsonItemRepository`, `JsonAnatomyRepository`
-- **Does NOT own**: File I/O (caller passes JSON string), data validation beyond parsing
+- **Owns**: JSON parsing, item/anatomy/trap/timing deserialization
+- **Public API**: `JsonItemRepository`, `JsonAnatomyRepository`, `JsonTrapRepository`, `JsonTimingRepository`
+- **Does NOT own**: File I/O (caller passes JSON string)
 
 ### Interfaces (`Pinder.Core.Interfaces`)
 - **Owns**: Abstraction contracts for injection points
-- **Public API**: `IDiceRoller`, `IFailurePool`, `ITrapRegistry`, `IItemRepository`, `IAnatomyRepository`, `ILlmAdapter`
-- **Does NOT own**: Any implementation (except `NullLlmAdapter` for testing)
+- **Public API**: `IDiceRoller`, `IFailurePool`, `ITrapRegistry`, `IItemRepository`, `IAnatomyRepository`, `ILlmAdapter`, `IGameClock` (NEW)
+- **Does NOT own**: Any implementation
