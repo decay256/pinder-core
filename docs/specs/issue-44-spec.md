@@ -233,7 +233,19 @@ Net Fixation delta from end-of-game: 0 (+1 for never-Chaos, −1 for variety off
 
 Plus any per-turn growth events from the roll that caused the unmatch.
 
-### Example 6: No shadow tracker configured
+### Example 6: Recover failure triggers Overthinking (O2)
+
+**Setup:** Player has an active trap. `SessionShadowTracker` is available. Player calls `RecoverAsync()`. Dice roll returns 3 (total below DC 12). Roll fails.
+
+**Expected `RecoverResult.ShadowGrowthEvents`:**
+```
+["Overthinking +1 (Recover failed)"]
+```
+
+**Expected `SessionShadowTracker` delta:** Overthinking increased by +1.
+**Expected `RecoverResult.Success`:** `false`
+
+### Example 7: No shadow tracker configured
 
 **Setup:** `GameSession` constructed without `SessionShadowTracker` (e.g., `GameSessionConfig` is null or has null shadow tracker). Player rolls Nat 1 on Charm.
 
@@ -260,6 +272,8 @@ The following counters are maintained within `GameSession`:
 - `_allStatsUsed` (HashSet<StatType>): all distinct stats ever used in the session
 - `_saUsageCount` (int): incremented when `roll.Stat == StatType.SelfAwareness`
 
+Additionally, `RecoverAsync` must apply Overthinking +1 on failure (trigger O2) and populate `RecoverResult.ShadowGrowthEvents` with the resulting event string. See §4.4 for ownership details.
+
 ### AC4: TurnResult.ShadowGrowthEvents populated when shadow grows
 
 Every `TurnResult` returned from `ResolveTurnAsync` includes a non-null `IReadOnlyList<string>` of growth event descriptions. The list is empty when no growth occurs and contains one entry per growth trigger that fired.
@@ -273,6 +287,7 @@ Tests must verify at minimum:
 - Multiple growth events in a single turn (e.g., Nat 1 on Wit triggering both D3 and D4)
 - End-of-game triggers fire correctly (Denial on DateSecured without Honesty)
 - No growth events when SessionShadowTracker is null
+- Overthinking +1 on Recover failure (O2) — `RecoverResult.ShadowGrowthEvents` contains `"Overthinking +1 (Recover failed)"`
 
 ### AC6: Build clean
 
@@ -374,3 +389,37 @@ For clarity, the exact position of shadow growth detection in the `ResolveTurnAs
 ```
 
 Shadow growth does **not** affect the current turn's roll or interest delta. It is a post-resolution side effect that records corruption for future turns.
+
+### Ordering of Operations in RecoverAsync (O2 trigger)
+
+```
+1. Validate active trap exists
+2. Check end conditions
+3. RollEngine.ResolveFixedDC(SA, 12) → RollResult
+4. If success: clear trap, xp = 15
+5. If failure:
+   a. Apply −1 interest
+   b. xp = 2
+   c. If _playerShadows != null:
+      → _playerShadows.ApplyGrowth(Overthinking, 1, "Recover failed")
+      → collect event string into shadowEvents list
+6. Advance trap timers
+7. _turnNumber++
+8. _currentOptions = null
+9. Check end conditions (interest == 0 → Unmatched)
+10. Record XP
+11. Return RecoverResult(success, clearedTrapName, roll, snapshot, xp, shadowEvents)
+```
+
+### Ordering of Operations in Wait
+
+Wait does **not** involve any shadow growth detection (no roll, no stat usage). For completeness:
+
+```
+1. If _ended → throw GameEndedException
+2. Apply −1 interest
+3. Advance trap timers
+4. _turnNumber++
+5. _currentOptions = null
+6. Check end conditions (interest == 0 → _ended = true, _outcome = Unmatched)
+```
