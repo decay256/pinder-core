@@ -1,9 +1,9 @@
 # Spec: Shadow Thresholds — Implement §7 Threshold Effects on Gameplay
 
 **Issue:** #45
-**Sprint:** 7 — RPG Rules Complete
+**Sprint:** 8 — RPG Rules Complete
 **Depends on:** #44 (shadow growth events), #139 (Wave 0 — `SessionShadowTracker`, `GameSessionConfig`)
-**Contract:** `contracts/sprint-7-shadow-thresholds.md`
+**Contract:** `contracts/sprint-8-shadow-thresholds.md`
 **Maturity:** Prototype
 
 ---
@@ -142,7 +142,7 @@ These are enforced in `GameSession` after the LLM returns dialogue options:
 
 #### Denial ≥ 18: Remove Honesty Options
 
-After `ILlmAdapter.GetDialogueOptionsAsync()` returns, filter out any `DialogueOption` where `option.Stat == StatType.Honesty`. If all options would be removed (unlikely but possible), leave one non-Honesty option. The LLM is not expected to comply with this restriction — it is enforced post-hoc.
+After `ILlmAdapter.GetDialogueOptionsAsync()` returns, filter out any `DialogueOption` where `option.Stat == StatType.Honesty`. If all options would be removed (unlikely but possible), keep one Chaos option as fallback (per Sprint 8 contract). If no Chaos option exists, keep the first option. The LLM is not expected to comply with this restriction — it is enforced post-hoc.
 
 #### Fixation ≥ 18: Force Same Stat as Last Turn
 
@@ -330,7 +330,7 @@ Tests must verify:
 
 ### 6.2 All Options Are Honesty at Denial T3
 
-If the LLM returns options where every option uses `StatType.Honesty` and Denial is at T3, filtering all of them would leave zero options. In this case, the implementation should keep at least one option (the first one) to prevent an empty option set. Alternatively, the GameSession can request new options from the LLM without the Honesty constraint, but at prototype maturity, keeping one option is acceptable.
+If the LLM returns options where every option uses `StatType.Honesty` and Denial is at T3, filtering all of them would leave zero options. In this case, the implementation should keep one Chaos option as a fallback to prevent an empty option set (per Sprint 8 contract). If no Chaos option exists in the original set, keep the first non-suppressed option; if all are suppressed, keep the first option regardless. At prototype maturity, this simple fallback is acceptable.
 
 ### 6.3 Fixation T3 on First Turn
 
