@@ -425,9 +425,9 @@ Three issues each propose adding a different optional parameter to `RollEngine.R
 
 | Issue | Proposed Parameter | Purpose |
 |-------|--------------------|---------|
-| #46 (Stat Combos) | `int bonusModifier = 0` | +1 roll bonus from The Triple combo |
-| #49 (Weakness Windows) | `int dcModifier = 0` | DC reduction from exploiting weakness |
-| #50 (Tell Detection) | `int rollBonus = 0` | +2 roll bonus from reading a tell |
+| #46 (Stat Combos) | `int externalBonus = 0` | +1 roll bonus from The Triple combo (combined with tell bonus) |
+| #49 (Weakness Windows) | `int dcAdjustment = 0` | DC reduction from exploiting weakness |
+| #50 (Tell Detection) | `int externalBonus = 0` | +2 roll bonus from reading a tell (additive with combo bonus) |
 
 **Merged API recommendation:** All three should be added as distinct optional parameters in a single merged signature:
 
@@ -442,15 +442,15 @@ public static RollResult Resolve(
     TrapState? attackerTraps = null,
     ITrapRegistry? trapRegistry = null,
     IFailurePool? failurePool = null,
-    int rollBonus = 0,      // From #46 (combo) and #50 (tell) — additive bonuses to roll total
-    int dcModifier = 0)     // From #49 (weakness window) — subtracted from DC
+    int externalBonus = 0,   // From #46 (combo) and #50 (tell) — additive bonuses to roll total
+    int dcAdjustment = 0)   // From #49 (weakness window) — subtracted from DC
 ```
 
-Note that #46's `bonusModifier` (+1 from combo) and #50's `rollBonus` (+2 from tell) serve the same mechanical purpose: they are additive bonuses to the roll total. They should be **combined into a single `rollBonus` parameter**, with the caller summing applicable bonuses before passing (e.g., `rollBonus: comboBonus + tellBonus`). The `dcModifier` from #49 is mechanically different (it lowers the DC) and remains a separate parameter.
+Note that #46's combo bonus (+1 from The Triple) and #50's tell bonus (+2 from reading a tell) serve the same mechanical purpose: they are additive bonuses to the roll total. They should be **combined into a single `externalBonus` parameter**, with the caller summing applicable bonuses before passing (e.g., `externalBonus: comboBonus + tellBonus + callbackBonus`). The `dcAdjustment` from #49 is mechanically different (it lowers the DC) and remains a separate parameter.
 
-**Impact on issue #48:** XP tier determination uses `RollResult.DC` (the DC value stored in the roll result). The `dcModifier` from #49 lowers the effective DC before comparison but the stored `RollResult.DC` should reflect the **effective** (post-modifier) DC. This means XP tiers are determined by the DC the player *actually faced*, which is correct: if a weakness window reduced DC from 18 to 16, the player earns mid-tier (10 XP), not high-tier (15 XP). The `rollBonus` parameters (#46, #50) do not affect DC and therefore have no effect on XP tier determination.
+**Impact on issue #48:** XP tier determination uses `RollResult.DC` (the DC value stored in the roll result). The `dcAdjustment` from #49 lowers the effective DC before comparison but the stored `RollResult.DC` should reflect the **effective** (post-adjustment) DC. This means XP tiers are determined by the DC the player *actually faced*, which is correct: if a weakness window reduced DC from 18 to 16, the player earns mid-tier (10 XP), not high-tier (15 XP). The `externalBonus` parameter (#46, #50) does not affect DC and therefore has no effect on XP tier determination.
 
-**Implementer note:** When implementing issue #48, use `rollResult.DC` as-is for XP tier calculation. If #49 is also implemented, ensure `RollResult.DC` stores the effective (post-dcModifier) DC. If #49 is not yet merged when #48 is implemented, this is a no-op — the existing `RollResult.DC` is already the effective DC.
+**Implementer note:** When implementing issue #48, use `rollResult.DC` as-is for XP tier calculation. If #49 is also implemented, ensure `RollResult.DC` stores the effective (post-dcAdjustment) DC. If #49 is not yet merged when #48 is implemented, this is a no-op — the existing `RollResult.DC` is already the effective DC.
 
 ---
 
@@ -467,9 +467,9 @@ Note that #46's `bonusModifier` (+1 from combo) and #50's `rollBonus` (+2 from t
 | Issue #42 (RiskTier) | Dependency — `RollResult.DC` must be available (already is). Risk tier does NOT affect XP amounts. |
 | Issue #43 (Read/Recover/Wait) | Dependency — `RecoverAsync` success path must record trap recovery XP. `ReadAsync` and `Wait` do NOT record XP. |
 | Issue #44 (Shadow growth / `CharacterState`) | Dependency — `GameSession` may use `CharacterState` by this point; XP tracking is additive and does not interact with shadow growth. |
-| Issue #46 (Stat Combos) | Co-sprint — adds `rollBonus`/`bonusModifier` to `RollEngine.Resolve`. Does not affect XP calculation. See §12.2. |
-| Issue #49 (Weakness Windows) | Co-sprint — adds `dcModifier` to `RollEngine.Resolve` and introduces `OpponentResponse`. `dcModifier` may affect effective DC used for XP tier. See §12.2. |
-| Issue #50 (Tell Detection) | Co-sprint — adds `rollBonus` to `RollEngine.Resolve` and introduces `OpponentResponse`. Does not affect XP calculation. See §12.1 and §12.2. |
+| Issue #46 (Stat Combos) | Co-sprint — adds combo bonus via `externalBonus` parameter on `RollEngine.Resolve`. Does not affect XP calculation. See §12.2. |
+| Issue #49 (Weakness Windows) | Co-sprint — adds `dcAdjustment` to `RollEngine.Resolve` and introduces `OpponentResponse`. `dcAdjustment` may affect effective DC used for XP tier. See §12.2. |
+| Issue #50 (Tell Detection) | Co-sprint — adds tell bonus via `externalBonus` parameter on `RollEngine.Resolve` and introduces `OpponentResponse`. Does not affect XP calculation. See §12.1 and §12.2. |
 
 ### External
 
