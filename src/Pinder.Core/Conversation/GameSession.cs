@@ -33,6 +33,9 @@ namespace Pinder.Core.Conversation
         private readonly SessionShadowTracker? _opponentShadows;
         private readonly string? _previousOpener;
 
+        // Combo tracking (#46)
+        private readonly ComboTracker _comboTracker;
+
         // Shadow growth tracking fields (#44)
         private readonly List<StatType> _statsUsedPerTurn;
         private readonly List<bool> _highestPctOptionPicked;
@@ -96,6 +99,9 @@ namespace Pinder.Core.Conversation
             _playerShadows = config?.PlayerShadows;
             _opponentShadows = config?.OpponentShadows;
             _previousOpener = config?.PreviousOpener;
+
+            // Combo tracking (#46)
+            _comboTracker = new ComboTracker();
 
             // Shadow growth tracking (#44)
             _statsUsedPerTurn = new List<StatType>();
@@ -178,7 +184,21 @@ namespace Pinder.Core.Conversation
                 activeTrapInstructions: activeTrapInstructions);
 
             // Get dialogue options from LLM
-            var options = await _llm.GetDialogueOptionsAsync(context).ConfigureAwait(false);
+            var rawOptions = await _llm.GetDialogueOptionsAsync(context).ConfigureAwait(false);
+
+            // Peek combos for each option (#46)
+            var options = new DialogueOption[rawOptions.Length];
+            for (int i = 0; i < rawOptions.Length; i++)
+            {
+                var opt = rawOptions[i];
+                string? comboName = _comboTracker.PeekCombo(opt.Stat);
+                options[i] = new DialogueOption(
+                    opt.Stat,
+                    opt.IntendedText,
+                    opt.CallbackTurnNumber,
+                    comboName,
+                    opt.HasTellBonus);
+            }
             _currentOptions = options;
 
             var snapshot = CreateSnapshot();
@@ -206,6 +226,13 @@ namespace Pinder.Core.Conversation
 
             var chosenOption = _currentOptions[optionIndex];
 
+            // Compute external bonus from Triple combo (#46)
+            int externalBonus = 0;
+            if (_comboTracker.HasTripleBonus)
+            {
+                externalBonus += 1;
+            }
+
             // 1. Roll dice
             var rollResult = RollEngine.Resolve(
                 stat: chosenOption.Stat,
@@ -216,7 +243,8 @@ namespace Pinder.Core.Conversation
                 trapRegistry: _trapRegistry,
                 dice: _dice,
                 hasAdvantage: _currentHasAdvantage,
-                hasDisadvantage: _currentHasDisadvantage);
+                hasDisadvantage: _currentHasDisadvantage,
+                externalBonus: externalBonus);
 
             // 2. Compute interest delta from roll outcome
             int interestDelta;
@@ -239,6 +267,16 @@ namespace Pinder.Core.Conversation
             else
             {
                 _momentumStreak = 0;
+            }
+
+            // 3b. Combo detection (#46)
+            _comboTracker.RecordTurn(chosenOption.Stat, rollResult.IsSuccess);
+            var combo = _comboTracker.CheckCombo();
+            string? comboTriggered = null;
+            if (combo != null)
+            {
+                interestDelta += combo.InterestBonus;
+                comboTriggered = combo.Name;
             }
 
             // 4. Record interest before applying delta
@@ -365,7 +403,8 @@ namespace Pinder.Core.Conversation
                 stateAfter: stateSnapshot,
                 isGameOver: isGameOver,
                 outcome: outcome,
-                shadowGrowthEvents: shadowGrowthEvents);
+                shadowGrowthEvents: shadowGrowthEvents,
+                comboTriggered: comboTriggered);
         }
 
         /// <summary>
@@ -568,7 +607,8 @@ namespace Pinder.Core.Conversation
                 state: _interest.GetState(),
                 momentumStreak: _momentumStreak,
                 activeTrapNames: trapNames,
-                turnNumber: _turnNumber);
+                turnNumber: _turnNumber,
+                tripleBonusActive: _comboTracker.HasTripleBonus);
         }
 
         private string GetLastOpponentMessage()
@@ -608,6 +648,9 @@ namespace Pinder.Core.Conversation
 
             // 4. Clear pending Speak options
             _currentOptions = null;
+
+            // 4b. Consume triple bonus if active (#46 edge case 7)
+            _comboTracker.ConsumeTripleBonus();
 
             // 5. Determine advantage/disadvantage from interest state
             bool hasAdvantage = _interest.GrantsAdvantage;
@@ -693,6 +736,9 @@ namespace Pinder.Core.Conversation
             // 5. Clear pending Speak options
             _currentOptions = null;
 
+            // 5b. Consume triple bonus if active (#46 edge case 7)
+            _comboTracker.ConsumeTripleBonus();
+
             // 6. Determine advantage/disadvantage from interest state
             bool hasAdvantage = _interest.GrantsAdvantage;
             bool hasDisadvantage = _interest.GrantsDisadvantage;
@@ -771,6 +817,9 @@ namespace Pinder.Core.Conversation
 
             // 4. Clear pending Speak options
             _currentOptions = null;
+
+            // 4b. Consume triple bonus if active (#46 edge case 7)
+            _comboTracker.ConsumeTripleBonus();
 
             // 5. Apply -1 interest
             _interest.Apply(-1);

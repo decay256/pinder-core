@@ -20,18 +20,23 @@ namespace Pinder.Core.Conversation
         /// <summary>Current turn number (0-based before first turn).</summary>
         public int TurnNumber { get; }
 
+        /// <summary>True if The Triple bonus is active for the current turn (+1 to all rolls).</summary>
+        public bool TripleBonusActive { get; }
+
         public GameStateSnapshot(
             int interest,
             InterestState state,
             int momentumStreak,
             string[] activeTrapNames,
-            int turnNumber)
+            int turnNumber,
+            bool tripleBonusActive = false)
         {
             Interest = interest;
             State = state;
             MomentumStreak = momentumStreak;
             ActiveTrapNames = activeTrapNames ?? System.Array.Empty<string>();
             TurnNumber = turnNumber;
+            TripleBonusActive = tripleBonusActive;
         }
     }
 }
