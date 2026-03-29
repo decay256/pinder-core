@@ -24,7 +24,7 @@ The combo system rewards players for using specific sequences of stats across co
 - The Triple checks that the last 3 turns used 3 **distinct** `StatType` values. It does NOT require success on turns 1 or 2 — only on the 3rd.
 - Interest bonuses from combos stack additively with `SuccessScale` delta, momentum bonus, and risk tier bonus (#42).
 - The Triple's +1 roll bonus applies to the **next** turn only and then expires.
-- If multiple combos match on the same turn, only the highest-bonus combo fires. If tied, the first matched combo wins. (Prototype simplification — stacking may be added later.)
+- If multiple combos match on the same turn: The Triple is always evaluated independently — if it matches, it fires (setting `HasTripleBonus`). Among the remaining interest-bonus combos, only the highest `InterestBonus` fires. If tied, the first matched combo wins. This means a turn can produce at most one interest-bonus combo AND The Triple simultaneously. (Prototype simplification — full stacking may be added later.)
 
 ---
 
@@ -48,20 +48,39 @@ public sealed class ComboTracker
     public void RecordTurn(StatType stat, bool succeeded);
 
     /// <summary>
-    /// After RecordTurn, returns the combo that completed this turn, or null.
+    /// After RecordTurn, returns the best interest-bonus combo that completed
+    /// this turn, or null. The Triple is handled separately — if it triggered,
+    /// HasTripleBonus is set to true regardless of what this method returns.
     /// Only valid immediately after RecordTurn — returns the result of the
     /// most recent RecordTurn call.
     /// </summary>
-    /// <returns>A ComboResult with name and bonus, or null if no combo fired.</returns>
+    /// <returns>A ComboResult with name and bonus, or null if no combo fired.
+    /// For The Triple, returns ComboResult("The Triple", 0, true) ONLY if no
+    /// other interest-bonus combo also matched (so the caller can report it
+    /// in TurnResult.ComboTriggered). If The Triple and an interest-bonus combo
+    /// both match, returns the interest-bonus combo and The Triple is still
+    /// active via HasTripleBonus.</returns>
     public ComboResult? CheckCombo();
 
     /// <summary>
     /// True if The Triple was completed on the previous turn, meaning
     /// the current turn gets +1 to all rolls via externalBonus.
-    /// Resets to false after the bonus turn is consumed (one-turn only).
+    /// Does NOT auto-reset — caller must invoke ConsumeTripleBonus()
+    /// after applying the bonus (or when the bonus turn is spent on
+    /// a non-roll action like Read/Recover/Wait).
     /// GameSession reads this before calling RollEngine.Resolve.
     /// </summary>
     public bool HasTripleBonus { get; }
+
+    /// <summary>
+    /// Consume (reset) the Triple bonus. Must be called exactly once
+    /// per bonus turn — either after applying +1 to a Speak roll via
+    /// externalBonus, or when the player spends the turn on a non-roll
+    /// action (Read/Recover/Wait) so the bonus expires unused.
+    /// After this call, HasTripleBonus returns false.
+    /// Calling when HasTripleBonus is already false is a no-op.
+    /// </summary>
+    public void ConsumeTripleBonus();
 
     /// <summary>
     /// Preview: returns the combo name that would complete if the given stat
@@ -156,7 +175,8 @@ After the roll resolves:
    - Add `combo.InterestBonus` to the interest delta (0 for The Triple).
    - Set `comboTriggered = combo.Name` for `TurnResult`.
    - If `combo.IsTriple`, the tracker internally flags `HasTripleBonus` for next turn.
-4. If `_comboTracker.HasTripleBonus` was true at the start of this turn, the +1 was already applied to the roll via `externalBonus`. After the roll, `HasTripleBonus` resets to false (consumed).
+4. If `_comboTracker.HasTripleBonus` was true at the start of this turn, the +1 was already applied to the roll via `externalBonus`. After the roll, call `_comboTracker.ConsumeTripleBonus()` to reset the flag.
+5. For non-Speak actions (`ReadAsync`, `RecoverAsync`, `Wait`): if `_comboTracker.HasTripleBonus` is true at the start of the action, call `_comboTracker.ConsumeTripleBonus()` before returning. The bonus expires unused — it does NOT carry over to the next turn.
 
 ### Triple Bonus Lifecycle
 
@@ -165,9 +185,15 @@ Turn N:   Player plays 3rd distinct stat, succeeds
           → ComboTracker.CheckCombo() returns ComboResult("The Triple", 0, true)
           → ComboTracker internally sets _pendingTripleBonus = true
 
-Turn N+1: GameSession.StartTurnAsync() reads ComboTracker.HasTripleBonus → true
+Turn N+1 (Speak): GameSession.StartTurnAsync() reads ComboTracker.HasTripleBonus → true
           → GameSession includes +1 in externalBonus when calling RollEngine.Resolve
-          → After resolve, HasTripleBonus is consumed (resets to false)
+          → After resolve, GameSession calls ComboTracker.ConsumeTripleBonus()
+          → HasTripleBonus → false
+
+Turn N+1 (Read/Recover/Wait): GameSession reads ComboTracker.HasTripleBonus → true
+          → No standard roll to apply it to
+          → GameSession calls ComboTracker.ConsumeTripleBonus() to expire the bonus unused
+          → HasTripleBonus → false
 
 Turn N+2: HasTripleBonus → false. Normal roll.
 ```
@@ -257,14 +283,17 @@ Turn N+2: HasTripleBonus → false. Normal roll.
 - `CheckCombo()` → `ComboResult("The Triple", 0, true)`
 - Also: Turn 1 was a fail, Turn 2 is Charm (not SA), so no Recovery.
 
-### Example 8: Multiple combos match same turn — highest wins
+### Example 8: Multiple combos match same turn — The Triple fires independently
 
 **Setup:** History = [Wit(success), Charm(success)]. Turn 3: Honesty, success.
 - Charm → Honesty = "The Reveal" (+1 interest)
 - 3 different stats = "The Triple" (+1 roll bonus next turn)
-- Both match. The Triple has `InterestBonus=0` but unique roll bonus. "The Reveal" has `InterestBonus=1`.
-- **Rule:** Only the highest-bonus combo fires. Since "The Reveal" has higher interest bonus (+1 vs 0), it wins. The Triple does NOT fire.
-- **Note:** If the implementer prefers, "highest value" could consider The Triple's roll bonus as more valuable. The contract says "highest-bonus one fires (or first if tied)." For prototype, treat `InterestBonus` as the tiebreaker — higher interest bonus wins.
+- Both match. The Triple is evaluated independently and sets `HasTripleBonus = true`.
+- Among interest-bonus combos, "The Reveal" wins with `InterestBonus=1`.
+- `CheckCombo()` returns `ComboResult("The Reveal", 1, false)` — the interest-bonus winner.
+- `HasTripleBonus` is `true` — the roll bonus is queued for next turn.
+- `TurnResult.ComboTriggered` = `"The Reveal"` (the returned combo).
+- **Result:** Player gets +1 interest this turn AND +1 roll bonus next turn. Both fire.
 
 ---
 
@@ -295,7 +324,8 @@ When The Triple triggers:
 - `ComboTracker.HasTripleBonus` becomes true for the next turn.
 - `GameSession` passes `externalBonus: 1` (or adds +1 via `AddExternalBonus`) on the next turn's roll.
 - The bonus must affect whether the roll succeeds — it is applied **before** success/failure determination, not as a post-hoc interest adjustment.
-- The bonus expires after one turn regardless of outcome.
+- After applying the bonus (or if the turn is a non-roll action), `GameSession` calls `ConsumeTripleBonus()` to reset the flag.
+- The bonus expires after one turn regardless of outcome. Calling `ConsumeTripleBonus()` when `HasTripleBonus` is already false is a no-op.
 
 ### AC5: `DialogueOption.ComboName` populated when option would complete a combo
 
@@ -328,11 +358,11 @@ Unit tests must verify:
 
 4. **The Triple with repeated stats:** Wit → Charm → Wit. Only 2 distinct stats in 3 turns. The Triple does NOT trigger (requires 3 different stats).
 
-5. **The Triple overlap with 2-stat combo:** Wit → Charm → Honesty. Turn 2 triggers "The Setup" (Wit→Charm). Turn 3 triggers "The Reveal" (Charm→Honesty) AND potentially "The Triple" (3 distinct stats). Per single-best-combo rule, only one fires on turn 3.
+5. **The Triple overlap with 2-stat combo:** Wit → Charm → Honesty. Turn 2 triggers "The Setup" (Wit→Charm). Turn 3 triggers "The Reveal" (Charm→Honesty) AND "The Triple" (3 distinct stats). Both fire: `CheckCombo()` returns The Reveal (+1 interest), and `HasTripleBonus` is set to true (+1 roll bonus next turn).
 
 6. **Triple bonus expires on fail:** If the player fails during the Triple bonus turn, the +1 was still applied to the roll (just wasn't enough). `HasTripleBonus` resets regardless.
 
-7. **Triple bonus with Read/Recover/Wait actions (#43):** If the player uses Read, Recover, or Wait instead of Speak on the bonus turn, the Triple bonus is consumed without effect (those actions don't go through `RollEngine.Resolve` in the same way, or use `ResolveFixedDC` which should also accept the bonus). Implementation note: `GameSession` should still consume the bonus even if no standard roll occurs.
+7. **Triple bonus with Read/Recover/Wait actions (#43):** If the player uses Read, Recover, or Wait instead of Speak on the bonus turn, `GameSession` must call `ConsumeTripleBonus()` at the start of the action. The bonus expires unused — it does NOT carry over. Read/Recover use `ResolveFixedDC` which does not receive the Triple bonus; Wait has no roll at all.
 
 8. **Game ends mid-combo sequence:** If interest hits 0 (Unmatched) or 25 (DateSecured) before a combo completes, the partial sequence is irrelevant. No special handling.
 

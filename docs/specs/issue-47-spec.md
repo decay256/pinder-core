@@ -292,7 +292,7 @@ Unit tests required:
 | Empty `_topics` list | `CallbackOpportunities` passed as `null`; LLM unlikely to generate callback options but engine handles it gracefully |
 | Nat 1 with callback bonus | Nat 1 = auto-fail. `externalBonus` is still passed but `IsSuccess` remains `false` per Nat 1 override |
 | Nat 20 with callback option | Nat 20 = auto-success. Callback bonus is computed and recorded in `TurnResult.CallbackBonusApplied` but doesn't change the outcome |
-| Callback + tell + triple combo stacking | All three bonuses are summed into a single `externalBonus` int before `RollEngine.Resolve()` |
+| Callback + tell + triple combo stacking | All three bonuses are summed into a single `externalBonus` int before `RollEngine.Resolve()`. After the roll, `GameSession` calls `ComboTracker.ConsumeTripleBonus()` to expire the triple bonus. |
 | Duplicate topics in `_topics` | Allowed. LLM may reference any `TurnIntroduced` value via `CallbackTurnNumber` |
 
 ## Error Conditions
