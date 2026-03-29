@@ -80,6 +80,27 @@ namespace Pinder.Core.Stats
         }
 
         /// <summary>
+        /// Applies a signed delta to a shadow stat. Unlike ApplyGrowth, allows negative values
+        /// (e.g., Fixation −1 offset for using 4+ different stats). Stores a description event.
+        /// </summary>
+        /// <param name="shadow">The shadow stat to adjust.</param>
+        /// <param name="delta">Signed delta (positive = growth, negative = reduction).</param>
+        /// <param name="reason">Human-readable reason for the change.</param>
+        /// <returns>Description string: "{ShadowStatName} {+/-delta} ({reason})"</returns>
+        public string ApplyOffset(ShadowStatType shadow, int delta, string reason)
+        {
+            if (_deltas.ContainsKey(shadow))
+                _deltas[shadow] += delta;
+            else
+                _deltas[shadow] = delta;
+
+            string sign = delta >= 0 ? $"+{delta}" : delta.ToString();
+            string description = $"{shadow} {sign} ({reason})";
+            _growthEvents.Add(description);
+            return description;
+        }
+
+        /// <summary>
         /// Returns all growth event description strings accumulated since last drain, then clears the internal log.
         /// Returns an empty list if no growth events have occurred since the last drain (or since construction).
         /// Added per #161 resolution — this is the canonical drain method, replacing the dropped CharacterState concept.

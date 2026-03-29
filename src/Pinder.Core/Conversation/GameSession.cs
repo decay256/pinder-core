@@ -29,9 +29,19 @@ namespace Pinder.Core.Conversation
 
         // Sprint 8 Wave 0: optional config fields
         private readonly IGameClock? _clock;
-        private readonly Stats.SessionShadowTracker? _playerShadows;
-        private readonly Stats.SessionShadowTracker? _opponentShadows;
+        private readonly SessionShadowTracker? _playerShadows;
+        private readonly SessionShadowTracker? _opponentShadows;
         private readonly string? _previousOpener;
+
+        // Shadow growth tracking fields (#44)
+        private readonly List<StatType> _statsUsedPerTurn;
+        private readonly List<bool> _highestPctOptionPicked;
+        private int _honestySuccessCount;
+        private int _tropeTrapCount;
+        private bool _tropeTrapMadnessTriggered;
+        private int _saUsageCount;
+        private bool _saOverthinkingTriggered;
+        private string? _sessionOpener;
 
         private int _momentumStreak;
         private int _turnNumber;
@@ -86,6 +96,16 @@ namespace Pinder.Core.Conversation
             _playerShadows = config?.PlayerShadows;
             _opponentShadows = config?.OpponentShadows;
             _previousOpener = config?.PreviousOpener;
+
+            // Shadow growth tracking (#44)
+            _statsUsedPerTurn = new List<StatType>();
+            _highestPctOptionPicked = new List<bool>();
+            _honestySuccessCount = 0;
+            _tropeTrapCount = 0;
+            _tropeTrapMadnessTriggered = false;
+            _saUsageCount = 0;
+            _saOverthinkingTriggered = false;
+            _sessionOpener = null;
         }
 
         /// <summary>
@@ -122,6 +142,15 @@ namespace Pinder.Core.Conversation
                 {
                     _ended = true;
                     _outcome = GameOutcome.Ghosted;
+
+                    // Shadow growth: Ghosted → +1 Dread (#44 trigger 8)
+                    if (_playerShadows != null)
+                    {
+                        _playerShadows.ApplyGrowth(ShadowStatType.Dread, 1, "Ghosted");
+                        var events = _playerShadows.DrainGrowthEvents();
+                        throw new GameEndedException(GameOutcome.Ghosted, events);
+                    }
+
                     throw new GameEndedException(GameOutcome.Ghosted);
                 }
             }
@@ -158,7 +187,7 @@ namespace Pinder.Core.Conversation
 
         /// <summary>
         /// Resolve a turn after the player selects an option.
-        /// Sequences: roll → interest delta → momentum → trap advance → deliver → opponent response.
+        /// Sequences: roll → interest delta → momentum → shadow growth → trap advance → deliver → opponent response.
         /// </summary>
         /// <param name="optionIndex">Index into the options array from StartTurnAsync.</param>
         /// <exception cref="GameEndedException">If the game has already ended.</exception>
@@ -221,6 +250,39 @@ namespace Pinder.Core.Conversation
 
             int interestAfter = _interest.Current;
             InterestState stateAfter = _interest.GetState();
+
+            // ---- Shadow growth evaluation (#44) ----
+            EvaluatePerTurnShadowGrowth(chosenOption, optionIndex, rollResult, interestAfter);
+
+            // Check end conditions for end-of-game triggers
+            bool isGameOver = false;
+            GameOutcome? outcome = null;
+
+            if (_interest.IsZero)
+            {
+                _ended = true;
+                _outcome = GameOutcome.Unmatched;
+                isGameOver = true;
+                outcome = GameOutcome.Unmatched;
+            }
+            else if (_interest.IsMaxed)
+            {
+                _ended = true;
+                _outcome = GameOutcome.DateSecured;
+                isGameOver = true;
+                outcome = GameOutcome.DateSecured;
+            }
+
+            // End-of-game shadow growth checks
+            if (isGameOver)
+            {
+                EvaluateEndOfGameShadowGrowth(outcome!.Value);
+            }
+
+            // Drain shadow growth events for this turn
+            var shadowGrowthEvents = _playerShadows != null
+                ? _playerShadows.DrainGrowthEvents()
+                : (IReadOnlyList<string>)Array.Empty<string>();
 
             // 6. Advance trap timers
             _traps.AdvanceTurn();
@@ -291,26 +353,7 @@ namespace Pinder.Core.Conversation
             // 14. Clear stored options
             _currentOptions = null;
 
-            // 15. Check end conditions after this turn
-            bool isGameOver = false;
-            GameOutcome? outcome = null;
-
-            if (_interest.IsZero)
-            {
-                _ended = true;
-                _outcome = GameOutcome.Unmatched;
-                isGameOver = true;
-                outcome = GameOutcome.Unmatched;
-            }
-            else if (_interest.IsMaxed)
-            {
-                _ended = true;
-                _outcome = GameOutcome.DateSecured;
-                isGameOver = true;
-                outcome = GameOutcome.DateSecured;
-            }
-
-            // 16. Build result
+            // 15. Build result
             var stateSnapshot = CreateSnapshot();
 
             return new TurnResult(
@@ -321,7 +364,186 @@ namespace Pinder.Core.Conversation
                 interestDelta: interestDelta,
                 stateAfter: stateSnapshot,
                 isGameOver: isGameOver,
-                outcome: outcome);
+                outcome: outcome,
+                shadowGrowthEvents: shadowGrowthEvents);
+        }
+
+        /// <summary>
+        /// Evaluates per-turn shadow growth triggers after a Speak action resolves.
+        /// Applies growth to _playerShadows when available.
+        /// </summary>
+        private void EvaluatePerTurnShadowGrowth(
+            DialogueOption chosenOption,
+            int optionIndex,
+            RollResult rollResult,
+            int interestAfter)
+        {
+            if (_playerShadows == null)
+                return;
+
+            // Trigger 1: Nat 1 → +1 to paired shadow
+            if (rollResult.IsNatOne)
+            {
+                var pairedShadow = StatBlock.ShadowPairs[chosenOption.Stat];
+                _playerShadows.ApplyGrowth(pairedShadow, 1,
+                    $"Nat 1 on {chosenOption.Stat}");
+            }
+
+            // Trigger 2: Catastrophic Wit failure → +1 Dread
+            if (chosenOption.Stat == StatType.Wit
+                && !rollResult.IsSuccess
+                && rollResult.Tier == FailureTier.Catastrophe)
+            {
+                _playerShadows.ApplyGrowth(ShadowStatType.Dread, 1,
+                    "Catastrophic Wit failure (miss by 10+)");
+            }
+
+            // Trigger 3: TropeTrap count → +1 Madness at 3
+            if (!rollResult.IsSuccess && rollResult.Tier >= FailureTier.TropeTrap
+                && rollResult.Tier != FailureTier.Legendary) // Legendary is Nat 1, separate tier
+            {
+                _tropeTrapCount++;
+                if (_tropeTrapCount == 3 && !_tropeTrapMadnessTriggered)
+                {
+                    _tropeTrapMadnessTriggered = true;
+                    _playerShadows.ApplyGrowth(ShadowStatType.Madness, 1,
+                        "3+ trope traps in one conversation");
+                }
+            }
+            // Legendary (Nat 1) also counts as a trope-trap-tier failure per spec (tier >= TropeTrap)
+            if (!rollResult.IsSuccess && rollResult.Tier == FailureTier.Legendary)
+            {
+                _tropeTrapCount++;
+                if (_tropeTrapCount == 3 && !_tropeTrapMadnessTriggered)
+                {
+                    _tropeTrapMadnessTriggered = true;
+                    _playerShadows.ApplyGrowth(ShadowStatType.Madness, 1,
+                        "3+ trope traps in one conversation");
+                }
+            }
+
+            // Trigger 4: Same stat 3 turns in a row → +1 Fixation
+            _statsUsedPerTurn.Add(chosenOption.Stat);
+            if (_statsUsedPerTurn.Count >= 3)
+            {
+                int tail = _statsUsedPerTurn.Count;
+                if (_statsUsedPerTurn[tail - 1] == _statsUsedPerTurn[tail - 2]
+                    && _statsUsedPerTurn[tail - 2] == _statsUsedPerTurn[tail - 3])
+                {
+                    // Count consecutive same-stat at tail
+                    int consecutiveCount = 1;
+                    for (int i = tail - 2; i >= 0; i--)
+                    {
+                        if (_statsUsedPerTurn[i] == _statsUsedPerTurn[tail - 1])
+                            consecutiveCount++;
+                        else
+                            break;
+                    }
+                    // Trigger every 3 consecutive (at 3, 6, 9, ...)
+                    if (consecutiveCount >= 3 && consecutiveCount % 3 == 0)
+                    {
+                        _playerShadows.ApplyGrowth(ShadowStatType.Fixation, 1,
+                            $"Same stat ({chosenOption.Stat}) used 3 turns in a row");
+                    }
+                }
+            }
+
+            // Trigger 5: Highest-% option (index 0) 3 turns in a row → +1 Fixation
+            _highestPctOptionPicked.Add(optionIndex == 0);
+            if (_highestPctOptionPicked.Count >= 3)
+            {
+                int tail = _highestPctOptionPicked.Count;
+                if (_highestPctOptionPicked[tail - 1]
+                    && _highestPctOptionPicked[tail - 2]
+                    && _highestPctOptionPicked[tail - 3])
+                {
+                    // Count consecutive trues at tail
+                    int consecutiveCount = 0;
+                    for (int i = tail - 1; i >= 0; i--)
+                    {
+                        if (_highestPctOptionPicked[i])
+                            consecutiveCount++;
+                        else
+                            break;
+                    }
+                    if (consecutiveCount >= 3 && consecutiveCount % 3 == 0)
+                    {
+                        _playerShadows.ApplyGrowth(ShadowStatType.Fixation, 1,
+                            "Highest-% option picked 3 turns in a row");
+                    }
+                }
+            }
+
+            // Trigger 6: Honesty success tracking
+            if (chosenOption.Stat == StatType.Honesty && rollResult.IsSuccess)
+            {
+                _honestySuccessCount++;
+            }
+
+            // Trigger 7: Interest hits 0 → +2 Dread
+            if (interestAfter == 0)
+            {
+                _playerShadows.ApplyGrowth(ShadowStatType.Dread, 2,
+                    "Interest hit 0 (unmatch)");
+            }
+
+            // Trigger 9: SA used 3+ times → +1 Overthinking (once)
+            if (chosenOption.Stat == StatType.SelfAwareness)
+            {
+                _saUsageCount++;
+                if (_saUsageCount == 3 && !_saOverthinkingTriggered)
+                {
+                    _saOverthinkingTriggered = true;
+                    _playerShadows.ApplyGrowth(ShadowStatType.Overthinking, 1,
+                        "SA used 3+ times in one conversation");
+                }
+            }
+
+            // Trigger 14: Same opener twice in a row → +1 Madness
+            if (_turnNumber == 0) // first turn
+            {
+                _sessionOpener = chosenOption.IntendedText;
+                if (_previousOpener != null
+                    && string.Equals(
+                        _sessionOpener.Trim(),
+                        _previousOpener.Trim(),
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    _playerShadows.ApplyGrowth(ShadowStatType.Madness, 1,
+                        "Same opener twice in a row");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Evaluates end-of-game shadow growth triggers.
+        /// </summary>
+        private void EvaluateEndOfGameShadowGrowth(GameOutcome outcome)
+        {
+            if (_playerShadows == null)
+                return;
+
+            // Trigger 11: Date secured without Honesty success → +1 Denial
+            if (outcome == GameOutcome.DateSecured && _honestySuccessCount == 0)
+            {
+                _playerShadows.ApplyGrowth(ShadowStatType.Denial, 1,
+                    "Date secured without any Honesty successes");
+            }
+
+            // Trigger 12: Never picked Chaos → +1 Fixation
+            if (!_statsUsedPerTurn.Contains(StatType.Chaos))
+            {
+                _playerShadows.ApplyGrowth(ShadowStatType.Fixation, 1,
+                    "Never picked Chaos in whole conversation");
+            }
+
+            // Trigger 13: 4+ different stats used → −1 Fixation (offset)
+            int distinctStats = _statsUsedPerTurn.Distinct().Count();
+            if (distinctStats >= 4)
+            {
+                _playerShadows.ApplyOffset(ShadowStatType.Fixation, -1,
+                    "4+ different stats used in conversation");
+            }
         }
 
         /// <summary>
@@ -419,7 +641,7 @@ namespace Pinder.Core.Conversation
                 _interest.Apply(-1);
                 xp = 2;
 
-                // Overthinking +1 via SessionShadowTracker if available
+                // Overthinking +1 via SessionShadowTracker if available (#44 trigger 10)
                 if (_playerShadows != null)
                 {
                     string evt = _playerShadows.ApplyGrowth(ShadowStatType.Overthinking, 1, "Read failed");
@@ -446,7 +668,7 @@ namespace Pinder.Core.Conversation
         }
 
         /// <summary>
-        /// Recover action: SA vs DC 12. Success clears one active trap. Failure: −1 interest.
+        /// Recover action: SA vs DC 12. Success clears one active trap. Failure: −1 interest + Overthinking +1.
         /// Throws InvalidOperationException if no traps active (TrapState.HasActive == false).
         /// Self-contained turn action — does NOT require StartTurnAsync() first.
         /// </summary>
@@ -503,6 +725,12 @@ namespace Pinder.Core.Conversation
             {
                 _interest.Apply(-1);
                 xp = 2;
+
+                // Overthinking +1 on Recover failure (#44 trigger 10)
+                if (_playerShadows != null)
+                {
+                    _playerShadows.ApplyGrowth(ShadowStatType.Overthinking, 1, "Recover failed");
+                }
             }
 
             // 9. Advance trap timers
@@ -583,6 +811,7 @@ namespace Pinder.Core.Conversation
 
         /// <summary>
         /// Checks ghost trigger: if Bored state, 25% chance (dice.Roll(4)==1) to ghost.
+        /// Includes shadow growth for ghost Dread +1.
         /// </summary>
         private void CheckGhostTrigger()
         {
@@ -593,6 +822,15 @@ namespace Pinder.Core.Conversation
                 {
                     _ended = true;
                     _outcome = GameOutcome.Ghosted;
+
+                    // Shadow growth: Ghosted → +1 Dread (#44 trigger 8)
+                    if (_playerShadows != null)
+                    {
+                        _playerShadows.ApplyGrowth(ShadowStatType.Dread, 1, "Ghosted");
+                        var events = _playerShadows.DrainGrowthEvents();
+                        throw new GameEndedException(GameOutcome.Ghosted, events);
+                    }
+
                     throw new GameEndedException(GameOutcome.Ghosted);
                 }
             }
