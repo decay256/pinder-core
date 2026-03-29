@@ -1,9 +1,9 @@
 # Spec: GameSession — Read, Recover, and Wait Turn Actions (§8)
 
 **Issue:** #43
-**Sprint:** 7 — RPG Rules Complete
-**Depends on:** #130 (Wave 0 — `RollEngine.ResolveFixedDC`, `SessionShadowTracker`, `TrapState.HasActive`)
-**Contract:** `contracts/sprint-7-read-recover-wait.md`
+**Sprint:** 8 — RPG Rules Complete
+**Depends on:** #139 (Wave 0 — `RollEngine.ResolveFixedDC`, `SessionShadowTracker`, `TrapState.HasActive`)
+**Contract:** `contracts/sprint-8-read-recover-wait.md`
 **Maturity:** Prototype
 
 ---
@@ -72,8 +72,8 @@ namespace Pinder.Core.Conversation
         public IReadOnlyList<string> ShadowGrowthEvents { get; }
 
         public ReadResult(bool success, int? interestValue, RollResult roll,
-            GameStateSnapshot stateAfter, int xpEarned = 0,
-            IReadOnlyList<string>? shadowGrowthEvents = null);
+            GameStateSnapshot stateAfter, int xpEarned,
+            IReadOnlyList<string> shadowGrowthEvents);
     }
 }
 ```
@@ -102,12 +102,8 @@ namespace Pinder.Core.Conversation
         /// <summary>XP earned from this action: 15 on recovery success, 2 on failure.</summary>
         public int XpEarned { get; }
 
-        /// <summary>Shadow growth events that occurred (e.g. "Overthinking +1 (Recover failed)" on failure). Empty list on success. Added by issue #44 (O2 trigger).</summary>
-        public IReadOnlyList<string> ShadowGrowthEvents { get; }
-
         public RecoverResult(bool success, string? clearedTrapName, RollResult roll,
-            GameStateSnapshot stateAfter, int xpEarned = 0,
-            IReadOnlyList<string>? shadowGrowthEvents = null);
+            GameStateSnapshot stateAfter, int xpEarned);
     }
 }
 ```
@@ -223,9 +219,11 @@ namespace Pinder.Core.Conversation
 - Checking end conditions after interest changes (interest hits 0 → set `_ended`, `_outcome = Unmatched`)
 - Advancing trap timers via `_traps.AdvanceTurn()`
 
-Read/Recover/Wait can be called **after** `StartTurnAsync()` (discards the pending Speak turn) or **standalone** without calling `StartTurnAsync()` first. Per vision concern #147, these are self-contained turn actions.
+Read/Recover/Wait can be called **after** `StartTurnAsync()` (discards the pending Speak turn) or **standalone** without calling `StartTurnAsync()` first. Per ADR #147, these are self-contained turn actions.
 
-Ghost trigger does NOT apply to Read/Recover/Wait — only on `StartTurnAsync` for the Speak action.
+**Ghost trigger applies to all three actions** (per ADR #147 and contract behavioral invariant #2): at the start of each action, if `_interest.GetState() == InterestState.Bored`, roll `_dice.Roll(4)` — if the result is 1, the game ends with `GameOutcome.Ghosted`. This check occurs after the end-condition check but before any roll or state mutation.
+
+**Ordering note for RecoverAsync:** The `HasActive` precondition check occurs **before** the ghost trigger check. Rationale: if there are no active traps, Recover is an invalid action regardless of ghost state, and the `InvalidOperationException` should be thrown immediately. This means a player in Bored state with no active traps gets `InvalidOperationException`, not a ghost trigger.
 
 ### AC2: Read — DC 12, SA stat, reveals interest on pass, −1 interest on fail
 
@@ -296,6 +294,10 @@ Tests must cover:
 - Wait causes interest to hit 0 (game ends with `Unmatched`)
 - Each action on an ended game (`GameEndedException`)
 - Read/Recover/Wait called after `StartTurnAsync` (options discarded, turn consumed)
+- Ghost trigger fires on Read when Bored (dice.Roll(4) == 1 → Ghosted)
+- Ghost trigger fires on Recover when Bored (dice.Roll(4) == 1 → Ghosted)
+- Ghost trigger fires on Wait when Bored (dice.Roll(4) == 1 → Ghosted)
+- RecoverAsync with no active traps in Bored state throws `InvalidOperationException` (not ghost trigger)
 - Build must be clean (`dotnet build` succeeds, `dotnet test` passes, all 254+ existing tests still pass).
 
 ---
@@ -355,7 +357,7 @@ Note: `GameEndedException` already exists with the message format `"Game has end
 
 ## 7. Dependencies
 
-### Code dependencies (Wave 0 prerequisites — Issue #130)
+### Code dependencies (Wave 0 prerequisites — Issue #139)
 
 These MUST be available before implementation can begin:
 
@@ -383,7 +385,7 @@ These MUST be available before implementation can begin:
 | `ITrapRegistry` | Injected trap definitions |
 | `CharacterProfile` | Player/opponent profiles (`.Stats`, `.Level`) |
 
-### Optional dependencies (Sprint 7, may not be present yet)
+### Optional dependencies (Sprint 8, may not be present yet)
 
 | Component | Usage | Behavior if absent |
 |-----------|-------|--------------------|
@@ -391,7 +393,7 @@ These MUST be available before implementation can begin:
 
 ### Issue dependencies
 
-- **#130 (Wave 0)** — MUST be merged first. Provides `ResolveFixedDC`, `SessionShadowTracker`, `TrapState.HasActive`, `GameSessionConfig`.
+- **#139 (Wave 0)** — MUST be merged first. Provides `ResolveFixedDC`, `SessionShadowTracker`, `TrapState.HasActive`, `GameSessionConfig`.
 - **#42 (RiskTier)** — Already merged (PR #119). `RollResult` carries `RiskTier` field. Risk tier bonus does NOT apply to Read/Recover (only Speak), but the type is compatible.
 
 ### External dependencies
@@ -437,12 +439,14 @@ All four actions increment `_turnNumber`, clear `_currentOptions`, advance trap 
 
 ```
 1. if _ended → throw GameEndedException(_outcome)
-2. hasAdvantage = _interest.GrantsAdvantage
-3. hasDisadvantage = _interest.GrantsDisadvantage
-4. roll = RollEngine.ResolveFixedDC(SelfAwareness, _player.Stats, 12, _traps, _player.Level, _trapRegistry, _dice, hasAdvantage, hasDisadvantage)
-5. shadowEvents = new List<string>()
-6. xp = 0
-7. if roll.IsSuccess:
+2. if _interest.GetState() == Bored && _dice.Roll(4) == 1:
+     _ended = true; _outcome = Ghosted; throw GameEndedException(_outcome)
+3. hasAdvantage = _interest.GrantsAdvantage
+4. hasDisadvantage = _interest.GrantsDisadvantage
+5. roll = RollEngine.ResolveFixedDC(SelfAwareness, _player.Stats, 12, _traps, _player.Level, _trapRegistry, _dice, hasAdvantage, hasDisadvantage)
+6. shadowEvents = new List<string>()
+7. xp = 0
+8. if roll.IsSuccess:
      interestValue = _interest.Current
      xp = 5
    else:
@@ -452,13 +456,13 @@ All four actions increment `_turnNumber`, clear `_currentOptions`, advance trap 
      if _playerShadows != null:
        event = _playerShadows.ApplyGrowth(Overthinking, 1, "Read failed")
        shadowEvents.Add(event)
-8. _traps.AdvanceTurn()
-9. _turnNumber++
-10. _currentOptions = null
-11. check end conditions (interest == 0 → _ended = true, _outcome = Unmatched)
-12. if _xpLedger != null: record xp
-13. snapshot = CreateSnapshot()
-14. return new ReadResult(roll.IsSuccess, interestValue, roll, snapshot, xp, shadowEvents)
+9. _traps.AdvanceTurn()
+10. _turnNumber++
+11. _currentOptions = null
+12. check end conditions (interest == 0 → _ended = true, _outcome = Unmatched)
+13. if _xpLedger != null: record xp
+14. snapshot = CreateSnapshot()
+15. return new ReadResult(roll.IsSuccess, interestValue, roll, snapshot, xp, shadowEvents)
 ```
 
 ### RecoverAsync pseudocode
@@ -466,11 +470,12 @@ All four actions increment `_turnNumber`, clear `_currentOptions`, advance trap 
 ```
 1. if _ended → throw GameEndedException(_outcome)
 2. if !_traps.HasActive → throw InvalidOperationException("Cannot recover: no active trap.")
-3. hasAdvantage = _interest.GrantsAdvantage
-4. hasDisadvantage = _interest.GrantsDisadvantage
-5. roll = RollEngine.ResolveFixedDC(SelfAwareness, _player.Stats, 12, _traps, _player.Level, _trapRegistry, _dice, hasAdvantage, hasDisadvantage)
-6. clearedTrapName = null
-7. shadowEvents = new List<string>()
+3. if _interest.GetState() == Bored && _dice.Roll(4) == 1:
+     _ended = true; _outcome = Ghosted; throw GameEndedException(_outcome)
+4. hasAdvantage = _interest.GrantsAdvantage
+5. hasDisadvantage = _interest.GrantsDisadvantage
+6. roll = RollEngine.ResolveFixedDC(SelfAwareness, _player.Stats, 12, _traps, _player.Level, _trapRegistry, _dice, hasAdvantage, hasDisadvantage)
+7. clearedTrapName = null
 8. xp = 0
 9. if roll.IsSuccess:
      firstTrap = _traps.AllActive.First()
@@ -480,25 +485,24 @@ All four actions increment `_turnNumber`, clear `_currentOptions`, advance trap 
    else:
      _interest.Apply(-1)
      xp = 2
-     if _playerShadows != null:
-       event = _playerShadows.ApplyGrowth(Overthinking, 1, "Recover failed")
-       shadowEvents.Add(event)                           // O2 trigger — owned by issue #44
 10. _traps.AdvanceTurn()
 11. _turnNumber++
 12. _currentOptions = null
 13. check end conditions (interest == 0 → _ended = true, _outcome = Unmatched)
 14. if _xpLedger != null: record xp
 15. snapshot = CreateSnapshot()
-16. return new RecoverResult(roll.IsSuccess, clearedTrapName, roll, snapshot, xp, shadowEvents)
+16. return new RecoverResult(roll.IsSuccess, clearedTrapName, roll, snapshot, xp)
 ```
 
 ### Wait pseudocode
 
 ```
 1. if _ended → throw GameEndedException(_outcome)
-2. _interest.Apply(-1)
-3. _traps.AdvanceTurn()
-4. _turnNumber++
-5. _currentOptions = null
-6. check end conditions (interest == 0 → _ended = true, _outcome = Unmatched)
+2. if _interest.GetState() == Bored && _dice.Roll(4) == 1:
+     _ended = true; _outcome = Ghosted; throw GameEndedException(_outcome)
+3. _interest.Apply(-1)
+4. _traps.AdvanceTurn()
+5. _turnNumber++
+6. _currentOptions = null
+7. check end conditions (interest == 0 → _ended = true, _outcome = Unmatched)
 ```
