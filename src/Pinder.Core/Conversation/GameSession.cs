@@ -367,6 +367,238 @@ namespace Pinder.Core.Conversation
         }
 
         /// <summary>
+        /// Read action: SA vs DC 12. Success reveals interest. Failure: −1 interest + Overthinking +1.
+        /// Self-contained turn action — does NOT require StartTurnAsync() first.
+        /// Clears _currentOptions if set. Checks end conditions independently.
+        /// </summary>
+        /// <exception cref="GameEndedException">If the game has already ended or ghost trigger fires.</exception>
+        public Task<ReadResult> ReadAsync()
+        {
+            // 1. Check if game already ended
+            if (_ended)
+                throw new GameEndedException(_outcome!.Value);
+
+            // 2. Check interest end conditions
+            CheckInterestEndConditions();
+
+            // 3. Ghost trigger check
+            CheckGhostTrigger();
+
+            // 4. Clear pending Speak options
+            _currentOptions = null;
+
+            // 5. Determine advantage/disadvantage from interest state
+            bool hasAdvantage = _interest.GrantsAdvantage;
+            bool hasDisadvantage = _interest.GrantsDisadvantage;
+
+            // 6. Roll SA vs DC 12
+            var roll = RollEngine.ResolveFixedDC(
+                StatType.SelfAwareness,
+                _player.Stats,
+                12,
+                _traps,
+                _player.Level,
+                _trapRegistry,
+                _dice,
+                hasAdvantage,
+                hasDisadvantage);
+
+            // 7. Resolve outcome
+            var shadowEvents = new List<string>();
+            int xp;
+            int? interestValue;
+
+            if (roll.IsSuccess)
+            {
+                interestValue = _interest.Current;
+                xp = 5;
+            }
+            else
+            {
+                interestValue = null;
+                _interest.Apply(-1);
+                xp = 2;
+
+                // Overthinking +1 via SessionShadowTracker if available
+                if (_playerShadows != null)
+                {
+                    string evt = _playerShadows.ApplyGrowth(ShadowStatType.Overthinking, 1, "Read failed");
+                    shadowEvents.Add(evt);
+                }
+            }
+
+            // 8. Advance trap timers
+            _traps.AdvanceTurn();
+
+            // 9. Increment turn
+            _turnNumber++;
+
+            // 10. Check end conditions after interest change
+            if (_interest.IsZero)
+            {
+                _ended = true;
+                _outcome = GameOutcome.Unmatched;
+            }
+
+            // 11. Build snapshot and return
+            var snapshot = CreateSnapshot();
+            return Task.FromResult(new ReadResult(roll.IsSuccess, interestValue, roll, snapshot, xp, shadowEvents));
+        }
+
+        /// <summary>
+        /// Recover action: SA vs DC 12. Success clears one active trap. Failure: −1 interest.
+        /// Throws InvalidOperationException if no traps active (TrapState.HasActive == false).
+        /// Self-contained turn action — does NOT require StartTurnAsync() first.
+        /// </summary>
+        /// <exception cref="GameEndedException">If the game has already ended or ghost trigger fires.</exception>
+        /// <exception cref="InvalidOperationException">If no traps are active.</exception>
+        public Task<RecoverResult> RecoverAsync()
+        {
+            // 1. Check if game already ended
+            if (_ended)
+                throw new GameEndedException(_outcome!.Value);
+
+            // 2. Check HasActive before anything else
+            if (!_traps.HasActive)
+                throw new InvalidOperationException("Cannot recover: no active trap.");
+
+            // 3. Check interest end conditions
+            CheckInterestEndConditions();
+
+            // 4. Ghost trigger check
+            CheckGhostTrigger();
+
+            // 5. Clear pending Speak options
+            _currentOptions = null;
+
+            // 6. Determine advantage/disadvantage from interest state
+            bool hasAdvantage = _interest.GrantsAdvantage;
+            bool hasDisadvantage = _interest.GrantsDisadvantage;
+
+            // 7. Roll SA vs DC 12
+            var roll = RollEngine.ResolveFixedDC(
+                StatType.SelfAwareness,
+                _player.Stats,
+                12,
+                _traps,
+                _player.Level,
+                _trapRegistry,
+                _dice,
+                hasAdvantage,
+                hasDisadvantage);
+
+            // 8. Resolve outcome
+            string? clearedTrapName = null;
+            int xp;
+
+            if (roll.IsSuccess)
+            {
+                // Clear first active trap
+                var firstTrap = _traps.AllActive.First();
+                clearedTrapName = firstTrap.Definition.Id;
+                _traps.Clear(firstTrap.Definition.Stat);
+                xp = 15;
+            }
+            else
+            {
+                _interest.Apply(-1);
+                xp = 2;
+            }
+
+            // 9. Advance trap timers
+            _traps.AdvanceTurn();
+
+            // 10. Increment turn
+            _turnNumber++;
+
+            // 11. Check end conditions after interest change
+            if (_interest.IsZero)
+            {
+                _ended = true;
+                _outcome = GameOutcome.Unmatched;
+            }
+
+            // 12. Build snapshot and return
+            var snapshot = CreateSnapshot();
+            return Task.FromResult(new RecoverResult(roll.IsSuccess, clearedTrapName, roll, snapshot, xp));
+        }
+
+        /// <summary>
+        /// Wait action: −1 interest, advance trap timers. No roll.
+        /// Synchronous — no LLM calls.
+        /// Self-contained turn action — does NOT require StartTurnAsync() first.
+        /// </summary>
+        /// <exception cref="GameEndedException">If the game has already ended or ghost trigger fires.</exception>
+        public void Wait()
+        {
+            // 1. Check if game already ended
+            if (_ended)
+                throw new GameEndedException(_outcome!.Value);
+
+            // 2. Check interest end conditions
+            CheckInterestEndConditions();
+
+            // 3. Ghost trigger check
+            CheckGhostTrigger();
+
+            // 4. Clear pending Speak options
+            _currentOptions = null;
+
+            // 5. Apply -1 interest
+            _interest.Apply(-1);
+
+            // 6. Advance trap timers
+            _traps.AdvanceTurn();
+
+            // 7. Increment turn
+            _turnNumber++;
+
+            // 8. Check end conditions after interest change
+            if (_interest.IsZero)
+            {
+                _ended = true;
+                _outcome = GameOutcome.Unmatched;
+            }
+        }
+
+        /// <summary>
+        /// Checks interest-based end conditions and throws GameEndedException if triggered.
+        /// </summary>
+        private void CheckInterestEndConditions()
+        {
+            if (_interest.IsZero)
+            {
+                _ended = true;
+                _outcome = GameOutcome.Unmatched;
+                throw new GameEndedException(GameOutcome.Unmatched);
+            }
+
+            if (_interest.IsMaxed)
+            {
+                _ended = true;
+                _outcome = GameOutcome.DateSecured;
+                throw new GameEndedException(GameOutcome.DateSecured);
+            }
+        }
+
+        /// <summary>
+        /// Checks ghost trigger: if Bored state, 25% chance (dice.Roll(4)==1) to ghost.
+        /// </summary>
+        private void CheckGhostTrigger()
+        {
+            if (_interest.GetState() == InterestState.Bored)
+            {
+                int ghostRoll = _dice.Roll(4);
+                if (ghostRoll == 1)
+                {
+                    _ended = true;
+                    _outcome = GameOutcome.Ghosted;
+                    throw new GameEndedException(GameOutcome.Ghosted);
+                }
+            }
+        }
+
+        /// <summary>
         /// Collects the LLM instruction text from all currently active traps.
         /// Returns null if no traps are active (avoids empty array allocation).
         /// </summary>
