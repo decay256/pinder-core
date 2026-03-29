@@ -64,6 +64,10 @@ namespace Pinder.Core.Conversation
         // Tell from opponent's last response (#50)
         private Tell? _activeTell;
 
+        // Shadow threshold tracking (#45)
+        private StatType? _lastStatUsed;
+        private HashSet<StatType>? _shadowDisadvantagedStats;
+
         // Stored between StartTurnAsync and ResolveTurnAsync
         private DialogueOption[]? _currentOptions;
         private bool _currentHasAdvantage;
@@ -97,9 +101,21 @@ namespace Pinder.Core.Conversation
             _dice = dice ?? throw new ArgumentNullException(nameof(dice));
             _trapRegistry = trapRegistry ?? throw new ArgumentNullException(nameof(trapRegistry));
 
-            _interest = config?.StartingInterest.HasValue == true
-                ? new InterestMeter(config.StartingInterest.Value)
-                : new InterestMeter();
+            // Determine starting interest: explicit config > Dread T3 > default
+            if (config?.StartingInterest.HasValue == true)
+            {
+                _interest = new InterestMeter(config.StartingInterest.Value);
+            }
+            else if (config?.PlayerShadows != null
+                && ShadowThresholdEvaluator.GetThresholdLevel(
+                    config.PlayerShadows.GetEffectiveShadow(ShadowStatType.Dread)) >= 3)
+            {
+                _interest = new InterestMeter(8);
+            }
+            else
+            {
+                _interest = new InterestMeter();
+            }
             _traps = new TrapState();
             _history = new List<(string Sender, string Text)>();
             _momentumStreak = 0;
@@ -207,11 +223,42 @@ namespace Pinder.Core.Conversation
             _currentHasAdvantage = hasAdvantage;
             _currentHasDisadvantage = hasDisadvantage;
 
+            // Shadow threshold evaluation (#45)
+            Dictionary<ShadowStatType, int>? shadowThresholds = null;
+            _shadowDisadvantagedStats = null;
+
+            if (_playerShadows != null)
+            {
+                shadowThresholds = new Dictionary<ShadowStatType, int>();
+                _shadowDisadvantagedStats = new HashSet<StatType>();
+
+                foreach (ShadowStatType shadow in Enum.GetValues(typeof(ShadowStatType)))
+                {
+                    int effectiveVal = _playerShadows.GetEffectiveShadow(shadow);
+                    int tier = ShadowThresholdEvaluator.GetThresholdLevel(effectiveVal);
+                    shadowThresholds[shadow] = tier;
+
+                    // T2+: paired positive stat gets disadvantage
+                    if (tier >= 2)
+                    {
+                        // Reverse lookup: find which StatType is paired with this shadow
+                        foreach (var kvp in StatBlock.ShadowPairs)
+                        {
+                            if (kvp.Value == shadow)
+                            {
+                                _shadowDisadvantagedStats.Add(kvp.Key);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
             // Get trap names and LLM instructions for context
             var activeTrapNames = GetActiveTrapNames();
             var activeTrapInstructions = GetActiveTrapInstructions();
 
-            // Build dialogue context — pass callback topics (#47)
+            // Build dialogue context — pass callback topics (#47) and shadow thresholds (#45)
             var context = new DialogueContext(
                 playerPrompt: _player.AssembledSystemPrompt,
                 opponentPrompt: _opponent.AssembledSystemPrompt,
@@ -219,6 +266,7 @@ namespace Pinder.Core.Conversation
                 opponentLastMessage: GetLastOpponentMessage(),
                 activeTraps: activeTrapNames,
                 currentInterest: _interest.Current,
+                shadowThresholds: shadowThresholds,
                 activeTrapInstructions: activeTrapInstructions,
                 callbackOpportunities: _topics.Count > 0 ? new List<CallbackOpportunity>(_topics) : null);
 
@@ -242,6 +290,38 @@ namespace Pinder.Core.Conversation
                     hasTellBonus,
                     hasWeaknessWindow);
             }
+            // T3 option filtering (#45)
+            if (_playerShadows != null && shadowThresholds != null)
+            {
+                // Fixation T3: force all options to use the same stat as last turn
+                if (shadowThresholds.TryGetValue(ShadowStatType.Fixation, out int fixTier)
+                    && fixTier >= 3 && _lastStatUsed.HasValue)
+                {
+                    var forcedStat = _lastStatUsed.Value;
+                    for (int i = 0; i < options.Length; i++)
+                    {
+                        var o = options[i];
+                        options[i] = new DialogueOption(
+                            forcedStat, o.IntendedText, o.CallbackTurnNumber,
+                            o.ComboName, o.HasTellBonus, o.HasWeaknessWindow);
+                    }
+                }
+
+                // Denial T3: remove Honesty options
+                if (shadowThresholds.TryGetValue(ShadowStatType.Denial, out int denTier)
+                    && denTier >= 3)
+                {
+                    var filtered = options.Where(o => o.Stat != StatType.Honesty).ToArray();
+                    if (filtered.Length == 0)
+                    {
+                        // Fallback: prefer Chaos, else first option
+                        var chaos = options.FirstOrDefault(o => o.Stat == StatType.Chaos);
+                        filtered = new[] { chaos ?? options[0] };
+                    }
+                    options = filtered;
+                }
+            }
+
             _currentOptions = options;
 
             var snapshot = CreateSnapshot();
@@ -300,6 +380,13 @@ namespace Pinder.Core.Conversation
             // Clear active tell — consumed this turn regardless of match (#50)
             _activeTell = null;
 
+            // Shadow threshold per-stat disadvantage (#45)
+            bool resolveHasDisadvantage = _currentHasDisadvantage;
+            if (_shadowDisadvantagedStats != null && _shadowDisadvantagedStats.Contains(chosenOption.Stat))
+            {
+                resolveHasDisadvantage = true;
+            }
+
             // 1. Roll dice
             var rollResult = RollEngine.Resolve(
                 stat: chosenOption.Stat,
@@ -310,7 +397,7 @@ namespace Pinder.Core.Conversation
                 trapRegistry: _trapRegistry,
                 dice: _dice,
                 hasAdvantage: _currentHasAdvantage,
-                hasDisadvantage: _currentHasDisadvantage,
+                hasDisadvantage: resolveHasDisadvantage,
                 externalBonus: externalBonus,
                 dcAdjustment: dcAdjustment);
 
@@ -337,7 +424,10 @@ namespace Pinder.Core.Conversation
                 _momentumStreak = 0;
             }
 
-            // 3b. Combo detection (#46)
+            // 3b. Track last stat used for Fixation T3 (#45)
+            _lastStatUsed = chosenOption.Stat;
+
+            // 3c. Combo detection (#46)
             _comboTracker.RecordTurn(chosenOption.Stat, rollResult.IsSuccess);
             var combo = _comboTracker.CheckCombo();
             string? comboTriggered = null;
@@ -347,7 +437,7 @@ namespace Pinder.Core.Conversation
                 comboTriggered = combo.Name;
             }
 
-            // 3c. Record roll XP (#48)
+            // 3d. Record roll XP (#48)
             RecordRollXp(rollResult);
 
             // 4. Record interest before applying delta
