@@ -1,442 +1,358 @@
-# Spec: Shadow Growth Events — Implement §7 Growth Table in GameSession
+# Spec: Shadow Growth Events — §7 Growth Table in GameSession
 
-**Issue:** #44
-**Sprint:** 7 — RPG Rules Complete
-**Depends on:** #139 (Wave 0 — `SessionShadowTracker`), #43 (Read/Recover actions for Overthinking triggers)
-**Contract:** `contracts/sprint-7-shadow-growth.md`
-**Maturity:** Prototype
+**Issue:** #44  
+**Depends on:** #43 (Read/Recover shadow growth for Overthinking)  
+**Component:** `Pinder.Core.Conversation`, `Pinder.Core.Characters`  
+**Target:** .NET Standard 2.0, C# 8.0, zero NuGet dependencies
 
 ---
 
 ## 1. Overview
 
-Rules v3.4 §7 defines a table of conditions under which each shadow stat grows during a conversation. `GameSession` currently tracks shadows via `SessionShadowTracker` but never applies growth events. This feature implements all 17 shadow growth triggers (plus one offset), detects them at the appropriate moment during turn resolution or game end, mutates the session shadow state via `SessionShadowTracker.ApplyGrowth()`, and populates `TurnResult.ShadowGrowthEvents` with human-readable descriptions of what grew and why.
-
-### ⚠️ O2 Trigger Reconciliation: Overthinking +1 on Recover Failure
-
-**Both Read failure AND Recover failure trigger Overthinking +1.** This table shows every spec section that mentions the O2 (Recover failure) trigger to confirm internal consistency:
-
-| Spec Section | What it says about O2 (Recover failure → Overthinking +1) |
-|---|---|
-| §3.5 Growth Table, row O2 | `Recover action failed → +1 Overthinking, detected in RecoverAsync()` |
-| §4.4 Integration Points | `RecoverAsync (O2): Owned by this issue (#44). Adds ShadowGrowthEvents to RecoverResult.` |
-| §5 Example 6 | `Recover failure → RecoverResult.ShadowGrowthEvents = ["Overthinking +1 (Recover failed)"]` |
-| AC3 | `O2 trigger — Recover failure → Overthinking +1` with full implementation instructions |
-| AC5 Test List | `Overthinking +1 on Recover failure (O2) — RecoverResult.ShadowGrowthEvents contains "Overthinking +1 (Recover failed)"` |
-| §9 Dependencies | `Recover action (O2): RecoverAsync exists from #43 but #44 adds Overthinking growth on failure` |
-| §10 RecoverAsync Pseudocode, step 5c | `_playerShadows.ApplyGrowth(Overthinking, 1, "Recover failed")` |
-
-**Ownership:** O1 (Read failure) is owned by issue #43. O2 (Recover failure) is owned by **this issue (#44)**.
+Shadow stats in the RPG engine grow in response to specific in-game events (bad rolls, behavioural patterns, game outcomes). Rules v3.4 §7 defines the full growth table. This feature implements all shadow growth triggers inside `GameSession`, using a new `CharacterState` wrapper class that tracks shadow deltas without mutating the immutable `StatBlock`. Growth events are surfaced to the host via `TurnResult.ShadowGrowthEvents` so the UI can display them.
 
 ---
 
-## 2. New Types
+## 2. New Class: `CharacterState`
 
-### 2.1 ShadowGrowthDetector (internal helper)
+**Namespace:** `Pinder.Core.Characters`  
+**Purpose:** Wraps a `CharacterProfile` with mutable per-session shadow deltas and a growth event log. This is the architect-mandated approach (Option D from #58): StatBlock is never mutated.
 
-**File:** `src/Pinder.Core/Conversation/ShadowGrowthDetector.cs`
-**Namespace:** `Pinder.Core.Conversation`
-
-An internal (non-public) helper class that encapsulates shadow growth detection logic, keeping `GameSession` from being bloated with 17+ condition checks. `GameSession` delegates to this class after each roll and at game end.
+### Constructor
 
 ```csharp
-internal sealed class ShadowGrowthDetector
-{
-    // Constructor receives the session shadow trackers for the player
-    internal ShadowGrowthDetector(SessionShadowTracker? playerShadows);
-
-    // Called after each Speak turn's roll is resolved.
-    // Returns list of human-readable growth event strings (e.g. "Dread +1 (Nat 1 on Wit)").
-    // Also mutates playerShadows via ApplyGrowth().
-    internal IReadOnlyList<string> DetectTurnGrowth(
-        RollResult roll,
-        StatType statUsed,
-        int tropeTrapsThisSession,
-        IReadOnlyList<StatType> recentStats,   // last 3 stats used (most recent last)
-        InterestMeter interest);
-
-    // Called when the game ends (DateSecured, Unmatched, Ghosted).
-    // Returns list of end-of-game growth event strings.
-    internal IReadOnlyList<string> DetectEndOfGameGrowth(
-        GameOutcome outcome,
-        bool hasHonestySuccess,
-        HashSet<StatType> allStatsUsed,
-        int saUsageCount);
-
-    // Called when a ghost trigger fires in StartTurnAsync.
-    // Returns list containing "Dread +1 (Ghosted)" or empty.
-    internal IReadOnlyList<string> DetectGhostGrowth();
-}
+public CharacterState(CharacterProfile profile)
 ```
 
-If `playerShadows` is `null` (no `SessionShadowTracker` configured), all `Detect*` methods return empty lists and perform no mutations.
+- `profile` — non-null `CharacterProfile`. Stored as `Profile` property.
+- Initializes an empty shadow delta dictionary and an empty growth log.
+- Throws `ArgumentNullException` if `profile` is null.
 
-### 2.2 Per-Session Tracking State
+### Properties
 
-The following counters are added as private fields to `GameSession` (or to an internal `SessionCounters` helper class if preferred by the implementer):
+| Name | Type | Description |
+|------|------|-------------|
+| `Profile` | `CharacterProfile` (readonly) | The underlying immutable character profile. |
+
+### Methods
+
+#### `ApplyShadowGrowth`
 
 ```csharp
-private int _tropeTrapsActivatedCount;          // int, starts at 0
-private bool _hasHonestySuccess;                 // bool, starts false
-private readonly List<StatType> _statsUsedHistory; // ordered list of stats used each turn
-private readonly HashSet<StatType> _allStatsUsed;  // set of all distinct stats used
-private int _saUsageCount;                        // int, starts at 0
+public void ApplyShadowGrowth(ShadowStatType shadow, int delta, string reason)
 ```
 
-These are **not** public. They exist solely to feed `ShadowGrowthDetector`.
+- Adds `delta` to the running shadow delta for `shadow`. If no delta exists yet for that shadow type, starts from 0.
+- Appends `reason` (a human-readable string) to the internal growth log.
+- `delta` is typically +1 or +2 but can be negative (e.g., Fixation offset −1).
+- `reason` must not be null or empty; throw `ArgumentException` if so.
+
+#### `GetEffective`
+
+```csharp
+public int GetEffective(StatType stat)
+```
+
+- Returns the effective modifier for `stat`, accounting for both the base shadow value from `Profile.Stats` and any session deltas.
+- Formula: `baseVal - ((baseShadow + sessionDelta) / 3)` where:
+  - `baseVal = Profile.Stats.GetBase(stat)`
+  - `baseShadow = Profile.Stats.GetShadow(StatBlock.ShadowPairs[stat])`
+  - `sessionDelta = _shadowDelta[shadow]` (0 if not present)
+- Integer division (floor) as per existing `StatBlock.GetEffective` behaviour.
+
+#### `DrainGrowthEvents`
+
+```csharp
+public IReadOnlyList<string> DrainGrowthEvents()
+```
+
+- Returns a snapshot of all growth event reason strings accumulated since the last drain.
+- Clears the internal log after copying.
+- Returns an empty list if no events occurred.
+- The returned list is a new `List<string>` (caller owns it).
+
+#### `GetShadowDelta`
+
+```csharp
+public int GetShadowDelta(ShadowStatType shadow)
+```
+
+- Returns the accumulated session delta for the given shadow type.
+- Returns 0 if no growth has occurred for that shadow type.
+- Useful for end-of-game checks and testing.
 
 ---
 
-## 3. Shadow Growth Table (Complete)
+## 3. Changes to `GameSession`
 
-All growth events use `SessionShadowTracker.ApplyGrowth(ShadowStatType shadow, int amount, string reason)`.
+### Internal State Changes
 
-### 3.1 Dread (penalizes Wit)
+- Replace `private readonly CharacterProfile _player` with `private readonly CharacterState _playerState`.
+- Add tracking fields for shadow growth trigger detection:
 
-| # | Trigger Condition | Amount | When Detected | Reason String |
-|---|---|---|---|---|
-| D1 | Interest reaches 0 (unmatch) | +2 | End of game (`GameOutcome.Unmatched`) | `"Dread +2 (Interest hit 0 — unmatched)"` |
-| D2 | Getting ghosted | +1 | Ghost trigger fires in `StartTurnAsync` | `"Dread +1 (Ghosted)"` |
-| D3 | Catastrophic Wit fail (miss by 10+) | +1 | `ResolveTurnAsync`, after roll, when `roll.Stat == StatType.Wit && roll.Tier == FailureTier.Catastrophe` | `"Dread +1 (Catastrophic Wit fail)"` |
-| D4 | Nat 1 on Wit | +1 | `ResolveTurnAsync`, after roll, when `roll.IsNatOne && roll.Stat == StatType.Wit` | `"Dread +1 (Nat 1 on Wit)"` |
+| Field | Type | Purpose |
+|-------|------|---------|
+| `_statsUsedPerTurn` | `List<StatType>` | Stats chosen each turn, in order. For "same stat 3 turns in a row" and "never picked Chaos" checks. |
+| `_honestySuccessCount` | `int` | Count of successful Honesty rolls this session. For Denial trigger. |
+| `_tropeTrapCount` | `int` | Count of TropeTrap-tier (or worse) failures this session. For Madness trigger (3+ trope traps). |
+| `_lastOpener` | `string?` | The `IntendedText` of the first turn's chosen option. For "same opener twice in a row" (requires cross-session tracking by host — see Edge Cases). |
+| `_highestPctOptionPicked` | `List<bool>` | Per-turn: whether the player picked the highest-percentage option. For Fixation trigger (3 in a row). |
 
-**Note on D3 vs D4:** A Nat 1 on Wit that also has miss margin ≥10 triggers **both** D3 and D4 (they are independent conditions). The reason string clearly distinguishes them.
+### Constructor Change
 
-### 3.2 Madness (penalizes Charm)
+```csharp
+public GameSession(
+    CharacterProfile player,
+    CharacterProfile opponent,
+    ILlmAdapter llm,
+    IDiceRoller dice,
+    ITrapRegistry trapRegistry,
+    string? previousOpener = null)  // NEW optional parameter
+```
 
-| # | Trigger Condition | Amount | When Detected | Reason String |
-|---|---|---|---|---|
-| M1 | Nat 1 on Charm | +1 | `ResolveTurnAsync`, after roll, when `roll.IsNatOne && roll.Stat == StatType.Charm` | `"Madness +1 (Nat 1 on Charm)"` |
-| M2 | 3rd trope trap activated in this conversation | +1 | `ResolveTurnAsync`, after roll, when `_tropeTrapsActivatedCount` reaches exactly 3 | `"Madness +1 (3rd trope trap in conversation)"` |
-| M3 | Same opener twice in a row | +1 | `ResolveTurnAsync`, on turn 0 (first turn), when the session detects the same opener stat was used in the immediately prior conversation. **Implementation note:** This requires cross-session state that is outside the scope of a single `GameSession`. At prototype maturity, this trigger is **deferred** — the detection hook exists but always returns false unless the host provides prior-opener context via `GameSessionConfig`. |
+- `previousOpener`: The `IntendedText` of the opener from the player's previous conversation. Used for the Madness "same opener twice in a row" trigger. Null if no previous conversation or unknown.
 
-### 3.3 Denial (penalizes Honesty)
+### Public API: `TurnResult` Changes
 
-| # | Trigger Condition | Amount | When Detected | Reason String |
-|---|---|---|---|---|
-| N1 | Date secured without any Honesty successes | +1 | End of game (`GameOutcome.DateSecured` and `_hasHonestySuccess == false`) | `"Denial +1 (Date secured without Honesty)"` |
-| N2 | Nat 1 on Honesty | +1 | `ResolveTurnAsync`, after roll, when `roll.IsNatOne && roll.Stat == StatType.Honesty` | `"Denial +1 (Nat 1 on Honesty)"` |
+`TurnResult` gains a new property:
 
-### 3.4 Fixation (penalizes Chaos)
+```csharp
+public IReadOnlyList<string> ShadowGrowthEvents { get; }
+```
 
-| # | Trigger Condition | Amount | When Detected | Reason String |
-|---|---|---|---|---|
-| F1 | Same stat used 3 turns in a row | +1 | `ResolveTurnAsync`, after recording the stat to `_statsUsedHistory`. Check: last 3 entries are all the same `StatType`. | `"Fixation +1 (Same stat 3 turns in a row)"` |
-| F2 | Never picked Chaos in whole conversation | +1 | End of game, when `!_allStatsUsed.Contains(StatType.Chaos)` | `"Fixation +1 (Never used Chaos)"` |
-| F3 | Nat 1 on Chaos | +1 | `ResolveTurnAsync`, after roll, when `roll.IsNatOne && roll.Stat == StatType.Chaos` | `"Fixation +1 (Nat 1 on Chaos)"` |
-| F4 | **Offset:** 4+ different stats used in conversation | −1 | End of game, when `_allStatsUsed.Count >= 4` | `"Fixation -1 (4+ different stats used)"` |
+- List of human-readable shadow growth event descriptions that occurred during this turn.
+- Empty list (never null) if no shadow growth happened.
+- The `TurnResult` constructor gains a corresponding parameter.
 
-**Note on F1:** The "highest-% option picked 3 turns in a row" trigger from the issue body is simplified to "same stat 3 turns in a row" per vision concern #66. "Highest-%" is defined as "highest stat modifier + level bonus" but at prototype, the simpler same-stat-3x check is the implementation target. The issue AC lists "same stat 3 turns" specifically.
+### Turn Flow Changes in `ResolveTurnAsync`
 
-**Note on F4:** Fixation cannot go below 0 total (base + delta). If the offset would reduce the session delta below the negation of the base shadow value, clamp at zero effective shadow.
+After step 5 (Apply interest delta) and before step 6 (Advance trap timers), insert shadow growth evaluation:
 
-### 3.5 Overthinking (penalizes SelfAwareness)
+**Per-turn shadow growth checks (evaluated every turn):**
 
-| # | Trigger Condition | Amount | When Detected | Reason String |
-|---|---|---|---|---|
-| O1 | Read action failed | +1 | `ReadAsync()` (issue #43), on roll failure | `"Overthinking +1 (Read failed)"` |
-| O2 | Recover action failed | +1 | `RecoverAsync()` (**owned by this issue #44**), on roll failure | `"Overthinking +1 (Recover failed)"` |
-| O3 | SA used 3+ times in one conversation | +1 | End of game, when `_saUsageCount >= 3` | `"Overthinking +1 (SA used 3+ times)"` |
-| O4 | Nat 1 on SA | +1 | `ResolveTurnAsync`, after roll, when `roll.IsNatOne && roll.Stat == StatType.SelfAwareness` | `"Overthinking +1 (Nat 1 on SA)"` |
+1. **Nat 1 triggers** — If `rollResult.IsNatOne`:
+   - Grow the shadow paired with the stat used: `+1` to `StatBlock.ShadowPairs[chosenOption.Stat]`.
+   - Reason string: `"Nat 1 on {statName}: +1 {shadowName}"`.
+   - This covers: Nat 1 on Charm → +1 Madness, Nat 1 on Wit → +1 Dread, Nat 1 on Honesty → +1 Denial, Nat 1 on Chaos → +1 Fixation, Nat 1 on SA → +1 Overthinking.
 
-**Cross-spec ownership note (O1 vs O2):**
+2. **Catastrophic Wit fail** — If `chosenOption.Stat == StatType.Wit` AND `!rollResult.IsSuccess` AND `rollResult.Tier == FailureTier.Catastrophe`:
+   - `+1 Dread`.
+   - Reason: `"Catastrophic Wit failure (miss by 10+): +1 Dread"`.
 
-- **O1 (Read failed → Overthinking +1)** is fully owned by issue #43. The issue-43 spec's `ReadResult` type includes a `ShadowGrowthEvents` field, and its `ReadAsync` pseudocode includes the `ApplyGrowth` call on failure. No action needed here.
-- **O2 (Recover failed → Overthinking +1) is owned by this issue (#44)**, NOT by #43. The issue-43 spec's `RecoverResult` type does **not** include a `ShadowGrowthEvents` field, and the `RecoverAsync` pseudocode in issue-43 does **not** apply Overthinking growth on failure. Therefore, the implementer of issue #44 MUST:
-  1. Add an `IReadOnlyList<string> ShadowGrowthEvents` property to `RecoverResult` (matching the pattern already present on `ReadResult`).
-  2. Update `RecoverAsync` to call `SessionShadowTracker.ApplyGrowth(ShadowStatType.Overthinking, 1, "Recover failed")` on failure (when a tracker is available) and populate the new `ShadowGrowthEvents` field.
-  3. Pass a default of `null` / empty list for backward compatibility when no tracker is configured.
+3. **TropeTrap count** — If `rollResult.Tier >= FailureTier.TropeTrap` (i.e., TropeTrap, Catastrophe, or Legendary):
+   - Increment `_tropeTrapCount`.
+   - If `_tropeTrapCount == 3`: apply `+1 Madness`.
+   - Reason: `"3+ trope traps in one conversation: +1 Madness"`.
+   - Only triggers once (on exactly reaching 3, not on 4, 5, etc.).
 
-This ensures the Overthinking growth on Recover failure is not missed by either implementer.
+4. **Same stat 3 turns in a row** — After appending `chosenOption.Stat` to `_statsUsedPerTurn`:
+   - If the last 3 entries are identical: `+1 Fixation`.
+   - Reason: `"Same stat ({statName}) used 3 turns in a row: +1 Fixation"`.
+   - Triggers each time a new consecutive-3 is formed (e.g., turns 3, 4, 5 all Charm → triggers on turn 5; turns 4, 5, 6 all Charm → triggers again on turn 6 only if turn 6 extends the streak to a new group of 3).
+   - Implementation note: trigger when `_statsUsedPerTurn.Count >= 3` and last 3 are equal. To avoid re-triggering every turn during a long streak, only trigger when the count of consecutive same-stat turns at the tail is exactly 3 (modulo 3 == 0, or simply: trigger on turns 3, 6, 9… of a continuous streak).
 
-### 3.6 Horniness (penalizes Rizz)
+5. **Highest-% option 3 turns in a row** — The "highest-percentage option" is defined as option index 0 (the first option returned by the LLM, which is conventionally the safest/highest-probability choice). After recording whether `optionIndex == 0`:
+   - If the last 3 entries in `_highestPctOptionPicked` are all `true`: `+1 Fixation`.
+   - Reason: `"Highest-% option picked 3 turns in a row: +1 Fixation"`.
+   - Same re-trigger logic as "same stat 3 turns in a row".
 
-No growth triggers defined in §7. Horniness is controlled by time-of-day modifier (issue #51/#54). No implementation needed here.
+6. **Honesty success tracking** — If `chosenOption.Stat == StatType.Honesty` AND `rollResult.IsSuccess`:
+   - Increment `_honestySuccessCount`.
+
+7. **Interest hits 0** — If `interestAfter == 0` (i.e., `_interest.IsZero` after applying delta):
+   - `+2 Dread`.
+   - Reason: `"Interest hit 0 (unmatch): +2 Dread"`.
+
+8. **Getting ghosted** — When `GameOutcome.Ghosted` is determined (in `StartTurnAsync`):
+   - `+1 Dread`.
+   - Reason: `"Ghosted: +1 Dread"`.
+   - Note: This happens in `StartTurnAsync`, not `ResolveTurnAsync`. The ghost event must be logged to `_playerState` and drained into a `TurnStart.ShadowGrowthEvents` or the `GameEndedException` must carry the events. **Recommended approach**: Apply the growth before throwing `GameEndedException`, and add a `ShadowGrowthEvents` property to `GameEndedException`.
+
+9. **SA used 3+ times** — Track SA usage count. If, after this turn, SA has been used 3 times total:
+   - `+1 Overthinking`.
+   - Reason: `"SA used 3+ times in one conversation: +1 Overthinking"`.
+   - Triggers once, when the count first reaches 3.
+
+10. **Read/Recover action failures** (from #43):
+    - When a Read action fails: `+1 Overthinking`. Reason: `"Read action failed: +1 Overthinking"`.
+    - When a Recover action fails: `+1 Overthinking`. Reason: `"Recover action failed: +1 Overthinking"`.
+    - The exact mechanism depends on #43's implementation of Read/Recover actions. This spec assumes those actions produce a `RollResult` that `GameSession` can inspect.
+
+**End-of-game shadow growth checks (evaluated when `isGameOver` is true):**
+
+11. **Date secured without Honesty success** — If `outcome == GameOutcome.DateSecured` AND `_honestySuccessCount == 0`:
+    - `+1 Denial`.
+    - Reason: `"Date secured without any Honesty successes: +1 Denial"`.
+
+12. **Never picked Chaos** — If the game is ending AND `_statsUsedPerTurn` does not contain `StatType.Chaos`:
+    - `+1 Fixation`.
+    - Reason: `"Never picked Chaos in whole conversation: +1 Fixation"`.
+
+13. **Fixation offset** — If the game is ending AND `_statsUsedPerTurn.Distinct().Count() >= 4`:
+    - `−1 Fixation` (reduce, not grow).
+    - Reason: `"4+ different stats used in conversation: −1 Fixation"`.
+    - This can result in a net negative session delta for Fixation.
+
+After evaluating all applicable triggers, call `_playerState.DrainGrowthEvents()` and pass the result into the `TurnResult` constructor as `ShadowGrowthEvents`.
+
+### "Same opener twice in a row" (Madness)
+
+- On turn 0 (first turn), record `chosenOption.IntendedText` as the session opener.
+- Compare against `previousOpener` (passed via constructor).
+- If they match (case-insensitive, trimmed): `+1 Madness`.
+- Reason: `"Same opener twice in a row: +1 Madness"`.
+- The host is responsible for persisting the opener across sessions and passing it into the next `GameSession`.
 
 ---
 
-## 4. Integration Points
+## 4. Input/Output Examples
 
-### 4.1 ResolveTurnAsync (per-turn growth)
+### Example 1: Nat 1 on Charm
 
-After the roll is resolved and interest delta is applied, but **before** constructing the `TurnResult`:
+**Setup:** Player rolls Charm, die result is 1.
 
-1. Record the stat used: append `roll.Stat` to `_statsUsedHistory` and add to `_allStatsUsed`.
-2. If `roll.Stat == StatType.SelfAwareness`, increment `_saUsageCount`.
-3. If `roll.Stat == StatType.Honesty && roll.IsSuccess`, set `_hasHonestySuccess = true`.
-4. If `roll.Tier == FailureTier.TropeTrap`, increment `_tropeTrapsActivatedCount`.
-5. Call `ShadowGrowthDetector.DetectTurnGrowth(roll, stat, _tropeTrapsActivatedCount, recentStats, _interest)`.
-6. Collect returned growth event strings and pass them to the `TurnResult` constructor as `shadowGrowthEvents`.
+**Shadow growth:**
+- `ApplyShadowGrowth(ShadowStatType.Madness, 1, "Nat 1 on Charm: +1 Madness")`
 
-### 4.2 StartTurnAsync (ghost growth)
+**TurnResult.ShadowGrowthEvents:** `["Nat 1 on Charm: +1 Madness"]`
 
-When a ghost trigger fires (the player is Ghosted):
+### Example 2: Interest drops to 0
 
-1. Call `ShadowGrowthDetector.DetectGhostGrowth()` to apply Dread +1.
-2. The growth event string is not returned to the caller via `TurnStart` (since the game ends via `GameEndedException`). However, the growth is applied to `SessionShadowTracker` so the host can read final shadow state.
+**Setup:** Interest is at 1, roll fails with delta −2.
 
-### 4.3 Game End (end-of-game growth)
+**Shadow growth:**
+- `ApplyShadowGrowth(ShadowStatType.Dread, 2, "Interest hit 0 (unmatch): +2 Dread")`
 
-When the game ends (any `GameOutcome`), before throwing `GameEndedException` or returning the final `TurnResult`:
+**TurnResult.ShadowGrowthEvents:** `["Interest hit 0 (unmatch): +2 Dread"]`
 
-1. Call `ShadowGrowthDetector.DetectEndOfGameGrowth(outcome, _hasHonestySuccess, _allStatsUsed, _saUsageCount)`.
-2. For `GameOutcome.Unmatched`: applies Dread +2.
-3. For `GameOutcome.DateSecured` without Honesty successes: applies Denial +1.
-4. For any outcome: checks Fixation (never-Chaos +1, 4+-stats offset -1) and Overthinking (SA 3+ times +1).
-5. End-of-game growth events are included in the final `TurnResult.ShadowGrowthEvents` (merged with any per-turn events from the same final turn).
-6. If the game ends via `GameEndedException` (ghost, unmatch detected at start of turn), the growth events are applied to `SessionShadowTracker` but not returned in a `TurnResult`. The host reads final shadow state from the tracker.
+### Example 3: Multiple triggers in one turn
 
-### 4.4 ReadAsync / RecoverAsync (Overthinking growth)
+**Setup:** Player uses Wit for the 3rd consecutive turn, rolls Nat 1.
 
-- **ReadAsync (O1):** Owned by issue #43. The `ReadAsync` method already applies Overthinking +1 on failure via `SessionShadowTracker.ApplyGrowth()` per the issue-43 spec. The growth event string is included in `ReadResult.ShadowGrowthEvents` (defined in issue #43 spec). No action needed from this issue.
-- **RecoverAsync (O2):** **Owned by this issue (#44).** The issue-43 spec's `RecoverResult` does not include a `ShadowGrowthEvents` field, and `RecoverAsync` does not apply Overthinking growth on failure. The implementer of this issue must:
-  1. Add `IReadOnlyList<string> ShadowGrowthEvents { get; }` to `RecoverResult` (with a constructor parameter defaulting to `null`).
-  2. In `RecoverAsync`, on failure, call `_playerShadows.ApplyGrowth(ShadowStatType.Overthinking, 1, "Recover failed")` (when tracker is available) and include the returned event string in `RecoverResult.ShadowGrowthEvents`.
-  3. On success, or when no tracker is configured, `ShadowGrowthEvents` is an empty list.
+**Shadow growth:**
+- `ApplyShadowGrowth(ShadowStatType.Dread, 1, "Nat 1 on Wit: +1 Dread")` — Nat 1 trigger
+- `ApplyShadowGrowth(ShadowStatType.Fixation, 1, "Same stat (Wit) used 3 turns in a row: +1 Fixation")` — same-stat trigger
+
+**TurnResult.ShadowGrowthEvents:** `["Nat 1 on Wit: +1 Dread", "Same stat (Wit) used 3 turns in a row: +1 Fixation"]`
+
+### Example 4: End-of-game with Fixation offset
+
+**Setup:** Game ends (DateSecured). Player used Charm, Wit, Honesty, Chaos across turns. Player had 1 Honesty success. Never used same stat 3x in a row.
+
+**Shadow growth (end-of-game):**
+- `ApplyShadowGrowth(ShadowStatType.Fixation, -1, "4+ different stats used in conversation: −1 Fixation")` — offset
+
+**TurnResult.ShadowGrowthEvents** (on final turn): `["4+ different stats used in conversation: −1 Fixation"]`
+
+### Example 5: CharacterState effective modifier
+
+**Setup:** Player has base Charm 4, base Madness shadow 2. Session delta for Madness is +1 (from Nat 1 on Charm).
+
+```
+GetEffective(StatType.Charm):
+  baseVal = 4
+  baseShadow = 2
+  sessionDelta = 1
+  totalShadow = 3
+  penalty = 3 / 3 = 1
+  return 4 - 1 = 3
+```
 
 ---
 
-## 5. Input/Output Examples
-
-### Example 1: Nat 1 on Wit (Dread growth)
-
-**Setup:** Player uses Wit stat. Dice roll returns 1 (Nat 1). DC is 15. Miss margin is 14 (≥10 → Catastrophe).
-
-**Expected `TurnResult.ShadowGrowthEvents`:**
-```
-["Dread +1 (Catastrophic Wit fail)", "Dread +1 (Nat 1 on Wit)"]
-```
-
-**Expected `SessionShadowTracker` delta:** Dread increased by +2 total.
-
-### Example 2: Same stat 3 turns in a row (Fixation growth)
-
-**Setup:** Turns 1–3 all use `StatType.Charm`. Turn 3 roll is a normal success.
-
-**Turn 3 `TurnResult.ShadowGrowthEvents`:**
-```
-["Fixation +1 (Same stat 3 turns in a row)"]
-```
-
-### Example 3: Third trope trap activates (Madness growth)
-
-**Setup:** Two trope traps already activated this session. Turn 5 roll is a TropeTrap failure on any stat.
-
-**Turn 5 `TurnResult.ShadowGrowthEvents`:**
-```
-["Madness +1 (3rd trope trap in conversation)"]
-```
-
-### Example 4: End-of-game — DateSecured, no Honesty, never used Chaos, used 4+ stats
-
-**Setup:** Game ends with `DateSecured`. `_hasHonestySuccess == false`. `_allStatsUsed = {Charm, Wit, Rizz, SA}` (4 distinct, no Chaos). `_saUsageCount == 4`.
-
-**Final `TurnResult.ShadowGrowthEvents` (end-of-game portion):**
-```
-["Denial +1 (Date secured without Honesty)", "Fixation +1 (Never used Chaos)", "Fixation -1 (4+ different stats used)", "Overthinking +1 (SA used 3+ times)"]
-```
-
-Net Fixation delta from end-of-game: 0 (+1 for never-Chaos, −1 for variety offset).
-
-### Example 5: Unmatch (Interest hits 0)
-
-**Setup:** Interest drops to 0 on this turn's resolution.
-
-**Final `TurnResult.ShadowGrowthEvents`:**
-```
-["Dread +2 (Interest hit 0 — unmatched)"]
-```
-
-Plus any per-turn growth events from the roll that caused the unmatch.
-
-### Example 6: Recover failure triggers Overthinking (O2)
-
-**Setup:** Player has an active trap. `SessionShadowTracker` is available. Player calls `RecoverAsync()`. Dice roll returns 3 (total below DC 12). Roll fails.
-
-**Expected `RecoverResult.ShadowGrowthEvents`:**
-```
-["Overthinking +1 (Recover failed)"]
-```
-
-**Expected `SessionShadowTracker` delta:** Overthinking increased by +1.
-**Expected `RecoverResult.Success`:** `false`
-
-### Example 7: No shadow tracker configured
-
-**Setup:** `GameSession` constructed without `SessionShadowTracker` (e.g., `GameSessionConfig` is null or has null shadow tracker). Player rolls Nat 1 on Charm.
-
-**Expected `TurnResult.ShadowGrowthEvents`:** `[]` (empty list). No error thrown.
-
----
-
-## 6. Acceptance Criteria
+## 5. Acceptance Criteria
 
 ### AC1: All shadow growth events from §7 implemented
 
-All 17 triggers enumerated in Section 3 (D1–D4, M1–M3, N1–N2, F1–F4, O1–O4) plus the F4 offset are implemented. Each trigger is detectable at the correct moment (per-turn, ghost, or end-of-game).
+All 17 triggers listed in section 3 must be implemented:
+- Dread: interest=0 (+2), ghosted (+1), catastrophic Wit fail (+1), Nat 1 Wit (+1)
+- Madness: Nat 1 Charm (+1), 3+ trope traps (+1), same opener twice (+1)
+- Denial: date secured without Honesty success (+1), Nat 1 Honesty (+1)
+- Fixation: highest-% 3 in a row (+1), same stat 3 in a row (+1), never Chaos (+1), Nat 1 Chaos (+1), offset 4+ stats (−1)
+- Overthinking: Read fail (+1), Recover fail (+1), SA 3+ times (+1), Nat 1 SA (+1)
 
-### AC2: Shadow mutations go through SessionShadowTracker, NOT StatBlock._shadow
+### AC2: Shadow stats mutate correctly during a session
 
-All shadow growth calls use `SessionShadowTracker.ApplyGrowth(ShadowStatType, int, string)`. No code reads or writes `StatBlock._shadow` directly. If `SessionShadowTracker` is null, growth is silently skipped.
+- `CharacterState` accumulates deltas without mutating `StatBlock`.
+- `GetEffective` returns correct values reflecting both base shadows and session deltas.
+- Multiple growths to the same shadow type accumulate additively.
 
-### AC3: Per-session counters tracked and Recover failure triggers Overthinking
+### AC3: `TurnResult.ShadowGrowthEvents` populated when shadow grows
 
-The following counters are maintained within `GameSession`:
-- `_tropeTrapsActivatedCount` (int): incremented each time `roll.Tier == FailureTier.TropeTrap`
-- `_hasHonestySuccess` (bool): set to `true` when any Honesty roll succeeds
-- `_statsUsedHistory` (List<StatType>): appended each Speak turn
-- `_allStatsUsed` (HashSet<StatType>): all distinct stats ever used in the session
-- `_saUsageCount` (int): incremented when `roll.Stat == StatType.SelfAwareness`
+- `TurnResult` exposes `IReadOnlyList<string> ShadowGrowthEvents`.
+- Non-empty when any shadow growth occurred during that turn.
+- Empty (not null) when no growth occurred.
+- Events are drained from `CharacterState` per turn — each event appears in exactly one `TurnResult`.
 
-**O2 trigger — Recover failure → Overthinking +1:** When `RecoverAsync()` fails (roll below DC 12), the implementer of this issue (#44) MUST apply `Overthinking +1` via `SessionShadowTracker.ApplyGrowth(ShadowStatType.Overthinking, 1, "Recover failed")` and populate `RecoverResult.ShadowGrowthEvents` with the resulting event string `"Overthinking +1 (Recover failed)"`. This trigger is **not** implemented by issue #43 — see §3.5 ownership note and §4.4 for full details. When no `SessionShadowTracker` is configured, `RecoverResult.ShadowGrowthEvents` is an empty list.
-
-### AC4: TurnResult.ShadowGrowthEvents populated when shadow grows
-
-Every `TurnResult` returned from `ResolveTurnAsync` includes a non-null `IReadOnlyList<string>` of growth event descriptions. The list is empty when no growth occurs and contains one entry per growth trigger that fired.
-
-### AC5: Tests verify key triggers
+### AC4: Test coverage for key triggers
 
 Tests must verify at minimum:
-- Dread +2 when interest reaches 0 (unmatch)
-- Fixation +1 when same stat used 3 turns in a row
-- Madness +1 on Nat 1 on Charm
-- Multiple growth events in a single turn (e.g., Nat 1 on Wit triggering both D3 and D4)
-- End-of-game triggers fire correctly (Denial on DateSecured without Honesty)
-- No growth events when SessionShadowTracker is null
-- Overthinking +1 on Recover failure (O2) — `RecoverResult.ShadowGrowthEvents` contains `"Overthinking +1 (Recover failed)"`
+- Dread +2 when interest reaches 0.
+- Fixation +1 when same stat used 3 turns in a row.
+- Madness +1 when Nat 1 on Charm.
+- End-of-game Denial +1 when DateSecured with 0 Honesty successes.
+- Fixation −1 offset when 4+ distinct stats used.
 
-### AC6: Build clean
+### AC5: Build clean
 
-`dotnet build` succeeds with zero errors and zero warnings. All existing 254+ tests continue to pass.
-
----
-
-## 7. Edge Cases
-
-### 7.1 Multiple triggers on the same turn
-A single roll can fire multiple growth events. Example: Nat 1 on Wit with miss margin ≥10 fires both D3 (Catastrophe) and D4 (Nat 1). All fired events are collected and returned in `TurnResult.ShadowGrowthEvents`.
-
-### 7.2 Same-stat-3x at turns 3, 4, 5...
-If a player uses Charm for turns 1–5, Fixation +1 fires on turn 3 (first time three consecutive same-stat turns are detected). It fires **again** on turn 4 (turns 2–4 are same) and turn 5 (turns 3–5 are same). Each occurrence is a separate +1 growth event. The trigger checks the last 3 entries in `_statsUsedHistory` each turn.
-
-### 7.3 TropeTrap count at exactly 3
-Madness +1 fires when `_tropeTrapsActivatedCount` reaches exactly 3. It does **not** fire again at 4, 5, etc. The trigger is: `_tropeTrapsActivatedCount == 3` after incrementing.
-
-### 7.4 Fixation offset cannot reduce below zero
-If the player's base Fixation shadow is 0 and the only end-of-game event is the −1 offset (4+ stats used), the delta is clamped so effective Fixation does not go below 0. `SessionShadowTracker.ApplyGrowth(Fixation, -1, ...)` is still called, but the tracker should clamp the effective value.
-
-### 7.5 No SessionShadowTracker configured
-When `GameSession` is constructed without a `SessionShadowTracker` (null tracker), all shadow growth detection is skipped. No errors are thrown. `TurnResult.ShadowGrowthEvents` is an empty list. This ensures backward compatibility with existing tests and configurations.
-
-### 7.6 Game ends on the same turn as per-turn growth
-When a turn's interest delta causes the game to end (e.g., interest drops to 0), both per-turn growth events AND end-of-game growth events are collected and merged into the final `TurnResult.ShadowGrowthEvents`.
-
-### 7.7 Ghost at start of turn (no TurnResult)
-When ghosting occurs in `StartTurnAsync`, Dread +1 is applied to `SessionShadowTracker` but there is no `TurnResult` to attach the event to (since `GameEndedException` is thrown). The host must read the shadow state from the tracker after catching the exception.
-
-### 7.8 Nat 1 is always a failure
-A Nat 1 always triggers the corresponding shadow growth regardless of modifiers. Even if modifiers would make the total exceed the DC, `IsNatOne` is true and the roll is a failure, so the Nat 1 shadow trigger fires.
-
-### 7.9 Empty conversation (0 turns played)
-If the game ends before any turns are played (e.g., immediate ghost), end-of-game checks run with: `_hasHonestySuccess == false`, `_allStatsUsed` is empty, `_saUsageCount == 0`. This means:
-- Fixation +1 (never used Chaos) fires — correct, Chaos was never used.
-- Denial +1 fires only if outcome is `DateSecured` — cannot happen with 0 turns normally.
-- Overthinking does not fire (SA count < 3).
-
-### 7.10 Highest-% option tracking (deferred)
-The issue body mentions "highest-% option picked 3 turns in a row" as a Fixation trigger. Per vision concern #66, at prototype maturity this is simplified to same-stat-3x (F1). Full highest-% tracking is deferred to a future issue.
+- `dotnet build` succeeds with zero warnings in the `Pinder.Core` project.
+- All existing tests continue to pass.
 
 ---
 
-## 8. Error Conditions
+## 6. Edge Cases
 
-### 8.1 SessionShadowTracker is null
-**Behavior:** All growth detection is silently skipped. No exceptions thrown. This is the normal backward-compatible path.
-
-### 8.2 Invalid ShadowStatType
-Should not occur since all triggers use hardcoded `ShadowStatType` enum values. If somehow an invalid value is passed to `ApplyGrowth`, `SessionShadowTracker` should throw `ArgumentOutOfRangeException`.
-
-### 8.3 Growth on already-ended game
-If `ResolveTurnAsync` is called after the game has ended, `GameSession` should throw `InvalidOperationException` (existing behavior). Shadow growth detection does not need to guard against this separately.
-
-### 8.4 Concurrent access
-`GameSession` is not thread-safe (existing design). Shadow growth detection inherits this constraint. No locking is required.
-
----
-
-## 9. Dependencies
-
-| Dependency | Issue | What's needed |
-|---|---|---|
-| `SessionShadowTracker` | #139 (Wave 0) | `ApplyGrowth(ShadowStatType, int, string)` method, `GetDelta(ShadowStatType)` for reading |
-| `RollEngine.ResolveFixedDC` | #139 (Wave 0) | Used by Read/Recover (issue #43), not directly by #44 |
-| Read action (O1) | #43 | `ReadAsync` applies Overthinking +1 on failure — fully owned by #43 |
-| Recover action (O2) | #43 creates `RecoverAsync`; **#44 adds O2 trigger** | `RecoverAsync` exists from #43 but does NOT apply Overthinking growth; this issue (#44) adds `ShadowGrowthEvents` to `RecoverResult` and applies Overthinking +1 on failure |
-| `TurnResult.ShadowGrowthEvents` | PR #117 (merged) | Already exists as `IReadOnlyList<string>` — no changes needed |
-| `RecoverResult` | #43 | Created by #43 — this issue (#44) adds `ShadowGrowthEvents` property and populates it with O2 trigger |
-| `RollResult.Stat` | Existing | `StatType` property on `RollResult` — used to detect which stat was rolled |
-| `RollResult.IsNatOne` | Existing | Boolean — used to detect Nat 1 triggers |
-| `RollResult.Tier` | Existing | `FailureTier` — used to detect Catastrophe and TropeTrap |
-| `InterestMeter` | Existing | `Current` property and `GetState()` — used to detect unmatch |
-| `GameOutcome` | Existing | Enum — used to determine which end-of-game triggers apply |
-| `StatBlock.ShadowPairs` | Existing | Maps `StatType → ShadowStatType` — used to determine which shadow grows for Nat 1 triggers |
+| Scenario | Expected Behaviour |
+|----------|-------------------|
+| Multiple Nat 1s in same session | Each Nat 1 triggers +1 to the corresponding shadow. They accumulate. |
+| Nat 1 on Wit that is also Catastrophe tier | Both "Nat 1 on Wit" (+1 Dread) and "Catastrophic Wit fail" (+1 Dread) trigger. Total: +2 Dread in one turn. |
+| Nat 1 on Wit where Nat 1 counts as Legendary, not Catastrophe | "Catastrophic Wit fail" does NOT trigger (tier is Legendary, not Catastrophe). Only Nat 1 trigger fires (+1 Dread). |
+| 3+ trope traps: exactly 3 vs. 4+ | +1 Madness fires once when `_tropeTrapCount` reaches 3. Does not fire again at 4, 5, etc. |
+| Same stat streak of 6 turns | Triggers Fixation at turn 3 and again at turn 6 (every 3 consecutive). |
+| Player uses only 3 distinct stats | Fixation offset does NOT apply (requires 4+). |
+| Session with 0 turns (immediate ghost on turn 1 start) | No turn-based triggers fire. Ghost Dread +1 applies. No end-of-game stat checks (conversation didn't really happen). |
+| `previousOpener` is null | "Same opener twice" check skips — no Madness growth for opener. |
+| `previousOpener` matches but with different casing/whitespace | Match is case-insensitive, trimmed. "Hello there" == "  hello THERE  ". |
+| Fixation offset and Fixation growth in same game | Both apply. E.g., +1 (never Chaos) and −1 (4+ stats) net to 0. |
+| Shadow delta goes negative | Allowed. `GetShadowDelta` can return negative values. `GetEffective` handles negative total shadow correctly (no penalty if totalShadow < 3). |
+| Existing `TurnResult` consumers | Adding `ShadowGrowthEvents` parameter is a breaking change to the constructor. All existing call sites and tests must be updated. |
+| Horniness shadow | Not in the §7 growth table — Horniness is rolled fresh each conversation (1d10), not grown by events. No triggers for Horniness. |
 
 ---
 
-## 10. Ordering of Operations in ResolveTurnAsync
+## 7. Error Conditions
 
-For clarity, the exact position of shadow growth detection in the `ResolveTurnAsync` flow:
+| Condition | Error Type | Message |
+|-----------|-----------|---------|
+| `CharacterState` constructed with null profile | `ArgumentNullException` | `"profile"` |
+| `ApplyShadowGrowth` called with null/empty reason | `ArgumentException` | `"reason cannot be null or empty"` |
+| `GameSession` constructor with null player | `ArgumentNullException` | `"player"` |
+| Ghost event shadow growth when game ends in `StartTurnAsync` | Growth applied to `_playerState` before `GameEndedException` is thrown. Events accessible via `GameEndedException.ShadowGrowthEvents` (new property, `IReadOnlyList<string>`). |
 
-```
-1. Validate option index
-2. Compute external bonuses (callback, tell, triple combo) — issues #47, #49, #46
-3. Compute DC adjustment (weakness window) — issue #50
-4. RollEngine.Resolve() → RollResult
-5. Compute interest delta from SuccessScale/FailureScale
-6. Add RiskTierBonus, momentum, combo interest bonus
-7. Apply interest delta → InterestMeter.Apply()
-8. ── SHADOW GROWTH DETECTION (this issue) ──
-   a. Record stat in _statsUsedHistory, _allStatsUsed
-   b. Update _saUsageCount, _hasHonestySuccess, _tropeTrapsActivatedCount
-   c. Detect per-turn growth events → collect strings
-   d. If game just ended → detect end-of-game growth events → merge
-9. Advance trap timers
-10. LLM calls (deliver message, get response)
-11. Construct and return TurnResult (with shadowGrowthEvents from step 8)
-```
+---
 
-Shadow growth does **not** affect the current turn's roll or interest delta. It is a post-resolution side effect that records corruption for future turns.
+## 8. Dependencies
 
-### Ordering of Operations in RecoverAsync (O2 trigger)
+| Dependency | Type | Notes |
+|------------|------|-------|
+| #43 (Read/Recover actions) | Hard dependency | Defines Read/Recover action types and their failure detection. Overthinking triggers for Read/Recover failures depend on this. |
+| `Pinder.Core.Stats.StatBlock` | Internal | `ShadowPairs` dictionary, `GetBase`, `GetShadow` methods. Not modified. |
+| `Pinder.Core.Stats.StatType` | Internal | Enum values for stat identification. |
+| `Pinder.Core.Stats.ShadowStatType` | Internal | Enum values for shadow stat identification. |
+| `Pinder.Core.Rolls.RollResult` | Internal | `IsNatOne`, `Tier`, `Stat`, `IsSuccess` properties. |
+| `Pinder.Core.Rolls.FailureTier` | Internal | `Catastrophe`, `TropeTrap`, `Legendary` values. |
+| `Pinder.Core.Characters.CharacterProfile` | Internal | Wrapped by `CharacterState`. Not modified. |
+| `Pinder.Core.Conversation.TurnResult` | Internal | Modified: new `ShadowGrowthEvents` property. |
+| `Pinder.Core.Conversation.GameSession` | Internal | Modified: uses `CharacterState`, adds tracking fields, evaluates triggers. |
+| `Pinder.Core.Conversation.GameEndedException` | Internal | Modified: new `ShadowGrowthEvents` property for ghost-triggered growth. |
 
-```
-1. Validate active trap exists
-2. Check end conditions
-3. RollEngine.ResolveFixedDC(SA, 12) → RollResult
-4. If success: clear trap, xp = 15
-5. If failure:
-   a. Apply −1 interest
-   b. xp = 2
-   c. If _playerShadows != null:
-      → _playerShadows.ApplyGrowth(Overthinking, 1, "Recover failed")
-      → collect event string into shadowEvents list
-6. Advance trap timers
-7. _turnNumber++
-8. _currentOptions = null
-9. Check end conditions (interest == 0 → Unmatched)
-10. Record XP
-11. Return RecoverResult(success, clearedTrapName, roll, snapshot, xp, shadowEvents)
-```
+---
 
-### Ordering of Operations in Wait
+## 9. Files to Create or Modify
 
-Wait does **not** involve any shadow growth detection (no roll, no stat usage). For completeness:
-
-```
-1. If _ended → throw GameEndedException
-2. Apply −1 interest
-3. Advance trap timers
-4. _turnNumber++
-5. _currentOptions = null
-6. Check end conditions (interest == 0 → _ended = true, _outcome = Unmatched)
-```
+| File | Action | Description |
+|------|--------|-------------|
+| `src/Pinder.Core/Characters/CharacterState.cs` | **Create** | New `CharacterState` class per §2 above. |
+| `src/Pinder.Core/Conversation/GameSession.cs` | **Modify** | Replace `CharacterProfile _player` with `CharacterState _playerState`. Add tracking fields. Add shadow growth evaluation to `ResolveTurnAsync`. Add `previousOpener` constructor parameter. |
+| `src/Pinder.Core/Conversation/TurnResult.cs` | **Modify** | Add `ShadowGrowthEvents` property and constructor parameter. |
+| `src/Pinder.Core/Conversation/GameEndedException.cs` | **Modify** | Add `ShadowGrowthEvents` property for ghost-triggered growth events. |

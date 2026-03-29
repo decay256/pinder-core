@@ -2,64 +2,131 @@
 
 ## Overview
 
-Weakness windows are a one-turn DC reduction mechanic from rules v3.4 §15. When the LLM detects a "crack" in the opponent's response (contradiction, genuine laugh, personal overshare, flustered reply, risky joke, or personal question), it returns a `WeaknessWindow` indicating which defending stat is weakened and by how much. On the next turn, the matching dialogue option's DC is reduced and flagged with `HasWeaknessWindow = true` so the UI can display a 🔓 icon. The window expires after exactly one turn regardless of whether the player exploits it.
+Weakness windows are a one-turn DC reduction mechanic triggered when the opponent's last message reveals a "crack" — a contradiction, genuine laugh, personal overshare, flustered reply, risky joke, or personal question. When the LLM detects a crack in the opponent's response, it returns a `WeaknessWindow` indicating which defending stat is weakened and by how much. On the next turn, the matching stat's DC is reduced, and the corresponding `DialogueOption` is flagged with `HasWeaknessWindow = true` so the UI can display a 🔓 icon.
 
----
-
-## Current Codebase State (Sprint 7 Baseline)
-
-The following types **already exist** and do NOT need to be created:
-
-- **`WeaknessWindow`** (`src/Pinder.Core/Conversation/WeaknessWindow.cs`) — sealed class with `StatType DefendingStat` and `int DcReduction` properties. Constructor exists but **lacks validation** (`dcReduction` can be ≤ 0).
-- **`OpponentResponse`** (`src/Pinder.Core/Conversation/OpponentResponse.cs`) — sealed class with `string MessageText`, `Tell? DetectedTell`, `WeaknessWindow? WeaknessWindow`. Constructor validates `messageText != null`.
-- **`ILlmAdapter.GetOpponentResponseAsync`** (`src/Pinder.Core/Interfaces/ILlmAdapter.cs`) — already returns `Task<OpponentResponse>`.
-
-The following **need to be added or modified**:
-
-- `WeaknessWindow` constructor: add `dcReduction > 0` validation
-- `DialogueOption`: add `bool HasWeaknessWindow` property
-- `RollEngine.Resolve`: add `int dcAdjustment = 0` parameter
-- `GameSession`: add `_activeWeaknessWindow` field + weakness window logic in `StartTurnAsync` / `ResolveTurnAsync`
-- `TurnResult`: add `WeaknessWindow? DetectedWindow` property
+This implements rules v3.4 §15.
 
 ---
 
 ## Crack Trigger Table (from §15)
 
-| Opponent Behaviour                      | Defending Stat   | DC Reduction |
-|-----------------------------------------|------------------|-------------|
-| Contradicts themselves                  | Honesty          | −2          |
-| Laughs genuinely                        | Charm            | −2          |
-| Shares something personal (unprompted)  | SelfAwareness    | −3          |
-| Gets flustered / responds too fast      | Wit              | −2          |
-| Asks YOU a personal question            | Honesty          | −2          |
-| Makes a risky joke                      | Chaos            | −2          |
+| Opponent Behaviour             | Defending Stat  | DC Reduction |
+|-------------------------------|-----------------|-------------|
+| Contradicts themselves         | Honesty         | −2          |
+| Laughs genuinely               | Charm           | −2          |
+| Shares something personal (unprompted) | SelfAwareness | −3    |
+| Gets flustered / responds too fast | Wit          | −2          |
+| Asks YOU a personal question   | Honesty         | −2          |
+| Makes a risky joke             | Chaos           | −2          |
 
-Note: Two behaviours map to Honesty with the same −2 reduction. They are distinct trigger reasons but mechanically identical. Detection is entirely the LLM's responsibility — `GameSession` does not detect cracks; it only stores and applies the `WeaknessWindow` returned by `ILlmAdapter.GetOpponentResponseAsync`.
+Note: two different behaviours (contradicts themselves, asks a personal question) map to the same stat (Honesty) with the same reduction (−2). They are distinct trigger reasons but mechanically identical.
 
 ---
 
-## Function Signatures
+## New Types
 
-### Modified: `WeaknessWindow` Constructor
+### `WeaknessWindow`
 
+**Namespace**: `Pinder.Core.Conversation`
 **File**: `src/Pinder.Core/Conversation/WeaknessWindow.cs`
 
 ```csharp
-public WeaknessWindow(StatType defendingStat, int dcReduction)
+public sealed class WeaknessWindow
+{
+    /// <summary>The defending stat whose DC is reduced.</summary>
+    public StatType DefendingStat { get; }
+
+    /// <summary>
+    /// The DC reduction amount (always a positive integer; subtracted from DC).
+    /// Typically 2, except SelfAwareness overshare which is 3.
+    /// </summary>
+    public int DcReduction { get; }
+
+    public WeaknessWindow(StatType defendingStat, int dcReduction);
+}
 ```
 
-**Change**: Add validation — throw `ArgumentOutOfRangeException` if `dcReduction <= 0`.
+**Constraints**:
+- `dcReduction` must be > 0. If ≤ 0, throw `ArgumentOutOfRangeException`.
+- `DefendingStat` is the stat used for *defence* against the attack — i.e., it's the value in `StatBlock.DefenceTable` for the attacking stat that benefits. For example, if `DefendingStat = StatType.Charm`, the attacker benefits when attacking with `Chaos` (because `DefenceTable[Chaos] = Charm`).
 
-### New Property: `DialogueOption.HasWeaknessWindow`
+**Platform note**: Cannot use `record` (C# 9+). Use `sealed class` per project conventions (netstandard2.0, LangVersion 8.0).
+
+---
+
+### `OpponentResponse`
+
+**Namespace**: `Pinder.Core.Conversation`
+**File**: `src/Pinder.Core/Conversation/OpponentResponse.cs`
+
+Currently, `ILlmAdapter.GetOpponentResponseAsync` returns `Task<string>`. To carry the optional weakness window alongside the opponent's message text, a new return type is needed.
+
+```csharp
+public sealed class OpponentResponse
+{
+    /// <summary>The opponent's reply text.</summary>
+    public string Message { get; }
+
+    /// <summary>
+    /// Weakness window detected in this response, or null if no crack was detected.
+    /// </summary>
+    public WeaknessWindow? Window { get; }
+
+    public OpponentResponse(string message, WeaknessWindow? window = null);
+}
+```
+
+**Constraints**:
+- `message` must not be null or empty. Throw `ArgumentNullException` / `ArgumentException` if violated.
+
+---
+
+## Modified Types
+
+### `ILlmAdapter` — Signature Change
+
+**File**: `src/Pinder.Core/Interfaces/ILlmAdapter.cs`
+
+Change the return type of `GetOpponentResponseAsync`:
+
+```csharp
+// Before:
+Task<string> GetOpponentResponseAsync(OpponentContext context);
+
+// After:
+Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context);
+```
+
+This is a **breaking change** to the interface. All implementations must be updated.
+
+### `NullLlmAdapter` — Updated Implementation
+
+**File**: `src/Pinder.Core/Conversation/NullLlmAdapter.cs`
+
+Update `GetOpponentResponseAsync` to return `OpponentResponse` with `Window = null` (no crack detected in test adapter):
+
+```csharp
+public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context)
+{
+    return Task.FromResult(new OpponentResponse("..."));
+}
+```
+
+### `DialogueOption` — New Property
 
 **File**: `src/Pinder.Core/Conversation/DialogueOption.cs`
 
+Add a new read-only property:
+
 ```csharp
+/// <summary>
+/// True if a weakness window is active for this option's defending stat.
+/// UI displays a 🔓 icon when true. The DC shown already reflects the reduction.
+/// </summary>
 public bool HasWeaknessWindow { get; }
 ```
 
-Constructor gains a new optional parameter (backward-compatible):
+Update the constructor to accept this parameter (with default `false` for backward compatibility):
 
 ```csharp
 public DialogueOption(
@@ -68,12 +135,51 @@ public DialogueOption(
     int? callbackTurnNumber = null,
     string? comboName = null,
     bool hasTellBonus = false,
-    bool hasWeaknessWindow = false)  // NEW
+    bool hasWeaknessWindow = false)
 ```
 
-### Modified: `RollEngine.Resolve`
+### `GameSession` — New Internal State and Turn Logic
+
+**File**: `src/Pinder.Core/Conversation/GameSession.cs`
+
+Add a new field:
+
+```csharp
+private WeaknessWindow? _activeWindow;  // set after opponent response, consumed on next turn
+```
+
+Initial value: `null`.
+
+#### Changes to `ResolveTurnAsync`
+
+After calling `_llm.GetOpponentResponseAsync(opponentContext)`:
+
+1. Extract `opponentMessage` from the `OpponentResponse.Message` property (instead of the raw string).
+2. Store `OpponentResponse.Window` as `_activeWindow` for the *next* turn.
+
+This means `_activeWindow` is set at the **end** of a turn and consumed at the **start** of the next turn.
+
+#### Changes to `StartTurnAsync`
+
+When building `DialogueOption` objects (or when the LLM returns them), the session must:
+
+1. Check if `_activeWindow` is not null.
+2. For each dialogue option, determine the defending stat via `StatBlock.DefenceTable[option.Stat]`.
+3. If `DefenceTable[option.Stat] == _activeWindow.DefendingStat`, that option gets `HasWeaknessWindow = true`.
+4. The DC for that option's roll must be reduced by `_activeWindow.DcReduction`.
+
+**DC Reduction Mechanism**: The DC reduction must be applied when `RollEngine.Resolve` is called in `ResolveTurnAsync`. There are two approaches:
+
+- **Option A (preferred)**: Store the active window and, before calling `RollEngine.Resolve`, temporarily compute a modified DC. Since `RollEngine` computes DC internally from `defender.GetDefenceDC(stat)`, the cleanest approach is to pass the reduction as additional context. However, `RollEngine.Resolve` does not currently accept a DC modifier parameter. **The implementation must add an optional `int dcModifier = 0` parameter to `RollEngine.Resolve`** that is subtracted from the computed DC before comparison.
+- **Option B**: Create a wrapper `StatBlock` that returns modified defence DCs. This is more complex and fragile.
+
+After the roll is resolved (regardless of success/failure), **clear `_activeWindow = null`**. The window lasts exactly one turn.
+
+### `RollEngine.Resolve` — New Optional Parameter
 
 **File**: `src/Pinder.Core/Rolls/RollEngine.cs`
+
+Add an optional parameter to the `Resolve` method:
 
 ```csharp
 public static RollResult Resolve(
@@ -86,210 +192,197 @@ public static RollResult Resolve(
     IDiceRoller dice,
     bool hasAdvantage = false,
     bool hasDisadvantage = false,
-    int dcAdjustment = 0)  // NEW — subtracted from DC
+    int dcModifier = 0)  // NEW: subtracted from DC (positive value = lower DC)
 ```
 
-Inside the method, after computing `dc = defender.GetDefenceDC(stat)`:
+In the DC computation:
 
+```csharp
+int dc = defender.GetDefenceDC(stat) - dcModifier;
 ```
-dc = dc - dcAdjustment;
-```
 
-The `dcAdjustment` is a signed integer subtracted from the DC. A `WeaknessWindow` with `DcReduction = 2` passes `dcAdjustment = 2`, lowering the DC by 2. The `RollResult.DC` property must reflect the **modified** DC (i.e., the DC actually used for the roll comparison).
+The `dcModifier` is a signed integer subtracted from DC. A `WeaknessWindow` with `DcReduction = 2` means `dcModifier = 2`, making the DC 2 lower.
 
-This parameter is also used by other Sprint 7 features (per architecture contract), so the name `dcAdjustment` is canonical — not `dcModifier`.
+The `RollResult.DC` property should reflect the **modified** DC (i.e., the DC the player actually had to beat), so it accurately represents what happened.
 
-### New Property: `TurnResult.DetectedWindow`
+### `TurnResult` — New Property
 
-**File**: `src/Pinder.Core/Conversation/TurnResult.cs`
+Add to `TurnResult`:
 
 ```csharp
 /// <summary>
 /// Weakness window detected in the opponent's response this turn, if any.
-/// The host/UI can use this to preview the next turn's opportunity.
+/// The caller (UI) may use this to preview the next turn's opportunity.
 /// </summary>
 public WeaknessWindow? DetectedWindow { get; }
 ```
 
-Constructor gains a new optional parameter (backward-compatible):
-
-```csharp
-public TurnResult(
-    ...,  // existing parameters
-    int xpEarned = 0,
-    WeaknessWindow? detectedWindow = null)  // NEW — appended at end
-```
-
-### Modified: `GameSession` Internal State
-
-**File**: `src/Pinder.Core/Conversation/GameSession.cs`
-
-New field:
-
-```csharp
-private WeaknessWindow? _activeWeaknessWindow;  // set after opponent response, consumed next turn
-```
-
-Initial value: `null`.
+This lets the host/UI display "You noticed a crack!" after the opponent responds.
 
 ---
 
-## Data Flow (Per-Turn)
+## Function Signatures (Complete Summary)
 
-### Turn N — Opponent cracks
+### New
 
-1. `ResolveTurnAsync` calls `_llm.GetOpponentResponseAsync(opponentContext)`
-2. `OpponentResponse` comes back with `WeaknessWindow? WeaknessWindow`
-3. `GameSession` stores `_activeWeaknessWindow = opponentResponse.WeaknessWindow`
-4. `TurnResult.DetectedWindow` is set to `opponentResponse.WeaknessWindow` (for UI preview)
+| Type | Member | Signature |
+|------|--------|-----------|
+| `WeaknessWindow` | Constructor | `WeaknessWindow(StatType defendingStat, int dcReduction)` |
+| `WeaknessWindow` | `DefendingStat` | `StatType` (read-only) |
+| `WeaknessWindow` | `DcReduction` | `int` (read-only) |
+| `OpponentResponse` | Constructor | `OpponentResponse(string message, WeaknessWindow? window = null)` |
+| `OpponentResponse` | `Message` | `string` (read-only) |
+| `OpponentResponse` | `Window` | `WeaknessWindow?` (read-only) |
 
-### Turn N+1 — Window is active
+### Modified
 
-5. `StartTurnAsync` checks `_activeWeaknessWindow != null`
-6. For each `DialogueOption`, compute: `StatBlock.DefenceTable[option.Stat]`
-7. If `DefenceTable[option.Stat] == _activeWeaknessWindow.DefendingStat` → set `HasWeaknessWindow = true`
-8. Return `TurnStart` with enriched options
-
-### Turn N+1 — Player resolves
-
-9. `ResolveTurnAsync(optionIndex)` checks if `_activeWeaknessWindow != null`
-10. Compute `StatType defenceStat = StatBlock.DefenceTable[chosenOption.Stat]`
-11. If `defenceStat == _activeWeaknessWindow.DefendingStat` → pass `dcAdjustment = _activeWeaknessWindow.DcReduction` to `RollEngine.Resolve`
-12. If no match → pass `dcAdjustment = 0`
-13. **Clear** `_activeWeaknessWindow = null` (regardless of match)
-14. Store new window from this turn's opponent response (step 3 above)
+| Type | Member | Change |
+|------|--------|--------|
+| `ILlmAdapter` | `GetOpponentResponseAsync` | Return type: `Task<string>` → `Task<OpponentResponse>` |
+| `NullLlmAdapter` | `GetOpponentResponseAsync` | Return type: `Task<string>` → `Task<OpponentResponse>` (window = null) |
+| `DialogueOption` | Constructor | Add `bool hasWeaknessWindow = false` parameter |
+| `DialogueOption` | `HasWeaknessWindow` | New `bool` property (read-only) |
+| `RollEngine` | `Resolve` | Add `int dcModifier = 0` parameter |
+| `GameSession` | `_activeWindow` | New `WeaknessWindow?` field |
+| `TurnResult` | `DetectedWindow` | New `WeaknessWindow?` property |
 
 ---
 
 ## Input/Output Examples
 
-### Example 1: Opponent contradicts themselves → SelfAwareness option benefits
+### Example 1: Crack Detected → Window Applied Next Turn
 
-**Turn 3 — Opponent response:**
-```
-OpponentResponse(
-    messageText: "Wait, I said I hated pineapple pizza but... okay fine I had some last week.",
-    detectedTell: null,
-    weaknessWindow: WeaknessWindow(StatType.Honesty, dcReduction: 2)
-)
-```
-`GameSession` stores `_activeWeaknessWindow = WeaknessWindow(Honesty, 2)`.
+**Turn N — Opponent response contains a crack:**
 
-**Turn 4 — StartTurnAsync returns options:**
-
-Defence table lookups:
-| Option Stat    | Defence Stat (from DefenceTable) | Matches Honesty? | HasWeaknessWindow |
-|----------------|----------------------------------|-------------------|-------------------|
-| Charm          | SelfAwareness                    | No                | false             |
-| Rizz           | Wit                              | No                | false             |
-| SelfAwareness  | Honesty                          | **Yes**           | **true** 🔓       |
-| Chaos          | Charm                            | No                | false             |
-
-**Turn 4 — Player picks SelfAwareness (index 2):**
-
-Normal DC: `13 + opponent.GetEffective(Honesty)` = e.g. 15
-With window: `RollEngine.Resolve(..., dcAdjustment: 2)` → DC becomes 13
-After roll, `_activeWeaknessWindow = null`.
-
-### Example 2: Window not exploited — still clears
-
-Same setup. Player picks Charm instead of SelfAwareness.
-`dcAdjustment = 0` (no match). Window still clears: `_activeWeaknessWindow = null`.
-Turn 5 has no active window.
-
-### Example 3: Personal overshare → Charm option benefits with −3
+The LLM detects the opponent contradicted themselves. `GetOpponentResponseAsync` returns:
 
 ```
 OpponentResponse(
-    messageText: "I haven't told anyone this but... I was actually born in a petri dish.",
-    weaknessWindow: WeaknessWindow(StatType.SelfAwareness, dcReduction: 3)
+    message: "Wait, I said I hated pineapple pizza but... okay fine I had some last week.",
+    window: WeaknessWindow(StatType.Honesty, dcReduction: 2)
 )
 ```
 
-`DefenceTable[Charm] = SelfAwareness` → the **Charm** option gets `HasWeaknessWindow = true`.
-If player picks Charm: `dcAdjustment = 3`.
+`GameSession` stores `_activeWindow = WeaknessWindow(Honesty, 2)`.
 
-### Example 4: No crack detected
+**Turn N+1 — StartTurnAsync:**
+
+The session checks `_activeWindow`. For each dialogue option, it looks up `StatBlock.DefenceTable[option.Stat]`:
+- `Charm` → defends with `SelfAwareness` → not Honesty → `HasWeaknessWindow = false`
+- `Honesty` → defends with `Chaos` → not Honesty → `HasWeaknessWindow = false`
+- `Chaos` → defends with `Charm` → not Honesty → `HasWeaknessWindow = false`
+- `SelfAwareness` → defends with `Honesty` → **match!** → `HasWeaknessWindow = true`
+
+So the `SelfAwareness` option gets the 🔓 icon.
+
+**Turn N+1 — ResolveTurnAsync (player picks SelfAwareness):**
+
+Normal DC would be `13 + opponent.GetEffective(Honesty)`. With the window: `DC = (13 + opponent.GetEffective(Honesty)) - 2`.
+
+`RollEngine.Resolve(..., dcModifier: 2)` is called. The window is then cleared: `_activeWindow = null`.
+
+### Example 2: Window Not Used (Player Picks a Different Stat)
+
+Same setup as above, but the player picks `Charm` instead of `SelfAwareness`. The window still clears after this turn — it only lasts one turn regardless of whether the player exploits it.
+
+### Example 3: No Crack Detected
+
+`GetOpponentResponseAsync` returns `OpponentResponse("...", window: null)`. `_activeWindow` remains null (or is set to null). Next turn proceeds normally with no DC modifications and all `HasWeaknessWindow = false`.
+
+### Example 4: SelfAwareness Overshare (DC −3)
+
+Opponent shares something deeply personal unprompted. LLM returns:
 
 ```
-OpponentResponse(messageText: "lol ok whatever", weaknessWindow: null)
+OpponentResponse(
+    message: "I haven't told anyone this but... I was actually born in a petri dish.",
+    window: WeaknessWindow(StatType.SelfAwareness, dcReduction: 3)
+)
 ```
 
-`_activeWeaknessWindow = null`. Next turn: all options `HasWeaknessWindow = false`, `dcAdjustment = 0`.
+On the next turn, the option attacking with the stat whose defence is `SelfAwareness` benefits. `DefenceTable[Charm] = SelfAwareness`, so the **Charm** option gets `HasWeaknessWindow = true` with a −3 DC reduction.
 
 ---
 
 ## Acceptance Criteria
 
-### AC1: `WeaknessWindow` type validation
+### AC1: `WeaknessWindow` type defined
 
-- `WeaknessWindow` constructor throws `ArgumentOutOfRangeException` when `dcReduction <= 0`
-- Existing constructor signature unchanged; only validation logic added
+A `WeaknessWindow` class exists in `Pinder.Core.Conversation` with:
+- `StatType DefendingStat` (read-only)
+- `int DcReduction` (read-only, must be > 0)
+- Constructor validates `dcReduction > 0`
 
 ### AC2: `OpponentResponse` carries optional `WeaknessWindow`
 
-- **Already implemented.** `OpponentResponse.WeaknessWindow` property exists.
-- `ILlmAdapter.GetOpponentResponseAsync` already returns `Task<OpponentResponse>`.
-- Verify no regressions: all existing callers/tests still compile and pass.
+- `OpponentResponse` class exists with `string Message` and `WeaknessWindow? Window` properties.
+- `ILlmAdapter.GetOpponentResponseAsync` returns `Task<OpponentResponse>` (not `Task<string>`).
+- `NullLlmAdapter` returns `OpponentResponse("...", null)`.
+- All other `ILlmAdapter` implementations compile with the new signature.
 
 ### AC3: `GameSession` stores active window, applies DC reduction for one turn, clears after turn
 
-- `GameSession` has `_activeWeaknessWindow` field of type `WeaknessWindow?`, initially `null`.
-- After `GetOpponentResponseAsync` returns, `_activeWeaknessWindow` is set to `opponentResponse.WeaknessWindow`.
-- In `ResolveTurnAsync`, if `_activeWeaknessWindow != null` and `StatBlock.DefenceTable[chosenOption.Stat] == _activeWeaknessWindow.DefendingStat`, call `RollEngine.Resolve` with `dcAdjustment = _activeWeaknessWindow.DcReduction`.
-- If defending stat does not match, `dcAdjustment = 0`.
-- After the roll, `_activeWeaknessWindow` is cleared to `null` regardless of match.
-- Window lasts exactly one turn.
+- `GameSession` has a `_activeWindow` field of type `WeaknessWindow?`.
+- After `GetOpponentResponseAsync` returns, the session stores `response.Window` as `_activeWindow`.
+- In the next `ResolveTurnAsync`, if `_activeWindow` is not null and the chosen option's defending stat matches `_activeWindow.DefendingStat`, `RollEngine.Resolve` is called with `dcModifier = _activeWindow.DcReduction`.
+- If the chosen option's defending stat does NOT match, `dcModifier = 0` (no reduction applied).
+- After the roll (regardless of which option was chosen), `_activeWindow` is set to null.
+- The window lasts exactly one turn — the turn immediately after the crack message.
 
 ### AC4: `DialogueOption.HasWeaknessWindow` set correctly
 
-- `DialogueOption` has a `bool HasWeaknessWindow` property (read-only, default `false`).
-- In `StartTurnAsync`, each option is enriched: `HasWeaknessWindow = true` if `_activeWeaknessWindow != null && StatBlock.DefenceTable[option.Stat] == _activeWeaknessWindow.DefendingStat`.
-- When `_activeWeaknessWindow` is null, all options have `HasWeaknessWindow = false`.
+- Each `DialogueOption` returned from `StartTurnAsync` has `HasWeaknessWindow = true` if `_activeWindow != null` and `StatBlock.DefenceTable[option.Stat] == _activeWindow.DefendingStat`.
+- Options whose defending stat does not match have `HasWeaknessWindow = false`.
+- When `_activeWindow` is null, all options have `HasWeaknessWindow = false`.
 
 ### AC5: DC displayed in option already reflects the reduction
 
-- The DC the host/UI sees for an option must already account for the weakness window reduction.
-- This is achieved via the `dcAdjustment` parameter flowing into `RollEngine.Resolve`, which computes the actual DC used; `RollResult.DC` reflects the modified value.
+- The DC shown to the player (in the option / UI) must already be the reduced value. The UI does not need to compute the reduction itself.
+- This means `TurnStart` or the options themselves should carry the effective DC, or the host can compute it from the stat blocks and `HasWeaknessWindow`. (Implementation detail — but the spec requires the reduction to be "baked in" to whatever DC the host sees.)
 
 ### AC6: Tests
 
-Required test scenarios:
-1. **Window applied for one turn then cleared**: Play turn N where LLM returns a `WeaknessWindow`. Verify turn N+1 applies the DC reduction. Verify turn N+2 has no window active.
-2. **Correct stat DC reduced**: Given `WeaknessWindow(Honesty, 2)`, verify the SelfAwareness option has `HasWeaknessWindow = true` and the roll DC is reduced by 2.
-3. **No window → no reduction**: When `OpponentResponse.WeaknessWindow` is null, verify all options `HasWeaknessWindow = false` and DC unmodified.
-4. **Window clears even if not exploited**: Player picks non-matching stat. Verify window clears.
-5. **DcReduction validation**: `new WeaknessWindow(StatType.Charm, 0)` throws `ArgumentOutOfRangeException`. Same for negative values.
-6. **dcAdjustment parameter on RollEngine**: `RollEngine.Resolve` with `dcAdjustment = 2` produces a result where `RollResult.DC` is 2 lower than without.
-7. **Backward compatibility**: Existing calls to `RollEngine.Resolve` without `dcAdjustment` produce identical results (default is 0).
+- **Window applied for one turn then cleared**: Create a `GameSession`, play one turn where the LLM returns a `WeaknessWindow`, verify the next turn applies the DC reduction, then verify the turn after that has no window active.
+- **Correct stat DC reduced**: Given a `WeaknessWindow(Honesty, 2)`, verify that the option whose defending stat is Honesty (i.e., attacking stat `SelfAwareness`) has `HasWeaknessWindow = true` and the DC is reduced by 2.
+- **No window → no reduction**: When `OpponentResponse.Window` is null, verify all options have `HasWeaknessWindow = false` and DC is unmodified.
+- **Window clears even if not exploited**: Player picks an option that does NOT match the window's stat. Verify the window still clears on the following turn.
+- **DcReduction validation**: Constructing `WeaknessWindow` with `dcReduction <= 0` throws `ArgumentOutOfRangeException`.
 
 ### AC7: Build clean
 
 - `dotnet build` succeeds with zero errors and zero warnings.
-- All existing 254+ tests pass unchanged.
+- All existing tests pass.
 - New tests pass.
 
 ---
 
 ## Edge Cases
 
-1. **Multiple cracks in sequence**: If turn N and turn N+1 both return a `WeaknessWindow`, the new one replaces the old. Only one window active at a time — latest overwrites.
+1. **Multiple cracks in sequence**: If the opponent's response on turn N detects a crack, and the opponent's response on turn N+1 also detects a crack, the new window **replaces** the old one. There is no stacking. `_activeWindow` is simply overwritten.
 
-2. **Window on first turn**: `_activeWeaknessWindow` starts as `null`. Turn 0's `StartTurnAsync` has no window. This is correct — no opponent response has occurred yet.
+2. **Same defending stat as previous window**: If a crack on turn N targets Honesty (−2) and the crack on turn N+1 also targets Honesty (−3), the turn N+2 uses the newer window (−3). The first window was already consumed/cleared on turn N+1.
 
-3. **Game ends on the turn a window is set**: If interest hits 0 or 25 during `ResolveTurnAsync`, the game ends. The stored window is irrelevant — no next turn exists. No special handling needed.
+3. **Window on first turn**: If `_activeWindow` is null at game start (which it always is), `StartTurnAsync` on turn 0 has no window active. This is the normal case.
 
-4. **DC goes very low or negative**: If `dcAdjustment` makes the DC < 1, the DC still applies as computed. No clamping. A d20 roll of 1 is still a Legendary Failure (Nat 1 rule), but any other roll trivially succeeds. This is intentional — the window makes the roll very easy.
+4. **Game ends on the turn a window is set**: If the game ends during `ResolveTurnAsync` (interest hits 0 or 25), the window stored from the opponent's response is irrelevant — there is no next turn. No special handling needed; the session just ends.
 
-5. **Same defending stat from different cracks**: Two different opponent behaviours can produce `WeaknessWindow(Honesty, 2)`. Mechanically identical — no distinction needed.
+5. **Window with dcReduction greater than DC**: If `dcReduction` is large enough that `dc - dcReduction < 1`, the DC still goes below the roll's minimum. This is valid — it makes the roll very easy. No clamping is needed. (The d20 minimum result is 1 + modifiers, which will likely beat a very low DC.)
 
-6. **LLM returns unexpected stat in window**: The engine does not validate that the window's stat matches the §15 crack table. The LLM is trusted. The engine only uses `DefendingStat` and `DcReduction`.
+6. **All six stats and the DefenceTable**: The defence table is:
+   - `Charm` → `SelfAwareness`
+   - `Rizz` → `Wit`
+   - `Honesty` → `Chaos`
+   - `Chaos` → `Charm`
+   - `Wit` → `Rizz`
+   - `SelfAwareness` → `Honesty`
 
-7. **DialogueOption enrichment vs LLM**: The LLM returns `DialogueOption[]` from `GetDialogueOptionsAsync`. These do NOT include `HasWeaknessWindow`. `GameSession` must enrich options post-LLM by checking `_activeWeaknessWindow` against each option's defending stat. The session is authoritative for this field.
+   So a `WeaknessWindow(Honesty, 2)` benefits attacks with `SelfAwareness`. A `WeaknessWindow(Charm, 2)` benefits attacks with `Chaos`. Implementers must use the DefenceTable lookup, not assume stat-to-stat identity.
 
-8. **Interaction with `externalBonus` (callback/tell)**: The `dcAdjustment` parameter is independent of `externalBonus`. Both can apply simultaneously. `dcAdjustment` reduces the DC; `externalBonus` adds to the roll total. They are separate mechanical channels per the architecture contract.
+7. **LLM adapter returns a window with a stat not matching any known crack**: The engine does not validate that the window's stat matches the §15 table — the LLM is trusted to return valid crack detections. The engine only cares about `DefendingStat` and `DcReduction`.
 
-9. **Interaction with Read/Recover/Wait (#43)**: These alternative actions use `ResolveFixedDC` (DC 12). Weakness windows do NOT apply to Read/Recover/Wait — they only apply to Speak actions via `ResolveTurnAsync`. The window should still clear if Read/Recover/Wait is chosen instead of Speak (consume the window, waste it).
+8. **NullLlmAdapter and testing adapters**: Test adapters that want to simulate cracks must return `OpponentResponse` with a non-null `Window`. The `NullLlmAdapter` always returns `null` for the window (no crack detection in test mode).
+
+9. **DialogueOption enrichment**: The LLM returns `DialogueOption[]` from `GetDialogueOptionsAsync`. These options do NOT have `HasWeaknessWindow` set by the LLM — the `GameSession` must enrich them by checking `_activeWindow` against each option's defending stat. If the LLM returns options with `HasWeaknessWindow = true`, the session should override based on its own state (session is authoritative).
 
 ---
 
@@ -297,43 +390,24 @@ Required test scenarios:
 
 | Condition | Error Type | Message |
 |-----------|-----------|---------|
-| `WeaknessWindow(stat, dcReduction)` with `dcReduction <= 0` | `ArgumentOutOfRangeException` | `"dcReduction must be greater than zero"` |
-| `RollEngine.Resolve` with existing invalid args | Unchanged — existing validation applies | — |
-| `ILlmAdapter` returns null `OpponentResponse` | `NullReferenceException` at `opponentResponse.MessageText` | Guard already exists via existing code path |
+| `WeaknessWindow` constructed with `dcReduction <= 0` | `ArgumentOutOfRangeException` | "dcReduction must be greater than zero" |
+| `OpponentResponse` constructed with null/empty message | `ArgumentNullException` / `ArgumentException` | Standard null/empty message |
+| `ILlmAdapter` implementation returns null `OpponentResponse` | `NullReferenceException` (or guard) | Session should guard against null response from LLM adapter |
 
-No new exception types are introduced.
+No new exception types are introduced. Existing `GameEndedException`, `InvalidOperationException`, and `ArgumentOutOfRangeException` cover all cases.
 
 ---
 
 ## Dependencies
 
-| Dependency | Type | Status | Notes |
-|-----------|------|--------|-------|
-| `GameSession` (Issue #27) | Code | **Merged** | Weakness windows modify `StartTurnAsync` and `ResolveTurnAsync` |
-| `ILlmAdapter` (Issue #26) | Interface | **Merged** | Already returns `Task<OpponentResponse>` |
-| `OpponentResponse` | Type | **Exists** | Already has `WeaknessWindow?` property |
-| `WeaknessWindow` | Type | **Exists** | Needs validation added |
-| Architecture review (#63) | Process | **Merged** | Sprint 3 architecture context |
-| `StatBlock.DefenceTable` | Data | **Exists** | Maps attacking stat → defending stat |
-| `RollEngine.Resolve` | Method | **Exists** | Needs `dcAdjustment` parameter added |
-| `DialogueOption` | Type | **Exists** | Needs `HasWeaknessWindow` property added |
-| Sprint 7 Wave 0 (#139) | Architecture | **Merged** | Defines `dcAdjustment` as canonical param name |
+| Dependency | Status | Notes |
+|-----------|--------|-------|
+| `GameSession` (Issue #27) | **Must be merged** | Weakness windows modify `GameSession.StartTurnAsync` and `ResolveTurnAsync` |
+| `ILlmAdapter` (Issue #26) | **Must be merged** | Return type of `GetOpponentResponseAsync` changes |
+| Architecture review (Issue #63) | **Must be merged** | Sprint 3 architecture context |
+| `StatBlock.DefenceTable` | Exists | Used to map attacking stat → defending stat for window matching |
+| `RollEngine.Resolve` | Exists | Needs new `dcModifier` parameter |
+| `DialogueOption` | Exists | Needs new `HasWeaknessWindow` property |
+| `InterestMeter`, `TrapState` | Exist | No changes needed |
 
-**No new external/NuGet dependencies.** All changes are pure C# within the existing `netstandard2.0` project.
-
----
-
-## Defence Table Quick Reference
-
-For implementers — the mapping from attacking stat to defending stat:
-
-| Attacking Stat   | Defending Stat   |
-|------------------|------------------|
-| Charm            | SelfAwareness    |
-| Rizz             | Wit              |
-| Honesty          | Chaos            |
-| Chaos            | Charm            |
-| Wit              | Rizz             |
-| SelfAwareness    | Honesty          |
-
-A `WeaknessWindow(DefendingStat = X)` benefits the attacking stat whose defence is X. For example, `WeaknessWindow(Honesty)` benefits `SelfAwareness` attacks (because `DefenceTable[SelfAwareness] = Honesty`).
+**No new external/NuGet dependencies.** All changes are pure C# within the existing project structure.
