@@ -4,6 +4,9 @@
 
 This issue is a dedicated QA pass across the entire Pinder.Core test suite (currently 254 tests in 14 files). The goal is to audit existing tests for quality, coverage gaps relative to interface contracts, and naming conventions — then fix straightforward gaps directly and file GitHub issues for complex ones. The output is a measurably improved test suite plus a contract-to-test coverage gap report. This is an implementation issue: the QA engineer must write actual C# test code, not just a report.
 
+**Contract reference**: `contracts/sprint-8-qa-review.md`
+**Related issues**: #39 (SuccessScale zero coverage), #40 (missing DateSecured end condition test)
+
 ---
 
 ## 1. Scope and Inputs
@@ -28,6 +31,8 @@ This issue is a dedicated QA pass across the entire Pinder.Core test suite (curr
 
 **Total**: 254 tests.
 
+**Out of scope**: Sprint 8 new components (SessionShadowTracker, ShadowThresholdEvaluator, ComboTracker, XpLedger, GameClock, PlayerResponseDelayEvaluator, ConversationRegistry) are being implemented in parallel. Their tests will be written by the implementation agents. This QA review covers only the pre-Sprint-8 baseline.
+
 ### 1.2 Contracts to Audit Against
 
 | Contract File | Key Clauses to Check |
@@ -37,6 +42,7 @@ This issue is a dedicated QA pass across the entire Pinder.Core test suite (curr
 | `contracts/issue-6-interest-state.md` | `InterestState` enum (6 values), `GetState()` boundaries, `GrantsAdvantage`/`GrantsDisadvantage` logic, exhaustive non-overlapping ranges |
 | `contracts/issue-7-rules-constants-tests.md` | Every rules-v3.4 numeric constant has a corresponding assertion |
 | `contracts/sprint-7-qa-review.md` | Meta-contract defining QA scope and deliverables |
+| `contracts/sprint-8-qa-review.md` | Sprint 8 QA contract: explicitly requires SuccessScale tests (#39) and DateSecured end condition test (#40) |
 
 ### 1.3 Source Files Referenced
 
@@ -306,13 +312,13 @@ Read contracts in `contracts/` and verify every contract clause has at least one
 
 Verify `GameSessionTests.ThreeTurnSession_HighRolls_SuccessfulTurns` asserts: (a) interest rose above starting value, (b) turn number is 3, (c) `DeliveredMessage` and `OpponentMessage` are non-null each turn. Add missing assertions if needed.
 
-### AC-3: Happy Path — RollEngine Success Margins
+### AC-3: Happy Path — RollEngine Success Margins (addresses #39)
 
-Add tests verifying `SuccessScale.GetInterestDelta()` returns +1 for beat-by 1–4, +2 for beat-by 5–9, +3 for beat-by 10+, +4 for nat20. At minimum test all boundary values (1, 4, 5, 9, 10).
+Add tests verifying `SuccessScale.GetInterestDelta()` returns +1 for beat-by 1–4, +2 for beat-by 5–9, +3 for beat-by 10+, +4 for nat20. At minimum test all boundary values (1, 4, 5, 9, 10). This directly addresses issue #39 (zero SuccessScale coverage).
 
-### AC-4: Happy Path — InterestMeter Full State Machine
+### AC-4: Happy Path — InterestMeter Full State Machine (addresses #40)
 
-Verify all 6 `InterestState` values are covered by existing boundary tests. Optionally add a full-traversal test.
+Verify all 6 `InterestState` values are covered by existing boundary tests. Specifically, verify that a `DateSecured` end condition test exists (issue #40). If missing, add a test that drives interest to 25 and verifies `GetState()` returns `InterestState.DateSecured`. Optionally add a full-traversal test.
 
 ### AC-5: Error Path — All 5 Failure Tiers
 
