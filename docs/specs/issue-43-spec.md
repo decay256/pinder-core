@@ -34,7 +34,7 @@ Performs a **Read** action: rolls SelfAwareness vs fixed DC 12 using `RollEngine
 public Task<RecoverResult> RecoverAsync()
 ```
 
-Performs a **Recover** action: only callable when at least one trap is active (checked via `TrapState.HasActive`). Rolls SelfAwareness vs fixed DC 12 using `RollEngine.ResolveFixedDC()`. On success, clears one active trap and returns its name. On failure, applies −1 interest. Consumes the player's turn.
+Performs a **Recover** action: only callable when at least one trap is active (checked via `TrapState.HasActive`). Rolls SelfAwareness vs fixed DC 12 using `RollEngine.ResolveFixedDC()`. On success, clears one active trap and returns its name. On failure, applies −1 interest only (no shadow growth). Consumes the player's turn.
 
 ### 2.3 Wait
 
@@ -102,15 +102,13 @@ namespace Pinder.Core.Conversation
         /// <summary>XP earned from this action: 15 on recovery success, 2 on failure.</summary>
         public int XpEarned { get; }
 
-        /// <summary>Shadow growth events that occurred (e.g. "Overthinking +1 (Recover failed)" on failure). Empty list on success. Added by issue #44 (O2 trigger).</summary>
-        public IReadOnlyList<string> ShadowGrowthEvents { get; }
-
         public RecoverResult(bool success, string? clearedTrapName, RollResult roll,
-            GameStateSnapshot stateAfter, int xpEarned = 0,
-            IReadOnlyList<string>? shadowGrowthEvents = null);
+            GameStateSnapshot stateAfter, int xpEarned = 0);
     }
 }
 ```
+
+**Note:** `RecoverResult` does NOT include a `ShadowGrowthEvents` field. Per the contract (`contracts/sprint-7-read-recover-wait.md`), Recover failure applies only −1 interest — no shadow growth. Shadow growth on failure is specific to Read (Overthinking +1 via `ReadResult.ShadowGrowthEvents`).
 
 ---
 
@@ -242,7 +240,7 @@ Ghost trigger does NOT apply to Read/Recover/Wait — only on `StartTurnAsync` f
 - **Precondition:** `_traps.HasActive` must be `true`. If false, throw `InvalidOperationException` with message `"Cannot recover: no active trap."` (or similar wording containing "no active trap").
 - **Roll mechanism:** Same as Read — `RollEngine.ResolveFixedDC(StatType.SelfAwareness, playerStats, 12, ...)`.
 - **On success:** Clear one active trap. If multiple traps are active, clear the **first** one from `_traps.AllActive` iteration order. Use `_traps.Clear(stat)` where `stat` is the trapped stat (from `ActiveTrap.Definition.Stat`). Return the trap's `Definition.Id` as `ClearedTrapName`.
-- **On failure:** `_interest.Apply(-1)`. Trap remains active. `ClearedTrapName = null`.
+- **On failure:** `_interest.Apply(-1)`. Trap remains active. `ClearedTrapName = null`. No shadow growth occurs (unlike Read, Recover failure does NOT trigger Overthinking).
 - **Nat 20 / Nat 1:** Standard auto-success/auto-fail rules.
 - **Interest penalty is always −1 regardless of failure tier.**
 
@@ -289,7 +287,7 @@ Tests must cover:
 - Read Nat 20 (auto-success)
 - Read Nat 1 (auto-fail, −1 interest, Overthinking +1)
 - Recover success path (trap cleared, XP = 15)
-- Recover failure path (interest −1, trap remains, XP = 2)
+- Recover failure path (interest −1, trap remains, no shadow growth, XP = 2)
 - Recover with no active trap (`InvalidOperationException`)
 - Recover with multiple traps (only first cleared)
 - Wait (interest −1, trap duration decremented)
@@ -470,9 +468,8 @@ All four actions increment `_turnNumber`, clear `_currentOptions`, advance trap 
 4. hasDisadvantage = _interest.GrantsDisadvantage
 5. roll = RollEngine.ResolveFixedDC(SelfAwareness, _player.Stats, 12, _traps, _player.Level, _trapRegistry, _dice, hasAdvantage, hasDisadvantage)
 6. clearedTrapName = null
-7. shadowEvents = new List<string>()
-8. xp = 0
-9. if roll.IsSuccess:
+7. xp = 0
+8. if roll.IsSuccess:
      firstTrap = _traps.AllActive.First()
      clearedTrapName = firstTrap.Definition.Id
      _traps.Clear(firstTrap.Definition.Stat)
@@ -480,17 +477,16 @@ All four actions increment `_turnNumber`, clear `_currentOptions`, advance trap 
    else:
      _interest.Apply(-1)
      xp = 2
-     if _playerShadows != null:
-       event = _playerShadows.ApplyGrowth(Overthinking, 1, "Recover failed")
-       shadowEvents.Add(event)                           // O2 trigger — owned by issue #44
-10. _traps.AdvanceTurn()
-11. _turnNumber++
-12. _currentOptions = null
-13. check end conditions (interest == 0 → _ended = true, _outcome = Unmatched)
-14. if _xpLedger != null: record xp
-15. snapshot = CreateSnapshot()
-16. return new RecoverResult(roll.IsSuccess, clearedTrapName, roll, snapshot, xp, shadowEvents)
+9. _traps.AdvanceTurn()
+10. _turnNumber++
+11. _currentOptions = null
+12. check end conditions (interest == 0 → _ended = true, _outcome = Unmatched)
+13. if _xpLedger != null: record xp
+14. snapshot = CreateSnapshot()
+15. return new RecoverResult(roll.IsSuccess, clearedTrapName, roll, snapshot, xp)
 ```
+
+**Note:** Recover failure does NOT trigger Overthinking shadow growth. Per the contract, only Read failure triggers Overthinking +1. The −1 interest penalty is the sole consequence of Recover failure.
 
 ### Wait pseudocode
 
