@@ -1,270 +1,276 @@
-# Spec: PlayerResponseDelay — Penalize Player for Slow Replies
+# Spec: Issue #55 — PlayerResponseDelay — Penalize Player for Slow Replies
 
-**Issue:** #55  
-**Component:** `Pinder.Core.Conversation`  
-**Depends on:** #54 (GameClock — provides the delay duration)  
-**Related:** #53 (OpponentTimingCalculator — similar pattern, opponent-side timing)
+## Overview
 
----
+`PlayerResponseDelayEvaluator` is a **pure, stateless function** that computes an interest penalty based on how long the player takes to respond to an opponent's message. The delay `TimeSpan` is computed externally by the caller (the Unity host in real-time mode, or `ConversationRegistry` via `IGameClock` in async mode). The evaluator receives the delay, the opponent's `StatBlock`, and the current `InterestState`, then returns a `DelayPenalty` containing the interest delta, whether a "test" message should fire, and an optional prompt for that test. Personality modifiers (Chaos base stat, Fixation/Overthinking shadow stats) alter the base penalty.
 
-## 1. Overview
+## Function Signatures
 
-In Pinder's asynchronous messaging model, the player's reply speed affects the opponent's Interest. If the player takes too long to reply, the opponent loses interest — but the penalty is modified by the opponent's personality stats. `PlayerResponseDelayEvaluator` is a **pure function** that takes a delay duration, the opponent's stat block, and the current interest state, and returns a penalty result containing the interest delta and an optional conversational test trigger. It lives in `Pinder.Core.Conversation` and has zero side effects.
+### `PlayerResponseDelayEvaluator` (static class)
 
----
-
-## 2. Function Signatures
-
-All types are in `Pinder.Core.Conversation` unless otherwise noted. `StatBlock` is in `Pinder.Core.Stats`. `InterestState` is in `Pinder.Core.Conversation`.
-
-### `PlayerResponseDelayEvaluator`
-
-A static class (or class with a static method — matches the engine's stateless pattern used by `RollEngine`, `SuccessScale`, `FailureScale`).
+**Namespace:** `Pinder.Core.Conversation`
+**File:** `src/Pinder.Core/Conversation/PlayerResponseDelayEvaluator.cs`
 
 ```csharp
-namespace Pinder.Core.Conversation
+public static class PlayerResponseDelayEvaluator
 {
-    public static class PlayerResponseDelayEvaluator
-    {
-        /// <summary>
-        /// Evaluates the interest penalty for the player taking <paramref name="delay"/>
-        /// to respond. The penalty is modified by the opponent's personality stats.
-        /// </summary>
-        /// <param name="delay">Time elapsed since the opponent's last message.
-        ///     Provided by GameClock (issue #54). Must be non-negative.</param>
-        /// <param name="opponentStats">The opponent's full StatBlock, used to check
-        ///     Chaos base stat and shadow stat values (Denial, Fixation, Overthinking).</param>
-        /// <param name="currentInterest">The current InterestState of the conversation,
-        ///     used to gate the 15–60 min penalty bucket.</param>
-        /// <returns>A DelayPenalty describing the interest delta and optional test trigger.</returns>
-        public static DelayPenalty Evaluate(
-            TimeSpan delay,
-            StatBlock opponentStats,
-            InterestState currentInterest);
-    }
+    /// <summary>
+    /// Evaluate the interest penalty for a player taking <paramref name="delay"/> to respond.
+    /// Pure function — does not measure time; receives a pre-computed delay.
+    /// </summary>
+    /// <param name="delay">Elapsed time since the opponent's last message. Must be non-negative.</param>
+    /// <param name="opponentStats">The opponent's StatBlock (used for personality modifier checks).</param>
+    /// <param name="currentInterest">The current InterestState of the conversation.</param>
+    /// <returns>A <see cref="DelayPenalty"/> with the computed interest delta and test trigger info.</returns>
+    public static DelayPenalty Evaluate(
+        TimeSpan delay,
+        StatBlock opponentStats,
+        InterestState currentInterest);
 }
 ```
 
-### `DelayPenalty`
+**Parameter types:**
+- `delay`: `System.TimeSpan` — non-negative duration
+- `opponentStats`: `Pinder.Core.Stats.StatBlock` — the opponent's stat block (immutable)
+- `currentInterest`: `Pinder.Core.Conversation.InterestState` — enum value representing current interest band
 
-A sealed class (NOT a record — netstandard2.0 / C# 8.0 constraint).
-
-```csharp
-namespace Pinder.Core.Conversation
-{
-    public sealed class DelayPenalty
-    {
-        /// <summary>
-        /// The interest change to apply. Always ≤ 0 (penalty) or 0 (no penalty).
-        /// </summary>
-        public int InterestDelta { get; }
-
-        /// <summary>
-        /// True when the delay is long enough to trigger a conversational test
-        /// (e.g. opponent sends "thought you ghosted me").
-        /// </summary>
-        public bool TriggerTest { get; }
-
-        /// <summary>
-        /// Optional prompt hint for the LLM when TriggerTest is true.
-        /// Null when TriggerTest is false.
-        /// </summary>
-        public string? TestPrompt { get; }
-
-        public DelayPenalty(int interestDelta, bool triggerTest, string? testPrompt = null)
-        {
-            InterestDelta = interestDelta;
-            TriggerTest = triggerTest;
-            TestPrompt = testPrompt;
-        }
-    }
-}
-```
+**Return type:** `Pinder.Core.Conversation.DelayPenalty`
 
 ---
 
-## 3. Input/Output Examples
+### `DelayPenalty` (sealed class)
 
-### Example 1 — Short delay, no penalty
-- **Input:** delay = 5 minutes, opponentStats = (Chaos base 2, all shadows 0), currentInterest = `Interested`
+**Namespace:** `Pinder.Core.Conversation`
+**File:** `src/Pinder.Core/Conversation/DelayPenalty.cs`
+
+```csharp
+public sealed class DelayPenalty
+{
+    /// <summary>Interest delta to apply. Always ≤ 0.</summary>
+    public int InterestDelta { get; }
+
+    /// <summary>True when the delay is in the 1–6 hour bucket, signaling the opponent may comment on the gap.</summary>
+    public bool TriggerTest { get; }
+
+    /// <summary>Optional LLM prompt for the test message. Null if and only if TriggerTest is false.</summary>
+    public string? TestPrompt { get; }
+
+    public DelayPenalty(int interestDelta, bool triggerTest, string? testPrompt = null);
+}
+```
+
+`DelayPenalty` is a **sealed class** (not a record — netstandard2.0 / C# 8.0 constraint). It is immutable after construction.
+
+---
+
+## Penalty Table (Base Penalties)
+
+The delay is classified into buckets. Boundary semantics use **inclusive lower, exclusive upper** unless stated otherwise:
+
+| Bucket | Delay Range | Base Interest Δ | Condition | TriggerTest |
+|--------|-------------|-----------------|-----------|-------------|
+| Instant | `delay < 1 minute` | 0 | — | false |
+| Quick | `1 min ≤ delay < 15 min` | 0 | — | false |
+| Medium | `15 min ≤ delay < 60 min` | −1 | **Only if** `currentInterest` is `VeryIntoIt`, `AlmostThere`, or `DateSecured` (i.e., interest value ≥ 16). Otherwise 0. | false |
+| Long | `1 hour ≤ delay < 6 hours` | −2 | — | **true** |
+| VeryLong | `6 hours ≤ delay < 24 hours` | −3 | — | false |
+| Ghosting | `delay ≥ 24 hours` | −5 | — | false |
+
+**Boundary precision:** Comparisons use `TimeSpan.TotalMinutes` and `TimeSpan.TotalHours`. Exact boundaries:
+- 1 minute = `TimeSpan.FromMinutes(1)`
+- 15 minutes = `TimeSpan.FromMinutes(15)`
+- 60 minutes = `TimeSpan.FromMinutes(60)` = 1 hour
+- 6 hours = `TimeSpan.FromHours(6)`
+- 24 hours = `TimeSpan.FromHours(24)`
+
+---
+
+## Personality Modifiers
+
+Personality modifiers are checked against the opponent's `StatBlock` and alter the base penalty. They are applied in a strict order:
+
+### Application Order
+
+1. **Compute base penalty** from the delay bucket table above.
+2. **Chaos check (early exit):** If `opponentStats.GetBase(StatType.Chaos) >= 4`, return `DelayPenalty(interestDelta: 0, triggerTest: false, testPrompt: null)`. Chaos nullifies all interest penalties **and** suppresses the test trigger. This preserves the invariant that `TriggerTest == true` always implies `TestPrompt != null`.
+3. **Fixation doubling:** If `opponentStats.GetShadow(ShadowStatType.Fixation) >= 6`, multiply the base penalty by 2 (e.g., −2 becomes −4).
+4. **Overthinking addition:** If `opponentStats.GetShadow(ShadowStatType.Overthinking) >= 6`, subtract 1 more from the penalty (e.g., −4 becomes −5).
+5. **Return** final `DelayPenalty` with the computed delta (always ≤ 0).
+
+### Modifier Details
+
+| Modifier | Stat Check | Threshold | Mechanical Effect |
+|----------|-----------|-----------|-------------------|
+| Chaos (base) | `opponentStats.GetBase(StatType.Chaos)` | ≥ 4 | Penalty forced to 0 and TriggerTest forced to false. Opponent doesn't care about response time. |
+| Fixation (shadow) | `opponentStats.GetShadow(ShadowStatType.Fixation)` | ≥ 6 | Penalty is doubled (more negative). Opponent fixates on the delay. |
+| Overthinking (shadow) | `opponentStats.GetShadow(ShadowStatType.Overthinking)` | ≥ 6 | Penalty worsened by −1. Opponent assumed the worst during the gap. |
+| Denial (shadow) | `opponentStats.GetShadow(ShadowStatType.Denial)` | ≥ 6 | **No mechanical effect.** This is an LLM flavor instruction only — the opponent acts like they didn't notice. No code needed. |
+
+**Important:** Fixation and Overthinking can stack. If both shadows are ≥ 6 with a base penalty of −2, the result is: −2 × 2 = −4, then −4 − 1 = −5.
+
+---
+
+## Input/Output Examples
+
+### Example 1: Quick reply, no penalty
+- **Input:** `delay = TimeSpan.FromMinutes(5)`, `opponentStats = {Chaos: 2, Fixation: 0, Overthinking: 0}`, `currentInterest = InterestState.Interested`
 - **Output:** `DelayPenalty(interestDelta: 0, triggerTest: false, testPrompt: null)`
 
-### Example 2 — 30-minute delay, interest below threshold
-- **Input:** delay = 30 minutes, opponentStats = (Chaos base 2, all shadows 0), currentInterest = `Interested` (interest value somewhere in 5–15)
+### Example 2: Medium delay, low interest — no penalty
+- **Input:** `delay = TimeSpan.FromMinutes(30)`, `opponentStats = {Chaos: 2, Fixation: 0, Overthinking: 0}`, `currentInterest = InterestState.Interested`
 - **Output:** `DelayPenalty(interestDelta: 0, triggerTest: false, testPrompt: null)`
-- **Rationale:** The 15–60 min bucket only applies when interest ≥ 16 (`VeryIntoIt` or `AlmostThere`).
+- **Reason:** Interest is not ≥ 16 (Interested = 5–15), so the 15–60 min penalty does not apply.
 
-### Example 3 — 30-minute delay, interest ≥ 16
-- **Input:** delay = 30 minutes, opponentStats = (Chaos base 2, all shadows 0), currentInterest = `VeryIntoIt`
+### Example 3: Medium delay, high interest — penalty applies
+- **Input:** `delay = TimeSpan.FromMinutes(30)`, `opponentStats = {Chaos: 2, Fixation: 0, Overthinking: 0}`, `currentInterest = InterestState.VeryIntoIt`
 - **Output:** `DelayPenalty(interestDelta: -1, triggerTest: false, testPrompt: null)`
+- **Reason:** Interest ≥ 16, so the −1 penalty applies.
 
-### Example 4 — 3-hour delay, triggers test
-- **Input:** delay = 3 hours, opponentStats = (Chaos base 2, all shadows 0), currentInterest = `Interested`
+### Example 4: Medium delay, DateSecured — penalty applies
+- **Input:** `delay = TimeSpan.FromMinutes(30)`, `opponentStats = {Chaos: 2, Fixation: 0, Overthinking: 0}`, `currentInterest = InterestState.DateSecured`
+- **Output:** `DelayPenalty(interestDelta: -1, triggerTest: false, testPrompt: null)`
+- **Reason:** DateSecured = interest 25, which is ≥ 16, so the −1 penalty applies. (Theoretical — game is effectively over at DateSecured.)
+
+### Example 5: Long delay — test trigger fires
+- **Input:** `delay = TimeSpan.FromHours(3)`, `opponentStats = {Chaos: 2, Fixation: 0, Overthinking: 0}`, `currentInterest = InterestState.Interested`
 - **Output:** `DelayPenalty(interestDelta: -2, triggerTest: true, testPrompt: <non-null string>)`
 
-### Example 5 — 3-hour delay, high Chaos nullifies penalty
-- **Input:** delay = 3 hours, opponentStats = (Chaos base 4, all shadows 0), currentInterest = `Interested`
-- **Output:** `DelayPenalty(interestDelta: 0, triggerTest: false, testPrompt: null)`
-- **Rationale:** Chaos base stat ≥ 4 → penalty = 0, which also means no test trigger (nothing to test if there's no penalty).
+### Example 6: Very long delay
+- **Input:** `delay = TimeSpan.FromHours(12)`, `opponentStats = {Chaos: 2, Fixation: 0, Overthinking: 0}`, `currentInterest = InterestState.Interested`
+- **Output:** `DelayPenalty(interestDelta: -3, triggerTest: false, testPrompt: null)`
 
-### Example 6 — 12-hour delay with Fixation doubling
-- **Input:** delay = 12 hours, opponentStats = (Chaos base 2, Fixation shadow 6), currentInterest = `Interested`
-- **Output:** `DelayPenalty(interestDelta: -6, triggerTest: false, testPrompt: null)`
-- **Rationale:** Base penalty for 6–24h = −3. Fixation ≥ 6 doubles it → −6. TriggerTest only fires for 1–6h bucket.
-
-### Example 7 — 2-hour delay with Overthinking +1
-- **Input:** delay = 2 hours, opponentStats = (Chaos base 2, Overthinking shadow 6), currentInterest = `Interested`
-- **Output:** `DelayPenalty(interestDelta: -3, triggerTest: true, testPrompt: <non-null string>)`
-- **Rationale:** Base penalty for 1–6h = −2. Overthinking ≥ 6 adds +1 → total −3. Still in 1–6h bucket so TriggerTest = true.
-
-### Example 8 — 2-hour delay with both Fixation AND Overthinking
-- **Input:** delay = 2 hours, opponentStats = (Chaos base 2, Fixation shadow 7, Overthinking shadow 8), currentInterest = `Interested`
-- **Output:** `DelayPenalty(interestDelta: -5, triggerTest: true, testPrompt: <non-null string>)`
-- **Rationale:** Base = −2. Fixation doubles → −4. Overthinking adds +1 → −5. (Fixation applies first via doubling, then Overthinking adds.)
-
-### Example 9 — 48-hour delay (24+ hours)
-- **Input:** delay = 48 hours, opponentStats = (Chaos base 2, all shadows 0), currentInterest = `Bored`
+### Example 7: Ghosting delay (24+ hours)
+- **Input:** `delay = TimeSpan.FromHours(48)`, `opponentStats = {Chaos: 2, Fixation: 0, Overthinking: 0}`, `currentInterest = InterestState.Interested`
 - **Output:** `DelayPenalty(interestDelta: -5, triggerTest: false, testPrompt: null)`
 
+### Example 8: Chaos ≥ 4 nullifies penalty
+- **Input:** `delay = TimeSpan.FromHours(48)`, `opponentStats = {Chaos: 4, Fixation: 0, Overthinking: 0}`, `currentInterest = InterestState.Interested`
+- **Output:** `DelayPenalty(interestDelta: 0, triggerTest: false, testPrompt: null)`
+- **Reason:** Chaos base stat ≥ 4, so penalty is forced to 0.
+
+### Example 9: Chaos ≥ 4 with Long delay — test trigger also suppressed
+- **Input:** `delay = TimeSpan.FromHours(3)`, `opponentStats = {Chaos: 4, Fixation: 0, Overthinking: 0}`, `currentInterest = InterestState.Interested`
+- **Output:** `DelayPenalty(interestDelta: 0, triggerTest: false, testPrompt: null)`
+- **Reason:** Chaos base stat ≥ 4 forces both penalty to 0 and TriggerTest to false, even though the 1–6h bucket normally sets TriggerTest = true.
+
+### Example 10: Fixation doubles penalty
+- **Input:** `delay = TimeSpan.FromHours(3)`, `opponentStats = {Chaos: 2, Fixation: 6, Overthinking: 0}`, `currentInterest = InterestState.Interested`
+- **Output:** `DelayPenalty(interestDelta: -4, triggerTest: true, testPrompt: <non-null string>)`
+- **Reason:** Base −2, doubled by Fixation to −4.
+
+### Example 11: Fixation + Overthinking stack
+- **Input:** `delay = TimeSpan.FromHours(3)`, `opponentStats = {Chaos: 2, Fixation: 6, Overthinking: 6}`, `currentInterest = InterestState.Interested`
+- **Output:** `DelayPenalty(interestDelta: -5, triggerTest: true, testPrompt: <non-null string>)`
+- **Reason:** Base −2, doubled to −4, then −1 more = −5.
+
+### Example 12: Chaos boundary — 3 does NOT nullify
+- **Input:** `delay = TimeSpan.FromHours(3)`, `opponentStats = {Chaos: 3, Fixation: 0, Overthinking: 0}`, `currentInterest = InterestState.Interested`
+- **Output:** `DelayPenalty(interestDelta: -2, triggerTest: true, testPrompt: <non-null string>)`
+- **Reason:** Chaos = 3 < 4, so the penalty applies normally.
+
+### Example 13: Zero delay
+- **Input:** `delay = TimeSpan.Zero`, `opponentStats = {any}`, `currentInterest = InterestState.Interested`
+- **Output:** `DelayPenalty(interestDelta: 0, triggerTest: false, testPrompt: null)`
+
 ---
 
-## 4. Acceptance Criteria
+## Acceptance Criteria
 
-### AC1: `PlayerResponseDelayEvaluator.Evaluate` exists
-The static method `PlayerResponseDelayEvaluator.Evaluate(TimeSpan, StatBlock, InterestState)` must exist in `Pinder.Core.Conversation` and return a `DelayPenalty`.
+### AC1: `PlayerResponseDelayEvaluator.Evaluate` exists as a pure function
+- The method is `public static` on a `public static class`.
+- It takes `TimeSpan delay`, `StatBlock opponentStats`, and `InterestState currentInterest`.
+- It returns a `DelayPenalty`.
+- It has no side effects: no fields, no state, no I/O.
 
 ### AC2: Correct penalty per delay bucket
-The base interest delta (before personality modifiers) must follow this table:
+- Each of the 6 delay buckets produces the correct base `InterestDelta` as specified in the penalty table.
+- The 15–60 min bucket returns −1 when `currentInterest` is `VeryIntoIt`, `AlmostThere`, or `DateSecured` (interest ≥ 16), and returns 0 for all other states.
+- Boundary values (exactly 1 min, exactly 15 min, exactly 60 min, exactly 6 hours, exactly 24 hours) fall into the correct bucket per inclusive-lower / exclusive-upper semantics.
 
-| Delay Range | Base Interest Δ | Condition |
-|---|---|---|
-| < 1 minute | 0 | — |
-| 1 minute to < 15 minutes | 0 | — |
-| 15 minutes to < 60 minutes | −1 | **Only if** `currentInterest` is `VeryIntoIt` or `AlmostThere` (i.e., interest value ≥ 16). Otherwise 0. |
-| 1 hour to < 6 hours | −2 | — |
-| 6 hours to < 24 hours | −3 | — |
-| 24 hours or more | −5 | — |
-
-Boundary precision: use `TimeSpan` comparison. Delay of exactly 1 minute falls in the 1–15 min bucket (penalty 0). Delay of exactly 15 minutes falls in the 15–60 min bucket. Delay of exactly 60 minutes falls in the 1–6h bucket. Delay of exactly 6 hours falls in the 6–24h bucket. Delay of exactly 24 hours falls in the 24+ bucket.
-
-### AC3: Chaos base stat ≥ 4 reduces penalty to 0
-If the opponent's **base stat** for `StatType.Chaos` (via `opponentStats.GetBase(StatType.Chaos)`) is ≥ 4, the entire penalty is zeroed. The returned `DelayPenalty` has `InterestDelta = 0`, `TriggerTest = false`, `TestPrompt = null`. This check takes priority over all other personality modifiers — if Chaos ≥ 4, no other modifiers are evaluated.
+### AC3: Chaos base stat ≥ 4 reduces penalty to 0 and suppresses test trigger
+- When `opponentStats.GetBase(StatType.Chaos) >= 4`, the returned `InterestDelta` is always 0 **and** `TriggerTest` is always `false`, regardless of delay bucket.
+- This preserves the invariant: `TriggerTest == true` implies `TestPrompt != null`.
+- When Chaos = 3, penalties and TriggerTest apply normally.
 
 ### AC4: Fixation shadow ≥ 6 doubles penalty
-If the opponent's shadow stat `ShadowStatType.Fixation` (via `opponentStats.GetShadow(ShadowStatType.Fixation)`) is ≥ 6, the base penalty is **doubled** (e.g. −2 becomes −4). This is applied before the Overthinking modifier.
+- When `opponentStats.GetShadow(ShadowStatType.Fixation) >= 6` and Chaos < 4, the base penalty is multiplied by 2.
+- When Fixation = 5, no doubling occurs.
 
 ### AC5: Overthinking shadow ≥ 6 applies +1 additional penalty
-If the opponent's shadow stat `ShadowStatType.Overthinking` (via `opponentStats.GetShadow(ShadowStatType.Overthinking)`) is ≥ 6, the penalty magnitude increases by 1 (e.g. −2 becomes −3, or if Fixation already doubled to −4, becomes −5). Applied after Fixation doubling.
+- When `opponentStats.GetShadow(ShadowStatType.Overthinking) >= 6` and Chaos < 4, 1 is subtracted from the (possibly Fixation-doubled) penalty.
+- Fixation and Overthinking stack: base × 2 − 1.
 
 ### AC6: Test trigger fires at 1–6h delay
-When the delay falls in the 1-hour-to-less-than-6-hours bucket **and** the final penalty is non-zero (i.e., Chaos did not zero it), `TriggerTest` must be `true` and `TestPrompt` must be a non-null string. For all other buckets, `TriggerTest` must be `false` and `TestPrompt` must be `null`.
+- `TriggerTest` is `true` when delay falls in the 1–6 hour bucket.
+- `TriggerTest` is `false` for all other buckets.
+- When `TriggerTest` is `true`, `TestPrompt` should be a non-null string suitable for prompting the LLM to generate a "thought you ghosted me" style message.
 
 ### AC7: `DelayPenalty` is a sealed class, NOT a record
-`DelayPenalty` must be declared as `public sealed class` with a constructor, not as a `record` (records require C# 9+, which is unavailable on netstandard2.0 with LangVersion 8.0).
+- `DelayPenalty` must be declared as `public sealed class`.
+- It must have a constructor `DelayPenalty(int interestDelta, bool triggerTest, string? testPrompt = null)`.
+- Properties `InterestDelta`, `TriggerTest`, and `TestPrompt` must be get-only.
 
-### AC8: Tests pass and build is clean
-Unit tests must cover each delay bucket, each personality modifier in isolation, and the Chaos base stat boundary (value 3 → penalty applies; value 4 → penalty zeroed). The project must compile with `dotnet build` with zero warnings/errors.
-
----
-
-## 5. Edge Cases
-
-### Delay boundaries
-- `TimeSpan.Zero` → 0 penalty (< 1 min bucket)
-- `TimeSpan.FromSeconds(59)` → 0 penalty (< 1 min bucket)
-- `TimeSpan.FromMinutes(1)` → 0 penalty (1–15 min bucket)
-- `TimeSpan.FromMinutes(14.999)` → 0 penalty (1–15 min bucket)
-- `TimeSpan.FromMinutes(15)` → −1 if interest ≥ 16, else 0
-- `TimeSpan.FromMinutes(59.999)` → −1 if interest ≥ 16, else 0
-- `TimeSpan.FromMinutes(60)` → −2 (1–6h bucket)
-- `TimeSpan.FromHours(5.999)` → −2 (1–6h bucket)
-- `TimeSpan.FromHours(6)` → −3 (6–24h bucket)
-- `TimeSpan.FromHours(23.999)` → −3 (6–24h bucket)
-- `TimeSpan.FromHours(24)` → −5 (24+ bucket)
-- Very large delays (e.g. 30 days) → −5 (same as 24+)
-
-### Interest state gating for 15–60 min bucket
-- `InterestState.Unmatched` → 0 (not ≥ 16)
-- `InterestState.Bored` → 0 (not ≥ 16)
-- `InterestState.Interested` → 0 (not ≥ 16)
-- `InterestState.VeryIntoIt` → −1 (interest 16–20)
-- `InterestState.AlmostThere` → −1 (interest 21–24)
-- `InterestState.DateSecured` → 0 (game is already over; however, the evaluator should still return −1 if called — or 0 because the game is over. **Recommendation:** treat `DateSecured` as ≥ 16, so return −1. The caller (GameSession) should not call this after DateSecured, but the evaluator should not special-case it.)
-
-### Chaos base stat boundary
-- `GetBase(StatType.Chaos)` = 3 → penalty applies normally
-- `GetBase(StatType.Chaos)` = 4 → penalty = 0
-- `GetBase(StatType.Chaos)` = 5 → penalty = 0
-- Note: this checks the **base** stat, not the effective stat (shadow-reduced). `GetBase()`, not `GetEffective()`.
-
-### Shadow stat boundaries
-- `GetShadow(ShadowStatType.Fixation)` = 5 → no doubling
-- `GetShadow(ShadowStatType.Fixation)` = 6 → doubling applies
-- `GetShadow(ShadowStatType.Overthinking)` = 5 → no +1
-- `GetShadow(ShadowStatType.Overthinking)` = 6 → +1 applies
-
-### Multiple personality modifiers active simultaneously
-- Fixation ≥ 6 AND Overthinking ≥ 6: Apply Fixation (double) first, then Overthinking (+1). E.g. base −2 → doubled to −4 → +1 = −5.
-- Chaos ≥ 4 overrides everything: even if Fixation and Overthinking thresholds are met, result is 0.
-
-### Denial shadow ≥ 6
-Per the issue, Denial ≥ 6 means "penalty applies to Interest but opponent acts like they didn't notice." This is a **narrative** effect, not a mechanical modifier. The `InterestDelta` is unchanged. This could be signaled via `TestPrompt` or a separate field, but the issue does not define a mechanical change. **Recommendation for implementer:** Denial ≥ 6 does NOT modify `InterestDelta`. It could optionally set a flag or `TestPrompt` hint for the LLM, but this is not mechanically specified. For prototype maturity, ignore Denial — document it as a known gap for future narrative integration.
-
-### Negative delay
-- If `delay` is negative (`TimeSpan` can represent negative durations), treat as 0 penalty. The method should not throw; a negative delay simply means no time has passed.
-
-### Zero-stat opponent
-- An opponent with all base stats = 0 and all shadow stats = 0: all modifiers are inactive, pure base penalty applies.
+### AC8: Build clean
+- The project compiles without errors or warnings under `dotnet build` targeting netstandard2.0.
+- All existing tests (254+) continue to pass.
 
 ---
 
-## 6. Error Conditions
+## Edge Cases
+
+| Case | Expected Behavior |
+|------|-------------------|
+| `delay` is `TimeSpan.Zero` | Returns `DelayPenalty(0, false, null)` |
+| `delay` is negative (e.g., clock skew) | Treat as 0 — return `DelayPenalty(0, false, null)`. Negative delays should not penalize the player. |
+| `delay` is exactly 1 minute | Falls into the "Quick" bucket (1 min ≤ delay < 15 min) → penalty 0 |
+| `delay` is exactly 15 minutes | Falls into the "Medium" bucket (15 min ≤ delay < 60 min) |
+| `delay` is exactly 60 minutes | Falls into the "Long" bucket (1 hour ≤ delay < 6 hours) → penalty −2, TriggerTest true |
+| `delay` is exactly 6 hours | Falls into the "VeryLong" bucket (6 hours ≤ delay < 24 hours) → penalty −3 |
+| `delay` is exactly 24 hours | Falls into the "Ghosting" bucket (≥ 24 hours) → penalty −5 |
+| `delay` is `TimeSpan.MaxValue` | Falls into "Ghosting" bucket → penalty −5 (with any applicable personality modifiers) |
+| Base penalty is 0, Fixation ≥ 6 | 0 × 2 = 0 — no penalty even with Fixation |
+| Base penalty is 0, Overthinking ≥ 6 | 0 − 1 = −1 — Overthinking adds its −1 even when base is 0 |
+| Chaos ≥ 4 AND Fixation ≥ 6 | Chaos early-exit returns `DelayPenalty(0, false, null)` — Fixation is never checked |
+| Chaos ≥ 4 with 1–6h delay | Chaos early-exit returns `DelayPenalty(0, false, null)` — TriggerTest suppressed despite being in the Long bucket |
+| `currentInterest` is `AlmostThere` with 15–60 min delay | Penalty −1 applies (AlmostThere implies interest 21–24, which is ≥ 16) |
+| `currentInterest` is `DateSecured` with 15–60 min delay | `DateSecured` = interest 25. Since 25 ≥ 16, the −1 penalty applies. However, the game is effectively over at DateSecured, so this is a theoretical edge case. |
+| `currentInterest` is `Unmatched` | Game is already over (interest = 0). The function still returns a penalty per the bucket table, but it has no practical effect. |
+
+---
+
+## Error Conditions
 
 | Condition | Expected Behavior |
-|---|---|
-| `delay` is negative | Return `DelayPenalty(0, false, null)` — no penalty |
-| `opponentStats` is null | Throw `ArgumentNullException` with parameter name `"opponentStats"` |
-| `currentInterest` is an undefined enum value | Treat as "not ≥ 16" for the 15–60 min bucket (i.e., no special-case penalty). Alternatively, use the default switch arm. Do NOT throw. |
-
-The method should never return null. It always returns a valid `DelayPenalty` instance.
+|-----------|-------------------|
+| `opponentStats` is `null` | Throw `ArgumentNullException`. StatBlock is required for personality modifier checks. |
+| `currentInterest` is an undefined enum value | Undefined behavior — callers must pass valid `InterestState` values. No explicit validation required. |
+| `delay` is negative | Treat as zero delay (no penalty). See edge cases above. |
 
 ---
 
-## 7. Dependencies
+## Dependencies
 
-### Internal (Pinder.Core)
-| Dependency | Namespace | Usage |
-|---|---|---|
-| `StatBlock` | `Pinder.Core.Stats` | Read opponent's Chaos base stat and shadow stat values |
-| `StatType` | `Pinder.Core.Stats` | Enum value `StatType.Chaos` for Chaos base stat lookup |
-| `ShadowStatType` | `Pinder.Core.Stats` | Enum values `Fixation`, `Overthinking`, `Denial` for shadow lookups |
-| `InterestState` | `Pinder.Core.Conversation` | Enum parameter to gate the 15–60 min penalty bucket |
+| Dependency | Type | Usage |
+|------------|------|-------|
+| `Pinder.Core.Stats.StatBlock` | Internal class | Read opponent's Chaos base stat and Fixation/Overthinking shadow stats |
+| `Pinder.Core.Stats.StatType` | Internal enum | `StatType.Chaos` for the Chaos base stat check |
+| `Pinder.Core.Stats.ShadowStatType` | Internal enum | `ShadowStatType.Fixation`, `ShadowStatType.Overthinking` for shadow checks |
+| `Pinder.Core.Conversation.InterestState` | Internal enum | Determines whether the 15–60 min conditional penalty applies |
+| `System.TimeSpan` | .NET BCL | Input parameter for delay duration |
+| **No external NuGet packages** | — | Zero-dependency constraint per project rules |
 
-### External
-- **None.** This is a pure function with zero external dependencies, zero NuGet packages, and zero I/O.
+### Upstream Dependencies (not consumed by this component directly)
+- **Issue #54 (`IGameClock`)**: The caller (`ConversationRegistry` or host) uses `IGameClock` to compute the `TimeSpan` delay before passing it to `Evaluate()`. The evaluator itself has no clock dependency.
 
-### Upstream issues
-- **#54 (GameClock):** Provides the `TimeSpan` delay value that is passed into `Evaluate()`. The evaluator does not measure time itself — it receives a pre-computed duration.
-- **#53 (OpponentTimingCalculator):** Related but independent. Computes opponent reply delays. `PlayerResponseDelayEvaluator` computes penalties for player reply delays. They do not call each other.
-
----
-
-## 8. Modifier Application Order
-
-This section clarifies the exact order of operations inside `Evaluate`:
-
-1. **Determine delay bucket** → look up base penalty from the table in AC2.
-2. **Apply interest gate** for 15–60 min bucket: if `currentInterest` is not `VeryIntoIt` or `AlmostThere` (or `DateSecured`), base penalty for this bucket = 0.
-3. **Check Chaos override**: if `opponentStats.GetBase(StatType.Chaos) >= 4`, return `DelayPenalty(0, false, null)` immediately.
-4. **Apply Fixation doubling**: if `opponentStats.GetShadow(ShadowStatType.Fixation) >= 6`, multiply penalty by 2 (e.g. −2 → −4).
-5. **Apply Overthinking addition**: if `opponentStats.GetShadow(ShadowStatType.Overthinking) >= 6`, subtract 1 more (e.g. −4 → −5).
-6. **Determine TriggerTest**: set `TriggerTest = true` only if the delay is in the 1–6h bucket AND the final `InterestDelta` is non-zero. Set `TestPrompt` to a descriptive string (e.g. `"Opponent noticed the long gap"`) when triggering.
-7. **Return** the `DelayPenalty`.
-
-Note: If the base penalty from step 1–2 is already 0 (e.g. < 15 min delay), skip steps 4–5 and return `DelayPenalty(0, false, null)`.
+### Downstream Consumers
+- **`GameSession`**: Calls `PlayerResponseDelayEvaluator.Evaluate()` and applies the returned `InterestDelta` to `InterestMeter`.
+- **`ConversationRegistry`**: In async/multi-session mode, computes the delay via `IGameClock` and calls the evaluator.
 
 ---
 
-## 9. Test Prompt Content
+## Notes
 
-The `TestPrompt` string is a hint for the LLM layer. For prototype maturity, the exact string content is not critical — it just needs to be non-null when `TriggerTest` is true. A reasonable default: `"Opponent noticed the long gap between replies"`. The LLM adapter will use this to flavor the opponent's next message. Future iterations may make this more personality-specific.
+- **Denial shadow ≥ 6** is mentioned in the issue but has **no mechanical effect**. It is purely an LLM flavor instruction ("opponent acts like they didn't notice"). No code handles Denial in this component.
+- **TestPrompt invariant**: `TriggerTest == true` if and only if `TestPrompt != null`. Downstream consumers rely on this — they use `TriggerTest` as a guard before reading `TestPrompt`. Constructing a `DelayPenalty` with `triggerTest: true, testPrompt: null` is a bug.
+- **TestPrompt content**: The exact string for `TestPrompt` when `TriggerTest` is `true` is implementation-discretion. A reasonable default is something like `"The opponent noticed you took a while to respond."` — it serves as context for the LLM to generate an in-character reaction.
+- **Modifier application on zero base**: When the base penalty is 0 (e.g., quick reply), Fixation doubling has no effect (0 × 2 = 0). However, Overthinking still subtracts 1 (0 − 1 = −1). This means a player with a very fast reply can still receive a −1 penalty if the opponent has Overthinking ≥ 6. This is per the rules — Overthinking opponents assume the worst regardless.
