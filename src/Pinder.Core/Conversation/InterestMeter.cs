@@ -19,6 +19,15 @@ namespace Pinder.Core.Conversation
             Current = StartingValue;
         }
 
+        /// <summary>
+        /// Creates an InterestMeter with a custom starting value, clamped to [Min, Max].
+        /// </summary>
+        /// <param name="startingValue">Initial interest value (will be clamped to 0–25).</param>
+        public InterestMeter(int startingValue)
+        {
+            Current = Math.Max(Min, Math.Min(Max, startingValue));
+        }
+
         /// <summary>Apply a positive or negative delta, clamped to [Min, Max].</summary>
         public void Apply(int delta)
         {

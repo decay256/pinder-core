@@ -27,6 +27,12 @@ namespace Pinder.Core.Conversation
         private readonly TrapState _traps;
         private readonly List<(string Sender, string Text)> _history;
 
+        // Sprint 8 Wave 0: optional config fields
+        private readonly IGameClock? _clock;
+        private readonly Stats.SessionShadowTracker? _playerShadows;
+        private readonly Stats.SessionShadowTracker? _opponentShadows;
+        private readonly string? _previousOpener;
+
         private int _momentumStreak;
         private int _turnNumber;
         private bool _ended;
@@ -43,6 +49,21 @@ namespace Pinder.Core.Conversation
             ILlmAdapter llm,
             IDiceRoller dice,
             ITrapRegistry trapRegistry)
+            : this(player, opponent, llm, dice, trapRegistry, null)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new GameSession with optional configuration.
+        /// When config is null, behavior is identical to the 5-parameter constructor.
+        /// </summary>
+        public GameSession(
+            CharacterProfile player,
+            CharacterProfile opponent,
+            ILlmAdapter llm,
+            IDiceRoller dice,
+            ITrapRegistry trapRegistry,
+            GameSessionConfig? config)
         {
             _player = player ?? throw new ArgumentNullException(nameof(player));
             _opponent = opponent ?? throw new ArgumentNullException(nameof(opponent));
@@ -50,13 +71,21 @@ namespace Pinder.Core.Conversation
             _dice = dice ?? throw new ArgumentNullException(nameof(dice));
             _trapRegistry = trapRegistry ?? throw new ArgumentNullException(nameof(trapRegistry));
 
-            _interest = new InterestMeter();
+            _interest = config?.StartingInterest.HasValue == true
+                ? new InterestMeter(config.StartingInterest.Value)
+                : new InterestMeter();
             _traps = new TrapState();
             _history = new List<(string Sender, string Text)>();
             _momentumStreak = 0;
             _turnNumber = 0;
             _ended = false;
             _outcome = null;
+
+            // Store optional config fields for downstream Sprint 8 features
+            _clock = config?.Clock;
+            _playerShadows = config?.PlayerShadows;
+            _opponentShadows = config?.OpponentShadows;
+            _previousOpener = config?.PreviousOpener;
         }
 
         /// <summary>

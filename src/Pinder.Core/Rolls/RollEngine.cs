@@ -33,7 +33,9 @@ namespace Pinder.Core.Rolls
             ITrapRegistry trapRegistry,
             IDiceRoller dice,
             bool hasAdvantage     = false,
-            bool hasDisadvantage  = false)
+            bool hasDisadvantage  = false,
+            int externalBonus     = 0,
+            int dcAdjustment      = 0)
         {
             // --- Determine advantage/disadvantage from active traps ---
             var activeTrap = attackerTraps.GetActive(stat);
@@ -65,28 +67,106 @@ namespace Pinder.Core.Rolls
             int levelBonus = LevelTable.GetBonus(level);
 
             // --- Compute DC ---
-            int dc = defender.GetDefenceDC(stat);
-
-            // Apply DC increase traps (e.g. OpponentDCIncrease)
-            // Note: caller should pre-compute these from the *defender's* active traps
-            // but we honour them via the defender's stat block directly for now.
+            int dc = defender.GetDefenceDC(stat) - dcAdjustment;
 
             // --- Determine failure tier ---
+            return ResolveFromComponents(stat, usedRoll, statMod, levelBonus, dc,
+                roll1, roll2, externalBonus, attackerTraps, trapRegistry);
+        }
+
+        /// <summary>
+        /// Resolve a roll against a fixed DC instead of computing DC from a defender.
+        /// All other mechanics (trap effects, advantage/disadvantage, failure tiers) are identical to Resolve().
+        /// </summary>
+        /// <param name="stat">Stat used by the attacker.</param>
+        /// <param name="attacker">Attacker's stat block.</param>
+        /// <param name="fixedDc">The DC to roll against (caller-specified).</param>
+        /// <param name="attackerTraps">Active traps on the attacker.</param>
+        /// <param name="level">Attacker's current level (1-based).</param>
+        /// <param name="trapRegistry">Trap definitions for TropeTrap activation.</param>
+        /// <param name="dice">Dice roller implementation.</param>
+        /// <param name="hasAdvantage">Roll twice, take higher.</param>
+        /// <param name="hasDisadvantage">Roll twice, take lower. Overrides advantage.</param>
+        /// <param name="externalBonus">External bonus passed into RollResult.</param>
+        public static RollResult ResolveFixedDC(
+            StatType stat,
+            StatBlock attacker,
+            int fixedDc,
+            TrapState attackerTraps,
+            int level,
+            ITrapRegistry trapRegistry,
+            IDiceRoller dice,
+            bool hasAdvantage     = false,
+            bool hasDisadvantage  = false,
+            int externalBonus     = 0)
+        {
+            // --- Determine advantage/disadvantage from active traps ---
+            var activeTrap = attackerTraps.GetActive(stat);
+            if (activeTrap != null)
+            {
+                if (activeTrap.Definition.Effect == TrapEffect.Disadvantage)
+                    hasDisadvantage = true;
+            }
+
+            // Disadvantage overrides advantage (standard rule)
+            bool rollTwice = hasAdvantage || hasDisadvantage;
+
+            // --- Roll the dice ---
+            int roll1 = dice.Roll(20);
+            int? roll2 = rollTwice ? (int?)dice.Roll(20) : null;
+
+            int usedRoll;
+            if (!rollTwice)          usedRoll = roll1;
+            else if (hasDisadvantage) usedRoll = roll2.HasValue ? System.Math.Min(roll1, roll2.Value) : roll1;
+            else                      usedRoll = roll2.HasValue ? System.Math.Max(roll1, roll2.Value) : roll1;
+
+            // --- Compute modifiers ---
+            int statMod = attacker.GetEffective(stat);
+
+            // Apply flat stat penalty from traps
+            if (activeTrap != null && activeTrap.Definition.Effect == TrapEffect.StatPenalty)
+                statMod -= activeTrap.Definition.EffectValue;
+
+            int levelBonus = LevelTable.GetBonus(level);
+
+            // --- Determine failure tier ---
+            return ResolveFromComponents(stat, usedRoll, statMod, levelBonus, fixedDc,
+                roll1, roll2, externalBonus, attackerTraps, trapRegistry);
+        }
+
+        /// <summary>
+        /// Shared failure-tier determination and RollResult construction used by both Resolve and ResolveFixedDC.
+        /// </summary>
+        private static RollResult ResolveFromComponents(
+            StatType stat,
+            int usedRoll,
+            int statMod,
+            int levelBonus,
+            int dc,
+            int roll1,
+            int? roll2,
+            int externalBonus,
+            TrapState attackerTraps,
+            ITrapRegistry trapRegistry)
+        {
             FailureTier tier;
             TrapDefinition? newTrap = null;
+
+            int total = usedRoll + statMod + levelBonus;
+            int finalTotal = total + externalBonus;
 
             if (usedRoll == 1)
             {
                 tier = FailureTier.Legendary;
             }
-            else if (usedRoll == 20 || (usedRoll + statMod + levelBonus) >= dc)
+            else if (usedRoll == 20 || finalTotal >= dc)
             {
                 tier = FailureTier.None; // success
             }
             else
             {
-                int total    = usedRoll + statMod + levelBonus;
-                int miss     = dc - total;
+                // MissMargin uses Total (not FinalTotal) for backward compatibility
+                int miss = dc - total;
 
                 if      (miss <= 2) tier = FailureTier.Fumble;
                 else if (miss <= 5) tier = FailureTier.Misfire;
@@ -113,7 +193,8 @@ namespace Pinder.Core.Rolls
                 levelBonus:    levelBonus,
                 dc:            dc,
                 tier:          tier,
-                activatedTrap: newTrap);
+                activatedTrap: newTrap,
+                externalBonus: externalBonus);
         }
     }
 }
