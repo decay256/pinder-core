@@ -54,6 +54,8 @@ namespace Pinder.Core.Conversation
 }
 ```
 
+Per the issue definition, `CrossChatEvent` is an enum with five values. The Sprint 8 contract proposes a sealed class with source/target/shadow fields; the enum form is preferred here because the effects are fixed per event type (see §6.2) and do not require per-instance parameterization.
+
 ### 2.3 `ConversationEntry` (sealed class)
 
 **File:** `src/Pinder.Core/Conversation/ConversationEntry.cs`
@@ -98,7 +100,7 @@ namespace Pinder.Core.Conversation
 
 ### 3.1 `ConversationRegistry`
 
-**File:** `src/Pinder.Core/Conversation/ConversationRegistry.cs`  
+**File:** `src/Pinder.Core/Conversation/ConversationRegistry.cs`
 **Namespace:** `Pinder.Core.Conversation`
 
 ```csharp
@@ -111,7 +113,7 @@ public sealed class ConversationRegistry
 
     // --- Properties ---
 
-    /// <summary>All registered entries (read-only view).</summary>
+    /// <summary>All registered entries (read-only view, all statuses).</summary>
     public IReadOnlyList<ConversationEntry> Entries { get; }
 
     // --- Methods ---
@@ -149,6 +151,17 @@ public sealed class ConversationRegistry
 }
 ```
 
+### 3.2 Required GameSession Accessor (Issue #160)
+
+`ConversationRegistry` needs to read current interest from `GameSession`. The following public property must be added to `GameSession`:
+
+```csharp
+// On GameSession (src/Pinder.Core/Conversation/GameSession.cs):
+public int CurrentInterest => _interest.Current;
+```
+
+This is a trivial addition that can be implemented alongside or before the registry.
+
 ---
 
 ## 4. Input/Output Examples
@@ -173,7 +186,7 @@ public sealed class ConversationRegistry
 **Setup:**
 - Clock at `2026-01-15T14:00:00`
 - Entry A: `PendingReplyAt = 2026-01-15T14:05:00`, Interest = 15, Active, LastInteractionAt = 2026-01-15T14:00:00
-- Entry B: `PendingReplyAt = null`, Interest = 3 (Bored), Active, LastInteractionAt = 2026-01-13T12:00:00 (25.5h silence at time of FastForward)
+- Entry B: `PendingReplyAt = null`, Interest = 3 (Bored), Active, LastInteractionAt = 2026-01-13T12:00:00 (25h 5min silence at delivery time)
 
 **Call:** `registry.FastForward()`
 
@@ -200,7 +213,7 @@ public sealed class ConversationRegistry
   - `Status = ConversationLifecycle.Fizzled`
   - No shadow penalty applied
 
-### Example 4: Interest Decay on Paused Conversations
+### Example 4: Interest Decay on Idle Conversations
 
 **Setup:**
 - Clock at `2026-01-15T12:00:00`
@@ -212,13 +225,13 @@ public sealed class ConversationRegistry
 **Result:**
 - Clock advances to `2026-01-17T12:00:00` (2 days forward)
 - Returns Entry A, `LastInteractionAt` updated to `2026-01-17T12:00:00`
-- Entry B: silence = 50h → 2 full days → Interest decay of −2 → Interest goes from 12 to 10
+- Entry B: silence = 50h → `floor(50/24)` = 2 full days → Interest decay of −2 → Interest goes from 12 to 10
   - Note: ghost/fizzle checks run before decay. Interest 12 is not in Bored (≤4) or Fizzle (5–9) range, so neither triggers. Decay is then applied.
 
 ### Example 5: Cross-Chat Event — Unmatched
 
 **Setup:**
-- 3 entries, all Active, each with a `GameSessionConfig` containing a `SessionShadowTracker`.
+- 3 entries, all Active, each with a `GameSessionConfig` containing a player `SessionShadowTracker`.
 
 **Call:** `registry.ApplyCrossChatEvent(CrossChatEvent.Unmatched)`
 
@@ -246,23 +259,23 @@ All four methods must exist with the signatures defined in §3.1. Additionally `
 The constructor parameter type must be `IGameClock` (the interface from `Pinder.Core.Interfaces`), not the concrete `GameClock` class. This ensures deterministic testing via `FixedGameClock`.
 
 ### AC-4: ConsumeEnergy delegates to IGameClock.ConsumeEnergy()
-`ConversationRegistry.ConsumeEnergy(int amount)` must call `_clock.ConsumeEnergy(amount)` and return its result. The registry must NOT maintain any energy counter or state of its own.
+`ConversationRegistry.ConsumeEnergy(int amount)` must call `_clock.ConsumeEnergy(amount)` and return its result. The registry must NOT maintain any energy counter or state of its own. Per VC-75: energy state is owned by `IGameClock` (#54), not by `ConversationRegistry`.
 
 ### AC-5: FastForward advances clock to earliest pending reply
 `FastForward` must find the `ConversationEntry` with the smallest `PendingReplyAt` value among entries where `Status == Active` and `PendingReplyAt != null`, then call `_clock.AdvanceTo(entry.PendingReplyAt.Value)`. After delivery, set `entry.PendingReplyAt = null` and update `entry.LastInteractionAt` to the delivered time.
 
 ### AC-6: Ghost trigger fires correctly
-During `FastForward`, for each OTHER active entry (not the one being delivered): if `entry.Session.Interest.GetState()` returns `InterestState.Bored` (Interest ≤ 4) **or** `InterestState.Unmatched` (Interest = 0), AND silence duration (`_clock.Now - entry.LastInteractionAt`) ≥ 24 hours, then:
+During `FastForward`, for each OTHER active entry (not the one being delivered): if interest ≤ 4 (Bored or Unmatched state) AND silence duration (`_clock.Now - entry.LastInteractionAt`) ≥ 24 hours, then:
 - Set `entry.Status = ConversationLifecycle.Ghosted`
-- Apply `Dread +1` globally to all sessions' player `SessionShadowTracker` via `ApplyGrowth(ShadowStatType.Dread, 1, "Ghosted in another chat")`
+- Apply Dread +1 globally to all sessions' player `SessionShadowTracker` via `ApplyGrowth(ShadowStatType.Dread, 1, "Ghosted in another chat")`
 
 ### AC-7: Fizzle fires correctly
-During `FastForward`, for each OTHER active entry: if Interest is 5–9 (i.e., `InterestState.Interested` but `Current <= 9`) AND silence ≥ 24h, then:
+During `FastForward`, for each OTHER active entry: if Interest is 5–9 AND silence ≥ 24h, then:
 - Set `entry.Status = ConversationLifecycle.Fizzled`
 - No shadow penalty. No other side-effects.
 
-### AC-8: Interest decay −1/day on paused conversations
-During `FastForward`, for each active entry that is NOT the one being delivered and was NOT ghosted/fizzled in this FastForward call: compute silence in full days (`floor((clock.Now - entry.LastInteractionAt).TotalDays)`). Apply `entry.Session.Interest.Apply(-fullDays)` if `fullDays >= 1`. Decay is applied **after** ghost/fizzle checks (ghost/fizzle use the pre-decay interest value).
+### AC-8: Interest decay −1/day on idle conversations
+During `FastForward`, for each active entry that is NOT the one being delivered and was NOT ghosted/fizzled in this `FastForward` call: compute silence in full days (`floor((_clock.Now - entry.LastInteractionAt).TotalDays)`). Apply `entry.Session.Interest.Apply(-fullDays)` if `fullDays >= 1`. Decay is applied **after** ghost/fizzle checks (ghost/fizzle use the pre-decay interest value).
 
 ### AC-9: All 5 cross-chat events propagate correctly
 See §6.2 for the exact effect of each `CrossChatEvent` value. Each effect must apply to the correct scope (all sessions, next session only, etc.) via `SessionShadowTracker.ApplyGrowth()`. If a session lacks a `SessionShadowTracker`, shadow effects are silently skipped for that session.
@@ -291,17 +304,20 @@ Solution must compile with zero warnings under netstandard2.0 with nullable refe
 ### 6.1 FastForward Algorithm
 
 ```
-1. Find entry E where:
+1. If any pending Nat1Catastrophe Madness bleed is stored, clear it (will be applied to the
+   delivered entry's session at step 7).
+
+2. Find entry E where:
      E.Status == Active
      AND E.PendingReplyAt != null
      AND E.PendingReplyAt is the minimum among all such entries
    If no such entry exists, return null.
 
-2. _clock.AdvanceTo(E.PendingReplyAt.Value)
+3. _clock.AdvanceTo(E.PendingReplyAt.Value)
 
-3. For each entry X where X != E AND X.Status == Active:
+4. For each entry X where X != E AND X.Status == Active:
    a. silenceDuration = _clock.Now - X.LastInteractionAt
-   b. interest = X.Session.Interest.Current
+   b. interest = X.Session.CurrentInterest   (via #160 accessor)
 
    Ghost check:
      If interest <= 4 AND silenceDuration >= 24 hours:
@@ -317,11 +333,13 @@ Solution must compile with zero warnings under netstandard2.0 with nullable refe
    Decay check:
      fullDays = floor(silenceDuration.TotalDays)
      If fullDays >= 1:
-       X.Session.Interest.Apply(-fullDays)
+       Apply interest delta of -fullDays via InterestMeter.Apply()
 
-4. E.PendingReplyAt = null
-5. E.LastInteractionAt = _clock.Now
-6. Return E
+5. E.PendingReplyAt = null
+6. E.LastInteractionAt = _clock.Now
+7. If a pending Nat1Catastrophe bleed was stored (from step 1), apply
+   Madness +1 to E's session's player SessionShadowTracker.
+8. Return E
 ```
 
 **Order of operations matters:** Ghost/fizzle checks happen on pre-decay interest values. An entry that gets ghosted or fizzled does not also receive decay.
@@ -330,9 +348,9 @@ Solution must compile with zero warnings under netstandard2.0 with nullable refe
 
 | Event | Scope | Effect |
 |---|---|---|
-| `DateSecured` | All OTHER active sessions | Set a flag granting +1 to all rolls for 1 game-hour from `_clock.Now`. Implementation note: the registry stores `DateSecuredBonusExpiresAt = _clock.Now + 1 hour`. Consumers (GameSession or host) query this to apply the bonus. |
+| `DateSecured` | All OTHER active sessions | Set a flag granting +1 to all rolls for 1 game-hour from `_clock.Now`. Implementation: the registry stores `DateSecuredBonusExpiresAt = _clock.Now + 1 hour`. Consumers (GameSession or host) query this to apply the bonus. |
 | `Unmatched` | ALL active sessions | `SessionShadowTracker.ApplyGrowth(ShadowStatType.Dread, 1, "Unmatched in another chat")` on each session's player tracker. |
-| `Nat1Catastrophe` | NEXT session to receive a turn only | `SessionShadowTracker.ApplyGrowth(ShadowStatType.Madness, 1, "Catastrophe bleed")`. The registry must track which session is "next" — this is the entry returned by the next `FastForward` call. Implementation: store a pending `Madness +1` that is applied during the next `FastForward` delivery. |
+| `Nat1Catastrophe` | NEXT session to receive a turn only | `SessionShadowTracker.ApplyGrowth(ShadowStatType.Madness, 1, "Catastrophe bleed")`. The registry stores a pending Madness +1 that is applied during the next `FastForward` delivery (step 7 of the algorithm). |
 | `ThreeDeadToday` | ALL active sessions | `ApplyGrowth(ShadowStatType.Dread, 3, "3 dead conversations today")` AND `ApplyGrowth(ShadowStatType.Madness, 1, "3 dead conversations today")` on each session's player tracker. |
 | `DoubleDateToday` | ALL active sessions | `ApplyGrowth(ShadowStatType.Overthinking, 2, "Double-booked dates")` on each session's player tracker. |
 
@@ -354,12 +372,18 @@ Solution must compile with zero warnings under netstandard2.0 with nullable refe
 
 1. Call `_clock.ConsumeEnergy(amount)`.
 2. Return the boolean result.
-3. No additional logic.
+3. No additional logic. Per VC-75, energy state is owned exclusively by `IGameClock`.
 
 ### 6.6 GetByStatus Behavior
 
 1. Return a new list containing all entries where `entry.Status == status`.
 2. Returns an empty list if none match.
+
+### 6.7 Accessing SessionShadowTracker from a GameSession
+
+To apply shadow bleed effects, the registry needs access to the player's `SessionShadowTracker` for each `GameSession`. This is obtained via `GameSessionConfig.PlayerShadows`. The registry must handle the case where a session was created without a config or without a player shadow tracker — in that case, shadow effects are silently skipped for that session (no exception).
+
+Implementation note: The registry either receives the shadow trackers at registration time (e.g., stored alongside the entry) or accesses them through the session's config. The exact mechanism depends on whether `GameSession` exposes its config. If not, `ConversationEntry` may need an optional `SessionShadowTracker? PlayerShadows` property set at registration time.
 
 ---
 
@@ -371,13 +395,14 @@ Solution must compile with zero warnings under netstandard2.0 with nullable refe
 | `FastForward` with entries but none have `PendingReplyAt` | Returns `null` |
 | `FastForward` with only non-Active entries having pending replies | Returns `null` (only Active entries are considered) |
 | Multiple entries with identical `PendingReplyAt` | Return any one of them (implementation may pick first added). Only one is delivered per call; the others remain pending for the next `FastForward`. |
-| Ghost triggers on multiple entries in a single FastForward | Each ghosted entry triggers Dread +1 independently. If 2 entries ghost, Dread +2 total. |
-| Interest exactly 0 during ghost check | Interest 0 → Unmatched state, but ghost check uses `interest <= 4`, so yes, it triggers ghost. However, if the session is already at InterestState.Unmatched (0), the host may have already set Status to Unmatched. The registry checks Status == Active, so already-Unmatched entries are skipped. |
+| Ghost triggers on multiple entries in a single FastForward | Each ghosted entry triggers Dread +1 independently. If 2 entries ghost, Dread +2 total applied to all sessions. |
+| Interest exactly 0 during ghost check | Interest 0 ≤ 4 → ghost check passes. If the session's Status is still Active (host hasn't set it to Unmatched yet), it will be ghosted. |
 | Interest exactly 5 during fizzle check | 5 is in range 5–9 → fizzle triggers if silence ≥ 24h |
 | Interest exactly 10 during fizzle check | 10 is NOT in range 5–9 → no fizzle; only decay applies |
 | Silence of exactly 24h | ≥ 24h is satisfied → ghost or fizzle triggers (whichever condition matches) |
 | Silence of 23h 59m 59s | < 24h → neither ghost nor fizzle triggers |
-| Decay with silence < 24h but ≥ 1 day impossible | Decay uses `floor(TotalDays)`, so < 24h = 0 full days = no decay |
+| Decay with silence < 24h | `floor(TotalDays)` = 0 → no decay applied |
+| Decay reduces interest below ghost/fizzle threshold | Ghost/fizzle are checked BEFORE decay. If pre-decay interest is 10, it won't trigger fizzle even if post-decay interest is 8. |
 | `ScheduleOpponentReply` on unregistered session | Throws `InvalidOperationException` |
 | `ScheduleOpponentReply` with `delayMinutes = 0` | Throws `ArgumentOutOfRangeException` |
 | `ScheduleOpponentReply` with negative delay | Throws `ArgumentOutOfRangeException` |
@@ -386,6 +411,9 @@ Solution must compile with zero warnings under netstandard2.0 with nullable refe
 | Null `IGameClock` in constructor | Throws `ArgumentNullException` |
 | `ApplyCrossChatEvent` when sessions lack `SessionShadowTracker` | Shadow effects are silently skipped for those sessions. No exception thrown. |
 | `Nat1Catastrophe` with no subsequent `FastForward` | The pending Madness +1 remains stored until a `FastForward` eventually delivers it, or is discarded if no future FastForward occurs. |
+| `Nat1Catastrophe` fired twice before a `FastForward` | Both are accumulated: Madness +2 applied to the next delivered session. |
+| `FastForward` after clock has already passed the pending reply time | Clock does not go backward. `AdvanceTo` with a time ≤ `Now` is a no-op on the clock. The reply is still delivered and lifecycle checks still run. |
+| Negative silence duration (PendingReplyAt in the future for non-delivered entry) | `_clock.Now - entry.LastInteractionAt` uses `LastInteractionAt`, not `PendingReplyAt`. `LastInteractionAt` is always in the past, so silence is always ≥ 0. |
 
 ---
 
@@ -397,7 +425,7 @@ Solution must compile with zero warnings under netstandard2.0 with nullable refe
 | Null entry in Register | `ArgumentNullException` | `"entry"` | `Register(null)` |
 | Duplicate session in Register | `InvalidOperationException` | `"Session is already registered"` | `Register(entry)` where `entry.Session` is already in registry |
 | Unregistered session in ScheduleOpponentReply | `InvalidOperationException` | `"Session is not registered"` | `ScheduleOpponentReply(unknownSession, 5.0)` |
-| Non-positive delay | `ArgumentOutOfRangeException` | `"delayMinutes"` | `ScheduleOpponentReply(session, 0)` or negative |
+| Non-positive delay | `ArgumentOutOfRangeException` | `"delayMinutes"` | `ScheduleOpponentReply(session, 0)` or negative value |
 | Null session in ConversationEntry constructor | `ArgumentNullException` | `"session"` | `new ConversationEntry(null, ...)` |
 
 ---
@@ -406,11 +434,35 @@ Solution must compile with zero warnings under netstandard2.0 with nullable refe
 
 | Dependency | Source | What's Used |
 |---|---|---|
-| `IGameClock` | `Pinder.Core.Interfaces` (issue #54 / #139) | `.Now`, `.AdvanceTo()`, `.ConsumeEnergy()` |
-| `GameSession` | `Pinder.Core.Conversation` (issue #27) | `.Interest` property (InterestMeter), referenced via ConversationEntry |
-| `InterestMeter` | `Pinder.Core.Conversation` (issue #6) | `.Current` (int), `.Apply(int delta)`, `.GetState()` |
+| `IGameClock` | `Pinder.Core.Interfaces` (issue #54 / #139) | `.Now` (DateTimeOffset), `.AdvanceTo(DateTimeOffset)`, `.ConsumeEnergy(int)` → bool |
+| `GameSession` | `Pinder.Core.Conversation` (issue #27) | `.CurrentInterest` (int, via #160), `.Interest` (InterestMeter — for `.Apply(int)`) |
+| `InterestMeter` | `Pinder.Core.Conversation` (issue #6) | `.Current` (int), `.Apply(int delta)`, `.GetState()` → InterestState |
 | `SessionShadowTracker` | `Pinder.Core.Stats` (issue #130 / Wave 0) | `.ApplyGrowth(ShadowStatType, int, string)` for cross-chat shadow bleed |
 | `ShadowStatType` | `Pinder.Core.Stats` | `Dread`, `Madness`, `Overthinking` enum values |
-| `GameSessionConfig` | `Pinder.Core.Conversation` | Access to `PlayerShadowTracker` property to get the session's `SessionShadowTracker` |
+| `GameSessionConfig` | `Pinder.Core.Conversation` (issue #139) | Access to `.PlayerShadows` property to get the session's `SessionShadowTracker` |
 
 **No external NuGet packages.** All dependencies are internal to `Pinder.Core`.
+
+### Upstream Issue Dependencies
+
+This component depends on implementation from:
+- **#54** — `IGameClock` interface and `GameClock` implementation (provides `.Now`, `.AdvanceTo()`, `.ConsumeEnergy()`)
+- **#44** — Shadow growth mechanics (`SessionShadowTracker.ApplyGrowth()`)
+- **#130** — Wave 0 infrastructure (SessionShadowTracker creation)
+- **#53** — `OpponentTimingCalculator` (computes delay values passed to `ScheduleOpponentReply`)
+
+---
+
+## 10. Contract Reconciliation Notes
+
+The Sprint 8 architecture contract (`contracts/sprint-8-conversation-registry.md`) proposes some API differences from the issue definition:
+
+| Contract Proposal | Spec Decision | Rationale |
+|---|---|---|
+| String-based `ConversationId` on entry and `Add(string, GameSession)` | Not adopted — use reference-based `Register(ConversationEntry)` | The issue defines `ConversationEntry` without an ID field. IDs can be added later if needed. Reference equality is simpler for prototype maturity. |
+| `CrossChatEvent` as sealed class with Source/Target/Shadow fields | Not adopted — keep as enum | Issue defines 5 fixed event types with predetermined effects. Per-instance parameterization is not needed. |
+| Separate `CheckLifecycleEvents()` and `ApplyShadowBleed()` methods | Not adopted — lifecycle checks are integrated into `FastForward()` | The issue's `FastForward` definition explicitly includes ghost/fizzle/decay logic. Splitting would duplicate clock advancement logic. |
+| `Lifecycle` / `NextOpponentReplyAt` / `LastActivity` property names | Use issue names: `Status` / `PendingReplyAt` / `LastInteractionAt` | Consistency with issue definition and review-approved naming. |
+| Ghost at interest < 10, Fizzle at 48h | Use issue rules: Ghost at interest ≤ 4 + 24h, Fizzle at interest 5–9 + 24h | Issue and rules §async-time are authoritative for game mechanics. |
+
+Implementers should follow **this spec** (aligned with the issue) rather than the contract where they differ. The contract reflects an earlier architectural sketch; the issue and code review feedback are more recent.
