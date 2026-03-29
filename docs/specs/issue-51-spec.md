@@ -1,53 +1,59 @@
 # Spec: Horniness-Forced Rizz Option — Implement §15 🔥 Mechanic
 
-**Issue:** #51  
-**Depends on:** #27 (GameSession), #45 (Shadow thresholds — Horniness at 12/18), #54 (GameClock — time-of-day Horniness modifier)  
-**Component:** `Pinder.Core.Conversation`, `Pinder.Core.Interfaces`  
+**Issue:** #51
+**Sprint:** 8 (RPG Rules Complete)
+**Depends on:** #45 (Shadow thresholds), #54 (IGameClock / time-of-day modifier), #130 (Wave 0 — SessionShadowTracker, GameSessionConfig)
+**Component:** `Pinder.Core.Conversation.GameSession`
+**Contract:** `contracts/sprint-8-horniness-forced-rizz.md`
 **Target:** .NET Standard 2.0, C# 8.0, zero NuGet dependencies
 
 ---
 
 ## 1. Overview
 
-When a player character's Horniness is high, it forces Rizz-stat dialogue options into the option list — whether the player wants them or not. At Horniness ≥ 6, at least one option becomes a forced Rizz option marked with 🔥. At Horniness ≥ 12, one option is *always* Rizz regardless of what the LLM returned. At Horniness ≥ 18, *all* options become Rizz. Horniness is computed once per conversation as `dice.Roll(10) + time-of-day modifier + shadow stat Horniness`.
+When a player character's Horniness level is high, the engine forces Rizz-stat dialogue options into the option list — whether the player wants them or not. At Horniness ≥ 6, at least one option becomes a forced Rizz option marked with 🔥. At Horniness ≥ 12, one option is *always* Rizz regardless of what the LLM returned. At Horniness ≥ 18, *all* options become Rizz. Horniness is computed **once per conversation** at session construction.
 
 ---
 
 ## 2. Horniness Calculation
 
-### Roll at Session Start
-
-At `GameSession` construction time, the player's Horniness level for this conversation is determined by combining a fresh 1d10 roll, a time-of-day modifier, and the character's accumulated shadow stat Horniness:
+### Formula (computed once at GameSession construction)
 
 ```
-horninessBase   = dice.Roll(10)                               // 1d10 → range 1–10
-timeModifier    = gameClock.GetHorninessModifier()             // -2 / 0 / +1 / +3 / +5
-shadowHorniness = player.Stats.GetShadowValue(ShadowStatType.Horniness)  // 0+
-horniness       = horninessBase + timeModifier + shadowHorniness
+horninessBase   = dice.Roll(10)                                                  // 1d10 → 1–10
+timeModifier    = gameClock?.GetHorninessModifier() ?? 0                         // -2 / 0 / +1 / +3 / +5
+shadowHorniness = playerShadows?.GetEffectiveShadow(ShadowStatType.Horniness)
+                  ?? player.Stats.GetShadow(ShadowStatType.Horniness)           // 0+
+horniness       = Math.Max(0, horninessBase + timeModifier + shadowHorniness)
 ```
 
-The resulting `horniness` value is clamped to a minimum of 0 (no upper clamp — values above 10 are valid and expected). This value is stored as a `private readonly int _horniness` field on `GameSession` and does **not** change during the conversation.
+**Sources:**
+- `dice` is the `IDiceRoller` injected into `GameSession`.
+- `gameClock` comes from `GameSessionConfig.Clock` (may be null; defaults modifier to 0).
+- `playerShadows` comes from `GameSessionConfig.PlayerShadows` (a `SessionShadowTracker`; may be null — falls back to `player.Stats.GetShadow()`).
 
-**Why shadow stat Horniness is included:** The maximum natural roll is 10, and the maximum time-of-day modifier is +5 (AfterTwoAm), giving a natural cap of 15. Threshold 3 (Overwhelming, ≥18) is therefore unreachable without shadow stat contribution. Per #45 (shadow thresholds), Horniness at 12/18 is explicitly defined as a shadow threshold effect. Including the shadow stat value ensures all three thresholds are reachable and aligns with the PO's stated dependency on #45.
+The result is stored as `private readonly int _horniness` on `GameSession`. It does **not** change during the conversation.
 
-**Note:** The fresh 1d10 roll adds per-session variance so that even characters with low shadow Horniness may occasionally hit threshold 1 (≥6), while characters with high shadow Horniness reliably reach higher thresholds.
+**Why all three terms are needed:** The 1d10 roll adds per-session variance so even characters with low shadow Horniness may occasionally hit threshold 1 (≥ 6). The time-of-day modifier shifts the distribution based on when the conversation takes place. The shadow stat Horniness makes threshold 3 (≥ 18) reachable — without it the natural maximum would be 15 (roll 10 + AfterTwoAm modifier +5).
 
 ### Threshold Levels
 
-| Horniness Value | Threshold Level | Effect |
-|----------------|----------------|--------|
-| 0–5 | 0 (None) | No forced options |
-| 6–11 | 1 (Low) | At least one Rizz option present; marked `IsHorninessForced = true` |
-| 12–17 | 2 (High) | At least one option is always forced Rizz |
-| 18+ | 3 (Overwhelming) | ALL options become Rizz |
+| Horniness Value | Threshold | Label         | Effect on Options                                           |
+|-----------------|-----------|---------------|-------------------------------------------------------------|
+| 0–5             | 0         | None          | No forced options                                           |
+| 6–11            | 1         | Low           | ≥ 1 Rizz option present; forced one marked `IsHorninessForced = true` |
+| 12–17           | 2         | High          | ≥ 1 option always forced Rizz                               |
+| ≥ 18            | 3         | Overwhelming  | ALL options become Rizz                                     |
 
-The distinction between threshold 1 and 2 is subtle: at threshold 1, the LLM is *asked* to include a Rizz option (via `DialogueContext.RequiresRizzOption`), and if it fails to do so, the engine replaces the lowest-priority option. At threshold 2, the engine *guarantees* at least one option is Rizz by replacing if needed — same as threshold 1 mechanically, but the `DialogueContext.HorninessLevel` tells the LLM to lean harder into Rizz content. At threshold 3, all options are replaced.
+**Threshold 1 vs 2 distinction:** Both guarantee at least one Rizz option. At threshold 1, the LLM is *asked* to include one (via `DialogueContext.RequiresRizzOption`), and the engine replaces only if the LLM failed to comply. At threshold 2, the engine *always* forces at least one regardless. The practical difference: `DialogueContext.HorninessLevel` conveys the urgency to the LLM, which should produce more Rizz-flavored content at higher levels.
 
 ---
 
 ## 3. Function Signatures
 
-### Modified: `GameSession` Constructor
+### 3.1 Modified: `GameSession` constructor (new overload)
+
+Per ADR #162, optional configuration flows through `GameSessionConfig`:
 
 ```csharp
 public GameSession(
@@ -56,16 +62,27 @@ public GameSession(
     ILlmAdapter llm,
     IDiceRoller dice,
     ITrapRegistry trapRegistry,
-    IGameClock gameClock)       // NEW — required for time-of-day modifier
+    GameSessionConfig? config = null)    // NEW optional parameter
 ```
 
-- `gameClock`: Non-null. Used at construction to compute `GetHorninessModifier()`. Stored if needed for other time features, but Horniness is computed once at construction.
-- Throws `ArgumentNullException` if `gameClock` is null.
-- Horniness is computed as: `dice.Roll(10) + gameClock.GetHorninessModifier() + player.Stats.GetShadowValue(ShadowStatType.Horniness)`, clamped to min 0.
+Inside the constructor, Horniness is computed:
 
-**Alternative (if IGameClock is not yet available):** Accept `int horninessModifier` as a constructor parameter instead, with the host responsible for calling `gameClock.GetHorninessModifier()` before constructing the session.
+```csharp
+var gameClock = config?.Clock;           // IGameClock? — may be null
+var playerShadows = config?.PlayerShadows; // SessionShadowTracker? — may be null
 
-### Modified: `DialogueOption`
+int horninessBase = dice.Roll(10);
+int timeModifier = gameClock?.GetHorninessModifier() ?? 0;
+int shadowHorniness = playerShadows != null
+    ? playerShadows.GetEffectiveShadow(ShadowStatType.Horniness)
+    : player.Stats.GetShadow(ShadowStatType.Horniness);
+
+_horniness = Math.Max(0, horninessBase + timeModifier + shadowHorniness);
+```
+
+**Backward compatibility:** The existing 5-parameter constructor remains unchanged and results in `_horniness = dice.Roll(10) + 0 + player.Stats.GetShadow(ShadowStatType.Horniness)` (no clock, no session shadow tracker).
+
+### 3.2 Modified: `DialogueOption`
 
 Add one new property:
 
@@ -73,9 +90,7 @@ Add one new property:
 public bool IsHorninessForced { get; }
 ```
 
-- `true` if this option was injected or replaced by the Horniness mechanic.
-- `false` for all organically generated options.
-- Added as an optional constructor parameter (default `false`) to preserve backward compatibility:
+Constructor gains an optional parameter (backward-compatible):
 
 ```csharp
 public DialogueOption(
@@ -84,68 +99,62 @@ public DialogueOption(
     int? callbackTurnNumber = null,
     string? comboName = null,
     bool hasTellBonus = false,
-    bool isHorninessForced = false)  // NEW
+    bool isHorninessForced = false)   // NEW — default false
 ```
 
-### Modified: `DialogueContext`
+`IsHorninessForced` is `true` only for options injected or replaced by the Horniness engine. Organically generated Rizz options remain `false`.
 
-Add two new properties:
+### 3.3 `DialogueContext` (already has fields)
 
-```csharp
-/// <summary>Current Horniness level for this session (0–15+).</summary>
-public int HorninessLevel { get; }
+`DialogueContext` already has `HorninessLevel` (int, default 0) and `RequiresRizzOption` (bool, default false) from PR #114. No structural changes needed — `GameSession.StartTurnAsync` must populate them.
 
-/// <summary>
-/// True if the LLM should generate at least one Rizz option.
-/// Set when Horniness ≥ 6.
-/// </summary>
-public bool RequiresRizzOption { get; }
-```
-
-Constructor gains two new parameters:
-
-```csharp
-public DialogueContext(
-    string playerPrompt,
-    string opponentPrompt,
-    IReadOnlyList<(string Sender, string Text)> conversationHistory,
-    string opponentLastMessage,
-    IReadOnlyList<string> activeTraps,
-    int currentInterest,
-    int horninessLevel,          // NEW
-    bool requiresRizzOption)     // NEW
-```
-
-### New Private Method on `GameSession`
+### 3.4 New private method: `ApplyHorninessOverrides`
 
 ```csharp
 /// <summary>
 /// Applies Horniness-forced Rizz option rules to the LLM-returned options.
 /// Returns a new array with replacements applied.
 /// </summary>
+/// <param name="options">Non-null array of dialogue options from the LLM.</param>
+/// <returns>Array with forced Rizz replacements applied per threshold rules.</returns>
 private DialogueOption[] ApplyHorninessOverrides(DialogueOption[] options)
 ```
 
-**Behavior:**
-- If `_horniness < 6`: returns `options` unchanged.
-- If `_horniness >= 6 && _horniness < 18`: ensures at least one option has `Stat == StatType.Rizz` and `IsHorninessForced == true`. If no Rizz option exists in the input, replaces the **last** option (index `options.Length - 1`, treated as lowest-priority) with a forced Rizz option.
-- If `_horniness >= 18`: replaces **all** options with forced Rizz options (each with `IsHorninessForced = true`).
+**Behavior by threshold:**
 
-When replacing an option, the replacement copies the original's `IntendedText` but overrides `Stat` to `StatType.Rizz` and sets `IsHorninessForced = true`. The `CallbackTurnNumber`, `ComboName`, and `HasTellBonus` are cleared (`null`, `null`, `false`) because forced Rizz options don't carry organic bonuses.
+- **`_horniness < 6`** — return `options` unchanged.
+- **`_horniness >= 6 && _horniness < 18`** (threshold 1 or 2) — check if any option has `Stat == StatType.Rizz`. If not, replace the **last** option (index `options.Length - 1`) with a forced Rizz copy. If a Rizz option already exists, return unchanged.
+- **`_horniness >= 18`** (threshold 3) — replace **every** option with a forced Rizz copy.
 
-**Why replace the last option:** The LLM is instructed (via the system prompt / dialogue context) to return options in descending priority order. The last option is the lowest priority and the most expendable. This is a convention, not enforced — but it matches the existing pattern.
-
-### Modified: `GameSession.StartTurnAsync`
-
-After receiving options from `_llm.GetDialogueOptionsAsync(context)`, apply overrides:
+**Replacement logic** — when replacing an option at index `i`:
 
 ```csharp
+new DialogueOption(
+    stat: StatType.Rizz,
+    intendedText: options[i].IntendedText,  // preserve original text
+    callbackTurnNumber: null,               // clear organic bonuses
+    comboName: null,
+    hasTellBonus: false,
+    isHorninessForced: true)
+```
+
+**Why replace the last option:** The LLM is instructed to return options in descending priority. The last is the lowest-priority and most expendable.
+
+### 3.5 Modified: `GameSession.StartTurnAsync`
+
+After receiving options from the LLM, apply overrides before returning:
+
+```csharp
+// Inside StartTurnAsync, after getting options from LLM:
+var context = new DialogueContext(
+    // ... existing params ...,
+    horninessLevel: _horniness,
+    requiresRizzOption: _horniness >= 6);
+
 var options = await _llm.GetDialogueOptionsAsync(context).ConfigureAwait(false);
 options = ApplyHorninessOverrides(options);
 _currentOptions = options;
 ```
-
-The `DialogueContext` passed to the LLM includes `HorninessLevel` and `RequiresRizzOption` so the LLM can proactively generate Rizz-flavored options (reducing the need for engine-side replacement).
 
 ---
 
@@ -153,67 +162,73 @@ The `DialogueContext` passed to the LLM includes `HorninessLevel` and `RequiresR
 
 ### Example 1: Horniness = 3 (No Effect)
 
-**Setup:** `dice.Roll(10)` returns 5, `gameClock.GetHorninessModifier()` returns −2. Horniness = 3.
+**Setup:** `dice.Roll(10)` → 5, `GetHorninessModifier()` → −2, shadow Horniness = 0. Total = max(0, 5 − 2 + 0) = 3.
+
+**LLM returns 4 options:**
+| Index | Stat   | Text              |
+|-------|--------|-------------------|
+| 0     | Charm  | "Hey beautiful…"  |
+| 1     | Wit    | "Did it hurt…"    |
+| 2     | Honesty| "I just want…"   |
+| 3     | Chaos  | "YEET into DMs"   |
+
+**After `ApplyHorninessOverrides`:** Unchanged. No `IsHorninessForced` flags.
+
+### Example 2: Horniness = 8, LLM already includes Rizz
+
+**Setup:** Total Horniness = 8 (threshold 1).
 
 **LLM returns:**
-```
-[Charm: "Hey beautiful...", Wit: "Did it hurt when...", Honesty: "I just want...", Chaos: "YEET into DMs"]
-```
+| Index | Stat   | Text                  |
+|-------|--------|-----------------------|
+| 0     | Charm  | "Hey…"                |
+| 1     | Rizz   | "You look incredible" |
+| 2     | Honesty| "Real talk…"          |
+| 3     | Wit    | "Clever quip"         |
 
-**After `ApplyHorninessOverrides`:**
-```
-[Charm: "Hey beautiful...", Wit: "Did it hurt when...", Honesty: "I just want...", Chaos: "YEET into DMs"]
-```
-No changes. No `IsHorninessForced` flags set.
+**After `ApplyHorninessOverrides`:** Unchanged. A Rizz option already exists at index 1. It is NOT marked `IsHorninessForced` because it was organically generated.
 
-### Example 2: Horniness = 8, LLM Already Includes Rizz
+### Example 3: Horniness = 8, no Rizz in LLM response
 
-**Setup:** Horniness = 8 (threshold 1).
-
-**LLM returns:**
-```
-[Charm: "Hey...", Rizz: "You look incredible", Honesty: "Real talk...", Wit: "Clever quip"]
-```
-
-**After `ApplyHorninessOverrides`:**
-```
-[Charm: "Hey...", Rizz: "You look incredible", Honesty: "Real talk...", Wit: "Clever quip"]
-```
-No replacement needed — a Rizz option already exists. However, the existing Rizz option does NOT get `IsHorninessForced = true` because it was organically generated. Only engine-injected replacements are flagged.
-
-### Example 3: Horniness = 8, No Rizz in LLM Response
-
-**Setup:** Horniness = 8 (threshold 1).
+**Setup:** Total Horniness = 8 (threshold 1).
 
 **LLM returns:**
-```
-[Charm: "Hey...", Wit: "Funny line", Honesty: "Truth bomb", Chaos: "Wild card"]
-```
+| Index | Stat   | Text         |
+|-------|--------|--------------|
+| 0     | Charm  | "Hey…"       |
+| 1     | Wit    | "Funny line" |
+| 2     | Honesty| "Truth bomb" |
+| 3     | Chaos  | "Wild card"  |
 
 **After `ApplyHorninessOverrides`:**
-```
-[Charm: "Hey...", Wit: "Funny line", Honesty: "Truth bomb", Rizz(forced): "Wild card"]
-```
-Last option replaced. `options[3].Stat == StatType.Rizz`, `options[3].IsHorninessForced == true`, `options[3].IntendedText == "Wild card"` (text preserved from original).
+| Index | Stat | Text        | IsHorninessForced |
+|-------|------|-------------|-------------------|
+| 0     | Charm| "Hey…"      | false             |
+| 1     | Wit  | "Funny line"| false             |
+| 2     | Honesty | "Truth bomb" | false        |
+| 3     | **Rizz** | "Wild card" | **true**     |
+
+Last option replaced. Text preserved, stat changed to Rizz, bonuses cleared.
 
 ### Example 4: Horniness = 20 (All Rizz)
 
-**Setup:** `dice.Roll(10)` returns 8, `gameClock.GetHorninessModifier()` returns +5 (AfterTwoAm), shadow Horniness = 7. Total Horniness = 8 + 5 + 7 = 20. Threshold 3 (Overwhelming).
+**Setup:** `dice.Roll(10)` → 8, `GetHorninessModifier()` → +5 (AfterTwoAm), shadow Horniness = 7. Total = max(0, 8 + 5 + 7) = 20 (threshold 3).
 
-**LLM returns:**
-```
-[Charm: "Hey...", Wit: "Funny line", Honesty: "Truth bomb", Chaos: "Wild card"]
-```
+**LLM returns 4 options** (any stats).
 
 **After `ApplyHorninessOverrides`:**
-```
-[Rizz(forced): "Hey...", Rizz(forced): "Funny line", Rizz(forced): "Truth bomb", Rizz(forced): "Wild card"]
-```
-All options replaced with `Stat = StatType.Rizz`, `IsHorninessForced = true`. Text preserved from originals.
+| Index | Stat | Text               | IsHorninessForced |
+|-------|------|--------------------|-------------------|
+| 0     | Rizz | (original text[0]) | true              |
+| 1     | Rizz | (original text[1]) | true              |
+| 2     | Rizz | (original text[2]) | true              |
+| 3     | Rizz | (original text[3]) | true              |
 
-### Example 5: DialogueContext Construction
+All options replaced. All are Rizz. All marked forced.
 
-**Setup:** Horniness = 8.
+### Example 5: DialogueContext population
+
+**Setup:** Horniness = 12.
 
 ```csharp
 var context = new DialogueContext(
@@ -222,87 +237,97 @@ var context = new DialogueContext(
     conversationHistory: history,
     opponentLastMessage: "...",
     activeTraps: trapNames,
-    currentInterest: 10,
-    horninessLevel: 8,         // NEW
-    requiresRizzOption: true); // NEW — because 8 >= 6
+    currentInterest: 14,
+    shadowThresholds: thresholds,
+    callbackOpportunities: callbacks,
+    horninessLevel: 12,           // from _horniness
+    requiresRizzOption: true);    // true because 12 >= 6
 ```
 
 ---
 
 ## 5. Acceptance Criteria
 
-### AC1: Horniness Rolled at Session Start and Stored in `GameSession`
+### AC1: Horniness level computed as shadow stat + time-of-day modifier + dice roll each session
 
-- On `GameSession` construction, Horniness is computed: `dice.Roll(10) + gameClock.GetHorninessModifier() + player.Stats.GetShadowValue(ShadowStatType.Horniness)`.
-- The value is clamped to a minimum of 0.
+- On `GameSession` construction (when `GameSessionConfig` is provided), Horniness is computed: `Math.Max(0, dice.Roll(10) + (config?.Clock?.GetHorninessModifier() ?? 0) + shadowHorniness)`.
+- `shadowHorniness` comes from `config.PlayerShadows.GetEffectiveShadow(ShadowStatType.Horniness)` if available, else `player.Stats.GetShadow(ShadowStatType.Horniness)`.
 - The value is stored as `_horniness` (private, readonly) and does not change during the session.
-- Accessible for testing via `GameStateSnapshot` or a read-only property if needed.
+- When no `GameSessionConfig` is provided (backward-compat constructor), Horniness still computed with `dice.Roll(10) + 0 + player.Stats.GetShadow(Horniness)`.
 
-### AC2: `DialogueContext.HorninessLevel` and `RequiresRizzOption` Set Correctly Each Turn
+### AC2: `DialogueContext.HorninessLevel` and `RequiresRizzOption` set correctly each turn
 
-- `HorninessLevel` is set to the session's Horniness value every time `DialogueContext` is constructed in `StartTurnAsync`.
-- `RequiresRizzOption` is `true` when `_horniness >= 6`, `false` otherwise.
-- These values do not change between turns (Horniness is per-session, not per-turn).
+- In `StartTurnAsync`, the `DialogueContext` is constructed with `horninessLevel: _horniness` and `requiresRizzOption: _horniness >= 6`.
+- These values are the same every turn (Horniness is per-session).
 
-### AC3: At Horniness ≥ 6, At Least One Rizz Option Present, Marked `IsHorninessForced = true`
+### AC3: At Horniness ≥ 6, at least one Rizz option present, marked `IsHorninessForced = true`
 
-- After `ApplyHorninessOverrides`, the returned options array contains at least one option with `Stat == StatType.Rizz`.
-- If the LLM already returned a Rizz option, no replacement occurs (the organic option is kept without the forced flag).
-- If no Rizz option was in the LLM response, the last option is replaced with a forced Rizz option (`IsHorninessForced = true`).
-- The replacement option preserves the original's `IntendedText`.
+- After `ApplyHorninessOverrides`, the options array contains at least one option with `Stat == StatType.Rizz`.
+- If the LLM already returned a Rizz option, no replacement occurs (organic option kept, NOT flagged).
+- If no Rizz option existed, the **last** option is replaced with a forced Rizz copy (`IsHorninessForced = true`, text preserved, bonuses cleared).
 
-### AC4: At Horniness ≥ 18, All Options Are Rizz
+### AC4: At Horniness ≥ 12, one option ALWAYS unwanted Rizz
 
-- When Horniness is 18 or higher, every option in the returned array has `Stat == StatType.Rizz` and `IsHorninessForced == true`.
-- Original `IntendedText` values are preserved on each replaced option.
-- No option retains its original stat.
+- Mechanically identical to AC3 for the engine-side replacement. The difference is that `DialogueContext.HorninessLevel = 12+` signals the LLM to lean harder into Rizz content.
+- The engine guarantee is the same: if no Rizz exists after LLM response, force one.
 
-### AC5: Tests — Horniness Threshold Effects on Option Composition
+### AC5: At Horniness ≥ 18, ALL options are Rizz
 
-Tests must verify:
+- Every option in the returned array has `Stat == StatType.Rizz` and `IsHorninessForced == true`.
+- Original `IntendedText` values are preserved.
+- `CallbackTurnNumber`, `ComboName`, and `HasTellBonus` are cleared on all replaced options.
+
+### AC6: Tests — Horniness threshold effects on option composition
+
+Tests must cover:
 - Horniness < 6: options unchanged, no `IsHorninessForced` flags.
-- Horniness = 6: one Rizz option present when LLM didn't provide one.
-- Horniness = 6: no replacement when LLM already provided Rizz.
-- Horniness = 12: same mechanical behavior as 6 (at least one Rizz).
+- Horniness = 6: one Rizz option forced when LLM provides none.
+- Horniness = 6: no replacement when LLM already includes a Rizz option.
+- Horniness = 12: forced Rizz present (same behavior as 6, stronger LLM hint).
 - Horniness = 18: all options replaced with Rizz.
-- Horniness = 0 (clamped): no effect.
+- Horniness = 0 (clamped from negative): no effect.
 - `DialogueContext` carries correct `HorninessLevel` and `RequiresRizzOption`.
+- Forced option preserves `IntendedText`, clears bonuses.
+- Empty options array: no crash, returns empty.
 
-### AC6: Build Clean
+### AC7: Build clean
 
-- `dotnet build` succeeds with zero errors.
-- All existing tests continue to pass (may require updating call sites that construct `DialogueContext` or `DialogueOption` due to new parameters).
+- `dotnet build` succeeds with zero errors and zero warnings.
+- All 254+ existing tests continue to pass. Backward-compatible defaults on new constructor parameters ensure this.
 
 ---
 
 ## 6. Edge Cases
 
-| Scenario | Expected Behaviour |
+| Scenario | Expected Behavior |
 |----------|-------------------|
-| `dice.Roll(10)` returns 1, modifier is −2 | Horniness = max(0, 1 + (−2)) = 0. No Rizz forcing. |
-| `dice.Roll(10)` returns 10, modifier is +5 | Horniness = 15. Threshold 2 (≥12). At least one forced Rizz. |
+| `dice.Roll(10)` returns 1, modifier = −2, shadow = 0 | Horniness = max(0, 1 − 2 + 0) = 0. No Rizz forcing. |
+| `dice.Roll(10)` returns 10, modifier = +5, shadow = 0 | Horniness = 15. Threshold 2 (≥ 12). At least one forced Rizz. |
 | Horniness exactly 6 | Threshold 1 active. One Rizz option ensured. |
-| Horniness exactly 12 | Threshold 2 active. Same mechanical effect as threshold 1 for engine-side replacement; `HorninessLevel = 12` passed to LLM for stronger Rizz flavor. |
+| Horniness exactly 12 | Threshold 2 active. Same engine-side replacement as threshold 1; `HorninessLevel = 12` passed to LLM. |
 | Horniness exactly 18 | Threshold 3 active. All options become Rizz. |
-| LLM returns fewer than 4 options | `ApplyHorninessOverrides` operates on whatever array length is returned. At threshold 3, replaces all N options. At threshold 1–2, replaces last option if no Rizz exists. If array is empty, returns empty (no crash). |
-| LLM returns multiple Rizz options organically | At threshold 1–2, no replacement needed (Rizz already present). None are marked `IsHorninessForced` since they were organic. |
-| Forced Rizz option is selected by player | Rolls against `StatType.Rizz` as normal. The `IsHorninessForced` flag is informational for the UI only — no mechanical difference in the roll. |
-| Reaching ≥18 threshold | With 1d10 (max 10) + max time modifier (+5 AfterTwoAm) = 15 without shadow stat. Shadow Horniness is added to the formula (see Section 2), so a character with shadow Horniness ≥ 3 and a max roll can reach 18. Characters with high shadow Horniness reliably reach threshold 3. |
-| Interaction with shadow threshold #45 | Issue #45 defines shadow thresholds at 6/12/18 for all shadow stats including Horniness. For this mechanic, shadow Horniness is included directly in the Horniness formula (Section 2) as an additive term, not via `ShadowThresholdEvaluator`. The thresholds in Section 2's table (6/12/18) align with #45's threshold levels, ensuring consistency. |
-| Interaction with Denial ≥ 18 (no Honesty options) | If both Horniness ≥ 18 and Denial ≥ 18 apply, Horniness wins — all options become Rizz. Denial's "no Honesty" restriction is moot since all options are already overridden. |
-| Interaction with Fixation ≥ 18 (forced same stat) | If Fixation ≥ 18 forces the same stat as last turn, and Horniness ≥ 18 forces all Rizz: if last turn was Rizz, both are satisfied. If last turn was Charm, conflict arises. **Recommended:** Horniness ≥ 18 takes priority (all Rizz). Fixation's forced-stat is overridden. |
-| `GameSession` constructor backward compatibility | Adding `IGameClock` (or `int horninessModifier`) to the constructor is a **breaking change**. All existing tests and call sites must be updated. Consider an overload that defaults Horniness to 0 for backward compat during prototype phase. |
+| LLM returns fewer than 4 options | `ApplyHorninessOverrides` operates on whatever array length is returned. Threshold 3 replaces all N. Threshold 1–2 replaces last if needed. |
+| LLM returns empty array | Returns empty array. No crash. |
+| LLM returns multiple organic Rizz options | Threshold 1–2: no replacement (Rizz already present). None flagged `IsHorninessForced`. |
+| Player selects a forced Rizz option | Rolls against `StatType.Rizz` as normal. `IsHorninessForced` is informational for the UI only — no mechanical roll difference. |
+| `GameSessionConfig` is null | Falls back: `dice.Roll(10) + 0 + player.Stats.GetShadow(Horniness)`. |
+| `config.Clock` is null | Time modifier defaults to 0. |
+| `config.PlayerShadows` is null | Shadow Horniness read from `player.Stats.GetShadow()`. |
+| Interaction with Denial ≥ 18 (no Honesty) | If both apply, Horniness ≥ 18 wins — all options Rizz. Denial restriction is moot. |
+| Interaction with Fixation ≥ 18 (forced same stat) | Horniness ≥ 18 takes priority — all options become Rizz. Fixation's forced-stat is overridden. |
+| Shadow Horniness grows mid-session | Does not affect `_horniness` — it was computed once at construction. Growth affects future sessions only (via `SessionShadowTracker` persistence). |
 
 ---
 
 ## 7. Error Conditions
 
-| Condition | Error Type | Message |
-|-----------|-----------|---------|
-| `GameSession` constructed with null `gameClock` | `ArgumentNullException` | `"gameClock"` |
-| `DialogueContext` constructed with negative `horninessLevel` | No error — negative values are valid (treated as 0 threshold; clamped at `GameSession` level, not at `DialogueContext`). |
-| `ApplyHorninessOverrides` receives null array | `ArgumentNullException` | `"options"` (should not happen in practice since `ILlmAdapter` contract requires non-null return). |
-| `ApplyHorninessOverrides` receives empty array | Returns empty array. No crash. |
+| Condition | Error Type | Message / Behavior |
+|-----------|-----------|-------------------|
+| `ApplyHorninessOverrides` receives null array | `ArgumentNullException` | `"options"` — should never happen (LLM contract requires non-null). |
+| `ApplyHorninessOverrides` receives empty array | No error | Returns empty array. |
+| Negative Horniness (before clamp) | No error | `Math.Max(0, ...)` clamps to 0. |
+| `DialogueContext.HorninessLevel` negative | No error | Allowed at context level; clamped at `GameSession` level before it reaches here. |
+| `dice.Roll(10)` throws | Propagates | Caller-provided dice roller; `GameSession` does not catch. |
 
 ---
 
@@ -310,16 +335,14 @@ Tests must verify:
 
 | Dependency | Type | Status | Notes |
 |------------|------|--------|-------|
-| #27 (GameSession) | Hard | Merged | `GameSession` class exists and is the modification target. |
-| #45 (Shadow thresholds) | Hard | In progress | Provides `ShadowThresholdEvaluator.GetThresholdLevel()` for shadow-based Horniness thresholds. Horniness ≥ 12/18 as shadow threshold effects come from here. |
-| #54 (GameClock) | Hard | In progress | Provides `IGameClock.GetHorninessModifier()` for time-of-day modifier to the Horniness roll. |
-| `Pinder.Core.Conversation.DialogueOption` | Internal | Exists | Modified: new `IsHorninessForced` property. |
-| `Pinder.Core.Conversation.DialogueContext` | Internal | Exists | Modified: new `HorninessLevel` and `RequiresRizzOption` properties. |
-| `Pinder.Core.Conversation.GameSession` | Internal | Exists | Modified: Horniness roll at construction, `ApplyHorninessOverrides` in `StartTurnAsync`. |
-| `Pinder.Core.Interfaces.IDiceRoller` | Internal | Exists | Used for `dice.Roll(10)` at session start. |
-| `Pinder.Core.Interfaces.IGameClock` | Internal | From #54 | Used for `GetHorninessModifier()`. |
-| `Pinder.Core.Stats.StatType` | Internal | Exists | `StatType.Rizz` used for forced options. |
-| `Pinder.Core.Stats.ShadowStatType` | Internal | Exists | `ShadowStatType.Horniness` — used directly in the Horniness formula at session start (shadow value is added to the 1d10 roll + time modifier). |
+| #130 (Wave 0 — SessionShadowTracker, GameSessionConfig) | Hard | Required | Provides `SessionShadowTracker.GetEffectiveShadow()` and `GameSessionConfig` as the config carrier. |
+| #45 (Shadow thresholds) | Hard | Required | Establishes Horniness as a shadow stat with thresholds at 6/12/18. Shadow Horniness value is an additive term in the formula. |
+| #54 (IGameClock) | Hard | Required | Provides `IGameClock.GetHorninessModifier()` returning time-of-day modifier (−2 to +5). |
+| `IDiceRoller` | Internal | Exists | `dice.Roll(10)` for the per-session 1d10 base roll. |
+| `DialogueOption` | Internal | Exists | Modified: new `IsHorninessForced` property. |
+| `DialogueContext` | Internal | Exists | Already has `HorninessLevel` and `RequiresRizzOption` (from #63 / PR #114). |
+| `StatType.Rizz` | Internal | Exists | Used for forced option stat. |
+| `ShadowStatType.Horniness` | Internal | Exists | Used to read shadow Horniness value. |
 
 ---
 
@@ -327,7 +350,6 @@ Tests must verify:
 
 | File | Action | Description |
 |------|--------|-------------|
-| `src/Pinder.Core/Conversation/DialogueOption.cs` | **Modify** | Add `bool IsHorninessForced` property and optional constructor parameter. |
-| `src/Pinder.Core/Conversation/DialogueContext.cs` | **Modify** | Add `int HorninessLevel` and `bool RequiresRizzOption` properties and constructor parameters. |
-| `src/Pinder.Core/Conversation/GameSession.cs` | **Modify** | Add `_horniness` field computed at construction from `dice.Roll(10) + timeModifier + shadowHorniness`. Add `IGameClock` constructor parameter. Add `ApplyHorninessOverrides` private method. Call it in `StartTurnAsync` after LLM returns options. Pass Horniness info in `DialogueContext`. |
+| `src/Pinder.Core/Conversation/DialogueOption.cs` | **Modify** | Add `bool IsHorninessForced` property and optional constructor parameter (default `false`). |
+| `src/Pinder.Core/Conversation/GameSession.cs` | **Modify** | Add `_horniness` field computed at construction. Add `GameSessionConfig?` constructor overload. Add `ApplyHorninessOverrides()` private method. Call it in `StartTurnAsync` after LLM options. Populate `HorninessLevel` and `RequiresRizzOption` in `DialogueContext`. |
 | `src/Pinder.Core/Conversation/GameStateSnapshot.cs` | **Modify** (optional) | Add `int Horniness` property for UI/test observability. |
