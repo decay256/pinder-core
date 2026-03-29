@@ -153,7 +153,7 @@ The `DialogueContext` passed to the LLM includes `HorninessLevel` and `RequiresR
 
 ### Example 1: Horniness = 3 (No Effect)
 
-**Setup:** `dice.Roll(10)` returns 5, `gameClock.GetHorninessModifier()` returns −2. Horniness = 3.
+**Setup:** `dice.Roll(10)` returns 5, `gameClock.GetHorninessModifier()` returns −2, shadow Horniness = 0. Horniness = 5 + (−2) + 0 = 3.
 
 **LLM returns:**
 ```
@@ -244,12 +244,16 @@ var context = new DialogueContext(
 - `RequiresRizzOption` is `true` when `_horniness >= 6`, `false` otherwise.
 - These values do not change between turns (Horniness is per-session, not per-turn).
 
-### AC3: At Horniness ≥ 6, At Least One Rizz Option Present, Marked `IsHorninessForced = true`
+### AC3: At Horniness ≥ 6 (Thresholds 1 and 2), At Least One Rizz Option Present
+
+This acceptance criterion covers **both** threshold 1 (Horniness 6–11) and threshold 2 (Horniness 12–17). The engine-side replacement logic is mechanically identical for both thresholds:
 
 - After `ApplyHorninessOverrides`, the returned options array contains at least one option with `Stat == StatType.Rizz`.
 - If the LLM already returned a Rizz option, no replacement occurs (the organic option is kept without the forced flag).
 - If no Rizz option was in the LLM response, the last option is replaced with a forced Rizz option (`IsHorninessForced = true`).
 - The replacement option preserves the original's `IntendedText`.
+
+**Threshold 1 vs Threshold 2 distinction:** The difference is in the signal sent to the LLM, not in the engine's post-processing. At threshold 1 (`HorninessLevel` 6–11), `DialogueContext.RequiresRizzOption = true` hints that the LLM should include a Rizz option. At threshold 2 (`HorninessLevel` 12–17), the higher `HorninessLevel` value tells the LLM to lean harder into Rizz-flavored content across all options. In both cases, the engine's fallback guarantee (replace last option if no Rizz present) is identical.
 
 ### AC4: At Horniness ≥ 18, All Options Are Rizz
 
@@ -279,11 +283,11 @@ Tests must verify:
 
 | Scenario | Expected Behaviour |
 |----------|-------------------|
-| `dice.Roll(10)` returns 1, modifier is −2 | Horniness = max(0, 1 + (−2)) = 0. No Rizz forcing. |
-| `dice.Roll(10)` returns 10, modifier is +5 | Horniness = 15. Threshold 2 (≥12). At least one forced Rizz. |
-| Horniness exactly 6 | Threshold 1 active. One Rizz option ensured. |
-| Horniness exactly 12 | Threshold 2 active. Same mechanical effect as threshold 1 for engine-side replacement; `HorninessLevel = 12` passed to LLM for stronger Rizz flavor. |
-| Horniness exactly 18 | Threshold 3 active. All options become Rizz. |
+| `dice.Roll(10)` returns 1, modifier is −2, shadowHorniness = 0 | Horniness = max(0, 1 + (−2) + 0) = 0. No Rizz forcing. |
+| `dice.Roll(10)` returns 10, modifier is +5, shadowHorniness = 0 | Horniness = 10 + 5 + 0 = 15. Threshold 2 (≥12). At least one forced Rizz. |
+| `dice.Roll(10)` returns 3, modifier is +0, shadowHorniness = 3 | Horniness = 3 + 0 + 3 = 6. Threshold 1 boundary. One Rizz option ensured. |
+| `dice.Roll(10)` returns 5, modifier is +1, shadowHorniness = 6 | Horniness = 5 + 1 + 6 = 12. Threshold 2 boundary. Same engine-side replacement as threshold 1; `HorninessLevel = 12` passed to LLM for stronger Rizz flavor. |
+| `dice.Roll(10)` returns 7, modifier is +3, shadowHorniness = 8 | Horniness = 7 + 3 + 8 = 18. Threshold 3 boundary. All options become Rizz. |
 | LLM returns fewer than 4 options | `ApplyHorninessOverrides` operates on whatever array length is returned. At threshold 3, replaces all N options. At threshold 1–2, replaces last option if no Rizz exists. If array is empty, returns empty (no crash). |
 | LLM returns multiple Rizz options organically | At threshold 1–2, no replacement needed (Rizz already present). None are marked `IsHorninessForced` since they were organic. |
 | Forced Rizz option is selected by player | Rolls against `StatType.Rizz` as normal. The `IsHorninessForced` flag is informational for the UI only — no mechanical difference in the roll. |
