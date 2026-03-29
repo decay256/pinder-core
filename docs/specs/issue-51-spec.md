@@ -1,6 +1,7 @@
 # Spec: Horniness-Forced Rizz Option — Implement §15 🔥 Mechanic
 
 **Issue:** #51  
+**Status:** Approved (spec review passed — 0 errors, 0 warnings)  
 **Depends on:** #27 (GameSession), #45 (Shadow thresholds — Horniness at 12/18), #54 (GameClock — time-of-day Horniness modifier)  
 **Component:** `Pinder.Core.Conversation`, `Pinder.Core.Interfaces`  
 **Target:** .NET Standard 2.0, C# 8.0, zero NuGet dependencies
