@@ -36,6 +36,9 @@ namespace Pinder.Core.Conversation
         // Combo tracking (#46)
         private readonly ComboTracker _comboTracker;
 
+        // Callback tracking (#47)
+        private readonly List<CallbackOpportunity> _topics;
+
         // Shadow growth tracking fields (#44)
         private readonly List<StatType> _statsUsedPerTurn;
         private readonly List<bool> _highestPctOptionPicked;
@@ -103,6 +106,9 @@ namespace Pinder.Core.Conversation
             // Combo tracking (#46)
             _comboTracker = new ComboTracker();
 
+            // Callback tracking (#47)
+            _topics = new List<CallbackOpportunity>();
+
             // Shadow growth tracking (#44)
             _statsUsedPerTurn = new List<StatType>();
             _highestPctOptionPicked = new List<bool>();
@@ -112,6 +118,19 @@ namespace Pinder.Core.Conversation
             _saUsageCount = 0;
             _saOverthinkingTriggered = false;
             _sessionOpener = null;
+        }
+
+        /// <summary>
+        /// Register a conversation topic for future callback opportunities.
+        /// Called by the host or LLM adapter after each turn to seed topics.
+        /// </summary>
+        /// <param name="topic">The topic to register. Must not be null.</param>
+        /// <exception cref="ArgumentNullException">If topic is null.</exception>
+        public void AddTopic(CallbackOpportunity topic)
+        {
+            if (topic == null)
+                throw new ArgumentNullException(nameof(topic));
+            _topics.Add(topic);
         }
 
         /// <summary>
@@ -173,7 +192,7 @@ namespace Pinder.Core.Conversation
             var activeTrapNames = GetActiveTrapNames();
             var activeTrapInstructions = GetActiveTrapInstructions();
 
-            // Build dialogue context
+            // Build dialogue context — pass callback topics (#47)
             var context = new DialogueContext(
                 playerPrompt: _player.AssembledSystemPrompt,
                 opponentPrompt: _opponent.AssembledSystemPrompt,
@@ -181,7 +200,8 @@ namespace Pinder.Core.Conversation
                 opponentLastMessage: GetLastOpponentMessage(),
                 activeTraps: activeTrapNames,
                 currentInterest: _interest.Current,
-                activeTrapInstructions: activeTrapInstructions);
+                activeTrapInstructions: activeTrapInstructions,
+                callbackOpportunities: _topics.Count > 0 ? new List<CallbackOpportunity>(_topics) : null);
 
             // Get dialogue options from LLM
             var rawOptions = await _llm.GetDialogueOptionsAsync(context).ConfigureAwait(false);
@@ -226,8 +246,15 @@ namespace Pinder.Core.Conversation
 
             var chosenOption = _currentOptions[optionIndex];
 
-            // Compute external bonus from Triple combo (#46)
-            int externalBonus = 0;
+            // Compute callback bonus (#47)
+            int callbackBonus = 0;
+            if (chosenOption.CallbackTurnNumber.HasValue)
+            {
+                callbackBonus = CallbackBonus.Compute(_turnNumber, chosenOption.CallbackTurnNumber.Value);
+            }
+
+            // Compute external bonus: callback + Triple combo (#46, #47)
+            int externalBonus = callbackBonus;
             if (_comboTracker.HasTripleBonus)
             {
                 externalBonus += 1;
@@ -404,7 +431,8 @@ namespace Pinder.Core.Conversation
                 isGameOver: isGameOver,
                 outcome: outcome,
                 shadowGrowthEvents: shadowGrowthEvents,
-                comboTriggered: comboTriggered);
+                comboTriggered: comboTriggered,
+                callbackBonusApplied: callbackBonus);
         }
 
         /// <summary>
