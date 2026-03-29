@@ -11,6 +11,9 @@ namespace Pinder.Core.Traps
     {
         private readonly Dictionary<StatType, ActiveTrap> _active = new Dictionary<StatType, ActiveTrap>();
 
+        /// <summary>True if any trap is currently active.</summary>
+        public bool HasActive => _active.Count > 0;
+
         /// <summary>Activate a trap. Replaces an existing trap on the same stat.</summary>
         public void Activate(TrapDefinition definition)
         {

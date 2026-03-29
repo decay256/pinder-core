@@ -44,13 +44,15 @@ namespace Pinder.Core.Rolls
         /// </summary>
         public int FinalTotal => Total + ExternalBonus;
 
-        /// <summary>Apply an external bonus (callback, tell, combo, momentum). Additive.</summary>
+        /// <summary>Apply an external bonus (callback, tell, combo, momentum). Additive.
+        /// DEPRECATED: Use the externalBonus parameter on RollEngine.Resolve() or ResolveFixedDC() instead.</summary>
+        [System.Obsolete("Use the externalBonus parameter on RollEngine.Resolve() or ResolveFixedDC() instead.")]
         public void AddExternalBonus(int bonus) { ExternalBonus += bonus; }
 
         /// <summary>DC that had to be beaten.</summary>
         public int DC { get; }
 
-        /// <summary>True if Total >= DC (or Nat 20).</summary>
+        /// <summary>True if FinalTotal >= DC (or Nat 20). Uses FinalTotal to account for external bonuses.</summary>
         public bool IsSuccess { get; }
 
         /// <summary>True if UsedDieRoll == 1 (auto-fail regardless of modifiers).</summary>
@@ -86,7 +88,8 @@ namespace Pinder.Core.Rolls
             int levelBonus,
             int dc,
             FailureTier tier,
-            TrapDefinition? activatedTrap = null)
+            TrapDefinition? activatedTrap = null,
+            int externalBonus = 0)
         {
             DieRoll        = dieRoll;
             SecondDieRoll  = secondDieRoll;
@@ -95,10 +98,11 @@ namespace Pinder.Core.Rolls
             StatModifier   = statModifier;
             LevelBonus     = levelBonus;
             Total          = usedDieRoll + statModifier + levelBonus;
+            ExternalBonus  = externalBonus;
             DC             = dc;
             IsNatOne       = usedDieRoll == 1;
             IsNatTwenty    = usedDieRoll == 20;
-            IsSuccess      = IsNatTwenty || (!IsNatOne && Total >= dc);
+            IsSuccess      = IsNatTwenty || (!IsNatOne && FinalTotal >= dc);
             Tier           = IsSuccess ? FailureTier.None : tier;
             ActivatedTrap  = activatedTrap;
             RiskTier       = ComputeRiskTier(dc, statModifier, levelBonus);
