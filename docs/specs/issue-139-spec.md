@@ -208,14 +208,9 @@ StatBlock with:
 | `GetDelta(Madness)` | `0` | no growth yet |
 | `ApplyGrowth(Madness, 1, "Charm fail")` | `"Madness +1 (Charm fail)"` | delta becomes 1 |
 | `GetEffectiveShadow(Madness)` | `3` | base 2 + delta 1 |
-| `GetEffectiveStat(Charm)` | `2` | Charm(3) − floor(3/3) = 3 − 1 = 2 |
+| `GetEffectiveStat(Charm)` | `2` | Charm(3) − floor(Madness(3)/3) = 3 − 1 = 2 |
 | `GetDelta(Madness)` | `1` | |
-| `GetEffectiveStat(Wit)` | `2` | Wit(4) − floor(Dread(5+0)/3) = 4 − 1 = 3... wait, floor(5/3) = 1, so 4−1=3 |
-
-Let me recalculate Wit example more carefully:
-- Wit base = 4, Dread base = 5, Dread delta = 0
-- floor(5 / 3) = 1
-- GetEffectiveStat(Wit) = 4 − 1 = 3
+| `GetEffectiveStat(Wit)` | `3` | Wit(4) − floor(Dread(5+0)/3) = 4 − floor(5/3) = 4 − 1 = 3 |
 
 After `ApplyGrowth(Dread, 1, "combo trigger")`:
 - Dread effective = 5 + 1 = 6, floor(6 / 3) = 2
