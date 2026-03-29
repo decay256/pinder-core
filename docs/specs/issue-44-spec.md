@@ -2,7 +2,7 @@
 
 **Issue:** #44
 **Sprint:** 7 — RPG Rules Complete
-**Depends on:** #130 (Wave 0 — `SessionShadowTracker`), #43 (Read/Recover actions for Overthinking triggers)
+**Depends on:** #139 (Wave 0 — `SessionShadowTracker`), #43 (Read/Recover actions for Overthinking triggers)
 **Contract:** `contracts/sprint-7-shadow-growth.md`
 **Maturity:** Prototype
 
@@ -123,7 +123,15 @@ All growth events use `SessionShadowTracker.ApplyGrowth(ShadowStatType shadow, i
 | O3 | SA used 3+ times in one conversation | +1 | End of game, when `_saUsageCount >= 3` | `"Overthinking +1 (SA used 3+ times)"` |
 | O4 | Nat 1 on SA | +1 | `ResolveTurnAsync`, after roll, when `roll.IsNatOne && roll.Stat == StatType.SelfAwareness` | `"Overthinking +1 (Nat 1 on SA)"` |
 
-**Note:** O1 and O2 are implemented as part of #43 (Read/Recover actions). This spec documents them for completeness. The `ReadAsync` and `RecoverAsync` methods in `GameSession` should call `SessionShadowTracker.ApplyGrowth()` on failure and include the growth event in their respective result types.
+**Cross-spec ownership note (O1 vs O2):**
+
+- **O1 (Read failed → Overthinking +1)** is fully owned by issue #43. The issue-43 spec's `ReadResult` type includes a `ShadowGrowthEvents` field, and its `ReadAsync` pseudocode includes the `ApplyGrowth` call on failure. No action needed here.
+- **O2 (Recover failed → Overthinking +1) is owned by this issue (#44)**, NOT by #43. The issue-43 spec's `RecoverResult` type does **not** include a `ShadowGrowthEvents` field, and the `RecoverAsync` pseudocode in issue-43 does **not** apply Overthinking growth on failure. Therefore, the implementer of issue #44 MUST:
+  1. Add an `IReadOnlyList<string> ShadowGrowthEvents` property to `RecoverResult` (matching the pattern already present on `ReadResult`).
+  2. Update `RecoverAsync` to call `SessionShadowTracker.ApplyGrowth(ShadowStatType.Overthinking, 1, "Recover failed")` on failure (when a tracker is available) and populate the new `ShadowGrowthEvents` field.
+  3. Pass a default of `null` / empty list for backward compatibility when no tracker is configured.
+
+This ensures the Overthinking growth on Recover failure is not missed by either implementer.
 
 ### 3.6 Horniness (penalizes Rizz)
 
@@ -162,9 +170,13 @@ When the game ends (any `GameOutcome`), before throwing `GameEndedException` or 
 5. End-of-game growth events are included in the final `TurnResult.ShadowGrowthEvents` (merged with any per-turn events from the same final turn).
 6. If the game ends via `GameEndedException` (ghost, unmatch detected at start of turn), the growth events are applied to `SessionShadowTracker` but not returned in a `TurnResult`. The host reads final shadow state from the tracker.
 
-### 4.4 ReadAsync / RecoverAsync (Overthinking growth — from #43)
+### 4.4 ReadAsync / RecoverAsync (Overthinking growth)
 
-These methods apply Overthinking +1 on failure via `SessionShadowTracker.ApplyGrowth()`. The growth event string is included in the respective `ReadResult` / `RecoverResult` types (defined in issue #43 spec). This spec does not redefine those result types but documents the trigger for completeness.
+- **ReadAsync (O1):** Owned by issue #43. The `ReadAsync` method already applies Overthinking +1 on failure via `SessionShadowTracker.ApplyGrowth()` per the issue-43 spec. The growth event string is included in `ReadResult.ShadowGrowthEvents` (defined in issue #43 spec). No action needed from this issue.
+- **RecoverAsync (O2):** **Owned by this issue (#44).** The issue-43 spec's `RecoverResult` does not include a `ShadowGrowthEvents` field, and `RecoverAsync` does not apply Overthinking growth on failure. The implementer of this issue must:
+  1. Add `IReadOnlyList<string> ShadowGrowthEvents { get; }` to `RecoverResult` (with a constructor parameter defaulting to `null`).
+  2. In `RecoverAsync`, on failure, call `_playerShadows.ApplyGrowth(ShadowStatType.Overthinking, 1, "Recover failed")` (when tracker is available) and include the returned event string in `RecoverResult.ShadowGrowthEvents`.
+  3. On success, or when no tracker is configured, `ShadowGrowthEvents` is an empty list.
 
 ---
 
@@ -325,10 +337,11 @@ If `ResolveTurnAsync` is called after the game has ended, `GameSession` should t
 
 | Dependency | Issue | What's needed |
 |---|---|---|
-| `SessionShadowTracker` | #130 (Wave 0) | `ApplyGrowth(ShadowStatType, int, string)` method, `GetDelta(ShadowStatType)` for reading |
-| `RollEngine.ResolveFixedDC` | #130 (Wave 0) | Used by Read/Recover (issue #43), not directly by #44 |
+| `SessionShadowTracker` | #139 (Wave 0) | `ApplyGrowth(ShadowStatType, int, string)` method, `GetDelta(ShadowStatType)` for reading |
+| `RollEngine.ResolveFixedDC` | #139 (Wave 0) | Used by Read/Recover (issue #43), not directly by #44 |
 | Read/Recover actions | #43 | `ReadAsync` and `RecoverAsync` apply Overthinking +1 on failure (O1, O2) |
 | `TurnResult.ShadowGrowthEvents` | PR #117 (merged) | Already exists as `IReadOnlyList<string>` — no changes needed |
+| `RecoverResult` | #43 | Created by #43 — this issue (#44) adds `ShadowGrowthEvents` property and populates it with O2 trigger |
 | `RollResult.Stat` | Existing | `StatType` property on `RollResult` — used to detect which stat was rolled |
 | `RollResult.IsNatOne` | Existing | Boolean — used to detect Nat 1 triggers |
 | `RollResult.Tier` | Existing | `FailureTier` — used to detect Catastrophe and TropeTrap |
