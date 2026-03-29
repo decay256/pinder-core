@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading.Tasks;
 using Pinder.Core.Characters;
 using Pinder.Core.Conversation;
@@ -292,6 +293,37 @@ namespace Pinder.Core.Tests
             Assert.False(start2.Options[0].HasWeaknessWindow);
         }
 
+        [Fact]
+        public async Task T7_RecoverClearsWeaknessWindow()
+        {
+            var llm = new WeaknessTestLlm();
+            // Turn 0: set up a window
+            llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Hey"));
+            llm.EnqueueWeaknessWindow(new WeaknessWindow(StatType.Honesty, 2));
+            // Turn 2: SA option - should NOT have window (cleared by Recover)
+            llm.EnqueueOptions(new DialogueOption(StatType.SelfAwareness, "After recover"));
+
+            // Turn 0: d20=15 + timing, Turn 1(Recover): d20=15
+            var dice = new FixedDice(15, 5, 15, 15, 5);
+            var trapRegistry = new NullTrapRegistry();
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, trapRegistry);
+
+            // Turn 0
+            await session.StartTurnAsync();
+            await session.ResolveTurnAsync(0);
+
+            // Activate a trap so RecoverAsync doesn't throw
+            ActivateTrapOnSession(session);
+
+            // Turn 1: Recover (should clear the window, DC 12 for SA not affected by weakness)
+            var recoverResult = await session.RecoverAsync();
+            Assert.Equal(12, recoverResult.Roll.DC); // Fixed DC 12, not reduced by weakness
+
+            // Turn 2: no window
+            var start2 = await session.StartTurnAsync();
+            Assert.False(start2.Options[0].HasWeaknessWindow);
+        }
+
         // ================================================================
         // Edge case: SelfAwareness overshare → Charm gets window (DC −3)
         // ================================================================
@@ -417,6 +449,20 @@ namespace Pinder.Core.Tests
                 displayName: name,
                 timing: new TimingProfile(5, 0.0f, 0.0f, "neutral"),
                 level: 1);
+        }
+
+        /// <summary>
+        /// Activates a trap on the session via reflection so RecoverAsync can be called.
+        /// </summary>
+        private static void ActivateTrapOnSession(GameSession session)
+        {
+            var trapDef = new TrapDefinition(
+                "TestTrap", StatType.Honesty,
+                TrapEffect.Disadvantage, 0, 3, "trap", "clear", "nat1");
+            var trapsField = typeof(GameSession).GetField("_traps",
+                BindingFlags.NonPublic | BindingFlags.Instance);
+            var trapState = (TrapState)trapsField!.GetValue(session)!;
+            trapState.Activate(trapDef);
         }
 
         /// <summary>
