@@ -6,6 +6,7 @@ using Pinder.Core.Characters;
 using Pinder.Core.Interfaces;
 using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
+using Pinder.Core.Progression;
 using Pinder.Core.Traps;
 
 namespace Pinder.Core.Conversation
@@ -53,6 +54,9 @@ namespace Pinder.Core.Conversation
         private int _turnNumber;
         private bool _ended;
         private GameOutcome? _outcome;
+
+        // XP tracking (#48)
+        private readonly XpLedger _xpLedger;
 
         // Weakness window from opponent's last response (#49)
         private WeaknessWindow? _activeWeakness;
@@ -109,6 +113,9 @@ namespace Pinder.Core.Conversation
             _opponentShadows = config?.OpponentShadows;
             _previousOpener = config?.PreviousOpener;
 
+            // XP tracking (#48)
+            _xpLedger = new XpLedger();
+
             // Combo tracking (#46)
             _comboTracker = new ComboTracker();
 
@@ -138,6 +145,12 @@ namespace Pinder.Core.Conversation
                 throw new ArgumentNullException(nameof(topic));
             _topics.Add(topic);
         }
+
+        /// <summary>Total XP earned during this session.</summary>
+        public int TotalXpEarned => _xpLedger.TotalXp;
+
+        /// <summary>The full XP ledger for this session.</summary>
+        public XpLedger XpLedger => _xpLedger;
 
         /// <summary>
         /// Start a new turn. Checks end conditions, determines advantage/disadvantage,
@@ -334,6 +347,9 @@ namespace Pinder.Core.Conversation
                 comboTriggered = combo.Name;
             }
 
+            // 3c. Record roll XP (#48)
+            RecordRollXp(rollResult);
+
             // 4. Record interest before applying delta
             int interestBefore = _interest.Current;
             InterestState stateBefore = _interest.GetState();
@@ -370,7 +386,14 @@ namespace Pinder.Core.Conversation
             if (isGameOver)
             {
                 EvaluateEndOfGameShadowGrowth(outcome!.Value);
+                RecordEndOfGameXp(outcome!.Value);
             }
+
+            // Drain XP events for this turn (#48)
+            var turnXpEvents = _xpLedger.DrainTurnEvents();
+            int turnXpEarned = 0;
+            for (int i = 0; i < turnXpEvents.Count; i++)
+                turnXpEarned += turnXpEvents[i].Amount;
 
             // Drain shadow growth events for this turn
             var shadowGrowthEvents = _playerShadows != null
@@ -471,7 +494,50 @@ namespace Pinder.Core.Conversation
                 callbackBonusApplied: callbackBonus,
                 tellReadBonus: tellBonus,
                 tellReadMessage: tellBonus > 0 ? "📖 You read the moment. +2 bonus." : null,
+                xpEarned: turnXpEarned,
                 detectedWindow: opponentResponse.WeaknessWindow);
+        }
+
+        /// <summary>
+        /// Records XP for a roll result following §10 precedence rules:
+        /// Nat 20 → 25 XP (overrides DC-tier), Nat 1 → 10 XP (overrides failure),
+        /// success → 5/10/15 by DC tier, failure → 2.
+        /// </summary>
+        private void RecordRollXp(RollResult rollResult)
+        {
+            if (rollResult.IsNatTwenty)
+            {
+                _xpLedger.Record("Nat20", 25);
+            }
+            else if (rollResult.IsNatOne)
+            {
+                _xpLedger.Record("Nat1", 10);
+            }
+            else if (rollResult.IsSuccess)
+            {
+                if (rollResult.DC <= 13)
+                    _xpLedger.Record("Success_DC_Low", 5);
+                else if (rollResult.DC <= 17)
+                    _xpLedger.Record("Success_DC_Mid", 10);
+                else
+                    _xpLedger.Record("Success_DC_High", 15);
+            }
+            else
+            {
+                _xpLedger.Record("Failure", 2);
+            }
+        }
+
+        /// <summary>
+        /// Records end-of-game XP based on the game outcome.
+        /// DateSecured → 50, Unmatched/Ghosted → 5.
+        /// </summary>
+        private void RecordEndOfGameXp(GameOutcome outcome)
+        {
+            if (outcome == GameOutcome.DateSecured)
+                _xpLedger.Record("DateSecured", 50);
+            else if (outcome == GameOutcome.Unmatched || outcome == GameOutcome.Ghosted)
+                _xpLedger.Record("ConversationComplete", 5);
         }
 
         /// <summary>
@@ -739,19 +805,16 @@ namespace Pinder.Core.Conversation
 
             // 7. Resolve outcome
             var shadowEvents = new List<string>();
-            int xp;
             int? interestValue;
 
             if (roll.IsSuccess)
             {
                 interestValue = _interest.Current;
-                xp = 5;
             }
             else
             {
                 interestValue = null;
                 _interest.Apply(-1);
-                xp = 2;
 
                 // Overthinking +1 via SessionShadowTracker if available (#44 trigger 10)
                 if (_playerShadows != null)
@@ -760,6 +823,9 @@ namespace Pinder.Core.Conversation
                     shadowEvents.Add(evt);
                 }
             }
+
+            // 7b. Read does not grant XP per §10 (#48)
+            int xp = 0;
 
             // 8. Advance trap timers
             _traps.AdvanceTurn();
@@ -828,7 +894,6 @@ namespace Pinder.Core.Conversation
 
             // 8. Resolve outcome
             string? clearedTrapName = null;
-            int xp;
 
             if (roll.IsSuccess)
             {
@@ -836,12 +901,13 @@ namespace Pinder.Core.Conversation
                 var firstTrap = _traps.AllActive.First();
                 clearedTrapName = firstTrap.Definition.Id;
                 _traps.Clear(firstTrap.Definition.Stat);
-                xp = 15;
+
+                // Record trap recovery XP (#48 AC-5)
+                _xpLedger.Record("TrapRecovery", 15);
             }
             else
             {
                 _interest.Apply(-1);
-                xp = 2;
 
                 // Overthinking +1 on Recover failure (#44 trigger 10)
                 if (_playerShadows != null)
@@ -849,6 +915,12 @@ namespace Pinder.Core.Conversation
                     _playerShadows.ApplyGrowth(ShadowStatType.Overthinking, 1, "Recover failed");
                 }
             }
+
+            // 8b. Drain XP events for this action (#48)
+            var recoverXpEvents = _xpLedger.DrainTurnEvents();
+            int xp = 0;
+            for (int i = 0; i < recoverXpEvents.Count; i++)
+                xp += recoverXpEvents[i].Amount;
 
             // 9. Advance trap timers
             _traps.AdvanceTurn();

@@ -28,7 +28,7 @@ namespace Pinder.Core.Tests
 
             Assert.True(result.Success);
             Assert.Equal(10, result.InterestValue); // default starting interest
-            Assert.Equal(5, result.XpEarned);
+            Assert.Equal(0, result.XpEarned); // Read does not grant XP per §10 (#48)
             Assert.Empty(result.ShadowGrowthEvents);
             Assert.Equal(10, result.StateAfter.Interest); // interest unchanged
             Assert.Equal(1, result.StateAfter.TurnNumber);
@@ -59,7 +59,7 @@ namespace Pinder.Core.Tests
             var result = await session.ReadAsync();
 
             Assert.True(result.Success);
-            Assert.Equal(5, result.XpEarned);
+            Assert.Equal(0, result.XpEarned); // Read does not grant XP per §10 (#48)
         }
 
         // What: AC2 — Read success does not apply shadow growth events
@@ -95,7 +95,7 @@ namespace Pinder.Core.Tests
 
             Assert.False(result.Success);
             Assert.Null(result.InterestValue);
-            Assert.Equal(2, result.XpEarned);
+            Assert.Equal(0, result.XpEarned); // Read does not grant XP per §10 (#48)
             Assert.Equal(9, result.StateAfter.Interest); // 10 - 1
             Assert.Single(result.ShadowGrowthEvents);
             Assert.Contains("Overthinking", result.ShadowGrowthEvents[0]);
@@ -128,7 +128,7 @@ namespace Pinder.Core.Tests
             var result = await session.ReadAsync();
 
             Assert.False(result.Success);
-            Assert.Equal(2, result.XpEarned);
+            Assert.Equal(0, result.XpEarned); // Read does not grant XP per §10 (#48)
         }
 
         // ======================== Read: Nat 20 / Nat 1 ========================
@@ -268,7 +268,7 @@ namespace Pinder.Core.Tests
 
             Assert.False(result.Success);
             Assert.Null(result.ClearedTrapName);
-            Assert.Equal(2, result.XpEarned);
+            Assert.Equal(0, result.XpEarned); // Failed recover does not grant XP per §10 (#48)
             Assert.Equal(9, result.StateAfter.Interest); // 10 - 1
         }
 
