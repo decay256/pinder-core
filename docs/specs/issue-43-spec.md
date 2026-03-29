@@ -102,8 +102,12 @@ namespace Pinder.Core.Conversation
         /// <summary>XP earned from this action: 15 on recovery success, 2 on failure.</summary>
         public int XpEarned { get; }
 
+        /// <summary>Shadow growth events that occurred (e.g. "Overthinking +1 (Recover failed)" on failure). Empty list on success. Added by issue #44 (O2 trigger).</summary>
+        public IReadOnlyList<string> ShadowGrowthEvents { get; }
+
         public RecoverResult(bool success, string? clearedTrapName, RollResult roll,
-            GameStateSnapshot stateAfter, int xpEarned = 0);
+            GameStateSnapshot stateAfter, int xpEarned = 0,
+            IReadOnlyList<string>? shadowGrowthEvents = null);
     }
 }
 ```
@@ -466,8 +470,9 @@ All four actions increment `_turnNumber`, clear `_currentOptions`, advance trap 
 4. hasDisadvantage = _interest.GrantsDisadvantage
 5. roll = RollEngine.ResolveFixedDC(SelfAwareness, _player.Stats, 12, _traps, _player.Level, _trapRegistry, _dice, hasAdvantage, hasDisadvantage)
 6. clearedTrapName = null
-7. xp = 0
-8. if roll.IsSuccess:
+7. shadowEvents = new List<string>()
+8. xp = 0
+9. if roll.IsSuccess:
      firstTrap = _traps.AllActive.First()
      clearedTrapName = firstTrap.Definition.Id
      _traps.Clear(firstTrap.Definition.Stat)
@@ -475,13 +480,16 @@ All four actions increment `_turnNumber`, clear `_currentOptions`, advance trap 
    else:
      _interest.Apply(-1)
      xp = 2
-9. _traps.AdvanceTurn()
-10. _turnNumber++
-11. _currentOptions = null
-12. check end conditions
-13. if _xpLedger != null: record xp
-14. snapshot = CreateSnapshot()
-15. return new RecoverResult(roll.IsSuccess, clearedTrapName, roll, snapshot, xp)
+     if _playerShadows != null:
+       event = _playerShadows.ApplyGrowth(Overthinking, 1, "Recover failed")
+       shadowEvents.Add(event)                           // O2 trigger — owned by issue #44
+10. _traps.AdvanceTurn()
+11. _turnNumber++
+12. _currentOptions = null
+13. check end conditions (interest == 0 → _ended = true, _outcome = Unmatched)
+14. if _xpLedger != null: record xp
+15. snapshot = CreateSnapshot()
+16. return new RecoverResult(roll.IsSuccess, clearedTrapName, roll, snapshot, xp, shadowEvents)
 ```
 
 ### Wait pseudocode
