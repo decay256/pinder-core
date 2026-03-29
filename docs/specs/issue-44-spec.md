@@ -12,6 +12,22 @@
 
 Rules v3.4 §7 defines a table of conditions under which each shadow stat grows during a conversation. `GameSession` currently tracks shadows via `SessionShadowTracker` but never applies growth events. This feature implements all 17 shadow growth triggers (plus one offset), detects them at the appropriate moment during turn resolution or game end, mutates the session shadow state via `SessionShadowTracker.ApplyGrowth()`, and populates `TurnResult.ShadowGrowthEvents` with human-readable descriptions of what grew and why.
 
+### ⚠️ O2 Trigger Reconciliation: Overthinking +1 on Recover Failure
+
+**Both Read failure AND Recover failure trigger Overthinking +1.** This table shows every spec section that mentions the O2 (Recover failure) trigger to confirm internal consistency:
+
+| Spec Section | What it says about O2 (Recover failure → Overthinking +1) |
+|---|---|
+| §3.5 Growth Table, row O2 | `Recover action failed → +1 Overthinking, detected in RecoverAsync()` |
+| §4.4 Integration Points | `RecoverAsync (O2): Owned by this issue (#44). Adds ShadowGrowthEvents to RecoverResult.` |
+| §5 Example 6 | `Recover failure → RecoverResult.ShadowGrowthEvents = ["Overthinking +1 (Recover failed)"]` |
+| AC3 | `O2 trigger — Recover failure → Overthinking +1` with full implementation instructions |
+| AC5 Test List | `Overthinking +1 on Recover failure (O2) — RecoverResult.ShadowGrowthEvents contains "Overthinking +1 (Recover failed)"` |
+| §9 Dependencies | `Recover action (O2): RecoverAsync exists from #43 but #44 adds Overthinking growth on failure` |
+| §10 RecoverAsync Pseudocode, step 5c | `_playerShadows.ApplyGrowth(Overthinking, 1, "Recover failed")` |
+
+**Ownership:** O1 (Read failure) is owned by issue #43. O2 (Recover failure) is owned by **this issue (#44)**.
+
 ---
 
 ## 2. New Types
