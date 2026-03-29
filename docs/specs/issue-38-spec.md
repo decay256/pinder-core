@@ -1,5 +1,9 @@
 # Spec: Issue #38 — QA Review: Audit and Improve Test Quality Across All Test Files
 
+> **Contract**: `contracts/sprint-8-qa-review.md`
+> **Related issues**: #39 (SuccessScale zero coverage), #40 (DateSecured end condition gap), #62 (meta-vision concern)
+> **Maturity**: Prototype
+
 ## Overview
 
 This issue is a dedicated QA pass across the entire Pinder.Core test suite (currently 254 tests in 14 files). The goal is to audit existing tests for quality, coverage gaps relative to interface contracts, and naming conventions — then fix straightforward gaps directly and file GitHub issues for complex ones. The output is a measurably improved test suite plus a contract-to-test coverage gap report. This is an implementation issue: the QA engineer must write actual C# test code, not just a report.
@@ -37,6 +41,7 @@ This issue is a dedicated QA pass across the entire Pinder.Core test suite (curr
 | `contracts/issue-6-interest-state.md` | `InterestState` enum (6 values), `GetState()` boundaries, `GrantsAdvantage`/`GrantsDisadvantage` logic, exhaustive non-overlapping ranges |
 | `contracts/issue-7-rules-constants-tests.md` | Every rules-v3.4 numeric constant has a corresponding assertion |
 | `contracts/sprint-7-qa-review.md` | Meta-contract defining QA scope and deliverables |
+| `contracts/sprint-8-qa-review.md` | Updated QA contract for Sprint 8 — adds #39/#40 traceability |
 
 ### 1.3 Source Files Referenced
 
@@ -55,6 +60,25 @@ This issue is a dedicated QA pass across the entire Pinder.Core test suite (curr
 | `src/Pinder.Core/Conversation/OpponentTimingCalculator.cs` | Static `ComputeDelayMinutes()` |
 | `src/Pinder.Core/Interfaces/IRollDataProvider.cs` | `IDiceRoller`, `IFailurePool`, `ITrapRegistry` interfaces |
 | `src/Pinder.Core/Interfaces/ILlmAdapter.cs` | LLM adapter interface (4 async methods) |
+
+### 1.4 Out of Scope — Sprint 8 Components
+
+The following components are being added or significantly modified in Sprint 8. Tests for these are owned by their respective issues, **not** by this QA audit:
+
+| Component | Owning Issue | Reason Out of Scope |
+|-----------|-------------|---------------------|
+| `SessionShadowTracker` | Sprint 8 shadow growth | New component — no existing tests to audit |
+| `ShadowThresholdEvaluator` | Sprint 8 shadow thresholds | New component |
+| `ComboTracker` | Sprint 8 combo system | New component |
+| `XpLedger` | Sprint 8 XP tracking | New component |
+| `PlayerResponseDelayEvaluator` | Sprint 8 player response delay | New component |
+| `ConversationRegistry` | Sprint 8 conversation registry | New component |
+| `GameClock` / `IGameClock` | Sprint 8 game clock | New component |
+| `GameSessionConfig` | Sprint 8 wave-0 infrastructure | New component |
+| `GameSession.ReadAsync/RecoverAsync/Wait` | Sprint 8 read-recover-wait | New methods — not yet implemented |
+| `RollEngine.ResolveFixedDC` | Sprint 8 wave-0 infrastructure | New overload — not yet implemented |
+
+This audit covers only the **existing** 254 tests and their coverage of **existing** production code as of the Sprint 8 baseline.
 
 ---
 
@@ -78,7 +102,7 @@ There are no new public production functions introduced by this issue. The work 
 
 **What to verify**: A `GameSession` with `NullLlmAdapter` and a `FixedDice` producing high rolls runs 3 turns. After 3 turns: interest has risen above `InterestMeter.StartingValue` (10), `TurnNumber` is 3, `DeliveredMessage` and `OpponentMessage` are populated each turn.
 
-**Existing coverage**: `GameSessionTests.ThreeTurnSession_HighRolls_SuccessfulTurns` — verify it asserts interest change AND turn count. If history length is accessible via `GameStateSnapshot`, assert that too.
+**Existing coverage**: `GameSessionTests.ThreeTurnSession_HighRolls_SuccessfulTurns` — verify it asserts interest change AND turn count. `GameStateSnapshot` exposes `TurnNumber` (int), `Interest` (int), `State` (InterestState), `MomentumStreak` (int), and `ActiveTrapNames` (string[]) — all are public read-only properties available for assertions.
 
 #### 2.2.2 RollEngine: Success Margin to Interest Delta Mapping
 
@@ -306,13 +330,13 @@ Read contracts in `contracts/` and verify every contract clause has at least one
 
 Verify `GameSessionTests.ThreeTurnSession_HighRolls_SuccessfulTurns` asserts: (a) interest rose above starting value, (b) turn number is 3, (c) `DeliveredMessage` and `OpponentMessage` are non-null each turn. Add missing assertions if needed.
 
-### AC-3: Happy Path — RollEngine Success Margins
+### AC-3: Happy Path — RollEngine Success Margins (addresses #39)
 
-Add tests verifying `SuccessScale.GetInterestDelta()` returns +1 for beat-by 1–4, +2 for beat-by 5–9, +3 for beat-by 10+, +4 for nat20. At minimum test all boundary values (1, 4, 5, 9, 10).
+Add tests verifying `SuccessScale.GetInterestDelta()` returns +1 for beat-by 1–4, +2 for beat-by 5–9, +3 for beat-by 10+, +4 for nat20. At minimum test all boundary values (1, 4, 5, 9, 10). This directly addresses the coverage gap identified in issue #39 (SuccessScale has zero test coverage).
 
-### AC-4: Happy Path — InterestMeter Full State Machine
+### AC-4: Happy Path — InterestMeter Full State Machine (addresses #40)
 
-Verify all 6 `InterestState` values are covered by existing boundary tests. Optionally add a full-traversal test.
+Verify all 6 `InterestState` values are covered by existing boundary tests. Optionally add a full-traversal test. Additionally, verify that a `DateSecured` end condition test exists — when interest reaches 25, `GameSession` should produce `GameOutcome.DateSecured`. This directly addresses the gap identified in issue #40 (missing DateSecured end condition test).
 
 ### AC-5: Error Path — All 5 Failure Tiers
 
@@ -353,6 +377,8 @@ Verify `LlmAdapterTests` covers all structural assertions (4 options, distinct s
 ### AC-14: Mock/Interface Drift — FixedDice Consolidation
 
 Consolidate duplicate `FixedDice` implementations into a single shared test helper. Verify it implements `IDiceRoller` with correct signature. Update all test files to use the shared implementation. All tests must still compile and pass.
+
+> **Note**: This consolidation is mechanical but touches multiple test files. If it proves complex or risky (e.g., different `FixedDice` variants have subtly different fallback behavior), it may be deferred to a dedicated cleanup issue. The implementer should verify all three existing implementations have compatible semantics before consolidating.
 
 ### AC-15: Report Findings
 
