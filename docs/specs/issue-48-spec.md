@@ -1,8 +1,8 @@
 # Spec: XP Tracking — Implement §10 XP Sources and Level-Up Accumulation
 
-**Issue:** #48  
-**Depends on:** #42 (RiskTier on RollResult; Hard/Bold tier bonuses), #43 (Read/Recover turn actions), #44 (Shadow growth events — introduces `CharacterState`)  
-**Maturity:** Prototype  
+**Issue:** #48
+**Depends on:** #42 (RiskTier on RollResult; Hard/Bold tier bonuses), #43 (Read/Recover turn actions), #44 (Shadow growth events)
+**Maturity:** Prototype
 **Target:** .NET Standard 2.0, C# 8.0, zero NuGet dependencies
 
 ---
@@ -57,7 +57,7 @@ namespace Pinder.Core.Progression
     {
         public sealed class XpEvent
         {
-            /// <summary>Human-readable label identifying the XP source (e.g. "SuccessDC15", "Nat20", "DateSecured").</summary>
+            /// <summary>Human-readable label identifying the XP source (e.g. "Success_DC_Mid", "Nat20", "DateSecured").</summary>
             public string Source { get; }
 
             /// <summary>XP amount awarded. Always positive.</summary>
@@ -144,7 +144,7 @@ private readonly XpLedger _xpLedger;
 
 Initialized in the constructor as `new XpLedger()`.
 
-### 5.2 New Public Property
+### 5.2 New Public Properties
 
 ```csharp
 /// <summary>Total XP earned during this session.</summary>
@@ -156,7 +156,7 @@ public XpLedger XpLedger => _xpLedger;
 
 ### 5.3 XP Recording in `ResolveTurnAsync`
 
-After the roll is resolved and the interest delta is computed (step 2 in existing flow), record XP based on the roll outcome:
+After the roll is resolved and the interest delta is computed, record XP based on the roll outcome:
 
 ```
 if (rollResult.IsNatTwenty)
@@ -195,7 +195,7 @@ When the game ends (interest hits 0 or 25, or ghosted), record the appropriate e
 - `GameOutcome.Unmatched` → `_xpLedger.Record("ConversationComplete", 5)`
 - `GameOutcome.Ghosted` → `_xpLedger.Record("ConversationComplete", 5)`
 
-This recording happens at the point where `_ended = true` and `_outcome` is set in `ResolveTurnAsync` (step 15 in the existing flow), before the `TurnResult` is constructed.
+This recording happens at the point where `_ended = true` and `_outcome` is set, before the `TurnResult` is constructed.
 
 ### 5.6 Drain Per Turn
 
@@ -205,16 +205,7 @@ After all XP events for the turn are recorded, call `_xpLedger.DrainTurnEvents()
 
 ## 6. Modifications to `TurnResult`
 
-### New Property
-
-```csharp
-/// <summary>XP earned during this turn.</summary>
-public int XpEarned { get; }
-```
-
-### Constructor Change
-
-Add `int xpEarned` parameter to the `TurnResult` constructor. Store it in the `XpEarned` property.
+`TurnResult` already has the `XpEarned` property and constructor parameter (added by PR #117). No structural changes needed — `GameSession` must populate the `xpEarned` constructor argument with the sum of drained XP events for each turn.
 
 ---
 
@@ -293,11 +284,11 @@ Constructor updated to accept `int xpEarned`. Always passed as 0.
 
 ### Example 9: Full Session XP Ledger
 
-Turn 1: Success DC 13 → 5 XP  
-Turn 2: Failure → 2 XP  
-Turn 3: Nat 20, DC 18 → 25 XP  
-Turn 4: Success DC 15, date secured → 10 + 50 = 60 XP  
-**Total:** 5 + 2 + 25 + 60 = 92 XP  
+Turn 1: Success DC 13 → 5 XP
+Turn 2: Failure → 2 XP
+Turn 3: Nat 20, DC 18 → 25 XP
+Turn 4: Success DC 15, date secured → 10 + 50 = 60 XP
+**Total:** 5 + 2 + 25 + 60 = 92 XP
 `session.TotalXpEarned` = 92
 
 ---
@@ -323,15 +314,19 @@ Turn 4: Success DC 15, date secured → 10 + 50 = 60 XP
 
 All nine XP source types are recorded in the `XpLedger` at the correct points in `GameSession`.
 
-### AC-3: `TurnResult.XpEarned` populated
+### AC-3: `TurnResult.XpEarned` populated each turn
 
-Every `TurnResult` returned by `ResolveTurnAsync` includes an `XpEarned` property containing the total XP earned during that specific turn (including end-of-game XP if the game ended on that turn).
+Every `TurnResult` returned by `ResolveTurnAsync` includes an `XpEarned` value containing the total XP earned during that specific turn (including end-of-game XP if the game ended on that turn).
 
 ### AC-4: Date secured grants 50 XP at game end
 
 When `GameOutcome.DateSecured` is triggered, exactly one `XpEvent("DateSecured", 50)` is recorded in the ledger. This is included in the final turn's `TurnResult.XpEarned`.
 
-### AC-5: Tests verify XP accumulation for success, fail, nat20, nat1
+### AC-5: Trap recovery (via Recover action) grants 15 XP
+
+When `RecoverAsync` succeeds, exactly one `XpEvent("TrapRecovery", 15)` is recorded. Failed recoveries grant no XP.
+
+### AC-6: Tests verify XP accumulation for success, fail, nat20, nat1, trap recovery
 
 Unit tests must cover:
 - Normal success at each DC tier (≤13, 14–17, ≥18)
@@ -344,7 +339,7 @@ Unit tests must cover:
 - Multi-turn accumulation: `TotalXpEarned` matches sum of all `TurnResult.XpEarned`
 - DC boundary values: DC = 13, DC = 14, DC = 17, DC = 18
 
-### AC-6: Build clean
+### AC-7: Build clean
 
 `dotnet build` and `dotnet test` must pass with zero errors. No existing tests may break.
 
@@ -396,15 +391,9 @@ Issues #46, #49, and #50 (all in the same sprint) introduce changes to shared AP
 
 ### 12.1 `OpponentResponse` Class — Conflicting Shapes (#49 vs #50)
 
-Issue #49 (Weakness Windows) and Issue #50 (Tell Detection) both independently define an `OpponentResponse` class to replace the `Task<string>` return type of `ILlmAdapter.GetOpponentResponseAsync`:
+Issue #49 (Weakness Windows) and Issue #50 (Tell Detection) both independently define an `OpponentResponse` class. The class already exists at `src/Pinder.Core/Conversation/OpponentResponse.cs`.
 
-| Property | Issue #49 Definition | Issue #50 Definition |
-|----------|---------------------|---------------------|
-| Text property | `string Message` | `string Text` |
-| Optional payload | `WeaknessWindow? Window` | `Tell? DetectedTell` |
-| Constructor | `OpponentResponse(string message, WeaknessWindow? window = null)` | `OpponentResponse(string text, Tell? detectedTell = null)` |
-
-**Merged API recommendation:** The final `OpponentResponse` class should carry **both** optional payloads and use a single consistent property name for the text. Suggested merged shape:
+**Merged API recommendation:** The final `OpponentResponse` class should carry **both** optional payloads:
 
 ```csharp
 public sealed class OpponentResponse
@@ -417,11 +406,11 @@ public sealed class OpponentResponse
 }
 ```
 
-**Impact on issue #48:** None. XP tracking does not read from `OpponentResponse`. This conflict is documented here for implementer awareness only.
+**Impact on issue #48:** None. XP tracking does not read from `OpponentResponse`.
 
 ### 12.2 `RollEngine.Resolve` — Conflicting New Parameters (#46, #49, #50)
 
-Three issues each propose adding a different optional parameter to `RollEngine.Resolve`:
+Three issues propose adding different optional parameters to `RollEngine.Resolve`:
 
 | Issue | Proposed Parameter | Purpose |
 |-------|--------------------|---------|
@@ -429,28 +418,18 @@ Three issues each propose adding a different optional parameter to `RollEngine.R
 | #49 (Weakness Windows) | `int dcModifier = 0` | DC reduction from exploiting weakness |
 | #50 (Tell Detection) | `int rollBonus = 0` | +2 roll bonus from reading a tell |
 
-**Merged API recommendation:** All three should be added as distinct optional parameters in a single merged signature:
+**Merged API recommendation:** Combine into two distinct parameters:
 
 ```csharp
 public static RollResult Resolve(
-    StatBlock attacker,
-    StatBlock defender,
-    StatType stat,
-    IDiceRoller dice,
-    bool advantage = false,
-    bool disadvantage = false,
-    TrapState? attackerTraps = null,
-    ITrapRegistry? trapRegistry = null,
-    IFailurePool? failurePool = null,
-    int rollBonus = 0,      // From #46 (combo) and #50 (tell) — additive bonuses to roll total
-    int dcModifier = 0)     // From #49 (weakness window) — subtracted from DC
+    ...,
+    int externalBonus = 0,  // Combined from #46 combo (+1) and #50 tell (+2) — caller sums
+    int dcAdjustment = 0)   // From #49 weakness window — subtracted from DC
 ```
 
-Note that #46's `bonusModifier` (+1 from combo) and #50's `rollBonus` (+2 from tell) serve the same mechanical purpose: they are additive bonuses to the roll total. They should be **combined into a single `rollBonus` parameter**, with the caller summing applicable bonuses before passing (e.g., `rollBonus: comboBonus + tellBonus`). The `dcModifier` from #49 is mechanically different (it lowers the DC) and remains a separate parameter.
+**Impact on issue #48:** XP tier determination uses `RollResult.DC`. The `dcAdjustment` from #49 affects the effective DC. `RollResult.DC` should store the **effective** (post-adjustment) DC. This means XP tiers reflect the DC the player *actually faced*: if a weakness window reduced DC from 18 to 16, the player earns mid-tier (10 XP), not high-tier (15 XP).
 
-**Impact on issue #48:** XP tier determination uses `RollResult.DC` (the DC value stored in the roll result). The `dcModifier` from #49 lowers the effective DC before comparison but the stored `RollResult.DC` should reflect the **effective** (post-modifier) DC. This means XP tiers are determined by the DC the player *actually faced*, which is correct: if a weakness window reduced DC from 18 to 16, the player earns mid-tier (10 XP), not high-tier (15 XP). The `rollBonus` parameters (#46, #50) do not affect DC and therefore have no effect on XP tier determination.
-
-**Implementer note:** When implementing issue #48, use `rollResult.DC` as-is for XP tier calculation. If #49 is also implemented, ensure `RollResult.DC` stores the effective (post-dcModifier) DC. If #49 is not yet merged when #48 is implemented, this is a no-op — the existing `RollResult.DC` is already the effective DC.
+**Implementer note:** Use `rollResult.DC` as-is for XP tier calculation. If #49 is merged first, `RollResult.DC` will already reflect the effective DC. If #49 is not yet merged, the existing `RollResult.DC` is already the effective DC (no adjustment applied).
 
 ---
 
@@ -462,14 +441,14 @@ Note that #46's `bonusModifier` (+1 from combo) and #50's `rollBonus` (+2 from t
 |-----------|-------------|
 | `Pinder.Core.Progression.LevelTable` | Existing — provides `GetLevel(int xp)` for host to resolve XP→level. Not called by `XpLedger` itself. |
 | `Pinder.Core.Conversation.GameSession` | Modified — records XP events during `ResolveTurnAsync` and at game end |
-| `Pinder.Core.Conversation.TurnResult` | Modified — new `XpEarned` property |
+| `Pinder.Core.Conversation.TurnResult` | Existing — `XpEarned` property already present (PR #117); must be populated |
 | `Pinder.Core.Rolls.RollResult` | Read-only — `IsNatTwenty`, `IsNatOne`, `IsSuccess`, `DC` used to determine XP source |
 | Issue #42 (RiskTier) | Dependency — `RollResult.DC` must be available (already is). Risk tier does NOT affect XP amounts. |
 | Issue #43 (Read/Recover/Wait) | Dependency — `RecoverAsync` success path must record trap recovery XP. `ReadAsync` and `Wait` do NOT record XP. |
-| Issue #44 (Shadow growth / `CharacterState`) | Dependency — `GameSession` may use `CharacterState` by this point; XP tracking is additive and does not interact with shadow growth. |
-| Issue #46 (Stat Combos) | Co-sprint — adds `rollBonus`/`bonusModifier` to `RollEngine.Resolve`. Does not affect XP calculation. See §12.2. |
-| Issue #49 (Weakness Windows) | Co-sprint — adds `dcModifier` to `RollEngine.Resolve` and introduces `OpponentResponse`. `dcModifier` may affect effective DC used for XP tier. See §12.2. |
-| Issue #50 (Tell Detection) | Co-sprint — adds `rollBonus` to `RollEngine.Resolve` and introduces `OpponentResponse`. Does not affect XP calculation. See §12.1 and §12.2. |
+| Issue #44 (Shadow growth) | Dependency — `GameSession` uses `SessionShadowTracker` (per Sprint 8 ADR resolving #161: SessionShadowTracker is canonical, CharacterState is dropped). XP tracking is additive and does not interact with shadow growth. |
+| Issue #46 (Stat Combos) | Co-sprint — adds roll bonus to `RollEngine.Resolve`. Does not affect XP calculation. See §12.2. |
+| Issue #49 (Weakness Windows) | Co-sprint — adds DC adjustment to `RollEngine.Resolve`. May affect effective DC used for XP tier. See §12.2. |
+| Issue #50 (Tell Detection) | Co-sprint — adds roll bonus to `RollEngine.Resolve`. Does not affect XP calculation. See §12.1 and §12.2. |
 
 ### External
 
@@ -490,18 +469,18 @@ The engine does NOT persist XP across sessions.
 
 ### Order of Operations in `ResolveTurnAsync`
 
-The XP recording step slots into the existing flow after roll resolution (step 1–2 in current code) and before interest application:
+The XP recording step slots into the existing flow after roll resolution and before interest application:
 
 1. Roll → `RollEngine.Resolve()`
 2. Compute interest delta (`SuccessScale` / `FailureScale` + risk bonus + momentum)
-3. **NEW: Record roll XP to ledger**
+3. **Record roll XP to ledger** (nat-20/nat-1 override, else DC-tier or failure)
 4. Apply interest delta → `InterestMeter.Apply()`
 5. Advance traps
 6. Deliver message via LLM
 7. Opponent response via LLM
 8. Check end conditions
-9. **NEW: Record end-of-game XP if game ended**
-10. **NEW: Drain turn events → sum → `TurnResult.XpEarned`**
+9. **Record end-of-game XP if game ended** (DateSecured 50, or ConversationComplete 5)
+10. **Drain turn events → sum → `TurnResult.XpEarned`**
 11. Return `TurnResult`
 
 ### Rules-to-Code Sync Table Additions
