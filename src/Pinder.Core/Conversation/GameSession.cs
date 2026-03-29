@@ -54,6 +54,9 @@ namespace Pinder.Core.Conversation
         private bool _ended;
         private GameOutcome? _outcome;
 
+        // Weakness window from opponent's last response (#49)
+        private WeaknessWindow? _activeWeakness;
+
         // Stored between StartTurnAsync and ResolveTurnAsync
         private DialogueOption[]? _currentOptions;
         private bool _currentHasAdvantage;
@@ -206,18 +209,21 @@ namespace Pinder.Core.Conversation
             // Get dialogue options from LLM
             var rawOptions = await _llm.GetDialogueOptionsAsync(context).ConfigureAwait(false);
 
-            // Peek combos for each option (#46)
+            // Peek combos for each option (#46) and enrich with weakness window (#49)
             var options = new DialogueOption[rawOptions.Length];
             for (int i = 0; i < rawOptions.Length; i++)
             {
                 var opt = rawOptions[i];
                 string? comboName = _comboTracker.PeekCombo(opt.Stat);
+                bool hasWeaknessWindow = _activeWeakness != null
+                    && StatBlock.DefenceTable[opt.Stat] == _activeWeakness.DefendingStat;
                 options[i] = new DialogueOption(
                     opt.Stat,
                     opt.IntendedText,
                     opt.CallbackTurnNumber,
                     comboName,
-                    opt.HasTellBonus);
+                    opt.HasTellBonus,
+                    hasWeaknessWindow);
             }
             _currentOptions = options;
 
@@ -260,6 +266,17 @@ namespace Pinder.Core.Conversation
                 externalBonus += 1;
             }
 
+            // Compute DC adjustment from weakness window (#49)
+            int dcAdjustment = 0;
+            if (_activeWeakness != null
+                && StatBlock.DefenceTable[chosenOption.Stat] == _activeWeakness.DefendingStat)
+            {
+                dcAdjustment = _activeWeakness.DcReduction;
+            }
+
+            // Clear weakness window — consumed this turn regardless of match (#49)
+            _activeWeakness = null;
+
             // 1. Roll dice
             var rollResult = RollEngine.Resolve(
                 stat: chosenOption.Stat,
@@ -271,7 +288,8 @@ namespace Pinder.Core.Conversation
                 dice: _dice,
                 hasAdvantage: _currentHasAdvantage,
                 hasDisadvantage: _currentHasDisadvantage,
-                externalBonus: externalBonus);
+                externalBonus: externalBonus,
+                dcAdjustment: dcAdjustment);
 
             // 2. Compute interest delta from roll outcome
             int interestDelta;
@@ -407,7 +425,12 @@ namespace Pinder.Core.Conversation
                 activeTrapInstructions: opponentTrapInstructions);
 
             var opponentResponse = await _llm.GetOpponentResponseAsync(opponentContext).ConfigureAwait(false);
+            if (opponentResponse == null)
+                throw new InvalidOperationException("LLM adapter returned null opponent response");
             string opponentMessage = opponentResponse.MessageText;
+
+            // Store weakness window from opponent response for next turn (#49)
+            _activeWeakness = opponentResponse.WeaknessWindow;
 
             // 12. Append opponent message to history
             _history.Add((_opponent.DisplayName, opponentMessage));
@@ -432,7 +455,8 @@ namespace Pinder.Core.Conversation
                 outcome: outcome,
                 shadowGrowthEvents: shadowGrowthEvents,
                 comboTriggered: comboTriggered,
-                callbackBonusApplied: callbackBonus);
+                callbackBonusApplied: callbackBonus,
+                detectedWindow: opponentResponse.WeaknessWindow);
         }
 
         /// <summary>
@@ -674,8 +698,9 @@ namespace Pinder.Core.Conversation
             // 3. Ghost trigger check
             CheckGhostTrigger();
 
-            // 4. Clear pending Speak options
+            // 4. Clear pending Speak options and weakness window (#49)
             _currentOptions = null;
+            _activeWeakness = null;
 
             // 4b. Consume triple bonus if active (#46 edge case 7)
             _comboTracker.ConsumeTripleBonus();
@@ -761,8 +786,9 @@ namespace Pinder.Core.Conversation
             // 4. Ghost trigger check
             CheckGhostTrigger();
 
-            // 5. Clear pending Speak options
+            // 5. Clear pending Speak options and weakness window (#49)
             _currentOptions = null;
+            _activeWeakness = null;
 
             // 5b. Consume triple bonus if active (#46 edge case 7)
             _comboTracker.ConsumeTripleBonus();
@@ -843,8 +869,9 @@ namespace Pinder.Core.Conversation
             // 3. Ghost trigger check
             CheckGhostTrigger();
 
-            // 4. Clear pending Speak options
+            // 4. Clear pending Speak options and weakness window (#49)
             _currentOptions = null;
+            _activeWeakness = null;
 
             // 4b. Consume triple bonus if active (#46 edge case 7)
             _comboTracker.ConsumeTripleBonus();
