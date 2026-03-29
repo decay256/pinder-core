@@ -22,18 +22,26 @@ namespace Pinder.Core.Conversation
         /// <summary>Whether this option has a tell bonus.</summary>
         public bool HasTellBonus { get; }
 
+        /// <summary>
+        /// True if a weakness window is active for this option's defending stat.
+        /// UI displays a 🔓 icon when true. The DC shown already reflects the reduction.
+        /// </summary>
+        public bool HasWeaknessWindow { get; }
+
         public DialogueOption(
             StatType stat,
             string intendedText,
             int? callbackTurnNumber = null,
             string? comboName = null,
-            bool hasTellBonus = false)
+            bool hasTellBonus = false,
+            bool hasWeaknessWindow = false)
         {
             Stat = stat;
             IntendedText = intendedText ?? throw new System.ArgumentNullException(nameof(intendedText));
             CallbackTurnNumber = callbackTurnNumber;
             ComboName = comboName;
             HasTellBonus = hasTellBonus;
+            HasWeaknessWindow = hasWeaknessWindow;
         }
     }
 }

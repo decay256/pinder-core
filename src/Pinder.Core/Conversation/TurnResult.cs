@@ -54,6 +54,12 @@ namespace Pinder.Core.Conversation
         /// <summary>Amount of XP earned from this turn's outcome. 0 if none.</summary>
         public int XpEarned { get; }
 
+        /// <summary>
+        /// Weakness window detected in the opponent's response this turn, if any.
+        /// The caller (UI) may use this to preview the next turn's opportunity.
+        /// </summary>
+        public WeaknessWindow? DetectedWindow { get; }
+
         public TurnResult(
             RollResult roll,
             string deliveredMessage,
@@ -69,7 +75,8 @@ namespace Pinder.Core.Conversation
             int tellReadBonus = 0,
             string? tellReadMessage = null,
             RiskTier riskTier = RiskTier.Safe,
-            int xpEarned = 0)
+            int xpEarned = 0,
+            WeaknessWindow? detectedWindow = null)
         {
             Roll = roll ?? throw new ArgumentNullException(nameof(roll));
             DeliveredMessage = deliveredMessage ?? throw new ArgumentNullException(nameof(deliveredMessage));
@@ -86,6 +93,7 @@ namespace Pinder.Core.Conversation
             TellReadMessage = tellReadMessage;
             RiskTier = riskTier;
             XpEarned = xpEarned;
+            DetectedWindow = detectedWindow;
         }
     }
 }

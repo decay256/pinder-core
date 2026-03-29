@@ -17,6 +17,8 @@ namespace Pinder.Core.Conversation
 
         public WeaknessWindow(StatType defendingStat, int dcReduction)
         {
+            if (dcReduction <= 0)
+                throw new System.ArgumentOutOfRangeException(nameof(dcReduction), "dcReduction must be greater than zero");
             DefendingStat = defendingStat;
             DcReduction = dcReduction;
         }
