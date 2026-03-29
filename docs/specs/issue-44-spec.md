@@ -19,14 +19,14 @@ Rules v3.4 §7 defines a table of conditions under which each shadow stat grows 
 | Spec Section | What it says about O2 (Recover failure → Overthinking +1) |
 |---|---|
 | §3.5 Growth Table, row O2 | `Recover action failed → +1 Overthinking, detected in RecoverAsync()` |
-| §4.4 Integration Points | `RecoverAsync (O2): Owned by this issue (#44). Adds ShadowGrowthEvents to RecoverResult.` |
+| §4.4 Integration Points | `RecoverAsync (O2): Code path created by #43 (annotated as owned by #44). Verify O2 trigger is correctly wired.` |
 | §5 Example 6 | `Recover failure → RecoverResult.ShadowGrowthEvents = ["Overthinking +1 (Recover failed)"]` |
-| AC3 | `O2 trigger — Recover failure → Overthinking +1` with full implementation instructions |
+| AC3 | `O2 trigger — Recover failure → Overthinking +1` with verification/implementation instructions |
 | AC5 Test List | `Overthinking +1 on Recover failure (O2) — RecoverResult.ShadowGrowthEvents contains "Overthinking +1 (Recover failed)"` |
-| §9 Dependencies | `Recover action (O2): RecoverAsync exists from #43 but #44 adds Overthinking growth on failure` |
+| §9 Dependencies | `Recover action (O2): Code path created by #43 (annotated as owned by #44). This issue verifies correctness.` |
 | §10 RecoverAsync Pseudocode, step 5c | `_playerShadows.ApplyGrowth(Overthinking, 1, "Recover failed")` |
 
-**Ownership:** O1 (Read failure) is owned by issue #43. O2 (Recover failure) is owned by **this issue (#44)**.
+**Ownership:** O1 (Read failure) is owned by issue #43. O2 (Recover failure) has its **code path** created by issue #43 (in `RecoverAsync` pseudocode and `RecoverResult` type), but **design authority** belongs to this issue (#44) as part of the §7 growth table. Issue #44 verifies the O2 trigger is correctly wired.
 
 ---
 
@@ -142,12 +142,9 @@ All growth events use `SessionShadowTracker.ApplyGrowth(ShadowStatType shadow, i
 **Cross-spec ownership note (O1 vs O2):**
 
 - **O1 (Read failed → Overthinking +1)** is fully owned by issue #43. The issue-43 spec's `ReadResult` type includes a `ShadowGrowthEvents` field, and its `ReadAsync` pseudocode includes the `ApplyGrowth` call on failure. No action needed here.
-- **O2 (Recover failed → Overthinking +1) is owned by this issue (#44)**, NOT by #43. The issue-43 spec's `RecoverResult` type does **not** include a `ShadowGrowthEvents` field, and the `RecoverAsync` pseudocode in issue-43 does **not** apply Overthinking growth on failure. Therefore, the implementer of issue #44 MUST:
-  1. Add an `IReadOnlyList<string> ShadowGrowthEvents` property to `RecoverResult` (matching the pattern already present on `ReadResult`).
-  2. Update `RecoverAsync` to call `SessionShadowTracker.ApplyGrowth(ShadowStatType.Overthinking, 1, "Recover failed")` on failure (when a tracker is available) and populate the new `ShadowGrowthEvents` field.
-  3. Pass a default of `null` / empty list for backward compatibility when no tracker is configured.
+- **O2 (Recover failed → Overthinking +1)** is structurally implemented by issue #43's `RecoverAsync` pseudocode and `RecoverResult` type (both include the O2 trigger call and `ShadowGrowthEvents` field, annotated as "O2 trigger — owned by issue #44"). This means the **code path** for O2 is created by #43, but the **game design authority** for this trigger belongs to this issue (#44) as part of the complete §7 growth table. The implementer of #44 should **verify** that the O2 trigger is correctly wired in `RecoverAsync` (as specified in the issue-43 pseudocode step 9, failure branch) and that `RecoverResult.ShadowGrowthEvents` is populated. If issue #43 is implemented first, no additional code changes to `RecoverAsync` are needed from this issue — just verification.
 
-This ensures the Overthinking growth on Recover failure is not missed by either implementer.
+**In summary:** Issue #43 creates both the `RecoverResult.ShadowGrowthEvents` field and the `ApplyGrowth` call in `RecoverAsync`. Issue #44 owns the growth table definition and verifies the O2 trigger is correctly integrated.
 
 ### 3.6 Horniness (penalizes Rizz)
 
@@ -189,10 +186,7 @@ When the game ends (any `GameOutcome`), before throwing `GameEndedException` or 
 ### 4.4 ReadAsync / RecoverAsync (Overthinking growth)
 
 - **ReadAsync (O1):** Owned by issue #43. The `ReadAsync` method already applies Overthinking +1 on failure via `SessionShadowTracker.ApplyGrowth()` per the issue-43 spec. The growth event string is included in `ReadResult.ShadowGrowthEvents` (defined in issue #43 spec). No action needed from this issue.
-- **RecoverAsync (O2):** **Owned by this issue (#44).** The issue-43 spec's `RecoverResult` does not include a `ShadowGrowthEvents` field, and `RecoverAsync` does not apply Overthinking growth on failure. The implementer of this issue must:
-  1. Add `IReadOnlyList<string> ShadowGrowthEvents { get; }` to `RecoverResult` (with a constructor parameter defaulting to `null`).
-  2. In `RecoverAsync`, on failure, call `_playerShadows.ApplyGrowth(ShadowStatType.Overthinking, 1, "Recover failed")` (when tracker is available) and include the returned event string in `RecoverResult.ShadowGrowthEvents`.
-  3. On success, or when no tracker is configured, `ShadowGrowthEvents` is an empty list.
+- **RecoverAsync (O2):** The issue-43 spec's `RecoverResult` already includes a `ShadowGrowthEvents` field, and its `RecoverAsync` pseudocode already applies Overthinking +1 on failure (annotated as "O2 trigger — owned by issue #44"). Therefore, the code path for O2 is created by issue #43. The implementer of this issue (#44) should **verify** that the O2 trigger is correctly wired — no additional modifications to `RecoverAsync` or `RecoverResult` are needed if issue #43 is implemented first. If issue #44 is implemented first (before #43), the implementer must create the `ShadowGrowthEvents` field on `RecoverResult` and add the `ApplyGrowth` call to `RecoverAsync` as described in the issue-43 pseudocode.
 
 ---
 
@@ -288,7 +282,7 @@ The following counters are maintained within `GameSession`:
 - `_allStatsUsed` (HashSet<StatType>): all distinct stats ever used in the session
 - `_saUsageCount` (int): incremented when `roll.Stat == StatType.SelfAwareness`
 
-**O2 trigger — Recover failure → Overthinking +1:** When `RecoverAsync()` fails (roll below DC 12), the implementer of this issue (#44) MUST apply `Overthinking +1` via `SessionShadowTracker.ApplyGrowth(ShadowStatType.Overthinking, 1, "Recover failed")` and populate `RecoverResult.ShadowGrowthEvents` with the resulting event string `"Overthinking +1 (Recover failed)"`. This trigger is **not** implemented by issue #43 — see §3.5 ownership note and §4.4 for full details. When no `SessionShadowTracker` is configured, `RecoverResult.ShadowGrowthEvents` is an empty list.
+**O2 trigger — Recover failure → Overthinking +1:** When `RecoverAsync()` fails (roll below DC 12), `Overthinking +1` is applied via `SessionShadowTracker.ApplyGrowth(ShadowStatType.Overthinking, 1, "Recover failed")` and `RecoverResult.ShadowGrowthEvents` is populated with the event string `"Overthinking +1 (Recover failed)"`. The code path for this trigger is created by issue #43 (in its `RecoverAsync` pseudocode and `RecoverResult` type definition, annotated as "O2 trigger — owned by issue #44"). The implementer of this issue (#44) should **verify** the O2 trigger is correctly wired in the #43 implementation. If #44 is implemented before #43, the implementer must add the `ShadowGrowthEvents` field to `RecoverResult` and the `ApplyGrowth` call to `RecoverAsync`. When no `SessionShadowTracker` is configured, `RecoverResult.ShadowGrowthEvents` is an empty list.
 
 ### AC4: TurnResult.ShadowGrowthEvents populated when shadow grows
 
@@ -371,9 +365,9 @@ If `ResolveTurnAsync` is called after the game has ended, `GameSession` should t
 | `SessionShadowTracker` | #139 (Wave 0) | `ApplyGrowth(ShadowStatType, int, string)` method, `GetDelta(ShadowStatType)` for reading |
 | `RollEngine.ResolveFixedDC` | #139 (Wave 0) | Used by Read/Recover (issue #43), not directly by #44 |
 | Read action (O1) | #43 | `ReadAsync` applies Overthinking +1 on failure — fully owned by #43 |
-| Recover action (O2) | #43 creates `RecoverAsync`; **#44 adds O2 trigger** | `RecoverAsync` exists from #43 but does NOT apply Overthinking growth; this issue (#44) adds `ShadowGrowthEvents` to `RecoverResult` and applies Overthinking +1 on failure |
+| Recover action (O2) | #43 creates `RecoverAsync` with O2 trigger code path | `RecoverAsync` from #43 already includes `ApplyGrowth(Overthinking, 1, "Recover failed")` on failure and `ShadowGrowthEvents` on `RecoverResult` (annotated as "O2 trigger — owned by #44"). This issue verifies correctness. |
 | `TurnResult.ShadowGrowthEvents` | PR #117 (merged) | Already exists as `IReadOnlyList<string>` — no changes needed |
-| `RecoverResult` | #43 | Created by #43 — this issue (#44) adds `ShadowGrowthEvents` property and populates it with O2 trigger |
+| `RecoverResult` | #43 | Created by #43 with `ShadowGrowthEvents` field already included for O2 trigger |
 | `RollResult.Stat` | Existing | `StatType` property on `RollResult` — used to detect which stat was rolled |
 | `RollResult.IsNatOne` | Existing | Boolean — used to detect Nat 1 triggers |
 | `RollResult.Tier` | Existing | `FailureTier` — used to detect Catastrophe and TropeTrap |

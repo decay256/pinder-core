@@ -2,7 +2,7 @@
 
 **Issue:** #43
 **Sprint:** 7 — RPG Rules Complete
-**Depends on:** #130 (Wave 0 — `RollEngine.ResolveFixedDC`, `SessionShadowTracker`, `TrapState.HasActive`)
+**Depends on:** #139 (Wave 0 — `RollEngine.ResolveFixedDC`, `SessionShadowTracker`, `TrapState.HasActive`)
 **Contract:** `contracts/sprint-7-read-recover-wait.md`
 **Maturity:** Prototype
 
@@ -355,7 +355,7 @@ Note: `GameEndedException` already exists with the message format `"Game has end
 
 ## 7. Dependencies
 
-### Code dependencies (Wave 0 prerequisites — Issue #130)
+### Code dependencies (Wave 0 prerequisites — Issue #139)
 
 These MUST be available before implementation can begin:
 
@@ -391,7 +391,7 @@ These MUST be available before implementation can begin:
 
 ### Issue dependencies
 
-- **#130 (Wave 0)** — MUST be merged first. Provides `ResolveFixedDC`, `SessionShadowTracker`, `TrapState.HasActive`, `GameSessionConfig`.
+- **#139 (Wave 0)** — MUST be merged first. Provides `ResolveFixedDC`, `SessionShadowTracker`, `TrapState.HasActive`, `GameSessionConfig`.
 - **#42 (RiskTier)** — Already merged (PR #119). `RollResult` carries `RiskTier` field. Risk tier bonus does NOT apply to Read/Recover (only Speak), but the type is compatible.
 
 ### External dependencies
