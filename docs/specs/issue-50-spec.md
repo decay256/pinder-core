@@ -2,7 +2,7 @@
 
 ## Overview
 
-Tells are a hidden bonus mechanic from rules v3.4 §15. The opponent's messages contain subtle behavioural cues ("tells") that hint at which stat will work best on the next turn. When the LLM detects a tell in the opponent's response, it returns a `Tell` object indicating the stat. If the player then picks a dialogue option using that stat, they receive a hidden +2 bonus to their roll total. The bonus is invisible in the displayed success percentage but is revealed post-roll via a message on `TurnResult`.
+Tells are a hidden bonus mechanic from rules v3.4 §15. The opponent's messages contain subtle behavioural cues ("tells") that hint at which stat will work best on the next turn. When the LLM detects a tell in the opponent's response, it returns a `Tell` object indicating the stat. If the player then picks a dialogue option using that stat, they receive a hidden +2 bonus to their roll via the `externalBonus` parameter on `RollEngine.Resolve`. The bonus is invisible in the displayed success percentage but is revealed post-roll via `TurnResult.TellReadBonus` and `TurnResult.TellReadMessage`.
 
 ---
 
@@ -25,192 +25,237 @@ Note: Some behaviours map to two possible stats. The LLM chooses one per respons
 
 ---
 
-## New Type: `Tell`
+## Existing Types (already in codebase)
 
-### Namespace
-`Pinder.Core.Conversation`
+The following types already exist and require **no changes**:
 
-### Signature
+### `Tell` (`src/Pinder.Core/Conversation/Tell.cs`)
+
 ```csharp
-namespace Pinder.Core.Conversation
+public sealed class Tell
 {
-    /// <summary>
-    /// Represents a detected tell from the opponent's behaviour.
-    /// Matching the tell stat on the next turn grants a hidden +2 roll bonus.
-    /// </summary>
-    public sealed class Tell
-    {
-        /// <summary>The stat that the tell hints at.</summary>
-        public StatType Stat { get; }
-
-        /// <summary>Human-readable description of the tell behaviour (e.g. "Flirts").</summary>
-        public string Description { get; }
-
-        public Tell(StatType stat, string description);
-    }
+    public StatType Stat { get; }
+    public string Description { get; }
+    public Tell(StatType stat, string description);
+    // Throws ArgumentNullException if description is null
 }
 ```
 
-### Constraints
-- Must be a `sealed class`, NOT a `record` (netstandard2.0 / C# 8.0).
-- `Description` must not be null; constructor throws `ArgumentNullException` if null.
-- `Stat` is a `StatType` enum value — no null check needed (value type).
+### `OpponentResponse` (`src/Pinder.Core/Conversation/OpponentResponse.cs`)
 
----
-
-## New Type: `OpponentResponse`
-
-### Namespace
-`Pinder.Core.Conversation`
-
-### Rationale
-`ILlmAdapter.GetOpponentResponseAsync` currently returns `Task<string>`. To carry the optional tell, a new return type is needed that wraps both the response text and the detected tell.
-
-### Signature
 ```csharp
-namespace Pinder.Core.Conversation
+public sealed class OpponentResponse
 {
-    /// <summary>
-    /// The opponent's response message plus any detected tell for the next turn.
-    /// </summary>
-    public sealed class OpponentResponse
-    {
-        /// <summary>The opponent's message text.</summary>
-        public string Text { get; }
-
-        /// <summary>The tell detected in this response, or null if no tell was detected.</summary>
-        public Tell? DetectedTell { get; }
-
-        public OpponentResponse(string text, Tell? detectedTell = null);
-    }
+    public string MessageText { get; }
+    public Tell? DetectedTell { get; }
+    public WeaknessWindow? WeaknessWindow { get; }
+    public OpponentResponse(string messageText, Tell? detectedTell = null, WeaknessWindow? weaknessWindow = null);
+    // Throws ArgumentNullException if messageText is null
 }
 ```
 
-### Constraints
-- `Text` must not be null; constructor throws `ArgumentNullException` if null.
-- `DetectedTell` may be null (no tell detected this turn).
+### `DialogueOption` (`src/Pinder.Core/Conversation/DialogueOption.cs`)
+
+```csharp
+public sealed class DialogueOption
+{
+    public StatType Stat { get; }
+    public string IntendedText { get; }
+    public int? CallbackTurnNumber { get; }
+    public string? ComboName { get; }
+    public bool HasTellBonus { get; }
+    public DialogueOption(StatType stat, string intendedText, int? callbackTurnNumber = null,
+        string? comboName = null, bool hasTellBonus = false);
+}
+```
+
+### `TurnResult` (`src/Pinder.Core/Conversation/TurnResult.cs`)
+
+Already has:
+```csharp
+public int TellReadBonus { get; }        // 0 or 2
+public string? TellReadMessage { get; }  // null or "📖 You read the moment. +2 bonus."
+```
+
+These are constructor parameters with defaults of `0` and `null`.
+
+### `ILlmAdapter.GetOpponentResponseAsync`
+
+Already returns `Task<OpponentResponse>` (not `Task<string>`).
+
+### `RollResult` (`src/Pinder.Core/Rolls/RollResult.cs`)
+
+Already has:
+```csharp
+public int ExternalBonus { get; private set; }         // defaults to 0
+public int FinalTotal => Total + ExternalBonus;         // computed
+public void AddExternalBonus(int bonus);                // DEPRECATED but available
+```
+
+`IsSuccess` is currently computed as `IsNatTwenty || (!IsNatOne && Total >= dc)`. Per the Wave 0 contract (#139), this will change to use `FinalTotal` when `externalBonus` flows through `RollEngine.Resolve`. See Dependencies section.
 
 ---
 
-## Interface Change: `ILlmAdapter.GetOpponentResponseAsync`
+## What Must Be Implemented
 
-### Current Signature
+### Prerequisite: `RollEngine.Resolve` Must Accept `externalBonus`
+
+Per the Sprint 8 Wave 0 contract (#139), `RollEngine.Resolve` gains:
 ```csharp
-Task<string> GetOpponentResponseAsync(OpponentContext context);
+public static RollResult Resolve(
+    StatType stat, StatBlock attacker, StatBlock defender,
+    TrapState attackerTraps, int level, ITrapRegistry trapRegistry, IDiceRoller dice,
+    bool hasAdvantage = false, bool hasDisadvantage = false,
+    int externalBonus = 0,    // NEW — added to total before success check
+    int dcAdjustment = 0);    // NEW — subtracted from DC
 ```
 
-### New Signature
-```csharp
-Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context);
-```
+And `RollResult` `IsSuccess` changes to: `IsNatTwenty || (!IsNatOne && FinalTotal >= dc)`.
 
-### Impact
-- **`ILlmAdapter`**: return type changes from `Task<string>` to `Task<OpponentResponse>`.
-- **`NullLlmAdapter`**: must be updated to return `new OpponentResponse("...", detectedTell: null)`.
-- **`GameSession`**: must unwrap `OpponentResponse.Text` for the history entry and store `OpponentResponse.DetectedTell` for the next turn.
+**If Wave 0 (#130) is not yet merged**, the tell bonus must still use the `externalBonus` parameter (not `AddExternalBonus()`). The implementer should either depend on Wave 0 or implement the `externalBonus` parameter as part of this issue.
+
+> ⚠️ Per vision concerns #68 and #129: The +2 tell bonus MUST flow through `RollEngine.Resolve(externalBonus)` so that `RollResult.FinalTotal`, `IsSuccess`, and `MissMargin` all reflect the bonus. Do NOT add it as a post-hoc adjustment via `AddExternalBonus()`.
 
 ---
 
-## Changes to `GameSession`
+### 1. New Field on `GameSession`: `_activeTell`
 
-### New Internal State
+```csharp
+private Tell? _activeTell;  // null initially
+```
 
-| Field | Type | Initial Value | Purpose |
-|-------|------|---------------|---------|
-| `_activeTell` | `Tell?` | `null` | The tell detected from the opponent's last response. Consumed on the next `ResolveTurnAsync`. |
+Stores the tell from the most recent opponent response. Consumed on the next `ResolveTurnAsync` call.
 
-### `ResolveTurnAsync` Changes
+---
 
-After step 1 (dice roll via `RollEngine.Resolve`), before computing interest delta:
+### 2. Changes to `GameSession.ResolveTurnAsync`
 
-1. **Check tell match**: If `_activeTell` is not null AND `chosenOption.Stat == _activeTell.Stat`:
-   - Add +2 to `rollResult.Total` for the purpose of success/failure determination. **Important**: the +2 is applied to the roll total, NOT to the interest delta. It can turn a miss into a hit.
-   - Record `tellReadBonus = 2` and `tellReadMessage = "📖 You read the moment. +2 bonus."`.
-2. **Clear the active tell**: Set `_activeTell = null` regardless of whether it matched. A tell is consumed after one turn.
-3. The `DialogueOption.HasTellBonus` flag is set during `StartTurnAsync` (see below) and is purely informational for the UI — it does NOT affect the roll computation in `ResolveTurnAsync`.
+#### 2a. Compute tell bonus before calling `RollEngine.Resolve`
 
-**Clarification on "hidden"**: The +2 bonus is NOT reflected in any success percentage shown to the player before they choose. After the roll resolves, the `TurnResult` reveals whether the tell was read correctly.
+Before the existing call to `RollEngine.Resolve`:
 
-### `StartTurnAsync` Changes
+1. Check if `_activeTell != null && chosenOption.Stat == _activeTell.Stat`.
+2. If match: `int tellBonus = 2`. If no match or no active tell: `int tellBonus = 0`.
+3. Pass `tellBonus` as part of `externalBonus` to `RollEngine.Resolve`.
 
-When building `DialogueContext` or processing options returned from the LLM:
+The `externalBonus` parameter may also include other bonuses (callback, triple combo) accumulated in the same turn. These are summed before the call:
 
-1. After receiving `DialogueOption[]` from `_llm.GetDialogueOptionsAsync(context)`:
-   - For each option, if `_activeTell` is not null and `option.Stat == _activeTell.Stat`, reconstruct the option with `hasTellBonus = true`.
-   - (Since `DialogueOption` properties are readonly, this means creating a new `DialogueOption` with the same values but `hasTellBonus = true`.)
-2. Store the modified options as `_currentOptions`.
+```
+externalBonus = tellBonus + callbackBonus + tripleComboBonus
+```
 
-This allows the host/UI to show a hint (e.g. a 📖 icon) without revealing the actual bonus.
+For this issue, only `tellBonus` is relevant. The others default to 0 until their respective issues (#47, #46) are implemented.
 
-### Opponent Response Handling
+#### 2b. Record tell result on `TurnResult`
+
+After the roll:
+- If `tellBonus > 0`: set `tellReadBonus: 2` and `tellReadMessage: "📖 You read the moment. +2 bonus."` on `TurnResult`.
+- If `tellBonus == 0`: set `tellReadBonus: 0` and `tellReadMessage: null` on `TurnResult`.
+
+#### 2c. Clear the active tell
+
+After the roll (regardless of match): set `_activeTell = null`. A tell is always consumed after one turn.
+
+#### Updated `RollEngine.Resolve` call
+
+```csharp
+// Before:
+var rollResult = RollEngine.Resolve(
+    stat: chosenOption.Stat,
+    attacker: _player.Stats,
+    defender: _opponent.Stats,
+    attackerTraps: _traps,
+    level: _player.Level,
+    trapRegistry: _trapRegistry,
+    dice: _dice,
+    hasAdvantage: _currentHasAdvantage,
+    hasDisadvantage: _currentHasDisadvantage);
+
+// After:
+int tellBonus = (_activeTell != null && chosenOption.Stat == _activeTell.Stat) ? 2 : 0;
+
+var rollResult = RollEngine.Resolve(
+    stat: chosenOption.Stat,
+    attacker: _player.Stats,
+    defender: _opponent.Stats,
+    attackerTraps: _traps,
+    level: _player.Level,
+    trapRegistry: _trapRegistry,
+    dice: _dice,
+    hasAdvantage: _currentHasAdvantage,
+    hasDisadvantage: _currentHasDisadvantage,
+    externalBonus: tellBonus);
+
+_activeTell = null;  // consumed
+```
+
+---
+
+### 3. Changes to `GameSession.StartTurnAsync`
+
+After receiving `DialogueOption[]` from `_llm.GetDialogueOptionsAsync(context)`:
+
+For each option, if `_activeTell != null` and `option.Stat == _activeTell.Stat`, create a new `DialogueOption` with `hasTellBonus: true`:
+
+```csharp
+new DialogueOption(
+    stat: option.Stat,
+    intendedText: option.IntendedText,
+    callbackTurnNumber: option.CallbackTurnNumber,
+    comboName: option.ComboName,
+    hasTellBonus: true)
+```
+
+Options whose stat does NOT match the active tell retain `hasTellBonus: false` (no reconstruction needed unless the LLM returns them with `hasTellBonus: true`, which it should not).
+
+This flag is purely informational — it lets the UI show a hint (e.g. 📖 icon) without revealing the actual +2 bonus value.
+
+---
+
+### 4. Extract and Store Tell from Opponent Response
 
 In `ResolveTurnAsync`, after calling `_llm.GetOpponentResponseAsync(opponentContext)`:
 
-1. Unwrap the `OpponentResponse`: extract `.Text` for the history entry.
-2. Store `.DetectedTell` as `_activeTell` for the next turn.
+```csharp
+var opponentResponse = await _llm.GetOpponentResponseAsync(opponentContext).ConfigureAwait(false);
+string opponentMessage = opponentResponse.MessageText;
+_activeTell = opponentResponse.DetectedTell;  // NEW — store tell for next turn
+```
+
+This line must be added after the existing `opponentMessage` extraction (currently at line ~254 of GameSession.cs).
 
 ---
 
-## Changes to `TurnResult`
+### 5. Updated `TurnResult` Construction
 
-### New Properties
+The existing `TurnResult` construction in `ResolveTurnAsync` must pass the tell fields:
 
 ```csharp
-/// <summary>
-/// The tell bonus applied this turn: 0 if no tell matched, 2 if the player read the tell correctly.
-/// </summary>
-public int TellReadBonus { get; }
-
-/// <summary>
-/// Post-roll message if the tell was read correctly, e.g. "📖 You read the moment. +2 bonus."
-/// Null if no tell bonus was applied.
-/// </summary>
-public string? TellReadMessage { get; }
+return new TurnResult(
+    roll: rollResult,
+    deliveredMessage: deliveredMessage,
+    opponentMessage: opponentMessage,
+    narrativeBeat: narrativeBeat,
+    interestDelta: interestDelta,
+    stateAfter: stateSnapshot,
+    isGameOver: isGameOver,
+    outcome: outcome,
+    tellReadBonus: tellBonus,
+    tellReadMessage: tellBonus > 0 ? "📖 You read the moment. +2 bonus." : null);
 ```
-
-### Constructor Change
-The constructor must accept two additional parameters: `int tellReadBonus` and `string? tellReadMessage`.
 
 ---
 
-## Roll Bonus Mechanics
+## Function Signatures (modified methods only)
 
-The +2 tell bonus is applied to the **d20 roll total** (i.e. `d20 + statMod + levelBonus + tellBonus`), which means:
-- It affects whether the roll succeeds or fails (can push a miss over the DC).
-- It affects the "beat DC by" margin, which in turn affects `SuccessScale` / `FailureScale` outputs.
-- It is NOT a separate interest delta addition — it modifies the roll itself.
+### `GameSession` — No new public methods
 
-### Integration with `RollEngine`
+All changes are internal to `ResolveTurnAsync` and `StartTurnAsync`. The public API is unchanged.
 
-`RollEngine.Resolve` currently computes `total = d20Roll + modifier + levelBonus`. The tell bonus needs to be added. There are two approaches:
-
-**Option A (preferred)**: Add an optional `int rollBonus = 0` parameter to `RollEngine.Resolve`. `GameSession` passes `2` when the tell matches, `0` otherwise. This keeps the bonus visible in `RollResult.Total`.
-
-**Option B**: `GameSession` applies the +2 after the roll by constructing a modified `RollResult`. This is less clean because `RollResult` is immutable.
-
-The implementer should use **Option A** — adding a `rollBonus` parameter to `RollEngine.Resolve` — since it is the simplest change and keeps all roll math in one place.
-
-### Updated `RollEngine.Resolve` Signature
+Internal additions:
 ```csharp
-public static RollResult Resolve(
-    StatType stat,
-    StatBlock attacker,
-    StatBlock defender,
-    TrapState attackerTraps,
-    int level,
-    ITrapRegistry trapRegistry,
-    IDiceRoller dice,
-    bool hasAdvantage,
-    bool hasDisadvantage,
-    int rollBonus = 0)  // NEW — hidden bonus from tells (or future mechanics)
+private Tell? _activeTell;  // new field
 ```
-
-The `rollBonus` is added to `total` before comparing against DC:
-```
-total = d20Roll + modifier + levelBonus + rollBonus
-```
-
-All existing callers pass 0 (default), so this is backward-compatible.
 
 ---
 
@@ -218,18 +263,18 @@ All existing callers pass 0 (default), so this is backward-compatible.
 
 ### Example 1: Tell Matched — Bonus Applied
 ```
-Turn 2 opponent response: OpponentResponse("Ha, that's actually funny", new Tell(StatType.Wit, "Makes a joke"))
-  → _activeTell = Tell(Wit, "Makes a joke")
+State: _activeTell = Tell(StatType.Wit, "Makes a joke")
 
-Turn 3 StartTurnAsync:
-  → LLM returns options: [Charm, Honesty, Wit, Chaos]
-  → Wit option gets HasTellBonus = true
+StartTurnAsync:
+  → LLM returns options: [DialogueOption(Charm, ...), DialogueOption(Honesty, ...), DialogueOption(Wit, ...), DialogueOption(Chaos, ...)]
+  → Wit option reconstructed with HasTellBonus = true
   → Player sees 📖 indicator on Wit option
 
-Turn 3 ResolveTurnAsync(optionIndex = 2):  // Player picks Wit
+ResolveTurnAsync(optionIndex = 2):  // Player picks Wit
   → chosenOption.Stat == Wit == _activeTell.Stat → match!
-  → RollEngine.Resolve(..., rollBonus: 2)
-  → Total = d20(12) + witMod(3) + levelBonus(1) + tellBonus(2) = 18 vs DC 16 → success
+  → tellBonus = 2
+  → RollEngine.Resolve(..., externalBonus: 2)
+  → d20(12) + witMod(3) + levelBonus(1) = Total 16, ExternalBonus 2, FinalTotal 18 vs DC 16 → success
   → _activeTell = null (consumed)
   → TurnResult.TellReadBonus = 2
   → TurnResult.TellReadMessage = "📖 You read the moment. +2 bonus."
@@ -237,12 +282,12 @@ Turn 3 ResolveTurnAsync(optionIndex = 2):  // Player picks Wit
 
 ### Example 2: Tell Not Matched — No Bonus
 ```
-Turn 2 opponent response: OpponentResponse("...", new Tell(StatType.SelfAwareness, "Goes silent"))
-  → _activeTell = Tell(SelfAwareness, "Goes silent")
+State: _activeTell = Tell(StatType.SelfAwareness, "Goes silent")
 
-Turn 3 ResolveTurnAsync(optionIndex = 0):  // Player picks Charm
-  → chosenOption.Stat == Charm != SelfAwareness → no match
-  → RollEngine.Resolve(..., rollBonus: 0)
+ResolveTurnAsync(optionIndex = 0):  // Player picks Charm
+  → chosenOption.Stat == Charm ≠ SelfAwareness → no match
+  → tellBonus = 0
+  → RollEngine.Resolve(..., externalBonus: 0)
   → _activeTell = null (consumed regardless)
   → TurnResult.TellReadBonus = 0
   → TurnResult.TellReadMessage = null
@@ -250,67 +295,83 @@ Turn 3 ResolveTurnAsync(optionIndex = 0):  // Player picks Charm
 
 ### Example 3: No Tell Active
 ```
-Turn 2 opponent response: OpponentResponse("Ok.", null)
-  → _activeTell = null
+State: _activeTell = null
 
-Turn 3 ResolveTurnAsync:
-  → _activeTell is null → no tell check
-  → RollEngine.Resolve(..., rollBonus: 0)
+ResolveTurnAsync:
+  → _activeTell is null → tellBonus = 0
+  → RollEngine.Resolve(..., externalBonus: 0)
   → TurnResult.TellReadBonus = 0
   → TurnResult.TellReadMessage = null
 ```
 
 ### Example 4: Tell Bonus Turns Miss Into Hit
 ```
-_activeTell = Tell(StatType.Honesty, "Shares something vulnerable")
+State: _activeTell = Tell(StatType.Honesty, "Shares something vulnerable")
 Player picks Honesty option.
 
-Without bonus: d20(11) + honestyMod(2) + levelBonus(0) = 13 vs DC 15 → miss by 2
-With bonus:    d20(11) + honestyMod(2) + levelBonus(0) + tellBonus(2) = 15 vs DC 15 → success (beat by 0 → SuccessScale +1)
+Without bonus: d20(11) + honestyMod(2) + levelBonus(0) = Total 13 vs DC 15 → miss by 2
+With bonus:    Total 13 + ExternalBonus 2 = FinalTotal 15 vs DC 15 → success (beat by 0 → SuccessScale +1)
 
 TurnResult.TellReadBonus = 2
 TurnResult.TellReadMessage = "📖 You read the moment. +2 bonus."
+```
+
+### Example 5: Tell Stored from Opponent Response
+```
+ResolveTurnAsync completes, opponent responds:
+  OpponentResponse("Ha, that's actually funny", new Tell(StatType.Wit, "Makes a joke"), null)
+  → opponentMessage = "Ha, that's actually funny"
+  → _activeTell = Tell(StatType.Wit, "Makes a joke")
+  → Available for next turn's ResolveTurnAsync
 ```
 
 ---
 
 ## Acceptance Criteria
 
-### AC1: `Tell` type defined
-- `Tell` is a `sealed class` in `Pinder.Core.Conversation`.
-- Has `StatType Stat` and `string Description` readonly properties.
-- Constructor throws `ArgumentNullException` if `description` is null.
+### AC1: `GameSession` stores active tell from previous turn's `OpponentResponse.DetectedTell`
 
-### AC2: `OpponentResponse` carries optional `Tell`
-- `OpponentResponse` is a `sealed class` in `Pinder.Core.Conversation`.
-- Has `string Text` and `Tell? DetectedTell` properties.
-- `ILlmAdapter.GetOpponentResponseAsync` return type changes from `Task<string>` to `Task<OpponentResponse>`.
-- `NullLlmAdapter` updated to return `new OpponentResponse("...", null)`.
+- After `_llm.GetOpponentResponseAsync()` in `ResolveTurnAsync`, `_activeTell` is set to `opponentResponse.DetectedTell`.
+- `_activeTell` persists across the `StartTurnAsync`/`ResolveTurnAsync` boundary.
+- On the first turn (before any opponent response), `_activeTell` is null.
 
-### AC3: `GameSession` applies +2 on roll for matching stat
-- `GameSession` stores `_activeTell` from the previous turn's `OpponentResponse.DetectedTell`.
-- In `ResolveTurnAsync`, if `_activeTell?.Stat == chosenOption.Stat`, passes `rollBonus: 2` to `RollEngine.Resolve`.
-- The +2 is added to the roll total (affects success/failure determination).
-- `_activeTell` is set to null after consumption (whether matched or not).
+### AC2: On matching stat — +2 added via `externalBonus` on `RollEngine.Resolve`
 
-### AC4: Displayed percentage excludes bonus
-- The `HasTellBonus` flag on `DialogueOption` is set during `StartTurnAsync` for UI display purposes only.
+- When `_activeTell != null && chosenOption.Stat == _activeTell.Stat`, the value `2` is passed as (part of) `externalBonus` to `RollEngine.Resolve`.
+- The +2 affects `RollResult.FinalTotal`, `IsSuccess`, and failure tier determination.
+- The +2 does NOT affect the interest delta directly — it modifies the roll, which then determines the interest delta via `SuccessScale`/`FailureScale`.
+
+### AC3: Displayed percentage excludes bonus
+
+- `DialogueOption.HasTellBonus` is set to `true` during `StartTurnAsync` for options matching the active tell.
+- This flag is informational only — it does not affect any roll or interest computation.
 - No success percentage computation includes the +2 bonus. The bonus is hidden until post-roll reveal.
-- (Note: the engine does not compute success percentages — this is a constraint on any future UI/host implementation.)
 
-### AC5: `TurnResult.TellReadBonus` and `TellReadMessage` populated correctly
-- `TurnResult` has new properties: `int TellReadBonus` (0 or 2) and `string? TellReadMessage`.
+### AC4: `TurnResult.TellReadBonus` and `TellReadMessage` populated correctly
+
 - When tell matches: `TellReadBonus = 2`, `TellReadMessage = "📖 You read the moment. +2 bonus."`.
 - When tell does not match or no tell active: `TellReadBonus = 0`, `TellReadMessage = null`.
+- The constant string `"📖 You read the moment. +2 bonus."` is exact (including emoji and period).
+
+### AC5: `DialogueOption.HasTellBonus` set when option stat matches active tell
+
+- During `StartTurnAsync`, each option from the LLM is checked against `_activeTell`.
+- Options with `Stat == _activeTell.Stat` are reconstructed with `hasTellBonus: true`.
+- Options with non-matching stat retain `hasTellBonus: false`.
+- When `_activeTell` is null, all options have `hasTellBonus: false`.
 
 ### AC6: Tests cover tell bonus application
-- Test: tell bonus applied when chosen stat matches active tell — verify `TurnResult.TellReadBonus == 2` and `TellReadMessage` is non-null.
-- Test: tell bonus NOT applied when chosen stat differs from active tell — verify `TurnResult.TellReadBonus == 0`.
-- Test: no tell active — verify `TurnResult.TellReadBonus == 0`.
-- Test: tell consumed after one turn (second turn after tell set has no bonus).
-- Test: tell bonus can turn a miss into a hit (integration with `RollEngine`).
+
+Required test cases (see Edge Cases section for additional detail):
+1. Tell bonus applied when chosen stat matches active tell → `TurnResult.TellReadBonus == 2`, `TellReadMessage` is non-null.
+2. Tell bonus NOT applied when chosen stat differs from active tell → `TurnResult.TellReadBonus == 0`.
+3. No tell active → `TurnResult.TellReadBonus == 0`.
+4. Tell consumed after one turn — second turn after tell set has no bonus.
+5. Tell bonus can turn a miss into a hit (integration with `RollEngine` via `externalBonus`).
+6. `HasTellBonus` flag set correctly on matching options during `StartTurnAsync`.
 
 ### AC7: Build clean
+
 - `dotnet build` succeeds with zero warnings/errors.
 - All existing tests pass (`dotnet test`).
 
@@ -318,86 +379,109 @@ TurnResult.TellReadMessage = "📖 You read the moment. +2 bonus."
 
 ## Edge Cases
 
-| Case | Expected Behaviour |
-|------|-------------------|
-| No tell active (`_activeTell == null`) | `rollBonus = 0`, `TellReadBonus = 0`, `TellReadMessage = null` |
-| Tell active but player picks different stat | `rollBonus = 0`, tell consumed (set to null), `TellReadBonus = 0` |
-| Tell active and player picks matching stat | `rollBonus = 2`, tell consumed, `TellReadBonus = 2` |
-| Tell from turn N, player doesn't act until turn N+2 | Tells persist until consumed. One `StartTurnAsync`/`ResolveTurnAsync` cycle consumes the tell regardless of match. (Tell set in turn N's resolve is active for turn N+1's resolve.) |
-| Multiple tells in sequence (opponent sends tell every turn) | Each new tell overwrites the previous one. Only the most recent tell is active. |
-| First turn (no prior opponent response) | `_activeTell` is null; no tell bonus possible. |
-| Nat 20 with tell bonus | `rollBonus: 2` is added to total. Nat 20 is already auto-success; the +2 increases the "beat DC by" margin, potentially yielding a higher `SuccessScale` tier. |
-| Nat 1 with tell bonus | Nat 1 is auto-failure (Legendary tier). The tell bonus does not override natural 1 auto-fail. Tell is still consumed. `TellReadBonus = 2` because the player correctly read the tell (picked the matching stat); the `rollBonus: 2` was passed to `RollEngine.Resolve` but Nat 1 auto-fail takes precedence. `TellReadMessage` is set. This is consistent with the "tell matches but roll still fails" case — the tell was read, the bonus was applied, the outcome was just too bad. |
-| Tell stat matches but roll still fails after +2 | `TellReadBonus = 2`, `TellReadMessage` is set. The bonus was applied but wasn't enough. (The tell was "read" even if the roll failed — the player picked the right stat.) |
-| `DialogueOption.HasTellBonus` is true but player picks a different option | The non-selected option's `HasTellBonus` flag is irrelevant. Only the chosen option's stat is compared to the tell. |
+| # | Case | Expected Behaviour |
+|---|------|-------------------|
+| 1 | No tell active (`_activeTell == null`) | `tellBonus = 0`, `TellReadBonus = 0`, `TellReadMessage = null` |
+| 2 | Tell active but player picks different stat | `tellBonus = 0`, tell consumed (set to null), `TellReadBonus = 0` |
+| 3 | Tell active and player picks matching stat | `tellBonus = 2`, tell consumed, `TellReadBonus = 2`, message set |
+| 4 | Tell persists across StartTurnAsync/ResolveTurnAsync boundary | `_activeTell` is not cleared by `StartTurnAsync` — only by `ResolveTurnAsync` |
+| 5 | Multiple tells in sequence (opponent sends tell every turn) | Each new `OpponentResponse.DetectedTell` overwrites `_activeTell`. Only the most recent tell is active. |
+| 6 | First turn (no prior opponent response) | `_activeTell` is null; no tell bonus possible. |
+| 7 | Nat 20 with tell bonus | `externalBonus: 2` is passed. Nat 20 is auto-success; the +2 increases `FinalTotal`, potentially yielding a higher `SuccessScale` tier. `TellReadBonus = 2`. |
+| 8 | Nat 1 with tell bonus | Nat 1 is auto-failure (Legendary tier). The `externalBonus: 2` is passed but Nat 1 auto-fail takes precedence. `TellReadBonus = 2` because the player correctly read the tell (picked the matching stat). The bonus was applied to the roll; the outcome was just too bad. |
+| 9 | Tell stat matches but roll still fails after +2 | `TellReadBonus = 2`, `TellReadMessage` set. The bonus was applied but wasn't enough. The tell was "read" correctly — the player picked the right stat. |
+| 10 | `DialogueOption.HasTellBonus` is true but player picks a different option | The non-selected option's `HasTellBonus` flag is irrelevant. Only the chosen option's stat is compared to `_activeTell`. |
+| 11 | Opponent response has no tell (`DetectedTell == null`) | `_activeTell` set to null. No bonus available next turn. |
+| 12 | Game ends during the turn (DateSecured or Unmatched) | Tell is still consumed. `TellReadBonus` is still recorded on `TurnResult`. |
 
 ---
 
 ## Error Conditions
 
-| Condition | Error Type | Message |
-|-----------|-----------|---------|
-| `Tell` constructed with null `description` | `ArgumentNullException` | `"description"` |
-| `OpponentResponse` constructed with null `text` | `ArgumentNullException` | `"text"` |
+No new error conditions are introduced by this feature. The tell mechanic is additive — it introduces new fields and a bonus but does not create new failure modes in the game session flow.
 
-No other new error conditions. The tell mechanic is additive — it introduces new fields and a bonus but does not create new failure modes in the game session flow.
+The only pre-existing error conditions relevant are:
+- `GameSession.ResolveTurnAsync` throws `GameEndedException` if game already ended.
+- `GameSession.ResolveTurnAsync` throws `InvalidOperationException` if `StartTurnAsync` was not called first.
+- `GameSession.ResolveTurnAsync` throws `ArgumentOutOfRangeException` for invalid option index.
+
+None of these are affected by tell logic.
 
 ---
 
 ## Dependencies
 
-| Dependency | Type | Status |
-|-----------|------|--------|
-| **#27 — GameSession** | Hard (modifies `GameSession`) | Merged |
-| **#63 — Architecture review** | Hard (per issue) | Merged |
-| `ILlmAdapter` | Interface (return type change) | Existing — modified |
-| `NullLlmAdapter` | Test adapter | Existing — modified |
-| `RollEngine.Resolve` | Static method (new `rollBonus` param) | Existing — modified |
-| `DialogueOption.HasTellBonus` | Existing property | Already present in codebase |
-| `TurnResult` | Existing class (new properties) | Existing — modified |
-| `StatType` | Existing enum | Unchanged |
+| Dependency | Type | Status | Notes |
+|-----------|------|--------|-------|
+| **#27 — GameSession** | Hard | ✅ Merged | Base GameSession exists |
+| **#63 — Tell/OpponentResponse types** | Hard | ✅ Merged | `Tell`, `OpponentResponse`, `DialogueOption.HasTellBonus`, `TurnResult.TellReadBonus/TellReadMessage` all exist |
+| **#130 — Wave 0: `RollEngine.Resolve(externalBonus)`** | Hard | ⚠️ Check status | `externalBonus` parameter on `RollEngine.Resolve` must exist. Currently `RollEngine.Resolve` does NOT have this parameter. `RollResult.ExternalBonus` and `FinalTotal` exist but are set post-hoc. |
+| `ILlmAdapter` | Interface | ✅ No change needed | Already returns `Task<OpponentResponse>` |
+| `NullLlmAdapter` | Test adapter | ✅ No change needed | Already returns `OpponentResponse` |
+
+### Critical Dependency: Wave 0 `externalBonus` on `RollEngine.Resolve`
+
+The current `RollEngine.Resolve` method does **not** accept an `externalBonus` parameter. Per the Sprint 8 architecture contract (#139), Wave 0 adds this parameter. If Wave 0 (#130) is not yet merged when this issue is implemented:
+
+**Option A (preferred):** Implement after Wave 0 merges.  
+**Option B:** Add the `externalBonus` parameter to `RollEngine.Resolve` as part of this issue (matching the Wave 0 contract exactly), then Wave 0 becomes a no-op for this specific change.
+
+The `RollResult` already has `ExternalBonus`, `FinalTotal`, and `AddExternalBonus()`. However, `IsSuccess` currently uses `Total` (not `FinalTotal`). Per the Wave 0 contract, `IsSuccess` must change to use `FinalTotal`. This is critical for the tell bonus to actually affect success/failure determination.
 
 ---
-
-## Files to Create
-
-| File | Content |
-|------|---------|
-| `src/Pinder.Core/Conversation/Tell.cs` | `Tell` sealed class |
-| `src/Pinder.Core/Conversation/OpponentResponse.cs` | `OpponentResponse` sealed class |
 
 ## Files to Modify
 
 | File | Change |
 |------|--------|
-| `src/Pinder.Core/Interfaces/ILlmAdapter.cs` | `GetOpponentResponseAsync` returns `Task<OpponentResponse>` |
-| `src/Pinder.Core/Conversation/NullLlmAdapter.cs` | Return `OpponentResponse` instead of `string` |
-| `src/Pinder.Core/Conversation/GameSession.cs` | Add `_activeTell` field; tell matching + bonus in `ResolveTurnAsync`; flag options in `StartTurnAsync`; extract tell from `OpponentResponse` |
-| `src/Pinder.Core/Conversation/TurnResult.cs` | Add `TellReadBonus` and `TellReadMessage` properties |
-| `src/Pinder.Core/Rolls/RollEngine.cs` | Add `int rollBonus = 0` parameter to `Resolve` |
+| `src/Pinder.Core/Conversation/GameSession.cs` | Add `_activeTell` field; compute tell bonus in `ResolveTurnAsync`; flag options in `StartTurnAsync`; store tell from `OpponentResponse` |
+| `src/Pinder.Core/Rolls/RollEngine.cs` | Add `int externalBonus = 0` parameter to `Resolve` (if Wave 0 not yet merged) |
+| `src/Pinder.Core/Rolls/RollResult.cs` | Change `IsSuccess` to use `FinalTotal` (if Wave 0 not yet merged) |
 
-## Test Files
+## Files NOT Modified (already correct)
 
-| File | Tests |
-|------|-------|
-| `tests/Pinder.Core.Tests/TellTests.cs` | Constructor validation, null description throws |
-| `tests/Pinder.Core.Tests/OpponentResponseTests.cs` | Constructor validation, null text throws, null tell allowed |
-| `tests/Pinder.Core.Tests/GameSessionTellTests.cs` | Tell bonus applied on match; not applied on mismatch; no tell active; tell consumed after one turn; tell bonus turns miss into hit; Nat 1 with tell; HasTellBonus flag set on matching options |
+| File | Reason |
+|------|--------|
+| `src/Pinder.Core/Conversation/Tell.cs` | Already exists with correct API |
+| `src/Pinder.Core/Conversation/OpponentResponse.cs` | Already exists with `DetectedTell` |
+| `src/Pinder.Core/Conversation/DialogueOption.cs` | Already has `HasTellBonus` |
+| `src/Pinder.Core/Conversation/TurnResult.cs` | Already has `TellReadBonus`, `TellReadMessage` |
+| `src/Pinder.Core/Interfaces/ILlmAdapter.cs` | Already returns `Task<OpponentResponse>` |
+| `src/Pinder.Core/Conversation/NullLlmAdapter.cs` | Already returns `OpponentResponse` |
 
 ---
 
-## Stacking Order in `ResolveTurnAsync` (Updated)
+## Stacking Order in `ResolveTurnAsync`
 
-After this issue is implemented, the full interest delta computation in `ResolveTurnAsync` follows this order:
+After this issue is implemented, the tell bonus integrates into the roll flow as follows:
 
 ```
-0. Tell bonus    = +2 to ROLL TOTAL if tell stat matches chosen stat (applied via rollBonus param)
-1. Base delta    = SuccessScale.GetInterestDelta(roll) or FailureScale.GetInterestDelta(roll)
-2. Risk bonus    = (from #42, if implemented) +1 for Hard, +2 for Bold — success only
-3. Callback bonus = (from #47, if implemented) CallbackBonus.Compute() — success only
-4. Momentum bonus = GetMomentumBonus(streak) — success only
-───────────────────
-   Total interestDelta = sum of 1–4 → InterestMeter.Apply(total)
+0. Compute externalBonus:
+     tellBonus         = +2 if _activeTell.Stat == chosenOption.Stat, else 0
+     callbackBonus     = (from #47, if implemented) 0 default
+     tripleComboBonus  = (from #46, if implemented) 0 default
+     externalBonus     = tellBonus + callbackBonus + tripleComboBonus
+
+1. RollEngine.Resolve(..., externalBonus: externalBonus)
+     → RollResult with FinalTotal = Total + ExternalBonus
+     → IsSuccess based on FinalTotal
+
+2. Interest delta:
+     Base delta    = SuccessScale or FailureScale (based on roll outcome)
+     Risk bonus    = (from #42) +1 for Hard, +2 for Bold — success only
+     Momentum      = GetMomentumBonus(streak) — success only
+     ─────────────
+     Total interest delta → InterestMeter.Apply(total)
 ```
 
-The tell bonus (step 0) is fundamentally different from the other bonuses: it modifies the **roll total**, not the interest delta. This means it can change the roll from failure to success, which then unlocks the other success-only bonuses.
+The tell bonus (step 0) modifies the **roll total**, not the interest delta. This means it can change a failure to a success, which then unlocks success-only bonuses (risk, momentum).
+
+---
+
+## Constants
+
+| Constant | Value | Location |
+|----------|-------|----------|
+| Tell bonus amount | `2` (int) | `GameSession.ResolveTurnAsync` |
+| Tell read message | `"📖 You read the moment. +2 bonus."` | `GameSession.ResolveTurnAsync` |
+| Bonus value on no match | `0` (int) | `GameSession.ResolveTurnAsync` |
