@@ -364,6 +364,7 @@ namespace Pinder.Core.Conversation
             if (_comboTracker.HasTripleBonus)
             {
                 externalBonus += 1;
+                _comboTracker.ConsumeTripleBonus(); // Consume after applying (#46 edge case 7)
             }
 
             // Compute DC adjustment from weakness window (#49)
