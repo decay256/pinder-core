@@ -263,7 +263,82 @@ Multi-session (ConversationRegistry):
 
 ---
 
-## Known Gaps (as of Sprint 8)
+## Sprint 9: Anthropic LLM Adapter — Architecture Briefing
+
+### What's changing
+
+**Previous architecture (Sprint 8):** Pinder.Core is a single zero-dependency .NET Standard 2.0 library. All LLM interaction is abstracted behind `ILlmAdapter` (Interfaces/). The only concrete implementation is `NullLlmAdapter` (Conversation/) which returns hardcoded responses for testing. No real LLM calls exist.
+
+**Sprint 9 additions** — 1 new project, minor Pinder.Core DTO extensions:
+
+#### New Project: `Pinder.LlmAdapters`
+
+A **separate** .NET Standard 2.0 project that depends on `Pinder.Core` and `Newtonsoft.Json`. This project contains all concrete LLM adapter implementations. The dependency is strictly one-way: `LlmAdapters → Core`. Core has zero knowledge of this project.
+
+```
+Pinder.LlmAdapters/
+├── Anthropic/
+│   ├── Dto/           — MessagesRequest, MessagesResponse, ContentBlock, etc.
+│   ├── AnthropicClient.cs        — HTTP transport + retry logic
+│   ├── AnthropicLlmAdapter.cs    — ILlmAdapter implementation
+│   ├── AnthropicOptions.cs       — Configuration carrier
+│   └── AnthropicApiException.cs  — Typed exception
+├── SessionDocumentBuilder.cs     — Formats conversation history + prompts for LLM calls
+├── PromptTemplates.cs            — Static §3.2–3.8 instruction templates
+└── Anthropic/CacheBlockBuilder.cs — Builds cache_control blocks for Anthropic prompt caching
+```
+
+#### Data Flow (Anthropic adapter — per turn)
+
+```
+GameSession calls ILlmAdapter.GetDialogueOptionsAsync(DialogueContext)
+  → AnthropicLlmAdapter receives context
+  → CacheBlockBuilder.BuildCachedSystemBlocks(playerPrompt, opponentPrompt)
+  → SessionDocumentBuilder.BuildDialogueOptionsPrompt(history, traps, interest, turn, names)
+  → AnthropicClient.SendMessagesAsync(request) → HTTP POST to Anthropic Messages API
+  → ParseDialogueOptions(responseText) → DialogueOption[]
+  → Return to GameSession
+```
+
+Caching strategy: character system prompts (~6k tokens) are placed in `cache_control: ephemeral` blocks. Turns 2+ read from cache at 10% of normal input cost. Prompt caching is GA — no beta header required.
+
+#### Pinder.Core DTO Extensions (Vision #211)
+
+`DialogueContext`, `DeliveryContext`, `OpponentContext` gain `PlayerName`, `OpponentName`, `CurrentTurn` fields (with backward-compatible defaults). `GameSession` wires `_player.DisplayName`, `_opponent.DisplayName`, `_turnNumber` through.
+
+#### Tell/WeaknessWindow Signal Generation (Vision #214)
+
+`GetOpponentResponseAsync` instructs Claude to optionally include a `[SIGNALS]` block with Tell/WeaknessWindow data. The adapter parses this structured output. This enables the Tell (+2 roll bonus) and WeaknessWindow (DC −2/−3) mechanics that `GameSession` already consumes from `OpponentResponse`.
+
+### Key Design Decisions
+
+#### ADR: Separate project for LLM adapters
+**Context:** Pinder.Core has zero external dependencies (critical for Unity compat). LLM adapters need Newtonsoft.Json for Anthropic API serialization.
+**Decision:** Create `Pinder.LlmAdapters` as a separate project. Core stays dependency-free. Unity host references both projects.
+**Consequences:** Two assemblies to deploy. Clear boundary: Core = game rules, LlmAdapters = LLM integration.
+
+#### ADR: No anthropic-beta header
+**Context:** Issue #206 spec included `anthropic-beta: prompt-caching-2024-07-31`. Anthropic docs (verified 2025-03-30) state prompt caching is GA.
+**Decision:** Remove beta header per #213. Use `cache_control` in request body only.
+
+#### ADR: LLM-generated Tell/WeaknessWindow signals
+**Context:** #208 initially specified Tell/WeaknessWindow come from context, not LLM. But GameSession reads them from OpponentResponse (#214).
+**Decision:** LLM generates signals in structured `[SIGNALS]` block. Adapter parses them leniently (null on parse failure).
+
+### Implicit assumptions for implementers
+
+1. **netstandard2.0 + LangVersion 8.0**: No `record` types. Use `sealed class`. `Enum.Parse` must use `(StatType)Enum.Parse(typeof(StatType), value, true)` — no generic overload.
+2. **Newtonsoft.Json allowed in LlmAdapters ONLY**: `Pinder.Core` must not reference it.
+3. **Backward compatibility**: All context DTO changes use optional constructor params with defaults. Existing 1118+ tests must pass unchanged.
+4. **NullLlmAdapter unchanged**: It stays in Pinder.Core as the test double. Returns null for Tell/WeaknessWindow (by design for testing).
+
+### What is NOT changing
+- All Pinder.Core game logic (Stats, Rolls, Traps, Progression, Characters, Prompts, Data)
+- GameSession orchestration logic
+- Existing NullLlmAdapter behavior
+- Any existing test behavior
+
+## Known Gaps (as of Sprint 9)
 
 | Gap | Rules Section | Status |
 |-----|--------------|--------|
@@ -271,3 +346,5 @@ Multi-session (ConversationRegistry):
 | `AddExternalBonus()` deprecated but not removed | — | Cleanup issue needed post-Sprint 8 |
 | Energy system consumers | #144 | IGameClock.ConsumeEnergy() exists but nothing calls it this sprint |
 | GameSession god object trajectory | #87 | Acknowledged — extraction planned for next maturity level |
+| Prompt template content not yet sourced | §3.2–3.8 | PromptTemplates.cs needs content from character-construction.md |
+| AnthropicOptions model string may need updating | — | Default `claude-sonnet-4-20250514` — verify model availability |
