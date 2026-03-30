@@ -11,6 +11,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{045D9318
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pinder.Core.Tests", "tests\Pinder.Core.Tests\Pinder.Core.Tests.csproj", "{0623E521-B4A6-44AE-9CFD-786B56610D84}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pinder.LlmAdapters", "src\Pinder.LlmAdapters\Pinder.LlmAdapters.csproj", "{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pinder.LlmAdapters.Tests", "tests\Pinder.LlmAdapters.Tests\Pinder.LlmAdapters.Tests.csproj", "{B2C3D4E5-F6A7-8901-BCDE-F12345678901}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -28,9 +32,19 @@ Global
 		{0623E521-B4A6-44AE-9CFD-786B56610D84}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0623E521-B4A6-44AE-9CFD-786B56610D84}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0623E521-B4A6-44AE-9CFD-786B56610D84}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B2C3D4E5-F6A7-8901-BCDE-F12345678901}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2C3D4E5-F6A7-8901-BCDE-F12345678901}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2C3D4E5-F6A7-8901-BCDE-F12345678901}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B2C3D4E5-F6A7-8901-BCDE-F12345678901}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{34017A49-6A92-41CF-854F-EC31687D3471} = {66983487-A9C3-46BF-98B2-B829E99C211B}
 		{0623E521-B4A6-44AE-9CFD-786B56610D84} = {045D9318-B32E-4259-8AB6-9A02DE6E0C31}
+		{A1B2C3D4-E5F6-7890-ABCD-EF1234567890} = {66983487-A9C3-46BF-98B2-B829E99C211B}
+		{B2C3D4E5-F6A7-8901-BCDE-F12345678901} = {045D9318-B32E-4259-8AB6-9A02DE6E0C31}
 	EndGlobalSection
 EndGlobal
