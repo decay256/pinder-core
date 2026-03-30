@@ -822,17 +822,18 @@ namespace Pinder.Core.Tests
         {
             // 3 turns with distinct non-overlapping stats, then check external bonus on turn 4
             var dice = new FixedDice(
-                15, 50, // Turn 1: Rizz
-                15, 50, // Turn 2: SA
-                15, 50, // Turn 3: Chaos → Triple
-                15, 50  // Turn 4: should get +1 external
+                15, 50, // Turn 1: Rizz (d20, d100)
+                15, 50, // Turn 2: SA (d20, d100)
+                15, 50, // Turn 3: Chaos → Triple (d20, d100)
+                15, 15, 50  // Turn 4: advantage from VeryIntoIt (d20, d20, d100)
             );
 
             var llm = new ComboTestLlmAdapter();
             llm.EnqueueOptions(new DialogueOption(StatType.Rizz, "R"));
             llm.EnqueueOptions(new DialogueOption(StatType.SelfAwareness, "SA"));
             llm.EnqueueOptions(new DialogueOption(StatType.Chaos, "C"));
-            llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Ch"));
+            // Use SA again to avoid triggering a second Triple (SA,Chaos,SA = not 3 distinct)
+            llm.EnqueueOptions(new DialogueOption(StatType.SelfAwareness, "SA2"));
 
             var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
 
