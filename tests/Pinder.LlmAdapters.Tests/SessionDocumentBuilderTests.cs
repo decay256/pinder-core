@@ -1,0 +1,425 @@
+using System;
+using System.Collections.Generic;
+using Pinder.Core.Conversation;
+using Pinder.Core.Rolls;
+using Pinder.Core.Stats;
+using Pinder.LlmAdapters;
+using Pinder.LlmAdapters.Anthropic;
+using Pinder.LlmAdapters.Anthropic.Dto;
+using Xunit;
+
+namespace Pinder.LlmAdapters.Tests
+{
+    public class SessionDocumentBuilderTests
+    {
+        // ── AC2: Conversation history formatting ──
+
+        [Fact]
+        public void BuildDialogueOptionsPrompt_EmptyHistory_ContainsConversationStartAndCurrentTurn()
+        {
+            var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
+                conversationHistory: new List<(string, string)>(),
+                opponentLastMessage: "",
+                activeTraps: new string[0],
+                currentInterest: 10,
+                currentTurn: 1,
+                playerName: "GERALD_42",
+                opponentName: "VELVET");
+
+            Assert.Contains("[CONVERSATION_START]", result);
+            Assert.Contains("[CURRENT_TURN]", result);
+
+            // No turn markers between start and current
+            int startIdx = result.IndexOf("[CONVERSATION_START]");
+            int currentIdx = result.IndexOf("[CURRENT_TURN]");
+            string between = result.Substring(
+                startIdx + "[CONVERSATION_START]".Length,
+                currentIdx - startIdx - "[CONVERSATION_START]".Length);
+            Assert.DoesNotContain("[T", between.Trim());
+        }
+
+        [Fact]
+        public void BuildDialogueOptionsPrompt_ThreeTurnHistory_CorrectTurnMarkers()
+        {
+            var history = new List<(string, string)>
+            {
+                ("GERALD_42", "Hey"),
+                ("VELVET", "Hi"),
+                ("GERALD_42", "How are you?"),
+                ("VELVET", "Good"),
+                ("GERALD_42", "Cool"),
+                ("VELVET", "Indeed")
+            };
+
+            var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
+                history, "Indeed", new string[0], 12, 4, "GERALD_42", "VELVET");
+
+            Assert.Contains("[T1|PLAYER|GERALD_42] \"Hey\"", result);
+            Assert.Contains("[T1|OPPONENT|VELVET] \"Hi\"", result);
+            Assert.Contains("[T2|PLAYER|GERALD_42] \"How are you?\"", result);
+            Assert.Contains("[T2|OPPONENT|VELVET] \"Good\"", result);
+            Assert.Contains("[T3|PLAYER|GERALD_42] \"Cool\"", result);
+            Assert.Contains("[T3|OPPONENT|VELVET] \"Indeed\"", result);
+        }
+
+        [Fact]
+        public void BuildDialogueOptionsPrompt_EightTurnHistory_AllTurnsPresent()
+        {
+            var history = new List<(string, string)>();
+            for (int i = 0; i < 16; i++)
+            {
+                string sender = i % 2 == 0 ? "PLAYER_A" : "OPP_B";
+                history.Add((sender, $"Message {i}"));
+            }
+
+            var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
+                history, "Message 15", new string[0], 10, 9, "PLAYER_A", "OPP_B");
+
+            for (int turn = 1; turn <= 8; turn++)
+            {
+                Assert.Contains($"[T{turn}|PLAYER|PLAYER_A]", result);
+                Assert.Contains($"[T{turn}|OPPONENT|OPP_B]", result);
+            }
+        }
+
+        [Fact]
+        public void BuildDialogueOptionsPrompt_OddEntries_HandlesLonePlayerMessage()
+        {
+            var history = new List<(string, string)>
+            {
+                ("GERALD", "Hey"),
+                ("VELVET", "Hi"),
+                ("GERALD", "So anyway...")
+            };
+
+            var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
+                history, "Hi", new string[0], 10, 2, "GERALD", "VELVET");
+
+            Assert.Contains("[T1|PLAYER|GERALD] \"Hey\"", result);
+            Assert.Contains("[T1|OPPONENT|VELVET] \"Hi\"", result);
+            Assert.Contains("[T2|PLAYER|GERALD] \"So anyway...\"", result);
+        }
+
+        // ── AC1: All 4 builder methods ──
+
+        [Fact]
+        public void BuildDialogueOptionsPrompt_ActiveTraps_FormattedCorrectly()
+        {
+            var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
+                new List<(string, string)>(), "", new[] { "Cringe", "Spiral" },
+                12, 1, "GERALD", "VELVET");
+
+            Assert.Contains("Active traps: Cringe, Spiral", result);
+        }
+
+        [Fact]
+        public void BuildDialogueOptionsPrompt_NoTraps_ShowsNone()
+        {
+            var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
+                new List<(string, string)>(), "", new string[0],
+                10, 1, "GERALD", "VELVET");
+
+            Assert.Contains("Active traps: none", result);
+        }
+
+        [Fact]
+        public void BuildDialogueOptionsPrompt_ContainsTaskInstruction()
+        {
+            var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
+                new List<(string, string)>(), "", new string[0],
+                10, 1, "GERALD", "VELVET");
+
+            Assert.Contains("YOUR TASK", result);
+            Assert.Contains("Generate exactly 4 dialogue options for GERALD", result);
+        }
+
+        [Fact]
+        public void BuildDeliveryPrompt_Success_ContainsSuccessInstruction()
+        {
+            var option = new DialogueOption(StatType.Wit, "Something clever");
+
+            var result = SessionDocumentBuilder.BuildDeliveryPrompt(
+                new List<(string, string)>(), option, FailureTier.None, 4, null,
+                "GERALD", "VELVET");
+
+            Assert.Contains("SUCCESS", result);
+            Assert.Contains("beat DC by 4", result);
+            Assert.Contains("Stat used: WIT", result);
+            Assert.Contains("Output only the message text", result);
+        }
+
+        [Fact]
+        public void BuildDeliveryPrompt_Misfire_ContainsFailureInstruction()
+        {
+            var option = new DialogueOption(StatType.Charm, "Tell me more");
+
+            var result = SessionDocumentBuilder.BuildDeliveryPrompt(
+                new List<(string, string)>(), option, FailureTier.Misfire, -4,
+                new[] { "You are aware of how you're coming across." },
+                "GERALD", "VELVET");
+
+            Assert.Contains("FAILED", result);
+            Assert.Contains("missed DC by 4", result);
+            Assert.Contains("MISFIRE", result);
+            Assert.Contains("corrupt the CONTENT, not the delivery", result);
+            Assert.Contains("Active trap instructions:", result);
+            Assert.Contains("You are aware of how you're coming across.", result);
+        }
+
+        [Fact]
+        public void BuildDeliveryPrompt_NullTrapInstructions_OmitsTrapSection()
+        {
+            var option = new DialogueOption(StatType.Honesty, "I'm just honest");
+
+            var result = SessionDocumentBuilder.BuildDeliveryPrompt(
+                new List<(string, string)>(), option, FailureTier.Fumble, -1, null,
+                "GERALD", "VELVET");
+
+            Assert.DoesNotContain("Active trap instructions:", result);
+        }
+
+        [Fact]
+        public void BuildOpponentPrompt_ContainsAllSections()
+        {
+            var history = new List<(string, string)>
+            {
+                ("GERALD", "Hey"),
+                ("VELVET", "Hi")
+            };
+
+            var result = SessionDocumentBuilder.BuildOpponentPrompt(
+                history, "How are you?", 10, 12, 3.5, null, "GERALD", "VELVET");
+
+            Assert.Contains("PLAYER'S LAST MESSAGE", result);
+            Assert.Contains("\"How are you?\"", result);
+            Assert.Contains("INTEREST CHANGE", result);
+            Assert.Contains("Interest moved from 10 to 12 (+2)", result);
+            Assert.Contains("Current Interest: 12/25", result);
+            Assert.Contains("RESPONSE TIMING", result);
+            Assert.Contains("3.5 minutes", result);
+            Assert.Contains("CURRENT INTEREST STATE", result);
+            Assert.Contains("[RESPONSE]", result);
+            Assert.Contains("[SIGNALS]", result);
+        }
+
+        [Fact]
+        public void BuildOpponentPrompt_NegativeDelta_FormattedCorrectly()
+        {
+            var result = SessionDocumentBuilder.BuildOpponentPrompt(
+                new List<(string, string)>(), "Bye", 12, 9, 5.0, null, "P", "O");
+
+            Assert.Contains("Interest moved from 12 to 9 (-3)", result);
+        }
+
+        [Fact]
+        public void BuildOpponentPrompt_SmallDelay_ShowsLessThanOneMinute()
+        {
+            var result = SessionDocumentBuilder.BuildOpponentPrompt(
+                new List<(string, string)>(), "Hey", 10, 10, 0.5, null, "P", "O");
+
+            Assert.Contains("less than 1 minute", result);
+        }
+
+        [Fact]
+        public void BuildOpponentPrompt_InterestBehaviourBlock_HighInterest()
+        {
+            var result = SessionDocumentBuilder.BuildOpponentPrompt(
+                new List<(string, string)>(), "Hey", 10, 18, 1.0, null, "P", "O");
+
+            Assert.Contains("very interested", result);
+        }
+
+        [Fact]
+        public void BuildOpponentPrompt_InterestBehaviourBlock_LowInterest()
+        {
+            var result = SessionDocumentBuilder.BuildOpponentPrompt(
+                new List<(string, string)>(), "Hey", 5, 3, 1.0, null, "P", "O");
+
+            Assert.Contains("disengaged", result);
+        }
+
+        [Fact]
+        public void BuildInterestChangeBeatPrompt_CrossedAbove15_ShowsInvestedReaction()
+        {
+            var result = SessionDocumentBuilder.BuildInterestChangeBeatPrompt(
+                "VELVET", 14, 16, InterestState.VeryIntoIt);
+
+            Assert.Contains("VELVET", result);
+            Assert.Contains("14", result);
+            Assert.Contains("16", result);
+            Assert.Contains("becoming more invested", result);
+        }
+
+        [Fact]
+        public void BuildInterestChangeBeatPrompt_CrossedBelow8_ShowsCooling()
+        {
+            var result = SessionDocumentBuilder.BuildInterestChangeBeatPrompt(
+                "VELVET", 9, 6, InterestState.Interested);
+
+            Assert.Contains("pulling back", result);
+        }
+
+        [Fact]
+        public void BuildInterestChangeBeatPrompt_DateSecured_ShowsMeetUp()
+        {
+            var result = SessionDocumentBuilder.BuildInterestChangeBeatPrompt(
+                "VELVET", 23, 25, InterestState.DateSecured);
+
+            Assert.Contains("meeting up", result);
+        }
+
+        [Fact]
+        public void BuildInterestChangeBeatPrompt_Unmatched_ShowsUnmatching()
+        {
+            var result = SessionDocumentBuilder.BuildInterestChangeBeatPrompt(
+                "VELVET", 2, 0, InterestState.Unmatched);
+
+            Assert.Contains("unmatching", result);
+        }
+
+        // ── AC4: CacheBlockBuilder ──
+
+        [Fact]
+        public void BuildCachedSystemBlocks_ReturnsTwoBlocksWithEphemeralCache()
+        {
+            var blocks = CacheBlockBuilder.BuildCachedSystemBlocks("player prompt", "opponent prompt");
+
+            Assert.Equal(2, blocks.Length);
+            Assert.Equal("text", blocks[0].Type);
+            Assert.Equal("player prompt", blocks[0].Text);
+            Assert.NotNull(blocks[0].CacheControl);
+            Assert.Equal("ephemeral", blocks[0].CacheControl!.Type);
+
+            Assert.Equal("text", blocks[1].Type);
+            Assert.Equal("opponent prompt", blocks[1].Text);
+            Assert.NotNull(blocks[1].CacheControl);
+            Assert.Equal("ephemeral", blocks[1].CacheControl!.Type);
+        }
+
+        [Fact]
+        public void BuildOpponentOnlySystemBlocks_ReturnsOneBlockWithEphemeralCache()
+        {
+            var blocks = CacheBlockBuilder.BuildOpponentOnlySystemBlocks("opponent prompt");
+
+            Assert.Single(blocks);
+            Assert.Equal("text", blocks[0].Type);
+            Assert.Equal("opponent prompt", blocks[0].Text);
+            Assert.NotNull(blocks[0].CacheControl);
+            Assert.Equal("ephemeral", blocks[0].CacheControl!.Type);
+        }
+
+        [Fact]
+        public void BuildCachedSystemBlocks_EmptyPrompts_ReturnsBlocksWithEmptyText()
+        {
+            var blocks = CacheBlockBuilder.BuildCachedSystemBlocks("", "");
+
+            Assert.Equal(2, blocks.Length);
+            Assert.Equal("", blocks[0].Text);
+            Assert.Equal("", blocks[1].Text);
+        }
+
+        [Fact]
+        public void BuildCachedSystemBlocks_NullPlayerPrompt_Throws()
+        {
+            Assert.Throws<ArgumentNullException>(() =>
+                CacheBlockBuilder.BuildCachedSystemBlocks(null!, "opponent"));
+        }
+
+        [Fact]
+        public void BuildCachedSystemBlocks_NullOpponentPrompt_Throws()
+        {
+            Assert.Throws<ArgumentNullException>(() =>
+                CacheBlockBuilder.BuildCachedSystemBlocks("player", null!));
+        }
+
+        [Fact]
+        public void BuildOpponentOnlySystemBlocks_NullPrompt_Throws()
+        {
+            Assert.Throws<ArgumentNullException>(() =>
+                CacheBlockBuilder.BuildOpponentOnlySystemBlocks(null!));
+        }
+
+        // ── Error conditions ──
+
+        [Fact]
+        public void BuildDialogueOptionsPrompt_NullHistory_Throws()
+        {
+            Assert.Throws<ArgumentNullException>(() =>
+                SessionDocumentBuilder.BuildDialogueOptionsPrompt(
+                    null!, "", new string[0], 10, 1, "P", "O"));
+        }
+
+        [Fact]
+        public void BuildDialogueOptionsPrompt_NullPlayerName_Throws()
+        {
+            Assert.Throws<ArgumentNullException>(() =>
+                SessionDocumentBuilder.BuildDialogueOptionsPrompt(
+                    new List<(string, string)>(), "", new string[0], 10, 1, null!, "O"));
+        }
+
+        [Fact]
+        public void BuildDeliveryPrompt_NullOption_Throws()
+        {
+            Assert.Throws<ArgumentNullException>(() =>
+                SessionDocumentBuilder.BuildDeliveryPrompt(
+                    new List<(string, string)>(), null!, FailureTier.None, 0, null, "P", "O"));
+        }
+
+        [Fact]
+        public void BuildOpponentPrompt_NullMessage_Throws()
+        {
+            Assert.Throws<ArgumentNullException>(() =>
+                SessionDocumentBuilder.BuildOpponentPrompt(
+                    new List<(string, string)>(), null!, 10, 10, 1.0, null, "P", "O"));
+        }
+
+        [Fact]
+        public void BuildInterestChangeBeatPrompt_NullOpponentName_Throws()
+        {
+            Assert.Throws<ArgumentNullException>(() =>
+                SessionDocumentBuilder.BuildInterestChangeBeatPrompt(
+                    null!, 10, 12, InterestState.Interested));
+        }
+
+        // ── PromptTemplates existence check ──
+
+        [Fact]
+        public void PromptTemplates_AllFieldsAreDefined()
+        {
+            Assert.False(string.IsNullOrEmpty(PromptTemplates.DialogueOptionsInstruction));
+            Assert.False(string.IsNullOrEmpty(PromptTemplates.SuccessDeliveryInstruction));
+            Assert.False(string.IsNullOrEmpty(PromptTemplates.FailureDeliveryInstruction));
+            Assert.False(string.IsNullOrEmpty(PromptTemplates.OpponentResponseInstruction));
+            Assert.False(string.IsNullOrEmpty(PromptTemplates.InterestBeatInstruction));
+        }
+
+        [Fact]
+        public void PromptTemplates_DialogueOptionsInstruction_ContainsKeyContent()
+        {
+            Assert.Contains("[STAT: X]", PromptTemplates.DialogueOptionsInstruction);
+            Assert.Contains("[CALLBACK:", PromptTemplates.DialogueOptionsInstruction);
+            Assert.Contains("[COMBO:", PromptTemplates.DialogueOptionsInstruction);
+            Assert.Contains("[TELL_BONUS:", PromptTemplates.DialogueOptionsInstruction);
+            Assert.Contains("exactly 4", PromptTemplates.DialogueOptionsInstruction);
+        }
+
+        [Fact]
+        public void PromptTemplates_FailureDeliveryInstruction_ContainsAllTiers()
+        {
+            Assert.Contains("FUMBLE", PromptTemplates.FailureDeliveryInstruction);
+            Assert.Contains("MISFIRE", PromptTemplates.FailureDeliveryInstruction);
+            Assert.Contains("TROPE_TRAP", PromptTemplates.FailureDeliveryInstruction);
+            Assert.Contains("CATASTROPHE", PromptTemplates.FailureDeliveryInstruction);
+            Assert.Contains("LEGENDARY", PromptTemplates.FailureDeliveryInstruction);
+        }
+
+        [Fact]
+        public void PromptTemplates_OpponentResponseInstruction_ContainsSignalsBlock()
+        {
+            Assert.Contains("[SIGNALS]", PromptTemplates.OpponentResponseInstruction);
+            Assert.Contains("[RESPONSE]", PromptTemplates.OpponentResponseInstruction);
+            Assert.Contains("TELL:", PromptTemplates.OpponentResponseInstruction);
+            Assert.Contains("WEAKNESS:", PromptTemplates.OpponentResponseInstruction);
+        }
+    }
+}
