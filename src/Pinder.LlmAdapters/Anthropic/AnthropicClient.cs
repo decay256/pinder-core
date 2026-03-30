@@ -87,8 +87,28 @@ namespace Pinder.LlmAdapters.Anthropic
                     if (response.IsSuccessStatusCode)
                     {
                         var responseBody = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                        var result = JsonConvert.DeserializeObject<MessagesResponse>(responseBody);
-                        return result!;
+                        MessagesResponse? result;
+                        try
+                        {
+                            result = JsonConvert.DeserializeObject<MessagesResponse>(responseBody);
+                        }
+                        catch (JsonException)
+                        {
+                            var truncated = responseBody?.Length > 200 ? responseBody.Substring(0, 200) : responseBody;
+                            throw new AnthropicApiException(
+                                statusCode,
+                                responseBody,
+                                $"Anthropic API returned {statusCode} but response body is malformed JSON: {truncated}") { };
+                        }
+                        if (result == null)
+                        {
+                            var truncated = responseBody?.Length > 200 ? responseBody.Substring(0, 200) : responseBody;
+                            throw new AnthropicApiException(
+                                statusCode,
+                                responseBody,
+                                $"Anthropic API returned {statusCode} but response body deserialized to null: {truncated}");
+                        }
+                        return result;
                     }
 
                     var errorBody = await response.Content.ReadAsStringAsync().ConfigureAwait(false);

@@ -300,6 +300,47 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             }
         }
 
+        [Fact]
+        public async Task SendMessagesAsync_200_MalformedJson_ThrowsAnthropicApiException()
+        {
+            var handler = new MockHttpMessageHandler((_, __) =>
+                new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent("not valid json", System.Text.Encoding.UTF8, "application/json")
+                });
+            var httpClient = new HttpClient(handler);
+            using (var client = new AnthropicClient(TestApiKey, httpClient))
+            {
+                var ex = await Assert.ThrowsAsync<AnthropicApiException>(
+                    () => client.SendMessagesAsync(MakeTestRequest()));
+
+                Assert.Equal(200, ex.StatusCode);
+                Assert.Contains("malformed JSON", ex.Message);
+                Assert.Equal("not valid json", ex.ResponseBody);
+                Assert.Equal(1, handler.CallCount); // no retry on deserialization failure
+            }
+        }
+
+        [Fact]
+        public async Task SendMessagesAsync_200_EmptyBody_ThrowsAnthropicApiException()
+        {
+            var handler = new MockHttpMessageHandler((_, __) =>
+                new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent("", System.Text.Encoding.UTF8, "application/json")
+                });
+            var httpClient = new HttpClient(handler);
+            using (var client = new AnthropicClient(TestApiKey, httpClient))
+            {
+                var ex = await Assert.ThrowsAsync<AnthropicApiException>(
+                    () => client.SendMessagesAsync(MakeTestRequest()));
+
+                Assert.Equal(200, ex.StatusCode);
+                Assert.Contains("deserialized to null", ex.Message);
+                Assert.Equal(1, handler.CallCount);
+            }
+        }
+
         // --- Dispose tests ---
 
         [Fact]
