@@ -2,7 +2,7 @@
 
 ## Overview
 
-This issue creates a new .NET Standard 2.0 project, `Pinder.LlmAdapters`, that will host all concrete `ILlmAdapter` implementations. The project references `Pinder.Core` (one-way dependency) and adds `Newtonsoft.Json 13.0.3` for Anthropic API serialization. This issue delivers the project scaffold, all Anthropic API DTO classes, `AnthropicOptions`, `AnthropicApiException`, and updates the solution file. No game logic in `Pinder.Core` is modified.
+This issue creates a new .NET Standard 2.0 project, `Pinder.LlmAdapters`, that will host all concrete `ILlmAdapter` implementations. The project references `Pinder.Core` (one-way dependency) and adds `Newtonsoft.Json 13.0.3` for Anthropic API serialization. This issue delivers the project scaffold, all Anthropic API DTO classes, `AnthropicOptions`, `AnthropicApiException`, a companion test project, and updates the solution file. No game logic in `Pinder.Core` is modified.
 
 ## Function Signatures
 
@@ -244,6 +244,8 @@ The project file must be located at `src/Pinder.LlmAdapters/Pinder.LlmAdapters.c
 - `TargetFramework`: `netstandard2.0`
 - `LangVersion`: `8.0`
 - `Nullable`: `enable`
+- `RootNamespace`: `Pinder.LlmAdapters`
+- `AssemblyName`: `Pinder.LlmAdapters`
 - `ProjectReference` to `../Pinder.Core/Pinder.Core.csproj`
 - `PackageReference` to `Newtonsoft.Json` version `13.0.3`
 
@@ -279,13 +281,27 @@ File: `src/Pinder.LlmAdapters/Anthropic/AnthropicApiException.cs`
 
 Must extend `System.Exception`. Constructor takes `(int statusCode, string responseBody)`. The `Message` (inherited from `Exception`) must follow the format: `"Anthropic API error {statusCode}: {responseBody}"`. Both `StatusCode` and `ResponseBody` must be exposed as read-only properties.
 
-### AC5: Solution file updated to include new project
+### AC5: Solution file updated to include new projects
 
-The `Pinder.Core.sln` solution file must include the `Pinder.LlmAdapters` project. It should be nested under the `src` solution folder, matching the existing `Pinder.Core` project organization. Running `dotnet build Pinder.Core.sln` must resolve the project correctly.
+The `Pinder.Core.sln` solution file must include both `Pinder.LlmAdapters` and `Pinder.LlmAdapters.Tests`. `Pinder.LlmAdapters` must be nested under the `src` solution folder; `Pinder.LlmAdapters.Tests` under the `tests` solution folder, matching the existing project organization. Running `dotnet build Pinder.Core.sln` must resolve all projects correctly.
+
+Per the architect contract (`contracts/sprint-9-llm-adapters-project.md`), a **test project** must also be created:
+
+**File:** `tests/Pinder.LlmAdapters.Tests/Pinder.LlmAdapters.Tests.csproj`
+
+- `TargetFramework`: `net8.0`
+- `ImplicitUsings`: `enable`
+- `Nullable`: `enable`
+- `IsPackable`: `false`
+- `IsTestProject`: `true`
+- References `Pinder.LlmAdapters` project via `ProjectReference`
+- Includes `Microsoft.NET.Test.Sdk 17.6.0`, `xunit 2.4.2`, `xunit.runner.visualstudio 2.4.5`, `coverlet.collector 6.0.0`
+
+**Constraint:** `Pinder.Core.Tests` must NOT reference `Pinder.LlmAdapters`. All adapter tests go in `Pinder.LlmAdapters.Tests`.
 
 ### AC6: `dotnet build` passes with 0 errors, 0 warnings
 
-Running `dotnet build src/Pinder.LlmAdapters/Pinder.LlmAdapters.csproj` must complete with 0 errors and 0 warnings. Running `dotnet build Pinder.Core.sln` must also pass with 0 errors and 0 warnings (including existing Pinder.Core and test projects).
+Running `dotnet build src/Pinder.LlmAdapters/Pinder.LlmAdapters.csproj` must complete with 0 errors and 0 warnings. Running `dotnet build Pinder.Core.sln` must also pass with 0 errors and 0 warnings (including existing Pinder.Core, Pinder.Core.Tests, Pinder.LlmAdapters, and Pinder.LlmAdapters.Tests projects). Running `dotnet test` on existing Pinder.Core.Tests must pass all 1118+ tests.
 
 ### AC7: Pinder.Core is NOT modified
 
@@ -363,6 +379,10 @@ All Anthropic DTOs must be in `Pinder.LlmAdapters.Anthropic.Dto`. `AnthropicOpti
 - **#208** (AnthropicLlmAdapter) — uses all DTOs plus `AnthropicOptions`
 - **#210** (Integration test) — depends on buildable project
 
+### Architect Contract
+
+See `contracts/sprint-9-llm-adapters-project.md` for the canonical contract.
+
 ### File Layout
 
 After this issue is complete, the following files must exist:
@@ -377,6 +397,9 @@ src/Pinder.LlmAdapters/
         ├── MessagesRequest.cs
         ├── ContentBlock.cs        (also contains CacheControl and Message)
         └── MessagesResponse.cs    (also contains ResponseContent and UsageStats)
+
+tests/Pinder.LlmAdapters.Tests/
+└── Pinder.LlmAdapters.Tests.csproj
 ```
 
-The solution file `Pinder.Core.sln` must be updated to include the new project.
+The solution file `Pinder.Core.sln` must be updated to include both new projects.
