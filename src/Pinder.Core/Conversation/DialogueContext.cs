@@ -42,6 +42,15 @@ namespace Pinder.Core.Conversation
         /// <summary>Full trap taint instructions for active traps, or null if none.</summary>
         public string[]? ActiveTrapInstructions { get; }
 
+        /// <summary>Display name of the player character. Default empty for backward compatibility.</summary>
+        public string PlayerName { get; }
+
+        /// <summary>Display name of the opponent character. Default empty for backward compatibility.</summary>
+        public string OpponentName { get; }
+
+        /// <summary>Current turn number (1-based). Default 0 for backward compatibility.</summary>
+        public int CurrentTurn { get; }
+
         public DialogueContext(
             string playerPrompt,
             string opponentPrompt,
@@ -53,7 +62,10 @@ namespace Pinder.Core.Conversation
             List<CallbackOpportunity>? callbackOpportunities = null,
             int horninessLevel = 0,
             bool requiresRizzOption = false,
-            string[]? activeTrapInstructions = null)
+            string[]? activeTrapInstructions = null,
+            string playerName = "",
+            string opponentName = "",
+            int currentTurn = 0)
         {
             PlayerPrompt = playerPrompt ?? throw new System.ArgumentNullException(nameof(playerPrompt));
             OpponentPrompt = opponentPrompt ?? throw new System.ArgumentNullException(nameof(opponentPrompt));
@@ -66,6 +78,9 @@ namespace Pinder.Core.Conversation
             HorninessLevel = horninessLevel;
             RequiresRizzOption = requiresRizzOption;
             ActiveTrapInstructions = activeTrapInstructions;
+            PlayerName = playerName ?? "";
+            OpponentName = opponentName ?? "";
+            CurrentTurn = currentTurn;
         }
     }
 }

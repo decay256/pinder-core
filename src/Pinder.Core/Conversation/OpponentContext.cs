@@ -44,6 +44,15 @@ namespace Pinder.Core.Conversation
         /// <summary>Full trap taint instructions for active traps, or null if none.</summary>
         public string[]? ActiveTrapInstructions { get; }
 
+        /// <summary>Display name of the player character. Default empty for backward compatibility.</summary>
+        public string PlayerName { get; }
+
+        /// <summary>Display name of the opponent character. Default empty for backward compatibility.</summary>
+        public string OpponentName { get; }
+
+        /// <summary>Current turn number (1-based). Default 0 for backward compatibility.</summary>
+        public int CurrentTurn { get; }
+
         public OpponentContext(
             string playerPrompt,
             string opponentPrompt,
@@ -56,7 +65,10 @@ namespace Pinder.Core.Conversation
             int interestAfter,
             double responseDelayMinutes,
             Dictionary<ShadowStatType, int>? shadowThresholds = null,
-            string[]? activeTrapInstructions = null)
+            string[]? activeTrapInstructions = null,
+            string playerName = "",
+            string opponentName = "",
+            int currentTurn = 0)
         {
             PlayerPrompt = playerPrompt ?? throw new System.ArgumentNullException(nameof(playerPrompt));
             OpponentPrompt = opponentPrompt ?? throw new System.ArgumentNullException(nameof(opponentPrompt));
@@ -70,6 +82,9 @@ namespace Pinder.Core.Conversation
             ResponseDelayMinutes = responseDelayMinutes;
             ShadowThresholds = shadowThresholds;
             ActiveTrapInstructions = activeTrapInstructions;
+            PlayerName = playerName ?? "";
+            OpponentName = opponentName ?? "";
+            CurrentTurn = currentTurn;
         }
     }
 }
