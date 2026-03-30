@@ -28,13 +28,20 @@ namespace Pinder.Core.Conversation
         /// </summary>
         public bool HasWeaknessWindow { get; }
 
+        /// <summary>
+        /// True if this option was injected or replaced by the Horniness mechanic (§15).
+        /// Informational for the UI — no mechanical difference in the roll.
+        /// </summary>
+        public bool IsHorninessForced { get; }
+
         public DialogueOption(
             StatType stat,
             string intendedText,
             int? callbackTurnNumber = null,
             string? comboName = null,
             bool hasTellBonus = false,
-            bool hasWeaknessWindow = false)
+            bool hasWeaknessWindow = false,
+            bool isHorninessForced = false)
         {
             Stat = stat;
             IntendedText = intendedText ?? throw new System.ArgumentNullException(nameof(intendedText));
@@ -42,6 +49,7 @@ namespace Pinder.Core.Conversation
             ComboName = comboName;
             HasTellBonus = hasTellBonus;
             HasWeaknessWindow = hasWeaknessWindow;
+            IsHorninessForced = isHorninessForced;
         }
     }
 }

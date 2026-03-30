@@ -64,6 +64,9 @@ namespace Pinder.Core.Conversation
         // Tell from opponent's last response (#50)
         private Tell? _activeTell;
 
+        // Horniness-forced Rizz option tracking (#51)
+        private readonly int _horniness;
+
         // Shadow threshold tracking (#45)
         private StatType? _lastStatUsed;
         private HashSet<StatType>? _shadowDisadvantagedStats;
@@ -128,6 +131,24 @@ namespace Pinder.Core.Conversation
             _playerShadows = config?.PlayerShadows;
             _opponentShadows = config?.OpponentShadows;
             _previousOpener = config?.PreviousOpener;
+
+            // Horniness-forced Rizz option (#51): compute once at session start
+            // Formula: dice.Roll(10) + timeModifier + shadowHorniness, clamped to min 0
+            // Only computed when a clock is available (time-of-day modifier is a required component).
+            // Without a clock, horniness defaults to 0 (no forced Rizz).
+            if (_clock != null)
+            {
+                int horninessBase = _dice.Roll(10);
+                int timeModifier = _clock.GetHorninessModifier();
+                int shadowHorniness = _playerShadows != null
+                    ? _playerShadows.GetEffectiveShadow(ShadowStatType.Horniness)
+                    : player.Stats.GetShadow(ShadowStatType.Horniness);
+                _horniness = Math.Max(0, horninessBase + timeModifier + shadowHorniness);
+            }
+            else
+            {
+                _horniness = 0;
+            }
 
             // XP tracking (#48)
             _xpLedger = new XpLedger();
@@ -258,7 +279,7 @@ namespace Pinder.Core.Conversation
             var activeTrapNames = GetActiveTrapNames();
             var activeTrapInstructions = GetActiveTrapInstructions();
 
-            // Build dialogue context — pass callback topics (#47) and shadow thresholds (#45)
+            // Build dialogue context — pass callback topics (#47), shadow thresholds (#45), horniness (#51)
             var context = new DialogueContext(
                 playerPrompt: _player.AssembledSystemPrompt,
                 opponentPrompt: _opponent.AssembledSystemPrompt,
@@ -268,7 +289,9 @@ namespace Pinder.Core.Conversation
                 currentInterest: _interest.Current,
                 shadowThresholds: shadowThresholds,
                 activeTrapInstructions: activeTrapInstructions,
-                callbackOpportunities: _topics.Count > 0 ? new List<CallbackOpportunity>(_topics) : null);
+                callbackOpportunities: _topics.Count > 0 ? new List<CallbackOpportunity>(_topics) : null,
+                horninessLevel: _horniness,
+                requiresRizzOption: _horniness >= 6);
 
             // Get dialogue options from LLM
             var rawOptions = await _llm.GetDialogueOptionsAsync(context).ConfigureAwait(false);
@@ -321,6 +344,9 @@ namespace Pinder.Core.Conversation
                     options = filtered;
                 }
             }
+
+            // Horniness-forced Rizz option overrides (#51) — applied after all other T3 filters
+            options = ApplyHorninessOverrides(options);
 
             _currentOptions = options;
 
@@ -809,6 +835,68 @@ namespace Pinder.Core.Conversation
         }
 
         /// <summary>
+        /// Applies Horniness-forced Rizz option rules to the LLM-returned options (§15).
+        /// - Horniness &lt; 6: no change.
+        /// - Horniness 6–17: ensures at least one Rizz option; replaces last if none present.
+        /// - Horniness ≥ 18: all options become forced Rizz.
+        /// Returns a new array with replacements applied.
+        /// </summary>
+        private DialogueOption[] ApplyHorninessOverrides(DialogueOption[] options)
+        {
+            if (options == null)
+                throw new ArgumentNullException(nameof(options));
+
+            if (options.Length == 0 || _horniness < 6)
+                return options;
+
+            if (_horniness >= 18)
+            {
+                // Threshold 3 (Overwhelming): ALL options become forced Rizz
+                var result = new DialogueOption[options.Length];
+                for (int i = 0; i < options.Length; i++)
+                {
+                    result[i] = new DialogueOption(
+                        StatType.Rizz,
+                        options[i].IntendedText,
+                        callbackTurnNumber: null,
+                        comboName: null,
+                        hasTellBonus: false,
+                        hasWeaknessWindow: false,
+                        isHorninessForced: true);
+                }
+                return result;
+            }
+
+            // Threshold 1 or 2 (6–17): ensure at least one Rizz option
+            bool hasRizz = false;
+            for (int i = 0; i < options.Length; i++)
+            {
+                if (options[i].Stat == StatType.Rizz)
+                {
+                    hasRizz = true;
+                    break;
+                }
+            }
+
+            if (hasRizz)
+                return options;
+
+            // Replace last option with forced Rizz
+            var overridden = new DialogueOption[options.Length];
+            Array.Copy(options, overridden, options.Length);
+            var last = options[options.Length - 1];
+            overridden[options.Length - 1] = new DialogueOption(
+                StatType.Rizz,
+                last.IntendedText,
+                callbackTurnNumber: null,
+                comboName: null,
+                hasTellBonus: false,
+                hasWeaknessWindow: false,
+                isHorninessForced: true);
+            return overridden;
+        }
+
+        /// <summary>
         /// Get momentum bonus for the current streak length.
         /// 3-streak → +2, 4-streak → +2, 5+ → +3.
         /// </summary>
@@ -831,7 +919,8 @@ namespace Pinder.Core.Conversation
                 momentumStreak: _momentumStreak,
                 activeTrapNames: trapNames,
                 turnNumber: _turnNumber,
-                tripleBonusActive: _comboTracker.HasTripleBonus);
+                tripleBonusActive: _comboTracker.HasTripleBonus,
+                horniness: _horniness);
         }
 
         private string GetLastOpponentMessage()

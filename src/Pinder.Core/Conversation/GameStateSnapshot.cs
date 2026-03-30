@@ -23,13 +23,17 @@ namespace Pinder.Core.Conversation
         /// <summary>True if The Triple bonus is active for the current turn (+1 to all rolls).</summary>
         public bool TripleBonusActive { get; }
 
+        /// <summary>Session Horniness level computed at session start (§15). 0 when not computed.</summary>
+        public int Horniness { get; }
+
         public GameStateSnapshot(
             int interest,
             InterestState state,
             int momentumStreak,
             string[] activeTrapNames,
             int turnNumber,
-            bool tripleBonusActive = false)
+            bool tripleBonusActive = false,
+            int horniness = 0)
         {
             Interest = interest;
             State = state;
@@ -37,6 +41,7 @@ namespace Pinder.Core.Conversation
             ActiveTrapNames = activeTrapNames ?? System.Array.Empty<string>();
             TurnNumber = turnNumber;
             TripleBonusActive = tripleBonusActive;
+            Horniness = horniness;
         }
     }
 }
