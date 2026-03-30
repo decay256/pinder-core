@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Pinder.Core.Conversation;
@@ -662,7 +663,7 @@ WEAKNESS: HONESTY -3 (clearly deflecting)";
         // What: Spec - Dispose on adapter constructed with external client doesn't dispose client
         // Mutation: Would catch if external client is disposed by adapter
         [Fact]
-        public void Dispose_ExternalClient_NotDisposed()
+        public async Task Dispose_ExternalClient_NotDisposed()
         {
             var handler = new CapturingHttpHandler("");
             using var client = new HttpClient(handler);
@@ -670,8 +671,19 @@ WEAKNESS: HONESTY -3 (clearly deflecting)";
             adapter.Dispose();
 
             // External client should still be usable — won't throw ObjectDisposedException
-            // (If adapter disposed it, this would throw)
-            Assert.NotNull(client.BaseAddress?.ToString() ?? "still alive");
+            // If adapter erroneously disposed it, SendAsync would throw ObjectDisposedException
+            var exception = await Record.ExceptionAsync(async () =>
+            {
+                try
+                {
+                    await client.GetAsync("http://localhost/health-check");
+                }
+                catch (HttpRequestException)
+                {
+                    // Expected: no server running. The point is it didn't throw ObjectDisposedException.
+                }
+            });
+            Assert.Null(exception);
         }
 
         // ==============================================================================
@@ -738,6 +750,171 @@ WEAKNESS: HONESTY -3 (clearly deflecting)";
             public ThrowingHandler(Exception ex) => _ex = ex;
             protected override Task<HttpResponseMessage> SendAsync(
                 HttpRequestMessage request, CancellationToken ct) => throw _ex;
+        }
+
+        // ==============================================================================
+        // Logging tests (code review W2 — adapter must log API calls)
+        // ==============================================================================
+
+        private sealed class CapturingLogger : ILogger<AnthropicLlmAdapter>
+        {
+            public List<(LogLevel Level, string Message)> Entries { get; } = new();
+
+            public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+            public bool IsEnabled(LogLevel logLevel) => true;
+
+            public void Log<TState>(LogLevel logLevel, EventId eventId, TState state,
+                Exception? exception, Func<TState, Exception?, string> formatter)
+            {
+                Entries.Add((logLevel, formatter(state, exception)));
+            }
+        }
+
+        [Fact]
+        public async Task GetDialogueOptionsAsync_LogsStartAndComplete()
+        {
+            var handler = new CapturingHttpHandler(@"OPTION_1
+[STAT: Charm] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
+""Hello there""
+OPTION_2
+[STAT: Wit] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
+""Witty line""
+OPTION_3
+[STAT: Honesty] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
+""Honest line""
+OPTION_4
+[STAT: Chaos] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
+""Chaos line""");
+            using var client = new HttpClient(handler);
+            var logger = new CapturingLogger();
+            using var adapter = new AnthropicLlmAdapter(DefaultOptions(), client, logger);
+
+            var history = new List<(string Sender, string Text)> { ("Player", "hi") };
+            var context = new DialogueContext(
+                "player prompt", "opponent prompt",
+                history, "hey", new string[0], 10);
+
+            await adapter.GetDialogueOptionsAsync(context);
+
+            Assert.Contains(logger.Entries, e =>
+                e.Level == LogLevel.Information && e.Message.Contains("GetDialogueOptionsAsync started"));
+            Assert.Contains(logger.Entries, e =>
+                e.Level == LogLevel.Information && e.Message.Contains("GetDialogueOptionsAsync complete"));
+        }
+
+        [Fact]
+        public async Task DeliverMessageAsync_LogsStartAndComplete()
+        {
+            var handler = new CapturingHttpHandler("Delivered message text");
+            using var client = new HttpClient(handler);
+            var logger = new CapturingLogger();
+            using var adapter = new AnthropicLlmAdapter(DefaultOptions(), client, logger);
+
+            var history = new List<(string Sender, string Text)> { ("Player", "hi") };
+            var option = new DialogueOption(StatType.Charm, "Hey there");
+            var context = new DeliveryContext(
+                "player prompt", "opponent prompt",
+                history, "Hey there", option,
+                FailureTier.None, 5, new string[0]);
+
+            await adapter.DeliverMessageAsync(context);
+
+            Assert.Contains(logger.Entries, e =>
+                e.Level == LogLevel.Information && e.Message.Contains("DeliverMessageAsync started"));
+            Assert.Contains(logger.Entries, e =>
+                e.Level == LogLevel.Information && e.Message.Contains("DeliverMessageAsync complete"));
+        }
+
+        [Fact]
+        public async Task GetOpponentResponseAsync_LogsStartAndComplete()
+        {
+            var handler = new CapturingHttpHandler(@"[RESPONSE] ""Hey back""");
+            using var client = new HttpClient(handler);
+            var logger = new CapturingLogger();
+            using var adapter = new AnthropicLlmAdapter(DefaultOptions(), client, logger);
+
+            var history = new List<(string Sender, string Text)> { ("Player", "hi") };
+            var context = new OpponentContext(
+                "player prompt", "opponent prompt",
+                history, "last msg", new string[0], 10,
+                "Delivered text", 10, 12, 0);
+
+            await adapter.GetOpponentResponseAsync(context);
+
+            Assert.Contains(logger.Entries, e =>
+                e.Level == LogLevel.Information && e.Message.Contains("GetOpponentResponseAsync started"));
+            Assert.Contains(logger.Entries, e =>
+                e.Level == LogLevel.Information && e.Message.Contains("GetOpponentResponseAsync complete"));
+        }
+
+        [Fact]
+        public async Task GetInterestChangeBeatAsync_LogsStartAndComplete()
+        {
+            var handler = new CapturingHttpHandler("Beat text");
+            using var client = new HttpClient(handler);
+            var logger = new CapturingLogger();
+            using var adapter = new AnthropicLlmAdapter(DefaultOptions(), client, logger);
+
+            var context = new InterestChangeContext("Opponent", 10, 16, InterestState.VeryIntoIt);
+
+            await adapter.GetInterestChangeBeatAsync(context);
+
+            Assert.Contains(logger.Entries, e =>
+                e.Level == LogLevel.Information && e.Message.Contains("GetInterestChangeBeatAsync started"));
+            Assert.Contains(logger.Entries, e =>
+                e.Level == LogLevel.Information && e.Message.Contains("GetInterestChangeBeatAsync complete"));
+        }
+
+        [Fact]
+        public void ParseDialogueOptions_InvalidStat_LogsWarning()
+        {
+            var logger = new CapturingLogger();
+            var response = @"OPTION_1
+[STAT: InvalidStat] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
+""Some text""";
+
+            AnthropicLlmAdapter.ParseDialogueOptions(response, logger);
+
+            Assert.Contains(logger.Entries, e =>
+                e.Level == LogLevel.Warning && e.Message.Contains("invalid stat"));
+        }
+
+        [Fact]
+        public void ParseDialogueOptions_EmptyResponse_LogsPaddingDebug()
+        {
+            var logger = new CapturingLogger();
+
+            AnthropicLlmAdapter.ParseDialogueOptions("", logger);
+
+            Assert.Contains(logger.Entries, e =>
+                e.Level == LogLevel.Debug && e.Message.Contains("padding"));
+        }
+
+        [Fact]
+        public void ParseOpponentResponse_InvalidTellStat_LogsWarning()
+        {
+            var logger = new CapturingLogger();
+            var response = @"[RESPONSE] ""Hey there""
+[SIGNALS]
+TELL: InvalidStat (some description)";
+
+            AnthropicLlmAdapter.ParseOpponentResponse(response, logger);
+
+            Assert.Contains(logger.Entries, e =>
+                e.Level == LogLevel.Warning && e.Message.Contains("invalid tell stat"));
+        }
+
+        [Fact]
+        public void ParseOpponentResponse_NoResponseBlock_LogsDebugFallback()
+        {
+            var logger = new CapturingLogger();
+            var response = "Just raw text without markers";
+
+            var result = AnthropicLlmAdapter.ParseOpponentResponse(response, logger);
+
+            Assert.Equal("Just raw text without markers", result.MessageText);
+            Assert.Contains(logger.Entries, e =>
+                e.Level == LogLevel.Debug && e.Message.Contains("fallback"));
         }
     }
 }

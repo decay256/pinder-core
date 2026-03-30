@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Pinder.Core.Conversation;
 using Pinder.Core.Interfaces;
 using Pinder.Core.Stats;
@@ -25,7 +28,7 @@ namespace Pinder.LlmAdapters.Anthropic
         private const double DefaultOpponentResponseTemperature = 0.85;
         private const double DefaultInterestChangeBeatTemperature = 0.8;
 
-        // Regex patterns for parsing LLM responses
+        // Regex patterns for parsing LLM responses (all static compiled)
         private static readonly Regex OptionHeaderRegex = new Regex(
             @"OPTION_\d+",
             RegexOptions.Compiled);
@@ -54,6 +57,10 @@ namespace Pinder.LlmAdapters.Anthropic
             @"\[RESPONSE\]\s*""([^""]+)""",
             RegexOptions.Compiled | RegexOptions.Singleline);
 
+        private static readonly Regex ResponseBlockAltRegex = new Regex(
+            @"\[RESPONSE\]\s*\n\s*""([^""]+)""",
+            RegexOptions.Compiled | RegexOptions.Singleline);
+
         private static readonly Regex TellSignalRegex = new Regex(
             @"TELL:\s*(\w+)\s*\(([^)]+)\)",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -70,32 +77,40 @@ namespace Pinder.LlmAdapters.Anthropic
 
         private readonly AnthropicClient _client;
         private readonly AnthropicOptions _options;
+        private readonly ILogger _logger;
 
         /// <summary>
         /// Creates adapter with internally-owned AnthropicClient.
         /// The adapter owns the client's lifecycle and disposes it.
         /// </summary>
-        public AnthropicLlmAdapter(AnthropicOptions options)
+        public AnthropicLlmAdapter(AnthropicOptions options, ILogger<AnthropicLlmAdapter>? logger = null)
         {
             _options = options ?? throw new ArgumentNullException(nameof(options));
             _client = new AnthropicClient(options.ApiKey);
+            _logger = logger ?? (ILogger)NullLogger.Instance;
         }
 
         /// <summary>
         /// Creates adapter with externally-provided HttpClient (for testing).
         /// The adapter does NOT dispose the external HttpClient.
         /// </summary>
-        public AnthropicLlmAdapter(AnthropicOptions options, HttpClient httpClient)
+        public AnthropicLlmAdapter(AnthropicOptions options, HttpClient httpClient, ILogger<AnthropicLlmAdapter>? logger = null)
         {
             _options = options ?? throw new ArgumentNullException(nameof(options));
             if (httpClient == null) throw new ArgumentNullException(nameof(httpClient));
             _client = new AnthropicClient(options.ApiKey, httpClient);
+            _logger = logger ?? (ILogger)NullLogger.Instance;
         }
 
         /// <inheritdoc />
         public async Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
+
+            _logger.LogInformation("GetDialogueOptionsAsync started: turn={Turn}, interest={Interest}, player={Player}",
+                context.CurrentTurn, context.CurrentInterest, FallbackName(context.PlayerName, "Player"));
+
+            var sw = Stopwatch.StartNew();
 
             var systemBlocks = CacheBlockBuilder.BuildCachedSystemBlocks(
                 context.PlayerPrompt, context.OpponentPrompt);
@@ -114,13 +129,28 @@ namespace Pinder.LlmAdapters.Anthropic
                 _options.DialogueOptionsTemperature ?? DefaultDialogueOptionsTemperature);
 
             var response = await _client.SendMessagesAsync(request).ConfigureAwait(false);
-            return ParseDialogueOptions(response.GetText());
+            var responseText = response.GetText();
+
+            _logger.LogDebug("GetDialogueOptionsAsync raw response: {Length} chars", responseText?.Length ?? 0);
+
+            var options = ParseDialogueOptions(responseText, _logger);
+
+            sw.Stop();
+            _logger.LogInformation("GetDialogueOptionsAsync complete: {Duration:F1}s, {ParsedCount} options parsed",
+                sw.Elapsed.TotalSeconds, options.Length);
+
+            return options;
         }
 
         /// <inheritdoc />
         public async Task<string> DeliverMessageAsync(DeliveryContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
+
+            _logger.LogInformation("DeliverMessageAsync started: outcome={Outcome}, beatDcBy={BeatDcBy}, player={Player}",
+                context.Outcome, context.BeatDcBy, FallbackName(context.PlayerName, "Player"));
+
+            var sw = Stopwatch.StartNew();
 
             var systemBlocks = CacheBlockBuilder.BuildCachedSystemBlocks(
                 context.PlayerPrompt, context.OpponentPrompt);
@@ -138,13 +168,24 @@ namespace Pinder.LlmAdapters.Anthropic
                 _options.DeliveryTemperature ?? DefaultDeliveryTemperature);
 
             var response = await _client.SendMessagesAsync(request).ConfigureAwait(false);
-            return response.GetText();
+            var text = response.GetText();
+
+            sw.Stop();
+            _logger.LogInformation("DeliverMessageAsync complete: {Duration:F1}s, {Length} chars",
+                sw.Elapsed.TotalSeconds, text?.Length ?? 0);
+
+            return text;
         }
 
         /// <inheritdoc />
         public async Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
+
+            _logger.LogInformation("GetOpponentResponseAsync started: interestBefore={Before}, interestAfter={After}, opponent={Opponent}",
+                context.InterestBefore, context.InterestAfter, FallbackName(context.OpponentName, "Opponent"));
+
+            var sw = Stopwatch.StartNew();
 
             // Per §3.5: only opponent prompt in system (opponent plays themselves)
             var systemBlocks = CacheBlockBuilder.BuildOpponentOnlySystemBlocks(context.OpponentPrompt);
@@ -163,13 +204,28 @@ namespace Pinder.LlmAdapters.Anthropic
                 _options.OpponentResponseTemperature ?? DefaultOpponentResponseTemperature);
 
             var response = await _client.SendMessagesAsync(request).ConfigureAwait(false);
-            return ParseOpponentResponse(response.GetText());
+            var responseText = response.GetText();
+
+            _logger.LogDebug("GetOpponentResponseAsync raw response: {Length} chars", responseText?.Length ?? 0);
+
+            var parsed = ParseOpponentResponse(responseText, _logger);
+
+            sw.Stop();
+            _logger.LogInformation("GetOpponentResponseAsync complete: {Duration:F1}s, hasTell={HasTell}, hasWeakness={HasWeakness}",
+                sw.Elapsed.TotalSeconds, parsed.DetectedTell != null, parsed.WeaknessWindow != null);
+
+            return parsed;
         }
 
         /// <inheritdoc />
         public async Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
+
+            _logger.LogInformation("GetInterestChangeBeatAsync started: {Before}→{After}, state={State}",
+                context.InterestBefore, context.InterestAfter, context.NewState);
+
+            var sw = Stopwatch.StartNew();
 
             // No cached system blocks for interest change beats
             var systemBlocks = Array.Empty<ContentBlock>();
@@ -185,7 +241,13 @@ namespace Pinder.LlmAdapters.Anthropic
 
             var response = await _client.SendMessagesAsync(request).ConfigureAwait(false);
             var text = response.GetText();
-            return string.IsNullOrWhiteSpace(text) ? null : text;
+            var result = string.IsNullOrWhiteSpace(text) ? null : text;
+
+            sw.Stop();
+            _logger.LogInformation("GetInterestChangeBeatAsync complete: {Duration:F1}s, hasResult={HasResult}",
+                sw.Elapsed.TotalSeconds, result != null);
+
+            return result;
         }
 
         /// <summary>Disposes the internal AnthropicClient.</summary>
@@ -198,7 +260,7 @@ namespace Pinder.LlmAdapters.Anthropic
         /// Parses structured LLM output into DialogueOption array.
         /// Never throws — returns 4 options, padding with defaults if needed.
         /// </summary>
-        internal static DialogueOption[] ParseDialogueOptions(string? llmResponse)
+        internal static DialogueOption[] ParseDialogueOptions(string? llmResponse, ILogger? logger = null)
         {
             var parsed = new List<DialogueOption>();
 
@@ -223,9 +285,10 @@ namespace Pinder.LlmAdapters.Anthropic
                         {
                             stat = (StatType)Enum.Parse(typeof(StatType), statStr, true);
                         }
-                        catch (ArgumentException)
+                        catch (ArgumentException ex)
                         {
-                            continue; // Invalid stat — skip this option
+                            logger?.LogWarning(ex, "ParseDialogueOptions: invalid stat '{Stat}', skipping option", statStr);
+                            continue;
                         }
 
                         var textMatch = QuotedTextRegex.Match(section);
@@ -242,18 +305,15 @@ namespace Pinder.LlmAdapters.Anthropic
                             var cbVal = callbackMatch.Groups[1].Value.Trim();
                             if (!string.Equals(cbVal, "none", StringComparison.OrdinalIgnoreCase))
                             {
-                                // Try extracting numeric value
                                 if (int.TryParse(cbVal, out int turnNum))
                                 {
                                     callbackTurn = turnNum;
                                 }
-                                // Also try "turn_N" pattern
                                 else if (cbVal.StartsWith("turn_", StringComparison.OrdinalIgnoreCase) &&
                                          int.TryParse(cbVal.Substring(5), out int turnNum2))
                                 {
                                     callbackTurn = turnNum2;
                                 }
-                                // Non-numeric callback reference — cannot resolve to int
                             }
                         }
 
@@ -280,13 +340,20 @@ namespace Pinder.LlmAdapters.Anthropic
                             stat, text, callbackTurn, comboName, hasTellBonus, hasWeaknessWindow: false));
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // Swallow any unexpected parse error — we'll pad with defaults below
+                    logger?.LogError(ex, "ParseDialogueOptions: unexpected parse failure, response={Length} chars. Padding with defaults.",
+                        llmResponse?.Length ?? 0);
                 }
             }
 
-            // Pad to exactly 4 options with defaults
+            var paddedCount = Math.Max(0, 4 - parsed.Count);
+            if (paddedCount > 0)
+            {
+                logger?.LogDebug("ParseDialogueOptions: parsed {Parsed} options, padding {Padded} defaults",
+                    parsed.Count, paddedCount);
+            }
+
             return PadToFour(parsed);
         }
 
@@ -294,14 +361,13 @@ namespace Pinder.LlmAdapters.Anthropic
         /// Parses structured LLM output with [RESPONSE] and optional [SIGNALS] blocks.
         /// Never throws — returns OpponentResponse with null signals on parse failure.
         /// </summary>
-        internal static OpponentResponse ParseOpponentResponse(string? llmResponse)
+        internal static OpponentResponse ParseOpponentResponse(string? llmResponse, ILogger? logger = null)
         {
             if (string.IsNullOrWhiteSpace(llmResponse))
             {
                 return new OpponentResponse("", null, null);
             }
 
-            // llmResponse is guaranteed non-null after the above check
             var response = llmResponse!;
             string messageText;
             Tell? tell = null;
@@ -317,9 +383,8 @@ namespace Pinder.LlmAdapters.Anthropic
                 }
                 else
                 {
-                    // No [RESPONSE] marker — check if there's a [RESPONSE] followed by text on next line
-                    var altPattern = new Regex(@"\[RESPONSE\]\s*\n\s*""([^""]+)""", RegexOptions.Singleline);
-                    var altMatch = altPattern.Match(response);
+                    // No [RESPONSE] marker — try alternative format with newline
+                    var altMatch = ResponseBlockAltRegex.Match(response);
                     if (altMatch.Success)
                     {
                         messageText = altMatch.Groups[1].Value.Trim();
@@ -337,6 +402,8 @@ namespace Pinder.LlmAdapters.Anthropic
                         {
                             messageText = messageText.Substring(1, messageText.Length - 2).Trim();
                         }
+
+                        logger?.LogDebug("ParseOpponentResponse: no [RESPONSE] block found, using fallback extraction");
                     }
                 }
 
@@ -356,9 +423,9 @@ namespace Pinder.LlmAdapters.Anthropic
                             var description = tellMatch.Groups[2].Value.Trim();
                             tell = new Tell(stat, description);
                         }
-                        catch (ArgumentException)
+                        catch (ArgumentException ex)
                         {
-                            // Invalid stat — tell stays null
+                            logger?.LogWarning(ex, "ParseOpponentResponse: invalid tell stat '{Stat}'", statStr);
                         }
                     }
 
@@ -375,16 +442,21 @@ namespace Pinder.LlmAdapters.Anthropic
                                 weakness = new WeaknessWindow(stat, reduction);
                             }
                         }
-                        catch (Exception)
+                        catch (ArgumentException ex)
                         {
-                            // Invalid stat or reduction — weakness stays null
+                            logger?.LogWarning(ex, "ParseOpponentResponse: invalid weakness stat '{Stat}'", statStr);
+                        }
+                        catch (FormatException ex)
+                        {
+                            logger?.LogWarning(ex, "ParseOpponentResponse: invalid weakness reduction value in signals block");
                         }
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // Any unexpected error — return empty response
+                logger?.LogError(ex, "ParseOpponentResponse: unexpected parse failure, response={Length} chars. Returning raw text with null signals.",
+                    response.Length);
                 return new OpponentResponse(response.Trim(), null, null);
             }
 
