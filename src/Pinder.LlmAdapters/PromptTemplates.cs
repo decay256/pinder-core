@@ -22,7 +22,24 @@ Each option must:
 For each option include metadata:
 [STAT: X] [CALLBACK: turn_N or none] [COMBO: name or none] [TELL_BONUS: yes/no]
 
-Keep options concise. One to three sentences. Match the opponent's register.";
+Keep options concise. One to three sentences. Match the opponent's register.
+
+Output EXACTLY this format for each option (no deviations):
+
+OPTION_1
+[STAT: CHARM] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
+""The exact text the character would send""
+
+OPTION_2
+[STAT: HONESTY] [CALLBACK: turn_2] [COMBO: The Reveal] [TELL_BONUS: yes]
+""The exact text the character would send""
+
+(continue for OPTION_3 and OPTION_4)
+
+Rules:
+- STAT must be one of: CHARM, RIZZ, HONESTY, CHAOS, WIT, SELF_AWARENESS
+- Text must be in double quotes on the line immediately after the metadata
+- No extra text before OPTION_1 or after the last option";
 
         /// <summary>§3.3 — Deliver the intended message on a successful roll.</summary>
         public const string SuccessDeliveryInstruction =
