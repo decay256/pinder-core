@@ -40,6 +40,27 @@ namespace Pinder.LlmAdapters.Anthropic
         }
 
         /// <summary>
+        /// Builds system blocks with only the player prompt cached.
+        /// Used by delivery calls where only the player speaks.
+        /// </summary>
+        /// <param name="playerPrompt">The player's assembled §3.1 system prompt.</param>
+        /// <returns>One ContentBlock with cache_control: ephemeral.</returns>
+        public static ContentBlock[] BuildPlayerOnlySystemBlocks(string playerPrompt)
+        {
+            if (playerPrompt == null) throw new ArgumentNullException(nameof(playerPrompt));
+
+            return new[]
+            {
+                new ContentBlock
+                {
+                    Type = "text",
+                    Text = playerPrompt,
+                    CacheControl = new CacheControl { Type = "ephemeral" }
+                }
+            };
+        }
+
+        /// <summary>
         /// Builds system blocks with only the opponent prompt cached.
         /// Used by opponent response calls.
         /// </summary>

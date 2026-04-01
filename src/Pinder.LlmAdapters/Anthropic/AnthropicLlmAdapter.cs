@@ -122,8 +122,7 @@ namespace Pinder.LlmAdapters.Anthropic
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
-            var systemBlocks = CacheBlockBuilder.BuildCachedSystemBlocks(
-                context.PlayerPrompt, context.OpponentPrompt);
+            var systemBlocks = CacheBlockBuilder.BuildPlayerOnlySystemBlocks(context.PlayerPrompt);
 
             var userContent = SessionDocumentBuilder.BuildDeliveryPrompt(
                 context.ConversationHistory,

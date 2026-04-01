@@ -509,7 +509,10 @@ namespace Pinder.Core.Conversation
                 outcome: rollResult.Tier,
                 beatDcBy: beatDcBy,
                 activeTraps: deliveryTrapNames,
-                activeTrapInstructions: deliveryTrapInstructions);
+                activeTrapInstructions: deliveryTrapInstructions,
+                playerName: _player.DisplayName,
+                opponentName: _opponent.DisplayName,
+                currentTurn: _turnNumber);
 
             string deliveredMessage = await _llm.DeliverMessageAsync(deliveryContext).ConfigureAwait(false);
 
@@ -546,7 +549,10 @@ namespace Pinder.Core.Conversation
                 interestBefore: interestBefore,
                 interestAfter: interestAfter,
                 responseDelayMinutes: responseDelayMinutes,
-                activeTrapInstructions: opponentTrapInstructions);
+                activeTrapInstructions: opponentTrapInstructions,
+                playerName: _player.DisplayName,
+                opponentName: _opponent.DisplayName,
+                currentTurn: _turnNumber);
 
             var opponentResponse = await _llm.GetOpponentResponseAsync(opponentContext).ConfigureAwait(false);
             if (opponentResponse == null)

@@ -571,7 +571,7 @@ OPTION_4
             Assert.Equal("Delivered message text", result);
             var body = JsonConvert.DeserializeObject<MessagesRequest>(handler.CapturedRequestBody!);
             Assert.Equal(0.7, body!.Temperature, 2);
-            Assert.Equal(2, body.System.Length); // Both prompts cached
+            Assert.Equal(1, body.System.Length); // Player-only prompt cached
         }
 
         [Fact]
