@@ -206,6 +206,86 @@ OPTION_2
     }
 
     // ============================================================
+    // DialogueOptionsInstruction template content tests
+    // ============================================================
+
+    public class DialogueOptionsInstructionTests
+    {
+        [Fact]
+        public void Instruction_contains_OPTION_headers()
+        {
+            Assert.Contains("OPTION_1", PromptTemplates.DialogueOptionsInstruction);
+            Assert.Contains("OPTION_2", PromptTemplates.DialogueOptionsInstruction);
+        }
+
+        [Fact]
+        public void Instruction_contains_output_format_rules()
+        {
+            Assert.Contains("STAT must be one of", PromptTemplates.DialogueOptionsInstruction);
+            Assert.Contains("SELF_AWARENESS", PromptTemplates.DialogueOptionsInstruction);
+            Assert.Contains("double quotes", PromptTemplates.DialogueOptionsInstruction);
+            Assert.Contains("No extra text before OPTION_1", PromptTemplates.DialogueOptionsInstruction);
+        }
+
+        [Fact]
+        public void Instruction_preserves_original_guidelines()
+        {
+            // Verify original instructional content was not removed
+            Assert.Contains("Generate exactly 4 dialogue options", PromptTemplates.DialogueOptionsInstruction);
+            Assert.Contains("CHARM, RIZZ, HONESTY, CHAOS, WIT, SELF_AWARENESS", PromptTemplates.DialogueOptionsInstruction);
+            Assert.Contains("Keep options concise", PromptTemplates.DialogueOptionsInstruction);
+        }
+
+        [Fact]
+        public void WellFormed_output_matching_instruction_format_parses_correctly()
+        {
+            // Simulate LLM output that follows the format described in the instruction
+            var llmOutput = @"OPTION_1
+[STAT: CHARM] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
+""hey so I noticed you're into marine biology… is that a career thing or a documentary thing""
+
+OPTION_2
+[STAT: HONESTY] [CALLBACK: turn_2] [COMBO: The Reveal] [TELL_BONUS: yes]
+""okay real talk I looked at your profile for way too long and I have questions about the penguin photo""
+
+OPTION_3
+[STAT: CHAOS] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
+""what if penguins had tinder. like what would their bios say. I need your thoughts on this""
+
+OPTION_4
+[STAT: WIT] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
+""your bio says looking for someone who gets it which is either deeply profound or deeply vague""";
+
+            var result = AnthropicLlmAdapter.ParseDialogueOptions(llmOutput);
+
+            Assert.Equal(4, result.Length);
+
+            // All options have non-empty IntendedText (not "...")
+            foreach (var opt in result)
+            {
+                Assert.NotEqual("...", opt.IntendedText);
+                Assert.False(string.IsNullOrWhiteSpace(opt.IntendedText));
+            }
+
+            // Correct stats
+            Assert.Equal(StatType.Charm, result[0].Stat);
+            Assert.Equal(StatType.Honesty, result[1].Stat);
+            Assert.Equal(StatType.Chaos, result[2].Stat);
+            Assert.Equal(StatType.Wit, result[3].Stat);
+
+            // Metadata on option 2
+            Assert.Equal(2, result[1].CallbackTurnNumber);
+            Assert.Equal("The Reveal", result[1].ComboName);
+            Assert.True(result[1].HasTellBonus);
+
+            // Option 1 has no callback/combo/tell
+            Assert.Null(result[0].CallbackTurnNumber);
+            Assert.Null(result[0].ComboName);
+            Assert.False(result[0].HasTellBonus);
+        }
+    }
+
+    // ============================================================
     // ParseOpponentResponse tests
     // ============================================================
 
