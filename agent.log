@@ -279,3 +279,6 @@
 {"ts":"2026-04-01T20:04:13+00:00","agent":"architect","issue":"240","component":"","action":"started","detail":"Starting: Architecture Review: LLM Adapter Bug Fixes","commit":null}
 {"ts":"2026-04-01T20:07:55+00:00","agent":"architect","issue":"240","component":"","action":"completed","correlationId":"architect-sprint-decay256-pinder-core-10-1775073428978","detail":"PR opened — correlationId: architect-sprint-decay256-pinder-core-10-1775073428978","commit":"ca43a15"}
 {"ts":"2026-04-01T20:08:55+00:00","agent":"product-visionary","issue":"240","component":"","action":"started","detail":"Starting: Architecture Vision Review (attempt 1): LLM Adapter Bug Fixes","commit":null}
+{"ts":"2026-04-01T20:56:00+00:00","agent":"backend-engineer","issue":"241","component":"","action":"started","detail":"Starting: Bug: Legendary fail delivery generates wrong character voice (opponent instead of player)","commit":null}
+{"ts":"2026-04-01T21:00:24.639Z","agent":"progress-auditor","issue":"sprint","component":"orchestrator","action":"audit","detail":"Warnings: stalled=, deadPIDs=, longRunning=, unreviewedPRs=215,204,192,142,141,140","commit":null}
+{"ts":"2026-04-01T21:10:46.835Z","agent":"progress-auditor","issue":"sprint","component":"orchestrator","action":"audit","detail":"Warnings: stalled=, deadPIDs=, longRunning=, unreviewedPRs=215,204,192,142,141,140","commit":null}

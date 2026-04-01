@@ -161,7 +161,7 @@ OPTION_4
         // What: AC2 - DeliverMessageAsync also uses cached system blocks with both prompts
         // Mutation: Would catch if delivery skips caching or uses wrong builder
         [Fact]
-        public async Task DeliverMessageAsync_SystemBlocks_HaveBothPromptsWithCacheControl()
+        public async Task DeliverMessageAsync_SystemBlocks_HavePlayerOnlyPromptWithCacheControl()
         {
             var handler = new CapturingHttpHandler("Delivered text");
             using var client = new HttpClient(handler);
@@ -172,7 +172,8 @@ OPTION_4
             Assert.Single(handler.RequestBodies);
             var body = JsonConvert.DeserializeObject<MessagesRequest>(handler.RequestBodies[0]);
             Assert.NotNull(body);
-            Assert.Equal(2, body!.System.Length);
+            // Issue #241: delivery uses player-only system blocks to prevent voice contamination
+            Assert.Equal(1, body!.System.Length);
             Assert.All(body.System, block =>
             {
                 Assert.NotNull(block.CacheControl);

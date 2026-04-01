@@ -43,7 +43,8 @@ Rules:
 
         /// <summary>§3.3 — Deliver the intended message on a successful roll.</summary>
         public const string SuccessDeliveryInstruction =
-@"Deliver this message as the character would actually send it.
+@"Write as {player_name}.
+Deliver this message as the character would actually send it.
 - On a clean success (margin 1–5): deliver it essentially as written, with natural voice
 - On a strong success (margin 6–10): add a small flourish or timing that makes it land better
 - On a critical success / Nat 20: deliver it at peak — perfectly timed, resonant, exactly right
@@ -53,7 +54,10 @@ Output only the message text.";
 
         /// <summary>§3.4 — Degrade the intended message according to failure tier.</summary>
         public const string FailureDeliveryInstruction =
-@"The player chose option: ""{intended_message}""
+@"You are writing as {player_name}. This is THEIR message, in THEIR voice.
+Do NOT write as the opponent. The failure corrupts what {player_name} says.
+
+The player chose option: ""{intended_message}""
 Stat used: {stat}
 They rolled FAILED — missed DC by {miss_margin}.
 Failure tier: {tier}

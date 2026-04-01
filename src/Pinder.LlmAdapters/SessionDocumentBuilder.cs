@@ -88,7 +88,8 @@ namespace Pinder.LlmAdapters
                 sb.AppendLine($"Stat used: {chosenOption.Stat.ToString().ToUpperInvariant()}");
                 sb.AppendLine($"They rolled SUCCESS — beat DC by {beatDcBy}.");
                 sb.AppendLine();
-                sb.Append(PromptTemplates.SuccessDeliveryInstruction);
+                sb.Append(PromptTemplates.SuccessDeliveryInstruction
+                    .Replace("{player_name}", playerName));
             }
             else
             {
@@ -104,6 +105,7 @@ namespace Pinder.LlmAdapters
                 sb.AppendLine();
 
                 string failureText = PromptTemplates.FailureDeliveryInstruction
+                    .Replace("{player_name}", playerName)
                     .Replace("{intended_message}", chosenOption.IntendedText)
                     .Replace("{stat}", chosenOption.Stat.ToString().ToUpperInvariant())
                     .Replace("{miss_margin}", missMargin.ToString())
