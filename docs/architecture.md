@@ -348,3 +348,44 @@ Caching strategy: character system prompts (~6k tokens) are placed in `cache_con
 | GameSession god object trajectory | #87 | Acknowledged — extraction planned for next maturity level |
 | Prompt template content not yet sourced | §3.2–3.8 | PromptTemplates.cs needs content from character-construction.md |
 | AnthropicOptions model string may need updating | — | Default `claude-sonnet-4-20250514` — verify model availability |
+
+---
+
+## Sprint 10: LLM Adapter Bug Fixes — Architecture Briefing
+
+### What's changing
+
+**This sprint continues the existing architecture with no structural changes.** Three bugs in the LLM adapter layer are being fixed. All changes are confined to `Pinder.LlmAdapters` (PromptTemplates, SessionDocumentBuilder, CacheBlockBuilder, AnthropicLlmAdapter) with minor wiring fixes in `Pinder.Core.Conversation.GameSession`.
+
+**Existing architecture summary**: Pinder.Core is a zero-dependency .NET Standard 2.0 RPG engine. `GameSession` orchestrates turns, calling `ILlmAdapter` methods with context DTOs (`DialogueContext`, `DeliveryContext`, `OpponentContext`). `Pinder.LlmAdapters` implements `ILlmAdapter` via `AnthropicLlmAdapter`, which uses `SessionDocumentBuilder` for prompt assembly, `CacheBlockBuilder` for Anthropic prompt caching, and `PromptTemplates` for instruction text. The dependency is strictly one-way: `LlmAdapters → Core`.
+
+### Components being extended
+
+1. **`PromptTemplates`** (LlmAdapters) — gains explicit output format in `DialogueOptionsInstruction`, player identity framing in `FailureDeliveryInstruction`, and shadow taint text constants
+2. **`SessionDocumentBuilder`** (LlmAdapters) — gains `{player_name}` substitution in delivery, optional `shadowThresholds` parameter on all three build methods
+3. **`CacheBlockBuilder`** (LlmAdapters) — gains `BuildPlayerOnlySystemBlocks` (mirrors existing opponent-only method)
+4. **`AnthropicLlmAdapter`** (LlmAdapters) — `DeliverMessageAsync` switches to player-only system blocks; all methods pass shadow thresholds through to builder
+5. **`GameSession`** (Core) — wires `playerName`, `opponentName`, `currentTurn`, `shadowThresholds` to `DeliveryContext` and `OpponentContext` constructors (fields already exist on DTOs, just not populated)
+
+### What is NOT changing
+- All Pinder.Core game logic (Stats, Rolls, Traps, Progression, Characters, Prompts, Data)
+- Context DTO class signatures (all new params are already optional with defaults)
+- Existing NullLlmAdapter behavior
+- Existing test behavior (all changes are backward-compatible via optional params)
+
+### Implicit assumptions for implementers
+1. **netstandard2.0 + LangVersion 8.0**: No `record` types. `Dictionary<ShadowStatType, int>?` is the shadow threshold carrier.
+2. **Context DTOs already have the fields**: `DeliveryContext.PlayerName`, `.OpponentName`, `.CurrentTurn`, `.ShadowThresholds` all exist with defaults. GameSession just needs to pass values.
+3. **`SessionDocumentBuilder` methods are static and pure**: New optional params must have defaults so existing callers (including all tests) compile unchanged.
+4. **Shadow taint is cosmetic (flavor text), not mechanical**: Taint blocks instruct the LLM on tone — they don't change game rules or roll math. The mechanical effects (disadvantage at tier 2+) are already handled by GameSession.
+5. **`ShadowStatType` enum is in `Pinder.Core.Stats`**: LlmAdapters already references Pinder.Core, so this import is available.
+
+### Known Gaps (as of Sprint 10)
+
+| Gap | Rules Section | Status |
+|-----|--------------|--------|
+| Shadow persistence across sessions | §8 | Not addressed — shadows are per-session via SessionShadowTracker |
+| `AddExternalBonus()` deprecated but not removed | — | Cleanup issue needed |
+| Energy system consumers | #144 | IGameClock.ConsumeEnergy() exists but nothing calls it |
+| GameSession god object trajectory | #87 | Acknowledged — extraction planned for next maturity level |
+| Opponent shadow threshold computation | §3.6 | GameSession computes player shadow thresholds; #242 adds opponent threshold computation for opponent prompt taint |
