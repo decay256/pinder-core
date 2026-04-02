@@ -389,3 +389,58 @@ Caching strategy: character system prompts (~6k tokens) are placed in `cache_con
 | Energy system consumers | #144 | IGameClock.ConsumeEnergy() exists but nothing calls it |
 | GameSession god object trajectory | #87 | Acknowledged — extraction planned for next maturity level |
 | Opponent shadow threshold computation | §3.6 | GameSession computes player shadow thresholds; #242 adds opponent threshold computation for opponent prompt taint |
+
+
+---
+
+## Sprint 11: Rules Compliance Fixes — Architecture Briefing
+
+### What's changing
+
+**This sprint continues the existing architecture with no structural changes.** Ten issues fix or complete game-rules logic within the existing module boundaries. All changes are confined to `Pinder.Core` — no `Pinder.LlmAdapters` changes.
+
+**Existing architecture summary**: Pinder.Core is a zero-dependency .NET Standard 2.0 RPG engine. `GameSession` orchestrates single-conversation turns, delegating to `RollEngine` (stateless roll resolution), `InterestMeter`, `TrapState`, `SessionShadowTracker`, `ComboTracker`, and `XpLedger`. State flows in via constructor params; per-turn state is owned by `GameSession`. Data loading is via `JsonParser` → repository classes.
+
+### Components being extended
+
+- `Data/` — new `data/traps/traps.json` file (#265)
+- `Rolls/FailureScale` — fix interest deltas to match rules §5 (#266)
+- `Rolls/RollEngine` — Catastrophe + Legendary trap activation (#267)
+- `Conversation/GameSession` — 7 issues:
+  - Momentum as roll bonus (#268)
+  - Horniness always rolled (#269)
+  - Read/Recover shadow disadvantage (#260)
+  - 5 shadow reduction events (#270)
+  - Nat 20 crit advantage (#271)
+  - Denial +1 on skipped Honesty (#272)
+  - Madness T3 option replacement (#273)
+- `Conversation/DialogueOption` — gains `IsUnhinged` property (#273)
+
+### What is NOT changing
+- Stats module (StatBlock, SessionShadowTracker, ShadowThresholdEvaluator) — no signature changes
+- Characters, Prompts, Data modules — untouched
+- Pinder.LlmAdapters — untouched
+- All context DTOs — no signature changes
+- NullLlmAdapter — untouched
+
+### Implicit assumptions for implementers
+1. **netstandard2.0 + LangVersion 8.0**: No `record` types, no generic `Enum.Parse<T>`
+2. **Zero NuGet dependencies in Pinder.Core**
+3. **`ApplyGrowth()` throws on amount ≤ 0** — use `ApplyOffset()` for shadow reductions
+4. **`AddExternalBonus()` is DEPRECATED** — use `externalBonus` param on `RollEngine.Resolve()`
+5. **Read/Recover are self-contained** — they do NOT call `StartTurnAsync()`
+6. **All 1146 existing tests must continue to pass** — changes are backward-compatible
+7. **Sequential implementation of GameSession issues** — 7 issues touch the same file
+
+### Known Gaps (as of Sprint 11)
+
+| Gap | Rules Section | Status |
+|-----|--------------|--------|
+| Shadow persistence across sessions | §8 | Not addressed — shadows are per-session |
+| `AddExternalBonus()` deprecated but not removed | — | Cleanup issue needed |
+| Energy system consumers | #144 | `IGameClock.ConsumeEnergy()` exists but nothing calls it |
+| GameSession god object trajectory | #87 | Growing — extraction planned for MVP |
+| Opponent shadow threshold computation | §3.6 | Player shadow thresholds only |
+| FailureScale values diverged from rules | §5 | Fixed this sprint (#266) |
+| Catastrophe/Legendary skip trap activation | §5 | Fixed this sprint (#267) |
+| Momentum applied as interest delta | §15 | Fixed this sprint (#268) |
