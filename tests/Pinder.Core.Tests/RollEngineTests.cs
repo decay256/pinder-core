@@ -23,6 +23,14 @@ namespace Pinder.Core.Tests
             public string? GetLlmInstruction(StatType stat) => null;
         }
 
+        private class SingleTrapRegistry : ITrapRegistry
+        {
+            private readonly TrapDefinition _trap;
+            public SingleTrapRegistry(TrapDefinition trap) => _trap = trap;
+            public TrapDefinition? GetTrap(StatType stat) => stat == _trap.Stat ? _trap : null;
+            public string? GetLlmInstruction(StatType stat) => null;
+        }
+
         private static StatBlock MakeStats(int charm = 0, int selfAwareness = 0, int madness = 0)
         {
             var baseStats = new Dictionary<StatType, int>
@@ -201,6 +209,95 @@ namespace Pinder.Core.Tests
 
             Assert.True(result.IsSuccess);
             Assert.Equal(2, result.LevelBonus);
+        }
+
+        [Fact]
+        public void Catastrophe_ActivatesTrap()
+        {
+            // Charm=-1, defender SA=10 → DC=23. Roll 9: total=9+(-1)+0=8, miss=15 → Catastrophe
+            // Trap should be activated on Catastrophe just like TropeTrap
+            var trapDef = new TrapDefinition("charm-trap", StatType.Charm,
+                TrapEffect.Disadvantage, 0, 2, "you're trapped", "cleared", "nat1 clear");
+            var registry = new SingleTrapRegistry(trapDef);
+            var traps = new TrapState();
+
+            var baseStats = new Dictionary<StatType, int>
+            {
+                { StatType.Charm, -1 }, { StatType.Rizz, 0 }, { StatType.Honesty, 0 },
+                { StatType.Chaos, 0 }, { StatType.Wit, 0 }, { StatType.SelfAwareness, 0 }
+            };
+            var shadowStats = new Dictionary<ShadowStatType, int>
+            {
+                { ShadowStatType.Madness, 0 }, { ShadowStatType.Horniness, 0 },
+                { ShadowStatType.Denial, 0 }, { ShadowStatType.Fixation, 0 },
+                { ShadowStatType.Dread, 0 }, { ShadowStatType.Overthinking, 0 }
+            };
+            var weakAttacker = new StatBlock(baseStats, shadowStats);
+            var strongDefender = MakeStats(selfAwareness: 10); // DC 23
+
+            var result = RollEngine.Resolve(
+                StatType.Charm, weakAttacker, strongDefender, traps, 1,
+                registry, new FixedDice(9));
+
+            Assert.Equal(FailureTier.Catastrophe, result.Tier);
+            Assert.NotNull(result.ActivatedTrap);
+            Assert.Equal("charm-trap", result.ActivatedTrap!.Id);
+            Assert.True(traps.IsActive(StatType.Charm));
+        }
+
+        [Fact]
+        public void Catastrophe_DoesNotActivateTrap_WhenAlreadyActive()
+        {
+            // If a trap is already active on the stat, Catastrophe should not replace it
+            var trapDef = new TrapDefinition("charm-trap", StatType.Charm,
+                TrapEffect.Disadvantage, 0, 2, "you're trapped", "cleared", "nat1 clear");
+            var registry = new SingleTrapRegistry(trapDef);
+            var traps = new TrapState();
+            // Pre-activate a trap
+            traps.Activate(trapDef);
+
+            var baseStats = new Dictionary<StatType, int>
+            {
+                { StatType.Charm, -1 }, { StatType.Rizz, 0 }, { StatType.Honesty, 0 },
+                { StatType.Chaos, 0 }, { StatType.Wit, 0 }, { StatType.SelfAwareness, 0 }
+            };
+            var shadowStats = new Dictionary<ShadowStatType, int>
+            {
+                { ShadowStatType.Madness, 0 }, { ShadowStatType.Horniness, 0 },
+                { ShadowStatType.Denial, 0 }, { ShadowStatType.Fixation, 0 },
+                { ShadowStatType.Dread, 0 }, { ShadowStatType.Overthinking, 0 }
+            };
+            var weakAttacker = new StatBlock(baseStats, shadowStats);
+            var strongDefender = MakeStats(selfAwareness: 10); // DC 23
+
+            var result = RollEngine.Resolve(
+                StatType.Charm, weakAttacker, strongDefender, traps, 1,
+                registry, new FixedDice(9));
+
+            Assert.Equal(FailureTier.Catastrophe, result.Tier);
+            // No new trap activated since one was already active
+            Assert.Null(result.ActivatedTrap);
+            Assert.True(traps.IsActive(StatType.Charm));
+        }
+
+        [Fact]
+        public void TropeTrap_StillActivatesTrap()
+        {
+            // Ensure existing TropeTrap trap activation still works after the Catastrophe fix
+            // Charm=0, defender SA=0 → DC=13. Roll 6: total=6, miss=7 → TropeTrap
+            var trapDef = new TrapDefinition("charm-trap", StatType.Charm,
+                TrapEffect.Disadvantage, 0, 2, "you're trapped", "cleared", "nat1 clear");
+            var registry = new SingleTrapRegistry(trapDef);
+            var traps = new TrapState();
+
+            var result = RollEngine.Resolve(
+                StatType.Charm, MakeStats(), MakeStats(), traps, 1,
+                registry, new FixedDice(6));
+
+            Assert.Equal(FailureTier.TropeTrap, result.Tier);
+            Assert.NotNull(result.ActivatedTrap);
+            Assert.Equal("charm-trap", result.ActivatedTrap!.Id);
+            Assert.True(traps.IsActive(StatType.Charm));
         }
     }
 }
