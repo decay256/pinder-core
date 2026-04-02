@@ -107,7 +107,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task TheRecovery_FailThenSASuccess_ComboTriggered()
         {
-            // Turn 1: Roll 5 → fail (5 + 2 = 7 vs DC 15, miss by 8 = TropeTrap -3)
+            // Turn 1: Roll 5 → fail (5 + 2 = 7 vs DC 15, miss by 8 = TropeTrap -2)
             // Turn 2: Roll 15 → success (SA, 15+2=17 vs DC 15)
             var dice = new FixedDice(
                 5, 50,   // Turn 1: fail

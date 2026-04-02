@@ -184,11 +184,9 @@ namespace Pinder.Core.Tests
         public async Task AC1_FourTropeTraps_MadnessStillOne()
         {
             var shadows = MakeTracker();
-            // Miss by 6-9 = TropeTrap = -3 interest. 4 turns × -3 = -12.
-            // Need to survive 4 turns without game ending.
-            // Starting at 15 (Interested, no adv/disadv). After 4 turns: 15-12=3 (Bored).
-            // Ghost check is in StartTurnAsync. After turn 3: 15-9=6 (Interested). Turn 4 start is safe.
-            // After turn 4: 6-3=3 (Bored) but game doesn't end on Bored, just ghost risk on next StartTurn.
+            // Miss by 6-9 = TropeTrap = -2 interest (rules-v3.4 §5). 4 turns × -2 = -8.
+            // Starting at 15 (Interested, no adv/disadv). After 4 turns: 15-8=7 (Interested).
+            // No game-ending risk.
             var diceValues = new List<int>();
             for (int i = 0; i < 4; i++) { diceValues.Add(6); diceValues.Add(50); }
             var session = BuildSession(
