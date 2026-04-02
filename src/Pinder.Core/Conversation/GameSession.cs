@@ -64,6 +64,9 @@ namespace Pinder.Core.Conversation
         // Tell from opponent's last response (#50)
         private Tell? _activeTell;
 
+        // Horniness session roll (#45)
+        private int _sessionHorniness;
+
         // Shadow threshold tracking (#45)
         private StatType? _lastStatUsed;
         private HashSet<StatType>? _shadowDisadvantagedStats;
@@ -128,6 +131,14 @@ namespace Pinder.Core.Conversation
             _playerShadows = config?.PlayerShadows;
             _opponentShadows = config?.OpponentShadows;
             _previousOpener = config?.PreviousOpener;
+
+            // Roll session Horniness (1d10) + time-of-day modifier (async-time feature, requires clock)
+            if (_clock != null)
+            {
+                int horninessRoll = _dice.Roll(10);
+                int todModifier = _clock.GetHorninessModifier();
+                _sessionHorniness = Math.Max(0, horninessRoll + todModifier);
+            }
 
             // XP tracking (#48)
             _xpLedger = new XpLedger();
@@ -268,7 +279,10 @@ namespace Pinder.Core.Conversation
                 currentInterest: _interest.Current,
                 shadowThresholds: shadowThresholds,
                 activeTrapInstructions: activeTrapInstructions,
-                callbackOpportunities: _topics.Count > 0 ? new List<CallbackOpportunity>(_topics) : null);
+                callbackOpportunities: _topics.Count > 0 ? new List<CallbackOpportunity>(_topics) : null,
+                horninessLevel: _sessionHorniness,
+                requiresRizzOption: _sessionHorniness >= 12,
+                currentTurn: _turnNumber);
 
             // Get dialogue options from LLM
             var rawOptions = await _llm.GetDialogueOptionsAsync(context).ConfigureAwait(false);
@@ -322,6 +336,17 @@ namespace Pinder.Core.Conversation
                 }
             }
 
+            // Horniness T3 (#45): all options become Rizz
+            if (_sessionHorniness >= 18)
+            {
+                for (int i = 0; i < options.Length; i++)
+                {
+                    var o = options[i];
+                    options[i] = new DialogueOption(StatType.Rizz, o.IntendedText, o.CallbackTurnNumber,
+                        o.ComboName, o.HasTellBonus, o.HasWeaknessWindow);
+                }
+            }
+
             _currentOptions = options;
 
             var snapshot = CreateSnapshot();
@@ -346,6 +371,14 @@ namespace Pinder.Core.Conversation
             if (optionIndex < 0 || optionIndex >= _currentOptions.Length)
                 throw new ArgumentOutOfRangeException(nameof(optionIndex),
                     $"Option index {optionIndex} is out of range. Valid range: 0–{_currentOptions.Length - 1}.");
+
+            // Consume 1 energy from clock if available
+            if (_clock != null && !_clock.ConsumeEnergy(1))
+            {
+                _ended = true;
+                _outcome = GameOutcome.Unmatched;
+                throw new GameEndedException(GameOutcome.Unmatched);
+            }
 
             var chosenOption = _currentOptions[optionIndex];
 
