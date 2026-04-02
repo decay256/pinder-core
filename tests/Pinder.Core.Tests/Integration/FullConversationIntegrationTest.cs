@@ -282,18 +282,19 @@ namespace Pinder.Core.Tests.Integration
             var gerald = new CharacterProfile(geraldStats, "Test", "Gerald", timing, level: 5);
             var velvet = new CharacterProfile(velvetStats, "Test", "Velvet", timing, level: 7);
 
-            // Start at 5 (Interested) — successes add interest but won't reach 16 (VeryIntoIt)
-            // with small beat margins. Charm DC=18, +15 modifier.
-            // T1: d20=3 → total=18, beat by 0 → +1. Interest 5→6. Momentum=1.
-            // T2: d20=3 → total=18, beat by 0 → +1. Interest 6→7. Momentum=2.
-            // T3: d20=3 → total=18, beat by 0 → +1. Momentum=3→bonus +2. Interest 7→10.
-            // T4: d20=1 → Nat1 fail. Interest 10→6 (Legendary -4). Momentum=0.
-            // T5: d20=3 → total=18, success. Interest 6→7. Momentum=1.
+            // Start at 10 (Interested) — successes add interest but won't reach Bored.
+            // Momentum is a roll bonus (#268), not interest delta — it appears in ExternalBonus.
+            // Charm DC=18, Gerald has +15 modifier.
+            // T1: streak=0→pending=0. d20=3 → total=18, beat by 0 → +1. Interest 10→11. Momentum=1.
+            // T2: streak=1→pending=0. d20=3 → total=18, beat by 0 → +1. Interest 11→12. Momentum=2.
+            // T3: streak=2→pending=0. d20=3 → total=18, beat by 0 → +1. Interest 12→13. Momentum=3.
+            // T4: streak=3→pending=+2. d20=1 → Nat1 fail (ExternalBonus=2 but Nat1 always fails). Interest 13→9 (Legendary -4). Momentum=0.
+            // T5: streak=0→pending=0. d20=3 → total=18, success. Interest 9→10. Momentum=1.
             var config = new GameSessionConfig(
                 clock: null,
                 playerShadows: new SessionShadowTracker(geraldStats),
                 opponentShadows: new SessionShadowTracker(velvetStats),
-                startingInterest: 5,
+                startingInterest: 10,
                 previousOpener: null);
 
             var llm = new ScriptedLlmAdapter(Enumerable.Range(0, 5).Select(_ =>
@@ -322,18 +323,23 @@ namespace Pinder.Core.Tests.Integration
             Assert.True(t2.Roll.IsSuccess);
             Assert.Equal(2, t2.StateAfter.MomentumStreak);
 
-            // T3: success → momentum 3 (bonus of +2 kicks in at streak 3)
+            // T3: success → momentum 3 (streak 3 bonus applied as roll bonus next turn)
             await session.StartTurnAsync();
             var t3 = await session.ResolveTurnAsync(0);
             Assert.True(t3.Roll.IsSuccess);
             // Mutation: Fails if momentum streak count is wrong
             Assert.Equal(3, t3.StateAfter.MomentumStreak);
+            // Momentum bonus is 0 this turn (streak was 2 at StartTurn)
+            Assert.Equal(0, t3.Roll.ExternalBonus);
 
             // T4: Nat1 → always fail → momentum resets to 0
+            // Pending momentum was +2 (streak=3 at start), but Nat1 overrides
             await session.StartTurnAsync();
             var t4 = await session.ResolveTurnAsync(0);
             Assert.False(t4.Roll.IsSuccess);
             Assert.True(t4.Roll.IsNatOne);
+            // Momentum bonus of +2 was in the roll but didn't help (Nat1 always fails)
+            Assert.Equal(2, t4.Roll.ExternalBonus);
             // Mutation: Fails if momentum doesn't reset to 0 on failure
             Assert.Equal(0, t4.StateAfter.MomentumStreak);
 

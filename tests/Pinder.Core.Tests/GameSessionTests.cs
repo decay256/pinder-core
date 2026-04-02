@@ -149,7 +149,7 @@ namespace Pinder.Core.Tests
 
             var result1 = await session.ResolveTurnAsync(0); // Charm
             Assert.True(result1.Roll.IsSuccess);
-            // beat by 2 → SuccessScale +1, need=13 → Hard → RiskTierBonus +1, no momentum at streak=1
+            // beat by 2 → SuccessScale +1, need=13 → Hard → RiskTierBonus +1, momentum bonus=0 (streak was 0)
             Assert.Equal(2, result1.InterestDelta);
             Assert.Equal(12, result1.StateAfter.Interest);
             Assert.False(result1.IsGameOver);
@@ -159,7 +159,7 @@ namespace Pinder.Core.Tests
             var start2 = await session.StartTurnAsync();
             var result2 = await session.ResolveTurnAsync(0);
             Assert.True(result2.Roll.IsSuccess);
-            Assert.Equal(2, result2.InterestDelta); // streak=2, no momentum; SuccessScale +1 + RiskTier +1
+            Assert.Equal(2, result2.InterestDelta); // streak=1 at start, no momentum; SuccessScale +1 + RiskTier +1
             Assert.Equal(14, result2.StateAfter.Interest);
             Assert.Equal(2, result2.StateAfter.TurnNumber);
 
@@ -167,9 +167,10 @@ namespace Pinder.Core.Tests
             var start3 = await session.StartTurnAsync();
             var result3 = await session.ResolveTurnAsync(0);
             Assert.True(result3.Roll.IsSuccess);
-            // streak=3 → +2 momentum bonus, SuccessScale +1, RiskTier +1, so delta = 1 + 1 + 2 = 4
-            Assert.Equal(4, result3.InterestDelta);
-            Assert.Equal(18, result3.StateAfter.Interest);
+            // streak=2 at start → momentum bonus=0 (applied as roll bonus, not interest delta #268)
+            // SuccessScale +1, RiskTier +1 = 2
+            Assert.Equal(2, result3.InterestDelta);
+            Assert.Equal(16, result3.StateAfter.Interest);
             Assert.Equal(3, result3.StateAfter.TurnNumber);
         }
 
@@ -266,32 +267,35 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public async Task MomentumBonus_AppliedCorrectly()
+        public async Task MomentumBonus_AppliedAsRollBonus()
         {
             // 5 consecutive successes with roll=15, each beating DC by 2 → +1 base
             // need = 15-(2+0) = 13 → Hard → +1 risk tier bonus per success
-            // streak 1: +1 base +1 risk +0 momentum = 2
-            // streak 2: +1 base +1 risk +0 momentum = 2
-            // streak 3: +1 base +1 risk +2 momentum = 4
-            // streak 4: +1 base +1 risk +2 momentum = 4 (advantage from VeryIntoIt)
-            // streak 5: +1 base +1 risk +3 momentum = 5 (advantage from AlmostThere, clamped to 25)
-            // Interest progression: 10→12→14→18→22→25 (clamped)
-            // At turn 4 start, interest=18 (VeryIntoIt) → advantage → 2x d20
-            // At turn 5 start, interest=22 (AlmostThere) → advantage → 2x d20
+            // Momentum is a roll bonus (ExternalBonus), not an interest delta (#268).
+            // SuccessScale uses Total (not FinalTotal), so momentum doesn't change the scale tier.
+            // streak 0→1: pending momentum=0, interestDelta = +1 scale +1 risk = 2
+            // streak 1→2: pending momentum=0, interestDelta = 2
+            // streak 2→3: pending momentum=0, interestDelta = 2. After: interest=16 (VeryIntoIt → advantage)
+            // streak 3→4: pending momentum=+2 (roll bonus), interestDelta = 2
+            // streak 4→5: pending momentum=+2 (roll bonus), interestDelta = 2
+            // Interest progression: 10→12→14→16→18→20
+            // At turn 4 start, interest=16 (VeryIntoIt) → advantage → 2x d20
+            // At turn 5 start, interest=18 (VeryIntoIt) → advantage → 2x d20
             var dice = new FixedDice(
                 15, 50,        // Turn 1: d20, d100 (timing)
                 15, 50,        // Turn 2: d20, d100
-                15, 50,        // Turn 3: d20, d100. After: 18 (VeryIntoIt)
-                15, 15, 50,    // Turn 4: 2x d20 (advantage), d100. After: 22 (AlmostThere)
-                15, 15, 50     // Turn 5: 2x d20 (advantage), d100. After: 25 (clamped)
+                15, 50,        // Turn 3: d20, d100. After: 16 (VeryIntoIt)
+                15, 15, 50,    // Turn 4: 2x d20 (advantage), d100
+                15, 15, 50     // Turn 5: 2x d20 (advantage), d100
             );
 
             var session = new GameSession(
                 MakeProfile("P"), MakeProfile("O"),
                 new NullLlmAdapter(), dice, new NullTrapRegistry());
 
-            // Note: interest is clamped to 25, so effective delta at turn 5 may be less
-            int[] expectedDeltas = { 2, 2, 4, 4, 5 };
+            // Every turn has the same interestDelta; momentum is in ExternalBonus
+            int[] expectedDeltas = { 2, 2, 2, 2, 2 };
+            int[] expectedMomentumBonus = { 0, 0, 0, 2, 2 };
             int expectedInterest = 10;
 
             for (int i = 0; i < 5; i++)
@@ -299,10 +303,47 @@ namespace Pinder.Core.Tests
                 await session.StartTurnAsync();
                 var result = await session.ResolveTurnAsync(0);
                 Assert.Equal(expectedDeltas[i], result.InterestDelta);
+                Assert.Equal(expectedMomentumBonus[i], result.Roll.ExternalBonus);
                 expectedInterest += expectedDeltas[i];
-                if (expectedInterest > 25) expectedInterest = 25; // clamp
                 Assert.Equal(expectedInterest, result.StateAfter.Interest);
             }
+        }
+
+        [Fact]
+        public async Task MomentumBonus_CanChangeOutcomeTier()
+        {
+            // AC: 3-win streak → next roll has +2 external bonus → can change outcome tier
+            // Setup: 3 successes with roll=15 (Total=17, DC=15, success), then
+            // turn 4 with roll=12 (Total=14, DC=15 → normally fail). With +2 momentum,
+            // FinalTotal=16 → success.
+            var dice = new FixedDice(
+                15, 50,   // Turn 1: success
+                15, 50,   // Turn 2: success
+                15, 50,   // Turn 3: success. After: interest=16 (VeryIntoIt → advantage)
+                12, 12, 50  // Turn 4: advantage → 2 d20s, both 12. Total=14, DC=15. Without momentum: fail. With +2: success.
+            );
+
+            var session = new GameSession(
+                MakeProfile("P"), MakeProfile("O"),
+                new NullLlmAdapter(), dice, new NullTrapRegistry());
+
+            // Build a 3-win streak
+            for (int i = 0; i < 3; i++)
+            {
+                await session.StartTurnAsync();
+                var r = await session.ResolveTurnAsync(0);
+                Assert.True(r.Roll.IsSuccess);
+            }
+
+            // Turn 4: roll that would fail without momentum but succeeds with it
+            await session.StartTurnAsync();
+            var result = await session.ResolveTurnAsync(0);
+
+            // Momentum bonus of +2 is in ExternalBonus
+            Assert.Equal(2, result.Roll.ExternalBonus);
+            // Total=14 (12+2+0), FinalTotal=16 (14+2) >= DC=15 → success
+            Assert.Equal(14, result.Roll.Total);
+            Assert.True(result.Roll.IsSuccess, "Momentum +2 should make this roll succeed (FinalTotal 16 >= DC 15)");
         }
 
         [Fact]

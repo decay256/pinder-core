@@ -131,7 +131,8 @@ namespace Pinder.Core.Tests
             Assert.True(start4.State.TripleBonusActive, "TripleBonusActive should be visible at start of turn 4");
 
             var r4 = await session.ResolveTurnAsync(0);
-            Assert.Equal(1, r4.Roll.ExternalBonus);
+            // ExternalBonus = triple(+1) + momentum(+2 from streak=3 at start, #268)
+            Assert.Equal(3, r4.Roll.ExternalBonus);
             Assert.False(r4.StateAfter.TripleBonusActive, "TripleBonusActive should be consumed after turn 4");
         }
 
@@ -141,7 +142,8 @@ namespace Pinder.Core.Tests
         public async Task InterestProgression_ThreeSuccessfulTurns_ReachesVeryIntoIt()
         {
             // With allStats=2, DC=15. Roll 15: total=17, beat by 2 → +1 success + +1 risk(Hard)
-            // Turn 1: +2 → 12, Turn 2: +2 → 14, Turn 3: +2 + momentum(+2) = +4 → 18 (VeryIntoIt)
+            // Momentum is a roll bonus (#268), not interest delta. Streak < 3 at start of each turn → no momentum bonus.
+            // Turn 1: +2 → 12, Turn 2: +2 → 14, Turn 3: +2 → 16 (VeryIntoIt)
             var dice = new FixedDice(
                 15, 50,
                 15, 50,
@@ -167,12 +169,12 @@ namespace Pinder.Core.Tests
             var r2 = await session.ResolveTurnAsync(0);
             Assert.Equal(14, r2.StateAfter.Interest);
 
-            // Turn 3: interest 14 → 18 (momentum kicks in at streak 3)
+            // Turn 3: interest 14 → 16 (momentum bonus=0 as streak was 2 at start; applied as roll bonus #268)
             await session.StartTurnAsync();
             var r3 = await session.ResolveTurnAsync(0);
-            Assert.Equal(18, r3.StateAfter.Interest);
+            Assert.Equal(16, r3.StateAfter.Interest);
 
-            // VeryIntoIt is interest 16-20; 18 is in that range
+            // VeryIntoIt is interest 16-20; 16 is in that range
             Assert.True(r3.StateAfter.Interest >= 16 && r3.StateAfter.Interest <= 20,
                 $"Interest {r3.StateAfter.Interest} should be in VeryIntoIt range (16-20)");
         }
@@ -212,7 +214,7 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
             var r4 = await session.ResolveTurnAsync(0);
 
-            // Roll should still succeed (max(15,15) + 2 + externalBonus(1) = 18 >= 15)
+            // Roll should still succeed (max(15,15) + 2 + momentum bonus(2) = 19 >= 15)
             Assert.True(r4.Roll.IsSuccess);
         }
 
@@ -228,7 +230,7 @@ namespace Pinder.Core.Tests
             Assert.Contains("no more values", ex.Message);
         }
 
-        // What: AC1 — ExternalBonus is exactly 1 from Triple bonus (not 0 or 2)
+        // What: AC1 — ExternalBonus includes +1 from Triple bonus (not 0 or 2)
         // Mutation: would catch if Triple bonus applied +2 instead of +1
         [Fact]
         public async Task TripleBonus_AppliesExactlyPlusOne_AsExternalBonus()
@@ -257,7 +259,8 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
             var r4 = await session.ResolveTurnAsync(0);
 
-            Assert.Equal(1, r4.Roll.ExternalBonus);
+            // ExternalBonus = triple(+1) + momentum(+2 from streak=3 at start, #268) = 3
+            Assert.Equal(3, r4.Roll.ExternalBonus);
         }
 
         // What: Edge case — Turns before VeryIntoIt consume exactly 2 dice each (no advantage)
