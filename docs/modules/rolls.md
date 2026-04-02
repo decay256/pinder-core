@@ -57,7 +57,8 @@ public enum FailureTier
 ## Architecture Notes
 
 - **FailureScale is pure logic** — no state, no dependencies. It takes a `RollResult` and returns an `int`.
-- **Side effects (trap activation, shadow growth) are handled by `GameSession`**, not by FailureScale. The scale only computes the interest delta.
+- **Trap activation on failure**: `RollEngine` activates traps for both `TropeTrap` (miss 6–9) and `Catastrophe` (miss 10+) tiers per rules §5. If a trap is already active on the stat, no new trap is activated. Trap lookup uses `ITrapRegistry.GetTrap(stat)`.
+- **Side effects (shadow growth) are handled by `GameSession`**, not by FailureScale. The scale only computes the interest delta.
 - **Interest is clamped to [0, 25] by GameSession** — FailureScale itself does not clamp.
 - The delta values were updated in issue #266 to match rules-v3.4 §5. The previous (prototype) values from issue #28 were steeper: Misfire −2, TropeTrap −3, Catastrophe −4, Legendary −5.
 
@@ -66,3 +67,4 @@ public enum FailureTier
 | Date | Issue | Summary |
 |------|-------|---------|
 | 2026-04-02 | #266 | Initial creation — documented FailureScale interest deltas updated to rules-v3.4 §5: Misfire −2→−1, TropeTrap −3→−2, Catastrophe −4→−3, Legendary −5→−4. Tests updated across GameSessionTests, ComboGameSessionTests, FullConversationIntegrationTest, ShadowGrowthEventTests, ShadowGrowthSpecTests. |
+| 2026-04-02 | #267 | Bug fix: Catastrophe tier (miss 10+) now also activates a trap via `RollEngine`, matching rules §5 (miss 10+ = −3 + trap). Previously only TropeTrap activated traps. Added `SingleTrapRegistry` test helper and three new tests in `RollEngineTests`. |
