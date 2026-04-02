@@ -109,7 +109,11 @@ namespace Pinder.LlmAdapters.Anthropic
                 context.CurrentTurn,
                 FallbackName(context.PlayerName, "Player"),
                 FallbackName(context.OpponentName, "Opponent"),
-                playerShadowThresholds: context.ShadowThresholds);
+                playerShadowThresholds: context.ShadowThresholds,
+                callbackOpportunities: context.CallbackOpportunities,
+                activeTrapInstructions: context.ActiveTrapInstructions,
+                horninessLevel: context.HorninessLevel,
+                requiresRizzOption: context.RequiresRizzOption);
 
             var request = BuildRequest(systemBlocks, userContent,
                 _options.DialogueOptionsTemperature ?? DefaultDialogueOptionsTemperature);

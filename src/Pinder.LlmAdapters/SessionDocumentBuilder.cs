@@ -24,7 +24,11 @@ namespace Pinder.LlmAdapters
             int currentTurn,
             string playerName,
             string opponentName,
-            Dictionary<ShadowStatType, int>? playerShadowThresholds = null)
+            Dictionary<ShadowStatType, int>? playerShadowThresholds = null,
+            List<CallbackOpportunity>? callbackOpportunities = null,
+            string[]? activeTrapInstructions = null,
+            int horninessLevel = 0,
+            bool requiresRizzOption = false)
         {
             if (conversationHistory == null) throw new ArgumentNullException(nameof(conversationHistory));
             if (opponentLastMessage == null) throw new ArgumentNullException(nameof(opponentLastMessage));
@@ -43,6 +47,17 @@ namespace Pinder.LlmAdapters
 
             sb.AppendLine();
             sb.AppendLine("GAME STATE");
+            sb.AppendLine($"- Turn: {currentTurn}");
+
+            // Interest state label
+            string interestLabel = currentInterest >= 21 ? "Almost There \U0001f525"
+                : currentInterest >= 16 ? "Very Into It \U0001f60d (player has advantage)"
+                : currentInterest >= 10 ? "Interested \U0001f60a"
+                : currentInterest >= 5  ? "Lukewarm \U0001f914"
+                : currentInterest >= 1  ? "Bored \U0001f610 (player has disadvantage)"
+                : "Unmatched \U0001f480";
+            sb.AppendLine($"- Interest: {currentInterest}/25 — {interestLabel}");
+
             if (activeTraps.Length == 0)
             {
                 sb.AppendLine("- Active traps: none");
@@ -52,12 +67,41 @@ namespace Pinder.LlmAdapters
                 sb.AppendLine($"- Active traps: {string.Join(", ", activeTraps)}");
             }
 
+            if (activeTrapInstructions != null && activeTrapInstructions.Length > 0)
+            {
+                sb.AppendLine("ACTIVE TRAP INSTRUCTIONS (taint ALL generated options regardless of stat):");
+                foreach (var instruction in activeTrapInstructions)
+                    sb.AppendLine(instruction);
+            }
+
+            if (horninessLevel >= 6)
+            {
+                sb.AppendLine($"- Horniness level: {horninessLevel}/10 (Rizz options are more prominent, slightly too forward)");
+            }
+            if (requiresRizzOption)
+            {
+                sb.AppendLine("- \U0001f525 REQUIRED: Include at least one Rizz option — Horniness is forcing it into the lineup.");
+            }
+
             string dialogueTaint = BuildShadowTaintBlock(playerShadowThresholds);
             if (!string.IsNullOrEmpty(dialogueTaint))
             {
                 sb.AppendLine();
                 sb.AppendLine("SHADOW STATE (corrupting forces on your communication)");
                 sb.AppendLine(dialogueTaint);
+            }
+
+            if (callbackOpportunities != null && callbackOpportunities.Count > 0)
+            {
+                sb.AppendLine();
+                sb.AppendLine("CALLBACK OPPORTUNITIES");
+                sb.AppendLine("Reference these topics naturally in 1-2 options to earn hidden roll bonuses:");
+                foreach (var cb in callbackOpportunities)
+                {
+                    int turnsAgo = currentTurn - cb.TurnIntroduced;
+                    string bonus = turnsAgo >= 4 ? "+2 hidden" : turnsAgo >= 2 ? "+1 hidden" : "+3 hidden (opener)";
+                    sb.AppendLine($"- \"{cb.TopicKey}\" (introduced T{cb.TurnIntroduced}, {turnsAgo} turns ago, {bonus})");
+                }
             }
 
             sb.AppendLine();
