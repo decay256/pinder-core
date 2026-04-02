@@ -181,7 +181,17 @@ namespace Pinder.Core.Rolls
                             attackerTraps.Activate(newTrap);
                     }
                 }
-                else tier = FailureTier.Catastrophe;
+                else
+                {
+                    tier = FailureTier.Catastrophe;
+                    // Catastrophe also activates trap (rules §5: miss 10+ = -3 + trap)
+                    if (!attackerTraps.IsActive(stat))
+                    {
+                        newTrap = trapRegistry.GetTrap(stat);
+                        if (newTrap != null)
+                            attackerTraps.Activate(newTrap);
+                    }
+                }
             }
 
             return new RollResult(
