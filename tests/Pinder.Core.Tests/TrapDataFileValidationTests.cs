@@ -223,6 +223,22 @@ namespace Pinder.Core.Tests
             Assert.Equal(3, repo.GetTrap(StatType.Wit)!.EffectValue);
         }
 
+        // Mutation: would catch if unhinged has effect_value != 0 (e.g., 2)
+        [Fact]
+        public void Unhinged_EffectValue_Is_0()
+        {
+            var repo = CreateRepo();
+            Assert.Equal(0, repo.GetTrap(StatType.Chaos)!.EffectValue);
+        }
+
+        // Mutation: would catch if spiral has effect_value != 0 (e.g., 2)
+        [Fact]
+        public void Spiral_EffectValue_Is_0()
+        {
+            var repo = CreateRepo();
+            Assert.Equal(0, repo.GetTrap(StatType.SelfAwareness)!.EffectValue);
+        }
+
         // === Duration turns ===
 
         // Mutation: would catch if cringe duration is 2 instead of 1
@@ -328,6 +344,16 @@ namespace Pinder.Core.Tests
             var repo = CreateRepo();
             var instruction = repo.GetLlmInstruction(StatType.Honesty);
             Assert.Contains("personal detail", instruction!);
+        }
+
+        // Mutation: would catch if unhinged llm_instruction has wrong content (e.g., missing momentum/acceleration)
+        [Fact]
+        public void Unhinged_LlmInstruction_ContainsExpectedContent()
+        {
+            var repo = CreateRepo();
+            var instruction = repo.GetLlmInstruction(StatType.Chaos);
+            Assert.Contains("momentum", instruction!);
+            Assert.Contains("derail", instruction!);
         }
 
         // Mutation: would catch if pretentious llm_instruction has wrong content
