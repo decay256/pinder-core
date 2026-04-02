@@ -1,4 +1,7 @@
+using System;
 using System.Collections.Generic;
+using Pinder.Core.Conversation;
+using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
 using Xunit;
 
@@ -6,8 +9,58 @@ namespace Pinder.LlmAdapters.Tests
 {
     public class ShadowTaintTests
     {
-        private static readonly IReadOnlyList<(string Sender, string Text)> MinimalHistory =
-            new List<(string, string)> { ("Opponent", "Hey there") };
+        private static DialogueContext MakeDialogueContext(
+            Dictionary<ShadowStatType, int> shadowThresholds = null)
+        {
+            return new DialogueContext(
+                playerPrompt: "player prompt",
+                opponentPrompt: "opponent prompt",
+                conversationHistory: new List<(string, string)> { ("Opponent", "Hey there") },
+                opponentLastMessage: "Hey there",
+                activeTraps: Array.Empty<string>(),
+                currentInterest: 10,
+                shadowThresholds: shadowThresholds,
+                playerName: "Player",
+                opponentName: "Opponent",
+                currentTurn: 1);
+        }
+
+        private static DeliveryContext MakeDeliveryContext(
+            DialogueOption option,
+            Dictionary<ShadowStatType, int> shadowThresholds = null)
+        {
+            return new DeliveryContext(
+                playerPrompt: "player prompt",
+                opponentPrompt: "opponent prompt",
+                conversationHistory: new List<(string, string)> { ("Opponent", "Hey there") },
+                opponentLastMessage: "Hey there",
+                chosenOption: option,
+                outcome: FailureTier.None,
+                beatDcBy: 3,
+                activeTraps: Array.Empty<string>(),
+                shadowThresholds: shadowThresholds,
+                playerName: "Player",
+                opponentName: "Opponent");
+        }
+
+        private static OpponentContext MakeOpponentContext(
+            Dictionary<ShadowStatType, int> shadowThresholds = null)
+        {
+            return new OpponentContext(
+                playerPrompt: "player prompt",
+                opponentPrompt: "opponent prompt",
+                conversationHistory: new List<(string, string)> { ("Opponent", "Hey there") },
+                opponentLastMessage: "Hey there",
+                activeTraps: Array.Empty<string>(),
+                currentInterest: 10,
+                playerDeliveredMessage: "Hello",
+                interestBefore: 10,
+                interestAfter: 12,
+                responseDelayMinutes: 2.0,
+                shadowThresholds: shadowThresholds,
+                playerName: "Player",
+                opponentName: "Opponent");
+        }
 
         [Fact]
         public void DialogueOptionsPrompt_HighMadness_ContainsShadowStateSection()
@@ -18,8 +71,7 @@ namespace Pinder.LlmAdapters.Tests
             };
 
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
-                MinimalHistory, "Hey there", new string[0], 10, 1, "Player", "Opponent",
-                playerShadowThresholds: shadows);
+                MakeDialogueContext(shadowThresholds: shadows));
 
             Assert.Contains("SHADOW STATE (corrupting forces on your communication)", result);
             Assert.Contains("Your Madness is elevated", result);
@@ -34,8 +86,7 @@ namespace Pinder.LlmAdapters.Tests
             };
 
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
-                MinimalHistory, "Hey there", new string[0], 10, 1, "Player", "Opponent",
-                playerShadowThresholds: shadows);
+                MakeDialogueContext(shadowThresholds: shadows));
 
             Assert.DoesNotContain("SHADOW STATE", result);
         }
@@ -51,8 +102,7 @@ namespace Pinder.LlmAdapters.Tests
             };
 
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
-                MinimalHistory, "Hey there", new string[0], 10, 1, "Player", "Opponent",
-                playerShadowThresholds: shadows);
+                MakeDialogueContext(shadowThresholds: shadows));
 
             Assert.Contains("Your Madness is elevated", result);
             Assert.Contains("Your Denial is elevated", result);
@@ -68,8 +118,7 @@ namespace Pinder.LlmAdapters.Tests
             };
 
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
-                MinimalHistory, "Hey there", new string[0], 10, 1, "Player", "Opponent",
-                playerShadowThresholds: shadows);
+                MakeDialogueContext(shadowThresholds: shadows));
 
             Assert.DoesNotContain("SHADOW STATE", result);
             Assert.DoesNotContain("Your Horniness is elevated", result);
@@ -84,8 +133,7 @@ namespace Pinder.LlmAdapters.Tests
             };
 
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
-                MinimalHistory, "Hey there", new string[0], 10, 1, "Player", "Opponent",
-                playerShadowThresholds: shadows);
+                MakeDialogueContext(shadowThresholds: shadows));
 
             Assert.Contains("SHADOW STATE (corrupting forces on your communication)", result);
             Assert.Contains("Your Horniness is elevated", result);
@@ -95,8 +143,7 @@ namespace Pinder.LlmAdapters.Tests
         public void DialogueOptionsPrompt_NullShadow_NoShadowStateSection()
         {
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
-                MinimalHistory, "Hey there", new string[0], 10, 1, "Player", "Opponent",
-                playerShadowThresholds: null);
+                MakeDialogueContext(shadowThresholds: null));
 
             Assert.DoesNotContain("SHADOW STATE", result);
         }
@@ -108,13 +155,11 @@ namespace Pinder.LlmAdapters.Tests
             {
                 { ShadowStatType.Overthinking, 7 }
             };
-            var option = new Pinder.Core.Conversation.DialogueOption(
+            var option = new DialogueOption(
                 StatType.Wit, "Test message", null, null, false, false);
 
             var result = SessionDocumentBuilder.BuildDeliveryPrompt(
-                MinimalHistory, option, Pinder.Core.Rolls.FailureTier.None, 3, null,
-                "Player", "Opponent",
-                playerShadowThresholds: shadows);
+                MakeDeliveryContext(option, shadowThresholds: shadows));
 
             Assert.Contains("SHADOW STATE (corrupting forces on your communication)", result);
             Assert.Contains("Your Overthinking is elevated", result);
@@ -129,9 +174,7 @@ namespace Pinder.LlmAdapters.Tests
             };
 
             var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MinimalHistory, "Hello", 10, 12, 2.0, null,
-                "Player", "Opponent",
-                opponentShadowThresholds: shadows);
+                MakeOpponentContext(shadowThresholds: shadows));
 
             Assert.Contains("SHADOW STATE (corrupting forces on your communication)", result);
             Assert.Contains("Your Fixation is elevated", result);

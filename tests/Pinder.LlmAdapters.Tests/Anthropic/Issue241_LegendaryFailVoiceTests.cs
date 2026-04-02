@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Pinder.Core.Conversation;
 using Pinder.Core.Rolls;
@@ -15,6 +16,29 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
     /// </summary>
     public class Issue241_LegendaryFailVoiceTests
     {
+        private static DeliveryContext MakeDeliveryContext(
+            IReadOnlyList<(string Sender, string Text)> conversationHistory = null,
+            DialogueOption chosenOption = null,
+            FailureTier outcome = FailureTier.None,
+            int beatDcBy = 0,
+            string[] activeTrapInstructions = null,
+            string playerName = "P",
+            string opponentName = "O")
+        {
+            return new DeliveryContext(
+                playerPrompt: "player prompt",
+                opponentPrompt: "opponent prompt",
+                conversationHistory: conversationHistory ?? new List<(string, string)>(),
+                opponentLastMessage: "",
+                chosenOption: chosenOption ?? new DialogueOption(StatType.Charm, "default"),
+                outcome: outcome,
+                beatDcBy: beatDcBy,
+                activeTraps: Array.Empty<string>(),
+                activeTrapInstructions: activeTrapInstructions,
+                playerName: playerName,
+                opponentName: opponentName);
+        }
+
         // ==========================================================
         // AC1: FailureDeliveryInstruction explicitly identifies player role
         // ==========================================================
@@ -116,11 +140,10 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
                 hasTellBonus: false, hasWeaknessWindow: false);
 
             string prompt = SessionDocumentBuilder.BuildDeliveryPrompt(
-                history, option, FailureTier.Legendary, beatDcBy: 0,
-                activeTrapInstructions: null,
-                playerName: "Sable", opponentName: "Brick");
+                MakeDeliveryContext(conversationHistory: history, chosenOption: option,
+                    outcome: FailureTier.Legendary, beatDcBy: 0,
+                    playerName: "Sable", opponentName: "Brick"));
 
-            // Player identity must be substituted (not raw token)
             Assert.Contains("You are writing as Sable", prompt);
             Assert.Contains("The failure corrupts what Sable says", prompt);
             Assert.DoesNotContain("{player_name}", prompt);
@@ -140,9 +163,9 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
                 hasTellBonus: false, hasWeaknessWindow: false);
 
             string prompt = SessionDocumentBuilder.BuildDeliveryPrompt(
-                history, option, FailureTier.None, beatDcBy: 5,
-                activeTrapInstructions: null,
-                playerName: "Sable", opponentName: "Brick");
+                MakeDeliveryContext(conversationHistory: history, chosenOption: option,
+                    outcome: FailureTier.None, beatDcBy: 5,
+                    playerName: "Sable", opponentName: "Brick"));
 
             Assert.Contains("Write as Sable", prompt);
             Assert.DoesNotContain("{player_name}", prompt);
@@ -151,16 +174,14 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         [Fact]
         public void AC4_Catastrophe_fail_delivery_prompt_contains_player_identity()
         {
-            var history = new List<(string, string)>();
             var option = new DialogueOption(
                 StatType.Honesty, "I think we could be great",
                 callbackTurnNumber: null, comboName: null,
                 hasTellBonus: false, hasWeaknessWindow: false);
 
             string prompt = SessionDocumentBuilder.BuildDeliveryPrompt(
-                history, option, FailureTier.Catastrophe, beatDcBy: 0,
-                activeTrapInstructions: null,
-                playerName: "Blaze", opponentName: "Jade");
+                MakeDeliveryContext(chosenOption: option, outcome: FailureTier.Catastrophe,
+                    playerName: "Blaze", opponentName: "Jade"));
 
             Assert.Contains("You are writing as Blaze", prompt);
             Assert.Contains("Do NOT write as the opponent", prompt);
@@ -169,16 +190,15 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         [Fact]
         public void AC4_Failure_prompt_with_active_traps_still_has_player_identity()
         {
-            var history = new List<(string, string)>();
             var option = new DialogueOption(
                 StatType.Wit, "clever joke",
                 callbackTurnNumber: null, comboName: null,
                 hasTellBonus: false, hasWeaknessWindow: false);
 
             string prompt = SessionDocumentBuilder.BuildDeliveryPrompt(
-                history, option, FailureTier.TropeTrap, beatDcBy: 0,
-                activeTrapInstructions: new[] { "Overthinking trap active" },
-                playerName: "Sable", opponentName: "Brick");
+                MakeDeliveryContext(chosenOption: option, outcome: FailureTier.TropeTrap,
+                    activeTrapInstructions: new[] { "Overthinking trap active" },
+                    playerName: "Sable", opponentName: "Brick"));
 
             Assert.Contains("You are writing as Sable", prompt);
             Assert.Contains("Overthinking trap active", prompt);
