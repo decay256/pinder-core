@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Trap Definitions",
+  "description": "Schema for Pinder trap definition data files consumed by JsonTrapRepository.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["id", "stat", "effect", "effect_value", "duration_turns", "llm_instruction"],
+    "properties": {
+      "id": {
+        "type": "string",
+        "description": "Unique identifier for the trap (e.g. 'cringe', 'creep')."
+      },
+      "stat": {
+        "type": "string",
+        "enum": ["charm", "rizz", "honesty", "chaos", "wit", "self_awareness"],
+        "description": "The stat that triggers this trap on a TropeTrap failure tier (miss by 6-9)."
+      },
+      "effect": {
+        "type": "string",
+        "enum": ["disadvantage", "stat_penalty", "opponent_dc_increase"],
+        "description": "The mechanical effect type applied while the trap is active."
+      },
+      "effect_value": {
+        "type": "integer",
+        "minimum": 0,
+        "description": "Magnitude of the effect. 0 for disadvantage (boolean effect), positive for stat_penalty/opponent_dc_increase."
+      },
+      "duration_turns": {
+        "type": "integer",
+        "minimum": 1,
+        "description": "Number of turns the trap remains active before expiring."
+      },
+      "llm_instruction": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Prompt taint instruction passed to the LLM to flavor generated messages while the trap is active."
+      },
+      "clear_method": {
+        "type": "string",
+        "description": "Description of how to clear the trap early (e.g. 'SA vs DC 12').",
+        "default": ""
+      },
+      "nat1_bonus": {
+        "type": "string",
+        "description": "Extra punishment on Nat 1 while trap is active.",
+        "default": ""
+      }
+    },
+    "additionalProperties": false
+  }
+}

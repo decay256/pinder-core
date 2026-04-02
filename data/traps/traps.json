@@ -1,0 +1,62 @@
+[
+  {
+    "id": "cringe",
+    "stat": "charm",
+    "effect": "disadvantage",
+    "effect_value": 0,
+    "duration_turns": 1,
+    "llm_instruction": "You are aware of how you're coming across, which is making it worse. Every message is slightly over-explained or self-undermined. The more you try to be charming, the harder you try.",
+    "clear_method": "SA vs DC 12",
+    "nat1_bonus": ""
+  },
+  {
+    "id": "creep",
+    "stat": "rizz",
+    "effect": "stat_penalty",
+    "effect_value": 2,
+    "duration_turns": 2,
+    "llm_instruction": "Inject a subtle 'agenda' quality into ALL generated messages. On success: one line that could be read two ways. On failure: the entire message feels like it's leading somewhere uncomfortable.",
+    "clear_method": "SA vs DC 12",
+    "nat1_bonus": ""
+  },
+  {
+    "id": "overshare",
+    "stat": "honesty",
+    "effect": "opponent_dc_increase",
+    "effect_value": 2,
+    "duration_turns": 1,
+    "llm_instruction": "Inject an accidental personal detail into ALL generated messages regardless of stat. On success: one parenthetical or aside that reveals something private. On failure: multiple personal details intrude and derail the message.",
+    "clear_method": "SA vs DC 12",
+    "nat1_bonus": ""
+  },
+  {
+    "id": "unhinged",
+    "stat": "chaos",
+    "effect": "disadvantage",
+    "effect_value": 0,
+    "duration_turns": 1,
+    "llm_instruction": "Inject momentum/acceleration into ALL generated messages. On success: one extra clause or tangent at the end that wasn't planned. On failure: the message progressively derails, starting controlled and ending somewhere completely different.",
+    "clear_method": "SA vs DC 12",
+    "nat1_bonus": ""
+  },
+  {
+    "id": "pretentious",
+    "stat": "wit",
+    "effect": "opponent_dc_increase",
+    "effect_value": 3,
+    "duration_turns": 1,
+    "llm_instruction": "Inject a condescending or over-explanatory quality into ALL generated messages. On success: one unnecessary clarification or reference. On failure: the message becomes pedagogical — explaining things the opponent didn't ask about.",
+    "clear_method": "SA vs DC 12",
+    "nat1_bonus": ""
+  },
+  {
+    "id": "spiral",
+    "stat": "self_awareness",
+    "effect": "disadvantage",
+    "effect_value": 0,
+    "duration_turns": 2,
+    "llm_instruction": "While this trap is active, inject meta-commentary into ALL generated messages. On success: one aside that acknowledges the conversation dynamic. On failure: the character narrates their own failure, creating a recursive self-awareness loop.",
+    "clear_method": "SA vs DC 12",
+    "nat1_bonus": ""
+  }
+]
