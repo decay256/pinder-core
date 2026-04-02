@@ -51,10 +51,10 @@ namespace Pinder.Core.Tests
         [Theory]
         [InlineData(FailureTier.None, 0)]
         [InlineData(FailureTier.Fumble, -1)]
-        [InlineData(FailureTier.Misfire, -2)]
-        [InlineData(FailureTier.TropeTrap, -3)]
-        [InlineData(FailureTier.Catastrophe, -4)]
-        [InlineData(FailureTier.Legendary, -5)]
+        [InlineData(FailureTier.Misfire, -1)]
+        [InlineData(FailureTier.TropeTrap, -2)]
+        [InlineData(FailureTier.Catastrophe, -3)]
+        [InlineData(FailureTier.Legendary, -4)]
         public void GetInterestDelta_ReturnsCorrectValue(FailureTier tier, int expected)
         {
             // Build a RollResult with the given tier
@@ -176,7 +176,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task FailedRoll_ResetsStreak_AppliesNegativeDelta()
         {
-            // DC = 13 + 2 = 15. Roll 5: 5 + 2 + 0 = 7 < 15. Miss by 8 → TropeTrap (-3)
+            // DC = 13 + 2 = 15. Roll 5: 5 + 2 + 0 = 7 < 15. Miss by 8 → TropeTrap (-2 per rules-v3.4 §5)
             var dice = new FixedDice(
                 5, 50  // d20=5, d100 for timing
             );
@@ -190,8 +190,8 @@ namespace Pinder.Core.Tests
 
             Assert.False(result.Roll.IsSuccess);
             Assert.Equal(FailureTier.TropeTrap, result.Roll.Tier);
-            Assert.Equal(-3, result.InterestDelta);
-            Assert.Equal(7, result.StateAfter.Interest); // 10 - 3
+            Assert.Equal(-2, result.InterestDelta);
+            Assert.Equal(8, result.StateAfter.Interest); // 10 - 2
             Assert.Equal(0, result.StateAfter.MomentumStreak);
         }
 
@@ -202,8 +202,8 @@ namespace Pinder.Core.Tests
             // We'll manipulate by having bad rolls to lower interest to 4 (Bored).
             // Then on next StartTurnAsync, ghost check: dice.Roll(4)==1 → Ghosted.
 
-            // Turn 1: roll 1 (nat 1 → Legendary → -5 interest) → interest = 5 (Interested)
-            // Turn 2: roll 5 → miss by 8 → TropeTrap → -3 → interest = 2 (Bored)
+            // Turn 1: roll 1 (nat 1 → Legendary → -4 interest) → interest = 6 (Interested)
+            // Turn 2: roll 5 → miss by 8 → TropeTrap → -2 → interest = 4 (Bored)
             // Turn 3 start: ghost check Roll(4)=1 → Ghosted
             var dice = new FixedDice(
                 1, 50,    // Turn 1: nat 1, timing
@@ -218,12 +218,12 @@ namespace Pinder.Core.Tests
             // Turn 1
             await session.StartTurnAsync();
             var r1 = await session.ResolveTurnAsync(0);
-            Assert.Equal(5, r1.StateAfter.Interest); // 10 - 5
+            Assert.Equal(6, r1.StateAfter.Interest); // 10 - 4
 
             // Turn 2
             await session.StartTurnAsync();
             var r2 = await session.ResolveTurnAsync(0);
-            Assert.Equal(2, r2.StateAfter.Interest); // 5 - 3 (TropeTrap)
+            Assert.Equal(4, r2.StateAfter.Interest); // 6 - 2 (TropeTrap)
 
             // Turn 3 start — should be ghosted
             var ex = await Assert.ThrowsAsync<GameEndedException>(() => session.StartTurnAsync());
@@ -233,10 +233,14 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task EndCondition_InterestHitsZero_ThrowsOnNextStart()
         {
-            // Nat 1 twice: -5 each → interest 10 → 5 → 0 (Unmatched)
+            // Nat 1 three times: -4 each → interest 10 → 6 → 2 → 0 (clamped, Unmatched)
+            // After turn 2, interest=2 (Bored), so StartTurnAsync does ghost check: need d4≠1
+            // Turn 3 has disadvantage (Bored), so RollEngine rolls 2 d20s
             var dice = new FixedDice(
-                1, 50,    // Turn 1: nat 1, timing
-                1, 50     // Turn 2: nat 1, timing
+                1, 50,       // Turn 1: nat 1, timing
+                1, 50,       // Turn 2: nat 1, timing
+                2,           // Turn 3: ghost check d4=2 (no ghost)
+                1, 2, 50     // Turn 3: d20=1 (disadv d20=2), timing
             );
 
             var session = new GameSession(
@@ -245,13 +249,17 @@ namespace Pinder.Core.Tests
 
             await session.StartTurnAsync();
             var r1 = await session.ResolveTurnAsync(0);
-            Assert.Equal(5, r1.StateAfter.Interest);
+            Assert.Equal(6, r1.StateAfter.Interest); // 10 - 4
 
             await session.StartTurnAsync();
             var r2 = await session.ResolveTurnAsync(0);
-            Assert.Equal(0, r2.StateAfter.Interest);
-            Assert.True(r2.IsGameOver);
-            Assert.Equal(GameOutcome.Unmatched, r2.Outcome);
+            Assert.Equal(2, r2.StateAfter.Interest); // 6 - 4
+
+            await session.StartTurnAsync();
+            var r3 = await session.ResolveTurnAsync(0);
+            Assert.Equal(0, r3.StateAfter.Interest); // 2 - 4 clamped to 0
+            Assert.True(r3.IsGameOver);
+            Assert.Equal(GameOutcome.Unmatched, r3.Outcome);
 
             // Next call should throw
             await Assert.ThrowsAsync<GameEndedException>(() => session.StartTurnAsync());

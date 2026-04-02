@@ -151,15 +151,9 @@ namespace Pinder.Core.Tests
         public async Task SameStat6Turns_TriggersFixationTwice()
         {
             var shadows = MakeShadowTracker();
-            // Use mild failures: d20=10, Charm=0, DC=13 → miss by 3 → Misfire(-2)
+            // Use mild failures: d20=10, Charm=0, DC=13 → miss by 3 → Misfire(-1 per rules-v3.4 §5)
             // Each turn: 1 d20 + 1 d100 (ComputeDelay) = 2 dice per turn, 12 total
-            // Start at 15 (Interested, no advantage). 6× -2 = -12 → 3 → Bored → ghost check.
-            // Actually let's start at 15. Turns 1-5: 15→13→11→9→7→5 (all Interested).
-            // Turn 6: 5-2=3 → Bored. But ghost check is only in StartTurnAsync.
-            // Ghost check: Bored → dice.Roll(4). Need non-1 to avoid ghost.
-            // We need ghost-safe dice. Let's give enough margin: start at 15.
-            // After 5 turns: 15-10=5 (Interested). Turn 6: needs ghost check on StartTurn if Bored.
-            // Interest 5 is still Interested (5-15), so no ghost check. Turn 6 result: 5-2=3 → Bored.
+            // Start at 15 (Interested, no advantage). 6× -1 = -6 → 9 → Interested. No ghost risk.
             var diceValues = new List<int>();
             for (int i = 0; i < 6; i++) { diceValues.Add(10); diceValues.Add(50); }
             var dice = new QueueDice(diceValues.ToArray());
@@ -247,7 +241,7 @@ namespace Pinder.Core.Tests
         {
             var shadows = MakeShadowTracker();
             // Start at interest 1. Need a failure that drops interest by >= 1.
-            // Roll: d20=2, Charm mod=0, level 1 → total 2, DC ~13 → fail Catastrophe (miss 11) → -4
+            // Roll: d20=2, Charm mod=0, level 1 → total 2, DC ~13 → fail Catastrophe (miss 11) → -3
             var dice = new QueueDice(new[] { 2, 50 });
             var session = MakeSessionWithDice(dice,
                 playerStats: MakeStatBlock(charm: 0),

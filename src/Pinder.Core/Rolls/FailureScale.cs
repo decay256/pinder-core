@@ -1,9 +1,10 @@
 namespace Pinder.Core.Rolls
 {
     /// <summary>
-    /// Maps failure tiers to negative interest deltas. Prototype defaults per #28.
-    /// Fumble → -1, Misfire → -2, TropeTrap → -3, Catastrophe → -4, Legendary → -5.
+    /// Maps failure tiers to negative interest deltas per rules-v3.4 §5.
+    /// Fumble → -1, Misfire → -1, TropeTrap → -2, Catastrophe → -3, Legendary → -4.
     /// Returns 0 for success (FailureTier.None).
+    /// Additional effects (trap activation, shadow growth) are handled by GameSession.
     /// </summary>
     public static class FailureScale
     {
@@ -16,10 +17,10 @@ namespace Pinder.Core.Rolls
             switch (result.Tier)
             {
                 case FailureTier.Fumble:      return -1;
-                case FailureTier.Misfire:     return -2;
-                case FailureTier.TropeTrap:   return -3;
-                case FailureTier.Catastrophe: return -4;
-                case FailureTier.Legendary:   return -5;
+                case FailureTier.Misfire:     return -1;
+                case FailureTier.TropeTrap:   return -2;
+                case FailureTier.Catastrophe: return -3;
+                case FailureTier.Legendary:   return -4;
                 default:                      return 0;
             }
         }

@@ -155,9 +155,9 @@ namespace Pinder.Core.Tests.Integration
             Assert.Equal(27, turn3.Roll.DC);               // 13 + Velvet Chaos 14
             // Mutation: Fails if miss margin 3 not mapped to Misfire tier (range 3–5)
             Assert.Equal(FailureTier.Misfire, turn3.Roll.Tier); // miss = 27-24 = 3
-            // Mutation: Fails if Misfire interest delta is wrong
-            Assert.Equal(-2, turn3.InterestDelta);         // Misfire → −2
-            Assert.Equal(17, turn3.StateAfter.Interest);   // 19 − 2
+            // Mutation: Fails if Misfire interest delta is wrong (rules-v3.4 §5)
+            Assert.Equal(-1, turn3.InterestDelta);         // Misfire → −1
+            Assert.Equal(18, turn3.StateAfter.Interest);   // 19 − 1
             Assert.Equal(InterestState.VeryIntoIt, turn3.StateAfter.State);
             // Mutation: Fails if momentum doesn't reset on failure
             Assert.Equal(0, turn3.StateAfter.MomentumStreak);
@@ -178,7 +178,7 @@ namespace Pinder.Core.Tests.Integration
             Assert.Equal("The Recovery", turn4.ComboTriggered);
             // Mutation: Fails if Bold bonus (+2) or Recovery bonus (+2) missing
             Assert.Equal(5, turn4.InterestDelta);          // +1 success + 2 Bold + 2 Recovery
-            Assert.Equal(22, turn4.StateAfter.Interest);   // 17 + 5
+            Assert.Equal(23, turn4.StateAfter.Interest);   // 18 + 5
             Assert.Equal(InterestState.AlmostThere, turn4.StateAfter.State);
             Assert.Equal(1, turn4.StateAfter.MomentumStreak);
             Assert.False(turn4.IsGameOver);
@@ -196,9 +196,9 @@ namespace Pinder.Core.Tests.Integration
             // Mutation: Fails if trap not activated from registry
             Assert.NotNull(turn5.Roll.ActivatedTrap);
             Assert.Equal("unhinged", turn5.Roll.ActivatedTrap.Id);
-            Assert.Equal(-3, turn5.InterestDelta);         // TropeTrap → −3
-            Assert.Equal(19, turn5.StateAfter.Interest);   // 22 − 3
-            Assert.Equal(InterestState.VeryIntoIt, turn5.StateAfter.State);
+            Assert.Equal(-2, turn5.InterestDelta);         // TropeTrap → −2 (rules-v3.4 §5)
+            Assert.Equal(21, turn5.StateAfter.Interest);   // 23 − 2
+            Assert.Equal(InterestState.AlmostThere, turn5.StateAfter.State);
             Assert.Equal(0, turn5.StateAfter.MomentumStreak);
             // Mutation: Fails if trap not tracked in game state
             Assert.Contains("unhinged", turn5.StateAfter.ActiveTrapNames);
@@ -215,7 +215,7 @@ namespace Pinder.Core.Tests.Integration
             Assert.Equal(16, recover.Roll.Total);          // max(10,8)=10 + 4 + 2
             Assert.Equal(12, recover.Roll.DC);
             // Mutation: Fails if Recover changes interest
-            Assert.Equal(19, recover.StateAfter.Interest);
+            Assert.Equal(21, recover.StateAfter.Interest);
             // Mutation: Fails if trap not cleared from state
             Assert.Empty(recover.StateAfter.ActiveTrapNames);
             // Mutation: Fails if recovery XP not awarded (15)
@@ -232,7 +232,7 @@ namespace Pinder.Core.Tests.Integration
             Assert.Equal(RiskTier.Safe, turn7.Roll.RiskTier);
             // Mutation: Fails if beat-by-5 not scored as +2
             Assert.Equal(2, turn7.InterestDelta);
-            Assert.Equal(21, turn7.StateAfter.Interest);   // 19 + 2
+            Assert.Equal(23, turn7.StateAfter.Interest);   // 21 + 2
             Assert.Equal(InterestState.AlmostThere, turn7.StateAfter.State);
             Assert.Equal(1, turn7.StateAfter.MomentumStreak);
             Assert.False(turn7.IsGameOver);
@@ -249,7 +249,7 @@ namespace Pinder.Core.Tests.Integration
             // Mutation: Fails if Nat20 doesn't give +4 interest delta
             Assert.Equal(4, turn8.InterestDelta);
             // Mutation: Fails if interest not clamped at 25
-            Assert.Equal(25, turn8.StateAfter.Interest);   // 21 + 4
+            Assert.Equal(25, turn8.StateAfter.Interest);   // 23 + 4 clamped to 25
             // Mutation: Fails if DateSecured state not set at interest=25
             Assert.Equal(InterestState.DateSecured, turn8.StateAfter.State);
             Assert.Equal(2, turn8.StateAfter.MomentumStreak);
@@ -287,8 +287,8 @@ namespace Pinder.Core.Tests.Integration
             // T1: d20=3 → total=18, beat by 0 → +1. Interest 5→6. Momentum=1.
             // T2: d20=3 → total=18, beat by 0 → +1. Interest 6→7. Momentum=2.
             // T3: d20=3 → total=18, beat by 0 → +1. Momentum=3→bonus +2. Interest 7→10.
-            // T4: d20=1 → Nat1 fail. Interest 10→5 (Legendary -5). Momentum=0.
-            // T5: d20=3 → total=18, success. Interest 5→6. Momentum=1.
+            // T4: d20=1 → Nat1 fail. Interest 10→6 (Legendary -4). Momentum=0.
+            // T5: d20=3 → total=18, success. Interest 6→7. Momentum=1.
             var config = new GameSessionConfig(
                 clock: null,
                 playerShadows: new SessionShadowTracker(geraldStats),
@@ -457,7 +457,7 @@ namespace Pinder.Core.Tests.Integration
 
             // Ghost check d4=3 (no ghost), disadvantage d20s, d100
             // Charm DC=18, with disadvantage take min. d20=1 d20=2 → min=1 → Nat1 → auto fail
-            // Nat1 → Legendary fail → -5 interest. Interest: 1-5 → clamped to 0 → Unmatched
+            // Nat1 → Legendary fail → -4 interest. Interest: 1-4 → clamped to 0 → Unmatched
             var dice = new FixedDice(3, 1, 2, 50);
 
             var session = new GameSession(gerald, velvet, llm, dice, new NullTrapRegistry(), config);
