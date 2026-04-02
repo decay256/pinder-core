@@ -108,7 +108,8 @@ namespace Pinder.LlmAdapters.Anthropic
                 context.CurrentInterest,
                 context.CurrentTurn,
                 FallbackName(context.PlayerName, "Player"),
-                FallbackName(context.OpponentName, "Opponent"));
+                FallbackName(context.OpponentName, "Opponent"),
+                playerShadowThresholds: context.ShadowThresholds);
 
             var request = BuildRequest(systemBlocks, userContent,
                 _options.DialogueOptionsTemperature ?? DefaultDialogueOptionsTemperature);
@@ -131,7 +132,8 @@ namespace Pinder.LlmAdapters.Anthropic
                 context.BeatDcBy,
                 context.ActiveTrapInstructions,
                 FallbackName(context.PlayerName, "Player"),
-                FallbackName(context.OpponentName, "Opponent"));
+                FallbackName(context.OpponentName, "Opponent"),
+                playerShadowThresholds: context.ShadowThresholds);
 
             var request = BuildRequest(systemBlocks, userContent,
                 _options.DeliveryTemperature ?? DefaultDeliveryTemperature);
@@ -156,7 +158,8 @@ namespace Pinder.LlmAdapters.Anthropic
                 context.ResponseDelayMinutes,
                 context.ActiveTrapInstructions,
                 FallbackName(context.PlayerName, "Player"),
-                FallbackName(context.OpponentName, "Opponent"));
+                FallbackName(context.OpponentName, "Opponent"),
+                opponentShadowThresholds: context.ShadowThresholds);
 
             var request = BuildRequest(systemBlocks, userContent,
                 _options.OpponentResponseTemperature ?? DefaultOpponentResponseTemperature);

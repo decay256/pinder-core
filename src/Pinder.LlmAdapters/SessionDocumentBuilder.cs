@@ -23,7 +23,8 @@ namespace Pinder.LlmAdapters
             int currentInterest,
             int currentTurn,
             string playerName,
-            string opponentName)
+            string opponentName,
+            Dictionary<ShadowStatType, int>? playerShadowThresholds = null)
         {
             if (conversationHistory == null) throw new ArgumentNullException(nameof(conversationHistory));
             if (opponentLastMessage == null) throw new ArgumentNullException(nameof(opponentLastMessage));
@@ -51,6 +52,14 @@ namespace Pinder.LlmAdapters
                 sb.AppendLine($"- Active traps: {string.Join(", ", activeTraps)}");
             }
 
+            string dialogueTaint = BuildShadowTaintBlock(playerShadowThresholds);
+            if (!string.IsNullOrEmpty(dialogueTaint))
+            {
+                sb.AppendLine();
+                sb.AppendLine("SHADOW STATE (corrupting forces on your communication)");
+                sb.AppendLine(dialogueTaint);
+            }
+
             sb.AppendLine();
             sb.AppendLine("YOUR TASK");
             sb.Append(PromptTemplates.DialogueOptionsInstruction.Replace("{player_name}", playerName));
@@ -68,7 +77,8 @@ namespace Pinder.LlmAdapters
             int beatDcBy,
             string[]? activeTrapInstructions,
             string playerName,
-            string opponentName)
+            string opponentName,
+            Dictionary<ShadowStatType, int>? playerShadowThresholds = null)
         {
             if (conversationHistory == null) throw new ArgumentNullException(nameof(conversationHistory));
             if (chosenOption == null) throw new ArgumentNullException(nameof(chosenOption));
@@ -79,6 +89,15 @@ namespace Pinder.LlmAdapters
 
             sb.AppendLine("CONVERSATION HISTORY");
             AppendConversationHistory(sb, conversationHistory, playerName);
+
+            string deliveryTaint = BuildShadowTaintBlock(playerShadowThresholds);
+            if (!string.IsNullOrEmpty(deliveryTaint))
+            {
+                sb.AppendLine();
+                sb.AppendLine("SHADOW STATE (corrupting forces on your communication)");
+                sb.AppendLine(deliveryTaint);
+            }
+
             sb.AppendLine();
 
             if (outcome == FailureTier.None)
@@ -139,7 +158,8 @@ namespace Pinder.LlmAdapters
             double responseDelayMinutes,
             string[]? activeTrapInstructions,
             string playerName,
-            string opponentName)
+            string opponentName,
+            Dictionary<ShadowStatType, int>? opponentShadowThresholds = null)
         {
             if (conversationHistory == null) throw new ArgumentNullException(nameof(conversationHistory));
             if (playerDeliveredMessage == null) throw new ArgumentNullException(nameof(playerDeliveredMessage));
@@ -186,6 +206,14 @@ namespace Pinder.LlmAdapters
                 {
                     sb.AppendLine(instruction);
                 }
+            }
+
+            string opponentTaint = BuildShadowTaintBlock(opponentShadowThresholds);
+            if (!string.IsNullOrEmpty(opponentTaint))
+            {
+                sb.AppendLine();
+                sb.AppendLine("SHADOW STATE (corrupting forces on your communication)");
+                sb.AppendLine(opponentTaint);
             }
 
             sb.AppendLine();
@@ -266,6 +294,25 @@ namespace Pinder.LlmAdapters
 
             // Generic fallback for other threshold crossings
             return PromptTemplates.InterestBeatGeneric.Replace("{opponent_name}", opponentName);
+        }
+
+        private static string BuildShadowTaintBlock(Dictionary<ShadowStatType, int>? thresholds)
+        {
+            if (thresholds == null || thresholds.Count == 0) return string.Empty;
+            var sb = new StringBuilder();
+            if (thresholds.TryGetValue(ShadowStatType.Madness, out int madness) && madness > 5)
+                sb.AppendLine("Your Madness is elevated. Your charm has an uncanny quality — warmth that somehow feels slightly off. Smooth words that land wrong. People can't identify why they feel uneasy. You don't notice.");
+            if (thresholds.TryGetValue(ShadowStatType.Horniness, out int horniness) && horniness > 6)
+                sb.AppendLine("Your Horniness is elevated. You are reading subtext that may not be there. Rizz options surface more often and more forward. You are slightly too aware of the tension.");
+            if (thresholds.TryGetValue(ShadowStatType.Denial, out int denial) && denial > 5)
+                sb.AppendLine("Your Denial is elevated. Your honest options sound rehearsed. You tell truths that are technically true but curated. Emotional availability is performed rather than felt.");
+            if (thresholds.TryGetValue(ShadowStatType.Fixation, out int fixation) && fixation > 5)
+                sb.AppendLine("Your Fixation is elevated. Chaos options feel forced — spontaneity that sounds calculated. You're trying to seem unpredictable. It shows.");
+            if (thresholds.TryGetValue(ShadowStatType.Dread, out int dread) && dread > 5)
+                sb.AppendLine("Your Dread is elevated. Even successful Wit options have melancholy undertones. Jokes land but leave a slightly hollow aftertaste. You're funny because it's easier than being vulnerable.");
+            if (thresholds.TryGetValue(ShadowStatType.Overthinking, out int overthinking) && overthinking > 5)
+                sb.AppendLine("Your Overthinking is elevated. Self-Awareness options are too clinical. You explain your feelings rather than expressing them. You know this. You're doing it anyway.");
+            return sb.ToString().Trim();
         }
 
         private static string GetFailureTierName(FailureTier tier)
