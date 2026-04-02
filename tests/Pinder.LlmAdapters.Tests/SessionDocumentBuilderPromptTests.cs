@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using Pinder.Core.Conversation;
+using Pinder.Core.Stats;
 using Pinder.LlmAdapters;
 using Xunit;
 
@@ -7,8 +9,36 @@ namespace Pinder.LlmAdapters.Tests
 {
     public class SessionDocumentBuilderPromptTests
     {
-        private static readonly List<(string Sender, string Text)> EmptyHistory =
-            new List<(string, string)>();
+        private static DialogueContext MakeDialogueContext(
+            List<CallbackOpportunity> callbackOpportunities = null,
+            string[] activeTrapInstructions = null,
+            int horninessLevel = 0,
+            bool requiresRizzOption = false,
+            int currentInterest = 10,
+            int currentTurn = 3,
+            IReadOnlyList<(string Sender, string Text)> conversationHistory = null,
+            string opponentLastMessage = "hey",
+            string[] activeTraps = null,
+            string playerName = "Player",
+            string opponentName = "Opponent",
+            Dictionary<ShadowStatType, int> shadowThresholds = null)
+        {
+            return new DialogueContext(
+                playerPrompt: "player prompt",
+                opponentPrompt: "opponent prompt",
+                conversationHistory: conversationHistory ?? Array.Empty<(string, string)>(),
+                opponentLastMessage: opponentLastMessage,
+                activeTraps: activeTraps ?? Array.Empty<string>(),
+                currentInterest: currentInterest,
+                shadowThresholds: shadowThresholds,
+                callbackOpportunities: callbackOpportunities,
+                horninessLevel: horninessLevel,
+                requiresRizzOption: requiresRizzOption,
+                activeTrapInstructions: activeTrapInstructions,
+                playerName: playerName,
+                opponentName: opponentName,
+                currentTurn: currentTurn);
+        }
 
         private static string BuildMinimal(
             List<CallbackOpportunity> callbackOpportunities = null,
@@ -19,17 +49,13 @@ namespace Pinder.LlmAdapters.Tests
             int currentTurn = 3)
         {
             return SessionDocumentBuilder.BuildDialogueOptionsPrompt(
-                conversationHistory: EmptyHistory,
-                opponentLastMessage: "hey",
-                activeTraps: new string[0],
-                currentInterest: currentInterest,
-                currentTurn: currentTurn,
-                playerName: "Player",
-                opponentName: "Opponent",
-                callbackOpportunities: callbackOpportunities,
-                activeTrapInstructions: activeTrapInstructions,
-                horninessLevel: horninessLevel,
-                requiresRizzOption: requiresRizzOption);
+                MakeDialogueContext(
+                    callbackOpportunities: callbackOpportunities,
+                    activeTrapInstructions: activeTrapInstructions,
+                    horninessLevel: horninessLevel,
+                    requiresRizzOption: requiresRizzOption,
+                    currentInterest: currentInterest,
+                    currentTurn: currentTurn));
         }
 
         // ── Callback Opportunities ──

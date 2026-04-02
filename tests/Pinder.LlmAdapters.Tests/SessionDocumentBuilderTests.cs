@@ -12,19 +12,99 @@ namespace Pinder.LlmAdapters.Tests
 {
     public class SessionDocumentBuilderTests
     {
+        // ── Helpers ──
+
+        private static DialogueContext MakeDialogueContext(
+            IReadOnlyList<(string Sender, string Text)> conversationHistory = null,
+            string opponentLastMessage = "",
+            string[] activeTraps = null,
+            int currentInterest = 10,
+            int currentTurn = 1,
+            string playerName = "P",
+            string opponentName = "O",
+            Dictionary<ShadowStatType, int> shadowThresholds = null,
+            List<CallbackOpportunity> callbackOpportunities = null,
+            string[] activeTrapInstructions = null,
+            int horninessLevel = 0,
+            bool requiresRizzOption = false)
+        {
+            return new DialogueContext(
+                playerPrompt: "player prompt",
+                opponentPrompt: "opponent prompt",
+                conversationHistory: conversationHistory ?? new List<(string, string)>(),
+                opponentLastMessage: opponentLastMessage,
+                activeTraps: activeTraps ?? Array.Empty<string>(),
+                currentInterest: currentInterest,
+                shadowThresholds: shadowThresholds,
+                callbackOpportunities: callbackOpportunities,
+                horninessLevel: horninessLevel,
+                requiresRizzOption: requiresRizzOption,
+                activeTrapInstructions: activeTrapInstructions,
+                playerName: playerName,
+                opponentName: opponentName,
+                currentTurn: currentTurn);
+        }
+
+        private static DeliveryContext MakeDeliveryContext(
+            IReadOnlyList<(string Sender, string Text)> conversationHistory = null,
+            DialogueOption chosenOption = null,
+            FailureTier outcome = FailureTier.None,
+            int beatDcBy = 0,
+            string[] activeTrapInstructions = null,
+            string playerName = "P",
+            string opponentName = "O",
+            Dictionary<ShadowStatType, int> shadowThresholds = null)
+        {
+            return new DeliveryContext(
+                playerPrompt: "player prompt",
+                opponentPrompt: "opponent prompt",
+                conversationHistory: conversationHistory ?? new List<(string, string)>(),
+                opponentLastMessage: "",
+                chosenOption: chosenOption ?? new DialogueOption(StatType.Charm, "default"),
+                outcome: outcome,
+                beatDcBy: beatDcBy,
+                activeTraps: Array.Empty<string>(),
+                shadowThresholds: shadowThresholds,
+                activeTrapInstructions: activeTrapInstructions,
+                playerName: playerName,
+                opponentName: opponentName);
+        }
+
+        private static OpponentContext MakeOpponentContext(
+            IReadOnlyList<(string Sender, string Text)> conversationHistory = null,
+            string playerDeliveredMessage = "Hey",
+            int interestBefore = 10,
+            int interestAfter = 10,
+            double responseDelayMinutes = 1.0,
+            string[] activeTrapInstructions = null,
+            string playerName = "P",
+            string opponentName = "O",
+            Dictionary<ShadowStatType, int> shadowThresholds = null)
+        {
+            return new OpponentContext(
+                playerPrompt: "player prompt",
+                opponentPrompt: "opponent prompt",
+                conversationHistory: conversationHistory ?? new List<(string, string)>(),
+                opponentLastMessage: "",
+                activeTraps: Array.Empty<string>(),
+                currentInterest: interestAfter,
+                playerDeliveredMessage: playerDeliveredMessage,
+                interestBefore: interestBefore,
+                interestAfter: interestAfter,
+                responseDelayMinutes: responseDelayMinutes,
+                shadowThresholds: shadowThresholds,
+                activeTrapInstructions: activeTrapInstructions,
+                playerName: playerName,
+                opponentName: opponentName);
+        }
+
         // ── AC2: Conversation history formatting ──
 
         [Fact]
         public void BuildDialogueOptionsPrompt_EmptyHistory_ContainsConversationStartAndCurrentTurn()
         {
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
-                conversationHistory: new List<(string, string)>(),
-                opponentLastMessage: "",
-                activeTraps: new string[0],
-                currentInterest: 10,
-                currentTurn: 1,
-                playerName: "GERALD_42",
-                opponentName: "VELVET");
+                MakeDialogueContext(playerName: "GERALD_42", opponentName: "VELVET"));
 
             Assert.Contains("[CONVERSATION_START]", result);
             Assert.Contains("[CURRENT_TURN]", result);
@@ -52,7 +132,8 @@ namespace Pinder.LlmAdapters.Tests
             };
 
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
-                history, "Indeed", new string[0], 12, 4, "GERALD_42", "VELVET");
+                MakeDialogueContext(conversationHistory: history, opponentLastMessage: "Indeed",
+                    currentInterest: 12, currentTurn: 4, playerName: "GERALD_42", opponentName: "VELVET"));
 
             Assert.Contains("[T1|PLAYER|GERALD_42] \"Hey\"", result);
             Assert.Contains("[T1|OPPONENT|VELVET] \"Hi\"", result);
@@ -73,7 +154,8 @@ namespace Pinder.LlmAdapters.Tests
             }
 
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
-                history, "Message 15", new string[0], 10, 9, "PLAYER_A", "OPP_B");
+                MakeDialogueContext(conversationHistory: history, opponentLastMessage: "Message 15",
+                    currentTurn: 9, playerName: "PLAYER_A", opponentName: "OPP_B"));
 
             for (int turn = 1; turn <= 8; turn++)
             {
@@ -93,7 +175,8 @@ namespace Pinder.LlmAdapters.Tests
             };
 
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
-                history, "Hi", new string[0], 10, 2, "GERALD", "VELVET");
+                MakeDialogueContext(conversationHistory: history, opponentLastMessage: "Hi",
+                    currentTurn: 2, playerName: "GERALD", opponentName: "VELVET"));
 
             Assert.Contains("[T1|PLAYER|GERALD] \"Hey\"", result);
             Assert.Contains("[T1|OPPONENT|VELVET] \"Hi\"", result);
@@ -106,8 +189,8 @@ namespace Pinder.LlmAdapters.Tests
         public void BuildDialogueOptionsPrompt_ActiveTraps_FormattedCorrectly()
         {
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
-                new List<(string, string)>(), "", new[] { "Cringe", "Spiral" },
-                12, 1, "GERALD", "VELVET");
+                MakeDialogueContext(activeTraps: new[] { "Cringe", "Spiral" },
+                    currentInterest: 12, playerName: "GERALD", opponentName: "VELVET"));
 
             Assert.Contains("Active traps: Cringe, Spiral", result);
         }
@@ -116,8 +199,7 @@ namespace Pinder.LlmAdapters.Tests
         public void BuildDialogueOptionsPrompt_NoTraps_ShowsNone()
         {
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
-                new List<(string, string)>(), "", new string[0],
-                10, 1, "GERALD", "VELVET");
+                MakeDialogueContext(playerName: "GERALD", opponentName: "VELVET"));
 
             Assert.Contains("Active traps: none", result);
         }
@@ -126,8 +208,7 @@ namespace Pinder.LlmAdapters.Tests
         public void BuildDialogueOptionsPrompt_ContainsTaskInstruction()
         {
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
-                new List<(string, string)>(), "", new string[0],
-                10, 1, "GERALD", "VELVET");
+                MakeDialogueContext(playerName: "GERALD", opponentName: "VELVET"));
 
             Assert.Contains("YOUR TASK", result);
             Assert.Contains("Generate exactly 4 dialogue options for GERALD", result);
@@ -139,8 +220,8 @@ namespace Pinder.LlmAdapters.Tests
             var option = new DialogueOption(StatType.Wit, "Something clever");
 
             var result = SessionDocumentBuilder.BuildDeliveryPrompt(
-                new List<(string, string)>(), option, FailureTier.None, 4, null,
-                "GERALD", "VELVET");
+                MakeDeliveryContext(chosenOption: option, outcome: FailureTier.None, beatDcBy: 4,
+                    playerName: "GERALD", opponentName: "VELVET"));
 
             Assert.Contains("SUCCESS", result);
             Assert.Contains("beat DC by 4", result);
@@ -154,9 +235,9 @@ namespace Pinder.LlmAdapters.Tests
             var option = new DialogueOption(StatType.Charm, "Tell me more");
 
             var result = SessionDocumentBuilder.BuildDeliveryPrompt(
-                new List<(string, string)>(), option, FailureTier.Misfire, -4,
-                new[] { "You are aware of how you're coming across." },
-                "GERALD", "VELVET");
+                MakeDeliveryContext(chosenOption: option, outcome: FailureTier.Misfire, beatDcBy: -4,
+                    activeTrapInstructions: new[] { "You are aware of how you're coming across." },
+                    playerName: "GERALD", opponentName: "VELVET"));
 
             Assert.Contains("FAILED", result);
             Assert.Contains("missed DC by 4", result);
@@ -172,8 +253,8 @@ namespace Pinder.LlmAdapters.Tests
             var option = new DialogueOption(StatType.Honesty, "I'm just honest");
 
             var result = SessionDocumentBuilder.BuildDeliveryPrompt(
-                new List<(string, string)>(), option, FailureTier.Fumble, -1, null,
-                "GERALD", "VELVET");
+                MakeDeliveryContext(chosenOption: option, outcome: FailureTier.Fumble, beatDcBy: -1,
+                    playerName: "GERALD", opponentName: "VELVET"));
 
             Assert.DoesNotContain("Active trap instructions:", result);
         }
@@ -188,7 +269,9 @@ namespace Pinder.LlmAdapters.Tests
             };
 
             var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                history, "How are you?", 10, 12, 3.5, null, "GERALD", "VELVET");
+                MakeOpponentContext(conversationHistory: history, playerDeliveredMessage: "How are you?",
+                    interestBefore: 10, interestAfter: 12, responseDelayMinutes: 3.5,
+                    playerName: "GERALD", opponentName: "VELVET"));
 
             Assert.Contains("PLAYER'S LAST MESSAGE", result);
             Assert.Contains("\"How are you?\"", result);
@@ -206,7 +289,8 @@ namespace Pinder.LlmAdapters.Tests
         public void BuildOpponentPrompt_NegativeDelta_FormattedCorrectly()
         {
             var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                new List<(string, string)>(), "Bye", 12, 9, 5.0, null, "P", "O");
+                MakeOpponentContext(playerDeliveredMessage: "Bye",
+                    interestBefore: 12, interestAfter: 9, responseDelayMinutes: 5.0));
 
             Assert.Contains("Interest moved from 12 to 9 (-3)", result);
         }
@@ -215,7 +299,7 @@ namespace Pinder.LlmAdapters.Tests
         public void BuildOpponentPrompt_SmallDelay_ShowsLessThanOneMinute()
         {
             var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                new List<(string, string)>(), "Hey", 10, 10, 0.5, null, "P", "O");
+                MakeOpponentContext(responseDelayMinutes: 0.5));
 
             Assert.Contains("less than 1 minute", result);
         }
@@ -224,7 +308,7 @@ namespace Pinder.LlmAdapters.Tests
         public void BuildOpponentPrompt_InterestBehaviourBlock_HighInterest()
         {
             var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                new List<(string, string)>(), "Hey", 10, 18, 1.0, null, "P", "O");
+                MakeOpponentContext(interestBefore: 10, interestAfter: 18));
 
             Assert.Contains("very interested", result);
         }
@@ -233,7 +317,7 @@ namespace Pinder.LlmAdapters.Tests
         public void BuildOpponentPrompt_InterestBehaviourBlock_LowInterest()
         {
             var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                new List<(string, string)>(), "Hey", 5, 3, 1.0, null, "P", "O");
+                MakeOpponentContext(interestBefore: 5, interestAfter: 3));
 
             Assert.Contains("disengaged", result);
         }
@@ -342,35 +426,24 @@ namespace Pinder.LlmAdapters.Tests
         // ── Error conditions ──
 
         [Fact]
-        public void BuildDialogueOptionsPrompt_NullHistory_Throws()
+        public void BuildDialogueOptionsPrompt_NullContext_Throws()
         {
             Assert.Throws<ArgumentNullException>(() =>
-                SessionDocumentBuilder.BuildDialogueOptionsPrompt(
-                    null!, "", new string[0], 10, 1, "P", "O"));
+                SessionDocumentBuilder.BuildDialogueOptionsPrompt((DialogueContext)null!));
         }
 
         [Fact]
-        public void BuildDialogueOptionsPrompt_NullPlayerName_Throws()
+        public void BuildDeliveryPrompt_NullContext_Throws()
         {
             Assert.Throws<ArgumentNullException>(() =>
-                SessionDocumentBuilder.BuildDialogueOptionsPrompt(
-                    new List<(string, string)>(), "", new string[0], 10, 1, null!, "O"));
+                SessionDocumentBuilder.BuildDeliveryPrompt((DeliveryContext)null!));
         }
 
         [Fact]
-        public void BuildDeliveryPrompt_NullOption_Throws()
+        public void BuildOpponentPrompt_NullContext_Throws()
         {
             Assert.Throws<ArgumentNullException>(() =>
-                SessionDocumentBuilder.BuildDeliveryPrompt(
-                    new List<(string, string)>(), null!, FailureTier.None, 0, null, "P", "O"));
-        }
-
-        [Fact]
-        public void BuildOpponentPrompt_NullMessage_Throws()
-        {
-            Assert.Throws<ArgumentNullException>(() =>
-                SessionDocumentBuilder.BuildOpponentPrompt(
-                    new List<(string, string)>(), null!, 10, 10, 1.0, null, "P", "O"));
+                SessionDocumentBuilder.BuildOpponentPrompt((OpponentContext)null!));
         }
 
         [Fact]

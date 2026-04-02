@@ -100,20 +100,7 @@ namespace Pinder.LlmAdapters.Anthropic
             var systemBlocks = CacheBlockBuilder.BuildCachedSystemBlocks(
                 context.PlayerPrompt, context.OpponentPrompt);
 
-            var trapsArray = ToStringArray(context.ActiveTraps);
-            var userContent = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
-                context.ConversationHistory,
-                context.OpponentLastMessage,
-                trapsArray,
-                context.CurrentInterest,
-                context.CurrentTurn,
-                FallbackName(context.PlayerName, "Player"),
-                FallbackName(context.OpponentName, "Opponent"),
-                playerShadowThresholds: context.ShadowThresholds,
-                callbackOpportunities: context.CallbackOpportunities,
-                activeTrapInstructions: context.ActiveTrapInstructions,
-                horninessLevel: context.HorninessLevel,
-                requiresRizzOption: context.RequiresRizzOption);
+            var userContent = SessionDocumentBuilder.BuildDialogueOptionsPrompt(context);
 
             var request = BuildRequest(systemBlocks, userContent,
                 _options.DialogueOptionsTemperature ?? DefaultDialogueOptionsTemperature);
@@ -129,15 +116,7 @@ namespace Pinder.LlmAdapters.Anthropic
 
             var systemBlocks = CacheBlockBuilder.BuildPlayerOnlySystemBlocks(context.PlayerPrompt);
 
-            var userContent = SessionDocumentBuilder.BuildDeliveryPrompt(
-                context.ConversationHistory,
-                context.ChosenOption,
-                context.Outcome,
-                context.BeatDcBy,
-                context.ActiveTrapInstructions,
-                FallbackName(context.PlayerName, "Player"),
-                FallbackName(context.OpponentName, "Opponent"),
-                playerShadowThresholds: context.ShadowThresholds);
+            var userContent = SessionDocumentBuilder.BuildDeliveryPrompt(context);
 
             var request = BuildRequest(systemBlocks, userContent,
                 _options.DeliveryTemperature ?? DefaultDeliveryTemperature);
@@ -154,16 +133,7 @@ namespace Pinder.LlmAdapters.Anthropic
             // Per §3.5: only opponent prompt in system (opponent plays themselves)
             var systemBlocks = CacheBlockBuilder.BuildOpponentOnlySystemBlocks(context.OpponentPrompt);
 
-            var userContent = SessionDocumentBuilder.BuildOpponentPrompt(
-                context.ConversationHistory,
-                context.PlayerDeliveredMessage,
-                context.InterestBefore,
-                context.InterestAfter,
-                context.ResponseDelayMinutes,
-                context.ActiveTrapInstructions,
-                FallbackName(context.PlayerName, "Player"),
-                FallbackName(context.OpponentName, "Opponent"),
-                opponentShadowThresholds: context.ShadowThresholds);
+            var userContent = SessionDocumentBuilder.BuildOpponentPrompt(context);
 
             var request = BuildRequest(systemBlocks, userContent,
                 _options.OpponentResponseTemperature ?? DefaultOpponentResponseTemperature);
@@ -460,18 +430,6 @@ namespace Pinder.LlmAdapters.Anthropic
             return result.ToArray();
         }
 
-        private static string[] ToStringArray(IReadOnlyList<string> list)
-        {
-            if (list is string[] arr) return arr;
-            var result = new string[list.Count];
-            for (int i = 0; i < list.Count; i++)
-                result[i] = list[i];
-            return result;
-        }
 
-        private static string FallbackName(string name, string fallback)
-        {
-            return string.IsNullOrEmpty(name) ? fallback : name;
-        }
     }
 }
