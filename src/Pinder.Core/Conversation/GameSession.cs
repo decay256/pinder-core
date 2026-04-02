@@ -51,6 +51,7 @@ namespace Pinder.Core.Conversation
         private string? _sessionOpener;
 
         private int _momentumStreak;
+        private int _pendingMomentumBonus;
         private int _turnNumber;
         private bool _ended;
         private GameOutcome? _outcome;
@@ -349,6 +350,9 @@ namespace Pinder.Core.Conversation
 
             _currentOptions = options;
 
+            // Compute pending momentum bonus for the upcoming roll (#268)
+            _pendingMomentumBonus = GetMomentumBonus(_momentumStreak);
+
             var snapshot = CreateSnapshot();
             return new TurnStart(options, snapshot);
         }
@@ -392,8 +396,8 @@ namespace Pinder.Core.Conversation
             // Compute tell bonus (#50)
             int tellBonus = (_activeTell != null && chosenOption.Stat == _activeTell.Stat) ? 2 : 0;
 
-            // Compute external bonus: tell + callback + Triple combo (#46, #47, #50)
-            int externalBonus = tellBonus + callbackBonus;
+            // Compute external bonus: tell + callback + Triple combo + momentum (#46, #47, #50, #268)
+            int externalBonus = tellBonus + callbackBonus + _pendingMomentumBonus;
             if (_comboTracker.HasTripleBonus)
             {
                 externalBonus += 1;
@@ -447,11 +451,11 @@ namespace Pinder.Core.Conversation
                 interestDelta = FailureScale.GetInterestDelta(rollResult);
             }
 
-            // 3. Apply momentum
+            // 3. Update momentum streak (bonus was already applied as externalBonus in the roll, #268)
+            _pendingMomentumBonus = 0;
             if (rollResult.IsSuccess)
             {
                 _momentumStreak++;
-                interestDelta += GetMomentumBonus(_momentumStreak);
             }
             else
             {

@@ -849,11 +849,11 @@ namespace Pinder.Core.Tests
             Assert.Equal("The Triple", r3.ComboTriggered);
             Assert.True(r3.StateAfter.TripleBonusActive);
 
-            // Turn 4: verify external bonus applied
+            // Turn 4: verify external bonus applied (triple +1 + momentum +2 from streak=3 at start, #268)
             var start4 = await session.StartTurnAsync();
             Assert.True(start4.State.TripleBonusActive);
             var r4 = await session.ResolveTurnAsync(0);
-            Assert.Equal(1, r4.Roll.ExternalBonus);
+            Assert.Equal(3, r4.Roll.ExternalBonus);
             Assert.False(r4.StateAfter.TripleBonusActive); // consumed
         }
 

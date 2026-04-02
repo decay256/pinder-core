@@ -173,12 +173,12 @@ namespace Pinder.Core.Tests
             Assert.Equal("The Triple", r3.ComboTriggered);
             Assert.True(r3.StateAfter.TripleBonusActive);
 
-            // Turn 4: should have +1 external bonus on roll
+            // Turn 4: should have +1 external bonus from triple + +2 from momentum (streak=3 at start, #268)
             var start4 = await session.StartTurnAsync();
             Assert.True(start4.State.TripleBonusActive);
             var r4 = await session.ResolveTurnAsync(0);
-            // Roll: 15+2+0=17 base, +1 external = 18 final total
-            Assert.Equal(1, r4.Roll.ExternalBonus);
+            // Roll: 15+2+0=17 base, +1 triple + 2 momentum = 3 external
+            Assert.Equal(3, r4.Roll.ExternalBonus);
             Assert.False(r4.StateAfter.TripleBonusActive); // consumed
         }
 
@@ -279,11 +279,11 @@ namespace Pinder.Core.Tests
             // Need to check interest won't be in Bored state
             session.Wait();
 
-            // Next turn should NOT have triple bonus
+            // Next turn should NOT have triple bonus, but still has momentum (streak=3 → +2 roll bonus, #268)
             var start5 = await session.StartTurnAsync();
             Assert.False(start5.State.TripleBonusActive);
             var r5 = await session.ResolveTurnAsync(0);
-            Assert.Equal(0, r5.Roll.ExternalBonus);
+            Assert.Equal(2, r5.Roll.ExternalBonus); // momentum only, triple was consumed by Wait
         }
     }
 }
