@@ -68,6 +68,9 @@ namespace Pinder.Core.Conversation
         // Horniness session roll (#45)
         private int _sessionHorniness;
 
+        // Nat 20 crit advantage (#271) — §4: previous crit grants advantage for 1 roll
+        private bool _pendingCritAdvantage;
+
         // Shadow threshold tracking (#45)
         private StatType? _lastStatUsed;
         private HashSet<StatType>? _shadowDisadvantagedStats;
@@ -229,6 +232,13 @@ namespace Pinder.Core.Conversation
             // Determine advantage/disadvantage from interest state + traps
             bool hasAdvantage = _interest.GrantsAdvantage;
             bool hasDisadvantage = _interest.GrantsDisadvantage;
+
+            // Nat 20 crit advantage (#271) — previous crit grants advantage for 1 roll
+            if (_pendingCritAdvantage)
+            {
+                hasAdvantage = true;
+                _pendingCritAdvantage = false;
+            }
 
             // Store for ResolveTurnAsync
             _currentHasAdvantage = hasAdvantage;
@@ -461,10 +471,16 @@ namespace Pinder.Core.Conversation
                 _momentumStreak = 0;
             }
 
-            // 3b. Track last stat used for Fixation T3 (#45)
+            // 3b. Nat 20 crit advantage (#271) — set for next roll
+            if (rollResult.IsNatTwenty)
+            {
+                _pendingCritAdvantage = true;
+            }
+
+            // 3c. Track last stat used for Fixation T3 (#45)
             _lastStatUsed = chosenOption.Stat;
 
-            // 3c. Combo detection (#46)
+            // 3d. Combo detection (#46)
             _comboTracker.RecordTurn(chosenOption.Stat, rollResult.IsSuccess);
             var combo = _comboTracker.CheckCombo();
             string? comboTriggered = null;
@@ -949,6 +965,13 @@ namespace Pinder.Core.Conversation
             bool hasAdvantage = _interest.GrantsAdvantage;
             bool hasDisadvantage = _interest.GrantsDisadvantage;
 
+            // Nat 20 crit advantage (#271) — previous crit grants advantage for 1 roll
+            if (_pendingCritAdvantage)
+            {
+                hasAdvantage = true;
+                _pendingCritAdvantage = false;
+            }
+
             // Shadow-based SA disadvantage: Overthinking T2+ → SA gets disadvantage
             if (_playerShadows != null)
             {
@@ -970,6 +993,12 @@ namespace Pinder.Core.Conversation
                 _dice,
                 hasAdvantage,
                 hasDisadvantage);
+
+            // 6b. Nat 20 crit advantage (#271) — set for next roll
+            if (roll.IsNatTwenty)
+            {
+                _pendingCritAdvantage = true;
+            }
 
             // 7. Resolve outcome
             var shadowEvents = new List<string>();
@@ -1048,6 +1077,13 @@ namespace Pinder.Core.Conversation
             bool hasAdvantage = _interest.GrantsAdvantage;
             bool hasDisadvantage = _interest.GrantsDisadvantage;
 
+            // Nat 20 crit advantage (#271) — previous crit grants advantage for 1 roll
+            if (_pendingCritAdvantage)
+            {
+                hasAdvantage = true;
+                _pendingCritAdvantage = false;
+            }
+
             // Shadow-based SA disadvantage: Overthinking T2+ → SA gets disadvantage
             if (_playerShadows != null)
             {
@@ -1069,6 +1105,12 @@ namespace Pinder.Core.Conversation
                 _dice,
                 hasAdvantage,
                 hasDisadvantage);
+
+            // 7b. Nat 20 crit advantage (#271) — set for next roll
+            if (roll.IsNatTwenty)
+            {
+                _pendingCritAdvantage = true;
+            }
 
             // 8. Resolve outcome
             string? clearedTrapName = null;

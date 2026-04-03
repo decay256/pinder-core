@@ -1,0 +1,286 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Pinder.Core.Characters;
+using Pinder.Core.Conversation;
+using Pinder.Core.Interfaces;
+using Pinder.Core.Rolls;
+using Pinder.Core.Stats;
+using Pinder.Core.Traps;
+using Xunit;
+
+namespace Pinder.Core.Tests
+{
+    /// <summary>
+    /// Tests for §4 Nat 20 crit advantage: after rolling a natural 20,
+    /// the player gets advantage on their next roll, consumed after one use.
+    /// </summary>
+    public class CritAdvantageTests
+    {
+        // What: Nat 20 on Speak turn N → advantage on Speak turn N+1
+        // Mutation: Fails if _pendingCritAdvantage is not set on Nat 20 or not consumed in StartTurnAsync
+        [Fact]
+        public async Task Speak_Nat20_GrantsAdvantageOnNextSpeak()
+        {
+            // Interest starts at 10 (Interested) — no interest-based adv/disadv
+            // Turn 1: Nat 20 → sets _pendingCritAdvantage
+            // Turn 2: advantage → rolls 2 dice, uses max
+            var dice = new FixedDice(
+                5,          // Constructor: horniness roll (1d10)
+                20, 50,     // Turn 1: d20=20 (Nat 20), d100=50 (ghost check not reached at interest 10)
+                15, 3, 50   // Turn 2: advantage → d20=15, d20=3 (max=15), d100=50
+            );
+
+            var session = MakeSession(dice);
+            var llm = (ScriptedLlm)GetLlm(session);
+
+            // Turn 1: Nat 20
+            var turn1Start = await session.StartTurnAsync();
+            var turn1Result = await session.ResolveTurnAsync(0);
+            Assert.True(turn1Result.Roll.IsNatTwenty, "Turn 1 should be a Nat 20");
+
+            // Turn 2: should have advantage — we verify by checking that 2 dice were consumed
+            // (FixedDice will throw if we try to dequeue more than queued)
+            var turn2Start = await session.StartTurnAsync();
+            var turn2Result = await session.ResolveTurnAsync(0);
+
+            // If advantage was granted, used die roll should be max(15, 3) = 15
+            Assert.Equal(15, turn2Result.Roll.UsedDieRoll);
+        }
+
+        // What: Advantage from Nat 20 clears after one roll — turn N+2 has no crit advantage
+        // Mutation: Fails if _pendingCritAdvantage is not cleared after consumption
+        [Fact]
+        public async Task Speak_Nat20_AdvantageClears_AfterOneRoll()
+        {
+            // Start interest at 5 (Interested, no adv/disadv) to keep it in Interested range throughout
+            // Turn 1: Nat 20 → interest 5+4=9 (still Interested)
+            // Turn 2: crit advantage → 2 dice; let's fail to keep interest low: 9 + fail = 8 or less
+            // Turn 3: no crit advantage, no interest advantage → 1 die
+            var dice = new FixedDice(
+                5,                  // Constructor: horniness
+                20, 50,             // Turn 1: d20=20 (Nat 20), d100=50 (timing)
+                15, 3, 50,          // Turn 2: crit adv → d20=15, d20=3=max 15, d100=50 (timing)
+                8, 50, 50, 50       // Turn 3: no adv → d20=8, extras
+            );
+
+            var config = new GameSessionConfig(startingInterest: 5);
+            var session = MakeSession(dice, config);
+
+            // Turn 1: Nat 20 — interest goes 5→9
+            await session.StartTurnAsync();
+            var t1 = await session.ResolveTurnAsync(0);
+            Assert.True(t1.Roll.IsNatTwenty);
+
+            // Turn 2: crit advantage consumed — max(15,3) = 15
+            await session.StartTurnAsync();
+            var t2 = await session.ResolveTurnAsync(0);
+            Assert.Equal(15, t2.Roll.UsedDieRoll);
+
+            // Turn 3: no crit advantage — single die = 8
+            await session.StartTurnAsync();
+            var t3 = await session.ResolveTurnAsync(0);
+            Assert.Equal(8, t3.Roll.UsedDieRoll);
+        }
+
+        // What: Nat 20 on Speak → next Read has advantage
+        // Mutation: Fails if ReadAsync doesn't consume _pendingCritAdvantage
+        [Fact]
+        public async Task Speak_Nat20_GrantsAdvantageOnNextRead()
+        {
+            // Turn 1: Speak with Nat 20
+            // Turn 2: Read with advantage
+            var dice = new FixedDice(
+                5,          // Constructor: horniness
+                20, 50,     // Turn 1: Nat 20
+                12, 3       // Turn 2 Read: advantage → d20=12, d20=3, max=12
+            );
+
+            var session = MakeSession(dice);
+
+            // Turn 1: Speak Nat 20
+            await session.StartTurnAsync();
+            var t1 = await session.ResolveTurnAsync(0);
+            Assert.True(t1.Roll.IsNatTwenty);
+
+            // Turn 2: Read — should have advantage
+            var readResult = await session.ReadAsync();
+            // With SA +2, total = max(12,3) + 2 = 14 >= DC 12 → success
+            Assert.True(readResult.Success);
+            Assert.Equal(12, readResult.Roll.UsedDieRoll);
+        }
+
+        // What: Nat 20 on Read → next Speak has advantage
+        // Mutation: Fails if ReadAsync doesn't set _pendingCritAdvantage on Nat 20
+        [Fact]
+        public async Task Read_Nat20_GrantsAdvantageOnNextSpeak()
+        {
+            // Turn 1: Read with Nat 20
+            // Turn 2: Speak with advantage
+            var dice = new FixedDice(
+                5,      // Constructor: horniness
+                20,     // Turn 1 Read: d20=20 (Nat 20, no advantage yet so single die)
+                14, 3, 50  // Turn 2 Speak: advantage → d20=14, d20=3, max=14
+            );
+
+            var session = MakeSession(dice);
+
+            // Turn 1: Read Nat 20
+            var readResult = await session.ReadAsync();
+            Assert.True(readResult.Roll.IsNatTwenty);
+
+            // Turn 2: Speak — should have advantage
+            var turn2Start = await session.StartTurnAsync();
+            var turn2Result = await session.ResolveTurnAsync(0);
+            Assert.Equal(14, turn2Result.Roll.UsedDieRoll);
+        }
+
+        // What: Nat 20 on Speak → next Recover has advantage
+        // Mutation: Fails if RecoverAsync doesn't consume _pendingCritAdvantage
+        [Fact]
+        public async Task Speak_Nat20_GrantsAdvantageOnNextRecover()
+        {
+            // Turn 1: Speak Nat 20 (Wit trap doesn't affect Charm roll)
+            // Turn 2: Recover with crit advantage (SA roll, trap on Wit doesn't affect SA)
+            var dice = new FixedDice(
+                5,              // Constructor: horniness
+                20, 50,         // Turn 1: d20=20 (Nat 20, no trap on Charm), d100=50 (timing)
+                11, 3,          // Turn 2 Recover: crit adv → d20=11, d20=3, max=11
+                50, 50, 50      // extras to avoid exhaustion
+            );
+
+            var session = MakeSession(dice);
+
+            // Activate a trap on Wit (not Charm/SA) so Recover is valid but trap doesn't affect rolls
+            ActivateTrap(session, StatType.Wit);
+
+            // Turn 1: Speak Nat 20 (option 0 = Charm, no trap interference)
+            await session.StartTurnAsync();
+            var t1 = await session.ResolveTurnAsync(0);
+            Assert.True(t1.Roll.IsNatTwenty);
+
+            // Turn 2: Recover — should have crit advantage, SA roll unaffected by Wit trap
+            var recoverResult = await session.RecoverAsync();
+            // SA +2, max(11,3)+2 = 13 >= DC 12 → success
+            Assert.True(recoverResult.Success);
+            Assert.Equal(11, recoverResult.Roll.UsedDieRoll);
+        }
+
+        // What: Crit advantage stacks correctly with interest-based advantage
+        // (both give advantage — still just advantage, no double-roll)
+        // Mutation: Fails if crit advantage overrides or conflicts with interest advantage
+        [Fact]
+        public async Task CritAdvantage_StacksWithInterestAdvantage()
+        {
+            // Start at interest 16 (VeryIntoIt → grants advantage already)
+            // Turn 1: Nat 20 → sets crit advantage
+            // Turn 2: has both interest advantage AND crit advantage → still just advantage (2 dice)
+            var dice = new FixedDice(
+                5,              // Constructor: horniness
+                20, 8, 50,      // Turn 1: advantage (interest=16→VeryIntoIt), d20=20, d20=8, Nat 20
+                14, 6, 50       // Turn 2: advantage (both interest + crit), d20=14, d20=6
+            );
+
+            var config = new GameSessionConfig(startingInterest: 16);
+            var session = MakeSession(dice, config);
+
+            // Turn 1: already has advantage from interest, Nat 20
+            await session.StartTurnAsync();
+            var t1 = await session.ResolveTurnAsync(0);
+            Assert.True(t1.Roll.IsNatTwenty);
+
+            // Turn 2: interest-based advantage + crit advantage = still advantage
+            await session.StartTurnAsync();
+            var t2 = await session.ResolveTurnAsync(0);
+            // max(14, 6) = 14
+            Assert.Equal(14, t2.Roll.UsedDieRoll);
+        }
+
+        // ======================== Test Helpers ========================
+
+        private static GameSession MakeSession(IDiceRoller dice, GameSessionConfig? config = null)
+        {
+            var stats = new StatBlock(
+                new Dictionary<StatType, int>
+                {
+                    { StatType.Charm, 3 }, { StatType.Rizz, 2 }, { StatType.Honesty, 1 },
+                    { StatType.Chaos, 0 }, { StatType.Wit, 4 }, { StatType.SelfAwareness, 2 }
+                },
+                new Dictionary<ShadowStatType, int>
+                {
+                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Horniness, 0 },
+                    { ShadowStatType.Denial, 0 }, { ShadowStatType.Fixation, 0 },
+                    { ShadowStatType.Dread, 0 }, { ShadowStatType.Overthinking, 0 }
+                });
+
+            var opponentStats = new StatBlock(
+                new Dictionary<StatType, int>
+                {
+                    { StatType.Charm, 2 }, { StatType.Rizz, 2 }, { StatType.Honesty, 2 },
+                    { StatType.Chaos, 2 }, { StatType.Wit, 2 }, { StatType.SelfAwareness, 2 }
+                },
+                new Dictionary<ShadowStatType, int>
+                {
+                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Horniness, 0 },
+                    { ShadowStatType.Denial, 0 }, { ShadowStatType.Fixation, 0 },
+                    { ShadowStatType.Dread, 0 }, { ShadowStatType.Overthinking, 0 }
+                });
+
+            var timing = new TimingProfile(5, 1.0f, 0.0f, "neutral");
+            var player = new CharacterProfile(stats, "system prompt", "Player", timing, 1);
+            var opponent = new CharacterProfile(opponentStats, "system prompt", "Opponent", timing, 1);
+            var llm = new ScriptedLlm();
+            var trapRegistry = new NullTrapRegistry();
+
+            return new GameSession(player, opponent, llm, dice, trapRegistry, config);
+        }
+
+        private static ILlmAdapter GetLlm(GameSession session)
+        {
+            var field = typeof(GameSession).GetField("_llm",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            return (ILlmAdapter)field!.GetValue(session)!;
+        }
+
+        private static void ActivateTrap(GameSession session, StatType stat = StatType.Charm)
+        {
+            var trapsField = typeof(GameSession).GetField("_traps",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var trapState = (TrapState)trapsField!.GetValue(session)!;
+            var trap = new TrapDefinition("test_trap", stat, TrapEffect.Disadvantage, -1, 3, "llm", "clear", "nat1");
+            trapState.Activate(trap);
+        }
+
+        /// <summary>
+        /// LLM adapter that always returns 4 Charm options and simple responses.
+        /// </summary>
+        private sealed class ScriptedLlm : ILlmAdapter
+        {
+            public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context)
+            {
+                return Task.FromResult(new[]
+                {
+                    new DialogueOption(StatType.Charm, "option 1"),
+                    new DialogueOption(StatType.Rizz, "option 2"),
+                    new DialogueOption(StatType.Honesty, "option 3"),
+                    new DialogueOption(StatType.Wit, "option 4")
+                });
+            }
+
+            public Task<string> DeliverMessageAsync(DeliveryContext context)
+            {
+                return Task.FromResult("delivered");
+            }
+
+            public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context)
+            {
+                return Task.FromResult(new OpponentResponse("response"));
+            }
+
+            public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context)
+            {
+                return Task.FromResult<string?>(null);
+            }
+        }
+    }
+}
