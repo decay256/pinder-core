@@ -339,6 +339,7 @@ namespace Pinder.Core.Tests
             //   TimingProfile delay: d20 for delay
             // Turn 2 StartTurnAsync: no ghost roll
             var dice = new FixedDice(
+                5,  // Constructor: horniness roll (1d10)
                 4,   // Turn 1: roll d20 (miss by 9 = TropeTrap)
                 10,  // Turn 1: timing delay
                 20   // Turn 2: padding
@@ -376,7 +377,7 @@ namespace Pinder.Core.Tests
         {
             var capturingLlm = new CapturingLlmAdapter();
             // Interested state (interest=10), no ghost check needed.
-            var dice = new FixedDice(20); // just need one roll
+            var dice = new FixedDice(5, 20); // just need one roll
 
             var session = new GameSession(
                 MakeProfile("Player"), MakeProfile("Opponent"),
@@ -413,6 +414,7 @@ namespace Pinder.Core.Tests
             // With allStats=2: DC=15, roll of 4 => total=6, miss by 9 => TropeTrap
             // After trap activation, the trap is active for delivery and opponent contexts
             var dice = new FixedDice(
+                5,  // Constructor: horniness roll (1d10)
                 4,  // Turn 1 roll: TropeTrap on Wit
                 10  // Turn 1 timing delay
             );
@@ -451,6 +453,7 @@ namespace Pinder.Core.Tests
             var capturingLlm = new CapturingLlmAdapter();
             // High roll = success, no trap activation
             var dice = new FixedDice(
+                5,  // Constructor: horniness roll (1d10)
                 20, // Turn 1 roll: natural 20 = success
                 10  // timing delay
             );

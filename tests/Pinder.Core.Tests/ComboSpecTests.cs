@@ -717,6 +717,7 @@ namespace Pinder.Core.Tests
             // Setup: Wit success → Charm success (The Setup, +1)
             // DC = 13 + 2 = 15. Roll 15: 15+2 = 17 >= 15 → success (beat by 2 → SuccessScale +1)
             var dice = new FixedDice(
+                5,  // Constructor: horniness roll (1d10)
                 15, 50, // Turn 1: Wit
                 15, 50  // Turn 2: Charm
             );
@@ -746,6 +747,7 @@ namespace Pinder.Core.Tests
         public async Task AC2_Integration_NoComboOnFailedRoll()
         {
             var dice = new FixedDice(
+                5,  // Constructor: horniness roll (1d10)
                 15, 50, // Turn 1: Wit success
                 5, 50   // Turn 2: Charm fail (5+2=7 < 15)
             );
@@ -770,6 +772,7 @@ namespace Pinder.Core.Tests
         public async Task AC6_Integration_TurnResultComboTriggeredPopulated()
         {
             var dice = new FixedDice(
+                5,  // Constructor: horniness roll (1d10)
                 15, 50, // Turn 1
                 15, 50  // Turn 2
             );
@@ -794,6 +797,7 @@ namespace Pinder.Core.Tests
         public async Task AC5_Integration_StartTurnPopulatesComboNames()
         {
             var dice = new FixedDice(
+                5,  // Constructor: horniness roll (1d10)
                 15, 50, // Turn 1
                 15, 50  // Turn 2
             );
@@ -822,6 +826,7 @@ namespace Pinder.Core.Tests
         {
             // 3 turns with distinct non-overlapping stats, then check external bonus on turn 4
             var dice = new FixedDice(
+                5,  // Constructor: horniness roll (1d10)
                 15, 50, // Turn 1: Rizz (d20, d100)
                 15, 50, // Turn 2: SA (d20, d100)
                 15, 50, // Turn 3: Chaos → Triple (d20, d100)
@@ -863,6 +868,7 @@ namespace Pinder.Core.Tests
         {
             // Turn 1: fail, Turn 2: SA success → Recovery (+2)
             var dice = new FixedDice(
+                5,  // Constructor: horniness roll (1d10)
                 5, 50,  // Turn 1: fail (5+2=7 < 15)
                 15, 50  // Turn 2: success (15+2=17 >= 15)
             );

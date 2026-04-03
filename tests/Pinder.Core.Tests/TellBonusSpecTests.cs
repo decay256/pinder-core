@@ -34,7 +34,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.Wit, "Should not have tell"));
 
             // Turn 0: d20=15, timing=5. Recover: d20=15. Turn 2: d20=15, timing=5
-            var dice = new FixedDice(15, 5, 15, 15, 5);
+            var dice = new FixedDice(5, 15, 5, 15, 15, 5);
             var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
 
             // Activate a trap so RecoverAsync doesn't throw
@@ -65,7 +65,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.Chaos, "Wild card"));
             llm.EnqueueTell(null);
 
-            var dice = new FixedDice(15, 5, 15, 5);
+            var dice = new FixedDice(5, 15, 5, 15, 5);
             var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
 
             await session.StartTurnAsync();
@@ -98,7 +98,7 @@ namespace Pinder.Core.Tests
                 new DialogueOption(StatType.Charm, "Smooth"));
             llm.EnqueueTell(null);
 
-            var dice = new FixedDice(15, 5, 15, 5);
+            var dice = new FixedDice(5, 15, 5, 15, 5);
             var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
 
             await session.StartTurnAsync();
@@ -132,7 +132,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.Rizz, "Flirt back"));
             llm.EnqueueTell(null);
 
-            var dice = new FixedDice(15, 5, 12, 5);
+            var dice = new FixedDice(5, 15, 5, 12, 5);
             var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
 
             await session.StartTurnAsync();
@@ -161,7 +161,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Hey there"));
             llm.EnqueueTell(null);
 
-            var dice = new FixedDice(15, 5, 15, 5);
+            var dice = new FixedDice(5, 15, 5, 15, 5);
             var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
 
             await session.StartTurnAsync();
@@ -191,7 +191,7 @@ namespace Pinder.Core.Tests
                 new DialogueOption(StatType.Honesty, "C"),
                 new DialogueOption(StatType.Chaos, "D"));
 
-            var dice = new FixedDice(15, 5);
+            var dice = new FixedDice(5, 15, 5);
             var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
 
             // First turn, no prior opponent response → _activeTell is null
@@ -218,7 +218,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.Honesty, "Truth"));
             llm.EnqueueTell(null);
 
-            var dice = new FixedDice(15, 5, 15, 5);
+            var dice = new FixedDice(5, 15, 5, 15, 5);
             var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
 
             await session.StartTurnAsync();
@@ -252,7 +252,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.Wit, "Late joke"));
             llm.EnqueueTell(null);
 
-            var dice = new FixedDice(15, 5, 15, 5, 15, 5);
+            var dice = new FixedDice(5, 15, 5, 15, 5, 15, 5);
             var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
 
             await session.StartTurnAsync();
@@ -290,7 +290,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(stat, "Match"));
             llm.EnqueueTell(null);
 
-            var dice = new FixedDice(15, 5, 15, 5);
+            var dice = new FixedDice(5, 15, 5, 15, 5);
             var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
 
             await session.StartTurnAsync();

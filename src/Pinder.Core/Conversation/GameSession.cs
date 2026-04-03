@@ -133,11 +133,10 @@ namespace Pinder.Core.Conversation
             _opponentShadows = config?.OpponentShadows;
             _previousOpener = config?.PreviousOpener;
 
-            // Roll session Horniness (1d10) + time-of-day modifier (async-time feature, requires clock)
-            if (_clock != null)
+            // Roll session Horniness (1d10) every session + time-of-day modifier when clock available
             {
                 int horninessRoll = _dice.Roll(10);
-                int todModifier = _clock.GetHorninessModifier();
+                int todModifier = _clock?.GetHorninessModifier() ?? 0;
                 _sessionHorniness = Math.Max(0, horninessRoll + todModifier);
             }
 
