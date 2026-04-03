@@ -505,3 +505,76 @@ Caching strategy: character system prompts (~6k tokens) are placed in `cache_con
 | Madness T3 not implemented | §7 | Fixed this sprint (#310) |
 | Tell categories not in prompt | §15 | Fixed this sprint (#311) |
 | Triple bonus on Read/Recover | §15 | Fixed this sprint (#312) |
+
+
+---
+
+## Sprint 2 (Player Agent + Sim Runner Fixes) — Architecture Briefing
+
+### What's changing
+
+**This sprint continues the existing architecture with no structural changes to Pinder.Core.** New components are added to the `session-runner/` project only. Bug fixes touch GameSession (Fixation probability), InterestChangeContext (opponent prompt for beats), and AnthropicLlmAdapter (beat voice).
+
+**Existing architecture summary**: Pinder.Core is a zero-dependency .NET Standard 2.0 RPG engine. `GameSession` orchestrates single-conversation turns, delegating to `RollEngine` (stateless), `InterestMeter`, `TrapState`, `SessionShadowTracker`, `ComboTracker`, and `XpLedger`. `Pinder.LlmAdapters` implements `ILlmAdapter` via `AnthropicLlmAdapter`. The session runner (`session-runner/`) is a .NET 8 console app that drives `GameSession` + `AnthropicLlmAdapter` for automated playtesting.
+
+### New components (session-runner/ only)
+
+1. **`IPlayerAgent`** — Decision-making interface for sim agents. Takes `TurnStart` + `PlayerAgentContext`, returns `PlayerDecision` (index, reasoning, scores). Per #355, lives in session-runner, NOT Pinder.Core.
+
+2. **`ScoringPlayerAgent`** — Deterministic expected-value scoring. Pure math, no LLM. Scores all options using success probability × expected gain − failure cost. Applies strategic adjustments for momentum, interest state, trap exposure.
+
+3. **`LlmPlayerAgent`** — Anthropic-backed agent. Formats full game state into LLM prompt, parses `PICK: [A/B/C/D]` response. Falls back to `ScoringPlayerAgent` on any failure.
+
+4. **`PlayerDecision`**, **`OptionScore`**, **`PlayerAgentContext`** — Supporting data types for the agent interface.
+
+### Bug fixes
+
+5. **File counter** (#354 + #359) — Fix glob from `session-???.md` to `session-*.md` and parsing from `Substring(8,3)` to `Split('-')[1]`.
+
+6. **Trap registry** (#353 + #356) — Replace `NullTrapRegistry` with `JsonTrapRepository(File.ReadAllText(path))`.
+
+7. **Fixation probability** (#349) — Replace `optionIndex == 0` proxy with actual probability comparison across all options.
+
+8. **Interest beat voice** (#352 + #357) — Add optional `opponentPrompt` to `InterestChangeContext`, wire through GameSession, include in adapter system blocks.
+
+### Session runner enhancements
+
+9. **Shadow tracking** (#350 + #360) — Wire `SessionShadowTracker(sableStats)` via `GameSessionConfig`. Display growth events per turn and delta table at session end.
+
+10. **Pick reasoning output** (#351) — Display `PlayerDecision.Reasoning` and score table in playtest markdown.
+
+### Components being extended
+- `session-runner/Program.cs` — #354, #353, #350, #351, #348
+- `Pinder.Core/Conversation/GameSession.cs` — #349
+- `Pinder.Core/Conversation/InterestChangeContext.cs` — #352
+- `Pinder.LlmAdapters/Anthropic/AnthropicLlmAdapter.cs` — #352
+
+### What is NOT changing
+- All Pinder.Core game logic (Stats, Rolls, Traps, Progression, Characters, Prompts, Data)
+- GameSession public API (no new public methods)
+- Existing NullLlmAdapter behavior
+- Existing context DTO class signatures (optional params only)
+
+### Implicit assumptions for implementers
+1. **netstandard2.0 + LangVersion 8.0** in Pinder.Core; net8.0 in session-runner (but LangVersion 8.0 per csproj)
+2. **Zero NuGet dependencies in Pinder.Core**
+3. **`JsonTrapRepository(string json)` takes content, not path** (#356)
+4. **`SessionShadowTracker(StatBlock)` takes StatBlock, not Dictionary** (#360)
+5. **All 1977 existing tests must pass** unchanged
+6. **Context DTO changes use optional params with defaults** (#357)
+7. **Player agent types go in session-runner, not Pinder.Core** (#355)
+8. **File counter glob must be `session-*.md`** (#359)
+
+### Known Gaps (as of Sprint 2)
+
+| Gap | Rules Section | Status |
+|-----|--------------|--------|
+| Shadow persistence across sessions | §8 | Not addressed — per-session via SessionShadowTracker |
+| `AddExternalBonus()` deprecated but not removed | — | Cleanup issue needed |
+| Energy system consumers | #144 | `IGameClock.ConsumeEnergy()` exists but nothing calls it |
+| GameSession god object trajectory | #87 | Growing — extraction planned for MVP |
+| Fixation uses option index as proxy | §7 | Fixed this sprint (#349) |
+| Interest beat lacks character voice | §3.8 | Fixed this sprint (#352) |
+| Session runner NullTrapRegistry | — | Fixed this sprint (#353) |
+| File counter glob mismatch | — | Fixed this sprint (#354 + #359) |
+| No automated player agent | — | Added this sprint (#346, #347, #348) |
