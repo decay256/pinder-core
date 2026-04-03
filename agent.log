@@ -409,3 +409,4 @@
 {"ts":"2026-04-03T11:52:39+00:00","agent":"backend-engineer","issue":"313","component":"","action":"started","detail":"Starting: Missing: Lukewarm (5-9) not a distinct InterestState — rules §6 defines it explicitly","commit":null}
 {"ts":"2026-04-03T11:52:47.246Z","agent":"progress-auditor","issue":"sprint","component":"orchestrator","action":"audit","detail":"Warnings: stalled=, deadPIDs=, longRunning=, unreviewedPRs=256","commit":null}
 {"ts":"2026-04-03T11:53:05+00:00","agent":"doc-merge-agent","issue":"312","action":"started","correlationId":"doc-merge-sprint-decay256-pinder-core-1-1775208291244-issue-312","detail":"Updating module doc for issue #312"}
+{"ts":"2026-04-03T11:53:57+00:00","agent":"doc-merge-agent","issue":"312","action":"completed","correlationId":"doc-merge-sprint-decay256-pinder-core-1-1775208291244-issue-312","detail":"Updated docs/modules/game-session.md — correlationId: doc-merge-sprint-decay256-pinder-core-1-1775208291244-issue-312"}
