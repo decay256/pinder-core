@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Pinder.Core\Pinder.Core.csproj" />
+    <ProjectReference Include="..\..\session-runner\session-runner.csproj" />
   </ItemGroup>
 
 </Project>

@@ -5,28 +5,11 @@ using Xunit;
 namespace Pinder.Core.Tests
 {
     /// <summary>
-    /// Tests the session file counter logic used in session-runner/Program.cs.
+    /// Tests the SessionFileCounter.GetNextSessionNumber method used in session-runner.
     /// Validates the glob pattern and number extraction from session filenames.
     /// </summary>
     public class SessionFileCounterTests
     {
-        /// <summary>
-        /// Extracts the next session number from a directory of session files.
-        /// This mirrors the logic in session-runner/Program.cs WritePlaytestLog.
-        /// </summary>
-        static int GetNextSessionNumber(string dir)
-        {
-            int nextNum = 1;
-            foreach (var f in Directory.GetFiles(dir, "session-*.md"))
-            {
-                var n = Path.GetFileNameWithoutExtension(f);
-                var parts = n.Split('-');
-                if (parts.Length >= 2 && int.TryParse(parts[1], out int num))
-                    nextNum = Math.Max(nextNum, num + 1);
-            }
-            return nextNum;
-        }
-
         [Fact]
         public void EmptyDirectory_Returns1()
         {
@@ -34,7 +17,7 @@ namespace Pinder.Core.Tests
             Directory.CreateDirectory(dir);
             try
             {
-                Assert.Equal(1, GetNextSessionNumber(dir));
+                Assert.Equal(1, SessionFileCounter.GetNextSessionNumber(dir));
             }
             finally
             {
@@ -50,7 +33,7 @@ namespace Pinder.Core.Tests
             try
             {
                 File.WriteAllText(Path.Combine(dir, "session-005-sable-vs-brick.md"), "");
-                Assert.Equal(6, GetNextSessionNumber(dir));
+                Assert.Equal(6, SessionFileCounter.GetNextSessionNumber(dir));
             }
             finally
             {
@@ -68,7 +51,7 @@ namespace Pinder.Core.Tests
                 File.WriteAllText(Path.Combine(dir, "session-001-sable-vs-brick.md"), "");
                 File.WriteAllText(Path.Combine(dir, "session-003-sable-vs-brick.md"), "");
                 File.WriteAllText(Path.Combine(dir, "session-005-sable-vs-brick.md"), "");
-                Assert.Equal(6, GetNextSessionNumber(dir));
+                Assert.Equal(6, SessionFileCounter.GetNextSessionNumber(dir));
             }
             finally
             {
@@ -83,9 +66,8 @@ namespace Pinder.Core.Tests
             Directory.CreateDirectory(dir);
             try
             {
-                // Character names with hyphens should not confuse the parser
                 File.WriteAllText(Path.Combine(dir, "session-010-mary-jane-vs-peter-parker.md"), "");
-                Assert.Equal(11, GetNextSessionNumber(dir));
+                Assert.Equal(11, SessionFileCounter.GetNextSessionNumber(dir));
             }
             finally
             {
@@ -103,7 +85,7 @@ namespace Pinder.Core.Tests
                 File.WriteAllText(Path.Combine(dir, "session-005-sable-vs-brick.md"), "");
                 File.WriteAllText(Path.Combine(dir, "notes.md"), "");
                 File.WriteAllText(Path.Combine(dir, "readme.txt"), "");
-                Assert.Equal(6, GetNextSessionNumber(dir));
+                Assert.Equal(6, SessionFileCounter.GetNextSessionNumber(dir));
             }
             finally
             {

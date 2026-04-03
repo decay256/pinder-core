@@ -6,6 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <InternalsVisibleTo Include="Pinder.Core.Tests" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\src\Pinder.Core\Pinder.Core.csproj" />
     <ProjectReference Include="..\src\Pinder.LlmAdapters\Pinder.LlmAdapters.csproj" />
   </ItemGroup>
