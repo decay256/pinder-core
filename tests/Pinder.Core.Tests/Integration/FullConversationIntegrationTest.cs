@@ -91,6 +91,7 @@ namespace Pinder.Core.Tests.Integration
             // T7 (adv, interest=19):       d20=8, d20=6,   d100=50
             // T8 (adv, interest=21):       d20=20, d20=5,  d100=50
             var dice = new FixedDice(
+                5,  // Constructor: horniness roll (1d10)
                 14, 50,             // T1
                 3, 5, 50,           // T2
                 19, 18, 50,         // T3
@@ -301,6 +302,7 @@ namespace Pinder.Core.Tests.Integration
                 new[] { Opt(StatType.Charm), Opt(StatType.Wit) }).ToArray());
 
             var dice = new FixedDice(
+                5,  // Constructor: horniness roll (1d10)
                 3, 50,   // T1: d20=3 (just beats DC 18), d100=50
                 3, 50,   // T2: same
                 3, 50,   // T3: same
@@ -382,7 +384,7 @@ namespace Pinder.Core.Tests.Integration
             });
 
             // Ghost check d4=1 triggers ghost. No more dice needed.
-            var dice = new FixedDice(1);
+            var dice = new FixedDice(5, 1);
 
             var session = new GameSession(gerald, velvet, llm, dice, new NullTrapRegistry(), config);
 
@@ -421,7 +423,7 @@ namespace Pinder.Core.Tests.Integration
             // With Charm DC=18, Gerald +15. Disadvantage: take min of two d20s.
             // d4=2 (ghost check), d20=15 d20=10 (disadv takes min=10), d100=50
             // total = 10+13+2=25 >= 18, success
-            var dice = new FixedDice(2, 15, 10, 50);
+            var dice = new FixedDice(5, 2, 15, 10, 50);
 
             var session = new GameSession(gerald, velvet, llm, dice, new NullTrapRegistry(), config);
 
@@ -464,7 +466,7 @@ namespace Pinder.Core.Tests.Integration
             // Ghost check d4=3 (no ghost), disadvantage d20s, d100
             // Charm DC=18, with disadvantage take min. d20=1 d20=2 → min=1 → Nat1 → auto fail
             // Nat1 → Legendary fail → -4 interest. Interest: 1-4 → clamped to 0 → Unmatched
-            var dice = new FixedDice(3, 1, 2, 50);
+            var dice = new FixedDice(5, 3, 1, 2, 50);
 
             var session = new GameSession(gerald, velvet, llm, dice, new NullTrapRegistry(), config);
 
@@ -517,6 +519,7 @@ namespace Pinder.Core.Tests.Integration
             //
             // Turn 3: Wait. -1 interest. Interest: 14-1=13
             var dice = new FixedDice(
+                5,  // Constructor: horniness roll (1d10)
                 10, 50,  // T1 Speak
                 8        // T2 Read
             );
@@ -574,7 +577,7 @@ namespace Pinder.Core.Tests.Integration
 
             // Read: SA vs DC 12. Gerald SA=4, level=+2. d20+6 < 12 → need d20 < 6.
             // d20=3 → total=3+4+2=9 < 12 → fail
-            var dice = new FixedDice(3);
+            var dice = new FixedDice(5, 3);
 
             var session = new GameSession(gerald, velvet, llm, dice, new NullTrapRegistry(), config);
 
@@ -611,7 +614,7 @@ namespace Pinder.Core.Tests.Integration
                 previousOpener: null);
 
             var llm = new ScriptedLlmAdapter(Array.Empty<DialogueOption[]>());
-            var dice = new FixedDice(10);
+            var dice = new FixedDice(5, 10);
 
             var session = new GameSession(gerald, velvet, llm, dice, new NullTrapRegistry(), config);
 
@@ -651,7 +654,7 @@ namespace Pinder.Core.Tests.Integration
                     new[] { Opt(StatType.Charm), Opt(StatType.Wit) },
                 });
 
-                var dice = new FixedDice(10, 50, 8, 50);
+                var dice = new FixedDice(5, 10, 50, 8, 50);
                 var session = new GameSession(gerald, velvet, llm, dice, new NullTrapRegistry(), config);
 
                 await session.StartTurnAsync();
@@ -709,7 +712,7 @@ namespace Pinder.Core.Tests.Integration
             });
 
             // d4=1 → ghost
-            var dice = new FixedDice(1);
+            var dice = new FixedDice(5, 1);
             var session = new GameSession(gerald, velvet, llm, dice, new NullTrapRegistry(), config);
 
             // First call triggers ghost
@@ -743,7 +746,7 @@ namespace Pinder.Core.Tests.Integration
                 previousOpener: null);
 
             var llm = new ScriptedLlmAdapter(Array.Empty<DialogueOption[]>());
-            var dice = new FixedDice();
+            var dice = new FixedDice(5);  // 5=horniness roll
             var session = new GameSession(gerald, velvet, llm, dice, new NullTrapRegistry(), config);
 
             // Mutation: Fails if ResolveTurnAsync doesn't validate prior StartTurnAsync

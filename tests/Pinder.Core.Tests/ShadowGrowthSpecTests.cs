@@ -842,13 +842,23 @@ namespace Pinder.Core.Tests
                 previousOpener: previousOpener,
                 startingInterest: startingInterest);
 
+            var wrappedDice = new PrependedDice(5, dice);
+
             return new GameSession(
                 MakeProfile("player", playerStats),
                 MakeProfile("opponent", opponentStats),
                 llm,
-                dice,
+                wrappedDice,
                 new NullTrapRegistry(),
                 config);
+        }
+
+        private sealed class PrependedDice : IDiceRoller
+        {
+            private int? _first;
+            private readonly IDiceRoller _inner;
+            public PrependedDice(int firstValue, IDiceRoller inner) { _first = firstValue; _inner = inner; }
+            public int Roll(int sides) { if (_first.HasValue) { var v = _first.Value; _first = null; return v; } return _inner.Roll(sides); }
         }
 
         /// <summary>Deterministic dice for tests — dequeues values in order.</summary>

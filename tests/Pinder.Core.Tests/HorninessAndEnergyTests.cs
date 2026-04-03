@@ -154,14 +154,15 @@ namespace Pinder.Core.Tests
         }
 
         /// <summary>
-        /// Without a clock, horniness stays at 0 and no energy is consumed.
+        /// Without a clock, horniness is still rolled (1d10) but with no time-of-day modifier.
+        /// No energy is consumed.
         /// </summary>
         [Fact]
-        public async Task GameSession_NoClock_HorninessZero_NoEnergyCheck()
+        public async Task GameSession_NoClock_HorninessStillRolled_NoEnergyCheck()
         {
-            // No horniness roll consumed from dice (no clock)
+            // Horniness roll (1d10) = 5, then Turn 1: d20=15 (roll), d100=50 (timing delay)
             var dice = new FixedDice(
-                // Turn 1: d20=15 (roll), d100=50 (timing delay)
+                5,   // horniness roll (always consumed now, even without clock)
                 15, 50);
 
             var session = new GameSession(
@@ -178,6 +179,33 @@ namespace Pinder.Core.Tests
             // Should not throw — no energy check without clock
             var result = await session.ResolveTurnAsync(0);
             Assert.NotNull(result);
+        }
+
+        /// <summary>
+        /// Without a clock, session horniness equals the raw dice roll (no time-of-day modifier).
+        /// Horniness >= 18 forces all options to Rizz even without a clock.
+        /// </summary>
+        [Fact]
+        public async Task GameSession_NoClock_HorninessRolled_ForcesRizzAtT3()
+        {
+            // FixedDice: 20 (horniness roll — unclamped), then enough for StartTurnAsync
+            var dice = new FixedDice(20);
+
+            var session = new GameSession(
+                MakeProfile("Player"),
+                MakeProfile("Opponent"),
+                new NullLlmAdapter(),
+                dice,
+                new NullTrapRegistry(),
+                null);
+
+            var turn = await session.StartTurnAsync();
+
+            // Horniness = 20 (no clock modifier) >= 18, all options should be Rizz
+            for (int i = 0; i < turn.Options.Length; i++)
+            {
+                Assert.Equal(StatType.Rizz, turn.Options[i].Stat);
+            }
         }
 
         // ======================== Helpers ========================

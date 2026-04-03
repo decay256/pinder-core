@@ -219,7 +219,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueWeaknessWindow(null);
 
             // Turn 0: roll 15, Turn 1: roll 11 (11+2=13, DC=15-2=13 → success)
-            var dice = new FixedDice(15, 5, 11, 5, 15, 5);
+            var dice = new FixedDice(5, 15, 5, 11, 5, 15, 5);
             var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
 
             await session.StartTurnAsync();
@@ -245,7 +245,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Smooth"));
             llm.EnqueueWeaknessWindow(null);
 
-            var dice = new FixedDice(15, 5, 15, 5, 15, 5);
+            var dice = new FixedDice(5, 15, 5, 15, 5, 15, 5);
             var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
 
             await session.StartTurnAsync();
@@ -299,7 +299,7 @@ namespace Pinder.Core.Tests
                 new DialogueOption(StatType.Rizz, "C"));       // Rizz → Wit = match!
             llm.EnqueueWeaknessWindow(null);
 
-            var dice = new FixedDice(15, 5, 15, 5, 15, 5);
+            var dice = new FixedDice(5, 15, 5, 15, 5, 15, 5);
             var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
 
             await session.StartTurnAsync();
@@ -330,7 +330,7 @@ namespace Pinder.Core.Tests
                 new DialogueOption(StatType.Charm, "Option C"));
             llm.EnqueueWeaknessWindow(null);
 
-            var dice = new FixedDice(15, 5, 15, 5, 15, 5);
+            var dice = new FixedDice(5, 15, 5, 15, 5, 15, 5);
             var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
 
             await session.StartTurnAsync();

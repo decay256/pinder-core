@@ -74,6 +74,7 @@ namespace Pinder.Core.Tests
             // DC = 13 + 2 = 15. Roll 15: 15 + 2 + 0 = 17 >= 15 → success (beat by 2 → SuccessScale +1)
             // Each turn: d20 + d100(timing)
             var dice = new FixedDice(
+                5,  // Constructor: horniness roll (1d10)
                 15, 50,  // Turn 1: Wit
                 15, 50   // Turn 2: Charm
             );
@@ -110,6 +111,7 @@ namespace Pinder.Core.Tests
             // Turn 1: Roll 5 → fail (5 + 2 = 7 vs DC 15, miss by 8 = TropeTrap -2)
             // Turn 2: Roll 15 → success (SA, 15+2=17 vs DC 15)
             var dice = new FixedDice(
+                5,  // Constructor: horniness roll (1d10)
                 5, 50,   // Turn 1: fail
                 15, 50   // Turn 2: SA success
             );
@@ -145,6 +147,7 @@ namespace Pinder.Core.Tests
             // Use stats that don't form 2-stat combos: Rizz, SelfAwareness, Chaos
             // DC = 15 for all. Roll 15: 15+2=17 >= 15 → success
             var dice = new FixedDice(
+                5,  // Constructor: horniness roll (1d10)
                 15, 50,  // Turn 1: Rizz (d20 + d100 timing)
                 15, 50,  // Turn 2: SA
                 15, 50,  // Turn 3: Chaos → Triple triggers
@@ -190,6 +193,7 @@ namespace Pinder.Core.Tests
         {
             // Turn 1: Wit success. Turn 2: Charm fail → no Setup
             var dice = new FixedDice(
+                5,  // Constructor: horniness roll (1d10)
                 15, 50,  // Turn 1: success
                 5, 50    // Turn 2: fail (5+2=7 < 15)
             );
@@ -216,6 +220,7 @@ namespace Pinder.Core.Tests
         public async Task PeekCombo_PopulatesDialogueOptionComboName()
         {
             var dice = new FixedDice(
+                5,  // Constructor: horniness roll (1d10)
                 15, 50,  // Turn 1
                 15, 50   // Turn 2 (not used for start, but needed for resolve)
             );
@@ -249,6 +254,7 @@ namespace Pinder.Core.Tests
         public async Task TripleBonus_ConsumedByWait()
         {
             var dice = new FixedDice(
+                5,  // Constructor: horniness roll (1d10)
                 15, 50,  // Turn 1
                 15, 50,  // Turn 2
                 15, 50,  // Turn 3

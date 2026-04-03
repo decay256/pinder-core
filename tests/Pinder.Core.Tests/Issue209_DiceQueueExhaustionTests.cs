@@ -35,6 +35,7 @@ namespace Pinder.Core.Tests
         {
             // 9 dice values: turns 1-3 use 2 each (d20+d100), turn 4 uses 3 (d20+d20[advantage]+d100)
             var dice = new FixedDice(
+                5,  // Constructor: horniness roll (1d10)
                 15, 50,       // Turn 1: Rizz (d20=15, d100=50)
                 15, 50,       // Turn 2: SA (d20=15, d100=50)
                 15, 50,       // Turn 3: Chaos → Triple (d20=15, d100=50)
@@ -71,6 +72,7 @@ namespace Pinder.Core.Tests
         public async Task TripleCombo_ThreeDistinctStats_TriggersOnTurn3()
         {
             var dice = new FixedDice(
+                5,  // Constructor: horniness roll (1d10)
                 15, 50,       // Turn 1
                 15, 50,       // Turn 2
                 15, 50,       // Turn 3
@@ -102,6 +104,7 @@ namespace Pinder.Core.Tests
         public async Task TripleBonus_SetAfterTriple_ConsumedOnNextTurn()
         {
             var dice = new FixedDice(
+                5,  // Constructor: horniness roll (1d10)
                 15, 50,
                 15, 50,
                 15, 50,
@@ -145,6 +148,7 @@ namespace Pinder.Core.Tests
             // Momentum is a roll bonus (#268), not interest delta. Streak < 3 at start of each turn → no momentum bonus.
             // Turn 1: +2 → 12, Turn 2: +2 → 14, Turn 3: +2 → 16 (VeryIntoIt)
             var dice = new FixedDice(
+                5,  // Constructor: horniness roll (1d10)
                 15, 50,
                 15, 50,
                 15, 50,
@@ -190,6 +194,7 @@ namespace Pinder.Core.Tests
             // the test would pass but leave unconsumed dice. We additionally verify
             // the roll succeeds with expected outcome.
             var dice = new FixedDice(
+                5,  // Constructor: horniness roll (1d10)
                 15, 50,        // Turn 1
                 15, 50,        // Turn 2
                 15, 50,        // Turn 3
@@ -236,6 +241,7 @@ namespace Pinder.Core.Tests
         public async Task TripleBonus_AppliesExactlyPlusOne_AsExternalBonus()
         {
             var dice = new FixedDice(
+                5,  // Constructor: horniness roll (1d10)
                 15, 50,
                 15, 50,
                 15, 50,
@@ -270,6 +276,7 @@ namespace Pinder.Core.Tests
         {
             // Provide exactly 4 dice for 2 turns at Interested state (interest 10-15)
             var dice = new FixedDice(
+                5,  // Constructor: horniness roll (1d10)
                 15, 50,  // Turn 1: d20 + d100
                 15, 50   // Turn 2: d20 + d100
             );

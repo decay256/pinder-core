@@ -727,11 +727,15 @@ namespace Pinder.Core.Tests
                 ? (ILlmAdapter)new FixedOptionsLlmAdapter(llmOptions)
                 : new NullLlmAdapter();
 
+            var allDice = new int[diceValues.Length + 1];
+            allDice[0] = 5;
+            Array.Copy(diceValues, 0, allDice, 1, diceValues.Length);
+
             return new GameSession(
                 MakeProfile("player"),
                 MakeProfile("opponent"),
                 llm,
-                new QueueDice(diceValues),
+                new QueueDice(allDice),
                 new EmptyTrapRegistry(),
                 config);
         }
@@ -742,11 +746,16 @@ namespace Pinder.Core.Tests
             ILlmAdapter llm)
         {
             var config = new GameSessionConfig(playerShadows: shadows);
+
+            var allDice2 = new int[diceValues.Length + 1];
+            allDice2[0] = 5;
+            Array.Copy(diceValues, 0, allDice2, 1, diceValues.Length);
+
             return new GameSession(
                 MakeProfile("player"),
                 MakeProfile("opponent"),
                 llm,
-                new QueueDice(diceValues),
+                new QueueDice(allDice2),
                 new EmptyTrapRegistry(),
                 config);
         }

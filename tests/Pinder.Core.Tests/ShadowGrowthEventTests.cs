@@ -610,11 +610,16 @@ namespace Pinder.Core.Tests
 
             var llm = llmOptions != null ? (ILlmAdapter)new CustomLlmAdapter(llmOptions) : new NullLlmAdapter();
 
+            // Prepend horniness roll (1d10)
+            var allDice = new int[diceValues.Length + 1];
+            allDice[0] = 5;
+            Array.Copy(diceValues, 0, allDice, 1, diceValues.Length);
+
             return new GameSession(
                 MakeProfile("player", playerStats),
                 MakeProfile("opponent", opponentStats),
                 llm,
-                new QueueDice(diceValues),
+                new QueueDice(allDice),
                 new NullTrapRegistry(),
                 config);
         }
@@ -638,13 +643,25 @@ namespace Pinder.Core.Tests
 
             var llm = llmOptions != null ? (ILlmAdapter)new CustomLlmAdapter(llmOptions) : new NullLlmAdapter();
 
+            // Prepend horniness roll via wrapper
+            var wrappedDice = new PrependedDice(5, dice);
+
             return new GameSession(
                 MakeProfile("player", playerStats),
                 MakeProfile("opponent", opponentStats),
                 llm,
-                dice,
+                wrappedDice,
                 new NullTrapRegistry(),
                 config);
+        }
+
+        /// <summary>Wraps a dice roller, returning a prepended value first.</summary>
+        private sealed class PrependedDice : IDiceRoller
+        {
+            private int? _first;
+            private readonly IDiceRoller _inner;
+            public PrependedDice(int firstValue, IDiceRoller inner) { _first = firstValue; _inner = inner; }
+            public int Roll(int sides) { if (_first.HasValue) { var v = _first.Value; _first = null; return v; } return _inner.Roll(sides); }
         }
 
         private static void ActivateTrap(GameSession session)

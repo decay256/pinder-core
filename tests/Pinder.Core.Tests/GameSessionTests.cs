@@ -126,6 +126,7 @@ namespace Pinder.Core.Tests
             // With stat mod +2, level bonus +0, DC = 13 + 2 = 15
             // Roll of 15: 15 + 2 + 0 = 17 >= 15 → success, beat by 2 → +1 interest
             var dice = new FixedDice(
+                5,  // Constructor: horniness roll (1d10)
                 // Turn 1: d20=15, d100=50 (timing delay)
                 15, 50,
                 // Turn 2: d20=15, d100=50
@@ -179,6 +180,7 @@ namespace Pinder.Core.Tests
         {
             // DC = 13 + 2 = 15. Roll 5: 5 + 2 + 0 = 7 < 15. Miss by 8 → TropeTrap (-2 per rules-v3.4 §5)
             var dice = new FixedDice(
+                5,  // Constructor: horniness roll (1d10)
                 5, 50  // d20=5, d100 for timing
             );
 
@@ -207,6 +209,7 @@ namespace Pinder.Core.Tests
             // Turn 2: roll 5 → miss by 8 → TropeTrap → -2 → interest = 4 (Bored)
             // Turn 3 start: ghost check Roll(4)=1 → Ghosted
             var dice = new FixedDice(
+                5,  // Constructor: horniness roll (1d10)
                 1, 50,    // Turn 1: nat 1, timing
                 5, 50,    // Turn 2: d20=5, timing
                 1         // Turn 3 ghost check: Roll(4)=1
@@ -238,6 +241,7 @@ namespace Pinder.Core.Tests
             // After turn 2, interest=2 (Bored), so StartTurnAsync does ghost check: need d4≠1
             // Turn 3 has disadvantage (Bored), so RollEngine rolls 2 d20s
             var dice = new FixedDice(
+                5,  // Constructor: horniness roll (1d10)
                 1, 50,       // Turn 1: nat 1, timing
                 1, 50,       // Turn 2: nat 1, timing
                 2,           // Turn 3: ghost check d4=2 (no ghost)
@@ -282,6 +286,7 @@ namespace Pinder.Core.Tests
             // At turn 4 start, interest=16 (VeryIntoIt) → advantage → 2x d20
             // At turn 5 start, interest=18 (VeryIntoIt) → advantage → 2x d20
             var dice = new FixedDice(
+                5,  // Constructor: horniness roll (1d10)
                 15, 50,        // Turn 1: d20, d100 (timing)
                 15, 50,        // Turn 2: d20, d100
                 15, 50,        // Turn 3: d20, d100. After: 16 (VeryIntoIt)
@@ -317,6 +322,7 @@ namespace Pinder.Core.Tests
             // turn 4 with roll=12 (Total=14, DC=15 → normally fail). With +2 momentum,
             // FinalTotal=16 → success.
             var dice = new FixedDice(
+                5,  // Constructor: horniness roll (1d10)
                 15, 50,   // Turn 1: success
                 15, 50,   // Turn 2: success
                 15, 50,   // Turn 3: success. After: interest=16 (VeryIntoIt → advantage)
@@ -349,7 +355,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task ResolveTurnAsync_ThrowsWhenCalledWithoutStart()
         {
-            var dice = new FixedDice();
+            var dice = new FixedDice(5);  // 5=horniness roll
             var session = new GameSession(
                 MakeProfile("P"), MakeProfile("O"),
                 new NullLlmAdapter(), dice, new NullTrapRegistry());
@@ -360,7 +366,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task ResolveTurnAsync_ThrowsOnInvalidIndex()
         {
-            var dice = new FixedDice(15, 50);
+            var dice = new FixedDice(5, 15, 50);
             var session = new GameSession(
                 MakeProfile("P"), MakeProfile("O"),
                 new NullLlmAdapter(), dice, new NullTrapRegistry());
@@ -373,7 +379,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task DeliveredMessage_AppearsInHistory()
         {
-            var dice = new FixedDice(15, 50);
+            var dice = new FixedDice(5, 15, 50);
             var session = new GameSession(
                 MakeProfile("Player"), MakeProfile("Opponent"),
                 new NullLlmAdapter(), dice, new NullTrapRegistry());

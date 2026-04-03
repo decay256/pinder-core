@@ -76,7 +76,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.SelfAwareness, "Hmm"));
 
             // Dice: each turn needs d20 roll + timing roll
-            var dice = new FixedDice(15, 5, 15, 5, 15, 5, 15, 5, 15, 5, 15, 5);
+            var dice = new FixedDice(5, 15, 5, 15, 5, 15, 5, 15, 5, 15, 5, 15, 5);
             var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
 
             // Turn 0
@@ -120,7 +120,7 @@ namespace Pinder.Core.Tests
             // Turn 1: roll 10 (SA mod=2, level bonus=0, total=12). Normal DC=15 → fail. With dcAdj=2 → DC=13 → fail.
             //   Actually 10+2+0 = 12 vs DC 13 = fail even with adjustment
             // Let's use roll=11: 11+2=13 vs DC 15=fail, but with adj DC=13 → success
-            var dice = new FixedDice(15, 5, 11, 5, 15, 5, 15, 5);
+            var dice = new FixedDice(5, 15, 5, 11, 5, 15, 5, 15, 5);
             var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
 
             // Turn 0
@@ -148,7 +148,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Hey"));
             llm.EnqueueWeaknessWindow(null);
 
-            var dice = new FixedDice(15, 5, 15, 5);
+            var dice = new FixedDice(5, 15, 5, 15, 5);
             var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
 
             var start = await session.StartTurnAsync();
@@ -179,7 +179,7 @@ namespace Pinder.Core.Tests
             // Turn 2: SA option - should NOT have window
             llm.EnqueueOptions(new DialogueOption(StatType.SelfAwareness, "Hmm"));
 
-            var dice = new FixedDice(15, 5, 15, 5, 15, 5, 15, 5);
+            var dice = new FixedDice(5, 15, 5, 15, 5, 15, 5, 15, 5);
             var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
 
             // Turn 0
@@ -210,7 +210,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Hey"));
             llm.EnqueueWeaknessWindow(new WeaknessWindow(StatType.Wit, 2));
 
-            var dice = new FixedDice(15, 5, 15, 5);
+            var dice = new FixedDice(5, 15, 5, 15, 5);
             var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
 
             await session.StartTurnAsync();
@@ -228,7 +228,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Hey"));
             llm.EnqueueWeaknessWindow(null);
 
-            var dice = new FixedDice(15, 5, 15, 5);
+            var dice = new FixedDice(5, 15, 5, 15, 5);
             var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
 
             await session.StartTurnAsync();
@@ -252,7 +252,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.SelfAwareness, "After read"));
 
             // Turn 0: d20=15 + timing, Turn 1(Read): d20=15
-            var dice = new FixedDice(15, 5, 15, 15, 5);
+            var dice = new FixedDice(5, 15, 5, 15, 15, 5);
             var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
 
             // Turn 0
@@ -278,7 +278,7 @@ namespace Pinder.Core.Tests
             // Turn 2: SA option - should NOT have window (cleared by Wait)
             llm.EnqueueOptions(new DialogueOption(StatType.SelfAwareness, "After wait"));
 
-            var dice = new FixedDice(15, 5, 15, 5);
+            var dice = new FixedDice(5, 15, 5, 15, 5);
             var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
 
             // Turn 0
@@ -304,7 +304,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.SelfAwareness, "After recover"));
 
             // Turn 0: d20=15 + timing, Turn 1(Recover): d20=15
-            var dice = new FixedDice(15, 5, 15, 15, 5);
+            var dice = new FixedDice(5, 15, 5, 15, 15, 5);
             var trapRegistry = new NullTrapRegistry();
             var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, trapRegistry);
 
@@ -339,7 +339,7 @@ namespace Pinder.Core.Tests
                 new DialogueOption(StatType.Charm, "Smooth"),
                 new DialogueOption(StatType.Honesty, "Truth"));
 
-            var dice = new FixedDice(15, 5, 15, 5, 15, 5);
+            var dice = new FixedDice(5, 15, 5, 15, 5, 15, 5);
             var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
 
             await session.StartTurnAsync();
@@ -369,7 +369,7 @@ namespace Pinder.Core.Tests
                 new DialogueOption(StatType.Chaos, "Wild"),      // Chaos → Charm = match
                 new DialogueOption(StatType.SelfAwareness, "SA")); // SA → Honesty ≠ Charm
 
-            var dice = new FixedDice(15, 5, 15, 5, 15, 5, 15, 5);
+            var dice = new FixedDice(5, 15, 5, 15, 5, 15, 5, 15, 5);
             var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
 
             // Turn 0
@@ -396,7 +396,7 @@ namespace Pinder.Core.Tests
             var llm = new WeaknessTestLlm();
             llm.EnqueueOptions(new DialogueOption(StatType.SelfAwareness, "First"));
 
-            var dice = new FixedDice(15, 5, 15, 5);
+            var dice = new FixedDice(5, 15, 5, 15, 5);
             var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
 
             var start = await session.StartTurnAsync();
@@ -427,7 +427,7 @@ namespace Pinder.Core.Tests
                 new DialogueOption(attackStat, "Match"),
                 new DialogueOption(otherStat, "NoMatch"));
 
-            var dice = new FixedDice(15, 5, 15, 5, 15, 5);
+            var dice = new FixedDice(5, 15, 5, 15, 5, 15, 5);
             var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
 
             await session.StartTurnAsync();

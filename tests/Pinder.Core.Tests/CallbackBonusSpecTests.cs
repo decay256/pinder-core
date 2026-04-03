@@ -191,6 +191,7 @@ namespace Pinder.Core.Tests
         {
             // Turn 2 with callback to turn 0 (opener) → distance 2 → +3
             var dice = new FixedDice(
+                5,  // Constructor: horniness roll (1d10)
                 15, 50,  // Turn 0
                 15, 50,  // Turn 1
                 15, 50,  // Turn 2
@@ -219,7 +220,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task AC3_ResolveTurn_NoCallbackOption_ZeroBonus()
         {
-            var dice = new FixedDice(15, 50, 50, 50);
+            var dice = new FixedDice(5, 15, 50, 50, 50);
             var llm = new StubLlmAdapter();
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Plain text"));
 
@@ -236,6 +237,7 @@ namespace Pinder.Core.Tests
         {
             // Turn 3, callback to turn 1 → distance 2 → +1 (non-opener)
             var dice = new FixedDice(
+                5,  // Constructor: horniness roll (1d10)
                 15, 50,  // Turn 0
                 15, 50,  // Turn 1
                 15, 50,  // Turn 2
@@ -274,6 +276,7 @@ namespace Pinder.Core.Tests
             // Without bonus: 14 < 15 → fail.
             // With opener callback bonus +3: FinalTotal = 14 + 3 = 17 >= 15 → success.
             var dice = new FixedDice(
+                5,  // Constructor: horniness roll (1d10)
                 15, 50,  // Turn 0: auto-success to keep interest up
                 15, 50,  // Turn 1: auto-success
                 12, 50,  // Turn 2: would-fail roll (12 + 2 = 14 < 15)
@@ -307,7 +310,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void ErrorCondition_AddTopic_NullThrowsArgumentNullException()
         {
-            var dice = new FixedDice(15);
+            var dice = new FixedDice(5, 15);
             var llm = new StubLlmAdapter();
             var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
 
@@ -318,7 +321,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void ErrorCondition_AddTopic_ValidTopic_Succeeds()
         {
-            var dice = new FixedDice(15);
+            var dice = new FixedDice(5, 15);
             var llm = new StubLlmAdapter();
             var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
 
@@ -381,6 +384,7 @@ namespace Pinder.Core.Tests
         {
             // Nat1 = auto-fail regardless of bonus
             var dice = new FixedDice(
+                5,  // Constructor: horniness roll (1d10)
                 15, 50,  // Turn 0
                 15, 50,  // Turn 1
                 1, 50,   // Turn 2: nat 1
@@ -416,6 +420,7 @@ namespace Pinder.Core.Tests
         public async Task EdgeCase_Nat20_WithCallback_SucceedsAndRecordsBonus()
         {
             var dice = new FixedDice(
+                5,  // Constructor: horniness roll (1d10)
                 15, 50,  // Turn 0
                 15, 50,  // Turn 1
                 20, 50,  // Turn 2: nat 20

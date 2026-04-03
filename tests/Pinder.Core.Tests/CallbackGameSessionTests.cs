@@ -65,6 +65,7 @@ namespace Pinder.Core.Tests
             // With callback bonus: FinalTotal = 15 + bonus.
             // We want to verify the bonus is recorded.
             var dice = new FixedDice(
+                5,  // Constructor: horniness roll (1d10)
                 // Turn 0: d20=15, d100=50 (timing)
                 15, 50,
                 // Turn 1: d20=15, d100=50 (timing)
@@ -108,6 +109,7 @@ namespace Pinder.Core.Tests
             // Without bonus: 14 < 15 → fail.
             // With callback bonus +3 (opener at distance 2): FinalTotal = 14 + 3 = 17 >= 15 → success.
             var dice = new FixedDice(
+                5,  // Constructor: horniness roll (1d10)
                 // Turn 0: d20=15, d100=50 (timing) — success to keep interest up
                 15, 50,
                 // Turn 1: d20=15, d100=50 (timing) — success
@@ -142,7 +144,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task ResolveTurn_NoCallbackOption_ZeroBonus()
         {
-            var dice = new FixedDice(15, 50);
+            var dice = new FixedDice(5, 15, 50);
             var llm = new CallbackTestLlmAdapter();
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Just chatting"));
 
@@ -159,6 +161,7 @@ namespace Pinder.Core.Tests
             // Turn 3, callback to turn 1 → distance 2 → +1 (non-opener)
             // Each turn needs d20 (roll) + d100 (timing delay)
             var dice = new FixedDice(
+                5,  // Constructor: horniness roll (1d10)
                 15, 50,  // Turn 0: d20, d100
                 15, 50,  // Turn 1: d20, d100
                 15, 50,  // Turn 2: d20, d100
@@ -189,7 +192,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void AddTopic_NullThrows()
         {
-            var dice = new FixedDice(15);
+            var dice = new FixedDice(5, 15);
             var llm = new CallbackTestLlmAdapter();
             var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
 
@@ -199,7 +202,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void AddTopic_ValidTopic_DoesNotThrow()
         {
-            var dice = new FixedDice(15);
+            var dice = new FixedDice(5, 15);
             var llm = new CallbackTestLlmAdapter();
             var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
 
