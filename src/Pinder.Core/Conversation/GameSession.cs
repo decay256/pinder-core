@@ -699,17 +699,44 @@ namespace Pinder.Core.Conversation
             }
             else if (rollResult.IsSuccess)
             {
+                int baseXp;
                 if (rollResult.DC <= 13)
-                    _xpLedger.Record("Success_DC_Low", 5);
+                    baseXp = 5;
                 else if (rollResult.DC <= 17)
-                    _xpLedger.Record("Success_DC_Mid", 10);
+                    baseXp = 10;
                 else
-                    _xpLedger.Record("Success_DC_High", 15);
+                    baseXp = 15;
+
+                int xp = ApplyRiskTierMultiplier(baseXp, rollResult.RiskTier);
+
+                string label = rollResult.DC <= 13 ? "Success_DC_Low"
+                    : rollResult.DC <= 17 ? "Success_DC_Mid"
+                    : "Success_DC_High";
+                _xpLedger.Record(label, xp);
             }
             else
             {
                 _xpLedger.Record("Failure", 2);
             }
+        }
+
+        /// <summary>
+        /// Applies the risk-tier XP multiplier per risk-reward doc:
+        /// Safe=1x, Medium=1.5x, Hard=2x, Bold=3x.
+        /// </summary>
+        private static int ApplyRiskTierMultiplier(int baseXp, RiskTier riskTier)
+        {
+            double multiplier;
+            if (riskTier == RiskTier.Bold)
+                multiplier = 3.0;
+            else if (riskTier == RiskTier.Hard)
+                multiplier = 2.0;
+            else if (riskTier == RiskTier.Medium)
+                multiplier = 1.5;
+            else
+                multiplier = 1.0;
+
+            return (int)Math.Round(baseXp * multiplier);
         }
 
         /// <summary>
