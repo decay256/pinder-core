@@ -1,6 +1,6 @@
 # Spec: Session Runner — Show Pick Reasoning in Playtest Output
 
-**Issue:** #351  
+**Issue:** #351
 **Module:** docs/modules/session-runner.md (create new)
 
 ---
@@ -101,6 +101,8 @@ public sealed class OptionScore
 - `PlayerDecision.Reasoning` = `"The 🔗 callback on option C (Honesty) closes the probability gap to near-tie. But Charm is Safe tier — Honesty is Hard. At Interest 19 I need one more win, not a risky bet. Going Charm — cleaner, lower trap exposure, gets us home.\nPick: C"`
 - Agent type name: `"LlmPlayerAgent"`
 
+> **Note:** The reasoning text is verbatim from the LLM. The fact that reasoning says "Going Charm" but `OptionIndex` is 2 (HONESTY) reflects that the LLM's natural-language reasoning may be inconsistent with its final `PICK:` directive. The `OptionIndex` is authoritative (parsed from the structured `PICK: C` line by LlmPlayerAgent); the reasoning prose is informational only.
+
 **Expected output:**
 
 ```markdown
@@ -168,7 +170,7 @@ The reasoning string comes directly from `PlayerDecision.Reasoning` as returned 
 
 ## Integration Point: Where to Insert in Program.cs
 
-The current flow around line 267–270 of `Program.cs` is:
+The current flow in `Program.cs` (in the turn loop, after the UI panel `Console.WriteLine("```")` and before the roll resolution) contains the pick logic. Locate this by searching for the pattern `BestOption(turnStart.Options` or `► Player picks`:
 
 ```csharp
 int pick = BestOption(turnStart.Options, sableStats);
@@ -218,6 +220,9 @@ LlmPlayerAgent may return multi-paragraph reasoning. No truncation — display t
 ### BonusesApplied contains multiple entries
 Concatenate them without separators: `📖🔗` not `📖 🔗`. This matches the issue example.
 
+### Reasoning text contradicts pick
+LlmPlayerAgent reasoning may appear to contradict the chosen option (e.g. reasoning says "Going Charm" but picks HONESTY). This is expected LLM behavior — the `OptionIndex` is authoritative (parsed from structured `PICK:` line), while reasoning prose is informational. The session runner displays both without attempting to reconcile them.
+
 ---
 
 ## Error Conditions
@@ -228,7 +233,7 @@ Concatenate them without separators: `📖🔗` not `📖 🔗`. This matches th
 | `PlayerDecision.Scores` is null | Skip score table. Still show reasoning block. Write warning to stderr. |
 | `PlayerDecision.Reasoning` is null or empty | Show `(no reasoning provided)` in blockquote. |
 | `OptionScore.SuccessChance` is NaN or negative | Display as `0%`. |
-| `OptionScore.Score` is NaN or negative | Display as `0.0`. |
+| `OptionScore.Score` is NaN or negative | Display score as-is (negative scores are valid, e.g. `-1.8`). Display NaN as `0.0`. |
 
 No exceptions should be thrown from the formatting functions. They are display-only and must be defensive.
 
