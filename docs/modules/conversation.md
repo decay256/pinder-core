@@ -10,7 +10,7 @@ The Conversation module implements the core game loop for Pinder's dating-conver
 | `GameSession.cs` | Core session state machine — manages turns, rolls, interest, traps, and game outcome |
 | `GameSessionConfig.cs` | Configuration parameters for a game session (starting interest, etc.) |
 | `InterestMeter.cs` | Tracks NPC interest level (0–25) and computes interest state, advantage/disadvantage |
-| `InterestState.cs` | Enum for interest bands (Bored, Neutral, Interested, VeryIntoIt, AlmostThere, etc.) |
+| `InterestState.cs` | Enum for interest bands: Unmatched, Bored, Lukewarm, Interested, VeryIntoIt, AlmostThere, DateSecured |
 | `TurnStart.cs` | Data returned by `StartTurnAsync()` — dialogue options, current state |
 | `TurnResult.cs` | Data returned by `ResolveTurnAsync()` — roll result, interest change, outcome |
 | `ReadResult.cs` | Data returned by `ReadAsync()` — SA roll result, interest reveal |
@@ -54,8 +54,10 @@ The Conversation module implements the core game loop for Pinder's dating-conver
 
 ### `InterestMeter`
 
+- **`GetState() → InterestState`** — Maps current value to a state: 0 = Unmatched, 1–4 = Bored, 5–9 = Lukewarm, 10–15 = Interested, 16–20 = VeryIntoIt, 21–24 = AlmostThere, 25 = DateSecured.
 - **`GrantsAdvantage`** — `true` when interest state is VeryIntoIt or AlmostThere.
 - **`GrantsDisadvantage`** — `true` when interest state is Bored.
+- **`StartingValue`** — `10` (Interested state).
 
 ### `GameSessionConfig`
 
@@ -77,3 +79,4 @@ The Conversation module implements the core game loop for Pinder's dating-conver
 | 2026-04-03 | #272 | Denial +1 when player skips available Honesty option (§7). Added shadow growth check in `ResolveTurnAsync()` — if Honesty is in the lineup and player picks a different stat, `ApplyGrowth(Denial, 1)` is called. Null-guarded for sessions without shadow tracking. Existing shadow-reduction tests updated to use Honesty-free option lineups to isolate from this new trigger. |
 | 2026-04-03 | #273 | Madness T3 (≥18) replaces one random dialogue option with unhinged text (§7). Added `IsUnhingedReplacement` bool property to `DialogueOption` (default `false`, backward-compatible). In `StartTurnAsync()`, Madness T3 block selects a random option via `IDiceRoller` and replaces it with `IsUnhingedReplacement=true`. Horniness T3 block updated to preserve `IsUnhingedReplacement` when reconstructing options. Processing order: Fixation T3 → Denial T3 → Madness T3 → Horniness T3. |
 | 2026-04-03 | #310 | Corrected property name from `IsUnhinged` to `IsUnhingedReplacement` in docs (matching actual code). Added comprehensive test coverage via `MadnessT3UnhingedSpecTests.cs`. |
+| 2026-04-03 | #313 | Added `Lukewarm` (5–9) as a distinct `InterestState` per rules §6. Previously, Interested covered 5–15; now Lukewarm covers 5–9 and Interested covers 10–15. Lukewarm grants neither advantage nor disadvantage. `InterestState` enum now has 7 values. Tests in `Issue313_LukewarmInterestStateTests.cs`. |
