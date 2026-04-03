@@ -849,8 +849,8 @@ namespace Pinder.Core.Conversation
                 }
             }
 
-            // Trigger 5: Highest-% option (index 0) 3 turns in a row → +1 Fixation
-            _highestPctOptionPicked.Add(optionIndex == 0);
+            // Trigger 5: Highest-% option picked 3 turns in a row → +1 Fixation
+            _highestPctOptionPicked.Add(IsHighestProbabilityOption(chosenOption, _currentOptions!));
             if (_highestPctOptionPicked.Count >= 3)
             {
                 int tail = _highestPctOptionPicked.Count;
@@ -1343,6 +1343,31 @@ namespace Pinder.Core.Conversation
                 .Where(s => !string.IsNullOrEmpty(s))
                 .ToArray();
             return instructions.Length > 0 ? instructions : null;
+        }
+
+        /// <summary>
+        /// Determines whether the chosen option has the highest (or tied-for-highest)
+        /// success probability among all available options.
+        /// Probability is based on attacker stat modifier + level bonus vs defender DC.
+        /// </summary>
+        private bool IsHighestProbabilityOption(DialogueOption chosen, DialogueOption[] options)
+        {
+            int levelBonus = LevelTable.GetBonus(_player.Level);
+
+            // Compute "roll margin" for chosen option: higher = easier to succeed
+            // margin = statMod + levelBonus - DC (more positive = higher probability)
+            int chosenMargin = _player.Stats.GetEffective(chosen.Stat) + levelBonus
+                               - _opponent.Stats.GetDefenceDC(chosen.Stat);
+
+            for (int i = 0; i < options.Length; i++)
+            {
+                int margin = _player.Stats.GetEffective(options[i].Stat) + levelBonus
+                             - _opponent.Stats.GetDefenceDC(options[i].Stat);
+                if (margin > chosenMargin)
+                    return false; // Another option has strictly higher probability
+            }
+
+            return true; // Chosen is highest or tied for highest
         }
     }
 }

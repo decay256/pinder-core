@@ -126,9 +126,10 @@ namespace Pinder.Core.Tests
             // Use high rolls to succeed (avoid Nat 1 side effects)
             // Each turn consumes: 1 d20 + 1 d100 (ComputeDelay) = 2 dice values per turn
             var dice = new QueueDice(new[] { 15, 50, 15, 50, 15, 50 });
-            // Put Charm at index 1 so we pick index 1 each time — avoids highest-% (index 0) trigger
+            // Charm(0) is NOT the highest-prob; Honesty(5) vs Chaos defence(0) is.
+            // This isolates same-stat trigger from highest-% trigger.
             var session = MakeSessionWithDice(dice,
-                playerStats: MakeStatBlock(charm: 5),
+                playerStats: MakeStatBlock(charm: 0, honesty: 5),
                 shadows: shadows,
                 llmOptions: new[]
                 {
@@ -141,7 +142,7 @@ namespace Pinder.Core.Tests
             for (int i = 0; i < 3; i++)
             {
                 await session.StartTurnAsync();
-                await session.ResolveTurnAsync(1); // Charm each time at index 1
+                await session.ResolveTurnAsync(1); // Charm each time at index 1 (NOT highest-prob)
             }
 
             Assert.Equal(1, shadows.GetDelta(ShadowStatType.Fixation));
@@ -188,10 +189,14 @@ namespace Pinder.Core.Tests
             var shadows = MakeShadowTracker();
             // Each turn: d20 + d100 = 2 dice. 3 turns = 6 dice.
             var dice = new QueueDice(new[] { 15, 50, 15, 50, 15, 50 });
+            // Charm(5) vs SA defence(0) → DC 13, margin = 5−13 = −8 → highest prob
+            // Honesty(5) vs Chaos(0) → DC 13, margin = 5−13 = −8 → tied
+            // Wit(5) vs Rizz(0) → DC 13, margin = 5−13 = −8 → tied
+            // All stats tied: picking any counts as "highest-%" per tie-breaking rule
             var session = MakeSessionWithDice(dice,
                 playerStats: MakeStatBlock(charm: 5, honesty: 5, wit: 5),
+                opponentStats: MakeStatBlock(sa: 0, chaos: 0, rizz: 0),
                 shadows: shadows,
-                // All same stat at index 0 — triggers both same-stat and highest-% triggers
                 llmOptions: new[]
                 {
                     new DialogueOption(StatType.Charm, "a"),
