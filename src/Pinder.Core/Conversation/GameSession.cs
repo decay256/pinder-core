@@ -920,9 +920,19 @@ namespace Pinder.Core.Conversation
             // 4b. Consume triple bonus if active (#46 edge case 7)
             _comboTracker.ConsumeTripleBonus();
 
-            // 5. Determine advantage/disadvantage from interest state
+            // 5. Determine advantage/disadvantage from interest state + shadow thresholds (#260)
             bool hasAdvantage = _interest.GrantsAdvantage;
             bool hasDisadvantage = _interest.GrantsDisadvantage;
+
+            // Shadow-based SA disadvantage: Overthinking T2+ → SA gets disadvantage
+            if (_playerShadows != null)
+            {
+                int overthinkingVal = _playerShadows.GetEffectiveShadow(ShadowStatType.Overthinking);
+                if (ShadowThresholdEvaluator.GetThresholdLevel(overthinkingVal) >= 2)
+                {
+                    hasDisadvantage = true;
+                }
+            }
 
             // 6. Roll SA vs DC 12
             var roll = RollEngine.ResolveFixedDC(
@@ -1009,9 +1019,19 @@ namespace Pinder.Core.Conversation
             // 5b. Consume triple bonus if active (#46 edge case 7)
             _comboTracker.ConsumeTripleBonus();
 
-            // 6. Determine advantage/disadvantage from interest state
+            // 6. Determine advantage/disadvantage from interest state + shadow thresholds (#260)
             bool hasAdvantage = _interest.GrantsAdvantage;
             bool hasDisadvantage = _interest.GrantsDisadvantage;
+
+            // Shadow-based SA disadvantage: Overthinking T2+ → SA gets disadvantage
+            if (_playerShadows != null)
+            {
+                int overthinkingVal = _playerShadows.GetEffectiveShadow(ShadowStatType.Overthinking);
+                if (ShadowThresholdEvaluator.GetThresholdLevel(overthinkingVal) >= 2)
+                {
+                    hasDisadvantage = true;
+                }
+            }
 
             // 7. Roll SA vs DC 12
             var roll = RollEngine.ResolveFixedDC(
