@@ -346,6 +346,19 @@ namespace Pinder.Core.Conversation
                     }
                     options = filtered;
                 }
+
+                // Madness T3: replace one random option with unhinged replacement marker
+                if (shadowThresholds.TryGetValue(ShadowStatType.Madness, out int madRaw)
+                    && madRaw >= 18
+                    && options.Length > 0)
+                {
+                    int unhingedIdx = _dice.Roll(options.Length) - 1;
+                    var o = options[unhingedIdx];
+                    options[unhingedIdx] = new DialogueOption(
+                        o.Stat, o.IntendedText, o.CallbackTurnNumber,
+                        o.ComboName, o.HasTellBonus, o.HasWeaknessWindow,
+                        isUnhingedReplacement: true);
+                }
             }
 
             // Horniness T3 (#45): all options become Rizz
@@ -355,7 +368,7 @@ namespace Pinder.Core.Conversation
                 {
                     var o = options[i];
                     options[i] = new DialogueOption(StatType.Rizz, o.IntendedText, o.CallbackTurnNumber,
-                        o.ComboName, o.HasTellBonus, o.HasWeaknessWindow);
+                        o.ComboName, o.HasTellBonus, o.HasWeaknessWindow, o.IsUnhingedReplacement);
                 }
             }
 
