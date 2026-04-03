@@ -982,7 +982,8 @@ namespace Pinder.Core.Conversation
             _activeWeakness = null;
             _activeTell = null;
 
-            // 4b. Consume triple bonus if active (#46 edge case 7)
+            // 4b. Capture and consume triple bonus if active (#312 — apply to Read roll)
+            bool hadTripleBonus = _comboTracker.HasTripleBonus;
             _comboTracker.ConsumeTripleBonus();
 
             // 5. Determine advantage/disadvantage from interest state + shadow thresholds (#260)
@@ -1006,7 +1007,8 @@ namespace Pinder.Core.Conversation
                 }
             }
 
-            // 6. Roll SA vs DC 12
+            // 6. Roll SA vs DC 12 (with triple bonus if active, #312)
+            int tripleBonus = hadTripleBonus ? 1 : 0;
             var roll = RollEngine.ResolveFixedDC(
                 StatType.SelfAwareness,
                 _player.Stats,
@@ -1016,7 +1018,8 @@ namespace Pinder.Core.Conversation
                 _trapRegistry,
                 _dice,
                 hasAdvantage,
-                hasDisadvantage);
+                hasDisadvantage,
+                externalBonus: tripleBonus);
 
             // 6b. Nat 20 crit advantage (#271) — set for next roll
             if (roll.IsNatTwenty)
@@ -1094,7 +1097,8 @@ namespace Pinder.Core.Conversation
             _activeWeakness = null;
             _activeTell = null;
 
-            // 5b. Consume triple bonus if active (#46 edge case 7)
+            // 5b. Capture and consume triple bonus if active (#312 — apply to Recover roll)
+            bool hadTripleBonus = _comboTracker.HasTripleBonus;
             _comboTracker.ConsumeTripleBonus();
 
             // 6. Determine advantage/disadvantage from interest state + shadow thresholds (#260)
@@ -1118,7 +1122,8 @@ namespace Pinder.Core.Conversation
                 }
             }
 
-            // 7. Roll SA vs DC 12
+            // 7. Roll SA vs DC 12 (with triple bonus if active, #312)
+            int tripleBonus = hadTripleBonus ? 1 : 0;
             var roll = RollEngine.ResolveFixedDC(
                 StatType.SelfAwareness,
                 _player.Stats,
@@ -1128,7 +1133,8 @@ namespace Pinder.Core.Conversation
                 _trapRegistry,
                 _dice,
                 hasAdvantage,
-                hasDisadvantage);
+                hasDisadvantage,
+                externalBonus: tripleBonus);
 
             // 7b. Nat 20 crit advantage (#271) — set for next roll
             if (roll.IsNatTwenty)
