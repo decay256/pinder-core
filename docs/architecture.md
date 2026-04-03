@@ -444,3 +444,64 @@ Caching strategy: character system prompts (~6k tokens) are placed in `cache_con
 | FailureScale values diverged from rules | §5 | Fixed this sprint (#266) |
 | Catastrophe/Legendary skip trap activation | §5 | Fixed this sprint (#267) |
 | Momentum applied as interest delta | §15 | Fixed this sprint (#268) |
+
+
+---
+
+## Sprint 12: Rules Compliance Round 2 — Architecture Briefing
+
+### What's changing
+
+**This sprint continues the existing architecture with no structural changes.** Ten issues fix or complete game-rules logic within the existing module boundaries. Changes span `Pinder.Core` (InterestState, InterestMeter, RollEngine, RollResult, SuccessScale, GameSession, DialogueOption, traps.json data) and `Pinder.LlmAdapters` (PromptTemplates, SessionDocumentBuilder). No new components, projects, or dependencies.
+
+**Existing architecture summary**: Pinder.Core is a zero-dependency .NET Standard 2.0 RPG engine. `GameSession` orchestrates single-conversation turns, delegating to `RollEngine` (stateless roll resolution), `InterestMeter`, `TrapState`, `SessionShadowTracker`, `ComboTracker`, and `XpLedger`. `Pinder.LlmAdapters` depends on `Pinder.Core` and implements `ILlmAdapter` via `AnthropicLlmAdapter`, using `SessionDocumentBuilder` for prompt assembly and `PromptTemplates` for instruction text constants. Dependency is strictly one-way: `LlmAdapters → Core`.
+
+### Components being extended
+
+- `Data/` — traps.json verification/fix (#306)
+- `Rolls/RollEngine` — failure tier uses FinalTotal (#309)
+- `Rolls/SuccessScale` — margin uses FinalTotal (#309)
+- `Rolls/RollResult` — MissMargin uses FinalTotal (#309)
+- `Conversation/InterestState` — gains Lukewarm (5-9) (#313)
+- `Conversation/InterestMeter` — GetState() split (#313)
+- `Conversation/DialogueOption` — gains IsUnhingedReplacement (#310)
+- `Conversation/GameSession` — 6 issues:
+  - Shadow raw values instead of tiers (#307)
+  - Wire shadowThresholds to Delivery/Opponent contexts (#308)
+  - beatDcBy uses FinalTotal (#309)
+  - Madness T3 unhinged option (#310)
+  - Triple bonus on Read/Recover (#312)
+  - XP risk-tier multiplier (#314)
+- `LlmAdapters/PromptTemplates` — tell categories (#311)
+
+### What is NOT changing
+- Stats module (StatBlock, SessionShadowTracker, ShadowThresholdEvaluator)
+- Characters, Prompts modules
+- NullLlmAdapter
+- Existing context DTO class signatures (all params already optional)
+
+### Implicit assumptions for implementers
+1. **netstandard2.0 + LangVersion 8.0**: No `record` types, no generic `Enum.Parse<T>`
+2. **Zero NuGet dependencies in Pinder.Core**
+3. **`AddExternalBonus()` is DEPRECATED** — all new bonuses via `externalBonus` param
+4. **All 1718 existing tests must continue to pass** — changes backward-compatible when externalBonus=0
+5. **Shadow thresholds change from tier (0-3) to raw values (0-30+)** after #307 — all T3 checks become `>= 18`
+6. **Lukewarm enum insertion shifts ordinals** — acceptable at prototype maturity
+7. **Sequential implementation within waves** — multiple issues touch GameSession
+
+### Known Gaps (as of Sprint 12)
+
+| Gap | Rules Section | Status |
+|-----|--------------|--------|
+| Shadow persistence across sessions | §8 | Not addressed — shadows are per-session |
+| `AddExternalBonus()` deprecated but not removed | — | Cleanup issue needed |
+| Energy system consumers | #144 | `IGameClock.ConsumeEnergy()` exists but nothing calls it |
+| GameSession god object trajectory | #87 | Growing — extraction planned for MVP |
+| Opponent shadow threshold computation | §3.6 | #308 adds opponent shadows to OpponentContext |
+| Shadow taint never fired | §11 | Fixed this sprint (#307) |
+| FinalTotal not used for tier/scale | §5 | Fixed this sprint (#309) |
+| Lukewarm state missing | §6 | Fixed this sprint (#313) |
+| XP risk multiplier missing | §10 | Fixed this sprint (#314) |
+| Madness T3 not implemented | §7 | Fixed this sprint (#310) |
+| Tell categories not in prompt | §15 | Fixed this sprint (#311) |
+| Triple bonus on Read/Recover | §15 | Fixed this sprint (#312) |
