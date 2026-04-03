@@ -267,10 +267,11 @@ namespace Pinder.Core.Tests
             var shadows = MakeTracker();
             var diceValues = new List<int>();
             for (int i = 0; i < 3; i++) { diceValues.Add(15); diceValues.Add(50); }
-            // Use index 1 to avoid highest-% trigger (index 0)
+            // Charm (0) is NOT the highest-prob option; Honesty (5) vs Chaos defence (0) is.
+            // This isolates the same-stat trigger from the highest-% trigger.
             var session = BuildSession(
                 dice: new TestDice(diceValues.ToArray()),
-                playerStats: Stats(charm: 5),
+                playerStats: Stats(charm: 0, honesty: 5),
                 shadows: shadows,
                 options: new[]
                 {
@@ -283,7 +284,7 @@ namespace Pinder.Core.Tests
             for (int i = 0; i < 3; i++)
             {
                 await session.StartTurnAsync();
-                await session.ResolveTurnAsync(1); // Charm each time
+                await session.ResolveTurnAsync(1); // Charm each time (NOT highest-prob)
             }
 
             Assert.Equal(1, shadows.GetDelta(ShadowStatType.Fixation));
