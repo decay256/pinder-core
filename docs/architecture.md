@@ -565,6 +565,14 @@ Caching strategy: character system prompts (~6k tokens) are placed in `cache_con
 7. **Player agent types go in session-runner, not Pinder.Core** (#355)
 8. **File counter glob must be `session-*.md`** (#359)
 
+### ADR: ScoringPlayerAgent reuses engine methods (#386)
+
+**Context:** ScoringPlayerAgent needs callback, momentum, and tell bonus values for its EV formula. These same values are computed inside `GameSession.ResolveTurnAsync()` and `CallbackBonus.Compute()`.
+
+**Decision:** ScoringPlayerAgent MUST call `CallbackBonus.Compute()` directly (it's public static in `Pinder.Core.Conversation`). Momentum bonus logic duplicates `GameSession.GetMomentumBonus()` (which is private static) with a `// SYNC: GameSession.GetMomentumBonus()` comment. Tell bonus is hardcoded `2` with a `// SYNC: GameSession ResolveTurnAsync tellBonus` comment.
+
+**Consequences:** Callback bonus is guaranteed in sync. Momentum and tell bonuses have sync comments that flag potential drift during code review. Acceptable at prototype maturity.
+
 ### Known Gaps (as of Sprint 2)
 
 | Gap | Rules Section | Status |
@@ -578,3 +586,4 @@ Caching strategy: character system prompts (~6k tokens) are placed in `cache_con
 | Session runner NullTrapRegistry | — | Fixed this sprint (#353) |
 | File counter glob mismatch | — | Fixed this sprint (#354 + #359) |
 | No automated player agent | — | Added this sprint (#346, #347, #348) |
+| ScoringPlayerAgent bonus constant sync | #386 | Mitigated via CallbackBonus.Compute() + SYNC comments |

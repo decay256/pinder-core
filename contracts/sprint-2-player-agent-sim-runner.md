@@ -2,50 +2,22 @@
 
 ## Architecture Overview
 
-This sprint introduces the **player agent abstraction** and fixes bugs
-in the session runner and core game logic. The existing architecture
-is unchanged — Pinder.Core remains a zero-dependency .NET Standard 2.0
-RPG engine. `GameSession` orchestrates single-conversation turns,
-delegating to `RollEngine`, `InterestMeter`, `TrapState`,
-`SessionShadowTracker`, `ComboTracker`, and `XpLedger`. The session
-runner (`session-runner/`) is a .NET 8 console app that depends on
-both `Pinder.Core` and `Pinder.LlmAdapters`.
+This sprint continues the existing architecture with no structural
+changes to Pinder.Core. New components are added to `session-runner/`
+only. Pinder.Core is a zero-dependency .NET Standard 2.0 RPG engine.
+`GameSession` orchestrates single-conversation turns, delegating to
+`RollEngine` (stateless), `InterestMeter`, `TrapState`,
+`SessionShadowTracker`, `ComboTracker`, and `XpLedger`.
+`Pinder.LlmAdapters` implements `ILlmAdapter` via
+`AnthropicLlmAdapter`. The session runner (`session-runner/`) is a
+.NET 8 console app that drives `GameSession` + `AnthropicLlmAdapter`
+for automated playtesting.
 
-**New components** are confined to `session-runner/`:
-- `IPlayerAgent` interface + supporting types
-- `ScoringPlayerAgent` (deterministic, math-only)
-- `LlmPlayerAgent` (Anthropic-backed, with fallback)
-
-**Bug fixes** touch:
-- `session-runner/Program.cs` — file counter, trap registry, shadow
-  tracking, reasoning output
-- `Pinder.Core/Conversation/GameSession.cs` — Fixation probability
-- `Pinder.Core/Conversation/InterestChangeContext.cs` — opponent prompt
-- `Pinder.LlmAdapters/Anthropic/AnthropicLlmAdapter.cs` — beat voice
+**Bug fixes #349, #352, #353, #354 are merged.** Remaining open
+issues: #346, #347, #348, #350, #351, #386.
 
 Per **#355**: all player agent types live in `session-runner/`, NOT
-in `Pinder.Core`. Core gains zero new public types.
-
-### Components being extended
-
-- `session-runner/Program.cs` — 5 issues (#354, #353, #350, #351, #348)
-- `Pinder.Core/Conversation/GameSession.cs` — 1 issue (#349)
-- `Pinder.Core/Conversation/InterestChangeContext.cs` — 1 issue (#352)
-- `Pinder.LlmAdapters/Anthropic/AnthropicLlmAdapter.cs` — 1 issue (#352)
-
-### Implicit assumptions for implementers
-
-1. **netstandard2.0 + LangVersion 8.0** in Pinder.Core. Session runner
-   is net8.0 and may use modern C# features (records, top-level, etc.)
-   but should stay at LangVersion 8.0 per project file.
-2. **Zero NuGet deps in Pinder.Core** — no new packages.
-3. **`JsonTrapRepository` takes a JSON string**, not a file path (#356).
-   Use `File.ReadAllText(path)` then pass to constructor.
-4. **`SessionShadowTracker` takes `StatBlock`**, not `Dictionary` (#360).
-   Use `new SessionShadowTracker(sableStats)`.
-5. **All 1977 existing tests must pass** unchanged.
-6. **Context DTO changes use optional params with defaults** (#357).
-7. **File counter glob must be `session-*.md`** not `session-???.md` (#359).
+in `Pinder.Core`. Core gains zero new public types this sprint.
 
 ---
 
@@ -70,6 +42,7 @@ in `Pinder.Core`. Core gains zero new public types.
     - Score options using expected-value formula
     - Apply strategic adjustments (momentum, interest, traps)
     - Return deterministic decisions with full reasoning
+    - Call CallbackBonus.Compute() for callback values (#386)
   - Interface:
     - Implements IPlayerAgent.DecideAsync
     - Pure function: same input → same output
@@ -97,6 +70,7 @@ in `Pinder.Core`. Core gains zero new public types.
     - Format playtest markdown output
     - File counter and naming
     - Shadow tracking display
+    - Pick reasoning display (#351)
   - Interface:
     - CLI entry point: `dotnet run` with env vars
     - Writes markdown to stdout + playtest directory
@@ -108,7 +82,7 @@ in `Pinder.Core`. Core gains zero new public types.
 - GameSession (Pinder.Core)
   - Responsibility:
     - Orchestrate single-conversation turns
-    - Shadow growth detection (including Fixation fix)
+    - Shadow growth detection
   - Interface:
     - StartTurnAsync() → TurnStart
     - ResolveTurnAsync(int) → TurnResult
@@ -118,176 +92,31 @@ in `Pinder.Core`. Core gains zero new public types.
     - Session file output
     - LLM transport
 
-- InterestChangeContext (Pinder.Core)
-  - Responsibility:
-    - Carry context for interest threshold beats
-  - Interface:
-    - Constructor gains optional `opponentPrompt`
-    - Backward-compatible (null default)
-  - Must NOT know:
-    - LLM prompt assembly
-    - How the beat is generated
+---
 
-- AnthropicLlmAdapter (Pinder.LlmAdapters)
-  - Responsibility:
-    - Use opponent prompt in interest beat generation
-  - Interface:
-    - GetInterestChangeBeatAsync reads OpponentPrompt
-    - Includes opponent system blocks when available
-  - Must NOT know:
-    - GameSession state
-    - Player agent decisions
+## Implicit Assumptions for Implementers
+
+1. **netstandard2.0 + LangVersion 8.0** in Pinder.Core.
+   Session runner is net8.0 but uses LangVersion 8.0 per csproj.
+2. **Zero NuGet dependencies in Pinder.Core** — no new packages.
+3. **`SessionShadowTracker` constructor takes `StatBlock`**, not
+   `Dictionary` (#360). Use `new SessionShadowTracker(sableStats)`.
+4. **All existing tests must pass** unchanged.
+5. **Player agent types go in session-runner, not Pinder.Core** (#355).
+6. **`CallbackBonus.Compute()` is public static** in
+   `Pinder.Core.Conversation` — scoring agent must call it (#386).
+7. **`GameSession.GetMomentumBonus()` is private static** —
+   scoring agent duplicates with `// SYNC:` comment (#386).
+8. **Tell bonus = literal 2** — no public constant exists.
+   Hardcode with `// SYNC: GameSession ResolveTurnAsync tellBonus`.
 
 ---
 
 ## Per-Issue Interface Definitions
 
-### #354 + #359 — File counter fix
+### #346 + #355 — IPlayerAgent Interface
 
-**Files changed:** `session-runner/Program.cs` (WritePlaytestLog method)
-
-**Current (broken):**
-```csharp
-foreach (var f in Directory.GetFiles(dir, "session-???.md"))
-{
-    var n = Path.GetFileNameWithoutExtension(f);
-    if (n.Length >= 11 && int.TryParse(n.Substring(8, 3), out int num))
-        nextNum = Math.Max(nextNum, num + 1);
-}
-```
-
-**Required change:**
-```csharp
-foreach (var f in Directory.GetFiles(dir, "session-*.md"))
-{
-    var name = Path.GetFileNameWithoutExtension(f);
-    var parts = name.Split('-');
-    if (parts.Length >= 2 && int.TryParse(parts[1], out int num))
-        nextNum = Math.Max(nextNum, num + 1);
-}
-```
-
-**Behavioral contract:**
-- Pre: directory may contain `session-NNN-name-vs-name.md` files
-- Post: `nextNum` = max(existing numbers) + 1
-- Post: next file slug = `session-{nextNum:D3}-{p1}-vs-{p2}.md`
-- Edge: empty directory → nextNum = 1
-- Edge: non-numeric parts after `session-` → skip gracefully
-
----
-
-### #353 + #356 — Real trap registry
-
-**Files changed:** `session-runner/Program.cs`
-
-**Current (broken):**
-```csharp
-class NullTrapRegistry : ITrapRegistry { ... }
-var session = new GameSession(sable, brick, llm, dice, new NullTrapRegistry());
-```
-
-**Required change:**
-```csharp
-// Remove NullTrapRegistry class
-string trapsJson = File.ReadAllText(trapsJsonPath);
-ITrapRegistry trapRegistry = new JsonTrapRepository(trapsJson);
-var session = new GameSession(sable, brick, llm, dice, trapRegistry);
-```
-
-**Behavioral contract:**
-- `JsonTrapRepository(string json)` — takes JSON content, NOT path
-- If file not found: print warning to stderr, fall back to
-  inline `NullTrapRegistry` (keep as private fallback)
-- Traps path: configurable via constant or env var
-  (default: `/root/.openclaw/agents-extra/pinder/data/traps/traps.json`)
-
----
-
-### #352 + #357 — Interest beat character voice
-
-**Files changed:**
-- `src/Pinder.Core/Conversation/InterestChangeContext.cs`
-- `src/Pinder.Core/Conversation/GameSession.cs` (where context is built)
-- `src/Pinder.LlmAdapters/Anthropic/AnthropicLlmAdapter.cs`
-
-**InterestChangeContext contract:**
-```csharp
-public sealed class InterestChangeContext
-{
-    public string OpponentName { get; }
-    public int InterestBefore { get; }
-    public int InterestAfter { get; }
-    public InterestState NewState { get; }
-    public string? OpponentPrompt { get; }  // NEW — optional
-
-    public InterestChangeContext(
-        string opponentName,
-        int interestBefore,
-        int interestAfter,
-        InterestState newState,
-        string? opponentPrompt = null)  // NEW — backward-compatible
-    {
-        ...
-        OpponentPrompt = opponentPrompt;
-    }
-}
-```
-
-**GameSession wiring:** Where `InterestChangeContext` is constructed,
-pass `_opponent.AssembledSystemPrompt`.
-
-**AnthropicLlmAdapter contract:**
-```
-GetInterestChangeBeatAsync(InterestChangeContext context):
-  IF context.OpponentPrompt is not null:
-    Build system blocks with opponent prompt (cached)
-    Include in request
-  ELSE:
-    Use empty system blocks (existing behavior)
-```
-
----
-
-### #349 — Fixation probability fix
-
-**Files changed:** `src/Pinder.Core/Conversation/GameSession.cs`
-
-**Current (broken):**
-```csharp
-_highestPctOptionPicked.Add(optionIndex == 0);  // assumes idx 0 is highest
-```
-
-**Required change:**
-```csharp
-bool isHighestPct = IsHighestProbabilityOption(
-    chosenOption, _currentOptions, _opponent.Stats);
-_highestPctOptionPicked.Add(isHighestPct);
-```
-
-**Helper contract:**
-```csharp
-/// <summary>
-/// Returns true if chosenOption has the highest (or tied for highest)
-/// success probability among all options.
-/// Probability = max(0, min(100, (21 - need) * 5))
-/// where need = opponent.GetDefenceDC(opt.Stat) - player.GetEffective(opt.Stat)
-/// </summary>
-private bool IsHighestProbabilityOption(
-    DialogueOption chosen,
-    DialogueOption[] allOptions,
-    StatBlock opponentStats)
-```
-
-**Behavioral contract:**
-- Probability computed from base stat + DC only (no external bonuses)
-- Ties: if chosen option ties for max, it counts as "highest"
-- All options have 0% probability: all count as highest (edge case)
-- Uses `_player.Stats.GetEffective(stat)` for attacker modifier
-- Uses `opponentStats.GetDefenceDC(stat)` for DC
-
----
-
-### #346 + #355 — IPlayerAgent interface
+**Status:** OPEN. Spec at `docs/specs/issue-346-spec.md`.
 
 **Files created (all in `session-runner/`):**
 - `session-runner/IPlayerAgent.cs`
@@ -297,8 +126,10 @@ private bool IsHighestProbabilityOption(
 
 **IPlayerAgent contract:**
 ```csharp
+// Namespace: up to implementer (suggested Pinder.SessionRunner)
 public interface IPlayerAgent
 {
+    /// Given a TurnStart and additional context, return a decision.
     Task<PlayerDecision> DecideAsync(
         TurnStart turn,
         PlayerAgentContext context);
@@ -309,33 +140,33 @@ public interface IPlayerAgent
 ```csharp
 public sealed class PlayerDecision
 {
-    public int OptionIndex { get; }
-    public string Reasoning { get; }
-    public OptionScore[] Scores { get; }
+    public int OptionIndex { get; }     // 0-based into TurnStart.Options
+    public string Reasoning { get; }    // never null, may be empty
+    public OptionScore[] Scores { get; } // one per option, never null
 
     public PlayerDecision(
-        int optionIndex,
-        string reasoning,
-        OptionScore[] scores) { ... }
+        int optionIndex, string reasoning, OptionScore[] scores);
 }
 ```
+
+**Invariants:**
+- `OptionIndex` in range `[0, Scores.Length)`
+- `Scores.Length == TurnStart.Options.Length`
+- `Reasoning` never null
 
 **OptionScore contract:**
 ```csharp
 public sealed class OptionScore
 {
     public int OptionIndex { get; }
-    public float Score { get; }
-    public float SuccessChance { get; }
-    public float ExpectedInterestGain { get; }
-    public string[] BonusesApplied { get; }
+    public float Score { get; }                  // composite (higher = better)
+    public float SuccessChance { get; }          // 0.0–1.0 probability
+    public float ExpectedInterestGain { get; }   // raw EV
+    public string[] BonusesApplied { get; }      // e.g. ["callback +2", "tell +2"]
 
     public OptionScore(
-        int optionIndex,
-        float score,
-        float successChance,
-        float expectedInterestGain,
-        string[] bonusesApplied) { ... }
+        int optionIndex, float score, float successChance,
+        float expectedInterestGain, string[] bonusesApplied);
 }
 ```
 
@@ -352,10 +183,18 @@ public sealed class PlayerAgentContext
     public int SessionHorniness { get; }
     public Dictionary<ShadowStatType, int>? ShadowValues { get; }
     public int TurnNumber { get; }
+
+    public PlayerAgentContext(
+        StatBlock playerStats, StatBlock opponentStats,
+        int currentInterest, InterestState interestState,
+        int momentumStreak, string[] activeTrapNames,
+        int sessionHorniness,
+        Dictionary<ShadowStatType, int>? shadowValues,
+        int turnNumber);
 }
 ```
 
-**Session runner wiring:** Replace `BestOption()` call with:
+**Session runner wiring (replaces `BestOption()`):**
 ```csharp
 var agentContext = new PlayerAgentContext(
     playerStats: sableStats,
@@ -364,17 +203,28 @@ var agentContext = new PlayerAgentContext(
     interestState: snap.State,
     momentumStreak: snap.MomentumStreak,
     activeTrapNames: snap.ActiveTrapNames,
-    sessionHorniness: 0,  // from shadow tracker if available
-    shadowValues: null,    // from shadow tracker if available
+    sessionHorniness: 0,
+    shadowValues: null,
     turnNumber: snap.TurnNumber);
 
 var decision = await agent.DecideAsync(turnStart, agentContext);
 int pick = decision.OptionIndex;
 ```
 
+**Dependencies:**
+- `Pinder.Core.Conversation.TurnStart`
+- `Pinder.Core.Conversation.GameStateSnapshot`
+- `Pinder.Core.Conversation.DialogueOption`
+- `Pinder.Core.Conversation.InterestState`
+- `Pinder.Core.Stats.StatBlock`
+- `Pinder.Core.Stats.ShadowStatType`
+
 ---
 
-### #347 — ScoringPlayerAgent
+### #347 + #386 — ScoringPlayerAgent
+
+**Status:** OPEN. Spec at `docs/specs/issue-347-spec.md`.
+**#386** modifies how bonus constants are sourced.
 
 **File created:** `session-runner/ScoringPlayerAgent.cs`
 
@@ -383,42 +233,61 @@ int pick = decision.OptionIndex;
 public sealed class ScoringPlayerAgent : IPlayerAgent
 {
     public Task<PlayerDecision> DecideAsync(
-        TurnStart turn,
-        PlayerAgentContext context);
+        TurnStart turn, PlayerAgentContext context);
 }
 ```
 
 **Scoring formula per option:**
 ```
-need = opponentDC - (statMod + momentumBonus + tellBonus + callbackBonus)
-successChance = clamp((21 - need) / 20.0, 0, 1)
-failChance = 1 - successChance
+attackerMod = context.PlayerStats.GetEffective(option.Stat)
+defenceDC   = context.OpponentStats.GetDefenceDC(option.Stat)
 
-expectedGain = successChance × (baseGain + riskTierBonus + comboBonusInterest)
+// MUST call engine method (#386):
+callbackBonus = option.CallbackTurnNumber.HasValue
+    ? CallbackBonus.Compute(context.TurnNumber, option.CallbackTurnNumber.Value)
+    : 0
+
+// Duplicate with sync comment (#386):
+// SYNC: GameSession.GetMomentumBonus()
+momentumBonus = streak >= 5 ? 3 : streak >= 3 ? 2 : 0
+
+// Hardcode with sync comment (#386):
+// SYNC: GameSession ResolveTurnAsync tellBonus
+tellBonus = option.HasTellBonus ? 2 : 0
+
+need = defenceDC - (attackerMod + momentumBonus + tellBonus + callbackBonus)
+successChance = clamp((21 - need) / 20.0, 0.0, 1.0)
+failChance = 1.0 - successChance
+
+expectedGain = successChance × (baseGain + riskTierBonus + comboBonus)
              - failChance × failCost
-
-where:
-  momentumBonus = momentum >= 3 ? (momentum >= 5 ? 3 : 2) : 0
-  tellBonus = opt.HasTellBonus ? 2 : 0
-  callbackBonus = opt.CallbackTurnNumber.HasValue
-    ? CallbackBonus.Compute(turn, callbackTurn) : 0
-  baseGain = 1 (Safe/Medium), 2 (Hard), 3 (Bold) — weighted avg
-  riskTierBonus = 0 (Safe/Medium), 1 (Hard), 2 (Bold)
-  failCost = 1 (Fumble-ish) to 3+ (TropeTrap+)
-  comboBonusInterest = opt.ComboName != null ? 1 : 0
 ```
 
+Where:
+- `riskTierBonus`: 0 (need ≤ 10), +1 (need 11–15), +2 (need ≥ 16)
+- `baseGain`: weighted average success interest (1 for Safe/Med, 2 for Hard, 3 for Bold)
+- `comboBonus`: +1 if `option.ComboName != null`
+- `failCost`: 1 (Fumble) to 3+ (TropeTrap+ with trap penalty estimate)
+
 **Strategic adjustments:**
-- momentum == 2: +1.0 bias toward high-success options
-- interest 19-24: prefer Safe/Medium (close the deal)
-- interest 1-4 (Bored): prefer Bold (nothing to lose)
-- active trap on stat: -2.0 penalty
+- momentum == 2: +1.0 bias to high-success options (reach streak)
+- interest 19–24: prefer Safe/Medium (close the deal)
+- interest 1–4 (Bored): prefer Bold (nothing to lose)
+- active trap on stat: −2.0 penalty
 
 **Determinism:** Same inputs MUST produce same outputs. No randomness.
+
+**Dependencies:**
+- `Pinder.Core.Conversation.CallbackBonus` (public static)
+- `Pinder.Core.Conversation.TurnStart`
+- `Pinder.Core.Stats.StatBlock`
+- All #346 types
 
 ---
 
 ### #348 — LlmPlayerAgent
+
+**Status:** OPEN.
 
 **File created:** `session-runner/LlmPlayerAgent.cs`
 
@@ -434,39 +303,43 @@ public sealed class LlmPlayerAgent : IPlayerAgent
         ScoringPlayerAgent fallback);
 
     public async Task<PlayerDecision> DecideAsync(
-        TurnStart turn,
-        PlayerAgentContext context);
+        TurnStart turn, PlayerAgentContext context);
 }
 ```
 
 **Behavioral contract:**
-- Builds a prompt with full game state and option details
-- Sends to Anthropic via AnthropicClient
+- Builds prompt with full game state + all 4 options + rules reminder
+- Sends to Anthropic via `AnthropicClient.SendMessagesAsync()`
 - Parses `PICK: [A/B/C/D]` from response (case-insensitive)
 - On ANY failure (API error, parse error, timeout):
   falls back to `_fallback.DecideAsync()`
-- Reasoning = full LLM response text
-- Scores = computed by ScoringPlayerAgent (for comparison)
+- `Reasoning` = full LLM response text
+- `Scores` = computed by ScoringPlayerAgent (for comparison table)
 
-**LLM prompt includes:**
-- Character identity (name, level)
-- Current state (interest, momentum, traps, shadows)
+**Prompt includes:**
+- Character identity
+- Current state (interest, momentum, traps, shadows, turn)
 - All 4 options with DC, %, risk tier, bonuses
-- Condensed rules reminder
-- Instruction: "Explain your reasoning, then state PICK: [A/B/C/D]"
+- Condensed rules reminder (success/fail tiers, momentum, combos)
+- Instruction: explain reasoning, then `PICK: [A/B/C/D]`
 
 **Dependencies:**
-- `AnthropicClient` (from Pinder.LlmAdapters) — for HTTP transport
-- `ScoringPlayerAgent` — for fallback + score comparison
+- `Pinder.LlmAdapters.Anthropic.AnthropicClient`
+- `Pinder.LlmAdapters.Anthropic.AnthropicOptions`
+- `ScoringPlayerAgent` (fallback)
+- All #346 types
 
 ---
 
-### #350 + #360 — Shadow tracking in session runner
+### #350 + #360 — Shadow Tracking in Session Runner
+
+**Status:** OPEN.
 
 **Files changed:** `session-runner/Program.cs`
 
 **Required change:**
 ```csharp
+// SessionShadowTracker takes StatBlock, NOT Dictionary (#360)
 var sableShadows = new SessionShadowTracker(sableStats);
 var config = new GameSessionConfig(playerShadows: sableShadows);
 var session = new GameSession(sable, brick, llm, dice, trapRegistry, config);
@@ -474,7 +347,7 @@ var session = new GameSession(sable, brick, llm, dice, trapRegistry, config);
 
 **Output contract — per turn (when shadow events fire):**
 ```
-⚠️ SHADOW GROWTH: {event description}
+⚠️ SHADOW GROWTH: {event description from TurnResult.ShadowGrowthEvents}
 ```
 
 **Output contract — session summary:**
@@ -484,22 +357,29 @@ var session = new GameSession(sable, brick, llm, dice, trapRegistry, config);
 |---|---|---|---|
 | Denial | 3 | 4 | +1 |
 | Fixation | 2 | 2 | 0 |
-| ... | ... | ... | ... |
 ```
 
 **Behavioral contract:**
-- Session runner holds reference to `sableShadows` for end-of-session delta
-- Shadow events come from `TurnResult.ShadowGrowthEvents`
-- Final shadow = `sableShadows.GetEffectiveShadow(type)` for each type
-- Starting shadow = `sableStats.GetShadow(type)` for each type
+- Session runner holds reference to `sableShadows`
+- Shadow events from `TurnResult.ShadowGrowthEvents` (already populated)
+- Final shadow: `sableShadows.GetEffectiveShadow(type)` per type
+- Starting shadow: `sableStats.GetShadow(type)` per type
+- All `ShadowStatType` enum values should be iterated
+
+**Dependencies:**
+- `Pinder.Core.Stats.SessionShadowTracker`
+- `Pinder.Core.Conversation.GameSessionConfig`
+- `Pinder.Core.Stats.ShadowStatType`
 
 ---
 
-### #351 — Pick reasoning output
+### #351 — Pick Reasoning Output
+
+**Status:** OPEN. Spec at `docs/specs/issue-351-spec.md`.
 
 **Files changed:** `session-runner/Program.cs`
 
-**Output contract — after pick line:**
+**Output contract — after the pick line:**
 ```markdown
 **► Player picks: A (CHARM)**
 
@@ -517,102 +397,82 @@ var session = new GameSession(sable, brick, llm, dice, trapRegistry, config);
 **Behavioral contract:**
 - ✓ marks the chosen option
 - Chosen option's score is **bold**
-- AgentTypeName = class name (e.g., "ScoringPlayerAgent")
-- Reasoning is word-wrapped at ~76 chars for readability
+- AgentTypeName = class name (e.g. "ScoringPlayerAgent")
+- Reasoning is blockquoted (each line prefixed with `> `)
 - Score table shows all scores from `PlayerDecision.Scores`
+- SuccessChance displayed as percentage (multiply by 100)
+
+**Dependencies:**
+- `PlayerDecision` from #346
+- `OptionScore` from #346
+- `DialogueOption` from Pinder.Core
+
+---
+
+### #386 — ScoringPlayerAgent Bonus Constant Sync
+
+**Status:** OPEN (vision concern).
+
+**This is NOT a separate implementation issue** — it modifies #347's
+implementation. The contract for #347 above already incorporates
+#386's requirements:
+
+1. `CallbackBonus.Compute()` called directly (not reimplemented)
+2. Momentum bonus duplicated with `// SYNC:` comment
+3. Tell bonus hardcoded `2` with `// SYNC:` comment
+
+No separate deliverable — this is a constraint on #347's implementation.
 
 ---
 
 ## Implementation Strategy
 
-### Wave 1 — No dependencies, can be parallel
+### Wave 1 — No dependencies
 
-1. **#354 + #359** — File counter fix (glob + parsing)
-   - Trivial. ~15 lines changed in WritePlaytestLog.
-   - Test: create temp dir with session files, verify counter.
+1. **#346** — IPlayerAgent interface + supporting types
+   - New files in session-runner/. No dependencies on other issues.
+   - Test: types construct, invariants hold.
 
-2. **#349** — Fixation probability fix
-   - Self-contained in GameSession.cs.
-   - Add `IsHighestProbabilityOption()` private method.
-   - Test: mock 4 options with known stats, verify tracking.
+### Wave 2 — Depends on Wave 1
 
-3. **#352 + #357** — Interest beat voice
-   - Touches Core DTO + LlmAdapters + GameSession wiring.
-   - Test: verify optional param default, verify adapter uses prompt.
-
-### Wave 2 — Sequential, depends on Wave 1
-
-4. **#353 + #356** — Real trap registry
-   - Changes session runner setup. Must read traps.json.
-   - Test: verify JsonTrapRepository loads, fallback works.
-
-5. **#346 + #355** — IPlayerAgent interface + types
-   - New files in session-runner/.
-   - No dependencies on other issues.
-   - Test: interface compiles, types construct correctly.
-
-6. **#350 + #360** — Shadow tracking
-   - Needs trap registry (#353) for realistic shadow triggers.
-   - Test: verify SessionShadowTracker wired, events display.
-
-### Wave 3 — Sequential, depends on Wave 2
-
-7. **#347** — ScoringPlayerAgent
+2. **#347 + #386** — ScoringPlayerAgent
    - Depends on #346 for IPlayerAgent.
+   - Must call `CallbackBonus.Compute()` per #386.
    - Test: deterministic scoring, strategic adjustments.
 
-8. **#348** — LlmPlayerAgent
+3. **#350** — Shadow tracking in session runner
+   - Independent of #346 but logically Wave 2.
+   - Test: SessionShadowTracker wired, events display.
+
+### Wave 3 — Depends on Wave 2
+
+4. **#348** — LlmPlayerAgent
    - Depends on #346 + #347 for interface + fallback.
    - Test: prompt construction, parse logic, fallback behavior.
 
-9. **#351** — Reasoning output
-   - Depends on #347 + #348 for PlayerDecision data.
+5. **#351** — Pick reasoning output
+   - Depends on #346 for PlayerDecision type.
+   - Can start after Wave 1 but full testing needs Wave 2/3.
    - Test: output format matches spec.
 
 ### Tradeoffs
 
-- **Player agent in session-runner vs Pinder.Simulation project:**
-  Keeping in session-runner is correct for prototype. If we need
-  multiple consumers, extract later.
-- **ScoringPlayerAgent formula approximates EV:** The actual
-  interest delta distribution is discrete (nat 20, success tiers,
-  failure tiers). A Monte Carlo sim would be more accurate. EV
-  formula is good enough for prototype.
-- **LlmPlayerAgent prompt doesn't include conversation history:**
-  It only sees current options + state. This is intentional —
-  the agent picks mechanically, not narratively.
+- **Player agent in session-runner vs shared project:**
+  Correct for prototype. Extract to `Pinder.Simulation` if
+  multiple consumers emerge later.
+- **EV formula approximates:** Discrete tier distribution
+  is simplified. Monte Carlo would be more accurate.
+  Good enough for prototype.
+- **LlmPlayerAgent prompt omits conversation history:**
+  Intentional — agent picks mechanically, not narratively.
 
-### Risk mitigation
+### Risk Mitigation
 
 - **LlmPlayerAgent API failure:** Falls back to ScoringPlayerAgent.
-  No single point of failure.
-- **traps.json missing:** Session runner prints warning, falls back
-  to NullTrapRegistry (degraded but functional).
-- **Shadow tracking breaks existing flow:** All shadow changes are
-  behind null checks (`_playerShadows != null`). No risk.
-
----
-
-## Sprint Plan Changes
-
-**SPRINT PLAN CHANGES:**
-
-The sprint issues are well-structured. Two adjustments needed:
-
-1. **#354 must include #359's glob fix** — they are the same bug.
-   The implementer must fix both the glob pattern AND the parsing.
-   No new issue needed; #359 is already created as a concern.
-
-2. **#350 must follow #360's constructor guidance** — already
-   documented. No new issue needed.
-
-3. **#346 must follow #355's location guidance** — types go in
-   session-runner, not Pinder.Core. Already documented.
-
-4. **#353 must follow #356's constructor guidance** — use
-   `File.ReadAllText()` then pass string. Already documented.
-
-No issues need to be dropped, split, or reordered.
+- **Shadow tracking breaks flow:** All behind null checks
+  (`_playerShadows != null`). Zero risk.
+- **Bonus constant drift (#386):** Mitigated by direct
+  `CallbackBonus.Compute()` call + SYNC comments.
 
 ---
 
@@ -621,8 +481,8 @@ No issues need to be dropped, split, or reordered.
 | Component | Latency target |
 |---|---|
 | ScoringPlayerAgent.DecideAsync | < 1ms (pure math) |
-| LlmPlayerAgent.DecideAsync | < 10s (API call) |
-| File counter (WritePlaytestLog) | < 100ms |
+| LlmPlayerAgent.DecideAsync | < 10s (API call + fallback) |
+| SessionRunner file counter | < 100ms |
 | GameSession.ResolveTurnAsync | unchanged |
 
 ---
@@ -630,6 +490,7 @@ No issues need to be dropped, split, or reordered.
 ## VERDICT: PROCEED
 
 Architecture is solid. No structural changes to Pinder.Core.
-All new types are correctly scoped to session-runner.
-Vision concerns (#355-#360) are well-documented and implementable.
+All new types correctly scoped to session-runner.
+Vision concerns (#355–#360, #386) are documented and addressed.
+Bug fixes (#349, #352, #353, #354) already merged.
 Implementation order is clear with minimal cross-dependencies.
