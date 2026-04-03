@@ -458,12 +458,14 @@ namespace Pinder.Core.Tests
             Assert.True(meter.IsZero);
         }
 
-        // Mutation: Fails if Interested state boundaries are wrong (5-15 range)
+        // Mutation: Fails if interest state boundaries are wrong
         [Fact]
         public void InterestMeter_CustomStart_Boundaries()
         {
             Assert.Equal(InterestState.Bored, new InterestMeter(4).GetState());
-            Assert.Equal(InterestState.Interested, new InterestMeter(5).GetState());
+            Assert.Equal(InterestState.Lukewarm, new InterestMeter(5).GetState());
+            Assert.Equal(InterestState.Lukewarm, new InterestMeter(9).GetState());
+            Assert.Equal(InterestState.Interested, new InterestMeter(10).GetState());
             Assert.Equal(InterestState.Interested, new InterestMeter(15).GetState());
             Assert.Equal(InterestState.VeryIntoIt, new InterestMeter(16).GetState());
             Assert.Equal(InterestState.VeryIntoIt, new InterestMeter(20).GetState());

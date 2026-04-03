@@ -28,9 +28,19 @@ namespace Pinder.Core.Tests
 
         [Theory]
         [InlineData(5)]
+        [InlineData(7)]
+        [InlineData(9)]
+        public void GetState_Between5And9_ReturnsLukewarm(int value)
+        {
+            var meter = CreateAtValue(value);
+            Assert.Equal(InterestState.Lukewarm, meter.GetState());
+        }
+
+        [Theory]
         [InlineData(10)]
+        [InlineData(12)]
         [InlineData(15)]
-        public void GetState_Between5And15_ReturnsInterested(int value)
+        public void GetState_Between10And15_ReturnsInterested(int value)
         {
             var meter = CreateAtValue(value);
             Assert.Equal(InterestState.Interested, meter.GetState());
@@ -97,10 +107,19 @@ namespace Pinder.Core.Tests
         // --- Boundary transitions ---
 
         [Fact]
-        public void Boundary_4To5_BoredToInterested()
+        public void Boundary_4To5_BoredToLukewarm()
         {
             var meter = CreateAtValue(4);
             Assert.Equal(InterestState.Bored, meter.GetState());
+            meter.Apply(1);
+            Assert.Equal(InterestState.Lukewarm, meter.GetState());
+        }
+
+        [Fact]
+        public void Boundary_9To10_LukewarmToInterested()
+        {
+            var meter = CreateAtValue(9);
+            Assert.Equal(InterestState.Lukewarm, meter.GetState());
             meter.Apply(1);
             Assert.Equal(InterestState.Interested, meter.GetState());
         }

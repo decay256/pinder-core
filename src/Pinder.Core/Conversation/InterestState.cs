@@ -12,7 +12,10 @@ namespace Pinder.Core.Conversation
         /// <summary>Interest 1–4. Player rolls with disadvantage.</summary>
         Bored,
 
-        /// <summary>Interest 5–15. No modifier.</summary>
+        /// <summary>Interest 5–9. No modifier.</summary>
+        Lukewarm,
+
+        /// <summary>Interest 10–15. No modifier.</summary>
         Interested,
 
         /// <summary>Interest 16–20. Player rolls with advantage.</summary>

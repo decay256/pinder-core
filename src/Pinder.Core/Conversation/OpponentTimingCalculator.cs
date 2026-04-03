@@ -113,6 +113,7 @@ namespace Pinder.Core.Conversation
             switch (state)
             {
                 case InterestState.Bored:       return 5.0;
+                case InterestState.Lukewarm:    return 2.0;
                 case InterestState.Interested:  return 1.0;
                 case InterestState.VeryIntoIt:  return 0.5;
                 case InterestState.AlmostThere: return 0.3;
