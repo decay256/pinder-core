@@ -66,7 +66,7 @@ public sealed class OptionScore
     /// <summary>Composite score (higher = better pick). Implementation-defined scale.</summary>
     public float Score { get; }
 
-    /// <summary>Estimated probability of beating the DC, as a percentage 0–100.</summary>
+    /// <summary>Estimated probability of beating the DC, as a value 0.0–1.0.</summary>
     public float SuccessChance { get; }
 
     /// <summary>Expected interest gain (positive or negative), weighting success and failure outcomes.</summary>
@@ -85,7 +85,7 @@ public sealed class OptionScore
 ```
 
 **Invariants:**
-- `SuccessChance` is clamped to `[0, 100]`.
+- `SuccessChance` is clamped to `[0.0, 1.0]`.
 - `BonusesApplied` is never null (may be empty array).
 
 ### PlayerAgentContext
