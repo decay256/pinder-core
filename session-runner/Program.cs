@@ -12,6 +12,7 @@ using Pinder.Core.Interfaces;
 using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
 using Pinder.Core.Traps;
+using Pinder.Core.Data;
 using Pinder.LlmAdapters.Anthropic;
 
 class NullTrapRegistry : ITrapRegistry
@@ -173,7 +174,39 @@ class Program
         var llm = new AnthropicLlmAdapter(new AnthropicOptions {
             ApiKey = apiKey, Model = "claude-sonnet-4-20250514", MaxTokens = 1024, Temperature = 0.9
         });
-        var session = new GameSession(sable, brick, llm, new SystemRandomDiceRoller(), new NullTrapRegistry());
+
+        // Load real trap definitions — fallback to NullTrapRegistry if file missing/corrupt
+        ITrapRegistry trapRegistry;
+        string trapsPath = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "data", "traps", "traps.json");
+        // Also check the absolute path used in playtesting environments
+        string altTrapsPath = "/root/.openclaw/agents-extra/pinder/data/traps/traps.json";
+        string repoTrapsPath = "/root/.openclaw/workspace/pinder-core/data/traps/traps.json";
+        string? resolvedPath = null;
+        if (File.Exists(trapsPath)) resolvedPath = trapsPath;
+        else if (File.Exists(repoTrapsPath)) resolvedPath = repoTrapsPath;
+        else if (File.Exists(altTrapsPath)) resolvedPath = altTrapsPath;
+
+        if (resolvedPath != null)
+        {
+            try
+            {
+                string trapsJson = File.ReadAllText(resolvedPath);
+                trapRegistry = new JsonTrapRepository(trapsJson);
+                Console.Error.WriteLine($"[INFO] Loaded traps from {resolvedPath}");
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"[WARN] Failed to load traps from {resolvedPath}: {ex.Message} — traps disabled");
+                trapRegistry = new NullTrapRegistry();
+            }
+        }
+        else
+        {
+            Console.Error.WriteLine("[WARN] traps.json not found — traps disabled");
+            trapRegistry = new NullTrapRegistry();
+        }
+
+        var session = new GameSession(sable, brick, llm, new SystemRandomDiceRoller(), trapRegistry);
 
         int interest = 10;
         int momentum = 0;
