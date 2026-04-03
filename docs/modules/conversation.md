@@ -15,7 +15,7 @@ The Conversation module implements the core game loop for Pinder's dating-conver
 | `TurnResult.cs` | Data returned by `ResolveTurnAsync()` — roll result, interest change, outcome |
 | `ReadResult.cs` | Data returned by `ReadAsync()` — SA roll result, interest reveal |
 | `RecoverResult.cs` | Data returned by `RecoverAsync()` — roll result, trap recovery |
-| `DialogueOption.cs` | A selectable dialogue choice for a Speak turn |
+| `DialogueOption.cs` | A selectable dialogue choice for a Speak turn (includes `IsUnhinged` flag for Madness T3) |
 | `DialogueContext.cs` | Context passed to the LLM adapter for generating dialogue options |
 | `DeliveryContext.cs` | Context for evaluating delivery/timing of player responses |
 | `ComboTracker.cs` | Tracks consecutive successes for combo bonuses |
@@ -47,6 +47,11 @@ The Conversation module implements the core game loop for Pinder's dating-conver
 - **`RecoverAsync() → Task<RecoverResult>`** — Self-contained action: rolls to recover from an active trap. Consumes and sets `_pendingCritAdvantage` independently.
 - **`Wait()`** — Skips a turn: applies −1 interest, advances trap timers. Does **not** consume `_pendingCritAdvantage`.
 
+### `DialogueOption`
+
+- **Constructor:** `DialogueOption(StatType stat, string intendedText, int? callbackTurnNumber = null, string? comboName = null, bool hasTellBonus = false, bool hasWeaknessWindow = false, bool isUnhinged = false)`
+- **`IsUnhinged`** — `true` when Madness T3 (≥18) has replaced this option with unhinged text. The option's `Stat` is preserved for roll mechanics; only the LLM-generated dialogue content is affected.
+
 ### `InterestMeter`
 
 - **`GrantsAdvantage`** — `true` when interest state is VeryIntoIt or AlmostThere.
@@ -62,6 +67,7 @@ The Conversation module implements the core game loop for Pinder's dating-conver
 - **Advantage sources:** Advantage is boolean (not cumulative). Sources include interest-based (`InterestMeter.GrantsAdvantage`) and crit-based (`_pendingCritAdvantage`). When both advantage and disadvantage are active, they cancel out to a normal roll.
 - **Crit advantage (`_pendingCritAdvantage`):** A private boolean flag on `GameSession`. Set to `true` after any roll produces a Nat 20 (`RollResult.IsNatTwenty`). Consumed (grants advantage, then cleared to `false`) at the start of the next roll in `StartTurnAsync`, `ReadAsync`, or `RecoverAsync`. `Wait()` does not consume it. The flag is per-session and does not persist across sessions.
 - **Roll mechanics:** Delegated to `RollEngine.Resolve()` and `RollEngine.ResolveFixedDC()` in the Rolls module. When advantage is active, two dice are rolled and the higher is used.
+- **Madness T3 unhinged option (§7):** In `StartTurnAsync()`, after the Denial T3 block and before the Horniness T3 block, if `shadowThresholds[ShadowStatType.Madness] >= 3` (effective Madness ≥18), one random option is replaced with a new `DialogueOption` that has `IsUnhinged = true`. The random index is selected via `_dice.Roll(options.Length) - 1`. The option's `Stat` is preserved so the roll is mechanically unchanged. The Horniness T3 block (which runs after) preserves the `IsUnhinged` flag when reconstructing options as Rizz. `DialogueOption` is immutable, so the replacement creates a new instance copying all properties.
 - **Denial shadow growth on skipped Honesty (§7):** In `ResolveTurnAsync()`, after determining `chosenOption`, if `_playerShadows` is non-null, `chosenOption.Stat != StatType.Honesty`, and any option in `_currentOptions` has `Stat == StatType.Honesty`, then `_playerShadows.ApplyGrowth(ShadowStatType.Denial, 1, "Skipped Honesty option")` is called. This is a boolean check (exactly +1 per turn regardless of how many Honesty options exist). The growth event flows into `TurnResult.ShadowGrowthEvents` via the existing `DrainGrowthEvents()` call. When Honesty is absent from the lineup (e.g., removed by Denial T3 threshold or Horniness-forced Rizz), no Denial growth occurs.
 
 ## Change Log
@@ -69,3 +75,4 @@ The Conversation module implements the core game loop for Pinder's dating-conver
 |------|-------|---------|
 | 2026-04-03 | #271 | Initial creation — Added `_pendingCritAdvantage` flag to `GameSession`: Nat 20 on any roll grants advantage on the next roll (§4). Consumed in `StartTurnAsync`, `ReadAsync`, `RecoverAsync`; persists through `Wait()`. Tests cover Speak→Speak, Speak→Read, Read→Speak, Recover→Speak, consecutive Nat 20s, Wait persistence, and advantage+disadvantage cancellation. |
 | 2026-04-03 | #272 | Denial +1 when player skips available Honesty option (§7). Added shadow growth check in `ResolveTurnAsync()` — if Honesty is in the lineup and player picks a different stat, `ApplyGrowth(Denial, 1)` is called. Null-guarded for sessions without shadow tracking. Existing shadow-reduction tests updated to use Honesty-free option lineups to isolate from this new trigger. |
+| 2026-04-03 | #273 | Madness T3 (≥18) replaces one random dialogue option with unhinged text (§7). Added `IsUnhinged` bool property to `DialogueOption` (default `false`, backward-compatible). In `StartTurnAsync()`, Madness T3 block selects a random option via `IDiceRoller` and replaces it with `IsUnhinged=true`. Horniness T3 block updated to preserve `IsUnhinged` when reconstructing options. Processing order: Fixation T3 → Denial T3 → Madness T3 → Horniness T3. |
