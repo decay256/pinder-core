@@ -177,14 +177,16 @@ namespace Pinder.Core.Tests
             shadows.DrainGrowthEvents();
 
             // Charm success at interest ≥15 should NOT reduce Denial
+            // Use options without Honesty to isolate from #272 Denial skip-Honesty growth
             var session = BuildSession(
                 dice: Dice(18, 50),
                 playerStats: Stats(charm: 5),
                 shadows: shadows,
-                startingInterest: 15);
+                startingInterest: 15,
+                options: new[] { new DialogueOption(StatType.Charm, "Hey, you come here often?") });
 
             await session.StartTurnAsync();
-            var result = await session.ResolveTurnAsync(0); // Charm, not Honesty
+            var result = await session.ResolveTurnAsync(0); // Charm, no Honesty available
 
             Assert.True(result.Roll.IsSuccess);
             Assert.Equal(2, shadows.GetDelta(ShadowStatType.Denial));

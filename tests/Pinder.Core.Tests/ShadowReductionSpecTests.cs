@@ -228,12 +228,13 @@ namespace Pinder.Core.Tests
             shadows.ApplyGrowth(ShadowStatType.Denial, 3, "setup");
             shadows.DrainGrowthEvents();
 
+            // Use options without Honesty to isolate from #272 Denial skip-Honesty growth
             var session = BuildSession(
                 dice: Dice(18, 50),
                 playerStats: MakeStats(charm: 5),
                 shadows: shadows,
-                startingInterest: 16);
-            // Default options use Charm
+                startingInterest: 16,
+                options: new[] { new DialogueOption(StatType.Charm, "Hey, you come here often?") });
 
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);

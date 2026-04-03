@@ -395,6 +395,15 @@ namespace Pinder.Core.Conversation
 
             var chosenOption = _currentOptions[optionIndex];
 
+            // Denial +1 when Honesty was available but player chose a different stat (#272 — §7)
+            if (_playerShadows != null
+                && chosenOption.Stat != StatType.Honesty
+                && _currentOptions.Any(o => o.Stat == StatType.Honesty))
+            {
+                _playerShadows.ApplyGrowth(ShadowStatType.Denial, 1,
+                    "Skipped Honesty option");
+            }
+
             // Compute callback bonus (#47)
             int callbackBonus = 0;
             if (chosenOption.CallbackTurnNumber.HasValue)
