@@ -76,8 +76,8 @@ namespace Pinder.Core.Rolls
         /// </summary>
         public RiskTier RiskTier { get; }
 
-        /// <summary>By how much the roll missed the DC. 0 on success.</summary>
-        public int MissMargin => IsSuccess ? 0 : DC - Total;
+        /// <summary>By how much the roll missed the DC (using FinalTotal). 0 on success.</summary>
+        public int MissMargin => IsSuccess ? 0 : DC - FinalTotal;
 
         public RollResult(
             int dieRoll,

@@ -572,7 +572,7 @@ namespace Pinder.Core.Conversation
             var deliveryTrapNames = GetActiveTrapNames();
             var deliveryTrapInstructions = GetActiveTrapInstructions();
 
-            int beatDcBy = rollResult.IsSuccess ? rollResult.Total - rollResult.DC : 0;
+            int beatDcBy = rollResult.IsSuccess ? rollResult.FinalTotal - rollResult.DC : 0;
 
             var deliveryContext = new DeliveryContext(
                 playerPrompt: _player.AssembledSystemPrompt,
