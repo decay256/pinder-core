@@ -46,11 +46,32 @@ public static class FailureScale
 public enum FailureTier
 {
     None,           // Not a failure
-    Fumble,         // Missed by 1–2
-    Misfire,        // Missed by 3–5
-    TropeTrap,      // Missed by 6–9 (activates a Trap)
-    Catastrophe,    // Missed by 10+
+    Fumble,         // Missed by 1–2 (using FinalTotal)
+    Misfire,        // Missed by 3–5 (using FinalTotal)
+    TropeTrap,      // Missed by 6–9 (using FinalTotal, activates a Trap)
+    Catastrophe,    // Missed by 10+ (using FinalTotal)
     Legendary       // Nat 1 (regardless of DC)
+}
+```
+
+### RollResult (selected members)
+
+```csharp
+public sealed class RollResult
+{
+    /// <summary>By how much the roll missed the DC (using FinalTotal). 0 on success.</summary>
+    public int MissMargin => IsSuccess ? 0 : DC - FinalTotal;
+}
+```
+
+### SuccessScale
+
+```csharp
+public static class SuccessScale
+{
+    /// Returns the positive interest delta for a successful roll.
+    /// Uses FinalTotal (includes external bonuses) to compute margin over DC.
+    public static int GetInterestDelta(RollResult result);
 }
 ```
 
@@ -61,6 +82,7 @@ public enum FailureTier
 - **Side effects (shadow growth) are handled by `GameSession`**, not by FailureScale. The scale only computes the interest delta.
 - **Interest is clamped to [0, 25] by GameSession** — FailureScale itself does not clamp.
 - The delta values were updated in issue #266 to match rules-v3.4 §5. The previous (prototype) values from issue #28 were steeper: Misfire −2, TropeTrap −3, Catastrophe −4, Legendary −5.
+- **FinalTotal is the canonical value for all margin calculations** (issue #309). `SuccessScale`, `RollEngine` failure tier assignment, `RollResult.MissMargin`, and `GameSession.beatDcBy` all use `FinalTotal` (which includes `externalBonus`) rather than `Total`. This ensures external bonuses affect outcome quality, not just the pass/fail threshold.
 
 ## Change Log
 
@@ -68,3 +90,4 @@ public enum FailureTier
 |------|-------|---------|
 | 2026-04-02 | #266 | Initial creation — documented FailureScale interest deltas updated to rules-v3.4 §5: Misfire −2→−1, TropeTrap −3→−2, Catastrophe −4→−3, Legendary −5→−4. Tests updated across GameSessionTests, ComboGameSessionTests, FullConversationIntegrationTest, ShadowGrowthEventTests, ShadowGrowthSpecTests. |
 | 2026-04-02 | #267 | Bug fix: Catastrophe tier (miss 10+) now also activates a trap via `RollEngine`, matching rules §5 (miss 10+ = −3 + trap). Previously only TropeTrap activated traps. Added `SingleTrapRegistry` test helper and three new tests in `RollEngineTests`. |
+| 2026-04-03 | #309 | Bug fix: All margin calculations now use `FinalTotal` (includes `externalBonus`) instead of `Total`. Affected: `SuccessScale.GetInterestDelta` margin, `RollEngine` failure tier assignment, `RollResult.MissMargin`, and `GameSession.beatDcBy`. Added `Issue309_FinalTotalTests.cs` (12 tests). Updated existing tests in `RollEngineExtensionTests` and `Wave0SpecTests`. |
