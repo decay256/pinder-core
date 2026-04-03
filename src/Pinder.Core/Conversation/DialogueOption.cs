@@ -28,13 +28,20 @@ namespace Pinder.Core.Conversation
         /// </summary>
         public bool HasWeaknessWindow { get; }
 
+        /// <summary>
+        /// True if this option was replaced by the Madness T3 (≥18) shadow threshold effect.
+        /// The LLM should generate unhinged/chaotic text for this option slot.
+        /// </summary>
+        public bool IsUnhingedReplacement { get; }
+
         public DialogueOption(
             StatType stat,
             string intendedText,
             int? callbackTurnNumber = null,
             string? comboName = null,
             bool hasTellBonus = false,
-            bool hasWeaknessWindow = false)
+            bool hasWeaknessWindow = false,
+            bool isUnhingedReplacement = false)
         {
             Stat = stat;
             IntendedText = intendedText ?? throw new System.ArgumentNullException(nameof(intendedText));
@@ -42,6 +49,7 @@ namespace Pinder.Core.Conversation
             ComboName = comboName;
             HasTellBonus = hasTellBonus;
             HasWeaknessWindow = hasWeaknessWindow;
+            IsUnhingedReplacement = isUnhingedReplacement;
         }
     }
 }
