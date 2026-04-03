@@ -15,6 +15,7 @@
 | `src/Pinder.Core/Conversation/TurnResult.cs` | Value object returned by `ResolveTurnAsync` with roll result, interest delta, state snapshot, combo info. |
 | `src/Pinder.Core/Conversation/TurnStart.cs` | Value object returned by `StartTurnAsync` with dialogue options and state snapshot. |
 | `tests/Pinder.Core.Tests/HorninessAlwaysRolledTests.cs` | Tests that horniness is rolled every session (with and without `IGameClock`), modifier application, and clamping. |
+| `tests/Pinder.Core.Tests/GameSessionReadRecoverWaitTests.cs` | Tests that `ReadAsync` and `RecoverAsync` apply shadow-based SA disadvantage (Overthinking T2+). |
 
 ## API / Public Interface
 
@@ -88,6 +89,7 @@ Interest is clamped to [0, 25] by `GameSession` / `InterestMeter`. Individual de
 - **Nat 1 always fails** regardless of modifiers or momentum bonus. The momentum bonus still appears in `ExternalBonus` on a Nat 1 roll but does not prevent failure.
 - **Combo system** (`ComboTracker`): The Triple bonus (+1 external) is consumed after the turn it's applied. `Wait()` also consumes the Triple bonus.
 - **Interest tiers** drive advantage/disadvantage: VeryIntoIt (16–20) and AlmostThere (21–25) grant advantage (roll 2d20, take highest).
+- **Shadow-based SA disadvantage**: When the player's Overthinking shadow reaches Tier 2+ (≥12), SA rolls get disadvantage. This is checked in `ResolveTurnAsync` (Speak), `ReadAsync`, and `RecoverAsync`. The check uses `ShadowThresholdEvaluator.GetThresholdLevel()` and is guarded by a null check on `_playerShadows`.
 
 ## Change Log
 
@@ -95,3 +97,4 @@ Interest is clamped to [0, 25] by `GameSession` / `InterestMeter`. Individual de
 |------|-------|---------|
 | 2026-04-02 | #268 | Initial creation — documented momentum system change: momentum bonus is now applied as a roll bonus (`externalBonus`) in `ResolveTurnAsync` instead of being added to `interestDelta`. `_pendingMomentumBonus` field added, computed at `StartTurnAsync`. Tests updated across GameSessionTests, ComboGameSessionTests, ComboSpecTests, FullConversationIntegrationTest, Issue209_DiceQueueExhaustionTests. |
 | 2026-04-03 | #269 | Horniness now always rolled (1d10) at construction, even without `IGameClock`. Previously the roll was skipped when `_clock == null`. Time-of-day modifier uses null-coalescing (`_clock?.GetHorninessModifier() ?? 0`). All test `FixedDice` constructors updated to prepend the horniness roll value. New test file `HorninessAlwaysRolledTests.cs` added. |
+| 2026-04-03 | #260 | `ReadAsync` and `RecoverAsync` now apply shadow-based SA disadvantage when Overthinking ≥ T2 (≥12), matching existing behavior in `ResolveTurnAsync` for Speak actions. New test file `GameSessionReadRecoverWaitTests.cs` (143 lines). |
