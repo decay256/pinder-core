@@ -165,8 +165,7 @@ namespace Pinder.Core.Rolls
             }
             else
             {
-                // MissMargin uses Total (not FinalTotal) for backward compatibility
-                int miss = dc - total;
+                int miss = dc - finalTotal;
 
                 if      (miss <= 2) tier = FailureTier.Fumble;
                 else if (miss <= 5) tier = FailureTier.Misfire;

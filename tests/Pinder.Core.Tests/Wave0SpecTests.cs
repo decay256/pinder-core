@@ -303,13 +303,13 @@ namespace Pinder.Core.Tests
 
         // Mutation: Fails if MissMargin uses FinalTotal instead of Total
         [Fact]
-        public void RollResult_MissMargin_IgnoresExternalBonus()
+        public void RollResult_MissMargin_UsesFinalTotal()
         {
             // Total=10, DC=14, externalBonus=2 → FinalTotal=12 < 14 → fail
-            // MissMargin should be 14 - 10 = 4 (not 14 - 12 = 2)
+            // MissMargin should be 14 - 12 = 2 (uses FinalTotal, not Total)
             var result = new RollResult(10, null, 10, StatType.Charm, 0, 0, 14,
                 FailureTier.Misfire, externalBonus: 2);
-            Assert.Equal(4, result.MissMargin);
+            Assert.Equal(2, result.MissMargin);
         }
 
         // Mutation: Fails if Nat1 with externalBonus somehow succeeds

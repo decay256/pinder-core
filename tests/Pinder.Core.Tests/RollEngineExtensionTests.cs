@@ -283,15 +283,15 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public void RollResult_MissMargin_UsesTotal_NotFinalTotal()
+        public void RollResult_MissMargin_UsesFinalTotal()
         {
             // Total=10, DC=14, externalBonus=1 → FinalTotal=11 < 14 → fail
-            // MissMargin should be DC - Total = 4, not DC - FinalTotal = 3
+            // MissMargin should be DC - FinalTotal = 3
             var result = new RollResult(10, null, 10, StatType.Charm, 0, 0, 14,
                 FailureTier.Misfire, externalBonus: 1);
 
             Assert.False(result.IsSuccess);
-            Assert.Equal(4, result.MissMargin); // DC(14) - Total(10) = 4
+            Assert.Equal(3, result.MissMargin); // DC(14) - FinalTotal(11) = 3
         }
 
         [Fact]

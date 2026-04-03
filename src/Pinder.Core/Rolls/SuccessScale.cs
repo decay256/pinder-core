@@ -22,7 +22,7 @@ namespace Pinder.Core.Rolls
             if (result.IsNatTwenty)
                 return 4;
 
-            int margin = result.Total - result.DC;
+            int margin = result.FinalTotal - result.DC;
 
             if (margin >= 10)
                 return 3;
