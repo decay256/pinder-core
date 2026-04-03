@@ -52,9 +52,11 @@ The prompt includes an explicit "ONLY" constraint with 10 behavior-to-stat mappi
 - **Template-based prompting:** All LLM instructions are static `const string` fields with `{placeholder}` tokens. `SessionDocumentBuilder` fills these at runtime with session-specific data (player name, opponent name, interest levels, etc.).
 - **Structured output:** Templates enforce strict output formats (`[RESPONSE]`, `[SIGNALS]`, `[STAT: X]` tags) so responses can be parsed deterministically.
 - **Tell category constraint:** The `OpponentResponseInstruction` explicitly lists which opponent behaviors map to which stat categories, preventing the LLM from inventing arbitrary tell associations. This was added to close a gap where the LLM was guessing which tells to produce.
+- **Character-voiced interest beats:** `GetInterestChangeBeatAsync` injects the opponent's system prompt as a system block (via `CacheBlockBuilder.BuildOpponentOnlySystemBlocks`) when `InterestChangeContext.OpponentPrompt` is non-empty. This ensures §3.8 interest change beats are generated in the opponent's voice rather than generic narration. When no prompt is provided, no system blocks are sent (backward-compatible).
 - **Provider abstraction:** The Anthropic-specific code is isolated in its own subdirectory. The adapter pattern allows swapping LLM providers without changing prompt templates or game logic.
 
 ## Change Log
 | Date | Issue | Summary |
 |------|-------|---------|
 | 2026-04-03 | #311 | Initial creation — Added 10 tell category mappings to `OpponentResponseInstruction` with "ONLY" constraint, preventing LLM from guessing tell stats. Mappings cover all 6 stats (CHARM, RIZZ, HONESTY, CHAOS, WIT, SELF_AWARENESS) across 10 opponent behaviors. |
+| 2026-04-03 | #352 | `AnthropicLlmAdapter.GetInterestChangeBeatAsync` now includes opponent system prompt as a system block when `InterestChangeContext.OpponentPrompt` is non-empty, so §3.8 interest change beats are generated in the opponent's character voice. Uses `CacheBlockBuilder.BuildOpponentOnlySystemBlocks`. Tests in `InterestChangeBeatVoiceTests.cs`. |
