@@ -256,8 +256,10 @@ namespace Pinder.Core.Conversation
                 foreach (ShadowStatType shadow in Enum.GetValues(typeof(ShadowStatType)))
                 {
                     int effectiveVal = _playerShadows.GetEffectiveShadow(shadow);
+                    // Store raw shadow value (not tier) so LLM prompt builder
+                    // can check fine-grained thresholds (e.g. >5 for T1 taint).
+                    shadowThresholds[shadow] = effectiveVal;
                     int tier = ShadowThresholdEvaluator.GetThresholdLevel(effectiveVal);
-                    shadowThresholds[shadow] = tier;
 
                     // T2+: paired positive stat gets disadvantage
                     if (tier >= 2)
@@ -318,8 +320,8 @@ namespace Pinder.Core.Conversation
             if (_playerShadows != null && shadowThresholds != null)
             {
                 // Fixation T3: force all options to use the same stat as last turn
-                if (shadowThresholds.TryGetValue(ShadowStatType.Fixation, out int fixTier)
-                    && fixTier >= 3 && _lastStatUsed.HasValue)
+                if (shadowThresholds.TryGetValue(ShadowStatType.Fixation, out int fixRaw)
+                    && fixRaw >= 18 && _lastStatUsed.HasValue)
                 {
                     var forcedStat = _lastStatUsed.Value;
                     for (int i = 0; i < options.Length; i++)
@@ -332,8 +334,8 @@ namespace Pinder.Core.Conversation
                 }
 
                 // Denial T3: remove Honesty options
-                if (shadowThresholds.TryGetValue(ShadowStatType.Denial, out int denTier)
-                    && denTier >= 3)
+                if (shadowThresholds.TryGetValue(ShadowStatType.Denial, out int denRaw)
+                    && denRaw >= 18)
                 {
                     var filtered = options.Where(o => o.Stat != StatType.Honesty).ToArray();
                     if (filtered.Length == 0)

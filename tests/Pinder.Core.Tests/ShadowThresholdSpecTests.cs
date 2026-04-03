@@ -503,9 +503,10 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
 
             Assert.NotNull(captured);
-            Assert.Equal(2, captured![ShadowStatType.Dread]);       // 14 → T2
-            Assert.Equal(1, captured[ShadowStatType.Denial]);       // 6 → T1
-            Assert.Equal(0, captured[ShadowStatType.Fixation]);     // 0 → T0
+            // #307: shadowThresholds now carries raw shadow values, not tier (0-3)
+            Assert.Equal(14, captured![ShadowStatType.Dread]);      // raw value 14
+            Assert.Equal(6, captured[ShadowStatType.Denial]);       // raw value 6
+            Assert.Equal(0, captured[ShadowStatType.Fixation]);     // raw value 0
         }
 
         // Mutation: would catch if all 6 shadow stats are not included in dictionary
@@ -659,9 +660,10 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
 
             Assert.NotNull(captured);
-            Assert.Equal(2, captured![ShadowStatType.Dread]);
-            Assert.Equal(1, captured[ShadowStatType.Denial]);
-            Assert.Equal(3, captured[ShadowStatType.Fixation]);
+            // #307: shadowThresholds now carries raw shadow values
+            Assert.Equal(14, captured![ShadowStatType.Dread]);
+            Assert.Equal(6, captured[ShadowStatType.Denial]);
+            Assert.Equal(18, captured[ShadowStatType.Fixation]);
             Assert.Equal(0, captured[ShadowStatType.Madness]);
             Assert.Equal(0, captured[ShadowStatType.Overthinking]);
             Assert.Equal(0, captured[ShadowStatType.Horniness]);
