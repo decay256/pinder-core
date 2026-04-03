@@ -18,16 +18,25 @@ namespace Pinder.Core.Conversation
         /// <summary>The new interest state after the change.</summary>
         public InterestState NewState { get; }
 
+        /// <summary>
+        /// The opponent's assembled system prompt, used to generate
+        /// interest change beats in the opponent's voice/character.
+        /// Null when not available (e.g. from NullLlmAdapter tests).
+        /// </summary>
+        public string? OpponentPrompt { get; }
+
         public InterestChangeContext(
             string opponentName,
             int interestBefore,
             int interestAfter,
-            InterestState newState)
+            InterestState newState,
+            string? opponentPrompt = null)
         {
             OpponentName = opponentName ?? throw new System.ArgumentNullException(nameof(opponentName));
             InterestBefore = interestBefore;
             InterestAfter = interestAfter;
             NewState = newState;
+            OpponentPrompt = opponentPrompt;
         }
     }
 }
