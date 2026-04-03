@@ -114,6 +114,18 @@ Occasionally (when it feels natural, roughly 30–40% of turns), include a signa
 TELL: {STAT_NAME} ({description of what reveals the tell})
 WEAKNESS: {STAT_NAME} -{reduction} ({description of the opening})
 
+When generating a TELL, use ONLY these category mappings:
+- Opponent compliments player → TELL: HONESTY
+- Opponent asks personal question → TELL: HONESTY or SELF_AWARENESS
+- Opponent makes joke → TELL: WIT or CHAOS
+- Opponent shares vulnerability → TELL: HONESTY
+- Opponent pulls back/guards → TELL: SELF_AWARENESS
+- Opponent tests/challenges → TELL: WIT or CHAOS
+- Opponent sends short reply → TELL: CHARM or CHAOS
+- Opponent flirts → TELL: RIZZ or CHARM
+- Opponent changes subject → TELL: CHAOS
+- Opponent goes quiet/silent → TELL: SELF_AWARENESS
+
 Rules for signals:
 - TELL line format: TELL: CHARM|RIZZ|HONESTY|CHAOS|WIT|SELF_AWARENESS (brief description)
 - WEAKNESS line format: WEAKNESS: CHARM|RIZZ|HONESTY|CHAOS|WIT|SELF_AWARENESS -2 or -3 (brief description)
