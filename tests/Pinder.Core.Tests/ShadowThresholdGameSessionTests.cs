@@ -285,9 +285,10 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
 
             Assert.NotNull(capturedThresholds);
-            Assert.Equal(2, capturedThresholds![ShadowStatType.Dread]);     // 14 → T2
-            Assert.Equal(1, capturedThresholds[ShadowStatType.Denial]);     // 6 → T1
-            Assert.Equal(0, capturedThresholds[ShadowStatType.Fixation]);   // 0 → T0
+            // #307: shadowThresholds now carries raw shadow values, not tier (0-3)
+            Assert.Equal(14, capturedThresholds![ShadowStatType.Dread]);     // raw value 14
+            Assert.Equal(6, capturedThresholds[ShadowStatType.Denial]);      // raw value 6
+            Assert.Equal(0, capturedThresholds[ShadowStatType.Fixation]);    // raw value 0
         }
 
         // ============== AC9: No effects when SessionShadowTracker is null ==============
@@ -368,6 +369,104 @@ namespace Pinder.Core.Tests
 
             // With adv+disadv canceling, should be a single roll = 12
             Assert.Equal(12, result.Roll.UsedDieRoll);
+        }
+
+        // ============== #307: Shadow taint uses raw values ==============
+
+        [Fact]
+        public async Task ShadowThresholds_StoresRawValues_NotTiers()
+        {
+            // Madness=8 is T1 (tier=1). Context should get raw value 8, not tier 1.
+            Dictionary<ShadowStatType, int>? capturedThresholds = null;
+            var shadows = MakeShadowTracker(madness: 8);
+
+            var llm = new CapturingLlmAdapter(ctx =>
+            {
+                capturedThresholds = ctx.ShadowThresholds;
+            });
+
+            var session = MakeSessionWithLlm(
+                diceValues: new[] { 15, 50 },
+                shadows: shadows,
+                llm: llm);
+
+            await session.StartTurnAsync();
+
+            Assert.NotNull(capturedThresholds);
+            // Raw value must be passed, not tier
+            Assert.Equal(8, capturedThresholds![ShadowStatType.Madness]);
+        }
+
+        [Fact]
+        public async Task ShadowThresholds_T0Value_PassedAsRawZero()
+        {
+            // Madness=3 is T0. Context should get raw value 3.
+            Dictionary<ShadowStatType, int>? capturedThresholds = null;
+            var shadows = MakeShadowTracker(madness: 3);
+
+            var llm = new CapturingLlmAdapter(ctx =>
+            {
+                capturedThresholds = ctx.ShadowThresholds;
+            });
+
+            var session = MakeSessionWithLlm(
+                diceValues: new[] { 15, 50 },
+                shadows: shadows,
+                llm: llm);
+
+            await session.StartTurnAsync();
+
+            Assert.NotNull(capturedThresholds);
+            Assert.Equal(3, capturedThresholds![ShadowStatType.Madness]);
+        }
+
+        [Fact]
+        public async Task FixationT3_StillTriggersAt18RawValue()
+        {
+            // Fixation=18 (T3) should still force all options to last stat used
+            var shadows = MakeShadowTracker(fixation: 18);
+            var options = new[]
+            {
+                new DialogueOption(StatType.Charm, "Hey"),
+                new DialogueOption(StatType.Wit, "Clever"),
+                new DialogueOption(StatType.Honesty, "Truth")
+            };
+
+            var session = MakeSession(
+                diceValues: new[] { 15, 15, 50, 15, 50 },
+                shadows: shadows,
+                llmOptions: options);
+
+            // First turn: no last stat used, so no fixation filtering
+            await session.StartTurnAsync();
+            await session.ResolveTurnAsync(0); // plays Charm
+
+            // Second turn: Fixation T3 should force all options to Charm
+            var turn2 = await session.StartTurnAsync();
+            Assert.All(turn2.Options, o => Assert.Equal(StatType.Charm, o.Stat));
+        }
+
+        [Fact]
+        public async Task DenialT3_StillTriggersAt18RawValue()
+        {
+            // Denial=18 (T3) should still remove Honesty options
+            var shadows = MakeShadowTracker(denial: 18);
+            var options = new[]
+            {
+                new DialogueOption(StatType.Charm, "Hey"),
+                new DialogueOption(StatType.Honesty, "Truth"),
+                new DialogueOption(StatType.Wit, "Clever")
+            };
+
+            var session = MakeSession(
+                diceValues: new[] { 15, 50 },
+                shadows: shadows,
+                llmOptions: options);
+
+            var turn = await session.StartTurnAsync();
+
+            // Honesty options should be filtered out
+            Assert.DoesNotContain(turn.Options, o => o.Stat == StatType.Honesty);
         }
 
         // ============ Helpers ============
