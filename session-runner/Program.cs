@@ -353,9 +353,11 @@ class Program
         string dir = "/root/.openclaw/agents-extra/pinder/design/playtests";
         if (!Directory.Exists(dir)) { Console.Error.WriteLine("Playtest dir not found"); return; }
         int nextNum = 1;
-        foreach (var f in Directory.GetFiles(dir, "session-???.md")) {
+        foreach (var f in Directory.GetFiles(dir, "session-*.md")) {
             var n = Path.GetFileNameWithoutExtension(f);
-            if (n.Length >= 11 && int.TryParse(n.Substring(8, 3), out int num)) nextNum = Math.Max(nextNum, num+1);
+            // name = "session-005-sable-vs-brick" → Split('-') = ["session","005","sable","vs","brick"]
+            var parts = n.Split('-');
+            if (parts.Length >= 2 && int.TryParse(parts[1], out int num)) nextNum = Math.Max(nextNum, num + 1);
         }
         string slug = $"session-{nextNum:D3}-{p1.ToLower()}-vs-{p2.ToLower()}.md";
         File.WriteAllText(Path.Combine(dir, slug), content);
