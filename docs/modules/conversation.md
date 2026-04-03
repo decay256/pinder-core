@@ -1,0 +1,69 @@
+# Conversation
+
+## Overview
+The Conversation module implements the core game loop for Pinder's dating-conversation mechanic. It manages turn flow (Speak, Read, Recover, Wait), interest tracking, dice rolls with advantage/disadvantage, traps, combos, timing, and game outcome resolution. The central class is `GameSession`, which orchestrates all player actions and NPC responses.
+
+## Key Components
+
+| File | Description |
+|------|-------------|
+| `GameSession.cs` | Core session state machine — manages turns, rolls, interest, traps, and game outcome |
+| `GameSessionConfig.cs` | Configuration parameters for a game session (starting interest, etc.) |
+| `InterestMeter.cs` | Tracks NPC interest level (0–25) and computes interest state, advantage/disadvantage |
+| `InterestState.cs` | Enum for interest bands (Bored, Neutral, Interested, VeryIntoIt, AlmostThere, etc.) |
+| `TurnStart.cs` | Data returned by `StartTurnAsync()` — dialogue options, current state |
+| `TurnResult.cs` | Data returned by `ResolveTurnAsync()` — roll result, interest change, outcome |
+| `ReadResult.cs` | Data returned by `ReadAsync()` — SA roll result, interest reveal |
+| `RecoverResult.cs` | Data returned by `RecoverAsync()` — roll result, trap recovery |
+| `DialogueOption.cs` | A selectable dialogue choice for a Speak turn |
+| `DialogueContext.cs` | Context passed to the LLM adapter for generating dialogue options |
+| `DeliveryContext.cs` | Context for evaluating delivery/timing of player responses |
+| `ComboTracker.cs` | Tracks consecutive successes for combo bonuses |
+| `ComboResult.cs` | Result of a combo evaluation |
+| `CallbackOpportunity.cs` | Represents a callback opportunity during conversation |
+| `CallbackBonus.cs` | Bonus granted from callbacks |
+| `DelayPenalty.cs` | Penalty applied for slow player responses |
+| `GameClock.cs` | Tracks in-game time progression |
+| `GameOutcome.cs` | Final outcome of a session (DateSecured, Ghosted, etc.) |
+| `GameEndedException.cs` | Exception thrown when actions are attempted after game end |
+| `OpponentContext.cs` | NPC opponent configuration and state |
+| `OpponentResponse.cs` | NPC response data |
+| `OpponentTimingCalculator.cs` | Calculates NPC response timing |
+| `PlayerResponseDelayEvaluator.cs` | Evaluates player response delay for penalty calculation |
+| `Tell.cs` | Represents a behavioral tell from the NPC |
+| `TimingProfile.cs` | Timing configuration for opponent responses |
+| `WeaknessWindow.cs` | Represents a window where the NPC is vulnerable |
+| `NullLlmAdapter.cs` | No-op LLM adapter for testing |
+| `InterestChangeContext.cs` | Context for interest change events |
+| `GameStateSnapshot.cs` | Serializable snapshot of game state |
+
+## API / Public Interface
+
+### `GameSession`
+
+- **`StartTurnAsync() → Task<TurnStart>`** — Begins a Speak turn. Computes advantage from interest state and `_pendingCritAdvantage`. Returns dialogue options.
+- **`ResolveTurnAsync(int optionIndex) → Task<TurnResult>`** — Resolves the selected dialogue option with a dice roll. Sets `_pendingCritAdvantage` if the roll is a Nat 20.
+- **`ReadAsync() → Task<ReadResult>`** — Self-contained action: rolls SA against DC 12 to reveal interest. Consumes and sets `_pendingCritAdvantage` independently.
+- **`RecoverAsync() → Task<RecoverResult>`** — Self-contained action: rolls to recover from an active trap. Consumes and sets `_pendingCritAdvantage` independently.
+- **`Wait()`** — Skips a turn: applies −1 interest, advances trap timers. Does **not** consume `_pendingCritAdvantage`.
+
+### `InterestMeter`
+
+- **`GrantsAdvantage`** — `true` when interest state is VeryIntoIt or AlmostThere.
+- **`GrantsDisadvantage`** — `true` when interest state is Bored.
+
+### `GameSessionConfig`
+
+- Constructor accepts `startingInterest` and other session parameters.
+
+## Architecture Notes
+
+- **Turn flow:** The player calls `StartTurnAsync()` → `ResolveTurnAsync()` for Speak actions, or calls `ReadAsync()` / `RecoverAsync()` / `Wait()` as standalone actions.
+- **Advantage sources:** Advantage is boolean (not cumulative). Sources include interest-based (`InterestMeter.GrantsAdvantage`) and crit-based (`_pendingCritAdvantage`). When both advantage and disadvantage are active, they cancel out to a normal roll.
+- **Crit advantage (`_pendingCritAdvantage`):** A private boolean flag on `GameSession`. Set to `true` after any roll produces a Nat 20 (`RollResult.IsNatTwenty`). Consumed (grants advantage, then cleared to `false`) at the start of the next roll in `StartTurnAsync`, `ReadAsync`, or `RecoverAsync`. `Wait()` does not consume it. The flag is per-session and does not persist across sessions.
+- **Roll mechanics:** Delegated to `RollEngine.Resolve()` and `RollEngine.ResolveFixedDC()` in the Rolls module. When advantage is active, two dice are rolled and the higher is used.
+
+## Change Log
+| Date | Issue | Summary |
+|------|-------|---------|
+| 2026-04-03 | #271 | Initial creation — Added `_pendingCritAdvantage` flag to `GameSession`: Nat 20 on any roll grants advantage on the next roll (§4). Consumed in `StartTurnAsync`, `ReadAsync`, `RecoverAsync`; persists through `Wait()`. Tests cover Speak→Speak, Speak→Read, Read→Speak, Recover→Speak, consecutive Nat 20s, Wait persistence, and advantage+disadvantage cancellation. |
