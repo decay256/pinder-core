@@ -769,6 +769,149 @@ namespace Pinder.Core.Tests
             Assert.True(result.Success);
         }
 
+        // ======================== Shadow Disadvantage on Read/Recover (#260) ========================
+
+        // What: AC1 — ReadAsync applies shadow SA disadvantage when Overthinking T2+ (≥12)
+        // Mutation: Fails if ReadAsync ignores shadow-based disadvantage
+        [Fact]
+        public async Task ReadAsync_OverthinkingT2_AppliesShadowDisadvantage()
+        {
+            // SA +3, Overthinking = 12 (T2) → SA should have disadvantage
+            // With disadvantage, dice rolls 2d20 takes lower. StubDice returns same value,
+            // but we use SequenceDice to prove disadvantage path: rolls 15, 5 → takes 5.
+            // 5 + 3 = 8 < DC 12 → failure (without disadvantage, 15+3=18 >= 12 → success)
+            var stats = new StatBlock(
+                new Dictionary<StatType, int>
+                {
+                    { StatType.Charm, 3 }, { StatType.Rizz, 2 }, { StatType.Honesty, 1 },
+                    { StatType.Chaos, 0 }, { StatType.Wit, 4 }, { StatType.SelfAwareness, 3 }
+                },
+                new Dictionary<ShadowStatType, int>
+                {
+                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Horniness, 0 },
+                    { ShadowStatType.Denial, 0 }, { ShadowStatType.Fixation, 0 },
+                    { ShadowStatType.Dread, 0 }, { ShadowStatType.Overthinking, 12 }
+                });
+
+            var shadows = new SessionShadowTracker(stats);
+            var config = new GameSessionConfig(playerShadows: shadows);
+            var player = MakeProfile("player", stats);
+            var opponent = MakeProfile("opponent", MakeStatBlock());
+
+            // Disadvantage rolls 2d20 takes lower: 15 then 5 → uses 5
+            var dice = new SequenceDice(new[] { 15, 5 });
+            var session = new GameSession(player, opponent, new StubLlmAdapter(), dice, new StubTrapRegistry(), config);
+
+            var result = await session.ReadAsync();
+
+            // 5 + 3 = 8 < 12 → failure
+            Assert.False(result.Success);
+        }
+
+        // What: AC3 — ReadAsync does NOT apply shadow disadvantage when Overthinking < T2 (e.g. 5)
+        // Mutation: Fails if ReadAsync incorrectly applies disadvantage at low Overthinking
+        [Fact]
+        public async Task ReadAsync_OverthinkingBelowT2_NoShadowDisadvantage()
+        {
+            // SA +3, Overthinking = 5 (T1, below T2 threshold of 12) → no shadow disadvantage
+            var stats = new StatBlock(
+                new Dictionary<StatType, int>
+                {
+                    { StatType.Charm, 3 }, { StatType.Rizz, 2 }, { StatType.Honesty, 1 },
+                    { StatType.Chaos, 0 }, { StatType.Wit, 4 }, { StatType.SelfAwareness, 3 }
+                },
+                new Dictionary<ShadowStatType, int>
+                {
+                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Horniness, 0 },
+                    { ShadowStatType.Denial, 0 }, { ShadowStatType.Fixation, 0 },
+                    { ShadowStatType.Dread, 0 }, { ShadowStatType.Overthinking, 5 }
+                });
+
+            var shadows = new SessionShadowTracker(stats);
+            var config = new GameSessionConfig(playerShadows: shadows);
+            var player = MakeProfile("player", stats);
+            var opponent = MakeProfile("opponent", MakeStatBlock());
+
+            // Single roll: 10 + 3 = 13 >= 12 → success (no disadvantage, so only one roll)
+            var dice = new SequenceDice(new[] { 10 });
+            var session = new GameSession(player, opponent, new StubLlmAdapter(), dice, new StubTrapRegistry(), config);
+
+            var result = await session.ReadAsync();
+
+            Assert.True(result.Success);
+        }
+
+        // What: AC2 — RecoverAsync applies shadow SA disadvantage when Overthinking T2+ (≥12)
+        // Mutation: Fails if RecoverAsync ignores shadow-based disadvantage
+        [Fact]
+        public async Task RecoverAsync_OverthinkingT2_AppliesShadowDisadvantage()
+        {
+            var stats = new StatBlock(
+                new Dictionary<StatType, int>
+                {
+                    { StatType.Charm, 3 }, { StatType.Rizz, 2 }, { StatType.Honesty, 1 },
+                    { StatType.Chaos, 0 }, { StatType.Wit, 4 }, { StatType.SelfAwareness, 3 }
+                },
+                new Dictionary<ShadowStatType, int>
+                {
+                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Horniness, 0 },
+                    { ShadowStatType.Denial, 0 }, { ShadowStatType.Fixation, 0 },
+                    { ShadowStatType.Dread, 0 }, { ShadowStatType.Overthinking, 12 }
+                });
+
+            var shadows = new SessionShadowTracker(stats);
+            var config = new GameSessionConfig(playerShadows: shadows);
+            var player = MakeProfile("player", stats);
+            var opponent = MakeProfile("opponent", MakeStatBlock());
+
+            // Disadvantage: rolls 15 then 5 → takes 5. 5 + 3 = 8 < 12 → failure
+            var dice = new SequenceDice(new[] { 15, 5 });
+            var session = new GameSession(player, opponent, new StubLlmAdapter(), dice, new StubTrapRegistry(), config);
+
+            // Activate a trap so Recover is valid
+            ActivateTrapOnSession(session, new TrapDefinition("test-trap", StatType.Charm, TrapEffect.Disadvantage, 0, 3, "trap", "clear", "nat1"));
+
+            var result = await session.RecoverAsync();
+
+            // 5 + 3 = 8 < 12 → failure
+            Assert.False(result.Success);
+        }
+
+        // What: AC3 — RecoverAsync does NOT apply shadow disadvantage when Overthinking < T2
+        // Mutation: Fails if RecoverAsync incorrectly applies disadvantage at low Overthinking
+        [Fact]
+        public async Task RecoverAsync_OverthinkingBelowT2_NoShadowDisadvantage()
+        {
+            var stats = new StatBlock(
+                new Dictionary<StatType, int>
+                {
+                    { StatType.Charm, 3 }, { StatType.Rizz, 2 }, { StatType.Honesty, 1 },
+                    { StatType.Chaos, 0 }, { StatType.Wit, 4 }, { StatType.SelfAwareness, 3 }
+                },
+                new Dictionary<ShadowStatType, int>
+                {
+                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Horniness, 0 },
+                    { ShadowStatType.Denial, 0 }, { ShadowStatType.Fixation, 0 },
+                    { ShadowStatType.Dread, 0 }, { ShadowStatType.Overthinking, 5 }
+                });
+
+            var shadows = new SessionShadowTracker(stats);
+            var config = new GameSessionConfig(playerShadows: shadows);
+            var player = MakeProfile("player", stats);
+            var opponent = MakeProfile("opponent", MakeStatBlock());
+
+            var dice = new SequenceDice(new[] { 10 });
+            var session = new GameSession(player, opponent, new StubLlmAdapter(), dice, new StubTrapRegistry(), config);
+
+            // Activate a trap so Recover is valid
+            ActivateTrapOnSession(session, new TrapDefinition("test-trap", StatType.Charm, TrapEffect.Disadvantage, 0, 3, "trap", "clear", "nat1"));
+
+            var result = await session.RecoverAsync();
+
+            // 10 + 3 = 13 >= 12 → success (no shadow disadvantage)
+            Assert.True(result.Success);
+        }
+
         // ======================== Helpers ========================
 
         private static GameSession MakeSession(
