@@ -28,13 +28,20 @@ namespace Pinder.Core.Conversation
         /// </summary>
         public bool HasWeaknessWindow { get; }
 
+        /// <summary>
+        /// True if this option was replaced by Madness T3 (≥18) with unhinged text.
+        /// The stat is preserved for roll purposes, but the LLM generates tainted dialogue.
+        /// </summary>
+        public bool IsUnhinged { get; }
+
         public DialogueOption(
             StatType stat,
             string intendedText,
             int? callbackTurnNumber = null,
             string? comboName = null,
             bool hasTellBonus = false,
-            bool hasWeaknessWindow = false)
+            bool hasWeaknessWindow = false,
+            bool isUnhinged = false)
         {
             Stat = stat;
             IntendedText = intendedText ?? throw new System.ArgumentNullException(nameof(intendedText));
@@ -42,6 +49,7 @@ namespace Pinder.Core.Conversation
             ComboName = comboName;
             HasTellBonus = hasTellBonus;
             HasWeaknessWindow = hasWeaknessWindow;
+            IsUnhinged = isUnhinged;
         }
     }
 }

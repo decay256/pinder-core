@@ -406,6 +406,123 @@ namespace Pinder.Core.Tests
         }
 
         // =====================================================================
+        // Madness T3 (≥18): one random option flagged IsUnhinged (#273 — §7)
+        // =====================================================================
+
+        // Happy path: Madness=18 → exactly one option marked IsUnhinged
+        [Fact]
+        public async Task MadnessT3_OneOptionMarkedUnhinged()
+        {
+            // What: Madness ≥18 → one option flagged IsUnhinged (spec §7)
+            // Dice: horniness(5 prepended), madnessRoll(2 → picks index 1), d20(15), delay(50)
+            var shadows = MakeShadowTracker(madness: 18);
+            var session = MakeSession(
+                diceValues: new[] { 2, 15, 50 },
+                shadows: shadows,
+                llmOptions: new[]
+                {
+                    new DialogueOption(StatType.Charm, "Hi"),
+                    new DialogueOption(StatType.Wit, "Clever"),
+                    new DialogueOption(StatType.Honesty, "Truth")
+                });
+
+            var turn = await session.StartTurnAsync();
+
+            Assert.Equal(3, turn.Options.Length);
+            Assert.Single(turn.Options, o => o.IsUnhinged);
+        }
+
+        // Mutation: would catch if Madness T2 incorrectly marks options (only T3 should)
+        [Fact]
+        public async Task MadnessT2_NoOptionsMarkedUnhinged()
+        {
+            // What: Madness=12 (T2) → no options flagged IsUnhinged
+            var shadows = MakeShadowTracker(madness: 12);
+            var session = MakeSession(
+                diceValues: new[] { 15, 50 },
+                shadows: shadows,
+                llmOptions: new[]
+                {
+                    new DialogueOption(StatType.Charm, "Hi"),
+                    new DialogueOption(StatType.Wit, "Clever"),
+                    new DialogueOption(StatType.Honesty, "Truth")
+                });
+
+            var turn = await session.StartTurnAsync();
+
+            Assert.DoesNotContain(turn.Options, o => o.IsUnhinged);
+        }
+
+        // Edge case: Madness T3 preserves the stat on the unhinged option (for roll purposes)
+        [Fact]
+        public async Task MadnessT3_PreservesStatOnUnhingedOption()
+        {
+            // What: The IsUnhinged option keeps its original stat
+            // Dice: horniness(5 prepended), madnessRoll(1 → picks index 0 = Charm)
+            var shadows = MakeShadowTracker(madness: 20);
+            var session = MakeSession(
+                diceValues: new[] { 1, 15, 50 },
+                shadows: shadows,
+                llmOptions: new[]
+                {
+                    new DialogueOption(StatType.Charm, "Hi"),
+                    new DialogueOption(StatType.Wit, "Clever"),
+                    new DialogueOption(StatType.Honesty, "Truth")
+                });
+
+            var turn = await session.StartTurnAsync();
+
+            var unhinged = turn.Options.Single(o => o.IsUnhinged);
+            Assert.Equal(StatType.Charm, unhinged.Stat); // index 0 → Charm
+        }
+
+        // Edge case: no player shadows → no unhinged options
+        [Fact]
+        public async Task NoShadows_NoUnhingedOptions()
+        {
+            var session = MakeSession(
+                diceValues: new[] { 15, 50 },
+                shadows: null);
+
+            var turn = await session.StartTurnAsync();
+
+            Assert.DoesNotContain(turn.Options, o => o.IsUnhinged);
+        }
+
+        // Edge case: Madness T3 + Horniness T3 → unhinged flag preserved after Rizz conversion
+        [Fact]
+        public async Task MadnessT3_PlusHorninessT3_UnhingedPreserved()
+        {
+            // MakeSession prepends allDice[0]=5 for the constructor's horniness roll.
+            // _sessionHorniness = max(0, 5 + 0) = 5, not ≥18.
+            // To get Horniness T3, we build the session directly with a custom dice queue
+            // where the first value (horniness roll) is 20.
+            var shadows = MakeShadowTracker(madness: 18);
+            var llmOptions = new[]
+            {
+                new DialogueOption(StatType.Charm, "Hi"),
+                new DialogueOption(StatType.Wit, "Clever"),
+                new DialogueOption(StatType.Honesty, "Truth")
+            };
+
+            // Dice: 20(horniness→_sessionHorniness=20≥18), 2(madnessRoll→idx 1), 15(spare), 50(spare)
+            var config = new GameSessionConfig(playerShadows: shadows);
+            var session = new GameSession(
+                MakeProfile("player"),
+                MakeProfile("opponent"),
+                new FixedOptionsLlmAdapter(llmOptions),
+                new QueueDice(new[] { 20, 2, 15, 50 }),
+                new EmptyTrapRegistry(),
+                config);
+
+            var turn = await session.StartTurnAsync();
+
+            // All options should be Rizz (Horniness T3) and one should be unhinged (Madness T3)
+            Assert.All(turn.Options, o => Assert.Equal(StatType.Rizz, o.Stat));
+            Assert.Single(turn.Options, o => o.IsUnhinged);
+        }
+
+        // =====================================================================
         // AC4: Fixation ≥18 → Forced stat (same as last turn)
         // =====================================================================
 
