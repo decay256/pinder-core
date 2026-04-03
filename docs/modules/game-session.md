@@ -20,6 +20,7 @@
 | `tests/Pinder.Core.Tests/ShadowReductionSpecTests.cs` | Spec-driven tests for shadow reductions — boundary values, edge cases, negative cases, null-safety. |
 | `tests/Pinder.Core.Tests/TripleBonusReadRecoverTests.cs` | Tests that triple combo bonus (+1) is applied to Read and Recover rolls via `externalBonus`. |
 | `tests/Pinder.Core.Tests/TripleBonusReadRecoverEdgeCaseTests.cs` | Edge case tests for triple bonus on Read/Recover: consumption on failure, advantage stacking, no-trap throws, boundary values. |
+| `tests/Pinder.Core.Tests/Issue308_ShadowThresholdWiringSpecTests.cs` | Tests that `GameSession` wires player shadows → `DeliveryContext` and opponent shadows → `OpponentContext`. 13 tests covering cross-wiring, null safety, all 6 stats, zero values. |
 
 ## API / Public Interface
 
@@ -111,3 +112,4 @@ Interest is clamped to [0, 25] by `GameSession` / `InterestMeter`. Individual de
 | 2026-04-03 | #260 | `ReadAsync` and `RecoverAsync` now apply shadow-based SA disadvantage when Overthinking ≥ T2 (≥12), matching existing behavior in `ResolveTurnAsync` for Speak actions. New test file `GameSessionReadRecoverWaitTests.cs` (143 lines). |
 | 2026-04-03 | #270 | Added 4 missing shadow reduction events from §7: Dread −1 on DateSecured, Denial −1 on Honesty success at interest ≥15, Madness −1 on successful recovery, Overthinking −1 on success despite shadow disadvantage. All use `ApplyOffset()` with null-checks. Overthinking reduction adds extra guard via `StatBlock.ShadowPairs` check. Two new test files (1202 lines total). |
 | 2026-04-03 | #312 | Bug fix: Triple combo bonus (+1) now actually applied to Read/Recover rolls. Previously `ConsumeTripleBonus()` was called but the bonus value was never passed to `RollEngine.ResolveFixedDC`. Now `HasTripleBonus` is captured before consumption and passed as `externalBonus`. Two new test files: `TripleBonusReadRecoverTests.cs` and `TripleBonusReadRecoverEdgeCaseTests.cs` (486 lines total). |
+| 2026-04-03 | #308 | Shadow threshold wiring: confirmed `GameSession` routes player shadows to `DeliveryContext` and opponent shadows to `OpponentContext`. `GameSessionConfig` accepts `opponentShadows` parameter. New test file `Issue308_ShadowThresholdWiringSpecTests.cs` (443 lines, 13 tests). |
