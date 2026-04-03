@@ -42,7 +42,7 @@ The Conversation module implements the core game loop for Pinder's dating-conver
 ### `GameSession`
 
 - **`StartTurnAsync() → Task<TurnStart>`** — Begins a Speak turn. Computes advantage from interest state and `_pendingCritAdvantage`. Returns dialogue options.
-- **`ResolveTurnAsync(int optionIndex) → Task<TurnResult>`** — Resolves the selected dialogue option with a dice roll. Sets `_pendingCritAdvantage` if the roll is a Nat 20.
+- **`ResolveTurnAsync(int optionIndex) → Task<TurnResult>`** — Resolves the selected dialogue option with a dice roll. Sets `_pendingCritAdvantage` if the roll is a Nat 20. Applies Denial +1 shadow growth if an Honesty option was available but the player chose a different stat (§7).
 - **`ReadAsync() → Task<ReadResult>`** — Self-contained action: rolls SA against DC 12 to reveal interest. Consumes and sets `_pendingCritAdvantage` independently.
 - **`RecoverAsync() → Task<RecoverResult>`** — Self-contained action: rolls to recover from an active trap. Consumes and sets `_pendingCritAdvantage` independently.
 - **`Wait()`** — Skips a turn: applies −1 interest, advances trap timers. Does **not** consume `_pendingCritAdvantage`.
@@ -62,8 +62,10 @@ The Conversation module implements the core game loop for Pinder's dating-conver
 - **Advantage sources:** Advantage is boolean (not cumulative). Sources include interest-based (`InterestMeter.GrantsAdvantage`) and crit-based (`_pendingCritAdvantage`). When both advantage and disadvantage are active, they cancel out to a normal roll.
 - **Crit advantage (`_pendingCritAdvantage`):** A private boolean flag on `GameSession`. Set to `true` after any roll produces a Nat 20 (`RollResult.IsNatTwenty`). Consumed (grants advantage, then cleared to `false`) at the start of the next roll in `StartTurnAsync`, `ReadAsync`, or `RecoverAsync`. `Wait()` does not consume it. The flag is per-session and does not persist across sessions.
 - **Roll mechanics:** Delegated to `RollEngine.Resolve()` and `RollEngine.ResolveFixedDC()` in the Rolls module. When advantage is active, two dice are rolled and the higher is used.
+- **Denial shadow growth on skipped Honesty (§7):** In `ResolveTurnAsync()`, after determining `chosenOption`, if `_playerShadows` is non-null, `chosenOption.Stat != StatType.Honesty`, and any option in `_currentOptions` has `Stat == StatType.Honesty`, then `_playerShadows.ApplyGrowth(ShadowStatType.Denial, 1, "Skipped Honesty option")` is called. This is a boolean check (exactly +1 per turn regardless of how many Honesty options exist). The growth event flows into `TurnResult.ShadowGrowthEvents` via the existing `DrainGrowthEvents()` call. When Honesty is absent from the lineup (e.g., removed by Denial T3 threshold or Horniness-forced Rizz), no Denial growth occurs.
 
 ## Change Log
 | Date | Issue | Summary |
 |------|-------|---------|
 | 2026-04-03 | #271 | Initial creation — Added `_pendingCritAdvantage` flag to `GameSession`: Nat 20 on any roll grants advantage on the next roll (§4). Consumed in `StartTurnAsync`, `ReadAsync`, `RecoverAsync`; persists through `Wait()`. Tests cover Speak→Speak, Speak→Read, Read→Speak, Recover→Speak, consecutive Nat 20s, Wait persistence, and advantage+disadvantage cancellation. |
+| 2026-04-03 | #272 | Denial +1 when player skips available Honesty option (§7). Added shadow growth check in `ResolveTurnAsync()` — if Honesty is in the lineup and player picks a different stat, `ApplyGrowth(Denial, 1)` is called. Null-guarded for sessions without shadow tracking. Existing shadow-reduction tests updated to use Honesty-free option lineups to isolate from this new trigger. |
