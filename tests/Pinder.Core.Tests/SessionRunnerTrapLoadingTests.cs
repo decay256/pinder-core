@@ -10,12 +10,28 @@ using Xunit;
 namespace Pinder.Core.Tests
 {
     /// <summary>
-    /// Tests that validate the session runner's trap loading pattern:
-    /// JsonTrapRepository loaded from data/traps/traps.json replaces NullTrapRegistry.
+    /// Tests that validate the session runner's trap loading via TrapRegistryLoader.
     /// Issue #353: NullTrapRegistry disables all traps in the session runner.
     /// </summary>
-    public sealed class SessionRunnerTrapLoadingTests
+    public sealed class SessionRunnerTrapLoadingTests : IDisposable
     {
+        private readonly string? _originalEnvVar;
+
+        public SessionRunnerTrapLoadingTests()
+        {
+            // Preserve original env var value for cleanup
+            _originalEnvVar = Environment.GetEnvironmentVariable(TrapRegistryLoader.EnvVarName);
+        }
+
+        public void Dispose()
+        {
+            // Restore original env var
+            if (_originalEnvVar != null)
+                Environment.SetEnvironmentVariable(TrapRegistryLoader.EnvVarName, _originalEnvVar);
+            else
+                Environment.SetEnvironmentVariable(TrapRegistryLoader.EnvVarName, null);
+        }
+
         private static string FindTrapsJson()
         {
             var dir = Directory.GetCurrentDirectory();
@@ -27,19 +43,88 @@ namespace Pinder.Core.Tests
             return Path.Combine(dir!, "data", "traps", "traps.json");
         }
 
-        [Fact]
-        public void JsonTrapRepository_ReturnsTraps_UnlikeNullTrapRegistry()
+        private static string FindRepoRoot()
         {
-            // NullTrapRegistry returns null for all stats — this was the bug
-            var nullRegistry = new NullTrapRegistryStub();
-            Assert.Null(nullRegistry.GetTrap(StatType.Rizz));
-            Assert.Null(nullRegistry.GetLlmInstruction(StatType.Rizz));
+            var dir = Directory.GetCurrentDirectory();
+            while (dir != null && !File.Exists(Path.Combine(dir, "data", "traps", "traps.json")))
+            {
+                dir = Directory.GetParent(dir)?.FullName;
+            }
+            Assert.NotNull(dir);
+            return dir!;
+        }
 
-            // JsonTrapRepository loaded from real data returns actual traps
-            var json = File.ReadAllText(FindTrapsJson());
-            var realRegistry = new JsonTrapRepository(json);
-            Assert.NotNull(realRegistry.GetTrap(StatType.Rizz));
-            Assert.NotNull(realRegistry.GetLlmInstruction(StatType.Rizz));
+        [Fact]
+        public void Load_WithEnvVar_LoadsFromSpecifiedPath()
+        {
+            // Arrange: point env var to real traps.json
+            string trapsPath = FindTrapsJson();
+            Environment.SetEnvironmentVariable(TrapRegistryLoader.EnvVarName, trapsPath);
+            var warnings = new StringWriter();
+
+            // Act
+            ITrapRegistry registry = TrapRegistryLoader.Load("/nonexistent", warnings);
+
+            // Assert: loaded real traps, not fallback
+            Assert.NotNull(registry.GetTrap(StatType.Rizz));
+            Assert.Contains("[INFO] Loaded traps", warnings.ToString());
+        }
+
+        [Fact]
+        public void Load_WithUpwardSearch_FindsTrapsJson()
+        {
+            // Arrange: clear env var so it uses upward search
+            Environment.SetEnvironmentVariable(TrapRegistryLoader.EnvVarName, null);
+            string repoRoot = FindRepoRoot();
+            // Start from a subdirectory — loader should walk up
+            string subDir = Path.Combine(repoRoot, "session-runner", "bin");
+            var warnings = new StringWriter();
+
+            // Act
+            ITrapRegistry registry = TrapRegistryLoader.Load(subDir, warnings);
+
+            // Assert
+            Assert.NotNull(registry.GetTrap(StatType.Charm));
+            Assert.Contains("[INFO] Loaded traps", warnings.ToString());
+        }
+
+        [Fact]
+        public void Load_WithMissingFile_FallsBackToNullRegistry()
+        {
+            // Arrange: point env var to nonexistent path
+            Environment.SetEnvironmentVariable(TrapRegistryLoader.EnvVarName, "/nonexistent/traps.json");
+            var warnings = new StringWriter();
+
+            // Act
+            ITrapRegistry registry = TrapRegistryLoader.Load("/also-nonexistent", warnings);
+
+            // Assert: graceful fallback — returns null for all stats
+            Assert.Null(registry.GetTrap(StatType.Charm));
+            Assert.Contains("[WARN]", warnings.ToString());
+        }
+
+        [Fact]
+        public void Load_WithCorruptJson_FallsBackToNullRegistry()
+        {
+            // Arrange: write corrupt JSON to temp file
+            string tempFile = Path.GetTempFileName();
+            try
+            {
+                File.WriteAllText(tempFile, "{ this is not valid json [[[");
+                Environment.SetEnvironmentVariable(TrapRegistryLoader.EnvVarName, tempFile);
+                var warnings = new StringWriter();
+
+                // Act
+                ITrapRegistry registry = TrapRegistryLoader.Load("/nonexistent", warnings);
+
+                // Assert
+                Assert.Null(registry.GetTrap(StatType.Rizz));
+                Assert.Contains("[WARN]", warnings.ToString());
+            }
+            finally
+            {
+                File.Delete(tempFile);
+            }
         }
 
         [Fact]
@@ -82,34 +167,6 @@ namespace Pinder.Core.Tests
 
             trapState.Activate(trapDef);
             Assert.True(trapState.HasActive);
-        }
-
-        [Fact]
-        public void FallbackToNullRegistry_WhenFileNotFound()
-        {
-            // Verify that the fallback pattern works — invalid JSON path
-            // should not crash, just return a registry that returns null
-            ITrapRegistry fallback;
-            try
-            {
-                string badJson = File.ReadAllText("/nonexistent/path/traps.json");
-                fallback = new JsonTrapRepository(badJson);
-            }
-            catch
-            {
-                // Expected: file not found → fall back gracefully
-                fallback = new NullTrapRegistryStub();
-            }
-
-            // Fallback still implements ITrapRegistry (returns null, but doesn't crash)
-            Assert.Null(fallback.GetTrap(StatType.Charm));
-        }
-
-        /// <summary>Stub matching the NullTrapRegistry in session-runner.</summary>
-        private sealed class NullTrapRegistryStub : ITrapRegistry
-        {
-            public TrapDefinition? GetTrap(StatType stat) => null;
-            public string? GetLlmInstruction(StatType stat) => null;
         }
     }
 }
