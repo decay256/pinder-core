@@ -619,7 +619,8 @@ namespace Pinder.Core.Conversation
                     opponentName: _opponent.DisplayName,
                     interestBefore: interestBefore,
                     interestAfter: interestAfter,
-                    newState: stateAfter);
+                    newState: stateAfter,
+                    opponentPrompt: _opponent.AssembledSystemPrompt);
 
                 narrativeBeat = await _llm.GetInterestChangeBeatAsync(interestChangeContext).ConfigureAwait(false);
             }

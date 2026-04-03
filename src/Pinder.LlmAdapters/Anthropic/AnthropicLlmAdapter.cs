@@ -147,8 +147,10 @@ namespace Pinder.LlmAdapters.Anthropic
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
-            // No cached system blocks for interest change beats
-            var systemBlocks = Array.Empty<ContentBlock>();
+            // Include opponent system prompt so the beat is generated in character voice
+            var systemBlocks = !string.IsNullOrEmpty(context.OpponentPrompt)
+                ? CacheBlockBuilder.BuildOpponentOnlySystemBlocks(context.OpponentPrompt)
+                : Array.Empty<ContentBlock>();
 
             var userContent = SessionDocumentBuilder.BuildInterestChangeBeatPrompt(
                 context.OpponentName,
