@@ -18,6 +18,8 @@
 | `tests/Pinder.Core.Tests/GameSessionReadRecoverWaitTests.cs` | Tests that `ReadAsync` and `RecoverAsync` apply shadow-based SA disadvantage (Overthinking T2+). |
 | `tests/Pinder.Core.Tests/ShadowReductionTests.cs` | Tests for the 4 new shadow reduction events (Dread, Denial, Madness, Overthinking). |
 | `tests/Pinder.Core.Tests/ShadowReductionSpecTests.cs` | Spec-driven tests for shadow reductions — boundary values, edge cases, negative cases, null-safety. |
+| `tests/Pinder.Core.Tests/TripleBonusReadRecoverTests.cs` | Tests that triple combo bonus (+1) is applied to Read and Recover rolls via `externalBonus`. |
+| `tests/Pinder.Core.Tests/TripleBonusReadRecoverEdgeCaseTests.cs` | Edge case tests for triple bonus on Read/Recover: consumption on failure, advantage stacking, no-trap throws, boundary values. |
 
 ## API / Public Interface
 
@@ -89,7 +91,7 @@ Interest is clamped to [0, 25] by `GameSession` / `InterestMeter`. Individual de
 - **Turn lifecycle**: `StartTurnAsync()` generates dialogue options, computes advantage/disadvantage, and pre-computes the pending momentum bonus. `ResolveTurnAsync(index)` executes the roll, computes interest delta, updates momentum streak, processes shadow growth, advances traps, and triggers the opponent response via LLM.
 - **Momentum is a roll bonus, not an interest delta** (changed in #268 per rules §15). Previously momentum was added to `interestDelta` after the roll; now it is added to `externalBonus` before the roll, meaning it can change the outcome tier (e.g., turn a miss into a hit).
 - **Nat 1 always fails** regardless of modifiers or momentum bonus. The momentum bonus still appears in `ExternalBonus` on a Nat 1 roll but does not prevent failure.
-- **Combo system** (`ComboTracker`): The Triple bonus (+1 external) is consumed after the turn it's applied. `Wait()` also consumes the Triple bonus.
+- **Combo system** (`ComboTracker`): The Triple bonus (+1 external) is consumed after the turn it's applied. `Wait()` also consumes the Triple bonus. As of #312, the triple bonus is also passed as `externalBonus` to `RollEngine.ResolveFixedDC` in both `ReadAsync` and `RecoverAsync` — previously it was consumed but never applied to those rolls.
 - **Interest tiers** drive advantage/disadvantage: VeryIntoIt (16–20) and AlmostThere (21–25) grant advantage (roll 2d20, take highest).
 - **Shadow-based SA disadvantage**: When the player's Overthinking shadow reaches Tier 2+ (≥12), SA rolls get disadvantage. This is checked in `ResolveTurnAsync` (Speak), `ReadAsync`, and `RecoverAsync`. The check uses `ShadowThresholdEvaluator.GetThresholdLevel()` and is guarded by a null check on `_playerShadows`.
 - **Shadow reduction events (§7)**: Five conditions reduce shadow stats by −1 via `SessionShadowTracker.ApplyOffset()` (not `ApplyGrowth`, which rejects negative values):
@@ -108,3 +110,4 @@ Interest is clamped to [0, 25] by `GameSession` / `InterestMeter`. Individual de
 | 2026-04-03 | #269 | Horniness now always rolled (1d10) at construction, even without `IGameClock`. Previously the roll was skipped when `_clock == null`. Time-of-day modifier uses null-coalescing (`_clock?.GetHorninessModifier() ?? 0`). All test `FixedDice` constructors updated to prepend the horniness roll value. New test file `HorninessAlwaysRolledTests.cs` added. |
 | 2026-04-03 | #260 | `ReadAsync` and `RecoverAsync` now apply shadow-based SA disadvantage when Overthinking ≥ T2 (≥12), matching existing behavior in `ResolveTurnAsync` for Speak actions. New test file `GameSessionReadRecoverWaitTests.cs` (143 lines). |
 | 2026-04-03 | #270 | Added 4 missing shadow reduction events from §7: Dread −1 on DateSecured, Denial −1 on Honesty success at interest ≥15, Madness −1 on successful recovery, Overthinking −1 on success despite shadow disadvantage. All use `ApplyOffset()` with null-checks. Overthinking reduction adds extra guard via `StatBlock.ShadowPairs` check. Two new test files (1202 lines total). |
+| 2026-04-03 | #312 | Bug fix: Triple combo bonus (+1) now actually applied to Read/Recover rolls. Previously `ConsumeTripleBonus()` was called but the bonus value was never passed to `RollEngine.ResolveFixedDC`. Now `HasTripleBonus` is captured before consumption and passed as `externalBonus`. Two new test files: `TripleBonusReadRecoverTests.cs` and `TripleBonusReadRecoverEdgeCaseTests.cs` (486 lines total). |
