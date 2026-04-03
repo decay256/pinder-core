@@ -490,6 +490,17 @@ namespace Pinder.Core.Conversation
             // ---- Shadow growth evaluation (#44) ----
             EvaluatePerTurnShadowGrowth(chosenOption, optionIndex, rollResult, interestAfter);
 
+            // Shadow reduction: Winning despite Overthinking disadvantage → Overthinking −1
+            if (rollResult.IsSuccess
+                && _playerShadows != null
+                && _shadowDisadvantagedStats != null
+                && _shadowDisadvantagedStats.Contains(chosenOption.Stat)
+                && StatBlock.ShadowPairs[chosenOption.Stat] == ShadowStatType.Overthinking)
+            {
+                _playerShadows.ApplyOffset(ShadowStatType.Overthinking, -1,
+                    "Succeeded despite Overthinking disadvantage");
+            }
+
             // Check end conditions for end-of-game triggers
             bool isGameOver = false;
             GameOutcome? outcome = null;
@@ -779,10 +790,17 @@ namespace Pinder.Core.Conversation
                 }
             }
 
-            // Trigger 6: Honesty success tracking
+            // Trigger 6: Honesty success tracking + Denial reduction at high interest
             if (chosenOption.Stat == StatType.Honesty && rollResult.IsSuccess)
             {
                 _honestySuccessCount++;
+
+                // Shadow reduction: Honesty success at Interest ≥15 → Denial −1
+                if (interestAfter >= 15)
+                {
+                    _playerShadows.ApplyOffset(ShadowStatType.Denial, -1,
+                        "Honesty success at high interest");
+                }
             }
 
             // Trigger 7: Interest hits 0 → +2 Dread
@@ -827,6 +845,13 @@ namespace Pinder.Core.Conversation
         {
             if (_playerShadows == null)
                 return;
+
+            // Shadow reduction: Date secured → Dread −1
+            if (outcome == GameOutcome.DateSecured)
+            {
+                _playerShadows.ApplyOffset(ShadowStatType.Dread, -1,
+                    "Date secured");
+            }
 
             // Trigger 11: Date secured without Honesty success → +1 Denial
             if (outcome == GameOutcome.DateSecured && _honestySuccessCount == 0)
@@ -1057,6 +1082,13 @@ namespace Pinder.Core.Conversation
 
                 // Record trap recovery XP (#48 AC-5)
                 _xpLedger.Record("TrapRecovery", 15);
+
+                // Shadow reduction: Recovering from trope trap → Madness −1
+                if (_playerShadows != null)
+                {
+                    _playerShadows.ApplyOffset(ShadowStatType.Madness, -1,
+                        "Recovered from trope trap");
+                }
             }
             else
             {
