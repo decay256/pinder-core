@@ -74,6 +74,7 @@ namespace Pinder.Core.Conversation
         // Shadow threshold tracking (#45)
         private StatType? _lastStatUsed;
         private HashSet<StatType>? _shadowDisadvantagedStats;
+        private Dictionary<ShadowStatType, int>? _currentShadowThresholds;
 
         // Stored between StartTurnAsync and ResolveTurnAsync
         private DialogueOption[]? _currentOptions;
@@ -276,6 +277,9 @@ namespace Pinder.Core.Conversation
                     }
                 }
             }
+
+            // Store player shadow thresholds for use in ResolveTurnAsync (#308)
+            _currentShadowThresholds = shadowThresholds;
 
             // Get trap names and LLM instructions for context
             var activeTrapNames = GetActiveTrapNames();
@@ -599,7 +603,8 @@ namespace Pinder.Core.Conversation
                 activeTrapInstructions: deliveryTrapInstructions,
                 playerName: _player.DisplayName,
                 opponentName: _opponent.DisplayName,
-                currentTurn: _turnNumber);
+                currentTurn: _turnNumber,
+                shadowThresholds: _currentShadowThresholds);
 
             string deliveredMessage = await _llm.DeliverMessageAsync(deliveryContext).ConfigureAwait(false);
 
@@ -625,6 +630,17 @@ namespace Pinder.Core.Conversation
             // 11. Generate opponent response
             var opponentTrapInstructions = GetActiveTrapInstructions();
 
+            // Compute opponent shadow thresholds for opponent prompt taint (#308)
+            Dictionary<ShadowStatType, int>? opponentShadowThresholds = null;
+            if (_opponentShadows != null)
+            {
+                opponentShadowThresholds = new Dictionary<ShadowStatType, int>();
+                foreach (ShadowStatType shadow in Enum.GetValues(typeof(ShadowStatType)))
+                {
+                    opponentShadowThresholds[shadow] = _opponentShadows.GetEffectiveShadow(shadow);
+                }
+            }
+
             var opponentContext = new OpponentContext(
                 playerPrompt: _player.AssembledSystemPrompt,
                 opponentPrompt: _opponent.AssembledSystemPrompt,
@@ -639,7 +655,8 @@ namespace Pinder.Core.Conversation
                 activeTrapInstructions: opponentTrapInstructions,
                 playerName: _player.DisplayName,
                 opponentName: _opponent.DisplayName,
-                currentTurn: _turnNumber);
+                currentTurn: _turnNumber,
+                shadowThresholds: opponentShadowThresholds);
 
             var opponentResponse = await _llm.GetOpponentResponseAsync(opponentContext).ConfigureAwait(false);
             if (opponentResponse == null)
