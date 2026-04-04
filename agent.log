@@ -599,3 +599,4 @@
 {"ts":"2026-04-04T11:51:42.269Z","issue":"414","action":"merged","source":"review-loop","pr":437}
 {"ts":"2026-04-04T11:51:49+00:00","agent":"test-engineer","issue":"414","component":"","action":"started","detail":"Starting: Write tests: Session runner: load characters from command-line args instead of hardcoded stat blocks","commit":null}
 >>>>>>> Stashed changes
+{"ts":"2026-04-04T14:13:51+00:00","agent":"architect","issue":"443","component":"","action":"started","detail":"Starting: Architecture Review: Rules DSL + Rule Engine","commit":null}
