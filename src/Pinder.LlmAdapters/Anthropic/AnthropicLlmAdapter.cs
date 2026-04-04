@@ -97,9 +97,10 @@ namespace Pinder.LlmAdapters.Anthropic
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
-            var systemBlocks = CacheBlockBuilder.BuildCachedSystemBlocks(
-                context.PlayerPrompt, context.OpponentPrompt);
+            // Only the player's identity in system — prevents voice bleed from opponent's register
+            var systemBlocks = CacheBlockBuilder.BuildPlayerOnlySystemBlocks(context.PlayerPrompt);
 
+            // Opponent profile is passed as informational context in the user message
             var userContent = SessionDocumentBuilder.BuildDialogueOptionsPrompt(context);
 
             var request = BuildRequest(systemBlocks, userContent,
