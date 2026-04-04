@@ -1,0 +1,40 @@
+{
+  "name": "Gerald_42",
+  "gender_identity": "he/him",
+  "bio": "Just a normal guy who loves the gym, good food, and real connections.",
+  "level": 5,
+  "items": [
+    "backwards-snapback",
+    "salmon-polo-collar-popped",
+    "chinos-too-tight",
+    "boat-shoes-no-socks",
+    "apple-watch",
+    "gym-membership-keychain"
+  ],
+  "anatomy": {
+    "length": "long",
+    "girth": "average",
+    "circumcision": "circumcised",
+    "vein_definition": "prominent",
+    "skin_texture": "natural",
+    "ball_size": "substantial",
+    "tattoos": "none",
+    "eye_style": "wide"
+  },
+  "build_points": {
+    "charm": 6,
+    "rizz": 5,
+    "honesty": 2,
+    "chaos": 4,
+    "wit": 2,
+    "self_awareness": 2
+  },
+  "shadows": {
+    "madness": 5,
+    "horniness": 0,
+    "denial": 2,
+    "fixation": 4,
+    "dread": 3,
+    "overthinking": 2
+  }
+}

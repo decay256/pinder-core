@@ -1,0 +1,41 @@
+{
+  "name": "Velvet_Void",
+  "gender_identity": "she/her",
+  "bio": "if you have to ask, you're not invited.",
+  "level": 4,
+  "items": [
+    "messy-bun-chopsticks",
+    "oversized-band-tee",
+    "fishnets-with-rips",
+    "platform-doc-martens",
+    "nose-ring-septum",
+    "tote-bag-ironic-slogan",
+    "thick-winged-eyeliner"
+  ],
+  "anatomy": {
+    "length": "medium",
+    "girth": "slim",
+    "circumcision": "uncircumcised",
+    "vein_definition": "defined",
+    "skin_texture": "textured",
+    "ball_size": "average",
+    "tattoos": "several",
+    "eye_style": "intense"
+  },
+  "build_points": {
+    "charm": 3,
+    "rizz": 3,
+    "honesty": 2,
+    "chaos": 5,
+    "wit": 4,
+    "self_awareness": 4
+  },
+  "shadows": {
+    "madness": 3,
+    "horniness": 0,
+    "denial": 4,
+    "fixation": 2,
+    "dread": 5,
+    "overthinking": 3
+  }
+}

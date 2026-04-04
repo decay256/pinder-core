@@ -1,0 +1,40 @@
+{
+  "name": "Sable_xo",
+  "gender_identity": "she/her",
+  "bio": "looking for my person. if you're boring, swipe left babe.",
+  "level": 3,
+  "items": [
+    "beach-waves",
+    "bodycon-dress-leopard",
+    "platform-sandals",
+    "press-on-nails-bejeweled",
+    "anklet-star-charm",
+    "lash-extensions-volume"
+  ],
+  "anatomy": {
+    "length": "medium",
+    "girth": "average",
+    "circumcision": "uncircumcised",
+    "vein_definition": "subtle",
+    "skin_texture": "smooth",
+    "ball_size": "average",
+    "tattoos": "one-meaningful",
+    "eye_style": "soft"
+  },
+  "build_points": {
+    "charm": 4,
+    "rizz": 6,
+    "honesty": 3,
+    "chaos": 4,
+    "wit": 2,
+    "self_awareness": 2
+  },
+  "shadows": {
+    "madness": 3,
+    "horniness": 0,
+    "denial": 2,
+    "fixation": 5,
+    "dread": 2,
+    "overthinking": 4
+  }
+}

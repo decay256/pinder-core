@@ -1,0 +1,512 @@
+[
+  {
+    "id": "length",
+    "name": "Length",
+    "tiers": [
+      {
+        "id": "short",
+        "name": "Short",
+        "stat_modifiers": { "self_awareness": 1, "honesty": 1 },
+        "personality_fragment": "got to the jokes before anyone else; uses self-deprecation as both weapon and shield; has a particular wit that grew specifically in this soil",
+        "backstory_fragment": "heard every short joke by age fourteen; got very good at landing the punchline before anyone else could; discovered that being the one who tells the joke first is better than being the one the joke is about; has since found this principle applies to most things in life",
+        "texting_style_fragment": "gets to the point faster than anyone; doesn't pad; the punchline arrives early and the content justifies it",
+        "archetype_tendencies": ["The Philosopher", "The Sniper"],
+        "response_timing_modifier": {
+          "base_delay_delta_minutes": -5,
+          "delay_variance_multiplier": 0.8,
+          "dry_spell_probability_delta": 0.0,
+          "read_receipt": "neutral"
+        }
+      },
+      {
+        "id": "medium",
+        "name": "Medium",
+        "stat_modifiers": {},
+        "personality_fragment": "comfortable in their own skin in a way that reads as unusual; not performing modesty, genuinely fine; this reads as confidence to some and blankness to others",
+        "backstory_fragment": "grew up without this being a topic; no locker room trauma, no defining comparison moment that stuck, no incident that reordered things; had to build an identity around actual things rather than reactions to a physical fact; considers this lucky in retrospect",
+        "texting_style_fragment": "matches energy without effort; doesn't overcommunicate or undercommunicate; the neutral is a genuine neutral",
+        "archetype_tendencies": ["The Bio Responder"],
+        "response_timing_modifier": {
+          "base_delay_delta_minutes": 0,
+          "delay_variance_multiplier": 1.0,
+          "dry_spell_probability_delta": 0.0,
+          "read_receipt": "neutral"
+        }
+      },
+      {
+        "id": "long",
+        "name": "Long",
+        "stat_modifiers": { "rizz": 1, "charm": 1, "self_awareness": -1 },
+        "personality_fragment": "has a quiet awareness of their advantage that surfaces in unexpected ways; not a braggart — just knows; expects to be welcomed in a way that is mostly correct",
+        "backstory_fragment": "the first time someone made a specific remark about it they were sixteen and had no idea how to respond; filed it as significant; learned to respond by twenty; have been responding with decreasing effort and increasing ease ever since",
+        "texting_style_fragment": "unhurried; lets messages settle; never writes from desperation; knows the reply will come",
+        "archetype_tendencies": ["The Breadcrumber", "The Peacock"],
+        "response_timing_modifier": {
+          "base_delay_delta_minutes": 8,
+          "delay_variance_multiplier": 1.3,
+          "dry_spell_probability_delta": 0.05,
+          "read_receipt": "hides"
+        }
+      },
+      {
+        "id": "legendary",
+        "name": "Legendary",
+        "stat_modifiers": { "rizz": 2, "charm": 1, "self_awareness": -2 },
+        "personality_fragment": "enters conversations at a slight offset to everyone else due to sheer presence; cannot fully diagnose why some exchanges go strangely; has been informed of the cause multiple times; it lands differently each time",
+        "backstory_fragment": "found out at fifteen from a reaction rather than a conversation; spent the next several years figuring out what to do with the information; the answer changed three times; currently on version three; version three is the calmest version and the most functional",
+        "texting_style_fragment": "messages arrive with gravitas independent of content; the medium has personality even when the message is mundane; they've noticed this; they use it carefully",
+        "archetype_tendencies": ["The Love Bomber", "The Peacock"],
+        "response_timing_modifier": {
+          "base_delay_delta_minutes": 15,
+          "delay_variance_multiplier": 1.5,
+          "dry_spell_probability_delta": 0.1,
+          "read_receipt": "hides"
+        }
+      }
+    ]
+  },
+  {
+    "id": "girth",
+    "name": "Girth",
+    "tiers": [
+      {
+        "id": "slim",
+        "name": "Slim",
+        "stat_modifiers": { "wit": 1 },
+        "personality_fragment": "compensated through sharpness; makes up in precision what others have in mass; there's a specific vein of humor that only grows in this particular circumstance",
+        "backstory_fragment": "the comparison happened at fourteen in a school changing room; the hierarchy was announced without words; went home that day and decided to be excellent at something else; they were; this is connected",
+        "texting_style_fragment": "precise, targeted; does more with less; the message is complete and brief and lands exactly",
+        "archetype_tendencies": ["The Sniper", "The Philosopher"],
+        "response_timing_modifier": {
+          "base_delay_delta_minutes": -3,
+          "delay_variance_multiplier": 0.9,
+          "dry_spell_probability_delta": 0.0,
+          "read_receipt": "neutral"
+        }
+      },
+      {
+        "id": "average",
+        "name": "Average",
+        "stat_modifiers": {},
+        "personality_fragment": "not particularly burdened or advantaged by this dimension; free to define themselves by other things; has taken advantage of this freedom to varying degrees",
+        "backstory_fragment": "was never the subject of any category in any room they were in; this turned out to be an advantage nobody warned them about; the absence of a physical narrative forced them to build an actual one; they did",
+        "texting_style_fragment": "no specific signature from this; other aspects of the build define the voice",
+        "archetype_tendencies": ["The Bio Responder"],
+        "response_timing_modifier": {
+          "base_delay_delta_minutes": 0,
+          "delay_variance_multiplier": 1.0,
+          "dry_spell_probability_delta": 0.0,
+          "read_receipt": "neutral"
+        }
+      },
+      {
+        "id": "thick",
+        "name": "Thick",
+        "stat_modifiers": { "rizz": 1, "charm": 1 },
+        "personality_fragment": "occupies space with authority without raising their voice; presence arrives before they do; has learned to be responsible with this",
+        "backstory_fragment": "had an early relationship where the other person's primary reaction was surprise; they had been trying for connection and received awe instead; took a long time to understand those are different things; now manages the distinction deliberately",
+        "texting_style_fragment": "deliberate pacing; messages feel substantive; nothing wasted but nothing rushed",
+        "archetype_tendencies": ["The Love Bomber", "The Peacock"],
+        "response_timing_modifier": {
+          "base_delay_delta_minutes": 5,
+          "delay_variance_multiplier": 1.1,
+          "dry_spell_probability_delta": 0.0,
+          "read_receipt": "neutral"
+        }
+      },
+      {
+        "id": "extra-thick",
+        "name": "Extra Thick",
+        "stat_modifiers": { "rizz": 2, "self_awareness": -1 },
+        "personality_fragment": "experiences conversations as slightly off-rhythm from others in a way they haven't fully diagnosed; people react unusually; they've filed this under 'interesting' and continue",
+        "backstory_fragment": "the first time someone had a visible physical reaction they were nineteen; they laughed; the other person didn't; stopped laughing; the subsequent years taught them that what reads as a compliment to one person reads as intimidation to another; this navigation is ongoing and imperfect",
+        "texting_style_fragment": "replies arrive and the response comes faster than content alone would earn; they've noticed the pattern; they haven't connected the cause; this is genuinely the case",
+        "archetype_tendencies": ["The Breadcrumber", "The Wall of Text"],
+        "response_timing_modifier": {
+          "base_delay_delta_minutes": 10,
+          "delay_variance_multiplier": 1.5,
+          "dry_spell_probability_delta": 0.05,
+          "read_receipt": "hides"
+        }
+      }
+    ]
+  },
+  {
+    "id": "circumcision",
+    "name": "Circumcision",
+    "tiers": [
+      {
+        "id": "uncircumcised",
+        "name": "Uncircumcised",
+        "stat_modifiers": { "honesty": 1 },
+        "personality_fragment": "nothing hidden; the full picture is always present; this can read as refreshing or overwhelming depending on what you're looking for",
+        "backstory_fragment": "the first time they encountered someone who was surprised by it they were twenty and had assumed this was unremarkable; learned that day it wasn't; spent some time processing the gap between their normal and someone else's normal; has since found this gap is more common and more interesting than expected",
+        "texting_style_fragment": "doesn't edit down; sends the full thought; the whole thing, not the curated version; sometimes more than was requested",
+        "archetype_tendencies": ["The Oversharer", "The Bio Responder"],
+        "response_timing_modifier": {
+          "base_delay_delta_minutes": -2,
+          "delay_variance_multiplier": 1.1,
+          "dry_spell_probability_delta": 0.0,
+          "read_receipt": "shows"
+        }
+      },
+      {
+        "id": "circumcised",
+        "name": "Circumcised",
+        "stat_modifiers": { "charm": 1 },
+        "personality_fragment": "tends toward clean conclusions; doesn't leave ambiguity behind if it can be avoided; says what they mean and means what they say; the edge is defined",
+        "backstory_fragment": "a decision was made for them at a few days old; they learned about it in a health class at twelve and felt briefly strange about having had no say; processed the strangeness; found it was no more or less defining than any other thing chosen before they could consent to it; this logic has been applied elsewhere in life",
+        "texting_style_fragment": "clear and direct; sentences end with periods; no trailing implications; what was said is what was meant",
+        "archetype_tendencies": ["The Copy-Paste Machine", "The Sniper"],
+        "response_timing_modifier": {
+          "base_delay_delta_minutes": 0,
+          "delay_variance_multiplier": 0.8,
+          "dry_spell_probability_delta": 0.0,
+          "read_receipt": "neutral"
+        }
+      }
+    ]
+  },
+  {
+    "id": "vein_definition",
+    "name": "Vein Definition",
+    "tiers": [
+      {
+        "id": "subtle",
+        "name": "Subtle",
+        "stat_modifiers": { "honesty": 1 },
+        "personality_fragment": "quiet; doesn't feel the need to signal effort through appearance; the work shows up in outcomes, not display; this reads as either very confident or slightly mysterious",
+        "backstory_fragment": "tried performing once — different clothes, a manufactured version of charisma — for about three months at nineteen; found it exhausting and unconvincing; stopped; found that stopping made things easier; has been not performing since and is more themselves as a result",
+        "texting_style_fragment": "understated; lets content do the work; never oversells; the good line arrives without announcement",
+        "archetype_tendencies": ["The Philosopher", "The Bio Responder"],
+        "response_timing_modifier": {
+          "base_delay_delta_minutes": 3,
+          "delay_variance_multiplier": 0.9,
+          "dry_spell_probability_delta": 0.0,
+          "read_receipt": "neutral"
+        }
+      },
+      {
+        "id": "defined",
+        "name": "Defined",
+        "stat_modifiers": { "wit": 1 },
+        "personality_fragment": "structure is visible underneath; organized mind with a system; the architecture shows to people who look; not everyone looks",
+        "backstory_fragment": "had a period at twenty-two when things went sideways simultaneously — job, relationship, living situation — all within the same four months; built systems to manage the chaos; the systems worked; kept them after the situations resolved; the systems are now just the character",
+        "texting_style_fragment": "structured messages; often longer but with clear through-lines; makes an argument and lands it",
+        "archetype_tendencies": ["The Philosopher", "The Copy-Paste Machine"],
+        "response_timing_modifier": {
+          "base_delay_delta_minutes": 0,
+          "delay_variance_multiplier": 1.0,
+          "dry_spell_probability_delta": 0.0,
+          "read_receipt": "neutral"
+        }
+      },
+      {
+        "id": "prominent",
+        "name": "Prominent",
+        "stat_modifiers": { "rizz": 1, "chaos": 1 },
+        "personality_fragment": "high-energy in a way that shows on the surface; enthusiasm visible and unfiltered; the vitality is a fact, not a performance",
+        "backstory_fragment": "was sent home from school once at age eleven for being disruptive; they hadn't done anything in particular; just had energy that read as a problem in a room; spent the next several years learning how to make that same quality read as enthusiasm rather than chaos; mostly succeeded; occasionally doesn't",
+        "texting_style_fragment": "things are capitalized when they land; exclamation points deployed but not wasted; messages arrive with visible energy",
+        "archetype_tendencies": ["The Love Bomber", "The Oversharer"],
+        "response_timing_modifier": {
+          "base_delay_delta_minutes": -5,
+          "delay_variance_multiplier": 1.4,
+          "dry_spell_probability_delta": 0.05,
+          "read_receipt": "shows"
+        }
+      },
+      {
+        "id": "throbbing",
+        "name": "Throbbing",
+        "stat_modifiers": { "rizz": 2, "chaos": 1, "self_awareness": -1 },
+        "personality_fragment": "very difficult to ignore in any context; has calibrated everything around managing the reaction they produce; mostly successful; occasionally not",
+        "backstory_fragment": "walked into a party at twenty and something shifted in the room without explanation; nobody said anything but there was an observable change in how people oriented; took about eighteen months to understand what was happening; takes it seriously now; is occasionally careless with it anyway and deals with the consequences",
+        "texting_style_fragment": "every message lands harder than content alone warrants; they've accounted for this; the accounting is imperfect; usually in their favor",
+        "archetype_tendencies": ["The Love Bomber", "The Peacock"],
+        "response_timing_modifier": {
+          "base_delay_delta_minutes": -3,
+          "delay_variance_multiplier": 1.7,
+          "dry_spell_probability_delta": 0.1,
+          "read_receipt": "hides"
+        }
+      }
+    ]
+  },
+  {
+    "id": "skin_texture",
+    "name": "Skin Texture",
+    "tiers": [
+      {
+        "id": "smooth",
+        "name": "Smooth",
+        "stat_modifiers": { "charm": 1 },
+        "personality_fragment": "easy to approach; the surface presents no barriers; people sometimes mistake this for simplicity; it is not simplicity",
+        "backstory_fragment": "grew up in a house where the rule was friendliness first — it was enforced so consistently that it became genuine before they were old enough to question it; by the time they were old enough to opt out they no longer wanted to; the ease with initial contact is not performance; what took longer to acknowledge was the difficulty with depth",
+        "texting_style_fragment": "soft openings; nothing abrupt; the first message always arrives gently regardless of what it says",
+        "archetype_tendencies": ["The Love Bomber", "The Bio Responder"],
+        "response_timing_modifier": {
+          "base_delay_delta_minutes": -3,
+          "delay_variance_multiplier": 1.0,
+          "dry_spell_probability_delta": 0.0,
+          "read_receipt": "shows"
+        }
+      },
+      {
+        "id": "natural",
+        "name": "Natural",
+        "stat_modifiers": {},
+        "personality_fragment": "comfortable with themselves as they are; no particular texture-consciousness; what you see is what they have; this is a fact they've already processed",
+        "backstory_fragment": "has no skin story; this is rarer than it sounds; grew up without a strong reaction to their appearance in either direction; used the absence of that noise to develop opinions about other things; those opinions turned out to be more interesting",
+        "texting_style_fragment": "no specific signature from this; the voice comes from other aspects of the build",
+        "archetype_tendencies": ["The Bio Responder"],
+        "response_timing_modifier": {
+          "base_delay_delta_minutes": 0,
+          "delay_variance_multiplier": 1.0,
+          "dry_spell_probability_delta": 0.0,
+          "read_receipt": "neutral"
+        }
+      },
+      {
+        "id": "textured",
+        "name": "Textured",
+        "stat_modifiers": { "honesty": 1, "self_awareness": 1 },
+        "personality_fragment": "the history is visible in the surface; doesn't sand it down for anyone's comfort; if you want smooth, this isn't the one; the texture is honest and they'd rather you know before proceeding",
+        "backstory_fragment": "the texture started at seventeen with a bad burn that healed wrong; then the stretch marks at twenty; then what happened in the accident at twenty-four; each layer was a specific event; they can date most of them; the texture is not something they explain unless asked, just something that happened to them over time",
+        "texting_style_fragment": "slightly complex sentence structures; the texture shows in the prose; not difficult to read, just more to read",
+        "archetype_tendencies": ["The Philosopher", "The Oversharer"],
+        "response_timing_modifier": {
+          "base_delay_delta_minutes": 5,
+          "delay_variance_multiplier": 1.2,
+          "dry_spell_probability_delta": 0.05,
+          "read_receipt": "neutral"
+        }
+      },
+      {
+        "id": "weathered",
+        "name": "Weathered",
+        "stat_modifiers": { "honesty": 2, "self_awareness": 1, "rizz": -1 },
+        "personality_fragment": "all the wear is visible and they're not going to pretend it isn't; the past happened; it shows; this is a fact rather than a complaint",
+        "backstory_fragment": "by the time they were thirty-two they had lived in four countries, ended a marriage, and gone two years without stable income; the surface shows all of it; people sometimes ask what happened; the accurate answer is 'a lot'; usually they give the short version and watch how people decide to respond to that",
+        "texting_style_fragment": "uses past tense frequently; the story has visible weight; direct about what happened in a way that doesn't demand anything in return",
+        "archetype_tendencies": ["The Bio Responder", "The Wall of Text"],
+        "response_timing_modifier": {
+          "base_delay_delta_minutes": 10,
+          "delay_variance_multiplier": 1.5,
+          "dry_spell_probability_delta": 0.1,
+          "read_receipt": "neutral"
+        }
+      }
+    ]
+  },
+  {
+    "id": "skin_tone",
+    "name": "Skin Tone",
+    "tiers": [
+      { "id": "pale",  "name": "Pale",  "visual_description": "a kind of blue-white that catches light differently; distinctive profile presence" },
+      { "id": "light", "name": "Light", "visual_description": "pinkish warmth; reads as approachable in profile thumbnail" },
+      { "id": "warm",  "name": "Warm",  "visual_description": "golden undertone; classic presentation" },
+      { "id": "brown", "name": "Brown", "visual_description": "rich mid-tone; strong profile contrast" },
+      { "id": "deep",  "name": "Deep",  "visual_description": "deep and even; high-contrast in profile" },
+      { "id": "ruddy", "name": "Ruddy", "visual_description": "flush or reddish undertone; distinctive warmth" }
+    ]
+  },
+  {
+    "id": "ball_size",
+    "name": "Ball Size",
+    "tiers": [
+      {
+        "id": "modest",
+        "name": "Modest",
+        "stat_modifiers": { "wit": 1, "self_awareness": 1 },
+        "personality_fragment": "precision over spectacle; quality over scale; the value is in what they do, not how much space they require to do it",
+        "backstory_fragment": "was asked once, early on, whether they were insecure about it; said no; the other person didn't believe them; they meant it; spent about ten minutes afterward quietly checking whether they meant it; still meant it; found this more telling about the person who asked than about themselves",
+        "texting_style_fragment": "targeted; never verbose when brief will serve; makes the exact point required and stops",
+        "archetype_tendencies": ["The Sniper", "The Philosopher"],
+        "response_timing_modifier": {
+          "base_delay_delta_minutes": -2,
+          "delay_variance_multiplier": 0.8,
+          "dry_spell_probability_delta": 0.0,
+          "read_receipt": "neutral"
+        }
+      },
+      {
+        "id": "average",
+        "name": "Average",
+        "stat_modifiers": {},
+        "personality_fragment": "not defined by this dimension; defined by other things; the freedom from this particular definition is real and used",
+        "backstory_fragment": "the first person who saw them fully was a partner at twenty-one who didn't react in any notable way; this non-reaction was one of the better moments of that year; has had low expectations of drama in this area ever since; those expectations have been consistently met",
+        "texting_style_fragment": "no specific signature from this",
+        "archetype_tendencies": ["The Bio Responder"],
+        "response_timing_modifier": {
+          "base_delay_delta_minutes": 0,
+          "delay_variance_multiplier": 1.0,
+          "dry_spell_probability_delta": 0.0,
+          "read_receipt": "neutral"
+        }
+      },
+      {
+        "id": "substantial",
+        "name": "Substantial",
+        "stat_modifiers": { "charm": 1, "rizz": 1 },
+        "personality_fragment": "carries themselves with a ballast that reads as groundedness; gives the impression of someone who has seriously considered their position; mostly accurate",
+        "backstory_fragment": "the awareness arrived at eighteen via a reaction they didn't expect and weren't prepared for; took about a year to calibrate; the calibration involved understanding that being noticed for a physical fact is not the same as being known; has been working on the distinction since; makes it the focus most of the time",
+        "texting_style_fragment": "grounded messages; even when excited, there's weight behind it; never light",
+        "archetype_tendencies": ["The Love Bomber", "The Bio Responder"],
+        "response_timing_modifier": {
+          "base_delay_delta_minutes": 0,
+          "delay_variance_multiplier": 1.1,
+          "dry_spell_probability_delta": 0.0,
+          "read_receipt": "shows"
+        }
+      },
+      {
+        "id": "asymmetric",
+        "name": "Asymmetric",
+        "stat_modifiers": { "chaos": 1, "self_awareness": 1, "charm": -1 },
+        "personality_fragment": "has made peace with the irregular; can lead with it or leave it; the awareness of asymmetry has produced unusual self-knowledge; notices imbalance in other things too",
+        "backstory_fragment": "didn't notice until a doctor pointed it out at twenty-five with no particular concern; spent the following week overthinking it; then stopped; the asymmetry had been there the whole time without consequence; learned from this that most things they'd been anxious about were similarly inert; this was worth knowing",
+        "texting_style_fragment": "uneven rhythm; one message short, next one longer; the asymmetry is structural in the prose; people who notice it find it interesting",
+        "archetype_tendencies": ["The Philosopher", "The Pun Troll"],
+        "response_timing_modifier": {
+          "base_delay_delta_minutes": 5,
+          "delay_variance_multiplier": 2.0,
+          "dry_spell_probability_delta": 0.05,
+          "read_receipt": "neutral"
+        }
+      }
+    ]
+  },
+  {
+    "id": "tattoos",
+    "name": "Tattoos",
+    "tiers": [
+      {
+        "id": "none",
+        "name": "None",
+        "stat_modifiers": { "honesty": 1 },
+        "personality_fragment": "everything they express is verbal; the body is not a canvas or hasn't been yet; this registers as either a clean slate or a missed opportunity depending on who's looking",
+        "backstory_fragment": "thought about a tattoo at nineteen after a relationship ended; got as far as choosing the design; then the relationship the design was for became a different kind of memory; stored the design in a folder on their laptop; it is still there; the tattoo is still not",
+        "texting_style_fragment": "no visual language in their writing; works in words not images; the vocabulary does the carrying",
+        "archetype_tendencies": ["The Bio Responder", "The Philosopher"],
+        "response_timing_modifier": {
+          "base_delay_delta_minutes": 0,
+          "delay_variance_multiplier": 1.0,
+          "dry_spell_probability_delta": 0.0,
+          "read_receipt": "neutral"
+        }
+      },
+      {
+        "id": "one-meaningful",
+        "name": "One Meaningful Tattoo",
+        "stat_modifiers": { "honesty": 1, "self_awareness": 1 },
+        "personality_fragment": "the tattoo is a story they don't bring up first; when asked, the answer is prepared and genuine; the single mark means they chose very carefully",
+        "backstory_fragment": "waited until something was true enough to be permanent; found the thing; committed; has not regretted the commitment though the story of how they got there is long and involves a year they don't talk about to most people",
+        "texting_style_fragment": "has one very good long story that arrives at exactly the right moment in a conversation and lands correctly",
+        "archetype_tendencies": ["The Bio Responder", "The Sniper"],
+        "response_timing_modifier": {
+          "base_delay_delta_minutes": 3,
+          "delay_variance_multiplier": 1.1,
+          "dry_spell_probability_delta": 0.0,
+          "read_receipt": "neutral"
+        }
+      },
+      {
+        "id": "several",
+        "name": "Several Tattoos",
+        "stat_modifiers": { "charm": 1, "self_awareness": 1, "rizz": -1 },
+        "personality_fragment": "each tattoo is a chapter marker; can be asked about any of them; the stories are all different in tone; some are funny, some are not; this is the most honest CV they have",
+        "backstory_fragment": "the first one was for their mother who died when they were twenty-two; the second was for someone they wanted to remember; by the fifth they stopped requiring a reason; each one tied to a year they still think about; taken together they form a timeline of becoming someone",
+        "texting_style_fragment": "longer messages when engaged; occasional tangent that reveals real history; the tangent is never entirely off-topic",
+        "archetype_tendencies": ["The Wall of Text", "The Oversharer"],
+        "response_timing_modifier": {
+          "base_delay_delta_minutes": 5,
+          "delay_variance_multiplier": 1.3,
+          "dry_spell_probability_delta": 0.05,
+          "read_receipt": "neutral"
+        }
+      },
+      {
+        "id": "fully-tattooed",
+        "name": "Fully Tattooed",
+        "stat_modifiers": { "charm": 2, "chaos": 1, "honesty": -1 },
+        "personality_fragment": "the skin is entirely a surface of information but paradoxically hard to read; the coverage creates privacy through information overload; there's too much to know where to start",
+        "backstory_fragment": "started at seventeen with something their older sibling designed; couldn't stop; went through a period at twenty-three where the adding outpaced the processing — a therapist once asked what they were covering; they said nothing; they think this is true; they're not entirely sure",
+        "texting_style_fragment": "very visual in language; imagery over abstraction; the subtext is always competing with the text; the competition is the point",
+        "archetype_tendencies": ["The Peacock", "The Love Bomber"],
+        "response_timing_modifier": {
+          "base_delay_delta_minutes": -3,
+          "delay_variance_multiplier": 1.5,
+          "dry_spell_probability_delta": 0.1,
+          "read_receipt": "shows"
+        }
+      }
+    ]
+  },
+  {
+    "id": "eye_style",
+    "name": "Eye Style",
+    "tiers": [
+      {
+        "id": "soft",
+        "name": "Soft",
+        "stat_modifiers": { "charm": 1 },
+        "personality_fragment": "people feel immediately safe; this creates a power they've been slow to fully realize; tends to be trusted quickly and has learned to be responsible with that",
+        "backstory_fragment": "was told at nineteen by a friend who had kept it quiet for two years that they make people feel safe within minutes of meeting them; spent some time figuring out whether this was a gift or a responsibility; decided it was both; is mostly careful with it though not always",
+        "texting_style_fragment": "warm openings; makes people feel received; the first message never arrives cold",
+        "archetype_tendencies": ["The Bio Responder", "The Love Bomber"],
+        "response_timing_modifier": {
+          "base_delay_delta_minutes": -3,
+          "delay_variance_multiplier": 0.9,
+          "dry_spell_probability_delta": 0.0,
+          "read_receipt": "shows"
+        }
+      },
+      {
+        "id": "intense",
+        "name": "Intense",
+        "stat_modifiers": { "rizz": 1, "chaos": 1 },
+        "personality_fragment": "makes people feel thoroughly seen; this is compelling and unsettling in proportions that vary by person; doesn't blink when something is important",
+        "backstory_fragment": "was told at seventeen that they stare; didn't think they were staring; thought they were listening; still believes this; has been told many times since by many different people; has not changed the behaviour; believes the people who stay after the intensity have self-selected correctly",
+        "texting_style_fragment": "pauses in messages that feel like eye contact; says something unexpectedly true and then waits; the wait is intentional",
+        "archetype_tendencies": ["The Sniper", "The Philosopher"],
+        "response_timing_modifier": {
+          "base_delay_delta_minutes": 5,
+          "delay_variance_multiplier": 1.6,
+          "dry_spell_probability_delta": 0.1,
+          "read_receipt": "hides"
+        }
+      },
+      {
+        "id": "wide",
+        "name": "Wide",
+        "stat_modifiers": { "chaos": 1, "self_awareness": 1 },
+        "personality_fragment": "perpetually finding things surprising in a way that doesn't wear out; has genuine reactions that are hard to fake; the wide quality suggests someone who has not yet decided to be jaded and keeps postponing the decision",
+        "backstory_fragment": "had a childhood with a lot of genuine surprises, not all of them good — a parent who left and came back, a school that closed mid-year, a best friend who moved away at eleven without warning; developed the permanent expression of someone who has not yet decided how things will turn out; has been corrected on this read multiple times; the expression remains",
+        "texting_style_fragment": "exclamation-forward but not cheap; when they say 'wait what' they mean it; the reaction is always genuine",
+        "archetype_tendencies": ["The Oversharer", "The Love Bomber"],
+        "response_timing_modifier": {
+          "base_delay_delta_minutes": -5,
+          "delay_variance_multiplier": 1.8,
+          "dry_spell_probability_delta": 0.05,
+          "read_receipt": "shows"
+        }
+      },
+      {
+        "id": "hooded",
+        "name": "Hooded",
+        "stat_modifiers": { "wit": 1, "rizz": 1 },
+        "personality_fragment": "projects ease they may or may not have; the hooded quality creates an impression of selectivity whether or not they feel selective; people work harder for their attention which means they get better conversations",
+        "backstory_fragment": "was told they look bored; was not bored; decided this was useful; has been using it since; occasionally actually bored but indistinguishable from the baseline and that's the whole point",
+        "texting_style_fragment": "replies arrive slowly and read like they've seen everything; the impression of selectivity is structural in the prose; the actual interest level is higher than it reads",
+        "archetype_tendencies": ["The Breadcrumber", "The Slow Fader"],
+        "response_timing_modifier": {
+          "base_delay_delta_minutes": 12,
+          "delay_variance_multiplier": 1.4,
+          "dry_spell_probability_delta": 0.15,
+          "read_receipt": "hides"
+        }
+      }
+    ]
+  }
+]
