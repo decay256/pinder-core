@@ -24,18 +24,27 @@ namespace Pinder.Core.Conversation
         /// <summary>Previous conversation opener for callback bonus calculation (per #162 resolution).</summary>
         public string? PreviousOpener { get; }
 
+        /// <summary>
+        /// Optional rule resolver for data-driven game constants.
+        /// When non-null, GameSession uses this for §5/§6/§7/§15 lookups.
+        /// When null or when a lookup returns null, hardcoded fallback is used.
+        /// </summary>
+        public IRuleResolver? Rules { get; }
+
         public GameSessionConfig(
             IGameClock? clock = null,
             SessionShadowTracker? playerShadows = null,
             SessionShadowTracker? opponentShadows = null,
             int? startingInterest = null,
-            string? previousOpener = null)
+            string? previousOpener = null,
+            IRuleResolver? rules = null)
         {
             Clock = clock;
             PlayerShadows = playerShadows;
             OpponentShadows = opponentShadows;
             StartingInterest = startingInterest;
             PreviousOpener = previousOpener;
+            Rules = rules;
         }
     }
 }

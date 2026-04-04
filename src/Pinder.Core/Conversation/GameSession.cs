@@ -59,6 +59,9 @@ namespace Pinder.Core.Conversation
         // XP tracking (#48)
         private readonly XpLedger _xpLedger;
 
+        // Rule resolver for data-driven game constants (#463)
+        private readonly IRuleResolver? _rules;
+
         // Weakness window from opponent's last response (#49)
         private WeaknessWindow? _activeWeakness;
 
@@ -109,13 +112,20 @@ namespace Pinder.Core.Conversation
             _dice = dice ?? throw new ArgumentNullException(nameof(dice));
             _trapRegistry = trapRegistry ?? throw new ArgumentNullException(nameof(trapRegistry));
 
+            // Store optional config fields early (needed by ResolveThresholdLevel below)
+            _clock = config?.Clock;
+            _playerShadows = config?.PlayerShadows;
+            _opponentShadows = config?.OpponentShadows;
+            _previousOpener = config?.PreviousOpener;
+            _rules = config?.Rules;
+
             // Determine starting interest: explicit config > Dread T3 > default
             if (config?.StartingInterest.HasValue == true)
             {
                 _interest = new InterestMeter(config.StartingInterest.Value);
             }
             else if (config?.PlayerShadows != null
-                && ShadowThresholdEvaluator.GetThresholdLevel(
+                && ResolveThresholdLevel(
                     config.PlayerShadows.GetEffectiveShadow(ShadowStatType.Dread)) >= 3)
             {
                 _interest = new InterestMeter(8);
@@ -130,12 +140,6 @@ namespace Pinder.Core.Conversation
             _turnNumber = 0;
             _ended = false;
             _outcome = null;
-
-            // Store optional config fields for downstream Sprint 8 features
-            _clock = config?.Clock;
-            _playerShadows = config?.PlayerShadows;
-            _opponentShadows = config?.OpponentShadows;
-            _previousOpener = config?.PreviousOpener;
 
             // Roll session Horniness (1d10) every session + time-of-day modifier when clock available
             {
@@ -210,7 +214,7 @@ namespace Pinder.Core.Conversation
             }
 
             // Ghost trigger: if Bored state, 25% chance per turn
-            if (_interest.GetState() == InterestState.Bored)
+            if (ResolveInterestState() == InterestState.Bored)
             {
                 int ghostRoll = _dice.Roll(4);
                 if (ghostRoll == 1)
@@ -260,7 +264,7 @@ namespace Pinder.Core.Conversation
                     // Store raw shadow value (not tier) so LLM prompt builder
                     // can check fine-grained thresholds (e.g. >5 for T1 taint).
                     shadowThresholds[shadow] = effectiveVal;
-                    int tier = ShadowThresholdEvaluator.GetThresholdLevel(effectiveVal);
+                    int tier = ResolveThresholdLevel(effectiveVal);
 
                     // T2+: paired positive stat gets disadvantage
                     if (tier >= 2)
@@ -480,12 +484,12 @@ namespace Pinder.Core.Conversation
             int interestDelta;
             if (rollResult.IsSuccess)
             {
-                interestDelta = SuccessScale.GetInterestDelta(rollResult);
+                interestDelta = ResolveSuccessInterestDelta(rollResult);
                 interestDelta += RiskTierBonus.GetInterestBonus(rollResult);
             }
             else
             {
-                interestDelta = FailureScale.GetInterestDelta(rollResult);
+                interestDelta = ResolveFailureInterestDelta(rollResult);
             }
 
             // 3. Update momentum streak (bonus was already applied as externalBonus in the roll, #268)
@@ -523,13 +527,13 @@ namespace Pinder.Core.Conversation
 
             // 4. Record interest before applying delta
             int interestBefore = _interest.Current;
-            InterestState stateBefore = _interest.GetState();
+            InterestState stateBefore = ResolveInterestState();
 
             // 5. Apply interest delta
             _interest.Apply(interestDelta);
 
             int interestAfter = _interest.Current;
-            InterestState stateAfter = _interest.GetState();
+            InterestState stateAfter = ResolveInterestState();
 
             // ---- Shadow growth evaluation (#44) ----
             EvaluatePerTurnShadowGrowth(chosenOption, optionIndex, rollResult, interestAfter);
@@ -742,8 +746,15 @@ namespace Pinder.Core.Conversation
         /// Applies the risk-tier XP multiplier per risk-reward doc:
         /// Safe=1x, Medium=1.5x, Hard=2x, Bold=3x.
         /// </summary>
-        private static int ApplyRiskTierMultiplier(int baseXp, RiskTier riskTier)
+        private int ApplyRiskTierMultiplier(int baseXp, RiskTier riskTier)
         {
+            if (_rules != null)
+            {
+                var resolved = _rules.GetRiskTierXpMultiplier(riskTier);
+                if (resolved.HasValue)
+                    return (int)Math.Round(baseXp * resolved.Value);
+            }
+
             double multiplier;
             if (riskTier == RiskTier.Bold)
                 multiplier = 3.0;
@@ -963,13 +974,81 @@ namespace Pinder.Core.Conversation
 
         /// <summary>
         /// Get momentum bonus for the current streak length.
+        /// Uses rule resolver if available, falls back to hardcoded values.
         /// 3-streak → +2, 4-streak → +2, 5+ → +3.
         /// </summary>
-        private static int GetMomentumBonus(int streak)
+        private int GetMomentumBonus(int streak)
         {
+            if (_rules != null)
+            {
+                var resolved = _rules.GetMomentumBonus(streak);
+                if (resolved.HasValue)
+                    return resolved.Value;
+            }
             if (streak >= 5) return 3;
             if (streak >= 3) return 2;
             return 0;
+        }
+
+        /// <summary>
+        /// Get failure interest delta, using rule resolver if available.
+        /// Falls back to FailureScale.GetInterestDelta().
+        /// </summary>
+        private int ResolveFailureInterestDelta(RollResult rollResult)
+        {
+            if (_rules != null)
+            {
+                var resolved = _rules.GetFailureInterestDelta(rollResult.MissMargin, rollResult.UsedDieRoll);
+                if (resolved.HasValue)
+                    return resolved.Value;
+            }
+            return FailureScale.GetInterestDelta(rollResult);
+        }
+
+        /// <summary>
+        /// Get success interest delta, using rule resolver if available.
+        /// Falls back to SuccessScale.GetInterestDelta().
+        /// </summary>
+        private int ResolveSuccessInterestDelta(RollResult rollResult)
+        {
+            if (_rules != null)
+            {
+                int beatMargin = rollResult.FinalTotal - rollResult.DC;
+                var resolved = _rules.GetSuccessInterestDelta(beatMargin, rollResult.UsedDieRoll);
+                if (resolved.HasValue)
+                    return resolved.Value;
+            }
+            return SuccessScale.GetInterestDelta(rollResult);
+        }
+
+        /// <summary>
+        /// Get interest state, using rule resolver if available.
+        /// Falls back to InterestMeter.GetState().
+        /// </summary>
+        private InterestState ResolveInterestState()
+        {
+            if (_rules != null)
+            {
+                var resolved = _rules.GetInterestState(_interest.Current);
+                if (resolved.HasValue)
+                    return resolved.Value;
+            }
+            return _interest.GetState();
+        }
+
+        /// <summary>
+        /// Get shadow threshold level, using rule resolver if available.
+        /// Falls back to ShadowThresholdEvaluator.GetThresholdLevel().
+        /// </summary>
+        private int ResolveThresholdLevel(int shadowValue)
+        {
+            if (_rules != null)
+            {
+                var resolved = _rules.GetShadowThresholdLevel(shadowValue);
+                if (resolved.HasValue)
+                    return resolved.Value;
+            }
+            return ShadowThresholdEvaluator.GetThresholdLevel(shadowValue);
         }
 
         private GameStateSnapshot CreateSnapshot()
@@ -980,7 +1059,7 @@ namespace Pinder.Core.Conversation
 
             return new GameStateSnapshot(
                 interest: _interest.Current,
-                state: _interest.GetState(),
+                state: ResolveInterestState(),
                 momentumStreak: _momentumStreak,
                 activeTrapNames: trapNames,
                 turnNumber: _turnNumber,
@@ -1046,7 +1125,7 @@ namespace Pinder.Core.Conversation
             if (_playerShadows != null)
             {
                 int overthinkingVal = _playerShadows.GetEffectiveShadow(ShadowStatType.Overthinking);
-                if (ShadowThresholdEvaluator.GetThresholdLevel(overthinkingVal) >= 2)
+                if (ResolveThresholdLevel(overthinkingVal) >= 2)
                 {
                     hasDisadvantage = true;
                 }
@@ -1161,7 +1240,7 @@ namespace Pinder.Core.Conversation
             if (_playerShadows != null)
             {
                 int overthinkingVal = _playerShadows.GetEffectiveShadow(ShadowStatType.Overthinking);
-                if (ShadowThresholdEvaluator.GetThresholdLevel(overthinkingVal) >= 2)
+                if (ResolveThresholdLevel(overthinkingVal) >= 2)
                 {
                     hasDisadvantage = true;
                 }
@@ -1311,7 +1390,7 @@ namespace Pinder.Core.Conversation
         /// </summary>
         private void CheckGhostTrigger()
         {
-            if (_interest.GetState() == InterestState.Bored)
+            if (ResolveInterestState() == InterestState.Bored)
             {
                 int ghostRoll = _dice.Roll(4);
                 if (ghostRoll == 1)
