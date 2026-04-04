@@ -84,10 +84,35 @@ class Program
 
     // ── main ─────────────────────────────────────────────────────────────────
 
+    // ── CLI arg parsing ─────────────────────────────────────────────────
+
+    static int ParseMaxTurns(string[] args, int defaultValue = 20)
+    {
+        for (int i = 0; i < args.Length - 1; i++)
+        {
+            if (args[i] == "--max-turns" && int.TryParse(args[i + 1], out int val) && val > 0)
+                return val;
+        }
+        return defaultValue;
+    }
+
+    static string ParseAgentArg(string[] args)
+    {
+        for (int i = 0; i < args.Length - 1; i++)
+        {
+            if (args[i] == "--agent")
+                return args[i + 1];
+        }
+        return Environment.GetEnvironmentVariable("PLAYER_AGENT") ?? "scoring";
+    }
+
     static async Task<int> Main(string[] args)
     {
         var apiKey = Environment.GetEnvironmentVariable("ANTHROPIC_API_KEY");
         if (string.IsNullOrEmpty(apiKey)) { Console.Error.WriteLine("ANTHROPIC_API_KEY not set"); return 1; }
+
+        int maxTurns = ParseMaxTurns(args);
+        string agentType = ParseAgentArg(args);
 
         var buffer = new StringBuilder();
         var tee = new TeeWriter(Console.Out, buffer);
@@ -176,9 +201,8 @@ class Program
         var config = new GameSessionConfig(playerShadows: sableShadows);
         var session = new GameSession(sable, brick, llm, new SystemRandomDiceRoller(), trapRegistry, config);
 
-        // Player agent for decision-making — configurable via PLAYER_AGENT env var
+        // Player agent for decision-making — configurable via --agent arg or PLAYER_AGENT env var
         IPlayerAgent agent;
-        string agentType = Environment.GetEnvironmentVariable("PLAYER_AGENT") ?? "scoring";
         if (agentType.Equals("llm", StringComparison.OrdinalIgnoreCase))
         {
             var agentOptions = new AnthropicOptions
@@ -210,7 +234,7 @@ class Program
         GameOutcome? finalOutcome = null;
         string lastOpponentMsg = "";
 
-        while (turn < 15)
+        while (turn < maxTurns)
         {
             turn++;
             TurnStart turnStart;
@@ -365,9 +389,28 @@ class Program
         Console.WriteLine();
         Console.WriteLine("## Session Summary");
         Console.WriteLine();
+        bool isCutoff = finalOutcome == null;
         string outcomeIcon = finalOutcome == GameOutcome.DateSecured ? "✅" :
-                             finalOutcome == GameOutcome.Unmatched  ? "💀" : "👻";
-        Console.WriteLine($"**{outcomeIcon} {finalOutcome?.ToString() ?? "Incomplete"} | Turns: {turn} | Total XP: {session.TotalXpEarned}**");
+                             finalOutcome == GameOutcome.Unmatched  ? "💀" :
+                             isCutoff ? "⏸️" : "👻";
+        string outcomeLabel = isCutoff ? $"Incomplete ({turn}/{maxTurns} turns)" : finalOutcome.ToString()!;
+        Console.WriteLine($"**{outcomeIcon} {outcomeLabel} | Interest: {interest}/25 | Total XP: {session.TotalXpEarned}**");
+
+        if (isCutoff)
+        {
+            // Compute interest state from current interest value
+            InterestState currentState = interest <= 0  ? InterestState.Unmatched :
+                                         interest <= 4  ? InterestState.Bored :
+                                         interest <= 9  ? InterestState.Lukewarm :
+                                         interest <= 15 ? InterestState.Interested :
+                                         interest <= 20 ? InterestState.VeryIntoIt :
+                                         interest <= 24 ? InterestState.AlmostThere :
+                                                          InterestState.DateSecured;
+            string projection = OutcomeProjector.Project(
+                interest, momentum, turn, maxTurns, currentState);
+            Console.WriteLine();
+            Console.WriteLine($"Projected: {projection}");
+        }
         Console.WriteLine();
 
         // ── shadow delta table ────────────────────────────────────────────
