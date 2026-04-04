@@ -664,7 +664,8 @@ namespace Pinder.Core.Conversation
                 playerName: _player.DisplayName,
                 opponentName: _opponent.DisplayName,
                 currentTurn: _turnNumber,
-                shadowThresholds: opponentShadowThresholds);
+                shadowThresholds: opponentShadowThresholds,
+                deliveryTier: rollResult.Tier);
 
             var opponentResponse = await _llm.GetOpponentResponseAsync(opponentContext).ConfigureAwait(false);
             if (opponentResponse == null)

@@ -203,8 +203,21 @@ namespace Pinder.LlmAdapters
             AppendConversationHistory(sb, context.ConversationHistory, playerName);
 
             sb.AppendLine();
-            sb.AppendLine("PLAYER'S LAST MESSAGE");
-            sb.AppendLine($"\"{context.PlayerDeliveredMessage}\"");
+
+            if (context.DeliveryTier != FailureTier.None)
+            {
+                string tierLabel = GetFailureTierName(context.DeliveryTier);
+                sb.AppendLine($"PLAYER'S LAST MESSAGE (delivered after a {tierLabel}):");
+                sb.AppendLine($"\"{context.PlayerDeliveredMessage}\"");
+                sb.AppendLine();
+                sb.AppendLine("FAILURE CONTEXT");
+                sb.AppendLine(GetOpponentReactionGuidance(context.DeliveryTier));
+            }
+            else
+            {
+                sb.AppendLine("PLAYER'S LAST MESSAGE");
+                sb.AppendLine($"\"{context.PlayerDeliveredMessage}\"");
+            }
 
             sb.AppendLine();
             sb.AppendLine("INTEREST CHANGE");
@@ -425,6 +438,22 @@ namespace Pinder.LlmAdapters
                 descriptor = PromptTemplates.ResistanceActiveDisengagement;
 
             return $"Current interest: {interest}/25. Resistance level: {descriptor}";
+        }
+
+        /// <summary>
+        /// Returns per-tier opponent reaction guidance for failure degradation (#493).
+        /// </summary>
+        internal static string GetOpponentReactionGuidance(FailureTier tier)
+        {
+            switch (tier)
+            {
+                case FailureTier.Fumble: return PromptTemplates.OpponentReactionFumble;
+                case FailureTier.Misfire: return PromptTemplates.OpponentReactionMisfire;
+                case FailureTier.TropeTrap: return PromptTemplates.OpponentReactionTropeTrap;
+                case FailureTier.Catastrophe: return PromptTemplates.OpponentReactionCatastrophe;
+                case FailureTier.Legendary: return PromptTemplates.OpponentReactionLegendary;
+                default: return string.Empty;
+            }
         }
 
         private static string FallbackName(string name, string fallback)
