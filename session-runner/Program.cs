@@ -103,7 +103,7 @@ class Program
             if (args[i] == "--agent")
                 return args[i + 1];
         }
-        return Environment.GetEnvironmentVariable("PLAYER_AGENT") ?? "scoring";
+        return "scoring";
     }
 
     static string? ParseArg(string[] args, string flag)

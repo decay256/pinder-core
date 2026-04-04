@@ -80,14 +80,51 @@ namespace Pinder.SessionRunner
 
         internal static string? ParseDisplayName(string content)
         {
-            // First line is typically "# Name — Assembled System Prompt"
             var lines = content.Split(new[] { '\n' }, StringSplitOptions.None);
+
+            // Priority 1: Extract from "name=X" in the Inputs block
+            foreach (var line in lines)
+            {
+                string trimmed = line.Trim();
+                // Look for "name=X" pattern (e.g. "> **Inputs:** name=Gerald_42 · he/him")
+                int nameIdx = trimmed.IndexOf("name=", StringComparison.Ordinal);
+                if (nameIdx >= 0)
+                {
+                    string afterName = trimmed.Substring(nameIdx + "name=".Length);
+                    // Name ends at space, · (middle dot), comma, or end of string
+                    string extracted = "";
+                    foreach (char c in afterName)
+                    {
+                        if (c == ' ' || c == '\u00b7' || c == ',' || c == '\t')
+                            break;
+                        extracted += c;
+                    }
+                    extracted = extracted.Trim();
+                    if (extracted.Length > 0)
+                        return extracted;
+                }
+            }
+
+            // Priority 2: "You are playing the role of X," inside code fence
+            foreach (var line in lines)
+            {
+                string trimmed = line.Trim();
+                const string rolePrefix = "You are playing the role of ";
+                if (trimmed.StartsWith(rolePrefix))
+                {
+                    string rest = trimmed.Substring(rolePrefix.Length);
+                    int commaIdx = rest.IndexOf(',');
+                    if (commaIdx > 0)
+                        return rest.Substring(0, commaIdx).Trim();
+                }
+            }
+
+            // Priority 3: Header "# Name — ..."
             foreach (var line in lines)
             {
                 string trimmed = line.Trim();
                 if (trimmed.StartsWith("# "))
                 {
-                    // Extract name before " — " or " - "
                     string rest = trimmed.Substring(2).Trim();
                     int dashIdx = rest.IndexOf(" — ", StringComparison.Ordinal);
                     if (dashIdx < 0) dashIdx = rest.IndexOf(" - ", StringComparison.Ordinal);
@@ -127,6 +164,7 @@ namespace Pinder.SessionRunner
             var stats = new Dictionary<StatType, int>();
             var lines = content.Split(new[] { '\n' }, StringSplitOptions.None);
             bool inSection = false;
+            bool foundSection = false;
 
             foreach (var line in lines)
             {
@@ -134,6 +172,7 @@ namespace Pinder.SessionRunner
                 if (trimmed == "EFFECTIVE STATS")
                 {
                     inSection = true;
+                    foundSection = true;
                     continue;
                 }
 
@@ -160,6 +199,24 @@ namespace Pinder.SessionRunner
                     if (int.TryParse(valueStr.Replace("+", ""), out int value))
                         stats[statType.Value] = value;
                 }
+            }
+
+            if (!foundSection)
+            {
+                throw new FormatException("File does not contain an EFFECTIVE STATS section");
+            }
+
+            // Verify all 6 required stats are present
+            var requiredStats = new[] { StatType.Charm, StatType.Rizz, StatType.Honesty, StatType.Chaos, StatType.Wit, StatType.SelfAwareness };
+            var missing = new List<string>();
+            foreach (var stat in requiredStats)
+            {
+                if (!stats.ContainsKey(stat))
+                    missing.Add(stat.ToString());
+            }
+            if (missing.Count > 0)
+            {
+                throw new FormatException($"EFFECTIVE STATS section is missing: {string.Join(", ", missing)}");
             }
 
             return stats;

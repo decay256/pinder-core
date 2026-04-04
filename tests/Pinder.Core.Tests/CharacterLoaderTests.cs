@@ -155,6 +155,76 @@ EFFECTIVE STATS
         }
 
         [Fact]
+        public void Parse_DisplayNameFromInputsNameField()
+        {
+            // name=Gerald_42 should yield "Gerald_42", not "Gerald" from the header
+            string content = @"# Gerald — Assembled System Prompt
+
+> **Inputs:** name=Gerald_42 · he/him · bio=""Just a normal guy""
+
+---
+
+```
+You are playing the role of Gerald_42, a sentient penis on the dating app Pinder.
+
+LEVEL
+- Level: 5 (Smooth-ish) | Level bonus: +2
+
+EFFECTIVE STATS
+- Charm: +13
+- Rizz: +11
+- Honesty: +5
+- Chaos: +9
+- Wit: +5
+- Self-Awareness: +4
+```
+";
+            var profile = CharacterLoader.Parse(content, "gerald");
+            Assert.Equal("Gerald_42", profile.DisplayName);
+        }
+
+        [Fact]
+        public void Parse_ThrowsFormatException_MissingEffectiveStats()
+        {
+            string content = @"# Test — Assembled System Prompt
+
+```
+You are playing the role of Test.
+
+LEVEL
+- Level: 1
+
+Some text but no EFFECTIVE STATS section here.
+```
+";
+            var ex = Assert.Throws<FormatException>(() =>
+                CharacterLoader.Parse(content, "test"));
+            Assert.Contains("EFFECTIVE STATS", ex.Message);
+        }
+
+        [Fact]
+        public void Parse_ThrowsFormatException_MissingIndividualStats()
+        {
+            string content = @"```
+LEVEL
+- Level: 1
+
+EFFECTIVE STATS
+- Charm: +5
+- Rizz: +5
+- Honesty: +5
+```
+";
+            var ex = Assert.Throws<FormatException>(() =>
+                CharacterLoader.Parse(content, "test"));
+            Assert.Contains("missing", ex.Message.ToLowerInvariant());
+            // Should mention the missing stats
+            Assert.Contains("Chaos", ex.Message);
+            Assert.Contains("Wit", ex.Message);
+            Assert.Contains("SelfAwareness", ex.Message);
+        }
+
+        [Fact]
         public void Load_ThrowsForMissingCharacter()
         {
             string tempDir = Path.Combine(Path.GetTempPath(), "charloader-test-" + Guid.NewGuid().ToString("N"));
