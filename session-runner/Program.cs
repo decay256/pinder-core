@@ -406,11 +406,11 @@ class Program
 
     static void WritePlaytestLog(string content, string p1, string p2, GameOutcome? outcome, int xp, int turns)
     {
-        string dir = "/root/.openclaw/agents-extra/pinder/design/playtests";
-        if (!Directory.Exists(dir)) { Console.Error.WriteLine("Playtest dir not found"); return; }
+        string? dir = SessionFileCounter.ResolvePlaytestDirectory(AppContext.BaseDirectory);
+        if (dir == null) { Console.Error.WriteLine("Playtest dir not found — set PINDER_PLAYTESTS_PATH or ensure design/playtests/ exists"); return; }
         int nextNum = SessionFileCounter.GetNextSessionNumber(dir);
         string slug = $"session-{nextNum:D3}-{p1.ToLower()}-vs-{p2.ToLower()}.md";
         File.WriteAllText(Path.Combine(dir, slug), content);
-        Console.WriteLine($"\n📝 Written → design/playtests/{slug}");
+        Console.WriteLine($"\n📝 Written → {dir}/{slug}");
     }
 }
