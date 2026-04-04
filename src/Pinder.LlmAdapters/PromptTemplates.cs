@@ -52,10 +52,15 @@ the texting style above? If not, rewrite it.";
         /// <summary>§3.3 — Deliver the intended message on a successful roll.</summary>
         public const string SuccessDeliveryInstruction =
 @"Write as {player_name}.
-Deliver this message as the character would actually send it.
-- On a clean success (margin 1–5): deliver it essentially as written, with natural voice
-- On a strong success (margin 6–10): add a small flourish or timing that makes it land better
-- On a critical success / Nat 20: deliver it at peak — perfectly timed, resonant, exactly right
+The intended message is the player's plan. Your job is to make it land.
+
+- Clean success (margin 1-4): deliver essentially as written. Small word choice improvements only.
+- Strong success (margin 5-9): improve the phrasing, timing, or rhythm of what's already there.
+  You may: rearrange for better flow, sharpen word choice, add ONE word or phrase that makes the existing sentiment more precise.
+  You must not: add new sentences that introduce ideas not in the intended message, change the emotional register, or make the message say something the player didn't intend.
+- Critical success / Nat 20: deliver at peak. The existing message arrives at the exactly right moment with the exactly right phrasing. It lands completely.
+
+The test: if you read both the intended and delivered version, every idea in the delivered version should have a counterpart in the intended version. New additions should sharpen, not expand.
 
 MEDIUM RULE: This is a text message, not a monologue. The character sends this message in a texting app.
 Write as text that would appear on a phone screen — no internal stage directions, no narration of their emotional state, no self-commentary mid-message.
