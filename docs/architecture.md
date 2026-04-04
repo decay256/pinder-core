@@ -674,3 +674,88 @@ Caching strategy: character system prompts (~6k tokens) are placed in `cache_con
 | CharacterAssembler never tested E2E | — | Fixed this sprint (#415) |
 | Max turns too low (15) | — | Fixed this sprint (#417) |
 | Data files missing from pinder-core | #421 | Fixed this sprint (#415) |
+
+
+---
+
+## Sprint (Rules DSL + Rule Engine) — Architecture Briefing
+
+### What's changing
+
+**This sprint introduces a Rules DSL pipeline (Python tooling fixes + enrichment) and a new `Pinder.Rules` project (C# rule engine).** Changes span the external `pinder` repo Python tools, YAML data files, and a new .NET project.
+
+**Previous architecture**: Game constants (failure deltas, interest thresholds, risk bonuses, shadow thresholds) are hardcoded in static C# classes (`FailureScale`, `SuccessScale`, `InterestMeter`, `RiskTierBonus`, `ShadowThresholdEvaluator`). Python tooling in the external repo extracts markdown → YAML → regenerated markdown for round-trip validation, and generates C# test stubs from enriched YAML. Only `rules-v3-enriched.yaml` has structured `condition`/`outcome` fields.
+
+#### New Project: `Pinder.Rules`
+
+A **separate** .NET Standard 2.0 project that depends on `Pinder.Core` + `YamlDotNet`. Contains a generic rule engine that loads enriched YAML and evaluates conditions against game state snapshots. Dependency is strictly one-way: `Pinder.Rules → Pinder.Core`. Core has zero knowledge of this project.
+
+```
+src/Pinder.Rules/
+├── Pinder.Rules.csproj        — netstandard2.0, refs Pinder.Core + YamlDotNet
+├── RuleEntry.cs               — POCO for a single rule entry
+├── RuleBook.cs                — Loads YAML, indexes by id and type
+├── GameState.cs               — Snapshot carrier for condition evaluation
+├── ConditionEvaluator.cs      — Static: Evaluate(condition, GameState) → bool
+├── OutcomeDispatcher.cs       — Static: Dispatch(outcome, GameState, IEffectHandler)
+└── IEffectHandler.cs          — Callback interface for outcome effects
+```
+
+#### Python tooling fixes (#443)
+- `extract.py` gains block-order preservation (paragraphs, tables, code blocks stored as ordered list)
+- `generate.py` reproduces blocks in original order, preserves table column widths
+
+#### Enrichment of all 9 YAML files (#444)
+- 8 additional YAML files gain structured `condition`/`outcome` fields using the same vocabulary as `rules-v3-enriched.yaml`
+
+#### Test stub integration (#445)
+- 54 generated C# test stubs integrated into `tests/Pinder.Core.Tests/RulesSpec/`
+- Method paths corrected to use real Pinder.Core APIs
+- 17 stubs marked `[Fact(Skip = "...")]` for non-testable rules
+
+### Key Architectural Decisions
+
+#### ADR: Pinder.Rules as separate project
+**Context:** Rule engine needs YAML parsing (YamlDotNet). Pinder.Core must remain zero-dependency.
+**Decision:** Create `Pinder.Rules` as a separate project, same pattern as `Pinder.LlmAdapters`.
+**Consequences:** Three assembly ecosystem. Clear boundary: Core = game rules (hardcoded), Rules = data-driven rule evaluation, LlmAdapters = LLM integration.
+
+#### ADR: No direct GameSession integration this sprint
+**Context:** #446 AC says "GameSession uses the engine for those two sections." Direct integration requires either Core referencing Rules (breaks zero-dep invariant) or complex delegate wiring.
+**Decision:** Prove equivalence via tests. Rule engine evaluates §5/§6 rules identically to hardcoded C#. Direct GameSession wiring deferred to follow-up sprint.
+**Consequences:** Hardcoded constants remain in C# this sprint. Rule engine is validated but not yet wired into game loop.
+
+#### ADR: Untyped condition/outcome dictionaries
+**Context:** YAML condition/outcome fields have heterogeneous key sets per rule type.
+**Decision:** Use `Dictionary<string, object>` at prototype maturity. Type-safe condition classes deferred to MVP.
+**Consequences:** Runtime type checking in ConditionEvaluator. Flexible but not compile-time safe.
+
+### Implicit assumptions for implementers
+
+1. **netstandard2.0 + LangVersion 8.0** in Pinder.Rules — no `record` types
+2. **YamlDotNet 16.3.0** — supports netstandard2.0 with zero transitive deps
+3. **Pinder.Core MUST NOT reference Pinder.Rules** — dependency is one-way only
+4. **All 2453 existing tests must pass unchanged**
+5. **Python 3 with PyYAML** for tooling — already used in existing pipeline
+6. **YAML files are loaded as content strings** — caller handles file I/O
+
+### What is NOT changing
+- All Pinder.Core game logic (Stats, Rolls, Traps, Progression, Characters, Prompts, Data)
+- Pinder.LlmAdapters
+- GameSession public API
+- NullLlmAdapter
+- Session runner
+
+### Known Gaps (as of this sprint)
+
+| Gap | Rules Section | Status |
+|-----|--------------|--------|
+| Shadow persistence across sessions | §8 | Not addressed — per-session via SessionShadowTracker |
+| `AddExternalBonus()` deprecated but not removed | — | Cleanup issue needed |
+| Energy system consumers | #144 | `IGameClock.ConsumeEnergy()` exists but nothing calls it |
+| GameSession god object trajectory | #87 | Growing — extraction planned for MVP |
+| Rule engine not wired into GameSession | — | Equivalence proven via tests; integration deferred |
+| Hardcoded constants duplicated in C# + YAML | §5, §6 | Intentional at prototype; YAML becomes source of truth at MVP |
+| 8 YAML files lack enrichment | — | Fixed this sprint (#444) |
+| Round-trip diffs ~1251 lines | — | Fixed this sprint (#443) |
+| Generated test stubs not in CI | — | Fixed this sprint (#445) |
