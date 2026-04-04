@@ -1,0 +1,167 @@
+- id: §0.data-driven-extensibility
+  section: §0
+  title: Data-Driven Extensibility
+  type: definition
+  blocks:
+  - kind: paragraph
+    text: All game content lives in structured data files. Adding a new trope, item, archetype, conversation arc, or failure line means dropping a JSON file — no code changes, no recompilation. The engine
+      reads data directories at runtime.
+  - kind: hr
+  description: All game content lives in structured data files. Adding a new trope, item, archetype, conversation arc, or failure line means dropping a JSON file — no code changes, no recompilation. The
+    engine reads data directories at runtime.
+  heading_level: 1
+- id: §1.file-structure
+  section: §1
+  title: File Structure
+  type: template
+  blocks:
+  - kind: code
+    text: "```\n/data/\n  failure-pools/\n    {stat}-tier{1-4}-{name}.json       ← Drop a new file, it's live\n  success-pools/\n    {stat}-success.json\n  archetypes/\n    stat-to-archetype.json\n    custom/\
+      \                             ← User-created archetypes\n  conversation-arcs/\n    interest-patterns.json\n    custom/                             ← User-created arcs\n  items/\n    common.json\n\
+      \    uncommon.json\n    rare.json\n    legendary.json\n    custom/                             ← User-created items\n  clothing-prompts/\n    {slot}-{item-id}.json              ← Personality fragment\
+      \ per item\n    custom/\n  events/\n    shadow-growth.json\n    shadow-reduction.json\n  achievements/\n    achievements.json\n    custom/\n  timing/\n    response-profiles.json             ← Opponent\
+      \ response timing personalities\n    custom/\n  schemas/\n    failure-entry.schema.json\n    item.schema.json\n    archetype.schema.json\n    conversation-arc.schema.json\n    achievement.schema.json\n\
+      ```"
+  - kind: hr
+  description: ''
+  heading_level: 2
+- id: §2.how-hot-loading-works
+  section: §2
+  title: How Hot-Loading Works
+  type: definition
+  blocks:
+  - kind: paragraph
+    text: '1. **On session start:** Engine scans all `/data/` subdirectories, loads every valid JSON file
+
+      2. **Custom directories:** Any `/custom/` subdirectory loads **after** base files — overrides or extends
+
+      3. **Schema validation:** Each file type has a schema. Invalid files are skipped with a warning, never crash
+
+      4. **Dev mode:** File watcher reloads changes immediately. Production: reload on session start.'
+  - kind: hr
+  description: '1. **On session start:** Engine scans all `/data/` subdirectories, loads every valid JSON file
+
+    2. **Custom directories:** Any `/custom/` subdirectory loads **after** base files — overrides or extends
+
+    3. **Schema validation:** Each file type has a schema. Invalid files are skipped with a warning, never crash
+
+    4. **Dev mode:** File watcher reloads changes immediately. Production: reload on session start.'
+  heading_level: 2
+- id: §3.adding-content-without-code
+  section: §3
+  title: Adding Content Without Code
+  type: definition
+  description: ''
+  heading_level: 2
+- id: §3.new-failure-line
+  section: §3
+  title: New failure line
+  type: template
+  blocks:
+  - kind: paragraph
+    text: 'Add an entry to `wit-tier3-advanced.json`:'
+  - kind: code
+    text: "```json\n{\n  \"severity\": \"trap\",\n  \"text\": \"Well actually, the etymology of 'pizza' comes from— you know what, never mind, I can hear myself.\",\n  \"context\": \"Player tried to be\
+      \ clever about food. The academic reflex kicked in.\",\n  \"tone\": \"Self-aware enough to catch it. Not self-aware enough to stop before starting.\",\n  \"source\": \"The Pretentious / community-submitted\"\
+      \n}\n```"
+  - kind: paragraph
+    text: Save file. Done.
+  description: 'Add an entry to `wit-tier3-advanced.json`:'
+  heading_level: 3
+- id: §3.new-item
+  section: §3
+  title: New item
+  type: template
+  blocks:
+  - kind: paragraph
+    text: 'Add to `custom/my-items.json`:'
+  - kind: code
+    text: "```json\n{\n  \"id\": \"rubber-duck\",\n  \"name\": \"Rubber Duck\",\n  \"slot\": \"accessory\",\n  \"tier\": \"rare\",\n  \"stats\": { \"chaos\": 3, \"self_awareness\": 1, \"rizz\": -1 },\n\
+      \  \"personality_fragment\": \"keeps a rubber duck as an emotional support object, references it in conversation, asks serious questions to the duck before answering\",\n  \"special\": null,\n  \"\
+      unlock_level\": 5,\n  \"cost\": 100\n}\n```"
+  - kind: paragraph
+    text: Item appears in shop. Personality fragment feeds into LLM prompt when equipped.
+  description: 'Add to `custom/my-items.json`:'
+  heading_level: 3
+- id: §3.new-archetype
+  section: §3
+  title: New archetype
+  type: template
+  blocks:
+  - kind: paragraph
+    text: 'Add to `archetypes/custom/my-archetype.json`:'
+  - kind: code
+    text: "```json\n{\n  \"name\": \"The Reply Guy\",\n  \"stat_profile\": { \"high\": [\"self_awareness\", \"honesty\"], \"low\": [\"rizz\", \"charm\"] },\n  \"shadow_profile\": { \"high\": [\"overthinking\"\
+      , \"horniness\"] },\n  \"level_range\": [4, 7],\n  \"behavior_notes\": \"Responds to everything with earnest analysis. Will write 4 paragraphs in response to 'lol'.\",\n  \"sample_lines\": [\n   \
+      \ \"That's a really interesting point. I think what you're getting at is...\",\n    \"I've been thinking about what you said and I have some thoughts\"\n  ],\n  \"source_trope\": \"Community-created\"\
+      \n}\n```"
+  description: 'Add to `archetypes/custom/my-archetype.json`:'
+  heading_level: 3
+- id: §3.new-conversation-arc
+  section: §3
+  title: New conversation arc
+  type: template
+  blocks:
+  - kind: paragraph
+    text: 'Add to `conversation-arcs/custom/my-arc.json`:'
+  - kind: code
+    text: "```json\n{\n  \"name\": \"The Boomerang\",\n  \"trigger\": \"Interest drops below 5 then recovers above 12 in 3 turns\",\n  \"opponent_behavior\": \"Surprised and slightly suspicious. Recalibrating.\
+      \ Guard goes back up even as interest rises.\",\n  \"player_experience\": \"You were losing them and pulled off a comeback.\",\n  \"recovery_possible\": true,\n  \"recovery_stat\": \"any — the comeback\
+      \ itself is the arc\",\n  \"source_trope\": \"Community-created\"\n}\n```"
+  - kind: hr
+  description: 'Add to `conversation-arcs/custom/my-arc.json`:'
+  heading_level: 3
+- id: §4.modding-support
+  section: §4
+  title: Modding Support
+  type: table
+  blocks:
+  - kind: paragraph
+    text: 'The `/custom/` pattern gives clean extensibility at every level:'
+  - kind: table
+    rows:
+    - Distribution channel: '**Base game**'
+      How it works: Ships core data files
+    - Distribution channel: '**Player mods**'
+      How it works: Drop files into `/custom/` directories
+    - Distribution channel: '**Steam Workshop**'
+      How it works: Content packs = zip of `/custom/` files
+    - Distribution channel: '**Community pipeline**'
+      How it works: Players submit failure lines/items. Best ones promoted to base game.
+    - Distribution channel: '**Themed packs**'
+      How it works: '"Horror Dating Pack" (eldritch items, Madness arcs), "Chaos Pack" (everything on fire)'
+    sep_cells:
+    - '---'
+    - '---'
+  - kind: hr
+  description: 'The `/custom/` pattern gives clean extensibility at every level:'
+  heading_level: 2
+- id: §5.llm-prompt-assembly-runtime
+  section: §5
+  title: LLM Prompt Assembly (Runtime)
+  type: interest_change
+  blocks:
+  - kind: paragraph
+    text: 'When generating dialogue options, the engine assembles context from data files:'
+  - kind: paragraph
+    text: '1. **Player''s equipped items** → load `clothing-prompts/{slot}-{item-id}.json` for each slot → combine `personality_fragment` fields
+
+      2. **Player''s level** → select failure tier pool (Basic / Intermediate / Advanced / Legendary)
+
+      3. **Player''s stats + shadows** → calculate effective modifiers
+
+      4. **Opponent''s profile** → their personality prompt + defence DCs
+
+      5. **Active conversation arc** → inject arc context from `interest-patterns.json`
+
+      6. **Trap state** → inject all active trap `llm_instruction` fields (taint ALL messages, not just trapped stat)'
+  - kind: paragraph
+    text: The LLM uses the failure pool entries as **seeds** — inspiration and voice examples, not verbatim output. Pools maintain voice consistency while producing unique dialogue every time.
+  - kind: paragraph
+    text: Full prompt templates are documented in [`character-construction.md`](./character-construction.md).
+  description: 'When generating dialogue options, the engine assembles context from data files:'
+  heading_level: 2
+  condition:
+    formula: prompt_assembly
+  outcome:
+    effect: fragment_concatenation

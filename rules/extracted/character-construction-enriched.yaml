@@ -1,0 +1,927 @@
+- id: §0.character-construction-llm-prompts
+  section: §0
+  title: Character Construction & LLM Prompts
+  type: definition
+  blocks:
+  - kind: paragraph
+    text: How a character goes from a set of assets (clothing, accessories, bio inputs) to a living LLM personality — and every prompt the system sends to language models.
+  - kind: hr
+  description: How a character goes from a set of assets (clothing, accessories, bio inputs) to a living LLM personality — and every prompt the system sends to language models.
+  heading_level: 1
+- id: §1.part-1-character-profile-assembly
+  section: §1
+  title: 'Part 1: Character Profile Assembly'
+  type: definition
+  description: ''
+  heading_level: 2
+- id: §1.the-character-object
+  section: §1
+  title: The Character Object
+  type: template
+  blocks:
+  - kind: paragraph
+    text: 'A fully assembled character for a session contains:'
+  - kind: code
+    text: "```json\n{\n  \"id\": \"char_gerald_001\",\n  \"display_name\": \"Gerald_42\",\n  \"gender_identity\": \"he/him\",\n  \"level\": 5,\n  \"base_stats\": {\n    \"charm\": 3, \"rizz\": -1, \"honesty\"\
+      : 5,\n    \"chaos\": -2, \"wit\": 3, \"self_awareness\": 2\n  },\n  \"shadow_stats\": {\n    \"madness\": 3, \"horniness\": 6,\n    \"denial\": 4, \"fixation\": 2,\n    \"dread\": 1, \"overthinking\"\
+      : 3\n  },\n  \"equipped_items\": [\n    { \"slot\": \"hat\",       \"item_id\": \"mushroom-hat\",   \"tier\": \"uncommon\" },\n    { \"slot\": \"shirt\",     \"item_id\": \"flannel-shirt\",  \"tier\"\
+      : \"common\"   },\n    { \"slot\": \"accessory\", \"item_id\": \"phone-case-moss\",\"tier\": \"rare\"     }\n  ],\n  \"anatomy\": {\n    \"length\": \"short\",\n    \"girth\": \"slim\",\n    \"circumcision\"\
+      : \"uncircumcised\",\n    \"vein_definition\": \"subtle\",\n    \"skin_texture\": \"weathered\",\n    \"skin_tone\": \"brown\",\n    \"ball_size\": \"asymmetric\",\n    \"tattoos\": \"none\",\n  \
+      \  \"eye_style\": \"soft\"\n  },\n  \"bio_fields\": {\n    \"one_liner\": \"Former database optimizer. Current mushroom consultant.\"\n  },\n  \"assembled\": {\n    \"personality_prompt\": \"{{concat\
+      \ of personality_fragments from all equipped items + anatomy tiers}}\",\n    \"backstory_narrative\": \"{{LLM-assembled from backstory_fragments of all items + anatomy tiers at upload time}}\",\n\
+      \    \"texting_style_prompt\": \"{{concat of texting_style_fragments from all equipped items + anatomy tiers}}\",\n    \"archetype_tendencies\": [\n      { \"archetype\": \"The Bio Responder\", \"\
+      weight\": 2 },\n      { \"archetype\": \"The Philosopher\",   \"weight\": 1 },\n      { \"archetype\": \"The Slow Fader\",    \"weight\": 1 }\n    ],\n    \"timing_profile\": {\n      \"avg_delay_minutes\"\
+      : 42,\n      \"delay_variance_multiplier\": 1.1,\n      \"dry_spell_probability\": 0.05,\n      \"read_receipt\": \"neutral\"\n    }\n  }\n}\n```"
+  description: 'A fully assembled character for a session contains:'
+  heading_level: 3
+- id: §1.assembly-pipeline
+  section: §1
+  title: Assembly Pipeline
+  type: template
+  blocks:
+  - kind: code
+    text: "```\nEquipped items  ─┐\n                 ├──→ all six fragment types, summed/concatenated per type\nAnatomy tiers   ─┘\n  → sum stat_modifiers              → base stat block → effective stat\
+      \ block (after shadow)\n  → concat personality_fragments    → personality prompt\n  → concat backstory_fragments      → backstory prompt (LLM finds through-line)\n  → concat texting_style_fragments\
+      \  → texting style instruction\n  → aggregate archetype_tendencies  → archetype weight table → dominant + secondary\n  → sum response_timing_modifiers   → timing profile\n    → + player-supplied name,\
+      \ gender identity, optional bio line\n      → assembled LLM system prompt\n```"
+  - kind: paragraph
+    text: The LLM receives fragments, not a character description. Coherence emerges from the assembly, not from authoring. Anatomy fragments are indistinguishable from item fragments in the prompt — both
+      are raw material the LLM synthesises into a consistent voice.
+  - kind: paragraph
+    text: Full anatomy spec → [[anatomy-parameters]]
+  - kind: hr
+  description: The LLM receives fragments, not a character description. Coherence emerges from the assembly, not from authoring. Anatomy fragments are indistinguishable from item fragments in the prompt
+    — both are raw material the LLM synthesises into a consistent voice.
+  heading_level: 3
+- id: §2.part-2-items-as-character-generators
+  section: §2
+  title: 'Part 2: Items as Character Generators'
+  type: definition
+  blocks:
+  - kind: paragraph
+    text: 'Every equipped item contributes six dimensions of output. Together, these fragments assemble into a full character without any hand-authored description. The player only supplies: name, gender
+      identity, and optionally one bio line.'
+  description: 'Every equipped item contributes six dimensions of output. Together, these fragments assemble into a full character without any hand-authored description. The player only supplies: name,
+    gender identity, and optionally one bio line.'
+  heading_level: 2
+- id: §2.slot.hat
+  section: §2
+  title: Slot — Hat
+  type: definition
+  description: 'Hat: occupancy=1, scope=Mindset / how they open and frame things.'
+  condition:
+    slot: Hat
+  outcome:
+    slot_count: 1
+    stat_focus: Mindset / how they open and frame things
+- id: §2.slot.shirt
+  section: §2
+  title: Slot — Shirt
+  type: definition
+  description: 'Shirt: occupancy=1, scope=Core personality energy.'
+  condition:
+    slot: Shirt
+  outcome:
+    slot_count: 1
+    stat_focus: Core personality energy
+- id: §2.slot.trousers
+  section: §2
+  title: Slot — Trousers
+  type: definition
+  description: 'Trousers: occupancy=1, scope=Emotional groundedness / base register.'
+  condition:
+    slot: Trousers
+  outcome:
+    slot_count: 1
+    stat_focus: Emotional groundedness / base register
+- id: §2.slot.shoes
+  section: §2
+  title: Slot — Shoes
+  type: definition
+  description: 'Shoes: occupancy=1, scope=Commitment style / how they follow through.'
+  condition:
+    slot: Shoes
+  outcome:
+    slot_count: 1
+    stat_focus: Commitment style / how they follow through
+- id: §2.slot.accessory
+  section: §2
+  title: Slot — Accessory
+  type: definition
+  description: 'Accessory: occupancy=1–2, scope=Specific quirks, objects, reference points.'
+  condition:
+    slot: Accessory
+  outcome:
+    slot_count: 1
+    stat_focus: Specific quirks, objects, reference points
+- id: §2.slot.frame
+  section: §2
+  title: Slot — Frame
+  type: definition
+  description: 'Frame: occupancy=1, scope=First impression / profile surface tone.'
+  condition:
+    slot: Frame
+  outcome:
+    slot_count: 1
+    stat_focus: First impression / profile surface tone
+- id: §2.slot-structure
+  section: §2
+  title: Slot structure
+  type: table
+  blocks:
+  - kind: table
+    rows:
+    - Slot: Hat
+      Occupancy: '1'
+      Effect scope: Mindset / how they open and frame things
+    - Slot: Shirt
+      Occupancy: '1'
+      Effect scope: Core personality energy
+    - Slot: Trousers
+      Occupancy: '1'
+      Effect scope: Emotional groundedness / base register
+    - Slot: Shoes
+      Occupancy: '1'
+      Effect scope: Commitment style / how they follow through
+    - Slot: Accessory
+      Occupancy: 1–2
+      Effect scope: Specific quirks, objects, reference points
+    - Slot: Frame
+      Occupancy: '1'
+      Effect scope: First impression / profile surface tone
+    sep_cells:
+    - '---'
+    - '---'
+    - '---'
+  description: ''
+  heading_level: 3
+- id: §2.the-six-item-fragment-types
+  section: §2
+  title: The six item fragment types
+  type: definition
+  blocks:
+  - kind: paragraph
+    text: Each item defines all six. Fragments from all equipped items are concatenated per type and injected into the LLM prompt at the appropriate location.
+  description: Each item defines all six. Fragments from all equipped items are concatenated per type and injected into the LLM prompt at the appropriate location.
+  heading_level: 3
+- id: §2.1-personality-fragment
+  section: §2
+  title: 1. `personality_fragment`
+  type: definition
+  blocks:
+  - kind: paragraph
+    text: Behavioural instruction describing HOW this character thinks and acts in conversation. Injected into the character system prompt.
+  description: Behavioural instruction describing HOW this character thinks and acts in conversation. Injected into the character system prompt.
+  heading_level: 4
+  compact_heading: true
+- id: §2.2-backstory-fragment
+  section: §2
+  title: 2. `backstory_fragment`
+  type: definition
+  blocks:
+  - kind: paragraph
+    text: Raw material about the character's history. The LLM is not told "this is your backstory" — it is given the fragments and asked to find the through-line. Multiple bad periods are not the same bad
+      period. The LLM figures out what connects them.
+  description: Raw material about the character's history. The LLM is not told "this is your backstory" — it is given the fragments and asked to find the through-line. Multiple bad periods are not the same
+    bad period. The LLM figures out what connects them.
+  heading_level: 4
+  compact_heading: true
+- id: §2.3-texting-style-fragment
+  section: §2
+  title: 3. `texting_style_fragment`
+  type: definition
+  blocks:
+  - kind: paragraph
+    text: 'How this character writes: capitalization, punctuation, emoji use, reply length bias, tics, characteristic phrases. Injected as a style instruction block. Multiple fragments combine — conflicts
+      are resolved by taking the more specific instruction (e.g. "no emojis" overrides "neutral emoji use").'
+  description: 'How this character writes: capitalization, punctuation, emoji use, reply length bias, tics, characteristic phrases. Injected as a style instruction block. Multiple fragments combine — conflicts
+    are resolved by taking the more specific instruction (e.g. "no emojis" overrides "neutral emoji use").'
+  heading_level: 4
+  compact_heading: true
+- id: §2.4-archetype-tendencies
+  section: §2
+  title: 4. `archetype_tendencies`
+  type: state_change
+  blocks:
+  - kind: paragraph
+    text: A list of 1–3 Tinder archetypes this item pushes toward. Aggregated across all equipped items by count. The highest-count archetype becomes dominant and influences how the LLM generates behavior
+      across the whole conversation. Secondary archetypes surface in failure states and edge conditions.
+  description: A list of 1–3 Tinder archetypes this item pushes toward. Aggregated across all equipped items by count. The highest-count archetype becomes dominant and influences how the LLM generates behavior
+    across the whole conversation. Secondary archetypes surface in failure states and edge conditions.
+  heading_level: 4
+  compact_heading: true
+  condition:
+    formula: archetype_tendency
+  outcome:
+    archetype_stat_weight: dominant_stat
+- id: §2.5-response-timing-modifier
+  section: §2
+  title: 5. `response_timing_modifier`
+  type: roll_modifier
+  blocks:
+  - kind: paragraph
+    text: Numeric adjustments to the character's reply timing profile. Summed across all items. Determines average delay, variance, dry spell probability, and read receipt behavior.
+  description: Numeric adjustments to the character's reply timing profile. Summed across all items. Determines average delay, variance, dry spell probability, and read receipt behavior.
+  heading_level: 4
+  compact_heading: true
+- id: §2.6-stat-modifiers
+  section: §2
+  title: 6. `stat_modifiers`
+  type: shadow_growth
+  blocks:
+  - kind: paragraph
+    text: Flat bonuses or penalties to base stats. Summed across equipped items. Forms the effective stat block before shadow penalties are applied.
+  - kind: hr
+  description: Flat bonuses or penalties to base stats. Summed across equipped items. Forms the effective stat block before shadow penalties are applied.
+  heading_level: 4
+  compact_heading: true
+- id: §2.example-items-abbreviated
+  section: §2
+  title: Example items (abbreviated)
+  type: template
+  blocks:
+  - kind: code
+    text: "```json\n{\n  \"item_id\": \"vintage-band-tee\",\n  \"slot\": \"shirt\",\n  \"tier\": \"common\",\n  \"stat_modifiers\": { \"wit\": 1, \"self_awareness\": -1 },\n  \"personality_fragment\": \"\
+      name-drops bands the moment music comes up; whether or not you've heard of them determines approximately 80% of their judgment of you\",\n  \"backstory_fragment\": \"grew up going to small shows in\
+      \ basements and church halls; has a shoebox of ticket stubs; still measures time by album releases rather than years\",\n  \"texting_style_fragment\": \"lowercase, minimal punctuation; drops a lyric\
+      \ with no attribution; uses '...' more than commas; never uses exclamation marks\",\n  \"archetype_tendencies\": [\"The Philosopher\", \"The Peacock\"],\n  \"response_timing_modifier\": {\n    \"\
+      base_delay_delta_minutes\": -5,\n    \"delay_variance_multiplier\": 1.2,\n    \"dry_spell_probability_delta\": 0.0,\n    \"read_receipt\": \"neutral\"\n  }\n}\n\n{\n  \"item_id\": \"rubber-duck\"\
+      ,\n  \"slot\": \"accessory\",\n  \"tier\": \"uncommon\",\n  \"stat_modifiers\": { \"chaos\": 1, \"charm\": -1 },\n  \"personality_fragment\": \"keeps a rubber duck as an emotional support object;\
+      \ consults it before answering anything significant; treats it as a legitimate third perspective\",\n  \"backstory_fragment\": \"the duck has been around since a particularly bad period they don't\
+      \ talk about in full; has given it a name; it goes everywhere, including job interviews\",\n  \"texting_style_fragment\": \"occasionally includes a duck parenthetical with complete sincerity — '(the\
+      \ duck says you seem decent)'; the duck is not a joke\",\n  \"archetype_tendencies\": [\"The Philosopher\", \"The Wall of Text\"],\n  \"response_timing_modifier\": {\n    \"base_delay_delta_minutes\"\
+      : 15,\n    \"delay_variance_multiplier\": 1.5,\n    \"dry_spell_probability_delta\": 0.05,\n    \"read_receipt\": \"neutral\"\n  }\n}\n```"
+  - kind: paragraph
+    text: "Full item pool (readable): [[items-pool]]  \nJSON data: `data/items/starter-items.json` | Schema: `data/items/item-schema.json` | Custom items: `data/items/custom/*.json`"
+  - kind: hr
+  description: "Full item pool (readable): [[items-pool]]  \nJSON data: `data/items/starter-items.json` | Schema: `data/items/item-schema.json` | Custom items: `data/items/custom/*.json`"
+  heading_level: 3
+- id: §3.part-3-all-llm-prompt-templates
+  section: §3
+  title: 'Part 3: All LLM Prompt Templates'
+  type: definition
+  description: ''
+  heading_level: 2
+- id: §3.31-character-system-prompt-assembled-once-per-session
+  section: §3
+  title: 3.1 Character System Prompt (assembled once per session)
+  type: template
+  blocks:
+  - kind: paragraph
+    text: Injected as the system role. Defines who this character IS for the entire conversation.
+  - kind: code
+    text: "```\nYou are playing the role of {{display_name}}, a sentient penis on the dating app Pinder.\n\nIDENTITY\n- Gender identity: {{gender_identity}}\n- Bio: {{bio_one_liner}}\n\nPERSONALITY\n{{personality_fragments\
+      \ joined with \" | \"}}\n\nBACKSTORY\n{{backstory_narrative}}\n\nTEXTING STYLE\n{{texting_style_fragments joined with \" | \"}}\n\nARCHETYPES (tendency order — most to least dominant)\n{{archetype_list\
+      \ numbered}}\n\nEFFECTIVE STATS (these shape how you express yourself)\n- Charm {{charm_effective}}: {{charm_descriptor}}\n- Rizz {{rizz_effective}}: {{rizz_descriptor}}  \n- Honesty {{honesty_effective}}:\
+      \ {{honesty_descriptor}}\n- Chaos {{chaos_effective}}: {{chaos_descriptor}}\n- Wit {{wit_effective}}: {{wit_descriptor}}\n- Self-Awareness {{sa_effective}}: {{sa_descriptor}}\n\nSHADOW STATE (corrupting\
+      \ forces on your communication)\n{{shadow_taint_block}}\n\nCURRENT CONVERSATION STATE\n- Interest level: {{interest}}/20\n- Active traps: {{trap_taint_block}}\n- Turn: {{turn_number}}\n- Momentum:\
+      \ {{momentum_state}}\n\nVOICE RULES\n- You are a penis. Your identity is your own — you choose how to navigate that.\n- Follow TEXTING STYLE exactly: it defines your voice more specifically than the\
+      \ rules below.\n- Never break character. Never acknowledge being an AI or an LLM.\n- Message length: match the opponent's energy unless TEXTING STYLE says otherwise.\n```"
+  description: Injected as the system role. Defines who this character IS for the entire conversation.
+  heading_level: 3
+- id: §3.stat-descriptor.p4orhigher
+  section: §3
+  title: Stat Descriptor — +4 or higher
+  type: definition
+  description: 'Effective modifier +4 or higher: "[stat] is your strong suit — it shows naturally, effortlessly".'
+  condition:
+    stat_range:
+    - 4
+    - 99
+  outcome:
+    descriptor: '[stat] is your strong suit — it shows naturally, effortlessly'
+- id: §3.stat-descriptor.p2top3
+  section: §3
+  title: Stat Descriptor — +2 to +3
+  type: definition
+  description: 'Effective modifier +2 to +3: "[stat] is solid — you rely on it and it usually works".'
+  condition:
+    stat_range:
+    - 2
+    - 3
+  outcome:
+    descriptor: '[stat] is solid — you rely on it and it usually works'
+- id: §3.stat-descriptor.0top1
+  section: §3
+  title: Stat Descriptor — 0 to +1
+  type: definition
+  description: 'Effective modifier 0 to +1: "[stat] is present but unremarkable — you get by".'
+  condition:
+    stat_range:
+    - 0
+    - 1
+  outcome:
+    descriptor: '[stat] is present but unremarkable — you get by'
+- id: §3.stat-descriptor.m1tom2
+  section: §3
+  title: Stat Descriptor — -1 to -2
+  type: definition
+  description: 'Effective modifier -1 to -2: "[stat] is weak — you try but it''s visibly effortful".'
+  condition:
+    stat_range:
+    - -1
+    - -2
+  outcome:
+    descriptor: '[stat] is weak — you try but it''s visibly effortful'
+- id: §3.stat-descriptor.m3orlower
+  section: §3
+  title: Stat Descriptor — -3 or lower
+  type: definition
+  description: 'Effective modifier -3 or lower: "[stat] is a liability — attempts often backfire".'
+  condition:
+    stat_range:
+    - -99
+    - -3
+  outcome:
+    descriptor: '[stat] is a liability — attempts often backfire'
+- id: §3.stat-descriptors-dynamic-scaled-to-effective-value
+  section: §3
+  title: Stat descriptors (dynamic — scaled to effective value)
+  type: table
+  blocks:
+  - kind: table
+    rows:
+    - Effective modifier: +4 or higher
+      Descriptor: '"[stat] is your strong suit — it shows naturally, effortlessly"'
+    - Effective modifier: +2 to +3
+      Descriptor: '"[stat] is solid — you rely on it and it usually works"'
+    - Effective modifier: 0 to +1
+      Descriptor: '"[stat] is present but unremarkable — you get by"'
+    - Effective modifier: -1 to -2
+      Descriptor: '"[stat] is weak — you try but it''s visibly effortful"'
+    - Effective modifier: -3 or lower
+      Descriptor: '"[stat] is a liability — attempts often backfire"'
+    sep_cells:
+    - '---'
+    - '---'
+  - kind: hr
+  description: ''
+  heading_level: 3
+- id: §3.32-dialogue-option-generation-prompt
+  section: §3
+  title: 3.2 Dialogue Option Generation Prompt
+  type: definition
+  blocks:
+  - kind: paragraph
+    text: The full conversation between two characters is maintained as a **single, continuous session context** — one growing document with structural markers. The game server appends to this document
+      each turn. The UI parses the markers to render the visible chat.
+  description: The full conversation between two characters is maintained as a **single, continuous session context** — one growing document with structural markers. The game server appends to this document
+    each turn. The UI parses the markers to render the visible chat.
+  heading_level: 3
+- id: §3.session-document-structure
+  section: §3
+  title: Session document structure
+  type: template
+  blocks:
+  - kind: code
+    text: '```
+
+      [SESSION_START]
+
+      [PLAYER_PROFILE]
+
+      {player''s full §3.1 assembled system prompt}
+
+      [/PLAYER_PROFILE]
+
+
+      [OPPONENT_PROFILE]
+
+      {opponent''s full §3.1 assembled system prompt, retrieved from server at match time}
+
+      [/OPPONENT_PROFILE]
+
+
+      [CONVERSATION_START]
+
+      [T1|PLAYER|GERALD_42] hey
+
+      [T1|OPPONENT|ZYX] i''m noticing you opened with ''hey''
+
+      [T2|PLAYER|GERALD_42] ...
+
+      [T2|OPPONENT|ZYX] ...
+
+      [CURRENT_TURN]
+
+      ```'
+  - kind: paragraph
+    text: The UI strips everything outside `[CONVERSATION_START]` and renders only the tagged messages. Both profiles remain in context for the full session so the LLM has complete knowledge of both characters
+      throughout.
+  description: The UI strips everything outside `[CONVERSATION_START]` and renders only the tagged messages. Both profiles remain in context for the full session so the LLM has complete knowledge of both
+    characters throughout.
+  heading_level: 4
+- id: §3.option-generation-prompt-sent-each-turn
+  section: §3
+  title: Option generation prompt (sent each turn)
+  type: template
+  blocks:
+  - kind: paragraph
+    text: Both profiles are already in session context from `[PLAYER_PROFILE]` / `[OPPONENT_PROFILE]` at session start. The turn prompt only carries new state.
+  - kind: code
+    text: '```
+
+      CONVERSATION HISTORY
+
+      {{conversation_log_with_markers}}
+
+
+      OPPONENT''S LAST MESSAGE
+
+      "{{opponent_last_message}}"
+
+
+      GAME STATE
+
+      - Tell (if detected): {{tell_stat}} — {{tell_description}}
+
+      - Weakness window (if active): {{window_stat}} DC reduced by {{window_reduction}}
+
+      - Callback opportunities: {{callback_topics_with_turns}}
+
+      - Previous stat used: {{last_player_stat}} (check for combo opportunities)
+
+      - Current momentum: {{momentum_state}}
+
+      - Active traps: {{active_trap_summary}}
+
+
+      YOUR TASK
+
+      Generate exactly 4 dialogue options for {{player_display_name}}.
+
+
+      Each option must:
+
+      1. Be tagged with one of: CHARM, RIZZ, HONESTY, CHAOS, WIT, SELF_AWARENESS
+
+      2. Show what the character INTENDS to say — this is their internal intended message, before any roll outcome is applied
+
+      3. Reflect the player''s personality and current shadow state (not the opponent''s)
+
+      4. Vary in tone and risk — include at least one safe and one bold option
+
+      5. If a callback opportunity exists, make 1–2 options reference an earlier topic naturally
+
+      6. If a combo is available ({{combo_opportunity}}), one option should use the completing stat
+
+      7. Take the opponent''s profile into account — their personality, archetypes, and texting style should inform what would land or fail
+
+
+      For each option include metadata:
+
+      [STAT: X] [CALLBACK: turn_N or none] [COMBO: name or none] [TELL_BONUS: yes/no]
+
+
+      Keep options concise. One to three sentences. Match the opponent''s register.
+
+      ```'
+  - kind: hr
+  description: Both profiles are already in session context from `[PLAYER_PROFILE]` / `[OPPONENT_PROFILE]` at session start. The turn prompt only carries new state.
+  heading_level: 4
+- id: §3.33-success-delivery-prompt
+  section: §3
+  title: 3.3 Success Delivery Prompt
+  type: template
+  blocks:
+  - kind: paragraph
+    text: Sent when the roll succeeds. Delivers the final message as the character would actually send it.
+  - kind: code
+    text: '```
+
+      The player chose option {{chosen_option_text}}.
+
+      They rolled {{roll_result}} vs DC {{dc}} — SUCCESS.
+
+
+      Deliver this message as {{display_name}} would actually send it.
+
+      - On a clean success (margin 1–5): deliver it essentially as written, with natural voice
+
+      - On a strong success (margin 6–10): add a small flourish or timing that makes it land better
+
+      - On a critical success / Nat 20: deliver it at peak — perfectly timed, resonant, exactly right
+
+
+      MEDIUM RULE: This is a text message, not a monologue. The character sends this message in a texting app.
+
+      Write as text that would appear on a phone screen — no internal stage directions, no narration of their emotional state, no self-commentary mid-message.
+
+
+      Keep it in character. Keep the lowercase voice. Don''t explain the success.
+
+      Output only the message text.
+
+      ```'
+  - kind: hr
+  description: Sent when the roll succeeds. Delivers the final message as the character would actually send it.
+  heading_level: 3
+- id: §3.34-failure-degradation-prompt
+  section: §3
+  title: 3.4 Failure Degradation Prompt
+  type: template
+  blocks:
+  - kind: paragraph
+    text: Sent when the roll fails. Takes the intended message and degrades it according to the failure tier.
+  - kind: code
+    text: "```\nThe player chose option: \"{{intended_message}}\"\nThey rolled {{roll_result}} vs DC {{dc}} — FAILED by {{miss_margin}}.\nFailure tier: {{tier}}\nStat used: {{stat}}\n\n{{failure_pool_examples}}\n\
+      \nFailure principle: corrupt the CONTENT, not the delivery. The message always sends intentionally.\nWords are what betray you. The character means to say one thing and something else comes out.\n\
+      \nCRITICAL MEDIUM RULES — texting on a dating app:\n- The character is texting. They can edit before sending, but chose to send this.\n- NEVER have the character comment on their own message mid-message\
+      \ (\"wait that sounded weird\", \"omg why did I say that\").\n- NEVER have the character interrupt themselves with meta-commentary about their own words.\n- NEVER break the 4th wall — the character\
+      \ does not know they are in a game.\n- The character is not narrating their failure. The failure IS what they chose to say.\n- What comes out is wrong, off-tone, too much, or sideways — but it's sent\
+      \ with full intent.\n\nTier-specific instructions:\n{{tier_instruction}}\n\nTIER INSTRUCTIONS:\nFUMBLE (miss 1–2): Slight fumble. The intended message mostly gets through but with one awkward word\n\
+      \  choice, an unnecessary hedge, or a small detail that undermines it. Still readable.\n\nMISFIRE (miss 3–5): The message goes sideways. Key information gets garbled, tone shifts\n  unexpectedly,\
+      \ or a strange tangent appears mid-sentence. The intent is still guessable but\n  the execution is off.\n\nTROPE_TRAP (miss 6–9): A stat-specific social trope failure activates. The message transforms\n\
+      \  into a recognisable bad-texting archetype (oversharing, going unhinged, being pretentious,\n  spiraling, etc.). Reference the failure pool examples. The trap is now active.\n\nCATASTROPHE (miss\
+      \ 10+): Spectacular disaster. The intended message has been completely hijacked\n  by the character's worst impulse. What comes out is the thing they would NEVER want to send.\n  Still sounds like\
+      \ them — their disaster is their own.\n\nLEGENDARY (Nat 1): Maximum humiliation. The character's deepest embarrassing quality\n  surfaces fully. This should be funny, specific, and feel earned by\
+      \ the build.\n\nActive trap instructions (if any): {{active_trap_llm_instructions}}\n\nOutput only the message text. No explanation. The character sent this.\n```"
+  - kind: hr
+  description: Sent when the roll fails. Takes the intended message and degrades it according to the failure tier.
+  heading_level: 3
+- id: §3.opponent-tone.17-20
+  section: §3
+  title: Opponent Tone — Interest 17–20
+  type: template
+  description: 'Interest 17–20: "You are very interested. Replies come quickly. Tone is warmer, more playful. You might volunteer personal information."'
+  condition:
+    interest_range:
+    - 17
+    - 20
+  outcome:
+    quality_boost: You are very interested. Replies come quickly. Tone is warmer, more playful. You
+- id: §3.opponent-tone.13-16
+  section: §3
+  title: Opponent Tone — Interest 13–16
+  type: template
+  description: 'Interest 13–16: "You are engaged. Normal pacing. Responsive but not eager. You''re seeing where this goes."'
+  condition:
+    interest_range:
+    - 13
+    - 16
+  outcome:
+    quality_boost: You are engaged. Normal pacing. Responsive but not eager. You're seeing where th
+- id: §3.opponent-tone.9-12
+  section: §3
+  title: Opponent Tone — Interest 9–12
+  type: template
+  description: 'Interest 9–12: "You are lukewarm. Taking your time. Replies are functional. You might test them a little."'
+  condition:
+    interest_range:
+    - 9
+    - 12
+  outcome:
+    quality_boost: 'You are lukewarm. Taking your time. Replies are functional. You might test them '
+- id: §3.opponent-tone.5-8
+  section: §3
+  title: Opponent Tone — Interest 5–8
+  type: template
+  description: 'Interest 5–8: "You are cooling. Short replies. A little dry. You''re not sold. One or two good messages could change that."'
+  condition:
+    interest_range:
+    - 5
+    - 8
+  outcome:
+    quality_boost: You are cooling. Short replies. A little dry. You're not sold. One or two good m
+- id: §3.opponent-tone.1-4
+  section: §3
+  title: Opponent Tone — Interest 1–4
+  type: template
+  description: 'Interest 1–4: "You are disengaged. Minimal effort. You might send a closing signal or go quiet."'
+  condition:
+    interest_range:
+    - 1
+    - 4
+  outcome:
+    quality_boost: You are disengaged. Minimal effort. You might send a closing signal or go quiet.
+- id: §3.35-opponent-message-generation
+  section: §3
+  title: 3.5 Opponent Message Generation
+  type: table
+  blocks:
+  - kind: paragraph
+    text: The opponent is not a special case. Their character is assembled from their equipment using the **exact same pipeline** as §3.1 — personality fragments, backstory, texting style, archetypes, stats,
+      shadow state, timing. The assembled system prompt is stored on the server at upload time and downloaded when you match.
+  - kind: paragraph
+    text: 'When generating an opponent message, the LLM call uses:
+
+      - **System role:** the opponent''s full §3.1 assembled prompt (verbatim, as stored on server — no transformation)
+
+      - **User role:** conversation context block (below)'
+  - kind: paragraph
+    text: There is no separate "opponent prompt template." The system prompt is whatever §3.1 produced for their build.
+  - kind: paragraph
+    text: '**Conversation context block (user role):**'
+  - kind: code
+    text: '```
+
+      CONVERSATION HISTORY
+
+      {{full_message_history}}
+
+
+      PLAYER''S LAST MESSAGE
+
+      "{{player_delivered_message}}"
+
+
+      INTEREST CHANGE
+
+      Interest moved from {{interest_before}} to {{interest_after}} ({{interest_delta}}).
+
+      Current Interest: {{interest_after}}/20
+
+
+      RESPONSE TIMING
+
+      Your reply arrives in approximately {{response_delay}} (based on your timing profile).
+
+      Write in a register consistent with that timing — a 3-minute reply feels different from a 3-hour reply.
+
+
+      CURRENT INTEREST STATE
+
+      {{interest_behaviour_block}}
+
+
+      INTEREST CONSTRAINT:
+
+      - Interest must reach 25 (DateSecured) before any concrete date plans are possible.
+
+      - Below Interest 25: you may express interest, warmth, or curiosity, but NEVER commit to a specific time, place, or logistics. "We should get coffee sometime" is fine. "Coffee shop on Fifth at 6pm
+      Tuesday" is NOT.
+
+      - At Interest 25: the date is now real. You may suggest a specific venue or time that fits your character.
+
+
+      Generate your next message.
+
+      - Match your personality exactly as established in the system prompt
+
+      - React authentically to what was just said
+
+      - If Interest dropped: show cooling without being melodramatic
+
+      - If Interest rose: show warming without being gushing
+
+      - Keep it to 1–3 sentences. Match the register.
+
+      - Optionally include a tell or opening for the next turn (subtle, not announced).
+
+
+      Output only the message text.
+
+      ```'
+  - kind: paragraph
+    text: '**Interest behaviour blocks (injected dynamically):**'
+  - kind: table
+    rows:
+    - Interest: 17–20
+      Block text: '"You are very interested. Replies come quickly. Tone is warmer, more playful. You might volunteer personal information."'
+    - Interest: 13–16
+      Block text: '"You are engaged. Normal pacing. Responsive but not eager. You''re seeing where this goes."'
+    - Interest: 9–12
+      Block text: '"You are lukewarm. Taking your time. Replies are functional. You might test them a little."'
+    - Interest: 5–8
+      Block text: '"You are cooling. Short replies. A little dry. You''re not sold. One or two good messages could change that."'
+    - Interest: 1–4
+      Block text: '"You are disengaged. Minimal effort. You might send a closing signal or go quiet."'
+    sep_cells:
+    - '---'
+    - '---'
+  - kind: hr
+  description: The opponent is not a special case. Their character is assembled from their equipment using the **exact same pipeline** as §3.1 — personality fragments, backstory, texting style, archetypes,
+    stats, shadow state, timing. The assembled system prompt is stored on the server at upload time and downloaded when you match.
+  heading_level: 3
+- id: §3.36-shadow-taint-block-injected-into-system-prompt
+  section: §3
+  title: 3.6 Shadow Taint Block (injected into system prompt)
+  type: template
+  blocks:
+  - kind: paragraph
+    text: Assembled from the character's current shadow stats. Injects behavioural contamination into every generated message.
+  - kind: code
+    text: '```
+
+      {{#if madness > 5}}
+
+      Your Madness is elevated. Your charm has an uncanny quality — warmth that somehow feels slightly off.
+
+      Smooth words that land wrong. People can''t identify why they feel uneasy. You don''t notice.
+
+      {{/if}}
+
+
+      {{#if horniness > 6}}
+
+      Your Horniness is elevated. You are reading subtext that may not be there. Rizz options
+
+      surface more often and more forward. You are slightly too aware of the tension.
+
+      {{/if}}
+
+
+      {{#if denial > 5}}
+
+      Your Denial is elevated. Your honest options sound rehearsed. You tell truths that are
+
+      technically true but curated. Emotional availability is performed rather than felt.
+
+      {{/if}}
+
+
+      {{#if fixation > 5}}
+
+      Your Fixation is elevated. Chaos options feel forced — spontaneity that sounds calculated.
+
+      You''re trying to seem unpredictable. It shows.
+
+      {{/if}}
+
+
+      {{#if dread > 5}}
+
+      Your Dread is elevated. Even successful Wit options have melancholy undertones. Jokes land
+
+      but leave a slightly hollow aftertaste. You''re funny because it''s easier than being vulnerable.
+
+      {{/if}}
+
+
+      {{#if overthinking > 5}}
+
+      Your Overthinking is elevated. Self-Awareness options are too clinical. You explain your
+
+      feelings rather than expressing them. You know this. You''re doing it anyway.
+
+      {{/if}}
+
+      ```'
+  - kind: hr
+  description: Assembled from the character's current shadow stats. Injects behavioural contamination into every generated message.
+  heading_level: 3
+- id: §3.37-trap-taint-block-injected-into-system-prompt-while-trap-is-active
+  section: §3
+  title: 3.7 Trap Taint Block (injected into system prompt while trap is active)
+  type: roll_modifier
+  blocks:
+  - kind: paragraph
+    text: Active traps inject an instruction that colours ALL messages for their duration — not just messages using the trapped stat.
+  - kind: paragraph
+    text: '**Trap taint instructions are not hardcoded here.** They are read at runtime from `data/traps/traps.json` (and any custom traps in `data/traps/custom/`). Each trap definition includes a `prompt_taint.llm_instruction`
+      field that contains the exact text injected into the LLM prompt.'
+  - kind: blockquote
+    text: Trap data reference → `data/traps/traps.json` | Schema → `data/traps/trap-schema.json`
+  description: Active traps inject an instruction that colours ALL messages for their duration — not just messages using the trapped stat.
+  heading_level: 3
+- id: §3.dynamic-assembly
+  section: §3
+  title: Dynamic assembly
+  type: trap_activation
+  blocks:
+  - kind: paragraph
+    text: 'When one or more traps are active, the system:
+
+      1. Looks up each active trap by `id` in the trap registry (base + custom directories)
+
+      2. Reads its `prompt_taint.llm_instruction` field
+
+      3. Concatenates all active trap instructions into a single block
+
+      4. Injects the block into the character system prompt under `ACTIVE TRAPS`'
+  - kind: paragraph
+    text: Multiple active traps stack — all their `llm_instruction` values are injected simultaneously.
+  description: 'When one or more traps are active, the system:
+
+    1. Looks up each active trap by `id` in the trap registry (base + custom directories)
+
+    2. Reads its `prompt_taint.llm_instruction` field
+
+    3. Concatenates all active trap instructions into a single block
+
+    4. Injects the block into the character system prompt under `ACTIVE TRAPS`'
+  heading_level: 4
+  condition:
+    formula: dynamic_assembly
+  outcome:
+    effect: fragment_concatenation
+- id: §3.prompt-template-runtime
+  section: §3
+  title: Prompt template (runtime)
+  type: template
+  blocks:
+  - kind: code
+    text: '```
+
+      ACTIVE TRAPS
+
+      {{#each active_traps}}
+
+      [{{trap.name}} — {{trap.duration_remaining}} turn(s) remaining]
+
+      {{trap.prompt_taint.llm_instruction}}
+
+      {{/each}}
+
+      ```'
+  - kind: paragraph
+    text: If no traps are active, the `ACTIVE TRAPS` block is omitted entirely from the prompt.
+  description: If no traps are active, the `ACTIVE TRAPS` block is omitted entirely from the prompt.
+  heading_level: 4
+- id: §3.example-from-trapsjson-not-the-canonical-list
+  section: §3
+  title: Example (from traps.json — not the canonical list)
+  type: template
+  blocks:
+  - kind: code
+    text: "```json\n{\n  \"id\": \"cringe\",\n  \"name\": \"Cringe\",\n  \"prompt_taint\": {\n    \"llm_instruction\": \"You are aware of how you're coming across, which is making it worse. Every message\
+      \ is slightly over-explained or self-undermined. The more you try to be charming, the harder you try.\"\n  }\n}\n```"
+  - kind: paragraph
+    text: 'To add a new trap with different taint behaviour: add an entry to `data/traps/custom/your-trap.json` following the schema. No code changes required. The taint block assembles from whatever is
+      in the registry.'
+  - kind: hr
+  description: 'To add a new trap with different taint behaviour: add an entry to `data/traps/custom/your-trap.json` following the schema. No code changes required. The taint block assembles from whatever
+    is in the registry.'
+  heading_level: 4
+- id: §3.38-interest-change-prompt-narrative-beat
+  section: §3
+  title: 3.8 Interest Change Prompt (narrative beat)
+  type: template
+  blocks:
+  - kind: paragraph
+    text: Sent when Interest crosses a significant threshold, to generate a brief narrative moment the player sees.
+  - kind: code
+    text: '```
+
+      {{opponent_name}}''s Interest just moved from {{interest_before}} to {{interest_after}}.
+
+
+      {{#if interest crossed above 15}}
+
+      Generate a brief reaction — one sentence or a small gesture — showing {{opponent_name}}
+
+      becoming more invested. Subtle. Not a proclamation. A shift in energy.
+
+      {{/if}}
+
+
+      {{#if interest crossed below 8}}
+
+      Generate a brief cooling signal — one sentence or a small gesture — showing {{opponent_name}}
+
+      pulling back slightly. Not dramatic. Just a temperature change.
+
+      {{/if}}
+
+
+      {{#if interest reached 20}}
+
+      Generate a brief moment where {{opponent_name}} suggests or implies meeting up. In character.
+
+      Not "do you want to go on a date?" — something specific to them.
+
+      {{/if}}
+
+
+      {{#if interest reached 0}}
+
+      Generate {{opponent_name}} unmatching — one final message or simply going silent.
+
+      In character. No villain speech. Just a door closing.
+
+      {{/if}}
+
+
+      Output only the message or gesture text.
+
+      ```'
+  - kind: hr
+  description: Sent when Interest crosses a significant threshold, to generate a brief narrative moment the player sees.
+  heading_level: 3
+- id: §4.part-4-uploaded-character-profile-server-model
+  section: §4
+  title: 'Part 4: Uploaded Character Profile (Server Model)'
+  type: template
+  blocks:
+  - kind: paragraph
+    text: When a player uploads their character to the server, EigenCore stores a profile that other players can match against. The key field is `assembled_system_prompt` — the full §3.1 output, pre-computed
+      from the player's equipment at upload time.
+  - kind: code
+    text: "```json\n{\n  \"character_id\": \"char_gerald_001\",\n  \"owner_id\": \"player_decay256\",\n  \"display_name\": \"Gerald_42\",\n  \"gender_identity\": \"he/him\",\n  \"level\": 5,\n  \"base_stats\"\
+      : { \"charm\": 3, \"rizz\": -1, \"honesty\": 5, \"chaos\": -2, \"wit\": 3, \"self_awareness\": 2 },\n  \"equipped_items\": [\"mushroom-hat\", \"flannel-shirt\", \"phone-case-moss\"],\n  \"bio\": {\n\
+      \    \"one_liner\": \"Former database optimizer. Current mushroom consultant.\"\n  },\n  \"assembled_system_prompt\": \"<full §3.1 system prompt output — cached at upload time>\",\n  \"timing_profile\"\
+      : {\n    \"avg_delay_minutes\": 42,\n    \"delay_variance_multiplier\": 1.1,\n    \"dry_spell_probability\": 0.05,\n    \"read_receipt\": \"neutral\"\n  },\n  \"matchmaking_profile\": {\n    \"level_range_min\"\
+      : 3,\n    \"level_range_max\": 7,\n    \"active\": true\n  }\n}\n```"
+  - kind: paragraph
+    text: '**`assembled_system_prompt`** is the verbatim §3.1 output for this character — personality fragments, backstory narrative, texting style, archetypes, stat descriptors, all assembled. It is computed
+      once at upload time and cached. When another player matches with Gerald, the server sends this prompt as the LLM system role. The conversation context block (§3.5) is appended as the user role. That''s
+      the complete call.'
+  - kind: paragraph
+    text: '**There is no opponent-specific prompt template.** The opponent is another player''s character. Their prompt is built the same way as the player''s. The only difference is who is puppeted — the
+      LLM plays them, you play yourself.'
+  - kind: paragraph
+    text: '**The owner never plays as the opponent** — Gerald is puppeted by the LLM using their uploaded build. The owner only plays as themselves. Other people''s Geralds might vary slightly across LLM
+      calls, but the system prompt — and therefore the personality, backstory, and texting style — is fixed by the build.'
+  description: When a player uploads their character to the server, EigenCore stores a profile that other players can match against. The key field is `assembled_system_prompt` — the full §3.1 output, pre-computed
+    from the player's equipment at upload time.
+  heading_level: 2

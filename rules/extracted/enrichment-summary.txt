@@ -1,0 +1,13 @@
+Enrichment Summary
+============================================================
+  rules-v3-enriched.yaml                             157 entries, 100 enriched
+  risk-reward-and-hidden-depth-enriched.yaml          51 entries,  39 enriched
+  async-time-enriched.yaml                            54 entries,  38 enriched
+  traps-enriched.yaml                                 12 entries,   7 enriched
+  archetypes-enriched.yaml                            49 entries,  41 enriched
+  character-construction-enriched.yaml                46 entries,  18 enriched
+  items-pool-enriched.yaml                            96 entries,  66 enriched
+  anatomy-parameters-enriched.yaml                    57 entries,  41 enriched
+  extensibility-enriched.yaml                         10 entries,   1 enriched
+============================================================
+  Total: 532 entries, 351 enriched

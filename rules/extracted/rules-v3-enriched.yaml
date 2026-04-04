@@ -1,0 +1,2740 @@
+- id: §0.pinder-core-rules-v34
+  section: §0
+  title: Pinder — Core Rules v3.4
+  type: definition
+  description: ''
+  heading_level: 1
+- id: §1.the-game-in-one-sentence
+  section: §1
+  title: The Game In One Sentence
+  type: roll_modifier
+  blocks:
+  - kind: paragraph
+    text: You're a sentient penis on a dating app. You dress up, upload your character to a server, and try to charm other players' penises into going on a date with you — using dice rolls, stat checks,
+      and an LLM that generates the actual conversation.
+  - kind: hr
+  description: You're a sentient penis on a dating app. You dress up, upload your character to a server, and try to charm other players' penises into going on a date with you — using dice rolls, stat checks,
+    and an LLM that generates the actual conversation.
+  heading_level: 2
+  compact_heading: true
+- id: §2.companion-specs
+  section: §2
+  title: Companion Specs
+  type: table
+  blocks:
+  - kind: paragraph
+    text: "**Systems** (`design/systems/`) — how the game works  \n**Settings** (`design/settings/`) — what exists in the game (content, pools, parameters)"
+  - kind: paragraph
+    text: 'This document is the authoritative rules reference. Detailed specs live in separate documents:'
+  - kind: table
+    rows:
+    - Topic: Character assembly (equipment → personality, backstory, texting style, archetypes, timing, LLM prompts)
+      Document: '[[character-construction]]'
+      Folder: systems
+    - Topic: Archetypes — full list (20), stat profiles, level ranges, behaviour notes
+      Document: '[[archetypes]]'
+      Folder: settings
+    - Topic: Async multi-chat, simulated time, energy budget
+      Document: '[[async-time]]'
+      Folder: systems
+    - Topic: Data-driven extensibility, JSON hot-loading, mod support
+      Document: '[[extensibility]]'
+      Folder: systems
+    - Topic: Risk/reward display, hidden depth mechanics (combos, tells, callbacks, momentum)
+      Document: '[[risk-reward-and-hidden-depth]]'
+      Folder: systems
+    - Topic: Item pool — default items, all fragment types, extensibility model
+      Document: '[[items-pool]]'
+      Folder: settings
+    - Topic: Anatomy parameters — body customization with full fragment sets per level
+      Document: '[[anatomy-parameters]]'
+      Folder: settings
+    - Topic: Traps — full list (6), taint behaviours, clear methods, custom trap guide
+      Document: '[[traps]]'
+      Folder: settings
+    sep_cells:
+    - '---'
+    - '---'
+    - '---'
+  - kind: hr
+  description: "**Systems** (`design/systems/`) — how the game works  \n**Settings** (`design/settings/`) — what exists in the game (content, pools, parameters)"
+  heading_level: 2
+- id: §1.1-the-multiplayer-structure
+  section: §1
+  title: 1. The Multiplayer Structure
+  type: interest_change
+  blocks:
+  - kind: paragraph
+    text: '**There are no NPCs.** Every character you encounter is another real player''s penis.'
+  - kind: paragraph
+    text: '- You **build your character** (stats, outfit, personality) and upload it to the server
+
+      - When you **swipe**, the game downloads other players'' characters from the server
+
+      - The **LLM puppets their character** during your conversation, using their stats, outfit, and personality prompt
+
+      - **Only you get XP and progression** from the conversation. The other player''s character is unaffected.
+
+      - **Both players can independently match with each other** and have separate conversations — each seeing a different LLM-generated version of the other
+
+      - **Your character is out there being dated by strangers** and you never see those conversations'
+  - kind: paragraph
+    text: 'This means:
+
+      - A well-built character with interesting clothes → fun personality prompt → people enjoy chatting with them → popular on the server
+
+      - A min-maxed character with all defense stats → hard to date → nobody swipes → thematically perfect loneliness
+
+      - Your outfit choices ripple out to every player who encounters you'
+  - kind: hr
+  description: '**There are no NPCs.** Every character you encounter is another real player''s penis.'
+  heading_level: 2
+- id: §2.2-your-character
+  section: §2
+  title: 2. Your Character
+  type: definition
+  description: ''
+  heading_level: 2
+- id: §4.stat-pair.charm
+  section: §4
+  title: Stat Pair — Charm/Madness
+  type: definition
+  description: Charm is paired with shadow Madness.
+  condition:
+    stat: Charm
+  outcome:
+    shadow: Madness
+- id: §4.stat-pair.rizz
+  section: §4
+  title: Stat Pair — Rizz/Horniness
+  type: definition
+  description: Rizz is paired with shadow Horniness.
+  condition:
+    stat: Rizz
+  outcome:
+    shadow: Horniness
+- id: §4.stat-pair.honesty
+  section: §4
+  title: Stat Pair — Honesty/Denial
+  type: definition
+  description: Honesty is paired with shadow Denial.
+  condition:
+    stat: Honesty
+  outcome:
+    shadow: Denial
+- id: §4.stat-pair.chaos
+  section: §4
+  title: Stat Pair — Chaos/Fixation
+  type: definition
+  description: Chaos is paired with shadow Fixation.
+  condition:
+    stat: Chaos
+  outcome:
+    shadow: Fixation
+- id: §4.stat-pair.wit
+  section: §4
+  title: Stat Pair — Wit/Dread
+  type: definition
+  description: Wit is paired with shadow Dread.
+  condition:
+    stat: Wit
+  outcome:
+    shadow: Dread
+- id: §4.stat-pair.self-awareness
+  section: §4
+  title: Stat Pair — Self-Awareness/Overthinking
+  type: definition
+  description: Self-Awareness is paired with shadow Overthinking.
+  condition:
+    stat: Self-Awareness
+  outcome:
+    shadow: Overthinking
+- id: §4.the-stat-pairs
+  section: §4
+  title: The Stat Pairs
+  type: table
+  blocks:
+  - kind: paragraph
+    text: Every positive stat has a shadow. Six pairs. The shadow is a passive debuff that penalizes its paired positive stat. You invest in the light. The dark grows on its own.
+  - kind: table
+    rows:
+    - Positive: '**Charm**'
+      What It Does: Smooth talk, flirtation, making them feel special
+      Shadow: '**Madness**'
+      What Causes It: Prolonged app use, repeated failures
+    - Positive: '**Rizz**'
+      What It Does: Sexual tension, bold moves, confidence
+      Shadow: '**Horniness**'
+      What Causes It: Random each conversation (1d10)
+    - Positive: '**Honesty**'
+      What It Does: Vulnerability, sincerity, saying something real
+      Shadow: '**Denial**'
+      What Causes It: Suppressing feelings, faking it
+    - Positive: '**Chaos**'
+      What It Does: Wildcard energy, random humor, spontaneity
+      Shadow: '**Fixation**'
+      What Causes It: Playing safe, repetitive behavior
+    - Positive: '**Wit**'
+      What It Does: Wordplay, comebacks, being clever
+      Shadow: '**Dread**'
+      What Causes It: Rejection, ghosting, existential weight
+    - Positive: '**Self-Awareness**'
+      What It Does: Reading the room, recovery, meta-humor
+      Shadow: '**Overthinking**'
+      What Causes It: Spiraling, over-analyzing
+    sep_cells:
+    - '----------'
+    - '-------------'
+    - '--------'
+    - '---------------'
+  description: Every positive stat has a shadow. Six pairs. The shadow is a passive debuff that penalizes its paired positive stat. You invest in the light. The dark grows on its own.
+  heading_level: 3
+  compact_heading: true
+- id: §4.shadow-penalty
+  section: §4
+  title: Shadow Penalty
+  type: shadow_growth
+  blocks:
+  - kind: paragraph
+    text: '**-1 to paired positive stat per 3 points of shadow.**'
+  description: '**-1 to paired positive stat per 3 points of shadow.**'
+  heading_level: 3
+  compact_heading: true
+  condition:
+    shadow: any
+    shadow_points_per_penalty: 3
+  outcome:
+    stat_penalty_per_step: -1
+- id: §4.starting-stats
+  section: §4
+  title: Starting Stats
+  type: interest_change
+  blocks:
+  - kind: paragraph
+    text: '**Positive:** 8 each (48 total). Gain points at level-up.
+
+      **Shadows:** 0 each. Grow from events. Horniness rolls fresh each conversation.'
+  description: '**Positive:** 8 each (48 total). Gain points at level-up.
+
+    **Shadows:** 0 each. Grow from events. Horniness rolls fresh each conversation.'
+  heading_level: 3
+  compact_heading: true
+  condition:
+    conversation_start: true
+  outcome:
+    base_positive_stats: 8
+    base_shadow_stats: 0
+- id: §4.level-bonus.1-2
+  section: §4
+  title: Level Bonus — Level 1-2
+  type: roll_modifier
+  description: 'Level 1-2: +0 to all rolls.'
+  condition:
+    level_range:
+    - 1
+    - 2
+  outcome:
+    level_bonus: 0
+- id: §4.level-bonus.3-4
+  section: §4
+  title: Level Bonus — Level 3-4
+  type: roll_modifier
+  description: 'Level 3-4: +1 to all rolls.'
+  condition:
+    level_range:
+    - 3
+    - 4
+  outcome:
+    level_bonus: 1
+- id: §4.level-bonus.5-6
+  section: §4
+  title: Level Bonus — Level 5-6
+  type: roll_modifier
+  description: 'Level 5-6: +2 to all rolls.'
+  condition:
+    level_range:
+    - 5
+    - 6
+  outcome:
+    level_bonus: 2
+- id: §4.level-bonus.7-8
+  section: §4
+  title: Level Bonus — Level 7-8
+  type: roll_modifier
+  description: 'Level 7-8: +3 to all rolls.'
+  condition:
+    level_range:
+    - 7
+    - 8
+  outcome:
+    level_bonus: 3
+- id: §4.level-bonus.9-10
+  section: §4
+  title: Level Bonus — Level 9-10
+  type: roll_modifier
+  description: 'Level 9-10: +4 to all rolls.'
+  condition:
+    level_range:
+    - 9
+    - 10
+  outcome:
+    level_bonus: 4
+- id: §4.level-bonus.11+
+  section: §4
+  title: Level Bonus — Level 11+
+  type: roll_modifier
+  description: 'Level 11+: +5 to all rolls.'
+  condition:
+    level_range:
+    - 11
+    - 99
+  outcome:
+    level_bonus: 5
+- id: §4.level-bonus
+  section: §4
+  title: Level Bonus
+  type: table
+  blocks:
+  - kind: paragraph
+    text: As you level up, you get a flat bonus to ALL rolls. This is how you outscale opponent defenses over time — and how shadows remain threatening even at high level (they eat into the bonus).
+  - kind: table
+    rows:
+    - Level: 1-2
+      Bonus: '+0'
+    - Level: 3-4
+      Bonus: '+1'
+    - Level: 5-6
+      Bonus: '+2'
+    - Level: 7-8
+      Bonus: '+3'
+    - Level: 9-10
+      Bonus: '+4'
+    - Level: 11+
+      Bonus: '+5'
+    sep_cells:
+    - '-------'
+    - '-------'
+  - kind: paragraph
+    text: '**Your roll = d20 + stat modifier + level bonus**'
+  description: As you level up, you get a flat bonus to ALL rolls. This is how you outscale opponent defenses over time — and how shadows remain threatening even at high level (they eat into the bonus).
+  heading_level: 3
+  compact_heading: true
+- id: §4.effective-stats-example
+  section: §4
+  title: Effective Stats Example
+  type: table
+  blocks:
+  - kind: paragraph
+    text: 'Gerald, Level 7 (+3 level bonus):
+
+      Base Charm 13 (gear included), Madness 4'
+  - kind: table
+    rows:
+    - Positive: Charm
+      Base+Gear: '13'
+      Shadow: Madness
+      Shadow Lvl: '4'
+      Penalty: '-1'
+      Effective: '12'
+      Modifier: '+1'
+      + Level: '+3'
+      Total Mod: '**+4**'
+    - Positive: Rizz
+      Base+Gear: '11'
+      Shadow: Horniness
+      Shadow Lvl: '8'
+      Penalty: '-2'
+      Effective: '9'
+      Modifier: '-1'
+      + Level: '+3'
+      Total Mod: '**+2**'
+    - Positive: Honesty
+      Base+Gear: '8'
+      Shadow: Denial
+      Shadow Lvl: '6'
+      Penalty: '-2'
+      Effective: '6'
+      Modifier: '-2'
+      + Level: '+3'
+      Total Mod: '**+1**'
+    - Positive: Chaos
+      Base+Gear: '9'
+      Shadow: Fixation
+      Shadow Lvl: '3'
+      Penalty: '-1'
+      Effective: '8'
+      Modifier: '-1'
+      + Level: '+3'
+      Total Mod: '**+2**'
+    - Positive: Wit
+      Base+Gear: '10'
+      Shadow: Dread
+      Shadow Lvl: '7'
+      Penalty: '-2'
+      Effective: '8'
+      Modifier: '-1'
+      + Level: '+3'
+      Total Mod: '**+2**'
+    - Positive: S-Aware
+      Base+Gear: '11'
+      Shadow: Overthinking
+      Shadow Lvl: '5'
+      Penalty: '-1'
+      Effective: '10'
+      Modifier: '+0'
+      + Level: '+3'
+      Total Mod: '**+3**'
+    sep_cells:
+    - '----------'
+    - '----------'
+    - '--------'
+    - '-----------'
+    - '---------'
+    - '-----------'
+    - '----------'
+    - '---------'
+    - '-----------'
+  - kind: paragraph
+    text: 'Level 7 Gerald with heavy shadows: his best roll is Charm +4 (vs maybe +7 without shadows). Shadows are eating half his level bonus. That''s the tension — leveling up fights the darkness but
+      doesn''t automatically win.'
+  - kind: paragraph
+    text: A Level 1 Gerald with the same shadows would be at Charm +1, Honesty -2. Brutal.
+  - kind: hr
+  description: 'Gerald, Level 7 (+3 level bonus):
+
+    Base Charm 13 (gear included), Madness 4'
+  heading_level: 3
+- id: §3.3-the-other-character-opponent
+  section: §3
+  title: 3. The Other Character (Opponent)
+  type: table
+  blocks:
+  - kind: paragraph
+    text: The opponent is another player's uploaded character. Their stats determine **defense DCs.**
+  - kind: paragraph
+    text: '**Defense DC = 13 + their stat modifier**'
+  - kind: table
+    rows:
+    - You Roll: Charm
+      They Defend With: Self-Awareness
+      Why: They see through flattery (or don't)
+    - You Roll: Rizz
+      They Defend With: Wit
+      Why: They judge if your boldness is hot or cringe
+    - You Roll: Honesty
+      They Defend With: Chaos
+      Why: Can they hold the unexpected thing? High-Chaos receives vulnerability without flinching. Low-Chaos deflects it into something safer.
+    - You Roll: Chaos
+      They Defend With: Charm
+      Why: Their social grace decides if randomness is fun or alarming
+    - You Roll: Wit
+      They Defend With: Rizz
+      Why: Their boldness determines if they're confident enough to be out-witted or if they deflect with bluster
+    - You Roll: Self-Awareness
+      They Defend With: Honesty
+      Why: You're reading them. Their authenticity determines if what you read is true.
+    sep_cells:
+    - '----------'
+    - '-----------------'
+    - '-----'
+  description: The opponent is another player's uploaded character. Their stats determine **defense DCs.**
+  heading_level: 2
+- id: §5.dc-examples
+  section: §5
+  title: DC Examples
+  type: interest_change
+  blocks:
+  - kind: paragraph
+    text: 'Opponent Velvet: Self-Awareness 12 (mod +1) → **DC to Charm her = 14**. Velvet''s Chaos 14 (mod +1) → **DC for Honesty = 14** (she can receive vulnerability; she''s been through enough to not
+      flinch).
+
+      Opponent Gerald: SA 4 (mod -3) → **DC to Charm him = 10** (easy — he doesn''t see through flattery). Gerald''s Rizz 11 (mod +0) → **DC for Wit = 13** (average — he can hold his own against cleverness
+      but won''t dominate it).'
+  - kind: paragraph
+    text: '**The opponent''s build creates their personality AND their mechanical difficulty.** A character with max Denial is hard to reach emotionally. A character with low Wit is easy to impress with
+      cleverness. Their build IS their dating personality.'
+  description: 'Opponent Velvet: Self-Awareness 12 (mod +1) → **DC to Charm her = 14**. Velvet''s Chaos 14 (mod +1) → **DC for Honesty = 14** (she can receive vulnerability; she''s been through enough to
+    not flinch).
+
+    Opponent Gerald: SA 4 (mod -3) → **DC to Charm him = 10** (easy — he doesn''t see through flattery). Gerald''s Rizz 11 (mod +0) → **DC for Wit = 13** (average — he can hold his own against cleverness
+    but won''t dominate it).'
+  heading_level: 3
+  condition:
+    formula: defense_dc
+  outcome:
+    base_dc: 13
+    addend: opponent_stat_modifier
+- id: §5.level-bonus-vs-opponent-dc-the-spread
+  section: §5
+  title: Level Bonus vs Opponent DC — The Spread
+  type: table
+  blocks:
+  - kind: table
+    rows:
+    - Your level bonus: +0 (Lvl 1-2)
+      Opponent DC 11 (weak defender): Need 11+ (50%)
+      DC 14 (average): Need 14+ (35%)
+      DC 17 (strong): Need 17+ (20%)
+    - Your level bonus: +2 (Lvl 5-6)
+      Opponent DC 11 (weak defender): Need 9+ (60%)
+      DC 14 (average): Need 12+ (45%)
+      DC 17 (strong): Need 15+ (30%)
+    - Your level bonus: +4 (Lvl 9-10)
+      Opponent DC 11 (weak defender): Need 7+ (70%)
+      DC 14 (average): Need 10+ (55%)
+      DC 17 (strong): Need 13+ (40%)
+    sep_cells:
+    - '-----------------'
+    - '-------------------------------'
+    - '-----------------'
+    - '----------------'
+  - kind: paragraph
+    text: 'With stat modifier +2 on top:'
+  - kind: table
+    rows:
+    - +4 level +2 stat = +6 total: ''
+      DC 11: Need 5+ (80%)
+      DC 14: Need 8+ (65%)
+      DC 17: Need 11+ (50%)
+    sep_cells:
+    - '-----------------------------'
+    - '-------'
+    - '-------'
+    - '-------'
+  - kind: paragraph
+    text: '**That''s real progression.** Level 1 with no build points is genuinely hard — most rolls below 50%. A maxed Level 10 with heavy investment feels powerful against average opponents but still
+      sweats against strong ones. And shadows can drag that +6 down to +3 or worse.'
+  - kind: hr
+  description: 'With stat modifier +2 on top:'
+  heading_level: 3
+- id: §4.4-the-roll
+  section: §4
+  title: 4. The Roll
+  type: roll_modifier
+  description: ''
+  heading_level: 2
+- id: §6.basic-roll
+  section: §6
+  title: Basic Roll
+  type: shadow_growth
+  blocks:
+  - kind: paragraph
+    text: '**d20 + stat modifier (after shadow) + level bonus ≥ opponent''s defense DC**'
+  description: '**d20 + stat modifier (after shadow) + level bonus ≥ opponent''s defense DC**'
+  heading_level: 3
+  compact_heading: true
+  condition:
+    formula: attack_roll
+  outcome:
+    roll: d20
+    addend: stat_modifier + level_bonus
+- id: §6.what-the-player-sees
+  section: §6
+  title: What The Player Sees
+  type: template
+  blocks:
+  - kind: code
+    text: '```
+
+      ╔══════════════════════════════════════════════════╗
+
+      ║  🎭 Opponent: Velvet (uploaded by player#4821)   ║
+
+      ║  "what''s your take on pineapple pizza            ║
+
+      ║  because this is a dealbreaker"                  ║
+
+      ╠══════════════════════════════════════════════════╣
+
+      ║                                                  ║
+
+      ║  A) 🎲 WIT (+2 total)                           ║
+
+      ║     INTENDED: "Pineapple pizza is just fruit     ║
+
+      ║     salad with commitment issues"                ║
+
+      ║     DC 11  |  Need: 9+  |  60%                  ║
+
+      ║                                                  ║
+
+      ║  B) 🎲 CHARM (+4 total)                         ║
+
+      ║     INTENDED: "I''ll try anything once if the     ║
+
+      ║     company''s right 😏"                          ║
+
+      ║     DC 11  |  Need: 7+  |  70%                  ║
+
+      ║                                                  ║
+
+      ║  C) 🎲 HONESTY (+1 total ⚠️ Denial eating it)   ║
+
+      ║     INTENDED: "I genuinely don''t care about      ║
+
+      ║     pizza and that says something about me"      ║
+
+      ║     DC 9   |  Need: 8+  |  65%                  ║
+
+      ║                                                  ║
+
+      ║  D) 🎲 CHAOS (+2 total)                         ║
+
+      ║     INTENDED: "I put hot sauce on everything     ║
+
+      ║     including relationships"                     ║
+
+      ║     DC 11  |  Need: 9+  |  60%                  ║
+
+      ║                                                  ║
+
+      ║  📊 SHADOWS                                      ║
+
+      ║  Madness 4 | Horniness 8 | Denial 6             ║
+
+      ║  Fixation 3 | Dread 7 | Overthinking 5          ║
+
+      ║  ❤️ Their Interest: 10/20                        ║
+
+      ║                                                  ║
+
+      ╚══════════════════════════════════════════════════╝
+
+      ```'
+  - kind: paragraph
+    text: '**Key UX detail:** The player sees what they INTEND to say. If they fail, the LLM shows what actually came out. The gap between intention and execution is the comedy engine.'
+  description: '**Key UX detail:** The player sees what they INTEND to say. If they fail, the LLM shows what actually came out. The gap between intention and execution is the comedy engine.'
+  heading_level: 3
+- id: §6.natural-1-and-natural-20
+  section: §6
+  title: Natural 1 and Natural 20
+  type: interest_change
+  blocks:
+  - kind: paragraph
+    text: '- **Nat 1:** Auto-fail regardless of modifier. Legendary disaster.
+
+      - **Nat 20:** Auto-success regardless of DC. Crit. +4 Interest.'
+  description: '- **Nat 1:** Auto-fail regardless of modifier. Legendary disaster.
+
+    - **Nat 20:** Auto-success regardless of DC. Crit. +4 Interest.'
+  heading_level: 3
+  compact_heading: true
+- id: §6.natural-1
+  section: §6
+  title: Natural 1 — Auto-fail
+  type: roll_modifier
+  description: 'Nat 1: Auto-fail regardless of modifier. Legendary disaster.'
+  condition:
+    natural_roll: 1
+  outcome:
+    tier: Legendary
+    interest_delta: -5
+    xp_payout: 10
+    trap: true
+- id: §6.natural-20
+  section: §6
+  title: Natural 20 — Auto-success
+  type: roll_modifier
+  description: 'Nat 20: Auto-success regardless of DC. Crit. +4 Interest. Advantage on next roll.'
+  condition:
+    natural_roll: 20
+  outcome:
+    interest_delta: 4
+    effect: advantage_next_roll
+    xp_payout: 25
+- id: §6.advantage-disadvantage
+  section: §6
+  title: Advantage / Disadvantage
+  type: interest_change
+  blocks:
+  - kind: paragraph
+    text: Roll 2d20, take higher (advantage) or lower (disadvantage).
+  - kind: paragraph
+    text: '**Advantage from:**
+
+      - Previous crit (1 roll)
+
+      - Interest at 15+ (they''re warm)
+
+      - Outfit synergy bonus'
+  - kind: paragraph
+    text: '**Disadvantage from:**
+
+      - Active trope trap (specific to that stat or general)
+
+      - Interest at 4 or below
+
+      - Shadow threshold effects (see Section 5)'
+  - kind: hr
+  description: Roll 2d20, take higher (advantage) or lower (disadvantage).
+  heading_level: 3
+  compact_heading: true
+  condition:
+    effect: advantage_or_disadvantage
+  outcome:
+    roll: 2d20_take_best_or_worst
+- id: §5.5-every-fail-triggers-something
+  section: §5
+  title: 5. Every Fail Triggers Something
+  type: roll_modifier
+  blocks:
+  - kind: paragraph
+    text: '**Every failed roll changes what you actually say.** The worse the fail, the more drastic the corruption of your intended message.'
+  description: '**Every failed roll changes what you actually say.** The worse the fail, the more drastic the corruption of your intended message.'
+  heading_level: 2
+- id: §7.fail-tier.fumble
+  section: §7
+  title: Fail Tier — Fumble
+  type: interest_change
+  description: 'Miss by 1-2: Fumble. -1.'
+  condition:
+    miss_range:
+    - 1
+    - 2
+  outcome:
+    tier: Fumble
+    interest_delta: -1
+- id: §7.fail-tier.misfire
+  section: §7
+  title: Fail Tier — Misfire
+  type: interest_change
+  description: 'Miss by 3-5: Misfire. -1.'
+  condition:
+    miss_range:
+    - 3
+    - 5
+  outcome:
+    tier: Misfire
+    interest_delta: -1
+- id: §7.fail-tier.trope-trap
+  section: §7
+  title: Fail Tier — Trope Trap
+  type: interest_change
+  description: 'Miss by 6-9: Trope Trap. -2 + trap status effect.'
+  condition:
+    miss_range:
+    - 6
+    - 9
+  outcome:
+    tier: Trope Trap
+    interest_delta: -2
+    trap: true
+- id: §7.fail-tier.catastrophe
+  section: §7
+  title: Fail Tier — Catastrophe
+  type: interest_change
+  description: 'Miss by 10+: Catastrophe. -3 + trap + extra shadow growth.'
+  condition:
+    miss_minimum: 10
+  outcome:
+    tier: Catastrophe
+    interest_delta: -3
+    trap: true
+- id: §7.fail-tier.legendary-fail
+  section: §7
+  title: Fail Tier — Legendary Fail
+  type: interest_change
+  description: 'Miss by Nat 1: Legendary Fail. -4 + trap + shadow +1.'
+  condition:
+    natural_roll: 1
+  outcome:
+    tier: Legendary Fail
+    interest_delta: -4
+    trap: true
+- id: §7.fail-severity-scale
+  section: §7
+  title: Fail Severity Scale
+  type: table
+  blocks:
+  - kind: table
+    rows:
+    - Miss DC by: 1-2
+      Severity: '**Fumble**'
+      What Happens To Your Message: Slightly off. Right words, flat delivery. "That was almost smooth."
+      Interest Δ: '-1'
+    - Miss DC by: 3-5
+      Severity: '**Misfire**'
+      What Happens To Your Message: Came out wrong. Your witty line became a dad joke. Your flirt became awkward.
+      Interest Δ: '-1'
+    - Miss DC by: 6-9
+      Severity: '**Trope Trap**'
+      What Happens To Your Message: Full stat-specific trap. Your clever opener became "hi". Your honest moment became a divorce monologue.
+      Interest Δ: -2 + trap status effect
+    - Miss DC by: 10+
+      Severity: '**Catastrophe**'
+      What Happens To Your Message: Double trap. The LLM writes the worst version. TED talk + CrossFit in one message.
+      Interest Δ: -3 + trap + extra shadow growth
+    - Miss DC by: Nat 1
+      Severity: '**Legendary Fail**'
+      What Happens To Your Message: Unique disaster. Something that's never happened on this app before. Screenshots are taken.
+      Interest Δ: -4 + trap + shadow +1
+    sep_cells:
+    - '-----------'
+    - '----------'
+    - '------------------------------'
+    - '-----------'
+  description: ''
+  heading_level: 3
+- id: §7.what-intended-vs-actual-looks-like
+  section: §7
+  title: What "Intended vs Actual" Looks Like
+  type: table
+  blocks:
+  - kind: paragraph
+    text: '**Player picks Wit option. Intended: "Pineapple pizza is just fruit salad with commitment issues"**'
+  - kind: table
+    rows:
+    - Roll Result: Success
+      What Actually Comes Out: '"Pineapple pizza is just fruit salad with commitment issues." *(lands perfectly, she laughs)*'
+    - Roll Result: Fumble (miss by 1-2)
+      What Actually Comes Out: '"Pineapple pizza is like... fruit? On bread? That''s kind of weird right? 😂" *(deflated version, no punch)*'
+    - Roll Result: Misfire (miss by 3-5)
+      What Actually Comes Out: '"So pineapple pizza, haha, I actually have a funny take on that — it''s like when you — ok it was funnier in my head." *(the joke died in transit)*'
+    - Roll Result: Trope Trap (miss by 6-9)
+      What Actually Comes Out: '"Hi." *(that''s it. That''s the message. Your entire witty opener compressed into the most generic greeting possible.)*'
+    - Roll Result: Catastrophe (miss by 10+)
+      What Actually Comes Out: '"Pineapple pizza is actually a fascinating case study in culinary colonialism. There''s a great TED talk about it. Also I do CrossFit. Not relevant but I''m just putting
+        it out there. 👍" *(multiple failures stacked)*'
+    - Roll Result: Nat 1
+      What Actually Comes Out: '"pinapel" *(you misspelled a word that wasn''t even a sentence. she screenshots it. it goes viral on the server.)*'
+    sep_cells:
+    - '-------------'
+    - '------------------------'
+  description: '**Player picks Wit option. Intended: "Pineapple pizza is just fruit salad with commitment issues"**'
+  heading_level: 3
+- id: §7.trope-trap.charm
+  section: §7
+  title: Trope Trap — Charm
+  type: trap_activation
+  description: 'Charm miss by 6+: The Cringe. Disadvantage on Charm, 1 turn.'
+  condition:
+    failed_stat: Charm
+    miss_minimum: 6
+  outcome:
+    trap_name: The Cringe
+    duration_turns: 1
+    effect: disadvantage
+    stat: Charm
+- id: §7.trope-trap.rizz
+  section: §7
+  title: Trope Trap — Rizz
+  type: trap_activation
+  description: 'Rizz miss by 6+: The Creep. -2 to Rizz rolls, 2 turns.'
+  condition:
+    failed_stat: Rizz
+    miss_minimum: 6
+  outcome:
+    trap_name: The Creep
+    duration_turns: 2
+    effect: stat_penalty
+    stat: Rizz
+- id: §7.trope-trap.honesty
+  section: §7
+  title: Trope Trap — Honesty
+  type: trap_activation
+  description: 'Honesty miss by 6+: The Overshare. Opponent''s Chaos defense +2 (they become harder to reach with honesty — they''ve seen your chaos, they''re braced for more), 1 turn.'
+  condition:
+    failed_stat: Honesty
+    miss_minimum: 6
+  outcome:
+    trap_name: The Overshare
+    duration_turns: 1
+    effect: stat_penalty
+    stat: Honesty
+- id: §7.trope-trap.chaos
+  section: §7
+  title: Trope Trap — Chaos
+  type: trap_activation
+  description: 'Chaos miss by 6+: The Unhinged. Disadvantage on Chaos, 1 turn.'
+  condition:
+    failed_stat: Chaos
+    miss_minimum: 6
+  outcome:
+    trap_name: The Unhinged
+    duration_turns: 1
+    effect: disadvantage
+    stat: Chaos
+- id: §7.trope-trap.wit
+  section: §7
+  title: Trope Trap — Wit
+  type: trap_activation
+  description: 'Wit miss by 6+: The Pretentious. Opponent''s Rizz defense +3 (they stop being impressed and start being dismissive — boldness beats condescension), 1 turn.'
+  condition:
+    failed_stat: Wit
+    miss_minimum: 6
+  outcome:
+    trap_name: The Pretentious
+    duration_turns: 1
+    effect: stat_penalty
+    stat: Wit
+- id: §7.trope-trap.self_awareness
+  section: §7
+  title: Trope Trap — Self-Awareness
+  type: trap_activation
+  description: 'Self-Awareness miss by 6+: The Spiral. Disadvantage on Self-Awareness, 2 turns.'
+  condition:
+    failed_stat: Self-Awareness
+    miss_minimum: 6
+  outcome:
+    trap_name: The Spiral
+    duration_turns: 2
+    effect: disadvantage
+    stat: Self-Awareness
+- id: §7.stat-specific-trope-traps-on-miss-by-6
+  section: §7
+  title: Stat-Specific Trope Traps (on miss by 6+)
+  type: table
+  blocks:
+  - kind: table
+    rows:
+    - Failed Stat: Charm
+      Trap: '**The Cringe**'
+      What Your Message Becomes: Your smooth line lands as try-hard. The emoji makes it worse.
+      Status Effect: Disadvantage on Charm, 1 turn
+    - Failed Stat: Rizz
+      Trap: '**The Creep**'
+      What Your Message Becomes: Your bold move reads as desperate. She visibly recoils.
+      Status Effect: -2 to Rizz rolls, 2 turns
+    - Failed Stat: Honesty
+      Trap: '**The Overshare**'
+      What Your Message Becomes: You meant to share one thing. You shared everything. The divorce. The therapist. The Costco membership. Steve.
+      Status Effect: Opponent's Chaos defense +2 (they become harder to reach with honesty — they've seen your chaos, they're braced for more), 1 turn
+    - Failed Stat: Chaos
+      Trap: '**The Unhinged**'
+      What Your Message Becomes: Your random humor isn't random-fun. It's random-concerning.
+      Status Effect: Disadvantage on Chaos, 1 turn
+    - Failed Stat: Wit
+      Trap: '**The Pretentious**'
+      What Your Message Becomes: You tried clever. You got condescending. There may be a TED talk reference.
+      Status Effect: Opponent's Rizz defense +3 (they stop being impressed and start being dismissive — boldness beats condescension), 1 turn
+    - Failed Stat: Self-Awareness
+      Trap: '**The Spiral**'
+      What Your Message Becomes: You started acknowledging the awkwardness and couldn't stop. You narrated your own failure. In real time. For three messages.
+      Status Effect: Disadvantage on Self-Awareness, 2 turns
+    sep_cells:
+    - '------------'
+    - '------'
+    - '--------------------------'
+    - '---------------'
+  description: ''
+  heading_level: 3
+- id: §7.success-scale.1-4
+  section: §7
+  title: Success Scale — Beat by 1-4
+  type: interest_change
+  description: 'Beat DC by 1-4: +1.'
+  condition:
+    beat_range:
+    - 1
+    - 4
+  outcome:
+    interest_delta: 1
+- id: §7.success-scale.5-9
+  section: §7
+  title: Success Scale — Beat by 5-9
+  type: interest_change
+  description: 'Beat DC by 5-9: +2.'
+  condition:
+    beat_range:
+    - 5
+    - 9
+  outcome:
+    interest_delta: 2
+- id: §7.success-scale.10plus
+  section: §7
+  title: Success Scale — Beat by 10+
+  type: interest_change
+  description: 'Beat DC by 10+: +3.'
+  condition:
+    beat_range:
+    - 10
+    - 99
+  outcome:
+    interest_delta: 3
+- id: §7.success-scale.nat-20
+  section: §7
+  title: Success Scale — Beat by Nat 20
+  type: interest_change
+  description: 'Beat DC by Nat 20: +4.'
+  condition:
+    natural_roll: 20
+  outcome:
+    interest_delta: 4
+- id: §7.on-success
+  section: §7
+  title: On Success
+  type: table
+  blocks:
+  - kind: table
+    rows:
+    - Beat DC by: 1-4
+      What Happens: Lands well. Good response.
+      Interest Δ: '+1'
+    - Beat DC by: 5-9
+      What Happens: Lands great. They're impressed/charmed/moved.
+      Interest Δ: '+2'
+    - Beat DC by: 10+
+      What Happens: '**Crit.** Something real happens. A wall comes down. A genuine moment.'
+      Interest Δ: '+3'
+    - Beat DC by: Nat 20
+      What Happens: '**Legendary success.** The best thing anyone''s ever said on this app.'
+      Interest Δ: '+4'
+    sep_cells:
+    - '-----------'
+    - '-------------'
+    - '-----------'
+  - kind: hr
+  description: ''
+  heading_level: 3
+- id: §6.interest-state.💀-unmatched
+  section: §6
+  title: Interest State — 💀 Unmatched
+  type: interest_change
+  description: '💀 Unmatched (0): '
+  condition:
+    interest_range:
+    - 0
+    - 0
+  outcome:
+    state: 💀 Unmatched
+- id: §6.interest-state.😐-bored
+  section: §6
+  title: Interest State — 😐 Bored
+  type: interest_change
+  description: '😐 Bored (1-4): '
+  condition:
+    interest_range:
+    - 1
+    - 4
+  outcome:
+    state: 😐 Bored
+- id: §6.interest-state.🤔-lukewarm
+  section: §6
+  title: Interest State — 🤔 Lukewarm
+  type: interest_change
+  description: '🤔 Lukewarm (5-9): '
+  condition:
+    interest_range:
+    - 5
+    - 9
+  outcome:
+    state: 🤔 Lukewarm
+- id: §6.interest-state.😊-interested
+  section: §6
+  title: Interest State — 😊 Interested
+  type: interest_change
+  description: '😊 Interested (10-15): '
+  condition:
+    interest_range:
+    - 10
+    - 15
+  outcome:
+    state: 😊 Interested
+- id: §6.interest-state.😍-very-into-it
+  section: §6
+  title: Interest State — 😍 Very Into It
+  type: interest_change
+  description: '😍 Very Into It (16-20): '
+  condition:
+    interest_range:
+    - 16
+    - 20
+  outcome:
+    state: 😍 Very Into It
+- id: §6.interest-state.🔥-almost-there
+  section: §6
+  title: Interest State — 🔥 Almost There
+  type: interest_change
+  description: '🔥 Almost There (21-24): '
+  condition:
+    interest_range:
+    - 21
+    - 24
+  outcome:
+    state: 🔥 Almost There
+- id: §6.interest-state.✅-date-secured
+  section: §6
+  title: Interest State — ✅ Date Secured
+  type: interest_change
+  description: '✅ Date Secured (25): '
+  condition:
+    interest_range:
+    - 25
+    - 25
+  outcome:
+    state: ✅ Date Secured
+- id: §6.6-the-interest-meter
+  section: §6
+  title: 6. The Interest Meter
+  type: table
+  blocks:
+  - kind: paragraph
+    text: '**One bar. Theirs.** Range: 0–25. Starts at 10. You want 25.'
+  - kind: table
+    rows:
+    - Range: '0'
+      State: 💀 Unmatched
+      Mechanical Effect: Game over. Dread +1.
+    - Range: 1-4
+      State: 😐 Bored
+      Mechanical Effect: Your rolls have disadvantage.
+    - Range: 5-9
+      State: 🤔 Lukewarm
+      Mechanical Effect: No modifiers.
+    - Range: 10-15
+      State: 😊 Interested
+      Mechanical Effect: No modifiers.
+    - Range: 16-20
+      State: 😍 Very Into It
+      Mechanical Effect: Your rolls have advantage.
+    - Range: 21-24
+      State: 🔥 Almost There
+      Mechanical Effect: Advantage + next good roll closes it.
+    - Range: '25'
+      State: ✅ Date Secured
+      Mechanical Effect: XP payout.
+    sep_cells:
+    - '-------'
+    - '-------'
+    - '------------------'
+  - kind: hr
+  description: '**One bar. Theirs.** Range: 0–25. Starts at 10. You want 25.'
+  heading_level: 2
+- id: §7.7-shadow-growth
+  section: §7
+  title: 7. Shadow Growth
+  type: shadow_growth
+  blocks:
+  - kind: paragraph
+    text: Shadows grow from in-game events. You never choose them.
+  description: Shadows grow from in-game events. You never choose them.
+  heading_level: 2
+- id: §9.shadow-growth.getting-unmatched-interest--0
+  section: §9
+  title: Shadow Growth — Getting unmatched (Interest → 0)
+  type: shadow_growth
+  description: 'Getting unmatched (Interest → 0): Dread +2.'
+  condition:
+    action: Getting unmatched (Interest → 0)
+  outcome:
+    shadow: Dread
+    shadow_delta: 2
+- id: §9.shadow-growth.getting-ghosted
+  section: §9
+  title: Shadow Growth — Getting ghosted
+  type: shadow_growth
+  description: 'Getting ghosted: Dread +1.'
+  condition:
+    action: Getting ghosted
+  outcome:
+    shadow: Dread
+    shadow_delta: 1
+- id: §9.shadow-growth.catastrophic-wit-fail-miss-by-10+
+  section: §9
+  title: Shadow Growth — Catastrophic Wit fail (miss by 10+)
+  type: shadow_growth
+  description: 'Catastrophic Wit fail (miss by 10+): Dread +1.'
+  condition:
+    action: Catastrophic Wit fail (miss by 10+)
+  outcome:
+    shadow: Dread
+    shadow_delta: 1
+- id: §9.shadow-growth.conversation-dies-without-date
+  section: §9
+  title: Shadow Growth — Conversation dies without date
+  type: shadow_growth
+  description: 'Conversation dies without date: Dread +1.'
+  condition:
+    action: Conversation dies without date
+  outcome:
+    shadow: Dread
+    shadow_delta: 1
+- id: §9.shadow-growth.3-consecutive-failed-conversations
+  section: §9
+  title: Shadow Growth — 3 consecutive failed conversations
+  type: shadow_growth
+  description: '3 consecutive failed conversations: Dread +1.'
+  condition:
+    action: 3 consecutive failed conversations
+  outcome:
+    shadow: Dread
+    shadow_delta: 1
+- id: §9.shadow-growth.nat-1-on-wit
+  section: §9
+  title: Shadow Growth — Nat 1 on Wit
+  type: shadow_growth
+  description: 'Nat 1 on Wit: Dread +1.'
+  condition:
+    action: Nat 1 on Wit
+  outcome:
+    shadow: Dread
+    shadow_delta: 1
+- id: §9.dread-penalizes-wit
+  section: §9
+  title: Dread → Penalizes Wit
+  type: table
+  blocks:
+  - kind: table
+    rows:
+    - Event: Getting unmatched (Interest → 0)
+      Dread Δ: '+2'
+    - Event: Getting ghosted
+      Dread Δ: '+1'
+    - Event: Catastrophic Wit fail (miss by 10+)
+      Dread Δ: '+1'
+    - Event: Conversation dies without date
+      Dread Δ: '+1'
+    - Event: 3 consecutive failed conversations
+      Dread Δ: '+1'
+    - Event: Nat 1 on Wit
+      Dread Δ: '+1'
+    sep_cells:
+    - '-------'
+    - '---------'
+  description: ''
+  heading_level: 3
+- id: §9.shadow-growth.5+-conversations-in-one-session-without-
+  section: §9
+  title: Shadow Growth — 5+ conversations in one session without a date
+  type: shadow_growth
+  description: '5+ conversations in one session without a date: Madness +1.'
+  condition:
+    action: 5+ conversations in one session without a date
+  outcome:
+    shadow: Madness
+    shadow_delta: 1
+- id: §9.shadow-growth.nat-1-on-charm
+  section: §9
+  title: Shadow Growth — Nat 1 on Charm
+  type: shadow_growth
+  description: 'Nat 1 on Charm: Madness +1.'
+  condition:
+    action: Nat 1 on Charm
+  outcome:
+    shadow: Madness
+    shadow_delta: 1
+- id: §9.shadow-growth.3+-trope-traps-in-one-conversation
+  section: §9
+  title: Shadow Growth — 3+ trope traps in one conversation
+  type: shadow_growth
+  description: '3+ trope traps in one conversation: Madness +1.'
+  condition:
+    action: 3+ trope traps in one conversation
+  outcome:
+    shadow: Madness
+    shadow_delta: 1
+- id: §9.shadow-growth.déjà-vu-same-opener-twice-in-a-row
+  section: §9
+  title: Shadow Growth — Déjà vu (same opener twice in a row)
+  type: shadow_growth
+  description: 'Déjà vu (same opener twice in a row): Madness +1.'
+  condition:
+    action: Déjà vu (same opener twice in a row)
+  outcome:
+    shadow: Madness
+    shadow_delta: 1
+- id: §9.shadow-growth.session-longer-than-30-min-real-time
+  section: §9
+  title: Shadow Growth — Session longer than 30 min real-time
+  type: shadow_growth
+  description: 'Session longer than 30 min real-time: Madness +1.'
+  condition:
+    action: Session longer than 30 min real-time
+  outcome:
+    shadow: Madness
+    shadow_delta: 1
+- id: §9.madness-penalizes-charm
+  section: §9
+  title: Madness → Penalizes Charm
+  type: table
+  blocks:
+  - kind: table
+    rows:
+    - Event: 5+ conversations in one session without a date
+      Madness Δ: '+1'
+    - Event: Nat 1 on Charm
+      Madness Δ: '+1'
+    - Event: 3+ trope traps in one conversation
+      Madness Δ: '+1'
+    - Event: Déjà vu (same opener twice in a row)
+      Madness Δ: '+1'
+    - Event: Session longer than 30 min real-time
+      Madness Δ: '+1'
+    sep_cells:
+    - '-------'
+    - '-----------'
+  description: ''
+  heading_level: 3
+- id: §9.shadow-growth.getting-a-date-without-any-honesty-succe
+  section: §9
+  title: Shadow Growth — Getting a date without any Honesty successes
+  type: shadow_growth
+  description: 'Getting a date without any Honesty successes: Denial +1.'
+  condition:
+    action: Getting a date without any Honesty successes
+  outcome:
+    shadow: Denial
+    shadow_delta: 1
+- id: §9.shadow-growth.choosing-a-non-honesty-option-when-hones
+  section: §9
+  title: Shadow Growth — Choosing a non-Honesty option when Honesty was ava
+  type: shadow_growth
+  description: 'Choosing a non-Honesty option when Honesty was available: Denial +1.'
+  condition:
+    action: Choosing a non-Honesty option when Honesty was available
+  outcome:
+    shadow: Denial
+    shadow_delta: 1
+- id: §9.shadow-growth.nat-1-on-honesty
+  section: §9
+  title: Shadow Growth — Nat 1 on Honesty
+  type: shadow_growth
+  description: 'Nat 1 on Honesty: Denial +1.'
+  condition:
+    action: Nat 1 on Honesty
+  outcome:
+    shadow: Denial
+    shadow_delta: 1
+- id: §9.denial-penalizes-honesty
+  section: §9
+  title: Denial → Penalizes Honesty
+  type: table
+  blocks:
+  - kind: table
+    rows:
+    - Event: Getting a date without any Honesty successes
+      Denial Δ: '+1'
+    - Event: Choosing a non-Honesty option when Honesty was available
+      Denial Δ: '+1'
+    - Event: Nat 1 on Honesty
+      Denial Δ: '+1'
+    sep_cells:
+    - '-------'
+    - '---------'
+  description: ''
+  heading_level: 3
+- id: §9.shadow-growth.picking-the-highest-%-option-3-turns-in-
+  section: §9
+  title: Shadow Growth — Picking the highest-% option 3 turns in a row
+  type: shadow_growth
+  description: 'Picking the highest-% option 3 turns in a row: Fixation +1.'
+  condition:
+    action: Picking the highest-% option 3 turns in a row
+  outcome:
+    shadow: Fixation
+    shadow_delta: 1
+- id: §9.shadow-growth.using-the-same-stat-3-turns-in-a-row
+  section: §9
+  title: Shadow Growth — Using the same stat 3 turns in a row
+  type: shadow_growth
+  description: 'Using the same stat 3 turns in a row: Fixation +1.'
+  condition:
+    action: Using the same stat 3 turns in a row
+  outcome:
+    shadow: Fixation
+    shadow_delta: 1
+- id: §9.shadow-growth.never-picking-chaos-in-a-whole-conversat
+  section: §9
+  title: Shadow Growth — Never picking Chaos in a whole conversation
+  type: shadow_growth
+  description: 'Never picking Chaos in a whole conversation: Fixation +1.'
+  condition:
+    action: Never picking Chaos in a whole conversation
+  outcome:
+    shadow: Fixation
+    shadow_delta: 1
+- id: §9.shadow-growth.nat-1-on-chaos
+  section: §9
+  title: Shadow Growth — Nat 1 on Chaos
+  type: shadow_growth
+  description: 'Nat 1 on Chaos: Fixation +1.'
+  condition:
+    action: Nat 1 on Chaos
+  outcome:
+    shadow: Fixation
+    shadow_delta: 1
+- id: §9.fixation-penalizes-chaos
+  section: §9
+  title: Fixation → Penalizes Chaos
+  type: table
+  blocks:
+  - kind: table
+    rows:
+    - Event: Picking the highest-% option 3 turns in a row
+      Fixation Δ: '+1'
+    - Event: Using the same stat 3 turns in a row
+      Fixation Δ: '+1'
+    - Event: Never picking Chaos in a whole conversation
+      Fixation Δ: '+1'
+    - Event: Nat 1 on Chaos
+      Fixation Δ: '+1'
+    sep_cells:
+    - '-------'
+    - '-----------'
+  description: ''
+  heading_level: 3
+- id: §9.shadow-growth.using-"read"-action-and-failing
+  section: §9
+  title: Shadow Growth — Using "Read" action and failing
+  type: shadow_growth
+  description: 'Using "Read" action and failing: Overthinking +1.'
+  condition:
+    action: Using "Read" action and failing
+  outcome:
+    shadow: Overthinking
+    shadow_delta: 1
+- id: §9.shadow-growth.using-"recover"-action-and-failing
+  section: §9
+  title: Shadow Growth — Using "Recover" action and failing
+  type: shadow_growth
+  description: 'Using "Recover" action and failing: Overthinking +1.'
+  condition:
+    action: Using "Recover" action and failing
+  outcome:
+    shadow: Overthinking
+    shadow_delta: 1
+- id: §9.shadow-growth.using-self-awareness-3+-times-in-one-con
+  section: §9
+  title: Shadow Growth — Using Self-Awareness 3+ times in one conversation
+  type: shadow_growth
+  description: 'Using Self-Awareness 3+ times in one conversation: Overthinking +1.'
+  condition:
+    action: Using Self-Awareness 3+ times in one conversation
+  outcome:
+    shadow: Overthinking
+    shadow_delta: 1
+- id: §9.shadow-growth.nat-1-on-self-awareness
+  section: §9
+  title: Shadow Growth — Nat 1 on Self-Awareness
+  type: shadow_growth
+  description: 'Nat 1 on Self-Awareness: Overthinking +1.'
+  condition:
+    action: Nat 1 on Self-Awareness
+  outcome:
+    shadow: Overthinking
+    shadow_delta: 1
+- id: §9.overthinking-penalizes-self-awareness
+  section: §9
+  title: Overthinking → Penalizes Self-Awareness
+  type: table
+  blocks:
+  - kind: table
+    rows:
+    - Event: Using "Read" action and failing
+      Overthinking Δ: '+1'
+    - Event: Using "Recover" action and failing
+      Overthinking Δ: '+1'
+    - Event: Using Self-Awareness 3+ times in one conversation
+      Overthinking Δ: '+1'
+    - Event: Nat 1 on Self-Awareness
+      Overthinking Δ: '+1'
+    sep_cells:
+    - '-------'
+    - '---------------'
+  description: ''
+  heading_level: 3
+- id: §9.horniness-penalizes-rizz
+  section: §9
+  title: Horniness → Penalizes Rizz
+  type: shadow_growth
+  blocks:
+  - kind: paragraph
+    text: '| Start of conversation | Roll 1d10 | That''s your Horniness |'
+  - kind: paragraph
+    text: No growth. No persistence. Just biology.
+  description: '| Start of conversation | Roll 1d10 | That''s your Horniness |'
+  heading_level: 3
+  condition:
+    shadow: Horniness
+    conversation_start: true
+  outcome:
+    roll: 1d10
+    shadow: Horniness
+- id: §9.shadow-reduce.date-secured
+  section: §9
+  title: Shadow Reduction — Date secured
+  type: shadow_growth
+  description: 'Date secured: Dread -1.'
+  condition:
+    action: Date secured
+  outcome:
+    shadow: Dread
+    shadow_delta: -1
+- id: §9.shadow-reduce.honesty-success-at-interest-15
+  section: §9
+  title: Shadow Reduction — Honesty success at Interest 15+
+  type: shadow_growth
+  description: 'Honesty success at Interest 15+: Denial -1 (being real with someone who received it reduces your own self-deception).'
+  condition:
+    action: Honesty success at Interest 15+
+  outcome:
+    shadow: Denial
+    shadow_delta: -1
+- id: §9.shadow-reduce.4+-different-stats-used-in-one
+  section: §9
+  title: Shadow Reduction — 4+ different stats used in one conversation
+  type: shadow_growth
+  description: '4+ different stats used in one conversation: Fixation -1.'
+  condition:
+    action: 4+ different stats used in one conversation
+  outcome:
+    shadow: Fixation
+    shadow_delta: -1
+- id: §9.shadow-reduce.recovering-from-a-trope-trap
+  section: §9
+  title: Shadow Reduction — Recovering from a trope trap
+  type: shadow_growth
+  description: 'Recovering from a trope trap: Madness -1.'
+  condition:
+    action: Recovering from a trope trap
+  outcome:
+    shadow: Madness
+    shadow_delta: -1
+- id: §9.shadow-reduce.winning-despite-overthinking-d
+  section: §9
+  title: Shadow Reduction — Winning despite Overthinking disadvantage
+  type: shadow_growth
+  description: 'Winning despite Overthinking disadvantage: Overthinking -1.'
+  condition:
+    action: Winning despite Overthinking disadvantage
+  outcome:
+    shadow: Overthinking
+    shadow_delta: -1
+- id: §9.shadow-reduction
+  section: §9
+  title: Shadow Reduction
+  type: table
+  blocks:
+  - kind: table
+    rows:
+    - Action: Date secured
+      Shadow Reduced: Dread -1
+    - Action: Honesty success at Interest 15+
+      Shadow Reduced: Denial -1 (being real with someone who received it reduces your own self-deception)
+    - Action: 4+ different stats used in one conversation
+      Shadow Reduced: Fixation -1
+    - Action: Recovering from a trope trap
+      Shadow Reduced: Madness -1
+    - Action: Winning despite Overthinking disadvantage
+      Shadow Reduced: Overthinking -1
+    - Action: Therapy Hoodie (legendary)
+      Shadow Reduced: -1 chosen shadow per 5 convos
+    - Action: Prestige reset
+      Shadow Reduced: All shadows → 0
+    sep_cells:
+    - '--------'
+    - '---------------'
+  description: ''
+  heading_level: 3
+- id: §9.shadow-threshold.dread.t1
+  section: §9
+  title: Shadow Threshold — Dread T1
+  type: shadow_growth
+  description: 'Dread at 6: Existential flavor in all options.'
+  condition:
+    shadow: Dread
+    threshold: 6
+  outcome:
+    effect: Existential flavor in all options
+- id: §9.shadow-threshold.dread.t2
+  section: §9
+  title: Shadow Threshold — Dread T2
+  type: shadow_growth
+  description: 'Dread at 12: Wit has disadvantage.'
+  condition:
+    shadow: Dread
+    threshold: 12
+  outcome:
+    effect: disadvantage
+    stat: Wit
+- id: §9.shadow-threshold.dread.t3
+  section: §9
+  title: Shadow Threshold — Dread T3
+  type: shadow_growth
+  description: 'Dread at 18: Starting Interest 8 instead of 10.'
+  condition:
+    shadow: Dread
+    threshold: 18
+  outcome:
+    effect: Starting Interest 8 instead of 10
+    starting_interest: 8
+- id: §9.shadow-threshold.madness.t1
+  section: §9
+  title: Shadow Threshold — Madness T1
+  type: shadow_growth
+  description: 'Madness at 6: Chat UI glitches (cosmetic).'
+  condition:
+    shadow: Madness
+    threshold: 6
+  outcome:
+    effect: Chat UI glitches (cosmetic)
+- id: §9.shadow-threshold.madness.t2
+  section: §9
+  title: Shadow Threshold — Madness T2
+  type: shadow_growth
+  description: 'Madness at 12: Charm has disadvantage.'
+  condition:
+    shadow: Madness
+    threshold: 12
+  outcome:
+    effect: disadvantage
+    stat: Charm
+- id: §9.shadow-threshold.madness.t3
+  section: §9
+  title: Shadow Threshold — Madness T3
+  type: shadow_growth
+  description: 'Madness at 18: One option per turn replaced with unhinged text.'
+  condition:
+    shadow: Madness
+    threshold: 18
+  outcome:
+    effect: One option per turn replaced with unhinged text
+- id: §9.shadow-threshold.denial.t1
+  section: §9
+  title: Shadow Threshold — Denial T1
+  type: shadow_growth
+  description: 'Denial at 6: "I''m fine" leaks into messages.'
+  condition:
+    shadow: Denial
+    threshold: 6
+  outcome:
+    effect: '"I''m fine" leaks into messages'
+- id: §9.shadow-threshold.denial.t2
+  section: §9
+  title: Shadow Threshold — Denial T2
+  type: shadow_growth
+  description: 'Denial at 12: Honesty has disadvantage.'
+  condition:
+    shadow: Denial
+    threshold: 12
+  outcome:
+    effect: disadvantage
+    stat: Honesty
+- id: §9.shadow-threshold.denial.t3
+  section: §9
+  title: Shadow Threshold — Denial T3
+  type: shadow_growth
+  description: 'Denial at 18: Honesty options stop appearing.'
+  condition:
+    shadow: Denial
+    threshold: 18
+  outcome:
+    effect: Honesty options stop appearing
+- id: §9.shadow-threshold.fixation.t1
+  section: §9
+  title: Shadow Threshold — Fixation T1
+  type: shadow_growth
+  description: 'Fixation at 6: Options start repeating patterns.'
+  condition:
+    shadow: Fixation
+    threshold: 6
+  outcome:
+    effect: Options start repeating patterns
+- id: §9.shadow-threshold.fixation.t2
+  section: §9
+  title: Shadow Threshold — Fixation T2
+  type: shadow_growth
+  description: 'Fixation at 12: Chaos has disadvantage.'
+  condition:
+    shadow: Fixation
+    threshold: 12
+  outcome:
+    effect: disadvantage
+    stat: Chaos
+- id: §9.shadow-threshold.fixation.t3
+  section: §9
+  title: Shadow Threshold — Fixation T3
+  type: shadow_growth
+  description: 'Fixation at 18: Must pick same stat as last turn.'
+  condition:
+    shadow: Fixation
+    threshold: 18
+  outcome:
+    effect: Must pick same stat as last turn
+- id: §9.shadow-threshold.overthinking.t1
+  section: §9
+  title: Shadow Threshold — Overthinking T1
+  type: shadow_growth
+  description: 'Overthinking at 6: You see Interest number always (TMI).'
+  condition:
+    shadow: Overthinking
+    threshold: 6
+  outcome:
+    effect: You see Interest number always (TMI)
+- id: §9.shadow-threshold.overthinking.t2
+  section: §9
+  title: Shadow Threshold — Overthinking T2
+  type: shadow_growth
+  description: 'Overthinking at 12: Self-Awareness has disadvantage.'
+  condition:
+    shadow: Overthinking
+    threshold: 12
+  outcome:
+    effect: disadvantage
+    stat: Self-Awareness
+- id: §9.shadow-threshold.overthinking.t3
+  section: §9
+  title: Shadow Threshold — Overthinking T3
+  type: shadow_growth
+  description: 'Overthinking at 18: You see opponent''s inner monologue (freeze).'
+  condition:
+    shadow: Overthinking
+    threshold: 18
+  outcome:
+    effect: You see opponent's inner monologue (freeze)
+- id: §9.shadow-threshold.horniness.t1
+  section: §9
+  title: Shadow Threshold — Horniness T1
+  type: shadow_growth
+  description: 'Horniness at 6: Rizz options appear more often.'
+  condition:
+    shadow: Horniness
+    threshold: 6
+  outcome:
+    effect: Rizz options appear more often
+- id: §9.shadow-threshold.horniness.t2
+  section: §9
+  title: Shadow Threshold — Horniness T2
+  type: shadow_growth
+  description: 'Horniness at 12: One option is always unwanted Rizz.'
+  condition:
+    shadow: Horniness
+    threshold: 12
+  outcome:
+    effect: One option is always unwanted Rizz
+- id: §9.shadow-threshold.horniness.t3
+  section: §9
+  title: Shadow Threshold — Horniness T3
+  type: shadow_growth
+  description: 'Horniness at 18: ALL options become Rizz. No other thoughts..'
+  condition:
+    shadow: Horniness
+    threshold: 18
+  outcome:
+    effect: ALL options become Rizz. No other thoughts.
+- id: §9.shadow-thresholds
+  section: §9
+  title: Shadow Thresholds
+  type: table
+  blocks:
+  - kind: table
+    rows:
+    - Shadow: '**Dread**'
+      At 6: Existential flavor in all options
+      At 12: Wit has disadvantage
+      At 18+: Starting Interest 8 instead of 10
+    - Shadow: '**Madness**'
+      At 6: Chat UI glitches (cosmetic)
+      At 12: Charm has disadvantage
+      At 18+: One option per turn replaced with unhinged text
+    - Shadow: '**Denial**'
+      At 6: '"I''m fine" leaks into messages'
+      At 12: Honesty has disadvantage
+      At 18+: Honesty options stop appearing
+    - Shadow: '**Fixation**'
+      At 6: Options start repeating patterns
+      At 12: Chaos has disadvantage
+      At 18+: Must pick same stat as last turn
+    - Shadow: '**Overthinking**'
+      At 6: You see Interest number always (TMI)
+      At 12: Self-Awareness has disadvantage
+      At 18+: You see opponent's inner monologue (freeze)
+    - Shadow: '**Horniness**'
+      At 6: Rizz options appear more often
+      At 12: One option is always unwanted Rizz
+      At 18+: ALL options become Rizz. No other thoughts.
+    sep_cells:
+    - '--------'
+    - '------'
+    - '-------'
+    - '--------'
+  - kind: hr
+  description: ''
+  heading_level: 3
+- id: §8.8-turn-structure
+  section: §8
+  title: 8. Turn Structure
+  type: definition
+  description: ''
+  heading_level: 2
+- id: §10.your-turn
+  section: §10
+  title: Your Turn
+  type: interest_change
+  blocks:
+  - kind: paragraph
+    text: 'Pick ONE:'
+  - kind: paragraph
+    text: '1. **Speak** — Choose a dialogue option. Roll d20 + mod + level bonus vs DC. See intended message. Dice determine what actually comes out.
+
+      2. **Read** — Roll Self-Awareness vs DC 12. Pass: see exact Interest + opponent modifiers. Fail: -1 Interest.
+
+      3. **Recover** — Active trap? Roll Self-Awareness vs DC 12. Pass: trap clears. Fail: -1 Interest.
+
+      4. **Wait** — Skip turn. Traps expire. -1 Interest.'
+  description: 'Pick ONE:'
+  heading_level: 3
+  compact_heading: true
+  condition:
+    action: player_turn
+  outcome:
+    actions:
+    - Speak
+    - Read
+    - Recover
+    - Wait
+- id: §10.opponent-turn.interest-1-4
+  section: §10
+  title: Opponent Turn — Interest 1-4
+  type: interest_change
+  description: 'At interest 1-4: .'
+  condition:
+    interest_range:
+    - 1
+    - 4
+  outcome:
+    opponent_action: ''
+- id: §10.opponent-turn.interest-5-9
+  section: §10
+  title: Opponent Turn — Interest 5-9
+  type: interest_change
+  description: 'At interest 5-9: .'
+  condition:
+    interest_range:
+    - 5
+    - 9
+  outcome:
+    opponent_action: ''
+- id: §10.opponent-turn.interest-10-14
+  section: §10
+  title: Opponent Turn — Interest 10-14
+  type: interest_change
+  description: 'At interest 10-14: .'
+  condition:
+    interest_range:
+    - 10
+    - 14
+  outcome:
+    opponent_action: ''
+- id: §10.opponent-turn.interest-15-18
+  section: §10
+  title: Opponent Turn — Interest 15-18
+  type: interest_change
+  description: 'At interest 15-18: .'
+  condition:
+    interest_range:
+    - 15
+    - 18
+  outcome:
+    opponent_action: ''
+- id: §10.opponents-turn-llm-controlled
+  section: §10
+  title: Opponent's Turn (LLM-controlled)
+  type: table
+  blocks:
+  - kind: paragraph
+    text: 'Based on Interest level:'
+  - kind: table
+    rows:
+    - Interest: 1-4
+      Behavior: Ghost chance (25%/turn), one-word answers, Tests
+    - Interest: 5-9
+      Behavior: Standard replies, occasional Tests
+    - Interest: 10-14
+      Behavior: Engaged, banter, shares personal details
+    - Interest: 15-18
+      Behavior: Warm, playful, deeper questions
+    - Interest: '19'
+      Behavior: Gives you a clear opening to ask for the date
+    sep_cells:
+    - '----------'
+    - '----------'
+  - kind: paragraph
+    text: 'Actions:
+
+      - **Respond** — Natural reply. Conversation flow.
+
+      - **Test** — Pointed question. Forces specific stat check on your next turn.
+
+      - **Pull Back** — Gets guarded. Your next roll has disadvantage.
+
+      - **Ghost** — Interest < 5: chance they leave. Dread +1.'
+  - kind: hr
+  description: 'Based on Interest level:'
+  heading_level: 3
+  compact_heading: true
+- id: §9.9-clothing-items
+  section: §9
+  title: 9. Clothing & Items
+  type: definition
+  description: ''
+  heading_level: 2
+- id: §11.item-slots
+  section: §11
+  title: Item Slots
+  type: definition
+  blocks:
+  - kind: paragraph
+    text: Hat, Shirt, Trousers, Shoes, Accessory (×2), Frame
+  description: Hat, Shirt, Trousers, Shoes, Accessory (×2), Frame
+  heading_level: 3
+  compact_heading: true
+  condition:
+    formula: item_slots
+  outcome:
+    slots:
+    - Hat
+    - Shirt
+    - Trousers
+    - Shoes
+    - Accessory
+    - Accessory
+    - Frame
+- id: §11.item-rules
+  section: §11
+  title: Item Rules
+  type: interest_change
+  blocks:
+  - kind: paragraph
+    text: '- Items modify **positive stats** (bonuses or penalties to any stat)
+
+      - Some legendaries reduce shadow stats
+
+      - **Every item contributes six fragment types** that assemble the character''s full personality — not just a stat bonus. The outfit IS the character.
+
+      - **Your outfit affects how OTHER players experience your character** when they match with you from the server'
+  - kind: blockquote
+    text: '**Full character assembly spec → [[character-construction]]**
+
+      How equipped items combine into: personality, backstory, texting style, archetype tendencies, response timing, and the assembled LLM system prompt.'
+  - kind: blockquote
+    text: '**Item definitions (readable) → [[items-pool]]**
+
+      Full fragment set, timing modifiers, and stat changes for each item.'
+  description: '- Items modify **positive stats** (bonuses or penalties to any stat)
+
+    - Some legendaries reduce shadow stats
+
+    - **Every item contributes six fragment types** that assemble the character''s full personality — not just a stat bonus. The outfit IS the character.
+
+    - **Your outfit affects how OTHER players experience your character** when they match with you from the server'
+  heading_level: 3
+  compact_heading: true
+- id: §11.the-six-fragment-types-per-item
+  section: §11
+  title: The Six Fragment Types Per Item
+  type: table
+  blocks:
+  - kind: paragraph
+    text: 'Each item defines all six. Fragments from all equipped items are concatenated by type and injected into the LLM:'
+  - kind: table
+    rows:
+    - Fragment: '`personality_fragment`'
+      Controls: How this character thinks and acts in conversation
+    - Fragment: '`backstory_fragment`'
+      Controls: Raw history material — LLM finds the through-line across all items
+    - Fragment: '`texting_style_fragment`'
+      Controls: Caps, punctuation, emoji, reply length, tics
+    - Fragment: '`archetype_tendencies`'
+      Controls: Which Tinder behavior archetypes this build gravitates toward
+    - Fragment: '`response_timing_modifier`'
+      Controls: Reply delay, variance, dry spell probability, read receipts
+    - Fragment: '`stat_modifiers`'
+      Controls: Flat bonuses/penalties to base stats
+    sep_cells:
+    - '---'
+    - '---'
+  - kind: paragraph
+    text: 'The player supplies only: **name**, **gender identity**, and optionally one bio line. Everything else is generated from equipment.'
+  description: 'Each item defines all six. Fragments from all equipped items are concatenated by type and injected into the LLM:'
+  heading_level: 3
+  compact_heading: true
+- id: §11.item-tier.common
+  section: §11
+  title: Item Tier — Common
+  type: definition
+  description: 'Common: Unlock at Lvl 1+, stats ±1 per stat.'
+  condition:
+    level_range:
+    - 1
+    - 99
+  outcome:
+    tier: Common
+    tier_stat_range: ±1 per stat
+- id: §11.item-tier.uncommon
+  section: §11
+  title: Item Tier — Uncommon
+  type: definition
+  description: 'Uncommon: Unlock at Lvl 3+, stats ±1/±1 or ±2.'
+  condition:
+    level_range:
+    - 3
+    - 99
+  outcome:
+    tier: Uncommon
+    tier_stat_range: ±1/±1 or ±2
+- id: §11.item-tier.rare
+  section: §11
+  title: Item Tier — Rare
+  type: definition
+  description: 'Rare: Unlock at Lvl 5+, stats ±2/±1 or ±3.'
+  condition:
+    level_range:
+    - 5
+    - 99
+  outcome:
+    tier: Rare
+    tier_stat_range: ±2/±1 or ±3
+- id: §11.item-tier.legendary
+  section: §11
+  title: Item Tier — Legendary
+  type: definition
+  description: 'Legendary: Unlock at Lvl 8+, stats ±3/±2 or ±4.'
+  condition:
+    level_range:
+    - 8
+    - 99
+  outcome:
+    tier: Legendary
+    tier_stat_range: ±3/±2 or ±4
+- id: §11.item-tiers
+  section: §11
+  title: Item Tiers
+  type: table
+  blocks:
+  - kind: table
+    rows:
+    - Tier: Common
+      Unlock: Lvl 1+
+      Stat Range: ±1 per stat
+      Special: None
+    - Tier: Uncommon
+      Unlock: Lvl 3+
+      Stat Range: ±1/±1 or ±2
+      Special: Minor
+    - Tier: Rare
+      Unlock: Lvl 5+
+      Stat Range: ±2/±1 or ±3
+      Special: Notable
+    - Tier: Legendary
+      Unlock: Lvl 8+
+      Stat Range: ±3/±2 or ±4
+      Special: Powerful, may reduce shadow
+    sep_cells:
+    - '------'
+    - '--------'
+    - '-----------'
+    - '---------'
+  description: ''
+  heading_level: 3
+  compact_heading: true
+- id: §11.sample-items
+  section: §11
+  title: Sample Items
+  type: table
+  blocks:
+  - kind: table
+    rows:
+    - Item: Vintage Band Tee
+      Tier: Common
+      Stats: Wit +1, S-Awr -1
+      Archetype tendency: Philosopher, Peacock
+    - Item: Beanie with Patches
+      Tier: Common
+      Stats: Charm +1, Rizz -1
+      Archetype tendency: Bio Responder, Sniper
+    - Item: Hiking Boots
+      Tier: Common
+      Stats: Honesty +1
+      Archetype tendency: Bio Responder, Slow Fader
+    - Item: Rubber Duck
+      Tier: Uncommon
+      Stats: Chaos +1, Charm -1
+      Archetype tendency: Philosopher, Wall of Text
+    - Item: Worn Paperback
+      Tier: Uncommon
+      Stats: Wit +1, S-Awr +1, Chaos -1
+      Archetype tendency: Wall of Text, Bio Responder
+    - Item: Ironic Cowboy Hat
+      Tier: Uncommon
+      Stats: Rizz +2, Honesty -1
+      Archetype tendency: Breadcrumber, Player
+    - Item: Fedora
+      Tier: Uncommon
+      Stats: Wit +2, S-Awr -1
+      Archetype tendency: extends Pretentious trap +1 turn
+    - Item: Therapy Hoodie
+      Tier: Legendary
+      Stats: S-Awr +3, Honesty +2
+      Archetype tendency: -1 chosen shadow per 5 convos
+    - Item: Cat on shoulder
+      Tier: Legendary
+      Stats: Charm +4, Chaos +1
+      Archetype tendency: +2 starting Interest
+    - Item: Cold shower towel
+      Tier: Legendary
+      Stats: Wit +3, S-Awr +2
+      Archetype tendency: Horniness capped at 5
+    sep_cells:
+    - '------'
+    - '------'
+    - '-------'
+    - '---------'
+  - kind: hr
+  description: ''
+  heading_level: 3
+  compact_heading: true
+- id: §10.10-leveling-xp
+  section: §10
+  title: 10. Leveling & XP
+  type: interest_change
+  description: ''
+  heading_level: 2
+- id: §12.xp-sources
+  section: §12
+  title: XP Sources
+  type: table
+  blocks:
+  - kind: table
+    rows:
+    - Action: Successful check
+      XP: 5 / 10 / 15 (by DC)
+    - Action: Failed check
+      XP: '2'
+    - Action: Nat 20
+      XP: '25'
+    - Action: Nat 1
+      XP: 10 (suffering is educational)
+    - Action: Date secured
+      XP: '50'
+    - Action: Trap recovery
+      XP: '15'
+    - Action: Achievement
+      XP: 20-50
+    - Action: Conversation completed (no date)
+      XP: '5'
+    sep_cells:
+    - '--------'
+    - '-----'
+  description: ''
+  heading_level: 3
+  compact_heading: true
+- id: §12.levels-build-points
+  section: §12
+  title: Levels & Build Points
+  type: table
+  blocks:
+  - kind: paragraph
+    text: On level-up you receive **build points** to spend on any positive stat you choose. This is your build. Stacking Rizz + Charm = different character than stacking Wit + Honesty — mechanically and
+      narratively.
+  - kind: table
+    rows:
+    - Level: '1'
+      XP: '0'
+      Title: Fresh Meat
+      Build Points: — (starting budget, see below)
+      Item Slots: '2'
+      Level Bonus: '+0'
+    - Level: '2'
+      XP: '50'
+      Title: First Swipe
+      Build Points: '+2'
+      Item Slots: '2'
+      Level Bonus: '+0'
+    - Level: '3'
+      XP: '150'
+      Title: Getting Somewhere
+      Build Points: '+2'
+      Item Slots: '3'
+      Level Bonus: '**+1**'
+    - Level: '4'
+      XP: '300'
+      Title: Regular
+      Build Points: '+2'
+      Item Slots: '3'
+      Level Bonus: '+1'
+    - Level: '5'
+      XP: '500'
+      Title: Smooth-ish
+      Build Points: '+3'
+      Item Slots: '4'
+      Level Bonus: '**+2**'
+    - Level: '6'
+      XP: '750'
+      Title: Player
+      Build Points: '+3'
+      Item Slots: '4'
+      Level Bonus: '+2'
+    - Level: '7'
+      XP: '1100'
+      Title: Veteran
+      Build Points: '+3'
+      Item Slots: '5'
+      Level Bonus: '**+3**'
+    - Level: '8'
+      XP: '1500'
+      Title: Seasoned
+      Build Points: '+4'
+      Item Slots: '5'
+      Level Bonus: '+3'
+    - Level: '9'
+      XP: '2000'
+      Title: Apex Predator
+      Build Points: '+4'
+      Item Slots: '6'
+      Level Bonus: '**+4**'
+    - Level: '10'
+      XP: '2750'
+      Title: Legendary
+      Build Points: '+5'
+      Item Slots: '6'
+      Level Bonus: '+4'
+    - Level: 11+
+      XP: 3500+
+      Title: Prestige
+      Build Points: Reset → Lvl 1, keep items, shadows → 0, cosmetic
+      Item Slots: '6'
+      Level Bonus: '**+5**'
+    sep_cells:
+    - '-------'
+    - '-----'
+    - '-------'
+    - ':---:'
+    - ':---:'
+    - ':---:'
+  description: On level-up you receive **build points** to spend on any positive stat you choose. This is your build. Stacking Rizz + Charm = different character than stacking Wit + Honesty — mechanically
+    and narratively.
+  heading_level: 3
+- id: §12.spending-build-points
+  section: §12
+  title: Spending Build Points
+  type: shadow_growth
+  blocks:
+  - kind: paragraph
+    text: '- 1 build point = +1 to any positive stat
+
+      - You can stack all points into one stat or spread them
+
+      - **Stat cap: +6 per stat** (before gear and shadow penalties)
+
+      - Gear can push a stat above the cap — the cap is for base stats only
+
+      - You cannot reduce stats with build points (only shadows do that)'
+  description: '- 1 build point = +1 to any positive stat
+
+    - You can stack all points into one stat or spread them
+
+    - **Stat cap: +6 per stat** (before gear and shadow penalties)
+
+    - Gear can push a stat above the cap — the cap is for base stats only
+
+    - You cannot reduce stats with build points (only shadows do that)'
+  heading_level: 3
+  condition:
+    formula: build_points
+  outcome:
+    stat_cap: 6
+- id: §12.character-creation-level-1-starting-budget
+  section: §12
+  title: Character Creation (Level 1 Starting Budget)
+  type: table
+  blocks:
+  - kind: paragraph
+    text: New characters start with **12 build points** to distribute freely across the six stats. No stat can start above +4 at creation.
+  - kind: paragraph
+    text: 'Example starting builds:'
+  - kind: table
+    rows:
+    - Build: Generalist
+      Allocation: +2 to all six stats
+      Playstyle: No weakness, no strength. Survives everything, excels at nothing.
+    - Build: Smooth Criminal
+      Allocation: Charm +4, Rizz +4, Wit +2, Honesty +1, SA +1
+      Playstyle: High floor against most opponents. Collapses if they see through you.
+    - Build: Authentic Intellectual
+      Allocation: Wit +4, Honesty +4, SA +4
+      Playstyle: High ceiling on emotional connection. Terrible at pure seduction.
+    - Build: Chaos Agent
+      Allocation: Chaos +4, Rizz +4, Charm +4
+      Playstyle: Volatile. Explosive upside, spectacular failures. Traps constantly.
+    - Build: The Mirror
+      Allocation: SA +4, Honesty +4, Wit +3, Charm +1
+      Playstyle: Great at reading opponents and adapting. Terrible opener.
+    sep_cells:
+    - '---'
+    - '---'
+    - '---'
+  description: New characters start with **12 build points** to distribute freely across the six stats. No stat can start above +4 at creation.
+  heading_level: 3
+  condition:
+    level_range:
+    - 1
+    - 1
+  outcome:
+    build_points: 12
+    stat_cap: 4
+- id: §12.build-synergies
+  section: §12
+  title: Build Synergies
+  type: table
+  blocks:
+  - kind: paragraph
+    text: 'Certain stat combinations create natural advantages:'
+  - kind: table
+    rows:
+    - Combo: '**Wit + Honesty**'
+      Synergy: '"Authentic Intellectual" — wit sets up honest moments; both benefit from The Disarm combo'
+    - Combo: '**Charm + Rizz**'
+      Synergy: '"Smooth Criminal" — most options feel natural; vulnerable to Self-Awareness opponents'
+    - Combo: '**Chaos + Rizz**'
+      Synergy: '"Chaos Seduction" — activates The Escalation combo; Trope Trap fires often but can recover'
+    - Combo: '**SA + Honesty**'
+      Synergy: '"The Reader" — activates The Read combo; great against low-Honesty opponents whose reads are unreliable'
+    - Combo: '**Wit + Charm**'
+      Synergy: '"The Comedian" — activates The Setup combo; charming people who''ve already laughed'
+    sep_cells:
+    - '---'
+    - '---'
+  - kind: paragraph
+    text: '**Shadow counter-pressure:** Building high in one stat means its shadow grows faster when you fail with it. A Rizz +6 build also means Horniness grows dramatically from failed Rizz rolls. The
+      build defines your risk profile, not just your strengths.'
+  - kind: hr
+  description: 'Certain stat combinations create natural advantages:'
+  heading_level: 3
+- id: §11.11-llm-integration
+  section: §11
+  title: 11. LLM Integration
+  type: definition
+  blocks:
+  - kind: blockquote
+    text: '**Full prompt templates → [[character-construction]]**
+
+      All 8 LLM prompts: character system prompt, dialogue option generation, success delivery, failure degradation (with tier instructions), opponent message generation, shadow taint block, trap taint
+      block, and interest change beats.'
+  description: ''
+  heading_level: 2
+- id: §13.the-llm-generates
+  section: §13
+  title: 'The LLM generates:'
+  type: interest_change
+  blocks:
+  - kind: paragraph
+    text: '1. **Opponent''s messages** — from their uploaded personality prompt (equipment fragments + stats), Interest level, convo history
+
+      2. **Your dialogue options** — 3-4 per turn, each tagged with a stat. The player sees what they INTEND to say.
+
+      3. **What actually comes out** — on success: the intended message, delivered well. On fail: a degraded version scaled to fail severity.
+
+      4. **Trap descriptions** — on 6+ miss: the stat-specific trope trap moment'
+  description: '1. **Opponent''s messages** — from their uploaded personality prompt (equipment fragments + stats), Interest level, convo history
+
+    2. **Your dialogue options** — 3-4 per turn, each tagged with a stat. The player sees what they INTEND to say.
+
+    3. **What actually comes out** — on success: the intended message, delivered well. On fail: a degraded version scaled to fail severity.
+
+    4. **Trap descriptions** — on 6+ miss: the stat-specific trope trap moment'
+  heading_level: 3
+  compact_heading: true
+- id: §13.the-llm-does-not
+  section: §13
+  title: 'The LLM does NOT:'
+  type: interest_change
+  blocks:
+  - kind: paragraph
+    text: '- Decide pass/fail (dice)
+
+      - Change stats (shadow rules)
+
+      - Control Interest (margin math)'
+  description: '- Decide pass/fail (dice)
+
+    - Change stats (shadow rules)
+
+    - Control Interest (margin math)'
+  heading_level: 3
+  compact_heading: true
+- id: §13.shadow-flavor
+  section: §13
+  title: Shadow Flavor
+  type: shadow_growth
+  blocks:
+  - kind: paragraph
+    text: 'The LLM uses shadow levels to tint ALL generated options:
+
+      - **High Dread:** Even successful Wit options have melancholy undertones
+
+      - **High Madness:** Charm options work but feel slightly uncanny
+
+      - **High Denial:** Honesty options sound rehearsed
+
+      - **High Fixation:** Chaos options feel forced
+
+      - **High Overthinking:** Self-Awareness options are too clinical
+
+      - **High Horniness:** Rizz options are more frequent and more forward'
+  - kind: hr
+  description: 'The LLM uses shadow levels to tint ALL generated options:
+
+    - **High Dread:** Even successful Wit options have melancholy undertones
+
+    - **High Madness:** Charm options work but feel slightly uncanny
+
+    - **High Denial:** Honesty options sound rehearsed
+
+    - **High Fixation:** Chaos options feel forced
+
+    - **High Overthinking:** Self-Awareness options are too clinical
+
+    - **High Horniness:** Rizz options are more frequent and more forward'
+  heading_level: 3
+  compact_heading: true
+- id: §12.12-server-social
+  section: §12
+  title: 12. Server & Social
+  type: definition
+  blocks:
+  - kind: blockquote
+    text: '**Async multi-chat & time system → [[async-time]]**
+
+      Energy budget (15-20 turns/day), simulated timestamps, time-of-day Horniness modifiers, response delay as Interest signal, cross-chat shadow bleed. Conversations run asynchronously with simulated
+      time — you can fast-forward, but the opponent''s timing profile (set by their equipment) shapes how and when they reply.'
+  description: ''
+  heading_level: 2
+- id: §14.character-upload
+  section: §14
+  title: Character Upload
+  type: shadow_growth
+  blocks:
+  - kind: paragraph
+    text: '- Your penis (stats, equipment, shadow levels, assembled personality prompt) is uploaded to the EigenCore server
+
+      - Other players download your character when they swipe; the LLM puppets your character using your uploaded build
+
+      - You never see conversations others have with your character
+
+      - You CAN see aggregate stats: how many players matched with you, how many got dates, your "popularity rating"'
+  description: '- Your penis (stats, equipment, shadow levels, assembled personality prompt) is uploaded to the EigenCore server
+
+    - Other players download your character when they swipe; the LLM puppets your character using your uploaded build
+
+    - You never see conversations others have with your character
+
+    - You CAN see aggregate stats: how many players matched with you, how many got dates, your "popularity rating"'
+  heading_level: 3
+  compact_heading: true
+- id: §14.matchmaking
+  section: §14
+  title: Matchmaking
+  type: interest_change
+  blocks:
+  - kind: paragraph
+    text: "- The server selects potential matches based on:\n  - Level range (±2 levels)\n  - Complementary stats (high-Charm vs high-Self-Awareness creates interesting dynamics)\n  - Random element (some\
+      \ matches should be \"what is this character?\")\n- **Swipe is asymmetric:** you swipe on their profile (outfit visual + bio). You don't know their stats until you're in conversation and start discovering\
+      \ them through interaction."
+  description: "- The server selects potential matches based on:\n  - Level range (±2 levels)\n  - Complementary stats (high-Charm vs high-Self-Awareness creates interesting dynamics)\n  - Random element\
+    \ (some matches should be \"what is this character?\")\n- **Swipe is asymmetric:** you swipe on their profile (outfit visual + bio). You don't know their stats until you're in conversation and start\
+    \ discovering them through interaction."
+  heading_level: 3
+  compact_heading: true
+  condition:
+    formula: matchmaking
+  outcome:
+    level_range_offset: 2
+- id: §14.leaderboards-optional
+  section: §14
+  title: Leaderboards (Optional)
+  type: interest_change
+  blocks:
+  - kind: paragraph
+    text: '- Most dates secured
+
+      - Highest single-conversation Interest swing
+
+      - Most spectacular Nat 1 (community voted?)
+
+      - Most popular character on the server (most matches by others)'
+  - kind: hr
+  description: '- Most dates secured
+
+    - Highest single-conversation Interest swing
+
+    - Most spectacular Nat 1 (community voted?)
+
+    - Most popular character on the server (most matches by others)'
+  heading_level: 3
+  compact_heading: true
+- id: §13.13-the-complete-loop
+  section: §13
+  title: 13. The Complete Loop
+  type: interest_change
+  blocks:
+  - kind: paragraph
+    text: '1. **Dress your penis** → each item contributes stat modifiers, personality, backstory, texting style, archetype tendency, and timing — the full character is assembled from equipment (→ [[character-construction]])
+
+      2. **Upload to server** → your character enters the dating pool
+
+      3. **Swipe** → browse other players'' uploaded characters
+
+      4. **Roll Horniness** → 1d10 for this conversation
+
+      5. **Calculate effective stats** → base + gear + level bonus - shadow penalties
+
+      6. **Conversation** → pick intended dialogue, roll d20, see what actually comes out, watch Interest move
+
+      7. **Every fail changes your words** → fumble, misfire, trap, or catastrophe
+
+      8. **Shadows grow** → rejection → Dread, grinding → Madness, faking → Denial, safe play → Fixation, spiraling → Overthinking, biology → Horniness
+
+      9. **Get the date** → Interest 20 = XP = level up = better stats + items
+
+      10. **Loop** → shadows accumulate. Early game is easy. Late game is hard. The baggage is real.
+
+      11. **Prestige** → full reset. Clean slate. New you. Same app.'
+  - kind: hr
+  description: '1. **Dress your penis** → each item contributes stat modifiers, personality, backstory, texting style, archetype tendency, and timing — the full character is assembled from equipment (→
+    [[character-construction]])
+
+    2. **Upload to server** → your character enters the dating pool
+
+    3. **Swipe** → browse other players'' uploaded characters
+
+    4. **Roll Horniness** → 1d10 for this conversation
+
+    5. **Calculate effective stats** → base + gear + level bonus - shadow penalties
+
+    6. **Conversation** → pick intended dialogue, roll d20, see what actually comes out, watch Interest move
+
+    7. **Every fail changes your words** → fumble, misfire, trap, or catastrophe
+
+    8. **Shadows grow** → rejection → Dread, grinding → Madness, faking → Denial, safe play → Fixation, spiraling → Overthinking, biology → Horniness
+
+    9. **Get the date** → Interest 20 = XP = level up = better stats + items
+
+    10. **Loop** → shadows accumulate. Early game is easy. Late game is hard. The baggage is real.
+
+    11. **Prestige** → full reset. Clean slate. New you. Same app.'
+  heading_level: 2
+- id: §14.14-design-principles
+  section: §14
+  title: 14. Design Principles
+  type: interest_change
+  blocks:
+  - kind: paragraph
+    text: '1. **One goal:** Get the date. XP is the reward. Everything serves that.
+
+      2. **Every fail is visible.** The player sees what they wanted to say and what came out. The gap IS the game.
+
+      3. **Shadows are never chosen.** They grow from how you play. The game punishes you for being human.
+
+      4. **The dice create stories.** Same characters, different rolls, different outcomes.
+
+      5. **Other players are your content.** Their characters populate your world. Your character populates theirs.
+
+      6. **Items fight shadows.** Gear is your weapon against the darkness. Therapy Hoodie is the holy grail.
+
+      7. **The long game is about baggage.** Prestige is the only true escape.
+
+      8. **Traps taint everything.** A failed Honesty roll doesn''t just make Honesty harder — it bleeds personal details into your Wit messages too. Traps are prompt-level contamination, not just stat
+      penalties.
+
+      9. **Failures corrupt content, not delivery.** A failed roll degrades what you *say*, never how you *send* it. No accidental sends, no butt-dials, no phone fumbles. The message is always delivered
+      intentionally — it''s the words themselves that betray you. The comedy comes from saying the wrong thing on purpose, not from UI accidents.'
+  - kind: hr
+  description: '1. **One goal:** Get the date. XP is the reward. Everything serves that.
+
+    2. **Every fail is visible.** The player sees what they wanted to say and what came out. The gap IS the game.
+
+    3. **Shadows are never chosen.** They grow from how you play. The game punishes you for being human.
+
+    4. **The dice create stories.** Same characters, different rolls, different outcomes.
+
+    5. **Other players are your content.** Their characters populate your world. Your character populates theirs.
+
+    6. **Items fight shadows.** Gear is your weapon against the darkness. Therapy Hoodie is the holy grail.
+
+    7. **The long game is about baggage.** Prestige is the only true escape.
+
+    8. **Traps taint everything.** A failed Honesty roll doesn''t just make Honesty harder — it bleeds personal details into your Wit messages too. Traps are prompt-level contamination, not just stat penalties.
+
+    9. **Failures corrupt content, not delivery.** A failed roll degrades what you *say*, never how you *send* it. No accidental sends, no butt-dials, no phone fumbles. The message is always delivered intentionally
+    — it''s the words themselves that betray you. The comedy comes from saying the wrong thing on purpose, not from UI accidents.'
+  heading_level: 2
+- id: §15.15-player-decision-framework
+  section: §15
+  title: 15. Player Decision Framework
+  type: roll_modifier
+  blocks:
+  - kind: paragraph
+    text: 'Every turn, the player sees 3-4 dialogue options with intended messages, stats, DCs, and odds. The competing pressures:'
+  description: 'Every turn, the player sees 3-4 dialogue options with intended messages, stats, DCs, and odds. The competing pressures:'
+  heading_level: 2
+- id: §17.raw-odds-vs-shadow-pressure
+  section: §17
+  title: Raw Odds vs Shadow Pressure
+  type: interest_change
+  blocks:
+  - kind: paragraph
+    text: 'The highest-% option is obvious. But the game punishes safe play:
+
+      - **Picking the highest-% option 3 turns in a row → Fixation +1**
+
+      - **Using the same stat 3 turns in a row → Fixation +1**
+
+      - **Never picking Chaos in a whole conversation → Fixation +1**
+
+      - **4+ different stats used in one conversation → Fixation -1** (reward)'
+  description: 'The highest-% option is obvious. But the game punishes safe play:
+
+    - **Picking the highest-% option 3 turns in a row → Fixation +1**
+
+    - **Using the same stat 3 turns in a row → Fixation +1**
+
+    - **Never picking Chaos in a whole conversation → Fixation +1**
+
+    - **4+ different stats used in one conversation → Fixation -1** (reward)'
+  heading_level: 3
+  compact_heading: true
+- id: §17.interest-budget
+  section: §17
+  title: Interest Budget
+  type: interest_change
+  blocks:
+  - kind: paragraph
+    text: At Interest 9-14 (safe zone), risk a -2. At Interest 4 (danger zone), you can't.
+  description: At Interest 9-14 (safe zone), risk a -2. At Interest 4 (danger zone), you can't.
+  heading_level: 3
+  compact_heading: true
+- id: §17.the-message-itself
+  section: §17
+  title: The Message Itself
+  type: definition
+  blocks:
+  - kind: paragraph
+    text: Sometimes the 18% option *sounds right* for the conversation. The player chooses between mechanical safety and narrative authenticity. That tension is the game.
+  description: Sometimes the 18% option *sounds right* for the conversation. The player chooses between mechanical safety and narrative authenticity. That tension is the game.
+  heading_level: 3
+  compact_heading: true
+- id: §17.fail-entertainment
+  section: §17
+  title: Fail Entertainment
+  type: definition
+  blocks:
+  - kind: paragraph
+    text: Players learn that failures are funny. The 65% safe pick produces "slightly flat delivery." The 18% chaos pick produces "invented a mycelium startup with an org chart." Some players chase spectacular
+      failures because that's where memorable moments live.
+  - kind: hr
+  description: Players learn that failures are funny. The 65% safe pick produces "slightly flat delivery." The 18% chaos pick produces "invented a mycelium startup with an org chart." Some players chase
+    spectacular failures because that's where memorable moments live.
+  heading_level: 3
+  compact_heading: true
+- id: §16.16-trap-system
+  section: §16
+  title: 16. Trap System
+  type: interest_change
+  blocks:
+  - kind: paragraph
+    text: Traps are **temporary status effects** triggered by failed rolls (miss by 6+). They differ from shadows in that they expire and they taint the LLM prompt for ALL messages.
+  description: Traps are **temporary status effects** triggered by failed rolls (miss by 6+). They differ from shadows in that they expire and they taint the LLM prompt for ALL messages.
+  heading_level: 2
+- id: §18.trap-lifecycle
+  section: §18
+  title: Trap Lifecycle
+  type: interest_change
+  blocks:
+  - kind: paragraph
+    text: '1. **Activation:** Miss DC by 6+ → stat-specific trap fires. Changes what your message becomes AND applies carry-forward effects.
+
+      2. **Active:** For 1-2 turns, the trap applies both a **mechanical effect** (DC/roll penalty on the trapped stat) and a **prompt taint** (colors ALL messages regardless of stat).
+
+      3. **Expiry:** Auto-expires after duration. Player sees notification. Alternatively, use **Recover** action (Self-Awareness vs DC 12, costs turn + -1 Interest) to clear early.'
+  description: '1. **Activation:** Miss DC by 6+ → stat-specific trap fires. Changes what your message becomes AND applies carry-forward effects.
+
+    2. **Active:** For 1-2 turns, the trap applies both a **mechanical effect** (DC/roll penalty on the trapped stat) and a **prompt taint** (colors ALL messages regardless of stat).
+
+    3. **Expiry:** Auto-expires after duration. Player sees notification. Alternatively, use **Recover** action (Self-Awareness vs DC 12, costs turn + -1 Interest) to clear early.'
+  heading_level: 3
+  compact_heading: true
+- id: §18.prompt-taint
+  section: §18
+  title: Prompt Taint
+  type: trap_activation
+  blocks:
+  - kind: paragraph
+    text: 'While a trap is active, it contaminates the LLM prompt so ALL generated messages carry the trap''s flavor:
+
+      - **On success:** Subtle — one word choice or aside that feels off
+
+      - **On failure:** Amplified — the failure AND the taint compound'
+  description: 'While a trap is active, it contaminates the LLM prompt so ALL generated messages carry the trap''s flavor:
+
+    - **On success:** Subtle — one word choice or aside that feels off
+
+    - **On failure:** Amplified — the failure AND the taint compound'
+  heading_level: 3
+  compact_heading: true
+- id: §18.trap-definitions
+  section: §18
+  title: Trap Definitions
+  type: interest_change
+  blocks:
+  - kind: paragraph
+    text: 'Trap data lives in `data/traps/traps.json` with schema at `data/traps/trap-schema.json`. Custom traps go in `data/traps/custom/`. Each trap defines:
+
+      - `mechanical_effect` — stat-specific DC/roll penalty
+
+      - `prompt_taint` — qualitative description + direct LLM instruction
+
+      - `flavor` — activation/expiry/indicator text
+
+      - `clear_method` — how to remove early
+
+      - `nat1_bonus` — extra effects on Natural 1'
+  description: 'Trap data lives in `data/traps/traps.json` with schema at `data/traps/trap-schema.json`. Custom traps go in `data/traps/custom/`. Each trap defines:
+
+    - `mechanical_effect` — stat-specific DC/roll penalty
+
+    - `prompt_taint` — qualitative description + direct LLM instruction
+
+    - `flavor` — activation/expiry/indicator text
+
+    - `clear_method` — how to remove early
+
+    - `nat1_bonus` — extra effects on Natural 1'
+  heading_level: 3
+  compact_heading: true
+- id: §18.traps-vs-shadows
+  section: §18
+  title: Traps vs Shadows
+  type: table
+  blocks:
+  - kind: table
+    rows:
+    - ? ''
+      : Duration
+      Traps: 1-2 turns
+      Shadows: Permanent (or semi-permanent)
+    - ? ''
+      : Trigger
+      Traps: Single bad roll (miss 6+)
+      Shadows: Patterns of play over time
+    - ? ''
+      : Effect
+      Traps: DC/roll penalty + prompt taint
+      Shadows: Stat modifier penalty + option flavor tint
+    - ? ''
+      : Removal
+      Traps: Auto-expire or Recover action
+      Shadows: Specific actions, items, or prestige reset
+    - ? ''
+      : Stacking
+      Traps: Can stack with shadows
+      Shadows: Grow independently
+    sep_cells:
+    - '---'
+    - '---'
+    - '---'
+  - kind: paragraph
+    text: 'A Catastrophe (miss 10+) or Nat 1 triggers BOTH: trap + shadow growth. Single terrible roll → compounding consequences.'
+  description: 'A Catastrophe (miss 10+) or Nat 1 triggers BOTH: trap + shadow growth. Single terrible roll → compounding consequences.'
+  heading_level: 3
+  compact_heading: true
