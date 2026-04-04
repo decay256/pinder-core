@@ -187,16 +187,14 @@ def extract_rules(filepath):
             i += 1
             continue
 
-        # Table detection
-        if '|' in line and not line.strip().startswith('>'):
-            stripped = line.strip()
-            if stripped.startswith('|') or (stripped.count('|') >= 2):
-                if not in_table:
-                    flush_table()
-                    in_table = True
-                table_lines.append(line)
-                i += 1
-                continue
+        # Table detection — only lines that start with '|' are table rows
+        if line.strip().startswith('|') and not line.strip().startswith('>'):
+            if not in_table:
+                flush_table()
+                in_table = True
+            table_lines.append(line)
+            i += 1
+            continue
         else:
             if in_table:
                 flush_table()
@@ -268,9 +266,16 @@ def extract_rules(filepath):
             i += 1
             continue
 
-        # Empty line
+        # Empty line — track consecutive blanks to preserve multi-blank gaps
         if not line.strip():
-            i += 1
+            blank_count = 1
+            j = i + 1
+            while j < len(lines) and not lines[j].strip():
+                blank_count += 1
+                j += 1
+            if blank_count > 1 and current_rule is not None:
+                _blocks(current_rule).append({'kind': 'blank_lines', 'count': blank_count})
+            i += blank_count
             continue
 
         # No current rule yet — create a preamble entry
