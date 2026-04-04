@@ -1,88 +1,92 @@
-# Vision Review — Sprint 2 (Player Agent + Sim Runner Fixes) — Attempt 2
+# Vision Review — Sprint 2 (Sim Runner + Scorer Improvements) — Attempt 2
 
-## Alignment: ✅
-This sprint serves the product vision well. The player agent abstraction (#346-#348) is critical infrastructure for automated playtesting — it transforms the sim runner from a "pick highest modifier" toy into a meaningful game balance tool. The bug fixes (#349, #352-#354) address real correctness issues found during simulation runs. Shadow tracking (#350) and reasoning output (#351) make the simulation output actionable for game design decisions. This is high-leverage prototype work.
+## Alignment: ✅ Strong
 
-## Vision Concerns — Status Review
+This sprint remains well-aligned with the product vision. The session runner is the primary tool for exercising the RPG engine at prototype maturity — every improvement here directly increases the value of automated playtesting. Character loading from CLI (#414) and CharacterAssembler integration (#415) eliminate hardcoded test data, making it possible to test any character combination. Shadow-aware scoring (#416) makes the automated player smarter, producing more realistic playtests. The max-turns fix (#417) and file counter fix (#418) are quality-of-life improvements that prevent data loss and misleading results.
 
-### #355 — IPlayerAgent should NOT live in Pinder.Core ✅ Well-specified
-- Clear AC: types must live in session-runner, not Core
-- Directly contradicts #346's AC ("IPlayerAgent interface defined in Pinder.Core") — implementer must follow #355
-- No changes needed
+## Insufficient Requirements
 
-### #356 — JsonTrapRepository takes JSON string, not file path ✅ Well-specified
-- Clear AC with exact code fix
-- No changes needed
-
-### #357 — InterestChangeContext backward-compatible optional parameter ✅ Well-specified
-- Clear AC: optional param with null default, existing tests unchanged
-- No changes needed
-
-### NEW #359 — File counter glob doesn't match actual filenames
-- #354's proposed fix addresses parsing but not the glob pattern
-- `session-???.md` matches `session-NNN.md` but actual files are `session-NNN-name-vs-name.md`
-- Glob returns zero files, so parsing fix never runs
-- **Created issue #359** with fix: change glob to `session-*.md`
-
-### NEW #360 — SessionShadowTracker constructor takes StatBlock, not Dictionary
-- #350's spec shows wrong constructor signature
-- `SessionShadowTracker(Dictionary<ShadowStatType, int>)` does not exist
-- Correct: `new SessionShadowTracker(sableStats)` where sableStats is the existing StatBlock
-- **Created issue #360** with correct usage
+None. All 5 issues have substantive bodies with clear acceptance criteria. Appropriate for prototype maturity.
 
 ## Data Flow Traces
 
-### Player Agent Decision Flow
-- `GameSession.StartTurnAsync()` → `TurnStart` (options, state snapshot)
-- `TurnStart` → `IPlayerAgent.DecideAsync(turnStart, context)` → `PlayerDecision` (index, reasoning, scores)
-- `PlayerDecision.OptionIndex` → `GameSession.ResolveTurnAsync(index)` → `TurnResult`
-- Required fields in `PlayerAgentContext`: PlayerStats, OpponentStats, CurrentInterest, InterestState, MomentumStreak, ActiveTrapNames, SessionHorniness, ShadowValues, TurnNumber
-- ⚠️ `PlayerAgentContext` duplicates `TurnStart.State` (GameStateSnapshot) — per #355, consider using TurnStart directly
+### Character Loading from CLI (#414)
+- User runs `--player gerald --opponent velvet` → `CharacterLoader` parses `design/examples/{name}-prompt.md` → extracts Level, 6 stat modifiers, shadow values, system prompt → constructs `StatBlock` + `CharacterProfile` → passed to `GameSession`
+- Required fields: Level, 6 stat modifiers, 5+ shadow values, system prompt text, display name
+- ✅ Path is clear. Prompt files exist at external path.
 
-### Shadow Tracking Flow (#350)
-- Session runner creates `SessionShadowTracker(sableStats)` → passes via `GameSessionConfig`
-- `GameSession` stores as `_playerShadows`
-- Growth triggers in `ProcessShadowGrowth()` call `_playerShadows.ApplyGrowth()`
-- `TurnResult.ShadowGrowthEvents` populated from `_playerShadows.DrainGrowthEvents()`
-- Session runner reads events from `TurnResult` for display
-- ⚠️ Shadow delta table at session end requires `SessionShadowTracker.GetDelta()` per shadow — session runner must hold reference to tracker
+### CharacterAssembler Integration (#415)
+- User runs `--player-def player-gerald.json` → load JSON definition → `JsonItemRepository` + `JsonAnatomyRepository` → `CharacterAssembler.Assemble(itemIds, anatomySelections, baseStats, shadows)` → `FragmentCollection` → `PromptBuilder.BuildSystemPrompt()` → `CharacterProfile` constructor → `GameSession`
+- Required fields: item IDs, anatomy selections, build points, shadow values, display name, level, bio, gender identity
+- ⚠️ **#419 (existing)**: `Assemble()` returns `FragmentCollection`, not `CharacterProfile` — spec code won't compile
+- ⚠️ **#421 (new)**: `data/items/starter-items.json` and `data/anatomy/anatomy-parameters.json` don't exist in pinder-core
 
-### Fixation Probability Fix (#349)
-- `ResolveTurnAsync` has `_currentOptions` (all 4 options) and `_opponent.Stats`
-- For each option: `need = opponent.GetDefenceDC(opt.Stat) - player.GetEffective(opt.Stat)`
-- `successPct = max(0, min(100, (21 - need) * 5))`
-- Compare chosen option's pct against all options' pcts
-- ⚠️ Must account for `externalBonus` (momentum, tell, callback) in probability calc — the "need" includes bonuses that modify the roll
+### Shadow Growth Risk Scoring (#416)
+- `ScoringPlayerAgent.DecideAsync(turn, context)` → for each option, compute `shadowPenalty` from stat history + Denial risk → adjust EV → pick highest
+- Required fields: last 2 stats used, current shadow levels, whether Honesty is in options
+- ⚠️ `PlayerAgentContext` currently lacks stat history. #416 AC correctly requires adding this.
+
+### Max Turns + Projected Outcome (#417)
+- Session loop runs up to `maxTurns` → on cutoff, compute projected outcome → append to markdown
+- ✅ All data available from `GameStateSnapshot`.
+- ⚠️ **#422 (new)**: `--max-turns` arg defined in both #414 (default 15) and #417 (default 20) — conflict
+
+### File Counter Fix (#418)
+- `SessionFileCounter.GetNextSessionNumber(dir)` → glob `session-*.md` → parse number → return max+1
+- ✅ `SessionFileCounter.cs` already uses correct glob and parsing. Issue suggests a path resolution bug.
 
 ## Unstated Requirements
-- Users running the LlmPlayerAgent (#348) expect it to produce **different** play patterns than ScoringPlayerAgent — otherwise why have two agents? The output should visibly show strategic personality differences.
-- If shadow tracking is enabled (#350), users expect shadow growth to actually **affect gameplay** within the session (not just be reported). Since GameSession already handles threshold effects, this should work — but the session output should make the effects visible (e.g., "⚠️ Dread T1: disadvantage applied").
-- Users expect the file counter fix (#354) to be idempotent — running the session runner N times should produce N correctly-numbered files.
+
+- **Character definition validation**: If #415 creates definition files with item IDs, those IDs must exist in `starter-items.json`. No cross-reference validation is specified.
+- **Loading path unification**: After #415 ships, `--player gerald` should use the assembler pipeline, not the prompt file parser from #414. The migration path isn't explicit.
+- **Shadow penalty tuning**: The constants in #416 (0.5, 0.3, 0.1) need to be validated against actual playtest outcomes. Should be easy to adjust.
 
 ## Domain Invariants
-- `ScoringPlayerAgent` must be deterministic: same `TurnStart` + `PlayerAgentContext` → same `PlayerDecision` always
-- `LlmPlayerAgent` must fall back to `ScoringPlayerAgent` on any API failure — no crashes
-- Session file numbering must be monotonically increasing and gap-free within a run
-- `SessionShadowTracker` wraps `StatBlock` — shadow starting values come from the `StatBlock`, not a separate dictionary
-- `InterestChangeContext` changes must be backward-compatible (optional params with defaults)
+
+- `ScoringPlayerAgent` must remain deterministic: identical inputs → identical outputs
+- File counter must be monotonically increasing: N sequential runs → N correctly-numbered files
+- `CharacterAssembler` pipeline must produce mechanically equivalent characters to hand-written prompt files — otherwise sim comparisons are invalid across loading paths
+- Shadow growth penalty must not make the scorer strictly worse vs. pure-EV baseline
 
 ## Gaps
-- **Missing (in #354)**: Glob pattern fix — addressed by new concern #359
-- **Missing (in #350)**: Constructor mismatch — addressed by new concern #360
-- **Assumption**: #349 probability computation only considers base stat + opponent DC, not external bonuses (momentum, tell, callback). If the "highest probability" should account for known bonuses, the fix is more complex. The issue's current scope (base probability comparison) is likely sufficient for prototype.
-- **Assumption**: #348 LlmPlayerAgent will use `AnthropicClient` from `Pinder.LlmAdapters` rather than rolling its own HTTP client. Session-runner already references LlmAdapters, so this should work.
 
-## Requirements Compliance
-- No `REQUIREMENTS.md` found in repo — no formal FR/NFR/DC checks possible.
-- All changes are backward-compatible (optional params, new types, session-runner-only changes).
-- Zero-dependency constraint on Pinder.Core is maintained (per #355, player agent types stay in session-runner).
+### Missing
+- **Item/anatomy data files** (#421): `data/items/starter-items.json` and `data/anatomy/anatomy-parameters.json` must be available for #415
+- **--max-turns ownership** (#422): Both #414 and #417 define this arg with different defaults
+
+### Unnecessary
+- Nothing — all 5 issues are well-scoped.
+
+### Assumptions to validate
+- Starter character prompt files produce mechanically identical results to running through `CharacterAssembler` + `PromptBuilder`
+
+## Requirements Compliance Check
+
+No `REQUIREMENTS.md` exists in the repo. No formal FR/NFR/DC entries to check against. Acceptable at prototype maturity.
+
+## Filed Concerns
+
+| # | Concern | Status |
+|---|---------|--------|
+| #419 | CharacterAssembler returns FragmentCollection, not CharacterProfile | Existing — well-specified ✅ |
+| #421 | #415 requires item/anatomy data files not in pinder-core | **New** — filed this pass |
+| #422 | #414 and #417 both add --max-turns with conflicting defaults | **New** — filed this pass |
+
+## Existing Concerns (resolved in code, still open on GitHub)
+
+These were filed in prior sprints and have been implemented. They remain open for PO closure:
+- #355 (IPlayerAgent in session-runner) — ✅ implemented correctly
+- #356 (JsonTrapRepository takes string) — ✅ implemented via TrapRegistryLoader
+- #359 (file counter glob) — ✅ implemented in SessionFileCounter
+- #360 (SessionShadowTracker takes StatBlock) — ✅ implemented correctly
 
 ## Recommendations
-1. Implementer of #354 **must also fix the glob** per #359 — the two issues should be addressed together
-2. Implementer of #350 **must use StatBlock constructor** per #360 — do not attempt `new SessionShadowTracker(Dictionary<>)`
-3. Implementer of #346 **must follow #355** and place types in session-runner, overriding the AC that says "in Pinder.Core"
-4. Implementer of #353 **must follow #356** and use `File.ReadAllText()` before passing to `JsonTrapRepository`
 
-## VERDICT: CLEAN
+1. **Address #421 before #415**: Either copy data files into pinder-core `data/` or add path resolution (like TrapRegistryLoader pattern).
+2. **Remove `--max-turns` from #414 scope** per #422: Let #417 own it with default 20.
+3. **Sequence #414 before #415**: #415 depends on #414 (stated). Ensure they're in separate waves.
+4. **#419 remains valid**: Implementer of #415 must bridge `FragmentCollection` → `PromptBuilder` → `CharacterProfile`.
 
-All 5 vision concerns (3 existing + 2 new) are now well-specified with actionable acceptance criteria. The sprint scope is appropriate for prototype maturity. No blocking gaps remain — all concerns are advisory corrections to spec code that implementers can follow.
+## Verdict: **ADVISORY**
+
+Two new concerns filed (#421, #422). Both are recoverable at prototype maturity but should be addressed before implementation to avoid wasted cycles. The sprint is well-aligned and appropriately scoped.
