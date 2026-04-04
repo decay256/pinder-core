@@ -7,7 +7,13 @@ The session runner orchestrates simulated playtest sessions between two `Charact
 
 - **`session-runner/Program.cs`** — Entry point. Parses CLI arguments (`--player`, `--opponent`, `--max-turns`, `--agent`), loads character profiles via `CharacterLoader`, configures `GameSession` with `GameSessionConfig`, runs the turn loop, and prints per-turn status and session summary markdown. Calls `PlaytestFormatter` to render pick reasoning and score tables. Uses `SessionFileCounter.ResolvePlaytestDirectory()` to locate the playtest output directory.
 - **`session-runner/CharacterLoader.cs`** — Static utility that loads `CharacterProfile` instances from pre-assembled prompt markdown files (`{name}-prompt.md`). Parses display name, level, primary stats (EFFECTIVE STATS section), shadow stats, and assembled system prompt from code-fenced content. Also provides `ListAvailable()` to discover characters in a directory.
+- **`session-runner/CharacterDefinitionLoader.cs`** — Static utility that loads character definition JSON files and runs them through the full `CharacterAssembler` + `PromptBuilder` pipeline to produce `CharacterProfile` instances. Exposes `Load(path, itemRepo, anatomyRepo)` for file-based loading and internal `Parse(json, itemRepo, anatomyRepo)` for direct JSON string parsing (used in tests).
+- **`session-runner/DataFileLocator.cs`** — Static utility that resolves paths to data files by walking up from a base directory. Checks `PINDER_DATA_PATH` env var first, then walks parent directories. Also provides `FindRepoRoot()` to locate the repo root (directory containing both `data/` and `src/`).
+- **`data/characters/*.json`** — Character definition JSON files (gerald, velvet, sable, brick, zyx). Each defines name, gender_identity, bio, level, item IDs, anatomy selections, build_points, and optional shadows.
+- **`data/items/starter-items.json`** — Item definitions consumed by `JsonItemRepository`. Contains stat modifiers, prompt fragments, archetype tendencies, and timing modifiers.
+- **`data/anatomy/anatomy-parameters.json`** — Anatomy parameter definitions consumed by `JsonAnatomyRepository`. Contains tier IDs, stat modifiers, fragments, and timing modifiers.
 - **`tests/Pinder.Core.Tests/CharacterLoaderSpecTests.cs`** — Comprehensive tests for `CharacterLoader`: prompt file parsing (stats, shadows, level, display name, system prompt extraction), error cases (missing file, missing stats, missing EFFECTIVE STATS section), edge cases (mixed case input, shadow lines with/without tilde prefix, parenthetical notes, multiple code fences, level from outside code fence), and conditional integration tests against real prompt files.
+- **`tests/Pinder.Core.Tests/Issue415_CharacterDefinitionLoaderSpecTests.cs`** — Spec-driven tests for `CharacterDefinitionLoader` and `DataFileLocator`: assembly pipeline (AC2–AC4), all 5 character definitions load successfully (AC5), `DataFileLocator` resolves character files (AC6), data file presence, edge cases (missing shadows, empty items/anatomy, special chars in name, unknown item IDs), error conditions (file not found, malformed JSON, missing required fields, level range, unknown stat/shadow types), shadow parsing, `DataFileLocator` walk-up and repo root discovery, integration tests for full pipeline across characters.
 - **`session-runner/PlaytestFormatter.cs`** — Static utility class for formatting player agent reasoning blocks and option score tables as markdown. Contains `FormatReasoningBlock` and `FormatScoreTable`.
 - **`session-runner/LlmPlayerAgent.cs`** — LLM-backed player agent. Sends game state and rules to Anthropic Claude, parses `PICK:` response, falls back to `ScoringPlayerAgent` on failure. Implements `IDisposable`.
 - **`tests/Pinder.Core.Tests/LlmPlayerAgentTests.cs`** — Tests for `LlmPlayerAgent`: adjusted probability display (tell/momentum/callback bonuses), no-bonus raw percentage, dispose idempotency.
@@ -29,14 +35,17 @@ The session runner is a console application (`Program.cs`), not a library.
 
 ```
 Usage: dotnet run --project session-runner -- --player <name> --opponent <name> [--max-turns <n>] [--agent <scoring|llm>]
+       dotnet run --project session-runner -- --player-def <path> --opponent-def <path> [--max-turns <n>] [--agent <scoring|llm>]
 
-  --player <name>      Player character name (required, case-insensitive)
-  --opponent <name>     Opponent character name (required, case-insensitive)
-  --max-turns <n>       Maximum turns (default: 20)
-  --agent <type>        Player agent: scoring or llm (default: scoring)
+  --player <name>        Player character name (tries data/characters/{name}.json first, falls back to prompt file)
+  --opponent <name>      Opponent character name (same resolution as --player)
+  --player-def <path>    Player character definition JSON file (uses CharacterDefinitionLoader)
+  --opponent-def <path>  Opponent character definition JSON file (uses CharacterDefinitionLoader)
+  --max-turns <n>        Maximum turns (default: 20)
+  --agent <type>         Player agent: scoring or llm (default: scoring)
 ```
 
-Character names resolve to `{basePath}/{name.ToLower()}-prompt.md` files in the examples directory. Running with no args or invalid args prints usage and dynamically-discovered available character names, then exits with code 1.
+`--player`/`--opponent` and `--player-def`/`--opponent-def` can be mixed freely. The `--player <name>` shorthand first attempts to resolve `data/characters/{name}.json` via `DataFileLocator`; if found, it delegates to `CharacterDefinitionLoader.Load()`. If not found, it falls back to `CharacterLoader.Load()` (prompt file parsing). Running with no args or invalid args prints usage and exits with code 1.
 
 The `--agent` argument replaces the previous `PLAYER_AGENT` environment variable for agent selection.
 
@@ -71,6 +80,52 @@ public static class CharacterLoader
 - **Shadows**: from `Shadow state` section outside code fence. `~` prefix stripped. Missing section defaults all to 0. Parenthetical notes after values are ignored.
 - **SystemPrompt**: full text between first and last code fences.
 - **Timing**: default `TimingProfile(0, 1.0f, 0.0f, "neutral")` for all prompt-loaded characters.
+
+### CharacterDefinitionLoader (static class)
+
+Loads character definition JSON files through the full `CharacterAssembler` + `PromptBuilder` pipeline.
+
+```csharp
+public static class CharacterDefinitionLoader
+{
+    /// Load a character definition from a JSON file and assemble into a CharacterProfile.
+    /// Throws FileNotFoundException if file missing.
+    /// Throws FormatException on malformed JSON, missing required fields,
+    /// level out of range (1–11), or unknown stat/shadow keys.
+    public static CharacterProfile Load(
+        string jsonPath, IItemRepository itemRepo, IAnatomyRepository anatomyRepo);
+
+    /// Parse a JSON string directly into a CharacterProfile (internal, for testing).
+    internal static CharacterProfile Parse(
+        string json, IItemRepository itemRepo, IAnatomyRepository anatomyRepo);
+}
+```
+
+**Assembly pipeline:** Read JSON → validate required fields (`name`, `gender_identity`, `bio`, `level`, `items`, `anatomy`, `build_points`) → parse stat keys to `StatType`/`ShadowStatType` enums → `CharacterAssembler.Assemble(items, anatomy, buildPoints, shadows)` → `PromptBuilder.BuildSystemPrompt(name, genderIdentity, bio, fragments, new TrapState())` → `new CharacterProfile(fragments.Stats, systemPrompt, name, fragments.Timing, level)`.
+
+**Stat key mapping:** `charm`→Charm, `rizz`→Rizz, `honesty`→Honesty, `chaos`→Chaos, `wit`→Wit, `self_awareness`→SelfAwareness. Shadow keys: `madness`→Madness, `horniness`→Horniness, `denial`→Denial, `fixation`→Fixation, `dread`→Dread, `overthinking`→Overthinking.
+
+**Optional field:** `shadows` — defaults all shadow stats to 0 if omitted.
+
+### DataFileLocator (static class)
+
+Resolves paths to data files by walking up from a base directory.
+
+```csharp
+public static class DataFileLocator
+{
+    internal const string EnvVarName = "PINDER_DATA_PATH";
+
+    /// Find a data file by walking up from baseDir.
+    /// Checks PINDER_DATA_PATH env var first, then walks parent directories.
+    /// Returns absolute path or null if not found.
+    public static string? FindDataFile(string baseDir, string relativePath);
+
+    /// Find the repo root (directory with both "data" and "src" subdirectories).
+    /// Returns absolute path or null if not found.
+    public static string? FindRepoRoot(string baseDir);
+}
+```
 
 ### Session Setup
 ```csharp
@@ -237,7 +292,8 @@ When all new fields are at defaults (`null`, `null`, `false`), scoring behavior 
 - **Retained reference pattern**: the session runner keeps a reference to the `SessionShadowTracker` it passes into `GameSessionConfig`. After the game loop exits (normally or via `GameEndedException`), it reads delta/effective values from that same reference for the summary table.
 - **`OpponentShadows` is optional**: the config only wires `playerShadows`; opponent shadow tracking is not used by the session runner currently.
 - **Shadow growth triggers** (e.g., Nat 1 → Madness, 3 consecutive same-stat picks → Fixation) are handled inside `GameSession`; the session runner only reads and displays results.
-- **Character loading**: All character data (stats, shadows, level, system prompt) is loaded from prompt markdown files via `CharacterLoader` rather than being hardcoded in `Program.cs`. The examples directory path is resolved similarly to the existing playtest directory pattern. Character names are case-insensitive and map to `{name.ToLower()}-prompt.md` files.
+- **Character loading (dual path)**: Characters can be loaded two ways: (1) **CharacterDefinitionLoader** reads JSON definition files and runs the full `CharacterAssembler` + `PromptBuilder` pipeline — this is the preferred path that exercises real item/anatomy data. (2) **CharacterLoader** reads pre-assembled prompt markdown files — retained as a fallback. CLI args `--player-def`/`--opponent-def` use the definition loader directly; `--player`/`--opponent` shorthand tries `data/characters/{name}.json` via `DataFileLocator` first, falling back to `CharacterLoader` if not found.
+- **Data file resolution**: `DataFileLocator` walks up from the working directory to find `data/items/starter-items.json` and `data/anatomy/anatomy-parameters.json`. Also checks the `PINDER_DATA_PATH` env var. If data files cannot be resolved, the runner warns and falls back to prompt file loading.
 - **CLI-driven configuration**: The session runner uses positional CLI arguments instead of environment variables for character selection and agent type. The `--max-turns` default is 20 (previously hardcoded as 15).
 - **Playtest directory resolution** uses a 3-tier strategy: (1) `PINDER_PLAYTESTS_PATH` env var override, (2) walk up from `AppContext.BaseDirectory` looking for `design/playtests/`, (3) hardcoded fallback. This replaced a previously hardcoded absolute path in `Program.cs` that caused `GetNextSessionNumber` to scan the wrong directory when the working directory didn't match expectations.
 
@@ -294,3 +350,4 @@ LLM-backed agent that sends full game state and rules context to Anthropic Claud
 | 2026-04-04 | #417 | Added `OutcomeProjector` static class for projecting game outcome on turn-cap cutoff. Uses `InterestState`-based dispatch (diverges from spec's pure numeric thresholds but covers same ranges). Session summary shows ⏸️ Incomplete header with projected outcome when no natural game-over reached. Rewrote `OutcomeProjectorTests.cs` with comprehensive coverage: all five decision tiers, boundary values, momentum display, degenerate cases, pure function guarantees. |
 | 2026-04-04 | #414 | Added `CharacterLoader` to load characters from prompt files. Replaced all hardcoded stat blocks in `Program.cs` with `CharacterLoader.Load()` calls. Added CLI argument parsing (`--player`, `--opponent`, `--max-turns` default 20, `--agent` replacing `PLAYER_AGENT` env var). Usage/error messages printed to stderr with exit code 1. Added `CharacterLoaderSpecTests.cs` with comprehensive parsing, error, and edge-case coverage. |
 | 2026-04-04 | #416 | Added shadow growth risk scoring to `ScoringPlayerAgent`: fixation growth penalty (−0.5 for 3x same stat), denial growth penalty (−0.3 for skipping Honesty), fixation threshold EV reduction (T1: 0.8× gain, T2+: success chance squared for Chaos), stat variety bonus (+0.1 for unused stats). Added `LastStatUsed`, `SecondLastStatUsed`, `HonestyAvailableLastTurn` optional fields to `PlayerAgentContext` (backward-compatible). Note: spec's `HonestyAvailableLastTurn` field exists but denial penalty is evaluated on current-turn options, not previous turn. 922-line test file `ScoringPlayerAgentShadowRiskTests.cs` covers all ACs and edge cases. |
+| 2026-04-04 | #415 | Added `CharacterDefinitionLoader` and `DataFileLocator` to enable loading characters from JSON definition files through the full `CharacterAssembler` + `PromptBuilder` pipeline. Added `--player-def`/`--opponent-def` CLI args and shorthand resolution (`--player gerald` → `data/characters/gerald.json`). Copied `starter-items.json` and `anatomy-parameters.json` data files into repo. Created 5 starter character definitions (gerald, velvet, sable, brick, zyx). 736-line spec test file covers assembly pipeline, data file presence, edge cases, error conditions, and integration tests. |
