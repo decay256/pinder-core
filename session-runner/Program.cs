@@ -176,8 +176,23 @@ class Program
         var config = new GameSessionConfig(playerShadows: sableShadows);
         var session = new GameSession(sable, brick, llm, new SystemRandomDiceRoller(), trapRegistry, config);
 
-        // Player agent for decision-making (replaces BestOption)
-        IPlayerAgent agent = new HighestModAgent();
+        // Player agent for decision-making — configurable via PLAYER_AGENT env var
+        IPlayerAgent agent;
+        string agentType = Environment.GetEnvironmentVariable("PLAYER_AGENT") ?? "scoring";
+        if (agentType.Equals("llm", StringComparison.OrdinalIgnoreCase))
+        {
+            var agentOptions = new AnthropicOptions
+            {
+                ApiKey = apiKey,
+                Model = Environment.GetEnvironmentVariable("PLAYER_AGENT_MODEL") ?? "claude-sonnet-4-20250514"
+            };
+            agent = new LlmPlayerAgent(agentOptions, new ScoringPlayerAgent(),
+                playerName: sable.DisplayName, opponentName: brick.DisplayName);
+        }
+        else
+        {
+            agent = new ScoringPlayerAgent();
+        }
 
         int interest = 10;
         int momentum = 0;
