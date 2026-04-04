@@ -101,6 +101,48 @@ namespace Pinder.LlmAdapters.Tests
         // ── AC2: Conversation history formatting ──
 
         [Fact]
+        public void BuildDialogueOptionsPrompt_OpponentProfileInUserMessage_NotSystem()
+        {
+            var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
+                MakeDialogueContext(playerName: "GERALD_42", opponentName: "VELVET"));
+
+            // Opponent profile appears as informational context in user message
+            Assert.Contains("OPPONENT PROFILE", result);
+            Assert.Contains("opponent prompt", result);
+            Assert.Contains("NOT who you are", result);
+        }
+
+        [Fact]
+        public void BuildDialogueOptionsPrompt_EmptyOpponentPrompt_OmitsOpponentProfile()
+        {
+            var ctx = new DialogueContext(
+                playerPrompt: "player prompt",
+                opponentPrompt: "",
+                conversationHistory: new List<(string, string)>(),
+                opponentLastMessage: "",
+                activeTraps: Array.Empty<string>(),
+                currentInterest: 10,
+                playerName: "P",
+                opponentName: "O");
+
+            var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(ctx);
+
+            Assert.DoesNotContain("OPPONENT PROFILE", result);
+        }
+
+        [Fact]
+        public void BuildDialogueOptionsPrompt_OpponentProfileBeforeConversationHistory()
+        {
+            var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
+                MakeDialogueContext(playerName: "GERALD_42", opponentName: "VELVET"));
+
+            int opponentIdx = result.IndexOf("OPPONENT PROFILE");
+            int historyIdx = result.IndexOf("CONVERSATION HISTORY");
+            Assert.True(opponentIdx < historyIdx,
+                "Opponent profile should appear before conversation history");
+        }
+
+        [Fact]
         public void BuildDialogueOptionsPrompt_EmptyHistory_ContainsConversationStartAndCurrentTurn()
         {
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(

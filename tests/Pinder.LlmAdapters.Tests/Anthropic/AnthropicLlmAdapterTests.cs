@@ -549,11 +549,14 @@ OPTION_4
             Assert.NotNull(body);
             Assert.Equal("claude-sonnet-4-20250514", body!.Model);
             Assert.Equal(0.9, body.Temperature, 2);
-            Assert.Equal(2, body.System.Length); // Both player + opponent prompts
+            // Only player prompt in system (fix for voice bleed #487)
+            Assert.Single(body.System);
             Assert.Equal("ephemeral", body.System[0].CacheControl?.Type);
-            Assert.Equal("ephemeral", body.System[1].CacheControl?.Type);
             Assert.Contains("Thundercock", body.System[0].Text);
-            Assert.Contains("Velvet", body.System[1].Text);
+            // Opponent profile appears in user message, not system
+            Assert.Single(body.Messages);
+            Assert.Contains("Velvet", body.Messages[0].Content);
+            Assert.Contains("OPPONENT PROFILE", body.Messages[0].Content);
         }
 
         [Fact]

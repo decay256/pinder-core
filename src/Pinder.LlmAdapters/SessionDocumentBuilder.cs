@@ -25,6 +25,15 @@ namespace Pinder.LlmAdapters
 
             var sb = new StringBuilder();
 
+            // Opponent profile as informational context (not system identity)
+            // so the LLM knows what kind of messages would land with this opponent
+            if (!string.IsNullOrWhiteSpace(context.OpponentPrompt))
+            {
+                sb.AppendLine($"OPPONENT PROFILE (for context — this is who you are talking to, NOT who you are):");
+                sb.AppendLine(context.OpponentPrompt);
+                sb.AppendLine();
+            }
+
             sb.AppendLine("CONVERSATION HISTORY");
             AppendConversationHistory(sb, context.ConversationHistory, playerName);
 
