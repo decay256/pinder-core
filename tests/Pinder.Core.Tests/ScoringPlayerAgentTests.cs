@@ -485,25 +485,35 @@ namespace Pinder.Core.Tests
                 b => b.Contains("callback", StringComparison.OrdinalIgnoreCase));
         }
 
+        // What: Momentum bonus thresholds match GameSession rules (§15)
+        // Mutation: Would catch if agent used wrong streak thresholds (e.g. >=4 instead of >=3)
         [Theory]
-        [InlineData(0, 0)]
-        [InlineData(1, 0)]
-        [InlineData(2, 0)]
-        [InlineData(3, 2)]
-        [InlineData(4, 2)]
-        [InlineData(5, 3)]
-        [InlineData(10, 3)]
-        public void MomentumBonus_MatchesGameSessionThresholds(int streak, int expectedBonus)
+        [InlineData(0, null)]
+        [InlineData(1, null)]
+        [InlineData(2, null)]
+        [InlineData(3, "momentum +2")]
+        [InlineData(4, "momentum +2")]
+        [InlineData(5, "momentum +3")]
+        [InlineData(10, "momentum +3")]
+        public async Task MomentumBonus_MatchesGameSessionThresholds(int streak, string? expectedBonusLabel)
         {
-            // SYNC: GameSession.GetMomentumBonus() uses streak>=5→3, >=3→2, else→0.
-            // ScoringPlayerAgent must mirror this exactly.
-            // This test validates both agent and engine agree on thresholds.
-            int agentBonus;
-            if (streak >= 5) agentBonus = 3;
-            else if (streak >= 3) agentBonus = 2;
-            else agentBonus = 0;
+            // Verify the agent's momentum bonus at each threshold by calling DecideAsync
+            // and inspecting BonusesApplied — exercises real production scoring code.
+            var turn = MakeTurn(MakeOption(StatType.Charm));
+            var context = MakeContext(momentum: streak);
 
-            Assert.Equal(expectedBonus, agentBonus);
+            var decision = await _agent.DecideAsync(turn, context);
+
+            if (expectedBonusLabel == null)
+            {
+                // No momentum bonus should appear
+                Assert.DoesNotContain(decision.Scores[0].BonusesApplied,
+                    b => b.Contains("momentum", StringComparison.OrdinalIgnoreCase));
+            }
+            else
+            {
+                Assert.Contains(expectedBonusLabel, decision.Scores[0].BonusesApplied);
+            }
         }
 
         [Fact]
