@@ -38,6 +38,15 @@ namespace Pinder.SessionRunner
         /// <summary>Current turn number (from GameStateSnapshot.TurnNumber).</summary>
         public int TurnNumber { get; }
 
+        /// <summary>Stat used on the previous turn. Null on first turn.</summary>
+        public StatType? LastStatUsed { get; }
+
+        /// <summary>Stat used two turns ago. Null on first or second turn.</summary>
+        public StatType? SecondLastStatUsed { get; }
+
+        /// <summary>Whether Honesty was available as an option last turn. False on first turn or unknown.</summary>
+        public bool HonestyAvailableLastTurn { get; }
+
         public PlayerAgentContext(
             StatBlock playerStats,
             StatBlock opponentStats,
@@ -47,7 +56,10 @@ namespace Pinder.SessionRunner
             string[] activeTrapNames,
             int sessionHorniness,
             Dictionary<ShadowStatType, int>? shadowValues,
-            int turnNumber)
+            int turnNumber,
+            StatType? lastStatUsed = null,
+            StatType? secondLastStatUsed = null,
+            bool honestyAvailableLastTurn = false)
         {
             PlayerStats = playerStats ?? throw new ArgumentNullException(nameof(playerStats));
             OpponentStats = opponentStats ?? throw new ArgumentNullException(nameof(opponentStats));
@@ -58,6 +70,9 @@ namespace Pinder.SessionRunner
             SessionHorniness = sessionHorniness;
             ShadowValues = shadowValues;
             TurnNumber = turnNumber;
+            LastStatUsed = lastStatUsed;
+            SecondLastStatUsed = secondLastStatUsed;
+            HonestyAvailableLastTurn = honestyAvailableLastTurn;
         }
     }
 }
