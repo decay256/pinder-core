@@ -276,8 +276,8 @@ EFFECTIVE STATS
 **Level 5 — Smooth-ish | +2 level bonus | 21 total build points**
 ";
             var profile = CharacterLoader.Parse(content, "test");
-            // Level defaults to 1 when not found in code fence; at minimum must be >= 1
-            Assert.True(profile.Level >= 1, "Level must be at least 1");
+            // Level defaults to 1 when not found in code fence (parser only checks "- Level:" lines)
+            Assert.Equal(1, profile.Level);
         }
 
         #endregion
@@ -486,7 +486,12 @@ EFFECTIVE STATS
         public void Load_StarterCharacter_HasValidProfile(string name)
         {
             string promptDir = FindPromptDir();
-            if (promptDir == null) return; // Skip if not available
+            if (promptDir == null)
+            {
+                // Explicit skip: prompt directory not available in this environment
+                Assert.True(false, "SKIPPED: design/examples/ directory not found — cannot run repo integration test");
+                return;
+            }
 
             var profile = CharacterLoader.Load(name, promptDir);
 
@@ -510,7 +515,11 @@ EFFECTIVE STATS
         public void Load_Gerald_MatchesSpecExactValues()
         {
             string promptDir = FindPromptDir();
-            if (promptDir == null) return;
+            if (promptDir == null)
+            {
+                Assert.True(false, "SKIPPED: design/examples/ directory not found — cannot run repo integration test");
+                return;
+            }
 
             var profile = CharacterLoader.Load("gerald", promptDir);
             Assert.Equal("Gerald_42", profile.DisplayName);

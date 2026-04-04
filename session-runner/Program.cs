@@ -176,11 +176,11 @@ class Program
         }
 
         // Load characters from prompt files
-        CharacterProfile sable, brick;
+        CharacterProfile player, opponent;
         try
         {
-            sable = CharacterLoader.Load(playerArg, promptDir);
-            brick = CharacterLoader.Load(opponentArg, promptDir);
+            player = CharacterLoader.Load(playerArg, promptDir);
+            opponent = CharacterLoader.Load(opponentArg, promptDir);
         }
         catch (FileNotFoundException ex)
         {
@@ -193,12 +193,12 @@ class Program
         Console.SetOut(tee);
 
         // ── character definitions (loaded from prompt files) ───────────────
-        string player1 = sable.DisplayName, player2 = brick.DisplayName;
-        int p1Level = sable.Level, p2Level = brick.Level;
+        string player1 = player.DisplayName, player2 = opponent.DisplayName;
+        int p1Level = player.Level, p2Level = opponent.Level;
         int p1LevelBonus = Pinder.Core.Progression.LevelTable.GetBonus(p1Level);
         int p2LevelBonus = Pinder.Core.Progression.LevelTable.GetBonus(p2Level);
-        var sableStats = sable.Stats;
-        var brickStats = brick.Stats;
+        var playerStats = player.Stats;
+        var opponentStats = opponent.Stats;
 
         // ── header ────────────────────────────────────────────────────────
         Console.WriteLine($"# Playtest Session 006 — {player1} × {player2}");
@@ -214,7 +214,7 @@ class Program
         Console.WriteLine("|---|---|---|");
         Console.WriteLine($"| Level | {p1Level} | {p2Level} |");
         foreach (var stat in new[] { StatType.Charm, StatType.Rizz, StatType.Honesty, StatType.Chaos, StatType.Wit, StatType.SelfAwareness }) {
-            int p1 = sableStats.GetEffective(stat), p2 = brickStats.GetEffective(stat);
+            int p1 = playerStats.GetEffective(stat), p2 = opponentStats.GetEffective(stat);
             Console.WriteLine($"| {StatLabel(stat)} | {p1:+#;-#;0} | {p2:+#;-#;0} |");
         }
         Console.WriteLine();
@@ -225,8 +225,8 @@ class Program
         Console.WriteLine("| Stat | Sable mod | Brick defends | DC | Need | % | Risk |");
         Console.WriteLine("|---|---|---|---|---|---|---|");
         foreach (var stat in new[] { StatType.Charm, StatType.Rizz, StatType.Honesty, StatType.Chaos, StatType.Wit, StatType.SelfAwareness }) {
-            int atkMod = sableStats.GetEffective(stat);
-            int dc = brickStats.GetDefenceDC(stat);
+            int atkMod = playerStats.GetEffective(stat);
+            int dc = opponentStats.GetDefenceDC(stat);
             int need = dc - atkMod;
             int pct = Math.Max(0, Math.Min(100, (21 - need) * 5));
             Console.WriteLine($"| {StatLabel(stat)} | {atkMod:+#;-#;0} | — | {dc} | {need}+ | {pct}% | {RiskLabel(need)} |");
@@ -244,9 +244,9 @@ class Program
         ITrapRegistry trapRegistry = TrapRegistryLoader.Load(AppContext.BaseDirectory, Console.Error);
 
         // Shadow tracking — wrap player's StatBlock so GameSession can track shadow growth
-        var sableShadows = new SessionShadowTracker(sableStats);
-        var config = new GameSessionConfig(playerShadows: sableShadows);
-        var session = new GameSession(sable, brick, llm, new SystemRandomDiceRoller(), trapRegistry, config);
+        var playerShadows = new SessionShadowTracker(playerStats);
+        var config = new GameSessionConfig(playerShadows: playerShadows);
+        var session = new GameSession(player, opponent, llm, new SystemRandomDiceRoller(), trapRegistry, config);
 
         // Player agent for decision-making — configurable via --agent arg or PLAYER_AGENT env var
         IPlayerAgent agent;
@@ -258,7 +258,7 @@ class Program
                 Model = Environment.GetEnvironmentVariable("PLAYER_AGENT_MODEL") ?? "claude-sonnet-4-20250514"
             };
             agent = new LlmPlayerAgent(agentOptions, new ScoringPlayerAgent(),
-                playerName: sable.DisplayName, opponentName: brick.DisplayName);
+                playerName: player.DisplayName, opponentName: opponent.DisplayName);
         }
         else
         {
@@ -323,8 +323,8 @@ class Program
             char[] letters = { 'A', 'B', 'C', 'D' };
             for (int i = 0; i < turnStart.Options.Length; i++) {
                 var opt = turnStart.Options[i];
-                int mod = sableStats.GetEffective(opt.Stat);
-                int dc = brickStats.GetDefenceDC(opt.Stat);
+                int mod = playerStats.GetEffective(opt.Stat);
+                int dc = opponentStats.GetDefenceDC(opt.Stat);
                 int need = dc - mod;
                 int pct = Math.Max(0, Math.Min(100, (21-need)*5));
                 string icons = "";
@@ -357,11 +357,11 @@ class Program
             // Build current shadow values from tracker for player agent context
             var currentShadowValues = new Dictionary<ShadowStatType, int>();
             foreach (ShadowStatType shadowType in Enum.GetValues(typeof(ShadowStatType)))
-                currentShadowValues[shadowType] = sableShadows.GetEffectiveShadow(shadowType);
+                currentShadowValues[shadowType] = playerShadows.GetEffectiveShadow(shadowType);
 
             var agentContext = new PlayerAgentContext(
-                playerStats: sableStats,
-                opponentStats: brickStats,
+                playerStats: playerStats,
+                opponentStats: opponentStats,
                 currentInterest: snap.Interest,
                 interestState: snap.State,
                 momentumStreak: snap.MomentumStreak,
@@ -466,9 +466,9 @@ class Program
         Console.WriteLine("|---|---|---|---|");
         foreach (ShadowStatType shadowType in Enum.GetValues(typeof(ShadowStatType)))
         {
-            int start = sableStats.GetShadow(shadowType);
-            int end = sableShadows.GetEffectiveShadow(shadowType);
-            int shadowDelta = sableShadows.GetDelta(shadowType);
+            int start = playerStats.GetShadow(shadowType);
+            int end = playerShadows.GetEffectiveShadow(shadowType);
+            int shadowDelta = playerShadows.GetDelta(shadowType);
             string deltaFmt = shadowDelta > 0 ? $"+{shadowDelta}" : shadowDelta.ToString();
             Console.WriteLine($"| {shadowType} | {start} | {end} | {deltaFmt} |");
         }

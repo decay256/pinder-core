@@ -312,7 +312,8 @@ EFFECTIVE STATS
             string promptDir = Path.Combine(repoRoot, "design", "examples");
             if (!Directory.Exists(promptDir))
             {
-                // Skip if prompt files aren't available (CI without data files)
+                // Explicit skip: prompt directory not available in this environment
+                Assert.True(false, "SKIPPED: design/examples/ directory not found — cannot run repo integration test");
                 return;
             }
 
