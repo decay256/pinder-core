@@ -14,6 +14,8 @@ The session runner orchestrates simulated playtest sessions between two `Charact
 - **`session-runner/SessionFileCounter.cs`** — Static utility class that scans a directory for `session-*.md` files and returns the next available session number (`max + 1`). Also provides `ResolvePlaytestDirectory()` with 3-tier directory resolution: env var override → walk-up search for `design/playtests/` → hardcoded fallback path.
 - **`tests/Pinder.Core.Tests/SessionFileCounterTests.cs`** — Tests for `SessionFileCounter`: number extraction, gaps, character names with digits, production write-read flow, large numbers, non-numeric parts, `ResolvePlaytestDirectory` env var/walk-up/null-fallback behavior.
 - **`tests/Pinder.Core.Tests/SessionFileCounterSpecTests.cs`** — Spec-driven tests for issue #418: AC1–AC4 coverage, path resolution with trailing slashes and `..` segments, integration test combining `ResolvePlaytestDirectory` + `GetNextSessionNumber`.
+- **`session-runner/OutcomeProjector.cs`** — Pure static class that projects likely game outcome when a session hits the turn cap without a natural ending. Uses `InterestState`-based heuristic with momentum and interest level to produce a human-readable projection string.
+- **`tests/Pinder.Core.Tests/OutcomeProjectorTests.cs`** — Tests for `OutcomeProjector.Project`: decision table coverage for all five tiers (AlmostThere/VeryIntoIt/Interested/Lukewarm/Bored/Unmatched), boundary values, momentum display, degenerate cases (maxTurns=0/1), out-of-range interest, pure function guarantees (non-null, deterministic).
 - **`tests/Pinder.Core.Tests/ScoringPlayerAgentTests.cs`** (engine-sync tests) — Verifies `ScoringPlayerAgent` uses engine constants correctly: `CallbackBonus.Compute()` for opener (+3) and mid-distance (+1) bonuses, momentum thresholds matching GameSession rules §15 (0–2→+0, 3–4→+2, 5+→+3), and tell bonus (+2) producing exactly 0.1 success chance delta.
 
 ## API / Public Interface
@@ -70,6 +72,54 @@ public static string FormatReasoningBlock(PlayerDecision? decision, string agent
 public static string FormatScoreTable(PlayerDecision? decision, DialogueOption[] options);
 ```
 
+### OutcomeProjector (internal static class)
+
+Projects likely game outcome when a session ends due to the turn cap (no natural `GameOutcome` reached).
+
+```csharp
+internal static class OutcomeProjector
+{
+    /// Projects the likely outcome when the session ends due to turn cap.
+    /// Pure function — no I/O, no exceptions, always returns a non-empty string.
+    /// Uses InterestState-based branching with momentum bonus estimation.
+    internal static string Project(
+        int interest,
+        int momentum,
+        int turnNumber,
+        int maxTurns,
+        InterestState interestState);
+}
+```
+
+**Projection logic by `InterestState`:**
+
+| InterestState | Projection |
+|---|---|
+| `DateSecured` | `"DateSecured already achieved."` |
+| `Unmatched` | `"Unmatched — interest hit 0."` |
+| `AlmostThere` | `"Likely DateSecured..."` with interest/momentum details and estimated turns |
+| `VeryIntoIt` | `"Probable DateSecured..."` with advantage note |
+| `Interested` / `Lukewarm` | `"Possible DateSecured"` (interest ≥ 12) or `"Uncertain outcome"` (interest < 12) |
+| `Bored` | `"Likely Unmatched..."` with disadvantage note |
+
+**Notes:**
+- Momentum bonus displayed when streak ≥ 3 (3–4 → +2, 5+ → +3).
+- Estimated turns to close calculated from `(25 - interest) / avgGainPerTurn`.
+- The spec's original design used pure numeric thresholds; the implementation dispatches on `InterestState` enum instead, which aligns with the same interest ranges but adds state-aware messaging.
+
+### Session Summary — Cutoff Projection
+
+When the game loop exits because `turn >= maxTurns` and no natural `GameOutcome` was reached, the session summary includes:
+
+```
+## Session Summary
+**⏸️ Incomplete ({turnsPlayed}/{maxTurns} turns) | Interest: {n}/25 | Total XP: {xp}**
+
+Projected: {OutcomeProjector.Project(...)}
+```
+
+When the game ends naturally (DateSecured, Unmatched, Ghost), the existing summary format is unchanged.
+
 ### SessionFileCounter (static class)
 
 Manages session file numbering and playtest directory resolution.
@@ -101,6 +151,7 @@ internal static class SessionFileCounter
 | `GameSession` | `Pinder.Core.Conversation` | Core turn-based session engine |
 | `TurnResult.ShadowGrowthEvents` | `Pinder.Core.Conversation` | `IReadOnlyList<string>` populated when `PlayerShadows` is non-null |
 | `ShadowStatType` | `Pinder.Core.Stats` | Enum: Madness, Horniness, Denial, Fixation, Dread, Overthinking |
+| `InterestState` | `Pinder.Core.Conversation` | Enum: Unmatched, Bored, Lukewarm, Interested, VeryIntoIt, AlmostThere, DateSecured — used by `OutcomeProjector` |
 
 ## Architecture Notes
 
@@ -145,3 +196,4 @@ LLM-backed agent that sends full game state and rules context to Anthropic Claud
 | 2026-04-04 | #351 | Added `PlaytestFormatter` static class with `FormatReasoningBlock` and `FormatScoreTable` methods. After each pick, playtest output now shows the agent's reasoning as a blockquote and a score table with all options' metrics. Defensive handling for null decisions, NaN values, missing scores. Tests in `Issue351_PickReasoningTests.cs`. |
 | 2026-04-04 | #386 | Added engine-constant sync tests to `ScoringPlayerAgentTests.cs`: callback bonus (opener +3, mid-distance +1) via `CallbackBonus.Compute()`, momentum threshold verification at all streak values (§15), and tell bonus exactness (+2 → 0.1 success chance delta). Guards against silent drift between agent scoring and engine rules. |
 | 2026-04-04 | #418 | Fixed `SessionFileCounter` to correctly find existing session files. Added `ResolvePlaytestDirectory(string baseDir)` with 3-tier resolution (env var → walk-up → fallback). `Program.WritePlaytestLog` now uses `ResolvePlaytestDirectory(AppContext.BaseDirectory)` instead of a hardcoded path. Added `SessionFileCounterSpecTests.cs` (25 tests) and extended `SessionFileCounterTests.cs` with AC coverage, edge cases, and resolution tests. |
+| 2026-04-04 | #417 | Added `OutcomeProjector` static class for projecting game outcome on turn-cap cutoff. Uses `InterestState`-based dispatch (diverges from spec's pure numeric thresholds but covers same ranges). Session summary shows ⏸️ Incomplete header with projected outcome when no natural game-over reached. Rewrote `OutcomeProjectorTests.cs` with comprehensive coverage: all five decision tiers, boundary values, momentum display, degenerate cases, pure function guarantees. |
