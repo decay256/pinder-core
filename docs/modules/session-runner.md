@@ -1,199 +1,66 @@
 # Session Runner
 
 ## Overview
-The session runner is a standalone C# program (`session-runner/Program.cs`) that orchestrates automated Pinder playtest sessions. It runs games between characters and writes playtest log files to disk with sequentially numbered filenames.
+The session runner orchestrates simulated playtest sessions between two `CharacterProfile` instances via `GameSession`. It handles turn execution, output formatting (interest bars, trap status, shadow events), and session summary generation including outcome and shadow delta tables.
 
 ## Key Components
 
-| File / Class | Description |
-|---|---|
-| `session-runner/Program.cs` | Entry point. Contains `WritePlaytestLog` which writes session markdown files, delegating numbering to `SessionFileCounter`. Delegates trap loading to `TrapRegistryLoader.Load`. Uses `IPlayerAgent.DecideAsync` for turn decisions. |
-| `session-runner/IPlayerAgent.cs` | Public interface for pluggable turn-decision agents. Single method: `DecideAsync(TurnStart, PlayerAgentContext) → Task<PlayerDecision>`. |
-| `session-runner/PlayerDecision.cs` | Sealed DTO returned by `IPlayerAgent.DecideAsync`. Contains chosen `OptionIndex`, `Reasoning` string, and `OptionScore[]` for all options. Constructor validates non-null and index range. |
-| `session-runner/OptionScore.cs` | Sealed DTO for per-option score breakdown: composite `Score`, `SuccessChance` (0.0–1.0, clamped), `ExpectedInterestGain`, and `BonusesApplied` string array. |
-| `session-runner/PlayerAgentContext.cs` | Sealed DTO carrying agent context beyond `TurnStart`: player/opponent `StatBlock`, `CurrentInterest`, `InterestState`, `MomentumStreak`, `ActiveTrapNames`, `SessionHorniness`, nullable `ShadowValues`, and `TurnNumber`. |
-| `session-runner/HighestModAgent.cs` | Baseline `IPlayerAgent` implementation. Picks the option with the highest effective stat modifier (replicating the former `BestOption` logic). Computes `SuccessChance` via `(21 - (DC - mod)) / 20` clamped to [0,1]. |
-| `session-runner/ScoringPlayerAgent.cs` | Deterministic `IPlayerAgent` implementation that scores all dialogue options using an expected-value formula. Computes `need`, `successChance`, risk tier bonuses, and raw EV per option, then applies strategic adjustments (momentum bias, near-win bias, bored-bold bias, active trap penalty). No LLM — pure math. |
-| `session-runner/TrapRegistryLoader.cs` | `internal static` class that loads an `ITrapRegistry` from `traps.json`. Searches env var override → relative path → upward directory walk. Falls back to `NullTrapRegistry` on failure. |
-| `session-runner/SessionFileCounter.cs` | `internal static` class that scans a directory for `session-*.md` files and returns the next available session number. |
-| `tests/Pinder.Core.Tests/PlayerAgentSpecTests.cs` | Spec-driven tests for `PlayerDecision`, `OptionScore`, `PlayerAgentContext`, and `HighestModAgent`. Covers constructor validation, clamping, edge cases (empty options, single option, identical stats, all-Rizz), and DC/success-chance calculations. |
-| `tests/Pinder.Core.Tests/SessionFileCounterTests.cs` | Tests for `SessionFileCounter.GetNextSessionNumber` — validates glob pattern matching and number extraction from session filenames. |
-| `tests/Pinder.Core.Tests/SessionRunnerTrapLoadingTests.cs` | Tests for `TrapRegistryLoader.Load` — env var override, upward search, missing file fallback, corrupt JSON fallback, trap activation with real registry. |
-| `tests/Pinder.Core.Tests/ScoringPlayerAgentSpecTests.cs` | Spec-driven tests for `ScoringPlayerAgent` — covers interface conformance, formula correctness, all four strategic adjustments, determinism, edge cases (empty/single options, boundary interest values, trap mappings, callback bonuses), error conditions, and bonus tracking. |
-| `tests/Pinder.Core.Tests/ScoringPlayerAgentTests.cs` | Additional unit tests for `ScoringPlayerAgent` — covers EV ordering, risk tier bonuses, momentum/tell/callback/combo bonus interactions, and reasoning string content. |
+- **`session-runner/Program.cs`** — Entry point. Builds character profiles, configures `GameSession` with `GameSessionConfig`, runs the turn loop, and prints per-turn status and session summary markdown.
+- **`tests/Pinder.Core.Tests/Issue350_ShadowTrackingSpecTests.cs`** — Spec tests verifying shadow tracking wiring: `SessionShadowTracker` wraps `StatBlock`, `GameSessionConfig` passes player shadows into `GameSession`, delta accumulation, edge cases (negative deltas, multiple events per turn, game-end readability).
 
 ## API / Public Interface
 
-### IPlayerAgent
+The session runner is a console application (`Program.cs`), not a library. It consumes the following public APIs:
 
+### Session Setup
 ```csharp
-public interface IPlayerAgent
-{
-    Task<PlayerDecision> DecideAsync(TurnStart turn, PlayerAgentContext context);
-}
+var sableShadows = new SessionShadowTracker(sableStats);   // wraps player's StatBlock
+var config = new GameSessionConfig(playerShadows: sableShadows);
+var session = new GameSession(player, opponent, llm, dice, traps, config);
 ```
 
-Pluggable decision-making interface for sim agents. `TurnStart` (from `Pinder.Core.Conversation`) provides the dialogue options and game state snapshot. `PlayerAgentContext` provides additional context (stat blocks, interest, momentum, shadows, etc.). Returns a `PlayerDecision` containing the chosen option index, reasoning, and per-option score breakdowns.
-
-**Error conditions:** Implementations must throw `ArgumentNullException` for null `turn` or `context`, and `InvalidOperationException` if `turn.Options` is empty.
-
-### PlayerDecision
-
-```csharp
-public sealed class PlayerDecision
-{
-    public int OptionIndex { get; }
-    public string Reasoning { get; }
-    public OptionScore[] Scores { get; }
-    public PlayerDecision(int optionIndex, string reasoning, OptionScore[] scores);
-}
+### Per-Turn Shadow Output
+After each `ResolveTurnAsync()`, if `TurnResult.ShadowGrowthEvents.Count > 0`, each event is printed as:
 ```
-
-**Invariants:** `OptionIndex` in `[0, Scores.Length)`. `Reasoning` and `Scores` are never null. Constructor throws `ArgumentNullException` for null `reasoning`/`scores`, `ArgumentOutOfRangeException` for invalid `optionIndex`.
-
-### OptionScore
-
-```csharp
-public sealed class OptionScore
-{
-    public int OptionIndex { get; }
-    public float Score { get; }
-    public float SuccessChance { get; }       // clamped to [0.0, 1.0]
-    public float ExpectedInterestGain { get; } // can be negative
-    public string[] BonusesApplied { get; }
-    public OptionScore(int optionIndex, float score, float successChance,
-                       float expectedInterestGain, string[] bonusesApplied);
-}
+⚠️ SHADOW GROWTH: {event}
 ```
+Lines appear inside the post-roll status block, after the interest bar and before the "Active Traps" line.
 
-**Invariants:** `SuccessChance` is clamped to `[0.0, 1.0]` in constructor. `BonusesApplied` is never null. Constructor throws `ArgumentNullException` for null `bonusesApplied`.
-
-### PlayerAgentContext
-
-```csharp
-public sealed class PlayerAgentContext
-{
-    public StatBlock PlayerStats { get; }
-    public StatBlock OpponentStats { get; }
-    public int CurrentInterest { get; }          // 0–25
-    public InterestState InterestState { get; }
-    public int MomentumStreak { get; }           // >= 0
-    public string[] ActiveTrapNames { get; }
-    public int SessionHorniness { get; }
-    public Dictionary<ShadowStatType, int>? ShadowValues { get; }
-    public int TurnNumber { get; }
-    public PlayerAgentContext(StatBlock playerStats, StatBlock opponentStats,
-        int currentInterest, InterestState interestState, int momentumStreak,
-        string[] activeTrapNames, int sessionHorniness,
-        Dictionary<ShadowStatType, int>? shadowValues, int turnNumber);
-}
+### Session Summary — Shadow Delta Table
+After the session outcome line, a markdown table is printed:
+```markdown
+## Shadow Changes This Session
+| Shadow | Start | End | Delta |
+|---|---|---|---|
+| Madness | 0 | 0 | 0 |
+| Horniness | 0 | 0 | 0 |
+| Denial | 3 | 4 | +1 |
+| Fixation | 2 | 2 | 0 |
+| Dread | 0 | 0 | 0 |
+| Overthinking | 0 | 0 | 0 |
 ```
+- **Start**: `statBlock.GetShadow(type)` (base value)
+- **End**: `shadowTracker.GetEffectiveShadow(type)` (base + session delta)
+- **Delta**: `shadowTracker.GetDelta(type)` — `+N` for positive, `-N` for negative, `0` for zero
+- All six `ShadowStatType` values are always listed.
 
-**Invariants:** `PlayerStats`, `OpponentStats`, `ActiveTrapNames` are never null (constructor throws `ArgumentNullException`). `ShadowValues` is nullable (null when shadow tracking disabled).
-
-### HighestModAgent
-
-```csharp
-public sealed class HighestModAgent : IPlayerAgent
-{
-    public Task<PlayerDecision> DecideAsync(TurnStart turn, PlayerAgentContext context);
-}
-```
-
-Baseline agent replicating the former `BestOption` logic. Picks the option whose stat has the highest effective modifier on the player's `StatBlock`. Computes `SuccessChance` as `max(0, min(1, (21 - (DC - mod)) / 20))`. Tiebreaks to lowest index. Returns `Task.FromResult(...)` (synchronous).
-
-### ScoringPlayerAgent
-
-```csharp
-public sealed class ScoringPlayerAgent : IPlayerAgent
-{
-    public Task<PlayerDecision> DecideAsync(TurnStart turn, PlayerAgentContext context);
-}
-```
-
-Deterministic expected-value scoring agent. No constructor parameters, no mutable state. Returns `Task.FromResult(...)` (synchronous).
-
-**Scoring pipeline (per option):**
-1. Compute `need = defenceDC - (attackerMod + momentumBonus + tellBonus + callbackBonus)`
-2. Compute `successChance = clamp((21 - need) / 20, 0, 1)`
-3. Determine risk tier from `need`: Safe (≤5, +0), Medium (6–10, +0), Hard (11–15, +1), Bold (≥16, +2)
-4. Compute `baseInterestGain` using midpoint approximation of success margin
-5. `expectedGainOnSuccess = baseInterestGain + riskTierBonus + comboBonus`
-6. Raw EV: `expectedInterestGain = successChance × expectedGainOnSuccess - failChance × 1.5`
-7. Apply strategic adjustments to `score` (not to raw EV):
-   - Momentum streak == 2 AND `successChance ≥ 0.5`: +1.0
-   - Interest in [19, 24] AND Safe/Medium tier: +2.0
-   - `InterestState.Bored` AND Hard/Bold tier: +1.0
-   - Active trap on option's stat: −2.0
-
-**Bonus sourcing (per #386 ADR):**
-- Callback bonus: calls `CallbackBonus.Compute()` directly (public static in `Pinder.Core.Conversation`)
-- Momentum bonus: duplicated from `GameSession.GetMomentumBonus()` (private) with `// SYNC` comment
-- Tell bonus: hardcoded `2` with `// SYNC` comment
-
-**Stat-to-trap mapping:** Charm→Madness, Rizz→Horniness, Honesty→Denial, Chaos→Fixation, Wit→Dread, SA→Overthinking.
-
-**Error conditions:** Throws `ArgumentNullException` for null `turn` or `context`. Throws `InvalidOperationException` if `turn.Options` is empty. Null `ActiveTrapNames` treated as empty.
-
-**Tiebreaking:** Lowest index wins on equal scores.
-
-### WritePlaytestLog (private static)
-
-```csharp
-static void WritePlaytestLog(string content, string p1, string p2, GameOutcome? outcome)
-```
-
-Writes a playtest log to `/root/.openclaw/agents-extra/pinder/design/playtests/` as a markdown file. The filename follows the pattern `session-{NNN}-{p1}-vs-{p2}.md` where `NNN` is zero-padded to 3 digits and auto-incremented based on existing files.
-
-Delegates session numbering to `SessionFileCounter.GetNextSessionNumber`.
-
-### TrapRegistryLoader.Load
-
-```csharp
-internal static class TrapRegistryLoader
-{
-    internal const string EnvVarName = "PINDER_TRAPS_PATH";
-    internal static ITrapRegistry Load(string baseDir, TextWriter warningWriter)
-}
-```
-
-Loads an `ITrapRegistry` from `traps.json` with graceful fallback. Search order:
-1. `PINDER_TRAPS_PATH` environment variable (if set)
-2. Relative path: `{baseDir}/data/traps/traps.json`
-3. Upward directory walk from `baseDir` looking for `data/traps/traps.json`
-
-Returns `JsonTrapRepository` on success, `NullTrapRegistry` on any failure. Logs `[INFO]` or `[WARN]` messages to `warningWriter`.
-
-### SessionFileCounter.GetNextSessionNumber
-
-```csharp
-internal static class SessionFileCounter
-{
-    public static int GetNextSessionNumber(string directory)
-}
-```
-
-Scans the given directory for `session-*.md` files. Splits each filename on `-` and parses the second segment as the session number. Returns `max(existing) + 1`, defaulting to `1` if no matching files exist. Exposed to `Pinder.Core.Tests` via `InternalsVisibleTo`.
+### Key Consumed Types
+| Type | Namespace | Role |
+|------|-----------|------|
+| `SessionShadowTracker` | `Pinder.Core.Stats` | Wraps `StatBlock`, tracks per-session shadow deltas |
+| `GameSessionConfig` | `Pinder.Core.Conversation` | Carries optional `PlayerShadows`, `OpponentShadows`, clock, etc. |
+| `GameSession` | `Pinder.Core.Conversation` | Core turn-based session engine |
+| `TurnResult.ShadowGrowthEvents` | `Pinder.Core.Conversation` | `IReadOnlyList<string>` populated when `PlayerShadows` is non-null |
+| `ShadowStatType` | `Pinder.Core.Stats` | Enum: Madness, Horniness, Denial, Fixation, Dread, Overthinking |
 
 ## Architecture Notes
 
-- Session files are named with character slugs (e.g., `session-005-sable-vs-brick.md`), which means filenames contain variable numbers of hyphens.
-- The glob pattern `session-*.md` (not `session-???.md`) ensures filenames with suffixes beyond the 3-digit number are matched correctly.
-- Number extraction uses `Split('-')[1]` to isolate the numeric segment, which is robust against hyphenated character names in the suffix.
-- The file counter logic is extracted into `SessionFileCounter` (internal static class) for testability. `session-runner.csproj` uses `InternalsVisibleTo` to expose it to `Pinder.Core.Tests`.
-- **Trap loading** is delegated to `TrapRegistryLoader` (extracted from `Program.cs` for testability). Uses a three-tier search: `PINDER_TRAPS_PATH` env var → relative path from base dir → upward directory walk. Falls back to `NullTrapRegistry` with a warning on stderr if no valid `traps.json` is found.
-- **Player agent abstraction:** Turn decisions are delegated to pluggable `IPlayerAgent` implementations via `DecideAsync`. This replaces the former inline `BestOption` static method. All agent types (`IPlayerAgent`, `PlayerDecision`, `OptionScore`, `PlayerAgentContext`) live in `session-runner/` (namespace `Pinder.SessionRunner`), NOT in `Pinder.Core`, per vision concern #355.
-- **HighestModAgent** is the baseline implementation, replicating the original highest-modifier selection logic. It serves as a simple fallback.
-- **ScoringPlayerAgent** is the deterministic EV-based agent. It uses no LLM — pure mechanical scoring from game rules. Useful for regression testing and as a fallback for `LlmPlayerAgent` (#348). Uses midpoint approximation (Option A from spec) for expected interest gain and a constant `1.5` fail cost.
-- **Success probability formula:** `need = DC - modifier`, `successChance = max(0, min(1, (21 - need) / 20))`. Natural 20 always succeeds, natural 1 always fails (captured by the clamp).
-- **LangVersion 8.0 constraint:** All new types use `sealed class` with constructor + get-only properties (no C# 9+ records or init-only setters).
+- **Shadow tracking is opt-in**: passing `GameSessionConfig` with a `SessionShadowTracker` enables shadow growth events. Without config (or with `playerShadows: null`), `TurnResult.ShadowGrowthEvents` is empty and no shadow output is produced.
+- **Retained reference pattern**: the session runner keeps a reference to the `SessionShadowTracker` it passes into `GameSessionConfig`. After the game loop exits (normally or via `GameEndedException`), it reads delta/effective values from that same reference for the summary table.
+- **`OpponentShadows` is optional**: the config only wires `playerShadows`; opponent shadow tracking is not used by the session runner currently.
+- **Shadow growth triggers** (e.g., Nat 1 → Madness, 3 consecutive same-stat picks → Fixation) are handled inside `GameSession`; the session runner only reads and displays results.
 
 ## Change Log
 | Date | Issue | Summary |
 |------|-------|---------|
-| 2026-04-03 | #354 | Initial creation — Fixed file counter bug where `session-???.md` glob missed files with character name suffixes (e.g., `session-005-sable-vs-brick.md`). Changed to `session-*.md` glob with `Split('-')[1]` number extraction. Added `SessionFileCounterTests`. |
-| 2026-04-03 | #353 | Replaced hardcoded `NullTrapRegistry` with `JsonTrapRepository` loaded from `data/traps/traps.json`. Added multi-path resolution with graceful fallback. Added `SessionRunnerTrapLoadingTests`. |
-| 2026-04-03 | #353 | Extracted inline trap-loading logic from `Program.cs` into `TrapRegistryLoader` (new file). Replaced hardcoded paths with env var override (`PINDER_TRAPS_PATH`) + upward directory walk. Tests rewritten to exercise `TrapRegistryLoader.Load` directly. |
-| 2026-04-03 | #354 | Extracted inline file counter logic from `WritePlaytestLog` into `SessionFileCounter.GetNextSessionNumber` (new file `SessionFileCounter.cs`). Tests now call the real class instead of a mirrored helper. Added `InternalsVisibleTo` for test access. |
-| 2026-04-04 | #346 | Added `IPlayerAgent` interface, `PlayerDecision`, `OptionScore`, `PlayerAgentContext` DTOs, and `HighestModAgent` baseline implementation. Replaced `BestOption` static method with agent-based turn decisions. Added `PlayerAgentSpecTests.cs` (749 lines). |
-| 2026-04-04 | #347 | Added `ScoringPlayerAgent` — deterministic EV-based option scorer implementing `IPlayerAgent`. Scores options via d20 probability model with risk tier bonuses and four strategic adjustments (momentum, near-win, bored, trap penalty). Uses midpoint approximation for interest gain and constant fail cost. Calls `CallbackBonus.Compute()` directly per #386 ADR. Added `ScoringPlayerAgentSpecTests.cs` and `ScoringPlayerAgentTests.cs`. Spec noted empty-options should return `OptionIndex=-1`; implementation throws `InvalidOperationException` instead. |
+| 2026-04-04 | #350 | Initial creation — wired `SessionShadowTracker` into `GameSession` via `GameSessionConfig`, added per-turn shadow growth event output and session-end shadow delta summary table. Added spec tests in `Issue350_ShadowTrackingSpecTests.cs`. |
