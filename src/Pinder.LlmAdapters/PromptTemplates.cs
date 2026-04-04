@@ -36,6 +36,11 @@ OPTION_2
 
 (continue for OPTION_3 and OPTION_4)
 
+MEDIUM: This is a texting app. Options are messages the character could send.
+- Each option should read as something a person would actually text — not internal thoughts, not narration.
+- The character types, may hesitate, but what appears here is what they would choose to send.
+- No ""(thinking to self:..."" no stage directions, no meta-commentary within the message text.
+
 Rules:
 - STAT must be one of: CHARM, RIZZ, HONESTY, CHAOS, WIT, SELF_AWARENESS
 - Text must be in double quotes on the line immediately after the metadata
@@ -48,6 +53,9 @@ Deliver this message as the character would actually send it.
 - On a clean success (margin 1–5): deliver it essentially as written, with natural voice
 - On a strong success (margin 6–10): add a small flourish or timing that makes it land better
 - On a critical success / Nat 20: deliver it at peak — perfectly timed, resonant, exactly right
+
+MEDIUM RULE: This is a text message, not a monologue. The character sends this message in a texting app.
+Write as text that would appear on a phone screen — no internal stage directions, no narration of their emotional state, no self-commentary mid-message.
 
 Keep it in character. Keep the lowercase voice. Don't explain the success.
 Output only the message text.";
@@ -64,6 +72,14 @@ Failure tier: {tier}
 
 Failure principle: corrupt the CONTENT, not the delivery. The message always sends intentionally.
 Words are what betray you. The character means to say one thing and something else comes out.
+
+CRITICAL MEDIUM RULES — texting on a dating app:
+- The character is texting. They can edit before sending, but chose to send this.
+- NEVER have the character comment on their own message mid-message (""wait that sounded weird"", ""omg why did I say that"").
+- NEVER have the character interrupt themselves with meta-commentary about their own words.
+- NEVER break the 4th wall — the character does not know they are in a game.
+- The character is not narrating their failure. The failure IS what they chose to say.
+- What comes out is wrong, off-tone, too much, or sideways — but it's sent with full intent.
 
 Tier-specific instructions:
 {tier_instruction}
@@ -96,7 +112,12 @@ Output only the message text. No explanation. The character sent this.";
         /// Uses {placeholder} tokens for dynamic content.
         /// </summary>
         public const string OpponentResponseInstruction =
-@"Generate your next message.
+@"INTEREST CONSTRAINT:
+- Interest must reach 25 (DateSecured) before any concrete date plans are possible.
+- Below Interest 25: you may express interest, warmth, or curiosity, but NEVER commit to a specific time, place, or logistics. ""We should get coffee sometime"" is fine. ""Coffee shop on Fifth at 6pm Tuesday"" is NOT.
+- At Interest 25: the date is now real. You may suggest a specific venue or time that fits your character.
+
+Generate your next message.
 - Match your personality exactly as established in the system prompt
 - React authentically to what was just said
 - If Interest dropped: show cooling without being melodramatic
