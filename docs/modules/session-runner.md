@@ -17,6 +17,7 @@ The session runner orchestrates simulated playtest sessions between two `Charact
 - **`session-runner/OutcomeProjector.cs`** — Pure static class that projects likely game outcome when a session hits the turn cap without a natural ending. Uses `InterestState`-based heuristic with momentum and interest level to produce a human-readable projection string.
 - **`tests/Pinder.Core.Tests/OutcomeProjectorTests.cs`** — Tests for `OutcomeProjector.Project`: decision table coverage for all five tiers (AlmostThere/VeryIntoIt/Interested/Lukewarm/Bored/Unmatched), boundary values, momentum display, degenerate cases (maxTurns=0/1), out-of-range interest, pure function guarantees (non-null, deterministic).
 - **`tests/Pinder.Core.Tests/ScoringPlayerAgentTests.cs`** (engine-sync tests) — Verifies `ScoringPlayerAgent` uses engine constants correctly: `CallbackBonus.Compute()` for opener (+3) and mid-distance (+1) bonuses, momentum thresholds matching GameSession rules §15 (0–2→+0, 3–4→+2, 5+→+3), and tell bonus (+2) producing exactly 0.1 success chance delta.
+- **`tests/Pinder.Core.Tests/ScoringPlayerAgentShadowRiskTests.cs`** — Tests for shadow growth risk scoring adjustments (issue #416): fixation growth penalty (AC1), denial growth penalty (AC2), fixation threshold EV reduction at T0/T1/T2/T3 (AC3), stat variety bonus (AC4), backward compatibility, and edge cases (null history, missing fixation key, combined adjustments).
 
 ## API / Public Interface
 
@@ -143,6 +144,34 @@ internal static class SessionFileCounter
 }
 ```
 
+### PlayerAgentContext — New Fields (issue #416)
+
+```csharp
+public sealed class PlayerAgentContext
+{
+    // ... existing properties ...
+
+    /// Stat used on the previous turn. Null on first turn.
+    public StatType? LastStatUsed { get; }
+
+    /// Stat used two turns ago. Null on first or second turn.
+    public StatType? SecondLastStatUsed { get; }
+
+    /// Whether Honesty was available as an option last turn. False on first turn or unknown.
+    public bool HonestyAvailableLastTurn { get; }
+
+    // Constructor — new optional parameters appended (backward-compatible):
+    public PlayerAgentContext(
+        ...,
+        int turnNumber,
+        StatType? lastStatUsed = null,
+        StatType? secondLastStatUsed = null,
+        bool honestyAvailableLastTurn = false);
+}
+```
+
+When all new fields are at defaults (`null`, `null`, `false`), scoring behavior is identical to pre-#416.
+
 ### Key Consumed Types
 | Type | Namespace | Role |
 |------|-----------|------|
@@ -172,7 +201,22 @@ Task<PlayerDecision> DecideAsync(TurnStart turn, PlayerAgentContext context)
 Takes a `TurnStart` (options + game state) and `PlayerAgentContext` (stats, interest, momentum, shadows), returns a `PlayerDecision` with chosen option index, reasoning text, and per-option score breakdowns.
 
 ### ScoringPlayerAgent
-Deterministic expected-value scoring agent. Pure math, no LLM. Scores all options using success probability × expected gain − failure cost. Applies strategic adjustments for momentum, interest state, trap exposure. Used as the fallback for `LlmPlayerAgent` and for regression testing.
+Deterministic expected-value scoring agent. Pure math, no LLM. Scores all options using success probability × expected gain − failure cost. Applies strategic adjustments for momentum, interest state, trap exposure, and shadow growth risk. Used as the fallback for `LlmPlayerAgent` and for regression testing.
+
+**Shadow growth risk scoring constants** (§7):
+| Constant | Value | Effect |
+|---|---|---|
+| `FixationGrowthPenalty` | 0.5 | Subtracted from score when option's stat matches both `LastStatUsed` and `SecondLastStatUsed` (would trigger 3-in-a-row Fixation growth) |
+| `DenialGrowthPenalty` | 0.3 | Subtracted from non-Honesty options when at least one Honesty option is available in the current turn |
+| `FixationT1EvMultiplier` | 0.8 | Multiplies `expectedGainOnSuccess` for Chaos options when Fixation is ≥ 6 and < 12 (Tier 1) |
+| `StatVarietyBonus` | 0.1 | Added to score for options whose stat was not used in the last two turns |
+
+**Fixation threshold tiers for Chaos options:**
+- **T0 (Fixation < 6):** No adjustment.
+- **T1 (Fixation ≥ 6, < 12):** `expectedGainOnSuccess *= 0.8`. Success chance unchanged.
+- **T2+ (Fixation ≥ 12):** Disadvantage applied to success chance: `adjustedSuccessChance = successChance²`. T3 (≥ 18) uses same T2 treatment.
+
+**Application order:** Fixation threshold modifies intermediate EV calc inputs (success chance or expected gain) *before* EV computation. Fixation growth penalty, denial penalty, and variety bonus adjust the final score *after* EV computation. All four adjustments are independent and stack additively on the final score.
 
 ### LlmPlayerAgent
 LLM-backed agent that sends full game state and rules context to Anthropic Claude, parses a `PICK: [A/B/C/D]` response. Falls back to `ScoringPlayerAgent` on any failure (API error, parse error, timeout). Implements `IDisposable` to clean up its internal `AnthropicClient`.
@@ -186,7 +230,7 @@ LLM-backed agent that sends full game state and rules context to Anthropic Claud
 ### Supporting Types
 - **`PlayerDecision`** — result type: `OptionIndex`, `Reasoning` (string), `Scores` (OptionScore[])
 - **`OptionScore`** — per-option breakdown: `Score`, `SuccessChance`, `ExpectedInterestGain`, `BonusesApplied`
-- **`PlayerAgentContext`** — input context: player/opponent stats, interest, momentum, traps, shadows, turn number
+- **`PlayerAgentContext`** — input context: player/opponent stats, interest, momentum, traps, shadows, turn number, stat history (`LastStatUsed`, `SecondLastStatUsed`), `HonestyAvailableLastTurn`
 
 ## Change Log
 | Date | Issue | Summary |
@@ -197,3 +241,4 @@ LLM-backed agent that sends full game state and rules context to Anthropic Claud
 | 2026-04-04 | #386 | Added engine-constant sync tests to `ScoringPlayerAgentTests.cs`: callback bonus (opener +3, mid-distance +1) via `CallbackBonus.Compute()`, momentum threshold verification at all streak values (§15), and tell bonus exactness (+2 → 0.1 success chance delta). Guards against silent drift between agent scoring and engine rules. |
 | 2026-04-04 | #418 | Fixed `SessionFileCounter` to correctly find existing session files. Added `ResolvePlaytestDirectory(string baseDir)` with 3-tier resolution (env var → walk-up → fallback). `Program.WritePlaytestLog` now uses `ResolvePlaytestDirectory(AppContext.BaseDirectory)` instead of a hardcoded path. Added `SessionFileCounterSpecTests.cs` (25 tests) and extended `SessionFileCounterTests.cs` with AC coverage, edge cases, and resolution tests. |
 | 2026-04-04 | #417 | Added `OutcomeProjector` static class for projecting game outcome on turn-cap cutoff. Uses `InterestState`-based dispatch (diverges from spec's pure numeric thresholds but covers same ranges). Session summary shows ⏸️ Incomplete header with projected outcome when no natural game-over reached. Rewrote `OutcomeProjectorTests.cs` with comprehensive coverage: all five decision tiers, boundary values, momentum display, degenerate cases, pure function guarantees. |
+| 2026-04-04 | #416 | Added shadow growth risk scoring to `ScoringPlayerAgent`: fixation growth penalty (−0.5 for 3x same stat), denial growth penalty (−0.3 for skipping Honesty), fixation threshold EV reduction (T1: 0.8× gain, T2+: success chance squared for Chaos), stat variety bonus (+0.1 for unused stats). Added `LastStatUsed`, `SecondLastStatUsed`, `HonestyAvailableLastTurn` optional fields to `PlayerAgentContext` (backward-compatible). Note: spec's `HonestyAvailableLastTurn` field exists but denial penalty is evaluated on current-turn options, not previous turn. 922-line test file `ScoringPlayerAgentShadowRiskTests.cs` covers all ACs and edge cases. |
