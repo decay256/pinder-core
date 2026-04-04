@@ -1,0 +1,845 @@
+- id: §0.riskreward-hidden-depth
+  section: §0
+  title: Risk/Reward & Hidden Depth
+  type: interest_change
+  blocks:
+  - kind: paragraph
+    text: Five layered mechanics that reward attentive players without punishing casual ones. Casual players see funny dialogue and roll dice. Strategic players are playing 4D chess with conversation mechanics.
+      The game works at every depth level.
+  - kind: hr
+  description: Five layered mechanics that reward attentive players without punishing casual ones. Casual players see funny dialogue and roll dice. Strategic players are playing 4D chess with conversation
+    mechanics. The game works at every depth level.
+  heading_level: 1
+- id: §1.the-ui-what-the-player-sees
+  section: §1
+  title: 'The UI: What The Player Sees'
+  type: template
+  blocks:
+  - kind: paragraph
+    text: This is the complete dialogue selection screen. Everything the player sees in one place. The sections below explain each element.
+  - kind: code
+    text: '```
+
+      ╔══════════════════════════════════════════════════════╗
+
+      ║  Velvet: "i dropped out of art school"               ║
+
+      ║  "everyone said i was throwing my life away"          ║
+
+      ║  "turns out my life was in a tattoo parlor"           ║
+
+      ║  "lmao"                                              ║
+
+      ╠══════════════════════════════════════════════════════╣
+
+      ║  📈 Momentum: 2 wins (one more = Momentum bonus)     ║
+
+      ║                                                      ║
+
+      ║  A) 🎲 HONESTY (+5)                    🟢 Safe      ║
+
+      ║     "the lmao is doing a lot of work...              ║
+
+      ║     you''re proud but you still hear                   ║
+
+      ║     their voices sometimes"                           ║
+
+      ║     DC 7 🔓  |  Need: 2+  |  95%                    ║
+
+      ║     Reward: +1 to +3                                  ║
+
+      ║                                                      ║
+
+      ║  B) 🎲 WIT (+2)                        🟡 Medium    ║
+
+      ║     "art school to tattoo artist is the              ║
+
+      ║     most direct pipeline since ''tech bro             ║
+
+      ║     to mushroom guy''"                                 ║
+
+      ║     DC 11  |  Need: 9+  |  60%                      ║
+
+      ║     Reward: +1 to +3  |  1.5x XP        🔗          ║
+
+      ║                                                      ║
+
+      ║  C) 🎲 SELF-AWARENESS (+3)             🟡 Medium    ║
+
+      ║     "you told that story like a joke                  ║
+
+      ║     but it''s not a joke to you"                       ║
+
+      ║     DC 9  |  Need: 6+  |  75%                       ║
+
+      ║     Reward: +1 to +3  |  1.5x XP        ⭐          ║
+
+      ║                                                      ║
+
+      ║  D) 🎲 RIZZ (-2) 🔥                   🔴 Bold      ║
+
+      ║     "rebels are hot... especially ones               ║
+
+      ║     with tattoo guns"                                 ║
+
+      ║     DC 11  |  Need: 13+  |  40%                     ║
+
+      ║     Reward: +3 to +5  |  3x XP                      ║
+
+      ║                                                      ║
+
+      ║  ICONS: ⭐ Combo  🔗 Callback  🔓 Window  🔥 Forced ║
+
+      ╚══════════════════════════════════════════════════════╝
+
+      ```'
+  description: This is the complete dialogue selection screen. Everything the player sees in one place. The sections below explain each element.
+  heading_level: 2
+- id: §1.icon-reference
+  section: §1
+  title: Icon Reference
+  type: table
+  blocks:
+  - kind: table
+    rows:
+    - Icon: 🟢🟡🟠🔴
+      Meaning: Risk tier (Safe / Medium / Hard / Bold)
+      Visible to all?: 'Yes'
+    - Icon: 🔓
+      Meaning: Opponent weakness window — DC reduced this turn
+      Visible to all?: Semi-hidden (icon visible, reason isn't)
+    - Icon: 🔗
+      Meaning: Callback to an earlier topic — hidden roll bonus
+      Visible to all?: Semi-hidden
+    - Icon: ⭐
+      Meaning: Stat combo available — hidden bonus if you pick this
+      Visible to all?: Semi-hidden
+    - Icon: 📈
+      Meaning: Momentum streak indicator
+      Visible to all?: Visible in status bar
+    - Icon: 📖
+      Meaning: Post-roll reveal when you read a tell correctly
+      Visible to all?: Post-roll feedback
+    - Icon: 🔥
+      Meaning: Horniness-forced option — this stat is being pushed by your Horniness score
+      Visible to all?: Visible (warning)
+    sep_cells:
+    - '------'
+    - '---------'
+    - '-----------------'
+  - kind: hr
+  description: ''
+  heading_level: 3
+- id: §2.risk-tier.safe
+  section: §2
+  title: Risk Tier — Safe
+  type: roll_modifier
+  description: 'Need Need 5 or less: Safe. +0 bonus. 1x.'
+  condition:
+    need_range:
+    - 1
+    - 5
+  outcome:
+    risk_tier: Safe
+    interest_bonus: 0
+    xp_multiplier: 1.0
+- id: §2.risk-tier.medium
+  section: §2
+  title: Risk Tier — Medium
+  type: roll_modifier
+  description: 'Need Need 6–10: Medium. +0 bonus. 1.5x.'
+  condition:
+    need_range:
+    - 6
+    - 10
+  outcome:
+    risk_tier: Medium
+    interest_bonus: 0
+    xp_multiplier: 1.5
+- id: §2.risk-tier.hard
+  section: §2
+  title: Risk Tier — Hard
+  type: roll_modifier
+  description: 'Need Need 11–15: Hard. +1 bonus Interest. 2x.'
+  condition:
+    need_range:
+    - 11
+    - 15
+  outcome:
+    risk_tier: Hard
+    interest_bonus: 1
+    xp_multiplier: 2.0
+- id: §2.risk-tier.bold
+  section: §2
+  title: Risk Tier — Bold
+  type: roll_modifier
+  description: 'Need Need 16+: Bold. +2 bonus Interest. 3x.'
+  condition:
+    need_range:
+    - 16
+    - 99
+  outcome:
+    risk_tier: Bold
+    interest_bonus: 2
+    xp_multiplier: 3.0
+- id: §2.risk-tiers
+  section: §2
+  title: 🟢🟡🟠🔴 Risk Tiers
+  type: table
+  blocks:
+  - kind: paragraph
+    text: Every option shows its risk tier based on how hard the roll is. Risk and reward are always visible — the player chooses their gamble.
+  - kind: table
+    rows:
+    - DC vs Your Modifier: Need 5 or less
+      Risk Tier: Safe
+      Interest Bonus on Success: +0 bonus
+      XP Multiplier: 1x
+      Display: 🟢 Safe
+    - DC vs Your Modifier: Need 6–10
+      Risk Tier: Medium
+      Interest Bonus on Success: +0 bonus
+      XP Multiplier: 1.5x
+      Display: 🟡 Medium
+    - DC vs Your Modifier: Need 11–15
+      Risk Tier: Hard
+      Interest Bonus on Success: +1 bonus Interest
+      XP Multiplier: 2x
+      Display: 🟠 Hard
+    - DC vs Your Modifier: Need 16+
+      Risk Tier: Bold
+      Interest Bonus on Success: +2 bonus Interest
+      XP Multiplier: 3x
+      Display: 🔴 Bold
+    sep_cells:
+    - '---'
+    - '---'
+    - '---'
+    - '---'
+    - '---'
+  - kind: paragraph
+    text: The percentage shown is the base probability of success before hidden bonuses. Hard and Bold options give more Interest on success AND more XP — but they can also miss by more, making failures
+      worse.
+  - kind: hr
+  description: Every option shows its risk tier based on how hard the roll is. Risk and reward are always visible — the player chooses their gamble.
+  heading_level: 2
+- id: §3.opponent-weakness-window
+  section: §3
+  title: 🔓 Opponent Weakness Window
+  type: interest_change
+  blocks:
+  - kind: paragraph
+    text: Some opponent messages crack their own guard. When an opponent contradicts themselves, laughs genuinely, or shares something unguarded — their defense DC drops for one turn. A 🔓 icon appears on
+      the option that exploits it. The DC shown is already reduced; the player doesn't see a "–2" explanation.
+  - kind: paragraph
+    text: '**In the UI above:** Velvet''s message contains a crack ("lmao" — she''s making light of something that clearly hurt). Her Honesty defense drops. Option A shows DC 7 instead of the normal 9.
+      The player sees a suspiciously high 95% and a 🔓 icon. The attentive player: "she cracked her own wall." The casual player: high percentage, pick it anyway.'
+  description: Some opponent messages crack their own guard. When an opponent contradicts themselves, laughs genuinely, or shares something unguarded — their defense DC drops for one turn. A 🔓 icon appears
+    on the option that exploits it. The DC shown is already reduced; the player doesn't see a "–2" explanation.
+  heading_level: 2
+  condition:
+    opponent_behaviour: crack
+  outcome:
+    dc_adjustment: -2
+- id: §3.weakness-trigger.contradicts-themselves
+  section: §3
+  title: Weakness Trigger — Contradicts themselves
+  type: roll_modifier
+  description: 'When opponent contradicts themselves: Honesty defense DC -2.'
+  condition:
+    opponent_behaviour: Contradicts themselves
+  outcome:
+    dc_adjustment: -2
+    defence_window: Honesty defense
+- id: §3.weakness-trigger.laughs-genuinely
+  section: §3
+  title: Weakness Trigger — Laughs genuinely
+  type: roll_modifier
+  description: 'When opponent laughs genuinely: Charm defense DC -2.'
+  condition:
+    opponent_behaviour: Laughs genuinely
+  outcome:
+    dc_adjustment: -2
+    defence_window: Charm defense
+- id: §3.weakness-trigger.shares-something-personal-unpr
+  section: §3
+  title: Weakness Trigger — Shares something personal unprompted
+  type: roll_modifier
+  description: 'When opponent shares something personal unprompted: Self-Awareness defense DC -3.'
+  condition:
+    opponent_behaviour: Shares something personal unprompted
+  outcome:
+    dc_adjustment: -3
+    defence_window: Self-Awareness defense
+- id: §3.weakness-trigger.gets-flustered---responds-too-
+  section: §3
+  title: Weakness Trigger — Gets flustered / responds too fast
+  type: roll_modifier
+  description: 'When opponent gets flustered / responds too fast: Wit defense DC -2.'
+  condition:
+    opponent_behaviour: Gets flustered / responds too fast
+  outcome:
+    dc_adjustment: -2
+    defence_window: Wit defense
+- id: §3.weakness-trigger.asks-you-a-personal-question
+  section: §3
+  title: Weakness Trigger — Asks YOU a personal question
+  type: roll_modifier
+  description: 'When opponent asks you a personal question: Honesty defense DC -2.'
+  condition:
+    opponent_behaviour: Asks YOU a personal question
+  outcome:
+    dc_adjustment: -2
+    defence_window: Honesty defense
+- id: §3.weakness-trigger.makes-a-risky-joke
+  section: §3
+  title: Weakness Trigger — Makes a risky joke
+  type: roll_modifier
+  description: 'When opponent makes a risky joke: Chaos defense DC -2.'
+  condition:
+    opponent_behaviour: Makes a risky joke
+  outcome:
+    dc_adjustment: -2
+    defence_window: Chaos defense
+- id: §3.weakness-triggers
+  section: §3
+  title: Weakness Triggers
+  type: table
+  blocks:
+  - kind: table
+    rows:
+    - Opponent Behaviour: Contradicts themselves
+      Defense Window: Honesty defense
+      DC Reduction: '-2'
+    - Opponent Behaviour: Laughs genuinely
+      Defense Window: Charm defense
+      DC Reduction: '-2'
+    - Opponent Behaviour: Shares something personal unprompted
+      Defense Window: Self-Awareness defense
+      DC Reduction: '-3'
+    - Opponent Behaviour: Gets flustered / responds too fast
+      Defense Window: Wit defense
+      DC Reduction: '-2'
+    - Opponent Behaviour: Asks YOU a personal question
+      Defense Window: Honesty defense
+      DC Reduction: '-2'
+    - Opponent Behaviour: Makes a risky joke
+      Defense Window: Chaos defense
+      DC Reduction: '-2'
+    sep_cells:
+    - '---'
+    - '---'
+    - '---'
+  - kind: hr
+  description: ''
+  heading_level: 3
+- id: §4.callback-bonus
+  section: §4
+  title: 🔗 Callback Bonus
+  type: interest_change
+  blocks:
+  - kind: paragraph
+    text: If a dialogue option references something introduced earlier in the conversation, it gets a hidden roll bonus and a 🔗 icon. The LLM tracks topics as they're introduced and flags options that call
+      back to them. The roll probability shown does not include the callback bonus — attentive players who recognise the reference are getting better odds than the number says.
+  - kind: paragraph
+    text: '**In the UI above:** Option B references "tech bro to mushroom guy" — Zyx''s own life story, introduced early in the conversation. The 🔗 icon marks it. Displayed at 60%; actual odds are closer
+      to 70%.'
+  description: If a dialogue option references something introduced earlier in the conversation, it gets a hidden roll bonus and a 🔗 icon. The LLM tracks topics as they're introduced and flags options that
+    call back to them. The roll probability shown does not include the callback bonus — attentive players who recognise the reference are getting better odds than the number says.
+  heading_level: 2
+  condition:
+    callback_distance: 2
+  outcome:
+    roll_bonus: 1
+- id: §4.callback-bonus.2-turns
+  section: §4
+  title: Callback Bonus — 2 turns ago
+  type: roll_modifier
+  description: Referencing a topic from 2 turns ago grants +1 to roll.
+  condition:
+    callback_distance: 2
+  outcome:
+    roll_bonus: 1
+- id: §4.callback-bonus.4-plus
+  section: §4
+  title: Callback Bonus — 4+ turns ago
+  type: roll_modifier
+  description: Referencing a topic from 4+ turns ago grants +2 to roll.
+  condition:
+    callback_distance: 4
+  outcome:
+    roll_bonus: 2
+- id: §4.callback-bonus.opener
+  section: §4
+  title: Callback Bonus — From the opener
+  type: roll_modifier
+  description: Referencing a topic from from the opener grants +3 to roll.
+  condition:
+    callback_distance: 0
+  outcome:
+    roll_bonus: 3
+- id: §4.callback-distances
+  section: §4
+  title: Callback Distances
+  type: table
+  blocks:
+  - kind: table
+    rows:
+    - When topic was introduced: 2 turns ago
+      Hidden bonus: +1 to roll
+    - When topic was introduced: 4+ turns ago
+      Hidden bonus: +2 to roll
+    - When topic was introduced: From the opener
+      Hidden bonus: +3 to roll
+    sep_cells:
+    - '---'
+    - '---'
+  description: ''
+  heading_level: 3
+- id: §4.llm-instruction
+  section: §4
+  title: LLM Instruction
+  type: template
+  blocks:
+  - kind: paragraph
+    text: 'When generating dialogue options, the LLM receives a list of callback-eligible topics with turn numbers:'
+  - kind: code
+    text: '```
+
+      CALLBACK OPPORTUNITIES
+
+      - "art school" — introduced turn 4 (4 turns ago, +2 bonus eligible)
+
+      - "mushroom guy" — introduced turn 1 (opener, +3 bonus eligible)
+
+      ```'
+  - kind: paragraph
+    text: 'Instruction: *"For 1–2 options, incorporate a natural reference to an earlier topic. Mark with `[CALLBACK: turn_number]` in metadata."* The engine applies the distance bonus automatically.'
+  - kind: hr
+  description: 'When generating dialogue options, the LLM receives a list of callback-eligible topics with turn numbers:'
+  heading_level: 3
+- id: §5.stat-combo
+  section: §5
+  title: ⭐ Stat Combo
+  type: interest_change
+  blocks:
+  - kind: paragraph
+    text: Certain stat sequences across consecutive turns create **combos** — bonus effects triggered by using the right stats in the right order. The ⭐ icon appears on an option that would *complete* a
+      combo. The icon doesn't explain the combo; players learn the patterns through play.
+  - kind: paragraph
+    text: '**In the UI above:** Option C (Self-Awareness) shows ⭐. This means the player''s previous stat + Self-Awareness completes a known combo sequence. The attentive player starts recognising these
+      patterns. The casual player picks it because it sounds right — which is fine.'
+  description: Certain stat sequences across consecutive turns create **combos** — bonus effects triggered by using the right stats in the right order. The ⭐ icon appears on an option that would *complete*
+    a combo. The icon doesn't explain the combo; players learn the patterns through play.
+  heading_level: 2
+- id: §5.combo.setup
+  section: §5
+  title: Combo — The Setup
+  type: roll_modifier
+  description: 'The Setup: Wit → Charm → +1 Interest on Charm.'
+  condition:
+    combo_sequence:
+    - Wit
+    - Charm
+  outcome:
+    interest_bonus: 1
+- id: §5.combo.reveal
+  section: §5
+  title: Combo — The Reveal
+  type: roll_modifier
+  description: 'The Reveal: Charm → Honesty → +1 Interest on Honesty.'
+  condition:
+    combo_sequence:
+    - Charm
+    - Honesty
+  outcome:
+    interest_bonus: 1
+- id: §5.combo.read
+  section: §5
+  title: Combo — The Read
+  type: roll_modifier
+  description: 'The Read: Self-Awareness → Honesty → +1 Interest on Honesty.'
+  condition:
+    combo_sequence:
+    - Self-Awareness
+    - Honesty
+  outcome:
+    interest_bonus: 1
+- id: §5.combo.pivot
+  section: §5
+  title: Combo — The Pivot
+  type: roll_modifier
+  description: 'The Pivot: Honesty → Chaos → +1 Interest on Chaos.'
+  condition:
+    combo_sequence:
+    - Honesty
+    - Chaos
+  outcome:
+    interest_bonus: 1
+- id: §5.combo.recovery
+  section: §5
+  title: Combo — The Recovery
+  type: roll_modifier
+  description: 'The Recovery: Any failed stat → Self-Awareness → **+2** Interest.'
+  condition:
+    combo_sequence:
+    - Any failed stat
+    - Self-Awareness
+  outcome:
+    interest_bonus: 2
+- id: §5.combo.escalation
+  section: §5
+  title: Combo — The Escalation
+  type: roll_modifier
+  description: 'The Escalation: Chaos → Rizz → +1 Interest on Rizz.'
+  condition:
+    combo_sequence:
+    - Chaos
+    - Rizz
+  outcome:
+    interest_bonus: 1
+- id: §5.combo.disarm
+  section: §5
+  title: Combo — The Disarm
+  type: roll_modifier
+  description: 'The Disarm: Wit → Honesty → +1 Interest on Honesty.'
+  condition:
+    combo_sequence:
+    - Wit
+    - Honesty
+  outcome:
+    interest_bonus: 1
+- id: §5.combo.triple
+  section: §5
+  title: Combo — The Triple
+  type: roll_modifier
+  description: 'The Triple: 3 different stats in 3 turns → +1 to all rolls next turn.'
+  condition:
+    combo_sequence:
+    - 3 different stats in 3 turns
+  outcome:
+    interest_bonus: 1
+    roll_bonus: 1
+- id: §5.combo-list
+  section: §5
+  title: Combo List
+  type: table
+  blocks:
+  - kind: table
+    rows:
+    - Combo: '**The Setup**'
+      Sequence: Wit → Charm
+      Bonus: +1 Interest on Charm
+      Narrative logic: You made them laugh, then charmed them. The joke lowered their guard.
+    - Combo: '**The Reveal**'
+      Sequence: Charm → Honesty
+      Bonus: +1 Interest on Honesty
+      Narrative logic: You were smooth, then dropped the act. The contrast is disarming.
+    - Combo: '**The Read**'
+      Sequence: Self-Awareness → Honesty
+      Bonus: +1 Interest on Honesty
+      Narrative logic: You showed you understood them, then let them understand you. Reciprocity.
+    - Combo: '**The Pivot**'
+      Sequence: Honesty → Chaos
+      Bonus: +1 Interest on Chaos
+      Narrative logic: You were real, then you were wild. Emotional whiplash in the best way.
+    - Combo: '**The Recovery**'
+      Sequence: Any failed stat → Self-Awareness
+      Bonus: '**+2** Interest'
+      Narrative logic: You messed up, then acknowledged it. Growth, live on stage.
+    - Combo: '**The Escalation**'
+      Sequence: Chaos → Rizz
+      Bonus: +1 Interest on Rizz
+      Narrative logic: You were unpredictable, then you made a move. Chaos as foreplay.
+    - Combo: '**The Disarm**'
+      Sequence: Wit → Honesty
+      Bonus: +1 Interest on Honesty
+      Narrative logic: You were clever, then you were real. Shows range.
+    - Combo: '**The Triple**'
+      Sequence: 3 different stats in 3 turns
+      Bonus: +1 to all rolls next turn
+      Narrative logic: Versatility. You're not a one-trick penis.
+    sep_cells:
+    - '---'
+    - '---'
+    - '---'
+    - '---'
+  - kind: hr
+  description: ''
+  heading_level: 3
+- id: §6.momentum.2-wins
+  section: §6
+  title: Momentum — 2 wins
+  type: roll_modifier
+  description: '2 wins: Nothing mechanical yet.'
+  condition:
+    streak: 2
+  outcome:
+    effect: none
+- id: §6.momentum.3-wins
+  section: §6
+  title: Momentum — 3 wins
+  type: roll_modifier
+  description: '3 wins: +2 to next roll, all options improve in quality.'
+  condition:
+    streak: 3
+  outcome:
+    roll_bonus: 2
+- id: §6.momentum.4-wins
+  section: §6
+  title: Momentum — 4 wins
+  type: roll_modifier
+  description: '4 wins: +2 to next 2 rolls, opponent''s next reply is warmer.'
+  condition:
+    streak: 4
+  outcome:
+    roll_bonus: 2
+- id: §6.momentum.5plus-wins
+  section: §6
+  title: Momentum — 5+ wins
+  type: roll_modifier
+  description: '5+ wins: +3 to next roll, opponent may spontaneously +1 Interest.'
+  condition:
+    streak_minimum: 5
+  outcome:
+    roll_bonus: 3
+    interest_delta: 1
+- id: §6.momentum
+  section: §6
+  title: 📈 Momentum
+  type: table
+  blocks:
+  - kind: paragraph
+    text: Three successes in a row builds **Momentum** — a hidden state shown in the status bar. Momentum boosts the next roll AND visibly improves the writing quality of all options (the LLM knows you're
+      on a streak). An attentive player notices their character sounds smoother and more assured. That's the tell.
+  - kind: table
+    rows:
+    - Streak: 2 wins
+      Status bar: '📈 Momentum: 2 wins (one more = Momentum bonus)'
+      Effect: Nothing mechanical yet
+    - Streak: 3 wins
+      Status bar: 📈 **Momentum**
+      Effect: +2 to next roll, all options improve in quality
+    - Streak: 4 wins
+      Status bar: 📈 **Flow State**
+      Effect: +2 to next 2 rolls, opponent's next reply is warmer
+    - Streak: 5+ wins
+      Status bar: 📈 **In The Zone**
+      Effect: +3 to next roll, opponent may spontaneously +1 Interest
+    sep_cells:
+    - '---'
+    - '---'
+    - '---'
+  - kind: paragraph
+    text: Momentum breaks on any failure. Good runs feel great — and the eventual failure stings more.
+  - kind: hr
+  description: Three successes in a row builds **Momentum** — a hidden state shown in the status bar. Momentum boosts the next roll AND visibly improves the writing quality of all options (the LLM knows
+    you're on a streak). An attentive player notices their character sounds smoother and more assured. That's the tell.
+  heading_level: 2
+- id: §7.opponent-tells-post-roll-feedback
+  section: §7
+  title: 📖 Opponent Tells (Post-Roll Feedback)
+  type: roll_modifier
+  blocks:
+  - kind: paragraph
+    text: 'The opponent''s message contains subtle clues about which stat will work best next turn. Reading a tell gives a hidden **+2** to the matching option. The player doesn''t see "+2" before the roll
+      — instead, the tell option has visibly better writing: more specific, more responsive, more alive.'
+  - kind: paragraph
+    text: 'After a successful tell read, the UI reveals: **"📖 You read the moment. +2 bonus."** — teaching the player to look for them.'
+  description: 'The opponent''s message contains subtle clues about which stat will work best next turn. Reading a tell gives a hidden **+2** to the matching option. The player doesn''t see "+2" before
+    the roll — instead, the tell option has visibly better writing: more specific, more responsive, more alive.'
+  heading_level: 2
+  condition:
+    action: tell_read
+  outcome:
+    roll_bonus: 2
+- id: §7.tell.compliments-you
+  section: §7
+  title: Tell — Compliments you
+  type: roll_modifier
+  description: 'Opponent compliments you: Tell stat Honesty (+2).'
+  condition:
+    opponent_behaviour: Compliments you
+  outcome:
+    roll_bonus: 2
+    tell_stat: Honesty
+- id: §7.tell.asks-a-personal-question
+  section: §7
+  title: Tell — Asks a personal question
+  type: roll_modifier
+  description: 'Opponent asks a personal question: Tell stat Honesty or Self-Awareness (+2).'
+  condition:
+    opponent_behaviour: Asks a personal question
+  outcome:
+    roll_bonus: 2
+    tell_stat: Honesty or Self-Awareness
+- id: §7.tell.makes-a-joke
+  section: §7
+  title: Tell — Makes a joke
+  type: roll_modifier
+  description: 'Opponent makes a joke: Tell stat Wit or Chaos (+2).'
+  condition:
+    opponent_behaviour: Makes a joke
+  outcome:
+    roll_bonus: 2
+    tell_stat: Wit or Chaos
+- id: §7.tell.shares-something-vulnerable
+  section: §7
+  title: Tell — Shares something vulnerable
+  type: roll_modifier
+  description: 'Opponent shares something vulnerable: Tell stat Honesty (+2).'
+  condition:
+    opponent_behaviour: Shares something vulnerable
+  outcome:
+    roll_bonus: 2
+    tell_stat: Honesty
+- id: §7.tell.pulls-back---gets-guarded
+  section: §7
+  title: Tell — Pulls back / gets guarded
+  type: roll_modifier
+  description: 'Opponent pulls back / gets guarded: Tell stat Self-Awareness (+2).'
+  condition:
+    opponent_behaviour: Pulls back / gets guarded
+  outcome:
+    roll_bonus: 2
+    tell_stat: Self-Awareness
+- id: §7.tell.tests-you---challenges
+  section: §7
+  title: Tell — Tests you / challenges
+  type: roll_modifier
+  description: 'Opponent tests you / challenges: Tell stat Wit or Chaos (+2).'
+  condition:
+    opponent_behaviour: Tests you / challenges
+  outcome:
+    roll_bonus: 2
+    tell_stat: Wit or Chaos
+- id: §7.tell.sends-a-short-reply
+  section: §7
+  title: Tell — Sends a short reply
+  type: roll_modifier
+  description: 'Opponent sends a short reply: Tell stat Charm or Chaos (+2).'
+  condition:
+    opponent_behaviour: Sends a short reply
+  outcome:
+    roll_bonus: 2
+    tell_stat: Charm or Chaos
+- id: §7.tell.flirts
+  section: §7
+  title: Tell — Flirts
+  type: roll_modifier
+  description: 'Opponent flirts: Tell stat Rizz or Charm (+2).'
+  condition:
+    opponent_behaviour: Flirts
+  outcome:
+    roll_bonus: 2
+    tell_stat: Rizz or Charm
+- id: §7.tell.changes-subject
+  section: §7
+  title: Tell — Changes subject
+  type: roll_modifier
+  description: 'Opponent changes subject: Tell stat Chaos (+2).'
+  condition:
+    opponent_behaviour: Changes subject
+  outcome:
+    roll_bonus: 2
+    tell_stat: Chaos
+- id: §7.tell.goes-silent-for-a-while
+  section: §7
+  title: Tell — Goes silent for a while
+  type: roll_modifier
+  description: 'Opponent goes silent for a while: Tell stat Self-Awareness (+2).'
+  condition:
+    opponent_behaviour: Goes silent for a while
+  outcome:
+    roll_bonus: 2
+    tell_stat: Self-Awareness
+- id: §7.tell-categories
+  section: §7
+  title: Tell Categories
+  type: table
+  blocks:
+  - kind: table
+    rows:
+    - Opponent says/does: Compliments you
+      Tell stat (+2): Honesty
+      Why: They're warm — be real back
+    - Opponent says/does: Asks a personal question
+      Tell stat (+2): Honesty or Self-Awareness
+      Why: They want depth
+    - Opponent says/does: Makes a joke
+      Tell stat (+2): Wit or Chaos
+      Why: Match their energy
+    - Opponent says/does: Shares something vulnerable
+      Tell stat (+2): Honesty
+      Why: Reciprocate
+    - Opponent says/does: Pulls back / gets guarded
+      Tell stat (+2): Self-Awareness
+      Why: Read the room, don't push
+    - Opponent says/does: Tests you / challenges
+      Tell stat (+2): Wit or Chaos
+      Why: They want to see what you're made of
+    - Opponent says/does: Sends a short reply
+      Tell stat (+2): Charm or Chaos
+      Why: Re-engage, they're drifting
+    - Opponent says/does: Flirts
+      Tell stat (+2): Rizz or Charm
+      Why: Match the energy
+    - Opponent says/does: Changes subject
+      Tell stat (+2): Chaos
+      Why: Follow the redirect
+    - Opponent says/does: Goes silent for a while
+      Tell stat (+2): Self-Awareness
+      Why: Acknowledge the pause
+    sep_cells:
+    - '---'
+    - '---'
+    - '---'
+  - kind: hr
+  description: ''
+  heading_level: 3
+- id: §8.horniness-forced-options
+  section: §8
+  title: 🔥 Horniness-Forced Options
+  type: shadow_growth
+  blocks:
+  - kind: paragraph
+    text: 'When Horniness is high, it pushes a Rizz option into the lineup whether the player wants it or not. The 🔥 icon is a warning: this option is here because your body is doing the thinking. It may
+      or may not be appropriate for this moment in the conversation.'
+  - kind: paragraph
+    text: The option always shows with 🔥 so the player can consciously choose to pick it or avoid it. Unlike all other hidden mechanics, this one is fully flagged — the comedy is in the player seeing it
+      and making a decision.
+  - kind: hr
+  description: 'When Horniness is high, it pushes a Rizz option into the lineup whether the player wants it or not. The 🔥 icon is a warning: this option is here because your body is doing the thinking.
+    It may or may not be appropriate for this moment in the conversation.'
+  heading_level: 2
+  condition:
+    shadow: Horniness
+    threshold: 6
+  outcome:
+    forced_stat: Rizz
+- id: §9.the-depth-gradient
+  section: §9
+  title: The Depth Gradient
+  type: table
+  blocks:
+  - kind: table
+    rows:
+    - Player Type: '**Casual**'
+      What they use: Risk tiers and percentages
+      How they play: Picks what feels safe or what sounds fun
+    - Player Type: '**Engaged**'
+      What they use: Risk tiers + icons (⭐🔗🔓)
+      How they play: Notices the markers, starts learning patterns
+    - Player Type: '**Strategic**'
+      What they use: Everything + mental model of combos/windows/callbacks
+      How they play: Plans 2–3 turns ahead, chains combos, reads tells
+    sep_cells:
+    - '---'
+    - '---'
+    - '---'
+  - kind: paragraph
+    text: All three player types have fun. The casual player sees funny dialogue and rolls dice. The strategic player is playing 4D chess with conversation mechanics. The game doesn't punish casuals or
+      bore strategists.
+  description: All three player types have fun. The casual player sees funny dialogue and rolls dice. The strategic player is playing 4D chess with conversation mechanics. The game doesn't punish casuals
+    or bore strategists.
+  heading_level: 2

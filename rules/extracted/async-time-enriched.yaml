@@ -1,0 +1,801 @@
+- id: §0.async-multi-chat-simulated-time
+  section: §0
+  title: Async Multi-Chat & Simulated Time
+  type: definition
+  blocks:
+  - kind: paragraph
+    text: You have multiple active conversations simultaneously. Each has its own simulated timeline. Messages have timestamps. Opponents reply at different speeds. You fast-forward to the next incoming
+      message across all chats. Just like real Tinder — but you're a penis.
+  - kind: hr
+  description: You have multiple active conversations simultaneously. Each has its own simulated timeline. Messages have timestamps. Opponents reply at different speeds. You fast-forward to the next incoming
+    message across all chats. Just like real Tinder — but you're a penis.
+  heading_level: 1
+- id: §1.the-phone-ui
+  section: §1
+  title: The Phone UI
+  type: template
+  blocks:
+  - kind: code
+    text: '```
+
+      ╔══════════════════════════════════════════╗
+
+      ║  📱 PINDER                    🕐 2:34 PM ║
+
+      ╠══════════════════════════════════════════╣
+
+      ║  💬 ACTIVE CHATS                         ║
+
+      ║                                          ║
+
+      ║  ┌──────────────────────────────────┐    ║
+
+      ║  │ 🟢 Velvet          2:31 PM      │    ║
+
+      ║  │ "lmao ok that was good"         │    ║
+
+      ║  │ ❤️ Interest: 14  ⏰ Your turn    │    ║
+
+      ║  └──────────────────────────────────┘    ║
+
+      ║                                          ║
+
+      ║  ┌──────────────────────────────────┐    ║
+
+      ║  │ 🟡 Brick           1:45 PM      │    ║
+
+      ║  │ "Interesting. Noted."            │    ║
+
+      ║  │ ❤️ Interest: 9   ⏰ Waiting...   │    ║
+
+      ║  │ 📨 Reply in ~47 min             │    ║
+
+      ║  └──────────────────────────────────┘    ║
+
+      ║                                          ║
+
+      ║  ┌──────────────────────────────────┐    ║
+
+      ║  │ 🔴 Zyx             Yesterday    │    ║
+
+      ║  │ "the forest remembers..."        │    ║
+
+      ║  │ ❤️ Interest: 11  ⏰ Waiting...   │    ║
+
+      ║  │ 📨 Reply in ~6 hours            │    ║
+
+      ║  └──────────────────────────────────┘    ║
+
+      ║                                          ║
+
+      ║  ┌──────────────────────────────────┐    ║
+
+      ║  │ ⚫ Gerald_42        3 days ago   │    ║
+
+      ║  │ "Hey! 😂👍"                      │    ║
+
+      ║  │ ❤️ Interest: 4   ☠️ Ghosting...  │    ║
+
+      ║  └──────────────────────────────────┘    ║
+
+      ║                                          ║
+
+      ║  [⏩ FAST FORWARD] to next message       ║
+
+      ║  [🔀 SWIPE] for new matches              ║
+
+      ║                                          ║
+
+      ╚══════════════════════════════════════════╝
+
+      ```'
+  - kind: hr
+  description: ''
+  heading_level: 2
+- id: §2.message-timestamps
+  section: §2
+  title: Message Timestamps
+  type: template
+  blocks:
+  - kind: paragraph
+    text: 'Every message gets an in-game timestamp:'
+  - kind: code
+    text: "```json\n{\n  \"conversation_id\": \"conv_velvet_001\",\n  \"messages\": [\n    {\n      \"sender\": \"player\",\n      \"text\": \"...\",\n      \"timestamp\": \"2026-03-10T14:28:00\",\n   \
+      \   \"stat_used\": \"charm\",\n      \"roll\": 16,\n      \"result\": \"success\"\n    },\n    {\n      \"sender\": \"opponent\",\n      \"text\": \"...\",\n      \"timestamp\": \"2026-03-10T14:31:00\"\
+      ,\n      \"response_delay_min\": 3\n    }\n  ]\n}\n```"
+  - kind: hr
+  description: 'Every message gets an in-game timestamp:'
+  heading_level: 2
+- id: §3.opponent-response-timing
+  section: §3
+  title: Opponent Response Timing
+  type: interest_change
+  blocks:
+  - kind: paragraph
+    text: Each opponent's response speed is derived from their stats and current Interest level.
+  description: Each opponent's response speed is derived from their stats and current Interest level.
+  heading_level: 2
+- id: §3.response-time.high-charm
+  section: §3
+  title: Response Time — High Charm
+  type: interest_change
+  description: 'High Charm: 1–5 min (socially engaged, responsive).'
+  condition:
+    opponent_trait: High Charm
+  outcome:
+    base_response_time: 1–5 min (socially engaged, responsive)
+    response_time_range_min:
+    - 1
+    - 5
+- id: §3.response-time.high-self-awareness
+  section: §3
+  title: Response Time — High Self-Awareness
+  type: interest_change
+  description: 'High Self-Awareness: 3–10 min (considers their reply carefully).'
+  condition:
+    opponent_trait: High Self-Awareness
+  outcome:
+    base_response_time: 3–10 min (considers their reply carefully)
+    response_time_range_min:
+    - 3
+    - 10
+- id: §3.response-time.high-chaos
+  section: §3
+  title: Response Time — High Chaos
+  type: interest_change
+  description: 'High Chaos: Random: 30 sec OR 3 hours (no in between).'
+  condition:
+    opponent_trait: High Chaos
+  outcome:
+    base_response_time: 'Random: 30 sec OR 3 hours (no in between)'
+- id: §3.response-time.high-honesty
+  section: §3
+  title: Response Time — High Honesty
+  type: interest_change
+  description: 'High Honesty: 5–15 min (thinking about what to actually say).'
+  condition:
+    opponent_trait: High Honesty
+  outcome:
+    base_response_time: 5–15 min (thinking about what to actually say)
+    response_time_range_min:
+    - 5
+    - 15
+- id: §3.response-time.high-wit
+  section: §3
+  title: Response Time — High Wit
+  type: interest_change
+  description: 'High Wit: 2–8 min (crafting their reply).'
+  condition:
+    opponent_trait: High Wit
+  outcome:
+    base_response_time: 2–8 min (crafting their reply)
+    response_time_range_min:
+    - 2
+    - 8
+- id: §3.response-time.low-everything
+  section: §3
+  title: Response Time — Low everything
+  type: interest_change
+  description: 'Low everything: 30 min – 2 hours (the "hey" person).'
+  condition:
+    opponent_trait: Low everything
+  outcome:
+    base_response_time: 30 min – 2 hours (the "hey" person)
+- id: §3.base-response-time-by-trait
+  section: §3
+  title: Base response time by trait
+  type: table
+  blocks:
+  - kind: table
+    rows:
+    - Opponent Trait: High Charm
+      Base Response Time: 1–5 min (socially engaged, responsive)
+    - Opponent Trait: High Self-Awareness
+      Base Response Time: 3–10 min (considers their reply carefully)
+    - Opponent Trait: High Chaos
+      Base Response Time: 'Random: 30 sec OR 3 hours (no in between)'
+    - Opponent Trait: High Honesty
+      Base Response Time: 5–15 min (thinking about what to actually say)
+    - Opponent Trait: High Wit
+      Base Response Time: 2–8 min (crafting their reply)
+    - Opponent Trait: Low everything
+      Base Response Time: 30 min – 2 hours (the "hey" person)
+    sep_cells:
+    - '---'
+    - '---'
+  description: ''
+  heading_level: 3
+- id: §3.interest-time.very-into-it
+  section: §3
+  title: Interest Time Modifier — Very Into It
+  type: interest_change
+  description: '15–20 (Very Into It): ×0.5 — replies fast, they''re excited.'
+  condition:
+    interest_range:
+    - 15
+    - 20
+  outcome:
+    time_multiplier: 0.5
+- id: §3.interest-time.interested
+  section: §3
+  title: Interest Time Modifier — Interested
+  type: interest_change
+  description: '10–14 (Interested): ×1.0 — normal.'
+  condition:
+    interest_range:
+    - 10
+    - 14
+  outcome:
+    time_multiplier: 1.0
+- id: §3.interest-time.lukewarm
+  section: §3
+  title: Interest Time Modifier — Lukewarm
+  type: interest_change
+  description: '5–9 (Lukewarm): ×2.0 — taking their time.'
+  condition:
+    interest_range:
+    - 5
+    - 9
+  outcome:
+    time_multiplier: 2.0
+- id: §3.interest-time.bored
+  section: §3
+  title: Interest Time Modifier — Bored
+  type: interest_change
+  description: '1–4 (Bored): ×5.0 — might not reply at all.'
+  condition:
+    interest_range:
+    - 1
+    - 4
+  outcome:
+    time_multiplier: 5.0
+- id: §3.interest-modifier
+  section: §3
+  title: Interest modifier
+  type: table
+  blocks:
+  - kind: table
+    rows:
+    - Interest Level: 15–20 (Very Into It)
+      Time Multiplier: ×0.5 — replies fast, they're excited
+    - Interest Level: 10–14 (Interested)
+      Time Multiplier: ×1.0 — normal
+    - Interest Level: 5–9 (Lukewarm)
+      Time Multiplier: ×2.0 — taking their time
+    - Interest Level: 1–4 (Bored)
+      Time Multiplier: ×5.0 — might not reply at all
+    sep_cells:
+    - '---'
+    - '---'
+  description: ''
+  heading_level: 3
+- id: §3.shadow-response.high-overthinking
+  section: §3
+  title: Shadow Response Modifier — High Overthinking
+  type: interest_change
+  description: 'High Overthinking: +50% more time — composing and recomposing.'
+  condition:
+    shadow: Overthinking
+  outcome:
+    response_style: +50% more time — composing and recomposing
+    time_modifier_percent: 50
+- id: §3.shadow-response.high-denial
+  section: §3
+  title: Shadow Response Modifier — High Denial
+  type: interest_change
+  description: 'High Denial: Replies at exactly calculated intervals (performatively casual).'
+  condition:
+    shadow: Denial
+  outcome:
+    response_style: Replies at exactly calculated intervals (performatively casual)
+- id: §3.shadow-response.high-fixation
+  section: §3
+  title: Shadow Response Modifier — High Fixation
+  type: interest_change
+  description: 'High Fixation: Replies at the same interval every time (rigid schedule).'
+  condition:
+    shadow: Fixation
+  outcome:
+    response_style: Replies at the same interval every time (rigid schedule)
+- id: §3.shadow-response.high-madness
+  section: §3
+  title: Shadow Response Modifier — High Madness
+  type: interest_change
+  description: 'High Madness: Erratic: 1 min, then 4 hours, then 30 seconds.'
+  condition:
+    shadow: Madness
+  outcome:
+    response_style: 'Erratic: 1 min, then 4 hours, then 30 seconds'
+- id: §3.shadow-modifier
+  section: §3
+  title: Shadow modifier
+  type: table
+  blocks:
+  - kind: paragraph
+    text: 'Active shadow stats affect response *style*, not just speed:'
+  - kind: table
+    rows:
+    - Shadow: High Overthinking
+      Effect on replies: +50% more time — composing and recomposing
+    - Shadow: High Denial
+      Effect on replies: Replies at exactly calculated intervals (performatively casual)
+    - Shadow: High Fixation
+      Effect on replies: Replies at the same interval every time (rigid schedule)
+    - Shadow: High Madness
+      Effect on replies: 'Erratic: 1 min, then 4 hours, then 30 seconds'
+    sep_cells:
+    - '---'
+    - '---'
+  description: 'Active shadow stats affect response *style*, not just speed:'
+  heading_level: 3
+- id: §3.examples
+  section: §3
+  title: Examples
+  type: interest_change
+  blocks:
+  - kind: paragraph
+    text: '**Brick** (High Wit, Interest 9, High Denial):
+
+      - Base: 2–8 min
+
+      - Interest: ×2.0
+
+      - Denial: exactly calculated intervals
+
+      - Result: Replies every 8–12 minutes, like clockwork. Suspiciously consistent.'
+  - kind: paragraph
+    text: '**Zyx** (High Honesty, Interest 11, High Dread):
+
+      - Base: 5–15 min
+
+      - Interest: ×1.0
+
+      - Dread: 20% chance of a 2–8 hour disappearance to the forest
+
+      - Result: Usually 5–15 min, with unpredictable long gaps.'
+  description: '**Brick** (High Wit, Interest 9, High Denial):
+
+    - Base: 2–8 min
+
+    - Interest: ×2.0
+
+    - Denial: exactly calculated intervals
+
+    - Result: Replies every 8–12 minutes, like clockwork. Suspiciously consistent.'
+  heading_level: 3
+- id: §3.response-profiles-data-driven
+  section: §3
+  title: Response profiles (data-driven)
+  type: template
+  blocks:
+  - kind: paragraph
+    text: 'Timing profiles live in `/data/timing/response-profiles.json`:'
+  - kind: code
+    text: "```json\n[\n  {\n    \"name\": \"eager\",\n    \"base_range_min\": [0.5, 3],\n    \"interest_multipliers\": { \"high\": 0.3, \"medium\": 0.7, \"low\": 1.5, \"bored\": 3.0 },\n    \"stat_triggers\"\
+      : { \"high_charm\": true, \"high_rizz\": true },\n    \"description\": \"Notifications are on. They won't admit it.\"\n  },\n  {\n    \"name\": \"calculated\",\n    \"base_range_min\": [8, 15],\n\
+      \    \"interest_multipliers\": { \"high\": 0.8, \"medium\": 1.0, \"low\": 1.5, \"bored\": 4.0 },\n    \"stat_triggers\": { \"high_self_awareness\": true, \"high_denial\": true },\n    \"description\"\
+      : \"Never too fast, never too slow. Suspiciously consistent.\"\n  },\n  {\n    \"name\": \"chaotic\",\n    \"base_range_min\": [0.5, 480],\n    \"interest_multipliers\": { \"high\": 0.5, \"medium\"\
+      : 1.0, \"low\": 1.0, \"bored\": 1.0 },\n    \"stat_triggers\": { \"high_chaos\": true, \"high_madness\": true },\n    \"description\": \"Could be 30 seconds. Could be 8 hours. Interest doesn't move\
+      \ the chaos, only the floor.\"\n  }\n]\n```"
+  - kind: paragraph
+    text: Modders can add new profiles. The engine matches opponent stat profiles to timing profiles automatically.
+  - kind: hr
+  description: 'Timing profiles live in `/data/timing/response-profiles.json`:'
+  heading_level: 3
+- id: §4.fast-forward
+  section: §4
+  title: Fast Forward
+  type: interest_change
+  blocks:
+  - kind: paragraph
+    text: '**[⏩ FAST FORWARD]** is the core UI verb for managing multiple chats.'
+  - kind: paragraph
+    text: 'When pressed:'
+  - kind: paragraph
+    text: "1. Check all active conversations for pending opponent replies\n2. Advance game clock to the **earliest** incoming message\n3. Deliver that message and open that conversation\n4. While time advanced,\
+      \ other things may have happened:\n   - Another opponent may have also replied (multiple notifications)\n   - A low-Interest chat may have ghosted (Dread +1)\n   - New match notifications may have\
+      \ arrived\n   - Horniness may have shifted if enough time passed (time-of-day re-check)"
+  - kind: paragraph
+    text: You don't wait in real time. You play one conversation, fast-forward to the next reply, play that, fast-forward again.
+  - kind: hr
+  description: '**[⏩ FAST FORWARD]** is the core UI verb for managing multiple chats.'
+  heading_level: 2
+- id: §5.response-delay.under--1-min
+  section: §5
+  title: Response Delay — < 1 min
+  type: interest_change
+  description: '< 1 min: Eager. No penalty. Some opponents find it intense..'
+  condition:
+    timing_range:
+    - 0
+    - 1
+  outcome:
+    delay_penalty: 0
+- id: §5.response-delay.1–15-min
+  section: §5
+  title: Response Delay — 1–15 min
+  type: interest_change
+  description: '1–15 min: Normal. No effect..'
+  condition:
+    timing_range:
+    - 1
+    - 15
+  outcome:
+    delay_penalty: 0
+- id: §5.response-delay.15–60-min
+  section: §5
+  title: Response Delay — 15–60 min
+  type: interest_change
+  description: '15–60 min: Slightly cool. -1 Interest if they were at 15+..'
+  condition:
+    timing_range:
+    - 15
+    - 60
+    interest_range:
+    - 15
+    - 25
+  outcome:
+    delay_penalty: -1
+- id: §5.response-delay.1–6-hours
+  section: §5
+  title: Response Delay — 1–6 hours
+  type: interest_change
+  description: '1–6 hours: They noticed. -2 Interest. They might Test you ("thought you ghosted me")..'
+  condition:
+    timing_range:
+    - 60
+    - 360
+  outcome:
+    delay_penalty: -2
+- id: §5.response-delay.6–24-hours
+  section: §5
+  title: Response Delay — 6–24 hours
+  type: interest_change
+  description: '6–24 hours: Major gap. -3 Interest. Pull Back likely..'
+  condition:
+    timing_range:
+    - 360
+    - 1440
+  outcome:
+    delay_penalty: -3
+- id: §5.response-delay.24plus-hours
+  section: §5
+  title: Response Delay — 24+ hours
+  type: interest_change
+  description: '24+ hours: You basically ghosted. -5 Interest. High ghost chance on their end..'
+  condition:
+    timing_range:
+    - 1440
+    - 99999
+  outcome:
+    delay_penalty: -5
+- id: §5.your-response-delay
+  section: §5
+  title: Your Response Delay
+  type: table
+  blocks:
+  - kind: paragraph
+    text: 'How long YOU take to respond matters:'
+  - kind: table
+    rows:
+    - Your response delay: < 1 min
+      Effect: Eager. No penalty. Some opponents find it intense.
+    - Your response delay: 1–15 min
+      Effect: Normal. No effect.
+    - Your response delay: 15–60 min
+      Effect: Slightly cool. -1 Interest if they were at 15+.
+    - Your response delay: 1–6 hours
+      Effect: They noticed. -2 Interest. They might Test you ("thought you ghosted me").
+    - Your response delay: 6–24 hours
+      Effect: Major gap. -3 Interest. Pull Back likely.
+    - Your response delay: 24+ hours
+      Effect: You basically ghosted. -5 Interest. High ghost chance on their end.
+    sep_cells:
+    - '---'
+    - '---'
+  - kind: paragraph
+    text: '**Modified by personality:**'
+  - kind: paragraph
+    text: '- High-Chaos: doesn''t care about gaps ("oh hey lol i forgot this app existed too")
+
+      - High-Denial: pretends they didn''t notice (but Interest still dropped)
+
+      - High-Fixation: specifically bothered by irregular timing
+
+      - High-Overthinking: assumed the worst during the gap'
+  - kind: hr
+  description: 'How long YOU take to respond matters:'
+  heading_level: 2
+- id: §6.time-of-day.morning
+  section: §6
+  title: Time of Day — Morning
+  type: roll_modifier
+  description: 'Morning (6AM–12PM): Horniness -2 — clear-headed.'
+  condition:
+    time_of_day: Morning
+  outcome:
+    horniness_modifier: -2
+- id: §6.time-of-day.afternoon
+  section: §6
+  title: Time of Day — Afternoon
+  type: roll_modifier
+  description: 'Afternoon (12PM–6PM): Horniness +0 — baseline.'
+  condition:
+    time_of_day: Afternoon
+  outcome:
+    horniness_modifier: 0
+- id: §6.time-of-day.evening
+  section: §6
+  title: Time of Day — Evening
+  type: roll_modifier
+  description: 'Evening (6PM–10PM): Horniness +1 — winding down.'
+  condition:
+    time_of_day: Evening
+  outcome:
+    horniness_modifier: 1
+- id: §6.time-of-day.late-night
+  section: §6
+  title: Time of Day — Late Night
+  type: roll_modifier
+  description: 'Late Night (10PM–2AM): Horniness +3 — danger zone.'
+  condition:
+    time_of_day: Late Night
+  outcome:
+    horniness_modifier: 3
+- id: §6.time-of-day.after-2am
+  section: §6
+  title: Time of Day — After 2AM
+  type: roll_modifier
+  description: 'After 2AM: Horniness +5 — nothing good happens after 2AM.'
+  condition:
+    time_of_day: After 2AM
+  outcome:
+    horniness_modifier: 5
+- id: §6.time-of-day-effects
+  section: §6
+  title: Time of Day Effects
+  type: table
+  blocks:
+  - kind: paragraph
+    text: 'The game clock has a time of day. This affects Horniness on top of the session''s 1d10 roll:'
+  - kind: table
+    rows:
+    - Time: Morning (6AM–12PM)
+      Horniness Modifier: -2 — clear-headed
+    - Time: Afternoon (12PM–6PM)
+      Horniness Modifier: +0 — baseline
+    - Time: Evening (6PM–10PM)
+      Horniness Modifier: +1 — winding down
+    - Time: Late Night (10PM–2AM)
+      Horniness Modifier: +3 — danger zone
+    - Time: After 2AM
+      Horniness Modifier: +5 — nothing good happens after 2AM
+    sep_cells:
+    - '---'
+    - '---'
+  - kind: paragraph
+    text: This stacks with the session roll. A Horniness roll of 6 at 11PM = effective Horniness 9. Your Rizz is destroyed. The LLM knows it's late and generates accordingly.
+  - kind: paragraph
+    text: '**Opponent behavior also shifts by time of day:**'
+  - kind: paragraph
+    text: '- Late-night messages are more informal
+
+      - Morning messages are more guarded
+
+      - Weekend timing is more relaxed'
+  - kind: paragraph
+    text: '**The 2AM Achievement:** Successfully secure a date via a conversation conducted entirely between midnight and 4AM. Bonus XP. Legendary difficulty because Horniness is maxed and every Rizz option
+      is catastrophic.'
+  - kind: hr
+  description: 'The game clock has a time of day. This affects Horniness on top of the session''s 1d10 roll:'
+  heading_level: 2
+- id: §7.managing-multiple-chats
+  section: §7
+  title: Managing Multiple Chats
+  type: definition
+  description: ''
+  heading_level: 2
+- id: §7.energy-system
+  section: §7
+  title: Energy system
+  type: definition
+  blocks:
+  - kind: paragraph
+    text: 'Each in-game day has limited energy:'
+  - kind: paragraph
+    text: '- Each conversation turn costs 1 energy
+
+      - You get 15–20 energy per day (replenishes at midnight game time)
+
+      - Fast-forwarding through dead time costs no energy
+
+      - Forces you to choose: spread across 5 conversations or focus on 2–3?'
+  description: 'Each in-game day has limited energy:'
+  heading_level: 3
+  condition:
+    formula: energy
+  outcome:
+    energy_per_day: 15
+    energy_per_day_max: 20
+    energy_cost: 1
+- id: §7.juggling.normal
+  section: §7
+  title: Juggling — Normal
+  type: interest_change
+  description: '1–3: Normal.'
+  condition:
+    active_conversations_range:
+    - 1
+    - 3
+  outcome:
+    effect: none
+- id: §7.juggling.overload
+  section: §7
+  title: Juggling — Overload
+  type: shadow_growth
+  description: '4+: Overthinking +1 per day — you''re managing too many connections.'
+  condition:
+    active_conversations_range:
+    - 4
+    - 99
+  outcome:
+    shadow: Overthinking
+    shadow_delta: 1
+    duration_turns: per_day
+- id: §7.juggling-penalty
+  section: §7
+  title: Juggling penalty
+  type: table
+  blocks:
+  - kind: table
+    rows:
+    - Active conversations: 1–3
+      Effect: Normal
+    - Active conversations: 4+
+      Effect: Overthinking +1 per day — you're managing too many connections
+    sep_cells:
+    - '---'
+    - '---'
+  description: ''
+  heading_level: 3
+- id: §7.cross-chat.securing-a-date
+  section: §7
+  title: Cross-Chat — Securing a date
+  type: shadow_growth
+  description: 'Securing a date: Confidence boost: +1 to all rolls in other chats for 1 hour game time.'
+  condition:
+    cross_chat_event: Securing a date
+  outcome:
+    roll_bonus: 1
+- id: §7.cross-chat.getting-unmatched
+  section: §7
+  title: Cross-Chat — Getting unmatched
+  type: shadow_growth
+  description: 'Getting unmatched: Dread +1 global.'
+  condition:
+    cross_chat_event: Getting unmatched
+  outcome:
+    shadow_dread: 1
+- id: §7.cross-chat.nat-1-catastrophe
+  section: §7
+  title: Cross-Chat — Nat 1 catastrophe
+  type: shadow_growth
+  description: 'Nat 1 catastrophe: Madness +1 bleeds into your next conversation.'
+  condition:
+    cross_chat_event: Nat 1 catastrophe
+  outcome:
+    shadow_madness: 1
+- id: §7.cross-chat.3-conversations-die-in-one-day
+  section: §7
+  title: Cross-Chat — 3 conversations die in one day
+  type: shadow_growth
+  description: '3 conversations die in one day: Dread +3, Madness +1 — bad day on the app.'
+  condition:
+    cross_chat_event: 3 conversations die in one day
+  outcome:
+    shadow_madness: 1
+    shadow_dread: 3
+- id: §7.cross-chat.securing-2-dates-in-one-day
+  section: §7
+  title: Cross-Chat — Securing 2 dates in one day
+  type: shadow_growth
+  description: 'Securing 2 dates in one day: Achievement: "Double Booked" + XP, but Overthinking +2.'
+  condition:
+    cross_chat_event: Securing 2 dates in one day
+  outcome:
+    shadow_overthinking: 2
+- id: §7.cross-chat-events
+  section: §7
+  title: Cross-chat events
+  type: table
+  blocks:
+  - kind: paragraph
+    text: 'Things happening in one chat affect others (shadow stats are global):'
+  - kind: table
+    rows:
+    - Event: Securing a date
+      Cross-Chat Effect: 'Confidence boost: +1 to all rolls in other chats for 1 hour game time'
+    - Event: Getting unmatched
+      Cross-Chat Effect: Dread +1 global
+    - Event: Nat 1 catastrophe
+      Cross-Chat Effect: Madness +1 bleeds into your next conversation
+    - Event: 3 conversations die in one day
+      Cross-Chat Effect: Dread +3, Madness +1 — bad day on the app
+    - Event: Securing 2 dates in one day
+      Cross-Chat Effect: 'Achievement: "Double Booked" + XP, but Overthinking +2'
+    sep_cells:
+    - '---'
+    - '---'
+  - kind: hr
+  description: 'Things happening in one chat affect others (shadow stats are global):'
+  heading_level: 3
+- id: §8.outcome.date-secured
+  section: §8
+  title: Outcome — Date Secured
+  type: interest_change
+  description: 'Interest reaches 20: Date Secured. XP payout, shadow reduction.'
+  condition:
+    interest_range:
+    - 20
+    - 25
+  outcome:
+    xp_payout: 50
+    shadow_reduction: true
+- id: §8.outcome.unmatched
+  section: §8
+  title: Outcome — Unmatched
+  type: interest_change
+  description: 'Interest reaches 0: Unmatched. Dread +1.'
+  condition:
+    interest_range:
+    - 0
+    - 0
+  outcome:
+    shadow: Dread
+    shadow_delta: 1
+- id: §8.outcome.ghosted
+  section: §8
+  title: Outcome — Ghosted
+  type: interest_change
+  description: '48h game silence: Ghosted. Dread +1.'
+  condition:
+    timing_range:
+    - 2880
+    - 99999
+  outcome:
+    shadow: Dread
+    shadow_delta: 1
+- id: §8.outcome.fizzled
+  section: §8
+  title: Outcome — Fizzled
+  type: interest_change
+  description: 'Interest 5-9 with 24h silence: Fizzled. Archived, no penalty.'
+  condition:
+    interest_range:
+    - 5
+    - 9
+    timing_range:
+    - 1440
+    - 99999
+  outcome:
+    effect: archived
+- id: §8.outcome.paused
+  section: §8
+  title: Outcome — Paused
+  type: interest_change
+  description: 'Paused: re-engage later. Interest decays -1/day of silence.'
+  condition:
+    action: pause
+  outcome:
+    interest_delta: -1
+    duration_turns: per_day
+- id: §8.conversation-lifecycle
+  section: §8
+  title: Conversation Lifecycle
+  type: template
+  blocks:
+  - kind: code
+    text: "```\nMATCH → ACTIVE → [conversation plays out] → OUTCOME\n\nOutcomes:\n  ✅ Date Secured (Interest 20) → XP payout, shadow reduction\n  \U0001F480 Unmatched (Interest 0)    → Dread +1\n  \U0001F47B\
+      \ Ghosted (48h game silence) → Dread +1\n  \U0001F4F1 Fizzled (Interest 5–9, 24h silence) → archived, no penalty\n  ⏸️ Paused → re-engage later, Interest decays -1/day of silence\n```"
+  description: ''
+  heading_level: 2

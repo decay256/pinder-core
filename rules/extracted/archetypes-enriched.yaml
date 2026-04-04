@@ -1,0 +1,923 @@
+- id: §0.archetypes
+  section: §0
+  title: Archetypes
+  type: definition
+  blocks:
+  - kind: paragraph
+    text: Archetypes describe dominant behavioural patterns that emerge from a character's stat profile and equipment build. They are Tinder stereotypes pushed to absurdity — each one is a recognisable
+      real-world dating persona, exaggerated for comedy.
+  - kind: paragraph
+    text: '**Authoritative data file:** `data/archetypes/stat-to-archetype.json`'
+  description: Archetypes describe dominant behavioural patterns that emerge from a character's stat profile and equipment build. They are Tinder stereotypes pushed to absurdity — each one is a recognisable
+    real-world dating persona, exaggerated for comedy.
+  heading_level: 1
+- id: §1.how-archetypes-work
+  section: §1
+  title: How Archetypes Work
+  type: state_change
+  blocks:
+  - kind: paragraph
+    text: Each item in a character's build lists 1–3 `archetype_tendencies`. These are aggregated by count across all equipped items and anatomy fragments. The archetype mentioned most across the full build
+      becomes **dominant** — it shapes the LLM's default voice, opener style, and recovery behaviour. Secondary archetypes surface in failure states and edge cases.
+  - kind: paragraph
+    text: Archetypes are not a separate character option. They emerge from equipment. You don't pick your archetype — your wardrobe picks it for you.
+  - kind: paragraph
+    text: See [[character-construction]] §3.1 for the full assembly pipeline.
+  - kind: hr
+  description: Each item in a character's build lists 1–3 `archetype_tendencies`. These are aggregated by count across all equipped items and anatomy fragments. The archetype mentioned most across the full
+    build becomes **dominant** — it shapes the LLM's default voice, opener style, and recovery behaviour. Secondary archetypes surface in failure states and edge cases.
+  heading_level: 2
+  condition:
+    formula: archetype_selection
+  outcome:
+    archetype_count: 2
+- id: §2.archetype-reference
+  section: §2
+  title: Archetype Reference
+  type: definition
+  description: ''
+  heading_level: 2
+- id: §2.tier-1-low-level-levels-13
+  section: §2
+  title: Tier 1 — Low Level (Levels 1–3)
+  type: definition
+  blocks:
+  - kind: hr
+  description: ''
+  heading_level: 3
+- id: §2.the-hey-opener
+  section: §2
+  title: The Hey Opener
+  type: shadow_growth
+  blocks:
+  - kind: paragraph
+    text: "**Stats:** Low Charm, Wit, Chaos | **Shadow:** High Dread, Fixation  \n**Level range:** 1–3"
+  - kind: paragraph
+    text: Can barely form a sentence. Every message is "hey" or "hi." Not malicious — just paralysed by fear of rejection and genuinely has no idea what else to say. Believes that opening a channel is the
+      hard part. It is not. The digital equivalent of standing in a doorway.
+  - kind: paragraph
+    text: '*Sample lines:* hey · hi · heyy · sup · what''s up'
+  - kind: hr
+  description: "**Stats:** Low Charm, Wit, Chaos | **Shadow:** High Dread, Fixation  \n**Level range:** 1–3"
+  heading_level: 4
+  compact_heading: true
+  condition:
+    level_range:
+    - 1
+    - 3
+  outcome:
+    key_shadow: Dread, Fixation
+- id: §2.the-dtf-opener
+  section: §2
+  title: The DTF Opener
+  type: interest_change
+  blocks:
+  - kind: paragraph
+    text: '**Stats:** High Rizz | Low Self-Awareness, Charm, Wit, Honesty | **Shadow:** High Horniness, Dread  '
+  - kind: paragraph
+    text: '**Level range:** 1–5'
+  - kind: paragraph
+    text: 'Skips all pretence. Opens with explicitly sexual messages. Expects enthusiasm. Gets blocked. Does it again. The internal logic: I want this, therefore saying so clearly is efficient. The self-awareness
+      to understand that directness about desire is different from consent to be desired is simply absent.'
+  - kind: paragraph
+    text: '*Sample lines:* "you up?" · "wanna come over" · "let''s skip the small talk"'
+  - kind: hr
+  description: '**Stats:** High Rizz | Low Self-Awareness, Charm, Wit, Honesty | **Shadow:** High Horniness, Dread  '
+  heading_level: 4
+  compact_heading: true
+  condition:
+    level_range:
+    - 1
+    - 5
+  outcome:
+    high_stats:
+    - Rizz
+    key_shadow: Horniness, Dread
+- id: §2.the-one-word-replier
+  section: §2
+  title: The One-Word Replier
+  type: shadow_growth
+  blocks:
+  - kind: paragraph
+    text: "**Stats:** Low Charm, Wit, Chaos, Honesty | **Shadow:** High Overthinking, Dread  \n**Level range:** 1–5"
+  - kind: paragraph
+    text: Responds to every thoughtful message with "haha", "lol", "yeah", "cool", "nice." The human embodiment of read-but-not-engaged energy. Often they're overthinking every response and producing nothing
+      as a result. A conversation black hole from which no momentum escapes.
+  - kind: paragraph
+    text: '*Sample lines:* haha · lol · yeah · cool · nice'
+  - kind: hr
+  description: "**Stats:** Low Charm, Wit, Chaos, Honesty | **Shadow:** High Overthinking, Dread  \n**Level range:** 1–5"
+  heading_level: 4
+  compact_heading: true
+  condition:
+    level_range:
+    - 1
+    - 5
+  outcome:
+    key_shadow: Overthinking, Dread
+- id: §2.the-wall-of-text
+  section: §2
+  title: The Wall of Text
+  type: interest_change
+  blocks:
+  - kind: paragraph
+    text: '**Stats:** High Honesty, Chaos | Low Self-Awareness, Charm | **Shadow:** High Overthinking, Fixation  '
+  - kind: paragraph
+    text: '**Level range:** 1–5'
+  - kind: paragraph
+    text: The overcorrection from the Hey Opener. First message is a 300-word paragraph covering their entire personality, life context, and opening question. Well-intentioned. Overwhelming. Usually written
+      in a single anxious sitting and sent before they can reconsider. Signals the same anxiety as "hey" — just a different expression of it.
+  - kind: hr
+  description: '**Stats:** High Honesty, Chaos | Low Self-Awareness, Charm | **Shadow:** High Overthinking, Fixation  '
+  heading_level: 4
+  compact_heading: true
+  condition:
+    level_range:
+    - 1
+    - 5
+  outcome:
+    high_stats:
+    - Honesty
+    - Chaos
+    key_shadow: Overthinking, Fixation
+- id: §2.tier-2-early-game-levels-26
+  section: §2
+  title: Tier 2 — Early Game (Levels 2–6)
+  type: definition
+  blocks:
+  - kind: hr
+  description: ''
+  heading_level: 3
+- id: §2.the-copy-paste-machine
+  section: §2
+  title: The Copy-Paste Machine
+  type: shadow_growth
+  blocks:
+  - kind: paragraph
+    text: '**Stats:** High Charm | Low Self-Awareness, Wit, Honesty | **Shadow:** High Fixation, Denial  '
+  - kind: paragraph
+    text: '**Level range:** 2–5'
+  - kind: paragraph
+    text: Has a message template. Sends it to everyone. Occasionally swaps in a name or a fake-specific detail. Women can always tell. The tell is that nothing in the message actually references anything
+      real about their profile. Volume strategy. The human equivalent of a mail merge.
+  - kind: hr
+  description: '**Stats:** High Charm | Low Self-Awareness, Wit, Honesty | **Shadow:** High Fixation, Denial  '
+  heading_level: 4
+  compact_heading: true
+  condition:
+    level_range:
+    - 2
+    - 5
+  outcome:
+    high_stats:
+    - Charm
+    key_shadow: Fixation, Denial
+- id: §2.the-pickup-line-spammer
+  section: §2
+  title: The Pickup Line Spammer
+  type: shadow_growth
+  blocks:
+  - kind: paragraph
+    text: '**Stats:** High Charm, Chaos | Low Self-Awareness, Wit | **Shadow:** High Fixation, Dread  '
+  - kind: paragraph
+    text: '**Level range:** 1–6'
+  - kind: paragraph
+    text: Opens with a memorised, usually terrible canned pickup line. Knows it's bad. Hopes the audacity makes it charming. The fixation on the tactic means they repeat the same approach regardless of
+      result. Sometimes delivers a genuinely good line and ruins it with a follow-up.
+  - kind: hr
+  description: '**Stats:** High Charm, Chaos | Low Self-Awareness, Wit | **Shadow:** High Fixation, Dread  '
+  heading_level: 4
+  compact_heading: true
+  condition:
+    level_range:
+    - 1
+    - 6
+  outcome:
+    high_stats:
+    - Charm
+    - Chaos
+    key_shadow: Fixation, Dread
+- id: §2.the-exploding-nice-guy
+  section: §2
+  title: The Exploding Nice Guy
+  type: interest_change
+  blocks:
+  - kind: paragraph
+    text: '**Stats:** High Charm | Low Self-Awareness, Honesty, Chaos | **Shadow:** High Dread, Horniness, Denial  '
+  - kind: paragraph
+    text: '**Level range:** 1–6'
+  - kind: paragraph
+    text: 'Polite and friendly right up until the moment you don''t respond fast enough or indicate disinterest. Then: immediate pivot to hostility, insults, or passive-aggressive withdrawal. The charm
+      was never real — it was transactional. Feels genuinely entitled to a response because he was "nice."'
+  - kind: hr
+  description: '**Stats:** High Charm | Low Self-Awareness, Honesty, Chaos | **Shadow:** High Dread, Horniness, Denial  '
+  heading_level: 4
+  compact_heading: true
+  condition:
+    level_range:
+    - 1
+    - 6
+  outcome:
+    high_stats:
+    - Charm
+    key_shadow: Dread, Horniness, Denial
+- id: §2.the-oversharer
+  section: §2
+  title: The Oversharer
+  type: shadow_growth
+  blocks:
+  - kind: paragraph
+    text: '**Stats:** High Honesty | Low Self-Awareness, Charm, Wit | **Shadow:** High Denial, Overthinking  '
+  - kind: paragraph
+    text: '**Level range:** 2–7'
+  - kind: paragraph
+    text: Trauma dumps in message 3. Shares divorce details, childhood wounds, therapy notes, and the full arc of their last relationship before you've asked their last name. Genuinely open and well-meaning.
+      Just doesn't have the self-awareness to read the room. The information isn't the problem — the timing is everything.
+  - kind: hr
+  description: '**Stats:** High Honesty | Low Self-Awareness, Charm, Wit | **Shadow:** High Denial, Overthinking  '
+  heading_level: 4
+  compact_heading: true
+  condition:
+    level_range:
+    - 2
+    - 7
+  outcome:
+    high_stats:
+    - Honesty
+    key_shadow: Denial, Overthinking
+- id: §2.the-philosopher
+  section: §2
+  title: The Philosopher
+  type: shadow_growth
+  blocks:
+  - kind: paragraph
+    text: '**Stats:** High Wit, Chaos | Low Charm, Rizz | **Shadow:** High Overthinking, Dread  '
+  - kind: paragraph
+    text: '**Level range:** 2–7'
+  - kind: paragraph
+    text: Opens with "what do you think the meaning of life is?" or a would-you-rather about horse-duck size ratios. Intellectualising as a defence mechanism — if the conversation stays in the realm of
+      ideas, rejection feels less personal. Uses philosophy as both genuine engagement and armour.
+  - kind: hr
+  description: '**Stats:** High Wit, Chaos | Low Charm, Rizz | **Shadow:** High Overthinking, Dread  '
+  heading_level: 4
+  compact_heading: true
+  condition:
+    level_range:
+    - 2
+    - 7
+  outcome:
+    high_stats:
+    - Wit
+    - Chaos
+    key_shadow: Overthinking, Dread
+- id: §2.the-instagram-recruiter
+  section: §2
+  title: The Instagram Recruiter
+  type: shadow_growth
+  blocks:
+  - kind: paragraph
+    text: '**Stats:** High Charm, Rizz | Low Honesty, Self-Awareness | **Shadow:** High Fixation, Denial  '
+  - kind: paragraph
+    text: '**Level range:** 2–6'
+  - kind: paragraph
+    text: Real person. Not here for a date. Here to grow their following. Bio often says "not here much, find me on IG." Uses Tinder as free advertising for their OnlyFans, fitness coaching brand, or personal
+      brand.
+  - kind: hr
+  description: '**Stats:** High Charm, Rizz | Low Honesty, Self-Awareness | **Shadow:** High Fixation, Denial  '
+  heading_level: 4
+  compact_heading: true
+  condition:
+    level_range:
+    - 2
+    - 6
+  outcome:
+    high_stats:
+    - Charm
+    - Rizz
+    key_shadow: Fixation, Denial
+- id: §2.the-bot-scammer
+  section: §2
+  title: The Bot / Scammer
+  type: shadow_growth
+  blocks:
+  - kind: paragraph
+    text: '**Stats:** High Charm | Low Honesty, Self-Awareness, Wit | **Shadow:** High Fixation, Denial  '
+  - kind: paragraph
+    text: '**Level range:** 1–4'
+  - kind: paragraph
+    text: Fake profile. Designed to redirect to external platforms, grow an OnlyFans, run crypto scams, or steal attention. Responds vaguely to direct questions. Pivots off-platform suspiciously fast. The
+      "too-perfect" photos are a tell. So is the "I'm from Cyprus" thing.
+  - kind: hr
+  description: '**Stats:** High Charm | Low Honesty, Self-Awareness, Wit | **Shadow:** High Fixation, Denial  '
+  heading_level: 4
+  compact_heading: true
+  condition:
+    level_range:
+    - 1
+    - 4
+  outcome:
+    high_stats:
+    - Charm
+    key_shadow: Fixation, Denial
+- id: §2.tier-3-mid-game-levels-39
+  section: §2
+  title: Tier 3 — Mid Game (Levels 3–9)
+  type: definition
+  blocks:
+  - kind: hr
+  description: ''
+  heading_level: 3
+- id: §2.the-zombie
+  section: §2
+  title: The Zombie
+  type: interest_change
+  blocks:
+  - kind: paragraph
+    text: '**Stats:** High Charm | Low Self-Awareness, Honesty | **Shadow:** High Denial, Fixation  '
+  - kind: paragraph
+    text: '**Level range:** 3–8'
+  - kind: paragraph
+    text: The Ghost who came back. Disappeared for weeks or months. Resurfaces as if nothing happened. High denial means they've genuinely rewritten the absence in their own head. Expects to pick up exactly
+      where they left off. Confused when this doesn't work. Usually the most charming archetype right up until the moment they ghost again.
+  - kind: paragraph
+    text: '*Sample lines:* "hey stranger 👋" · "omg I was literally just thinking about you" · "sorry I disappeared, things got crazy"'
+  - kind: hr
+  description: '**Stats:** High Charm | Low Self-Awareness, Honesty | **Shadow:** High Denial, Fixation  '
+  heading_level: 4
+  compact_heading: true
+  condition:
+    level_range:
+    - 3
+    - 8
+  outcome:
+    high_stats:
+    - Charm
+    key_shadow: Denial, Fixation
+- id: §2.the-breadcrumber
+  section: §2
+  title: The Breadcrumber
+  type: interest_change
+  blocks:
+  - kind: paragraph
+    text: '**Stats:** High Charm, Wit | Low Honesty, Self-Awareness | **Shadow:** High Denial, Fixation  '
+  - kind: paragraph
+    text: '**Level range:** 4–9'
+  - kind: paragraph
+    text: Sends just enough to keep interest alive without ever committing to anything real. Sporadic likes. Random 3am replies. A meme with no context. Never progresses toward an actual date. An expert
+      at "almost." Not cruel — just optimising for options without being honest about it.
+  - kind: hr
+  description: '**Stats:** High Charm, Wit | Low Honesty, Self-Awareness | **Shadow:** High Denial, Fixation  '
+  heading_level: 4
+  compact_heading: true
+  condition:
+    level_range:
+    - 4
+    - 9
+  outcome:
+    high_stats:
+    - Charm
+    - Wit
+    key_shadow: Denial, Fixation
+- id: §2.the-love-bomber
+  section: §2
+  title: The Love Bomber
+  type: shadow_growth
+  blocks:
+  - kind: paragraph
+    text: '**Stats:** High Charm, Rizz | Low Self-Awareness, Honesty | **Shadow:** High Fixation, Horniness, Denial  '
+  - kind: paragraph
+    text: '**Level range:** 3–9'
+  - kind: paragraph
+    text: Overwhelming affection, attention, and declarations on the fastest possible timeline. "I feel like I've known you forever" after two days. Future-faking at scale. May be genuine anxiety presenting
+      as intensity. May be a control tactic. Can't read that this is alarming rather than romantic.
+  - kind: hr
+  description: '**Stats:** High Charm, Rizz | Low Self-Awareness, Honesty | **Shadow:** High Fixation, Horniness, Denial  '
+  heading_level: 4
+  compact_heading: true
+  condition:
+    level_range:
+    - 3
+    - 9
+  outcome:
+    high_stats:
+    - Charm
+    - Rizz
+    key_shadow: Fixation, Horniness, Denial
+- id: §2.the-peacock
+  section: §2
+  title: The Peacock
+  type: interest_change
+  blocks:
+  - kind: paragraph
+    text: '**Stats:** High Charm, Rizz | Low Honesty, Self-Awareness | **Shadow:** High Dread, Denial  '
+  - kind: paragraph
+    text: '**Level range:** 3–8'
+  - kind: paragraph
+    text: Uses the opening message to establish status. "As a doctor/lawyer/investor..." The charm and rizz stats are real — these profiles are often well-constructed. The problem is they're driven by the
+      dread of not being enough, expressed as evidence that they are.
+  - kind: hr
+  description: '**Stats:** High Charm, Rizz | Low Honesty, Self-Awareness | **Shadow:** High Dread, Denial  '
+  heading_level: 4
+  compact_heading: true
+  condition:
+    level_range:
+    - 3
+    - 8
+  outcome:
+    high_stats:
+    - Charm
+    - Rizz
+    key_shadow: Dread, Denial
+- id: §2.the-slow-fader
+  section: §2
+  title: The Slow Fader
+  type: shadow_growth
+  blocks:
+  - kind: paragraph
+    text: '**Stats:** High Self-Awareness | Low Honesty, Chaos | **Shadow:** High Denial, Dread  '
+  - kind: paragraph
+    text: '**Level range:** 2–8'
+  - kind: paragraph
+    text: Never fully ghosts. Just responds less and less frequently. Daily → every 2 days → weekly → silence. No formal ending. The decent human impulse to not hurt anyone combined with the cowardly impulse
+      to not say the thing. Leaves everyone in ambiguous purgatory.
+  - kind: hr
+  description: '**Stats:** High Self-Awareness | Low Honesty, Chaos | **Shadow:** High Denial, Dread  '
+  heading_level: 4
+  compact_heading: true
+  condition:
+    level_range:
+    - 2
+    - 8
+  outcome:
+    high_stats:
+    - Self-Awareness
+    key_shadow: Denial, Dread
+- id: §2.tier-4-high-level-levels-511
+  section: §2
+  title: Tier 4 — High Level (Levels 5–11)
+  type: definition
+  blocks:
+  - kind: hr
+  description: ''
+  heading_level: 3
+- id: §2.the-ghost
+  section: §2
+  title: The Ghost
+  type: interest_change
+  blocks:
+  - kind: paragraph
+    text: '**Stats:** High Self-Awareness | Low Honesty, Charm | **Shadow:** High Dread, Denial  '
+  - kind: paragraph
+    text: '**Level range:** 1–10'
+  - kind: paragraph
+    text: 'Matches. Maybe chats a bit. Then disappears without explanation. Can ghost at any stage: the match itself, after three messages, after a week of good conversation, after planning a date. High
+      self-awareness means they know when something isn''t working. Low honesty means they can''t say it. The most common archetype at every level.'
+  - kind: hr
+  description: '**Stats:** High Self-Awareness | Low Honesty, Charm | **Shadow:** High Dread, Denial  '
+  heading_level: 4
+  compact_heading: true
+  condition:
+    level_range:
+    - 1
+    - 10
+  outcome:
+    high_stats:
+    - Self-Awareness
+    key_shadow: Dread, Denial
+- id: §2.the-player
+  section: §2
+  title: The Player
+  type: shadow_growth
+  blocks:
+  - kind: paragraph
+    text: '**Stats:** High Charm, Rizz, Wit | Low Honesty | **Shadow:** High Fixation, Denial  '
+  - kind: paragraph
+    text: '**Level range:** 5–10'
+  - kind: paragraph
+    text: Keeps multiple conversations running simultaneously. Deliberately vague about intentions. Not necessarily malicious — just maximising options in a system designed for maximising options. The denial
+      about what they're doing means they can't be honest about it, which crosses into deception.
+  - kind: hr
+  description: '**Stats:** High Charm, Rizz, Wit | Low Honesty | **Shadow:** High Fixation, Denial  '
+  heading_level: 4
+  compact_heading: true
+  condition:
+    level_range:
+    - 5
+    - 10
+  outcome:
+    high_stats:
+    - Charm
+    - Rizz
+    - Wit
+    key_shadow: Fixation, Denial
+- id: §2.the-sniper
+  section: §2
+  title: The Sniper
+  type: shadow_growth
+  blocks:
+  - kind: paragraph
+    text: '**Stats:** High Wit, Self-Awareness, Charm | Low Chaos | **Shadow:** High Overthinking  '
+  - kind: paragraph
+    text: '**Level range:** 5–11'
+  - kind: paragraph
+    text: Doesn't waste swipes. Selective. Considered. When they message, it's deliberate and specific. Every message is a risk they've calculated, which means they can freeze on the edge of a send. The
+      counterpart to the Copy-Paste Machine in every way.
+  - kind: paragraph
+    text: '*Sample lines:* "I''ve been on here for three months and I''ve matched with seventeen people. I swiped on you specifically because of [reason]."'
+  - kind: hr
+  description: '**Stats:** High Wit, Self-Awareness, Charm | Low Chaos | **Shadow:** High Overthinking  '
+  heading_level: 4
+  compact_heading: true
+  condition:
+    level_range:
+    - 5
+    - 11
+  outcome:
+    high_stats:
+    - Wit
+    - Self-Awareness
+    - Charm
+    key_shadow: Overthinking
+- id: §2.the-bio-responder
+  section: §2
+  title: The Bio Responder
+  type: interest_change
+  blocks:
+  - kind: paragraph
+    text: '**Stats:** High Self-Awareness, Wit, Charm | No notable lows | **Shadow:** None notable  '
+  - kind: paragraph
+    text: '**Level range:** 4–11'
+  - kind: paragraph
+    text: The rarest and most appreciated archetype. Actually reads the bio. References something specific. Asks a thoughtful question. The ideal player type — every mechanic in the game is designed to
+      reward this behaviour. Women in every study and thread say this is all they want. Why is it so rare? Because it requires showing up for real.
+  - kind: hr
+  description: '**Stats:** High Self-Awareness, Wit, Charm | No notable lows | **Shadow:** None notable  '
+  heading_level: 4
+  compact_heading: true
+  condition:
+    level_range:
+    - 4
+    - 11
+  outcome:
+    high_stats:
+    - Self-Awareness
+    - Wit
+    - Charm
+- id: §3.archetype.hey-opener
+  section: §3
+  title: Archetype — The Hey Opener
+  type: definition
+  description: 'The Hey Opener: Stats=—, Shadow=Dread, Fixation, Levels=1–3.'
+  condition:
+    level_range:
+    - 1
+    - 3
+  outcome:
+    key_shadow: Dread, Fixation
+- id: §3.archetype.dtf-opener
+  section: §3
+  title: Archetype — The DTF Opener
+  type: definition
+  description: 'The DTF Opener: Stats=Rizz, Shadow=Horniness, Dread, Levels=1–5.'
+  condition:
+    level_range:
+    - 1
+    - 5
+  outcome:
+    key_stats: Rizz
+    key_shadow: Horniness, Dread
+- id: §3.archetype.one-word-replier
+  section: §3
+  title: Archetype — The One-Word Replier
+  type: definition
+  description: 'The One-Word Replier: Stats=—, Shadow=Overthinking, Dread, Levels=1–5.'
+  condition:
+    level_range:
+    - 1
+    - 5
+  outcome:
+    key_shadow: Overthinking, Dread
+- id: §3.archetype.wall-of-text
+  section: §3
+  title: Archetype — The Wall of Text
+  type: definition
+  description: 'The Wall of Text: Stats=Honesty, Chaos, Shadow=Overthinking, Fixation, Levels=1–5.'
+  condition:
+    level_range:
+    - 1
+    - 5
+  outcome:
+    key_stats: Honesty, Chaos
+    key_shadow: Overthinking, Fixation
+- id: §3.archetype.copy-paste-machine
+  section: §3
+  title: Archetype — The Copy-Paste Machine
+  type: definition
+  description: 'The Copy-Paste Machine: Stats=Charm, Shadow=Fixation, Denial, Levels=2–5.'
+  condition:
+    level_range:
+    - 2
+    - 5
+  outcome:
+    key_stats: Charm
+    key_shadow: Fixation, Denial
+- id: §3.archetype.pickup-line-spammer
+  section: §3
+  title: Archetype — The Pickup Line Spammer
+  type: definition
+  description: 'The Pickup Line Spammer: Stats=Charm, Chaos, Shadow=Fixation, Dread, Levels=1–6.'
+  condition:
+    level_range:
+    - 1
+    - 6
+  outcome:
+    key_stats: Charm, Chaos
+    key_shadow: Fixation, Dread
+- id: §3.archetype.exploding-nice-guy
+  section: §3
+  title: Archetype — The Exploding Nice Guy
+  type: definition
+  description: 'The Exploding Nice Guy: Stats=Charm, Shadow=Dread, Horniness, Denial, Levels=1–6.'
+  condition:
+    level_range:
+    - 1
+    - 6
+  outcome:
+    key_stats: Charm
+    key_shadow: Dread, Horniness, Denial
+- id: §3.archetype.oversharer
+  section: §3
+  title: Archetype — The Oversharer
+  type: definition
+  description: 'The Oversharer: Stats=Honesty, Shadow=Denial, Overthinking, Levels=2–7.'
+  condition:
+    level_range:
+    - 2
+    - 7
+  outcome:
+    key_stats: Honesty
+    key_shadow: Denial, Overthinking
+- id: §3.archetype.philosopher
+  section: §3
+  title: Archetype — The Philosopher
+  type: definition
+  description: 'The Philosopher: Stats=Wit, Chaos, Shadow=Overthinking, Dread, Levels=2–7.'
+  condition:
+    level_range:
+    - 2
+    - 7
+  outcome:
+    key_stats: Wit, Chaos
+    key_shadow: Overthinking, Dread
+- id: §3.archetype.instagram-recruiter
+  section: §3
+  title: Archetype — The Instagram Recruiter
+  type: definition
+  description: 'The Instagram Recruiter: Stats=Charm, Rizz, Shadow=Fixation, Denial, Levels=2–6.'
+  condition:
+    level_range:
+    - 2
+    - 6
+  outcome:
+    key_stats: Charm, Rizz
+    key_shadow: Fixation, Denial
+- id: §3.archetype.bot-/-scammer
+  section: §3
+  title: Archetype — The Bot / Scammer
+  type: definition
+  description: 'The Bot / Scammer: Stats=Charm, Shadow=Fixation, Denial, Levels=1–4.'
+  condition:
+    level_range:
+    - 1
+    - 4
+  outcome:
+    key_stats: Charm
+    key_shadow: Fixation, Denial
+- id: §3.archetype.zombie
+  section: §3
+  title: Archetype — The Zombie
+  type: definition
+  description: 'The Zombie: Stats=Charm, Shadow=Denial, Fixation, Levels=3–8.'
+  condition:
+    level_range:
+    - 3
+    - 8
+  outcome:
+    key_stats: Charm
+    key_shadow: Denial, Fixation
+- id: §3.archetype.breadcrumber
+  section: §3
+  title: Archetype — The Breadcrumber
+  type: definition
+  description: 'The Breadcrumber: Stats=Charm, Wit, Shadow=Denial, Fixation, Levels=4–9.'
+  condition:
+    level_range:
+    - 4
+    - 9
+  outcome:
+    key_stats: Charm, Wit
+    key_shadow: Denial, Fixation
+- id: §3.archetype.love-bomber
+  section: §3
+  title: Archetype — The Love Bomber
+  type: definition
+  description: 'The Love Bomber: Stats=Charm, Rizz, Shadow=Fixation, Horniness, Denial, Levels=3–9.'
+  condition:
+    level_range:
+    - 3
+    - 9
+  outcome:
+    key_stats: Charm, Rizz
+    key_shadow: Fixation, Horniness, Denial
+- id: §3.archetype.peacock
+  section: §3
+  title: Archetype — The Peacock
+  type: definition
+  description: 'The Peacock: Stats=Charm, Rizz, Shadow=Dread, Denial, Levels=3–8.'
+  condition:
+    level_range:
+    - 3
+    - 8
+  outcome:
+    key_stats: Charm, Rizz
+    key_shadow: Dread, Denial
+- id: §3.archetype.slow-fader
+  section: §3
+  title: Archetype — The Slow Fader
+  type: definition
+  description: 'The Slow Fader: Stats=Self-Awareness, Shadow=Denial, Dread, Levels=2–8.'
+  condition:
+    level_range:
+    - 2
+    - 8
+  outcome:
+    key_stats: Self-Awareness
+    key_shadow: Denial, Dread
+- id: §3.archetype.ghost
+  section: §3
+  title: Archetype — The Ghost
+  type: definition
+  description: 'The Ghost: Stats=Self-Awareness, Shadow=Dread, Denial, Levels=1–10.'
+  condition:
+    level_range:
+    - 1
+    - 10
+  outcome:
+    key_stats: Self-Awareness
+    key_shadow: Dread, Denial
+- id: §3.archetype.player
+  section: §3
+  title: Archetype — The Player
+  type: definition
+  description: 'The Player: Stats=Charm, Rizz, Wit, Shadow=Fixation, Denial, Levels=5–10.'
+  condition:
+    level_range:
+    - 5
+    - 10
+  outcome:
+    key_stats: Charm, Rizz, Wit
+    key_shadow: Fixation, Denial
+- id: §3.archetype.sniper
+  section: §3
+  title: Archetype — The Sniper
+  type: definition
+  description: 'The Sniper: Stats=Wit, Self-Awareness, Charm, Shadow=Overthinking, Levels=5–11.'
+  condition:
+    level_range:
+    - 5
+    - 11
+  outcome:
+    key_stats: Wit, Self-Awareness, Charm
+    key_shadow: Overthinking
+- id: §3.archetype.bio-responder
+  section: §3
+  title: Archetype — The Bio Responder
+  type: definition
+  description: 'The Bio Responder: Stats=Self-Awareness, Wit, Charm, Shadow=—, Levels=4–11.'
+  condition:
+    level_range:
+    - 4
+    - 11
+  outcome:
+    key_stats: Self-Awareness, Wit, Charm
+    key_shadow: —
+- id: §3.archetype-summary-table
+  section: §3
+  title: Archetype Summary Table
+  type: table
+  blocks:
+  - kind: table
+    rows:
+    - Archetype: The Hey Opener
+      Key High Stats: —
+      Key Shadow: Dread, Fixation
+      Level Range: 1–3
+    - Archetype: The DTF Opener
+      Key High Stats: Rizz
+      Key Shadow: Horniness, Dread
+      Level Range: 1–5
+    - Archetype: The One-Word Replier
+      Key High Stats: —
+      Key Shadow: Overthinking, Dread
+      Level Range: 1–5
+    - Archetype: The Wall of Text
+      Key High Stats: Honesty, Chaos
+      Key Shadow: Overthinking, Fixation
+      Level Range: 1–5
+    - Archetype: The Copy-Paste Machine
+      Key High Stats: Charm
+      Key Shadow: Fixation, Denial
+      Level Range: 2–5
+    - Archetype: The Pickup Line Spammer
+      Key High Stats: Charm, Chaos
+      Key Shadow: Fixation, Dread
+      Level Range: 1–6
+    - Archetype: The Exploding Nice Guy
+      Key High Stats: Charm
+      Key Shadow: Dread, Horniness, Denial
+      Level Range: 1–6
+    - Archetype: The Oversharer
+      Key High Stats: Honesty
+      Key Shadow: Denial, Overthinking
+      Level Range: 2–7
+    - Archetype: The Philosopher
+      Key High Stats: Wit, Chaos
+      Key Shadow: Overthinking, Dread
+      Level Range: 2–7
+    - Archetype: The Instagram Recruiter
+      Key High Stats: Charm, Rizz
+      Key Shadow: Fixation, Denial
+      Level Range: 2–6
+    - Archetype: The Bot / Scammer
+      Key High Stats: Charm
+      Key Shadow: Fixation, Denial
+      Level Range: 1–4
+    - Archetype: The Zombie
+      Key High Stats: Charm
+      Key Shadow: Denial, Fixation
+      Level Range: 3–8
+    - Archetype: The Breadcrumber
+      Key High Stats: Charm, Wit
+      Key Shadow: Denial, Fixation
+      Level Range: 4–9
+    - Archetype: The Love Bomber
+      Key High Stats: Charm, Rizz
+      Key Shadow: Fixation, Horniness, Denial
+      Level Range: 3–9
+    - Archetype: The Peacock
+      Key High Stats: Charm, Rizz
+      Key Shadow: Dread, Denial
+      Level Range: 3–8
+    - Archetype: The Slow Fader
+      Key High Stats: Self-Awareness
+      Key Shadow: Denial, Dread
+      Level Range: 2–8
+    - Archetype: The Ghost
+      Key High Stats: Self-Awareness
+      Key Shadow: Dread, Denial
+      Level Range: 1–10
+    - Archetype: The Player
+      Key High Stats: Charm, Rizz, Wit
+      Key Shadow: Fixation, Denial
+      Level Range: 5–10
+    - Archetype: The Sniper
+      Key High Stats: Wit, Self-Awareness, Charm
+      Key Shadow: Overthinking
+      Level Range: 5–11
+    - Archetype: The Bio Responder
+      Key High Stats: Self-Awareness, Wit, Charm
+      Key Shadow: —
+      Level Range: 4–11
+    sep_cells:
+    - '---'
+    - '---'
+    - '---'
+    - '---'
+  - kind: blockquote
+    text: '**Note:** Level range is not a hard gate. It reflects the stat configuration that makes the archetype coherent — a high-level character can still fall back into Hey Opener behaviour under trap
+      pressure.'
+  - kind: hr
+  description: ''
+  heading_level: 2
+- id: §4.related-docs
+  section: §4
+  title: Related Docs
+  type: shadow_growth
+  blocks:
+  - kind: paragraph
+    text: '- [[character-construction]] — §3.1 pipeline; archetype aggregation and injection into system prompt
+
+      - [[items-pool]] — item `archetype_tendencies` field
+
+      - [[anatomy-parameters]] — anatomy fragments can also push archetype tendencies
+
+      - [[rules-v3]] — stat definitions and shadow mechanics'
+  description: '- [[character-construction]] — §3.1 pipeline; archetype aggregation and injection into system prompt
+
+    - [[items-pool]] — item `archetype_tendencies` field
+
+    - [[anatomy-parameters]] — anatomy fragments can also push archetype tendencies
+
+    - [[rules-v3]] — stat definitions and shadow mechanics'
+  heading_level: 2
+  compact_heading: true
