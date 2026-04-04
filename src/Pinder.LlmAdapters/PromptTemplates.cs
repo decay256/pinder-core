@@ -50,8 +50,11 @@ Rules:
         public const string SuccessDeliveryInstruction =
 @"Write as {player_name}.
 Deliver this message as the character would actually send it.
+
+CRITICAL: Do not add sentences or ideas not in the intended message. Deliver it, do not expand it.
+
 - On a clean success (margin 1–5): deliver it essentially as written, with natural voice
-- On a strong success (margin 6–10): add a small flourish or timing that makes it land better
+- On a strong success (margin 6–10): improve PHRASING or TIMING of existing content only. Do NOT add new sentences.
 - On a critical success / Nat 20: deliver it at peak — perfectly timed, resonant, exactly right
 
 MEDIUM RULE: This is a text message, not a monologue. The character sends this message in a texting app.
