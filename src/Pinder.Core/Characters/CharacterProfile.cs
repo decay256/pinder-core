@@ -25,18 +25,23 @@ namespace Pinder.Core.Characters
         /// <summary>Character level (1-based) for level bonus in rolls.</summary>
         public int Level { get; }
 
+        /// <summary>The character's one-liner bio shown on their profile.</summary>
+        public string Bio { get; }
+
         public CharacterProfile(
             StatBlock stats,
             string assembledSystemPrompt,
             string displayName,
             TimingProfile timing,
-            int level)
+            int level,
+            string bio = "")
         {
             Stats = stats ?? throw new ArgumentNullException(nameof(stats));
             AssembledSystemPrompt = assembledSystemPrompt ?? throw new ArgumentNullException(nameof(assembledSystemPrompt));
             DisplayName = displayName ?? throw new ArgumentNullException(nameof(displayName));
             Timing = timing ?? throw new ArgumentNullException(nameof(timing));
             Level = level;
+            Bio = bio ?? string.Empty;
         }
     }
 }

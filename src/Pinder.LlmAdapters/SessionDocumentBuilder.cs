@@ -243,17 +243,38 @@ namespace Pinder.LlmAdapters
             string opponentName,
             int interestBefore,
             int interestAfter,
-            InterestState newState)
+            InterestState newState,
+            IReadOnlyList<(string Sender, string Text)>? conversationHistory = null,
+            string? playerName = null)
         {
             if (opponentName == null) throw new ArgumentNullException(nameof(opponentName));
 
             string thresholdInstruction = GetThresholdInstruction(interestBefore, interestAfter, newState, opponentName);
 
-            return PromptTemplates.InterestBeatInstruction
+            var sb = new StringBuilder();
+
+            // Include recent conversation history so the LLM can reference specific details
+            if (conversationHistory != null && conversationHistory.Count > 0)
+            {
+                sb.AppendLine("RECENT CONVERSATION (for context — reference specific details in your response):");
+                // Include last 6 messages (3 exchanges) to keep context focused
+                int start = Math.Max(0, conversationHistory.Count - 6);
+                for (int i = start; i < conversationHistory.Count; i++)
+                {
+                    var entry = conversationHistory[i];
+                    string role = (!string.IsNullOrEmpty(playerName) && entry.Sender == playerName) ? "PLAYER" : "OPPONENT";
+                    sb.AppendLine($"[{role}] \"{entry.Text}\"");
+                }
+                sb.AppendLine();
+            }
+
+            sb.Append(PromptTemplates.InterestBeatInstruction
                 .Replace("{opponent_name}", opponentName)
                 .Replace("{interest_before}", interestBefore.ToString())
                 .Replace("{interest_after}", interestAfter.ToString())
-                .Replace("{threshold_instruction}", thresholdInstruction);
+                .Replace("{threshold_instruction}", thresholdInstruction));
+
+            return sb.ToString();
         }
 
         /// <summary>

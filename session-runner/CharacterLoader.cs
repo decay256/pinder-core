@@ -47,11 +47,12 @@ namespace Pinder.SessionRunner
             var stats = ParseEffectiveStats(content);
             var shadows = ParseShadows(content);
             string systemPrompt = ExtractSystemPrompt(content);
+            string bio = ParseBio(content);
 
             var statBlock = new StatBlock(stats, shadows);
             var timing = new TimingProfile(0, 1.0f, 0.0f, "neutral");
 
-            return new CharacterProfile(statBlock, systemPrompt, displayName, timing, level);
+            return new CharacterProfile(statBlock, systemPrompt, displayName, timing, level, bio: bio);
         }
 
         /// <summary>
@@ -331,6 +332,22 @@ namespace Pinder.SessionRunner
                 case "overthinking": return ShadowStatType.Overthinking;
                 default: return null;
             }
+        }
+
+        private static string ParseBio(string content)
+        {
+            foreach (var line in content.Split('\n'))
+            {
+                var trimmed = line.Trim();
+                if (trimmed.StartsWith("- Bio:", System.StringComparison.OrdinalIgnoreCase))
+                {
+                    int q1 = trimmed.IndexOf('"');
+                    int q2 = trimmed.LastIndexOf('"');
+                    if (q1 >= 0 && q2 > q1)
+                        return trimmed.Substring(q1 + 1, q2 - q1 - 1);
+                }
+            }
+            return string.Empty;
         }
 
         private static string CapitaliseName(string name)

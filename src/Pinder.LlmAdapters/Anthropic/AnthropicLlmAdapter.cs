@@ -156,7 +156,9 @@ namespace Pinder.LlmAdapters.Anthropic
                 context.OpponentName,
                 context.InterestBefore,
                 context.InterestAfter,
-                context.NewState);
+                context.NewState,
+                context.ConversationHistory,
+                context.PlayerName);
 
             var request = BuildRequest(systemBlocks, userContent,
                 _options.InterestChangeBeatTemperature ?? DefaultInterestChangeBeatTemperature);
