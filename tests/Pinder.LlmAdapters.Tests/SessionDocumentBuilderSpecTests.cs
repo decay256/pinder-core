@@ -852,5 +852,40 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("disengaged", result);
             Assert.DoesNotContain("lost all interest", result);
         }
+
+        // Issue #491 — success delivery tiers use margin-based language
+        [Fact]
+        public void PromptTemplates_SuccessDelivery_ContainsMarginBasedTiers()
+        {
+            var t = PromptTemplates.SuccessDeliveryInstruction;
+            // Clean success tier
+            Assert.Contains("margin 1-4", t);
+            // Strong success tier
+            Assert.Contains("margin 5-9", t);
+            // Critical / Nat 20 tier
+            Assert.Contains("Critical success / Nat 20", t);
+        }
+
+        [Fact]
+        public void PromptTemplates_SuccessDelivery_ContainsSharpenNotExpandConstraint()
+        {
+            var t = PromptTemplates.SuccessDeliveryInstruction;
+            Assert.Contains("sharpen, not expand", t);
+            Assert.Contains("every idea in the delivered version should have a counterpart in the intended version", t);
+        }
+
+        [Fact]
+        public void PromptTemplates_SuccessDelivery_StrongSuccessAllowsOneAddition()
+        {
+            var t = PromptTemplates.SuccessDeliveryInstruction;
+            Assert.Contains("add ONE word or phrase that makes the existing sentiment more precise", t);
+        }
+
+        [Fact]
+        public void PromptTemplates_SuccessDelivery_StrongSuccessProhibitsNewIdeas()
+        {
+            var t = PromptTemplates.SuccessDeliveryInstruction;
+            Assert.Contains("must not: add new sentences that introduce ideas not in the intended message", t);
+        }
     }
 }
