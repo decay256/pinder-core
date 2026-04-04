@@ -6,3 +6,7 @@ obj/
 *.DotSettings.user
 TestResults/
 agent.log
+rules/diffs/
+rules/extracted/
+rules/regenerated/
+__pycache__/
