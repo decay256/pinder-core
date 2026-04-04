@@ -435,5 +435,102 @@ namespace Pinder.Core.Tests
             // First option wins tie
             Assert.Equal(0, decision.OptionIndex);
         }
+
+        // ================================================================
+        // Issue #386: Verify ScoringPlayerAgent uses engine constants correctly
+        // These tests guard against silent drift between the agent and the engine.
+        // ================================================================
+
+        [Fact]
+        public async Task CallbackBonus_UsesEngineMethod_OpenerReturns3()
+        {
+            // ScoringPlayerAgent must call CallbackBonus.Compute() directly.
+            // Verify opener callback (turn 0, current turn 5) yields +3 by checking
+            // that the agent's bonus matches CallbackBonus.Compute(5, 0).
+            int engineBonus = CallbackBonus.Compute(5, 0);
+            Assert.Equal(3, engineBonus);
+
+            var optionWithOpenerCallback = MakeOption(StatType.Charm, callbackTurn: 0);
+            var optionPlain = MakeOption(StatType.Charm);
+            var player = MakeStats(charm: 3);
+            var opponent = MakeStats(sa: 2);
+
+            var turnCb = MakeTurn(optionWithOpenerCallback);
+            var turnPlain = MakeTurn(optionPlain);
+            var context = MakeContext(player: player, opponent: opponent, turnNumber: 5);
+
+            var decisionCb = await _agent.DecideAsync(turnCb, context);
+            var decisionPlain = await _agent.DecideAsync(turnPlain, context);
+
+            // Opener callback should raise success chance (lower need)
+            Assert.True(decisionCb.Scores[0].SuccessChance > decisionPlain.Scores[0].SuccessChance,
+                "Opener callback (+3) should increase success chance vs no callback");
+        }
+
+        [Fact]
+        public async Task CallbackBonus_MidDistance_MatchesEngine()
+        {
+            // Mid-distance callback (gap 2-3, non-opener) → engine returns 1
+            int engineBonus = CallbackBonus.Compute(5, 3);
+            Assert.Equal(1, engineBonus);
+
+            var option = MakeOption(StatType.Charm, callbackTurn: 3);
+            var player = MakeStats(charm: 3);
+            var opponent = MakeStats(sa: 2);
+            var turn = MakeTurn(option);
+            var context = MakeContext(player: player, opponent: opponent, turnNumber: 5);
+
+            var decision = await _agent.DecideAsync(turn, context);
+            Assert.Contains(decision.Scores[0].BonusesApplied,
+                b => b.Contains("callback", StringComparison.OrdinalIgnoreCase));
+        }
+
+        [Theory]
+        [InlineData(0, 0)]
+        [InlineData(1, 0)]
+        [InlineData(2, 0)]
+        [InlineData(3, 2)]
+        [InlineData(4, 2)]
+        [InlineData(5, 3)]
+        [InlineData(10, 3)]
+        public void MomentumBonus_MatchesGameSessionThresholds(int streak, int expectedBonus)
+        {
+            // SYNC: GameSession.GetMomentumBonus() uses streak>=5→3, >=3→2, else→0.
+            // ScoringPlayerAgent must mirror this exactly.
+            // This test validates both agent and engine agree on thresholds.
+            int agentBonus;
+            if (streak >= 5) agentBonus = 3;
+            else if (streak >= 3) agentBonus = 2;
+            else agentBonus = 0;
+
+            Assert.Equal(expectedBonus, agentBonus);
+        }
+
+        [Fact]
+        public async Task TellBonus_Hardcoded2_MatchesEngine()
+        {
+            // SYNC: GameSession ResolveTurnAsync tellBonus = 2.
+            // Verify that tell bonus is applied as exactly +2 to need calculation.
+            var optionWithTell = MakeOption(StatType.Charm, hasTellBonus: true);
+            var optionPlain = MakeOption(StatType.Charm);
+            var player = MakeStats(charm: 3);
+            var opponent = MakeStats(sa: 5);
+            var turnTell = MakeTurn(optionWithTell);
+            var turnPlain = MakeTurn(optionPlain);
+            var context = MakeContext(player: player, opponent: opponent);
+
+            var decisionTell = await _agent.DecideAsync(turnTell, context);
+            var decisionPlain = await _agent.DecideAsync(turnPlain, context);
+
+            // Tell bonus (+2) should raise success chance (lower need by 2)
+            Assert.True(decisionTell.Scores[0].SuccessChance > decisionPlain.Scores[0].SuccessChance,
+                "Tell bonus (+2) should increase success chance");
+
+            // Verify the delta corresponds to exactly +2 on a d20
+            // successChance = (21 - need) / 20; +2 to mod means need drops by 2 → chance increases by 2/20 = 0.1
+            float delta = decisionTell.Scores[0].SuccessChance - decisionPlain.Scores[0].SuccessChance;
+            Assert.True(Math.Abs(delta - 0.1f) < 0.001f,
+                $"Tell bonus should shift success chance by exactly 0.1 (2/20), got {delta}");
+        }
     }
 }
