@@ -224,5 +224,27 @@ Rules:
         /// <summary>Interest 25: Resistance dissolved.</summary>
         internal const string ResistanceDissolved =
             "Resistance dissolved — the date is real. You are genuinely won over.";
+
+        // ── Per-tier opponent reaction guidance for failure degradation (#493) ──
+
+        /// <summary>Fumble (miss 1-2): barely noticeable.</summary>
+        internal const string OpponentReactionFumble =
+            "Something was slightly off about their last message — a small hedge, an awkward word choice. You almost didn't notice. React with a slight coolness or a question that shows you caught the minor stumble. Do NOT comment on it directly.";
+
+        /// <summary>Misfire (miss 3-5): something felt off.</summary>
+        internal const string OpponentReactionMisfire =
+            "Something in their last message felt off — the tone shifted, or a detail didn't land right. You're a half-step more guarded than you'd normally be. Let the wariness show in your register, not in what you say about their message.";
+
+        /// <summary>TropeTrap (miss 6-9): clearly wrong.</summary>
+        internal const string OpponentReactionTropeTrap =
+            "Something was clearly wrong with their last message. It read like a recognizable bad-texting archetype — the kind of message that makes you pause before replying. Your warmth drops noticeably. You respond to what they said, but the energy has shifted. Do NOT diagnose what went wrong.";
+
+        /// <summary>Catastrophe (miss 10+): genuine confusion or discomfort.</summary>
+        internal const string OpponentReactionCatastrophe =
+            "Their last message was a disaster. Something in it was genuinely confusing or uncomfortable. Your response reflects real discomfort — shorter, cooler, possibly questioning. The vibe has taken a visible hit. Do NOT explain what went wrong. Just let your reaction show it.";
+
+        /// <summary>Legendary (Nat 1): maximum cringe response.</summary>
+        internal const string OpponentReactionLegendary =
+            "Their last message was spectacularly bad — the kind of message you screenshot and send to your friends. Your response reflects genuine shock, confusion, or secondhand embarrassment. The temperature in this conversation just dropped to freezing. Do NOT narrate your reaction. Just react.";
     }
 }
