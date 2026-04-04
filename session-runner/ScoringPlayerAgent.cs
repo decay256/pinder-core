@@ -22,6 +22,12 @@ namespace Pinder.SessionRunner
         private const float BoredBoldBias = 1.0f;
         private const float ActiveTrapPenalty = 2.0f;
 
+        // Shadow growth risk constants (§7)
+        private const float FixationGrowthPenalty = 0.5f;
+        private const float DenialGrowthPenalty = 0.3f;
+        private const float FixationT1EvMultiplier = 0.8f;
+        private const float StatVarietyBonus = 0.1f;
+
         // SYNC: GameSession ResolveTurnAsync tellBonus
         private const int TellBonusValue = 2;
 
@@ -166,6 +172,77 @@ namespace Pinder.SessionRunner
                 {
                     score -= ActiveTrapPenalty;
                     strategicReasons.Add($"Active {trapName} trap — penalty applied");
+                }
+
+                // Shadow growth risk: Fixation growth penalty (§7: same stat 3x → +1 Fixation)
+                if (context.LastStatUsed.HasValue
+                    && context.SecondLastStatUsed.HasValue
+                    && option.Stat == context.LastStatUsed.Value
+                    && context.LastStatUsed.Value == context.SecondLastStatUsed.Value)
+                {
+                    score -= FixationGrowthPenalty;
+                    strategicReasons.Add("Fixation growth risk — same stat 3x");
+                }
+
+                // Shadow growth risk: Denial penalty (§7: skip Honesty when available → +1 Denial)
+                bool honestyInOptions = false;
+                for (int j = 0; j < options.Length; j++)
+                {
+                    if (options[j].Stat == StatType.Honesty)
+                    {
+                        honestyInOptions = true;
+                        break;
+                    }
+                }
+                if (option.Stat != StatType.Honesty && honestyInOptions)
+                {
+                    score -= DenialGrowthPenalty;
+                    strategicReasons.Add("Denial growth risk — skipping available Honesty");
+                }
+
+                // Shadow threshold: Fixation effects on Chaos options (§7)
+                if (option.Stat == StatType.Chaos && context.ShadowValues != null)
+                {
+                    int fixation = 0;
+                    context.ShadowValues.TryGetValue(ShadowStatType.Fixation, out fixation);
+                    if (fixation >= 12)
+                    {
+                        // T2+: apply disadvantage to success chance calculation
+                        // Disadvantage: roll 2d20 take lowest → P(success) = 1 - (1 - p)^2... actually P = p^2
+                        // For d20 with threshold: P(both >= need) = p * p
+                        float disadvSuccessChance = successChance * successChance;
+                        float disadvExpectedGain = disadvSuccessChance * expectedGainOnSuccess
+                                                 - (1.0f - disadvSuccessChance) * failCost;
+                        // Replace the EV component of score with disadvantaged version
+                        score = score - expectedInterestGain + disadvExpectedGain;
+                        expectedInterestGain = disadvExpectedGain;
+                        successChance = disadvSuccessChance;
+                        strategicReasons.Add($"Fixation T2 ({fixation}) — Chaos disadvantage applied");
+                    }
+                    else if (fixation >= 6)
+                    {
+                        // T1: reduce expected gain on success by 20% (LLM quality degradation)
+                        float reducedGain = expectedGainOnSuccess * FixationT1EvMultiplier;
+                        float reducedEv = successChance * reducedGain - failChance * failCost;
+                        score = score - expectedInterestGain + reducedEv;
+                        expectedInterestGain = reducedEv;
+                        strategicReasons.Add($"Fixation T1 ({fixation}) — Chaos EV reduced 20%");
+                    }
+                }
+
+                // Stat variety bonus: prefer stats not used recently
+                if (context.LastStatUsed.HasValue || context.SecondLastStatUsed.HasValue)
+                {
+                    bool usedRecently = false;
+                    if (context.LastStatUsed.HasValue && option.Stat == context.LastStatUsed.Value)
+                        usedRecently = true;
+                    if (context.SecondLastStatUsed.HasValue && option.Stat == context.SecondLastStatUsed.Value)
+                        usedRecently = true;
+                    if (!usedRecently)
+                    {
+                        score += StatVarietyBonus;
+                        strategicReasons.Add("Stat variety bonus — not used recently");
+                    }
                 }
 
                 scores[i] = new OptionScore(
