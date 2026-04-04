@@ -171,7 +171,10 @@ class Program
         // Load real trap definitions — fallback to NullTrapRegistry if file missing/corrupt
         ITrapRegistry trapRegistry = TrapRegistryLoader.Load(AppContext.BaseDirectory, Console.Error);
 
-        var session = new GameSession(sable, brick, llm, new SystemRandomDiceRoller(), trapRegistry);
+        // Shadow tracking — wrap player's StatBlock so GameSession can track shadow growth
+        var sableShadows = new SessionShadowTracker(sableStats);
+        var config = new GameSessionConfig(playerShadows: sableShadows);
+        var session = new GameSession(sable, brick, llm, new SystemRandomDiceRoller(), trapRegistry, config);
 
         // Player agent for decision-making (replaces BestOption)
         IPlayerAgent agent = new HighestModAgent();
@@ -265,6 +268,11 @@ class Program
             Console.WriteLine();
 
             // ── pick + roll ───────────────────────────────────────────────
+            // Build current shadow values from tracker for player agent context
+            var currentShadowValues = new Dictionary<ShadowStatType, int>();
+            foreach (ShadowStatType shadowType in Enum.GetValues(typeof(ShadowStatType)))
+                currentShadowValues[shadowType] = sableShadows.GetEffectiveShadow(shadowType);
+
             var agentContext = new PlayerAgentContext(
                 playerStats: sableStats,
                 opponentStats: brickStats,
@@ -273,7 +281,7 @@ class Program
                 momentumStreak: snap.MomentumStreak,
                 activeTrapNames: snap.ActiveTrapNames,
                 sessionHorniness: 0,
-                shadowValues: null,
+                shadowValues: currentShadowValues,
                 turnNumber: snap.TurnNumber);
             var decision = await agent.DecideAsync(turnStart, agentContext);
             int pick = decision.OptionIndex;
@@ -317,7 +325,10 @@ class Program
             Console.WriteLine("```");
             Console.WriteLine($"Interest: {InterestBar(newInterest)}  {newInterest}/25  ({deltaStr})");
             if (result.ShadowGrowthEvents?.Count > 0)
-                Console.WriteLine($"Shadow growth: {string.Join(", ", result.ShadowGrowthEvents)}");
+            {
+                foreach (var shadowEvent in result.ShadowGrowthEvents)
+                    Console.WriteLine($"\u26a0\ufe0f SHADOW GROWTH: {shadowEvent}");
+            }
             string trapLine = result.StateAfter.ActiveTrapNames.Length > 0
                 ? string.Join(", ", result.StateAfter.ActiveTrapNames) : "none";
             Console.WriteLine($"Active Traps: {trapLine}  |  Momentum: {result.StateAfter.MomentumStreak} win{(result.StateAfter.MomentumStreak!=1?"s":"")}");
@@ -339,6 +350,21 @@ class Program
         string outcomeIcon = finalOutcome == GameOutcome.DateSecured ? "✅" :
                              finalOutcome == GameOutcome.Unmatched  ? "💀" : "👻";
         Console.WriteLine($"**{outcomeIcon} {finalOutcome?.ToString() ?? "Incomplete"} | Turns: {turn} | Total XP: {session.TotalXpEarned}**");
+        Console.WriteLine();
+
+        // ── shadow delta table ────────────────────────────────────────────
+        Console.WriteLine("## Shadow Changes This Session");
+        Console.WriteLine("| Shadow | Start | End | Delta |");
+        Console.WriteLine("|---|---|---|---|");
+        foreach (ShadowStatType shadowType in Enum.GetValues(typeof(ShadowStatType)))
+        {
+            int start = sableStats.GetShadow(shadowType);
+            int end = sableShadows.GetEffectiveShadow(shadowType);
+            int shadowDelta = sableShadows.GetDelta(shadowType);
+            string deltaFmt = shadowDelta > 0 ? $"+{shadowDelta}" : shadowDelta.ToString();
+            Console.WriteLine($"| {shadowType} | {start} | {end} | {deltaFmt} |");
+        }
+        Console.WriteLine();
 
         llm.Dispose();
 
