@@ -471,6 +471,100 @@ namespace Pinder.Core.Tests
             Assert.DoesNotContain("B)", prompt);
         }
 
+        // ── BuildPrompt adjusted probability tests ────────────────────────
+
+        [Fact]
+        public void BuildPrompt_TellBonus_ShowsAdjustedPct()
+        {
+            var opts = new Pinder.LlmAdapters.Anthropic.AnthropicOptions { ApiKey = "test-key" };
+            using var agent = new LlmPlayerAgent(opts, new ScoringPlayerAgent(), "Sable", "Brick");
+            var turn = MakeTurnStart(); // option C has tell bonus
+            var context = MakeContext();
+
+            string prompt = agent.BuildPrompt(turn, context);
+
+            // Option C (Honesty) has tell bonus, should show "base, ~adjusted"
+            Assert.Contains("base, ~", prompt);
+        }
+
+        [Fact]
+        public void BuildPrompt_MomentumBonus_ShowsAdjustedPct()
+        {
+            var opts = new Pinder.LlmAdapters.Anthropic.AnthropicOptions { ApiKey = "test-key" };
+            using var agent = new LlmPlayerAgent(opts, new ScoringPlayerAgent(), "Sable", "Brick");
+            var options = new[]
+            {
+                new DialogueOption(StatType.Charm, "Hey gorgeous"), // no hidden bonuses
+                new DialogueOption(StatType.Rizz, "Math curves")
+            };
+            var turn = MakeTurnStart(options);
+            // Momentum at 3 = +2 bonus
+            var context = new PlayerAgentContext(
+                MakeStats(), MakeStats(charm: 2, rizz: 3, honesty: 2, chaos: 2, wit: 2, sa: 2),
+                12, InterestState.Interested, 3,
+                Array.Empty<string>(), 0, null, 5);
+
+            string prompt = agent.BuildPrompt(turn, context);
+
+            // All options get momentum bonus, so all should show adjusted
+            Assert.Contains("base, ~", prompt);
+        }
+
+        [Fact]
+        public void BuildPrompt_NoHiddenBonuses_ShowsRawPctOnly()
+        {
+            var opts = new Pinder.LlmAdapters.Anthropic.AnthropicOptions { ApiKey = "test-key" };
+            using var agent = new LlmPlayerAgent(opts, new ScoringPlayerAgent(), "Sable", "Brick");
+            var options = new[]
+            {
+                new DialogueOption(StatType.Charm, "Hey gorgeous"), // no bonuses
+            };
+            var turn = MakeTurnStart(options);
+            // Momentum 0, no tell/callback
+            var context = new PlayerAgentContext(
+                MakeStats(), MakeStats(charm: 2, rizz: 3, honesty: 2, chaos: 2, wit: 2, sa: 2),
+                12, InterestState.Interested, 0,
+                Array.Empty<string>(), 0, null, 5);
+
+            string prompt = agent.BuildPrompt(turn, context);
+
+            // Should show "% success" not "base, ~adjusted"
+            Assert.Contains("% success", prompt);
+            Assert.DoesNotContain("base, ~", prompt);
+        }
+
+        [Fact]
+        public void BuildPrompt_CallbackBonus_ShowsAdjustedPct()
+        {
+            var opts = new Pinder.LlmAdapters.Anthropic.AnthropicOptions { ApiKey = "test-key" };
+            using var agent = new LlmPlayerAgent(opts, new ScoringPlayerAgent(), "Sable", "Brick");
+            var options = new[]
+            {
+                new DialogueOption(StatType.Charm, "Callback!", callbackTurnNumber: 3),
+            };
+            var turn = MakeTurnStart(options);
+            var context = new PlayerAgentContext(
+                MakeStats(), MakeStats(charm: 2, rizz: 3, honesty: 2, chaos: 2, wit: 2, sa: 2),
+                12, InterestState.Interested, 0,
+                Array.Empty<string>(), 0, null, 5);
+
+            string prompt = agent.BuildPrompt(turn, context);
+
+            Assert.Contains("base, ~", prompt);
+            Assert.Contains("🔗", prompt);
+        }
+
+        // ── Dispose tests ─────────────────────────────────────────────────
+
+        [Fact]
+        public void Dispose_CanBeCalledMultipleTimes()
+        {
+            var opts = new Pinder.LlmAdapters.Anthropic.AnthropicOptions { ApiKey = "test-key" };
+            var agent = new LlmPlayerAgent(opts, new ScoringPlayerAgent());
+            agent.Dispose();
+            agent.Dispose(); // should not throw
+        }
+
         // ── BuildPrompt option text formatting ─────────────────────────────
 
         [Fact]

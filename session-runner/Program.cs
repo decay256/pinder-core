@@ -178,6 +178,7 @@ class Program
 
         // Player agent for decision-making — configurable via PLAYER_AGENT env var
         IPlayerAgent agent;
+        LlmPlayerAgent? llmAgent = null; // track for disposal
         string agentType = Environment.GetEnvironmentVariable("PLAYER_AGENT") ?? "scoring";
         if (agentType.Equals("llm", StringComparison.OrdinalIgnoreCase))
         {
@@ -186,8 +187,9 @@ class Program
                 ApiKey = apiKey,
                 Model = Environment.GetEnvironmentVariable("PLAYER_AGENT_MODEL") ?? "claude-sonnet-4-20250514"
             };
-            agent = new LlmPlayerAgent(agentOptions, new ScoringPlayerAgent(),
+            llmAgent = new LlmPlayerAgent(agentOptions, new ScoringPlayerAgent(),
                 playerName: sable.DisplayName, opponentName: brick.DisplayName);
+            agent = llmAgent;
         }
         else
         {
@@ -381,6 +383,7 @@ class Program
         }
         Console.WriteLine();
 
+        llmAgent?.Dispose();
         llm.Dispose();
 
         Console.SetOut(tee._console);

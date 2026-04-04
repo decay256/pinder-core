@@ -60,7 +60,35 @@ After the session outcome line, a markdown table is printed:
 - **`OpponentShadows` is optional**: the config only wires `playerShadows`; opponent shadow tracking is not used by the session runner currently.
 - **Shadow growth triggers** (e.g., Nat 1 → Madness, 3 consecutive same-stat picks → Fixation) are handled inside `GameSession`; the session runner only reads and displays results.
 
+## Player Agents
+
+The session runner supports pluggable player agent strategies via the `IPlayerAgent` interface.
+
+### IPlayerAgent (interface)
+```csharp
+Task<PlayerDecision> DecideAsync(TurnStart turn, PlayerAgentContext context)
+```
+Takes a `TurnStart` (options + game state) and `PlayerAgentContext` (stats, interest, momentum, shadows), returns a `PlayerDecision` with chosen option index, reasoning text, and per-option score breakdowns.
+
+### ScoringPlayerAgent
+Deterministic expected-value scoring agent. Pure math, no LLM. Scores all options using success probability × expected gain − failure cost. Applies strategic adjustments for momentum, interest state, trap exposure. Used as the fallback for `LlmPlayerAgent` and for regression testing.
+
+### LlmPlayerAgent
+LLM-backed agent that sends full game state and rules context to Anthropic Claude, parses a `PICK: [A/B/C/D]` response. Falls back to `ScoringPlayerAgent` on any failure (API error, parse error, timeout). Implements `IDisposable` to clean up its internal `AnthropicClient`.
+
+**Constructor:** `LlmPlayerAgent(AnthropicOptions, ScoringPlayerAgent, playerName?, opponentName?)`
+
+**Prompt includes:** game state (interest, momentum, traps, shadows, turn), all options with stat/DC/need/%/risk tier/bonus icons, adjusted probabilities including hidden bonuses (momentum, tell, callback), and a rules reminder.
+
+**Agent selection:** controlled via `PLAYER_AGENT` env var (`scoring` or `llm`, default `scoring`). LLM model configurable via `PLAYER_AGENT_MODEL` env var.
+
+### Supporting Types
+- **`PlayerDecision`** — result type: `OptionIndex`, `Reasoning` (string), `Scores` (OptionScore[])
+- **`OptionScore`** — per-option breakdown: `Score`, `SuccessChance`, `ExpectedInterestGain`, `BonusesApplied`
+- **`PlayerAgentContext`** — input context: player/opponent stats, interest, momentum, traps, shadows, turn number
+
 ## Change Log
 | Date | Issue | Summary |
 |------|-------|---------|
+| 2026-04-04 | #348 | Added `LlmPlayerAgent` with Anthropic integration, adjusted probability display, `IDisposable` disposal in Program.cs, player agent docs. |
 | 2026-04-04 | #350 | Initial creation — wired `SessionShadowTracker` into `GameSession` via `GameSessionConfig`, added per-turn shadow growth event output and session-end shadow delta summary table. Added spec tests in `Issue350_ShadowTrackingSpecTests.cs`. |

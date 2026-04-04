@@ -154,6 +154,12 @@ namespace Pinder.SessionRunner
             sb.AppendLine();
 
             // Options
+            // SYNC: GameSession.GetMomentumBonus()
+            int momentumBonus;
+            if (context.MomentumStreak >= 5) momentumBonus = 3;
+            else if (context.MomentumStreak >= 3) momentumBonus = 2;
+            else momentumBonus = 0;
+
             sb.AppendLine("## Your Options");
             char letter = 'A';
             for (int i = 0; i < turn.Options.Length; i++)
@@ -161,12 +167,26 @@ namespace Pinder.SessionRunner
                 DialogueOption opt = turn.Options[i];
                 int modifier = context.PlayerStats.GetEffective(opt.Stat);
                 int dc = context.OpponentStats.GetDefenceDC(opt.Stat);
-                int need = dc - modifier;
-                int pct = Math.Max(0, Math.Min(100, (21 - need) * 5));
-                string riskTier = GetRiskTier(need);
+                int baseNeed = dc - modifier;
+                int basePct = Math.Max(0, Math.Min(100, (21 - baseNeed) * 5));
+                string riskTier = GetRiskTier(baseNeed);
                 string icons = FormatBonusIcons(opt);
 
-                sb.AppendLine($"{letter}) [{opt.Stat.ToString().ToUpperInvariant()} +{modifier}] DC {dc} | Need {need}+ on d20 | {pct}% success | {riskTier}{icons}");
+                // Compute adjusted probability including hidden bonuses
+                // SYNC: GameSession ResolveTurnAsync tellBonus
+                int tellBonus = opt.HasTellBonus ? 2 : 0;
+                int callbackBonus = opt.CallbackTurnNumber.HasValue
+                    ? CallbackBonus.Compute(context.TurnNumber, opt.CallbackTurnNumber.Value)
+                    : 0;
+                int totalHiddenBonus = momentumBonus + tellBonus + callbackBonus;
+                int adjNeed = baseNeed - totalHiddenBonus;
+                int adjPct = Math.Max(0, Math.Min(100, (21 - adjNeed) * 5));
+
+                string pctDisplay = totalHiddenBonus > 0
+                    ? $"{basePct}% base, ~{adjPct}% adjusted"
+                    : $"{basePct}% success";
+
+                sb.AppendLine($"{letter}) [{opt.Stat.ToString().ToUpperInvariant()} +{modifier}] DC {dc} | Need {baseNeed}+ on d20 | {pctDisplay} | {riskTier}{icons}");
                 sb.AppendLine($"   Text: \"{opt.IntendedText}\"");
 
                 letter = (char)(letter + 1);
