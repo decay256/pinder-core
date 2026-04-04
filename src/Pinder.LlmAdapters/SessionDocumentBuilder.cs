@@ -248,7 +248,10 @@ namespace Pinder.LlmAdapters
             }
 
             sb.AppendLine();
-            sb.Append(PromptTemplates.OpponentResponseInstruction);
+
+            string resistanceBlock = GetResistanceBlock(context.InterestAfter);
+            sb.Append(PromptTemplates.OpponentResponseInstruction
+                .Replace("{resistance_block}", resistanceBlock));
 
             return sb.ToString();
         }
@@ -397,6 +400,31 @@ namespace Pinder.LlmAdapters
                 default:
                     return "A failure has occurred. Degrade the message accordingly.";
             }
+        }
+
+        /// <summary>
+        /// Returns a resistance descriptor block based on current interest level.
+        /// Below 25, the opponent always maintains some form of resistance.
+        /// </summary>
+        internal static string GetResistanceBlock(int interest)
+        {
+            string descriptor;
+            if (interest >= 25)
+                descriptor = PromptTemplates.ResistanceDissolved;
+            else if (interest >= 21)
+                descriptor = PromptTemplates.ResistanceAlmostConvinced;
+            else if (interest >= 15)
+                descriptor = PromptTemplates.ResistanceDeliberateApproach;
+            else if (interest >= 10)
+                descriptor = PromptTemplates.ResistanceUnstableAgreement;
+            else if (interest >= 5)
+                descriptor = PromptTemplates.ResistanceSkepticalInterest;
+            else if (interest >= 1)
+                descriptor = PromptTemplates.ResistanceActiveDisengagement;
+            else
+                descriptor = PromptTemplates.ResistanceActiveDisengagement;
+
+            return $"Current interest: {interest}/25. Resistance level: {descriptor}";
         }
 
         private static string FallbackName(string name, string fallback)
