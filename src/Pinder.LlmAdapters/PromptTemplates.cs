@@ -115,7 +115,13 @@ Output only the message text. No explanation. The character sent this.";
         /// Uses {placeholder} tokens for dynamic content.
         /// </summary>
         public const string OpponentResponseInstruction =
-@"INTEREST CONSTRAINT:
+@"FUNDAMENTAL RULE: Below Interest 25, you are not won over. You may agree, warm, laugh — but the resistance is always present underneath. It may be subtle (a withheld thing, a reframe, a slightly cooler tone than expected) but it never fully dissolves. Agreement below 25 is unstable. It can flip.
+
+Your archetype determines HOW you resist, not WHETHER.
+
+{resistance_block}
+
+INTEREST CONSTRAINT:
 - Interest must reach 25 (DateSecured) before any concrete date plans are possible.
 - Below Interest 25: you may express interest, warmth, or curiosity, but NEVER commit to a specific time, place, or logistics. ""We should get coffee sometime"" is fine. ""Coffee shop on Fifth at 6pm Tuesday"" is NOT.
 - At Interest 25: the date is now real. You may suggest a specific venue or time that fits your character.
@@ -187,5 +193,31 @@ Rules:
 
         internal const string InterestBeatGeneric =
 @"Generate a brief reaction from {opponent_name} reflecting the change in interest. Subtle and in character.";
+
+        // ── Resistance descriptors by interest range ──
+
+        /// <summary>Interest 1-4: Active disengagement.</summary>
+        internal const string ResistanceActiveDisengagement =
+            "Active disengagement — short replies, testing, near-silence. You are barely here.";
+
+        /// <summary>Interest 5-9: Skeptical interest.</summary>
+        internal const string ResistanceSkepticalInterest =
+            "Skeptical interest — you engage but visibly evaluate. Tests disguised as questions. You're deciding if this is worth your time.";
+
+        /// <summary>Interest 10-14: Unstable agreement.</summary>
+        internal const string ResistanceUnstableAgreement =
+            "Unstable agreement — you respond warmly to good moments but hold back. One misfire and the warmth vanishes. Agreement is conditional.";
+
+        /// <summary>Interest 15-20: Deliberate approach.</summary>
+        internal const string ResistanceDeliberateApproach =
+            "Deliberate approach — you are invested but still managing the gap. One wrong move still costs. You give more but not everything.";
+
+        /// <summary>Interest 21-24: Almost convinced.</summary>
+        internal const string ResistanceAlmostConvinced =
+            "Almost convinced — warm but the final resistance is visible. You are choosing whether to give it. The holdback is small but real.";
+
+        /// <summary>Interest 25: Resistance dissolved.</summary>
+        internal const string ResistanceDissolved =
+            "Resistance dissolved — the date is real. You are genuinely won over.";
     }
 }
