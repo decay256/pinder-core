@@ -838,3 +838,53 @@ src/Pinder.Rules/
 | Hardcoded constants duplicated in C# + YAML | §5, §6, §15 | Intentional — YAML is primary, C# is fallback |
 | Rule engine not wired for all sections | §8-§14 | Only §5/§6/§7/§15 wired this sprint |
 | Per-shadow-type threshold effects | §7 | IRuleResolver returns generic tier, not per-shadow effects |
+
+
+---
+
+## Sprint (Rules DSL Completeness) — Architecture Briefing
+
+### What's changing
+
+**This sprint continues the existing architecture with no structural changes.** Three issues improve the Rules DSL pipeline (Python tooling + YAML data + generated C# tests). No new projects, no new C# components, no dependency changes. All changes are confined to `rules/tools/` (Python), `rules/extracted/` (YAML data), and `tests/Pinder.Core.Tests/RulesSpec/` (generated test stubs).
+
+**Existing architecture summary**: Pinder.Core is a zero-dependency .NET Standard 2.0 RPG engine. `Pinder.Rules` (YamlDotNet) provides data-driven rule evaluation via `RuleBook`, `ConditionEvaluator`, `OutcomeDispatcher`. `IRuleResolver` in Core bridges to Rules via dependency inversion. The Rules DSL pipeline (`rules/tools/`) transforms authoritative Markdown docs into YAML (`rules/extracted/`) and back (`rules/regenerated/`), with enrichment adding structured `condition`/`outcome` fields.
+
+### Components being extended
+
+- `rules/tools/extract.py` — #443: block-order preservation, table column width metadata
+- `rules/tools/generate.py` — #443: ordered block rendering, separator row fidelity
+- `rules/tools/enrich.py` — #444: enrichment patterns for 8 additional YAML files
+- `rules/extracted/*-enriched.yaml` — #444: 351 enriched entries across 9 files
+- `tests/Pinder.Core.Tests/RulesSpec/RulesSpecTests.cs` — #445: 54 test stubs (37 active + 17 skipped)
+
+### What is NOT changing
+
+- All Pinder.Core game logic (Stats, Rolls, Traps, Progression, Characters, Prompts, Data)
+- Pinder.Rules project (RuleBook, ConditionEvaluator, etc.)
+- Pinder.LlmAdapters
+- GameSession, IRuleResolver wiring
+- NullLlmAdapter
+- Session runner
+
+### Implicit assumptions for implementers
+
+1. **Python 3 + PyYAML** for all pipeline tooling
+2. **YAML enrichment vocabulary** shared across all 9 files — condition/outcome keys must match existing patterns from `rules-v3-enriched.yaml`
+3. **All 2716 existing C# tests must pass** — test stubs are additive only
+4. **17 skipped stubs** are for LLM/qualitative rules — must remain as `[Fact(Skip = "...")]`
+5. **Round-trip diffs < 50 lines per doc** — whitespace-only diffs acceptable
+
+### Known Gaps (as of this sprint)
+
+| Gap | Rules Section | Status |
+|-----|--------------|--------|
+| Shadow persistence across sessions | §8 | Not addressed — per-session via SessionShadowTracker |
+| `AddExternalBonus()` deprecated but not removed | — | Cleanup issue needed |
+| Energy system consumers | #144 | `IGameClock.ConsumeEnergy()` exists but nothing calls it |
+| GameSession god object trajectory | #87 | Growing — extraction planned for MVP |
+| Hardcoded constants duplicated in C# + YAML | §5, §6, §15 | Intentional — YAML is primary, C# is fallback |
+| Rule engine not wired for all sections | §8-§14 | Only §5/§6/§7/§15 wired |
+| Per-shadow-type threshold effects | §7 | IRuleResolver returns generic tier, not per-shadow effects |
+| enrich.py is 1839 lines of pattern matching | — | Brittle but acceptable at prototype |
+| Round-trip diffs not zero | — | <50 per doc, whitespace-only — within tolerance |
