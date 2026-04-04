@@ -888,3 +888,55 @@ src/Pinder.Rules/
 | Per-shadow-type threshold effects | §7 | IRuleResolver returns generic tier, not per-shadow effects |
 | enrich.py is 1839 lines of pattern matching | — | Brittle but acceptable at prototype |
 | Round-trip diffs not zero | — | <50 per doc, whitespace-only — within tolerance |
+
+
+---
+
+## Sprint: Dramatic Arc + Voice Fixes — Architecture Briefing
+
+### What's changing
+
+**This sprint continues the existing architecture with no structural changes.** Six issues improve prompt engineering quality in `Pinder.LlmAdapters` (PromptTemplates, SessionDocumentBuilder, CacheBlockBuilder, AnthropicLlmAdapter) with minor DTO extensions in `Pinder.Core` (CharacterProfile, OpponentContext, DialogueContext) and a rework of `LlmPlayerAgent` in `session-runner/`.
+
+**Existing architecture summary**: Pinder.Core is a zero-dependency .NET Standard 2.0 RPG engine. `GameSession` orchestrates single-conversation turns, calling `ILlmAdapter` methods with context DTOs. `Pinder.LlmAdapters` implements `ILlmAdapter` via `AnthropicLlmAdapter`, using `SessionDocumentBuilder` for prompt assembly, `CacheBlockBuilder` for Anthropic prompt caching, and `PromptTemplates` for instruction text constants. Dependency is strictly one-way: `LlmAdapters → Core`. `session-runner/` is a .NET 8 console app with player agent types.
+
+### Components being extended
+
+- `CacheBlockBuilder` (LlmAdapters) — #487: dialogue options switches to player-only system blocks
+- `SessionDocumentBuilder` (LlmAdapters) — #487: opponent profile in user message; #489: texting style injection; #490: resistance descriptor; #493: failure context
+- `PromptTemplates` (LlmAdapters) — #489: voice check; #490: resistance rule; #491: success delivery revision; #493: per-tier opponent reaction guidance
+- `AnthropicLlmAdapter` (LlmAdapters) — #487: player-only system blocks for options
+- `CharacterProfile` (Core) — #489: gains `TextingStyleFragment` property
+- `DialogueContext` (Core) — #489: gains `PlayerTextingStyle` field
+- `OpponentContext` (Core) — #493: gains `DeliveryTier` field (FailureTier)
+- `GameSession` (Core) — #489: passes texting style to DialogueContext; #493: passes failure tier to OpponentContext
+- `LlmPlayerAgent` (session-runner) — #492: character-aware prompt with system prompt, texting style, conversation history, scoring EV advisory
+
+### What is NOT changing
+
+- All Pinder.Core game logic (Stats, Rolls, Traps, Progression, Data)
+- Pinder.Rules project
+- `GetOpponentResponseAsync` and `DeliverMessageAsync` system block strategy
+- NullLlmAdapter
+- Existing test behavior
+
+### Implicit assumptions for implementers
+
+1. **netstandard2.0 + LangVersion 8.0** in Pinder.Core — no `record` types
+2. **Zero NuGet dependencies in Pinder.Core**
+3. **All 2295 existing tests must pass unchanged**
+4. **Context DTO changes use optional constructor params with defaults** — backward-compatible
+5. **FailureTier.None means success** — existing convention
+6. **Qualitative LLM output** — voice distinctness, resistance, delivery quality verified via playtest, not automated tests
+7. **CharacterProfile.TextingStyleFragment** populated by session-runner loaders from FragmentCollection.TextingStyleFragments or prompt file parsing
+
+### Known Gaps (as of this sprint)
+
+| Gap | Rules Section | Status |
+|-----|--------------|--------|
+| Shadow persistence across sessions | §8 | Not addressed — per-session via SessionShadowTracker |
+| `AddExternalBonus()` deprecated but not removed | — | Cleanup issue needed |
+| Energy system consumers | #144 | `IGameClock.ConsumeEnergy()` exists but nothing calls it |
+| GameSession god object trajectory | #87 | 1454 lines — extraction planned for MVP |
+| Prompt caching cost for dialogue options | — | Opponent prompt no longer cached after #487 — monitor |
+| CharacterProfile.TextingStyleFragment source | — | Populated by loaders, not PromptBuilder |
