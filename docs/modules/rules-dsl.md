@@ -46,6 +46,8 @@ The Rules DSL is a toolchain for extracting structured YAML rules from Pinder de
 
 - **`rules/tools/test_issue443_roundtrip.py`** — Round-trip fidelity tests verifying paragraph order preservation, table column width preservation, full-document round-trip with < 50 diff lines, and no information loss.
 
+- **`rules/tools/test_issue443_spec.py`** — Spec-driven edge case and error condition tests for round-trip fidelity. Covers empty documents, preamble entries, tables with no data rows/empty cells/empty first header, code blocks with pipes, consecutive tables, blockquotes, horizontal rules, compact headings, legacy YAML fallback, mixed 5-block ordering, flavor text, `parse_table` sep_cells preservation, `render_blocks` dispatch, `slugify`, per-document diff line counts (<50 threshold), and all 9 design docs extraction/generation.
+
 - **`rules/tools/test_enrichment.py`** — Tests for the YAML enrichment pipeline: validates all 9 enriched files exist and are valid YAML, enrichment is additive, condition/outcome types are correct, known mechanical values are correctly enriched, and accuracy check passes with 0 INACCURATE findings.
 
 - **`rules/tools/test_issue444_enrichment.py`** — 35 tests covering all acceptance criteria for issue #444: file existence, enrichment counts, vocabulary compliance, numeric accuracy, type correctness, and summary report validation.
@@ -145,3 +147,4 @@ Note: Entry counts differ from the original un-enriched files because table rows
 |------|-------|---------|
 | 2026-04-04 | #443 | Initial creation — fixed round-trip diffs for paragraph reordering and table formatting; added `test_issue443_roundtrip.py` with tests for paragraph order preservation (AC1), table column width preservation (AC2), full doc round-trip < 50 lines (AC3/AC4), and no information loss (AC5). |
 | 2026-04-04 | #444 | Enriched all 9 YAML files with `condition`/`outcome` fields — added `enrich.py` (per-file enrichers), `accuracy_check.py` (validation), 8 new `*-enriched.yaml` files, enrichment summary (532 entries, 351 enriched), `test_enrichment.py` and `test_issue444_enrichment.py` (35 tests). |
+| 2026-04-04 | #443 | Added `test_issue443_spec.py` — spec-driven edge case and error condition tests (empty docs, table edge cases, code blocks with pipes, blockquotes, HR vs separator, compact headings, legacy YAML fallback, mixed block ordering, per-doc diff thresholds). |
