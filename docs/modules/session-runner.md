@@ -13,11 +13,14 @@ The session runner is a standalone C# program (`session-runner/Program.cs`) that
 | `session-runner/OptionScore.cs` | Sealed DTO for per-option score breakdown: composite `Score`, `SuccessChance` (0.0–1.0, clamped), `ExpectedInterestGain`, and `BonusesApplied` string array. |
 | `session-runner/PlayerAgentContext.cs` | Sealed DTO carrying agent context beyond `TurnStart`: player/opponent `StatBlock`, `CurrentInterest`, `InterestState`, `MomentumStreak`, `ActiveTrapNames`, `SessionHorniness`, nullable `ShadowValues`, and `TurnNumber`. |
 | `session-runner/HighestModAgent.cs` | Baseline `IPlayerAgent` implementation. Picks the option with the highest effective stat modifier (replicating the former `BestOption` logic). Computes `SuccessChance` via `(21 - (DC - mod)) / 20` clamped to [0,1]. |
+| `session-runner/ScoringPlayerAgent.cs` | Deterministic `IPlayerAgent` implementation that scores all dialogue options using an expected-value formula. Computes `need`, `successChance`, risk tier bonuses, and raw EV per option, then applies strategic adjustments (momentum bias, near-win bias, bored-bold bias, active trap penalty). No LLM — pure math. |
 | `session-runner/TrapRegistryLoader.cs` | `internal static` class that loads an `ITrapRegistry` from `traps.json`. Searches env var override → relative path → upward directory walk. Falls back to `NullTrapRegistry` on failure. |
 | `session-runner/SessionFileCounter.cs` | `internal static` class that scans a directory for `session-*.md` files and returns the next available session number. |
 | `tests/Pinder.Core.Tests/PlayerAgentSpecTests.cs` | Spec-driven tests for `PlayerDecision`, `OptionScore`, `PlayerAgentContext`, and `HighestModAgent`. Covers constructor validation, clamping, edge cases (empty options, single option, identical stats, all-Rizz), and DC/success-chance calculations. |
 | `tests/Pinder.Core.Tests/SessionFileCounterTests.cs` | Tests for `SessionFileCounter.GetNextSessionNumber` — validates glob pattern matching and number extraction from session filenames. |
 | `tests/Pinder.Core.Tests/SessionRunnerTrapLoadingTests.cs` | Tests for `TrapRegistryLoader.Load` — env var override, upward search, missing file fallback, corrupt JSON fallback, trap activation with real registry. |
+| `tests/Pinder.Core.Tests/ScoringPlayerAgentSpecTests.cs` | Spec-driven tests for `ScoringPlayerAgent` — covers interface conformance, formula correctness, all four strategic adjustments, determinism, edge cases (empty/single options, boundary interest values, trap mappings, callback bonuses), error conditions, and bonus tracking. |
+| `tests/Pinder.Core.Tests/ScoringPlayerAgentTests.cs` | Additional unit tests for `ScoringPlayerAgent` — covers EV ordering, risk tier bonuses, momentum/tell/callback/combo bonus interactions, and reasoning string content. |
 
 ## API / Public Interface
 
@@ -99,6 +102,41 @@ public sealed class HighestModAgent : IPlayerAgent
 
 Baseline agent replicating the former `BestOption` logic. Picks the option whose stat has the highest effective modifier on the player's `StatBlock`. Computes `SuccessChance` as `max(0, min(1, (21 - (DC - mod)) / 20))`. Tiebreaks to lowest index. Returns `Task.FromResult(...)` (synchronous).
 
+### ScoringPlayerAgent
+
+```csharp
+public sealed class ScoringPlayerAgent : IPlayerAgent
+{
+    public Task<PlayerDecision> DecideAsync(TurnStart turn, PlayerAgentContext context);
+}
+```
+
+Deterministic expected-value scoring agent. No constructor parameters, no mutable state. Returns `Task.FromResult(...)` (synchronous).
+
+**Scoring pipeline (per option):**
+1. Compute `need = defenceDC - (attackerMod + momentumBonus + tellBonus + callbackBonus)`
+2. Compute `successChance = clamp((21 - need) / 20, 0, 1)`
+3. Determine risk tier from `need`: Safe (≤5, +0), Medium (6–10, +0), Hard (11–15, +1), Bold (≥16, +2)
+4. Compute `baseInterestGain` using midpoint approximation of success margin
+5. `expectedGainOnSuccess = baseInterestGain + riskTierBonus + comboBonus`
+6. Raw EV: `expectedInterestGain = successChance × expectedGainOnSuccess - failChance × 1.5`
+7. Apply strategic adjustments to `score` (not to raw EV):
+   - Momentum streak == 2 AND `successChance ≥ 0.5`: +1.0
+   - Interest in [19, 24] AND Safe/Medium tier: +2.0
+   - `InterestState.Bored` AND Hard/Bold tier: +1.0
+   - Active trap on option's stat: −2.0
+
+**Bonus sourcing (per #386 ADR):**
+- Callback bonus: calls `CallbackBonus.Compute()` directly (public static in `Pinder.Core.Conversation`)
+- Momentum bonus: duplicated from `GameSession.GetMomentumBonus()` (private) with `// SYNC` comment
+- Tell bonus: hardcoded `2` with `// SYNC` comment
+
+**Stat-to-trap mapping:** Charm→Madness, Rizz→Horniness, Honesty→Denial, Chaos→Fixation, Wit→Dread, SA→Overthinking.
+
+**Error conditions:** Throws `ArgumentNullException` for null `turn` or `context`. Throws `InvalidOperationException` if `turn.Options` is empty. Null `ActiveTrapNames` treated as empty.
+
+**Tiebreaking:** Lowest index wins on equal scores.
+
 ### WritePlaytestLog (private static)
 
 ```csharp
@@ -145,7 +183,8 @@ Scans the given directory for `session-*.md` files. Splits each filename on `-` 
 - The file counter logic is extracted into `SessionFileCounter` (internal static class) for testability. `session-runner.csproj` uses `InternalsVisibleTo` to expose it to `Pinder.Core.Tests`.
 - **Trap loading** is delegated to `TrapRegistryLoader` (extracted from `Program.cs` for testability). Uses a three-tier search: `PINDER_TRAPS_PATH` env var → relative path from base dir → upward directory walk. Falls back to `NullTrapRegistry` with a warning on stderr if no valid `traps.json` is found.
 - **Player agent abstraction:** Turn decisions are delegated to pluggable `IPlayerAgent` implementations via `DecideAsync`. This replaces the former inline `BestOption` static method. All agent types (`IPlayerAgent`, `PlayerDecision`, `OptionScore`, `PlayerAgentContext`) live in `session-runner/` (namespace `Pinder.SessionRunner`), NOT in `Pinder.Core`, per vision concern #355.
-- **HighestModAgent** is the baseline implementation, replicating the original highest-modifier selection logic. It serves as a placeholder until `ScoringPlayerAgent` (#347) and `LlmPlayerAgent` (#348) are implemented.
+- **HighestModAgent** is the baseline implementation, replicating the original highest-modifier selection logic. It serves as a simple fallback.
+- **ScoringPlayerAgent** is the deterministic EV-based agent. It uses no LLM — pure mechanical scoring from game rules. Useful for regression testing and as a fallback for `LlmPlayerAgent` (#348). Uses midpoint approximation (Option A from spec) for expected interest gain and a constant `1.5` fail cost.
 - **Success probability formula:** `need = DC - modifier`, `successChance = max(0, min(1, (21 - need) / 20))`. Natural 20 always succeeds, natural 1 always fails (captured by the clamp).
 - **LangVersion 8.0 constraint:** All new types use `sealed class` with constructor + get-only properties (no C# 9+ records or init-only setters).
 
@@ -157,3 +196,4 @@ Scans the given directory for `session-*.md` files. Splits each filename on `-` 
 | 2026-04-03 | #353 | Extracted inline trap-loading logic from `Program.cs` into `TrapRegistryLoader` (new file). Replaced hardcoded paths with env var override (`PINDER_TRAPS_PATH`) + upward directory walk. Tests rewritten to exercise `TrapRegistryLoader.Load` directly. |
 | 2026-04-03 | #354 | Extracted inline file counter logic from `WritePlaytestLog` into `SessionFileCounter.GetNextSessionNumber` (new file `SessionFileCounter.cs`). Tests now call the real class instead of a mirrored helper. Added `InternalsVisibleTo` for test access. |
 | 2026-04-04 | #346 | Added `IPlayerAgent` interface, `PlayerDecision`, `OptionScore`, `PlayerAgentContext` DTOs, and `HighestModAgent` baseline implementation. Replaced `BestOption` static method with agent-based turn decisions. Added `PlayerAgentSpecTests.cs` (749 lines). |
+| 2026-04-04 | #347 | Added `ScoringPlayerAgent` — deterministic EV-based option scorer implementing `IPlayerAgent`. Scores options via d20 probability model with risk tier bonuses and four strategic adjustments (momentum, near-win, bored, trap penalty). Uses midpoint approximation for interest gain and constant fail cost. Calls `CallbackBonus.Compute()` directly per #386 ADR. Added `ScoringPlayerAgentSpecTests.cs` and `ScoringPlayerAgentTests.cs`. Spec noted empty-options should return `OptionIndex=-1`; implementation throws `InvalidOperationException` instead. |
