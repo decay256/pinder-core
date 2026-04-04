@@ -1,0 +1,279 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Pinder.Core.Conversation;
+using Pinder.Core.Stats;
+
+namespace Pinder.SessionRunner
+{
+    /// <summary>
+    /// Deterministic player agent that scores all dialogue options using an expected-value
+    /// formula derived from the game's mechanical rules. No LLM — pure math.
+    /// Produces consistent, explainable decisions useful for regression testing.
+    /// </summary>
+    public sealed class ScoringPlayerAgent : IPlayerAgent
+    {
+        // Baseline fail cost approximation across failure tiers
+        private const float DefaultFailCost = 1.5f;
+
+        // Strategic adjustment magnitudes
+        private const float MomentumStreakBias = 1.0f;
+        private const float NearWinBias = 2.0f;
+        private const float BoredBoldBias = 1.0f;
+        private const float ActiveTrapPenalty = 2.0f;
+
+        // SYNC: GameSession ResolveTurnAsync tellBonus
+        private const int TellBonusValue = 2;
+
+        /// <summary>
+        /// Mapping from StatType to the trap name that appears in ActiveTrapNames.
+        /// Uses the shadow stat name from StatBlock.ShadowPairs.
+        /// </summary>
+        private static readonly Dictionary<StatType, string> StatToTrapName = new Dictionary<StatType, string>
+        {
+            { StatType.Charm,         "Madness" },
+            { StatType.Rizz,          "Horniness" },
+            { StatType.Honesty,       "Denial" },
+            { StatType.Chaos,         "Fixation" },
+            { StatType.Wit,           "Dread" },
+            { StatType.SelfAwareness, "Overthinking" }
+        };
+
+        /// <summary>
+        /// Scores all options in the TurnStart and picks the highest-scoring one.
+        /// Deterministic: same inputs always produce the same output.
+        /// </summary>
+        public Task<PlayerDecision> DecideAsync(TurnStart turn, PlayerAgentContext context)
+        {
+            if (turn == null) throw new ArgumentNullException(nameof(turn));
+            if (context == null) throw new ArgumentNullException(nameof(context));
+
+            var options = turn.Options;
+
+            // Edge case: no options available
+            if (options.Length == 0)
+            {
+                throw new InvalidOperationException("No options available to score.");
+            }
+
+            // SYNC: GameSession.GetMomentumBonus()
+            int momentumBonus;
+            if (context.MomentumStreak >= 5) momentumBonus = 3;
+            else if (context.MomentumStreak >= 3) momentumBonus = 2;
+            else momentumBonus = 0;
+
+            // Pre-compute active trap set for O(1) lookups
+            var activeTrapSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            if (context.ActiveTrapNames != null)
+            {
+                for (int i = 0; i < context.ActiveTrapNames.Length; i++)
+                {
+                    activeTrapSet.Add(context.ActiveTrapNames[i]);
+                }
+            }
+
+            var scores = new OptionScore[options.Length];
+            int bestIndex = 0;
+            float bestScore = float.MinValue;
+
+            for (int i = 0; i < options.Length; i++)
+            {
+                DialogueOption option = options[i];
+
+                // Step 1: Compute need
+                int attackerMod = context.PlayerStats.GetEffective(option.Stat);
+                int defenceDC = context.OpponentStats.GetDefenceDC(option.Stat);
+
+                // Callback bonus — MUST call CallbackBonus.Compute() directly (per #386 ADR)
+                int callbackBonus = option.CallbackTurnNumber.HasValue
+                    ? CallbackBonus.Compute(context.TurnNumber, option.CallbackTurnNumber.Value)
+                    : 0;
+
+                int tellBonus = option.HasTellBonus ? TellBonusValue : 0;
+
+                int totalMod = attackerMod + momentumBonus + tellBonus + callbackBonus;
+                int need = defenceDC - totalMod;
+
+                // Step 2: Compute success/fail chances
+                float successChance = Math.Max(0.0f, Math.Min(1.0f, (21.0f - need) / 20.0f));
+                float failChance = 1.0f - successChance;
+
+                // Step 3: Risk tier and bonus
+                RiskTierInfo riskInfo = ComputeRiskTier(need);
+
+                // Step 4: Expected interest on success (Option A — midpoint approximation)
+                float baseInterestGain;
+                if (successChance > 0.0f)
+                {
+                    // Midpoint of the success range: average margin when succeeding
+                    float avgMargin = (21.0f - need) / 2.0f;
+                    if (avgMargin >= 10.0f) baseInterestGain = 3.0f;
+                    else if (avgMargin >= 5.0f) baseInterestGain = 2.0f;
+                    else baseInterestGain = 1.0f;
+                }
+                else
+                {
+                    baseInterestGain = 0.0f;
+                }
+
+                float comboBonus = option.ComboName != null ? 1.0f : 0.0f;
+                float expectedGainOnSuccess = baseInterestGain + riskInfo.Bonus + comboBonus;
+
+                // Step 5: Expected cost on failure
+                float failCost = DefaultFailCost;
+
+                // Step 6: Raw EV
+                float expectedInterestGain = successChance * expectedGainOnSuccess
+                                           - failChance * failCost;
+                float score = expectedInterestGain;
+
+                // Step 7: Strategic adjustments
+                var bonuses = new List<string>();
+                var strategicReasons = new List<string>();
+
+                if (momentumBonus > 0) bonuses.Add($"momentum +{momentumBonus}");
+                if (tellBonus > 0) bonuses.Add($"tell +{tellBonus}");
+                if (callbackBonus > 0) bonuses.Add($"callback +{callbackBonus}");
+                if (option.ComboName != null) bonuses.Add($"combo: {option.ComboName}");
+
+                // Momentum streak == 2: bias toward safe success
+                if (context.MomentumStreak == 2 && successChance >= 0.5f)
+                {
+                    score += MomentumStreakBias;
+                    strategicReasons.Add("Momentum at 2 — prioritizing reliable success");
+                }
+
+                // Near win (interest 19-24): prefer safe/medium
+                if (context.CurrentInterest >= 19 && context.CurrentInterest <= 24
+                    && (riskInfo.Tier == RiskTierCategory.Safe || riskInfo.Tier == RiskTierCategory.Medium))
+                {
+                    score += NearWinBias;
+                    strategicReasons.Add("Near win — preferring low-variance option");
+                }
+
+                // Bored state: prefer bold
+                if (context.InterestState == InterestState.Bored
+                    && (riskInfo.Tier == RiskTierCategory.Hard || riskInfo.Tier == RiskTierCategory.Bold))
+                {
+                    score += BoredBoldBias;
+                    strategicReasons.Add("Bored — swinging for the fences");
+                }
+
+                // Active trap penalty
+                if (StatToTrapName.TryGetValue(option.Stat, out string? trapName)
+                    && trapName != null
+                    && activeTrapSet.Contains(trapName))
+                {
+                    score -= ActiveTrapPenalty;
+                    strategicReasons.Add($"Active {trapName} trap — penalty applied");
+                }
+
+                scores[i] = new OptionScore(
+                    optionIndex: i,
+                    score: score,
+                    successChance: successChance,
+                    expectedInterestGain: expectedInterestGain,
+                    bonusesApplied: bonuses.ToArray());
+
+                if (score > bestScore)
+                {
+                    bestScore = score;
+                    bestIndex = i;
+                }
+            }
+
+            // Step 8: Build reasoning
+            string reasoning = BuildReasoning(options, scores, bestIndex, context);
+
+            var decision = new PlayerDecision(bestIndex, reasoning, scores);
+            return Task.FromResult(decision);
+        }
+
+        private static string BuildReasoning(
+            DialogueOption[] options,
+            OptionScore[] scores,
+            int bestIndex,
+            PlayerAgentContext context)
+        {
+            DialogueOption chosen = options[bestIndex];
+            OptionScore chosenScore = scores[bestIndex];
+
+            string statName = StatLabel(chosen.Stat);
+            string pct = $"{chosenScore.SuccessChance * 100:F0}%";
+
+            // Find runner-up
+            int runnerIndex = -1;
+            float runnerScore = float.MinValue;
+            for (int i = 0; i < scores.Length; i++)
+            {
+                if (i != bestIndex && scores[i].Score > runnerScore)
+                {
+                    runnerScore = scores[i].Score;
+                    runnerIndex = i;
+                }
+            }
+
+            string comparison = "";
+            if (runnerIndex >= 0)
+            {
+                string runnerName = StatLabel(options[runnerIndex].Stat);
+                string runnerPct = $"{scores[runnerIndex].SuccessChance * 100:F0}%";
+                comparison = $" beats {runnerName} at {runnerPct}";
+            }
+
+            string result = $"{statName} at {pct}{comparison} — EV {chosenScore.ExpectedInterestGain:F2}.";
+
+            // Add strategic notes
+            if (context.MomentumStreak == 2)
+                result += " Momentum at 2 — prioritizing success to reach +2 bonus.";
+            if (context.CurrentInterest >= 19 && context.CurrentInterest <= 24)
+                result += " Near win — preferring safe options.";
+            if (context.InterestState == InterestState.Bored)
+                result += " Bored state — favouring bold plays.";
+
+            return result;
+        }
+
+        private static string StatLabel(StatType s)
+        {
+            switch (s)
+            {
+                case StatType.Charm: return "Charm";
+                case StatType.Rizz: return "Rizz";
+                case StatType.Honesty: return "Honesty";
+                case StatType.Chaos: return "Chaos";
+                case StatType.Wit: return "Wit";
+                case StatType.SelfAwareness: return "SA";
+                default: return s.ToString();
+            }
+        }
+
+        private static RiskTierInfo ComputeRiskTier(int need)
+        {
+            if (need <= 5) return new RiskTierInfo(RiskTierCategory.Safe, 0);
+            if (need <= 10) return new RiskTierInfo(RiskTierCategory.Medium, 0);
+            if (need <= 15) return new RiskTierInfo(RiskTierCategory.Hard, 1);
+            return new RiskTierInfo(RiskTierCategory.Bold, 2);
+        }
+
+        private enum RiskTierCategory
+        {
+            Safe,
+            Medium,
+            Hard,
+            Bold
+        }
+
+        private sealed class RiskTierInfo
+        {
+            public RiskTierCategory Tier { get; }
+            public int Bonus { get; }
+
+            public RiskTierInfo(RiskTierCategory tier, int bonus)
+            {
+                Tier = tier;
+                Bonus = bonus;
+            }
+        }
+    }
+}
