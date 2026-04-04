@@ -14,6 +14,7 @@ using Pinder.Core.Stats;
 using Pinder.Core.Traps;
 using Pinder.Core.Data;
 using Pinder.LlmAdapters.Anthropic;
+using Pinder.SessionRunner;
 
 class NullTrapRegistry : ITrapRegistry
 {
@@ -79,15 +80,7 @@ class Program
         return md.Substring(start, end - start).Trim();
     }
 
-    static int BestOption(DialogueOption[] options, StatBlock stats)
-    {
-        int best = 0, bestMod = int.MinValue;
-        for (int i = 0; i < options.Length; i++) {
-            int mod = stats.GetEffective(options[i].Stat);
-            if (mod > bestMod) { bestMod = mod; best = i; }
-        }
-        return best;
-    }
+    // BestOption removed — replaced by IPlayerAgent (see HighestModAgent)
 
     // ── main ─────────────────────────────────────────────────────────────────
 
@@ -180,6 +173,9 @@ class Program
 
         var session = new GameSession(sable, brick, llm, new SystemRandomDiceRoller(), trapRegistry);
 
+        // Player agent for decision-making (replaces BestOption)
+        IPlayerAgent agent = new HighestModAgent();
+
         int interest = 10;
         int momentum = 0;
         Console.WriteLine("## Session State");
@@ -269,7 +265,18 @@ class Program
             Console.WriteLine();
 
             // ── pick + roll ───────────────────────────────────────────────
-            int pick = BestOption(turnStart.Options, sableStats);
+            var agentContext = new PlayerAgentContext(
+                playerStats: sableStats,
+                opponentStats: brickStats,
+                currentInterest: snap.Interest,
+                interestState: snap.State,
+                momentumStreak: snap.MomentumStreak,
+                activeTrapNames: snap.ActiveTrapNames,
+                sessionHorniness: 0,
+                shadowValues: null,
+                turnNumber: snap.TurnNumber);
+            var decision = await agent.DecideAsync(turnStart, agentContext);
+            int pick = decision.OptionIndex;
             var chosen = turnStart.Options[pick];
             Console.WriteLine($"**► Player picks: {letters[pick]} ({StatLabel(chosen.Stat)})**");
             Console.WriteLine();
