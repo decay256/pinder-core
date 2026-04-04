@@ -318,6 +318,71 @@ namespace Pinder.Core.Tests
             Assert.True(shadows.GetDelta(ShadowStatType.Fixation) >= 1);
         }
 
+        // Mutation: would catch if highest-% still used optionIndex==0 instead of actual probability
+        [Fact]
+        public async Task AC1_HighestPctAtIndex1_PickedThrice_GrowsFixation()
+        {
+            var shadows = MakeTracker();
+            var diceValues = new List<int>();
+            for (int i = 0; i < 3; i++) { diceValues.Add(15); diceValues.Add(50); }
+            // Opponent has Chaos=0 → Honesty defence DC is low (13+0=13)
+            // Player Honesty=5 → margin = 5-13 = -8 (best available)
+            // Put Honesty at index 1 each turn, lower-prob stat at index 0
+            // Charm vs SA defence: 3 - (13+2) = -12 (worse)
+            // Wit vs Rizz defence: 4 - (13+2) = -11 (worse)
+            // Chaos vs Charm defence: 0 - (13+3) = -16 (much worse)
+            var opts1 = new[] { new DialogueOption(StatType.Charm, "a"), new DialogueOption(StatType.Honesty, "b") };
+            var opts2 = new[] { new DialogueOption(StatType.Wit, "c"), new DialogueOption(StatType.Honesty, "d") };
+            var opts3 = new[] { new DialogueOption(StatType.Chaos, "e"), new DialogueOption(StatType.Honesty, "f") };
+            var rotatingLlm = new RotatingLlmAdapter(new[] { opts1, opts2, opts3 });
+            var session = BuildSessionWithLlm(
+                dice: new TestDice(diceValues.ToArray()),
+                llm: rotatingLlm,
+                playerStats: Stats(charm: 3, honesty: 5, wit: 4, chaos: 0),
+                shadows: shadows);
+
+            for (int i = 0; i < 3; i++)
+            {
+                await session.StartTurnAsync();
+                await session.ResolveTurnAsync(1); // Always index 1 (Honesty) → highest-%
+            }
+
+            // Same stat 3 turns AND highest-% 3 turns → Fixation should grow
+            Assert.True(shadows.GetDelta(ShadowStatType.Fixation) >= 1);
+        }
+
+        // Mutation: would catch if picking the lower-prob option still triggered highest-% Fixation
+        [Fact]
+        public async Task AC1_PickLowerProbOption3Turns_NoHighestPctFixation()
+        {
+            var shadows = MakeTracker();
+            var diceValues = new List<int>();
+            for (int i = 0; i < 3; i++) { diceValues.Add(15); diceValues.Add(50); }
+            // Player: Honesty=5 is highest, Chaos=0 is lowest
+            // Honesty margin = 5 - (13+0) = -8 (best)
+            // Chaos margin = 0 - (13+3) = -16 (worst)
+            // Each turn: [Honesty, Chaos] — always pick index 1 (Chaos = NOT highest-%)
+            var opts1 = new[] { new DialogueOption(StatType.Honesty, "a"), new DialogueOption(StatType.Chaos, "b") };
+            var opts2 = new[] { new DialogueOption(StatType.Honesty, "c"), new DialogueOption(StatType.Chaos, "d") };
+            var opts3 = new[] { new DialogueOption(StatType.Honesty, "e"), new DialogueOption(StatType.Chaos, "f") };
+            var rotatingLlm = new RotatingLlmAdapter(new[] { opts1, opts2, opts3 });
+            var session = BuildSessionWithLlm(
+                dice: new TestDice(diceValues.ToArray()),
+                llm: rotatingLlm,
+                playerStats: Stats(charm: 3, honesty: 5, wit: 4, chaos: 0),
+                shadows: shadows);
+
+            for (int i = 0; i < 3; i++)
+            {
+                await session.StartTurnAsync();
+                await session.ResolveTurnAsync(1); // Always index 1 (Chaos) → NOT highest-%
+            }
+
+            // Same stat (Chaos) 3 turns → Fixation +1 from same-stat trigger
+            // But NOT highest-% trigger — so exactly +1, not +2
+            Assert.Equal(1, shadows.GetDelta(ShadowStatType.Fixation));
+        }
+
         // Mutation: would catch if never-Chaos check used wrong stat
         [Fact]
         public async Task AC1_NeverPickedChaos_EndOfGame_GrowsFixation()
