@@ -7,8 +7,7 @@ using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
 using Pinder.Core.Conversation;
 using Pinder.Core.Progression;
-using Pinder.Core.Interfaces;
-using Pinder.Core.Traps;
+
 
 namespace Pinder.Core.Tests.RulesSpec
 {
@@ -209,6 +208,14 @@ namespace Pinder.Core.Tests.RulesSpec
         public void Rule_S5_RiskBonus_Safe_Zero()
         {
             var result = MakeRiskResult(4, true);
+            Assert.Equal(0, RiskTierBonus.GetInterestBonus(result));
+        }
+
+        // Mutation: would catch if Medium returned non-zero bonus
+        [Fact]
+        public void Rule_S5_RiskBonus_Medium_Zero()
+        {
+            var result = MakeRiskResult(8, true);
             Assert.Equal(0, RiskTierBonus.GetInterestBonus(result));
         }
 
