@@ -106,6 +106,55 @@ class Program
         return Environment.GetEnvironmentVariable("PLAYER_AGENT") ?? "scoring";
     }
 
+    static string? ParseArg(string[] args, string flag)
+    {
+        for (int i = 0; i < args.Length - 1; i++)
+        {
+            if (args[i] == flag)
+                return args[i + 1];
+        }
+        return null;
+    }
+
+    static string ResolvePromptDirectory(string baseDir)
+    {
+        // 1. Environment variable override
+        string? envPath = Environment.GetEnvironmentVariable("PINDER_PROMPTS_PATH");
+        if (!string.IsNullOrEmpty(envPath) && Directory.Exists(envPath))
+            return Path.GetFullPath(envPath!);
+
+        // 2. Walk up from baseDir looking for design/examples/
+        string? dir = baseDir;
+        while (dir != null)
+        {
+            string candidate = Path.Combine(dir, "design", "examples");
+            if (Directory.Exists(candidate))
+                return Path.GetFullPath(candidate);
+            dir = Directory.GetParent(dir)?.FullName;
+        }
+
+        // 3. Hardcoded fallback
+        const string fallback = "/root/.openclaw/agents-extra/pinder/design/examples";
+        if (Directory.Exists(fallback))
+            return fallback;
+
+        return Path.Combine(baseDir, "design", "examples");
+    }
+
+    static void PrintUsage(string promptDir)
+    {
+        Console.Error.WriteLine("Usage: dotnet run --project session-runner -- --player <name> --opponent <name> [--max-turns <n>] [--agent <scoring|llm>]");
+        Console.Error.WriteLine();
+        Console.Error.WriteLine("Options:");
+        Console.Error.WriteLine("  --player <name>      Player character name (required)");
+        Console.Error.WriteLine("  --opponent <name>     Opponent character name (required)");
+        Console.Error.WriteLine("  --max-turns <n>       Maximum turns (default: 20)");
+        Console.Error.WriteLine("  --agent <type>        Player agent: scoring or llm (default: scoring)");
+        Console.Error.WriteLine();
+        string available = CharacterLoader.ListAvailable(promptDir);
+        Console.Error.WriteLine($"Available characters: {available}");
+    }
+
     static async Task<int> Main(string[] args)
     {
         var apiKey = Environment.GetEnvironmentVariable("ANTHROPIC_API_KEY");
@@ -114,44 +163,42 @@ class Program
         int maxTurns = ParseMaxTurns(args);
         string agentType = ParseAgentArg(args);
 
+        string promptDir = ResolvePromptDirectory(AppContext.BaseDirectory);
+
+        // Parse character name args
+        string? playerArg = ParseArg(args, "--player");
+        string? opponentArg = ParseArg(args, "--opponent");
+
+        if (playerArg == null || opponentArg == null)
+        {
+            PrintUsage(promptDir);
+            return 1;
+        }
+
+        // Load characters from prompt files
+        CharacterProfile sable, brick;
+        try
+        {
+            sable = CharacterLoader.Load(playerArg, promptDir);
+            brick = CharacterLoader.Load(opponentArg, promptDir);
+        }
+        catch (FileNotFoundException ex)
+        {
+            Console.Error.WriteLine(ex.Message);
+            return 1;
+        }
+
         var buffer = new StringBuilder();
         var tee = new TeeWriter(Console.Out, buffer);
         Console.SetOut(tee);
 
-        // ── character definitions ──────────────────────────────────────────
-        string player1 = "Sable", player2 = "Brick";
-        int p1Level = 3, p2Level = 9;
-        int p1LevelBonus = 1, p2LevelBonus = 4;
-
-        var sableStats = new StatBlock(
-            new Dictionary<StatType, int> {
-                { StatType.Charm, 7 }, { StatType.Rizz, 7 }, { StatType.Honesty, 8 },
-                { StatType.Chaos, 4 }, { StatType.Wit, 1 }, { StatType.SelfAwareness, 4 }
-            },
-            new Dictionary<ShadowStatType, int> {
-                { ShadowStatType.Madness, 0 }, { ShadowStatType.Horniness, 0 },
-                { ShadowStatType.Denial, 3 }, { ShadowStatType.Fixation, 2 },
-                { ShadowStatType.Dread, 0 }, { ShadowStatType.Overthinking, 0 }
-            });
-
-        var brickStats = new StatBlock(
-            new Dictionary<StatType, int> {
-                { StatType.Charm, 16 }, { StatType.Rizz, 14 }, { StatType.Honesty, 11 },
-                { StatType.Chaos, 10 }, { StatType.Wit, 15 }, { StatType.SelfAwareness, 8 }
-            },
-            new Dictionary<ShadowStatType, int> {
-                { ShadowStatType.Madness, 8 }, { ShadowStatType.Horniness, 0 },
-                { ShadowStatType.Denial, 4 }, { ShadowStatType.Fixation, 3 },
-                { ShadowStatType.Dread, 5 }, { ShadowStatType.Overthinking, 6 }
-            });
-
-        string basePath = "/root/.openclaw/agents-extra/pinder/design/examples";
-        string sablePrompt = ExtractSystemPrompt(File.ReadAllText($"{basePath}/sable-prompt.md"));
-        string brickPrompt = ExtractSystemPrompt(File.ReadAllText($"{basePath}/brick-prompt.md"));
-
-        var timing = new TimingProfile(0, 1.0f, 0.0f, "neutral");
-        var sable = new CharacterProfile(sableStats, sablePrompt, player1, timing, level: p1Level);
-        var brick  = new CharacterProfile(brickStats, brickPrompt, player2, timing, level: p2Level);
+        // ── character definitions (loaded from prompt files) ───────────────
+        string player1 = sable.DisplayName, player2 = brick.DisplayName;
+        int p1Level = sable.Level, p2Level = brick.Level;
+        int p1LevelBonus = Pinder.Core.Progression.LevelTable.GetBonus(p1Level);
+        int p2LevelBonus = Pinder.Core.Progression.LevelTable.GetBonus(p2Level);
+        var sableStats = sable.Stats;
+        var brickStats = brick.Stats;
 
         // ── header ────────────────────────────────────────────────────────
         Console.WriteLine($"# Playtest Session 006 — {player1} × {player2}");
