@@ -52,6 +52,8 @@ The Rules DSL is a toolchain for extracting structured YAML rules from Pinder de
 
 - **`rules/tools/test_issue444_enrichment.py`** — 35 tests covering all acceptance criteria for issue #444: file existence, enrichment counts, vocabulary compliance, numeric accuracy, type correctness, and summary report validation.
 
+- **`rules/tools/test_issue444_spec_compliance.py`** — Spec compliance tests supplementing `test_issue444_enrichment.py`. Covers `stat_modifiers` dict type validation, `accuracy_check.py` execution (AC4), per-file enrichment minimum thresholds, table-row splitting ID conventions (`§N.parent-slug.qualifier`), known rule enrichment cross-checks (momentum, combos, tells, energy costs, horniness/time-of-day), snake_case key convention enforcement, range value ordering, empty condition/outcome dict detection, and total enriched entry count minimums.
+
 - **`rules/tools/test_roundtrip.py`** — Additional round-trip tests.
 
 - **`rules/tools/roundtrip_test.sh`** — Shell-based round-trip test script.
@@ -148,3 +150,4 @@ Note: Entry counts differ from the original un-enriched files because table rows
 | 2026-04-04 | #443 | Initial creation — fixed round-trip diffs for paragraph reordering and table formatting; added `test_issue443_roundtrip.py` with tests for paragraph order preservation (AC1), table column width preservation (AC2), full doc round-trip < 50 lines (AC3/AC4), and no information loss (AC5). |
 | 2026-04-04 | #444 | Enriched all 9 YAML files with `condition`/`outcome` fields — added `enrich.py` (per-file enrichers), `accuracy_check.py` (validation), 8 new `*-enriched.yaml` files, enrichment summary (532 entries, 351 enriched), `test_enrichment.py` and `test_issue444_enrichment.py` (35 tests). |
 | 2026-04-04 | #443 | Added `test_issue443_spec.py` — spec-driven edge case and error condition tests (empty docs, table edge cases, code blocks with pipes, blockquotes, HR vs separator, compact headings, legacy YAML fallback, mixed block ordering, per-doc diff thresholds). |
+| 2026-04-04 | #444 | Added `test_issue444_spec_compliance.py` — spec compliance tests for enrichment: `stat_modifiers` type validation, `accuracy_check.py` execution, per-file enrichment minimums, ID convention checks, known rule cross-checks, snake_case enforcement, range ordering, empty dict detection, total count validation. |
