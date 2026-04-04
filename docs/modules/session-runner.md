@@ -5,10 +5,12 @@ The session runner orchestrates simulated playtest sessions between two `Charact
 
 ## Key Components
 
-- **`session-runner/Program.cs`** — Entry point. Builds character profiles, configures `GameSession` with `GameSessionConfig`, runs the turn loop, and prints per-turn status and session summary markdown.
+- **`session-runner/Program.cs`** — Entry point. Builds character profiles, configures `GameSession` with `GameSessionConfig`, runs the turn loop, and prints per-turn status and session summary markdown. Calls `PlaytestFormatter` to render pick reasoning and score tables.
+- **`session-runner/PlaytestFormatter.cs`** — Static utility class for formatting player agent reasoning blocks and option score tables as markdown. Contains `FormatReasoningBlock` and `FormatScoreTable`.
 - **`session-runner/LlmPlayerAgent.cs`** — LLM-backed player agent. Sends game state and rules to Anthropic Claude, parses `PICK:` response, falls back to `ScoringPlayerAgent` on failure. Implements `IDisposable`.
 - **`tests/Pinder.Core.Tests/LlmPlayerAgentTests.cs`** — Tests for `LlmPlayerAgent`: adjusted probability display (tell/momentum/callback bonuses), no-bonus raw percentage, dispose idempotency.
 - **`tests/Pinder.Core.Tests/Issue350_ShadowTrackingSpecTests.cs`** — Spec tests verifying shadow tracking wiring: `SessionShadowTracker` wraps `StatBlock`, `GameSessionConfig` passes player shadows into `GameSession`, delta accumulation, edge cases (negative deltas, multiple events per turn, game-end readability).
+- **`tests/Pinder.Core.Tests/Issue351_PickReasoningTests.cs`** — Tests for `PlaytestFormatter`: reasoning block formatting, score table columns/checkmarks/bold/bonuses, edge cases (null decision, NaN values, empty reasoning, score mismatch, fewer options).
 
 ## API / Public Interface
 
@@ -45,6 +47,24 @@ After the session outcome line, a markdown table is printed:
 - **End**: `shadowTracker.GetEffectiveShadow(type)` (base + session delta)
 - **Delta**: `shadowTracker.GetDelta(type)` — `+N` for positive, `-N` for negative, `0` for zero
 - All six `ShadowStatType` values are always listed.
+
+### PlaytestFormatter (static class)
+
+Formats player agent decision output for playtest markdown.
+
+```csharp
+/// Formats reasoning as a markdown blockquote. Returns "" if decision is null.
+/// Empty/null reasoning renders as "> (no reasoning provided)".
+public static string FormatReasoningBlock(PlayerDecision? decision, string agentTypeName);
+
+/// Formats option scores as a markdown table with columns: Option, Stat, Pct, Expected ΔI, Score.
+/// Chosen option row is marked with ✓ and bold score. Returns "" if decision is null.
+/// If Scores is null, skips table and writes warning to stderr.
+/// NaN/negative SuccessChance → 0%. NaN/negative Score → 0.0.
+/// Missing score entries for an option render as "—".
+/// BonusesApplied are concatenated without spaces (e.g. "📖🔗").
+public static string FormatScoreTable(PlayerDecision? decision, DialogueOption[] options);
+```
 
 ### Key Consumed Types
 | Type | Namespace | Role |
@@ -94,3 +114,4 @@ LLM-backed agent that sends full game state and rules context to Anthropic Claud
 |------|-------|---------|
 | 2026-04-04 | #348 | Added `LlmPlayerAgent` with Anthropic integration, adjusted probability display in prompt (base vs adjusted % when hidden bonuses apply), `IDisposable` disposal in Program.cs, player agent docs. Added tests for adjusted probability display, callback bonus display, and dispose idempotency. |
 | 2026-04-04 | #350 | Initial creation — wired `SessionShadowTracker` into `GameSession` via `GameSessionConfig`, added per-turn shadow growth event output and session-end shadow delta summary table. Added spec tests in `Issue350_ShadowTrackingSpecTests.cs`. |
+| 2026-04-04 | #351 | Added `PlaytestFormatter` static class with `FormatReasoningBlock` and `FormatScoreTable` methods. After each pick, playtest output now shows the agent's reasoning as a blockquote and a score table with all options' metrics. Defensive handling for null decisions, NaN values, missing scores. Tests in `Issue351_PickReasoningTests.cs`. |
