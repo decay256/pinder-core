@@ -44,7 +44,10 @@ MEDIUM: This is a texting app. Options are messages the character could send.
 Rules:
 - STAT must be one of: CHARM, RIZZ, HONESTY, CHAOS, WIT, SELF_AWARENESS
 - Text must be in double quotes on the line immediately after the metadata
-- No extra text before OPTION_1 or after the last option";
+- No extra text before OPTION_1 or after the last option
+
+Before writing each option, verify: does this sound exactly like
+the texting style above? If not, rewrite it.";
 
         /// <summary>§3.3 — Deliver the intended message on a successful roll.</summary>
         public const string SuccessDeliveryInstruction =

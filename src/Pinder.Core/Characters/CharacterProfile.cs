@@ -28,13 +28,20 @@ namespace Pinder.Core.Characters
         /// <summary>The character's one-liner bio shown on their profile.</summary>
         public string Bio { get; }
 
+        /// <summary>
+        /// The texting style fragment(s) joined, for injection into
+        /// option-generation prompts. Empty string if not available.
+        /// </summary>
+        public string TextingStyleFragment { get; }
+
         public CharacterProfile(
             StatBlock stats,
             string assembledSystemPrompt,
             string displayName,
             TimingProfile timing,
             int level,
-            string bio = "")
+            string bio = "",
+            string textingStyleFragment = "")
         {
             Stats = stats ?? throw new ArgumentNullException(nameof(stats));
             AssembledSystemPrompt = assembledSystemPrompt ?? throw new ArgumentNullException(nameof(assembledSystemPrompt));
@@ -42,6 +49,7 @@ namespace Pinder.Core.Characters
             Timing = timing ?? throw new ArgumentNullException(nameof(timing));
             Level = level;
             Bio = bio ?? string.Empty;
+            TextingStyleFragment = textingStyleFragment ?? string.Empty;
         }
     }
 }
