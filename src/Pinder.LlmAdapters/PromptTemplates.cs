@@ -169,7 +169,15 @@ Output only the message or gesture text.";
 @"Generate a brief cooling signal — one sentence or a small gesture — showing {opponent_name} pulling back slightly. Not dramatic. Just a temperature change.";
 
         internal const string InterestBeatDateSecured =
-@"Generate a brief moment where {opponent_name} suggests or implies meeting up. In character. Not ""do you want to go on a date?"" — something specific to them.";
+@"Generate a brief moment where {opponent_name} suggests or implies meeting up.
+In character. Not ''do you want to go on a date?'' — something specific to them.
+
+Rules:
+- Reference something concrete from the conversation above (a specific detail, running joke, or shared reference)
+- Use the location or activity that makes sense for this character's personality
+- Keep it to 1-2 sentences — a suggestion, not a monologue
+- This is a text message on a dating app — no stage directions, no internal thoughts
+- The suggestion should feel earned by the conversation, not generic";
 
         internal const string InterestBeatUnmatched =
 @"Generate {opponent_name} unmatching — one final message or simply going silent. In character. No villain speech. Just a door closing.";
