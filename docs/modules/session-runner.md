@@ -5,7 +5,9 @@ The session runner orchestrates simulated playtest sessions between two `Charact
 
 ## Key Components
 
-- **`session-runner/Program.cs`** — Entry point. Builds character profiles, configures `GameSession` with `GameSessionConfig`, runs the turn loop, and prints per-turn status and session summary markdown. Calls `PlaytestFormatter` to render pick reasoning and score tables. Uses `SessionFileCounter.ResolvePlaytestDirectory()` to locate the playtest output directory.
+- **`session-runner/Program.cs`** — Entry point. Parses CLI arguments (`--player`, `--opponent`, `--max-turns`, `--agent`), loads character profiles via `CharacterLoader`, configures `GameSession` with `GameSessionConfig`, runs the turn loop, and prints per-turn status and session summary markdown. Calls `PlaytestFormatter` to render pick reasoning and score tables. Uses `SessionFileCounter.ResolvePlaytestDirectory()` to locate the playtest output directory.
+- **`session-runner/CharacterLoader.cs`** — Static utility that loads `CharacterProfile` instances from pre-assembled prompt markdown files (`{name}-prompt.md`). Parses display name, level, primary stats (EFFECTIVE STATS section), shadow stats, and assembled system prompt from code-fenced content. Also provides `ListAvailable()` to discover characters in a directory.
+- **`tests/Pinder.Core.Tests/CharacterLoaderSpecTests.cs`** — Comprehensive tests for `CharacterLoader`: prompt file parsing (stats, shadows, level, display name, system prompt extraction), error cases (missing file, missing stats, missing EFFECTIVE STATS section), edge cases (mixed case input, shadow lines with/without tilde prefix, parenthetical notes, multiple code fences, level from outside code fence), and conditional integration tests against real prompt files.
 - **`session-runner/PlaytestFormatter.cs`** — Static utility class for formatting player agent reasoning blocks and option score tables as markdown. Contains `FormatReasoningBlock` and `FormatScoreTable`.
 - **`session-runner/LlmPlayerAgent.cs`** — LLM-backed player agent. Sends game state and rules to Anthropic Claude, parses `PICK:` response, falls back to `ScoringPlayerAgent` on failure. Implements `IDisposable`.
 - **`tests/Pinder.Core.Tests/LlmPlayerAgentTests.cs`** — Tests for `LlmPlayerAgent`: adjusted probability display (tell/momentum/callback bonuses), no-bonus raw percentage, dispose idempotency.
@@ -21,7 +23,54 @@ The session runner orchestrates simulated playtest sessions between two `Charact
 
 ## API / Public Interface
 
-The session runner is a console application (`Program.cs`), not a library. It consumes the following public APIs:
+The session runner is a console application (`Program.cs`), not a library.
+
+### CLI Interface
+
+```
+Usage: dotnet run --project session-runner -- --player <name> --opponent <name> [--max-turns <n>] [--agent <scoring|llm>]
+
+  --player <name>      Player character name (required, case-insensitive)
+  --opponent <name>     Opponent character name (required, case-insensitive)
+  --max-turns <n>       Maximum turns (default: 20)
+  --agent <type>        Player agent: scoring or llm (default: scoring)
+```
+
+Character names resolve to `{basePath}/{name.ToLower()}-prompt.md` files in the examples directory. Running with no args or invalid args prints usage and dynamically-discovered available character names, then exits with code 1.
+
+The `--agent` argument replaces the previous `PLAYER_AGENT` environment variable for agent selection.
+
+### CharacterLoader (static class)
+
+Loads and parses pre-assembled prompt markdown files into `CharacterProfile` instances.
+
+```csharp
+public static class CharacterLoader
+{
+    /// Load a CharacterProfile by name from a prompt directory.
+    /// Resolves to {promptDirectory}/{name.ToLowerInvariant()}-prompt.md.
+    /// Throws FileNotFoundException (with path + available characters) if file missing.
+    /// Throws FormatException if file lacks EFFECTIVE STATS or required stats.
+    public static CharacterProfile Load(string name, string promptDirectory);
+
+    /// Parse prompt file content into a CharacterProfile.
+    /// fallbackName used as display name if no name= or role line found.
+    public static CharacterProfile Parse(string content, string fallbackName);
+
+    /// List available character names from *-prompt.md files in directory.
+    /// Returns sorted comma-separated names, or "(none)" if empty.
+    /// Does not throw on nonexistent directory.
+    public static string ListAvailable(string promptDirectory);
+}
+```
+
+**Parsing logic:**
+- **DisplayName**: extracted from `name=<X>` in Inputs line, or `You are playing the role of <X>` in code fence, or capitalized fallback name.
+- **Level**: from `- Level: N` inside code fence first; falls back to `**Level N —` pattern outside.
+- **Stats**: 6 required stats from `EFFECTIVE STATS` section inside code fence (`Charm`, `Rizz`, `Honesty`, `Chaos`, `Wit`, `Self-Awareness`). Missing stats throw `FormatException`.
+- **Shadows**: from `Shadow state` section outside code fence. `~` prefix stripped. Missing section defaults all to 0. Parenthetical notes after values are ignored.
+- **SystemPrompt**: full text between first and last code fences.
+- **Timing**: default `TimingProfile(0, 1.0f, 0.0f, "neutral")` for all prompt-loaded characters.
 
 ### Session Setup
 ```csharp
@@ -188,6 +237,8 @@ When all new fields are at defaults (`null`, `null`, `false`), scoring behavior 
 - **Retained reference pattern**: the session runner keeps a reference to the `SessionShadowTracker` it passes into `GameSessionConfig`. After the game loop exits (normally or via `GameEndedException`), it reads delta/effective values from that same reference for the summary table.
 - **`OpponentShadows` is optional**: the config only wires `playerShadows`; opponent shadow tracking is not used by the session runner currently.
 - **Shadow growth triggers** (e.g., Nat 1 → Madness, 3 consecutive same-stat picks → Fixation) are handled inside `GameSession`; the session runner only reads and displays results.
+- **Character loading**: All character data (stats, shadows, level, system prompt) is loaded from prompt markdown files via `CharacterLoader` rather than being hardcoded in `Program.cs`. The examples directory path is resolved similarly to the existing playtest directory pattern. Character names are case-insensitive and map to `{name.ToLower()}-prompt.md` files.
+- **CLI-driven configuration**: The session runner uses positional CLI arguments instead of environment variables for character selection and agent type. The `--max-turns` default is 20 (previously hardcoded as 15).
 - **Playtest directory resolution** uses a 3-tier strategy: (1) `PINDER_PLAYTESTS_PATH` env var override, (2) walk up from `AppContext.BaseDirectory` looking for `design/playtests/`, (3) hardcoded fallback. This replaced a previously hardcoded absolute path in `Program.cs` that caused `GetNextSessionNumber` to scan the wrong directory when the working directory didn't match expectations.
 
 ## Player Agents
@@ -225,7 +276,7 @@ LLM-backed agent that sends full game state and rules context to Anthropic Claud
 
 **Prompt includes:** game state (interest, momentum, traps, shadows, turn), all options with stat/DC/need/%/risk tier/bonus icons, adjusted probabilities including hidden bonuses (momentum, tell, callback), and a rules reminder.
 
-**Agent selection:** controlled via `PLAYER_AGENT` env var (`scoring` or `llm`, default `scoring`). LLM model configurable via `PLAYER_AGENT_MODEL` env var.
+**Agent selection:** controlled via `--agent` CLI argument (`scoring` or `llm`, default `scoring`). The `PLAYER_AGENT` env var is no longer used. LLM model configurable via `PLAYER_AGENT_MODEL` env var.
 
 ### Supporting Types
 - **`PlayerDecision`** — result type: `OptionIndex`, `Reasoning` (string), `Scores` (OptionScore[])
@@ -241,4 +292,5 @@ LLM-backed agent that sends full game state and rules context to Anthropic Claud
 | 2026-04-04 | #386 | Added engine-constant sync tests to `ScoringPlayerAgentTests.cs`: callback bonus (opener +3, mid-distance +1) via `CallbackBonus.Compute()`, momentum threshold verification at all streak values (§15), and tell bonus exactness (+2 → 0.1 success chance delta). Guards against silent drift between agent scoring and engine rules. |
 | 2026-04-04 | #418 | Fixed `SessionFileCounter` to correctly find existing session files. Added `ResolvePlaytestDirectory(string baseDir)` with 3-tier resolution (env var → walk-up → fallback). `Program.WritePlaytestLog` now uses `ResolvePlaytestDirectory(AppContext.BaseDirectory)` instead of a hardcoded path. Added `SessionFileCounterSpecTests.cs` (25 tests) and extended `SessionFileCounterTests.cs` with AC coverage, edge cases, and resolution tests. |
 | 2026-04-04 | #417 | Added `OutcomeProjector` static class for projecting game outcome on turn-cap cutoff. Uses `InterestState`-based dispatch (diverges from spec's pure numeric thresholds but covers same ranges). Session summary shows ⏸️ Incomplete header with projected outcome when no natural game-over reached. Rewrote `OutcomeProjectorTests.cs` with comprehensive coverage: all five decision tiers, boundary values, momentum display, degenerate cases, pure function guarantees. |
+| 2026-04-04 | #414 | Added `CharacterLoader` to load characters from prompt files. Replaced all hardcoded stat blocks in `Program.cs` with `CharacterLoader.Load()` calls. Added CLI argument parsing (`--player`, `--opponent`, `--max-turns` default 20, `--agent` replacing `PLAYER_AGENT` env var). Usage/error messages printed to stderr with exit code 1. Added `CharacterLoaderSpecTests.cs` with comprehensive parsing, error, and edge-case coverage. |
 | 2026-04-04 | #416 | Added shadow growth risk scoring to `ScoringPlayerAgent`: fixation growth penalty (−0.5 for 3x same stat), denial growth penalty (−0.3 for skipping Honesty), fixation threshold EV reduction (T1: 0.8× gain, T2+: success chance squared for Chaos), stat variety bonus (+0.1 for unused stats). Added `LastStatUsed`, `SecondLastStatUsed`, `HonestyAvailableLastTurn` optional fields to `PlayerAgentContext` (backward-compatible). Note: spec's `HonestyAvailableLastTurn` field exists but denial penalty is evaluated on current-turn options, not previous turn. 922-line test file `ScoringPlayerAgentShadowRiskTests.cs` covers all ACs and edge cases. |
