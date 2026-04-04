@@ -587,3 +587,90 @@ Caching strategy: character system prompts (~6k tokens) are placed in `cache_con
 | File counter glob mismatch | — | Fixed this sprint (#354 + #359) |
 | No automated player agent | — | Added this sprint (#346, #347, #348) |
 | ScoringPlayerAgent bonus constant sync | #386 | Mitigated via CallbackBonus.Compute() + SYNC comments |
+
+
+---
+
+## Sprint (Sim Runner + Scorer Improvements) — Architecture Briefing
+
+### What's changing
+
+**This sprint continues the existing architecture with no structural changes to Pinder.Core or Pinder.LlmAdapters.** All changes are confined to `session-runner/` (the .NET 8 console app), plus copying data files from the external `pinder` repo into `pinder-core` so the CharacterAssembler pipeline can run standalone.
+
+**Existing architecture summary**: Pinder.Core is a zero-dependency .NET Standard 2.0 RPG engine. `GameSession` orchestrates single-conversation turns. `Pinder.LlmAdapters` implements `ILlmAdapter` via `AnthropicLlmAdapter`. The session runner (`session-runner/`) is a .NET 8 console app that drives `GameSession` + `AnthropicLlmAdapter` for automated playtesting. Player agent types (`IPlayerAgent`, `ScoringPlayerAgent`, `LlmPlayerAgent`) live in `session-runner/`.
+
+### New components (session-runner/ only)
+
+1. **`CharacterLoader`** — Parses pre-assembled prompt files (`design/examples/{name}-prompt.md`), extracts stat block, shadow values, level, system prompt. Returns `CharacterProfile` for GameSession.
+
+2. **`CharacterDefinitionLoader`** — Loads character definition JSON, runs the full `CharacterAssembler` + `PromptBuilder` pipeline, returns `CharacterProfile`. Bridges the `FragmentCollection` → `CharacterProfile` gap (#419).
+
+3. **`DataFileLocator`** — Resolves data file paths by walking up from base directory. Follows the same pattern as `TrapRegistryLoader`.
+
+4. **`OutcomeProjector`** — Pure function: given interest, momentum, and turn count at cutoff, returns projected outcome text.
+
+### Extended components
+
+5. **`SessionFileCounter`** — Bug fix for path resolution (#418).
+
+6. **`ScoringPlayerAgent`** — Shadow growth risk scoring: Fixation growth penalty, Denial skip penalty, Fixation threshold EV reduction, stat variety bonus (#416).
+
+7. **`PlayerAgentContext`** — Gains `LastStatUsed`, `SecondLastStatUsed`, `HonestyAvailableLastTurn` fields (#416).
+
+8. **`Program.cs`** — CLI arg parsing (`--player`, `--opponent`, `--player-def`, `--opponent-def`, `--max-turns`, `--agent`), projected outcome reporting, CharacterAssembler pipeline wiring (#414, #415, #417).
+
+### Data files added
+
+- `data/items/starter-items.json` — copied from external repo (#415, #421)
+- `data/anatomy/anatomy-parameters.json` — copied from external repo (#415, #421)
+- `data/characters/{gerald,velvet,sable,brick,zyx}.json` — character definitions (#415)
+
+### What is NOT changing
+- All Pinder.Core game logic (Stats, Rolls, Traps, Progression, Characters, Prompts, Data)
+- Pinder.LlmAdapters
+- GameSession public API
+- NullLlmAdapter
+- Existing test behavior
+
+### Key Architectural Decisions
+
+#### ADR: Copy data files into pinder-core repo
+**Context:** #415 requires item/anatomy JSON for CharacterAssembler. Files only exist in external repo (#421).
+**Decision:** Copy into `data/items/` and `data/anatomy/`. Matches existing `data/traps/traps.json` pattern.
+**Consequences:** Data duplication across repos. Acceptable at prototype.
+
+#### ADR: --max-turns owned by #414 with default 20
+**Context:** #414 and #417 both add `--max-turns` with conflicting defaults (#422).
+**Decision:** #414 adds the arg with default 20. #417 only adds projection logic.
+**Consequences:** #414 adopts #417's recommended default, eliminating merge conflict.
+
+#### ADR: CharacterAssembler → CharacterProfile bridging in loader
+**Context:** `CharacterAssembler.Assemble()` returns `FragmentCollection`, not `CharacterProfile` (#419).
+**Decision:** `CharacterDefinitionLoader` bridges: `Assemble()` → `PromptBuilder.BuildSystemPrompt()` → `new CharacterProfile(...)`.
+**Consequences:** Loader needs `TrapState` for prompt building — uses `new TrapState()` (empty).
+
+### Implicit assumptions for implementers
+1. **netstandard2.0 + LangVersion 8.0** in Pinder.Core; net8.0 + LangVersion 8.0 in session-runner
+2. **Zero NuGet dependencies in Pinder.Core**
+3. **Session runner CAN use System.Text.Json** (built into net8.0) for character definition parsing
+4. **`CharacterAssembler.Assemble()` returns `FragmentCollection`** — NOT `CharacterProfile`
+5. **`PromptBuilder.BuildSystemPrompt()` requires `TrapState`** — use `new TrapState()` for initial generation
+6. **`PlayerAgentContext` changes must be backward-compatible** — new params have defaults
+7. **All existing tests must pass**
+8. **External data files** at `/root/.openclaw/agents-extra/pinder/data/`
+
+### Known Gaps (as of this sprint)
+
+| Gap | Rules Section | Status |
+|-----|--------------|--------|
+| Shadow persistence across sessions | §8 | Not addressed — per-session via SessionShadowTracker |
+| `AddExternalBonus()` deprecated but not removed | — | Cleanup issue needed |
+| Energy system consumers | #144 | `IGameClock.ConsumeEnergy()` exists but nothing calls it |
+| GameSession god object trajectory | #87 | Growing — extraction planned for MVP |
+| ScoringPlayerAgent bonus constant sync | #386 | Mitigated via CallbackBonus.Compute() + SYNC comments |
+| File counter still producing session-001 | — | Fixed this sprint (#418) |
+| Scorer ignores shadow growth risk | §7 | Fixed this sprint (#416) |
+| Characters hardcoded in runner | — | Fixed this sprint (#414) |
+| CharacterAssembler never tested E2E | — | Fixed this sprint (#415) |
+| Max turns too low (15) | — | Fixed this sprint (#417) |
+| Data files missing from pinder-core | #421 | Fixed this sprint (#415) |
