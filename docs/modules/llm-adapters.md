@@ -7,8 +7,8 @@ The LLM Adapters module (`Pinder.LlmAdapters`) provides prompt templates and API
 
 | File | Description |
 |------|-------------|
-| `PromptTemplates.cs` | Static instruction templates (§3.2–3.8) with `{placeholder}` tokens for dynamic content |
-| `SessionDocumentBuilder.cs` | Fills placeholder tokens in prompt templates with session-specific data; also injects opponent profile as informational context in user messages |
+| `PromptTemplates.cs` | Static instruction templates (§3.2–3.8) with `{placeholder}` tokens for dynamic content; includes resistance band descriptors |
+| `SessionDocumentBuilder.cs` | Fills placeholder tokens in prompt templates with session-specific data; injects opponent profile, texting style, and resistance stance into user messages |
 | `Anthropic/AnthropicClient.cs` | HTTP client for the Anthropic Messages API |
 | `Anthropic/AnthropicLlmAdapter.cs` | Adapter implementing the LLM interface using Anthropic's API |
 | `Anthropic/AnthropicOptions.cs` | Configuration options for the Anthropic client |
@@ -23,12 +23,26 @@ The LLM Adapters module (`Pinder.LlmAdapters`) provides prompt templates and API
 ### `PromptTemplates` (static class)
 
 - **`DialogueOptionsInstruction`** (`const string`) — §3.2: Instructs the LLM to generate exactly 4 dialogue options tagged with stat, callback, combo, and tell bonus metadata. Includes a voice-check reminder: "Before writing each option, verify: does this sound exactly like the texting style above? If not, rewrite it."
-- **`OpponentResponseInstruction`** (`const string`) — §3.5: Instructs the LLM to generate an opponent response with optional `[SIGNALS]` block containing TELLs and WEAKNESSes. Includes 10 explicit tell category mappings (behavior → stat) to constrain LLM output.
+- **`OpponentResponseInstruction`** (`const string`) — §3.5: Instructs the LLM to generate an opponent response with optional `[SIGNALS]` block containing TELLs and WEAKNESSes. Includes 10 explicit tell category mappings (behavior → stat) to constrain LLM output. Now embeds a fundamental resistance rule ("Below Interest 25, you are not won over…") and a `{resistance_block}` placeholder filled at runtime by `SessionDocumentBuilder`.
+- **`ResistanceActiveDisengagement`** (`internal const string`) — Interest 0–4: active disengagement descriptor.
+- **`ResistanceSkepticalInterest`** (`internal const string`) — Interest 5–9: skeptical interest descriptor.
+- **`ResistanceUnstableAgreement`** (`internal const string`) — Interest 10–14: unstable agreement descriptor.
+- **`ResistanceDeliberateApproach`** (`internal const string`) — Interest 15–20: deliberate approach descriptor.
+- **`ResistanceAlmostConvinced`** (`internal const string`) — Interest 21–24: almost convinced descriptor.
+- **`ResistanceDissolved`** (`internal const string`) — Interest 25: resistance dissolved descriptor.
 - **`InterestBeatInstruction`** (`const string`) — §3.8: Generates narrative beats when interest crosses a threshold.
 - **`InterestBeatAbove15`** (`internal const string`) — Sub-instruction for interest rising above 15.
 - **`InterestBeatBelow8`** (`internal const string`) — Sub-instruction for interest dropping below 8.
 - **`InterestBeatDateSecured`** (`internal const string`) — Sub-instruction for date-secured outcome.
 - **`InterestBeatUnmatched`** (`internal const string`) — Sub-instruction for unmatched outcome.
+
+### `SessionDocumentBuilder.GetResistanceBlock(int interest)` (internal)
+
+Returns a resistance descriptor string for the given interest level. Selects one of six `PromptTemplates.Resistance*` constants based on interest bands (0–4, 5–9, 10–14, 15–20, 21–24, 25) and formats it as `"Current interest: {interest}/25. Resistance level: {descriptor}"`. Values below 0 are treated as 0; values above 25 are treated as 25.
+
+### `SessionDocumentBuilder.BuildOpponentPrompt(OpponentContext)`
+
+Builds the user-message content for `GetOpponentResponseAsync` (§3.5). Assembles conversation history, interest state, optional trap/shadow blocks, and the final `OpponentResponseInstruction`. The resistance block is injected into `OpponentResponseInstruction` by replacing the `{resistance_block}` placeholder with the output of `GetResistanceBlock(context.InterestAfter)`. Section order: CONVERSATION HISTORY → PLAYER'S LAST MESSAGE → INTEREST CHANGE → RESPONSE TIMING → CURRENT INTEREST STATE → ACTIVE TRAP INSTRUCTIONS (conditional) → SHADOW STATE (conditional) → OpponentResponseInstruction (with embedded FUNDAMENTAL RULE + resistance block).
 
 ### `SessionDocumentBuilder.BuildDialogueOptionsPrompt(DialogueContext)`
 
@@ -59,6 +73,7 @@ The prompt includes an explicit "ONLY" constraint with 10 behavior-to-stat mappi
 - **Character-voiced interest beats:** `GetInterestChangeBeatAsync` injects the opponent's system prompt as a system block (via `CacheBlockBuilder.BuildOpponentOnlySystemBlocks`) when `InterestChangeContext.OpponentPrompt` is non-empty. This ensures §3.8 interest change beats are generated in the opponent's voice rather than generic narration. When no prompt is provided, no system blocks are sent (backward-compatible).
 - **Voice bleed prevention (dialogue options):** `GetDialogueOptionsAsync` places only the player's prompt in the system blocks (via `CacheBlockBuilder.BuildPlayerOnlySystemBlocks`). The opponent's prompt is moved to the user message as an `OPPONENT PROFILE` informational section built by `SessionDocumentBuilder`. This prevents the LLM from adopting the opponent's register/voice when generating dialogue options for the player. The opponent profile is explicitly labelled "NOT who you are" to reinforce the boundary.
 - **Voice distinctness (texting style reinforcement):** `SessionDocumentBuilder.BuildDialogueOptionsPrompt` injects a `YOUR TEXTING STYLE` constraint block immediately before `YOUR TASK` when `DialogueContext.PlayerTextingStyle` is non-empty. The texting style fragment originates from `CharacterProfile.TextingStyleFragment`, threaded through `DialogueContext.PlayerTextingStyle` via `GameSession.StartTurnAsync`. `PromptTemplates.DialogueOptionsInstruction` includes a voice-check reminder that tells the LLM to verify each option matches the style. This layers on top of the voice bleed fix (#487) to ensure generated options sound like the player character.
+- **Opponent resistance framing:** `OpponentResponseInstruction` now contains a fundamental resistance rule stating the opponent is not won over below Interest 25. A `{resistance_block}` placeholder is filled at runtime by `GetResistanceBlock()`, which selects from six archetype-independent resistance postures (Active disengagement → Skeptical interest → Unstable agreement → Deliberate approach → Almost convinced → Resistance dissolved). The resistance system is purely prompt-engineering — no game mechanics or DTOs were changed. It complements the existing `GetInterestBehaviourBlock()` (which describes engagement behavior like reply speed/length) by framing the opponent's *opposition posture*.
 - **Provider abstraction:** The Anthropic-specific code is isolated in its own subdirectory. The adapter pattern allows swapping LLM providers without changing prompt templates or game logic.
 
 ## Change Log
@@ -68,3 +83,4 @@ The prompt includes an explicit "ONLY" constraint with 10 behavior-to-stat mappi
 | 2026-04-03 | #352 | `AnthropicLlmAdapter.GetInterestChangeBeatAsync` now includes opponent system prompt as a system block when `InterestChangeContext.OpponentPrompt` is non-empty, so §3.8 interest change beats are generated in the opponent's character voice. Uses `CacheBlockBuilder.BuildOpponentOnlySystemBlocks`. Tests in `InterestChangeBeatVoiceTests.cs`. |
 | 2026-04-04 | #487 | Fix voice bleed — moved opponent prompt out of system blocks into user message for dialogue option generation. `AnthropicLlmAdapter.GetDialogueOptionsAsync` now uses `CacheBlockBuilder.BuildPlayerOnlySystemBlocks` (player only). `SessionDocumentBuilder.BuildDialogueOptionsPrompt` prepends `OPPONENT PROFILE` section in user content when opponent prompt is present. |
 | 2026-04-04 | #489 | Voice distinctness — `CharacterProfile` gains `TextingStyleFragment` property (optional, default `""`). `DialogueContext` gains `PlayerTextingStyle` property (optional, default `""`). `SessionDocumentBuilder.BuildDialogueOptionsPrompt` injects `YOUR TEXTING STYLE` block before `YOUR TASK` when style is non-empty. `PromptTemplates.DialogueOptionsInstruction` appended with voice-check reminder. `GameSession.StartTurnAsync` wires player's texting style into `DialogueContext`. Session-runner loaders (`CharacterLoader`, `CharacterDefinitionLoader`) extract/join texting style fragments for `CharacterProfile`. |
+| 2026-04-04 | #490 | Opponent resistance — `OpponentResponseInstruction` now embeds a fundamental resistance rule and `{resistance_block}` placeholder. Six `internal const` resistance descriptors added to `PromptTemplates` (bands: 0–4, 5–9, 10–14, 15–20, 21–24, 25). `SessionDocumentBuilder.GetResistanceBlock(int)` selects the appropriate descriptor. `BuildOpponentPrompt` fills the placeholder at runtime. Note: spec proposed `GetResistanceDescriptor` on `PromptTemplates` and a separate `OpponentResistanceRule` constant; implementation places logic on `SessionDocumentBuilder.GetResistanceBlock` and inlines the rule into `OpponentResponseInstruction`. Band names also differ from spec (e.g. "Unstable agreement" vs "Warmth with visible holdback"). Tests in `Issue490_ResistanceSpec_Tests.cs` (25 tests). |
