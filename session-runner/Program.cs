@@ -303,6 +303,9 @@ class Program
             var chosen = turnStart.Options[pick];
             Console.WriteLine($"**► Player picks: {letters[pick]} ({StatLabel(chosen.Stat)})**");
             Console.WriteLine();
+            Console.WriteLine(PlaytestFormatter.FormatReasoningBlock(decision, agent.GetType().Name));
+            Console.WriteLine(PlaytestFormatter.FormatScoreTable(decision, turnStart.Options));
+            Console.WriteLine();
 
             TurnResult result;
             try { result = await session.ResolveTurnAsync(pick); }
