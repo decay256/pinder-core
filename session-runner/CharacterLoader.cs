@@ -48,11 +48,12 @@ namespace Pinder.SessionRunner
             var shadows = ParseShadows(content);
             string systemPrompt = ExtractSystemPrompt(content);
             string bio = ParseBio(content);
+            string textingStyle = ParseTextingStyle(content);
 
             var statBlock = new StatBlock(stats, shadows);
             var timing = new TimingProfile(0, 1.0f, 0.0f, "neutral");
 
-            return new CharacterProfile(statBlock, systemPrompt, displayName, timing, level, bio: bio);
+            return new CharacterProfile(statBlock, systemPrompt, displayName, timing, level, bio: bio, textingStyleFragment: textingStyle);
         }
 
         /// <summary>
@@ -332,6 +333,42 @@ namespace Pinder.SessionRunner
                 case "overthinking": return ShadowStatType.Overthinking;
                 default: return null;
             }
+        }
+
+        internal static string ParseTextingStyle(string content)
+        {
+            // Extract the TEXTING STYLE section from the system prompt
+            string prompt = ExtractSystemPrompt(content);
+            var lines = prompt.Split(new[] { '\n' }, StringSplitOptions.None);
+            var result = new List<string>();
+            bool inSection = false;
+
+            foreach (var line in lines)
+            {
+                string trimmed = line.Trim();
+                // Match section headers like "TEXTING STYLE", "## TEXTING STYLE", "### TEXTING STYLE"
+                if (trimmed.Replace("#", "").Trim().StartsWith("TEXTING STYLE", StringComparison.OrdinalIgnoreCase))
+                {
+                    inSection = true;
+                    continue;
+                }
+
+                if (inSection)
+                {
+                    // Stop at the next section header (all-caps line or # heading)
+                    if (trimmed.Length > 0 && trimmed == trimmed.ToUpperInvariant() && !trimmed.StartsWith("-") && !trimmed.StartsWith("*") && trimmed.Length > 3)
+                        break;
+                    if (trimmed.StartsWith("##"))
+                        break;
+                    result.Add(line);
+                }
+            }
+
+            // Trim trailing empty lines
+            while (result.Count > 0 && string.IsNullOrWhiteSpace(result[result.Count - 1]))
+                result.RemoveAt(result.Count - 1);
+
+            return result.Count > 0 ? string.Join("\n", result).Trim() : string.Empty;
         }
 
         private static string ParseBio(string content)

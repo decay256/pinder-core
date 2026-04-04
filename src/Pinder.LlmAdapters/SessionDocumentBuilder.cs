@@ -100,6 +100,14 @@ namespace Pinder.LlmAdapters
                 }
             }
 
+            // Inject texting style block immediately before task instruction (#489)
+            if (!string.IsNullOrEmpty(context.PlayerTextingStyle))
+            {
+                sb.AppendLine();
+                sb.AppendLine("YOUR TEXTING STYLE — follow this exactly, no deviations:");
+                sb.AppendLine(context.PlayerTextingStyle);
+            }
+
             sb.AppendLine();
             sb.AppendLine("YOUR TASK");
             sb.Append(PromptTemplates.DialogueOptionsInstruction.Replace("{player_name}", playerName));

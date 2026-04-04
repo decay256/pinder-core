@@ -51,6 +51,9 @@ namespace Pinder.Core.Conversation
         /// <summary>Current turn number (1-based). Default 0 for backward compatibility.</summary>
         public int CurrentTurn { get; }
 
+        /// <summary>The player's texting style fragment for voice reinforcement. Empty string if not available.</summary>
+        public string PlayerTextingStyle { get; }
+
         public DialogueContext(
             string playerPrompt,
             string opponentPrompt,
@@ -65,7 +68,8 @@ namespace Pinder.Core.Conversation
             string[]? activeTrapInstructions = null,
             string playerName = "",
             string opponentName = "",
-            int currentTurn = 0)
+            int currentTurn = 0,
+            string playerTextingStyle = "")
         {
             PlayerPrompt = playerPrompt ?? throw new System.ArgumentNullException(nameof(playerPrompt));
             OpponentPrompt = opponentPrompt ?? throw new System.ArgumentNullException(nameof(opponentPrompt));
@@ -81,6 +85,7 @@ namespace Pinder.Core.Conversation
             PlayerName = playerName ?? "";
             OpponentName = opponentName ?? "";
             CurrentTurn = currentTurn;
+            PlayerTextingStyle = playerTextingStyle ?? "";
         }
     }
 }

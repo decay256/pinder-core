@@ -92,9 +92,15 @@ namespace Pinder.SessionRunner
                 string systemPrompt = PromptBuilder.BuildSystemPrompt(
                     name, genderIdentity, bio, fragments, new TrapState());
 
+                // Join texting style fragments for voice reinforcement
+                string textingStyle = fragments.TextingStyleFragments.Count > 0
+                    ? string.Join(" | ", fragments.TextingStyleFragments)
+                    : string.Empty;
+
                 // Construct CharacterProfile
                 return new CharacterProfile(
-                    fragments.Stats, systemPrompt, name, fragments.Timing, level);
+                    fragments.Stats, systemPrompt, name, fragments.Timing, level,
+                    textingStyleFragment: textingStyle);
             }
         }
 
