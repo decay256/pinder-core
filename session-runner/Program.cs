@@ -483,12 +483,12 @@ class Program
             Console.WriteLine();
 
             Console.WriteLine($"**📨 {player1} sends:**");
-            Console.WriteLine($"> \"{result.DeliveredMessage}\"");
+            PrintQuoted(result.DeliveredMessage);
             Console.WriteLine();
 
             lastOpponentMsg = result.OpponentMessage ?? "";
             Console.WriteLine($"**📩 {player2} replies:**");
-            Console.WriteLine($"> \"{result.OpponentMessage}\"");
+            PrintQuoted(result.OpponentMessage);
             Console.WriteLine();
 
             int newInterest = result.StateAfter.Interest;
@@ -564,6 +564,17 @@ class Program
         Console.SetOut(tee._console);
         WritePlaytestLog(buffer.ToString(), player1, player2, finalOutcome, session.TotalXpEarned, turn);
         return 0;
+    }
+
+    static void PrintQuoted(string? text)
+    {
+        if (string.IsNullOrEmpty(text)) { Console.WriteLine("> (empty)"); return; }
+        // Prefix every line with > so multi-paragraph messages stay in the quote block
+        foreach (var line in text.Split('\n'))
+        {
+            // Blank lines need "> " not just ">" to be a valid blockquote continuation
+            Console.WriteLine(string.IsNullOrWhiteSpace(line) ? ">" : $"> {line.TrimEnd()}");
+        }
     }
 
     static List<string> WrapText(string text, int maxLen)
