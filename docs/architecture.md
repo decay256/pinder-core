@@ -759,3 +759,82 @@ src/Pinder.Rules/
 | 8 YAML files lack enrichment | — | Fixed this sprint (#444) |
 | Round-trip diffs ~1251 lines | — | Fixed this sprint (#443) |
 | Generated test stubs not in CI | — | Fixed this sprint (#445) |
+
+
+---
+
+## Sprint (Wire GameSession to Rule Engine) — Architecture Briefing
+
+### What's changing
+
+**This sprint introduces one structural addition**: an `IRuleResolver` interface in `Pinder.Core.Interfaces` that bridges the dependency gap between `Pinder.Core` (zero deps) and `Pinder.Rules` (YamlDotNet) via Dependency Inversion. Core defines the abstraction, Rules provides the implementation. GameSession gains optional data-driven rule resolution with null-safe fallback to existing hardcoded statics.
+
+**Previous architecture**: GameSession calls hardcoded static classes (`FailureScale`, `SuccessScale`, `RiskTierBonus`, `ShadowThresholdEvaluator`) and private methods (`GetMomentumBonus`) for all game constants. The `Pinder.Rules` project exists with `RuleBook`, `ConditionEvaluator`, and `OutcomeDispatcher` but is not connected to GameSession.
+
+#### New Components
+
+1. **`IRuleResolver`** (Interfaces/) — Abstraction for data-driven game constant resolution. Methods return nullable values — null means "no rule matched, use hardcoded fallback". Covers §5 (failure/success deltas), §6 (interest states), §7 (shadow thresholds), §15 (momentum bonuses, risk-tier XP multipliers).
+
+2. **`RuleBookResolver`** (Pinder.Rules/) — Implements `IRuleResolver` using `RuleBook` + `ConditionEvaluator`. Accepts one or more RuleBooks (for multi-file YAML). Thread-safe after construction.
+
+#### Extended Components
+
+3. **`GameSessionConfig`** — Gains `IRuleResolver? Rules` property (optional, null default).
+
+4. **`GameSession`** — 5 call sites gain `_rules?.GetX() ?? hardcoded` pattern:
+   - `FailureScale.GetInterestDelta()` → `_rules.GetFailureInterestDelta()`
+   - `SuccessScale.GetInterestDelta()` → `_rules.GetSuccessInterestDelta()`
+   - `_interest.GetState()` → `_rules.GetInterestState()`
+   - `ShadowThresholdEvaluator.GetThresholdLevel()` → `_rules.GetShadowThresholdLevel()`
+   - `GetMomentumBonus()` → `_rules.GetMomentumBonus()`
+   - `ApplyRiskTierMultiplier()` → `_rules.GetRiskTierXpMultiplier()`
+
+### Key Architectural Decisions
+
+#### ADR: IRuleResolver via Dependency Inversion (resolves deferred integration from Rules DSL sprint)
+
+**Context:** The Rules DSL sprint deferred GameSession integration because Core can't reference Rules. The issue (#463) now requires wiring.
+
+**Decision:** Define `IRuleResolver` in `Pinder.Core.Interfaces`. `Pinder.Rules` implements it as `RuleBookResolver`. GameSession accepts it via `GameSessionConfig.Rules`. All methods return nullable — null triggers hardcoded fallback.
+
+**Consequences:**
+- Core remains zero-dependency (interface only, no YAML knowledge)
+- Rules project gains one new file implementing the interface
+- GameSession call sites gain ~2 lines each for the fallback pattern
+- Host (session-runner) is responsible for loading YAML and creating the resolver
+
+#### ADR: Multi-file RuleBook merge
+
+**Context:** §5/§6/§7 rules live in `rules-v3-enriched.yaml`. §15 momentum/risk-tier rules live in `risk-reward-and-hidden-depth-enriched.yaml`.
+
+**Decision:** `RuleBookResolver` accepts multiple `RuleBook` instances. Host loads both YAML files. Later books' entries are additive (no id collision expected across files).
+
+**Consequences:** Host must know which YAML files to load. Acceptable at prototype maturity.
+
+### What is NOT changing
+- Static classes (FailureScale, SuccessScale, etc.) — remain as fallback
+- InterestMeter.GetState() signature — unchanged
+- Pinder.LlmAdapters — untouched
+- All existing tests — pass unchanged
+
+### Implicit assumptions for implementers
+
+1. **netstandard2.0 + LangVersion 8.0** — no records, no generic Enum.Parse
+2. **Pinder.Core MUST NOT reference Pinder.Rules** — IRuleResolver in Core, implementation in Rules
+3. **All 2651 existing tests must pass unchanged**
+4. **YAML files loaded by host, not GameSession** — GameSession receives IRuleResolver via config
+5. **Null-return = use hardcoded fallback** — every IRuleResolver method returns nullable
+6. **InterestMeter class NOT modified** — GameSession wraps calls externally
+7. **Shadow thresholds are generic** — IRuleResolver returns tier (0-3), not per-shadow effects
+
+### Known Gaps (as of this sprint)
+
+| Gap | Rules Section | Status |
+|-----|--------------|--------|
+| Shadow persistence across sessions | §8 | Not addressed — per-session via SessionShadowTracker |
+| `AddExternalBonus()` deprecated but not removed | — | Cleanup issue needed |
+| Energy system consumers | #144 | `IGameClock.ConsumeEnergy()` exists but nothing calls it |
+| GameSession god object trajectory | #87 | Growing — extraction planned for MVP |
+| Hardcoded constants duplicated in C# + YAML | §5, §6, §15 | Intentional — YAML is primary, C# is fallback |
+| Rule engine not wired for all sections | §8-§14 | Only §5/§6/§7/§15 wired this sprint |
+| Per-shadow-type threshold effects | §7 | IRuleResolver returns generic tier, not per-shadow effects |
