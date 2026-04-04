@@ -82,6 +82,75 @@ class Program
 
     // BestOption removed — replaced by IPlayerAgent (see HighestModAgent)
 
+    // ── character loading ─────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Load a character from either a definition file or a prompt file.
+    /// Priority: --player-def path > --player name (try assembler first, then prompt file fallback).
+    /// </summary>
+    static CharacterProfile LoadCharacter(
+        string? defPath,
+        string? name,
+        string promptDir,
+        ref IItemRepository? itemRepo,
+        ref IAnatomyRepository? anatomyRepo)
+    {
+        // Explicit --player-def / --opponent-def takes priority
+        if (defPath != null)
+        {
+            EnsureReposLoaded(ref itemRepo, ref anatomyRepo);
+            return CharacterDefinitionLoader.Load(defPath, itemRepo!, anatomyRepo!);
+        }
+
+        // --player / --opponent name: try assembler pipeline first
+        if (name != null)
+        {
+            string? charDefPath = DataFileLocator.FindDataFile(
+                AppContext.BaseDirectory,
+                Path.Combine("data", "characters", $"{name.ToLowerInvariant()}.json"));
+
+            if (charDefPath != null)
+            {
+                try
+                {
+                    EnsureReposLoaded(ref itemRepo, ref anatomyRepo);
+                    return CharacterDefinitionLoader.Load(charDefPath, itemRepo!, anatomyRepo!);
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine($"[WARN] Failed to load {name} via assembler: {ex.Message} — falling back to prompt file");
+                }
+            }
+
+            // Fallback to prompt file loading
+            return CharacterLoader.Load(name, promptDir);
+        }
+
+        throw new InvalidOperationException("Neither definition path nor name provided");
+    }
+
+    /// <summary>
+    /// Lazily load item and anatomy repositories from data files.
+    /// </summary>
+    static void EnsureReposLoaded(ref IItemRepository? itemRepo, ref IAnatomyRepository? anatomyRepo)
+    {
+        if (itemRepo != null && anatomyRepo != null)
+            return;
+
+        string baseDir = AppContext.BaseDirectory;
+
+        string? itemsPath = DataFileLocator.FindDataFile(baseDir, Path.Combine("data", "items", "starter-items.json"));
+        if (itemsPath == null)
+            throw new FileNotFoundException("Could not find data/items/starter-items.json — ensure data files are present in the repo");
+
+        string? anatomyPath = DataFileLocator.FindDataFile(baseDir, Path.Combine("data", "anatomy", "anatomy-parameters.json"));
+        if (anatomyPath == null)
+            throw new FileNotFoundException("Could not find data/anatomy/anatomy-parameters.json — ensure data files are present in the repo");
+
+        itemRepo = new JsonItemRepository(File.ReadAllText(itemsPath));
+        anatomyRepo = new JsonAnatomyRepository(File.ReadAllText(anatomyPath));
+    }
+
     // ── main ─────────────────────────────────────────────────────────────────
 
     // ── CLI arg parsing ─────────────────────────────────────────────────
@@ -144,10 +213,13 @@ class Program
     static void PrintUsage(string promptDir)
     {
         Console.Error.WriteLine("Usage: dotnet run --project session-runner -- --player <name> --opponent <name> [--max-turns <n>] [--agent <scoring|llm>]");
+        Console.Error.WriteLine("       dotnet run --project session-runner -- --player-def <path> --opponent-def <path> [--max-turns <n>] [--agent <scoring|llm>]");
         Console.Error.WriteLine();
         Console.Error.WriteLine("Options:");
-        Console.Error.WriteLine("  --player <name>      Player character name (required)");
-        Console.Error.WriteLine("  --opponent <name>     Opponent character name (required)");
+        Console.Error.WriteLine("  --player <name>       Player character name (required, or use --player-def)");
+        Console.Error.WriteLine("  --opponent <name>      Opponent character name (required, or use --opponent-def)");
+        Console.Error.WriteLine("  --player-def <path>   Player character definition JSON file");
+        Console.Error.WriteLine("  --opponent-def <path>  Opponent character definition JSON file");
         Console.Error.WriteLine("  --max-turns <n>       Maximum turns (default: 20)");
         Console.Error.WriteLine("  --agent <type>        Player agent: scoring or llm (default: scoring)");
         Console.Error.WriteLine();
@@ -165,26 +237,38 @@ class Program
 
         string promptDir = ResolvePromptDirectory(AppContext.BaseDirectory);
 
-        // Parse character name args
+        // Parse character name / definition args
         string? playerArg = ParseArg(args, "--player");
         string? opponentArg = ParseArg(args, "--opponent");
+        string? playerDefArg = ParseArg(args, "--player-def");
+        string? opponentDefArg = ParseArg(args, "--opponent-def");
 
-        if (playerArg == null || opponentArg == null)
+        // Must have at least one identifier per side
+        if ((playerArg == null && playerDefArg == null) ||
+            (opponentArg == null && opponentDefArg == null))
         {
             PrintUsage(promptDir);
             return 1;
         }
 
-        // Load characters from prompt files
+        // Preload assembler repos (lazy — only if needed)
+        IItemRepository? itemRepo = null;
+        IAnatomyRepository? anatomyRepo = null;
+
         CharacterProfile sable, brick;
         try
         {
-            sable = CharacterLoader.Load(playerArg, promptDir);
-            brick = CharacterLoader.Load(opponentArg, promptDir);
+            sable = LoadCharacter(playerDefArg, playerArg, promptDir, ref itemRepo, ref anatomyRepo);
+            brick = LoadCharacter(opponentDefArg, opponentArg, promptDir, ref itemRepo, ref anatomyRepo);
         }
         catch (FileNotFoundException ex)
         {
             Console.Error.WriteLine(ex.Message);
+            return 1;
+        }
+        catch (FormatException ex)
+        {
+            Console.Error.WriteLine($"[ERROR] {ex.Message}");
             return 1;
         }
 

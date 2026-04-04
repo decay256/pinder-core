@@ -1,0 +1,40 @@
+{
+  "name": "Brick_haus",
+  "gender_identity": "she/her",
+  "bio": "CEO of knowing my worth. Don't waste my time.",
+  "level": 6,
+  "items": [
+    "slicked-back-ponytail",
+    "blazer-crop-top",
+    "tailored-trousers",
+    "red-bottom-heels",
+    "designer-glasses-clear",
+    "color-coded-planner"
+  ],
+  "anatomy": {
+    "length": "long",
+    "girth": "thick",
+    "circumcision": "circumcised",
+    "vein_definition": "defined",
+    "skin_texture": "smooth",
+    "ball_size": "modest",
+    "tattoos": "none",
+    "eye_style": "hooded"
+  },
+  "build_points": {
+    "charm": 5,
+    "rizz": 4,
+    "honesty": 3,
+    "chaos": 2,
+    "wit": 5,
+    "self_awareness": 2
+  },
+  "shadows": {
+    "madness": 2,
+    "horniness": 0,
+    "denial": 5,
+    "fixation": 3,
+    "dread": 2,
+    "overthinking": 4
+  }
+}
