@@ -346,5 +346,65 @@ EFFECTIVE STATS
             }
             return AppContext.BaseDirectory;
         }
+
+        // ── ParseBio tests ────────────────────────────────────────────────
+
+        [Fact]
+        public void ParseBio_UnquotedBio_ReturnsFullText()
+        {
+            string content = "- Bio: I will absolutely judge your taste in music.\n";
+            string result = CharacterLoader.ParseBio(content);
+            Assert.Equal("I will absolutely judge your taste in music.", result);
+        }
+
+        [Fact]
+        public void ParseBio_QuotedBio_StripsQuotesAndReturnsContent()
+        {
+            string content = "- Bio: \"Scorpio. Living my best life. Send memes.\"\n";
+            string result = CharacterLoader.ParseBio(content);
+            Assert.Equal("Scorpio. Living my best life. Send memes.", result);
+        }
+
+        [Fact]
+        public void ParseBio_NoBioLine_ReturnsEmpty()
+        {
+            string content = "- Level: 3\n- Name: Gerald\n";
+            string result = CharacterLoader.ParseBio(content);
+            Assert.Equal(string.Empty, result);
+        }
+
+        [Theory]
+        [InlineData("- Bio: I will absolutely judge your taste in music.", "I will absolutely judge your taste in music.")]
+        [InlineData("- Bio: Schedule a meeting.", "Schedule a meeting.")]
+        [InlineData("- Bio: Just a normal guy who loves the gym, good food, and real connections.", "Just a normal guy who loves the gym, good food, and real connections.")]
+        [InlineData("- Bio: Scorpio. Living my best life. Send memes.", "Scorpio. Living my best life. Send memes.")]
+        [InlineData("- Bio: The universe doesn't need your help.", "The universe doesn't need your help.")]
+        public void ParseBio_AllStarterCharacters_ReturnsCorrectBio(string bioLine, string expected)
+        {
+            string content = $"Some header\n{bioLine}\nMore content\n";
+            string result = CharacterLoader.ParseBio(content);
+            Assert.Equal(expected, result);
+        }
+
+        [Fact]
+        public void ParseBio_BioInsideCodeFence_ExtractsBio()
+        {
+            // Real prompt files have "- Bio:" inside the code fence
+            string content = @"# Sable — Assembled System Prompt
+
+```
+You are playing the role of Sable.
+
+IDENTITY
+- Gender identity: she/her
+- Bio: Scorpio. Living my best life. Send memes.
+
+PERSONALITY
+- ...
+```
+";
+            string result = CharacterLoader.ParseBio(content);
+            Assert.Equal("Scorpio. Living my best life. Send memes.", result);
+        }
     }
 }
