@@ -193,6 +193,39 @@ namespace Pinder.Core.Tests
             }
         }
 
+        // Issue #515: Session number resolved once at start, used for both header and file
+        [Fact]
+        public void ConsecutiveSessions_ProduceDifferentNumbers()
+        {
+            var dir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(dir);
+            try
+            {
+                // Simulate three consecutive session runs
+                for (int expected = 1; expected <= 3; expected++)
+                {
+                    // Resolve number (like Program.cs does at session start)
+                    int sessionNum = SessionFileCounter.GetNextSessionNumber(dir);
+                    Assert.Equal(expected, sessionNum);
+
+                    // Write the file (like WritePlaytestLog does with the pre-resolved number)
+                    string slug = $"session-{sessionNum:D3}-player-vs-opponent.md";
+                    File.WriteAllText(Path.Combine(dir, slug), $"# Playtest Session {sessionNum:D3}");
+
+                    // Verify content uses the correct number
+                    string content = File.ReadAllText(Path.Combine(dir, slug));
+                    Assert.Contains($"Session {sessionNum:D3}", content);
+                }
+
+                // Final check: next number should be 4
+                Assert.Equal(4, SessionFileCounter.GetNextSessionNumber(dir));
+            }
+            finally
+            {
+                Directory.Delete(dir, true);
+            }
+        }
+
         // ResolvePlaytestDirectory: env var takes priority
         [Fact]
         public void ResolvePlaytestDirectory_EnvVarOverride()

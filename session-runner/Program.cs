@@ -276,6 +276,10 @@ class Program
         var tee = new TeeWriter(Console.Out, buffer);
         Console.SetOut(tee);
 
+        // ── resolve session number once, up front ─────────────────────────
+        string? playtestDir = SessionFileCounter.ResolvePlaytestDirectory(AppContext.BaseDirectory);
+        int sessionNumber = playtestDir != null ? SessionFileCounter.GetNextSessionNumber(playtestDir) : 1;
+
         // ── character definitions (loaded from prompt files) ───────────────
         string player1 = sable.DisplayName, player2 = brick.DisplayName;
         int p1Level = sable.Level, p2Level = brick.Level;
@@ -285,7 +289,7 @@ class Program
         var brickStats = brick.Stats;
 
         // ── header ────────────────────────────────────────────────────────
-        Console.WriteLine($"# Playtest Session 006 — {player1} × {player2}");
+        Console.WriteLine($"# Playtest Session {sessionNumber:D3} — {player1} × {player2}");
         Console.WriteLine($"**Date:** {DateTime.UtcNow:yyyy-MM-dd}");
         Console.WriteLine($"**Engine:** `pinder-core GameSession` + `AnthropicLlmAdapter` → claude-sonnet-4-20250514");
         Console.WriteLine($"**Player:** {player1} (Level {p1Level}, +{p1LevelBonus} level bonus) | **Opponent:** {player2} (Level {p2Level}, +{p2LevelBonus} level bonus, LLM puppet)");
@@ -544,7 +548,7 @@ class Program
         llm.Dispose();
 
         Console.SetOut(tee._console);
-        WritePlaytestLog(buffer.ToString(), player1, player2, finalOutcome, session.TotalXpEarned, turn);
+        WritePlaytestLog(buffer.ToString(), player1, player2, finalOutcome, session.TotalXpEarned, turn, playtestDir, sessionNumber);
         return 0;
     }
 
@@ -572,12 +576,10 @@ class Program
         return lines.Count > 0 ? lines : new List<string> { "" };
     }
 
-    static void WritePlaytestLog(string content, string p1, string p2, GameOutcome? outcome, int xp, int turns)
+    static void WritePlaytestLog(string content, string p1, string p2, GameOutcome? outcome, int xp, int turns, string? dir, int sessionNum)
     {
-        string? dir = SessionFileCounter.ResolvePlaytestDirectory(AppContext.BaseDirectory);
         if (dir == null) { Console.Error.WriteLine("Playtest dir not found — set PINDER_PLAYTESTS_PATH or ensure design/playtests/ exists"); return; }
-        int nextNum = SessionFileCounter.GetNextSessionNumber(dir);
-        string slug = $"session-{nextNum:D3}-{p1.ToLower()}-vs-{p2.ToLower()}.md";
+        string slug = $"session-{sessionNum:D3}-{p1.ToLower()}-vs-{p2.ToLower()}.md";
         File.WriteAllText(Path.Combine(dir, slug), content);
         Console.WriteLine($"\n📝 Written → {dir}/{slug}");
     }
