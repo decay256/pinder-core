@@ -100,7 +100,6 @@ namespace Pinder.SessionRunner
                 // Construct CharacterProfile
                 return new CharacterProfile(
                     fragments.Stats, systemPrompt, name, fragments.Timing, level,
-                    bio: bio,
                     textingStyleFragment: textingStyle);
             }
         }
