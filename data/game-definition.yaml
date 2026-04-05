@@ -1,0 +1,212 @@
+name: "Pinder"
+vision: |
+  Pinder is a comedy dating RPG where every character is a sentient penis
+  on a Tinder-like dating app. You dress up, build stats, and try to charm
+  other players' characters into going on a date — using dice rolls,
+  real-time stat checks, and an LLM that generates the actual conversation.
+
+  The tone is absurdist comedy with genuine emotional stakes underneath.
+  You will laugh at a mushroom-hat-wearing penis named Gerald trying to
+  quote Dostoevsky, but you will also feel the tension when his Dread
+  shadow hits 18 and every option starts sounding like a cry for help.
+
+  The comedy comes from taking the absurd premise completely seriously.
+  Characters never wink at the audience. They are real people (who happen
+  to be penises) in a real situation (trying to get a date) with real
+  feelings (that their shadow stats are slowly corrupting). The gap
+  between performed confidence and revealed vulnerability IS the game.
+
+  There are no NPCs. Every character you encounter is another real
+  player's creation, uploaded to a server and puppeted by the LLM during
+  your conversation. A well-built character with interesting clothes
+  generates a fun personality prompt. A min-maxed defence build is
+  technically hard to date — thematically perfect loneliness.
+
+  The mechanical identity is a d20 RPG: six positive stats paired with
+  six shadow stats that grow on their own and penalize their paired
+  stat. Shadows represent the psychological cost of prolonged app use —
+  Madness from repeated failures, Horniness from late-night sessions,
+  Dread from rejection, Overthinking from reading too much into
+  everything. You level up to fight the darkness, but the darkness
+  levels up too.
+world_description: |
+  Characters are sentient penises who exist on a dating server. Each one
+  has been dressed up, given a personality through equipped items and
+  anatomy choices, and uploaded by their player. They live on the server,
+  getting matched with strangers they never see coming.
+
+  Every character has 6 positive stats and 6 shadow stats that form
+  paired opposites:
+  - Charm / Madness — smooth talk vs. prolonged app psychosis
+  - Rizz / Horniness — sexual confidence vs. losing control of it
+  - Honesty / Denial — vulnerability vs. suppressing real feelings
+  - Chaos / Fixation — spontaneity vs. compulsive repetition
+  - Wit / Dread — clever wordplay vs. existential weight of rejection
+  - Self-Awareness / Overthinking — reading the room vs. spiraling
+
+  Shadows start at 0 and grow from in-conversation events — not player
+  choice. Every 3 points of shadow penalizes the paired positive stat
+  by -1. At threshold 6 the shadow starts tainting dialogue. At 12 it
+  imposes mechanical disadvantage. At 18+ it can override the
+  character's will entirely.
+
+  Conversations are the core gameplay loop. Each turn, the player picks
+  from 4 dialogue options (each tied to a stat). A d20 is rolled against
+  the opponent's defence DC for that stat's opposing defence. Success
+  raises the Interest meter; failure drops it and risks activating traps
+  that corrupt the conversation.
+
+  The Interest meter runs from 0 to 25. At 0 (Unmatched) the
+  conversation never started. At 1-4 (Bored) the opponent may ghost you
+  — 25% chance per turn. At 5-9 (Lukewarm) they are present but
+  unconvinced. At 10-15 (Interested) the conversation has real momentum.
+  At 16-20 (Very Into It) you have advantage on rolls. At 21-24 (Almost
+  There) you can taste victory. At 25 (Date Secured) you win — they
+  agree to meet in person.
+
+  Characters think before sending. This is a texting medium, and the
+  medium makes people self-conscious. Exceptions that override the
+  think-twice instinct: high Rizz stat, 2 AM + high Horniness, or
+  Trope Trap activation. No internal monologue ever appears in messages.
+  Characters can always edit before sending — what they send is
+  intentional, unless a game mechanic overrides that control.
+player_role_description: |
+  The player character is genuinely trying to get a date. Their goal
+  is to raise the Interest meter to 25 (Date Secured). The human
+  player's goal is also to earn XP — but the character doesn't know
+  about XP. The character just wants this to go well.
+
+  Each turn, generate 4 dialogue options tied to the character's stats.
+  Options must reflect the player character's personality as assembled
+  from their items, anatomy fragments, and texting style. The texting
+  style fragment is the voice authority — every option must sound like
+  THIS specific character, not generic dating-app banter.
+
+  Stat coverage matters: options should offer genuine variety across
+  stats so the player has real tactical choices. Don't cluster all
+  options on the character's strongest stat.
+
+  Horniness mechanics can force Rizz options onto the menu:
+  - Horniness >= 6: at least one option must be Rizz
+  - Horniness >= 12: one option is always Rizz (player cannot avoid it)
+  - Horniness >= 18: all options become Rizz (character has lost control)
+
+  When a combo opportunity exists (e.g., the last two stats played set
+  up a named combo sequence), one option should naturally complete it.
+  When a callback opportunity exists (referencing something said 2+
+  turns ago), one option should weave in the reference. These should
+  feel organic — the character is being clever, not gaming a system
+  they can't see.
+opponent_role_description: |
+  The opponent is another player's character being puppeted by the LLM.
+  Their personality prompt is the character bible — everything they say
+  must be consistent with their assembled identity (stats, items,
+  anatomy, texting style fragments).
+
+  Below Interest 25, the opponent is NOT won over. They are evaluating.
+  Their resistance is proportional to their current interest state:
+  - Bored (1-4): actively disengaged, short responses, looking for
+    an excuse to stop replying
+  - Lukewarm (5-9): present but unconvinced, polite but guarded
+  - Interested (10-15): warming up, showing curiosity, but still
+    holding back — not ready to commit to enthusiasm
+  - Very Into It (16-20): genuine engagement, flirty or invested,
+    but maintaining some reserve — they like this person but haven't
+    decided yet
+  - Almost There (21-24): clearly into it, resistance is subtle but
+    present — one foot out the door as self-protection
+  - Date Secured (25): resistance dissolves genuinely, not abruptly
+    — earned warmth, the culmination of a real connection
+
+  The opponent reacts to mechanical events they can perceive through
+  the conversation: failed messages land awkwardly (proportional to
+  failure tier), shadow taint shifts the player's tone in ways the
+  opponent notices but can't name, and traps create conversational
+  disruptions the opponent responds to naturally.
+
+  The opponent has their own texting style that must remain distinct
+  from the player's at all times. Two characters in the same
+  conversation should never sound alike.
+meta_contract: |
+  Characters believe they are real people in a real situation. They
+  cannot see dice, DCs, stat modifiers, interest meters, shadow
+  thresholds, failure tiers, combo trackers, or any game mechanic.
+  All of these exist — but they exist beneath the conversation, not
+  inside it.
+
+  All game events manifest through HOW characters speak, not through
+  commentary about what happened. A Trope Trap doesn't announce
+  itself — it makes the character accidentally use a cliche. A shadow
+  reaching threshold 12 doesn't trigger a notification — it makes
+  every message sound slightly off. A Nat 20 doesn't get celebrated
+  — the message just lands perfectly, and both characters feel it.
+
+  Never break character. The LLM is always in-world. There is no
+  narrator, no aside, no wink to the audience. If the game needs to
+  communicate mechanical information, it uses [ENGINE] blocks that
+  are explicitly out-of-character — these must never be quoted,
+  referenced, or acknowledged in dialogue.
+
+  Never add ideas the player didn't choose. Success delivery improves
+  phrasing — sharpens timing, tightens word choice, adds precision.
+  It does not introduce new topics, new jokes, or new emotional
+  content. What the player picked is what gets sent. Strong rolls
+  make it land better, not land differently.
+
+  Never resolve the date before Interest reaches 25 mechanically.
+  Characters may flirt, hint, or express desire to meet — but the
+  actual agreement to go on a date is gated by the Interest meter.
+  No shortcuts, no narrative overrides.
+
+  Maintain two distinct character voices throughout the entire
+  conversation. The player character and opponent character must
+  never converge in register, vocabulary, emoji usage, or sentence
+  structure. If one texts in lowercase with no punctuation, the
+  other should not drift to match.
+writing_rules: |
+  All dialogue is texting register. These are messages on a dating
+  app, not letters, not speeches, not narration. Short, informal,
+  platform-appropriate. The way real people actually text — which
+  means sentence fragments, strategic punctuation, and words chosen
+  for how they look on a screen.
+
+  Message length: typically 1-3 sentences for player options, 1-4
+  sentences for opponent responses. Brevity is a feature. The best
+  messages are the ones where every word earns its place.
+
+  Emoji: use only when the character's texting style fragment calls
+  for it, and even then, sparingly. Emoji is a character choice,
+  not a default. Some characters never use emoji. Some use exactly
+  one per message. Match the fragment.
+
+  No asterisk actions (*walks over*, *sighs*). This is a text-based
+  dating app. Characters cannot perform physical actions. Everything
+  is communicated through words, punctuation, and timing.
+
+  Comedy comes from character voice, not from narration or winking
+  at the audience. A character is funny because of how THEY talk,
+  not because the game points out that something is funny. Never
+  break the fourth wall. Never have a character acknowledge the
+  absurdity of their situation unless it is completely in-character
+  for them to do so.
+
+  Strong rolls sharpen phrasing. They do NOT add new ideas, new
+  topics, or new emotional content. A clean success (beat DC by
+  1-4) delivers the message as intended. A strong success (5-9)
+  tightens the phrasing — removes a hesitation, finds the perfect
+  word. A critical success or Nat 20 makes it land with precision
+  that surprises even the character who sent it.
+
+  Failed deliveries corrupt the message proportional to the failure
+  tier. A Fumble (miss by 1-2) adds slight awkwardness — a word
+  that doesn't quite fit, timing slightly off. A Misfire (3-5) is
+  a noticeable stumble — wrong tone, accidental double meaning. A
+  Trope Trap (6-9) makes the character fall into a dating cliche
+  they would normally avoid. A Catastrophe (10+) is a genuine
+  misfire — the message communicates the opposite of what was
+  intended.
+
+  Subtext over text. Reveal through choices, not statements. The
+  reader — the human player — is watching this conversation unfold.
+  Make it worth their time. Every message should sound like something
+  a real person would actually send on a dating app at 1 AM.
