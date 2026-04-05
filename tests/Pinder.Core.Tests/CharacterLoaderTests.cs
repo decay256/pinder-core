@@ -406,5 +406,74 @@ PERSONALITY
             string result = CharacterLoader.ParseBio(content);
             Assert.Equal("Scorpio. Living my best life. Send memes.", result);
         }
+
+        // ── ParseLevel tests ───────────────────────────────────────────
+
+        [Fact]
+        public void ParseLevel_StandardFormat_ReturnsLevel()
+        {
+            string content = @"```
+LEVEL
+- Level: 7 (Veteran) | Level bonus: +3
+
+EFFECTIVE STATS
+- Charm: +5
+```";
+            int result = CharacterLoader.ParseLevel(content);
+            Assert.Equal(7, result);
+        }
+
+        [Fact]
+        public void ParseLevel_SingleDigit_ReturnsLevel()
+        {
+            string content = @"```
+LEVEL
+- Level: 3 (Getting Somewhere) | Level bonus: +1
+```";
+            int result = CharacterLoader.ParseLevel(content);
+            Assert.Equal(3, result);
+        }
+
+        [Fact]
+        public void ParseLevel_DoubleDigit_ReturnsLevel()
+        {
+            string content = @"```
+LEVEL
+- Level: 11 (Legendary) | Level bonus: +5
+```";
+            int result = CharacterLoader.ParseLevel(content);
+            Assert.Equal(11, result);
+        }
+
+        [Fact]
+        public void ParseLevel_NoLevelLine_ReturnsDefault1()
+        {
+            string content = @"```
+EFFECTIVE STATS
+- Charm: +5
+```";
+            int result = CharacterLoader.ParseLevel(content);
+            Assert.Equal(1, result);
+        }
+
+        [Theory]
+        [InlineData("velvet", 7)]
+        [InlineData("brick", 9)]
+        [InlineData("sable", 3)]
+        [InlineData("gerald", 5)]
+        [InlineData("zyx", 1)]
+        public void ParseLevel_AllStarterCharacters_ReturnsCorrectLevel(string name, int expectedLevel)
+        {
+            string promptDir = "/root/.openclaw/agents-extra/pinder/design/examples";
+            string path = System.IO.Path.Combine(promptDir, $"{name}-prompt.md");
+            if (!System.IO.File.Exists(path))
+            {
+                // Skip if prompt files not available in this environment
+                return;
+            }
+            string content = System.IO.File.ReadAllText(path);
+            int result = CharacterLoader.ParseLevel(content);
+            Assert.Equal(expectedLevel, result);
+        }
     }
 }
