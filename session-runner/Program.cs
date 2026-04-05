@@ -305,9 +305,9 @@ class Program
         Console.WriteLine();
 
         // ── DC table ──────────────────────────────────────────────────────
-        Console.WriteLine("## DC Reference (Sable attacking, Brick defending)");
+        Console.WriteLine($"## DC Reference ({player1} attacking, {player2} defending)");
         Console.WriteLine();
-        Console.WriteLine("| Stat | Sable mod | Brick defends | DC | Need | % | Risk |");
+        Console.WriteLine($"| Stat | {player1} mod | {player2} defends | DC | Need | % | Risk |");
         Console.WriteLine("|---|---|---|---|---|---|---|");
         foreach (var stat in new[] { StatType.Charm, StatType.Rizz, StatType.Honesty, StatType.Chaos, StatType.Wit, StatType.SelfAwareness }) {
             int atkMod = sableStats.GetEffective(stat);
