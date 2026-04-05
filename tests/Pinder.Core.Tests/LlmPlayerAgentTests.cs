@@ -200,7 +200,7 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public void BuildPrompt_ContainsCharacterNames()
+        public void BuildPrompt_ContainsPlayerName()
         {
             var options = new Pinder.LlmAdapters.Anthropic.AnthropicOptions { ApiKey = "test-key" };
             using var agent = new LlmPlayerAgent(options, new ScoringPlayerAgent(), "Sable", "Brick");
@@ -209,8 +209,20 @@ namespace Pinder.Core.Tests
 
             string prompt = agent.BuildPrompt(turn, context);
 
+            // Player name appears in task instruction
             Assert.Contains("Sable", prompt);
-            Assert.Contains("Brick", prompt);
+        }
+
+        [Fact]
+        public void BuildSystemMessage_ContainsCharacterNames()
+        {
+            var options = new Pinder.LlmAdapters.Anthropic.AnthropicOptions { ApiKey = "test-key" };
+            using var agent = new LlmPlayerAgent(options, new ScoringPlayerAgent(), "Sable", "Brick",
+                playerSystemPrompt: "You are a dramatic character.");
+            string systemMsg = agent.BuildSystemMessage();
+
+            Assert.Contains("Sable", systemMsg);
+            Assert.Contains("Brick", systemMsg);
         }
 
         [Fact]
@@ -485,6 +497,219 @@ namespace Pinder.Core.Tests
 
             Assert.Contains("\"Hey gorgeous\"", prompt);
             Assert.Contains("\"I'm nervous\"", prompt);
+        }
+
+        // ── BuildSystemMessage tests ─────────────────────────────────────
+
+        [Fact]
+        public void BuildSystemMessage_NoCharacterContext_ReturnsGeneric()
+        {
+            var opts = new Pinder.LlmAdapters.Anthropic.AnthropicOptions { ApiKey = "test-key" };
+            using var agent = new LlmPlayerAgent(opts, new ScoringPlayerAgent(), "Sable", "Brick");
+            string systemMsg = agent.BuildSystemMessage();
+
+            Assert.Contains("strategic player in Pinder", systemMsg);
+            Assert.DoesNotContain("personality and voice", systemMsg);
+        }
+
+        [Fact]
+        public void BuildSystemMessage_WithSystemPrompt_IncludesCharacterIdentity()
+        {
+            var opts = new Pinder.LlmAdapters.Anthropic.AnthropicOptions { ApiKey = "test-key" };
+            using var agent = new LlmPlayerAgent(opts, new ScoringPlayerAgent(), "Sable", "Brick",
+                playerSystemPrompt: "You are Sable, a dramatic artisanal penis.");
+            string systemMsg = agent.BuildSystemMessage();
+
+            Assert.Contains("You are playing as Sable", systemMsg);
+            Assert.Contains("talking to Brick", systemMsg);
+            Assert.Contains("artisanal penis", systemMsg);
+            Assert.Contains("personality and voice", systemMsg);
+        }
+
+        [Fact]
+        public void BuildSystemMessage_WithTextingStyle_IncludesStyle()
+        {
+            var opts = new Pinder.LlmAdapters.Anthropic.AnthropicOptions { ApiKey = "test-key" };
+            using var agent = new LlmPlayerAgent(opts, new ScoringPlayerAgent(), "Sable", "Brick",
+                playerTextingStyle: "lowercase, ironic, precise");
+            string systemMsg = agent.BuildSystemMessage();
+
+            Assert.Contains("lowercase, ironic, precise", systemMsg);
+            Assert.Contains("personality and voice", systemMsg);
+        }
+
+        [Fact]
+        public void BuildSystemMessage_WithBoth_IncludesAll()
+        {
+            var opts = new Pinder.LlmAdapters.Anthropic.AnthropicOptions { ApiKey = "test-key" };
+            using var agent = new LlmPlayerAgent(opts, new ScoringPlayerAgent(), "Sable", "Brick",
+                playerSystemPrompt: "Dramatic character.", playerTextingStyle: "lowercase vibes");
+            string systemMsg = agent.BuildSystemMessage();
+
+            Assert.Contains("Dramatic character.", systemMsg);
+            Assert.Contains("lowercase vibes", systemMsg);
+            Assert.Contains("character fit", systemMsg);
+        }
+
+        // ── Conversation history tests ─────────────────────────────────────
+
+        [Fact]
+        public void BuildPrompt_WithConversationHistory_IncludesHistory()
+        {
+            var opts = new Pinder.LlmAdapters.Anthropic.AnthropicOptions { ApiKey = "test-key" };
+            using var agent = new LlmPlayerAgent(opts, new ScoringPlayerAgent(), "Sable", "Brick");
+            var turn = MakeTurnStart();
+            var history = new List<(string Sender, string Text)>
+            {
+                ("Sable", "hey there"),
+                ("Brick", "oh hi lol"),
+                ("Sable", "nice hat"),
+                ("Brick", "thanks i grew it myself")
+            };
+            var context = new PlayerAgentContext(
+                MakeStats(), MakeStats(charm: 2, rizz: 3, honesty: 2, chaos: 2, wit: 2, sa: 2),
+                12, InterestState.Interested, 2, Array.Empty<string>(), 4,
+                new Dictionary<ShadowStatType, int>
+                {
+                    { ShadowStatType.Denial, 3 }, { ShadowStatType.Fixation, 1 },
+                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Horniness, 4 },
+                    { ShadowStatType.Dread, 0 }, { ShadowStatType.Overthinking, 2 }
+                },
+                5, conversationHistory: history);
+
+            string prompt = agent.BuildPrompt(turn, context);
+
+            Assert.Contains("## Conversation So Far", prompt);
+            Assert.Contains("Sable: hey there", prompt);
+            Assert.Contains("Brick: oh hi lol", prompt);
+            Assert.Contains("Brick: thanks i grew it myself", prompt);
+        }
+
+        [Fact]
+        public void BuildPrompt_NullConversationHistory_OmitsSection()
+        {
+            var opts = new Pinder.LlmAdapters.Anthropic.AnthropicOptions { ApiKey = "test-key" };
+            using var agent = new LlmPlayerAgent(opts, new ScoringPlayerAgent(), "Sable", "Brick");
+            var turn = MakeTurnStart();
+            var context = MakeContext(); // null conversation history by default
+
+            string prompt = agent.BuildPrompt(turn, context);
+
+            Assert.DoesNotContain("Conversation So Far", prompt);
+        }
+
+        [Fact]
+        public void BuildPrompt_EmptyConversationHistory_OmitsSection()
+        {
+            var opts = new Pinder.LlmAdapters.Anthropic.AnthropicOptions { ApiKey = "test-key" };
+            using var agent = new LlmPlayerAgent(opts, new ScoringPlayerAgent(), "Sable", "Brick");
+            var turn = MakeTurnStart();
+            var context = new PlayerAgentContext(
+                MakeStats(), MakeStats(), 12, InterestState.Interested, 0,
+                Array.Empty<string>(), 0, null, 1,
+                conversationHistory: new List<(string, string)>());
+
+            string prompt = agent.BuildPrompt(turn, context);
+
+            Assert.DoesNotContain("Conversation So Far", prompt);
+        }
+
+        // ── Scoring advisory tests ─────────────────────────────────────
+
+        [Fact]
+        public void BuildPrompt_WithScoringDecision_IncludesAdvisory()
+        {
+            var opts = new Pinder.LlmAdapters.Anthropic.AnthropicOptions { ApiKey = "test-key" };
+            using var agent = new LlmPlayerAgent(opts, new ScoringPlayerAgent(), "Sable", "Brick");
+            var turn = MakeTurnStart();
+            var context = MakeContext();
+            var scores = new[]
+            {
+                new OptionScore(0, 1.2f, 0.60f, 0.4f, Array.Empty<string>()),
+                new OptionScore(1, 2.8f, 0.75f, 1.1f, Array.Empty<string>()),
+                new OptionScore(2, 0.9f, 0.40f, -0.1f, Array.Empty<string>()),
+                new OptionScore(3, 2.1f, 0.65f, 0.7f, Array.Empty<string>())
+            };
+            var scoringDecision = new PlayerDecision(1, "EV pick", scores);
+
+            string prompt = agent.BuildPrompt(turn, context, scoringDecision);
+
+            Assert.Contains("## Scoring Agent Advisory", prompt);
+            Assert.Contains("← scorer pick", prompt);
+            Assert.Contains("Score: 2.80", prompt);
+        }
+
+        [Fact]
+        public void BuildPrompt_WithoutScoringDecision_OmitsAdvisory()
+        {
+            var opts = new Pinder.LlmAdapters.Anthropic.AnthropicOptions { ApiKey = "test-key" };
+            using var agent = new LlmPlayerAgent(opts, new ScoringPlayerAgent(), "Sable", "Brick");
+            var turn = MakeTurnStart();
+            var context = MakeContext();
+
+            string prompt = agent.BuildPrompt(turn, context);
+
+            Assert.DoesNotContain("Scoring Agent Advisory", prompt);
+        }
+
+        // ── Task instruction tests ─────────────────────────────────────
+
+        [Fact]
+        public void BuildPrompt_ContainsCharacterAwareTaskInstruction()
+        {
+            var opts = new Pinder.LlmAdapters.Anthropic.AnthropicOptions { ApiKey = "test-key" };
+            using var agent = new LlmPlayerAgent(opts, new ScoringPlayerAgent(), "Sable", "Brick");
+            var turn = MakeTurnStart();
+            var context = MakeContext();
+
+            string prompt = agent.BuildPrompt(turn, context);
+
+            Assert.Contains("fits Sable's personality", prompt);
+            Assert.Contains("narrative moment", prompt);
+            Assert.Contains("PICK: [A/B/C/D]", prompt);
+        }
+
+        // ── Constructor with character context tests ─────────────────────
+
+        [Fact]
+        public void Constructor_WithCharacterContext_DoesNotThrow()
+        {
+            var opts = new Pinder.LlmAdapters.Anthropic.AnthropicOptions { ApiKey = "test-key" };
+            using var agent = new LlmPlayerAgent(opts, new ScoringPlayerAgent(), "Sable", "Brick",
+                playerSystemPrompt: "You are Sable.", playerTextingStyle: "lowercase ironic");
+            Assert.NotNull(agent);
+        }
+
+        [Fact]
+        public void Constructor_NullPromptAndStyle_DefaultsToEmpty()
+        {
+            var opts = new Pinder.LlmAdapters.Anthropic.AnthropicOptions { ApiKey = "test-key" };
+            using var agent = new LlmPlayerAgent(opts, new ScoringPlayerAgent(), "Sable", "Brick",
+                playerSystemPrompt: null!, playerTextingStyle: null!);
+            // Should not throw and should fall back to generic system message
+            string systemMsg = agent.BuildSystemMessage();
+            Assert.Contains("strategic player in Pinder", systemMsg);
+        }
+
+        // ── PlayerAgentContext conversation history tests ─────────────────
+
+        [Fact]
+        public void PlayerAgentContext_ConversationHistory_DefaultsToNull()
+        {
+            var context = MakeContext();
+            Assert.Null(context.ConversationHistory);
+        }
+
+        [Fact]
+        public void PlayerAgentContext_ConversationHistory_CanBeSet()
+        {
+            var history = new List<(string, string)> { ("A", "hello"), ("B", "hi") };
+            var context = new PlayerAgentContext(
+                MakeStats(), MakeStats(), 12, InterestState.Interested, 0,
+                Array.Empty<string>(), 0, null, 1,
+                conversationHistory: history);
+            Assert.NotNull(context.ConversationHistory);
+            Assert.Equal(2, context.ConversationHistory!.Count);
         }
     }
 }

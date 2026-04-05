@@ -343,7 +343,9 @@ class Program
                 Model = Environment.GetEnvironmentVariable("PLAYER_AGENT_MODEL") ?? "claude-sonnet-4-20250514"
             };
             agent = new LlmPlayerAgent(agentOptions, new ScoringPlayerAgent(),
-                playerName: sable.DisplayName, opponentName: brick.DisplayName);
+                playerName: sable.DisplayName, opponentName: brick.DisplayName,
+                playerSystemPrompt: sable.AssembledSystemPrompt,
+                playerTextingStyle: sable.TextingStyleFragment);
         }
         else
         {
@@ -365,6 +367,7 @@ class Program
         int turn = 0;
         GameOutcome? finalOutcome = null;
         string lastOpponentMsg = "";
+        var conversationHistory = new List<(string Sender, string Text)>();
 
         while (turn < maxTurns)
         {
@@ -453,7 +456,8 @@ class Program
                 activeTrapNames: snap.ActiveTrapNames,
                 sessionHorniness: 0,
                 shadowValues: currentShadowValues,
-                turnNumber: snap.TurnNumber);
+                turnNumber: snap.TurnNumber,
+                conversationHistory: conversationHistory);
             var decision = await agent.DecideAsync(turnStart, agentContext);
             int pick = decision.OptionIndex;
             var chosen = turnStart.Options[pick];
@@ -487,6 +491,10 @@ class Program
             Console.WriteLine();
 
             lastOpponentMsg = result.OpponentMessage ?? "";
+            // Accumulate conversation history for LLM player agent
+            conversationHistory.Add((player1, result.DeliveredMessage));
+            if (!string.IsNullOrEmpty(result.OpponentMessage))
+                conversationHistory.Add((player2, result.OpponentMessage));
             Console.WriteLine($"**📩 {player2} replies:**");
             PrintQuoted(result.OpponentMessage);
             Console.WriteLine();

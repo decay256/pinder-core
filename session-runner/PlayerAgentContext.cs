@@ -47,6 +47,12 @@ namespace Pinder.SessionRunner
         /// <summary>Whether Honesty was available as an option last turn. False on first turn or unknown.</summary>
         public bool HonestyAvailableLastTurn { get; }
 
+        /// <summary>
+        /// Conversation history for LLM context. Each tuple is (SenderName, MessageText).
+        /// Null if conversation history is not available (e.g., first turn or scoring-only agent).
+        /// </summary>
+        public IReadOnlyList<(string Sender, string Text)>? ConversationHistory { get; }
+
         public PlayerAgentContext(
             StatBlock playerStats,
             StatBlock opponentStats,
@@ -59,7 +65,8 @@ namespace Pinder.SessionRunner
             int turnNumber,
             StatType? lastStatUsed = null,
             StatType? secondLastStatUsed = null,
-            bool honestyAvailableLastTurn = false)
+            bool honestyAvailableLastTurn = false,
+            IReadOnlyList<(string Sender, string Text)>? conversationHistory = null)
         {
             PlayerStats = playerStats ?? throw new ArgumentNullException(nameof(playerStats));
             OpponentStats = opponentStats ?? throw new ArgumentNullException(nameof(opponentStats));
@@ -73,6 +80,7 @@ namespace Pinder.SessionRunner
             LastStatUsed = lastStatUsed;
             SecondLastStatUsed = secondLastStatUsed;
             HonestyAvailableLastTurn = honestyAvailableLastTurn;
+            ConversationHistory = conversationHistory;
         }
     }
 }

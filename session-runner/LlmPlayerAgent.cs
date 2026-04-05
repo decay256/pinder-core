@@ -11,13 +11,14 @@ using Pinder.LlmAdapters.Anthropic.Dto;
 namespace Pinder.SessionRunner
 {
     /// <summary>
-    /// LLM-backed player agent that sends full game state and rules context to
-    /// Anthropic's Claude API and parses a strategic pick from the response.
+    /// LLM-backed player agent that sends full game state, character context,
+    /// conversation history, and scoring advisory to Anthropic's Claude API
+    /// and parses a character-consistent pick from the response.
     /// Falls back to ScoringPlayerAgent on any failure.
     /// </summary>
     public sealed class LlmPlayerAgent : IPlayerAgent, IDisposable
     {
-        private const string SystemMessage =
+        private const string GenericSystemMessage =
             "You are a strategic player in Pinder, a comedy dating RPG. You analyze game mechanics " +
             "and choose the optimal dialogue option each turn. Your goal is to reach Interest 25 " +
             "(date secured) while avoiding Interest 0 (unmatched/ghosted).";
@@ -40,26 +41,39 @@ namespace Pinder.SessionRunner
         private readonly string _model;
         private readonly string _playerName;
         private readonly string _opponentName;
+        private readonly string _playerSystemPrompt;
+        private readonly string _playerTextingStyle;
         private bool _disposed;
 
         /// <summary>
-        /// Creates an LLM-backed player agent.
+        /// Creates an LLM-backed player agent with character context.
         /// </summary>
         /// <param name="options">Anthropic API configuration (API key, model, etc.).</param>
         /// <param name="fallback">Deterministic scoring agent used on LLM failure.</param>
-        /// <param name="playerName">Player character display name (optional, for prompt immersion).</param>
-        /// <param name="opponentName">Opponent character display name (optional, for prompt immersion).</param>
-        /// <exception cref="ArgumentNullException">If options or fallback is null.</exception>
+        /// <param name="playerName">Player character display name.</param>
+        /// <param name="opponentName">Opponent character display name.</param>
+        /// <param name="playerSystemPrompt">
+        ///   The player character's full assembled system prompt (from CharacterProfile.AssembledSystemPrompt).
+        ///   Empty string if not available. Used to give the LLM the character's personality and voice.
+        /// </param>
+        /// <param name="playerTextingStyle">
+        ///   The player character's texting style fragment (from CharacterProfile.TextingStyleFragment).
+        ///   Empty string if not available. Used to reinforce character voice in option selection reasoning.
+        /// </param>
         public LlmPlayerAgent(
             AnthropicOptions options,
             ScoringPlayerAgent fallback,
             string playerName = "the player",
-            string opponentName = "the opponent")
+            string opponentName = "the opponent",
+            string playerSystemPrompt = "",
+            string playerTextingStyle = "")
         {
             if (options == null) throw new ArgumentNullException(nameof(options));
             _fallback = fallback ?? throw new ArgumentNullException(nameof(fallback));
             _playerName = playerName ?? "the player";
             _opponentName = opponentName ?? "the opponent";
+            _playerSystemPrompt = playerSystemPrompt ?? "";
+            _playerTextingStyle = playerTextingStyle ?? "";
             _model = options.Model;
             _client = new AnthropicClient(options.ApiKey);
         }
@@ -80,14 +94,15 @@ namespace Pinder.SessionRunner
 
             try
             {
-                string userMessage = BuildPrompt(turn, context);
+                string systemMessage = BuildSystemMessage();
+                string userMessage = BuildPrompt(turn, context, scoringDecision);
 
                 var request = new MessagesRequest
                 {
                     Model = _model,
                     MaxTokens = 512,
                     Temperature = 0.3,
-                    System = new[] { new ContentBlock { Type = "text", Text = SystemMessage } },
+                    System = new[] { new ContentBlock { Type = "text", Text = systemMessage } },
                     Messages = new[] { new Message { Role = "user", Content = userMessage } }
                 };
 
@@ -126,15 +141,60 @@ namespace Pinder.SessionRunner
         }
 
         /// <summary>
-        /// Builds the full LLM prompt from turn data and agent context.
+        /// Builds the system message, incorporating character identity when available.
+        /// Falls back to generic strategic prompt when no character context is provided.
         /// </summary>
-        internal string BuildPrompt(TurnStart turn, PlayerAgentContext context)
+        internal string BuildSystemMessage()
         {
-            var sb = new System.Text.StringBuilder(2048);
+            bool hasPrompt = !string.IsNullOrWhiteSpace(_playerSystemPrompt);
+            bool hasStyle = !string.IsNullOrWhiteSpace(_playerTextingStyle);
 
-            sb.AppendLine($"You are playing as {_playerName}, a sentient penis on a dating app.");
-            sb.AppendLine($"You are talking to {_opponentName}. Choose one of the dialogue options below.");
+            if (!hasPrompt && !hasStyle)
+            {
+                return GenericSystemMessage;
+            }
+
+            var sb = new System.Text.StringBuilder(4096);
+            sb.AppendLine($"You are playing as {_playerName} in Pinder, a comedy dating RPG.");
+            sb.AppendLine($"You are talking to {_opponentName}.");
             sb.AppendLine();
+
+            if (hasPrompt)
+            {
+                sb.AppendLine(_playerSystemPrompt);
+                sb.AppendLine();
+            }
+
+            if (hasStyle)
+            {
+                sb.AppendLine(_playerTextingStyle);
+                sb.AppendLine();
+            }
+
+            sb.AppendLine($"Choose dialogue options that fit {_playerName}'s personality and voice.");
+            sb.Append("You also understand game mechanics and consider expected value, but character fit ");
+            sb.AppendLine("and narrative moment take priority over pure optimization.");
+
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Builds the full LLM user prompt from turn data, agent context, and scoring advisory.
+        /// </summary>
+        internal string BuildPrompt(TurnStart turn, PlayerAgentContext context, PlayerDecision? scoringDecision = null)
+        {
+            var sb = new System.Text.StringBuilder(4096);
+
+            // Conversation history (if available)
+            if (context.ConversationHistory != null && context.ConversationHistory.Count > 0)
+            {
+                sb.AppendLine("## Conversation So Far");
+                foreach (var (sender, text) in context.ConversationHistory)
+                {
+                    sb.AppendLine($"{sender}: {text}");
+                }
+                sb.AppendLine();
+            }
 
             // Current state
             sb.AppendLine("## Current State");
@@ -173,11 +233,30 @@ namespace Pinder.SessionRunner
             }
             sb.AppendLine();
 
+            // Scoring agent advisory (if available)
+            if (scoringDecision != null && scoringDecision.Scores.Length > 0)
+            {
+                sb.AppendLine("## Scoring Agent Advisory (pure EV — use as input, not gospel)");
+                char advisoryLetter = 'A';
+                for (int i = 0; i < scoringDecision.Scores.Length; i++)
+                {
+                    var score = scoringDecision.Scores[i];
+                    string scorerPick = i == scoringDecision.OptionIndex ? " ← scorer pick" : "";
+                    sb.AppendLine($"{advisoryLetter}) Score: {score.Score:F2} | {score.SuccessChance * 100:F0}% success | EV: {score.ExpectedInterestGain:+0.00;-0.00;+0.00}{scorerPick}");
+                    advisoryLetter = (char)(advisoryLetter + 1);
+                }
+                sb.AppendLine();
+            }
+
             // Rules reminder
             sb.AppendLine(RulesReminder);
 
-            sb.AppendLine("Explain your reasoning step by step, weighing success probability, interest gain, risk,");
-            sb.AppendLine("and any active bonuses or traps. Then state your final choice as:");
+            // Task instruction
+            sb.AppendLine($"Consider: (1) Which option fits {_playerName}'s personality right now?");
+            sb.AppendLine("(2) What would make the best narrative moment given the conversation so far?");
+            sb.AppendLine("(3) The scoring agent's EV analysis — diverge when character or story demands it.");
+            sb.AppendLine();
+            sb.AppendLine("Explain your reasoning in 2-4 sentences. Then state your final choice as:");
             sb.AppendLine("PICK: [A/B/C/D]");
 
             return sb.ToString();
