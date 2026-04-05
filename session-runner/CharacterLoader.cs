@@ -372,17 +372,18 @@ namespace Pinder.SessionRunner
         }
 
 
-        private static string ParseBio(string content)
+        internal static string ParseBio(string content)
         {
             foreach (var line in content.Split('\n'))
             {
                 var trimmed = line.Trim();
-                if (trimmed.StartsWith("- Bio:", System.StringComparison.OrdinalIgnoreCase))
+                if (trimmed.StartsWith("- Bio:", StringComparison.OrdinalIgnoreCase))
                 {
-                    int q1 = trimmed.IndexOf('"');
-                    int q2 = trimmed.LastIndexOf('"');
-                    if (q1 >= 0 && q2 > q1)
-                        return trimmed.Substring(q1 + 1, q2 - q1 - 1);
+                    var value = trimmed.Substring("- Bio:".Length).Trim();
+                    // Strip optional surrounding quotes if present
+                    if (value.Length >= 2 && value[0] == '"' && value[value.Length - 1] == '"')
+                        value = value.Substring(1, value.Length - 2);
+                    return value;
                 }
             }
             return string.Empty;
