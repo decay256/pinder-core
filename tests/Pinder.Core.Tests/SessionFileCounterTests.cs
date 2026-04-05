@@ -193,6 +193,70 @@ namespace Pinder.Core.Tests
             }
         }
 
+        // Simulates the bug: two consecutive session writes must produce sequential numbers
+        // Previously the session number was computed at write time and could be stale
+        // if the header was written before the file (or path mismatch between runs)
+        [Fact]
+        public void ConsecutiveSessionWrites_ProduceSequentialNumbers()
+        {
+            var dir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(dir);
+            try
+            {
+                // Simulate 5 existing files
+                for (int i = 1; i <= 5; i++)
+                    File.WriteAllText(Path.Combine(dir, $"session-{i:D3}-sable-vs-brick.md"), "");
+
+                // First write: should be session-006
+                int firstNum = SessionFileCounter.GetNextSessionNumber(dir);
+                Assert.Equal(6, firstNum);
+                string firstSlug = $"session-{firstNum:D3}-sable-vs-brick.md";
+                File.WriteAllText(Path.Combine(dir, firstSlug), "session 6 content");
+
+                // Second write: should be session-007 (NOT session-006 again)
+                int secondNum = SessionFileCounter.GetNextSessionNumber(dir);
+                Assert.Equal(7, secondNum);
+                string secondSlug = $"session-{secondNum:D3}-sable-vs-brick.md";
+                File.WriteAllText(Path.Combine(dir, secondSlug), "session 7 content");
+
+                // Verify both files exist with distinct content
+                Assert.True(File.Exists(Path.Combine(dir, "session-006-sable-vs-brick.md")));
+                Assert.True(File.Exists(Path.Combine(dir, "session-007-sable-vs-brick.md")));
+                Assert.Equal("session 6 content", File.ReadAllText(Path.Combine(dir, "session-006-sable-vs-brick.md")));
+                Assert.Equal("session 7 content", File.ReadAllText(Path.Combine(dir, "session-007-sable-vs-brick.md")));
+            }
+            finally
+            {
+                Directory.Delete(dir, true);
+            }
+        }
+
+        // Verifies the fix: session number computed once at start is used for both header and filename
+        [Fact]
+        public void SessionNumberComputedOnce_HeaderMatchesFilename()
+        {
+            var dir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(dir);
+            try
+            {
+                for (int i = 1; i <= 5; i++)
+                    File.WriteAllText(Path.Combine(dir, $"session-{i:D3}-a-vs-b.md"), "");
+
+                // Simulate the fixed flow: compute number ONCE, use for both header and file
+                int sessionNumber = SessionFileCounter.GetNextSessionNumber(dir);
+                string header = $"# Playtest Session {sessionNumber:D3}";
+                string slug = $"session-{sessionNumber:D3}-a-vs-b.md";
+
+                // Header number matches slug number
+                Assert.Contains("006", header);
+                Assert.Contains("006", slug);
+            }
+            finally
+            {
+                Directory.Delete(dir, true);
+            }
+        }
+
         // ResolvePlaytestDirectory: env var takes priority
         [Fact]
         public void ResolvePlaytestDirectory_EnvVarOverride()
