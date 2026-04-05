@@ -13,8 +13,12 @@ namespace Pinder.SessionRunner
     /// </summary>
     public sealed class ScoringPlayerAgent : IPlayerAgent
     {
-        // Baseline fail cost approximation across failure tiers
-        private const float DefaultFailCost = 1.5f;
+        // Trap activation cost added to TropeTrap/Catastrophe/Legendary failure tiers
+        // Represents ~1.5 turns of reduced effectiveness from activated trap
+        private const float TrapActivationCost = 1.5f;
+
+        // Low success threshold below which combo bonus is further scaled down
+        private const float LowSuccessThreshold = 0.20f;
 
         // Strategic adjustment magnitudes
         private const float MomentumStreakBias = 1.0f;
@@ -122,11 +126,17 @@ namespace Pinder.SessionRunner
                     baseInterestGain = 0.0f;
                 }
 
-                float comboBonus = option.ComboName != null ? 1.0f : 0.0f;
+                // Scale combo bonus when success probability is low (<20%).
+                // A combo that fires 15% of the time is worth much less than full value.
+                float comboScale = successChance < LowSuccessThreshold
+                    ? successChance / LowSuccessThreshold
+                    : 1.0f;
+                float comboBonus = option.ComboName != null ? 1.0f * comboScale : 0.0f;
                 float expectedGainOnSuccess = baseInterestGain + riskInfo.Bonus + comboBonus;
 
-                // Step 5: Expected cost on failure
-                float failCost = DefaultFailCost;
+                // Step 5: Weighted failure cost based on miss margin distribution
+                // Accounts for trap activation on TropeTrap/Catastrophe/Legendary
+                float failCost = ComputeWeightedFailCost(need);
 
                 // Step 6: Raw EV
                 float expectedInterestGain = successChance * expectedGainOnSuccess
@@ -323,6 +333,57 @@ namespace Pinder.SessionRunner
                 case StatType.SelfAwareness: return "SA";
                 default: return s.ToString();
             }
+        }
+
+        /// <summary>
+        /// Computes weighted average failure cost based on the distribution of miss margins
+        /// across failure tiers. Includes trap activation cost for TropeTrap, Catastrophe,
+        /// and Legendary tiers. Replaces flat DefaultFailCost for more accurate EV.
+        /// </summary>
+        private static float ComputeWeightedFailCost(int need)
+        {
+            // If need <= 1, only nat1 can fail (handled by d20 min=1)
+            if (need <= 1) return 0f;
+
+            int maxFailRoll = Math.Min(need - 1, 20);
+            if (maxFailRoll <= 0) return 0f;
+
+            float totalCost = 0f;
+
+            for (int roll = 1; roll <= maxFailRoll; roll++)
+            {
+                if (roll == 1)
+                {
+                    // Nat1 → Legendary: -4 interest + trap activation
+                    totalCost += 4.0f + TrapActivationCost;
+                }
+                else
+                {
+                    int missMargin = need - roll;
+                    if (missMargin >= 10)
+                    {
+                        // Catastrophe: -3 interest + trap activation
+                        totalCost += 3.0f + TrapActivationCost;
+                    }
+                    else if (missMargin >= 6)
+                    {
+                        // TropeTrap: -2 interest + trap activation
+                        totalCost += 2.0f + TrapActivationCost;
+                    }
+                    else if (missMargin >= 3)
+                    {
+                        // Misfire: -1 interest
+                        totalCost += 1.0f;
+                    }
+                    else
+                    {
+                        // Fumble (miss 1-2): -1 interest
+                        totalCost += 1.0f;
+                    }
+                }
+            }
+
+            return totalCost / maxFailRoll;
         }
 
         private static RiskTierInfo ComputeRiskTier(int need)
