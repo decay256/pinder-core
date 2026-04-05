@@ -343,3 +343,193 @@ As a playtester, I want the scoring agent to accurately evaluate option risk so 
 - Changes to LlmPlayerAgent
 - Changes to Pinder.Core game mechanics
 - Changes to combo/tell detection logic
+
+---
+
+## Sprint: Session Architecture + Archetype Fix
+
+### Issue #540 — Bug: archetype selection ignores level range
+
+#### User Story
+
+As a game designer, I want the dominant archetype to be selected from archetypes whose level range includes the character's current level so that a Level 1 character cannot incorrectly receive a high-level archetype like The Sniper (Level 5-11).
+
+#### Acceptance Criteria
+
+- [ ] `archetypes-enriched.yaml` created with all 20 archetypes including `level_range` fields
+- [ ] `CharacterAssembler` filters by level range when selecting dominant archetype
+- [ ] Level 1 character cannot have Sniper as dominant (level range 5-11)
+- [ ] Level 7 character can have Sniper but not Hey Opener (level range 1-3)
+- [ ] Unit tests verify level-gating
+- [ ] `settings/archetypes.md` regenerated from YAML (or noted for future round-trip)
+- [ ] Build clean
+
+#### NFR Notes (flag for Architect)
+
+- **Data dependency**: Archetype level ranges must be machine-readable (YAML), not just in markdown prose
+- **Backward compatibility**: Existing CharacterAssembler tests must pass; level-range filtering is additive
+
+#### Out of Scope
+
+- Archetype behavioral instructions (#533)
+- Changes to other assembly pipeline stages
+
+---
+
+### Issue #541 — AnthropicLlmAdapter: add stateful conversation mode
+
+#### User Story
+
+As a game session host, I want the LLM adapter to accumulate messages across calls within a session so that conversation context builds naturally without rebuilding from scratch each turn.
+
+#### Acceptance Criteria
+
+- [ ] `ConversationSession` class with `AppendUser`, `AppendAssistant`, `Messages`, `SystemPrompt`
+- [ ] `AnthropicLlmAdapter.StartConversation(systemPrompt)` creates a session
+- [ ] When a session is active, calls use accumulated messages[] not fresh context
+- [ ] `ILlmAdapter` interface unchanged
+- [ ] All existing tests still pass
+- [ ] Build clean
+
+#### NFR Notes (flag for Architect)
+
+- **Memory**: Message list grows unbounded within a session — acceptable at prototype maturity, may need truncation strategy at MVP
+- **Backward compatibility**: `ILlmAdapter` unchanged; `NullLlmAdapter` unchanged; stateful mode is opt-in
+
+#### Out of Scope
+
+- Message truncation or summarization
+- Changes to `ILlmAdapter` interface
+- Changes to `NullLlmAdapter`
+
+---
+
+### Issue #542 — GameSession: create LLM conversation session at start
+
+#### User Story
+
+As a game session host, I want GameSession to automatically create a stateful LLM conversation at construction so that all turns within a game share continuous context.
+
+#### Acceptance Criteria
+
+- [ ] `IStatefulLlmAdapter : ILlmAdapter` interface with `StartConversation(string)`
+- [ ] `AnthropicLlmAdapter` implements `IStatefulLlmAdapter`
+- [ ] `GameSession` uses stateful session if adapter supports it
+- [ ] Session system prompt includes both character profiles
+- [ ] All existing tests still pass (NullLlmAdapter is not IStatefulLlmAdapter → stateless path)
+- [ ] Build clean
+
+#### NFR Notes (flag for Architect)
+
+- **Interface design**: `IStatefulLlmAdapter` extends `ILlmAdapter` — avoids casting to concrete type
+- **Backward compatibility**: NullLlmAdapter does not implement IStatefulLlmAdapter, so all existing test paths remain stateless
+
+#### Out of Scope
+
+- System prompt content design (that's #543)
+- Changes to NullLlmAdapter
+
+#### Dependencies
+
+- #541 (ConversationSession class must exist first)
+
+---
+
+### Issue #543 — Build session system prompt: character profiles + game vision + world rules
+
+#### User Story
+
+As a game designer, I want the session system prompt to contain the full game context (character bibles, game vision, world rules, meta contract) so that the LLM maintains consistent character voice and world coherence across all turns.
+
+#### Acceptance Criteria
+
+- [ ] `GameDefinition` class with all fields (Name, Vision, WorldDescription, PlayerRoleDescription, OpponentRoleDescription, MetaContract, WritingRules)
+- [ ] `GameDefinition.LoadFrom(yamlPath)` parses YAML
+- [ ] `GameDefinition.PinderDefaults` hardcoded fallback
+- [ ] `SessionSystemPromptBuilder.Build` produces system prompt with all 5 sections
+- [ ] Unit test: prompt contains both character names, game vision, world rules
+- [ ] Build clean
+
+#### NFR Notes (flag for Architect)
+
+- **Dependency**: `GameDefinition` needs YAML parsing — must live in LlmAdapters or a project with YAML dependency, NOT in Pinder.Core
+- **Fallback**: Hardcoded PinderDefaults ensures the system works without YAML file
+
+#### Out of Scope
+
+- YAML file content (that's #545)
+- LLM conversation session wiring (that's #542)
+
+#### Dependencies
+
+- #541, #542 (session infrastructure must exist)
+
+---
+
+### Issue #544 — Add [ENGINE] injection blocks to LLM calls
+
+#### User Story
+
+As a game designer, I want dice results and game events to appear as [ENGINE] injection blocks in LLM calls so that the LLM can use mechanical outcomes as narrative context without breaking character immersion.
+
+#### Acceptance Criteria
+
+- [ ] Options injection format replaces current BuildDialogueOptionsPrompt user content
+- [ ] Delivery injection format includes roll context from rule YAML
+- [ ] Opponent injection format includes Interest narrative per band
+- [ ] Interest narratives configurable (6 bands defined)
+- [ ] Roll context narratives sourced from enriched YAML `flavor` fields
+- [ ] Unit tests verify injection format correctness
+- [ ] Build clean
+
+#### NFR Notes (flag for Architect)
+
+- **Prompt engineering**: [ENGINE] blocks are a convention for separating game mechanics from character dialogue in the LLM conversation
+- **YAML dependency**: Roll context narratives from enriched YAML — needs access to rule data
+
+#### Out of Scope
+
+- Changes to game mechanics or roll resolution
+- LLM output parsing changes
+
+#### Dependencies
+
+- #541, #542, #543 (stateful session infrastructure and system prompt must exist)
+
+---
+
+### Issue #545 — Create game-definition.yaml with Pinder game vision, world rules, and meta contract
+
+#### User Story
+
+As a game designer, I want a YAML data file containing Pinder's game vision, world rules, character roles, meta contract, and writing rules so that these creative direction elements are data-driven and editable without code changes.
+
+#### Acceptance Criteria
+
+- [ ] File exists at correct path (`/root/.openclaw/agents-extra/pinder/data/game-definition.yaml`)
+- [ ] All 5 sections present with Pinder-specific content (game vision, world rules, character roles, meta contract, writing rules)
+- [ ] `GameDefinition.LoadFrom` can parse it successfully
+- [ ] Content reads as genuine creative direction, not boilerplate
+- [ ] Build clean (file is data, not code)
+
+#### NFR Notes (flag for Architect)
+
+- **Data file**: This is pure content, no code changes — but must be parseable by GameDefinition.LoadFrom (#543)
+
+#### Out of Scope
+
+- GameDefinition class implementation (that's #543)
+- SessionSystemPromptBuilder (that's #543)
+
+## PM Pre-flight Summary
+
+### Sprint: Session Architecture + Archetype Fix
+
+| Issue | Title | Checks | Changes Made |
+|-------|-------|--------|-------------|
+| #540 | Bug: archetype selection ignores level range | AC ✅ Description ✅ Role ❌→✅ Maturity ❌→✅ | Added Role + Maturity fields |
+| #541 | AnthropicLlmAdapter: stateful conversation mode | AC ✅ Description ✅ Role ❌→✅ Maturity ❌→✅ | Added Role + Maturity fields |
+| #542 | GameSession: create LLM conversation session | AC ✅ Description ✅ Role ❌→✅ Maturity ❌→✅ | Added Role + Maturity fields |
+| #543 | Build session system prompt | AC ✅ Description ✅ Role ❌→✅ Maturity ❌→✅ | Added Role + Maturity fields |
+| #544 | Add [ENGINE] injection blocks | AC ✅ Description ✅ Role ❌→✅ Maturity ❌→✅ | Added Role + Maturity fields |
+| #545 | Create game-definition.yaml | AC ✅ Description ✅ Role ❌→✅ Maturity ❌→✅ | Added Role + Maturity fields |
