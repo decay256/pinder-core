@@ -12,11 +12,13 @@ The session runner orchestrates simulated playtest sessions between two `Charact
 - **`data/characters/*.json`** — Character definition JSON files (gerald, velvet, sable, brick, zyx). Each defines name, gender_identity, bio, level, item IDs, anatomy selections, build_points, and optional shadows.
 - **`data/items/starter-items.json`** — Item definitions consumed by `JsonItemRepository`. Contains stat modifiers, prompt fragments, archetype tendencies, and timing modifiers.
 - **`data/anatomy/anatomy-parameters.json`** — Anatomy parameter definitions consumed by `JsonAnatomyRepository`. Contains tier IDs, stat modifiers, fragments, and timing modifiers.
+- **`tests/Pinder.Core.Tests/CharacterLoaderTests.cs`** — Unit tests for `CharacterLoader.ParseBio`: unquoted bio extraction, quoted bio with quote stripping, missing bio line returns empty, parameterized tests for all starter characters, bio inside code fence extraction.
 - **`tests/Pinder.Core.Tests/CharacterLoaderSpecTests.cs`** — Comprehensive tests for `CharacterLoader`: prompt file parsing (stats, shadows, level, display name, system prompt extraction), error cases (missing file, missing stats, missing EFFECTIVE STATS section), edge cases (mixed case input, shadow lines with/without tilde prefix, parenthetical notes, multiple code fences, level from outside code fence), and conditional integration tests against real prompt files.
 - **`tests/Pinder.Core.Tests/Issue415_CharacterDefinitionLoaderSpecTests.cs`** — Spec-driven tests for `CharacterDefinitionLoader` and `DataFileLocator`: assembly pipeline (AC2–AC4), all 5 character definitions load successfully (AC5), `DataFileLocator` resolves character files (AC6), data file presence, edge cases (missing shadows, empty items/anatomy, special chars in name, unknown item IDs), error conditions (file not found, malformed JSON, missing required fields, level range, unknown stat/shadow types), shadow parsing, `DataFileLocator` walk-up and repo root discovery, integration tests for full pipeline across characters.
 - **`session-runner/PlaytestFormatter.cs`** — Static utility class for formatting player agent reasoning blocks and option score tables as markdown. Contains `FormatReasoningBlock` and `FormatScoreTable`.
-- **`session-runner/LlmPlayerAgent.cs`** — LLM-backed player agent. Sends game state and rules to Anthropic Claude, parses `PICK:` response, falls back to `ScoringPlayerAgent` on failure. Implements `IDisposable`.
+- **`session-runner/LlmPlayerAgent.cs`** — LLM-backed player agent with character context. Sends game state, character personality, conversation history, and scoring advisory to Anthropic Claude, parses `PICK:` response, falls back to `ScoringPlayerAgent` on failure. Implements `IDisposable`. Uses character-aware system message when `playerSystemPrompt` or `playerTextingStyle` is provided; falls back to generic strategic prompt otherwise.
 - **`tests/Pinder.Core.Tests/LlmPlayerAgentTests.cs`** — Tests for `LlmPlayerAgent`: adjusted probability display (tell/momentum/callback bonuses), no-bonus raw percentage, dispose idempotency.
+- **`tests/Pinder.Core.Tests/LlmPlayerAgentSpecTests.cs`** — Spec tests for issue #492: character-aware system message (player name, opponent name, system prompt, texting style, generic fallback), conversation history in prompt (inclusion, sender names, null/empty omission), scoring advisory section (header, scorer pick marker, omission when null), task instruction (player name, narrative mention, PICK format), fallback behavior (valid index, scores array, reasoning marker), game state in prompt.
 - **`tests/Pinder.Core.Tests/Issue350_ShadowTrackingSpecTests.cs`** — Spec tests verifying shadow tracking wiring: `SessionShadowTracker` wraps `StatBlock`, `GameSessionConfig` passes player shadows into `GameSession`, delta accumulation, edge cases (negative deltas, multiple events per turn, game-end readability).
 - **`tests/Pinder.Core.Tests/Issue351_PickReasoningTests.cs`** — Tests for `PlaytestFormatter`: reasoning block formatting, score table columns/checkmarks/bold/bonuses, edge cases (null decision, NaN values, empty reasoning, score mismatch, fewer options).
 - **`session-runner/SessionFileCounter.cs`** — Static utility class that scans a directory for `session-*.md` files and returns the next available session number (`max + 1`). Also provides `ResolvePlaytestDirectory()` with 3-tier directory resolution: env var override → walk-up search for `design/playtests/` → hardcoded fallback path.
@@ -70,12 +72,18 @@ public static class CharacterLoader
     /// Returns sorted comma-separated names, or "(none)" if empty.
     /// Does not throw on nonexistent directory.
     public static string ListAvailable(string promptDirectory);
+
+    /// Parse the bio value from a "- Bio:" line in the content.
+    /// Returns text after "- Bio:" prefix, trimmed.
+    /// Strips surrounding double quotes if present. Returns "" if no bio line found.
+    internal static string ParseBio(string content);
 }
 ```
 
 **Parsing logic:**
 - **DisplayName**: extracted from `name=<X>` in Inputs line, or `You are playing the role of <X>` in code fence, or capitalized fallback name.
 - **Level**: from `- Level: N` inside code fence first; falls back to `**Level N —` pattern outside.
+- **Bio**: from `- Bio:` line. Extracts text after the prefix, trims whitespace, and strips optional surrounding double quotes. Does not require quotes (fixes prior bug where unquoted bios returned empty).
 - **Stats**: 6 required stats from `EFFECTIVE STATS` section inside code fence (`Charm`, `Rizz`, `Honesty`, `Chaos`, `Wit`, `Self-Awareness`). Missing stats throw `FormatException`.
 - **Shadows**: from `Shadow state` section outside code fence. `~` prefix stripped. Missing section defaults all to 0. Parenthetical notes after values are ignored.
 - **SystemPrompt**: full text between first and last code fences.
@@ -248,7 +256,7 @@ internal static class SessionFileCounter
 }
 ```
 
-### PlayerAgentContext — New Fields (issue #416)
+### PlayerAgentContext — Optional Fields
 
 ```csharp
 public sealed class PlayerAgentContext
@@ -264,17 +272,22 @@ public sealed class PlayerAgentContext
     /// Whether Honesty was available as an option last turn. False on first turn or unknown.
     public bool HonestyAvailableLastTurn { get; }
 
-    // Constructor — new optional parameters appended (backward-compatible):
+    /// Conversation history for LLM context. Each tuple is (SenderName, MessageText).
+    /// Null if conversation history is not available (e.g., first turn or scoring-only agent).
+    public IReadOnlyList<(string Sender, string Text)>? ConversationHistory { get; }
+
+    // Constructor — optional parameters appended (backward-compatible):
     public PlayerAgentContext(
         ...,
         int turnNumber,
         StatType? lastStatUsed = null,
         StatType? secondLastStatUsed = null,
-        bool honestyAvailableLastTurn = false);
+        bool honestyAvailableLastTurn = false,
+        IReadOnlyList<(string Sender, string Text)>? conversationHistory = null);
 }
 ```
 
-When all new fields are at defaults (`null`, `null`, `false`), scoring behavior is identical to pre-#416.
+When all optional fields are at defaults, scoring behavior is identical to pre-#416. `ConversationHistory` is used only by `LlmPlayerAgent` for prompt context.
 
 ### Key Consumed Types
 | Type | Namespace | Role |
@@ -326,18 +339,35 @@ Deterministic expected-value scoring agent. Pure math, no LLM. Scores all option
 **Application order:** Fixation threshold modifies intermediate EV calc inputs (success chance or expected gain) *before* EV computation. Fixation growth penalty, denial penalty, and variety bonus adjust the final score *after* EV computation. All four adjustments are independent and stack additively on the final score.
 
 ### LlmPlayerAgent
-LLM-backed agent that sends full game state and rules context to Anthropic Claude, parses a `PICK: [A/B/C/D]` response. Falls back to `ScoringPlayerAgent` on any failure (API error, parse error, timeout). Implements `IDisposable` to clean up its internal `AnthropicClient`.
+LLM-backed agent that sends character context, conversation history, game state, and scoring advisory to Anthropic Claude, parses a `PICK: [A/B/C/D]` response. Falls back to `ScoringPlayerAgent` on any failure (API error, parse error, timeout). Implements `IDisposable` to clean up its internal `AnthropicClient`.
 
-**Constructor:** `LlmPlayerAgent(AnthropicOptions, ScoringPlayerAgent, playerName?, opponentName?)`
+**Constructor:**
+```csharp
+LlmPlayerAgent(
+    AnthropicOptions options,
+    ScoringPlayerAgent fallback,
+    string playerName = "the player",
+    string opponentName = "the opponent",
+    string playerSystemPrompt = "",
+    string playerTextingStyle = "")
+```
 
-**Prompt includes:** game state (interest, momentum, traps, shadows, turn), all options with stat/DC/need/%/risk tier/bonus icons, adjusted probabilities including hidden bonuses (momentum, tell, callback), and a rules reminder.
+**System message (`BuildSystemMessage()`):** When `playerSystemPrompt` or `playerTextingStyle` is non-empty, builds a character-aware system message containing the player/opponent names, the character's assembled system prompt, texting style fragment, and an instruction that character fit and narrative moment take priority over pure optimization. When both are empty, falls back to a generic strategic prompt (backward-compatible).
+
+**User prompt (`BuildPrompt()`):** Sections in order:
+1. **Conversation So Far** — from `PlayerAgentContext.ConversationHistory` (omitted if null/empty)
+2. **Current State** — interest, momentum, traps, shadows, turn number
+3. **Your Options** — stat, DC, success %, risk tier, bonus icons, intended text
+4. **Scoring Agent Advisory** — `ScoringPlayerAgent`'s EV table with `← scorer pick` marker (omitted if no scoring decision)
+5. **Rules Reminder** — success/failure tiers, risk bonus, momentum, bonus icons
+6. **Task** — character-fit reasoning instruction with `PICK: [A/B/C/D]` format
 
 **Agent selection:** controlled via `--agent` CLI argument (`scoring` or `llm`, default `scoring`). The `PLAYER_AGENT` env var is no longer used. LLM model configurable via `PLAYER_AGENT_MODEL` env var.
 
 ### Supporting Types
 - **`PlayerDecision`** — result type: `OptionIndex`, `Reasoning` (string), `Scores` (OptionScore[])
 - **`OptionScore`** — per-option breakdown: `Score`, `SuccessChance`, `ExpectedInterestGain`, `BonusesApplied`
-- **`PlayerAgentContext`** — input context: player/opponent stats, interest, momentum, traps, shadows, turn number, stat history (`LastStatUsed`, `SecondLastStatUsed`), `HonestyAvailableLastTurn`
+- **`PlayerAgentContext`** — input context: player/opponent stats, interest, momentum, traps, shadows, turn number, stat history (`LastStatUsed`, `SecondLastStatUsed`), `HonestyAvailableLastTurn`, `ConversationHistory`
 
 ## Change Log
 | Date | Issue | Summary |
@@ -351,3 +381,4 @@ LLM-backed agent that sends full game state and rules context to Anthropic Claud
 | 2026-04-04 | #414 | Added `CharacterLoader` to load characters from prompt files. Replaced all hardcoded stat blocks in `Program.cs` with `CharacterLoader.Load()` calls. Added CLI argument parsing (`--player`, `--opponent`, `--max-turns` default 20, `--agent` replacing `PLAYER_AGENT` env var). Usage/error messages printed to stderr with exit code 1. Added `CharacterLoaderSpecTests.cs` with comprehensive parsing, error, and edge-case coverage. |
 | 2026-04-04 | #416 | Added shadow growth risk scoring to `ScoringPlayerAgent`: fixation growth penalty (−0.5 for 3x same stat), denial growth penalty (−0.3 for skipping Honesty), fixation threshold EV reduction (T1: 0.8× gain, T2+: success chance squared for Chaos), stat variety bonus (+0.1 for unused stats). Added `LastStatUsed`, `SecondLastStatUsed`, `HonestyAvailableLastTurn` optional fields to `PlayerAgentContext` (backward-compatible). Note: spec's `HonestyAvailableLastTurn` field exists but denial penalty is evaluated on current-turn options, not previous turn. 922-line test file `ScoringPlayerAgentShadowRiskTests.cs` covers all ACs and edge cases. |
 | 2026-04-04 | #415 | Added `CharacterDefinitionLoader` and `DataFileLocator` to enable loading characters from JSON definition files through the full `CharacterAssembler` + `PromptBuilder` pipeline. Added `--player-def`/`--opponent-def` CLI args and shorthand resolution (`--player gerald` → `data/characters/gerald.json`). Copied `starter-items.json` and `anatomy-parameters.json` data files into repo. Created 5 starter character definitions (gerald, velvet, sable, brick, zyx). 736-line spec test file covers assembly pipeline, data file presence, edge cases, error conditions, and integration tests. |
+| 2026-04-05 | #513 | Fixed `CharacterLoader.ParseBio` bug: bio lines without surrounding quotes previously returned empty string. Changed parsing to extract text after `- Bio:` prefix and optionally strip quotes instead of requiring them. Changed `ParseBio` visibility from `private` to `internal`. Added 5 test methods in `CharacterLoaderTests.cs` covering unquoted, quoted, missing, parameterized starter characters, and code-fence scenarios. |
