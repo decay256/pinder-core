@@ -75,6 +75,8 @@ namespace Pinder.LlmAdapters
 
 The adapter gains a `StartConversation` method. It does NOT implement a new interface in this issue (that is #542's responsibility with `IStatefulLlmAdapter`). This issue adds the internal capability.
 
+> **Return type clarification:** The architecture briefing's "New Components" section describes `IStatefulLlmAdapter` with `ConversationSession? StartConversation(string systemPrompt)` (returning a session handle). However, the **ADR in the same briefing** resolves this: `IStatefulLlmAdapter.StartConversation()` returns `void` — the adapter internally tracks the active session. `GameSession` does not hold or pass the session object. For this issue (#541), `StartConversation` is a concrete `void` method on `AnthropicLlmAdapter`. The return type is **`void`**, not `ConversationSession?`. The ADR supersedes the initial component description.
+
 ```csharp
 // Added to existing AnthropicLlmAdapter class:
 
