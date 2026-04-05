@@ -70,6 +70,7 @@ namespace Pinder.LlmAdapters.Anthropic
 
         private readonly AnthropicClient _client;
         private readonly AnthropicOptions _options;
+        private ConversationSession? _session;
 
         /// <summary>
         /// Creates adapter with internally-owned AnthropicClient.
@@ -92,16 +93,53 @@ namespace Pinder.LlmAdapters.Anthropic
             _client = new AnthropicClient(options.ApiKey, httpClient);
         }
 
+        /// <summary>
+        /// Whether a stateful conversation session is currently active.
+        /// When true, all ILlmAdapter calls route through the accumulated session.
+        /// When false, behavior is identical to current stateless mode.
+        /// </summary>
+        public bool HasActiveConversation => _session != null;
+
+        /// <summary>
+        /// Start a stateful conversation session with the given system prompt.
+        /// After calling this, all ILlmAdapter method calls will append to and
+        /// read from the accumulated message history instead of building
+        /// fresh single-message requests.
+        ///
+        /// Calling this when a session is already active replaces it (no error).
+        /// </summary>
+        /// <param name="systemPrompt">
+        /// Full system prompt (both character profiles, game vision, etc.).
+        /// Must not be null or empty.
+        /// </param>
+        /// <exception cref="ArgumentException">If systemPrompt is null or whitespace.</exception>
+        public void StartConversation(string systemPrompt)
+        {
+            _session = new ConversationSession(systemPrompt);
+        }
+
         /// <inheritdoc />
         public async Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
-            // Only the player's identity in system — prevents voice bleed from opponent's register
-            var systemBlocks = CacheBlockBuilder.BuildPlayerOnlySystemBlocks(context.PlayerPrompt);
-
             // Opponent profile is passed as informational context in the user message
             var userContent = SessionDocumentBuilder.BuildDialogueOptionsPrompt(context);
+
+            if (_session != null)
+            {
+                _session.AppendUser(userContent);
+                var statefulRequest = _session.BuildRequest(
+                    _options.Model, _options.MaxTokens,
+                    _options.DialogueOptionsTemperature ?? DefaultDialogueOptionsTemperature);
+                var statefulResponse = await _client.SendMessagesAsync(statefulRequest).ConfigureAwait(false);
+                var statefulText = statefulResponse.GetText();
+                _session.AppendAssistant(statefulText);
+                return ParseDialogueOptions(statefulText);
+            }
+
+            // Only the player's identity in system — prevents voice bleed from opponent's register
+            var systemBlocks = CacheBlockBuilder.BuildPlayerOnlySystemBlocks(context.PlayerPrompt);
 
             var request = BuildRequest(systemBlocks, userContent,
                 _options.DialogueOptionsTemperature ?? DefaultDialogueOptionsTemperature);
@@ -115,9 +153,21 @@ namespace Pinder.LlmAdapters.Anthropic
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
-            var systemBlocks = CacheBlockBuilder.BuildPlayerOnlySystemBlocks(context.PlayerPrompt);
-
             var userContent = SessionDocumentBuilder.BuildDeliveryPrompt(context);
+
+            if (_session != null)
+            {
+                _session.AppendUser(userContent);
+                var statefulRequest = _session.BuildRequest(
+                    _options.Model, _options.MaxTokens,
+                    _options.DeliveryTemperature ?? DefaultDeliveryTemperature);
+                var statefulResponse = await _client.SendMessagesAsync(statefulRequest).ConfigureAwait(false);
+                var statefulText = statefulResponse.GetText();
+                _session.AppendAssistant(statefulText);
+                return statefulText;
+            }
+
+            var systemBlocks = CacheBlockBuilder.BuildPlayerOnlySystemBlocks(context.PlayerPrompt);
 
             var request = BuildRequest(systemBlocks, userContent,
                 _options.DeliveryTemperature ?? DefaultDeliveryTemperature);
@@ -131,10 +181,22 @@ namespace Pinder.LlmAdapters.Anthropic
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
+            var userContent = SessionDocumentBuilder.BuildOpponentPrompt(context);
+
+            if (_session != null)
+            {
+                _session.AppendUser(userContent);
+                var statefulRequest = _session.BuildRequest(
+                    _options.Model, _options.MaxTokens,
+                    _options.OpponentResponseTemperature ?? DefaultOpponentResponseTemperature);
+                var statefulResponse = await _client.SendMessagesAsync(statefulRequest).ConfigureAwait(false);
+                var statefulText = statefulResponse.GetText();
+                _session.AppendAssistant(statefulText);
+                return ParseOpponentResponse(statefulText);
+            }
+
             // Per §3.5: only opponent prompt in system (opponent plays themselves)
             var systemBlocks = CacheBlockBuilder.BuildOpponentOnlySystemBlocks(context.OpponentPrompt);
-
-            var userContent = SessionDocumentBuilder.BuildOpponentPrompt(context);
 
             var request = BuildRequest(systemBlocks, userContent,
                 _options.OpponentResponseTemperature ?? DefaultOpponentResponseTemperature);
@@ -148,11 +210,6 @@ namespace Pinder.LlmAdapters.Anthropic
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
-            // Include opponent system prompt so the beat is generated in character voice
-            var systemBlocks = !string.IsNullOrEmpty(context.OpponentPrompt)
-                ? CacheBlockBuilder.BuildOpponentOnlySystemBlocks(context.OpponentPrompt)
-                : Array.Empty<ContentBlock>();
-
             var userContent = SessionDocumentBuilder.BuildInterestChangeBeatPrompt(
                 context.OpponentName,
                 context.InterestBefore,
@@ -160,6 +217,23 @@ namespace Pinder.LlmAdapters.Anthropic
                 context.NewState,
                 context.ConversationHistory,
                 context.PlayerName);
+
+            if (_session != null)
+            {
+                _session.AppendUser(userContent);
+                var statefulRequest = _session.BuildRequest(
+                    _options.Model, _options.MaxTokens,
+                    _options.InterestChangeBeatTemperature ?? DefaultInterestChangeBeatTemperature);
+                var statefulResponse = await _client.SendMessagesAsync(statefulRequest).ConfigureAwait(false);
+                var statefulText = statefulResponse.GetText();
+                _session.AppendAssistant(statefulText);
+                return string.IsNullOrWhiteSpace(statefulText) ? null : statefulText;
+            }
+
+            // Include opponent system prompt so the beat is generated in character voice
+            var systemBlocks = !string.IsNullOrEmpty(context.OpponentPrompt)
+                ? CacheBlockBuilder.BuildOpponentOnlySystemBlocks(context.OpponentPrompt)
+                : Array.Empty<ContentBlock>();
 
             var request = BuildRequest(systemBlocks, userContent,
                 _options.InterestChangeBeatTemperature ?? DefaultInterestChangeBeatTemperature);
