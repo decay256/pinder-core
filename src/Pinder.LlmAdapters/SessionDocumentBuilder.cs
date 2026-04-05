@@ -25,6 +25,15 @@ namespace Pinder.LlmAdapters
 
             var sb = new StringBuilder();
 
+            // Opponent profile as informational context (not system identity)
+            // so the LLM knows what kind of messages would land with this opponent
+            if (!string.IsNullOrWhiteSpace(context.OpponentPrompt))
+            {
+                sb.AppendLine($"OPPONENT PROFILE (for context — this is who you are talking to, NOT who you are):");
+                sb.AppendLine(context.OpponentPrompt);
+                sb.AppendLine();
+            }
+
             sb.AppendLine("CONVERSATION HISTORY");
             AppendConversationHistory(sb, context.ConversationHistory, playerName);
 
@@ -89,6 +98,14 @@ namespace Pinder.LlmAdapters
                     string bonus = turnsAgo >= 4 ? "+2 hidden" : turnsAgo >= 2 ? "+1 hidden" : "+3 hidden (opener)";
                     sb.AppendLine($"- \"{cb.TopicKey}\" (introduced T{cb.TurnIntroduced}, {turnsAgo} turns ago, {bonus})");
                 }
+            }
+
+            // Inject texting style block immediately before task instruction (#489)
+            if (!string.IsNullOrEmpty(context.PlayerTextingStyle))
+            {
+                sb.AppendLine();
+                sb.AppendLine("YOUR TEXTING STYLE — follow this exactly, no deviations:");
+                sb.AppendLine(context.PlayerTextingStyle);
             }
 
             sb.AppendLine();
@@ -186,8 +203,21 @@ namespace Pinder.LlmAdapters
             AppendConversationHistory(sb, context.ConversationHistory, playerName);
 
             sb.AppendLine();
-            sb.AppendLine("PLAYER'S LAST MESSAGE");
-            sb.AppendLine($"\"{context.PlayerDeliveredMessage}\"");
+
+            if (context.DeliveryTier != FailureTier.None)
+            {
+                string tierLabel = GetFailureTierName(context.DeliveryTier);
+                sb.AppendLine($"PLAYER'S LAST MESSAGE (delivered after a {tierLabel}):");
+                sb.AppendLine($"\"{context.PlayerDeliveredMessage}\"");
+                sb.AppendLine();
+                sb.AppendLine("FAILURE CONTEXT");
+                sb.AppendLine(GetOpponentReactionGuidance(context.DeliveryTier));
+            }
+            else
+            {
+                sb.AppendLine("PLAYER'S LAST MESSAGE");
+                sb.AppendLine($"\"{context.PlayerDeliveredMessage}\"");
+            }
 
             sb.AppendLine();
             sb.AppendLine("INTEREST CHANGE");
@@ -231,7 +261,10 @@ namespace Pinder.LlmAdapters
             }
 
             sb.AppendLine();
-            sb.Append(PromptTemplates.OpponentResponseInstruction);
+
+            string resistanceBlock = GetResistanceBlock(context.InterestAfter);
+            sb.Append(PromptTemplates.OpponentResponseInstruction
+                .Replace("{resistance_block}", resistanceBlock));
 
             return sb.ToString();
         }
@@ -379,6 +412,47 @@ namespace Pinder.LlmAdapters
                     return "Maximum humiliation. The character's deepest embarrassing quality surfaces fully. This should be funny, specific, and feel earned by the build.";
                 default:
                     return "A failure has occurred. Degrade the message accordingly.";
+            }
+        }
+
+        /// <summary>
+        /// Returns a resistance descriptor block based on current interest level.
+        /// Below 25, the opponent always maintains some form of resistance.
+        /// </summary>
+        internal static string GetResistanceBlock(int interest)
+        {
+            string descriptor;
+            if (interest >= 25)
+                descriptor = PromptTemplates.ResistanceDissolved;
+            else if (interest >= 21)
+                descriptor = PromptTemplates.ResistanceAlmostConvinced;
+            else if (interest >= 15)
+                descriptor = PromptTemplates.ResistanceDeliberateApproach;
+            else if (interest >= 10)
+                descriptor = PromptTemplates.ResistanceUnstableAgreement;
+            else if (interest >= 5)
+                descriptor = PromptTemplates.ResistanceSkepticalInterest;
+            else if (interest >= 1)
+                descriptor = PromptTemplates.ResistanceActiveDisengagement;
+            else
+                descriptor = PromptTemplates.ResistanceActiveDisengagement;
+
+            return $"Current interest: {interest}/25. Resistance level: {descriptor}";
+        }
+
+        /// <summary>
+        /// Returns per-tier opponent reaction guidance for failure degradation (#493).
+        /// </summary>
+        internal static string GetOpponentReactionGuidance(FailureTier tier)
+        {
+            switch (tier)
+            {
+                case FailureTier.Fumble: return PromptTemplates.OpponentReactionFumble;
+                case FailureTier.Misfire: return PromptTemplates.OpponentReactionMisfire;
+                case FailureTier.TropeTrap: return PromptTemplates.OpponentReactionTropeTrap;
+                case FailureTier.Catastrophe: return PromptTemplates.OpponentReactionCatastrophe;
+                case FailureTier.Legendary: return PromptTemplates.OpponentReactionLegendary;
+                default: return string.Empty;
             }
         }
 

@@ -135,9 +135,10 @@ These keys describe **what happens** when a rule fires:
 | `horniness_modifier` | `int` | Horniness modifier | `+3` |
 | `delay_penalty` | `int` | Interest penalty for delay | `-2` |
 | `stat_modifier` | `int` | Stat modifier value | `+2` |
+| `stat_modifiers` | `dict<string, int>` | Flat stat→modifier map | `{"charm": 1, "rizz": -1}` |
 | `quality_boost` | `string` | LLM prompt quality instruction | `"improved"` |
 
-New keys may be introduced for document-specific mechanics (e.g., anatomy tiers, item slots) as long as they follow the pattern of `snake_case` names with primitive values (`int`, `float`, `string`, `bool`, `[int, int]`).
+New keys may be introduced for document-specific mechanics (e.g., anatomy tiers, item slots) as long as they follow the pattern of `snake_case` names with primitive values (`int`, `float`, `string`, `bool`, `[int, int]`) or flat `string→int` dicts for stat modifier maps (`stat_modifiers`).
 
 ---
 

@@ -302,7 +302,8 @@ namespace Pinder.Core.Conversation
                 callbackOpportunities: _topics.Count > 0 ? new List<CallbackOpportunity>(_topics) : null,
                 horninessLevel: _sessionHorniness,
                 requiresRizzOption: _sessionHorniness >= 12,
-                currentTurn: _turnNumber);
+                currentTurn: _turnNumber,
+                playerTextingStyle: _player.TextingStyleFragment);
 
             // Get dialogue options from LLM
             var rawOptions = await _llm.GetDialogueOptionsAsync(context).ConfigureAwait(false);
@@ -663,7 +664,8 @@ namespace Pinder.Core.Conversation
                 playerName: _player.DisplayName,
                 opponentName: _opponent.DisplayName,
                 currentTurn: _turnNumber,
-                shadowThresholds: opponentShadowThresholds);
+                shadowThresholds: opponentShadowThresholds,
+                deliveryTier: rollResult.Tier);
 
             var opponentResponse = await _llm.GetOpponentResponseAsync(opponentContext).ConfigureAwait(false);
             if (opponentResponse == null)

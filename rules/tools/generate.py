@@ -38,7 +38,11 @@ def generate_table(table_block):
 
     def pad_cell(text, width):
         """Pad cell content to fill *width* characters between pipes."""
-        content = ' {} '.format(text)
+        if text == '':
+            # Empty cell — use single space to match common markdown convention
+            content = ' '
+        else:
+            content = ' {} '.format(text)
         if len(content) < width:
             content = content + ' ' * (width - len(content))
         return content
@@ -52,8 +56,14 @@ def generate_table(table_block):
             hparts.append(pad_cell(h, col_widths[i]) if i < len(col_widths) else ' {} '.format(h))
         lines.append('|' + '|'.join(hparts) + '|')
     else:
-        # Compact format
-        lines.append('| ' + ' | '.join(headers) + ' |')
+        # Compact format — empty headers get single space
+        hparts = []
+        for h in headers:
+            if h == '':
+                hparts.append(' ')
+            else:
+                hparts.append(' {} '.format(h))
+        lines.append('|' + '|'.join(hparts) + '|')
 
     # Separator — always use stored raw cells when available
     if sep_cells and len(sep_cells) == len(headers):
@@ -70,7 +80,14 @@ def generate_table(table_block):
                 dparts.append(pad_cell(c, col_widths[i]) if i < len(col_widths) else ' {} '.format(c))
             lines.append('|' + '|'.join(dparts) + '|')
         else:
-            lines.append('| ' + ' | '.join(cells) + ' |')
+            # Format each cell: empty cells get single space, others get ' text '
+            cparts = []
+            for c in cells:
+                if c == '':
+                    cparts.append(' ')
+                else:
+                    cparts.append(' {} '.format(c))
+            lines.append('|' + '|'.join(cparts) + '|')
 
     return '\n'.join(lines)
 
@@ -109,6 +126,12 @@ def render_blocks(blocks):
         elif kind == 'hr':
             parts.append('---')
             parts.append('')
+        elif kind == 'blank_lines':
+            # Emit extra blank lines (the normal paragraph separator already
+            # emits one blank line, so we only need count-1 additional blanks)
+            extra = block.get('count', 2) - 1
+            for _ in range(extra):
+                parts.append('')
     return parts
 
 
@@ -190,7 +213,10 @@ def generate_markdown(rules):
         md = rule_to_markdown(rule, heading_level)
         parts.append(md)
 
-    return '\n'.join(parts)
+    result = '\n'.join(parts)
+    # Strip trailing blank lines to avoid extra newline at end of document
+    result = result.rstrip('\n')
+    return result
 
 
 def main():

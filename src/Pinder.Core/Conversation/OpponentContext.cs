@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
 
 namespace Pinder.Core.Conversation
@@ -53,6 +54,9 @@ namespace Pinder.Core.Conversation
         /// <summary>Current turn number (1-based). Default 0 for backward compatibility.</summary>
         public int CurrentTurn { get; }
 
+        /// <summary>Failure tier of the player's last roll. None means success. Default None for backward compatibility.</summary>
+        public FailureTier DeliveryTier { get; }
+
         public OpponentContext(
             string playerPrompt,
             string opponentPrompt,
@@ -68,7 +72,8 @@ namespace Pinder.Core.Conversation
             string[]? activeTrapInstructions = null,
             string playerName = "",
             string opponentName = "",
-            int currentTurn = 0)
+            int currentTurn = 0,
+            FailureTier deliveryTier = FailureTier.None)
         {
             PlayerPrompt = playerPrompt ?? throw new System.ArgumentNullException(nameof(playerPrompt));
             OpponentPrompt = opponentPrompt ?? throw new System.ArgumentNullException(nameof(opponentPrompt));
@@ -85,6 +90,7 @@ namespace Pinder.Core.Conversation
             PlayerName = playerName ?? "";
             OpponentName = opponentName ?? "";
             CurrentTurn = currentTurn;
+            DeliveryTier = deliveryTier;
         }
     }
 }

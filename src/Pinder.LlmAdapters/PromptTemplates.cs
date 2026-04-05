@@ -44,18 +44,23 @@ MEDIUM: This is a texting app. Options are messages the character could send.
 Rules:
 - STAT must be one of: CHARM, RIZZ, HONESTY, CHAOS, WIT, SELF_AWARENESS
 - Text must be in double quotes on the line immediately after the metadata
-- No extra text before OPTION_1 or after the last option";
+- No extra text before OPTION_1 or after the last option
+
+Before writing each option, verify: does this sound exactly like
+the texting style above? If not, rewrite it.";
 
         /// <summary>§3.3 — Deliver the intended message on a successful roll.</summary>
         public const string SuccessDeliveryInstruction =
 @"Write as {player_name}.
-Deliver this message as the character would actually send it.
+The intended message is the player's plan. Your job is to make it land.
 
-CRITICAL: Do not add sentences or ideas not in the intended message. Deliver it, do not expand it.
+- Clean success (margin 1-4): deliver essentially as written. Small word choice improvements only.
+- Strong success (margin 5-9): improve the phrasing, timing, or rhythm of what's already there.
+  You may: rearrange for better flow, sharpen word choice, add ONE word or phrase that makes the existing sentiment more precise.
+  You must not: add new sentences that introduce ideas not in the intended message, change the emotional register, or make the message say something the player didn't intend.
+- Critical success / Nat 20: deliver at peak. The existing message arrives at the exactly right moment with the exactly right phrasing. It lands completely.
 
-- On a clean success (margin 1–5): deliver it essentially as written, with natural voice
-- On a strong success (margin 6–10): improve PHRASING or TIMING of existing content only. Do NOT add new sentences.
-- On a critical success / Nat 20: deliver it at peak — perfectly timed, resonant, exactly right
+The test: if you read both the intended and delivered version, every idea in the delivered version should have a counterpart in the intended version. New additions should sharpen, not expand.
 
 MEDIUM RULE: This is a text message, not a monologue. The character sends this message in a texting app.
 Write as text that would appear on a phone screen — no internal stage directions, no narration of their emotional state, no self-commentary mid-message.
@@ -115,7 +120,13 @@ Output only the message text. No explanation. The character sent this.";
         /// Uses {placeholder} tokens for dynamic content.
         /// </summary>
         public const string OpponentResponseInstruction =
-@"INTEREST CONSTRAINT:
+@"FUNDAMENTAL RULE: Below Interest 25, you are not won over. You may agree, warm, laugh — but the resistance is always present underneath. It may be subtle (a withheld thing, a reframe, a slightly cooler tone than expected) but it never fully dissolves. Agreement below 25 is unstable. It can flip.
+
+Your archetype determines HOW you resist, not WHETHER.
+
+{resistance_block}
+
+INTEREST CONSTRAINT:
 - Interest must reach 25 (DateSecured) before any concrete date plans are possible.
 - Below Interest 25: you may express interest, warmth, or curiosity, but NEVER commit to a specific time, place, or logistics. ""We should get coffee sometime"" is fine. ""Coffee shop on Fifth at 6pm Tuesday"" is NOT.
 - At Interest 25: the date is now real. You may suggest a specific venue or time that fits your character.
@@ -187,5 +198,53 @@ Rules:
 
         internal const string InterestBeatGeneric =
 @"Generate a brief reaction from {opponent_name} reflecting the change in interest. Subtle and in character.";
+
+        // ── Resistance descriptors by interest range ──
+
+        /// <summary>Interest 1-4: Active disengagement.</summary>
+        internal const string ResistanceActiveDisengagement =
+            "Active disengagement — short replies, testing, near-silence. You are barely here.";
+
+        /// <summary>Interest 5-9: Skeptical interest.</summary>
+        internal const string ResistanceSkepticalInterest =
+            "Skeptical interest — you engage but visibly evaluate. Tests disguised as questions. You're deciding if this is worth your time.";
+
+        /// <summary>Interest 10-14: Unstable agreement.</summary>
+        internal const string ResistanceUnstableAgreement =
+            "Unstable agreement — you respond warmly to good moments but hold back. One misfire and the warmth vanishes. Agreement is conditional.";
+
+        /// <summary>Interest 15-20: Deliberate approach.</summary>
+        internal const string ResistanceDeliberateApproach =
+            "Deliberate approach — you are invested but still managing the gap. One wrong move still costs. You give more but not everything.";
+
+        /// <summary>Interest 21-24: Almost convinced.</summary>
+        internal const string ResistanceAlmostConvinced =
+            "Almost convinced — warm but the final resistance is visible. You are choosing whether to give it. The holdback is small but real.";
+
+        /// <summary>Interest 25: Resistance dissolved.</summary>
+        internal const string ResistanceDissolved =
+            "Resistance dissolved — the date is real. You are genuinely won over.";
+
+        // ── Per-tier opponent reaction guidance for failure degradation (#493) ──
+
+        /// <summary>Fumble (miss 1-2): barely noticeable.</summary>
+        internal const string OpponentReactionFumble =
+            "Something was slightly off about their last message — a small hedge, an awkward word choice. You almost didn't notice. React with a slight coolness or a question that shows you caught the minor stumble. Do NOT comment on it directly.";
+
+        /// <summary>Misfire (miss 3-5): something felt off.</summary>
+        internal const string OpponentReactionMisfire =
+            "Something in their last message felt off — the tone shifted, or a detail didn't land right. You're a half-step more guarded than you'd normally be. Let the wariness show in your register, not in what you say about their message.";
+
+        /// <summary>TropeTrap (miss 6-9): clearly wrong.</summary>
+        internal const string OpponentReactionTropeTrap =
+            "Something was clearly wrong with their last message. It read like a recognizable bad-texting archetype — the kind of message that makes you pause before replying. Your warmth drops noticeably. You respond to what they said, but the energy has shifted. Do NOT diagnose what went wrong.";
+
+        /// <summary>Catastrophe (miss 10+): genuine confusion or discomfort.</summary>
+        internal const string OpponentReactionCatastrophe =
+            "Their last message was a disaster. Something in it was genuinely confusing or uncomfortable. Your response reflects real discomfort — shorter, cooler, possibly questioning. The vibe has taken a visible hit. Do NOT explain what went wrong. Just let your reaction show it.";
+
+        /// <summary>Legendary (Nat 1): maximum cringe response.</summary>
+        internal const string OpponentReactionLegendary =
+            "Their last message was spectacularly bad — the kind of message you screenshot and send to your friends. Your response reflects genuine shock, confusion, or secondhand embarrassment. The temperature in this conversation just dropped to freezing. Do NOT narrate your reaction. Just react.";
     }
 }
