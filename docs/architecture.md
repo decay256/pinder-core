@@ -993,3 +993,142 @@ src/Pinder.Rules/
 | Session file counter writes same number | — | Fixed this sprint (#515) |
 | JSON character levels stale | — | Fixed this sprint (#516) |
 | ScoringAgent EV overestimates low-success | — | Fixed this sprint (#517) |
+
+
+---
+
+## Sprint: Session Architecture + Archetype Fix — Architecture Briefing
+
+### What's changing
+
+**This sprint introduces significant structural changes**: a new stateful conversation layer in `Pinder.LlmAdapters`, a new interface (`IStatefulLlmAdapter`) in `Pinder.Core.Interfaces`, a new `SessionSystemPromptBuilder` and `GameDefinition` in LlmAdapters, and a level-range filter in `CharacterAssembler`. The fundamental shift is from **stateless per-call LLM context** (each ILlmAdapter call rebuilds all context from scratch) to **stateful accumulated conversation** (messages[] grows across turns within a session).
+
+**Previous architecture**: Each `ILlmAdapter` method call (`GetDialogueOptionsAsync`, `DeliverMessageAsync`, `GetOpponentResponseAsync`, `GetInterestChangeBeatAsync`) builds a fresh `MessagesRequest` with `system[]` blocks and a single `messages[{role:user, content:...}]`. No conversation history is maintained at the adapter level — the adapter is stateless. Context is passed entirely through DTOs (`DialogueContext`, `DeliveryContext`, `OpponentContext`, `InterestChangeContext`). The Anthropic API itself is stateless (full history must be sent each call).
+
+**Sprint changes** — 4 new components, 2 extended components:
+
+#### New Components
+
+1. **`ConversationSession`** (LlmAdapters/) — In-memory message accumulator. Stores system prompt (as `ContentBlock[]`) and a growing `List<Message>` of user/assistant turns. Provides `AppendUser(string)`, `AppendAssistant(string)`, and `BuildRequest(temperature, maxTokens, model)` that constructs a `MessagesRequest` using accumulated state. This is the key state-holding object — one per `GameSession`.
+
+2. **`IStatefulLlmAdapter`** (Core/Interfaces/) — Extends `ILlmAdapter` with `ConversationSession? StartConversation(string systemPrompt)`. Returns an opaque session handle. When `GameSession` detects the adapter is `IStatefulLlmAdapter`, it starts a conversation at construction and routes all subsequent LLM calls through the accumulated session. When the adapter is plain `ILlmAdapter` (e.g., `NullLlmAdapter`), behavior is unchanged.
+
+3. **`SessionSystemPromptBuilder`** (LlmAdapters/) — Pure static builder: takes player prompt, opponent prompt, game definition, and returns a single assembled system prompt string. Sections: game vision, world rules, player character bible, opponent character bible, meta contract, writing rules.
+
+4. **`GameDefinition`** (LlmAdapters/) — Data carrier for game-level creative direction: Name, Vision, WorldDescription, PlayerRoleDescription, OpponentRoleDescription, MetaContract, WritingRules. Has `LoadFrom(string yaml)` (parses YAML via Newtonsoft.Json or YamlDotNet) and `PinderDefaults` static property (hardcoded fallback).
+
+#### Extended Components
+
+5. **`AnthropicLlmAdapter`** — Implements `IStatefulLlmAdapter`. When a `ConversationSession` is active, each ILlmAdapter method appends user content + parses assistant response, maintaining the full conversation thread. When no session is active, falls back to existing stateless behavior. `[ENGINE]` injection blocks replace current `SessionDocumentBuilder` content for all 4 method calls.
+
+6. **`CharacterAssembler`** — `Assemble()` gains optional `int? characterLevel` and `IReadOnlyDictionary<string, (int Min, int Max)>? archetypeLevelRanges` parameters. When both are provided, archetype ranking filters to archetypes whose `[Min, Max]` includes the character's level. When not provided (backward-compat), behavior is identical to current.
+
+#### Data File
+
+7. **`game-definition.yaml`** — External data file at `/root/.openclaw/agents-extra/pinder/data/game-definition.yaml` containing Pinder's creative direction. Parsed by `GameDefinition.LoadFrom()`.
+
+### Data Flow (stateful conversation — per turn)
+
+```
+Host creates GameSession(player, opponent, llmAdapter, dice, traps, config?)
+  → GameSession checks: is llmAdapter IStatefulLlmAdapter?
+    → Yes: systemPrompt = SessionSystemPromptBuilder.Build(player, opponent, gameDef)
+           session = adapter.StartConversation(systemPrompt)
+    → No:  stateless path (unchanged)
+
+Per turn (stateful path):
+  1. StartTurnAsync()
+     → build [ENGINE] injection for options context
+     → session.AppendUser(engineBlock)
+     → adapter sends accumulated messages[]
+     → parse response → session.AppendAssistant(rawResponse)
+     → return TurnStart with parsed options
+
+  2. ResolveTurnAsync(optionIndex)
+     → roll resolution (unchanged)
+     → build [ENGINE] injection for delivery context (roll result, tier)
+     → session.AppendUser(engineBlock)
+     → adapter sends → session.AppendAssistant(deliveredText)
+     → build [ENGINE] injection for opponent context (interest change, narrative band)
+     → session.AppendUser(engineBlock)
+     → adapter sends → session.AppendAssistant(opponentResponse)
+     → parse tell/weakness from response
+     → return TurnResult
+```
+
+### Key Architectural Decisions
+
+#### ADR: IStatefulLlmAdapter extends ILlmAdapter (resolves #542)
+
+**Context:** GameSession calls `ILlmAdapter` methods. Stateful conversation requires the adapter to accumulate messages. GameSession needs to know if the adapter supports stateful mode.
+
+**Decision:** Define `IStatefulLlmAdapter : ILlmAdapter` in Core/Interfaces. GameSession uses `is IStatefulLlmAdapter` check at construction. This avoids modifying ILlmAdapter (which would break NullLlmAdapter and all tests).
+
+**Consequences:** NullLlmAdapter stays unchanged. All 2979 tests pass. Stateful mode is opt-in. The `ConversationSession` type lives in LlmAdapters (not Core) — IStatefulLlmAdapter returns `object` or a Core-side opaque handle to avoid Core depending on LlmAdapters types.
+
+#### ADR: ConversationSession is internal to LlmAdapters
+
+**Context:** `ConversationSession` holds `List<Message>` which uses LlmAdapters DTOs. Core can't reference LlmAdapters types.
+
+**Decision:** `IStatefulLlmAdapter.StartConversation()` returns `void` — the adapter internally tracks the active session. GameSession doesn't need to hold or pass the session object. The adapter is 1:1 with a GameSession anyway.
+
+**Consequences:** Simpler interface. Adapter owns session lifecycle. If multiple GameSessions share an adapter (not a current pattern), they'd need separate adapter instances.
+
+#### ADR: [ENGINE] blocks replace SessionDocumentBuilder content (#544)
+
+**Context:** Current adapter builds fresh user content per call via SessionDocumentBuilder. With stateful conversation, context is already in the message history — only new game events need injection.
+
+**Decision:** In stateful mode, each ILlmAdapter call injects an `[ENGINE]` block as the user message containing only the new game state delta (roll results, interest changes, trap activations). In stateless mode, existing SessionDocumentBuilder behavior is preserved.
+
+**Consequences:** Dual code paths in AnthropicLlmAdapter (stateful vs stateless). Stateful path is simpler per-call but requires correct session management.
+
+#### ADR: CharacterAssembler level-range filtering via optional params (resolves #547)
+
+**Context:** Vision concern #547 identifies that `Assemble()` lacks `characterLevel` and archetype level-range data.
+
+**Decision:** Add optional params to `Assemble()`: `int? characterLevel = null` and `IReadOnlyDictionary<string, (int Min, int Max)>? archetypeLevelRanges = null`. When both are provided, archetype ranking filters before sorting. When either is null, no filtering occurs (backward-compat).
+
+**Consequences:** No new interfaces needed. Data source is caller's responsibility (session-runner loads from JSON). Existing callers compile unchanged.
+
+#### ADR: GameDefinition lives in LlmAdapters (not Core)
+
+**Context:** GameDefinition needs YAML parsing. Core must remain zero-dependency.
+
+**Decision:** `GameDefinition` lives in `Pinder.LlmAdapters`. Uses Newtonsoft.Json or a simple hand parser (Newtonsoft is already a dependency). `PinderDefaults` provides hardcoded fallback when YAML is unavailable.
+
+**Consequences:** Session-runner loads YAML and passes GameDefinition to adapter/prompt builder. Core has no knowledge of game definition content.
+
+### What is NOT changing
+
+- `ILlmAdapter` interface (no method signature changes)
+- `NullLlmAdapter` (does not implement IStatefulLlmAdapter)
+- All Pinder.Core game logic (Stats, Rolls, Traps, Progression, Data)
+- Pinder.Rules project
+- Existing context DTO class signatures (all params remain optional)
+- Stateless adapter path (preserved as fallback)
+
+### Implicit assumptions for implementers
+
+1. **netstandard2.0 + LangVersion 8.0** in Core and LlmAdapters — no `record` types
+2. **Zero NuGet dependencies in Pinder.Core** — IStatefulLlmAdapter is interface-only
+3. **All 2979 existing tests must pass unchanged**
+4. **Anthropic API is stateless** — the adapter accumulates messages[] client-side and sends full history each call
+5. **`Message.Content` is `string`** — sufficient for text-only conversation. Multi-modal deferred.
+6. **ConversationSession grows unbounded** — acceptable at prototype. Truncation strategy deferred to MVP.
+7. **One ConversationSession per adapter instance** — adapter is 1:1 with GameSession
+8. **`CharacterAssembler.Assemble()` changes are backward-compatible** — new params have defaults
+9. **Archetype level-range data** from `stat-to-archetype.json` (external repo) or `archetypes-enriched.yaml`
+10. **`GameDefinition.LoadFrom` parses YAML** — can use Newtonsoft.Json YamlDotNet is NOT a dep of LlmAdapters. Use simple key-value parsing or add YamlDotNet to LlmAdapters.
+
+### Known Gaps (as of this sprint)
+
+| Gap | Rules Section | Status |
+|-----|--------------|--------|
+| Shadow persistence across sessions | §8 | Not addressed — per-session via SessionShadowTracker |
+| `AddExternalBonus()` deprecated but not removed | — | Cleanup issue needed |
+| Energy system consumers | #144 | `IGameClock.ConsumeEnergy()` exists but nothing calls it |
+| GameSession god object trajectory | #87 | 1454 lines — growing with stateful session wiring |
+| ConversationSession unbounded growth | — | Acceptable at prototype; truncation at MVP |
+| Dual code paths (stateful/stateless) in adapter | — | Necessary for backward compat; unify at MVP |
+| GameDefinition YAML parsing dependency | — | LlmAdapters has Newtonsoft.Json; YAML needs strategy |
+| Archetype level-range data loading in session-runner | — | Caller responsibility; no IArchetypeRepository |
