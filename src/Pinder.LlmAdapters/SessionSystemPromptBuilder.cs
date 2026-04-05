@@ -1,0 +1,54 @@
+using System;
+
+namespace Pinder.LlmAdapters
+{
+    /// <summary>
+    /// Assembles a session-level system prompt from character profiles and game definition.
+    /// The output contains 5 clearly delineated sections: game vision, world rules,
+    /// player character, opponent character, and meta contract (with writing rules).
+    /// </summary>
+    public static class SessionSystemPromptBuilder
+    {
+        /// <summary>
+        /// Build the full session system prompt.
+        /// </summary>
+        /// <param name="playerPrompt">
+        /// Player's assembled character system prompt (from CharacterProfile.AssembledSystemPrompt).
+        /// </param>
+        /// <param name="opponentPrompt">
+        /// Opponent's assembled character system prompt (from CharacterProfile.AssembledSystemPrompt).
+        /// </param>
+        /// <param name="gameDef">
+        /// Game definition containing vision, world rules, meta contract.
+        /// When null, GameDefinition.PinderDefaults is used.
+        /// </param>
+        /// <returns>A single string containing the full session system prompt.</returns>
+        public static string Build(
+            string playerPrompt,
+            string opponentPrompt,
+            GameDefinition? gameDef = null)
+        {
+            if (playerPrompt == null)
+                throw new ArgumentNullException(nameof(playerPrompt));
+            if (opponentPrompt == null)
+                throw new ArgumentNullException(nameof(opponentPrompt));
+
+            var def = gameDef ?? GameDefinition.PinderDefaults;
+
+            return string.Concat(
+                "== GAME VISION ==\n\n",
+                def.Vision.TrimEnd(),
+                "\n\n== WORLD RULES ==\n\n",
+                def.WorldDescription.TrimEnd(),
+                "\n\n== PLAYER CHARACTER ==\n\n",
+                playerPrompt.TrimEnd(),
+                "\n\n== OPPONENT CHARACTER ==\n\n",
+                opponentPrompt.TrimEnd(),
+                "\n\n== META CONTRACT ==\n\n",
+                def.MetaContract.TrimEnd(),
+                "\n\n",
+                def.WritingRules.TrimEnd(),
+                "\n");
+        }
+    }
+}
