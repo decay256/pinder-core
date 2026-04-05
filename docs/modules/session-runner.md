@@ -12,7 +12,7 @@ The session runner orchestrates simulated playtest sessions between two `Charact
 - **`data/characters/*.json`** — Character definition JSON files (gerald, velvet, sable, brick, zyx). Each defines name, gender_identity, bio, level, item IDs, anatomy selections, build_points, and optional shadows.
 - **`data/items/starter-items.json`** — Item definitions consumed by `JsonItemRepository`. Contains stat modifiers, prompt fragments, archetype tendencies, and timing modifiers.
 - **`data/anatomy/anatomy-parameters.json`** — Anatomy parameter definitions consumed by `JsonAnatomyRepository`. Contains tier IDs, stat modifiers, fragments, and timing modifiers.
-- **`tests/Pinder.Core.Tests/CharacterLoaderTests.cs`** — Unit tests for `CharacterLoader.ParseBio`: unquoted bio extraction, quoted bio with quote stripping, missing bio line returns empty, parameterized tests for all starter characters, bio inside code fence extraction.
+- **`tests/Pinder.Core.Tests/CharacterLoaderTests.cs`** — Unit tests for `CharacterLoader.ParseBio` and `ParseLevel`: bio tests (unquoted, quoted, missing, parameterized starter characters, code fence); level tests (standard format, single-digit, double-digit, missing level line defaults to 1, parameterized all starter characters).
 - **`tests/Pinder.Core.Tests/CharacterLoaderSpecTests.cs`** — Comprehensive tests for `CharacterLoader`: prompt file parsing (stats, shadows, level, display name, system prompt extraction), error cases (missing file, missing stats, missing EFFECTIVE STATS section), edge cases (mixed case input, shadow lines with/without tilde prefix, parenthetical notes, multiple code fences, level from outside code fence), and conditional integration tests against real prompt files.
 - **`tests/Pinder.Core.Tests/Issue415_CharacterDefinitionLoaderSpecTests.cs`** — Spec-driven tests for `CharacterDefinitionLoader` and `DataFileLocator`: assembly pipeline (AC2–AC4), all 5 character definitions load successfully (AC5), `DataFileLocator` resolves character files (AC6), data file presence, edge cases (missing shadows, empty items/anatomy, special chars in name, unknown item IDs), error conditions (file not found, malformed JSON, missing required fields, level range, unknown stat/shadow types), shadow parsing, `DataFileLocator` walk-up and repo root discovery, integration tests for full pipeline across characters.
 - **`session-runner/PlaytestFormatter.cs`** — Static utility class for formatting player agent reasoning blocks and option score tables as markdown. Contains `FormatReasoningBlock` and `FormatScoreTable`.
@@ -78,6 +78,12 @@ public static class CharacterLoader
     /// Returns text after "- Bio:" prefix, trimmed.
     /// Strips surrounding double quotes if present. Returns "" if no bio line found.
     internal static string ParseBio(string content);
+
+    /// Parse the level from a "- Level: N ..." line in the content.
+    /// Extracts leading digits after "- Level:" prefix.
+    /// Returns 1 (default) if no matching line found or number cannot be parsed.
+    /// Supports single and double-digit levels.
+    internal static int ParseLevel(string content);
 }
 ```
 
@@ -384,4 +390,5 @@ LlmPlayerAgent(
 | 2026-04-04 | #415 | Added `CharacterDefinitionLoader` and `DataFileLocator` to enable loading characters from JSON definition files through the full `CharacterAssembler` + `PromptBuilder` pipeline. Added `--player-def`/`--opponent-def` CLI args and shorthand resolution (`--player gerald` → `data/characters/gerald.json`). Copied `starter-items.json` and `anatomy-parameters.json` data files into repo. Created 5 starter character definitions (gerald, velvet, sable, brick, zyx). 736-line spec test file covers assembly pipeline, data file presence, edge cases, error conditions, and integration tests. |
 | 2026-04-05 | #513 | Fixed `CharacterLoader.ParseBio` bug: bio lines without surrounding quotes previously returned empty string. Changed parsing to extract text after `- Bio:` prefix and optionally strip quotes instead of requiring them. Changed `ParseBio` visibility from `private` to `internal`. Added 5 test methods in `CharacterLoaderTests.cs` covering unquoted, quoted, missing, parameterized starter characters, and code-fence scenarios. |
 | 2026-04-05 | #514 | Fixed hardcoded "Sable"/"Brick" names in DC Reference table header and column header in `Program.cs`. Now uses `player1`/`player2` string interpolation for dynamic character names. Added `DcTableHeaderTests.cs` (4 tests) verifying interpolation with custom names, default names, and source file assertion that no hardcoded header remains. |
+| 2026-04-05 | #516 | Fixed `CharacterLoader.ParseLevel` bug: corrected stale level values in character JSON files (velvet: 4→7, brick: 6→9, zyx: 4→1). Added `ParseLevel` tests to `CharacterLoaderTests.cs` (standard format, single/double digit, missing line default, parameterized starter characters). Made `ParseLevel` visible as `internal static`. |
 | 2026-04-05 | #515 | Fixed session number duplication bug: session number is now resolved once at startup (`ResolvePlaytestDirectory` + `GetNextSessionNumber`) and reused for both the header (`# Playtest Session {N:D3}`) and file write. Previously, header was hardcoded to "006" and `WritePlaytestLog` called `GetNextSessionNumber` independently, causing header/filename mismatch. `WritePlaytestLog` signature changed to accept pre-resolved `dir` and `sessionNum` parameters. Added `ConsecutiveSessions_ProduceDifferentNumbers` test to `SessionFileCounterTests.cs`. |
