@@ -25,6 +25,11 @@ The LLM Adapters module (`Pinder.LlmAdapters`) provides prompt templates and API
 | `Issue541_StatefulConversationTests.cs` (test) | Integration tests for stateful conversation mode — multi-turn accumulation, error recovery, stateless fallback |
 | `Issue541_AdditionalTests.cs` (test) | Additional coverage for snapshot isolation, role correctness, message ordering, system block caching, and API failure resilience |
 | `Issue542_StatefulSession_TestEngineerTests.cs` (test) | Spec-driven tests for `IStatefulLlmAdapter` interface shape, `GameSession` constructor stateful detection, system prompt format, and backward compatibility |
+| `GameDefinition.cs` | Sealed data carrier for game-level creative direction (7 string properties); includes `LoadFrom(yamlContent)` YAML parser and `PinderDefaults` hardcoded fallback |
+| `SessionSystemPromptBuilder.cs` | Static builder that assembles a 5-section session system prompt from character profiles and a `GameDefinition` |
+| `GameDefinitionTests.cs` (test) | Unit tests for `GameDefinition` constructor, `LoadFrom` YAML parsing (valid, invalid, missing keys, null values, extra keys), and `PinderDefaults` |
+| `SessionSystemPromptBuilderTests.cs` (test) | Unit tests for `SessionSystemPromptBuilder.Build` output structure, section ordering, null handling, and defaults fallback |
+| `Issue543_SessionSystemPromptSpecTests.cs` (test) | 45 spec-driven tests covering all acceptance criteria for `GameDefinition` and `SessionSystemPromptBuilder` |
 
 ## API / Public Interface
 
@@ -97,6 +102,42 @@ Accumulates user/assistant messages for stateful multi-turn conversations with t
 - **`HasActiveConversation`** (`bool`, read-only) — `true` when a `ConversationSession` is active; `false` otherwise. When `true`, all four `ILlmAdapter` methods route through the accumulated session.
 - **`StartConversation(string systemPrompt)`** — Creates a new `ConversationSession` and stores it in the internal `_session` field. Replaces any existing session (no error). Throws `ArgumentException` if `systemPrompt` is null or whitespace. Implements `IStatefulLlmAdapter.StartConversation`.
 
+### `GameDefinition` (public sealed class)
+
+Data carrier for game-level creative direction. Parsed from YAML or provided via hardcoded defaults. All properties are non-null strings set at construction.
+
+- **`Name`** (`string`) — Game name (e.g. "Pinder").
+- **`Vision`** (`string`) — Creative brief: what the game is, tone, goal.
+- **`WorldDescription`** (`string`) — World setting description.
+- **`PlayerRoleDescription`** (`string`) — Player character role description.
+- **`OpponentRoleDescription`** (`string`) — Opponent character role description.
+- **`MetaContract`** (`string`) — Immersion rules: never break character, [ENGINE] blocks as stage directions.
+- **`WritingRules`** (`string`) — Writing style rules: texting register, brevity, character voice fidelity.
+- **`GameDefinition(string name, string vision, string worldDescription, string playerRoleDescription, string opponentRoleDescription, string metaContract, string writingRules)`** — Constructor. Throws `ArgumentNullException` if any argument is null. Empty strings are allowed.
+- **`LoadFrom(string yamlContent)`** (`static`) — Parses a YAML string into a `GameDefinition`. Maps keys: `name`, `vision`, `world_description`, `player_role_description`, `opponent_role_description`, `meta_contract`, `writing_rules`. Extra YAML keys are ignored. Throws `ArgumentNullException` if `yamlContent` is null. Throws `FormatException` if YAML is unparseable, a required key is missing, or a key has a null value. Block scalar newlines are preserved as-is from the YAML parser (no trimming). Uses `YamlDotNet 16.3.0` with `UnderscoredNamingConvention`.
+- **`PinderDefaults`** (`static GameDefinition`) — Hardcoded fallback with all 7 fields populated with Pinder-specific creative direction: comedy dating RPG, sentient penises, absurdist world, d20 mechanics, shadow stats, texting register, immersion rules. Usable in production playtests.
+
+### `SessionSystemPromptBuilder` (public static class)
+
+Assembles a session-level system prompt from character profiles and game definition data.
+
+```csharp
+public static string Build(
+    string playerPrompt,
+    string opponentPrompt,
+    GameDefinition? gameDef = null);
+```
+
+- Returns a single string with 5 sections delimited by `== SECTION NAME ==` headers:
+  1. **== GAME VISION ==** — from `gameDef.Vision`
+  2. **== WORLD RULES ==** — from `gameDef.WorldDescription`
+  3. **== PLAYER CHARACTER ==** — `playerPrompt` verbatim
+  4. **== OPPONENT CHARACTER ==** — `opponentPrompt` verbatim
+  5. **== META CONTRACT ==** — `gameDef.MetaContract` + `gameDef.WritingRules` concatenated
+- Each section body is trimmed of trailing whitespace via `TrimEnd()`.
+- When `gameDef` is `null`, `GameDefinition.PinderDefaults` is used.
+- Throws `ArgumentNullException` if `playerPrompt` or `opponentPrompt` is null. Empty strings are allowed.
+
 ### Tell Category Mappings (in `OpponentResponseInstruction`)
 
 The prompt includes an explicit "ONLY" constraint with 10 behavior-to-stat mappings:
@@ -126,6 +167,7 @@ The prompt includes an explicit "ONLY" constraint with 10 behavior-to-stat mappi
 - **Success delivery: sharpen, not expand:** `SuccessDeliveryInstruction` (§3.3) uses margin-based tiers (1–4 clean, 5–9 strong, 10+ critical/Nat 20) aligned with `SuccessScale`. The strong tier allows sharpening word choice and adding at most ONE word or phrase to make the existing sentiment more precise, but explicitly prohibits adding new sentences or ideas not in the intended message. A counterpart rule enforces that every idea in the delivered message maps back to the intended message. This replaced an earlier version that used misaligned bands (1–5, 6–10) and a "small flourish" instruction that caused LLMs to inject new content.
 - **Failure degradation legibility:** When a player's roll fails, `OpponentContext.DeliveryTier` (set from `rollResult.Tier` in `GameSession.ResolveTurnAsync`) carries the `FailureTier` enum value into `BuildOpponentPrompt`. The method injects a "FAILURE CONTEXT" section with tier-specific guidance from `GetOpponentReactionGuidance()`, so the opponent LLM reacts proportionally to how badly the message was corrupted — from slight coolness (Fumble) to secondhand embarrassment (Legendary). Guidance text avoids fourth-wall-breaking language (no "failed", "rolled", etc.). On success (`FailureTier.None`), no failure section is injected. Note: the spec proposed a `PromptTemplates.GetOpponentFailureGuidance()` method and "DELIVERY NOTE" section name; the implementation places the method on `SessionDocumentBuilder.GetOpponentReactionGuidance()` and uses the section name "FAILURE CONTEXT".
 - **Stateful conversation mode:** `AnthropicLlmAdapter` supports an optional stateful mode activated by `StartConversation(systemPrompt)`. When active (`HasActiveConversation == true`), all four `ILlmAdapter` methods follow a shared pattern: (1) build user content via `SessionDocumentBuilder` (same as stateless), (2) append user message to `ConversationSession`, (3) build request via `_session.BuildRequest()` (includes system blocks + ALL accumulated messages), (4) send via `_client.SendMessagesAsync()`, (5) append raw assistant response to session, (6) parse and return. System blocks come from the `ConversationSession` (set at construction), not from `CacheBlockBuilder`. When no session is active, all methods execute the original stateless code path with no conditional logic overhead. The Anthropic Messages API is stateless (full history must be sent each call), so `ConversationSession` accumulates messages client-side. Messages grow unbounded within a session (acceptable for ~20-turn games within Anthropic's 200k token window). `ConversationSession` does not enforce user/assistant alternation — the caller is responsible. The class is not thread-safe; it is designed for sequential use within one `GameSession`.
+- **Session system prompt assembly:** `SessionSystemPromptBuilder.Build` produces a structured 5-section system prompt combining game-level creative direction (`GameDefinition`) with per-character profile prompts. This replaces the placeholder concatenation (player + `\n\n---\n\n` + opponent) used in the initial `GameSession` wiring (#542). The output is passed to `IStatefulLlmAdapter.StartConversation()` to initialize a stateful conversation session. `GameDefinition` can be loaded from a YAML file via `LoadFrom()` or use `PinderDefaults` as a hardcoded fallback. The YAML parsing uses `YamlDotNet 16.3.0` (same version as `Pinder.Rules`), added only to `Pinder.LlmAdapters.csproj` — `Pinder.Core` remains dependency-free.
 - **Provider abstraction:** The Anthropic-specific code is isolated in its own subdirectory. The adapter pattern allows swapping LLM providers without changing prompt templates or game logic.
 
 ## Change Log
@@ -141,3 +183,4 @@ The prompt includes an explicit "ONLY" constraint with 10 behavior-to-stat mappi
 | 2026-04-05 | #545 | Game definition YAML content validation — Added `GameDefinitionYamlContentTests.cs` (30 tests) in `Pinder.Rules.Tests`. Tests validate that `data/game-definition.yaml` exists, is valid YAML (no tabs, no BOM, all scalar strings, exactly 7 keys), and contains Pinder-specific creative content in all sections (vision, world_description, player_role_description, opponent_role_description, meta_contract, writing_rules). Each section is checked for required domain concepts (e.g. shadow growth, d20 rolls, 4 dialogue options, resistance, ENGINE blocks, asterisk prohibition). The YAML file itself lives outside the repo at `/root/.openclaw/agents-extra/pinder/data/game-definition.yaml` and is consumed by `GameDefinition.LoadFrom()` (#543). No C# production code changed. |
 | 2026-04-05 | #541 | Stateful conversation mode — Added `ConversationSession` class (`Pinder.LlmAdapters`) that accumulates user/assistant `Message` objects and builds `MessagesRequest` with cached system blocks (ephemeral `CacheControl`) + full message history snapshot. `AnthropicLlmAdapter` gains `StartConversation(string systemPrompt)` and `HasActiveConversation` property. When active, all four `ILlmAdapter` methods (`GetDialogueOptionsAsync`, `DeliverMessageAsync`, `GetOpponentResponseAsync`, `GetInterestChangeBeatAsync`) append to and read from the session instead of building fresh single-message requests. Stateless fallback is preserved when no session is active. `ILlmAdapter` interface unchanged. Tests: `ConversationSessionTests.cs` (16), `AnthropicLlmAdapterStatefulTests.cs` (12), `Issue541_StatefulConversationTests.cs`, `Issue541_AdditionalTests.cs`. |
 | 2026-04-05 | #542 | `IStatefulLlmAdapter` interface + GameSession wiring — New `IStatefulLlmAdapter` interface in `Pinder.Core.Interfaces` formalizes `StartConversation(string)` and `HasActiveConversation` as a sub-interface of `ILlmAdapter`. `AnthropicLlmAdapter` class declaration changed from `ILlmAdapter` to `IStatefulLlmAdapter`. `GameSession` 6-parameter constructor now checks `_llm is IStatefulLlmAdapter` and, if true, builds a system prompt from both character profiles (player + `\n\n---\n\n` + opponent) and calls `StartConversation`. `NullLlmAdapter` unchanged — stateless path preserved. Tests: `Issue542_StatefulSession_TestEngineerTests.cs`. |
+| 2026-04-05 | #543 | Session system prompt builder — Added `GameDefinition` sealed class (7 read-only string properties, `LoadFrom(yamlContent)` YAML parser, `PinderDefaults` hardcoded fallback) and `SessionSystemPromptBuilder` static class (`Build` method producing 5-section `== SECTION NAME ==` delimited prompt from character profiles + game definition). `YamlDotNet 16.3.0` added to `Pinder.LlmAdapters.csproj`. Tests: `GameDefinitionTests.cs`, `SessionSystemPromptBuilderTests.cs`, `Issue543_SessionSystemPromptSpecTests.cs` (45 spec-driven tests). |
