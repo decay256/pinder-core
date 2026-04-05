@@ -387,24 +387,19 @@ class Program
                 Console.WriteLine($"**{player1}'s opener | {player2}'s bio**");
             Console.WriteLine();
 
-            // ── UI panel ──────────────────────────────────────────────────
-            Console.WriteLine("```");
-            Console.WriteLine("╔══════════════════════════════════════════════════════════╗");
+            // // -- Option display: one block per option --
             if (!string.IsNullOrEmpty(lastOpponentMsg)) {
-                var lines = WrapText(lastOpponentMsg, 54);
-                Console.WriteLine($"║  {player2}: {lines[0].PadRight(54)}║");
-                for (int li = 1; li < lines.Count; li++)
-                    Console.WriteLine($"║  {lines[li].PadRight(58)}║");
+                Console.WriteLine($"**{player2}:** *\"{lastOpponentMsg}\"*");
+                Console.WriteLine();
             }
-            Console.WriteLine("╠══════════════════════════════════════════════════════════╣");
-            string momentumLine = momentum >= 3 ? $"📈 MOMENTUM +{(momentum>=5?3:momentum>=4?2:2)} active" :
-                                  momentum > 0  ? $"📈 Momentum: {momentum} win{(momentum>1?"s":"")}" : "";
-            if (!string.IsNullOrEmpty(momentumLine))
-                Console.WriteLine(FillLine(momentumLine));
+            var statusParts = new System.Collections.Generic.List<string>();
             if (snap.ActiveTrapNames.Length > 0)
-                Console.WriteLine(FillLine($"⚠️  Traps: {string.Join(", ", snap.ActiveTrapNames)}"));
-            Console.WriteLine("║                                                          ║");
-
+                statusParts.Add($"Traps: {string.Join(", ", snap.ActiveTrapNames)}");
+            if (momentum >= 3)
+                statusParts.Add($"Momentum +{(momentum>=5?3:momentum>=4?2:2)} ACTIVE");
+            else if (momentum > 0)
+                statusParts.Add($"Momentum: {momentum} win streak");
+            if (statusParts.Count > 0) { Console.WriteLine(string.Join(" | ", statusParts)); Console.WriteLine(); }
             char[] letters = { 'A', 'B', 'C', 'D' };
             for (int i = 0; i < turnStart.Options.Length; i++) {
                 var opt = turnStart.Options[i];
@@ -412,31 +407,18 @@ class Program
                 int dc = brickStats.GetDefenceDC(opt.Stat);
                 int need = dc - mod;
                 int pct = Math.Max(0, Math.Min(100, (21-need)*5));
-                string icons = "";
-                if (opt.HasTellBonus)              icons += " 📖";
-                if (opt.ComboName != null)          icons += " ⭐";
-                if (opt.CallbackTurnNumber.HasValue) icons += " 🔗";
-                if (opt.HasWeaknessWindow)          icons += " 🔓";
-
-                string header = $"{letters[i]}) 🎲 {StatLabel(opt.Stat)} ({mod:+#;-#;0})";
-                string riskStr = $"{RiskLabel(need)}{icons}";
-                // right-align risk label
-                int headerPad = 40 - header.Length - riskStr.Length;
-                Console.WriteLine(FillLine(header + (headerPad > 0 ? new string(' ', headerPad) : "  ") + riskStr));
-
-                if (!string.IsNullOrEmpty(opt.IntendedText) && opt.IntendedText != "...") {
-                    var wrapped = WrapText($"\"{opt.IntendedText}\"", 54);
-                    foreach (var wl in wrapped) Console.WriteLine(FillLine("   " + wl));
-                }
-                Console.WriteLine(FillLine($"   DC {dc}  |  Need: {need}+  |  {pct}%"));
-                Console.WriteLine(FillLine($"   Reward: {RewardRange(need)}  |  {XpMultiplier(need)}"));
-                Console.WriteLine("║                                                          ║");
+                string riskColor = need <= 5 ? "[Safe]" : need <= 10 ? "[Medium]" : need <= 15 ? "[Hard]" : "[Bold]";
+                var badges = new System.Collections.Generic.List<string>();
+                if (opt.HasTellBonus)               badges.Add("Tell +2");
+                if (opt.ComboName != null)           badges.Add($"Combo: {opt.ComboName}");
+                if (opt.CallbackTurnNumber.HasValue) badges.Add("Callback");
+                if (opt.HasWeaknessWindow)           badges.Add("Window");
+                string badgeStr = badges.Count > 0 ? " | " + string.Join(", ", badges) : "";
+                Console.WriteLine($"**{letters[i]})** {StatLabel(opt.Stat)} {mod:+#;-#;0} | {pct}% {riskColor}{badgeStr}");
+                if (!string.IsNullOrEmpty(opt.IntendedText) && opt.IntendedText != "...")
+                    Console.WriteLine($"> \"{opt.IntendedText}\"");
+                Console.WriteLine();
             }
-            Console.WriteLine("║  ICONS: 🟢🟡🟠🔴 Risk | 🔓 Window | 🔗 Callback        ║");
-            Console.WriteLine("║         ⭐ Combo | 📈 Momentum | 🔥 Forced | 📖 Tell    ║");
-            Console.WriteLine("╚══════════════════════════════════════════════════════════╝");
-            Console.WriteLine("```");
-            Console.WriteLine();
 
             // ── pick + roll ───────────────────────────────────────────────
             // Build current shadow values from tracker for player agent context

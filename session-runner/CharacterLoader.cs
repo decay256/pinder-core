@@ -371,6 +371,7 @@ namespace Pinder.SessionRunner
             return result.Count > 0 ? string.Join("\n", result).Trim() : string.Empty;
         }
 
+
         private static string ParseBio(string content)
         {
             foreach (var line in content.Split('\n'))
