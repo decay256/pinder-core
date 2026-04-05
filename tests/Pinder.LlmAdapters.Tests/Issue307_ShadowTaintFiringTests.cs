@@ -30,7 +30,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
                 MakeDialogueContext(shadows));
 
-            Assert.Contains("SHADOW STATE", result);
+            Assert.Contains("Shadow state:", result);
             Assert.Contains("Madness", result);
         }
 
@@ -48,7 +48,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
                 MakeDialogueContext(shadows));
 
-            Assert.DoesNotContain("SHADOW STATE", result);
+            Assert.DoesNotContain("Shadow state:", result);
         }
 
         // ============== Edge: Boundary value Madness=5 → no taint (> 5 needed) ==============
@@ -65,7 +65,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
                 MakeDialogueContext(shadows));
 
-            Assert.DoesNotContain("SHADOW STATE", result);
+            Assert.DoesNotContain("Shadow state:", result);
         }
 
         // ============== Edge: Boundary value Madness=6 → taint fires (> 5) ==============
@@ -82,7 +82,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
                 MakeDialogueContext(shadows));
 
-            Assert.Contains("SHADOW STATE", result);
+            Assert.Contains("Shadow state:", result);
         }
 
         // ============== Edge: Horniness has different threshold (> 6) ==============
@@ -99,7 +99,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
                 MakeDialogueContext(shadows));
 
-            Assert.DoesNotContain("SHADOW STATE", result);
+            Assert.DoesNotContain("Shadow state:", result);
         }
 
         // Mutation: would catch if Horniness threshold is > 7 instead of > 6
@@ -114,7 +114,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
                 MakeDialogueContext(shadows));
 
-            Assert.Contains("SHADOW STATE", result);
+            Assert.Contains("Shadow state:", result);
             Assert.Contains("Horniness", result);
         }
 

@@ -73,7 +73,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
                 MakeDialogueContext(shadowThresholds: shadows));
 
-            Assert.Contains("SHADOW STATE (corrupting forces on your communication)", result);
+            Assert.Contains("Shadow state:", result);
             Assert.Contains("Your Madness is elevated", result);
         }
 
@@ -135,7 +135,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
                 MakeDialogueContext(shadowThresholds: shadows));
 
-            Assert.Contains("SHADOW STATE (corrupting forces on your communication)", result);
+            Assert.Contains("Shadow state:", result);
             Assert.Contains("Your Horniness is elevated", result);
         }
 
@@ -161,7 +161,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildDeliveryPrompt(
                 MakeDeliveryContext(option, shadowThresholds: shadows));
 
-            Assert.Contains("SHADOW STATE (corrupting forces on your communication)", result);
+            Assert.Contains("SHADOW STATE", result);
             Assert.Contains("Your Overthinking is elevated", result);
         }
 
@@ -176,7 +176,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildOpponentPrompt(
                 MakeOpponentContext(shadowThresholds: shadows));
 
-            Assert.Contains("SHADOW STATE (corrupting forces on your communication)", result);
+            Assert.Contains("SHADOW STATE", result);
             Assert.Contains("Your Fixation is elevated", result);
         }
     }
