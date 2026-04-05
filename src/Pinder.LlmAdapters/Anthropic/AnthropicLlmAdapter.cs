@@ -118,6 +118,39 @@ namespace Pinder.LlmAdapters.Anthropic
             _session = new ConversationSession(systemPrompt);
         }
 
+        /// <summary>
+        /// Sends a user message through the active stateful session and appends
+        /// both user and assistant messages atomically on success.
+        /// If the API call fails, no messages are appended — the session remains
+        /// in a consistent state for retry.
+        /// </summary>
+        /// <param name="session">Active conversation session (must not be null).</param>
+        /// <param name="userContent">User message content to send.</param>
+        /// <param name="temperature">Sampling temperature for this call.</param>
+        /// <returns>The assistant's response text.</returns>
+        private async Task<string> SendStatefulAsync(ConversationSession session, string userContent, double temperature)
+        {
+            // Build request with the user message included but NOT yet appended to session.
+            // This avoids corrupting the session if SendMessagesAsync throws.
+            session.AppendUser(userContent);
+            var request = session.BuildRequest(_options.Model, _options.MaxTokens, temperature);
+            try
+            {
+                var response = await _client.SendMessagesAsync(request).ConfigureAwait(false);
+                var responseText = response.GetText();
+                session.AppendAssistant(responseText);
+                return responseText;
+            }
+            catch
+            {
+                // Roll back the user message so the session stays consistent.
+                // Without this, a dangling user message would cause consecutive
+                // user roles, violating Anthropic's alternation requirement.
+                session.RemoveLast();
+                throw;
+            }
+        }
+
         /// <inheritdoc />
         public async Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context)
         {
@@ -128,14 +161,10 @@ namespace Pinder.LlmAdapters.Anthropic
 
             if (_session != null)
             {
-                _session.AppendUser(userContent);
-                var statefulRequest = _session.BuildRequest(
-                    _options.Model, _options.MaxTokens,
-                    _options.DialogueOptionsTemperature ?? DefaultDialogueOptionsTemperature);
-                var statefulResponse = await _client.SendMessagesAsync(statefulRequest).ConfigureAwait(false);
-                var statefulText = statefulResponse.GetText();
-                _session.AppendAssistant(statefulText);
-                return ParseDialogueOptions(statefulText);
+                var responseText = await SendStatefulAsync(
+                    _session, userContent,
+                    _options.DialogueOptionsTemperature ?? DefaultDialogueOptionsTemperature).ConfigureAwait(false);
+                return ParseDialogueOptions(responseText);
             }
 
             // Only the player's identity in system — prevents voice bleed from opponent's register
@@ -157,14 +186,9 @@ namespace Pinder.LlmAdapters.Anthropic
 
             if (_session != null)
             {
-                _session.AppendUser(userContent);
-                var statefulRequest = _session.BuildRequest(
-                    _options.Model, _options.MaxTokens,
-                    _options.DeliveryTemperature ?? DefaultDeliveryTemperature);
-                var statefulResponse = await _client.SendMessagesAsync(statefulRequest).ConfigureAwait(false);
-                var statefulText = statefulResponse.GetText();
-                _session.AppendAssistant(statefulText);
-                return statefulText;
+                return await SendStatefulAsync(
+                    _session, userContent,
+                    _options.DeliveryTemperature ?? DefaultDeliveryTemperature).ConfigureAwait(false);
             }
 
             var systemBlocks = CacheBlockBuilder.BuildPlayerOnlySystemBlocks(context.PlayerPrompt);
@@ -185,14 +209,10 @@ namespace Pinder.LlmAdapters.Anthropic
 
             if (_session != null)
             {
-                _session.AppendUser(userContent);
-                var statefulRequest = _session.BuildRequest(
-                    _options.Model, _options.MaxTokens,
-                    _options.OpponentResponseTemperature ?? DefaultOpponentResponseTemperature);
-                var statefulResponse = await _client.SendMessagesAsync(statefulRequest).ConfigureAwait(false);
-                var statefulText = statefulResponse.GetText();
-                _session.AppendAssistant(statefulText);
-                return ParseOpponentResponse(statefulText);
+                var responseText = await SendStatefulAsync(
+                    _session, userContent,
+                    _options.OpponentResponseTemperature ?? DefaultOpponentResponseTemperature).ConfigureAwait(false);
+                return ParseOpponentResponse(responseText);
             }
 
             // Per §3.5: only opponent prompt in system (opponent plays themselves)
@@ -220,14 +240,10 @@ namespace Pinder.LlmAdapters.Anthropic
 
             if (_session != null)
             {
-                _session.AppendUser(userContent);
-                var statefulRequest = _session.BuildRequest(
-                    _options.Model, _options.MaxTokens,
-                    _options.InterestChangeBeatTemperature ?? DefaultInterestChangeBeatTemperature);
-                var statefulResponse = await _client.SendMessagesAsync(statefulRequest).ConfigureAwait(false);
-                var statefulText = statefulResponse.GetText();
-                _session.AppendAssistant(statefulText);
-                return string.IsNullOrWhiteSpace(statefulText) ? null : statefulText;
+                var responseText = await SendStatefulAsync(
+                    _session, userContent,
+                    _options.InterestChangeBeatTemperature ?? DefaultInterestChangeBeatTemperature).ConfigureAwait(false);
+                return string.IsNullOrWhiteSpace(responseText) ? null : responseText;
             }
 
             // Include opponent system prompt so the beat is generated in character voice

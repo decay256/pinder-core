@@ -74,6 +74,20 @@ namespace Pinder.LlmAdapters
         }
 
         /// <summary>
+        /// Remove the last message from the conversation history.
+        /// Used internally by the adapter to roll back a user message
+        /// when the API call fails, preventing session corruption
+        /// (consecutive user messages violate Anthropic alternation).
+        /// </summary>
+        /// <exception cref="InvalidOperationException">If the message list is empty.</exception>
+        internal void RemoveLast()
+        {
+            if (_messages.Count == 0)
+                throw new InvalidOperationException("Cannot remove from an empty message list.");
+            _messages.RemoveAt(_messages.Count - 1);
+        }
+
+        /// <summary>
         /// Build a MessagesRequest using accumulated state:
         /// system blocks + all messages + specified parameters.
         /// Returns a snapshot — subsequent appends do not affect returned requests.

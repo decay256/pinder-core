@@ -561,5 +561,173 @@ OPTION_4
             var messages = body["messages"] as JArray;
             Assert.Single(messages!);
         }
+
+        // ==============================================================================
+        // Error recovery: API failure must not corrupt session state
+        // ==============================================================================
+
+        // Mutation: would catch if AppendUser was not rolled back on API failure
+        [Fact]
+        public async Task API_failure_rolls_back_user_message_session_stays_clean()
+        {
+            var callNum = 0;
+            var handler = new CapturingHandler(req =>
+            {
+                callNum++;
+                if (callNum <= 3) // AnthropicClient retries up to 3 times for 500
+                {
+                    return new HttpResponseMessage(HttpStatusCode.InternalServerError)
+                    {
+                        Content = new StringContent(
+                            "{\"error\":{\"type\":\"server_error\",\"message\":\"fail\"}}",
+                            System.Text.Encoding.UTF8, "application/json")
+                    };
+                }
+                return CapturingHandler.MakeJsonResponse(FourOptionResponse);
+            });
+            using var http = new HttpClient(handler);
+            using var adapter = new AnthropicLlmAdapter(DefaultOptions(), http);
+
+            adapter.StartConversation("system");
+
+            // First call fails — should NOT leave dangling user message
+            await Assert.ThrowsAnyAsync<Exception>(
+                () => adapter.GetDialogueOptionsAsync(MakeDialogueContext()));
+
+            // Session should have 0 messages (rolled back)
+            Assert.True(adapter.HasActiveConversation);
+
+            // Reset callNum so next call succeeds
+            callNum = 3;
+
+            // Second call should succeed with only 1 message (fresh user)
+            var options = await adapter.GetDialogueOptionsAsync(MakeDialogueContext());
+            Assert.NotNull(options);
+            Assert.Equal(4, options.Length);
+
+            // The successful request should have exactly 1 message
+            // (the last request body is the successful one)
+            var lastBody = JObject.Parse(handler.RequestBodies[handler.RequestBodies.Count - 1]);
+            var messages = lastBody["messages"] as JArray;
+            Assert.Single(messages!);
+            Assert.Equal("user", messages![0]!["role"]!.ToString());
+        }
+
+        // Mutation: would catch if only GetDialogueOptions had rollback but not DeliverMessage
+        [Fact]
+        public async Task API_failure_in_DeliverMessage_rolls_back_user_message()
+        {
+            var callNum = 0;
+            var handler = new CapturingHandler(req =>
+            {
+                callNum++;
+                if (callNum <= 3)
+                {
+                    return new HttpResponseMessage(HttpStatusCode.InternalServerError)
+                    {
+                        Content = new StringContent(
+                            "{\"error\":{\"type\":\"server_error\",\"message\":\"fail\"}}",
+                            System.Text.Encoding.UTF8, "application/json")
+                    };
+                }
+                return CapturingHandler.MakeJsonResponse("delivered text");
+            });
+            using var http = new HttpClient(handler);
+            using var adapter = new AnthropicLlmAdapter(DefaultOptions(), http);
+
+            adapter.StartConversation("system");
+
+            // Fail
+            await Assert.ThrowsAnyAsync<Exception>(
+                () => adapter.DeliverMessageAsync(MakeDeliveryContext()));
+
+            // Reset so next succeeds
+            callNum = 3;
+
+            // Should work cleanly with 1 user message
+            var result = await adapter.DeliverMessageAsync(MakeDeliveryContext());
+            Assert.Equal("delivered text", result);
+
+            var lastBody = JObject.Parse(handler.RequestBodies[handler.RequestBodies.Count - 1]);
+            var messages = lastBody["messages"] as JArray;
+            Assert.Single(messages!);
+        }
+
+        // Mutation: would catch if failure after successful calls corrupted prior history
+        [Fact]
+        public async Task API_failure_after_successful_call_preserves_prior_history()
+        {
+            var callNum = 0;
+            var handler = new CapturingHandler(req =>
+            {
+                callNum++;
+                // Calls 1-3: succeed (initial call retries are transparent)
+                if (callNum <= 1)
+                    return CapturingHandler.MakeJsonResponse(FourOptionResponse);
+                // Calls 2-4: fail (second call retries)
+                if (callNum <= 4)
+                {
+                    return new HttpResponseMessage(HttpStatusCode.InternalServerError)
+                    {
+                        Content = new StringContent(
+                            "{\"error\":{\"type\":\"server_error\",\"message\":\"fail\"}}",
+                            System.Text.Encoding.UTF8, "application/json")
+                    };
+                }
+                // Call 5+: succeed again
+                return CapturingHandler.MakeJsonResponse("delivered ok");
+            });
+            using var http = new HttpClient(handler);
+            using var adapter = new AnthropicLlmAdapter(DefaultOptions(), http);
+
+            adapter.StartConversation("system");
+
+            // First call succeeds — session has [user, assistant]
+            await adapter.GetDialogueOptionsAsync(MakeDialogueContext());
+
+            // Second call fails — should roll back, leaving session with [user, assistant]
+            await Assert.ThrowsAnyAsync<Exception>(
+                () => adapter.DeliverMessageAsync(MakeDeliveryContext()));
+
+            // Reset for success
+            callNum = 4;
+
+            // Third call should see prior 2 messages + new user = 3 total
+            await adapter.DeliverMessageAsync(MakeDeliveryContext());
+
+            var lastBody = JObject.Parse(handler.RequestBodies[handler.RequestBodies.Count - 1]);
+            var messages = lastBody["messages"] as JArray;
+            Assert.Equal(3, messages!.Count);
+            Assert.Equal("user", messages[0]!["role"]!.ToString());
+            Assert.Equal("assistant", messages[1]!["role"]!.ToString());
+            Assert.Equal("user", messages[2]!["role"]!.ToString());
+        }
+
+        // ==============================================================================
+        // ConversationSession.RemoveLast
+        // ==============================================================================
+
+        // Mutation: would catch if RemoveLast was a no-op
+        [Fact]
+        public void RemoveLast_removes_last_appended_message()
+        {
+            var session = new ConversationSession("system");
+            session.AppendUser("u1");
+            session.AppendAssistant("a1");
+            session.AppendUser("u2");
+
+            session.RemoveLast();
+
+            Assert.Equal(2, session.Messages.Count);
+            Assert.Equal("a1", session.Messages[1].Content);
+        }
+
+        // Mutation: would catch if RemoveLast silently did nothing on empty list
+        [Fact]
+        public void RemoveLast_throws_on_empty_session()
+        {
+            var session = new ConversationSession("system");
+            Assert.Throws<InvalidOperationException>(() => session.RemoveLast());
+        }
     }
 }
