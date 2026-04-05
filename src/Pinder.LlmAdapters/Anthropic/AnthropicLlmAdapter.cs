@@ -17,7 +17,7 @@ namespace Pinder.LlmAdapters.Anthropic
     /// using AnthropicClient for HTTP transport, SessionDocumentBuilder for prompt
     /// formatting, and CacheBlockBuilder for prompt caching.
     /// </summary>
-    public sealed class AnthropicLlmAdapter : ILlmAdapter, IDisposable
+    public sealed class AnthropicLlmAdapter : IStatefulLlmAdapter, IDisposable
     {
         // Default temperatures per method (used when AnthropicOptions override is null)
         private const double DefaultDialogueOptionsTemperature = 0.9;
