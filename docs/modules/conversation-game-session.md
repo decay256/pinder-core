@@ -1,7 +1,7 @@
-# Conversation Game Session — Shadow Reductions
+# Conversation Game Session
 
 ## Overview
-This document covers the shadow stat reduction events implemented within `GameSession` per rules §7. Shadow reductions decrease a shadow stat by −1 as a reward for specific player behavior, complementing the existing shadow growth triggers. The primary module doc for `GameSession` is [`game-session.md`](game-session.md).
+This document covers `GameSession` features beyond the primary module doc [`game-session.md`](game-session.md): shadow stat reductions (§7) and stateful LLM conversation session wiring.
 
 ## Key Components
 
@@ -11,10 +11,29 @@ This document covers the shadow stat reduction events implemented within `GameSe
 | `src/Pinder.Core/Stats/SessionShadowTracker.cs` | Provides `ApplyOffset(ShadowStatType, int, string)` — the method used for all reductions (accepts negative deltas, unlike `ApplyGrowth`). |
 | `tests/Pinder.Core.Tests/ShadowReductionTests.cs` | Core positive/negative tests for each of the 4 new reduction events. |
 | `tests/Pinder.Core.Tests/ShadowReductionSpecTests.cs` | Spec-driven tests — boundary values, edge cases (negative deltas, null shadows, stacking), and coexistence with other shadow events. |
+| `src/Pinder.Core/Interfaces/IStatefulLlmAdapter.cs` | Interface extending `ILlmAdapter` with `StartConversation(string)` and `HasActiveConversation` for stateful conversation mode. |
+| `tests/Pinder.Core.Tests/Issue542_StatefulSession_TestEngineerTests.cs` | Spec-driven tests for stateful session wiring — interface shape, constructor detection, system prompt format, backward compatibility. |
 
 ## API / Public Interface
 
-No new public methods or types were introduced. All changes are internal to existing `GameSession` private/public methods. The reductions use existing `SessionShadowTracker` API:
+### `IStatefulLlmAdapter` (Pinder.Core.Interfaces)
+
+```csharp
+public interface IStatefulLlmAdapter : ILlmAdapter
+{
+    void StartConversation(string systemPrompt);
+    bool HasActiveConversation { get; }
+}
+```
+
+- Extends `ILlmAdapter` — any implementor must also satisfy the four `ILlmAdapter` methods.
+- `StartConversation` initializes an internal conversation session. Calling again replaces the previous session (no error).
+- `HasActiveConversation` returns `false` before `StartConversation` is called, `true` after.
+- Lives in `Pinder.Core` (zero NuGet dependencies — pure interface).
+
+### Shadow Reduction API
+
+No new public methods or types for shadow reductions. All changes are internal to existing `GameSession` private/public methods. The reductions use existing `SessionShadowTracker` API:
 
 ```csharp
 // Used for all reductions (delta is negative, e.g. -1)
@@ -45,6 +64,17 @@ public int GetDelta(ShadowStatType shadow);
 
 ## Architecture Notes
 
+### Stateful LLM Session Wiring
+
+- **Detection via interface check:** `GameSession`'s 6-parameter constructor checks `_llm is IStatefulLlmAdapter stateful` at the end of initialization. The 5-parameter constructor delegates to the 6-parameter constructor, so the check runs for both.
+- **System prompt assembly:** When the adapter is stateful, the constructor builds a system prompt by concatenating `_player.AssembledSystemPrompt + "\n\n---\n\n" + _opponent.AssembledSystemPrompt` and passes it to `stateful.StartConversation(systemPrompt)`. This is a temporary format — issue #543 introduces `SessionSystemPromptBuilder` with structured game vision/rules/meta-contract.
+- **Transparent to callers:** No `GameSession` method bodies changed. The adapter internally routes calls through the accumulated `ConversationSession` when active. `GameSession` continues calling `_llm.GetDialogueOptionsAsync(context)` etc. as before.
+- **Backward compatibility:** `NullLlmAdapter` implements only `ILlmAdapter` (not `IStatefulLlmAdapter`), so the `is` check returns `false` for all existing tests. Zero behavioral change on the stateless path.
+- **One adapter per session:** Architecture assumes 1:1 adapter-to-GameSession relationship. Sharing an adapter across sessions silently replaces the conversation (documented as unsupported).
+- **Config-independent:** Stateful detection uses the adapter's type, not `GameSessionConfig`. A null config does not prevent stateful mode.
+
+### Shadow Reductions
+
 - Shadow reductions follow the same event recording pattern as growth triggers — `ApplyOffset` logs the event string, which is later drained via `DrainGrowthEvents()` and surfaced in `TurnResult.ShadowGrowthEvents`.
 - The Overthinking reduction is placed in `ResolveTurnAsync()` (not in `EvaluatePerTurnShadowGrowth()`) because it depends on `_shadowDisadvantagedStats`, which is computed during turn resolution.
 - See [`game-session.md`](game-session.md) for the full `GameSession` module documentation.
@@ -54,3 +84,4 @@ public int GetDelta(ShadowStatType shadow);
 | Date | Issue | Summary |
 |------|-------|---------|
 | 2026-04-03 | #270 | Initial creation — documented 4 new shadow reduction events (Dread, Denial, Madness, Overthinking) added to `GameSession`. Two new test files (1202 lines). |
+| 2026-04-05 | #542 | Stateful LLM session wiring — `IStatefulLlmAdapter` interface added to `Pinder.Core.Interfaces`. `GameSession` constructor detects stateful adapters and calls `StartConversation` with player + opponent system prompts (separated by `\n\n---\n\n`). `NullLlmAdapter` unchanged (stateless path preserved). Test file: `Issue542_StatefulSession_TestEngineerTests.cs`. |

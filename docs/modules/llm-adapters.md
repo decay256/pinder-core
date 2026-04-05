@@ -17,12 +17,14 @@ The LLM Adapters module (`Pinder.LlmAdapters`) provides prompt templates and API
 | `Anthropic/Dto/MessagesRequest.cs` | Request DTO for the Anthropic Messages API |
 | `Anthropic/Dto/MessagesResponse.cs` | Response DTO for the Anthropic Messages API |
 | `Anthropic/Dto/ContentBlock.cs` | Content block DTO for Anthropic message payloads |
+| `src/Pinder.Core/Interfaces/IStatefulLlmAdapter.cs` | Interface extending `ILlmAdapter` with `StartConversation(string)` and `HasActiveConversation` for stateful conversation mode |
 | `ConversationSession.cs` | Accumulates user/assistant messages for stateful multi-turn conversations; builds `MessagesRequest` with cached system blocks + full history |
 | `GameDefinitionYamlContentTests.cs` (test) | 30 content-validation tests ensuring `game-definition.yaml` has correct structure and Pinder-specific creative content |
 | `ConversationSessionTests.cs` (test) | 16 unit tests for `ConversationSession` construction, append, BuildRequest, and edge cases |
 | `AnthropicLlmAdapterStatefulTests.cs` (test) | 12 tests for stateful adapter behavior across all 4 `ILlmAdapter` methods |
 | `Issue541_StatefulConversationTests.cs` (test) | Integration tests for stateful conversation mode — multi-turn accumulation, error recovery, stateless fallback |
 | `Issue541_AdditionalTests.cs` (test) | Additional coverage for snapshot isolation, role correctness, message ordering, system block caching, and API failure resilience |
+| `Issue542_StatefulSession_TestEngineerTests.cs` (test) | Spec-driven tests for `IStatefulLlmAdapter` interface shape, `GameSession` constructor stateful detection, system prompt format, and backward compatibility |
 
 ## API / Public Interface
 
@@ -64,6 +66,21 @@ Builds the user-message content for `GetOpponentResponseAsync` (§3.5). Assemble
 
 Builds the user message content for dialogue option generation. When `context.OpponentPrompt` is non-empty, prepends an `OPPONENT PROFILE` section (labelled "NOT who you are") before the conversation history. When `context.PlayerTextingStyle` is non-empty, injects a `YOUR TEXTING STYLE — follow this exactly, no deviations:` block immediately before the `YOUR TASK` heading. If `PlayerTextingStyle` is empty, the block is omitted entirely. This provides the LLM with opponent context without placing the opponent's identity in the system prompt, and reinforces the player character's unique texting voice.
 
+### `IStatefulLlmAdapter` (Pinder.Core.Interfaces)
+
+```csharp
+public interface IStatefulLlmAdapter : ILlmAdapter
+{
+    void StartConversation(string systemPrompt);
+    bool HasActiveConversation { get; }
+}
+```
+
+- Extends `ILlmAdapter` — implementors must also satisfy the four `ILlmAdapter` methods.
+- `StartConversation` initializes an internal conversation session. Calling again replaces the previous session (no error).
+- `HasActiveConversation` returns `false` before `StartConversation`, `true` after.
+- Lives in `Pinder.Core` (zero NuGet dependencies — pure interface). Implemented by `AnthropicLlmAdapter`; not implemented by `NullLlmAdapter`.
+
 ### `ConversationSession` (public sealed class)
 
 Accumulates user/assistant messages for stateful multi-turn conversations with the Anthropic Messages API. System blocks are set once at construction; messages grow unbounded as turns are played.
@@ -78,7 +95,7 @@ Accumulates user/assistant messages for stateful multi-turn conversations with t
 ### `AnthropicLlmAdapter` — Stateful Conversation Members
 
 - **`HasActiveConversation`** (`bool`, read-only) — `true` when a `ConversationSession` is active; `false` otherwise. When `true`, all four `ILlmAdapter` methods route through the accumulated session.
-- **`StartConversation(string systemPrompt)`** — Creates a new `ConversationSession` and stores it in the internal `_session` field. Replaces any existing session (no error). Throws `ArgumentException` if `systemPrompt` is null or whitespace. These are concrete members on `AnthropicLlmAdapter` only — `ILlmAdapter` is unchanged.
+- **`StartConversation(string systemPrompt)`** — Creates a new `ConversationSession` and stores it in the internal `_session` field. Replaces any existing session (no error). Throws `ArgumentException` if `systemPrompt` is null or whitespace. Implements `IStatefulLlmAdapter.StartConversation`.
 
 ### Tell Category Mappings (in `OpponentResponseInstruction`)
 
@@ -123,3 +140,4 @@ The prompt includes an explicit "ONLY" constraint with 10 behavior-to-stat mappi
 | 2026-04-04 | #493 | Failure degradation legibility — `OpponentContext` gains `DeliveryTier` property (`FailureTier`, default `None`). `GameSession.ResolveTurnAsync` passes `rollResult.Tier` to `OpponentContext`. Five `OpponentReaction*` constants added to `PromptTemplates` (Fumble/Misfire/TropeTrap/Catastrophe/Legendary). `SessionDocumentBuilder.GetOpponentReactionGuidance(FailureTier)` maps tiers to guidance. `BuildOpponentPrompt` injects "FAILURE CONTEXT" section for non-None tiers. Spec divergences: method placed on `SessionDocumentBuilder` (not `PromptTemplates`), section named "FAILURE CONTEXT" (not "DELIVERY NOTE"), constants named `OpponentReaction*` (not `OpponentFailureGuidance` / `Opponent*Guidance`). Tests in `Issue493_FailureDegradationTests.cs`, `Issue493_FailureDegradationSpecTests.cs`, `Issue493_FailureDegradationCoreTests.cs`. |
 | 2026-04-05 | #545 | Game definition YAML content validation — Added `GameDefinitionYamlContentTests.cs` (30 tests) in `Pinder.Rules.Tests`. Tests validate that `data/game-definition.yaml` exists, is valid YAML (no tabs, no BOM, all scalar strings, exactly 7 keys), and contains Pinder-specific creative content in all sections (vision, world_description, player_role_description, opponent_role_description, meta_contract, writing_rules). Each section is checked for required domain concepts (e.g. shadow growth, d20 rolls, 4 dialogue options, resistance, ENGINE blocks, asterisk prohibition). The YAML file itself lives outside the repo at `/root/.openclaw/agents-extra/pinder/data/game-definition.yaml` and is consumed by `GameDefinition.LoadFrom()` (#543). No C# production code changed. |
 | 2026-04-05 | #541 | Stateful conversation mode — Added `ConversationSession` class (`Pinder.LlmAdapters`) that accumulates user/assistant `Message` objects and builds `MessagesRequest` with cached system blocks (ephemeral `CacheControl`) + full message history snapshot. `AnthropicLlmAdapter` gains `StartConversation(string systemPrompt)` and `HasActiveConversation` property. When active, all four `ILlmAdapter` methods (`GetDialogueOptionsAsync`, `DeliverMessageAsync`, `GetOpponentResponseAsync`, `GetInterestChangeBeatAsync`) append to and read from the session instead of building fresh single-message requests. Stateless fallback is preserved when no session is active. `ILlmAdapter` interface unchanged. Tests: `ConversationSessionTests.cs` (16), `AnthropicLlmAdapterStatefulTests.cs` (12), `Issue541_StatefulConversationTests.cs`, `Issue541_AdditionalTests.cs`. |
+| 2026-04-05 | #542 | `IStatefulLlmAdapter` interface + GameSession wiring — New `IStatefulLlmAdapter` interface in `Pinder.Core.Interfaces` formalizes `StartConversation(string)` and `HasActiveConversation` as a sub-interface of `ILlmAdapter`. `AnthropicLlmAdapter` class declaration changed from `ILlmAdapter` to `IStatefulLlmAdapter`. `GameSession` 6-parameter constructor now checks `_llm is IStatefulLlmAdapter` and, if true, builds a system prompt from both character profiles (player + `\n\n---\n\n` + opponent) and calls `StartConversation`. `NullLlmAdapter` unchanged — stateless path preserved. Tests: `Issue542_StatefulSession_TestEngineerTests.cs`. |
