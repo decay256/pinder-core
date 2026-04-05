@@ -30,11 +30,16 @@ namespace Pinder.Core.Characters
         /// <param name="anatomySelections">Map of parameterId → tierId (e.g. "length" → "short").</param>
         /// <param name="playerBaseStats">Player-authored base stat values.</param>
         /// <param name="shadowStats">Current shadow stat values.</param>
+        /// <param name="characterLevel">
+        /// Character level used to filter archetypes by their eligible level range.
+        /// When 0 (default), no level filtering is applied (backward-compatible).
+        /// </param>
         public FragmentCollection Assemble(
             IEnumerable<string> equippedItemIds,
             IReadOnlyDictionary<string, string> anatomySelections,
             IReadOnlyDictionary<StatType, int> playerBaseStats,
-            IReadOnlyDictionary<ShadowStatType, int> shadowStats)
+            IReadOnlyDictionary<ShadowStatType, int> shadowStats,
+            int characterLevel = 0)
         {
             // --- 1. Resolve items and anatomy tiers --------------------------------
 
@@ -138,6 +143,10 @@ namespace Pinder.Core.Characters
                              tier.TextingStyleFragment, tier.ArchetypeTendencies);
 
             // --- 6. Count and rank archetypes -------------------------------------
+            // When characterLevel > 0, filter to archetypes whose level range
+            // includes the character's level. Unknown archetypes (not in catalog)
+            // are always kept. If no eligible archetypes remain, fall back to
+            // the unfiltered list so the character always has archetype data.
 
             var archetypeCount = new Dictionary<string, int>(StringComparer.Ordinal);
             foreach (var a in allArchetypes)
@@ -146,7 +155,20 @@ namespace Pinder.Core.Characters
                 archetypeCount[a] = c + 1;
             }
 
-            var ranked = archetypeCount
+            IEnumerable<KeyValuePair<string, int>> archetypesToRank = archetypeCount;
+
+            if (characterLevel > 0)
+            {
+                var eligible = archetypeCount
+                    .Where(kv => ArchetypeCatalog.IsEligibleAtLevel(kv.Key, characterLevel))
+                    .ToList();
+
+                if (eligible.Count > 0)
+                    archetypesToRank = eligible;
+                // else: fall back to unfiltered list
+            }
+
+            var ranked = archetypesToRank
                 .OrderByDescending(kv => kv.Value)
                 .Select(kv => (kv.Key, kv.Value))
                 .ToList();
