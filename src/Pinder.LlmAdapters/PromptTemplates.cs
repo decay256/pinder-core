@@ -246,5 +246,69 @@ Rules:
         /// <summary>Legendary (Nat 1): maximum cringe response.</summary>
         internal const string OpponentReactionLegendary =
             "Their last message was spectacularly bad — the kind of message you screenshot and send to your friends. Your response reflects genuine shock, confusion, or secondhand embarrassment. The temperature in this conversation just dropped to freezing. Do NOT narrate your reaction. Just react.";
+
+        // ── Interest narrative bands for [ENGINE — OPPONENT] blocks ──
+
+        /// <summary>Interest 1-4: reconsidering.</summary>
+        internal const string InterestNarrative_1_4 =
+            "Reconsidering. Something went wrong.";
+
+        /// <summary>Interest 5-9: skeptical.</summary>
+        internal const string InterestNarrative_5_9 =
+            "Skeptical. Still testing.";
+
+        /// <summary>Interest 10-14: engaged but not sold.</summary>
+        internal const string InterestNarrative_10_14 =
+            "Engaged but not sold. Evaluating.";
+
+        /// <summary>Interest 15-20: interested but holding back.</summary>
+        internal const string InterestNarrative_15_20 =
+            "Interested but holding back. Close.";
+
+        /// <summary>Interest 21-24: basically sold.</summary>
+        internal const string InterestNarrative_21_24 =
+            "Basically sold. They can still blow it.";
+
+        /// <summary>Interest 25: resistance dissolved.</summary>
+        internal const string InterestNarrative_25 =
+            "The resistance dissolved.";
+
+        /// <summary>
+        /// Returns the interest narrative string for a given interest level.
+        /// Six configurable bands as specified in §544.
+        /// </summary>
+        internal static string GetInterestNarrative(int interest)
+        {
+            if (interest >= 25) return InterestNarrative_25;
+            if (interest >= 21) return InterestNarrative_21_24;
+            if (interest >= 15) return InterestNarrative_15_20;
+            if (interest >= 10) return InterestNarrative_10_14;
+            if (interest >= 5) return InterestNarrative_5_9;
+            if (interest >= 1) return InterestNarrative_1_4;
+            return "Unmatched. The conversation is over.";
+        }
+
+        // ── [ENGINE] block format templates ──
+
+        /// <summary>[ENGINE — Turn N] injection block for options generation.</summary>
+        internal const string EngineOptionsBlock =
+@"[ENGINE — Turn {turn}]
+{player_name} is deciding what to send next.
+{game_state}
+Generate 4 options for what {player_name} might send, given the conversation above.
+Format: OPTION_A: [message] OPTION_B: [message] etc.";
+
+        /// <summary>[ENGINE — DELIVERY] injection block for message delivery.</summary>
+        internal const string EngineDeliveryBlock =
+@"[ENGINE — DELIVERY]
+Player chose: '{chosen_option}'
+Dice result: {roll_context}
+Write the message {player_name} actually sends, given the above.";
+
+        /// <summary>[ENGINE — OPPONENT] injection block for opponent response.</summary>
+        internal const string EngineOpponentBlock =
+@"[ENGINE — OPPONENT]
+{opponent_name} is at Interest {interest}/25. {interest_narrative}
+Write {opponent_name}'s response.";
     }
 }

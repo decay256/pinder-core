@@ -137,7 +137,7 @@ namespace Pinder.LlmAdapters.Tests
                 MakeDialogueContext(playerName: "GERALD_42", opponentName: "VELVET"));
 
             int opponentIdx = result.IndexOf("OPPONENT PROFILE");
-            int historyIdx = result.IndexOf("CONVERSATION HISTORY");
+            int historyIdx = result.IndexOf("[CONVERSATION_START]");
             Assert.True(opponentIdx < historyIdx,
                 "Opponent profile should appear before conversation history");
         }
@@ -238,12 +238,13 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Fact]
-        public void BuildDialogueOptionsPrompt_NoTraps_ShowsNone()
+        public void BuildDialogueOptionsPrompt_NoTraps_NoTrapsMentioned()
         {
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
                 MakeDialogueContext(playerName: "GERALD", opponentName: "VELVET"));
 
-            Assert.Contains("Active traps: none", result);
+            // With no active traps, the output should not mention any trap names
+            Assert.DoesNotContain("Active traps:", result);
         }
 
         [Fact]
@@ -252,7 +253,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
                 MakeDialogueContext(playerName: "GERALD", opponentName: "VELVET"));
 
-            Assert.Contains("YOUR TASK", result);
+            Assert.Contains("[ENGINE — Turn", result);
             Assert.Contains("Generate exactly 4 dialogue options for GERALD", result);
         }
 
@@ -265,9 +266,9 @@ namespace Pinder.LlmAdapters.Tests
                 MakeDeliveryContext(chosenOption: option, outcome: FailureTier.None, beatDcBy: 4,
                     playerName: "GERALD", opponentName: "VELVET"));
 
-            Assert.Contains("SUCCESS", result);
-            Assert.Contains("beat DC by 4", result);
-            Assert.Contains("Stat used: WIT", result);
+            Assert.Contains("[ENGINE — DELIVERY]", result);
+            Assert.Contains("Beat DC by 4", result);
+            Assert.Contains("Stat: WIT", result);
             Assert.Contains("Output only the message text", result);
         }
 
@@ -317,12 +318,12 @@ namespace Pinder.LlmAdapters.Tests
 
             Assert.Contains("PLAYER'S LAST MESSAGE", result);
             Assert.Contains("\"How are you?\"", result);
-            Assert.Contains("INTEREST CHANGE", result);
+            Assert.Contains("[ENGINE — OPPONENT]", result);
             Assert.Contains("Interest moved from 10 to 12 (+2)", result);
-            Assert.Contains("Current Interest: 12/25", result);
+            Assert.Contains("Interest 12/25", result);
             Assert.Contains("RESPONSE TIMING", result);
             Assert.Contains("3.5 minutes", result);
-            Assert.Contains("CURRENT INTEREST STATE", result);
+            Assert.Contains("Engaged but not sold", result);
             Assert.Contains("[RESPONSE]", result);
             Assert.Contains("[SIGNALS]", result);
         }
@@ -352,7 +353,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildOpponentPrompt(
                 MakeOpponentContext(interestBefore: 10, interestAfter: 18));
 
-            Assert.Contains("very interested", result);
+            Assert.Contains("Interested but holding back", result);
         }
 
         [Fact]
@@ -361,7 +362,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildOpponentPrompt(
                 MakeOpponentContext(interestBefore: 5, interestAfter: 3));
 
-            Assert.Contains("disengaged", result);
+            Assert.Contains("Reconsidering", result);
         }
 
         [Fact]

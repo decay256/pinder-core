@@ -10,11 +10,16 @@ namespace Pinder.LlmAdapters
     /// <summary>
     /// Builds the user-message content for each of the 4 ILlmAdapter method calls.
     /// Pure static utility — no I/O, no state, no async.
+    ///
+    /// Sprint 12+: Uses compact [ENGINE] injection blocks that translate game
+    /// mechanics into narrative for the LLM. Each block type provides exactly
+    /// the information the LLM needs for that call.
     /// </summary>
     public static class SessionDocumentBuilder
     {
         /// <summary>
-        /// Builds the user-message content for GetDialogueOptionsAsync (§3.2).
+        /// Builds the user-message content for GetDialogueOptionsAsync.
+        /// Uses [ENGINE — Turn N] injection block format.
         /// </summary>
         public static string BuildDialogueOptionsPrompt(DialogueContext context)
         {
@@ -26,7 +31,6 @@ namespace Pinder.LlmAdapters
             var sb = new StringBuilder();
 
             // Opponent profile as informational context (not system identity)
-            // so the LLM knows what kind of messages would land with this opponent
             if (!string.IsNullOrWhiteSpace(context.OpponentPrompt))
             {
                 sb.AppendLine($"OPPONENT PROFILE (for context — this is who you are talking to, NOT who you are):");
@@ -34,100 +38,97 @@ namespace Pinder.LlmAdapters
                 sb.AppendLine();
             }
 
-            sb.AppendLine("CONVERSATION HISTORY");
+            // Conversation history
             AppendConversationHistory(sb, context.ConversationHistory, playerName);
-
             sb.AppendLine();
-            sb.AppendLine("OPPONENT'S LAST MESSAGE");
-            sb.AppendLine($"\"{context.OpponentLastMessage}\"");
 
-            sb.AppendLine();
-            sb.AppendLine("GAME STATE");
-            sb.AppendLine($"- Turn: {context.CurrentTurn}");
+            // Game state summary for the ENGINE block
+            var gameState = new StringBuilder();
+            gameState.AppendLine($"Interest: {context.CurrentInterest}/25 — {GetInterestLabel(context.CurrentInterest)}");
 
-            // Interest state label
-            string interestLabel = context.CurrentInterest >= 21 ? "Almost There \U0001f525"
-                : context.CurrentInterest >= 16 ? "Very Into It \U0001f60d (player has advantage)"
-                : context.CurrentInterest >= 10 ? "Interested \U0001f60a"
-                : context.CurrentInterest >= 5  ? "Lukewarm \U0001f914"
-                : context.CurrentInterest >= 1  ? "Bored \U0001f610 (player has disadvantage)"
-                : "Unmatched \U0001f480";
-            sb.AppendLine($"- Interest: {context.CurrentInterest}/25 — {interestLabel}");
-
-            if (context.ActiveTraps.Count == 0)
+            if (context.ActiveTraps.Count > 0)
             {
-                sb.AppendLine("- Active traps: none");
-            }
-            else
-            {
-                sb.AppendLine($"- Active traps: {string.Join(", ", context.ActiveTraps)}");
+                gameState.AppendLine($"Active traps: {string.Join(", ", context.ActiveTraps)}");
             }
 
             if (context.ActiveTrapInstructions != null && context.ActiveTrapInstructions.Length > 0)
             {
-                sb.AppendLine("ACTIVE TRAP INSTRUCTIONS (taint ALL generated options regardless of stat):");
+                gameState.AppendLine("ACTIVE TRAP INSTRUCTIONS (taint ALL generated options regardless of stat):");
                 foreach (var instruction in context.ActiveTrapInstructions)
-                    sb.AppendLine(instruction);
+                    gameState.AppendLine(instruction);
             }
 
             if (context.HorninessLevel >= 6)
             {
-                sb.AppendLine($"- Horniness level: {context.HorninessLevel}/10 (Rizz options are more prominent, slightly too forward)");
+                gameState.AppendLine($"Horniness: {context.HorninessLevel}/10 — Rizz options more prominent, slightly too forward.");
             }
             if (context.RequiresRizzOption)
             {
-                sb.AppendLine("- \U0001f525 REQUIRED: Include at least one Rizz option — Horniness is forcing it into the lineup.");
+                gameState.AppendLine("\U0001f525 REQUIRED: Include at least one Rizz option.");
             }
 
-            string dialogueTaint = BuildShadowTaintBlock(context.ShadowThresholds);
-            if (!string.IsNullOrEmpty(dialogueTaint))
+            string shadowTaint = BuildShadowTaintBlock(context.ShadowThresholds);
+            if (!string.IsNullOrEmpty(shadowTaint))
             {
-                sb.AppendLine();
-                sb.AppendLine("SHADOW STATE (corrupting forces on your communication)");
-                sb.AppendLine(dialogueTaint);
+                gameState.AppendLine($"Shadow state: {shadowTaint}");
             }
 
             if (context.CallbackOpportunities != null && context.CallbackOpportunities.Count > 0)
             {
-                sb.AppendLine();
-                sb.AppendLine("CALLBACK OPPORTUNITIES");
-                sb.AppendLine("Reference these topics naturally in 1-2 options to earn hidden roll bonuses:");
+                gameState.AppendLine("Callback opportunities:");
                 foreach (var cb in context.CallbackOpportunities)
                 {
                     int turnsAgo = context.CurrentTurn - cb.TurnIntroduced;
                     string bonus = turnsAgo >= 4 ? "+2 hidden" : turnsAgo >= 2 ? "+1 hidden" : "+3 hidden (opener)";
-                    sb.AppendLine($"- \"{cb.TopicKey}\" (introduced T{cb.TurnIntroduced}, {turnsAgo} turns ago, {bonus})");
+                    gameState.AppendLine($"  \"{cb.TopicKey}\" (T{cb.TurnIntroduced}, {turnsAgo} turns ago, {bonus})");
                 }
             }
 
-            // Inject texting style block immediately before task instruction (#489)
+            // Inject texting style immediately before the ENGINE block (#489)
             if (!string.IsNullOrEmpty(context.PlayerTextingStyle))
             {
-                sb.AppendLine();
                 sb.AppendLine("YOUR TEXTING STYLE — follow this exactly, no deviations:");
                 sb.AppendLine(context.PlayerTextingStyle);
+                sb.AppendLine();
             }
 
+            // [ENGINE — Turn N] injection block
+            sb.Append(PromptTemplates.EngineOptionsBlock
+                .Replace("{turn}", context.CurrentTurn.ToString())
+                .Replace("{player_name}", playerName)
+                .Replace("{game_state}", gameState.ToString().TrimEnd()));
+
             sb.AppendLine();
-            sb.AppendLine("YOUR TASK");
+            sb.AppendLine();
+
+            // Output format instructions
             sb.Append(PromptTemplates.DialogueOptionsInstruction.Replace("{player_name}", playerName));
 
             return sb.ToString();
         }
 
         /// <summary>
-        /// Builds the user-message content for DeliverMessageAsync (§3.3 success / §3.4 failure).
+        /// Builds the user-message content for DeliverMessageAsync.
+        /// Uses [ENGINE — DELIVERY] injection block format.
         /// </summary>
-        public static string BuildDeliveryPrompt(DeliveryContext context)
+        /// <param name="context">The delivery context.</param>
+        /// <param name="rollContextBuilder">
+        /// Optional RollContextBuilder for YAML-sourced flavor text.
+        /// When null, uses hardcoded roll context defaults.
+        /// </param>
+        public static string BuildDeliveryPrompt(
+            DeliveryContext context,
+            RollContextBuilder? rollContextBuilder = null)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
             var playerName = FallbackName(context.PlayerName, "Player");
             var opponentName = FallbackName(context.OpponentName, "Opponent");
+            var builder = rollContextBuilder ?? new RollContextBuilder();
 
             var sb = new StringBuilder();
 
-            sb.AppendLine("CONVERSATION HISTORY");
+            // Conversation history
             AppendConversationHistory(sb, context.ConversationHistory, playerName);
 
             string deliveryTaint = BuildShadowTaintBlock(context.ShadowThresholds);
@@ -140,28 +141,39 @@ namespace Pinder.LlmAdapters
 
             sb.AppendLine();
 
+            // Build roll context narrative from YAML or fallback
+            string rollContext;
             if (context.Outcome == FailureTier.None)
             {
-                // Success path (§3.3)
-                sb.AppendLine($"The player chose option: \"{context.ChosenOption.IntendedText}\"");
-                sb.AppendLine($"Stat used: {context.ChosenOption.Stat.ToString().ToUpperInvariant()}");
-                sb.AppendLine($"They rolled SUCCESS — beat DC by {context.BeatDcBy}.");
-                sb.AppendLine();
+                rollContext = builder.GetSuccessContext(context.BeatDcBy, false);
+            }
+            else
+            {
+                rollContext = builder.GetFailureContext(context.Outcome);
+            }
+
+            // [ENGINE — DELIVERY] injection block
+            sb.AppendLine(PromptTemplates.EngineDeliveryBlock
+                .Replace("{chosen_option}", context.ChosenOption.IntendedText)
+                .Replace("{roll_context}", rollContext)
+                .Replace("{player_name}", playerName));
+
+            sb.AppendLine();
+
+            // Additional context for the LLM based on outcome
+            if (context.Outcome == FailureTier.None)
+            {
+                sb.AppendLine($"Stat: {context.ChosenOption.Stat.ToString().ToUpperInvariant()} | Beat DC by {context.BeatDcBy}");
                 sb.Append(PromptTemplates.SuccessDeliveryInstruction
                     .Replace("{player_name}", playerName));
             }
             else
             {
-                // Failure path (§3.4)
                 int missMargin = Math.Abs(context.BeatDcBy);
                 string tierName = GetFailureTierName(context.Outcome);
                 string tierInstruction = GetTierInstruction(context.Outcome);
 
-                sb.AppendLine($"The player chose option: \"{context.ChosenOption.IntendedText}\"");
-                sb.AppendLine($"Stat used: {context.ChosenOption.Stat.ToString().ToUpperInvariant()}");
-                sb.AppendLine($"They rolled FAILED — missed DC by {missMargin}.");
-                sb.AppendLine($"Failure tier: {tierName}");
-                sb.AppendLine();
+                sb.AppendLine($"Stat: {context.ChosenOption.Stat.ToString().ToUpperInvariant()} | Missed DC by {missMargin} | Tier: {tierName}");
 
                 string failureText = PromptTemplates.FailureDeliveryInstruction
                     .Replace("{player_name}", playerName)
@@ -188,7 +200,8 @@ namespace Pinder.LlmAdapters
         }
 
         /// <summary>
-        /// Builds the user-message content for GetOpponentResponseAsync (§3.5).
+        /// Builds the user-message content for GetOpponentResponseAsync.
+        /// Uses [ENGINE — OPPONENT] injection block format.
         /// </summary>
         public static string BuildOpponentPrompt(OpponentContext context)
         {
@@ -199,11 +212,11 @@ namespace Pinder.LlmAdapters
 
             var sb = new StringBuilder();
 
-            sb.AppendLine("CONVERSATION HISTORY");
+            // Conversation history
             AppendConversationHistory(sb, context.ConversationHistory, playerName);
-
             sb.AppendLine();
 
+            // Player's last message with failure context if applicable
             if (context.DeliveryTier != FailureTier.None)
             {
                 string tierLabel = GetFailureTierName(context.DeliveryTier);
@@ -220,12 +233,22 @@ namespace Pinder.LlmAdapters
             }
 
             sb.AppendLine();
-            sb.AppendLine("INTEREST CHANGE");
+
+            // [ENGINE — OPPONENT] injection block with interest narrative
+            string interestNarrative = PromptTemplates.GetInterestNarrative(context.InterestAfter);
+            sb.AppendLine(PromptTemplates.EngineOpponentBlock
+                .Replace("{opponent_name}", opponentName)
+                .Replace("{interest}", context.InterestAfter.ToString())
+                .Replace("{interest_narrative}", interestNarrative));
+
+            sb.AppendLine();
+
+            // Interest change delta
             int delta = context.InterestAfter - context.InterestBefore;
             string deltaStr = delta >= 0 ? $"+{delta}" : delta.ToString();
             sb.AppendLine($"Interest moved from {context.InterestBefore} to {context.InterestAfter} ({deltaStr}).");
-            sb.AppendLine($"Current Interest: {context.InterestAfter}/25");
 
+            // Response timing
             sb.AppendLine();
             sb.AppendLine("RESPONSE TIMING");
             if (context.ResponseDelayMinutes < 1.0)
@@ -236,11 +259,6 @@ namespace Pinder.LlmAdapters
             {
                 sb.AppendLine($"Your reply arrives in approximately {context.ResponseDelayMinutes:F1} minutes.");
             }
-            sb.AppendLine("Write in a register consistent with that timing — a 3-minute reply feels different from a 3-hour reply.");
-
-            sb.AppendLine();
-            sb.AppendLine("CURRENT INTEREST STATE");
-            sb.AppendLine(GetInterestBehaviourBlock(context.InterestAfter));
 
             if (context.ActiveTrapInstructions != null && context.ActiveTrapInstructions.Length > 0)
             {
@@ -290,7 +308,6 @@ namespace Pinder.LlmAdapters
             if (conversationHistory != null && conversationHistory.Count > 0)
             {
                 sb.AppendLine("RECENT CONVERSATION (for context — reference specific details in your response):");
-                // Include last 6 messages (3 exchanges) to keep context focused
                 int start = Math.Max(0, conversationHistory.Count - 6);
                 for (int i = start; i < conversationHistory.Count; i++)
                 {
@@ -332,21 +349,17 @@ namespace Pinder.LlmAdapters
             sb.AppendLine("[CURRENT_TURN]");
         }
 
-        private static string GetInterestBehaviourBlock(int interest)
+        /// <summary>
+        /// Returns a compact interest state label for the game state summary.
+        /// </summary>
+        private static string GetInterestLabel(int interest)
         {
-            if (interest >= 21)
-                return "You are extremely interested. You're looking for excuses to keep talking. The date is basically happening.";
-            if (interest >= 17)
-                return "You are very interested. Replies come quickly. Tone is warmer, more playful. You might volunteer personal information.";
-            if (interest >= 13)
-                return "You are engaged. Normal pacing. Responsive but not eager. You're seeing where this goes.";
-            if (interest >= 9)
-                return "You are lukewarm. Taking your time. Replies are functional. You might test them a little.";
-            if (interest >= 5)
-                return "You are cooling. Short replies. A little dry. You're not sold. One or two good messages could change that.";
-            if (interest >= 1)
-                return "You are disengaged. Minimal effort. You might send a closing signal or go quiet.";
-            return "You have lost all interest. You are unmatching.";
+            if (interest >= 21) return "Almost There \U0001f525";
+            if (interest >= 16) return "Very Into It \U0001f60d (advantage)";
+            if (interest >= 10) return "Interested \U0001f60a";
+            if (interest >= 5) return "Lukewarm \U0001f914";
+            if (interest >= 1) return "Bored \U0001f610 (disadvantage)";
+            return "Unmatched \U0001f480";
         }
 
         private static string GetThresholdInstruction(int before, int after, InterestState newState, string opponentName)
@@ -360,7 +373,6 @@ namespace Pinder.LlmAdapters
             if (after < before && after < 8 && before >= 8)
                 return PromptTemplates.InterestBeatBelow8.Replace("{opponent_name}", opponentName);
 
-            // Generic fallback for other threshold crossings
             return PromptTemplates.InterestBeatGeneric.Replace("{opponent_name}", opponentName);
         }
 

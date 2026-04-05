@@ -157,7 +157,7 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("lowercase-with-intent, precise, ironic", result);
         }
 
-        // Mutation: would catch if texting style is placed AFTER YOUR TASK instead of before
+        // Mutation: would catch if texting style is placed AFTER [ENGINE] block instead of before
         [Fact]
         public void BuildDialogueOptionsPrompt_TextingStyleAppearsBeforeYourTask()
         {
@@ -165,12 +165,12 @@ namespace Pinder.LlmAdapters.Tests
             string result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(ctx);
 
             int styleIdx = result.IndexOf("YOUR TEXTING STYLE", StringComparison.Ordinal);
-            int taskIdx = result.IndexOf("YOUR TASK", StringComparison.Ordinal);
+            int engineIdx = result.IndexOf("[ENGINE — Turn", StringComparison.Ordinal);
 
             Assert.True(styleIdx >= 0, "TEXTING STYLE block must be present");
-            Assert.True(taskIdx >= 0, "YOUR TASK block must be present");
-            Assert.True(styleIdx < taskIdx,
-                $"TEXTING STYLE (at {styleIdx}) must appear before YOUR TASK (at {taskIdx})");
+            Assert.True(engineIdx >= 0, "[ENGINE] block must be present");
+            Assert.True(styleIdx < engineIdx,
+                $"TEXTING STYLE (at {styleIdx}) must appear before [ENGINE] block (at {engineIdx})");
         }
 
         // Mutation: would catch if texting style block is emitted even when style is empty
@@ -240,7 +240,7 @@ namespace Pinder.LlmAdapters.Tests
 
             Assert.DoesNotContain("YOUR TEXTING STYLE", result);
             // YOUR TASK should still appear
-            Assert.Contains("YOUR TASK", result);
+            Assert.Contains("Generate exactly 4 dialogue options", result);
         }
 
         // ══════════════════════════════════════════════════════════════
@@ -330,10 +330,10 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("YOUR TEXTING STYLE — follow this exactly, no deviations:", result);
             // Style text present
             Assert.Contains(velvetStyle, result);
-            // Style before task
+            // Style before ENGINE block
             int styleIdx = result.IndexOf("YOUR TEXTING STYLE", StringComparison.Ordinal);
-            int taskIdx = result.IndexOf("YOUR TASK", StringComparison.Ordinal);
-            Assert.True(styleIdx < taskIdx);
+            int engineIdx = result.IndexOf("[ENGINE — Turn", StringComparison.Ordinal);
+            Assert.True(styleIdx < engineIdx);
         }
 
         // ══════════════════════════════════════════════════════════════
@@ -349,7 +349,7 @@ namespace Pinder.LlmAdapters.Tests
 
             Assert.DoesNotContain("YOUR TEXTING STYLE", result);
             // YOUR TASK should still be present
-            Assert.Contains("YOUR TASK", result);
+            Assert.Contains("Generate exactly 4 dialogue options", result);
         }
 
         // ══════════════════════════════════════════════════════════════
@@ -385,7 +385,7 @@ namespace Pinder.LlmAdapters.Tests
             var ctx = MakeContext(playerTextingStyle: style);
             string result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(ctx);
 
-            Assert.Contains("YOUR TASK", result);
+            Assert.Contains("Generate exactly 4 dialogue options", result);
         }
     }
 }

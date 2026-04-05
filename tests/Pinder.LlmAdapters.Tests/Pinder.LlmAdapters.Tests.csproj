@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Pinder.LlmAdapters\Pinder.LlmAdapters.csproj" />
+    <ProjectReference Include="..\..\src\Pinder.Rules\Pinder.Rules.csproj" />
   </ItemGroup>
 
 </Project>

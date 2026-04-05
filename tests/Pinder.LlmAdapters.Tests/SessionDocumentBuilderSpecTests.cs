@@ -255,7 +255,7 @@ namespace Pinder.LlmAdapters.Tests
         public void BuildDialogueOptionsPrompt_ContainsConversationHistoryHeader()
         {
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(MakeDialogueContext());
-            Assert.Contains("CONVERSATION HISTORY", result);
+            Assert.Contains("[CONVERSATION_START]", result);
         }
 
         [Fact]
@@ -270,7 +270,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
                 MakeDialogueContext(conversationHistory: history, opponentLastMessage: "Whatever", currentTurn: 2));
 
-            Assert.Contains("OPPONENT'S LAST MESSAGE", result);
+            // Opponent's last message is part of conversation history
             Assert.Contains("\"Whatever\"", result);
         }
 
@@ -278,7 +278,7 @@ namespace Pinder.LlmAdapters.Tests
         public void BuildDialogueOptionsPrompt_ContainsGameStateSection()
         {
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(MakeDialogueContext());
-            Assert.Contains("GAME STATE", result);
+            Assert.Contains("[ENGINE — Turn", result);
         }
 
         [Fact]
@@ -311,7 +311,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildDeliveryPrompt(
                 MakeDeliveryContext(chosenOption: option, beatDcBy: 7));
 
-            Assert.Contains("Stat used: CHARM", result);
+            Assert.Contains("Stat: CHARM", result);
         }
 
         [Fact]
@@ -321,7 +321,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildDeliveryPrompt(
                 MakeDeliveryContext(chosenOption: option, beatDcBy: 9));
 
-            Assert.Contains("beat DC by 9", result);
+            Assert.Contains("Beat DC by 9", result);
         }
 
         [Fact]
@@ -331,7 +331,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildDeliveryPrompt(
                 MakeDeliveryContext(chosenOption: option, beatDcBy: 3));
 
-            Assert.Contains("SUCCESS", result);
+            Assert.Contains("[ENGINE — DELIVERY]", result);
             Assert.DoesNotContain("Failure tier:", result);
         }
 
@@ -445,7 +445,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildOpponentPrompt(
                 MakeOpponentContext(interestBefore: 10, interestAfter: 15));
 
-            Assert.Contains("Current Interest: 15/25", result);
+            Assert.Contains("Interest 15/25", result);
         }
 
         [Fact]
@@ -472,7 +472,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildOpponentPrompt(
                 MakeOpponentContext(interestBefore: 20, interestAfter: 21));
 
-            Assert.Contains("extremely interested", result);
+            Assert.Contains("Basically sold", result);
         }
 
         [Fact]
@@ -481,7 +481,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildOpponentPrompt(
                 MakeOpponentContext(interestBefore: 10, interestAfter: 13));
 
-            Assert.Contains("engaged", result);
+            Assert.Contains("Engaged but not sold", result);
         }
 
         [Fact]
@@ -490,7 +490,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildOpponentPrompt(
                 MakeOpponentContext(interestBefore: 10, interestAfter: 9));
 
-            Assert.Contains("lukewarm", result);
+            Assert.Contains("Skeptical", result);
         }
 
         [Fact]
@@ -499,7 +499,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildOpponentPrompt(
                 MakeOpponentContext(interestBefore: 10, interestAfter: 5));
 
-            Assert.Contains("cooling", result);
+            Assert.Contains("Skeptical", result);
         }
 
         [Fact]
@@ -508,7 +508,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildOpponentPrompt(
                 MakeOpponentContext(interestBefore: 2, interestAfter: 0));
 
-            Assert.Contains("lost all interest", result);
+            Assert.Contains("Unmatched", result);
         }
 
         [Fact]
@@ -794,8 +794,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildOpponentPrompt(
                 MakeOpponentContext(interestBefore: 10, interestAfter: 16));
 
-            Assert.Contains("engaged", result);
-            Assert.DoesNotContain("very interested", result);
+            Assert.Contains("Interested but holding back", result);
         }
 
         [Fact]
@@ -804,7 +803,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildOpponentPrompt(
                 MakeOpponentContext(interestBefore: 10, interestAfter: 17));
 
-            Assert.Contains("very interested", result);
+            Assert.Contains("Interested but holding back", result);
         }
 
         [Fact]
@@ -813,7 +812,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildOpponentPrompt(
                 MakeOpponentContext(interestBefore: 10, interestAfter: 12));
 
-            Assert.Contains("lukewarm", result);
+            Assert.Contains("Engaged but not sold", result);
         }
 
         [Fact]
@@ -822,7 +821,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildOpponentPrompt(
                 MakeOpponentContext(interestBefore: 10, interestAfter: 8));
 
-            Assert.Contains("cooling", result);
+            Assert.Contains("Skeptical", result);
         }
 
         [Fact]
@@ -831,7 +830,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildOpponentPrompt(
                 MakeOpponentContext(interestBefore: 10, interestAfter: 4));
 
-            Assert.Contains("disengaged", result);
+            Assert.Contains("Reconsidering", result);
         }
 
         [Fact]
@@ -840,7 +839,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildOpponentPrompt(
                 MakeOpponentContext(interestBefore: 10, interestAfter: 25));
 
-            Assert.Contains("extremely interested", result);
+            Assert.Contains("resistance dissolved", result);
         }
 
         [Fact]
@@ -849,8 +848,8 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildOpponentPrompt(
                 MakeOpponentContext(interestBefore: 2, interestAfter: 1));
 
-            Assert.Contains("disengaged", result);
-            Assert.DoesNotContain("lost all interest", result);
+            Assert.Contains("Reconsidering", result);
+            Assert.DoesNotContain("Unmatched", result);
         }
 
         // Issue #491 — success delivery tiers use margin-based language

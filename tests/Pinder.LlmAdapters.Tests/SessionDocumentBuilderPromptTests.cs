@@ -71,7 +71,7 @@ namespace Pinder.LlmAdapters.Tests
 
             var result = BuildMinimal(callbackOpportunities: cbs, currentTurn: 5);
 
-            Assert.Contains("CALLBACK OPPORTUNITIES", result);
+            Assert.Contains("Callback opportunities:", result);
             Assert.Contains("\"cats\"", result);
             Assert.Contains("\"hiking\"", result);
             Assert.Contains("+2 hidden", result); // cats: 5-1=4 turns ago
@@ -125,7 +125,7 @@ namespace Pinder.LlmAdapters.Tests
         {
             var result = BuildMinimal(horninessLevel: 7);
 
-            Assert.Contains("Horniness level: 7/10", result);
+            Assert.Contains("Horniness: 7/10", result);
         }
 
         [Fact]
@@ -133,7 +133,7 @@ namespace Pinder.LlmAdapters.Tests
         {
             var result = BuildMinimal(horninessLevel: 5);
 
-            Assert.DoesNotContain("Horniness level", result);
+            Assert.DoesNotContain("Horniness:", result);
         }
 
         [Fact]
@@ -159,7 +159,7 @@ namespace Pinder.LlmAdapters.Tests
         {
             var result = BuildMinimal(currentTurn: 7);
 
-            Assert.Contains("Turn: 7", result);
+            Assert.Contains("[ENGINE — Turn 7]", result);
         }
 
         [Fact]
@@ -187,7 +187,7 @@ namespace Pinder.LlmAdapters.Tests
 
             Assert.Contains("Interest: 2/25", result);
             Assert.Contains("Bored", result);
-            Assert.Contains("player has disadvantage", result);
+            Assert.Contains("disadvantage", result);
         }
 
         [Fact]
@@ -205,7 +205,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = BuildMinimal(currentInterest: 18);
 
             Assert.Contains("Very Into It", result);
-            Assert.Contains("player has advantage", result);
+            Assert.Contains("advantage", result);
         }
 
         [Fact]

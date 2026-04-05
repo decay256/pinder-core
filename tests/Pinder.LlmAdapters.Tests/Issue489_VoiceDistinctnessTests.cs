@@ -106,11 +106,11 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("YOUR TEXTING STYLE — follow this exactly, no deviations:", result);
             Assert.Contains("lowercase-with-intent, precise, ironic", result);
 
-            // TEXTING STYLE must appear before YOUR TASK
+            // TEXTING STYLE must appear before ENGINE block
             int styleIdx = result.IndexOf("YOUR TEXTING STYLE", StringComparison.Ordinal);
-            int taskIdx = result.IndexOf("YOUR TASK", StringComparison.Ordinal);
-            Assert.True(styleIdx < taskIdx,
-                "TEXTING STYLE block must appear before YOUR TASK");
+            int engineIdx = result.IndexOf("[ENGINE — Turn", StringComparison.Ordinal);
+            Assert.True(styleIdx < engineIdx,
+                "TEXTING STYLE block must appear before [ENGINE] block");
         }
 
         [Fact]
