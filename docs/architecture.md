@@ -940,3 +940,56 @@ src/Pinder.Rules/
 | GameSession god object trajectory | #87 | 1454 lines — extraction planned for MVP |
 | Prompt caching cost for dialogue options | — | Opponent prompt no longer cached after #487 — monitor |
 | CharacterProfile.TextingStyleFragment source | — | Populated by loaders, not PromptBuilder |
+
+
+---
+
+## Sprint: Session Runner Bug Fixes — Architecture Briefing
+
+### What's changing
+
+**This sprint continues the existing architecture with no structural changes.** Five bug fixes in `session-runner/` (the .NET 8 console app). No changes to `Pinder.Core` game logic, `Pinder.LlmAdapters`, or `Pinder.Rules`. No new components, projects, or dependencies.
+
+**Existing architecture summary**: `session-runner/` is a .NET 8 console app that creates `GameSession` + `AnthropicLlmAdapter` for automated playtesting. Character loading flows through two paths: `CharacterDefinitionLoader` (JSON → `CharacterAssembler` pipeline, tried first) and `CharacterLoader` (prompt file parsing, fallback). `ScoringPlayerAgent` evaluates option expected-value for deterministic pick selection. `SessionFileCounter` resolves output directory and computes next session number.
+
+### Components being extended
+
+- `CharacterLoader` — ParseBio fix (#513), ParseLevel data fix (#516)
+- `Program.cs` — DC table header fix (#514), session number header (#515)
+- `SessionFileCounter` — repeated write fix (#515)
+- `ScoringPlayerAgent` — EV overestimation on low-success options (#517)
+- `data/characters/*.json` — stale level values (#516)
+
+### What is NOT changing
+
+- All Pinder.Core game logic (Stats, Rolls, Traps, Progression, Characters, Prompts, Data, Conversation)
+- Pinder.LlmAdapters
+- Pinder.Rules
+- GameSession public API
+- NullLlmAdapter
+- Existing test behavior
+
+### Implicit assumptions for implementers
+
+1. **net8.0 + LangVersion 8.0** in session-runner
+2. **All existing tests must pass unchanged**
+3. **CharacterLoader.Parse* methods are `internal static`** — testable directly
+4. **ScoringPlayerAgent is deterministic** — same inputs → same output
+5. **Program.cs LoadCharacter tries assembler (JSON) first** — prompt file is fallback
+6. **JSON character definitions in `data/characters/` must match prompt files in `design/examples/`**
+
+### Known Gaps (as of this sprint)
+
+| Gap | Rules Section | Status |
+|-----|--------------|--------|
+| Shadow persistence across sessions | §8 | Not addressed — per-session via SessionShadowTracker |
+| `AddExternalBonus()` deprecated but not removed | — | Cleanup issue needed |
+| Energy system consumers | #144 | `IGameClock.ConsumeEnergy()` exists but nothing calls it |
+| GameSession god object trajectory | #87 | 1454 lines — extraction planned for MVP |
+| Prompt caching cost for dialogue options | — | Opponent prompt no longer cached after #487 — monitor |
+| CharacterProfile.TextingStyleFragment source | — | Populated by loaders, not PromptBuilder |
+| ParseBio returns empty for unquoted bios | — | Fixed this sprint (#513) |
+| DC table header hardcoded | — | Fixed this sprint (#514) |
+| Session file counter writes same number | — | Fixed this sprint (#515) |
+| JSON character levels stale | — | Fixed this sprint (#516) |
+| ScoringAgent EV overestimates low-success | — | Fixed this sprint (#517) |
