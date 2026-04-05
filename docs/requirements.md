@@ -220,3 +220,126 @@ As a player, I want the opponent to react to my failed messages based on how bad
 - Changes to failure scale or interest deltas
 - Player-visible failure diff/comparison
 - Changes to `DeliverMessageAsync` behavior
+
+---
+
+## Sprint: Session Runner Bug Fixes
+
+### Issue #513 — Bug: CharacterLoader.ParseBio returns empty — bio lines have no quotes
+
+#### User Story
+
+As a playtester, I want character bios to load correctly from prompt files so that the playtest header displays actual bio text instead of empty strings.
+
+#### Acceptance Criteria
+
+- [ ] Given any of the 5 starter characters, when loaded via CharacterLoader, then ParseBio returns the actual bio text
+- [ ] Given a bio line without quotes (e.g. `- Bio: I will absolutely judge your taste in music.`), when parsed, then the full text after `- Bio:` is returned
+- [ ] Given a bio line with optional surrounding quotes, when parsed, then quotes are stripped and content returned
+- [ ] Build clean, all tests pass
+
+#### NFR Notes (flag for Architect)
+
+- No architectural implications — isolated parser fix in session-runner
+
+#### Out of Scope
+
+- Changes to Pinder.Core
+- Changes to CharacterDefinitionLoader (JSON path)
+
+---
+
+### Issue #514 — Bug: DC Reference table header hardcoded as 'Sable attacking, Brick defending'
+
+#### User Story
+
+As a playtester, I want the DC Reference table in playtest output to show the actual character names so that the output is accurate for any character matchup.
+
+#### Acceptance Criteria
+
+- [ ] Given any two characters are loaded, when the DC table is printed, then the header shows their actual names (not hardcoded 'Sable attacking, Brick defending')
+- [ ] Given the DC table column header, when printed, then it uses the actual player character name
+- [ ] Build clean, all tests pass
+
+#### NFR Notes (flag for Architect)
+
+- No architectural implications — string interpolation fix in session-runner Program.cs
+
+#### Out of Scope
+
+- Changes to DC calculation logic
+- Changes to Pinder.Core
+
+---
+
+### Issue #515 — Bug: SessionFileCounter writes session-006 repeatedly
+
+#### User Story
+
+As a playtester, I want each session run to produce a uniquely numbered output file so that previous sessions are not overwritten and session history is preserved.
+
+#### Acceptance Criteria
+
+- [ ] Given N session files exist, when a new session completes, then file is named session-(N+1)
+- [ ] Given the session just wrote session-006, when the next session runs, then it writes session-007 (not session-006 again)
+- [ ] Given `PINDER_PLAYTESTS_PATH` env var is set, when resolving the output directory, then it is used as the canonical path
+- [ ] Build clean, all tests pass
+
+#### NFR Notes (flag for Architect)
+
+- Path mismatch between counter and writer is the likely root cause — needs diagnosis
+
+#### Out of Scope
+
+- Changes to session file content format
+- Changes to Pinder.Core
+
+---
+
+### Issue #516 — Bug: CharacterLoader.ParseLevel reads wrong level — Velvet loads as 4 instead of 7
+
+#### User Story
+
+As a playtester, I want characters to load their correct level from prompt files so that stat bonuses and game mechanics reflect the intended character build.
+
+#### Acceptance Criteria
+
+- [ ] Given Velvet's prompt file with `- Level: 7 (Veteran) | Level bonus: +3`, when loaded, then level is 7
+- [ ] Given all 5 starter characters, when loaded via CharacterLoader, then each loads their correct level
+- [ ] Given a unit test for ParseLevel, when run against all example files, then all pass
+- [ ] Build clean, all tests pass
+
+#### NFR Notes (flag for Architect)
+
+- Incorrect level affects stat bonuses, roll calculations, and XP thresholds — high gameplay impact
+
+#### Out of Scope
+
+- Changes to CharacterDefinitionLoader (JSON path)
+- Changes to Pinder.Core level/XP logic
+
+---
+
+### Issue #517 — Bug: ScoringPlayerAgent applies combo/tell bonus to options with near-0% success
+
+#### User Story
+
+As a playtester, I want the scoring agent to accurately evaluate option risk so that it doesn't pick high-risk options where combo/tell bonuses mask near-certain failure and trap costs.
+
+#### Acceptance Criteria
+
+- [ ] Given an option with <20% success probability, when combo/tell bonuses are calculated, then they are scaled by actual success probability (not applied at full value)
+- [ ] Given an option where miss margin lands in TropeTrap range (6-9), when EV is computed, then trap cost is applied before combo/tell bonuses
+- [ ] Given a unit test with 15% success and TropeTrap-range miss, when scored, then EV is lower than same option with 50% success
+- [ ] Build clean, all tests pass
+
+#### NFR Notes (flag for Architect)
+
+- **Dependency**: Depends on #416 (ScoringPlayerAgent shadow growth risk)
+- Scoring accuracy affects automated playtest quality
+
+#### Out of Scope
+
+- Changes to LlmPlayerAgent
+- Changes to Pinder.Core game mechanics
+- Changes to combo/tell detection logic
