@@ -993,3 +993,49 @@ src/Pinder.Rules/
 | Session file counter writes same number | — | Fixed this sprint (#515) |
 | JSON character levels stale | — | Fixed this sprint (#516) |
 | ScoringAgent EV overestimates low-success | — | Fixed this sprint (#517) |
+
+---
+
+## Sprint 10: Session Output Bug Fixes & Game Def Injection — Architecture Briefing
+
+### What's changing
+
+**This sprint continues the existing stateless architecture with no structural changes.** Initially, a stateful LLM session architecture was proposed (#536) but was rejected by the CPO (#583) as it violates the Anthropic persona invariant and causes severe voice bleed. The architecture remains **strictly stateless**, meaning each LLM call (Options, Opponent Response, Delivery, Beat) provides the full context via `_history` and uses role-specific system prompts.
+
+Changes in this sprint focus on UI fixes, parser fallbacks, and prompt injection:
+1. **Fallback parsing for Opponent Responses** (#596 / rescoped #572) — Ensure the `[RESPONSE]` tag is stripped even if the LLM drops quotes.
+2. **Complete removal of NarrativeBeat LLM calls** (#573) — The `GetInterestChangeBeatAsync` method becomes a no-op (or returns null/empty) to prevent polluting the history or causing out-of-character narration.
+3. **Bio parsing pipeline fix** (#579 / rescoped #574) — `CharacterDefinitionLoader` must pass the loaded `bio` parameter to the `CharacterProfile` constructor so that JSON-loaded characters display their bios.
+4. **Game Definition Injection** (#576 / rescoped #575) — The game vision, world rules, and dating frame from `game-definition.yaml` must be injected into the LLM system prompts. Since we are remaining stateless, this means updating `GameSessionConfig` to accept a `GameDefinition` object, and using `SessionSystemPromptBuilder.Build()` when building the `DialogueContext` and `OpponentContext` system blocks.
+
+### Components being extended
+
+- `Pinder.Core/Conversation/GameSessionConfig` — Gains `GameDefinition` field.
+- `Pinder.Core/Conversation/GameSession` — Uses `SessionSystemPromptBuilder.Build()` to construct the player and opponent system prompts using the `GameDefinition`, rather than relying solely on the character's system prompt fragment.
+- `Pinder.LlmAdapters/Anthropic/AnthropicLlmAdapter` — Fallback parsing for `[RESPONSE]` stripping (handles missing quotes). Narrative beat call removed.
+- `session-runner/CharacterDefinitionLoader` — Fixes the dropped `bio` parameter when calling `new CharacterProfile(...)`.
+- `session-runner/Program.cs` — Loads `game-definition.yaml` and passes it to `GameSessionConfig`.
+
+### What is NOT changing
+
+- **The stateless LLM architecture** — #536 was dropped. `messages[]` arrays are NOT persisted.
+- **The requirement for `[RESPONSE]` tags** — The tag remains mandatory to separate meta-chatter from dialogue.
+- All Pinder.Core game logic (Stats, Rolls, Traps, Progression, Rules).
+
+### Implicit assumptions for implementers
+
+1. **Stateful generation is cancelled**: Any stateful session implementations must be reverted.
+2. **Backward Compatibility**: `GameSessionConfig` changes must be optional. `GameDefinition` should be nullable or have a default.
+3. **SessionSystemPromptBuilder**: If `GameDefinition` is provided, `GameSession` should construct the comprehensive system prompt for the player and opponent using it. If not, fallback to existing `_player.AssembledSystemPrompt`.
+4. **All 2000+ tests must continue to pass**.
+
+### Known Gaps (as of this sprint)
+
+| Gap | Rules Section | Status |
+|-----|--------------|--------|
+| Shadow persistence across sessions | §8 | Not addressed — per-session via SessionShadowTracker |
+| GameSession god object trajectory | #87 | 1454 lines — extraction planned for MVP |
+| `[RESPONSE]` fallback parsing missing | — | Fixed this sprint (#596/#572) |
+| Assembler bio parameter dropped | — | Fixed this sprint (#579/#574) |
+| Game definition not injected | — | Fixed this sprint (#576/#575) |
+| NarrativeBeat call polluting history | — | Fixed this sprint (#573) |
