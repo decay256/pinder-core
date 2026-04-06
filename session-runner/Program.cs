@@ -299,9 +299,11 @@ class Program
         // ── character table ───────────────────────────────────────────────
         Console.WriteLine("## Characters");
         Console.WriteLine();
+        Console.WriteLine($"***{player1} bio:*** *\"{sable.Bio}\"*");
+        Console.WriteLine($"***{player2} bio:*** *\"{brick.Bio}\"*");
+        Console.WriteLine();
         Console.WriteLine($"| | **{player1}** | **{player2}** |");
         Console.WriteLine("|---|---|---|");
-        Console.WriteLine($"| Bio | \"{sable.Bio}\" | \"{brick.Bio}\" |");
         Console.WriteLine($"| Level | {p1Level} | {p2Level} |");
         foreach (var stat in new[] { StatType.Charm, StatType.Rizz, StatType.Honesty, StatType.Chaos, StatType.Wit, StatType.SelfAwareness }) {
             int p1 = sableStats.GetEffective(stat), p2 = brickStats.GetEffective(stat);
@@ -372,6 +374,19 @@ class Program
         }
 
         int interest = 10;
+        // ── Matchup Analysis ──────────────────────────────────────────────
+        Console.Error.WriteLine("Generating matchup analysis...");
+        var analysisOptions = new AnthropicOptions {
+            ApiKey = apiKey,
+            Model = Environment.GetEnvironmentVariable("PLAYER_AGENT_MODEL") ?? "claude-sonnet-4-20250514"
+        };
+        var analysis = await MatchupAnalyzer.AnalyzeMatchupAsync(analysisOptions, sable, brick);
+        if (!string.IsNullOrWhiteSpace(analysis))
+        {
+            Console.WriteLine(analysis);
+            Console.WriteLine();
+        }
+
         int momentum = 0;
         Console.WriteLine("## Session State");
         Console.WriteLine();
