@@ -34,7 +34,6 @@ The Conversation module implements the core game loop for Pinder's dating-conver
 | `TimingProfile.cs` | Timing configuration for opponent responses |
 | `WeaknessWindow.cs` | Represents a window where the NPC is vulnerable |
 | `NullLlmAdapter.cs` | No-op LLM adapter for testing |
-| `InterestChangeContext.cs` | Context for interest change events — includes optional `OpponentPrompt` for character-voiced beats |
 | `GameStateSnapshot.cs` | Serializable snapshot of game state |
 
 ## API / Public Interface
@@ -81,3 +80,4 @@ The Conversation module implements the core game loop for Pinder's dating-conver
 | 2026-04-03 | #310 | Corrected property name from `IsUnhinged` to `IsUnhingedReplacement` in docs (matching actual code). Added comprehensive test coverage via `MadnessT3UnhingedSpecTests.cs`. |
 | 2026-04-03 | #313 | Added `Lukewarm` (5–9) as a distinct `InterestState` per rules §6. Previously, Interested covered 5–15; now Lukewarm covers 5–9 and Interested covers 10–15. Lukewarm grants neither advantage nor disadvantage. `InterestState` enum now has 7 values. Tests in `Issue313_LukewarmInterestStateTests.cs`. |
 | 2026-04-03 | #352 | `InterestChangeContext` gains `OpponentPrompt` property (`string?`, default `null`) so interest change beats (§3.8) can be generated in the opponent's character voice. `GameSession.ResolveTurnAsync` now passes `_opponent.AssembledSystemPrompt` when constructing `InterestChangeContext`. Backward-compatible — null prompt falls back to generic beats. |
+| 2026-04-06 | #573 | Removed LLM API call for NarrativeBeat generation to maintain stateless generation. `GameSession` now sets `TurnResult.NarrativeBeat` to a simple UI string signal on interest state changes. Deleted `InterestChangeContext`. |
