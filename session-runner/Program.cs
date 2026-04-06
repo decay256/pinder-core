@@ -443,7 +443,7 @@ class Program
                 int dc = brickStats.GetDefenceDC(opt.Stat);
                 int need = dc - mod;
                 int pct = Math.Max(0, Math.Min(100, (21-need)*5));
-                string riskColor = need <= 5 ? "[Safe]" : need <= 10 ? "[Medium]" : need <= 15 ? "[Hard]" : "[Bold]";
+                string riskColor = RiskLabel(need);
                 var badges = new System.Collections.Generic.List<string>();
                 if (opt.HasTellBonus)               badges.Add("Tell +2");
                 if (opt.ComboName != null)           badges.Add($"⭐ Combo: {opt.ComboName} ({PlaytestFormatter.GetComboRewardSummary(opt.ComboName)})");

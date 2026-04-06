@@ -163,9 +163,12 @@ namespace Pinder.LlmAdapters
             // Additional context for the LLM based on outcome
             if (context.Outcome == FailureTier.None)
             {
-                sb.AppendLine($"Stat: {context.ChosenOption.Stat.ToString().ToUpperInvariant()} | Beat DC by {context.BeatDcBy}");
+                string nat20Str = context.IsNat20 ? " (NAT 20)" : "";
+                string beatDcByStr = $"{context.BeatDcBy}{nat20Str}";
+                sb.AppendLine($"Stat: {context.ChosenOption.Stat.ToString().ToUpperInvariant()} | Beat DC by {beatDcByStr}");
                 sb.Append(PromptTemplates.SuccessDeliveryInstruction
-                    .Replace("{player_name}", playerName));
+                    .Replace("{player_name}", playerName)
+                    .Replace("{beat_dc_by}", beatDcByStr));
             }
             else
             {
