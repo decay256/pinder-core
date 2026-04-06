@@ -431,11 +431,17 @@ class Program
                 string riskColor = need <= 5 ? "[Safe]" : need <= 10 ? "[Medium]" : need <= 15 ? "[Hard]" : "[Bold]";
                 var badges = new System.Collections.Generic.List<string>();
                 if (opt.HasTellBonus)               badges.Add("Tell +2");
-                if (opt.ComboName != null)           badges.Add($"Combo: {opt.ComboName}");
+                if (opt.ComboName != null)           badges.Add($"⭐ Combo: {opt.ComboName} ({PlaytestFormatter.GetComboRewardSummary(opt.ComboName)})");
                 if (opt.CallbackTurnNumber.HasValue) badges.Add("Callback");
                 if (opt.HasWeaknessWindow)           badges.Add("Window");
                 string badgeStr = badges.Count > 0 ? " | " + string.Join(", ", badges) : "";
                 Console.WriteLine($"**{letters[i]})** {StatLabel(opt.Stat)} {mod:+#;-#;0} | {pct}% {riskColor}{badgeStr}");
+                
+                if (opt.ComboName != null)
+                {
+                    Console.WriteLine($"> *{opt.ComboName}: {PlaytestFormatter.GetComboSequenceDescription(opt.ComboName)}*");
+                }
+
                 if (!string.IsNullOrEmpty(opt.IntendedText) && opt.IntendedText != "...")
                     Console.WriteLine($"> \"{opt.IntendedText}\"");
                 Console.WriteLine();
@@ -481,7 +487,11 @@ class Program
             Console.WriteLine($"**🎲 Roll:** d20({roll.UsedDieRoll}) + {StatLabel(chosen.Stat)}({rollMod}) = **{roll.FinalTotal}** vs DC {roll.DC} → **Miss: {(roll.FinalTotal>=roll.DC ? $"−{roll.FinalTotal-roll.DC}" : $"+{roll.DC-roll.FinalTotal}")} → {rollResult}**");
             Console.WriteLine();
 
-            if (result.ComboTriggered != null) Console.WriteLine($"> *⭐ {result.ComboTriggered} combo fires!*");
+            if (result.ComboTriggered != null)
+            {
+                Console.WriteLine($"> *⭐ {result.ComboTriggered} combo fires!*");
+                Console.WriteLine($"> *{PlaytestFormatter.GetComboSequenceDescription(result.ComboTriggered)}*");
+            }
             if (result.TellReadBonus > 0)      Console.WriteLine($"> *📖 Tell read! +{result.TellReadBonus}*");
             Console.WriteLine();
 

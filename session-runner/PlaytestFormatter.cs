@@ -140,5 +140,37 @@ namespace Pinder.SessionRunner
                 default: return s.ToString().ToUpperInvariant();
             }
         }
+
+        /// <summary>
+        /// Returns a descriptive explanation of the sequence that triggers a given combo.
+        /// </summary>
+        public static string GetComboSequenceDescription(string comboName)
+        {
+            switch (comboName)
+            {
+                case "The Setup": return "You played Wit last turn, then Charm this turn — the sequence earns +1 bonus interest.";
+                case "The Reveal": return "You played Charm last turn, then Honesty this turn — the sequence earns +1 bonus interest.";
+                case "The Read": return "You played SA last turn, then Honesty this turn — the sequence earns +1 bonus interest.";
+                case "The Pivot": return "You played Honesty last turn, then Chaos this turn — the sequence earns +1 bonus interest.";
+                case "The Escalation": return "You played Chaos last turn, then Rizz this turn — the sequence earns +1 bonus interest.";
+                case "The Disarm": return "You played Wit last turn, then Honesty this turn — the sequence earns +1 bonus interest.";
+                case "The Recovery": return "You failed a roll last turn, then played SA this turn — the sequence earns +2 bonus interest.";
+                case "The Triple": return "You played 3 different stats in 3 consecutive turns — your next roll gains +1 bonus.";
+                default: return "Unknown combo sequence.";
+            }
+        }
+
+        /// <summary>
+        /// Returns a summary of the reward provided by a given combo.
+        /// </summary>
+        public static string GetComboRewardSummary(string comboName)
+        {
+            switch (comboName)
+            {
+                case "The Recovery": return "+2 Interest if success";
+                case "The Triple": return "+1 to ALL rolls next turn";
+                default: return "+1 Interest if success";
+            }
+        }
     }
 }
