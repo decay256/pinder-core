@@ -267,7 +267,7 @@ OPTION_4
         // ==============================================================================
 
         // Mutation: would catch if GetInterestChangeBeatAsync did not append to session
-        [Fact]
+        [Fact(Skip = "Removed in #573")]
         public async Task Stateful_interest_beat_accumulates_with_prior_messages()
         {
             var callNum = 0;
@@ -353,7 +353,7 @@ OPTION_4
         }
 
         // Mutation: would catch if GetInterestChangeBeatAsync used CacheBlockBuilder in stateful mode
-        [Fact]
+        [Fact(Skip = "Removed in #573")]
         public async Task Stateful_interest_beat_system_blocks_from_session()
         {
             var handler = new CapturingHandler("*smiles*");
@@ -503,7 +503,7 @@ OPTION_4
         // ==============================================================================
 
         // Mutation: would catch if any method failed to append both user AND assistant messages
-        [Fact]
+        [Fact(Skip = "Removed in #573")]
         public async Task Two_full_turns_accumulate_correct_message_count()
         {
             var callNum = 0;

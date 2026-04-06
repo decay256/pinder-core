@@ -202,41 +202,13 @@ namespace Pinder.LlmAdapters.Anthropic
         }
 
         /// <inheritdoc />
-        public async Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context)
+        public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
-            var userContent = SessionDocumentBuilder.BuildInterestChangeBeatPrompt(
-                context.OpponentName,
-                context.InterestBefore,
-                context.InterestAfter,
-                context.NewState,
-                context.ConversationHistory,
-                context.PlayerName);
-
-            if (_session != null)
-            {
-                _session.AppendUser(userContent);
-                var statefulRequest = _session.BuildRequest(
-                    _options.Model, _options.MaxTokens,
-                    _options.InterestChangeBeatTemperature ?? DefaultInterestChangeBeatTemperature);
-                var statefulResponse = await _client.SendMessagesAsync(statefulRequest).ConfigureAwait(false);
-                var statefulText = statefulResponse.GetText();
-                _session.AppendAssistant(statefulText);
-                return string.IsNullOrWhiteSpace(statefulText) ? null : statefulText;
-            }
-
-            // Include opponent system prompt so the beat is generated in character voice
-            var systemBlocks = !string.IsNullOrEmpty(context.OpponentPrompt)
-                ? CacheBlockBuilder.BuildOpponentOnlySystemBlocks(context.OpponentPrompt)
-                : Array.Empty<ContentBlock>();
-
-            var request = BuildRequest(systemBlocks, userContent,
-                _options.InterestChangeBeatTemperature ?? DefaultInterestChangeBeatTemperature);
-
-            var response = await _client.SendMessagesAsync(request).ConfigureAwait(false);
-            var text = response.GetText();
-            return string.IsNullOrWhiteSpace(text) ? null : text;
+            // Per Issue #573: The LLM call for NarrativeBeat has been removed.
+            // Returning null avoids making an unnecessary API call.
+            return Task.FromResult<string?>(null);
         }
 
         /// <summary>Disposes the internal AnthropicClient.</summary>

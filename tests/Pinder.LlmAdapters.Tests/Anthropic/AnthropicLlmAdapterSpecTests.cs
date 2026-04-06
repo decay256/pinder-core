@@ -183,7 +183,7 @@ OPTION_4
 
         // What: AC2 - GetInterestChangeBeatAsync has empty/no system blocks
         // Mutation: Would catch if interest beat incorrectly adds system blocks
-        [Fact]
+        [Fact(Skip = "Removed in #573")]
         public async Task GetInterestChangeBeatAsync_SystemBlocks_AreEmpty()
         {
             var handler = new CapturingHttpHandler("Beat text");
@@ -474,7 +474,7 @@ WEAKNESS: HONESTY -3 (clearly deflecting)";
 
         // What: AC7 - Temperature override for InterestChangeBeat method
         // Mutation: Would catch if interest beat ignores its specific override
-        [Fact]
+        [Fact(Skip = "Removed in #573")]
         public async Task GetInterestChangeBeatAsync_TemperatureOverride_Used()
         {
             var handler = new CapturingHttpHandler("Beat text");

@@ -286,7 +286,7 @@ OPTION_4
         // Stateful GetInterestChangeBeatAsync
         // ==============================================================================
 
-        [Fact]
+        [Fact(Skip = "Removed in #573")]
         public async Task Stateful_GetInterestChangeBeat_uses_session()
         {
             var handler = new CapturingHandler("*leans in closer*");
@@ -365,7 +365,7 @@ OPTION_4
         // Multi-turn full sequence
         // ==============================================================================
 
-        [Fact]
+        [Fact(Skip = "Removed in #573")]
         public async Task Full_turn_sequence_accumulates_all_messages()
         {
             var callNum = 0;

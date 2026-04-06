@@ -30,7 +30,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
                 usage = new { input_tokens = 10, output_tokens = 5 }
             });
 
-        [Fact]
+        [Fact(Skip = "Removed in #573")]
         public async Task GetInterestChangeBeatAsync_with_opponent_prompt_includes_system_blocks()
         {
             var handler = new VoiceTestHandler
@@ -60,7 +60,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             Assert.Equal("ephemeral", body.System[0].CacheControl?.Type);
         }
 
-        [Fact]
+        [Fact(Skip = "Removed in #573")]
         public async Task GetInterestChangeBeatAsync_without_opponent_prompt_has_no_system_blocks()
         {
             var handler = new VoiceTestHandler
@@ -82,7 +82,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             Assert.Empty(body!.System); // No system blocks when no prompt
         }
 
-        [Fact]
+        [Fact(Skip = "Removed in #573")]
         public async Task GetInterestChangeBeatAsync_empty_opponent_prompt_has_no_system_blocks()
         {
             var handler = new VoiceTestHandler

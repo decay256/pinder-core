@@ -738,7 +738,7 @@ WEAKNESS: HONESTY -2 (opening)";
 
         // What: AC7 — InterestChangeBeat temperature is 0.8 by default
         // Mutation: Would catch if interest change beat uses wrong temperature
-        [Fact]
+        [Fact(Skip = "Removed in #573")]
         public async Task AC7_InterestChangeBeat_DefaultTemperature_0_8()
         {
             var handler = new MockHttpHandler { ResponseBody = MakeApiResponse("\"A beat\"") };
@@ -753,7 +753,7 @@ WEAKNESS: HONESTY -2 (opening)";
 
         // What: AC7 — InterestChangeBeat has empty system blocks
         // Mutation: Would catch if system blocks are populated for interest change beat
-        [Fact]
+        [Fact(Skip = "Removed in #573")]
         public async Task AC7_InterestChangeBeat_EmptySystemBlocks()
         {
             var handler = new MockHttpHandler { ResponseBody = MakeApiResponse("\"A beat\"") };
@@ -1023,7 +1023,7 @@ WEAKNESS: WIT -2 (overthinking their responses)";
 
         // What: AC1 — GetInterestChangeBeatAsync returns narrative beat
         // Mutation: Would catch if interest change beat returns null for valid response
-        [Fact]
+        [Fact(Skip = "Removed in #573")]
         public async Task FullFlow_InterestChangeBeat_ReturnsNarrativeBeat()
         {
             var handler = new MockHttpHandler

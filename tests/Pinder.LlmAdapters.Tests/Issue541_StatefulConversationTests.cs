@@ -548,7 +548,7 @@ OPTION_4
         // ==============================================================================
 
         // Mutation: would catch if stateless beat accumulated messages
-        [Fact]
+        [Fact(Skip = "Removed in #573")]
         public async Task Stateless_interest_beat_sends_single_message()
         {
             var handler = new CapturingHandler("*smiles*");
