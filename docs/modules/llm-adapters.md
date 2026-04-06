@@ -126,17 +126,23 @@ public static string Build(
     string playerPrompt,
     string opponentPrompt,
     GameDefinition? gameDef = null);
+
+public static string BuildPlayer(string playerPrompt, GameDefinition? gameDef = null);
+
+public static string BuildOpponent(string opponentPrompt, GameDefinition? gameDef = null);
 ```
 
 - Returns a single string with 5 sections delimited by `== SECTION NAME ==` headers:
   1. **== GAME VISION ==** — from `gameDef.Vision`
   2. **== WORLD RULES ==** — from `gameDef.WorldDescription`
-  3. **== PLAYER CHARACTER ==** — `playerPrompt` verbatim
-  4. **== OPPONENT CHARACTER ==** — `opponentPrompt` verbatim
+  3. **== PLAYER CHARACTER ==** (or **== OPPONENT CHARACTER ==**) — character prompt verbatim
+  4. **== OPPONENT CHARACTER ==** (only in `Build`) — `opponentPrompt` verbatim
   5. **== META CONTRACT ==** — `gameDef.MetaContract` + `gameDef.WritingRules` concatenated
 - Each section body is trimmed of trailing whitespace via `TrimEnd()`.
 - When `gameDef` is `null`, `GameDefinition.PinderDefaults` is used.
-- Throws `ArgumentNullException` if `playerPrompt` or `opponentPrompt` is null. Empty strings are allowed.
+- Throws `ArgumentNullException` if prompts are null. Empty strings are allowed.
+- `BuildPlayer` creates a prompt with only the player profile and game definition (for player actions).
+- `BuildOpponent` creates a prompt with only the opponent profile and game definition (for opponent actions).
 
 ### Tell Category Mappings (in `OpponentResponseInstruction`)
 
@@ -168,6 +174,7 @@ The prompt includes an explicit "ONLY" constraint with 10 behavior-to-stat mappi
 - **Failure degradation legibility:** When a player's roll fails, `OpponentContext.DeliveryTier` (set from `rollResult.Tier` in `GameSession.ResolveTurnAsync`) carries the `FailureTier` enum value into `BuildOpponentPrompt`. The method injects a "FAILURE CONTEXT" section with tier-specific guidance from `GetOpponentReactionGuidance()`, so the opponent LLM reacts proportionally to how badly the message was corrupted — from slight coolness (Fumble) to secondhand embarrassment (Legendary). Guidance text avoids fourth-wall-breaking language (no "failed", "rolled", etc.). On success (`FailureTier.None`), no failure section is injected. Note: the spec proposed a `PromptTemplates.GetOpponentFailureGuidance()` method and "DELIVERY NOTE" section name; the implementation places the method on `SessionDocumentBuilder.GetOpponentReactionGuidance()` and uses the section name "FAILURE CONTEXT".
 - **Stateful conversation mode:** `AnthropicLlmAdapter` supports an optional stateful mode activated by `StartConversation(systemPrompt)`. When active (`HasActiveConversation == true`), all four `ILlmAdapter` methods follow a shared pattern: (1) build user content via `SessionDocumentBuilder` (same as stateless), (2) append user message to `ConversationSession`, (3) build request via `_session.BuildRequest()` (includes system blocks + ALL accumulated messages), (4) send via `_client.SendMessagesAsync()`, (5) append raw assistant response to session, (6) parse and return. System blocks come from the `ConversationSession` (set at construction), not from `CacheBlockBuilder`. When no session is active, all methods execute the original stateless code path with no conditional logic overhead. The Anthropic Messages API is stateless (full history must be sent each call), so `ConversationSession` accumulates messages client-side. Messages grow unbounded within a session (acceptable for ~20-turn games within Anthropic's 200k token window). `ConversationSession` does not enforce user/assistant alternation — the caller is responsible. The class is not thread-safe; it is designed for sequential use within one `GameSession`.
 - **Session system prompt assembly:** `SessionSystemPromptBuilder.Build` produces a structured 5-section system prompt combining game-level creative direction (`GameDefinition`) with per-character profile prompts. This replaces the placeholder concatenation (player + `\n\n---\n\n` + opponent) used in the initial `GameSession` wiring (#542). The output is passed to `IStatefulLlmAdapter.StartConversation()` to initialize a stateful conversation session. `GameDefinition` can be loaded from a YAML file via `LoadFrom()` or use `PinderDefaults` as a hardcoded fallback. The YAML parsing uses `YamlDotNet 16.3.0` (same version as `Pinder.Rules`), added only to `Pinder.LlmAdapters.csproj` — `Pinder.Core` remains dependency-free.
+- **Game Definition System Prompt Injection:** `AnthropicLlmAdapter` operations (`GetDialogueOptionsAsync`, `DeliverMessageAsync`, `GetOpponentResponseAsync`) use `SessionSystemPromptBuilder.BuildPlayer` and `BuildOpponent` to inject `AnthropicOptions.GameDefinition` (which contains game vision, world rules, and meta contract) into the system block alongside the isolated character profile. This resolves an issue where the dating frame and romantic pursuit context were missing during LLM calls.
 - **Provider abstraction:** The Anthropic-specific code is isolated in its own subdirectory. The adapter pattern allows swapping LLM providers without changing prompt templates or game logic.
 
 ## Change Log
@@ -185,4 +192,4 @@ The prompt includes an explicit "ONLY" constraint with 10 behavior-to-stat mappi
 | 2026-04-05 | #542 | `IStatefulLlmAdapter` interface + GameSession wiring — New `IStatefulLlmAdapter` interface in `Pinder.Core.Interfaces` formalizes `StartConversation(string)` and `HasActiveConversation` as a sub-interface of `ILlmAdapter`. `AnthropicLlmAdapter` class declaration changed from `ILlmAdapter` to `IStatefulLlmAdapter`. `GameSession` 6-parameter constructor now checks `_llm is IStatefulLlmAdapter` and, if true, builds a system prompt from both character profiles (player + `\n\n---\n\n` + opponent) and calls `StartConversation`. `NullLlmAdapter` unchanged — stateless path preserved. Tests: `Issue542_StatefulSession_TestEngineerTests.cs`. |
 | 2026-04-05 | #543 | Session system prompt builder — Added `GameDefinition` sealed class (7 read-only string properties, `LoadFrom(yamlContent)` YAML parser, `PinderDefaults` hardcoded fallback) and `SessionSystemPromptBuilder` static class (`Build` method producing 5-section `== SECTION NAME ==` delimited prompt from character profiles + game definition). `YamlDotNet 16.3.0` added to `Pinder.LlmAdapters.csproj`. Tests: `GameDefinitionTests.cs`, `SessionSystemPromptBuilderTests.cs`, `Issue543_SessionSystemPromptSpecTests.cs` (45 spec-driven tests). |
 | 2026-04-06 | #572 | Bug fix — Removed the `[RESPONSE]` tag requirement from `PromptTemplates.OpponentResponseInstruction` so the LLM outputs message text directly. Updated `AnthropicLlmAdapter.ParseOpponentResponse` to extract text before `[SIGNALS]` and gracefully strip legacy `[RESPONSE]` tags or quotes if generated. |
-| 2026-04-06 | #573 | Removed the LLM call for Narrative Beats. `AnthropicLlmAdapter.GetInterestChangeBeatAsync` now immediately returns `null` to avoid unnecessary API calls, and `GameSession` generates a hardcoded status string instead. |
+| 2026-04-06 | #575 | Bug fix — `game-definition.yaml` dating frame missing in session prompts. `session-runner` now loads the YAML and passes it to `AnthropicOptions.GameDefinition`. `AnthropicLlmAdapter` injects it via new `SessionSystemPromptBuilder.BuildPlayer` and `BuildOpponent` methods during dialogue options, delivery, and opponent response generation. |
