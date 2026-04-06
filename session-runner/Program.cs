@@ -299,8 +299,8 @@ class Program
         // ── character table ───────────────────────────────────────────────
         Console.WriteLine("## Characters");
         Console.WriteLine();
-        Console.WriteLine($"**{player1}** — *\"{sable.Bio}\"*");
-        Console.WriteLine($"**{player2}** — *\"{brick.Bio}\"*");
+        Console.WriteLine($"***{player1} bio:*** *\"{sable.Bio}\"*");
+        Console.WriteLine($"***{player2} bio:*** *\"{brick.Bio}\"*");
         Console.WriteLine();
         Console.WriteLine($"| | **{player1}** | **{player2}** |");
         Console.WriteLine("|---|---|---|");
