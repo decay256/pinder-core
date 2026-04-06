@@ -13,6 +13,7 @@ using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
 using Pinder.Core.Traps;
 using Pinder.Core.Data;
+using Pinder.LlmAdapters;
 using Pinder.LlmAdapters.Anthropic;
 using Pinder.SessionRunner;
 
@@ -325,8 +326,24 @@ class Program
         Console.WriteLine();
 
         // ── LLM + session setup ───────────────────────────────────────────
+        // Load game-definition.yaml if present
+        string? gameDefPath = DataFileLocator.FindDataFile(AppContext.BaseDirectory, Path.Combine("data", "game-definition.yaml"));
+        GameDefinition? gameDef = null;
+        if (gameDefPath != null)
+        {
+            try
+            {
+                gameDef = GameDefinition.LoadFrom(File.ReadAllText(gameDefPath));
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"[WARN] Failed to load game-definition.yaml: {ex.Message}");
+            }
+        }
+
         var llm = new AnthropicLlmAdapter(new AnthropicOptions {
-            ApiKey = apiKey, Model = "claude-sonnet-4-20250514", MaxTokens = 1024, Temperature = 0.9
+            ApiKey = apiKey, Model = "claude-sonnet-4-20250514", MaxTokens = 1024, Temperature = 0.9,
+            GameDefinition = gameDef
         });
 
         // Load real trap definitions — fallback to NullTrapRegistry if file missing/corrupt

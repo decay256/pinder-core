@@ -135,7 +135,8 @@ namespace Pinder.LlmAdapters.Anthropic
             }
 
             // Only the player's identity in system — prevents voice bleed from opponent's register
-            var systemBlocks = CacheBlockBuilder.BuildPlayerOnlySystemBlocks(context.PlayerPrompt);
+            var fullPlayerPrompt = SessionSystemPromptBuilder.BuildPlayer(context.PlayerPrompt, _options.GameDefinition);
+            var systemBlocks = CacheBlockBuilder.BuildPlayerOnlySystemBlocks(fullPlayerPrompt);
 
             var request = BuildRequest(systemBlocks, userContent,
                 _options.DialogueOptionsTemperature ?? DefaultDialogueOptionsTemperature);
@@ -163,7 +164,8 @@ namespace Pinder.LlmAdapters.Anthropic
                 return statefulText;
             }
 
-            var systemBlocks = CacheBlockBuilder.BuildPlayerOnlySystemBlocks(context.PlayerPrompt);
+            var fullPlayerPrompt = SessionSystemPromptBuilder.BuildPlayer(context.PlayerPrompt, _options.GameDefinition);
+            var systemBlocks = CacheBlockBuilder.BuildPlayerOnlySystemBlocks(fullPlayerPrompt);
 
             var request = BuildRequest(systemBlocks, userContent,
                 _options.DeliveryTemperature ?? DefaultDeliveryTemperature);
@@ -192,7 +194,8 @@ namespace Pinder.LlmAdapters.Anthropic
             }
 
             // Per §3.5: only opponent prompt in system (opponent plays themselves)
-            var systemBlocks = CacheBlockBuilder.BuildOpponentOnlySystemBlocks(context.OpponentPrompt);
+            var fullOpponentPrompt = SessionSystemPromptBuilder.BuildOpponent(context.OpponentPrompt, _options.GameDefinition);
+            var systemBlocks = CacheBlockBuilder.BuildOpponentOnlySystemBlocks(fullOpponentPrompt);
 
             var request = BuildRequest(systemBlocks, userContent,
                 _options.OpponentResponseTemperature ?? DefaultOpponentResponseTemperature);

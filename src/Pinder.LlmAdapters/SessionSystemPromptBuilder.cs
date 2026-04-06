@@ -50,5 +50,55 @@ namespace Pinder.LlmAdapters
                 def.WritingRules.TrimEnd(),
                 "\n");
         }
+
+        /// <summary>
+        /// Build a system prompt containing only the player's character profile and game definition.
+        /// Used to prevent voice bleed when generating dialogue options or delivering messages.
+        /// </summary>
+        public static string BuildPlayer(string playerPrompt, GameDefinition? gameDef = null)
+        {
+            if (playerPrompt == null) throw new ArgumentNullException(nameof(playerPrompt));
+            var def = gameDef ?? GameDefinition.PinderDefaults;
+
+            return string.Concat(
+                "== GAME VISION ==\n\n",
+                def.Vision.TrimEnd(),
+                "\n\n== WORLD RULES ==\n\n",
+                def.WorldDescription.TrimEnd(),
+                "\n\n== PLAYER CHARACTER ==\n\n",
+                def.PlayerRoleDescription.TrimEnd(),
+                "\n\n",
+                playerPrompt.TrimEnd(),
+                "\n\n== META CONTRACT ==\n\n",
+                def.MetaContract.TrimEnd(),
+                "\n\n",
+                def.WritingRules.TrimEnd(),
+                "\n");
+        }
+
+        /// <summary>
+        /// Build a system prompt containing only the opponent's character profile and game definition.
+        /// Used to prevent voice bleed when generating opponent responses.
+        /// </summary>
+        public static string BuildOpponent(string opponentPrompt, GameDefinition? gameDef = null)
+        {
+            if (opponentPrompt == null) throw new ArgumentNullException(nameof(opponentPrompt));
+            var def = gameDef ?? GameDefinition.PinderDefaults;
+
+            return string.Concat(
+                "== GAME VISION ==\n\n",
+                def.Vision.TrimEnd(),
+                "\n\n== WORLD RULES ==\n\n",
+                def.WorldDescription.TrimEnd(),
+                "\n\n== OPPONENT CHARACTER ==\n\n",
+                def.OpponentRoleDescription.TrimEnd(),
+                "\n\n",
+                opponentPrompt.TrimEnd(),
+                "\n\n== META CONTRACT ==\n\n",
+                def.MetaContract.TrimEnd(),
+                "\n\n",
+                def.WritingRules.TrimEnd(),
+                "\n");
+        }
     }
 }

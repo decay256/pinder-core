@@ -14,5 +14,11 @@ namespace Pinder.LlmAdapters.Anthropic
         public double? DeliveryTemperature { get; set; }
         public double? OpponentResponseTemperature { get; set; }
         public double? InterestChangeBeatTemperature { get; set; }
+        
+        /// <summary>
+        /// Game definition used for building system prompts.
+        /// If null, GameDefinition.PinderDefaults is used.
+        /// </summary>
+        public GameDefinition? GameDefinition { get; set; }
     }
 }
