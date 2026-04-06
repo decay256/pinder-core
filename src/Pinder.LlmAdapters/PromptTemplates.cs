@@ -79,6 +79,9 @@ the texting style above? If not, rewrite it.";
                 "The intended message is the player's plan. Your job is to make it land.\n" +
                 "You beat the DC by {beat_dc_by}.\n" +
                 "\n" +
+                "YOUR TIER: {tier_instruction}\n" +
+                "\n" +
+                "Other tiers for reference:\n" +
                 "- Clean success (margin 1-4): " + clean + "\n" +
                 "- Strong success (margin 5-9): " + strong + "\n" +
                 "- Critical success (margin 10-14): " + critical + "\n" +
