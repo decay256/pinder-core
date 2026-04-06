@@ -16,6 +16,8 @@ The session runner orchestrates simulated playtest sessions between two `Charact
 - **`tests/Pinder.Core.Tests/CharacterLoaderSpecTests.cs`** — Comprehensive tests for `CharacterLoader`: prompt file parsing (stats, shadows, level, display name, system prompt extraction), error cases (missing file, missing stats, missing EFFECTIVE STATS section), edge cases (mixed case input, shadow lines with/without tilde prefix, parenthetical notes, multiple code fences, level from outside code fence), and conditional integration tests against real prompt files.
 - **`tests/Pinder.Core.Tests/Issue415_CharacterDefinitionLoaderSpecTests.cs`** — Spec-driven tests for `CharacterDefinitionLoader` and `DataFileLocator`: assembly pipeline (AC2–AC4), all 5 character definitions load successfully (AC5), `DataFileLocator` resolves character files (AC6), data file presence, edge cases (missing shadows, empty items/anatomy, special chars in name, unknown item IDs), error conditions (file not found, malformed JSON, missing required fields, level range, unknown stat/shadow types), shadow parsing, `DataFileLocator` walk-up and repo root discovery, integration tests for full pipeline across characters.
 - **`tests/Pinder.Core.Tests/Issue527_SessionRunnerBioFormatTests.cs`** — Tests for character bio output formatting in session runner, verifying bio row is removed from table and bios are printed as bold italic paragraphs (issue #527).
+- **`session-runner/MatchupAnalyzer.cs`** — Static utility that generates a pre-game LLM-backed character analysis using `AnthropicClient`. Analyzes player and opponent stats vs DC table to provide a brief strategic summary of best lanes and shadow risks. Outputs results under `## Matchup Analysis` header.
+- **`tests/Pinder.Core.Tests/Issue528_MatchupAnalyzerTests.cs`** — Tests for `MatchupAnalyzer`: verifies spec signature, prompt generation, edge cases (missing bio, mirror matches), error handling (graceful fallback on API failure), and `Program.cs` integration.
 - **`session-runner/PlaytestFormatter.cs`** — Static utility class for formatting player agent reasoning blocks and option score tables as markdown. Contains `FormatReasoningBlock` and `FormatScoreTable`.
 - **`session-runner/LlmPlayerAgent.cs`** — LLM-backed player agent with character context. Sends game state, character personality, conversation history, and scoring advisory to Anthropic Claude, parses `PICK:` response, falls back to `ScoringPlayerAgent` on failure. Implements `IDisposable`. Uses character-aware system message when `playerSystemPrompt` or `playerTextingStyle` is provided; falls back to generic strategic prompt otherwise.
 - **`tests/Pinder.Core.Tests/LlmPlayerAgentTests.cs`** — Tests for `LlmPlayerAgent`: adjusted probability display (tell/momentum/callback bonuses), no-bonus raw percentage, dispose idempotency.
@@ -191,6 +193,26 @@ public static string FormatReasoningBlock(PlayerDecision? decision, string agent
 /// Missing score entries for an option render as "—".
 /// BonusesApplied are concatenated without spaces (e.g. "📖🔗").
 public static string FormatScoreTable(PlayerDecision? decision, DialogueOption[] options);
+```
+
+### MatchupAnalyzer (static class)
+
+Generates a pre-game LLM-backed character analysis based on stats and matchup.
+Called at the beginning of a playtest session to provide strategic context.
+
+```csharp
+public static class MatchupAnalyzer
+{
+    /// Analyzes the player and opponent stats, shadow traits, and bios alongside the DC table.
+    /// Uses Anthropic API with zero-shot prompting to provide a brief strategic summary,
+    /// best lanes, shadow risks, and a matchup prediction.
+    /// Caches the output in `.matchup-cache/` locally (hashed by character stats) to save API calls.
+    /// Returns a graceful fallback string on API or network failure.
+    public static async Task<string?> AnalyzeMatchupAsync(
+        AnthropicOptions options,
+        CharacterProfile player,
+        CharacterProfile opponent);
+}
 ```
 
 ### OutcomeProjector (internal static class)
@@ -394,3 +416,4 @@ LlmPlayerAgent(
 | 2026-04-05 | #516 | Fixed `CharacterLoader.ParseLevel` bug: corrected stale level values in character JSON files (velvet: 4→7, brick: 6→9, zyx: 4→1). Added `ParseLevel` tests to `CharacterLoaderTests.cs` (standard format, single/double digit, missing line default, parameterized starter characters). Made `ParseLevel` visible as `internal static`. |
 | 2026-04-05 | #515 | Fixed session number duplication bug: session number is now resolved once at startup (`ResolvePlaytestDirectory` + `GetNextSessionNumber`) and reused for both the header (`# Playtest Session {N:D3}`) and file write. Previously, header was hardcoded to "006" and `WritePlaytestLog` called `GetNextSessionNumber` independently, causing header/filename mismatch. `WritePlaytestLog` signature changed to accept pre-resolved `dir` and `sessionNum` parameters. Added `ConsecutiveSessions_ProduceDifferentNumbers` test to `SessionFileCounterTests.cs`. |
 | 2026-04-06 | #527 | Updated character stats output formatting in `Program.cs`. Character bios are now rendered as bold italic paragraphs (`***{Player} bio:*** *{Bio text}*`) immediately above the stats table, and the "Bio" row has been removed from the markdown table. Added `Issue527_SessionRunnerBioFormatTests.cs` to verify formatting and edge cases. |
+| 2026-04-06 | #528 | Added `MatchupAnalyzer` to provide a pre-game LLM-generated character analysis (best lane, shadow risks, prediction) at the start of a playtest session. Uses `AnthropicClient` and caches results based on stat hashes to avoid redundant API calls. Analysis is printed under `## Matchup Analysis` before Turn 1. Added comprehensive tests in `Issue528_MatchupAnalyzerTests.cs`. Note: Implemented as `AnalyzeMatchupAsync(AnthropicOptions options, CharacterProfile player, CharacterProfile opponent)` as a static class, diverging slightly from the spec's instance method signature. |
