@@ -20,5 +20,7 @@ namespace Pinder.LlmAdapters.Anthropic
         /// If null, GameDefinition.PinderDefaults is used.
         /// </summary>
         public GameDefinition? GameDefinition { get; set; }
+
+        public string? DebugDirectory { get; set; }
     }
 }

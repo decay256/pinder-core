@@ -1,3 +1,5 @@
+using Newtonsoft.Json;
+using System.IO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +19,16 @@ namespace Pinder.LlmAdapters.Anthropic
     /// using AnthropicClient for HTTP transport, SessionDocumentBuilder for prompt
     /// formatting, and CacheBlockBuilder for prompt caching.
     /// </summary>
+    public class CallSummaryStat
+    {
+        [JsonProperty("turn")] public int Turn { get; set; }
+        [JsonProperty("type")] public string Type { get; set; }
+        [JsonProperty("cache_creation_input_tokens")] public int CacheCreationInputTokens { get; set; }
+        [JsonProperty("cache_read_input_tokens")] public int CacheReadInputTokens { get; set; }
+        [JsonProperty("input_tokens")] public int InputTokens { get; set; }
+        [JsonProperty("output_tokens")] public int OutputTokens { get; set; }
+    }
+
     public sealed class AnthropicLlmAdapter : ILlmAdapter, IDisposable
     {
         // Default temperatures per method (used when AnthropicOptions override is null)
@@ -66,6 +78,7 @@ namespace Pinder.LlmAdapters.Anthropic
 
         private readonly AnthropicClient _client;
         private readonly AnthropicOptions _options;
+        private readonly List<CallSummaryStat> _callStats = new List<CallSummaryStat>();
 
         /// <summary>
         /// Creates adapter with internally-owned AnthropicClient.
@@ -111,6 +124,7 @@ namespace Pinder.LlmAdapters.Anthropic
                 _options.DialogueOptionsTemperature ?? DefaultDialogueOptionsTemperature);
 
             var response = await _client.SendMessagesAsync(request).ConfigureAwait(false);
+            LogDebug("options", context.CurrentTurn, request, response);
             return ParseDialogueOptions(response.GetText());
         }
 
@@ -129,6 +143,7 @@ namespace Pinder.LlmAdapters.Anthropic
                 _options.DeliveryTemperature ?? DefaultDeliveryTemperature);
 
             var response = await _client.SendMessagesAsync(request).ConfigureAwait(false);
+            LogDebug("delivery", context.CurrentTurn, request, response);
             return response.GetText();
         }
 
@@ -148,6 +163,7 @@ namespace Pinder.LlmAdapters.Anthropic
                 _options.OpponentResponseTemperature ?? DefaultOpponentResponseTemperature);
 
             var response = await _client.SendMessagesAsync(request).ConfigureAwait(false);
+            LogDebug("opponent", context.CurrentTurn, request, response);
             return ParseOpponentResponse(response.GetText());
         }
 
@@ -162,6 +178,42 @@ namespace Pinder.LlmAdapters.Anthropic
         }
 
         /// <summary>Disposes the internal AnthropicClient.</summary>
+        private void LogDebug(string callType, int turn, MessagesRequest request, MessagesResponse response)
+        {
+            if (string.IsNullOrEmpty(_options.DebugDirectory)) return;
+
+            try
+            {
+                Directory.CreateDirectory(_options.DebugDirectory);
+
+                string reqFile = Path.Combine(_options.DebugDirectory, $"turn-{turn:D2}-{callType}-request.json");
+                string resFile = Path.Combine(_options.DebugDirectory, $"turn-{turn:D2}-{callType}-response.json");
+
+                File.WriteAllText(reqFile, JsonConvert.SerializeObject(request, Formatting.Indented));
+                File.WriteAllText(resFile, JsonConvert.SerializeObject(response, Formatting.Indented));
+
+                if (response.Usage != null)
+                {
+                    var stat = new CallSummaryStat {
+                        Turn = turn,
+                        Type = callType,
+                        CacheCreationInputTokens = response.Usage.CacheCreationInputTokens,
+                        CacheReadInputTokens = response.Usage.CacheReadInputTokens,
+                        InputTokens = response.Usage.InputTokens,
+                        OutputTokens = response.Usage.OutputTokens
+                    };
+                    _callStats.Add(stat);
+
+                    var summaryFile = Path.Combine(_options.DebugDirectory, "session-summary.json");
+                    File.WriteAllText(summaryFile, JsonConvert.SerializeObject(new { calls = _callStats, totals = new { cache_creation_input_tokens = _callStats.Sum(s => s.CacheCreationInputTokens), cache_read_input_tokens = _callStats.Sum(s => s.CacheReadInputTokens), input_tokens = _callStats.Sum(s => s.InputTokens), output_tokens = _callStats.Sum(s => s.OutputTokens) } }, Formatting.Indented));
+                }
+            }
+            catch
+            {
+                // Ignore logging errors
+            }
+        }
+
         public void Dispose()
         {
             _client.Dispose();
