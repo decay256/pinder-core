@@ -82,6 +82,34 @@ class Program
         return md.Substring(start, end - start).Trim();
     }
 
+    static async Task<string> SummarizeCharacterAsync(string apiKey, string assembledSystemPrompt, string characterName)
+    {
+        try
+        {
+            var client = new Pinder.LlmAdapters.Anthropic.AnthropicClient(apiKey);
+            var request = new Pinder.LlmAdapters.Anthropic.Dto.MessagesRequest
+            {
+                Model = "claude-sonnet-4-20250514",
+                MaxTokens = 150,
+                Temperature = 0.5,
+                Messages = new Pinder.LlmAdapters.Anthropic.Dto.Message[]
+                {
+                    new Pinder.LlmAdapters.Anthropic.Dto.Message
+                    {
+                        Role = "user",
+                        Content = $"Based on this character profile, write exactly one paragraph (3 sentences max) summarizing: who they are and their backstory, their personality, and their texting style. Be specific and vivid. Do not use bullet points.\n\n{assembledSystemPrompt.Substring(0, System.Math.Min(3000, assembledSystemPrompt.Length))}"
+                    }
+                }
+            };
+            var response = await client.SendMessagesAsync(request).ConfigureAwait(false);
+            return response.GetText().Trim();
+        }
+        catch
+        {
+            return string.Empty;
+        }
+    }
+
     // BestOption removed — replaced by IPlayerAgent (see HighestModAgent)
 
     // ── character loading ─────────────────────────────────────────────────────
@@ -304,12 +332,28 @@ class Program
         Console.WriteLine($"***{player1} bio:*** *\"{sable.Bio}\"*");
         Console.WriteLine($"***{player2} bio:*** *\"{brick.Bio}\"*");
         Console.WriteLine();
+        Console.Error.WriteLine("Generating character summaries...");
+        string p1Summary = await SummarizeCharacterAsync(apiKey, sable.AssembledSystemPrompt, player1).ConfigureAwait(false);
+        string p2Summary = await SummarizeCharacterAsync(apiKey, brick.AssembledSystemPrompt, player2).ConfigureAwait(false);
+        if (!string.IsNullOrWhiteSpace(p1Summary))
+            Console.WriteLine($"**{player1}:** {p1Summary}");
+        if (!string.IsNullOrWhiteSpace(p2Summary))
+            Console.WriteLine($"**{player2}:** {p2Summary}");
+        Console.WriteLine();
         Console.WriteLine($"| | **{player1}** | **{player2}** |");
         Console.WriteLine("|---|---|---|");
         Console.WriteLine($"| Level | {p1Level} | {p2Level} |");
         foreach (var stat in new[] { StatType.Charm, StatType.Rizz, StatType.Honesty, StatType.Chaos, StatType.Wit, StatType.SelfAwareness }) {
             int p1 = sableStats.GetEffective(stat), p2 = brickStats.GetEffective(stat);
             Console.WriteLine($"| {StatLabel(stat)} | {p1:+#;-#;0} | {p2:+#;-#;0} |");
+        }
+        Console.WriteLine($"| — | — | — |");
+        foreach (Pinder.Core.Stats.ShadowStatType shadowType in Enum.GetValues(typeof(Pinder.Core.Stats.ShadowStatType))) {
+            int p1Shadow = sableStats.GetShadow(shadowType);
+            int p2Shadow = brickStats.GetShadow(shadowType);
+            string p1Str = p1Shadow > 0 ? p1Shadow.ToString() : "0";
+            string p2Str = p2Shadow > 0 ? p2Shadow.ToString() : "0";
+            Console.WriteLine($"| {shadowType} | {p1Str} | {p2Str} |");
         }
         Console.WriteLine();
 
