@@ -236,6 +236,7 @@ class Program
 
         int maxTurns = ParseMaxTurns(args);
         string agentType = ParseAgentArg(args);
+        bool isDebug = args.Contains("--debug");
 
         string promptDir = ResolvePromptDirectory(AppContext.BaseDirectory);
 
@@ -344,9 +345,16 @@ class Program
             }
         }
 
+        string? debugDir = null;
+        if (isDebug && playtestDir != null)
+        {
+            debugDir = Path.Combine(playtestDir, $"session-{sessionNumber:D3}-debug");
+        }
+
         var llm = new AnthropicLlmAdapter(new AnthropicOptions {
             ApiKey = apiKey, Model = "claude-sonnet-4-20250514", MaxTokens = 1024, Temperature = 0.9,
-            GameDefinition = gameDef
+            GameDefinition = gameDef,
+            DebugDirectory = debugDir
         });
 
         // Load real trap definitions — fallback to NullTrapRegistry if file missing/corrupt
