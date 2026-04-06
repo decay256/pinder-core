@@ -535,7 +535,7 @@ class Program
                 
                 PrintQuoted("**Intended:** " + (string.IsNullOrWhiteSpace(intended) || intended == "..." ? "..." : $"\"{intended}\""));
                 
-                string marker = isStrongSuccess ? "*" : "~~";
+                string marker = "*";
                 string formattedDelivered = FormatDeliveredAdditions(intended, result.DeliveredMessage ?? "", marker);
                 PrintQuoted($"**Delivered ({label}):** \"{formattedDelivered}\"");
             }
