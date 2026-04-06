@@ -681,6 +681,22 @@ OPTION_4
                 adapter.GetInterestChangeBeatAsync(null!));
         }
 
+
+        // What: Reviewer feedback — GetInterestChangeBeatAsync exhibits new null-return behavior
+        // Mutation: Fails if GetInterestChangeBeatAsync makes an HTTP call or returns anything other than null
+        [Fact]
+        public async Task GetInterestChangeBeatAsync_ReturnsNull_WithoutApiCall()
+        {
+            var handler = new FakeHttpHandler();
+            using var client = new System.Net.Http.HttpClient(handler);
+            using var adapter = new AnthropicLlmAdapter(DefaultOptions(), client);
+
+            var context = new Pinder.Core.Conversation.InterestChangeContext("Velvet", 10, 11, Pinder.Core.Conversation.InterestState.Interested);
+            var result = await adapter.GetInterestChangeBeatAsync(context);
+
+            Assert.Null(result);
+            Assert.Null(handler.CapturedRequest); // Assert NO HTTP call was made
+        }
         [Fact]
         public async Task GetDialogueOptionsAsync_fallback_on_unparseable_response()
         {

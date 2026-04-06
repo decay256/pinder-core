@@ -267,36 +267,6 @@ OPTION_4
         // ==============================================================================
 
         // Mutation: would catch if GetInterestChangeBeatAsync did not append to session
-        [Fact(Skip = "Removed in #573")]
-        public async Task Stateful_interest_beat_accumulates_with_prior_messages()
-        {
-            var callNum = 0;
-            var handler = new CapturingHandler(_ =>
-            {
-                callNum++;
-                if (callNum == 1) return CapturingHandler.MakeJsonResponse(FourOptionResponse);
-                return CapturingHandler.MakeJsonResponse("*leans in*");
-            });
-            using var http = new HttpClient(handler);
-            using var adapter = new AnthropicLlmAdapter(DefaultOptions(), http);
-
-            adapter.StartConversation("system");
-
-            // First call: options — adds user+assistant
-            await adapter.GetDialogueOptionsAsync(MakeDialogueContext());
-
-            // Second call: interest beat — should see prior messages + new user
-            await adapter.GetInterestChangeBeatAsync(MakeInterestChangeContext());
-
-            var body2 = JObject.Parse(handler.RequestBodies[1]);
-            var messages = body2["messages"] as JArray;
-            Assert.NotNull(messages);
-            // Should have 3 messages: u1(options), a1(options response), u2(beat)
-            Assert.Equal(3, messages!.Count);
-            Assert.Equal("user", messages[0]!["role"]!.ToString());
-            Assert.Equal("assistant", messages[1]!["role"]!.ToString());
-            Assert.Equal("user", messages[2]!["role"]!.ToString());
-        }
 
         // ==============================================================================
         // AC3: Stateful GetOpponentResponse accumulates with delivery
@@ -353,21 +323,6 @@ OPTION_4
         }
 
         // Mutation: would catch if GetInterestChangeBeatAsync used CacheBlockBuilder in stateful mode
-        [Fact(Skip = "Removed in #573")]
-        public async Task Stateful_interest_beat_system_blocks_from_session()
-        {
-            var handler = new CapturingHandler("*smiles*");
-            using var http = new HttpClient(handler);
-            using var adapter = new AnthropicLlmAdapter(DefaultOptions(), http);
-
-            adapter.StartConversation("UNIQUE_SESSION_PROMPT_FOR_BEAT");
-            await adapter.GetInterestChangeBeatAsync(MakeInterestChangeContext());
-
-            var body = JObject.Parse(handler.RequestBodies[0]);
-            var system = body["system"] as JArray;
-            Assert.NotNull(system);
-            Assert.Contains("UNIQUE_SESSION_PROMPT_FOR_BEAT", system![0]!["text"]!.ToString());
-        }
 
         // ==============================================================================
         // AC4: HasActiveConversation is on concrete class, not interface
@@ -503,59 +458,6 @@ OPTION_4
         // ==============================================================================
 
         // Mutation: would catch if any method failed to append both user AND assistant messages
-        [Fact(Skip = "Removed in #573")]
-        public async Task Two_full_turns_accumulate_correct_message_count()
-        {
-            var callNum = 0;
-            var handler = new CapturingHandler(_ =>
-            {
-                callNum++;
-                switch (callNum)
-                {
-                    case 1: return CapturingHandler.MakeJsonResponse(FourOptionResponse); // T1 options
-                    case 2: return CapturingHandler.MakeJsonResponse("msg1");              // T1 delivery
-                    case 3: return CapturingHandler.MakeJsonResponse("[RESPONSE] \"r1\""); // T1 opponent
-                    case 4: return CapturingHandler.MakeJsonResponse("*beat1*");           // T1 beat
-                    case 5: return CapturingHandler.MakeJsonResponse(FourOptionResponse); // T2 options
-                    case 6: return CapturingHandler.MakeJsonResponse("msg2");              // T2 delivery
-                    case 7: return CapturingHandler.MakeJsonResponse("[RESPONSE] \"r2\""); // T2 opponent
-                    default: return CapturingHandler.MakeJsonResponse("*beat2*");          // T2 beat
-                }
-            });
-            using var http = new HttpClient(handler);
-            using var adapter = new AnthropicLlmAdapter(DefaultOptions(), http);
-
-            adapter.StartConversation("system");
-
-            // Turn 1: 4 calls → 8 messages (4 user + 4 assistant)
-            await adapter.GetDialogueOptionsAsync(MakeDialogueContext());
-            await adapter.DeliverMessageAsync(MakeDeliveryContext());
-            await adapter.GetOpponentResponseAsync(MakeOpponentContext());
-            await adapter.GetInterestChangeBeatAsync(MakeInterestChangeContext());
-
-            // Turn 2 options: should send 9 messages (8 prior + 1 new user)
-            await adapter.GetDialogueOptionsAsync(MakeDialogueContext());
-
-            var body5 = JObject.Parse(handler.RequestBodies[4]);
-            var messages = body5["messages"] as JArray;
-            Assert.Equal(9, messages!.Count);
-
-            // Turn 2 last call: should have 15 messages (8 from T1 + 6 from T2 so far + 1 new user)
-            await adapter.DeliverMessageAsync(MakeDeliveryContext());
-            await adapter.GetOpponentResponseAsync(MakeOpponentContext());
-            await adapter.GetInterestChangeBeatAsync(MakeInterestChangeContext());
-
-            var body8 = JObject.Parse(handler.RequestBodies[7]);
-            var messages8 = body8["messages"] as JArray;
-            Assert.Equal(15, messages8!.Count); // 7 pairs + 1 new user
-
-            // All should alternate user/assistant
-            for (int i = 0; i < messages8.Count; i++)
-            {
-                var expectedRole = i % 2 == 0 ? "user" : "assistant";
-                Assert.Equal(expectedRole, messages8[i]!["role"]!.ToString());
-            }
-        }
 
         // ==============================================================================
         // Edge case: ConversationSession content preservation

@@ -548,18 +548,5 @@ OPTION_4
         // ==============================================================================
 
         // Mutation: would catch if stateless beat accumulated messages
-        [Fact(Skip = "Removed in #573")]
-        public async Task Stateless_interest_beat_sends_single_message()
-        {
-            var handler = new CapturingHandler("*smiles*");
-            using var http = new HttpClient(handler);
-            using var adapter = new AnthropicLlmAdapter(DefaultOptions(), http);
-
-            await adapter.GetInterestChangeBeatAsync(MakeInterestChangeContext());
-
-            var body = JObject.Parse(handler.RequestBodies[0]);
-            var messages = body["messages"] as JArray;
-            Assert.Single(messages!);
-        }
     }
 }

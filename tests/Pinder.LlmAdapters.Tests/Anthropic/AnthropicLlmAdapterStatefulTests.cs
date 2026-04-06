@@ -286,18 +286,6 @@ OPTION_4
         // Stateful GetInterestChangeBeatAsync
         // ==============================================================================
 
-        [Fact(Skip = "Removed in #573")]
-        public async Task Stateful_GetInterestChangeBeat_uses_session()
-        {
-            var handler = new CapturingHandler("*leans in closer*");
-            using var http = new HttpClient(handler);
-            using var adapter = new AnthropicLlmAdapter(DefaultOptions(), http);
-
-            adapter.StartConversation("system");
-            var result = await adapter.GetInterestChangeBeatAsync(MakeInterestChangeContext());
-
-            Assert.Equal("*leans in closer*", result);
-        }
 
         [Fact]
         public async Task Stateful_GetInterestChangeBeat_returns_null_for_empty()
@@ -365,48 +353,5 @@ OPTION_4
         // Multi-turn full sequence
         // ==============================================================================
 
-        [Fact(Skip = "Removed in #573")]
-        public async Task Full_turn_sequence_accumulates_all_messages()
-        {
-            var callNum = 0;
-            var handler = new CapturingHandler(_ =>
-            {
-                callNum++;
-                switch (callNum)
-                {
-                    case 1: return CapturingHandler.MakeJsonResponse(FourOptionResponse);
-                    case 2: return CapturingHandler.MakeJsonResponse("delivered message");
-                    case 3: return CapturingHandler.MakeJsonResponse("[RESPONSE] \"opponent reply\"");
-                    default: return CapturingHandler.MakeJsonResponse("beat text");
-                }
-            });
-            using var http = new HttpClient(handler);
-            using var adapter = new AnthropicLlmAdapter(DefaultOptions(), http);
-
-            adapter.StartConversation("combined system prompt");
-
-            // Turn 1: options
-            await adapter.GetDialogueOptionsAsync(MakeDialogueContext());
-            // Turn 1: delivery
-            await adapter.DeliverMessageAsync(MakeDeliveryContext());
-            // Turn 1: opponent response
-            await adapter.GetOpponentResponseAsync(MakeOpponentContext());
-            // Interest beat
-            await adapter.GetInterestChangeBeatAsync(MakeInterestChangeContext());
-
-            Assert.Equal(4, handler.RequestBodies.Count);
-
-            // 4th call should have 7 messages: u1, a1, u2, a2, u3, a3, u4
-            var body4 = JObject.Parse(handler.RequestBodies[3]);
-            var messages = body4["messages"] as JArray;
-            Assert.Equal(7, messages!.Count);
-
-            // Verify alternation
-            for (int i = 0; i < messages.Count; i++)
-            {
-                var expectedRole = i % 2 == 0 ? "user" : "assistant";
-                Assert.Equal(expectedRole, messages[i]!["role"]!.ToString());
-            }
-        }
     }
 }

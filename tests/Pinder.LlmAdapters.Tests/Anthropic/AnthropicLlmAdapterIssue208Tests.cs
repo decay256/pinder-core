@@ -738,39 +738,9 @@ WEAKNESS: HONESTY -2 (opening)";
 
         // What: AC7 — InterestChangeBeat temperature is 0.8 by default
         // Mutation: Would catch if interest change beat uses wrong temperature
-        [Fact(Skip = "Removed in #573")]
-        public async Task AC7_InterestChangeBeat_DefaultTemperature_0_8()
-        {
-            var handler = new MockHttpHandler { ResponseBody = MakeApiResponse("\"A beat\"") };
-            using var client = new HttpClient(handler);
-            using var adapter = new AnthropicLlmAdapter(DefaultOptions(), client);
-
-            await adapter.GetInterestChangeBeatAsync(MakeInterestChangeContext());
-
-            var body = JObject.Parse(handler.LastRequestBody!);
-            Assert.Equal(0.8, body["temperature"]!.Value<double>(), 2);
-        }
 
         // What: AC7 — InterestChangeBeat has empty system blocks
         // Mutation: Would catch if system blocks are populated for interest change beat
-        [Fact(Skip = "Removed in #573")]
-        public async Task AC7_InterestChangeBeat_EmptySystemBlocks()
-        {
-            var handler = new MockHttpHandler { ResponseBody = MakeApiResponse("\"A beat\"") };
-            using var client = new HttpClient(handler);
-            using var adapter = new AnthropicLlmAdapter(DefaultOptions(), client);
-
-            await adapter.GetInterestChangeBeatAsync(MakeInterestChangeContext());
-
-            var body = JObject.Parse(handler.LastRequestBody!);
-            var system = body["system"];
-            // System should be empty array or absent
-            if (system != null && system is JArray arr)
-            {
-                Assert.Empty(arr);
-            }
-            // If system is null/absent, that's also acceptable
-        }
 
         // What: Temperature overrides from options are used
         // Mutation: Would catch if per-method temperature overrides are ignored
@@ -1023,21 +993,6 @@ WEAKNESS: WIT -2 (overthinking their responses)";
 
         // What: AC1 — GetInterestChangeBeatAsync returns narrative beat
         // Mutation: Would catch if interest change beat returns null for valid response
-        [Fact(Skip = "Removed in #573")]
-        public async Task FullFlow_InterestChangeBeat_ReturnsNarrativeBeat()
-        {
-            var handler = new MockHttpHandler
-            {
-                ResponseBody = MakeApiResponse("Velvet leans closer, a smile spreading across her face.")
-            };
-            using var client = new HttpClient(handler);
-            using var adapter = new AnthropicLlmAdapter(DefaultOptions(), client);
-
-            var result = await adapter.GetInterestChangeBeatAsync(MakeInterestChangeContext());
-
-            Assert.NotNull(result);
-            Assert.Contains("Velvet", result!);
-        }
 
         // What: Spec — SelfAwareness stat parsed correctly (two-word stat)
         // Mutation: Would catch if SELF_AWARENESS is not mapped to StatType.SelfAwareness

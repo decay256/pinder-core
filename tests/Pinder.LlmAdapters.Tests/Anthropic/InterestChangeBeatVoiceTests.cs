@@ -30,76 +30,8 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
                 usage = new { input_tokens = 10, output_tokens = 5 }
             });
 
-        [Fact(Skip = "Removed in #573")]
-        public async Task GetInterestChangeBeatAsync_with_opponent_prompt_includes_system_blocks()
-        {
-            var handler = new VoiceTestHandler
-            {
-                ResponseBody = MakeApiResponse("Brick checks her planner and pencils you in.")
-            };
-            using var client = new HttpClient(handler);
-            using var adapter = new AnthropicLlmAdapter(DefaultOptions(), client);
 
-            var context = new InterestChangeContext(
-                "Brick",
-                20,
-                25,
-                InterestState.DateSecured,
-                opponentPrompt: "You are Brick, a Level 9 M&A professional who color-codes her planner.");
 
-            var result = await adapter.GetInterestChangeBeatAsync(context);
-
-            Assert.Equal("Brick checks her planner and pencils you in.", result);
-
-            var body = JsonConvert.DeserializeObject<MessagesRequest>(handler.CapturedRequestBody!);
-            Assert.NotNull(body);
-            Assert.NotNull(body!.System);
-            Assert.Single(body.System); // Opponent-only system block
-            Assert.Contains("Brick", body.System[0].Text);
-            Assert.Contains("M&A professional", body.System[0].Text);
-            Assert.Equal("ephemeral", body.System[0].CacheControl?.Type);
-        }
-
-        [Fact(Skip = "Removed in #573")]
-        public async Task GetInterestChangeBeatAsync_without_opponent_prompt_has_no_system_blocks()
-        {
-            var handler = new VoiceTestHandler
-            {
-                ResponseBody = MakeApiResponse("They lean closer.")
-            };
-            using var client = new HttpClient(handler);
-            using var adapter = new AnthropicLlmAdapter(DefaultOptions(), client);
-
-            // No opponentPrompt (default null) — backward compatible
-            var context = new InterestChangeContext("Velvet", 15, 17, InterestState.VeryIntoIt);
-
-            var result = await adapter.GetInterestChangeBeatAsync(context);
-
-            Assert.Equal("They lean closer.", result);
-
-            var body = JsonConvert.DeserializeObject<MessagesRequest>(handler.CapturedRequestBody!);
-            Assert.NotNull(body);
-            Assert.Empty(body!.System); // No system blocks when no prompt
-        }
-
-        [Fact(Skip = "Removed in #573")]
-        public async Task GetInterestChangeBeatAsync_empty_opponent_prompt_has_no_system_blocks()
-        {
-            var handler = new VoiceTestHandler
-            {
-                ResponseBody = MakeApiResponse("Generic beat.")
-            };
-            using var client = new HttpClient(handler);
-            using var adapter = new AnthropicLlmAdapter(DefaultOptions(), client);
-
-            var context = new InterestChangeContext("Test", 10, 16, InterestState.VeryIntoIt, opponentPrompt: "");
-
-            var result = await adapter.GetInterestChangeBeatAsync(context);
-
-            var body = JsonConvert.DeserializeObject<MessagesRequest>(handler.CapturedRequestBody!);
-            Assert.NotNull(body);
-            Assert.Empty(body!.System);
-        }
 
         [Fact]
         public void InterestChangeContext_stores_opponent_prompt()

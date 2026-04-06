@@ -183,19 +183,6 @@ OPTION_4
 
         // What: AC2 - GetInterestChangeBeatAsync has empty/no system blocks
         // Mutation: Would catch if interest beat incorrectly adds system blocks
-        [Fact(Skip = "Removed in #573")]
-        public async Task GetInterestChangeBeatAsync_SystemBlocks_AreEmpty()
-        {
-            var handler = new CapturingHttpHandler("Beat text");
-            using var client = new HttpClient(handler);
-            using var adapter = new AnthropicLlmAdapter(DefaultOptions(), client);
-
-            var ctx = new InterestChangeContext("Velvet", 15, 17, InterestState.VeryIntoIt);
-            await adapter.GetInterestChangeBeatAsync(ctx);
-
-            var body = JsonConvert.DeserializeObject<MessagesRequest>(handler.RequestBodies[0]);
-            Assert.Empty(body!.System);
-        }
 
         // ==============================================================================
         // AC3: Opponent response uses ONLY OpponentPrompt
@@ -474,21 +461,6 @@ WEAKNESS: HONESTY -3 (clearly deflecting)";
 
         // What: AC7 - Temperature override for InterestChangeBeat method
         // Mutation: Would catch if interest beat ignores its specific override
-        [Fact(Skip = "Removed in #573")]
-        public async Task GetInterestChangeBeatAsync_TemperatureOverride_Used()
-        {
-            var handler = new CapturingHttpHandler("Beat text");
-            using var client = new HttpClient(handler);
-            var options = DefaultOptions();
-            options.InterestChangeBeatTemperature = 0.4;
-            using var adapter = new AnthropicLlmAdapter(options, client);
-
-            var ctx = new InterestChangeContext("Velvet", 10, 12, InterestState.Interested);
-            await adapter.GetInterestChangeBeatAsync(ctx);
-
-            var body = JsonConvert.DeserializeObject<MessagesRequest>(handler.RequestBodies[0]);
-            Assert.Equal(0.4, body!.Temperature, 2);
-        }
 
         // What: AC7 - Temperature override for DeliverMessage method
         // Mutation: Would catch if delivery uses dialogue options temp instead of its own
