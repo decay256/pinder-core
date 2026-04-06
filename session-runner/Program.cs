@@ -299,9 +299,11 @@ class Program
         // ── character table ───────────────────────────────────────────────
         Console.WriteLine("## Characters");
         Console.WriteLine();
+        Console.WriteLine($"**{player1}** — *\"{sable.Bio}\"*");
+        Console.WriteLine($"**{player2}** — *\"{brick.Bio}\"*");
+        Console.WriteLine();
         Console.WriteLine($"| | **{player1}** | **{player2}** |");
         Console.WriteLine("|---|---|---|");
-        Console.WriteLine($"| Bio | \"{sable.Bio}\" | \"{brick.Bio}\" |");
         Console.WriteLine($"| Level | {p1Level} | {p2Level} |");
         foreach (var stat in new[] { StatType.Charm, StatType.Rizz, StatType.Honesty, StatType.Chaos, StatType.Wit, StatType.SelfAwareness }) {
             int p1 = sableStats.GetEffective(stat), p2 = brickStats.GetEffective(stat);
