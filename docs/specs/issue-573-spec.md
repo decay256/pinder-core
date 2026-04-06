@@ -1,78 +1,66 @@
-**Module**: docs/modules/conversation.md
+**Module**: docs/modules/llm-adapters.md
 
 ## Overview
-The `NarrativeBeat` LLM call mechanic was originally designed to generate atmospheric beats when the interest meter crossed a threshold. However, using the conversational session context for this generated character echoes rather than proper stage directions. This feature completely removes the LLM call from the NarrativeBeat flow to maintain stateless generation and eliminate voice bleed. `GameSession` will instead provide a simple UI signal (the new interest state) via `TurnResult.NarrativeBeat` without making any LLM API requests. The session runner is updated to display this as a plain state-change marker rather than quoted narrative text.
+
+This specification details the complete removal of the NarrativeBeat LLM call from the Anthropic LLM Adapter. Making an LLM call for the narrative beat polluted the conversation history and risked out-of-character behavior. `GetInterestChangeBeatAsync` must immediately return `null` without calling the LLM API. All tests validating the old behavior must be cleaned up, and a new test must be added to explicitly verify that the method returns `null` and avoids making API calls.
 
 ## Function Signatures
 
-### `Pinder.Core.Interfaces.ILlmAdapter`
-- **Action**: Remove the method `Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context);` completely.
+```csharp
+namespace Pinder.LlmAdapters.Anthropic
+{
+    public sealed class AnthropicLlmAdapter : ILlmAdapter, IDisposable
+    {
+        // Other methods omitted for brevity
 
-### `Pinder.Core.Conversation.InterestChangeContext`
-- **Action**: Delete this class completely, as it is no longer needed.
-
-### `Pinder.Core.Conversation.GameSession`
-- **Action**: In `ResolveTurnAsync`, remove the instantiation of `InterestChangeContext` and the call to `_llm.GetInterestChangeBeatAsync`.
-
-### `Pinder.LlmAdapters.SessionDocumentBuilder`
-- **Action**: Remove `BuildInterestChangeBeatPrompt` and `GetThresholdInstruction`.
-
-### `Pinder.LlmAdapters.Anthropic.AnthropicOptions`
-- **Action**: Remove `InterestChangeBeatTemperature`.
+        public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context);
+    }
+}
+```
 
 ## Input/Output Examples
 
-**GameSession Local Processing (Before)**:
+**Input:**
 ```csharp
-var interestChangeContext = new InterestChangeContext(...);
-narrativeBeat = await _llm.GetInterestChangeBeatAsync(interestChangeContext);
-// Output was an LLM-generated paragraph.
+var context = new InterestChangeContext("Velvet", 10, 11, InterestState.Interested);
+var result = await adapter.GetInterestChangeBeatAsync(context);
 ```
 
-**GameSession Local Processing (After)**:
+**Output:**
 ```csharp
-// No LLM call. Set directly to a UI signal.
-narrativeBeat = $"*** Interest is now {stateAfter} ***";
+null
 ```
-
-**Session Runner Console Output (Before)**:
-`✨ The tension in the air drops noticeably as Velvet sighs.`
-
-**Session Runner Console Output (After)**:
-`*** Interest is now Bored ***`
 
 ## Acceptance Criteria
 
-### 1. No LLM API call fires for NarrativeBeat during a session
-- The method `GetInterestChangeBeatAsync` is removed from `ILlmAdapter`.
-- Implementations of `ILlmAdapter` (`AnthropicLlmAdapter` and `NullLlmAdapter`) delete this method.
-- `GameSession.ResolveTurnAsync` no longer makes any LLM call when `stateBefore != stateAfter`.
+### 1. No LLM Call on GetInterestChangeBeatAsync
+- **Given** `GetInterestChangeBeatAsync` is called on the `AnthropicLlmAdapter`
+- **When** the method is executed
+- **Then** it immediately returns `Task.FromResult<string?>(null)`.
+- **And** no Anthropic HTTP API request is made.
 
-### 2. Session runner does not display ✨ quoted beat text
-- In `session-runner/Program.cs`, the display logic for `result.NarrativeBeat` is updated.
-- The `✨` emoji is removed. It simply prints the value of `TurnResult.NarrativeBeat`.
+### 2. Clean Up Dead Code
+- **Given** existing tests in `AnthropicLlmAdapterTests.cs` testing `GetInterestChangeBeatAsync`
+- **When** updating the test suite
+- **Then** any skipped tests (e.g., `GetInterestChangeBeatAsync_no_system_blocks`) must be permanently deleted.
+- **And** any old behavior tests (e.g., `GetInterestChangeBeatAsync_empty_response_returns_null` mocking API responses) must be removed.
 
-### 3. TurnResult.NarrativeBeat field can remain but holds no LLM-generated string
-- The property `TurnResult.NarrativeBeat` remains in the codebase (in `TurnResult`).
-- `GameSession` populates `narrativeBeat` with a simple hardcoded string indicating the new state (e.g., `"*** Interest is now " + stateAfter + " ***"`).
+### 3. Test Null Return Behavior
+- **Given** the test suite `AnthropicLlmAdapterTests.cs`
+- **When** testing the `AnthropicLlmAdapter`
+- **Then** a new test `GetInterestChangeBeatAsync_ReturnsNullWithoutCallingApi` must be added.
+- **And** the test must verify that `GetInterestChangeBeatAsync` returns `null` without invoking the `HttpClient` (using a mock handler that asserts it was not called or simply by passing a context).
 
-### 4. Clean up prompt builder methods and options
-- Remove `BuildInterestChangeBeatPrompt` and `GetThresholdInstruction` from `Pinder.LlmAdapters.SessionDocumentBuilder`.
-- Remove `InterestChangeBeatInstruction` from `Pinder.LlmAdapters.PromptTemplates` (if it exists).
-- Remove `InterestChangeBeatTemperature` and its constant `DefaultInterestChangeBeatTemperature` from `Pinder.LlmAdapters.Anthropic.AnthropicLlmAdapter` and `AnthropicOptions`.
-
-### 5. Build and tests pass
-- `InterestChangeContext.cs` is deleted.
-- All unit tests that mocked or tested `GetInterestChangeBeatAsync`, `InterestChangeContext`, or `BuildInterestChangeBeatPrompt` are safely removed.
-- All tests pass and the solution builds cleanly.
+### 4. Context Validation
+- **Given** `GetInterestChangeBeatAsync` is called with a `null` context
+- **When** the method is executed
+- **Then** it must throw an `ArgumentNullException`.
 
 ## Edge Cases
-- **No State Change**: If the interest roll does not result in a state change (e.g., remaining in `Interested`), `TurnResult.NarrativeBeat` must remain `null`. The session runner must not print anything.
-- **Null Safety**: The session runner must still check `if (result.NarrativeBeat != null)` before printing to avoid empty lines.
+- **Missing or Disconnected HttpClient**: Since the method immediately returns `null` before utilizing the HTTP client, it should safely handle scenarios where the client might be disposed or disconnected without throwing `ObjectDisposedException` or similar networking exceptions.
 
 ## Error Conditions
-- N/A — Removing this network call eliminates the possibility of timeouts or serialization errors during interest state transitions.
+- Passing `null` to `GetInterestChangeBeatAsync` throws `ArgumentNullException(nameof(context))`.
 
 ## Dependencies
-- Modifying `ILlmAdapter` requires updating `Pinder.LlmAdapters/Anthropic/AnthropicLlmAdapter.cs`, `Pinder.Core/Conversation/NullLlmAdapter.cs`, and `Pinder.Core/Conversation/GameSession.cs`.
-- Requires modifying `session-runner/Program.cs` for output formatting.
+- `Pinder.Core.Conversation.InterestChangeContext`
