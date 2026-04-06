@@ -610,7 +610,8 @@ namespace Pinder.Core.Conversation
                 playerName: _player.DisplayName,
                 opponentName: _opponent.DisplayName,
                 currentTurn: _turnNumber,
-                shadowThresholds: _currentShadowThresholds);
+                shadowThresholds: _currentShadowThresholds,
+                isNat20: rollResult.IsNatTwenty);
 
             string deliveredMessage = await _llm.DeliverMessageAsync(deliveryContext).ConfigureAwait(false);
 

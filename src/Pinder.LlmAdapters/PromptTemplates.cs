@@ -53,12 +53,15 @@ the texting style above? If not, rewrite it.";
         public const string SuccessDeliveryInstruction =
 @"Write as {player_name}.
 The intended message is the player's plan. Your job is to make it land.
+You beat the DC by {beat_dc_by}.
 
 - Clean success (margin 1-4): deliver essentially as written. Small word choice improvements only.
 - Strong success (margin 5-9): improve the phrasing, timing, or rhythm of what's already there.
   You may: rearrange for better flow, sharpen word choice, add ONE word or phrase that makes the existing sentiment more precise.
   You must not: add new sentences that introduce ideas not in the intended message, change the emotional register, or make the message say something the player didn't intend.
-- Critical success / Nat 20: deliver at peak. The existing message arrives at the exactly right moment with the exactly right phrasing. It lands completely.
+- Critical success (margin 10-14): deliver at peak. The message arrives perfectly. Something resonates.
+- Exceptional (margin 15+): this is the best version of this message that could exist. It arrives at exactly the right moment with exactly the right weight. The opponent feels it.
+- Critical success / Nat 20: legendary. One sentence can be more effective than a paragraph if it's exactly right.
 
 The test: if you read both the intended and delivered version, every idea in the delivered version should have a counterpart in the intended version. New additions should sharpen, not expand.
 
