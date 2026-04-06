@@ -163,6 +163,15 @@ namespace Pinder.SessionRunner
         /// <summary>
         /// Returns a summary of the reward provided by a given combo.
         /// </summary>
+        public static string FormatMessageDiff(string? intended, string? delivered)
+        {
+            string d = delivered ?? "";
+            if (string.IsNullOrWhiteSpace(intended) || intended.Trim() == "...")
+                return d;
+            if (string.Equals(intended.Trim(), d.Trim(), StringComparison.OrdinalIgnoreCase))
+                return d;
+            return $"*Intended: \"{intended}\"*\n*Delivered:*\n{d}";
+        }
         public static string GetComboRewardSummary(string comboName)
         {
             switch (comboName)
