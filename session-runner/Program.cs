@@ -497,7 +497,7 @@ class Program
             interest = newInterest;
             momentum = result.StateAfter.MomentumStreak;
 
-            if (result.NarrativeBeat != null) { Console.WriteLine(); Console.WriteLine($"✨ {result.NarrativeBeat}"); }
+            if (result.NarrativeBeat != null) { Console.WriteLine(); Console.WriteLine($"{result.NarrativeBeat}"); }
             if (result.IsGameOver) { finalOutcome = result.Outcome; break; }
         }
 

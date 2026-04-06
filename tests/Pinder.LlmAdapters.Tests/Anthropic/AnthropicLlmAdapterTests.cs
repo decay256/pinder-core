@@ -600,7 +600,7 @@ OPTION_4
             Assert.Equal("ephemeral", body.System[0].CacheControl?.Type);
         }
 
-        [Fact]
+        [Fact(Skip = "Removed in #573")]
         public async Task GetInterestChangeBeatAsync_no_system_blocks()
         {
             var handler = new FakeHttpHandler

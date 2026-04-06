@@ -628,16 +628,7 @@ namespace Pinder.Core.Conversation
             string? narrativeBeat = null;
             if (stateBefore != stateAfter)
             {
-                var interestChangeContext = new InterestChangeContext(
-                    opponentName: _opponent.DisplayName,
-                    interestBefore: interestBefore,
-                    interestAfter: interestAfter,
-                    newState: stateAfter,
-                    opponentPrompt: _opponent.AssembledSystemPrompt,
-                    conversationHistory: _history.AsReadOnly(),
-                    playerName: _player.DisplayName);
-
-                narrativeBeat = await _llm.GetInterestChangeBeatAsync(interestChangeContext).ConfigureAwait(false);
+                narrativeBeat = $"*** Interest state changed to {stateAfter} ***";
             }
 
             // 10. Compute response delay
