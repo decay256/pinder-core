@@ -29,7 +29,7 @@ namespace Pinder.LlmAdapters.Anthropic
         [JsonProperty("output_tokens")] public int OutputTokens { get; set; }
     }
 
-    public sealed class AnthropicLlmAdapter : ILlmAdapter, IDisposable
+    public sealed class AnthropicLlmAdapter : IStatefulLlmAdapter, IDisposable
     {
         // Default temperatures per method (used when AnthropicOptions override is null)
         private const double DefaultDialogueOptionsTemperature = 0.9;
@@ -80,6 +80,10 @@ namespace Pinder.LlmAdapters.Anthropic
         private readonly AnthropicOptions _options;
         private readonly List<CallSummaryStat> _callStats = new List<CallSummaryStat>();
 
+        // Stateful opponent session (#536)
+        private ConversationSession? _opponentSession;
+        private string? _opponentSystemPrompt;
+
         /// <summary>
         /// Creates adapter with internally-owned AnthropicClient.
         /// The adapter owns the client's lifecycle and disposes it.
@@ -101,11 +105,15 @@ namespace Pinder.LlmAdapters.Anthropic
             _client = new AnthropicClient(options.ApiKey, httpClient);
         }
 
-        /// <summary>
-        /// Whether a stateful conversation session is currently active.
-        /// When true, all ILlmAdapter calls route through the accumulated session.
-        /// When false, behavior is identical to current stateless mode.
-        /// </summary>
+        /// <inheritdoc />
+        public void StartOpponentSession(string opponentSystemPrompt)
+        {
+            _opponentSystemPrompt = opponentSystemPrompt ?? throw new ArgumentNullException(nameof(opponentSystemPrompt));
+            _opponentSession = new ConversationSession();
+        }
+
+        /// <inheritdoc />
+        public bool HasOpponentSession => _opponentSession != null;
 
         /// <inheritdoc />
         public async Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context)
@@ -159,12 +167,36 @@ namespace Pinder.LlmAdapters.Anthropic
             var fullOpponentPrompt = SessionSystemPromptBuilder.BuildOpponent(context.OpponentPrompt, _options.GameDefinition);
             var systemBlocks = CacheBlockBuilder.BuildOpponentOnlySystemBlocks(fullOpponentPrompt);
 
-            var request = BuildRequest(systemBlocks, userContent,
-                _options.OpponentResponseTemperature ?? DefaultOpponentResponseTemperature);
+            MessagesRequest request;
+            if (_opponentSession != null)
+            {
+                // Stateful path: append user message to persistent session, build request from accumulated history
+                _opponentSession.AppendUser(userContent);
+                request = _opponentSession.BuildRequest(
+                    _options.Model,
+                    _options.MaxTokens,
+                    _options.OpponentResponseTemperature ?? DefaultOpponentResponseTemperature,
+                    systemBlocks);
+            }
+            else
+            {
+                // Stateless fallback: single-message request as before
+                request = BuildRequest(systemBlocks, userContent,
+                    _options.OpponentResponseTemperature ?? DefaultOpponentResponseTemperature);
+            }
 
             var response = await _client.SendMessagesAsync(request).ConfigureAwait(false);
             LogDebug("opponent", context.CurrentTurn, request, response);
-            return ParseOpponentResponse(response.GetText());
+
+            var responseText = response.GetText();
+
+            // Stateful path: append assistant response to persistent session
+            if (_opponentSession != null)
+            {
+                _opponentSession.AppendAssistant(responseText);
+            }
+
+            return ParseOpponentResponse(responseText);
         }
 
         /// <inheritdoc />

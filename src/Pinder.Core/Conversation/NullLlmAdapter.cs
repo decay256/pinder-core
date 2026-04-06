@@ -9,8 +9,17 @@ namespace Pinder.Core.Conversation
     /// A no-op LLM adapter that returns hardcoded placeholder responses.
     /// Used for unit testing and standalone runs without an actual LLM provider.
     /// </summary>
-    public sealed class NullLlmAdapter : ILlmAdapter
+    public sealed class NullLlmAdapter : ILlmAdapter, IStatefulLlmAdapter
     {
+        /// <inheritdoc />
+        public void StartOpponentSession(string opponentSystemPrompt)
+        {
+            // No-op: NullLlmAdapter does not maintain stateful sessions.
+        }
+
+        /// <inheritdoc />
+        public bool HasOpponentSession => false;
+
         /// <summary>
         /// Returns 4 generic dialogue options, one per stat family
         /// (Charm, Honesty, Wit, Chaos).

@@ -167,6 +167,12 @@ namespace Pinder.Core.Conversation
             _saOverthinkingTriggered = false;
             _sessionOpener = null;
 
+            // Wire up stateful opponent session (#536)
+            if (_llm is IStatefulLlmAdapter stateful)
+            {
+                stateful.StartOpponentSession(_opponent.AssembledSystemPrompt);
+            }
+
         }
 
         /// <summary>
