@@ -372,6 +372,19 @@ class Program
         }
 
         int interest = 10;
+        // ── Matchup Analysis ──────────────────────────────────────────────
+        Console.Error.WriteLine("Generating matchup analysis...");
+        var analysisOptions = new AnthropicOptions {
+            ApiKey = apiKey,
+            Model = Environment.GetEnvironmentVariable("PLAYER_AGENT_MODEL") ?? "claude-sonnet-4-20250514"
+        };
+        var analysis = await MatchupAnalyzer.AnalyzeMatchupAsync(analysisOptions, sable, brick);
+        if (!string.IsNullOrWhiteSpace(analysis))
+        {
+            Console.WriteLine(analysis);
+            Console.WriteLine();
+        }
+
         int momentum = 0;
         Console.WriteLine("## Session State");
         Console.WriteLine();
