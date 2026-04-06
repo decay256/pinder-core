@@ -167,13 +167,6 @@ namespace Pinder.Core.Conversation
             _saOverthinkingTriggered = false;
             _sessionOpener = null;
 
-            // Stateful conversation session (#542)
-            // If the adapter supports stateful mode, start a conversation with both character profiles.
-            if (_llm is IStatefulLlmAdapter stateful)
-            {
-                var systemPrompt = _player.AssembledSystemPrompt + "\n\n---\n\n" + _opponent.AssembledSystemPrompt;
-                stateful.StartConversation(systemPrompt);
-            }
         }
 
         /// <summary>

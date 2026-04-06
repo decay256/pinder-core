@@ -17,7 +17,7 @@ namespace Pinder.LlmAdapters.Anthropic
     /// using AnthropicClient for HTTP transport, SessionDocumentBuilder for prompt
     /// formatting, and CacheBlockBuilder for prompt caching.
     /// </summary>
-    public sealed class AnthropicLlmAdapter : IStatefulLlmAdapter, IDisposable
+    public sealed class AnthropicLlmAdapter : ILlmAdapter, IDisposable
     {
         // Default temperatures per method (used when AnthropicOptions override is null)
         private const double DefaultDialogueOptionsTemperature = 0.9;
@@ -66,7 +66,6 @@ namespace Pinder.LlmAdapters.Anthropic
 
         private readonly AnthropicClient _client;
         private readonly AnthropicOptions _options;
-        private ConversationSession? _session;
 
         /// <summary>
         /// Creates adapter with internally-owned AnthropicClient.
@@ -94,25 +93,6 @@ namespace Pinder.LlmAdapters.Anthropic
         /// When true, all ILlmAdapter calls route through the accumulated session.
         /// When false, behavior is identical to current stateless mode.
         /// </summary>
-        public bool HasActiveConversation => _session != null;
-
-        /// <summary>
-        /// Start a stateful conversation session with the given system prompt.
-        /// After calling this, all ILlmAdapter method calls will append to and
-        /// read from the accumulated message history instead of building
-        /// fresh single-message requests.
-        ///
-        /// Calling this when a session is already active replaces it (no error).
-        /// </summary>
-        /// <param name="systemPrompt">
-        /// Full system prompt (both character profiles, game vision, etc.).
-        /// Must not be null or empty.
-        /// </param>
-        /// <exception cref="ArgumentException">If systemPrompt is null or whitespace.</exception>
-        public void StartConversation(string systemPrompt)
-        {
-            _session = new ConversationSession(systemPrompt);
-        }
 
         /// <inheritdoc />
         public async Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context)
@@ -122,17 +102,6 @@ namespace Pinder.LlmAdapters.Anthropic
             // Opponent profile is passed as informational context in the user message
             var userContent = SessionDocumentBuilder.BuildDialogueOptionsPrompt(context);
 
-            if (_session != null)
-            {
-                _session.AppendUser(userContent);
-                var statefulRequest = _session.BuildRequest(
-                    _options.Model, _options.MaxTokens,
-                    _options.DialogueOptionsTemperature ?? DefaultDialogueOptionsTemperature);
-                var statefulResponse = await _client.SendMessagesAsync(statefulRequest).ConfigureAwait(false);
-                var statefulText = statefulResponse.GetText();
-                _session.AppendAssistant(statefulText);
-                return ParseDialogueOptions(statefulText);
-            }
 
             // Only the player's identity in system — prevents voice bleed from opponent's register
             var fullPlayerPrompt = SessionSystemPromptBuilder.BuildPlayer(context.PlayerPrompt, _options.GameDefinition);
@@ -152,17 +121,6 @@ namespace Pinder.LlmAdapters.Anthropic
 
             var userContent = SessionDocumentBuilder.BuildDeliveryPrompt(context);
 
-            if (_session != null)
-            {
-                _session.AppendUser(userContent);
-                var statefulRequest = _session.BuildRequest(
-                    _options.Model, _options.MaxTokens,
-                    _options.DeliveryTemperature ?? DefaultDeliveryTemperature);
-                var statefulResponse = await _client.SendMessagesAsync(statefulRequest).ConfigureAwait(false);
-                var statefulText = statefulResponse.GetText();
-                _session.AppendAssistant(statefulText);
-                return statefulText;
-            }
 
             var fullPlayerPrompt = SessionSystemPromptBuilder.BuildPlayer(context.PlayerPrompt, _options.GameDefinition);
             var systemBlocks = CacheBlockBuilder.BuildPlayerOnlySystemBlocks(fullPlayerPrompt);
@@ -181,17 +139,6 @@ namespace Pinder.LlmAdapters.Anthropic
 
             var userContent = SessionDocumentBuilder.BuildOpponentPrompt(context);
 
-            if (_session != null)
-            {
-                _session.AppendUser(userContent);
-                var statefulRequest = _session.BuildRequest(
-                    _options.Model, _options.MaxTokens,
-                    _options.OpponentResponseTemperature ?? DefaultOpponentResponseTemperature);
-                var statefulResponse = await _client.SendMessagesAsync(statefulRequest).ConfigureAwait(false);
-                var statefulText = statefulResponse.GetText();
-                _session.AppendAssistant(statefulText);
-                return ParseOpponentResponse(statefulText);
-            }
 
             // Per §3.5: only opponent prompt in system (opponent plays themselves)
             var fullOpponentPrompt = SessionSystemPromptBuilder.BuildOpponent(context.OpponentPrompt, _options.GameDefinition);
