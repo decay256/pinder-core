@@ -6,6 +6,32 @@ using YamlDotNet.Serialization.NamingConventions;
 namespace Pinder.LlmAdapters
 {
     /// <summary>
+    /// Configurable rules for how successful deliveries are written at each margin tier.
+    /// </summary>
+    public sealed class DeliveryRules
+    {
+        public string Clean { get; }
+        public string Strong { get; }
+        public string Critical { get; }
+        public string Exceptional { get; }
+        public string Test { get; }
+        public string RegisterInstruction { get; }
+        public string MediumRule { get; }
+
+        public DeliveryRules(string clean, string strong, string critical, string exceptional,
+            string test, string registerInstruction, string mediumRule)
+        {
+            Clean = clean ?? "";
+            Strong = strong ?? "";
+            Critical = critical ?? "";
+            Exceptional = exceptional ?? "";
+            Test = test ?? "";
+            RegisterInstruction = registerInstruction ?? "";
+            MediumRule = mediumRule ?? "";
+        }
+    }
+
+    /// <summary>
     /// Data carrier for game-level creative direction.
     /// Parsed from YAML or provided via hardcoded defaults.
     /// </summary>
@@ -32,6 +58,9 @@ namespace Pinder.LlmAdapters
         /// <summary>Writing style rules: texting register, brevity, etc.</summary>
         public string WritingRules { get; }
 
+        /// <summary>Configurable delivery prompt rules, or null for hardcoded defaults.</summary>
+        public DeliveryRules DeliveryRules { get; }
+
         public GameDefinition(
             string name,
             string vision,
@@ -39,7 +68,8 @@ namespace Pinder.LlmAdapters
             string playerRoleDescription,
             string opponentRoleDescription,
             string metaContract,
-            string writingRules)
+            string writingRules,
+            DeliveryRules deliveryRules = null)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Vision = vision ?? throw new ArgumentNullException(nameof(vision));
@@ -48,6 +78,7 @@ namespace Pinder.LlmAdapters
             OpponentRoleDescription = opponentRoleDescription ?? throw new ArgumentNullException(nameof(opponentRoleDescription));
             MetaContract = metaContract ?? throw new ArgumentNullException(nameof(metaContract));
             WritingRules = writingRules ?? throw new ArgumentNullException(nameof(writingRules));
+            DeliveryRules = deliveryRules;
         }
 
         /// <summary>
@@ -86,6 +117,25 @@ namespace Pinder.LlmAdapters
                 return value.ToString()!;
             }
 
+            DeliveryRules deliveryRules = null;
+            if (parsed.TryGetValue("delivery_rules", out var drObj) && drObj is Dictionary<object, object> drDict)
+            {
+                string DrGet(string key)
+                {
+                    if (drDict.TryGetValue(key, out var v) && v != null)
+                        return v.ToString();
+                    return "";
+                }
+                deliveryRules = new DeliveryRules(
+                    clean: DrGet("clean"),
+                    strong: DrGet("strong"),
+                    critical: DrGet("critical"),
+                    exceptional: DrGet("exceptional"),
+                    test: DrGet("test"),
+                    registerInstruction: DrGet("register_instruction"),
+                    mediumRule: DrGet("medium_rule"));
+            }
+
             return new GameDefinition(
                 name: GetRequired("name"),
                 vision: GetRequired("vision"),
@@ -93,7 +143,8 @@ namespace Pinder.LlmAdapters
                 playerRoleDescription: GetRequired("player_role_description"),
                 opponentRoleDescription: GetRequired("opponent_role_description"),
                 metaContract: GetRequired("meta_contract"),
-                writingRules: GetRequired("writing_rules")
+                writingRules: GetRequired("writing_rules"),
+                deliveryRules: deliveryRules
             );
         }
 
@@ -172,6 +223,16 @@ Never add ideas the player didn't choose. Success delivery improves
 phrasing — it does not introduce new topics, jokes, or emotional content.
 Never resolve the date before Interest reaches 25 mechanically.
 Maintain two distinct character voices throughout the entire conversation.",
+            deliveryRules: new DeliveryRules(
+                clean: "Deliver essentially as written. Small word choice improvements only.",
+                strong: "Improve the phrasing, timing, or rhythm of what's already there.\n" +
+                    "You may: rearrange for better flow, sharpen word choice, add ONE word or phrase that makes the existing sentiment more precise.\n" +
+                    "You must not: add new sentences that introduce ideas not in the intended message, change the emotional register, or make the message say something the player didn't intend.",
+                critical: "Deliver at peak. The message arrives perfectly. Something resonates.",
+                exceptional: "This is the best version of this message that could exist. It arrives at exactly the right moment with exactly the right weight. The opponent feels it.",
+                test: "The test: every idea in the delivered version should have a counterpart in the intended version. New additions should sharpen, not expand.",
+                registerInstruction: "Stay in character. Match the texting register from the character profile above. Do not change the character's capitalization style.",
+                mediumRule: "This is a text message on a phone screen, not a monologue. No internal stage directions, no narration of emotional state, no self-commentary mid-message."),
             writingRules: @"All dialogue is texting register. Short, informal, platform-appropriate.
 Message length: typically 1-3 sentences for player options, 1-4 sentences
 for opponent responses. Brevity is a feature.

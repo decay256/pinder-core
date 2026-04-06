@@ -141,7 +141,8 @@ namespace Pinder.LlmAdapters.Anthropic
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
-            var userContent = SessionDocumentBuilder.BuildDeliveryPrompt(context);
+            var deliveryRules = _options.GameDefinition?.DeliveryRules;
+            var userContent = SessionDocumentBuilder.BuildDeliveryPrompt(context, deliveryRules: deliveryRules);
 
 
             var fullPlayerPrompt = SessionSystemPromptBuilder.BuildPlayer(context.PlayerPrompt, _options.GameDefinition);
@@ -209,35 +210,154 @@ namespace Pinder.LlmAdapters.Anthropic
             return Task.FromResult<string?>(null);
         }
 
-        /// <summary>Disposes the internal AnthropicClient.</summary>
+        private static readonly object _debugLock = new object();
+        private bool _debugHeaderWritten;
+
+        /// <summary>Appends a markdown section for one LLM call to the debug transcript file.</summary>
         private void LogDebug(string callType, int turn, MessagesRequest request, MessagesResponse response)
         {
             if (string.IsNullOrEmpty(_options.DebugDirectory)) return;
 
             try
             {
-                Directory.CreateDirectory(_options.DebugDirectory);
-
-                string reqFile = Path.Combine(_options.DebugDirectory, $"turn-{turn:D2}-{callType}-request.json");
-                string resFile = Path.Combine(_options.DebugDirectory, $"turn-{turn:D2}-{callType}-response.json");
-
-                File.WriteAllText(reqFile, JsonConvert.SerializeObject(request, Formatting.Indented));
-                File.WriteAllText(resFile, JsonConvert.SerializeObject(response, Formatting.Indented));
-
+                // Track token stats regardless of file write success
                 if (response.Usage != null)
                 {
-                    var stat = new CallSummaryStat {
+                    _callStats.Add(new CallSummaryStat
+                    {
                         Turn = turn,
                         Type = callType,
                         CacheCreationInputTokens = response.Usage.CacheCreationInputTokens,
                         CacheReadInputTokens = response.Usage.CacheReadInputTokens,
                         InputTokens = response.Usage.InputTokens,
                         OutputTokens = response.Usage.OutputTokens
-                    };
-                    _callStats.Add(stat);
+                    });
+                }
 
-                    var summaryFile = Path.Combine(_options.DebugDirectory, "session-summary.json");
-                    File.WriteAllText(summaryFile, JsonConvert.SerializeObject(new { calls = _callStats, totals = new { cache_creation_input_tokens = _callStats.Sum(s => s.CacheCreationInputTokens), cache_read_input_tokens = _callStats.Sum(s => s.CacheReadInputTokens), input_tokens = _callStats.Sum(s => s.InputTokens), output_tokens = _callStats.Sum(s => s.OutputTokens) } }, Formatting.Indented));
+                var sb = new System.Text.StringBuilder();
+                string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss") + " UTC";
+                string callLabel = callType.ToUpperInvariant();
+
+                // Turn header: emit before the first call of each turn (options)
+                if (string.Equals(callType, "options", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (turn > 1) sb.AppendLine();
+                    sb.AppendLine($"## Turn {turn}");
+                    sb.AppendLine();
+                }
+
+                // System prompt snippet (first 200 chars of first system block)
+                string systemSnippet = "";
+                if (request.System != null && request.System.Length > 0)
+                {
+                    string full = request.System[0].Text ?? "";
+                    systemSnippet = full.Length > 200 ? full.Substring(0, 200) + "..." : full;
+                }
+
+                // REQUEST section
+                sb.AppendLine($"### {callLabel} REQUEST [{timestamp}]");
+                if (!string.IsNullOrEmpty(systemSnippet))
+                    sb.AppendLine($"**System (first 200 chars):** {systemSnippet}");
+                sb.AppendLine();
+
+                if (string.Equals(callType, "opponent", StringComparison.OrdinalIgnoreCase))
+                {
+                    // Opponent: show message count + only the last user message
+                    int msgCount = request.Messages != null ? request.Messages.Length : 0;
+                    sb.AppendLine($"**Context window:** {msgCount} messages accumulated");
+                    sb.AppendLine();
+
+                    string lastUserMsg = "";
+                    if (request.Messages != null)
+                    {
+                        for (int i = request.Messages.Length - 1; i >= 0; i--)
+                        {
+                            if (string.Equals(request.Messages[i].Role, "user", StringComparison.OrdinalIgnoreCase))
+                            {
+                                lastUserMsg = request.Messages[i].Content;
+                                break;
+                            }
+                        }
+                    }
+                    sb.AppendLine("**New user message (this turn):**");
+                    sb.AppendLine("```");
+                    sb.AppendLine(lastUserMsg);
+                    sb.AppendLine("```");
+                }
+                else
+                {
+                    // Options/Delivery: show full user message
+                    string userMsg = "";
+                    if (request.Messages != null && request.Messages.Length > 0)
+                        userMsg = request.Messages[0].Content ?? "";
+                    sb.AppendLine("**User message:**");
+                    sb.AppendLine("```");
+                    sb.AppendLine(userMsg);
+                    sb.AppendLine("```");
+                }
+                sb.AppendLine();
+
+                // RESPONSE section
+                string responseTimestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss") + " UTC";
+                sb.AppendLine($"### {callLabel} RESPONSE [{responseTimestamp}]");
+                sb.AppendLine("```");
+                sb.AppendLine(response.GetText());
+                sb.AppendLine("```");
+                sb.AppendLine();
+                sb.AppendLine("---");
+                sb.AppendLine();
+
+                lock (_debugLock)
+                {
+                    // Ensure parent directory exists
+                    string dir = Path.GetDirectoryName(_options.DebugDirectory);
+                    if (!string.IsNullOrEmpty(dir))
+                        Directory.CreateDirectory(dir);
+
+                    // Write header on first append
+                    if (!_debugHeaderWritten)
+                    {
+                        File.WriteAllText(_options.DebugDirectory, $"# Session Debug Transcript\n\n---\n\n");
+                        _debugHeaderWritten = true;
+                    }
+
+                    File.AppendAllText(_options.DebugDirectory, sb.ToString());
+                }
+            }
+            catch
+            {
+                // Ignore logging errors
+            }
+        }
+
+        /// <summary>Writes the token summary table to the end of the debug transcript.</summary>
+        public void WriteDebugSummary()
+        {
+            if (string.IsNullOrEmpty(_options.DebugDirectory)) return;
+            if (_callStats.Count == 0) return;
+
+            try
+            {
+                var sb = new System.Text.StringBuilder();
+                sb.AppendLine("## Token Summary");
+                sb.AppendLine("| Turn | Call | Input | Output | Cache Read | Cache Write |");
+                sb.AppendLine("|------|------|-------|--------|------------|-------------|");
+
+                foreach (var stat in _callStats)
+                {
+                    sb.AppendLine($"| {stat.Turn} | {stat.Type} | {stat.InputTokens} | {stat.OutputTokens} | {stat.CacheReadInputTokens} | {stat.CacheCreationInputTokens} |");
+                }
+
+                int totalInput = _callStats.Sum(s => s.InputTokens);
+                int totalOutput = _callStats.Sum(s => s.OutputTokens);
+                int totalCacheRead = _callStats.Sum(s => s.CacheReadInputTokens);
+                int totalCacheWrite = _callStats.Sum(s => s.CacheCreationInputTokens);
+                sb.AppendLine($"| **Total** | | **{totalInput}** | **{totalOutput}** | **{totalCacheRead}** | **{totalCacheWrite}** |");
+                sb.AppendLine();
+
+                lock (_debugLock)
+                {
+                    File.AppendAllText(_options.DebugDirectory, sb.ToString());
                 }
             }
             catch

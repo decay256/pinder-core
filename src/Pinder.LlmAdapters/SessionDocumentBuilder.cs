@@ -118,7 +118,8 @@ namespace Pinder.LlmAdapters
         /// </param>
         public static string BuildDeliveryPrompt(
             DeliveryContext context,
-            RollContextBuilder? rollContextBuilder = null)
+            RollContextBuilder? rollContextBuilder = null,
+            DeliveryRules? deliveryRules = null)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
@@ -166,7 +167,7 @@ namespace Pinder.LlmAdapters
                 string nat20Str = context.IsNat20 ? " (NAT 20)" : "";
                 string beatDcByStr = $"{context.BeatDcBy}{nat20Str}";
                 sb.AppendLine($"Stat: {context.ChosenOption.Stat.ToString().ToUpperInvariant()} | Beat DC by {beatDcByStr}");
-                sb.Append(PromptTemplates.SuccessDeliveryInstruction
+                sb.Append(PromptTemplates.BuildSuccessDeliveryInstruction(deliveryRules)
                     .Replace("{player_name}", playerName)
                     .Replace("{beat_dc_by}", beatDcByStr));
             }

@@ -1,0 +1,20 @@
+--- session-runner/PlaytestFormatter.cs
++++ session-runner/PlaytestFormatter.cs
+@@ -194,11 +194,15 @@
+ 
+-        public static string FormatMessageDiff(string? intended, string? delivered)
++        public static string FormatMessageDiff(string? intended, string? delivered)
+         {
++            string d = delivered ?? "";
+             if (string.IsNullOrWhiteSpace(intended) || intended.Trim() == "...")
+-                return delivered;
++                return d;
+                 
+-            if (string.Equals(intended.Trim(), delivered.Trim(), StringComparison.OrdinalIgnoreCase))
+-                return delivered;
++            if (string.Equals(intended.Trim(), d.Trim(), StringComparison.OrdinalIgnoreCase))
++                return d;
+                 
+-            return $"*Intended: \"{intended}\"*\n*Delivered:*\n{delivered}";
++            return $"*Intended: \"{intended}\"*\n*Delivered:*\n{d}";
+         }

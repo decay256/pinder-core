@@ -348,7 +348,7 @@ class Program
         string? debugDir = null;
         if (isDebug && playtestDir != null)
         {
-            debugDir = Path.Combine(playtestDir, $"session-{sessionNumber:D3}-debug");
+            debugDir = Path.Combine(playtestDir, $"session-{sessionNumber:D3}-debug.md");
         }
 
         var llm = new AnthropicLlmAdapter(new AnthropicOptions {
@@ -617,6 +617,7 @@ class Program
         }
         Console.WriteLine();
 
+        llm.WriteDebugSummary();
         llm.Dispose();
 
         Console.SetOut(tee._console);
