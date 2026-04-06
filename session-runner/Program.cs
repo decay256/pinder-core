@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Pinder.Core.Characters;
 using Pinder.Core.Conversation;
@@ -13,6 +14,7 @@ using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
 using Pinder.Core.Traps;
 using Pinder.Core.Data;
+using Pinder.LlmAdapters;
 using Pinder.LlmAdapters.Anthropic;
 using Pinder.SessionRunner;
 
@@ -298,9 +300,11 @@ class Program
         // ── character table ───────────────────────────────────────────────
         Console.WriteLine("## Characters");
         Console.WriteLine();
+        Console.WriteLine($"***{player1} bio:*** *\"{sable.Bio}\"*");
+        Console.WriteLine($"***{player2} bio:*** *\"{brick.Bio}\"*");
+        Console.WriteLine();
         Console.WriteLine($"| | **{player1}** | **{player2}** |");
         Console.WriteLine("|---|---|---|");
-        Console.WriteLine($"| Bio | \"{sable.Bio}\" | \"{brick.Bio}\" |");
         Console.WriteLine($"| Level | {p1Level} | {p2Level} |");
         foreach (var stat in new[] { StatType.Charm, StatType.Rizz, StatType.Honesty, StatType.Chaos, StatType.Wit, StatType.SelfAwareness }) {
             int p1 = sableStats.GetEffective(stat), p2 = brickStats.GetEffective(stat);
@@ -325,8 +329,24 @@ class Program
         Console.WriteLine();
 
         // ── LLM + session setup ───────────────────────────────────────────
+        // Load game-definition.yaml if present
+        string? gameDefPath = DataFileLocator.FindDataFile(AppContext.BaseDirectory, Path.Combine("data", "game-definition.yaml"));
+        GameDefinition? gameDef = null;
+        if (gameDefPath != null)
+        {
+            try
+            {
+                gameDef = GameDefinition.LoadFrom(File.ReadAllText(gameDefPath));
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"[WARN] Failed to load game-definition.yaml: {ex.Message}");
+            }
+        }
+
         var llm = new AnthropicLlmAdapter(new AnthropicOptions {
-            ApiKey = apiKey, Model = "claude-sonnet-4-20250514", MaxTokens = 1024, Temperature = 0.9
+            ApiKey = apiKey, Model = "claude-sonnet-4-20250514", MaxTokens = 1024, Temperature = 0.9,
+            GameDefinition = gameDef
         });
 
         // Load real trap definitions — fallback to NullTrapRegistry if file missing/corrupt
@@ -355,6 +375,19 @@ class Program
         }
 
         int interest = 10;
+        // ── Matchup Analysis ──────────────────────────────────────────────
+        Console.Error.WriteLine("Generating matchup analysis...");
+        var analysisOptions = new AnthropicOptions {
+            ApiKey = apiKey,
+            Model = Environment.GetEnvironmentVariable("PLAYER_AGENT_MODEL") ?? "claude-sonnet-4-20250514"
+        };
+        var analysis = await MatchupAnalyzer.AnalyzeMatchupAsync(analysisOptions, sable, brick);
+        if (!string.IsNullOrWhiteSpace(analysis))
+        {
+            Console.WriteLine(analysis);
+            Console.WriteLine();
+        }
+
         int momentum = 0;
         Console.WriteLine("## Session State");
         Console.WriteLine();
@@ -411,14 +444,20 @@ class Program
                 int dc = brickStats.GetDefenceDC(opt.Stat);
                 int need = dc - mod;
                 int pct = Math.Max(0, Math.Min(100, (21-need)*5));
-                string riskColor = need <= 5 ? "[Safe]" : need <= 10 ? "[Medium]" : need <= 15 ? "[Hard]" : "[Bold]";
+                string riskColor = RiskLabel(need);
                 var badges = new System.Collections.Generic.List<string>();
                 if (opt.HasTellBonus)               badges.Add("Tell +2");
-                if (opt.ComboName != null)           badges.Add($"Combo: {opt.ComboName}");
+                if (opt.ComboName != null)           badges.Add($"⭐ Combo: {opt.ComboName} ({PlaytestFormatter.GetComboRewardSummary(opt.ComboName)})");
                 if (opt.CallbackTurnNumber.HasValue) badges.Add("Callback");
                 if (opt.HasWeaknessWindow)           badges.Add("Window");
                 string badgeStr = badges.Count > 0 ? " | " + string.Join(", ", badges) : "";
                 Console.WriteLine($"**{letters[i]})** {StatLabel(opt.Stat)} {mod:+#;-#;0} | {pct}% {riskColor}{badgeStr}");
+                
+                if (opt.ComboName != null)
+                {
+                    Console.WriteLine($"> *{opt.ComboName}: {PlaytestFormatter.GetComboSequenceDescription(opt.ComboName)}*");
+                }
+
                 if (!string.IsNullOrEmpty(opt.IntendedText) && opt.IntendedText != "...")
                     Console.WriteLine($"> \"{opt.IntendedText}\"");
                 Console.WriteLine();
@@ -464,12 +503,37 @@ class Program
             Console.WriteLine($"**🎲 Roll:** d20({roll.UsedDieRoll}) + {StatLabel(chosen.Stat)}({rollMod}) = **{roll.FinalTotal}** vs DC {roll.DC} → **Miss: {(roll.FinalTotal>=roll.DC ? $"−{roll.FinalTotal-roll.DC}" : $"+{roll.DC-roll.FinalTotal}")} → {rollResult}**");
             Console.WriteLine();
 
-            if (result.ComboTriggered != null) Console.WriteLine($"> *⭐ {result.ComboTriggered} combo fires!*");
+            if (result.ComboTriggered != null)
+            {
+                Console.WriteLine($"> *⭐ {result.ComboTriggered} combo fires!*");
+                Console.WriteLine($"> *{PlaytestFormatter.GetComboSequenceDescription(result.ComboTriggered)}*");
+            }
             if (result.TellReadBonus > 0)      Console.WriteLine($"> *📖 Tell read! +{result.TellReadBonus}*");
             Console.WriteLine();
 
             Console.WriteLine($"**📨 {player1} sends:**");
-            PrintQuoted(result.DeliveredMessage);
+            bool isSuccess = roll.Tier == FailureTier.None || roll.IsNatTwenty;
+            bool isStrongSuccess = isSuccess && (roll.FinalTotal - roll.DC >= 5 || roll.IsNatTwenty);
+            bool isFail = roll.Tier != FailureTier.None || roll.IsNatOne;
+            
+            if (isStrongSuccess || isFail)
+            {
+                string intended = chosen.IntendedText ?? "";
+                string label = isStrongSuccess ? "Strong success" : 
+                               roll.IsNatOne ? "Nat 1" : 
+                               roll.Tier.ToString();
+                if (roll.IsNatTwenty) label = "Nat 20";
+                
+                PrintQuoted("**Intended:** " + (string.IsNullOrWhiteSpace(intended) || intended == "..." ? "..." : $"\"{intended}\""));
+                
+                string marker = isStrongSuccess ? "*" : "~~";
+                string formattedDelivered = FormatDeliveredAdditions(intended, result.DeliveredMessage ?? "", marker);
+                PrintQuoted($"**Delivered ({label}):** \"{formattedDelivered}\"");
+            }
+            else
+            {
+                PrintQuoted(result.DeliveredMessage);
+            }
             Console.WriteLine();
 
             lastOpponentMsg = result.OpponentMessage ?? "";
@@ -550,6 +614,50 @@ class Program
         Console.SetOut(tee._console);
         WritePlaytestLog(buffer.ToString(), player1, player2, playtestDir, sessionNumber);
         return 0;
+    }
+
+    internal static string FormatDeliveredAdditions(string intended, string delivered, string marker) {
+        if (string.IsNullOrWhiteSpace(intended) || intended == "...") return $"{marker}{delivered}{marker}";
+        
+        int exactIdx = delivered.IndexOf(intended, StringComparison.OrdinalIgnoreCase);
+        if (exactIdx >= 0) return WrapAdditions(intended, delivered, exactIdx, marker);
+        
+        string normalized = Regex.Replace(intended, @"\s+", " ");
+        string pattern = Regex.Escape(normalized).Replace(@"\ ", @"\s+");
+        var match = Regex.Match(delivered, pattern, RegexOptions.IgnoreCase);
+        if (match.Success) {
+            return WrapAdditions(match.Value, delivered, match.Index, marker);
+        }
+        
+        return $"{marker}{delivered}{marker}";
+    }
+    
+    internal static string WrapAdditions(string matchStr, string delivered, int exactIdx, string marker) {
+        string before = delivered.Substring(0, exactIdx);
+        string after = delivered.Substring(exactIdx + matchStr.Length);
+        
+        string afterSpace = "";
+        while (after.Length > 0 && (char.IsWhiteSpace(after[0]) || char.IsPunctuation(after[0]))) {
+            afterSpace += after[0];
+            after = after.Substring(1);
+        }
+        
+        string beforeSpace = "";
+        while (before.Length > 0 && (char.IsWhiteSpace(before[before.Length - 1]) || char.IsPunctuation(before[before.Length - 1]))) {
+            beforeSpace = before[before.Length - 1] + beforeSpace;
+            before = before.Substring(0, before.Length - 1);
+        }
+        
+        string res = "";
+        if (before.Length > 0) res += marker + before + marker + beforeSpace;
+        else res += beforeSpace;
+        
+        res += matchStr;
+        
+        if (after.Length > 0) res += afterSpace + marker + after + marker;
+        else res += afterSpace;
+        
+        return res;
     }
 
     static void PrintQuoted(string? text)

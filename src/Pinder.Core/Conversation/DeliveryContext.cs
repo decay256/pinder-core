@@ -52,6 +52,9 @@ namespace Pinder.Core.Conversation
         /// <summary>Current turn number (1-based). Default 0 for backward compatibility.</summary>
         public int CurrentTurn { get; }
 
+        /// <summary>True if the roll was a Natural 20.</summary>
+        public bool IsNat20 { get; }
+
         public DeliveryContext(
             string playerPrompt,
             string opponentPrompt,
@@ -65,7 +68,8 @@ namespace Pinder.Core.Conversation
             string[]? activeTrapInstructions = null,
             string playerName = "",
             string opponentName = "",
-            int currentTurn = 0)
+            int currentTurn = 0,
+            bool isNat20 = false)
         {
             PlayerPrompt = playerPrompt ?? throw new System.ArgumentNullException(nameof(playerPrompt));
             OpponentPrompt = opponentPrompt ?? throw new System.ArgumentNullException(nameof(opponentPrompt));
@@ -80,6 +84,7 @@ namespace Pinder.Core.Conversation
             PlayerName = playerName ?? "";
             OpponentName = opponentName ?? "";
             CurrentTurn = currentTurn;
+            IsNat20 = isNat20;
         }
     }
 }

@@ -1,3 +1,5 @@
+using Newtonsoft.Json;
+using System.IO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +19,17 @@ namespace Pinder.LlmAdapters.Anthropic
     /// using AnthropicClient for HTTP transport, SessionDocumentBuilder for prompt
     /// formatting, and CacheBlockBuilder for prompt caching.
     /// </summary>
-    public sealed class AnthropicLlmAdapter : IStatefulLlmAdapter, IDisposable
+    public class CallSummaryStat
+    {
+        [JsonProperty("turn")] public int Turn { get; set; }
+        [JsonProperty("type")] public string Type { get; set; }
+        [JsonProperty("cache_creation_input_tokens")] public int CacheCreationInputTokens { get; set; }
+        [JsonProperty("cache_read_input_tokens")] public int CacheReadInputTokens { get; set; }
+        [JsonProperty("input_tokens")] public int InputTokens { get; set; }
+        [JsonProperty("output_tokens")] public int OutputTokens { get; set; }
+    }
+
+    public sealed class AnthropicLlmAdapter : ILlmAdapter, IDisposable
     {
         // Default temperatures per method (used when AnthropicOptions override is null)
         private const double DefaultDialogueOptionsTemperature = 0.9;
@@ -66,7 +78,7 @@ namespace Pinder.LlmAdapters.Anthropic
 
         private readonly AnthropicClient _client;
         private readonly AnthropicOptions _options;
-        private ConversationSession? _session;
+        private readonly List<CallSummaryStat> _callStats = new List<CallSummaryStat>();
 
         /// <summary>
         /// Creates adapter with internally-owned AnthropicClient.
@@ -94,25 +106,6 @@ namespace Pinder.LlmAdapters.Anthropic
         /// When true, all ILlmAdapter calls route through the accumulated session.
         /// When false, behavior is identical to current stateless mode.
         /// </summary>
-        public bool HasActiveConversation => _session != null;
-
-        /// <summary>
-        /// Start a stateful conversation session with the given system prompt.
-        /// After calling this, all ILlmAdapter method calls will append to and
-        /// read from the accumulated message history instead of building
-        /// fresh single-message requests.
-        ///
-        /// Calling this when a session is already active replaces it (no error).
-        /// </summary>
-        /// <param name="systemPrompt">
-        /// Full system prompt (both character profiles, game vision, etc.).
-        /// Must not be null or empty.
-        /// </param>
-        /// <exception cref="ArgumentException">If systemPrompt is null or whitespace.</exception>
-        public void StartConversation(string systemPrompt)
-        {
-            _session = new ConversationSession(systemPrompt);
-        }
 
         /// <inheritdoc />
         public async Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context)
@@ -122,25 +115,16 @@ namespace Pinder.LlmAdapters.Anthropic
             // Opponent profile is passed as informational context in the user message
             var userContent = SessionDocumentBuilder.BuildDialogueOptionsPrompt(context);
 
-            if (_session != null)
-            {
-                _session.AppendUser(userContent);
-                var statefulRequest = _session.BuildRequest(
-                    _options.Model, _options.MaxTokens,
-                    _options.DialogueOptionsTemperature ?? DefaultDialogueOptionsTemperature);
-                var statefulResponse = await _client.SendMessagesAsync(statefulRequest).ConfigureAwait(false);
-                var statefulText = statefulResponse.GetText();
-                _session.AppendAssistant(statefulText);
-                return ParseDialogueOptions(statefulText);
-            }
 
             // Only the player's identity in system — prevents voice bleed from opponent's register
-            var systemBlocks = CacheBlockBuilder.BuildPlayerOnlySystemBlocks(context.PlayerPrompt);
+            var fullPlayerPrompt = SessionSystemPromptBuilder.BuildPlayer(context.PlayerPrompt, _options.GameDefinition);
+            var systemBlocks = CacheBlockBuilder.BuildPlayerOnlySystemBlocks(fullPlayerPrompt);
 
             var request = BuildRequest(systemBlocks, userContent,
                 _options.DialogueOptionsTemperature ?? DefaultDialogueOptionsTemperature);
 
             var response = await _client.SendMessagesAsync(request).ConfigureAwait(false);
+            LogDebug("options", context.CurrentTurn, request, response);
             return ParseDialogueOptions(response.GetText());
         }
 
@@ -151,24 +135,15 @@ namespace Pinder.LlmAdapters.Anthropic
 
             var userContent = SessionDocumentBuilder.BuildDeliveryPrompt(context);
 
-            if (_session != null)
-            {
-                _session.AppendUser(userContent);
-                var statefulRequest = _session.BuildRequest(
-                    _options.Model, _options.MaxTokens,
-                    _options.DeliveryTemperature ?? DefaultDeliveryTemperature);
-                var statefulResponse = await _client.SendMessagesAsync(statefulRequest).ConfigureAwait(false);
-                var statefulText = statefulResponse.GetText();
-                _session.AppendAssistant(statefulText);
-                return statefulText;
-            }
 
-            var systemBlocks = CacheBlockBuilder.BuildPlayerOnlySystemBlocks(context.PlayerPrompt);
+            var fullPlayerPrompt = SessionSystemPromptBuilder.BuildPlayer(context.PlayerPrompt, _options.GameDefinition);
+            var systemBlocks = CacheBlockBuilder.BuildPlayerOnlySystemBlocks(fullPlayerPrompt);
 
             var request = BuildRequest(systemBlocks, userContent,
                 _options.DeliveryTemperature ?? DefaultDeliveryTemperature);
 
             var response = await _client.SendMessagesAsync(request).ConfigureAwait(false);
+            LogDebug("delivery", context.CurrentTurn, request, response);
             return response.GetText();
         }
 
@@ -179,25 +154,16 @@ namespace Pinder.LlmAdapters.Anthropic
 
             var userContent = SessionDocumentBuilder.BuildOpponentPrompt(context);
 
-            if (_session != null)
-            {
-                _session.AppendUser(userContent);
-                var statefulRequest = _session.BuildRequest(
-                    _options.Model, _options.MaxTokens,
-                    _options.OpponentResponseTemperature ?? DefaultOpponentResponseTemperature);
-                var statefulResponse = await _client.SendMessagesAsync(statefulRequest).ConfigureAwait(false);
-                var statefulText = statefulResponse.GetText();
-                _session.AppendAssistant(statefulText);
-                return ParseOpponentResponse(statefulText);
-            }
 
             // Per §3.5: only opponent prompt in system (opponent plays themselves)
-            var systemBlocks = CacheBlockBuilder.BuildOpponentOnlySystemBlocks(context.OpponentPrompt);
+            var fullOpponentPrompt = SessionSystemPromptBuilder.BuildOpponent(context.OpponentPrompt, _options.GameDefinition);
+            var systemBlocks = CacheBlockBuilder.BuildOpponentOnlySystemBlocks(fullOpponentPrompt);
 
             var request = BuildRequest(systemBlocks, userContent,
                 _options.OpponentResponseTemperature ?? DefaultOpponentResponseTemperature);
 
             var response = await _client.SendMessagesAsync(request).ConfigureAwait(false);
+            LogDebug("opponent", context.CurrentTurn, request, response);
             return ParseOpponentResponse(response.GetText());
         }
 
@@ -212,6 +178,42 @@ namespace Pinder.LlmAdapters.Anthropic
         }
 
         /// <summary>Disposes the internal AnthropicClient.</summary>
+        private void LogDebug(string callType, int turn, MessagesRequest request, MessagesResponse response)
+        {
+            if (string.IsNullOrEmpty(_options.DebugDirectory)) return;
+
+            try
+            {
+                Directory.CreateDirectory(_options.DebugDirectory);
+
+                string reqFile = Path.Combine(_options.DebugDirectory, $"turn-{turn:D2}-{callType}-request.json");
+                string resFile = Path.Combine(_options.DebugDirectory, $"turn-{turn:D2}-{callType}-response.json");
+
+                File.WriteAllText(reqFile, JsonConvert.SerializeObject(request, Formatting.Indented));
+                File.WriteAllText(resFile, JsonConvert.SerializeObject(response, Formatting.Indented));
+
+                if (response.Usage != null)
+                {
+                    var stat = new CallSummaryStat {
+                        Turn = turn,
+                        Type = callType,
+                        CacheCreationInputTokens = response.Usage.CacheCreationInputTokens,
+                        CacheReadInputTokens = response.Usage.CacheReadInputTokens,
+                        InputTokens = response.Usage.InputTokens,
+                        OutputTokens = response.Usage.OutputTokens
+                    };
+                    _callStats.Add(stat);
+
+                    var summaryFile = Path.Combine(_options.DebugDirectory, "session-summary.json");
+                    File.WriteAllText(summaryFile, JsonConvert.SerializeObject(new { calls = _callStats, totals = new { cache_creation_input_tokens = _callStats.Sum(s => s.CacheCreationInputTokens), cache_read_input_tokens = _callStats.Sum(s => s.CacheReadInputTokens), input_tokens = _callStats.Sum(s => s.InputTokens), output_tokens = _callStats.Sum(s => s.OutputTokens) } }, Formatting.Indented));
+                }
+            }
+            catch
+            {
+                // Ignore logging errors
+            }
+        }
+
         public void Dispose()
         {
             _client.Dispose();
