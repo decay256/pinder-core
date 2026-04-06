@@ -50,10 +50,6 @@ namespace Pinder.LlmAdapters.Anthropic
             @"""([^""]+)""",
             RegexOptions.Compiled);
 
-        private static readonly Regex ResponseBlockRegex = new Regex(
-            @"\[RESPONSE\]\s*""([^""]+)""",
-            RegexOptions.Compiled | RegexOptions.Singleline);
-
         private static readonly Regex TellSignalRegex = new Regex(
             @"TELL:\s*(\w+)\s*\(([^)]+)\)",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -346,7 +342,7 @@ namespace Pinder.LlmAdapters.Anthropic
         }
 
         /// <summary>
-        /// Parses structured LLM output with [RESPONSE] and optional [SIGNALS] blocks.
+        /// Parses structured LLM output with optional [SIGNALS] blocks.
         /// Never throws — returns OpponentResponse with null signals on parse failure.
         /// </summary>
         internal static OpponentResponse ParseOpponentResponse(string? llmResponse)
@@ -364,35 +360,23 @@ namespace Pinder.LlmAdapters.Anthropic
 
             try
             {
-                // Try to extract [RESPONSE] block
-                var responseMatch = ResponseBlockRegex.Match(response);
-                if (responseMatch.Success)
-                {
-                    messageText = responseMatch.Groups[1].Value.Trim();
-                }
-                else
-                {
-                    // No [RESPONSE] marker — check if there's a [RESPONSE] followed by text on next line
-                    var altPattern = new Regex(@"\[RESPONSE\]\s*\n\s*""([^""]+)""", RegexOptions.Singleline);
-                    var altMatch = altPattern.Match(response);
-                    if (altMatch.Success)
-                    {
-                        messageText = altMatch.Groups[1].Value.Trim();
-                    }
-                    else
-                    {
-                        // Fallback: use entire text as message (strip any [SIGNALS] block)
-                        var signalIdx = response.IndexOf("[SIGNALS]", StringComparison.OrdinalIgnoreCase);
-                        messageText = signalIdx >= 0
-                            ? response.Substring(0, signalIdx).Trim()
-                            : response.Trim();
+                // Extract message text (everything before [SIGNALS])
+                var signalIdx = response.IndexOf("[SIGNALS]", StringComparison.OrdinalIgnoreCase);
+                messageText = signalIdx >= 0
+                    ? response.Substring(0, signalIdx).Trim()
+                    : response.Trim();
 
-                        // Strip surrounding quotes if present
-                        if (messageText.Length >= 2 && messageText[0] == '"' && messageText[messageText.Length - 1] == '"')
-                        {
-                            messageText = messageText.Substring(1, messageText.Length - 2).Trim();
-                        }
-                    }
+                // Strip [RESPONSE] tag if the LLM still generates it
+                var responseTagIdx = messageText.IndexOf("[RESPONSE]", StringComparison.OrdinalIgnoreCase);
+                if (responseTagIdx >= 0)
+                {
+                    messageText = messageText.Substring(responseTagIdx + "[RESPONSE]".Length).Trim();
+                }
+
+                // Strip surrounding quotes if present
+                if (messageText.Length >= 2 && messageText[0] == '"' && messageText[messageText.Length - 1] == '"')
+                {
+                    messageText = messageText.Substring(1, messageText.Length - 2).Trim();
                 }
 
                 // Parse optional [SIGNALS] block

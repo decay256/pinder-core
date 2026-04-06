@@ -138,10 +138,8 @@ Generate your next message.
 - If Interest rose: show warming without being gushing
 - Keep it to 1–3 sentences. Match the register.
 
-Output format — use EXACTLY this structure:
-
-[RESPONSE]
-""your actual message text""
+Output format:
+Output your actual message text directly. Do not wrap it in quotes or [RESPONSE] tags.
 
 Occasionally (when it feels natural, roughly 30–40% of turns), include a signals block after your response:
 
