@@ -141,7 +141,8 @@ namespace Pinder.LlmAdapters.Anthropic
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
-            var userContent = SessionDocumentBuilder.BuildDeliveryPrompt(context);
+            var deliveryRules = _options.GameDefinition?.DeliveryRules;
+            var userContent = SessionDocumentBuilder.BuildDeliveryPrompt(context, deliveryRules: deliveryRules);
 
 
             var fullPlayerPrompt = SessionSystemPromptBuilder.BuildPlayer(context.PlayerPrompt, _options.GameDefinition);
