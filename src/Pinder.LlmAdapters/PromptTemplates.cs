@@ -11,7 +11,7 @@ namespace Pinder.LlmAdapters
 @"Generate exactly 4 dialogue options for {player_name}.
 
 Each option must:
-1. Be tagged with one of: CHARM, RIZZ, HONESTY, CHAOS, WIT, SELF_AWARENESS
+1. Be tagged with one of the available stats for this turn: {available_stats}
 2. Show what the character INTENDS to say — this is their internal intended message, before any roll outcome is applied
 3. Reflect the player's personality and current shadow state (not the opponent's)
 4. Vary in tone and risk — include at least one safe and one bold option
@@ -42,7 +42,7 @@ MEDIUM: This is a texting app. Options are messages the character could send.
 - No ""(thinking to self:..."" no stage directions, no meta-commentary within the message text.
 
 Rules:
-- STAT must be one of: CHARM, RIZZ, HONESTY, CHAOS, WIT, SELF_AWARENESS
+- STAT must be one of the available stats listed above: {available_stats}
 - Text must be in double quotes on the line immediately after the metadata
 - No extra text before OPTION_1 or after the last option
 

@@ -296,6 +296,10 @@ namespace Pinder.Core.Conversation
             var activeTrapNames = GetActiveTrapNames();
             var activeTrapInstructions = GetActiveTrapInstructions();
 
+            // Draw 4 random stats for this turn's options
+            var allStats = new[] { StatType.Charm, StatType.Rizz, StatType.Honesty, StatType.Chaos, StatType.Wit, StatType.SelfAwareness };
+            var availableStats = DrawRandomStats(allStats, 4, shadowThresholds);
+
             // Build dialogue context — pass callback topics (#47) and shadow thresholds (#45)
             var context = new DialogueContext(
                 playerPrompt: _player.AssembledSystemPrompt,
@@ -310,7 +314,8 @@ namespace Pinder.Core.Conversation
                 horninessLevel: _sessionHorniness,
                 requiresRizzOption: _sessionHorniness >= 12,
                 currentTurn: _turnNumber,
-                playerTextingStyle: _player.TextingStyleFragment);
+                playerTextingStyle: _player.TextingStyleFragment,
+                availableStats: availableStats);
 
             // Get dialogue options from LLM
             var rawOptions = await _llm.GetDialogueOptionsAsync(context).ConfigureAwait(false);
@@ -784,6 +789,51 @@ namespace Pinder.Core.Conversation
         }
 
         /// <summary>
+/// <summary>
+        /// Draws N random stats from the pool, applying special case rules.
+        /// Horniness ≥12 forces RIZZ in. Denial T3 removes HONESTY.
+        /// </summary>
+        private StatType[] DrawRandomStats(StatType[] pool, int count, Dictionary<ShadowStatType, int>? shadowThresholds)
+        {
+            // Horniness ≥18: all slots are RIZZ
+            if (_sessionHorniness >= 18)
+                return new[] { StatType.Rizz, StatType.Rizz, StatType.Rizz, StatType.Rizz };
+
+            // Build eligible pool
+            var eligible = new List<StatType>(pool);
+
+            // Denial T3 (≥12): remove HONESTY from pool
+            if (shadowThresholds != null
+                && shadowThresholds.TryGetValue(ShadowStatType.Denial, out int denVal)
+                && denVal >= 12)
+            {
+                eligible.Remove(StatType.Honesty);
+            }
+
+            // Shuffle eligible pool using System.Random (stat selection is UI randomness, not game mechanics)
+            var rng = new System.Random();
+            for (int i = eligible.Count - 1; i > 0; i--)
+            {
+                int j = rng.Next(0, i + 1);
+                var tmp = eligible[i];
+                eligible[i] = eligible[j];
+                eligible[j] = tmp;
+            }
+
+            // Take first N
+            var drawn = new List<StatType>();
+            for (int i = 0; i < System.Math.Min(count, eligible.Count); i++)
+                drawn.Add(eligible[i]);
+
+            // Horniness ≥6: ensure RIZZ is present
+            if (_sessionHorniness >= 6 && !drawn.Contains(StatType.Rizz))
+            {
+                drawn[drawn.Count - 1] = StatType.Rizz;
+            }
+
+            return drawn.ToArray();
+        }
+
         /// Evaluates per-turn shadow growth triggers after a Speak action resolves.
         /// Applies growth to _playerShadows when available.
         /// </summary>

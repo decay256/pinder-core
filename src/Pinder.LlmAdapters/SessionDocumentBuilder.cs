@@ -102,7 +102,13 @@ namespace Pinder.LlmAdapters
             sb.AppendLine();
 
             // Output format instructions
-            sb.Append(PromptTemplates.DialogueOptionsInstruction.Replace("{player_name}", playerName));
+// Build available stats string for this turn
+            string availableStatsStr = context.AvailableStats != null && context.AvailableStats.Length > 0
+                ? string.Join(", ", System.Array.ConvertAll(context.AvailableStats, s => s.ToString().ToUpperInvariant()))
+                : "CHARM, RIZZ, HONESTY, CHAOS, WIT, SELF_AWARENESS";
+            sb.Append(PromptTemplates.DialogueOptionsInstruction
+                .Replace("{player_name}", playerName)
+                .Replace("{available_stats}", availableStatsStr));
 
             return sb.ToString();
         }

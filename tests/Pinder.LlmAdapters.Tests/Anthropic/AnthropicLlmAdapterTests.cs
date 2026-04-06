@@ -222,7 +222,7 @@ OPTION_2
         public void Instruction_contains_output_format_rules()
         {
             Assert.Contains("STAT must be one of", PromptTemplates.DialogueOptionsInstruction);
-            Assert.Contains("SELF_AWARENESS", PromptTemplates.DialogueOptionsInstruction);
+            Assert.Contains("{available_stats}", PromptTemplates.DialogueOptionsInstruction); // stat list injected at runtime
             Assert.Contains("double quotes", PromptTemplates.DialogueOptionsInstruction);
             Assert.Contains("No extra text before OPTION_1", PromptTemplates.DialogueOptionsInstruction);
         }
@@ -232,7 +232,7 @@ OPTION_2
         {
             // Verify original instructional content was not removed
             Assert.Contains("Generate exactly 4 dialogue options", PromptTemplates.DialogueOptionsInstruction);
-            Assert.Contains("CHARM, RIZZ, HONESTY, CHAOS, WIT, SELF_AWARENESS", PromptTemplates.DialogueOptionsInstruction);
+            Assert.Contains("{available_stats}", PromptTemplates.DialogueOptionsInstruction); // stat list is now injected at runtime
             Assert.Contains("Keep options concise", PromptTemplates.DialogueOptionsInstruction);
         }
 
