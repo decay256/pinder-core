@@ -51,6 +51,7 @@ namespace Pinder.Core.Tests
             var profile = CharacterDefinitionLoader.Load(path, itemRepo, anatomyRepo);
 
             Assert.Equal("Gerald_42", profile.DisplayName);
+            Assert.Equal("Just a normal guy who loves the gym, good food, and real connections.", profile.Bio);
             Assert.Equal(5, profile.Level);
             Assert.NotNull(profile.Stats);
             Assert.NotNull(profile.AssembledSystemPrompt);
