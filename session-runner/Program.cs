@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Pinder.Core.Characters;
 using Pinder.Core.Conversation;
@@ -511,7 +512,28 @@ class Program
             Console.WriteLine();
 
             Console.WriteLine($"**📨 {player1} sends:**");
-            PrintQuoted(result.DeliveredMessage);
+            bool isSuccess = roll.Tier == FailureTier.None || roll.IsNatTwenty;
+            bool isStrongSuccess = isSuccess && (roll.FinalTotal - roll.DC >= 5 || roll.IsNatTwenty);
+            bool isFail = roll.Tier != FailureTier.None || roll.IsNatOne;
+            
+            if (isStrongSuccess || isFail)
+            {
+                string intended = chosen.IntendedText ?? "";
+                string label = isStrongSuccess ? "Strong success" : 
+                               roll.IsNatOne ? "Nat 1" : 
+                               roll.Tier.ToString();
+                if (roll.IsNatTwenty) label = "Nat 20";
+                
+                PrintQuoted("**Intended:** " + (string.IsNullOrWhiteSpace(intended) || intended == "..." ? "..." : $"\"{intended}\""));
+                
+                string marker = isStrongSuccess ? "*" : "~~";
+                string formattedDelivered = FormatDeliveredAdditions(intended, result.DeliveredMessage ?? "", marker);
+                PrintQuoted($"**Delivered ({label}):** \"{formattedDelivered}\"");
+            }
+            else
+            {
+                PrintQuoted(result.DeliveredMessage);
+            }
             Console.WriteLine();
 
             lastOpponentMsg = result.OpponentMessage ?? "";
@@ -592,6 +614,50 @@ class Program
         Console.SetOut(tee._console);
         WritePlaytestLog(buffer.ToString(), player1, player2, playtestDir, sessionNumber);
         return 0;
+    }
+
+    internal static string FormatDeliveredAdditions(string intended, string delivered, string marker) {
+        if (string.IsNullOrWhiteSpace(intended) || intended == "...") return $"{marker}{delivered}{marker}";
+        
+        int exactIdx = delivered.IndexOf(intended, StringComparison.OrdinalIgnoreCase);
+        if (exactIdx >= 0) return WrapAdditions(intended, delivered, exactIdx, marker);
+        
+        string normalized = Regex.Replace(intended, @"\s+", " ");
+        string pattern = Regex.Escape(normalized).Replace(@"\ ", @"\s+");
+        var match = Regex.Match(delivered, pattern, RegexOptions.IgnoreCase);
+        if (match.Success) {
+            return WrapAdditions(match.Value, delivered, match.Index, marker);
+        }
+        
+        return $"{marker}{delivered}{marker}";
+    }
+    
+    internal static string WrapAdditions(string matchStr, string delivered, int exactIdx, string marker) {
+        string before = delivered.Substring(0, exactIdx);
+        string after = delivered.Substring(exactIdx + matchStr.Length);
+        
+        string afterSpace = "";
+        while (after.Length > 0 && (char.IsWhiteSpace(after[0]) || char.IsPunctuation(after[0]))) {
+            afterSpace += after[0];
+            after = after.Substring(1);
+        }
+        
+        string beforeSpace = "";
+        while (before.Length > 0 && (char.IsWhiteSpace(before[before.Length - 1]) || char.IsPunctuation(before[before.Length - 1]))) {
+            beforeSpace = before[before.Length - 1] + beforeSpace;
+            before = before.Substring(0, before.Length - 1);
+        }
+        
+        string res = "";
+        if (before.Length > 0) res += marker + before + marker + beforeSpace;
+        else res += beforeSpace;
+        
+        res += matchStr;
+        
+        if (after.Length > 0) res += afterSpace + marker + after + marker;
+        else res += afterSpace;
+        
+        return res;
     }
 
     static void PrintQuoted(string? text)
