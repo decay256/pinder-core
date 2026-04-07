@@ -50,6 +50,11 @@ namespace Pinder.LlmAdapters
                 def.WritingRules.TrimEnd(),
                 "\n\n== DRAMATIC CRAFT ==\n\n",
                 def.DramaticCraft != null ? def.DramaticCraft.BuildSection().TrimEnd() : "",
+                string.IsNullOrWhiteSpace(def.TextingPsychology) ? "" : "\n\n== TEXTING PSYCHOLOGY ==\n\n" + def.TextingPsychology.TrimEnd(),
+                string.IsNullOrWhiteSpace(def.RevelationOverStatement) ? "" : "\n\n== REVELATION OVER STATEMENT ==\n\n" + def.RevelationOverStatement.TrimEnd(),
+                string.IsNullOrWhiteSpace(def.OpponentFriction) ? "" : "\n\n== OPPONENT RESISTANCE ==\n\n" + def.OpponentFriction.TrimEnd(),
+                string.IsNullOrWhiteSpace(def.OpponentCuriosity) ? "" : "\n\n== OPPONENT CURIOSITY ==\n\n" + def.OpponentCuriosity.TrimEnd(),
+                string.IsNullOrWhiteSpace(def.ConversationArcProgression) ? "" : "\n\n== CONVERSATION ARC ==\n\n" + def.ConversationArcProgression.TrimEnd(),
                 "\n");
         }
 
@@ -77,6 +82,11 @@ namespace Pinder.LlmAdapters
                 def.WritingRules.TrimEnd(),
                 "\n\n== DRAMATIC CRAFT ==\n\n",
                 def.DramaticCraft != null ? def.DramaticCraft.BuildSection().TrimEnd() : "",
+                string.IsNullOrWhiteSpace(def.TextingPsychology) ? "" : "\n\n== TEXTING PSYCHOLOGY ==\n\n" + def.TextingPsychology.TrimEnd(),
+                string.IsNullOrWhiteSpace(def.RevelationOverStatement) ? "" : "\n\n== REVELATION OVER STATEMENT ==\n\n" + def.RevelationOverStatement.TrimEnd(),
+                string.IsNullOrWhiteSpace(def.OpponentFriction) ? "" : "\n\n== OPPONENT RESISTANCE ==\n\n" + def.OpponentFriction.TrimEnd(),
+                string.IsNullOrWhiteSpace(def.OpponentCuriosity) ? "" : "\n\n== OPPONENT CURIOSITY ==\n\n" + def.OpponentCuriosity.TrimEnd(),
+                string.IsNullOrWhiteSpace(def.ConversationArcProgression) ? "" : "\n\n== CONVERSATION ARC ==\n\n" + def.ConversationArcProgression.TrimEnd(),
                 "\n");
         }
 
@@ -104,6 +114,11 @@ namespace Pinder.LlmAdapters
                 def.WritingRules.TrimEnd(),
                 "\n\n== DRAMATIC CRAFT ==\n\n",
                 def.DramaticCraft != null ? def.DramaticCraft.BuildSection().TrimEnd() : "",
+                string.IsNullOrWhiteSpace(def.TextingPsychology) ? "" : "\n\n== TEXTING PSYCHOLOGY ==\n\n" + def.TextingPsychology.TrimEnd(),
+                string.IsNullOrWhiteSpace(def.RevelationOverStatement) ? "" : "\n\n== REVELATION OVER STATEMENT ==\n\n" + def.RevelationOverStatement.TrimEnd(),
+                string.IsNullOrWhiteSpace(def.OpponentFriction) ? "" : "\n\n== OPPONENT RESISTANCE ==\n\n" + def.OpponentFriction.TrimEnd(),
+                string.IsNullOrWhiteSpace(def.OpponentCuriosity) ? "" : "\n\n== OPPONENT CURIOSITY ==\n\n" + def.OpponentCuriosity.TrimEnd(),
+                string.IsNullOrWhiteSpace(def.ConversationArcProgression) ? "" : "\n\n== CONVERSATION ARC ==\n\n" + def.ConversationArcProgression.TrimEnd(),
                 "\n");
         }
     }

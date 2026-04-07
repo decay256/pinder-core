@@ -167,6 +167,12 @@ namespace Pinder.Core.Conversation
             _saOverthinkingTriggered = false;
             _sessionOpener = null;
 
+            // Stateful conversation session (#536)
+            // If the adapter supports stateful mode, start a persistent opponent session.
+            if (_llm is Pinder.Core.Interfaces.IStatefulLlmAdapter stateful)
+            {
+                stateful.StartOpponentSession(_opponent.AssembledSystemPrompt);
+            }
         }
 
         /// <summary>

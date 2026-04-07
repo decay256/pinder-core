@@ -94,6 +94,21 @@ namespace Pinder.LlmAdapters
         /// <summary>Writing style rules: texting register, brevity, etc.</summary>
         public string WritingRules { get; }
 
+        /// <summary>Additional world rules about texting psychology.</summary>
+        public string TextingPsychology { get; }
+
+        /// <summary>Show-don't-tell writing principle for character revelation.</summary>
+        public string RevelationOverStatement { get; }
+
+        /// <summary>Opponent friction / resistance framing.</summary>
+        public string OpponentFriction { get; }
+
+        /// <summary>Opponent curiosity / reciprocal questions direction.</summary>
+        public string OpponentCuriosity { get; }
+
+        /// <summary>Conversation arc / topic progression guidance.</summary>
+        public string ConversationArcProgression { get; }
+
         /// <summary>Configurable delivery prompt rules, or null for hardcoded defaults.</summary>
         public DeliveryRules DeliveryRules { get; }
 
@@ -109,7 +124,12 @@ namespace Pinder.LlmAdapters
             string metaContract,
             string writingRules,
             DeliveryRules deliveryRules = null,
-            DramaticCraft dramaticCraft = null)
+            DramaticCraft dramaticCraft = null,
+            string textingPsychology = null,
+            string revelationOverStatement = null,
+            string opponentFriction = null,
+            string opponentCuriosity = null,
+            string conversationArcProgression = null)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Vision = vision ?? throw new ArgumentNullException(nameof(vision));
@@ -118,6 +138,11 @@ namespace Pinder.LlmAdapters
             OpponentRoleDescription = opponentRoleDescription ?? throw new ArgumentNullException(nameof(opponentRoleDescription));
             MetaContract = metaContract ?? throw new ArgumentNullException(nameof(metaContract));
             WritingRules = writingRules ?? throw new ArgumentNullException(nameof(writingRules));
+            TextingPsychology = textingPsychology ?? "";
+            RevelationOverStatement = revelationOverStatement ?? "";
+            OpponentFriction = opponentFriction ?? "";
+            OpponentCuriosity = opponentCuriosity ?? "";
+            ConversationArcProgression = conversationArcProgression ?? "";
             DeliveryRules = deliveryRules;
             DramaticCraft = dramaticCraft;
         }
@@ -195,6 +220,21 @@ namespace Pinder.LlmAdapters
                     earningTheClose: DcGet("earning_the_close"));
             }
 
+            // Parse optional prose fields
+            string GetOptional(string key)
+            {
+                if (parsed.TryGetValue(key, out var v) && v != null)
+                    return v.ToString();
+                return null;
+            }
+            // conversation_arc is a dict with a "progression" key
+            string conversationArcProgression = null;
+            if (parsed.TryGetValue("conversation_arc", out var caObj) && caObj is Dictionary<object, object> caDict)
+            {
+                if (caDict.TryGetValue("progression", out var caV) && caV != null)
+                    conversationArcProgression = caV.ToString();
+            }
+
             return new GameDefinition(
                 name: GetRequired("name"),
                 vision: GetRequired("vision"),
@@ -204,7 +244,12 @@ namespace Pinder.LlmAdapters
                 metaContract: GetRequired("meta_contract"),
                 writingRules: GetRequired("writing_rules"),
                 deliveryRules: deliveryRules,
-                dramaticCraft: dramaticCraft
+                dramaticCraft: dramaticCraft,
+                textingPsychology: GetOptional("texting_psychology"),
+                revelationOverStatement: GetOptional("revelation_over_statement"),
+                opponentFriction: GetOptional("opponent_friction"),
+                opponentCuriosity: GetOptional("opponent_curiosity"),
+                conversationArcProgression: conversationArcProgression
             );
         }
 
