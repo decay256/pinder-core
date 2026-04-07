@@ -57,6 +57,9 @@ namespace Pinder.Core.Conversation
         /// <summary>The opponent's active tell from their last response, if any. Used to craft specific options.</summary>
         public Tell? ActiveTell { get; }
 
+        /// <summary>The stats available for options this turn (randomly drawn). Null means all 6 stats available.</summary>
+        public StatType[]? AvailableStats { get; }
+
         public DialogueContext(
             string playerPrompt,
             string opponentPrompt,
@@ -73,7 +76,8 @@ namespace Pinder.Core.Conversation
             string opponentName = "",
             int currentTurn = 0,
             string playerTextingStyle = "",
-            Tell? activeTell = null)
+            Tell? activeTell = null,
+            StatType[]? availableStats = null)
         {
             PlayerPrompt = playerPrompt ?? throw new System.ArgumentNullException(nameof(playerPrompt));
             OpponentPrompt = opponentPrompt ?? throw new System.ArgumentNullException(nameof(opponentPrompt));
@@ -91,6 +95,7 @@ namespace Pinder.Core.Conversation
             CurrentTurn = currentTurn;
             PlayerTextingStyle = playerTextingStyle ?? "";
             ActiveTell = activeTell;
+            AvailableStats = availableStats;
         }
     }
 }
