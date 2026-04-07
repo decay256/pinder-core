@@ -8,7 +8,7 @@ namespace Pinder.LlmAdapters
     {
         /// <summary>§3.2 — Instructs the LLM to generate exactly 4 dialogue options with metadata tags.</summary>
         public const string DialogueOptionsInstruction =
-@"Generate exactly 4 dialogue options for {player_name}.
+@"Generate exactly 3 dialogue options for {player_name}.
 
 Each option must:
 1. Be tagged with one of the available stats for this turn: {available_stats}
@@ -34,7 +34,7 @@ OPTION_2
 [STAT: HONESTY] [CALLBACK: turn_2] [COMBO: The Reveal] [TELL_BONUS: yes]
 ""The exact text the character would send""
 
-(continue for OPTION_3 and OPTION_4)
+(only OPTION_1, OPTION_2, OPTION_3)
 
 MEDIUM: This is a texting app. Options are messages the character could send.
 - Each option should read as something a person would actually text — not internal thoughts, not narration.
