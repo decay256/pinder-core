@@ -425,6 +425,36 @@ class Program
             Console.WriteLine();
         }
 
+        // ── Psychological Stakes ──────────────────────────────────────────
+        Console.Error.WriteLine("Generating psychological stakes...");
+        string p1Stake = await GeneratePsychologicalStakeAsync(apiKey, sable.AssembledSystemPrompt, player1).ConfigureAwait(false);
+        string p2Stake = await GeneratePsychologicalStakeAsync(apiKey, brick.AssembledSystemPrompt, player2).ConfigureAwait(false);
+        sable.PsychologicalStake = p1Stake;
+        brick.PsychologicalStake = p2Stake;
+
+        if (!string.IsNullOrWhiteSpace(sable.PsychologicalStake))
+        {
+            Console.WriteLine();
+            Console.WriteLine($"### {player1} — Psychological Stake");
+            Console.WriteLine();
+            Console.WriteLine(sable.PsychologicalStake);
+            Console.WriteLine();
+        }
+        if (!string.IsNullOrWhiteSpace(brick.PsychologicalStake))
+        {
+            Console.WriteLine();
+            Console.WriteLine($"### {player2} — Psychological Stake");
+            Console.WriteLine();
+            Console.WriteLine(brick.PsychologicalStake);
+            Console.WriteLine();
+        }
+
+        // Inject stakes into assembled system prompts
+        if (!string.IsNullOrWhiteSpace(sable.PsychologicalStake))
+            sable.AppendToSystemPrompt("\n\n== PSYCHOLOGICAL STAKE ==\n\n" + sable.PsychologicalStake);
+        if (!string.IsNullOrWhiteSpace(brick.PsychologicalStake))
+            brick.AppendToSystemPrompt("\n\n== PSYCHOLOGICAL STAKE ==\n\n" + brick.PsychologicalStake);
+
         int momentum = 0;
         Console.WriteLine("## Session State");
         Console.WriteLine();
@@ -887,6 +917,46 @@ class Program
             case "openrouter": return "https://openrouter.ai/api/v1";
             case "ollama": return "http://localhost:11434/v1";
             default: return "https://api.openai.com";
+        }
+    }
+
+    static async Task<string> GeneratePsychologicalStakeAsync(string apiKey, string assembledSystemPrompt, string characterName)
+    {
+        try
+        {
+            var client = new Pinder.LlmAdapters.Anthropic.AnthropicClient(apiKey);
+            var request = new Pinder.LlmAdapters.Anthropic.Dto.MessagesRequest
+            {
+                Model = "claude-sonnet-4-20250514",
+                MaxTokens = 800,
+                Temperature = 0.9,
+                Messages = new Pinder.LlmAdapters.Anthropic.Dto.Message[]
+                {
+                    new Pinder.LlmAdapters.Anthropic.Dto.Message
+                    {
+                        Role = "user",
+                        Content = $@"Based on this character's assembled fragments, write a psychological portrait that a novelist would use to write their dialogue. Be creative and specific — fill in gaps based on what the fragments imply, don't summarize them.
+
+Cover five things, each in 2-3 paragraphs:
+1. Why they are on this app right now. Not a general 'looking for connection' — a specific emotional context. What happened recently? What need brought them here today?
+2. What they actually want from a match. Their real underlying need, which may be different from what they would consciously say or admit. What would having it feel like?
+3. What they are secretly afraid of. The belief about themselves they are protecting. What would it confirm about them if they failed here?
+4. What winning this conversation would mean emotionally — not 'getting the date' but what it proves or heals or demonstrates.
+5. What losing would mean emotionally — not 'getting unmatched' but what it confirms.
+
+Write 2-3 paragraphs per point. This is a novelist's character bible. Do not use headers or bullet points — write flowing prose.
+
+CHARACTER PROFILE:
+{assembledSystemPrompt.Substring(0, System.Math.Min(4000, assembledSystemPrompt.Length))}"
+                    }
+                }
+            };
+            var response = await client.SendMessagesAsync(request).ConfigureAwait(false);
+            return response.GetText().Trim();
+        }
+        catch
+        {
+            return string.Empty;
         }
     }
 

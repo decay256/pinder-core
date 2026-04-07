@@ -47,7 +47,9 @@ Rules:
 - No extra text before OPTION_1 or after the last option
 
 Before writing each option, verify: does this sound exactly like
-the texting style above? If not, rewrite it.";
+the texting style above? If not, rewrite it.
+
+If a PSYCHOLOGICAL STAKE section is present in the character profile above, at least one option per turn should serve that stake — either protecting the character's fear or risking revealing it. Options that only respond to the surface topic without touching the emotional through-line are incomplete.";
 
         /// <summary>§3.3 — Backward-compatible accessor that returns the default success delivery instruction.</summary>
         public static string SuccessDeliveryInstruction => BuildSuccessDeliveryInstruction(null);

@@ -14,7 +14,7 @@ namespace Pinder.Core.Characters
         public StatBlock Stats { get; }
 
         /// <summary>The fully assembled system prompt for LLM interactions.</summary>
-        public string AssembledSystemPrompt { get; }
+        public string AssembledSystemPrompt { get; private set; }
 
         /// <summary>Display name shown in conversation history.</summary>
         public string DisplayName { get; }
@@ -39,6 +39,16 @@ namespace Pinder.Core.Characters
         /// Carries name, behavior directive, and interference level.
         /// </summary>
         public ActiveArchetype ActiveArchetype { get; }
+
+        /// <summary>LLM-generated psychological portrait. Set at session start.</summary>
+        public string? PsychologicalStake { get; set; }
+
+        /// <summary>Appends additional text to the assembled system prompt.</summary>
+        public void AppendToSystemPrompt(string text)
+        {
+            if (!string.IsNullOrEmpty(text))
+                AssembledSystemPrompt += text;
+        }
 
         public CharacterProfile(
             StatBlock stats,
