@@ -125,11 +125,9 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
-            if (!result.Roll.IsSuccess)
-            {
-                Assert.True(resolver.FailureDeltaCalls.Count > 0,
-                    "Expected GetFailureInterestDelta to be called on a failed roll");
-            }
+            Assert.False(result.Roll.IsSuccess, "Expected failure roll — check FixedDice setup");
+            Assert.True(resolver.FailureDeltaCalls.Count > 0,
+                "Expected GetFailureInterestDelta to be called on a failed roll");
         }
 
         // Fails if: GameSession ignores the resolver's failure delta value
@@ -149,14 +147,12 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
-            if (!result.Roll.IsSuccess)
-            {
-                // With -10 delta from resolver, interest should drop significantly from 15
-                // Hardcoded max failure delta is -4 (Legendary), so if we see interest <= 5,
-                // the resolver value was used rather than hardcoded
-                Assert.True(result.StateAfter.Interest < 10,
-                    $"Expected interest < 10 with custom failure delta -10, got {result.StateAfter.Interest}");
-            }
+            Assert.False(result.Roll.IsSuccess, "Expected failure roll — check FixedDice setup");
+            // With -10 delta from resolver, interest should drop significantly from 15
+            // Hardcoded max failure delta is -4 (Legendary), so if we see interest <= 5,
+            // the resolver value was used rather than hardcoded
+            Assert.True(result.StateAfter.Interest < 10,
+                $"Expected interest < 10 with custom failure delta -10, got {result.StateAfter.Interest}");
         }
 
         // =====================================================================
@@ -357,11 +353,9 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
-            if (result.Roll.IsSuccess)
-            {
-                Assert.True(resolver.XpMultiplierCalls.Count > 0,
-                    "Expected GetRiskTierXpMultiplier to be called during ResolveTurnAsync on non-nat20 success");
-            }
+            Assert.True(result.Roll.IsSuccess, "Expected success roll — check FixedDice setup");
+            Assert.True(resolver.XpMultiplierCalls.Count > 0,
+                "Expected GetRiskTierXpMultiplier to be called during ResolveTurnAsync on non-nat20 success");
         }
 
         // Fails if: GameSession ignores the resolver's XP multiplier (uses hardcoded instead)
@@ -381,13 +375,11 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
-            if (result.Roll.IsSuccess)
-            {
-                // Base XP for a success is at least 5. With 10x = at least 50.
-                // Hardcoded Bold max is 3x = 15 from base 5.
-                Assert.True(result.XpEarned >= 50,
-                    $"Expected XP >= 50 with 10x multiplier, got {result.XpEarned}");
-            }
+            Assert.True(result.Roll.IsSuccess, "Expected success roll — check FixedDice setup");
+            // Base XP for a success is at least 5. With 10x = at least 50.
+            // Hardcoded Bold max is 3x = 15 from base 5.
+            Assert.True(result.XpEarned >= 50,
+                $"Expected XP >= 50 with 10x multiplier, got {result.XpEarned}");
         }
 
         // =====================================================================

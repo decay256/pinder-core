@@ -25,6 +25,7 @@ namespace Pinder.SessionRunner
         private const float NearWinBias = 2.0f;
         private const float BoredBoldBias = 1.0f;
         private const float ActiveTrapPenalty = 2.0f;
+        private const float LukewarmBoldBias = 0.2f;
 
         // Shadow growth risk constants (§7)
         private const float ShadowAvoidanceBonus = 0.8f; // bonus to options that avoid shadow growth
@@ -172,6 +173,22 @@ namespace Pinder.SessionRunner
                 {
                     score += BoredBoldBias;
                     strategicReasons.Add("Bored — swinging for the fences");
+                }
+
+                // #481: High interest safety bias — penalize TropeTrap exposure when interest >= 20
+                // TropeTrap fires on miss by 6+, which requires need >= 7
+                if (context.CurrentInterest >= 20 && need >= 7)
+                {
+                    score -= 0.5f;
+                    strategicReasons.Add("High interest — penalizing TropeTrap exposure");
+                }
+
+                // #481: Low interest aggression bonus — favor higher-variance plays when Lukewarm
+                if (context.InterestState == InterestState.Lukewarm
+                    && (riskInfo.Tier == RiskTierCategory.Hard || riskInfo.Tier == RiskTierCategory.Bold))
+                {
+                    score += LukewarmBoldBias;
+                    strategicReasons.Add("Low interest — favoring higher-variance plays");
                 }
 
                 // Active trap penalty
@@ -369,8 +386,8 @@ namespace Pinder.SessionRunner
                     }
                     else if (missMargin >= 6)
                     {
-                        // TropeTrap: -2 interest + trap activation
-                        totalCost += 2.0f + TrapActivationCost;
+                        // TropeTrap: -2 interest + trap activation + duration penalty (#481)
+                        totalCost += 2.0f + TrapActivationCost + 0.5f;
                     }
                     else if (missMargin >= 3)
                     {
