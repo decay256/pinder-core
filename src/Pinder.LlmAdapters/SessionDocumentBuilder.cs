@@ -84,6 +84,13 @@ namespace Pinder.LlmAdapters
                 }
             }
 
+            if (context.ActiveTell != null)
+            {
+                gameState.AppendLine($"📡 TELL DETECTED: The opponent revealed a vulnerability around {context.ActiveTell.Stat}.");
+                gameState.AppendLine($"One option using {context.ActiveTell.Stat} should explicitly capitalize on this moment —");
+                gameState.AppendLine("it landed differently than intended. The player read the room.");
+            }
+
             // Inject texting style immediately before the ENGINE block (#489)
             if (!string.IsNullOrEmpty(context.PlayerTextingStyle))
             {
