@@ -246,18 +246,27 @@ namespace Pinder.LlmAdapters.Anthropic
                     sb.AppendLine();
                 }
 
-                // System prompt snippet (first 200 chars of first system block)
-                string systemSnippet = "";
-                if (request.System != null && request.System.Length > 0)
+                // Full system prompt (all blocks)
+                var systemBlocks = new System.Text.StringBuilder();
+                if (request.System != null)
                 {
-                    string full = request.System[0].Text ?? "";
-                    systemSnippet = full.Length > 200 ? full.Substring(0, 200) + "..." : full;
+                    foreach (var block in request.System)
+                    {
+                        if (!string.IsNullOrEmpty(block.Text))
+                            systemBlocks.AppendLine(block.Text);
+                    }
                 }
+                string fullSystemPrompt = systemBlocks.ToString().TrimEnd();
 
                 // REQUEST section
                 sb.AppendLine($"### {callLabel} REQUEST [{timestamp}]");
-                if (!string.IsNullOrEmpty(systemSnippet))
-                    sb.AppendLine($"**System (first 200 chars):** {systemSnippet}");
+                if (!string.IsNullOrEmpty(fullSystemPrompt))
+                {
+                    sb.AppendLine("**System prompt:**");
+                    sb.AppendLine("```");
+                    sb.AppendLine(fullSystemPrompt);
+                    sb.AppendLine("```");
+                }
                 sb.AppendLine();
 
                 if (string.Equals(callType, "opponent", StringComparison.OrdinalIgnoreCase))
