@@ -16,6 +16,7 @@ using Pinder.Core.Traps;
 using Pinder.Core.Data;
 using Pinder.LlmAdapters;
 using Pinder.LlmAdapters.Anthropic;
+using Pinder.LlmAdapters.OpenAi;
 using Pinder.SessionRunner;
 
 class NullTrapRegistry : ITrapRegistry
@@ -353,11 +354,37 @@ class Program
             debugFile = Path.Combine(playtestDir, $"session-{sessionNumber:D3}-debug.md");
         }
 
-        var llm = new AnthropicLlmAdapter(new AnthropicOptions {
-            ApiKey = apiKey, Model = "claude-sonnet-4-20250514", MaxTokens = 1024, Temperature = 0.9,
-            GameDefinition = gameDef,
-            DebugDirectory = debugFile
-        });
+        string modelSpec = ParseArg(args, "--model") ?? "";
+        IStatefulLlmAdapter llm;
+        if (modelSpec.StartsWith("groq/") || modelSpec.StartsWith("together/") ||
+            modelSpec.StartsWith("openrouter/") || modelSpec.StartsWith("ollama/"))
+        {
+            string[] providerParts = modelSpec.Split(new[] { '/' }, 2);
+            string provider = providerParts[0];
+            string model = providerParts.Length > 1 ? providerParts[1] : modelSpec;
+            string baseUrl = GetProviderBaseUrl(provider);
+            string envKey = provider.ToUpperInvariant() + "_API_KEY";
+            string openAiKey = Environment.GetEnvironmentVariable(envKey) ?? apiKey;
+            llm = new OpenAiLlmAdapter(new OpenAiOptions
+            {
+                ApiKey = openAiKey,
+                BaseUrl = baseUrl,
+                Model = model,
+                MaxTokens = 1024,
+                Temperature = 0.9,
+                GameDefinition = gameDef,
+                DebugDirectory = debugFile
+            });
+        }
+        else
+        {
+            llm = new AnthropicLlmAdapter(new AnthropicOptions
+            {
+                ApiKey = apiKey, Model = "claude-sonnet-4-20250514", MaxTokens = 1024, Temperature = 0.9,
+                GameDefinition = gameDef,
+                DebugDirectory = debugFile
+            });
+        }
 
         // Load real trap definitions — fallback to NullTrapRegistry if file missing/corrupt
         ITrapRegistry trapRegistry = TrapRegistryLoader.Load(AppContext.BaseDirectory, Console.Error);
@@ -729,7 +756,7 @@ class Program
         }
         Console.WriteLine();
 
-        llm.Dispose();
+        (llm as IDisposable)?.Dispose();
 
         Console.SetOut(tee._console);
         WritePlaytestLog(buffer.ToString(), player1, player2, playtestDir, sessionNumber);
@@ -850,6 +877,18 @@ class Program
         ShadowStatType.Overthinking => "Self-Awareness",
         _ => shadow.ToString()
     };
+
+    static string GetProviderBaseUrl(string provider)
+    {
+        switch (provider.ToLowerInvariant())
+        {
+            case "groq": return "https://api.groq.com/openai";
+            case "together": return "https://api.together.xyz/v1";
+            case "openrouter": return "https://openrouter.ai/api/v1";
+            case "ollama": return "http://localhost:11434/v1";
+            default: return "https://api.openai.com";
+        }
+    }
 
     static void WritePlaytestLog(string content, string p1, string p2, string? dir, int sessionNumber)
     {
