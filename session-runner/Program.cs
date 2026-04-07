@@ -330,15 +330,22 @@ class Program
         Console.WriteLine("## Characters");
         Console.WriteLine();
         Console.WriteLine($"***{player1} bio:*** *\"{sable.Bio}\"*");
+        Console.WriteLine();
         Console.WriteLine($"***{player2} bio:*** *\"{brick.Bio}\"*");
         Console.WriteLine();
         Console.Error.WriteLine("Generating character summaries...");
         string p1Summary = await SummarizeCharacterAsync(apiKey, sable.AssembledSystemPrompt, player1).ConfigureAwait(false);
         string p2Summary = await SummarizeCharacterAsync(apiKey, brick.AssembledSystemPrompt, player2).ConfigureAwait(false);
         if (!string.IsNullOrWhiteSpace(p1Summary))
+        {
+            Console.WriteLine();
             Console.WriteLine($"**{player1}:** {p1Summary}");
+        }
         if (!string.IsNullOrWhiteSpace(p2Summary))
+        {
+            Console.WriteLine();
             Console.WriteLine($"**{player2}:** {p2Summary}");
+        }
         Console.WriteLine();
         Console.WriteLine($"| | **{player1}** | **{player2}** |");
         Console.WriteLine("|---|---|---|");
@@ -578,7 +585,7 @@ class Program
                 if (roll.IsNatTwenty) label = "Nat 20";
                 
                 PrintQuoted("**Intended:** " + (string.IsNullOrWhiteSpace(intended) || intended == "..." ? "..." : $"\"{intended}\""));
-                
+                Console.WriteLine();
                 string marker = isStrongSuccess ? "__" : "*";
                 string formattedDelivered = FormatDeliveredAdditions(intended, result.DeliveredMessage ?? "", marker);
                 PrintQuoted($"**Delivered ({label}):** \"{formattedDelivered}\"");
