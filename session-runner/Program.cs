@@ -236,6 +236,7 @@ class Program
 
         int maxTurns = ParseMaxTurns(args);
         string agentType = ParseAgentArg(args);
+        bool isDebug = args.Contains("--debug");
 
         string promptDir = ResolvePromptDirectory(AppContext.BaseDirectory);
 
@@ -295,6 +296,7 @@ class Program
         Console.WriteLine($"**Date:** {DateTime.UtcNow:yyyy-MM-dd}");
         Console.WriteLine($"**Engine:** `pinder-core GameSession` + `AnthropicLlmAdapter` → claude-sonnet-4-20250514");
         Console.WriteLine($"**Player:** {player1} (Level {p1Level}, +{p1LevelBonus} level bonus) | **Opponent:** {player2} (Level {p2Level}, +{p2LevelBonus} level bonus, LLM puppet)");
+        Console.WriteLine($"**Active Archetype:** {(sable.ActiveArchetype?.Name ?? "None")} | {(brick.ActiveArchetype?.Name ?? "None")}");
         Console.WriteLine();
 
         // ── character table ───────────────────────────────────────────────
@@ -344,9 +346,16 @@ class Program
             }
         }
 
+        string? debugFile = null;
+        if (isDebug && playtestDir != null)
+        {
+            debugFile = Path.Combine(playtestDir, $"session-{sessionNumber:D3}-debug.md");
+        }
+
         var llm = new AnthropicLlmAdapter(new AnthropicOptions {
             ApiKey = apiKey, Model = "claude-sonnet-4-20250514", MaxTokens = 1024, Temperature = 0.9,
-            GameDefinition = gameDef
+            GameDefinition = gameDef,
+            DebugDirectory = debugFile
         });
 
         // Load real trap definitions — fallback to NullTrapRegistry if file missing/corrupt
@@ -478,7 +487,10 @@ class Program
                 activeTrapNames: snap.ActiveTrapNames,
                 sessionHorniness: 0,
                 shadowValues: currentShadowValues,
-                turnNumber: snap.TurnNumber);
+                turnNumber: snap.TurnNumber,
+                activeArchetype: sable.ActiveArchetype?.Name,
+                textingStyleFragment: sable.TextingStyleFragment,
+                history: session.History);
             var decision = await agent.DecideAsync(turnStart, agentContext);
             int pick = decision.OptionIndex;
             var chosen = turnStart.Options[pick];
