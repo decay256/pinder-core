@@ -109,7 +109,13 @@ namespace Pinder.LlmAdapters
             sb.AppendLine();
 
             // Output format instructions
-            sb.Append(PromptTemplates.DialogueOptionsInstruction.Replace("{player_name}", playerName));
+// Build available stats string for this turn
+            string availableStatsStr = context.AvailableStats != null && context.AvailableStats.Length > 0
+                ? string.Join(", ", System.Array.ConvertAll(context.AvailableStats, s => s.ToString().ToUpperInvariant()))
+                : "CHARM, RIZZ, HONESTY, CHAOS, WIT, SELF_AWARENESS";
+            sb.Append(PromptTemplates.DialogueOptionsInstruction
+                .Replace("{player_name}", playerName)
+                .Replace("{available_stats}", availableStatsStr));
 
             return sb.ToString();
         }
@@ -125,7 +131,8 @@ namespace Pinder.LlmAdapters
         /// </param>
         public static string BuildDeliveryPrompt(
             DeliveryContext context,
-            RollContextBuilder? rollContextBuilder = null)
+            RollContextBuilder? rollContextBuilder = null,
+            DeliveryRules? deliveryRules = null)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
@@ -172,10 +179,16 @@ namespace Pinder.LlmAdapters
             {
                 string nat20Str = context.IsNat20 ? " (NAT 20)" : "";
                 string beatDcByStr = $"{context.BeatDcBy}{nat20Str}";
+                string tierLabel = context.IsNat20 ? "Nat 20 — legendary. One sentence can be more effective than a paragraph if it's exactly right."
+                    : context.BeatDcBy >= 15 ? "Exceptional (margin 15+) — the best version of this message that could exist. It arrives at exactly the right moment with exactly the right weight."
+                    : context.BeatDcBy >= 10 ? "Critical success (margin 10-14) — deliver at peak. The message arrives perfectly. Something resonates."
+                    : context.BeatDcBy >= 5  ? "Strong success (margin 5-9) — improve the phrasing, timing, or rhythm. Sharpen word choice. You may add ONE word or phrase that makes the existing sentiment more precise. Do NOT add new sentences or new ideas."
+                    : "Clean success (margin 1-4) — deliver essentially as written. Small word choice improvements only.";
                 sb.AppendLine($"Stat: {context.ChosenOption.Stat.ToString().ToUpperInvariant()} | Beat DC by {beatDcByStr}");
-                sb.Append(PromptTemplates.SuccessDeliveryInstruction
+                sb.Append(PromptTemplates.BuildSuccessDeliveryInstruction(deliveryRules)
                     .Replace("{player_name}", playerName)
-                    .Replace("{beat_dc_by}", beatDcByStr));
+                    .Replace("{beat_dc_by}", beatDcByStr)
+                    .Replace("{tier_instruction}", tierLabel));
             }
             else
             {

@@ -1,0 +1,7 @@
+## Matchup Analysis
+
+**Gerald_42** (Level 5, Gym Bro/Straightforward): Gerald's strongest approach is his impressive Charm (+10) against Velvet's SelfAwareness defense, giving him a solid 60% success rate to break through her mysterious facade. His high Rizz (+9) provides a backup option at 55% success, allowing him to lean into his natural charisma and genuine personality. However, his elevated Madness (5) and Fixation (4) shadows create serious risks of becoming obsessively attached or spiraling if Velvet's enigmatic nature triggers his insecurities.
+
+**Velvet_Void** (Level 7, Mysterious/Chaotic): Velvet's best defense lies in her maxed Chaos (+10), making her nearly impervious to honest, straightforward approaches with only a 5% vulnerability to Gerald's Honesty attacks. Her balanced Wit (+6) and SelfAwareness (+6) provide solid secondary defenses, while her high Dread (5) shadow can psychologically destabilize opponents who get too close. Her lower Fixation (2) suggests she won't get emotionally entangled easily, but her Denial (4) might blind her to genuine connections.
+
+**Prediction:** This matchup heavily favors Gerald's charm-based strategy, but the psychological warfare will be intense. Gerald's straightforward gym-bro energy clashes dramatically with Velvet's mysterious chaos, likely creating a push-pull dynamic where his Madness shadow feeds off her inscrutability while her Dread amplifies his growing obsession.

@@ -9,10 +9,29 @@ using Pinder.Core.Traps;
 
 namespace Pinder.Core.Tests.Conversation
 {
-    public class Issue536_RevertStatefulAdapterTests
+    public class Issue536_StatefulAdapterTests
     {
         private sealed class DummyLlmAdapter : ILlmAdapter
         {
+            public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context) => Task.FromResult(new DialogueOption[0]);
+            public Task<string> DeliverMessageAsync(DeliveryContext context) => Task.FromResult("");
+            public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context) => Task.FromResult(new OpponentResponse("", null, null));
+            public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context) => Task.FromResult<string?>("");
+        }
+
+        private sealed class StatefulDummyLlmAdapter : IStatefulLlmAdapter
+        {
+            public bool StartCalled { get; private set; }
+            public string? ReceivedPrompt { get; private set; }
+
+            public void StartOpponentSession(string opponentSystemPrompt)
+            {
+                StartCalled = true;
+                ReceivedPrompt = opponentSystemPrompt;
+            }
+
+            public bool HasOpponentSession => StartCalled;
+
             public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context) => Task.FromResult(new DialogueOption[0]);
             public Task<string> DeliverMessageAsync(DeliveryContext context) => Task.FromResult("");
             public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context) => Task.FromResult(new OpponentResponse("", null, null));
@@ -34,27 +53,50 @@ namespace Pinder.Core.Tests.Conversation
                 level: 1);
         }
 
-        // What: 1. Delete Interface: The file src/Pinder.Core/Interfaces/IStatefulLlmAdapter.cs is deleted.
-        // Mutation: Fails if IStatefulLlmAdapter is recreated or still exists.
         [Fact]
-        public void IStatefulLlmAdapter_ShouldNotExist()
+        public void IStatefulLlmAdapter_ShouldExist()
         {
             var type = Type.GetType("Pinder.Core.Interfaces.IStatefulLlmAdapter, Pinder.Core");
-            Assert.Null(type);
+            Assert.NotNull(type);
         }
 
-        // What: 5. Revert GameSession Wiring: The GameSession constructor has the type check removed.
-        // Mutation: Fails if GameSession constructor tries to do stateful casts and throws or fails.
         [Fact]
         public void GameSession_Constructor_ShouldSucceedWithStatelessAdapter()
         {
             var player = MakeProfile("P1");
             var opponent = MakeProfile("P2");
-            
-            // Should not throw or do anything with llmMock besides storing it.
+
+            // Plain ILlmAdapter — no stateful cast, should not throw
             var session = new GameSession(player, opponent, new DummyLlmAdapter(), new DummyDice(), new NullTrapRegistry());
-            
+
             Assert.NotNull(session);
+        }
+
+        [Fact]
+        public void GameSession_Constructor_WiresStatefulSession()
+        {
+            var player = MakeProfile("P1");
+            var opponent = MakeProfile("P2");
+            var statefulAdapter = new StatefulDummyLlmAdapter();
+
+            var session = new GameSession(player, opponent, statefulAdapter, new DummyDice(), new NullTrapRegistry());
+
+            Assert.True(statefulAdapter.StartCalled, "GameSession should call StartOpponentSession on construction");
+            Assert.True(statefulAdapter.HasOpponentSession);
+            Assert.Equal("You are P2.", statefulAdapter.ReceivedPrompt);
+        }
+
+        [Fact]
+        public void NullLlmAdapter_ImplementsIStatefulLlmAdapter()
+        {
+            var adapter = new NullLlmAdapter();
+            Assert.True(adapter is IStatefulLlmAdapter);
+
+            var stateful = (IStatefulLlmAdapter)adapter;
+            // Should not throw
+            stateful.StartOpponentSession("test prompt");
+            // NullLlmAdapter always reports no session
+            Assert.False(stateful.HasOpponentSession);
         }
     }
 }

@@ -11,7 +11,7 @@ namespace Pinder.LlmAdapters
 @"Generate exactly 4 dialogue options for {player_name}.
 
 Each option must:
-1. Be tagged with one of: CHARM, RIZZ, HONESTY, CHAOS, WIT, SELF_AWARENESS
+1. Be tagged with one of the available stats for this turn: {available_stats}
 2. Show what the character INTENDS to say — this is their internal intended message, before any roll outcome is applied
 3. Reflect the player's personality and current shadow state (not the opponent's)
 4. Vary in tone and risk — include at least one safe and one bold option
@@ -42,34 +42,59 @@ MEDIUM: This is a texting app. Options are messages the character could send.
 - No ""(thinking to self:..."" no stage directions, no meta-commentary within the message text.
 
 Rules:
-- STAT must be one of: CHARM, RIZZ, HONESTY, CHAOS, WIT, SELF_AWARENESS
+- STAT must be one of the available stats listed above: {available_stats}
 - Text must be in double quotes on the line immediately after the metadata
 - No extra text before OPTION_1 or after the last option
 
 Before writing each option, verify: does this sound exactly like
 the texting style above? If not, rewrite it.";
 
-        /// <summary>§3.3 — Deliver the intended message on a successful roll.</summary>
-        public const string SuccessDeliveryInstruction =
-@"Write as {player_name}.
-The intended message is the player's plan. Your job is to make it land.
-You beat the DC by {beat_dc_by}.
+        /// <summary>§3.3 — Backward-compatible accessor that returns the default success delivery instruction.</summary>
+        public static string SuccessDeliveryInstruction => BuildSuccessDeliveryInstruction(null);
 
-- Clean success (margin 1-4): deliver essentially as written. Small word choice improvements only.
-- Strong success (margin 5-9): improve the phrasing, timing, or rhythm of what's already there.
-  You may: rearrange for better flow, sharpen word choice, add ONE word or phrase that makes the existing sentiment more precise.
-  You must not: add new sentences that introduce ideas not in the intended message, change the emotional register, or make the message say something the player didn't intend.
-- Critical success (margin 10-14): deliver at peak. The message arrives perfectly. Something resonates.
-- Exceptional (margin 15+): this is the best version of this message that could exist. It arrives at exactly the right moment with exactly the right weight. The opponent feels it.
-- Critical success / Nat 20: legendary. One sentence can be more effective than a paragraph if it's exactly right.
+        // Default delivery rule strings used when no DeliveryRules object is provided.
+        private const string DefaultClean = "deliver essentially as written. Small word choice improvements only.";
+        private const string DefaultStrong = "improve the phrasing, timing, or rhythm of what's already there.\n  You may: rearrange for better flow, sharpen word choice, add ONE word or phrase that makes the existing sentiment more precise.\n  You must not: add new sentences that introduce ideas not in the intended message, change the emotional register, or make the message say something the player didn't intend.";
+        private const string DefaultCritical = "deliver at peak. The message arrives perfectly. Something resonates.";
+        private const string DefaultExceptional = "this is the best version of this message that could exist. It arrives at exactly the right moment with exactly the right weight. The opponent feels it.";
+        private const string DefaultTest = "The test: every idea in the delivered version should have a counterpart in the intended version. New additions should sharpen, not expand.";
+        private const string DefaultRegisterInstruction = "Stay in character. Match the texting register from the character profile above. Do not change the character's capitalization style.";
+        private const string DefaultMediumRule = "This is a text message on a phone screen, not a monologue. No internal stage directions, no narration of emotional state, no self-commentary mid-message.";
 
-The test: if you read both the intended and delivered version, every idea in the delivered version should have a counterpart in the intended version. New additions should sharpen, not expand.
+        /// <summary>
+        /// §3.3 — Build the success delivery instruction from configurable rules.
+        /// Falls back to hardcoded defaults when rules is null.
+        /// </summary>
+        public static string BuildSuccessDeliveryInstruction(DeliveryRules rules)
+        {
+            string clean = (rules != null && !string.IsNullOrEmpty(rules.Clean)) ? rules.Clean.TrimEnd() : DefaultClean;
+            string strong = (rules != null && !string.IsNullOrEmpty(rules.Strong)) ? rules.Strong.TrimEnd() : DefaultStrong;
+            string critical = (rules != null && !string.IsNullOrEmpty(rules.Critical)) ? rules.Critical.TrimEnd() : DefaultCritical;
+            string exceptional = (rules != null && !string.IsNullOrEmpty(rules.Exceptional)) ? rules.Exceptional.TrimEnd() : DefaultExceptional;
+            string test = (rules != null && !string.IsNullOrEmpty(rules.Test)) ? rules.Test.TrimEnd() : DefaultTest;
+            string registerInstruction = (rules != null && !string.IsNullOrEmpty(rules.RegisterInstruction)) ? rules.RegisterInstruction.TrimEnd() : DefaultRegisterInstruction;
+            string mediumRule = (rules != null && !string.IsNullOrEmpty(rules.MediumRule)) ? rules.MediumRule.TrimEnd() : DefaultMediumRule;
 
-MEDIUM RULE: This is a text message, not a monologue. The character sends this message in a texting app.
-Write as text that would appear on a phone screen — no internal stage directions, no narration of their emotional state, no self-commentary mid-message.
-
-Keep it in character. Keep the lowercase voice. Don't explain the success.
-Output only the message text.";
+            return "Write as {player_name}.\n" +
+                "The intended message is the player's plan. Your job is to make it land.\n" +
+                "You beat the DC by {beat_dc_by}.\n" +
+                "\n" +
+                "YOUR TIER: {tier_instruction}\n" +
+                "\n" +
+                "Other tiers for reference:\n" +
+                "- Clean success (margin 1-4): " + clean + "\n" +
+                "- Strong success (margin 5-9): " + strong + "\n" +
+                "- Critical success (margin 10-14): " + critical + "\n" +
+                "- Exceptional (margin 15+): " + exceptional + "\n" +
+                "- Critical success / Nat 20: legendary. One sentence can be more effective than a paragraph if it's exactly right.\n" +
+                "\n" +
+                test + "\n" +
+                "\n" +
+                "MEDIUM RULE: " + mediumRule + "\n" +
+                "\n" +
+                registerInstruction + " Don't explain the success.\n" +
+                "Output only the message text.";
+        }
 
         /// <summary>§3.4 — Degrade the intended message according to failure tier.</summary>
         public const string FailureDeliveryInstruction =

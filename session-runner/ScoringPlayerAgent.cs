@@ -27,8 +27,7 @@ namespace Pinder.SessionRunner
         private const float ActiveTrapPenalty = 2.0f;
 
         // Shadow growth risk constants (§7)
-        private const float FixationGrowthPenalty = 0.5f;
-        private const float DenialGrowthPenalty = 0.3f;
+        private const float ShadowAvoidanceBonus = 0.8f; // bonus to options that avoid shadow growth
         private const float FixationT1EvMultiplier = 0.8f;
         private const float StatVarietyBonus = 0.1f;
 
@@ -184,17 +183,20 @@ namespace Pinder.SessionRunner
                     strategicReasons.Add($"Active {trapName} trap — penalty applied");
                 }
 
-                // Shadow growth risk: Fixation growth penalty (§7: same stat 3x → +1 Fixation)
+                // Shadow growth avoidance: bonus to options that break a same-stat streak (§7: avoids Fixation +1)
+                // Applied to options that break the streak — makes streak-breakers relatively more attractive.
                 if (context.LastStatUsed.HasValue
                     && context.SecondLastStatUsed.HasValue
-                    && option.Stat == context.LastStatUsed.Value
-                    && context.LastStatUsed.Value == context.SecondLastStatUsed.Value)
+                    && context.LastStatUsed.Value == context.SecondLastStatUsed.Value
+                    && option.Stat != context.LastStatUsed.Value)
                 {
-                    score -= FixationGrowthPenalty;
-                    strategicReasons.Add("Fixation growth risk — same stat 3x");
+                    score += ShadowAvoidanceBonus;
+                    strategicReasons.Add("Shadow avoidance — breaks same-stat streak (avoids Fixation +1)");
                 }
 
-                // Shadow growth risk: Denial penalty (§7: skip Honesty when available → +1 Denial)
+                // Shadow growth avoidance: bonus to Honesty when it avoids Denial growth (§7)
+                // Applied to Honesty only — makes it relatively more attractive vs options that grow Denial.
+                // Not applied to other options — we want to improve Honesty's rank, not uniformly penalize others.
                 bool honestyInOptions = false;
                 for (int j = 0; j < options.Length; j++)
                 {
@@ -204,10 +206,10 @@ namespace Pinder.SessionRunner
                         break;
                     }
                 }
-                if (option.Stat != StatType.Honesty && honestyInOptions)
+                if (option.Stat == StatType.Honesty && honestyInOptions)
                 {
-                    score -= DenialGrowthPenalty;
-                    strategicReasons.Add("Denial growth risk — skipping available Honesty");
+                    score += ShadowAvoidanceBonus;
+                    strategicReasons.Add("Shadow avoidance — Honesty avoids Denial growth");
                 }
 
                 // Shadow threshold: Fixation effects on Chaos options (§7)

@@ -51,7 +51,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             var instruction = PromptTemplates.DialogueOptionsInstruction;
             // Must still contain the original guidelines
             Assert.Contains("Generate exactly 4 dialogue options", instruction);
-            Assert.Contains("CHARM, RIZZ, HONESTY, CHAOS, WIT, SELF_AWARENESS", instruction);
+            Assert.Contains("{available_stats}", instruction); // stat list injected at runtime
         }
 
         // Mutation: Would catch if the instruction didn't include a complete example with at least 2 options
@@ -303,7 +303,8 @@ OPTION_4
         public void AC1_Instruction_lists_SELF_AWARENESS_as_valid_stat()
         {
             var instruction = PromptTemplates.DialogueOptionsInstruction;
-            Assert.Contains("SELF_AWARENESS", instruction);
+            // Stat list is now dynamic ({available_stats} placeholder injected by SessionDocumentBuilder)
+            Assert.Contains("{available_stats}", instruction);
         }
 
         // Mutation: Would catch if RIZZ stat was parseable in the format

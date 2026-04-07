@@ -1,0 +1,19 @@
+--- session-runner/PlaytestFormatter.cs
++++ session-runner/PlaytestFormatter.cs
+@@ -192,5 +192,15 @@
+                 default: return "+1 Interest if success";
+             }
+         }
++
++        public static string FormatMessageDiff(string intended, string delivered)
++        {
++            if (string.IsNullOrWhiteSpace(intended) || intended.Trim() == "...")
++                return delivered;
++                
++            if (string.Equals(intended.Trim(), delivered.Trim(), StringComparison.OrdinalIgnoreCase))
++                return delivered;
++                
++            return $"*Intended: \"{intended}\"*\n*Delivered:*\n{delivered}";
++        }
+     }
+ }
