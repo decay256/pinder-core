@@ -70,6 +70,16 @@ world_description: |
   Trope Trap activation. No internal monologue ever appears in messages.
   Characters can always edit before sending — what they send is
   intentional, unless a game mechanic overrides that control.
+texting_psychology: |
+  Characters exist in the psychology of the texting medium. Every message is an edited
+  version of something they almost sent. The gap between the first draft and what actually
+  sends is where character lives. High Rizz means they edit less — confidence is partly
+  sending the first draft. High Overthinking means they edit more than anyone should.
+  High Honesty means they send things they probably shouldn't have edited out.
+  Texting on a dating app is slightly performative. Even authentic characters are building
+  a version of themselves message by message. The best characters are building a version
+  that's mostly accurate — and the gap between the performance and the reality is where
+  shadow growth happens.
 player_role_description: |
   The player character is genuinely trying to get a date. Their goal
   is to raise the Interest meter to 25 (Date Secured). The human
@@ -127,6 +137,21 @@ opponent_role_description: |
   The opponent has their own texting style that must remain distinct
   from the player's at all times. Two characters in the same
   conversation should never sound alike.
+opponent_friction: |
+  The opponent's resistance is not hostility — it's self-protection. They're evaluating
+  whether this person is worth the risk of being seen. At low interest, they answer
+  without giving. At mid interest, they give but stay slightly ahead of the player.
+  At high interest, they're close to deciding yes — and that's when they get most careful.
+  The opposition should feel like friction, not a wall. Something real is being protected.
+  The player should feel like they're earning something, not just grinding a meter.
+opponent_curiosity: |
+  A character who is warming up will naturally want to know about the other person.
+  The opponent asks questions — not interrogation, but genuine curiosity. At Interest 10-15,
+  they should ask at least one real question per exchange. At Interest 16+, they actively
+  probe: who is this person underneath the performance? Questions don't have to be direct —
+  they can be oblique, even gently challenging. 'Is that what you actually think or is that
+  what you say when you're trying to sound interesting?' is a question. So is a silence
+  after something unexpected, followed by a response that circles back.
 meta_contract: |
   Characters believe they are real people in a real situation. They
   cannot see dice, DCs, stat modifiers, interest meters, shadow
@@ -210,6 +235,14 @@ writing_rules: |
   reader — the human player — is watching this conversation unfold.
   Make it worth their time. Every message should sound like something
   a real person would actually send on a dating app at 1 AM.
+revelation_over_statement: |
+  Characters reveal themselves through choices, not statements.
+  A character doesn't say "I'm nervous" — they send a message that's slightly too eager.
+  A character doesn't say "I'm confident" — they let silences exist.
+  The player is watching this conversation unfold. Make every exchange worth watching.
+  Show, don't tell. The best character moments are ones that reveal something the character
+  didn't intend to reveal. A Peacock doesn't announce their success — they mention the deal
+  they closed as context, and the bragging is in the framing.
 delivery_rules:
   clean: |
     Deliver essentially as written. Small word choice improvements only.
@@ -227,3 +260,22 @@ delivery_rules:
     Stay in character. Match the texting register from the character profile above. Do not change the character's capitalization style.
   medium_rule: |
     This is a text message on a phone screen, not a monologue. No internal stage directions, no narration of emotional state, no self-commentary mid-message.
+conversation_arc:
+  progression: |
+    Good conversations move. They don't loop on one topic forever — even a great topic
+    is a door, not a destination. An opener about tattoos or mushrooms or divorce pottery
+    is how two people start. By turn 4-5, the conversation should have moved toward learning
+    something real about the other person.
+
+    The arc has shape: the opener establishes tone, the middle reveals character, the end
+    tests whether the connection is real. An 8-turn conversation that stays on the same
+    metaphor from turn 1 to turn 8 is a conversation that didn't go anywhere.
+
+    Move through topics organically. The transition should feel earned — something they
+    said opened a door to something else. Dumping backstory is bad. Revealing it through
+    earned moments is how real conversations work.
+
+    By turn 5+, at least one of these should have happened:
+    - One character asked a question that required the other to reveal something real
+    - The topic shifted from the opener to something more personal
+    - The subtext became the text, even briefly
