@@ -500,7 +500,26 @@ class Program
             else if (roll.Tier == FailureTier.None) rollResult = $"SUCCESS";
             else                      rollResult = roll.Tier.ToString().ToUpperInvariant();
 
-            Console.WriteLine($"**🎲 Roll:** d20({roll.UsedDieRoll}) + {StatLabel(chosen.Stat)}({rollMod}) = **{roll.FinalTotal}** vs DC {roll.DC} → **Miss: {(roll.FinalTotal>=roll.DC ? $"−{roll.FinalTotal-roll.DC}" : $"+{roll.DC-roll.FinalTotal}")} → {rollResult}**");
+            string marginText;
+            if (roll.FinalTotal >= roll.DC)
+            {
+                if (roll.IsNatOne)
+                {
+                    marginText = $"Total beat DC by {roll.FinalTotal - roll.DC} — but NAT 1 💀 overrides";
+                    rollResult = ""; // embedded in marginText
+                }
+                else
+                {
+                    marginText = $"Beat by {roll.FinalTotal - roll.DC}";
+                }
+            }
+            else
+            {
+                marginText = $"Miss by {roll.DC - roll.FinalTotal}";
+            }
+
+            string arrowResult = string.IsNullOrEmpty(rollResult) ? "" : $" → {rollResult}";
+            Console.WriteLine($"**🎲 Roll:** d20({roll.UsedDieRoll}) + {StatLabel(chosen.Stat)}({rollMod}) = **{roll.FinalTotal}** vs DC {roll.DC} → **{marginText}{arrowResult}**");
             Console.WriteLine();
 
             if (result.ComboTriggered != null)
