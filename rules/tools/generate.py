@@ -135,8 +135,64 @@ def render_blocks(blocks):
     return parts
 
 
+
+def generate_archetype_definition(rule: dict, heading_level: int = 4) -> str:
+    parts = []
+    prefix = '#' * heading_level
+    parts.append(f"{prefix} {rule['title']}")
+    
+    stats = rule.get('stats', {})
+    shadows = rule.get('shadows', {})
+    
+    high_stats = stats.get('high', [])
+    low_stats = stats.get('low', [])
+    stats_parts = []
+    if high_stats:
+        stats_parts.append(f"High {', '.join(high_stats)}")
+    if low_stats:
+        stats_parts.append(f"Low {', '.join(low_stats)}")
+    stats_str = " | ".join(stats_parts) if stats_parts else "—"
+
+    high_shadows = shadows.get('high', [])
+    if high_shadows:
+        shadow_str = f"High {', '.join(high_shadows)}"
+    else:
+        shadow_str = "None notable"
+        
+    parts.append(f"**Stats:** {stats_str} | **Shadow:** {shadow_str}  ")
+    
+    lr = rule.get('level_range', [])
+    if lr:
+        if lr[1] == 99:
+            parts.append(f"**Level range:** {lr[0]}+")
+        else:
+            parts.append(f"**Level range:** {lr[0]}–{lr[1]}")
+    else:
+        parts.append(f"**Level range:** Unknown")
+    parts.append("")
+    
+    if rule.get('behavior'):
+        parts.append(rule['behavior'])
+        parts.append("")
+        
+    interference = rule.get('interference', {})
+    if interference:
+        parts.append("**Interference:**")
+        for k, v in interference.items():
+            parts.append(f"* {k}: {v}")
+        parts.append("")
+        
+    if rule.get('has_hr'):
+        parts.append('---')
+        parts.append('')
+    return '\n'.join(parts)
+
+
 def rule_to_markdown(rule, heading_level=2):
     """Convert a single rule entry to markdown."""
+    if rule.get('type') == 'archetype_definition':
+        return generate_archetype_definition(rule, heading_level)
+
     parts = []
 
     # Title as heading
