@@ -304,7 +304,8 @@ namespace Pinder.Core.Conversation
                 horninessLevel: _sessionHorniness,
                 requiresRizzOption: _sessionHorniness >= 12,
                 currentTurn: _turnNumber,
-                playerTextingStyle: _player.TextingStyleFragment);
+                playerTextingStyle: _player.TextingStyleFragment,
+                activeTell: _activeTell);
 
             // Get dialogue options from LLM
             var rawOptions = await _llm.GetDialogueOptionsAsync(context).ConfigureAwait(false);
