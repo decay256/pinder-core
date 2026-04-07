@@ -48,6 +48,8 @@ namespace Pinder.LlmAdapters
                 def.MetaContract.TrimEnd(),
                 "\n\n",
                 def.WritingRules.TrimEnd(),
+                "\n\n== DRAMATIC CRAFT ==\n\n",
+                def.DramaticCraft != null ? def.DramaticCraft.BuildSection().TrimEnd() : "",
                 "\n");
         }
 
@@ -73,6 +75,8 @@ namespace Pinder.LlmAdapters
                 def.MetaContract.TrimEnd(),
                 "\n\n",
                 def.WritingRules.TrimEnd(),
+                "\n\n== DRAMATIC CRAFT ==\n\n",
+                def.DramaticCraft != null ? def.DramaticCraft.BuildSection().TrimEnd() : "",
                 "\n");
         }
 
@@ -98,6 +102,8 @@ namespace Pinder.LlmAdapters
                 def.MetaContract.TrimEnd(),
                 "\n\n",
                 def.WritingRules.TrimEnd(),
+                "\n\n== DRAMATIC CRAFT ==\n\n",
+                def.DramaticCraft != null ? def.DramaticCraft.BuildSection().TrimEnd() : "",
                 "\n");
         }
     }

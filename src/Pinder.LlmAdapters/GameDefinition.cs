@@ -32,6 +32,42 @@ namespace Pinder.LlmAdapters
     }
 
     /// <summary>
+    /// Configurable dramatic craft rules governing emotional investment, tension, and payoff.
+    /// </summary>
+    public sealed class DramaticCraft
+    {
+        public string Goal { get; }
+        public string OpponentWant { get; }
+        public string RevelationBudget { get; }
+        public string DirectnessDial { get; }
+        public string FailureCost { get; }
+        public string EarningTheClose { get; }
+
+        public DramaticCraft(string goal, string opponentWant, string revelationBudget,
+            string directnessDial, string failureCost, string earningTheClose)
+        {
+            Goal = goal ?? "";
+            OpponentWant = opponentWant ?? "";
+            RevelationBudget = revelationBudget ?? "";
+            DirectnessDial = directnessDial ?? "";
+            FailureCost = failureCost ?? "";
+            EarningTheClose = earningTheClose ?? "";
+        }
+
+        public string BuildSection()
+        {
+            var sb = new System.Text.StringBuilder();
+            if (!string.IsNullOrWhiteSpace(Goal)) { sb.AppendLine("DRAMATIC GOAL"); sb.AppendLine(Goal.TrimEnd()); sb.AppendLine(); }
+            if (!string.IsNullOrWhiteSpace(OpponentWant)) { sb.AppendLine("OPPONENT'S WANT"); sb.AppendLine(OpponentWant.TrimEnd()); sb.AppendLine(); }
+            if (!string.IsNullOrWhiteSpace(RevelationBudget)) { sb.AppendLine("REVELATION BUDGET"); sb.AppendLine(RevelationBudget.TrimEnd()); sb.AppendLine(); }
+            if (!string.IsNullOrWhiteSpace(DirectnessDial)) { sb.AppendLine("DIRECTNESS CALIBRATION"); sb.AppendLine(DirectnessDial.TrimEnd()); sb.AppendLine(); }
+            if (!string.IsNullOrWhiteSpace(FailureCost)) { sb.AppendLine("FAILURE COST"); sb.AppendLine(FailureCost.TrimEnd()); sb.AppendLine(); }
+            if (!string.IsNullOrWhiteSpace(EarningTheClose)) { sb.AppendLine("EARNING THE CLOSE"); sb.AppendLine(EarningTheClose.TrimEnd()); }
+            return sb.ToString().TrimEnd();
+        }
+    }
+
+    /// <summary>
     /// Data carrier for game-level creative direction.
     /// Parsed from YAML or provided via hardcoded defaults.
     /// </summary>
@@ -61,6 +97,9 @@ namespace Pinder.LlmAdapters
         /// <summary>Configurable delivery prompt rules, or null for hardcoded defaults.</summary>
         public DeliveryRules DeliveryRules { get; }
 
+        /// <summary>Configurable dramatic craft rules, or null for hardcoded defaults.</summary>
+        public DramaticCraft DramaticCraft { get; }
+
         public GameDefinition(
             string name,
             string vision,
@@ -69,7 +108,8 @@ namespace Pinder.LlmAdapters
             string opponentRoleDescription,
             string metaContract,
             string writingRules,
-            DeliveryRules deliveryRules = null)
+            DeliveryRules deliveryRules = null,
+            DramaticCraft dramaticCraft = null)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Vision = vision ?? throw new ArgumentNullException(nameof(vision));
@@ -79,6 +119,7 @@ namespace Pinder.LlmAdapters
             MetaContract = metaContract ?? throw new ArgumentNullException(nameof(metaContract));
             WritingRules = writingRules ?? throw new ArgumentNullException(nameof(writingRules));
             DeliveryRules = deliveryRules;
+            DramaticCraft = dramaticCraft;
         }
 
         /// <summary>
@@ -136,6 +177,24 @@ namespace Pinder.LlmAdapters
                     mediumRule: DrGet("medium_rule"));
             }
 
+            DramaticCraft dramaticCraft = null;
+            if (parsed.TryGetValue("dramatic_craft", out var dcObj) && dcObj is Dictionary<object, object> dcDict)
+            {
+                string DcGet(string key)
+                {
+                    if (dcDict.TryGetValue(key, out var v) && v != null)
+                        return v.ToString();
+                    return "";
+                }
+                dramaticCraft = new DramaticCraft(
+                    goal: DcGet("goal"),
+                    opponentWant: DcGet("opponent_want"),
+                    revelationBudget: DcGet("revelation_budget"),
+                    directnessDial: DcGet("directness_dial"),
+                    failureCost: DcGet("failure_cost"),
+                    earningTheClose: DcGet("earning_the_close"));
+            }
+
             return new GameDefinition(
                 name: GetRequired("name"),
                 vision: GetRequired("vision"),
@@ -144,7 +203,8 @@ namespace Pinder.LlmAdapters
                 opponentRoleDescription: GetRequired("opponent_role_description"),
                 metaContract: GetRequired("meta_contract"),
                 writingRules: GetRequired("writing_rules"),
-                deliveryRules: deliveryRules
+                deliveryRules: deliveryRules,
+                dramaticCraft: dramaticCraft
             );
         }
 
@@ -246,7 +306,77 @@ message proportional to the failure tier.
 
 Subtext over text. Reveal through choices, not statements. Every message
 should sound like something a real person would actually send on a dating
-app at 1 AM."
+app at 1 AM.",
+            dramaticCraft: new DramaticCraft(
+                goal: @"Every conversation should produce emotional investment, tension, and payoff.
+Not just a pleasant exchange — a story the player felt. The player should be
+leaning in when they pick turn 7's option, not clicking on autopilot.
+
+The three experiences we are building toward:
+- INVESTMENT: The player cares what the opponent thinks. Not just about winning —
+  about this specific person's response to this specific thing they said.
+- TENSION: Something feels at stake. The player is not sure how the next message
+  will land. They have been burned before. They are not comfortable.
+- PAYOFF: The win or loss lands with weight. DateSecured should feel earned.
+  Unmatched should sting. Neither should feel like a probability calculation resolving.",
+                opponentWant: @"The opponent is not passive. They have something they want from this conversation.
+
+At Interest 10-14: They want to find out if there is anything real here, or if
+this is another performance. They are gathering evidence. Their questions are tests.
+Their humor is a filter. Not hostile — efficient.
+
+At Interest 15-20: They have found something interesting. Now they want to understand
+what is underneath it. They are probing for the gap between who the player presents
+themselves as and who they actually are. That gap is what they are attracted to —
+not the performance, the moment the performance slips.
+
+At Interest 21-24: They are close to deciding yes. Now they are testing whether
+the thing they found is real or whether it will disappear under pressure. They
+give more — and watch what the player does with it.
+
+This want should drive responses. Not just reaction, but active pursuit.",
+                revelationBudget: @"Each conversation has a budget of 2-3 moments where something real surfaces.
+Not exposition — moments when behavioral evidence accumulates until the underlying
+thing becomes visible.
+
+Spend this budget at structurally meaningful points:
+- One moment early-mid (turn 3-5): the first real thing surfaces, usually accidentally
+- One moment at or after a failure: pressure creates revelation
+- One moment near the close: what makes the win feel earned or the loss feel true
+
+Between these moments, operate at the surface — subtext, deflection, humor, testing.
+The real things should feel withheld until the moment they cannot be.",
+                directnessDial: @"Characters operate at 2-4 on a 0-10 scale of directness.
+
+0 = pure subtext (everything implied, nothing stated)
+5 = occasional direct statement of feeling or intention
+10 = characters explain their emotional states
+
+Target: 2-3 for normal exchanges. 4-5 only at maximum pressure points. Never above 6.
+A character who says 'I am nervous' is at 7. A character who sends a message that is
+slightly too eager is at 2. The eagerness IS the nervousness.
+
+For the opponent: at low interest, operate at 1-2 (near pure subtext). At high
+interest, move toward 3-4 — say slightly more real things, but never lose the
+withholding quality that makes them worth pursuing.",
+                failureCost: @"When the player's message fails (Misfire, Trope Trap, Nat 1), the opponent does not
+reset to neutral. They noticed. Whatever leaked through in the corrupted message
+informs their emotional stance for the rest of the conversation.
+
+A Misfire revealing backstory is not erased by the next successful message. The
+opponent saw it. They are now watching for whether it comes back.
+
+The opponent's response to a failure: reaction to what they saw, dilemma about
+what it means, decision about how to proceed. This is how failures create dramatic
+arcs rather than temporary interest dips.",
+                earningTheClose: @"DateSecured should feel like something dissolved, not a threshold crossed.
+
+A win that came too easily was not a win — it was a transaction. If the path had
+friction, reversal, near-loss, and genuine earned moments — the close lands.
+
+The opponent's final concession is not 'Interest hit 25.' It is the opponent
+deciding this person earned it. The final message should reflect that something
+real happened, not just that the meter filled.")
         );
     }
 }
