@@ -551,12 +551,18 @@ class Program
 
             string arrowResult = string.IsNullOrEmpty(rollResult) ? "" : $" → {rollResult}";
             Console.WriteLine($"**🎲 Roll:** d20({roll.UsedDieRoll}) + {StatLabel(chosen.Stat)}({rollMod}) = **{roll.FinalTotal}** vs DC {roll.DC} → **{marginText}{arrowResult}**");
+
+            // #484/#698: Inline rule explanation after roll
+            string rollExplanation = GetRollExplanation(roll);
+            if (!string.IsNullOrEmpty(rollExplanation))
+                Console.WriteLine($"> 📋 *{rollExplanation}*");
             Console.WriteLine();
 
             if (result.ComboTriggered != null)
             {
                 Console.WriteLine($"> *⭐ {result.ComboTriggered} combo fires!*");
                 Console.WriteLine($"> *{PlaytestFormatter.GetComboSequenceDescription(result.ComboTriggered)}*");
+                Console.WriteLine($"> *{PlaytestFormatter.GetComboRewardSummary(result.ComboTriggered)}*");
             }
             if (result.TellReadBonus > 0)      Console.WriteLine($"> *📖 Tell read! +{result.TellReadBonus}*");
             Console.WriteLine();
@@ -603,15 +609,70 @@ class Program
             Console.WriteLine();
             Console.WriteLine("```");
             Console.WriteLine($"Interest: {InterestBar(newInterest)}  {newInterest}/25  ({deltaStr})");
+
+            // #699: Interest delta breakdown
+            if (delta != 0 && result.Roll != null)
+            {
+                var parts = new List<string>();
+                if (result.Roll.IsNatOne) parts.Add("Nat 1: -4");
+                else if (result.Roll.IsNatTwenty) parts.Add("Nat 20: +4 base");
+                else if (result.Roll.IsSuccess)
+                {
+                    int beat = result.Roll.FinalTotal - result.Roll.DC;
+                    if (beat >= 10) parts.Add("crit: +3 base");
+                    else if (beat >= 5) parts.Add("strong: +2 base");
+                    else parts.Add("clean: +1 base");
+                }
+                else parts.Add($"fail: {result.InterestDelta}");
+                if (result.ComboTriggered != null) parts.Add("combo bonus");
+                if (result.TellReadBonus > 0) parts.Add($"tell +{result.TellReadBonus}");
+                if (result.CallbackBonusApplied > 0) parts.Add($"callback +{result.CallbackBonusApplied}");
+                if (parts.Count > 0)
+                    Console.WriteLine($"  *({string.Join(", ", parts)})*");
+            }
             if (result.ShadowGrowthEvents?.Count > 0)
             {
                 foreach (var shadowEvent in result.ShadowGrowthEvents)
+                {
                     Console.WriteLine($"\u26a0\ufe0f SHADOW GROWTH: {shadowEvent}");
+                    // #484: Shadow threshold warnings
+                    foreach (ShadowStatType sType in Enum.GetValues(typeof(ShadowStatType)))
+                    {
+                        if (shadowEvent.Contains(sType.ToString()))
+                        {
+                            int sv = sableShadows.GetEffectiveShadow(sType);
+                            string paired = GetPairedStat(sType);
+                            if (sv == 6) Console.WriteLine($"> ⚠️ *Threshold 6: {sType} now taints {paired} dialogue.*");
+                            else if (sv == 12) Console.WriteLine($"> ⚠️ *Threshold 12: {sType} now penalizes {paired} rolls.*");
+                            else if (sv == 18) Console.WriteLine($"> ⚠️ *Threshold 18: {sType} may override your {paired} choices.*");
+                        }
+                    }
+                }
             }
             string trapLine = result.StateAfter.ActiveTrapNames.Length > 0
                 ? string.Join(", ", result.StateAfter.ActiveTrapNames) : "none";
             Console.WriteLine($"Active Traps: {trapLine}  |  Momentum: {result.StateAfter.MomentumStreak} win{(result.StateAfter.MomentumStreak!=1?"s":"")}");
             Console.WriteLine("```");
+
+            // #481/#700: Momentum tooltip
+            if (result.StateAfter.MomentumStreak >= 3)
+            {
+                int mBonus = result.StateAfter.MomentumStreak >= 5 ? 3 : 2;
+                Console.WriteLine($"> *Momentum: +{mBonus} added to your next roll total.*");
+            }
+
+            // #700: Interest state change explanation
+            {
+                InterestState stateBefore = snap.State;
+                InterestState stateAfter = result.StateAfter.State;
+                if (stateBefore != stateAfter)
+                {
+                    Console.WriteLine($"*** Interest state changed to {stateAfter} ***");
+                    string stateDesc = GetInterestStateDescription(stateAfter);
+                    if (!string.IsNullOrEmpty(stateDesc))
+                        Console.WriteLine($"> *{stateDesc}*");
+                }
+            }
 
             interest = newInterest;
             momentum = result.StateAfter.MomentumStreak;
@@ -742,6 +803,53 @@ class Program
         if (text.Length > 0) lines.Add(text);
         return lines.Count > 0 ? lines : new List<string> { "" };
     }
+
+    // #484/#698: Roll explanation helper
+    static string GetRollExplanation(RollResult roll)
+    {
+        if (roll.IsNatOne) return "Nat 1 — Legendary Fail: the die showing 1 overrides all bonuses. Maximum corruption tier.";
+        if (roll.IsNatTwenty) return "Nat 20 — Always succeeds regardless of DC. +4 Interest.";
+        if (!roll.IsSuccess)
+        {
+            int miss = roll.DC - roll.FinalTotal;
+            if (miss >= 10) return $"Catastrophe (miss by {miss}): −3 Interest + trap activates.";
+            if (miss >= 6)  return $"Trope Trap (miss by {miss}): −2 Interest + trap activates.";
+            if (miss >= 3)  return $"Misfire (miss by {miss}): −1 Interest.";
+            return $"Fumble (miss by {miss}): −1 Interest, slight stumble.";
+        }
+        else
+        {
+            int beat = roll.FinalTotal - roll.DC;
+            if (beat >= 15) return $"Exceptional (beat by {beat}): best possible delivery. +3 Interest base.";
+            if (beat >= 10) return $"Critical success (beat by {beat}): peak delivery. +3 Interest base.";
+            if (beat >= 5)  return $"Strong success (beat by {beat}): improved delivery. +2 Interest base.";
+            return $"Clean success (beat by {beat}): delivered as intended. +1 Interest base.";
+        }
+    }
+
+    // #700: Interest state description helper
+    static string GetInterestStateDescription(InterestState state) => state switch
+    {
+        InterestState.Bored => "Ghost risk: 25% per turn. Opponent may stop responding.",
+        InterestState.Lukewarm => "Opponent is present but unconvinced. No ghost risk.",
+        InterestState.Interested => "Conversation has traction. Opponent is engaged.",
+        InterestState.VeryIntoIt => "Opponent is genuinely interested. +advantage on rolls.",
+        InterestState.AlmostThere => "One step from the date. Opponent is deciding.",
+        InterestState.DateSecured => "Date secured. Opponent agreed to meet.",
+        _ => ""
+    };
+
+    // #484: Shadow-to-stat pairing helper
+    static string GetPairedStat(ShadowStatType shadow) => shadow switch
+    {
+        ShadowStatType.Madness => "Charm",
+        ShadowStatType.Horniness => "Rizz",
+        ShadowStatType.Denial => "Honesty",
+        ShadowStatType.Fixation => "Chaos",
+        ShadowStatType.Dread => "Wit",
+        ShadowStatType.Overthinking => "Self-Awareness",
+        _ => shadow.ToString()
+    };
 
     static void WritePlaytestLog(string content, string p1, string p2, string? dir, int sessionNumber)
     {
