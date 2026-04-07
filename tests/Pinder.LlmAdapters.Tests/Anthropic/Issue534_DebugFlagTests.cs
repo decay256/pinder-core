@@ -260,7 +260,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         [Fact]
         public async Task DebugFile_SystemPromptTruncatedTo200Chars()
         {
-            // What: Issue #639 — system prompt shown as first 200 chars
+            // What: Issue #639 — system prompt now shown in full (no truncation, per fix in b2a6f3a)
             var handler = new MockHttpMessageHandler((_, __) => MakeOptionsSuccessResponse());
             var httpClient = new HttpClient(handler);
             var options = new AnthropicOptions { ApiKey = "test", DebugDirectory = _debugFile };
@@ -269,7 +269,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             await adapter.GetDialogueOptionsAsync(MakeContext());
 
             var content = File.ReadAllText(_debugFile);
-            Assert.Contains("**System (first 200 chars):**", content);
+            Assert.Contains("**System prompt:**", content);
         }
     }
 }
