@@ -82,34 +82,6 @@ class Program
         return md.Substring(start, end - start).Trim();
     }
 
-    static async Task<string> SummarizeCharacterAsync(string apiKey, string assembledSystemPrompt, string characterName)
-    {
-        try
-        {
-            var client = new Pinder.LlmAdapters.Anthropic.AnthropicClient(apiKey);
-            var request = new Pinder.LlmAdapters.Anthropic.Dto.MessagesRequest
-            {
-                Model = "claude-sonnet-4-20250514",
-                MaxTokens = 150,
-                Temperature = 0.5,
-                Messages = new Pinder.LlmAdapters.Anthropic.Dto.Message[]
-                {
-                    new Pinder.LlmAdapters.Anthropic.Dto.Message
-                    {
-                        Role = "user",
-                        Content = $"Based on this character profile, write exactly one paragraph (3 sentences max) summarizing: who they are and their backstory, their personality, and their texting style. Be specific and vivid. Do not use bullet points.\n\n{assembledSystemPrompt.Substring(0, System.Math.Min(3000, assembledSystemPrompt.Length))}"
-                    }
-                }
-            };
-            var response = await client.SendMessagesAsync(request).ConfigureAwait(false);
-            return response.GetText().Trim();
-        }
-        catch
-        {
-            return string.Empty;
-        }
-    }
-
     // BestOption removed — replaced by IPlayerAgent (see HighestModAgent)
 
     // ── character loading ─────────────────────────────────────────────────────
@@ -264,7 +236,6 @@ class Program
 
         int maxTurns = ParseMaxTurns(args);
         string agentType = ParseAgentArg(args);
-        bool isDebug = args.Contains("--debug");
 
         string promptDir = ResolvePromptDirectory(AppContext.BaseDirectory);
 
@@ -330,22 +301,7 @@ class Program
         Console.WriteLine("## Characters");
         Console.WriteLine();
         Console.WriteLine($"***{player1} bio:*** *\"{sable.Bio}\"*");
-        Console.WriteLine();
         Console.WriteLine($"***{player2} bio:*** *\"{brick.Bio}\"*");
-        Console.WriteLine();
-        Console.Error.WriteLine("Generating character summaries...");
-        string p1Summary = await SummarizeCharacterAsync(apiKey, sable.AssembledSystemPrompt, player1).ConfigureAwait(false);
-        string p2Summary = await SummarizeCharacterAsync(apiKey, brick.AssembledSystemPrompt, player2).ConfigureAwait(false);
-        if (!string.IsNullOrWhiteSpace(p1Summary))
-        {
-            Console.WriteLine();
-            Console.WriteLine($"**{player1}:** {p1Summary}");
-        }
-        if (!string.IsNullOrWhiteSpace(p2Summary))
-        {
-            Console.WriteLine();
-            Console.WriteLine($"**{player2}:** {p2Summary}");
-        }
         Console.WriteLine();
         Console.WriteLine($"| | **{player1}** | **{player2}** |");
         Console.WriteLine("|---|---|---|");
@@ -353,14 +309,6 @@ class Program
         foreach (var stat in new[] { StatType.Charm, StatType.Rizz, StatType.Honesty, StatType.Chaos, StatType.Wit, StatType.SelfAwareness }) {
             int p1 = sableStats.GetEffective(stat), p2 = brickStats.GetEffective(stat);
             Console.WriteLine($"| {StatLabel(stat)} | {p1:+#;-#;0} | {p2:+#;-#;0} |");
-        }
-        Console.WriteLine($"| — | — | — |");
-        foreach (Pinder.Core.Stats.ShadowStatType shadowType in Enum.GetValues(typeof(Pinder.Core.Stats.ShadowStatType))) {
-            int p1Shadow = sableStats.GetShadow(shadowType);
-            int p2Shadow = brickStats.GetShadow(shadowType);
-            string p1Str = p1Shadow > 0 ? p1Shadow.ToString() : "0";
-            string p2Str = p2Shadow > 0 ? p2Shadow.ToString() : "0";
-            Console.WriteLine($"| {shadowType} | {p1Str} | {p2Str} |");
         }
         Console.WriteLine();
 
@@ -374,8 +322,7 @@ class Program
             int dc = brickStats.GetDefenceDC(stat);
             int need = dc - atkMod;
             int pct = Math.Max(0, Math.Min(100, (21 - need) * 5));
-            StatType defenceStat = Pinder.Core.Stats.StatBlock.DefenceTable[stat];
-            Console.WriteLine($"| {StatLabel(stat)} | {atkMod:+#;-#;0} | {StatLabel(defenceStat)} | {dc} | {need}+ | {pct}% | {RiskLabel(need)} |");
+            Console.WriteLine($"| {StatLabel(stat)} | {atkMod:+#;-#;0} | — | {dc} | {need}+ | {pct}% | {RiskLabel(need)} |");
         }
         Console.WriteLine();
         Console.WriteLine("> DC = 13 + opponent defending stat modifier. Miss by 1–2 = Fumble | 3–5 = Misfire | 6–9 = Trope Trap | 10+ = Catastrophe | Nat 1 = Legendary.");
@@ -397,16 +344,9 @@ class Program
             }
         }
 
-        string? debugDir = null;
-        if (isDebug && playtestDir != null)
-        {
-            debugDir = Path.Combine(playtestDir, $"session-{sessionNumber:D3}-debug.md");
-        }
-
         var llm = new AnthropicLlmAdapter(new AnthropicOptions {
             ApiKey = apiKey, Model = "claude-sonnet-4-20250514", MaxTokens = 1024, Temperature = 0.9,
-            GameDefinition = gameDef,
-            DebugDirectory = debugDir
+            GameDefinition = gameDef
         });
 
         // Load real trap definitions — fallback to NullTrapRegistry if file missing/corrupt
@@ -462,8 +402,6 @@ class Program
         int turn = 0;
         GameOutcome? finalOutcome = null;
         string lastOpponentMsg = "";
-        StatType? lastStatUsed = null;
-        StatType? secondLastStatUsed = null;
 
         while (turn < maxTurns)
         {
@@ -487,6 +425,10 @@ class Program
             Console.WriteLine();
 
             // // -- Option display: one block per option --
+            if (!string.IsNullOrEmpty(lastOpponentMsg)) {
+                Console.WriteLine($"**{player2}:** *\"{lastOpponentMsg}\"*");
+                Console.WriteLine();
+            }
             var statusParts = new System.Collections.Generic.List<string>();
             if (snap.ActiveTrapNames.Length > 0)
                 statusParts.Add($"Traps: {string.Join(", ", snap.ActiveTrapNames)}");
@@ -495,12 +437,6 @@ class Program
             else if (momentum > 0)
                 statusParts.Add($"Momentum: {momentum} win streak");
             if (statusParts.Count > 0) { Console.WriteLine(string.Join(" | ", statusParts)); Console.WriteLine(); }
-            // Build current shadow values from tracker for option display
-            var currentShadowValues = new Dictionary<ShadowStatType, int>();
-            foreach (ShadowStatType shadowType in Enum.GetValues(typeof(ShadowStatType)))
-                currentShadowValues[shadowType] = sableShadows.GetEffectiveShadow(shadowType);
-
-            bool honestyAvailable = turnStart.Options.Any(o => o.Stat == StatType.Honesty);
             char[] letters = { 'A', 'B', 'C', 'D' };
             for (int i = 0; i < turnStart.Options.Length; i++) {
                 var opt = turnStart.Options[i];
@@ -514,23 +450,8 @@ class Program
                 if (opt.ComboName != null)           badges.Add($"⭐ Combo: {opt.ComboName} ({PlaytestFormatter.GetComboRewardSummary(opt.ComboName)})");
                 if (opt.CallbackTurnNumber.HasValue) badges.Add("Callback");
                 if (opt.HasWeaknessWindow)           badges.Add("Window");
-                // Shadow growth warnings
-                var shadowBadges = new System.Collections.Generic.List<string>();
-                if (opt.Stat != StatType.Honesty && honestyAvailable)
-                    shadowBadges.Add("⚠️ Denial +1");
-                if (opt.Stat == StatType.Honesty && honestyAvailable && interest >= 15)
-                    shadowBadges.Add("✨ Denial -1");
-                if (lastStatUsed.HasValue && secondLastStatUsed.HasValue
-                    && lastStatUsed.Value == secondLastStatUsed.Value
-                    && opt.Stat == lastStatUsed.Value)
-                    shadowBadges.Add("⚠️ Fixation +1");
-                if (lastStatUsed.HasValue && secondLastStatUsed.HasValue
-                    && lastStatUsed.Value == secondLastStatUsed.Value
-                    && opt.Stat != lastStatUsed.Value)
-                    shadowBadges.Add("✨ breaks streak");
                 string badgeStr = badges.Count > 0 ? " | " + string.Join(", ", badges) : "";
-                string shadowStr = shadowBadges.Count > 0 ? "  ‖ " + string.Join(", ", shadowBadges) : "";
-                Console.WriteLine($"**{letters[i]})** {StatLabel(opt.Stat)} {mod:+#;-#;0} | {pct}% {riskColor}{badgeStr}{shadowStr}");
+                Console.WriteLine($"**{letters[i]})** {StatLabel(opt.Stat)} {mod:+#;-#;0} | {pct}% {riskColor}{badgeStr}");
                 
                 if (opt.ComboName != null)
                 {
@@ -543,6 +464,11 @@ class Program
             }
 
             // ── pick + roll ───────────────────────────────────────────────
+            // Build current shadow values from tracker for player agent context
+            var currentShadowValues = new Dictionary<ShadowStatType, int>();
+            foreach (ShadowStatType shadowType in Enum.GetValues(typeof(ShadowStatType)))
+                currentShadowValues[shadowType] = sableShadows.GetEffectiveShadow(shadowType);
+
             var agentContext = new PlayerAgentContext(
                 playerStats: sableStats,
                 opponentStats: brickStats,
@@ -574,14 +500,26 @@ class Program
             else if (roll.Tier == FailureTier.None) rollResult = $"SUCCESS";
             else                      rollResult = roll.Tier.ToString().ToUpperInvariant();
 
-            string rollMargin;
-            if (roll.IsNatOne)
-                rollMargin = $"Nat 1 (would have beaten DC by {roll.FinalTotal - roll.DC})";
-            else if (roll.IsSuccess || roll.FinalTotal >= roll.DC)
-                rollMargin = $"Beat by {roll.FinalTotal - roll.DC}";
+            string marginText;
+            if (roll.FinalTotal >= roll.DC)
+            {
+                if (roll.IsNatOne)
+                {
+                    marginText = $"Total beat DC by {roll.FinalTotal - roll.DC} — but NAT 1 💀 overrides";
+                    rollResult = ""; // embedded in marginText
+                }
+                else
+                {
+                    marginText = $"Beat by {roll.FinalTotal - roll.DC}";
+                }
+            }
             else
-                rollMargin = $"Miss by {roll.DC - roll.FinalTotal}";
-            Console.WriteLine($"**🎲 Roll:** d20({roll.UsedDieRoll}) + {StatLabel(chosen.Stat)}({rollMod}) = **{roll.FinalTotal}** vs DC {roll.DC} → **{rollMargin} → {rollResult}**");
+            {
+                marginText = $"Miss by {roll.DC - roll.FinalTotal}";
+            }
+
+            string arrowResult = string.IsNullOrEmpty(rollResult) ? "" : $" → {rollResult}";
+            Console.WriteLine($"**🎲 Roll:** d20({roll.UsedDieRoll}) + {StatLabel(chosen.Stat)}({rollMod}) = **{roll.FinalTotal}** vs DC {roll.DC} → **{marginText}{arrowResult}**");
             Console.WriteLine();
 
             if (result.ComboTriggered != null)
@@ -605,25 +543,11 @@ class Program
                                roll.Tier.ToString();
                 if (roll.IsNatTwenty) label = "Nat 20";
                 
-                string marker = isStrongSuccess ? "__" : "*";
+                PrintQuoted("**Intended:** " + (string.IsNullOrWhiteSpace(intended) || intended == "..." ? "..." : $"\"{intended}\""));
+                
+                string marker = isStrongSuccess ? "*" : "~~";
                 string formattedDelivered = FormatDeliveredAdditions(intended, result.DeliveredMessage ?? "", marker);
-                
-                // Only show diff when messages actually differ
-                bool messagesIdentical = string.Equals(
-                    (intended ?? "").Trim(),
-                    (result.DeliveredMessage ?? "").Trim(),
-                    StringComparison.Ordinal);
-                
-                if (!messagesIdentical)
-                {
-                    PrintQuoted("**Intended:** " + (string.IsNullOrWhiteSpace(intended) || intended == "..." ? "..." : $"\"{intended}\""));
-                    Console.WriteLine();
-                    PrintQuoted($"**Delivered ({label}):** \"{formattedDelivered}\"");
-                }
-                else
-                {
-                    PrintQuoted(result.DeliveredMessage);
-                }
+                PrintQuoted($"**Delivered ({label}):** \"{formattedDelivered}\"");
             }
             else
             {
@@ -635,10 +559,6 @@ class Program
             Console.WriteLine($"**📩 {player2} replies:**");
             PrintQuoted(result.OpponentMessage);
             Console.WriteLine();
-
-            // Track stat history for fixation warnings
-            secondLastStatUsed = lastStatUsed;
-            lastStatUsed = chosen.Stat;
 
             int newInterest = result.StateAfter.Interest;
             int delta = result.InterestDelta;
@@ -708,7 +628,6 @@ class Program
         }
         Console.WriteLine();
 
-        llm.WriteDebugSummary();
         llm.Dispose();
 
         Console.SetOut(tee._console);

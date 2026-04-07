@@ -504,6 +504,8 @@
   - kind: paragraph
     text: '**That''s real progression.** Level 1 with no build points is genuinely hard — most rolls below 50%. A maxed Level 10 with heavy investment feels powerful against average opponents but still
       sweats against strong ones. And shadows can drag that +6 down to +3 or worse.'
+  - kind: blank_lines
+    count: 3
   - kind: hr
   description: 'With stat modifier +2 on top:'
   heading_level: 3
@@ -2737,4 +2739,554 @@
     text: 'A Catastrophe (miss 10+) or Nat 1 triggers BOTH: trap + shadow growth. Single terrible roll → compounding consequences.'
   description: 'A Catastrophe (miss 10+) or Nat 1 triggers BOTH: trap + shadow growth. Single terrible roll → compounding consequences.'
   heading_level: 3
+  compact_heading: true
+- id: archetype.hey-opener
+  section: §3
+  title: The Hey Opener
+  type: archetype_definition
+  stats:
+    high: []
+    low:
+    - Charm
+    - Wit
+    - Chaos
+  shadows:
+    high:
+    - Dread
+    - Fixation
+    low: []
+  level_range:
+  - 1
+  - 3
+  behavior: 'Can barely form a sentence. Every message is "hey" or "hi." Not malicious — just paralysed by fear of rejection and genuinely has no idea what else to say. Believes that opening a channel is
+    the hard part. It is not. The digital equivalent of standing in a doorway.
+
+
+    *Sample lines:* hey · hi · heyy · sup · what''s up'
+  interference: {}
+  has_hr: true
+  tier: 1
+  description: Can barely form a sentence. Every message is "hey" or "hi." Not malicious — just paralysed by fear o
+  heading_level: 4
+  compact_heading: true
+- id: archetype.dtf-opener
+  section: §3
+  title: The DTF Opener
+  type: archetype_definition
+  stats:
+    high:
+    - Rizz
+    low:
+    - Self-Awareness
+    - Charm
+    - Wit
+    - Honesty
+  shadows:
+    high:
+    - Horniness
+    - Dread
+    low: []
+  level_range:
+  - 1
+  - 5
+  behavior: 'Skips all pretence. Opens with explicitly sexual messages. Expects enthusiasm. Gets blocked. Does it again. The internal logic: I want this, therefore saying so clearly is efficient. The self-awareness
+    to understand that directness about desire is different from consent to be desired is simply absent.
+
+
+    *Sample lines:* "you up?" · "wanna come over" · "let''s skip the small talk"'
+  interference: {}
+  has_hr: true
+  tier: 1
+  description: Skips all pretence. Opens with explicitly sexual messages. Expects enthusiasm. Gets blocked. Does it
+  heading_level: 4
+  compact_heading: true
+- id: archetype.one-word-replier
+  section: §3
+  title: The One-Word Replier
+  type: archetype_definition
+  stats:
+    high: []
+    low:
+    - Charm
+    - Wit
+    - Chaos
+    - Honesty
+  shadows:
+    high:
+    - Overthinking
+    - Dread
+    low: []
+  level_range:
+  - 1
+  - 5
+  behavior: 'Responds to every thoughtful message with "haha", "lol", "yeah", "cool", "nice." The human embodiment of read-but-not-engaged energy. Often they''re overthinking every response and producing
+    nothing as a result. A conversation black hole from which no momentum escapes.
+
+
+    *Sample lines:* haha · lol · yeah · cool · nice'
+  interference: {}
+  has_hr: true
+  tier: 1
+  description: Responds to every thoughtful message with "haha", "lol", "yeah", "cool", "nice." The human embodimen
+  heading_level: 4
+  compact_heading: true
+- id: archetype.wall-of-text
+  section: §3
+  title: The Wall of Text
+  type: archetype_definition
+  stats:
+    high:
+    - Honesty
+    - Chaos
+    low:
+    - Self-Awareness
+    - Charm
+  shadows:
+    high:
+    - Overthinking
+    - Fixation
+    low: []
+  level_range:
+  - 1
+  - 5
+  behavior: The overcorrection from the Hey Opener. First message is a 300-word paragraph covering their entire personality, life context, and opening question. Well-intentioned. Overwhelming. Usually written
+    in a single anxious sitting and sent before they can reconsider. Signals the same anxiety as "hey" — just a different expression of it.
+  interference: {}
+  has_hr: true
+  tier: 2
+  description: 'The overcorrection from the Hey Opener. First message is a 300-word paragraph covering their entire '
+  heading_level: 4
+  compact_heading: true
+- id: archetype.copy-paste-machine
+  section: §3
+  title: The Copy-Paste Machine
+  type: archetype_definition
+  stats:
+    high:
+    - Charm
+    low:
+    - Self-Awareness
+    - Wit
+    - Honesty
+  shadows:
+    high:
+    - Fixation
+    - Denial
+    low: []
+  level_range:
+  - 2
+  - 5
+  behavior: Has a message template. Sends it to everyone. Occasionally swaps in a name or a fake-specific detail. Women can always tell. The tell is that nothing in the message actually references anything
+    real about their profile. Volume strategy. The human equivalent of a mail merge.
+  interference: {}
+  has_hr: true
+  tier: 2
+  description: Has a message template. Sends it to everyone. Occasionally swaps in a name or a fake-specific detail
+  heading_level: 4
+  compact_heading: true
+- id: archetype.pickup-line-spammer
+  section: §3
+  title: The Pickup Line Spammer
+  type: archetype_definition
+  stats:
+    high:
+    - Charm
+    - Chaos
+    low:
+    - Self-Awareness
+    - Wit
+  shadows:
+    high:
+    - Fixation
+    - Dread
+    low: []
+  level_range:
+  - 1
+  - 6
+  behavior: Opens with a memorised, usually terrible canned pickup line. Knows it's bad. Hopes the audacity makes it charming. The fixation on the tactic means they repeat the same approach regardless of
+    result. Sometimes delivers a genuinely good line and ruins it with a follow-up.
+  interference: {}
+  has_hr: true
+  tier: 2
+  description: Opens with a memorised, usually terrible canned pickup line. Knows it's bad. Hopes the audacity make
+  heading_level: 4
+  compact_heading: true
+- id: archetype.exploding-nice-guy
+  section: §3
+  title: The Exploding Nice Guy
+  type: archetype_definition
+  stats:
+    high:
+    - Charm
+    low:
+    - Self-Awareness
+    - Honesty
+    - Chaos
+  shadows:
+    high:
+    - Dread
+    - Horniness
+    - Denial
+    low: []
+  level_range:
+  - 1
+  - 6
+  behavior: 'Polite and friendly right up until the moment you don''t respond fast enough or indicate disinterest. Then: immediate pivot to hostility, insults, or passive-aggressive withdrawal. The charm
+    was never real — it was transactional. Feels genuinely entitled to a response because he was "nice."'
+  interference: {}
+  has_hr: true
+  tier: 2
+  description: Polite and friendly right up until the moment you don't respond fast enough or indicate disinterest.
+  heading_level: 4
+  compact_heading: true
+- id: archetype.oversharer
+  section: §3
+  title: The Oversharer
+  type: archetype_definition
+  stats:
+    high:
+    - Honesty
+    low:
+    - Self-Awareness
+    - Charm
+    - Wit
+  shadows:
+    high:
+    - Denial
+    - Overthinking
+    low: []
+  level_range:
+  - 2
+  - 7
+  behavior: Trauma dumps in message 3. Shares divorce details, childhood wounds, therapy notes, and the full arc of their last relationship before you've asked their last name. Genuinely open and well-meaning.
+    Just doesn't have the self-awareness to read the room. The information isn't the problem — the timing is everything.
+  interference: {}
+  has_hr: true
+  tier: 2
+  description: Trauma dumps in message 3. Shares divorce details, childhood wounds, therapy notes, and the full arc
+  heading_level: 4
+  compact_heading: true
+- id: archetype.philosopher
+  section: §3
+  title: The Philosopher
+  type: archetype_definition
+  stats:
+    high:
+    - Wit
+    - Chaos
+    low:
+    - Charm
+    - Rizz
+  shadows:
+    high:
+    - Overthinking
+    - Dread
+    low: []
+  level_range:
+  - 2
+  - 7
+  behavior: Opens with "what do you think the meaning of life is?" or a would-you-rather about horse-duck size ratios. Intellectualising as a defence mechanism — if the conversation stays in the realm of
+    ideas, rejection feels less personal. Uses philosophy as both genuine engagement and armour.
+  interference: {}
+  has_hr: true
+  tier: 2
+  description: Opens with "what do you think the meaning of life is?" or a would-you-rather about horse-duck size r
+  heading_level: 4
+  compact_heading: true
+- id: archetype.instagram-recruiter
+  section: §3
+  title: The Instagram Recruiter
+  type: archetype_definition
+  stats:
+    high:
+    - Charm
+    - Rizz
+    low:
+    - Honesty
+    - Self-Awareness
+  shadows:
+    high:
+    - Fixation
+    - Denial
+    low: []
+  level_range:
+  - 2
+  - 6
+  behavior: Real person. Not here for a date. Here to grow their following. Bio often says "not here much, find me on IG." Uses Tinder as free advertising for their OnlyFans, fitness coaching brand, or
+    personal brand.
+  interference: {}
+  has_hr: true
+  tier: 2
+  description: 'Real person. Not here for a date. Here to grow their following. Bio often says "not here much, find '
+  heading_level: 4
+  compact_heading: true
+- id: archetype.bot-/-scammer
+  section: §3
+  title: The Bot / Scammer
+  type: archetype_definition
+  stats:
+    high:
+    - Charm
+    low:
+    - Honesty
+    - Self-Awareness
+    - Wit
+  shadows:
+    high:
+    - Fixation
+    - Denial
+    low: []
+  level_range:
+  - 1
+  - 4
+  behavior: Fake profile. Designed to redirect to external platforms, grow an OnlyFans, run crypto scams, or steal attention. Responds vaguely to direct questions. Pivots off-platform suspiciously fast.
+    The "too-perfect" photos are a tell. So is the "I'm from Cyprus" thing.
+  interference: {}
+  has_hr: true
+  tier: 3
+  description: Fake profile. Designed to redirect to external platforms, grow an OnlyFans, run crypto scams, or ste
+  heading_level: 4
+  compact_heading: true
+- id: archetype.zombie
+  section: §3
+  title: The Zombie
+  type: archetype_definition
+  stats:
+    high:
+    - Charm
+    low:
+    - Self-Awareness
+    - Honesty
+  shadows:
+    high:
+    - Denial
+    - Fixation
+    low: []
+  level_range:
+  - 3
+  - 8
+  behavior: 'The Ghost who came back. Disappeared for weeks or months. Resurfaces as if nothing happened. High denial means they''ve genuinely rewritten the absence in their own head. Expects to pick up
+    exactly where they left off. Confused when this doesn''t work. Usually the most charming archetype right up until the moment they ghost again.
+
+
+    *Sample lines:* "hey stranger 👋" · "omg I was literally just thinking about you" · "sorry I disappeared, things got crazy"'
+  interference: {}
+  has_hr: true
+  tier: 3
+  description: The Ghost who came back. Disappeared for weeks or months. Resurfaces as if nothing happened. High de
+  heading_level: 4
+  compact_heading: true
+- id: archetype.breadcrumber
+  section: §3
+  title: The Breadcrumber
+  type: archetype_definition
+  stats:
+    high:
+    - Charm
+    - Wit
+    low:
+    - Honesty
+    - Self-Awareness
+  shadows:
+    high:
+    - Denial
+    - Fixation
+    low: []
+  level_range:
+  - 4
+  - 9
+  behavior: Sends just enough to keep interest alive without ever committing to anything real. Sporadic likes. Random 3am replies. A meme with no context. Never progresses toward an actual date. An expert
+    at "almost." Not cruel — just optimising for options without being honest about it.
+  interference: {}
+  has_hr: true
+  tier: 3
+  description: Sends just enough to keep interest alive without ever committing to anything real. Sporadic likes. R
+  heading_level: 4
+  compact_heading: true
+- id: archetype.love-bomber
+  section: §3
+  title: The Love Bomber
+  type: archetype_definition
+  stats:
+    high:
+    - Charm
+    - Rizz
+    low:
+    - Self-Awareness
+    - Honesty
+  shadows:
+    high:
+    - Fixation
+    - Horniness
+    - Denial
+    low: []
+  level_range:
+  - 3
+  - 9
+  behavior: Overwhelming affection, attention, and declarations on the fastest possible timeline. "I feel like I've known you forever" after two days. Future-faking at scale. May be genuine anxiety presenting
+    as intensity. May be a control tactic. Can't read that this is alarming rather than romantic.
+  interference: {}
+  has_hr: true
+  tier: 3
+  description: Overwhelming affection, attention, and declarations on the fastest possible timeline. "I feel like I
+  heading_level: 4
+  compact_heading: true
+- id: archetype.peacock
+  section: §3
+  title: The Peacock
+  type: archetype_definition
+  stats:
+    high:
+    - Charm
+    - Rizz
+    low:
+    - Honesty
+    - Self-Awareness
+  shadows:
+    high:
+    - Dread
+    - Denial
+    low: []
+  level_range:
+  - 3
+  - 8
+  behavior: Uses the opening message to establish status. "As a doctor/lawyer/investor..." The charm and rizz stats are real — these profiles are often well-constructed. The problem is they're driven by
+    the dread of not being enough, expressed as evidence that they are.
+  interference: {}
+  has_hr: true
+  tier: 3
+  description: Uses the opening message to establish status. "As a doctor/lawyer/investor..." The charm and rizz st
+  heading_level: 4
+  compact_heading: true
+- id: archetype.slow-fader
+  section: §3
+  title: The Slow Fader
+  type: archetype_definition
+  stats:
+    high:
+    - Self-Awareness
+    low:
+    - Honesty
+    - Chaos
+  shadows:
+    high:
+    - Denial
+    - Dread
+    low: []
+  level_range:
+  - 2
+  - 8
+  behavior: Never fully ghosts. Just responds less and less frequently. Daily → every 2 days → weekly → silence. No formal ending. The decent human impulse to not hurt anyone combined with the cowardly
+    impulse to not say the thing. Leaves everyone in ambiguous purgatory.
+  interference: {}
+  has_hr: true
+  tier: 4
+  description: Never fully ghosts. Just responds less and less frequently. Daily → every 2 days → weekly → silence.
+  heading_level: 4
+  compact_heading: true
+- id: archetype.ghost
+  section: §3
+  title: The Ghost
+  type: archetype_definition
+  stats:
+    high:
+    - Self-Awareness
+    low:
+    - Honesty
+    - Charm
+  shadows:
+    high:
+    - Dread
+    - Denial
+    low: []
+  level_range:
+  - 1
+  - 10
+  behavior: 'Matches. Maybe chats a bit. Then disappears without explanation. Can ghost at any stage: the match itself, after three messages, after a week of good conversation, after planning a date. High
+    self-awareness means they know when something isn''t working. Low honesty means they can''t say it. The most common archetype at every level.'
+  interference: {}
+  has_hr: true
+  tier: 4
+  description: 'Matches. Maybe chats a bit. Then disappears without explanation. Can ghost at any stage: the match i'
+  heading_level: 4
+  compact_heading: true
+- id: archetype.player
+  section: §3
+  title: The Player
+  type: archetype_definition
+  stats:
+    high:
+    - Charm
+    - Rizz
+    - Wit
+    low:
+    - Honesty
+  shadows:
+    high:
+    - Fixation
+    - Denial
+    low: []
+  level_range:
+  - 5
+  - 10
+  behavior: Keeps multiple conversations running simultaneously. Deliberately vague about intentions. Not necessarily malicious — just maximising options in a system designed for maximising options. The
+    denial about what they're doing means they can't be honest about it, which crosses into deception.
+  interference: {}
+  has_hr: true
+  tier: 4
+  description: Keeps multiple conversations running simultaneously. Deliberately vague about intentions. Not necess
+  heading_level: 4
+  compact_heading: true
+- id: archetype.sniper
+  section: §3
+  title: The Sniper
+  type: archetype_definition
+  stats:
+    high:
+    - Wit
+    - Self-Awareness
+    - Charm
+    low:
+    - Chaos
+  shadows:
+    high:
+    - Overthinking
+    low: []
+  level_range:
+  - 5
+  - 11
+  behavior: 'Doesn''t waste swipes. Selective. Considered. When they message, it''s deliberate and specific. Every message is a risk they''ve calculated, which means they can freeze on the edge of a send.
+    The counterpart to the Copy-Paste Machine in every way.
+
+
+    *Sample lines:* "I''ve been on here for three months and I''ve matched with seventeen people. I swiped on you specifically because of [reason]."'
+  interference: {}
+  has_hr: true
+  tier: 4
+  description: 'Doesn''t waste swipes. Selective. Considered. When they message, it''s deliberate and specific. Every '
+  heading_level: 4
+  compact_heading: true
+- id: archetype.bio-responder
+  section: §3
+  title: The Bio Responder
+  type: archetype_definition
+  stats:
+    high:
+    - Self-Awareness
+    - Wit
+    - Charm
+    low: []
+  shadows:
+    high: []
+    low: []
+  level_range:
+  - 4
+  - 11
+  behavior: The rarest and most appreciated archetype. Actually reads the bio. References something specific. Asks a thoughtful question. The ideal player type — every mechanic in the game is designed to
+    reward this behaviour. Women in every study and thread say this is all they want. Why is it so rare? Because it requires showing up for real.
+  interference: {}
+  has_hr: true
+  tier: 4
+  description: The rarest and most appreciated archetype. Actually reads the bio. References something specific. As
+  heading_level: 4
   compact_heading: true

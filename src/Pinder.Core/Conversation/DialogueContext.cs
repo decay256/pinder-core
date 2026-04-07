@@ -54,8 +54,8 @@ namespace Pinder.Core.Conversation
         /// <summary>The player's texting style fragment for voice reinforcement. Empty string if not available.</summary>
         public string PlayerTextingStyle { get; }
 
-        /// <summary>The stats available for options this turn (randomly drawn). Null means all 6 stats available.</summary>
-        public StatType[]? AvailableStats { get; }
+        /// <summary>The opponent's active tell from their last response, if any. Used to craft specific options.</summary>
+        public Tell? ActiveTell { get; }
 
         public DialogueContext(
             string playerPrompt,
@@ -73,7 +73,7 @@ namespace Pinder.Core.Conversation
             string opponentName = "",
             int currentTurn = 0,
             string playerTextingStyle = "",
-            StatType[]? availableStats = null)
+            Tell? activeTell = null)
         {
             PlayerPrompt = playerPrompt ?? throw new System.ArgumentNullException(nameof(playerPrompt));
             OpponentPrompt = opponentPrompt ?? throw new System.ArgumentNullException(nameof(opponentPrompt));
@@ -90,7 +90,7 @@ namespace Pinder.Core.Conversation
             OpponentName = opponentName ?? "";
             CurrentTurn = currentTurn;
             PlayerTextingStyle = playerTextingStyle ?? "";
-            AvailableStats = availableStats;
+            ActiveTell = activeTell;
         }
     }
 }

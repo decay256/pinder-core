@@ -688,7 +688,23 @@ def enrich_rules_v3(entries: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             continue
 
         result.append(e)
+
+    # Inject archetypes into rules-v3
+    archetypes_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'extracted', 'archetypes.yaml')
+    if not os.path.exists(archetypes_path):
+        raise FileNotFoundError(f"Missing {archetypes_path} required for rules-v3 injection")
+    
+    arch_entries = load_yaml(archetypes_path)
+        
+    for a in arch_entries:
+        if a.get('type') == 'archetype_definition':
+            a['section'] = '§3'
+            slug = a.get('title', '').lower().replace(' ', '-').replace('the-', '')
+            a['id'] = f"archetype.{slug}"
+            result.append(a)
+
     return result
+
 
 
 def enrich_risk_reward(entries: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
