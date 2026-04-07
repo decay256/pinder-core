@@ -47,6 +47,18 @@ namespace Pinder.SessionRunner
         /// <summary>Whether Honesty was available as an option last turn. False on first turn or unknown.</summary>
         public bool HonestyAvailableLastTurn { get; }
 
+        /// <summary>The player character's assembled system prompt (personality, texting style). Empty if not available.</summary>
+        public string PlayerSystemPrompt { get; }
+
+        /// <summary>The player character's display name.</summary>
+        public string PlayerName { get; }
+
+        /// <summary>The opponent character's display name.</summary>
+        public string OpponentName { get; }
+
+        /// <summary>Recent conversation history as (sender, text) pairs. Null or empty on first turn.</summary>
+        public IReadOnlyList<(string Sender, string Text)> RecentHistory { get; }
+
         public PlayerAgentContext(
             StatBlock playerStats,
             StatBlock opponentStats,
@@ -59,7 +71,11 @@ namespace Pinder.SessionRunner
             int turnNumber,
             StatType? lastStatUsed = null,
             StatType? secondLastStatUsed = null,
-            bool honestyAvailableLastTurn = false)
+            bool honestyAvailableLastTurn = false,
+            string playerSystemPrompt = "",
+            string playerName = "",
+            string opponentName = "",
+            IReadOnlyList<(string Sender, string Text)> recentHistory = null)
         {
             PlayerStats = playerStats ?? throw new ArgumentNullException(nameof(playerStats));
             OpponentStats = opponentStats ?? throw new ArgumentNullException(nameof(opponentStats));
@@ -73,6 +89,10 @@ namespace Pinder.SessionRunner
             LastStatUsed = lastStatUsed;
             SecondLastStatUsed = secondLastStatUsed;
             HonestyAvailableLastTurn = honestyAvailableLastTurn;
+            PlayerSystemPrompt = playerSystemPrompt ?? "";
+            PlayerName = playerName ?? "";
+            OpponentName = opponentName ?? "";
+            RecentHistory = recentHistory;
         }
     }
 }

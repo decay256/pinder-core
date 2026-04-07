@@ -295,7 +295,9 @@ class Program
         Console.WriteLine($"# Playtest Session {sessionNumber:D3} — {player1} × {player2}");
         Console.WriteLine($"**Date:** {DateTime.UtcNow:yyyy-MM-dd}");
         Console.WriteLine($"**Engine:** `pinder-core GameSession` + `AnthropicLlmAdapter` → claude-sonnet-4-20250514");
-        Console.WriteLine($"**Player:** {player1} (Level {p1Level}, +{p1LevelBonus} level bonus) | **Opponent:** {player2} (Level {p2Level}, +{p2LevelBonus} level bonus, LLM puppet)");
+        string p1Archetype = sable.ActiveArchetype != null ? $" | Archetype: {sable.ActiveArchetype.Name} ({sable.ActiveArchetype.InterferenceLevel})" : "";
+        string p2Archetype = brick.ActiveArchetype != null ? $" | Archetype: {brick.ActiveArchetype.Name} ({brick.ActiveArchetype.InterferenceLevel})" : "";
+        Console.WriteLine($"**Player:** {player1} (Level {p1Level}, +{p1LevelBonus} level bonus{p1Archetype}) | **Opponent:** {player2} (Level {p2Level}, +{p2LevelBonus} level bonus, LLM puppet{p2Archetype})");
         Console.WriteLine();
 
         // ── character table ───────────────────────────────────────────────
@@ -410,6 +412,9 @@ class Program
         int turn = 0;
         GameOutcome? finalOutcome = null;
         string lastOpponentMsg = "";
+        StatType? lastStatUsed = null;
+        StatType? secondLastStatUsed = null;
+        var conversationHistory = new List<(string Sender, string Text)>();
 
         while (turn < maxTurns)
         {
@@ -458,6 +463,20 @@ class Program
                 if (opt.ComboName != null)           badges.Add($"⭐ Combo: {opt.ComboName} ({PlaytestFormatter.GetComboRewardSummary(opt.ComboName)})");
                 if (opt.CallbackTurnNumber.HasValue) badges.Add("Callback");
                 if (opt.HasWeaknessWindow)           badges.Add("Window");
+                // Shadow growth warnings (#644)
+                bool honestyAvailable = Array.Exists(turnStart.Options, o => o.Stat == StatType.Honesty);
+                if (opt.Stat != StatType.Honesty && honestyAvailable)
+                    badges.Add("⚠️ Denial +1");
+                if (opt.Stat == StatType.Honesty && honestyAvailable && interest >= 15)
+                    badges.Add("✨ Denial -1");
+                if (lastStatUsed.HasValue && secondLastStatUsed.HasValue
+                    && lastStatUsed.Value == secondLastStatUsed.Value
+                    && opt.Stat == lastStatUsed.Value)
+                    badges.Add("⚠️ Fixation +1");
+                if (lastStatUsed.HasValue && secondLastStatUsed.HasValue
+                    && lastStatUsed.Value == secondLastStatUsed.Value
+                    && opt.Stat != lastStatUsed.Value)
+                    badges.Add("✨ breaks streak");
                 string badgeStr = badges.Count > 0 ? " | " + string.Join(", ", badges) : "";
                 Console.WriteLine($"**{letters[i]})** {StatLabel(opt.Stat)} {mod:+#;-#;0} | {pct}% {riskColor}{badgeStr}");
                 
@@ -486,7 +505,11 @@ class Program
                 activeTrapNames: snap.ActiveTrapNames,
                 sessionHorniness: 0,
                 shadowValues: currentShadowValues,
-                turnNumber: snap.TurnNumber);
+                turnNumber: snap.TurnNumber,
+                playerSystemPrompt: sable.AssembledSystemPrompt,
+                playerName: player1,
+                opponentName: player2,
+                recentHistory: conversationHistory.Count > 0 ? conversationHistory.AsReadOnly() : null);
             var decision = await agent.DecideAsync(turnStart, agentContext);
             int pick = decision.OptionIndex;
             var chosen = turnStart.Options[pick];
@@ -563,7 +586,12 @@ class Program
             }
             Console.WriteLine();
 
+            // Track conversation history for LLM agent context (#492)
+            if (!string.IsNullOrEmpty(result.DeliveredMessage))
+                conversationHistory.Add((player1, result.DeliveredMessage));
             lastOpponentMsg = result.OpponentMessage ?? "";
+            if (!string.IsNullOrEmpty(lastOpponentMsg))
+                conversationHistory.Add((player2, lastOpponentMsg));
             Console.WriteLine($"**📩 {player2} replies:**");
             PrintQuoted(result.OpponentMessage);
             Console.WriteLine();
@@ -587,6 +615,10 @@ class Program
 
             interest = newInterest;
             momentum = result.StateAfter.MomentumStreak;
+
+            // Track stat usage for shadow warnings (#644)
+            secondLastStatUsed = lastStatUsed;
+            lastStatUsed = chosen.Stat;
 
             if (result.NarrativeBeat != null) { Console.WriteLine(); Console.WriteLine($"{result.NarrativeBeat}"); }
             if (result.IsGameOver) { finalOutcome = result.Outcome; break; }

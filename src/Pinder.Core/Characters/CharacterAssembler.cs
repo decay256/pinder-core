@@ -173,7 +173,11 @@ namespace Pinder.Core.Characters
                 .Select(kv => (kv.Key, kv.Value))
                 .ToList();
 
-            // --- 7. Return FragmentCollection -------------------------------------
+            // --- 7. Resolve active archetype ------------------------------------
+
+            ActiveArchetype activeArchetype = ResolveActiveArchetype(ranked, characterLevel);
+
+            // --- 8. Return FragmentCollection -------------------------------------
 
             return new FragmentCollection(
                 personality.AsReadOnly(),
@@ -181,7 +185,40 @@ namespace Pinder.Core.Characters
                 texting.AsReadOnly(),
                 ranked.AsReadOnly(),
                 timingProfile,
-                statBlock);
+                statBlock,
+                activeArchetype);
+        }
+
+        /// <summary>
+        /// Selects the active archetype from ranked archetypes based on character level.
+        /// If characterLevel > 0, prefers the highest-count archetype whose level range
+        /// includes the character's level. Falls back to highest-count overall.
+        /// </summary>
+        internal static ActiveArchetype ResolveActiveArchetype(
+            IReadOnlyList<(string Archetype, int Count)> ranked,
+            int characterLevel)
+        {
+            if (ranked == null || ranked.Count == 0)
+                return null;
+
+            // Try to find the highest-count archetype eligible at this level
+            if (characterLevel > 0)
+            {
+                foreach (var entry in ranked)
+                {
+                    var def = ArchetypeCatalog.GetByName(entry.Archetype);
+                    if (def != null && def.IsEligibleAtLevel(characterLevel))
+                    {
+                        string behavior = ArchetypeCatalog.GetBehavior(entry.Archetype);
+                        return new ActiveArchetype(entry.Archetype, behavior, entry.Count);
+                    }
+                }
+            }
+
+            // Fallback: use the highest-count archetype overall
+            var top = ranked[0];
+            string topBehavior = ArchetypeCatalog.GetBehavior(top.Archetype);
+            return new ActiveArchetype(top.Archetype, topBehavior, top.Count);
         }
     }
 }

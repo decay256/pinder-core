@@ -57,6 +57,9 @@ namespace Pinder.Core.Conversation
         /// <summary>Failure tier of the player's last roll. None means success. Default None for backward compatibility.</summary>
         public FailureTier DeliveryTier { get; }
 
+        /// <summary>Active archetype directive for the opponent character, or null if none.</summary>
+        public string ActiveArchetypeDirective { get; }
+
         public OpponentContext(
             string playerPrompt,
             string opponentPrompt,
@@ -73,7 +76,8 @@ namespace Pinder.Core.Conversation
             string playerName = "",
             string opponentName = "",
             int currentTurn = 0,
-            FailureTier deliveryTier = FailureTier.None)
+            FailureTier deliveryTier = FailureTier.None,
+            string activeArchetypeDirective = null)
         {
             PlayerPrompt = playerPrompt ?? throw new System.ArgumentNullException(nameof(playerPrompt));
             OpponentPrompt = opponentPrompt ?? throw new System.ArgumentNullException(nameof(opponentPrompt));
@@ -91,6 +95,7 @@ namespace Pinder.Core.Conversation
             OpponentName = opponentName ?? "";
             CurrentTurn = currentTurn;
             DeliveryTier = deliveryTier;
+            ActiveArchetypeDirective = activeArchetypeDirective;
         }
     }
 }

@@ -86,7 +86,7 @@ namespace Pinder.SessionRunner
 
                 // Run assembly pipeline
                 var assembler = new CharacterAssembler(itemRepo, anatomyRepo);
-                var fragments = assembler.Assemble(items, anatomy, buildPoints, shadows);
+                var fragments = assembler.Assemble(items, anatomy, buildPoints, shadows, level);
 
                 // Build system prompt
                 string systemPrompt = PromptBuilder.BuildSystemPrompt(
@@ -101,7 +101,8 @@ namespace Pinder.SessionRunner
                 return new CharacterProfile(
                     fragments.Stats, systemPrompt, name, fragments.Timing, level,
                     bio: bio,
-                    textingStyleFragment: textingStyle);
+                    textingStyleFragment: textingStyle,
+                    activeArchetype: fragments.ActiveArchetype);
             }
         }
 

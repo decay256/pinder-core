@@ -91,6 +91,13 @@ namespace Pinder.LlmAdapters
                 gameState.AppendLine("it landed differently than intended. The player read the room.");
             }
 
+            // Inject active archetype directive (#649)
+            if (!string.IsNullOrEmpty(context.ActiveArchetypeDirective))
+            {
+                sb.AppendLine(context.ActiveArchetypeDirective);
+                sb.AppendLine();
+            }
+
             // Inject texting style immediately before the ENGINE block (#489)
             if (!string.IsNullOrEmpty(context.PlayerTextingStyle))
             {
@@ -299,6 +306,13 @@ namespace Pinder.LlmAdapters
                 sb.AppendLine();
                 sb.AppendLine("SHADOW STATE (corrupting forces on your communication)");
                 sb.AppendLine(opponentTaint);
+            }
+
+            // Inject active archetype directive for opponent (#649)
+            if (!string.IsNullOrEmpty(context.ActiveArchetypeDirective))
+            {
+                sb.AppendLine();
+                sb.AppendLine(context.ActiveArchetypeDirective);
             }
 
             sb.AppendLine();
