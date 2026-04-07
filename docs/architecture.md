@@ -2,6 +2,8 @@
 
 ## Overview
 
+*See [Data Architecture & Extensibility Model](data-architecture.md) for details on the two-tier data separation and content configuration strategy.*
+
 Pinder.Core is a **pure C# (.NET Standard 2.0) RPG engine** for a comedy dating game where players are sentient penises on a Tinder-like app. It has **zero external dependencies** and is designed to drop into Unity or any .NET host.
 
 The engine is **stateless at the roll level** — all state is passed in via parameters. State management (whose turn, what happened last) lives in the host (Unity game loop) or in `GameSession` (the first stateful component in the engine). The engine owns the math, data models, and single-conversation orchestration.
