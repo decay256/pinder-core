@@ -693,8 +693,8 @@
   condition:
     cross_chat_event: 3 conversations die in one day
   outcome:
-    shadow_madness: 1
     shadow_dread: 3
+    shadow_madness: 1
 - id: §7.cross-chat.securing-2-dates-in-one-day
   section: §7
   title: Cross-Chat — Securing 2 dates in one day

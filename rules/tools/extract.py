@@ -94,6 +94,101 @@ def parse_table(lines):
     return rows, sep_cells, None
 
 
+
+def parse_archetype_blocks(title: str, blocks: list, current_tier: int) -> dict:
+    stats = {'high': [], 'low': []}
+    shadows = {'high': [], 'low': []}
+    level_range = []
+    behavior_lines = []
+    interference = {}
+    has_hr = False
+
+    in_interference = False
+
+    for b in blocks:
+        if b['kind'] == 'paragraph':
+            text = b['text']
+            
+            if '**Stats:**' in text or '**Level range:**' in text:
+                for line in text.split('\n'):
+                    if '**Stats:**' in line or '**Shadow:**' in line:
+                        stats_match = re.search(r'\*\*Stats:\*\*\s*(.*?)(?=\s*\|\s*\*\*Shadow|$)', line)
+                        if stats_match:
+                            stats_str = stats_match.group(1).strip()
+                            high_match = re.search(r'High\s+([^|]+)', stats_str)
+                            if high_match:
+                                stats['high'] = [s.strip() for s in high_match.group(1).split(',') if s.strip() and s.strip() != '—']
+                            low_match = re.search(r'Low\s+([^|]+)', stats_str)
+                            if low_match:
+                                stats['low'] = [s.strip() for s in low_match.group(1).split(',') if s.strip() and s.strip() != '—']
+                        
+                        shadow_match = re.search(r'\*\*Shadow:\*\*\s*(.*?)(?=\n|$)', line)
+                        if shadow_match:
+                            shadow_str = shadow_match.group(1).strip()
+                            sh_high_match = re.search(r'High\s+([^|]+)', shadow_str)
+                            if sh_high_match:
+                                shadows['high'] = [s.strip() for s in sh_high_match.group(1).split(',') if s.strip() and s.strip() not in ('—', 'None notable')]
+                            else:
+                                if shadow_str and shadow_str not in ('—', 'None notable', 'None'):
+                                    shadows['high'] = [s.strip() for s in shadow_str.replace('High', '').split(',') if s.strip() and s.strip() != '—']
+                    
+                    elif '**Level range:**' in line:
+                        lr_match = re.search(r'\*\*Level range:\*\*\s*(\d+)\s*[–-]\s*(\d+|\+)', line)
+                        if lr_match:
+                            low_lr = int(lr_match.group(1))
+                            high_lr = lr_match.group(2)
+                            if high_lr == '+':
+                                level_range = [low_lr, 99]
+                            else:
+                                level_range = [low_lr, int(high_lr)]
+                    
+                    elif line.strip().startswith('**Interference:**'):
+                        in_interference = True
+                    elif in_interference and (line.strip().startswith('*') or line.strip().startswith('-')):
+                        item = line.strip()[1:].strip()
+                        if ':' in item:
+                            k, v = item.split(':', 1)
+                            interference[k.strip()] = v.strip()
+                    else:
+                        if line.strip():
+                            behavior_lines.append(line.strip())
+            else:
+                if text.strip().startswith('**Interference:**'):
+                    in_interference = True
+                    for line in text.split('\n'):
+                        if line.strip().startswith('**Interference:**'):
+                            continue
+                        if line.strip().startswith('*') or line.strip().startswith('-'):
+                            item = line.strip()[1:].strip()
+                            if ':' in item:
+                                k, v = item.split(':', 1)
+                                interference[k.strip()] = v.strip()
+                elif in_interference:
+                    for line in text.split('\n'):
+                        if line.strip().startswith('*') or line.strip().startswith('-'):
+                            item = line.strip()[1:].strip()
+                            if ':' in item:
+                                k, v = item.split(':', 1)
+                                interference[k.strip()] = v.strip()
+                else:
+                    behavior_lines.append(text)
+        
+        elif b['kind'] == 'flavor':
+            behavior_lines.append(f"*{b['text']}*")
+        elif b['kind'] == 'hr':
+            has_hr = True
+
+    behavior = '\n\n'.join(behavior_lines).strip()
+    
+    return {
+        'stats': stats,
+        'shadows': shadows,
+        'level_range': level_range,
+        'behavior': behavior,
+        'interference': interference,
+        'has_hr': has_hr
+    }
+
 def extract_rules(filepath):
     """Parse markdown file into structured rule entries with ordered blocks."""
     with open(filepath, 'r', encoding='utf-8') as f:
@@ -103,6 +198,7 @@ def extract_rules(filepath):
     rules = []
 
     current_h1 = ''
+    current_tier = 0
     section_counter = 0
     current_rule = None
 
@@ -146,20 +242,28 @@ def extract_rules(filepath):
     def finalize_rule(rule):
         if rule is None:
             return
-        # Guess type from blocks
         blocks = rule.get('blocks', [])
-        rule['type'] = guess_type(rule['title'], blocks)
-        # Set description from first paragraph block (for backward compat / search)
-        first_para = next((b for b in blocks if b['kind'] == 'paragraph'), None)
-        if first_para:
-            rule['description'] = first_para['text']
+        
+        if rule.get('_heading_level') == 4 and current_tier > 0:
+            parsed = parse_archetype_blocks(rule['title'], blocks, current_tier)
+            rule.update(parsed)
+            rule['type'] = 'archetype_definition'
+            rule['tier'] = current_tier
+            # Behavior text might be empty, make sure description has a fallback
+            rule['description'] = parsed.get('behavior', '').strip().split('\n')[0][:100]
+            if 'blocks' in rule:
+                del rule['blocks']
         else:
-            rule['description'] = ''
-        # Clean up empty fields
+            rule['type'] = guess_type(rule['title'], blocks)
+            first_para = next((b for b in blocks if b['kind'] == 'paragraph'), None)
+            if first_para:
+                rule['description'] = first_para['text']
+            else:
+                rule['description'] = ''
+        
         for key in list(rule.keys()):
             if rule[key] is None or rule[key] == '' or rule[key] == []:
                 del rule[key]
-        # Ensure required fields
         if 'description' not in rule:
             rule['description'] = ''
         rules.append(rule)
@@ -212,6 +316,11 @@ def extract_rules(filepath):
             while j < len(lines) and not lines[j].strip():
                 blank_count += 1
                 j += 1
+
+            if level == 3 and 'Tier' in title:
+                m = re.search(r'Tier\s*(\d+)', title)
+                if m:
+                    current_tier = int(m.group(1))
 
             if level == 1:
                 finalize_rule(current_rule)

@@ -45,8 +45,8 @@
     - Slot: Frame
       Attaches to: Eyes (on glans)
     sep_cells:
-    - '---'
-    - '---'
+    - ' --------- '
+    - ' --------------------------------------------------- '
   - kind: paragraph
     text: Items requiring ears are anatomically invalid and excluded. See [[anatomy-parameters]] for body customization.
   - kind: hr
@@ -201,10 +201,10 @@
       Stats: Chaos +1
       Archetypes: The Philosopher, The Ghost
     sep_cells:
-    - '---'
-    - '---'
-    - '---'
-    - '---'
+    - ' --------------------------- '
+    - ' -------- '
+    - ' ------------------- '
+    - ' ----------------------------------- '
   description: ''
   heading_level: 2
 - id: §7.shirts-quick-reference.vintage-band-tee
@@ -784,8 +784,8 @@
     - Fragment: Timing
       Content: '+5min delay, ×0.8 var, 0% dry, receipts: hides'
     sep_cells:
-    - '---'
-    - '---'
+    - ' ------------- '
+    - ' ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ '
   - kind: blockquote
     text: '*"A well-loved beanie covered in hand-sewn patches from places, events, and moments. The person wearing this has been somewhere and isn''t sure how to explain it yet. They will ask you a real
       question in the first three messages."*'
@@ -823,8 +823,8 @@
     - Fragment: Timing
       Content: '-8min delay, ×1.8 var, 15% dry, receipts: hides'
     sep_cells:
-    - '---'
-    - '---'
+    - ' ------------- '
+    - ' ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- '
   - kind: blockquote
     text: '*"The hat is real. Whether the person wearing it is sincere about the hat is genuinely unclear. They like it that way. The hat has been to brunch, a funeral, and a job interview. All three went
       fine."*'
