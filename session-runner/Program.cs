@@ -462,6 +462,8 @@ class Program
         int turn = 0;
         GameOutcome? finalOutcome = null;
         string lastOpponentMsg = "";
+        StatType? lastStatUsed = null;
+        StatType? secondLastStatUsed = null;
 
         while (turn < maxTurns)
         {
@@ -485,10 +487,6 @@ class Program
             Console.WriteLine();
 
             // // -- Option display: one block per option --
-            if (!string.IsNullOrEmpty(lastOpponentMsg)) {
-                Console.WriteLine($"**{player2}:** *\"{lastOpponentMsg}\"*");
-                Console.WriteLine();
-            }
             var statusParts = new System.Collections.Generic.List<string>();
             if (snap.ActiveTrapNames.Length > 0)
                 statusParts.Add($"Traps: {string.Join(", ", snap.ActiveTrapNames)}");
@@ -497,6 +495,12 @@ class Program
             else if (momentum > 0)
                 statusParts.Add($"Momentum: {momentum} win streak");
             if (statusParts.Count > 0) { Console.WriteLine(string.Join(" | ", statusParts)); Console.WriteLine(); }
+            // Build current shadow values from tracker for option display
+            var currentShadowValues = new Dictionary<ShadowStatType, int>();
+            foreach (ShadowStatType shadowType in Enum.GetValues(typeof(ShadowStatType)))
+                currentShadowValues[shadowType] = sableShadows.GetEffectiveShadow(shadowType);
+
+            bool honestyAvailable = turnStart.Options.Any(o => o.Stat == StatType.Honesty);
             char[] letters = { 'A', 'B', 'C', 'D' };
             for (int i = 0; i < turnStart.Options.Length; i++) {
                 var opt = turnStart.Options[i];
@@ -510,8 +514,23 @@ class Program
                 if (opt.ComboName != null)           badges.Add($"⭐ Combo: {opt.ComboName} ({PlaytestFormatter.GetComboRewardSummary(opt.ComboName)})");
                 if (opt.CallbackTurnNumber.HasValue) badges.Add("Callback");
                 if (opt.HasWeaknessWindow)           badges.Add("Window");
+                // Shadow growth warnings
+                var shadowBadges = new System.Collections.Generic.List<string>();
+                if (opt.Stat != StatType.Honesty && honestyAvailable)
+                    shadowBadges.Add("⚠️ Denial +1");
+                if (opt.Stat == StatType.Honesty && honestyAvailable && interest >= 15)
+                    shadowBadges.Add("✨ Denial -1");
+                if (lastStatUsed.HasValue && secondLastStatUsed.HasValue
+                    && lastStatUsed.Value == secondLastStatUsed.Value
+                    && opt.Stat == lastStatUsed.Value)
+                    shadowBadges.Add("⚠️ Fixation +1");
+                if (lastStatUsed.HasValue && secondLastStatUsed.HasValue
+                    && lastStatUsed.Value == secondLastStatUsed.Value
+                    && opt.Stat != lastStatUsed.Value)
+                    shadowBadges.Add("✨ breaks streak");
                 string badgeStr = badges.Count > 0 ? " | " + string.Join(", ", badges) : "";
-                Console.WriteLine($"**{letters[i]})** {StatLabel(opt.Stat)} {mod:+#;-#;0} | {pct}% {riskColor}{badgeStr}");
+                string shadowStr = shadowBadges.Count > 0 ? "  ‖ " + string.Join(", ", shadowBadges) : "";
+                Console.WriteLine($"**{letters[i]})** {StatLabel(opt.Stat)} {mod:+#;-#;0} | {pct}% {riskColor}{badgeStr}{shadowStr}");
                 
                 if (opt.ComboName != null)
                 {
@@ -524,11 +543,6 @@ class Program
             }
 
             // ── pick + roll ───────────────────────────────────────────────
-            // Build current shadow values from tracker for player agent context
-            var currentShadowValues = new Dictionary<ShadowStatType, int>();
-            foreach (ShadowStatType shadowType in Enum.GetValues(typeof(ShadowStatType)))
-                currentShadowValues[shadowType] = sableShadows.GetEffectiveShadow(shadowType);
-
             var agentContext = new PlayerAgentContext(
                 playerStats: sableStats,
                 opponentStats: brickStats,
@@ -560,7 +574,14 @@ class Program
             else if (roll.Tier == FailureTier.None) rollResult = $"SUCCESS";
             else                      rollResult = roll.Tier.ToString().ToUpperInvariant();
 
-            Console.WriteLine($"**🎲 Roll:** d20({roll.UsedDieRoll}) + {StatLabel(chosen.Stat)}({rollMod}) = **{roll.FinalTotal}** vs DC {roll.DC} → **Miss: {(roll.FinalTotal>=roll.DC ? $"−{roll.FinalTotal-roll.DC}" : $"+{roll.DC-roll.FinalTotal}")} → {rollResult}**");
+            string rollMargin;
+            if (roll.IsNatOne)
+                rollMargin = $"Nat 1 (would have beaten DC by {roll.FinalTotal - roll.DC})";
+            else if (roll.IsSuccess || roll.FinalTotal >= roll.DC)
+                rollMargin = $"Beat by {roll.FinalTotal - roll.DC}";
+            else
+                rollMargin = $"Miss by {roll.DC - roll.FinalTotal}";
+            Console.WriteLine($"**🎲 Roll:** d20({roll.UsedDieRoll}) + {StatLabel(chosen.Stat)}({rollMod}) = **{roll.FinalTotal}** vs DC {roll.DC} → **{rollMargin} → {rollResult}**");
             Console.WriteLine();
 
             if (result.ComboTriggered != null)
@@ -584,11 +605,25 @@ class Program
                                roll.Tier.ToString();
                 if (roll.IsNatTwenty) label = "Nat 20";
                 
-                PrintQuoted("**Intended:** " + (string.IsNullOrWhiteSpace(intended) || intended == "..." ? "..." : $"\"{intended}\""));
-                Console.WriteLine();
                 string marker = isStrongSuccess ? "__" : "*";
                 string formattedDelivered = FormatDeliveredAdditions(intended, result.DeliveredMessage ?? "", marker);
-                PrintQuoted($"**Delivered ({label}):** \"{formattedDelivered}\"");
+                
+                // Only show diff when messages actually differ
+                bool messagesIdentical = string.Equals(
+                    (intended ?? "").Trim(),
+                    (result.DeliveredMessage ?? "").Trim(),
+                    StringComparison.Ordinal);
+                
+                if (!messagesIdentical)
+                {
+                    PrintQuoted("**Intended:** " + (string.IsNullOrWhiteSpace(intended) || intended == "..." ? "..." : $"\"{intended}\""));
+                    Console.WriteLine();
+                    PrintQuoted($"**Delivered ({label}):** \"{formattedDelivered}\"");
+                }
+                else
+                {
+                    PrintQuoted(result.DeliveredMessage);
+                }
             }
             else
             {
@@ -600,6 +635,10 @@ class Program
             Console.WriteLine($"**📩 {player2} replies:**");
             PrintQuoted(result.OpponentMessage);
             Console.WriteLine();
+
+            // Track stat history for fixation warnings
+            secondLastStatUsed = lastStatUsed;
+            lastStatUsed = chosen.Stat;
 
             int newInterest = result.StateAfter.Interest;
             int delta = result.InterestDelta;
