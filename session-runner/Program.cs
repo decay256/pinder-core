@@ -296,7 +296,6 @@ class Program
         Console.WriteLine($"**Date:** {DateTime.UtcNow:yyyy-MM-dd}");
         Console.WriteLine($"**Engine:** `pinder-core GameSession` + `AnthropicLlmAdapter` → claude-sonnet-4-20250514");
         Console.WriteLine($"**Player:** {player1} (Level {p1Level}, +{p1LevelBonus} level bonus) | **Opponent:** {player2} (Level {p2Level}, +{p2LevelBonus} level bonus, LLM puppet)");
-        Console.WriteLine($"**Active Archetype:** {(sable.ActiveArchetype?.Name ?? "None")} | {(brick.ActiveArchetype?.Name ?? "None")}");
         Console.WriteLine();
 
         // ── character table ───────────────────────────────────────────────
@@ -487,10 +486,7 @@ class Program
                 activeTrapNames: snap.ActiveTrapNames,
                 sessionHorniness: 0,
                 shadowValues: currentShadowValues,
-                turnNumber: snap.TurnNumber,
-                activeArchetype: sable.ActiveArchetype?.Name,
-                textingStyleFragment: sable.TextingStyleFragment,
-                history: session.History);
+                turnNumber: snap.TurnNumber);
             var decision = await agent.DecideAsync(turnStart, agentContext);
             int pick = decision.OptionIndex;
             var chosen = turnStart.Options[pick];
