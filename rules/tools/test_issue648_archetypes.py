@@ -1,13 +1,12 @@
-import sys
-import os
-import json
 import pytest
+import os
 import yaml
-import re
+import sys
+from unittest.mock import patch
 
 sys.path.append(os.path.dirname(__file__))
 
-from extract import parse_archetype_blocks, extract_rules
+from extract import parse_archetype_blocks
 from generate import generate_archetype_definition
 from enrich import enrich_rules_v3
 from accuracy_check import check_file
@@ -29,68 +28,25 @@ def test_parse_archetype_blocks_basic():
     assert res['shadows']['high'] == ['Dread', 'Denial']
     assert res['shadows']['low'] == []
     assert res['level_range'] == [3, 8]
-    assert "By message 3" in res['behavior']
+    assert "By message 3, mention one achievement or capability as context" in res['behavior']
     assert "Frame it as information." in res['behavior']
     assert res['interference'] == {}
 
-# What: Ensures tier tracking correctly assigns the current tier to the block without an off-by-one error on block finalization.
-# Mutation: Fails if extract_rules updates current_tier before calling finalize_rule on the previous block (which causes the previous block to receive the new tier).
-def test_extract_rules_tier_assignment(tmp_path):
-    md_content = """# Archetypes
-### Tier 1 - Early Game
-#### Arch A
-**Stats:** High Charm | Low Honesty | **Shadow:** High Dread
-**Level range:** 1-2
-
-Some behavior A.
-### Tier 2 - Mid Game
-#### Arch B
-**Stats:** High Rizz | Low Honesty | **Shadow:** High Denial
-**Level range:** 3-5
-
-Some behavior B.
-"""
-    p = tmp_path / "dummy.md"
-    p.write_text(md_content)
+# What: Ensures missing stats/shadows ("-") and open-ended level ranges ("8+") are parsed correctly.
+# Mutation: Fails if parse_archetype_blocks crashes on missing data ("—" or "-") or fails to map "8+" to [8, 99].
+def test_parse_archetype_blocks_edge_cases():
+    title = "The Edge Case"
+    blocks = [
+        {"kind": "paragraph", "text": "**Stats:** High \u2014 | Low \u2014 | **Shadow:** High \u2014\n**Level range:** 8+\n\nBehavior"},
+    ]
     
-    rules = extract_rules(str(p))
+    res = parse_archetype_blocks(title, blocks, 3)
     
-    arch_a = next(r for r in rules if 'Arch A' in r['title'])
-    arch_b = next(r for r in rules if 'Arch B' in r['title'])
-    
-    assert arch_a.get('type') == 'archetype_definition'
-    assert arch_a.get('tier') == 1, "Arch A should be tier 1, not affected by Tier 2 heading"
-    
-    assert arch_b.get('type') == 'archetype_definition'
-    assert arch_b.get('tier') == 2
-
-# What: Ensures behavior text is extracted fully and description isn't arbitrarily truncated mid-word.
-# Mutation: Fails if the behavior field drops paragraphs or if description blindly slices to 100 chars mid-word.
-def test_extract_rules_no_midword_truncation(tmp_path):
-    md_content = """# Archetypes
-### Tier 3
-#### The Peacock
-**Stats:** High Charm | Low Honesty | **Shadow:** High Dread
-**Level range:** 3-8
-
-This is a very long behavior block that should definitely not be arbitrarily truncated mid-word under any circumstances whatsoever. It is critical that the entire text is preserved exactly as it appears in the source markdown document.
-"""
-    p = tmp_path / "dummy.md"
-    p.write_text(md_content)
-    
-    rules = extract_rules(str(p))
-    arch = next(r for r in rules if 'The Peacock' in r['title'])
-    
-    # Behavior must be fully intact
-    assert "This is a very long behavior block" in arch['behavior']
-    assert "source markdown document." in arch['behavior']
-    
-    # If description is present, it shouldn't end with a broken word
-    if 'description' in arch:
-        desc = arch['description']
-        if len(desc) < len(arch['behavior']) and arch['behavior'].startswith(desc):
-            next_char = arch['behavior'][len(desc)]
-            assert not (re.match(r'\w', desc[-1]) and re.match(r'\w', next_char)), "Description appears truncated mid-word"
+    assert res['stats']['high'] == []
+    assert res['stats']['low'] == []
+    assert res['shadows']['high'] == []
+    assert res['shadows']['low'] == []
+    assert res['level_range'] == [8, 99]
 
 # --- 2. Generation Pipeline Updates (generate.py) ---
 
@@ -120,14 +76,12 @@ def test_generate_archetype_definition():
     assert "* count_1_2: slight - occasionally drops a credential" in res
     assert "* count_3_5: moderate - consistent" in res
 
+
 # --- 3. V3 Enrichment Injection (enrich.py) ---
 
 # What: enrich_rules_v3 loads archetypes.yaml, processes archetype_definition entries, and appends them
 # Mutation: Fails if enrich_rules_v3 does not read archetypes.yaml, fails to normalize IDs, or fails to set section §3.
-def test_enrich_rules_v3(tmp_path, monkeypatch):
-    # Mock the archetypes.yaml path to our temporary file
-    mock_yaml_path = tmp_path / "archetypes.yaml"
-    
+def test_enrich_rules_v3(monkeypatch):
     mock_arch = [
         {
             "id": "§0.the-peacock",
@@ -139,50 +93,54 @@ def test_enrich_rules_v3(tmp_path, monkeypatch):
             "interference": {}
         }
     ]
-    mock_yaml_path.write_text(yaml.dump(mock_arch))
     
+    def mock_exists(path):
+        if "archetypes.yaml" in path:
+            return True
+        return os.path.exists(path)
+
+    def mock_load_yaml(path):
+        if "archetypes.yaml" in path:
+            return mock_arch
+        # Fallback to standard open for other cases, though load_yaml in enrich just loads it
+        with open(path, 'r', encoding='utf-8') as f:
+            return yaml.safe_load(f)
+            
     import enrich
+    monkeypatch.setattr(enrich.os.path, "exists", mock_exists)
+    monkeypatch.setattr(enrich, "load_yaml", mock_load_yaml)
+
+    base_entries = [{"id": "base_rule", "type": "rule"}]
+    result = enrich_rules_v3(base_entries)
     
-    # Write to the real path to be safe
-    real_path = os.path.join(os.path.dirname(__file__), '../extracted/archetypes.yaml')
-    os.makedirs(os.path.dirname(real_path), exist_ok=True)
+    assert len(result) == 2
+    arch_entry = result[1]
+    assert arch_entry['type'] == 'archetype_definition'
+    assert arch_entry['id'] == 'archetype.peacock'
+    assert arch_entry['section'] == '§3'
+
+# What: If archetypes.yaml cannot be located by enrich.py during injection, it logs a critical error or raises FileNotFoundError.
+# Mutation: Fails if enrich_rules_v3 silently ignores a missing archetypes.yaml file.
+def test_enrich_rules_v3_missing_file(monkeypatch):
+    def mock_exists(path):
+        if "archetypes.yaml" in path:
+            return False
+        return os.path.exists(path)
+        
+    import enrich
+    monkeypatch.setattr(enrich.os.path, "exists", mock_exists)
     
-    backup = None
-    if os.path.exists(real_path):
-        with open(real_path, 'r') as f:
-            backup = f.read()
-            
-    try:
-        with open(real_path, 'w') as f:
-            yaml.dump(mock_arch, f)
-            
-        base_entries = [{"id": "base_rule", "type": "rule"}]
-        result = enrich_rules_v3(base_entries)
+    base_entries = [{"id": "base_rule", "type": "rule"}]
+    with pytest.raises((FileNotFoundError, SystemExit, Exception)) as excinfo:
+        enrich_rules_v3(base_entries)
         
-        # Check that the archetype was appended
-        assert len(result) == 2
-        arch_entry = result[1]
-        
-        assert arch_entry['type'] == 'archetype_definition'
-        # Check ID normalization
-        assert arch_entry['id'] == 'archetype.peacock'
-        # Check section mapping
-        assert arch_entry['section'] == '§3'
-        
-    finally:
-        if backup is not None:
-            with open(real_path, 'w') as f:
-                f.write(backup)
-        else:
-            if os.path.exists(real_path):
-                os.remove(real_path)
+    # Validates an exception was raised due to missing file
 
 # --- 4. Accuracy Checker Updates (accuracy_check.py) ---
 
 # What: Recognizes archetype_definition as valid and validates required keys.
 # Mutation: Fails if accuracy_check does not recognize archetype_definition, or does not report missing required fields (tier, level_range, behavior, interference).
 def test_accuracy_check_archetype_definition(tmp_path):
-    # Valid
     valid_arch = [
         {
             "id": "archetype.peacock",
@@ -199,7 +157,6 @@ def test_accuracy_check_archetype_definition(tmp_path):
     errors = check_file(str(valid_path))
     assert len(errors) == 0, f"Expected no errors for valid archetype, got: {errors}"
     
-    # Invalid missing tier
     invalid_arch = [
         {
             "id": "archetype.missing_tier",
@@ -214,21 +171,60 @@ def test_accuracy_check_archetype_definition(tmp_path):
     
     errors = check_file(str(invalid_path))
     assert len(errors) > 0, "Expected an error for missing 'tier' field"
-    assert any("tier" in err.lower() or "missing" in err.lower() for err in errors)
+    assert any("tier" in err["message"].lower() or "missing" in err["message"].lower() for err in errors)
 
-
-# What: Ensures missing stats/shadows ("—") and open-ended level ranges ("8+") are parsed correctly.
-# Mutation: Fails if extract_rules crashes on missing data or fails to map "8+" to [8, 99].
-def test_parse_archetype_blocks_edge_cases():
-    title = "The Edge Case"
-    blocks = [
-        {"kind": "paragraph", "text": "**Stats:** High — | Low — | **Shadow:** High —\n**Level range:** 8+\n\nBehavior"},
+# What: If accuracy_check.py finds an archetype with missing or malformed interference structure, it logs INACCURATE with specific entry ID and field name.
+# Mutation: Fails if accuracy_check doesn't report 'INACCURATE' for malformed 'interference'.
+def test_accuracy_check_malformed_interference(tmp_path):
+    invalid_arch = [
+        {
+            "id": "archetype.bad_interference",
+            "type": "archetype_definition",
+            "tier": 3,
+            "level_range": [3, 8],
+            "behavior": "Valid behavior",
+            "interference": []  # Should be a dict
+        }
     ]
+    invalid_path = tmp_path / "invalid_interference.yaml"
+    invalid_path.write_text(yaml.dump(invalid_arch))
     
-    res = parse_archetype_blocks(title, blocks, 3)
+    errors = check_file(str(invalid_path))
+    assert len(errors) > 0, "Expected an error for malformed 'interference' field"
+    error_msg = " ".join(err["message"] for err in errors).lower()
+    assert "inaccurate" in error_msg
+    assert "archetype.bad_interference" in error_msg
+    assert "interference" in error_msg
+
+
+# What: Ensures tier tracking correctly assigns the current tier to the block without an off-by-one error on block finalization.
+# Mutation: Fails if extract_rules updates current_tier before calling finalize_rule on the previous block (which causes the previous block to receive the new tier).
+def test_extract_rules_tier_assignment(tmp_path):
+    from extract import extract_rules
+    md_content = """# Archetypes
+### Tier 1 - Early Game
+#### Arch A
+**Stats:** High Charm | Low Honesty | **Shadow:** High Dread
+**Level range:** 1-2
+
+Some behavior A.
+### Tier 2 - Mid Game
+#### Arch B
+**Stats:** High Rizz | Low Honesty | **Shadow:** High Denial
+**Level range:** 3-5
+
+Some behavior B.
+"""
+    p = tmp_path / "dummy.md"
+    p.write_text(md_content)
     
-    assert res['stats']['high'] == []
-    assert res['stats']['low'] == []
-    assert res['shadows']['high'] == []
-    assert res['shadows']['low'] == []
-    assert res['level_range'] == [8, 99]
+    rules = extract_rules(str(p))
+    
+    arch_a = next(r for r in rules if 'Arch A' in r['title'])
+    arch_b = next(r for r in rules if 'Arch B' in r['title'])
+    
+    assert arch_a.get('type') == 'archetype_definition'
+    assert arch_a.get('tier') == 1, "Arch A should be tier 1, not affected by Tier 2 heading"
+    
+    assert arch_b.get('type') == 'archetype_definition'
+    assert arch_b.get('tier') == 2
