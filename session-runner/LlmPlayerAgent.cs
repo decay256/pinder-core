@@ -17,10 +17,11 @@ namespace Pinder.SessionRunner
     /// </summary>
     public sealed class LlmPlayerAgent : IPlayerAgent, IDisposable
     {
-        private const string SystemMessage =
-            "You are a strategic player in Pinder, a comedy dating RPG. You analyze game mechanics " +
-            "and choose the optimal dialogue option each turn. Your goal is to reach Interest 25 " +
-            "(date secured) while avoiding Interest 0 (unmatched/ghosted).";
+        private const string DefaultSystemMessage =
+            "You are playing Pinder, a comedy dating RPG. You make choices as your character — " +
+            "genuine, in-voice decisions that reflect who they are. You want to reach Interest 25 " +
+            "(date secured) while avoiding Interest 0 (unmatched/ghosted), but you choose based on " +
+            "what your character would actually say, not just what maximizes expected value.";
 
         private const string RulesReminder =
             "## Rules Reminder\n" +
@@ -82,12 +83,14 @@ namespace Pinder.SessionRunner
             {
                 string userMessage = BuildPrompt(turn, context);
 
+                string systemMsg = BuildSystemMessage(context);
+
                 var request = new MessagesRequest
                 {
                     Model = _model,
                     MaxTokens = 512,
-                    Temperature = 0.3,
-                    System = new[] { new ContentBlock { Type = "text", Text = SystemMessage } },
+                    Temperature = 0.5,
+                    System = new[] { new ContentBlock { Type = "text", Text = systemMsg } },
                     Messages = new[] { new Message { Role = "user", Content = userMessage } }
                 };
 
@@ -126,15 +129,47 @@ namespace Pinder.SessionRunner
         }
 
         /// <summary>
+        /// Builds the system message, incorporating character personality if available.
+        /// </summary>
+        private string BuildSystemMessage(PlayerAgentContext context)
+        {
+            if (!string.IsNullOrEmpty(context.PlayerSystemPrompt))
+            {
+                string name = !string.IsNullOrEmpty(context.PlayerName) ? context.PlayerName : _playerName;
+                return $"You are {name}, making genuine character choices in Pinder (a comedy dating RPG). " +
+                       $"Stay in character. Your personality and voice:\n\n{context.PlayerSystemPrompt}\n\n" +
+                       "Your goal is Interest 25 (date secured) while avoiding Interest 0. " +
+                       "Choose based on what you would actually send, not just mechanical optimization.";
+            }
+            return DefaultSystemMessage;
+        }
+
+        /// <summary>
         /// Builds the full LLM prompt from turn data and agent context.
         /// </summary>
         internal string BuildPrompt(TurnStart turn, PlayerAgentContext context)
         {
             var sb = new System.Text.StringBuilder(2048);
 
-            sb.AppendLine($"You are playing as {_playerName}, a sentient penis on a dating app.");
-            sb.AppendLine($"You are talking to {_opponentName}. Choose one of the dialogue options below.");
+            string playerLabel = !string.IsNullOrEmpty(context.PlayerName) ? context.PlayerName : _playerName;
+            string opponentLabel = !string.IsNullOrEmpty(context.OpponentName) ? context.OpponentName : _opponentName;
+
+            sb.AppendLine($"You are {playerLabel}. Choose one of the dialogue options below.");
+            sb.AppendLine($"You are talking to {opponentLabel}.");
             sb.AppendLine();
+
+            // Recent conversation context (#492)
+            if (context.RecentHistory != null && context.RecentHistory.Count > 0)
+            {
+                sb.AppendLine("## Recent Conversation");
+                int start = Math.Max(0, context.RecentHistory.Count - 6);
+                for (int i = start; i < context.RecentHistory.Count; i++)
+                {
+                    var entry = context.RecentHistory[i];
+                    sb.AppendLine($"{entry.Sender}: \"{entry.Text}\"");
+                }
+                sb.AppendLine();
+            }
 
             // Current state
             sb.AppendLine("## Current State");
@@ -176,8 +211,13 @@ namespace Pinder.SessionRunner
             // Rules reminder
             sb.AppendLine(RulesReminder);
 
-            sb.AppendLine("Explain your reasoning step by step, weighing success probability, interest gain, risk,");
-            sb.AppendLine("and any active bonuses or traps. Then state your final choice as:");
+            sb.AppendLine($"Think as {playerLabel}. What would you actually send here? Consider:");
+            sb.AppendLine("- Which option sounds most like something you'd genuinely type?");
+            sb.AppendLine("- Success probability and risk (you still want to win)");
+            sb.AppendLine("- Any active bonuses, traps, or momentum");
+            sb.AppendLine();
+            sb.AppendLine("Explain your reasoning in your character's voice — why this feels right,");
+            sb.AppendLine("not just why it's optimal. Then state your final choice as:");
             sb.AppendLine("PICK: [A/B/C/D]");
 
             return sb.ToString();

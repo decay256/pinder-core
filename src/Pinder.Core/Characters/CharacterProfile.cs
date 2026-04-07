@@ -34,6 +34,12 @@ namespace Pinder.Core.Characters
         /// </summary>
         public string TextingStyleFragment { get; }
 
+        /// <summary>
+        /// The character's active archetype, or null if none resolved.
+        /// Carries name, behavior directive, and interference level.
+        /// </summary>
+        public ActiveArchetype ActiveArchetype { get; }
+
         public CharacterProfile(
             StatBlock stats,
             string assembledSystemPrompt,
@@ -41,7 +47,8 @@ namespace Pinder.Core.Characters
             TimingProfile timing,
             int level,
             string bio = "",
-            string textingStyleFragment = "")
+            string textingStyleFragment = "",
+            ActiveArchetype activeArchetype = null)
         {
             Stats = stats ?? throw new ArgumentNullException(nameof(stats));
             AssembledSystemPrompt = assembledSystemPrompt ?? throw new ArgumentNullException(nameof(assembledSystemPrompt));
@@ -50,6 +57,7 @@ namespace Pinder.Core.Characters
             Level = level;
             Bio = bio ?? string.Empty;
             TextingStyleFragment = textingStyleFragment ?? string.Empty;
+            ActiveArchetype = activeArchetype;
         }
     }
 }

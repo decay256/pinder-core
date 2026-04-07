@@ -297,6 +297,9 @@ namespace Pinder.Core.Conversation
             var activeTrapInstructions = GetActiveTrapInstructions();
 
             // Build dialogue context — pass callback topics (#47) and shadow thresholds (#45)
+            // Resolve active archetype directive for player
+            string playerArchetypeDirective = _player.ActiveArchetype?.Directive;
+
             var context = new DialogueContext(
                 playerPrompt: _player.AssembledSystemPrompt,
                 opponentPrompt: _opponent.AssembledSystemPrompt,
@@ -311,7 +314,8 @@ namespace Pinder.Core.Conversation
                 requiresRizzOption: _sessionHorniness >= 12,
                 currentTurn: _turnNumber,
                 playerTextingStyle: _player.TextingStyleFragment,
-                activeTell: _activeTell);
+                activeTell: _activeTell,
+                activeArchetypeDirective: playerArchetypeDirective);
 
             // Get dialogue options from LLM
             var rawOptions = await _llm.GetDialogueOptionsAsync(context).ConfigureAwait(false);
@@ -649,6 +653,9 @@ namespace Pinder.Core.Conversation
                 }
             }
 
+            // Resolve active archetype directive for opponent
+            string opponentArchetypeDirective = _opponent.ActiveArchetype?.Directive;
+
             var opponentContext = new OpponentContext(
                 playerPrompt: _player.AssembledSystemPrompt,
                 opponentPrompt: _opponent.AssembledSystemPrompt,
@@ -665,7 +672,8 @@ namespace Pinder.Core.Conversation
                 opponentName: _opponent.DisplayName,
                 currentTurn: _turnNumber,
                 shadowThresholds: opponentShadowThresholds,
-                deliveryTier: rollResult.Tier);
+                deliveryTier: rollResult.Tier,
+                activeArchetypeDirective: opponentArchetypeDirective);
 
             var opponentResponse = await _llm.GetOpponentResponseAsync(opponentContext).ConfigureAwait(false);
             if (opponentResponse == null)

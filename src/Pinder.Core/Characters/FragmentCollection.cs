@@ -31,13 +31,20 @@ namespace Pinder.Core.Characters
         /// <summary>Effective stat block (base + item + anatomy modifiers, shadow applied).</summary>
         public StatBlock Stats { get; }
 
+        /// <summary>
+        /// The resolved active archetype for this character, or null if none could be determined.
+        /// Selected based on character level and archetype frequency.
+        /// </summary>
+        public ActiveArchetype ActiveArchetype { get; }
+
         public FragmentCollection(
             IReadOnlyList<string> personalityFragments,
             IReadOnlyList<string> backstoryFragments,
             IReadOnlyList<string> textingStyleFragments,
             IReadOnlyList<(string Archetype, int Count)> rankedArchetypes,
             TimingProfile timing,
-            StatBlock stats)
+            StatBlock stats,
+            ActiveArchetype activeArchetype = null)
         {
             PersonalityFragments  = personalityFragments;
             BackstoryFragments    = backstoryFragments;
@@ -45,6 +52,7 @@ namespace Pinder.Core.Characters
             RankedArchetypes      = rankedArchetypes;
             Timing                = timing;
             Stats                 = stats;
+            ActiveArchetype       = activeArchetype;
         }
     }
 }

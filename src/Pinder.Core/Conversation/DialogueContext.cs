@@ -60,6 +60,9 @@ namespace Pinder.Core.Conversation
         /// <summary>The stats available for options this turn (randomly drawn). Null means all 6 stats available.</summary>
         public StatType[]? AvailableStats { get; }
 
+        /// <summary>Active archetype directive for the player character, or null if none.</summary>
+        public string ActiveArchetypeDirective { get; }
+
         public DialogueContext(
             string playerPrompt,
             string opponentPrompt,
@@ -77,7 +80,8 @@ namespace Pinder.Core.Conversation
             int currentTurn = 0,
             string playerTextingStyle = "",
             Tell? activeTell = null,
-            StatType[]? availableStats = null)
+            StatType[]? availableStats = null,
+            string activeArchetypeDirective = null)
         {
             PlayerPrompt = playerPrompt ?? throw new System.ArgumentNullException(nameof(playerPrompt));
             OpponentPrompt = opponentPrompt ?? throw new System.ArgumentNullException(nameof(opponentPrompt));
@@ -96,6 +100,7 @@ namespace Pinder.Core.Conversation
             PlayerTextingStyle = playerTextingStyle ?? "";
             ActiveTell = activeTell;
             AvailableStats = availableStats;
+            ActiveArchetypeDirective = activeArchetypeDirective;
         }
     }
 }

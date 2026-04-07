@@ -67,5 +67,28 @@ namespace Pinder.Core.Characters
             if (def == null) return true; // unknown archetypes are not filtered
             return def.IsEligibleAtLevel(characterLevel);
         }
+
+        /// <summary>
+        /// Returns the behavioral instruction for the given archetype, or a
+        /// placeholder if no behavior text is registered.
+        /// </summary>
+        public static string GetBehavior(string archetypeName)
+        {
+            if (_behaviors.TryGetValue(archetypeName, out var behavior))
+                return behavior;
+            return $"Follow {archetypeName} behavioral pattern.";
+        }
+
+        /// <summary>
+        /// Register behavior text for an archetype (e.g. loaded from YAML).
+        /// </summary>
+        public static void RegisterBehavior(string archetypeName, string behavior)
+        {
+            if (!string.IsNullOrEmpty(archetypeName) && !string.IsNullOrEmpty(behavior))
+                _behaviors[archetypeName] = behavior;
+        }
+
+        private static readonly Dictionary<string, string> _behaviors
+            = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
     }
 }
