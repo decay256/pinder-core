@@ -358,6 +358,22 @@ class Program
             }
         }
 
+        // Load delivery-instructions.yaml if present
+        string? deliveryInstructionsPath = DataFileLocator.FindDataFile(AppContext.BaseDirectory, Path.Combine("data", "delivery-instructions.yaml"));
+        StatDeliveryInstructions? statDeliveryInstructions = null;
+        if (deliveryInstructionsPath != null)
+        {
+            try
+            {
+                statDeliveryInstructions = StatDeliveryInstructions.LoadFrom(File.ReadAllText(deliveryInstructionsPath));
+                Console.Error.WriteLine("Loaded delivery-instructions.yaml");
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"[WARN] Failed to load delivery-instructions.yaml: {ex.Message}");
+            }
+        }
+
         string? debugFile = null;
         if (isDebug && playtestDir != null)
         {
@@ -383,7 +399,8 @@ class Program
                 MaxTokens = 1024,
                 Temperature = 0.9,
                 GameDefinition = gameDef,
-                DebugDirectory = debugFile
+                DebugDirectory = debugFile,
+                StatDeliveryInstructions = statDeliveryInstructions
             });
         }
         else
@@ -392,7 +409,8 @@ class Program
             {
                 ApiKey = apiKey, Model = "claude-sonnet-4-20250514", MaxTokens = 1024, Temperature = 0.9,
                 GameDefinition = gameDef,
-                DebugDirectory = debugFile
+                DebugDirectory = debugFile,
+                StatDeliveryInstructions = statDeliveryInstructions
             });
         }
 

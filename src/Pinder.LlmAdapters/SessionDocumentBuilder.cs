@@ -149,7 +149,8 @@ namespace Pinder.LlmAdapters
         public static string BuildDeliveryPrompt(
             DeliveryContext context,
             RollContextBuilder? rollContextBuilder = null,
-            DeliveryRules? deliveryRules = null)
+            DeliveryRules? deliveryRules = null,
+            StatDeliveryInstructions? statDeliveryInstructions = null)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
@@ -196,16 +197,32 @@ namespace Pinder.LlmAdapters
             {
                 string nat20Str = context.IsNat20 ? " (NAT 20)" : "";
                 string beatDcByStr = $"{context.BeatDcBy}{nat20Str}";
-                string statVoice = GetStatSuccessVoice(context.ChosenOption.Stat);
-                string tierLabel = context.IsNat20
-                    ? $"Nat 20 — legendary. One sentence can be more effective than a paragraph if it's exactly right. {statVoice}"
-                    : context.BeatDcBy >= 15
-                    ? $"Exceptional (margin 15+) — this is the best version of this message that could exist. It arrives at exactly the right moment with exactly the right weight. {statVoice}"
-                    : context.BeatDcBy >= 10
-                    ? $"Critical success (margin 10-14) — deliver at peak. The message arrives perfectly. Something in the wording resonates more deeply than intended. {statVoice}"
-                    : context.BeatDcBy >= 5
-                    ? $"Strong success (margin 5-9) — the message lands better than the player planned. Something clicked in the phrasing. {statVoice} You may sharpen word choice or add ONE phrase that makes the sentiment more precise and alive. Do NOT add new sentences or new ideas."
-                    : "Clean success (margin 1-4) — deliver essentially as written. Small word choice improvements only.";
+
+                // Use per-stat delivery instructions when available, fall back to generic
+                string tierKey = StatDeliveryInstructions.SuccessTierKey(context.BeatDcBy, context.IsNat20);
+                string configuredInstruction = statDeliveryInstructions != null
+                    ? statDeliveryInstructions.Get(context.ChosenOption.Stat, tierKey)
+                    : null;
+
+                string tierLabel;
+                if (!string.IsNullOrWhiteSpace(configuredInstruction))
+                {
+                    tierLabel = configuredInstruction;
+                }
+                else
+                {
+                    string statVoice = GetStatSuccessVoice(context.ChosenOption.Stat);
+                    tierLabel = context.IsNat20
+                        ? $"Nat 20 — legendary. One sentence can be more effective than a paragraph if it's exactly right. {statVoice}"
+                        : context.BeatDcBy >= 15
+                        ? $"Exceptional (margin 15+) — this is the best version of this message that could exist. {statVoice}"
+                        : context.BeatDcBy >= 10
+                        ? $"Critical success (margin 10-14) — deliver at peak. {statVoice}"
+                        : context.BeatDcBy >= 5
+                        ? $"Strong success (margin 5-9) — the message lands better than planned. {statVoice}"
+                        : "Clean success (margin 1-4) — deliver essentially as written. Small word choice improvements only.";
+                }
+
                 sb.AppendLine($"Stat: {context.ChosenOption.Stat.ToString().ToUpperInvariant()} | Beat DC by {beatDcByStr}");
                 sb.Append(PromptTemplates.BuildSuccessDeliveryInstruction(deliveryRules)
                     .Replace("{player_name}", playerName)
@@ -216,7 +233,15 @@ namespace Pinder.LlmAdapters
             {
                 int missMargin = Math.Abs(context.BeatDcBy);
                 string tierName = GetFailureTierName(context.Outcome);
-                string tierInstruction = GetTierInstruction(context.Outcome);
+
+                // Use per-stat failure instructions when available, fall back to generic
+                string failureTierKey = StatDeliveryInstructions.FailureTierKey(context.Outcome);
+                string configuredFailureInstruction = statDeliveryInstructions != null
+                    ? statDeliveryInstructions.Get(context.ChosenOption.Stat, failureTierKey)
+                    : null;
+                string tierInstruction = !string.IsNullOrWhiteSpace(configuredFailureInstruction)
+                    ? configuredFailureInstruction
+                    : GetTierInstruction(context.Outcome);
 
                 sb.AppendLine($"Stat: {context.ChosenOption.Stat.ToString().ToUpperInvariant()} | Missed DC by {missMargin} | Tier: {tierName}");
 

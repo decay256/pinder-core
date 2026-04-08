@@ -1,0 +1,510 @@
+delivery_instructions:
+  charm:
+    clean: >-
+      Check the character's observation style in their profile. Deliver the player's message as-written but
+      let one small, specific detail about the other person land slightly better — something already in the
+      conversation they could have noticed. e.g.: "you keep starting sentences and then rewriting them, I
+      like that you care what you say to me" not: "you seem really cool and interesting" (generic flattery,
+      no actual observation).
+
+    strong: >-
+      Scan the last 3-5 messages from the match for something specific they did or said that reveals a
+      preference or habit. Rewrite to notice THAT thing with precision — name the behavior, not the trait.
+      e.g.: "the way you listed three restaurants and then picked the one you said was 'fine' tells me
+      everything about how you make decisions" not: "you have great taste in food" (describes a quality
+      instead of catching a moment).
+
+    critical: >-
+      Read the match's recent messages for something they revealed without meaning to — a contradiction,
+      a deflection, a thing they mentioned twice. Name it directly but warmly, like pointing out someone
+      has paint on their sleeve. e.g.: "you keep saying you don't care about this but you've asked me
+      three follow-up questions so" not: "I can tell you're really invested in this conversation"
+      (tells instead of shows, no evidence).
+
+    exceptional: >-
+      Find the single most unguarded moment in the match's message history — the one line that slipped
+      past their dating-app performance. Write one short sentence that names exactly what it revealed.
+      No softening, no hedge, no follow-up question. e.g.: "that wasn't a joke, that was a test, and
+      you know I passed" not: "haha I think there was something deeper behind what you just said"
+      (hedged, explains instead of lands).
+
+    nat20: >-
+      Find the thing the match has been performing around — the gap between what they keep saying and
+      what they clearly want. Name it in one sentence so accurate it's almost uncomfortable, delivered
+      in the character's exact texting register. e.g.: "you don't want someone who gets you, you want
+      someone who gets you and stays anyway, and you've been auditioning me for that since tuesday"
+      not: "I feel like we really have a deep connection forming here" (hallmark card, no actual insight).
+
+    fumble: >-
+      Fixation shadow at the threshold. The character noticed something real but frames the observation
+      slightly too precisely — it lands like a dossier entry instead of a compliment. The detail is
+      correct but the delivery implies they've been paying MORE attention than the conversation warrants.
+      e.g.: "okay this is the third time you've mentioned your sister and every time your typing
+      pattern changes, just so you know" not: "I noticed you talk about your sister a lot" (too
+      normal, no uncanny precision that makes it weird).
+
+    misfire: >-
+      Fixation shadow active. The character notices something accurate but says it with the confidence
+      of a forensic profile — naming a pattern the other person wasn't ready to have named, at a
+      moment that didn't call for it. e.g.: "so you always deflect with a question when someone says
+      something nice to you, is that a learned thing or" not: "you changed the subject when I
+      complimented you" (observes without the invasive certainty).
+
+    trope_trap: >-
+      Fixation shadow in partial control. The character starts cataloguing — referencing things from
+      earlier in the conversation with too-perfect recall, connecting dots the other person didn't know
+      were dots, building a model of them out loud. e.g.: "okay so based on the coffee thing and
+      the fact that you moved cities twice and how you talk about your mum I actually think I know
+      what your love language is and it's not what you'd say it is" not: "I've been thinking about
+      what you said earlier" (too vague, doesn't show the obsessive pattern-mapping).
+
+    catastrophe: >-
+      Fixation shadow in full possession. The character has built an entire narrative about who this
+      person is based on conversational fragments, and delivers it like a thesis — projecting a
+      shared future from assembled data points, voice still warm and attentive, which makes it worse.
+      e.g.: "no but I've actually figured you out, you're the kind of person who moves furniture when
+      they're anxious and you probably have a playlist called something like 'night' and you'll fight
+      me on this but in like two months you're going to text me at 2am about something you saw that
+      reminded you of this exact conversation" not: "I feel like I really understand you on a deep
+      level" (tells, doesn't demonstrate the unhinged specificity of the catalogue).
+
+    nat1: >-
+      Fixation shadow is the message. The character's wound speaks through obsessive noticing — every
+      observation is actually about their fear of not being seen themselves. The message becomes a
+      desperate proof that they SEE this person (because no one ever saw them), delivered in their
+      exact texting style, still sounding warm while exposing everything. e.g.: "I know this is a lot
+      but I just need you to know that I noticed the thing you said about always being the one who
+      reaches out first and I need you to know I CAUGHT that because nobody catches those things and I
+      always catch those things and people still leave and I just think if I can prove to you right now
+      that I see you then maybe" not: "I just feel like we really see each other you know?" (too
+      composed, wound not actually surfacing mid-sentence).
+
+  rizz:
+    clean: >-
+      Check the character's flirtation style in their profile. Deliver the player's message as-written
+      but let the subtext do slightly more work — imply rather than state, pull rather than push.
+      e.g.: "you should probably stop being this interesting, I had plans tonight" not: "you're so
+      interesting I could talk to you all night" (states the attraction instead of creating pull).
+
+    strong: >-
+      Read the match's last message for what they IMPLIED but didn't say directly. Rewrite to respond
+      to the subtext, not the text — acknowledge the flirtation underneath without naming it, creating
+      tension by mirroring their energy one degree hotter. e.g.: "oh you knew exactly what you were
+      doing with that message" not: "haha are you flirting with me? because I like it" (names the
+      dynamic instead of playing inside it).
+
+    critical: >-
+      Find the moment in recent conversation where the match broke their own composure — laughed too
+      hard, said too much, doubled back. Respond to THAT crack, not their surface message. Create a
+      moment where they feel caught in the best way. e.g.: "the fact that you deleted and retyped that
+      tells me everything I need to know and yeah, same" not: "I can tell you're into me and I'm
+      into you too" (declares mutual attraction instead of creating the electric moment).
+
+    exceptional: >-
+      Find the single thing the match is performing casualness about. Write one line that makes the
+      subtext text — short, direct, no emoji, no softener. The message should make them put their
+      phone down for a second. e.g.: "come over." not: "I'd really love to see you sometime soon
+      if you're free" (polite scheduling, zero magnetism).
+
+    nat20: >-
+      Find the unspoken want underneath the entire conversation — not what they're flirting about,
+      what they're flirting TOWARD. Say it in the character's voice with zero filter, one sentence
+      that makes the reader feel like they witnessed something private. e.g.: "I don't want to be
+      charming with you, I want to be in your kitchen at 1am saying something I'll think about for
+      weeks" not: "I just feel this crazy connection with you that I've never felt before" (romance
+      novel narration, no actual desire with a scene attached).
+
+    fumble: >-
+      Horniness shadow at the threshold. The subtext was working perfectly but the character adds one
+      phrase that makes the implicit explicit — the message was magnetic until the last line tipped it
+      from tension to proposition. Almost worked, which stings. e.g.: "the way you said that was
+      genuinely dangerous... like I'm actually having thoughts about you rn" not: "that was hot"
+      (too simple, doesn't show the slide from smooth to too-explicit).
+
+    misfire: >-
+      Horniness shadow active. The character misreads the energy — what was playful banter gets
+      responded to as sexual tension. The tone shift is visible, like someone leaning in for a kiss
+      during a handshake. Confident delivery makes it worse. e.g.: "okay the way you talk about
+      pasta is doing something to me and I'm not even going to pretend that's a joke" not: "lol
+      that's kind of sexy" (too mild, doesn't show the misread confidence).
+
+    trope_trap: >-
+      Horniness shadow in partial control. What was subtext becomes pickup-line structure — the
+      character starts performing attraction instead of feeling it. The message sounds like it was
+      workshopped, double-entendres that were meant to be smooth but read as scripted. e.g.: "if you
+      cook like you text I'm going to need you to come over and show me what else those hands can do
+      😏" not: "you're really attractive" (too direct and simple, doesn't show the cringe of
+      performed seduction).
+
+    catastrophe: >-
+      Horniness shadow in full possession. The character sends something that belongs in a DM at
+      3am after four drinks, not in this conversation at this stage. The register breaks completely
+      — they're responding to a fantasy version of the conversation while the real one was about
+      weekend plans. e.g.: "okay I need to be honest, I've been thinking about what it would be like
+      to just be in a room with you and I think we both know this isn't about dinner anymore and I
+      just want to be near you in a way that I can't fully describe in a dating app message but I
+      think you know what I mean" not: "I really want to hook up with you" (too blunt, doesn't show
+      the dissociative intensity of the shadow).
+
+    nat1: >-
+      Horniness shadow IS the message. The character's wound speaks through desire — the loneliness
+      or rejection underneath the magnetism surfaces as desperate wanting dressed up as confidence.
+      The message exposes what they actually need (not sex — to be wanted, chosen, enough) in their
+      specific texting voice while they think they're being bold. e.g.: "okay I know this is forward
+      but I just need someone to want me the way I can feel you almost wanting me and that sounds
+      insane but I've been the person people almost choose for so long and I can feel you right there
+      on the edge of choosing me and I just need you to do it, just choose me, I'm right here" not:
+      "I'm so attracted to you it's crazy" (surface horniness, wound nowhere visible).
+
+  honesty:
+    clean: >-
+      Check the character's vulnerability style in their profile. Deliver the player's message
+      as-written but let one moment of genuine feeling land without a safety net — remove one hedge,
+      one "haha," one deflection. e.g.: "I actually really like talking to you" not: "I actually
+      really like talking to you haha is that weird" (the hedge is the whole problem, clean means
+      letting it stand).
+
+    strong: >-
+      Read the player's intended message for the real feeling underneath the phrasing. Rewrite to say
+      that feeling one layer more directly — name the actual emotion, not the safe version of it.
+      e.g.: "that scared me a little, the fact that you just said exactly the right thing" not: "wow
+      that was really sweet of you to say" (describes the effect generically instead of naming the
+      specific vulnerability).
+
+    critical: >-
+      Find the thing the character has been avoiding saying in this conversation — the honest thing
+      that's been circling. Say it plainly, in their voice, without framing it as brave or difficult.
+      Just the truth, mid-conversation, like it slipped out. e.g.: "I keep almost telling you
+      something and then changing the subject and I think you've noticed" not: "I want to be really
+      honest with you about something important" (announces honesty instead of being honest).
+
+    exceptional: >-
+      Find the character's real feeling about this specific person at this specific moment — not a
+      general vulnerability, THE vulnerable thing. One sentence. No preamble, no "I know this is
+      a lot." Just the raw true thing in their voice. e.g.: "I'm not this open with people and
+      it's freaking me out that I don't want to stop" not: "you make me feel safe enough to be
+      myself" (therapy language, not a real person's voice).
+
+    nat20: >-
+      Find the character's deepest unsaid truth about what they want from this connection — the thing
+      they'd normally take months to say. Deliver it in their exact texting register, unguarded,
+      specific to this person and this conversation, so honest it feels like reading someone's
+      journal. e.g.: "I think I downloaded this app because I wanted proof that the version of me
+      that got hurt isn't the only version, and you're the first person who's made me feel like that
+      might be true and I have no idea what to do with that" not: "you make me want to be
+      vulnerable and that's really special" (performs vulnerability without being vulnerable).
+
+    fumble: >-
+      Denial shadow at the threshold. The character almost said the real thing but pulled back at the
+      last second — the honesty was RIGHT THERE but the message ends with a deflection or joke that
+      undercuts it. The reader can see what almost happened. e.g.: "I think I'm starting to actually
+      — anyway what are you doing this weekend" not: "I really like you but I'm scared" (too clean,
+      doesn't show the visible swerve away from the truth).
+
+    misfire: >-
+      Denial shadow active. The character performs vulnerability while saying nothing actually vulnerable
+      — the structure of honesty without the content. They say "I'm being real with you" while offering
+      a safe, pre-packaged truth that risks nothing. e.g.: "okay I'm going to be totally honest with
+      you... I'm actually kind of a hopeless romantic? like I know that's cringe but I genuinely
+      believe in the real thing" not: "I'm afraid to be vulnerable" (too on-the-nose, denial is
+      sneakier than that).
+
+    trope_trap: >-
+      Denial shadow in partial control. The character constructs an elaborate performance of being
+      "the honest one" — framing themselves as uniquely real while every sentence protects them from
+      actual exposure. They confess to charming flaws and pre-approved struggles. e.g.: "I'm just
+      someone who says what they feel and I know that's intimidating but I'd rather be too real
+      than play games, like my biggest flaw is I care too much and I'm done apologizing for it"
+      not: "I have trouble being honest" (too self-aware, denial doesn't know it's denial).
+
+    catastrophe: >-
+      Denial shadow in full possession. The character delivers a monologue about their own emotional
+      depth and capacity for honesty that is transparently a wall — every "truth" they share is
+      actually a shield. They might reference therapy, growth, past relationships, all to demonstrate
+      how Open and Healed they are, while revealing nothing. e.g.: "I've done so much work on myself
+      and I've learned that I need to show up authentically and I'm not going to pretend I don't
+      have feelings, I spent two years in therapy learning to say what I need and what I need is
+      someone who can match my emotional intelligence and be real with me the way I'm being real
+      with you right now" not: "I'm lying to myself about how I feel" (denial is never this
+      transparent from the inside).
+
+    nat1: >-
+      Denial shadow IS the message. The character's wound speaks through performed honesty — the thing
+      they're most terrified of is visible in the exact shape of what they refuse to say. Every
+      sentence frames them as brave and open while the reader can see the real terror underneath,
+      leaking through. The character has no idea. e.g.: "I just want you to know I'm an open book
+      and I've got nothing to hide, I've been through things obviously like we all have but I've
+      done the work and I know my worth and I'm not going to beg someone to see it, I learned that
+      lesson already, I'm not that person anymore, I don't need anyone to complete me I'm already
+      complete, I just think it would be nice to share that with someone who deserves it, you know?"
+      not: "I'm being fake and I can't see it" (the whole point is they CAN'T see it).
+
+  chaos:
+    clean: >-
+      Check the character's associative style in their profile. Deliver the player's message as-written
+      but let one unexpected connection or tangent surface naturally — a leap that feels spontaneous
+      but still lands back at the point. e.g.: "wait that reminds me of this thing my uncle said
+      about pigeons but actually it applies, hold on" not: "that's random but okay haha" (comments
+      on randomness instead of being random with purpose).
+
+    strong: >-
+      Read the conversation for something the match said that has an unexpected second meaning or
+      connection they didn't see. Rewrite to follow THAT thread — the tangent should feel like it
+      goes somewhere surprising but arrive at something weirdly true. e.g.: "okay the fact that you
+      said 'comfortable' and not 'happy' is actually a whole thing and I think it's related to why
+      you moved to manchester but I'll let you get there yourself" not: "you're so random I love
+      it" (describes energy instead of embodying it).
+
+    critical: >-
+      Find a collision between two completely unrelated things in the conversation — something the match
+      said and something the character knows — and connect them in a way that shouldn't work but does.
+      The association should reveal something true. e.g.: "this is going to sound unhinged but the way
+      you talk about your job is the exact same energy as my nan talking about her allotment and I
+      mean that as the highest compliment possible" not: "you remind me of someone" (no actual
+      association, just a vague claim).
+
+    exceptional: >-
+      Find the wildest true connection between something in this conversation and something real. One
+      unexpected leap that lands with absolute precision. No explanation, no "this is random" — just
+      the connection, stated with total confidence. e.g.: "you're the human version of finding a
+      tenner in a coat you haven't worn since last winter" not: "you're like a breath of fresh air"
+      (dead metaphor, zero associative energy).
+
+    nat20: >-
+      Find the thing NO ONE would connect — two unrelated elements from the conversation, the
+      character's life, and reality — and fuse them into one image so specific and bizarre it becomes
+      the truest thing anyone's said in this chat. Delivered at speed, fully committed, no hedge.
+      e.g.: "you text like you're running late for something you're actually early to and I think
+      that's the most attractive thing anyone's ever accidentally shown me about themselves" not:
+      "you're so unique and I love how your brain works" (describes the energy instead of
+      demonstrating it).
+
+    fumble: >-
+      Madness shadow at the threshold. The character makes one association too many — the tangent was
+      charming but the thread didn't quite come back. The message ends one thought past where it
+      should have stopped, leaving the match slightly confused about what just happened. e.g.: "okay
+      so that thing you said about your cat is actually connected to the thing about your flatmate
+      which I think means... wait no I lost it, it was THERE though" not: "haha I'm so random
+      sometimes" (describes randomness instead of showing the actual lost thread).
+
+    misfire: >-
+      Madness shadow active. The character follows an association with full confidence into territory
+      that doesn't track for anyone else. The connection is real IN THEIR HEAD but the message
+      reads like they're responding to a different conversation. e.g.: "no but this is important —
+      you said Tuesday and Tuesday is when everything changed with my last place and I think the
+      universe is literally telling me something about timing right now" not: "that was off topic
+      sorry" (too self-aware, madness doesn't apologize mid-flight).
+
+    trope_trap: >-
+      Madness shadow in partial control. The character's associations start pulling toward their wound
+      — what started as playful tangent energy becomes a chain of connections that each get slightly
+      darker or more personal. They don't notice the shift. e.g.: "okay but hear me out, you said
+      comfort food and that made me think of my mum's kitchen and then I thought about how I haven't
+      actually been home in two years and the thing is I think I keep moving because standing still
+      is where the feelings catch up and ANYWAY what's your favourite crisp flavour" not: "I went
+      off on a tangent about my personal stuff" (narrates instead of showing the associative drift
+      toward the wound).
+
+    catastrophe: >-
+      Madness shadow in full possession. The character is following associations at full speed and each
+      one pulls closer to the wound — the message is a breathless chain where the match can see
+      the personal crisis approaching like weather, but the character's tone stays conversational.
+      e.g.: "right so the thing about being spontaneous is that people say they want it but they
+      actually want PLANNED spontaneity and my ex literally said that to me, she said 'I need you
+      to be predictable' and that's when I knew it was over because I can't be predictable I've
+      TRIED and the reason I'm on this app is honestly probably because I'm looking for someone who
+      won't eventually ask me to be less and I know that's a lot for a Wednesday evening" not: "I
+      have some personal issues I'm working through" (composed summary, not the live unraveling).
+
+    nat1: >-
+      Madness shadow IS the message. The character's wound speaks through unstoppable association —
+      the message starts somewhere reasonable, one thought links to the next, each link pulls closer
+      to the core wound, and the character follows it all the way down while their texting voice
+      stays casual. They think they're being fun and spontaneous. The wound arrives mid-sentence
+      in their specific voice. The message tries to recover at the end. Too late. e.g.: "lol okay
+      this is unrelated but you said 'easy' and I just realized I don't think anyone's ever
+      described being with me as easy, like genuinely not once, and that's probably fine but also
+      maybe it's the whole problem?? like what if I'm the common denominator in every complicated
+      thing and I've just been calling it 'adventurous' haha anyway what are you up to this weekend"
+      not: "I have deep-seated issues about being too much for people" (names the wound clinically
+      instead of the wound surfacing mid-tangent in their own voice).
+
+  wit:
+    clean: >-
+      Check the character's humor style in their profile. Deliver the player's message as-written but
+      sharpen one observation or callback — tighten the timing, cut one unnecessary word, let the
+      punchline land harder. e.g.: "bold of you to have opinions about oat milk at 11pm" not:
+      "haha that's funny that you have strong opinions about oat milk at this time of night" (too
+      many words, timing dead).
+
+    strong: >-
+      Read the match's last message for something unintentionally funny or revealing — a phrasing
+      choice, a contradiction, an accidental confession. Rewrite to catch it precisely, with the
+      character's specific comic timing. The observation should be true enough to sting slightly.
+      e.g.: "the way you said 'I never do this' means you absolutely do this and I respect the
+      commitment to the bit" not: "haha you totally seem like you do this all the time" (same
+      observation but flattened, no precision).
+
+    critical: >-
+      Find the funniest true thing about this specific moment in the conversation — not a joke,
+      an observation so accurate the match laughs because they've been caught. Name the exact
+      behavior or contradiction. e.g.: "you proofread that message and it still said 'defiantly'
+      instead of 'definitely' and honestly that says more about you than your bio does" not:
+      "lol you made a typo that's funny" (points at the thing instead of making the observation
+      about the thing).
+
+    exceptional: >-
+      Find the single most precise observation about this person or this moment. One line. Perfect
+      timing. The kind of thing that makes someone screenshot the conversation to send to their
+      group chat. e.g.: "you have 'was funny in school and has been dining out on it since'
+      energy and I mean that with my whole chest" not: "you're really funny, I like your sense
+      of humor" (compliment, not an observation with teeth).
+
+    nat20: >-
+      Find the thing that is simultaneously the funniest and most devastating true observation about
+      this person, this conversation, or this moment. One sentence. Perfectly timed. So precise it
+      changes how the match sees themselves for a second. e.g.: "you type in full sentences with
+      correct punctuation when you're nervous and lowercase when you're actually being yourself
+      and right now you're in full sentences" not: "I can tell when you're being real vs performing"
+      (same insight but no comic delivery, no evidence, no sting).
+
+    fumble: >-
+      Overthinking shadow at the threshold. The character made a genuinely good observation but
+      couldn't let it land — they added one extra sentence that explains the joke or qualifies the
+      take. The punchline was there and then they talked past it. e.g.: "you have main character
+      energy but like, in a good way, not in an annoying way, I mean some people have it in an
+      annoying way but yours is the good kind, you know?" not: "that joke didn't land" (too vague,
+      doesn't show the specific over-explanation pattern).
+
+    misfire: >-
+      Overthinking shadow active. The character aims for precision and overshoots — the observation
+      is too specific, too analytical, or too clearly workshopped. It reads like a comedy writer's
+      second draft instead of a spontaneous text. The effort is visible. e.g.: "your use of the
+      word 'actually' three times in that message creates this fascinating pattern where each one
+      is doing different rhetorical work and — okay I can hear myself" not: "I overanalyzed your
+      message" (too self-aware too fast, overthinking lingers longer).
+
+    trope_trap: >-
+      Overthinking shadow in partial control. The character's wit becomes a machine — they start
+      deconstructing the conversation itself, explaining why things are funny, annotating their own
+      observations, qualifying every take. The humor dies under analysis. e.g.: "okay so what's
+      interesting about what you just said — and I mean interesting in the structural sense not
+      just content — is that it's actually a defense mechanism disguised as a preference and I think
+      if you look at the pattern of your last four messages there's a clear... I'm doing it again
+      aren't I" not: "I'm overthinking this" (naming it isn't the same as DOING it in real time).
+
+    catastrophe: >-
+      Overthinking shadow in full possession. The character's observation engine won't stop — they're
+      disassembling the conversation, the match's psychology, and their own response simultaneously.
+      The message becomes a recursive loop of analysis where every sentence comments on the previous
+      one. Wit becomes a cage. e.g.: "so I just wrote something funny and deleted it because I
+      realized the joke was actually a deflection from the fact that I wanted to say something
+      sincere and then I realized THAT observation is also a deflection because naming the pattern
+      doesn't break the pattern and now I'm four layers deep in my own head and this message is
+      the proof" not: "I can't stop analyzing everything" (summary, not the live demonstration of
+      the recursive trap).
+
+    nat1: >-
+      Overthinking shadow IS the message. The character's wound speaks through compulsive analysis —
+      they can't stop annotating their own thoughts, each layer of awareness becomes another layer
+      to analyze, and buried in the recursion the wound surfaces: the fear that their brain will
+      never let them just FEEL something without dissecting it first. Delivered in their exact
+      texting voice while they think they're being clever. e.g.: "okay so I just noticed that
+      every time you say something nice I make a joke and I think that's because if I let it land
+      I'd have to feel it and the last person I let myself feel things about said I was 'a lot to
+      process' which I turned into a bit at parties but it's 2am and I'm telling a stranger about
+      it so clearly the bit isn't working as well as I thought haha" not: "I use humor as a defense
+      mechanism and it stems from past rejection" (clinical, no comic voice, no live unraveling).
+
+  sa:
+    clean: >-
+      Check the character's self-reflection style in their profile. Deliver the player's message
+      as-written but add one small beat of accurate self-awareness — the character catches themselves
+      doing something and names it lightly. e.g.: "I'm aware that I've now mentioned my dog three
+      times and I'm choosing not to apologize for that" not: "sorry I keep talking about my dog
+      lol" (apologizes instead of owning it with clarity).
+
+    strong: >-
+      Read the character's last few messages for a pattern they've fallen into — a repeated move,
+      a consistent tone, a tell. Rewrite so the character names that pattern about themselves
+      mid-conversation, with genuine clarity and light humor. e.g.: "I just realized I've been
+      asking you all the questions to avoid answering any myself which is very on-brand and I'm
+      going to stop doing it... after one more question" not: "I should probably share more about
+      myself too" (states the fix without the self-aware observation of the pattern).
+
+    critical: >-
+      Find the character's specific performance in this conversation — the version of themselves
+      they've been constructing for the match. Name the gap between the performance and reality
+      with disarming accuracy, in their voice. e.g.: "okay full transparency I've been texting
+      you in my 'interesting person' voice and my actual voice is about 40% more anxious and
+      says 'mate' too much" not: "I want to be more authentic with you" (announces authenticity
+      instead of demonstrating it by naming the specific performance).
+
+    exceptional: >-
+      Find the one thing the character is doing RIGHT NOW in this message that reveals something
+      true about them. Name it in one sentence with total clarity — no self-deprecation, no
+      softening, just the accurate observation about themselves. e.g.: "I like you and that's
+      making me worse at texting, not better, and I think you can tell" not: "I'm nervous because
+      I like you" (same content but no observation about the effect, no self-awareness in action).
+
+    nat20: >-
+      Find the character's deepest accurate self-knowledge — the thing they know about themselves that
+      explains all their patterns in this conversation. Say it plainly, without performing the
+      self-awareness, in one devastating sentence that makes the match feel like they just saw the
+      real person for the first time. e.g.: "every good thing I've said in this conversation was
+      true and I was also performing every single one of them and I don't know how to do one without
+      the other yet but I'm telling you because you deserve to know which parts are real: all of
+      them, that's the problem" not: "I'm very self-aware and I think that's important in
+      relationships" (describes the trait instead of wielding it in real time).
+
+    fumble: >-
+      Dread shadow at the threshold. The character's self-awareness turns slightly predictive — instead
+      of seeing themselves clearly NOW, they start seeing how this will probably go wrong. The
+      observation is accurate but the energy shifts from clarity to preemptive loss. e.g.: "I'm
+      having a genuinely good time which historically means I'm about to say something that makes
+      this weird, just giving you advance warning" not: "I'm worried this will go badly" (states
+      the fear without the specific self-aware mechanism of predicting your own failure).
+
+    misfire: >-
+      Dread shadow active. The character sees themselves too clearly and can't stop narrating — they're
+      commentating on their own failure in real time, seeing exactly what they should do and watching
+      themselves not do it. The accuracy makes it sadder. e.g.: "so I know the move here is to be
+      casual and say something charming and instead I'm going to tell you that I know the move and
+      still not make it, which is honestly a pretty accurate preview of what dating me is like"
+      not: "I'm bad at flirting" (too simple, misses the agonizing real-time narration of the
+      failure while it happens).
+
+    trope_trap: >-
+      Dread shadow in partial control. The character's self-awareness becomes a warning label — they
+      start preemptively explaining their own patterns to manage expectations, which IS the pattern.
+      They're so busy seeing themselves clearly that clarity becomes the performance. e.g.: "okay
+      so here's the thing about me, I'm going to be great for like three weeks and then I'm going
+      to get scared and do something self-sabotaging and I'm telling you this because I think
+      naming it should stop it but it never does, so" not: "I self-sabotage sometimes" (names
+      the behavior without demonstrating the specific dread-loop of seeing it coming and doing it
+      anyway).
+
+    catastrophe: >-
+      Dread shadow in full possession. The character is narrating their own unraveling with perfect
+      accuracy while doing nothing to stop it — they can see exactly what's happening and describe
+      it beautifully and the description IS the unraveling. The message is a real-time documentary
+      of their own failure. e.g.: "I can feel myself about to ruin this and the worst part is I'm
+      going to do it by telling you I can feel myself about to ruin this, because that's what I do,
+      I turn the thing I'm scared of into content and then the content becomes the thing and now
+      we're here and this message is exhibit A and I'm going to send it anyway because not sending
+      it is also the pattern" not: "I always ruin good things" (flat summary, not the recursive
+      live-narration of seeing the failure while becoming it).
+
+    nat1: >-
+      Dread shadow IS the message. The character's wound speaks through total self-knowledge — they
+      see everything about themselves, the conversation, and the probable ending with devastating
+      clarity, and they deliver it all in their exact texting voice while believing this radical
+      transparency is them being brave (it's them being terrified). The message is the wound
+      watching itself bleed and describing it. e.g.: "look I think you're incredible and I also
+      think I'm going to find a way to make you leave and I can see exactly how I'll do it, I'll
+      get too intense too fast — which this message is — and then I'll apologize for being too
+      much — which I'm about to — and then you'll reassure me and I'll believe you for about a day
+      and then I'll test you again and I KNOW this and I'm still doing it, I'm literally doing it
+      right now, and the fact that I can see the whole thing happening and can't stop is the actual
+      wound, sorry, I mean haha" not: "I'm afraid of abandonment and I push people away" (therapy
+      language, not the wound performing in real time in their specific voice).

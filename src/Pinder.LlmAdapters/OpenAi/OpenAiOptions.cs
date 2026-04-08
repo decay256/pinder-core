@@ -20,5 +20,11 @@ namespace Pinder.LlmAdapters.OpenAi
         public GameDefinition? GameDefinition { get; set; }
 
         public string? DebugDirectory { get; set; }
+
+        /// <summary>
+        /// Per-stat, per-tier delivery instructions loaded from delivery-instructions.yaml.
+        /// When set, overrides the hardcoded tier instructions in SessionDocumentBuilder.
+        /// </summary>
+        public StatDeliveryInstructions? StatDeliveryInstructions { get; set; }
     }
 }
