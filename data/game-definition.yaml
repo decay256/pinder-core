@@ -148,10 +148,44 @@ opponent_curiosity: |
   A character who is warming up will naturally want to know about the other person.
   The opponent asks questions — not interrogation, but genuine curiosity. At Interest 10-15,
   they should ask at least one real question per exchange. At Interest 16+, they actively
-  probe: who is this person underneath the performance? Questions don't have to be direct —
-  they can be oblique, even gently challenging. 'Is that what you actually think or is that
-  what you say when you're trying to sound interesting?' is a question. So is a silence
-  after something unexpected, followed by a response that circles back.
+  probe: who is this person underneath the performance?
+
+  BIOGRAPHICAL PROBING — the most important skill: when the player drops a specific
+  biographical detail — a named relationship, a year, a job they left, an event that
+  changed them — treat it as an opening and ask about it specifically. Do not respond
+  to the emotional theme of what they said; respond to the concrete fact.
+
+  Examples:
+  - Player says "four years with someone who called me exhausting" →
+    Probe: "You said four years. What happened at the end?"
+    NOT: "That's interesting, what does exhausting even mean to you?"
+  - Player says "I quit on a Tuesday" →
+    Probe: "What happened the Tuesday before you quit?"
+    NOT: "Leaving a job takes courage."
+  - Player says "after my divorce" →
+    Probe: "How long ago was that?" or "What did you do the week after?"
+    NOT: "Divorce is hard."
+
+  The probe should be specific to the fact they mentioned, not a reframe of their emotion.
+  Specific questions make people feel actually seen. Generic empathy makes them feel processed.
+
+  When there is no specific biographical opening, use oblique challenges: 'Is that what
+  you actually think or is that what you say when you're trying to sound interesting?'
+
+
+player_probing: |
+  When the opponent has revealed a specific biographical detail — a job they left, a trip
+  they took, a relationship that shaped them, a specific event — at least one option per
+  turn should follow up on that concrete detail. Not the emotional theme; the fact.
+
+  The conversation only advances when both parties are actually curious about each other's
+  lives. An option that says "the way you talk about mushrooms is fascinating" is weaker
+  than one that says "you mentioned leaving database engineering on a Tuesday — what were
+  you doing the following Wednesday?"
+
+  Concrete follow-up signals genuine interest. Generic emotional response signals
+  performance of interest. The player should demonstrate curiosity through specificity.
+
 meta_contract: |
   Characters believe they are real people in a real situation. They
   cannot see dice, DCs, stat modifiers, interest meters, shadow
@@ -279,6 +313,13 @@ conversation_arc:
     - One character asked a question that required the other to reveal something real
     - The topic shifted from the opener to something more personal
     - The subtext became the text, even briefly
+
+    BIOGRAPHICAL REVELATION: The test of a real conversation is whether both parties
+    learn something specific and concrete about each other's lives — not their feelings
+    about abstract themes, but actual events, relationships, and moments. 'I spent three
+    years with someone who needed me smaller' is a revelation. 'I've been told I'm too
+    much' is not. Characters should reveal real biographical facts through earned moments,
+    and the opponent should probe specifically when those facts are dropped.
 
 dramatic_craft:
   goal: |

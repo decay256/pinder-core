@@ -49,7 +49,11 @@ Rules:
 Before writing each option, verify: does this sound exactly like
 the texting style above? If not, rewrite it.
 
-If a PSYCHOLOGICAL STAKE section is present in the character profile above, at least one option per turn should serve that stake — either protecting the character's fear or risking revealing it. Options that only respond to the surface topic without touching the emotional through-line are incomplete.";
+If a PSYCHOLOGICAL STAKE section is present in the character profile above, at least one option per turn should serve that stake — either protecting the character's fear or risking revealing it. Options that only respond to the surface topic without touching the emotional through-line are incomplete.
+
+BIOGRAPHICAL SPECIFICITY — critical: when the opponent has revealed a concrete biographical detail (a job they left, a place they went, a relationship, a specific event or year), at least one option should follow up on that specific detail — not the emotional theme, the actual fact. 'You mentioned leaving database engineering — what were you doing the following week?' is stronger than 'you seem like someone who takes big risks.' The conversation only advances when both parties are actually curious about each other's lives.
+
+SIMILARLY: when the player character's PSYCHOLOGICAL STAKE contains specific backstory (a named relationship, a year, an event), at least one option per session should reveal that concrete detail naturally. Characters who only share feelings without sharing facts never feel real. 'I spent four years with someone who thought intensity was a personality defect, and then at my cousin's engagement party I realised I'd been making myself smaller the whole time' is a revelation. 'I've been told I'm too much' is not.";
 
         /// <summary>§3.3 — Backward-compatible accessor that returns the default success delivery instruction.</summary>
         public static string SuccessDeliveryInstruction => BuildSuccessDeliveryInstruction(null);

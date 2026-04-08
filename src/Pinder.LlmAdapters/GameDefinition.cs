@@ -109,6 +109,9 @@ namespace Pinder.LlmAdapters
         /// <summary>Conversation arc / topic progression guidance.</summary>
         public string ConversationArcProgression { get; }
 
+        /// <summary>Player options probing directive — biographical follow-up instruction.</summary>
+        public string PlayerProbing { get; }
+
         /// <summary>Configurable delivery prompt rules, or null for hardcoded defaults.</summary>
         public DeliveryRules DeliveryRules { get; }
 
@@ -129,7 +132,8 @@ namespace Pinder.LlmAdapters
             string revelationOverStatement = null,
             string opponentFriction = null,
             string opponentCuriosity = null,
-            string conversationArcProgression = null)
+            string conversationArcProgression = null,
+            string playerProbing = null)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Vision = vision ?? throw new ArgumentNullException(nameof(vision));
@@ -143,6 +147,7 @@ namespace Pinder.LlmAdapters
             OpponentFriction = opponentFriction ?? "";
             OpponentCuriosity = opponentCuriosity ?? "";
             ConversationArcProgression = conversationArcProgression ?? "";
+            PlayerProbing = playerProbing ?? "";
             DeliveryRules = deliveryRules;
             DramaticCraft = dramaticCraft;
         }
@@ -249,7 +254,8 @@ namespace Pinder.LlmAdapters
                 revelationOverStatement: GetOptional("revelation_over_statement"),
                 opponentFriction: GetOptional("opponent_friction"),
                 opponentCuriosity: GetOptional("opponent_curiosity"),
-                conversationArcProgression: conversationArcProgression
+                conversationArcProgression: conversationArcProgression,
+                playerProbing: GetOptional("player_probing")
             );
         }
 

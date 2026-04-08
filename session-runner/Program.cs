@@ -937,12 +937,13 @@ class Program
                         Role = "user",
                         Content = $@"Based on this character's assembled fragments, write a psychological portrait that a novelist would use to write their dialogue. Be creative and specific — fill in gaps based on what the fragments imply, don't summarize them.
 
-Cover five things, each in 2-3 paragraphs:
-1. Why they are on this app right now. Not a general 'looking for connection' — a specific emotional context. What happened recently? What need brought them here today?
+Cover six things, each in 2-3 paragraphs:
+1. Why they are on this app right now. Not a general 'looking for connection' — a specific emotional context. What happened recently? What need brought them here today? Name the specific moment or event that preceded this.
 2. What they actually want from a match. Their real underlying need, which may be different from what they would consciously say or admit. What would having it feel like?
 3. What they are secretly afraid of. The belief about themselves they are protecting. What would it confirm about them if they failed here?
 4. What winning this conversation would mean emotionally — not 'getting the date' but what it proves or heals or demonstrates.
 5. What losing would mean emotionally — not 'getting unmatched' but what it confirms.
+6. Their biographical backstory: 3-5 specific concrete events from the last 2-3 years of their life that shaped who they are right now. These should be specific enough to be revealed in conversation — not themes but events. A named relationship and how it ended. A job decision and what the week after felt like. A specific moment of realisation. A place they went alone. These are the facts the character can share when the conversation gets real. Write them as vivid, specific narrative fragments, not summaries.
 
 Write 2-3 paragraphs per point. This is a novelist's character bible. Do not use headers or bullet points — write flowing prose.
 
