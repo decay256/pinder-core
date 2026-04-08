@@ -449,6 +449,11 @@ class Program
             Console.WriteLine();
         }
 
+        // Freeze base prompts before appending stakes — BaseSystemPrompt stays clean
+        // for opponent profile injection (player must not see opponent's stake as prior knowledge)
+        sable.FreezeBasePrompt();
+        brick.FreezeBasePrompt();
+
         // Inject stakes into assembled system prompts
         if (!string.IsNullOrWhiteSpace(sable.PsychologicalStake))
             sable.AppendToSystemPrompt("\n\n== PSYCHOLOGICAL STAKE ==\n\n" + sable.PsychologicalStake);

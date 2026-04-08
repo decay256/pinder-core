@@ -106,6 +106,16 @@ namespace Pinder.LlmAdapters
                 sb.AppendLine();
             }
 
+            // Turn 1 cold-opener guard: player has NOT spoken to opponent yet
+            if (context.CurrentTurn == 1)
+            {
+                sb.AppendLine("COLD OPENER RULE: This is Turn 1. You have never spoken to this person before.");
+                sb.AppendLine("Your only knowledge of them is what is visible on their dating profile (bio, display name).");
+                sb.AppendLine("Do NOT reference anything from the opponent profile above that they have not said to you.");
+                sb.AppendLine("Write a first message to a stranger. React only to what is on their public-facing profile.");
+                sb.AppendLine();
+            }
+
             // [ENGINE — Turn N] injection block
             sb.Append(PromptTemplates.EngineOptionsBlock
                 .Replace("{turn}", context.CurrentTurn.ToString())

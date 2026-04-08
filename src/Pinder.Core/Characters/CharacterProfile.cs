@@ -16,6 +16,13 @@ namespace Pinder.Core.Characters
         /// <summary>The fully assembled system prompt for LLM interactions.</summary>
         public string AssembledSystemPrompt { get; private set; }
 
+        /// <summary>
+        /// The base system prompt before psychological stake was appended.
+        /// Used when building opponent context for the player agent — the player
+        /// should not see the opponent's generated stake as prior knowledge.
+        /// </summary>
+        public string BaseSystemPrompt { get; private set; }
+
         /// <summary>Display name shown in conversation history.</summary>
         public string DisplayName { get; }
 
@@ -50,6 +57,16 @@ namespace Pinder.Core.Characters
                 AssembledSystemPrompt += text;
         }
 
+        /// <summary>
+        /// Freezes BaseSystemPrompt to the current AssembledSystemPrompt value.
+        /// Call this immediately before appending the psychological stake so the
+        /// base prompt remains clean for opponent profile injection.
+        /// </summary>
+        public void FreezeBasePrompt()
+        {
+            BaseSystemPrompt = AssembledSystemPrompt;
+        }
+
         public CharacterProfile(
             StatBlock stats,
             string assembledSystemPrompt,
@@ -62,6 +79,7 @@ namespace Pinder.Core.Characters
         {
             Stats = stats ?? throw new ArgumentNullException(nameof(stats));
             AssembledSystemPrompt = assembledSystemPrompt ?? throw new ArgumentNullException(nameof(assembledSystemPrompt));
+            BaseSystemPrompt = AssembledSystemPrompt;
             DisplayName = displayName ?? throw new ArgumentNullException(nameof(displayName));
             Timing = timing ?? throw new ArgumentNullException(nameof(timing));
             Level = level;

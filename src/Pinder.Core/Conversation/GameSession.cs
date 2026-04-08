@@ -306,7 +306,10 @@ namespace Pinder.Core.Conversation
 
             var context = new DialogueContext(
                 playerPrompt: _player.AssembledSystemPrompt,
-                opponentPrompt: _opponent.AssembledSystemPrompt,
+                // Use BaseSystemPrompt so the player agent never sees the opponent's
+                // generated psychological stake as prior knowledge. The stake is internal
+                // context for the opponent agent only.
+                opponentPrompt: _opponent.BaseSystemPrompt ?? _opponent.AssembledSystemPrompt,
                 conversationHistory: _history.AsReadOnly(),
                 opponentLastMessage: GetLastOpponentMessage(),
                 activeTraps: activeTrapNames,
