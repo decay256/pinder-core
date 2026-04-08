@@ -196,10 +196,15 @@ namespace Pinder.LlmAdapters
             {
                 string nat20Str = context.IsNat20 ? " (NAT 20)" : "";
                 string beatDcByStr = $"{context.BeatDcBy}{nat20Str}";
-                string tierLabel = context.IsNat20 ? "Nat 20 — legendary. One sentence can be more effective than a paragraph if it's exactly right."
-                    : context.BeatDcBy >= 15 ? "Exceptional (margin 15+) — the best version of this message that could exist. It arrives at exactly the right moment with exactly the right weight."
-                    : context.BeatDcBy >= 10 ? "Critical success (margin 10-14) — deliver at peak. The message arrives perfectly. Something resonates."
-                    : context.BeatDcBy >= 5  ? "Strong success (margin 5-9) — improve the phrasing, timing, or rhythm. Sharpen word choice. You may add ONE word or phrase that makes the existing sentiment more precise. Do NOT add new sentences or new ideas."
+                string statVoice = GetStatSuccessVoice(context.ChosenOption.Stat);
+                string tierLabel = context.IsNat20
+                    ? $"Nat 20 — legendary. One sentence can be more effective than a paragraph if it's exactly right. {statVoice}"
+                    : context.BeatDcBy >= 15
+                    ? $"Exceptional (margin 15+) — this is the best version of this message that could exist. It arrives at exactly the right moment with exactly the right weight. {statVoice}"
+                    : context.BeatDcBy >= 10
+                    ? $"Critical success (margin 10-14) — deliver at peak. The message arrives perfectly. Something in the wording resonates more deeply than intended. {statVoice}"
+                    : context.BeatDcBy >= 5
+                    ? $"Strong success (margin 5-9) — the message lands better than the player planned. Something clicked in the phrasing. {statVoice} You may sharpen word choice or add ONE phrase that makes the sentiment more precise and alive. Do NOT add new sentences or new ideas."
                     : "Clean success (margin 1-4) — deliver essentially as written. Small word choice improvements only.";
                 sb.AppendLine($"Stat: {context.ChosenOption.Stat.ToString().ToUpperInvariant()} | Beat DC by {beatDcByStr}");
                 sb.Append(PromptTemplates.BuildSuccessDeliveryInstruction(deliveryRules)
@@ -394,6 +399,31 @@ namespace Pinder.LlmAdapters
             }
 
             sb.AppendLine("[CURRENT_TURN]");
+        }
+
+        /// <summary>
+        /// Returns a stat-specific note on what success with that stat sounds and feels like.
+        /// Used to guide the delivery LLM toward the right quality of improvement.
+        /// </summary>
+        private static string GetStatSuccessVoice(Pinder.Core.Stats.StatType stat)
+        {
+            switch (stat)
+            {
+                case Pinder.Core.Stats.StatType.Charm:
+                    return "CHARM success: the warmth came through more genuinely than planned. The message feels more likeable, more disarming — less performed, more real.";
+                case Pinder.Core.Stats.StatType.Rizz:
+                    return "RIZZ success: the attraction landed. Something in the phrasing became more undeniably magnetic. The message has a pull to it now.";
+                case Pinder.Core.Stats.StatType.Honesty:
+                    return "HONESTY success: more vulnerability came through than intended — more specifically true, more unguarded. The message reveals something real.";
+                case Pinder.Core.Stats.StatType.Chaos:
+                    return "CHAOS success: the energy landed wilder and more alive than planned. The message is more surprising, more unexpected, more itself.";
+                case Pinder.Core.Stats.StatType.Wit:
+                    return "WIT success: the timing or sharpness clicked. The joke lands cleaner, the observation is more precise, the intelligence shows without trying.";
+                case Pinder.Core.Stats.StatType.SelfAwareness:
+                    return "SELF-AWARENESS success: the self-knowledge came through more clearly than planned — the character sees themselves more honestly and it shows in how they speak.";
+                default:
+                    return string.Empty;
+            }
         }
 
         /// <summary>
