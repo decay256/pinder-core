@@ -134,10 +134,14 @@ namespace Pinder.LlmAdapters.Anthropic
             var response = await _client.SendMessagesAsync(request).ConfigureAwait(false);
             LogDebug("options", context.CurrentTurn, request, response);
             var optionsDraft = response.GetText();
-            var optionsImproved = await ApplyImprovementAsync(
-                systemBlocks, userContent, optionsDraft,
-                _options.DialogueOptionsTemperature ?? DefaultDialogueOptionsTemperature).ConfigureAwait(false);
-            return ParseDialogueOptions(optionsImproved);
+            // Skip improvement pass on T1 — conversation history is empty, improvement
+            // loop incorrectly generates options assuming prior exchanges exist
+            string optionsText = context.CurrentTurn <= 1
+                ? optionsDraft
+                : await ApplyImprovementAsync(
+                    systemBlocks, userContent, optionsDraft,
+                    _options.DialogueOptionsTemperature ?? DefaultDialogueOptionsTemperature).ConfigureAwait(false);
+            return ParseDialogueOptions(optionsText);
         }
 
         /// <inheritdoc />

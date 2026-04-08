@@ -6,7 +6,7 @@ namespace Pinder.LlmAdapters
     /// </summary>
     public static class PromptTemplates
     {
-        /// <summary>§3.2 — Instructs the LLM to generate exactly 4 dialogue options with metadata tags.</summary>
+        /// <summary>§3.2 — Instructs the LLM to generate exactly 3 dialogue options with metadata tags.</summary>
         public const string DialogueOptionsInstruction =
 @"Generate exactly 3 dialogue options for {player_name}.
 
@@ -329,7 +329,7 @@ Rules:
 @"[ENGINE — Turn {turn}]
 {player_name} is deciding what to send next.
 {game_state}
-Generate 4 options for what {player_name} might send, given the conversation above.
+Generate 3 options for what {player_name} might send, given the conversation above.
 Format: OPTION_A: [message] OPTION_B: [message] etc.";
 
         /// <summary>[ENGINE — DELIVERY] injection block for message delivery.</summary>
