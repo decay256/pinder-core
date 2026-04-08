@@ -162,7 +162,17 @@ namespace Pinder.LlmAdapters.Anthropic
             var response = await _client.SendMessagesAsync(request).ConfigureAwait(false);
             LogDebug("delivery", context.CurrentTurn, request, response);
             var deliveryDraft = response.GetText();
-            return await ApplyImprovementAsync(systemBlocks, userContent, deliveryDraft, _options.DeliveryTemperature ?? DefaultDeliveryTemperature).ConfigureAwait(false);
+
+            // Only apply improvement on notable outcomes — not clean success or fumble.
+            // Clean success means deliver as written; improvement would corrupt that intent.
+            // Fumble is a minor stumble; catastrophe/nat1 have their own escalation logic.
+            bool applyImprovement = context.Outcome == Pinder.Core.Rolls.FailureTier.None
+                ? context.BeatDcBy >= 5 || context.IsNat20  // strong, crit, exceptional, nat20
+                : context.Outcome >= Pinder.Core.Rolls.FailureTier.Misfire; // misfire+, not fumble
+
+            return applyImprovement
+                ? await ApplyImprovementAsync(systemBlocks, userContent, deliveryDraft, _options.DeliveryTemperature ?? DefaultDeliveryTemperature).ConfigureAwait(false)
+                : deliveryDraft;
         }
 
         /// <inheritdoc />
