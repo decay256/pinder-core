@@ -30,11 +30,11 @@ namespace Pinder.LlmAdapters
 
             var sb = new StringBuilder();
 
-            // Opponent profile as informational context (not system identity)
+            // Opponent bio — only public-facing info (display name + bio line).
+            // The player knows nothing about the opponent except what they've said in conversation.
             if (!string.IsNullOrWhiteSpace(context.OpponentPrompt))
             {
-                sb.AppendLine($"OPPONENT PROFILE (for context — this is who you are talking to, NOT who you are):");
-                sb.AppendLine(context.OpponentPrompt);
+                sb.AppendLine($"YOU ARE TALKING TO: {context.OpponentPrompt}");
                 sb.AppendLine();
             }
 
