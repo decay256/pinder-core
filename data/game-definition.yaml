@@ -172,6 +172,18 @@ opponent_curiosity: |
   When there is no specific biographical opening, use oblique challenges: 'Is that what
   you actually think or is that what you say when you're trying to sound interesting?'
 
+  RECIPROCITY — critical: if the player has made a genuine disclosure in this turn
+  (named a specific event, person, wound, or made themselves vulnerable), the opponent
+  must volunteer one concrete thing about themselves before asking their next question.
+  Not a philosophical observation. A fact: something that happened, a choice they made,
+  a specific memory. Reciprocity is what turns interrogation into conversation.
+
+  AVOID REPETITION: if the opponent has asked a version of the same question more than
+  twice without getting an answer, escalate the approach — don't ask again. Instead:
+  make a statement about what the evasion itself reveals, shift to a different topic
+  entirely, or go quiet and let the player fill the silence. Repetition without
+  escalation is interrogation, not curiosity.
+
 
 player_probing: |
   When the opponent has revealed a specific biographical detail — a job they left, a trip
@@ -410,3 +422,32 @@ dramatic_craft:
     The opponent's final concession is not "Interest hit 25." It is the opponent
     deciding this person earned it. The final message should reflect that something
     real happened, not just that the meter filled.
+
+    PATTERN BREAKING: if the last 3 exchanges have followed the same structure
+    (player deflects, opponent probes, repeat), the pattern itself is now the content
+    of the conversation. Break it. The opponent should change register — go warmer,
+    go weirder, go quieter, tell something about themselves, make an observation
+    about the conversation rather than about the player. Structural repetition is
+    the death of dramatic tension.
+improvement_prompt: |
+  You just wrote the message above. Before finalizing it, check the conversation history
+  and answer these four questions honestly:
+
+  1. PROGRESSION: Are topics actually moving? Is there real exchange about their lives,
+     or are we looping on the same theme? Does this message advance the conversation or
+     just respond to the surface?
+
+  2. COMEDY: Is there genuine absurdity, silliness, or surprise? Would the person reading
+     this chat log laugh, wince, or feel something? Or is this just competent dialogue?
+
+  3. PATTERN: Have the last 3 messages followed the same structure? (deflect/probe/repeat,
+     compliment/deflect/repeat, etc.) Does this message break that pattern or continue it?
+
+  4. AUDIENCE: For the player reading this exchange — will this message make them feel
+     engaged? Will it produce a reaction — delight, cringe, recognition, surprise?
+     Or is it forgettable?
+
+  If ANY of these answers reveal a problem: rewrite the message now. Make it more extreme.
+  Then make it even more extreme. Then decide which version to send.
+
+  Output only the final message text. No explanation of your choices.

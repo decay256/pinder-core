@@ -133,7 +133,11 @@ namespace Pinder.LlmAdapters.Anthropic
 
             var response = await _client.SendMessagesAsync(request).ConfigureAwait(false);
             LogDebug("options", context.CurrentTurn, request, response);
-            return ParseDialogueOptions(response.GetText());
+            var optionsDraft = response.GetText();
+            var optionsImproved = await ApplyImprovementAsync(
+                systemBlocks, userContent, optionsDraft,
+                _options.DialogueOptionsTemperature ?? DefaultDialogueOptionsTemperature).ConfigureAwait(false);
+            return ParseDialogueOptions(optionsImproved);
         }
 
         /// <inheritdoc />
@@ -142,7 +146,7 @@ namespace Pinder.LlmAdapters.Anthropic
             if (context == null) throw new ArgumentNullException(nameof(context));
 
             var deliveryRules = _options.GameDefinition?.DeliveryRules;
-            var userContent = SessionDocumentBuilder.BuildDeliveryPrompt(context, deliveryRules: deliveryRules);
+            var userContent = SessionDocumentBuilder.BuildDeliveryPrompt(context, deliveryRules: deliveryRules, statDeliveryInstructions: _options.StatDeliveryInstructions);
 
 
             var fullPlayerPrompt = SessionSystemPromptBuilder.BuildPlayer(context.PlayerPrompt, _options.GameDefinition);
@@ -153,7 +157,8 @@ namespace Pinder.LlmAdapters.Anthropic
 
             var response = await _client.SendMessagesAsync(request).ConfigureAwait(false);
             LogDebug("delivery", context.CurrentTurn, request, response);
-            return response.GetText();
+            var deliveryDraft = response.GetText();
+            return await ApplyImprovementAsync(systemBlocks, userContent, deliveryDraft, _options.DeliveryTemperature ?? DefaultDeliveryTemperature).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
@@ -190,6 +195,9 @@ namespace Pinder.LlmAdapters.Anthropic
             LogDebug("opponent", context.CurrentTurn, request, response);
 
             var responseText = response.GetText();
+            responseText = await ApplyImprovementAsync(
+                systemBlocks, userContent, responseText,
+                _options.OpponentResponseTemperature ?? DefaultOpponentResponseTemperature).ConfigureAwait(false);
 
             // Stateful path: append assistant response to persistent session
             if (_opponentSession != null)
@@ -563,6 +571,45 @@ namespace Pinder.LlmAdapters.Anthropic
             }
 
             return new OpponentResponse(messageText, tell, weakness);
+        }
+
+        /// <summary>
+        /// If an improvement prompt is configured, sends a second LLM call asking the model
+        /// to self-critique and rewrite the draft. Returns the improved text, or the original
+        /// draft if improvement is not configured or the call fails.
+        /// </summary>
+        private async Task<string> ApplyImprovementAsync(
+            ContentBlock[] systemBlocks,
+            string originalUserContent,
+            string draft,
+            double temperature)
+        {
+            var improvementPrompt = _options.GameDefinition?.ImprovementPrompt;
+            if (string.IsNullOrWhiteSpace(improvementPrompt)) return draft;
+
+            try
+            {
+                var improveRequest = new MessagesRequest
+                {
+                    Model = _options.Model,
+                    MaxTokens = _options.MaxTokens,
+                    Temperature = temperature,
+                    System = systemBlocks,
+                    Messages = new[]
+                    {
+                        new Message { Role = "user", Content = originalUserContent },
+                        new Message { Role = "assistant", Content = draft },
+                        new Message { Role = "user", Content = improvementPrompt }
+                    }
+                };
+                var improveResponse = await _client.SendMessagesAsync(improveRequest).ConfigureAwait(false);
+                var improved = improveResponse.GetText()?.Trim();
+                return string.IsNullOrWhiteSpace(improved) ? draft : improved;
+            }
+            catch
+            {
+                return draft; // fallback to original on any error
+            }
         }
 
         private MessagesRequest BuildRequest(ContentBlock[] systemBlocks, string userContent, double temperature)

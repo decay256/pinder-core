@@ -158,7 +158,7 @@ class Program
 
     // ── CLI arg parsing ─────────────────────────────────────────────────
 
-    static int ParseMaxTurns(string[] args, int defaultValue = 20)
+    static int ParseMaxTurns(string[] args, int defaultValue = 30)
     {
         for (int i = 0; i < args.Length - 1; i++)
         {

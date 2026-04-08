@@ -112,6 +112,9 @@ namespace Pinder.LlmAdapters
         /// <summary>Player options probing directive — biographical follow-up instruction.</summary>
         public string PlayerProbing { get; }
 
+        /// <summary>Two-stage improvement prompt — appended after initial generation to trigger self-critique and rewrite.</summary>
+        public string ImprovementPrompt { get; }
+
         /// <summary>Configurable delivery prompt rules, or null for hardcoded defaults.</summary>
         public DeliveryRules DeliveryRules { get; }
 
@@ -133,7 +136,8 @@ namespace Pinder.LlmAdapters
             string opponentFriction = null,
             string opponentCuriosity = null,
             string conversationArcProgression = null,
-            string playerProbing = null)
+            string playerProbing = null,
+            string improvementPrompt = null)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Vision = vision ?? throw new ArgumentNullException(nameof(vision));
@@ -148,6 +152,7 @@ namespace Pinder.LlmAdapters
             OpponentCuriosity = opponentCuriosity ?? "";
             ConversationArcProgression = conversationArcProgression ?? "";
             PlayerProbing = playerProbing ?? "";
+            ImprovementPrompt = improvementPrompt ?? "";
             DeliveryRules = deliveryRules;
             DramaticCraft = dramaticCraft;
         }
@@ -255,7 +260,8 @@ namespace Pinder.LlmAdapters
                 opponentFriction: GetOptional("opponent_friction"),
                 opponentCuriosity: GetOptional("opponent_curiosity"),
                 conversationArcProgression: conversationArcProgression,
-                playerProbing: GetOptional("player_probing")
+                playerProbing: GetOptional("player_probing"),
+                improvementPrompt: GetOptional("improvement_prompt")
             );
         }
 

@@ -53,7 +53,9 @@ If a PSYCHOLOGICAL STAKE section is present in the character profile above, at l
 
 BIOGRAPHICAL SPECIFICITY — critical: when the opponent has revealed a concrete biographical detail (a job they left, a place they went, a relationship, a specific event or year), at least one option should follow up on that specific detail — not the emotional theme, the actual fact. 'You mentioned leaving database engineering — what were you doing the following week?' is stronger than 'you seem like someone who takes big risks.' The conversation only advances when both parties are actually curious about each other's lives.
 
-SIMILARLY: when the player character's PSYCHOLOGICAL STAKE contains specific backstory (a named relationship, a year, an event), at least one option per session should reveal that concrete detail naturally. Characters who only share feelings without sharing facts never feel real. 'I spent four years with someone who thought intensity was a personality defect, and then at my cousin's engagement party I realised I'd been making myself smaller the whole time' is a revelation. 'I've been told I'm too much' is not.";
+SIMILARLY: when the player character's PSYCHOLOGICAL STAKE contains specific backstory (a named relationship, a year, an event), at least one option per session should reveal that concrete detail naturally. Characters who only share feelings without sharing facts never feel real. 'I spent four years with someone who thought intensity was a personality defect, and then at my cousin's engagement party I realised I'd been making myself smaller the whole time' is a revelation. 'I've been told I'm too much' is not.
+
+WORD & PATTERN REPETITION — check all delivered messages above before writing options. Do not repeat: (a) the same filler words or phrases used in the previous 2 messages ('honestly', 'literally', 'actually', 'okay but', etc.), (b) the same emoji used in the previous message, (c) the same structural pattern (e.g. 'wait...???', 'omg...\U0001f62d', 'I literally just realized...') used in the last 2 messages. Each option should feel like a new move, not a variation on the last one.";
 
         /// <summary>§3.3 — Backward-compatible accessor that returns the default success delivery instruction.</summary>
         public static string SuccessDeliveryInstruction => BuildSuccessDeliveryInstruction(null);
@@ -64,7 +66,7 @@ SIMILARLY: when the player character's PSYCHOLOGICAL STAKE contains specific bac
         private const string DefaultCritical = "deliver at peak. The message arrives perfectly. Something resonates.";
         private const string DefaultExceptional = "this is the best version of this message that could exist. It arrives at exactly the right moment with exactly the right weight. The opponent feels it.";
         private const string DefaultTest = "The test: every idea in the delivered version should have a counterpart in the intended version. New additions should sharpen, not expand.";
-        private const string DefaultRegisterInstruction = "Stay in character. Match the texting register from the character profile above. Do not change the character's capitalization style.";
+        private const string DefaultRegisterInstruction = "Stay in character. Match the texting register from the character profile above. Do not change the character's capitalization style. Before finalizing: check the conversation above for any word, filler phrase, or emoji the character used in the previous 2 messages — do not repeat them here. Each delivered message should feel like a fresh move.";
         private const string DefaultMediumRule = "This is a text message on a phone screen, not a monologue. No internal stage directions, no narration of emotional state, no self-commentary mid-message.";
 
         /// <summary>
