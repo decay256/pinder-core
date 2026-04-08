@@ -61,6 +61,7 @@ namespace Pinder.Core.Conversation
 
         // Rule resolver for data-driven game constants (#463)
         private readonly IRuleResolver? _rules;
+        private readonly int _globalDcBias;
 
         // Weakness window from opponent's last response (#49)
         private WeaknessWindow? _activeWeakness;
@@ -118,6 +119,7 @@ namespace Pinder.Core.Conversation
             _opponentShadows = config?.OpponentShadows;
             _previousOpener = config?.PreviousOpener;
             _rules = config?.Rules;
+            _globalDcBias = config?.GlobalDcBias ?? 0;
 
             // Determine starting interest: explicit config > Dread T3 > default
             if (config?.StartingInterest.HasValue == true)
@@ -466,13 +468,16 @@ namespace Pinder.Core.Conversation
                 _comboTracker.ConsumeTripleBonus(); // Consume after applying (#46 edge case 7)
             }
 
-            // Compute DC adjustment from weakness window (#49)
+            // Compute DC adjustment from weakness window (#49) + global difficulty bias
             int dcAdjustment = 0;
             if (_activeWeakness != null
                 && StatBlock.DefenceTable[chosenOption.Stat] == _activeWeakness.DefendingStat)
             {
                 dcAdjustment = _activeWeakness.DcReduction;
             }
+            // Global DC bias: positive bias raises DC (harder), applied as negative dcAdjustment
+            if (_globalDcBias != 0)
+                dcAdjustment -= _globalDcBias;
 
             // Clear weakness window — consumed this turn regardless of match (#49)
             _activeWeakness = null;

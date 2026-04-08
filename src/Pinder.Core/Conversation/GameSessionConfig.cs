@@ -31,13 +31,20 @@ namespace Pinder.Core.Conversation
         /// </summary>
         public IRuleResolver? Rules { get; }
 
+        /// <summary>
+        /// Global DC adjustment applied to every roll. Positive = harder (DC raised),
+        /// negative = easier (DC lowered). Does not affect Nat 1 / Nat 20 detection.
+        /// </summary>
+        public int GlobalDcBias { get; }
+
         public GameSessionConfig(
             IGameClock? clock = null,
             SessionShadowTracker? playerShadows = null,
             SessionShadowTracker? opponentShadows = null,
             int? startingInterest = null,
             string? previousOpener = null,
-            IRuleResolver? rules = null)
+            IRuleResolver? rules = null,
+            int globalDcBias = 0)
         {
             Clock = clock;
             PlayerShadows = playerShadows;
@@ -45,6 +52,7 @@ namespace Pinder.Core.Conversation
             StartingInterest = startingInterest;
             PreviousOpener = previousOpener;
             Rules = rules;
+            GlobalDcBias = globalDcBias;
         }
     }
 }

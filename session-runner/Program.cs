@@ -401,11 +401,8 @@ class Program
 
         // Shadow tracking — wrap player's StatBlock so GameSession can track shadow growth
         var sableShadows = new SessionShadowTracker(sableStats);
-        var config = new GameSessionConfig(playerShadows: sableShadows);
-        IDiceRoller diceRoller = new SystemRandomDiceRoller();
-        if (difficultyBias != 0)
-            diceRoller = new Pinder.Core.Rolls.BiasedDiceRoller(diceRoller, difficultyBias);
-        var session = new GameSession(sable, brick, llm, diceRoller, trapRegistry, config);
+        var config = new GameSessionConfig(playerShadows: sableShadows, globalDcBias: difficultyBias);
+        var session = new GameSession(sable, brick, llm, new SystemRandomDiceRoller(), trapRegistry, config);
 
         // Player agent for decision-making — configurable via --agent arg or PLAYER_AGENT env var
         IPlayerAgent agent;
