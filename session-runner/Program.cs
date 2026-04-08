@@ -239,6 +239,16 @@ class Program
         string agentType = ParseAgentArg(args);
         bool isDebug = args.Contains("--debug");
 
+        // --difficulty <pct>: reduce success chance by N% (e.g. --difficulty 20 = 20% harder).
+        // Implemented as a DC bias: dcBias = (int)Math.Round(20.0 * pct / 100.0)
+        int difficultyBias = 0;
+        string? difficultyArg = ParseArg(args, "--difficulty");
+        if (difficultyArg != null && double.TryParse(difficultyArg, out double difficultyPct) && difficultyPct != 0)
+        {
+            difficultyBias = (int)Math.Round(20.0 * difficultyPct / 100.0);
+            Console.Error.WriteLine($"Difficulty bias: {(difficultyPct > 0 ? "+" : "")}{difficultyPct}% → dcBias={difficultyBias}");
+        }
+
         string promptDir = ResolvePromptDirectory(AppContext.BaseDirectory);
 
         // Parse character name / definition args
@@ -392,7 +402,10 @@ class Program
         // Shadow tracking — wrap player's StatBlock so GameSession can track shadow growth
         var sableShadows = new SessionShadowTracker(sableStats);
         var config = new GameSessionConfig(playerShadows: sableShadows);
-        var session = new GameSession(sable, brick, llm, new SystemRandomDiceRoller(), trapRegistry, config);
+        IDiceRoller diceRoller = new SystemRandomDiceRoller();
+        if (difficultyBias != 0)
+            diceRoller = new Pinder.Core.Rolls.BiasedDiceRoller(diceRoller, difficultyBias);
+        var session = new GameSession(sable, brick, llm, diceRoller, trapRegistry, config);
 
         // Player agent for decision-making — configurable via --agent arg or PLAYER_AGENT env var
         IPlayerAgent agent;
