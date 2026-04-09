@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.IO;
 using System;
 using System.Collections.Generic;
@@ -130,9 +131,19 @@ namespace Pinder.LlmAdapters.Anthropic
 
             var request = BuildRequest(systemBlocks, userContent,
                 _options.DialogueOptionsTemperature ?? DefaultDialogueOptionsTemperature);
+            AttachTool(request, ToolSchemas.DialogueOptions);
 
             var response = await _client.SendMessagesAsync(request).ConfigureAwait(false);
             LogDebug("options", context.CurrentTurn, request, response);
+
+            // Try structured tool_use first, fall back to text parsing
+            var toolInput = response.GetToolInput();
+            if (toolInput != null)
+            {
+                var parsed = ParseDialogueOptionsFromTool(toolInput);
+                if (parsed != null) return parsed;
+            }
+
             var optionsDraft = response.GetText();
             // Skip improvement pass on T1 — conversation history is empty, improvement
             // loop incorrectly generates options assuming prior exchanges exist
@@ -158,9 +169,20 @@ namespace Pinder.LlmAdapters.Anthropic
 
             var request = BuildRequest(systemBlocks, userContent,
                 _options.DeliveryTemperature ?? DefaultDeliveryTemperature);
+            AttachTool(request, ToolSchemas.Delivery);
 
             var response = await _client.SendMessagesAsync(request).ConfigureAwait(false);
             LogDebug("delivery", context.CurrentTurn, request, response);
+
+            // Try structured tool_use first
+            var toolInput = response.GetToolInput();
+            if (toolInput != null)
+            {
+                var delivered = toolInput.Value<string>("delivered");
+                if (!string.IsNullOrWhiteSpace(delivered))
+                    return delivered;
+            }
+
             var deliveryDraft = response.GetText();
 
             // Only apply improvement on notable outcomes — not clean success or fumble.
@@ -207,10 +229,28 @@ namespace Pinder.LlmAdapters.Anthropic
                 request = BuildRequest(systemBlocks, userContent,
                     _options.OpponentResponseTemperature ?? DefaultOpponentResponseTemperature);
             }
+            AttachTool(request, ToolSchemas.OpponentResponse);
 
             var response = await _client.SendMessagesAsync(request).ConfigureAwait(false);
             LogDebug("opponent", context.CurrentTurn, request, response);
 
+            // Try structured tool_use first
+            var toolInput = response.GetToolInput();
+            if (toolInput != null)
+            {
+                var parsed = ParseOpponentResponseFromTool(toolInput);
+                if (parsed != null)
+                {
+                    // Stateful path: append assistant response to persistent session
+                    if (_opponentSession != null)
+                    {
+                        _opponentSession.AppendAssistant(parsed.MessageText);
+                    }
+                    return parsed;
+                }
+            }
+
+            // Fallback: text parsing with improvement pass
             var responseText = response.GetText();
             responseText = await ApplyImprovementAsync(
                 systemBlocks, userContent, responseText,
@@ -699,19 +739,173 @@ namespace Pinder.LlmAdapters.Anthropic
                         new Message { Role = "user", Content = improvementPrompt }
                     }
                 };
+                AttachTool(improveRequest, ToolSchemas.Improvement);
+
                 var improveResponse = await _client.SendMessagesAsync(improveRequest).ConfigureAwait(false);
-                var improved = improveResponse.GetText()?.Trim();
-                if (string.IsNullOrWhiteSpace(improved)) return draft;
+
+                // Try structured tool_use first
+                var toolInput = improveResponse.GetToolInput();
+                if (toolInput != null)
+                {
+                    var improved = toolInput.Value<string>("improved");
+                    if (!string.IsNullOrWhiteSpace(improved))
+                        return improved;
+                }
+
+                // Fallback to text extraction
+                var improvedText = improveResponse.GetText()?.Trim();
+                if (string.IsNullOrWhiteSpace(improvedText)) return draft;
 
                 // Strip evaluation block headers if the model included them in the output.
                 // The improvement prompt asks for content only, but the model sometimes
                 // outputs the self-evaluation before the rewritten content.
-                improved = StripImprovementEvaluation(improved, draft);
-                return string.IsNullOrWhiteSpace(improved) ? draft : improved;
+                improvedText = StripImprovementEvaluation(improvedText, draft);
+                return string.IsNullOrWhiteSpace(improvedText) ? draft : improvedText;
             }
             catch
             {
                 return draft; // fallback to original on any error
+            }
+        }
+
+        /// <summary>
+        /// Attaches a single tool definition with forced tool_choice to a request.
+        /// </summary>
+        private static void AttachTool(MessagesRequest request, ToolDefinition tool)
+        {
+            request.Tools = new[] { tool };
+            request.ToolChoice = ToolSchemas.ForceAny();
+        }
+
+        /// <summary>
+        /// Parses dialogue options from a tool_use JSON input.
+        /// Returns null if the input is malformed (caller should fall back to text parsing).
+        /// </summary>
+        private static DialogueOption[] ParseDialogueOptionsFromTool(JObject toolInput)
+        {
+            try
+            {
+                var optionsArray = toolInput["options"] as JArray;
+                if (optionsArray == null || optionsArray.Count == 0)
+                    return null;
+
+                var parsed = new List<DialogueOption>();
+                foreach (var item in optionsArray)
+                {
+                    if (parsed.Count >= 4) break;
+
+                    var statStr = NormalizeStatName(item.Value<string>("stat") ?? "");
+                    StatType stat;
+                    try
+                    {
+                        stat = (StatType)Enum.Parse(typeof(StatType), statStr, true);
+                    }
+                    catch (ArgumentException)
+                    {
+                        continue; // Invalid stat — skip
+                    }
+
+                    var text = item.Value<string>("text");
+                    if (string.IsNullOrWhiteSpace(text)) continue;
+
+                    // Parse callback
+                    int? callbackTurn = null;
+                    var callbackVal = item.Value<string>("callback");
+                    if (!string.IsNullOrEmpty(callbackVal) &&
+                        !string.Equals(callbackVal, "none", StringComparison.OrdinalIgnoreCase) &&
+                        !string.Equals(callbackVal, "null", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (int.TryParse(callbackVal, out int turnNum))
+                        {
+                            callbackTurn = turnNum;
+                        }
+                        else if (callbackVal.StartsWith("turn_", StringComparison.OrdinalIgnoreCase) &&
+                                 int.TryParse(callbackVal.Substring(5), out int turnNum2))
+                        {
+                            callbackTurn = turnNum2;
+                        }
+                    }
+
+                    // Parse combo
+                    string comboName = null;
+                    var comboVal = item.Value<string>("combo");
+                    if (!string.IsNullOrEmpty(comboVal) &&
+                        !string.Equals(comboVal, "none", StringComparison.OrdinalIgnoreCase) &&
+                        !string.Equals(comboVal, "null", StringComparison.OrdinalIgnoreCase))
+                    {
+                        comboName = comboVal;
+                    }
+
+                    var tellBonus = item.Value<bool?>("tell_bonus") ?? false;
+                    var weaknessWindow = item.Value<bool?>("weakness_window") ?? false;
+
+                    parsed.Add(new DialogueOption(
+                        stat, text, callbackTurn, comboName, tellBonus, weaknessWindow));
+                }
+
+                if (parsed.Count == 0) return null;
+                return PadToFour(parsed);
+            }
+            catch
+            {
+                return null; // Malformed — fall back to text parsing
+            }
+        }
+
+        /// <summary>
+        /// Parses opponent response from a tool_use JSON input.
+        /// Returns null if the input is malformed (caller should fall back to text parsing).
+        /// </summary>
+        private static OpponentResponse ParseOpponentResponseFromTool(JObject toolInput)
+        {
+            try
+            {
+                var message = toolInput.Value<string>("message");
+                if (string.IsNullOrWhiteSpace(message))
+                    return null;
+
+                Tell tell = null;
+                var tellObj = toolInput["tell"] as JObject;
+                if (tellObj != null)
+                {
+                    var statStr = NormalizeStatName(tellObj.Value<string>("stat") ?? "");
+                    try
+                    {
+                        var stat = (StatType)Enum.Parse(typeof(StatType), statStr, true);
+                        var desc = tellObj.Value<string>("description") ?? "";
+                        tell = new Tell(stat, desc);
+                    }
+                    catch (ArgumentException)
+                    {
+                        // Invalid stat — tell stays null
+                    }
+                }
+
+                WeaknessWindow weakness = null;
+                var weakObj = toolInput["weakness"] as JObject;
+                if (weakObj != null)
+                {
+                    var statStr = NormalizeStatName(weakObj.Value<string>("defending_stat") ?? "");
+                    try
+                    {
+                        var stat = (StatType)Enum.Parse(typeof(StatType), statStr, true);
+                        var reduction = weakObj.Value<int?>("dc_reduction") ?? 0;
+                        if (reduction > 0)
+                        {
+                            weakness = new WeaknessWindow(stat, reduction);
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        // Invalid stat or reduction — weakness stays null
+                    }
+                }
+
+                return new OpponentResponse(message, tell, weakness);
+            }
+            catch
+            {
+                return null; // Malformed — fall back to text parsing
             }
         }
 

@@ -22,5 +22,11 @@ namespace Pinder.LlmAdapters.Anthropic.Dto
 
         [JsonProperty("messages")]
         public Message[] Messages { get; set; } = Array.Empty<Message>();
+
+        [JsonProperty("tools", NullValueHandling = NullValueHandling.Ignore)]
+        public ToolDefinition[] Tools { get; set; }
+
+        [JsonProperty("tool_choice", NullValueHandling = NullValueHandling.Ignore)]
+        public ToolChoiceOption ToolChoice { get; set; }
     }
 }
