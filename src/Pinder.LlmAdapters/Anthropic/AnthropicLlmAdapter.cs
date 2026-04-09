@@ -166,9 +166,12 @@ namespace Pinder.LlmAdapters.Anthropic
             // Only apply improvement on notable outcomes — not clean success or fumble.
             // Clean success means deliver as written; improvement would corrupt that intent.
             // Fumble is a minor stumble; catastrophe/nat1 have their own escalation logic.
-            bool applyImprovement = context.Outcome == Pinder.Core.Rolls.FailureTier.None
-                ? context.BeatDcBy >= 5 || context.IsNat20  // strong, crit, exceptional, nat20
-                : context.Outcome >= Pinder.Core.Rolls.FailureTier.Misfire; // misfire+, not fumble
+            // Skip improvement at T1 — conversation history is empty and improvement loop
+            // can invent imagined prior exchanges.
+            bool applyImprovement = context.CurrentTurn > 1 && (
+                context.Outcome == Pinder.Core.Rolls.FailureTier.None
+                    ? context.BeatDcBy >= 5 || context.IsNat20  // strong, crit, exceptional, nat20
+                    : context.Outcome >= Pinder.Core.Rolls.FailureTier.Misfire); // misfire+, not fumble
 
             return applyImprovement
                 ? await ApplyImprovementAsync(systemBlocks, userContent, deliveryDraft, _options.DeliveryTemperature ?? DefaultDeliveryTemperature).ConfigureAwait(false)
@@ -404,7 +407,7 @@ namespace Pinder.LlmAdapters.Anthropic
 
         /// <summary>
         /// Parses structured LLM output into DialogueOption array.
-        /// Never throws — returns 4 options, padding with defaults if needed.
+        /// Never throws — returns 3 options, padding with defaults if needed.
         /// </summary>
         internal static DialogueOption[] ParseDialogueOptions(string? llmResponse)
         {
@@ -420,7 +423,7 @@ namespace Pinder.LlmAdapters.Anthropic
                     foreach (var section in sections)
                     {
                         if (string.IsNullOrWhiteSpace(section)) continue;
-                        if (parsed.Count >= 4) break;
+                        if (parsed.Count >= 3) break;
 
                         var statMatch = StatRegex.Match(section);
                         if (!statMatch.Success) continue;
@@ -671,15 +674,15 @@ namespace Pinder.LlmAdapters.Anthropic
             var result = new List<DialogueOption>(parsed);
             foreach (var defaultStat in DefaultPaddingStats)
             {
-                if (result.Count >= 4) break;
+                if (result.Count >= 3) break;
                 if (usedStats.Contains(defaultStat)) continue;
                 result.Add(new DialogueOption(defaultStat, "...",
                     callbackTurnNumber: null, comboName: null,
                     hasTellBonus: false, hasWeaknessWindow: false));
             }
 
-            // If we still need more (e.g., all 4 default stats were used), just pad with Charm
-            while (result.Count < 4)
+            // If we still need more (e.g., all 3 default stats were used), just pad with Charm
+            while (result.Count < 3)
             {
                 result.Add(new DialogueOption(StatType.Charm, "...",
                     callbackTurnNumber: null, comboName: null,
