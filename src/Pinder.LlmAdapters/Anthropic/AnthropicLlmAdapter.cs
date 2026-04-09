@@ -537,8 +537,8 @@ namespace Pinder.LlmAdapters.Anthropic
                 }
             }
 
-            // Pad to exactly 4 options with defaults
-            return PadToFour(parsed);
+            // Pad to exactly 3 options with defaults
+            return PadToThree(parsed);
         }
 
         /// <summary>
@@ -792,7 +792,7 @@ namespace Pinder.LlmAdapters.Anthropic
                 var parsed = new List<DialogueOption>();
                 foreach (var item in optionsArray)
                 {
-                    if (parsed.Count >= 4) break;
+                    if (parsed.Count >= 3) break;
 
                     var statStr = NormalizeStatName(item.Value<string>("stat") ?? "");
                     StatType stat;
@@ -844,7 +844,7 @@ namespace Pinder.LlmAdapters.Anthropic
                 }
 
                 if (parsed.Count == 0) return null;
-                return PadToFour(parsed);
+                return PadToThree(parsed);
             }
             catch
             {
@@ -938,11 +938,11 @@ namespace Pinder.LlmAdapters.Anthropic
         }
 
         /// <summary>Pads parsed options to exactly 4 using default stats not already present.</summary>
-        private static DialogueOption[] PadToFour(List<DialogueOption> parsed)
+        private static DialogueOption[] PadToThree(List<DialogueOption> parsed)
         {
-            if (parsed.Count >= 4)
+            if (parsed.Count >= 3)
             {
-                return parsed.GetRange(0, 4).ToArray();
+                return parsed.GetRange(0, 3).ToArray();
             }
 
             var usedStats = new HashSet<StatType>();
