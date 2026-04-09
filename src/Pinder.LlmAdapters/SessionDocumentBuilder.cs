@@ -110,9 +110,10 @@ namespace Pinder.LlmAdapters
             if (context.CurrentTurn == 1)
             {
                 sb.AppendLine("COLD OPENER RULE: This is Turn 1. You have never spoken to this person before.");
-                sb.AppendLine("Your only knowledge of them is what is visible on their dating profile (bio, display name).");
-                sb.AppendLine("Do NOT reference anything from the opponent profile above that they have not said to you.");
-                sb.AppendLine("Write a first message to a stranger. React only to what is on their public-facing profile.");
+                sb.AppendLine("Your only knowledge of them is their dating profile: bio text AND visible appearance (items listed after 'Wearing:' in the profile above).");
+                sb.AppendLine("Do NOT reference anything you would only know from inside knowledge of the character — only what is visible on their public profile.");
+                sb.AppendLine("A strong opener can react to their bio, their look, or both. Something specific beats something generic.");
+                sb.AppendLine("Examples: their outfit, a specific item they're wearing, the energy their style projects, something the bio implies about them.");
                 sb.AppendLine();
             }
 
