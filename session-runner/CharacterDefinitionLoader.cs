@@ -97,12 +97,22 @@ namespace Pinder.SessionRunner
                     ? string.Join(" | ", fragments.TextingStyleFragments)
                     : string.Empty;
 
+                // Collect item display names for visible profile (shown to opposing player at T1)
+                var itemDisplayNames = new System.Collections.Generic.List<string>();
+                foreach (var itemId in items)
+                {
+                    var item = itemRepo.GetItem(itemId);
+                    if (item != null && !string.IsNullOrWhiteSpace(item.DisplayName))
+                        itemDisplayNames.Add(item.DisplayName);
+                }
+
                 // Construct CharacterProfile
                 return new CharacterProfile(
                     fragments.Stats, systemPrompt, name, fragments.Timing, level,
                     bio: bio,
                     textingStyleFragment: textingStyle,
-                    activeArchetype: fragments.ActiveArchetype);
+                    activeArchetype: fragments.ActiveArchetype,
+                    equippedItemDisplayNames: itemDisplayNames);
             }
         }
 

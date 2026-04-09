@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Pinder.Core.Conversation;
 using Pinder.Core.Stats;
 
@@ -50,6 +51,12 @@ namespace Pinder.Core.Characters
         /// <summary>LLM-generated psychological portrait. Set at session start.</summary>
         public string? PsychologicalStake { get; set; }
 
+        /// <summary>
+        /// Display names of equipped items, in slot order.
+        /// Used to build the visible profile shown to the opposing player at T1.
+        /// </summary>
+        public IReadOnlyList<string> EquippedItemDisplayNames { get; }
+
         /// <summary>Appends additional text to the assembled system prompt.</summary>
         public void AppendToSystemPrompt(string text)
         {
@@ -75,7 +82,8 @@ namespace Pinder.Core.Characters
             int level,
             string bio = "",
             string textingStyleFragment = "",
-            ActiveArchetype activeArchetype = null)
+            ActiveArchetype activeArchetype = null,
+            IReadOnlyList<string> equippedItemDisplayNames = null)
         {
             Stats = stats ?? throw new ArgumentNullException(nameof(stats));
             AssembledSystemPrompt = assembledSystemPrompt ?? throw new ArgumentNullException(nameof(assembledSystemPrompt));
@@ -86,6 +94,7 @@ namespace Pinder.Core.Characters
             Bio = bio ?? string.Empty;
             TextingStyleFragment = textingStyleFragment ?? string.Empty;
             ActiveArchetype = activeArchetype;
+            EquippedItemDisplayNames = equippedItemDisplayNames ?? new System.Collections.Generic.List<string>();
         }
     }
 }

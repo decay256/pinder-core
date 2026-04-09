@@ -9,9 +9,10 @@ namespace Pinder.Core.Characters
     /// </summary>
     public sealed class ItemDefinition
     {
-        public string ItemId { get; }
-        public string Slot   { get; }
-        public string Tier   { get; }
+        public string ItemId       { get; }
+        public string DisplayName   { get; }
+        public string Slot          { get; }
+        public string Tier          { get; }
 
         /// <summary>Flat bonuses/penalties to base stats.</summary>
         public IReadOnlyDictionary<StatType, int> StatModifiers { get; }
@@ -24,6 +25,7 @@ namespace Pinder.Core.Characters
 
         public ItemDefinition(
             string itemId,
+            string displayName,
             string slot,
             string tier,
             IReadOnlyDictionary<StatType, int> statModifiers,
@@ -34,6 +36,7 @@ namespace Pinder.Core.Characters
             TimingModifier responseTimingModifier)
         {
             ItemId                  = itemId;
+            DisplayName             = displayName ?? itemId;
             Slot                    = slot;
             Tier                    = tier;
             StatModifiers           = statModifiers;

@@ -311,7 +311,7 @@ namespace Pinder.Core.Conversation
                 // Only pass the opponent's public-facing bio — the player knows nothing about
                 // the opponent except what they've said in the conversation. Full profile and
                 // psychological stake are for the opponent agent only.
-                opponentPrompt: string.IsNullOrWhiteSpace(_opponent.Bio) ? _opponent.DisplayName : _opponent.DisplayName + ": \"" + _opponent.Bio + "\"",
+                opponentPrompt: BuildOpponentVisibleProfile(_opponent),
                 conversationHistory: _history.AsReadOnly(),
                 opponentLastMessage: GetLastOpponentMessage(),
                 activeTraps: activeTrapNames,
@@ -1131,6 +1131,22 @@ namespace Pinder.Core.Conversation
                 activeTrapNames: trapNames,
                 turnNumber: _turnNumber,
                 tripleBonusActive: _comboTracker.HasTripleBonus);
+        }
+
+        /// <summary>
+        /// Builds the visible profile string passed to the player's options context.
+        /// Includes display name, bio, and equipped item display names (appearance).
+        /// This is what the player "sees" on the opponent's dating profile.
+        /// </summary>
+        private static string BuildOpponentVisibleProfile(CharacterProfile opponent)
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.Append(opponent.DisplayName);
+            if (!string.IsNullOrWhiteSpace(opponent.Bio))
+                sb.Append(": \"").Append(opponent.Bio).Append('"');
+            if (opponent.EquippedItemDisplayNames != null && opponent.EquippedItemDisplayNames.Count > 0)
+                sb.Append(" | Wearing: ").Append(string.Join(", ", opponent.EquippedItemDisplayNames));
+            return sb.ToString();
         }
 
         private string GetLastOpponentMessage()

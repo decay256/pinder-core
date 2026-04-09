@@ -42,9 +42,10 @@ namespace Pinder.Core.Data
 
         private static ItemDefinition ParseItem(JsonObject obj)
         {
-            string itemId = obj.GetString("item_id");
-            string slot   = obj.GetString("slot");
-            string tier   = obj.GetString("tier");
+            string itemId      = obj.GetString("item_id");
+            string displayName = obj.GetString("display_name");
+            string slot        = obj.GetString("slot");
+            string tier        = obj.GetString("tier");
 
             var statMods = ParseStatModifiers(obj.GetObject("stat_modifiers"));
 
@@ -55,7 +56,7 @@ namespace Pinder.Core.Data
             var timing          = ParseTimingModifier(obj.GetObject("response_timing_modifier"));
 
             return new ItemDefinition(
-                itemId, slot, tier, statMods,
+                itemId, displayName, slot, tier, statMods,
                 personality, backstory, texting, archetypes, timing);
         }
 
