@@ -434,6 +434,10 @@ class Program
             agent = new LlmPlayerAgent(agentOptions, new ScoringPlayerAgent(),
                 playerName: sable.DisplayName, opponentName: brick.DisplayName);
         }
+        else if (agentType.Equals("human", StringComparison.OrdinalIgnoreCase))
+        {
+            agent = new HumanPlayerAgent();
+        }
         else
         {
             agent = new ScoringPlayerAgent();
