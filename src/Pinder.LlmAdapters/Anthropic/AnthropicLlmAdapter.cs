@@ -533,6 +533,28 @@ namespace Pinder.LlmAdapters.Anthropic
                     messageText = messageText.Substring(responseTagIdx + "[RESPONSE]".Length).Trim();
                 }
 
+                // Strip improvement-loop evaluation headers that leaked into the response.
+                // Pattern: numbered evaluation lines followed by the actual content.
+                // Detect by looking for the evaluation block ending marker.
+                var evalEndMarkers = new[] {
+                    "The content works as written.",
+                    "content works as written",
+                    "4. AUDIENCE:",
+                    "4. Audience:"
+                };
+                foreach (var marker in evalEndMarkers)
+                {
+                    var markerIdx = messageText.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
+                    if (markerIdx >= 0)
+                    {
+                        // Content after the marker is the actual message
+                        var afterMarker = messageText.Substring(markerIdx + marker.Length).Trim();
+                        if (!string.IsNullOrWhiteSpace(afterMarker))
+                            messageText = afterMarker;
+                        break;
+                    }
+                }
+
                 // Strip surrounding quotes if present
                 if (messageText.Length >= 2 && messageText[0] == '"' && messageText[messageText.Length - 1] == '"')
                 {

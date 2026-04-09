@@ -430,28 +430,15 @@ dramatic_craft:
     about the conversation rather than about the player. Structural repetition is
     the death of dramatic tension.
 improvement_prompt: |
-  You just wrote the content above. Before finalizing it, check the conversation history
-  and answer these four questions honestly:
+  Silently check whether the content you just wrote has any of these problems:
+  - Topics are looping without moving forward, or the exchange is not about their actual lives
+  - No comedy, surprise, absurdity, or emotional punch — just competent filler
+  - Same structure as the last 2-3 messages (no pattern break)
+  - A reader watching this conversation would feel nothing
 
-  1. PROGRESSION: Are topics actually moving? Is there real exchange about their lives,
-     or are we looping on the same theme? Does this content advance the conversation or
-     just respond to the surface?
+  If any problem exists, rewrite now to fix it. Make it more specific, more alive, more surprising.
+  If no problem exists, output the content unchanged.
 
-  2. COMEDY: Is there genuine absurdity, silliness, or surprise? Would the person reading
-     this chat log laugh, wince, or feel something? Or is this just competent dialogue?
-
-  3. PATTERN: Have the last 3 messages followed the same structure? (deflect/probe/repeat,
-     compliment/deflect/repeat, etc.) Does this content break that pattern or continue it?
-
-  4. AUDIENCE: For the player reading this exchange — will this content make them feel
-     engaged? Will it produce a reaction — delight, cringe, recognition, surprise?
-     Or is it forgettable?
-
-  If ANY of these answers reveal a problem: rewrite the content now to fix the problem.
-  Make the language more specific, more alive, more surprising. Push it further.
-
-  CRITICAL CONSTRAINTS — do not violate these:
-  - If rewriting dialogue options: keep EXACTLY the same number of options. Do not add or remove options.
-  - Do not change the output format (OPTION_1/OPTION_2/OPTION_3 structure must be preserved exactly).
-  - Do not add commentary or explanation — output only the rewritten content.
-  - This is a text message on a dating app. Keep it in the character's voice.
+  CRITICAL OUTPUT RULE: Output ONLY the final content. No evaluation. No numbered lists.
+  No "here's what I changed." No "the content works as written." Just the content itself.
+  A single message or set of options — nothing else.
