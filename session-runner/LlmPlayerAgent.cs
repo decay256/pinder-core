@@ -22,7 +22,23 @@ namespace Pinder.SessionRunner
             "## Shadow Threshold Rules\n" +
             "- T1 (≥6): shadow taints delivery of paired stat.\n" +
             "- T2 (≥12): -2 penalty to paired stat rolls.\n" +
-            "- T3 (≥18): shadow may override your choices for paired stat.\n";
+            "- T3 (≥18): shadow may override your choices for paired stat.\n" +
+            "\n" +
+            "## How to Reduce Shadows\n" +
+            "- Madness: −1 on any combo success | −1 on Tell option selected | −1 on Nat 20 CHAOS\n" +
+            "- Despair: −1 when SA or HONESTY succeeds at interest >18\n" +
+            "- Denial: −1 when HONESTY succeeds at interest ≥15\n" +
+            "- Fixation: −1 when 4+ different stats used in session | −1 on CHAOS combo\n" +
+            "- Dread: −1 when date secured | −1 on any Nat 20\n" +
+            "- Overthinking: −1 when any roll succeeds at interest ≥20\n" +
+            "\n" +
+            "## What Grows Shadows (avoid when near threshold)\n" +
+            "- Madness: every TropeTrap failure +1 | CHARM used 3x in session +1\n" +
+            "- Despair: Nat 1 on RIZZ +2 | RIZZ TropeTrap +1 | every 3rd cumulative RIZZ failure +1\n" +
+            "- Denial: skipping available HONESTY option +1 | date secured without HONESTY success +1\n" +
+            "- Fixation: same stat 3 turns in a row +1 | always picking highest-% 3 turns +1\n" +
+            "- Dread: Nat 1 on WIT +1 | catastrophic WIT fail +1 | interest hits 0 +2 | Ghosted +1\n" +
+            "- Overthinking: Nat 1 on SA +1 | SA used 3+ times in session +1\n";
 
         private const string RulesReminder =
             "## Rules Reminder\n" +
