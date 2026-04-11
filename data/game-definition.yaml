@@ -442,6 +442,8 @@ improvement_prompt: |
   CRITICAL OUTPUT RULE: Output ONLY the final content. No evaluation. No numbered lists.
   No "here's what I changed." No "the content works as written." Just the content itself.
   A single message or set of options — nothing else.
+global_dc_bias: 0  # Raises DC for all rolls. 0 = standard difficulty. Positive = harder.
+
 horniness_time_modifiers:
   morning: 3      # 09:00-11:59
   afternoon: 0    # 12:00-17:59

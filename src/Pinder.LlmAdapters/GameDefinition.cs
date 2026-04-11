@@ -150,6 +150,9 @@ namespace Pinder.LlmAdapters
         /// <summary>Configurable dramatic craft rules, or null for hardcoded defaults.</summary>
         public DramaticCraft DramaticCraft { get; }
 
+        /// <summary>Global DC bias applied to all rolls. 0 = standard difficulty. Positive = harder.</summary>
+        public int GlobalDcBias { get; }
+
         /// <summary>Time-of-day horniness modifiers loaded from game-definition.yaml.</summary>
         public HorninessTimeModifiers HorninessTimeModifiers { get; }
 
@@ -171,7 +174,8 @@ namespace Pinder.LlmAdapters
             string playerProbing = null,
             string improvementPrompt = null,
             string steeringPrompt = null,
-            HorninessTimeModifiers horninessTimeModifiers = null)
+            HorninessTimeModifiers horninessTimeModifiers = null,
+            int globalDcBias = 0)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Vision = vision ?? throw new ArgumentNullException(nameof(vision));
@@ -191,6 +195,7 @@ namespace Pinder.LlmAdapters
             DeliveryRules = deliveryRules;
             DramaticCraft = dramaticCraft;
             HorninessTimeModifiers = horninessTimeModifiers;
+            GlobalDcBias = globalDcBias;
         }
 
         /// <summary>
@@ -303,14 +308,29 @@ namespace Pinder.LlmAdapters
                 evening: ParseHtmInt("evening"),
                 overnight: ParseHtmInt("overnight"));
 
+            // Validate core required keys first (throws FormatException)
+            var name = GetRequired("name");
+            var vision = GetRequired("vision");
+            var worldDescription = GetRequired("world_description");
+            var playerRoleDescription = GetRequired("player_role_description");
+            var opponentRoleDescription = GetRequired("opponent_role_description");
+            var metaContract = GetRequired("meta_contract");
+            var writingRules = GetRequired("writing_rules");
+
+            // Parse required global_dc_bias
+            if (!parsed.TryGetValue("global_dc_bias", out var gdcbObj) || gdcbObj == null)
+                throw new InvalidOperationException("game-definition.yaml is missing required key: global_dc_bias");
+            if (!int.TryParse(gdcbObj.ToString(), out int globalDcBias))
+                throw new InvalidOperationException("game-definition.yaml global_dc_bias must be an integer");
+
             return new GameDefinition(
-                name: GetRequired("name"),
-                vision: GetRequired("vision"),
-                worldDescription: GetRequired("world_description"),
-                playerRoleDescription: GetRequired("player_role_description"),
-                opponentRoleDescription: GetRequired("opponent_role_description"),
-                metaContract: GetRequired("meta_contract"),
-                writingRules: GetRequired("writing_rules"),
+                name: name,
+                vision: vision,
+                worldDescription: worldDescription,
+                playerRoleDescription: playerRoleDescription,
+                opponentRoleDescription: opponentRoleDescription,
+                metaContract: metaContract,
+                writingRules: writingRules,
                 deliveryRules: deliveryRules,
                 dramaticCraft: dramaticCraft,
                 textingPsychology: GetOptional("texting_psychology"),
@@ -321,7 +341,8 @@ namespace Pinder.LlmAdapters
                 playerProbing: GetOptional("player_probing"),
                 improvementPrompt: GetOptional("improvement_prompt"),
                 steeringPrompt: GetOptional("steering_prompt"),
-                horninessTimeModifiers: horninessTimeModifiers
+                horninessTimeModifiers: horninessTimeModifiers,
+                globalDcBias: globalDcBias
             );
         }
 

@@ -19,6 +19,12 @@ meta_contract: |
   Meta contract text.
 writing_rules: |
   Writing rules text.
+global_dc_bias: 0
+horniness_time_modifiers:
+  morning: 3
+  afternoon: 0
+  evening: 2
+  overnight: 5
 ";
 
         [Fact]
@@ -103,6 +109,12 @@ player_role_description: p
 opponent_role_description: o
 meta_contract: m
 writing_rules: w
+global_dc_bias: 0
+horniness_time_modifiers:
+  morning: 3
+  afternoon: 0
+  evening: 2
+  overnight: 5
 ";
             var ex = Assert.Throws<FormatException>(() =>
                 GameDefinition.LoadFrom(yaml));
@@ -120,6 +132,12 @@ player_role_description: p
 opponent_role_description: o
 meta_contract: m
 writing_rules: wr
+global_dc_bias: 0
+horniness_time_modifiers:
+  morning: 3
+  afternoon: 0
+  evening: 2
+  overnight: 5
 extra_field: should be ignored
 another: also ignored
 ";

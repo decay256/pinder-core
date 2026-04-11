@@ -133,6 +133,12 @@ meta_contract: |
   Never break character.
 writing_rules: |
   Write in texting register.
+global_dc_bias: 0
+horniness_time_modifiers:
+  morning: 3
+  afternoon: 0
+  evening: 2
+  overnight: 5
 ";
 
         // What: AC2 — LoadFrom parses valid YAML and maps all 7 keys correctly
