@@ -457,43 +457,6 @@ namespace Pinder.Core.Tests
 
         // ======================== Read/Recover Overthinking ========================
 
-        [Fact]
-        public async Task ReadFailure_GrowsOverthinking()
-        {
-            var shadows = MakeShadowTracker();
-            // SA=0, dice=2 → total 2 < DC 12 → fail
-            var dice = new QueueDice(new[] { 2 });
-            var session = MakeSessionWithDice(dice,
-                playerStats: MakeStatBlock(sa: 0),
-                shadows: shadows);
-
-            var result = await session.ReadAsync();
-
-            Assert.False(result.Success);
-            Assert.Single(result.ShadowGrowthEvents);
-            Assert.Contains(result.ShadowGrowthEvents, e => e.Contains("Overthinking") && e.Contains("Read failed"));
-            Assert.Equal(1, shadows.GetDelta(ShadowStatType.Overthinking));
-        }
-
-        [Fact]
-        public async Task RecoverFailure_GrowsOverthinking()
-        {
-            var shadows = MakeShadowTracker();
-            // SA=0, dice=2 → fail
-            var dice = new QueueDice(new[] { 2 });
-            var session = MakeSessionWithDice(dice,
-                playerStats: MakeStatBlock(sa: 0),
-                shadows: shadows);
-
-            // Activate a trap so Recover is valid
-            ActivateTrap(session);
-
-            var result = await session.RecoverAsync();
-
-            Assert.False(result.Success);
-            Assert.Equal(1, shadows.GetDelta(ShadowStatType.Overthinking));
-        }
-
         // ======================== Multiple triggers in one turn ========================
 
         [Fact]

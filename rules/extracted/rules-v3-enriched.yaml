@@ -1375,26 +1375,6 @@
     - '-----------'
   description: ''
   heading_level: 3
-- id: §9.shadow-growth.using-"read"-action-and-failing
-  section: §9
-  title: Shadow Growth — Using "Read" action and failing
-  type: shadow_growth
-  description: 'Using "Read" action and failing: Overthinking +1.'
-  condition:
-    action: Using "Read" action and failing
-  outcome:
-    shadow: Overthinking
-    shadow_delta: 1
-- id: §9.shadow-growth.using-"recover"-action-and-failing
-  section: §9
-  title: Shadow Growth — Using "Recover" action and failing
-  type: shadow_growth
-  description: 'Using "Recover" action and failing: Overthinking +1.'
-  condition:
-    action: Using "Recover" action and failing
-  outcome:
-    shadow: Overthinking
-    shadow_delta: 1
 - id: §9.shadow-growth.using-self-awareness-3+-times-in-one-con
   section: §9
   title: Shadow Growth — Using Self-Awareness 3+ times in one conversation
@@ -1422,10 +1402,6 @@
   blocks:
   - kind: table
     rows:
-    - Event: Using "Read" action and failing
-      Overthinking Δ: '+1'
-    - Event: Using "Recover" action and failing
-      Overthinking Δ: '+1'
     - Event: Using Self-Awareness 3+ times in one conversation
       Overthinking Δ: '+1'
     - Event: Nat 1 on Self-Awareness
@@ -1482,16 +1458,6 @@
   outcome:
     shadow: Fixation
     shadow_delta: -1
-- id: §9.shadow-reduce.recovering-from-a-trope-trap
-  section: §9
-  title: Shadow Reduction — Recovering from a trope trap
-  type: shadow_growth
-  description: 'Recovering from a trope trap: Madness -1.'
-  condition:
-    action: Recovering from a trope trap
-  outcome:
-    shadow: Madness
-    shadow_delta: -1
 - id: §9.shadow-reduce.winning-despite-overthinking-d
   section: §9
   title: Shadow Reduction — Winning despite Overthinking disadvantage
@@ -1515,8 +1481,6 @@
       Shadow Reduced: Denial -1 (being real with someone who received it reduces your own self-deception)
     - Action: 4+ different stats used in one conversation
       Shadow Reduced: Fixation -1
-    - Action: Recovering from a trope trap
-      Shadow Reduced: Madness -1
     - Action: Winning despite Overthinking disadvantage
       Shadow Reduced: Overthinking -1
     - Action: Therapy Hoodie (legendary)
@@ -1769,11 +1733,7 @@
   - kind: paragraph
     text: '1. **Speak** — Choose a dialogue option. Roll d20 + mod + level bonus vs DC. See intended message. Dice determine what actually comes out.
 
-      2. **Read** — Roll Self-Awareness vs DC 12. Pass: see exact Interest + opponent modifiers. Fail: -1 Interest.
-
-      3. **Recover** — Active trap? Roll Self-Awareness vs DC 12. Pass: trap clears. Fail: -1 Interest.
-
-      4. **Wait** — Skip turn. Traps expire. -1 Interest.'
+      2. **Wait** — Skip turn. Traps expire. -1 Interest.'
   description: 'Pick ONE:'
   heading_level: 3
   compact_heading: true
@@ -1782,8 +1742,6 @@
   outcome:
     actions:
     - Speak
-    - Read
-    - Recover
     - Wait
 - id: §10.opponent-turn.interest-1-4
   section: §10
@@ -2109,8 +2067,6 @@
       XP: 10 (suffering is educational)
     - Action: Date secured
       XP: '50'
-    - Action: Trap recovery
-      XP: '15'
     - Action: Achievement
       XP: 20-50
     - Action: Conversation completed (no date)
@@ -2648,12 +2604,12 @@
 
       2. **Active:** For 1-2 turns, the trap applies both a **mechanical effect** (DC/roll penalty on the trapped stat) and a **prompt taint** (colors ALL messages regardless of stat).
 
-      3. **Expiry:** Auto-expires after duration. Player sees notification. Alternatively, use **Recover** action (Self-Awareness vs DC 12, costs turn + -1 Interest) to clear early.'
+      3. **Expiry:** Auto-expires after duration. Player sees notification. '
   description: '1. **Activation:** Miss DC by 6+ → stat-specific trap fires. Changes what your message becomes AND applies carry-forward effects.
 
     2. **Active:** For 1-2 turns, the trap applies both a **mechanical effect** (DC/roll penalty on the trapped stat) and a **prompt taint** (colors ALL messages regardless of stat).
 
-    3. **Expiry:** Auto-expires after duration. Player sees notification. Alternatively, use **Recover** action (Self-Awareness vs DC 12, costs turn + -1 Interest) to clear early.'
+    3. **Expiry:** Auto-expires after duration. Player sees notification. '
   heading_level: 3
   compact_heading: true
 - id: §18.prompt-taint
@@ -2725,7 +2681,7 @@
       Shadows: Stat modifier penalty + option flavor tint
     - ? ''
       : Removal
-      Traps: Auto-expire or Recover action
+      Traps: Auto-expire after duration
       Shadows: Specific actions, items, or prestige reset
     - ? ''
       : Stacking

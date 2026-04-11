@@ -436,33 +436,6 @@ namespace Pinder.Core.Tests
         }
 
         // ================================================================
-        // Edge Case: Read clears active tell
-        // ================================================================
-
-        [Fact]
-        public async Task ReadClearsActiveTell()
-        {
-            var llm = new TellTestLlm();
-            llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Setup"));
-            llm.EnqueueTell(new Tell(StatType.Wit, "Makes joke"));
-            // After Read, tell should be cleared
-            llm.EnqueueOptions(new DialogueOption(StatType.Wit, "Should not have tell"));
-
-            // Turn 0: d20=15, timing=5. Read: d20=15. Turn 2: d20=15, timing=5
-            var dice = new FixedDice(5, 15, 5, 15, 15, 5);
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
-
-            await session.StartTurnAsync();
-            await session.ResolveTurnAsync(0);
-
-            // Read clears the tell
-            await session.ReadAsync();
-
-            var start2 = await session.StartTurnAsync();
-            Assert.False(start2.Options[0].HasTellBonus);
-        }
-
-        // ================================================================
         // Edge Case: Wait clears active tell
         // ================================================================
 

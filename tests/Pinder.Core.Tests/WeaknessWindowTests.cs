@@ -240,33 +240,6 @@ namespace Pinder.Core.Tests
         // ================================================================
 
         [Fact]
-        public async Task T7_ReadClearsWeaknessWindow()
-        {
-            var llm = new WeaknessTestLlm();
-            // Turn 0: set up a window
-            llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Hey"));
-            llm.EnqueueWeaknessWindow(new WeaknessWindow(StatType.Honesty, 2));
-            // Turn 2: SA option - should NOT have window (cleared by Read)
-            llm.EnqueueOptions(new DialogueOption(StatType.SelfAwareness, "After read"));
-
-            // Turn 0: d20=15 + timing, Turn 1(Read): d20=15
-            var dice = new FixedDice(5, 15, 5, 15, 15, 5);
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
-
-            // Turn 0
-            await session.StartTurnAsync();
-            await session.ResolveTurnAsync(0);
-
-            // Turn 1: Read (should clear the window, DC 12 for SA not affected by weakness)
-            var readResult = await session.ReadAsync();
-            Assert.Equal(12, readResult.Roll.DC); // Fixed DC 12, not reduced
-
-            // Turn 2: no window
-            var start2 = await session.StartTurnAsync();
-            Assert.False(start2.Options[0].HasWeaknessWindow);
-        }
-
-        [Fact]
         public async Task T7_WaitClearsWeaknessWindow()
         {
             var llm = new WeaknessTestLlm();
@@ -285,38 +258,6 @@ namespace Pinder.Core.Tests
 
             // Turn 1: Wait
             session.Wait();
-
-            // Turn 2: no window
-            var start2 = await session.StartTurnAsync();
-            Assert.False(start2.Options[0].HasWeaknessWindow);
-        }
-
-        [Fact]
-        public async Task T7_RecoverClearsWeaknessWindow()
-        {
-            var llm = new WeaknessTestLlm();
-            // Turn 0: set up a window
-            llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Hey"));
-            llm.EnqueueWeaknessWindow(new WeaknessWindow(StatType.Honesty, 2));
-            // Turn 2: SA option - should NOT have window (cleared by Recover)
-            llm.EnqueueOptions(new DialogueOption(StatType.SelfAwareness, "After recover"));
-
-            // Turn 0: d20=15 + timing, Turn 1(Recover): d20=15
-            var dice = new FixedDice(5, 15, 5, 15, 15, 5);
-            var trapRegistry = new NullTrapRegistry();
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, trapRegistry,
-                new GameSessionConfig(clock: TestHelpers.MakeClock()));
-
-            // Turn 0
-            await session.StartTurnAsync();
-            await session.ResolveTurnAsync(0);
-
-            // Activate a trap so RecoverAsync doesn't throw
-            ActivateTrapOnSession(session);
-
-            // Turn 1: Recover (should clear the window, DC 12 for SA not affected by weakness)
-            var recoverResult = await session.RecoverAsync();
-            Assert.Equal(12, recoverResult.Roll.DC); // Fixed DC 12, not reduced by weakness
 
             // Turn 2: no window
             var start2 = await session.StartTurnAsync();
@@ -451,7 +392,7 @@ namespace Pinder.Core.Tests
         }
 
         /// <summary>
-        /// Activates a trap on the session via reflection so RecoverAsync can be called.
+        /// Activates a trap on the session via reflection.
         /// </summary>
         private static void ActivateTrapOnSession(GameSession session)
         {

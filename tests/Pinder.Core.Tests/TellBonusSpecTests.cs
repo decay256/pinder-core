@@ -13,43 +13,11 @@ namespace Pinder.Core.Tests
 {
     /// <summary>
     /// Additional spec-driven tests for Issue #50: Tells — §15 opponent tell detection and hidden roll bonus.
-    /// Covers gaps identified in code review: RecoverAsync clearing tell, edge case 10 (HasTellBonus
-    /// true but player picks different option), edge case 3 (explicit matching stat test),
-    /// and edge case 12 (game ends during turn with tell).
+    /// Covers edge case 10 (HasTellBonus true but player picks different option),
+    /// edge case 3 (explicit matching stat test), and edge case 12 (game ends during turn with tell).
     /// </summary>
     public class TellBonusSpecTests
     {
-        // ================================================================
-        // Edge Case: RecoverAsync clears active tell
-        // Mutation: Fails if RecoverAsync does not set _activeTell = null
-        // ================================================================
-
-        [Fact]
-        public async Task RecoverAsync_ClearsActiveTell()
-        {
-            var llm = new TellTestLlm();
-            llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Setup"));
-            llm.EnqueueTell(new Tell(StatType.Wit, "Makes joke"));
-            // After Recover, tell should be cleared
-            llm.EnqueueOptions(new DialogueOption(StatType.Wit, "Should not have tell"));
-
-            // Turn 0: d20=15, timing=5. Recover: d20=15. Turn 2: d20=15, timing=5
-            var dice = new FixedDice(5, 15, 5, 15, 15, 5);
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
-
-            // Activate a trap so RecoverAsync doesn't throw
-            ActivateTrapOnSession(session);
-
-            await session.StartTurnAsync();
-            await session.ResolveTurnAsync(0);
-
-            // Recover clears the tell
-            await session.RecoverAsync();
-
-            var start2 = await session.StartTurnAsync();
-            Assert.False(start2.Options[0].HasTellBonus);
-        }
-
         // ================================================================
         // Edge Case 3 (explicit): Tell active + matching stat → TellReadBonus=2
         // Mutation: Fails if tell bonus is not exactly 2, or if tell comparison

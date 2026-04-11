@@ -580,21 +580,6 @@ namespace Pinder.Core.Tests
             Assert.Equal(1, shadows.GetDelta(ShadowStatType.Overthinking));
         }
 
-        // Mutation: would catch if Read failure didn't grow Overthinking
-        [Fact]
-        public async Task AC1_ReadFailure_GrowsOverthinking()
-        {
-            var shadows = MakeTracker();
-            // SA=0, dice=2 → total 2 < DC 12 → fail
-            var session = BuildSession(dice: Dice(2), playerStats: Stats(sa: 0), shadows: shadows);
-
-            var result = await session.ReadAsync();
-
-            Assert.False(result.Success);
-            Assert.Equal(1, shadows.GetDelta(ShadowStatType.Overthinking));
-            Assert.Contains(result.ShadowGrowthEvents, e => e.Contains("Overthinking"));
-        }
-
         // =====================================================================
         // AC2: Shadow stats mutate correctly during a session
         // =====================================================================

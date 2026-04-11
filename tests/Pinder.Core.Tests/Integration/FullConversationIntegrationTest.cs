@@ -33,10 +33,10 @@ namespace Pinder.Core.Tests.Integration
         ///   T2: Charm success        → +2 (The Setup combo: Wit→Charm)
         ///   T3: Honesty fail Misfire → −2
         ///   T4: SA success           → +5 (Bold tier + The Recovery combo)
-        ///   T5: Chaos fail TropeTrap → −3 (trap "unhinged" activates)
-        ///   T6: Recover success      → 0  (trap cleared)
-        ///   T7: Charm success        → +2
-        ///   T8: Charm Nat20 success  → +4 → interest 25 → DateSecured
+        ///   T5: Chaos fail TropeTrap → −2 (trap "unhinged" activates)
+        ///   T6: Wait                 → −1 interest (trap still active, 2 turns left)
+        ///   T7: Charm success        → +3
+        ///   T8: Charm Nat20 success  → +5 → interest 25 → DateSecured
         /// </summary>
         [Fact]
         public async Task FullEightTurnConversation_VerifiesAllMechanics()
@@ -74,7 +74,7 @@ namespace Pinder.Core.Tests.Integration
                 new[] { Opt(StatType.SelfAwareness), Opt(StatType.Charm), Opt(StatType.Wit), Opt(StatType.Chaos) },
                 // Turn 5: pick index 0 = Chaos
                 new[] { Opt(StatType.Chaos), Opt(StatType.Charm), Opt(StatType.Wit), Opt(StatType.Honesty) },
-                // Turn 6 is Recover — no options needed
+                // Turn 6 is Wait — no options needed
                 // Turn 7: pick index 0 = Charm
                 new[] { Opt(StatType.Charm), Opt(StatType.Honesty), Opt(StatType.Wit), Opt(StatType.Chaos) },
                 // Turn 8: pick index 0 = Charm
@@ -94,12 +94,11 @@ namespace Pinder.Core.Tests.Integration
             //   SA DC=23, total=24, margin=1 → scale+1, Bold(need=17) → +5, Recovery +2. delta=8. Interest=20.
             // T5 (adv, interest=20, VeryIntoIt):   d20=5, d20=7, d100=50
             //   Chaos DC=18, total=11, miss=7 → TropeTrap(-2). Interest=18.
-            // T6 (Recover, adv, interest=18, VeryIntoIt): d20=10, d20=8
-            //   SA DC=12, total=16, success. Interest=18 (unchanged).
-            // T7 (adv, interest=18, VeryIntoIt):   d20=8, d20=6, d100=50
-            //   Charm DC=18, total=23, margin=5 → scale+2, Safe+1. delta=3. Interest=21.
-            // T8 (adv, interest=21, AlmostThere):  d20=20, d20=5, d100=50
-            //   Charm DC=18, Nat20! delta=+4. Interest=21+4=25 → DateSecured.
+            // T6 (Wait, interest=18, VeryIntoIt): -1 interest. Interest=17. Trap 2 turns left.
+            // T7 (adv, interest=17, VeryIntoIt):   d20=8, d20=6, d100=50
+            //   Charm DC=18, total=23, margin=5 → scale+2, Safe+1. delta=3. Interest=20.
+            // T8 (adv, interest=20, VeryIntoIt):  d20=20, d20=5, d100=50
+            //   Charm DC=18, Nat20! delta=+5. Interest=20+5=25 → DateSecured.
             var dice = new FixedDice(
                 5,  // Constructor: horniness roll (1d10)
                 16, 50,             // T1
@@ -107,7 +106,7 @@ namespace Pinder.Core.Tests.Integration
                 19, 50,             // T3
                 18, 50,             // T4
                 5, 7, 50,           // T5
-                10, 8,              // T6 Recover
+                                    // T6 Wait (no dice)
                 8, 6, 50,           // T7
                 20, 5, 50           // T8
             );
@@ -213,22 +212,9 @@ namespace Pinder.Core.Tests.Integration
             Assert.Contains("unhinged", turn5.StateAfter.ActiveTrapNames);
             Assert.False(turn5.IsGameOver);
 
-            // ========== Turn 6: Recover (SA vs DC 12, Success) ==========
-            var recover = await session.RecoverAsync();
-
-            // Mutation: Fails if Recover doesn't use SA stat with DC 12
-            Assert.True(recover.Success);
-            // Mutation: Fails if cleared trap name not populated
-            Assert.Equal("unhinged", recover.ClearedTrapName);
-            Assert.True(recover.Roll.IsSuccess);
-            Assert.Equal(16, recover.Roll.Total);          // max(10,8)=10 + 4 + 2
-            Assert.Equal(12, recover.Roll.DC);
-            // Mutation: Fails if Recover changes interest
-            Assert.Equal(18, recover.StateAfter.Interest);
-            // Mutation: Fails if trap not cleared from state
-            Assert.Empty(recover.StateAfter.ActiveTrapNames);
-            // Mutation: Fails if recovery XP not awarded (15)
-            Assert.Equal(15, recover.XpEarned);
+            // ========== Turn 6: Wait (-1 interest, trap still active) ==========
+            session.Wait();
+            // Interest: 18 - 1 = 17. Trap "unhinged" has 2 turns remaining (duration 3, turn 5 + AdvanceTurn = 2 left, then Wait AdvanceTurn = 1 left).
 
             // ========== Turn 7: Speak CHARM (Success) ==========
             var turn7Start = await session.StartTurnAsync();
@@ -241,8 +227,8 @@ namespace Pinder.Core.Tests.Integration
             Assert.Equal(RiskTier.Safe, turn7.Roll.RiskTier);
             // Mutation: Fails if beat-by-5 not scored as +2
             Assert.Equal(3, turn7.InterestDelta);          // +2 success(beat by 5) + 1 Safe
-            Assert.Equal(21, turn7.StateAfter.Interest);   // 18 + 3
-            Assert.Equal(InterestState.AlmostThere, turn7.StateAfter.State);
+            Assert.Equal(20, turn7.StateAfter.Interest);   // 17 + 3
+            Assert.Equal(InterestState.VeryIntoIt, turn7.StateAfter.State);
             Assert.Equal(1, turn7.StateAfter.MomentumStreak);
             Assert.False(turn7.IsGameOver);
 
@@ -258,7 +244,7 @@ namespace Pinder.Core.Tests.Integration
             // Mutation: Fails if Nat20 doesn't give +5 interest delta (scale+4 + Safe+1)
             Assert.Equal(5, turn8.InterestDelta);
             // Mutation: Fails if interest not clamped at 25
-            Assert.Equal(25, turn8.StateAfter.Interest);   // 21 + 5 clamped to 25
+            Assert.Equal(25, turn8.StateAfter.Interest);   // 20 + 5 = 25
             // Mutation: Fails if DateSecured state not set at interest=25
             Assert.Equal(InterestState.DateSecured, turn8.StateAfter.State);
             Assert.Equal(2, turn8.StateAfter.MomentumStreak);
@@ -496,141 +482,7 @@ namespace Pinder.Core.Tests.Integration
         // Mixed actions: Speak + Read + Wait in one session
         // ================================================================
 
-        /// <summary>
-        /// Verifies that Read, Wait, and Speak actions can be mixed in a session.
-        /// Read reveals interest on success. Wait costs -1 interest.
-        /// </summary>
-        [Fact]
-        public async Task MixedActions_SpeakReadWait_CorrectInterestChanges()
-        {
-            var geraldStats = CreateGeraldStats();
-            var velvetStats = CreateVelvetStats();
-            var timing = new TimingProfile(baseDelay: 10, variance: 0.5f, drySpell: 0.0f, readReceipt: "neutral");
-            var gerald = new CharacterProfile(geraldStats, "Test", "Gerald", timing, level: 5);
-            var velvet = new CharacterProfile(velvetStats, "Test", "Velvet", timing, level: 7);
 
-            var config = new GameSessionConfig(
-                clock: TestHelpers.MakeClock(),
-                playerShadows: new SessionShadowTracker(geraldStats),
-                opponentShadows: new SessionShadowTracker(velvetStats),
-                startingInterest: 12,
-                previousOpener: null);
-
-            var llm = new ScriptedLlmAdapter(new[]
-            {
-                new[] { Opt(StatType.Charm), Opt(StatType.Wit) },
-            });
-
-            // Turn 1: Speak Charm. d20=10, d100=50.
-            // total=10+13+2=25, DC=18, beat by 7 → +2 success
-            // Risk: need=3 (16+SA2-13-2=3) → Safe(+1). Interest: 12+2+1=15
-            //
-            // Turn 2: Read. SA vs DC 12. d20=8 → total=8+4+2=14 >= 12, success.
-            //
-            // Turn 3: Wait. -1 interest. Interest: 15-1=14
-            var dice = new FixedDice(
-                5,  // Constructor: horniness roll (1d10)
-                10, 50,  // T1 Speak
-                8        // T2 Read
-            );
-
-            var session = new GameSession(gerald, velvet, llm, dice, new NullTrapRegistry(), config);
-
-            // T1: Speak
-            await session.StartTurnAsync();
-            var t1 = await session.ResolveTurnAsync(0);
-            Assert.True(t1.Roll.IsSuccess);
-            Assert.Equal(15, t1.StateAfter.Interest);
-
-            // T2: Read (self-contained, no StartTurnAsync needed)
-            var readResult = await session.ReadAsync();
-            // Mutation: Fails if Read doesn't use DC 12
-            Assert.True(readResult.Success);
-            Assert.Equal(12, readResult.Roll.DC);
-            // Mutation: Fails if successful Read doesn't reveal interest
-            Assert.NotNull(readResult.InterestValue);
-            Assert.Equal(15, readResult.InterestValue);
-
-            // T3: Wait (-1 interest)
-            // Mutation: Fails if Wait doesn't reduce interest by 1
-            session.Wait();
-            // We need to check interest after Wait — do a Read to see state
-            // Actually, Wait is void. We'll check on next turn.
-            // Use another Speak to verify interest
-        }
-
-        // ================================================================
-        // Read failure: DC 12 miss → -1 interest + Overthinking shadow
-        // ================================================================
-
-        /// <summary>
-        /// Verifies that a failed Read action results in -1 interest.
-        /// </summary>
-        [Fact]
-        public async Task ReadFailure_MinusOneInterest()
-        {
-            var geraldStats = CreateGeraldStats();
-            var velvetStats = CreateVelvetStats();
-            var timing = new TimingProfile(baseDelay: 10, variance: 0.5f, drySpell: 0.0f, readReceipt: "neutral");
-            var gerald = new CharacterProfile(geraldStats, "Test", "Gerald", timing, level: 5);
-            var velvet = new CharacterProfile(velvetStats, "Test", "Velvet", timing, level: 7);
-
-            var playerShadows = new SessionShadowTracker(geraldStats);
-            var config = new GameSessionConfig(
-                clock: TestHelpers.MakeClock(),
-                playerShadows: playerShadows,
-                opponentShadows: new SessionShadowTracker(velvetStats),
-                startingInterest: 10,
-                previousOpener: null);
-
-            var llm = new ScriptedLlmAdapter(Array.Empty<DialogueOption[]>());
-
-            // Read: SA vs DC 12. Gerald SA=4, level=+2. d20+6 < 12 → need d20 < 6.
-            // d20=3 → total=3+4+2=9 < 12 → fail
-            var dice = new FixedDice(5, 3);
-
-            var session = new GameSession(gerald, velvet, llm, dice, new NullTrapRegistry(), config);
-
-            var readResult = await session.ReadAsync();
-
-            // Mutation: Fails if Read failure doesn't deduct interest
-            Assert.False(readResult.Success);
-            Assert.Equal(9, readResult.StateAfter.Interest); // 10 - 1
-            // Mutation: Fails if failed Read reveals interest (should be null)
-            Assert.Null(readResult.InterestValue);
-        }
-
-        // ================================================================
-        // Recover without active trap
-        // ================================================================
-
-        /// <summary>
-        /// Verifies that RecoverAsync when no trap is active throws InvalidOperationException.
-        /// </summary>
-        [Fact]
-        public async Task RecoverWithoutActiveTrap_Throws()
-        {
-            var geraldStats = CreateGeraldStats();
-            var velvetStats = CreateVelvetStats();
-            var timing = new TimingProfile(baseDelay: 10, variance: 0.5f, drySpell: 0.0f, readReceipt: "neutral");
-            var gerald = new CharacterProfile(geraldStats, "Test", "Gerald", timing, level: 5);
-            var velvet = new CharacterProfile(velvetStats, "Test", "Velvet", timing, level: 7);
-
-            var config = new GameSessionConfig(
-                clock: TestHelpers.MakeClock(),
-                playerShadows: new SessionShadowTracker(geraldStats),
-                opponentShadows: new SessionShadowTracker(velvetStats),
-                startingInterest: 10,
-                previousOpener: null);
-
-            var llm = new ScriptedLlmAdapter(Array.Empty<DialogueOption[]>());
-            var dice = new FixedDice(5, 10);
-
-            var session = new GameSession(gerald, velvet, llm, dice, new NullTrapRegistry(), config);
-
-            // Mutation: Fails if Recover allows call when no trap is active
-            await Assert.ThrowsAsync<InvalidOperationException>(() => session.RecoverAsync());
-        }
 
         // ================================================================
         // AC11: Determinism — same dice = same results

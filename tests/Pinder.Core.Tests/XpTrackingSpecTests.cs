@@ -354,64 +354,6 @@ namespace Pinder.Core.Tests
             Assert.Equal(5, endEvent.Amount);
         }
 
-        // What: AC-5 — Successful Recover action awards 15 XP with label "TrapRecovery" (spec §2, §5.4)
-        // Mutation: Fails if recovery XP is not 15 or label is wrong
-        [Fact]
-        public async Task RecoverAsync_Success_Awards15Xp()
-        {
-            var session = MakeSession(diceRoll: 15, opponentStatValue: 0);
-            ActivateTrap(session);
-
-            var result = await session.RecoverAsync();
-
-            Assert.True(result.Success);
-            Assert.Equal(15, result.XpEarned);
-            Assert.Equal(15, session.TotalXpEarned);
-
-            var evt = session.XpLedger.Events.Single(e => e.Source == "TrapRecovery");
-            Assert.Equal(15, evt.Amount);
-        }
-
-        // What: AC-5 — Failed Recover action awards 0 XP (spec §10 edge case)
-        // Mutation: Fails if failed recovery still grants XP
-        [Fact]
-        public async Task RecoverAsync_Failure_Awards0Xp()
-        {
-            var session = MakeSession(diceRoll: 3, opponentStatValue: 0);
-            ActivateTrap(session);
-
-            var result = await session.RecoverAsync();
-
-            Assert.False(result.Success);
-            Assert.Equal(0, result.XpEarned);
-            Assert.Equal(0, session.TotalXpEarned);
-        }
-
-        // What: Edge case — ReadAsync success awards 0 XP (spec §10, Read not in XP sources)
-        // Mutation: Fails if Read grants XP
-        [Fact]
-        public async Task ReadAsync_Success_Awards0Xp()
-        {
-            var session = MakeSession(diceRoll: 15, opponentStatValue: 0);
-            var result = await session.ReadAsync();
-
-            Assert.True(result.Success);
-            Assert.Equal(0, result.XpEarned);
-            Assert.Equal(0, session.TotalXpEarned);
-        }
-
-        // What: Edge case — ReadAsync failure awards 0 XP (spec §10)
-        // Mutation: Fails if failed Read grants XP
-        [Fact]
-        public async Task ReadAsync_Failure_Awards0Xp()
-        {
-            var session = MakeSession(diceRoll: 3, opponentStatValue: 0);
-            var result = await session.ReadAsync();
-
-            Assert.False(result.Success);
-            Assert.Equal(0, result.XpEarned);
-        }
-
         // What: Edge case — Wait action awards 0 XP (spec §10, Wait not in XP sources)
         // Mutation: Fails if Wait grants XP
         [Fact]

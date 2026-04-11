@@ -264,58 +264,6 @@ namespace Pinder.Core.Tests
             Assert.Equal(5, endEvent!.Amount);
         }
 
-        // AC-5: Trap recovery → 15 XP on success
-        [Fact]
-        public async Task RecoverAsync_Success_Awards15Xp()
-        {
-            var session = MakeSession(diceRoll: 15, opponentStatValue: 0);
-            ActivateTrap(session);
-
-            var result = await session.RecoverAsync();
-
-            Assert.True(result.Success);
-            Assert.Equal(15, result.XpEarned);
-            Assert.Equal(15, session.TotalXpEarned);
-
-            var evt = session.XpLedger.Events.FirstOrDefault(e => e.Source == "TrapRecovery");
-            Assert.NotNull(evt);
-            Assert.Equal(15, evt!.Amount);
-        }
-
-        // AC-5: Failed recover → 0 XP
-        [Fact]
-        public async Task RecoverAsync_Failure_Awards0Xp()
-        {
-            var session = MakeSession(diceRoll: 3, opponentStatValue: 0);
-            ActivateTrap(session);
-
-            var result = await session.RecoverAsync();
-
-            Assert.False(result.Success);
-            Assert.Equal(0, result.XpEarned);
-        }
-
-        // Read action → 0 XP always (per §10)
-        [Fact]
-        public async Task ReadAsync_Success_Awards0Xp()
-        {
-            var session = MakeSession(diceRoll: 15, opponentStatValue: 0);
-            var result = await session.ReadAsync();
-
-            Assert.True(result.Success);
-            Assert.Equal(0, result.XpEarned);
-        }
-
-        [Fact]
-        public async Task ReadAsync_Failure_Awards0Xp()
-        {
-            var session = MakeSession(diceRoll: 3, opponentStatValue: 0);
-            var result = await session.ReadAsync();
-
-            Assert.False(result.Success);
-            Assert.Equal(0, result.XpEarned);
-        }
-
         // AC-6: DC boundary test — DC exactly 13, Medium risk → 5*1.5=8 XP
         [Fact]
         public async Task ResolveTurnAsync_DcExactly13_AwardsLowTierXp()
