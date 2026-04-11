@@ -8,7 +8,7 @@ namespace Pinder.Core.Rolls
     /// <summary>
     /// Core roll resolution engine. Stateless — all state is passed in.
     /// Formula: d20 + statMod + levelBonus >= DC
-    /// DC    = 13 + opponent defending stat's effective modifier
+    /// DC    = 16 + opponent defending stat's effective modifier
     /// </summary>
     public static class RollEngine
     {

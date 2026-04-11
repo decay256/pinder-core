@@ -25,7 +25,7 @@ vision: |
   The mechanical identity is a d20 RPG: six positive stats paired with
   six shadow stats that grow on their own and penalize their paired
   stat. Shadows represent the psychological cost of prolonged app use —
-  Madness from repeated failures, Horniness from late-night sessions,
+  Madness from repeated failures, Despair from failed charm attempts,
   Dread from rejection, Overthinking from reading too much into
   everything. You level up to fight the darkness, but the darkness
   levels up too.
@@ -51,7 +51,7 @@ world_description: |
   character's will entirely.
 
   Conversations are the core gameplay loop. Each turn, the player picks
-  from 4 dialogue options (each tied to a stat). A d20 is rolled against
+  from 3 dialogue options (each tied to a stat). A d20 is rolled against
   the opponent's defence DC for that stat's opposing defence. Success
   raises the Interest meter; failure drops it and risks activating traps
   that corrupt the conversation.
@@ -66,7 +66,7 @@ world_description: |
 
   Characters think before sending. This is a texting medium, and the
   medium makes people self-conscious. Exceptions that override the
-  think-twice instinct: high Rizz stat, 2 AM + high Horniness, or
+  think-twice instinct: high Rizz stat, high ambient Horniness (session-level d10+time-of-day), or
   Trope Trap activation. No internal monologue ever appears in messages.
   Characters can always edit before sending — what they send is
   intentional, unless a game mechanic overrides that control.
@@ -86,7 +86,7 @@ player_role_description: |
   player's goal is also to earn XP — but the character doesn't know
   about XP. The character just wants this to go well.
 
-  Each turn, generate 4 dialogue options tied to the character's stats.
+  Each turn, generate 3 dialogue options tied to the character's stats.
   Options must reflect the player character's personality as assembled
   from their items, anatomy fragments, and texting style. The texting
   style fragment is the voice authority — every option must sound like
@@ -96,10 +96,10 @@ player_role_description: |
   stats so the player has real tactical choices. Don't cluster all
   options on the character's strongest stat.
 
-  Horniness mechanics can force Rizz options onto the menu:
-  - Horniness >= 6: at least one option must be Rizz
-  - Horniness >= 12: one option is always Rizz (player cannot avoid it)
-  - Horniness >= 18: all options become Rizz (character has lost control)
+  Ambient Horniness is a session-level property (d10 + time-of-day modifier) that can
+  overlay any delivered message with involuntary heat. The character doesn't notice.
+  It does not force specific stat options. Despair is RIZZ's shadow stat — it grows
+  from cumulative RIZZ failures and represents performed magnetism from scarcity.
 
   When a combo opportunity exists (e.g., the last two stats played set
   up a named combo sequence), one option should naturally complete it.

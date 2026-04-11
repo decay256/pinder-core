@@ -213,10 +213,10 @@
   - kind: paragraph
     text: '**Positive:** 8 each (48 total). Gain points at level-up.
 
-      **Shadows:** 0 each. Grow from events. Despair rolls fresh each conversation.'
+      **Shadows:** 0 each. Grow from events. Despair starts at character base value and grows/shrinks per-session.'
   description: '**Positive:** 8 each (48 total). Gain points at level-up.
 
-    **Shadows:** 0 each. Grow from events. Despair rolls fresh each conversation.'
+    **Shadows:** 0 each. Grow from events. Despair starts at character base value and grows/shrinks per-session.'
   heading_level: 3
   compact_heading: true
   condition:
@@ -445,24 +445,24 @@
   type: interest_change
   blocks:
   - kind: paragraph
-    text: 'Opponent Velvet: Self-Awareness 12 (mod +1) → **DC to Charm her = 14**. Velvet''s Chaos 14 (mod +1) → **DC for Honesty = 14** (she can receive vulnerability; she''s been through enough to not
+    text: 'Opponent Velvet: Self-Awareness 12 (mod +1) → **DC to Charm her = 17**. Velvet''s Chaos 14 (mod +1) → **DC for Honesty = 17** (she can receive vulnerability; she''s been through enough to not
       flinch).
 
-      Opponent Gerald: SA 4 (mod -3) → **DC to Charm him = 10** (easy — he doesn''t see through flattery). Gerald''s Rizz 11 (mod +0) → **DC for Wit = 13** (average — he can hold his own against cleverness
+      Opponent Gerald: SA 4 (mod -3) → **DC to Charm him = 13** (easy — he doesn''t see through flattery). Gerald''s Rizz 11 (mod +0) → **DC for Wit = 16** (average — he can hold his own against cleverness
       but won''t dominate it).'
   - kind: paragraph
     text: '**The opponent''s build creates their personality AND their mechanical difficulty.** A character with max Denial is hard to reach emotionally. A character with low Wit is easy to impress with
       cleverness. Their build IS their dating personality.'
-  description: 'Opponent Velvet: Self-Awareness 12 (mod +1) → **DC to Charm her = 14**. Velvet''s Chaos 14 (mod +1) → **DC for Honesty = 14** (she can receive vulnerability; she''s been through enough to
+  description: 'Opponent Velvet: Self-Awareness 12 (mod +1) → **DC to Charm her = 17**. Velvet''s Chaos 14 (mod +1) → **DC for Honesty = 17** (she can receive vulnerability; she''s been through enough to
     not flinch).
 
-    Opponent Gerald: SA 4 (mod -3) → **DC to Charm him = 10** (easy — he doesn''t see through flattery). Gerald''s Rizz 11 (mod +0) → **DC for Wit = 13** (average — he can hold his own against cleverness
+    Opponent Gerald: SA 4 (mod -3) → **DC to Charm him = 13** (easy — he doesn''t see through flattery). Gerald''s Rizz 11 (mod +0) → **DC for Wit = 16** (average — he can hold his own against cleverness
     but won''t dominate it).'
   heading_level: 3
   condition:
     formula: defense_dc
   outcome:
-    base_dc: 13
+    base_dc: 16
     addend: opponent_stat_modifier
 - id: §5.level-bonus-vs-opponent-dc-the-spread
   section: §5
@@ -473,15 +473,15 @@
     rows:
     - Your level bonus: +0 (Lvl 1-2)
       Opponent DC 11 (weak defender): Need 11+ (50%)
-      DC 14 (average): Need 14+ (35%)
+      DC 17 (average): Need 17+ (20%)
       DC 17 (strong): Need 17+ (20%)
     - Your level bonus: +2 (Lvl 5-6)
       Opponent DC 11 (weak defender): Need 9+ (60%)
-      DC 14 (average): Need 12+ (45%)
+      DC 17 (average): Need 15+ (30%)
       DC 17 (strong): Need 15+ (30%)
     - Your level bonus: +4 (Lvl 9-10)
       Opponent DC 11 (weak defender): Need 7+ (70%)
-      DC 14 (average): Need 10+ (55%)
+      DC 17 (average): Need 13+ (40%)
       DC 17 (strong): Need 13+ (40%)
     sep_cells:
     - '-----------------'
@@ -494,7 +494,7 @@
     rows:
     - +4 level +2 stat = +6 total: ''
       DC 11: Need 5+ (80%)
-      DC 14: Need 8+ (65%)
+      DC 17: Need 11+ (50%)
       DC 17: Need 11+ (50%)
     sep_cells:
     - '-----------------------------'
@@ -630,7 +630,7 @@
     natural_roll: 1
   outcome:
     tier: Legendary
-    interest_delta: -5
+    interest_delta: -4
     xp_payout: 10
     trap: true
 - id: §6.natural-20
@@ -1474,7 +1474,7 @@
     - '-------'
     - '-----------'
   - kind: paragraph
-    text: 'Despair rolls fresh each conversation (1d10). Growth triggers are cumulative across the session.'
+    text: 'Growth triggers are cumulative across the session. Despair persists from character base value and grows/shrinks per-session.'
   description: 'Nat 1 on Rizz → +2 Despair. Rizz TropeTrap failure → +1 Despair. Every 3rd cumulative RIZZ failure → +1 Despair.'
   heading_level: 3
   condition:
