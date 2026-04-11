@@ -452,7 +452,7 @@ class Program
             Console.WriteLine();
         }
 
-        int yamlDcBias = gameDef?.GlobalDcBias ?? 0;
+        int yamlDcBias = gameDef.GlobalDcBias;
         int totalDcBias = difficultyBias + yamlDcBias;
         var config = new GameSessionConfig(clock: clock, playerShadows: sableShadows, globalDcBias: totalDcBias, statDeliveryInstructions: statDeliveryInstructions);
         var session = new GameSession(sable, brick, llm, new SystemRandomDiceRoller(), trapRegistry, config);
