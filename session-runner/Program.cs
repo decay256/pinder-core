@@ -659,6 +659,7 @@ class Program
 
             var roll = result.Roll;
             string rollMod = $"{roll.StatModifier:+#;-#;0}";
+            string lvPart = roll.LevelBonus > 0 ? $"+Lv({roll.LevelBonus:+#;-#;0})" : "";
             string rollResult;
             if (roll.IsNatTwenty)     rollResult = "NAT 20 ⭐";
             else if (roll.IsNatOne)   rollResult = "NAT 1 💀";
@@ -684,7 +685,7 @@ class Program
             }
 
             string arrowResult = string.IsNullOrEmpty(rollResult) ? "" : $" → {rollResult}";
-            Console.WriteLine($"**🎲 Roll:** d20({roll.UsedDieRoll}) + {StatLabel(chosen.Stat)}({rollMod}) = **{roll.FinalTotal}** vs DC {roll.DC} → **{marginText}{arrowResult}**");
+            Console.WriteLine($"**🎲 Roll:** d20({roll.UsedDieRoll})+{StatLabel(chosen.Stat)}({rollMod}){lvPart} = **{roll.FinalTotal}** vs DC {roll.DC} → **{marginText}{arrowResult}**");
 
             // #484/#698: Inline rule explanation after roll
             string rollExplanation = GetRollExplanation(roll);
