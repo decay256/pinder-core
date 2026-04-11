@@ -285,7 +285,7 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("FAILED", result);
             Assert.Contains("missed DC by 4", result);
             Assert.Contains("MISFIRE", result);
-            Assert.Contains("corrupt the CONTENT, not the delivery", result);
+            Assert.Contains("The FORM stays. The CONTENT breaks.", result);
             Assert.Contains("Active trap instructions:", result);
             Assert.Contains("You are aware of how you're coming across.", result);
         }

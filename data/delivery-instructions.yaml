@@ -36,48 +36,52 @@ delivery_instructions:
       not: "I feel like we really have a deep connection forming here" (hallmark card, no actual insight).
 
     fumble: >-
-      Fixation shadow at the threshold. The character noticed something real but frames the observation
-      slightly too precisely — it lands like a dossier entry instead of a compliment. The detail is
-      correct but the delivery implies they've been paying MORE attention than the conversation warrants.
-      e.g.: "okay this is the third time you've mentioned your sister and every time your typing
-      pattern changes, just so you know" not: "I noticed you talk about your sister a lot" (too
-      normal, no uncanny precision that makes it weird).
+      SHADOW: FIXATION (cataloguing, tracking, over-invested).
+      One word in the intended message shifts from warm to clinical. The observation is the same but
+      a single phrase lands like a dossier entry instead of a compliment. Same sentence count, same
+      length. The character noticed something real — the word choice just made it uncannily precise.
+      e.g.: intended "I like how you talk about your sister" → delivered "I like how your whole
+      register shifts when you talk about your sister" — one substitution, warmth replaced by forensic
+      precision.
 
     misfire: >-
-      Fixation shadow active. The character notices something accurate but says it with the confidence
-      of a forensic profile — naming a pattern the other person wasn't ready to have named, at a
-      moment that didn't call for it. e.g.: "so you always deflect with a question when someone says
-      something nice to you, is that a learned thing or" not: "you changed the subject when I
-      complimented you" (observes without the invasive certainty).
+      SHADOW: FIXATION (cataloguing, tracking, over-invested).
+      The message starts as intended but mid-sentence the observation sharpens into forensic territory.
+      The second half of the message is REPLACED (not appended to) by pattern-naming the other person
+      wasn't ready for. Same length, same sentence count. First half recognizable, second half is the
+      fixation shadow speaking.
+      e.g.: intended "I think you're really interesting and I like talking to you" → delivered "I think
+      you're really interesting and you deflect with a question every time someone says something nice
+      to you" — first half tracks, second half replaced.
 
     trope_trap: >-
-      Fixation shadow in partial control. The character starts cataloguing — referencing things from
-      earlier in the conversation with too-perfect recall, connecting dots the other person didn't know
-      were dots, building a model of them out loud. e.g.: "okay so based on the coffee thing and
-      the fact that you moved cities twice and how you talk about your mum I actually think I know
-      what your love language is and it's not what you'd say it is" not: "I've been thinking about
-      what you said earlier" (too vague, doesn't show the obsessive pattern-mapping).
+      SHADOW: FIXATION (cataloguing, tracking, over-invested).
+      The fixation shadow has taken the wheel. The character starts cataloguing — referencing things
+      from earlier with too-perfect recall, connecting dots the other person didn't know were dots,
+      building a model of them out loud. The message is the SAME LENGTH as intended, rewritten
+      entirely as the fixation's voice. They think they're being attentive.
+      e.g.: "okay so based on the coffee thing and the fact that you moved cities twice and how you
+      talk about your mum I actually think I know what your love language is"
 
     catastrophe: >-
-      Fixation shadow in full possession. The character has built an entire narrative about who this
-      person is based on conversational fragments, and delivers it like a thesis — projecting a
-      shared future from assembled data points, voice still warm and attentive, which makes it worse.
-      e.g.: "no but I've actually figured you out, you're the kind of person who moves furniture when
-      they're anxious and you probably have a playlist called something like 'night' and you'll fight
-      me on this but in like two months you're going to text me at 2am about something you saw that
-      reminded you of this exact conversation" not: "I feel like I really understand you on a deep
-      level" (tells, doesn't demonstrate the unhinged specificity of the catalogue).
+      SHADOW: FIXATION (full possession).
+      The character has built an entire narrative about who this person is from conversational
+      fragments and delivers it like a thesis — projecting a shared future from assembled data
+      points, voice still warm, which makes it worse. SAME LENGTH OR SHORTER than intended.
+      Rewrite the intended message completely in the fixation's voice.
+      e.g.: "no I've actually figured you out, you're the kind of person who moves furniture when
+      they're anxious and you probably have a playlist called 'night' and in two months you're going
+      to text me at 2am about something that reminded you of this exact conversation"
 
     nat1: >-
-      Fixation shadow is the message. The character's wound speaks through obsessive noticing — every
-      observation is actually about their fear of not being seen themselves. The message becomes a
-      desperate proof that they SEE this person (because no one ever saw them), delivered in their
-      exact texting style, still sounding warm while exposing everything. e.g.: "I know this is a lot
-      but I just need you to know that I noticed the thing you said about always being the one who
-      reaches out first and I need you to know I CAUGHT that because nobody catches those things and I
-      always catch those things and people still leave and I just think if I can prove to you right now
-      that I see you then maybe" not: "I just feel like we really see each other you know?" (too
-      composed, wound not actually surfacing mid-sentence).
+      SHADOW: FIXATION (the wound itself).
+      The character's deepest wound speaks: every observation is actually about their fear of not
+      being seen themselves. The message becomes desperate proof that they SEE this person (because
+      no one ever saw them). Delivered in their exact texting style, still sounding warm while
+      exposing everything. SAME LENGTH OR SHORTER than intended. The character has no idea.
+      e.g.: "I need you to know I noticed the thing you said about always being the one who reaches
+      out first because nobody catches those things and I always catch those things and people still
+      leave"
 
   rizz:
     clean: >-
@@ -115,49 +119,46 @@ delivery_instructions:
       novel narration, no actual desire with a scene attached).
 
     fumble: >-
-      Horniness shadow at the threshold. The message was working — then the last line named
-      something specific the character was thinking that they should have kept internal. The reader
-      sees exactly what they were actually imagining, delivered as a non-sequitur mid-flirt. Scan
-      the conversation for what would be the most miscalibrated specific thing to reveal right now.
-      e.g.: "the way you described that is actually making me think about what your hands look like
-      when you're explaining something you care about and that's probably too much information for
-      turn four but here we are 😭" not: "I'm having thoughts about you rn" (too vague, no specific
-      image, doesn't show the exact wrong thing that slipped out).
+      SHADOW: HORNINESS (subtext becomes explicit too fast).
+      One word or phrase in the intended message gets swapped for something slightly too physical or
+      intimate. The sentence structure holds perfectly — a single substitution shifts the register
+      from flirty to revealing. Same length, same sentence count.
+      e.g.: intended "I really like talking to you about this" → delivered "I really like picturing
+      you talking about this" — one word swap, whole vibe shifts.
 
     misfire: >-
-      Horniness shadow active. The character misreads the energy — what was playful banter gets
-      responded to as sexual tension. The tone shift is visible, like someone leaning in for a kiss
-      during a handshake. Confident delivery makes it worse. e.g.: "okay the way you talk about
-      pasta is doing something to me and I'm not even going to pretend that's a joke" not: "lol
-      that's kind of sexy" (too mild, doesn't show the misread confidence).
+      SHADOW: HORNINESS (subtext becomes explicit too fast).
+      The message starts as intended but the second half slides from playful into sexual tension.
+      What should have been light banter gets REPLACED mid-sentence by something that reads the
+      energy as much more charged than it was. Same length, same sentence count.
+      e.g.: intended "the way you talk about pasta is making me hungry, where's your favourite
+      place" → delivered "the way you talk about pasta is doing something to me and I'm not even
+      going to pretend that's about the food" — first half tracks, second half replaced.
 
     trope_trap: >-
-      Horniness shadow in partial control. What was subtext becomes pickup-line structure — the
-      character starts performing attraction instead of feeling it. The message sounds like it was
-      workshopped, double-entendres that were meant to be smooth but read as scripted. e.g.: "if you
-      cook like you text I'm going to need you to come over and show me what else those hands can do
-      😏" not: "you're really attractive" (too direct and simple, doesn't show the cringe of
-      performed seduction).
+      SHADOW: HORNINESS (the subtext IS the text now).
+      What was subtext has become pickup-line structure. The character starts performing attraction
+      instead of feeling it — double-entendres that were meant to be smooth but read as scripted.
+      Rewrite the intended message at the SAME LENGTH in the horniness shadow's voice.
+      e.g.: "if you cook like you text I'm going to need you to come over and show me what else
+      those hands can do"
 
     catastrophe: >-
-      Horniness shadow in full possession. The character sends something that belongs in a DM at
-      3am after four drinks, not in this conversation at this stage. The register breaks completely
-      — they're responding to a fantasy version of the conversation while the real one was about
-      weekend plans. e.g.: "okay I need to be honest, I've been thinking about what it would be like
-      to just be in a room with you and I think we both know this isn't about dinner anymore and I
-      just want to be near you in a way that I can't fully describe in a dating app message but I
-      think you know what I mean" not: "I really want to hook up with you" (too blunt, doesn't show
-      the dissociative intensity of the shadow).
+      SHADOW: HORNINESS (full possession).
+      The character sends something that belongs at 3am after four drinks, not in this conversation
+      at this stage. The register breaks completely — they're responding to a fantasy version of the
+      conversation. SAME LENGTH OR SHORTER than intended. Rewrite completely in the shadow's voice.
+      e.g.: "okay I need to be honest, I've been thinking about what it would be like to just be in
+      a room with you and I think we both know this isn't about dinner anymore"
 
     nat1: >-
-      Horniness shadow IS the message. The character's wound speaks through desire — the loneliness
-      or rejection underneath the magnetism surfaces as desperate wanting dressed up as confidence.
-      The message exposes what they actually need (not sex — to be wanted, chosen, enough) in their
-      specific texting voice while they think they're being bold. e.g.: "okay I know this is forward
-      but I just need someone to want me the way I can feel you almost wanting me and that sounds
-      insane but I've been the person people almost choose for so long and I can feel you right there
-      on the edge of choosing me and I just need you to do it, just choose me, I'm right here" not:
-      "I'm so attracted to you it's crazy" (surface horniness, wound nowhere visible).
+      SHADOW: HORNINESS (the wound itself).
+      The character's wound speaks through desire — the loneliness underneath the magnetism surfaces
+      as desperate wanting dressed up as confidence. The message exposes what they actually need (not
+      sex — to be wanted, chosen, enough) in their specific texting voice while they think they're
+      being bold. SAME LENGTH OR SHORTER than intended. The character has no idea.
+      e.g.: "I just need someone to want me the way I can feel you almost wanting me and that sounds
+      insane but I've been the person people almost choose for so long"
 
   honesty:
     clean: >-
@@ -198,51 +199,50 @@ delivery_instructions:
       vulnerable and that's really special" (performs vulnerability without being vulnerable).
 
     fumble: >-
-      Denial shadow at the threshold. The character almost said the real thing but pulled back at the
-      last second — the honesty was RIGHT THERE but the message ends with a deflection or joke that
-      undercuts it. The reader can see what almost happened. e.g.: "I think I'm starting to actually
-      — anyway what are you doing this weekend" not: "I really like you but I'm scared" (too clean,
-      doesn't show the visible swerve away from the truth).
+      SHADOW: DENIAL (performs vulnerability while protecting the real thing).
+      The intended message is delivered at the same length but the final clause swerves — where the
+      character was about to land on the honest thing, the last few words get REPLACED by a deflection
+      or subject change. Same sentence count, same length. A visible flinch at the finish.
+      e.g.: intended "I think I'm starting to really like talking to you" → delivered "I think I'm
+      starting to — anyway what are you doing this weekend" — the ending replaced by a swerve.
 
     misfire: >-
-      Denial shadow active. The character performs vulnerability while saying nothing actually vulnerable
-      — the structure of honesty without the content. They say "I'm being real with you" while offering
-      a safe, pre-packaged truth that risks nothing. e.g.: "okay I'm going to be totally honest with
-      you... I'm actually kind of a hopeless romantic? like I know that's cringe but I genuinely
-      believe in the real thing" not: "I'm afraid to be vulnerable" (too on-the-nose, denial is
-      sneakier than that).
+      SHADOW: DENIAL (performs vulnerability while protecting the real thing).
+      The message is the same length as intended but the vulnerable content has been REPLACED with
+      performed vulnerability — the structure of honesty without the actual risk. The character says
+      the words but the meaning has been swapped for something safe. Same sentence count.
+      e.g.: intended "I haven't felt this comfortable with someone in a long time" → delivered
+      "I'm actually kind of a hopeless romantic? like I know that's cringe but I genuinely believe
+      in the real thing" — same length, specific feeling replaced by pre-packaged safe truth.
 
     trope_trap: >-
-      Denial shadow in partial control. The character constructs an elaborate performance of being
-      "the honest one" while protecting everything real. Scan the character's profile above for their
-      specific pre-approved self-image (their "I'm actually..." statement). The failure produces THAT
-      speech — the version of themselves they've rehearsed saying instead of the version that's true.
-      The content should be specific to THIS character's particular shield, not generic self-help.
+      SHADOW: DENIAL (the performance has taken over).
+      The character constructs an elaborate performance of being "the honest one" while protecting
+      everything real. The failure produces their rehearsed self-image speech — the version of
+      themselves they've practiced saying instead of the version that's true. Rewrite the intended
+      message at the SAME LENGTH in the denial shadow's voice. Denial never announces itself.
       e.g.: "I'm just someone who says what they feel and I know that's intimidating but I've done
-      the work and I know my worth and I'm not going to beg anyone to see it" not: "I have trouble
-      being honest" (too self-aware — denial never announces itself that clearly).
+      the work and I know my worth and I'm not going to beg anyone to see it"
 
     catastrophe: >-
-      Denial shadow in full possession. The character delivers a monologue about their own emotional
-      depth and capacity for honesty that is transparently a wall — every "truth" they share is
-      actually a shield. They might reference therapy, growth, past relationships, all to demonstrate
-      how Open and Healed they are, while revealing nothing. e.g.: "I've done so much work on myself
-      and I've learned that I need to show up authentically and I'm not going to pretend I don't
-      have feelings, I spent two years in therapy learning to say what I need and what I need is
-      someone who can match my emotional intelligence and be real with me the way I'm being real
-      with you right now" not: "I'm lying to myself about how I feel" (denial is never this
-      transparent from the inside).
+      SHADOW: DENIAL (full possession).
+      The character delivers a monologue about their own emotional depth and capacity for honesty
+      that is transparently a wall — every "truth" is actually a shield. They reference therapy,
+      growth, past relationships, all to demonstrate how Open and Healed they are, while revealing
+      nothing. SAME LENGTH OR SHORTER than intended. Rewrite completely in the denial shadow's voice.
+      e.g.: "I've done so much work on myself and I've learned that I need to show up authentically
+      and I spent two years in therapy learning to say what I need and what I need is someone who
+      can match my emotional intelligence"
 
     nat1: >-
-      Denial shadow IS the message. The character's wound speaks through performed honesty — the thing
-      they're most terrified of is visible in the exact shape of what they refuse to say. Every
-      sentence frames them as brave and open while the reader can see the real terror underneath,
-      leaking through. The character has no idea. e.g.: "I just want you to know I'm an open book
-      and I've got nothing to hide, I've been through things obviously like we all have but I've
-      done the work and I know my worth and I'm not going to beg someone to see it, I learned that
-      lesson already, I'm not that person anymore, I don't need anyone to complete me I'm already
-      complete, I just think it would be nice to share that with someone who deserves it, you know?"
-      not: "I'm being fake and I can't see it" (the whole point is they CAN'T see it).
+      SHADOW: DENIAL (the wound itself).
+      The character's wound speaks through performed honesty — the thing they're most terrified of
+      is visible in the exact shape of what they refuse to say. Every sentence frames them as brave
+      and open while the reader can see the real terror underneath. The character has no idea.
+      SAME LENGTH OR SHORTER than intended. Delivered in their exact texting style.
+      e.g.: "I just want you to know I'm an open book and I've got nothing to hide, I've done the
+      work and I know my worth and I'm not going to beg someone to see it, I learned that lesson
+      already, I'm not that person anymore"
 
   chaos:
     clean: >-
@@ -285,54 +285,55 @@ delivery_instructions:
       demonstrating it).
 
     fumble: >-
-      Madness shadow at the threshold. The character makes one association too many — the tangent was
-      charming but the thread didn't quite come back. The message ends one thought past where it
-      should have stopped, leaving the match slightly confused about what just happened. e.g.: "okay
-      so that thing you said about your cat is actually connected to the thing about your flatmate
-      which I think means... wait no I lost it, it was THERE though" not: "haha I'm so random
-      sometimes" (describes randomness instead of showing the actual lost thread).
+      SHADOW: MADNESS (follows associations until lost).
+      The message is the same length as intended but the final thought loses its thread — the last
+      clause gets REPLACED by an association that doesn't quite connect back. Same sentence count,
+      same length. The landing just misses.
+      e.g.: intended "that thing you said about your cat reminded me of my flatmate's theory about
+      pets and I think she's right" → delivered "that thing you said about your cat reminded me of
+      my flatmate and actually I think Tuesdays have always felt heavier than other days" — the
+      conclusion replaced by a dropped thread.
 
     misfire: >-
-      Madness shadow active. The character follows an association with full confidence into territory
-      that doesn't track for anyone else. The connection is real IN THEIR HEAD but the message
-      reads like they're responding to a different conversation. e.g.: "no but this is important —
-      you said Tuesday and Tuesday is when everything changed with my last place and I think the
-      universe is literally telling me something about timing right now" not: "that was off topic
-      sorry" (too self-aware, madness doesn't apologize mid-flight).
+      SHADOW: MADNESS (follows associations until lost).
+      The message starts as intended but the second half derails into an association that only makes
+      sense in the character's head. The original point gets REPLACED mid-sentence by a confident
+      tangent. Same length, same sentence count, different destination.
+      e.g.: intended "I've been thinking about what you said and I think you're onto something" →
+      delivered "I've been thinking about what you said and I think that's why Tuesdays have always
+      felt heavier than other days and my last flat was on a Tuesday and anyway yes you're probably
+      right"
 
     trope_trap: >-
-      Madness shadow in partial control. The character's associations start pulling toward their wound
-      — what started as playful tangent energy becomes a chain of connections that each get slightly
-      darker or more personal. They don't notice the shift. e.g.: "okay but hear me out, you said
-      comfort food and that made me think of my mum's kitchen and then I thought about how I haven't
-      actually been home in two years and the thing is I think I keep moving because standing still
-      is where the feelings catch up and ANYWAY what's your favourite crisp flavour" not: "I went
-      off on a tangent about my personal stuff" (narrates instead of showing the associative drift
-      toward the wound).
+      SHADOW: MADNESS (the associations are pulling toward the wound).
+      What started as playful tangent energy becomes a chain of connections that each get slightly
+      darker or more personal. The character doesn't notice the shift. Rewrite the intended message
+      at the SAME LENGTH entirely in the madness shadow's voice — each association pulls closer to
+      something they haven't dealt with, then tries to recover at the end. Too late.
+      e.g.: "you said comfort food and that made me think of my mum's kitchen and then I thought
+      about how I haven't actually been home in two years and I think I keep moving because standing
+      still is where the feelings catch up anyway what's your favourite crisp flavour"
 
     catastrophe: >-
-      Madness shadow in full possession. The character is following associations at full speed and each
-      one pulls closer to the wound — the message is a breathless chain where the match can see
-      the personal crisis approaching like weather, but the character's tone stays conversational.
-      e.g.: "right so the thing about being spontaneous is that people say they want it but they
-      actually want PLANNED spontaneity and my ex literally said that to me, she said 'I need you
-      to be predictable' and that's when I knew it was over because I can't be predictable I've
-      TRIED and the reason I'm on this app is honestly probably because I'm looking for someone who
-      won't eventually ask me to be less and I know that's a lot for a Wednesday evening" not: "I
-      have some personal issues I'm working through" (composed summary, not the live unraveling).
+      SHADOW: MADNESS (full possession).
+      The character is following associations at full speed and each one pulls closer to the wound.
+      The message is a breathless chain where the reader can see the personal crisis approaching,
+      but the character's tone stays conversational. SAME LENGTH OR SHORTER than intended.
+      Rewrite completely in the madness shadow's voice.
+      e.g.: "the thing about being spontaneous is people say they want it but they want PLANNED
+      spontaneity and my ex literally said I need you to be predictable and that's when I knew it
+      was over because I can't be predictable I've tried"
 
     nat1: >-
-      Madness shadow IS the message. The character's wound speaks through unstoppable association —
-      the message starts somewhere reasonable, one thought links to the next, each link pulls closer
-      to the core wound, and the character follows it all the way down while their texting voice
-      stays casual. They think they're being fun and spontaneous. The wound arrives mid-sentence
-      in their specific voice. The message tries to recover at the end. Too late. e.g.: "lol okay
-      this is unrelated but you said 'easy' and I just realized I don't think anyone's ever
-      described being with me as easy, like genuinely not once, and that's probably fine but also
-      maybe it's the whole problem?? like what if I'm the common denominator in every complicated
-      thing and I've just been calling it 'adventurous' haha anyway what are you up to this weekend"
-      not: "I have deep-seated issues about being too much for people" (names the wound clinically
-      instead of the wound surfacing mid-tangent in their own voice).
+      SHADOW: MADNESS (the wound itself).
+      The character's wound speaks through unstoppable association — the message starts somewhere
+      reasonable, one thought links to the next, each link pulls closer to the core wound, and the
+      character follows it all the way down while their texting voice stays casual. They think
+      they're being fun. The wound arrives mid-sentence. The message tries to recover. Too late.
+      SAME LENGTH OR SHORTER than intended.
+      e.g.: "you said 'easy' and I just realized I don't think anyone's ever described being with
+      me as easy, like genuinely not once, and that's probably fine but also maybe it's the whole
+      problem haha anyway what are you up to this weekend"
 
   wit:
     clean: >-
@@ -374,52 +375,54 @@ delivery_instructions:
       (same insight but no comic delivery, no evidence, no sting).
 
     fumble: >-
-      Overthinking shadow at the threshold. The character made a genuinely good observation but
-      couldn't let it land — they added one extra sentence that explains the joke or qualifies the
-      take. The punchline was there and then they talked past it. e.g.: "you have main character
-      energy but like, in a good way, not in an annoying way, I mean some people have it in an
-      annoying way but yours is the good kind, you know?" not: "that joke didn't land" (too vague,
-      doesn't show the specific over-explanation pattern).
+      SHADOW: OVERTHINKING (explains the joke, qualifies everything to death).
+      The message is the same length as intended but one sharp observation gets REPLACED by a
+      qualified, hedged version of itself. The punchline was there but the words got swapped for
+      softer, over-explained ones. Same sentence count, same length.
+      e.g.: intended "you have main character energy" → delivered "you have main character energy
+      but like, in a good way, not in an annoying way, you know?" — the clean landing replaced
+      by qualification that kills the timing.
 
     misfire: >-
-      Overthinking shadow active. The character aims for precision and overshoots — the observation
-      is too specific, too analytical, or too clearly workshopped. It reads like a comedy writer's
-      second draft instead of a spontaneous text. The effort is visible. e.g.: "your use of the
-      word 'actually' three times in that message creates this fascinating pattern where each one
-      is doing different rhetorical work and — okay I can hear myself" not: "I overanalyzed your
-      message" (too self-aware too fast, overthinking lingers longer).
+      SHADOW: OVERTHINKING (explains the joke, qualifies everything to death).
+      The message starts as intended but mid-sentence the casual tone gets REPLACED by analytical
+      precision. What should have been a witty text becomes a workshopped analysis. Same length,
+      same sentence count. The spontaneity replaced by visible effort.
+      e.g.: intended "you keep saying 'actually' and it's revealing" → delivered "your use of
+      'actually' three times creates this fascinating pattern where each one is doing different
+      rhetorical work" — first half tracks, second half replaced by the overthinking shadow.
 
     trope_trap: >-
-      Overthinking shadow in partial control. The character's wit becomes a machine — they start
-      deconstructing the conversation itself, explaining why things are funny, annotating their own
-      observations, qualifying every take. The humor dies under analysis. e.g.: "okay so what's
-      interesting about what you just said — and I mean interesting in the structural sense not
-      just content — is that it's actually a defense mechanism disguised as a preference and I think
-      if you look at the pattern of your last four messages there's a clear... I'm doing it again
-      aren't I" not: "I'm overthinking this" (naming it isn't the same as DOING it in real time).
+      SHADOW: OVERTHINKING (the analysis machine won't stop).
+      The character's wit becomes a machine — they deconstruct the conversation itself, explain
+      why things are funny, annotate their own observations. The humor dies under analysis.
+      Rewrite the intended message at the SAME LENGTH in the overthinking shadow's voice.
+      e.g.: "okay so what's interesting about what you just said — and I mean interesting in the
+      structural sense not just content — is that it's actually a defense mechanism disguised as
+      a preference and if you look at the pattern of your last four messages there's a clear
+      throughline"
 
     catastrophe: >-
-      Overthinking shadow in full possession. The character's observation engine won't stop — they're
-      disassembling the conversation, the match's psychology, and their own response simultaneously.
-      The message becomes a recursive loop of analysis where every sentence comments on the previous
-      one. Wit becomes a cage. e.g.: "so I just wrote something funny and deleted it because I
-      realized the joke was actually a deflection from the fact that I wanted to say something
-      sincere and then I realized THAT observation is also a deflection because naming the pattern
-      doesn't break the pattern and now I'm four layers deep in my own head and this message is
-      the proof" not: "I can't stop analyzing everything" (summary, not the live demonstration of
-      the recursive trap).
+      SHADOW: OVERTHINKING (full possession).
+      The character's observation engine won't stop — they're disassembling the conversation, the
+      match's psychology, and their own response simultaneously. The message becomes a recursive
+      loop where every sentence comments on the previous one. Wit becomes a cage. SAME LENGTH OR
+      SHORTER than intended. Rewrite completely in the overthinking shadow's voice.
+      e.g.: "I just wrote something funny and deleted it because the joke was actually a deflection
+      from wanting to say something sincere and then I realized THAT observation is also a deflection
+      because naming the pattern doesn't break the pattern"
 
     nat1: >-
-      Overthinking shadow IS the message. The character's wound speaks through compulsive analysis —
-      they can't stop annotating their own thoughts, each layer of awareness becomes another layer
-      to analyze, and buried in the recursion the wound surfaces: the fear that their brain will
-      never let them just FEEL something without dissecting it first. Delivered in their exact
-      texting voice while they think they're being clever. e.g.: "okay so I just noticed that
-      every time you say something nice I make a joke and I think that's because if I let it land
-      I'd have to feel it and the last person I let myself feel things about said I was 'a lot to
-      process' which I turned into a bit at parties but it's 2am and I'm telling a stranger about
-      it so clearly the bit isn't working as well as I thought haha" not: "I use humor as a defense
-      mechanism and it stems from past rejection" (clinical, no comic voice, no live unraveling).
+      SHADOW: OVERTHINKING (the wound itself).
+      The character's wound speaks through compulsive analysis — they can't stop annotating their
+      own thoughts, each layer of awareness becomes another layer to analyze, and buried in the
+      recursion the wound surfaces: the fear that their brain will never let them just FEEL
+      something. Delivered in their exact texting voice while they think they're being clever.
+      SAME LENGTH OR SHORTER than intended.
+      e.g.: "every time you say something nice I make a joke and I think that's because if I let
+      it land I'd have to feel it and the last person I let myself feel things about said I was
+      'a lot to process' which I turned into a bit at parties but it's 2am and clearly the bit
+      isn't working"
 
   sa:
     clean: >-
@@ -463,53 +466,49 @@ delivery_instructions:
       relationships" (describes the trait instead of wielding it in real time).
 
     fumble: >-
-      Dread shadow at the threshold. The character's self-awareness turns slightly predictive — instead
-      of seeing themselves clearly NOW, they start seeing how this will probably go wrong. The
-      observation is accurate but the energy shifts from clarity to preemptive loss. e.g.: "I'm
+      SHADOW: DREAD (sees the failure coming and narrates it while doing it).
+      The message is the same length as intended but the final clause shifts from present clarity to
+      predictive dread — where the character was going to land on something warm, the last words get
+      REPLACED by a forecast of failure. Same sentence count, same length.
+      e.g.: intended "I'm having a genuinely good time talking to you tonight" → delivered "I'm
       having a genuinely good time which historically means I'm about to say something that makes
-      this weird, just giving you advance warning" not: "I'm worried this will go badly" (states
-      the fear without the specific self-aware mechanism of predicting your own failure).
+      this weird" — the warm ending replaced by preemptive dread.
 
     misfire: >-
-      Dread shadow active. The character sees themselves too clearly and can't stop narrating — they're
-      commentating on their own failure in real time, seeing exactly what they should do and watching
-      themselves not do it. The accuracy makes it sadder. e.g.: "so I know the move here is to be
-      casual and say something charming and instead I'm going to tell you that I know the move and
-      still not make it, which is honestly a pretty accurate preview of what dating me is like"
-      not: "I'm bad at flirting" (too simple, misses the agonizing real-time narration of the
-      failure while it happens).
+      SHADOW: DREAD (sees the failure coming and narrates it while doing it).
+      The message starts as intended but the second half gets REPLACED by real-time self-narration —
+      the character sees what they should say and the words get swapped for commentary on their own
+      failure to say it. Same length, same sentence count.
+      e.g.: intended "I think you're great and I'd love to keep talking" → delivered "I think
+      you're great and instead of saying something charming I'm going to tell you I know the move
+      and still not make it" — first half recognizable, second half replaced by dread.
 
     trope_trap: >-
-      Dread shadow in partial control. The character's self-awareness becomes a warning label — they
-      start preemptively explaining their own patterns to manage expectations, which IS the pattern.
-      They're so busy seeing themselves clearly that clarity becomes the performance. e.g.: "okay
-      so here's the thing about me, I'm going to be great for like three weeks and then I'm going
-      to get scared and do something self-sabotaging and I'm telling you this because I think
-      naming it should stop it but it never does, so" not: "I self-sabotage sometimes" (names
-      the behavior without demonstrating the specific dread-loop of seeing it coming and doing it
-      anyway).
+      SHADOW: DREAD (self-awareness becomes a warning label).
+      The character starts preemptively explaining their own patterns to manage expectations, which
+      IS the pattern. They're so busy seeing themselves clearly that clarity becomes the performance.
+      Rewrite the intended message at the SAME LENGTH in the dread shadow's voice.
+      e.g.: "here's the thing about me, I'm going to be great for like three weeks and then I'm
+      going to get scared and do something self-sabotaging and I'm telling you this because I think
+      naming it should stop it but it never does"
 
     catastrophe: >-
-      Dread shadow in full possession. The character is narrating their own unraveling with perfect
-      accuracy while doing nothing to stop it — they can see exactly what's happening and describe
-      it beautifully and the description IS the unraveling. The message is a real-time documentary
-      of their own failure. e.g.: "I can feel myself about to ruin this and the worst part is I'm
-      going to do it by telling you I can feel myself about to ruin this, because that's what I do,
-      I turn the thing I'm scared of into content and then the content becomes the thing and now
-      we're here and this message is exhibit A and I'm going to send it anyway because not sending
-      it is also the pattern" not: "I always ruin good things" (flat summary, not the recursive
-      live-narration of seeing the failure while becoming it).
+      SHADOW: DREAD (full possession).
+      The character is narrating their own unraveling with perfect accuracy while doing nothing to
+      stop it — they see exactly what's happening and the description IS the unraveling. The message
+      is a real-time documentary of their own failure. SAME LENGTH OR SHORTER than intended.
+      Rewrite completely in the dread shadow's voice.
+      e.g.: "I can feel myself about to ruin this and the worst part is I'm going to do it by
+      telling you I can feel myself about to ruin this, because that's what I do, I turn the thing
+      I'm scared of into content and then the content becomes the thing"
 
     nat1: >-
-      Dread shadow IS the message. The character's wound speaks through total self-knowledge — they
-      see everything about themselves, the conversation, and the probable ending with devastating
-      clarity, and they deliver it all in their exact texting voice while believing this radical
-      transparency is them being brave (it's them being terrified). The message is the wound
-      watching itself bleed and describing it. e.g.: "look I think you're incredible and I also
-      think I'm going to find a way to make you leave and I can see exactly how I'll do it, I'll
-      get too intense too fast — which this message is — and then I'll apologize for being too
-      much — which I'm about to — and then you'll reassure me and I'll believe you for about a day
-      and then I'll test you again and I KNOW this and I'm still doing it, I'm literally doing it
-      right now, and the fact that I can see the whole thing happening and can't stop is the actual
-      wound, sorry, I mean haha" not: "I'm afraid of abandonment and I push people away" (therapy
-      language, not the wound performing in real time in their specific voice).
+      SHADOW: DREAD (the wound itself).
+      The character's wound speaks through total self-knowledge — they see everything about
+      themselves and the probable ending with devastating clarity, delivered in their exact texting
+      voice while believing this radical transparency is them being brave (it's them being
+      terrified). The message is the wound watching itself bleed and describing it. SAME LENGTH
+      OR SHORTER than intended. The character has no idea.
+      e.g.: "I think you're incredible and I also think I'm going to find a way to make you leave
+      and I can see exactly how I'll do it, I'll get too intense too fast — which this message is —
+      and then I'll apologize for being too much — which I'm about to"

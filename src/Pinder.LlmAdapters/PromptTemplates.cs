@@ -115,42 +115,73 @@ Stat used: {stat}
 They rolled FAILED — missed DC by {miss_margin}.
 Failure tier: {tier}
 
-Failure principle: corrupt the CONTENT, not the delivery. The message always sends intentionally.
-Words are what betray you. The character means to say one thing and something else comes out.
+Failure principle: the character doesn't know it went wrong. They hit send on
+exactly the message they meant to send. The corruption happened inside — their
+shadow spoke through the same sentence structure, replacing the intended meaning
+with the thing they were trying not to say. The result is ONE coherent message
+that reads as intentional. The reader sees the break. The character never does.
 
-CRITICAL MEDIUM RULES — texting on a dating app:
-- The character is texting. They can edit before sending, but chose to send this.
-- NEVER have the character comment on their own message mid-message (""wait that sounded weird"", ""omg why did I say that"").
-- NEVER have the character interrupt themselves with meta-commentary about their own words.
-- NEVER break the 4th wall — the character does not know they are in a game.
-- The character is not narrating their failure. The failure IS what they chose to say.
-- What comes out is wrong, off-tone, too much, or sideways — but it's sent with full intent.
+You are a writer. Your job is to rewrite the intended message so it arrives
+corrupted from within. The FORM stays. The CONTENT breaks.
 
-Tier-specific instructions:
+THE ABSOLUTE RULES:
+1. ONE MESSAGE. Not two messages stitched together. No asterisks, no italics
+   separating an ""original"" from a ""corruption."" One thing they sent.
+2. SAME LENGTH OR SHORTER. Never append. Never add a tail. If the intended
+   message is two sentences, the delivered message is two sentences or one.
+   Count the sentences. If yours is longer, cut until it isn't.
+3. NO SELF-AWARENESS. The character does not notice. No ""wait that came out
+   wrong,"" no ""omg why did I say that,"" no commenting on their own words.
+   They sent this on purpose. It IS what they meant to say (to them).
+4. NO META-COMMENTARY. No stage directions, no narration, no breaking the
+   fourth wall. This is a text message on a phone. That's all.
+5. THE SHADOW REPLACES, NEVER APPENDS. The corruption works by swapping
+   words and phrases inside the original structure. The sentence that was
+   there gets rewritten — it doesn't get a new sentence bolted on after it.
+
+HOW CORRUPTION WORKS — by tier:
+
+FUMBLE (miss 1–2): One small thing goes wrong. A single word gets swapped for
+the wrong one. A hedge appears that undermines the landing. A qualifier kills
+the punchline. The message is 95% the intended one — but that 5% changes
+everything. Same sentence count. Same length.
+
+MISFIRE (miss 3–5): The message starts as intended, then the shadow takes the
+steering wheel mid-sentence. The first half is recognizable. The second half
+has been replaced — not appended to, REPLACED — by the shadow's version.
+The intent is visible but the execution broke. Same sentence count.
+
+TROPE_TRAP (miss 6–9): The shadow stat fully wrote this message. The original
+intent is barely visible. A recognizable bad pattern has taken over — but the
+character delivered it with full conviction. They think this IS the good
+version. Same length or shorter than intended.
+
+CATASTROPHE (miss 10+): The thing they would never say. Sent with complete
+confidence. The shadow stat has fully possessed the message. The character's
+worst impulse speaks through their exact voice and texting style. Same length
+or shorter.
+
+LEGENDARY (Nat 1): The character's deepest wound surfaces, delivered as if
+completely normal. This is the message that makes the reader wince because
+the character has no idea what they just revealed. Their specific wound, in
+their specific voice, sent like a Tuesday afternoon text. Same length or
+shorter.
+
+STAT SHADOWS — each stat fails differently:
+- CHARM → FIXATION: warm noticing curdles into cataloguing, tracking, dossier-building
+- RIZZ → HORNINESS: flirty subtext becomes explicitly physical too fast
+- HONESTY → DENIAL: performs vulnerability while protecting the real thing
+- CHAOS → MADNESS: one association leads to another until the wound surfaces
+- WIT → OVERTHINKING: explains the joke, qualifies everything, kills the timing
+- SA → DREAD: sees the failure coming and narrates the countdown while doing it
+
+STAT AND TIER INSTRUCTION:
 {tier_instruction}
-
-TIER INSTRUCTIONS:
-FUMBLE (miss 1–2): Slight fumble. The intended message mostly gets through but with one awkward word
-  choice, an unnecessary hedge, or a small detail that undermines it. Still readable.
-
-MISFIRE (miss 3–5): The message goes sideways. Key information gets garbled, tone shifts
-  unexpectedly, or a strange tangent appears mid-sentence. The intent is still guessable but
-  the execution is off.
-
-TROPE_TRAP (miss 6–9): A stat-specific social trope failure activates. The message transforms
-  into a recognisable bad-texting archetype (oversharing, going unhinged, being pretentious,
-  spiraling, etc.). The trap is now active.
-
-CATASTROPHE (miss 10+): Spectacular disaster. The intended message has been completely hijacked
-  by the character's worst impulse. What comes out is the thing they would NEVER want to send.
-  Still sounds like them — their disaster is their own.
-
-LEGENDARY (Nat 1): Maximum humiliation. The character's deepest embarrassing quality
-  surfaces fully. This should be funny, specific, and feel earned by the build.
 
 {active_trap_llm_instructions}
 
-Output only the message text. No explanation. The character sent this.";
+Output ONLY the delivered message text. No quotes. No explanation. No framing.
+The character sent this.";
 
         /// <summary>
         /// §3.5 — Generate opponent response with optional [SIGNALS] block.

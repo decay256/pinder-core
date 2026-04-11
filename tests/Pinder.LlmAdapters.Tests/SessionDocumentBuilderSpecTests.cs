@@ -646,7 +646,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void PromptTemplates_FailureDelivery_ContainsCorruptionPrinciple()
         {
-            Assert.Contains("corrupt the CONTENT", PromptTemplates.FailureDeliveryInstruction);
+            Assert.Contains("The CONTENT breaks", PromptTemplates.FailureDeliveryInstruction);
         }
 
         [Fact]
