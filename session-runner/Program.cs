@@ -680,8 +680,8 @@ class Program
             string rollMod = $"{roll.StatModifier:+#;-#;0}";
             string lvPart = roll.LevelBonus > 0 ? $"+Lv({roll.LevelBonus:+#;-#;0})" : "";
             string rollResult;
-            if (roll.IsNatTwenty)     rollResult = "NAT 20 ⭐";
-            else if (roll.IsNatOne)   rollResult = "NAT 1 💀";
+            if (roll.IsNatTwenty)     rollResult = "NAT 20 ⭐ — always succeeds";
+            else if (roll.IsNatOne)   rollResult = "NAT 1 💀 — always fails";
             else if (roll.Tier == FailureTier.None) rollResult = $"SUCCESS";
             else                      rollResult = roll.Tier.ToString().ToUpperInvariant();
 
@@ -690,7 +690,7 @@ class Program
             {
                 if (roll.IsNatOne)
                 {
-                    marginText = $"Total beat DC by {roll.FinalTotal - roll.DC} — but NAT 1 💀 overrides";
+                    marginText = $"Total beat DC by {roll.FinalTotal - roll.DC} — but NAT 1 💀 always fails";
                     rollResult = ""; // embedded in marginText
                 }
                 else
