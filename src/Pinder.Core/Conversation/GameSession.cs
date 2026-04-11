@@ -151,10 +151,12 @@ namespace Pinder.Core.Conversation
             _ended = false;
             _outcome = null;
 
-            // Roll session Horniness (1d10) every session + time-of-day modifier when clock available
+            // Roll session Horniness (1d10) every session + time-of-day modifier from clock (required)
             {
+                if (_clock == null)
+                    throw new InvalidOperationException("GameClock is required \u2014 pass via GameSessionConfig");
                 int horninessRoll = _dice.Roll(10);
-                int todModifier = _clock?.GetHorninessModifier() ?? 0;
+                int todModifier = _clock.GetHorninessModifier();
                 _sessionHorniness = Math.Max(0, horninessRoll + todModifier);
             }
 
@@ -542,6 +544,13 @@ namespace Pinder.Core.Conversation
             if (rollResult.IsNatTwenty)
             {
                 _pendingCritAdvantage = true;
+
+                // Nat 20 on CHAOS → Madness −1
+                if (chosenOption.Stat == StatType.Chaos)
+                {
+                    _playerShadows?.ApplyOffset(ShadowStatType.Madness, -1,
+                        "Nat 20 on Chaos — chaos mastered, not consumed");
+                }
             }
 
             // 3c. Track last stat used for Fixation T3 (#45)
@@ -963,11 +972,28 @@ namespace Pinder.Core.Conversation
                     "Catastrophic Wit failure (miss by 10+)");
             }
 
-            // Trigger 3: Every TropeTrap (or Legendary) failure → +1 Madness
-            if (!rollResult.IsSuccess && rollResult.Tier >= FailureTier.TropeTrap)
+            // Trigger 3: TropeTrap count → +1 Madness at 3
+            if (!rollResult.IsSuccess && rollResult.Tier >= FailureTier.TropeTrap
+                && rollResult.Tier != FailureTier.Legendary) // Legendary is Nat 1, separate tier
             {
-                _playerShadows.ApplyGrowth(ShadowStatType.Madness, 1,
-                    "TropeTrap or Legendary failure");
+                _tropeTrapCount++;
+                if (_tropeTrapCount == 3 && !_tropeTrapMadnessTriggered)
+                {
+                    _tropeTrapMadnessTriggered = true;
+                    _playerShadows.ApplyGrowth(ShadowStatType.Madness, 1,
+                        "3+ trope traps in one conversation");
+                }
+            }
+            // Legendary (Nat 1) also counts as a trope-trap-tier failure per spec (tier >= TropeTrap)
+            if (!rollResult.IsSuccess && rollResult.Tier == FailureTier.Legendary)
+            {
+                _tropeTrapCount++;
+                if (_tropeTrapCount == 3 && !_tropeTrapMadnessTriggered)
+                {
+                    _tropeTrapMadnessTriggered = true;
+                    _playerShadows.ApplyGrowth(ShadowStatType.Madness, 1,
+                        "3+ trope traps in one conversation");
+                }
             }
 
             // Trigger 3b: RIZZ TropeTrap failure → +1 Despair (#708)
@@ -1117,11 +1143,13 @@ namespace Pinder.Core.Conversation
                     "Date secured without any Honesty successes");
             }
 
-            // Trigger 12: Never picked Chaos → +1 Fixation
+            // Trigger 12: Never picked Chaos → +1 Fixation, −1 Madness
             if (!_statsUsedPerTurn.Contains(StatType.Chaos))
             {
                 _playerShadows.ApplyGrowth(ShadowStatType.Fixation, 1,
                     "Never picked Chaos in whole conversation");
+                _playerShadows.ApplyOffset(ShadowStatType.Madness, -1,
+                    "Chaos never used — Madness subsides");
             }
 
             // Trigger 13: 4+ different stats used → −1 Fixation (offset)
