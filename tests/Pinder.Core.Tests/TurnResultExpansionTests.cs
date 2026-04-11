@@ -165,6 +165,49 @@ namespace Pinder.Core.Tests
 
         #endregion
 
+        #region Interest delta breakdown fields (#699)
+
+        [Fact]
+        public void TurnResult_BreakdownFields_DefaultToZero()
+        {
+            var result = new TurnResult(
+                MakeRoll(), "a", "b", null, 0, MakeSnapshot(), false, null);
+
+            Assert.Equal(0, result.BaseInterestDelta);
+            Assert.Equal(0, result.RiskBonusDelta);
+            Assert.Equal(0, result.ComboBonusDelta);
+        }
+
+        [Fact]
+        public void TurnResult_BreakdownFields_PopulatedCorrectly()
+        {
+            var result = new TurnResult(
+                MakeRoll(), "a", "b", null, 6, MakeSnapshot(), false, null,
+                baseInterestDelta: 2,
+                riskBonusDelta: 3,
+                comboBonusDelta: 1);
+
+            Assert.Equal(2, result.BaseInterestDelta);
+            Assert.Equal(3, result.RiskBonusDelta);
+            Assert.Equal(1, result.ComboBonusDelta);
+        }
+
+        [Fact]
+        public void TurnResult_BreakdownFields_NegativeValues()
+        {
+            var result = new TurnResult(
+                MakeRoll(), "a", "b", null, -3, MakeSnapshot(), false, null,
+                baseInterestDelta: -2,
+                riskBonusDelta: 0,
+                comboBonusDelta: -1);
+
+            Assert.Equal(-2, result.BaseInterestDelta);
+            Assert.Equal(0, result.RiskBonusDelta);
+            Assert.Equal(-1, result.ComboBonusDelta);
+        }
+
+        #endregion
+
         #region Edge cases: negative values stored as-is
 
         [Fact]

@@ -503,16 +503,18 @@ namespace Pinder.Core.Conversation
                 dcAdjustment: dcAdjustment);
 
             // 2. Compute interest delta from roll outcome
-            int interestDelta;
+            int baseInterestDelta;
+            int riskBonusDelta = 0;
             if (rollResult.IsSuccess)
             {
-                interestDelta = ResolveSuccessInterestDelta(rollResult);
-                interestDelta += RiskTierBonus.GetInterestBonus(rollResult);
+                baseInterestDelta = ResolveSuccessInterestDelta(rollResult);
+                riskBonusDelta = RiskTierBonus.GetInterestBonus(rollResult);
             }
             else
             {
-                interestDelta = ResolveFailureInterestDelta(rollResult);
+                baseInterestDelta = ResolveFailureInterestDelta(rollResult);
             }
+            int interestDelta = baseInterestDelta + riskBonusDelta;
 
             // 3. Update momentum streak (bonus was already applied as externalBonus in the roll, #268)
             _pendingMomentumBonus = 0;
@@ -549,9 +551,11 @@ namespace Pinder.Core.Conversation
             _comboTracker.RecordTurn(chosenOption.Stat, rollResult.IsSuccess);
             var combo = _comboTracker.CheckCombo();
             string? comboTriggered = null;
+            int comboBonusDelta = 0;
             if (combo != null)
             {
-                interestDelta += combo.InterestBonus;
+                comboBonusDelta = combo.InterestBonus;
+                interestDelta += comboBonusDelta;
                 comboTriggered = combo.Name;
             }
 
@@ -802,6 +806,9 @@ namespace Pinder.Core.Conversation
                 tellReadBonus: tellBonus,
                 tellReadMessage: tellBonus > 0 ? "📖 You read the moment. +2 bonus." : null,
                 xpEarned: turnXpEarned,
+                baseInterestDelta: baseInterestDelta,
+                riskBonusDelta: riskBonusDelta,
+                comboBonusDelta: comboBonusDelta,
                 detectedWindow: opponentResponse.WeaknessWindow,
                 steering: steeringResult,
                 horninessCheck: horninessCheckResult);

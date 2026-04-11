@@ -24,6 +24,15 @@ namespace Pinder.Core.Conversation
         /// <summary>Net interest delta applied this turn (includes momentum).</summary>
         public int InterestDelta { get; }
 
+        /// <summary>Base interest delta from success scale or failure scale (before risk/combo bonuses).</summary>
+        public int BaseInterestDelta { get; }
+
+        /// <summary>Risk tier bonus added on success. 0 on failure.</summary>
+        public int RiskBonusDelta { get; }
+
+        /// <summary>Interest bonus from combo trigger. 0 if no combo.</summary>
+        public int ComboBonusDelta { get; }
+
         /// <summary>Snapshot of game state after this turn.</summary>
         public GameStateSnapshot StateAfter { get; }
 
@@ -87,6 +96,9 @@ namespace Pinder.Core.Conversation
             string? tellReadMessage = null,
             RiskTier riskTier = RiskTier.Safe,
             int xpEarned = 0,
+            int baseInterestDelta = 0,
+            int riskBonusDelta = 0,
+            int comboBonusDelta = 0,
             WeaknessWindow? detectedWindow = null,
             SteeringRollResult steering = null,
             HorninessCheckResult horninessCheck = null)
@@ -106,6 +118,9 @@ namespace Pinder.Core.Conversation
             TellReadMessage = tellReadMessage;
             RiskTier = riskTier;
             XpEarned = xpEarned;
+            BaseInterestDelta = baseInterestDelta;
+            RiskBonusDelta = riskBonusDelta;
+            ComboBonusDelta = comboBonusDelta;
             DetectedWindow = detectedWindow;
             Steering = steering ?? SteeringRollResult.NotAttempted;
             HorninessCheck = horninessCheck ?? HorninessCheckResult.NotPerformed;

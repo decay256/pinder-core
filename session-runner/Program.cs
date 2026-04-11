@@ -795,21 +795,35 @@ class Program
             if (delta != 0 && result.Roll != null)
             {
                 var parts = new List<string>();
-                if (result.Roll.IsNatOne) parts.Add("Nat 1: -4");
-                else if (result.Roll.IsNatTwenty) parts.Add("Nat 20: +4 base");
-                else if (result.Roll.IsSuccess)
+
+                // Base delta (success scale or failure scale)
+                if (result.Roll.IsSuccess)
                 {
-                    int beat = result.Roll.FinalTotal - result.Roll.DC;
-                    if (beat >= 10) parts.Add("crit: +3 base");
-                    else if (beat >= 5) parts.Add("strong: +2 base");
-                    else parts.Add("clean: +1 base");
+                    string baseSign = result.BaseInterestDelta >= 0 ? "+" : "";
+                    parts.Add($"Roll success {baseSign}{result.BaseInterestDelta}");
                 }
-                else parts.Add($"fail: {result.InterestDelta}");
-                if (result.ComboTriggered != null) parts.Add("combo bonus");
-                if (result.TellReadBonus > 0) parts.Add($"tell +{result.TellReadBonus}");
-                if (result.CallbackBonusApplied > 0) parts.Add($"callback +{result.CallbackBonusApplied}");
+                else
+                {
+                    string tierName = result.Roll.Tier.ToString();
+                    parts.Add($"{tierName} miss {result.BaseInterestDelta}");
+                }
+
+                // Risk tier bonus (success only)
+                if (result.RiskBonusDelta != 0)
+                {
+                    string riskSign = result.RiskBonusDelta >= 0 ? "+" : "";
+                    parts.Add($"Risk bonus ({result.RiskTier}) {riskSign}{result.RiskBonusDelta}");
+                }
+
+                // Combo bonus
+                if (result.ComboBonusDelta != 0 && result.ComboTriggered != null)
+                {
+                    string comboSign = result.ComboBonusDelta >= 0 ? "+" : "";
+                    parts.Add($"Combo: {result.ComboTriggered} {comboSign}{result.ComboBonusDelta}");
+                }
+
                 if (parts.Count > 0)
-                    Console.WriteLine($"  *({string.Join(", ", parts)})*");
+                    Console.WriteLine($"  ↳ {string.Join(" | ", parts)}");
             }
             if (result.ShadowGrowthEvents?.Count > 0)
             {
