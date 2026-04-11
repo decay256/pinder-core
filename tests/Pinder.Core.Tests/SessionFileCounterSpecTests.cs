@@ -8,6 +8,7 @@ namespace Pinder.Core.Tests
     /// Spec-driven tests for SessionFileCounter (issue #418).
     /// Verifies acceptance criteria from docs/specs/issue-418-spec.md.
     /// </summary>
+    [Trait("Category", "SessionRunner")]
     public class SessionFileCounterSpecTests : IDisposable
     {
         private readonly string _tempDir;

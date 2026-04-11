@@ -4,6 +4,7 @@ using Pinder.SessionRunner;
 
 namespace Pinder.Core.Tests
 {
+    [Trait("Category", "SessionRunner")]
     public class Issue526_ComboExplanationTests
     {
         // What: Returns expected description for known combos (AC 3)

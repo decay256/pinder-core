@@ -16,6 +16,7 @@ namespace Pinder.Core.Tests
     /// not just DialogueContext. Player shadows go to DeliveryContext, opponent shadows to OpponentContext.
     /// Maturity: Prototype (happy-path per AC).
     /// </summary>
+    [Trait("Category", "Core")]
     public class Issue308_DeliveryOpponentShadowThresholdsTests
     {
         // AC: DeliveryContext receives player shadowThresholds

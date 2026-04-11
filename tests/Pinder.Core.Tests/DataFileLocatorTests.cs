@@ -5,6 +5,7 @@ using Xunit;
 
 namespace Pinder.Core.Tests
 {
+    [Trait("Category", "SessionRunner")]
     public class DataFileLocatorTests
     {
         [Fact]

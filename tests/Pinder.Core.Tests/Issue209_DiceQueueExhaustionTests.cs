@@ -16,6 +16,7 @@ namespace Pinder.Core.Tests
     /// Verifies that the 4-turn Triple combo integration test correctly accounts for
     /// advantage-triggered double d20 rolls when interest reaches VeryIntoIt (16-20).
     /// </summary>
+    [Trait("Category", "Core")]
     public class Issue209_DiceQueueExhaustionTests
     {
         private static CharacterProfile MakeProfile(string name, int allStats = 2)

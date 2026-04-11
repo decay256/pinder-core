@@ -8,6 +8,7 @@ using Xunit;
 
 namespace Pinder.Core.Tests
 {
+    [Trait("Category", "Core")]
     public class LlmPlayerAgentTests
     {
         // Helper to build standard test fixtures

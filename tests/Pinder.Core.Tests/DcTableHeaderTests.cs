@@ -6,6 +6,7 @@ namespace Pinder.Core.Tests
     /// Verifies that DC Reference table formatting uses dynamic character names,
     /// not hardcoded values. Tests the interpolation pattern from Program.cs.
     /// </summary>
+    [Trait("Category", "SessionRunner")]
     public class DcTableHeaderTests
     {
         [Fact]

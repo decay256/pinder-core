@@ -7,6 +7,7 @@ using Xunit;
 
 namespace Pinder.Core.Tests
 {
+    [Trait("Category", "Characters")]
     public class CharacterLoaderTests
     {
         private const string SablePromptContent = @"# Sable — Assembled System Prompt

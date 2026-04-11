@@ -17,6 +17,7 @@ namespace Pinder.Core.Tests
     /// so taint never fired. Fix: store raw values.
     /// Maturity: Prototype (happy-path per AC).
     /// </summary>
+    [Trait("Category", "Core")]
     public class Issue307_ShadowTaintRawValueTests
     {
         // ============== AC: Madness=8 (T1) → raw value 8 passed in context ==============

@@ -5,6 +5,7 @@ using Xunit;
 
 namespace Pinder.Core.Tests
 {
+    [Trait("Category", "Core")]
     public class Issue644_ShadowHintComputerTests
     {
         private static StatBlock MakeStats(int charm = 3, int rizz = 2, int honesty = 1, int chaos = 0, int wit = 2, int sa = 1)

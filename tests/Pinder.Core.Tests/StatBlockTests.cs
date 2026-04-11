@@ -4,6 +4,7 @@ using Xunit;
 
 namespace Pinder.Core.Tests
 {
+    [Trait("Category", "Core")]
     public class StatBlockTests
     {
         private static StatBlock MakeDefender(

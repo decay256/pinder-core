@@ -13,6 +13,7 @@ namespace Pinder.Core.Tests
     /// Spec-driven tests for ScoringPlayerAgent (issue #347).
     /// Written from docs/specs/issue-347-spec.md only — context-isolated from implementation.
     /// </summary>
+    [Trait("Category", "Core")]
     public class ScoringPlayerAgentSpecTests
     {
         private readonly ScoringPlayerAgent _agent = new ScoringPlayerAgent();

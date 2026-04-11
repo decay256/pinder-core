@@ -6,6 +6,7 @@ using Xunit;
 
 namespace Pinder.Core.Tests
 {
+    [Trait("Category", "SessionRunner")]
     public class Issue529_EmojiRiskColorsTests
     {
         private static string InvokeRiskLabel(int need)

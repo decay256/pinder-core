@@ -4,6 +4,7 @@ using Xunit;
 
 namespace Pinder.Core.Tests
 {
+    [Trait("Category", "Core")]
     public class ComboTrackerTests
     {
         // ---- The Setup: Wit → Charm (success) = +1 interest ----

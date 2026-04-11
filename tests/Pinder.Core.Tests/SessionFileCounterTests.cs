@@ -8,6 +8,7 @@ namespace Pinder.Core.Tests
     /// Tests the SessionFileCounter used in session-runner.
     /// Validates number extraction from session filenames and path resolution.
     /// </summary>
+    [Trait("Category", "SessionRunner")]
     public class SessionFileCounterTests
     {
         [Fact]

@@ -20,6 +20,7 @@ namespace Pinder.Core.Tests.Integration
     ///
     /// All randomness is controlled via FixedDice; no real LLM API calls are made.
     /// </summary>
+    [Trait("Category", "Core")]
     public class FullConversationIntegrationTest
     {
         // ================================================================

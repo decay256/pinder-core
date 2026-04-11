@@ -14,6 +14,7 @@ namespace Pinder.Core.Tests
     /// <summary>
     /// Deterministic dice roller that returns values from a queue.
     /// </summary>
+    [Trait("Category", "Core")]
     public sealed class FixedDice : IDiceRoller
     {
         private readonly Queue<int> _values;
@@ -40,12 +41,14 @@ namespace Pinder.Core.Tests
     /// <summary>
     /// Trap registry that returns no traps for any stat.
     /// </summary>
+    [Trait("Category", "Core")]
     public sealed class NullTrapRegistry : ITrapRegistry
     {
         public TrapDefinition? GetTrap(StatType stat) => null;
         public string? GetLlmInstruction(StatType stat) => null;
     }
 
+    [Trait("Category", "Core")]
     public class FailureScaleTests
     {
         [Theory]
@@ -73,6 +76,7 @@ namespace Pinder.Core.Tests
         }
     }
 
+    [Trait("Category", "Core")]
     public class CharacterProfileTests
     {
         [Fact]
@@ -98,6 +102,7 @@ namespace Pinder.Core.Tests
         }
     }
 
+    [Trait("Category", "Core")]
     public class GameSessionTests
     {
         private static StatBlock MakeStatBlock(int allStats = 2, int allShadow = 0)

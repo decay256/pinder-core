@@ -15,6 +15,7 @@ namespace Pinder.Core.Tests
     /// Tests for Issue #50: Tells — §15 opponent tell detection and hidden roll bonus.
     /// Covers AC1–AC7 and edge cases 1–12 from docs/specs/issue-50-spec.md.
     /// </summary>
+    [Trait("Category", "Core")]
     public class TellBonusTests
     {
         // ================================================================

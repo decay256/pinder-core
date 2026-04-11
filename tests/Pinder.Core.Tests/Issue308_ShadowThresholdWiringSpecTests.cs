@@ -21,6 +21,7 @@ namespace Pinder.Core.Tests
     ///   AC3: Madness=8 → shadow taint appears in delivery prompt
     ///   AC4: Madness=8 → shadow taint appears in opponent response prompt
     /// </summary>
+    [Trait("Category", "Core")]
     public class Issue308_ShadowThresholdWiringSpecTests
     {
         // ================================================================

@@ -10,6 +10,7 @@ namespace Pinder.Core.Tests
     /// Based on docs/specs/issue-54-spec.md acceptance criteria.
     /// Issue #711: GetHorninessModifier() is now configurable via HorninessModifiers.
     /// </summary>
+    [Trait("Category", "Core")]
     public class GameClockSpecTests
     {
         private static DateTimeOffset MakeTime(int hour, int minute = 0) =>

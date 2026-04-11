@@ -14,6 +14,7 @@ namespace Pinder.Core.Tests
     /// <summary>
     /// Mock IRuleResolver that returns predictable custom values for testing wiring.
     /// </summary>
+    [Trait("Category", "Rules")]
     public sealed class MockRuleResolver : IRuleResolver
     {
         public int? FailureDelta { get; set; }
@@ -68,6 +69,7 @@ namespace Pinder.Core.Tests
         }
     }
 
+    [Trait("Category", "Rules")]
     public class RuleResolverIntegrationTests
     {
         private static CharacterProfile MakeProfile(string name, int allStats = 2)

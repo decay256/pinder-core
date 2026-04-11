@@ -12,6 +12,7 @@ namespace Pinder.Core.Tests
     /// Tests for ScoringPlayerAgent (issue #347).
     /// Validates EV scoring, strategic adjustments, and determinism.
     /// </summary>
+    [Trait("Category", "Core")]
     public class ScoringPlayerAgentTests
     {
         private readonly ScoringPlayerAgent _agent = new ScoringPlayerAgent();

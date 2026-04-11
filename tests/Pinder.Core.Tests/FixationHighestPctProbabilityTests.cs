@@ -13,6 +13,7 @@ namespace Pinder.Core.Tests
     /// comparison, not option index, to determine if the player picked the
     /// highest-probability option.
     /// </summary>
+    [Trait("Category", "Core")]
     public class FixationHighestPctProbabilityTests
     {
         /// <summary>

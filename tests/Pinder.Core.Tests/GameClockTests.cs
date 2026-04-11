@@ -5,6 +5,7 @@ using Xunit;
 
 namespace Pinder.Core.Tests
 {
+    [Trait("Category", "Core")]
     public class GameClockTests
     {
         private static DateTimeOffset MakeTime(int hour) =>

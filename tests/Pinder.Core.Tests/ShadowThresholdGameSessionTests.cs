@@ -18,6 +18,7 @@ namespace Pinder.Core.Tests
     /// Fixation T3 forced stat, ShadowThresholds in DialogueContext, backward compatibility.
     /// Maturity: Prototype (happy-path tests).
     /// </summary>
+    [Trait("Category", "Core")]
     public class ShadowThresholdGameSessionTests
     {
         // ============== AC5: Dread T3 → Starting Interest 8 ==============

@@ -11,6 +11,7 @@ namespace Pinder.Core.Tests
     /// Validates FormatReasoningBlock and FormatScoreTable from PlaytestFormatter.
     /// Spec: docs/specs/issue-351-spec.md
     /// </summary>
+    [Trait("Category", "SessionRunner")]
     public class Issue351_PickReasoningTests
     {
         // ── Helper factories (test-only utilities) ──────────────────────

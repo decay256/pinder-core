@@ -11,6 +11,7 @@ namespace Pinder.Core.Tests
     /// Spec-driven tests for Issue #78 — TurnResult expansion and RiskTier enum.
     /// Written by test-engineer agent from docs/specs/issue-78-spec.md.
     /// </summary>
+    [Trait("Category", "Core")]
     public class TurnResultExpansionSpecTests
     {
         // Helpers — create minimal valid instances for required constructor params

@@ -13,6 +13,7 @@ namespace Pinder.Core.Tests
     /// Tests for issue #269: Horniness must always be rolled (1d10) at session start,
     /// regardless of whether an IGameClock is provided.
     /// </summary>
+    [Trait("Category", "Core")]
     public class HorninessAlwaysRolledTests
     {
         private static CharacterProfile MakeProfile(string name)

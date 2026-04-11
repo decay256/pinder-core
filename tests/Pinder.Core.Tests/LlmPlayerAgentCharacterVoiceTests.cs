@@ -10,6 +10,7 @@ namespace Pinder.Core.Tests
     /// <summary>
     /// Tests for LlmPlayerAgent character-driven improvements (#492).
     /// </summary>
+    [Trait("Category", "Core")]
     public class LlmPlayerAgentCharacterVoiceTests
     {
         private static StatBlock MakeStats()

@@ -17,6 +17,7 @@ namespace Pinder.Core.Tests
     /// Written from docs/specs/issue-45-spec.md only (context-isolated from implementation).
     /// Maturity: Prototype — happy-path per AC + key edge cases.
     /// </summary>
+    [Trait("Category", "Core")]
     public class ShadowThresholdSpecTests
     {
         // =====================================================================

@@ -5,6 +5,7 @@ using Xunit;
 
 namespace Pinder.Core.Tests
 {
+    [Trait("Category", "Core")]
     public class JsonTimingRepositoryTests
     {
         private const string SampleJson = @"[

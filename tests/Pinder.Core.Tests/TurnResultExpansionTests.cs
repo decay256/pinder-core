@@ -10,6 +10,7 @@ namespace Pinder.Core.Tests
     /// <summary>
     /// Tests for TurnResult expansion (Issue #78) and RiskTier enum.
     /// </summary>
+    [Trait("Category", "Core")]
     public class TurnResultExpansionTests
     {
         // Helper to create a minimal valid RollResult

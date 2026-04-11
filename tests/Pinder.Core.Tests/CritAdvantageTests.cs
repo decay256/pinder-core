@@ -15,6 +15,7 @@ namespace Pinder.Core.Tests
     /// Tests for §4 Nat 20 crit advantage: after rolling a natural 20,
     /// the player gets advantage on their next roll, consumed after one use.
     /// </summary>
+    [Trait("Category", "Core")]
     public class CritAdvantageTests
     {
         // What: Nat 20 on Speak turn N → advantage on Speak turn N+1

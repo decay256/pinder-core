@@ -10,6 +10,7 @@ using Xunit;
 
 namespace Pinder.Core.Tests
 {
+    [Trait("Category", "Characters")]
     public class CharacterDefinitionLoaderTests
     {
         // Locate data files relative to repo root

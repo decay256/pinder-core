@@ -17,6 +17,7 @@ namespace Pinder.Core.Tests
     /// Tests for issue #48 — XP tracking per spec docs/specs/issue-48-spec.md.
     /// Covers all acceptance criteria, edge cases, and error conditions.
     /// </summary>
+    [Trait("Category", "Core")]
     public class XpTrackingSpecTests
     {
         // ====================== XpLedger Unit Tests ======================

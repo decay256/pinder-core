@@ -7,6 +7,7 @@ namespace Pinder.Core.Tests
     /// <summary>
     /// Tests for ActiveArchetype resolution in CharacterAssembler (#649).
     /// </summary>
+    [Trait("Category", "Core")]
     public class ActiveArchetypeTests
     {
         [Fact]

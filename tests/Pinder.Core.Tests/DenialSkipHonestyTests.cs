@@ -16,6 +16,7 @@ namespace Pinder.Core.Tests
     /// Tests for issue #272: Denial +1 when player skips available Honesty option (§7).
     /// Maturity: Prototype — happy-path per AC.
     /// </summary>
+    [Trait("Category", "Core")]
     public class DenialSkipHonestyTests
     {
         // AC1: Denial +1 when Honesty option available and player chose different stat

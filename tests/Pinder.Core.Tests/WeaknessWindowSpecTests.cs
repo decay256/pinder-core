@@ -17,6 +17,7 @@ namespace Pinder.Core.Tests
     /// Covers additional acceptance criteria and edge cases from docs/specs/issue-49-spec.md
     /// that are not in WeaknessWindowTests.cs.
     /// </summary>
+    [Trait("Category", "Core")]
     public class WeaknessWindowSpecTests
     {
         // ================================================================

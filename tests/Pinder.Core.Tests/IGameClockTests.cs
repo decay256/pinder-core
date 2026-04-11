@@ -8,6 +8,7 @@ namespace Pinder.Core.Tests
     /// Tests for the IGameClock interface contract via a minimal FixedGameClock test double.
     /// Validates the TimeOfDay enum values and horniness modifier mapping.
     /// </summary>
+    [Trait("Category", "Core")]
     public class IGameClockTests
     {
         [Fact]

@@ -13,6 +13,7 @@ namespace Pinder.Core.Tests
     /// Validates Fixation growth penalty, Denial penalty, Fixation threshold effects,
     /// and stat variety bonus.
     /// </summary>
+    [Trait("Category", "Core")]
     public class ScoringPlayerAgentShadowTests
     {
         private readonly ScoringPlayerAgent _agent = new ScoringPlayerAgent();

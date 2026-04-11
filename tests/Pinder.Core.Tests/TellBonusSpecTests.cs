@@ -16,6 +16,7 @@ namespace Pinder.Core.Tests
     /// Covers edge case 10 (HasTellBonus true but player picks different option),
     /// edge case 3 (explicit matching stat test), and edge case 12 (game ends during turn with tell).
     /// </summary>
+    [Trait("Category", "Core")]
     public class TellBonusSpecTests
     {
         // ================================================================

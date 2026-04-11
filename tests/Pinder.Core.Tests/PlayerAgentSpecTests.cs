@@ -12,6 +12,7 @@ namespace Pinder.Core.Tests
     /// Spec-driven tests for issue #346: IPlayerAgent interface and supporting DTOs.
     /// Tests verify acceptance criteria from docs/specs/issue-346-spec.md.
     /// </summary>
+    [Trait("Category", "Core")]
     public class PlayerDecisionSpecTests
     {
         #region Helpers
@@ -109,6 +110,7 @@ namespace Pinder.Core.Tests
         }
     }
 
+    [Trait("Category", "Core")]
     public class OptionScoreSpecTests
     {
         // -- AC2: OptionScore properties set via constructor --
@@ -195,6 +197,7 @@ namespace Pinder.Core.Tests
         }
     }
 
+    [Trait("Category", "Core")]
     public class PlayerAgentContextSpecTests
     {
         private static StatBlock MakeStats(int charm = 3, int rizz = 2, int honesty = 2,
@@ -346,6 +349,7 @@ namespace Pinder.Core.Tests
     /// Tests for HighestModAgent (the baseline IPlayerAgent implementation from #346).
     /// Verifies AC1 (IPlayerAgent interface contract) and AC4 (session runner integration).
     /// </summary>
+    [Trait("Category", "Core")]
     public class HighestModAgentSpecTests
     {
         private static StatBlock MakePlayerStats()

@@ -13,6 +13,7 @@ namespace Pinder.Core.Tests
     /// Validates that data/traps/traps.json contains all 6 canonical trap definitions
     /// and that they match the spec exactly when loaded via JsonTrapRepository.
     /// </summary>
+    [Trait("Category", "Core")]
     public sealed class TrapDataFileValidationTests
     {
         private static string FindTrapsJsonPath()

@@ -13,6 +13,7 @@ namespace Pinder.Core.Tests
     /// <summary>
     /// Tests for issue #709: Horniness as ambient per-turn overlay (separate from shadow stat).
     /// </summary>
+    [Trait("Category", "Core")]
     public class HorninessOverlayTests
     {
         /// <summary>

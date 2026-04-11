@@ -17,6 +17,7 @@ namespace Pinder.Core.Tests
     /// Tests verify behavior from the spec, not implementation details.
     /// Maturity: Prototype (happy-path per acceptance criterion).
     /// </summary>
+    [Trait("Category", "SessionRunner")]
     public sealed class Issue350_ShadowTrackingSpecTests
     {
         // ── AC1: SessionShadowTracker wraps StatBlock and wires via GameSessionConfig ──

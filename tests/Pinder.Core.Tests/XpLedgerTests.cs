@@ -15,6 +15,7 @@ namespace Pinder.Core.Tests
 {
     // ====================== XpLedger Unit Tests ======================
 
+    [Trait("Category", "Core")]
     public class XpLedgerTests
     {
         [Fact]
@@ -132,6 +133,7 @@ namespace Pinder.Core.Tests
 
     // ====================== GameSession XP Integration Tests ======================
 
+    [Trait("Category", "Core")]
     public class XpTrackingGameSessionTests
     {
         // AC-2: Normal success DC ≤ 13, Medium risk → 5*1.5=8 XP (Success_DC_Low)

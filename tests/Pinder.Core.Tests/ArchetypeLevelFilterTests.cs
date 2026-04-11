@@ -12,6 +12,7 @@ namespace Pinder.Core.Tests
     /// Verifies that dominant archetype selection respects level ranges
     /// per rules §archetypes.
     /// </summary>
+    [Trait("Category", "Core")]
     public class ArchetypeLevelFilterTests
     {
         // -- Helpers ----------------------------------------------------------

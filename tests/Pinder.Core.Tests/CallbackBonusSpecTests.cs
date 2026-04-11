@@ -15,6 +15,7 @@ namespace Pinder.Core.Tests
     /// Spec-driven tests for Issue #47: Callback Bonus (§15 callback distance detection).
     /// Tests verify behavior described in docs/specs/issue-47-spec.md.
     /// </summary>
+    [Trait("Category", "Core")]
     public class CallbackBonusSpecTests
     {
         // =================================================================

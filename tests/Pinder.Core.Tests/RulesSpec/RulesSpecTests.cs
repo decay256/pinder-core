@@ -12,6 +12,7 @@ using Pinder.Core.Traps;
 
 namespace Pinder.Core.Tests.RulesSpec
 {
+    [Trait("Category", "Rules")]
     public class RulesSpecTests
     {
         // =====================================================================

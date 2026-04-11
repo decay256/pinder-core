@@ -15,6 +15,7 @@ namespace Pinder.Core.Tests
     /// Tests for Issue #493: Mechanic — failure degradation should be legible to the opponent.
     /// Covers OpponentContext DTO extension and GameSession wiring of FailureTier.
     /// </summary>
+    [Trait("Category", "Core")]
     public class Issue493_FailureDegradationCoreTests
     {
         #region Helpers

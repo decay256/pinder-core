@@ -15,6 +15,7 @@ namespace Pinder.Core.Tests.RulesSpec
     /// Each test verifies a specific acceptance criterion or edge case
     /// from the spec document.
     /// </summary>
+    [Trait("Category", "Rules")]
     public class RulesSpecValidationTests
     {
         // =====================================================================

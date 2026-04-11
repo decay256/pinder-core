@@ -4,6 +4,7 @@ using Xunit;
 
 namespace Pinder.Core.Tests
 {
+    [Trait("Category", "Core")]
     public class RiskTierTests
     {
         // Helper: build a RollResult with specific modifiers and DC to control "need"

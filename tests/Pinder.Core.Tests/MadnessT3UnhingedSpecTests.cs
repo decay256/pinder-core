@@ -17,6 +17,7 @@ namespace Pinder.Core.Tests
     /// Spec: docs/specs/issue-310-spec.md
     /// Maturity: Prototype (happy-path per acceptance criterion + edge cases).
     /// </summary>
+    [Trait("Category", "Core")]
     public class MadnessT3UnhingedSpecTests
     {
         // =====================================================================

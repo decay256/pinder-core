@@ -16,6 +16,7 @@ namespace Pinder.Core.Tests
     /// Spec-driven tests for Issue #46 — Combo System (§15).
     /// Tests are derived from docs/specs/issue-46-spec.md acceptance criteria and edge cases.
     /// </summary>
+    [Trait("Category", "Core")]
     public class ComboSpecTests
     {
         // ============================================================
@@ -698,6 +699,7 @@ namespace Pinder.Core.Tests
     // GameSession Integration Tests for Combo System
     // ============================================================
 
+    [Trait("Category", "Core")]
     public class ComboGameSessionSpecTests
     {
         private static CharacterProfile MakeProfile(string name, int allStats = 2)

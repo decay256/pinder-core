@@ -17,6 +17,7 @@ namespace Pinder.Core.Tests
     /// Written by test-engineer agent from docs/specs/issue-44-spec.md.
     /// Maturity: Prototype — happy-path per AC + key edge cases.
     /// </summary>
+    [Trait("Category", "Core")]
     public class ShadowGrowthSpecTests
     {
         // =====================================================================

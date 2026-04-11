@@ -16,6 +16,7 @@ namespace Pinder.Core.Tests
     /// Tests for issue #270: 5 shadow reduction events from §7.
     /// 4 reductions are new; the 5th (Fixation −1 for 4+ distinct stats) already existed.
     /// </summary>
+    [Trait("Category", "Core")]
     public class ShadowReductionTests
     {
         // =====================================================================

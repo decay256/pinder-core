@@ -18,6 +18,7 @@ namespace Pinder.Core.Tests
     /// shadow growth events in TurnResult and accumulates deltas correctly.
     /// Maturity: Prototype (happy-path tests).
     /// </summary>
+    [Trait("Category", "SessionRunner")]
     public sealed class Issue350_SessionRunnerShadowTrackingTests
     {
         // ── AC1: GameSessionConfig with PlayerShadows wires correctly ──

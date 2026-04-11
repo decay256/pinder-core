@@ -7,6 +7,7 @@ namespace Pinder.Core.Tests
     /// <summary>
     /// Tests for issue #711: GameDefinition loading of horniness_time_modifiers from YAML.
     /// </summary>
+    [Trait("Category", "Core")]
     public class Issue711_GameDefinitionHorninessTests
     {
         private const string MinimalValidYaml = @"
@@ -17,6 +18,7 @@ player_role_description: p
 opponent_role_description: o
 meta_contract: m
 writing_rules: wr
+global_dc_bias: 0
 horniness_time_modifiers:
   morning: 3
   afternoon: 0
@@ -66,6 +68,7 @@ player_role_description: p
 opponent_role_description: o
 meta_contract: m
 writing_rules: wr
+global_dc_bias: 0
 horniness_time_modifiers:
   morning: 10
   afternoon: 20
@@ -92,6 +95,7 @@ player_role_description: p
 opponent_role_description: o
 meta_contract: m
 writing_rules: wr
+global_dc_bias: 0
 ";
             var ex = Assert.Throws<InvalidOperationException>(
                 () => GameDefinition.LoadFrom(yaml));
@@ -109,6 +113,7 @@ player_role_description: p
 opponent_role_description: o
 meta_contract: m
 writing_rules: wr
+global_dc_bias: 0
 ";
             var ex = Assert.Throws<InvalidOperationException>(
                 () => GameDefinition.LoadFrom(yaml));
@@ -126,6 +131,7 @@ player_role_description: p
 opponent_role_description: o
 meta_contract: m
 writing_rules: wr
+global_dc_bias: 0
 horniness_time_modifiers: ~
 ";
             Assert.Throws<InvalidOperationException>(
@@ -145,6 +151,7 @@ player_role_description: p
 opponent_role_description: o
 meta_contract: m
 writing_rules: wr
+global_dc_bias: 0
 horniness_time_modifiers:
   morning: -3
   afternoon: -1
@@ -169,6 +176,7 @@ player_role_description: p
 opponent_role_description: o
 meta_contract: m
 writing_rules: wr
+global_dc_bias: 0
 horniness_time_modifiers:
   morning: 0
   afternoon: 0

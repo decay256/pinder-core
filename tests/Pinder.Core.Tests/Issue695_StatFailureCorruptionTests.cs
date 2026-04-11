@@ -16,6 +16,7 @@ namespace Pinder.Core.Tests
     /// Issue #695: Verify that stat-specific failure corruption instructions
     /// from delivery-instructions.yaml reach DeliveryContext on failure.
     /// </summary>
+    [Trait("Category", "Core")]
     public class Issue695_StatFailureCorruptionTests
     {
         private static StatDeliveryInstructions LoadYaml()

@@ -4,6 +4,7 @@ using Xunit;
 
 namespace Pinder.Core.Tests
 {
+    [Trait("Category", "Core")]
     public class TrapStateHasActiveTests
     {
         private static TrapDefinition MakeTrap(StatType stat) =>

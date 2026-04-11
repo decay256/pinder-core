@@ -16,6 +16,7 @@ namespace Pinder.Core.Tests
     /// Verifies that CallbackBonus is computed and passed as externalBonus to RollEngine.Resolve,
     /// and that TurnResult.CallbackBonusApplied reflects the bonus.
     /// </summary>
+    [Trait("Category", "Core")]
     public class CallbackGameSessionTests
     {
         private static CharacterProfile MakeProfile(string name, int allStats = 2)

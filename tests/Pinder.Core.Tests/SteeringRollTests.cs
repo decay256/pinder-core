@@ -10,6 +10,7 @@ using Xunit;
 
 namespace Pinder.Core.Tests
 {
+    [Trait("Category", "Core")]
     public class SteeringRollTests
     {
         // Helper: create a StatBlock with specific values for the steering stats

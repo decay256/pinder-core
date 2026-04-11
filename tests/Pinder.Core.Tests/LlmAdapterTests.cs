@@ -12,6 +12,7 @@ namespace Pinder.Core.Tests
     /// Tests for NullLlmAdapter and LLM context types.
     /// Prototype maturity: happy-path tests for all interface methods.
     /// </summary>
+    [Trait("Category", "Core")]
     public class LlmAdapterTests
     {
         private readonly NullLlmAdapter _adapter = new NullLlmAdapter();

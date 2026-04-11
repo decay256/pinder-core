@@ -10,6 +10,7 @@ namespace Pinder.Core.Tests
     /// Tests for OpponentResponse, Tell, WeaknessWindow, and CallbackOpportunity types.
     /// Prototype maturity: happy-path construction and property tests.
     /// </summary>
+    [Trait("Category", "Core")]
     public class OpponentResponseTests
     {
         // --- OpponentResponse ---

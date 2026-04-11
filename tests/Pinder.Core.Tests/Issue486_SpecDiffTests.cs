@@ -4,6 +4,7 @@ using Pinder.SessionRunner;
 
 namespace Pinder.Core.Tests
 {
+    [Trait("Category", "SessionRunner")]
     public class Issue486_SpecDiffTests
     {
         // What: 1. Clean success (or exact match)

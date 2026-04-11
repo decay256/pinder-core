@@ -15,6 +15,7 @@ namespace Pinder.Core.Tests
     /// These tests target mutation-catching gaps in the existing test suite, covering
     /// edge cases, error conditions, and acceptance criteria from docs/specs/issue-139-spec.md.
     /// </summary>
+    [Trait("Category", "Core")]
     public class Wave0SpecTests
     {
         #region Helpers

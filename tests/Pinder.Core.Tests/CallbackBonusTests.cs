@@ -7,6 +7,7 @@ namespace Pinder.Core.Tests
     /// Unit tests for CallbackBonus.Compute — §15 callback distance detection.
     /// Covers all tiers (0, +1, +2, +3) including boundary values and opener priority.
     /// </summary>
+    [Trait("Category", "Core")]
     public class CallbackBonusTests
     {
         // --- Distance < 2: no bonus ---

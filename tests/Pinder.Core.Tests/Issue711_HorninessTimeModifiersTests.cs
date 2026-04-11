@@ -9,6 +9,7 @@ namespace Pinder.Core.Tests
     /// Tests for issue #711: configurable time-of-day Horniness modifiers.
     /// Verifies that HorninessModifiers are loaded from config and used by GameClock.
     /// </summary>
+    [Trait("Category", "Core")]
     public class Issue711_HorninessTimeModifiersTests
     {
         private static DateTimeOffset MakeTime(int hour) =>

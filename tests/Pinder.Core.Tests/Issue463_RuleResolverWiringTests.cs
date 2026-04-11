@@ -15,6 +15,7 @@ namespace Pinder.Core.Tests
     /// Tests for Issue #463: Wire GameSession to use IRuleResolver for §5/§6/§7/§15 rules.
     /// Verifies the Dependency Inversion wiring, fallback behavior, and edge cases.
     /// </summary>
+    [Trait("Category", "Rules")]
     public class Issue463_RuleResolverWiringTests
     {
         // =====================================================================

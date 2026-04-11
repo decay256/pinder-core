@@ -14,6 +14,7 @@ namespace Pinder.Core.Tests
     /// Issue #241 AC3: Verify GameSession populates PlayerName, OpponentName, CurrentTurn
     /// on DeliveryContext and OpponentContext when calling ILlmAdapter methods.
     /// </summary>
+    [Trait("Category", "Core")]
     public class Issue241_GameSessionDeliveryContextTests
     {
         [Fact]

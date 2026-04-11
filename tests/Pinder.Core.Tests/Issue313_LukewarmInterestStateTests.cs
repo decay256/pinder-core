@@ -8,6 +8,7 @@ namespace Pinder.Core.Tests
     /// Verifies that the Interested range (previously 5-15) is properly split into
     /// Lukewarm (5-9) and Interested (10-15).
     /// </summary>
+    [Trait("Category", "Core")]
     public class Issue313_LukewarmInterestStateTests
     {
         // =====================================================================

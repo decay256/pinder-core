@@ -11,6 +11,7 @@ using Xunit;
 
 namespace Pinder.Core.Tests
 {
+    [Trait("Category", "Core")]
     public class GameSessionWaitTests
     {
         // ======================== Wait ========================

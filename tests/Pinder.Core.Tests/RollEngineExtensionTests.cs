@@ -7,6 +7,7 @@ using Xunit;
 
 namespace Pinder.Core.Tests
 {
+    [Trait("Category", "Core")]
     public class RollEngineExtensionTests
     {
         private static StatBlock MakeAttacker(int sa = 2, int overthinking = 0, int charm = 3)

@@ -17,6 +17,7 @@ namespace Pinder.Core.Tests
     /// These tests verify behavior from the spec document (docs/specs/issue-270-spec.md)
     /// and cover edge cases, boundary values, and error conditions.
     /// </summary>
+    [Trait("Category", "Core")]
     public class ShadowReductionSpecTests
     {
         // =====================================================================

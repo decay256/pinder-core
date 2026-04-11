@@ -5,6 +5,7 @@ using Xunit;
 
 namespace Pinder.Core.Tests
 {
+    [Trait("Category", "Core")]
     public class SessionShadowTrackerTests
     {
         private static StatBlock MakeStats(

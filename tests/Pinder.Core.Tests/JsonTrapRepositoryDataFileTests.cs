@@ -11,6 +11,7 @@ namespace Pinder.Core.Tests
     /// Tests that data/traps/traps.json loads correctly via JsonTrapRepository
     /// and contains all 6 canonical trap definitions.
     /// </summary>
+    [Trait("Category", "Core")]
     public sealed class JsonTrapRepositoryDataFileTests
     {
         private static string LoadTrapsJson()

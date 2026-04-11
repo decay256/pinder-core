@@ -16,6 +16,7 @@ namespace Pinder.Core.Tests
     /// Tests for shadow growth events — §7 growth table in GameSession (#44).
     /// Maturity: Prototype (happy-path tests for key triggers).
     /// </summary>
+    [Trait("Category", "Core")]
     public class ShadowGrowthEventTests
     {
         // ======================== Trigger 1: Nat 1 → +1 paired shadow ========================

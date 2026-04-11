@@ -13,6 +13,7 @@ namespace Pinder.Core.Tests
     /// Tests that validate the session runner's trap loading via TrapRegistryLoader.
     /// Issue #353: NullTrapRegistry disables all traps in the session runner.
     /// </summary>
+    [Trait("Category", "SessionRunner")]
     public sealed class SessionRunnerTrapLoadingTests : IDisposable
     {
         private readonly string? _originalEnvVar;

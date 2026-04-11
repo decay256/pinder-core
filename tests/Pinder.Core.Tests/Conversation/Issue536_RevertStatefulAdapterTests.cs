@@ -9,6 +9,7 @@ using Pinder.Core.Traps;
 
 namespace Pinder.Core.Tests.Conversation
 {
+    [Trait("Category", "Core")]
     public class Issue536_StatefulAdapterTests
     {
         private sealed class DummyLlmAdapter : ILlmAdapter

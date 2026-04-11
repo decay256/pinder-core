@@ -19,6 +19,7 @@ namespace Pinder.Core.Tests
     ///   Safe=1x, Medium=1.5x, Hard=2x, Bold=3x.
     /// Multiplier applies only to successful (non-Nat20, non-Nat1) rolls.
     /// </summary>
+    [Trait("Category", "Core")]
     public class XpRiskTierMultiplierSpecTests
     {
         // ====================== AC-1: Safe success → 1x base XP ======================

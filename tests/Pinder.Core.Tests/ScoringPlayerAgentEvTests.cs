@@ -13,6 +13,7 @@ namespace Pinder.Core.Tests
     /// Validates that combo/tell bonuses are scaled for low-success options,
     /// and that trap cost is properly weighted by failure tier distribution.
     /// </summary>
+    [Trait("Category", "Core")]
     public class ScoringPlayerAgentEvTests
     {
         private readonly ScoringPlayerAgent _agent = new ScoringPlayerAgent();

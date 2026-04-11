@@ -16,6 +16,7 @@ namespace Pinder.Core.Tests
     /// and the character assembly pipeline via JSON data files.
     /// Tests verify behavior from docs/specs/issue-415-spec.md only.
     /// </summary>
+    [Trait("Category", "Characters")]
     public class Issue415_CharacterDefinitionLoaderSpecTests
     {
         #region Helpers

@@ -13,6 +13,7 @@ using Xunit;
 
 namespace Pinder.Core.Tests
 {
+    [Trait("Category", "Characters")]
     public class CharacterSystemTests
     {
         // -----------------------------------------------------------------------

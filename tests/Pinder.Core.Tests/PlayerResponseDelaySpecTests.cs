@@ -10,6 +10,7 @@ namespace Pinder.Core.Tests
     /// Spec-driven tests for PlayerResponseDelayEvaluator (issue #55).
     /// Written from docs/specs/issue-55-spec.md — context-isolated from implementation.
     /// </summary>
+    [Trait("Category", "Core")]
     public class PlayerResponseDelaySpecTests
     {
         #region Test Helpers

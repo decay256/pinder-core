@@ -13,6 +13,7 @@ namespace Pinder.Core.Tests
     /// Verifies that traps.json uses the flat schema expected by JsonTrapRepository
     /// and that all 6 traps load correctly with correct field values.
     /// </summary>
+    [Trait("Category", "Core")]
     public sealed class TrapsJsonIssue306Tests
     {
         private static string LoadTrapsJson()

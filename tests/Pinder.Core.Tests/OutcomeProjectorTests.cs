@@ -18,6 +18,7 @@ namespace Pinder.Core.Tests
     /// The implementation takes an InterestState parameter in addition to the
     /// numeric interest. Tests map interest values to the appropriate InterestState.
     /// </summary>
+    [Trait("Category", "Core")]
     public class OutcomeProjectorTests
     {
         // ===== SPEC DECISION TABLE: Rule 1 — interest >= 20 AND momentum >= 3 =====

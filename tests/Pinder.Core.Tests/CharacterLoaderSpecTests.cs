@@ -11,6 +11,7 @@ namespace Pinder.Core.Tests
     /// Spec-driven tests for issue #414: CharacterLoader and CLI args.
     /// Tests verify behavior from docs/specs/issue-414-spec.md.
     /// </summary>
+    [Trait("Category", "Characters")]
     public class CharacterLoaderSpecTests
     {
         #region Test Fixtures

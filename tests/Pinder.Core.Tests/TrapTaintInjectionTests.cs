@@ -16,6 +16,7 @@ namespace Pinder.Core.Tests
     // ---------------------------------------------------------------
     // Capturing LLM adapter: records all contexts passed to it
     // ---------------------------------------------------------------
+    [Trait("Category", "Core")]
     public sealed class CapturingLlmAdapter : ILlmAdapter
     {
         public List<DialogueContext> DialogueContexts { get; } = new List<DialogueContext>();
@@ -60,6 +61,7 @@ namespace Pinder.Core.Tests
     // ---------------------------------------------------------------
     // Trap registry that returns a specific trap with LLM instruction
     // ---------------------------------------------------------------
+    [Trait("Category", "Core")]
     public sealed class TestTrapRegistry : ITrapRegistry
     {
         private readonly Dictionary<StatType, TrapDefinition> _traps =
@@ -83,6 +85,7 @@ namespace Pinder.Core.Tests
     // ---------------------------------------------------------------
     // JsonTrapRepository tests
     // ---------------------------------------------------------------
+    [Trait("Category", "Core")]
     public class JsonTrapRepositoryTests
     {
         private const string SampleJson = @"[
@@ -284,6 +287,7 @@ namespace Pinder.Core.Tests
     // ---------------------------------------------------------------
     // GameSession trap taint wiring tests
     // ---------------------------------------------------------------
+    [Trait("Category", "Core")]
     public class GameSessionTrapTaintTests
     {
         private static StatBlock MakeStatBlock(int allStats = 2)
@@ -481,6 +485,7 @@ namespace Pinder.Core.Tests
     /// LLM contexts on the turn they activate. Before #692, AdvanceTurn was called
     /// before delivery, expiring duration-1 traps immediately.
     /// </summary>
+    [Trait("Category", "Core")]
     public sealed class TrapDuration1RegressionTests
     {
         private static StatBlock MakeStatBlock(int allStats = 2)

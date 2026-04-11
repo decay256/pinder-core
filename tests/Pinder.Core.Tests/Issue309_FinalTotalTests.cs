@@ -11,6 +11,7 @@ namespace Pinder.Core.Tests
     /// Tests for Issue #309: SuccessScale, failure tier, beatDcBy, and MissMargin
     /// must all use FinalTotal (including external bonuses), not base Total.
     /// </summary>
+    [Trait("Category", "Core")]
     public class Issue309_FinalTotalTests
     {
         private class FixedDice : IDiceRoller

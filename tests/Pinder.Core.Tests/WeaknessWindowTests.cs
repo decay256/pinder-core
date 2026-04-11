@@ -16,6 +16,7 @@ namespace Pinder.Core.Tests
     /// Tests for Issue #49: Weakness Windows — §15 opponent crack detection.
     /// Covers AC1–AC7 and test scenarios T1–T7 from docs/specs/issue-49-spec.md.
     /// </summary>
+    [Trait("Category", "Core")]
     public class WeaknessWindowTests
     {
         // ================================================================

@@ -8,6 +8,7 @@ using Xunit;
 
 namespace Pinder.Core.Tests
 {
+    [Trait("Category", "Core")]
     public class PlayerDecisionTests
     {
         [Fact]
@@ -53,6 +54,7 @@ namespace Pinder.Core.Tests
         }
     }
 
+    [Trait("Category", "Core")]
     public class OptionScoreTests
     {
         [Fact]
@@ -84,6 +86,7 @@ namespace Pinder.Core.Tests
         }
     }
 
+    [Trait("Category", "Core")]
     public class PlayerAgentContextTests
     {
         private static StatBlock MakeStats()
@@ -146,6 +149,7 @@ namespace Pinder.Core.Tests
         }
     }
 
+    [Trait("Category", "Core")]
     public class HighestModAgentTests
     {
         private static StatBlock MakePlayerStats()

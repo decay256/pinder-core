@@ -9,6 +9,7 @@ using Xunit;
 
 namespace Pinder.Core.Tests
 {
+    [Trait("Category", "Core")]
     public class HorninessAndEnergyTests
     {
         /// <summary>

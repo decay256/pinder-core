@@ -12,6 +12,7 @@ namespace Pinder.Core.Tests;
 /// Runs the Python rules pipeline to catch rules drift automatically.
 /// These tests shell out to python3, so they require python3 + pyyaml on PATH.
 /// </summary>
+[Trait("Category", "Rules")]
 public class RulesPipelineTests
 {
     private readonly ITestOutputHelper _output;
@@ -80,7 +81,6 @@ public class RulesPipelineTests
     }
 
     [Fact]
-    [Trait("Category", "Rules")]
     public void RoundTripCheck_ExitCodeZero_DiffUnder30()
     {
         var (exitCode, stdout, stderr) = RunPipeline("check");
@@ -100,7 +100,6 @@ public class RulesPipelineTests
     }
 
     [Fact]
-    [Trait("Category", "Rules")]
     public void CheckDiff_LlmClassifiesAsFormattingOnly()
     {
         // First check if there are any diffs at all

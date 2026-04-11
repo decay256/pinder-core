@@ -16,6 +16,7 @@ namespace Pinder.Core.Tests
     /// Spec-driven tests for issue #272: Denial +1 when player skips available Honesty option (§7).
     /// These tests verify behavioral acceptance criteria from docs/specs/issue-272-spec.md.
     /// </summary>
+    [Trait("Category", "Core")]
     public class DenialSkipHonestySpecTests
     {
         // =====================================================================
