@@ -32,7 +32,6 @@ namespace Pinder.Core.Conversation
         private readonly IGameClock? _clock;
         private readonly SessionShadowTracker? _playerShadows;
         private readonly SessionShadowTracker? _opponentShadows;
-        private readonly string? _previousOpener;
 
         // Combo tracking (#46)
         private readonly ComboTracker _comboTracker;
@@ -44,11 +43,10 @@ namespace Pinder.Core.Conversation
         private readonly List<StatType> _statsUsedPerTurn;
         private readonly List<bool> _highestPctOptionPicked;
         private int _honestySuccessCount;
-        private int _tropeTrapCount;
-        private bool _tropeTrapMadnessTriggered;
         private int _saUsageCount;
+        private int _charmUsageCount;
+        private bool _charmMadnessTriggered;
         private bool _saOverthinkingTriggered;
-        private string? _sessionOpener;
 
         // Despair (RIZZ failure shadow) tracking (#708)
         private int _rizzConsecutiveCount;
@@ -114,7 +112,6 @@ namespace Pinder.Core.Conversation
             _clock = config?.Clock;
             _playerShadows = config?.PlayerShadows;
             _opponentShadows = config?.OpponentShadows;
-            _previousOpener = config?.PreviousOpener;
             _rules = config?.Rules;
             _globalDcBias = config?.GlobalDcBias ?? 0;
             _steeringRng = config?.SteeringRng ?? new Random();
@@ -165,11 +162,10 @@ namespace Pinder.Core.Conversation
             _statsUsedPerTurn = new List<StatType>();
             _highestPctOptionPicked = new List<bool>();
             _honestySuccessCount = 0;
-            _tropeTrapCount = 0;
-            _tropeTrapMadnessTriggered = false;
             _saUsageCount = 0;
+            _charmUsageCount = 0;
+            _charmMadnessTriggered = false;
             _saOverthinkingTriggered = false;
-            _sessionOpener = null;
             _rizzConsecutiveCount = 0;
 
             // Stateful conversation session (#536)
@@ -461,7 +457,8 @@ namespace Pinder.Core.Conversation
             }
 
             // Compute tell bonus (#50)
-            int tellBonus = (_activeTell != null && chosenOption.Stat == _activeTell.Stat) ? 2 : 0;
+            bool hasTellOption = _activeTell != null && chosenOption.Stat == _activeTell.Stat;
+            int tellBonus = hasTellOption ? 2 : 0;
 
             // Compute external bonus: tell + callback + Triple combo + momentum (#46, #47, #50, #268)
             int externalBonus = tellBonus + callbackBonus + _pendingMomentumBonus;
@@ -572,7 +569,7 @@ namespace Pinder.Core.Conversation
             InterestState stateAfter = ResolveInterestState();
 
             // ---- Shadow growth evaluation (#44) ----
-            EvaluatePerTurnShadowGrowth(chosenOption, optionIndex, rollResult, interestAfter);
+            EvaluatePerTurnShadowGrowth(chosenOption, optionIndex, rollResult, interestAfter, comboTriggered, hasTellOption);
 
             // Shadow reduction: Winning despite Overthinking disadvantage → Overthinking −1
             if (rollResult.IsSuccess
@@ -942,7 +939,9 @@ namespace Pinder.Core.Conversation
             DialogueOption chosenOption,
             int optionIndex,
             RollResult rollResult,
-            int interestAfter)
+            int interestAfter,
+            string? comboTriggered,
+            bool hasTellOption)
         {
             if (_playerShadows == null)
                 return;
@@ -965,28 +964,12 @@ namespace Pinder.Core.Conversation
                     "Catastrophic Wit failure (miss by 10+)");
             }
 
-            // Trigger 3: TropeTrap count → +1 Madness at 3
+            // Trigger 3: Every TropeTrap failure → +1 Madness (Legendary/Nat1 excluded — handled by Trigger 1)
             if (!rollResult.IsSuccess && rollResult.Tier >= FailureTier.TropeTrap
-                && rollResult.Tier != FailureTier.Legendary) // Legendary is Nat 1, separate tier
+                && rollResult.Tier != FailureTier.Legendary)
             {
-                _tropeTrapCount++;
-                if (_tropeTrapCount == 3 && !_tropeTrapMadnessTriggered)
-                {
-                    _tropeTrapMadnessTriggered = true;
-                    _playerShadows.ApplyGrowth(ShadowStatType.Madness, 1,
-                        "3+ trope traps in one conversation");
-                }
-            }
-            // Legendary (Nat 1) also counts as a trope-trap-tier failure per spec (tier >= TropeTrap)
-            if (!rollResult.IsSuccess && rollResult.Tier == FailureTier.Legendary)
-            {
-                _tropeTrapCount++;
-                if (_tropeTrapCount == 3 && !_tropeTrapMadnessTriggered)
-                {
-                    _tropeTrapMadnessTriggered = true;
-                    _playerShadows.ApplyGrowth(ShadowStatType.Madness, 1,
-                        "3+ trope traps in one conversation");
-                }
+                _playerShadows.ApplyGrowth(ShadowStatType.Madness, 1,
+                    "TropeTrap failure");
             }
 
             // Trigger 3b: RIZZ TropeTrap failure → +1 Despair (#708)
@@ -1098,19 +1081,30 @@ namespace Pinder.Core.Conversation
                 }
             }
 
-            // Trigger 14: Same opener twice in a row → +1 Madness
-            if (_turnNumber == 0) // first turn
+            // Trigger 15: CHARM used 3+ times → +1 Madness (once)
+            if (chosenOption.Stat == StatType.Charm)
             {
-                _sessionOpener = chosenOption.IntendedText;
-                if (_previousOpener != null
-                    && string.Equals(
-                        _sessionOpener.Trim(),
-                        _previousOpener.Trim(),
-                        StringComparison.OrdinalIgnoreCase))
+                _charmUsageCount++;
+                if (_charmUsageCount == 3 && !_charmMadnessTriggered)
                 {
+                    _charmMadnessTriggered = true;
                     _playerShadows.ApplyGrowth(ShadowStatType.Madness, 1,
-                        "Same opener twice in a row");
+                        "CHARM used 3+ times in one conversation");
                 }
+            }
+
+            // Shadow reduction: Combo success → Madness -1
+            if (comboTriggered != null)
+            {
+                _playerShadows.ApplyOffset(ShadowStatType.Madness, -1,
+                    $"Combo success ({comboTriggered})");
+            }
+
+            // Shadow reduction: Tell option selected → Madness -1
+            if (hasTellOption)
+            {
+                _playerShadows.ApplyOffset(ShadowStatType.Madness, -1,
+                    "Tell option selected");
             }
         }
 

@@ -1215,26 +1215,46 @@
   outcome:
     shadow: Madness
     shadow_delta: 1
-- id: §9.shadow-growth.3+-trope-traps-in-one-conversation
+- id: §9.shadow-growth.any-trope-trap-failure
   section: §9
-  title: Shadow Growth — 3+ trope traps in one conversation
+  title: Shadow Growth — Any trope trap failure
   type: shadow_growth
-  description: '3+ trope traps in one conversation: Madness +1.'
+  description: 'Any trope trap failure: Madness +1 (every occurrence).'
   condition:
-    action: 3+ trope traps in one conversation
+    action: Any trope trap failure
   outcome:
     shadow: Madness
     shadow_delta: 1
-- id: §9.shadow-growth.déjà-vu-same-opener-twice-in-a-row
+- id: §9.shadow-growth.charm-used-3+-times
   section: §9
-  title: Shadow Growth — Déjà vu (same opener twice in a row)
+  title: Shadow Growth — CHARM used 3+ times in one conversation
   type: shadow_growth
-  description: 'Déjà vu (same opener twice in a row): Madness +1.'
+  description: 'CHARM used 3+ times in one conversation: Madness +1 (once per conversation).'
   condition:
-    action: Déjà vu (same opener twice in a row)
+    action: CHARM used 3+ times in one conversation
   outcome:
     shadow: Madness
     shadow_delta: 1
+- id: §9.shadow-reduce.combo-success
+  section: §9
+  title: Shadow Reduction — Combo success
+  type: shadow_growth
+  description: 'Combo success: Madness -1.'
+  condition:
+    action: Combo success
+  outcome:
+    shadow: Madness
+    shadow_delta: -1
+- id: §9.shadow-reduce.tell-option-selected
+  section: §9
+  title: Shadow Reduction — Tell option selected
+  type: shadow_growth
+  description: 'Tell option selected: Madness -1 (regardless of success/failure).'
+  condition:
+    action: Tell option selected
+  outcome:
+    shadow: Madness
+    shadow_delta: -1
 - id: §9.shadow-growth.session-longer-than-30-min-real-time
   section: §9
   title: Shadow Growth — Session longer than 30 min real-time

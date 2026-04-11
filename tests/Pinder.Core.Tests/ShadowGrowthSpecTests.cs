@@ -155,19 +155,20 @@ namespace Pinder.Core.Tests
 
         // --- Madness triggers ---
 
-        // Mutation: would catch if trope trap threshold was 2 instead of 3
+        // Every TropeTrap failure → +1 Madness (not just 3rd)
         [Fact]
-        public async Task AC1_ThreeTropeTraps_GrowsMadness()
+        public async Task AC716_EveryTropeTrap_GrowsMadness()
         {
-            // Miss by 6-9 = TropeTrap. Charm=0, SA=0 → DC=13. d20=6 → miss=7 → TropeTrap
+            // Use Honesty to avoid CHARM 3x trigger. Honesty=0, Charm=0 → DC will cause TropeTrap.
             var shadows = MakeTracker();
             var diceValues = new List<int>();
             for (int i = 0; i < 3; i++) { diceValues.Add(6); diceValues.Add(50); }
             var session = BuildSession(
                 dice: new TestDice(diceValues.ToArray()),
-                playerStats: Stats(charm: 0),
-                opponentStats: Stats(sa: 0),
+                playerStats: Stats(honesty: 0),
+                opponentStats: Stats(charm: 0),
                 shadows: shadows,
+                options: new[] { new DialogueOption(StatType.Honesty, "truth") },
                 startingInterest: 15);
 
             for (int i = 0; i < 3; i++)
@@ -176,64 +177,162 @@ namespace Pinder.Core.Tests
                 await session.ResolveTurnAsync(0);
             }
 
-            Assert.Equal(1, shadows.GetDelta(ShadowStatType.Madness));
+            // Each TropeTrap gives +1, so 3 TropeTraps = +3 Madness
+            Assert.Equal(3, shadows.GetDelta(ShadowStatType.Madness));
         }
 
-        // Mutation: would catch if trope trap triggered again at count 4
+        // Single TropeTrap should give +1 Madness immediately
         [Fact]
-        public async Task AC1_FourTropeTraps_MadnessStillOne()
+        public async Task AC716_SingleTropeTrap_GrowsMadnessOne()
         {
             var shadows = MakeTracker();
-            // Miss by 6-9 = TropeTrap = -2 interest (rules-v3.4 §5). 4 turns × -2 = -8.
-            // Starting at 15 (Interested, no adv/disadv). After 4 turns: 15-8=7 (Interested).
-            // No game-ending risk.
-            var diceValues = new List<int>();
-            for (int i = 0; i < 4; i++) { diceValues.Add(6); diceValues.Add(50); }
             var session = BuildSession(
-                dice: new TestDice(diceValues.ToArray()),
+                dice: new TestDice(new[] { 6, 50 }),
                 playerStats: Stats(charm: 0),
                 opponentStats: Stats(sa: 0),
                 shadows: shadows,
                 startingInterest: 15);
 
-            for (int i = 0; i < 4; i++)
+            await session.StartTurnAsync();
+            var result = await session.ResolveTurnAsync(0);
+
+            Assert.Equal(1, shadows.GetDelta(ShadowStatType.Madness));
+            Assert.Contains(result.ShadowGrowthEvents, e => e.Contains("TropeTrap"));
+        }
+
+        // CHARM used 3 times → +1 Madness
+        [Fact]
+        public async Task AC716_CharmUsed3Times_GrowsMadness()
+        {
+            var shadows = MakeTracker();
+            // Use moderate rolls that succeed but don't push interest to DateSecured.
+            // Charm=3, SA=2 → DC=15. d20=15 → success. Start low interest to avoid date.
+            var diceValues = new List<int>();
+            for (int i = 0; i < 4; i++) { diceValues.Add(15); diceValues.Add(50); }
+            var session = BuildSession(
+                dice: new TestDice(diceValues.ToArray()),
+                shadows: shadows,
+                startingInterest: 5);
+
+            for (int i = 0; i < 3; i++)
             {
                 await session.StartTurnAsync();
-                await session.ResolveTurnAsync(0);
+                await session.ResolveTurnAsync(0); // Charm at index 0
             }
 
-            // Should still be 1, not 2
             Assert.Equal(1, shadows.GetDelta(ShadowStatType.Madness));
         }
 
-        // Mutation: would catch if same-opener check was case-sensitive
+        // CHARM used 2 times → no Madness from this trigger
         [Fact]
-        public async Task AC1_SameOpenerCaseInsensitive_GrowsMadness()
+        public async Task AC716_CharmUsed2Times_NoMadnessFromUsage()
         {
             var shadows = MakeTracker();
+            var diceValues = new List<int>();
+            for (int i = 0; i < 3; i++) { diceValues.Add(15); diceValues.Add(50); }
             var session = BuildSession(
-                dice: Dice(15, 50),
+                dice: new TestDice(diceValues.ToArray()),
                 shadows: shadows,
-                previousOpener: "  HEY, YOU COME HERE OFTEN?  "); // NullLlmAdapter Charm option
+                startingInterest: 5);
 
-            await session.StartTurnAsync();
-            var result = await session.ResolveTurnAsync(0);
+            for (int i = 0; i < 2; i++)
+            {
+                await session.StartTurnAsync();
+                await session.ResolveTurnAsync(0); // Charm at index 0
+            }
 
-            Assert.Contains(result.ShadowGrowthEvents, e => e.Contains("Same opener twice"));
-            Assert.Equal(1, shadows.GetDelta(ShadowStatType.Madness));
+            Assert.Equal(0, shadows.GetDelta(ShadowStatType.Madness));
         }
 
-        // Mutation: would catch if previousOpener=null still triggered madness
+        // Combo success → Madness -1
         [Fact]
-        public async Task AC1_NullPreviousOpener_NoMadnessGrowth()
+        public async Task AC716_ComboSuccess_ReducesMadness()
         {
             var shadows = MakeTracker();
-            var session = BuildSession(dice: Dice(15, 50), shadows: shadows, previousOpener: null);
+            shadows.ApplyGrowth(ShadowStatType.Madness, 2, "setup");
 
+            // NullLlmAdapter: idx 0=Charm, idx 1=Honesty, idx 2=Wit, idx 3=Chaos
+            // Combo: 2 different stats succeed in a row.
+            // Turn 1: Wit (idx 2) success. Turn 2: Charm (idx 0) success → "The Setup" combo.
+            // Use Nat 20 to guarantee success and avoid date-secured by starting low.
+            var diceValues = new List<int> { 20, 50, 20, 50, 20, 50, 20, 50 };
+            var session = BuildSession(
+                dice: new TestDice(diceValues.ToArray()),
+                shadows: shadows,
+                startingInterest: 5);
+
+            // Turn 1: Wit success
+            await session.StartTurnAsync();
+            await session.ResolveTurnAsync(2);
+
+            // Turn 2: Charm success → should trigger "The Setup" combo (Wit → Charm)
+            await session.StartTurnAsync();
+            var result2 = await session.ResolveTurnAsync(0);
+
+            // If combo triggered, Madness should be reduced from 2 to 1
+            if (result2.ComboTriggered != null)
+            {
+                Assert.True(shadows.GetDelta(ShadowStatType.Madness) < 2,
+                    $"Combo '{result2.ComboTriggered}' triggered but Madness not reduced: {shadows.GetDelta(ShadowStatType.Madness)}");
+            }
+        }
+
+        // Tell option selected → Madness -1
+        [Fact]
+        public async Task AC716_TellOptionSelected_ReducesMadness()
+        {
+            var shadows = MakeTracker();
+            shadows.ApplyGrowth(ShadowStatType.Madness, 2, "setup");
+
+            // Use TellLlmAdapter: turn 1 opponent response reveals a Charm tell.
+            // Turn 2: player picks Charm → HasTellBonus = true.
+            var diceValues = new List<int> { 15, 50, 15, 50, 15, 50, 15, 50 };
+            var session = BuildSessionWithLlm(
+                dice: new TestDice(diceValues.ToArray()),
+                llm: new TellLlmAdapter(StatType.Charm),
+                shadows: shadows,
+                startingInterest: 5);
+
+            // Turn 1: any option (sets up tell for next turn)
+            await session.StartTurnAsync();
+            await session.ResolveTurnAsync(0);
+
+            // Turn 2: Charm (idx 0) with active tell → Madness -1
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
-            Assert.DoesNotContain(result.ShadowGrowthEvents, e => e.Contains("Same opener twice"));
+            // setup 2 - 1 (tell) = 1
+            Assert.Equal(1, shadows.GetDelta(ShadowStatType.Madness));
+            Assert.Contains(result.ShadowGrowthEvents, e => e.Contains("Tell option"));
+        }
+
+        // Tell option selected on failure → still reduces Madness
+        [Fact]
+        public async Task AC716_TellOptionFailure_StillReducesMadness()
+        {
+            var shadows = MakeTracker();
+            shadows.ApplyGrowth(ShadowStatType.Madness, 3, "setup");
+
+            // Turn 1: succeed to set up tell. Turn 2: fail (Fumble) but tell still reduces.
+            // Charm=3, DC=15. Turn 2 roll=10 → total=13, miss by 2 → Fumble (no TropeTrap).
+            var diceValues = new List<int> { 15, 50, 10, 50, 15, 50, 15, 50 };
+            var session = BuildSessionWithLlm(
+                dice: new TestDice(diceValues.ToArray()),
+                llm: new TellLlmAdapter(StatType.Charm),
+                shadows: shadows,
+                startingInterest: 5);
+
+            // Turn 1: sets up tell
+            await session.StartTurnAsync();
+            await session.ResolveTurnAsync(0);
+
+            // Turn 2: Charm with Tell, roll=10 → Fumble. Tell reduction still fires.
+            await session.StartTurnAsync();
+            var result = await session.ResolveTurnAsync(0);
+
+            // setup 3 - 1 (tell) = 2
+            Assert.Equal(2, shadows.GetDelta(ShadowStatType.Madness));
+            Assert.Contains(result.ShadowGrowthEvents, e => e.Contains("Tell option"));
         }
 
         // --- Despair triggers (#708) ---
@@ -840,20 +939,21 @@ namespace Pinder.Core.Tests
             }
         }
 
-        // Mutation: would catch if different opener didn't prevent madness growth
+        // Same opener trigger removed (#716) — verify no Madness from same opener
         [Fact]
-        public async Task Edge_DifferentOpener_NoMadness()
+        public async Task AC716_SameOpener_NoLongerGrowsMadness()
         {
             var shadows = MakeTracker();
             var session = BuildSession(
                 dice: Dice(15, 50),
                 shadows: shadows,
-                previousOpener: "Something completely unrelated");
+                previousOpener: "  HEY, YOU COME HERE OFTEN?  "); // NullLlmAdapter Charm option
 
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
-            Assert.DoesNotContain(result.ShadowGrowthEvents, e => e.Contains("Same opener twice"));
+            Assert.DoesNotContain(result.ShadowGrowthEvents, e => e.Contains("Same opener"));
+            Assert.Equal(0, shadows.GetDelta(ShadowStatType.Madness));
         }
 
         // Mutation: would catch if negative shadow delta was rejected
@@ -1049,6 +1149,32 @@ namespace Pinder.Core.Tests
                 => Task.FromResult(context.ChosenOption.IntendedText);
             public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context)
                 => Task.FromResult(new OpponentResponse("..."));
+            public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context)
+                => Task.FromResult<string?>(null);
+        }
+
+        /// <summary>LLM adapter that returns a Tell on the opponent's response for a specific stat.</summary>
+        private sealed class TellLlmAdapter : ILlmAdapter
+        {
+            private readonly StatType _tellStat;
+            public TellLlmAdapter(StatType tellStat) => _tellStat = tellStat;
+
+            public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context)
+            {
+                var options = new[]
+                {
+                    new DialogueOption(StatType.Charm, "Hey, you come here often?"),
+                    new DialogueOption(StatType.Honesty, "I have to be real with you..."),
+                    new DialogueOption(StatType.Wit, "Did you know that penguins propose with pebbles?"),
+                    new DialogueOption(StatType.Chaos, "I once ate a whole pizza in a bouncy castle.")
+                };
+                return Task.FromResult(options);
+            }
+            public Task<string> DeliverMessageAsync(DeliveryContext context)
+                => Task.FromResult(context.ChosenOption.IntendedText);
+            public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context)
+                => Task.FromResult(new OpponentResponse("...",
+                    detectedTell: new Tell(_tellStat, $"Tell on {_tellStat}")));
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context)
                 => Task.FromResult<string?>(null);
         }

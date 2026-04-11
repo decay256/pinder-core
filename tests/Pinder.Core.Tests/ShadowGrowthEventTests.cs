@@ -90,31 +90,30 @@ namespace Pinder.Core.Tests
             Assert.Contains(result.ShadowGrowthEvents, e => e.Contains("Catastrophic Wit failure"));
         }
 
-        // ======================== Trigger 3: 3+ TropeTrap → +1 Madness ========================
+        // ======================== Trigger 3: Every TropeTrap → +1 Madness (#716) ========================
 
         [Fact]
         public async Task ThreeTropeTraps_GrowsMadness()
         {
             // Need 3 TropeTrap-tier failures. Miss by 6–9 = TropeTrap.
-            // DC = 16 + defender's SA effective. With SA=0, DC=13.
-            // Charm mod=0, level bonus=0. d20=6 → total=6, miss=13-6=7 → TropeTrap.
-            // Start at 15 (Interested, no advantage). 3× -3 = -9 → 6, still alive.
-            // Each turn: 1 d20 + 1 d100 = 2 dice. 3 turns = 6 dice.
+            // Use Honesty to avoid CHARM 3x trigger.
             var shadows = MakeShadowTracker();
             var dice = new QueueDice(new[] { 6, 50, 6, 50, 6, 50 });
             var session = MakeSessionWithDice(dice,
-                playerStats: MakeStatBlock(charm: 0),
-                opponentStats: MakeStatBlock(sa: 0), // Charm defence = SA, DC=13+0=13
+                playerStats: MakeStatBlock(honesty: 0),
+                opponentStats: MakeStatBlock(charm: 0), // Honesty defence = Charm
                 shadows: shadows,
-                startingInterest: 15); // Interested state, no advantage
+                llmOptions: new[] { new DialogueOption(StatType.Honesty, "truth") },
+                startingInterest: 15);
 
             for (int i = 0; i < 3; i++)
             {
                 await session.StartTurnAsync();
-                await session.ResolveTurnAsync(0); // Charm each time
+                await session.ResolveTurnAsync(0);
             }
 
-            Assert.Equal(1, shadows.GetDelta(ShadowStatType.Madness));
+            // Each TropeTrap gives +1 Madness, so 3 TropeTraps = 3
+            Assert.Equal(3, shadows.GetDelta(ShadowStatType.Madness));
         }
 
         // ======================== Trigger 4: Same stat 3 turns → +1 Fixation ========================
@@ -373,54 +372,22 @@ namespace Pinder.Core.Tests
             Assert.DoesNotContain(result.ShadowGrowthEvents, e => e.Contains("Never picked Chaos"));
         }
 
-        // ======================== Trigger 14: Same opener twice → +1 Madness ========================
+        // ======================== Trigger 14: Same opener removed (#716) ========================
 
         [Fact]
-        public async Task SameOpenerTwice_GrowsMadness()
+        public async Task SameOpenerTwice_NoLongerGrowsMadness()
         {
             var shadows = MakeShadowTracker();
             var dice = new QueueDice(new[] { 15, 50 });
             var session = MakeSessionWithDice(dice,
                 playerStats: MakeStatBlock(charm: 5),
                 shadows: shadows,
-                previousOpener: "Hey, you come here often?"); // matches NullLlmAdapter Charm option
-
-            await session.StartTurnAsync();
-            var result = await session.ResolveTurnAsync(0); // Charm: "Hey, you come here often?"
-
-            Assert.Contains(result.ShadowGrowthEvents, e => e.Contains("Madness") && e.Contains("Same opener twice in a row"));
-        }
-
-        [Fact]
-        public async Task SameOpenerDifferentCase_GrowsMadness()
-        {
-            var shadows = MakeShadowTracker();
-            var dice = new QueueDice(new[] { 15, 50 });
-            var session = MakeSessionWithDice(dice,
-                playerStats: MakeStatBlock(charm: 5),
-                shadows: shadows,
-                previousOpener: "  HEY, YOU COME HERE OFTEN?  "); // different casing + whitespace
+                previousOpener: "Hey, you come here often?");
 
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
-            Assert.Contains(result.ShadowGrowthEvents, e => e.Contains("Same opener twice in a row"));
-        }
-
-        [Fact]
-        public async Task DifferentOpener_NoMadness()
-        {
-            var shadows = MakeShadowTracker();
-            var dice = new QueueDice(new[] { 15, 50 });
-            var session = MakeSessionWithDice(dice,
-                playerStats: MakeStatBlock(charm: 5),
-                shadows: shadows,
-                previousOpener: "Something completely different");
-
-            await session.StartTurnAsync();
-            var result = await session.ResolveTurnAsync(0);
-
-            Assert.DoesNotContain(result.ShadowGrowthEvents, e => e.Contains("Same opener twice in a row"));
+            Assert.DoesNotContain(result.ShadowGrowthEvents, e => e.Contains("Same opener"));
         }
 
         [Fact]
