@@ -94,8 +94,8 @@ namespace Pinder.Core.Conversation
         private bool _currentHasDisadvantage;
 
         /// <summary>
-        /// Creates a new GameSession with optional configuration.
-        /// When config is null, behavior is identical to the 5-parameter constructor.
+        /// Creates a new GameSession with required configuration.
+        /// Config must be non-null — no silent fallbacks.
         /// </summary>
         public GameSession(
             CharacterProfile player,
@@ -103,7 +103,7 @@ namespace Pinder.Core.Conversation
             ILlmAdapter llm,
             IDiceRoller dice,
             ITrapRegistry trapRegistry,
-            GameSessionConfig? config)
+            GameSessionConfig config)
         {
             _player = player ?? throw new ArgumentNullException(nameof(player));
             _opponent = opponent ?? throw new ArgumentNullException(nameof(opponent));
@@ -111,21 +111,24 @@ namespace Pinder.Core.Conversation
             _dice = dice ?? throw new ArgumentNullException(nameof(dice));
             _trapRegistry = trapRegistry ?? throw new ArgumentNullException(nameof(trapRegistry));
 
-            // Store optional config fields early (needed by ResolveThresholdLevel below)
-            _clock = config?.Clock;
-            _playerShadows = config?.PlayerShadows;
-            _opponentShadows = config?.OpponentShadows;
-            _rules = config?.Rules;
-            _globalDcBias = config?.GlobalDcBias ?? 0;
-            _steeringRng = config?.SteeringRng ?? new Random();
-            _statDeliveryInstructions = config?.StatDeliveryInstructions;
+            if (config == null)
+                throw new ArgumentNullException(nameof(config), "GameSessionConfig is required — no silent defaults");
+
+            // Store config fields early (needed by ResolveThresholdLevel below)
+            _clock = config.Clock;
+            _playerShadows = config.PlayerShadows;
+            _opponentShadows = config.OpponentShadows;
+            _rules = config.Rules;
+            _globalDcBias = config.GlobalDcBias;
+            _steeringRng = config.SteeringRng ?? new Random();
+            _statDeliveryInstructions = config.StatDeliveryInstructions;
 
             // Determine starting interest: explicit config > Dread T3 > default
-            if (config?.StartingInterest.HasValue == true)
+            if (config.StartingInterest.HasValue)
             {
                 _interest = new InterestMeter(config.StartingInterest.Value);
             }
-            else if (config?.PlayerShadows != null
+            else if (config.PlayerShadows != null
                 && ResolveThresholdLevel(
                     config.PlayerShadows.GetEffectiveShadow(ShadowStatType.Dread)) >= 3)
             {

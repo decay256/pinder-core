@@ -47,10 +47,10 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public void GameSession_NullConfig_ThrowsInvalidOperationException()
+        public void GameSession_NullConfig_ThrowsArgumentNullException()
         {
-            // Clock is required — null config means no clock → must throw
-            Assert.Throws<InvalidOperationException>(() => new GameSession(
+            // Config is required — null config must throw before any field access
+            Assert.Throws<ArgumentNullException>(() => new GameSession(
                 MakeProfile("player"),
                 MakeProfile("opponent"),
                 new StubLlmAdapter(),

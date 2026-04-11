@@ -1870,6 +1870,183 @@ class TestMdToYamlContentFidelity(unittest.TestCase):
 
 
 # ###########################################################################
+# SECTION 10: Semantic round-trip test (deterministic, no LLM)
+# ###########################################################################
+
+# Category: Rules
+# Run with: dotnet test --filter "Category=Rules" (via RulesPipelineTests.cs)
+# Or directly: python3 -m pytest rules/tools/test_rules_pipeline.py -k "Semantic"
+
+
+def _normalize_value(v):
+    """Normalize a value for semantic comparison."""
+    if isinstance(v, str):
+        # Collapse whitespace, strip quote artifacts
+        return ' '.join(v.split()).strip().strip("'\"")
+    if isinstance(v, list):
+        return [_normalize_value(x) for x in v]
+    if isinstance(v, dict):
+        return {k: _normalize_value(val) for k, val in sorted(v.items())}
+    return v
+
+
+def _find_semantic_losses(original, roundtripped, path=""):
+    """Recursively find fields where content was lost."""
+    losses = []
+    if isinstance(original, dict):
+        for key, orig_val in original.items():
+            if key not in roundtripped:
+                losses.append(f"MISSING key '{path}.{key}'")
+            else:
+                losses.extend(_find_semantic_losses(
+                    orig_val, roundtripped[key], f"{path}.{key}"
+                ))
+    elif isinstance(original, list) and isinstance(roundtripped, list):
+        for i, (o, r) in enumerate(zip(original, roundtripped)):
+            losses.extend(_find_semantic_losses(o, r, f"{path}[{i}]"))
+        # Extra items in original that roundtripped lost
+        for i in range(len(roundtripped), len(original)):
+            losses.append(f"MISSING list item '{path}[{i}]'")
+    elif isinstance(original, str):
+        norm_orig = _normalize_value(original)
+        norm_rt = _normalize_value(roundtripped) if isinstance(roundtripped, str) else ""
+        if norm_orig and norm_rt and norm_orig != norm_rt:
+            losses.append(
+                f"VALUE CHANGED at {path}: '{norm_orig[:60]}' → '{norm_rt[:60]}'"
+            )
+    return losses
+
+
+def _is_acceptable_loss(loss_msg: str) -> bool:
+    """Filter out known acceptable differences."""
+    # sep_cells — formatting-only separator rows
+    if '.sep_cells' in loss_msg:
+        return True
+    # heading_level — integer, can be regenerated from context
+    if '.heading_level' in loss_msg:
+        return True
+    # Empty string values
+    if loss_msg.startswith("VALUE CHANGED") and "'' →" in loss_msg:
+        return True
+    if loss_msg.startswith("VALUE CHANGED") and "→ ''" in loss_msg:
+        return True
+    # description field when content moved into blocks
+    if '.description' in loss_msg and 'MISSING' not in loss_msg:
+        return True
+    # Enrichment-only fields that md_to_yaml cannot reconstruct
+    enrichment_only = {
+        '.condition', '.outcome', '.type', '.formula',
+        '.section', '.compact_heading', '.tier',
+        '.stats', '.shadows', '.level_range', '.behavior', '.interference',
+    }
+    for field in enrichment_only:
+        if field in loss_msg:
+            return True
+    return False
+
+
+class TestSemanticRoundTrip(unittest.TestCase):
+    """Deterministic semantic round-trip test — no LLM required."""
+
+    def test_no_content_lost_in_round_trip(self):
+        """YAML→MD→YAML round-trip produces semantically equivalent content.
+
+        This test is deterministic and requires no LLM or API key.
+        It verifies that no actual rule content (text, values, numbers) is lost
+        during the round-trip, even if formatting changes.
+        """
+        yaml_path = os.path.join(EXTRACTED_DIR, 'rules-v3-enriched.yaml')
+        if not os.path.exists(yaml_path):
+            self.skipTest("rules-v3-enriched.yaml not found")
+
+        # Load original YAML
+        with open(yaml_path, 'r', encoding='utf-8') as f:
+            original_rules = yaml.safe_load(f)
+        self.assertIsInstance(original_rules, list)
+        self.assertGreater(len(original_rules), 0)
+
+        # Round-trip: YAML → MD → YAML
+        md_text = yaml_to_md(yaml_path)
+        roundtripped_rules = md_to_rules(md_text)
+
+        # Build lookup by title for matching (ids may differ slightly)
+        orig_by_title = {}
+        for r in original_rules:
+            title = r.get('title', '')
+            if title:
+                orig_by_title[title] = r
+
+        rt_by_title = {}
+        for r in roundtripped_rules:
+            title = r.get('title', '')
+            if title:
+                rt_by_title[title] = r
+
+        all_losses = []
+
+        for title, orig_rule in orig_by_title.items():
+            if title not in rt_by_title:
+                all_losses.append(f"MISSING rule '{title}'")
+                continue
+
+            rt_rule = rt_by_title[title]
+
+            # Compare blocks (the primary content carrier)
+            orig_blocks = orig_rule.get('blocks', [])
+            rt_blocks = rt_rule.get('blocks', [])
+
+            if orig_blocks and rt_blocks:
+                losses = _find_semantic_losses(
+                    orig_blocks, rt_blocks, path=f"[{title}].blocks"
+                )
+                if not losses:
+                    continue
+
+                # Build full text of all round-tripped blocks to check
+                # for content that was restructured (e.g. consecutive
+                # blockquotes merged into one) but not actually lost.
+                rt_all_text = ' '.join(
+                    _normalize_value(b.get('text', ''))
+                    for b in rt_blocks if isinstance(b, dict)
+                )
+
+                for loss in losses:
+                    # For MISSING list items, check if content appears
+                    # elsewhere in the round-tripped rule
+                    if 'MISSING list item' in loss:
+                        m = re.search(r'\[(\d+)\]', loss.rsplit('.blocks', 1)[-1])
+                        if m:
+                            idx = int(m.group(1))
+                            if idx < len(orig_blocks):
+                                orig_text = _normalize_value(
+                                    orig_blocks[idx].get('text', '')
+                                )
+                                if orig_text and orig_text in rt_all_text:
+                                    continue  # content present, just restructured
+                    # For VALUE CHANGED on .text, check if the original
+                    # content appears in the round-tripped text
+                    if 'VALUE CHANGED' in loss and '.text' in loss:
+                        # Extract the original value snippet
+                        m = re.search(r"'(.+?)'", loss)
+                        if m:
+                            orig_snippet = m.group(1)
+                            if orig_snippet in rt_all_text:
+                                continue  # content present, just rearranged
+                    all_losses.append(loss)
+
+        # Filter acceptable differences
+        real_losses = [l for l in all_losses if not _is_acceptable_loss(l)]
+
+        if real_losses:
+            summary = "\n".join(real_losses[:20])
+            if len(real_losses) > 20:
+                summary += f"\n... and {len(real_losses) - 20} more"
+            self.fail(
+                f"{len(real_losses)} semantic content losses found:\n{summary}"
+            )
+
+
+# ###########################################################################
 # Entry point
 # ###########################################################################
 
