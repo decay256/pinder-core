@@ -547,6 +547,15 @@ class Program
         StatType? secondLastStatUsed = null;
         var conversationHistory = new List<(string Sender, string Text)>();
 
+        // Shadow hint tracking state (#644)
+        var statsUsedHistory = new List<StatType>();
+        var highestPctHistory = new List<bool>();
+        int charmUsageCount = 0;
+        bool charmMadnessTriggered = false;
+        int saUsageCount = 0;
+        bool saOverthinkingTriggered = false;
+        int rizzCumulativeFailureCount = 0;
+
         while (turn < maxTurns)
         {
             turn++;
@@ -597,16 +606,26 @@ class Program
                 if (opt.ComboName != null)           badges.Add($"⭐ Combo: {opt.ComboName} ({PlaytestFormatter.GetComboRewardSummary(opt.ComboName)})");
                 if (opt.CallbackTurnNumber.HasValue) badges.Add("Callback");
                 if (opt.HasWeaknessWindow)           badges.Add("Window");
-                // Shadow growth warnings (#644)
-                bool honestyAvailable = Array.Exists(turnStart.Options, o => o.Stat == StatType.Honesty);
-                if (opt.Stat != StatType.Honesty && honestyAvailable)
-                    badges.Add("⚠️ Denial +1");
-                if (opt.Stat == StatType.Honesty && honestyAvailable && interest >= 15)
-                    badges.Add("✨ Denial -1");
-                if (lastStatUsed.HasValue && secondLastStatUsed.HasValue
-                    && lastStatUsed.Value == secondLastStatUsed.Value
-                    && opt.Stat == lastStatUsed.Value)
-                    badges.Add("⚠️ Fixation +1");
+                // Shadow growth warnings and reduction hints (#644)
+                var shadowCtx = new ShadowHintContext
+                {
+                    StatsUsedHistory = statsUsedHistory,
+                    HighestPctHistory = highestPctHistory,
+                    CurrentInterest = interest,
+                    CharmUsageCount = charmUsageCount,
+                    CharmMadnessTriggered = charmMadnessTriggered,
+                    SaUsageCount = saUsageCount,
+                    SaOverthinkingTriggered = saOverthinkingTriggered,
+                    RizzCumulativeFailureCount = rizzCumulativeFailureCount,
+                    CurrentOptions = turnStart.Options,
+                    PlayerStats = sableStats,
+                    OpponentStats = brickStats,
+                    PlayerLevelBonus = p1LevelBonus,
+                    HonestyAvailable = Array.Exists(turnStart.Options, o => o.Stat == StatType.Honesty)
+                };
+                var shadowHints = ShadowHintComputer.ComputeShadowHints(opt, shadowCtx);
+                badges.AddRange(shadowHints);
+                // Streak-breaking hint (not shadow-specific)
                 if (lastStatUsed.HasValue && secondLastStatUsed.HasValue
                     && lastStatUsed.Value == secondLastStatUsed.Value
                     && opt.Stat != lastStatUsed.Value)
@@ -794,10 +813,10 @@ class Program
             }
             if (result.ShadowGrowthEvents?.Count > 0)
             {
+                Console.WriteLine($"📊 Shadow: {string.Join(" | ", result.ShadowGrowthEvents)}");
+                // #484: Shadow threshold warnings
                 foreach (var shadowEvent in result.ShadowGrowthEvents)
                 {
-                    Console.WriteLine($"\u26a0\ufe0f SHADOW GROWTH: {shadowEvent}");
-                    // #484: Shadow threshold warnings
                     foreach (ShadowStatType sType in Enum.GetValues(typeof(ShadowStatType)))
                     {
                         if (shadowEvent.Contains(sType.ToString()))
@@ -811,28 +830,44 @@ class Program
                     }
                 }
             }
-            string trapLine = result.StateAfter.ActiveTrapNames.Length > 0
-                ? string.Join(", ", result.StateAfter.ActiveTrapNames) : "none";
-            Console.WriteLine($"Active Traps: {trapLine}  |  Momentum: {result.StateAfter.MomentumStreak} win{(result.StateAfter.MomentumStreak!=1?"s":"")}");
-            Console.WriteLine("```");
-
-            // #481/#700: Momentum tooltip
+            // #700: Active trap details
+            if (result.StateAfter.ActiveTrapDetails.Length > 0)
+            {
+                foreach (var trap in result.StateAfter.ActiveTrapDetails)
+                {
+                    Console.WriteLine($"🪤 Trap: {trap.Name} [{trap.Stat}] — {trap.TurnsRemaining} turn{(trap.TurnsRemaining != 1 ? "s" : "")} remaining — {trap.PenaltyDescription}");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Active Traps: none");
+            }
+            // #700: Momentum state
             if (result.StateAfter.MomentumStreak >= 3)
             {
                 int mBonus = result.StateAfter.MomentumStreak >= 5 ? 3 : 2;
-                Console.WriteLine($"> *Momentum: +{mBonus} added to your next roll total.*");
+                Console.WriteLine($"⚡ Momentum: {result.StateAfter.MomentumStreak}-streak → +{mBonus} bonus next roll");
             }
+            else
+            {
+                Console.WriteLine($"Momentum: {result.StateAfter.MomentumStreak} win{(result.StateAfter.MomentumStreak != 1 ? "s" : "")}");
+            }
+            Console.WriteLine("```");
 
-            // #700: Interest state change explanation
+            // #700: Interest range explanation
             {
                 InterestState stateBefore = snap.State;
                 InterestState stateAfter = result.StateAfter.State;
+                int newI = result.StateAfter.Interest;
+                string tierRange = GetInterestTierRange(stateAfter);
+                string stateDesc = GetInterestStateDescription(stateAfter);
                 if (stateBefore != stateAfter)
                 {
-                    Console.WriteLine($"*** Interest state changed to {stateAfter} ***");
-                    string stateDesc = GetInterestStateDescription(stateAfter);
-                    if (!string.IsNullOrEmpty(stateDesc))
-                        Console.WriteLine($"> *{stateDesc}*");
+                    Console.WriteLine($"💡 Interest: {newI} — **{stateAfter}** ({tierRange}: {stateDesc})");
+                }
+                else if (turn == 1)
+                {
+                    Console.WriteLine($"💡 Interest: {newI} — {stateAfter} ({tierRange}: {stateDesc})");
                 }
             }
 
@@ -842,6 +877,36 @@ class Program
             // Track stat usage for shadow warnings (#644)
             secondLastStatUsed = lastStatUsed;
             lastStatUsed = chosen.Stat;
+
+            // Update shadow hint tracking state
+            // Highest-% detection for this turn
+            {
+                int chosenMargin = sableStats.GetEffective(chosen.Stat) + p1LevelBonus
+                                   - brickStats.GetDefenceDC(chosen.Stat);
+                bool isHighest = true;
+                for (int oi = 0; oi < turnStart.Options.Length; oi++)
+                {
+                    int margin = sableStats.GetEffective(turnStart.Options[oi].Stat) + p1LevelBonus
+                                 - brickStats.GetDefenceDC(turnStart.Options[oi].Stat);
+                    if (margin > chosenMargin) { isHighest = false; break; }
+                }
+                highestPctHistory.Add(isHighest);
+            }
+            statsUsedHistory.Add(chosen.Stat);
+            if (chosen.Stat == StatType.Charm)
+            {
+                charmUsageCount++;
+                if (charmUsageCount == 3 && !charmMadnessTriggered)
+                    charmMadnessTriggered = true;
+            }
+            if (chosen.Stat == StatType.SelfAwareness)
+            {
+                saUsageCount++;
+                if (saUsageCount == 3 && !saOverthinkingTriggered)
+                    saOverthinkingTriggered = true;
+            }
+            if (chosen.Stat == StatType.Rizz && result.Roll != null && !result.Roll.IsSuccess)
+                rizzCumulativeFailureCount++;
 
             if (result.NarrativeBeat != null) { Console.WriteLine(); Console.WriteLine($"{result.NarrativeBeat}"); }
             if (result.IsGameOver) { finalOutcome = result.Outcome; break; }
@@ -952,6 +1017,19 @@ class Program
             return $"Clean success (beat by {beat}): delivered as intended. +1 Interest base.";
         }
     }
+
+    // #700: Interest tier range helper
+    static string GetInterestTierRange(InterestState state) => state switch
+    {
+        InterestState.Bored => "0-4",
+        InterestState.Lukewarm => "5-9",
+        InterestState.Interested => "10-15",
+        InterestState.VeryIntoIt => "16-20",
+        InterestState.AlmostThere => "21-24",
+        InterestState.DateSecured => "25",
+        InterestState.Unmatched => "≤0",
+        _ => "?"
+    };
 
     // #700: Interest state description helper
     static string GetInterestStateDescription(InterestState state) => state switch
