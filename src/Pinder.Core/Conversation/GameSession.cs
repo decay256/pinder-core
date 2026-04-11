@@ -622,10 +622,7 @@ namespace Pinder.Core.Conversation
                 ? _playerShadows.DrainGrowthEvents()
                 : (IReadOnlyList<string>)Array.Empty<string>();
 
-            // 6. Advance trap timers
-            _traps.AdvanceTurn();
-
-            // 7. Deliver message via LLM
+            // 6. Deliver message via LLM (trap timers advanced AFTER delivery + opponent, see step 12b)
             var deliveryTrapNames = GetActiveTrapNames();
             var deliveryTrapInstructions = GetActiveTrapInstructions();
 
@@ -721,6 +718,10 @@ namespace Pinder.Core.Conversation
 
             // 12. Append opponent message to history
             _history.Add((_opponent.DisplayName, opponentMessage));
+
+            // 12b. Advance trap timers — after delivery + opponent LLM calls so
+            //       duration-1 traps are visible during the turn they activate (#692)
+            _traps.AdvanceTurn();
 
             // 13. Increment turn number
             _turnNumber++;
