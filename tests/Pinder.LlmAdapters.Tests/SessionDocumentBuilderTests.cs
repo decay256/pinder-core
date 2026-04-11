@@ -516,7 +516,7 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("[CALLBACK:", PromptTemplates.DialogueOptionsInstruction);
             Assert.Contains("[COMBO:", PromptTemplates.DialogueOptionsInstruction);
             Assert.Contains("[TELL_BONUS:", PromptTemplates.DialogueOptionsInstruction);
-            Assert.Contains("exactly 4", PromptTemplates.DialogueOptionsInstruction);
+            Assert.Contains("exactly 3", PromptTemplates.DialogueOptionsInstruction);
         }
 
         [Fact]
@@ -536,6 +536,50 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("[RESPONSE]", PromptTemplates.OpponentResponseInstruction);
             Assert.Contains("TELL:", PromptTemplates.OpponentResponseInstruction);
             Assert.Contains("WEAKNESS:", PromptTemplates.OpponentResponseInstruction);
+        }
+
+        // ── Pivot directive tests (#696) ──
+
+        [Fact]
+        public void PivotDirective_NotPresent_AtTurn1()
+        {
+            var ctx = MakeDialogueContext(currentTurn: 1);
+            var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(ctx);
+            Assert.DoesNotContain("TOPIC PIVOT RULE", result);
+        }
+
+        [Fact]
+        public void PivotDirective_NotPresent_AtTurn2()
+        {
+            var ctx = MakeDialogueContext(currentTurn: 2);
+            var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(ctx);
+            Assert.DoesNotContain("TOPIC PIVOT RULE", result);
+        }
+
+        [Fact]
+        public void PivotDirective_Present_AtTurn3()
+        {
+            var ctx = MakeDialogueContext(currentTurn: 3);
+            var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(ctx);
+            Assert.Contains("TOPIC PIVOT RULE", result);
+            Assert.Contains("bridge to a different dimension", result);
+        }
+
+        [Fact]
+        public void PivotDirective_Present_AtTurn5()
+        {
+            var ctx = MakeDialogueContext(currentTurn: 5);
+            var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(ctx);
+            Assert.Contains("TOPIC PIVOT RULE", result);
+        }
+
+        [Fact]
+        public void PivotDirective_ContextCarriesTurnNumber()
+        {
+            var ctx = MakeDialogueContext(currentTurn: 4);
+            Assert.Equal(4, ctx.CurrentTurn);
+            var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(ctx);
+            Assert.Contains("Turn 4", result);
         }
     }
 }

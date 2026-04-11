@@ -265,6 +265,14 @@ Rules:
         internal const string InterestBeatGeneric =
 @"Generate a brief reaction from {opponent_name} reflecting the change in interest. Subtle and in character.";
 
+        // ── Pivot directive for topic exploration at turn 3+ ──
+
+        /// <summary>Pivot directive injected at turn 3+ to ensure conversation explores new dimensions.</summary>
+        internal const string PivotDirective =
+@"TOPIC PIVOT RULE (Turn 3+): If the conversation has stayed on the same topic since the opener, one option (Option C) MUST bridge to a different dimension of the character. The bridge should feel natural, not abrupt — use the current topic as a stepping stone.
+Examples: from 'mushrooms' to asking about the character's relationship to risk, from 'travel' to asking what home means to them, from 'work stress' to what they do when they need to feel alive.
+The pivot option should still be tagged with an appropriate stat and follow all other rules. It opens a new conversational thread without abandoning the rapport built so far.";
+
         // ── Resistance descriptors by interest range ──
 
         /// <summary>Interest 1-4: Active disengagement.</summary>

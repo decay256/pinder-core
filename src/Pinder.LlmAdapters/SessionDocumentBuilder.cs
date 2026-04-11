@@ -117,6 +117,13 @@ namespace Pinder.LlmAdapters
                 sb.AppendLine();
             }
 
+            // Turn 3+ pivot directive: encourage topic exploration
+            if (context.CurrentTurn >= 3)
+            {
+                sb.AppendLine(PromptTemplates.PivotDirective);
+                sb.AppendLine();
+            }
+
             // [ENGINE — Turn N] injection block
             sb.Append(PromptTemplates.EngineOptionsBlock
                 .Replace("{turn}", context.CurrentTurn.ToString())

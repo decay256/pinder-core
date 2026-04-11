@@ -3331,3 +3331,19 @@
   description: The rarest and most appreciated archetype. Actually reads the bio. References something specific. As
   heading_level: 4
   compact_heading: true
+- id: directive.pivot-at-turn-3
+  section: §3.2
+  title: Topic Pivot Directive (Turn 3+)
+  type: prompt_directive
+  description: >-
+    At turn 3 or later, if the conversation has stayed on the same topic since
+    the opener, one of the three dialogue options (Option C) must bridge to a
+    different dimension of the character. The bridge should feel natural, not
+    abrupt — use the current topic as a stepping stone. Examples: from
+    'mushrooms' to asking about the character's relationship to risk, from
+    'travel' to asking what home means to them. This prevents conversations
+    from stalling on a single topic and encourages deeper character exploration.
+  trigger_condition: currentTurn >= 3
+  applies_to: dialogue_options_generation
+  heading_level: 4
+  compact_heading: true
