@@ -62,10 +62,10 @@ WORD & PATTERN REPETITION — check all delivered messages above before writing 
 
         // Default delivery rule strings used when no DeliveryRules object is provided.
         private const string DefaultClean = "deliver essentially as written. Small word choice improvements only.";
-        private const string DefaultStrong = "improve the phrasing, timing, or rhythm of what's already there.\n  You may: rearrange for better flow, sharpen word choice, add ONE word or phrase that makes the existing sentiment more precise.\n  You must not: add new sentences that introduce ideas not in the intended message, change the emotional register, or make the message say something the player didn't intend.";
+        private const string DefaultStrong = "rewrite the intended message so it lands harder. The same idea, in the same voice, with sharper word choice and better timing.\n  You must NOT: append a new sentence at the end, add an em-dash continuation, or extend the message beyond what the player wrote.\n  The delivered version should be the same length or shorter than the intended version. If you add a word, you should cut a different word. Rewrite, do not extend.";
         private const string DefaultCritical = "deliver at peak. The message arrives perfectly. Something resonates.";
         private const string DefaultExceptional = "this is the best version of this message that could exist. It arrives at exactly the right moment with exactly the right weight. The opponent feels it.";
-        private const string DefaultTest = "The test: every idea in the delivered version should have a counterpart in the intended version. New additions should sharpen, not expand.";
+        private const string DefaultTest = "The test: the delivered version must not be longer than the intended version. Every sentence in the delivered version must have a counterpart in the intended version. Do not append. Do not extend. Rewrite.";
         private const string DefaultRegisterInstruction = "Stay in character. Match the texting register from the character profile above. Do not change the character's capitalization style. Before finalizing: check the conversation above for any word, filler phrase, or emoji the character used in the previous 2 messages — do not repeat them here. Each delivered message should feel like a fresh move.";
         private const string DefaultMediumRule = "This is a text message on a phone screen, not a monologue. No internal stage directions, no narration of emotional state, no self-commentary mid-message.";
 
@@ -101,6 +101,7 @@ WORD & PATTERN REPETITION — check all delivered messages above before writing 
                 "MEDIUM RULE: " + mediumRule + "\n" +
                 "\n" +
                 registerInstruction + " Don't explain the success.\n" +
+                "HARD RULE: Do not append a new sentence or em-dash continuation to the end of the message. Do not make the message longer. Rewrite — do not extend.\n" +
                 "Output only the message text.";
         }
 
