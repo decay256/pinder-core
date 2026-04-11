@@ -772,7 +772,8 @@ namespace Pinder.Core.Tests
                 dice: new TestDice(diceValues.ToArray()),
                 playerStats: Stats(sa: 5),
                 shadows: shadows,
-                options: new[] { new DialogueOption(StatType.SelfAwareness, "aware") });
+                options: new[] { new DialogueOption(StatType.SelfAwareness, "aware") },
+                startingInterest: 5);
 
             for (int i = 0; i < 3; i++)
             {

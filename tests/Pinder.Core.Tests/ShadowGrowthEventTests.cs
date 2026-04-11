@@ -293,7 +293,8 @@ namespace Pinder.Core.Tests
                 llmOptions: new[]
                 {
                     new DialogueOption(StatType.SelfAwareness, "Hmm...")
-                });
+                },
+                startingInterest: 5);
 
             for (int i = 0; i < 3; i++)
             {

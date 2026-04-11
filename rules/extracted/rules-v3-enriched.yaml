@@ -1518,6 +1518,17 @@
   outcome:
     shadow: Overthinking
     shadow_delta: -1
+- id: §9.shadow-reduce.success-high-interest-overthinking
+  section: §9
+  title: Shadow Reduction — Success at Interest ≥20 reduces Overthinking
+  type: shadow_growth
+  description: 'Any successful roll at Interest ≥20: Overthinking -1.'
+  condition:
+    action: Success at Interest ≥20
+    interest_min: 20
+  outcome:
+    shadow: Overthinking
+    shadow_delta: -1
 - id: §9.shadow-reduce.sa-honesty-success-high-interest
   section: §9
   title: Shadow Reduction — SA/Honesty success at Interest >18
@@ -1549,6 +1560,8 @@
       Shadow Reduced: Fixation -1
     - Action: Winning despite Overthinking disadvantage
       Shadow Reduced: Overthinking -1
+    - Action: Success at Interest ≥20
+      Shadow Reduced: Overthinking -1 (pressure lifts)
     - Action: SA/Honesty success at Interest >18
       Shadow Reduced: Despair -1
     - Action: Therapy Hoodie (legendary)

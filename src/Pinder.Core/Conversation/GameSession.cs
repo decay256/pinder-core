@@ -586,6 +586,13 @@ namespace Pinder.Core.Conversation
                     "Succeeded despite Overthinking disadvantage");
             }
 
+            // Shadow reduction: Success at interest ≥20 → Overthinking -1
+            if (rollResult.IsSuccess && interestAfter >= 20)
+            {
+                _playerShadows?.ApplyOffset(ShadowStatType.Overthinking, -1,
+                    "Success at high interest \u2014 pressure lifts");
+            }
+
             // Check end conditions for end-of-game triggers
             bool isGameOver = false;
             GameOutcome? outcome = null;

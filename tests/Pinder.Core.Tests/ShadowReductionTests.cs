@@ -439,6 +439,81 @@ namespace Pinder.Core.Tests
         }
 
         // =====================================================================
+        // Reduction 7: Success at interest ≥20 → Overthinking -1 (#721)
+        // =====================================================================
+
+        [Fact]
+        public async Task SuccessAtInterest20_ReducesOverthinking()
+        {
+            var shadows = MakeTracker();
+            shadows.ApplyGrowth(ShadowStatType.Overthinking, 3, "setup");
+            shadows.DrainGrowthEvents();
+
+            // Interest starts at 20, Charm=5, opponent wit=0 → DC=16.
+            // Roll 18+5=23 vs 16 → success. interestAfter ≥ 20.
+            var session = BuildSession(
+                dice: Dice(18, 50),
+                playerStats: Stats(charm: 5),
+                shadows: shadows,
+                startingInterest: 20);
+
+            await session.StartTurnAsync();
+            var result = await session.ResolveTurnAsync(0);
+
+            Assert.True(result.Roll.IsSuccess);
+            // Overthinking was 3, should be 3 - 1 = 2
+            Assert.Equal(2, shadows.GetDelta(ShadowStatType.Overthinking));
+            Assert.Contains(result.ShadowGrowthEvents, e => e.Contains("Overthinking") && e.Contains("pressure lifts"));
+        }
+
+        [Fact]
+        public async Task SuccessAtInterest19_NoOverthinkingReduction()
+        {
+            var shadows = MakeTracker();
+            shadows.ApplyGrowth(ShadowStatType.Overthinking, 3, "setup");
+            shadows.DrainGrowthEvents();
+
+            // Interest starts at 5, Charm=5 → success but interestAfter well below 20.
+            var session = BuildSession(
+                dice: Dice(15, 50),
+                playerStats: Stats(charm: 5),
+                shadows: shadows,
+                startingInterest: 5);
+
+            await session.StartTurnAsync();
+            var result = await session.ResolveTurnAsync(0);
+
+            Assert.True(result.Roll.IsSuccess);
+            // Overthinking should remain at 3 (interestAfter < 20)
+            Assert.Equal(3, shadows.GetDelta(ShadowStatType.Overthinking));
+        }
+
+        [Fact]
+        public async Task FailureAtInterest20_NoOverthinkingReduction()
+        {
+            var shadows = MakeTracker();
+            shadows.ApplyGrowth(ShadowStatType.Overthinking, 3, "setup");
+            shadows.DrainGrowthEvents();
+
+            // Interest starts at 20 (VeryIntoIt → advantage, rolls 2 d20s).
+            // SA=0, opponent honesty=1 → DC=14. Both d20s must be low.
+            // Dice: d20a=2, d20b=3, d100(delay)=50.
+            var session = BuildSession(
+                dice: Dice(2, 3, 50),
+                playerStats: Stats(sa: 0),
+                shadows: shadows,
+                startingInterest: 20,
+                options: new[] { new DialogueOption(StatType.SelfAwareness, "reflect") });
+
+            await session.StartTurnAsync();
+            var result = await session.ResolveTurnAsync(0);
+
+            Assert.False(result.Roll.IsSuccess);
+            // Overthinking should remain at 3 (failure, no reduction)
+            Assert.Equal(3, shadows.GetDelta(ShadowStatType.Overthinking));
+        }
+
+        // =====================================================================
         // Helpers
         // =====================================================================
 
