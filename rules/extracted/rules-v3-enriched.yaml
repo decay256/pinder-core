@@ -1475,7 +1475,7 @@
     - '-----------'
   - kind: paragraph
     text: 'Growth triggers are cumulative across the session. Despair persists from character base value and grows/shrinks per-session.'
-  description: 'Nat 1 on Rizz → +2 Despair. Rizz TropeTrap failure → +1 Despair. Every 3rd cumulative RIZZ failure → +1 Despair.'
+  description: 'Nat 1 on Rizz → +2 Despair. Rizz TropeTrap failure → +1 Despair. Every 3rd cumulative RIZZ failure → +1 Despair. SA or HONESTY success at interest >18 → Despair -1. Growth triggers are cumulative across the session.'
   heading_level: 3
   condition:
     shadow: Despair
