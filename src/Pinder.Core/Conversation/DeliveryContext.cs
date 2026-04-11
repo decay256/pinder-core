@@ -55,6 +55,12 @@ namespace Pinder.Core.Conversation
         /// <summary>True if the roll was a Natural 20.</summary>
         public bool IsNat20 { get; }
 
+        /// <summary>
+        /// Stat-specific failure instruction text from delivery-instructions.yaml, or null on success.
+        /// Only populated when the roll is a failure.
+        /// </summary>
+        public string StatFailureInstruction { get; }
+
         public DeliveryContext(
             string playerPrompt,
             string opponentPrompt,
@@ -69,7 +75,8 @@ namespace Pinder.Core.Conversation
             string playerName = "",
             string opponentName = "",
             int currentTurn = 0,
-            bool isNat20 = false)
+            bool isNat20 = false,
+            string statFailureInstruction = null)
         {
             PlayerPrompt = playerPrompt ?? throw new System.ArgumentNullException(nameof(playerPrompt));
             OpponentPrompt = opponentPrompt ?? throw new System.ArgumentNullException(nameof(opponentPrompt));
@@ -85,6 +92,7 @@ namespace Pinder.Core.Conversation
             OpponentName = opponentName ?? "";
             CurrentTurn = currentTurn;
             IsNat20 = isNat20;
+            StatFailureInstruction = statFailureInstruction;
         }
     }
 }

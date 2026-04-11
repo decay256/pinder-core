@@ -63,6 +63,16 @@ namespace Pinder.LlmAdapters
         }
 
         /// <summary>
+        /// Returns the stat-specific failure instruction for the given stat and failure tier, or null if not found.
+        /// Convenience wrapper around Get() + FailureTierKey().
+        /// </summary>
+        public string GetStatFailureInstruction(Pinder.Core.Stats.StatType stat, Pinder.Core.Rolls.FailureTier tier)
+        {
+            string tierKey = FailureTierKey(tier);
+            return Get(stat, tierKey);
+        }
+
+        /// <summary>
         /// Returns the horniness overlay instruction for the given failure tier, or null if not found.
         /// The horniness_overlay section in YAML has tiers: fumble, misfire, trope_trap, catastrophe.
         /// </summary>

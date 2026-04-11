@@ -235,14 +235,23 @@ namespace Pinder.LlmAdapters
                 int missMargin = Math.Abs(context.BeatDcBy);
                 string tierName = GetFailureTierName(context.Outcome);
 
-                // Use per-stat failure instructions when available, fall back to generic
-                string failureTierKey = StatDeliveryInstructions.FailureTierKey(context.Outcome);
-                string configuredFailureInstruction = statDeliveryInstructions != null
-                    ? statDeliveryInstructions.Get(context.ChosenOption.Stat, failureTierKey)
-                    : null;
-                string tierInstruction = !string.IsNullOrWhiteSpace(configuredFailureInstruction)
-                    ? configuredFailureInstruction
-                    : GetTierInstruction(context.Outcome);
+                // Prefer stat-specific failure instruction from DeliveryContext (#695),
+                // then fall back to adapter-level YAML lookup, then generic tier text.
+                string tierInstruction;
+                if (!string.IsNullOrWhiteSpace(context.StatFailureInstruction))
+                {
+                    tierInstruction = context.StatFailureInstruction;
+                }
+                else
+                {
+                    string failureTierKey = StatDeliveryInstructions.FailureTierKey(context.Outcome);
+                    string configuredFailureInstruction = statDeliveryInstructions != null
+                        ? statDeliveryInstructions.Get(context.ChosenOption.Stat, failureTierKey)
+                        : null;
+                    tierInstruction = !string.IsNullOrWhiteSpace(configuredFailureInstruction)
+                        ? configuredFailureInstruction
+                        : GetTierInstruction(context.Outcome);
+                }
 
                 sb.AppendLine($"Stat: {context.ChosenOption.Stat.ToString().ToUpperInvariant()} | Missed DC by {missMargin} | Tier: {tierName}");
 

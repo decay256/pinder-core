@@ -2348,8 +2348,8 @@
   - kind: blockquote
     text: '**Full prompt templates → [[character-construction]]**
 
-      All 8 LLM prompts: character system prompt, dialogue option generation, success delivery, failure degradation (with tier instructions), opponent message generation, shadow taint block, trap taint
-      block, and interest change beats.'
+      All 8 LLM prompts: character system prompt, dialogue option generation, success delivery, failure degradation (with stat-specific tier instructions from delivery-instructions.yaml), opponent message generation, shadow taint block, trap taint
+      block, and interest change beats. Failure delivery uses the stat''s paired shadow voice (e.g. RIZZ → DESPAIR, WIT → OVERTHINKING) at the appropriate tier (fumble/misfire/trope_trap/catastrophe/nat1).'
   description: ''
   heading_level: 2
 - id: §13.the-llm-generates

@@ -632,6 +632,13 @@ namespace Pinder.Core.Conversation
 
             int beatDcBy = rollResult.IsSuccess ? rollResult.FinalTotal - rollResult.DC : 0;
 
+            // Resolve stat-specific failure instruction when the roll failed (#695)
+            string statFailureInstruction = null;
+            if (!rollResult.IsSuccess && _statDeliveryInstructions != null)
+            {
+                statFailureInstruction = GetStatFailureInstruction(chosenOption.Stat, rollResult.Tier);
+            }
+
             var deliveryContext = new DeliveryContext(
                 playerPrompt: _player.AssembledSystemPrompt,
                 opponentPrompt: _opponent.AssembledSystemPrompt,
@@ -646,7 +653,8 @@ namespace Pinder.Core.Conversation
                 opponentName: _opponent.DisplayName,
                 currentTurn: _turnNumber,
                 shadowThresholds: _currentShadowThresholds,
-                isNat20: rollResult.IsNatTwenty);
+                isNat20: rollResult.IsNatTwenty,
+                statFailureInstruction: statFailureInstruction);
 
             string deliveredMessage = await _llm.DeliverMessageAsync(deliveryContext).ConfigureAwait(false);
 
@@ -1321,6 +1329,24 @@ namespace Pinder.Core.Conversation
             if (missMargin <= 5) return Rolls.FailureTier.Misfire;
             if (missMargin <= 9) return Rolls.FailureTier.TropeTrap;
             return Rolls.FailureTier.Catastrophe;
+        }
+
+        /// <summary>
+        /// Retrieves the stat-specific failure instruction from the stat delivery instructions.
+        /// Uses reflection to call GetStatFailureInstruction on the injected object
+        /// (which is StatDeliveryInstructions from the LlmAdapters layer).
+        /// Returns null if instructions are not available.
+        /// </summary>
+        private string GetStatFailureInstruction(Stats.StatType stat, Rolls.FailureTier tier)
+        {
+            if (_statDeliveryInstructions == null)
+                return null;
+
+            var method = _statDeliveryInstructions.GetType().GetMethod("GetStatFailureInstruction");
+            if (method == null)
+                return null;
+
+            return method.Invoke(_statDeliveryInstructions, new object[] { stat, tier }) as string;
         }
 
         /// <summary>
