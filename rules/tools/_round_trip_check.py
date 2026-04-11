@@ -7,13 +7,8 @@
 4. Compare original vs round-tripped YAML (structural fields only)
 5. Report differences
 
-Enrichment-only rules (no heading_level key) exist only in the enriched YAML
-and are generated as headings during YAML→MD.  The MD parser correctly picks
-them up as separate rules.  These are reported as "enrichment extras" and
-excluded from the per-rule diff.
-
 Usage:
-    python3 rules/tools/round_trip_check.py [yaml_path]
+    python3 rules/tools/rules_pipeline.py check
 """
 import sys
 import yaml
@@ -21,8 +16,8 @@ import difflib
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from yaml_to_md import yaml_to_md
-from md_to_yaml import md_to_rules
+from _yaml_to_md import yaml_to_md
+from _md_to_yaml import md_to_rules
 
 
 # Fields that only exist in the enriched YAML and cannot be recovered from MD
@@ -50,6 +45,57 @@ def clean_rule(r: dict) -> dict:
 def to_yaml(obj) -> str:
     return yaml.dump(obj, default_flow_style=False, allow_unicode=True,
                      sort_keys=True, width=200)
+
+
+def run_check(yaml_path: str | None = None) -> tuple[int, list[tuple], int]:
+    """Run round-trip check. Returns (total_diff_lines, diffs_found, missing_count).
+    
+    diffs_found is a list of (title, diff_lines_list, changed_count).
+    """
+    root = Path(__file__).parent.parent.parent
+    if yaml_path is None:
+        yaml_path = str(root / 'rules' / 'extracted' / 'rules-v3-enriched.yaml')
+
+    with open(yaml_path, 'r', encoding='utf-8') as f:
+        original_rules = yaml.safe_load(f)
+
+    heading_rules = [r for r in original_rules if 'heading_level' in r]
+
+    md_text = yaml_to_md(yaml_path)
+    round_tripped = md_to_rules(md_text)
+
+    orig_by_title = {r['title']: r for r in heading_rules}
+    rt_by_title = {r['title']: r for r in round_tripped}
+
+    orig_titles = set(orig_by_title)
+    rt_titles = set(rt_by_title)
+    missing = orig_titles - rt_titles
+    matched = orig_titles & rt_titles
+
+    archetype_titles = {r['title'] for r in heading_rules if r.get('type') == 'archetype_definition'}
+
+    total_diff_lines = 0
+    diffs_found = []
+
+    for title in sorted(matched):
+        if title in archetype_titles:
+            continue
+
+        o = clean_rule(orig_by_title[title])
+        r = clean_rule(rt_by_title[title])
+        oy = to_yaml([o])
+        ry = to_yaml([r])
+        d = list(difflib.unified_diff(
+            oy.splitlines(keepends=True), ry.splitlines(keepends=True),
+            fromfile='orig', tofile='rt', n=1))
+        changed = [l for l in d
+                   if (l.startswith('+') or l.startswith('-'))
+                   and not l.startswith('+++') and not l.startswith('---')]
+        if changed:
+            total_diff_lines += len(changed)
+            diffs_found.append((title, d, len(changed)))
+
+    return total_diff_lines, diffs_found, len(missing)
 
 
 def main():
@@ -86,19 +132,14 @@ def main():
     extra = rt_titles - orig_titles
     matched = orig_titles & rt_titles
 
-    # Identify archetype definitions — they use special fields, not blocks
     archetype_titles = {r['title'] for r in heading_rules if r.get('type') == 'archetype_definition'}
 
-    # Per-rule content diff
     total_diff_lines = 0
     diffs_found = []
     block_mismatches = 0
     archetypes_skipped = 0
 
     for title in sorted(matched):
-        # Archetype definitions store content in enrichment fields (stats, behavior, etc.)
-        # not in blocks. The round-trip creates blocks from the rendered MD. This is a
-        # known structural difference, not content loss — skip from diff.
         if title in archetype_titles:
             archetypes_skipped += 1
             continue
@@ -125,16 +166,13 @@ def main():
     print(f"4. Matched {len(matched)}/{len(heading_rules)} rules  |  diff lines: {total_diff_lines}  |  archetypes skipped: {archetypes_skipped}")
     print()
 
-    # Report missing titles (content loss!)
     if missing:
         print(f"⚠️  MISSING titles ({len(missing)}):")
         for t in sorted(missing):
             print(f"  - {t}")
         print()
 
-    # Enrichment extras are expected
     if extra:
-        # These come from enrichment-only derived rules rendered as headings
         derived_titles = {r['title'] for r in derived_rules}
         expected_extras = extra & derived_titles
         unexpected_extras = extra - derived_titles
@@ -146,7 +184,6 @@ def main():
                 print(f"  + {t}")
         print()
 
-    # Show per-rule diffs
     if diffs_found:
         print(f"=== RULE DIFFS ({len(diffs_found)} rules) ===")
         for i, (title, d, count) in enumerate(diffs_found):
@@ -182,7 +219,7 @@ def main():
     if total_diff_lines <= 50:
         print(f"\n✅ Round-trip diff is acceptable ({total_diff_lines} content diff lines)")
     else:
-        print(f"\n⚠️  Round-trip diff is {total_diff_lines} lines — investigating most significant losses")
+        print(f"\n⚠️  Round-trip diff is {total_diff_lines} lines — investigate for content loss")
 
     return 0 if not missing else 1
 

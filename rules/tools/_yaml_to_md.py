@@ -15,9 +15,9 @@ import sys
 import yaml
 from pathlib import Path
 
-# Allow importing generate.py from same directory
+# Allow importing _generate.py from same directory
 sys.path.insert(0, str(Path(__file__).parent))
-from generate import generate_markdown
+from _generate import generate_markdown
 
 
 def yaml_to_md(yaml_path: str) -> str:
