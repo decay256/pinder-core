@@ -151,12 +151,10 @@ namespace Pinder.Core.Conversation
             _ended = false;
             _outcome = null;
 
-            // Roll session Horniness (1d10) every session + time-of-day modifier from clock (required)
+            // Roll session Horniness (1d10) every session + time-of-day modifier when clock available
             {
-                if (_clock == null)
-                    throw new InvalidOperationException("GameClock is required \u2014 pass via GameSessionConfig");
                 int horninessRoll = _dice.Roll(10);
-                int todModifier = _clock.GetHorninessModifier();
+                int todModifier = _clock?.GetHorninessModifier() ?? 0;
                 _sessionHorniness = Math.Max(0, horninessRoll + todModifier);
             }
 
@@ -1143,11 +1141,9 @@ namespace Pinder.Core.Conversation
                     "Date secured without any Honesty successes");
             }
 
-            // Trigger 12: Never picked Chaos → +1 Fixation, −1 Madness
+            // Trigger 12: Chaos never used → −1 Madness (restraint, stays sane)
             if (!_statsUsedPerTurn.Contains(StatType.Chaos))
             {
-                _playerShadows.ApplyGrowth(ShadowStatType.Fixation, 1,
-                    "Never picked Chaos in whole conversation");
                 _playerShadows.ApplyOffset(ShadowStatType.Madness, -1,
                     "Chaos never used — Madness subsides");
             }
