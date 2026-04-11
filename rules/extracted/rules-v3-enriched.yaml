@@ -1476,6 +1476,18 @@
   outcome:
     shadow: Denial
     shadow_delta: -1
+- id: §9.shadow-reduce.chaos-combo-trigger
+  section: §9
+  title: Shadow Reduction — CHAOS combo trigger
+  type: shadow_growth
+  description: 'Any combo triggered on a CHAOS play: Fixation -1.'
+  condition:
+    action: CHAOS combo trigger
+    stat: Chaos
+    combo: any
+  outcome:
+    shadow: Fixation
+    shadow_delta: -1
 - id: §9.shadow-reduce.4+-different-stats-used-in-one
   section: §9
   title: Shadow Reduction — 4+ different stats used in one conversation
@@ -1521,6 +1533,8 @@
       Shadow Reduced: Dread -1
     - Action: Honesty success at Interest 15+
       Shadow Reduced: Denial -1 (being real with someone who received it reduces your own self-deception)
+    - Action: CHAOS combo trigger
+      Shadow Reduced: Fixation -1
     - Action: 4+ different stats used in one conversation
       Shadow Reduced: Fixation -1
     - Action: Winning despite Overthinking disadvantage
@@ -2584,7 +2598,9 @@
 
       - **Never picking Chaos in a whole conversation → Fixation +1**
 
-      - **4+ different stats used in one conversation → Fixation -1** (reward)'
+      - **4+ different stats used in one conversation → Fixation -1** (reward)
+
+      - **CHAOS combo trigger → Fixation -1** (reward)'
   description: 'The highest-% option is obvious. But the game punishes safe play:
 
     - **Picking the highest-% option 3 turns in a row → Fixation +1**
@@ -2593,7 +2609,9 @@
 
     - **Never picking Chaos in a whole conversation → Fixation +1**
 
-    - **4+ different stats used in one conversation → Fixation -1** (reward)'
+    - **4+ different stats used in one conversation → Fixation -1** (reward)
+
+    - **CHAOS combo trigger → Fixation -1** (reward)'
   heading_level: 3
   compact_heading: true
 - id: §17.interest-budget

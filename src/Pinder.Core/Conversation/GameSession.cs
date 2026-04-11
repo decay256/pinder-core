@@ -1105,6 +1105,13 @@ namespace Pinder.Core.Conversation
                     $"Combo success ({comboTriggered})");
             }
 
+            // Shadow reduction: CHAOS combo → Fixation -1
+            if (comboTriggered != null && chosenOption.Stat == StatType.Chaos)
+            {
+                _playerShadows.ApplyOffset(ShadowStatType.Fixation, -1,
+                    $"CHAOS combo ({comboTriggered})");
+            }
+
             // Shadow reduction: Tell option selected → Madness -1
             if (hasTellOption)
             {

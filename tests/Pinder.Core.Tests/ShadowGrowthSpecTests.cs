@@ -277,6 +277,41 @@ namespace Pinder.Core.Tests
             }
         }
 
+        // CHAOS combo trigger → Fixation -1 (#719)
+        [Fact]
+        public async Task AC719_ChaosCombo_ReducesFixation()
+        {
+            var shadows = MakeTracker();
+            shadows.ApplyGrowth(ShadowStatType.Fixation, 2, "setup");
+
+            // NullLlmAdapter: idx 0=Charm, idx 1=Honesty, idx 2=Wit, idx 3=Chaos
+            // The Pivot combo: Honesty → Chaos (both succeed)
+            // Use Nat 20 to guarantee success.
+            var diceValues = new List<int> { 20, 50, 20, 50, 20, 50, 20, 50 };
+            var session = BuildSession(
+                dice: new TestDice(diceValues.ToArray()),
+                shadows: shadows,
+                startingInterest: 5);
+
+            // Turn 1: Honesty success (idx 1)
+            await session.StartTurnAsync();
+            await session.ResolveTurnAsync(1);
+
+            // Turn 2: Chaos success (idx 3) → should trigger "The Pivot" combo
+            await session.StartTurnAsync();
+            var result2 = await session.ResolveTurnAsync(3);
+
+            // The Pivot combo should fire, reducing Fixation by 1
+            Assert.NotNull(result2.ComboTriggered);
+            Assert.Equal("The Pivot", result2.ComboTriggered);
+
+            // Fixation: setup 2, combo reduction -1 = net delta 1
+            // (Also Madness -1 from generic combo reduction, but we only check Fixation)
+            Assert.True(shadows.GetDelta(ShadowStatType.Fixation) < 2,
+                $"CHAOS combo triggered but Fixation not reduced: {shadows.GetDelta(ShadowStatType.Fixation)}");
+            Assert.Contains(result2.ShadowGrowthEvents, e => e.Contains("CHAOS combo"));
+        }
+
         // Tell option selected → Madness -1
         [Fact]
         public async Task AC716_TellOptionSelected_ReducesMadness()
