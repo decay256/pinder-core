@@ -188,7 +188,7 @@ namespace Pinder.Core.Tests
 
             var session = new GameSession(
                 MakeProfile("P"), MakeProfile("O"),
-                new NullLlmAdapter(), dice, new NullTrapRegistry());
+                new NullLlmAdapter(), dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
@@ -219,7 +219,7 @@ namespace Pinder.Core.Tests
 
             var session = new GameSession(
                 MakeProfile("P"), MakeProfile("O"),
-                new NullLlmAdapter(), dice, new NullTrapRegistry());
+                new NullLlmAdapter(), dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             // Turn 1
             await session.StartTurnAsync();
@@ -252,7 +252,7 @@ namespace Pinder.Core.Tests
 
             var session = new GameSession(
                 MakeProfile("P"), MakeProfile("O"),
-                new NullLlmAdapter(), dice, new NullTrapRegistry());
+                new NullLlmAdapter(), dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             await session.StartTurnAsync();
             var r1 = await session.ResolveTurnAsync(0);
@@ -297,7 +297,7 @@ namespace Pinder.Core.Tests
 
             var session = new GameSession(
                 MakeProfile("P", 9), MakeProfile("O", 0),
-                new NullLlmAdapter(), dice, new NullTrapRegistry());
+                new NullLlmAdapter(), dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             // Every turn has the same interestDelta; momentum is in ExternalBonus
             int[] expectedDeltas = { 2, 2, 2, 2, 2 };
@@ -333,7 +333,7 @@ namespace Pinder.Core.Tests
 
             var session = new GameSession(
                 MakeProfile("P", 9), MakeProfile("O", 0),
-                new NullLlmAdapter(), dice, new NullTrapRegistry());
+                new NullLlmAdapter(), dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             // Build a 3-win streak
             for (int i = 0; i < 3; i++)
@@ -360,7 +360,7 @@ namespace Pinder.Core.Tests
             var dice = new FixedDice(5);  // 5=horniness roll
             var session = new GameSession(
                 MakeProfile("P"), MakeProfile("O"),
-                new NullLlmAdapter(), dice, new NullTrapRegistry());
+                new NullLlmAdapter(), dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             await Assert.ThrowsAsync<InvalidOperationException>(() => session.ResolveTurnAsync(0));
         }
@@ -371,7 +371,7 @@ namespace Pinder.Core.Tests
             var dice = new FixedDice(5, 15, 50);
             var session = new GameSession(
                 MakeProfile("P"), MakeProfile("O"),
-                new NullLlmAdapter(), dice, new NullTrapRegistry());
+                new NullLlmAdapter(), dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             await session.StartTurnAsync();
             await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => session.ResolveTurnAsync(5));
@@ -384,7 +384,7 @@ namespace Pinder.Core.Tests
             var dice = new FixedDice(5, 16, 50);
             var session = new GameSession(
                 MakeProfile("Player"), MakeProfile("Opponent"),
-                new NullLlmAdapter(), dice, new NullTrapRegistry());
+                new NullLlmAdapter(), dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
@@ -397,6 +397,25 @@ namespace Pinder.Core.Tests
 
     internal static class TestHelpers
     {
+        /// <summary>
+        /// Returns a zero-modifier IGameClock for test isolation.
+        /// </summary>
+        public static IGameClock MakeClock(int horninessModifier = 0)
+            => new ZeroModifierClock(horninessModifier);
+
+        private sealed class ZeroModifierClock : Pinder.Core.Interfaces.IGameClock
+        {
+            private readonly int _mod;
+            public ZeroModifierClock(int mod) => _mod = mod;
+            public DateTimeOffset Now => DateTimeOffset.UtcNow;
+            public int RemainingEnergy => 100;
+            public void Advance(TimeSpan amount) { }
+            public void AdvanceTo(DateTimeOffset target) { }
+            public Pinder.Core.Interfaces.TimeOfDay GetTimeOfDay() => Pinder.Core.Interfaces.TimeOfDay.Afternoon;
+            public int GetHorninessModifier() => _mod;
+            public bool ConsumeEnergy(int amount) => true;
+        }
+
         public static StatBlock MakeStatBlock(int allStats = 2, int allShadow = 0)
         {
             var stats = new Dictionary<StatType, int>
@@ -411,7 +430,7 @@ namespace Pinder.Core.Tests
             var shadow = new Dictionary<ShadowStatType, int>
             {
                 { ShadowStatType.Madness, allShadow },
-                { ShadowStatType.Horniness, allShadow },
+                { ShadowStatType.Despair, allShadow },
                 { ShadowStatType.Denial, allShadow },
                 { ShadowStatType.Fixation, allShadow },
                 { ShadowStatType.Dread, allShadow },

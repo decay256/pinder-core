@@ -50,6 +50,9 @@ namespace Pinder.Core.Conversation
         private bool _saOverthinkingTriggered;
         private string? _sessionOpener;
 
+        // Despair (RIZZ failure shadow) tracking (#708)
+        private int _rizzConsecutiveCount;
+
         private int _momentumStreak;
         private int _pendingMomentumBonus;
         private int _turnNumber;
@@ -173,6 +176,7 @@ namespace Pinder.Core.Conversation
             _saUsageCount = 0;
             _saOverthinkingTriggered = false;
             _sessionOpener = null;
+            _rizzConsecutiveCount = 0;
 
             // Stateful conversation session (#536)
             // If the adapter supports stateful mode, start a persistent opponent session.
@@ -941,11 +945,12 @@ namespace Pinder.Core.Conversation
             if (_playerShadows == null)
                 return;
 
-            // Trigger 1: Nat 1 → +1 to paired shadow
+            // Trigger 1: Nat 1 → +1 to paired shadow (+2 for Rizz Nat 1 → Despair #708)
             if (rollResult.IsNatOne)
             {
                 var pairedShadow = StatBlock.ShadowPairs[chosenOption.Stat];
-                _playerShadows.ApplyGrowth(pairedShadow, 1,
+                int natOneAmount = chosenOption.Stat == StatType.Rizz ? 2 : 1;
+                _playerShadows.ApplyGrowth(pairedShadow, natOneAmount,
                     $"Nat 1 on {chosenOption.Stat}");
             }
 
@@ -958,28 +963,36 @@ namespace Pinder.Core.Conversation
                     "Catastrophic Wit failure (miss by 10+)");
             }
 
-            // Trigger 3: TropeTrap count → +1 Madness at 3
-            if (!rollResult.IsSuccess && rollResult.Tier >= FailureTier.TropeTrap
-                && rollResult.Tier != FailureTier.Legendary) // Legendary is Nat 1, separate tier
+            // Trigger 3: Every TropeTrap (or Legendary) failure → +1 Madness
+            if (!rollResult.IsSuccess && rollResult.Tier >= FailureTier.TropeTrap)
             {
-                _tropeTrapCount++;
-                if (_tropeTrapCount == 3 && !_tropeTrapMadnessTriggered)
+                _playerShadows.ApplyGrowth(ShadowStatType.Madness, 1,
+                    "TropeTrap or Legendary failure");
+            }
+
+            // Trigger 3b: RIZZ TropeTrap failure → +1 Despair (#708)
+            if (chosenOption.Stat == StatType.Rizz
+                && !rollResult.IsSuccess
+                && rollResult.Tier >= FailureTier.TropeTrap
+                && rollResult.Tier != FailureTier.Legendary) // Legendary handled by Trigger 1
+            {
+                _playerShadows.ApplyGrowth(ShadowStatType.Despair, 1,
+                    "RIZZ TropeTrap failure");
+            }
+
+            // Trigger 3c: RIZZ picked 3 consecutive turns without success → +1 Despair (#708)
+            if (chosenOption.Stat == StatType.Rizz && !rollResult.IsSuccess)
+            {
+                _rizzConsecutiveCount++;
+                if (_rizzConsecutiveCount >= 3 && _rizzConsecutiveCount % 3 == 0)
                 {
-                    _tropeTrapMadnessTriggered = true;
-                    _playerShadows.ApplyGrowth(ShadowStatType.Madness, 1,
-                        "3+ trope traps in one conversation");
+                    _playerShadows.ApplyGrowth(ShadowStatType.Despair, 1,
+                        "RIZZ picked 3 turns in a row without success");
                 }
             }
-            // Legendary (Nat 1) also counts as a trope-trap-tier failure per spec (tier >= TropeTrap)
-            if (!rollResult.IsSuccess && rollResult.Tier == FailureTier.Legendary)
+            else
             {
-                _tropeTrapCount++;
-                if (_tropeTrapCount == 3 && !_tropeTrapMadnessTriggered)
-                {
-                    _tropeTrapMadnessTriggered = true;
-                    _playerShadows.ApplyGrowth(ShadowStatType.Madness, 1,
-                        "3+ trope traps in one conversation");
-                }
+                _rizzConsecutiveCount = 0;
             }
 
             // Trigger 4: Same stat 3 turns in a row → +1 Fixation
