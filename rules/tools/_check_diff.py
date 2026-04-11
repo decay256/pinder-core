@@ -39,25 +39,41 @@ def classify_diffs(diffs_found: list[tuple]) -> str:
         diff_text = diff_text[:30000] + '\n\n... (truncated)'
 
     prompt = f"""You are reviewing a YAML round-trip diff from a rules pipeline.
-The pipeline converts YAML → Markdown → YAML. Some differences are expected:
+The pipeline converts YAML → Markdown → YAML. Many differences are expected
+because the round-trip re-derives structural fields from content. You must
+distinguish real data loss from harmless structural/formatting artifacts.
+
+EXPECTED (not content loss — classify as FORMATTING_ONLY):
 - Whitespace/formatting changes (padding, blank lines, trailing spaces)
 - YAML quoting style changes (single vs double quotes, block vs flow)
 - Key reordering within a dict
 - Line wrapping differences in long strings
-- Separator row width normalization in markdown tables
+- Separator row width normalization in markdown tables (sep_cells changing
+  width, e.g. '-------' → '---' — these are column separator dashes)
+- The 'description' field changing value — description is auto-generated
+  from blocks, so its exact wording may differ after round-trip
+- A 'blocks' field appearing in the round-trip that wasn't in the original
+  (the parser always creates blocks from markdown content)
+- Blockquote boundaries changing (two blockquotes merging, or a blockquote
+  merging into adjacent paragraph content) when the same text is preserved
+- Block kind changing (e.g. blockquote → paragraph) when text is preserved
 
-Content loss means:
-- Actual rule text, values, or data is missing or changed
-- Table rows or cells have different content (not just formatting)
-- Paragraphs dropped or substantially altered
+REAL CONTENT LOSS (classify as CONTENT_LOSS):
+- Actual rule text, values, or data is completely missing (not just moved
+  to a different field like description → blocks or vice versa)
+- Table rows or cells have different data values (not separator formatting)
+- Entire paragraphs dropped with no equivalent text elsewhere in the rule
 - Numeric values changed
+
+Key principle: if the same text/data appears in the rule but in a different
+field or with different structure, that is NOT content loss.
 
 Classify the ENTIRE diff as one of exactly two categories.
 
-If ALL hunks are formatting/whitespace/quoting changes, respond with exactly:
+If ALL hunks are formatting/structural/inference changes, respond with exactly:
 FORMATTING_ONLY
 
-If ANY hunk shows actual content loss, respond with exactly:
+If ANY hunk shows actual content loss (data gone, not just moved), respond with:
 CONTENT_LOSS: <one-line summary of what was lost>
 
 Respond with ONLY the single verdict line, nothing else.
