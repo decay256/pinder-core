@@ -540,6 +540,10 @@ namespace Pinder.Core.Conversation
                     _playerShadows?.ApplyOffset(ShadowStatType.Madness, -1,
                         "Nat 20 on Chaos — chaos mastered, not consumed");
                 }
+
+                // Nat 20 (any stat) → Dread −1 (#720)
+                _playerShadows?.ApplyOffset(ShadowStatType.Dread, -1,
+                    "Nat 20 — existential confidence surge");
             }
 
             // 3c. Track last stat used for Fixation T3 (#45)

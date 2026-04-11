@@ -1466,6 +1466,16 @@
   outcome:
     shadow: Dread
     shadow_delta: -1
+- id: §9.shadow-reduce.nat20-dread
+  section: §9
+  title: Shadow Reduction — Nat 20 reduces Dread
+  type: shadow_growth
+  description: 'Nat 20 on any stat: Dread -1 (existential confidence surge).'
+  condition:
+    action: Nat 20 on any stat
+  outcome:
+    shadow: Dread
+    shadow_delta: -1
 - id: §9.shadow-reduce.honesty-success-at-interest-15
   section: §9
   title: Shadow Reduction — Honesty success at Interest 15+
