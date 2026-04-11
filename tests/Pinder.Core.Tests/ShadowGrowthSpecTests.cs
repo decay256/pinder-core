@@ -392,14 +392,12 @@ namespace Pinder.Core.Tests
             Assert.Contains(result.ShadowGrowthEvents, e => e.Contains("Despair") && e.Contains("TropeTrap"));
         }
 
-        // Mutation: would catch if 3 consecutive RIZZ failures didn't grow Despair
+        // Mutation: would catch if 3 cumulative RIZZ failures didn't grow Despair (#717)
         [Fact]
-        public async Task AC708_ThreeConsecutiveRizzFailures_GrowsDespair()
+        public async Task AC717_ThreeCumulativeRizzFailures_GrowsDespair()
         {
             // RIZZ=0, DC=16. d20=7 → miss by 9 → TropeTrap each turn.
-            // 3 turns × -2 interest from TropeTrap = -6 total. Start at 20 → end at 14. No game-end.
             var shadows = MakeTracker();
-            // Extra dice: prepend also adds 5, so actual consumed: 5(horn), 7,50, 7,50, 7,50
             var diceValues = new List<int>();
             for (int i = 0; i < 4; i++) { diceValues.Add(7); diceValues.Add(50); } // extra pair for safety
             var session = BuildSession(
@@ -408,7 +406,7 @@ namespace Pinder.Core.Tests
                 opponentStats: Stats(wit: 0),
                 shadows: shadows,
                 options: new[] { new DialogueOption(StatType.Rizz, "smooth") },
-                startingInterest: 13); // low enough to never reach 25 via mishap
+                startingInterest: 13);
 
             for (int i = 0; i < 3; i++)
             {
@@ -416,20 +414,19 @@ namespace Pinder.Core.Tests
                 await session.ResolveTurnAsync(0);
             }
 
-            // After 3 consecutive RIZZ failures: 3 TropeTrap (+1 each) + 1 consecutive = 4
+            // After 3 cumulative RIZZ failures: 3 TropeTrap (+1 each) + 1 cumulative = 4
             var despair = shadows.GetDelta(ShadowStatType.Despair);
-            Assert.True(despair >= 4, $"Expected Despair >= 4 (3 TropeTrap + 1 consecutive), got {despair}");
+            Assert.True(despair >= 4, $"Expected Despair >= 4 (3 TropeTrap + 1 cumulative), got {despair}");
         }
 
-        // Mutation: would catch if consecutive RIZZ counter didn't reset on success
+        // Mutation: would catch if RIZZ success reset the cumulative counter (#717)
         [Fact]
-        public async Task AC708_RizzSuccess_ResetsDespairConsecutiveCount()
+        public async Task AC717_RizzSuccessBetweenFailures_CumulativeStillCounts()
         {
-            // Two failures (TropeTrap) then one success. Consecutive count resets at success.
-            // rizz:0, wit:0 → DC=16. Roll=7 → total=7, miss by 9 → TropeTrap. Roll=20 → success.
+            // Two failures, one success, one failure = 3 cumulative failures → Despair +1 from cumulative
+            // rizz:0, wit:0 → DC=16. Roll=7 → miss. Roll=20 → success. Roll=7 → miss.
             var shadows = MakeTracker();
-            // PrependedDice adds 5 first. Sequence: 5(horn), 7,50, 7,50, 20,50
-            var diceValues = new List<int> { 7, 50, 7, 50, 20, 50, 15, 50 }; // extra safety
+            var diceValues = new List<int> { 7, 50, 7, 50, 20, 50, 7, 50, 15, 50 };
             var session = BuildSession(
                 dice: new TestDice(diceValues.ToArray()),
                 playerStats: Stats(rizz: 0),
@@ -438,16 +435,72 @@ namespace Pinder.Core.Tests
                 options: new[] { new DialogueOption(StatType.Rizz, "smooth") },
                 startingInterest: 12);
 
+            for (int i = 0; i < 4; i++)
+            {
+                await session.StartTurnAsync();
+                await session.ResolveTurnAsync(0);
+            }
+
+            // 3 failures (turns 1, 2, 4) are TropeTrap → 3 Despair from TropeTrap.
+            // 3rd cumulative failure (turn 4) → +1 cumulative Despair. Total >= 4.
+            var despair = shadows.GetDelta(ShadowStatType.Despair);
+            Assert.True(despair >= 4, $"Expected Despair >= 4 (3 TropeTrap + 1 cumulative), got {despair}");
+        }
+
+        // Mutation: would catch if cumulative counter only triggered once (#717)
+        [Fact]
+        public async Task AC717_SixCumulativeRizzFailures_DespairGrowsTwice()
+        {
+            // 6 RIZZ failures → cumulative triggers at 3 and 6
+            var shadows = MakeTracker();
+            var diceValues = new List<int>();
+            for (int i = 0; i < 8; i++) { diceValues.Add(7); diceValues.Add(50); }
+            var session = BuildSession(
+                dice: new TestDice(diceValues.ToArray()),
+                playerStats: Stats(rizz: 0),
+                opponentStats: Stats(wit: 0),
+                shadows: shadows,
+                options: new[] { new DialogueOption(StatType.Rizz, "smooth") },
+                startingInterest: 20);
+
+            for (int i = 0; i < 6; i++)
+            {
+                await session.StartTurnAsync();
+                await session.ResolveTurnAsync(0);
+            }
+
+            // 6 TropeTrap (+1 each) + 2 cumulative (at 3 and 6) = 8
+            var despair = shadows.GetDelta(ShadowStatType.Despair);
+            Assert.True(despair >= 8, $"Expected Despair >= 8 (6 TropeTrap + 2 cumulative), got {despair}");
+        }
+
+        // Mutation: would catch if Nat 1 on RIZZ didn't count in cumulative total (#717)
+        [Fact]
+        public async Task AC717_Nat1OnRizz_CountsInCumulativeTotal()
+        {
+            // Nat 1 on RIZZ: +2 Despair (Trigger 1) + counts as cumulative failure.
+            // 2 normal failures + 1 Nat 1 = 3 cumulative → triggers cumulative bonus.
+            var shadows = MakeTracker();
+            // Roll 7 → miss (TropeTrap), Roll 7 → miss (TropeTrap), Roll 1 → Nat 1
+            var diceValues = new List<int> { 7, 50, 7, 50, 1, 50, 15, 50 };
+            var session = BuildSession(
+                dice: new TestDice(diceValues.ToArray()),
+                playerStats: Stats(rizz: 0),
+                opponentStats: Stats(wit: 0),
+                shadows: shadows,
+                options: new[] { new DialogueOption(StatType.Rizz, "smooth") },
+                startingInterest: 13);
+
             for (int i = 0; i < 3; i++)
             {
                 await session.StartTurnAsync();
                 await session.ResolveTurnAsync(0);
             }
 
-            // 2 TropeTrap failures = 2 Despair growths. No consecutive bonus (reset at success).
+            // 2 TropeTrap (+1 each) + Nat 1 (+2) + cumulative at 3 (+1) = 6 minimum
+            // Nat 1 also triggers TropeTrap tier so potentially more
             var despair = shadows.GetDelta(ShadowStatType.Despair);
-            Assert.True(despair >= 2, $"Expected Despair >= 2 (2 TropeTrap growths), got {despair}");
-            // Importantly the consecutive count reset, so no +1 at exactly 3 consecutive
+            Assert.True(despair >= 5, $"Expected Despair >= 5 (2 TropeTrap + Nat1 +2 + 1 cumulative), got {despair}");
         }
 
         // --- Denial triggers ---

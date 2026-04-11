@@ -328,6 +328,106 @@ namespace Pinder.Core.Tests
         }
 
         // =====================================================================
+        // Reduction 6: SA/Honesty success at Interest >18 → Despair −1 (#717)
+        // =====================================================================
+
+        [Fact]
+        public async Task SASuccessAtInterest19_ReducesDespair()
+        {
+            var shadows = MakeTracker();
+            shadows.ApplyGrowth(ShadowStatType.Despair, 3, "setup");
+            shadows.DrainGrowthEvents();
+
+            // Interest starts at 19, SA success. SA=5, opponent wit=0 → DC=16.
+            // Roll 18 + 5 = 23 vs 16 → success. Interest should go up (still >18 after).
+            var session = BuildSession(
+                dice: Dice(18, 50),
+                playerStats: Stats(sa: 5),
+                shadows: shadows,
+                startingInterest: 19,
+                options: new[] { new DialogueOption(StatType.SelfAwareness, "reflect") });
+
+            await session.StartTurnAsync();
+            var result = await session.ResolveTurnAsync(0);
+
+            Assert.True(result.Roll.IsSuccess);
+            // Despair was 3, should be 3 - 1 = 2
+            Assert.Equal(2, shadows.GetDelta(ShadowStatType.Despair));
+            Assert.Contains(result.ShadowGrowthEvents, e => e.Contains("Despair") && e.Contains("SA/Honesty success at high interest"));
+        }
+
+        [Fact]
+        public async Task HonestySuccessAtInterest19_ReducesDespair()
+        {
+            var shadows = MakeTracker();
+            shadows.ApplyGrowth(ShadowStatType.Despair, 3, "setup");
+            shadows.DrainGrowthEvents();
+
+            var session = BuildSession(
+                dice: Dice(18, 50),
+                playerStats: Stats(honesty: 5),
+                shadows: shadows,
+                startingInterest: 19,
+                options: new[] { new DialogueOption(StatType.Honesty, "truth") });
+
+            await session.StartTurnAsync();
+            var result = await session.ResolveTurnAsync(0);
+
+            Assert.True(result.Roll.IsSuccess);
+            Assert.Equal(2, shadows.GetDelta(ShadowStatType.Despair));
+            Assert.Contains(result.ShadowGrowthEvents, e => e.Contains("Despair") && e.Contains("SA/Honesty success at high interest"));
+        }
+
+        [Fact]
+        public async Task SASuccessAtInterest18_NoDespairReduction()
+        {
+            var shadows = MakeTracker();
+            shadows.ApplyGrowth(ShadowStatType.Despair, 3, "setup");
+            shadows.DrainGrowthEvents();
+
+            // Interest at 15, SA success. After delta interest should be around 18-19.
+            // We need interest AFTER roll to be exactly 18 (not >18).
+            // SA=5, opponent wit=0 → DC=16. Roll 12+5=17 vs DC 16 → beat by 1 → scale=+1. delta=+3.
+            // Start at 15 → 15+3=18. interestAfter = 18, which is NOT >18.
+            var session = BuildSession(
+                dice: Dice(12, 50),
+                playerStats: Stats(sa: 5),
+                shadows: shadows,
+                startingInterest: 15,
+                options: new[] { new DialogueOption(StatType.SelfAwareness, "reflect") });
+
+            await session.StartTurnAsync();
+            var result = await session.ResolveTurnAsync(0);
+
+            Assert.True(result.Roll.IsSuccess);
+            // Despair should remain at 3 (no reduction since interest = 18, not > 18)
+            Assert.Equal(3, shadows.GetDelta(ShadowStatType.Despair));
+        }
+
+        [Fact]
+        public async Task SAFailureAtInterest19_NoDespairReduction()
+        {
+            var shadows = MakeTracker();
+            shadows.ApplyGrowth(ShadowStatType.Despair, 3, "setup");
+            shadows.DrainGrowthEvents();
+
+            // SA=0, opponent wit=0 → DC=16. Roll 5+0=5 vs 16 → miss. No reduction.
+            var session = BuildSession(
+                dice: Dice(5, 50),
+                playerStats: Stats(sa: 0),
+                shadows: shadows,
+                startingInterest: 19,
+                options: new[] { new DialogueOption(StatType.SelfAwareness, "reflect") });
+
+            await session.StartTurnAsync();
+            var result = await session.ResolveTurnAsync(0);
+
+            Assert.False(result.Roll.IsSuccess);
+            // Despair should remain at 3 (failure → no reduction)
+            Assert.Equal(3, shadows.GetDelta(ShadowStatType.Despair));
+        }
+
+        // =====================================================================
         // Helpers
         // =====================================================================
 

@@ -48,8 +48,8 @@ namespace Pinder.Core.Conversation
         private bool _charmMadnessTriggered;
         private bool _saOverthinkingTriggered;
 
-        // Despair (RIZZ failure shadow) tracking (#708)
-        private int _rizzConsecutiveCount;
+        // Despair (RIZZ failure shadow) tracking (#708, #717)
+        private int _rizzCumulativeFailureCount;
 
         private int _momentumStreak;
         private int _pendingMomentumBonus;
@@ -166,7 +166,7 @@ namespace Pinder.Core.Conversation
             _charmUsageCount = 0;
             _charmMadnessTriggered = false;
             _saOverthinkingTriggered = false;
-            _rizzConsecutiveCount = 0;
+            _rizzCumulativeFailureCount = 0;
 
             // Stateful conversation session (#536)
             // If the adapter supports stateful mode, start a persistent opponent session.
@@ -982,19 +982,15 @@ namespace Pinder.Core.Conversation
                     "RIZZ TropeTrap failure");
             }
 
-            // Trigger 3c: RIZZ picked 3 consecutive turns without success → +1 Despair (#708)
+            // Trigger 3c: Every 3rd cumulative RIZZ failure → +1 Despair (#717)
             if (chosenOption.Stat == StatType.Rizz && !rollResult.IsSuccess)
             {
-                _rizzConsecutiveCount++;
-                if (_rizzConsecutiveCount >= 3 && _rizzConsecutiveCount % 3 == 0)
+                _rizzCumulativeFailureCount++;
+                if (_rizzCumulativeFailureCount % 3 == 0)
                 {
                     _playerShadows.ApplyGrowth(ShadowStatType.Despair, 1,
-                        "RIZZ picked 3 turns in a row without success");
+                        "3rd cumulative RIZZ failure");
                 }
-            }
-            else
-            {
-                _rizzConsecutiveCount = 0;
             }
 
             // Trigger 4: Same stat 3 turns in a row → +1 Fixation
@@ -1060,6 +1056,15 @@ namespace Pinder.Core.Conversation
                     _playerShadows.ApplyOffset(ShadowStatType.Denial, -1,
                         "Honesty success at high interest");
                 }
+            }
+
+            // Shadow reduction: SA/Honesty success at Interest >18 → Despair −1 (#717)
+            if (rollResult.IsSuccess
+                && (chosenOption.Stat == StatType.SelfAwareness || chosenOption.Stat == StatType.Honesty)
+                && interestAfter > 18)
+            {
+                _playerShadows.ApplyOffset(ShadowStatType.Despair, -1,
+                    "SA/Honesty success at high interest");
             }
 
             // Trigger 7: Interest hits 0 → +2 Dread

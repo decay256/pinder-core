@@ -1436,17 +1436,25 @@
   title: Despair → Penalizes Rizz
   type: shadow_growth
   blocks:
+  - kind: table
+    rows:
+    - Event: Nat 1 on Rizz
+      Despair Δ: '+2'
+    - Event: Rizz TropeTrap failure
+      Despair Δ: '+1'
+    - Event: Every 3rd cumulative RIZZ failure
+      Despair Δ: '+1'
+    sep_cells:
+    - '-------'
+    - '-----------'
   - kind: paragraph
-    text: '| Start of conversation | Roll 1d10 | That''s your Despair |'
-  - kind: paragraph
-    text: No growth. No persistence. Just biology.
-  description: '| Start of conversation | Roll 1d10 | That''s your Despair |'
+    text: 'Despair rolls fresh each conversation (1d10). Growth triggers are cumulative across the session.'
+  description: 'Nat 1 on Rizz → +2 Despair. Rizz TropeTrap failure → +1 Despair. Every 3rd cumulative RIZZ failure → +1 Despair.'
   heading_level: 3
   condition:
     shadow: Despair
-    conversation_start: true
+    stat: Rizz
   outcome:
-    roll: 1d10
     shadow: Despair
 - id: §9.shadow-reduce.date-secured
   section: §9
@@ -1488,6 +1496,20 @@
   outcome:
     shadow: Overthinking
     shadow_delta: -1
+- id: §9.shadow-reduce.sa-honesty-success-high-interest
+  section: §9
+  title: Shadow Reduction — SA/Honesty success at Interest >18
+  type: shadow_growth
+  description: 'SA or Honesty success at Interest >18: Despair -1.'
+  condition:
+    action: SA/Honesty success at Interest >18
+    stat:
+    - SelfAwareness
+    - Honesty
+    interest_above: 18
+  outcome:
+    shadow: Despair
+    shadow_delta: -1
 - id: §9.shadow-reduction
   section: §9
   title: Shadow Reduction
@@ -1503,6 +1525,8 @@
       Shadow Reduced: Fixation -1
     - Action: Winning despite Overthinking disadvantage
       Shadow Reduced: Overthinking -1
+    - Action: SA/Honesty success at Interest >18
+      Shadow Reduced: Despair -1
     - Action: Therapy Hoodie (legendary)
       Shadow Reduced: -1 chosen shadow per 5 convos
     - Action: Prestige reset
