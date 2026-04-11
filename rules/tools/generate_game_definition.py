@@ -54,6 +54,7 @@ def main():
         ('delivery_rules', 'Delivery Rules'),
         ('conversation_arc', 'Conversation Arc'),
         ('dramatic_craft', 'Dramatic Craft'),
+        ('horniness_time_modifiers', 'Horniness Time Modifiers'),
     ]
 
     for key, title in section_order:

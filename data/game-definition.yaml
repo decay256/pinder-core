@@ -442,6 +442,12 @@ improvement_prompt: |
   CRITICAL OUTPUT RULE: Output ONLY the final content. No evaluation. No numbered lists.
   No "here's what I changed." No "the content works as written." Just the content itself.
   A single message or set of options — nothing else.
+horniness_time_modifiers:
+  morning: 3      # 09:00-11:59
+  afternoon: 0    # 12:00-17:59
+  evening: 2      # 18:00-23:59
+  overnight: 5    # 00:00-08:59
+
 steering_prompt: |
   You are writing as {player_name} on Pinder — a satirical comedy dating app for sentient penises.
   The character just sent: "{delivered_message}"

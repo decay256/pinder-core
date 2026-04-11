@@ -6,13 +6,21 @@ using Xunit;
 namespace Pinder.Core.Tests
 {
     /// <summary>
-    /// Spec-driven tests for GameClock (issue #54).
+    /// Spec-driven tests for GameClock (issue #54, updated by issue #711).
     /// Based on docs/specs/issue-54-spec.md acceptance criteria.
+    /// Issue #711: GetHorninessModifier() is now configurable via HorninessModifiers.
     /// </summary>
     public class GameClockSpecTests
     {
         private static DateTimeOffset MakeTime(int hour, int minute = 0) =>
             new DateTimeOffset(2024, 1, 15, hour, minute, 0, TimeSpan.Zero);
+
+        /// <summary>
+        /// Default modifiers matching game-definition.yaml (issue #711).
+        /// morning(09-11)=3, afternoon(12-17)=0, evening(18-23)=2, overnight(00-08)=5.
+        /// </summary>
+        private static readonly HorninessModifiers DefaultModifiers =
+            new HorninessModifiers(morning: 3, afternoon: 0, evening: 2, overnight: 5);
 
         // ===== AC1: IGameClock interface exists =====
 
@@ -91,7 +99,7 @@ namespace Pinder.Core.Tests
         [InlineData(23, TimeOfDay.LateNight)]
         public void AC4_GetTimeOfDay_AllHours(int hour, TimeOfDay expected)
         {
-            var clock = new GameClock(MakeTime(hour));
+            var clock = new GameClock(MakeTime(hour), DefaultModifiers);
             Assert.Equal(expected, clock.GetTimeOfDay());
         }
 
@@ -102,53 +110,63 @@ namespace Pinder.Core.Tests
             Assert.Equal(5, Enum.GetValues(typeof(TimeOfDay)).Length);
         }
 
-        // ===== AC5: GetHorninessModifier returns correct value =====
+        // ===== AC5: GetHorninessModifier returns configurable values (issue #711) =====
+        // New 4-bucket system: overnight(00-08), morning(09-11), afternoon(12-17), evening(18-23)
+        // Default values from game-definition.yaml: overnight=5, morning=3, afternoon=0, evening=2
 
-        // Mutation: Would catch if Morning returned 0 instead of -2
+        // Mutation: Would catch if morning bucket (09-11) returned wrong value
         [Fact]
-        public void AC5_HorninessModifier_Morning_Negative2()
+        public void AC5_HorninessModifier_MorningBucket_Returns3()
         {
-            var clock = new GameClock(MakeTime(6));
-            Assert.Equal(-2, clock.GetHorninessModifier());
-        }
-
-        // Mutation: Would catch if Afternoon returned -2 instead of 0
-        [Fact]
-        public void AC5_HorninessModifier_Afternoon_Zero()
-        {
-            var clock = new GameClock(MakeTime(12));
-            Assert.Equal(0, clock.GetHorninessModifier());
-        }
-
-        // Mutation: Would catch if Evening returned 0 instead of +1
-        [Fact]
-        public void AC5_HorninessModifier_Evening_Plus1()
-        {
-            var clock = new GameClock(MakeTime(18));
-            Assert.Equal(1, clock.GetHorninessModifier());
-        }
-
-        // Mutation: Would catch if LateNight returned +5 instead of +3
-        [Fact]
-        public void AC5_HorninessModifier_LateNight_Plus3()
-        {
-            var clock = new GameClock(MakeTime(22));
+            var clock = new GameClock(MakeTime(9), DefaultModifiers);
             Assert.Equal(3, clock.GetHorninessModifier());
         }
 
-        // Mutation: Would catch if AfterTwoAm returned +3 instead of +5
+        // Mutation: Would catch if afternoon bucket (12-17) returned wrong value
         [Fact]
-        public void AC5_HorninessModifier_AfterTwoAm_Plus5()
+        public void AC5_HorninessModifier_AfternoonBucket_Returns0()
         {
-            var clock = new GameClock(MakeTime(3));
+            var clock = new GameClock(MakeTime(12), DefaultModifiers);
+            Assert.Equal(0, clock.GetHorninessModifier());
+        }
+
+        // Mutation: Would catch if evening bucket (18-23) returned wrong value
+        [Fact]
+        public void AC5_HorninessModifier_EveningBucket_Returns2()
+        {
+            var clock = new GameClock(MakeTime(18), DefaultModifiers);
+            Assert.Equal(2, clock.GetHorninessModifier());
+        }
+
+        // Mutation: Would catch if evening bucket boundary (23) was misclassified
+        [Fact]
+        public void AC5_HorninessModifier_Hour23_EveningBucket_Returns2()
+        {
+            var clock = new GameClock(MakeTime(23), DefaultModifiers);
+            Assert.Equal(2, clock.GetHorninessModifier());
+        }
+
+        // Mutation: Would catch if overnight bucket (00-08) returned wrong value
+        [Fact]
+        public void AC5_HorninessModifier_OvernightBucket_Hour0_Returns5()
+        {
+            var clock = new GameClock(MakeTime(0), DefaultModifiers);
             Assert.Equal(5, clock.GetHorninessModifier());
         }
 
-        // Mutation: Would catch if LateNight hour 0 was misclassified as AfterTwoAm
+        // Mutation: Would catch if overnight bucket boundary (08) was misclassified as morning
         [Fact]
-        public void AC5_HorninessModifier_Hour0_IsLateNight_Returns3()
+        public void AC5_HorninessModifier_OvernightBucket_Hour8_Returns5()
         {
-            var clock = new GameClock(MakeTime(0));
+            var clock = new GameClock(MakeTime(8), DefaultModifiers);
+            Assert.Equal(5, clock.GetHorninessModifier());
+        }
+
+        // Mutation: Would catch if morning bucket start (09) was classified as overnight
+        [Fact]
+        public void AC5_HorninessModifier_MorningBucket_Hour9_Returns3()
+        {
+            var clock = new GameClock(MakeTime(9), DefaultModifiers);
             Assert.Equal(3, clock.GetHorninessModifier());
         }
 
@@ -156,11 +174,29 @@ namespace Pinder.Core.Tests
         [Fact]
         public void AC5_HorninessModifier_UpdatesAfterAdvance()
         {
-            var clock = new GameClock(MakeTime(8)); // Morning → -2
-            Assert.Equal(-2, clock.GetHorninessModifier());
+            var clock = new GameClock(MakeTime(8), DefaultModifiers); // overnight → 5
+            Assert.Equal(5, clock.GetHorninessModifier());
 
-            clock.Advance(TimeSpan.FromHours(15)); // 8 + 15 = 23 → LateNight → +3
-            Assert.Equal(3, clock.GetHorninessModifier());
+            clock.Advance(TimeSpan.FromHours(15)); // 8 + 15 = 23 → evening → 2
+            Assert.Equal(2, clock.GetHorninessModifier());
+        }
+
+        // Mutation: Would catch if custom modifiers were ignored (hardcoded values used instead)
+        [Fact]
+        public void AC5_HorninessModifier_UsesCustomModifiers_NotHardcoded()
+        {
+            var custom = new HorninessModifiers(morning: 99, afternoon: 88, evening: 77, overnight: 66);
+            var clock = new GameClock(MakeTime(10), custom); // morning hour (09-11)
+            Assert.Equal(99, clock.GetHorninessModifier());
+
+            var clock2 = new GameClock(MakeTime(14), custom); // afternoon
+            Assert.Equal(88, clock2.GetHorninessModifier());
+
+            var clock3 = new GameClock(MakeTime(20), custom); // evening
+            Assert.Equal(77, clock3.GetHorninessModifier());
+
+            var clock4 = new GameClock(MakeTime(4), custom); // overnight
+            Assert.Equal(66, clock4.GetHorninessModifier());
         }
 
         // ===== AC6: DailyEnergy system =====
@@ -169,7 +205,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void AC6_DefaultDailyEnergy_Is10()
         {
-            var clock = new GameClock(MakeTime(10));
+            var clock = new GameClock(MakeTime(10), DefaultModifiers);
             Assert.Equal(10, clock.RemainingEnergy);
         }
 
@@ -177,7 +213,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void AC6_ConsumeEnergy_DeductsOnSuccess()
         {
-            var clock = new GameClock(MakeTime(10), dailyEnergy: 15);
+            var clock = new GameClock(MakeTime(10), DefaultModifiers, dailyEnergy: 15);
             Assert.True(clock.ConsumeEnergy(5));
             Assert.Equal(10, clock.RemainingEnergy);
         }
@@ -186,7 +222,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void AC6_ConsumeEnergy_NoDeductionOnInsufficient()
         {
-            var clock = new GameClock(MakeTime(10), dailyEnergy: 3);
+            var clock = new GameClock(MakeTime(10), DefaultModifiers, dailyEnergy: 3);
             Assert.False(clock.ConsumeEnergy(5));
             Assert.Equal(3, clock.RemainingEnergy);
         }
@@ -195,7 +231,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void AC6_ConsumeEnergy_ExactlyRemainingSucceeds()
         {
-            var clock = new GameClock(MakeTime(10), dailyEnergy: 7);
+            var clock = new GameClock(MakeTime(10), DefaultModifiers, dailyEnergy: 7);
             Assert.True(clock.ConsumeEnergy(7));
             Assert.Equal(0, clock.RemainingEnergy);
         }
@@ -204,7 +240,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void AC6_ConsumeEnergy_MultipleCalls_Accumulate()
         {
-            var clock = new GameClock(MakeTime(10), dailyEnergy: 15);
+            var clock = new GameClock(MakeTime(10), DefaultModifiers, dailyEnergy: 15);
             Assert.True(clock.ConsumeEnergy(5));
             Assert.Equal(10, clock.RemainingEnergy);
             Assert.True(clock.ConsumeEnergy(10));
@@ -217,7 +253,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void AC6_MidnightCrossing_ReplenishesToDailyEnergy()
         {
-            var clock = new GameClock(MakeTime(23), dailyEnergy: 15);
+            var clock = new GameClock(MakeTime(23), DefaultModifiers, dailyEnergy: 15);
             clock.ConsumeEnergy(15);
             Assert.Equal(0, clock.RemainingEnergy);
 
@@ -229,7 +265,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void AC6_MidnightCrossing_ReplenishesToCustomDailyEnergy()
         {
-            var clock = new GameClock(MakeTime(23), dailyEnergy: 20);
+            var clock = new GameClock(MakeTime(23), DefaultModifiers, dailyEnergy: 20);
             clock.ConsumeEnergy(20);
             clock.Advance(TimeSpan.FromHours(2));
             Assert.Equal(20, clock.RemainingEnergy);
@@ -239,7 +275,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void AC6_SameDayAdvance_DoesNotReplenish()
         {
-            var clock = new GameClock(MakeTime(10), dailyEnergy: 10);
+            var clock = new GameClock(MakeTime(10), DefaultModifiers, dailyEnergy: 10);
             clock.ConsumeEnergy(5);
             clock.Advance(TimeSpan.FromHours(3));
             Assert.Equal(5, clock.RemainingEnergy);
@@ -249,7 +285,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void AC6_ZeroDailyEnergy_AllConsumesFail()
         {
-            var clock = new GameClock(MakeTime(10), dailyEnergy: 0);
+            var clock = new GameClock(MakeTime(10), DefaultModifiers, dailyEnergy: 0);
             Assert.Equal(0, clock.RemainingEnergy);
             Assert.False(clock.ConsumeEnergy(1));
         }
@@ -260,7 +296,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void AC7_GameClock_UsableAsIGameClock()
         {
-            IGameClock clock = new GameClock(MakeTime(10));
+            IGameClock clock = new GameClock(MakeTime(10), DefaultModifiers);
             Assert.NotNull(clock);
             Assert.IsAssignableFrom<IGameClock>(clock);
         }
@@ -271,7 +307,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void AC8_Boundary_Hour2_IsAfterTwoAm_NotLateNight()
         {
-            var clock = new GameClock(MakeTime(2));
+            var clock = new GameClock(MakeTime(2), DefaultModifiers);
             Assert.Equal(TimeOfDay.AfterTwoAm, clock.GetTimeOfDay());
         }
 
@@ -279,7 +315,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void AC8_Boundary_Hour1_IsLateNight_NotAfterTwoAm()
         {
-            var clock = new GameClock(MakeTime(1));
+            var clock = new GameClock(MakeTime(1), DefaultModifiers);
             Assert.Equal(TimeOfDay.LateNight, clock.GetTimeOfDay());
         }
 
@@ -287,7 +323,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void AC8_AdvanceTo_CrossingMidnight_ReplenishesEnergy()
         {
-            var clock = new GameClock(MakeTime(23), dailyEnergy: 10);
+            var clock = new GameClock(MakeTime(23), DefaultModifiers, dailyEnergy: 10);
             clock.ConsumeEnergy(8);
             Assert.Equal(2, clock.RemainingEnergy);
 
@@ -303,15 +339,23 @@ namespace Pinder.Core.Tests
         public void Error_Constructor_NegativeEnergy_Throws_ArgumentOutOfRangeException()
         {
             var ex = Assert.Throws<ArgumentOutOfRangeException>(
-                () => new GameClock(MakeTime(10), dailyEnergy: -1));
+                () => new GameClock(MakeTime(10), DefaultModifiers, dailyEnergy: -1));
             Assert.NotNull(ex);
+        }
+
+        // Mutation: Would catch if null modifiers was silently accepted
+        [Fact]
+        public void Error_Constructor_NullModifiers_Throws_ArgumentNullException()
+        {
+            Assert.Throws<ArgumentNullException>(
+                () => new GameClock(MakeTime(10), null));
         }
 
         // Mutation: Would catch if Advance(Zero) was silently accepted
         [Fact]
         public void Error_Advance_Zero_Throws_ArgumentOutOfRangeException()
         {
-            var clock = new GameClock(MakeTime(10));
+            var clock = new GameClock(MakeTime(10), DefaultModifiers);
             Assert.Throws<ArgumentOutOfRangeException>(
                 () => clock.Advance(TimeSpan.Zero));
         }
@@ -320,7 +364,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void Error_Advance_Negative_Throws_ArgumentOutOfRangeException()
         {
-            var clock = new GameClock(MakeTime(10));
+            var clock = new GameClock(MakeTime(10), DefaultModifiers);
             Assert.Throws<ArgumentOutOfRangeException>(
                 () => clock.Advance(TimeSpan.FromMinutes(-30)));
         }
@@ -330,7 +374,7 @@ namespace Pinder.Core.Tests
         public void Error_AdvanceTo_SameTime_Throws_ArgumentException()
         {
             var start = MakeTime(10);
-            var clock = new GameClock(start);
+            var clock = new GameClock(start, DefaultModifiers);
             Assert.Throws<ArgumentException>(() => clock.AdvanceTo(start));
         }
 
@@ -338,7 +382,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void Error_AdvanceTo_PastTime_Throws_ArgumentException()
         {
-            var clock = new GameClock(MakeTime(14));
+            var clock = new GameClock(MakeTime(14), DefaultModifiers);
             Assert.Throws<ArgumentException>(() => clock.AdvanceTo(MakeTime(10)));
         }
 
@@ -346,7 +390,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void Error_ConsumeEnergy_Zero_Throws_ArgumentOutOfRangeException()
         {
-            var clock = new GameClock(MakeTime(10));
+            var clock = new GameClock(MakeTime(10), DefaultModifiers);
             Assert.Throws<ArgumentOutOfRangeException>(
                 () => clock.ConsumeEnergy(0));
         }
@@ -355,7 +399,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void Error_ConsumeEnergy_Negative_Throws_ArgumentOutOfRangeException()
         {
-            var clock = new GameClock(MakeTime(10));
+            var clock = new GameClock(MakeTime(10), DefaultModifiers);
             Assert.Throws<ArgumentOutOfRangeException>(
                 () => clock.ConsumeEnergy(-5));
         }
@@ -366,7 +410,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void Edge_MultipleMidnightCrossings_StillReplenishes()
         {
-            var clock = new GameClock(MakeTime(23), dailyEnergy: 10);
+            var clock = new GameClock(MakeTime(23), DefaultModifiers, dailyEnergy: 10);
             clock.ConsumeEnergy(10);
             Assert.Equal(0, clock.RemainingEnergy);
 
@@ -379,7 +423,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void Edge_Advance_UpdatesNow()
         {
-            var clock = new GameClock(MakeTime(10));
+            var clock = new GameClock(MakeTime(10), DefaultModifiers);
             clock.Advance(TimeSpan.FromHours(4));
             Assert.Equal(MakeTime(14), clock.Now);
         }
@@ -388,7 +432,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void Edge_AdvanceTo_SetsNowToTarget()
         {
-            var clock = new GameClock(MakeTime(10));
+            var clock = new GameClock(MakeTime(10), DefaultModifiers);
             var target = MakeTime(14);
             clock.AdvanceTo(target);
             Assert.Equal(target, clock.Now);
@@ -399,7 +443,7 @@ namespace Pinder.Core.Tests
         public void Edge_Constructor_StoresStartTimeAsNow()
         {
             var start = new DateTimeOffset(2024, 6, 15, 14, 30, 45, TimeSpan.FromHours(5));
-            var clock = new GameClock(start);
+            var clock = new GameClock(start, DefaultModifiers);
             Assert.Equal(start, clock.Now);
         }
 
@@ -407,7 +451,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void Edge_Advance_SmallAmount_Minutes()
         {
-            var clock = new GameClock(MakeTime(10));
+            var clock = new GameClock(MakeTime(10), DefaultModifiers);
             clock.Advance(TimeSpan.FromMinutes(30));
             Assert.Equal(MakeTime(10, 30), clock.Now);
         }
@@ -416,7 +460,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void Edge_AdvanceTo_SameDay_NoReplenish()
         {
-            var clock = new GameClock(MakeTime(8), dailyEnergy: 10);
+            var clock = new GameClock(MakeTime(8), DefaultModifiers, dailyEnergy: 10);
             clock.ConsumeEnergy(6);
             clock.AdvanceTo(MakeTime(20));
             Assert.Equal(4, clock.RemainingEnergy);
@@ -427,7 +471,7 @@ namespace Pinder.Core.Tests
         public void Edge_GetTimeOfDay_MinutesIgnored()
         {
             // 5:59 should still be AfterTwoAm (hour 5), not Morning
-            var clock = new GameClock(new DateTimeOffset(2024, 1, 15, 5, 59, 59, TimeSpan.Zero));
+            var clock = new GameClock(new DateTimeOffset(2024, 1, 15, 5, 59, 59, TimeSpan.Zero), DefaultModifiers);
             Assert.Equal(TimeOfDay.AfterTwoAm, clock.GetTimeOfDay());
         }
 
@@ -435,7 +479,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void Edge_GetTimeOfDay_11_59_StillMorning()
         {
-            var clock = new GameClock(new DateTimeOffset(2024, 1, 15, 11, 59, 59, TimeSpan.Zero));
+            var clock = new GameClock(new DateTimeOffset(2024, 1, 15, 11, 59, 59, TimeSpan.Zero), DefaultModifiers);
             Assert.Equal(TimeOfDay.Morning, clock.GetTimeOfDay());
         }
 
@@ -443,7 +487,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void Edge_ConsumeAfterMidnightReplenish()
         {
-            var clock = new GameClock(MakeTime(23), dailyEnergy: 10);
+            var clock = new GameClock(MakeTime(23), DefaultModifiers, dailyEnergy: 10);
             clock.ConsumeEnergy(10);
             clock.Advance(TimeSpan.FromHours(2)); // cross midnight
             Assert.Equal(10, clock.RemainingEnergy);

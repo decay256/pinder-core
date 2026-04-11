@@ -4,6 +4,32 @@ using Pinder.Core.Interfaces;
 namespace Pinder.Core.Conversation
 {
     /// <summary>
+    /// Configurable time-of-day horniness modifiers for <see cref="GameClock"/>.
+    /// </summary>
+    public sealed class HorninessModifiers
+    {
+        /// <summary>Modifier for 09:00–11:59.</summary>
+        public int Morning { get; }
+
+        /// <summary>Modifier for 12:00–17:59.</summary>
+        public int Afternoon { get; }
+
+        /// <summary>Modifier for 18:00–23:59.</summary>
+        public int Evening { get; }
+
+        /// <summary>Modifier for 00:00–08:59.</summary>
+        public int Overnight { get; }
+
+        public HorninessModifiers(int morning, int afternoon, int evening, int overnight)
+        {
+            Morning = morning;
+            Afternoon = afternoon;
+            Evening = evening;
+            Overnight = overnight;
+        }
+    }
+
+    /// <summary>
     /// Simulated in-game clock that tracks time-of-day, provides horniness modifiers,
     /// and manages a daily energy budget. Energy replenishes automatically when the
     /// clock crosses midnight via <see cref="Advance"/> or <see cref="AdvanceTo"/>.
@@ -11,6 +37,7 @@ namespace Pinder.Core.Conversation
     public sealed class GameClock : IGameClock
     {
         private readonly int _dailyEnergy;
+        private readonly HorninessModifiers _horninessModifiers;
 
         /// <summary>Current simulated time.</summary>
         public DateTimeOffset Now { get; private set; }
@@ -20,21 +47,30 @@ namespace Pinder.Core.Conversation
 
         /// <summary>
         /// Creates a new GameClock starting at <paramref name="startTime"/>
-        /// with the specified daily energy budget.
+        /// with the specified daily energy budget and horniness modifiers.
         /// </summary>
         /// <param name="startTime">Initial simulated time.</param>
+        /// <param name="modifiers">
+        /// Time-of-day horniness modifiers. Must not be null.
+        /// </param>
         /// <param name="dailyEnergy">
         /// Energy budget per day. Default: 10. Must be &gt;= 0.
         /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when <paramref name="modifiers"/> is null.
+        /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">
         /// Thrown when <paramref name="dailyEnergy"/> is negative.
         /// </exception>
-        public GameClock(DateTimeOffset startTime, int dailyEnergy = 10)
+        public GameClock(DateTimeOffset startTime, HorninessModifiers modifiers, int dailyEnergy = 10)
         {
+            if (modifiers == null)
+                throw new ArgumentNullException(nameof(modifiers));
             if (dailyEnergy < 0)
                 throw new ArgumentOutOfRangeException(nameof(dailyEnergy), "dailyEnergy must be non-negative");
 
             Now = startTime;
+            _horninessModifiers = modifiers;
             _dailyEnergy = dailyEnergy;
             RemainingEnergy = dailyEnergy;
         }
@@ -92,19 +128,17 @@ namespace Pinder.Core.Conversation
 
         /// <summary>
         /// Returns the horniness modifier for the current time of day.
-        /// Morning=-2, Afternoon=0, Evening=+1, LateNight=+3, AfterTwoAm=+5.
+        /// Uses the configurable <see cref="HorninessModifiers"/> provided at construction.
+        /// Buckets: overnight (00:00-08:59), morning (09:00-11:59),
+        /// afternoon (12:00-17:59), evening (18:00-23:59).
         /// </summary>
         public int GetHorninessModifier()
         {
-            switch (GetTimeOfDay())
-            {
-                case TimeOfDay.Morning: return -2;
-                case TimeOfDay.Afternoon: return 0;
-                case TimeOfDay.Evening: return 1;
-                case TimeOfDay.LateNight: return 3;
-                case TimeOfDay.AfterTwoAm: return 5;
-                default: return 0;
-            }
+            int hour = Now.Hour;
+            if (hour >= 9 && hour <= 11) return _horninessModifiers.Morning;
+            if (hour >= 12 && hour <= 17) return _horninessModifiers.Afternoon;
+            if (hour >= 18 && hour <= 23) return _horninessModifiers.Evening;
+            return _horninessModifiers.Overnight; // 00:00-08:59
         }
 
         /// <summary>

@@ -6,6 +6,32 @@ using YamlDotNet.Serialization.NamingConventions;
 namespace Pinder.LlmAdapters
 {
     /// <summary>
+    /// Configurable time-of-day horniness modifiers loaded from game-definition.yaml.
+    /// </summary>
+    public sealed class HorninessTimeModifiers
+    {
+        /// <summary>Modifier for 09:00–11:59.</summary>
+        public int Morning { get; }
+
+        /// <summary>Modifier for 12:00–17:59.</summary>
+        public int Afternoon { get; }
+
+        /// <summary>Modifier for 18:00–23:59.</summary>
+        public int Evening { get; }
+
+        /// <summary>Modifier for 00:00–08:59.</summary>
+        public int Overnight { get; }
+
+        public HorninessTimeModifiers(int morning, int afternoon, int evening, int overnight)
+        {
+            Morning = morning;
+            Afternoon = afternoon;
+            Evening = evening;
+            Overnight = overnight;
+        }
+    }
+
+    /// <summary>
     /// Configurable rules for how successful deliveries are written at each margin tier.
     /// </summary>
     public sealed class DeliveryRules
@@ -124,6 +150,9 @@ namespace Pinder.LlmAdapters
         /// <summary>Configurable dramatic craft rules, or null for hardcoded defaults.</summary>
         public DramaticCraft DramaticCraft { get; }
 
+        /// <summary>Time-of-day horniness modifiers loaded from game-definition.yaml.</summary>
+        public HorninessTimeModifiers HorninessTimeModifiers { get; }
+
         public GameDefinition(
             string name,
             string vision,
@@ -141,7 +170,8 @@ namespace Pinder.LlmAdapters
             string conversationArcProgression = null,
             string playerProbing = null,
             string improvementPrompt = null,
-            string steeringPrompt = null)
+            string steeringPrompt = null,
+            HorninessTimeModifiers horninessTimeModifiers = null)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Vision = vision ?? throw new ArgumentNullException(nameof(vision));
@@ -160,6 +190,7 @@ namespace Pinder.LlmAdapters
             SteeringPrompt = steeringPrompt ?? "";
             DeliveryRules = deliveryRules;
             DramaticCraft = dramaticCraft;
+            HorninessTimeModifiers = horninessTimeModifiers;
         }
 
         /// <summary>
@@ -250,6 +281,28 @@ namespace Pinder.LlmAdapters
                     conversationArcProgression = caV.ToString();
             }
 
+            // Parse required horniness_time_modifiers
+            if (!parsed.TryGetValue("horniness_time_modifiers", out var htmObj) || htmObj == null)
+                throw new InvalidOperationException("game-definition.yaml is missing required key: horniness_time_modifiers");
+
+            if (!(htmObj is Dictionary<object, object> htmDict))
+                throw new InvalidOperationException("game-definition.yaml is missing required key: horniness_time_modifiers");
+
+            int ParseHtmInt(string key)
+            {
+                if (!htmDict.TryGetValue(key, out var v) || v == null)
+                    throw new InvalidOperationException($"game-definition.yaml horniness_time_modifiers is missing required sub-key: {key}");
+                if (!int.TryParse(v.ToString(), out int result))
+                    throw new InvalidOperationException($"game-definition.yaml horniness_time_modifiers.{key} must be an integer");
+                return result;
+            }
+
+            var horninessTimeModifiers = new HorninessTimeModifiers(
+                morning: ParseHtmInt("morning"),
+                afternoon: ParseHtmInt("afternoon"),
+                evening: ParseHtmInt("evening"),
+                overnight: ParseHtmInt("overnight"));
+
             return new GameDefinition(
                 name: GetRequired("name"),
                 vision: GetRequired("vision"),
@@ -267,7 +320,8 @@ namespace Pinder.LlmAdapters
                 conversationArcProgression: conversationArcProgression,
                 playerProbing: GetOptional("player_probing"),
                 improvementPrompt: GetOptional("improvement_prompt"),
-                steeringPrompt: GetOptional("steering_prompt")
+                steeringPrompt: GetOptional("steering_prompt"),
+                horninessTimeModifiers: horninessTimeModifiers
             );
         }
 
