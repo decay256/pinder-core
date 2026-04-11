@@ -1190,6 +1190,10 @@
       Dread Δ: '+1'
     - Event: Nat 1 on Wit
       Dread Δ: '+1'
+    - Event: Date secured (session end)
+      Dread Δ: '-1'
+    - Event: Any Nat 20 (any stat)
+      Dread Δ: '-1'
     sep_cells:
     - '-------'
     - '---------'
@@ -1255,6 +1259,18 @@
   outcome:
     shadow: Madness
     shadow_delta: -1
+- id: §9.shadow-reduce.nat20-chaos-madness
+  section: §9
+  title: Shadow Reduction — Nat 20 on CHAOS reduces Madness
+  type: shadow_growth
+  description: 'Nat 20 on CHAOS stat: Madness -1. Chaos mastered rather than consumed.'
+  condition:
+    action: Nat 20 on CHAOS
+    stat: Chaos
+    roll: nat20
+  outcome:
+    shadow: Madness
+    shadow_delta: -1
 - id: §9.shadow-growth.session-longer-than-30-min-real-time
   section: §9
   title: Shadow Growth — Session longer than 30 min real-time
@@ -1276,12 +1292,18 @@
       Madness Δ: '+1'
     - Event: Nat 1 on Charm
       Madness Δ: '+1'
-    - Event: 3+ trope traps in one conversation
+    - Event: Every TropeTrap failure
       Madness Δ: '+1'
-    - Event: Déjà vu (same opener twice in a row)
-      Madness Δ: '+1'
+    - Event: CHARM used 3+ times in conversation
+      Madness Δ: '+1 (once)'
     - Event: Session longer than 30 min real-time
       Madness Δ: '+1'
+    - Event: Combo success
+      Madness Δ: '-1'
+    - Event: Tell option selected
+      Madness Δ: '-1'
+    - Event: Nat 20 on CHAOS
+      Madness Δ: '-1'
     sep_cells:
     - '-------'
     - '-----------'
@@ -1426,6 +1448,8 @@
       Overthinking Δ: '+1'
     - Event: Nat 1 on Self-Awareness
       Overthinking Δ: '+1'
+    - Event: Success at interest ≥20
+      Overthinking Δ: '-1'
     sep_cells:
     - '-------'
     - '---------------'
@@ -1444,6 +1468,8 @@
       Despair Δ: '+1'
     - Event: Every 3rd cumulative RIZZ failure
       Despair Δ: '+1'
+    - Event: SA or HONESTY success at interest >18
+      Despair Δ: '-1'
     sep_cells:
     - '-------'
     - '-----------'
@@ -1558,6 +1584,14 @@
       Shadow Reduced: Fixation -1
     - Action: 4+ different stats used in one conversation
       Shadow Reduced: Fixation -1
+    - Action: Combo success
+      Shadow Reduced: Madness -1
+    - Action: Tell option selected
+      Shadow Reduced: Madness -1
+    - Action: Nat 20 on CHAOS
+      Shadow Reduced: Madness -1
+    - Action: Any Nat 20 (any stat)
+      Shadow Reduced: Dread -1
     - Action: Winning despite Overthinking disadvantage
       Shadow Reduced: Overthinking -1
     - Action: Success at Interest ≥20
@@ -1573,6 +1607,52 @@
     - '---------------'
   description: ''
   heading_level: 3
+- id: §9.steering-roll
+  section: §9
+  title: Steering Roll Mechanic
+  type: mechanic
+  description: >
+    After a successful delivery, a steering roll fires automatically.
+    Modifier: average of player (SA + CHARM + WIT) / 3.
+    DC: 16 + average of opponent (SA + RIZZ + HONESTY) / 3.
+    On success: LLM generates a date-steering question appended to the delivered message.
+    Uses a separate RNG (does not consume game dice).
+  condition:
+    trigger: successful delivery
+  outcome:
+    on_success: date-steering question appended to message
+    on_failure: no effect
+  formula:
+    modifier: (player.SA + player.CHARM + player.WIT) / 3
+    dc: 16 + (opponent.SA + opponent.RIZZ + opponent.HONESTY) / 3
+    rng: separate (non-game dice)
+- id: §9.horniness-ambient-overlay
+  section: §9
+  title: Horniness Ambient Per-Turn Overlay
+  type: mechanic
+  description: >
+    Session Horniness = d10 + time-of-day modifier (from GameClock, configured in game-definition.yaml).
+    Per-turn check: d20 vs DC (20 - sessionHorniness) — lower session horniness = harder check.
+    On miss: overlay applied to delivered message using horniness_overlay tiers from delivery-instructions.yaml.
+    Tiers: Fumble (miss 1-2), Misfire (miss 3-5), TropeTrap (miss 6-9), Catastrophe (miss 10+).
+    Character has no awareness the overlay occurred.
+    NOT a shadow stat — ambient environmental effect.
+  condition:
+    trigger: every turn (after delivery)
+    check: d20 vs DC (20 - sessionHorniness)
+  outcome:
+    on_miss: horniness overlay applied to delivered message
+    on_pass: no overlay
+  time_bands:
+    morning_09_11: '+3'
+    afternoon_12_17: '+0'
+    evening_18_23: '+2'
+    overnight_00_08: '+5'
+  overlay_tiers:
+    fumble: miss by 1-2
+    misfire: miss by 3-5
+    trope_trap: miss by 6-9
+    catastrophe: miss by 10+
 - id: §9.shadow-threshold.dread.t1
   section: §9
   title: Shadow Threshold — Dread T1
