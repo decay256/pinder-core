@@ -452,7 +452,9 @@ class Program
             Console.WriteLine();
         }
 
-        var config = new GameSessionConfig(clock: clock, playerShadows: sableShadows, globalDcBias: difficultyBias, statDeliveryInstructions: statDeliveryInstructions);
+        int yamlDcBias = gameDef?.GlobalDcBias ?? 0;
+        int totalDcBias = difficultyBias + yamlDcBias;
+        var config = new GameSessionConfig(clock: clock, playerShadows: sableShadows, globalDcBias: totalDcBias, statDeliveryInstructions: statDeliveryInstructions);
         var session = new GameSession(sable, brick, llm, new SystemRandomDiceRoller(), trapRegistry, config);
 
         // Display session horniness in header (#709)
@@ -602,10 +604,10 @@ class Program
                 int riskBonus = need <= 7 ? 1 : need <= 11 ? 2 : need <= 15 ? 3 : need <= 19 ? 5 : 10;
                 string riskBonusTag = $" [+{riskBonus}i★]"; // always show — Reckless shows +10
                 var badges = new System.Collections.Generic.List<string>();
-                if (opt.HasTellBonus)               badges.Add("Tell +2");
+                if (opt.HasTellBonus)               badges.Add("📖 Tell (+2 bonus)");
                 if (opt.ComboName != null)           badges.Add($"⭐ Combo: {opt.ComboName} ({PlaytestFormatter.GetComboRewardSummary(opt.ComboName)})");
-                if (opt.CallbackTurnNumber.HasValue) badges.Add("Callback");
-                if (opt.HasWeaknessWindow)           badges.Add("Window");
+                if (opt.CallbackTurnNumber.HasValue) badges.Add($"🔄 Callback (references turn {opt.CallbackTurnNumber.Value})");
+                if (opt.HasWeaknessWindow)           badges.Add("🎯 Window (+DC reduction)");
                 // Shadow growth warnings and reduction hints (#644)
                 var shadowCtx = new ShadowHintContext
                 {
@@ -712,6 +714,8 @@ class Program
                 Console.WriteLine($"> 📋 *{rollExplanation}*");
             Console.WriteLine();
 
+            if (result.TripleBonusApplied > 0)
+                Console.WriteLine($"> *⚡ Combo: The Triple — +{result.TripleBonusApplied} to this roll*");
             if (result.ComboTriggered != null)
             {
                 Console.WriteLine($"> *⭐ {result.ComboTriggered} combo fires!*");
@@ -819,7 +823,8 @@ class Program
                 if (result.ComboBonusDelta != 0 && result.ComboTriggered != null)
                 {
                     string comboSign = result.ComboBonusDelta >= 0 ? "+" : "";
-                    parts.Add($"Combo: {result.ComboTriggered} {comboSign}{result.ComboBonusDelta}");
+                    string comboExpl = PlaytestFormatter.GetComboBreakdownExplanation(result.ComboTriggered);
+                    parts.Add($"Combo: {result.ComboTriggered} {comboSign}{result.ComboBonusDelta} ({comboExpl})");
                 }
 
                 if (parts.Count > 0)
@@ -827,7 +832,10 @@ class Program
             }
             if (result.ShadowGrowthEvents?.Count > 0)
             {
-                Console.WriteLine($"📊 Shadow: {string.Join(" | ", result.ShadowGrowthEvents)}");
+                var enrichedShadow = new List<string>();
+                foreach (var se in result.ShadowGrowthEvents)
+                    enrichedShadow.Add(PlaytestFormatter.EnrichShadowEvent(se));
+                Console.WriteLine($"📊 Shadow: {string.Join(" | ", enrichedShadow)}");
                 // #484: Shadow threshold warnings
                 foreach (var shadowEvent in result.ShadowGrowthEvents)
                 {
@@ -849,7 +857,7 @@ class Program
             {
                 foreach (var trap in result.StateAfter.ActiveTrapDetails)
                 {
-                    Console.WriteLine($"🪤 Trap: {trap.Name} [{trap.Stat}] — {trap.TurnsRemaining} turn{(trap.TurnsRemaining != 1 ? "s" : "")} remaining — {trap.PenaltyDescription}");
+                    Console.WriteLine($"🪤 Trap: {trap.Name} [{trap.Stat}] — {trap.TurnsRemaining} turn{(trap.TurnsRemaining != 1 ? "s" : "")} remaining — {trap.PenaltyDescription} (activated by {trap.Stat} check failure)");
                 }
             }
             else
@@ -860,7 +868,8 @@ class Program
             if (result.StateAfter.MomentumStreak >= 3)
             {
                 int mBonus = result.StateAfter.MomentumStreak >= 5 ? 3 : 2;
-                Console.WriteLine($"⚡ Momentum: {result.StateAfter.MomentumStreak}-streak → +{mBonus} bonus next roll");
+                string momExpl = PlaytestFormatter.GetMomentumExplanation(result.StateAfter.MomentumStreak);
+                Console.WriteLine($"⚡ Momentum: {result.StateAfter.MomentumStreak}-streak → +{mBonus} bonus ({momExpl})");
             }
             else
             {

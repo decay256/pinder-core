@@ -181,5 +181,87 @@ namespace Pinder.SessionRunner
                 default: return "+1 Interest if success";
             }
         }
+
+        /// <summary>
+        /// Returns a brief (&lt;10 word) rule explanation for a shadow growth/reduction event reason.
+        /// </summary>
+        public static string GetShadowRuleExplanation(string reason)
+        {
+            if (reason == null) return "";
+            // Normalize for matching
+            string r = reason.Trim();
+            if (r.StartsWith("Nat 1 on")) return "Nat 1 grows paired shadow";
+            if (r == "TropeTrap failure") return "every TropeTrap grows Madness";
+            if (r == "RIZZ TropeTrap failure") return "RIZZ TropeTrap also grows Despair";
+            if (r.StartsWith("Catastrophic Wit failure")) return "Wit catastrophe grows Dread";
+            if (r.StartsWith("Same stat") && r.Contains("3 turns")) return "same stat 3x grows Fixation";
+            if (r.Contains("Highest-% option picked")) return "safe picks grow Fixation";
+            if (r == "Honesty success at high interest") return "Honesty success reduces Denial";
+            if (r == "SA/Honesty success at high interest") return "SA/Honesty success reduces Despair";
+            if (r == "Interest hit 0 (unmatch)") return "unmatch grows Dread";
+            if (r.StartsWith("SA used 3+")) return "overusing SA grows Overthinking";
+            if (r.StartsWith("CHARM used 3+")) return "overusing CHARM grows Madness";
+            if (r.StartsWith("Combo success")) return "combo success reduces Madness";
+            if (r.StartsWith("CHAOS combo")) return "CHAOS combo reduces Fixation";
+            if (r == "Tell option selected") return "tell choice reduces Madness";
+            if (r == "Date secured") return "date secured reduces Dread";
+            if (r.Contains("without any Honesty")) return "no Honesty grows Denial";
+            if (r.Contains("Never picked Chaos")) return "no Chaos grows Fixation";
+            if (r.Contains("4+ different stats")) return "variety reduces Fixation";
+            if (r == "Ghosted") return "ghosting grows Dread";
+            if (r.Contains("3rd cumulative RIZZ failure")) return "repeated RIZZ fails grow Despair";
+            if (r.Contains("Wit success variety")) return "Wit variety reduces Overthinking";
+            if (r.Contains("Chaos success")) return "Chaos success reduces Overthinking";
+            if (r.Contains("Rizz success")) return "Rizz success reduces Dread";
+            if (r.Contains("miss acceptance")) return "accepting failure reduces Denial";
+            return "";
+        }
+
+        /// <summary>
+        /// Enriches a shadow event string by appending a brief rule explanation.
+        /// Input format: "ShadowType +N (reason)" → "ShadowType +N (reason — explanation)"
+        /// </summary>
+        public static string EnrichShadowEvent(string shadowEvent)
+        {
+            if (string.IsNullOrEmpty(shadowEvent)) return shadowEvent;
+            // Extract reason from parentheses
+            int openParen = shadowEvent.IndexOf('(');
+            int closeParen = shadowEvent.LastIndexOf(')');
+            if (openParen < 0 || closeParen <= openParen) return shadowEvent;
+            string reason = shadowEvent.Substring(openParen + 1, closeParen - openParen - 1);
+            string explanation = GetShadowRuleExplanation(reason);
+            if (string.IsNullOrEmpty(explanation)) return shadowEvent;
+            // Insert explanation before closing paren
+            return shadowEvent.Substring(0, closeParen) + " — " + explanation + ")";
+        }
+
+        /// <summary>
+        /// Returns a brief rule explanation for momentum display.
+        /// </summary>
+        public static string GetMomentumExplanation(int streak)
+        {
+            if (streak >= 5) return "5+ wins grant +3 bonus";
+            if (streak >= 3) return "3+ consecutive wins grant bonus";
+            return "";
+        }
+
+        /// <summary>
+        /// Returns a brief combo rule explanation for the interest breakdown line.
+        /// </summary>
+        public static string GetComboBreakdownExplanation(string comboName)
+        {
+            switch (comboName)
+            {
+                case "The Setup": return "Wit→Charm sequence";
+                case "The Reveal": return "Charm→Honesty sequence";
+                case "The Read": return "SA→Honesty sequence";
+                case "The Pivot": return "Honesty→Chaos sequence";
+                case "The Escalation": return "Chaos→Rizz sequence";
+                case "The Disarm": return "Wit→Honesty sequence";
+                case "The Recovery": return "fail→SA sequence";
+                case "The Triple": return "3 different stats in a row";
+                default: return "combo bonus applied";
+            }
+        }
     }
 }

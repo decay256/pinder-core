@@ -458,9 +458,11 @@ namespace Pinder.Core.Conversation
 
             // Compute external bonus: tell + callback + Triple combo + momentum (#46, #47, #50, #268)
             int externalBonus = tellBonus + callbackBonus + _pendingMomentumBonus;
+            int tripleBonusApplied = 0;
             if (_comboTracker.HasTripleBonus)
             {
-                externalBonus += 1;
+                tripleBonusApplied = 1;
+                externalBonus += tripleBonusApplied;
                 _comboTracker.ConsumeTripleBonus(); // Consume after applying (#46 edge case 7)
             }
 
@@ -811,7 +813,8 @@ namespace Pinder.Core.Conversation
                 comboBonusDelta: comboBonusDelta,
                 detectedWindow: opponentResponse.WeaknessWindow,
                 steering: steeringResult,
-                horninessCheck: horninessCheckResult);
+                horninessCheck: horninessCheckResult,
+                tripleBonusApplied: tripleBonusApplied);
         }
 
         /// <summary>

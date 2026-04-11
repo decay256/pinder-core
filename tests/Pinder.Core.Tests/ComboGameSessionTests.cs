@@ -15,6 +15,7 @@ namespace Pinder.Core.Tests
     /// <summary>
     /// LLM adapter that returns options with specific stats, allowing combo testing.
     /// </summary>
+    [Trait("Category", "Core")]
     public sealed class ComboTestLlmAdapter : ILlmAdapter
     {
         private readonly Queue<DialogueOption[]> _optionSets = new Queue<DialogueOption[]>();
@@ -53,6 +54,7 @@ namespace Pinder.Core.Tests
         public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction) => System.Threading.Tasks.Task.FromResult(message);
     }
 
+    [Trait("Category", "Core")]
     public class ComboGameSessionTests
     {
         private static CharacterProfile MakeProfile(string name, int allStats = 2)
@@ -177,6 +179,7 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
             var r3 = await session.ResolveTurnAsync(0);
             Assert.Equal("The Triple", r3.ComboTriggered);
+            Assert.Equal(0, r3.TripleBonusApplied); // #693: bonus not yet consumed on triggering turn
             Assert.True(r3.StateAfter.TripleBonusActive);
 
             // Turn 4: should have +1 external bonus from triple + +2 from momentum (streak=3 at start, #268)
@@ -185,6 +188,7 @@ namespace Pinder.Core.Tests
             var r4 = await session.ResolveTurnAsync(0);
             // Roll: 15+2+0=17 base, +1 triple + 2 momentum = 3 external
             Assert.Equal(3, r4.Roll.ExternalBonus);
+            Assert.Equal(1, r4.TripleBonusApplied); // #693: Triple bonus surfaced in TurnResult
             Assert.False(r4.StateAfter.TripleBonusActive); // consumed
         }
 

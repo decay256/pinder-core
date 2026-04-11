@@ -80,6 +80,11 @@ namespace Pinder.Core.Conversation
         /// </summary>
         public HorninessCheckResult HorninessCheck { get; }
 
+        /// <summary>
+        /// Roll bonus applied from a previous Triple combo (+1). 0 if no Triple bonus was consumed this turn.
+        /// </summary>
+        public int TripleBonusApplied { get; }
+
         public TurnResult(
             RollResult roll,
             string deliveredMessage,
@@ -101,7 +106,8 @@ namespace Pinder.Core.Conversation
             int comboBonusDelta = 0,
             WeaknessWindow? detectedWindow = null,
             SteeringRollResult steering = null,
-            HorninessCheckResult horninessCheck = null)
+            HorninessCheckResult horninessCheck = null,
+            int tripleBonusApplied = 0)
         {
             Roll = roll ?? throw new ArgumentNullException(nameof(roll));
             DeliveredMessage = deliveredMessage ?? throw new ArgumentNullException(nameof(deliveredMessage));
@@ -124,6 +130,7 @@ namespace Pinder.Core.Conversation
             DetectedWindow = detectedWindow;
             Steering = steering ?? SteeringRollResult.NotAttempted;
             HorninessCheck = horninessCheck ?? HorninessCheckResult.NotPerformed;
+            TripleBonusApplied = tripleBonusApplied;
         }
     }
 }
