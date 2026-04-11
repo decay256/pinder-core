@@ -54,7 +54,7 @@ namespace Pinder.Core.Tests.Integration
             var opponentShadows = new SessionShadowTracker(velvetStats);
 
             var config = new GameSessionConfig(
-                clock: null,
+                clock: TestHelpers.MakeClock(),
                 playerShadows: playerShadows,
                 opponentShadows: opponentShadows,
                 startingInterest: 5,  // low start to stay in range with new higher risk bonuses
@@ -302,7 +302,7 @@ namespace Pinder.Core.Tests.Integration
             // T4: streak=3→pending=+2. d20=1 → Nat1 fail (ExternalBonus=2 but Nat1 always fails). Interest 11→7 (Legendary -4). Momentum=0.
             // T5: streak=0→pending=0. d20=3 → success. Interest 7→9. Momentum=1.
             var config = new GameSessionConfig(
-                clock: null,
+                clock: TestHelpers.MakeClock(),
                 playerShadows: new SessionShadowTracker(geraldStats),
                 opponentShadows: new SessionShadowTracker(velvetStats),
                 startingInterest: 5,
@@ -382,7 +382,7 @@ namespace Pinder.Core.Tests.Integration
 
             // Start at interest=4 (Bored)
             var config = new GameSessionConfig(
-                clock: null,
+                clock: TestHelpers.MakeClock(),
                 playerShadows: new SessionShadowTracker(geraldStats),
                 opponentShadows: new SessionShadowTracker(velvetStats),
                 startingInterest: 4,
@@ -418,7 +418,7 @@ namespace Pinder.Core.Tests.Integration
 
             // Start at interest=4 (Bored) — Bored grants disadvantage
             var config = new GameSessionConfig(
-                clock: null,
+                clock: TestHelpers.MakeClock(),
                 playerShadows: new SessionShadowTracker(geraldStats),
                 opponentShadows: new SessionShadowTracker(velvetStats),
                 startingInterest: 4,
@@ -462,7 +462,7 @@ namespace Pinder.Core.Tests.Integration
 
             // Start at interest=1 (Bored, just above Unmatched)
             var config = new GameSessionConfig(
-                clock: null,
+                clock: TestHelpers.MakeClock(),
                 playerShadows: new SessionShadowTracker(geraldStats),
                 opponentShadows: new SessionShadowTracker(velvetStats),
                 startingInterest: 1,
@@ -510,7 +510,7 @@ namespace Pinder.Core.Tests.Integration
             var velvet = new CharacterProfile(velvetStats, "Test", "Velvet", timing, level: 7);
 
             var config = new GameSessionConfig(
-                clock: null,
+                clock: TestHelpers.MakeClock(),
                 playerShadows: new SessionShadowTracker(geraldStats),
                 opponentShadows: new SessionShadowTracker(velvetStats),
                 startingInterest: 12,
@@ -577,7 +577,7 @@ namespace Pinder.Core.Tests.Integration
 
             var playerShadows = new SessionShadowTracker(geraldStats);
             var config = new GameSessionConfig(
-                clock: null,
+                clock: TestHelpers.MakeClock(),
                 playerShadows: playerShadows,
                 opponentShadows: new SessionShadowTracker(velvetStats),
                 startingInterest: 10,
@@ -617,7 +617,7 @@ namespace Pinder.Core.Tests.Integration
             var velvet = new CharacterProfile(velvetStats, "Test", "Velvet", timing, level: 7);
 
             var config = new GameSessionConfig(
-                clock: null,
+                clock: TestHelpers.MakeClock(),
                 playerShadows: new SessionShadowTracker(geraldStats),
                 opponentShadows: new SessionShadowTracker(velvetStats),
                 startingInterest: 10,
@@ -652,7 +652,7 @@ namespace Pinder.Core.Tests.Integration
                 var velvet = new CharacterProfile(velvetStats, "Test", "Velvet", timing, level: 7);
 
                 var config = new GameSessionConfig(
-                    clock: null,
+                    clock: TestHelpers.MakeClock(),
                     playerShadows: new SessionShadowTracker(geraldStats),
                     opponentShadows: new SessionShadowTracker(velvetStats),
                     startingInterest: 10,
@@ -709,7 +709,7 @@ namespace Pinder.Core.Tests.Integration
 
             // Start at interest=1 (Bored). Ghost check d4=1 → Ghosted immediately.
             var config = new GameSessionConfig(
-                clock: null,
+                clock: TestHelpers.MakeClock(),
                 playerShadows: new SessionShadowTracker(geraldStats),
                 opponentShadows: new SessionShadowTracker(velvetStats),
                 startingInterest: 4,
@@ -749,7 +749,7 @@ namespace Pinder.Core.Tests.Integration
             var velvet = new CharacterProfile(velvetStats, "Test", "Velvet", timing, level: 7);
 
             var config = new GameSessionConfig(
-                clock: null,
+                clock: TestHelpers.MakeClock(),
                 playerShadows: new SessionShadowTracker(geraldStats),
                 opponentShadows: new SessionShadowTracker(velvetStats),
                 startingInterest: 10,
@@ -780,7 +780,7 @@ namespace Pinder.Core.Tests.Integration
                 new Dictionary<ShadowStatType, int>
                 {
                     { ShadowStatType.Madness, 0 },
-                    { ShadowStatType.Horniness, 0 },
+                    { ShadowStatType.Despair, 0 },
                     { ShadowStatType.Denial, 0 },
                     { ShadowStatType.Fixation, 0 },
                     { ShadowStatType.Dread, 0 },
@@ -805,7 +805,7 @@ namespace Pinder.Core.Tests.Integration
                 new Dictionary<ShadowStatType, int>
                 {
                     { ShadowStatType.Madness, 0 },
-                    { ShadowStatType.Horniness, 0 },
+                    { ShadowStatType.Despair, 0 },
                     { ShadowStatType.Denial, 0 },
                     { ShadowStatType.Fixation, 0 },
                     { ShadowStatType.Dread, 0 },

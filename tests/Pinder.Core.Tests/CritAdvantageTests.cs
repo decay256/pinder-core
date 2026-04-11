@@ -64,7 +64,7 @@ namespace Pinder.Core.Tests
                 8, 50, 50, 50       // Turn 3: no adv → d20=8, extras
             );
 
-            var config = new GameSessionConfig(startingInterest: 5);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 5);
             var session = MakeSession(dice, config);
 
             // Turn 1: Nat 20 — interest goes 5→9
@@ -181,7 +181,7 @@ namespace Pinder.Core.Tests
                 14, 6, 50       // Turn 2: advantage (both interest + crit), d20=14, d20=6
             );
 
-            var config = new GameSessionConfig(startingInterest: 16);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 16);
             var session = MakeSession(dice, config);
 
             // Turn 1: already has advantage from interest, Nat 20
@@ -280,7 +280,7 @@ namespace Pinder.Core.Tests
                 14, 3, 50       // Turn 3: crit adv → d20=14, d20=3, max=14
             );
 
-            var config = new GameSessionConfig(startingInterest: 10);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 10);
             var session = MakeSession(dice, config);
 
             // Turn 1: Speak Nat 20
@@ -343,7 +343,7 @@ namespace Pinder.Core.Tests
                 },
                 new Dictionary<ShadowStatType, int>
                 {
-                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Horniness, 0 },
+                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Despair, 0 },
                     { ShadowStatType.Denial, 0 }, { ShadowStatType.Fixation, 0 },
                     { ShadowStatType.Dread, 0 }, { ShadowStatType.Overthinking, 0 }
                 });
@@ -356,7 +356,7 @@ namespace Pinder.Core.Tests
                 },
                 new Dictionary<ShadowStatType, int>
                 {
-                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Horniness, 0 },
+                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Despair, 0 },
                     { ShadowStatType.Denial, 0 }, { ShadowStatType.Fixation, 0 },
                     { ShadowStatType.Dread, 0 }, { ShadowStatType.Overthinking, 0 }
                 });
@@ -367,6 +367,7 @@ namespace Pinder.Core.Tests
             var llm = new ScriptedLlm();
             var trapRegistry = new NullTrapRegistry();
 
+            config = config ?? new GameSessionConfig(clock: TestHelpers.MakeClock());
             return new GameSession(player, opponent, llm, dice, trapRegistry, config);
         }
 

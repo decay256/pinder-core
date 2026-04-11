@@ -117,7 +117,7 @@ namespace Pinder.Core.Tests
             Assert.Equal(1, profile.Level);
             // Shadows default to 0
             Assert.Equal(0, profile.Stats.GetShadow(ShadowStatType.Madness));
-            Assert.Equal(0, profile.Stats.GetShadow(ShadowStatType.Horniness));
+            Assert.Equal(0, profile.Stats.GetShadow(ShadowStatType.Despair));
         }
 
         [Fact]

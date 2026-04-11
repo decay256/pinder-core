@@ -36,7 +36,7 @@ namespace Pinder.Core.Tests
                 new Dictionary<ShadowStatType, int>
                 {
                     { ShadowStatType.Madness, madness },
-                    { ShadowStatType.Horniness, horniness },
+                    { ShadowStatType.Despair, horniness },
                     { ShadowStatType.Denial, denial },
                     { ShadowStatType.Fixation, fixation },
                     { ShadowStatType.Dread, dread },
@@ -82,12 +82,12 @@ namespace Pinder.Core.Tests
         // AC1: SessionShadowTracker — all shadow/stat pairs
         // ==================================================================
 
-        // Mutation: Fails if Rizz uses wrong paired shadow (not Horniness)
+        // Mutation: Fails if Rizz uses wrong paired shadow (not Despair)
         [Fact]
-        public void SessionShadowTracker_RizzPairedWithHorniness()
+        public void SessionShadowTracker_RizzPairedWithDespair()
         {
             var tracker = new SessionShadowTracker(MakeStatBlock(rizz: 4, horniness: 6));
-            // Rizz(4) - floor(Horniness(6) / 3) = 4 - 2 = 2
+            // Rizz(4) - floor(Despair(6) / 3) = 4 - 2 = 2
             Assert.Equal(2, tracker.GetEffectiveStat(StatType.Rizz));
         }
 
@@ -138,13 +138,13 @@ namespace Pinder.Core.Tests
             var tracker = new SessionShadowTracker(MakeStatBlock());
             tracker.ApplyGrowth(ShadowStatType.Dread, 2, "first");
             tracker.ApplyGrowth(ShadowStatType.Madness, 1, "second");
-            tracker.ApplyGrowth(ShadowStatType.Horniness, 3, "third");
+            tracker.ApplyGrowth(ShadowStatType.Despair, 3, "third");
 
             var events = tracker.DrainGrowthEvents();
             Assert.Equal(3, events.Count);
             Assert.Equal("Dread +2 (first)", events[0]);
             Assert.Equal("Madness +1 (second)", events[1]);
-            Assert.Equal("Horniness +3 (third)", events[2]);
+            Assert.Equal("Despair +3 (third)", events[2]);
         }
 
         // Mutation: Fails if multiple growths to same shadow lose individual descriptions
@@ -180,8 +180,8 @@ namespace Pinder.Core.Tests
         public void SessionShadowTracker_ApplyGrowth_DescriptionFormat()
         {
             var tracker = new SessionShadowTracker(MakeStatBlock());
-            var desc = tracker.ApplyGrowth(ShadowStatType.Horniness, 5, "rizz crit");
-            Assert.Equal("Horniness +5 (rizz crit)", desc);
+            var desc = tracker.ApplyGrowth(ShadowStatType.Despair, 5, "rizz crit");
+            Assert.Equal("Despair +5 (rizz crit)", desc);
         }
 
         // ==================================================================
@@ -340,7 +340,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void GameSessionConfig_PreviousOpener_Stored()
         {
-            var config = new GameSessionConfig(previousOpener: "Hey beautiful");
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), previousOpener: "Hey beautiful");
             Assert.Equal("Hey beautiful", config.PreviousOpener);
         }
 
@@ -348,7 +348,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void GameSessionConfig_StartingInterest_Zero_IsValidNotNull()
         {
-            var config = new GameSessionConfig(startingInterest: 0);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 0);
             Assert.Equal(0, config.StartingInterest);
             Assert.True(config.StartingInterest.HasValue);
         }
@@ -363,7 +363,7 @@ namespace Pinder.Core.Tests
                 new StubLlmAdapter(),
                 new FixedDice(10),
                 new NullTrapRegistry(),
-                new GameSessionConfig(startingInterest: 0));
+                new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 0));
 
             // Interest=0 should be Unmatched state.
             // StartTurnAsync should handle this (likely end condition).
@@ -382,7 +382,7 @@ namespace Pinder.Core.Tests
                 new StubLlmAdapter(),
                 new FixedDice(10),
                 new NullTrapRegistry(),
-                new GameSessionConfig(startingInterest: -10));
+                new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: -10));
             Assert.NotNull(session);
         }
 

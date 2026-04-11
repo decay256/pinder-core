@@ -158,12 +158,14 @@ namespace Pinder.Core.Tests
         /// No energy is consumed.
         /// </summary>
         [Fact]
-        public async Task GameSession_NoClock_HorninessStillRolled_NoEnergyCheck()
+        public async Task GameSession_WithClock_HorninessRolled_NoEnergyCheck()
         {
-            // Horniness roll (1d10) = 5, then Turn 1: d20=15 (roll), d100=50 (timing delay)
+            // Clock required. Horniness roll (1d10) = 5, then Turn 1: d20=15 (roll), d100=50 (timing delay)
             var dice = new FixedDice(
-                5,   // horniness roll (always consumed now, even without clock)
+                5,   // horniness roll
                 15, 50);
+            var clock = new ConfigurableClock(horninessModifier: 0, remainingEnergy: 100);
+            var config = new GameSessionConfig(clock: clock);
 
             var session = new GameSession(
                 MakeProfile("Player"),
@@ -171,12 +173,12 @@ namespace Pinder.Core.Tests
                 new NullLlmAdapter(),
                 dice,
                 new NullTrapRegistry(),
-                null);
+                config);
 
             var turn = await session.StartTurnAsync();
             Assert.Equal(4, turn.Options.Length);
 
-            // Should not throw — no energy check without clock
+            // Should not throw
             var result = await session.ResolveTurnAsync(0);
             Assert.NotNull(result);
         }
@@ -186,10 +188,12 @@ namespace Pinder.Core.Tests
         /// Horniness >= 18 forces all options to Rizz even without a clock.
         /// </summary>
         [Fact]
-        public async Task GameSession_NoClock_HorninessRolled_ForcesRizzAtT3()
+        public async Task GameSession_WithClock_HorninessRolled_ForcesRizzAtT3()
         {
-            // FixedDice: 20 (horniness roll — unclamped), then enough for StartTurnAsync
+            // Clock required. Dice roll 20 + modifier 0 = 20 >= 18, forces all options to Rizz.
             var dice = new FixedDice(20);
+            var clock = new ConfigurableClock(horninessModifier: 0, remainingEnergy: 100);
+            var config = new GameSessionConfig(clock: clock);
 
             var session = new GameSession(
                 MakeProfile("Player"),
@@ -197,11 +201,11 @@ namespace Pinder.Core.Tests
                 new NullLlmAdapter(),
                 dice,
                 new NullTrapRegistry(),
-                null);
+                config);
 
             var turn = await session.StartTurnAsync();
 
-            // Horniness = 20 (no clock modifier) >= 18, all options should be Rizz
+            // Horniness = 20 (modifier 0) >= 18, all options should be Rizz
             for (int i = 0; i < turn.Options.Length; i++)
             {
                 Assert.Equal(StatType.Rizz, turn.Options[i].Stat);

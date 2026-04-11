@@ -229,7 +229,7 @@ namespace Pinder.SessionRunner
             var shadows = new Dictionary<ShadowStatType, int>
             {
                 { ShadowStatType.Madness, 0 },
-                { ShadowStatType.Horniness, 0 },
+                { ShadowStatType.Despair, 0 },
                 { ShadowStatType.Denial, 0 },
                 { ShadowStatType.Fixation, 0 },
                 { ShadowStatType.Dread, 0 },
@@ -326,7 +326,8 @@ namespace Pinder.SessionRunner
             switch (name.ToLowerInvariant().Replace("-", "").Replace(" ", ""))
             {
                 case "madness": return ShadowStatType.Madness;
-                case "horniness": return ShadowStatType.Horniness;
+                case "despair":   return ShadowStatType.Despair;
+                case "horniness": return ShadowStatType.Despair; // legacy alias
                 case "denial": return ShadowStatType.Denial;
                 case "fixation": return ShadowStatType.Fixation;
                 case "dread": return ShadowStatType.Dread;

@@ -181,7 +181,7 @@ namespace Pinder.Core.Tests
             Assert.Equal(6, capturedDelivery[ShadowStatType.Fixation]);
             Assert.Equal(8, capturedDelivery[ShadowStatType.Madness]);
             Assert.Equal(10, capturedDelivery[ShadowStatType.Overthinking]);
-            Assert.Equal(12, capturedDelivery[ShadowStatType.Horniness]);
+            Assert.Equal(12, capturedDelivery[ShadowStatType.Despair]);
         }
 
         // What: AC4 — all shadow stat types appear in OpponentContext thresholds
@@ -206,7 +206,7 @@ namespace Pinder.Core.Tests
             Assert.Equal(5, capturedOpponent[ShadowStatType.Fixation]);
             Assert.Equal(7, capturedOpponent[ShadowStatType.Madness]);
             Assert.Equal(9, capturedOpponent[ShadowStatType.Overthinking]);
-            Assert.Equal(11, capturedOpponent[ShadowStatType.Horniness]);
+            Assert.Equal(11, capturedOpponent[ShadowStatType.Despair]);
         }
 
         // ================================================================
@@ -236,12 +236,12 @@ namespace Pinder.Core.Tests
             // Delivery = player shadows
             Assert.NotNull(capturedDelivery);
             Assert.Equal(10, capturedDelivery![ShadowStatType.Madness]);
-            Assert.Equal(3, capturedDelivery[ShadowStatType.Horniness]);
+            Assert.Equal(3, capturedDelivery[ShadowStatType.Despair]);
 
             // Opponent = opponent shadows
             Assert.NotNull(capturedOpponent);
             Assert.Equal(2, capturedOpponent![ShadowStatType.Madness]);
-            Assert.Equal(14, capturedOpponent[ShadowStatType.Horniness]);
+            Assert.Equal(14, capturedOpponent[ShadowStatType.Despair]);
         }
 
         // What: Edge — player shadows set but opponent not → delivery has thresholds, opponent null
@@ -332,7 +332,7 @@ namespace Pinder.Core.Tests
                 {
                     { ShadowStatType.Dread, dread }, { ShadowStatType.Denial, denial },
                     { ShadowStatType.Fixation, fixation }, { ShadowStatType.Madness, madness },
-                    { ShadowStatType.Overthinking, overthinking }, { ShadowStatType.Horniness, horniness }
+                    { ShadowStatType.Overthinking, overthinking }, { ShadowStatType.Despair, horniness }
                 });
             return new SessionShadowTracker(stats);
         }
@@ -347,7 +347,7 @@ namespace Pinder.Core.Tests
                 },
                 new Dictionary<ShadowStatType, int>
                 {
-                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Horniness, 0 },
+                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Despair, 0 },
                     { ShadowStatType.Denial, 0 }, { ShadowStatType.Fixation, 0 },
                     { ShadowStatType.Dread, 0 }, { ShadowStatType.Overthinking, 0 }
                 });
@@ -365,8 +365,7 @@ namespace Pinder.Core.Tests
             SessionShadowTracker? opponentShadows = null,
             ILlmAdapter? llm = null)
         {
-            var config = new GameSessionConfig(
-                playerShadows: playerShadows,
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: playerShadows,
                 opponentShadows: opponentShadows);
 
             // dice[0] = ghost check (need >1 to avoid ghost), rest = roll

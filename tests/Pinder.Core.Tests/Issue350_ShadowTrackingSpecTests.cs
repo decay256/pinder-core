@@ -28,7 +28,7 @@ namespace Pinder.Core.Tests
             // Nat 1 triggers Madness shadow growth when PlayerShadows is wired
             var stats = BuildStatBlock();
             var shadows = new SessionShadowTracker(stats);
-            var config = new GameSessionConfig(playerShadows: shadows);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: shadows);
             var session = BuildSession(stats, config, diceRolls: new[] { 5, 1, 50 }); // horniness, d20=1, d100
 
             await session.StartTurnAsync();
@@ -68,7 +68,7 @@ namespace Pinder.Core.Tests
         {
             var stats = BuildStatBlock();
             var shadows = new SessionShadowTracker(stats);
-            var config = new GameSessionConfig(playerShadows: shadows);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: shadows);
             var session = BuildSession(stats, config, diceRolls: new[] { 5, 1, 50 });
 
             await session.StartTurnAsync();
@@ -87,7 +87,7 @@ namespace Pinder.Core.Tests
         {
             var stats = BuildStatBlock();
             var shadows = new SessionShadowTracker(stats);
-            var config = new GameSessionConfig(playerShadows: shadows);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: shadows);
             var session = BuildSession(stats, config, diceRolls: new[] { 5, 1, 50 });
 
             await session.StartTurnAsync();
@@ -162,7 +162,7 @@ namespace Pinder.Core.Tests
         {
             var stats = BuildStatBlock(charm: 3);
             var shadows = new SessionShadowTracker(stats);
-            var config = new GameSessionConfig(playerShadows: shadows);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: shadows);
 
             // 3 turns: horniness + (d20 + d100) * 3, high rolls to succeed
             var dice = new[] { 5, 15, 50, 15, 50, 15, 50 };
@@ -188,7 +188,7 @@ namespace Pinder.Core.Tests
             // Fixation fires too on the 3rd turn.
             var stats = BuildStatBlock(charm: 3);
             var shadows = new SessionShadowTracker(stats);
-            var config = new GameSessionConfig(playerShadows: shadows);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: shadows);
 
             // 3 turns of Charm: turns 1-2 succeed, turn 3 is Nat 1
             var dice = new[] { 5, 15, 50, 15, 50, 1, 50 };
@@ -219,7 +219,7 @@ namespace Pinder.Core.Tests
             // Use high charm/wit to ensure easy success, and pick Wit which has no skip penalty
             var stats = BuildStatBlock(wit: 5, denial: 0, fixation: 0);
             var shadows = new SessionShadowTracker(stats);
-            var config = new GameSessionConfig(playerShadows: shadows);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: shadows);
             // d20=18 → strong success, no shadow trigger expected
             var session = BuildSession(stats, config, diceRolls: new[] { 5, 18, 50 });
 
@@ -242,7 +242,7 @@ namespace Pinder.Core.Tests
         {
             var stats = BuildStatBlock(charm: 3);
             var shadows = new SessionShadowTracker(stats);
-            var config = new GameSessionConfig(playerShadows: shadows);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: shadows);
 
             // Two Nat 1s on Charm → Madness +1 each = +2 total
             var dice = new[] { 5, 1, 50, 1, 50 };
@@ -282,13 +282,13 @@ namespace Pinder.Core.Tests
             var shadows = new SessionShadowTracker(stats);
 
             shadows.ApplyGrowth(ShadowStatType.Dread, 3, "test dread");
-            shadows.ApplyGrowth(ShadowStatType.Horniness, 1, "test horniness");
+            shadows.ApplyGrowth(ShadowStatType.Despair, 1, "test horniness");
 
             // Even after multiple growths, all values are consistent
             Assert.Equal(3, shadows.GetDelta(ShadowStatType.Dread));
             Assert.Equal(3, shadows.GetEffectiveShadow(ShadowStatType.Dread));
-            Assert.Equal(1, shadows.GetDelta(ShadowStatType.Horniness));
-            Assert.Equal(1, shadows.GetEffectiveShadow(ShadowStatType.Horniness));
+            Assert.Equal(1, shadows.GetDelta(ShadowStatType.Despair));
+            Assert.Equal(1, shadows.GetEffectiveShadow(ShadowStatType.Despair));
             // Untouched shadows remain at base
             Assert.Equal(0, shadows.GetDelta(ShadowStatType.Madness));
         }
@@ -310,7 +310,7 @@ namespace Pinder.Core.Tests
         {
             var stats = BuildStatBlock();
             var shadows = new SessionShadowTracker(stats);
-            var config = new GameSessionConfig(playerShadows: shadows); // no opponentShadows
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: shadows); // no opponentShadows
 
             var session = BuildSession(stats, config, diceRolls: new[] { 5, 15, 50 });
 
@@ -338,7 +338,7 @@ namespace Pinder.Core.Tests
                 },
                 new Dictionary<ShadowStatType, int>
                 {
-                    { ShadowStatType.Madness, madness }, { ShadowStatType.Horniness, horniness },
+                    { ShadowStatType.Madness, madness }, { ShadowStatType.Despair, horniness },
                     { ShadowStatType.Denial, denial }, { ShadowStatType.Fixation, fixation },
                     { ShadowStatType.Dread, dread }, { ShadowStatType.Overthinking, overthinking }
                 });
@@ -356,6 +356,8 @@ namespace Pinder.Core.Tests
             int[] diceRolls)
         {
             var opponentStats = BuildStatBlock();
+            // Clock is required; if config has no clock, provide a default.
+            config = config ?? new GameSessionConfig(clock: TestHelpers.MakeClock());
             return new GameSession(
                 BuildProfile("player", playerStats),
                 BuildProfile("opponent", opponentStats),

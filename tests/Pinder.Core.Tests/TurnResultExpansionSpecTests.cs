@@ -163,7 +163,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void Constructor_AllNewFieldsPopulated_MatchSpec()
         {
-            var events = new[] { "Horniness +1 (Rizz overuse)" };
+            var events = new[] { "Despair +1 (Rizz overuse)" };
             var result = new TurnResult(
                 MakeRoll(), "I noticed you like long walks...", "Omg yes! Tell me more!",
                 "Things are heating up!", 3, MakeSnapshot(), false, null,
@@ -176,7 +176,7 @@ namespace Pinder.Core.Tests
                 xpEarned: 15);
 
             Assert.Equal(1, result.ShadowGrowthEvents.Count);
-            Assert.Equal("Horniness +1 (Rizz overuse)", result.ShadowGrowthEvents[0]);
+            Assert.Equal("Despair +1 (Rizz overuse)", result.ShadowGrowthEvents[0]);
             Assert.Equal("SmoothOperator", result.ComboTriggered);
             Assert.Equal(1, result.CallbackBonusApplied);
             Assert.Equal(2, result.TellReadBonus);
@@ -221,13 +221,13 @@ namespace Pinder.Core.Tests
         [Fact]
         public void EdgeCase_MultipleShadowGrowthEvents_PreservedInOrder()
         {
-            var events = new List<string> { "Horniness +1", "Dread +1", "Fixation +2" };
+            var events = new List<string> { "Despair +1", "Dread +1", "Fixation +2" };
             var result = new TurnResult(
                 MakeRoll(), "a", "b", null, 0, MakeSnapshot(), false, null,
                 shadowGrowthEvents: events);
 
             Assert.Equal(3, result.ShadowGrowthEvents.Count);
-            Assert.Equal("Horniness +1", result.ShadowGrowthEvents[0]);
+            Assert.Equal("Despair +1", result.ShadowGrowthEvents[0]);
             Assert.Equal("Dread +1", result.ShadowGrowthEvents[1]);
             Assert.Equal("Fixation +2", result.ShadowGrowthEvents[2]);
         }

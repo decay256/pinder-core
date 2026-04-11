@@ -94,7 +94,7 @@ namespace Pinder.Core.Tests
             Assert.Equal(3, shadows.GetEffectiveShadow(ShadowStatType.Denial));
             Assert.Equal(2, shadows.GetEffectiveShadow(ShadowStatType.Fixation));
             Assert.Equal(0, shadows.GetEffectiveShadow(ShadowStatType.Madness));
-            Assert.Equal(0, shadows.GetEffectiveShadow(ShadowStatType.Horniness));
+            Assert.Equal(0, shadows.GetEffectiveShadow(ShadowStatType.Despair));
             Assert.Equal(0, shadows.GetEffectiveShadow(ShadowStatType.Dread));
             Assert.Equal(0, shadows.GetEffectiveShadow(ShadowStatType.Overthinking));
         }
@@ -168,7 +168,7 @@ namespace Pinder.Core.Tests
                 },
                 new Dictionary<ShadowStatType, int>
                 {
-                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Horniness, 0 },
+                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Despair, 0 },
                     { ShadowStatType.Denial, 3 }, { ShadowStatType.Fixation, 2 },
                     { ShadowStatType.Dread, 0 }, { ShadowStatType.Overthinking, 0 }
                 });
@@ -190,8 +190,8 @@ namespace Pinder.Core.Tests
             opponentStats = opponentStats ?? MakeStatBlock();
 
             var config = shadows != null
-                ? new GameSessionConfig(playerShadows: shadows)
-                : (GameSessionConfig?)null;
+                ? new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: shadows)
+                : new GameSessionConfig(clock: TestHelpers.MakeClock());
 
             // Prepend horniness roll (1d10)
             var allDice = new int[diceValues.Length + 1];

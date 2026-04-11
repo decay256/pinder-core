@@ -38,7 +38,7 @@ namespace Pinder.Core.Tests
                 new Dictionary<ShadowStatType, int>
                 {
                     { ShadowStatType.Madness, madness },
-                    { ShadowStatType.Horniness, horniness },
+                    { ShadowStatType.Despair, horniness },
                     { ShadowStatType.Denial, denial },
                     { ShadowStatType.Fixation, fixation },
                     { ShadowStatType.Dread, dread },
@@ -244,7 +244,7 @@ namespace Pinder.Core.Tests
             {
                 { ShadowStatType.Fixation, 6 },
                 { ShadowStatType.Madness, 0 },
-                { ShadowStatType.Horniness, 0 },
+                { ShadowStatType.Despair, 0 },
                 { ShadowStatType.Denial, 0 },
                 { ShadowStatType.Dread, 0 },
                 { ShadowStatType.Overthinking, 0 }
@@ -253,7 +253,7 @@ namespace Pinder.Core.Tests
             {
                 { ShadowStatType.Fixation, 0 },
                 { ShadowStatType.Madness, 0 },
-                { ShadowStatType.Horniness, 0 },
+                { ShadowStatType.Despair, 0 },
                 { ShadowStatType.Denial, 0 },
                 { ShadowStatType.Dread, 0 },
                 { ShadowStatType.Overthinking, 0 }
@@ -282,7 +282,7 @@ namespace Pinder.Core.Tests
             {
                 { ShadowStatType.Fixation, 12 },
                 { ShadowStatType.Madness, 0 },
-                { ShadowStatType.Horniness, 0 },
+                { ShadowStatType.Despair, 0 },
                 { ShadowStatType.Denial, 0 },
                 { ShadowStatType.Dread, 0 },
                 { ShadowStatType.Overthinking, 0 }
@@ -291,7 +291,7 @@ namespace Pinder.Core.Tests
             {
                 { ShadowStatType.Fixation, 6 },
                 { ShadowStatType.Madness, 0 },
-                { ShadowStatType.Horniness, 0 },
+                { ShadowStatType.Despair, 0 },
                 { ShadowStatType.Denial, 0 },
                 { ShadowStatType.Dread, 0 },
                 { ShadowStatType.Overthinking, 0 }
@@ -320,7 +320,7 @@ namespace Pinder.Core.Tests
             {
                 { ShadowStatType.Fixation, 12 },
                 { ShadowStatType.Madness, 0 },
-                { ShadowStatType.Horniness, 0 },
+                { ShadowStatType.Despair, 0 },
                 { ShadowStatType.Denial, 0 },
                 { ShadowStatType.Dread, 0 },
                 { ShadowStatType.Overthinking, 0 }
@@ -329,7 +329,7 @@ namespace Pinder.Core.Tests
             {
                 { ShadowStatType.Fixation, 0 },
                 { ShadowStatType.Madness, 0 },
-                { ShadowStatType.Horniness, 0 },
+                { ShadowStatType.Despair, 0 },
                 { ShadowStatType.Denial, 0 },
                 { ShadowStatType.Dread, 0 },
                 { ShadowStatType.Overthinking, 0 }
@@ -509,7 +509,7 @@ namespace Pinder.Core.Tests
             {
                 { ShadowStatType.Fixation, 8 },
                 { ShadowStatType.Madness, 0 },
-                { ShadowStatType.Horniness, 0 },
+                { ShadowStatType.Despair, 0 },
                 { ShadowStatType.Denial, 0 },
                 { ShadowStatType.Dread, 0 },
                 { ShadowStatType.Overthinking, 0 }
@@ -535,7 +535,7 @@ namespace Pinder.Core.Tests
             {
                 { ShadowStatType.Fixation, 7 },
                 { ShadowStatType.Madness, 0 },
-                { ShadowStatType.Horniness, 0 },
+                { ShadowStatType.Despair, 0 },
                 { ShadowStatType.Denial, 0 },
                 { ShadowStatType.Dread, 0 },
                 { ShadowStatType.Overthinking, 0 }

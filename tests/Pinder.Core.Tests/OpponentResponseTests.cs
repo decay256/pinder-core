@@ -135,7 +135,7 @@ namespace Pinder.Core.Tests
         {
             var shadows = new Dictionary<ShadowStatType, int>
             {
-                { ShadowStatType.Horniness, 7 }
+                { ShadowStatType.Despair, 7 }
             };
             var callbacks = new List<CallbackOpportunity>
             {

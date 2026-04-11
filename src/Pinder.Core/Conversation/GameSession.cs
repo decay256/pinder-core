@@ -1141,11 +1141,11 @@ namespace Pinder.Core.Conversation
                     "Date secured without any Honesty successes");
             }
 
-            // Trigger 12: Chaos never used → −1 Madness (restraint, stays sane)
+            // Trigger 12: Never picked Chaos → +1 Fixation
             if (!_statsUsedPerTurn.Contains(StatType.Chaos))
             {
-                _playerShadows.ApplyOffset(ShadowStatType.Madness, -1,
-                    "Chaos never used — Madness subsides");
+                _playerShadows.ApplyGrowth(ShadowStatType.Fixation, 1,
+                    "Never picked Chaos in whole conversation");
             }
 
             // Trigger 13: 4+ different stats used → −1 Fixation (offset)

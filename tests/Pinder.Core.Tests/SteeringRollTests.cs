@@ -29,7 +29,7 @@ namespace Pinder.Core.Tests
             var shadow = new Dictionary<ShadowStatType, int>
             {
                 { ShadowStatType.Madness, 0 },
-                { ShadowStatType.Horniness, 0 },
+                { ShadowStatType.Despair, 0 },
                 { ShadowStatType.Denial, 0 },
                 { ShadowStatType.Fixation, 0 },
                 { ShadowStatType.Dread, 0 },
@@ -107,7 +107,7 @@ namespace Pinder.Core.Tests
             var steeringRng = new FixedRandom(20);
 
             var llm = new NullLlmAdapter();
-            var config = new GameSessionConfig(steeringRng: steeringRng);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), steeringRng: steeringRng);
             var session = new GameSession(player, opponent, llm, dice, new NullTrapRegistry(), config);
 
             var turnStart = await session.StartTurnAsync();
@@ -152,7 +152,7 @@ namespace Pinder.Core.Tests
             var steeringRng = new FixedRandom(1);
 
             var llm = new NullLlmAdapter();
-            var config = new GameSessionConfig(steeringRng: steeringRng);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), steeringRng: steeringRng);
             var session = new GameSession(player, opponent, llm, dice, new NullTrapRegistry(), config);
 
             var turnStart = await session.StartTurnAsync();

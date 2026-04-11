@@ -38,7 +38,7 @@ namespace Pinder.Core.Tests
                 new Dictionary<ShadowStatType, int>
                 {
                     { ShadowStatType.Madness, madness },
-                    { ShadowStatType.Horniness, horniness },
+                    { ShadowStatType.Despair, horniness },
                     { ShadowStatType.Denial, denial },
                     { ShadowStatType.Fixation, fixation },
                     { ShadowStatType.Dread, dread },

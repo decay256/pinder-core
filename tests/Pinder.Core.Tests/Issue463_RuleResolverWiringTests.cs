@@ -93,7 +93,7 @@ namespace Pinder.Core.Tests
         public void GameSessionConfig_Rules_Property_StoresResolver()
         {
             var resolver = new StubRuleResolver();
-            var config = new GameSessionConfig(rules: resolver);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), rules: resolver);
             Assert.Same(resolver, config.Rules);
         }
 
@@ -101,7 +101,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void GameSessionConfig_Rules_DefaultsToNull()
         {
-            var config = new GameSessionConfig();
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock());
             Assert.Null(config.Rules);
         }
 
@@ -114,7 +114,7 @@ namespace Pinder.Core.Tests
         public async Task ResolveTurn_OnFailure_CallsResolverForFailureDelta()
         {
             var resolver = new StubRuleResolver { FailureDeltaReturn = -1 };
-            var config = new GameSessionConfig(rules: resolver, startingInterest: 15);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), rules: resolver, startingInterest: 15);
 
             // Dice: horniness(1d10)=1, d20=2 (low roll, likely fail)
             var dice = new FixedDice(1, 2, 50, 50, 50, 50, 50, 50, 50, 50, 50);
@@ -136,7 +136,7 @@ namespace Pinder.Core.Tests
         {
             // Custom failure delta much larger than any hardcoded value
             var resolver = new StubRuleResolver { FailureDeltaReturn = -10 };
-            var config = new GameSessionConfig(rules: resolver, startingInterest: 15);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), rules: resolver, startingInterest: 15);
 
             // d20=2, very likely to fail against DC 13+
             var dice = new FixedDice(1, 2, 50, 50, 50, 50, 50, 50, 50, 50, 50);
@@ -164,7 +164,7 @@ namespace Pinder.Core.Tests
         public async Task ResolveTurn_OnSuccess_CallsResolverForSuccessDelta()
         {
             var resolver = new StubRuleResolver { SuccessDeltaReturn = 2 };
-            var config = new GameSessionConfig(rules: resolver, startingInterest: 10);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), rules: resolver, startingInterest: 10);
 
             // Nat 20 = guaranteed success
             var dice = new FixedDice(1, 20, 50, 50, 50, 50, 50, 50, 50, 50, 50);
@@ -185,7 +185,7 @@ namespace Pinder.Core.Tests
         {
             // Custom success delta of +10 (way above any hardcoded value of +1 to +4)
             var resolver = new StubRuleResolver { SuccessDeltaReturn = 10 };
-            var config = new GameSessionConfig(rules: resolver, startingInterest: 10);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), rules: resolver, startingInterest: 10);
 
             // Nat 20 = guaranteed success
             var dice = new FixedDice(1, 20, 50, 50, 50, 50, 50, 50, 50, 50, 50);
@@ -211,7 +211,7 @@ namespace Pinder.Core.Tests
         public async Task StartTurn_CallsResolverForInterestState()
         {
             var resolver = new StubRuleResolver();
-            var config = new GameSessionConfig(rules: resolver, startingInterest: 10);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), rules: resolver, startingInterest: 10);
 
             var dice = new FixedDice(1, 4);
             var session = new GameSession(
@@ -230,7 +230,7 @@ namespace Pinder.Core.Tests
         {
             // Resolver says Bored for interest=10 (normally this would be Interested)
             var resolver = new StubRuleResolver { InterestStateReturn = InterestState.Bored };
-            var config = new GameSessionConfig(rules: resolver, startingInterest: 10);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), rules: resolver, startingInterest: 10);
 
             // Dice: horniness=1, ghost roll=1 (triggers ghost at 25% chance when Bored)
             var dice = new FixedDice(1, 1);
@@ -257,8 +257,7 @@ namespace Pinder.Core.Tests
             var playerShadows = new SessionShadowTracker(playerStats);
             playerShadows.ApplyGrowth(ShadowStatType.Dread, 5, "test");
 
-            var config = new GameSessionConfig(
-                playerShadows: playerShadows,
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: playerShadows,
                 rules: resolver);
 
             var dice = new FixedDice(1);
@@ -281,8 +280,7 @@ namespace Pinder.Core.Tests
             // Small dread growth — hardcoded evaluator would return T0, but resolver says T3
             playerShadows.ApplyGrowth(ShadowStatType.Dread, 1, "test");
 
-            var config = new GameSessionConfig(
-                playerShadows: playerShadows,
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: playerShadows,
                 rules: resolver);
 
             var dice = new FixedDice(1, 4);
@@ -307,7 +305,7 @@ namespace Pinder.Core.Tests
         public async Task StartTurn_WithMomentumStreak_CallsResolverForMomentum()
         {
             var resolver = new StubRuleResolver { MomentumReturn = 5, SuccessDeltaReturn = 1 };
-            var config = new GameSessionConfig(rules: resolver, startingInterest: 10);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), rules: resolver, startingInterest: 10);
 
             // Need: horniness, nat20 for turn 1 success, then another turn
             var dice = new FixedDice(
@@ -342,7 +340,7 @@ namespace Pinder.Core.Tests
         {
             // Use high stats (5) so a roll of 15 succeeds against the opponent's DC
             var resolver = new StubRuleResolver { SuccessDeltaReturn = 2, XpMultiplierReturn = 5.0 };
-            var config = new GameSessionConfig(rules: resolver, startingInterest: 10);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), rules: resolver, startingInterest: 10);
 
             // Roll 15 (not nat20) — with +5 stat bonus = 20 total, should succeed against most DCs
             var dice = new FixedDice(1, 15, 50, 50, 50, 50, 50, 50, 50, 50, 50);
@@ -364,7 +362,7 @@ namespace Pinder.Core.Tests
         {
             // 10x multiplier — should produce noticeably more XP than any hardcoded value (max 3x)
             var resolver = new StubRuleResolver { SuccessDeltaReturn = 2, XpMultiplierReturn = 10.0 };
-            var config = new GameSessionConfig(rules: resolver, startingInterest: 10);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), rules: resolver, startingInterest: 10);
 
             // Roll 15 (not nat20) with high stat bonus so it succeeds
             var dice = new FixedDice(1, 15, 50, 50, 50, 50, 50, 50, 50, 50, 50);
@@ -390,7 +388,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task GameSession_NullResolver_WorksWithHardcodedFallback()
         {
-            var config = new GameSessionConfig(startingInterest: 10);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 10);
 
             var dice = new FixedDice(1, 20, 50, 50, 50, 50, 50, 50, 50, 50, 50);
             var session = new GameSession(
@@ -410,10 +408,12 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task GameSession_NoConfig_WorksWithHardcodedFallback()
         {
+            // Clock is now required; use a config with zero-modifier clock and no resolver.
             var dice = new FixedDice(1, 20, 50, 50, 50, 50, 50, 50, 50, 50, 50);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock());
             var session = new GameSession(
                 MakeProfile("Player"), MakeProfile("Opponent"),
-                new NullLlmAdapter(), dice, new NullTrapRegistry(), null);
+                new NullLlmAdapter(), dice, new NullTrapRegistry(), config);
 
             var start = await session.StartTurnAsync();
             Assert.NotNull(start);
@@ -432,7 +432,7 @@ namespace Pinder.Core.Tests
         {
             // Resolver returns null for everything
             var resolver = new StubRuleResolver();
-            var config = new GameSessionConfig(rules: resolver, startingInterest: 10);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), rules: resolver, startingInterest: 10);
 
             // Nat 20 → success
             var dice = new FixedDice(1, 20, 50, 50, 50, 50, 50, 50, 50, 50, 50);
@@ -455,7 +455,7 @@ namespace Pinder.Core.Tests
         {
             // Resolver only returns success delta, everything else is null
             var resolver = new StubRuleResolver { SuccessDeltaReturn = 7 };
-            var config = new GameSessionConfig(rules: resolver, startingInterest: 10);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), rules: resolver, startingInterest: 10);
 
             var dice = new FixedDice(1, 20, 50, 50, 50, 50, 50, 50, 50, 50, 50);
             var session = new GameSession(
@@ -479,7 +479,7 @@ namespace Pinder.Core.Tests
         public async Task AllNullResolver_BehavesIdenticallyToNoResolver()
         {
             // With null resolver
-            var config1 = new GameSessionConfig(startingInterest: 10);
+            var config1 = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 10);
             var dice1 = new FixedDice(1, 20, 50, 50, 50, 50, 50, 50, 50, 50, 50);
             var session1 = new GameSession(
                 MakeProfile("Player"), MakeProfile("Opponent"),
@@ -489,7 +489,7 @@ namespace Pinder.Core.Tests
 
             // With all-null resolver
             var resolver = new StubRuleResolver();
-            var config2 = new GameSessionConfig(rules: resolver, startingInterest: 10);
+            var config2 = new GameSessionConfig(clock: TestHelpers.MakeClock(), rules: resolver, startingInterest: 10);
             var dice2 = new FixedDice(1, 20, 50, 50, 50, 50, 50, 50, 50, 50, 50);
             var session2 = new GameSession(
                 MakeProfile("Player"), MakeProfile("Opponent"),
@@ -509,7 +509,7 @@ namespace Pinder.Core.Tests
         public async Task InterestStateResolver_ReceivesCurrentInterestValue()
         {
             var resolver = new StubRuleResolver();
-            var config = new GameSessionConfig(rules: resolver, startingInterest: 15);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), rules: resolver, startingInterest: 15);
 
             var dice = new FixedDice(1, 4);
             var session = new GameSession(
@@ -534,8 +534,7 @@ namespace Pinder.Core.Tests
             var playerStats = TestHelpers.MakeStatBlock(2, 0);
             var playerShadows = new SessionShadowTracker(playerStats);
 
-            var config = new GameSessionConfig(
-                playerShadows: playerShadows,
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: playerShadows,
                 rules: resolver);
 
             var dice = new FixedDice(1);
@@ -564,7 +563,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void GameSessionConfig_Rules_PropertyType_IsIRuleResolver()
         {
-            var config = new GameSessionConfig();
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock());
             // Verify the property exists and is the right type
             IRuleResolver? rules = config.Rules;
             Assert.Null(rules);

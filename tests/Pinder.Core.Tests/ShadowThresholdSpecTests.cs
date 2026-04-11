@@ -260,11 +260,11 @@ namespace Pinder.Core.Tests
             Assert.Equal(2, result.Roll.UsedDieRoll);
         }
 
-        // Mutation: would catch if Horniness→Rizz pairing is wrong
+        // Mutation: would catch if Despair→Rizz pairing is wrong
         [Fact]
-        public async Task AC2_HorninessT2_RizzHasDisadvantage()
+        public async Task AC2_DespairT2_RizzHasDisadvantage()
         {
-            // What: Horniness ≥12 → Rizz rolls with disadvantage
+            // What: Despair ≥12 → Rizz rolls with disadvantage
             var shadows = MakeShadowTracker(horniness: 14);
             var session = MakeSession(
                 diceValues: new[] { 18, 7, 50 },
@@ -529,7 +529,7 @@ namespace Pinder.Core.Tests
             Assert.True(captured.ContainsKey(ShadowStatType.Denial));
             Assert.True(captured.ContainsKey(ShadowStatType.Fixation));
             Assert.True(captured.ContainsKey(ShadowStatType.Overthinking));
-            Assert.True(captured.ContainsKey(ShadowStatType.Horniness));
+            Assert.True(captured.ContainsKey(ShadowStatType.Despair));
         }
 
         // =====================================================================
@@ -585,7 +585,7 @@ namespace Pinder.Core.Tests
         public async Task AC9_ConfigWithNullTracker_BehavesLikeNoTracker()
         {
             // What: GameSessionConfig exists but PlayerShadows is null → skip all (spec §7.4)
-            var config = new GameSessionConfig(playerShadows: null);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: null);
             var session = new GameSession(
                 MakeProfile("player"),
                 MakeProfile("opponent"),
@@ -666,7 +666,7 @@ namespace Pinder.Core.Tests
             Assert.Equal(18, captured[ShadowStatType.Fixation]);
             Assert.Equal(0, captured[ShadowStatType.Madness]);
             Assert.Equal(0, captured[ShadowStatType.Overthinking]);
-            Assert.Equal(0, captured[ShadowStatType.Horniness]);
+            Assert.Equal(0, captured[ShadowStatType.Despair]);
         }
 
         // =====================================================================
@@ -687,7 +687,7 @@ namespace Pinder.Core.Tests
                 {
                     { ShadowStatType.Dread, dread }, { ShadowStatType.Denial, denial },
                     { ShadowStatType.Fixation, fixation }, { ShadowStatType.Madness, madness },
-                    { ShadowStatType.Overthinking, overthinking }, { ShadowStatType.Horniness, horniness }
+                    { ShadowStatType.Overthinking, overthinking }, { ShadowStatType.Despair, horniness }
                 });
             return new SessionShadowTracker(stats);
         }
@@ -702,7 +702,7 @@ namespace Pinder.Core.Tests
                 },
                 new Dictionary<ShadowStatType, int>
                 {
-                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Horniness, 0 },
+                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Despair, 0 },
                     { ShadowStatType.Denial, 0 }, { ShadowStatType.Fixation, 0 },
                     { ShadowStatType.Dread, 0 }, { ShadowStatType.Overthinking, 0 }
                 });
@@ -721,8 +721,7 @@ namespace Pinder.Core.Tests
             DialogueOption[]? llmOptions = null,
             int? startingInterest = null)
         {
-            var config = new GameSessionConfig(
-                playerShadows: shadows,
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: shadows,
                 startingInterest: startingInterest);
 
             ILlmAdapter llm = llmOptions != null
@@ -747,7 +746,7 @@ namespace Pinder.Core.Tests
             SessionShadowTracker? shadows,
             ILlmAdapter llm)
         {
-            var config = new GameSessionConfig(playerShadows: shadows);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: shadows);
 
             var allDice2 = new int[diceValues.Length + 1];
             allDice2[0] = 5;

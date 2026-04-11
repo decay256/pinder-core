@@ -85,15 +85,15 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("Shadow state:", result);
         }
 
-        // ============== Edge: Horniness has different threshold (> 6) ==============
+        // ============== Edge: Despair has different threshold (> 6) ==============
 
-        // Mutation: would catch if Horniness threshold is > 5 instead of > 6
+        // Mutation: would catch if Despair threshold is > 5 instead of > 6
         [Fact]
-        public void Horniness6_NoTaint()
+        public void Despair6_NoTaint()
         {
             var shadows = new Dictionary<ShadowStatType, int>
             {
-                { ShadowStatType.Horniness, 6 }
+                { ShadowStatType.Despair, 6 }
             };
 
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
@@ -102,20 +102,20 @@ namespace Pinder.LlmAdapters.Tests
             Assert.DoesNotContain("Shadow state:", result);
         }
 
-        // Mutation: would catch if Horniness threshold is > 7 instead of > 6
+        // Mutation: would catch if Despair threshold is > 7 instead of > 6
         [Fact]
-        public void Horniness7_HasTaint()
+        public void Despair7_HasTaint()
         {
             var shadows = new Dictionary<ShadowStatType, int>
             {
-                { ShadowStatType.Horniness, 7 }
+                { ShadowStatType.Despair, 7 }
             };
 
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
                 MakeDialogueContext(shadows));
 
             Assert.Contains("Shadow state:", result);
-            Assert.Contains("Horniness", result);
+            Assert.Contains("Despair", result);
         }
 
         // ============== Taint fires on Delivery prompt too ==============

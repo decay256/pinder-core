@@ -234,7 +234,8 @@ namespace Pinder.SessionRunner
             switch (key.ToLowerInvariant())
             {
                 case "madness":       result = ShadowStatType.Madness;       return true;
-                case "horniness":     result = ShadowStatType.Horniness;     return true;
+                case "despair":       result = ShadowStatType.Despair;       return true;
+                case "horniness":     result = ShadowStatType.Despair;       return true; // legacy alias
                 case "denial":        result = ShadowStatType.Denial;        return true;
                 case "fixation":      result = ShadowStatType.Fixation;      return true;
                 case "dread":         result = ShadowStatType.Dread;         return true;

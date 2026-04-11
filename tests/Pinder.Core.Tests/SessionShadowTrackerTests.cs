@@ -24,7 +24,7 @@ namespace Pinder.Core.Tests
                 new Dictionary<ShadowStatType, int>
                 {
                     { ShadowStatType.Madness, madness },
-                    { ShadowStatType.Horniness, horniness },
+                    { ShadowStatType.Despair, horniness },
                     { ShadowStatType.Denial, denial },
                     { ShadowStatType.Fixation, fixation },
                     { ShadowStatType.Dread, dread },
@@ -43,7 +43,7 @@ namespace Pinder.Core.Tests
         {
             var tracker = new SessionShadowTracker(MakeStats());
             Assert.Equal(2, tracker.GetEffectiveShadow(ShadowStatType.Madness));
-            Assert.Equal(0, tracker.GetEffectiveShadow(ShadowStatType.Horniness));
+            Assert.Equal(0, tracker.GetEffectiveShadow(ShadowStatType.Despair));
             Assert.Equal(5, tracker.GetEffectiveShadow(ShadowStatType.Dread));
         }
 
@@ -157,7 +157,7 @@ namespace Pinder.Core.Tests
         {
             var tracker = new SessionShadowTracker(MakeStats());
             tracker.ApplyGrowth(ShadowStatType.Madness, 5, "test");
-            Assert.Equal(0, tracker.GetDelta(ShadowStatType.Horniness));
+            Assert.Equal(0, tracker.GetDelta(ShadowStatType.Despair));
             Assert.Equal(0, tracker.GetDelta(ShadowStatType.Dread));
         }
 

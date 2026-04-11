@@ -415,7 +415,7 @@ namespace Pinder.Core.Tests
                 },
                 new Dictionary<ShadowStatType, int>
                 {
-                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Horniness, 0 },
+                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Despair, 0 },
                     { ShadowStatType.Denial, 0 }, { ShadowStatType.Fixation, 0 },
                     { ShadowStatType.Dread, 0 }, { ShadowStatType.Overthinking, 0 }
                 });
@@ -441,8 +441,7 @@ namespace Pinder.Core.Tests
                 ? (ILlmAdapter)new StubLlmAdapter(options)
                 : new NullLlmAdapter();
 
-            var config = new GameSessionConfig(
-                playerShadows: shadows,
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: shadows,
                 previousOpener: previousOpener,
                 startingInterest: startingInterest);
 
@@ -465,7 +464,7 @@ namespace Pinder.Core.Tests
             TrapDefinition? trapDef = null)
         {
             playerStats ??= Stats();
-            var config = new GameSessionConfig(playerShadows: shadows);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: shadows);
 
             // Prepend horniness roll (1d10) consumed by constructor
             var wrappedDice = new PrependedDice(5, dice);

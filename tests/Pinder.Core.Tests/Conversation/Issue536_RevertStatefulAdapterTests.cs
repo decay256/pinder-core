@@ -68,7 +68,7 @@ namespace Pinder.Core.Tests.Conversation
             var opponent = MakeProfile("P2");
 
             // Plain ILlmAdapter — no stateful cast, should not throw
-            var session = new GameSession(player, opponent, new DummyLlmAdapter(), new DummyDice(), new NullTrapRegistry());
+            var session = new GameSession(player, opponent, new DummyLlmAdapter(), new DummyDice(), new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             Assert.NotNull(session);
         }
@@ -80,7 +80,7 @@ namespace Pinder.Core.Tests.Conversation
             var opponent = MakeProfile("P2");
             var statefulAdapter = new StatefulDummyLlmAdapter();
 
-            var session = new GameSession(player, opponent, statefulAdapter, new DummyDice(), new NullTrapRegistry());
+            var session = new GameSession(player, opponent, statefulAdapter, new DummyDice(), new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             Assert.True(statefulAdapter.StartCalled, "GameSession should call StartOpponentSession on construction");
             Assert.True(statefulAdapter.HasOpponentSession);

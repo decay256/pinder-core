@@ -186,7 +186,7 @@ namespace Pinder.Core.Tests
                 },
                 new Dictionary<ShadowStatType, int>
                 {
-                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Horniness, 0 },
+                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Despair, 0 },
                     { ShadowStatType.Denial, 0 }, { ShadowStatType.Fixation, 0 },
                     { ShadowStatType.Dread, 0 }, { ShadowStatType.Overthinking, 0 }
                 });
@@ -199,7 +199,8 @@ namespace Pinder.Core.Tests
                 opponent,
                 new StubLlmAdapter(),
                 new StubDice(diceValue),
-                new StubTrapRegistry());
+                new StubTrapRegistry(),
+                new GameSessionConfig(clock: TestHelpers.MakeClock()));
         }
 
         private sealed class StubDice : IDiceRoller

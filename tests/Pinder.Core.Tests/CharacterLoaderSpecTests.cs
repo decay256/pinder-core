@@ -47,7 +47,7 @@ Some notes.
 - Fixation: ~4
 - Dread: ~3
 - Denial: ~2
-- Horniness: ~0
+- Despair: ~0
 - Overthinking: ~2
 ";
 
@@ -125,9 +125,9 @@ EFFECTIVE STATS
         {
             var profile = CharacterLoader.Parse(GeraldPromptContent, "gerald");
 
-            // Spec: Madness=5, Horniness=0, Denial=2, Fixation=4, Dread=3, Overthinking=2
+            // Spec: Madness=5, Despair=0, Denial=2, Fixation=4, Dread=3, Overthinking=2
             Assert.Equal(5, profile.Stats.GetShadow(ShadowStatType.Madness));
-            Assert.Equal(0, profile.Stats.GetShadow(ShadowStatType.Horniness));
+            Assert.Equal(0, profile.Stats.GetShadow(ShadowStatType.Despair));
             Assert.Equal(2, profile.Stats.GetShadow(ShadowStatType.Denial));
             Assert.Equal(4, profile.Stats.GetShadow(ShadowStatType.Fixation));
             Assert.Equal(3, profile.Stats.GetShadow(ShadowStatType.Dread));
@@ -763,7 +763,7 @@ EFFECTIVE STATS
             Assert.Equal(4, profile.Stats.GetShadow(ShadowStatType.Fixation));
             Assert.Equal(3, profile.Stats.GetShadow(ShadowStatType.Dread));
             Assert.Equal(2, profile.Stats.GetShadow(ShadowStatType.Denial));
-            Assert.Equal(0, profile.Stats.GetShadow(ShadowStatType.Horniness));
+            Assert.Equal(0, profile.Stats.GetShadow(ShadowStatType.Despair));
             Assert.Equal(2, profile.Stats.GetShadow(ShadowStatType.Overthinking));
         }
 
@@ -795,7 +795,7 @@ EFFECTIVE STATS
 
 **Shadow state:**
 - Madness: ~1
-- Horniness: ~2
+- Despair: ~2
 - Denial: ~3
 - Fixation: ~4
 - Dread: ~5
@@ -803,7 +803,7 @@ EFFECTIVE STATS
 ";
             var profile = CharacterLoader.Parse(content, "test");
             Assert.Equal(1, profile.Stats.GetShadow(ShadowStatType.Madness));
-            Assert.Equal(2, profile.Stats.GetShadow(ShadowStatType.Horniness));
+            Assert.Equal(2, profile.Stats.GetShadow(ShadowStatType.Despair));
             Assert.Equal(3, profile.Stats.GetShadow(ShadowStatType.Denial));
             Assert.Equal(4, profile.Stats.GetShadow(ShadowStatType.Fixation));
             Assert.Equal(5, profile.Stats.GetShadow(ShadowStatType.Dread));

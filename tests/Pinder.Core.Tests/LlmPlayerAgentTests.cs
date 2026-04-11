@@ -26,7 +26,7 @@ namespace Pinder.Core.Tests
                 new Dictionary<ShadowStatType, int>
                 {
                     { ShadowStatType.Madness, 0 },
-                    { ShadowStatType.Horniness, 0 },
+                    { ShadowStatType.Despair, 0 },
                     { ShadowStatType.Denial, 0 },
                     { ShadowStatType.Fixation, 0 },
                     { ShadowStatType.Dread, 0 },
@@ -67,7 +67,7 @@ namespace Pinder.Core.Tests
                     { ShadowStatType.Denial, 3 },
                     { ShadowStatType.Fixation, 1 },
                     { ShadowStatType.Madness, 0 },
-                    { ShadowStatType.Horniness, 4 },
+                    { ShadowStatType.Despair, 4 },
                     { ShadowStatType.Dread, 0 },
                     { ShadowStatType.Overthinking, 2 }
                 },
@@ -239,7 +239,7 @@ namespace Pinder.Core.Tests
 
             Assert.Contains("Denial 3", prompt);
             Assert.Contains("Fixation 1", prompt);
-            Assert.Contains("Horniness 4", prompt);
+            Assert.Contains("Despair 4", prompt);
         }
 
         [Fact]

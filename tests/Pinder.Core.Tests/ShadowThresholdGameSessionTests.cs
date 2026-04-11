@@ -544,7 +544,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task MadnessT3_WithHorninessT3_PreservesUnhingedFlag()
         {
-            // Both Madness T3 and Horniness T3 active — Horniness converts to Rizz
+            // Both Madness T3 and Despair T3 active (session Horniness converts to Rizz)
             // but should preserve the IsUnhingedReplacement flag.
             // Horniness = base roll(10) + shadow horniness. Need _sessionHorniness >= 18.
             // With horniness shadow=18, base roll=5 → _sessionHorniness = 5+0 = 5 (no clock).
@@ -619,7 +619,7 @@ namespace Pinder.Core.Tests
                 {
                     { ShadowStatType.Dread, dread }, { ShadowStatType.Denial, denial },
                     { ShadowStatType.Fixation, fixation }, { ShadowStatType.Madness, madness },
-                    { ShadowStatType.Overthinking, overthinking }, { ShadowStatType.Horniness, horniness }
+                    { ShadowStatType.Overthinking, overthinking }, { ShadowStatType.Despair, horniness }
                 });
             return new SessionShadowTracker(stats);
         }
@@ -633,7 +633,7 @@ namespace Pinder.Core.Tests
             };
             var shadow = new Dictionary<ShadowStatType, int>
             {
-                { ShadowStatType.Madness, allShadow }, { ShadowStatType.Horniness, allShadow },
+                { ShadowStatType.Madness, allShadow }, { ShadowStatType.Despair, allShadow },
                 { ShadowStatType.Denial, allShadow }, { ShadowStatType.Fixation, allShadow },
                 { ShadowStatType.Dread, allShadow }, { ShadowStatType.Overthinking, allShadow }
             };
@@ -653,8 +653,7 @@ namespace Pinder.Core.Tests
             DialogueOption[]? llmOptions = null,
             int? startingInterest = null)
         {
-            var config = new GameSessionConfig(
-                playerShadows: shadows,
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: shadows,
                 startingInterest: startingInterest);
 
             ILlmAdapter llm = llmOptions != null
@@ -679,7 +678,7 @@ namespace Pinder.Core.Tests
             SessionShadowTracker? shadows,
             ILlmAdapter llm)
         {
-            var config = new GameSessionConfig(playerShadows: shadows);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: shadows);
 
             var allDice2 = new int[diceValues.Length + 1];
             allDice2[0] = 5;

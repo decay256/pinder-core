@@ -38,7 +38,7 @@ namespace Pinder.Core.Tests
                 new Dictionary<ShadowStatType, int>
                 {
                     { ShadowStatType.Madness, madness },
-                    { ShadowStatType.Horniness, horniness },
+                    { ShadowStatType.Despair, horniness },
                     { ShadowStatType.Denial, denial },
                     { ShadowStatType.Fixation, fixation },
                     { ShadowStatType.Dread, dread },
@@ -372,9 +372,9 @@ namespace Pinder.Core.Tests
                 "Untapped option should beat trapped option");
         }
 
-        // Mutation: would catch if trap mapping is wrong (e.g., Rizz → Horniness)
+        // Mutation: would catch if trap mapping is wrong (e.g., Rizz → Despair)
         [Fact]
-        public async Task ActiveTrap_RizzMapsToHorniness()
+        public async Task ActiveTrap_RizzMapsToDespair()
         {
             var playerStats = MakeStats(rizz: 5, honesty: 3);
             var opponentStats = MakeStats();
@@ -388,11 +388,11 @@ namespace Pinder.Core.Tests
             var ctx = MakeContext(
                 playerStats: playerStats,
                 opponentStats: opponentStats,
-                activeTrapNames: new[] { "Horniness" });
+                activeTrapNames: new[] { "Despair" });
 
             var result = await _agent.DecideAsync(turn, ctx);
 
-            // Rizz → Horniness shadow → trap penalty applied
+            // Rizz → Despair shadow → trap penalty applied
             Assert.Equal(1, result.OptionIndex);
         }
 

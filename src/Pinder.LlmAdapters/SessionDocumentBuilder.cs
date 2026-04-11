@@ -485,8 +485,8 @@ namespace Pinder.LlmAdapters
             var sb = new StringBuilder();
             if (thresholds.TryGetValue(ShadowStatType.Madness, out int madness) && madness > 5)
                 sb.AppendLine("Your Madness is elevated. Your charm has an uncanny quality — warmth that somehow feels slightly off. Smooth words that land wrong. People can't identify why they feel uneasy. You don't notice.");
-            if (thresholds.TryGetValue(ShadowStatType.Horniness, out int horniness) && horniness > 6)
-                sb.AppendLine("Your Horniness is elevated. You are reading subtext that may not be there. Rizz options surface more often and more forward. You are slightly too aware of the tension.");
+            if (thresholds.TryGetValue(ShadowStatType.Despair, out int despair) && despair > 6)
+                sb.AppendLine("Your Despair is elevated. You want to be desired and it shows. Neediness leaks through even confident-sounding Rizz options. You are performing magnetism rather than feeling it.");
             if (thresholds.TryGetValue(ShadowStatType.Denial, out int denial) && denial > 5)
                 sb.AppendLine("Your Denial is elevated. Your honest options sound rehearsed. You tell truths that are technically true but curated. Emotional availability is performed rather than felt.");
             if (thresholds.TryGetValue(ShadowStatType.Fixation, out int fixation) && fixation > 5)

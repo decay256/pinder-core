@@ -136,7 +136,7 @@ namespace Pinder.Core.Tests
             Assert.Equal(3, capturedDelivery[ShadowStatType.Fixation]);
             Assert.Equal(10, capturedDelivery[ShadowStatType.Madness]);
             Assert.Equal(5, capturedDelivery[ShadowStatType.Overthinking]);
-            Assert.Equal(12, capturedDelivery[ShadowStatType.Horniness]);
+            Assert.Equal(12, capturedDelivery[ShadowStatType.Despair]);
         }
 
         // ============ Helpers ============
@@ -155,7 +155,7 @@ namespace Pinder.Core.Tests
                 {
                     { ShadowStatType.Dread, dread }, { ShadowStatType.Denial, denial },
                     { ShadowStatType.Fixation, fixation }, { ShadowStatType.Madness, madness },
-                    { ShadowStatType.Overthinking, overthinking }, { ShadowStatType.Horniness, horniness }
+                    { ShadowStatType.Overthinking, overthinking }, { ShadowStatType.Despair, horniness }
                 });
             return new SessionShadowTracker(stats);
         }
@@ -170,7 +170,7 @@ namespace Pinder.Core.Tests
                 },
                 new Dictionary<ShadowStatType, int>
                 {
-                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Horniness, 0 },
+                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Despair, 0 },
                     { ShadowStatType.Denial, 0 }, { ShadowStatType.Fixation, 0 },
                     { ShadowStatType.Dread, 0 }, { ShadowStatType.Overthinking, 0 }
                 });
@@ -188,8 +188,7 @@ namespace Pinder.Core.Tests
             SessionShadowTracker? opponentShadows,
             ILlmAdapter llm)
         {
-            var config = new GameSessionConfig(
-                playerShadows: playerShadows,
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: playerShadows,
                 opponentShadows: opponentShadows);
 
             // dice[0] = ghost check, rest = roll dice

@@ -48,7 +48,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.Chaos, "C"));
             llm.EnqueueOptions(new DialogueOption(StatType.SelfAwareness, "SA2"));
 
-            var session = new GameSession(MakeProfile("P", 9), MakeProfile("O", 0), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P", 9), MakeProfile("O", 0), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             // Turns 1-3
             await session.StartTurnAsync();
@@ -85,7 +85,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.Chaos, "C"));
             llm.EnqueueOptions(new DialogueOption(StatType.SelfAwareness, "SA2"));
 
-            var session = new GameSession(MakeProfile("P", 9), MakeProfile("O", 0), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P", 9), MakeProfile("O", 0), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0);
@@ -117,7 +117,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.Chaos, "C"));
             llm.EnqueueOptions(new DialogueOption(StatType.SelfAwareness, "SA2"));
 
-            var session = new GameSession(MakeProfile("P", 9), MakeProfile("O", 0), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P", 9), MakeProfile("O", 0), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0);
@@ -161,7 +161,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.Chaos, "C"));
             llm.EnqueueOptions(new DialogueOption(StatType.SelfAwareness, "SA2"));
 
-            var session = new GameSession(MakeProfile("P", 9), MakeProfile("O", 0), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P", 9), MakeProfile("O", 0), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             // Turn 1: interest 10 → 12
             await session.StartTurnAsync();
@@ -207,7 +207,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.Chaos, "C"));
             llm.EnqueueOptions(new DialogueOption(StatType.SelfAwareness, "SA2"));
 
-            var session = new GameSession(MakeProfile("P", 9), MakeProfile("O", 0), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P", 9), MakeProfile("O", 0), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             for (int i = 0; i < 3; i++)
             {
@@ -254,7 +254,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.Chaos, "C"));
             llm.EnqueueOptions(new DialogueOption(StatType.SelfAwareness, "SA2"));
 
-            var session = new GameSession(MakeProfile("P", 9), MakeProfile("O", 0), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P", 9), MakeProfile("O", 0), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             for (int i = 0; i < 3; i++)
             {
@@ -285,7 +285,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "C1"));
             llm.EnqueueOptions(new DialogueOption(StatType.Wit, "W1"));
 
-            var session = new GameSession(MakeProfile("P", 9), MakeProfile("O", 0), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P", 9), MakeProfile("O", 0), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             await session.StartTurnAsync();
             var r1 = await session.ResolveTurnAsync(0);

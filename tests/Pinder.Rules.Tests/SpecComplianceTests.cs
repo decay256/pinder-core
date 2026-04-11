@@ -842,13 +842,13 @@ namespace Pinder.Rules.Tests
             {
                 ["shadow_effect"] = new Dictionary<string, object>
                 {
-                    ["shadow"] = "Horniness",
+                    ["shadow"] = "Despair",
                     ["delta"] = 3
                 }
             };
             OutcomeDispatcher.Dispatch(outcome, new GameState(), handler);
             Assert.Single(handler.ShadowGrowths);
-            Assert.Equal("Horniness", handler.ShadowGrowths[0].Shadow);
+            Assert.Equal("Despair", handler.ShadowGrowths[0].Shadow);
             Assert.Equal(3, handler.ShadowGrowths[0].Delta);
         }
 

@@ -84,7 +84,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.Wit, "A witty remark"));
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "A charming line"));
 
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O", 0), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O", 0), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             // Turn 1: Wit
             await session.StartTurnAsync();
@@ -122,7 +122,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.Chaos, "Chaos line"));
             llm.EnqueueOptions(new DialogueOption(StatType.SelfAwareness, "SA line"));
 
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O", 0), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O", 0), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             // Turn 1: Chaos fail
             await session.StartTurnAsync();
@@ -164,7 +164,7 @@ namespace Pinder.Core.Tests
             // Turn 4: use Chaos again so we don't re-trigger Triple
             llm.EnqueueOptions(new DialogueOption(StatType.Chaos, "Chaos again"));
 
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O", 0), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O", 0), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             // Turns 1-2
             await session.StartTurnAsync();
@@ -204,7 +204,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.Wit, "Wit"));
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Charm"));
 
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O", 0), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O", 0), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0);
@@ -236,7 +236,7 @@ namespace Pinder.Core.Tests
                 new DialogueOption(StatType.Rizz, "Rizz")
             );
 
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O", 0), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O", 0), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             // Turn 1: Wit
             await session.StartTurnAsync();
@@ -270,7 +270,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.Chaos, "C"));
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Ch"));
 
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O", 0), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O", 0), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             // 3 turns to trigger Triple
             await session.StartTurnAsync();

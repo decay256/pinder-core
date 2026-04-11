@@ -116,7 +116,7 @@ namespace Pinder.Rules.Tests
             Assert.Contains("Charm", world);
             Assert.Contains("Madness", world);
             Assert.Contains("Rizz", world);
-            Assert.Contains("Horniness", world);
+            Assert.Contains("Despair", world);
             Assert.Contains("Honesty", world);
             Assert.Contains("Denial", world);
             Assert.Contains("Chaos", world);

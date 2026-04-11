@@ -296,6 +296,9 @@ namespace Pinder.Core.Tests
             var opponentStats = MakeStatBlock(allStats: opponentStatValue);
             var opponent = MakeProfile("opponent", opponentStats);
 
+            // Clock is required; provide default zero-modifier clock if caller didn't supply config.
+            config = config ?? new GameSessionConfig(clock: TestHelpers.MakeClock());
+
             return new GameSession(
                 player,
                 opponent,
@@ -316,7 +319,7 @@ namespace Pinder.Core.Tests
                 },
                 new Dictionary<ShadowStatType, int>
                 {
-                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Horniness, 0 },
+                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Despair, 0 },
                     { ShadowStatType.Denial, 0 }, { ShadowStatType.Fixation, 0 },
                     { ShadowStatType.Dread, 0 }, { ShadowStatType.Overthinking, 0 }
                 });

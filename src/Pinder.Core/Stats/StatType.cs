@@ -7,7 +7,7 @@ namespace Pinder.Core.Stats
     public enum StatType
     {
         Charm,          // paired with Madness
-        Rizz,           // paired with Horniness
+        Rizz,           // paired with Despair
         Honesty,        // paired with Denial
         Chaos,          // paired with Fixation
         Wit,            // paired with Dread
@@ -21,7 +21,14 @@ namespace Pinder.Core.Stats
     public enum ShadowStatType
     {
         Madness,        // paired with Charm
-        Horniness,      // paired with Rizz (rolled fresh each conversation: 1d10)
+        /// <summary>
+        /// Despair = the opposite of magnetism. The character wants to be desired and it shows.
+        /// Paired with Rizz. Grows on: RIZZ Nat 1 (+2), RIZZ TropeTrap failure (+1),
+        /// picking RIZZ 3+ turns in a row without success (+1).
+        /// T1 (≥6): taints RIZZ delivery dialogue.
+        /// T2 (≥12): penalises RIZZ rolls (−2 effective modifier).
+        /// </summary>
+        Despair,        // paired with Rizz
         Denial,         // paired with Honesty
         Fixation,       // paired with Chaos
         Dread,          // paired with Wit

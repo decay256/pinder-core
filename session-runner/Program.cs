@@ -960,7 +960,7 @@ class Program
     static string GetPairedStat(ShadowStatType shadow) => shadow switch
     {
         ShadowStatType.Madness => "Charm",
-        ShadowStatType.Horniness => "Rizz",
+        ShadowStatType.Despair => "Rizz",
         ShadowStatType.Denial => "Honesty",
         ShadowStatType.Fixation => "Chaos",
         ShadowStatType.Dread => "Wit",

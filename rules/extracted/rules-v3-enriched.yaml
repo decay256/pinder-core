@@ -106,13 +106,13 @@
     shadow: Madness
 - id: §4.stat-pair.rizz
   section: §4
-  title: Stat Pair — Rizz/Horniness
+  title: Stat Pair — Rizz/Despair
   type: definition
-  description: Rizz is paired with shadow Horniness.
+  description: Rizz is paired with shadow Despair.
   condition:
     stat: Rizz
   outcome:
-    shadow: Horniness
+    shadow: Despair
 - id: §4.stat-pair.honesty
   section: §4
   title: Stat Pair — Honesty/Denial
@@ -164,7 +164,7 @@
       What Causes It: Prolonged app use, repeated failures
     - Positive: '**Rizz**'
       What It Does: Sexual tension, bold moves, confidence
-      Shadow: '**Horniness**'
+      Shadow: '**Despair**'
       What Causes It: Random each conversation (1d10)
     - Positive: '**Honesty**'
       What It Does: Vulnerability, sincerity, saying something real
@@ -213,10 +213,10 @@
   - kind: paragraph
     text: '**Positive:** 8 each (48 total). Gain points at level-up.
 
-      **Shadows:** 0 each. Grow from events. Horniness rolls fresh each conversation.'
+      **Shadows:** 0 each. Grow from events. Despair rolls fresh each conversation.'
   description: '**Positive:** 8 each (48 total). Gain points at level-up.
 
-    **Shadows:** 0 each. Grow from events. Horniness rolls fresh each conversation.'
+    **Shadows:** 0 each. Grow from events. Despair rolls fresh each conversation.'
   heading_level: 3
   compact_heading: true
   condition:
@@ -341,7 +341,7 @@
       Total Mod: '**+4**'
     - Positive: Rizz
       Base+Gear: '11'
-      Shadow: Horniness
+      Shadow: Despair
       Shadow Lvl: '8'
       Penalty: '-2'
       Effective: '9'
@@ -592,7 +592,7 @@
 
       ║  📊 SHADOWS                                      ║
 
-      ║  Madness 4 | Horniness 8 | Denial 6             ║
+      ║  Madness 4 | Despair 8 | Denial 6             ║
 
       ║  Fixation 3 | Dread 7 | Overthinking 5          ║
 
@@ -1435,23 +1435,23 @@
     - '---------------'
   description: ''
   heading_level: 3
-- id: §9.horniness-penalizes-rizz
+- id: §9.despair-penalizes-rizz
   section: §9
-  title: Horniness → Penalizes Rizz
+  title: Despair → Penalizes Rizz
   type: shadow_growth
   blocks:
   - kind: paragraph
-    text: '| Start of conversation | Roll 1d10 | That''s your Horniness |'
+    text: '| Start of conversation | Roll 1d10 | That''s your Despair |'
   - kind: paragraph
     text: No growth. No persistence. Just biology.
-  description: '| Start of conversation | Roll 1d10 | That''s your Horniness |'
+  description: '| Start of conversation | Roll 1d10 | That''s your Despair |'
   heading_level: 3
   condition:
-    shadow: Horniness
+    shadow: Despair
     conversation_start: true
   outcome:
     roll: 1d10
-    shadow: Horniness
+    shadow: Despair
 - id: §9.shadow-reduce.date-secured
   section: §9
   title: Shadow Reduction — Date secured
@@ -1684,33 +1684,33 @@
     threshold: 18
   outcome:
     effect: You see opponent's inner monologue (freeze)
-- id: §9.shadow-threshold.horniness.t1
+- id: §9.shadow-threshold.despair.t1
   section: §9
-  title: Shadow Threshold — Horniness T1
+  title: Shadow Threshold — Despair T1
   type: shadow_growth
-  description: 'Horniness at 6: Rizz options appear more often.'
+  description: 'Despair at 6: Rizz options appear more often.'
   condition:
-    shadow: Horniness
+    shadow: Despair
     threshold: 6
   outcome:
     effect: Rizz options appear more often
-- id: §9.shadow-threshold.horniness.t2
+- id: §9.shadow-threshold.despair.t2
   section: §9
-  title: Shadow Threshold — Horniness T2
+  title: Shadow Threshold — Despair T2
   type: shadow_growth
-  description: 'Horniness at 12: One option is always unwanted Rizz.'
+  description: 'Despair at 12: One option is always unwanted Rizz.'
   condition:
-    shadow: Horniness
+    shadow: Despair
     threshold: 12
   outcome:
     effect: One option is always unwanted Rizz
-- id: §9.shadow-threshold.horniness.t3
+- id: §9.shadow-threshold.despair.t3
   section: §9
-  title: Shadow Threshold — Horniness T3
+  title: Shadow Threshold — Despair T3
   type: shadow_growth
-  description: 'Horniness at 18: ALL options become Rizz. No other thoughts..'
+  description: 'Despair at 18: ALL options become Rizz. No other thoughts..'
   condition:
-    shadow: Horniness
+    shadow: Despair
     threshold: 18
   outcome:
     effect: ALL options become Rizz. No other thoughts.
@@ -1741,7 +1741,7 @@
       At 6: You see Interest number always (TMI)
       At 12: Self-Awareness has disadvantage
       At 18+: You see opponent's inner monologue (freeze)
-    - Shadow: '**Horniness**'
+    - Shadow: '**Despair**'
       At 6: Rizz options appear more often
       At 12: One option is always unwanted Rizz
       At 18+: ALL options become Rizz. No other thoughts.
@@ -2076,7 +2076,7 @@
     - Item: Cold shower towel
       Tier: Legendary
       Stats: Wit +3, S-Awr +2
-      Archetype tendency: Horniness capped at 5
+      Archetype tendency: Despair capped at 5
     sep_cells:
     - '------'
     - '------'
@@ -2298,7 +2298,7 @@
     - '---'
     - '---'
   - kind: paragraph
-    text: '**Shadow counter-pressure:** Building high in one stat means its shadow grows faster when you fail with it. A Rizz +6 build also means Horniness grows dramatically from failed Rizz rolls. The
+    text: '**Shadow counter-pressure:** Building high in one stat means its shadow grows faster when you fail with it. A Rizz +6 build also means Despair grows dramatically from failed Rizz rolls. The
       build defines your risk profile, not just your strengths.'
   - kind: hr
   description: 'Certain stat combinations create natural advantages:'
@@ -2373,7 +2373,7 @@
 
       - **High Overthinking:** Self-Awareness options are too clinical
 
-      - **High Horniness:** Rizz options are more frequent and more forward'
+      - **High Despair:** Rizz options are more frequent and more forward'
   - kind: hr
   description: 'The LLM uses shadow levels to tint ALL generated options:
 
@@ -2387,7 +2387,7 @@
 
     - **High Overthinking:** Self-Awareness options are too clinical
 
-    - **High Horniness:** Rizz options are more frequent and more forward'
+    - **High Despair:** Rizz options are more frequent and more forward'
   heading_level: 3
   compact_heading: true
 - id: §12.12-server-social
@@ -2398,7 +2398,7 @@
   - kind: blockquote
     text: '**Async multi-chat & time system → [[async-time]]**
 
-      Energy budget (15-20 turns/day), simulated timestamps, time-of-day Horniness modifiers, response delay as Interest signal, cross-chat shadow bleed. Conversations run asynchronously with simulated
+      Energy budget (15-20 turns/day), simulated timestamps, time-of-day Despair modifiers, response delay as Interest signal, cross-chat shadow bleed. Conversations run asynchronously with simulated
       time — you can fast-forward, but the opponent''s timing profile (set by their equipment) shapes how and when they reply.'
   description: ''
   heading_level: 2
@@ -2477,7 +2477,7 @@
 
       3. **Swipe** → browse other players'' uploaded characters
 
-      4. **Roll Horniness** → 1d10 for this conversation
+      4. **Roll Despair** → 1d10 for this conversation
 
       5. **Calculate effective stats** → base + gear + level bonus - shadow penalties
 
@@ -2485,7 +2485,7 @@
 
       7. **Every fail changes your words** → fumble, misfire, trap, or catastrophe
 
-      8. **Shadows grow** → rejection → Dread, grinding → Madness, faking → Denial, safe play → Fixation, spiraling → Overthinking, biology → Horniness
+      8. **Shadows grow** → rejection → Dread, grinding → Madness, faking → Denial, safe play → Fixation, spiraling → Overthinking, biology → Despair
 
       9. **Get the date** → Interest 20 = XP = level up = better stats + items
 
@@ -2500,7 +2500,7 @@
 
     3. **Swipe** → browse other players'' uploaded characters
 
-    4. **Roll Horniness** → 1d10 for this conversation
+    4. **Roll Despair** → 1d10 for this conversation
 
     5. **Calculate effective stats** → base + gear + level bonus - shadow penalties
 
@@ -2508,7 +2508,7 @@
 
     7. **Every fail changes your words** → fumble, misfire, trap, or catastrophe
 
-    8. **Shadows grow** → rejection → Dread, grinding → Madness, faking → Denial, safe play → Fixation, spiraling → Overthinking, biology → Horniness
+    8. **Shadows grow** → rejection → Dread, grinding → Madness, faking → Denial, safe play → Fixation, spiraling → Overthinking, biology → Despair
 
     9. **Get the date** → Interest 20 = XP = level up = better stats + items
 
@@ -2783,7 +2783,7 @@
     - Honesty
   shadows:
     high:
-    - Horniness
+    - Despair
     - Dread
     low: []
   level_range:
@@ -2925,7 +2925,7 @@
   shadows:
     high:
     - Dread
-    - Horniness
+    - Despair
     - Denial
     low: []
   level_range:
@@ -3117,7 +3117,7 @@
   shadows:
     high:
     - Fixation
-    - Horniness
+    - Despair
     - Denial
     low: []
   level_range:

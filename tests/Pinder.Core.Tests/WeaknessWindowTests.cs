@@ -77,7 +77,7 @@ namespace Pinder.Core.Tests
 
             // Dice: each turn needs d20 roll + timing roll
             var dice = new FixedDice(5, 15, 5, 15, 5, 15, 5, 15, 5, 15, 5, 15, 5);
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             // Turn 0
             var start0 = await session.StartTurnAsync();
@@ -119,7 +119,7 @@ namespace Pinder.Core.Tests
             // Turn 0: roll 15, timing roll
             // Turn 1: roll 14 (SA mod=2, level bonus=0, total=16). Normal DC=18 → fail. With dcAdj=2 → DC=16 → success.
             var dice = new FixedDice(5, 15, 5, 14, 5, 15, 5, 15, 5);
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             // Turn 0
             await session.StartTurnAsync();
@@ -147,7 +147,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueWeaknessWindow(null);
 
             var dice = new FixedDice(5, 15, 5, 15, 5);
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             var start = await session.StartTurnAsync();
             Assert.False(start.Options[0].HasWeaknessWindow);
@@ -178,7 +178,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.SelfAwareness, "Hmm"));
 
             var dice = new FixedDice(5, 15, 5, 15, 5, 15, 5, 15, 5);
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             // Turn 0
             await session.StartTurnAsync();
@@ -209,7 +209,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueWeaknessWindow(new WeaknessWindow(StatType.Wit, 2));
 
             var dice = new FixedDice(5, 15, 5, 15, 5);
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
@@ -227,7 +227,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueWeaknessWindow(null);
 
             var dice = new FixedDice(5, 15, 5, 15, 5);
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
@@ -251,7 +251,7 @@ namespace Pinder.Core.Tests
 
             // Turn 0: d20=15 + timing, Turn 1(Read): d20=15
             var dice = new FixedDice(5, 15, 5, 15, 15, 5);
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             // Turn 0
             await session.StartTurnAsync();
@@ -277,7 +277,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.SelfAwareness, "After wait"));
 
             var dice = new FixedDice(5, 15, 5, 15, 5);
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             // Turn 0
             await session.StartTurnAsync();
@@ -304,7 +304,8 @@ namespace Pinder.Core.Tests
             // Turn 0: d20=15 + timing, Turn 1(Recover): d20=15
             var dice = new FixedDice(5, 15, 5, 15, 15, 5);
             var trapRegistry = new NullTrapRegistry();
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, trapRegistry);
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, trapRegistry,
+                new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             // Turn 0
             await session.StartTurnAsync();
@@ -338,7 +339,7 @@ namespace Pinder.Core.Tests
                 new DialogueOption(StatType.Honesty, "Truth"));
 
             var dice = new FixedDice(5, 15, 5, 15, 5, 15, 5);
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0);
@@ -368,7 +369,7 @@ namespace Pinder.Core.Tests
                 new DialogueOption(StatType.SelfAwareness, "SA")); // SA → Honesty ≠ Charm
 
             var dice = new FixedDice(5, 15, 5, 15, 5, 15, 5, 15, 5);
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             // Turn 0
             await session.StartTurnAsync();
@@ -395,7 +396,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.SelfAwareness, "First"));
 
             var dice = new FixedDice(5, 15, 5, 15, 5);
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             var start = await session.StartTurnAsync();
             Assert.False(start.Options[0].HasWeaknessWindow);
@@ -426,7 +427,7 @@ namespace Pinder.Core.Tests
                 new DialogueOption(otherStat, "NoMatch"));
 
             var dice = new FixedDice(5, 15, 5, 15, 5, 15, 5);
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0);

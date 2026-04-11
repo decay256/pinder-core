@@ -23,7 +23,7 @@ namespace Pinder.Core.Tests
             var dice = new FixedDice(15, 5); // d20=15 (success), timing=5
             var session = new GameSession(
                 MakeProfile("Sable"), MakeProfile("Brick"),
-                llm, dice, new NullTrapRegistry());
+                llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0);
@@ -40,7 +40,7 @@ namespace Pinder.Core.Tests
             var dice = new FixedDice(15, 5);
             var session = new GameSession(
                 MakeProfile("Sable"), MakeProfile("Brick"),
-                llm, dice, new NullTrapRegistry());
+                llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0);
@@ -58,7 +58,7 @@ namespace Pinder.Core.Tests
             var dice = new FixedDice(15, 5, 15, 5);
             var session = new GameSession(
                 MakeProfile("Sable"), MakeProfile("Brick"),
-                llm, dice, new NullTrapRegistry());
+                llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             // Turn 1
             await session.StartTurnAsync();

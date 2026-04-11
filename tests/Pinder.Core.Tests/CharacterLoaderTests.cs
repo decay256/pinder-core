@@ -107,7 +107,7 @@ All shadows at 0. Zyx arrived clean.
             Assert.Equal(3, stats.GetShadow(ShadowStatType.Denial));
             Assert.Equal(2, stats.GetShadow(ShadowStatType.Fixation));
             Assert.Equal(0, stats.GetShadow(ShadowStatType.Madness));
-            Assert.Equal(0, stats.GetShadow(ShadowStatType.Horniness));
+            Assert.Equal(0, stats.GetShadow(ShadowStatType.Despair));
             Assert.Equal(0, stats.GetShadow(ShadowStatType.Dread));
             Assert.Equal(0, stats.GetShadow(ShadowStatType.Overthinking));
         }

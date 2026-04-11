@@ -236,6 +236,121 @@ namespace Pinder.Core.Tests
             Assert.DoesNotContain(result.ShadowGrowthEvents, e => e.Contains("Same opener twice"));
         }
 
+        // --- Despair triggers (#708) ---
+
+        // Mutation: would catch if RIZZ Nat 1 grows only +1 Despair instead of +2
+        [Fact]
+        public async Task AC708_RizzNat1_GrowsDespair2()
+        {
+            var shadows = MakeTracker();
+            var session = BuildSession(
+                dice: Dice(1, 50),
+                shadows: shadows,
+                options: new[] { new DialogueOption(StatType.Rizz, "smooth move") });
+
+            await session.StartTurnAsync();
+            var result = await session.ResolveTurnAsync(0);
+
+            Assert.Equal(2, shadows.GetDelta(ShadowStatType.Despair));
+            Assert.Contains(result.ShadowGrowthEvents, e => e.Contains("Despair") && e.Contains("Nat 1"));
+        }
+
+        // Mutation: would catch if Charm Nat 1 accidentally grew Despair (wrong pairing)
+        [Fact]
+        public async Task AC708_CharmNat1_DoesNotGrowDespair()
+        {
+            var shadows = MakeTracker();
+            var session = BuildSession(
+                dice: Dice(1, 50),
+                shadows: shadows);
+
+            await session.StartTurnAsync();
+            var result = await session.ResolveTurnAsync(0); // Charm
+
+            Assert.Equal(0, shadows.GetDelta(ShadowStatType.Despair));
+            Assert.Equal(1, shadows.GetDelta(ShadowStatType.Madness));
+        }
+
+        // Mutation: would catch if RIZZ TropeTrap didn't grow Despair
+        [Fact]
+        public async Task AC708_RizzTropeTrap_GrowsDespair1()
+        {
+            // RIZZ=0, Wit defence=Rizz attack → opponent Wit=0 → DC=16.
+            // d20=7 → miss by 9 → TropeTrap (6-9)
+            var shadows = MakeTracker();
+            var session = BuildSession(
+                dice: Dice(7, 50),
+                playerStats: Stats(rizz: 0),
+                opponentStats: Stats(wit: 0),
+                shadows: shadows,
+                options: new[] { new DialogueOption(StatType.Rizz, "smooth") },
+                startingInterest: 15);
+
+            await session.StartTurnAsync();
+            var result = await session.ResolveTurnAsync(0);
+
+            Assert.Equal(1, shadows.GetDelta(ShadowStatType.Despair));
+            Assert.Contains(result.ShadowGrowthEvents, e => e.Contains("Despair") && e.Contains("TropeTrap"));
+        }
+
+        // Mutation: would catch if 3 consecutive RIZZ failures didn't grow Despair
+        [Fact]
+        public async Task AC708_ThreeConsecutiveRizzFailures_GrowsDespair()
+        {
+            // RIZZ=0, DC=16. d20=7 → miss by 9 → TropeTrap each turn.
+            // 3 turns × -2 interest from TropeTrap = -6 total. Start at 20 → end at 14. No game-end.
+            var shadows = MakeTracker();
+            // Extra dice: prepend also adds 5, so actual consumed: 5(horn), 7,50, 7,50, 7,50
+            var diceValues = new List<int>();
+            for (int i = 0; i < 4; i++) { diceValues.Add(7); diceValues.Add(50); } // extra pair for safety
+            var session = BuildSession(
+                dice: new TestDice(diceValues.ToArray()),
+                playerStats: Stats(rizz: 0),
+                opponentStats: Stats(wit: 0),
+                shadows: shadows,
+                options: new[] { new DialogueOption(StatType.Rizz, "smooth") },
+                startingInterest: 13); // low enough to never reach 25 via mishap
+
+            for (int i = 0; i < 3; i++)
+            {
+                await session.StartTurnAsync();
+                await session.ResolveTurnAsync(0);
+            }
+
+            // After 3 consecutive RIZZ failures: 3 TropeTrap (+1 each) + 1 consecutive = 4
+            var despair = shadows.GetDelta(ShadowStatType.Despair);
+            Assert.True(despair >= 4, $"Expected Despair >= 4 (3 TropeTrap + 1 consecutive), got {despair}");
+        }
+
+        // Mutation: would catch if consecutive RIZZ counter didn't reset on success
+        [Fact]
+        public async Task AC708_RizzSuccess_ResetsDespairConsecutiveCount()
+        {
+            // Two failures (TropeTrap) then one success. Consecutive count resets at success.
+            // rizz:0, wit:0 → DC=16. Roll=7 → total=7, miss by 9 → TropeTrap. Roll=20 → success.
+            var shadows = MakeTracker();
+            // PrependedDice adds 5 first. Sequence: 5(horn), 7,50, 7,50, 20,50
+            var diceValues = new List<int> { 7, 50, 7, 50, 20, 50, 15, 50 }; // extra safety
+            var session = BuildSession(
+                dice: new TestDice(diceValues.ToArray()),
+                playerStats: Stats(rizz: 0),
+                opponentStats: Stats(wit: 0),
+                shadows: shadows,
+                options: new[] { new DialogueOption(StatType.Rizz, "smooth") },
+                startingInterest: 12);
+
+            for (int i = 0; i < 3; i++)
+            {
+                await session.StartTurnAsync();
+                await session.ResolveTurnAsync(0);
+            }
+
+            // 2 TropeTrap failures = 2 Despair growths. No consecutive bonus (reset at success).
+            var despair = shadows.GetDelta(ShadowStatType.Despair);
+            Assert.True(despair >= 2, $"Expected Despair >= 2 (2 TropeTrap growths), got {despair}");
+            // Importantly the consecutive count reset, so no +1 at exactly 3 consecutive
+        }
+
         // --- Denial triggers ---
 
         // Mutation: would catch if date-secured-without-honesty didn't grow Denial
@@ -860,7 +975,7 @@ namespace Pinder.Core.Tests
                 },
                 new Dictionary<ShadowStatType, int>
                 {
-                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Horniness, 0 },
+                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Despair, 0 },
                     { ShadowStatType.Denial, 0 }, { ShadowStatType.Fixation, 0 },
                     { ShadowStatType.Dread, 0 }, { ShadowStatType.Overthinking, 0 }
                 });
@@ -903,8 +1018,7 @@ namespace Pinder.Core.Tests
             opponentStats ??= Stats();
             llm ??= new NullLlmAdapter();
 
-            var config = new GameSessionConfig(
-                playerShadows: shadows,
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: shadows,
                 previousOpener: previousOpener,
                 startingInterest: startingInterest);
 

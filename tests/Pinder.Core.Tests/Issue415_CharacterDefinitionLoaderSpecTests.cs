@@ -294,7 +294,7 @@ namespace Pinder.Core.Tests
             var profile = CharacterDefinitionLoader.Parse(json, itemRepo, anatomyRepo);
 
             Assert.Equal(0, profile.Stats.GetShadow(ShadowStatType.Madness));
-            Assert.Equal(0, profile.Stats.GetShadow(ShadowStatType.Horniness));
+            Assert.Equal(0, profile.Stats.GetShadow(ShadowStatType.Despair));
             Assert.Equal(0, profile.Stats.GetShadow(ShadowStatType.Denial));
             Assert.Equal(0, profile.Stats.GetShadow(ShadowStatType.Fixation));
             Assert.Equal(0, profile.Stats.GetShadow(ShadowStatType.Dread));
@@ -634,7 +634,7 @@ namespace Pinder.Core.Tests
             var profile = CharacterDefinitionLoader.Parse(json, itemRepo, anatomyRepo);
 
             Assert.Equal(7, profile.Stats.GetShadow(ShadowStatType.Madness));
-            Assert.Equal(3, profile.Stats.GetShadow(ShadowStatType.Horniness));
+            Assert.Equal(3, profile.Stats.GetShadow(ShadowStatType.Despair));
             Assert.Equal(0, profile.Stats.GetShadow(ShadowStatType.Denial));
             Assert.Equal(12, profile.Stats.GetShadow(ShadowStatType.Fixation));
             Assert.Equal(1, profile.Stats.GetShadow(ShadowStatType.Dread));

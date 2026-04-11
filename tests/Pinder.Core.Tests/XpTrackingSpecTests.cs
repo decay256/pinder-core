@@ -321,7 +321,7 @@ namespace Pinder.Core.Tests
         public async Task ResolveTurn_DateSecured_Awards50XpEndOfGame()
         {
             // Start at 24 interest, success pushes to 25+ → DateSecured
-            var config = new GameSessionConfig(startingInterest: 24);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 24);
             var session = MakeSession(diceRoll: 15, opponentStatValue: 0, config: config);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
@@ -342,7 +342,7 @@ namespace Pinder.Core.Tests
         public async Task ResolveTurn_Unmatched_Awards5XpConversationComplete()
         {
             // Start at 1 interest, failure drops to 0 → Unmatched
-            var config = new GameSessionConfig(startingInterest: 1);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 1);
             var session = MakeSession(diceRoll: 2, opponentStatValue: 0, config: config);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
@@ -588,7 +588,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task ResolveTurn_DateSecuredFinalTurn_XpEarnedIncludesBoth()
         {
-            var config = new GameSessionConfig(startingInterest: 24);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 24);
             var session = MakeSession(diceRoll: 15, opponentStatValue: 0, config: config);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
@@ -606,7 +606,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task ResolveTurn_FailurePlusUnmatched_BothXpRecorded()
         {
-            var config = new GameSessionConfig(startingInterest: 1);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 1);
             var session = MakeSession(diceRoll: 2, opponentStatValue: 0, config: config);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
@@ -624,7 +624,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task ResolveTurn_GameEndsFirstTurn_BothXpTypes()
         {
-            var config = new GameSessionConfig(startingInterest: 24);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 24);
             var session = MakeSession(diceRoll: 15, opponentStatValue: 0, config: config);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
@@ -865,6 +865,9 @@ namespace Pinder.Core.Tests
             var opponentStats = MakeStatBlock(allStats: opponentStatValue);
             var opponent = MakeProfile("opponent", opponentStats);
 
+            // Clock is required; if caller did not supply a config, provide one with a zero-modifier clock.
+            config = config ?? new GameSessionConfig(clock: TestHelpers.MakeClock());
+
             return new GameSession(
                 player,
                 opponent,
@@ -884,6 +887,9 @@ namespace Pinder.Core.Tests
 
             var opponentStats = MakeStatBlock(allStats: opponentStatValue);
             var opponent = MakeProfile("opponent", opponentStats);
+
+            // Clock is required; if caller did not supply a config, provide one with a zero-modifier clock.
+            config = config ?? new GameSessionConfig(clock: TestHelpers.MakeClock());
 
             return new GameSession(
                 player,
@@ -905,7 +911,7 @@ namespace Pinder.Core.Tests
                 },
                 new Dictionary<ShadowStatType, int>
                 {
-                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Horniness, 0 },
+                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Despair, 0 },
                     { ShadowStatType.Denial, 0 }, { ShadowStatType.Fixation, 0 },
                     { ShadowStatType.Dread, 0 }, { ShadowStatType.Overthinking, 0 }
                 });

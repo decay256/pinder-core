@@ -69,7 +69,7 @@ namespace Pinder.Core.Tests
         {
             var stats = MakeStatBlock(sa: 3);
             var shadows = new SessionShadowTracker(stats);
-            var config = new GameSessionConfig(playerShadows: shadows);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: shadows);
             var session = MakeSession(diceValue: 15, saModifier: 3, config: config);
 
             var result = await session.ReadAsync();
@@ -88,7 +88,7 @@ namespace Pinder.Core.Tests
             // SA +0, dice rolls 5 → total 5 < DC 12 → failure
             var stats = MakeStatBlock(sa: 0);
             var shadows = new SessionShadowTracker(stats);
-            var config = new GameSessionConfig(playerShadows: shadows);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: shadows);
             var session = MakeSession(diceValue: 5, saModifier: 0, config: config);
 
             var result = await session.ReadAsync();
@@ -155,7 +155,7 @@ namespace Pinder.Core.Tests
             // SA +5 but nat1 → auto-fail
             var stats = MakeStatBlock(sa: 5);
             var shadows = new SessionShadowTracker(stats);
-            var config = new GameSessionConfig(playerShadows: shadows);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: shadows);
             var session = MakeSession(diceValue: 1, saModifier: 5, config: config);
 
             var result = await session.ReadAsync();
@@ -174,7 +174,7 @@ namespace Pinder.Core.Tests
         public async Task ReadAsync_FailureCausesInterestZero_GameEnds()
         {
             // Start at interest 1, fail → drops to 0 → Unmatched
-            var config = new GameSessionConfig(startingInterest: 1);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 1);
             var session = MakeSession(diceValue: 3, saModifier: 0, config: config);
 
             var result = await session.ReadAsync();
@@ -192,7 +192,7 @@ namespace Pinder.Core.Tests
         public async Task ReadAsync_OnEndedGame_ThrowsGameEndedException()
         {
             // Start at interest 1, wait to end game, then try read
-            var config = new GameSessionConfig(startingInterest: 1);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 1);
             var session = MakeSession(diceValue: 10, saModifier: 0, config: config);
 
             session.Wait(); // interest 1→0, game ends
@@ -207,7 +207,7 @@ namespace Pinder.Core.Tests
         {
             // Start at 10, Wait twice to get to 8, then Read
             var dice = new SequenceDice(new[] { 10, 10, 15 }); // two Waits don't use dice for roll, but ghost checks; then Read d20=15
-            var config = new GameSessionConfig(startingInterest: 13);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 13);
             var session = MakeSessionWithDice(dice, saModifier: 3, config: config);
 
             var result = await session.ReadAsync();
@@ -355,7 +355,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task RecoverAsync_OnEndedGame_ThrowsGameEndedException()
         {
-            var config = new GameSessionConfig(startingInterest: 1);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 1);
             var session = MakeSession(diceValue: 10, saModifier: 0, config: config);
             session.Wait(); // ends game
 
@@ -367,7 +367,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task RecoverAsync_FailureCausesInterestZero_GameEnds()
         {
-            var config = new GameSessionConfig(startingInterest: 1);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 1);
             var trapDef = new TrapDefinition("T", StatType.Charm,
                 TrapEffect.Disadvantage, 0, 5, "t", "clear", "nat1");
             var session = MakeSession(diceValue: 3, saModifier: 0, config: config);
@@ -454,7 +454,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void Wait_InterestHitsZero_GameEnds()
         {
-            var config = new GameSessionConfig(startingInterest: 1);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 1);
             var session = MakeSession(diceValue: 10, saModifier: 0, config: config);
 
             session.Wait(); // interest 1→0
@@ -467,7 +467,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void Wait_OnEndedGame_ThrowsGameEndedException()
         {
-            var config = new GameSessionConfig(startingInterest: 1);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 1);
             var session = MakeSession(diceValue: 10, saModifier: 0, config: config);
             session.Wait(); // ends game
 
@@ -605,7 +605,7 @@ namespace Pinder.Core.Tests
         public async Task ReadAsync_Bored_GhostTrigger_Fires()
         {
             // Interest at 2 (Bored), dice returns 1 (ghost trigger fires on d4==1)
-            var config = new GameSessionConfig(startingInterest: 2);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 2);
             var session = MakeSession(diceValue: 1, saModifier: 0, config: config);
 
             var ex = await Assert.ThrowsAsync<GameEndedException>(() => session.ReadAsync());
@@ -619,7 +619,7 @@ namespace Pinder.Core.Tests
         {
             var trapDef = new TrapDefinition("T", StatType.Charm,
                 TrapEffect.Disadvantage, 0, 5, "t", "clear", "nat1");
-            var config = new GameSessionConfig(startingInterest: 2);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 2);
             var session = MakeSession(diceValue: 1, saModifier: 0, config: config);
             ActivateTrapOnSession(session, trapDef);
 
@@ -632,7 +632,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void Wait_Bored_GhostTrigger_Fires()
         {
-            var config = new GameSessionConfig(startingInterest: 2);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 2);
             var session = MakeSession(diceValue: 1, saModifier: 0, config: config);
 
             var ex = Assert.Throws<GameEndedException>(() => session.Wait());
@@ -647,7 +647,7 @@ namespace Pinder.Core.Tests
             // Interest at 3 (Bored), dice returns 2 (not 1 → ghost doesn't fire)
             // Dice is also used for the d20 roll. We need a sequence dice.
             var dice = new SequenceDice(new[] { 2, 15 }); // d4=2 (no ghost), d20=15
-            var config = new GameSessionConfig(startingInterest: 3);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 3);
             var session = MakeSessionWithDice(dice, saModifier: 0, config: config);
 
             var result = await session.ReadAsync();
@@ -661,7 +661,7 @@ namespace Pinder.Core.Tests
         public async Task RecoverAsync_NoTrap_Bored_ThrowsInvalidOp_NotGhosted()
         {
             // No active trap AND Bored. Per pseudocode, HasActive check comes first (step 2) before ghost (step 4)
-            var config = new GameSessionConfig(startingInterest: 2);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 2);
             var session = MakeSession(diceValue: 1, saModifier: 0, config: config);
 
             // Should throw InvalidOperationException for no trap, not GameEndedException for ghost
@@ -788,13 +788,13 @@ namespace Pinder.Core.Tests
                 },
                 new Dictionary<ShadowStatType, int>
                 {
-                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Horniness, 0 },
+                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Despair, 0 },
                     { ShadowStatType.Denial, 0 }, { ShadowStatType.Fixation, 0 },
                     { ShadowStatType.Dread, 0 }, { ShadowStatType.Overthinking, 12 }
                 });
 
             var shadows = new SessionShadowTracker(stats);
-            var config = new GameSessionConfig(playerShadows: shadows);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: shadows);
             var player = MakeProfile("player", stats);
             var opponent = MakeProfile("opponent", MakeStatBlock());
 
@@ -822,13 +822,13 @@ namespace Pinder.Core.Tests
                 },
                 new Dictionary<ShadowStatType, int>
                 {
-                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Horniness, 0 },
+                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Despair, 0 },
                     { ShadowStatType.Denial, 0 }, { ShadowStatType.Fixation, 0 },
                     { ShadowStatType.Dread, 0 }, { ShadowStatType.Overthinking, 5 }
                 });
 
             var shadows = new SessionShadowTracker(stats);
-            var config = new GameSessionConfig(playerShadows: shadows);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: shadows);
             var player = MakeProfile("player", stats);
             var opponent = MakeProfile("opponent", MakeStatBlock());
 
@@ -854,13 +854,13 @@ namespace Pinder.Core.Tests
                 },
                 new Dictionary<ShadowStatType, int>
                 {
-                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Horniness, 0 },
+                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Despair, 0 },
                     { ShadowStatType.Denial, 0 }, { ShadowStatType.Fixation, 0 },
                     { ShadowStatType.Dread, 0 }, { ShadowStatType.Overthinking, 12 }
                 });
 
             var shadows = new SessionShadowTracker(stats);
-            var config = new GameSessionConfig(playerShadows: shadows);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: shadows);
             var player = MakeProfile("player", stats);
             var opponent = MakeProfile("opponent", MakeStatBlock());
 
@@ -890,13 +890,13 @@ namespace Pinder.Core.Tests
                 },
                 new Dictionary<ShadowStatType, int>
                 {
-                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Horniness, 0 },
+                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Despair, 0 },
                     { ShadowStatType.Denial, 0 }, { ShadowStatType.Fixation, 0 },
                     { ShadowStatType.Dread, 0 }, { ShadowStatType.Overthinking, 5 }
                 });
 
             var shadows = new SessionShadowTracker(stats);
-            var config = new GameSessionConfig(playerShadows: shadows);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: shadows);
             var player = MakeProfile("player", stats);
             var opponent = MakeProfile("opponent", MakeStatBlock());
 
@@ -922,6 +922,7 @@ namespace Pinder.Core.Tests
             var stats = MakeStatBlock(sa: saModifier);
             var player = MakeProfile("player", stats);
             var opponent = MakeProfile("opponent", MakeStatBlock());
+            config = config ?? new GameSessionConfig(clock: TestHelpers.MakeClock());
 
             return new GameSession(
                 player,
@@ -940,6 +941,7 @@ namespace Pinder.Core.Tests
             var stats = MakeStatBlock(sa: saModifier);
             var player = MakeProfile("player", stats);
             var opponent = MakeProfile("opponent", MakeStatBlock());
+            config = config ?? new GameSessionConfig(clock: TestHelpers.MakeClock());
 
             return new GameSession(
                 player,
@@ -958,6 +960,7 @@ namespace Pinder.Core.Tests
             var stats = MakeStatBlock(sa: saModifier);
             var player = MakeProfile("player", stats);
             var opponent = MakeProfile("opponent", MakeStatBlock());
+            config = config ?? new GameSessionConfig(clock: TestHelpers.MakeClock());
 
             return new GameSession(
                 player,
@@ -987,7 +990,7 @@ namespace Pinder.Core.Tests
                 },
                 new Dictionary<ShadowStatType, int>
                 {
-                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Horniness, 0 },
+                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Despair, 0 },
                     { ShadowStatType.Denial, 0 }, { ShadowStatType.Fixation, 0 },
                     { ShadowStatType.Dread, 0 }, { ShadowStatType.Overthinking, 0 }
                 });

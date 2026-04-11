@@ -42,7 +42,7 @@ namespace Pinder.SessionRunner
         private static readonly Dictionary<StatType, string> StatToTrapName = new Dictionary<StatType, string>
         {
             { StatType.Charm,         "Madness" },
-            { StatType.Rizz,          "Horniness" },
+            { StatType.Rizz,          "Despair" },
             { StatType.Honesty,       "Denial" },
             { StatType.Chaos,         "Fixation" },
             { StatType.Wit,           "Dread" },

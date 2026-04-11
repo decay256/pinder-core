@@ -76,7 +76,7 @@ namespace Pinder.Core.Tests
             Assert.Equal(3, captured[ShadowStatType.Fixation]);
             Assert.Equal(10, captured[ShadowStatType.Madness]);
             Assert.Equal(5, captured[ShadowStatType.Overthinking]);
-            Assert.Equal(12, captured[ShadowStatType.Horniness]);
+            Assert.Equal(12, captured[ShadowStatType.Despair]);
         }
 
         // ============== Edge: Zero shadow value passes as 0 ==============
@@ -189,7 +189,7 @@ namespace Pinder.Core.Tests
                 {
                     { ShadowStatType.Dread, dread }, { ShadowStatType.Denial, denial },
                     { ShadowStatType.Fixation, fixation }, { ShadowStatType.Madness, madness },
-                    { ShadowStatType.Overthinking, overthinking }, { ShadowStatType.Horniness, horniness }
+                    { ShadowStatType.Overthinking, overthinking }, { ShadowStatType.Despair, horniness }
                 });
             return new SessionShadowTracker(stats);
         }
@@ -204,7 +204,7 @@ namespace Pinder.Core.Tests
                 },
                 new Dictionary<ShadowStatType, int>
                 {
-                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Horniness, 0 },
+                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Despair, 0 },
                     { ShadowStatType.Denial, 0 }, { ShadowStatType.Fixation, 0 },
                     { ShadowStatType.Dread, 0 }, { ShadowStatType.Overthinking, 0 }
                 });
@@ -221,7 +221,7 @@ namespace Pinder.Core.Tests
             SessionShadowTracker? shadows,
             DialogueOption[]? llmOptions = null)
         {
-            var config = new GameSessionConfig(playerShadows: shadows);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: shadows);
             ILlmAdapter llm = llmOptions != null
                 ? new CustomOptionsLlmAdapter(llmOptions)
                 : (ILlmAdapter)new NullLlmAdapter();
@@ -244,7 +244,7 @@ namespace Pinder.Core.Tests
             SessionShadowTracker? shadows,
             ILlmAdapter llm)
         {
-            var config = new GameSessionConfig(playerShadows: shadows);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: shadows);
             var allDice = new int[diceValues.Length + 1];
             allDice[0] = 5;
             Array.Copy(diceValues, 0, allDice, 1, diceValues.Length);

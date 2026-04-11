@@ -110,33 +110,33 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Fact]
-        public void DialogueOptionsPrompt_HorninessAt6_NoTaint()
+        public void DialogueOptionsPrompt_DespairAt6_NoTaint()
         {
             var shadows = new Dictionary<ShadowStatType, int>
             {
-                { ShadowStatType.Horniness, 6 }
+                { ShadowStatType.Despair, 6 }
             };
 
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
                 MakeDialogueContext(shadowThresholds: shadows));
 
             Assert.DoesNotContain("SHADOW STATE", result);
-            Assert.DoesNotContain("Your Horniness is elevated", result);
+            Assert.DoesNotContain("Your Despair is elevated", result);
         }
 
         [Fact]
-        public void DialogueOptionsPrompt_HorninessAt7_HasTaint()
+        public void DialogueOptionsPrompt_DespairAt7_HasTaint()
         {
             var shadows = new Dictionary<ShadowStatType, int>
             {
-                { ShadowStatType.Horniness, 7 }
+                { ShadowStatType.Despair, 7 }
             };
 
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
                 MakeDialogueContext(shadowThresholds: shadows));
 
             Assert.Contains("Shadow state:", result);
-            Assert.Contains("Your Horniness is elevated", result);
+            Assert.Contains("Your Despair is elevated", result);
         }
 
         [Fact]

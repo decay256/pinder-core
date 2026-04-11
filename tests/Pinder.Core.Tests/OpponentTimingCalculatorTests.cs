@@ -447,17 +447,17 @@ namespace Pinder.Core.Tests
         }
 
         // =====================================================================
-        // Ignored shadow stats (Horniness, Dread)
+        // Ignored shadow stats (Despair, Dread)
         // =====================================================================
 
         [Fact]
-        public void Horniness_And_Dread_HaveNoEffect()
+        public void Despair_And_Dread_HaveNoEffect()
         {
             var profile = MakeProfile(baseDelay: 10, variance: 0.0f);
             var dice = new FixedDice(50);
             var shadows = new Dictionary<ShadowStatType, int>
             {
-                { ShadowStatType.Horniness, 10 },
+                { ShadowStatType.Despair, 10 },
                 { ShadowStatType.Dread, 10 }
             };
 

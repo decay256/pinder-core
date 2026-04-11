@@ -28,7 +28,7 @@ namespace Pinder.Core.Stats
         public static readonly Dictionary<StatType, ShadowStatType> ShadowPairs = new Dictionary<StatType, ShadowStatType>
         {
             { StatType.Charm,         ShadowStatType.Madness      },
-            { StatType.Rizz,          ShadowStatType.Horniness    },
+            { StatType.Rizz,          ShadowStatType.Despair      },
             { StatType.Honesty,       ShadowStatType.Denial       },
             { StatType.Chaos,         ShadowStatType.Fixation     },
             { StatType.Wit,           ShadowStatType.Dread        },

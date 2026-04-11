@@ -83,7 +83,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void GameSessionConfig_AcceptsNullRules()
         {
-            var config = new GameSessionConfig(rules: null);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), rules: null);
             Assert.Null(config.Rules);
         }
 
@@ -91,7 +91,7 @@ namespace Pinder.Core.Tests
         public void GameSessionConfig_AcceptsMockRules()
         {
             var resolver = new MockRuleResolver();
-            var config = new GameSessionConfig(rules: resolver);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), rules: resolver);
             Assert.Same(resolver, config.Rules);
         }
 
@@ -99,7 +99,7 @@ namespace Pinder.Core.Tests
         public async Task GameSession_WithResolver_CallsGetInterestState()
         {
             var resolver = new MockRuleResolver();
-            var config = new GameSessionConfig(rules: resolver);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), rules: resolver);
 
             // Dice: horniness roll (1d10) = 1, ghost check needs d4 (enqueue 4 = no ghost)
             var dice = new FixedDice(1, 4);
@@ -119,8 +119,7 @@ namespace Pinder.Core.Tests
         {
             // Return a custom success delta of +10
             var resolver = new MockRuleResolver { SuccessDelta = 10 };
-            var config = new GameSessionConfig(
-                rules: resolver,
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), rules: resolver,
                 startingInterest: 10);
 
             // Dice: horniness (1d10)=1, d20 roll = 20 (auto-success, nat 20),
@@ -150,8 +149,7 @@ namespace Pinder.Core.Tests
         {
             // Return a custom failure delta of -5
             var resolver = new MockRuleResolver { FailureDelta = -5 };
-            var config = new GameSessionConfig(
-                rules: resolver,
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), rules: resolver,
                 startingInterest: 15);
 
             // Dice: horniness (1d10)=1, d20 roll = 2 (very likely to fail),
@@ -176,11 +174,12 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task GameSession_WithNullConfig_FallsBackToHardcoded()
         {
-            // No config at all — should use hardcoded values
+            // Clock is now required; use a config with zero-modifier clock and no resolver.
             var dice = new FixedDice(1, 20, 50, 50, 50, 50, 50, 50);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock());
             var session = new GameSession(
                 MakeProfile("Player"), MakeProfile("Opponent"),
-                new NullLlmAdapter(), dice, new NullTrapRegistry(), null);
+                new NullLlmAdapter(), dice, new NullTrapRegistry(), config);
 
             var start = await session.StartTurnAsync();
             Assert.NotNull(start);
@@ -195,7 +194,7 @@ namespace Pinder.Core.Tests
         {
             // Resolver returns null for everything — should fall back to hardcoded
             var resolver = new MockRuleResolver();
-            var config = new GameSessionConfig(rules: resolver, startingInterest: 10);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), rules: resolver, startingInterest: 10);
 
             var dice = new FixedDice(1, 20, 50, 50, 50, 50, 50, 50);
             var session = new GameSession(
@@ -223,8 +222,7 @@ namespace Pinder.Core.Tests
             // Give dread a small value — but resolver overrides to T3
             playerShadows.ApplyGrowth(ShadowStatType.Dread, 1, "test");
 
-            var config = new GameSessionConfig(
-                playerShadows: playerShadows,
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: playerShadows,
                 rules: resolver);
 
             var dice = new FixedDice(1); // horniness roll
@@ -243,7 +241,7 @@ namespace Pinder.Core.Tests
         {
             // Set up a resolver that returns +5 momentum bonus for any streak
             var resolver = new MockRuleResolver { Momentum = 5 };
-            var config = new GameSessionConfig(rules: resolver, startingInterest: 10);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), rules: resolver, startingInterest: 10);
 
             // We need enough dice for: horniness, turn1 roll (success) + timing,
             // turn2 start + roll etc.

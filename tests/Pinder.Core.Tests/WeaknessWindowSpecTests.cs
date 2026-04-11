@@ -220,7 +220,7 @@ namespace Pinder.Core.Tests
 
             // Turn 0: roll 15, Turn 1: roll 14 (14+2=16, DC=18-2=16 → success)
             var dice = new FixedDice(5, 15, 5, 14, 5, 15, 5);
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0);
@@ -246,7 +246,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueWeaknessWindow(null);
 
             var dice = new FixedDice(5, 15, 5, 15, 5, 15, 5);
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0);
@@ -300,7 +300,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueWeaknessWindow(null);
 
             var dice = new FixedDice(5, 15, 5, 15, 5, 15, 5);
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0);
@@ -331,7 +331,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueWeaknessWindow(null);
 
             var dice = new FixedDice(5, 15, 5, 15, 5, 15, 5);
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0);

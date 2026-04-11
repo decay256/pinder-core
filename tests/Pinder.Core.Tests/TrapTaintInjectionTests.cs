@@ -347,7 +347,8 @@ namespace Pinder.Core.Tests
 
             var session = new GameSession(
                 MakeProfile("Player"), MakeProfile("Opponent"),
-                capturingLlm, dice, trapRegistry);
+                capturingLlm, dice, trapRegistry,
+                new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             // Turn 1: start + resolve (activates trap)
             await session.StartTurnAsync();
@@ -381,7 +382,7 @@ namespace Pinder.Core.Tests
 
             var session = new GameSession(
                 MakeProfile("Player"), MakeProfile("Opponent"),
-                capturingLlm, dice, new NullTrapRegistry());
+                capturingLlm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             await session.StartTurnAsync();
 
@@ -421,7 +422,8 @@ namespace Pinder.Core.Tests
 
             var session = new GameSession(
                 MakeProfile("Player"), MakeProfile("Opponent"),
-                capturingLlm, dice, trapRegistry);
+                capturingLlm, dice, trapRegistry,
+                new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             await session.StartTurnAsync();
 
@@ -460,7 +462,7 @@ namespace Pinder.Core.Tests
 
             var session = new GameSession(
                 MakeProfile("Player"), MakeProfile("Opponent"),
-                capturingLlm, dice, new NullTrapRegistry());
+                capturingLlm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0);

@@ -355,7 +355,7 @@ namespace Pinder.Core.Tests
                 {
                     { ShadowStatType.Dread, dread }, { ShadowStatType.Denial, denial },
                     { ShadowStatType.Fixation, fixation }, { ShadowStatType.Madness, madness },
-                    { ShadowStatType.Overthinking, overthinking }, { ShadowStatType.Horniness, horniness }
+                    { ShadowStatType.Overthinking, overthinking }, { ShadowStatType.Despair, horniness }
                 });
             return new SessionShadowTracker(stats);
         }
@@ -369,7 +369,7 @@ namespace Pinder.Core.Tests
             };
             var shadow = new Dictionary<ShadowStatType, int>
             {
-                { ShadowStatType.Madness, allShadow }, { ShadowStatType.Horniness, allShadow },
+                { ShadowStatType.Madness, allShadow }, { ShadowStatType.Despair, allShadow },
                 { ShadowStatType.Denial, allShadow }, { ShadowStatType.Fixation, allShadow },
                 { ShadowStatType.Dread, allShadow }, { ShadowStatType.Overthinking, allShadow }
             };
@@ -389,8 +389,7 @@ namespace Pinder.Core.Tests
             DialogueOption[]? llmOptions = null,
             int? startingInterest = null)
         {
-            var config = new GameSessionConfig(
-                playerShadows: shadows,
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: shadows,
                 startingInterest: startingInterest);
 
             ILlmAdapter llm = llmOptions != null

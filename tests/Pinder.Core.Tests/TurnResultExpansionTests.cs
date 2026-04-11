@@ -94,13 +94,13 @@ namespace Pinder.Core.Tests
         [Fact]
         public void TurnResult_ShadowGrowthEvents_PreservesList()
         {
-            var events = new List<string> { "Horniness +1 (Rizz overuse)", "Dread +1" };
+            var events = new List<string> { "Despair +1 (Rizz overuse)", "Dread +1" };
             var result = new TurnResult(
                 MakeRoll(), "a", "b", null, 0, MakeSnapshot(), false, null,
                 shadowGrowthEvents: events);
 
             Assert.Equal(2, result.ShadowGrowthEvents.Count);
-            Assert.Equal("Horniness +1 (Rizz overuse)", result.ShadowGrowthEvents[0]);
+            Assert.Equal("Despair +1 (Rizz overuse)", result.ShadowGrowthEvents[0]);
             Assert.Equal("Dread +1", result.ShadowGrowthEvents[1]);
         }
 
