@@ -279,9 +279,10 @@ namespace Pinder.Core.Tests
 
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context)
                 => Task.FromResult<string?>(null);
+            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction) => System.Threading.Tasks.Task.FromResult(message);
         }
 
-        private sealed class ThrowingLlmAdapter : ILlmAdapter
+                private sealed class ThrowingLlmAdapter : ILlmAdapter
         {
             public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context)
                 => throw new InvalidOperationException("LLM should not be called for Wait");
@@ -294,9 +295,10 @@ namespace Pinder.Core.Tests
 
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context)
                 => throw new InvalidOperationException("LLM should not be called for Wait");
+            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction) => System.Threading.Tasks.Task.FromResult(message);
         }
 
-        private sealed class StubTrapRegistry : ITrapRegistry
+                private sealed class StubTrapRegistry : ITrapRegistry
         {
             public TrapDefinition? GetTrap(StatType stat) => null;
             public string? GetLlmInstruction(StatType stat) => null;

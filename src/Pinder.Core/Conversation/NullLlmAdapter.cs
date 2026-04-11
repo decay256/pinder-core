@@ -71,5 +71,13 @@ namespace Pinder.Core.Conversation
         {
             return Task.FromResult("so... when are we actually doing this?");
         }
+
+        /// <summary>
+        /// Returns the message unchanged (no LLM overlay in test mode).
+        /// </summary>
+        public Task<string> ApplyHorninessOverlayAsync(string message, string instruction)
+        {
+            return Task.FromResult(message);
+        }
     }
 }

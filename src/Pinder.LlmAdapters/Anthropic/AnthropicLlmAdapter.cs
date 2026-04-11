@@ -1014,6 +1014,36 @@ namespace Pinder.LlmAdapters.Anthropic
             return result.ToArray();
         }
 
+        /// <summary>
+        /// Apply a horniness overlay to a delivered message by calling the LLM.
+        /// </summary>
+        public async Task<string> ApplyHorninessOverlayAsync(string message, string instruction)
+        {
+            if (string.IsNullOrWhiteSpace(message) || string.IsNullOrWhiteSpace(instruction))
+                return message;
+
+            string systemPrompt = "You are a message editor. Apply the overlay instruction to the message. Return ONLY the modified message text, nothing else.";
+            var systemBlocks = new ContentBlock[]
+            {
+                new ContentBlock { Type = "text", Text = systemPrompt }
+            };
+
+            string userContent = $"OVERLAY INSTRUCTION:\n{instruction}\n\nORIGINAL MESSAGE:\n{message}\n\nApply the overlay and return the modified message.";
+
+            var request = BuildRequest(systemBlocks, userContent,
+                _options.DeliveryTemperature ?? DefaultDeliveryTemperature);
+
+            try
+            {
+                var response = await _client.SendMessagesAsync(request).ConfigureAwait(false);
+                string result = response?.Content?[0]?.Text;
+                return string.IsNullOrWhiteSpace(result) ? message : result.Trim();
+            }
+            catch
+            {
+                return message;
+            }
+        }
 
     }
 }

@@ -789,9 +789,10 @@ namespace Pinder.Core.Tests
                 => Task.FromResult(new OpponentResponse("..."));
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context)
                 => Task.FromResult<string?>(null);
+            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction) => System.Threading.Tasks.Task.FromResult(message);
         }
 
-        private sealed class CapturingLlmAdapter : ILlmAdapter
+                private sealed class CapturingLlmAdapter : ILlmAdapter
         {
             private readonly Action<DialogueContext> _onGetOptions;
             public CapturingLlmAdapter(Action<DialogueContext> onGetOptions) => _onGetOptions = onGetOptions;
@@ -811,6 +812,7 @@ namespace Pinder.Core.Tests
                 => Task.FromResult(new OpponentResponse("..."));
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context)
                 => Task.FromResult<string?>(null);
+            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction) => System.Threading.Tasks.Task.FromResult(message);
         }
     }
 }

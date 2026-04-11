@@ -85,6 +85,9 @@ namespace Pinder.Core.Conversation
         // consume values from the game dice queue.
         private readonly Random _steeringRng;
 
+        // Stat delivery instructions for horniness overlay tier lookups (#709)
+        private readonly object? _statDeliveryInstructions;
+
         // Stored between StartTurnAsync and ResolveTurnAsync
         private DialogueOption[]? _currentOptions;
         private bool _currentHasAdvantage;
@@ -115,6 +118,7 @@ namespace Pinder.Core.Conversation
             _rules = config?.Rules;
             _globalDcBias = config?.GlobalDcBias ?? 0;
             _steeringRng = config?.SteeringRng ?? new Random();
+            _statDeliveryInstructions = config?.StatDeliveryInstructions;
 
             // Determine starting interest: explicit config > Dread T3 > default
             if (config?.StartingInterest.HasValue == true)
@@ -191,6 +195,9 @@ namespace Pinder.Core.Conversation
 
         /// <summary>Total XP earned during this session.</summary>
         public int TotalXpEarned => _xpLedger.TotalXp;
+
+        /// <summary>Session horniness value (d10 + clock modifier). Used for display.</summary>
+        public int SessionHorniness => _sessionHorniness;
 
         /// <summary>The full XP ledger for this session.</summary>
         public XpLedger XpLedger => _xpLedger;
@@ -319,7 +326,7 @@ namespace Pinder.Core.Conversation
                 activeTrapInstructions: activeTrapInstructions,
                 callbackOpportunities: _topics.Count > 0 ? new List<CallbackOpportunity>(_topics) : null,
                 horninessLevel: _sessionHorniness,
-                requiresRizzOption: _sessionHorniness >= 12,
+                requiresRizzOption: false,
                 currentTurn: _turnNumber,
                 playerTextingStyle: _player.TextingStyleFragment,
                 activeTell: _activeTell,
@@ -388,17 +395,6 @@ namespace Pinder.Core.Conversation
                         o.Stat, o.IntendedText, o.CallbackTurnNumber,
                         o.ComboName, o.HasTellBonus, o.HasWeaknessWindow,
                         isUnhingedReplacement: true);
-                }
-            }
-
-            // Horniness T3 (#45): all options become Rizz
-            if (_sessionHorniness >= 18)
-            {
-                for (int i = 0; i < options.Length; i++)
-                {
-                    var o = options[i];
-                    options[i] = new DialogueOption(StatType.Rizz, o.IntendedText, o.CallbackTurnNumber,
-                        o.ComboName, o.HasTellBonus, o.HasWeaknessWindow, o.IsUnhingedReplacement);
                 }
             }
 
@@ -675,6 +671,49 @@ namespace Pinder.Core.Conversation
                 deliveredMessage = deliveredMessage.TrimEnd() + " " + steeringResult.SteeringQuestion;
             }
 
+            // Per-turn Horniness overlay check (#709)
+            // Uses separate RNG (like steering) so it doesn't consume game dice values.
+            HorninessCheckResult horninessCheckResult;
+            if (_sessionHorniness > 0 && _playerShadows != null)
+            {
+                int horninessRoll = _steeringRng.Next(1, 21);
+                int horninessModifier = 0; // No base horniness stat on characters; pure session control
+                int horninessTotal = horninessRoll + horninessModifier;
+                int horninessDC = 20 - _sessionHorniness;
+                bool horninessMiss = horninessTotal < horninessDC;
+
+                if (horninessMiss)
+                {
+                    int missMargin = horninessDC - horninessTotal;
+                    Rolls.FailureTier horninessTier = DetermineHorninessTier(missMargin);
+                    string overlayInstruction = GetHorninessOverlayInstruction(horninessTier);
+
+                    if (overlayInstruction != null)
+                    {
+                        deliveredMessage = await _llm.ApplyHorninessOverlayAsync(deliveredMessage, overlayInstruction).ConfigureAwait(false);
+                        horninessCheckResult = new HorninessCheckResult(
+                            horninessRoll, horninessModifier, horninessTotal, horninessDC,
+                            true, horninessTier, true);
+                    }
+                    else
+                    {
+                        horninessCheckResult = new HorninessCheckResult(
+                            horninessRoll, horninessModifier, horninessTotal, horninessDC,
+                            true, horninessTier, false);
+                    }
+                }
+                else
+                {
+                    horninessCheckResult = new HorninessCheckResult(
+                        horninessRoll, horninessModifier, horninessTotal, horninessDC,
+                        false, Rolls.FailureTier.None, false);
+                }
+            }
+            else
+            {
+                horninessCheckResult = HorninessCheckResult.NotPerformed;
+            }
+
             _history.Add((_player.DisplayName, deliveredMessage));
 
             // 11. Generate opponent response
@@ -756,7 +795,8 @@ namespace Pinder.Core.Conversation
                 tellReadMessage: tellBonus > 0 ? "📖 You read the moment. +2 bonus." : null,
                 xpEarned: turnXpEarned,
                 detectedWindow: opponentResponse.WeaknessWindow,
-                steering: steeringResult);
+                steering: steeringResult,
+                horninessCheck: horninessCheckResult);
         }
 
         /// <summary>
@@ -906,10 +946,6 @@ namespace Pinder.Core.Conversation
         /// </summary>
         private StatType[] DrawRandomStats(StatType[] pool, int count, Dictionary<ShadowStatType, int>? shadowThresholds)
         {
-            // Horniness ≥18: all slots are RIZZ
-            if (_sessionHorniness >= 18)
-                return new StatType[] { StatType.Rizz, StatType.Rizz, StatType.Rizz };
-
             // Build eligible pool
             var eligible = new System.Collections.Generic.List<StatType>(pool);
 
@@ -935,10 +971,6 @@ namespace Pinder.Core.Conversation
             var drawn = new System.Collections.Generic.List<StatType>();
             for (int i = 0; i < System.Math.Min(count, eligible.Count); i++)
                 drawn.Add(eligible[i]);
-
-            // Horniness ≥6: ensure RIZZ is present
-            if (_sessionHorniness >= 6 && !drawn.Contains(StatType.Rizz))
-                drawn[drawn.Count - 1] = StatType.Rizz;
 
             return drawn.ToArray();
         }
@@ -1277,6 +1309,37 @@ namespace Pinder.Core.Conversation
             if (opponent.EquippedItemDisplayNames != null && opponent.EquippedItemDisplayNames.Count > 0)
                 sb.Append(" | Wearing: ").Append(string.Join(", ", opponent.EquippedItemDisplayNames));
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// Determines the horniness overlay failure tier from miss margin.
+        /// Uses same thresholds as normal failure tiers.
+        /// </summary>
+        private static Rolls.FailureTier DetermineHorninessTier(int missMargin)
+        {
+            if (missMargin <= 2) return Rolls.FailureTier.Fumble;
+            if (missMargin <= 5) return Rolls.FailureTier.Misfire;
+            if (missMargin <= 9) return Rolls.FailureTier.TropeTrap;
+            return Rolls.FailureTier.Catastrophe;
+        }
+
+        /// <summary>
+        /// Retrieves the horniness overlay instruction from the stat delivery instructions.
+        /// Uses reflection to call GetHorninessOverlayInstruction on the injected object
+        /// (which is StatDeliveryInstructions from the LlmAdapters layer).
+        /// Returns null if instructions are not available.
+        /// </summary>
+        private string GetHorninessOverlayInstruction(Rolls.FailureTier tier)
+        {
+            if (_statDeliveryInstructions == null)
+                return null;
+
+            // Use reflection to avoid a direct dependency on Pinder.LlmAdapters from Pinder.Core
+            var method = _statDeliveryInstructions.GetType().GetMethod("GetHorninessOverlayInstruction");
+            if (method == null)
+                return null;
+
+            return method.Invoke(_statDeliveryInstructions, new object[] { tier }) as string;
         }
 
         private string GetLastOpponentMessage()

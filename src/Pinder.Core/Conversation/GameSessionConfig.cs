@@ -44,6 +44,13 @@ namespace Pinder.Core.Conversation
         /// </summary>
         public Random? SteeringRng { get; }
 
+        /// <summary>
+        /// Optional delivery instructions for horniness overlay tier lookups.
+        /// When null, horniness overlay is skipped (no silent fallback — caller
+        /// should supply instructions if horniness mechanic is desired).
+        /// </summary>
+        public object? StatDeliveryInstructions { get; }
+
         public GameSessionConfig(
             IGameClock? clock = null,
             SessionShadowTracker? playerShadows = null,
@@ -52,7 +59,8 @@ namespace Pinder.Core.Conversation
             string? previousOpener = null,
             IRuleResolver? rules = null,
             int globalDcBias = 0,
-            Random? steeringRng = null)
+            Random? steeringRng = null,
+            object? statDeliveryInstructions = null)
         {
             Clock = clock;
             PlayerShadows = playerShadows;
@@ -62,6 +70,7 @@ namespace Pinder.Core.Conversation
             Rules = rules;
             GlobalDcBias = globalDcBias;
             SteeringRng = steeringRng;
+            StatDeliveryInstructions = statDeliveryInstructions;
         }
     }
 }

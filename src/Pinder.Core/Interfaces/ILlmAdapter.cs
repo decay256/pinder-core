@@ -31,5 +31,12 @@ namespace Pinder.Core.Interfaces
         /// Return null to skip the beat.
         /// </summary>
         Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context);
+
+        /// <summary>
+        /// Apply a horniness overlay to a delivered message.
+        /// The instruction describes how to rewrite the message with involuntary heat.
+        /// Returns the modified message text.
+        /// </summary>
+        Task<string> ApplyHorninessOverlayAsync(string message, string instruction);
     }
 }

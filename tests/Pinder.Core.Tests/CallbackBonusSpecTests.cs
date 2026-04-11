@@ -183,9 +183,10 @@ namespace Pinder.Core.Tests
 
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context)
                 => Task.FromResult<string?>(null);
+            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction) => System.Threading.Tasks.Task.FromResult(message);
         }
 
-        // Mutation: would catch if ResolveTurnAsync ignored CallbackTurnNumber and always set bonus to 0
+                // Mutation: would catch if ResolveTurnAsync ignored CallbackTurnNumber and always set bonus to 0
         [Fact]
         public async Task AC3_ResolveTurn_OpenerCallback_RecordsBonusThree()
         {

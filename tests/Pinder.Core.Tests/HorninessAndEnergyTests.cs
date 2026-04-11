@@ -50,23 +50,11 @@ namespace Pinder.Core.Tests
         }
 
         /// <summary>
-        /// When horniness >= 18 (T3), all dialogue options become Rizz.
-        /// Clock returns +5 (AfterTwoAm), dice returns 10 → horniness = 15 (not T3).
-        /// So we use dice=10 + modifier=+8... but max modifier is +5.
-        /// We need horniness >= 18: use dice=10, modifier=+8? No, IGameClock max is +5.
-        /// So: dice roll must be high enough. dice=10 + 5 = 15. Not enough.
-        /// We can't reach 18 with a d10 + max modifier 5 (max 15).
-        /// Wait — the spec says 1d10. Max roll = 10, max modifier = 5 → max 15.
-        /// But the code uses Math.Max(0, roll + modifier). So 18 is not reachable naturally.
-        /// The T3 threshold is checked against _sessionHorniness which is set in constructor.
-        /// For testing, we need to set it to >= 18 somehow.
-        /// Since we can't modify _sessionHorniness directly, we need a custom dice and clock
-        /// that can produce a total >= 18. But dice.Roll(10) can return any int — it's not
-        /// clamped. The FixedDice just returns queued values.
-        /// So FixedDice(15) + modifier(+3) = 18. That works!
+        /// With horniness >= 18, old T3 all-Rizz override was removed (#709).
+        /// Options should retain their original stats.
         /// </summary>
         [Fact]
-        public async Task GameSession_HorninessT3_AllOptionsBecomeRizz()
+        public async Task GameSession_HorninessT3_OptionsRetainOriginalStats()
         {
             // FixedDice returns 15 for the horniness roll (not clamped to 1-10 in FixedDice)
             var dice = new FixedDice(15);
@@ -81,14 +69,18 @@ namespace Pinder.Core.Tests
                 new NullTrapRegistry(),
                 config);
 
-            // horniness = 15 + 3 = 18 → T3
+            // horniness = 15 + 3 = 18 → old T3 removed, options retain original stats
             var turn = await session.StartTurnAsync();
 
             Assert.Equal(4, turn.Options.Length);
+            // At least one option should NOT be Rizz
+            bool hasNonRizz = false;
             for (int i = 0; i < turn.Options.Length; i++)
             {
-                Assert.Equal(StatType.Rizz, turn.Options[i].Stat);
+                if (turn.Options[i].Stat != StatType.Rizz)
+                    hasNonRizz = true;
             }
+            Assert.True(hasNonRizz, "Horniness T3 override removed — options should retain original stats");
         }
 
         /// <summary>
@@ -184,13 +176,11 @@ namespace Pinder.Core.Tests
         }
 
         /// <summary>
-        /// Without a clock, session horniness equals the raw dice roll (no time-of-day modifier).
-        /// Horniness >= 18 forces all options to Rizz even without a clock.
+        /// Old T3 all-Rizz override removed (#709). High horniness no longer forces all options to Rizz.
         /// </summary>
         [Fact]
-        public async Task GameSession_WithClock_HorninessRolled_ForcesRizzAtT3()
+        public async Task GameSession_WithClock_HighHorniness_DoesNotForceRizz()
         {
-            // Clock required. Dice roll 20 + modifier 0 = 20 >= 18, forces all options to Rizz.
             var dice = new FixedDice(20);
             var clock = new ConfigurableClock(horninessModifier: 0, remainingEnergy: 100);
             var config = new GameSessionConfig(clock: clock);
@@ -205,11 +195,14 @@ namespace Pinder.Core.Tests
 
             var turn = await session.StartTurnAsync();
 
-            // Horniness = 20 (modifier 0) >= 18, all options should be Rizz
+            // Horniness = 20, but old T3 override removed — options retain original stats
+            bool hasNonRizz = false;
             for (int i = 0; i < turn.Options.Length; i++)
             {
-                Assert.Equal(StatType.Rizz, turn.Options[i].Stat);
+                if (turn.Options[i].Stat != StatType.Rizz)
+                    hasNonRizz = true;
             }
+            Assert.True(hasNonRizz, "High horniness should no longer force all options to Rizz");
         }
 
         // ======================== Helpers ========================

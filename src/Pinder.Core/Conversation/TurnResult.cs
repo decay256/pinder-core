@@ -66,6 +66,11 @@ namespace Pinder.Core.Conversation
         /// </summary>
         public SteeringRollResult Steering { get; }
 
+        /// <summary>
+        /// Result of the per-turn horniness overlay check. NotPerformed if skipped.
+        /// </summary>
+        public HorninessCheckResult HorninessCheck { get; }
+
         public TurnResult(
             RollResult roll,
             string deliveredMessage,
@@ -83,7 +88,8 @@ namespace Pinder.Core.Conversation
             RiskTier riskTier = RiskTier.Safe,
             int xpEarned = 0,
             WeaknessWindow? detectedWindow = null,
-            SteeringRollResult steering = null)
+            SteeringRollResult steering = null,
+            HorninessCheckResult horninessCheck = null)
         {
             Roll = roll ?? throw new ArgumentNullException(nameof(roll));
             DeliveredMessage = deliveredMessage ?? throw new ArgumentNullException(nameof(deliveredMessage));
@@ -102,6 +108,7 @@ namespace Pinder.Core.Conversation
             XpEarned = xpEarned;
             DetectedWindow = detectedWindow;
             Steering = steering ?? SteeringRollResult.NotAttempted;
+            HorninessCheck = horninessCheck ?? HorninessCheckResult.NotPerformed;
         }
     }
 }

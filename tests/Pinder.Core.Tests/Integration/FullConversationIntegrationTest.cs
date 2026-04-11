@@ -750,6 +750,7 @@ namespace Pinder.Core.Tests.Integration
             {
                 return Task.FromResult<string?>(null);
             }
+            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction) => System.Threading.Tasks.Task.FromResult(message);
         }
     }
 }

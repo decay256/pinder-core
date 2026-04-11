@@ -452,8 +452,12 @@ class Program
             Console.WriteLine();
         }
 
-        var config = new GameSessionConfig(clock: clock, playerShadows: sableShadows, globalDcBias: difficultyBias);
+        var config = new GameSessionConfig(clock: clock, playerShadows: sableShadows, globalDcBias: difficultyBias, statDeliveryInstructions: statDeliveryInstructions);
         var session = new GameSession(sable, brick, llm, new SystemRandomDiceRoller(), trapRegistry, config);
+
+        // Display session horniness in header (#709)
+        Console.WriteLine($"🌶️ Session Horniness: {session.SessionHorniness}");
+        Console.WriteLine();
 
         // Player agent for decision-making — configurable via --agent arg or PLAYER_AGENT env var
         IPlayerAgent agent;
@@ -633,7 +637,7 @@ class Program
                 interestState: snap.State,
                 momentumStreak: snap.MomentumStreak,
                 activeTrapNames: snap.ActiveTrapNames,
-                sessionHorniness: 0,
+                sessionHorniness: session.SessionHorniness,
                 shadowValues: currentShadowValues,
                 turnNumber: snap.TurnNumber,
                 playerSystemPrompt: sable.AssembledSystemPrompt,
@@ -735,6 +739,17 @@ class Program
                 {
                     Console.WriteLine($"> 🧭 Steering roll: d20({result.Steering.SteeringRoll}) + {result.Steering.SteeringMod} = {steeringTotal} vs DC {result.Steering.SteeringDC} → MISS");
                 }
+                Console.WriteLine();
+            }
+
+            // Per-turn horniness check display (#709)
+            if (result.HorninessCheck != null && result.HorninessCheck.DC > 0)
+            {
+                var hc = result.HorninessCheck;
+                string hcResult = hc.IsMiss
+                    ? $"MISS ({hc.Tier}){(hc.OverlayApplied ? " — overlay applied" : "")}"
+                    : "OK";
+                Console.WriteLine($"> 🌶️ Horniness check: d20({hc.Roll}) + {hc.Modifier} = {hc.Total} vs DC {hc.DC} → {hcResult}");
                 Console.WriteLine();
             }
 
