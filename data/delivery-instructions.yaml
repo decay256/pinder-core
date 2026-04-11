@@ -120,45 +120,45 @@ delivery_instructions:
 
     fumble: >-
       SHADOW: DESPAIR (neediness leaks; performing magnetism instead of feeling it).
-      One word or phrase in the intended message gets swapped for something slightly too physical or
-      intimate. The sentence structure holds perfectly — a single substitution shifts the register
-      from flirty to revealing. Same length, same sentence count.
-      e.g.: intended "I really like talking to you about this" → delivered "I really like picturing
-      you talking about this" — one word swap, whole vibe shifts.
+      One word or phrase in the intended message gets swapped for something slightly too eager. The
+      sentence structure holds perfectly — a single qualifier reveals they care more than they're
+      letting on. Same length, same sentence count.
+      e.g.: intended "I like talking to you about this" → delivered "I really like talking to you
+      about this" — one qualifier added, effortlessness gone.
 
     misfire: >-
       SHADOW: DESPAIR (neediness leaks; performing magnetism instead of feeling it).
-      The message starts as intended but the second half slides from playful into sexual tension.
-      What should have been light banter gets REPLACED mid-sentence by something that reads the
-      energy as much more charged than it was. Same length, same sentence count.
+      The message starts as intended but the second half slides from playful into trying too hard.
+      What should have been light banter gets REPLACED mid-sentence by something that sounds like
+      it's auditioning for the other person's attention. Same length, same sentence count.
       e.g.: intended "the way you talk about pasta is making me hungry, where's your favourite
-      place" → delivered "the way you talk about pasta is doing something to me and I'm not even
-      going to pretend that's about the food" — first half tracks, second half replaced.
+      place" → delivered "the way you talk about pasta is making me hungry, we should definitely
+      go somewhere together soon" — first half tracks, second half replaced with visible effort.
 
     trope_trap: >-
       SHADOW: DESPAIR (the performance has collapsed; effortlessness is gone).
-      What was subtext has become pickup-line structure. The character starts performing attraction
-      instead of feeling it — double-entendres that were meant to be smooth but read as scripted.
+      Magnetic ease replaced by visible effort. The character sounds like someone who used to be
+      good at this and knows they've lost it — every line carries "please like me" energy.
       Rewrite the intended message at the SAME LENGTH in the despair shadow's voice.
-      e.g.: "if you cook like you text I'm going to need you to come over and show me what else
-      those hands can do"
+      e.g.: "I promise I'm actually fun to be around, everyone says so, we should hang out and
+      you'd see what I mean"
 
     catastrophe: >-
-      SHADOW: DESPAIR (full possession; the wanting is the only thing left).
-      The character sends something that belongs at 3am after four drinks, not in this conversation
-      at this stage. The register breaks completely — they're responding to a fantasy version of the
-      conversation. SAME LENGTH OR SHORTER than intended. Rewrite completely in the shadow's voice.
-      e.g.: "okay I need to be honest, I've been thinking about what it would be like to just be in
-      a room with you and I think we both know this isn't about dinner anymore"
+      SHADOW: DESPAIR (full possession; the neediness is the only thing left).
+      The character is no longer performing attraction — they are asking for it. The register breaks
+      completely into open bidding for approval and attention. SAME LENGTH OR SHORTER than intended.
+      Rewrite completely in the shadow's voice.
+      e.g.: "okay I need to be honest, I keep checking if you've replied and I don't do that with
+      anyone and I just really want you to like me, is that too much"
 
     nat1: >-
       SHADOW: DESPAIR (the wound itself).
-      The character's wound speaks through desire — the loneliness underneath the magnetism surfaces
-      as desperate wanting dressed up as confidence. The message exposes what they actually need (not
-      sex — to be wanted, chosen, enough) in their specific texting voice while they think they're
-      being bold. SAME LENGTH OR SHORTER than intended. The character has no idea.
-      e.g.: "I just need someone to want me the way I can feel you almost wanting me and that sounds
-      insane but I've been the person people almost choose for so long"
+      The character's deepest wound surfaces — the loneliness underneath the magnetism speaks as
+      raw need dressed up as confidence. The message exposes how much this particular rejection
+      would mean to them, delivered with full sincerity as if it were normal. SAME LENGTH OR
+      SHORTER than intended. The character has no idea.
+      e.g.: "I just need someone to choose me the way I can feel you almost choosing me and that
+      sounds insane but I've been the person people almost pick for so long"
 
   honesty:
     clean: >-
@@ -512,3 +512,44 @@ delivery_instructions:
       e.g.: "I think you're incredible and I also think I'm going to find a way to make you leave
       and I can see exactly how I'll do it, I'll get too intense too fast — which this message is —
       and then I'll apologize for being too much — which I'm about to"
+
+  horniness_overlay:
+    fumble: >-
+      OVERLAY: INVOLUNTARY HEAT (one word runs warm).
+      One verb, adjective, or metaphor in the intended message gets replaced by a slightly warmer
+      synonym — something that could be read two ways. The sentence structure is identical, the
+      meaning is technically identical, but one word now has a pulse. Same length, same sentence
+      count. The character chose the word innocently. The reader did not.
+      e.g.: intended "I've been thinking about trying that new place you mentioned" → delivered
+      "I've been craving that new place you mentioned" — one substitution, the sentence now
+      breathes differently.
+
+    misfire: >-
+      OVERLAY: INVOLUNTARY HEAT (the temperature shifts mid-sentence).
+      The message starts as intended but a phrase or clause tilts the register — what was neutral
+      now reads as charged. Not explicit, but the subtext has changed channels. Same length, same
+      sentence count. The topic hasn't changed. The way it lands has.
+      e.g.: intended "I really want to hear more about your mushroom foraging thing" → delivered
+      "I really want to hear what you do with your hands out there in the woods" — same topic,
+      same length, entirely different energy.
+
+    trope_trap: >-
+      OVERLAY: INVOLUNTARY HEAT (the fog thickens across the whole message).
+      Every sentence in the intended message gets rewritten so the word choices, metaphors, and
+      rhythm all run warm. The character is discussing the original topic with complete sincerity.
+      The reader cannot read it with a straight face. Same length or shorter. The character is
+      genuinely talking about cooking, or gardening, or the gym. It does not sound like that.
+      e.g.: intended "I spent all morning kneading dough and it's so satisfying when it finally
+      rises" → delivered "I spent all morning working it with my hands and it's so satisfying
+      when it finally swells up for you" — still about bread. Technically.
+
+    catastrophe: >-
+      OVERLAY: INVOLUNTARY HEAT (full fog; the message has been reinterpreted).
+      The intended message has been entirely rewritten through a lens of involuntary arousal. Every
+      noun, verb, and modifier has been replaced by its warmest possible synonym. The character is
+      still — in their mind — talking about the original subject. The message is unmistakably about
+      something else. Same length or shorter. No winking, no awareness, no self-commentary. The
+      character would be mortified.
+      e.g.: intended "I finally got the pipe fixed, the plumber came and went really fast" →
+      delivered "I finally got it taken care of, he came so fast I barely had time to finish" —
+      still about plumbing. Absolutely not about plumbing.
