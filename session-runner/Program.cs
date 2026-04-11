@@ -176,7 +176,7 @@ class Program
             if (args[i] == "--agent")
                 return args[i + 1];
         }
-        return "scoring";
+        return "llm";
     }
 
     static string? ParseArg(string[] args, string flag)
@@ -225,7 +225,7 @@ class Program
         Console.Error.WriteLine("  --player-def <path>   Player character definition JSON file");
         Console.Error.WriteLine("  --opponent-def <path>  Opponent character definition JSON file");
         Console.Error.WriteLine("  --max-turns <n>       Maximum turns (default: 20)");
-        Console.Error.WriteLine("  --agent <type>        Player agent: scoring or llm (default: scoring)");
+        Console.Error.WriteLine("  --agent <type>        Player agent: scoring or llm (default: llm)");
         Console.Error.WriteLine();
         string available = CharacterLoader.ListAvailable(promptDir);
         Console.Error.WriteLine($"Available characters: {available}");
