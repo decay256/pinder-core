@@ -1294,13 +1294,37 @@ namespace Pinder.Core.Conversation
                 .Select(t => t.Definition.Id)
                 .ToArray();
 
+            var trapDetails = _traps.AllActive
+                .Select(t => new TrapDetail(
+                    name: t.Definition.Id,
+                    stat: t.Definition.Stat.ToString().ToUpperInvariant(),
+                    turnsRemaining: t.TurnsRemaining,
+                    penaltyDescription: FormatTrapPenalty(t.Definition)))
+                .ToArray();
+
             return new GameStateSnapshot(
                 interest: _interest.Current,
                 state: ResolveInterestState(),
                 momentumStreak: _momentumStreak,
                 activeTrapNames: trapNames,
                 turnNumber: _turnNumber,
-                tripleBonusActive: _comboTracker.HasTripleBonus);
+                tripleBonusActive: _comboTracker.HasTripleBonus,
+                activeTrapDetails: trapDetails);
+        }
+
+        private static string FormatTrapPenalty(TrapDefinition def)
+        {
+            switch (def.Effect)
+            {
+                case TrapEffect.StatPenalty:
+                    return $"stat penalty -{def.EffectValue}";
+                case TrapEffect.Disadvantage:
+                    return "roll at disadvantage";
+                case TrapEffect.OpponentDCIncrease:
+                    return $"opponent DC +{def.EffectValue}";
+                default:
+                    return def.Effect.ToString();
+            }
         }
 
         /// <summary>

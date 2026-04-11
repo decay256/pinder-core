@@ -17,6 +17,9 @@ namespace Pinder.Core.Conversation
         /// <summary>Names of all currently active traps.</summary>
         public string[] ActiveTrapNames { get; }
 
+        /// <summary>Detailed info for each active trap (stat, duration, penalty).</summary>
+        public TrapDetail[] ActiveTrapDetails { get; }
+
         /// <summary>Current turn number (0-based before first turn).</summary>
         public int TurnNumber { get; }
 
@@ -29,12 +32,14 @@ namespace Pinder.Core.Conversation
             int momentumStreak,
             string[] activeTrapNames,
             int turnNumber,
-            bool tripleBonusActive = false)
+            bool tripleBonusActive = false,
+            TrapDetail[] activeTrapDetails = null)
         {
             Interest = interest;
             State = state;
             MomentumStreak = momentumStreak;
             ActiveTrapNames = activeTrapNames ?? System.Array.Empty<string>();
+            ActiveTrapDetails = activeTrapDetails ?? System.Array.Empty<TrapDetail>();
             TurnNumber = turnNumber;
             TripleBonusActive = tripleBonusActive;
         }
