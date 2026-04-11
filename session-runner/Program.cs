@@ -337,8 +337,9 @@ class Program
             StatType defStat = Pinder.Core.Stats.StatBlock.DefenceTable[stat];
             int defMod = brickStats.GetEffective(defStat);
             int dc = brickStats.GetDefenceDC(stat);
-            int need = dc - atkMod;
-            int pct = Math.Max(0, Math.Min(100, (21 - need) * 5));
+            int need = dc - (atkMod + p1LevelBonus); // include level bonus
+            // need ≥20 = Reckless (only Nat 20 succeeds = 5%); else standard formula
+            int pct = need >= 20 ? 5 : Math.Max(0, Math.Min(100, (21 - need) * 5));
             Console.WriteLine($"| {StatLabel(stat)} | {atkMod:+#;-#;0} | {StatLabel(defStat)} {defMod:+#;-#;0} | {dc} | {need}+ | {pct}% | {RiskLabel(need)} |");
         }
         Console.WriteLine();
@@ -552,11 +553,12 @@ class Program
                 var opt = turnStart.Options[i];
                 int mod = sableStats.GetEffective(opt.Stat);
                 int dc = brickStats.GetDefenceDC(opt.Stat);
-                int need = dc - mod;
-                int pct = Math.Max(0, Math.Min(100, (21-need)*5));
+                int need = dc - (mod + p1LevelBonus); // include level bonus
+                // need ≥20 = Reckless (only Nat 20 succeeds = 5%)
+                int pct = need >= 20 ? 5 : Math.Max(0, Math.Min(100, (21-need)*5));
                 string riskColor = RiskLabel(need);
                 int riskBonus = need <= 7 ? 1 : need <= 11 ? 2 : need <= 15 ? 3 : need <= 19 ? 5 : 10;
-                string riskBonusTag = pct > 0 ? $" [+{riskBonus}i★]" : "";
+                string riskBonusTag = $" [+{riskBonus}i★]"; // always show — Reckless shows +10
                 var badges = new System.Collections.Generic.List<string>();
                 if (opt.HasTellBonus)               badges.Add("Tell +2");
                 if (opt.ComboName != null)           badges.Add($"⭐ Combo: {opt.ComboName} ({PlaytestFormatter.GetComboRewardSummary(opt.ComboName)})");
