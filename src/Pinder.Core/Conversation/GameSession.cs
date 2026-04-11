@@ -92,16 +92,6 @@ namespace Pinder.Core.Conversation
         private bool _currentHasAdvantage;
         private bool _currentHasDisadvantage;
 
-        public GameSession(
-            CharacterProfile player,
-            CharacterProfile opponent,
-            ILlmAdapter llm,
-            IDiceRoller dice,
-            ITrapRegistry trapRegistry)
-            : this(player, opponent, llm, dice, trapRegistry, null)
-        {
-        }
-
         /// <summary>
         /// Creates a new GameSession with optional configuration.
         /// When config is null, behavior is identical to the 5-parameter constructor.
@@ -151,10 +141,14 @@ namespace Pinder.Core.Conversation
             _ended = false;
             _outcome = null;
 
-            // Roll session Horniness (1d10) every session + time-of-day modifier when clock available
+            // GameClock is required — no fallback
+            if (_clock == null)
+                throw new InvalidOperationException("GameClock is required — pass clock via GameSessionConfig.Clock");
+
+            // Roll session Horniness (1d10) every session + time-of-day modifier from clock
             {
                 int horninessRoll = _dice.Roll(10);
-                int todModifier = _clock?.GetHorninessModifier() ?? 0;
+                int todModifier = _clock.GetHorninessModifier();
                 _sessionHorniness = Math.Max(0, horninessRoll + todModifier);
             }
 

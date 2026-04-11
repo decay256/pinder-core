@@ -423,7 +423,36 @@ class Program
 
         // Shadow tracking — wrap player's StatBlock so GameSession can track shadow growth
         var sableShadows = new SessionShadowTracker(sableStats);
-        var config = new GameSessionConfig(playerShadows: sableShadows, globalDcBias: difficultyBias);
+
+        // Create real wall clock with time-of-day horniness modifiers from game definition
+        var now = DateTimeOffset.Now;
+        Pinder.Core.Conversation.GameClock clock;
+        if (gameDef != null)
+        {
+            var mods = gameDef.HorninessTimeModifiers;
+            var horninessModifiers = new Pinder.Core.Conversation.HorninessModifiers(
+                mods.Morning, mods.Afternoon, mods.Evening, mods.Overnight);
+            clock = new Pinder.Core.Conversation.GameClock(now, horninessModifiers);
+        }
+        else
+        {
+            // Fallback: zero modifiers when game definition is unavailable
+            var zeroModifiers = new Pinder.Core.Conversation.HorninessModifiers(0, 0, 0, 0);
+            clock = new Pinder.Core.Conversation.GameClock(now, zeroModifiers);
+        }
+
+        // Display time-of-day info in session header
+        {
+            int hour = now.Hour;
+            int min = now.Minute;
+            var band = clock.GetTimeOfDay();
+            int modifier = clock.GetHorninessModifier();
+            string modDisplay = modifier >= 0 ? $"+{modifier}" : modifier.ToString();
+            Console.WriteLine($"🕐 Time: {hour:00}:{min:00} UTC — {band} | Horniness modifier: {modDisplay}");
+            Console.WriteLine();
+        }
+
+        var config = new GameSessionConfig(clock: clock, playerShadows: sableShadows, globalDcBias: difficultyBias);
         var session = new GameSession(sable, brick, llm, new SystemRandomDiceRoller(), trapRegistry, config);
 
         // Player agent for decision-making — configurable via --agent arg or PLAYER_AGENT env var

@@ -142,7 +142,8 @@ namespace Pinder.Core.Tests
             var llm = new NullLlmAdapter();
             var traps = new NullTrapRegistry();
 
-            var session = new GameSession(player, opponent, llm, dice, traps);
+            var session = new GameSession(player, opponent, llm, dice, traps,
+                new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             // Turn 1
             var start1 = await session.StartTurnAsync();

@@ -46,32 +46,43 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public void GameSession_NullConfig_BehavesLikeNoConfig()
+        public void GameSession_NullConfig_ThrowsInvalidOperationException()
         {
-            // Should not throw
-            var session = new GameSession(
+            // Clock is required — null config means no clock → must throw
+            Assert.Throws<InvalidOperationException>(() => new GameSession(
                 MakeProfile("player"),
                 MakeProfile("opponent"),
                 new StubLlmAdapter(),
                 new StubDice(),
                 new StubTrapRegistry(),
-                null);
-
-            Assert.NotNull(session);
+                null));
         }
 
         [Fact]
-        public void GameSession_EmptyConfig_BehavesLikeNoConfig()
+        public void GameSession_EmptyConfig_NoClock_ThrowsInvalidOperationException()
         {
-            var session = new GameSession(
+            // Clock is required — GameSessionConfig without clock → must throw
+            Assert.Throws<InvalidOperationException>(() => new GameSession(
                 MakeProfile("player"),
                 MakeProfile("opponent"),
                 new StubLlmAdapter(),
                 new StubDice(),
                 new StubTrapRegistry(),
-                new GameSessionConfig());
+                new GameSessionConfig()));
+        }
 
-            Assert.NotNull(session);
+        [Fact]
+        public void GameSession_WithoutClock_ThrowsWithCorrectMessage()
+        {
+            // Verify the exact exception message
+            var ex = Assert.Throws<InvalidOperationException>(() => new GameSession(
+                MakeProfile("player"),
+                MakeProfile("opponent"),
+                new StubLlmAdapter(),
+                new StubDice(),
+                new StubTrapRegistry(),
+                new GameSessionConfig()));
+            Assert.Contains("GameClock is required", ex.Message);
         }
 
         [Fact]
@@ -85,7 +96,7 @@ namespace Pinder.Core.Tests
                 llm,
                 new StubDice(10),
                 new StubTrapRegistry(),
-                new GameSessionConfig(startingInterest: 20));
+                new GameSessionConfig(clock: new TestClock(), startingInterest: 20));
 
             // StartTurnAsync should work without throwing — if interest were 0 it would throw Unmatched
             var turn = await session.StartTurnAsync();
