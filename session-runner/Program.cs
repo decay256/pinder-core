@@ -555,6 +555,8 @@ class Program
                 int need = dc - mod;
                 int pct = Math.Max(0, Math.Min(100, (21-need)*5));
                 string riskColor = RiskLabel(need);
+                int riskBonus = need <= 7 ? 1 : need <= 11 ? 2 : need <= 15 ? 3 : need <= 19 ? 5 : 10;
+                string riskBonusTag = pct > 0 ? $" [+{riskBonus}i★]" : "";
                 var badges = new System.Collections.Generic.List<string>();
                 if (opt.HasTellBonus)               badges.Add("Tell +2");
                 if (opt.ComboName != null)           badges.Add($"⭐ Combo: {opt.ComboName} ({PlaytestFormatter.GetComboRewardSummary(opt.ComboName)})");
@@ -575,7 +577,7 @@ class Program
                     && opt.Stat != lastStatUsed.Value)
                     badges.Add("✨ breaks streak");
                 string badgeStr = badges.Count > 0 ? " | " + string.Join(", ", badges) : "";
-                Console.WriteLine($"**{letters[i]})** {StatLabel(opt.Stat)} {mod:+#;-#;0} | {pct}% {riskColor}{badgeStr}");
+                Console.WriteLine($"**{letters[i]})** {StatLabel(opt.Stat)} {mod:+#;-#;0} | {pct}% {riskColor}{riskBonusTag}{badgeStr}");
                 
                 if (opt.ComboName != null)
                 {
