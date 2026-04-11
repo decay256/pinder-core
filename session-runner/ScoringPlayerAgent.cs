@@ -13,6 +13,8 @@ namespace Pinder.SessionRunner
     /// </summary>
     public sealed class ScoringPlayerAgent : IPlayerAgent
     {
+        public string LastExplanation { get; private set; } = "";
+
         // Trap activation cost added to TropeTrap/Catastrophe/Legendary failure tiers
         // Represents ~1.5 turns of reduced effectiveness from activated trap
         private const float TrapActivationCost = 1.5f;

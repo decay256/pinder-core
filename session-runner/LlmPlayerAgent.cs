@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 using Pinder.Core.Conversation;
 using Pinder.Core.Stats;
 using Pinder.LlmAdapters.Anthropic;
@@ -11,17 +12,17 @@ using Pinder.LlmAdapters.Anthropic.Dto;
 namespace Pinder.SessionRunner
 {
     /// <summary>
-    /// LLM-backed player agent that sends full game state and rules context to
-    /// Anthropic's Claude API and parses a strategic pick from the response.
+    /// LLM-backed player agent that sends full game state (including shadow thresholds
+    /// and strategic rules) to Anthropic's Claude API via tool_use for structured output.
     /// Falls back to ScoringPlayerAgent on any failure.
     /// </summary>
     public sealed class LlmPlayerAgent : IPlayerAgent, IDisposable
     {
-        private const string DefaultSystemMessage =
-            "You are playing Pinder, a comedy dating RPG. You make choices as your character — " +
-            "genuine, in-voice decisions that reflect who they are. You want to reach Interest 25 " +
-            "(date secured) while avoiding Interest 0 (unmatched/ghosted), but you choose based on " +
-            "what your character would actually say, not just what maximizes expected value.";
+        private const string ShadowRulesReminder =
+            "## Shadow Threshold Rules\n" +
+            "- T1 (≥6): shadow taints delivery of paired stat.\n" +
+            "- T2 (≥12): -2 penalty to paired stat rolls.\n" +
+            "- T3 (≥18): shadow may override your choices for paired stat.\n";
 
         private const string RulesReminder =
             "## Rules Reminder\n" +
@@ -36,12 +37,47 @@ namespace Pinder.SessionRunner
             "- ⭐ = combo: +1 interest on success.\n" +
             "- 🔓 = weakness window: DC is already reduced by 2-3.\n";
 
+        private const string StrategyReminder =
+            "## Your Strategy\n" +
+            "PRIMARY GOAL: Win the date. Raise interest to 25.\n" +
+            "SECONDARY: Manage shadows strategically. Trade a losing roll for shadow reduction when it prevents a dangerous threshold.\n" +
+            "NARRATIVE GAMBLE: When EV difference between options is < 5 percentage points, you may pick the riskier/more interesting option.\n" +
+            "Always explain your reasoning in 1-2 sentences.\n";
+
+        /// <summary>
+        /// Tool definition for structured output via Anthropic tool_use.
+        /// </summary>
+        private static readonly ToolDefinition SubmitChoiceTool = new ToolDefinition
+        {
+            Name = "submit_choice",
+            Description = "Submit your choice of dialogue option with a strategic explanation.",
+            InputSchema = JObject.Parse(@"{
+                ""type"": ""object"",
+                ""properties"": {
+                    ""choice"": {
+                        ""type"": ""integer"",
+                        ""description"": ""0-based index of the chosen option (0=A, 1=B, 2=C, 3=D)""
+                    },
+                    ""explanation"": {
+                        ""type"": ""string"",
+                        ""description"": ""1-2 sentence strategic explanation for this pick. Reference shadow levels, success %, combos, or momentum as relevant.""
+                    }
+                },
+                ""required"": [""choice"", ""explanation""]
+            }")
+        };
+
         private readonly AnthropicClient _client;
         private readonly ScoringPlayerAgent _fallback;
         private readonly string _model;
         private readonly string _playerName;
         private readonly string _opponentName;
         private bool _disposed;
+
+        /// <summary>
+        /// The last explanation produced by the LLM agent. Empty string if no explanation available.
+        /// </summary>
+        public string LastExplanation { get; private set; } = "";
 
         /// <summary>
         /// Creates an LLM-backed player agent.
@@ -66,7 +102,8 @@ namespace Pinder.SessionRunner
         }
 
         /// <summary>
-        /// Sends the full game state to Claude, parses the pick, and returns a decision.
+        /// Sends the full game state to Claude with tool_use for structured output,
+        /// parses the strategic pick and explanation.
         /// Falls back to ScoringPlayerAgent on any failure.
         /// </summary>
         public async Task<PlayerDecision> DecideAsync(TurnStart turn, PlayerAgentContext context)
@@ -81,34 +118,45 @@ namespace Pinder.SessionRunner
 
             try
             {
-                string userMessage = BuildPrompt(turn, context);
-
+                string userMessage = BuildPrompt(turn, context, scoringDecision.Scores);
                 string systemMsg = BuildSystemMessage(context);
 
                 var request = new MessagesRequest
                 {
                     Model = _model,
                     MaxTokens = 512,
-                    Temperature = 0.5,
+                    Temperature = 0.3,
                     System = new[] { new ContentBlock { Type = "text", Text = systemMsg } },
-                    Messages = new[] { new Message { Role = "user", Content = userMessage } }
+                    Messages = new[] { new Message { Role = "user", Content = userMessage } },
+                    Tools = new[] { SubmitChoiceTool },
+                    ToolChoice = new ToolChoiceOption { Type = "tool", Name = "submit_choice" }
                 };
 
                 var response = await _client.SendMessagesAsync(request).ConfigureAwait(false);
-                string responseText = response.GetText();
 
-                if (string.IsNullOrWhiteSpace(responseText))
+                // Extract tool_use input
+                JObject toolInput = response.GetToolInput();
+                if (toolInput == null)
                 {
-                    return MakeFallbackDecision(scoringDecision, "Empty response from LLM");
+                    // Fallback: try parsing text response for PICK: pattern
+                    string responseText = response.GetText();
+                    return HandleTextFallback(responseText, turn, scoringDecision);
                 }
 
-                int? pickIndex = ParsePick(responseText, turn.Options.Length);
-                if (pickIndex == null)
+                int? choice = toolInput.Value<int?>("choice");
+                string explanation = toolInput.Value<string>("explanation") ?? "";
+
+                if (choice == null || choice.Value < 0 || choice.Value >= turn.Options.Length)
                 {
-                    return MakeFallbackDecision(scoringDecision, "Could not parse PICK from response");
+                    LastExplanation = "LLM response invalid, defaulting to option 0";
+                    return new PlayerDecision(0, LastExplanation, scoringDecision.Scores);
                 }
 
-                return new PlayerDecision(pickIndex.Value, responseText, scoringDecision.Scores);
+                LastExplanation = !string.IsNullOrWhiteSpace(explanation)
+                    ? explanation
+                    : "No explanation provided";
+
+                return new PlayerDecision(choice.Value, LastExplanation, scoringDecision.Scores);
             }
             catch (AnthropicApiException ex)
             {
@@ -129,36 +177,46 @@ namespace Pinder.SessionRunner
         }
 
         /// <summary>
-        /// Builds the system message, incorporating character personality if available.
+        /// Builds the system message with strategic framing and character personality.
         /// </summary>
         private string BuildSystemMessage(PlayerAgentContext context)
         {
+            string name = !string.IsNullOrEmpty(context.PlayerName) ? context.PlayerName : _playerName;
+
+            var sb = new System.Text.StringBuilder(512);
+            sb.Append($"You are playing as {name} in Pinder, a comedy dating RPG. ");
+            sb.Append("You are a strategic player agent. Your PRIMARY goal is to WIN — raise interest to 25. ");
+            sb.Append("Your SECONDARY goal is strategic shadow management — prevent shadows from hitting dangerous thresholds. ");
+            sb.Append("You make calculated decisions, not random ones.");
+
             if (!string.IsNullOrEmpty(context.PlayerSystemPrompt))
             {
-                string name = !string.IsNullOrEmpty(context.PlayerName) ? context.PlayerName : _playerName;
-                return $"You are {name}, making genuine character choices in Pinder (a comedy dating RPG). " +
-                       $"Stay in character. Your personality and voice:\n\n{context.PlayerSystemPrompt}\n\n" +
-                       "Your goal is Interest 25 (date secured) while avoiding Interest 0. " +
-                       "Choose based on what you would actually send, not just mechanical optimization.";
+                // Extract brief personality traits (first 500 chars to keep prompt lean)
+                string personality = context.PlayerSystemPrompt.Length > 500
+                    ? context.PlayerSystemPrompt.Substring(0, 500) + "..."
+                    : context.PlayerSystemPrompt;
+                sb.AppendLine();
+                sb.AppendLine();
+                sb.Append($"Character personality (for voice, not strategy):\n{personality}");
             }
-            return DefaultSystemMessage;
+
+            return sb.ToString();
         }
 
         /// <summary>
-        /// Builds the full LLM prompt from turn data and agent context.
+        /// Builds the full LLM prompt with game state, shadow analysis, and option details.
         /// </summary>
-        internal string BuildPrompt(TurnStart turn, PlayerAgentContext context)
+        internal string BuildPrompt(TurnStart turn, PlayerAgentContext context, OptionScore[] scores = null)
         {
             var sb = new System.Text.StringBuilder(2048);
 
             string playerLabel = !string.IsNullOrEmpty(context.PlayerName) ? context.PlayerName : _playerName;
             string opponentLabel = !string.IsNullOrEmpty(context.OpponentName) ? context.OpponentName : _opponentName;
 
-            sb.AppendLine($"You are {playerLabel}. Choose one of the dialogue options below.");
-            sb.AppendLine($"You are talking to {opponentLabel}.");
+            sb.AppendLine($"You are {playerLabel} talking to {opponentLabel}. Choose a dialogue option.");
             sb.AppendLine();
 
-            // Recent conversation context (#492)
+            // Recent conversation context
             if (context.RecentHistory != null && context.RecentHistory.Count > 0)
             {
                 sb.AppendLine("## Recent Conversation");
@@ -183,12 +241,33 @@ namespace Pinder.SessionRunner
                 ? string.Join(", ", context.ActiveTrapNames)
                 : "none";
             sb.AppendLine($"- Active traps: {trapList}");
-
-            sb.AppendLine($"- Shadow levels: {FormatShadows(context.ShadowValues)}");
             sb.AppendLine($"- Turn: {context.TurnNumber}");
             sb.AppendLine();
 
-            // Options
+            // Shadow state with threshold warnings
+            sb.AppendLine("## Shadow Status");
+            if (context.ShadowValues != null)
+            {
+                foreach (ShadowStatType s in (ShadowStatType[])Enum.GetValues(typeof(ShadowStatType)))
+                {
+                    if (context.ShadowValues.TryGetValue(s, out int value))
+                    {
+                        string warning = "";
+                        if (value >= 18) warning = " ⚠️ T3 CRITICAL — may override choices!";
+                        else if (value >= 12) warning = " ⚠️ T2 — -2 penalty to paired stat rolls";
+                        else if (value >= 6) warning = " ⚠️ T1 — taints delivery";
+                        else if (value >= 4) warning = " (approaching T1)";
+                        sb.AppendLine($"- {s}: {value}/18{warning}");
+                    }
+                }
+            }
+            else
+            {
+                sb.AppendLine("- Shadow tracking unavailable");
+            }
+            sb.AppendLine();
+
+            // Options with shadow hints
             sb.AppendLine("## Your Options");
             char letter = 'A';
             for (int i = 0; i < turn.Options.Length; i++)
@@ -204,23 +283,92 @@ namespace Pinder.SessionRunner
                 sb.AppendLine($"{letter}) [{opt.Stat.ToString().ToUpperInvariant()} +{modifier}] DC {dc} | Need {need}+ on d20 | {pct}% success | {riskTier}{icons}");
                 sb.AppendLine($"   Text: \"{opt.IntendedText}\"");
 
+                // Shadow impact hints
+                string shadowImpact = GetShadowImpact(opt.Stat, context);
+                if (!string.IsNullOrEmpty(shadowImpact))
+                    sb.AppendLine($"   Shadow: {shadowImpact}");
+
+                // Include EV from scoring agent if available
+                if (scores != null && i < scores.Length)
+                    sb.AppendLine($"   EV: {scores[i].ExpectedInterestGain:F2}");
+
                 letter = (char)(letter + 1);
             }
             sb.AppendLine();
 
-            // Rules reminder
+            // Rules
             sb.AppendLine(RulesReminder);
+            sb.AppendLine(ShadowRulesReminder);
+            sb.AppendLine(StrategyReminder);
 
-            sb.AppendLine($"Think as {playerLabel}. What would you actually send here? Consider:");
-            sb.AppendLine("- Which option sounds most like something you'd genuinely type?");
-            sb.AppendLine("- Success probability and risk (you still want to win)");
-            sb.AppendLine("- Any active bonuses, traps, or momentum");
-            sb.AppendLine();
-            sb.AppendLine("Explain your reasoning in your character's voice — why this feels right,");
-            sb.AppendLine("not just why it's optimal. Then state your final choice as:");
-            sb.AppendLine("PICK: [A/B/C/D]");
+            sb.AppendLine("Use the submit_choice tool to make your pick. choice is 0-indexed (A=0, B=1, C=2, D=3).");
 
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// Returns a shadow impact description for the given stat choice.
+        /// </summary>
+        private static string GetShadowImpact(StatType stat, PlayerAgentContext context)
+        {
+            if (context.ShadowValues == null) return "";
+
+            var parts = new List<string>();
+
+            // Shadow growth: using a stat can grow its paired shadow
+            ShadowStatType paired = GetPairedShadow(stat);
+            if (context.ShadowValues.TryGetValue(paired, out int currentVal))
+            {
+                if (currentVal >= 4 && currentVal < 6)
+                    parts.Add($"RISK: {paired} at {currentVal}, using {stat} may push to T1 (≥6)");
+                else if (currentVal >= 10 && currentVal < 12)
+                    parts.Add($"RISK: {paired} at {currentVal}, may push to T2 (≥12)");
+                else if (currentVal >= 16 && currentVal < 18)
+                    parts.Add($"DANGER: {paired} at {currentVal}, may push to T3 (≥18)!");
+            }
+
+            // Honesty reduces Denial
+            if (stat == StatType.Honesty)
+            {
+                if (context.ShadowValues.TryGetValue(ShadowStatType.Denial, out int denial) && denial > 0)
+                    parts.Add($"BENEFIT: Honesty can reduce Denial (currently {denial})");
+            }
+
+            return parts.Count > 0 ? string.Join(" | ", parts) : "";
+        }
+
+        private static ShadowStatType GetPairedShadow(StatType stat)
+        {
+            switch (stat)
+            {
+                case StatType.Charm: return ShadowStatType.Madness;
+                case StatType.Rizz: return ShadowStatType.Despair;
+                case StatType.Honesty: return ShadowStatType.Denial;
+                case StatType.Chaos: return ShadowStatType.Fixation;
+                case StatType.Wit: return ShadowStatType.Dread;
+                case StatType.SelfAwareness: return ShadowStatType.Overthinking;
+                default: return ShadowStatType.Madness;
+            }
+        }
+
+        /// <summary>
+        /// Fallback for when tool_use isn't returned — try parsing PICK: from text.
+        /// </summary>
+        private PlayerDecision HandleTextFallback(string responseText, TurnStart turn, PlayerDecision scoringDecision)
+        {
+            if (string.IsNullOrWhiteSpace(responseText))
+            {
+                return MakeFallbackDecision(scoringDecision, "Empty response from LLM");
+            }
+
+            int? pickIndex = ParsePick(responseText, turn.Options.Length);
+            if (pickIndex == null)
+            {
+                return MakeFallbackDecision(scoringDecision, "Could not parse PICK from response");
+            }
+
+            LastExplanation = responseText;
+            return new PlayerDecision(pickIndex.Value, responseText, scoringDecision.Scores);
         }
 
         /// <summary>
@@ -232,17 +380,14 @@ namespace Pinder.SessionRunner
         {
             if (string.IsNullOrEmpty(responseText)) return null;
 
-            // Match PICK: followed by optional whitespace and optional brackets around a letter
             var matches = Regex.Matches(responseText, @"PICK:\s*\[?([A-Da-d])\]?", RegexOptions.IgnoreCase);
             if (matches.Count == 0) return null;
 
-            // Use the last match (LLM may revise its choice)
             Match last = matches[matches.Count - 1];
-            char letter = char.ToUpperInvariant(last.Groups[1].Value[0]);
-            int index = letter - 'A';
+            char letterChar = char.ToUpperInvariant(last.Groups[1].Value[0]);
+            int index = letterChar - 'A';
 
             if (index < 0 || index >= optionCount) return null;
-
             return index;
         }
 
@@ -255,9 +400,10 @@ namespace Pinder.SessionRunner
             }
         }
 
-        private static PlayerDecision MakeFallbackDecision(PlayerDecision scoringDecision, string reason)
+        private PlayerDecision MakeFallbackDecision(PlayerDecision scoringDecision, string reason)
         {
             string reasoning = $"[LLM fallback: {reason}] {scoringDecision.Reasoning}";
+            LastExplanation = "";
             return new PlayerDecision(scoringDecision.OptionIndex, reasoning, scoringDecision.Scores);
         }
 
@@ -282,22 +428,6 @@ namespace Pinder.SessionRunner
             return "";
         }
 
-        private static string FormatShadows(Dictionary<ShadowStatType, int>? shadows)
-        {
-            if (shadows == null) return "unknown";
-
-            var parts = new List<string>();
-            // Iterate in enum order for consistent output
-            foreach (ShadowStatType s in (ShadowStatType[])Enum.GetValues(typeof(ShadowStatType)))
-            {
-                if (shadows.TryGetValue(s, out int value))
-                {
-                    parts.Add($"{s} {value}");
-                }
-            }
-            return parts.Count > 0 ? string.Join(", ", parts) : "unknown";
-        }
-
         private static string GetRiskTier(int need)
         {
             if (need <= 5) return "Safe";
@@ -311,7 +441,7 @@ namespace Pinder.SessionRunner
             var icons = new List<string>();
             if (opt.CallbackTurnNumber != null) icons.Add("🔗");
             if (opt.HasTellBonus) icons.Add("📖");
-            if (opt.ComboName != null) icons.Add("⭐");
+            if (opt.ComboName != null) icons.Add($"⭐ combo: {opt.ComboName}");
             if (opt.HasWeaknessWindow) icons.Add("🔓");
 
             return icons.Count > 0 ? " " + string.Join(" ", icons) : "";

@@ -225,7 +225,7 @@ namespace Pinder.Core.Tests
             string prompt = agent.BuildPrompt(turn, context);
 
             Assert.Contains("## Rules Reminder", prompt);
-            Assert.Contains("PICK: [A/B/C/D]", prompt);
+            Assert.Contains("submit_choice", prompt);
         }
 
         [Fact]
@@ -238,9 +238,9 @@ namespace Pinder.Core.Tests
 
             string prompt = agent.BuildPrompt(turn, context);
 
-            Assert.Contains("Denial 3", prompt);
-            Assert.Contains("Fixation 1", prompt);
-            Assert.Contains("Despair 4", prompt);
+            Assert.Contains("Denial: 3/18", prompt);
+            Assert.Contains("Fixation: 1/18", prompt);
+            Assert.Contains("Despair: 4/18", prompt);
         }
 
         [Fact]
@@ -255,7 +255,7 @@ namespace Pinder.Core.Tests
 
             string prompt = agent.BuildPrompt(turn, context);
 
-            Assert.Contains("Shadow levels: unknown", prompt);
+            Assert.Contains("Shadow tracking unavailable", prompt);
         }
 
         [Fact]
@@ -486,6 +486,106 @@ namespace Pinder.Core.Tests
 
             Assert.Contains("\"Hey gorgeous\"", prompt);
             Assert.Contains("\"I'm nervous\"", prompt);
+        }
+
+        // ── LastExplanation tests (#492) ─────────────────────────────────
+
+        [Fact]
+        public async Task DecideAsync_Fallback_LastExplanationIsEmpty()
+        {
+            var opts = new Pinder.LlmAdapters.Anthropic.AnthropicOptions { ApiKey = "test-key" };
+            using var agent = new LlmPlayerAgent(opts, new ScoringPlayerAgent(), "Sable", "Brick");
+
+            var turn = MakeTurnStart();
+            var context = MakeContext();
+
+            // Fake API key → falls back to scoring agent
+            var decision = await agent.DecideAsync(turn, context);
+
+            // On fallback, LastExplanation should be empty
+            Assert.Equal("", agent.LastExplanation);
+        }
+
+        [Fact]
+        public async Task DecideAsync_Fallback_ReturnsValidIndex()
+        {
+            var opts = new Pinder.LlmAdapters.Anthropic.AnthropicOptions { ApiKey = "test-key" };
+            using var agent = new LlmPlayerAgent(opts, new ScoringPlayerAgent(), "Sable", "Brick");
+
+            var turn = MakeTurnStart();
+            var context = MakeContext();
+
+            var decision = await agent.DecideAsync(turn, context);
+
+            // Should return a valid index within range
+            Assert.InRange(decision.OptionIndex, 0, turn.Options.Length - 1);
+        }
+
+        [Fact]
+        public void BuildPrompt_ContainsShadowThresholdRules()
+        {
+            var opts = new Pinder.LlmAdapters.Anthropic.AnthropicOptions { ApiKey = "test-key" };
+            using var agent = new LlmPlayerAgent(opts, new ScoringPlayerAgent(), "Sable", "Brick");
+            var turn = MakeTurnStart();
+            var context = MakeContext();
+
+            string prompt = agent.BuildPrompt(turn, context);
+
+            Assert.Contains("T1", prompt);
+            Assert.Contains("T2", prompt);
+            Assert.Contains("T3", prompt);
+            Assert.Contains("Shadow Threshold Rules", prompt);
+        }
+
+        [Fact]
+        public void BuildPrompt_ContainsStrategySection()
+        {
+            var opts = new Pinder.LlmAdapters.Anthropic.AnthropicOptions { ApiKey = "test-key" };
+            using var agent = new LlmPlayerAgent(opts, new ScoringPlayerAgent(), "Sable", "Brick");
+            var turn = MakeTurnStart();
+            var context = MakeContext();
+
+            string prompt = agent.BuildPrompt(turn, context);
+
+            Assert.Contains("PRIMARY GOAL", prompt);
+            Assert.Contains("SECONDARY", prompt);
+            Assert.Contains("NARRATIVE GAMBLE", prompt);
+        }
+
+        [Fact]
+        public void BuildPrompt_HighShadow_ShowsThresholdWarning()
+        {
+            var opts = new Pinder.LlmAdapters.Anthropic.AnthropicOptions { ApiKey = "test-key" };
+            using var agent = new LlmPlayerAgent(opts, new ScoringPlayerAgent(), "Sable", "Brick");
+            var turn = MakeTurnStart();
+            var context = new PlayerAgentContext(
+                MakeStats(), MakeStats(), 12, InterestState.Interested, 0,
+                Array.Empty<string>(), 0,
+                new Dictionary<ShadowStatType, int>
+                {
+                    { ShadowStatType.Madness, 13 },
+                    { ShadowStatType.Despair, 0 },
+                    { ShadowStatType.Denial, 5 },
+                    { ShadowStatType.Fixation, 0 },
+                    { ShadowStatType.Dread, 0 },
+                    { ShadowStatType.Overthinking, 0 }
+                },
+                turnNumber: 5);
+
+            string prompt = agent.BuildPrompt(turn, context);
+
+            Assert.Contains("T2", prompt);
+            Assert.Contains("Madness: 13/18", prompt);
+            Assert.Contains("approaching T1", prompt); // Denial at 5
+        }
+
+        [Fact]
+        public void LastExplanation_InitiallyEmpty()
+        {
+            var opts = new Pinder.LlmAdapters.Anthropic.AnthropicOptions { ApiKey = "test-key" };
+            using var agent = new LlmPlayerAgent(opts, new ScoringPlayerAgent(), "Sable", "Brick");
+
+            Assert.Equal("", agent.LastExplanation);
         }
     }
 }

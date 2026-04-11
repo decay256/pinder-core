@@ -670,6 +670,12 @@ class Program
             var chosen = turnStart.Options[pick];
             Console.WriteLine($"**► Player picks: {letters[pick]} ({StatLabel(chosen.Stat)})**");
             Console.WriteLine();
+            // Show LLM agent explanation if available (#492)
+            if (!string.IsNullOrEmpty(agent.LastExplanation))
+            {
+                Console.WriteLine($"💭 {player1}: {agent.LastExplanation}");
+                Console.WriteLine();
+            }
             Console.WriteLine(PlaytestFormatter.FormatReasoningBlock(decision, agent.GetType().Name));
             Console.WriteLine(PlaytestFormatter.FormatScoreTable(decision, turnStart.Options));
             Console.WriteLine();

@@ -115,9 +115,9 @@ namespace Pinder.Core.Tests
 
             string prompt = agent.BuildPrompt(turn, context);
 
-            // Should ask for character-driven reasoning, not just strategic
-            Assert.Contains("genuinely type", prompt);
-            Assert.Contains("character's voice", prompt);
+            // Should contain strategic framing
+            Assert.Contains("submit_choice", prompt);
+            Assert.Contains("Gerald", prompt);
         }
     }
 }

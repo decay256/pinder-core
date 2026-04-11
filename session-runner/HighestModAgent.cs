@@ -12,6 +12,8 @@ namespace Pinder.SessionRunner
     /// </summary>
     public sealed class HighestModAgent : IPlayerAgent
     {
+        public string LastExplanation { get; private set; } = "";
+
         public Task<PlayerDecision> DecideAsync(TurnStart turn, PlayerAgentContext context)
         {
             if (turn == null) throw new ArgumentNullException(nameof(turn));

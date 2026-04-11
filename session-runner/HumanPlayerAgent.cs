@@ -10,6 +10,8 @@ namespace Pinder.SessionRunner
     /// </summary>
     public sealed class HumanPlayerAgent : IPlayerAgent
     {
+        public string LastExplanation { get; private set; } = "";
+
         public Task<PlayerDecision> DecideAsync(TurnStart turn, PlayerAgentContext context)
         {
             var options = turn.Options;

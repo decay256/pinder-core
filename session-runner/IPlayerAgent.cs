@@ -14,5 +14,11 @@ namespace Pinder.SessionRunner
         /// returns a decision: which option to pick, why, and score breakdowns for all options.
         /// </summary>
         Task<PlayerDecision> DecideAsync(TurnStart turn, PlayerAgentContext context);
+
+        /// <summary>
+        /// The last explanation produced by the agent (e.g. LLM reasoning).
+        /// Null or empty when the agent does not produce explanations.
+        /// </summary>
+        string LastExplanation { get; }
     }
 }
