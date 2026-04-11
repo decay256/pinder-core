@@ -330,14 +330,16 @@ class Program
         // ── DC table ──────────────────────────────────────────────────────
         Console.WriteLine($"## DC Reference ({player1} attacking, {player2} defending)");
         Console.WriteLine();
-        Console.WriteLine($"| Stat | {player1} mod | {player2} defends | DC | Need | % | Risk |");
+        Console.WriteLine($"| Stat | {player1} mod | {player2} defends with | DC | Need | % | Risk |");
         Console.WriteLine("|---|---|---|---|---|---|---|");
         foreach (var stat in new[] { StatType.Charm, StatType.Rizz, StatType.Honesty, StatType.Chaos, StatType.Wit, StatType.SelfAwareness }) {
             int atkMod = sableStats.GetEffective(stat);
+            StatType defStat = Pinder.Core.Stats.StatBlock.DefenceTable[stat];
+            int defMod = brickStats.GetEffective(defStat);
             int dc = brickStats.GetDefenceDC(stat);
             int need = dc - atkMod;
             int pct = Math.Max(0, Math.Min(100, (21 - need) * 5));
-            Console.WriteLine($"| {StatLabel(stat)} | {atkMod:+#;-#;0} | — | {dc} | {need}+ | {pct}% | {RiskLabel(need)} |");
+            Console.WriteLine($"| {StatLabel(stat)} | {atkMod:+#;-#;0} | {StatLabel(defStat)} {defMod:+#;-#;0} | {dc} | {need}+ | {pct}% | {RiskLabel(need)} |");
         }
         Console.WriteLine();
         Console.WriteLine("> DC = 16 + opponent defending stat modifier. Miss by 1–2 = Fumble | 3–5 = Misfire | 6–9 = Trope Trap | 10+ = Catastrophe | Nat 1 = Legendary.");
