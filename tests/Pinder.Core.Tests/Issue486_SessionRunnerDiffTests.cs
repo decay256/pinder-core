@@ -5,58 +5,69 @@ namespace Pinder.Core.Tests
     public class Issue486_SessionRunnerDiffTests
     {
         [Fact]
-        public void FormatDeliveredAdditions_WithFumbleAddition_AppliesStrikethroughToAddition()
+        public void FormatDeliveredAdditions_IdenticalText_ReturnsDelivered()
+        {
+            string intended = "hello world";
+            string delivered = "hello world";
+
+            string result = global::Program.FormatDeliveredAdditions(intended, delivered, "~~");
+
+            Assert.Equal("hello world", result);
+        }
+
+        [Fact]
+        public void FormatDeliveredAdditions_WithAdditionAtEnd_ReturnsDeliveredAsIs()
         {
             string intended = "that's not nothing";
             string delivered = "that's not nothing well i mean it's not everything either but you know what i mean";
-            
+
             string result = global::Program.FormatDeliveredAdditions(intended, delivered, "~~");
-            
-            Assert.Equal("that's not nothing ~~well i mean it's not everything either but you know what i mean~~", result);
+
+            Assert.Equal(delivered, result);
         }
 
         [Fact]
-        public void FormatDeliveredAdditions_WithEmbellishment_AppliesItalicsToAddition()
+        public void FormatDeliveredAdditions_WithWordSubstitutionInMiddle_ReturnsDeliveredAsIs()
         {
-            string intended = "she never had to learn";
-            string delivered = "she never had to learn, because she never had to survive it";
-            
+            string intended = "she walked to the bright store";
+            string delivered = "she walked to the dark store quickly";
+
             string result = global::Program.FormatDeliveredAdditions(intended, delivered, "*");
-            
-            Assert.Equal("she never had to learn, *because she never had to survive it*", result);
+
+            Assert.Equal(delivered, result);
         }
 
         [Fact]
-        public void FormatDeliveredAdditions_WithPlaceholder_WrapsEntireString()
+        public void FormatDeliveredAdditions_WithPlaceholder_ReturnsDeliveredAsIs()
         {
             string intended = "...";
             string delivered = "this is completely new";
-            
+
             string result = global::Program.FormatDeliveredAdditions(intended, delivered, "~~");
-            
-            Assert.Equal("~~this is completely new~~", result);
+
+            Assert.Equal(delivered, result);
         }
 
         [Fact]
-        public void FormatDeliveredAdditions_WithWhitespaceDiff_IgnoresWhitespaceForMatch()
-        {
-            string intended = "whitespace   diff";
-            string delivered = "whitespace diff and more";
-            
-            string result = global::Program.FormatDeliveredAdditions(intended, delivered, "*");
-            
-            Assert.Equal("whitespace diff *and more*", result);
-        }
-
-        [Fact]
-        public void FormatDeliveredAdditions_NoMatch_WrapsEntireString()
+        public void FormatDeliveredAdditions_NoMatch_ReturnsDeliveredAsIs()
         {
             string intended = "hello";
             string delivered = "world";
-            
+
             string result = global::Program.FormatDeliveredAdditions(intended, delivered, "~~");
-            
-            Assert.Equal("~~world~~", result);
+
+            Assert.Equal(delivered, result);
+        }
+
+        [Fact]
+        public void FormatDeliveredAdditions_EmptyIntended_ReturnsDeliveredAsIs()
+        {
+            string intended = "";
+            string delivered = "something new";
+
+            string result = global::Program.FormatDeliveredAdditions(intended, delivered, "*");
+
+            Assert.Equal(delivered, result);
         }
     }
 }
