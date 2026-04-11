@@ -693,6 +693,22 @@ class Program
             }
             Console.WriteLine();
 
+            // Steering roll display
+            if (result.Steering != null && result.Steering.SteeringAttempted)
+            {
+                int steeringTotal = result.Steering.SteeringRoll + result.Steering.SteeringMod;
+                if (result.Steering.SteeringSucceeded)
+                {
+                    Console.WriteLine($"> 🧭 Steering roll: d20({result.Steering.SteeringRoll}) + {result.Steering.SteeringMod} = {steeringTotal} vs DC {result.Steering.SteeringDC} → SUCCESS");
+                    Console.WriteLine($"> *{player1} adds:* \"{result.Steering.SteeringQuestion}\"");
+                }
+                else
+                {
+                    Console.WriteLine($"> 🧭 Steering roll: d20({result.Steering.SteeringRoll}) + {result.Steering.SteeringMod} = {steeringTotal} vs DC {result.Steering.SteeringDC} → MISS");
+                }
+                Console.WriteLine();
+            }
+
             // Track conversation history for LLM agent context (#492)
             if (!string.IsNullOrEmpty(result.DeliveredMessage))
                 conversationHistory.Add((player1, result.DeliveredMessage));

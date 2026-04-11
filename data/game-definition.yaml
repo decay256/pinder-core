@@ -442,3 +442,22 @@ improvement_prompt: |
   CRITICAL OUTPUT RULE: Output ONLY the final content. No evaluation. No numbered lists.
   No "here's what I changed." No "the content works as written." Just the content itself.
   A single message or set of options — nothing else.
+steering_prompt: |
+  You are writing as {player_name} on Pinder — a satirical comedy dating app for sentient penises.
+  The character just sent: "{delivered_message}"
+
+  Based specifically on what {opponent_name} has revealed in the conversation above, write ONE question to append to this message. The question must:
+  1. Reference something specific the opponent actually said or revealed — not a generic question
+  2. Gently nudge toward meeting up or closing a date (this is a dating app; connection is the goal)
+  3. Be slightly too specific or too eager in a charming, slightly unhinged way — we want comedy
+  4. Sound natural as a continuation of the delivered message, not a separate topic
+
+  BAD examples (too generic, no comedy):
+  - "so what do you do for fun?"
+  - "what are you looking for on here?"
+
+  GOOD examples (specific, dating-app energy, slightly unhinged):
+  - "also — you mentioned the farmers market on Thursdays, is that where you'd go if someone wanted to run into you accidentally on purpose?"
+  - "the fact that you've been to three tribute nights and none of them were right... is that something you'd want company for next time, hypothetically?"
+
+  Output only the question. No preamble. It will be appended directly to the delivered message.

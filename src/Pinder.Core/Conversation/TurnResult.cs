@@ -60,6 +60,12 @@ namespace Pinder.Core.Conversation
         /// </summary>
         public WeaknessWindow? DetectedWindow { get; }
 
+        /// <summary>
+        /// Result of the steering roll this turn. Contains roll details and the
+        /// appended question text if the roll succeeded.
+        /// </summary>
+        public SteeringRollResult Steering { get; }
+
         public TurnResult(
             RollResult roll,
             string deliveredMessage,
@@ -76,7 +82,8 @@ namespace Pinder.Core.Conversation
             string? tellReadMessage = null,
             RiskTier riskTier = RiskTier.Safe,
             int xpEarned = 0,
-            WeaknessWindow? detectedWindow = null)
+            WeaknessWindow? detectedWindow = null,
+            SteeringRollResult steering = null)
         {
             Roll = roll ?? throw new ArgumentNullException(nameof(roll));
             DeliveredMessage = deliveredMessage ?? throw new ArgumentNullException(nameof(deliveredMessage));
@@ -94,6 +101,7 @@ namespace Pinder.Core.Conversation
             RiskTier = riskTier;
             XpEarned = xpEarned;
             DetectedWindow = detectedWindow;
+            Steering = steering ?? SteeringRollResult.NotAttempted;
         }
     }
 }

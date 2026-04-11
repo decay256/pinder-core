@@ -1,3 +1,6 @@
+using System.Threading.Tasks;
+using Pinder.Core.Conversation;
+
 namespace Pinder.Core.Interfaces
 {
     /// <summary>
@@ -20,5 +23,12 @@ namespace Pinder.Core.Interfaces
         /// Whether a persistent opponent session is currently active.
         /// </summary>
         bool HasOpponentSession { get; }
+
+        /// <summary>
+        /// Generate a steering question to append to the player's delivered message.
+        /// Called after a successful steering roll. The question should reference
+        /// specifics from the conversation and nudge toward meeting up.
+        /// </summary>
+        Task<string> GetSteeringQuestionAsync(SteeringContext context);
     }
 }

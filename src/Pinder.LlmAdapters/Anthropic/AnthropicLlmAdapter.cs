@@ -266,6 +266,48 @@ namespace Pinder.LlmAdapters.Anthropic
         }
 
         /// <inheritdoc />
+        public async Task<string> GetSteeringQuestionAsync(SteeringContext context)
+        {
+            if (context == null) throw new ArgumentNullException(nameof(context));
+
+            // Build steering prompt from game definition or default
+            string template = _options.GameDefinition?.SteeringPrompt;
+            if (string.IsNullOrWhiteSpace(template))
+                template = GameDefinition.DefaultSteeringPrompt;
+
+            string prompt = template
+                .Replace("{player_name}", context.PlayerName)
+                .Replace("{opponent_name}", context.OpponentName)
+                .Replace("{delivered_message}", context.DeliveredMessage);
+
+            // Build conversation context
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine("CONVERSATION SO FAR:");
+            foreach (var (sender, text) in context.ConversationHistory)
+            {
+                sb.AppendLine($"{sender}: {text}");
+            }
+            sb.AppendLine();
+            sb.AppendLine(prompt);
+
+            var fullPlayerPrompt = SessionSystemPromptBuilder.BuildPlayer(context.PlayerPrompt, _options.GameDefinition);
+            var systemBlocks = CacheBlockBuilder.BuildPlayerOnlySystemBlocks(fullPlayerPrompt);
+
+            var request = BuildRequest(systemBlocks, sb.ToString(), 0.9);
+            var response = await _client.SendMessagesAsync(request).ConfigureAwait(false);
+
+            var question = response.GetText()?.Trim();
+            if (string.IsNullOrWhiteSpace(question))
+                return "so... when are we doing this?";
+
+            // Strip surrounding quotes if present
+            if (question.Length >= 2 && question[0] == '"' && question[question.Length - 1] == '"')
+                question = question.Substring(1, question.Length - 2).Trim();
+
+            return question;
+        }
+
+        /// <inheritdoc />
         public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));

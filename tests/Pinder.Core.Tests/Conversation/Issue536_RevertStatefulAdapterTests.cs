@@ -36,6 +36,7 @@ namespace Pinder.Core.Tests.Conversation
             public Task<string> DeliverMessageAsync(DeliveryContext context) => Task.FromResult("");
             public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context) => Task.FromResult(new OpponentResponse("", null, null));
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context) => Task.FromResult<string?>("");
+            public Task<string> GetSteeringQuestionAsync(SteeringContext context) => Task.FromResult("test steering question");
         }
 
         private sealed class DummyDice : IDiceRoller

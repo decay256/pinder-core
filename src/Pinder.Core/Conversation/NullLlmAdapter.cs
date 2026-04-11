@@ -63,5 +63,13 @@ namespace Pinder.Core.Conversation
         {
             return Task.FromResult<string?>(null);
         }
+
+        /// <summary>
+        /// Returns a placeholder steering question.
+        /// </summary>
+        public Task<string> GetSteeringQuestionAsync(SteeringContext context)
+        {
+            return Task.FromResult("so... when are we actually doing this?");
+        }
     }
 }

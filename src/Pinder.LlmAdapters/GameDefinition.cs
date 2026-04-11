@@ -115,6 +115,9 @@ namespace Pinder.LlmAdapters
         /// <summary>Two-stage improvement prompt — appended after initial generation to trigger self-critique and rewrite.</summary>
         public string ImprovementPrompt { get; }
 
+        /// <summary>Steering question prompt template. Placeholders: {player_name}, {opponent_name}, {delivered_message}.</summary>
+        public string SteeringPrompt { get; }
+
         /// <summary>Configurable delivery prompt rules, or null for hardcoded defaults.</summary>
         public DeliveryRules DeliveryRules { get; }
 
@@ -137,7 +140,8 @@ namespace Pinder.LlmAdapters
             string opponentCuriosity = null,
             string conversationArcProgression = null,
             string playerProbing = null,
-            string improvementPrompt = null)
+            string improvementPrompt = null,
+            string steeringPrompt = null)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Vision = vision ?? throw new ArgumentNullException(nameof(vision));
@@ -153,6 +157,7 @@ namespace Pinder.LlmAdapters
             ConversationArcProgression = conversationArcProgression ?? "";
             PlayerProbing = playerProbing ?? "";
             ImprovementPrompt = improvementPrompt ?? "";
+            SteeringPrompt = steeringPrompt ?? "";
             DeliveryRules = deliveryRules;
             DramaticCraft = dramaticCraft;
         }
@@ -261,7 +266,8 @@ namespace Pinder.LlmAdapters
                 opponentCuriosity: GetOptional("opponent_curiosity"),
                 conversationArcProgression: conversationArcProgression,
                 playerProbing: GetOptional("player_probing"),
-                improvementPrompt: GetOptional("improvement_prompt")
+                improvementPrompt: GetOptional("improvement_prompt"),
+                steeringPrompt: GetOptional("steering_prompt")
             );
         }
 
@@ -435,5 +441,29 @@ The opponent's final concession is not 'Interest hit 25.' It is the opponent
 deciding this person earned it. The final message should reflect that something
 real happened, not just that the meter filled.")
         );
+
+        /// <summary>
+        /// Default steering prompt template used when game-definition.yaml
+        /// does not specify a steering_prompt key.
+        /// </summary>
+        public static string DefaultSteeringPrompt { get; } =
+@"You are writing as {player_name} on Pinder — a satirical comedy dating app for sentient penises.
+The character just sent: ""{delivered_message}""
+
+Based specifically on what {opponent_name} has revealed in the conversation above, write ONE question to append to this message. The question must:
+1. Reference something specific the opponent actually said or revealed — not a generic question
+2. Gently nudge toward meeting up or closing a date (this is a dating app; connection is the goal)
+3. Be slightly too specific or too eager in a charming, slightly unhinged way — we want comedy
+4. Sound natural as a continuation of the delivered message, not a separate topic
+
+BAD examples (too generic, no comedy):
+- ""so what do you do for fun?""
+- ""what are you looking for on here?""
+
+GOOD examples (specific, dating-app energy, slightly unhinged):
+- ""also — you mentioned the farmers market on Thursdays, is that where you'd go if someone wanted to run into you accidentally on purpose?""
+- ""the fact that you've been to three tribute nights and none of them were right... is that something you'd want company for next time, hypothetically?""
+
+Output only the question. No preamble. It will be appended directly to the delivered message.";
     }
 }

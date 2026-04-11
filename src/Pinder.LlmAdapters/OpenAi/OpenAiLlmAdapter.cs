@@ -141,6 +141,43 @@ namespace Pinder.LlmAdapters.OpenAi
         }
 
         /// <inheritdoc />
+        public async Task<string> GetSteeringQuestionAsync(SteeringContext context)
+        {
+            if (context == null) throw new ArgumentNullException(nameof(context));
+
+            string template = _options.GameDefinition?.SteeringPrompt;
+            if (string.IsNullOrWhiteSpace(template))
+                template = GameDefinition.DefaultSteeringPrompt;
+
+            string prompt = template
+                .Replace("{player_name}", context.PlayerName)
+                .Replace("{opponent_name}", context.OpponentName)
+                .Replace("{delivered_message}", context.DeliveredMessage);
+
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine("CONVERSATION SO FAR:");
+            foreach (var (sender, text) in context.ConversationHistory)
+            {
+                sb.AppendLine($"{sender}: {text}");
+            }
+            sb.AppendLine();
+            sb.AppendLine(prompt);
+
+            string fullPlayerPrompt = SessionSystemPromptBuilder.BuildPlayer(context.PlayerPrompt, _options.GameDefinition);
+            var requestJson = BuildRequestJson(fullPlayerPrompt, sb.ToString(), 0.9);
+            var responseText = await _client.SendChatCompletionAsync(requestJson).ConfigureAwait(false);
+
+            var question = responseText?.Trim();
+            if (string.IsNullOrWhiteSpace(question))
+                return "so... when are we doing this?";
+
+            if (question.Length >= 2 && question[0] == '"' && question[question.Length - 1] == '"')
+                question = question.Substring(1, question.Length - 2).Trim();
+
+            return question;
+        }
+
+        /// <inheritdoc />
         public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));

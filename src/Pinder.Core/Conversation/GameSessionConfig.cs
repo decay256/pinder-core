@@ -1,3 +1,4 @@
+using System;
 using Pinder.Core.Interfaces;
 using Pinder.Core.Stats;
 
@@ -37,6 +38,12 @@ namespace Pinder.Core.Conversation
         /// </summary>
         public int GlobalDcBias { get; }
 
+        /// <summary>
+        /// Optional RNG for the steering roll. When null, a new System.Random is used.
+        /// Inject a seeded Random for deterministic test scenarios.
+        /// </summary>
+        public Random? SteeringRng { get; }
+
         public GameSessionConfig(
             IGameClock? clock = null,
             SessionShadowTracker? playerShadows = null,
@@ -44,7 +51,8 @@ namespace Pinder.Core.Conversation
             int? startingInterest = null,
             string? previousOpener = null,
             IRuleResolver? rules = null,
-            int globalDcBias = 0)
+            int globalDcBias = 0,
+            Random? steeringRng = null)
         {
             Clock = clock;
             PlayerShadows = playerShadows;
@@ -53,6 +61,7 @@ namespace Pinder.Core.Conversation
             PreviousOpener = previousOpener;
             Rules = rules;
             GlobalDcBias = globalDcBias;
+            SteeringRng = steeringRng;
         }
     }
 }

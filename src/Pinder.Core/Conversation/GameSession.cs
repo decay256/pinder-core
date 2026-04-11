@@ -80,6 +80,10 @@ namespace Pinder.Core.Conversation
         private HashSet<StatType>? _shadowDisadvantagedStats;
         private Dictionary<ShadowStatType, int>? _currentShadowThresholds;
 
+        // Separate RNG for the steering roll — cosmetic mechanic that must not
+        // consume values from the game dice queue.
+        private readonly Random _steeringRng;
+
         // Stored between StartTurnAsync and ResolveTurnAsync
         private DialogueOption[]? _currentOptions;
         private bool _currentHasAdvantage;
@@ -120,6 +124,7 @@ namespace Pinder.Core.Conversation
             _previousOpener = config?.PreviousOpener;
             _rules = config?.Rules;
             _globalDcBias = config?.GlobalDcBias ?? 0;
+            _steeringRng = config?.SteeringRng ?? new Random();
 
             // Determine starting interest: explicit config > Dread T3 > default
             if (config?.StartingInterest.HasValue == true)
@@ -639,8 +644,8 @@ namespace Pinder.Core.Conversation
 
             string deliveredMessage = await _llm.DeliverMessageAsync(deliveryContext).ConfigureAwait(false);
 
-            // 8. Append player message to history
-            _history.Add((_player.DisplayName, deliveredMessage));
+            // 8. Append player message to history (pre-steering, so opponent sees base message)
+            // We'll update it below if steering succeeds.
 
             // 9. Check interest threshold crossing → narrative beat
             string? narrativeBeat = null;
@@ -651,6 +656,16 @@ namespace Pinder.Core.Conversation
 
             // 10. Compute response delay
             double responseDelayMinutes = _opponent.Timing.ComputeDelay(_interest.Current, _dice);
+
+            // 10b. Steering roll — attempt to append a date-steering question
+            // Placed after response delay so deterministic test dice queues aren't disrupted.
+            SteeringRollResult steeringResult = await AttemptSteeringRollAsync(deliveredMessage).ConfigureAwait(false);
+            if (steeringResult.SteeringSucceeded && steeringResult.SteeringQuestion != null)
+            {
+                deliveredMessage = deliveredMessage.TrimEnd() + " " + steeringResult.SteeringQuestion;
+            }
+
+            _history.Add((_player.DisplayName, deliveredMessage));
 
             // 11. Generate opponent response
             var opponentTrapInstructions = GetActiveTrapInstructions();
@@ -726,7 +741,73 @@ namespace Pinder.Core.Conversation
                 tellReadBonus: tellBonus,
                 tellReadMessage: tellBonus > 0 ? "📖 You read the moment. +2 bonus." : null,
                 xpEarned: turnXpEarned,
-                detectedWindow: opponentResponse.WeaknessWindow);
+                detectedWindow: opponentResponse.WeaknessWindow,
+                steering: steeringResult);
+        }
+
+        /// <summary>
+        /// Attempts a steering roll after message delivery.
+        /// Steering modifier = average of (CHARM + WIT + SA) effective modifiers (integer division).
+        /// Steering DC = 16 + average of opponent's (SA + RIZZ + HONESTY) effective modifiers.
+        /// On success, calls LLM to generate a steering question.
+        /// </summary>
+        private async Task<SteeringRollResult> AttemptSteeringRollAsync(string deliveredMessage)
+        {
+            // Compute steering modifier: (playerCharm + playerWit + playerSA) / 3
+            int playerCharm = _player.Stats.GetEffective(StatType.Charm);
+            int playerWit = _player.Stats.GetEffective(StatType.Wit);
+            int playerSA = _player.Stats.GetEffective(StatType.SelfAwareness);
+            int steeringMod = (playerCharm + playerWit + playerSA) / 3;
+
+            // Compute steering DC: 16 + (opponentSA + opponentRizz + opponentHonesty) / 3
+            int opponentSA = _opponent.Stats.GetEffective(StatType.SelfAwareness);
+            int opponentRizz = _opponent.Stats.GetEffective(StatType.Rizz);
+            int opponentHonesty = _opponent.Stats.GetEffective(StatType.Honesty);
+            int steeringDC = 16 + (opponentSA + opponentRizz + opponentHonesty) / 3;
+
+            // Roll d20 using a separate RNG.
+            // The steering roll is cosmetic (does not affect interest delta) so it
+            // uses its own random source to avoid consuming values from the game
+            // dice queue, which would break deterministic test setups.
+            int roll = _steeringRng.Next(1, 21);
+
+            int total = roll + steeringMod;
+            bool success = total >= steeringDC;
+
+            string steeringQuestion = null;
+            if (success && _llm is Pinder.Core.Interfaces.IStatefulLlmAdapter stateful)
+            {
+                var steeringContext = new SteeringContext(
+                    playerPrompt: _player.AssembledSystemPrompt,
+                    opponentName: _opponent.DisplayName,
+                    playerName: _player.DisplayName,
+                    deliveredMessage: deliveredMessage,
+                    conversationHistory: _history.AsReadOnly());
+
+                try
+                {
+                    steeringQuestion = await stateful.GetSteeringQuestionAsync(steeringContext).ConfigureAwait(false);
+                }
+                catch
+                {
+                    // LLM failure should not break the game
+                    steeringQuestion = null;
+                    success = false;
+                }
+            }
+            else if (success)
+            {
+                // Non-stateful adapter: mark as not attempted
+                success = false;
+            }
+
+            return new SteeringRollResult(
+                steeringAttempted: true,
+                steeringSucceeded: success,
+                steeringRoll: roll,
+                steeringMod: steeringMod,
+                steeringDC: steeringDC,
+                steeringQuestion: steeringQuestion);
         }
 
         /// <summary>
