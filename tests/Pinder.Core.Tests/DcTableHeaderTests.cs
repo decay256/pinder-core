@@ -26,9 +26,9 @@ namespace Pinder.Core.Tests
         {
             string player1 = "Velvet";
             string player2 = "Gerald";
-            string columnHeader = $"| Stat | {player1} mod | {player2} defends | DC | Need | % | Risk |";
+            string columnHeader = $"| Stat | {player1} mod | {player2} defends with | DC | Need | % | Risk |";
 
-            Assert.Equal("| Stat | Velvet mod | Gerald defends | DC | Need | % | Risk |", columnHeader);
+            Assert.Equal("| Stat | Velvet mod | Gerald defends with | DC | Need | % | Risk |", columnHeader);
             Assert.DoesNotContain("Sable", columnHeader);
             Assert.DoesNotContain("Brick", columnHeader);
         }
@@ -57,7 +57,7 @@ namespace Pinder.Core.Tests
 
             // The dynamic interpolated strings SHOULD appear
             Assert.Contains("$\"## DC Reference ({player1} attacking, {player2} defending)\"", content);
-            Assert.Contains($"$\"| Stat | {{player1}} mod | {{player2}} defends | DC | Need | % | Risk |\"", content);
+            Assert.Contains($"$\"| Stat | {{player1}} mod | {{player2}} defends with | DC | Need | % | Risk |\"", content);
         }
 
         private static string FindProgramCs()
