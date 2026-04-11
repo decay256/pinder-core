@@ -62,9 +62,9 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task Medium_LowDc_Returns_1_5x_BaseXp()
         {
-            // Player stat 3, opponent stat 0 → DC = 13, need = 10 → Medium (6–10)
+            // Player stat 6, opponent stat 0 → DC = 16, need = 10 → Medium (8–11)
             // Base XP = 5, 5 * 1.5 = 7.5 → rounds to 8
-            var session = MakeSession(diceRoll: 15, opponentStatValue: 0, playerStatValue: 3);
+            var session = MakeSession(diceRoll: 15, opponentStatValue: 0, playerStatValue: 6);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -107,20 +107,20 @@ namespace Pinder.Core.Tests
             Assert.Equal(20, result.XpEarned);
         }
 
-        // What: AC-3 — Hard risk tier gives 2x base XP, high DC
+        // What: AC-3 — Hard risk tier gives 2x base XP, mid DC
         // Mutation: Fails if Hard multiplier uses wrong DC bucket
         [Fact]
         public async Task Hard_HighDc_Returns_2x_BaseXp()
         {
-            // Player stat 3, opponent stat 5 → DC = 18, need = 15 → Hard (11–15)
-            // Base XP = 15, 15 * 2.0 = 30
-            var session = MakeSession(diceRoll: 19, opponentStatValue: 5, playerStatValue: 3);
+            // Player stat 3, opponent stat 1 → DC = 17, need = 14 → Hard (12–15)
+            // Base XP = 10 (DC≤20), 10 * 2.0 = 20
+            var session = MakeSession(diceRoll: 14, opponentStatValue: 1, playerStatValue: 3);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
             Assert.True(result.Roll.IsSuccess);
             Assert.Equal(RiskTier.Hard, result.Roll.RiskTier);
-            Assert.Equal(30, result.XpEarned);
+            Assert.Equal(20, result.XpEarned);
         }
 
         // ====================== AC-4: Bold success → 3x base XP ======================
@@ -130,9 +130,9 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task Bold_HighDc_Returns_3x_BaseXp()
         {
-            // Player stat 3, opponent stat 8 → DC = 21, need = 18 → Bold (≥16)
-            // Base XP = 15, 15 * 3.0 = 45
-            var session = MakeSession(diceRoll: 19, opponentStatValue: 8, playerStatValue: 3);
+            // Player stat 3, opponent stat 6 → DC = 22, need = 19 → Bold (16–19)
+            // Base XP = 15 (DC>20), 15 * 3.0 = 45
+            var session = MakeSession(diceRoll: 19, opponentStatValue: 6, playerStatValue: 3);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -146,9 +146,9 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task Bold_LowDc_Returns_3x_BaseXp()
         {
-            // Player stat -5 (synthetic), opponent stat 0 → DC = 13, need = 18 → Bold (≥16)
-            // Base XP = 5, 5 * 3.0 = 15
-            var session = MakeSession(diceRoll: 19, opponentStatValue: 0, playerStatValue: -5);
+            // Player stat -3 (synthetic), opponent stat 0 → DC = 16, need = 19 → Bold (16–19)
+            // Base XP = 5 (DC≤16), 5 * 3.0 = 15
+            var session = MakeSession(diceRoll: 19, opponentStatValue: 0, playerStatValue: -3);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -207,8 +207,8 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task Medium_LowDc_RoundsUp_From_7_5_To_8()
         {
-            // 5 * 1.5 = 7.5 → should round to 8
-            var session = MakeSession(diceRoll: 15, opponentStatValue: 0, playerStatValue: 3);
+            // 5 * 1.5 = 7.5 → should round to 8. Player stat 6, opponent stat 0 → DC=16, need=10 → Medium
+            var session = MakeSession(diceRoll: 15, opponentStatValue: 0, playerStatValue: 6);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -238,8 +238,8 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task XpLedger_Records_MultipliedAmount()
         {
-            // Medium, base 5, multiplied to 8
-            var session = MakeSession(diceRoll: 15, opponentStatValue: 0, playerStatValue: 3);
+            // Medium, base 5, multiplied to 8. Player stat 6, opponent stat 0 → DC=16, need=10 → Medium
+            var session = MakeSession(diceRoll: 15, opponentStatValue: 0, playerStatValue: 6);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -254,8 +254,8 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task XpLedger_Bold_Records_3xAmount()
         {
-            // Bold, base 15, multiplied to 45
-            var session = MakeSession(diceRoll: 19, opponentStatValue: 8, playerStatValue: 3);
+            // Bold, base 15 (DC>20), multiplied to 45. Player stat 3, opponent stat 6 → DC=22, need=19 → Bold
+            var session = MakeSession(diceRoll: 19, opponentStatValue: 6, playerStatValue: 3);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 

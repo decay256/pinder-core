@@ -67,12 +67,12 @@ namespace Pinder.Core.Tests
         }
 
         // What: Edge case where need is extremely large
-        // Mutation: would catch if RiskLabel didn't handle large numbers and failed to fallback to Bold
+        // Mutation: would catch if RiskLabel didn't handle large numbers and failed to fallback to Reckless
         [Fact]
         public void RiskLabel_LargeNeed_ReturnsRedBold()
         {
             var result = InvokeRiskLabel(99);
-            Assert.Equal("🔴 Bold", result);
+            Assert.Equal("☠️ Reckless", result);
         }
         
         // What: Tests that the exact format includes the word text, ensuring accessibility fallback

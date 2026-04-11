@@ -160,8 +160,8 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task ComboBonus_NotScaled_WhenSuccessAbove20Percent()
         {
-            // Player charm=3, opponent SA=0 → DC=13, need=10 → success=55%
-            var player = MakeStats(charm: 3);
+            // Player charm=6, opponent SA=0 → DC=16, need=10 → success=55%
+            var player = MakeStats(charm: 6);
             var opponent = MakeStats(sa: 0);
 
             var withCombo = MakeOption(StatType.Charm, comboName: "SomeCombo");
@@ -249,14 +249,14 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task Option15Pct_TropeTrapRange_ScoresLowerThan_Option50Pct()
         {
-            // Option with ~15% success: need=18 (DC=18, mod=0)
+            // Option with ~15% success: need=18 (DC=18, player charm=0, opponent SA=2)
             // Failures at need=18 include TropeTrap range (miss 6-9 for rolls 9-12)
             var playerLow = MakeStats(charm: 0);
-            var opponentHigh = MakeStats(sa: 5); // DC=18
+            var opponentHigh = MakeStats(sa: 2); // DC=16+2=18
 
-            // Option with ~50% success: need=11 (DC=13, mod=2)
-            var playerHigh = MakeStats(charm: 2);
-            var opponentLow = MakeStats(sa: 0); // DC=13
+            // Option with ~50% success: need=11 (DC=16, player charm=5, opponent SA=0)
+            var playerHigh = MakeStats(charm: 5);
+            var opponentLow = MakeStats(sa: 0); // DC=16
 
             var turnLow = MakeTurn(MakeOption(StatType.Charm));
             var turnHigh = MakeTurn(MakeOption(StatType.Charm));
@@ -325,8 +325,8 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task HighSuccess_ComboBonus_AppliedNormally()
         {
-            // Player charm=8, opponent SA=0 → DC=13, need=5 → success=80%
-            var player = MakeStats(charm: 8);
+            // Player charm=11, opponent SA=0 → DC=16, need=5 → success=80%
+            var player = MakeStats(charm: 11);
             var opponent = MakeStats(sa: 0);
 
             var withCombo = MakeOption(StatType.Charm, comboName: "SomeCombo");

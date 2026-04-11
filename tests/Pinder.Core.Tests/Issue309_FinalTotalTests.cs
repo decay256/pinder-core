@@ -101,10 +101,10 @@ namespace Pinder.Core.Tests
         [Fact]
         public void FailureTier_ExternalBonus_ReducesMissMargin()
         {
-            // Without bonus: roll 5 + mod 0 + level 0 = 5 vs DC 13 → miss 8 → TropeTrap (6-9)
-            // With +3 bonus: finalTotal = 8 vs DC 13 → miss 5 → Misfire (3-5)
+            // Without bonus: roll 5 + mod 0 + level 0 = 5 vs DC 16 → miss 11 → Catastrophe (10+)
+            // With +3 bonus: finalTotal = 8 vs DC 16 → miss 8 → TropeTrap (6-9)
             var attacker = MakeStats(charm: 0);
-            var defender = MakeStats(); // DC = 13 + 0 = 13
+            var defender = MakeStats(); // DC = 16 + 0 = 16
             var traps = new TrapState();
             var dice = new FixedDice(5); // roll a 5
 
@@ -114,15 +114,15 @@ namespace Pinder.Core.Tests
                 externalBonus: 3);
 
             Assert.False(result.IsSuccess);
-            // miss = 13 - (5 + 0 + 0 + 3) = 5 → Misfire
-            Assert.Equal(FailureTier.Misfire, result.Tier);
+            // miss = 16 - (5 + 0 + 0 + 3) = 8 → TropeTrap
+            Assert.Equal(FailureTier.TropeTrap, result.Tier);
         }
 
         [Fact]
         public void FailureTier_ExternalBonus_TurnsMissIntoFumble()
         {
-            // roll 8 + mod 2 = 10 vs DC 13 → miss 3 → Misfire (without bonus)
-            // With +1 bonus: finalTotal = 11, miss = 2 → Fumble (1-2)
+            // roll 8 + mod 2 = 10 vs DC 16 → miss 6 → TropeTrap (without bonus)
+            // With +4 bonus: finalTotal = 14, miss = 2 → Fumble (1-2)
             var attacker = MakeStats(charm: 2);
             var defender = MakeStats();
             var traps = new TrapState();
@@ -131,7 +131,7 @@ namespace Pinder.Core.Tests
             var result = RollEngine.Resolve(
                 StatType.Charm, attacker, defender, traps, 1,
                 new EmptyTrapRegistry(), dice,
-                externalBonus: 1);
+                externalBonus: 4);
 
             Assert.False(result.IsSuccess);
             Assert.Equal(FailureTier.Fumble, result.Tier);
@@ -144,7 +144,7 @@ namespace Pinder.Core.Tests
             var attacker = MakeStats(charm: 0);
             var defender = MakeStats();
             var traps = new TrapState();
-            var dice = new FixedDice(5); // total = 5, miss = 8 → TropeTrap
+            var dice = new FixedDice(5); // total = 5, miss = 16-5 = 11 → Catastrophe
 
             var result = RollEngine.Resolve(
                 StatType.Charm, attacker, defender, traps, 1,
@@ -152,14 +152,14 @@ namespace Pinder.Core.Tests
                 externalBonus: 0);
 
             Assert.False(result.IsSuccess);
-            Assert.Equal(FailureTier.TropeTrap, result.Tier);
+            Assert.Equal(FailureTier.Catastrophe, result.Tier);
         }
 
         [Fact]
         public void FailureTier_ExternalBonus_CanTurnFailureIntoSuccess()
         {
-            // roll 8 + mod 2 = 10 vs DC 13 → fail (without bonus)
-            // With +3 bonus: finalTotal = 13 → success
+            // roll 8 + mod 2 = 10 vs DC 16 → fail (without bonus)
+            // With +6 bonus: finalTotal = 16 → success
             var attacker = MakeStats(charm: 2);
             var defender = MakeStats();
             var traps = new TrapState();
@@ -168,7 +168,7 @@ namespace Pinder.Core.Tests
             var result = RollEngine.Resolve(
                 StatType.Charm, attacker, defender, traps, 1,
                 new EmptyTrapRegistry(), dice,
-                externalBonus: 3);
+                externalBonus: 6);
 
             Assert.True(result.IsSuccess);
             Assert.Equal(FailureTier.None, result.Tier);
@@ -207,8 +207,8 @@ namespace Pinder.Core.Tests
         [Fact]
         public void FailureTier_ExternalBonus_PreventsLargeMissFromCatastrophe()
         {
-            // roll 2 + mod 0 = 2 vs DC 13 → miss 11 → Catastrophe (without bonus)
-            // With +2 bonus: finalTotal = 4, miss = 9 → TropeTrap (6-9)
+            // roll 2 + mod 0 = 2 vs DC 16 → miss 14 → Catastrophe (without bonus)
+            // With +7 bonus: finalTotal = 9, miss = 7 → TropeTrap (6-9)
             var attacker = MakeStats(charm: 0);
             var defender = MakeStats();
             var traps = new TrapState();
@@ -217,7 +217,7 @@ namespace Pinder.Core.Tests
             var result = RollEngine.Resolve(
                 StatType.Charm, attacker, defender, traps, 1,
                 new EmptyTrapRegistry(), dice,
-                externalBonus: 2);
+                externalBonus: 7);
 
             Assert.False(result.IsSuccess);
             Assert.Equal(FailureTier.TropeTrap, result.Tier);

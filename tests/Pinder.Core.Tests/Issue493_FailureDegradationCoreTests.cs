@@ -186,11 +186,11 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task AC2_GameSession_PassesFumble_OnSmallMiss()
         {
-            // With stat mod +2, DC = 15
-            // Roll of 12: 12 + 2 = 14 < 15 → miss by 1 → Fumble
+            // With stat mod +2, DC = 18
+            // Roll of 15: 15 + 2 = 17 < 18 → miss by 1 → Fumble
             var dice = new FixedDice(
                 5,   // Constructor: horniness roll
-                12,  // d20 roll → total 14 vs DC 15 → miss by 1 → Fumble
+                15,  // d20 roll → total 17 vs DC 18 → miss by 1 → Fumble
                 50   // d100 timing
             );
 

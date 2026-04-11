@@ -407,10 +407,11 @@ namespace Pinder.SessionRunner
 
         private static RiskTierInfo ComputeRiskTier(int need)
         {
-            if (need <= 5) return new RiskTierInfo(RiskTierCategory.Safe, 0);
-            if (need <= 10) return new RiskTierInfo(RiskTierCategory.Medium, 0);
-            if (need <= 15) return new RiskTierInfo(RiskTierCategory.Hard, 1);
-            return new RiskTierInfo(RiskTierCategory.Bold, 2);
+            if (need <= 7)  return new RiskTierInfo(RiskTierCategory.Safe,     1);
+            if (need <= 11) return new RiskTierInfo(RiskTierCategory.Medium,   2);
+            if (need <= 15) return new RiskTierInfo(RiskTierCategory.Hard,     3);
+            if (need <= 19) return new RiskTierInfo(RiskTierCategory.Bold,     5);
+            return              new RiskTierInfo(RiskTierCategory.Reckless, 10);
         }
 
         private enum RiskTierCategory
@@ -418,7 +419,8 @@ namespace Pinder.SessionRunner
             Safe,
             Medium,
             Hard,
-            Bold
+            Bold,
+            Reckless
         }
 
         private sealed class RiskTierInfo

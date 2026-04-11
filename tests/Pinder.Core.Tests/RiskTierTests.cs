@@ -36,9 +36,9 @@ namespace Pinder.Core.Tests
         }
 
         [Theory]
-        [InlineData(10, 4, 0)]  // need = 6
+        [InlineData(12, 4, 0)]  // need = 8
         [InlineData(14, 4, 0)]  // need = 10
-        [InlineData(12, 4, 1)]  // need = 7
+        [InlineData(15, 4, 0)]  // need = 11 (≤11 = Medium)
         public void RollResult_RiskTier_Medium(int dc, int statMod, int levelBonus)
         {
             var r = MakeResult(dc, statMod, levelBonus, 15);
@@ -46,23 +46,29 @@ namespace Pinder.Core.Tests
         }
 
         [Theory]
-        [InlineData(14, 3, 0)]    // need = 11
+        [InlineData(14, 3, 0)]    // need = 11 (≤11 = Medium; was Hard with old ≤10 boundary)
         [InlineData(18, 3, 0)]    // need = 15
         [InlineData(16, 2, 1)]    // need = 13
         public void RollResult_RiskTier_Hard(int dc, int statMod, int levelBonus)
         {
             var r = MakeResult(dc, statMod, levelBonus, 15);
-            Assert.Equal(RiskTier.Hard, r.RiskTier);
+            // need=11 is Medium (≤11); need=15 and need=13 are Hard (12-15)
+            int need = dc - (statMod + levelBonus);
+            var expectedTier = need <= 11 ? RiskTier.Medium : RiskTier.Hard;
+            Assert.Equal(expectedTier, r.RiskTier);
         }
 
         [Theory]
         [InlineData(16, 0, 0)]    // need = 16
-        [InlineData(20, 0, 0)]    // need = 20
-        [InlineData(25, 0, 0)]    // need = 25 (impossible without nat-20)
+        [InlineData(20, 0, 0)]    // need = 20 (≥20 = Reckless with new boundaries)
+        [InlineData(25, 0, 0)]    // need = 25 (≥20 = Reckless)
         public void RollResult_RiskTier_Bold(int dc, int statMod, int levelBonus)
         {
             var r = MakeResult(dc, statMod, levelBonus, 15);
-            Assert.Equal(RiskTier.Bold, r.RiskTier);
+            // need=16..19 = Bold; need≥20 = Reckless
+            int need = dc - (statMod + levelBonus);
+            var expectedTier = need <= 19 ? RiskTier.Bold : RiskTier.Reckless;
+            Assert.Equal(expectedTier, r.RiskTier);
         }
 
         // Boundary values
@@ -74,23 +80,23 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public void RollResult_RiskTier_BoundaryNeed6_IsMedium()
+        public void RollResult_RiskTier_BoundaryNeed8_IsMedium()
         {
-            var r = MakeResult(6, 0, 0, 10); // need = 6
+            var r = MakeResult(8, 0, 0, 10); // need = 8
             Assert.Equal(RiskTier.Medium, r.RiskTier);
         }
 
         [Fact]
-        public void RollResult_RiskTier_BoundaryNeed10_IsMedium()
-        {
-            var r = MakeResult(10, 0, 0, 10); // need = 10
-            Assert.Equal(RiskTier.Medium, r.RiskTier);
-        }
-
-        [Fact]
-        public void RollResult_RiskTier_BoundaryNeed11_IsHard()
+        public void RollResult_RiskTier_BoundaryNeed11_IsMedium()
         {
             var r = MakeResult(11, 0, 0, 10); // need = 11
+            Assert.Equal(RiskTier.Medium, r.RiskTier);
+        }
+
+        [Fact]
+        public void RollResult_RiskTier_BoundaryNeed12_IsHard()
+        {
+            var r = MakeResult(12, 0, 0, 10); // need = 12
             Assert.Equal(RiskTier.Hard, r.RiskTier);
         }
 
@@ -113,43 +119,53 @@ namespace Pinder.Core.Tests
         // ============================================================
 
         [Fact]
-        public void RiskTierBonus_SafeSuccess_ReturnsZero()
+        public void RiskTierBonus_SafeSuccess_ReturnsOne()
         {
-            // need = 2, roll 20 → success
-            var r = MakeResult(5, 3, 0, 20);
+            // need = 5 (Safe), roll 20 → success
+            var r = MakeResult(5, 0, 0, 20);
             Assert.True(r.IsSuccess);
             Assert.Equal(RiskTier.Safe, r.RiskTier);
-            Assert.Equal(0, RiskTierBonus.GetInterestBonus(r));
-        }
-
-        [Fact]
-        public void RiskTierBonus_MediumSuccess_ReturnsZero()
-        {
-            // need = 8, roll 20 → success
-            var r = MakeResult(10, 2, 0, 20);
-            Assert.True(r.IsSuccess);
-            Assert.Equal(RiskTier.Medium, r.RiskTier);
-            Assert.Equal(0, RiskTierBonus.GetInterestBonus(r));
-        }
-
-        [Fact]
-        public void RiskTierBonus_HardSuccess_ReturnsOne()
-        {
-            // need = 15, roll 20 → success (nat-20)
-            var r = MakeResult(18, 3, 0, 20);
-            Assert.True(r.IsSuccess);
-            Assert.Equal(RiskTier.Hard, r.RiskTier);
             Assert.Equal(1, RiskTierBonus.GetInterestBonus(r));
         }
 
         [Fact]
-        public void RiskTierBonus_BoldSuccess_ReturnsTwo()
+        public void RiskTierBonus_MediumSuccess_ReturnsTwo()
         {
-            // need = 20, roll 20 → success (nat-20)
-            var r = MakeResult(20, 0, 0, 20);
+            // need = 9 (Medium), roll 20 → success
+            var r = MakeResult(9, 0, 0, 20);
+            Assert.True(r.IsSuccess);
+            Assert.Equal(RiskTier.Medium, r.RiskTier);
+            Assert.Equal(2, RiskTierBonus.GetInterestBonus(r));
+        }
+
+        [Fact]
+        public void RiskTierBonus_HardSuccess_ReturnsThree()
+        {
+            // need = 13 (Hard), roll 20 → success (nat-20)
+            var r = MakeResult(13, 0, 0, 20);
+            Assert.True(r.IsSuccess);
+            Assert.Equal(RiskTier.Hard, r.RiskTier);
+            Assert.Equal(3, RiskTierBonus.GetInterestBonus(r));
+        }
+
+        [Fact]
+        public void RiskTierBonus_BoldSuccess_ReturnsFive()
+        {
+            // need = 17 (Bold), roll 20 → success (nat-20)
+            var r = MakeResult(17, 0, 0, 20);
             Assert.True(r.IsSuccess);
             Assert.Equal(RiskTier.Bold, r.RiskTier);
-            Assert.Equal(2, RiskTierBonus.GetInterestBonus(r));
+            Assert.Equal(5, RiskTierBonus.GetInterestBonus(r));
+        }
+
+        [Fact]
+        public void RiskTierBonus_RecklessSuccess_ReturnsTen()
+        {
+            // need = 21 (Reckless), roll 20 → success (nat-20)
+            var r = MakeResult(21, 0, 0, 20);
+            Assert.True(r.IsSuccess);
+            Assert.Equal(RiskTier.Reckless, r.RiskTier);
+            Assert.Equal(10, RiskTierBonus.GetInterestBonus(r));
         }
 
         // Failures → always 0 regardless of tier
@@ -180,37 +196,38 @@ namespace Pinder.Core.Tests
         {
             // Stat +2, level +1, DC 18 → need=15 → Hard
             // Roll 16 → total=19 → success, margin=1 → SuccessScale +1
-            // RiskTierBonus: +1. Total = +2
+            // RiskTierBonus: Hard=+3. Total = +4
             var r = new RollResult(16, null, 16, StatType.Charm, 2, 1, 18, FailureTier.None);
             Assert.True(r.IsSuccess);
             Assert.Equal(RiskTier.Hard, r.RiskTier);
             Assert.Equal(1, SuccessScale.GetInterestDelta(r));
-            Assert.Equal(1, RiskTierBonus.GetInterestBonus(r));
+            Assert.Equal(3, RiskTierBonus.GetInterestBonus(r));
         }
 
         [Fact]
         public void Spec_Example2_BoldNat20()
         {
-            // Stat +0, level +0, DC 20 → need=20 → Bold
+            // Stat +0, level +0, DC 20 → need=20 → Reckless (≥20)
             // Roll 20 → nat-20 → success → SuccessScale +4
-            // RiskTierBonus: +2. Total = +6
+            // RiskTierBonus: Reckless=+10. Total = +14
             var r = new RollResult(20, null, 20, StatType.Charm, 0, 0, 20, FailureTier.None);
             Assert.True(r.IsSuccess);
-            Assert.Equal(RiskTier.Bold, r.RiskTier);
+            Assert.Equal(RiskTier.Reckless, r.RiskTier);
             Assert.Equal(4, SuccessScale.GetInterestDelta(r));
-            Assert.Equal(2, RiskTierBonus.GetInterestBonus(r));
+            Assert.Equal(10, RiskTierBonus.GetInterestBonus(r));
         }
 
         [Fact]
         public void Spec_Example3_SafeSuccess_NoBonus()
         {
-            // Stat +4, level +2, DC 10 → need=4 → Safe
+            // Stat +4, level +2, DC 10 → need=4 → Safe (≤7)
             // Roll 8 → total=14 → success, margin=4 → SuccessScale +1
+            // RiskTierBonus: Safe=+1
             var r = new RollResult(8, null, 8, StatType.Charm, 4, 2, 10, FailureTier.None);
             Assert.True(r.IsSuccess);
             Assert.Equal(RiskTier.Safe, r.RiskTier);
             Assert.Equal(1, SuccessScale.GetInterestDelta(r));
-            Assert.Equal(0, RiskTierBonus.GetInterestBonus(r));
+            Assert.Equal(1, RiskTierBonus.GetInterestBonus(r));
         }
     }
 }

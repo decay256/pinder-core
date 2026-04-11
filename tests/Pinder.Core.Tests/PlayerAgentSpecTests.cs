@@ -562,18 +562,18 @@ namespace Pinder.Core.Tests
         {
             var agent = new HighestModAgent();
             var player = MakePlayerStats(); // Charm +4
-            var opponent = MakeOpponentStats(); // SA defence DC = 13 + 2 = 15
-            // Charm +4 vs DC 15: need 11, success = (21-11)/20 = 0.5
+            var opponent = MakeOpponentStats(); // SA defence DC = 16 + 2 = 18
+            // Charm +4 vs DC 18: need 14, success = (21-14)/20 = 0.35
             var options = new[] { new DialogueOption(StatType.Charm, "charm line") };
             var turn = MakeTurn(options);
             var ctx = MakeContext(player, opponent);
 
             var decision = await agent.DecideAsync(turn, ctx);
 
-            // Must be 0.5, not 50.0
+            // Must be 0.35, not 35.0
             Assert.True(decision.Scores[0].SuccessChance >= 0.0f);
             Assert.True(decision.Scores[0].SuccessChance <= 1.0f);
-            Assert.Equal(0.5f, decision.Scores[0].SuccessChance);
+            Assert.Equal(0.35f, decision.Scores[0].SuccessChance);
         }
 
         // -- Spec: Reasoning is never null --
@@ -697,10 +697,10 @@ namespace Pinder.Core.Tests
 
             var options = new[]
             {
-                new DialogueOption(StatType.Charm, "charm line"),   // Charm +4 vs SA DC=15, need 11
-                new DialogueOption(StatType.Rizz, "rizz line"),     // Rizz +1 vs Wit DC=14, need 13
-                new DialogueOption(StatType.Honesty, "hon line"),   // Honesty +3 vs Chaos DC=15, need 12
-                new DialogueOption(StatType.Chaos, "chaos line"),   // Chaos +2 vs Charm DC=15, need 13
+                new DialogueOption(StatType.Charm, "charm line"),   // Charm +4 vs SA DC=18, need 14
+                new DialogueOption(StatType.Rizz, "rizz line"),     // Rizz +1 vs Wit DC=17, need 16
+                new DialogueOption(StatType.Honesty, "hon line"),   // Honesty +3 vs Chaos DC=18, need 15
+                new DialogueOption(StatType.Chaos, "chaos line"),   // Chaos +2 vs Charm DC=18, need 16
             };
             var turn = MakeTurn(options, interest: 12, state: InterestState.Interested, momentum: 2, turn: 5);
             var ctx = MakeContext(player, opponent, interest: 12, state: InterestState.Interested, momentum: 2);
@@ -710,11 +710,11 @@ namespace Pinder.Core.Tests
             // Charm has highest modifier (+4), should be picked
             Assert.Equal(0, decision.OptionIndex);
 
-            // Verify success chances from spec: 50%, 40%, 45%, 40%
-            Assert.Equal(0.5f, decision.Scores[0].SuccessChance);  // Charm
-            Assert.Equal(0.4f, decision.Scores[1].SuccessChance);  // Rizz
-            Assert.Equal(0.45f, decision.Scores[2].SuccessChance); // Honesty
-            Assert.Equal(0.4f, decision.Scores[3].SuccessChance);  // Chaos
+            // Verify success chances with DC base 16: 35%, 25%, 30%, 25%
+            Assert.Equal(0.35f, decision.Scores[0].SuccessChance);  // Charm
+            Assert.Equal(0.25f, decision.Scores[1].SuccessChance);  // Rizz
+            Assert.Equal(0.30f, decision.Scores[2].SuccessChance); // Honesty
+            Assert.Equal(0.25f, decision.Scores[3].SuccessChance);  // Chaos
         }
 
         // -- Spec: Horniness-forced all-Rizz scenario (all same stat) --

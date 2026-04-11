@@ -26,7 +26,7 @@ namespace Pinder.Core.Tests
         public void RiskTier_HasFourMembers()
         {
             var values = Enum.GetValues(typeof(RiskTier));
-            Assert.Equal(4, values.Length);
+            Assert.Equal(5, values.Length);
         }
 
         [Theory]

@@ -747,17 +747,17 @@ namespace Pinder.Core.Conversation
             else if (rollResult.IsSuccess)
             {
                 int baseXp;
-                if (rollResult.DC <= 13)
+                if (rollResult.DC <= 16)
                     baseXp = 5;
-                else if (rollResult.DC <= 17)
+                else if (rollResult.DC <= 20)
                     baseXp = 10;
                 else
                     baseXp = 15;
 
                 int xp = ApplyRiskTierMultiplier(baseXp, rollResult.RiskTier);
 
-                string label = rollResult.DC <= 13 ? "Success_DC_Low"
-                    : rollResult.DC <= 17 ? "Success_DC_Mid"
+                string label = rollResult.DC <= 16 ? "Success_DC_Low"
+                    : rollResult.DC <= 20 ? "Success_DC_Mid"
                     : "Success_DC_High";
                 _xpLedger.Record(label, xp);
             }

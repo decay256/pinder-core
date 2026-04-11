@@ -1,0 +1,7 @@
+## Matchup Analysis
+
+**Reuben_404** (Level 4, Academic Disaster/Honest Wreck): Reuben's strongest lane is clearly Honesty with a devastating +11 modifier, giving him a 90% success chance against Brick's minimal Chaos defense. His raw authenticity about his academic meltdown could cut through pretense, but his negative Self-Awareness creates serious blind spots. Shadow risks include moderate Dread (5) and Madness (4) potentially triggering self-destructive spirals mid-conversation.
+
+**Brick_haus** (Level 9, Corporate Fortress/Intellectual Elite): Brick defends best through overwhelming Wit (+10), creating a 21 DC wall that shuts down most of Reuben's approaches to just 10-20% success rates. Her high Charm (+11) and polished Rizz (+8) suggest she's built an impenetrable professional persona. However, significant Denial (5) shadows reveal potential vulnerability to genuine emotional honesty that bypasses her intellectual defenses.
+
+**Prediction:** This will likely be a clash between Reuben's chaotic authenticity and Brick's polished armor. Reuben's best shot is his Honesty lane potentially cracking through Brick's Denial shadows, but her level advantage and superior stats in most areas give her strong control. Expect Brick to dominate early exchanges until Reuben either breaks through with brutal honesty or spirals into his shadow patterns.

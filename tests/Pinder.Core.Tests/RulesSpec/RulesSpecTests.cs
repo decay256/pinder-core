@@ -204,28 +204,28 @@ namespace Pinder.Core.Tests.RulesSpec
         // §5 — Risk Tier Bonus (4 tests)
         // =====================================================================
 
-        // Mutation: would catch if Safe returned non-zero bonus
+        // Mutation: would catch if Safe returned wrong bonus
         [Fact]
         public void Rule_S5_RiskBonus_Safe_Zero()
         {
             var result = MakeRiskResult(4, true);
-            Assert.Equal(0, RiskTierBonus.GetInterestBonus(result));
+            Assert.Equal(1, RiskTierBonus.GetInterestBonus(result)); // Safe now returns +1
         }
 
-        // Mutation: would catch if Hard returned 0 or 2 instead of 1
+        // Mutation: would catch if Hard returned wrong bonus
         [Fact]
         public void Rule_S5_RiskBonus_Hard_PlusOne()
         {
             var result = MakeRiskResult(13, true);
-            Assert.Equal(1, RiskTierBonus.GetInterestBonus(result));
+            Assert.Equal(3, RiskTierBonus.GetInterestBonus(result)); // Hard now returns +3
         }
 
-        // Mutation: would catch if Bold returned 1 or 0 instead of 2
+        // Mutation: would catch if Bold returned wrong bonus
         [Fact]
         public void Rule_S5_RiskBonus_Bold_PlusTwo()
         {
             var result = MakeRiskResult(18, true);
-            Assert.Equal(2, RiskTierBonus.GetInterestBonus(result));
+            Assert.Equal(5, RiskTierBonus.GetInterestBonus(result)); // Bold now returns +5
         }
 
         // Mutation: would catch if bonus was awarded on failure (Hard fail should be 0)

@@ -116,8 +116,8 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task HorninessRoll_ConsumedAtConstruction()
         {
-            // 3 = horniness roll at construction, 15 = d20 for turn, 50 = timing
-            var dice = new FixedDice(3, 15, 50);
+            // 3 = horniness roll at construction, 16 = d20 for turn, 50 = timing
+            var dice = new FixedDice(3, 16, 50);
             var capturingLlm = new CapturingLlmAdapter();
 
             var session = new GameSession(
@@ -129,9 +129,9 @@ namespace Pinder.Core.Tests
             // Horniness = 3 (no clock, no modifier)
             Assert.Equal(3, capturingLlm.Contexts[0].HorninessLevel);
 
-            // The d20=15 should have been consumed by ResolveTurnAsync
+            // The d20=16 should have been consumed by ResolveTurnAsync
             var result = await session.ResolveTurnAsync(0);
-            Assert.True(result.Roll.IsSuccess); // 15+2=17 >= DC 15
+            Assert.True(result.Roll.IsSuccess); // 16+2=18 >= DC 18
         }
 
         /// <summary>

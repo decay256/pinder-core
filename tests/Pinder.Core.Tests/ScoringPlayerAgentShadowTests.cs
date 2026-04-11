@@ -431,10 +431,9 @@ namespace Pinder.Core.Tests
         public async Task CombinedShadowAdjustments_AgentAvoidsThirdSameStat()
         {
             // Setup: Honesty was used last 2 turns, Honesty and Charm available
-            // Without shadow risk, Honesty has slightly higher EV (charm: 2, honesty: 3)
-            // With Fixation penalty (-0.5), variety bonus (+0.1 for Charm), and
-            // no Denial penalty (Honesty IS the option), Charm should win
-            var player = MakeStats(charm: 2, honesty: 3);
+            // Equal mods (charm=3, honesty=3) → equal base EV.
+            // With Fixation penalty (-0.5) on Honesty and variety bonus (+0.1) on Charm, Charm wins.
+            var player = MakeStats(charm: 3, honesty: 3);
             var opponent = MakeStats();
 
             var turn = MakeTurn(

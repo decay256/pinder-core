@@ -69,30 +69,30 @@ namespace Pinder.Core.Tests
             Assert.Equal(StatType.Honesty, StatBlock.DefenceTable[StatType.SelfAwareness]);
         }
 
-        // --- Base DC = 13 tests ---
+        // --- Base DC = 16 tests ---
 
         [Fact]
         public void GetDefenceDC_BaseDCIs13()
         {
             var defender = MakeDefender();
-            // All stats 0, so DC = 13 + 0 = 13
-            Assert.Equal(13, defender.GetDefenceDC(StatType.Charm));
+            // All stats 0, so DC = 16 + 0 = 16
+            Assert.Equal(16, defender.GetDefenceDC(StatType.Charm));
         }
 
         [Fact]
         public void GetDefenceDC_Honesty_UsesChaos()
         {
             var defender = MakeDefender(chaos: 5);
-            // DC = 13 + Chaos effective (5) = 18
-            Assert.Equal(18, defender.GetDefenceDC(StatType.Honesty));
+            // DC = 16 + Chaos effective (5) = 21
+            Assert.Equal(21, defender.GetDefenceDC(StatType.Honesty));
         }
 
         [Fact]
         public void GetDefenceDC_Wit_UsesRizz()
         {
             var defender = MakeDefender(rizz: 3);
-            // DC = 13 + Rizz effective (3) = 16
-            Assert.Equal(16, defender.GetDefenceDC(StatType.Wit));
+            // DC = 16 + Rizz effective (3) = 19
+            Assert.Equal(19, defender.GetDefenceDC(StatType.Wit));
         }
     }
 }

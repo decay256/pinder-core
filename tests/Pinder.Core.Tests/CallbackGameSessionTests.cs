@@ -61,7 +61,7 @@ namespace Pinder.Core.Tests
         public async Task ResolveTurn_WithCallbackOption_AppliesCallbackBonus()
         {
             // Setup: roll = 13, stat mod = 2, level bonus = 0 → total = 15
-            // DC = 13 + 2 = 15. Without bonus: 15 >= 15 → success.
+            // DC = 16 + 2 = 15. Without bonus: 15 >= 15 → success.
             // With callback bonus: FinalTotal = 15 + bonus.
             // We want to verify the bonus is recorded.
             var dice = new FixedDice(
@@ -105,17 +105,17 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task ResolveTurn_CallbackBonusTurnsMissIntoSuccess()
         {
-            // DC = 13 + 2 = 15. Roll = 12. Total = 12 + 2 + 0 = 14.
-            // Without bonus: 14 < 15 → fail.
-            // With callback bonus +3 (opener at distance 2): FinalTotal = 14 + 3 = 17 >= 15 → success.
+            // DC = 16 + 2 = 18. Roll = 13. Total = 13 + 2 + 0 = 15.
+            // Without bonus: 15 < 18 → fail.
+            // With callback bonus +3 (opener at distance 2): FinalTotal = 15 + 3 = 18 >= 18 → success.
             var dice = new FixedDice(
                 5,  // Constructor: horniness roll (1d10)
-                // Turn 0: d20=15, d100=50 (timing) — success to keep interest up
+                // Turn 0: d20=15, d100=50 (timing) — setup turn
                 15, 50,
-                // Turn 1: d20=15, d100=50 (timing) — success
+                // Turn 1: d20=15, d100=50 (timing) — setup turn
                 15, 50,
-                // Turn 2: d20=12, d100=50 (timing) — would fail without bonus
-                12, 50,
+                // Turn 2: d20=13, d100=50 (timing) — would fail without bonus
+                13, 50,
                 // Extra buffer
                 50, 50, 50, 50
             );

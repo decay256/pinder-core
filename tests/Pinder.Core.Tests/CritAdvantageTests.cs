@@ -54,13 +54,13 @@ namespace Pinder.Core.Tests
         public async Task Speak_Nat20_AdvantageClears_AfterOneRoll()
         {
             // Start interest at 5 (Interested, no adv/disadv) to keep it in Interested range throughout
-            // Turn 1: Nat 20 → interest 5+4=9 (still Interested)
-            // Turn 2: crit advantage → 2 dice; let's fail to keep interest low: 9 + fail = 8 or less
+            // Turn 1: Nat 20 → interest rises (Bold tier bonus with new DC base 16)
+            // Turn 2: crit advantage → 2 dice; use roll=12 to fail (12+3=15 < DC 18) → keep interest below VeryIntoIt
             // Turn 3: no crit advantage, no interest advantage → 1 die
             var dice = new FixedDice(
                 5,                  // Constructor: horniness
                 20, 50,             // Turn 1: d20=20 (Nat 20), d100=50 (timing)
-                15, 3, 50,          // Turn 2: crit adv → d20=15, d20=3=max 15, d100=50 (timing)
+                12, 3, 50,          // Turn 2: crit adv → d20=12, d20=3=max 12, d100=50 (timing)
                 8, 50, 50, 50       // Turn 3: no adv → d20=8, extras
             );
 
@@ -72,10 +72,10 @@ namespace Pinder.Core.Tests
             var t1 = await session.ResolveTurnAsync(0);
             Assert.True(t1.Roll.IsNatTwenty);
 
-            // Turn 2: crit advantage consumed — max(15,3) = 15
+            // Turn 2: crit advantage consumed — max(12,3) = 12
             await session.StartTurnAsync();
             var t2 = await session.ResolveTurnAsync(0);
-            Assert.Equal(15, t2.Roll.UsedDieRoll);
+            Assert.Equal(12, t2.Roll.UsedDieRoll);
 
             // Turn 3: no crit advantage — single die = 8
             await session.StartTurnAsync();

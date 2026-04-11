@@ -36,10 +36,10 @@ namespace Pinder.Core.Tests
             // 9 dice values: turns 1-3 use 2 each (d20+d100), turn 4 uses 3 (d20+d20[advantage]+d100)
             var dice = new FixedDice(
                 5,  // Constructor: horniness roll (1d10)
-                15, 50,       // Turn 1: Rizz (d20=15, d100=50)
-                15, 50,       // Turn 2: SA (d20=15, d100=50)
-                15, 50,       // Turn 3: Chaos → Triple (d20=15, d100=50)
-                15, 15, 50    // Turn 4: advantage from VeryIntoIt (d20=15, d20=15, d100=50)
+                8, 50,       // Turn 1: Rizz (d20=15, d100=50)
+                8, 50,       // Turn 2: SA (d20=15, d100=50)
+                8, 50,       // Turn 3: Chaos → Triple (d20=15, d100=50)
+                8, 8, 50    // Turn 4: advantage from VeryIntoIt (d20=15, d20=15, d100=50)
             );
 
             var llm = new ComboTestLlmAdapter();
@@ -48,7 +48,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.Chaos, "C"));
             llm.EnqueueOptions(new DialogueOption(StatType.SelfAwareness, "SA2"));
 
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P", 9), MakeProfile("O", 0), llm, dice, new NullTrapRegistry());
 
             // Turns 1-3
             await session.StartTurnAsync();
@@ -73,10 +73,10 @@ namespace Pinder.Core.Tests
         {
             var dice = new FixedDice(
                 5,  // Constructor: horniness roll (1d10)
-                15, 50,       // Turn 1
-                15, 50,       // Turn 2
-                15, 50,       // Turn 3
-                15, 15, 50    // Turn 4 (advantage)
+                8, 50,       // Turn 1
+                8, 50,       // Turn 2
+                8, 50,       // Turn 3
+                8, 8, 50    // Turn 4 (advantage)
             );
 
             var llm = new ComboTestLlmAdapter();
@@ -85,7 +85,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.Chaos, "C"));
             llm.EnqueueOptions(new DialogueOption(StatType.SelfAwareness, "SA2"));
 
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P", 9), MakeProfile("O", 0), llm, dice, new NullTrapRegistry());
 
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0);
@@ -105,10 +105,10 @@ namespace Pinder.Core.Tests
         {
             var dice = new FixedDice(
                 5,  // Constructor: horniness roll (1d10)
-                15, 50,
-                15, 50,
-                15, 50,
-                15, 15, 50
+                8, 50,
+                8, 50,
+                8, 50,
+                8, 8, 50
             );
 
             var llm = new ComboTestLlmAdapter();
@@ -117,7 +117,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.Chaos, "C"));
             llm.EnqueueOptions(new DialogueOption(StatType.SelfAwareness, "SA2"));
 
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P", 9), MakeProfile("O", 0), llm, dice, new NullTrapRegistry());
 
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0);
@@ -144,15 +144,15 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task InterestProgression_ThreeSuccessfulTurns_ReachesVeryIntoIt()
         {
-            // With allStats=2, DC=15. Roll 15: total=17, beat by 2 → +1 success + +1 risk(Hard)
+            // Player allStats=9, opponent allStats=0, DC=16. Roll 8: total=17, beat by 1 → +1 success + Safe(+1).
             // Momentum is a roll bonus (#268), not interest delta. Streak < 3 at start of each turn → no momentum bonus.
             // Turn 1: +2 → 12, Turn 2: +2 → 14, Turn 3: +2 → 16 (VeryIntoIt)
             var dice = new FixedDice(
                 5,  // Constructor: horniness roll (1d10)
-                15, 50,
-                15, 50,
-                15, 50,
-                15, 15, 50
+                8, 50,
+                8, 50,
+                8, 50,
+                8, 8, 50
             );
 
             var llm = new ComboTestLlmAdapter();
@@ -161,7 +161,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.Chaos, "C"));
             llm.EnqueueOptions(new DialogueOption(StatType.SelfAwareness, "SA2"));
 
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P", 9), MakeProfile("O", 0), llm, dice, new NullTrapRegistry());
 
             // Turn 1: interest 10 → 12
             await session.StartTurnAsync();
@@ -195,10 +195,10 @@ namespace Pinder.Core.Tests
             // the roll succeeds with expected outcome.
             var dice = new FixedDice(
                 5,  // Constructor: horniness roll (1d10)
-                15, 50,        // Turn 1
-                15, 50,        // Turn 2
-                15, 50,        // Turn 3
-                15, 15, 50     // Turn 4 (advantage: two d20s)
+                8, 50,        // Turn 1
+                8, 50,        // Turn 2
+                8, 50,        // Turn 3
+                8, 8, 50     // Turn 4 (advantage: two d20s)
             );
 
             var llm = new ComboTestLlmAdapter();
@@ -207,7 +207,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.Chaos, "C"));
             llm.EnqueueOptions(new DialogueOption(StatType.SelfAwareness, "SA2"));
 
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P", 9), MakeProfile("O", 0), llm, dice, new NullTrapRegistry());
 
             for (int i = 0; i < 3; i++)
             {
@@ -219,7 +219,7 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
             var r4 = await session.ResolveTurnAsync(0);
 
-            // Roll should still succeed (max(15,15) + 2 + momentum bonus(2) = 19 >= 15)
+            // Roll should still succeed (max(8,8) + 9 + momentum bonus(2) = 19 >= 16)
             Assert.True(r4.Roll.IsSuccess);
         }
 
@@ -242,10 +242,10 @@ namespace Pinder.Core.Tests
         {
             var dice = new FixedDice(
                 5,  // Constructor: horniness roll (1d10)
-                15, 50,
-                15, 50,
-                15, 50,
-                15, 15, 50
+                8, 50,
+                8, 50,
+                8, 50,
+                8, 8, 50
             );
 
             var llm = new ComboTestLlmAdapter();
@@ -254,7 +254,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.Chaos, "C"));
             llm.EnqueueOptions(new DialogueOption(StatType.SelfAwareness, "SA2"));
 
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P", 9), MakeProfile("O", 0), llm, dice, new NullTrapRegistry());
 
             for (int i = 0; i < 3; i++)
             {
@@ -277,15 +277,15 @@ namespace Pinder.Core.Tests
             // Provide exactly 4 dice for 2 turns at Interested state (interest 10-15)
             var dice = new FixedDice(
                 5,  // Constructor: horniness roll (1d10)
-                15, 50,  // Turn 1: d20 + d100
-                15, 50   // Turn 2: d20 + d100
+                8, 50,  // Turn 1: d20 + d100
+                8, 50   // Turn 2: d20 + d100
             );
 
             var llm = new ComboTestLlmAdapter();
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "C1"));
             llm.EnqueueOptions(new DialogueOption(StatType.Wit, "W1"));
 
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P", 9), MakeProfile("O", 0), llm, dice, new NullTrapRegistry());
 
             await session.StartTurnAsync();
             var r1 = await session.ResolveTurnAsync(0);

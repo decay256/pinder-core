@@ -138,15 +138,15 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task ResolveTurnAsync_SuccessDcLow_Awards5Xp()
         {
-            // Opponent has 0 → DC = 13, need=13-3=10 → Medium (1.5x), base 5 → 8
+            // Opponent has 0 → DC = 16, need=16-3=13 → Hard (2x), base 5 → 10
             var session = MakeSession(diceRoll: 15, opponentStatValue: 0);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
             Assert.True(result.Roll.IsSuccess);
-            Assert.Equal(13, result.Roll.DC);
-            Assert.Equal(8, result.XpEarned); // 5 * 1.5 = 7.5 → 8
-            Assert.Equal(8, session.TotalXpEarned);
+            Assert.Equal(16, result.Roll.DC);
+            Assert.Equal(10, result.XpEarned); // 5 * 2.0 = 10
+            Assert.Equal(10, session.TotalXpEarned);
         }
 
         // AC-2: Normal success DC 14-17, Hard risk → 10*2=20 XP (Success_DC_Mid)
@@ -159,7 +159,7 @@ namespace Pinder.Core.Tests
             var result = await session.ResolveTurnAsync(0);
 
             Assert.True(result.Roll.IsSuccess);
-            Assert.Equal(14, result.Roll.DC);
+            Assert.Equal(17, result.Roll.DC);
             Assert.Equal(20, result.XpEarned); // 10 * 2.0 = 20
         }
 
@@ -167,15 +167,15 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task ResolveTurnAsync_SuccessDcHigh_Awards15Xp()
         {
-            // Opponent has +5 → DC = 18, need=18-3=15 → Hard (2x), base 15 → 30
-            var session = MakeSession(diceRoll: 16, opponentStatValue: 5);
+            // Opponent has +5 → DC = 21, need=21-3=18 → Bold (3x for XP), base 15 → 45
+            var session = MakeSession(diceRoll: 19, opponentStatValue: 5);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
             Assert.True(result.Roll.IsSuccess);
             Assert.False(result.Roll.IsNatTwenty);
             Assert.True(result.Roll.DC >= 18);
-            Assert.Equal(30, result.XpEarned); // 15 * 2.0 = 30
+            Assert.Equal(45, result.XpEarned); // 15 * 3.0 = 45
         }
 
         // AC-2: Normal failure → 2 XP
@@ -320,13 +320,13 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task ResolveTurnAsync_DcExactly13_AwardsLowTierXp()
         {
-            // need=13-3=10 → Medium (1.5x), base 5 → 8
+            // need=16-3=13 → Hard (2x), base 5 → 10
             var session = MakeSession(diceRoll: 15, opponentStatValue: 0);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
-            Assert.Equal(13, result.Roll.DC);
-            Assert.Equal(8, result.XpEarned); // 5 * 1.5 = 7.5 → 8
+            Assert.Equal(16, result.Roll.DC);
+            Assert.Equal(10, result.XpEarned); // 5 * 2.0 = 10
         }
 
         // AC-6: DC boundary test — DC exactly 14, Hard risk → 10*2=20 XP
@@ -338,7 +338,7 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
-            Assert.Equal(14, result.Roll.DC);
+            Assert.Equal(17, result.Roll.DC);
             Assert.Equal(20, result.XpEarned); // 10 * 2.0 = 20
         }
 
@@ -378,7 +378,7 @@ namespace Pinder.Core.Tests
             var result = await session.ResolveTurnAsync(0);
 
             Assert.True(result.Roll.IsNatTwenty);
-            Assert.Equal(13, result.Roll.DC);
+            Assert.Equal(16, result.Roll.DC);
             Assert.Equal(25, result.XpEarned);
         }
 

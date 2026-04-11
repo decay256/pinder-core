@@ -106,7 +106,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void AC5_RollEngine_DcAdjustment_ReducesDC()
         {
-            // Opponent Honesty = 2 → DC = 13 + 2 = 15. With dcAdjustment=2 → DC=13.
+            // Opponent Honesty = 2 → DC = 16 + 2 = 18. With dcAdjustment=5 → DC=13.
             var attacker = TestHelpers.MakeStatBlock(2); // SA mod = 2
             var defender = TestHelpers.MakeStatBlock(2); // Honesty mod = 2
             var traps = new TrapState();
@@ -115,9 +115,9 @@ namespace Pinder.Core.Tests
             var result = RollEngine.Resolve(
                 StatType.SelfAwareness, attacker, defender,
                 traps, 1, new NullTrapReg(), dice,
-                dcAdjustment: 2);
+                dcAdjustment: 5);
 
-            Assert.Equal(13, result.DC); // 15 - 2 = 13
+            Assert.Equal(13, result.DC); // 18 - 5 = 13
         }
 
         // Mutation: would catch if dcAdjustment is added to DC instead of subtracted
@@ -127,13 +127,13 @@ namespace Pinder.Core.Tests
             var attacker = TestHelpers.MakeStatBlock(2);
             var defender = TestHelpers.MakeStatBlock(2);
             var traps = new TrapState();
-            // Roll 13: total = 13 + 2 = 15. Normal DC = 15 → exactly meets. With adj=2 → DC=13 → beats.
-            var dice = new FixedDiceRoller(13);
+            // Roll 16: total = 16 + 2 = 18. Normal DC = 18 → exactly meets. With adj=5 → DC=13 → beats.
+            var dice = new FixedDiceRoller(16);
 
             var withAdj = RollEngine.Resolve(
                 StatType.SelfAwareness, attacker, defender,
                 traps, 1, new NullTrapReg(), dice,
-                dcAdjustment: 2);
+                dcAdjustment: 5);
 
             Assert.True(withAdj.IsSuccess);
             Assert.Equal(13, withAdj.DC);
@@ -153,7 +153,7 @@ namespace Pinder.Core.Tests
                 traps, 1, new NullTrapReg(), dice,
                 dcAdjustment: 0);
 
-            Assert.Equal(15, result.DC); // 13 + 2 = 15, no adjustment
+            Assert.Equal(18, result.DC); // 16 + 2 = 18, no adjustment
         }
 
         // ================================================================
@@ -165,15 +165,15 @@ namespace Pinder.Core.Tests
         public void EdgeCase_LargeDcReduction_NoClamping()
         {
             var attacker = TestHelpers.MakeStatBlock(0);
-            var defender = TestHelpers.MakeStatBlock(0); // DC = 13 + 0 = 13
+            var defender = TestHelpers.MakeStatBlock(0); // DC = 16 + 0 = 16
             var traps = new TrapState();
             var dice = new FixedDiceRoller(2); // roll 2, total = 2 + 0 = 2
 
-            // dcAdjustment=15 → DC = 13 - 15 = -2. Roll of 2 should beat DC of -2.
+            // dcAdjustment=18 → DC = 16 - 18 = -2. Roll of 2 should beat DC of -2.
             var result = RollEngine.Resolve(
                 StatType.SelfAwareness, attacker, defender,
                 traps, 1, new NullTrapReg(), dice,
-                dcAdjustment: 15);
+                dcAdjustment: 18);
 
             Assert.True(result.DC < 1); // DC went negative
             Assert.True(result.IsSuccess); // Low roll still beats very low DC
@@ -188,15 +188,15 @@ namespace Pinder.Core.Tests
         public void EdgeCase_DcAdjustment_And_ExternalBonus_Independent()
         {
             var attacker = TestHelpers.MakeStatBlock(2);
-            var defender = TestHelpers.MakeStatBlock(2); // DC = 15
+            var defender = TestHelpers.MakeStatBlock(2); // DC = 18 (16+2)
             var traps = new TrapState();
             var dice = new FixedDiceRoller(10); // roll 10, stat 2 = base total 12
 
-            // externalBonus=2 → FinalTotal = 14. dcAdjustment=2 → DC = 13. 14 >= 13 → success
+            // externalBonus=2 → FinalTotal = 14. dcAdjustment=5 → DC = 13. 14 >= 13 → success
             var result = RollEngine.Resolve(
                 StatType.SelfAwareness, attacker, defender,
                 traps, 1, new NullTrapReg(), dice,
-                externalBonus: 2, dcAdjustment: 2);
+                externalBonus: 2, dcAdjustment: 5);
 
             Assert.Equal(13, result.DC); // DC reduced by dcAdjustment
             Assert.True(result.IsSuccess); // externalBonus helped meet reduced DC
@@ -218,8 +218,8 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.SelfAwareness, "Insight"));
             llm.EnqueueWeaknessWindow(null);
 
-            // Turn 0: roll 15, Turn 1: roll 11 (11+2=13, DC=15-2=13 → success)
-            var dice = new FixedDice(5, 15, 5, 11, 5, 15, 5);
+            // Turn 0: roll 15, Turn 1: roll 14 (14+2=16, DC=18-2=16 → success)
+            var dice = new FixedDice(5, 15, 5, 14, 5, 15, 5);
             var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
 
             await session.StartTurnAsync();
@@ -228,8 +228,8 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
-            // Verify the DC in the roll result is 13 (15 - 2)
-            Assert.Equal(13, result.Roll.DC);
+            // Verify the DC in the roll result is 16 (18 - 2)
+            Assert.Equal(16, result.Roll.DC);
             Assert.True(result.Roll.IsSuccess);
         }
 
@@ -254,8 +254,8 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
-            // Charm defended by SA(mod=2) → DC=13+2=15, no reduction
-            Assert.Equal(15, result.Roll.DC);
+            // Charm defended by SA(mod=2) → DC=16+2=18, no reduction
+            Assert.Equal(18, result.Roll.DC);
         }
 
         // ================================================================

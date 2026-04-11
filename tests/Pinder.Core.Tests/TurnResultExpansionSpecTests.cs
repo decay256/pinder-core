@@ -22,22 +22,23 @@ namespace Pinder.Core.Tests
 
         #region AC1: RiskTier enum defined
 
-        // What: AC1 — RiskTier enum exists with exactly 4 members (§1)
+        // What: AC1 — RiskTier enum exists with exactly 5 members (§1)
         // Mutation: would catch if any member was removed or extra members added
         [Fact]
         public void RiskTier_Enum_HasExactlyFourMembers()
         {
             var names = Enum.GetNames(typeof(RiskTier));
-            Assert.Equal(4, names.Length);
+            Assert.Equal(5, names.Length);
         }
 
-        // What: AC1 — RiskTier members are in ascending risk order: Safe, Medium, Hard, Bold (§1)
+        // What: AC1 — RiskTier members are in ascending risk order: Safe, Medium, Hard, Bold, Reckless (§1)
         // Mutation: would catch if enum member order was changed or names misspelled
         [Theory]
         [InlineData("Safe", 0)]
         [InlineData("Medium", 1)]
         [InlineData("Hard", 2)]
         [InlineData("Bold", 3)]
+        [InlineData("Reckless", 4)]
         public void RiskTier_MemberNamesAndValues_MatchSpec(string name, int expectedValue)
         {
             var parsed = (RiskTier)Enum.Parse(typeof(RiskTier), name);
@@ -307,6 +308,7 @@ namespace Pinder.Core.Tests
         [InlineData(RiskTier.Medium)]
         [InlineData(RiskTier.Hard)]
         [InlineData(RiskTier.Bold)]
+        [InlineData(RiskTier.Reckless)]
         public void EdgeCase_EachRiskTier_RoundtripsCorrectly(RiskTier tier)
         {
             var result = new TurnResult(

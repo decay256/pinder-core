@@ -115,10 +115,11 @@ namespace Pinder.Core.Rolls
         {
             int need = dc - (statModifier + levelBonus);
 
-            if (need <= 5)  return RiskTier.Safe;
-            if (need <= 10) return RiskTier.Medium;
+            if (need <= 7)  return RiskTier.Safe;
+            if (need <= 11) return RiskTier.Medium;
             if (need <= 15) return RiskTier.Hard;
-            return RiskTier.Bold;
+            if (need <= 19) return RiskTier.Bold;
+            return RiskTier.Reckless;
         }
 
         public override string ToString() =>

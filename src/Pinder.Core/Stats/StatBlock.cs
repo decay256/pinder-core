@@ -74,12 +74,12 @@ namespace Pinder.Core.Stats
         }
 
         /// <summary>
-        /// DC to resist an incoming stat. DC = 13 + defending stat's effective modifier.
+        /// DC to resist an incoming stat. DC = 16 + defending stat's effective modifier.
         /// </summary>
         public int GetDefenceDC(StatType attackingStat)
         {
             StatType defenceStat = DefenceTable[attackingStat];
-            return 13 + GetEffective(defenceStat);
+            return 16 + GetEffective(defenceStat);
         }
     }
 }

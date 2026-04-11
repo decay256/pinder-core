@@ -251,27 +251,28 @@ namespace Pinder.Core.Tests.RulesSpec
             Assert.Equal(RiskTier.Safe, result.RiskTier);
         }
 
-        // Mutation: would catch if need=6 was Safe instead of Medium
+        // New boundaries: Safe ≤7, Medium 8–11, Hard 12–15, Bold 16–19, Reckless ≥20
+        // Mutation: would catch if need=8 was Safe instead of Medium
         [Fact]
         public void Edge_S5_RiskTier_Need6_Medium_LowerBound()
         {
-            var result = MakeRisk(6, true);
+            var result = MakeRisk(8, true); // need=8 is the new Medium lower bound
             Assert.Equal(RiskTier.Medium, result.RiskTier);
         }
 
-        // Mutation: would catch if need=10 was Hard instead of Medium
+        // Mutation: would catch if need=11 was Hard instead of Medium
         [Fact]
         public void Edge_S5_RiskTier_Need10_Medium_UpperBound()
         {
-            var result = MakeRisk(10, true);
+            var result = MakeRisk(11, true); // need=11 is the new Medium upper bound
             Assert.Equal(RiskTier.Medium, result.RiskTier);
         }
 
-        // Mutation: would catch if need=11 was Medium instead of Hard
+        // Mutation: would catch if need=12 was Medium instead of Hard
         [Fact]
         public void Edge_S5_RiskTier_Need11_Hard_LowerBound()
         {
-            var result = MakeRisk(11, true);
+            var result = MakeRisk(12, true); // need=12 is the new Hard lower bound
             Assert.Equal(RiskTier.Hard, result.RiskTier);
         }
 
@@ -291,12 +292,12 @@ namespace Pinder.Core.Tests.RulesSpec
             Assert.Equal(RiskTier.Bold, result.RiskTier);
         }
 
-        // Mutation: would catch if Medium risk tier returned non-zero bonus
+        // Medium risk tier now returns +2
         [Fact]
         public void Edge_S5_RiskBonus_Medium_Zero()
         {
             var result = MakeRisk(8, true);
-            Assert.Equal(0, RiskTierBonus.GetInterestBonus(result));
+            Assert.Equal(2, RiskTierBonus.GetInterestBonus(result)); // Medium now returns +2
         }
 
         // =====================================================================
@@ -527,12 +528,12 @@ namespace Pinder.Core.Tests.RulesSpec
             Assert.Equal(0, RiskTierBonus.GetInterestBonus(result));
         }
 
-        // Mutation: would catch if Safe success returned non-zero
+        // Safe success now returns +1
         [Fact]
         public void Edge_S5_RiskBonus_SafeSuccess_Zero()
         {
             var result = MakeRisk(3, true);
-            Assert.Equal(0, RiskTierBonus.GetInterestBonus(result));
+            Assert.Equal(1, RiskTierBonus.GetInterestBonus(result)); // Safe now returns +1
         }
     }
 }

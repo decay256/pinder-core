@@ -85,7 +85,7 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(2); // Wit option
 
-            // Roll: d20=2 + 0 (wit) + 0 (level bonus at level 1) = 2, DC = 13 + opponent's Rizz effective
+            // Roll: d20=2 + 0 (wit) + 0 (level bonus at level 1) = 2, DC = 16 + opponent's Rizz effective
             // Miss margin = DC - Total, need >= 10 for Catastrophe
             Assert.Contains(result.ShadowGrowthEvents, e => e.Contains("Catastrophic Wit failure"));
         }
@@ -96,7 +96,7 @@ namespace Pinder.Core.Tests
         public async Task ThreeTropeTraps_GrowsMadness()
         {
             // Need 3 TropeTrap-tier failures. Miss by 6–9 = TropeTrap.
-            // DC = 13 + defender's SA effective. With SA=0, DC=13.
+            // DC = 16 + defender's SA effective. With SA=0, DC=13.
             // Charm mod=0, level bonus=0. d20=6 → total=6, miss=13-6=7 → TropeTrap.
             // Start at 15 (Interested, no advantage). 3× -3 = -9 → 6, still alive.
             // Each turn: 1 d20 + 1 d100 = 2 dice. 3 turns = 6 dice.
@@ -342,7 +342,7 @@ namespace Pinder.Core.Tests
             var session = MakeSessionWithDice(dice,
                 playerStats: MakeStatBlock(charm: 5, honesty: 5, wit: 5, chaos: 5),
                 shadows: shadows,
-                startingInterest: 10);
+                startingInterest: 5);
 
             // Turn 1: Charm (index 0)
             await session.StartTurnAsync();

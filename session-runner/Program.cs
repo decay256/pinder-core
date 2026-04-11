@@ -42,9 +42,10 @@ class Program
     // ── helpers ─────────────────────────────────────────────────────────────
 
     static string RiskLabel(int need) =>
-        need <= 5  ? "🟢 Safe" :
-        need <= 10 ? "🟡 Medium" :
-        need <= 15 ? "🟠 Hard" : "🔴 Bold";
+        need <= 7  ? "🟢 Safe" :
+        need <= 11 ? "🟡 Medium" :
+        need <= 15 ? "🟠 Hard" :
+        need <= 19 ? "🔴 Bold" : "☠️ Reckless";
 
     static string XpMultiplier(int need) =>
         need <= 5  ? "1x XP" :
@@ -339,7 +340,7 @@ class Program
             Console.WriteLine($"| {StatLabel(stat)} | {atkMod:+#;-#;0} | — | {dc} | {need}+ | {pct}% | {RiskLabel(need)} |");
         }
         Console.WriteLine();
-        Console.WriteLine("> DC = 13 + opponent defending stat modifier. Miss by 1–2 = Fumble | 3–5 = Misfire | 6–9 = Trope Trap | 10+ = Catastrophe | Nat 1 = Legendary.");
+        Console.WriteLine("> DC = 16 + opponent defending stat modifier. Miss by 1–2 = Fumble | 3–5 = Misfire | 6–9 = Trope Trap | 10+ = Catastrophe | Nat 1 = Legendary.");
         Console.WriteLine();
 
         // ── LLM + session setup ───────────────────────────────────────────

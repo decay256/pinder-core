@@ -222,10 +222,10 @@ namespace Pinder.Core.Tests
         [Fact]
         public void Resolve_DcAdjustment_IsSubtracted_NotAdded()
         {
-            // Charm=3, level=1(bonus=0), defender SA=0 → base DC=13+0=13
-            // dcAdjustment=5 → adjusted DC should be 8, not 18
-            // roll=5, total=5+3=8 → should succeed if DC=8, fail if DC=18
-            var dice = new FixedDice(5);
+            // Charm=3, level=1(bonus=0), defender SA=0 → base DC=16+0=16
+            // dcAdjustment=5 → adjusted DC should be 11, not 21
+            // roll=8, total=8+3=11 → should succeed if DC=11, fail if DC=21
+            var dice = new FixedDice(8);
             var defender = MakeStatBlock(sa: 0, madness: 0, horniness: 0, denial: 0, fixation: 0, dread: 0, overthinking: 0);
             var result = RollEngine.Resolve(
                 StatType.Charm, MakeStatBlock(charm: 3, madness: 0, horniness: 0, denial: 0, fixation: 0, dread: 0, overthinking: 0),
@@ -233,8 +233,8 @@ namespace Pinder.Core.Tests
                 new TrapState(), 1, new NullTrapRegistry(), dice,
                 dcAdjustment: 5);
 
-            Assert.Equal(8, result.DC); // 13 - 5 = 8
-            Assert.True(result.IsSuccess); // Total(8) >= DC(8)
+            Assert.Equal(11, result.DC); // 16 - 5 = 11
+            Assert.True(result.IsSuccess); // Total(11) >= DC(11)
         }
 
         // Mutation: Fails if ResolveFixedDC doesn't pass externalBonus to RollResult

@@ -413,7 +413,7 @@ namespace Pinder.Core.Tests
                 dice: new TestDice(diceValues.ToArray()),
                 playerStats: Stats(charm: 5, honesty: 5, wit: 5, chaos: 5),
                 shadows: shadows,
-                startingInterest: 10);
+                startingInterest: 5);
 
             // Play 4 different stats
             await session.StartTurnAsync();
@@ -675,7 +675,7 @@ namespace Pinder.Core.Tests
                 dice: new TestDice(diceValues.ToArray()),
                 playerStats: Stats(charm: 5, honesty: 5, wit: 5),
                 shadows: shadows,
-                startingInterest: 10);
+                startingInterest: 5);
 
             // Use only 3 distinct stats: Charm, Honesty, Wit (skip Chaos)
             await session.StartTurnAsync();
@@ -708,7 +708,7 @@ namespace Pinder.Core.Tests
                 dice: new TestDice(diceValues.ToArray()),
                 playerStats: Stats(charm: 5, honesty: 5, wit: 5, sa: 5),
                 shadows: shadows,
-                startingInterest: 10,
+                startingInterest: 5,
                 options: new[]
                 {
                     new DialogueOption(StatType.Charm, "a"),

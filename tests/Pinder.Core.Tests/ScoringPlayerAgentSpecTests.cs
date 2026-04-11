@@ -160,7 +160,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task HigherAttackerMod_GivesHigherSuccessChance()
         {
-            var opponentStats = MakeStats(selfAwareness: 2); // Charm → SA defence, DC = 13 + 2 = 15
+            var opponentStats = MakeStats(selfAwareness: 2); // Charm → SA defence, DC = 16 + 2 = 15
 
             var weakPlayer = MakeStats(charm: 1); // need = 15 - 1 = 14, chance = 7/20
             var strongPlayer = MakeStats(charm: 5); // need = 15 - 5 = 10, chance = 11/20
@@ -585,7 +585,7 @@ namespace Pinder.Core.Tests
         public async Task VeryHighDc_SuccessChanceClampedTo0()
         {
             var playerStats = MakeStats(charm: 0);
-            var opponentStats = MakeStats(selfAwareness: 10); // DC = 13 + 10 = 23, need = 23
+            var opponentStats = MakeStats(selfAwareness: 10); // DC = 16 + 10 = 23, need = 23
 
             var turn = MakeTurn(new DialogueOption(StatType.Charm, "impossible"));
             var ctx = MakeContext(playerStats: playerStats, opponentStats: opponentStats);
@@ -679,7 +679,7 @@ namespace Pinder.Core.Tests
         public async Task Interest5_IsLukewarm_NoBoredBias()
         {
             var playerStats = MakeStats(chaos: 0);
-            var opponentStats = MakeStats(charm: 5); // Chaos→Charm, DC=18 → Bold
+            var opponentStats = MakeStats(charm: 3); // Chaos→Charm, DC=16+3=19 → Bold (need=19)
 
             var turn = MakeTurn(new DialogueOption(StatType.Chaos, "bold"));
 

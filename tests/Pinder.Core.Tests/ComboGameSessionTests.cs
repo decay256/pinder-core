@@ -71,7 +71,8 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task TheSetup_WitThenCharm_ComboTriggeredAndBonusApplied()
         {
-            // DC = 13 + 2 = 15. Roll 15: 15 + 2 + 0 = 17 >= 15 → success (beat by 2 → SuccessScale +1)
+            // Opponent allStats=0 → DC = 16. Roll 15: 15 + 2 + 0 = 17 >= 16 → success (beat by 1 → SuccessScale +1)
+            // need = 16-2=14 → Hard → RiskTierBonus +3. Turn 2 + combo +1 = total 5.
             // Each turn: d20 + d100(timing)
             var dice = new FixedDice(
                 5,  // Constructor: horniness roll (1d10)
@@ -83,7 +84,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.Wit, "A witty remark"));
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "A charming line"));
 
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O", 0), llm, dice, new NullTrapRegistry());
 
             // Turn 1: Wit
             await session.StartTurnAsync();
@@ -98,8 +99,8 @@ namespace Pinder.Core.Tests
             Assert.True(r2.Roll.IsSuccess);
             Assert.Equal("The Setup", r2.ComboTriggered);
 
-            // Interest delta: SuccessScale(+1) + RiskTierBonus(+1 for Hard) + momentum(0 streak=2) + combo(+1) = +3
-            Assert.Equal(3, r2.InterestDelta);
+            // Interest delta: SuccessScale(+1) + RiskTierBonus(+3 for Hard) + momentum(0 streak=2) + combo(+1) = +5
+            Assert.Equal(5, r2.InterestDelta);
         }
 
         /// <summary>
@@ -108,8 +109,9 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task TheRecovery_FailThenSASuccess_ComboTriggered()
         {
-            // Turn 1: Roll 5 → fail (5 + 2 = 7 vs DC 15, miss by 8 = TropeTrap -2)
-            // Turn 2: Roll 15 → success (SA, 15+2=17 vs DC 15)
+            // Opponent allStats=0 → DC=16.
+            // Turn 1: Roll 5 → fail (5 + 2 = 7 vs DC 16, miss by 9 = TropeTrap -2)
+            // Turn 2: Roll 15 → success (SA, 15+2=17 vs DC 16, need=14 → Hard +3)
             var dice = new FixedDice(
                 5,  // Constructor: horniness roll (1d10)
                 5, 50,   // Turn 1: fail
@@ -120,7 +122,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.Chaos, "Chaos line"));
             llm.EnqueueOptions(new DialogueOption(StatType.SelfAwareness, "SA line"));
 
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O", 0), llm, dice, new NullTrapRegistry());
 
             // Turn 1: Chaos fail
             await session.StartTurnAsync();
@@ -134,8 +136,8 @@ namespace Pinder.Core.Tests
             Assert.True(r2.Roll.IsSuccess);
             Assert.Equal("The Recovery", r2.ComboTriggered);
 
-            // Interest delta: SuccessScale(+1) + RiskTierBonus(+1) + combo(+2) = +4
-            Assert.Equal(4, r2.InterestDelta);
+            // Interest delta: SuccessScale(+1) + RiskTierBonus(+3 for Hard) + combo(+2) = +6
+            Assert.Equal(6, r2.InterestDelta);
         }
 
         /// <summary>
@@ -145,14 +147,14 @@ namespace Pinder.Core.Tests
         public async Task TheTriple_ThreeDistinctStats_RollBonusNextTurn()
         {
             // Use stats that don't form 2-stat combos: Rizz, SelfAwareness, Chaos
-            // DC = 15 for all. Roll 15: 15+2=17 >= 15 → success
+            // Opponent allStats=0 → DC=16. Roll 15: 15+2=17 >= 16 → success
             var dice = new FixedDice(
                 5,  // Constructor: horniness roll (1d10)
-                15, 50,  // Turn 1: Rizz (d20 + d100 timing)
-                15, 50,  // Turn 2: SA
-                15, 50,  // Turn 3: Chaos → Triple triggers
-                15, 50,  // Turn 4: should get +1 external bonus
-                15, 50   // Extra safety margin
+                15, 50,      // Turn 1: Rizz (d20 + d100 timing)
+                15, 50,      // Turn 2: SA
+                15, 15, 50,  // Turn 3: Chaos → Triple triggers (VeryIntoIt advantage after turn 2)
+                15, 15, 50,  // Turn 4: advantage, +1 triple + 2 momentum = 3 external
+                15, 50       // Extra safety margin
             );
 
             var llm = new ComboTestLlmAdapter();
@@ -162,7 +164,7 @@ namespace Pinder.Core.Tests
             // Turn 4: use Chaos again so we don't re-trigger Triple
             llm.EnqueueOptions(new DialogueOption(StatType.Chaos, "Chaos again"));
 
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O", 0), llm, dice, new NullTrapRegistry());
 
             // Turns 1-2
             await session.StartTurnAsync();
@@ -202,7 +204,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.Wit, "Wit"));
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Charm"));
 
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O", 0), llm, dice, new NullTrapRegistry());
 
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0);
@@ -234,7 +236,7 @@ namespace Pinder.Core.Tests
                 new DialogueOption(StatType.Rizz, "Rizz")
             );
 
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O", 0), llm, dice, new NullTrapRegistry());
 
             // Turn 1: Wit
             await session.StartTurnAsync();
@@ -253,13 +255,13 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task TripleBonus_ConsumedByWait()
         {
+            // Opponent allStats=0 → DC=16. Turn 2 reaches VeryIntoIt → turn 3 uses advantage (2 d20s).
             var dice = new FixedDice(
                 5,  // Constructor: horniness roll (1d10)
-                15, 50,  // Turn 1
-                15, 50,  // Turn 2
-                15, 50,  // Turn 3
-                4,       // Ghost check (not 1, no ghost)
-                15, 50   // Turn 5: should NOT have triple bonus
+                15, 50,      // Turn 1
+                15, 50,      // Turn 2
+                15, 15, 50,  // Turn 3 (VeryIntoIt advantage after turn 2)
+                15, 15, 50   // Turn 5: should NOT have triple bonus (also VeryIntoIt+ advantage)
             );
 
             var llm = new ComboTestLlmAdapter();
@@ -268,7 +270,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.Chaos, "C"));
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Ch"));
 
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O", 0), llm, dice, new NullTrapRegistry());
 
             // 3 turns to trigger Triple
             await session.StartTurnAsync();
@@ -280,9 +282,7 @@ namespace Pinder.Core.Tests
             Assert.Equal("The Triple", r3.ComboTriggered);
             Assert.True(r3.StateAfter.TripleBonusActive);
 
-            // Wait consumes the triple bonus
-            // Interest is high enough (~16+), Wait applies -1
-            // Need to check interest won't be in Bored state
+            // Wait consumes the triple bonus (interest is ~22, no Bored ghost check)
             session.Wait();
 
             // Next turn should NOT have triple bonus, but still has momentum (streak=3 → +2 roll bonus, #268)

@@ -154,30 +154,30 @@ namespace Pinder.Core.Tests
         [Fact]
         public void Resolve_ExternalBonus_TurnsFailIntoSuccess()
         {
-            // Charm=3, level=2(bonus=0), defender SA=2 → DC=13+2=15
-            // roll=10, total=13, miss by 2 → Fumble without bonus
-            // With externalBonus=2: FinalTotal=15 >= DC=15 → success
+            // Charm=3, level=2(bonus=0), defender SA=2 → DC=16+2=18
+            // roll=10, total=13, miss by 5 → Misfire without bonus
+            // With externalBonus=5: FinalTotal=18 >= DC=18 → success
             var dice = new FixedDice(10);
             var result = RollEngine.Resolve(
                 StatType.Charm, MakeAttacker(charm: 3), MakeDefender(sa: 2),
                 new TrapState(), 2, new NullTrapRegistry(), dice,
-                externalBonus: 2);
+                externalBonus: 5);
 
             Assert.True(result.IsSuccess);
             Assert.Equal(13, result.Total);
-            Assert.Equal(15, result.FinalTotal);
+            Assert.Equal(18, result.FinalTotal);
         }
 
         [Fact]
         public void Resolve_DcAdjustment_LowersDC()
         {
-            // Charm=3, level=2(bonus=0), defender SA=2 → base DC=15, adjusted=15-2=13
+            // Charm=3, level=2(bonus=0), defender SA=2 → base DC=18, adjusted=18-5=13
             // roll=10, total=13, FinalTotal=13 >= 13 → success
             var dice = new FixedDice(10);
             var result = RollEngine.Resolve(
                 StatType.Charm, MakeAttacker(charm: 3), MakeDefender(sa: 2),
                 new TrapState(), 2, new NullTrapRegistry(), dice,
-                dcAdjustment: 2);
+                dcAdjustment: 5);
 
             Assert.True(result.IsSuccess);
             Assert.Equal(13, result.DC); // adjusted DC stored
@@ -186,14 +186,14 @@ namespace Pinder.Core.Tests
         [Fact]
         public void Resolve_BothBonusAndAdjustment()
         {
-            // Charm=3, level=2(bonus=0), defender SA=2 → base DC=15
-            // dcAdjustment=2 → DC=13, externalBonus=2, roll=10
+            // Charm=3, level=2(bonus=0), defender SA=2 → base DC=18
+            // dcAdjustment=5 → DC=13, externalBonus=2, roll=10
             // Total=13, FinalTotal=15, DC=13 → success
             var dice = new FixedDice(10);
             var result = RollEngine.Resolve(
                 StatType.Charm, MakeAttacker(charm: 3), MakeDefender(sa: 2),
                 new TrapState(), 2, new NullTrapRegistry(), dice,
-                externalBonus: 2, dcAdjustment: 2);
+                externalBonus: 2, dcAdjustment: 5);
 
             Assert.True(result.IsSuccess);
             Assert.Equal(13, result.DC);

@@ -85,14 +85,14 @@ namespace Pinder.Core.Tests
         [Fact]
         public void MissByOne_IsFumble()
         {
-            // DC = 13 + 0 = 13. Roll 11 + 0 + 0 = 11. Miss by 2 → Fumble
+            // DC = 16 + 0 = 16. Roll 14 + 0 + 0 = 14. Miss by 2 → Fumble
             var attacker = MakeStats();
             var defender = MakeStats();
             var result = RollEngine.Resolve(
                 StatType.Charm, attacker, defender, new TrapState(), 1,
-                new EmptyTrapRegistry(), new FixedDice(11));
+                new EmptyTrapRegistry(), new FixedDice(14));
 
-            Assert.Equal(13, result.DC);
+            Assert.Equal(16, result.DC);
             Assert.Equal(2, result.MissMargin);
             Assert.Equal(FailureTier.Fumble, result.Tier);
         }
@@ -102,10 +102,10 @@ namespace Pinder.Core.Tests
         {
             var attacker = MakeStats();
             var defender = MakeStats();
-            // Roll 8: total 8, DC 13, miss 5 → Misfire
+            // Roll 11: total 11, DC 16, miss 5 → Misfire
             var result = RollEngine.Resolve(
                 StatType.Charm, attacker, defender, new TrapState(), 1,
-                new EmptyTrapRegistry(), new FixedDice(8));
+                new EmptyTrapRegistry(), new FixedDice(11));
 
             Assert.Equal(FailureTier.Misfire, result.Tier);
         }
@@ -115,10 +115,10 @@ namespace Pinder.Core.Tests
         {
             var attacker = MakeStats();
             var defender = MakeStats();
-            // Roll 6: total 6, DC 13, miss 7 → TropeTrap
+            // Roll 9: total 9, DC 16, miss 7 → TropeTrap
             var result = RollEngine.Resolve(
                 StatType.Charm, attacker, defender, new TrapState(), 1,
-                new EmptyTrapRegistry(), new FixedDice(6));
+                new EmptyTrapRegistry(), new FixedDice(9));
 
             Assert.Equal(FailureTier.TropeTrap, result.Tier);
         }
@@ -200,12 +200,12 @@ namespace Pinder.Core.Tests
         [Fact]
         public void LevelBonus_AppliesToRoll()
         {
-            // Level 5 → bonus +2. Roll 12 + 0 + 2 = 14 vs DC 13 → success
+            // Level 5 → bonus +2. Roll 14 + 0 + 2 = 16 vs DC 16 → success
             var attacker = MakeStats();
             var defender = MakeStats();
             var result = RollEngine.Resolve(
                 StatType.Charm, attacker, defender, new TrapState(), 5,
-                new EmptyTrapRegistry(), new FixedDice(12));
+                new EmptyTrapRegistry(), new FixedDice(14));
 
             Assert.True(result.IsSuccess);
             Assert.Equal(2, result.LevelBonus);
@@ -284,7 +284,7 @@ namespace Pinder.Core.Tests
         public void TropeTrap_StillActivatesTrap()
         {
             // Ensure existing TropeTrap trap activation still works after the Catastrophe fix
-            // Charm=0, defender SA=0 → DC=13. Roll 6: total=6, miss=7 → TropeTrap
+            // Charm=0, defender SA=0 → DC=16. Roll 9: total=9, miss=7 → TropeTrap
             var trapDef = new TrapDefinition("charm-trap", StatType.Charm,
                 TrapEffect.Disadvantage, 0, 2, "you're trapped", "cleared", "nat1 clear");
             var registry = new SingleTrapRegistry(trapDef);
@@ -292,7 +292,7 @@ namespace Pinder.Core.Tests
 
             var result = RollEngine.Resolve(
                 StatType.Charm, MakeStats(), MakeStats(), traps, 1,
-                registry, new FixedDice(6));
+                registry, new FixedDice(9));
 
             Assert.Equal(FailureTier.TropeTrap, result.Tier);
             Assert.NotNull(result.ActivatedTrap);

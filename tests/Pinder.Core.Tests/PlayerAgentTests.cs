@@ -262,14 +262,14 @@ namespace Pinder.Core.Tests
             var agent = new HighestModAgent();
             var player = MakePlayerStats();
             var opponent = MakeOpponentStats();
-            // Charm +4 vs SA defence DC = 13 + 2 = 15. Need 11. Success = (21-11)/20 = 0.5
+            // Charm +4 vs SA defence DC = 16 + 2 = 18. Need 14. Success = (21-14)/20 = 0.35
             var options = new[] { new DialogueOption(StatType.Charm, "charm") };
             var turn = new TurnStart(options, new GameStateSnapshot(10, InterestState.Interested, 0, Array.Empty<string>(), 1));
             var ctx = MakeContext(player, opponent);
 
             var decision = await agent.DecideAsync(turn, ctx);
 
-            Assert.Equal(0.5f, decision.Scores[0].SuccessChance);
+            Assert.Equal(0.35f, decision.Scores[0].SuccessChance);
         }
 
         [Fact]

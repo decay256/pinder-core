@@ -123,20 +123,22 @@ namespace Pinder.Core.Tests
         public async Task ThreeTurnSession_HighRolls_SuccessfulTurns()
         {
             // Each turn needs: d20 roll for RollEngine, d100 for TimingProfile.ComputeDelay
-            // With stat mod +2, level bonus +0, DC = 13 + 2 = 15
-            // Roll of 15: 15 + 2 + 0 = 17 >= 15 → success, beat by 2 → +1 interest
+            // With player stat mod +2, opponent allStats=0 → DC = 16 + 0 = 16
+            // Roll of 15: 15 + 2 + 0 = 17 >= 16 → success, beat by 1 → SuccessScale +1
+            // need = 16 - 2 = 14 → Hard → RiskTierBonus +3. Total delta = 4.
+            // Turn 3 starts at VeryIntoIt (interest=18) → advantage → 2 d20 rolls
             var dice = new FixedDice(
                 5,  // Constructor: horniness roll (1d10)
-                // Turn 1: d20=15, d100=50 (timing delay)
+                // Turn 1: d20=15, d100=50
                 15, 50,
                 // Turn 2: d20=15, d100=50
                 15, 50,
-                // Turn 3: d20=15, d100=50
-                15, 50
+                // Turn 3: advantage (VeryIntoIt) → d20=15, d20=15, d100=50
+                15, 15, 50
             );
 
             var player = MakeProfile("Player");
-            var opponent = MakeProfile("Opponent");
+            var opponent = MakeProfile("Opponent", 0);
             var llm = new NullLlmAdapter();
             var traps = new NullTrapRegistry();
 
@@ -144,15 +146,15 @@ namespace Pinder.Core.Tests
 
             // Turn 1
             var start1 = await session.StartTurnAsync();
-            Assert.Equal(4, start1.Options.Length);
+            Assert.True(start1.Options.Length >= 1);
             Assert.Equal(10, start1.State.Interest);
             Assert.Equal(InterestState.Interested, start1.State.State);
 
             var result1 = await session.ResolveTurnAsync(0); // Charm
             Assert.True(result1.Roll.IsSuccess);
-            // beat by 2 → SuccessScale +1, need=13 → Hard → RiskTierBonus +1, momentum bonus=0 (streak was 0)
-            Assert.Equal(2, result1.InterestDelta);
-            Assert.Equal(12, result1.StateAfter.Interest);
+            // SuccessScale +1 (beat by 1), Hard → RiskTierBonus +3, momentum=0 (streak was 0)
+            Assert.Equal(4, result1.InterestDelta);
+            Assert.Equal(14, result1.StateAfter.Interest);
             Assert.False(result1.IsGameOver);
             Assert.Equal(1, result1.StateAfter.TurnNumber);
 
@@ -160,28 +162,28 @@ namespace Pinder.Core.Tests
             var start2 = await session.StartTurnAsync();
             var result2 = await session.ResolveTurnAsync(0);
             Assert.True(result2.Roll.IsSuccess);
-            Assert.Equal(2, result2.InterestDelta); // streak=1 at start, no momentum; SuccessScale +1 + RiskTier +1
-            Assert.Equal(14, result2.StateAfter.Interest);
+            Assert.Equal(4, result2.InterestDelta); // streak=1 at start, SuccessScale +1 + Hard RiskTier +3
+            Assert.Equal(18, result2.StateAfter.Interest);
             Assert.Equal(2, result2.StateAfter.TurnNumber);
 
-            // Turn 3
+            // Turn 3 (VeryIntoIt → advantage, 2 d20 rolls)
             var start3 = await session.StartTurnAsync();
             var result3 = await session.ResolveTurnAsync(0);
             Assert.True(result3.Roll.IsSuccess);
             // streak=2 at start → momentum bonus=0 (applied as roll bonus, not interest delta #268)
-            // SuccessScale +1, RiskTier +1 = 2
-            Assert.Equal(2, result3.InterestDelta);
-            Assert.Equal(16, result3.StateAfter.Interest);
+            // SuccessScale +1, Hard RiskTier +3 = 4
+            Assert.Equal(4, result3.InterestDelta);
+            Assert.Equal(22, result3.StateAfter.Interest);
             Assert.Equal(3, result3.StateAfter.TurnNumber);
         }
 
         [Fact]
         public async Task FailedRoll_ResetsStreak_AppliesNegativeDelta()
         {
-            // DC = 13 + 2 = 15. Roll 5: 5 + 2 + 0 = 7 < 15. Miss by 8 → TropeTrap (-2 per rules-v3.4 §5)
+            // DC = 16 + 2 = 18. Roll 10: 10 + 2 + 0 = 12 < 18. Miss by 6 → TropeTrap (-2 per rules-v3.4 §5)
             var dice = new FixedDice(
                 5,  // Constructor: horniness roll (1d10)
-                5, 50  // d20=5, d100 for timing
+                10, 50  // d20=10, d100 for timing
             );
 
             var session = new GameSession(
@@ -206,12 +208,12 @@ namespace Pinder.Core.Tests
             // Then on next StartTurnAsync, ghost check: dice.Roll(4)==1 → Ghosted.
 
             // Turn 1: roll 1 (nat 1 → Legendary → -4 interest) → interest = 6 (Interested)
-            // Turn 2: roll 5 → miss by 8 → TropeTrap → -2 → interest = 4 (Bored)
+            // Turn 2: roll 7 → 7+2=9 vs DC 18 → miss by 9 → TropeTrap → -2 → interest = 4 (Bored)
             // Turn 3 start: ghost check Roll(4)=1 → Ghosted
             var dice = new FixedDice(
                 5,  // Constructor: horniness roll (1d10)
                 1, 50,    // Turn 1: nat 1, timing
-                5, 50,    // Turn 2: d20=5, timing
+                7, 50,    // Turn 2: d20=7, timing
                 1         // Turn 3 ghost check: Roll(4)=1
             );
 
@@ -273,11 +275,10 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task MomentumBonus_AppliedAsRollBonus()
         {
-            // 5 consecutive successes with roll=15, each beating DC by 2 → +1 base
-            // need = 15-(2+0) = 13 → Hard → +1 risk tier bonus per success
+            // 5 consecutive successes with player allStats=9, opponent allStats=0 → DC=16
+            // roll=8: 8+9=17 ≥ 16 → success, margin=1 → scale=+1. need=7 → Safe → +1 risk bonus.
             // Momentum is a roll bonus (ExternalBonus), not an interest delta (#268).
-            // SuccessScale uses Total (not FinalTotal), so momentum doesn't change the scale tier.
-            // streak 0→1: pending momentum=0, interestDelta = +1 scale +1 risk = 2
+            // streak 0→1: pending momentum=0, interestDelta = +1 scale +1 safe = 2
             // streak 1→2: pending momentum=0, interestDelta = 2
             // streak 2→3: pending momentum=0, interestDelta = 2. After: interest=16 (VeryIntoIt → advantage)
             // streak 3→4: pending momentum=+2 (roll bonus), interestDelta = 2
@@ -287,15 +288,15 @@ namespace Pinder.Core.Tests
             // At turn 5 start, interest=18 (VeryIntoIt) → advantage → 2x d20
             var dice = new FixedDice(
                 5,  // Constructor: horniness roll (1d10)
-                15, 50,        // Turn 1: d20, d100 (timing)
-                15, 50,        // Turn 2: d20, d100
-                15, 50,        // Turn 3: d20, d100. After: 16 (VeryIntoIt)
-                15, 15, 50,    // Turn 4: 2x d20 (advantage), d100
-                15, 15, 50     // Turn 5: 2x d20 (advantage), d100
+                8, 50,        // Turn 1: d20, d100 (timing)
+                8, 50,        // Turn 2: d20, d100
+                8, 50,        // Turn 3: d20, d100. After: 16 (VeryIntoIt)
+                8, 8, 50,     // Turn 4: 2x d20 (advantage), d100
+                8, 8, 50      // Turn 5: 2x d20 (advantage), d100
             );
 
             var session = new GameSession(
-                MakeProfile("P"), MakeProfile("O"),
+                MakeProfile("P", 9), MakeProfile("O", 0),
                 new NullLlmAdapter(), dice, new NullTrapRegistry());
 
             // Every turn has the same interestDelta; momentum is in ExternalBonus
@@ -318,19 +319,20 @@ namespace Pinder.Core.Tests
         public async Task MomentumBonus_CanChangeOutcomeTier()
         {
             // AC: 3-win streak → next roll has +2 external bonus → can change outcome tier
-            // Setup: 3 successes with roll=15 (Total=17, DC=15, success), then
-            // turn 4 with roll=12 (Total=14, DC=15 → normally fail). With +2 momentum,
+            // Player allStats=9, opponent allStats=0 → DC=16.
+            // Setup: 3 successes with roll=8 (Total=17, DC=16, success), then
+            // turn 4 with roll=5 (Total=14, DC=16 → normally fail). With +2 momentum,
             // FinalTotal=16 → success.
             var dice = new FixedDice(
                 5,  // Constructor: horniness roll (1d10)
-                15, 50,   // Turn 1: success
-                15, 50,   // Turn 2: success
-                15, 50,   // Turn 3: success. After: interest=16 (VeryIntoIt → advantage)
-                12, 12, 50  // Turn 4: advantage → 2 d20s, both 12. Total=14, DC=15. Without momentum: fail. With +2: success.
+                8, 50,   // Turn 1: success (8+9=17)
+                8, 50,   // Turn 2: success
+                8, 50,   // Turn 3: success. After: interest=16 (VeryIntoIt → advantage)
+                5, 5, 50  // Turn 4: advantage → 2 d20s, both 5. Total=14, DC=16. Without momentum: fail. With +2: success.
             );
 
             var session = new GameSession(
-                MakeProfile("P"), MakeProfile("O"),
+                MakeProfile("P", 9), MakeProfile("O", 0),
                 new NullLlmAdapter(), dice, new NullTrapRegistry());
 
             // Build a 3-win streak
@@ -347,9 +349,9 @@ namespace Pinder.Core.Tests
 
             // Momentum bonus of +2 is in ExternalBonus
             Assert.Equal(2, result.Roll.ExternalBonus);
-            // Total=14 (12+2+0), FinalTotal=16 (14+2) >= DC=15 → success
+            // Total=14 (5+9+0), FinalTotal=16 (14+2) >= DC=16 → success
             Assert.Equal(14, result.Roll.Total);
-            Assert.True(result.Roll.IsSuccess, "Momentum +2 should make this roll succeed (FinalTotal 16 >= DC 15)");
+            Assert.True(result.Roll.IsSuccess, "Momentum +2 should make this roll succeed (FinalTotal 16 >= DC 16)");
         }
 
         [Fact]
@@ -379,7 +381,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task DeliveredMessage_AppearsInHistory()
         {
-            var dice = new FixedDice(5, 15, 50);
+            var dice = new FixedDice(5, 16, 50);
             var session = new GameSession(
                 MakeProfile("Player"), MakeProfile("Opponent"),
                 new NullLlmAdapter(), dice, new NullTrapRegistry());

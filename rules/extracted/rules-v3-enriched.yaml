@@ -412,7 +412,7 @@
   - kind: paragraph
     text: The opponent is another player's uploaded character. Their stats determine **defense DCs.**
   - kind: paragraph
-    text: '**Defense DC = 13 + their stat modifier**'
+    text: '**Defense DC = 16 + their stat modifier**'
   - kind: table
     rows:
     - You Roll: Charm

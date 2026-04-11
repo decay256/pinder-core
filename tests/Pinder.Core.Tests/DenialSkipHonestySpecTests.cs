@@ -152,7 +152,7 @@ namespace Pinder.Core.Tests
                 new DialogueOption(StatType.Wit, "clever quip")
             };
             var session = BuildSession(
-                dice: Dice(15, 50, 15, 50, 15, 50),
+                dice: Dice(15, 50, 15, 50, 15, 15, 50),
                 shadows: shadows,
                 options: options);
 

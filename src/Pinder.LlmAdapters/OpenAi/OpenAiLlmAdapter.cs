@@ -101,7 +101,7 @@ namespace Pinder.LlmAdapters.OpenAi
             if (context == null) throw new ArgumentNullException(nameof(context));
 
             var deliveryRules = _options.GameDefinition?.DeliveryRules;
-            var userContent = SessionDocumentBuilder.BuildDeliveryPrompt(context, deliveryRules: deliveryRules);
+            var userContent = SessionDocumentBuilder.BuildDeliveryPrompt(context, deliveryRules: deliveryRules, statDeliveryInstructions: _options.StatDeliveryInstructions);
             var systemPrompt = SessionSystemPromptBuilder.BuildPlayer(context.PlayerPrompt, _options.GameDefinition);
 
             var requestJson = BuildRequestJson(systemPrompt, userContent, DefaultDeliveryTemperature);

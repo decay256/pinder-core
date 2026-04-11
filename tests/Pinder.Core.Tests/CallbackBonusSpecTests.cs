@@ -272,14 +272,14 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task AC5_CallbackBonus_TurnsMissIntoSuccess()
         {
-            // DC = 13 + 2 = 15. Roll d20=12, mod=2, levelBonus=0 → Total=14.
-            // Without bonus: 14 < 15 → fail.
-            // With opener callback bonus +3: FinalTotal = 14 + 3 = 17 >= 15 → success.
+            // DC = 16 + 2 = 18. Roll d20=13, mod=2, levelBonus=0 → Total=15.
+            // Without bonus: 15 < 18 → fail.
+            // With opener callback bonus +3: FinalTotal = 15 + 3 = 18 >= 18 → success.
             var dice = new FixedDice(
                 5,  // Constructor: horniness roll (1d10)
-                15, 50,  // Turn 0: auto-success to keep interest up
-                15, 50,  // Turn 1: auto-success
-                12, 50,  // Turn 2: would-fail roll (12 + 2 = 14 < 15)
+                15, 50,  // Turn 0: setup turn
+                15, 50,  // Turn 1: setup turn
+                13, 50,  // Turn 2: would-fail roll (13 + 2 = 15 < 18)
                 50, 50, 50, 50  // buffer
             );
 

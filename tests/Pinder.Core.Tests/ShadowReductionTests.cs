@@ -127,14 +127,14 @@ namespace Pinder.Core.Tests
             shadows.DrainGrowthEvents();
 
             // Interest at 14 (just under threshold) — need to check what interest is AFTER the roll
-            // With a success of +1, interest goes from 14 to 15. interestAfter is 15 → should trigger.
-            // So let's use interest 13 where even after success it stays at 14
+            // Honesty vs Chaos(1) → DC = 16 + 1 = 17. need=17-5=12 → Hard (+3). Roll 14+5=19 beat by 2 → scale=+1. delta=4.
+            // startingInterest=10: after delta=4 → interest=14 < 15, no reduction.
             var session = BuildSession(
-                dice: Dice(14, 50), // roll 14 + honesty 5 = 19 vs DC ~14 → just beats by 5 → +2 interest
+                dice: Dice(14, 50), // roll 14 + honesty 5 = 19 vs DC 17 → beats by 2 → scale=+1
                 playerStats: Stats(honesty: 5),
-                opponentStats: Stats(chaos: 1), // defence for Honesty is Chaos → DC = 13 + 1 = 14
+                opponentStats: Stats(chaos: 1), // defence for Honesty is Chaos → DC = 16 + 1 = 17
                 shadows: shadows,
-                startingInterest: 12, // after +2 = 14 < 15
+                startingInterest: 10, // after +4 = 14 < 15
                 options: new[] { new DialogueOption(StatType.Honesty, "truth") });
 
             await session.StartTurnAsync();
@@ -373,7 +373,7 @@ namespace Pinder.Core.Tests
                 dice: new TestDice(diceValues.ToArray()),
                 playerStats: Stats(charm: 5, honesty: 5, wit: 5, chaos: 5),
                 shadows: shadows,
-                startingInterest: 10);
+                startingInterest: 5);
 
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0); // Charm

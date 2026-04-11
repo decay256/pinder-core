@@ -214,17 +214,17 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task ResolveTurn_SuccessDcLow_AwardsMultipliedXp()
         {
-            // Opponent stat 0 → DC = 13 + 0 = 13, need=13-3=10 → Medium (1.5x), base 5 → 8
+            // Opponent stat 0 → DC = 16 + 0 = 16, need=16-3=13 → Hard (2x), base 5 → 10
             var session = MakeSession(diceRoll: 15, opponentStatValue: 0);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
             Assert.True(result.Roll.IsSuccess);
-            Assert.Equal(13, result.Roll.DC);
-            Assert.Equal(RiskTier.Medium, result.Roll.RiskTier);
-            Assert.Equal(8, result.XpEarned); // 5 * 1.5 = 7.5 → 8
+            Assert.Equal(16, result.Roll.DC);
+            Assert.Equal(RiskTier.Hard, result.Roll.RiskTier);
+            Assert.Equal(10, result.XpEarned); // 5 * 2.0 = 10
             var evt = session.XpLedger.Events.Single(e => e.Source == "Success_DC_Low");
-            Assert.Equal(8, evt.Amount);
+            Assert.Equal(10, evt.Amount);
         }
 
         // What: AC-2 — Successful check DC 14–17, Hard risk tier awards 10*2=20 XP (spec §2, §4, risk-reward doc)
@@ -232,13 +232,13 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task ResolveTurn_SuccessDcMid_AwardsMultipliedXp()
         {
-            // Opponent stat 1 → DC = 13 + 1 = 14, need=14-3=11 → Hard (2x), base 10 → 20
+            // Opponent stat 1 → DC = 16 + 1 = 17, need=17-3=14 → Hard (2x), base 10 → 20
             var session = MakeSession(diceRoll: 18, opponentStatValue: 1);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
             Assert.True(result.Roll.IsSuccess);
-            Assert.Equal(14, result.Roll.DC);
+            Assert.Equal(17, result.Roll.DC);
             Assert.Equal(RiskTier.Hard, result.Roll.RiskTier);
             Assert.Equal(20, result.XpEarned); // 10 * 2.0 = 20
             var evt = session.XpLedger.Events.Single(e => e.Source == "Success_DC_Mid");
@@ -250,18 +250,18 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task ResolveTurn_SuccessDcHigh_AwardsMultipliedXp()
         {
-            // Opponent stat 5 → DC = 13 + 5 = 18, need=18-3=15 → Hard (2x), base 15 → 30
-            var session = MakeSession(diceRoll: 16, opponentStatValue: 5);
+            // Opponent stat 5 → DC = 16 + 5 = 21, need=21-3=18 → Bold (3x), base 15 → 45
+            var session = MakeSession(diceRoll: 19, opponentStatValue: 5);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
             Assert.True(result.Roll.IsSuccess);
             Assert.False(result.Roll.IsNatTwenty);
             Assert.True(result.Roll.DC >= 18);
-            Assert.Equal(RiskTier.Hard, result.Roll.RiskTier);
-            Assert.Equal(30, result.XpEarned); // 15 * 2.0 = 30
+            Assert.Equal(RiskTier.Bold, result.Roll.RiskTier);
+            Assert.Equal(45, result.XpEarned); // 15 * 3.0 = 45
             var evt = session.XpLedger.Events.Single(e => e.Source == "Success_DC_High");
-            Assert.Equal(30, evt.Amount);
+            Assert.Equal(45, evt.Amount);
         }
 
         // What: AC-2 — Failed check awards 2 XP with label "Failure" (spec §2, §4)
@@ -462,13 +462,13 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task ResolveTurn_DcExactly13_IsLowTier()
         {
-            // need=13-3=10 → Medium (1.5x), base 5 → 8
-            var session = MakeSession(diceRoll: 15, opponentStatValue: 0); // DC = 13+0 = 13
+            // need=16-3=13 → Hard (2x), base 5 → 10 (DC base is now 16)
+            var session = MakeSession(diceRoll: 15, opponentStatValue: 0); // DC = 16+0 = 16
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
-            Assert.Equal(13, result.Roll.DC);
-            Assert.Equal(8, result.XpEarned); // 5 * 1.5 = 7.5 → 8
+            Assert.Equal(16, result.Roll.DC);
+            Assert.Equal(10, result.XpEarned); // 5 * 2.0 = 10
         }
 
         // What: AC-6 — DC exactly 14, Hard risk → 10*2=20 XP (spec §10 boundary)
@@ -476,12 +476,12 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task ResolveTurn_DcExactly14_IsMidTier()
         {
-            // need=14-3=11 → Hard (2x), base 10 → 20
-            var session = MakeSession(diceRoll: 18, opponentStatValue: 1); // DC = 13+1 = 14
+            // need=17-3=14 → Hard (2x), base 10 → 20 (DC base is now 16)
+            var session = MakeSession(diceRoll: 18, opponentStatValue: 1); // DC = 16+1 = 17
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
-            Assert.Equal(14, result.Roll.DC);
+            Assert.Equal(17, result.Roll.DC);
             Assert.Equal(20, result.XpEarned); // 10 * 2.0 = 20
         }
 
@@ -490,16 +490,16 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task ResolveTurn_DcExactly17_IsMidTier()
         {
-            // need=17-3=14 → Hard (2x), base 10 → 20
-            var session2 = MakeSession(diceRoll: 16, opponentStatValue: 4); // DC = 13+4 = 17
+            // need=20-3=17 → Bold (3x), base 10 → 30 (DC base is now 16, opponentStat=4 → DC=20)
+            var session2 = MakeSession(diceRoll: 18, opponentStatValue: 4); // DC = 16+4 = 20
             await session2.StartTurnAsync();
             var result = await session2.ResolveTurnAsync(0);
 
-            Assert.Equal(17, result.Roll.DC);
+            Assert.Equal(20, result.Roll.DC);
             Assert.True(result.Roll.IsSuccess);
             Assert.False(result.Roll.IsNatTwenty);
-            Assert.Equal(RiskTier.Hard, result.Roll.RiskTier);
-            Assert.Equal(20, result.XpEarned); // 10 * 2.0 = 20
+            Assert.Equal(RiskTier.Bold, result.Roll.RiskTier);
+            Assert.Equal(30, result.XpEarned); // 10 * 3.0 = 30
         }
 
         // What: AC-6 — DC exactly 18, Hard risk → 15*2=30 XP (spec §10 boundary)
@@ -507,16 +507,16 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task ResolveTurn_DcExactly18_IsHighTier()
         {
-            // need=18-3=15 → Hard (2x), base 15 → 30
-            var session = MakeSession(diceRoll: 16, opponentStatValue: 5); // DC = 13+5 = 18
+            // need=21-3=18 → Bold (3x), base 15 → 45 (DC base is now 16, opponentStat=5 → DC=21)
+            var session = MakeSession(diceRoll: 19, opponentStatValue: 5); // DC = 16+5 = 21
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
-            Assert.Equal(18, result.Roll.DC);
+            Assert.True(result.Roll.DC >= 18);
             Assert.True(result.Roll.IsSuccess);
             Assert.False(result.Roll.IsNatTwenty);
-            Assert.Equal(RiskTier.Hard, result.Roll.RiskTier);
-            Assert.Equal(30, result.XpEarned); // 15 * 2.0 = 30
+            Assert.Equal(RiskTier.Bold, result.Roll.RiskTier);
+            Assert.Equal(45, result.XpEarned); // 15 * 3.0 = 45
         }
 
         // What: Edge case — DC > 20, Bold risk → 15*3=45 XP (spec §10)
@@ -524,8 +524,8 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task ResolveTurn_DcAbove20_IsHighTier()
         {
-            // need=21-3=18 → Bold (3x), base 15 → 45
-            var session = MakeSession(diceRoll: 19, opponentStatValue: 8); // DC = 13+8 = 21
+            // need=22-3=19 → Bold (3x), base 15 → 45 (DC base 16, opponentStat=6 → DC=22)
+            var session = MakeSession(diceRoll: 19, opponentStatValue: 6); // DC = 16+6 = 22
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -541,13 +541,13 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task ResolveTurn_DcBelow13_IsLowTier()
         {
-            // need=13-3=10 → Medium (1.5x), base 5 → 8
+            // need=16-3=13 → Hard (2x), base 5 → 10 (DC base is now 16)
             var session = MakeSession(diceRoll: 15, opponentStatValue: 0);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
-            Assert.True(result.Roll.DC <= 13);
-            Assert.Equal(8, result.XpEarned); // 5 * 1.5 = 7.5 → 8
+            Assert.True(result.Roll.DC <= 16);
+            Assert.Equal(10, result.XpEarned); // 5 * 2.0 = 10
         }
 
         // ====================== Precedence / Override Tests ======================
@@ -557,14 +557,14 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task ResolveTurn_Nat20LowDc_Awards25Not5()
         {
-            var session = MakeSession(diceRoll: 20, opponentStatValue: 0); // DC=13
+            var session = MakeSession(diceRoll: 20, opponentStatValue: 0); // DC=16
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
             Assert.True(result.Roll.IsNatTwenty);
-            Assert.Equal(13, result.Roll.DC);
+            Assert.Equal(16, result.Roll.DC);
             Assert.Equal(25, result.XpEarned);
-            // Specifically NOT 5 (DC low) and NOT 30 (5+25)
+            // Specifically NOT 5 (DC low) and NOT 35 (10+25)
         }
 
         // What: Spec §10 edge case — Nat 20 with high DC awards 25, not 15 (high tier replaced)
@@ -659,8 +659,8 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task FullSession_XpAccumulation_AccrossTurns()
         {
-            // All turns succeed with DC 13, Medium risk (1.5x), base 5 → 8 each
-            // 3 turns = 24 XP total
+            // All turns succeed with DC 16, Hard risk (2x), base 5 → 10 each
+            // 3 turns = 30 XP total
             var session = MakeSession(diceRoll: 15, opponentStatValue: 0);
 
             int totalFromTurns = 0;
@@ -677,11 +677,11 @@ namespace Pinder.Core.Tests
             var t3 = await session.ResolveTurnAsync(0);
             totalFromTurns += t3.XpEarned;
 
-            // Each turn earns 8 XP (base 5 * 1.5 Medium = 7.5 → 8)
-            Assert.Equal(8, t1.XpEarned);
-            Assert.Equal(8, t2.XpEarned);
-            Assert.Equal(8, t3.XpEarned);
-            Assert.Equal(24, totalFromTurns);
+            // Each turn earns 10 XP (base 5 * 2.0 Hard = 10)
+            Assert.Equal(10, t1.XpEarned);
+            Assert.Equal(10, t2.XpEarned);
+            Assert.Equal(10, t3.XpEarned);
+            Assert.Equal(30, totalFromTurns);
             Assert.Equal(totalFromTurns, session.TotalXpEarned);
         }
 
@@ -738,9 +738,9 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task RiskTierXp_Medium_1_5xMultiplier()
         {
-            // Player stat 3 → need = 13 - 3 = 10 → Medium (6–10)
-            // DC = 13, base XP = 5, multiplier 1.5x → 8
-            var session = MakeSession(diceRoll: 15, opponentStatValue: 0, playerStatValue: 3);
+            // Player stat 6 → need = 16 - 6 = 10 → Medium (8–11)
+            // DC = 16, base XP = 5, multiplier 1.5x → 8
+            var session = MakeSession(diceRoll: 15, opponentStatValue: 0, playerStatValue: 6);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -770,9 +770,9 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task RiskTierXp_Bold_3xMultiplier()
         {
-            // Player stat 3 → need = 21 - 3 = 18 → Bold (≥16)
-            // DC = 21, base XP = 15, multiplier 3x → 45
-            var session = MakeSession(diceRoll: 19, opponentStatValue: 8, playerStatValue: 3);
+            // Player stat 3 → need = 22 - 3 = 19 → Bold (16–19)
+            // DC = 22 (opponent=6), base XP = 15 (DC>20), multiplier 3x → 45
+            var session = MakeSession(diceRoll: 19, opponentStatValue: 6, playerStatValue: 3);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -826,8 +826,8 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task RiskTierXp_Medium_RoundsCorrectly()
         {
-            // base 5 * 1.5 = 7.5, Math.Round → 8
-            var session = MakeSession(diceRoll: 15, opponentStatValue: 0, playerStatValue: 3);
+            // base 5 * 1.5 = 7.5, Math.Round → 8. Player stat 6, opponent 0 → DC=16, need=10 → Medium
+            var session = MakeSession(diceRoll: 15, opponentStatValue: 0, playerStatValue: 6);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 

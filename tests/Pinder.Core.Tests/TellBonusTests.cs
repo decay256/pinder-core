@@ -357,7 +357,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task EdgeCase9_TellMatchedButRollStillFails_BonusRecorded()
         {
-            // Player has allStats=2, opponent allStats=2, so DC = 13 + 2 = 15
+            // Player has allStats=2, opponent allStats=2, so DC = 16 + 2 = 15
             // d20=10, mod=2, total=12, externalBonus=2, finalTotal=14 < 15 → still fails
             var llm = new TellTestLlm();
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Setup"));
@@ -387,15 +387,15 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task TellBonusTurnsMissIntoHit()
         {
-            // DC = 13 + 2 = 15. d20=11 + mod=2 = total 13, externalBonus=2 → FinalTotal=15 = success
+            // DC = 16 + 2 = 18. d20=14 + mod=2 = total 16, externalBonus=2 → FinalTotal=18 = success
             var llm = new TellTestLlm();
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Setup"));
             llm.EnqueueTell(new Tell(StatType.Wit, "Makes joke"));
             llm.EnqueueOptions(new DialogueOption(StatType.Wit, "Funny"));
             llm.EnqueueTell(null);
 
-            // Turn 0: d20=15, timing=5. Turn 1: d20=11, timing=5
-            var dice = new FixedDice(5, 15, 5, 11, 5);
+            // Turn 0: d20=15, timing=5. Turn 1: d20=14, timing=5
+            var dice = new FixedDice(5, 15, 5, 14, 5);
             var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
 
             await session.StartTurnAsync();
@@ -404,8 +404,8 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
-            // Without bonus: 11+2=13 < 15 → fail
-            // With bonus: 11+2+2=15 >= 15 → success
+            // Without bonus: 14+2=16 < 18 → fail
+            // With bonus: 14+2+2=18 >= 18 → success
             Assert.True(result.Roll.IsSuccess);
             Assert.Equal(2, result.TellReadBonus);
         }

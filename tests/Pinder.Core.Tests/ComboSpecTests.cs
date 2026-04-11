@@ -726,7 +726,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.Wit, "Witty"));
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Charming"));
 
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O", 0), llm, dice, new NullTrapRegistry());
 
             await session.StartTurnAsync();
             var r1 = await session.ResolveTurnAsync(0);
@@ -738,8 +738,8 @@ namespace Pinder.Core.Tests
             Assert.Equal("The Setup", r2.ComboTriggered);
 
             // Verify combo bonus (+1) is included in interest delta
-            // SuccessScale(+1 for beat by 2) + RiskTierBonus(Hard:+1) + combo(+1) = 3
-            Assert.Equal(3, r2.InterestDelta);
+            // SuccessScale(+1 for beat by 1) + RiskTierBonus(Hard:+3) + combo(+1) = 5
+            Assert.Equal(5, r2.InterestDelta);
         }
 
         // Mutation: would catch if GameSession set ComboTriggered even on failed roll
@@ -756,7 +756,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.Wit, "Witty"));
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Charming"));
 
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O", 0), llm, dice, new NullTrapRegistry());
 
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0);
@@ -781,7 +781,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.Chaos, "Chaos"));
             llm.EnqueueOptions(new DialogueOption(StatType.Rizz, "Rizz"));
 
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O", 0), llm, dice, new NullTrapRegistry());
 
             await session.StartTurnAsync();
             var r1 = await session.ResolveTurnAsync(0);
@@ -810,7 +810,7 @@ namespace Pinder.Core.Tests
                 new DialogueOption(StatType.SelfAwareness, "SA")
             );
 
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O", 0), llm, dice, new NullTrapRegistry());
 
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0);
@@ -825,12 +825,13 @@ namespace Pinder.Core.Tests
         public async Task AC4_Integration_TripleBonusAppliedAsExternalBonus()
         {
             // 3 turns with distinct non-overlapping stats, then check external bonus on turn 4
+            // Opponent allStats=0 → DC=16. Turn 2 reaches VeryIntoIt (interest 10+4+4=18) → advantage from turn 3.
             var dice = new FixedDice(
                 5,  // Constructor: horniness roll (1d10)
-                15, 50, // Turn 1: Rizz (d20, d100)
-                15, 50, // Turn 2: SA (d20, d100)
-                15, 50, // Turn 3: Chaos → Triple (d20, d100)
-                15, 15, 50  // Turn 4: advantage from VeryIntoIt (d20, d20, d100)
+                15, 50,      // Turn 1: Rizz (d20, d100)
+                15, 50,      // Turn 2: SA (d20, d100)
+                15, 15, 50,  // Turn 3: Chaos → Triple (VeryIntoIt advantage: d20, d20, d100)
+                15, 15, 50   // Turn 4: advantage (d20, d20, d100)
             );
 
             var llm = new ComboTestLlmAdapter();
@@ -840,7 +841,7 @@ namespace Pinder.Core.Tests
             // Use SA again to avoid triggering a second Triple (SA,Chaos,SA = not 3 distinct)
             llm.EnqueueOptions(new DialogueOption(StatType.SelfAwareness, "SA2"));
 
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O", 0), llm, dice, new NullTrapRegistry());
 
             // Turns 1-2
             await session.StartTurnAsync();
@@ -877,7 +878,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.Wit, "Wit"));
             llm.EnqueueOptions(new DialogueOption(StatType.SelfAwareness, "SA"));
 
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry());
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O", 0), llm, dice, new NullTrapRegistry());
 
             await session.StartTurnAsync();
             var r1 = await session.ResolveTurnAsync(0);
@@ -888,8 +889,8 @@ namespace Pinder.Core.Tests
             Assert.True(r2.Roll.IsSuccess);
             Assert.Equal("The Recovery", r2.ComboTriggered);
 
-            // Interest delta: SuccessScale(+1) + RiskTierBonus(Hard:+1) + combo(+2) = +4
-            Assert.Equal(4, r2.InterestDelta);
+            // Interest delta: SuccessScale(+1) + RiskTierBonus(Hard:+3) + combo(+2) = +6
+            Assert.Equal(6, r2.InterestDelta);
         }
     }
 }
