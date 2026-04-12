@@ -1,4 +1,5 @@
 name: "Pinder"
+max_turns: 30
 vision: |
   Pinder is a comedy dating RPG where every character is a sentient penis
   on a Tinder-like dating app. You dress up, build stats, and try to charm

@@ -153,6 +153,9 @@ namespace Pinder.LlmAdapters
         /// <summary>Global DC bias applied to all rolls. 0 = standard difficulty. Positive = harder.</summary>
         public int GlobalDcBias { get; }
 
+        /// <summary>Maximum number of turns per session. Default 30 if not set in YAML.</summary>
+        public int MaxTurns { get; }
+
         /// <summary>Time-of-day horniness modifiers loaded from game-definition.yaml.</summary>
         public HorninessTimeModifiers HorninessTimeModifiers { get; }
 
@@ -175,7 +178,8 @@ namespace Pinder.LlmAdapters
             string improvementPrompt = null,
             string steeringPrompt = null,
             HorninessTimeModifiers horninessTimeModifiers = null,
-            int globalDcBias = 0)
+            int globalDcBias = 0,
+            int maxTurns = 30)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Vision = vision ?? throw new ArgumentNullException(nameof(vision));
@@ -196,6 +200,7 @@ namespace Pinder.LlmAdapters
             DramaticCraft = dramaticCraft;
             HorninessTimeModifiers = horninessTimeModifiers;
             GlobalDcBias = globalDcBias;
+            MaxTurns = maxTurns > 0 ? maxTurns : 30;
         }
 
         /// <summary>
@@ -342,7 +347,8 @@ namespace Pinder.LlmAdapters
                 improvementPrompt: GetOptional("improvement_prompt"),
                 steeringPrompt: GetOptional("steering_prompt"),
                 horninessTimeModifiers: horninessTimeModifiers,
-                globalDcBias: globalDcBias
+                globalDcBias: globalDcBias,
+                maxTurns: parsed.TryGetValue("max_turns", out var mtObj) && int.TryParse(mtObj?.ToString(), out int mt) ? mt : 30
             );
         }
 

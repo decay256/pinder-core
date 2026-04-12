@@ -236,7 +236,7 @@ class Program
         var apiKey = Environment.GetEnvironmentVariable("ANTHROPIC_API_KEY");
         if (string.IsNullOrEmpty(apiKey)) { Console.Error.WriteLine("ANTHROPIC_API_KEY not set"); return 1; }
 
-        int maxTurns = ParseMaxTurns(args);
+        int maxTurnsArg = ParseMaxTurns(args, defaultValue: -1); // -1 = not specified
         string agentType = ParseAgentArg(args);
         bool isDebug = args.Contains("--debug");
 
@@ -370,6 +370,9 @@ class Program
                 Console.Error.WriteLine($"[WARN] Failed to load game-definition.yaml: {ex.Message}");
             }
         }
+
+        // Resolve maxTurns: CLI arg overrides YAML, YAML overrides default (30)
+        int maxTurns = maxTurnsArg > 0 ? maxTurnsArg : (gameDef?.MaxTurns ?? 30);
 
         // Load delivery-instructions.yaml if present
         string? deliveryInstructionsPath = DataFileLocator.FindDataFile(AppContext.BaseDirectory, Path.Combine("data", "delivery-instructions.yaml"));
