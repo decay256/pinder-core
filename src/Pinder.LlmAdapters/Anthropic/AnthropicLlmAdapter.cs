@@ -17,7 +17,9 @@ namespace Pinder.LlmAdapters.Anthropic
     /// Parsing, request building, improvement, debug logging, and overlay logic
     /// are delegated to single-responsibility modules:
     /// - AnthropicRequestBuilders
-    /// - AnthropicResponseParsers
+    /// - DialogueOptionParsers
+    /// - OpponentResponseParsers
+    /// - StatNameNormalizer
     /// - AnthropicResponseImprover
     /// - AnthropicDebugLogger
     /// - AnthropicOverlayApplier
@@ -89,7 +91,7 @@ namespace Pinder.LlmAdapters.Anthropic
             var toolInput = response.GetToolInput();
             if (toolInput != null)
             {
-                var parsed = AnthropicResponseParsers.ParseDialogueOptionsTool(toolInput);
+                var parsed = DialogueOptionParsers.ParseDialogueOptionsTool(toolInput);
                 if (parsed != null) return parsed;
             }
 
@@ -100,7 +102,7 @@ namespace Pinder.LlmAdapters.Anthropic
                 : await AnthropicResponseImprover.ApplyImprovementAsync(
                     _client, _options, systemBlocks, userContent, optionsDraft,
                     _options.DialogueOptionsTemperature ?? DefaultDialogueOptionsTemperature).ConfigureAwait(false);
-            return AnthropicResponseParsers.ParseDialogueOptionsText(optionsText);
+            return DialogueOptionParsers.ParseDialogueOptionsText(optionsText);
         }
 
         /// <inheritdoc />
@@ -179,7 +181,7 @@ namespace Pinder.LlmAdapters.Anthropic
             var toolInput = response.GetToolInput();
             if (toolInput != null)
             {
-                var parsed = AnthropicResponseParsers.ParseOpponentResponseTool(toolInput);
+                var parsed = OpponentResponseParsers.ParseOpponentResponseTool(toolInput);
                 if (parsed != null)
                 {
                     if (_opponentSession != null)
@@ -201,7 +203,7 @@ namespace Pinder.LlmAdapters.Anthropic
                 _opponentSession.AppendAssistant(responseText);
             }
 
-            return AnthropicResponseParsers.ParseOpponentResponseText(responseText);
+            return OpponentResponseParsers.ParseOpponentResponseText(responseText);
         }
 
         /// <inheritdoc />
@@ -274,17 +276,17 @@ namespace Pinder.LlmAdapters.Anthropic
 
         /// <summary>
         /// Parses structured LLM output into DialogueOption array.
-        /// Delegates to AnthropicResponseParsers.ParseDialogueOptionsText.
+        /// Delegates to DialogueOptionParsers.ParseDialogueOptionsText.
         /// </summary>
         internal static DialogueOption[] ParseDialogueOptions(string? llmResponse)
-            => AnthropicResponseParsers.ParseDialogueOptionsText(llmResponse);
+            => DialogueOptionParsers.ParseDialogueOptionsText(llmResponse);
 
         /// <summary>
         /// Parses structured LLM output with optional [SIGNALS] blocks.
-        /// Delegates to AnthropicResponseParsers.ParseOpponentResponseText.
+        /// Delegates to OpponentResponseParsers.ParseOpponentResponseText.
         /// </summary>
         internal static OpponentResponse ParseOpponentResponse(string? llmResponse)
-            => AnthropicResponseParsers.ParseOpponentResponseText(llmResponse);
+            => OpponentResponseParsers.ParseOpponentResponseText(llmResponse);
 
         public void Dispose()
         {
