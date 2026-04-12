@@ -49,8 +49,8 @@ namespace Pinder.LlmAdapters.Anthropic
                 // Detect refusal — fall back to original message silently
                 if (trimmed.StartsWith("I can't", System.StringComparison.OrdinalIgnoreCase) ||
                     trimmed.StartsWith("I cannot", System.StringComparison.OrdinalIgnoreCase) ||
-                    trimmed.Contains("inappropriate", System.StringComparison.OrdinalIgnoreCase) ||
-                    trimmed.Contains("I'd be happy to help", System.StringComparison.OrdinalIgnoreCase))
+                    trimmed.IndexOf("inappropriate", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    trimmed.IndexOf("I'd be happy to help", System.StringComparison.OrdinalIgnoreCase) >= 0)
                     return message;
                 return trimmed;
             }
