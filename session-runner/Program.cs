@@ -793,23 +793,45 @@ class Program
             bool isStrongSuccess = isSuccess && (roll.FinalTotal - roll.DC >= 5 || roll.IsNatTwenty);
             bool isFail = roll.Tier != FailureTier.None || roll.IsNatOne;
             
-            if (isStrongSuccess || isFail)
+            // #736: Layered display — tier modifier and horniness overlay shown as separate layers
+            bool tierFired = isStrongSuccess || isFail;
+            bool horninessFired = result.HorninessCheck != null && result.HorninessCheck.OverlayApplied;
+
+            if (!tierFired && !horninessFired)
             {
-                string intended = chosen.IntendedText ?? "";
-                string label = isStrongSuccess ? "Strong success" : 
-                               roll.IsNatOne ? "Nat 1" : 
-                               roll.Tier.ToString();
-                if (roll.IsNatTwenty) label = "Nat 20";
-                
-                PrintQuoted("**Intended:** " + (string.IsNullOrWhiteSpace(intended) || intended == "..." ? "..." : $"\"{intended}\""));
-                Console.WriteLine();
-                string marker = isStrongSuccess ? "__" : "*";
-                string formattedDelivered = FormatDeliveredAdditions(intended, result.DeliveredMessage ?? "", marker);
-                PrintQuoted($"**Delivered ({label}):** \"{formattedDelivered}\"");
+                // Clean success, no horniness — just show the message
+                PrintQuoted(result.DeliveredMessage);
             }
             else
             {
-                PrintQuoted(result.DeliveredMessage);
+                string intended = chosen.IntendedText ?? "";
+                string intendedDisplay = string.IsNullOrWhiteSpace(intended) || intended == "..." ? "..." : $"\"{intended}\"";
+                PrintQuoted("**Intended:** " + intendedDisplay);
+                Console.WriteLine();
+
+                if (tierFired)
+                {
+                    string label = isStrongSuccess ? "Strong success" :
+                                   roll.IsNatOne ? "Nat 1" :
+                                   roll.Tier.ToString();
+                    if (roll.IsNatTwenty) label = "Nat 20";
+                    string marker = isStrongSuccess ? "__" : "*";
+                    // When horniness also fired, the tier-modified intermediate is DeliveredBeforeHorniness
+                    string tierText = horninessFired
+                        ? (result.DeliveredBeforeHorniness ?? result.DeliveredMessage ?? "")
+                        : (result.DeliveredMessage ?? "");
+                    string formattedDelivered = FormatDeliveredAdditions(intended, tierText, marker);
+                    PrintQuoted($"**Delivered ({label}):** \"{formattedDelivered}\"");
+                    Console.WriteLine();
+                }
+
+                if (horninessFired)
+                {
+                    var hc = result.HorninessCheck!;
+                    string horninessLabel = hc.Tier != Pinder.Core.Rolls.FailureTier.None ? hc.Tier.ToString() : "Overlay";
+                    PrintQuoted($"**After horniness ({horninessLabel}):** \"{result.DeliveredMessage}\"");
+                    Console.WriteLine();
+                }
             }
             Console.WriteLine();
 
