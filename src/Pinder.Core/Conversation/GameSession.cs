@@ -652,6 +652,18 @@ namespace Pinder.Core.Conversation
                     deliveredMessage = await _llm.ApplyHorninessOverlayAsync(deliveredMessage, instruction).ConfigureAwait(false);
                 }).ConfigureAwait(false);
 
+            // #743: Horniness penalty — when overlay fires and interest > 0, halve interest
+            int horninessInterestPenalty = 0;
+            int horninessInterestBefore = 0;
+            if (horninessCheckResult.OverlayApplied && _interest.Current > 0)
+            {
+                horninessInterestBefore = _interest.Current;
+                int newInterestFromPenalty = (int)Math.Floor(_interest.Current / 2.0);
+                horninessInterestPenalty = newInterestFromPenalty - horninessInterestBefore;
+                _interest.Apply(horninessInterestPenalty);
+                interestDelta += horninessInterestPenalty;
+            }
+
             _history.Add((_player.DisplayName, deliveredMessage));
 
             // 11. Generate opponent response
@@ -737,7 +749,9 @@ namespace Pinder.Core.Conversation
                 detectedWindow: opponentResponse.WeaknessWindow,
                 steering: steeringResult,
                 horninessCheck: horninessCheckResult,
-                tripleBonusApplied: tripleBonusApplied);
+                tripleBonusApplied: tripleBonusApplied,
+                horninessInterestPenalty: horninessInterestPenalty,
+                horninessInterestBefore: horninessInterestBefore);
         }
 
         /// <summary>

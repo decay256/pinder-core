@@ -256,6 +256,8 @@ Called only on successful steering roll via `IStatefulLlmAdapter`. Receives play
 
 Called on failed horniness check. Receives the delivered message + tier-specific overlay instruction. Returns the rewritten message with involuntary heat.
 
+> When a horniness overlay fires, if interest > 0, it is halved (floor). This represents the character losing track of the connection in the heat of arousal.
+
 ## 7. Constraints & Best Practices
 
 ### Language & framework

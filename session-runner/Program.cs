@@ -898,6 +898,12 @@ class Program
                 if (parts.Count > 0)
                     Console.WriteLine($"  ↳ {string.Join(" | ", parts)}");
             }
+            // #743: Horniness penalty display
+            if (result.HorninessInterestPenalty != 0)
+            {
+                int penaltyAfter = result.HorninessInterestBefore + result.HorninessInterestPenalty;
+                Console.WriteLine($"  ↳ Horniness penalty: interest halved ({result.HorninessInterestBefore} → {penaltyAfter})");
+            }
             if (result.ShadowGrowthEvents?.Count > 0)
             {
                 var enrichedShadow = new List<string>();

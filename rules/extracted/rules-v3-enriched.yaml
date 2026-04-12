@@ -1653,6 +1653,13 @@
     misfire: miss by 3-5
     trope_trap: miss by 6-9
     catastrophe: miss by 10+
+- id: §15.horniness-interest-penalty
+  section: §15
+  title: Horniness Interest Penalty
+  type: rule
+  blocks:
+  - kind: paragraph
+    text: "When a horniness overlay fires and current interest > 0, interest is set to floor(interest / 2)."
 - id: §9.shadow-threshold.dread.t1
   section: §9
   title: Shadow Threshold — Dread T1

@@ -85,6 +85,17 @@ namespace Pinder.Core.Conversation
         /// </summary>
         public int TripleBonusApplied { get; }
 
+        /// <summary>
+        /// Interest delta from the horniness penalty (floor(interest/2) - interestBefore), when overlay fired and interest > 0.
+        /// 0 if no penalty was applied.
+        /// </summary>
+        public int HorninessInterestPenalty { get; }
+
+        /// <summary>
+        /// Interest value before horniness penalty, for display. 0 if no penalty fired.
+        /// </summary>
+        public int HorninessInterestBefore { get; }
+
         public TurnResult(
             RollResult roll,
             string deliveredMessage,
@@ -107,7 +118,9 @@ namespace Pinder.Core.Conversation
             WeaknessWindow? detectedWindow = null,
             SteeringRollResult steering = null,
             HorninessCheckResult horninessCheck = null,
-            int tripleBonusApplied = 0)
+            int tripleBonusApplied = 0,
+            int horninessInterestPenalty = 0,
+            int horninessInterestBefore = 0)
         {
             Roll = roll ?? throw new ArgumentNullException(nameof(roll));
             DeliveredMessage = deliveredMessage ?? throw new ArgumentNullException(nameof(deliveredMessage));
@@ -131,6 +144,8 @@ namespace Pinder.Core.Conversation
             Steering = steering ?? SteeringRollResult.NotAttempted;
             HorninessCheck = horninessCheck ?? HorninessCheckResult.NotPerformed;
             TripleBonusApplied = tripleBonusApplied;
+            HorninessInterestPenalty = horninessInterestPenalty;
+            HorninessInterestBefore = horninessInterestBefore;
         }
     }
 }
