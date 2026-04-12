@@ -323,11 +323,9 @@ namespace Pinder.LlmAdapters.Anthropic
         /// <summary>Appends a markdown section for one LLM call to the debug transcript file.</summary>
         private void LogDebug(string callType, int turn, MessagesRequest request, MessagesResponse response)
         {
-            if (string.IsNullOrEmpty(_options.DebugDirectory)) return;
-
             try
             {
-                // Track token stats regardless of file write success
+                // Track token stats always (not gated on DebugDirectory)
                 if (response.Usage != null)
                 {
                     _callStats.Add(new CallSummaryStat
@@ -423,21 +421,24 @@ namespace Pinder.LlmAdapters.Anthropic
                 sb.AppendLine("---");
                 sb.AppendLine();
 
-                lock (_debugLock)
+                if (!string.IsNullOrEmpty(_options.DebugDirectory))
                 {
-                    // Ensure parent directory exists
-                    string dir = Path.GetDirectoryName(_options.DebugDirectory);
-                    if (!string.IsNullOrEmpty(dir))
-                        Directory.CreateDirectory(dir);
-
-                    // Write header on first append
-                    if (!_debugHeaderWritten)
+                    lock (_debugLock)
                     {
-                        File.WriteAllText(_options.DebugDirectory, $"# Session Debug Transcript\n\n---\n\n");
-                        _debugHeaderWritten = true;
-                    }
+                        // Ensure parent directory exists
+                        string dir = Path.GetDirectoryName(_options.DebugDirectory);
+                        if (!string.IsNullOrEmpty(dir))
+                            Directory.CreateDirectory(dir);
 
-                    File.AppendAllText(_options.DebugDirectory, sb.ToString());
+                        // Write header on first append
+                        if (!_debugHeaderWritten)
+                        {
+                            File.WriteAllText(_options.DebugDirectory, $"# Session Debug Transcript\n\n---\n\n");
+                            _debugHeaderWritten = true;
+                        }
+
+                        File.AppendAllText(_options.DebugDirectory, sb.ToString());
+                    }
                 }
             }
             catch
