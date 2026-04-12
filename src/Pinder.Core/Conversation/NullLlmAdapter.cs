@@ -75,7 +75,7 @@ namespace Pinder.Core.Conversation
         /// <summary>
         /// Returns the message unchanged (no LLM overlay in test mode).
         /// </summary>
-        public Task<string> ApplyHorninessOverlayAsync(string message, string instruction)
+        public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null)
         {
             return Task.FromResult(message);
         }

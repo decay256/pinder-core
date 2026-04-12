@@ -516,48 +516,57 @@ delivery_instructions:
   horniness_overlay:
     fumble: >-
       OVERLAY: INVOLUNTARY HEAT (one word runs warm).
-      One verb, adjective, or metaphor in the intended message gets replaced by a slightly warmer
-      synonym — something that could be read two ways. The sentence structure is identical, the
-      meaning is technically identical, but one word now has a pulse. Same length, same sentence
-      count. The character chose the word innocently. The reader did not.
+      Find the latent charge already present in the message — in its word choices, its rhythm,
+      what it's describing. Surface that charge with a single word change. One verb, adjective,
+      or noun gets a synonym that works in both registers simultaneously. The sentence structure
+      is identical, the meaning is technically identical, but one word now has a pulse. Same
+      length, same sentence count. The character chose the word innocently. The reader did not.
+      The synonym MUST remain plausible for the original subject — stay in the same physical
+      or semantic domain. Do not import metaphors from unrelated domains.
       e.g.: intended "I've been thinking about trying that new place you mentioned" → delivered
       "I've been craving that new place you mentioned" — one substitution, the sentence now
       breathes differently.
 
     misfire: >-
       OVERLAY: INVOLUNTARY HEAT (the temperature shifts mid-sentence).
-      The message starts as intended but a phrase or clause tilts the register — what was neutral
-      now reads as charged. Not explicit, but the subtext has changed channels. Same length, same
-      sentence count. The topic hasn't changed. The way it lands has.
+      Find the latent charge in the message and surface it with minimum word changes — ideally
+      one word per clause. A phrase or clause tilts the register: what was neutral now reads as
+      charged. Prefer adjusting emphasis through phrasing over wholesale substitution. Not explicit,
+      but the subtext has changed channels. Same length, same sentence count. The topic hasn't
+      changed. The way it lands has. Synonyms must remain plausible for the original subject —
+      do not substitute from unrelated domains.
       e.g.: intended "I really want to hear more about your mushroom foraging thing" → delivered
       "I really want to hear what you do with your hands out there in the woods" — same topic,
       same length, entirely different energy.
 
     trope_trap: >-
       OVERLAY: INVOLUNTARY HEAT (the fog thickens across the whole message).
-      Every sentence in the intended message gets rewritten so the word choices, metaphors, and
-      rhythm all run warm. The character is discussing the original topic with complete sincerity.
-      The reader cannot read it with a straight face. Same length or shorter. The character is
-      genuinely talking about cooking, or gardening, or the gym. It does not sound like that.
+      Find the latent charge across every sentence and surface it with the minimum word changes
+      needed per clause — adjusting one or two words per sentence, changing emphasis through
+      phrasing, using synonyms that work in both registers simultaneously. The character is
+      discussing the original topic with complete sincerity. The reader cannot read it with a
+      straight face. Same length or shorter. No winking. Synonyms must remain plausible for
+      the original subject — stay in the same physical or semantic domain throughout.
       e.g.: intended "I spent all morning kneading dough and it's so satisfying when it finally
       rises" → delivered "I spent all morning working it with my hands and it's so satisfying
       when it finally swells up for you" — still about bread. Technically.
 
     catastrophe: >-
-      OVERLAY: INVOLUNTARY HEAT (full fog; the message has been reinterpreted).
-      The intended message has been entirely rewritten through a lens of involuntary arousal. Every
-      noun, verb, and modifier has been replaced by its warmest possible synonym — BUT the synonym
-      must stay in the same physical or semantic domain as the original word. The character is
-      still — in their mind — talking about the original subject. The message is unmistakably about
-      something else. Same length or shorter. No winking, no awareness, no self-commentary. The
-      character would be mortified.
-      CRITICAL RULE: synonyms must remain physically plausible for the original object. Do not
-      substitute metaphors from unrelated domains (e.g. fire, heat, flames) — the reader must
-      still be able to picture the original scene while reading the charged version.
-      e.g. GOOD: intended "I finally got the pipe fixed, the plumber came and went really fast" →
-      delivered "I finally got it taken care of, he came so fast I barely had time to finish" —
-      'came' is still an arrival verb for a person, 'finish' still describes task completion.
-      e.g. BAD: intended "The chopsticks are a power move" → "The flames are a passionate gesture"
-      — flames cannot hold hair; the physical object has been abandoned entirely. Wrong.
-      e.g. GOOD: intended "The chopsticks are a power move" → "The silk rods are a bold choice"
-      — silk rods could plausibly be hair accessories; the reader pictures both simultaneously.
+      OVERLAY: INVOLUNTARY HEAT (the message rewrites itself through latent charge).
+      Find the double meaning already present or latent in the message — in its word choices,
+      its rhythm, what it's describing. Surface that charge with the minimum word changes needed.
+      Prefer: adjusting one word per clause, changing emphasis through phrasing, using a synonym
+      that works in both registers simultaneously.
+      The character is still — in their mind — talking about what they were talking about. The
+      reader cannot read it innocently. Same length. No new sentences. No winking. The character
+      would be mortified.
+      The synonyms MUST remain plausible for the original physical object or action. Do not
+      substitute metaphors from unrelated domains (fire, flames, heat) — if the message is about
+      chopsticks in someone's hair, the overlay must still be readable as being about chopsticks
+      in someone's hair.
+      GOOD: intended "The chopsticks are a power move" → "Those long ones make a statement" —
+      still hair accessories, now loaded.
+      BAD: "The flames are a passionate gesture" — flames cannot hold hair. Wrong domain.
+      e.g.: intended "I finally got the pipe fixed, the plumber came and went really fast" →
+      "I finally got sorted, he finished so fast I barely had time to appreciate it" — minimal
+      changes, both readings work.

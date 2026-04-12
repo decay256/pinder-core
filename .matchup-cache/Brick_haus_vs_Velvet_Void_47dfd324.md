@@ -1,0 +1,7 @@
+## Matchup Analysis
+
+**Brick_haus** (Level 9, High-Value/Intellectual): Their strongest offensive lanes are Charm (50% success rate) and Wit (50% success rate), leveraging their CEO confidence and sharp intellect to break through Velvet_Void's defenses. With maxed Charm at +11, they can potentially overwhelm their opponent's self-awareness, while their +10 Wit gives them excellent banter potential. However, their high Denial shadow (5) creates a significant blind spot that could lead to catastrophic misreads of social cues.
+
+**Velvet_Void** (Level 7, Chaos/Mysterious): Their best defensive strategy relies on their +10 Chaos completely shutting down any Honesty-based approaches (0% success rate) and their balanced SelfAwareness/Wit providing solid protection against conventional charm tactics. Their high Dread shadow (5) amplifies their mysterious allure but also makes them prone to self-sabotage through anxiety spirals. They're most vulnerable to sustained Charm and Wit attacks, where their lower defensive stats leave them exposed.
+
+**Prediction:** This will be a battle of executive confidence versus enigmatic chaos, with Brick_haus holding the statistical advantage through their dual 50% success lanes. However, Velvet_Void's Chaos dominance and Brick_haus's Denial shadow could create unexpected dynamics where the CEO's assumptions about "knowing their worth" clash hard against someone who fundamentally operates outside conventional social frameworks.

@@ -17,15 +17,19 @@ namespace Pinder.LlmAdapters.Anthropic
             AnthropicClient client,
             AnthropicOptions options,
             string message,
-            string instruction)
+            string instruction,
+            string? opponentContext = null)
         {
             if (string.IsNullOrWhiteSpace(message) || string.IsNullOrWhiteSpace(instruction))
                 return message;
 
-            string systemPrompt = "You are a dialogue editor for Pinder, a comedy RPG where sentient penises date each other on a fictional app. " +
+            string systemPrompt = "You are editing dialogue for Pinder, a comedy RPG where sentient penises date each other on a fictional app. " +
                 "The humour is absurdist and satirical — characters are oblivious to double-entendre, not explicit. " +
                 "Apply the overlay instruction to rewrite the message with the requested tonal shift. " +
                 "Return ONLY the rewritten message text. No commentary, no refusals, no preamble.";
+
+            if (!string.IsNullOrWhiteSpace(opponentContext))
+                systemPrompt += $"\n\nThe message being sent is directed at this character:\n{opponentContext}";
             var systemBlocks = new ContentBlock[]
             {
                 new ContentBlock { Type = "text", Text = systemPrompt }

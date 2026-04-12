@@ -431,7 +431,7 @@ namespace Pinder.LlmAdapters.OpenAi
         /// <summary>
         /// Apply a horniness overlay — returns input unchanged (OpenAI overlay not yet implemented).
         /// </summary>
-        public Task<string> ApplyHorninessOverlayAsync(string message, string instruction)
+        public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null)
         {
             return Task.FromResult(message);
         }

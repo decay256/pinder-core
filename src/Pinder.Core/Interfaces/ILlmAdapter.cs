@@ -37,6 +37,7 @@ namespace Pinder.Core.Interfaces
         /// The instruction describes how to rewrite the message with involuntary heat.
         /// Returns the modified message text.
         /// </summary>
-        Task<string> ApplyHorninessOverlayAsync(string message, string instruction);
+        /// <param name="opponentContext">Optional compact opponent context (name, bio, items) to ground the overlay.</param>
+        Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null);
     }
 }

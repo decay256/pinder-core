@@ -265,10 +265,10 @@ namespace Pinder.LlmAdapters.Anthropic
         /// <summary>
         /// Apply a horniness overlay to a delivered message by calling the LLM.
         /// </summary>
-        public async Task<string> ApplyHorninessOverlayAsync(string message, string instruction)
+        public async Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null)
         {
             return await AnthropicOverlayApplier.ApplyHorninessOverlayAsync(
-                _client, _options, message, instruction).ConfigureAwait(false);
+                _client, _options, message, instruction, opponentContext).ConfigureAwait(false);
         }
 
         // Backward-compatibility: expose static parse methods for tests

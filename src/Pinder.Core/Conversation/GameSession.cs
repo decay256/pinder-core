@@ -672,7 +672,8 @@ namespace Pinder.Core.Conversation
                 async (instruction) =>
                 {
                     string beforeHorniness = deliveredMessage;
-                    deliveredMessage = await _llm.ApplyHorninessOverlayAsync(deliveredMessage, instruction).ConfigureAwait(false);
+                    string opponentCtx = BuildOpponentContext(_opponent);
+                    deliveredMessage = await _llm.ApplyHorninessOverlayAsync(deliveredMessage, instruction, opponentCtx).ConfigureAwait(false);
                     if (deliveredMessage != beforeHorniness)
                     {
                         var horninessSpans = WordDiff.Compute(beforeHorniness, deliveredMessage);
@@ -955,6 +956,20 @@ namespace Pinder.Core.Conversation
                     throw new GameEndedException(GameOutcome.Ghosted);
                 }
             }
+        }
+
+        /// <summary>
+        /// Builds a compact opponent context string for the horniness overlay system prompt.
+        /// Format: Opponent: [DisplayName] | Bio: "[bio]" | Wearing: [items]
+        /// </summary>
+        private static string BuildOpponentContext(CharacterProfile opponent)
+        {
+            if (opponent == null) return string.Empty;
+            string bio = string.IsNullOrWhiteSpace(opponent.Bio) ? "(no bio)" : opponent.Bio;
+            string items = opponent.EquippedItemDisplayNames != null && opponent.EquippedItemDisplayNames.Count > 0
+                ? string.Join(", ", opponent.EquippedItemDisplayNames)
+                : "(none)";
+            return $"Opponent: {opponent.DisplayName} | Bio: \"{bio}\" | Wearing: {items}";
         }
     }
 }
