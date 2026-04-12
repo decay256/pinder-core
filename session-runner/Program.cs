@@ -712,6 +712,22 @@ class Program
             string rollExplanation = GetRollExplanation(roll);
             if (!string.IsNullOrEmpty(rollExplanation))
                 Console.WriteLine($"> 📋 *{rollExplanation}*");
+
+            // #727: Show activated trap name, effect, and duration
+            if (roll.ActivatedTrap != null)
+            {
+                var trap = roll.ActivatedTrap;
+                string effectDesc = trap.Effect switch
+                {
+                    TrapEffect.Disadvantage        => $"disadvantage on {trap.Stat} rolls",
+                    TrapEffect.StatPenalty         => $"-{trap.EffectValue} to {trap.Stat} rolls",
+                    TrapEffect.OpponentDCIncrease  => $"opponent DC +{trap.EffectValue}",
+                    _                              => trap.Effect.ToString()
+                };
+                int dur = trap.DurationTurns;
+                string turnWord = dur == 1 ? "turn" : "turns";
+                Console.WriteLine($"> 🪤 *Trap activated: {trap.Id} [{trap.Stat}] — {effectDesc} for {dur} {turnWord} (clear with {trap.ClearMethod})*");
+            }
             Console.WriteLine();
 
             if (result.TripleBonusApplied > 0)
@@ -939,7 +955,7 @@ class Program
         Console.WriteLine();
         Console.WriteLine("---");
         Console.WriteLine();
-        Console.WriteLine("## Session Summary");
+        Console.WriteLine($"## Session Summary  [{DateTime.UtcNow.ToString("HH:mm:ss")} UTC]");
         Console.WriteLine();
         bool isCutoff = finalOutcome == null;
         string outcomeIcon = finalOutcome == GameOutcome.DateSecured ? "✅" :
