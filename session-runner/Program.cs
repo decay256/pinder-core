@@ -693,6 +693,12 @@ class Program
             var roll = result.Roll;
             string rollMod = $"{roll.StatModifier:+#;-#;0}";
             string lvPart = roll.LevelBonus > 0 ? $"+Lv({roll.LevelBonus:+#;-#;0})" : "";
+            // #732: append external bonus components to roll formula
+            var _extParts = new System.Text.StringBuilder();
+            if (result.TripleBonusApplied > 0)    _extParts.Append($"+Triple(+{result.TripleBonusApplied})");
+            if (result.TellReadBonus > 0)          _extParts.Append($"+Tell(+{result.TellReadBonus})");
+            if (result.CallbackBonusApplied > 0)   _extParts.Append($"+Callback(+{result.CallbackBonusApplied})");
+            string extBonusPart = _extParts.ToString();
             string rollResult;
             if (roll.IsNatTwenty)     rollResult = "NAT 20 ⭐ — always succeeds";
             else if (roll.IsNatOne)   rollResult = "NAT 1 💀 — always fails";
@@ -718,7 +724,7 @@ class Program
             }
 
             string arrowResult = string.IsNullOrEmpty(rollResult) ? "" : $" → {rollResult}";
-            Console.WriteLine($"**🎲 Roll:** d20({roll.UsedDieRoll})+{StatLabel(chosen.Stat)}({rollMod}){lvPart} = **{roll.FinalTotal}** vs DC {roll.DC} → **{marginText}{arrowResult}**");
+            Console.WriteLine($"**🎲 Roll:** d20({roll.UsedDieRoll})+{StatLabel(chosen.Stat)}({rollMod}){lvPart}{extBonusPart} = **{roll.FinalTotal}** vs DC {roll.DC} → **{marginText}{arrowResult}**");
 
             // #484/#698: Inline rule explanation after roll
             string rollExplanation = GetRollExplanation(roll);
