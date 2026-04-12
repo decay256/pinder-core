@@ -572,7 +572,7 @@ class Program
             Console.WriteLine();
             Console.WriteLine($"---");
             Console.WriteLine();
-            Console.WriteLine($"## ═══ TURN {turn} ═══");
+            Console.WriteLine($"## ═══ TURN {turn} ═══  [{DateTime.UtcNow.ToString("HH:mm:ss")} UTC]");
             if (!string.IsNullOrEmpty(lastOpponentMsg))
                 Console.WriteLine($"**Responding to {player2}'s T{turn-1} reply**");
             else
