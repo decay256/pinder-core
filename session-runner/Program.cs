@@ -772,6 +772,22 @@ class Program
             if (result.TellReadBonus > 0)      Console.WriteLine($"> *📖 Tell read! +{result.TellReadBonus}*");
             Console.WriteLine();
 
+            // Steering roll display (#734 — moved before message delivery block)
+            if (result.Steering != null && result.Steering.SteeringAttempted)
+            {
+                int steeringTotal = result.Steering.SteeringRoll + result.Steering.SteeringMod;
+                if (result.Steering.SteeringSucceeded)
+                {
+                    Console.WriteLine($"> 🧭 Steering roll: d20({result.Steering.SteeringRoll}) + {result.Steering.SteeringMod} = {steeringTotal} vs DC {result.Steering.SteeringDC} → SUCCESS");
+                    Console.WriteLine($"> *{player1} adds:* \"{result.Steering.SteeringQuestion}\"");
+                }
+                else
+                {
+                    Console.WriteLine($"> 🧭 Steering roll: d20({result.Steering.SteeringRoll}) + {result.Steering.SteeringMod} = {steeringTotal} vs DC {result.Steering.SteeringDC} → MISS");
+                }
+                Console.WriteLine();
+            }
+
             Console.WriteLine($"**📨 {player1} sends:**");
             bool isSuccess = roll.Tier == FailureTier.None || roll.IsNatTwenty;
             bool isStrongSuccess = isSuccess && (roll.FinalTotal - roll.DC >= 5 || roll.IsNatTwenty);
@@ -796,22 +812,6 @@ class Program
                 PrintQuoted(result.DeliveredMessage);
             }
             Console.WriteLine();
-
-            // Steering roll display
-            if (result.Steering != null && result.Steering.SteeringAttempted)
-            {
-                int steeringTotal = result.Steering.SteeringRoll + result.Steering.SteeringMod;
-                if (result.Steering.SteeringSucceeded)
-                {
-                    Console.WriteLine($"> 🧭 Steering roll: d20({result.Steering.SteeringRoll}) + {result.Steering.SteeringMod} = {steeringTotal} vs DC {result.Steering.SteeringDC} → SUCCESS");
-                    Console.WriteLine($"> *{player1} adds:* \"{result.Steering.SteeringQuestion}\"");
-                }
-                else
-                {
-                    Console.WriteLine($"> 🧭 Steering roll: d20({result.Steering.SteeringRoll}) + {result.Steering.SteeringMod} = {steeringTotal} vs DC {result.Steering.SteeringDC} → MISS");
-                }
-                Console.WriteLine();
-            }
 
             // Per-turn horniness check display (#709)
             if (result.HorninessCheck != null && result.HorninessCheck.DC > 0)
