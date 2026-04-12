@@ -773,7 +773,7 @@ class Program
                 if (roll.IsNatTwenty) label = "Nat 20";
                 
                 PrintQuoted("**Intended:** " + (string.IsNullOrWhiteSpace(intended) || intended == "..." ? "..." : $"\"{intended}\""));
-                
+                Console.WriteLine();
                 string marker = isStrongSuccess ? "__" : "*";
                 string formattedDelivered = FormatDeliveredAdditions(intended, result.DeliveredMessage ?? "", marker);
                 PrintQuoted($"**Delivered ({label}):** \"{formattedDelivered}\"");
