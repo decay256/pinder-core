@@ -227,6 +227,8 @@ class Program
         Console.Error.WriteLine("  --opponent-def <path>  Opponent character definition JSON file");
         Console.Error.WriteLine("  --max-turns <n>       Maximum turns (default: 20)");
         Console.Error.WriteLine("  --agent <type>        Player agent: scoring or llm (default: llm)");
+        Console.Error.WriteLine("  --overlay-model MODEL  Route horniness overlay to this Groq model (e.g. moonshotai/kimi-k2-instruct, llama-3.3-70b-versatile)");
+        Console.Error.WriteLine("                         Reads GROQ_API_KEY env var for auth");
         Console.Error.WriteLine();
         string available = CharacterLoader.ListAvailable(promptDir);
         Console.Error.WriteLine($"Available characters: {available}");
@@ -398,6 +400,7 @@ class Program
         }
 
         string modelSpec = ParseArg(args, "--model") ?? "";
+        string? overlayModel = ParseArg(args, "--overlay-model");
         IStatefulLlmAdapter llm;
         if (modelSpec.StartsWith("groq/") || modelSpec.StartsWith("together/") ||
             modelSpec.StartsWith("openrouter/") || modelSpec.StartsWith("ollama/"))
@@ -422,12 +425,23 @@ class Program
         }
         else
         {
+            string? groqApiKey = !string.IsNullOrWhiteSpace(overlayModel)
+                ? Environment.GetEnvironmentVariable("GROQ_API_KEY")
+                : null;
+            if (!string.IsNullOrWhiteSpace(overlayModel))
+            {
+                Console.Error.WriteLine($"Overlay model: {overlayModel} (Groq)");
+                if (string.IsNullOrWhiteSpace(groqApiKey))
+                    Console.Error.WriteLine("[WARN] GROQ_API_KEY not set — overlay calls will fall back to Claude");
+            }
             llm = new AnthropicLlmAdapter(new AnthropicOptions
             {
                 ApiKey = apiKey, Model = "claude-sonnet-4-20250514", MaxTokens = 1024, Temperature = 0.9,
                 GameDefinition = gameDef,
                 DebugDirectory = debugFile,
-                StatDeliveryInstructions = statDeliveryInstructions
+                StatDeliveryInstructions = statDeliveryInstructions,
+                OverlayGroqModel = overlayModel,
+                OverlayGroqApiKey = groqApiKey
             });
         }
 

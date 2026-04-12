@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Pinder.LlmAdapters.Groq;
 using Pinder.Core.Conversation;
 using Pinder.Core.Interfaces;
 using Pinder.Core.Stats;
@@ -264,9 +265,16 @@ namespace Pinder.LlmAdapters.Anthropic
 
         /// <summary>
         /// Apply a horniness overlay to a delivered message by calling the LLM.
+        /// Routes to Groq when OverlayGroqModel and OverlayGroqApiKey are configured.
         /// </summary>
         public async Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null)
         {
+            if (!string.IsNullOrWhiteSpace(_options.OverlayGroqModel) && !string.IsNullOrWhiteSpace(_options.OverlayGroqApiKey))
+            {
+                return await GroqOverlayApplier.ApplyHorninessOverlayAsync(
+                    _options.OverlayGroqApiKey, _options.OverlayGroqModel, message, instruction, opponentContext)
+                    .ConfigureAwait(false);
+            }
             return await AnthropicOverlayApplier.ApplyHorninessOverlayAsync(
                 _client, _options, message, instruction, opponentContext).ConfigureAwait(false);
         }

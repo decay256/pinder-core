@@ -23,6 +23,12 @@ namespace Pinder.LlmAdapters.Anthropic
 
         public string? DebugDirectory { get; set; }
 
+        /// <summary>When set, horniness overlay calls are routed to this Groq model instead of Claude.</summary>
+        public string? OverlayGroqModel { get; set; }
+
+        /// <summary>Groq API key for overlay calls.</summary>
+        public string? OverlayGroqApiKey { get; set; }
+
         /// <summary>
         /// Per-stat, per-tier delivery instructions loaded from delivery-instructions.yaml.
         /// When set, overrides the hardcoded tier instructions in SessionDocumentBuilder.
