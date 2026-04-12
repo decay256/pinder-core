@@ -879,6 +879,12 @@ class Program
             else
             {
                 Console.WriteLine("Active Traps: none");
+                // #728: 1-turn traps expire before state snapshot — show acknowledgement
+                var activatedTrap = result.Roll?.ActivatedTrap;
+                if (activatedTrap != null && activatedTrap.DurationTurns <= 1)
+                {
+                    Console.WriteLine($"  ↳ ({activatedTrap.Id} [{activatedTrap.Stat}] was active this turn — expired after 1 turn)");
+                }
             }
             // #700: Momentum state
             if (result.StateAfter.MomentumStreak >= 3)
