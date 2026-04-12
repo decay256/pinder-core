@@ -564,9 +564,10 @@ delivery_instructions:
       substitute metaphors from unrelated domains (fire, flames, heat) — if the message is about
       chopsticks in someone's hair, the overlay must still be readable as being about chopsticks
       in someone's hair.
-      GOOD: intended "The chopsticks are a power move" → "Those long ones make a statement" —
-      still hair accessories, now loaded.
-      BAD: "The flames are a passionate gesture" — flames cannot hold hair. Wrong domain.
+      GOOD: intended "I made sourdough for the first time and it took all weekend to get the
+      rise right" → "I worked it all weekend and it finally swelled up the way I wanted" —
+      still about bread; 'worked it' is kneading; 'swelled up the way I wanted' is still rising.
+      BAD: "The flames consumed me passionately all weekend" — no bread, no kitchen, wrong domain.
       e.g.: intended "I finally got the pipe fixed, the plumber came and went really fast" →
       "I finally got sorted, he finished so fast I barely had time to appreciate it" — minimal
-      changes, both readings work.
+      changes, both readings work simultaneously.
