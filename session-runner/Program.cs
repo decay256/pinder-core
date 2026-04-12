@@ -458,7 +458,12 @@ class Program
         var session = new GameSession(sable, brick, llm, new SystemRandomDiceRoller(), trapRegistry, config);
 
         // Display session horniness in header (#709)
-        Console.WriteLine($"🌶️ Session Horniness: {session.SessionHorniness}");
+        {
+            int sh = session.SessionHorniness;
+            int horninessDC = 20 - sh;
+            Console.WriteLine($"🌶️ Session Horniness: {sh}  (per-turn DC {horninessDC} — miss = message deformation)");
+            Console.WriteLine($"   → Fumble/Misfire/TropeTrap/Catastrophe tier on miss (same as roll failure tiers)");
+        }
         Console.WriteLine();
 
         // Player agent for decision-making — configurable via --agent arg or PLAYER_AGENT env var
