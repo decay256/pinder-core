@@ -816,10 +816,8 @@ class Program
                                    roll.Tier.ToString();
                     if (roll.IsNatTwenty) label = "Nat 20";
                     string marker = isStrongSuccess ? "__" : "*";
-                    // When horniness also fired, the tier-modified intermediate is DeliveredBeforeHorniness
-                    string tierText = horninessFired
-                        ? (result.DeliveredBeforeHorniness ?? result.DeliveredMessage ?? "")
-                        : (result.DeliveredMessage ?? "");
+                    // When horniness also fired, use the delivered message
+                    string tierText = result.DeliveredMessage ?? "";
                     string formattedDelivered = FormatDeliveredAdditions(intended, tierText, marker);
                     PrintQuoted($"**Delivered ({label}):** \"{formattedDelivered}\"");
                     Console.WriteLine();

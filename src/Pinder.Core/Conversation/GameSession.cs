@@ -15,6 +15,8 @@ namespace Pinder.Core.Conversation
     /// Orchestrates a single Pinder conversation from match to outcome.
     /// Owns all mutable game state: interest, traps, momentum, history, turn count.
     /// Sequences calls to RollEngine (stateless), ILlmAdapter, and interest/trap tracking.
+    /// Delegates shadow growth, XP recording, steering, horniness, and option filtering
+    /// to dedicated single-responsibility modules.
     /// </summary>
     public sealed class GameSession
     {
@@ -38,15 +40,6 @@ namespace Pinder.Core.Conversation
 
         // Callback tracking (#47)
         private readonly List<CallbackOpportunity> _topics;
-
-        // Shadow growth tracking fields (#44)
-        private readonly List<StatType> _statsUsedPerTurn;
-        private readonly List<bool> _highestPctOptionPicked;
-        private int _honestySuccessCount;
-        private int _saUsageCount;
-        private int _charmUsageCount;
-        private bool _charmMadnessTriggered;
-        private bool _saOverthinkingTriggered;
 
         // Despair (RIZZ failure shadow) tracking (#708, #717)
         private int _rizzCumulativeFailureCount;
@@ -81,10 +74,6 @@ namespace Pinder.Core.Conversation
         private HashSet<StatType>? _shadowDisadvantagedStats;
         private Dictionary<ShadowStatType, int>? _currentShadowThresholds;
 
-        // Separate RNG for the steering roll — cosmetic mechanic that must not
-        // consume values from the game dice queue.
-        private readonly Random _steeringRng;
-
         // Stat delivery instructions for horniness overlay tier lookups (#709)
         private readonly object? _statDeliveryInstructions;
 
@@ -92,6 +81,12 @@ namespace Pinder.Core.Conversation
         private DialogueOption[]? _currentOptions;
         private bool _currentHasAdvantage;
         private bool _currentHasDisadvantage;
+
+        // Extracted single-responsibility modules
+        private readonly ShadowGrowthEvaluator? _shadowGrowthEvaluator;
+        private readonly SessionXpRecorder _xpRecorder;
+        private readonly SteeringEngine _steeringEngine;
+        private readonly HorninessEngine _horninessEngine;
 
         /// <summary>
         /// Creates a new GameSession with required configuration.
@@ -120,7 +115,7 @@ namespace Pinder.Core.Conversation
             _opponentShadows = config.OpponentShadows;
             _rules = config.Rules;
             _globalDcBias = config.GlobalDcBias;
-            _steeringRng = config.SteeringRng ?? new Random();
+            var steeringRng = config.SteeringRng ?? new Random();
             _statDeliveryInstructions = config.StatDeliveryInstructions;
 
             // Determine starting interest: explicit config > Dread T3 > default
@@ -166,14 +161,15 @@ namespace Pinder.Core.Conversation
             _topics = new List<CallbackOpportunity>();
 
             // Shadow growth tracking (#44)
-            _statsUsedPerTurn = new List<StatType>();
-            _highestPctOptionPicked = new List<bool>();
-            _honestySuccessCount = 0;
-            _saUsageCount = 0;
-            _charmUsageCount = 0;
-            _charmMadnessTriggered = false;
-            _saOverthinkingTriggered = false;
             _rizzCumulativeFailureCount = 0;
+
+            // Initialize extracted modules
+            _shadowGrowthEvaluator = _playerShadows != null
+                ? new ShadowGrowthEvaluator(_playerShadows)
+                : null;
+            _xpRecorder = new SessionXpRecorder(_xpLedger, _rules);
+            _steeringEngine = new SteeringEngine(steeringRng);
+            _horninessEngine = new HorninessEngine(steeringRng);
 
             // Stateful conversation session (#536)
             // If the adapter supports stateful mode, start a persistent opponent session.
@@ -279,15 +275,12 @@ namespace Pinder.Core.Conversation
                 foreach (ShadowStatType shadow in Enum.GetValues(typeof(ShadowStatType)))
                 {
                     int effectiveVal = _playerShadows.GetEffectiveShadow(shadow);
-                    // Store raw shadow value (not tier) so LLM prompt builder
-                    // can check fine-grained thresholds (e.g. >5 for T1 taint).
                     shadowThresholds[shadow] = effectiveVal;
                     int tier = ResolveThresholdLevel(effectiveVal);
 
                     // T2+: paired positive stat gets disadvantage
                     if (tier >= 2)
                     {
-                        // Reverse lookup: find which StatType is paired with this shadow
                         foreach (var kvp in StatBlock.ShadowPairs)
                         {
                             if (kvp.Value == shadow)
@@ -304,25 +297,21 @@ namespace Pinder.Core.Conversation
             _currentShadowThresholds = shadowThresholds;
 
             // Get trap names and LLM instructions for context
-            var activeTrapNames = GetActiveTrapNames();
-            var activeTrapInstructions = GetActiveTrapInstructions();
+            var activeTrapNames = GameSessionHelpers.GetActiveTrapNames(_traps);
+            var activeTrapInstructions = GameSessionHelpers.GetActiveTrapInstructions(_traps);
 
             // Build dialogue context — pass callback topics (#47) and shadow thresholds (#45)
-            // Resolve active archetype directive for player
             string playerArchetypeDirective = _player.ActiveArchetype?.Directive;
 
             // Draw 3 random stats for this turn's options
             var allStats = new[] { StatType.Charm, StatType.Rizz, StatType.Honesty, StatType.Chaos, StatType.Wit, StatType.SelfAwareness };
-            var availableStats = DrawRandomStats(allStats, 3, shadowThresholds);
+            var availableStats = OptionFilterEngine.DrawRandomStats(allStats, 3, shadowThresholds);
 
             var context = new DialogueContext(
                 playerPrompt: _player.AssembledSystemPrompt,
-                // Only pass the opponent's public-facing bio — the player knows nothing about
-                // the opponent except what they've said in the conversation. Full profile and
-                // psychological stake are for the opponent agent only.
-                opponentPrompt: BuildOpponentVisibleProfile(_opponent),
+                opponentPrompt: GameSessionHelpers.BuildOpponentVisibleProfile(_opponent),
                 conversationHistory: _history.AsReadOnly(),
-                opponentLastMessage: GetLastOpponentMessage(),
+                opponentLastMessage: GameSessionHelpers.GetLastOpponentMessage(_history, _opponent.DisplayName),
                 activeTraps: activeTrapNames,
                 currentInterest: _interest.Current,
                 shadowThresholds: shadowThresholds,
@@ -356,49 +345,11 @@ namespace Pinder.Core.Conversation
                     hasTellBonus,
                     hasWeaknessWindow);
             }
+
             // T3 option filtering (#45)
             if (_playerShadows != null && shadowThresholds != null)
             {
-                // Fixation T3: force all options to use the same stat as last turn
-                if (shadowThresholds.TryGetValue(ShadowStatType.Fixation, out int fixRaw)
-                    && fixRaw >= 18 && _lastStatUsed.HasValue)
-                {
-                    var forcedStat = _lastStatUsed.Value;
-                    for (int i = 0; i < options.Length; i++)
-                    {
-                        var o = options[i];
-                        options[i] = new DialogueOption(
-                            forcedStat, o.IntendedText, o.CallbackTurnNumber,
-                            o.ComboName, o.HasTellBonus, o.HasWeaknessWindow);
-                    }
-                }
-
-                // Denial T3: remove Honesty options
-                if (shadowThresholds.TryGetValue(ShadowStatType.Denial, out int denRaw)
-                    && denRaw >= 18)
-                {
-                    var filtered = options.Where(o => o.Stat != StatType.Honesty).ToArray();
-                    if (filtered.Length == 0)
-                    {
-                        // Fallback: prefer Chaos, else first option
-                        var chaos = options.FirstOrDefault(o => o.Stat == StatType.Chaos);
-                        filtered = new[] { chaos ?? options[0] };
-                    }
-                    options = filtered;
-                }
-
-                // Madness T3: replace one random option with unhinged replacement marker
-                if (shadowThresholds.TryGetValue(ShadowStatType.Madness, out int madRaw)
-                    && madRaw >= 18
-                    && options.Length > 0)
-                {
-                    int unhingedIdx = _dice.Roll(options.Length) - 1;
-                    var o = options[unhingedIdx];
-                    options[unhingedIdx] = new DialogueOption(
-                        o.Stat, o.IntendedText, o.CallbackTurnNumber,
-                        o.ComboName, o.HasTellBonus, o.HasWeaknessWindow,
-                        isUnhingedReplacement: true);
-                }
+                options = OptionFilterEngine.ApplyT3Filters(options, shadowThresholds, _lastStatUsed, _dice);
             }
 
             _currentOptions = options;
@@ -476,7 +427,6 @@ namespace Pinder.Core.Conversation
             {
                 dcAdjustment = _activeWeakness.DcReduction;
             }
-            // Global DC bias: positive bias raises DC (harder), applied as negative dcAdjustment
             if (_globalDcBias != 0)
                 dcAdjustment -= _globalDcBias;
 
@@ -521,7 +471,7 @@ namespace Pinder.Core.Conversation
             }
             int interestDelta = baseInterestDelta + riskBonusDelta;
 
-            // 3. Update momentum streak (bonus was already applied as externalBonus in the roll, #268)
+            // 3. Update momentum streak
             _pendingMomentumBonus = 0;
             if (rollResult.IsSuccess)
             {
@@ -565,7 +515,7 @@ namespace Pinder.Core.Conversation
             }
 
             // 3d. Record roll XP (#48)
-            RecordRollXp(rollResult);
+            _xpRecorder.RecordRollXp(rollResult);
 
             // 4. Record interest before applying delta
             int interestBefore = _interest.Current;
@@ -578,7 +528,10 @@ namespace Pinder.Core.Conversation
             InterestState stateAfter = ResolveInterestState();
 
             // ---- Shadow growth evaluation (#44) ----
-            EvaluatePerTurnShadowGrowth(chosenOption, optionIndex, rollResult, interestAfter, comboTriggered, hasTellOption);
+            _shadowGrowthEvaluator?.EvaluatePerTurn(
+                chosenOption, optionIndex, rollResult, interestAfter, comboTriggered, hasTellOption,
+                _currentOptions,
+                (chosen, opts) => GameSessionHelpers.IsHighestProbabilityOption(chosen, opts, _player, _opponent));
 
             // Shadow reduction: Winning despite Overthinking disadvantage → Overthinking −1
             if (rollResult.IsSuccess
@@ -620,8 +573,8 @@ namespace Pinder.Core.Conversation
             // End-of-game shadow growth checks
             if (isGameOver)
             {
-                EvaluateEndOfGameShadowGrowth(outcome!.Value);
-                RecordEndOfGameXp(outcome!.Value);
+                _shadowGrowthEvaluator?.EvaluateEndOfGame(outcome!.Value);
+                _xpRecorder.RecordEndOfGameXp(outcome!.Value);
             }
 
             // Drain XP events for this turn (#48)
@@ -635,24 +588,25 @@ namespace Pinder.Core.Conversation
                 ? _playerShadows.DrainGrowthEvents()
                 : (IReadOnlyList<string>)Array.Empty<string>();
 
-            // 6. Deliver message via LLM (trap timers advanced AFTER delivery + opponent, see step 12b)
-            var deliveryTrapNames = GetActiveTrapNames();
-            var deliveryTrapInstructions = GetActiveTrapInstructions();
+            // 6. Deliver message via LLM
+            var deliveryTrapNames = GameSessionHelpers.GetActiveTrapNames(_traps);
+            var deliveryTrapInstructions = GameSessionHelpers.GetActiveTrapInstructions(_traps);
 
             int beatDcBy = rollResult.IsSuccess ? rollResult.FinalTotal - rollResult.DC : 0;
 
             // Resolve stat-specific failure instruction when the roll failed (#695)
-            string statFailureInstruction = null;
+            string? statFailureInstruction = null;
             if (!rollResult.IsSuccess && _statDeliveryInstructions != null)
             {
-                statFailureInstruction = GetStatFailureInstruction(chosenOption.Stat, rollResult.Tier);
+                statFailureInstruction = HorninessEngine.GetStatFailureInstruction(
+                    _statDeliveryInstructions, chosenOption.Stat, rollResult.Tier);
             }
 
             var deliveryContext = new DeliveryContext(
                 playerPrompt: _player.AssembledSystemPrompt,
                 opponentPrompt: _opponent.AssembledSystemPrompt,
                 conversationHistory: _history.AsReadOnly(),
-                opponentLastMessage: GetLastOpponentMessage(),
+                opponentLastMessage: GameSessionHelpers.GetLastOpponentMessage(_history, _opponent.DisplayName),
                 chosenOption: chosenOption,
                 outcome: rollResult.Tier,
                 beatDcBy: beatDcBy,
@@ -667,9 +621,6 @@ namespace Pinder.Core.Conversation
 
             string deliveredMessage = await _llm.DeliverMessageAsync(deliveryContext).ConfigureAwait(false);
 
-            // 8. Append player message to history (pre-steering, so opponent sees base message)
-            // We'll update it below if steering succeeds.
-
             // 9. Check interest threshold crossing → narrative beat
             string? narrativeBeat = null;
             if (stateBefore != stateAfter)
@@ -681,60 +632,30 @@ namespace Pinder.Core.Conversation
             double responseDelayMinutes = _opponent.Timing.ComputeDelay(_interest.Current, _dice);
 
             // 10b. Steering roll — attempt to append a date-steering question
-            // Placed after response delay so deterministic test dice queues aren't disrupted.
-            SteeringRollResult steeringResult = await AttemptSteeringRollAsync(deliveredMessage).ConfigureAwait(false);
+            SteeringRollResult steeringResult = await _steeringEngine.AttemptSteeringRollAsync(
+                deliveredMessage, _player, _opponent, _llm, _history.AsReadOnly()).ConfigureAwait(false);
             if (steeringResult.SteeringSucceeded && steeringResult.SteeringQuestion != null)
             {
                 deliveredMessage = deliveredMessage.TrimEnd() + " " + steeringResult.SteeringQuestion;
             }
 
             // Per-turn Horniness overlay check (#709)
-            // Uses separate RNG (like steering) so it doesn't consume game dice values.
-            HorninessCheckResult horninessCheckResult;
-            if (_sessionHorniness > 0 && _playerShadows != null)
-            {
-                int horninessRoll = _steeringRng.Next(1, 21);
-                int horninessModifier = 0; // No base horniness stat on characters; pure session control
-                int horninessTotal = horninessRoll + horninessModifier;
-                int horninessDC = 20 - _sessionHorniness;
-                bool horninessMiss = horninessTotal < horninessDC;
-
-                if (horninessMiss)
+            string deliveredForHorniness = deliveredMessage;
+            HorninessCheckResult horninessCheckResult = await _horninessEngine.CheckAsync(
+                _sessionHorniness,
+                _playerShadows,
+                deliveredMessage,
+                _llm,
+                _statDeliveryInstructions,
+                async (instruction) =>
                 {
-                    int missMargin = horninessDC - horninessTotal;
-                    Rolls.FailureTier horninessTier = DetermineHorninessTier(missMargin);
-                    string overlayInstruction = GetHorninessOverlayInstruction(horninessTier);
-
-                    if (overlayInstruction != null)
-                    {
-                        deliveredMessage = await _llm.ApplyHorninessOverlayAsync(deliveredMessage, overlayInstruction).ConfigureAwait(false);
-                        horninessCheckResult = new HorninessCheckResult(
-                            horninessRoll, horninessModifier, horninessTotal, horninessDC,
-                            true, horninessTier, true);
-                    }
-                    else
-                    {
-                        horninessCheckResult = new HorninessCheckResult(
-                            horninessRoll, horninessModifier, horninessTotal, horninessDC,
-                            true, horninessTier, false);
-                    }
-                }
-                else
-                {
-                    horninessCheckResult = new HorninessCheckResult(
-                        horninessRoll, horninessModifier, horninessTotal, horninessDC,
-                        false, Rolls.FailureTier.None, false);
-                }
-            }
-            else
-            {
-                horninessCheckResult = HorninessCheckResult.NotPerformed;
-            }
+                    deliveredMessage = await _llm.ApplyHorninessOverlayAsync(deliveredMessage, instruction).ConfigureAwait(false);
+                }).ConfigureAwait(false);
 
             _history.Add((_player.DisplayName, deliveredMessage));
 
             // 11. Generate opponent response
-            var opponentTrapInstructions = GetActiveTrapInstructions();
+            var opponentTrapInstructions = GameSessionHelpers.GetActiveTrapInstructions(_traps);
 
             // Compute opponent shadow thresholds for opponent prompt taint (#308)
             Dictionary<ShadowStatType, int>? opponentShadowThresholds = null;
@@ -754,8 +675,8 @@ namespace Pinder.Core.Conversation
                 playerPrompt: _player.AssembledSystemPrompt,
                 opponentPrompt: _opponent.AssembledSystemPrompt,
                 conversationHistory: _history.AsReadOnly(),
-                opponentLastMessage: GetLastOpponentMessage(),
-                activeTraps: GetActiveTrapNames(),
+                opponentLastMessage: GameSessionHelpers.GetLastOpponentMessage(_history, _opponent.DisplayName),
+                activeTraps: GameSessionHelpers.GetActiveTrapNames(_traps),
                 currentInterest: _interest.Current,
                 playerDeliveredMessage: deliveredMessage,
                 interestBefore: interestBefore,
@@ -783,8 +704,7 @@ namespace Pinder.Core.Conversation
             // 12. Append opponent message to history
             _history.Add((_opponent.DisplayName, opponentMessage));
 
-            // 12b. Advance trap timers — after delivery + opponent LLM calls so
-            //       duration-1 traps are visible during the turn they activate (#692)
+            // 12b. Advance trap timers
             _traps.AdvanceTurn();
 
             // 13. Increment turn number
@@ -821,408 +741,6 @@ namespace Pinder.Core.Conversation
         }
 
         /// <summary>
-        /// Attempts a steering roll after message delivery.
-        /// Steering modifier = average of (CHARM + WIT + SA) effective modifiers (integer division).
-        /// Steering DC = 16 + average of opponent's (SA + RIZZ + HONESTY) effective modifiers.
-        /// On success, calls LLM to generate a steering question.
-        /// </summary>
-        private async Task<SteeringRollResult> AttemptSteeringRollAsync(string deliveredMessage)
-        {
-            // Compute steering modifier: (playerCharm + playerWit + playerSA) / 3
-            int playerCharm = _player.Stats.GetEffective(StatType.Charm);
-            int playerWit = _player.Stats.GetEffective(StatType.Wit);
-            int playerSA = _player.Stats.GetEffective(StatType.SelfAwareness);
-            int steeringMod = (playerCharm + playerWit + playerSA) / 3;
-
-            // Compute steering DC: 16 + (opponentSA + opponentRizz + opponentHonesty) / 3
-            int opponentSA = _opponent.Stats.GetEffective(StatType.SelfAwareness);
-            int opponentRizz = _opponent.Stats.GetEffective(StatType.Rizz);
-            int opponentHonesty = _opponent.Stats.GetEffective(StatType.Honesty);
-            int steeringDC = 16 + (opponentSA + opponentRizz + opponentHonesty) / 3;
-
-            // Roll d20 using a separate RNG.
-            // The steering roll is cosmetic (does not affect interest delta) so it
-            // uses its own random source to avoid consuming values from the game
-            // dice queue, which would break deterministic test setups.
-            int roll = _steeringRng.Next(1, 21);
-
-            int total = roll + steeringMod;
-            bool success = total >= steeringDC;
-
-            string steeringQuestion = null;
-            if (success && _llm is Pinder.Core.Interfaces.IStatefulLlmAdapter stateful)
-            {
-                var steeringContext = new SteeringContext(
-                    playerPrompt: _player.AssembledSystemPrompt,
-                    opponentName: _opponent.DisplayName,
-                    playerName: _player.DisplayName,
-                    deliveredMessage: deliveredMessage,
-                    conversationHistory: _history.AsReadOnly());
-
-                try
-                {
-                    steeringQuestion = await stateful.GetSteeringQuestionAsync(steeringContext).ConfigureAwait(false);
-                }
-                catch
-                {
-                    // LLM failure should not break the game
-                    steeringQuestion = null;
-                    success = false;
-                }
-            }
-            else if (success)
-            {
-                // Non-stateful adapter: mark as not attempted
-                success = false;
-            }
-
-            return new SteeringRollResult(
-                steeringAttempted: true,
-                steeringSucceeded: success,
-                steeringRoll: roll,
-                steeringMod: steeringMod,
-                steeringDC: steeringDC,
-                steeringQuestion: steeringQuestion);
-        }
-
-        /// <summary>
-        /// Records XP for a roll result following §10 precedence rules:
-        /// Nat 20 → 25 XP (overrides DC-tier), Nat 1 → 10 XP (overrides failure),
-        /// success → 5/10/15 by DC tier, failure → 2.
-        /// </summary>
-        private void RecordRollXp(RollResult rollResult)
-        {
-            if (rollResult.IsNatTwenty)
-            {
-                _xpLedger.Record("Nat20", 25);
-            }
-            else if (rollResult.IsNatOne)
-            {
-                _xpLedger.Record("Nat1", 10);
-            }
-            else if (rollResult.IsSuccess)
-            {
-                int baseXp;
-                if (rollResult.DC <= 16)
-                    baseXp = 5;
-                else if (rollResult.DC <= 20)
-                    baseXp = 10;
-                else
-                    baseXp = 15;
-
-                int xp = ApplyRiskTierMultiplier(baseXp, rollResult.RiskTier);
-
-                string label = rollResult.DC <= 16 ? "Success_DC_Low"
-                    : rollResult.DC <= 20 ? "Success_DC_Mid"
-                    : "Success_DC_High";
-                _xpLedger.Record(label, xp);
-            }
-            else
-            {
-                _xpLedger.Record("Failure", 2);
-            }
-        }
-
-        /// <summary>
-        /// Applies the risk-tier XP multiplier per risk-reward doc:
-        /// Safe=1x, Medium=1.5x, Hard=2x, Bold=3x.
-        /// </summary>
-        private int ApplyRiskTierMultiplier(int baseXp, RiskTier riskTier)
-        {
-            if (_rules != null)
-            {
-                var resolved = _rules.GetRiskTierXpMultiplier(riskTier);
-                if (resolved.HasValue)
-                    return (int)Math.Round(baseXp * resolved.Value);
-            }
-
-            double multiplier;
-            if (riskTier == RiskTier.Bold)
-                multiplier = 3.0;
-            else if (riskTier == RiskTier.Hard)
-                multiplier = 2.0;
-            else if (riskTier == RiskTier.Medium)
-                multiplier = 1.5;
-            else
-                multiplier = 1.0;
-
-            return (int)Math.Round(baseXp * multiplier);
-        }
-
-        /// <summary>
-        /// Records end-of-game XP based on the game outcome.
-        /// DateSecured → 50, Unmatched/Ghosted → 5.
-        /// </summary>
-        private void RecordEndOfGameXp(GameOutcome outcome)
-        {
-            if (outcome == GameOutcome.DateSecured)
-                _xpLedger.Record("DateSecured", 50);
-            else if (outcome == GameOutcome.Unmatched || outcome == GameOutcome.Ghosted)
-                _xpLedger.Record("ConversationComplete", 5);
-        }
-
-        /// <summary>
-        /// <summary>
-        /// Draws N random stats from the pool, applying special case rules.
-        /// </summary>
-        private StatType[] DrawRandomStats(StatType[] pool, int count, Dictionary<ShadowStatType, int>? shadowThresholds)
-        {
-            // Build eligible pool
-            var eligible = new System.Collections.Generic.List<StatType>(pool);
-
-            // Denial T3 (≥12): remove HONESTY from pool
-            if (shadowThresholds != null
-                && shadowThresholds.TryGetValue(ShadowStatType.Denial, out int denVal)
-                && denVal >= 12)
-            {
-                eligible.Remove(StatType.Honesty);
-            }
-
-            // Shuffle using System.Random (stat selection is UI randomness, not game mechanics)
-            var rng = new System.Random();
-            for (int i = eligible.Count - 1; i > 0; i--)
-            {
-                int j = rng.Next(0, i + 1);
-                var tmp = eligible[i];
-                eligible[i] = eligible[j];
-                eligible[j] = tmp;
-            }
-
-            // Take first N
-            var drawn = new System.Collections.Generic.List<StatType>();
-            for (int i = 0; i < System.Math.Min(count, eligible.Count); i++)
-                drawn.Add(eligible[i]);
-
-            return drawn.ToArray();
-        }
-
-                /// Evaluates per-turn shadow growth triggers after a Speak action resolves.
-        /// Applies growth to _playerShadows when available.
-        /// </summary>
-        private void EvaluatePerTurnShadowGrowth(
-            DialogueOption chosenOption,
-            int optionIndex,
-            RollResult rollResult,
-            int interestAfter,
-            string? comboTriggered,
-            bool hasTellOption)
-        {
-            if (_playerShadows == null)
-                return;
-
-            // Trigger 1: Nat 1 → +1 to paired shadow (+2 for Rizz Nat 1 → Despair #708)
-            if (rollResult.IsNatOne)
-            {
-                var pairedShadow = StatBlock.ShadowPairs[chosenOption.Stat];
-                int natOneAmount = chosenOption.Stat == StatType.Rizz ? 2 : 1;
-                _playerShadows.ApplyGrowth(pairedShadow, natOneAmount,
-                    $"Nat 1 on {chosenOption.Stat}");
-            }
-
-            // Trigger 2: Catastrophic Wit failure → +1 Dread
-            if (chosenOption.Stat == StatType.Wit
-                && !rollResult.IsSuccess
-                && rollResult.Tier == FailureTier.Catastrophe)
-            {
-                _playerShadows.ApplyGrowth(ShadowStatType.Dread, 1,
-                    "Catastrophic Wit failure (miss by 10+)");
-            }
-
-            // Trigger 3: Every TropeTrap failure → +1 Madness (Legendary/Nat1 excluded — handled by Trigger 1)
-            if (!rollResult.IsSuccess && rollResult.Tier >= FailureTier.TropeTrap
-                && rollResult.Tier != FailureTier.Legendary)
-            {
-                _playerShadows.ApplyGrowth(ShadowStatType.Madness, 1,
-                    "TropeTrap failure");
-            }
-
-            // Trigger 3b: RIZZ TropeTrap failure → +1 Despair (#708)
-            if (chosenOption.Stat == StatType.Rizz
-                && !rollResult.IsSuccess
-                && rollResult.Tier >= FailureTier.TropeTrap
-                && rollResult.Tier != FailureTier.Legendary) // Legendary handled by Trigger 1
-            {
-                _playerShadows.ApplyGrowth(ShadowStatType.Despair, 1,
-                    "RIZZ TropeTrap failure");
-            }
-
-            // Trigger 3c: Every 3rd cumulative RIZZ failure → +1 Despair (#717)
-            if (chosenOption.Stat == StatType.Rizz && !rollResult.IsSuccess)
-            {
-                _rizzCumulativeFailureCount++;
-                if (_rizzCumulativeFailureCount % 3 == 0)
-                {
-                    _playerShadows.ApplyGrowth(ShadowStatType.Despair, 1,
-                        "3rd cumulative RIZZ failure");
-                }
-            }
-
-            // Trigger 4: Same stat 3 turns in a row → +1 Fixation
-            _statsUsedPerTurn.Add(chosenOption.Stat);
-            if (_statsUsedPerTurn.Count >= 3)
-            {
-                int tail = _statsUsedPerTurn.Count;
-                if (_statsUsedPerTurn[tail - 1] == _statsUsedPerTurn[tail - 2]
-                    && _statsUsedPerTurn[tail - 2] == _statsUsedPerTurn[tail - 3])
-                {
-                    // Count consecutive same-stat at tail
-                    int consecutiveCount = 1;
-                    for (int i = tail - 2; i >= 0; i--)
-                    {
-                        if (_statsUsedPerTurn[i] == _statsUsedPerTurn[tail - 1])
-                            consecutiveCount++;
-                        else
-                            break;
-                    }
-                    // Trigger every 3 consecutive (at 3, 6, 9, ...)
-                    if (consecutiveCount >= 3 && consecutiveCount % 3 == 0)
-                    {
-                        _playerShadows.ApplyGrowth(ShadowStatType.Fixation, 1,
-                            $"Same stat ({chosenOption.Stat}) used 3 turns in a row");
-                    }
-                }
-            }
-
-            // Trigger 5: Highest-% option picked 3 turns in a row → +1 Fixation
-            _highestPctOptionPicked.Add(IsHighestProbabilityOption(chosenOption, _currentOptions!));
-            if (_highestPctOptionPicked.Count >= 3)
-            {
-                int tail = _highestPctOptionPicked.Count;
-                if (_highestPctOptionPicked[tail - 1]
-                    && _highestPctOptionPicked[tail - 2]
-                    && _highestPctOptionPicked[tail - 3])
-                {
-                    // Count consecutive trues at tail
-                    int consecutiveCount = 0;
-                    for (int i = tail - 1; i >= 0; i--)
-                    {
-                        if (_highestPctOptionPicked[i])
-                            consecutiveCount++;
-                        else
-                            break;
-                    }
-                    if (consecutiveCount >= 3 && consecutiveCount % 3 == 0)
-                    {
-                        _playerShadows.ApplyGrowth(ShadowStatType.Fixation, 1,
-                            "Highest-% option picked 3 turns in a row");
-                    }
-                }
-            }
-
-            // Trigger 6: Honesty success tracking + Denial reduction at high interest
-            if (chosenOption.Stat == StatType.Honesty && rollResult.IsSuccess)
-            {
-                _honestySuccessCount++;
-
-                // Shadow reduction: Honesty success at Interest ≥15 → Denial −1
-                if (interestAfter >= 15)
-                {
-                    _playerShadows.ApplyOffset(ShadowStatType.Denial, -1,
-                        "Honesty success at high interest");
-                }
-            }
-
-            // Shadow reduction: SA/Honesty success at Interest >18 → Despair −1 (#717)
-            if (rollResult.IsSuccess
-                && (chosenOption.Stat == StatType.SelfAwareness || chosenOption.Stat == StatType.Honesty)
-                && interestAfter > 18)
-            {
-                _playerShadows.ApplyOffset(ShadowStatType.Despair, -1,
-                    "SA/Honesty success at high interest");
-            }
-
-            // Trigger 7: Interest hits 0 → +2 Dread
-            if (interestAfter == 0)
-            {
-                _playerShadows.ApplyGrowth(ShadowStatType.Dread, 2,
-                    "Interest hit 0 (unmatch)");
-            }
-
-            // Trigger 9: SA used 3+ times → +1 Overthinking (once)
-            if (chosenOption.Stat == StatType.SelfAwareness)
-            {
-                _saUsageCount++;
-                if (_saUsageCount == 3 && !_saOverthinkingTriggered)
-                {
-                    _saOverthinkingTriggered = true;
-                    _playerShadows.ApplyGrowth(ShadowStatType.Overthinking, 1,
-                        "SA used 3+ times in one conversation");
-                }
-            }
-
-            // Trigger 15: CHARM used 3+ times → +1 Madness (once)
-            if (chosenOption.Stat == StatType.Charm)
-            {
-                _charmUsageCount++;
-                if (_charmUsageCount == 3 && !_charmMadnessTriggered)
-                {
-                    _charmMadnessTriggered = true;
-                    _playerShadows.ApplyGrowth(ShadowStatType.Madness, 1,
-                        "CHARM used 3+ times in one conversation");
-                }
-            }
-
-            // Shadow reduction: Combo success → Madness -1
-            if (comboTriggered != null)
-            {
-                _playerShadows.ApplyOffset(ShadowStatType.Madness, -1,
-                    $"Combo success ({comboTriggered})");
-            }
-
-            // Shadow reduction: CHAOS combo → Fixation -1
-            if (comboTriggered != null && chosenOption.Stat == StatType.Chaos)
-            {
-                _playerShadows.ApplyOffset(ShadowStatType.Fixation, -1,
-                    $"CHAOS combo ({comboTriggered})");
-            }
-
-            // Shadow reduction: Tell option selected → Madness -1
-            if (hasTellOption)
-            {
-                _playerShadows.ApplyOffset(ShadowStatType.Madness, -1,
-                    "Tell option selected");
-            }
-        }
-
-        /// <summary>
-        /// Evaluates end-of-game shadow growth triggers.
-        /// </summary>
-        private void EvaluateEndOfGameShadowGrowth(GameOutcome outcome)
-        {
-            if (_playerShadows == null)
-                return;
-
-            // Shadow reduction: Date secured → Dread −1
-            if (outcome == GameOutcome.DateSecured)
-            {
-                _playerShadows.ApplyOffset(ShadowStatType.Dread, -1,
-                    "Date secured");
-            }
-
-            // Trigger 11: Date secured without Honesty success → +1 Denial
-            if (outcome == GameOutcome.DateSecured && _honestySuccessCount == 0)
-            {
-                _playerShadows.ApplyGrowth(ShadowStatType.Denial, 1,
-                    "Date secured without any Honesty successes");
-            }
-
-            // Trigger 12: Never picked Chaos → +1 Fixation
-            if (!_statsUsedPerTurn.Contains(StatType.Chaos))
-            {
-                _playerShadows.ApplyGrowth(ShadowStatType.Fixation, 1,
-                    "Never picked Chaos in whole conversation");
-            }
-
-            // Trigger 13: 4+ different stats used → −1 Fixation (offset)
-            int distinctStats = _statsUsedPerTurn.Distinct().Count();
-            if (distinctStats >= 4)
-            {
-                _playerShadows.ApplyOffset(ShadowStatType.Fixation, -1,
-                    "4+ different stats used in conversation");
-            }
-        }
-
-        /// <summary>
         /// Get momentum bonus for the current streak length.
         /// Uses rule resolver if available, falls back to hardcoded values.
         /// 3-streak → +2, 4-streak → +2, 5+ → +3.
@@ -1242,7 +760,6 @@ namespace Pinder.Core.Conversation
 
         /// <summary>
         /// Get failure interest delta, using rule resolver if available.
-        /// Falls back to FailureScale.GetInterestDelta().
         /// </summary>
         private int ResolveFailureInterestDelta(RollResult rollResult)
         {
@@ -1257,7 +774,6 @@ namespace Pinder.Core.Conversation
 
         /// <summary>
         /// Get success interest delta, using rule resolver if available.
-        /// Falls back to SuccessScale.GetInterestDelta().
         /// </summary>
         private int ResolveSuccessInterestDelta(RollResult rollResult)
         {
@@ -1273,7 +789,6 @@ namespace Pinder.Core.Conversation
 
         /// <summary>
         /// Get interest state, using rule resolver if available.
-        /// Falls back to InterestMeter.GetState().
         /// </summary>
         private InterestState ResolveInterestState()
         {
@@ -1288,7 +803,6 @@ namespace Pinder.Core.Conversation
 
         /// <summary>
         /// Get shadow threshold level, using rule resolver if available.
-        /// Falls back to ShadowThresholdEvaluator.GetThresholdLevel().
         /// </summary>
         private int ResolveThresholdLevel(int shadowValue)
         {
@@ -1303,123 +817,13 @@ namespace Pinder.Core.Conversation
 
         private GameStateSnapshot CreateSnapshot()
         {
-            var trapNames = _traps.AllActive
-                .Select(t => t.Definition.Id)
-                .ToArray();
-
-            var trapDetails = _traps.AllActive
-                .Select(t => new TrapDetail(
-                    name: t.Definition.Id,
-                    stat: t.Definition.Stat.ToString().ToUpperInvariant(),
-                    turnsRemaining: t.TurnsRemaining,
-                    penaltyDescription: FormatTrapPenalty(t.Definition)))
-                .ToArray();
-
-            return new GameStateSnapshot(
-                interest: _interest.Current,
-                state: ResolveInterestState(),
-                momentumStreak: _momentumStreak,
-                activeTrapNames: trapNames,
-                turnNumber: _turnNumber,
-                tripleBonusActive: _comboTracker.HasTripleBonus,
-                activeTrapDetails: trapDetails);
-        }
-
-        private static string FormatTrapPenalty(TrapDefinition def)
-        {
-            switch (def.Effect)
-            {
-                case TrapEffect.StatPenalty:
-                    return $"stat penalty -{def.EffectValue}";
-                case TrapEffect.Disadvantage:
-                    return "roll at disadvantage";
-                case TrapEffect.OpponentDCIncrease:
-                    return $"opponent DC +{def.EffectValue}";
-                default:
-                    return def.Effect.ToString();
-            }
-        }
-
-        /// <summary>
-        /// Builds the visible profile string passed to the player's options context.
-        /// Includes display name, bio, and equipped item display names (appearance).
-        /// This is what the player "sees" on the opponent's dating profile.
-        /// </summary>
-        private static string BuildOpponentVisibleProfile(CharacterProfile opponent)
-        {
-            var sb = new System.Text.StringBuilder();
-            sb.Append(opponent.DisplayName);
-            if (!string.IsNullOrWhiteSpace(opponent.Bio))
-                sb.Append(": \"").Append(opponent.Bio).Append('"');
-            if (opponent.EquippedItemDisplayNames != null && opponent.EquippedItemDisplayNames.Count > 0)
-                sb.Append(" | Wearing: ").Append(string.Join(", ", opponent.EquippedItemDisplayNames));
-            return sb.ToString();
-        }
-
-        /// <summary>
-        /// Determines the horniness overlay failure tier from miss margin.
-        /// Uses same thresholds as normal failure tiers.
-        /// </summary>
-        private static Rolls.FailureTier DetermineHorninessTier(int missMargin)
-        {
-            if (missMargin <= 2) return Rolls.FailureTier.Fumble;
-            if (missMargin <= 5) return Rolls.FailureTier.Misfire;
-            if (missMargin <= 9) return Rolls.FailureTier.TropeTrap;
-            return Rolls.FailureTier.Catastrophe;
-        }
-
-        /// <summary>
-        /// Retrieves the stat-specific failure instruction from the stat delivery instructions.
-        /// Uses reflection to call GetStatFailureInstruction on the injected object
-        /// (which is StatDeliveryInstructions from the LlmAdapters layer).
-        /// Returns null if instructions are not available.
-        /// </summary>
-        private string GetStatFailureInstruction(Stats.StatType stat, Rolls.FailureTier tier)
-        {
-            if (_statDeliveryInstructions == null)
-                return null;
-
-            var method = _statDeliveryInstructions.GetType().GetMethod("GetStatFailureInstruction");
-            if (method == null)
-                return null;
-
-            return method.Invoke(_statDeliveryInstructions, new object[] { stat, tier }) as string;
-        }
-
-        /// <summary>
-        /// Retrieves the horniness overlay instruction from the stat delivery instructions.
-        /// Uses reflection to call GetHorninessOverlayInstruction on the injected object
-        /// (which is StatDeliveryInstructions from the LlmAdapters layer).
-        /// Returns null if instructions are not available.
-        /// </summary>
-        private string GetHorninessOverlayInstruction(Rolls.FailureTier tier)
-        {
-            if (_statDeliveryInstructions == null)
-                return null;
-
-            // Use reflection to avoid a direct dependency on Pinder.LlmAdapters from Pinder.Core
-            var method = _statDeliveryInstructions.GetType().GetMethod("GetHorninessOverlayInstruction");
-            if (method == null)
-                return null;
-
-            return method.Invoke(_statDeliveryInstructions, new object[] { tier }) as string;
-        }
-
-        private string GetLastOpponentMessage()
-        {
-            for (int i = _history.Count - 1; i >= 0; i--)
-            {
-                if (_history[i].Sender == _opponent.DisplayName)
-                    return _history[i].Text;
-            }
-            return string.Empty;
-        }
-
-        private List<string> GetActiveTrapNames()
-        {
-            return _traps.AllActive
-                .Select(t => t.Definition.Id)
-                .ToList();
+            return GameSessionHelpers.CreateSnapshot(
+                _interest,
+                ResolveInterestState(),
+                _momentumStreak,
+                _traps,
+                _turnNumber,
+                _comboTracker.HasTripleBonus);
         }
 
         /// <summary>
@@ -1487,7 +891,6 @@ namespace Pinder.Core.Conversation
 
         /// <summary>
         /// Checks ghost trigger: if Bored state, 25% chance (dice.Roll(4)==1) to ghost.
-        /// Includes shadow growth for ghost Dread +1.
         /// </summary>
         private void CheckGhostTrigger()
         {
@@ -1499,7 +902,6 @@ namespace Pinder.Core.Conversation
                     _ended = true;
                     _outcome = GameOutcome.Ghosted;
 
-                    // Shadow growth: Ghosted → +1 Dread (#44 trigger 8)
                     if (_playerShadows != null)
                     {
                         _playerShadows.ApplyGrowth(ShadowStatType.Dread, 1, "Ghosted");
@@ -1510,44 +912,6 @@ namespace Pinder.Core.Conversation
                     throw new GameEndedException(GameOutcome.Ghosted);
                 }
             }
-        }
-
-        /// <summary>
-        /// Collects the LLM instruction text from all currently active traps.
-        /// Returns null if no traps are active (avoids empty array allocation).
-        /// </summary>
-        private string[]? GetActiveTrapInstructions()
-        {
-            var instructions = _traps.AllActive
-                .Select(t => t.Definition.LlmInstruction)
-                .Where(s => !string.IsNullOrEmpty(s))
-                .ToArray();
-            return instructions.Length > 0 ? instructions : null;
-        }
-
-        /// <summary>
-        /// Determines whether the chosen option has the highest (or tied-for-highest)
-        /// success probability among all available options.
-        /// Probability is based on attacker stat modifier + level bonus vs defender DC.
-        /// </summary>
-        private bool IsHighestProbabilityOption(DialogueOption chosen, DialogueOption[] options)
-        {
-            int levelBonus = LevelTable.GetBonus(_player.Level);
-
-            // Compute "roll margin" for chosen option: higher = easier to succeed
-            // margin = statMod + levelBonus - DC (more positive = higher probability)
-            int chosenMargin = _player.Stats.GetEffective(chosen.Stat) + levelBonus
-                               - _opponent.Stats.GetDefenceDC(chosen.Stat);
-
-            for (int i = 0; i < options.Length; i++)
-            {
-                int margin = _player.Stats.GetEffective(options[i].Stat) + levelBonus
-                             - _opponent.Stats.GetDefenceDC(options[i].Stat);
-                if (margin > chosenMargin)
-                    return false; // Another option has strictly higher probability
-            }
-
-            return true; // Chosen is highest or tied for highest
         }
     }
 }
