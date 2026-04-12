@@ -598,8 +598,20 @@ class Program
                 int mod = sableStats.GetEffective(opt.Stat);
                 int dc = brickStats.GetDefenceDC(opt.Stat);
                 int need = dc - (mod + p1LevelBonus); // include level bonus
+                // Compute display bonuses (tell, Triple combo, callback)
+                int displayBonus = 0;
+                var bonusAnnotations = new System.Collections.Generic.List<string>();
+                if (opt.HasTellBonus) { displayBonus += 2; bonusAnnotations.Add("+2 tell"); }
+                if (snap.TripleBonusActive) { displayBonus += 1; bonusAnnotations.Add("+1 Triple"); }
+                if (opt.CallbackTurnNumber.HasValue)
+                {
+                    int cbBonus = CallbackBonus.Compute(snap.TurnNumber, opt.CallbackTurnNumber.Value);
+                    if (cbBonus > 0) { displayBonus += cbBonus; bonusAnnotations.Add($"+{cbBonus} callback"); }
+                }
                 // need ≥20 = Reckless (only Nat 20 succeeds = 5%)
-                int pct = need >= 20 ? 5 : Math.Max(0, Math.Min(100, (21-need)*5));
+                int effectiveNeed = need - displayBonus;
+                int pct = effectiveNeed >= 20 ? 5 : Math.Max(0, Math.Min(100, (21-effectiveNeed)*5));
+                string pctAnnotation = bonusAnnotations.Count > 0 ? $" ({string.Join(", ", bonusAnnotations)})" : "";
                 string riskColor = RiskLabel(need);
                 int riskBonus = need <= 7 ? 1 : need <= 11 ? 2 : need <= 15 ? 3 : need <= 19 ? 5 : 10;
                 string riskBonusTag = $" [+{riskBonus}i★]"; // always show — Reckless shows +10
@@ -633,7 +645,7 @@ class Program
                     && opt.Stat != lastStatUsed.Value)
                     badges.Add("✨ breaks streak");
                 string badgeStr = badges.Count > 0 ? " | " + string.Join(", ", badges) : "";
-                Console.WriteLine($"**{letters[i]})** {StatLabel(opt.Stat)} {mod:+#;-#;0} | {pct}% {riskColor}{riskBonusTag}{badgeStr}");
+                Console.WriteLine($"**{letters[i]})** {StatLabel(opt.Stat)} {mod:+#;-#;0} | {pct}%{pctAnnotation} {riskColor}{riskBonusTag}{badgeStr}");
                 
                 if (opt.ComboName != null)
                 {
