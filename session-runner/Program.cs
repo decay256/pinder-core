@@ -346,6 +346,14 @@ class Program
         Console.WriteLine("> DC = 16 + opponent defending stat modifier. Miss by 1–2 = Fumble | 3–5 = Misfire | 6–9 = Trope Trap | 10+ = Catastrophe | Nat 1 = Legendary.");
         Console.WriteLine();
 
+        // ── steering roll explanation ─────────────────────────────────────
+        int steeringMod = (sableStats.GetEffective(StatType.Charm) + sableStats.GetEffective(StatType.Wit) + sableStats.GetEffective(StatType.SelfAwareness)) / 3;
+        int steeringDC = 16 + (brickStats.GetEffective(StatType.SelfAwareness) + brickStats.GetEffective(StatType.Rizz) + brickStats.GetEffective(StatType.Honesty)) / 3;
+        Console.WriteLine($"> 🧭 **Steering**: After each delivery, {player1} may append a follow-up sentence.");
+        Console.WriteLine($"> Roll: d20 + (CHARM+WIT+SA)/3 = +{steeringMod} vs DC = 16 + (opponent SA+RIZZ+HONESTY)/3 = {steeringDC}");
+        Console.WriteLine("> On success: adds a steering question. No interest effect — purely narrative.");
+        Console.WriteLine();
+
         // ── LLM + session setup ───────────────────────────────────────────
         // Load game-definition.yaml if present
         string? gameDefPath = DataFileLocator.FindDataFile(AppContext.BaseDirectory, Path.Combine("data", "game-definition.yaml"));
