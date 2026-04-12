@@ -447,6 +447,9 @@ namespace Pinder.LlmAdapters.Anthropic
         }
 
         /// <summary>Writes the token summary table to the end of the debug transcript.</summary>
+        /// <summary>Returns a read-only view of all per-call token stats collected during the session.</summary>
+        public IReadOnlyList<CallSummaryStat> GetCallStats() => _callStats.AsReadOnly();
+
         public void WriteDebugSummary()
         {
             if (string.IsNullOrEmpty(_options.DebugDirectory)) return;

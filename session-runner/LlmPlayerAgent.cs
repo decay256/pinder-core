@@ -89,11 +89,15 @@ namespace Pinder.SessionRunner
         private readonly string _playerName;
         private readonly string _opponentName;
         private bool _disposed;
+        private readonly List<CallSummaryStat> _tokenStats = new List<CallSummaryStat>();
 
         /// <summary>
         /// The last explanation produced by the LLM agent. Empty string if no explanation available.
         /// </summary>
         public string LastExplanation { get; private set; } = "";
+
+        /// <summary>Returns per-call token stats for each llm-player-pick call made.</summary>
+        public IReadOnlyList<CallSummaryStat> GetTokenStats() => _tokenStats.AsReadOnly();
 
         /// <summary>
         /// Creates an LLM-backed player agent.
@@ -149,6 +153,20 @@ namespace Pinder.SessionRunner
                 };
 
                 var response = await _client.SendMessagesAsync(request).ConfigureAwait(false);
+
+                // Record token usage for audit table
+                if (response.Usage != null)
+                {
+                    _tokenStats.Add(new CallSummaryStat
+                    {
+                        Turn = turn.State.TurnNumber,
+                        Type = "llm-player-pick",
+                        InputTokens = response.Usage.InputTokens,
+                        OutputTokens = response.Usage.OutputTokens,
+                        CacheReadInputTokens = response.Usage.CacheReadInputTokens,
+                        CacheCreationInputTokens = response.Usage.CacheCreationInputTokens
+                    });
+                }
 
                 // Extract tool_use input
                 JObject toolInput = response.GetToolInput();

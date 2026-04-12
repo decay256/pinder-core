@@ -670,12 +670,6 @@ class Program
             var chosen = turnStart.Options[pick];
             Console.WriteLine($"**► Player picks: {letters[pick]} ({StatLabel(chosen.Stat)})**");
             Console.WriteLine();
-            // Show LLM agent explanation if available (#492)
-            if (!string.IsNullOrEmpty(agent.LastExplanation))
-            {
-                Console.WriteLine($"💭 {player1}: {agent.LastExplanation}");
-                Console.WriteLine();
-            }
             Console.WriteLine(PlaytestFormatter.FormatReasoningBlock(decision, agent.GetType().Name));
             Console.WriteLine(PlaytestFormatter.FormatScoreTable(decision, turnStart.Options));
             Console.WriteLine();
@@ -984,6 +978,47 @@ class Program
             Console.WriteLine($"| {shadowType} | {start} | {end} | {deltaFmt} |");
         }
         Console.WriteLine();
+
+        // ── token audit table ─────────────────────────────────────────────
+        {
+            var allStats = new List<CallSummaryStat>();
+            if (llm is AnthropicLlmAdapter anthropicLlm)
+            {
+                allStats.AddRange(anthropicLlm.GetCallStats());
+            }
+            if (agent is LlmPlayerAgent llmAgent)
+            {
+                allStats.AddRange(llmAgent.GetTokenStats());
+            }
+            if (allStats.Count > 0)
+            {
+                // Sort by turn, then adapter calls before player pick
+                allStats.Sort((a, b) =>
+                {
+                    int tc = a.Turn.CompareTo(b.Turn);
+                    if (tc != 0) return tc;
+                    // llm-player-pick sorts after adapter calls within same turn
+                    bool aIsPlayer = a.Type == "llm-player-pick";
+                    bool bIsPlayer = b.Type == "llm-player-pick";
+                    if (aIsPlayer == bIsPlayer) return 0;
+                    return aIsPlayer ? 1 : -1;
+                });
+
+                Console.WriteLine();
+                Console.WriteLine("## Token Audit");
+                Console.WriteLine("| Turn | Call | Input | Output | Cache Read | Cache Write |");
+                Console.WriteLine("|------|------|-------|--------|------------|-------------|" );
+                foreach (var stat in allStats)
+                    Console.WriteLine($"| {stat.Turn} | {stat.Type} | {stat.InputTokens} | {stat.OutputTokens} | {stat.CacheReadInputTokens} | {stat.CacheCreationInputTokens} |");
+
+                int totalInput      = allStats.Sum(s => s.InputTokens);
+                int totalOutput     = allStats.Sum(s => s.OutputTokens);
+                int totalCacheRead  = allStats.Sum(s => s.CacheReadInputTokens);
+                int totalCacheWrite = allStats.Sum(s => s.CacheCreationInputTokens);
+                Console.WriteLine($"| **Total** | | **{totalInput}** | **{totalOutput}** | **{totalCacheRead}** | **{totalCacheWrite}** |");
+                Console.WriteLine();
+            }
+        }
 
         (llm as IDisposable)?.Dispose();
 
