@@ -27,8 +27,6 @@ namespace Pinder.SessionRunner
             }
 
             var sb = new StringBuilder();
-            sb.AppendLine($"**Player reasoning ({agentTypeName}):**");
-
             string reasoning = decision.Reasoning;
             if (string.IsNullOrEmpty(reasoning))
             {
