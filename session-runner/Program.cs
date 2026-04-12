@@ -14,6 +14,7 @@ using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
 using Pinder.Core.Traps;
 using Pinder.Core.Data;
+using Pinder.Core.Text;
 using Pinder.LlmAdapters;
 using Pinder.LlmAdapters.Anthropic;
 using Pinder.LlmAdapters.OpenAi;
@@ -804,45 +805,26 @@ class Program
             }
 
             Console.WriteLine($"**📨 {player1} sends:**");
-            bool isSuccess = roll.Tier == FailureTier.None || roll.IsNatTwenty;
-            bool isStrongSuccess = isSuccess && (roll.FinalTotal - roll.DC >= 5 || roll.IsNatTwenty);
-            bool isFail = roll.Tier != FailureTier.None || roll.IsNatOne;
-            
-            // #736: Layered display — tier modifier and horniness overlay shown as separate layers
-            bool tierFired = isStrongSuccess || isFail;
-            bool horninessFired = result.HorninessCheck != null && result.HorninessCheck.OverlayApplied;
 
-            if (!tierFired && !horninessFired)
+            // #745: Diff-aware layered display
+            if (result.TextDiffs == null || result.TextDiffs.Count == 0)
             {
-                // Clean success, no horniness — just show the message
+                // Clean success with no transforms — just show the message
                 PrintQuoted(result.DeliveredMessage);
             }
             else
             {
+                // Show intended text
                 string intended = chosen.IntendedText ?? "";
                 string intendedDisplay = string.IsNullOrWhiteSpace(intended) || intended == "..." ? "..." : $"\"{intended}\"";
                 PrintQuoted("**Intended:** " + intendedDisplay);
                 Console.WriteLine();
 
-                if (tierFired)
+                // Render each diff layer
+                foreach (var diff in result.TextDiffs)
                 {
-                    string label = isStrongSuccess ? "Strong success" :
-                                   roll.IsNatOne ? "Nat 1" :
-                                   roll.Tier.ToString();
-                    if (roll.IsNatTwenty) label = "Nat 20";
-                    string marker = isStrongSuccess ? "__" : "*";
-                    // When horniness also fired, use the delivered message
-                    string tierText = result.DeliveredMessage ?? "";
-                    string formattedDelivered = FormatDeliveredAdditions(intended, tierText, marker);
-                    PrintQuoted($"**Delivered ({label}):** \"{formattedDelivered}\"");
-                    Console.WriteLine();
-                }
-
-                if (horninessFired)
-                {
-                    var hc = result.HorninessCheck!;
-                    string horninessLabel = hc.Tier != Pinder.Core.Rolls.FailureTier.None ? hc.Tier.ToString() : "Overlay";
-                    PrintQuoted($"**After horniness ({horninessLabel}):** \"{result.DeliveredMessage}\"");
+                    string rendered = RenderDiff(diff);
+                    PrintQuoted($"**Diff ({diff.LayerName}):** \"{rendered}\"");
                     Console.WriteLine();
                 }
             }
@@ -1108,6 +1090,25 @@ class Program
         Console.SetOut(tee._console);
         WritePlaytestLog(buffer.ToString(), player1, player2, playtestDir, sessionNumber);
         return 0;
+    }
+
+    /// <summary>
+    /// Render a TextDiff into a markdown string:
+    /// Keep → plain, Remove → ~~text~~, Add → ***text***
+    /// </summary>
+    internal static string RenderDiff(TextDiff diff)
+    {
+        var sb = new StringBuilder();
+        foreach (var span in diff.Spans)
+        {
+            switch (span.Type)
+            {
+                case DiffSpanType.Keep:   sb.Append(span.Text); break;
+                case DiffSpanType.Remove: sb.Append("~~").Append(span.Text.TrimEnd()).Append("~~ "); break;
+                case DiffSpanType.Add:    sb.Append("***").Append(span.Text.TrimEnd()).Append("*** "); break;
+            }
+        }
+        return sb.ToString().TrimEnd();
     }
 
     internal static string FormatDeliveredAdditions(string intended, string delivered, string marker) {

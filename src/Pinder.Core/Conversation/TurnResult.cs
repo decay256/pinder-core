@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Pinder.Core.Rolls;
+using Pinder.Core.Text;
 
 namespace Pinder.Core.Conversation
 {
@@ -96,6 +97,9 @@ namespace Pinder.Core.Conversation
         /// </summary>
         public int HorninessInterestBefore { get; }
 
+        /// <summary>Word-level diffs for each text transform layer that changed the message.</summary>
+        public IReadOnlyList<TextDiff> TextDiffs { get; }
+
         public TurnResult(
             RollResult roll,
             string deliveredMessage,
@@ -120,7 +124,8 @@ namespace Pinder.Core.Conversation
             HorninessCheckResult horninessCheck = null,
             int tripleBonusApplied = 0,
             int horninessInterestPenalty = 0,
-            int horninessInterestBefore = 0)
+            int horninessInterestBefore = 0,
+            IReadOnlyList<TextDiff>? textDiffs = null)
         {
             Roll = roll ?? throw new ArgumentNullException(nameof(roll));
             DeliveredMessage = deliveredMessage ?? throw new ArgumentNullException(nameof(deliveredMessage));
@@ -146,6 +151,7 @@ namespace Pinder.Core.Conversation
             TripleBonusApplied = tripleBonusApplied;
             HorninessInterestPenalty = horninessInterestPenalty;
             HorninessInterestBefore = horninessInterestBefore;
+            TextDiffs = textDiffs ?? Array.Empty<TextDiff>();
         }
     }
 }

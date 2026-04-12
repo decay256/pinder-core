@@ -8,6 +8,7 @@ using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
 using Pinder.Core.Progression;
 using Pinder.Core.Traps;
+using Pinder.Core.Text;
 
 namespace Pinder.Core.Conversation
 {
@@ -621,6 +622,21 @@ namespace Pinder.Core.Conversation
 
             string deliveredMessage = await _llm.DeliverMessageAsync(deliveryContext).ConfigureAwait(false);
 
+            // Collect word-level diffs for each text transform layer
+            var textDiffs = new List<TextDiff>();
+
+            // Tier modifier diff: intended text vs delivered-after-LLM rewrite
+            string intendedText = chosenOption.IntendedText ?? "";
+            if (deliveredMessage != intendedText && !string.IsNullOrEmpty(intendedText) && intendedText != "...")
+            {
+                string layerLabel = rollResult.IsNatTwenty ? "Nat 20" :
+                                    rollResult.IsNatOne    ? "Nat 1"  :
+                                    rollResult.Tier == Rolls.FailureTier.None ? "Strong success" :
+                                    rollResult.Tier.ToString();
+                var tierSpans = WordDiff.Compute(intendedText, deliveredMessage);
+                textDiffs.Add(new TextDiff(layerLabel, tierSpans, intendedText, deliveredMessage));
+            }
+
             // 9. Check interest threshold crossing → narrative beat
             string? narrativeBeat = null;
             if (stateBefore != stateAfter)
@@ -636,7 +652,13 @@ namespace Pinder.Core.Conversation
                 deliveredMessage, _player, _opponent, _llm, _history.AsReadOnly()).ConfigureAwait(false);
             if (steeringResult.SteeringSucceeded && steeringResult.SteeringQuestion != null)
             {
+                string beforeSteering = deliveredMessage;
                 deliveredMessage = deliveredMessage.TrimEnd() + " " + steeringResult.SteeringQuestion;
+                if (deliveredMessage != beforeSteering)
+                {
+                    var steeringSpans = WordDiff.Compute(beforeSteering, deliveredMessage);
+                    textDiffs.Add(new TextDiff("Steering", steeringSpans, beforeSteering, deliveredMessage));
+                }
             }
 
             // Per-turn Horniness overlay check (#709)
@@ -649,7 +671,13 @@ namespace Pinder.Core.Conversation
                 _statDeliveryInstructions,
                 async (instruction) =>
                 {
+                    string beforeHorniness = deliveredMessage;
                     deliveredMessage = await _llm.ApplyHorninessOverlayAsync(deliveredMessage, instruction).ConfigureAwait(false);
+                    if (deliveredMessage != beforeHorniness)
+                    {
+                        var horninessSpans = WordDiff.Compute(beforeHorniness, deliveredMessage);
+                        textDiffs.Add(new TextDiff("Horniness", horninessSpans, beforeHorniness, deliveredMessage));
+                    }
                 }).ConfigureAwait(false);
 
             // #743: Horniness penalty — when overlay fires and interest > 0, halve interest
@@ -751,7 +779,8 @@ namespace Pinder.Core.Conversation
                 horninessCheck: horninessCheckResult,
                 tripleBonusApplied: tripleBonusApplied,
                 horninessInterestPenalty: horninessInterestPenalty,
-                horninessInterestBefore: horninessInterestBefore);
+                horninessInterestBefore: horninessInterestBefore,
+                textDiffs: textDiffs.Count > 0 ? textDiffs : null);
         }
 
         /// <summary>
