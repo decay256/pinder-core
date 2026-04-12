@@ -789,6 +789,17 @@ class Program
                 Console.WriteLine();
             }
 
+            // Per-turn horniness check display (#709, moved after steering roll per #742)
+            if (result.HorninessCheck != null && result.HorninessCheck.DC > 0)
+            {
+                var hc = result.HorninessCheck;
+                string hcResult = hc.IsMiss
+                    ? $"MISS ({hc.Tier}){(hc.OverlayApplied ? " — overlay applied" : "")}"
+                    : "OK";
+                Console.WriteLine($"> 🌶️ Horniness check: d20({hc.Roll}) + {hc.Modifier} = {hc.Total} vs DC {hc.DC} → {hcResult}");
+                Console.WriteLine();
+            }
+
             Console.WriteLine($"**📨 {player1} sends:**");
             bool isSuccess = roll.Tier == FailureTier.None || roll.IsNatTwenty;
             bool isStrongSuccess = isSuccess && (roll.FinalTotal - roll.DC >= 5 || roll.IsNatTwenty);
@@ -833,17 +844,6 @@ class Program
                 }
             }
             Console.WriteLine();
-
-            // Per-turn horniness check display (#709)
-            if (result.HorninessCheck != null && result.HorninessCheck.DC > 0)
-            {
-                var hc = result.HorninessCheck;
-                string hcResult = hc.IsMiss
-                    ? $"MISS ({hc.Tier}){(hc.OverlayApplied ? " — overlay applied" : "")}"
-                    : "OK";
-                Console.WriteLine($"> 🌶️ Horniness check: d20({hc.Roll}) + {hc.Modifier} = {hc.Total} vs DC {hc.DC} → {hcResult}");
-                Console.WriteLine();
-            }
 
             // Track conversation history for LLM agent context (#492)
             if (!string.IsNullOrEmpty(result.DeliveredMessage))
