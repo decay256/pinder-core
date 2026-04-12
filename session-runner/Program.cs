@@ -316,6 +316,7 @@ class Program
         Console.WriteLine("## Characters");
         Console.WriteLine();
         Console.WriteLine($"***{player1} bio:*** *\"{sable.Bio}\"*");
+        Console.WriteLine();
         Console.WriteLine($"***{player2} bio:*** *\"{brick.Bio}\"*");
         Console.WriteLine();
         Console.WriteLine($"| | **{player1}** | **{player2}** |");
