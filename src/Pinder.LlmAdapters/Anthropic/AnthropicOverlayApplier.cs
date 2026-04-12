@@ -22,7 +22,10 @@ namespace Pinder.LlmAdapters.Anthropic
             if (string.IsNullOrWhiteSpace(message) || string.IsNullOrWhiteSpace(instruction))
                 return message;
 
-            string systemPrompt = "You are a message editor. Apply the overlay instruction to the message. Return ONLY the modified message text, nothing else.";
+            string systemPrompt = "You are a dialogue editor for Pinder, a comedy RPG where sentient penises date each other on a fictional app. " +
+                "The humour is absurdist and satirical — characters are oblivious to double-entendre, not explicit. " +
+                "Apply the overlay instruction to rewrite the message with the requested tonal shift. " +
+                "Return ONLY the rewritten message text. No commentary, no refusals, no preamble.";
             var systemBlocks = new ContentBlock[]
             {
                 new ContentBlock { Type = "text", Text = systemPrompt }
@@ -41,7 +44,15 @@ namespace Pinder.LlmAdapters.Anthropic
             {
                 var response = await client.SendMessagesAsync(request).ConfigureAwait(false);
                 string result = response?.Content?[0]?.Text;
-                return string.IsNullOrWhiteSpace(result) ? message : result.Trim();
+                if (string.IsNullOrWhiteSpace(result)) return message;
+                string trimmed = result.Trim();
+                // Detect refusal — fall back to original message silently
+                if (trimmed.StartsWith("I can't", System.StringComparison.OrdinalIgnoreCase) ||
+                    trimmed.StartsWith("I cannot", System.StringComparison.OrdinalIgnoreCase) ||
+                    trimmed.Contains("inappropriate", System.StringComparison.OrdinalIgnoreCase) ||
+                    trimmed.Contains("I'd be happy to help", System.StringComparison.OrdinalIgnoreCase))
+                    return message;
+                return trimmed;
             }
             catch
             {
