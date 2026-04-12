@@ -286,6 +286,10 @@ Called on failed horniness check. Receives the delivered message + tier-specific
 - Shadow growth evaluation happens in `EvaluatePerTurnShadowGrowth()` and `EvaluateEndOfGameShadowGrowth()`
 - Shadow reductions are intentional design — combos, tell reads, high-interest successes can reduce shadows
 
+## Progression
+
+**Level Bonus**: Each level grants a flat +1 bonus to ALL rolls (not per-stat). This is intentional: players outscale opponent DCs over time, but shadows remain threatening even at high level because they eat into the level bonus. Keeping it flat (not per-stat) avoids complex stat-specific levelling decisions and keeps progression simple.
+
 ### Testing
 - **0 test failures before any merge**
 - Deterministic testing via `BiasedDiceRoller` (queued dice values) and `FixedGameClock`
