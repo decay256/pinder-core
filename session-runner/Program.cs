@@ -309,7 +309,8 @@ class Program
         // ── header ────────────────────────────────────────────────────────
         Console.WriteLine($"# Playtest Session {sessionNumber:D3} — {player1} × {player2}");
         Console.WriteLine($"**Date:** {DateTime.UtcNow:yyyy-MM-dd}");
-        Console.WriteLine($"**Engine:** `pinder-core GameSession` + `AnthropicLlmAdapter` → claude-sonnet-4-20250514");
+        string engineLabel = "AnthropicLlmAdapter → claude-sonnet-4-20250514"; // updated after adapter selection
+        // Engine line printed below after adapter is resolved
         string p1Archetype = sable.ActiveArchetype != null ? $" | Archetype: {sable.ActiveArchetype.Name} ({sable.ActiveArchetype.InterferenceLevel})" : "";
         string p2Archetype = brick.ActiveArchetype != null ? $" | Archetype: {brick.ActiveArchetype.Name} ({brick.ActiveArchetype.InterferenceLevel})" : "";
         Console.WriteLine($"**Player:** {player1} (Level {p1Level}, +{p1LevelBonus} level bonus{p1Archetype}) | **Opponent:** {player2} (Level {p2Level}, +{p2LevelBonus} level bonus, LLM puppet{p2Archetype})");
@@ -422,6 +423,7 @@ class Program
                 DebugDirectory = debugFile,
                 StatDeliveryInstructions = statDeliveryInstructions
             });
+            engineLabel = $"OpenAiLlmAdapter ({provider}) → {model}";
         }
         else
         {
@@ -443,7 +445,12 @@ class Program
                 OverlayGroqModel = overlayModel,
                 OverlayGroqApiKey = groqApiKey
             });
+            engineLabel = string.IsNullOrWhiteSpace(overlayModel)
+                ? "AnthropicLlmAdapter → claude-sonnet-4-20250514"
+                : $"AnthropicLlmAdapter → claude-sonnet-4-20250514 (overlay: {overlayModel} via Groq)";
         }
+
+        Console.WriteLine($"**Engine:** `pinder-core GameSession` + `{engineLabel}`");
 
         // Load real trap definitions — fallback to NullTrapRegistry if file missing/corrupt
         ITrapRegistry trapRegistry = TrapRegistryLoader.Load(AppContext.BaseDirectory, Console.Error);
