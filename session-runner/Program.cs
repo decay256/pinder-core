@@ -304,7 +304,7 @@ class Program
 
         // ── resolve session number early so header matches filename ──────
         string? playtestDir = SessionFileCounter.ResolvePlaytestDirectory(AppContext.BaseDirectory);
-        int sessionNumber = playtestDir != null ? SessionFileCounter.GetNextSessionNumber(playtestDir) : 1;
+        int sessionNumber = playtestDir != null ? SessionFileCounter.ClaimNextSessionNumber(playtestDir) : 1;
 
         // ── header ────────────────────────────────────────────────────────
         Console.WriteLine($"# Playtest Session {sessionNumber:D3} — {player1} × {player2}");
@@ -1120,6 +1120,7 @@ class Program
 
         Console.SetOut(tee._console);
         WritePlaytestLog(buffer.ToString(), player1, player2, playtestDir, sessionNumber);
+        if (playtestDir != null) SessionFileCounter.ReleaseLock(playtestDir, sessionNumber);
         return 0;
     }
 

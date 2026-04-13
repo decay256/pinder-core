@@ -34,6 +34,39 @@ internal static class SessionFileCounter
     }
 
     /// <summary>
+    /// Claims the next session number atomically by creating a placeholder .lock file.
+    /// Concurrent processes will get different numbers. Caller is responsible for
+    /// deleting the .lock file after writing the real session file.
+    /// Returns the claimed session number.
+    /// </summary>
+    public static int ClaimNextSessionNumber(string directory)
+    {
+        for (int attempt = 0; attempt < 100; attempt++)
+        {
+            int candidate = GetNextSessionNumber(directory);
+            string lockPath = Path.Combine(directory, $"session-{candidate:D3}.lock");
+            try
+            {
+                // FileMode.CreateNew fails atomically if the file already exists
+                using var fs = new FileStream(lockPath, FileMode.CreateNew, FileAccess.Write, FileShare.None);
+                return candidate;
+            }
+            catch (IOException)
+            {
+                // Another process claimed this number — retry
+            }
+        }
+        throw new InvalidOperationException("Could not claim a session number after 100 attempts");
+    }
+
+    /// <summary>Removes the .lock placeholder after the real session file is written.</summary>
+    public static void ReleaseLock(string directory, int sessionNumber)
+    {
+        string lockPath = Path.Combine(directory, $"session-{sessionNumber:D3}.lock");
+        try { File.Delete(lockPath); } catch { }
+    }
+
+    /// <summary>
     /// Resolves the playtest output directory.
     /// Search order:
     ///   1. PINDER_PLAYTESTS_PATH env var (if set and directory exists)
