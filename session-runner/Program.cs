@@ -636,10 +636,13 @@ class Program
                 var opt = turnStart.Options[i];
                 int mod = sableStats.GetEffective(opt.Stat);
                 int dc = brickStats.GetDefenceDC(opt.Stat);
-                int need = dc - (mod + p1LevelBonus); // include level bonus
-                // Compute display bonuses (tell, Triple combo, callback)
+                int need = dc - mod; // base stat only — bonuses added via displayBonus
+                // Compute display bonuses (level, momentum, tell, Triple combo, callback)
                 int displayBonus = 0;
                 var bonusAnnotations = new System.Collections.Generic.List<string>();
+                if (p1LevelBonus > 0) { displayBonus += p1LevelBonus; bonusAnnotations.Add($"+{p1LevelBonus} Lv"); }
+                int mBonus = momentum >= 5 ? 3 : momentum >= 3 ? 2 : 0;
+                if (mBonus > 0) { displayBonus += mBonus; bonusAnnotations.Add($"+{mBonus} momentum"); }
                 if (opt.HasTellBonus) { displayBonus += 2; bonusAnnotations.Add("+2 tell"); }
                 if (snap.TripleBonusActive) { displayBonus += 1; bonusAnnotations.Add("+1 Triple"); }
                 if (opt.CallbackTurnNumber.HasValue)
