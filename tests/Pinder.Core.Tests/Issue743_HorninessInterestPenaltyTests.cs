@@ -54,10 +54,11 @@ namespace Pinder.Core.Tests
             int startingInterest,
             int sessionHorniness,
             int steeringSeed,
-            StatDeliveryInstructions? instructions = null)
+            StatDeliveryInstructions? instructions = null,
+            int mainRoll = 15)
         {
             // Dice: first roll is sessionHorniness (d10), rest pad the turn
-            var dice = new FixedDice(sessionHorniness, 15, 50);
+            var dice = new FixedDice(sessionHorniness, mainRoll, 50);
             var shadows = new SessionShadowTracker(TestHelpers.MakeStatBlock());
             var rng = new Random(steeringSeed);
             var config = new GameSessionConfig(
@@ -83,7 +84,8 @@ namespace Pinder.Core.Tests
                 startingInterest: 14,
                 sessionHorniness: 5,
                 steeringSeed: OverlayFiredSeed,
-                instructions: instructions);
+                instructions: instructions,
+                mainRoll: 18); // Use 18 to ensure a success and positive interest delta
 
             var turn = await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
@@ -92,16 +94,15 @@ namespace Pinder.Core.Tests
             Assert.True(result.HorninessCheck.OverlayApplied,
                 "Expected horniness overlay to fire with seed=1, sessionHorniness=5");
 
-            // Penalty should be non-zero
+            // Penalty should be non-zero (since interestDelta should be > 0)
             Assert.NotEqual(0, result.HorninessInterestPenalty);
 
-            // HorninessInterestBefore should be positive
-            Assert.True(result.HorninessInterestBefore > 0);
+            // Calculate expected penalty
+            int prePenaltyDelta = result.InterestDelta - result.HorninessInterestPenalty;
+            Assert.True(prePenaltyDelta > 0, "Expected a positive interest delta before penalty");
 
-            // Final interest should be floor(before / 2) or less (further deltas may apply)
-            int expectedPenaltyTarget = (int)Math.Floor(result.HorninessInterestBefore / 2.0);
-            int penaltyAfter = result.HorninessInterestBefore + result.HorninessInterestPenalty;
-            Assert.Equal(expectedPenaltyTarget, penaltyAfter);
+            int expectedPenalty = (int)Math.Floor(prePenaltyDelta / 2.0) - prePenaltyDelta;
+            Assert.Equal(expectedPenalty, result.HorninessInterestPenalty);
         }
 
         /// <summary>
@@ -111,10 +112,11 @@ namespace Pinder.Core.Tests
         public async Task Overlay_Fires_OddInterest15_FloorTo7()
         {
             var instructions = LoadDeliveryInstructions();
-            // Use interest=15 before penalty, but the penalty fires after the main delta.
-            // We start at 15 and force no delta from roll by using a successful roll.
-            // FixedDice: sessionHorniness=5, d20=20 (nat 20 success), timing=50
-            var dice = new FixedDice(5, 20, 50);
+            // We want an odd delta so we can test the floor behavior.
+            // Using mainRoll=19 will yield a success with some positive delta. We'll verify
+            // that floor(delta/2) is applied correctly.
+            // sessionHorniness=5 → DC=15; OverlayFiredSeed=1 produces a miss on the horniness check
+            var dice = new FixedDice(5, 19, 50);
             var shadows = new SessionShadowTracker(TestHelpers.MakeStatBlock());
             var rng = new Random(OverlayFiredSeed);
             var config = new GameSessionConfig(
@@ -134,18 +136,17 @@ namespace Pinder.Core.Tests
             Assert.True(result.HorninessCheck.OverlayApplied,
                 "Expected horniness overlay to fire");
 
-            // The penalty should halve the interest at the point it fires
-            // HorninessInterestBefore is what interest was right before penalty
-            int expectedAfterPenalty = (int)Math.Floor(result.HorninessInterestBefore / 2.0);
-            int actualAfterPenalty = result.HorninessInterestBefore + result.HorninessInterestPenalty;
-            Assert.Equal(expectedAfterPenalty, actualAfterPenalty);
+            int prePenaltyDelta = result.InterestDelta - result.HorninessInterestPenalty;
+            Assert.True(prePenaltyDelta > 0, "Test requires positive delta");
 
-            // Specifically: floor is applied, not round-up
-            if (result.HorninessInterestBefore % 2 != 0)
+            int expectedPenalty = (int)Math.Floor(prePenaltyDelta / 2.0) - prePenaltyDelta;
+            Assert.Equal(expectedPenalty, result.HorninessInterestPenalty);
+
+            // Specifically: floor is applied
+            if (prePenaltyDelta % 2 != 0)
             {
-                // Odd → floor, so penaltyAfter < before/2 rounded up
-                Assert.True(actualAfterPenalty * 2 <= result.HorninessInterestBefore,
-                    $"Floor should round down: {result.HorninessInterestBefore} / 2 → {actualAfterPenalty}");
+                int expectedNetGain = (int)Math.Floor(prePenaltyDelta / 2.0);
+                Assert.Equal(expectedNetGain, result.InterestDelta);
             }
         }
 
@@ -255,9 +256,10 @@ namespace Pinder.Core.Tests
             var instructions = LoadDeliveryInstructions();
             var session = MakeSession(
                 startingInterest: 14,
-                sessionHorniness: 5,
+                sessionHorniness: 5, // DC=15; OverlayFiredSeed=1 produces miss
                 steeringSeed: OverlayFiredSeed,
-                instructions: instructions);
+                instructions: instructions,
+                mainRoll: 18); // Ensure positive interest delta
 
             var turn = await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
@@ -270,14 +272,34 @@ namespace Pinder.Core.Tests
             Assert.True(result.HorninessInterestPenalty < 0,
                 "Penalty should be negative (interest reduced)");
 
-            // InterestDelta should include the penalty contribution
             // Total delta = base delta + horniness penalty delta
             int expectedDeltaWithoutPenalty = result.InterestDelta - result.HorninessInterestPenalty;
-            // If we add the penalty back, we get the delta without penalty
-            // We can't directly verify this without knowing the base, but we can verify
-            // that InterestDelta includes a component equal to HorninessInterestPenalty
-            Assert.True(result.InterestDelta <= result.InterestDelta - result.HorninessInterestPenalty,
+            Assert.True(result.InterestDelta < expectedDeltaWithoutPenalty,
                 "InterestDelta should be lower due to horniness penalty");
+        }
+
+        /// <summary>
+        /// When overlay fires but the interest delta is non-positive, no penalty is applied.
+        /// </summary>
+        [Fact]
+        public async Task Overlay_Fires_NonPositiveDelta_NoPenalty()
+        {
+            var instructions = LoadDeliveryInstructions();
+            var session = MakeSession(
+                startingInterest: 14,
+                sessionHorniness: 5,
+                steeringSeed: OverlayFiredSeed,
+                instructions: instructions,
+                mainRoll: 10); // Low roll ensures negative interest delta
+
+            var turn = await session.StartTurnAsync();
+            var result = await session.ResolveTurnAsync(0);
+
+            Assert.True(result.HorninessCheck.OverlayApplied,
+                "Expected overlay to fire");
+
+            // No positive delta, so no penalty
+            Assert.Equal(0, result.HorninessInterestPenalty);
         }
 
         /// <summary>
