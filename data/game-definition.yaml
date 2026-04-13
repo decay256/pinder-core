@@ -457,7 +457,7 @@ steering_prompt: |
   The character just sent: "{delivered_message}"
 
   Based specifically on what {opponent_name} has revealed in the conversation above, write ONE question to append to this message. The question must:
-  1. Reference something specific the opponent actually said or revealed — not a generic question
+  1. Reference something specific the opponent actually said or revealed. If no conversation has happened yet and only their bio or profile is visible, ask a question about something specific in their bio or items — not a generic question.
   2. Gently nudge toward meeting up or closing a date (this is a dating app; connection is the goal)
   3. Be slightly too specific or too eager in a charming, slightly unhinged way — we want comedy
   4. Sound natural as a continuation of the delivered message, not a separate topic
