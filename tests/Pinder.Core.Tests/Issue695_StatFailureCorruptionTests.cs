@@ -191,7 +191,7 @@ namespace Pinder.Core.Tests
             public Task<string> GetInterestChangeBeatAsync(InterestChangeContext context)
                 => Task.FromResult<string>(null);
 
-            public Task<string> ApplyHorninessOverlayAsync(string message, string instruction)
+            public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null)
                 => Task.FromResult(message);
         }
 

@@ -1257,7 +1257,7 @@ namespace Pinder.Core.Tests
                 => Task.FromResult(new OpponentResponse("..."));
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context)
                 => Task.FromResult<string?>(null);
-            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction) => System.Threading.Tasks.Task.FromResult(message);
+            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null) => System.Threading.Tasks.Task.FromResult(message);
         }
 
                 /// <summary>LLM adapter that returns a Tell on the opponent's response for a specific stat.</summary>
@@ -1284,7 +1284,7 @@ namespace Pinder.Core.Tests
                     detectedTell: new Tell(_tellStat, $"Tell on {_tellStat}")));
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context)
                 => Task.FromResult<string?>(null);
-            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction) => System.Threading.Tasks.Task.FromResult(message);
+            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null) => System.Threading.Tasks.Task.FromResult(message);
         }
 
                 /// <summary>LLM adapter that rotates through different option sets per turn.</summary>
@@ -1306,7 +1306,7 @@ namespace Pinder.Core.Tests
                 => Task.FromResult(new OpponentResponse("..."));
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context)
                 => Task.FromResult<string?>(null);
-            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction) => System.Threading.Tasks.Task.FromResult(message);
+            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null) => System.Threading.Tasks.Task.FromResult(message);
         }
     }
 }

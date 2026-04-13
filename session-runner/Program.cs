@@ -403,6 +403,15 @@ class Program
         string modelSpec = ParseArg(args, "--model") ?? "";
         string? overlayModel = ParseArg(args, "--overlay-model");
         IStatefulLlmAdapter llm;
+
+        var adapterOptions = new PinderLlmAdapterOptions
+        {
+            GameDefinition = gameDef,
+            StatDeliveryInstructions = statDeliveryInstructions,
+            MaxTokens = 1024,
+            Temperature = 0.9,
+        };
+
         if (modelSpec.StartsWith("groq/") || modelSpec.StartsWith("together/") ||
             modelSpec.StartsWith("openrouter/") || modelSpec.StartsWith("ollama/"))
         {
@@ -412,18 +421,9 @@ class Program
             string baseUrl = GetProviderBaseUrl(provider);
             string envKey = provider.ToUpperInvariant() + "_API_KEY";
             string openAiKey = Environment.GetEnvironmentVariable(envKey) ?? apiKey;
-            llm = new OpenAiLlmAdapter(new OpenAiOptions
-            {
-                ApiKey = openAiKey,
-                BaseUrl = baseUrl,
-                Model = model,
-                MaxTokens = 1024,
-                Temperature = 0.9,
-                GameDefinition = gameDef,
-                DebugDirectory = debugFile,
-                StatDeliveryInstructions = statDeliveryInstructions
-            });
-            engineLabel = $"OpenAiLlmAdapter ({provider}) → {model}";
+            var transport = new OpenAiTransport(openAiKey, baseUrl, model);
+            llm = new PinderLlmAdapter(transport, adapterOptions);
+            engineLabel = $"PinderLlmAdapter + OpenAiTransport ({provider}) → {model}";
         }
         else
         {
@@ -434,20 +434,16 @@ class Program
             {
                 Console.Error.WriteLine($"Overlay model: {overlayModel} (Groq)");
                 if (string.IsNullOrWhiteSpace(groqApiKey))
-                    Console.Error.WriteLine("[WARN] GROQ_API_KEY not set — overlay calls will fall back to Claude");
+                    Console.Error.WriteLine("[WARN] GROQ_API_KEY not set — overlay calls will fall back to primary transport");
+                adapterOptions.OverlayGroqModel = overlayModel;
+                adapterOptions.OverlayGroqApiKey = groqApiKey;
             }
-            llm = new AnthropicLlmAdapter(new AnthropicOptions
-            {
-                ApiKey = apiKey, Model = "claude-sonnet-4-20250514", MaxTokens = 1024, Temperature = 0.9,
-                GameDefinition = gameDef,
-                DebugDirectory = debugFile,
-                StatDeliveryInstructions = statDeliveryInstructions,
-                OverlayGroqModel = overlayModel,
-                OverlayGroqApiKey = groqApiKey
-            });
+            string anthropicModel = "claude-sonnet-4-20250514";
+            var transport = new AnthropicTransport(apiKey, anthropicModel);
+            llm = new PinderLlmAdapter(transport, adapterOptions);
             engineLabel = string.IsNullOrWhiteSpace(overlayModel)
-                ? "AnthropicLlmAdapter → claude-sonnet-4-20250514"
-                : $"AnthropicLlmAdapter → claude-sonnet-4-20250514 (overlay: {overlayModel} via Groq)";
+                ? $"PinderLlmAdapter + AnthropicTransport → {anthropicModel}"
+                : $"PinderLlmAdapter + AnthropicTransport → {anthropicModel} (overlay: {overlayModel} via Groq)";
         }
 
         Console.WriteLine($"**Engine:** `pinder-core GameSession` + `{engineLabel}`");
