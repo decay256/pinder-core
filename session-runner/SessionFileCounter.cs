@@ -41,6 +41,25 @@ internal static class SessionFileCounter
     /// </summary>
     public static int ClaimNextSessionNumber(string directory)
     {
+        // Clean up stale .lock files that have no corresponding .md file
+        // (left by crashed processes). Never deletes .md files.
+        foreach (var lockFile in Directory.GetFiles(directory, "session-*.lock"))
+        {
+            string mdPath = lockFile.Replace(".lock", ".md");
+            // Only remove lock if the corresponding session file doesn't exist
+            // and the lock is older than 60 seconds (not actively being written)
+            if (!File.Exists(mdPath))
+            {
+                try
+                {
+                    var lockAge = DateTime.UtcNow - File.GetCreationTimeUtc(lockFile);
+                    if (lockAge.TotalSeconds > 60)
+                        File.Delete(lockFile);
+                }
+                catch { }
+            }
+        }
+
         for (int attempt = 0; attempt < 100; attempt++)
         {
             int candidate = GetNextSessionNumber(directory);
