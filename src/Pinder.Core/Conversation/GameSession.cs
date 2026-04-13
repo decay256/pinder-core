@@ -689,16 +689,18 @@ namespace Pinder.Core.Conversation
                     }
                 }).ConfigureAwait(false);
 
-            // #743: Horniness penalty — when overlay fires and interest > 0, halve interest
+            // #743: Horniness penalty — when overlay fires and turn delta is positive, halve the delta
+            // e.g. +5 interest gained this turn → horniness fires → floor(5/2) = 2 net gain
             int horninessInterestPenalty = 0;
             int horninessInterestBefore = 0;
-            if (horninessCheckResult.OverlayApplied && _interest.Current > 0)
+            if (horninessCheckResult.OverlayApplied && interestDelta > 0)
             {
                 horninessInterestBefore = _interest.Current;
-                int newInterestFromPenalty = (int)Math.Floor(_interest.Current / 2.0);
-                horninessInterestPenalty = newInterestFromPenalty - horninessInterestBefore;
-                _interest.Apply(horninessInterestPenalty);
-                interestDelta += horninessInterestPenalty;
+                int halvedDelta = (int)Math.Floor(interestDelta / 2.0);
+                int penalty = halvedDelta - interestDelta; // negative: e.g. 2 - 5 = -3
+                _interest.Apply(penalty);
+                horninessInterestPenalty = penalty;
+                interestDelta += penalty; // net delta = halvedDelta
             }
 
             _history.Add((_player.DisplayName, deliveredMessage));
@@ -782,6 +784,7 @@ namespace Pinder.Core.Conversation
                 xpEarned: turnXpEarned,
                 baseInterestDelta: baseInterestDelta,
                 riskBonusDelta: riskBonusDelta,
+                riskTier: rollResult.RiskTier,
                 comboBonusDelta: comboBonusDelta,
                 detectedWindow: opponentResponse.WeaknessWindow,
                 steering: steeringResult,
