@@ -64,7 +64,15 @@ namespace Pinder.LlmAdapters
             var responseText = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens)
                 .ConfigureAwait(false);
 
-            return DialogueOptionParsers.ParseDialogueOptionsText(responseText);
+            var parsedOptions = DialogueOptionParsers.ParseDialogueOptionsText(responseText);
+            int maxOptions = _options.GameDefinition?.MaxDialogueOptions ?? 3;
+            if (parsedOptions.Length > maxOptions)
+            {
+                var capped = new DialogueOption[maxOptions];
+                System.Array.Copy(parsedOptions, capped, maxOptions);
+                return capped;
+            }
+            return parsedOptions;
         }
 
         /// <inheritdoc />

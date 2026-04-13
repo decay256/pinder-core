@@ -66,6 +66,8 @@ namespace Pinder.Core.Conversation
 
         // Horniness session roll (#45)
         private int _sessionHorniness;
+        private int _horninessRoll;
+        private int _horninessTimeModifier;
 
         // Nat 20 crit advantage (#271) — §4: previous crit grants advantage for 1 roll
         private bool _pendingCritAdvantage;
@@ -147,9 +149,9 @@ namespace Pinder.Core.Conversation
 
             // Roll session Horniness (1d10) every session + time-of-day modifier from clock
             {
-                int horninessRoll = _dice.Roll(10);
-                int todModifier = _clock.GetHorninessModifier();
-                _sessionHorniness = Math.Max(0, horninessRoll + todModifier);
+                _horninessRoll = _dice.Roll(10);
+                _horninessTimeModifier = _clock.GetHorninessModifier();
+                _sessionHorniness = Math.Max(0, _horninessRoll + _horninessTimeModifier);
             }
 
             // XP tracking (#48)
@@ -198,6 +200,12 @@ namespace Pinder.Core.Conversation
 
         /// <summary>Session horniness value (d10 + clock modifier). Used for display.</summary>
         public int SessionHorniness => _sessionHorniness;
+
+        /// <summary>Raw d10 roll used for session horniness.</summary>
+        public int HorninessRoll => _horninessRoll;
+
+        /// <summary>Time-of-day modifier applied to the horniness roll.</summary>
+        public int HorninessTimeModifier => _horninessTimeModifier;
 
         /// <summary>The full XP ledger for this session.</summary>
         public XpLedger XpLedger => _xpLedger;

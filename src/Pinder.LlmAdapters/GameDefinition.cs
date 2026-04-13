@@ -156,6 +156,9 @@ namespace Pinder.LlmAdapters
         /// <summary>Maximum number of turns per session. Default 30 if not set in YAML.</summary>
         public int MaxTurns { get; }
 
+        /// <summary>Maximum number of dialogue options per turn. Default 3 if not set in YAML.</summary>
+        public int MaxDialogueOptions { get; }
+
         /// <summary>Time-of-day horniness modifiers loaded from game-definition.yaml.</summary>
         public HorninessTimeModifiers HorninessTimeModifiers { get; }
 
@@ -179,7 +182,8 @@ namespace Pinder.LlmAdapters
             string steeringPrompt = null,
             HorninessTimeModifiers horninessTimeModifiers = null,
             int globalDcBias = 0,
-            int maxTurns = 30)
+            int maxTurns = 30,
+            int maxDialogueOptions = 3)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Vision = vision ?? throw new ArgumentNullException(nameof(vision));
@@ -201,6 +205,7 @@ namespace Pinder.LlmAdapters
             HorninessTimeModifiers = horninessTimeModifiers;
             GlobalDcBias = globalDcBias;
             MaxTurns = maxTurns > 0 ? maxTurns : 30;
+            MaxDialogueOptions = maxDialogueOptions > 0 ? maxDialogueOptions : 3;
         }
 
         /// <summary>
@@ -348,7 +353,8 @@ namespace Pinder.LlmAdapters
                 steeringPrompt: GetOptional("steering_prompt"),
                 horninessTimeModifiers: horninessTimeModifiers,
                 globalDcBias: globalDcBias,
-                maxTurns: parsed.TryGetValue("max_turns", out var mtObj) && int.TryParse(mtObj?.ToString(), out int mt) ? mt : 30
+                maxTurns: parsed.TryGetValue("max_turns", out var mtObj) && int.TryParse(mtObj?.ToString(), out int mt) ? mt : 30,
+                maxDialogueOptions: parsed.TryGetValue("max_dialogue_options", out var mdoObj) && int.TryParse(mdoObj?.ToString(), out int mdo) ? mdo : 3
             );
         }
 

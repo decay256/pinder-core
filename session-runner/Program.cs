@@ -487,11 +487,15 @@ class Program
         var config = new GameSessionConfig(clock: clock, playerShadows: sableShadows, globalDcBias: totalDcBias, statDeliveryInstructions: statDeliveryInstructions);
         var session = new GameSession(sable, brick, llm, new SystemRandomDiceRoller(), trapRegistry, config);
 
-        // Display session horniness in header (#709)
+        // Display session horniness in header (#709, #750)
         {
             int sh = session.SessionHorniness;
             int horninessDC = 20 - sh;
-            Console.WriteLine($"🌶️ Session Horniness: {sh}  (per-turn DC {horninessDC} — miss = message deformation)");
+            int hRoll = session.HorninessRoll;
+            int hMod = session.HorninessTimeModifier;
+            string timeBand = clock.GetTimeOfDay().ToString().ToLower();
+            string hModDisplay = hMod >= 0 ? $"+{hMod}" : hMod.ToString();
+            Console.WriteLine($"🌶️ Session Horniness: {sh}  (1d10[{hRoll}] {timeBand} {hModDisplay} = {sh} → DC {horninessDC} per turn)");
             Console.WriteLine($"   → Fumble/Misfire/TropeTrap/Catastrophe tier on miss (same as roll failure tiers)");
         }
         Console.WriteLine();
@@ -653,7 +657,13 @@ class Program
                 var badges = new System.Collections.Generic.List<string>();
                 if (opt.HasTellBonus)               badges.Add("📖 Tell (+2 bonus)");
                 if (opt.ComboName != null)           badges.Add($"⭐ Combo: {opt.ComboName} ({PlaytestFormatter.GetComboRewardSummary(opt.ComboName)})");
-                if (opt.CallbackTurnNumber.HasValue) badges.Add($"🔄 Callback (references turn {opt.CallbackTurnNumber.Value})");
+                if (opt.CallbackTurnNumber.HasValue)
+                {
+                    int cbTurn = opt.CallbackTurnNumber.Value;
+                    int cbBadgeBonus = CallbackBonus.Compute(snap.TurnNumber, cbTurn);
+                    string cbTurnLabel = cbTurn == 0 ? "opener" : $"turn {cbTurn}";
+                    badges.Add($"🔗 +{cbBadgeBonus} (refs {cbTurnLabel})");
+                }
                 if (opt.HasWeaknessWindow)           badges.Add("🎯 Window (+DC reduction)");
                 // Shadow growth warnings and reduction hints (#644)
                 var shadowCtx = new ShadowHintContext

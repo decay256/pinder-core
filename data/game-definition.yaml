@@ -1,5 +1,6 @@
 name: "Pinder"
 max_turns: 30
+max_dialogue_options: 3
 vision: |
   Pinder is a comedy dating RPG where every character is a sentient penis
   on a Tinder-like dating app. You dress up, build stats, and try to charm
@@ -87,7 +88,7 @@ player_role_description: |
   player's goal is also to earn XP — but the character doesn't know
   about XP. The character just wants this to go well.
 
-  Each turn, generate 3 dialogue options tied to the character's stats.
+  Each turn, generate up to max_dialogue_options dialogue options tied to the character's stats.
   Options must reflect the player character's personality as assembled
   from their items, anatomy fragments, and texting style. The texting
   style fragment is the voice authority — every option must sound like
