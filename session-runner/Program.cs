@@ -721,7 +721,8 @@ class Program
                 playerSystemPrompt: sable.AssembledSystemPrompt,
                 playerName: player1,
                 opponentName: player2,
-                recentHistory: conversationHistory.Count > 0 ? conversationHistory.AsReadOnly() : null);
+                recentHistory: conversationHistory.Count > 0 ? conversationHistory.AsReadOnly() : null,
+                playerLevelBonus: p1LevelBonus);
             var decision = await agent.DecideAsync(turnStart, agentContext);
             int pick = decision.OptionIndex;
             var chosen = turnStart.Options[pick];

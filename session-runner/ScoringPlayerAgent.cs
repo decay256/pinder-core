@@ -103,7 +103,7 @@ namespace Pinder.SessionRunner
 
                 int tellBonus = option.HasTellBonus ? TellBonusValue : 0;
 
-                int totalMod = attackerMod + momentumBonus + tellBonus + callbackBonus;
+                int totalMod = attackerMod + context.PlayerLevelBonus + momentumBonus + tellBonus + callbackBonus;
                 int need = defenceDC - totalMod;
 
                 // Step 2: Compute success/fail chances

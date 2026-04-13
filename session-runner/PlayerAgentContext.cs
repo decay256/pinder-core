@@ -38,6 +38,9 @@ namespace Pinder.SessionRunner
         /// <summary>Current turn number (from GameStateSnapshot.TurnNumber).</summary>
         public int TurnNumber { get; }
 
+        /// <summary>Player character's flat level bonus applied to all rolls.</summary>
+        public int PlayerLevelBonus { get; }
+
         /// <summary>Stat used on the previous turn. Null on first turn.</summary>
         public StatType? LastStatUsed { get; }
 
@@ -75,7 +78,8 @@ namespace Pinder.SessionRunner
             string playerSystemPrompt = "",
             string playerName = "",
             string opponentName = "",
-            IReadOnlyList<(string Sender, string Text)> recentHistory = null)
+            IReadOnlyList<(string Sender, string Text)> recentHistory = null,
+            int playerLevelBonus = 0)
         {
             PlayerStats = playerStats ?? throw new ArgumentNullException(nameof(playerStats));
             OpponentStats = opponentStats ?? throw new ArgumentNullException(nameof(opponentStats));
@@ -93,6 +97,7 @@ namespace Pinder.SessionRunner
             PlayerName = playerName ?? "";
             OpponentName = opponentName ?? "";
             RecentHistory = recentHistory;
+            PlayerLevelBonus = playerLevelBonus;
         }
     }
 }
