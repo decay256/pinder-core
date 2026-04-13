@@ -1223,7 +1223,7 @@ class Program
         {
             case "groq": return "https://api.groq.com/openai";
             case "together": return "https://api.together.xyz/v1";
-            case "openrouter": return "https://openrouter.ai/api/v1";
+            case "openrouter": return "https://openrouter.ai/api";
             case "ollama": return "http://localhost:11434/v1";
             default: return "https://api.openai.com";
         }
