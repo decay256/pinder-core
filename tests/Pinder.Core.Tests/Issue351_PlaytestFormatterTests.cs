@@ -38,7 +38,8 @@ namespace Pinder.Core.Tests
 
             var result = PlaytestFormatter.FormatReasoningBlock(decision, "ScoringPlayerAgent");
 
-            Assert.Contains("**Player reasoning (ScoringPlayerAgent):**", result);
+            // Header label removed in #746 — only blockquote content remains
+            Assert.DoesNotContain("**Player reasoning", result);
             Assert.Contains("> Line one.", result);
             Assert.Contains("> Line two.", result);
             Assert.Contains("> Pick: A", result);
@@ -74,7 +75,9 @@ namespace Pinder.Core.Tests
 
             var result = PlaytestFormatter.FormatReasoningBlock(decision, "LlmPlayerAgent");
 
-            Assert.Contains("**Player reasoning (LlmPlayerAgent):**", result);
+            // Header label removed in #746
+            Assert.DoesNotContain("**Player reasoning", result);
+            Assert.Contains("> LLM reasoning", result);
         }
 
         // ── FormatScoreTable tests ──────────────────────────────────────
