@@ -654,8 +654,8 @@ class Program
                 int effectiveNeed = need - displayBonus;
                 int pct = effectiveNeed >= 20 ? 5 : Math.Max(0, Math.Min(100, (21-effectiveNeed)*5));
                 string pctAnnotation = bonusAnnotations.Count > 0 ? $" ({string.Join(", ", bonusAnnotations)})" : "";
-                string riskColor = RiskLabel(need);
-                int riskBonus = need <= 7 ? 1 : need <= 11 ? 2 : need <= 15 ? 3 : need <= 19 ? 5 : 10;
+                string riskColor = RiskLabel(effectiveNeed); // use effective need (includes all bonuses)
+                int riskBonus = effectiveNeed <= 7 ? 1 : effectiveNeed <= 11 ? 2 : effectiveNeed <= 15 ? 3 : effectiveNeed <= 19 ? 5 : 10;
                 string riskBonusTag = $" [+{riskBonus}i★]"; // always show — Reckless shows +10
                 var badges = new System.Collections.Generic.List<string>();
                 if (opt.HasTellBonus)               badges.Add("📖 Tell (+2 bonus)");
@@ -918,7 +918,7 @@ class Program
             if (result.HorninessInterestPenalty != 0)
             {
                 int penaltyAfter = result.HorninessInterestBefore + result.HorninessInterestPenalty;
-                Console.WriteLine($"  ↳ Horniness penalty: interest halved ({result.HorninessInterestBefore} → {penaltyAfter})");
+                Console.WriteLine($"  ↳ Horniness penalty: turn gain halved (interest {result.HorninessInterestBefore} → {penaltyAfter})");
             }
             if (result.ShadowGrowthEvents?.Count > 0)
             {
