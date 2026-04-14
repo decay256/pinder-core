@@ -69,6 +69,10 @@ namespace Pinder.Core.Rolls
             // --- Compute DC ---
             int dc = defender.GetDefenceDC(stat) - dcAdjustment;
 
+            // Apply OpponentDCIncrease trap effect
+            if (activeTrap != null && activeTrap.Definition.Effect == TrapEffect.OpponentDCIncrease)
+                dc += activeTrap.Definition.EffectValue;
+
             // --- Determine failure tier ---
             return ResolveFromComponents(stat, usedRoll, statMod, levelBonus, dc,
                 roll1, roll2, externalBonus, attackerTraps, trapRegistry);
@@ -129,8 +133,13 @@ namespace Pinder.Core.Rolls
 
             int levelBonus = LevelTable.GetBonus(level);
 
+            // Apply OpponentDCIncrease trap effect
+            int effectiveDc = fixedDc;
+            if (activeTrap != null && activeTrap.Definition.Effect == TrapEffect.OpponentDCIncrease)
+                effectiveDc += activeTrap.Definition.EffectValue;
+
             // --- Determine failure tier ---
-            return ResolveFromComponents(stat, usedRoll, statMod, levelBonus, fixedDc,
+            return ResolveFromComponents(stat, usedRoll, statMod, levelBonus, effectiveDc,
                 roll1, roll2, externalBonus, attackerTraps, trapRegistry);
         }
 
@@ -158,6 +167,13 @@ namespace Pinder.Core.Rolls
             if (usedRoll == 1)
             {
                 tier = FailureTier.Legendary;
+                // Nat 1 activates a trap (rules: Legendary fail = trap)
+                if (!attackerTraps.IsActive(stat))
+                {
+                    newTrap = trapRegistry.GetTrap(stat);
+                    if (newTrap != null)
+                        attackerTraps.Activate(newTrap);
+                }
             }
             else if (usedRoll == 20 || finalTotal >= dc)
             {

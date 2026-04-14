@@ -55,6 +55,29 @@ namespace Pinder.Core.Traps
 
         /// <summary>Clear all traps.</summary>
         public void ClearAll() => _active.Clear();
+
+        /// <summary>
+        /// Clears the oldest active trap (the one with fewest turns remaining).
+        /// Used when SA roll succeeds vs DC 12 to allow a trap clear.
+        /// Does nothing if no traps are active.
+        /// </summary>
+        public void ClearOldest()
+        {
+            if (_active.Count == 0) return;
+
+            StatType? oldestKey = null;
+            int minTurns = int.MaxValue;
+            foreach (var kv in _active)
+            {
+                if (kv.Value.TurnsRemaining < minTurns)
+                {
+                    minTurns = kv.Value.TurnsRemaining;
+                    oldestKey = kv.Key;
+                }
+            }
+            if (oldestKey.HasValue)
+                _active.Remove(oldestKey.Value);
+        }
     }
 
     /// <summary>

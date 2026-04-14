@@ -226,6 +226,13 @@ namespace Pinder.Core.Conversation
             {
                 _ended = true;
                 _outcome = GameOutcome.Unmatched;
+                // End-of-game Dread +1: conversation ended without date
+                if (_playerShadows != null)
+                {
+                    _playerShadows.ApplyGrowth(ShadowStatType.Dread, 1, "Conversation ended without date");
+                    var dreadEvents = _playerShadows.DrainGrowthEvents();
+                    throw new GameEndedException(GameOutcome.Unmatched, dreadEvents);
+                }
                 throw new GameEndedException(GameOutcome.Unmatched);
             }
 
@@ -394,6 +401,13 @@ namespace Pinder.Core.Conversation
             {
                 _ended = true;
                 _outcome = GameOutcome.Unmatched;
+                // End-of-game Dread +1: conversation ended without date (energy depleted)
+                if (_playerShadows != null)
+                {
+                    _playerShadows.ApplyGrowth(ShadowStatType.Dread, 1, "Conversation ended without date");
+                    var dreadEvents = _playerShadows.DrainGrowthEvents();
+                    throw new GameEndedException(GameOutcome.Unmatched, dreadEvents);
+                }
                 throw new GameEndedException(GameOutcome.Unmatched);
             }
 
@@ -570,6 +584,8 @@ namespace Pinder.Core.Conversation
                 _outcome = GameOutcome.Unmatched;
                 isGameOver = true;
                 outcome = GameOutcome.Unmatched;
+                // End-of-game Dread +1: conversation ended without date
+                _playerShadows?.ApplyGrowth(ShadowStatType.Dread, 1, "Conversation ended without date");
             }
             else if (_interest.IsMaxed)
             {
@@ -755,6 +771,15 @@ namespace Pinder.Core.Conversation
             // 12. Append opponent message to history
             _history.Add((_opponent.DisplayName, opponentMessage));
 
+            // SA trap clear: SA success vs DC 12 clears oldest active trap (rules §clear)
+            if (chosenOption.Stat == StatType.SelfAwareness
+                && rollResult.IsSuccess
+                && rollResult.FinalTotal >= 12
+                && _traps.HasActive)
+            {
+                _traps.ClearOldest();
+            }
+
             // 12b. Advance trap timers
             _traps.AdvanceTurn();
 
@@ -921,6 +946,8 @@ namespace Pinder.Core.Conversation
             {
                 _ended = true;
                 _outcome = GameOutcome.Unmatched;
+                // End-of-game Dread +1: conversation ended without date (Wait)
+                _playerShadows?.ApplyGrowth(ShadowStatType.Dread, 1, "Conversation ended without date");
             }
         }
 
@@ -933,6 +960,13 @@ namespace Pinder.Core.Conversation
             {
                 _ended = true;
                 _outcome = GameOutcome.Unmatched;
+                // End-of-game Dread +1: conversation ended without date
+                if (_playerShadows != null)
+                {
+                    _playerShadows.ApplyGrowth(ShadowStatType.Dread, 1, "Conversation ended without date");
+                    var dreadEvents = _playerShadows.DrainGrowthEvents();
+                    throw new GameEndedException(GameOutcome.Unmatched, dreadEvents);
+                }
                 throw new GameEndedException(GameOutcome.Unmatched);
             }
 
