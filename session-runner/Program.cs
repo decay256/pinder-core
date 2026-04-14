@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Pinder.Core.Characters;
@@ -19,6 +20,7 @@ using Pinder.LlmAdapters;
 using Pinder.LlmAdapters.Anthropic;
 using Pinder.LlmAdapters.OpenAi;
 using Pinder.SessionRunner;
+using Pinder.SessionRunner.Snapshot;
 
 class NullTrapRegistry : ITrapRegistry
 {
@@ -598,6 +600,28 @@ class Program
         bool saOverthinkingTriggered = false;
         int rizzCumulativeFailureCount = 0;
 
+        // Combo history tracking for snapshots (#754)
+        // Mirrors what ComboTracker sees — (stat, succeeded) per turn
+        var comboHistoryForSnapshot = new List<(StatType Stat, bool Succeeded)>();
+        // Pending triple bonus is read from TurnStart.State.TripleBonusActive
+
+        // Compute session slug (same format as .md filename)
+        string sessionSlug = playtestDir != null
+            ? $"session-{sessionNumber:D3}-{player1.ToLower()}-vs-{player2.ToLower()}"
+            : $"session-{sessionNumber:D3}-unknown";
+
+        // ── Write initial snapshot before turn 1 (#754) ───────────────────
+        if (playtestDir != null)
+        {
+            var initialSnap = BuildInitialSnapshot(
+                sable, brick, p1LevelBonus, p2LevelBonus,
+                session, interest, maxTurns, modelSpec,
+                gameDef?.GlobalDcBias ?? 0, gameDef?.MaxDialogueOptions ?? 3);
+            string initialSnapPath = Path.Combine(playtestDir, $"{sessionSlug}.initial.snap.json");
+            File.WriteAllText(initialSnapPath, JsonSerializer.Serialize(initialSnap, new JsonSerializerOptions { WriteIndented = true }));
+            Console.Error.WriteLine($"📸 Initial snapshot → {initialSnapPath}");
+        }
+
         while (turn < maxTurns)
         {
             turn++;
@@ -1028,6 +1052,35 @@ class Program
             if (chosen.Stat == StatType.Rizz && result.Roll != null && !result.Roll.IsSuccess)
                 rizzCumulativeFailureCount++;
 
+            // Track combo history for snapshot (#754)
+            comboHistoryForSnapshot.Add((chosen.Stat, result.Roll?.IsSuccess ?? false));
+
+            // ── Write turn snapshot (#754) ────────────────────────────────
+            if (playtestDir != null)
+            {
+                // Infer active tell from next turn options (will be null this turn since
+                // we snapshot after resolve; the tell only manifests on StartTurnAsync.
+                // We capture the tell that was active at the START of this turn instead,
+                // using the options we already have from turnStart.)
+                TellSnapshot? tellSnap = null;
+                var tellOption = Array.Find(turnStart.Options, o => o.HasTellBonus);
+                if (tellOption != null)
+                    tellSnap = new TellSnapshot { Stat = StatLabel(tellOption.Stat), Description = "detected" };
+
+                var turnSnap = BuildTurnSnapshot(
+                    turn, result, sableShadows,
+                    statsUsedHistory, highestPctHistory,
+                    charmUsageCount, charmMadnessTriggered,
+                    saUsageCount, saOverthinkingTriggered,
+                    rizzCumulativeFailureCount,
+                    conversationHistory,
+                    comboHistoryForSnapshot,
+                    tellSnap);
+
+                string turnSnapPath = Path.Combine(playtestDir, $"{sessionSlug}.turn-{turn:D2}.snap.json");
+                File.WriteAllText(turnSnapPath, JsonSerializer.Serialize(turnSnap, new JsonSerializerOptions { WriteIndented = true }));
+            }
+
             if (result.NarrativeBeat != null) { Console.WriteLine(); Console.WriteLine($"{result.NarrativeBeat}"); }
             if (result.IsGameOver) { finalOutcome = result.Outcome; break; }
         }
@@ -1289,6 +1342,115 @@ CHARACTER PROFILE:
         {
             return string.Empty;
         }
+    }
+
+    // ── Snapshot builders (#754) ─────────────────────────────────
+
+    static InitialSessionSnapshot BuildInitialSnapshot(
+        CharacterProfile player,
+        CharacterProfile opponent,
+        int playerLevelBonus,
+        int opponentLevelBonus,
+        GameSession session,
+        int startingInterest,
+        int maxTurns,
+        string modelSpec,
+        int globalDcBias,
+        int maxDialogueOptions)
+    {
+        return new InitialSessionSnapshot
+        {
+            Player = BuildCharacterSnapshot(player, playerLevelBonus),
+            Opponent = BuildCharacterSnapshot(opponent, opponentLevelBonus),
+            SessionHorniness = session.SessionHorniness,
+            HorninessRoll = session.HorninessRoll,
+            HorninessTimeModifier = session.HorninessTimeModifier,
+            StartingInterest = startingInterest,
+            MaxTurns = maxTurns,
+            ModelSpec = modelSpec,
+            SessionStartedAt = DateTime.UtcNow.ToString("o"),
+            PlayerPsychologicalStake = player.PsychologicalStake ?? string.Empty,
+            OpponentPsychologicalStake = opponent.PsychologicalStake ?? string.Empty,
+            GlobalDcBias = globalDcBias,
+            MaxDialogueOptions = maxDialogueOptions,
+        };
+    }
+
+    static CharacterSnapshot BuildCharacterSnapshot(CharacterProfile profile, int levelBonus)
+    {
+        var stats = new Dictionary<string, int>();
+        foreach (StatType stat in Enum.GetValues(typeof(StatType)))
+            stats[stat.ToString()] = profile.Stats.GetBase(stat);
+
+        return new CharacterSnapshot
+        {
+            DisplayName = profile.DisplayName,
+            Level = profile.Level,
+            LevelBonus = levelBonus,
+            Stats = stats,
+            Bio = profile.Bio,
+            AssembledSystemPrompt = profile.AssembledSystemPrompt,
+            EquippedItems = profile.EquippedItemDisplayNames.ToArray(),
+        };
+    }
+
+    static TurnSnapshot BuildTurnSnapshot(
+        int turnNumber,
+        TurnResult result,
+        SessionShadowTracker shadows,
+        List<StatType> statsUsedHistory,
+        List<bool> highestPctHistory,
+        int charmUsageCount,
+        bool charmMadnessTriggered,
+        int saUsageCount,
+        bool saOverthinkingTriggered,
+        int rizzCumulativeFailureCount,
+        List<(string Sender, string Text)> conversationHistory,
+        List<(StatType Stat, bool Succeeded)> comboHistory,
+        TellSnapshot? activeTell)
+    {
+        var state = result.StateAfter;
+
+        // Shadow values
+        var shadowValues = new Dictionary<string, int>();
+        foreach (ShadowStatType shadow in Enum.GetValues(typeof(ShadowStatType)))
+            shadowValues[shadow.ToString()] = shadows.GetEffectiveShadow(shadow);
+
+        // Active traps from state
+        var activeTraps = state.ActiveTrapDetails
+            .Select(t => new TrapSnapshot { Id = t.Name, Stat = t.Stat, TurnsRemaining = t.TurnsRemaining })
+            .ToList();
+
+        // Last 3 turns of combo history
+        var comboWindow = comboHistory
+            .Skip(Math.Max(0, comboHistory.Count - 3))
+            .Select(e => new TurnHistoryEntry { Stat = e.Stat.ToString(), Succeeded = e.Succeeded })
+            .ToList();
+
+        // Conversation history
+        var convEntries = conversationHistory
+            .Select(e => new ConversationEntry { Sender = e.Sender, Text = e.Text })
+            .ToList();
+
+        return new TurnSnapshot
+        {
+            TurnNumber = turnNumber,
+            Interest = state.Interest,
+            ShadowValues = shadowValues,
+            MomentumStreak = state.MomentumStreak,
+            ActiveTraps = activeTraps,
+            ActiveTell = activeTell,
+            ComboHistory = comboWindow,
+            PendingTripleBonus = state.TripleBonusActive,
+            StatsUsedHistory = statsUsedHistory.Select(s => s.ToString()).ToList(),
+            HighestPctHistory = new List<bool>(highestPctHistory),
+            CharmUsageCount = charmUsageCount,
+            CharmMadnessTriggered = charmMadnessTriggered,
+            SaUsageCount = saUsageCount,
+            SaOverthinkingTriggered = saOverthinkingTriggered,
+            RizzCumulativeFailureCount = rizzCumulativeFailureCount,
+            ConversationHistory = convEntries,
+        };
     }
 
     static void WritePlaytestLog(string content, string p1, string p2, string? dir, int sessionNumber)
