@@ -211,6 +211,62 @@ namespace Pinder.Core.Conversation
         public XpLedger XpLedger => _xpLedger;
 
         /// <summary>
+        /// Restores all mutable session state from a <see cref="ResimulateData"/> snapshot.
+        /// Call this immediately after constructing a GameSession with the correct initial snapshot;
+        /// the session must not have had any turns played.
+        /// </summary>
+        /// <param name="data">State data to restore.</param>
+        /// <param name="trapRegistry">Used to look up trap definitions by stat.</param>
+        public void RestoreState(ResimulateData data, ITrapRegistry trapRegistry)
+        {
+            if (data == null) throw new ArgumentNullException(nameof(data));
+            if (trapRegistry == null) throw new ArgumentNullException(nameof(trapRegistry));
+
+            // Interest: apply delta to reach the target value
+            int interestDelta = data.TargetInterest - _interest.Current;
+            if (interestDelta != 0)
+                _interest.Apply(interestDelta);
+
+            // Shadow tracker: set deltas so effective values match the snapshot
+            if (_playerShadows != null && data.ShadowValues != null)
+                _playerShadows.RestoreFromSnapshot(data.ShadowValues);
+
+            // Momentum
+            _momentumStreak = data.MomentumStreak;
+
+            // Traps: clear and re-activate with original remaining durations
+            _traps.ClearAll();
+            if (data.ActiveTraps != null)
+            {
+                foreach (var (statName, turnsRemaining) in data.ActiveTraps)
+                {
+                    if (Enum.TryParse<StatType>(statName, out var stat))
+                    {
+                        var definition = trapRegistry.GetTrap(stat);
+                        if (definition != null)
+                            _traps.Activate(definition, turnsRemaining);
+                    }
+                }
+            }
+
+            // Conversation history
+            _history.Clear();
+            if (data.ConversationHistory != null)
+                _history.AddRange(data.ConversationHistory);
+
+            // Turn number
+            _turnNumber = data.TurnNumber;
+
+            // Combo tracker
+            _comboTracker.RestoreFromSnapshot(
+                data.ComboHistory ?? new List<(string StatName, bool Succeeded)>(),
+                data.PendingTripleBonus);
+
+            // Rizz cumulative failure count (drives Despair shadow growth)
+            _rizzCumulativeFailureCount = data.RizzCumulativeFailureCount;
+        }
+
+        /// <summary>
         /// Start a new turn. Checks end conditions, determines advantage/disadvantage,
         /// and fetches dialogue options from the LLM adapter.
         /// </summary>

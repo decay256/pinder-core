@@ -84,6 +84,30 @@ namespace Pinder.Core.Conversation
         }
 
         /// <summary>
+        /// Restores combo tracker history and pending triple bonus from snapshot data.
+        /// Replaces the current history with the provided entries; clears _lastCombo.
+        /// Used by GameSession.RestoreState when resimulating from a snapshot.
+        /// </summary>
+        /// <param name="history">Ordered (stat name, succeeded) pairs from the snapshot window.</param>
+        /// <param name="pendingTripleBonus">Whether The Triple bonus is pending for the next roll.</param>
+        public void RestoreFromSnapshot(
+            IReadOnlyList<(string StatName, bool Succeeded)> history,
+            bool pendingTripleBonus)
+        {
+            _history.Clear();
+            if (history != null)
+            {
+                foreach (var (statName, succeeded) in history)
+                {
+                    if (System.Enum.TryParse<StatType>(statName, out var stat))
+                        _history.Add(new TurnEntry { Stat = stat, Succeeded = succeeded });
+                }
+            }
+            _pendingTripleBonus = pendingTripleBonus;
+            _lastCombo = null;
+        }
+
+        /// <summary>
         /// Consumes the Triple bonus without recording a turn.
         /// Used when the player takes a non-Speak action (Read/Recover/Wait)
         /// during the bonus turn.

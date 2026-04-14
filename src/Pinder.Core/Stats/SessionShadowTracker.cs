@@ -101,6 +101,32 @@ namespace Pinder.Core.Stats
         }
 
         /// <summary>
+        /// Restores shadow deltas so that effective values match the provided target values.
+        /// For each shadow stat, sets delta = targetValue − baseStats.GetShadow(shadow).
+        /// Clears any previously accumulated deltas and the growth event log before restoring.
+        /// Used by GameSession.RestoreState when resimulating from a snapshot.
+        /// </summary>
+        /// <param name="targetValues">Map of ShadowStatType.ToString() → desired effective value.</param>
+        public void RestoreFromSnapshot(Dictionary<string, int> targetValues)
+        {
+            if (targetValues == null) return;
+            _deltas.Clear();
+            _growthEvents.Clear();
+
+            foreach (ShadowStatType shadow in System.Enum.GetValues(typeof(ShadowStatType)))
+            {
+                string key = shadow.ToString();
+                if (targetValues.TryGetValue(key, out int targetValue))
+                {
+                    int baseValue = _baseStats.GetShadow(shadow);
+                    int delta = targetValue - baseValue;
+                    if (delta != 0)
+                        _deltas[shadow] = delta;
+                }
+            }
+        }
+
+        /// <summary>
         /// Returns all growth event description strings accumulated since last drain, then clears the internal log.
         /// Returns an empty list if no growth events have occurred since the last drain (or since construction).
         /// Added per #161 resolution — this is the canonical drain method, replacing the dropped CharacterState concept.

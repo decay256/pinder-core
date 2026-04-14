@@ -20,6 +20,15 @@ namespace Pinder.Core.Traps
             _active[definition.Stat] = new ActiveTrap(definition, definition.DurationTurns);
         }
 
+        /// <summary>
+        /// Activate a trap with an explicit turns-remaining override.
+        /// Used when restoring session state from a snapshot where the trap is mid-duration.
+        /// </summary>
+        public void Activate(TrapDefinition definition, int turnsRemaining)
+        {
+            _active[definition.Stat] = new ActiveTrap(definition, turnsRemaining);
+        }
+
         /// <summary>True if a trap is active on this stat.</summary>
         public bool IsActive(StatType stat) => _active.ContainsKey(stat);
 

@@ -231,6 +231,8 @@ class Program
         Console.Error.WriteLine("  --agent <type>        Player agent: scoring or llm (default: llm)");
         Console.Error.WriteLine("  --overlay-model MODEL  Route horniness overlay to this Groq model (e.g. moonshotai/kimi-k2-instruct, llama-3.3-70b-versatile)");
         Console.Error.WriteLine("                         Reads GROQ_API_KEY env var for auth");
+        Console.Error.WriteLine("  --resimulate SLUG      Resume from an existing session snapshot (skips character loading)");
+        Console.Error.WriteLine("  --from-turn N          Start from after turn N (default: last saved turn; requires --resimulate)");
         Console.Error.WriteLine();
         string available = CharacterLoader.ListAvailable(promptDir);
         Console.Error.WriteLine($"Available characters: {available}");
@@ -244,6 +246,16 @@ class Program
         int maxTurnsArg = ParseMaxTurns(args, defaultValue: -1); // -1 = not specified
         string agentType = ParseAgentArg(args);
         bool isDebug = args.Contains("--debug");
+
+        // ── Resimulation flags ────────────────────────────────────────────
+        string? resimulateSlug = ParseArg(args, "--resimulate");
+        bool isResimulation = resimulateSlug != null;
+        int fromTurnArg = -1; // -1 = auto-detect last saved turn
+        {
+            string? fromTurnStr = ParseArg(args, "--from-turn");
+            if (fromTurnStr != null && int.TryParse(fromTurnStr, out int ft) && ft > 0)
+                fromTurnArg = ft;
+        }
 
         // --difficulty <pct>: reduce success chance by N% (e.g. --difficulty 20 = 20% harder).
         // Implemented as a DC bias: dcBias = (int)Math.Round(20.0 * pct / 100.0)
@@ -263,33 +275,109 @@ class Program
         string? playerDefArg = ParseArg(args, "--player-def");
         string? opponentDefArg = ParseArg(args, "--opponent-def");
 
-        // Must have at least one identifier per side
-        if ((playerArg == null && playerDefArg == null) ||
-            (opponentArg == null && opponentDefArg == null))
+        // Must have at least one identifier per side (skipped for --resimulate)
+        if (!isResimulation &&
+            ((playerArg == null && playerDefArg == null) ||
+             (opponentArg == null && opponentDefArg == null)))
         {
             PrintUsage(promptDir);
             return 1;
         }
 
-        // Preload assembler repos (lazy — only if needed)
-        IItemRepository? itemRepo = null;
-        IAnatomyRepository? anatomyRepo = null;
+        // ── Resimulation snapshot state ────────────────────────────────────────
+        InitialSessionSnapshot? resimInitialSnap = null;
+        TurnSnapshot? resimTurnSnap = null;
+        int fromTurn = 0;
+        int resimOriginalSessionNum = 0;
+        var assumptionLog = new List<string>();
 
         CharacterProfile sable, brick;
-        try
+
+        if (isResimulation)
         {
-            sable = LoadCharacter(playerDefArg, playerArg, promptDir, ref itemRepo, ref anatomyRepo);
-            brick = LoadCharacter(opponentDefArg, opponentArg, promptDir, ref itemRepo, ref anatomyRepo);
+            string? resimDir = SessionFileCounter.ResolvePlaytestDirectory(AppContext.BaseDirectory);
+            if (resimDir == null)
+            {
+                Console.Error.WriteLine("[ERROR] Cannot find playtest directory for resimulation snapshots. " +
+                    "Set PINDER_PLAYTESTS_PATH or ensure design/playtests/ exists.");
+                return 1;
+            }
+
+            var snapOpts = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
+            string initialSnapPath = Path.Combine(resimDir, $"{resimulateSlug}.initial.snap.json");
+            if (!File.Exists(initialSnapPath))
+            {
+                Console.Error.WriteLine($"[ERROR] Initial snapshot not found: {initialSnapPath}");
+                return 1;
+            }
+            resimInitialSnap = JsonSerializer.Deserialize<InitialSessionSnapshot>(
+                File.ReadAllText(initialSnapPath), snapOpts);
+            if (resimInitialSnap == null)
+            {
+                Console.Error.WriteLine($"[ERROR] Failed to deserialize initial snapshot: {initialSnapPath}");
+                return 1;
+            }
+
+            // Determine which turn to resume from
+            fromTurn = fromTurnArg >= 1 ? fromTurnArg : FindLastTurnSnapshot(resimDir, resimulateSlug!);
+            if (fromTurn <= 0)
+            {
+                Console.Error.WriteLine($"[ERROR] No turn snapshots found for slug: {resimulateSlug}");
+                return 1;
+            }
+
+            string turnSnapPath = Path.Combine(resimDir, $"{resimulateSlug}.turn-{fromTurn:D2}.snap.json");
+            if (!File.Exists(turnSnapPath))
+            {
+                Console.Error.WriteLine($"[ERROR] Turn snapshot not found: {turnSnapPath}");
+                return 1;
+            }
+            resimTurnSnap = JsonSerializer.Deserialize<TurnSnapshot>(
+                File.ReadAllText(turnSnapPath), snapOpts);
+            if (resimTurnSnap == null)
+            {
+                Console.Error.WriteLine($"[ERROR] Failed to deserialize turn snapshot: {turnSnapPath}");
+                return 1;
+            }
+
+            // Validate + log assumptions for missing fields
+            resimTurnSnap = ValidateAndPatchTurnSnapshot(resimTurnSnap, assumptionLog);
+
+            // Reconstruct CharacterProfile objects from frozen snapshot data
+            sable = BuildProfileFromSnapshot(resimInitialSnap.Player);
+            brick = BuildProfileFromSnapshot(resimInitialSnap.Opponent);
+
+            // Restore psychological stakes from snapshot (no API calls needed)
+            sable.PsychologicalStake = resimInitialSnap.PlayerPsychologicalStake;
+            brick.PsychologicalStake = resimInitialSnap.OpponentPsychologicalStake;
+
+            // Parse original session number from slug (format: session-NNN-...)
+            resimOriginalSessionNum = ParseSessionNumberFromSlug(resimulateSlug!);
+
+            Console.Error.WriteLine($"⏪ Resimulation: {resimulateSlug} from turn {fromTurn}");
         }
-        catch (FileNotFoundException ex)
+        else
         {
-            Console.Error.WriteLine(ex.Message);
-            return 1;
-        }
-        catch (FormatException ex)
-        {
-            Console.Error.WriteLine($"[ERROR] {ex.Message}");
-            return 1;
+            // Preload assembler repos (lazy — only if needed)
+            IItemRepository? itemRepo = null;
+            IAnatomyRepository? anatomyRepo = null;
+
+            try
+            {
+                sable = LoadCharacter(playerDefArg, playerArg, promptDir, ref itemRepo, ref anatomyRepo);
+                brick = LoadCharacter(opponentDefArg, opponentArg, promptDir, ref itemRepo, ref anatomyRepo);
+            }
+            catch (FileNotFoundException ex)
+            {
+                Console.Error.WriteLine(ex.Message);
+                return 1;
+            }
+            catch (FormatException ex)
+            {
+                Console.Error.WriteLine($"[ERROR] {ex.Message}");
+                return 1;
+            }
         }
 
         var buffer = new StringBuilder();
@@ -317,6 +405,18 @@ class Program
         string p2Archetype = brick.ActiveArchetype != null ? $" | Archetype: {brick.ActiveArchetype.Name} ({brick.ActiveArchetype.InterferenceLevel})" : "";
         Console.WriteLine($"**Player:** {player1} (Level {p1Level}, +{p1LevelBonus} level bonus{p1Archetype}) | **Opponent:** {player2} (Level {p2Level}, +{p2LevelBonus} level bonus, LLM puppet{p2Archetype})");
         Console.WriteLine();
+
+        // ── Resimulation banner (printed immediately after header) ────────
+        if (isResimulation && resimTurnSnap != null)
+        {
+            string resimSessionLabel = resimOriginalSessionNum > 0
+                ? $"session-{resimOriginalSessionNum:D3}"
+                : resimulateSlug!;
+            Console.WriteLine($"**\u23ea RESIMULATED from {resimSessionLabel}, turn {fromTurn}**");
+            Console.WriteLine($"**Original session:** {resimulateSlug}");
+            Console.WriteLine($"**Continuing from:** Interest {resimTurnSnap.Interest}/25 | Momentum {resimTurnSnap.MomentumStreak} | Turn {fromTurn}");
+            Console.WriteLine();
+        }
 
         // ── character table ───────────────────────────────────────────────
         Console.WriteLine("## Characters");
@@ -513,6 +613,13 @@ class Program
         var config = new GameSessionConfig(clock: clock, playerShadows: sableShadows, globalDcBias: totalDcBias, statDeliveryInstructions: statDeliveryInstructions);
         var session = new GameSession(sable, brick, llm, new SystemRandomDiceRoller(), trapRegistry, config);
 
+        // ── Resimulation: restore session state from snapshot ───────────
+        if (isResimulation && resimTurnSnap != null)
+        {
+            var resimData = BuildResimulateData(resimTurnSnap);
+            session.RestoreState(resimData, trapRegistry);
+        }
+
         // Display session horniness in header (#709, #750)
         {
             int sh = session.SessionHorniness;
@@ -547,85 +654,127 @@ class Program
             agent = new ScoringPlayerAgent();
         }
 
-        int interest = 10;
-        // ── Matchup Analysis ──────────────────────────────────────────────
-        Console.Error.WriteLine("Generating matchup analysis...");
-        var analysisOptions = new AnthropicOptions {
-            ApiKey = apiKey,
-            Model = Environment.GetEnvironmentVariable("PLAYER_AGENT_MODEL") ?? "claude-sonnet-4-20250514"
-        };
-        var analysis = await MatchupAnalyzer.AnalyzeMatchupAsync(analysisOptions, sable, brick);
-        if (!string.IsNullOrWhiteSpace(analysis))
+        int interest = isResimulation && resimTurnSnap != null ? resimTurnSnap.Interest : 10;
+
+        if (!isResimulation)
         {
-            Console.WriteLine(analysis);
-            Console.WriteLine();
+            // ── Matchup Analysis ──────────────────────────────────────────
+            Console.Error.WriteLine("Generating matchup analysis...");
+            var analysisOptions = new AnthropicOptions {
+                ApiKey = apiKey,
+                Model = Environment.GetEnvironmentVariable("PLAYER_AGENT_MODEL") ?? "claude-sonnet-4-20250514"
+            };
+            var analysis = await MatchupAnalyzer.AnalyzeMatchupAsync(analysisOptions, sable, brick);
+            if (!string.IsNullOrWhiteSpace(analysis))
+            {
+                Console.WriteLine(analysis);
+                Console.WriteLine();
+            }
+
+            // ── Psychological Stakes ──────────────────────────────────
+            Console.Error.WriteLine("Generating psychological stakes...");
+            string p1Stake = await GeneratePsychologicalStakeAsync(apiKey, sable.AssembledSystemPrompt, player1).ConfigureAwait(false);
+            string p2Stake = await GeneratePsychologicalStakeAsync(apiKey, brick.AssembledSystemPrompt, player2).ConfigureAwait(false);
+            sable.PsychologicalStake = p1Stake;
+            brick.PsychologicalStake = p2Stake;
+
+            if (!string.IsNullOrWhiteSpace(sable.PsychologicalStake))
+            {
+                Console.WriteLine();
+                Console.WriteLine($"### {player1} — Psychological Stake");
+                Console.WriteLine();
+                Console.WriteLine(sable.PsychologicalStake);
+                Console.WriteLine();
+            }
+            if (!string.IsNullOrWhiteSpace(brick.PsychologicalStake))
+            {
+                Console.WriteLine();
+                Console.WriteLine($"### {player2} — Psychological Stake");
+                Console.WriteLine();
+                Console.WriteLine(brick.PsychologicalStake);
+                Console.WriteLine();
+            }
+
+            // Freeze base prompts before appending stakes — BaseSystemPrompt stays clean
+            // for opponent profile injection (player must not see opponent's stake as prior knowledge)
+            sable.FreezeBasePrompt();
+            brick.FreezeBasePrompt();
+
+            // Inject stakes into assembled system prompts
+            if (!string.IsNullOrWhiteSpace(sable.PsychologicalStake))
+                sable.AppendToSystemPrompt("\n\n== PSYCHOLOGICAL STAKE ==\n\n" + sable.PsychologicalStake);
+            if (!string.IsNullOrWhiteSpace(brick.PsychologicalStake))
+                brick.AppendToSystemPrompt("\n\n== PSYCHOLOGICAL STAKE ==\n\n" + brick.PsychologicalStake);
+        }
+        else
+        {
+            // Resimulation: stakes already embedded in AssembledSystemPrompt (from snapshot).
+            // FreezeBasePrompt so BaseSystemPrompt is consistent; no re-injection needed.
+            sable.FreezeBasePrompt();
+            brick.FreezeBasePrompt();
         }
 
-        // ── Psychological Stakes ──────────────────────────────────────────
-        Console.Error.WriteLine("Generating psychological stakes...");
-        string p1Stake = await GeneratePsychologicalStakeAsync(apiKey, sable.AssembledSystemPrompt, player1).ConfigureAwait(false);
-        string p2Stake = await GeneratePsychologicalStakeAsync(apiKey, brick.AssembledSystemPrompt, player2).ConfigureAwait(false);
-        sable.PsychologicalStake = p1Stake;
-        brick.PsychologicalStake = p2Stake;
-
-        if (!string.IsNullOrWhiteSpace(sable.PsychologicalStake))
-        {
-            Console.WriteLine();
-            Console.WriteLine($"### {player1} — Psychological Stake");
-            Console.WriteLine();
-            Console.WriteLine(sable.PsychologicalStake);
-            Console.WriteLine();
-        }
-        if (!string.IsNullOrWhiteSpace(brick.PsychologicalStake))
-        {
-            Console.WriteLine();
-            Console.WriteLine($"### {player2} — Psychological Stake");
-            Console.WriteLine();
-            Console.WriteLine(brick.PsychologicalStake);
-            Console.WriteLine();
-        }
-
-        // Freeze base prompts before appending stakes — BaseSystemPrompt stays clean
-        // for opponent profile injection (player must not see opponent's stake as prior knowledge)
-        sable.FreezeBasePrompt();
-        brick.FreezeBasePrompt();
-
-        // Inject stakes into assembled system prompts
-        if (!string.IsNullOrWhiteSpace(sable.PsychologicalStake))
-            sable.AppendToSystemPrompt("\n\n== PSYCHOLOGICAL STAKE ==\n\n" + sable.PsychologicalStake);
-        if (!string.IsNullOrWhiteSpace(brick.PsychologicalStake))
-            brick.AppendToSystemPrompt("\n\n== PSYCHOLOGICAL STAKE ==\n\n" + brick.PsychologicalStake);
-
-        int momentum = 0;
+        int momentum = isResimulation && resimTurnSnap != null ? resimTurnSnap.MomentumStreak : 0;
         Console.WriteLine("## Session State");
         Console.WriteLine();
         Console.WriteLine($"```");
         Console.WriteLine($"Interest: {InterestBar(interest)}  {interest}/25");
-        Console.WriteLine($"Active Traps: none");
-        Console.WriteLine($"Momentum: —");
+        if (isResimulation && resimTurnSnap != null)
+        {
+            string trapStr = resimTurnSnap.ActiveTraps.Count > 0
+                ? string.Join(", ", resimTurnSnap.ActiveTraps.Select(t => $"{t.Id} [{t.Stat}]"))
+                : "none";
+            Console.WriteLine($"Active Traps: {trapStr}");
+            Console.WriteLine($"Momentum: {momentum}");
+        }
+        else
+        {
+            Console.WriteLine($"Active Traps: none");
+            Console.WriteLine($"Momentum: —");
+        }
         Console.WriteLine($"```");
         Console.WriteLine();
         Console.WriteLine("---");
 
-        int turn = 0;
+        // ── Initialize loop variables ────────────────────────────────────
+        // For resimulation, restore from snapshot; for normal sessions, start fresh.
+        int turn = isResimulation ? fromTurn : 0;
         GameOutcome? finalOutcome = null;
-        string lastOpponentMsg = "";
         StatType? lastStatUsed = null;
         StatType? secondLastStatUsed = null;
-        var conversationHistory = new List<(string Sender, string Text)>();
+
+        var conversationHistory = isResimulation && resimTurnSnap != null
+            ? resimTurnSnap.ConversationHistory.Select(e => (e.Sender, e.Text)).ToList()
+            : new List<(string Sender, string Text)>();
+
+        string lastOpponentMsg = isResimulation && resimTurnSnap != null
+            ? (resimTurnSnap.ConversationHistory.LastOrDefault(e => e.Sender == player2)?.Text ?? "")
+            : "";
 
         // Shadow hint tracking state (#644)
-        var statsUsedHistory = new List<StatType>();
-        var highestPctHistory = new List<bool>();
-        int charmUsageCount = 0;
-        bool charmMadnessTriggered = false;
-        int saUsageCount = 0;
-        bool saOverthinkingTriggered = false;
-        int rizzCumulativeFailureCount = 0;
+        var statsUsedHistory = isResimulation && resimTurnSnap != null
+            ? resimTurnSnap.StatsUsedHistory
+                .Select(s => { Enum.TryParse<StatType>(s, out var st); return st; })
+                .ToList()
+            : new List<StatType>();
+
+        var highestPctHistory = isResimulation && resimTurnSnap != null
+            ? new List<bool>(resimTurnSnap.HighestPctHistory)
+            : new List<bool>();
+
+        int charmUsageCount = isResimulation && resimTurnSnap != null ? resimTurnSnap.CharmUsageCount : 0;
+        bool charmMadnessTriggered = isResimulation && resimTurnSnap != null && resimTurnSnap.CharmMadnessTriggered;
+        int saUsageCount = isResimulation && resimTurnSnap != null ? resimTurnSnap.SaUsageCount : 0;
+        bool saOverthinkingTriggered = isResimulation && resimTurnSnap != null && resimTurnSnap.SaOverthinkingTriggered;
+        int rizzCumulativeFailureCount = isResimulation && resimTurnSnap != null ? resimTurnSnap.RizzCumulativeFailureCount : 0;
 
         // Combo history tracking for snapshots (#754)
         // Mirrors what ComboTracker sees — (stat, succeeded) per turn
-        var comboHistoryForSnapshot = new List<(StatType Stat, bool Succeeded)>();
+        var comboHistoryForSnapshot = isResimulation && resimTurnSnap != null
+            ? resimTurnSnap.ComboHistory
+                .Select(e => { Enum.TryParse<StatType>(e.Stat, out var s); return (s, e.Succeeded); })
+                .ToList()
+            : new List<(StatType Stat, bool Succeeded)>();
         // Pending triple bonus is read from TurnStart.State.TripleBonusActive
 
         // Compute session slug (same format as .md filename)
@@ -634,7 +783,8 @@ class Program
             : $"session-{sessionNumber:D3}-unknown";
 
         // ── Write initial snapshot before turn 1 (#754) ───────────────────
-        if (playtestDir != null)
+        // Skipped for resimulations (we're continuing an existing session, not starting a new one).
+        if (!isResimulation && playtestDir != null)
         {
             var initialSnap = BuildInitialSnapshot(
                 sable, brick, p1LevelBonus, p2LevelBonus,
@@ -1210,6 +1360,11 @@ class Program
 
         Console.SetOut(tee._console);
         WritePlaytestLog(buffer.ToString(), player1, player2, playtestDir, sessionNumber);
+
+        // Write assumption log for resimulations
+        if (isResimulation && playtestDir != null && assumptionLog.Count > 0)
+            WriteAssumptionLog(playtestDir, resimulateSlug!, assumptionLog);
+
         if (playtestDir != null) SessionFileCounter.ReleaseLock(playtestDir, sessionNumber);
         return 0;
     }
@@ -1495,5 +1650,152 @@ CHARACTER PROFILE:
         string slug = $"session-{sessionNumber:D3}-{p1.ToLower()}-vs-{p2.ToLower()}.md";
         File.WriteAllText(Path.Combine(dir, slug), content);
         Console.WriteLine($"\n📝 Written → {dir}/{slug}");
+    }
+
+    // ────────────────────────────────────────────────────────────
+    // Resimulation helpers
+    // ────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Finds the highest turn-NN snapshot that exists for a given session slug.
+    /// Returns 0 if none found.
+    /// </summary>
+    static int FindLastTurnSnapshot(string playtestDir, string slug)
+    {
+        int last = 0;
+        for (int i = 1; i <= 99; i++)
+        {
+            string path = Path.Combine(playtestDir, $"{slug}.turn-{i:D2}.snap.json");
+            if (File.Exists(path))
+                last = i;
+            else if (last > 0)
+                break; // stop scanning after finding a gap (assumes no gaps)
+        }
+        return last;
+    }
+
+    /// <summary>
+    /// Parses the session number from a slug like "session-082-gerald-vs-sable".
+    /// Returns 0 if the slug doesn’t match the expected format.
+    /// </summary>
+    static int ParseSessionNumberFromSlug(string slug)
+    {
+        // Format: session-NNN-...
+        if (slug.StartsWith("session-", StringComparison.OrdinalIgnoreCase))
+        {
+            string rest = slug.Substring("session-".Length);
+            int dash = rest.IndexOf('-');
+            string numStr = dash >= 0 ? rest.Substring(0, dash) : rest;
+            if (int.TryParse(numStr, out int n))
+                return n;
+        }
+        return 0;
+    }
+
+    /// <summary>
+    /// Validates a TurnSnapshot after deserialization, filling in defaults for missing fields
+    /// and recording each assumption in <paramref name="log"/>.
+    /// </summary>
+    static TurnSnapshot ValidateAndPatchTurnSnapshot(TurnSnapshot snap, List<string> log)
+    {
+        snap.ShadowValues ??= new Dictionary<string, int>();
+        snap.ActiveTraps ??= new List<TrapSnapshot>();
+        snap.ComboHistory ??= new List<TurnHistoryEntry>();
+        snap.StatsUsedHistory ??= new List<string>();
+        snap.HighestPctHistory ??= new List<bool>();
+        snap.ConversationHistory ??= new List<ConversationEntry>();
+
+        void Assume(string field, string defaultValue)
+        {
+            string msg = $"[ASSUMPTION] {field} = {defaultValue} (not present in snapshot)";
+            Console.Error.WriteLine(msg);
+            log.Add(msg);
+        }
+
+        // Check required int fields for 0-default (can’t distinguish missing from explicit 0,
+        // but log if the whole ShadowValues map is empty on a non-turn-1 snap)
+        if (snap.TurnNumber == 0)
+            Assume("TurnNumber", "0");
+        if (snap.ShadowValues.Count == 0 && snap.TurnNumber > 0)
+            Assume("ShadowValues", "(empty — all shadows assumed 0)");
+
+        return snap;
+    }
+
+    /// <summary>
+    /// Writes assumption log entries to a markdown file in the playtests directory.
+    /// Does nothing if <paramref name="assumptionLog"/> is empty.
+    /// </summary>
+    static void WriteAssumptionLog(string playtestDir, string slug, List<string> assumptionLog)
+    {
+        if (assumptionLog.Count == 0) return;
+        var sb = new StringBuilder();
+        sb.AppendLine($"# Resimulation Assumptions — {slug}");
+        sb.AppendLine();
+        sb.AppendLine("The following fields were missing from the snapshot and replaced with defaults:");
+        sb.AppendLine();
+        foreach (var entry in assumptionLog)
+            sb.AppendLine($"- {entry}");
+        string path = Path.Combine(playtestDir, $"{slug}-resimulate-assumptions.md");
+        File.WriteAllText(path, sb.ToString());
+        Console.Error.WriteLine($"[ASSUMPTION LOG] Written → {path}");
+    }
+
+    /// <summary>
+    /// Builds a <see cref="ResimulateData"/> from a <see cref="TurnSnapshot"/>.
+    /// </summary>
+    static Pinder.Core.Conversation.ResimulateData BuildResimulateData(TurnSnapshot snap)
+    {
+        return new Pinder.Core.Conversation.ResimulateData
+        {
+            TargetInterest       = snap.Interest,
+            TurnNumber           = snap.TurnNumber,
+            MomentumStreak       = snap.MomentumStreak,
+            ShadowValues         = snap.ShadowValues ?? new Dictionary<string, int>(),
+            ActiveTraps          = (snap.ActiveTraps ?? new List<TrapSnapshot>())
+                                     .Select(t => (t.Stat, t.TurnsRemaining))
+                                     .ToList(),
+            ConversationHistory  = (snap.ConversationHistory ?? new List<ConversationEntry>())
+                                     .Select(e => (e.Sender, e.Text))
+                                     .ToList(),
+            ComboHistory         = (snap.ComboHistory ?? new List<TurnHistoryEntry>())
+                                     .Select(e => (e.Stat, e.Succeeded))
+                                     .ToList(),
+            PendingTripleBonus   = snap.PendingTripleBonus,
+            RizzCumulativeFailureCount = snap.RizzCumulativeFailureCount,
+        };
+    }
+
+    /// <summary>
+    /// Reconstructs a <see cref="CharacterProfile"/> from frozen snapshot data.
+    /// Shadow stat base values are set to 0; the SessionShadowTracker accumulates
+    /// deltas to reach the effective snapshot values via RestoreFromSnapshot.
+    /// </summary>
+    static CharacterProfile BuildProfileFromSnapshot(CharacterSnapshot charSnap)
+    {
+        var baseStats = new Dictionary<Pinder.Core.Stats.StatType, int>();
+        foreach (var kvp in charSnap.Stats)
+        {
+            if (Enum.TryParse<Pinder.Core.Stats.StatType>(kvp.Key, out var statType))
+                baseStats[statType] = kvp.Value;
+        }
+        // Start with 0 base shadow values; shadow tracker deltas carry the actual values
+        var shadowStats = new Dictionary<Pinder.Core.Stats.ShadowStatType, int>();
+
+        var statBlock = new Pinder.Core.Stats.StatBlock(baseStats, shadowStats);
+        // Default timing profile — exact values don’t affect resimulation fidelity
+        var timing = new Pinder.Core.Conversation.TimingProfile(
+            baseDelay: 5, variance: 0.5f, drySpell: 0.0f, readReceipt: "neutral");
+
+        return new CharacterProfile(
+            stats: statBlock,
+            assembledSystemPrompt: charSnap.AssembledSystemPrompt,
+            displayName: charSnap.DisplayName,
+            timing: timing,
+            level: charSnap.Level,
+            bio: charSnap.Bio,
+            textingStyleFragment: "",
+            activeArchetype: null,
+            equippedItemDisplayNames: charSnap.EquippedItems?.ToList() ?? new List<string>());
     }
 }
