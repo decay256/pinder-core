@@ -611,7 +611,8 @@ class Program
         int yamlDcBias = gameDef.GlobalDcBias;
         int totalDcBias = difficultyBias + yamlDcBias;
         var config = new GameSessionConfig(clock: clock, playerShadows: sableShadows, globalDcBias: totalDcBias, statDeliveryInstructions: statDeliveryInstructions);
-        int? diceSeed = ParseArg(args, "--seed") is string seedStr && int.TryParse(seedStr, out int sv) ? sv : (int?)null;
+        int? diceSeed = null;
+        { if (ParseArg(args, "--seed") is string s2 && int.TryParse(s2, out int s3)) diceSeed = s3; }
         var session = new GameSession(sable, brick, llm, new SystemRandomDiceRoller(diceSeed), trapRegistry, config);
 
         // ── Resimulation: restore session state from snapshot ───────────
