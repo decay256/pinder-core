@@ -62,56 +62,57 @@ namespace Pinder.Core.Tests
             Assert.Equal(5, turn.State.Interest);
         }
 
-        // ============== AC2: T2 Disadvantage on paired stat ==============
+        // ============== AC2: T2 shadow check (not disadvantage) — #755 ==============
+        // T2 generic disadvantage is removed. Shadow check IS the mechanic.
 
         [Fact]
-        public async Task DenialT2_HonestyRollsWithDisadvantage()
+        public async Task DenialT2_HonestyNoLongerRollsWithDisadvantage()
         {
-            // Denial at 12 → Honesty has disadvantage → rolls twice, takes lower
+            // Denial at 12 → shadow check fires, but NO roll disadvantage per #755
             var shadows = MakeShadowTracker(denial: 12);
-            // d20 rolls: first=18, second=5 (disadvantage takes 5), then ComputeDelay dice
+            // Single d20 roll (no disadvantage)
             var session = MakeSession(
-                diceValues: new[] { 18, 5, 50 },
+                diceValues: new[] { 18, 50 },
                 shadows: shadows,
                 llmOptions: new[] { new DialogueOption(StatType.Honesty, "Let me be honest...") });
 
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
-            // With disadvantage, should use the lower roll (5)
-            Assert.Equal(5, result.Roll.UsedDieRoll);
+            // Single roll used (not the lower of two)
+            Assert.Equal(18, result.Roll.UsedDieRoll);
         }
 
         [Fact]
-        public async Task DreadT2_WitRollsWithDisadvantage()
+        public async Task DreadT2_WitNoLongerRollsWithDisadvantage()
         {
             var shadows = MakeShadowTracker(dread: 14);
-            // d20: first=19, second=3 → uses 3
+            // Single d20 roll per #755
             var session = MakeSession(
-                diceValues: new[] { 19, 3, 50 },
+                diceValues: new[] { 19, 50 },
                 shadows: shadows,
                 llmOptions: new[] { new DialogueOption(StatType.Wit, "Witty remark") });
 
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
-            Assert.Equal(3, result.Roll.UsedDieRoll);
+            Assert.Equal(19, result.Roll.UsedDieRoll);
         }
 
         [Fact]
-        public async Task MadnessT2_CharmRollsWithDisadvantage()
+        public async Task MadnessT2_CharmNoLongerRollsWithDisadvantage()
         {
             var shadows = MakeShadowTracker(madness: 15);
-            // d20: first=17, second=4 → uses 4
+            // Single d20 roll per #755
             var session = MakeSession(
-                diceValues: new[] { 17, 4, 50 },
+                diceValues: new[] { 17, 50 },
                 shadows: shadows,
                 llmOptions: new[] { new DialogueOption(StatType.Charm, "Hey there") });
 
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
-            Assert.Equal(4, result.Roll.UsedDieRoll);
+            Assert.Equal(17, result.Roll.UsedDieRoll);
         }
 
         [Fact]
@@ -332,35 +333,34 @@ namespace Pinder.Core.Tests
             Assert.Null(capturedThresholds);
         }
 
-        // ============== Edge: Multiple T2 simultaneous ==============
+        // ============== Edge: Multiple T2 — #755: no longer causes disadvantage ==============
 
         [Fact]
-        public async Task MultipleT2_BothStatsGetDisadvantage()
+        public async Task MultipleT2_NoLongerBothStatsGetDisadvantage()
         {
-            // Dread T2 → Wit disadvantage, Denial T2 → Honesty disadvantage
+            // #755: T2 shadow fires shadow check, not roll disadvantage
             var shadows = MakeShadowTracker(dread: 12, denial: 12);
 
-            // Test Honesty: d20 first=19, second=2 → uses 2
+            // Single d20 roll (no disadvantage)
             var session = MakeSession(
-                diceValues: new[] { 19, 2, 50 },
+                diceValues: new[] { 19, 50 },
                 shadows: shadows,
                 llmOptions: new[] { new DialogueOption(StatType.Honesty, "Truth") });
 
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
-            Assert.Equal(2, result.Roll.UsedDieRoll);
+            Assert.Equal(19, result.Roll.UsedDieRoll);
         }
 
-        // ============== Edge: Advantage and disadvantage cancel ==============
+        // ============== Edge: Advantage from VeryIntoIt still applies ==============
 
         [Fact]
         public async Task AdvantageAndShadowDisadvantage_Cancel()
         {
-            // Interest in VeryIntoIt (grants advantage) + Denial T2 (Honesty disadvantage)
-            // They cancel → normal single roll
+            // #755: T2 no longer causes disadvantage, so advantage from VeryIntoIt applies cleanly.
             var shadows = MakeShadowTracker(denial: 14);
             var session = MakeSession(
-                diceValues: new[] { 12, 50 },
+                diceValues: new[] { 8, 14, 50 },
                 shadows: shadows,
                 startingInterest: 18, // VeryIntoIt → advantage
                 llmOptions: new[] { new DialogueOption(StatType.Honesty, "Truth") });
@@ -368,8 +368,8 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
-            // With adv+disadv canceling, should be a single roll = 12
-            Assert.Equal(12, result.Roll.UsedDieRoll);
+            // Only advantage active → takes higher of 8 and 14 = 14
+            Assert.Equal(14, result.Roll.UsedDieRoll);
         }
 
         // ============== #307: Shadow taint uses raw values ==============
@@ -717,6 +717,7 @@ namespace Pinder.Core.Tests
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context)
                 => Task.FromResult<string?>(null);
             public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null) => System.Threading.Tasks.Task.FromResult(message);
+            public System.Threading.Tasks.Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow) => System.Threading.Tasks.Task.FromResult(message);
         }
 
                 /// <summary>LLM adapter that captures DialogueContext for inspection.</summary>
@@ -741,6 +742,7 @@ namespace Pinder.Core.Tests
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context)
                 => Task.FromResult<string?>(null);
             public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null) => System.Threading.Tasks.Task.FromResult(message);
+            public System.Threading.Tasks.Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow) => System.Threading.Tasks.Task.FromResult(message);
         }
     }
 }

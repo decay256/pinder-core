@@ -82,6 +82,11 @@ namespace Pinder.Core.Conversation
         public HorninessCheckResult HorninessCheck { get; }
 
         /// <summary>
+        /// Result of the per-turn shadow check. NotPerformed if the chosen stat had no active paired shadow.
+        /// </summary>
+        public ShadowCheckResult ShadowCheck { get; }
+
+        /// <summary>
         /// Roll bonus applied from a previous Triple combo (+1). 0 if no Triple bonus was consumed this turn.
         /// </summary>
         public int TripleBonusApplied { get; }
@@ -125,7 +130,8 @@ namespace Pinder.Core.Conversation
             int tripleBonusApplied = 0,
             int horninessInterestPenalty = 0,
             int horninessInterestBefore = 0,
-            IReadOnlyList<TextDiff>? textDiffs = null)
+            IReadOnlyList<TextDiff>? textDiffs = null,
+            ShadowCheckResult shadowCheck = null)
         {
             Roll = roll ?? throw new ArgumentNullException(nameof(roll));
             DeliveredMessage = deliveredMessage ?? throw new ArgumentNullException(nameof(deliveredMessage));
@@ -152,6 +158,7 @@ namespace Pinder.Core.Conversation
             HorninessInterestPenalty = horninessInterestPenalty;
             HorninessInterestBefore = horninessInterestBefore;
             TextDiffs = textDiffs ?? Array.Empty<TextDiff>();
+            ShadowCheck = shadowCheck ?? ShadowCheckResult.NotPerformed;
         }
     }
 }

@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using Pinder.Core.Conversation;
+using Pinder.Core.Stats;
 
 namespace Pinder.Core.Interfaces
 {
@@ -39,5 +40,13 @@ namespace Pinder.Core.Interfaces
         /// </summary>
         /// <param name="opponentContext">Optional compact opponent context (name, bio, items) to ground the overlay.</param>
         Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null);
+
+        /// <summary>
+        /// Apply a shadow corruption instruction to a delivered message.
+        /// Called when a shadow check fails and the main roll was a success —
+        /// the message is rewritten to show the corruption bleeding through.
+        /// Returns the corrupted message text.
+        /// </summary>
+        Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow);
     }
 }

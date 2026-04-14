@@ -86,6 +86,39 @@ namespace Pinder.LlmAdapters
             return null;
         }
 
+        /// <summary>
+        /// Returns the shadow corruption instruction for the given shadow stat and failure tier, or null if not found.
+        /// The shadow_corruption section in YAML has subsections per shadow, each with tiers:
+        /// fumble, misfire, trope_trap, catastrophe.
+        /// </summary>
+        public string GetShadowCorruptionInstruction(Pinder.Core.Stats.ShadowStatType shadow, Pinder.Core.Rolls.FailureTier tier)
+        {
+            string shadowKey = ShadowKey(shadow);
+            string tierKey = FailureTierKey(tier);
+
+            // shadow_corruption is parsed as composite keys: "shadow_corruption.{shadowName}"
+            string compositeKey = "shadow_corruption." + shadowKey;
+            if (_instructions.TryGetValue(compositeKey, out var shadowTiers) &&
+                shadowTiers.TryGetValue(tierKey, out var text) &&
+                !string.IsNullOrWhiteSpace(text))
+                return text;
+            return null;
+        }
+
+        private static string ShadowKey(Pinder.Core.Stats.ShadowStatType shadow)
+        {
+            switch (shadow)
+            {
+                case Pinder.Core.Stats.ShadowStatType.Madness:       return "madness";
+                case Pinder.Core.Stats.ShadowStatType.Despair:       return "despair";
+                case Pinder.Core.Stats.ShadowStatType.Denial:        return "denial";
+                case Pinder.Core.Stats.ShadowStatType.Fixation:      return "fixation";
+                case Pinder.Core.Stats.ShadowStatType.Dread:         return "dread";
+                case Pinder.Core.Stats.ShadowStatType.Overthinking:  return "overthinking";
+                default: return shadow.ToString().ToLowerInvariant();
+            }
+        }
+
         private static string StatKey(StatType stat)
         {
             switch (stat)
@@ -116,12 +149,14 @@ namespace Pinder.LlmAdapters
                     .Build();
 
                 var root = deserializer.Deserialize<Dictionary<string, object>>(yamlContent);
-                if (root == null || !root.TryGetValue("delivery_instructions", out var diObj))
+                if (root == null)
                     return new StatDeliveryInstructions(null);
 
                 var result = new Dictionary<string, Dictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
 
-                if (diObj is Dictionary<object, object> statMap)
+                // Parse delivery_instructions (flat stat → tier → text)
+                if (root.TryGetValue("delivery_instructions", out var diObj) &&
+                    diObj is Dictionary<object, object> statMap)
                 {
                     foreach (var statEntry in statMap)
                     {
@@ -141,6 +176,33 @@ namespace Pinder.LlmAdapters
 
                         if (!string.IsNullOrWhiteSpace(statKey))
                             result[statKey] = tierDict;
+                    }
+                }
+
+                // Parse shadow_corruption (nested: shadowName → tier → text)
+                // Stored as composite keys "shadow_corruption.{shadowName}" for lookup.
+                if (root.TryGetValue("shadow_corruption", out var scObj) &&
+                    scObj is Dictionary<object, object> shadowMap)
+                {
+                    foreach (var shadowEntry in shadowMap)
+                    {
+                        string shadowName = shadowEntry.Key?.ToString() ?? "";
+                        if (string.IsNullOrWhiteSpace(shadowName)) continue;
+
+                        var tierDict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+                        if (shadowEntry.Value is Dictionary<object, object> tierMap)
+                        {
+                            foreach (var tierEntry in tierMap)
+                            {
+                                string tierKey = tierEntry.Key?.ToString() ?? "";
+                                string text = tierEntry.Value?.ToString() ?? "";
+                                if (!string.IsNullOrWhiteSpace(tierKey) && tierKey != "description")
+                                    tierDict[tierKey] = text;
+                            }
+                        }
+
+                        result["shadow_corruption." + shadowName] = tierDict;
                     }
                 }
 

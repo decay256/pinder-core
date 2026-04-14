@@ -111,5 +111,22 @@ namespace Pinder.Core.Conversation
 
             return method.Invoke(statDeliveryInstructions, new object[] { stat, tier }) as string;
         }
+
+        /// <summary>
+        /// Retrieves the shadow corruption instruction from the stat delivery instructions.
+        /// Uses reflection to avoid a direct dependency on Pinder.LlmAdapters from Pinder.Core.
+        /// Returns null if instructions are not available.
+        /// </summary>
+        internal static string? GetShadowCorruptionInstruction(object? statDeliveryInstructions, ShadowStatType shadow, FailureTier tier)
+        {
+            if (statDeliveryInstructions == null)
+                return null;
+
+            var method = statDeliveryInstructions.GetType().GetMethod("GetShadowCorruptionInstruction");
+            if (method == null)
+                return null;
+
+            return method.Invoke(statDeliveryInstructions, new object[] { shadow, tier }) as string;
+        }
     }
 }

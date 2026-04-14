@@ -279,18 +279,18 @@ namespace Pinder.Core.Tests
         // AC-4: Success with Overthinking Disadvantage → Overthinking −1
         // =====================================================================
 
-        // What: AC-4 — Success despite Overthinking disadvantage reduces Overthinking
-        // Mutation: Would catch if Overthinking reduction is missing from ResolveTurnAsync
+        // What: AC-4 (updated for #755) — T2 disadvantage removed, Overthinking reduction via disadvantage no longer fires.
+        // The shadow check mechanic (not roll disadvantage) is now the T2 effect.
         [Fact]
-        public async Task AC4_SuccessWithOverthinkingDisadvantage_OverthinkingReduced()
+        public async Task AC4_SuccessWithOverthinkingAtT2_NoLongerReducesOverthinking_ViaDis()
         {
-            // Overthinking at 12 (T2) → SA gets disadvantage
+            // #755: T2 no longer causes roll disadvantage, so the "succeeded despite disadvantage" reduction is gone.
             var shadows = new SessionShadowTracker(MakeStats());
             shadows.ApplyGrowth(ShadowStatType.Overthinking, 12, "setup");
             shadows.DrainGrowthEvents();
 
             var session = BuildSession(
-                dice: Dice(20, 20, 50), // Nat20 succeeds despite disadvantage
+                dice: Dice(20, 50), // single roll (no disadvantage)
                 playerStats: MakeStats(sa: 5),
                 shadows: shadows,
                 options: new[] { new DialogueOption(StatType.SelfAwareness, "insightful") });
@@ -299,21 +299,21 @@ namespace Pinder.Core.Tests
             var result = await session.ResolveTurnAsync(0);
 
             Assert.True(result.Roll.IsSuccess);
-            // Mutation: Fails if Overthinking reduction is omitted
-            Assert.Equal(11, shadows.GetDelta(ShadowStatType.Overthinking));
+            // #755: T2 disadvantage removed — Overthinking delta unchanged (reduction doesn't fire via old T2 path)
+            // (may still reduce via high-interest mechanic if interest ≥20)
+            Assert.True(shadows.GetDelta(ShadowStatType.Overthinking) >= 12); // no reduction from T2 disadvantage path
         }
 
-        // What: AC-4 — Growth event recorded for Overthinking reduction
-        // Mutation: Would catch if event text is wrong or not recorded
+        // What: AC-4 (updated for #755) — Growth event for overthinking-via-disadvantage no longer fires.
         [Fact]
-        public async Task AC4_SuccessWithOverthinkingDisadvantage_GrowthEventRecorded()
+        public async Task AC4_SuccessWithOverthinkingAtT2_NoDisadvantageEvent()
         {
             var shadows = new SessionShadowTracker(MakeStats());
             shadows.ApplyGrowth(ShadowStatType.Overthinking, 12, "setup");
             shadows.DrainGrowthEvents();
 
             var session = BuildSession(
-                dice: Dice(20, 20, 50),
+                dice: Dice(20, 50),
                 playerStats: MakeStats(sa: 5),
                 shadows: shadows,
                 options: new[] { new DialogueOption(StatType.SelfAwareness, "aware") });
@@ -322,8 +322,8 @@ namespace Pinder.Core.Tests
             var result = await session.ResolveTurnAsync(0);
 
             Assert.True(result.Roll.IsSuccess);
-            // Mutation: Fails if reason text is wrong
-            Assert.Contains(result.ShadowGrowthEvents,
+            // #755: T2 disadvantage path removed — "Succeeded despite" event should NOT appear
+            Assert.DoesNotContain(result.ShadowGrowthEvents,
                 e => e.Contains("Overthinking") && e.Contains("Succeeded despite"));
         }
 
@@ -641,6 +641,7 @@ namespace Pinder.Core.Tests
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context)
                 => Task.FromResult<string?>(null);
             public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null) => System.Threading.Tasks.Task.FromResult(message);
+            public System.Threading.Tasks.Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow) => System.Threading.Tasks.Task.FromResult(message);
         }
     }
 }

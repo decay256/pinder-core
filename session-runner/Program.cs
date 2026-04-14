@@ -883,6 +883,19 @@ class Program
                 Console.WriteLine();
             }
 
+            // Per-turn shadow check display (#755)
+            if (result.ShadowCheck != null && result.ShadowCheck.CheckPerformed)
+            {
+                var sc = result.ShadowCheck;
+                string scResult = sc.IsMiss
+                    ? $"MISS ({sc.Tier}){(sc.OverlayApplied ? " — corruption applied" : "")}"
+                    : "OK";
+                Console.WriteLine($"> ⚫ Shadow check ({sc.Shadow}): d20({sc.Roll}) + 0 = {sc.Roll} vs DC {sc.DC} → {scResult}");
+                if (sc.OverlayApplied)
+                    Console.WriteLine($"  ↳ Shadow override ({sc.Shadow} {sc.Tier}): success forced to fail");
+                Console.WriteLine();
+            }
+
             Console.WriteLine($"**📨 {player1} sends:**");
 
             // #745: Diff-aware layered display

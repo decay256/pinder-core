@@ -22,6 +22,12 @@ namespace Pinder.Core.Conversation
         }
 
         /// <summary>
+        /// Rolls a d20 using the steering RNG (separate from game dice).
+        /// Used by the shadow check mechanic to avoid consuming game dice values.
+        /// </summary>
+        public int RollD20() => _steeringRng.Next(1, 21);
+
+        /// <summary>
         /// Attempts a steering roll after message delivery.
         /// Steering modifier = average of (CHARM + WIT + SA) effective modifiers (integer division).
         /// Steering DC = 16 + average of opponent's (SA + RIZZ + HONESTY) effective modifiers.

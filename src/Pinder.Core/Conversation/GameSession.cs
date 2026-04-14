@@ -293,19 +293,8 @@ namespace Pinder.Core.Conversation
                     int effectiveVal = _playerShadows.GetEffectiveShadow(shadow);
                     shadowThresholds[shadow] = effectiveVal;
                     int tier = ResolveThresholdLevel(effectiveVal);
-
-                    // T2+: paired positive stat gets disadvantage
-                    if (tier >= 2)
-                    {
-                        foreach (var kvp in StatBlock.ShadowPairs)
-                        {
-                            if (kvp.Value == shadow)
-                            {
-                                _shadowDisadvantagedStats.Add(kvp.Key);
-                                break;
-                            }
-                        }
-                    }
+                    // T2+ disadvantage for paired stats is removed: shadow check IS the disadvantage (#755)
+                    _ = tier; // suppress unused warning
                 }
             }
 
@@ -719,6 +708,60 @@ namespace Pinder.Core.Conversation
                 interestDelta += penalty; // net delta = halvedDelta
             }
 
+            // #755: Shadow check — fires when using a stat with active paired shadow
+            ShadowStatType? pairedShadow = GetPairedShadow(chosenOption.Stat);
+            ShadowCheckResult shadowCheckResult = ShadowCheckResult.NotPerformed;
+
+            if (pairedShadow.HasValue && _playerShadows != null)
+            {
+                int shadowValue = _playerShadows.GetEffectiveShadow(pairedShadow.Value);
+                if (shadowValue > 0)
+                {
+                    int shadowRoll = _steeringEngine.RollD20(); // use steering rng so it doesn't consume game dice
+                    int shadowDC = 20 - shadowValue;
+                    bool shadowMiss = shadowRoll < shadowDC;
+
+                    if (shadowMiss)
+                    {
+                        int missMargin = shadowDC - shadowRoll;
+                        FailureTier shadowTier = HorninessEngine.DetermineHorninessTier(missMargin);
+                        string? corruptionInstruction = HorninessEngine.GetShadowCorruptionInstruction(
+                            _statDeliveryInstructions, pairedShadow.Value, shadowTier);
+
+                        bool overlayApplied = false;
+                        if (corruptionInstruction != null && rollResult.IsSuccess)
+                        {
+                            // Rewrite the delivered message with shadow corruption
+                            string beforeShadow = deliveredMessage;
+                            deliveredMessage = await _llm.ApplyShadowCorruptionAsync(
+                                deliveredMessage, corruptionInstruction, pairedShadow.Value).ConfigureAwait(false);
+                            if (deliveredMessage != beforeShadow)
+                            {
+                                var shadowSpans = WordDiff.Compute(beforeShadow, deliveredMessage);
+                                textDiffs.Add(new TextDiff($"Shadow ({pairedShadow.Value})", shadowSpans, beforeShadow, deliveredMessage));
+                            }
+
+                            // Override: force success to be treated as a failure
+                            // Undo the success interest delta, apply failure delta instead
+                            var forcedFailResult = CreateForcedFailResult(rollResult, shadowTier);
+                            int shadowFailDelta = ResolveFailureInterestDelta(forcedFailResult);
+                            int correction = shadowFailDelta - interestDelta; // usually negative
+                            _interest.Apply(correction);
+                            interestDelta = shadowFailDelta;
+                            overlayApplied = true;
+                        }
+
+                        shadowCheckResult = new ShadowCheckResult(
+                            true, pairedShadow.Value, shadowRoll, shadowDC, true, shadowTier, overlayApplied);
+                    }
+                    else
+                    {
+                        shadowCheckResult = new ShadowCheckResult(
+                            true, pairedShadow.Value, shadowRoll, shadowDC, false, FailureTier.None, false);
+                    }
+                }
+            }
+
             _history.Add((_player.DisplayName, deliveredMessage));
 
             // 11. Generate opponent response
@@ -817,7 +860,8 @@ namespace Pinder.Core.Conversation
                 tripleBonusApplied: tripleBonusApplied,
                 horninessInterestPenalty: horninessInterestPenalty,
                 horninessInterestBefore: horninessInterestBefore,
-                textDiffs: textDiffs.Count > 0 ? textDiffs : null);
+                textDiffs: textDiffs.Count > 0 ? textDiffs : null,
+                shadowCheck: shadowCheckResult);
         }
 
         /// <summary>
@@ -1001,6 +1045,45 @@ namespace Pinder.Core.Conversation
                     throw new GameEndedException(GameOutcome.Ghosted);
                 }
             }
+        }
+
+        /// <summary>
+        /// Returns the shadow stat paired with the given positive stat, or null if unrecognised.
+        /// </summary>
+        private static ShadowStatType? GetPairedShadow(StatType stat)
+        {
+            switch (stat)
+            {
+                case StatType.Charm:         return ShadowStatType.Madness;
+                case StatType.Rizz:          return ShadowStatType.Despair;
+                case StatType.Honesty:       return ShadowStatType.Denial;
+                case StatType.Chaos:         return ShadowStatType.Fixation;
+                case StatType.Wit:           return ShadowStatType.Dread;
+                case StatType.SelfAwareness: return ShadowStatType.Overthinking;
+                default:                     return null;
+            }
+        }
+
+        /// <summary>
+        /// Creates a synthetic RollResult that represents a forced failure at the given tier.
+        /// Used by the shadow check to compute the failure interest delta when overriding a success.
+        /// </summary>
+        private static RollResult CreateForcedFailResult(RollResult original, FailureTier shadowTier)
+        {
+            // Build a result that looks like a miss at the given tier.
+            // We derive a miss margin that maps to the tier, then compute a die roll that misses DC.
+            int fakeDie = original.DC > 1 ? original.DC - 1 : 1; // just below DC
+            return new RollResult(
+                dieRoll: fakeDie,
+                secondDieRoll: null,
+                usedDieRoll: fakeDie,
+                stat: original.Stat,
+                statModifier: 0,
+                levelBonus: 0,
+                dc: original.DC,
+                tier: shadowTier,
+                activatedTrap: null,
+                externalBonus: 0);
         }
 
         /// <summary>

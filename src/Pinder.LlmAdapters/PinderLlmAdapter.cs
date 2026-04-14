@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Pinder.Core.Conversation;
 using Pinder.Core.Interfaces;
+using Pinder.Core.Stats;
 using Pinder.LlmAdapters.Anthropic;
 using Pinder.LlmAdapters.Groq;
 
@@ -186,6 +187,44 @@ namespace Pinder.LlmAdapters
                 systemPrompt += $"\n\nThe message being sent is directed at this character:\n{opponentContext}";
 
             string userContent = $"OVERLAY INSTRUCTION:\n{instruction}\n\nORIGINAL MESSAGE:\n{message}\n\nApply the overlay and return the modified message.";
+
+            try
+            {
+                double temperature = _options.DeliveryTemperature ?? 0.7;
+                var result = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens)
+                    .ConfigureAwait(false);
+
+                if (string.IsNullOrWhiteSpace(result)) return message;
+                string trimmed = result.Trim();
+
+                // Detect refusal — fall back to original message silently
+                if (trimmed.StartsWith("I can't", StringComparison.OrdinalIgnoreCase) ||
+                    trimmed.StartsWith("I cannot", StringComparison.OrdinalIgnoreCase) ||
+                    trimmed.IndexOf("inappropriate", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    trimmed.IndexOf("I'd be happy to help", StringComparison.OrdinalIgnoreCase) >= 0)
+                    return message;
+
+                return trimmed;
+            }
+            catch
+            {
+                return message;
+            }
+        }
+
+        /// <inheritdoc />
+        public async Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow)
+        {
+            if (string.IsNullOrWhiteSpace(message) || string.IsNullOrWhiteSpace(instruction))
+                return message;
+
+            string systemPrompt = "You are editing a text message for Pinder, a satirical comedy dating app. " +
+                "Apply the shadow corruption instruction to rewrite the delivered message. " +
+                "The message has already been through its normal delivery transformation. " +
+                "Now the character's shadow stat is corrupting it further. " +
+                "Return ONLY the corrupted message text. No commentary, no preamble, no refusals.";
+
+            string userContent = $"SHADOW CORRUPTION INSTRUCTION ({shadow}):\n{instruction}\n\nORIGINAL MESSAGE:\n{message}\n\nApply the corruption and return the modified message.";
 
             try
             {

@@ -194,20 +194,20 @@ namespace Pinder.Core.Tests
         }
 
         // =====================================================================
-        // Reduction 4: Winning despite Overthinking disadvantage → Overthinking −1
+        // Reduction 4: #755 — T2 disadvantage removed, Overthinking reduction via disadvantage path no longer fires.
         // =====================================================================
 
         [Fact]
-        public async Task SuccessWithOverthinkingDisadvantage_ReducesOverthinkingByOne()
+        public async Task SuccessWithOverthinkingAtT2_NoLongerReducesViaDisadvantage()
         {
-            // Overthinking at 12 (T2) → SA gets disadvantage
+            // #755: T2 no longer causes roll disadvantage for paired stats.
             var shadows = new SessionShadowTracker(Stats());
             shadows.ApplyGrowth(ShadowStatType.Overthinking, 12, "setup");
             shadows.DrainGrowthEvents();
 
-            // SA option, high roll to succeed despite disadvantage
+            // SA option, single roll (no disadvantage)
             var session = BuildSession(
-                dice: Dice(20, 20, 50), // adv: takes lower of two d20s, but Nat20 always succeeds
+                dice: Dice(20, 50), // single Nat20
                 playerStats: Stats(sa: 5),
                 shadows: shadows,
                 options: new[] { new DialogueOption(StatType.SelfAwareness, "aware") });
@@ -216,9 +216,9 @@ namespace Pinder.Core.Tests
             var result = await session.ResolveTurnAsync(0);
 
             Assert.True(result.Roll.IsSuccess);
-            // Overthinking was 12, should be 12 - 1 = 11
-            Assert.Equal(11, shadows.GetDelta(ShadowStatType.Overthinking));
-            Assert.Contains(result.ShadowGrowthEvents, e => e.Contains("Overthinking") && e.Contains("Succeeded despite"));
+            // #755: T2 disadvantage removed — "Succeeded despite disadvantage" reduction should NOT fire
+            Assert.DoesNotContain(result.ShadowGrowthEvents,
+                e => e.Contains("Overthinking") && e.Contains("Succeeded despite"));
         }
 
         [Fact]
@@ -642,6 +642,7 @@ namespace Pinder.Core.Tests
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context)
                 => Task.FromResult<string?>(null);
             public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null) => System.Threading.Tasks.Task.FromResult(message);
+            public System.Threading.Tasks.Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow) => System.Threading.Tasks.Task.FromResult(message);
         }
     }
 }

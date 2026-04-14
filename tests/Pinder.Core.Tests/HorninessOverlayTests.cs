@@ -249,6 +249,9 @@ namespace Pinder.Core.Tests
 
             public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null)
                 => Task.FromResult(message);
+
+            public Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow)
+                => Task.FromResult(message);
         }
     }
 }

@@ -279,6 +279,45 @@ namespace Pinder.LlmAdapters.Anthropic
                 _client, _options, message, instruction, opponentContext).ConfigureAwait(false);
         }
 
+        /// <inheritdoc />
+        public async Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow)
+        {
+            if (string.IsNullOrWhiteSpace(message) || string.IsNullOrWhiteSpace(instruction))
+                return message;
+
+            string systemPrompt = "You are editing a text message for Pinder, a satirical comedy dating app. " +
+                "Apply the shadow corruption instruction to rewrite the delivered message. " +
+                "The message has already been through its normal delivery transformation. " +
+                "Now the character's shadow stat is corrupting it further. " +
+                "Return ONLY the corrupted message text. No commentary, no preamble, no refusals.";
+
+            string userContent = $"SHADOW CORRUPTION INSTRUCTION ({shadow}):\n{instruction}\n\nORIGINAL MESSAGE:\n{message}\n\nApply the corruption and return the modified message.";
+
+            try
+            {
+                var systemBlocks = CacheBlockBuilder.BuildPlayerOnlySystemBlocks(systemPrompt);
+                var request = AnthropicRequestBuilders.BuildMessagesRequest(
+                    _options.Model, _options.MaxTokens, systemBlocks, userContent,
+                    _options.DeliveryTemperature ?? 0.7);
+                var response = await _client.SendMessagesAsync(request).ConfigureAwait(false);
+                var result = response.GetText()?.Trim();
+
+                if (string.IsNullOrWhiteSpace(result)) return message;
+
+                // Detect refusal
+                if (result.StartsWith("I can't", StringComparison.OrdinalIgnoreCase) ||
+                    result.StartsWith("I cannot", StringComparison.OrdinalIgnoreCase) ||
+                    result.IndexOf("inappropriate", StringComparison.OrdinalIgnoreCase) >= 0)
+                    return message;
+
+                return result;
+            }
+            catch
+            {
+                return message;
+            }
+        }
+
         // Backward-compatibility: expose static parse methods for tests
         // that reference AnthropicLlmAdapter.ParseDialogueOptions / ParseOpponentResponse
 

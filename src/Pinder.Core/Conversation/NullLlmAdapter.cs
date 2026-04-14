@@ -79,5 +79,13 @@ namespace Pinder.Core.Conversation
         {
             return Task.FromResult(message);
         }
+
+        /// <summary>
+        /// Returns the message unchanged (no shadow corruption in test mode).
+        /// </summary>
+        public Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow)
+        {
+            return Task.FromResult(message);
+        }
     }
 }

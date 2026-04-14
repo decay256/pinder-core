@@ -435,5 +435,12 @@ namespace Pinder.LlmAdapters.OpenAi
         {
             return Task.FromResult(message);
         }
+
+        /// <inheritdoc />
+        public Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow)
+        {
+            // Shadow corruption via OpenAI transport — returns input unchanged (not yet implemented).
+            return Task.FromResult(message);
+        }
     }
 }
