@@ -1659,7 +1659,7 @@
   type: rule
   blocks:
   - kind: paragraph
-    text: "When a horniness overlay fires and current interest > 0, interest is set to floor(interest / 2)."
+    text: "When a horniness overlay fires and the turn's interest delta is positive, the delta is halved (floor). e.g. a +5 gain becomes +2. If the delta is 0 or negative, no penalty."
 - id: §9.shadow-threshold.dread.t1
   section: §9
   title: Shadow Threshold — Dread T1
@@ -1820,32 +1820,58 @@
   section: §9
   title: Shadow Threshold — Despair T1
   type: shadow_growth
-  description: 'Despair at 6: Rizz options appear more often.'
+  description: 'Despair at 6: Shadow check fires when using RIZZ — DC 14, 30% failure rate. Neediness leaks into delivered messages.'
   condition:
     shadow: Despair
     threshold: 6
   outcome:
-    effect: Rizz options appear more often
+    effect: Shadow check fires when using RIZZ — DC 14, 30% failure rate. Neediness leaks into delivered messages.
 - id: §9.shadow-threshold.despair.t2
   section: §9
   title: Shadow Threshold — Despair T2
   type: shadow_growth
-  description: 'Despair at 12: One option is always unwanted Rizz.'
+  description: 'Despair at 12: Shadow check DC 8, 65% failure rate. Performed magnetism overtakes the message on failure.'
   condition:
     shadow: Despair
     threshold: 12
   outcome:
-    effect: One option is always unwanted Rizz
+    effect: Shadow check DC 8, 65% failure rate. Performed magnetism overtakes the message on failure.
 - id: §9.shadow-threshold.despair.t3
   section: §9
   title: Shadow Threshold — Despair T3
   type: shadow_growth
-  description: 'Despair at 18: ALL options become Rizz. No other thoughts..'
+  description: "Despair at 18: Shadow check DC 2, ~95% failure rate. Desperation has colonised the character's ability to play Rizz."
   condition:
     shadow: Despair
     threshold: 18
   outcome:
-    effect: ALL options become Rizz. No other thoughts.
+    effect: "Shadow check DC 2, ~95% failure rate. Desperation has colonised the character's ability to play Rizz."
+- id: §9.shadow-check
+  section: §9
+  title: Shadow Check — Continuous Interference
+  type: rule
+  blocks:
+  - kind: paragraph
+    text: >-
+      When a player picks an option using a stat with a paired shadow value > 0,
+      a shadow check roll fires automatically after the main roll resolves.
+      The check uses d20 vs DC = (20 - shadowValue). Higher shadow = lower DC = higher failure rate.
+
+      If the shadow check fails AND the main roll succeeded:
+      - The success is overridden — interest delta is replaced with the failure delta for that tier
+      - The delivered message is rewritten using the shadow corruption instruction for that tier
+      - The rewrite is shown as a diff layer: "Shadow (ShadowName)"
+      - No trap activates (shadow corruption is not a trap failure)
+
+      If the shadow check fails and the main roll already failed:
+      - The message is still rewritten with shadow corruption (narrative)
+      - No additional interest penalty (the roll was already a failure)
+
+      Shadow check failure tiers use the same miss-margin calculation as normal rolls
+      (Fumble: miss 1-2, Misfire: miss 3-5, TropeTrap: miss 6-9, Catastrophe: miss 10+)
+      but are labeled "Shadow (Name) Misfire" etc. and do not activate traps.
+  description: >-
+    Shadow check: d20 vs DC=(20-shadowValue). Failure overrides success and corrupts the message.
 - id: §9.shadow-thresholds
   section: §9
   title: Shadow Thresholds
@@ -1874,9 +1900,9 @@
       At 12: Self-Awareness has disadvantage
       At 18+: You see opponent's inner monologue (freeze)
     - Shadow: '**Despair**'
-      At 6: Rizz options appear more often
-      At 12: One option is always unwanted Rizz
-      At 18+: ALL options become Rizz. No other thoughts.
+      At 6: Shadow check DC 14 (30% fail) — neediness leaks into messages
+      At 12: Shadow check DC 8 (65% fail) — performed magnetism overtakes message
+      At 18+: Shadow check DC 2 (~95% fail) — desperation colonises Rizz ability
     sep_cells:
     - '--------'
     - '------'
