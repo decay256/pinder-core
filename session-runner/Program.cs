@@ -353,6 +353,29 @@ class Program
         Console.WriteLine("> DC = 16 + opponent defending stat modifier. Miss by 1–2 = Fumble | 3–5 = Misfire | 6–9 = Trope Trap | 10+ = Catastrophe | Nat 1 = Legendary.");
         Console.WriteLine();
 
+        // ── archetype directives ──────────────────────────────────────────
+        bool hasP1Archetype = sable.ActiveArchetype != null;
+        bool hasP2Archetype = brick.ActiveArchetype != null;
+        if (hasP1Archetype || hasP2Archetype)
+        {
+            Console.WriteLine("### Archetype Directives");
+            Console.WriteLine();
+            if (hasP1Archetype)
+            {
+                Console.WriteLine($"**{player1} ({sable.ActiveArchetype!.Name} — {sable.ActiveArchetype.InterferenceLevel}):**");
+                foreach (var directiveLine in sable.ActiveArchetype.Behavior.Split('\n'))
+                    Console.WriteLine($"> {directiveLine}");
+                Console.WriteLine();
+            }
+            if (hasP2Archetype)
+            {
+                Console.WriteLine($"**{player2} ({brick.ActiveArchetype!.Name} — {brick.ActiveArchetype.InterferenceLevel}):**");
+                foreach (var directiveLine in brick.ActiveArchetype.Behavior.Split('\n'))
+                    Console.WriteLine($"> {directiveLine}");
+                Console.WriteLine();
+            }
+        }
+
         // ── steering roll explanation ─────────────────────────────────────
         int steeringMod = (sableStats.GetEffective(StatType.Charm) + sableStats.GetEffective(StatType.Wit) + sableStats.GetEffective(StatType.SelfAwareness)) / 3;
         int steeringDC = 16 + (brickStats.GetEffective(StatType.SelfAwareness) + brickStats.GetEffective(StatType.Rizz) + brickStats.GetEffective(StatType.Honesty)) / 3;

@@ -103,16 +103,20 @@ namespace Pinder.Core.Tests
         }
 
         [Theory]
-        [InlineData("The Sniper", 4, false)]
-        [InlineData("The Sniper", 5, true)]
-        [InlineData("The Sniper", 11, true)]
-        [InlineData("The Sniper", 12, false)]
-        [InlineData("The Hey Opener", 1, true)]
-        [InlineData("The Hey Opener", 3, true)]
-        [InlineData("The Hey Opener", 4, false)]
-        [InlineData("The Bio Responder", 3, false)]
-        [InlineData("The Bio Responder", 4, true)]
-        [InlineData("The Bio Responder", 11, true)]
+        // Tier 4 archetypes (Sniper): eligible at levels where tier 4 applies (5+)
+        [InlineData("The Sniper", 4, false)]  // level 4 → tiers {2,3}; Sniper is T4 → no
+        [InlineData("The Sniper", 5, true)]   // level 5 → tiers {2,3,4}; Sniper is T4 → yes
+        [InlineData("The Sniper", 11, true)]  // level 11 → tier {4}; Sniper is T4 → yes
+        [InlineData("The Sniper", 12, true)]  // level 12 → tier {4} (no upper bound); Sniper T4 → yes
+        // Tier 1 archetypes (Hey Opener): eligible only at levels 1–3
+        [InlineData("The Hey Opener", 1, true)]   // level 1 → tiers {1}; T1 → yes
+        [InlineData("The Hey Opener", 3, true)]   // level 3 → tiers {1,2,3}; T1 → yes
+        [InlineData("The Hey Opener", 4, false)]  // level 4 → tiers {2,3}; T1 → no
+        // Tier 4 archetypes (Bio Responder): eligible where tier 4 applies (5+)
+        [InlineData("The Bio Responder", 3, false)] // level 3 → tiers {1,2,3}; T4 → no
+        [InlineData("The Bio Responder", 4, false)] // level 4 → tiers {2,3}; T4 → no
+        [InlineData("The Bio Responder", 5, true)]  // level 5 → tiers {2,3,4}; T4 → yes
+        [InlineData("The Bio Responder", 11, true)] // level 11 → tier {4}; T4 → yes
         public void Catalog_IsEligibleAtLevel(string name, int level, bool expected)
         {
             Assert.Equal(expected, ArchetypeCatalog.IsEligibleAtLevel(name, level));

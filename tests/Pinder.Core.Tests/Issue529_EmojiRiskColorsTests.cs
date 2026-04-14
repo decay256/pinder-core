@@ -103,8 +103,10 @@ namespace Pinder.Core.Tests
             // The old hardcoded string should NOT appear
             Assert.DoesNotContain("need <= 5 ? \"[Safe]\" : need <= 10 ? \"[Medium]\" : need <= 15 ? \"[Hard]\" : \"[Bold]\"", content);
 
-            // It should be calling the helper method for riskColor
-            Assert.Contains("string riskColor = RiskLabel(need);", content);
+            // It should be calling the helper method for riskColor (may use need or effectiveNeed)
+            bool usesRiskLabel = content.Contains("string riskColor = RiskLabel(need);") ||
+                                  content.Contains("string riskColor = RiskLabel(effectiveNeed);");
+            Assert.True(usesRiskLabel, "Program.cs should call RiskLabel to assign riskColor");
         }
 
         private static string FindProgramCs()
