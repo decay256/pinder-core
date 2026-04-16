@@ -26,16 +26,23 @@ def parse_turns(path):
         sent = ""
         
         # All Diff blocks in order — last one is the final message
-        # Format: **Diff (LayerName):** "text" or **Diff (LayerName):** "~~old~~ ***new***"
+        # Format: **Diff (LayerName):** "text" — text may contain internal quotes, use newline as terminator
         # Match Diff (LayerName) where LayerName may contain nested parens e.g. Shadow (Madness)
-        all_diffs = re.findall(r'\*\*Diff \((?:[^()]*|\([^)]*\))+\):\*\*[\s\*]*"(.+?)"', body, re.DOTALL)
+        # The closing quote of a Diff block is always followed by \n\n (double newline).
+        # This handles internal quotes in the diff content.
+        all_diffs = re.findall(
+            r'\*\*Diff \((?:[^()]*|\([^)]*\))+\):\*\*[\s\*]*"(.*?)"\s*\n\n',
+            body, re.DOTALL
+        )
         if all_diffs:
             # Clean diff markup: ~~removed~~ and ***added*** — keep only added text
             last = all_diffs[-1].strip()
             # Remove strikethrough: ~~text~~
             last = re.sub(r'~~.+?~~\s*', '', last)
             # Remove bold-italic markers: ***text*** → text
-            last = re.sub(r'\*\*\*(.+?)\*\*\*', r'\1', last)
+            last = re.sub(r'\*\*\*(.+?)\*\*\*', r'\1', last, flags=re.DOTALL)
+            # Clean any trailing *** (incomplete markup)
+            last = re.sub(r'\*+$', '', last).strip()
             sent = last.strip()
         
         # No diffs — try Delivered
@@ -58,10 +65,12 @@ def parse_turns(path):
                     real = [q for q in quoted if not q.startswith('**') and len(q) > 10]
                     if real: sent = real[-1].strip()
         
-        # Add steering question if it was appended
+        # Add steering question ONLY if not already in the sent text
         steer = re.search(r'\*Gerald_42 adds:\* "(.+?)"', body)
         if steer and sent:
-            sent = sent.rstrip('.!?') + " " + steer.group(1).strip()
+            steer_text = steer.group(1).strip()[:40]  # first 40 chars as fingerprint
+            if steer_text not in sent:
+                sent = sent.rstrip('.!?') + " " + steer.group(1).strip()
         
         # ── Find Sable's reply ───────────────────────────────────────────────
         opp = re.search(r'📩 .+ replies:\*\*\s*\n((?:> .+\n?)+)', body)
