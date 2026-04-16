@@ -81,9 +81,35 @@ def parse_turns(path):
             lines = re.findall(r'> (.+)', raw)
             reply = " ".join(l.strip() for l in lines).strip()
         
-        # Clean up [OPPONENT] artifacts
-        sent = re.sub(r'\[OPPONENT\]\s*', '', sent or '').strip() or '*(no message extracted)*'
-        reply = re.sub(r'\[OPPONENT\]\s*', '', reply or '').strip() or '*(no reply)*'
+        # Clean up model metadata leakage artifacts
+        # Remove [OPPONENT] tags
+        sent = re.sub(r'\[OPPONENT\]\s*', '', sent or '').strip()
+        reply = re.sub(r'\[OPPONENT\]\s*', '', reply or '').strip()
+        # Remove visible [Overlay applied: ...] reasoning text from models like Qwen3
+        sent = re.sub(r'\n?>?\s*\[Overlay applied[^\]]*\]\s*', '', sent).strip()
+        sent = re.sub(r'\n?>?\s*\[.+? applied[^\]]*\]\s*', '', sent).strip()
+        # Remove duplicate content (same block appearing twice)
+        if sent:
+            half = len(sent) // 2
+            if half > 50 and sent[:half].strip() == sent[half:].strip():
+                sent = sent[:half].strip()
+        def clean_cell(text):
+            if not text: return text
+            # Collapse all newlines (including blockquote > markers)
+            text = re.sub(r'\n\s*', ' ', text)
+            # Remove any remaining > markers (blockquote artifacts)
+            text = re.sub(r'\s*>\s*', ' ', text)
+            # Remove leading/trailing dashes and em-dashes
+            text = re.sub(r'^[—\-]+\s*', '', text)
+            text = re.sub(r'\s*[—]+\s*', ' ', text)
+            # Collapse multiple spaces
+            text = re.sub(r'  +', ' ', text)
+            return text.strip()
+        
+        sent = clean_cell(sent)
+        reply = clean_cell(reply)
+        sent = sent or '*(no message extracted)*'
+        reply = reply or '*(no reply)*'
         
         # ── Interest delta ──────────────────────────────────────────────────
         int_m = re.search(r'Interest: [█░]+ +(\d+)/25 +\(([+-]?\d+)\)', body)
