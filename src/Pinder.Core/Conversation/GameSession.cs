@@ -198,6 +198,23 @@ namespace Pinder.Core.Conversation
         /// <summary>Total XP earned during this session.</summary>
         public int TotalXpEarned => _xpLedger.TotalXp;
 
+        /// <summary>Current 0-based turn number. Incremented by ResolveTurnAsync.</summary>
+        public int TurnNumber => _turnNumber;
+
+        /// <summary>True after the session has reached a terminal <see cref="GameOutcome"/>.</summary>
+        public bool IsEnded => _ended;
+
+        /// <summary>Terminal outcome, or null while the session is still running.</summary>
+        public GameOutcome? Outcome => _outcome;
+
+        /// <summary>
+        /// Conversation history as (sender, text) tuples, in emission order.
+        /// Read-only snapshot view; safe to enumerate concurrently with session mutation
+        /// since the underlying list is only appended during ResolveTurnAsync.
+        /// </summary>
+        public System.Collections.Generic.IReadOnlyList<(string Sender, string Text)> ConversationHistory
+            => _history;
+
         /// <summary>Session horniness value (d10 + clock modifier). Used for display.</summary>
         public int SessionHorniness => _sessionHorniness;
 
@@ -429,7 +446,16 @@ namespace Pinder.Core.Conversation
         /// <param name="optionIndex">Index into the options array from StartTurnAsync.</param>
         /// <exception cref="GameEndedException">If the game has already ended.</exception>
         /// <exception cref="InvalidOperationException">If StartTurnAsync was not called first or index is invalid.</exception>
-        public async Task<TurnResult> ResolveTurnAsync(int optionIndex)
+        public Task<TurnResult> ResolveTurnAsync(int optionIndex)
+            => ResolveTurnAsync(optionIndex, progress: null);
+
+        /// <summary>
+        /// Resolve the current turn with an optional progress reporter.
+        /// <paramref name="progress"/> receives one <see cref="TurnProgressEvent"/>
+        /// per coarse stage of the multi-LLM resolution pipeline. Intended for
+        /// the web session-runner's SSE endpoint — see <see cref="TurnProgressStage"/>.
+        /// </summary>
+        public async Task<TurnResult> ResolveTurnAsync(int optionIndex, System.IProgress<TurnProgressEvent>? progress)
         {
             if (_ended)
                 throw new GameEndedException(_outcome!.Value);
@@ -689,7 +715,9 @@ namespace Pinder.Core.Conversation
                 isNat20: rollResult.IsNatTwenty,
                 statFailureInstruction: statFailureInstruction);
 
+            progress?.Report(new TurnProgressEvent(TurnProgressStage.DeliveryStarted));
             string deliveredMessage = await _llm.DeliverMessageAsync(deliveryContext).ConfigureAwait(false);
+            progress?.Report(new TurnProgressEvent(TurnProgressStage.DeliveryCompleted, deliveredMessage));
 
             // Collect word-level diffs for each text transform layer
             var textDiffs = new List<TextDiff>();
@@ -717,8 +745,12 @@ namespace Pinder.Core.Conversation
             double responseDelayMinutes = _opponent.Timing.ComputeDelay(_interest.Current, _dice);
 
             // 10b. Steering roll — attempt to append a date-steering question
+            progress?.Report(new TurnProgressEvent(TurnProgressStage.SteeringStarted));
             SteeringRollResult steeringResult = await _steeringEngine.AttemptSteeringRollAsync(
                 deliveredMessage, _player, _opponent, _llm, _history.AsReadOnly()).ConfigureAwait(false);
+            progress?.Report(new TurnProgressEvent(
+                TurnProgressStage.SteeringCompleted,
+                steeringResult.SteeringSucceeded ? steeringResult.SteeringQuestion : null));
             if (steeringResult.SteeringSucceeded && steeringResult.SteeringQuestion != null)
             {
                 string beforeSteering = deliveredMessage;
@@ -742,7 +774,9 @@ namespace Pinder.Core.Conversation
                 {
                     string beforeHorniness = deliveredMessage;
                     string opponentCtx = BuildOpponentContext(_opponent);
+                    progress?.Report(new TurnProgressEvent(TurnProgressStage.HorninessOverlayStarted));
                     deliveredMessage = await _llm.ApplyHorninessOverlayAsync(deliveredMessage, instruction, opponentCtx).ConfigureAwait(false);
+                    progress?.Report(new TurnProgressEvent(TurnProgressStage.HorninessOverlayCompleted, deliveredMessage));
                     if (deliveredMessage != beforeHorniness)
                     {
                         var horninessSpans = WordDiff.Compute(beforeHorniness, deliveredMessage);
@@ -789,8 +823,10 @@ namespace Pinder.Core.Conversation
                         {
                             // Rewrite the delivered message with shadow corruption
                             string beforeShadow = deliveredMessage;
+                            progress?.Report(new TurnProgressEvent(TurnProgressStage.ShadowCorruptionStarted));
                             deliveredMessage = await _llm.ApplyShadowCorruptionAsync(
                                 deliveredMessage, corruptionInstruction, pairedShadow.Value).ConfigureAwait(false);
+                            progress?.Report(new TurnProgressEvent(TurnProgressStage.ShadowCorruptionCompleted, deliveredMessage));
                             if (deliveredMessage != beforeShadow)
                             {
                                 var shadowSpans = WordDiff.Compute(beforeShadow, deliveredMessage);
@@ -856,10 +892,12 @@ namespace Pinder.Core.Conversation
                 deliveryTier: rollResult.Tier,
                 activeArchetypeDirective: opponentArchetypeDirective);
 
+            progress?.Report(new TurnProgressEvent(TurnProgressStage.OpponentResponseStarted));
             var opponentResponse = await _llm.GetOpponentResponseAsync(opponentContext).ConfigureAwait(false);
             if (opponentResponse == null)
                 throw new InvalidOperationException("LLM adapter returned null opponent response");
             string opponentMessage = opponentResponse.MessageText;
+            progress?.Report(new TurnProgressEvent(TurnProgressStage.OpponentResponseCompleted, opponentMessage));
 
             // Store weakness window from opponent response for next turn (#49)
             _activeWeakness = opponentResponse.WeaknessWindow;

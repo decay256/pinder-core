@@ -7,6 +7,7 @@ using Pinder.Core.Data;
 using Pinder.Core.Interfaces;
 using Pinder.Core.Stats;
 using Pinder.SessionRunner;
+using Pinder.SessionSetup;
 using Xunit;
 
 namespace Pinder.Core.Tests
