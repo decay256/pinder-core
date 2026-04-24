@@ -51,6 +51,13 @@ namespace Pinder.Core.Conversation
         /// </summary>
         public object? StatDeliveryInstructions { get; }
 
+        /// <summary>
+        /// Optional dice roller override. When non-null, GameSession uses this instead of
+        /// creating a new SystemRandomDiceRoller. Inject a seeded roller for deterministic
+        /// test scenarios — ensures roll outcomes are reproducible across capture and replay.
+        /// </summary>
+        public IDiceRoller? DiceRoller { get; }
+
         public GameSessionConfig(
             IGameClock? clock = null,
             SessionShadowTracker? playerShadows = null,
@@ -60,7 +67,8 @@ namespace Pinder.Core.Conversation
             IRuleResolver? rules = null,
             int globalDcBias = 0,
             Random? steeringRng = null,
-            object? statDeliveryInstructions = null)
+            object? statDeliveryInstructions = null,
+            IDiceRoller? diceRoller = null)
         {
             Clock = clock;
             PlayerShadows = playerShadows;
@@ -71,6 +79,7 @@ namespace Pinder.Core.Conversation
             GlobalDcBias = globalDcBias;
             SteeringRng = steeringRng;
             StatDeliveryInstructions = statDeliveryInstructions;
+            DiceRoller = diceRoller;
         }
     }
 }
