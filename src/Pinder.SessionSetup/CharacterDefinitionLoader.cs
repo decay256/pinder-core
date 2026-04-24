@@ -10,7 +10,7 @@ using Pinder.Core.Prompts;
 using Pinder.Core.Stats;
 using Pinder.Core.Traps;
 
-namespace Pinder.SessionRunner
+namespace Pinder.SessionSetup
 {
     /// <summary>
     /// Loads a character definition JSON file and runs the full

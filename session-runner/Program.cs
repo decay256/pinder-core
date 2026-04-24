@@ -21,12 +21,9 @@ using Pinder.LlmAdapters.Anthropic;
 using Pinder.LlmAdapters.OpenAi;
 using Pinder.SessionRunner;
 using Pinder.SessionRunner.Snapshot;
+using Pinder.SessionSetup;
 
-class NullTrapRegistry : ITrapRegistry
-{
-    public TrapDefinition? GetTrap(StatType stat) => null;
-    public string? GetLlmInstruction(StatType stat) => null;
-}
+// NullTrapRegistry moved to Pinder.Core.Traps (Track B #114).
 
 class TeeWriter : TextWriter
 {
@@ -661,12 +658,18 @@ class Program
         if (!isResimulation)
         {
             // ── Matchup Analysis ──────────────────────────────────────────
+            // Setup helpers live in Pinder.SessionSetup (Track B #114) and are
+            // consumed by both session-runner and Pinder.GameApi.
             Console.Error.WriteLine("Generating matchup analysis...");
-            var analysisOptions = new AnthropicOptions {
-                ApiKey = apiKey,
-                Model = Environment.GetEnvironmentVariable("PLAYER_AGENT_MODEL") ?? "claude-sonnet-4-20250514"
-            };
-            var analysis = await MatchupAnalyzer.AnalyzeMatchupAsync(analysisOptions, sable, brick);
+            string setupModel = Environment.GetEnvironmentVariable("PLAYER_AGENT_MODEL") ?? "claude-sonnet-4-20250514";
+            using var setupTransport = new Pinder.LlmAdapters.Anthropic.AnthropicTransport(apiKey, setupModel);
+            var matchupAnalyzer = new Pinder.SessionSetup.LlmMatchupAnalyzer(
+                setupTransport,
+                new Pinder.SessionSetup.LlmMatchupAnalyzer.Options
+                {
+                    CacheDirectory = System.IO.Path.Combine(Environment.CurrentDirectory, ".matchup-cache"),
+                });
+            var analysis = await matchupAnalyzer.AnalyzeMatchupAsync(sable, brick);
             if (!string.IsNullOrWhiteSpace(analysis))
             {
                 Console.WriteLine(analysis);
@@ -675,8 +678,9 @@ class Program
 
             // ── Psychological Stakes ──────────────────────────────────
             Console.Error.WriteLine("Generating psychological stakes...");
-            string p1Stake = await GeneratePsychologicalStakeAsync(apiKey, sable.AssembledSystemPrompt, player1).ConfigureAwait(false);
-            string p2Stake = await GeneratePsychologicalStakeAsync(apiKey, brick.AssembledSystemPrompt, player2).ConfigureAwait(false);
+            var stakeGenerator = new Pinder.SessionSetup.LlmStakeGenerator(setupTransport);
+            string p1Stake = await stakeGenerator.GenerateAsync(player1, sable.AssembledSystemPrompt).ConfigureAwait(false);
+            string p2Stake = await stakeGenerator.GenerateAsync(player2, brick.AssembledSystemPrompt).ConfigureAwait(false);
             sable.PsychologicalStake = p1Stake;
             brick.PsychologicalStake = p2Stake;
 
@@ -1494,48 +1498,7 @@ class Program
         }
     }
 
-    static async Task<string> GeneratePsychologicalStakeAsync(string apiKey, string assembledSystemPrompt, string characterName)
-    {
-        try
-        {
-            var client = new Pinder.LlmAdapters.Anthropic.AnthropicClient(apiKey);
-            var request = new Pinder.LlmAdapters.Anthropic.Dto.MessagesRequest
-            {
-                Model = "claude-sonnet-4-20250514",
-                MaxTokens = 800,
-                Temperature = 0.9,
-                Messages = new Pinder.LlmAdapters.Anthropic.Dto.Message[]
-                {
-                    new Pinder.LlmAdapters.Anthropic.Dto.Message
-                    {
-                        Role = "user",
-                        Content = $@"Based on this character's assembled fragments, write a psychological portrait that a novelist would use to write their dialogue. Be creative and specific — fill in gaps based on what the fragments imply, don't summarize them.
-
-TONAL INSTRUCTION: This is a comedy game about the absurdity of online dating. The psychological stakes should be over the top and slightly ridiculous — but the character treats them as completely, genuinely real. The comedy lives in the gap between how absurd the reason sounds stated plainly and how seriously the character feels it. A character who joined because they had a spiritual crisis in an IKEA and now believes their soulmate is someone who understands the existential weight of flat-pack furniture is funnier than a character who is simply 'looking for connection' — and no less emotionally true. Lean into specific absurdity. Make the precipitating events specific and a little unhinged. The character should never know they're funny.
-
-Cover six things, each in 2-3 paragraphs:
-1. Why they are on this app right now. Not a general 'looking for connection' — a specific, absurd, over-the-top emotional context. What ridiculous but emotionally real thing happened recently? Name the specific humiliating, strange, or unhinged moment that preceded this. Make it funny but play it straight.
-2. What they actually want from a match. Their real underlying need — and it should be slightly deranged in its specificity. What exact bizarre thing would having it feel like? What would they do the morning after?
-3. What they are secretly afraid of. The belief about themselves they are protecting — make it specific and a little ridiculous. What absurd thing would it confirm about them if they failed here?
-4. What winning this conversation would mean emotionally — not 'getting the date' but what specific, slightly unhinged thing it proves or heals or demonstrates.
-5. What losing would mean emotionally — not 'getting unmatched' but the specific catastrophic conclusion they would draw about themselves.
-6. Their biographical backstory: 3-5 specific, concrete, slightly unhinged events from the last 2-3 years of their life. These should be specific enough to be revealed in conversation and funny enough to belong in a comedy — not themes but events. A named relationship and the specific absurd way it ended. A job decision and what they did the week after (something strange). A specific moment of realisation in an unlikely location. A place they went alone and what they did there. These are the facts the character can share when the conversation gets real. Write them as vivid, specific narrative fragments. The more specific and slightly absurd, the better.
-
-Write 2-3 paragraphs per point. This is a novelist's character bible for a comedy. Do not use headers or bullet points — write flowing prose. The character is real, their feelings are genuine, their reasons are ridiculous.
-
-CHARACTER PROFILE:
-{assembledSystemPrompt.Substring(0, System.Math.Min(4000, assembledSystemPrompt.Length))}"
-                    }
-                }
-            };
-            var response = await client.SendMessagesAsync(request).ConfigureAwait(false);
-            return response.GetText().Trim();
-        }
-        catch
-        {
-            return string.Empty;
-        }
-    }
+    // GeneratePsychologicalStakeAsync was ported to Pinder.SessionSetup.LlmStakeGenerator in Track B (#114).
 
     // ── Snapshot builders (#754) ─────────────────────────────────
 
