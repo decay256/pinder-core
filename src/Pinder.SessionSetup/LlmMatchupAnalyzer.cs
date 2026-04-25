@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
@@ -11,7 +13,9 @@ using Pinder.Core.Stats;
 namespace Pinder.SessionSetup
 {
     /// <summary>
-    /// Default <see cref="IMatchupAnalyzer"/> built on <see cref="ILlmTransport"/>.
+    /// Default <see cref="IMatchupAnalyzer"/> built on <see cref="ILlmTransport"/>
+    /// (non-streaming) and optionally <see cref="IStreamingLlmTransport"/>
+    /// (streaming overload).
     /// Provider-agnostic: pass any transport (Anthropic, OpenAi, Groq, etc.).
     /// </summary>
     /// <remarks>
@@ -25,15 +29,39 @@ namespace Pinder.SessionSetup
     /// system + user prompts forbid markdown explicitly. <c>Pinder.GameApi</c>
     /// additionally runs a <c>MarkdownSanitizer</c> as defence-in-depth before
     /// storing the result.
+    ///
+    /// Streaming: when an <see cref="IStreamingLlmTransport"/> is supplied,
+    /// <see cref="StreamMatchupAsync"/> yields raw fragments as they arrive
+    /// and propagates transport failures as
+    /// <see cref="LlmTransportException"/> (deliberate departure from the
+    /// non-streaming overload, which swallows). Streaming intentionally
+    /// bypasses the on-disk cache.
     /// </remarks>
     public sealed class LlmMatchupAnalyzer : IMatchupAnalyzer
     {
+        private const string SystemPrompt =
+            "You are an expert game designer analyzing a matchup in a dating RPG. " +
+            "Respond in plain prose only. Do NOT use markdown formatting of any " +
+            "kind: no headings (#, ##), no bold or italics (**, __, *, _), no " +
+            "bullet or numbered lists (-, *, +, 1., 2.), no blockquotes (>), and " +
+            "no inline or fenced code (`, ```). Use paragraph breaks for structure.";
+
         private readonly ILlmTransport _transport;
+        private readonly IStreamingLlmTransport? _streamingTransport;
         private readonly Options _options;
 
         public LlmMatchupAnalyzer(ILlmTransport transport, Options? options = null)
+            : this(transport, streamingTransport: null, options)
+        {
+        }
+
+        public LlmMatchupAnalyzer(
+            ILlmTransport transport,
+            IStreamingLlmTransport? streamingTransport,
+            Options? options = null)
         {
             _transport = transport ?? throw new ArgumentNullException(nameof(transport));
+            _streamingTransport = streamingTransport;
             _options = options ?? new Options();
         }
 
@@ -70,22 +98,12 @@ namespace Pinder.SessionSetup
                 }
             }
 
-            // Output is rendered as plain text by the frontend; markdown markers
-            // would leak through as literal characters. Forbid them at the
-            // system prompt level (pinder-web #136). MarkdownSanitizer in
-            // Pinder.GameApi.Services is the backstop.
-            string systemPrompt =
-                "You are an expert game designer analyzing a matchup in a dating RPG. " +
-                "Respond in plain prose only. Do NOT use markdown formatting of any " +
-                "kind: no headings (#, ##), no bold or italics (**, __, *, _), no " +
-                "bullet or numbered lists (-, *, +, 1., 2.), no blockquotes (>), and " +
-                "no inline or fenced code (`, ```). Use paragraph breaks for structure.";
             string userPrompt = BuildPrompt(player, opponent);
 
             try
             {
                 string analysis = await _transport
-                    .SendAsync(systemPrompt, userPrompt, _options.Temperature, _options.MaxTokens)
+                    .SendAsync(SystemPrompt, userPrompt, _options.Temperature, _options.MaxTokens)
                     .ConfigureAwait(false);
 
                 analysis = (analysis ?? string.Empty).Trim();
@@ -112,6 +130,87 @@ namespace Pinder.SessionSetup
             {
                 // Parity with legacy helper: any transport error → null, not an exception.
                 return null;
+            }
+        }
+
+        /// <inheritdoc />
+        public async IAsyncEnumerable<string> StreamMatchupAsync(
+            CharacterProfile player,
+            CharacterProfile opponent,
+            [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        {
+            if (player == null) throw new ArgumentNullException(nameof(player));
+            if (opponent == null) throw new ArgumentNullException(nameof(opponent));
+            if (_streamingTransport == null)
+            {
+                throw new InvalidOperationException(
+                    "Streaming overload requires an IStreamingLlmTransport. " +
+                    "Construct LlmMatchupAnalyzer with the (ILlmTransport, IStreamingLlmTransport, Options?) overload.");
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            string userPrompt = BuildPrompt(player, opponent);
+
+            // Open the underlying stream. Translate transport failures
+            // (anything that isn't OperationCanceledException) into the
+            // typed LlmTransportException — both at enumerator-construction
+            // time (rare) and at MoveNextAsync time (the common case for
+            // network/SSE failures, which surface mid-iteration).
+            IAsyncEnumerator<string> enumerator;
+            try
+            {
+                enumerator = _streamingTransport.SendStreamAsync(
+                        SystemPrompt, userPrompt,
+                        _options.Temperature, _options.MaxTokens,
+                        cancellationToken)
+                    .GetAsyncEnumerator(cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (LlmTransportException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new LlmTransportException(
+                    "Failed to open streaming matchup analysis: " + ex.Message, ex);
+            }
+
+            try
+            {
+                while (true)
+                {
+                    bool moved;
+                    try
+                    {
+                        moved = await enumerator.MoveNextAsync().ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        throw;
+                    }
+                    catch (LlmTransportException)
+                    {
+                        throw;
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new LlmTransportException(
+                            "Streaming matchup analysis failed mid-stream: " + ex.Message, ex);
+                    }
+
+                    if (!moved) break;
+
+                    yield return enumerator.Current;
+                }
+            }
+            finally
+            {
+                await enumerator.DisposeAsync().ConfigureAwait(false);
             }
         }
 
@@ -199,7 +298,7 @@ namespace Pinder.SessionSetup
 
             /// <summary>
             /// Optional directory for caching analyses by (player+opponent+stats) hash.
-            /// When null or empty, caching is disabled.
+            /// When null or empty, caching is disabled. Streaming bypasses the cache.
             /// </summary>
             public string? CacheDirectory { get; set; }
         }
