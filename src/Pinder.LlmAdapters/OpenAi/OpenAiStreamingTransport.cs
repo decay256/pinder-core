@@ -24,10 +24,24 @@ namespace Pinder.LlmAdapters.OpenAi
     /// stream terminates with <c>data: [DONE]</c>.
     /// </para>
     /// <para>
-    /// For each chunk, only <c>choices[0].delta.content</c> strings are yielded
-    /// (when present and non-empty). The role-only initial delta, tool/function
-    /// call deltas, and the <c>[DONE]</c> sentinel are ignored. <c>finish_reason</c>
-    /// is not surfaced — the stream simply ends when the response body is exhausted.
+    /// For each chunk, the transport yields, in this order:
+    /// </para>
+    /// <list type="number">
+    ///   <item><description><c>choices[0].delta.content</c> if present and non-empty.</description></item>
+    ///   <item><description><c>choices[0].delta.reasoning</c> if present and non-empty
+    ///     (OpenAI/OpenRouter reasoning models — <c>gpt-5-nano</c>, <c>:thinking</c>
+    ///     variants, etc. — emit tokens here while <c>delta.content</c> stays empty).</description></item>
+    ///   <item><description>The concatenation of
+    ///     <c>choices[0].delta.reasoning_details[i].summary</c> strings if any are
+    ///     non-empty (OpenRouter v1 structured reasoning summaries).</description></item>
+    /// </list>
+    /// <para>
+    /// When both <c>content</c> and <c>reasoning</c> arrive in the same frame
+    /// (e.g. Anthropic-thinking on OpenRouter), content is yielded first and
+    /// reasoning second. Empty / whitespace fragments are suppressed. The
+    /// role-only initial delta, tool/function call deltas, and the
+    /// <c>[DONE]</c> sentinel are ignored. <c>finish_reason</c> is not surfaced —
+    /// the stream simply ends when the response body is exhausted.
     /// </para>
     /// <para>
     /// <b>Error mapping.</b> Any non-2xx HTTP response, malformed SSE frame, or
@@ -252,9 +266,13 @@ namespace Pinder.LlmAdapters.OpenAi
                         if (data == "[DONE]")
                             yield break;
 
-                        var fragment = ExtractContentFragmentOrThrow(data);
-                        if (!string.IsNullOrEmpty(fragment))
-                            yield return fragment!;
+                        foreach (var fragment in ExtractContentFragmentsOrThrow(data))
+                        {
+                            // Defensive: also suppress whitespace-only fragments so
+                            // consumers never see empty pushes.
+                            if (!string.IsNullOrWhiteSpace(fragment))
+                                yield return fragment;
+                        }
                     }
                     continue;
                 }
@@ -283,12 +301,16 @@ namespace Pinder.LlmAdapters.OpenAi
         }
 
         /// <summary>
-        /// Parse a single SSE <c>data:</c> JSON payload. Returns the
-        /// <c>choices[0].delta.content</c> string when present and non-empty,
-        /// otherwise <c>null</c>. Throws <see cref="LlmTransportException"/> on
-        /// a top-level <c>error</c> object or malformed JSON.
+        /// Parse a single SSE <c>data:</c> JSON payload. Returns an ordered
+        /// sequence of non-empty fragments to yield to the consumer:
+        /// <c>choices[0].delta.content</c> first (if non-empty), followed by
+        /// <c>choices[0].delta.reasoning</c> (if non-empty), followed by the
+        /// concatenation of <c>choices[0].delta.reasoning_details[i].summary</c>
+        /// strings (if any are non-empty). Whitespace-only candidates are
+        /// dropped. Throws <see cref="LlmTransportException"/> on a top-level
+        /// <c>error</c> object or malformed JSON.
         /// </summary>
-        private static string? ExtractContentFragmentOrThrow(string data)
+        private static IEnumerable<string> ExtractContentFragmentsOrThrow(string data)
         {
             JObject obj;
             try
@@ -315,8 +337,47 @@ namespace Pinder.LlmAdapters.OpenAi
                     "OpenAI-compatible streaming endpoint returned error frame: " + message);
             }
 
-            var content = obj["choices"]?[0]?["delta"]?["content"]?.Value<string?>();
-            return string.IsNullOrEmpty(content) ? null : content;
+            var delta = obj["choices"]?[0]?["delta"];
+            if (delta == null || delta.Type != JTokenType.Object)
+                yield break;
+
+            var results = new List<string>(3);
+
+            // 1) delta.content
+            var content = delta["content"]?.Value<string?>();
+            if (!string.IsNullOrWhiteSpace(content))
+                results.Add(content!);
+
+            // 2) delta.reasoning (OpenAI/OpenRouter reasoning models stream tokens here
+            //    while delta.content stays empty).
+            var reasoning = delta["reasoning"]?.Value<string?>();
+            if (!string.IsNullOrWhiteSpace(reasoning))
+                results.Add(reasoning!);
+
+            // 3) delta.reasoning_details[i].summary — concatenated as one fragment
+            //    so consumers see a single coherent reasoning-summary push per frame.
+            var details = delta["reasoning_details"] as JArray;
+            if (details != null && details.Count > 0)
+            {
+                StringBuilder? sb = null;
+                foreach (var d in details)
+                {
+                    if (d == null || d.Type != JTokenType.Object) continue;
+                    var summary = d["summary"]?.Value<string?>();
+                    if (string.IsNullOrEmpty(summary)) continue;
+                    if (sb == null) sb = new StringBuilder();
+                    sb.Append(summary);
+                }
+                if (sb != null)
+                {
+                    var joined = sb.ToString();
+                    if (!string.IsNullOrWhiteSpace(joined))
+                        results.Add(joined);
+                }
+            }
+
+            foreach (var r in results)
+                yield return r;
         }
 
         public void Dispose()
