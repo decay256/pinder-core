@@ -119,6 +119,61 @@ namespace Pinder.LlmAdapters.Tests.OpenAi
             Assert.Equal(new[] { "real" }, fragments);
         }
 
+        // ------------------------------------------------------------------
+        // Reasoning models (issue #178)
+        // ------------------------------------------------------------------
+
+        [Fact]
+        public async Task SendStreamAsync_ReasoningOnlyStream_YieldsReasoningAndDetailSummaries()
+        {
+            // Reasoning model: every chunk has empty content but non-empty
+            // delta.reasoning, plus a structured reasoning_details[].summary
+            // on the final reasoning frame. No delta.content arrives at all.
+            var sse = BuildSse(new[]
+            {
+                ChunkRole(),
+                ChunkReasoning("I"),
+                ChunkReasoning(" need"),
+                ChunkReasoning(" to think."),
+                ChunkReasoningDetailsSummaries(new[] { "Summary part A.", " Summary part B." }),
+                "[DONE]",
+            });
+
+            using var transport = NewTransport(sse);
+            var fragments = await CollectAsync(transport.SendStreamAsync("sys", "user"));
+
+            Assert.Equal(
+                new[] { "I", " need", " to think.", "Summary part A. Summary part B." },
+                fragments);
+        }
+
+        [Fact]
+        public async Task SendStreamAsync_MixedReasoningAndContentStream_YieldsContentFirstThenReasoning()
+        {
+            // Mixed stream:
+            //   1. role-only
+            //   2. reasoning-only frames (Anthropic-thinking style)
+            //   3. mixed frame with BOTH content and reasoning
+            //      (per yield order: content first, reasoning second)
+            //   4. final content-only frames
+            var sse = BuildSse(new[]
+            {
+                ChunkRole(),
+                ChunkReasoning("thinking..."),
+                ChunkContentAndReasoning("Hi", " still thinking"),
+                ChunkContent(", "),
+                ChunkContent("world!"),
+                "[DONE]",
+            });
+
+            using var transport = NewTransport(sse);
+            var fragments = await CollectAsync(transport.SendStreamAsync("sys", "user"));
+
+            Assert.Equal(
+                new[] { "thinking...", "Hi", " still thinking", ", ", "world!" },
+                fragments);
+        }
+
         [Fact]
         public async Task SendStreamAsync_TolleratesSseCommentsAndOtherFields()
         {
@@ -413,6 +468,39 @@ namespace Pinder.LlmAdapters.Tests.OpenAi
         private static string ChunkRole()
         {
             return "{\"id\":\"c1\",\"object\":\"chat.completion.chunk\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\"}}]}";
+        }
+
+        private static string ChunkReasoning(string reasoning)
+        {
+            var escaped = JsonEscape(reasoning);
+            return "{\"id\":\"c1\",\"object\":\"chat.completion.chunk\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\",\"reasoning\":\"" + escaped + "\"}}]}";
+        }
+
+        private static string ChunkContentAndReasoning(string content, string reasoning)
+        {
+            var ec = JsonEscape(content);
+            var er = JsonEscape(reasoning);
+            return "{\"id\":\"c1\",\"object\":\"chat.completion.chunk\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"" + ec + "\",\"reasoning\":\"" + er + "\"}}]}";
+        }
+
+        private static string ChunkReasoningDetailsSummaries(string[] summaries)
+        {
+            var sb = new StringBuilder();
+            sb.Append("{\"id\":\"c1\",\"object\":\"chat.completion.chunk\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\",\"reasoning_details\":[");
+            for (int i = 0; i < summaries.Length; i++)
+            {
+                if (i > 0) sb.Append(',');
+                sb.Append("{\"type\":\"reasoning.summary\",\"summary\":\"")
+                  .Append(JsonEscape(summaries[i]))
+                  .Append("\"}");
+            }
+            sb.Append("]}}]}");
+            return sb.ToString();
+        }
+
+        private static string JsonEscape(string s)
+        {
+            return s.Replace("\\", "\\\\").Replace("\"", "\\\"");
         }
 
         /// <summary>Handler that returns a fixed body (string) and optional status code.</summary>
