@@ -18,6 +18,13 @@ namespace Pinder.SessionSetup
     /// Behaviour mirrors the previous static <c>MatchupAnalyzer</c> in
     /// <c>session-runner</c>: builds the same prompt, same 500-token budget,
     /// same 0.7 temperature. Caching is opt-in via <see cref="Options.CacheDirectory"/>.
+    ///
+    /// Output contract (issue pinder-web #136): the returned analysis is
+    /// plain prose with paragraph breaks only — no markdown headings, bold,
+    /// italics, bullet or numbered lists, blockquotes, or code fences. The
+    /// system + user prompts forbid markdown explicitly. <c>Pinder.GameApi</c>
+    /// additionally runs a <c>MarkdownSanitizer</c> as defence-in-depth before
+    /// storing the result.
     /// </remarks>
     public sealed class LlmMatchupAnalyzer : IMatchupAnalyzer
     {
@@ -63,7 +70,16 @@ namespace Pinder.SessionSetup
                 }
             }
 
-            string systemPrompt = "You are an expert game designer analyzing a matchup in a dating RPG.";
+            // Output is rendered as plain text by the frontend; markdown markers
+            // would leak through as literal characters. Forbid them at the
+            // system prompt level (pinder-web #136). MarkdownSanitizer in
+            // Pinder.GameApi.Services is the backstop.
+            string systemPrompt =
+                "You are an expert game designer analyzing a matchup in a dating RPG. " +
+                "Respond in plain prose only. Do NOT use markdown formatting of any " +
+                "kind: no headings (#, ##), no bold or italics (**, __, *, _), no " +
+                "bullet or numbered lists (-, *, +, 1., 2.), no blockquotes (>), and " +
+                "no inline or fenced code (`, ```). Use paragraph breaks for structure.";
             string userPrompt = BuildPrompt(player, opponent);
 
             try
@@ -105,14 +121,15 @@ namespace Pinder.SessionSetup
         {
             var sb = new StringBuilder();
             sb.AppendLine("Analyze the following matchup between two characters in a dating RPG.");
-            sb.AppendLine("Produce a brief 3-paragraph output exactly matching this format:");
-            sb.AppendLine("## Matchup Analysis");
+            sb.AppendLine("Produce a brief 3-paragraph plain-prose output. The format must be:");
             sb.AppendLine();
-            sb.AppendLine("**[PlayerName]** (Level [X], [Archetypes]): [3-4 sentences on their strongest lane, % chance, and shadow risks.]");
+            sb.AppendLine("Paragraph 1 — begin with the player's name followed by their level and archetype list in parentheses, then 3-4 sentences on their strongest lane, percent chance, and shadow risks.");
             sb.AppendLine();
-            sb.AppendLine("**[OpponentName]** (Level [X], [Archetypes]): [3-4 sentences on their best defense, shadow effects, and vulnerabilities.]");
+            sb.AppendLine("Paragraph 2 — begin with the opponent's name followed by their level and archetype list in parentheses, then 3-4 sentences on their best defence, shadow effects, and vulnerabilities.");
             sb.AppendLine();
-            sb.AppendLine("**Prediction:** [2-3 sentences predicting how the match will play out based on stats and shadows.]");
+            sb.AppendLine("Paragraph 3 — begin with 'Prediction:' (followed by a space) and then 2-3 sentences predicting how the match will play out based on stats and shadows.");
+            sb.AppendLine();
+            sb.AppendLine("IMPORTANT: write plain prose only. Do not use markdown. Do not bold names with **. Do not use headings, bullets, numbered lists, blockquotes, or code formatting.");
             sb.AppendLine();
             sb.AppendLine("Here is the data:");
             sb.AppendLine();
