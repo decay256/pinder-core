@@ -11,7 +11,8 @@ pinder-core/
 ├── src/
 │   ├── Pinder.Core/          # Domain model, game loop, interfaces (netstandard2.0)
 │   ├── Pinder.LlmAdapters/   # LLM provider integrations + prompt assembly (netstandard2.0)
-│   └── Pinder.Rules/         # Data-driven rule resolution from YAML (netstandard2.0)
+│   ├── Pinder.Rules/         # Data-driven rule resolution from YAML (netstandard2.0)
+│   └── Pinder.SessionSetup/  # Pre-session matchup + stake generation (netstandard2.0)
 ├── session-runner/            # CLI harness — runs a full game session (net8.0)
 ├── tests/
 │   ├── Pinder.Core.Tests/
@@ -23,6 +24,11 @@ pinder-core/
 ├── contracts/                 # Interface contracts
 └── docs/                      # This file
 ```
+
+Consumers: the `session-runner` CLI harness uses Core + LlmAdapters + Rules.
+The web-tier `Pinder.GameApi` (separate repo `pinder-web`, mounts this repo as
+a git submodule) additionally uses `Pinder.SessionSetup` for matchup + stake
+generation outside the per-turn game loop.
 
 ## 2. Assembly Map
 
@@ -70,11 +76,29 @@ Data-driven rule resolution. Loads YAML rule definitions and evaluates condition
 | | `RuleEntry.cs` — single rule: condition + outcome |
 | | `ConditionEvaluator.cs` — evaluates rule conditions against game state |
 
+### Pinder.SessionSetup
+
+Pre-session setup: narrative matchup analysis + stake generation. Isolated
+from the per-turn game loop so that the web tier (`Pinder.GameApi`) can run
+it eagerly in the background after session create, while the CLI harness
+skips it or runs a lighter version.
+
+| Depends on | Pinder.Core, Pinder.LlmAdapters (via ILlmTransport) |
+|---|---|
+| **Purpose** | Matchup preview + stake copy at session boot time |
+| **Key files** | `IMatchupAnalyzer.cs` / `LlmMatchupAnalyzer.cs` — matchup narrative |
+| | `IStakeGenerator.cs` / `LlmStakeGenerator.cs` — player + opponent stake strings |
+| | `CharacterDefinitionLoader.cs` — shared character JSON loader |
+
+Ported into this library in #756 (`569b9f9`). Previously inlined in
+`session-runner/MatchupAnalyzer.cs`; still referenced there via the new
+interface for CLI use.
+
 ### session-runner
 
 CLI executable that wires everything together and runs a full game session.
 
-| Depends on | Pinder.Core, Pinder.LlmAdapters |
+| Depends on | Pinder.Core, Pinder.LlmAdapters, Pinder.SessionSetup |
 |---|---|
 | **Purpose** | Character loading, LLM adapter construction, player agent selection, game loop execution, markdown output |
 | **Key files** | `Program.cs` — main entry point, CLI arg parsing, session orchestration |
@@ -117,6 +141,33 @@ A single turn flows through two phases: `StartTurnAsync` (generate options) and 
 13. **Cleanup** — Advance trap timers. Increment turn. Clear stored options. Return `TurnResult` with roll, messages, interest delta, shadow events, combo/callback/tell info.
 
 ## 4. Key Interfaces
+
+The engine deliberately exposes narrow, single-responsibility interfaces so
+different consumers (CLI sim runner, web API, tests) can plug in adapters
+without reaching into implementation details. The canonical extension points
+are:
+
+| Interface | Owner | Purpose |
+|---|---|---|
+| `ILlmTransport` | Pinder.Core | HTTP wire adapter for an LLM provider — the lowest-level swap point |
+| `ILlmAdapter` / `IStatefulLlmAdapter` | Pinder.LlmAdapters | Turn-time prompt assembly + parsing |
+| `ITrapRegistry` | Pinder.Core | Supplies trap definitions by stat |
+| `IDiceRoller` | Pinder.Core | Deterministic roll injection for tests |
+| `IRuleResolver` | Pinder.Rules | YAML-driven constant lookup |
+| `IMatchupAnalyzer` | Pinder.SessionSetup | Pre-session matchup narrative |
+| `IStakeGenerator` | Pinder.SessionSetup | Pre-session stake generation |
+| `IPlayerAgent` | session-runner | Sim-agent decision-making |
+
+### ILlmTransport
+
+Low-level HTTP transport abstraction. Sits underneath `ILlmAdapter`. Tests
+inject `RecordingLlmTransport` / `PlaybackLlmTransport` (in pinder-web
+`Pinder.GameApi.Tests.Infrastructure`) to capture and replay live LLM traffic
+deterministically — no network calls in CI.
+
+| Method | Purpose |
+|---|---|
+| `SendAsync(LlmRequest)` | Send a raw prompt, receive a raw response |
 
 ### ILlmAdapter
 
@@ -202,6 +253,60 @@ Data-driven game constant resolution. When injected, GameSession calls it first 
 | `GetRiskTierXpMultiplier(riskTier)` | §15 risk → XP multiplier |
 
 **Implementation:** `RuleBookResolver` (in Pinder.Rules)
+
+## 4a. Roll Outcomes — Risk Tiers and Failure Tiers
+
+Rolls resolve to a `RollResult` carrying both success/failure classification
+and a semantic tier. Interest deltas and XP multipliers are driven by tier,
+not raw margin.
+
+### Success path (RiskTier)
+
+Attack d20 + stat mod + level bonus + external bonuses vs DC (16 + opponent
+defending stat). Risk tier is derived from the attempt's **effective need**
+(i.e., the gap between the player's modifier total and the DC) — not from the
+post-roll margin. This keeps "risk" a property of the choice, not of luck.
+
+| Risk tier     | When                                       |
+|---------------|--------------------------------------------|
+| `Safe`        | Needed ≤ 5 on d20                          |
+| `Moderate`    | Needed 6–10                                |
+| `Risky`       | Needed 11–15                               |
+| `Desperate`   | Needed 16–19                               |
+| `Legendary`   | Needed 20 (only a nat 20 succeeds)         |
+
+Success interest delta is `baseDelta(beatMargin) + riskTierBonus` with the
+bonus scaling with risk. See `Pinder.Core/Rolls/RollEngine.cs` and
+`RuleBookResolver.GetSuccessInterestDelta`.
+
+### Failure path (FailureTier)
+
+Failures are tiered by **miss margin** and natural roll. Delivery instructions
+are tier-specific — a `Fumble` corrupts differently from a `Catastrophe`.
+
+| Failure tier   | Trigger                                |
+|----------------|----------------------------------------|
+| `None`         | Success                                |
+| `Fumble`       | Miss by 1–2                            |
+| `Misfire`      | Miss by 3–5                            |
+| `TropeTrap`    | Miss by 6–10 (or active trap hit)      |
+| `Catastrophe`  | Miss by 11+                            |
+| `Legendary`    | Nat 1 on a desperate/legendary attempt |
+
+See `Pinder.Core/Rolls/FailureScale.cs` for the mapping used by
+`GetFailureInterestDelta`.
+
+### Stat model (6 + 6)
+
+Six primary stats — **Chaos, Honesty, Rizz, SA, Charm, HighBrow** — each
+paired with a shadow counterpart (Madness, Denial, Despair, Fixation,
+Hollow, Obsession). Shadows corrupt by stat-usage patterns (§7) and, past
+threshold T2, impose disadvantage on the paired stat's rolls.
+
+Roll formula (attempt side): `d20 + stat_mod + level_bonus + external_bonus`
+vs DC `16 + opponent_defending_stat`. `level_bonus` is a flat +1 per level
+applied to all rolls — progression keeps scaling simple; shadows are the
+threat that actually eats into it.
 
 ## 5. Data Files
 
@@ -337,3 +442,23 @@ dotnet test                                    # Everything
 ```
 
 Categories are additive — a test can belong to multiple categories. Use `Category=Core` during development for fast feedback loops.
+
+## 10. Onboarding Reading Order
+
+For an agent / engineer picking up this repo cold, read in this order:
+
+1. **Game design context** — `design/game-definition.md` (what the game is)
+2. **This doc** — full systems map
+3. **`src/Pinder.Core/Conversation/GameSession.cs`** — the game loop (1,197 lines, canonical spec)
+4. **`src/Pinder.Core/Rolls/RollEngine.cs`** — roll + risk-tier + failure-tier math
+5. **`src/Pinder.Core/Stats/StatBlock.cs`** — stat + shadow model
+6. **`docs/modules/game-session.md`** — loop narrative
+7. **`docs/modules/rolls.md`** — rolls deep dive
+8. **`docs/modules/llm-adapters.md`** — prompt construction + call types
+9. **`docs/modules/rules-dsl.md`** + `docs/modules/rule-engine.md` — YAML-driven rules
+10. **`data/game-definition.yaml`** + `data/delivery-instructions.yaml` — creative direction + per-stat delivery prompts
+11. **`session-runner/Program.cs`** — the canonical wiring example
+12. **`rules/tools/README.md`** — rules pipeline if touching YAML
+
+When working from the web tier (`pinder-web`), also read that repo's
+`docs/ARCHITECTURE.md` for how `Pinder.GameApi` wraps this engine.
