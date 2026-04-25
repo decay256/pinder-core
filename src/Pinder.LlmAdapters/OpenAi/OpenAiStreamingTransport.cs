@@ -147,18 +147,35 @@ namespace Pinder.LlmAdapters.OpenAi
                             $"OpenAI-compatible streaming endpoint returned HTTP {(int)response.StatusCode}: {truncated}");
                     }
 
+                    // Honour pre-cancellation deterministically before we touch the
+                    // response stream — mirrors the Anthropic transport's guard so a
+                    // pre-cancelled token surfaces as OCE rather than a stream-construction
+                    // ArgumentException.
+                    cancellationToken.ThrowIfCancellationRequested();
+
                     Stream responseStream;
                     try
                     {
                         responseStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
                     }
+                    catch (OperationCanceledException) { throw; }
                     catch (Exception ex)
                     {
                         throw new LlmTransportException(
                             "Failed to open OpenAI-compatible streaming response body: " + ex.Message, ex);
                     }
 
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    // Register cancellation to forcibly close the underlying stream so
+                    // a blocking ReadLineAsync wakes up. ReadLineAsync on netstandard2.0
+                    // does not accept a CancellationToken; without this dispose-on-cancel
+                    // hook a token cancellation mid-read would not interrupt the read.
                     using (responseStream)
+                    using (cancellationToken.Register(s =>
+                    {
+                        try { ((Stream)s!).Dispose(); } catch { /* best effort */ }
+                    }, responseStream))
                     using (var reader = new StreamReader(responseStream, Encoding.UTF8))
                     {
                         await foreach (var fragment in ParseSseAsync(reader, cancellationToken).ConfigureAwait(false))
@@ -188,12 +205,29 @@ namespace Pinder.LlmAdapters.OpenAi
                 try
                 {
                     // StreamReader.ReadLineAsync on netstandard2.0 has no CancellationToken
-                    // overload; we check the token between lines instead.
+                    // overload; we check the token between lines and rely on the
+                    // dispose-on-cancel registration in StreamCore to wake any blocked
+                    // read from inside ReadLineAsync.
                     line = await reader.ReadLineAsync().ConfigureAwait(false);
                 }
                 catch (OperationCanceledException)
                 {
                     throw;
+                }
+                catch (ObjectDisposedException) when (cancellationToken.IsCancellationRequested)
+                {
+                    // Stream was disposed by the cancellation callback above.
+                    cancellationToken.ThrowIfCancellationRequested();
+                    throw; // unreachable
+                }
+                catch (IOException ioex) when (cancellationToken.IsCancellationRequested)
+                {
+                    // Some platforms surface the dispose-on-cancel as an IOException
+                    // ("stream was closed") rather than ObjectDisposedException.
+                    // Treat it as cancellation.
+                    cancellationToken.ThrowIfCancellationRequested();
+                    throw new LlmTransportException(
+                        "OpenAI-compatible streaming response read failed: " + ioex.Message, ioex);
                 }
                 catch (Exception ex)
                 {
