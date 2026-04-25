@@ -9,6 +9,14 @@ namespace Pinder.SessionSetup
     /// Default <see cref="IStakeGenerator"/> built on <see cref="ILlmTransport"/>.
     /// Generates a novella-style "psychological stake" character bible.
     /// </summary>
+    /// <remarks>
+    /// Output contract (issue pinder-web #136): the returned stake is plain
+    /// prose, paragraph breaks only — no markdown headings, bold, italics,
+    /// bullet or numbered lists, blockquotes, or code fences. Both the system
+    /// and user prompts forbid markdown explicitly. <c>Pinder.GameApi</c>
+    /// runs a <c>MarkdownSanitizer</c> as defence-in-depth before storing
+    /// the result.
+    /// </remarks>
     public sealed class LlmStakeGenerator : IStakeGenerator
     {
         private readonly ILlmTransport _transport;
@@ -46,15 +54,23 @@ Cover six things, each in 2-3 paragraphs:
 5. What losing would mean emotionally — not 'getting unmatched' but the specific catastrophic conclusion they would draw about themselves.
 6. Their biographical backstory: 3-5 specific, concrete, slightly unhinged events from the last 2-3 years of their life. These should be specific enough to be revealed in conversation and funny enough to belong in a comedy — not themes but events. A named relationship and the specific absurd way it ended. A job decision and what they did the week after (something strange). A specific moment of realisation in an unlikely location. A place they went alone and what they did there. These are the facts the character can share when the conversation gets real. Write them as vivid, specific narrative fragments. The more specific and slightly absurd, the better.
 
-Write 2-3 paragraphs per point. This is a novelist's character bible for a comedy. Do not use headers or bullet points — write flowing prose. The character is real, their feelings are genuine, their reasons are ridiculous.
+Write 2-3 paragraphs per point. This is a novelist's character bible for a comedy. Write flowing prose only. Do NOT use markdown formatting of any kind: no headings (#, ##), no bold or italics (**, __, *, _), no bullet or numbered lists (-, *, +, 1., 2.), no blockquotes (>), no inline or fenced code (`, ```). Separate paragraphs with blank lines. Do not number the six points; let the prose flow from one to the next. The character is real, their feelings are genuine, their reasons are ridiculous.
 
 CHARACTER PROFILE:
 {promptSlice}";
 
             try
             {
+                // Output is rendered as plain text by the frontend; markdown
+                // markers would leak through as literal characters. Forbid them
+                // at the system-prompt level (pinder-web #136).
+                // MarkdownSanitizer in Pinder.GameApi.Services is the backstop.
                 const string systemPrompt =
-                    "You are a novelist writing a character bible for a comedy about online dating.";
+                    "You are a novelist writing a character bible for a comedy about online dating. " +
+                    "Respond in plain prose only. Do NOT use markdown formatting of any kind: no " +
+                    "headings (#, ##), no bold or italics (**, __, *, _), no bullet or numbered " +
+                    "lists (-, *, +, 1., 2.), no blockquotes (>), and no inline or fenced code " +
+                    "(`, ```). Separate paragraphs with blank lines.";
                 string response = await _transport
                     .SendAsync(systemPrompt, userMessage, _options.Temperature, _options.MaxTokens)
                     .ConfigureAwait(false);
