@@ -1090,3 +1090,4 @@
 {"ts":"2026-04-12T20:22:50+00:00","agent":"backend-engineer","issue":"857","component":"","action":"completed","correlationId":"decompose-src-Pinder.LlmAdapters-Anthropic-AnthropicResponseParsers.cs-1776024849331","detail":"PR opened — correlationId: decompose-src-Pinder.LlmAdapters-Anthropic-AnthropicResponseParsers.cs-1776024849331","commit":"9fbacb4"}
 {"ts":"2026-04-25T07:10:27+00:00","agent":"backend-engineer","issue":"144","action":"started","detail":"Starting: streaming overloads on IMatchupAnalyzer + IStakeGenerator","commit":null}
 {"ts":"2026-04-25T07:20:01+00:00","agent":"backend-engineer","issue":"144","action":"completed","detail":"PR #759 opened — streaming overloads on IMatchupAnalyzer + IStakeGenerator","commit":"8b6bd84","prUrl":"https://github.com/decay256/pinder-core/pull/759"}
+{"ts":"2026-04-25T17:02:24Z","agent":"backend-engineer","issue":"149","action":"started","detail":"AnthropicStreamingTransport — Anthropic Messages SSE","commit":null}
