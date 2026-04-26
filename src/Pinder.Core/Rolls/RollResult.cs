@@ -110,8 +110,9 @@ namespace Pinder.Core.Rolls
 
         /// <summary>
         /// Compute risk tier from the "need" value: dc - (statMod + levelBonus).
+        /// Canonical formula; DTOs/UI MUST call this rather than re-implement (#117).
         /// </summary>
-        private static RiskTier ComputeRiskTier(int dc, int statModifier, int levelBonus)
+        public static RiskTier ComputeRiskTier(int dc, int statModifier, int levelBonus)
         {
             int need = dc - (statModifier + levelBonus);
 
