@@ -103,9 +103,16 @@ namespace Pinder.Core.Data
             string clearMethod = obj.GetString("clear_method", "");
             string nat1Bonus = obj.GetString("nat1_bonus", "");
 
+            // #255: optional player-facing copy. Both default to safe values
+            // (display_name → id, summary → "") so legacy data files keep
+            // loading without changes.
+            string displayName = obj.GetString("display_name", "");
+            string summary = obj.GetString("summary", "");
+
             return new TrapDefinition(
                 id, stat, effect, effectValue, durationTurns,
-                llmInstruction, clearMethod, nat1Bonus);
+                llmInstruction, clearMethod, nat1Bonus,
+                displayName, summary);
         }
 
         private static bool TryParseStatType(string key, out StatType st)
