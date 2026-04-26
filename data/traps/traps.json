@@ -1,6 +1,8 @@
 [
   {
     "id": "cringe",
+    "display_name": "Cringe",
+    "summary": "You're aware of how you're coming across, which is making it worse.",
     "stat": "charm",
     "effect": "disadvantage",
     "effect_value": 0,
@@ -11,6 +13,8 @@
   },
   {
     "id": "creep",
+    "display_name": "Creep",
+    "summary": "An accidental 'agenda' quality is leaking into your messages.",
     "stat": "rizz",
     "effect": "stat_penalty",
     "effect_value": 2,
@@ -21,6 +25,8 @@
   },
   {
     "id": "overshare",
+    "display_name": "Overshare",
+    "summary": "Personal details keep leaking into your replies.",
     "stat": "honesty",
     "effect": "opponent_dc_increase",
     "effect_value": 2,
@@ -31,6 +37,8 @@
   },
   {
     "id": "unhinged",
+    "display_name": "Unhinged",
+    "summary": "Your messages keep accelerating beyond where you meant to land.",
     "stat": "chaos",
     "effect": "disadvantage",
     "effect_value": 0,
@@ -41,6 +49,8 @@
   },
   {
     "id": "pretentious",
+    "display_name": "Pretentious",
+    "summary": "You can't stop over-explaining things nobody asked you to clarify.",
     "stat": "wit",
     "effect": "opponent_dc_increase",
     "effect_value": 3,
@@ -51,6 +61,8 @@
   },
   {
     "id": "spiral",
+    "display_name": "Spiral",
+    "summary": "You keep narrating the conversation while you're inside it.",
     "stat": "self_awareness",
     "effect": "disadvantage",
     "effect_value": 0,

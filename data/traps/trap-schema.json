@@ -11,6 +11,16 @@
         "type": "string",
         "description": "Unique identifier for the trap (e.g. 'cringe', 'creep')."
       },
+      "display_name": {
+        "type": "string",
+        "description": "Player-facing Title-Case name of the trap (e.g. 'Cringe', 'Creep'). Used in the failure-tier label and the activated-trap line. Optional; falls back to id when absent. (#255)",
+        "default": ""
+      },
+      "summary": {
+        "type": "string",
+        "description": "Short one-sentence player-facing description of the trap's flavour. Distinct from llm_instruction (which is internal). Rendered under the activated-trap line. Optional; empty string omits the line. (#255)",
+        "default": ""
+      },
       "stat": {
         "type": "string",
         "enum": ["charm", "rizz", "honesty", "chaos", "wit", "self_awareness"],

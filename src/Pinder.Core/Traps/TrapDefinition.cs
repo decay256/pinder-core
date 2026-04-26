@@ -10,6 +10,15 @@ namespace Pinder.Core.Traps
         public string Id          { get; }
         public StatType Stat      { get; }
 
+        // Player-facing copy (#255)
+        // Title-Case display name (e.g. "Cringe"). Falls back to Id when the
+        // data file does not provide one, so legacy data continues to work.
+        public string DisplayName { get; }
+
+        // Short one-sentence player-facing flavour. Distinct from
+        // LlmInstruction (which is internal). Empty string when absent.
+        public string Summary     { get; }
+
         // Mechanical effect
         public TrapEffect Effect  { get; }
         public int EffectValue    { get; }   // magnitude of penalty / DC increase
@@ -32,7 +41,9 @@ namespace Pinder.Core.Traps
             int durationTurns,
             string llmInstruction,
             string clearMethod,
-            string nat1Bonus)
+            string nat1Bonus,
+            string? displayName = null,
+            string? summary = null)
         {
             Id             = id;
             Stat           = stat;
@@ -42,6 +53,8 @@ namespace Pinder.Core.Traps
             LlmInstruction = llmInstruction;
             ClearMethod    = clearMethod;
             Nat1Bonus      = nat1Bonus;
+            DisplayName    = string.IsNullOrEmpty(displayName) ? id : displayName!;
+            Summary        = summary ?? "";
         }
     }
 
