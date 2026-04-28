@@ -62,7 +62,7 @@ namespace Pinder.LlmAdapters
             var systemPrompt = SessionSystemPromptBuilder.BuildPlayer(context.PlayerPrompt, _options.GameDefinition);
             double temperature = _options.DialogueOptionsTemperature ?? DefaultDialogueOptionsTemperature;
 
-            var responseText = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens)
+            var responseText = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.DialogueOptions)
                 .ConfigureAwait(false);
 
             var parsedOptions = DialogueOptionParsers.ParseDialogueOptionsText(responseText);
@@ -87,7 +87,7 @@ namespace Pinder.LlmAdapters
             var systemPrompt = SessionSystemPromptBuilder.BuildPlayer(context.PlayerPrompt, _options.GameDefinition);
             double temperature = _options.DeliveryTemperature ?? DefaultDeliveryTemperature;
 
-            var responseText = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens)
+            var responseText = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.Delivery)
                 .ConfigureAwait(false);
 
             return responseText ?? "";
@@ -114,7 +114,7 @@ namespace Pinder.LlmAdapters
             }
             else
             {
-                responseText = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens)
+                responseText = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.OpponentResponse)
                     .ConfigureAwait(false);
             }
 
@@ -144,7 +144,7 @@ namespace Pinder.LlmAdapters
 
             try
             {
-                var responseText = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens)
+                var responseText = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.InterestChangeBeat)
                     .ConfigureAwait(false);
 
                 var trimmed = responseText?.Trim();
@@ -191,7 +191,7 @@ namespace Pinder.LlmAdapters
             try
             {
                 double temperature = _options.DeliveryTemperature ?? 0.7;
-                var result = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens)
+                var result = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.HorninessOverlay)
                     .ConfigureAwait(false);
 
                 if (string.IsNullOrWhiteSpace(result)) return message;
@@ -229,7 +229,7 @@ namespace Pinder.LlmAdapters
             try
             {
                 double temperature = _options.DeliveryTemperature ?? 0.7;
-                var result = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens)
+                var result = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.ShadowCorruption)
                     .ConfigureAwait(false);
 
                 if (string.IsNullOrWhiteSpace(result)) return message;
@@ -275,7 +275,7 @@ namespace Pinder.LlmAdapters
 
             string systemPrompt = SessionSystemPromptBuilder.BuildPlayer(context.PlayerPrompt, _options.GameDefinition);
 
-            var responseText = await _transport.SendAsync(systemPrompt, sb.ToString(), 0.9, _options.MaxTokens)
+            var responseText = await _transport.SendAsync(systemPrompt, sb.ToString(), 0.9, _options.MaxTokens, phase: LlmPhase.Steering)
                 .ConfigureAwait(false);
 
             var question = responseText?.Trim();
@@ -299,14 +299,14 @@ namespace Pinder.LlmAdapters
         private async Task<string> SendStatefulOpponentAsync(string systemPrompt, double temperature)
         {
             if (_opponentHistory.Count == 0)
-                return await _transport.SendAsync(systemPrompt, "", temperature, _options.MaxTokens)
+                return await _transport.SendAsync(systemPrompt, "", temperature, _options.MaxTokens, phase: LlmPhase.OpponentResponse)
                     .ConfigureAwait(false);
 
             // The last message is the current user message (just appended)
             if (_opponentHistory.Count == 1)
             {
                 // Single user message — just send it directly
-                return await _transport.SendAsync(systemPrompt, _opponentHistory[0].Content, temperature, _options.MaxTokens)
+                return await _transport.SendAsync(systemPrompt, _opponentHistory[0].Content, temperature, _options.MaxTokens, phase: LlmPhase.OpponentResponse)
                     .ConfigureAwait(false);
             }
 
@@ -326,7 +326,7 @@ namespace Pinder.LlmAdapters
             // Last message is the current user prompt
             contextBuilder.Append(_opponentHistory[_opponentHistory.Count - 1].Content);
 
-            return await _transport.SendAsync(systemPrompt, contextBuilder.ToString(), temperature, _options.MaxTokens)
+            return await _transport.SendAsync(systemPrompt, contextBuilder.ToString(), temperature, _options.MaxTokens, phase: LlmPhase.OpponentResponse)
                 .ConfigureAwait(false);
         }
 
