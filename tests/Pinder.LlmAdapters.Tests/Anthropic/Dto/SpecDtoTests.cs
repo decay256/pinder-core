@@ -224,10 +224,14 @@ namespace Pinder.LlmAdapters.Tests.Anthropic.Dto
 
         #region AC2: MessagesResponse + GetText()
 
-        // What: AC2 — GetText() returns Content[0].Text when content exists
-        // Mutation: would catch if GetText() returned Content[1].Text or concatenated
+        // What: AC2 (revised by issue #320) — GetText() concatenates every
+        // type:"text" block in order. Pre-#320 it returned only Content[0].Text,
+        // which broke Anthropic extended-thinking responses (block 0 is
+        // type:"thinking", block 1 is the real type:"text" answer).
+        // Mutation: would catch if GetText() returned only the first block,
+        // skipped one of the text blocks, or reordered them.
         [Fact]
-        public void MessagesResponse_GetText_ReturnsFirstBlockText()
+        public void MessagesResponse_GetText_ConcatenatesAllTextBlocks()
         {
             var resp = new MessagesResponse
             {
@@ -237,7 +241,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic.Dto
                     new ResponseContent { Type = "text", Text = "Second block" }
                 }
             };
-            Assert.Equal("First block", resp.GetText());
+            Assert.Equal("First blockSecond block", resp.GetText());
         }
 
         // What: Edge case — GetText() returns "" when Content is empty array

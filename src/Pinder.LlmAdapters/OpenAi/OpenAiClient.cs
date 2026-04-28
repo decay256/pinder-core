@@ -74,8 +74,13 @@ namespace Pinder.LlmAdapters.OpenAi
                         try
                         {
                             var json = JObject.Parse(body);
-                            var text = json["choices"]?[0]?["message"]?["content"]?.ToString();
-                            return text ?? "";
+                            return ExtractAssistantText(json);
+                        }
+                        catch (InvalidOperationException)
+                        {
+                            // ExtractAssistantText raises a typed error for malformed shapes;
+                            // re-throw without wrapping to preserve the message.
+                            throw;
                         }
                         catch (Exception)
                         {
@@ -109,6 +114,70 @@ namespace Pinder.LlmAdapters.OpenAi
                     throw new HttpRequestException($"OpenAI-compatible API error. Status: {statusCode}. Body: {errorBody}");
                 }
             }
+        }
+
+        /// <summary>
+        /// Extracts the user-visible assistant text from a parsed chat-completions
+        /// response body. Issue #320: reasoning models on OpenAI/OpenRouter
+        /// (Anthropic-via-OpenRouter with extended thinking, OpenAI o-series,
+        /// gpt-5* with reasoning enabled, etc.) sometimes return
+        /// <c>choices[0].message.content == ""</c> (or null) and surface the
+        /// real answer alongside reasoning in <c>message.reasoning</c> and/or
+        /// <c>message.reasoning_details[i].summary</c>.
+        /// </summary>
+        /// <remarks>
+        /// Resolution order (mirrors <c>OpenAiStreamingTransport.ExtractContentFragmentsOrThrow</c>):
+        /// <list type="number">
+        ///   <item><description><c>message.content</c> when non-empty / non-whitespace.</description></item>
+        ///   <item><description><c>message.reasoning</c> when non-empty / non-whitespace.</description></item>
+        ///   <item><description>concatenated <c>message.reasoning_details[i].summary</c> when any are non-empty.</description></item>
+        /// </list>
+        /// Returns the empty string when none of the channels carry text.
+        /// </remarks>
+        internal static string ExtractAssistantText(JObject json)
+        {
+            if (json == null) throw new ArgumentNullException(nameof(json));
+
+            // Note: JArray's int indexer throws on empty arrays (it does not support
+            // null-conditional chain semantics for out-of-range indices). Guard
+            // explicitly so a no-choices payload returns the empty string.
+            var choices = json["choices"] as JArray;
+            if (choices == null || choices.Count == 0) return "";
+            var message = choices[0]?["message"];
+            if (message == null || message.Type != JTokenType.Object) return "";
+
+            // 1) message.content
+            var content = message["content"]?.Value<string?>();
+            if (!string.IsNullOrWhiteSpace(content))
+                return content!;
+
+            // 2) message.reasoning (OpenRouter / OpenAI surface internal reasoning here
+            //    for models like Anthropic-via-OpenRouter with extended thinking).
+            var reasoning = message["reasoning"]?.Value<string?>();
+            if (!string.IsNullOrWhiteSpace(reasoning))
+                return reasoning!;
+
+            // 3) message.reasoning_details[i].summary — concatenated.
+            if (message["reasoning_details"] is Newtonsoft.Json.Linq.JArray details && details.Count > 0)
+            {
+                System.Text.StringBuilder? sb = null;
+                foreach (var d in details)
+                {
+                    if (d == null || d.Type != JTokenType.Object) continue;
+                    var summary = d["summary"]?.Value<string?>();
+                    if (string.IsNullOrEmpty(summary)) continue;
+                    if (sb == null) sb = new System.Text.StringBuilder();
+                    sb.Append(summary);
+                }
+                if (sb != null)
+                {
+                    var joined = sb.ToString();
+                    if (!string.IsNullOrWhiteSpace(joined))
+                        return joined;
+                }
+            }
+
+            return "";
         }
 
         public void Dispose()

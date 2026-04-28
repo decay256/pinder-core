@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -16,9 +17,41 @@ namespace Pinder.LlmAdapters.Anthropic.Dto
         public UsageStats? Usage { get; set; }
 
         /// <summary>
-        /// Returns the text of the first content block, or empty string if no content blocks exist.
+        /// Returns the user-visible assistant text from the response.
+        /// Concatenates every <c>type: "text"</c> content block in order and skips
+        /// non-text blocks such as <c>thinking</c> / <c>redacted_thinking</c>
+        /// (Anthropic extended thinking — issue #320) and <c>tool_use</c> (which is
+        /// surfaced separately via <see cref="GetToolInput"/>). Returns the empty
+        /// string when no text blocks are present.
         /// </summary>
-        public string GetText() => Content.Length > 0 ? Content[0].Text ?? "" : "";
+        /// <remarks>
+        /// Pre-#320 this method returned <c>Content[0].Text</c>. That was correct
+        /// only when the model emitted text as the very first block; with extended
+        /// thinking enabled the first block is <c>type: "thinking"</c> and the
+        /// real answer sits in a later <c>type: "text"</c> block, so the old
+        /// behaviour returned the empty string and downstream parsers reported
+        /// <c>matchup_llm_failed</c> / similar empty-output errors.
+        /// </remarks>
+        public string GetText()
+        {
+            if (Content == null || Content.Length == 0) return "";
+            StringBuilder? sb = null;
+            for (int i = 0; i < Content.Length; i++)
+            {
+                var block = Content[i];
+                if (block == null) continue;
+                // Only "text" blocks contribute to the user-visible answer. Thinking
+                // and redacted_thinking blocks are deliberately suppressed; tool_use
+                // is exposed separately via GetToolInput().
+                if (!string.Equals(block.Type, "text", StringComparison.OrdinalIgnoreCase))
+                    continue;
+                var text = block.Text;
+                if (string.IsNullOrEmpty(text)) continue;
+                if (sb == null) sb = new StringBuilder(text.Length);
+                sb.Append(text);
+            }
+            return sb?.ToString() ?? "";
+        }
 
         /// <summary>
         /// Returns the tool input from the first tool_use content block, or null if none.

@@ -42,8 +42,12 @@ namespace Pinder.LlmAdapters.Tests.Anthropic.Dto
         }
 
         [Fact]
-        public void GetText_ReturnsFirstOnly_WhenMultipleBlocks()
+        public void GetText_ConcatenatesAllTextBlocks_WhenMultipleBlocks()
         {
+            // Issue #320: previously this returned only the first block. Anthropic
+            // can split a single answer across multiple type:"text" blocks (and
+            // also interleaves type:"thinking" blocks for extended-thinking
+            // models), so GetText() must concatenate every text block in order.
             var response = new MessagesResponse
             {
                 Content = new[]
@@ -53,7 +57,82 @@ namespace Pinder.LlmAdapters.Tests.Anthropic.Dto
                 }
             };
 
-            Assert.Equal("First", response.GetText());
+            Assert.Equal("FirstSecond", response.GetText());
+        }
+
+        [Fact]
+        public void GetText_SkipsThinkingBlocks_AndReturnsTrailingText()
+        {
+            // Issue #320: Anthropic extended-thinking responses lead with a
+            // type:"thinking" block followed by the real type:"text" answer.
+            // The old GetText() returned Content[0].Text — i.e. the empty
+            // string — and downstream parsers saw "empty output".
+            var json = @"{
+                ""content"": [
+                    { ""type"": ""thinking"", ""thinking"": ""...internal reasoning..."" },
+                    { ""type"": ""text"", ""text"": ""The real answer."" }
+                ]
+            }";
+            var response = JsonConvert.DeserializeObject<MessagesResponse>(json)!;
+
+            Assert.Equal("The real answer.", response.GetText());
+        }
+
+        [Fact]
+        public void GetText_SkipsRedactedThinkingBlocks()
+        {
+            // redacted_thinking is the encrypted form Anthropic emits when the
+            // platform redacts internal reasoning. It must be skipped just like
+            // plain thinking blocks.
+            var response = new MessagesResponse
+            {
+                Content = new[]
+                {
+                    new ResponseContent { Type = "redacted_thinking", Text = "" },
+                    new ResponseContent { Type = "thinking", Text = "" },
+                    new ResponseContent { Type = "text", Text = "Visible answer." }
+                }
+            };
+
+            Assert.Equal("Visible answer.", response.GetText());
+        }
+
+        [Fact]
+        public void GetText_ReturnsEmpty_WhenOnlyThinkingBlocks()
+        {
+            // Defensive: if a provider returns a thinking-only payload (no text
+            // block), GetText() must return empty string — not throw, not return
+            // the thinking content. Callers detect empty and route to the
+            // setup_error path rather than feeding internal reasoning to users.
+            var response = new MessagesResponse
+            {
+                Content = new[]
+                {
+                    new ResponseContent { Type = "thinking", Text = "" }
+                }
+            };
+
+            Assert.Equal("", response.GetText());
+        }
+
+        [Fact]
+        public void GetText_IgnoresToolUseBlocks_ConcatenatesText()
+        {
+            // tool_use is surfaced via GetToolInput(). When a response contains
+            // both a text block and a tool_use block, GetText() must return only
+            // the text — the JObject input is for the structured-tool path.
+            var response = new MessagesResponse
+            {
+                Content = new[]
+                {
+                    new ResponseContent { Type = "thinking", Text = "" },
+                    new ResponseContent { Type = "text", Text = "Prelude. " },
+                    new ResponseContent { Type = "tool_use", Text = "", Name = "do_thing" },
+                    new ResponseContent { Type = "text", Text = "Postlude." }
+                }
+            };
+
+            Assert.Equal("Prelude. Postlude.", response.GetText());
         }
 
         [Fact]
