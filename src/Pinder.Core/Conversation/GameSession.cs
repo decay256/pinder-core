@@ -235,8 +235,68 @@ namespace Pinder.Core.Conversation
         /// Read-only snapshot view; safe to enumerate concurrently with session mutation
         /// since the underlying list is only appended during ResolveTurnAsync.
         /// </summary>
+        /// <remarks>
+        /// Includes any turn-0 scene-setting entries (issue #333) tagged with
+        /// <see cref="Senders.Scene"/>. Callers that feed the history back
+        /// into an LLM should use <see cref="BuildHistoryForLlmContext"/>
+        /// instead so the analyzer/delivery LLM does not see the scene
+        /// entries.
+        /// </remarks>
         public System.Collections.Generic.IReadOnlyList<(string Sender, string Text)> ConversationHistory
             => _history;
+
+        /// <summary>
+        /// Build the conversation history view fed to subsequent LLM calls.
+        /// Excludes synthetic scene-setting entries (issue #333) so the
+        /// matchup analyser / delivery LLM / opponent-response LLM never
+        /// sees its own scene-description output as prior conversation.
+        /// </summary>
+        private System.Collections.Generic.IReadOnlyList<(string Sender, string Text)> BuildHistoryForLlmContext()
+        {
+            // Hot path: when there are no scene entries, return the full
+            // list as-is so we don’t allocate a copy on every turn.
+            bool anyScene = false;
+            for (int i = 0; i < _history.Count; i++)
+            {
+                if (Senders.IsScene(_history[i].Sender)) { anyScene = true; break; }
+            }
+            if (!anyScene) return _history.AsReadOnly();
+
+            var view = new List<(string Sender, string Text)>(_history.Count);
+            for (int i = 0; i < _history.Count; i++)
+            {
+                var entry = _history[i];
+                if (Senders.IsScene(entry.Sender)) continue;
+                view.Add(entry);
+            }
+            return view.AsReadOnly();
+        }
+
+        /// <summary>
+        /// Issue #333: append the three turn-0 scene-setting entries
+        /// (player bio, opponent bio, LLM-generated outfit description) to
+        /// the conversation log BEFORE the first player turn. Sender for
+        /// each entry is <see cref="Senders.Scene"/>; the frontend renders
+        /// these distinctly from player/opponent dialogue.
+        /// </summary>
+        /// <param name="playerBio">Player bio text. Empty entries are skipped.</param>
+        /// <param name="opponentBio">Opponent bio text. Empty entries are skipped.</param>
+        /// <param name="outfitDescription">LLM-generated outfit description. Empty entries are skipped.</param>
+        /// <exception cref="InvalidOperationException">If any turn has already been resolved.</exception>
+        public void SeedSceneEntries(string? playerBio, string? opponentBio, string? outfitDescription)
+        {
+            if (_turnNumber > 0)
+            {
+                throw new InvalidOperationException(
+                    "SeedSceneEntries must be called before the first turn is resolved.");
+            }
+            if (!string.IsNullOrWhiteSpace(playerBio))
+                _history.Add((Senders.Scene, playerBio!.Trim()));
+            if (!string.IsNullOrWhiteSpace(opponentBio))
+                _history.Add((Senders.Scene, opponentBio!.Trim()));
+            if (!string.IsNullOrWhiteSpace(outfitDescription))
+                _history.Add((Senders.Scene, outfitDescription!.Trim()));
+        }
 
         /// <summary>Session horniness value (d10 + clock modifier). Used for display.</summary>
         public int SessionHorniness => _sessionHorniness;
@@ -411,7 +471,8 @@ namespace Pinder.Core.Conversation
             var context = new DialogueContext(
                 playerPrompt: _player.AssembledSystemPrompt,
                 opponentPrompt: GameSessionHelpers.BuildOpponentVisibleProfile(_opponent),
-                conversationHistory: _history.AsReadOnly(),
+                // #333: scene entries are excluded from the LLM context view.
+                conversationHistory: BuildHistoryForLlmContext(),
                 opponentLastMessage: GameSessionHelpers.GetLastOpponentMessage(_history, _opponent.DisplayName),
                 activeTraps: activeTrapNames,
                 currentInterest: _interest.Current,
@@ -724,7 +785,8 @@ namespace Pinder.Core.Conversation
             var deliveryContext = new DeliveryContext(
                 playerPrompt: _player.AssembledSystemPrompt,
                 opponentPrompt: _opponent.AssembledSystemPrompt,
-                conversationHistory: _history.AsReadOnly(),
+                // #333: scene entries are excluded from the LLM context view.
+                conversationHistory: BuildHistoryForLlmContext(),
                 opponentLastMessage: GameSessionHelpers.GetLastOpponentMessage(_history, _opponent.DisplayName),
                 chosenOption: chosenOption,
                 outcome: rollResult.Tier,
@@ -769,8 +831,9 @@ namespace Pinder.Core.Conversation
 
             // 10b. Steering roll — attempt to append a date-steering question
             progress?.Report(new TurnProgressEvent(TurnProgressStage.SteeringStarted));
+            // #333: scene entries are excluded from the LLM context view.
             SteeringRollResult steeringResult = await _steeringEngine.AttemptSteeringRollAsync(
-                deliveredMessage, _player, _opponent, _llm, _history.AsReadOnly()).ConfigureAwait(false);
+                deliveredMessage, _player, _opponent, _llm, BuildHistoryForLlmContext()).ConfigureAwait(false);
             progress?.Report(new TurnProgressEvent(
                 TurnProgressStage.SteeringCompleted,
                 steeringResult.SteeringSucceeded ? steeringResult.SteeringQuestion : null));
@@ -877,6 +940,25 @@ namespace Pinder.Core.Conversation
                 }
             }
 
+            // Issue #339: same-turn callback-phrase strip. Runs after all
+            // LLM-driven transforms so it operates on the final delivered
+            // text. Emits a TextDiff layer when it actually changes the
+            // message so the audit log / replay tool / UI can render the
+            // before/after just like Steering / Horniness / Shadow.
+            {
+                string beforeCallbackStrip = deliveredMessage;
+                string strippedMessage = CallbackStripper.Strip(beforeCallbackStrip);
+                if (!ReferenceEquals(strippedMessage, beforeCallbackStrip)
+                    && strippedMessage != beforeCallbackStrip)
+                {
+                    deliveredMessage = strippedMessage;
+                    var stripSpans = WordDiff.Compute(beforeCallbackStrip, deliveredMessage);
+                    textDiffs.Add(new TextDiff(
+                        CallbackStripper.LayerName, stripSpans,
+                        beforeCallbackStrip, deliveredMessage));
+                }
+            }
+
             _history.Add((_player.DisplayName, deliveredMessage));
 
             // 11. Generate opponent response
@@ -899,7 +981,8 @@ namespace Pinder.Core.Conversation
             var opponentContext = new OpponentContext(
                 playerPrompt: _player.AssembledSystemPrompt,
                 opponentPrompt: _opponent.AssembledSystemPrompt,
-                conversationHistory: _history.AsReadOnly(),
+                // #333: scene entries are excluded from the LLM context view.
+                conversationHistory: BuildHistoryForLlmContext(),
                 opponentLastMessage: GameSessionHelpers.GetLastOpponentMessage(_history, _opponent.DisplayName),
                 activeTraps: GameSessionHelpers.GetActiveTrapNames(_traps),
                 currentInterest: _interest.Current,

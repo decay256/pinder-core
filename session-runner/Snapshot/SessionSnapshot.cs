@@ -63,7 +63,15 @@ namespace Pinder.SessionRunner.Snapshot
     ///   <item><description><c>CharmUsageCount</c>, <c>CharmMadnessTriggered</c></description></item>
     ///   <item><description><c>SaUsageCount</c>, <c>SaOverthinkingTriggered</c></description></item>
     ///   <item><description><c>RizzCumulativeFailureCount</c></description></item>
-    ///   <item><description><c>ConversationHistory</c> (per-entry sender + text + per-layer text_diffs[] — issue #305)</description></item>
+    ///   <item><description>
+    ///     <c>ConversationHistory</c> (per-entry sender + text + per-layer text_diffs[]
+    ///     — issue #305). Includes the turn-0 scene-setting entries seeded by
+    ///     <c>GameSession.SeedSceneEntries</c> (issue #333): three entries with
+    ///     sender == <c>"[scene]"</c> for player bio, opponent bio, and the
+    ///     LLM-generated outfit description. The <c>callback_strip</c> layer
+    ///     (issue #339) appears as one more entry in <c>TextDiffs</c> when
+    ///     same-turn callback phrases were stripped from the delivered message.
+    ///   </description></item>
     /// </list>
     /// </summary>
     public sealed class TurnSnapshot

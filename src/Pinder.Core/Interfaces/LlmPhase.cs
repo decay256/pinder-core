@@ -41,6 +41,23 @@ namespace Pinder.Core.Interfaces
         /// <summary>Session-setup psychological-stake generation.</summary>
         public const string PsychologicalStake = "psychological_stake";
 
+        /// <summary>
+        /// Same-turn callback-phrase strip pass (issue #339). No LLM call —
+        /// purely a regex post-process that runs alongside the other text
+        /// transform layers — but the constant is reserved here so any
+        /// future LLM-driven variant lands under the same phase id and
+        /// snapshot tooling has a stable label.
+        /// </summary>
+        public const string CallbackStrip = "callback_strip";
+
+        /// <summary>
+        /// Session-setup outfit description generation (issue #333).
+        /// One LLM call per session that produces the brief paragraph
+        /// describing what each character is wearing for the turn-0
+        /// scene-setting entry.
+        /// </summary>
+        public const string OutfitDescription = "outfit_description";
+
         /// <summary>Phase could not be determined (decorators may use this when no phase was supplied).</summary>
         public const string Unknown = "unknown";
     }
