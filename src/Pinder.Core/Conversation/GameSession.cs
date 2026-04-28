@@ -213,6 +213,24 @@ namespace Pinder.Core.Conversation
         public GameOutcome? Outcome => _outcome;
 
         /// <summary>
+        /// Restore an already-ended session from persisted state. Sets the
+        /// terminal flags so subsequent <see cref="StartTurnAsync"/> throws
+        /// <see cref="GameEndedException"/> with the right outcome.
+        ///
+        /// Intended for post-game replay/rehydration paths (e.g. loading a
+        /// finished session back from storage). <see cref="RestoreState"/>
+        /// targets mid-game resimulation and deliberately does not touch the
+        /// terminal flags; callers reviving an ended session must call this
+        /// in addition.
+        /// </summary>
+        /// <param name="outcome">The terminal <see cref="GameOutcome"/> the session ended with.</param>
+        public void MarkEnded(GameOutcome outcome)
+        {
+            _ended = true;
+            _outcome = outcome;
+        }
+
+        /// <summary>
         /// Conversation history as (sender, text) tuples, in emission order.
         /// Read-only snapshot view; safe to enumerate concurrently with session mutation
         /// since the underlying list is only appended during ResolveTurnAsync.
