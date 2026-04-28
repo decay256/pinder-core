@@ -58,6 +58,17 @@ namespace Pinder.Core.Conversation
         /// </summary>
         public IDiceRoller? DiceRoller { get; }
 
+        /// <summary>
+        /// Optional RNG used by <c>OptionFilterEngine.DrawRandomStats</c> to shuffle the
+        /// stat pool each turn. Distinct from <see cref="SteeringRng"/> so that tests
+        /// which inject a tightly-queued <see cref="Random"/> for steering rolls are
+        /// not perturbed by unrelated stat-draw calls.
+        /// When null, <c>OptionFilterEngine</c> falls back to a fresh <see cref="Random"/>
+        /// (legacy non-deterministic behaviour). Inject a seeded RNG for test fixture
+        /// reproducibility (issue #130).
+        /// </summary>
+        public Random? StatDrawRng { get; }
+
         public GameSessionConfig(
             IGameClock? clock = null,
             SessionShadowTracker? playerShadows = null,
@@ -68,7 +79,8 @@ namespace Pinder.Core.Conversation
             int globalDcBias = 0,
             Random? steeringRng = null,
             object? statDeliveryInstructions = null,
-            IDiceRoller? diceRoller = null)
+            IDiceRoller? diceRoller = null,
+            Random? statDrawRng = null)
         {
             Clock = clock;
             PlayerShadows = playerShadows;
@@ -80,6 +92,7 @@ namespace Pinder.Core.Conversation
             SteeringRng = steeringRng;
             StatDeliveryInstructions = statDeliveryInstructions;
             DiceRoller = diceRoller;
+            StatDrawRng = statDrawRng;
         }
     }
 }
