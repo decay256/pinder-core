@@ -16,11 +16,20 @@ namespace Pinder.Core.Conversation
         /// <summary>
         /// Draws N random stats from the pool, applying shadow-based exclusions.
         /// Denial T3 (≥12): removes HONESTY from pool.
+        ///
+        /// <para>
+        /// <paramref name="rng"/> is used to shuffle the eligible pool. When null a
+        /// fresh <see cref="Random"/> is created (legacy non-deterministic behaviour).
+        /// Pass an injected/seeded Random — typically a dedicated stat-draw RNG owned
+        /// by the GameSession — to make stat draws reproducible across capture/replay
+        /// runs (see issue #130).
+        /// </para>
         /// </summary>
         public static StatType[] DrawRandomStats(
             StatType[] pool,
             int count,
-            Dictionary<ShadowStatType, int>? shadowThresholds)
+            Dictionary<ShadowStatType, int>? shadowThresholds,
+            Random? rng = null)
         {
             var eligible = new List<StatType>(pool);
 
@@ -32,11 +41,13 @@ namespace Pinder.Core.Conversation
                 eligible.Remove(StatType.Honesty);
             }
 
-            // Shuffle using System.Random (stat selection is UI randomness, not game mechanics)
-            var rng = new Random();
+            // Shuffle using the provided RNG (or a fresh non-deterministic one if none
+            // was supplied). Stat selection is UI randomness, not game mechanics, but
+            // tests inject a seeded RNG so prompt fixtures stay stable (#130).
+            var shuffler = rng ?? new Random();
             for (int i = eligible.Count - 1; i > 0; i--)
             {
-                int j = rng.Next(0, i + 1);
+                int j = shuffler.Next(0, i + 1);
                 var tmp = eligible[i];
                 eligible[i] = eligible[j];
                 eligible[j] = tmp;

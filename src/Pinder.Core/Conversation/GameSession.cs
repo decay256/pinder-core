@@ -90,6 +90,10 @@ namespace Pinder.Core.Conversation
         private readonly SessionXpRecorder _xpRecorder;
         private readonly SteeringEngine _steeringEngine;
         private readonly HorninessEngine _horninessEngine;
+        // Dedicated RNG for OptionFilterEngine.DrawRandomStats. Kept separate from
+        // the steering RNG so tests can queue exact steering values without our
+        // stat-draw shuffle consuming them (see issue #130).
+        private readonly Random? _statDrawRng;
 
         /// <summary>
         /// Creates a new GameSession with required configuration.
@@ -119,6 +123,7 @@ namespace Pinder.Core.Conversation
             _rules = config.Rules;
             _globalDcBias = config.GlobalDcBias;
             var steeringRng = config.SteeringRng ?? new Random();
+            _statDrawRng = config.StatDrawRng;
             _statDeliveryInstructions = config.StatDeliveryInstructions;
 
             // Determine starting interest: explicit config > Dread T3 > default
@@ -383,7 +388,7 @@ namespace Pinder.Core.Conversation
 
             // Draw 3 random stats for this turn's options
             var allStats = new[] { StatType.Charm, StatType.Rizz, StatType.Honesty, StatType.Chaos, StatType.Wit, StatType.SelfAwareness };
-            var availableStats = OptionFilterEngine.DrawRandomStats(allStats, 3, shadowThresholds);
+            var availableStats = OptionFilterEngine.DrawRandomStats(allStats, 3, shadowThresholds, _statDrawRng);
 
             var context = new DialogueContext(
                 playerPrompt: _player.AssembledSystemPrompt,
