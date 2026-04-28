@@ -48,6 +48,23 @@ namespace Pinder.SessionRunner.Snapshot
     /// <summary>
     /// Snapshot of tracking state written after each ResolveTurnAsync call.
     /// Contains everything needed to reconstruct mid-session state.
+    ///
+    /// <para>
+    /// Fields covered (per AGENTS.md schema-discipline rule — every
+    /// player-visible <c>GameSession</c> field MUST appear here):
+    /// </para>
+    /// <list type="bullet">
+    ///   <item><description><c>TurnNumber</c>, <c>Interest</c></description></item>
+    ///   <item><description><c>ShadowValues</c> (per <c>ShadowStatType</c>)</description></item>
+    ///   <item><description><c>MomentumStreak</c>, <c>PendingTripleBonus</c></description></item>
+    ///   <item><description><c>ActiveTraps</c>, <c>ActiveTell</c></description></item>
+    ///   <item><description><c>ComboHistory</c> (last 3 turns of stat + success)</description></item>
+    ///   <item><description><c>StatsUsedHistory</c>, <c>HighestPctHistory</c></description></item>
+    ///   <item><description><c>CharmUsageCount</c>, <c>CharmMadnessTriggered</c></description></item>
+    ///   <item><description><c>SaUsageCount</c>, <c>SaOverthinkingTriggered</c></description></item>
+    ///   <item><description><c>RizzCumulativeFailureCount</c></description></item>
+    ///   <item><description><c>ConversationHistory</c> (per-entry sender + text + per-layer text_diffs[] — issue #305)</description></item>
+    /// </list>
     /// </summary>
     public sealed class TurnSnapshot
     {
@@ -78,7 +95,12 @@ namespace Pinder.SessionRunner.Snapshot
         public bool SaOverthinkingTriggered { get; set; }
         public int RizzCumulativeFailureCount { get; set; }
 
-        /// <summary>Full conversation history up to and including this turn.</summary>
+        /// <summary>
+        /// Full conversation history up to and including this turn.
+        /// Per #305 each entry now carries optional <see cref="ConversationEntry.TextDiffs"/>
+        /// for the player's delivered message (Misfire / Steering /
+        /// Horniness / Shadow layers); opponent entries leave it empty.
+        /// </summary>
         public List<ConversationEntry> ConversationHistory { get; set; } = new List<ConversationEntry>();
     }
 
@@ -108,6 +130,41 @@ namespace Pinder.SessionRunner.Snapshot
     public sealed class ConversationEntry
     {
         public string Sender { get; set; } = string.Empty;
+        public string Text { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Issue #305: per-layer word-level diffs for the player's
+        /// delivered message on this turn (Misfire / Steering / Horniness
+        /// / Shadow). Empty list for opponent entries and for player
+        /// entries with no recorded transformations. Mirrors the wire
+        /// <c>TextDiffDto</c> shape so the snapshot can be deserialised
+        /// straight into a renderer / replay tool.
+        /// </summary>
+        public List<TextDiffSnapshot> TextDiffs { get; set; } = new List<TextDiffSnapshot>();
+    }
+
+    /// <summary>
+    /// Issue #305: snapshot shape for one text-transform layer's
+    /// word-level diff. Layer name + before/after strings + per-token
+    /// spans (Keep / Remove / Add).
+    /// </summary>
+    public sealed class TextDiffSnapshot
+    {
+        public string Layer { get; set; } = string.Empty;
+        public string Before { get; set; } = string.Empty;
+        public string After { get; set; } = string.Empty;
+        public List<TextDiffSpanSnapshot> Spans { get; set; } = new List<TextDiffSpanSnapshot>();
+    }
+
+    /// <summary>
+    /// Issue #305: one word-level token span inside a
+    /// <see cref="TextDiffSnapshot"/>. <see cref="Type"/> is one of
+    /// <c>Keep</c> / <c>Remove</c> / <c>Add</c> (mirrors
+    /// <c>Pinder.Core.Text.DiffSpanType</c>).
+    /// </summary>
+    public sealed class TextDiffSpanSnapshot
+    {
+        public string Type { get; set; } = string.Empty;
         public string Text { get; set; } = string.Empty;
     }
 }

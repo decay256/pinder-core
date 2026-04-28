@@ -753,6 +753,17 @@ class Program
             ? resimTurnSnap.ConversationHistory.Select(e => (e.Sender, e.Text)).ToList()
             : new List<(string Sender, string Text)>();
 
+        // #305: parallel list of per-turn text_diffs[] for the player's
+        // delivered message. Index = turn_number - 1. When resuming from a
+        // resim snapshot we lift the diffs from the player entries (the
+        // opponent entries always carry an empty list).
+        var perTurnTextDiffs = isResimulation && resimTurnSnap != null
+            ? resimTurnSnap.ConversationHistory
+                .Where((_, idx) => idx % 2 == 0)
+                .Select(e => e.TextDiffs ?? new List<TextDiffSnapshot>())
+                .ToList()
+            : new List<List<TextDiffSnapshot>>();
+
         string lastOpponentMsg = isResimulation && resimTurnSnap != null
             ? (resimTurnSnap.ConversationHistory.LastOrDefault(e => e.Sender == player2)?.Text ?? "")
             : "";
@@ -1081,6 +1092,24 @@ class Program
             // Track conversation history for LLM agent context (#492)
             if (!string.IsNullOrEmpty(result.DeliveredMessage))
                 conversationHistory.Add((player1, result.DeliveredMessage));
+                // #305: stash this turn's TextDiffs (snapshot shape) so we can
+                // attach them to the player's history entry when building
+                // the turn snapshot below. Empty list when no layer
+                // transformed the text.
+                perTurnTextDiffs.Add(
+                    (result.TextDiffs ?? Array.Empty<Pinder.Core.Text.TextDiff>())
+                        .Select(d => new TextDiffSnapshot
+                        {
+                            Layer = d.LayerName,
+                            Before = d.Before,
+                            After = d.After,
+                            Spans = d.Spans.Select(s => new TextDiffSpanSnapshot
+                            {
+                                Type = s.Type.ToString(),
+                                Text = s.Text,
+                            }).ToList(),
+                        })
+                        .ToList());
             lastOpponentMsg = result.OpponentMessage ?? "";
             if (!string.IsNullOrEmpty(lastOpponentMsg))
                 conversationHistory.Add((player2, lastOpponentMsg));
@@ -1267,7 +1296,8 @@ class Program
                     rizzCumulativeFailureCount,
                     conversationHistory,
                     comboHistoryForSnapshot,
-                    tellSnap);
+                    tellSnap,
+                    perTurnTextDiffs);
 
                 string turnSnapPath = Path.Combine(playtestDir, $"{sessionSlug}.turn-{turn:D2}.snap.json");
                 File.WriteAllText(turnSnapPath, JsonSerializer.Serialize(turnSnap, new JsonSerializerOptions { WriteIndented = true }));
@@ -1563,7 +1593,8 @@ class Program
         int rizzCumulativeFailureCount,
         List<(string Sender, string Text)> conversationHistory,
         List<(StatType Stat, bool Succeeded)> comboHistory,
-        TellSnapshot? activeTell)
+        TellSnapshot? activeTell,
+        List<List<TextDiffSnapshot>>? perTurnTextDiffs = null)
     {
         var state = result.StateAfter;
 
@@ -1583,10 +1614,26 @@ class Program
             .Select(e => new TurnHistoryEntry { Stat = e.Stat.ToString(), Succeeded = e.Succeeded })
             .ToList();
 
-        // Conversation history
-        var convEntries = conversationHistory
-            .Select(e => new ConversationEntry { Sender = e.Sender, Text = e.Text })
-            .ToList();
+        // Conversation history (#305: attach per-turn text_diffs[] to the
+        // player's entry on each turn so the snapshot can be deserialised
+        // straight into a renderer / replay tool. Each resolved turn
+        // appends two entries — player then opponent — so player entries
+        // live at even indices and turn-N maps to history index 2*(N-1).)
+        var convEntries = new List<ConversationEntry>(conversationHistory.Count);
+        for (int i = 0; i < conversationHistory.Count; i++)
+        {
+            var (sender, text) = conversationHistory[i];
+            var entry = new ConversationEntry { Sender = sender, Text = text };
+            bool isPlayerEntry = (i % 2) == 0;
+            int turnIdx = i / 2;
+            if (isPlayerEntry
+                && perTurnTextDiffs != null
+                && turnIdx < perTurnTextDiffs.Count)
+            {
+                entry.TextDiffs = perTurnTextDiffs[turnIdx] ?? new List<TextDiffSnapshot>();
+            }
+            convEntries.Add(entry);
+        }
 
         return new TurnSnapshot
         {
