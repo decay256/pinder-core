@@ -1091,11 +1091,16 @@ class Program
 
             // Track conversation history for LLM agent context (#492)
             if (!string.IsNullOrEmpty(result.DeliveredMessage))
+            {
                 conversationHistory.Add((player1, result.DeliveredMessage));
                 // #305: stash this turn's TextDiffs (snapshot shape) so we can
                 // attach them to the player's history entry when building
                 // the turn snapshot below. Empty list when no layer
-                // transformed the text.
+                // transformed the text. MUST stay in lock-step with
+                // conversationHistory — BuildTurnSnapshot indexes
+                // perTurnTextDiffs[i/2] against the player entry at index i,
+                // so skipping a player entry without skipping the diffs entry
+                // (or vice versa) desyncs every subsequent turn's diffs.
                 perTurnTextDiffs.Add(
                     (result.TextDiffs ?? Array.Empty<Pinder.Core.Text.TextDiff>())
                         .Select(d => new TextDiffSnapshot
@@ -1110,6 +1115,7 @@ class Program
                             }).ToList(),
                         })
                         .ToList());
+            }
             lastOpponentMsg = result.OpponentMessage ?? "";
             if (!string.IsNullOrEmpty(lastOpponentMsg))
                 conversationHistory.Add((player2, lastOpponentMsg));
@@ -1580,7 +1586,9 @@ class Program
         };
     }
 
-    static TurnSnapshot BuildTurnSnapshot(
+    // internal so Pinder.Core.Tests can verify the conversationHistory ↔ perTurnTextDiffs
+    // indexing contract (see Issue767BraceScopeTests).
+    internal static TurnSnapshot BuildTurnSnapshot(
         int turnNumber,
         TurnResult result,
         SessionShadowTracker shadows,
