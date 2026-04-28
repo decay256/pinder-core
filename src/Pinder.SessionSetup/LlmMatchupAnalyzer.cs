@@ -103,7 +103,7 @@ namespace Pinder.SessionSetup
             try
             {
                 string analysis = await _transport
-                    .SendAsync(SystemPrompt, userPrompt, _options.Temperature, _options.MaxTokens)
+                    .SendAsync(SystemPrompt, userPrompt, _options.Temperature, _options.MaxTokens, phase: LlmPhase.MatchupAnalysis)
                     .ConfigureAwait(false);
 
                 analysis = (analysis ?? string.Empty).Trim();
@@ -163,7 +163,8 @@ namespace Pinder.SessionSetup
                 enumerator = _streamingTransport.SendStreamAsync(
                         SystemPrompt, userPrompt,
                         _options.Temperature, _options.MaxTokens,
-                        cancellationToken)
+                        cancellationToken,
+                        phase: LlmPhase.MatchupAnalysis)
                     .GetAsyncEnumerator(cancellationToken);
             }
             catch (OperationCanceledException)

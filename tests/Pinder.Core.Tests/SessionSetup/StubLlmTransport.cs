@@ -14,7 +14,8 @@ namespace Pinder.Core.Tests.SessionSetup
             string systemPrompt,
             string userMessage,
             double temperature = 0.9,
-            int maxTokens = 1024) =>
+            int maxTokens = 1024,
+            string? phase = null) =>
             Task.FromResult(string.Empty);
     }
 }

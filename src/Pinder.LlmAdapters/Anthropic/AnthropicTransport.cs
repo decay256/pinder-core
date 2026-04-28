@@ -35,8 +35,10 @@ namespace Pinder.LlmAdapters.Anthropic
         }
 
         /// <inheritdoc />
-        public async Task<string> SendAsync(string systemPrompt, string userMessage, double temperature = 0.9, int maxTokens = 1024)
+        public async Task<string> SendAsync(string systemPrompt, string userMessage, double temperature = 0.9, int maxTokens = 1024, string? phase = null)
         {
+            // phase is metadata for decorators; the underlying provider has no use for it.
+            _ = phase;
             if (systemPrompt == null) throw new ArgumentNullException(nameof(systemPrompt));
             if (userMessage == null) throw new ArgumentNullException(nameof(userMessage));
 

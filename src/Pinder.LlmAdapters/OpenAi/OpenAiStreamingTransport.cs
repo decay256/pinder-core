@@ -93,8 +93,11 @@ namespace Pinder.LlmAdapters.OpenAi
             string userMessage,
             double temperature = 0.9,
             int maxTokens = 1024,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default,
+            string? phase = null)
         {
+            // phase is metadata for decorators; the underlying provider has no use for it.
+            _ = phase;
             if (systemPrompt == null) throw new ArgumentNullException(nameof(systemPrompt));
             if (userMessage == null) throw new ArgumentNullException(nameof(userMessage));
 

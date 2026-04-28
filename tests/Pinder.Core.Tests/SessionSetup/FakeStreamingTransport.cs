@@ -23,6 +23,7 @@ namespace Pinder.Core.Tests.SessionSetup
         public string? LastUserMessage { get; private set; }
         public double? LastTemperature { get; private set; }
         public int? LastMaxTokens { get; private set; }
+        public string? LastPhase { get; private set; }
         public int FragmentsYielded { get; private set; }
 
         public FakeStreamingTransport(IEnumerable<string> fragments)
@@ -54,12 +55,14 @@ namespace Pinder.Core.Tests.SessionSetup
             string userMessage,
             double temperature = 0.9,
             int maxTokens = 1024,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default,
+            string? phase = null)
         {
             LastSystemPrompt = systemPrompt;
             LastUserMessage = userMessage;
             LastTemperature = temperature;
             LastMaxTokens = maxTokens;
+            LastPhase = phase;
 
             if (_throwOnOpen)
                 throw _throwException!;
