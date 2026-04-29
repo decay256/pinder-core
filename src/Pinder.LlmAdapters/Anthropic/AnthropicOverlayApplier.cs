@@ -18,7 +18,8 @@ namespace Pinder.LlmAdapters.Anthropic
             AnthropicOptions options,
             string message,
             string instruction,
-            string? opponentContext = null)
+            string? opponentContext = null,
+            string? archetypeDirective = null)
         {
             if (string.IsNullOrWhiteSpace(message) || string.IsNullOrWhiteSpace(instruction))
                 return message;
@@ -35,7 +36,11 @@ namespace Pinder.LlmAdapters.Anthropic
                 new ContentBlock { Type = "text", Text = systemPrompt }
             };
 
-            string userContent = $"OVERLAY INSTRUCTION:\n{instruction}\n\nORIGINAL MESSAGE:\n{message}\n\nApply the overlay and return the modified message.";
+            // Inject the speaker's active archetype directive (#372) so the
+            // overlay rewrite stays in the character's voice.
+            string userContent = !string.IsNullOrWhiteSpace(archetypeDirective)
+                ? $"{archetypeDirective}\n\nOVERLAY INSTRUCTION:\n{instruction}\n\nORIGINAL MESSAGE:\n{message}\n\nApply the overlay (preserving the archetype voice above) and return the modified message."
+                : $"OVERLAY INSTRUCTION:\n{instruction}\n\nORIGINAL MESSAGE:\n{message}\n\nApply the overlay and return the modified message.";
 
             var request = AnthropicRequestBuilders.BuildMessagesRequest(
                 options.Model,

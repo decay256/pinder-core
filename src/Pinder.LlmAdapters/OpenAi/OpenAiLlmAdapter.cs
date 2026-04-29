@@ -431,13 +431,13 @@ namespace Pinder.LlmAdapters.OpenAi
         /// <summary>
         /// Apply a horniness overlay — returns input unchanged (OpenAI overlay not yet implemented).
         /// </summary>
-        public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null)
+        public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null)
         {
             return Task.FromResult(message);
         }
 
         /// <inheritdoc />
-        public Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow)
+        public Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow, string? archetypeDirective = null)
         {
             // Shadow corruption via OpenAI transport — returns input unchanged (not yet implemented).
             return Task.FromResult(message);

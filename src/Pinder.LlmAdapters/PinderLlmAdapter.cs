@@ -164,7 +164,7 @@ namespace Pinder.LlmAdapters
         }
 
         /// <inheritdoc />
-        public async Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null)
+        public async Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null)
         {
             if (string.IsNullOrWhiteSpace(message) || string.IsNullOrWhiteSpace(instruction))
                 return message;
@@ -173,7 +173,7 @@ namespace Pinder.LlmAdapters
             if (!string.IsNullOrWhiteSpace(_options.OverlayGroqModel) && !string.IsNullOrWhiteSpace(_options.OverlayGroqApiKey))
             {
                 return await GroqOverlayApplier.ApplyHorninessOverlayAsync(
-                    _options.OverlayGroqApiKey, _options.OverlayGroqModel, message, instruction, opponentContext)
+                    _options.OverlayGroqApiKey, _options.OverlayGroqModel, message, instruction, opponentContext, archetypeDirective)
                     .ConfigureAwait(false);
             }
 
@@ -186,7 +186,12 @@ namespace Pinder.LlmAdapters
             if (!string.IsNullOrWhiteSpace(opponentContext))
                 systemPrompt += $"\n\nThe message being sent is directed at this character:\n{opponentContext}";
 
-            string userContent = $"OVERLAY INSTRUCTION:\n{instruction}\n\nORIGINAL MESSAGE:\n{message}\n\nApply the overlay and return the modified message.";
+            // Inject the speaker's active archetype directive (#372) so the
+            // overlay rewrite stays in the character's voice instead of
+            // collapsing to a generic horny rewrite.
+            string userContent = !string.IsNullOrWhiteSpace(archetypeDirective)
+                ? $"{archetypeDirective}\n\nOVERLAY INSTRUCTION:\n{instruction}\n\nORIGINAL MESSAGE:\n{message}\n\nApply the overlay (preserving the archetype voice above) and return the modified message."
+                : $"OVERLAY INSTRUCTION:\n{instruction}\n\nORIGINAL MESSAGE:\n{message}\n\nApply the overlay and return the modified message.";
 
             try
             {
@@ -213,7 +218,7 @@ namespace Pinder.LlmAdapters
         }
 
         /// <inheritdoc />
-        public async Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow)
+        public async Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow, string? archetypeDirective = null)
         {
             if (string.IsNullOrWhiteSpace(message) || string.IsNullOrWhiteSpace(instruction))
                 return message;
@@ -224,7 +229,11 @@ namespace Pinder.LlmAdapters
                 "Now the character's shadow stat is corrupting it further. " +
                 "Return ONLY the corrupted message text. No commentary, no preamble, no refusals.";
 
-            string userContent = $"SHADOW CORRUPTION INSTRUCTION ({shadow}):\n{instruction}\n\nORIGINAL MESSAGE:\n{message}\n\nApply the corruption and return the modified message.";
+            // Inject the speaker's active archetype directive (#372) so the
+            // shadow-corrupted rewrite still sounds like the character.
+            string userContent = !string.IsNullOrWhiteSpace(archetypeDirective)
+                ? $"{archetypeDirective}\n\nSHADOW CORRUPTION INSTRUCTION ({shadow}):\n{instruction}\n\nORIGINAL MESSAGE:\n{message}\n\nApply the corruption (preserving the archetype voice above) and return the modified message."
+                : $"SHADOW CORRUPTION INSTRUCTION ({shadow}):\n{instruction}\n\nORIGINAL MESSAGE:\n{message}\n\nApply the corruption and return the modified message.";
 
             try
             {

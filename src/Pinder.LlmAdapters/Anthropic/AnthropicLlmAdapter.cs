@@ -267,20 +267,20 @@ namespace Pinder.LlmAdapters.Anthropic
         /// Apply a horniness overlay to a delivered message by calling the LLM.
         /// Routes to Groq when OverlayGroqModel and OverlayGroqApiKey are configured.
         /// </summary>
-        public async Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null)
+        public async Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null)
         {
             if (!string.IsNullOrWhiteSpace(_options.OverlayGroqModel) && !string.IsNullOrWhiteSpace(_options.OverlayGroqApiKey))
             {
                 return await GroqOverlayApplier.ApplyHorninessOverlayAsync(
-                    _options.OverlayGroqApiKey, _options.OverlayGroqModel, message, instruction, opponentContext)
+                    _options.OverlayGroqApiKey, _options.OverlayGroqModel, message, instruction, opponentContext, archetypeDirective)
                     .ConfigureAwait(false);
             }
             return await AnthropicOverlayApplier.ApplyHorninessOverlayAsync(
-                _client, _options, message, instruction, opponentContext).ConfigureAwait(false);
+                _client, _options, message, instruction, opponentContext, archetypeDirective).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
-        public async Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow)
+        public async Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow, string? archetypeDirective = null)
         {
             if (string.IsNullOrWhiteSpace(message) || string.IsNullOrWhiteSpace(instruction))
                 return message;
@@ -291,7 +291,11 @@ namespace Pinder.LlmAdapters.Anthropic
                 "Now the character's shadow stat is corrupting it further. " +
                 "Return ONLY the corrupted message text. No commentary, no preamble, no refusals.";
 
-            string userContent = $"SHADOW CORRUPTION INSTRUCTION ({shadow}):\n{instruction}\n\nORIGINAL MESSAGE:\n{message}\n\nApply the corruption and return the modified message.";
+            // Inject the speaker's active archetype directive (#372) so the
+            // shadow-corrupted rewrite still sounds like the character.
+            string userContent = !string.IsNullOrWhiteSpace(archetypeDirective)
+                ? $"{archetypeDirective}\n\nSHADOW CORRUPTION INSTRUCTION ({shadow}):\n{instruction}\n\nORIGINAL MESSAGE:\n{message}\n\nApply the corruption (preserving the archetype voice above) and return the modified message."
+                : $"SHADOW CORRUPTION INSTRUCTION ({shadow}):\n{instruction}\n\nORIGINAL MESSAGE:\n{message}\n\nApply the corruption and return the modified message.";
 
             try
             {
