@@ -38,6 +38,14 @@ namespace Pinder.Core.Interfaces
         /// <summary>Session-setup matchup analysis.</summary>
         public const string MatchupAnalysis = "matchup_analysis";
 
+        /// <summary>
+        /// Session-setup short matchup summary (issue #332). A 1-2 paragraph
+        /// LLM-generated condensation of the long-form matchup analysis,
+        /// surfaced to the UI as a display-only affordance. NOT used as
+        /// input to any subsequent LLM prompt in the session.
+        /// </summary>
+        public const string MatchupSummary = "matchup_summary";
+
         /// <summary>Session-setup psychological-stake generation.</summary>
         public const string PsychologicalStake = "psychological_stake";
 
