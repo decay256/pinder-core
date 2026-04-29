@@ -87,5 +87,15 @@ namespace Pinder.Core.Conversation
         {
             return Task.FromResult(message);
         }
+
+        /// <summary>
+        /// Returns the message unchanged (no trap overlay in test mode).
+        /// Used by the deterministic test harness so engine flow can be exercised
+        /// without an actual LLM round-trip.
+        /// </summary>
+        public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null)
+        {
+            return Task.FromResult(message);
+        }
     }
 }

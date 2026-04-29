@@ -264,6 +264,11 @@ namespace Pinder.Core.Tests
                 return Task.FromResult(message + " [shadow:" + shadow + "]");
             }
 
+            public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null)
+            {
+                return Task.FromResult(message);
+            }
+
             public Task<string> GetSteeringQuestionAsync(SteeringContext context)
                 => Task.FromResult("steering question");
         }

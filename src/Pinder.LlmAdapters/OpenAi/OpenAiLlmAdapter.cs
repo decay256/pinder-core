@@ -442,5 +442,15 @@ namespace Pinder.LlmAdapters.OpenAi
             // Shadow corruption via OpenAI transport — returns input unchanged (not yet implemented).
             return Task.FromResult(message);
         }
+
+        /// <summary>
+        /// Apply a trap overlay — returns input unchanged (OpenAI overlay not yet implemented).
+        /// Production deployments route trap overlays through <see cref="PinderLlmAdapter"/>; this
+        /// stub preserves the contract for non-overlay OpenAI adapter usage.
+        /// </summary>
+        public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null)
+        {
+            return Task.FromResult(message);
+        }
     }
 }

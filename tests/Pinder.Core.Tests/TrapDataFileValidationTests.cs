@@ -226,64 +226,33 @@ namespace Pinder.Core.Tests
 
         // === Duration turns ===
 
-        // Mutation: would catch if cringe duration is 2 instead of 1
-        [Fact]
-        public void Cringe_Duration_Is_1()
+        // Per #371 (W2a): every trap is fixed at 3 turns regardless of which trap.
+        // The data file's duration_turns is now 3 for every trap.
+        [Theory]
+        [InlineData(StatType.Charm)]
+        [InlineData(StatType.Rizz)]
+        [InlineData(StatType.Honesty)]
+        [InlineData(StatType.Chaos)]
+        [InlineData(StatType.Wit)]
+        [InlineData(StatType.SelfAwareness)]
+        public void AllTraps_Duration_Is_3(StatType stat)
         {
             var repo = CreateRepo();
-            Assert.Equal(1, repo.GetTrap(StatType.Charm)!.DurationTurns);
-        }
-
-        // Mutation: would catch if creep duration is 1 instead of 2
-        [Fact]
-        public void Creep_Duration_Is_2()
-        {
-            var repo = CreateRepo();
-            Assert.Equal(2, repo.GetTrap(StatType.Rizz)!.DurationTurns);
-        }
-
-        // Mutation: would catch if overshare duration is 2 instead of 1
-        [Fact]
-        public void Overshare_Duration_Is_1()
-        {
-            var repo = CreateRepo();
-            Assert.Equal(1, repo.GetTrap(StatType.Honesty)!.DurationTurns);
-        }
-
-        // Mutation: would catch if unhinged duration is 2 instead of 1
-        [Fact]
-        public void Unhinged_Duration_Is_1()
-        {
-            var repo = CreateRepo();
-            Assert.Equal(1, repo.GetTrap(StatType.Chaos)!.DurationTurns);
-        }
-
-        // Mutation: would catch if pretentious duration is 2 instead of 1
-        [Fact]
-        public void Pretentious_Duration_Is_1()
-        {
-            var repo = CreateRepo();
-            Assert.Equal(1, repo.GetTrap(StatType.Wit)!.DurationTurns);
-        }
-
-        // Mutation: would catch if spiral duration is 1 instead of 2
-        [Fact]
-        public void Spiral_Duration_Is_2()
-        {
-            var repo = CreateRepo();
-            Assert.Equal(2, repo.GetTrap(StatType.SelfAwareness)!.DurationTurns);
+            Assert.Equal(3, repo.GetTrap(stat)!.DurationTurns);
         }
 
         // === Clear method ===
 
         // Mutation: would catch if any trap has wrong clear_method
+        // Per #371 (W2a): clear method is SA-option-selection, not a DC-12 roll.
         [Fact]
-        public void AllTraps_ClearMethod_Is_SA_vs_DC12()
+        public void AllTraps_ClearMethod_Is_PickAnySelfAwarenessOption()
         {
             var repo = CreateRepo();
+            const string expected = "Pick any Self-Awareness option (selection disarms; SA fail triggers Spiral)";
             foreach (var trap in repo.GetAll())
             {
-                Assert.Equal("SA vs DC 12", trap.ClearMethod);
+                Assert.Equal(expected, trap.ClearMethod);
             }
         }
 

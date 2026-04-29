@@ -147,32 +147,31 @@ namespace Pinder.Core.Tests
 
         // ── AC5: Correct duration turns ──
 
-        // Mutation: catches if duration_turns is wrong (e.g. defaults to 3 instead of explicit value)
+        // Per #371 (W2a): every trap is fixed at 3 turns regardless of which trap.
         [Theory]
-        [InlineData(StatType.Charm, 1)]
-        [InlineData(StatType.Rizz, 2)]
-        [InlineData(StatType.Honesty, 1)]
-        [InlineData(StatType.Chaos, 1)]
-        [InlineData(StatType.Wit, 1)]
-        [InlineData(StatType.SelfAwareness, 2)]
-        public void Trap_DurationTurns_MatchesExpected(StatType stat, int expectedDuration)
+        [InlineData(StatType.Charm)]
+        [InlineData(StatType.Rizz)]
+        [InlineData(StatType.Honesty)]
+        [InlineData(StatType.Chaos)]
+        [InlineData(StatType.Wit)]
+        [InlineData(StatType.SelfAwareness)]
+        public void Trap_DurationTurns_Is_3(StatType stat)
         {
             var repo = new JsonTrapRepository(LoadTrapsJson());
             var trap = repo.GetTrap(stat);
             Assert.NotNull(trap);
-            Assert.Equal(expectedDuration, trap!.DurationTurns);
+            Assert.Equal(3, trap!.DurationTurns);
         }
 
-        // ── AC6: Clear method is "SA vs DC 12" for all traps ──
-
-        // Mutation: catches if clear_method is empty or wrong
+        // ── AC6: Clear method (W2a #371): SA-option-selection ──
         [Fact]
-        public void AllTraps_ClearMethod_IsSaVsDc12()
+        public void AllTraps_ClearMethod_IsPickAnySelfAwarenessOption()
         {
             var repo = new JsonTrapRepository(LoadTrapsJson());
+            const string expected = "Pick any Self-Awareness option (selection disarms; SA fail triggers Spiral)";
             foreach (var trap in repo.GetAll())
             {
-                Assert.Equal("SA vs DC 12", trap.ClearMethod);
+                Assert.Equal(expected, trap.ClearMethod);
             }
         }
 

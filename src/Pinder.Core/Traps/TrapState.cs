@@ -4,20 +4,44 @@ using System.Collections.Generic;
 namespace Pinder.Core.Traps
 {
     /// <summary>
-    /// Tracks currently active traps for a character in a conversation.
-    /// Traps persist across turns and taint ALL messages, not just the trapped stat.
+    /// Tracks the currently active trap for a character in a conversation.
+    ///
+    /// Single-slot design (issue #371 redesign): at most one trap is active at
+    /// any time. Activating a new trap REPLACES the existing one — traps no
+    /// longer stack. Every trap has a fixed 3-turn duration and self-deletes
+    /// after affecting the third turn.
+    ///
+    /// Per-stat lookup methods (<see cref="IsActive"/>, <see cref="GetActive"/>)
+    /// are preserved for the existing call sites in <c>RollEngine</c> — they
+    /// return state for the single active trap iff its stat matches.
     /// </summary>
     public sealed class TrapState
     {
-        private readonly Dictionary<StatType, ActiveTrap> _active = new Dictionary<StatType, ActiveTrap>();
+        // The fixed duration applied to every newly activated trap (#371).
+        // The activation turn counts as turn 1 of 3.
+        public const int FixedDurationTurns = 3;
+
+        private ActiveTrap? _active;
 
         /// <summary>True if any trap is currently active.</summary>
-        public bool HasActive => _active.Count > 0;
+        public bool HasActive => _active != null;
 
-        /// <summary>Activate a trap. Replaces an existing trap on the same stat.</summary>
+        /// <summary>The single active trap, or null when none is active.</summary>
+        public ActiveTrap? Active => _active;
+
+        /// <summary>
+        /// Returns the single active trap (or null when none is active).
+        /// Convenience accessor used by tests and by callers that don't care
+        /// which stat triggered the trap. Equivalent to <see cref="Active"/>.
+        /// </summary>
+        public ActiveTrap? Get() => _active;
+
+        /// <summary>Activate a trap. Replaces the existing active trap (if any).</summary>
         public void Activate(TrapDefinition definition)
         {
-            _active[definition.Stat] = new ActiveTrap(definition, definition.DurationTurns);
+            // Per #371: every trap is exactly 3 turns regardless of its
+            // declared duration_turns. The activation turn counts as turn 1 of 3.
+            _active = new ActiveTrap(definition, FixedDurationTurns);
         }
 
         /// <summary>
@@ -26,67 +50,70 @@ namespace Pinder.Core.Traps
         /// </summary>
         public void Activate(TrapDefinition definition, int turnsRemaining)
         {
-            _active[definition.Stat] = new ActiveTrap(definition, turnsRemaining);
+            _active = new ActiveTrap(definition, turnsRemaining);
         }
-
-        /// <summary>True if a trap is active on this stat.</summary>
-        public bool IsActive(StatType stat) => _active.ContainsKey(stat);
-
-        /// <summary>Returns the active trap for a stat, or null.</summary>
-        public ActiveTrap? GetActive(StatType stat)
-        {
-            _active.TryGetValue(stat, out var trap);
-            return trap;
-        }
-
-        /// <summary>All currently active traps (for LLM prompt taint assembly).</summary>
-        public IEnumerable<ActiveTrap> AllActive => _active.Values;
 
         /// <summary>
-        /// Advance all trap counters by one turn. Removes traps that have expired.
-        /// Call once at the end of each player turn.
+        /// True if a trap is active AND it was triggered by this stat.
+        /// (Single-slot model: at most one trap is active at a time.)
+        /// </summary>
+        public bool IsActive(StatType stat) => _active != null && _active.Definition.Stat == stat;
+
+        /// <summary>Returns the active trap iff its stat matches, else null.</summary>
+        public ActiveTrap? GetActive(StatType stat)
+        {
+            if (_active != null && _active.Definition.Stat == stat) return _active;
+            return null;
+        }
+
+        /// <summary>
+        /// All currently active traps. Single-slot: yields zero or one trap.
+        /// Kept as IEnumerable for backward compatibility with prompt-builder
+        /// and helper code that iterated the prior multi-slot collection.
+        /// </summary>
+        public IEnumerable<ActiveTrap> AllActive
+        {
+            get
+            {
+                if (_active != null) yield return _active;
+            }
+        }
+
+        /// <summary>
+        /// Advance the active trap's counter by one turn. Removes the trap
+        /// if it has reached zero. Call once at the end of each player turn
+        /// the trap's effects fired in (including the activation turn).
         /// </summary>
         public void AdvanceTurn()
         {
-            var toRemove = new List<StatType>();
-            foreach (var kv in _active)
-            {
-                kv.Value.DecrementTurn();
-                if (kv.Value.TurnsRemaining <= 0)
-                    toRemove.Add(kv.Key);
-            }
-            foreach (var key in toRemove)
-                _active.Remove(key);
+            if (_active == null) return;
+            _active.DecrementTurn();
+            if (_active.TurnsRemaining <= 0)
+                _active = null;
         }
-
-        /// <summary>Manually clear a trap (e.g. via clear method action).</summary>
-        public void Clear(StatType stat) => _active.Remove(stat);
-
-        /// <summary>Clear all traps.</summary>
-        public void ClearAll() => _active.Clear();
 
         /// <summary>
-        /// Clears the oldest active trap (the one with fewest turns remaining).
-        /// Used when SA roll succeeds vs DC 12 to allow a trap clear.
-        /// Does nothing if no traps are active.
+        /// Manually clear the active trap iff it matches the given stat.
+        /// Preserved for callers that target a specific stat. Single-slot model.
         /// </summary>
-        public void ClearOldest()
+        public void Clear(StatType stat)
         {
-            if (_active.Count == 0) return;
-
-            StatType? oldestKey = null;
-            int minTurns = int.MaxValue;
-            foreach (var kv in _active)
-            {
-                if (kv.Value.TurnsRemaining < minTurns)
-                {
-                    minTurns = kv.Value.TurnsRemaining;
-                    oldestKey = kv.Key;
-                }
-            }
-            if (oldestKey.HasValue)
-                _active.Remove(oldestKey.Value);
+            if (_active != null && _active.Definition.Stat == stat)
+                _active = null;
         }
+
+        /// <summary>Clear the active trap (if any) — used by SA disarm + RestoreState reset.</summary>
+        public void Clear() => _active = null;
+
+        /// <summary>Clear all traps. Equivalent to <see cref="Clear()"/> in the single-slot model.</summary>
+        public void ClearAll() => _active = null;
+
+        /// <summary>
+        /// Clears the oldest (== only) active trap. Preserved for backward
+        /// compatibility with #371's pre-redesign callers; in the single-slot
+        /// model this is identical to <see cref="Clear()"/>.
+        /// </summary>
+        public void ClearOldest() => _active = null;
     }
 
     /// <summary>

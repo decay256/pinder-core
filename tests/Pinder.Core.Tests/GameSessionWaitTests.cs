@@ -28,23 +28,27 @@ namespace Pinder.Core.Tests
             Assert.Equal(9, GetInterest(session)); // 10 - 1
         }
 
-        // What: AC4 — Wait advances trap timers; trap with 1 turn expires (spec §3.7, edge case §5.4)
+        // What: AC4 — Wait advances trap timer; per #371 (W2a) every trap is
+        // fixed at 3 turns so three Wait() calls are needed to expire it.
         // Mutation: Fails if AdvanceTurn is not called (trap would remain active)
         [Fact]
         public void Wait_AdvancesTrapTimers_TrapExpires()
         {
             var trapDef = new TrapDefinition("TestTrap", StatType.Charm,
-                TrapEffect.Disadvantage, 0, 1, "test", "clear", "nat1");
+                TrapEffect.Disadvantage, 0, 3, "test", "clear", "nat1");
             var session = MakeSession(diceValue: 15, saModifier: 3);
             ActivateTrapOnSession(session, trapDef);
 
-            session.Wait(); // trap with 1 turn remaining → expires
-
-            // After Wait, trap should be gone
+            // Activation ⇒ TurnsRemaining=3. Wait once: 2 remaining; twice: 1; thrice: expired.
+            session.Wait();
+            Assert.True(GetTrapState(session).HasActive);
+            session.Wait();
+            Assert.True(GetTrapState(session).HasActive);
+            session.Wait();
             Assert.False(GetTrapState(session).HasActive);
         }
 
-        // What: AC4 — Wait with trap that has multiple turns: doesn't expire yet
+        // What: AC4 — Wait with trap mid-cycle: doesn't expire on a single Wait
         // Mutation: Fails if all traps are cleared instead of just decrementing
         [Fact]
         public void Wait_AdvancesTrapTimers_TrapNotExpiredIfMultipleTurns()
@@ -54,7 +58,7 @@ namespace Pinder.Core.Tests
             var session = MakeSession(diceValue: 15, saModifier: 3);
             ActivateTrapOnSession(session, trapDef);
 
-            session.Wait(); // trap with 3 turns → 2 remaining
+            session.Wait(); // 3 → 2 remaining
 
             // Trap should still be active
             Assert.True(GetTrapState(session).HasActive);
@@ -282,6 +286,7 @@ namespace Pinder.Core.Tests
                 => Task.FromResult<string?>(null);
             public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null) => System.Threading.Tasks.Task.FromResult(message);
             public System.Threading.Tasks.Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow) => System.Threading.Tasks.Task.FromResult(message);
+            public System.Threading.Tasks.Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null) => System.Threading.Tasks.Task.FromResult(message);
         }
 
                 private sealed class ThrowingLlmAdapter : ILlmAdapter
@@ -299,6 +304,7 @@ namespace Pinder.Core.Tests
                 => throw new InvalidOperationException("LLM should not be called for Wait");
             public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null) => System.Threading.Tasks.Task.FromResult(message);
             public System.Threading.Tasks.Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow) => System.Threading.Tasks.Task.FromResult(message);
+            public System.Threading.Tasks.Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null) => System.Threading.Tasks.Task.FromResult(message);
         }
 
                 private sealed class StubTrapRegistry : ITrapRegistry

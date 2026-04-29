@@ -276,6 +276,7 @@ namespace Pinder.Core.Tests
 
             public Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow)
                 => Task.FromResult(message);
+            public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null) => Task.FromResult(message);
 
             public Task<string> GetSteeringQuestionAsync(SteeringContext context)
                 => Task.FromResult("so when are we doing this?");

@@ -35,6 +35,14 @@ namespace Pinder.Core.Interfaces
         /// <summary>Shadow-stat corruption rewrite of a delivered message.</summary>
         public const string ShadowCorruption = "shadow_corruption";
 
+        /// <summary>
+        /// Trap overlay rewrite of a delivered message (#371). Fires only on
+        /// turns 2 and 3 of an active trap (the activation turn's taint is the
+        /// roll-modification, not a separate overlay). Adds a `Trap (X)`
+        /// text-diff layer when the rewrite changes the message.
+        /// </summary>
+        public const string TrapOverlay = "trap_overlay";
+
         /// <summary>Session-setup matchup analysis.</summary>
         public const string MatchupAnalysis = "matchup_analysis";
 
