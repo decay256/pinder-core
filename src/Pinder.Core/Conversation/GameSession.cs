@@ -838,6 +838,12 @@ namespace Pinder.Core.Conversation
                     chosenOption.IsUnhingedReplacement);
             }
 
+            // Resolve player archetype directive once for delivery + overlays
+            // (#372 / #375). The same directive flows into ApplyHorninessOverlay
+            // and ApplyShadowCorruption below so every LLM rewrite of the
+            // delivered message respects the player's voice.
+            string playerArchetypeDirectiveForDelivery = _player.ActiveArchetype?.Directive;
+
             var deliveryContext = new DeliveryContext(
                 playerPrompt: _player.AssembledSystemPrompt,
                 opponentPrompt: _opponent.AssembledSystemPrompt,
@@ -854,7 +860,8 @@ namespace Pinder.Core.Conversation
                 currentTurn: _turnNumber,
                 shadowThresholds: _currentShadowThresholds,
                 isNat20: rollResult.IsNatTwenty,
-                statFailureInstruction: statFailureInstruction);
+                statFailureInstruction: statFailureInstruction,
+                activeArchetypeDirective: playerArchetypeDirectiveForDelivery);
 
             progress?.Report(new TurnProgressEvent(TurnProgressStage.DeliveryStarted));
             string deliveredMessage = await _llm.DeliverMessageAsync(deliveryContext).ConfigureAwait(false);
@@ -898,7 +905,7 @@ namespace Pinder.Core.Conversation
                     string beforeHorniness = deliveredMessage;
                     string opponentCtx = BuildOpponentContext(_opponent);
                     progress?.Report(new TurnProgressEvent(TurnProgressStage.HorninessOverlayStarted));
-                    deliveredMessage = await _llm.ApplyHorninessOverlayAsync(deliveredMessage, instruction, opponentCtx).ConfigureAwait(false);
+                    deliveredMessage = await _llm.ApplyHorninessOverlayAsync(deliveredMessage, instruction, opponentCtx, playerArchetypeDirectiveForDelivery).ConfigureAwait(false);
                     progress?.Report(new TurnProgressEvent(TurnProgressStage.HorninessOverlayCompleted, deliveredMessage));
                     if (deliveredMessage != beforeHorniness)
                     {
@@ -958,7 +965,7 @@ namespace Pinder.Core.Conversation
                             string beforeShadow = deliveredMessage;
                             progress?.Report(new TurnProgressEvent(TurnProgressStage.ShadowCorruptionStarted));
                             deliveredMessage = await _llm.ApplyShadowCorruptionAsync(
-                                deliveredMessage, corruptionInstruction, pairedShadow.Value).ConfigureAwait(false);
+                                deliveredMessage, corruptionInstruction, pairedShadow.Value, playerArchetypeDirectiveForDelivery).ConfigureAwait(false);
                             progress?.Report(new TurnProgressEvent(TurnProgressStage.ShadowCorruptionCompleted, deliveredMessage));
                             if (deliveredMessage != beforeShadow)
                             {

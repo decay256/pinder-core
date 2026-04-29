@@ -39,7 +39,12 @@ namespace Pinder.Core.Interfaces
         /// Returns the modified message text.
         /// </summary>
         /// <param name="opponentContext">Optional compact opponent context (name, bio, items) to ground the overlay.</param>
-        Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null);
+        /// <param name="archetypeDirective">
+        /// Optional active archetype directive for the speaking character
+        /// (e.g. <c>"ACTIVE ARCHETYPE: The Peacock (clear)\n..."</c>) so the
+        /// overlay rewrite respects the character's voice (#372).
+        /// </param>
+        Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null);
 
         /// <summary>
         /// Apply a shadow corruption instruction to a delivered message.
@@ -47,6 +52,10 @@ namespace Pinder.Core.Interfaces
         /// the message is rewritten to show the corruption bleeding through.
         /// Returns the corrupted message text.
         /// </summary>
-        Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow);
+        /// <param name="archetypeDirective">
+        /// Optional active archetype directive for the speaking character so
+        /// the corrupted rewrite still sounds like the character (#372).
+        /// </param>
+        Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow, string? archetypeDirective = null);
     }
 }

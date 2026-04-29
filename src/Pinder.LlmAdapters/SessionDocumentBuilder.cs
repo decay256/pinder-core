@@ -179,6 +179,16 @@ namespace Pinder.LlmAdapters
                 sb.AppendLine(deliveryTaint);
             }
 
+            // Inject active archetype directive (#372 / #375). Without this
+            // the delivery rewrite scrubs the archetype voice that the
+            // dialogue-options call already chose, leaving the actually-sent
+            // message generic.
+            if (!string.IsNullOrEmpty(context.ActiveArchetypeDirective))
+            {
+                sb.AppendLine();
+                sb.AppendLine(context.ActiveArchetypeDirective);
+            }
+
             sb.AppendLine();
 
             // Build roll context narrative from YAML or fallback

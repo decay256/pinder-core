@@ -75,7 +75,7 @@ namespace Pinder.Core.Conversation
         /// <summary>
         /// Returns the message unchanged (no LLM overlay in test mode).
         /// </summary>
-        public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null)
+        public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null)
         {
             return Task.FromResult(message);
         }
@@ -83,7 +83,7 @@ namespace Pinder.Core.Conversation
         /// <summary>
         /// Returns the message unchanged (no shadow corruption in test mode).
         /// </summary>
-        public Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow)
+        public Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow, string? archetypeDirective = null)
         {
             return Task.FromResult(message);
         }
