@@ -55,8 +55,9 @@ namespace Pinder.Core.Tests
         {
             return Task.FromResult<string?>(null);
         }
-        public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null) => System.Threading.Tasks.Task.FromResult(message);
-            public System.Threading.Tasks.Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow) => System.Threading.Tasks.Task.FromResult(message);
+        public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null) => System.Threading.Tasks.Task.FromResult(message);
+            public System.Threading.Tasks.Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow, string? archetypeDirective = null) => System.Threading.Tasks.Task.FromResult(message);
+            public System.Threading.Tasks.Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null) => System.Threading.Tasks.Task.FromResult(message);
     }
 
     // ---------------------------------------------------------------
@@ -482,9 +483,13 @@ namespace Pinder.Core.Tests
     }
 
     /// <summary>
-    /// Regression: duration-1 traps must still be visible to delivery and opponent
-    /// LLM contexts on the turn they activate. Before #692, AdvanceTurn was called
-    /// before delivery, expiring duration-1 traps immediately.
+    /// Regression: a freshly-activated trap must still be visible to delivery and
+    /// opponent LLM contexts on the turn it activates. Before #692, AdvanceTurn was
+    /// called before delivery, expiring short-duration traps immediately.
+    ///
+    /// Per #371 (W2a) every trap is now fixed at 3 turns regardless of the
+    /// definition's DurationTurns; these tests use definition.DurationTurns=1 to
+    /// document the legacy data shape but TrapState.Activate clamps to 3 turns.
     /// </summary>
     [Trait("Category", "Core")]
     public sealed class TrapDuration1RegressionTests
@@ -555,41 +560,12 @@ namespace Pinder.Core.Tests
                 oppCtx.ActiveTrapInstructions!);
         }
 
-        [Fact]
-        public async Task Duration1Trap_ExpiresBeforeNextTurnDialogue()
-        {
-            // Duration=1: should be gone by next StartTurnAsync
-            var trapDef = new TrapDefinition(
-                "cringe_trap", StatType.Charm, TrapEffect.Disadvantage, 0, 1,
-                "You become extremely awkward.", "SA vs DC 12", "");
-
-            var trapRegistry = new TestTrapRegistry();
-            trapRegistry.Register(trapDef);
-
-            var capturingLlm = new CapturingLlmAdapter();
-
-            var dice = new FixedDice(
-                5,   // Constructor: horniness roll
-                4,   // Turn 1: TropeTrap
-                10,  // Turn 1: timing delay
-                20   // Turn 2: padding
-            );
-
-            var session = new GameSession(
-                MakeProfile("Player"), MakeProfile("Opponent"),
-                capturingLlm, dice, trapRegistry,
-                new GameSessionConfig(clock: TestHelpers.MakeClock()));
-
-            await session.StartTurnAsync();
-            await session.ResolveTurnAsync(0);
-
-            // Turn 2
-            dice.Enqueue(10);
-            await session.StartTurnAsync();
-
-            // Duration-1 trap should have expired after AdvanceTurn at end of turn 1
-            var turn2Context = capturingLlm.DialogueContexts[1];
-            Assert.Null(turn2Context.ActiveTrapInstructions);
-        }
+        // The previous Duration1Trap_ExpiresBeforeNextTurnDialogue test asserted
+        // that a duration_turns=1 trap expired after one AdvanceTurn. Under
+        // #371 (W2a) every trap is fixed at 3 turns regardless of the definition.
+        // The 3-turn lifecycle is covered by
+        // <see cref="TrapStateHasActiveTests.AdvanceTurn_ExpiresAfterThreeTurns"/>
+        // and end-to-end by the persistence-path engine tests in
+        // <see cref="TrapPipelineW2aTests"/>.
     }
 }

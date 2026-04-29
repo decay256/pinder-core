@@ -193,6 +193,9 @@ namespace Pinder.Core.Characters
         /// Selects the active archetype from ranked archetypes based on character level.
         /// If characterLevel > 0, prefers the highest-count archetype whose level range
         /// includes the character's level. Falls back to highest-count overall.
+        /// The total archetype-tendency vote count is propagated to
+        /// <see cref="ActiveArchetype"/> so its <c>InterferenceLevel</c> reflects
+        /// share-of-votes (#375), not raw count.
         /// </summary>
         internal static ActiveArchetype ResolveActiveArchetype(
             IReadOnlyList<(string Archetype, int Count)> ranked,
@@ -200,6 +203,13 @@ namespace Pinder.Core.Characters
         {
             if (ranked == null || ranked.Count == 0)
                 return null;
+
+            // Compute total archetype-tendency votes across the entire ranked
+            // set so InterferenceLevel can be expressed as a share, not raw
+            // count (#375).
+            int totalCount = 0;
+            for (int i = 0; i < ranked.Count; i++)
+                totalCount += ranked[i].Count;
 
             // Try to find the highest-count archetype eligible at this level
             if (characterLevel > 0)
@@ -210,7 +220,7 @@ namespace Pinder.Core.Characters
                     if (def != null && def.IsEligibleAtLevel(characterLevel))
                     {
                         string behavior = ArchetypeCatalog.GetBehavior(entry.Archetype);
-                        return new ActiveArchetype(entry.Archetype, behavior, entry.Count);
+                        return new ActiveArchetype(entry.Archetype, behavior, entry.Count, totalCount);
                     }
                 }
             }
@@ -218,7 +228,7 @@ namespace Pinder.Core.Characters
             // Fallback: use the highest-count archetype overall
             var top = ranked[0];
             string topBehavior = ArchetypeCatalog.GetBehavior(top.Archetype);
-            return new ActiveArchetype(top.Archetype, topBehavior, top.Count);
+            return new ActiveArchetype(top.Archetype, topBehavior, top.Count, totalCount);
         }
     }
 }

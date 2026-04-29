@@ -619,6 +619,111 @@
   description: The rarest and most appreciated archetype. Actually reads the bio. References something specific. As
   heading_level: 4
   compact_heading: true
+# ── Item / anatomy YAML referenced these names that were missing from
+#    §2 above. Added (#372) so ArchetypeCatalog has real behaviour text
+#    for every name the JSON data references — without these, GetBehavior
+#    would fall back to the bare placeholder "Follow {Name} behavioral
+#    pattern." which is what the LLM actually receives.
+- id: §2.the-pun-troll
+  section: §2
+  title: The Pun Troll
+  type: archetype_definition
+  stats:
+    high:
+    - Wit
+    low:
+    - Self-Awareness
+  shadows:
+    high:
+    - Fixation
+    low: []
+  level_range:
+  - 2
+  - 8
+  behavior: 'Cannot resist a wordplay. Every reply is contorted around a pun, a
+    homonym, or a stretched double-meaning the conversation didn''t ask for.
+    Genuine wit is occasionally in the tank — what kills it is the inability
+    to let a single message land without a pun retrofitted onto it.
+    Self-applauding. Will quote their own pun back in the next message in
+    case it was missed. The dating-app cousin of the dad-joke uncle.
+
+
+    *Sample lines:* "are you a librarian? because you''ve got me booked" ·
+    "sorry that was a pun-ishing line" · "I lentil-told you I''d find a way
+    to work beans into this"'
+  interference: {}
+  has_hr: true
+  tier: 2
+  description: Cannot resist a wordplay. Every reply is contorted around a pun, a homonym, or a stretched double-mean
+  heading_level: 4
+  compact_heading: true
+- id: §2.the-nice-guy
+  section: §2
+  title: The Nice Guy
+  type: archetype_definition
+  stats:
+    high:
+    - Charm
+    low:
+    - Self-Awareness
+  shadows:
+    high:
+    - Dread
+    - Denial
+    low: []
+  level_range:
+  - 1
+  - 6
+  behavior: 'Performs niceness as a transaction. Compliments are precise and
+    front-loaded; favours are tracked silently; "I''m one of the good ones"
+    is the stable belief underneath. Polite right up to the moment it stops
+    paying off, at which point niceness reveals itself as resentment that
+    was waiting for a trigger. The shorter, calmer cousin of The Exploding
+    Nice Guy — same engine, lower volume, same disappointment.
+
+
+    *Sample lines:* "you don''t see a lot of guys like me on here" · "I''m
+    just looking for someone real" · "most guys would have given up by now"'
+  interference: {}
+  has_hr: true
+  tier: 2
+  description: Performs niceness as a transaction. Compliments are precise and front-loaded; favours are tracked si
+  heading_level: 4
+  compact_heading: true
+- id: §2.the-2am-texter
+  section: §2
+  title: The 2AM Texter
+  type: archetype_definition
+  stats:
+    high:
+    - Rizz
+    - Chaos
+    low:
+    - Self-Awareness
+  shadows:
+    high:
+    - Horniness
+    - Overthinking
+    low: []
+  level_range:
+  - 3
+  - 9
+  behavior: 'Reliably resurfaces between 1am and 4am with messages that read
+    very differently than they would at noon. Lowered inhibition presented
+    as honesty. Sometimes a sincere late-night thought, more often a thinly
+    laundered booty-text. Has plausible deniability built in — "haha I was
+    so tired" — for whichever direction the morning takes. The platform''s
+    timestamp is doing more work than they realise.
+
+
+    *Sample lines:* "u up?" · "random thought but" · "don''t answer this
+    if you''re asleep" · "I''ve been thinking about you all day"'
+  interference: {}
+  has_hr: true
+  tier: 3
+  description: Reliably resurfaces between 1am and 4am with messages that read very differently than they would at
+  heading_level: 4
+  compact_heading: true
 - id: §3.archetype.hey-opener
   section: §3
   title: Archetype — The Hey Opener

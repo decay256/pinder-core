@@ -24,10 +24,11 @@ namespace Pinder.Core.Tests
             // Act: level 4 — Peacock eligible (3-8), Sniper not (5-11)
             var result = CharacterAssembler.ResolveActiveArchetype(ranked, 4);
 
-            // Assert
+            // Assert: 5 / (5+3+2) = 0.50 → "clear" (#375 ratio rule).
             Assert.NotNull(result);
             Assert.Equal("The Peacock", result.Name);
             Assert.Equal(5, result.Count);
+            Assert.Equal(10, result.TotalCount);
             Assert.Equal("clear", result.InterferenceLevel);
         }
 
@@ -74,43 +75,75 @@ namespace Pinder.Core.Tests
             Assert.Equal("The Sniper", result.Name);
         }
 
+        // ── #375 ratio-based intensity tests ─────────────────────────────────────
+        // Intensity is now share-of-archetype-votes, not raw count, so a
+        // single-vote lead no longer gets "clear" or "dominant". The legacy
+        // single-arg ctor defaults TotalCount to Count, which gives ratio=1.0
+        // and therefore "dominant" — preserved for backward compatibility for
+        // callers that have not yet been migrated to pass totalCount.
+
         [Fact]
-        public void ActiveArchetype_InterferenceLevel_Slight()
+        public void ActiveArchetype_InterferenceLevel_LegacyCtor_DefaultsToDominant()
         {
+            // No total supplied → ratio = Count/Count = 1.0 → dominant.
+            // This preserves "always dominant" for callers that haven't
+            // migrated to pass totalCount, and keeps the public API
+            // source-compatible.
             var arch = new ActiveArchetype("Test", "behavior", 1);
-            Assert.Equal("slight", arch.InterferenceLevel);
-
-            arch = new ActiveArchetype("Test", "behavior", 2);
-            Assert.Equal("slight", arch.InterferenceLevel);
-        }
-
-        [Fact]
-        public void ActiveArchetype_InterferenceLevel_Clear()
-        {
-            var arch = new ActiveArchetype("Test", "behavior", 3);
-            Assert.Equal("clear", arch.InterferenceLevel);
-
-            arch = new ActiveArchetype("Test", "behavior", 5);
-            Assert.Equal("clear", arch.InterferenceLevel);
-        }
-
-        [Fact]
-        public void ActiveArchetype_InterferenceLevel_Dominant()
-        {
-            var arch = new ActiveArchetype("Test", "behavior", 6);
             Assert.Equal("dominant", arch.InterferenceLevel);
+            Assert.Equal(1, arch.TotalCount);
+        }
 
-            arch = new ActiveArchetype("Test", "behavior", 10);
+        [Fact]
+        public void ActiveArchetype_InterferenceLevel_PunTroll2_Player1_IsClear()
+        {
+            // The #375 acceptance test: a 2-over-1 lead must NOT be "dominant".
+            // 2/3 = 0.67 → < 0.7 → "clear".
+            var arch = new ActiveArchetype("The Pun Troll", "behavior", count: 2, totalCount: 3);
+            Assert.Equal("clear", arch.InterferenceLevel);
+        }
+
+        [Fact]
+        public void ActiveArchetype_InterferenceLevel_PunTroll4_Player1_IsDominant()
+        {
+            // The #375 acceptance test: a 4-over-1 lead IS "dominant".
+            // 4/5 = 0.80 → ≥ 0.7 → "dominant".
+            var arch = new ActiveArchetype("The Pun Troll", "behavior", count: 4, totalCount: 5);
+            Assert.Equal("dominant", arch.InterferenceLevel);
+        }
+
+        [Fact]
+        public void ActiveArchetype_InterferenceLevel_TiedBuild_IsClear()
+        {
+            // [Pun Troll: 2, Player: 2] → 2/4 = 0.50 → "clear" (tied lead).
+            var arch = new ActiveArchetype("The Pun Troll", "behavior", count: 2, totalCount: 4);
+            Assert.Equal("clear", arch.InterferenceLevel);
+        }
+
+        [Fact]
+        public void ActiveArchetype_InterferenceLevel_OneVoiceAmongMany_IsSlight()
+        {
+            // 1/4 = 0.25 → < 0.4 → "slight".
+            var arch = new ActiveArchetype("The Pun Troll", "behavior", count: 1, totalCount: 4);
+            Assert.Equal("slight", arch.InterferenceLevel);
+        }
+
+        [Fact]
+        public void ActiveArchetype_InterferenceLevel_PureBuild_IsDominant()
+        {
+            // 4/4 = 1.0 → "dominant" (a build that votes one archetype only).
+            var arch = new ActiveArchetype("The Peacock", "behavior", count: 4, totalCount: 4);
             Assert.Equal("dominant", arch.InterferenceLevel);
         }
 
         [Fact]
         public void ActiveArchetype_Directive_ContainsNameAndBehavior()
         {
-            var arch = new ActiveArchetype("The Peacock", "Shows off constantly.", 4);
+            // Build of 4 votes total, this archetype gets 4 → dominant.
+            var arch = new ActiveArchetype("The Peacock", "Shows off constantly.", count: 4, totalCount: 4);
             var directive = arch.Directive;
 
-            Assert.Contains("ACTIVE ARCHETYPE: The Peacock (clear)", directive);
+            Assert.Contains("ACTIVE ARCHETYPE: The Peacock (dominant)", directive);
             Assert.Contains("Shows off constantly.", directive);
         }
 

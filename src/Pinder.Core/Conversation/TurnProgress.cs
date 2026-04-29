@@ -32,6 +32,12 @@ namespace Pinder.Core.Conversation
         /// <summary>Shadow corruption LLM returned; Text carries the rewritten message.</summary>
         ShadowCorruptionCompleted,
 
+        /// <summary>Trap overlay LLM call is about to run (issue #371; persistence turns only).</summary>
+        TrapOverlayStarted,
+
+        /// <summary>Trap overlay LLM returned; Text carries the rewritten message.</summary>
+        TrapOverlayCompleted,
+
         /// <summary>About to call the opponent-response LLM.</summary>
         OpponentResponseStarted,
 

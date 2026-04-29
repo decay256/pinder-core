@@ -431,15 +431,25 @@ namespace Pinder.LlmAdapters.OpenAi
         /// <summary>
         /// Apply a horniness overlay — returns input unchanged (OpenAI overlay not yet implemented).
         /// </summary>
-        public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null)
+        public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null)
         {
             return Task.FromResult(message);
         }
 
         /// <inheritdoc />
-        public Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow)
+        public Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow, string? archetypeDirective = null)
         {
             // Shadow corruption via OpenAI transport — returns input unchanged (not yet implemented).
+            return Task.FromResult(message);
+        }
+
+        /// <summary>
+        /// Apply a trap overlay — returns input unchanged (OpenAI overlay not yet implemented).
+        /// Production deployments route trap overlays through <see cref="PinderLlmAdapter"/>; this
+        /// stub preserves the contract for non-overlay OpenAI adapter usage.
+        /// </summary>
+        public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null)
+        {
             return Task.FromResult(message);
         }
     }

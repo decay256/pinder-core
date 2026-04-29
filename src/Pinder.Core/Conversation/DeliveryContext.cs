@@ -61,6 +61,14 @@ namespace Pinder.Core.Conversation
         /// </summary>
         public string StatFailureInstruction { get; }
 
+        /// <summary>
+        /// Active archetype directive for the player character (e.g.
+        /// <c>"ACTIVE ARCHETYPE: The Peacock (clear)\n..."</c>), or null if
+        /// the player has no active archetype. Threaded into the delivery LLM
+        /// prompt so the rewrite respects the character's voice (#372 / #375).
+        /// </summary>
+        public string ActiveArchetypeDirective { get; }
+
         public DeliveryContext(
             string playerPrompt,
             string opponentPrompt,
@@ -76,7 +84,8 @@ namespace Pinder.Core.Conversation
             string opponentName = "",
             int currentTurn = 0,
             bool isNat20 = false,
-            string statFailureInstruction = null)
+            string statFailureInstruction = null,
+            string activeArchetypeDirective = null)
         {
             PlayerPrompt = playerPrompt ?? throw new System.ArgumentNullException(nameof(playerPrompt));
             OpponentPrompt = opponentPrompt ?? throw new System.ArgumentNullException(nameof(opponentPrompt));
@@ -93,6 +102,7 @@ namespace Pinder.Core.Conversation
             CurrentTurn = currentTurn;
             IsNat20 = isNat20;
             StatFailureInstruction = statFailureInstruction;
+            ActiveArchetypeDirective = activeArchetypeDirective;
         }
     }
 }

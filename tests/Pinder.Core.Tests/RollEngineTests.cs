@@ -247,14 +247,17 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public void Catastrophe_DoesNotActivateTrap_WhenAlreadyActive()
+        public void Catastrophe_ReactivatesTrap_WhenAlreadyActive_PerSingleSlotRule()
         {
-            // If a trap is already active on the stat, Catastrophe should not replace it
+            // #371 (W2a): single-slot replacement — a Catastrophe roll always
+            // (re-)activates the stat's trap. The previous "don't replace if
+            // already active" guard is gone; the new activation refreshes the
+            // 3-turn timer and the new trap REPLACES whatever was previously active.
             var trapDef = new TrapDefinition("charm-trap", StatType.Charm,
                 TrapEffect.Disadvantage, 0, 2, "you're trapped", "cleared", "nat1 clear");
             var registry = new SingleTrapRegistry(trapDef);
             var traps = new TrapState();
-            // Pre-activate a trap
+            // Pre-activate a trap (will be replaced by the fresh activation)
             traps.Activate(trapDef);
 
             var baseStats = new Dictionary<StatType, int>
@@ -276,9 +279,12 @@ namespace Pinder.Core.Tests
                 registry, new FixedDice(9));
 
             Assert.Equal(FailureTier.Catastrophe, result.Tier);
-            // No new trap activated since one was already active
-            Assert.Null(result.ActivatedTrap);
+            // #371: new trap replaces the existing one (single-slot rule).
+            Assert.NotNull(result.ActivatedTrap);
+            Assert.Equal("charm-trap", result.ActivatedTrap!.Id);
             Assert.True(traps.IsActive(StatType.Charm));
+            // Fresh activation refreshes the timer to FixedDurationTurns (3).
+            Assert.Equal(TrapState.FixedDurationTurns, traps.Get()!.TurnsRemaining);
         }
 
         [Fact]

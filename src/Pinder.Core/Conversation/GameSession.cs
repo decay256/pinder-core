@@ -340,7 +340,11 @@ namespace Pinder.Core.Conversation
             {
                 foreach (var (statName, turnsRemaining) in data.ActiveTraps)
                 {
-                    if (Enum.TryParse<StatType>(statName, out var stat))
+                    // #369: parse case-insensitively. Snapshots have historically
+                    // stored stat names in lowercase ("selfawareness") in some
+                    // environments and TitleCase ("SelfAwareness") in others.
+                    // The TrapState round-trip must survive both.
+                    if (Enum.TryParse<StatType>(statName, ignoreCase: true, out var stat))
                     {
                         var definition = trapRegistry.GetTrap(stat);
                         if (definition != null)
@@ -567,6 +571,21 @@ namespace Pinder.Core.Conversation
             }
 
             var chosenOption = _currentOptions[optionIndex];
+
+            // ---- Trap SA-disarm (issue #371) ----
+            // When the chosen option's stat is Self-Awareness AND a trap is active,
+            // the trap is disarmed IMMEDIATELY — BEFORE the SA roll resolves and
+            // before any text-modification pipeline runs. The cleared trap does NOT
+            // corrupt this turn's message. If the SA roll subsequently fails, the
+            // failure tier may activate Spiral as a fresh trap (its turn 1 of 3 is
+            // this turn, taint via the failure-tier rewrite — no separate trap LLM
+            // call this turn).
+            string? trapClearedDisplayName = null;
+            if (chosenOption.Stat == StatType.SelfAwareness && _traps.HasActive)
+            {
+                trapClearedDisplayName = _traps.Active!.Definition.DisplayName;
+                _traps.Clear();
+            }
 
             // Denial +1 when Honesty was available but player chose a different stat (#272 — §7)
             if (_playerShadows != null
@@ -838,6 +857,12 @@ namespace Pinder.Core.Conversation
                     chosenOption.IsUnhingedReplacement);
             }
 
+            // Resolve player archetype directive once for delivery + overlays
+            // (#372 / #375). The same directive flows into ApplyHorninessOverlay
+            // and ApplyShadowCorruption below so every LLM rewrite of the
+            // delivered message respects the player's voice.
+            string playerArchetypeDirectiveForDelivery = _player.ActiveArchetype?.Directive;
+
             var deliveryContext = new DeliveryContext(
                 playerPrompt: _player.AssembledSystemPrompt,
                 opponentPrompt: _opponent.AssembledSystemPrompt,
@@ -854,7 +879,8 @@ namespace Pinder.Core.Conversation
                 currentTurn: _turnNumber,
                 shadowThresholds: _currentShadowThresholds,
                 isNat20: rollResult.IsNatTwenty,
-                statFailureInstruction: statFailureInstruction);
+                statFailureInstruction: statFailureInstruction,
+                activeArchetypeDirective: playerArchetypeDirectiveForDelivery);
 
             progress?.Report(new TurnProgressEvent(TurnProgressStage.DeliveryStarted));
             string deliveredMessage = await _llm.DeliverMessageAsync(deliveryContext).ConfigureAwait(false);
@@ -873,6 +899,47 @@ namespace Pinder.Core.Conversation
                                     rollResult.Tier.ToString();
                 var tierSpans = WordDiff.Compute(intendedTextForDelivery, deliveredMessage);
                 textDiffs.Add(new TextDiff(layerLabel, tierSpans, intendedTextForDelivery, deliveredMessage));
+            }
+
+            // ---- Trap LLM overlay (issue #371) ----
+            // Fires only on PERSISTENCE turns: when a trap is currently active AND
+            // it was NOT activated this turn. The activation turn (turn 1 of 3) is
+            // already tainted by the failure-tier rewrite above, so adding the trap
+            // overlay on top would double-corrupt the message.
+            //
+            // Path mapping (final spec, see #371 latest comment):
+            //   - SA picked, trap was active → disarmed at start; _traps.HasActive
+            //     is false here UNLESS the SA roll just failed and re-activated
+            //     Spiral as a NEW trap (rollResult.ActivatedTrap != null). That's
+            //     the activation case — skip the overlay.
+            //   - Non-SA picked, trap persisting → _traps.HasActive AND
+            //     rollResult.ActivatedTrap is null. FIRE the overlay.
+            //   - Non-SA picked, roll just activated a fresh trap (replacing or
+            //     adding) → rollResult.ActivatedTrap != null. Skip the overlay
+            //     (this turn is the new trap's turn 1 of 3).
+            if (_traps.HasActive && rollResult.ActivatedTrap == null)
+            {
+                var activeTrap = _traps.Active!;
+                string trapInstruction = activeTrap.Definition.LlmInstruction;
+                string trapDisplayName = activeTrap.Definition.DisplayName;
+                if (!string.IsNullOrWhiteSpace(trapInstruction)
+                    && !string.IsNullOrEmpty(deliveredMessage)
+                    && deliveredMessage != "...")
+                {
+                    string beforeTrap = deliveredMessage;
+                    string opponentCtxForTrap = BuildOpponentContext(_opponent);
+                    progress?.Report(new TurnProgressEvent(TurnProgressStage.TrapOverlayStarted));
+                    deliveredMessage = await _llm.ApplyTrapOverlayAsync(
+                        deliveredMessage, trapInstruction, trapDisplayName, opponentCtxForTrap, playerArchetypeDirectiveForDelivery)
+                        .ConfigureAwait(false);
+                    progress?.Report(new TurnProgressEvent(TurnProgressStage.TrapOverlayCompleted, deliveredMessage));
+                    if (deliveredMessage != beforeTrap)
+                    {
+                        var trapSpans = WordDiff.Compute(beforeTrap, deliveredMessage);
+                        textDiffs.Add(new TextDiff(
+                            $"Trap ({trapDisplayName})", trapSpans, beforeTrap, deliveredMessage));
+                    }
+                }
             }
 
             // 9. Check interest threshold crossing → narrative beat
@@ -898,7 +965,7 @@ namespace Pinder.Core.Conversation
                     string beforeHorniness = deliveredMessage;
                     string opponentCtx = BuildOpponentContext(_opponent);
                     progress?.Report(new TurnProgressEvent(TurnProgressStage.HorninessOverlayStarted));
-                    deliveredMessage = await _llm.ApplyHorninessOverlayAsync(deliveredMessage, instruction, opponentCtx).ConfigureAwait(false);
+                    deliveredMessage = await _llm.ApplyHorninessOverlayAsync(deliveredMessage, instruction, opponentCtx, playerArchetypeDirectiveForDelivery).ConfigureAwait(false);
                     progress?.Report(new TurnProgressEvent(TurnProgressStage.HorninessOverlayCompleted, deliveredMessage));
                     if (deliveredMessage != beforeHorniness)
                     {
@@ -958,7 +1025,7 @@ namespace Pinder.Core.Conversation
                             string beforeShadow = deliveredMessage;
                             progress?.Report(new TurnProgressEvent(TurnProgressStage.ShadowCorruptionStarted));
                             deliveredMessage = await _llm.ApplyShadowCorruptionAsync(
-                                deliveredMessage, corruptionInstruction, pairedShadow.Value).ConfigureAwait(false);
+                                deliveredMessage, corruptionInstruction, pairedShadow.Value, playerArchetypeDirectiveForDelivery).ConfigureAwait(false);
                             progress?.Report(new TurnProgressEvent(TurnProgressStage.ShadowCorruptionCompleted, deliveredMessage));
                             if (deliveredMessage != beforeShadow)
                             {
@@ -1070,16 +1137,14 @@ namespace Pinder.Core.Conversation
             // 12. Append opponent message to history
             _history.Add((_opponent.DisplayName, opponentMessage));
 
-            // SA trap clear: SA success vs DC 12 clears oldest active trap (rules §clear)
-            if (chosenOption.Stat == StatType.SelfAwareness
-                && rollResult.IsSuccess
-                && rollResult.FinalTotal >= 12
-                && _traps.HasActive)
-            {
-                _traps.ClearOldest();
-            }
-
-            // 12b. Advance trap timers
+            // 12b. Advance trap timer (single-slot model). Decrements TurnsRemaining
+            // for the active trap (if any) and removes it when it reaches 0.
+            // Per #371: traps activated this turn (rollResult.ActivatedTrap)
+            // start at TurnsRemaining=3 — this AdvanceTurn brings them to 2,
+            // because the activation turn counts as turn 1 of 3.
+            // SA-disarm (handled at the top of this method) clears the trap before
+            // the pipeline runs, so AdvanceTurn here only ticks down a NEW trap if
+            // one was activated by the roll, OR a persisting trap on a non-SA pick.
             _traps.AdvanceTurn();
 
             // 13. Increment turn number
@@ -1117,7 +1182,8 @@ namespace Pinder.Core.Conversation
                 horninessInterestPenalty: horninessInterestPenalty,
                 horninessInterestBefore: horninessInterestBefore,
                 textDiffs: textDiffs.Count > 0 ? textDiffs : null,
-                shadowCheck: shadowCheckResult);
+                shadowCheck: shadowCheckResult,
+                trapClearedDisplayName: trapClearedDisplayName);
         }
 
         /// <summary>
@@ -1195,7 +1261,12 @@ namespace Pinder.Core.Conversation
             return ShadowThresholdEvaluator.GetThresholdLevel(shadowValue);
         }
 
-        private GameStateSnapshot CreateSnapshot()
+        /// <summary>
+        /// Build a fresh <see cref="GameStateSnapshot"/> for the current session state.
+        /// Public so test/debug code can observe restored or mid-flight state without
+        /// running a turn (e.g. the W2a #371 RestoreState round-trip tests).
+        /// </summary>
+        public GameStateSnapshot CreateSnapshot()
         {
             return GameSessionHelpers.CreateSnapshot(
                 _interest,

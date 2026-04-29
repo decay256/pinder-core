@@ -170,10 +170,11 @@ namespace Pinder.Core.Tests
 
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context)
                 => Task.FromResult<string?>(null);
-            public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null)
+            public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null)
                 => Task.FromResult(message);
-            public Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow)
+            public Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow, string? archetypeDirective = null)
                 => Task.FromResult(message);
+            public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null) => Task.FromResult(message);
         }
     }
 }

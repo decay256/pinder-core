@@ -105,6 +105,14 @@ namespace Pinder.Core.Conversation
         /// <summary>Word-level diffs for each text transform layer that changed the message.</summary>
         public IReadOnlyList<TextDiff> TextDiffs { get; }
 
+        /// <summary>
+        /// Display name of the trap that was disarmed at the start of this turn
+        /// by the player selecting a Self-Awareness option (issue #371). Null when
+        /// no SA-disarm fired (no trap was active, or chosen option was not SA).
+        /// The frontend uses this signal to show a "Trap cleared" toast/event.
+        /// </summary>
+        public string? TrapClearedDisplayName { get; }
+
         public TurnResult(
             RollResult roll,
             string deliveredMessage,
@@ -131,7 +139,8 @@ namespace Pinder.Core.Conversation
             int horninessInterestPenalty = 0,
             int horninessInterestBefore = 0,
             IReadOnlyList<TextDiff>? textDiffs = null,
-            ShadowCheckResult shadowCheck = null)
+            ShadowCheckResult shadowCheck = null,
+            string? trapClearedDisplayName = null)
         {
             Roll = roll ?? throw new ArgumentNullException(nameof(roll));
             DeliveredMessage = deliveredMessage ?? throw new ArgumentNullException(nameof(deliveredMessage));
@@ -159,6 +168,7 @@ namespace Pinder.Core.Conversation
             HorninessInterestBefore = horninessInterestBefore;
             TextDiffs = textDiffs ?? Array.Empty<TextDiff>();
             ShadowCheck = shadowCheck ?? ShadowCheckResult.NotPerformed;
+            TrapClearedDisplayName = trapClearedDisplayName;
         }
     }
 }
