@@ -42,9 +42,11 @@ namespace Pinder.SessionSetup
 
         /// <summary>
         /// Parse a character definition JSON string and assemble it into a CharacterProfile.
-        /// Exposed for testing without file I/O.
+        /// Exposed publicly so callers (e.g. the GameApi character generator,
+        /// issues #330/#331) can validate freshly composed JSON without first
+        /// writing it to disk.
         /// </summary>
-        internal static CharacterProfile Parse(
+        public static CharacterProfile Parse(
             string json,
             IItemRepository itemRepo,
             IAnatomyRepository anatomyRepo)
