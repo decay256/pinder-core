@@ -252,6 +252,7 @@ namespace Pinder.Core.Tests
 
             public Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow, string? archetypeDirective = null)
                 => Task.FromResult(message);
+            public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null) => Task.FromResult(message);
         }
     }
 }

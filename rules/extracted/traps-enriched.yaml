@@ -20,18 +20,19 @@
   type: interest_change
   blocks:
   - kind: paragraph
-    text: "**Trigger:** Miss a roll by 6–9 (Trope Trap fail tier). The trap for the stat you rolled activates.  \n**Duration:** 1–2 turns (defined per trap).  \n**Effect:** Two layers:\n1. **Mechanical**\
+    text: "**Trigger:** Miss a roll by 6–9 (Trope Trap fail tier). The trap for the stat you rolled activates.  \n**Duration:** 3 turns (fixed for all traps; activation turn counts as turn 1 of 3).  \n**Effect:** Two layers:\n1. **Mechanical**\
       \ — disadvantage on the triggering stat, or opponent's defense stat boosted\n2. **Prompt taint** — `llm_instruction` injected into the character system prompt for the duration; taints all generated\
       \ messages regardless of what stat is being rolled"
   - kind: paragraph
-    text: '**Clearing a trap:** Spend a turn on a Self-Awareness recovery roll (DC 12). Costs −1 Interest and the turn. The trap remains active until either the roll succeeds or duration expires.'
+    text: '**Disarm:** selecting any SA-stat option disarms the active trap immediately, before the SA roll resolves. Disarm fires regardless of whether the SA roll succeeds. A failed SA roll then triggers Spiral as the new active trap (this turn is Spiral''s turn 1 of 3, taint via roll-modification, no separate trap LLM call this turn).'
   - kind: paragraph
-    text: '**Stacking:** Multiple active traps stack. Each injects its `llm_instruction` independently. A character with The Cringe and The Spiral active is simultaneously try-hard and narrating their own
-      try-hardness.'
+    text: '**Single slot:** a newly activated trap replaces the currently active trap. Old trap''s remaining turns are discarded. The new trap''s first corruption turn IS the activation turn (taint via roll-modification, no separate trap LLM call).'
+  - kind: paragraph
+    text: '**Stacking:** single slot only; new activation replaces. Traps do not stack.'
   - kind: paragraph
     text: '**Nat 1 bonus:** Rolling a natural 1 on any roll while a trap is active escalates the trap''s DC modifier and adds a shadow stat bonus.'
   - kind: hr
-  description: "**Trigger:** Miss a roll by 6–9 (Trope Trap fail tier). The trap for the stat you rolled activates.  \n**Duration:** 1–2 turns (defined per trap).  \n**Effect:** Two layers:\n1. **Mechanical**\
+  description: "**Trigger:** Miss a roll by 6–9 (Trope Trap fail tier). The trap for the stat you rolled activates.  \n**Duration:** 3 turns (fixed for all traps; activation turn counts as turn 1 of 3).  \n**Effect:** Two layers:\n1. **Mechanical**\
     \ — disadvantage on the triggering stat, or opponent's defense stat boosted\n2. **Prompt taint** — `llm_instruction` injected into the character system prompt for the duration; taints all generated\
     \ messages regardless of what stat is being rolled"
   heading_level: 2
@@ -41,7 +42,7 @@
     - 9
   outcome:
     trap: true
-    duration_turns: 1
+    duration_turns: 3
 - id: §2.trap-reference
   section: §2
   title: Trap Reference
@@ -54,7 +55,7 @@
   type: table
   blocks:
   - kind: paragraph
-    text: "**Triggered by:** Charm miss by 6+  \n**Duration:** 1 turn  \n**Mechanical effect:** Disadvantage on all Charm rolls  \n**Clears:** Self-Awareness DC 12 (costs −1 Interest, uses turn)"
+    text: "**Triggered by:** Charm miss by 6+  \n**Duration:** 3 turns  \n**Mechanical effect:** Disadvantage on all Charm rolls  \n**Clears:** Pick any Self-Awareness option (selection disarms; SA fail triggers Spiral)"
   - kind: paragraph
     text: '**What it does:** Everything sounds slightly try-hard. Compliments feel rehearsed. Humor has a "please laugh" energy. Even a successful Wit line has an aftertaste of desperation.'
   - kind: table
@@ -72,7 +73,7 @@
   - kind: blockquote
     text: "*\"Your smooth line landed like a pickup artist at a poetry reading. The emoji made it worse.\"*  \n*Expiry: \"The cringe fades. You can look at your own messages again without wincing.\"*"
   - kind: hr
-  description: "**Triggered by:** Charm miss by 6+  \n**Duration:** 1 turn  \n**Mechanical effect:** Disadvantage on all Charm rolls  \n**Clears:** Self-Awareness DC 12 (costs −1 Interest, uses turn)"
+  description: "**Triggered by:** Charm miss by 6+  \n**Duration:** 3 turns  \n**Mechanical effect:** Disadvantage on all Charm rolls  \n**Clears:** Pick any Self-Awareness option (selection disarms; SA fail triggers Spiral)"
   heading_level: 3
   compact_heading: true
   condition:
@@ -80,7 +81,7 @@
     miss_minimum: 6
   outcome:
     trap_name: the-cringe
-    duration_turns: 1
+    duration_turns: 3
     effect: disadvantage
     stat: Charm
 - id: §2.the-creep
@@ -89,7 +90,7 @@
   type: table
   blocks:
   - kind: paragraph
-    text: "**Triggered by:** Rizz miss by 6+  \n**Duration:** 2 turns  \n**Mechanical effect:** −2 to all Rizz rolls  \n**Clears:** Self-Awareness DC 12 (costs −1 Interest, uses turn)"
+    text: "**Triggered by:** Rizz miss by 6+  \n**Duration:** 3 turns  \n**Mechanical effect:** −2 to all Rizz rolls  \n**Clears:** Pick any Self-Awareness option (selection disarms; SA fail triggers Spiral)"
   - kind: paragraph
     text: '**What it does:** Bold statements read as loaded. Innocent questions sound like they have an agenda. Even a kind Charm message feels like it''s building toward something uncomfortable.'
   - kind: table
@@ -108,7 +109,7 @@
     text: "*\"Your bold move didn't read as confident. It read as desperate. They visibly recoiled.\"*  \n*Expiry: \"The creep factor subsides. Your messages stop sounding like they have a hidden agenda.\"\
       *"
   - kind: hr
-  description: "**Triggered by:** Rizz miss by 6+  \n**Duration:** 2 turns  \n**Mechanical effect:** −2 to all Rizz rolls  \n**Clears:** Self-Awareness DC 12 (costs −1 Interest, uses turn)"
+  description: "**Triggered by:** Rizz miss by 6+  \n**Duration:** 3 turns  \n**Mechanical effect:** −2 to all Rizz rolls  \n**Clears:** Pick any Self-Awareness option (selection disarms; SA fail triggers Spiral)"
   heading_level: 3
   compact_heading: true
   condition:
@@ -116,7 +117,7 @@
     miss_minimum: 6
   outcome:
     trap_name: the-creep
-    duration_turns: 2
+    duration_turns: 3
     effect: stat_penalty
     stat: Rizz
     effect_value: -2
@@ -126,8 +127,8 @@
   type: table
   blocks:
   - kind: paragraph
-    text: "**Triggered by:** Honesty miss by 6+  \n**Duration:** 1 turn  \n**Mechanical effect:** Opponent's Chaos defense +2 (Honesty DC increases by 2 — they've seen the overshare, they're braced for\
-      \ more chaos from you)  \n**Clears:** Self-Awareness DC 12 (costs −1 Interest, uses turn)"
+    text: "**Triggered by:** Honesty miss by 6+  \n**Duration:** 3 turns  \n**Mechanical effect:** Opponent's Chaos defense +2 (Honesty DC increases by 2 — they've seen the overshare, they're braced for\
+      \ more chaos from you)  \n**Clears:** Pick any Self-Awareness option (selection disarms; SA fail triggers Spiral)"
   - kind: paragraph
     text: '**What it does:** Personal details leak into unrelated topics. A Wit message about mycelium accidentally includes a confession. A Charm compliment trails off into a memory. You can''t keep the
       personal stuff contained.'
@@ -147,8 +148,8 @@
     text: "*\"You meant to share one thing. You shared everything. The divorce. The therapist. The Costco membership. Steve.\"*  \n*Expiry: \"The overshare impulse subsides. You can hold a thought without\
       \ it trailing into confession.\"*"
   - kind: hr
-  description: "**Triggered by:** Honesty miss by 6+  \n**Duration:** 1 turn  \n**Mechanical effect:** Opponent's Chaos defense +2 (Honesty DC increases by 2 — they've seen the overshare, they're braced\
-    \ for more chaos from you)  \n**Clears:** Self-Awareness DC 12 (costs −1 Interest, uses turn)"
+  description: "**Triggered by:** Honesty miss by 6+  \n**Duration:** 3 turns  \n**Mechanical effect:** Opponent's Chaos defense +2 (Honesty DC increases by 2 — they've seen the overshare, they're braced\
+    \ for more chaos from you)  \n**Clears:** Pick any Self-Awareness option (selection disarms; SA fail triggers Spiral)"
   heading_level: 3
   compact_heading: true
   condition:
@@ -156,7 +157,7 @@
     miss_minimum: 6
   outcome:
     trap_name: the-overshare
-    duration_turns: 1
+    duration_turns: 3
     effect: opponent_dc_increase
     stat: Chaos
     effect_value: 2
@@ -166,7 +167,7 @@
   type: table
   blocks:
   - kind: paragraph
-    text: "**Triggered by:** Chaos miss by 6+  \n**Duration:** 1 turn  \n**Mechanical effect:** Disadvantage on all Chaos rolls  \n**Clears:** Self-Awareness DC 12 (costs −1 Interest, uses turn)"
+    text: "**Triggered by:** Chaos miss by 6+  \n**Duration:** 3 turns  \n**Mechanical effect:** Disadvantage on all Chaos rolls  \n**Clears:** Pick any Self-Awareness option (selection disarms; SA fail triggers Spiral)"
   - kind: paragraph
     text: '**What it does:** Structured thoughts derail mid-sentence. Tangents intrude. Even a careful recovery message accelerates into unexpected territory. Bullet points become manifestos.'
   - kind: table
@@ -185,7 +186,7 @@
     text: "*\"Your random humor wasn't random-fun. It was random-concerning. They're reconsidering this match.\"*  \n*Expiry: \"The manic energy subsides. Your thoughts stop accelerating past your ability\
       \ to type them.\"*"
   - kind: hr
-  description: "**Triggered by:** Chaos miss by 6+  \n**Duration:** 1 turn  \n**Mechanical effect:** Disadvantage on all Chaos rolls  \n**Clears:** Self-Awareness DC 12 (costs −1 Interest, uses turn)"
+  description: "**Triggered by:** Chaos miss by 6+  \n**Duration:** 3 turns  \n**Mechanical effect:** Disadvantage on all Chaos rolls  \n**Clears:** Pick any Self-Awareness option (selection disarms; SA fail triggers Spiral)"
   heading_level: 3
   compact_heading: true
   condition:
@@ -193,7 +194,7 @@
     miss_minimum: 6
   outcome:
     trap_name: the-unhinged
-    duration_turns: 1
+    duration_turns: 3
     effect: disadvantage
     stat: Chaos
 - id: §2.the-pretentious
@@ -202,8 +203,8 @@
   type: table
   blocks:
   - kind: paragraph
-    text: "**Triggered by:** Wit miss by 6+  \n**Duration:** 1 turn  \n**Mechanical effect:** Opponent's Rizz defense +3 (Rizz DC increases by 3 — they become dismissive rather than impressed)  \n**Clears:**\
-      \ Self-Awareness DC 12 (costs −1 Interest, uses turn)"
+    text: "**Triggered by:** Wit miss by 6+  \n**Duration:** 3 turns  \n**Mechanical effect:** Opponent's Rizz defense +3 (Rizz DC increases by 3 — they become dismissive rather than impressed)  \n**Clears:**\
+      \ Pick any Self-Awareness option (selection disarms; SA fail triggers Spiral)"
   - kind: paragraph
     text: '**What it does:** Condescension leaks in everywhere. References feel like showing off. A Rizz line sounds like a TED talk. An Honesty moment sounds like a lecture. You can''t stop explaining.'
   - kind: table
@@ -222,8 +223,8 @@
     text: "*\"You tried clever. You got condescending. There may be a TED talk reference. There was definitely a TED talk reference.\"*  \n*Expiry: \"The urge to explain subsides. You can make a point without\
       \ citing a source.\"*"
   - kind: hr
-  description: "**Triggered by:** Wit miss by 6+  \n**Duration:** 1 turn  \n**Mechanical effect:** Opponent's Rizz defense +3 (Rizz DC increases by 3 — they become dismissive rather than impressed)  \n\
-    **Clears:** Self-Awareness DC 12 (costs −1 Interest, uses turn)"
+  description: "**Triggered by:** Wit miss by 6+  \n**Duration:** 3 turns  \n**Mechanical effect:** Opponent's Rizz defense +3 (Rizz DC increases by 3 — they become dismissive rather than impressed)  \n\
+    **Clears:** Pick any Self-Awareness option (selection disarms; SA fail triggers Spiral)"
   heading_level: 3
   compact_heading: true
   condition:
@@ -231,7 +232,7 @@
     miss_minimum: 6
   outcome:
     trap_name: the-pretentious
-    duration_turns: 1
+    duration_turns: 3
     effect: opponent_dc_increase
     stat: Rizz
     effect_value: 3
@@ -241,8 +242,7 @@
   type: table
   blocks:
   - kind: paragraph
-    text: "**Triggered by:** Self-Awareness miss by 6+  \n**Duration:** 2 turns  \n**Mechanical effect:** Disadvantage on all Self-Awareness rolls  \n**Clears:** Self-Awareness DC 12 (costs −1 Interest,\
-      \ uses turn)"
+    text: "**Triggered by:** Self-Awareness miss by 6+  \n**Duration:** 3 turns  \n**Mechanical effect:** Disadvantage on all Self-Awareness rolls  \n**Clears:** Pick any Self-Awareness option (selection disarms; SA fail triggers Spiral)"
   - kind: paragraph
     text: '**What it does:** Meta-commentary intrudes. You narrate your own behaviour mid-message. A Charm attempt includes "I''m trying to be charming right now and I can feel it not working." Self-awareness
       becomes self-sabotage.'
@@ -262,8 +262,7 @@
     text: "*\"You started acknowledging the awkwardness and couldn't stop. You narrated your own failure. In real time. For three messages.\"*  \n*Expiry: \"The meta-loop breaks. You can say things without\
       \ immediately analyzing why you said them.\"*"
   - kind: hr
-  description: "**Triggered by:** Self-Awareness miss by 6+  \n**Duration:** 2 turns  \n**Mechanical effect:** Disadvantage on all Self-Awareness rolls  \n**Clears:** Self-Awareness DC 12 (costs −1 Interest,\
-    \ uses turn)"
+  description: "**Triggered by:** Self-Awareness miss by 6+  \n**Duration:** 3 turns  \n**Mechanical effect:** Disadvantage on all Self-Awareness rolls  \n**Clears:** Pick any Self-Awareness option (selection disarms; SA fail triggers Spiral)"
   heading_level: 3
   compact_heading: true
   condition:
@@ -271,7 +270,7 @@
     miss_minimum: 6
   outcome:
     trap_name: the-spiral
-    duration_turns: 2
+    duration_turns: 3
     effect: disadvantage
     stat: Self-Awareness
 - id: §3.trap-summary-table
@@ -283,32 +282,32 @@
     rows:
     - Trap: The Cringe
       Stat: Charm
-      Duration: 1 turn
+      Duration: 3 turns
       Mechanical effect: Disadvantage on Charm
       Taint quality: Try-hard energy
     - Trap: The Creep
       Stat: Rizz
-      Duration: 2 turns
+      Duration: 3 turns
       Mechanical effect: −2 Rizz rolls
       Taint quality: Hidden agenda
     - Trap: The Overshare
       Stat: Honesty
-      Duration: 1 turn
+      Duration: 3 turns
       Mechanical effect: Opponent Chaos +2
       Taint quality: Personal details leak
     - Trap: The Unhinged
       Stat: Chaos
-      Duration: 1 turn
+      Duration: 3 turns
       Mechanical effect: Disadvantage on Chaos
       Taint quality: Message accelerates/derails
     - Trap: The Pretentious
       Stat: Wit
-      Duration: 1 turn
+      Duration: 3 turns
       Mechanical effect: Opponent Rizz +3
       Taint quality: Condescension / over-explains
     - Trap: The Spiral
       Stat: Self-Awareness
-      Duration: 2 turns
+      Duration: 3 turns
       Mechanical effect: Disadvantage on S-Awr
       Taint quality: Meta-commentary
     sep_cells:
@@ -318,7 +317,7 @@
     - '---'
     - '---'
   - kind: blockquote
-    text: 'All traps share the same clear method: Self-Awareness recovery roll, DC 12, −1 Interest, costs turn.'
+    text: 'All traps share the same clear method: pick any Self-Awareness option (selection disarms; SA fail triggers Spiral). The disarm fires on selection, before the SA roll resolves. Single slot — a newly activated trap replaces the currently active trap.'
   - kind: hr
   description: ''
   heading_level: 2

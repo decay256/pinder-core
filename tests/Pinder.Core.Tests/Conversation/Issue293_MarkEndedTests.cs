@@ -24,6 +24,7 @@ namespace Pinder.Core.Tests.Conversation
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context) => Task.FromResult<string?>("");
             public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null) => Task.FromResult(message);
             public Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow, string? archetypeDirective = null) => Task.FromResult(message);
+            public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null) => Task.FromResult(message);
         }
 
         private sealed class FixedDice : IDiceRoller

@@ -322,6 +322,62 @@ namespace Pinder.LlmAdapters.Anthropic
             }
         }
 
+        /// <summary>
+        /// Apply a trap overlay to a delivered message (issue #371). Routes to
+        /// Groq when configured; otherwise uses the Anthropic transport with the
+        /// trap-overlay system prompt. Returns the message unchanged on transport
+        /// failure or detected refusal.
+        /// </summary>
+        public async Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null)
+        {
+            if (string.IsNullOrWhiteSpace(message) || string.IsNullOrWhiteSpace(trapInstruction))
+                return message;
+
+            if (!string.IsNullOrWhiteSpace(_options.OverlayGroqModel) && !string.IsNullOrWhiteSpace(_options.OverlayGroqApiKey))
+            {
+                return await GroqOverlayApplier.ApplyTrapOverlayAsync(
+                    _options.OverlayGroqApiKey, _options.OverlayGroqModel, message, trapInstruction, trapName, opponentContext, archetypeDirective)
+                    .ConfigureAwait(false);
+            }
+
+            string systemPrompt = "You are editing a text message for Pinder, a satirical comedy dating app. " +
+                "A trap is currently corrupting the character's voice. " +
+                "Apply the trap instruction to rewrite the delivered message so the trap's signature taint is visible. " +
+                "Return ONLY the rewritten message text. No commentary, no preamble, no refusals.";
+
+            if (!string.IsNullOrWhiteSpace(opponentContext))
+                systemPrompt += $"\n\nThe message being sent is directed at this character:\n{opponentContext}";
+
+            // Inject the speaker's active archetype directive (#372 + #371 union) so the
+            // trap-overlay rewrite still sounds like the character.
+            string userContent = !string.IsNullOrWhiteSpace(archetypeDirective)
+                ? $"{archetypeDirective}\n\nTRAP INSTRUCTION ({trapName}):\n{trapInstruction}\n\nORIGINAL MESSAGE:\n{message}\n\nApply the trap taint (preserving the archetype voice above) and return the modified message."
+                : $"TRAP INSTRUCTION ({trapName}):\n{trapInstruction}\n\nORIGINAL MESSAGE:\n{message}\n\nApply the trap taint and return the modified message.";
+
+            try
+            {
+                var systemBlocks = CacheBlockBuilder.BuildPlayerOnlySystemBlocks(systemPrompt);
+                var request = AnthropicRequestBuilders.BuildMessagesRequest(
+                    _options.Model, _options.MaxTokens, systemBlocks, userContent,
+                    _options.DeliveryTemperature ?? 0.7);
+                var response = await _client.SendMessagesAsync(request).ConfigureAwait(false);
+                var result = response.GetText()?.Trim();
+
+                if (string.IsNullOrWhiteSpace(result)) return message;
+
+                if (result.StartsWith("I can't", StringComparison.OrdinalIgnoreCase) ||
+                    result.StartsWith("I cannot", StringComparison.OrdinalIgnoreCase) ||
+                    result.IndexOf("inappropriate", StringComparison.OrdinalIgnoreCase) >= 0)
+                    return message;
+
+                return result;
+            }
+            catch
+            {
+                return message;
+            }
+        }
+
         // Backward-compatibility: expose static parse methods for tests
         // that reference AnthropicLlmAdapter.ParseDialogueOptions / ParseOpponentResponse
 

@@ -164,16 +164,18 @@ namespace Pinder.Core.Rolls
             int total = usedRoll + statMod + levelBonus;
             int finalTotal = total + externalBonus;
 
+            // Per #371 (W2a): single-slot trap state. Trap-activating failure tiers
+            // (Legendary / TropeTrap / Catastrophe) ALWAYS activate the stat's trap
+            // when the roll trips that tier — the new activation REPLACES whatever
+            // was active (single-slot rule). This is a behaviour change from the prior
+            // "only activate if not already active on this stat" guard.
             if (usedRoll == 1)
             {
                 tier = FailureTier.Legendary;
                 // Nat 1 activates a trap (rules: Legendary fail = trap)
-                if (!attackerTraps.IsActive(stat))
-                {
-                    newTrap = trapRegistry.GetTrap(stat);
-                    if (newTrap != null)
-                        attackerTraps.Activate(newTrap);
-                }
+                newTrap = trapRegistry.GetTrap(stat);
+                if (newTrap != null)
+                    attackerTraps.Activate(newTrap);
             }
             else if (usedRoll == 20 || finalTotal >= dc)
             {
@@ -188,24 +190,19 @@ namespace Pinder.Core.Rolls
                 else if (miss <= 9)
                 {
                     tier = FailureTier.TropeTrap;
-                    // Activate trap if one is defined and not already active on this stat
-                    if (!attackerTraps.IsActive(stat))
-                    {
-                        newTrap = trapRegistry.GetTrap(stat);
-                        if (newTrap != null)
-                            attackerTraps.Activate(newTrap);
-                    }
+                    // Activate the stat's trap (single-slot replacement, #371).
+                    newTrap = trapRegistry.GetTrap(stat);
+                    if (newTrap != null)
+                        attackerTraps.Activate(newTrap);
                 }
                 else
                 {
                     tier = FailureTier.Catastrophe;
-                    // Catastrophe also activates trap (rules §5: miss 10+ = -3 + trap)
-                    if (!attackerTraps.IsActive(stat))
-                    {
-                        newTrap = trapRegistry.GetTrap(stat);
-                        if (newTrap != null)
-                            attackerTraps.Activate(newTrap);
-                    }
+                    // Catastrophe also activates trap (rules §5: miss 10+ = -3 + trap).
+                    // Single-slot replacement under #371.
+                    newTrap = trapRegistry.GetTrap(stat);
+                    if (newTrap != null)
+                        attackerTraps.Activate(newTrap);
                 }
             }
 

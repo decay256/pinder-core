@@ -92,13 +92,20 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public void Bug1_Nat1_DoesNotActivateTrap_WhenAlreadyActive()
+        public void Bug1_Nat1_ReactivatesTrap_PerSingleSlotReplacement()
         {
+            // Per #371 (W2a) single-slot replacement: a fresh trap-triggering
+            // failure tier (including Nat 1) ALWAYS activates the stat's trap,
+            // even if the same trap was already active. The new activation
+            // replaces the existing entry and resets TurnsRemaining to 3.
             var trapDef = new TrapDefinition("charm-trap", StatType.Charm,
-                TrapEffect.Disadvantage, 0, 2, "instruction", "clear", "nat1");
+                TrapEffect.Disadvantage, 0, 3, "instruction", "clear", "nat1");
             var registry = new SingleTrapRegistry2(trapDef);
             var traps = new TrapState();
             traps.Activate(trapDef); // already active
+            // Simulate one turn elapsed, so TurnsRemaining was 2 before re-activation.
+            traps.AdvanceTurn();
+            Assert.Equal(2, traps.Get()!.TurnsRemaining);
 
             var attacker = MakeStats(charm: 10);
             var defender = MakeStats();
@@ -108,9 +115,11 @@ namespace Pinder.Core.Tests
                 registry, new FixedDice2(1));
 
             Assert.Equal(FailureTier.Legendary, result.Tier);
-            // No new trap activated (already active)
-            Assert.Null(result.ActivatedTrap);
+            Assert.NotNull(result.ActivatedTrap);
+            Assert.Equal("charm-trap", result.ActivatedTrap!.Id);
             Assert.True(traps.IsActive(StatType.Charm));
+            // Re-activation refreshed TurnsRemaining to FixedDurationTurns=3.
+            Assert.Equal(3, traps.Get()!.TurnsRemaining);
         }
 
         // ──────────────────────────────────────────────────────────────────────────
@@ -163,35 +172,34 @@ namespace Pinder.Core.Tests
         }
 
         // ──────────────────────────────────────────────────────────────────────────
-        // Bug 3: SA success vs DC 12 clears oldest active trap
+        // Bug 3 (W2a #371): single-slot trap — second Activate REPLACES the first;
+        // SA-DC-12-clears-oldest mechanic is obsolete (replaced by SA-selection-disarm).
         // ──────────────────────────────────────────────────────────────────────────
 
         [Fact]
-        public void TrapState_ClearOldest_RemovesOldestTrap()
+        public void TrapState_SecondActivate_ReplacesFirst()
         {
             var trap1 = new TrapDefinition("trap1", StatType.Charm,
-                TrapEffect.Disadvantage, 0, 5, "i1", "c1", "n1");
+                TrapEffect.Disadvantage, 0, 3, "i1", "c1", "n1");
             var trap2 = new TrapDefinition("trap2", StatType.Rizz,
-                TrapEffect.Disadvantage, 0, 2, "i2", "c2", "n2");
+                TrapEffect.Disadvantage, 0, 3, "i2", "c2", "n2");
 
             var state = new TrapState();
-            state.Activate(trap1); // 5 turns remaining
-            state.Activate(trap2); // 2 turns remaining — oldest (fewest turns = soonest to expire)
+            state.Activate(trap1);
+            state.Activate(trap2); // replaces trap1 under #371 single-slot rule
 
-            state.ClearOldest();
-
-            // trap2 had fewest turns → cleared
-            Assert.False(state.IsActive(StatType.Rizz));
-            // trap1 still active
-            Assert.True(state.IsActive(StatType.Charm));
+            Assert.True(state.HasActive);
+            Assert.False(state.IsActive(StatType.Charm));
+            Assert.True(state.IsActive(StatType.Rizz));
+            Assert.Equal("trap2", state.Get()!.Definition.Id);
         }
 
         [Fact]
-        public void TrapState_ClearOldest_DoesNothingWhenEmpty()
+        public void TrapState_Clear_DoesNothingWhenEmpty()
         {
             var state = new TrapState();
             // Should not throw
-            state.ClearOldest();
+            state.Clear();
             Assert.False(state.HasActive);
         }
 

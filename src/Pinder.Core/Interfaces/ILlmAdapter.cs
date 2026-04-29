@@ -57,5 +57,24 @@ namespace Pinder.Core.Interfaces
         /// the corrupted rewrite still sounds like the character (#372).
         /// </param>
         Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow, string? archetypeDirective = null);
+
+        /// <summary>
+        /// Apply a trap overlay to a delivered message (issue #371). Called on
+        /// trap PERSISTENCE turns (turn 2 or 3 of an active trap) for non-SA
+        /// option picks where the roll did not activate a fresh trap. The trap's
+        /// llm_instruction is used to rewrite the post-roll-modification message,
+        /// adding the trap's signature taint on top of the tier rewrite. Activation
+        /// turns are NOT routed through this method — their taint comes from the
+        /// failure-tier rewrite. Returns the modified message text.
+        /// </summary>
+        /// <param name="message">The current delivered message (post roll modification).</param>
+        /// <param name="trapInstruction">The active trap's <c>llm_instruction</c>.</param>
+        /// <param name="trapName">Display name of the active trap (used for logging / refusal-detection labelling).</param>
+        /// <param name="opponentContext">Optional compact opponent context (name, bio, items) to ground the overlay.</param>
+        /// <param name="archetypeDirective">
+        /// Optional active archetype directive for the speaking character so
+        /// the trap-overlay rewrite still sounds like the character (#372 + #371 union).
+        /// </param>
+        Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null);
     }
 }

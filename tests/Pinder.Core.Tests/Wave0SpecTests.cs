@@ -77,6 +77,7 @@ namespace Pinder.Core.Tests
                 => Task.FromResult<string?>(null);
             public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null) => System.Threading.Tasks.Task.FromResult(message);
             public System.Threading.Tasks.Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow, string? archetypeDirective = null) => System.Threading.Tasks.Task.FromResult(message);
+            public System.Threading.Tasks.Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null) => System.Threading.Tasks.Task.FromResult(message);
         }
 
                 #endregion
@@ -477,31 +478,34 @@ namespace Pinder.Core.Tests
         }
 
         // ==================================================================
-        // AC8: TrapState.HasActive — after AdvanceTurn with mixed durations
+        // AC8 (W2a #371): TrapState single-slot model — HasActive after AdvanceTurn.
+        // Replaces the prior multi-slot mixed-duration test. Every trap is fixed
+        // at 3 turns and a fresh Activate REPLACES the existing trap.
         // ==================================================================
 
-        // Mutation: Fails if HasActive checks wrong collection or uses != instead of >
         [Fact]
         public void TrapState_HasActive_AfterPartialExpiry()
         {
             var state = new TrapState();
-            // Duration 1 trap (expires after 1 AdvanceTurn)
-            var shortTrap = new TrapDefinition("short", StatType.Charm,
+            // Definition's duration_turns is overridden to FixedDurationTurns=3
+            // by Activate(); the activation turn counts as turn 1 of 3.
+            var trap = new TrapDefinition("trap", StatType.Charm,
                 TrapEffect.Disadvantage, 0, 1, "i", "c", "n");
-            // Duration 2 trap (expires after 2 AdvanceTurns)  
-            var longTrap = new TrapDefinition("long", StatType.Wit,
-                TrapEffect.Disadvantage, 0, 2, "i", "c", "n");
 
-            state.Activate(shortTrap);
-            state.Activate(longTrap);
+            state.Activate(trap);
             Assert.True(state.HasActive);
+            Assert.Equal(3, state.Get()!.TurnsRemaining);
 
             state.AdvanceTurn();
-            // Short expired, long still has 1 turn
             Assert.True(state.HasActive);
+            Assert.Equal(2, state.Get()!.TurnsRemaining);
 
             state.AdvanceTurn();
-            // Both expired
+            Assert.True(state.HasActive);
+            Assert.Equal(1, state.Get()!.TurnsRemaining);
+
+            state.AdvanceTurn();
+            // Expired after 3 AdvanceTurn calls
             Assert.False(state.HasActive);
         }
 
