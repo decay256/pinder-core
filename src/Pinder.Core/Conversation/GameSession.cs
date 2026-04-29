@@ -80,6 +80,13 @@ namespace Pinder.Core.Conversation
         // Stat delivery instructions for horniness overlay tier lookups (#709)
         private readonly object? _statDeliveryInstructions;
 
+        // #314: optional callback invoked when a text-transform layer (Horniness /
+        // Shadow / Trap overlay) ran an LLM call but produced byte-identical
+        // output. Lets the host distinguish "layer ran but no-op" from "layer
+        // didn't run" in audit logs. Null when not configured — same shape as
+        // before the field existed.
+        private readonly Action<TextLayerNoopEvent>? _onTextLayerNoop;
+
         // Stored between StartTurnAsync and ResolveTurnAsync
         private DialogueOption[]? _currentOptions;
         private bool _currentHasAdvantage;
@@ -125,6 +132,7 @@ namespace Pinder.Core.Conversation
             var steeringRng = config.SteeringRng ?? new Random();
             _statDrawRng = config.StatDrawRng;
             _statDeliveryInstructions = config.StatDeliveryInstructions;
+            _onTextLayerNoop = config.OnTextLayerNoop;
 
             // Determine starting interest: explicit config > Dread T3 > default
             if (config.StartingInterest.HasValue)
@@ -939,6 +947,13 @@ namespace Pinder.Core.Conversation
                         textDiffs.Add(new TextDiff(
                             $"Trap ({trapDisplayName})", trapSpans, beforeTrap, deliveredMessage));
                     }
+                    else
+                    {
+                        // #314: layer ran but produced byte-identical output — emit
+                        // a structured breadcrumb so the audit can distinguish it from
+                        // "layer didn't run".
+                        EmitTextLayerNoop($"Trap ({trapDisplayName})", beforeTrap, deliveredMessage);
+                    }
                 }
             }
 
@@ -971,6 +986,11 @@ namespace Pinder.Core.Conversation
                     {
                         var horninessSpans = WordDiff.Compute(beforeHorniness, deliveredMessage);
                         textDiffs.Add(new TextDiff("Horniness", horninessSpans, beforeHorniness, deliveredMessage));
+                    }
+                    else
+                    {
+                        // #314: layer ran but produced byte-identical output.
+                        EmitTextLayerNoop("Horniness", beforeHorniness, deliveredMessage);
                     }
                 }).ConfigureAwait(false);
 
@@ -1031,6 +1051,11 @@ namespace Pinder.Core.Conversation
                             {
                                 var shadowSpans = WordDiff.Compute(beforeShadow, deliveredMessage);
                                 textDiffs.Add(new TextDiff($"Shadow ({pairedShadow.Value})", shadowSpans, beforeShadow, deliveredMessage));
+                            }
+                            else
+                            {
+                                // #314: layer ran but produced byte-identical output.
+                                EmitTextLayerNoop($"Shadow ({pairedShadow.Value})", beforeShadow, deliveredMessage);
                             }
 
                             // Interest-delta override only applies when the main
@@ -1425,6 +1450,53 @@ namespace Pinder.Core.Conversation
                 ? string.Join(", ", opponent.EquippedItemDisplayNames)
                 : "(none)";
             return $"Opponent: {opponent.DisplayName} | Bio: \"{bio}\" | Wearing: {items}";
+        }
+
+        // ── #314: text-layer no-op breadcrumb ─────────────────────────────
+
+        /// <summary>
+        /// Issue #314: emit a structured event when a text-transform layer
+        /// (Horniness / Shadow / Trap overlay) ran an LLM call but produced
+        /// byte-identical output. The diff is silently dropped from
+        /// <c>TextDiffs</c> in that case (correctly — there's nothing to
+        /// render), but without this breadcrumb the audit cannot tell
+        /// "layer ran and produced no delta" apart from "layer didn't run
+        /// at all". Hosts that wire <c>OnTextLayerNoop</c> can log a
+        /// structured INFO line with <c>{turn, layer, before_hash,
+        /// after_hash}</c>.
+        /// </summary>
+        private void EmitTextLayerNoop(string layer, string beforeText, string afterText)
+        {
+            if (_onTextLayerNoop == null) return;
+            try
+            {
+                string beforeHash = ComputeStableHash(beforeText);
+                string afterHash = ComputeStableHash(afterText);
+                _onTextLayerNoop(new TextLayerNoopEvent(_turnNumber, layer, beforeHash, afterHash));
+            }
+            catch
+            {
+                // Diagnostic-only path — never let a logging failure break
+                // the turn. Swallow and move on.
+            }
+        }
+
+        /// <summary>
+        /// Stable, non-cryptographic, run-independent hash for the layer-noop
+        /// breadcrumb. Uses SHA-256 truncated to 16 hex chars; the value is
+        /// an audit identifier, not a security primitive.
+        /// </summary>
+        private static string ComputeStableHash(string? text)
+        {
+            if (text == null) return "";
+            using (var sha = System.Security.Cryptography.SHA256.Create())
+            {
+                byte[] bytes = sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(text));
+                var sb = new System.Text.StringBuilder(16);
+                for (int i = 0; i < 8 && i < bytes.Length; i++)
+                    sb.Append(bytes[i].ToString("x2"));
+                return sb.ToString();
+            }
         }
     }
 }

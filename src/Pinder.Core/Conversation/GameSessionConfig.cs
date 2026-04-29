@@ -69,6 +69,21 @@ namespace Pinder.Core.Conversation
         /// </summary>
         public Random? StatDrawRng { get; }
 
+        /// <summary>
+        /// Optional callback fired when a text-transform layer (Horniness /
+        /// Shadow / Trap overlay) ran an LLM call but produced byte-identical
+        /// output (#314). The callback receives <c>(turn, layer, beforeHash,
+        /// afterHash)</c> so the host can emit a structured log line
+        /// distinguishing "layer ran but no-op" from "layer didn't run at all".
+        /// When null (default), no callback fires — same shape as today.
+        ///
+        /// Note: this is deliberately a callback rather than an ILogger so
+        /// pinder-core stays free of <c>Microsoft.Extensions.Logging</c>
+        /// dependencies. Hosts can wire structlog / ILogger / a custom sink
+        /// at the call site.
+        /// </summary>
+        public Action<TextLayerNoopEvent>? OnTextLayerNoop { get; }
+
         public GameSessionConfig(
             IGameClock? clock = null,
             SessionShadowTracker? playerShadows = null,
@@ -80,7 +95,8 @@ namespace Pinder.Core.Conversation
             Random? steeringRng = null,
             object? statDeliveryInstructions = null,
             IDiceRoller? diceRoller = null,
-            Random? statDrawRng = null)
+            Random? statDrawRng = null,
+            Action<TextLayerNoopEvent>? onTextLayerNoop = null)
         {
             Clock = clock;
             PlayerShadows = playerShadows;
@@ -93,6 +109,7 @@ namespace Pinder.Core.Conversation
             StatDeliveryInstructions = statDeliveryInstructions;
             DiceRoller = diceRoller;
             StatDrawRng = statDrawRng;
+            OnTextLayerNoop = onTextLayerNoop;
         }
     }
 }
