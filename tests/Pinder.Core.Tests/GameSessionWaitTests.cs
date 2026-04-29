@@ -280,8 +280,8 @@ namespace Pinder.Core.Tests
 
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context)
                 => Task.FromResult<string?>(null);
-            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null) => System.Threading.Tasks.Task.FromResult(message);
-            public System.Threading.Tasks.Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow) => System.Threading.Tasks.Task.FromResult(message);
+            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null) => System.Threading.Tasks.Task.FromResult(message);
+            public System.Threading.Tasks.Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow, string? archetypeDirective = null) => System.Threading.Tasks.Task.FromResult(message);
         }
 
                 private sealed class ThrowingLlmAdapter : ILlmAdapter
@@ -297,8 +297,8 @@ namespace Pinder.Core.Tests
 
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context)
                 => throw new InvalidOperationException("LLM should not be called for Wait");
-            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null) => System.Threading.Tasks.Task.FromResult(message);
-            public System.Threading.Tasks.Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow) => System.Threading.Tasks.Task.FromResult(message);
+            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null) => System.Threading.Tasks.Task.FromResult(message);
+            public System.Threading.Tasks.Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow, string? archetypeDirective = null) => System.Threading.Tasks.Task.FromResult(message);
         }
 
                 private sealed class StubTrapRegistry : ITrapRegistry
