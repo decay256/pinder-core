@@ -782,13 +782,69 @@ namespace Pinder.Core.Conversation
                     _statDeliveryInstructions, chosenOption.Stat, rollResult.Tier);
             }
 
+            // Collect word-level diffs for each text transform layer.
+            // Order matters: Steering diff (intended → intended+question) is
+            // emitted BEFORE the tier-modifier diff (intended+question → delivered),
+            // because steering now runs prior to DeliverMessageAsync — see #364.
+            var textDiffs = new List<TextDiff>();
+
+            // 10b. Steering roll — runs BEFORE delivery so the LLM degrades the
+            // steering question along with the rest of the message on a failed
+            // roll. Previously steering ran after delivery, which produced a
+            // perfectly lucid steering question appended to a Catastrophe-degraded
+            // message — see #364.
+            string originalIntendedText = chosenOption.IntendedText ?? "";
+            progress?.Report(new TurnProgressEvent(TurnProgressStage.SteeringStarted));
+            // #333: scene entries are excluded from the LLM context view.
+            // Steering now sees the player's *intended* text (pre-delivery), not
+            // the LLM-rewritten delivered text. The SteeringContext field is still
+            // named DeliveredMessage for backward compatibility with the LLM
+            // adapter contract.
+            SteeringRollResult steeringResult = await _steeringEngine.AttemptSteeringRollAsync(
+                originalIntendedText, _player, _opponent, _llm, BuildHistoryForLlmContext()).ConfigureAwait(false);
+            progress?.Report(new TurnProgressEvent(
+                TurnProgressStage.SteeringCompleted,
+                steeringResult.SteeringSucceeded ? steeringResult.SteeringQuestion : null));
+
+            // If steering succeeded, append the question to the intended text
+            // before passing it into the delivery LLM. Use a wrapper DialogueOption
+            // so we don't mutate the caller's option (and so the rest of the turn
+            // pipeline, e.g. _comboTracker.RecordTurn, still uses the original).
+            string intendedTextForDelivery = originalIntendedText;
+            DialogueOption deliveryOption = chosenOption;
+            if (steeringResult.SteeringSucceeded && steeringResult.SteeringQuestion != null)
+            {
+                intendedTextForDelivery = originalIntendedText.Length == 0
+                    ? steeringResult.SteeringQuestion
+                    : originalIntendedText.TrimEnd() + " " + steeringResult.SteeringQuestion;
+
+                // Steering diff (FIRST in the textDiffs list per #364): the
+                // pre-steering intended text vs the intended-plus-question.
+                if (intendedTextForDelivery != originalIntendedText
+                    && !string.IsNullOrEmpty(originalIntendedText)
+                    && originalIntendedText != "...")
+                {
+                    var steeringSpans = WordDiff.Compute(originalIntendedText, intendedTextForDelivery);
+                    textDiffs.Add(new TextDiff("Steering", steeringSpans, originalIntendedText, intendedTextForDelivery));
+                }
+
+                deliveryOption = new DialogueOption(
+                    chosenOption.Stat,
+                    intendedTextForDelivery,
+                    chosenOption.CallbackTurnNumber,
+                    chosenOption.ComboName,
+                    chosenOption.HasTellBonus,
+                    chosenOption.HasWeaknessWindow,
+                    chosenOption.IsUnhingedReplacement);
+            }
+
             var deliveryContext = new DeliveryContext(
                 playerPrompt: _player.AssembledSystemPrompt,
                 opponentPrompt: _opponent.AssembledSystemPrompt,
                 // #333: scene entries are excluded from the LLM context view.
                 conversationHistory: BuildHistoryForLlmContext(),
                 opponentLastMessage: GameSessionHelpers.GetLastOpponentMessage(_history, _opponent.DisplayName),
-                chosenOption: chosenOption,
+                chosenOption: deliveryOption,
                 outcome: rollResult.Tier,
                 beatDcBy: beatDcBy,
                 activeTraps: deliveryTrapNames,
@@ -804,19 +860,19 @@ namespace Pinder.Core.Conversation
             string deliveredMessage = await _llm.DeliverMessageAsync(deliveryContext).ConfigureAwait(false);
             progress?.Report(new TurnProgressEvent(TurnProgressStage.DeliveryCompleted, deliveredMessage));
 
-            // Collect word-level diffs for each text transform layer
-            var textDiffs = new List<TextDiff>();
-
-            // Tier modifier diff: intended text vs delivered-after-LLM rewrite
-            string intendedText = chosenOption.IntendedText ?? "";
-            if (deliveredMessage != intendedText && !string.IsNullOrEmpty(intendedText) && intendedText != "...")
+            // Tier modifier diff (SECOND per #364): intended+steering text vs
+            // delivered-after-LLM rewrite. The LLM now degrades the combined
+            // intended+steering string when the roll is a failure tier.
+            if (deliveredMessage != intendedTextForDelivery
+                && !string.IsNullOrEmpty(intendedTextForDelivery)
+                && intendedTextForDelivery != "...")
             {
                 string layerLabel = rollResult.IsNatTwenty ? "Nat 20" :
                                     rollResult.IsNatOne    ? "Nat 1"  :
                                     rollResult.Tier == Rolls.FailureTier.None ? "Strong success" :
                                     rollResult.Tier.ToString();
-                var tierSpans = WordDiff.Compute(intendedText, deliveredMessage);
-                textDiffs.Add(new TextDiff(layerLabel, tierSpans, intendedText, deliveredMessage));
+                var tierSpans = WordDiff.Compute(intendedTextForDelivery, deliveredMessage);
+                textDiffs.Add(new TextDiff(layerLabel, tierSpans, intendedTextForDelivery, deliveredMessage));
             }
 
             // 9. Check interest threshold crossing → narrative beat
@@ -828,25 +884,6 @@ namespace Pinder.Core.Conversation
 
             // 10. Compute response delay
             double responseDelayMinutes = _opponent.Timing.ComputeDelay(_interest.Current, _dice);
-
-            // 10b. Steering roll — attempt to append a date-steering question
-            progress?.Report(new TurnProgressEvent(TurnProgressStage.SteeringStarted));
-            // #333: scene entries are excluded from the LLM context view.
-            SteeringRollResult steeringResult = await _steeringEngine.AttemptSteeringRollAsync(
-                deliveredMessage, _player, _opponent, _llm, BuildHistoryForLlmContext()).ConfigureAwait(false);
-            progress?.Report(new TurnProgressEvent(
-                TurnProgressStage.SteeringCompleted,
-                steeringResult.SteeringSucceeded ? steeringResult.SteeringQuestion : null));
-            if (steeringResult.SteeringSucceeded && steeringResult.SteeringQuestion != null)
-            {
-                string beforeSteering = deliveredMessage;
-                deliveredMessage = deliveredMessage.TrimEnd() + " " + steeringResult.SteeringQuestion;
-                if (deliveredMessage != beforeSteering)
-                {
-                    var steeringSpans = WordDiff.Compute(beforeSteering, deliveredMessage);
-                    textDiffs.Add(new TextDiff("Steering", steeringSpans, beforeSteering, deliveredMessage));
-                }
-            }
 
             // Per-turn Horniness overlay check (#709)
             string deliveredForHorniness = deliveredMessage;
@@ -905,7 +942,17 @@ namespace Pinder.Core.Conversation
                             _statDeliveryInstructions, pairedShadow.Value, shadowTier);
 
                         bool overlayApplied = false;
-                        if (corruptionInstruction != null && rollResult.IsSuccess)
+                        // #365: shadow corruption fires whenever the shadow check
+                        // misses AND the YAML provides a corruption instruction
+                        // for this (shadow, tier) pair — regardless of whether the
+                        // main roll succeeded or failed. The previous gating on
+                        // rollResult.IsSuccess silently dropped shadow corruption
+                        // for Catastrophe / Nat 1 etc, which contradicts the rules
+                        // in delivery-instructions.yaml (which provide instructions
+                        // for fumble/misfire/trope_trap/catastrophe/nat1) and the
+                        // explicit rule "Catastrophe + Nat 1 trigger BOTH trap +
+                        // shadow growth".
+                        if (corruptionInstruction != null)
                         {
                             // Rewrite the delivered message with shadow corruption
                             string beforeShadow = deliveredMessage;
@@ -919,13 +966,22 @@ namespace Pinder.Core.Conversation
                                 textDiffs.Add(new TextDiff($"Shadow ({pairedShadow.Value})", shadowSpans, beforeShadow, deliveredMessage));
                             }
 
-                            // Override: force success to be treated as a failure
-                            // Undo the success interest delta, apply failure delta instead
-                            var forcedFailResult = CreateForcedFailResult(rollResult, shadowTier);
-                            int shadowFailDelta = ResolveFailureInterestDelta(forcedFailResult);
-                            int correction = shadowFailDelta - interestDelta; // usually negative
-                            _interest.Apply(correction);
-                            interestDelta = shadowFailDelta;
+                            // Interest-delta override only applies when the main
+                            // roll was a SUCCESS — in that case shadow corruption
+                            // demotes the success to a failure (with shadowTier as
+                            // the failure tier) and we have to undo the success
+                            // delta and apply the failure delta instead. On a
+                            // failed roll the failure delta has already been
+                            // applied above; doing it again here would
+                            // double-penalize. (#365)
+                            if (rollResult.IsSuccess)
+                            {
+                                var forcedFailResult = CreateForcedFailResult(rollResult, shadowTier);
+                                int shadowFailDelta = ResolveFailureInterestDelta(forcedFailResult);
+                                int correction = shadowFailDelta - interestDelta; // usually negative
+                                _interest.Apply(correction);
+                                interestDelta = shadowFailDelta;
+                            }
                             overlayApplied = true;
                         }
 
