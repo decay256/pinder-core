@@ -16,7 +16,8 @@ namespace Pinder.LlmAdapters.Groq
             string model,
             string message,
             string instruction,
-            string? opponentContext = null)
+            string? opponentContext = null,
+            string? archetypeDirective = null)
         {
             if (string.IsNullOrWhiteSpace(message) || string.IsNullOrWhiteSpace(instruction))
                 return message;
@@ -29,6 +30,12 @@ namespace Pinder.LlmAdapters.Groq
             if (!string.IsNullOrWhiteSpace(opponentContext))
                 systemPrompt += $"\n\nThe message being sent is directed at this character:\n{opponentContext}";
 
+            // Inject the speaker's active archetype directive (#372) so the
+            // overlay rewrite stays in the character's voice.
+            string userContent = !string.IsNullOrWhiteSpace(archetypeDirective)
+                ? $"{archetypeDirective}\n\nOVERLAY INSTRUCTION:\n{instruction}\n\nORIGINAL MESSAGE:\n{message}\n\nApply the overlay (preserving the archetype voice above) and return the modified message."
+                : $"OVERLAY INSTRUCTION:\n{instruction}\n\nORIGINAL MESSAGE:\n{message}\n\nApply the overlay and return the modified message.";
+
             var payload = new
             {
                 model = model,
@@ -36,7 +43,7 @@ namespace Pinder.LlmAdapters.Groq
                 messages = new[]
                 {
                     new { role = "system", content = systemPrompt },
-                    new { role = "user", content = $"OVERLAY INSTRUCTION:\n{instruction}\n\nORIGINAL MESSAGE:\n{message}\n\nApply the overlay and return the modified message." }
+                    new { role = "user", content = userContent }
                 }
             };
 
