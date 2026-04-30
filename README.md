@@ -63,7 +63,8 @@ Run `dotnet test --filter "Category=Rules"` after any change to YAML rule files 
 ## Documentation
 
 - **[Architecture](docs/ARCHITECTURE.md)** — assemblies, game loop, interfaces, data files, constraints
-- **[Data Architecture](docs/data-architecture.md)** — two-tier data model, extensibility
+- **[Data Architecture](docs/data-architecture.md)** — full config map (characters, items, anatomy, traps, delivery prompts), two-tier data model, extensibility (incl. anatomy parameter extensibility)
+- **[Hosting (Unity / non-web)](docs/HOSTING.md)** — integrating Pinder.Core into a Unity project, asset binding for items + anatomy, session wiring, host contract
 - **[Rules Tools](rules/tools/README.md)** — pipeline commands and YAML enrichment
 
 ## Project Structure
