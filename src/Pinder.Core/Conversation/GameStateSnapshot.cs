@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Pinder.Core.Conversation
 {
     /// <summary>
@@ -26,6 +28,14 @@ namespace Pinder.Core.Conversation
         /// <summary>True if The Triple bonus is active for the current turn (+1 to all rolls).</summary>
         public bool TripleBonusActive { get; }
 
+        /// <summary>
+        /// #788: snapshot of the engine-owned opponent LLM conversation
+        /// history at the time the snapshot was taken. Each entry's role is
+        /// <c>"user"</c> or <c>"assistant"</c>. Always non-null — empty list
+        /// when no opponent calls have resolved yet.
+        /// </summary>
+        public IReadOnlyList<ConversationMessage> OpponentHistory { get; }
+
         public GameStateSnapshot(
             int interest,
             InterestState state,
@@ -33,7 +43,8 @@ namespace Pinder.Core.Conversation
             string[] activeTrapNames,
             int turnNumber,
             bool tripleBonusActive = false,
-            TrapDetail[] activeTrapDetails = null)
+            TrapDetail[] activeTrapDetails = null,
+            IReadOnlyList<ConversationMessage> opponentHistory = null)
         {
             Interest = interest;
             State = state;
@@ -42,6 +53,7 @@ namespace Pinder.Core.Conversation
             ActiveTrapDetails = activeTrapDetails ?? System.Array.Empty<TrapDetail>();
             TurnNumber = turnNumber;
             TripleBonusActive = tripleBonusActive;
+            OpponentHistory = opponentHistory ?? System.Array.Empty<ConversationMessage>();
         }
     }
 }

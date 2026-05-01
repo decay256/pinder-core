@@ -72,6 +72,14 @@ namespace Pinder.SessionRunner.Snapshot
     ///     (issue #339) appears as one more entry in <c>TextDiffs</c> when
     ///     same-turn callback phrases were stripped from the delivered message.
     ///   </description></item>
+    ///   <item><description>
+    ///     <c>OpponentHistory</c> (issue #788): engine-owned opponent-LLM
+    ///     conversation history. Each entry carries <c>Role</c>
+    ///     (<c>"user"</c> or <c>"assistant"</c>) and <c>Content</c>. Survives
+    ///     snapshot/restore so a replayed session can reproduce the same
+    ///     multi-turn opponent context the original session ran with. Empty
+    ///     list when no opponent calls have resolved yet.
+    ///   </description></item>
     /// </list>
     /// </summary>
     public sealed class TurnSnapshot
@@ -110,6 +118,25 @@ namespace Pinder.SessionRunner.Snapshot
         /// Horniness / Shadow layers); opponent entries leave it empty.
         /// </summary>
         public List<ConversationEntry> ConversationHistory { get; set; } = new List<ConversationEntry>();
+
+        /// <summary>
+        /// Issue #788: engine-owned opponent-LLM conversation history at the
+        /// time of snapshot. Each entry's <see cref="OpponentHistoryEntry.Role"/>
+        /// is <c>"user"</c> or <c>"assistant"</c>. Empty when no opponent calls
+        /// have resolved yet.
+        /// </summary>
+        public List<OpponentHistoryEntry> OpponentHistory { get; set; } = new List<OpponentHistoryEntry>();
+    }
+
+    /// <summary>
+    /// Issue #788: one entry of opponent-LLM conversation history. <c>Role</c>
+    /// is the OpenAI/Anthropic wire role (<c>"user"</c> or <c>"assistant"</c>);
+    /// <c>Content</c> is the raw text content.
+    /// </summary>
+    public sealed class OpponentHistoryEntry
+    {
+        public string Role { get; set; } = string.Empty;
+        public string Content { get; set; } = string.Empty;
     }
 
     /// <summary>Active trap state at the time of snapshot.</summary>

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Pinder.LlmAdapters.Groq;
 using Pinder.Core.Conversation;
@@ -36,9 +37,8 @@ namespace Pinder.LlmAdapters.Anthropic
         private readonly AnthropicOptions _options;
         private readonly AnthropicDebugLogger _debugLogger = new AnthropicDebugLogger();
 
-        // Stateful opponent session (#536)
-        private ConversationSession? _opponentSession;
-        private string? _opponentSystemPrompt;
+        // #788: opponent conversation state lives on GameSession, not here.
+        // The adapter is pure-stateless and safe for concurrent reuse across sessions.
 
         /// <summary>
         /// Creates adapter with internally-owned AnthropicClient.
@@ -61,15 +61,7 @@ namespace Pinder.LlmAdapters.Anthropic
             _client = new AnthropicClient(options.ApiKey, httpClient);
         }
 
-        /// <inheritdoc />
-        public void StartOpponentSession(string opponentSystemPrompt)
-        {
-            _opponentSystemPrompt = opponentSystemPrompt ?? throw new ArgumentNullException(nameof(opponentSystemPrompt));
-            _opponentSession = new ConversationSession();
-        }
 
-        /// <inheritdoc />
-        public bool HasOpponentSession => _opponentSession != null;
 
         /// <inheritdoc />
         public async Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context)
@@ -151,60 +143,88 @@ namespace Pinder.LlmAdapters.Anthropic
         /// <inheritdoc />
         public async Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context)
         {
+            // #788: stateless single-turn fallback. Stateful callers route
+            // through the IStatefulLlmAdapter overload that takes a history.
+            var result = await GetOpponentResponseAsync(context, System.Array.Empty<ConversationMessage>(), default).ConfigureAwait(false);
+            return result.Response;
+        }
+
+        /// <inheritdoc />
+        public async Task<StatefulOpponentResult> GetOpponentResponseAsync(
+            OpponentContext context,
+            IReadOnlyList<ConversationMessage> history,
+            CancellationToken cancellationToken = default)
+        {
             if (context == null) throw new ArgumentNullException(nameof(context));
+            if (history == null) throw new ArgumentNullException(nameof(history));
 
             var userContent = SessionDocumentBuilder.BuildOpponentPrompt(context);
             var fullOpponentPrompt = SessionSystemPromptBuilder.BuildOpponent(context.OpponentPrompt, _options.GameDefinition);
             var systemBlocks = CacheBlockBuilder.BuildOpponentOnlySystemBlocks(fullOpponentPrompt);
 
             MessagesRequest request;
-            if (_opponentSession != null)
-            {
-                _opponentSession.AppendUser(userContent);
-                request = _opponentSession.BuildRequest(
-                    _options.Model,
-                    _options.MaxTokens,
-                    _options.OpponentResponseTemperature ?? DefaultOpponentResponseTemperature,
-                    systemBlocks);
-            }
-            else
+            if (history.Count == 0)
             {
                 request = AnthropicRequestBuilders.BuildMessagesRequest(
                     _options.Model, _options.MaxTokens, systemBlocks, userContent,
                     _options.OpponentResponseTemperature ?? DefaultOpponentResponseTemperature);
+            }
+            else
+            {
+                // Multi-turn: build a fresh ConversationSession per call from the
+                // engine-supplied history. The session object is purely a
+                // request-builder helper here — no state survives the call.
+                var ephemeral = new ConversationSession();
+                for (int i = 0; i < history.Count; i++)
+                {
+                    var msg = history[i];
+                    if (msg.Role == ConversationMessage.UserRole)
+                        ephemeral.AppendUser(msg.Content);
+                    else
+                        ephemeral.AppendAssistant(msg.Content);
+                }
+                ephemeral.AppendUser(userContent);
+                request = ephemeral.BuildRequest(
+                    _options.Model,
+                    _options.MaxTokens,
+                    _options.OpponentResponseTemperature ?? DefaultOpponentResponseTemperature,
+                    systemBlocks);
             }
             AnthropicRequestBuilders.AttachTool(request, ToolSchemas.OpponentResponse);
 
             var response = await _client.SendMessagesAsync(request).ConfigureAwait(false);
             _debugLogger.LogDebug("opponent", context.CurrentTurn, request, response, _options.DebugDirectory);
 
+            OpponentResponse parsed;
+            string assistantTextForHistory;
+
             // Try structured tool_use first
             var toolInput = response.GetToolInput();
-            if (toolInput != null)
+            var toolParsed = toolInput != null
+                ? OpponentResponseParsers.ParseOpponentResponseTool(toolInput)
+                : null;
+            if (toolParsed != null)
             {
-                var parsed = OpponentResponseParsers.ParseOpponentResponseTool(toolInput);
-                if (parsed != null)
-                {
-                    if (_opponentSession != null)
-                    {
-                        _opponentSession.AppendAssistant(parsed.MessageText);
-                    }
-                    return parsed;
-                }
+                parsed = toolParsed;
+                assistantTextForHistory = toolParsed.MessageText ?? string.Empty;
+            }
+            else
+            {
+                // Fallback: text parsing with improvement pass
+                var responseText = response.GetText();
+                responseText = await AnthropicResponseImprover.ApplyImprovementAsync(
+                    _client, _options, systemBlocks, userContent, responseText,
+                    _options.OpponentResponseTemperature ?? DefaultOpponentResponseTemperature).ConfigureAwait(false);
+                parsed = OpponentResponseParsers.ParseOpponentResponseText(responseText);
+                assistantTextForHistory = responseText ?? string.Empty;
             }
 
-            // Fallback: text parsing with improvement pass
-            var responseText = response.GetText();
-            responseText = await AnthropicResponseImprover.ApplyImprovementAsync(
-                _client, _options, systemBlocks, userContent, responseText,
-                _options.OpponentResponseTemperature ?? DefaultOpponentResponseTemperature).ConfigureAwait(false);
-
-            if (_opponentSession != null)
+            var newEntries = new ConversationMessage[]
             {
-                _opponentSession.AppendAssistant(responseText);
-            }
-
-            return OpponentResponseParsers.ParseOpponentResponseText(responseText);
+                ConversationMessage.User(userContent),
+                ConversationMessage.Assistant(assistantTextForHistory),
+            };
+            return new StatefulOpponentResult(parsed, newEntries);
         }
 
         /// <inheritdoc />

@@ -225,8 +225,18 @@ namespace Pinder.Core.Tests
             public bool ShadowCorruptionCalled { get; private set; }
             public DialogueOption[] LastOptions { get; private set; } = System.Array.Empty<DialogueOption>();
 
-            public void StartOpponentSession(string opponentSystemPrompt) { }
-            public bool HasOpponentSession => false;
+            // #788: stateful LLM adapter is now history-passing and stateless.
+            public Task<StatefulOpponentResult> GetOpponentResponseAsync(
+                OpponentContext context,
+                System.Collections.Generic.IReadOnlyList<ConversationMessage> history,
+                System.Threading.CancellationToken ct = default)
+                => Task.FromResult(new StatefulOpponentResult(
+                    new OpponentResponse("..."),
+                    new ConversationMessage[]
+                    {
+                        ConversationMessage.User(string.Empty),
+                        ConversationMessage.Assistant("..."),
+                    }));
 
             public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context)
             {

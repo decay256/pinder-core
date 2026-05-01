@@ -31,6 +31,12 @@ namespace Pinder.Core.Conversation
         private readonly TrapState _traps;
         private readonly List<(string Sender, string Text)> _history;
 
+        // #788: opponent LLM conversation history lives here, not in the adapter.
+        // The adapter is pure-stateless across calls; the engine passes this list
+        // in on every opponent call and appends the new entries returned by the
+        // adapter. Survives snapshot/restore via ResimulateData.OpponentHistory.
+        private readonly List<ConversationMessage> _opponentHistory = new List<ConversationMessage>();
+
         // Sprint 8 Wave 0: optional config fields
         private readonly IGameClock? _clock;
         private readonly SessionShadowTracker? _playerShadows;
@@ -187,12 +193,11 @@ namespace Pinder.Core.Conversation
             _steeringEngine = new SteeringEngine(steeringRng);
             _horninessEngine = new HorninessEngine(steeringRng);
 
-            // Stateful conversation session (#536)
-            // If the adapter supports stateful mode, start a persistent opponent session.
-            if (_llm is Pinder.Core.Interfaces.IStatefulLlmAdapter stateful)
-            {
-                stateful.StartOpponentSession(_opponent.AssembledSystemPrompt);
-            }
+            // #788: stateful opponent context now lives on this GameSession
+            // (_opponentHistory). The adapter is pure-stateless and is fed the
+            // history on each opponent call. No initialisation needed here —
+            // the list starts empty and grows after every successful opponent
+            // call in ResolveTurnAsync.
         }
 
         /// <summary>
@@ -252,6 +257,16 @@ namespace Pinder.Core.Conversation
         /// </remarks>
         public System.Collections.Generic.IReadOnlyList<(string Sender, string Text)> ConversationHistory
             => _history;
+
+        /// <summary>
+        /// #788: opponent-LLM conversation history owned by the engine. Each
+        /// entry's role is <c>"user"</c> or <c>"assistant"</c>. Read-only view
+        /// over the live mutable list so callers see updates as turns resolve.
+        /// Survives snapshot/restore via
+        /// <see cref="ResimulateData.OpponentHistory"/>.
+        /// </summary>
+        public System.Collections.Generic.IReadOnlyList<ConversationMessage> OpponentHistory
+            => _opponentHistory;
 
         /// <summary>
         /// Build the conversation history view fed to subsequent LLM calls.
@@ -365,6 +380,25 @@ namespace Pinder.Core.Conversation
             _history.Clear();
             if (data.ConversationHistory != null)
                 _history.AddRange(data.ConversationHistory);
+
+            // Opponent LLM conversation history (#788)
+            _opponentHistory.Clear();
+            if (data.OpponentHistory != null)
+            {
+                foreach (var (role, content) in data.OpponentHistory)
+                {
+                    if (string.IsNullOrEmpty(role)) continue;
+                    try
+                    {
+                        _opponentHistory.Add(new ConversationMessage(role, content ?? string.Empty));
+                    }
+                    catch (ArgumentException)
+                    {
+                        // Skip entries with unrecognized roles — forward-compatible
+                        // with snapshots that may have stored other role labels.
+                    }
+                }
+            }
 
             // Turn number
             _turnNumber = data.TurnNumber;
@@ -1170,9 +1204,38 @@ namespace Pinder.Core.Conversation
                 activeArchetypeDirective: opponentArchetypeDirective);
 
             progress?.Report(new TurnProgressEvent(TurnProgressStage.OpponentResponseStarted));
-            var opponentResponse = await _llm.GetOpponentResponseAsync(opponentContext).ConfigureAwait(false);
-            if (opponentResponse == null)
-                throw new InvalidOperationException("LLM adapter returned null opponent response");
+
+            // #788: route through IStatefulLlmAdapter when available so the
+            // adapter can build a multi-turn wire payload from the engine-owned
+            // _opponentHistory. The adapter returns the parsed response plus
+            // the entries to append to history; the engine appends them.
+            OpponentResponse opponentResponse;
+            if (_llm is Pinder.Core.Interfaces.IStatefulLlmAdapter statefulLlm)
+            {
+                var statefulResult = await statefulLlm.GetOpponentResponseAsync(
+                    opponentContext,
+                    _opponentHistory,
+                    default).ConfigureAwait(false);
+                if (statefulResult == null)
+                    throw new InvalidOperationException("LLM adapter returned null stateful opponent result");
+                opponentResponse = statefulResult.Response;
+                if (opponentResponse == null)
+                    throw new InvalidOperationException("LLM adapter returned null opponent response");
+                if (statefulResult.NewHistoryEntries != null)
+                {
+                    foreach (var entry in statefulResult.NewHistoryEntries)
+                    {
+                        if (entry != null)
+                            _opponentHistory.Add(entry);
+                    }
+                }
+            }
+            else
+            {
+                opponentResponse = await _llm.GetOpponentResponseAsync(opponentContext).ConfigureAwait(false);
+                if (opponentResponse == null)
+                    throw new InvalidOperationException("LLM adapter returned null opponent response");
+            }
             string opponentMessage = opponentResponse.MessageText;
             progress?.Report(new TurnProgressEvent(TurnProgressStage.OpponentResponseCompleted, opponentMessage));
 
@@ -1322,7 +1385,8 @@ namespace Pinder.Core.Conversation
                 _momentumStreak,
                 _traps,
                 _turnNumber,
-                _comboTracker.HasTripleBonus);
+                _comboTracker.HasTripleBonus,
+                _opponentHistory);
         }
 
         /// <summary>
