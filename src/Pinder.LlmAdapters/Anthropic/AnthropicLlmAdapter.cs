@@ -64,7 +64,7 @@ namespace Pinder.LlmAdapters.Anthropic
 
 
         /// <inheritdoc />
-        public async Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context)
+        public async Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, CancellationToken ct = default)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
@@ -77,7 +77,7 @@ namespace Pinder.LlmAdapters.Anthropic
                 _options.DialogueOptionsTemperature ?? DefaultDialogueOptionsTemperature);
             AnthropicRequestBuilders.AttachTool(request, ToolSchemas.DialogueOptions);
 
-            var response = await _client.SendMessagesAsync(request).ConfigureAwait(false);
+            var response = await _client.SendMessagesAsync(request, ct).ConfigureAwait(false);
             _debugLogger.LogDebug("options", context.CurrentTurn, request, response, _options.DebugDirectory);
 
             // Try structured tool_use first, fall back to text parsing
@@ -94,12 +94,12 @@ namespace Pinder.LlmAdapters.Anthropic
                 ? optionsDraft
                 : await AnthropicResponseImprover.ApplyImprovementAsync(
                     _client, _options, systemBlocks, userContent, optionsDraft,
-                    _options.DialogueOptionsTemperature ?? DefaultDialogueOptionsTemperature).ConfigureAwait(false);
+                    _options.DialogueOptionsTemperature ?? DefaultDialogueOptionsTemperature, ct).ConfigureAwait(false);
             return DialogueOptionParsers.ParseDialogueOptionsText(optionsText);
         }
 
         /// <inheritdoc />
-        public async Task<string> DeliverMessageAsync(DeliveryContext context)
+        public async Task<string> DeliverMessageAsync(DeliveryContext context, CancellationToken ct = default)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
@@ -113,7 +113,7 @@ namespace Pinder.LlmAdapters.Anthropic
                 _options.DeliveryTemperature ?? DefaultDeliveryTemperature);
             AnthropicRequestBuilders.AttachTool(request, ToolSchemas.Delivery);
 
-            var response = await _client.SendMessagesAsync(request).ConfigureAwait(false);
+            var response = await _client.SendMessagesAsync(request, ct).ConfigureAwait(false);
             _debugLogger.LogDebug("delivery", context.CurrentTurn, request, response, _options.DebugDirectory);
 
             // Try structured tool_use first
@@ -136,16 +136,16 @@ namespace Pinder.LlmAdapters.Anthropic
             return applyImprovement
                 ? await AnthropicResponseImprover.ApplyImprovementAsync(
                     _client, _options, systemBlocks, userContent, deliveryDraft,
-                    _options.DeliveryTemperature ?? DefaultDeliveryTemperature).ConfigureAwait(false)
+                    _options.DeliveryTemperature ?? DefaultDeliveryTemperature, ct).ConfigureAwait(false)
                 : deliveryDraft;
         }
 
         /// <inheritdoc />
-        public async Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context)
+        public async Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context, CancellationToken ct = default)
         {
             // #788: stateless single-turn fallback. Stateful callers route
             // through the IStatefulLlmAdapter overload that takes a history.
-            var result = await GetOpponentResponseAsync(context, System.Array.Empty<ConversationMessage>(), default).ConfigureAwait(false);
+            var result = await GetOpponentResponseAsync(context, System.Array.Empty<ConversationMessage>(), ct).ConfigureAwait(false);
             return result.Response;
         }
 
@@ -192,7 +192,7 @@ namespace Pinder.LlmAdapters.Anthropic
             }
             AnthropicRequestBuilders.AttachTool(request, ToolSchemas.OpponentResponse);
 
-            var response = await _client.SendMessagesAsync(request).ConfigureAwait(false);
+            var response = await _client.SendMessagesAsync(request, cancellationToken).ConfigureAwait(false);
             _debugLogger.LogDebug("opponent", context.CurrentTurn, request, response, _options.DebugDirectory);
 
             OpponentResponse parsed;
@@ -214,7 +214,7 @@ namespace Pinder.LlmAdapters.Anthropic
                 var responseText = response.GetText();
                 responseText = await AnthropicResponseImprover.ApplyImprovementAsync(
                     _client, _options, systemBlocks, userContent, responseText,
-                    _options.OpponentResponseTemperature ?? DefaultOpponentResponseTemperature).ConfigureAwait(false);
+                    _options.OpponentResponseTemperature ?? DefaultOpponentResponseTemperature, cancellationToken).ConfigureAwait(false);
                 parsed = OpponentResponseParsers.ParseOpponentResponseText(responseText);
                 assistantTextForHistory = responseText ?? string.Empty;
             }
@@ -228,7 +228,7 @@ namespace Pinder.LlmAdapters.Anthropic
         }
 
         /// <inheritdoc />
-        public async Task<string> GetSteeringQuestionAsync(SteeringContext context)
+        public async Task<string> GetSteeringQuestionAsync(SteeringContext context, CancellationToken ct = default)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
@@ -255,7 +255,7 @@ namespace Pinder.LlmAdapters.Anthropic
 
             var request = AnthropicRequestBuilders.BuildMessagesRequest(
                 _options.Model, _options.MaxTokens, systemBlocks, sb.ToString(), 0.9);
-            var response = await _client.SendMessagesAsync(request).ConfigureAwait(false);
+            var response = await _client.SendMessagesAsync(request, ct).ConfigureAwait(false);
 
             var question = response.GetText()?.Trim();
             if (string.IsNullOrWhiteSpace(question))
@@ -268,9 +268,10 @@ namespace Pinder.LlmAdapters.Anthropic
         }
 
         /// <inheritdoc />
-        public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context)
+        public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, CancellationToken ct = default)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
+            ct.ThrowIfCancellationRequested();
             return Task.FromResult<string?>(null);
         }
 
@@ -287,20 +288,20 @@ namespace Pinder.LlmAdapters.Anthropic
         /// Apply a horniness overlay to a delivered message by calling the LLM.
         /// Routes to Groq when OverlayGroqModel and OverlayGroqApiKey are configured.
         /// </summary>
-        public async Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null)
+        public async Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null, CancellationToken ct = default)
         {
             if (!string.IsNullOrWhiteSpace(_options.OverlayGroqModel) && !string.IsNullOrWhiteSpace(_options.OverlayGroqApiKey))
             {
                 return await GroqOverlayApplier.ApplyHorninessOverlayAsync(
-                    _options.OverlayGroqApiKey, _options.OverlayGroqModel, message, instruction, opponentContext, archetypeDirective)
+                    _options.OverlayGroqApiKey, _options.OverlayGroqModel, message, instruction, opponentContext, archetypeDirective, ct)
                     .ConfigureAwait(false);
             }
             return await AnthropicOverlayApplier.ApplyHorninessOverlayAsync(
-                _client, _options, message, instruction, opponentContext, archetypeDirective).ConfigureAwait(false);
+                _client, _options, message, instruction, opponentContext, archetypeDirective, ct).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
-        public async Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow, string? archetypeDirective = null)
+        public async Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow, string? archetypeDirective = null, CancellationToken ct = default)
         {
             if (string.IsNullOrWhiteSpace(message) || string.IsNullOrWhiteSpace(instruction))
                 return message;
@@ -323,7 +324,7 @@ namespace Pinder.LlmAdapters.Anthropic
                 var request = AnthropicRequestBuilders.BuildMessagesRequest(
                     _options.Model, _options.MaxTokens, systemBlocks, userContent,
                     _options.DeliveryTemperature ?? 0.7);
-                var response = await _client.SendMessagesAsync(request).ConfigureAwait(false);
+                var response = await _client.SendMessagesAsync(request, ct).ConfigureAwait(false);
                 var result = response.GetText()?.Trim();
 
                 if (string.IsNullOrWhiteSpace(result)) return message;
@@ -335,6 +336,10 @@ namespace Pinder.LlmAdapters.Anthropic
                     return message;
 
                 return result;
+            }
+            catch (OperationCanceledException) when (ct.IsCancellationRequested)
+            {
+                throw; // #794: cancellation must propagate.
             }
             catch
             {
@@ -348,7 +353,7 @@ namespace Pinder.LlmAdapters.Anthropic
         /// trap-overlay system prompt. Returns the message unchanged on transport
         /// failure or detected refusal.
         /// </summary>
-        public async Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null)
+        public async Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null, CancellationToken ct = default)
         {
             if (string.IsNullOrWhiteSpace(message) || string.IsNullOrWhiteSpace(trapInstruction))
                 return message;
@@ -356,7 +361,7 @@ namespace Pinder.LlmAdapters.Anthropic
             if (!string.IsNullOrWhiteSpace(_options.OverlayGroqModel) && !string.IsNullOrWhiteSpace(_options.OverlayGroqApiKey))
             {
                 return await GroqOverlayApplier.ApplyTrapOverlayAsync(
-                    _options.OverlayGroqApiKey, _options.OverlayGroqModel, message, trapInstruction, trapName, opponentContext, archetypeDirective)
+                    _options.OverlayGroqApiKey, _options.OverlayGroqModel, message, trapInstruction, trapName, opponentContext, archetypeDirective, ct)
                     .ConfigureAwait(false);
             }
 
@@ -380,7 +385,7 @@ namespace Pinder.LlmAdapters.Anthropic
                 var request = AnthropicRequestBuilders.BuildMessagesRequest(
                     _options.Model, _options.MaxTokens, systemBlocks, userContent,
                     _options.DeliveryTemperature ?? 0.7);
-                var response = await _client.SendMessagesAsync(request).ConfigureAwait(false);
+                var response = await _client.SendMessagesAsync(request, ct).ConfigureAwait(false);
                 var result = response.GetText()?.Trim();
 
                 if (string.IsNullOrWhiteSpace(result)) return message;
@@ -391,6 +396,10 @@ namespace Pinder.LlmAdapters.Anthropic
                     return message;
 
                 return result;
+            }
+            catch (OperationCanceledException) when (ct.IsCancellationRequested)
+            {
+                throw; // #794: cancellation must propagate.
             }
             catch
             {

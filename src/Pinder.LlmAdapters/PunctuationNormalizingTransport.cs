@@ -78,10 +78,11 @@ namespace Pinder.LlmAdapters
 
         public async Task<string> SendAsync(
             string systemPrompt, string userMessage,
-            double temperature = 0.9, int maxTokens = 1024, string? phase = null)
+            double temperature = 0.9, int maxTokens = 1024, string? phase = null,
+            CancellationToken ct = default)
         {
             string raw = await _inner
-                .SendAsync(systemPrompt, userMessage, temperature, maxTokens, phase)
+                .SendAsync(systemPrompt, userMessage, temperature, maxTokens, phase, ct)
                 .ConfigureAwait(false);
             return Normalize(raw);
         }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Pinder.Core.Characters;
 using Pinder.Core.Interfaces;
@@ -38,8 +39,10 @@ namespace Pinder.Core.Conversation
             CharacterProfile player,
             CharacterProfile opponent,
             ILlmAdapter llm,
-            IReadOnlyList<(string Sender, string Text)> history)
+            IReadOnlyList<(string Sender, string Text)> history,
+            CancellationToken ct = default)
         {
+            ct.ThrowIfCancellationRequested();
             // Compute steering modifier: (playerCharm + playerWit + playerSA) / 3
             int playerCharm = player.Stats.GetEffective(StatType.Charm);
             int playerWit = player.Stats.GetEffective(StatType.Wit);
@@ -70,7 +73,14 @@ namespace Pinder.Core.Conversation
 
                 try
                 {
-                    steeringQuestion = await stateful.GetSteeringQuestionAsync(steeringContext).ConfigureAwait(false);
+                    steeringQuestion = await stateful.GetSteeringQuestionAsync(steeringContext, ct).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException) when (ct.IsCancellationRequested)
+                {
+                    // Cancellation must propagate — this is the engine-level
+                    // cancellation contract (#794). Don't swallow it like a
+                    // generic LLM transport failure.
+                    throw;
                 }
                 catch
                 {

@@ -253,7 +253,7 @@ namespace Pinder.Core.Tests
                         ConversationMessage.Assistant("..."),
                     }));
 
-            public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context)
+            public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, System.Threading.CancellationToken ct = default)
             {
                 return Task.FromResult(new[]
                 {
@@ -264,7 +264,7 @@ namespace Pinder.Core.Tests
                 });
             }
 
-            public Task<string> DeliverMessageAsync(DeliveryContext context)
+            public Task<string> DeliverMessageAsync(DeliveryContext context, System.Threading.CancellationToken ct = default)
             {
                 CapturedDeliveryContext = context;
                 string intended = context.ChosenOption.IntendedText;
@@ -275,20 +275,20 @@ namespace Pinder.Core.Tests
                 return Task.FromResult(intended.ToUpperInvariant());
             }
 
-            public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context)
+            public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult(new OpponentResponse("..."));
 
-            public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context)
+            public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult<string?>(null);
 
-            public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null)
+            public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
                 => Task.FromResult(message);
 
-            public Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow, string? archetypeDirective = null)
+            public Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
                 => Task.FromResult(message);
-            public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null) => Task.FromResult(message);
+            public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => Task.FromResult(message);
 
-            public Task<string> GetSteeringQuestionAsync(SteeringContext context)
+            public Task<string> GetSteeringQuestionAsync(SteeringContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult("so when are we doing this?");
         }
 

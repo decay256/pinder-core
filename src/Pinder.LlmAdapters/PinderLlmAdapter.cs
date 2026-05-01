@@ -40,7 +40,7 @@ namespace Pinder.LlmAdapters
         // ── ILlmAdapter ────────────────────────────────────────────────────
 
         /// <inheritdoc />
-        public async Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context)
+        public async Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, CancellationToken ct = default)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
@@ -48,7 +48,7 @@ namespace Pinder.LlmAdapters
             var systemPrompt = SessionSystemPromptBuilder.BuildPlayer(context.PlayerPrompt, _options.GameDefinition);
             double temperature = _options.DialogueOptionsTemperature ?? DefaultDialogueOptionsTemperature;
 
-            var responseText = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.DialogueOptions)
+            var responseText = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.DialogueOptions, ct: ct)
                 .ConfigureAwait(false);
 
             var parsedOptions = DialogueOptionParsers.ParseDialogueOptionsText(responseText);
@@ -63,7 +63,7 @@ namespace Pinder.LlmAdapters
         }
 
         /// <inheritdoc />
-        public async Task<string> DeliverMessageAsync(DeliveryContext context)
+        public async Task<string> DeliverMessageAsync(DeliveryContext context, CancellationToken ct = default)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
@@ -73,18 +73,18 @@ namespace Pinder.LlmAdapters
             var systemPrompt = SessionSystemPromptBuilder.BuildPlayer(context.PlayerPrompt, _options.GameDefinition);
             double temperature = _options.DeliveryTemperature ?? DefaultDeliveryTemperature;
 
-            var responseText = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.Delivery)
+            var responseText = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.Delivery, ct: ct)
                 .ConfigureAwait(false);
 
             return responseText ?? "";
         }
 
         /// <inheritdoc />
-        public async Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context)
+        public async Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context, CancellationToken ct = default)
         {
             // #788: stateless single-turn fallback path. Stateful callers route
             // through the IStatefulLlmAdapter overload that takes a history.
-            var result = await GetOpponentResponseAsync(context, System.Array.Empty<ConversationMessage>(), default).ConfigureAwait(false);
+            var result = await GetOpponentResponseAsync(context, System.Array.Empty<ConversationMessage>(), ct).ConfigureAwait(false);
             return result.Response;
         }
 
@@ -105,7 +105,7 @@ namespace Pinder.LlmAdapters
             if (history.Count == 0)
             {
                 // No prior turns — single-shot.
-                responseText = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.OpponentResponse)
+                responseText = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.OpponentResponse, ct: cancellationToken)
                     .ConfigureAwait(false);
             }
             else
@@ -114,7 +114,7 @@ namespace Pinder.LlmAdapters
                 // (the transport contract is single-turn). The current turn's
                 // user content is appended last, mirroring Anthropic/OpenAI
                 // wire ordering.
-                responseText = await SendStatefulOpponentAsync(systemPrompt, userContent, history, temperature)
+                responseText = await SendStatefulOpponentAsync(systemPrompt, userContent, history, temperature, cancellationToken)
                     .ConfigureAwait(false);
             }
 
@@ -131,7 +131,7 @@ namespace Pinder.LlmAdapters
         }
 
         /// <inheritdoc />
-        public async Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context)
+        public async Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, CancellationToken ct = default)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
@@ -153,7 +153,7 @@ namespace Pinder.LlmAdapters
 
             try
             {
-                var responseText = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.InterestChangeBeat)
+                var responseText = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.InterestChangeBeat, ct: ct)
                     .ConfigureAwait(false);
 
                 var trimmed = responseText?.Trim();
@@ -166,6 +166,12 @@ namespace Pinder.LlmAdapters
 
                 return trimmed;
             }
+            catch (OperationCanceledException) when (ct.IsCancellationRequested)
+            {
+                // Cancellation must propagate — don't bury OCE under the
+                // generic LLM-failure fallback (#794).
+                throw;
+            }
             catch
             {
                 return null;
@@ -173,7 +179,7 @@ namespace Pinder.LlmAdapters
         }
 
         /// <inheritdoc />
-        public async Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null)
+        public async Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null, CancellationToken ct = default)
         {
             if (string.IsNullOrWhiteSpace(message) || string.IsNullOrWhiteSpace(instruction))
                 return message;
@@ -182,7 +188,7 @@ namespace Pinder.LlmAdapters
             if (!string.IsNullOrWhiteSpace(_options.OverlayGroqModel) && !string.IsNullOrWhiteSpace(_options.OverlayGroqApiKey))
             {
                 return await GroqOverlayApplier.ApplyHorninessOverlayAsync(
-                    _options.OverlayGroqApiKey, _options.OverlayGroqModel, message, instruction, opponentContext, archetypeDirective)
+                    _options.OverlayGroqApiKey, _options.OverlayGroqModel, message, instruction, opponentContext, archetypeDirective, ct)
                     .ConfigureAwait(false);
             }
 
@@ -205,7 +211,7 @@ namespace Pinder.LlmAdapters
             try
             {
                 double temperature = _options.DeliveryTemperature ?? 0.7;
-                var result = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.HorninessOverlay)
+                var result = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.HorninessOverlay, ct: ct)
                     .ConfigureAwait(false);
 
                 if (string.IsNullOrWhiteSpace(result)) return message;
@@ -225,6 +231,10 @@ namespace Pinder.LlmAdapters
 
                 return trimmed;
             }
+            catch (OperationCanceledException) when (ct.IsCancellationRequested)
+            {
+                throw; // #794: cancellation must propagate.
+            }
             catch
             {
                 return message;
@@ -232,7 +242,7 @@ namespace Pinder.LlmAdapters
         }
 
         /// <inheritdoc />
-        public async Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null)
+        public async Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null, CancellationToken ct = default)
         {
             if (string.IsNullOrWhiteSpace(message) || string.IsNullOrWhiteSpace(trapInstruction))
                 return message;
@@ -241,7 +251,7 @@ namespace Pinder.LlmAdapters
             if (!string.IsNullOrWhiteSpace(_options.OverlayGroqModel) && !string.IsNullOrWhiteSpace(_options.OverlayGroqApiKey))
             {
                 return await GroqOverlayApplier.ApplyTrapOverlayAsync(
-                    _options.OverlayGroqApiKey, _options.OverlayGroqModel, message, trapInstruction, trapName, opponentContext, archetypeDirective)
+                    _options.OverlayGroqApiKey, _options.OverlayGroqModel, message, trapInstruction, trapName, opponentContext, archetypeDirective, ct)
                     .ConfigureAwait(false);
             }
 
@@ -263,7 +273,7 @@ namespace Pinder.LlmAdapters
             try
             {
                 double temperature = _options.DeliveryTemperature ?? 0.7;
-                var result = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.TrapOverlay)
+                var result = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.TrapOverlay, ct: ct)
                     .ConfigureAwait(false);
 
                 if (string.IsNullOrWhiteSpace(result)) return message;
@@ -280,6 +290,10 @@ namespace Pinder.LlmAdapters
 
                 return trimmed;
             }
+            catch (OperationCanceledException) when (ct.IsCancellationRequested)
+            {
+                throw; // #794: cancellation must propagate.
+            }
             catch
             {
                 return message;
@@ -287,7 +301,7 @@ namespace Pinder.LlmAdapters
         }
 
         /// <inheritdoc />
-        public async Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow, string? archetypeDirective = null)
+        public async Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow, string? archetypeDirective = null, CancellationToken ct = default)
         {
             if (string.IsNullOrWhiteSpace(message) || string.IsNullOrWhiteSpace(instruction))
                 return message;
@@ -307,7 +321,7 @@ namespace Pinder.LlmAdapters
             try
             {
                 double temperature = _options.DeliveryTemperature ?? 0.7;
-                var result = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.ShadowCorruption)
+                var result = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.ShadowCorruption, ct: ct)
                     .ConfigureAwait(false);
 
                 if (string.IsNullOrWhiteSpace(result)) return message;
@@ -324,6 +338,10 @@ namespace Pinder.LlmAdapters
 
                 return trimmed;
             }
+            catch (OperationCanceledException) when (ct.IsCancellationRequested)
+            {
+                throw; // #794: cancellation must propagate.
+            }
             catch
             {
                 return message;
@@ -331,7 +349,7 @@ namespace Pinder.LlmAdapters
         }
 
         /// <inheritdoc />
-        public async Task<string> GetSteeringQuestionAsync(SteeringContext context)
+        public async Task<string> GetSteeringQuestionAsync(SteeringContext context, CancellationToken ct = default)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
@@ -355,7 +373,7 @@ namespace Pinder.LlmAdapters
 
             string systemPrompt = SessionSystemPromptBuilder.BuildPlayer(context.PlayerPrompt, _options.GameDefinition);
 
-            var responseText = await _transport.SendAsync(systemPrompt, sb.ToString(), 0.9, _options.MaxTokens, phase: LlmPhase.Steering)
+            var responseText = await _transport.SendAsync(systemPrompt, sb.ToString(), 0.9, _options.MaxTokens, phase: LlmPhase.Steering, ct: ct)
                 .ConfigureAwait(false);
 
             // #351: strip inline <thinking>/<reasoning> blocks before any
@@ -385,7 +403,8 @@ namespace Pinder.LlmAdapters
             string systemPrompt,
             string currentUserContent,
             IReadOnlyList<ConversationMessage> priorHistory,
-            double temperature)
+            double temperature,
+            CancellationToken ct = default)
         {
             // Multi-turn: prefix prior exchanges into the user message for context.
             var contextBuilder = new StringBuilder();
@@ -406,7 +425,8 @@ namespace Pinder.LlmAdapters
                 contextBuilder.ToString(),
                 temperature,
                 _options.MaxTokens,
-                phase: LlmPhase.OpponentResponse);
+                phase: LlmPhase.OpponentResponse,
+                ct: ct);
         }
 
         public void Dispose()

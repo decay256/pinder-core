@@ -41,24 +41,24 @@ namespace Pinder.Core.Tests
                 _optionSets.Enqueue(options);
             }
 
-            public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context)
+            public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, System.Threading.CancellationToken ct = default)
             {
                 if (_optionSets.Count > 0)
                     return Task.FromResult(_optionSets.Dequeue());
                 return Task.FromResult(new[] { new DialogueOption(StatType.Charm, "Default") });
             }
 
-            public Task<string> DeliverMessageAsync(DeliveryContext context)
+            public Task<string> DeliverMessageAsync(DeliveryContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult(context.ChosenOption.IntendedText);
 
-            public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context)
+            public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult(new OpponentResponse("..."));
 
-            public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context)
+            public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult<string?>(null);
-            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null) => System.Threading.Tasks.Task.FromResult(message);
-            public System.Threading.Tasks.Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow, string? archetypeDirective = null) => System.Threading.Tasks.Task.FromResult(message);
-            public System.Threading.Tasks.Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null) => System.Threading.Tasks.Task.FromResult(message);
+            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
+            public System.Threading.Tasks.Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
+            public System.Threading.Tasks.Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
         }
 
                 [Fact]

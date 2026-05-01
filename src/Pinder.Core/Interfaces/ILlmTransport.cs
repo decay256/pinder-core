@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Pinder.Core.Interfaces
@@ -23,7 +24,14 @@ namespace Pinder.Core.Interfaces
         /// for backwards compatibility — existing callers and ILlmTransport implementations
         /// do not need to change.
         /// </param>
+        /// <param name="ct">
+        /// Cancellation token (#794). Implementations MUST pass the token through to
+        /// the underlying HTTP call so a mid-turn cancel from the engine halts the
+        /// in-flight request and propagates <see cref="System.OperationCanceledException"/>.
+        /// Defaults to <c>default</c> for backwards compatibility — existing callers
+        /// that don't pass a token continue to work unchanged.
+        /// </param>
         /// <returns>Raw text response from the LLM.</returns>
-        Task<string> SendAsync(string systemPrompt, string userMessage, double temperature = 0.9, int maxTokens = 1024, string? phase = null);
+        Task<string> SendAsync(string systemPrompt, string userMessage, double temperature = 0.9, int maxTokens = 1024, string? phase = null, CancellationToken ct = default);
     }
 }

@@ -70,14 +70,17 @@ namespace Pinder.Core.Tests.Phase0
         }
 
         // F3 — cancellation token fires mid-stream.
-        // pinder-core's non-streaming path has NO CancellationToken plumbing
-        // (gap documented in I6). The closest fixture: transport throws
-        // OperationCanceledException during the streaming-equivalent phase
-        // (opponent_response, the longest call). Half-streamed responses
-        // are discarded by definition because non-streaming has no partial
-        // state. F3 is therefore a thin wrapper around the OCE assertion.
+        // Pre-#794: pinder-core's non-streaming path had NO CancellationToken
+        // plumbing. F3 was a thin wrapper around "transport throws OCE".
+        // Post-#794: the engine accepts a real CancellationToken on
+        // ResolveTurnAsync. F3 now exercises both shapes:
+        //   F3a (legacy): transport throws OCE during opponent_response.
+        //   F3b (new):    real CancellationTokenSource.Cancel() fires after
+        //                 delivery completes; the next awaited LLM call sees
+        //                 the cancelled token and surfaces OCE.
+        // Both must propagate cleanly with no half-written audit.
         [Fact]
-        public async Task F3_CancellationMidStream_FailsCleanly_NoHalfWrittenAudit()
+        public async Task F3a_TransportThrowsOCE_MidStream_FailsCleanly_NoHalfWrittenAudit()
         {
             var transport = new ExceptionInjectingTransport(
                 throwOnPhase: LlmPhase.OpponentResponse,
@@ -94,6 +97,37 @@ namespace Pinder.Core.Tests.Phase0
             // BEFORE the throw, but no opponent_response exchange was
             // committed because the throwing transport never delegated.
             Assert.Empty(inner.ExchangesByPhase(LlmPhase.OpponentResponse));
+        }
+
+        // F3b — real cancellation. CancellationTokenSource.Cancel() fires
+        // after the delivery phase completes; the engine's next awaited
+        // adapter call (overlay or opponent_response) sees the cancelled
+        // token and propagates OCE. This is the post-#794 invariant
+        // strengthened from a weaker "OCE-from-transport" smoke check.
+        [Fact]
+        public async Task F3b_RealCancel_AfterDelivery_FailsCleanly_NoHalfWrittenAudit()
+        {
+            var cts = new CancellationTokenSource();
+            var transport = new CancelOnPhaseTransport(
+                cancelOnPhase: LlmPhase.Delivery,
+                cts: cts);
+
+            var adapter = Phase0Fixtures.MakeAdapter(transport);
+            var dice = new PlaybackDiceRoller(5, 15, 50);
+            var session = new GameSession(
+                Phase0Fixtures.MakeProfile("Player"),
+                Phase0Fixtures.MakeProfile("Opponent"),
+                adapter, dice, new NullTrapRegistry(),
+                Phase0Fixtures.MakeConfig());
+
+            int turnBefore = session.TurnNumber;
+            await session.StartTurnAsync(cts.Token);
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(
+                () => session.ResolveTurnAsync(0, progress: null, ct: cts.Token));
+
+            // No turn advancement, no opponent_response written.
+            Assert.Equal(turnBefore, session.TurnNumber);
+            Assert.Empty(transport.Inner.ExchangesByPhase(LlmPhase.OpponentResponse));
         }
 
         // F4 — disk-full during audit write.
@@ -168,6 +202,49 @@ namespace Pinder.Core.Tests.Phase0
             public HttpRequestExceptionShim(string message) : base(message) { }
         }
 
+        /// <summary>
+        /// Helper transport for F3b (#794): calls
+        /// <see cref="CancellationTokenSource.Cancel"/> AFTER it produces a
+        /// successful response for the configured phase. The engine then
+        /// notices the cancellation on the next awaited adapter call and
+        /// surfaces <see cref="OperationCanceledException"/>.
+        /// </summary>
+        private sealed class CancelOnPhaseTransport : ILlmTransport
+        {
+            private readonly string _cancelOnPhase;
+            private readonly CancellationTokenSource _cts;
+            public RecordingLlmTransport Inner { get; }
+
+            public CancelOnPhaseTransport(string cancelOnPhase, CancellationTokenSource cts)
+            {
+                _cancelOnPhase = cancelOnPhase;
+                _cts = cts;
+                Inner = new RecordingLlmTransport { DefaultResponse = "" };
+                Inner.QueueDialogueOptions(Phase0Fixtures.CannedDialogueOptions);
+                Inner.QueueDelivery(Phase0Fixtures.CannedDelivery);
+                Inner.QueueOpponent(Phase0Fixtures.CannedOpponent);
+            }
+
+            public async Task<string> SendAsync(
+                string systemPrompt,
+                string userMessage,
+                double temperature = 0.9,
+                int maxTokens = 1024,
+                string? phase = null,
+                System.Threading.CancellationToken ct = default)
+            {
+                ct.ThrowIfCancellationRequested();
+                var response = await Inner
+                    .SendAsync(systemPrompt, userMessage, temperature, maxTokens, phase, ct)
+                    .ConfigureAwait(false);
+                if (string.Equals(phase, _cancelOnPhase, StringComparison.Ordinal))
+                {
+                    _cts.Cancel();
+                }
+                return response;
+            }
+        }
+
         private sealed class ExceptionInjectingTransport : ILlmTransport
         {
             private readonly string _throwOnPhase;
@@ -189,13 +266,15 @@ namespace Pinder.Core.Tests.Phase0
                 string userMessage,
                 double temperature = 0.9,
                 int maxTokens = 1024,
-                string? phase = null)
+                string? phase = null,
+                System.Threading.CancellationToken ct = default)
             {
+                ct.ThrowIfCancellationRequested();
                 if (string.Equals(phase, _throwOnPhase, StringComparison.Ordinal))
                 {
                     throw _exFactory();
                 }
-                return Inner.SendAsync(systemPrompt, userMessage, temperature, maxTokens, phase);
+                return Inner.SendAsync(systemPrompt, userMessage, temperature, maxTokens, phase, ct);
             }
         }
     }

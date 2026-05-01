@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Pinder.Core.Interfaces;
 using Pinder.LlmAdapters.Anthropic.Dto;
@@ -35,7 +36,7 @@ namespace Pinder.LlmAdapters.Anthropic
         }
 
         /// <inheritdoc />
-        public async Task<string> SendAsync(string systemPrompt, string userMessage, double temperature = 0.9, int maxTokens = 1024, string? phase = null)
+        public async Task<string> SendAsync(string systemPrompt, string userMessage, double temperature = 0.9, int maxTokens = 1024, string? phase = null, CancellationToken ct = default)
         {
             // phase is metadata for decorators; the underlying provider has no use for it.
             _ = phase;
@@ -50,7 +51,9 @@ namespace Pinder.LlmAdapters.Anthropic
             var request = AnthropicRequestBuilders.BuildMessagesRequest(
                 _model, maxTokens, systemBlocks, userMessage, temperature);
 
-            var response = await _client.SendMessagesAsync(request).ConfigureAwait(false);
+            // #794: forward the engine-level cancellation token to the underlying
+            // HTTP call so a mid-turn Cancel() halts the in-flight request.
+            var response = await _client.SendMessagesAsync(request, ct).ConfigureAwait(false);
             return response.GetText() ?? "";
         }
 

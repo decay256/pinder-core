@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 using Pinder.LlmAdapters.Anthropic.Dto;
 
@@ -19,7 +20,8 @@ namespace Pinder.LlmAdapters.Anthropic
             string message,
             string instruction,
             string? opponentContext = null,
-            string? archetypeDirective = null)
+            string? archetypeDirective = null,
+            CancellationToken ct = default)
         {
             if (string.IsNullOrWhiteSpace(message) || string.IsNullOrWhiteSpace(instruction))
                 return message;
@@ -51,7 +53,7 @@ namespace Pinder.LlmAdapters.Anthropic
 
             try
             {
-                var response = await client.SendMessagesAsync(request).ConfigureAwait(false);
+                var response = await client.SendMessagesAsync(request, ct).ConfigureAwait(false);
                 string result = response?.Content?[0]?.Text;
                 if (string.IsNullOrWhiteSpace(result)) return message;
                 string trimmed = result.Trim();
@@ -62,6 +64,10 @@ namespace Pinder.LlmAdapters.Anthropic
                     trimmed.IndexOf("I'd be happy to help", System.StringComparison.OrdinalIgnoreCase) >= 0)
                     return message;
                 return trimmed;
+            }
+            catch (System.OperationCanceledException) when (ct.IsCancellationRequested)
+            {
+                throw; // #794: cancellation must propagate.
             }
             catch
             {

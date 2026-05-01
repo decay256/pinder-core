@@ -58,6 +58,11 @@ namespace Pinder.Core.Interfaces
         /// Called after a successful steering roll. The question should reference
         /// specifics from the conversation and nudge toward meeting up.
         /// </summary>
-        Task<string> GetSteeringQuestionAsync(SteeringContext context);
+        /// <param name="ct">
+        /// Cancellation token forwarded from <see cref="GameSession.ResolveTurnAsync(int, System.IProgress{TurnProgressEvent}?, CancellationToken)"/>
+        /// (#794). Implementations MUST pass this through to the underlying
+        /// transport so a mid-turn cancel halts the in-flight HTTP call.
+        /// </param>
+        Task<string> GetSteeringQuestionAsync(SteeringContext context, CancellationToken ct = default);
     }
 }

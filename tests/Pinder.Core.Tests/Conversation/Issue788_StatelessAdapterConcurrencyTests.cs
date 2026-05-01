@@ -43,19 +43,19 @@ namespace Pinder.Core.Tests.Conversation
             private int _inFlight;
             public int MaxInFlightObserved { get; private set; }
 
-            public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context)
+            public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, CancellationToken ct = default)
                 => Task.FromResult(System.Array.Empty<DialogueOption>());
-            public Task<string> DeliverMessageAsync(DeliveryContext context)
+            public Task<string> DeliverMessageAsync(DeliveryContext context, CancellationToken ct = default)
                 => Task.FromResult(string.Empty);
-            public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context)
+            public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context, CancellationToken ct = default)
                 => Task.FromResult(new OpponentResponse(string.Empty));
-            public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context)
+            public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, CancellationToken ct = default)
                 => Task.FromResult<string?>(null);
-            public Task<string> GetSteeringQuestionAsync(SteeringContext context)
+            public Task<string> GetSteeringQuestionAsync(SteeringContext context, CancellationToken ct = default)
                 => Task.FromResult(string.Empty);
-            public Task<string> ApplyHorninessOverlayAsync(string m, string i, string? oc = null, string? ad = null) => Task.FromResult(m);
-            public Task<string> ApplyShadowCorruptionAsync(string m, string i, ShadowStatType s, string? ad = null) => Task.FromResult(m);
-            public Task<string> ApplyTrapOverlayAsync(string m, string i, string n, string? oc = null, string? ad = null) => Task.FromResult(m);
+            public Task<string> ApplyHorninessOverlayAsync(string m, string i, string? oc = null, string? ad = null, CancellationToken ct = default) => Task.FromResult(m);
+            public Task<string> ApplyShadowCorruptionAsync(string m, string i, ShadowStatType s, string? ad = null, CancellationToken ct = default) => Task.FromResult(m);
+            public Task<string> ApplyTrapOverlayAsync(string m, string i, string n, string? oc = null, string? ad = null, CancellationToken ct = default) => Task.FromResult(m);
 
             public async Task<StatefulOpponentResult> GetOpponentResponseAsync(
                 OpponentContext context,

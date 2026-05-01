@@ -15,7 +15,8 @@ namespace Pinder.Core.Tests.SessionSetup
             string userMessage,
             double temperature = 0.9,
             int maxTokens = 1024,
-            string? phase = null) =>
+            string? phase = null,
+            System.Threading.CancellationToken ct = default) =>
             Task.FromResult(string.Empty);
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -17,7 +18,8 @@ namespace Pinder.LlmAdapters.Groq
             string message,
             string instruction,
             string? opponentContext = null,
-            string? archetypeDirective = null)
+            string? archetypeDirective = null,
+            CancellationToken ct = default)
         {
             if (string.IsNullOrWhiteSpace(message) || string.IsNullOrWhiteSpace(instruction))
                 return message;
@@ -53,7 +55,7 @@ namespace Pinder.LlmAdapters.Groq
 
             try
             {
-                var response = await _http.SendAsync(request).ConfigureAwait(false);
+                var response = await _http.SendAsync(request, ct).ConfigureAwait(false);
                 var body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 if (!response.IsSuccessStatusCode) return message;
 
@@ -69,6 +71,10 @@ namespace Pinder.LlmAdapters.Groq
                     return message;
 
                 return text;
+            }
+            catch (OperationCanceledException) when (ct.IsCancellationRequested)
+            {
+                throw; // #794: cancellation must propagate.
             }
             catch
             {
@@ -88,7 +94,8 @@ namespace Pinder.LlmAdapters.Groq
             string trapInstruction,
             string trapName,
             string? opponentContext = null,
-            string? archetypeDirective = null)
+            string? archetypeDirective = null,
+            CancellationToken ct = default)
         {
             if (string.IsNullOrWhiteSpace(message) || string.IsNullOrWhiteSpace(trapInstruction))
                 return message;
@@ -125,7 +132,7 @@ namespace Pinder.LlmAdapters.Groq
 
             try
             {
-                var response = await _http.SendAsync(request).ConfigureAwait(false);
+                var response = await _http.SendAsync(request, ct).ConfigureAwait(false);
                 var body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 if (!response.IsSuccessStatusCode) return message;
 
@@ -140,6 +147,10 @@ namespace Pinder.LlmAdapters.Groq
                     return message;
 
                 return text;
+            }
+            catch (OperationCanceledException) when (ct.IsCancellationRequested)
+            {
+                throw; // #794: cancellation must propagate.
             }
             catch
             {

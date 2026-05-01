@@ -17,8 +17,9 @@ namespace Pinder.Core.Conversation
         /// Returns 4 generic dialogue options, one per stat family
         /// (Charm, Honesty, Wit, Chaos).
         /// </summary>
-        public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context)
+        public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, CancellationToken ct = default)
         {
+            ct.ThrowIfCancellationRequested();
             var options = new[]
             {
                 new DialogueOption(StatType.Charm, "Hey, you come here often?"),
@@ -33,8 +34,9 @@ namespace Pinder.Core.Conversation
         /// Echoes the intended text with a failure tier prefix.
         /// Format: "[{tier}] {intendedText}" for failures, or the intended text as-is for success.
         /// </summary>
-        public Task<string> DeliverMessageAsync(DeliveryContext context)
+        public Task<string> DeliverMessageAsync(DeliveryContext context, CancellationToken ct = default)
         {
+            ct.ThrowIfCancellationRequested();
             string message = context.Outcome == FailureTier.None
                 ? context.ChosenOption.IntendedText
                 : $"[{context.Outcome}] {context.ChosenOption.IntendedText}";
@@ -44,8 +46,9 @@ namespace Pinder.Core.Conversation
         /// <summary>
         /// Returns a minimal placeholder OpponentResponse with "..." text and no signals.
         /// </summary>
-        public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context)
+        public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context, CancellationToken ct = default)
         {
+            ct.ThrowIfCancellationRequested();
             return Task.FromResult(new OpponentResponse("..."));
         }
 
@@ -70,32 +73,36 @@ namespace Pinder.Core.Conversation
         /// <summary>
         /// Always returns null (no narrative beat).
         /// </summary>
-        public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context)
+        public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, CancellationToken ct = default)
         {
+            ct.ThrowIfCancellationRequested();
             return Task.FromResult<string?>(null);
         }
 
         /// <summary>
         /// Returns a placeholder steering question.
         /// </summary>
-        public Task<string> GetSteeringQuestionAsync(SteeringContext context)
+        public Task<string> GetSteeringQuestionAsync(SteeringContext context, CancellationToken ct = default)
         {
+            ct.ThrowIfCancellationRequested();
             return Task.FromResult("so... when are we actually doing this?");
         }
 
         /// <summary>
         /// Returns the message unchanged (no LLM overlay in test mode).
         /// </summary>
-        public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null)
+        public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null, CancellationToken ct = default)
         {
+            ct.ThrowIfCancellationRequested();
             return Task.FromResult(message);
         }
 
         /// <summary>
         /// Returns the message unchanged (no shadow corruption in test mode).
         /// </summary>
-        public Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow, string? archetypeDirective = null)
+        public Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow, string? archetypeDirective = null, CancellationToken ct = default)
         {
+            ct.ThrowIfCancellationRequested();
             return Task.FromResult(message);
         }
 
@@ -104,8 +111,9 @@ namespace Pinder.Core.Conversation
         /// Used by the deterministic test harness so engine flow can be exercised
         /// without an actual LLM round-trip.
         /// </summary>
-        public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null)
+        public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null, CancellationToken ct = default)
         {
+            ct.ThrowIfCancellationRequested();
             return Task.FromResult(message);
         }
     }

@@ -74,7 +74,7 @@ namespace Pinder.LlmAdapters.OpenAi
 
 
         /// <inheritdoc />
-        public async Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context)
+        public async Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, CancellationToken ct = default)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
@@ -82,13 +82,13 @@ namespace Pinder.LlmAdapters.OpenAi
             var systemPrompt = SessionSystemPromptBuilder.BuildPlayer(context.PlayerPrompt, _options.GameDefinition);
 
             var requestJson = BuildRequestJson(systemPrompt, userContent, DefaultDialogueOptionsTemperature);
-            var responseText = await _client.SendChatCompletionAsync(requestJson).ConfigureAwait(false);
+            var responseText = await _client.SendChatCompletionAsync(requestJson, ct).ConfigureAwait(false);
 
             return ParseDialogueOptions(responseText);
         }
 
         /// <inheritdoc />
-        public async Task<string> DeliverMessageAsync(DeliveryContext context)
+        public async Task<string> DeliverMessageAsync(DeliveryContext context, CancellationToken ct = default)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
@@ -97,17 +97,17 @@ namespace Pinder.LlmAdapters.OpenAi
             var systemPrompt = SessionSystemPromptBuilder.BuildPlayer(context.PlayerPrompt, _options.GameDefinition);
 
             var requestJson = BuildRequestJson(systemPrompt, userContent, DefaultDeliveryTemperature);
-            var responseText = await _client.SendChatCompletionAsync(requestJson).ConfigureAwait(false);
+            var responseText = await _client.SendChatCompletionAsync(requestJson, ct).ConfigureAwait(false);
 
             return responseText;
         }
 
         /// <inheritdoc />
-        public async Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context)
+        public async Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context, CancellationToken ct = default)
         {
             // #788: stateless single-turn fallback. Stateful callers route
             // through the IStatefulLlmAdapter overload that takes a history.
-            var result = await GetOpponentResponseAsync(context, System.Array.Empty<ConversationMessage>(), default).ConfigureAwait(false);
+            var result = await GetOpponentResponseAsync(context, System.Array.Empty<ConversationMessage>(), ct).ConfigureAwait(false);
             return result.Response;
         }
 
@@ -133,7 +133,7 @@ namespace Pinder.LlmAdapters.OpenAi
                 requestJson = BuildStatefulRequestJson(systemPrompt, history, userContent, DefaultOpponentResponseTemperature);
             }
 
-            var responseText = await _client.SendChatCompletionAsync(requestJson).ConfigureAwait(false);
+            var responseText = await _client.SendChatCompletionAsync(requestJson, cancellationToken).ConfigureAwait(false);
             var parsed = ParseOpponentResponse(responseText);
 
             var newEntries = new ConversationMessage[]
@@ -145,7 +145,7 @@ namespace Pinder.LlmAdapters.OpenAi
         }
 
         /// <inheritdoc />
-        public async Task<string> GetSteeringQuestionAsync(SteeringContext context)
+        public async Task<string> GetSteeringQuestionAsync(SteeringContext context, CancellationToken ct = default)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
@@ -169,7 +169,7 @@ namespace Pinder.LlmAdapters.OpenAi
 
             string fullPlayerPrompt = SessionSystemPromptBuilder.BuildPlayer(context.PlayerPrompt, _options.GameDefinition);
             var requestJson = BuildRequestJson(fullPlayerPrompt, sb.ToString(), 0.9);
-            var responseText = await _client.SendChatCompletionAsync(requestJson).ConfigureAwait(false);
+            var responseText = await _client.SendChatCompletionAsync(requestJson, ct).ConfigureAwait(false);
 
             // #351: strip inline <thinking>/<reasoning> blocks — the steering
             // question is consumed verbatim by the player UI.
@@ -184,9 +184,10 @@ namespace Pinder.LlmAdapters.OpenAi
         }
 
         /// <inheritdoc />
-        public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context)
+        public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, CancellationToken ct = default)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
+            ct.ThrowIfCancellationRequested();
             return Task.FromResult<string?>(null);
         }
 
@@ -450,7 +451,7 @@ namespace Pinder.LlmAdapters.OpenAi
         // false fallback to the un-overlaid message.
 
         /// <inheritdoc />
-        public async Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null)
+        public async Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null, CancellationToken ct = default)
         {
             if (string.IsNullOrWhiteSpace(message) || string.IsNullOrWhiteSpace(instruction))
                 return message;
@@ -467,12 +468,12 @@ namespace Pinder.LlmAdapters.OpenAi
                 ? $"{archetypeDirective}\n\nOVERLAY INSTRUCTION:\n{instruction}\n\nORIGINAL MESSAGE:\n{message}\n\nApply the overlay (preserving the archetype voice above) and return the modified message."
                 : $"OVERLAY INSTRUCTION:\n{instruction}\n\nORIGINAL MESSAGE:\n{message}\n\nApply the overlay and return the modified message.";
 
-            return await SendOverlayWithRefusalFallbackAsync(systemPrompt, userContent, message, DefaultDeliveryTemperature)
+            return await SendOverlayWithRefusalFallbackAsync(systemPrompt, userContent, message, DefaultDeliveryTemperature, ct)
                 .ConfigureAwait(false);
         }
 
         /// <inheritdoc />
-        public async Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow, string? archetypeDirective = null)
+        public async Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow, string? archetypeDirective = null, CancellationToken ct = default)
         {
             if (string.IsNullOrWhiteSpace(message) || string.IsNullOrWhiteSpace(instruction))
                 return message;
@@ -487,12 +488,12 @@ namespace Pinder.LlmAdapters.OpenAi
                 ? $"{archetypeDirective}\n\nSHADOW CORRUPTION INSTRUCTION ({shadow}):\n{instruction}\n\nORIGINAL MESSAGE:\n{message}\n\nApply the corruption (preserving the archetype voice above) and return the modified message."
                 : $"SHADOW CORRUPTION INSTRUCTION ({shadow}):\n{instruction}\n\nORIGINAL MESSAGE:\n{message}\n\nApply the corruption and return the modified message.";
 
-            return await SendOverlayWithRefusalFallbackAsync(systemPrompt, userContent, message, DefaultDeliveryTemperature)
+            return await SendOverlayWithRefusalFallbackAsync(systemPrompt, userContent, message, DefaultDeliveryTemperature, ct)
                 .ConfigureAwait(false);
         }
 
         /// <inheritdoc />
-        public async Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null)
+        public async Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null, CancellationToken ct = default)
         {
             if (string.IsNullOrWhiteSpace(message) || string.IsNullOrWhiteSpace(trapInstruction))
                 return message;
@@ -510,7 +511,7 @@ namespace Pinder.LlmAdapters.OpenAi
                 ? $"{archetypeDirective}\n\nTRAP INSTRUCTION ({trapName}):\n{trapInstruction}\n\nORIGINAL MESSAGE:\n{message}\n\nApply the trap taint (preserving the archetype voice above) and return the modified message."
                 : $"TRAP INSTRUCTION ({trapName}):\n{trapInstruction}\n\nORIGINAL MESSAGE:\n{message}\n\nApply the trap taint and return the modified message.";
 
-            return await SendOverlayWithRefusalFallbackAsync(systemPrompt, userContent, message, DefaultDeliveryTemperature)
+            return await SendOverlayWithRefusalFallbackAsync(systemPrompt, userContent, message, DefaultDeliveryTemperature, ct)
                 .ConfigureAwait(false);
         }
 
@@ -522,12 +523,13 @@ namespace Pinder.LlmAdapters.OpenAi
         /// through to the player.
         /// </summary>
         private async Task<string> SendOverlayWithRefusalFallbackAsync(
-            string systemPrompt, string userContent, string originalMessage, double temperature)
+            string systemPrompt, string userContent, string originalMessage, double temperature,
+            CancellationToken ct = default)
         {
             try
             {
                 var requestJson = BuildRequestJson(systemPrompt, userContent, temperature);
-                var result = await _client.SendChatCompletionAsync(requestJson).ConfigureAwait(false);
+                var result = await _client.SendChatCompletionAsync(requestJson, ct).ConfigureAwait(false);
                 if (string.IsNullOrWhiteSpace(result)) return originalMessage;
 
                 // #351: strip inline <thinking>/<reasoning> blocks before
@@ -542,6 +544,10 @@ namespace Pinder.LlmAdapters.OpenAi
                     return originalMessage;
 
                 return trimmed;
+            }
+            catch (OperationCanceledException) when (ct.IsCancellationRequested)
+            {
+                throw; // #794: cancellation must propagate.
             }
             catch
             {
