@@ -9,8 +9,13 @@ using Xunit;
 
 namespace Pinder.Core.Tests
 {
+    /// <summary>
+    /// Horniness-modifier behaviour driven by clock-of-day.
+    /// Energy mechanics were removed in #786; this file is the surviving horniness slice
+    /// of the former <c>HorninessAndEnergyTests</c>.
+    /// </summary>
     [Trait("Category", "Core")]
-    public class HorninessAndEnergyTests
+    public class HorninessTests
     {
         /// <summary>
         /// When a clock is present, session horniness = dice roll + clock modifier.
@@ -23,7 +28,7 @@ namespace Pinder.Core.Tests
         {
             // Dice queue: 7 (horniness roll), then enough for StartTurnAsync (no rolls needed there)
             var dice = new FixedDice(7);
-            var clock = new ConfigurableClock(horninessModifier: 3, remainingEnergy: 10);
+            var clock = new ConfigurableClock(horninessModifier: 3);
 
             var config = new GameSessionConfig(clock: clock);
             var session = new GameSession(
@@ -59,7 +64,7 @@ namespace Pinder.Core.Tests
         {
             // FixedDice returns 15 for the horniness roll (not clamped to 1-10 in FixedDice)
             var dice = new FixedDice(15);
-            var clock = new ConfigurableClock(horninessModifier: 3, remainingEnergy: 10);
+            var clock = new ConfigurableClock(horninessModifier: 3);
 
             var config = new GameSessionConfig(clock: clock);
             var session = new GameSession(
@@ -85,35 +90,6 @@ namespace Pinder.Core.Tests
         }
 
         /// <summary>
-        /// When clock.ConsumeEnergy returns false, ResolveTurnAsync should throw GameEndedException
-        /// with Unmatched outcome.
-        /// </summary>
-        [Fact]
-        public async Task GameSession_EnergyDepletion_ThrowsGameEnded()
-        {
-            // Dice queue: 5 (horniness roll), then enough for StartTurnAsync
-            // ResolveTurnAsync will check energy before rolling, so no more dice needed if energy fails.
-            var dice = new FixedDice(5);
-            var clock = new ConfigurableClock(horninessModifier: 0, remainingEnergy: 0);
-
-            var config = new GameSessionConfig(clock: clock);
-            var session = new GameSession(
-                MakeProfile("Player"),
-                MakeProfile("Opponent"),
-                new NullLlmAdapter(),
-                dice,
-                new NullTrapRegistry(),
-                config);
-
-            var turn = await session.StartTurnAsync();
-            Assert.NotNull(turn);
-
-            var ex = await Assert.ThrowsAsync<GameEndedException>(
-                () => session.ResolveTurnAsync(0));
-            Assert.Equal(GameOutcome.Unmatched, ex.Outcome);
-        }
-
-        /// <summary>
         /// When horniness < 12, options retain original stats (no T2/T3 effect on options).
         /// When horniness >= 12 but < 18, RequiresRizzOption is set in context but options aren't all forced to Rizz.
         /// </summary>
@@ -122,7 +98,7 @@ namespace Pinder.Core.Tests
         {
             // dice=10 + modifier(+3) = 13 → T2 (>= 12), but not T3 (< 18)
             var dice = new FixedDice(10);
-            var clock = new ConfigurableClock(horninessModifier: 3, remainingEnergy: 10);
+            var clock = new ConfigurableClock(horninessModifier: 3);
 
             var config = new GameSessionConfig(clock: clock);
             var session = new GameSession(
@@ -147,17 +123,17 @@ namespace Pinder.Core.Tests
         }
 
         /// <summary>
-        /// Without a clock, horniness is still rolled (1d10) but with no time-of-day modifier.
-        /// No energy is consumed.
+        /// With a clock present, horniness is rolled (1d10) and the clock modifier applied.
+        /// ResolveTurnAsync should complete normally (energy mechanics removed in #786).
         /// </summary>
         [Fact]
-        public async Task GameSession_WithClock_HorninessRolled_NoEnergyCheck()
+        public async Task GameSession_WithClock_HorninessRolled_ResolvesNormally()
         {
             // Clock required. Horniness roll (1d10) = 5, then Turn 1: d20=15 (roll), d100=50 (timing delay)
             var dice = new FixedDice(
                 5,   // horniness roll
                 15, 50);
-            var clock = new ConfigurableClock(horninessModifier: 0, remainingEnergy: 100);
+            var clock = new ConfigurableClock(horninessModifier: 0);
             var config = new GameSessionConfig(clock: clock);
 
             var session = new GameSession(
@@ -183,7 +159,7 @@ namespace Pinder.Core.Tests
         public async Task GameSession_WithClock_HighHorniness_DoesNotForceRizz()
         {
             var dice = new FixedDice(20);
-            var clock = new ConfigurableClock(horninessModifier: 0, remainingEnergy: 100);
+            var clock = new ConfigurableClock(horninessModifier: 0);
             var config = new GameSessionConfig(clock: clock);
 
             var session = new GameSession(
@@ -218,27 +194,17 @@ namespace Pinder.Core.Tests
         private sealed class ConfigurableClock : IGameClock
         {
             private readonly int _horninessModifier;
-            private int _remainingEnergy;
 
-            public ConfigurableClock(int horninessModifier, int remainingEnergy)
+            public ConfigurableClock(int horninessModifier)
             {
                 _horninessModifier = horninessModifier;
-                _remainingEnergy = remainingEnergy;
             }
 
             public DateTimeOffset Now => DateTimeOffset.UtcNow;
-            public int RemainingEnergy => _remainingEnergy;
             public void Advance(TimeSpan amount) { }
             public void AdvanceTo(DateTimeOffset target) { }
             public TimeOfDay GetTimeOfDay() => TimeOfDay.LateNight;
             public int GetHorninessModifier() => _horninessModifier;
-
-            public bool ConsumeEnergy(int amount)
-            {
-                if (_remainingEnergy < amount) return false;
-                _remainingEnergy -= amount;
-                return true;
-            }
         }
     }
 }

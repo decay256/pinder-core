@@ -52,13 +52,5 @@ namespace Pinder.Core.Interfaces
         /// Morning=-2, Afternoon=0, Evening=+1, LateNight=+3, AfterTwoAm=+5.
         /// </summary>
         int GetHorninessModifier();
-
-        /// <summary>Energy remaining for the current day.</summary>
-        int RemainingEnergy { get; }
-
-        /// <summary>
-        /// Attempt to consume energy. Returns false if insufficient (no deduction on failure).
-        /// </summary>
-        bool ConsumeEnergy(int amount);
     }
 }

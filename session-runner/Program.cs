@@ -584,14 +584,14 @@ class Program
             var mods = gameDef.HorninessTimeModifiers;
             var horninessModifiers = new Pinder.Core.Conversation.HorninessModifiers(
                 mods.Morning, mods.Afternoon, mods.Evening, mods.Overnight);
-            // dailyEnergy: unlimited in single-session sim (energy budget is a game-loop feature, not yet implemented)
-            clock = new Pinder.Core.Conversation.GameClock(now, horninessModifiers, dailyEnergy: int.MaxValue);
+            // Energy mechanics removed in #786.
+            clock = new Pinder.Core.Conversation.GameClock(now, horninessModifiers);
         }
         else
         {
             // Fallback: zero modifiers when game definition is unavailable
             var zeroModifiers = new Pinder.Core.Conversation.HorninessModifiers(0, 0, 0, 0);
-            clock = new Pinder.Core.Conversation.GameClock(now, zeroModifiers, dailyEnergy: int.MaxValue);
+            clock = new Pinder.Core.Conversation.GameClock(now, zeroModifiers);
         }
 
         // Display time-of-day info in session header

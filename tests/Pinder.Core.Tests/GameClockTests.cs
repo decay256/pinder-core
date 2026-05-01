@@ -5,6 +5,10 @@ using Xunit;
 
 namespace Pinder.Core.Tests
 {
+    /// <summary>
+    /// Time-of-day and horniness-modifier behaviour for <see cref="GameClock"/>.
+    /// Energy mechanics were removed in #786.
+    /// </summary>
     [Trait("Category", "Core")]
     public class GameClockTests
     {
@@ -21,34 +25,12 @@ namespace Pinder.Core.Tests
         // --- Constructor ---
 
         [Fact]
-        public void Constructor_SetsNowAndEnergy()
+        public void Constructor_SetsNow()
         {
             var start = MakeTime(10);
-            var clock = new GameClock(start, DefaultModifiers, dailyEnergy: 15);
+            var clock = new GameClock(start, DefaultModifiers);
 
             Assert.Equal(start, clock.Now);
-            Assert.Equal(15, clock.RemainingEnergy);
-        }
-
-        [Fact]
-        public void Constructor_DefaultEnergy_Is10()
-        {
-            var clock = new GameClock(MakeTime(10), DefaultModifiers);
-            Assert.Equal(10, clock.RemainingEnergy);
-        }
-
-        [Fact]
-        public void Constructor_ZeroEnergy_Allowed()
-        {
-            var clock = new GameClock(MakeTime(10), DefaultModifiers, dailyEnergy: 0);
-            Assert.Equal(0, clock.RemainingEnergy);
-        }
-
-        [Fact]
-        public void Constructor_NegativeEnergy_Throws()
-        {
-            Assert.Throws<ArgumentOutOfRangeException>(
-                () => new GameClock(MakeTime(10), DefaultModifiers, dailyEnergy: -1));
         }
 
         [Fact]
@@ -134,35 +116,6 @@ namespace Pinder.Core.Tests
                 () => clock.Advance(TimeSpan.FromHours(-1)));
         }
 
-        [Fact]
-        public void Advance_CrossingMidnight_ReplenishesEnergy()
-        {
-            var clock = new GameClock(MakeTime(23), DefaultModifiers, dailyEnergy: 10);
-            clock.ConsumeEnergy(7);
-            Assert.Equal(3, clock.RemainingEnergy);
-
-            clock.Advance(TimeSpan.FromHours(2)); // crosses midnight
-            Assert.Equal(10, clock.RemainingEnergy);
-        }
-
-        [Fact]
-        public void Advance_SameDay_DoesNotReplenishEnergy()
-        {
-            var clock = new GameClock(MakeTime(10), DefaultModifiers, dailyEnergy: 10);
-            clock.ConsumeEnergy(5);
-            clock.Advance(TimeSpan.FromHours(2));
-            Assert.Equal(5, clock.RemainingEnergy);
-        }
-
-        [Fact]
-        public void Advance_MultipleMidnightCrossings_ReplenishesEnergy()
-        {
-            var clock = new GameClock(MakeTime(23), DefaultModifiers, dailyEnergy: 10);
-            clock.ConsumeEnergy(10);
-            clock.Advance(TimeSpan.FromHours(50)); // crosses midnight twice
-            Assert.Equal(10, clock.RemainingEnergy);
-        }
-
         // --- AdvanceTo ---
 
         [Fact]
@@ -188,75 +141,6 @@ namespace Pinder.Core.Tests
             var clock = new GameClock(MakeTime(10), DefaultModifiers);
             Assert.Throws<ArgumentException>(
                 () => clock.AdvanceTo(MakeTime(8)));
-        }
-
-        [Fact]
-        public void AdvanceTo_CrossingMidnight_ReplenishesEnergy()
-        {
-            var clock = new GameClock(MakeTime(23), DefaultModifiers, dailyEnergy: 10);
-            clock.ConsumeEnergy(8);
-            var target = new DateTimeOffset(2024, 1, 16, 1, 0, 0, TimeSpan.Zero);
-            clock.AdvanceTo(target);
-            Assert.Equal(10, clock.RemainingEnergy);
-        }
-
-        [Fact]
-        public void AdvanceTo_SameDay_DoesNotReplenish()
-        {
-            var clock = new GameClock(MakeTime(10), DefaultModifiers, dailyEnergy: 10);
-            clock.ConsumeEnergy(3);
-            clock.AdvanceTo(MakeTime(15));
-            Assert.Equal(7, clock.RemainingEnergy);
-        }
-
-        // --- ConsumeEnergy ---
-
-        [Fact]
-        public void ConsumeEnergy_Success()
-        {
-            var clock = new GameClock(MakeTime(10), DefaultModifiers, dailyEnergy: 15);
-            Assert.True(clock.ConsumeEnergy(5));
-            Assert.Equal(10, clock.RemainingEnergy);
-        }
-
-        [Fact]
-        public void ConsumeEnergy_ExactlyRemaining_Success()
-        {
-            var clock = new GameClock(MakeTime(10), DefaultModifiers, dailyEnergy: 10);
-            Assert.True(clock.ConsumeEnergy(10));
-            Assert.Equal(0, clock.RemainingEnergy);
-        }
-
-        [Fact]
-        public void ConsumeEnergy_Insufficient_ReturnsFalseNoDeduction()
-        {
-            var clock = new GameClock(MakeTime(10), DefaultModifiers, dailyEnergy: 3);
-            Assert.False(clock.ConsumeEnergy(5));
-            Assert.Equal(3, clock.RemainingEnergy);
-        }
-
-        [Fact]
-        public void ConsumeEnergy_ZeroAmount_Throws()
-        {
-            var clock = new GameClock(MakeTime(10), DefaultModifiers);
-            Assert.Throws<ArgumentOutOfRangeException>(
-                () => clock.ConsumeEnergy(0));
-        }
-
-        [Fact]
-        public void ConsumeEnergy_NegativeAmount_Throws()
-        {
-            var clock = new GameClock(MakeTime(10), DefaultModifiers);
-            Assert.Throws<ArgumentOutOfRangeException>(
-                () => clock.ConsumeEnergy(-1));
-        }
-
-        [Fact]
-        public void ConsumeEnergy_ZeroEnergyBudget_AlwaysFails()
-        {
-            var clock = new GameClock(MakeTime(10), DefaultModifiers, dailyEnergy: 0);
-            Assert.False(clock.ConsumeEnergy(1));
-            Assert.Equal(0, clock.RemainingEnergy);
         }
 
         // --- IGameClock interface conformance ---

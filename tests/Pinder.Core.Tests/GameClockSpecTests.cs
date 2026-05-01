@@ -9,6 +9,7 @@ namespace Pinder.Core.Tests
     /// Spec-driven tests for GameClock (issue #54, updated by issue #711).
     /// Based on docs/specs/issue-54-spec.md acceptance criteria.
     /// Issue #711: GetHorninessModifier() is now configurable via HorninessModifiers.
+    /// Issue #786: Energy mechanics removed. AC6/AC8-energy/edge-energy specs deleted.
     /// </summary>
     [Trait("Category", "Core")]
     public class GameClockSpecTests
@@ -200,97 +201,6 @@ namespace Pinder.Core.Tests
             Assert.Equal(66, clock4.GetHorninessModifier());
         }
 
-        // ===== AC6: DailyEnergy system =====
-
-        // Mutation: Would catch if default dailyEnergy was 0 or some other value instead of 10
-        [Fact]
-        public void AC6_DefaultDailyEnergy_Is10()
-        {
-            var clock = new GameClock(MakeTime(10), DefaultModifiers);
-            Assert.Equal(10, clock.RemainingEnergy);
-        }
-
-        // Mutation: Would catch if ConsumeEnergy didn't deduct on success
-        [Fact]
-        public void AC6_ConsumeEnergy_DeductsOnSuccess()
-        {
-            var clock = new GameClock(MakeTime(10), DefaultModifiers, dailyEnergy: 15);
-            Assert.True(clock.ConsumeEnergy(5));
-            Assert.Equal(10, clock.RemainingEnergy);
-        }
-
-        // Mutation: Would catch if ConsumeEnergy deducted even when insufficient
-        [Fact]
-        public void AC6_ConsumeEnergy_NoDeductionOnInsufficient()
-        {
-            var clock = new GameClock(MakeTime(10), DefaultModifiers, dailyEnergy: 3);
-            Assert.False(clock.ConsumeEnergy(5));
-            Assert.Equal(3, clock.RemainingEnergy);
-        }
-
-        // Mutation: Would catch if ConsumeEnergy used > instead of >= for boundary
-        [Fact]
-        public void AC6_ConsumeEnergy_ExactlyRemainingSucceeds()
-        {
-            var clock = new GameClock(MakeTime(10), DefaultModifiers, dailyEnergy: 7);
-            Assert.True(clock.ConsumeEnergy(7));
-            Assert.Equal(0, clock.RemainingEnergy);
-        }
-
-        // Mutation: Would catch if multiple consecutive consumes didn't accumulate
-        [Fact]
-        public void AC6_ConsumeEnergy_MultipleCalls_Accumulate()
-        {
-            var clock = new GameClock(MakeTime(10), DefaultModifiers, dailyEnergy: 15);
-            Assert.True(clock.ConsumeEnergy(5));
-            Assert.Equal(10, clock.RemainingEnergy);
-            Assert.True(clock.ConsumeEnergy(10));
-            Assert.Equal(0, clock.RemainingEnergy);
-            Assert.False(clock.ConsumeEnergy(1));
-            Assert.Equal(0, clock.RemainingEnergy);
-        }
-
-        // Mutation: Would catch if midnight replenishment set energy to 0 instead of dailyEnergy
-        [Fact]
-        public void AC6_MidnightCrossing_ReplenishesToDailyEnergy()
-        {
-            var clock = new GameClock(MakeTime(23), DefaultModifiers, dailyEnergy: 15);
-            clock.ConsumeEnergy(15);
-            Assert.Equal(0, clock.RemainingEnergy);
-
-            clock.Advance(TimeSpan.FromHours(2));
-            Assert.Equal(15, clock.RemainingEnergy);
-        }
-
-        // Mutation: Would catch if midnight replenishment used hardcoded 10 instead of constructor dailyEnergy
-        [Fact]
-        public void AC6_MidnightCrossing_ReplenishesToCustomDailyEnergy()
-        {
-            var clock = new GameClock(MakeTime(23), DefaultModifiers, dailyEnergy: 20);
-            clock.ConsumeEnergy(20);
-            clock.Advance(TimeSpan.FromHours(2));
-            Assert.Equal(20, clock.RemainingEnergy);
-        }
-
-        // Mutation: Would catch if midnight detection was off-by-one (same day advance incorrectly replenishes)
-        [Fact]
-        public void AC6_SameDayAdvance_DoesNotReplenish()
-        {
-            var clock = new GameClock(MakeTime(10), DefaultModifiers, dailyEnergy: 10);
-            clock.ConsumeEnergy(5);
-            clock.Advance(TimeSpan.FromHours(3));
-            Assert.Equal(5, clock.RemainingEnergy);
-        }
-
-        // Mutation: Would catch if zero dailyEnergy was rejected instead of allowed
-        [Fact]
-        public void AC6_ZeroDailyEnergy_AllConsumesFail()
-        {
-            var clock = new GameClock(MakeTime(10), DefaultModifiers, dailyEnergy: 0);
-            Assert.Equal(0, clock.RemainingEnergy);
-            Assert.False(clock.ConsumeEnergy(1));
-        }
-
         // ===== AC7: Consumers inject IGameClock =====
 
         // Mutation: Would catch if GameClock couldn't be assigned to IGameClock variable
@@ -320,29 +230,7 @@ namespace Pinder.Core.Tests
             Assert.Equal(TimeOfDay.LateNight, clock.GetTimeOfDay());
         }
 
-        // Mutation: Would catch if AdvanceTo midnight crossing didn't trigger replenish
-        [Fact]
-        public void AC8_AdvanceTo_CrossingMidnight_ReplenishesEnergy()
-        {
-            var clock = new GameClock(MakeTime(23), DefaultModifiers, dailyEnergy: 10);
-            clock.ConsumeEnergy(8);
-            Assert.Equal(2, clock.RemainingEnergy);
-
-            var target = new DateTimeOffset(2024, 1, 16, 1, 0, 0, TimeSpan.Zero);
-            clock.AdvanceTo(target);
-            Assert.Equal(10, clock.RemainingEnergy);
-        }
-
         // ===== Error Conditions =====
-
-        // Mutation: Would catch if negative dailyEnergy was silently accepted
-        [Fact]
-        public void Error_Constructor_NegativeEnergy_Throws_ArgumentOutOfRangeException()
-        {
-            var ex = Assert.Throws<ArgumentOutOfRangeException>(
-                () => new GameClock(MakeTime(10), DefaultModifiers, dailyEnergy: -1));
-            Assert.NotNull(ex);
-        }
 
         // Mutation: Would catch if null modifiers was silently accepted
         [Fact]
@@ -387,38 +275,7 @@ namespace Pinder.Core.Tests
             Assert.Throws<ArgumentException>(() => clock.AdvanceTo(MakeTime(10)));
         }
 
-        // Mutation: Would catch if ConsumeEnergy(0) was silently accepted instead of throwing
-        [Fact]
-        public void Error_ConsumeEnergy_Zero_Throws_ArgumentOutOfRangeException()
-        {
-            var clock = new GameClock(MakeTime(10), DefaultModifiers);
-            Assert.Throws<ArgumentOutOfRangeException>(
-                () => clock.ConsumeEnergy(0));
-        }
-
-        // Mutation: Would catch if ConsumeEnergy(-1) was silently accepted
-        [Fact]
-        public void Error_ConsumeEnergy_Negative_Throws_ArgumentOutOfRangeException()
-        {
-            var clock = new GameClock(MakeTime(10), DefaultModifiers);
-            Assert.Throws<ArgumentOutOfRangeException>(
-                () => clock.ConsumeEnergy(-5));
-        }
-
         // ===== Edge Cases =====
-
-        // Mutation: Would catch if multiple midnight crossings didn't replenish
-        [Fact]
-        public void Edge_MultipleMidnightCrossings_StillReplenishes()
-        {
-            var clock = new GameClock(MakeTime(23), DefaultModifiers, dailyEnergy: 10);
-            clock.ConsumeEnergy(10);
-            Assert.Equal(0, clock.RemainingEnergy);
-
-            // Advance 50 hours — crosses midnight at least twice
-            clock.Advance(TimeSpan.FromHours(50));
-            Assert.Equal(10, clock.RemainingEnergy);
-        }
 
         // Mutation: Would catch if Advance didn't actually update Now
         [Fact]
@@ -457,16 +314,6 @@ namespace Pinder.Core.Tests
             Assert.Equal(MakeTime(10, 30), clock.Now);
         }
 
-        // Mutation: Would catch if energy replenish happened on same-day AdvanceTo
-        [Fact]
-        public void Edge_AdvanceTo_SameDay_NoReplenish()
-        {
-            var clock = new GameClock(MakeTime(8), DefaultModifiers, dailyEnergy: 10);
-            clock.ConsumeEnergy(6);
-            clock.AdvanceTo(MakeTime(20));
-            Assert.Equal(4, clock.RemainingEnergy);
-        }
-
         // Mutation: Would catch if GetTimeOfDay used minutes instead of just hour
         [Fact]
         public void Edge_GetTimeOfDay_MinutesIgnored()
@@ -482,20 +329,6 @@ namespace Pinder.Core.Tests
         {
             var clock = new GameClock(new DateTimeOffset(2024, 1, 15, 11, 59, 59, TimeSpan.Zero), DefaultModifiers);
             Assert.Equal(TimeOfDay.Morning, clock.GetTimeOfDay());
-        }
-
-        // Mutation: Would catch if consuming after replenish didn't work
-        [Fact]
-        public void Edge_ConsumeAfterMidnightReplenish()
-        {
-            var clock = new GameClock(MakeTime(23), DefaultModifiers, dailyEnergy: 10);
-            clock.ConsumeEnergy(10);
-            clock.Advance(TimeSpan.FromHours(2)); // cross midnight
-            Assert.Equal(10, clock.RemainingEnergy);
-
-            // Should be able to consume again after replenish
-            Assert.True(clock.ConsumeEnergy(3));
-            Assert.Equal(7, clock.RemainingEnergy);
         }
     }
 }

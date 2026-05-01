@@ -30,54 +30,38 @@ namespace Pinder.Core.Conversation
     }
 
     /// <summary>
-    /// Simulated in-game clock that tracks time-of-day, provides horniness modifiers,
-    /// and manages a daily energy budget. Energy replenishes automatically when the
-    /// clock crosses midnight via <see cref="Advance"/> or <see cref="AdvanceTo"/>.
+    /// Simulated in-game clock that tracks time-of-day and provides horniness modifiers.
+    /// Energy mechanics were removed in #786 (deferred indefinitely; refactor blocker for #393).
     /// </summary>
     public sealed class GameClock : IGameClock
     {
-        private readonly int _dailyEnergy;
         private readonly HorninessModifiers _horninessModifiers;
 
         /// <summary>Current simulated time.</summary>
         public DateTimeOffset Now { get; private set; }
 
-        /// <summary>Remaining energy for the current in-game day.</summary>
-        public int RemainingEnergy { get; private set; }
-
         /// <summary>
         /// Creates a new GameClock starting at <paramref name="startTime"/>
-        /// with the specified daily energy budget and horniness modifiers.
+        /// with the specified horniness modifiers.
         /// </summary>
         /// <param name="startTime">Initial simulated time.</param>
         /// <param name="modifiers">
         /// Time-of-day horniness modifiers. Must not be null.
         /// </param>
-        /// <param name="dailyEnergy">
-        /// Energy budget per day. Default: 10. Must be &gt;= 0.
-        /// </param>
         /// <exception cref="ArgumentNullException">
         /// Thrown when <paramref name="modifiers"/> is null.
         /// </exception>
-        /// <exception cref="ArgumentOutOfRangeException">
-        /// Thrown when <paramref name="dailyEnergy"/> is negative.
-        /// </exception>
-        public GameClock(DateTimeOffset startTime, HorninessModifiers modifiers, int dailyEnergy = 10)
+        public GameClock(DateTimeOffset startTime, HorninessModifiers modifiers)
         {
             if (modifiers == null)
                 throw new ArgumentNullException(nameof(modifiers));
-            if (dailyEnergy < 0)
-                throw new ArgumentOutOfRangeException(nameof(dailyEnergy), "dailyEnergy must be non-negative");
 
             Now = startTime;
             _horninessModifiers = modifiers;
-            _dailyEnergy = dailyEnergy;
-            RemainingEnergy = dailyEnergy;
         }
 
         /// <summary>
         /// Advance the clock forward by the given amount.
-        /// If the advance crosses midnight, energy is replenished to dailyEnergy.
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">
         /// Thrown when <paramref name="amount"/> is zero or negative.
@@ -87,16 +71,11 @@ namespace Pinder.Core.Conversation
             if (amount <= TimeSpan.Zero)
                 throw new ArgumentOutOfRangeException(nameof(amount), "amount must be positive");
 
-            var oldDate = Now.Date;
             Now = Now.Add(amount);
-
-            if (Now.Date != oldDate)
-                RemainingEnergy = _dailyEnergy;
         }
 
         /// <summary>
         /// Advance the clock to the specified target time.
-        /// If the advance crosses midnight, energy is replenished to dailyEnergy.
         /// </summary>
         /// <exception cref="ArgumentException">
         /// Thrown when <paramref name="target"/> is less than or equal to <see cref="Now"/>.
@@ -106,11 +85,7 @@ namespace Pinder.Core.Conversation
             if (target <= Now)
                 throw new ArgumentException("target must be after Now", nameof(target));
 
-            var oldDate = Now.Date;
             Now = target;
-
-            if (Now.Date != oldDate)
-                RemainingEnergy = _dailyEnergy;
         }
 
         /// <summary>
@@ -139,26 +114,6 @@ namespace Pinder.Core.Conversation
             if (hour >= 12 && hour <= 17) return _horninessModifiers.Afternoon;
             if (hour >= 18 && hour <= 23) return _horninessModifiers.Evening;
             return _horninessModifiers.Overnight; // 00:00-08:59
-        }
-
-        /// <summary>
-        /// Attempt to consume the given amount of energy.
-        /// Returns true and deducts if sufficient energy remains.
-        /// Returns false without deducting if insufficient.
-        /// </summary>
-        /// <exception cref="ArgumentOutOfRangeException">
-        /// Thrown when <paramref name="amount"/> is zero or negative.
-        /// </exception>
-        public bool ConsumeEnergy(int amount)
-        {
-            if (amount <= 0)
-                throw new ArgumentOutOfRangeException(nameof(amount), "amount must be positive");
-
-            if (amount > RemainingEnergy)
-                return false;
-
-            RemainingEnergy -= amount;
-            return true;
         }
     }
 }

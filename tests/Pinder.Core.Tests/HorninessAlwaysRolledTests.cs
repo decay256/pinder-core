@@ -174,12 +174,10 @@ namespace Pinder.Core.Tests
             public TestClock(int horninessModifier) => _horninessModifier = horninessModifier;
 
             public DateTimeOffset Now => DateTimeOffset.UtcNow;
-            public int RemainingEnergy => 100;
             public void Advance(TimeSpan amount) { }
             public void AdvanceTo(DateTimeOffset target) { }
             public TimeOfDay GetTimeOfDay() => TimeOfDay.Afternoon;
             public int GetHorninessModifier() => _horninessModifier;
-            public bool ConsumeEnergy(int amount) => true;
         }
     }
 }
