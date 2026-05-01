@@ -48,11 +48,17 @@ namespace Pinder.Core.Tests
         }
 
         // What: AC-1 — Growth event string contains expected text
+        // (#405 update) Pre-grow Dread so the reduction is real (not floored). This keeps
+        // the original test intent: "the Dread reduction event records 'Date secured' with
+        // a real -1 delta". With Dread=0 the reduction would be (floored) per #405.
         // Mutation: Would catch if reason string is wrong or event not recorded
         [Fact]
         public async Task AC1_DateSecured_GrowthEventContainsDreadDateSecured()
         {
             var shadows = MakeTracker();
+            shadows.ApplyGrowth(ShadowStatType.Dread, 2, "setup");
+            shadows.DrainGrowthEvents();
+
             var session = BuildSession(
                 dice: Dice(20, 50),
                 playerStats: MakeStats(charm: 5),
@@ -65,13 +71,15 @@ namespace Pinder.Core.Tests
             Assert.Equal(GameOutcome.DateSecured, result.Outcome);
             // Mutation: Fails if "Date secured" reason text is wrong
             Assert.Contains(result.ShadowGrowthEvents,
-                e => e.Contains("Dread") && e.Contains("-1") && e.Contains("Date secured"));
+                e => e.Contains("Dread") && e.Contains("-1") && e.Contains("Date secured")
+                  && !e.Contains("(floored)"));
         }
 
-        // What: Edge case — Dread delta goes negative (from 0 to -1)
-        // Mutation: Would catch if ApplyGrowth is used instead of ApplyOffset (throws on negative)
+        // What: (#405 update) Dread reduction at floor is suppressed — effective shadow is
+        // floored at 0; the audit log records the floored event for honesty.
+        // Pre-#405 this test asserted GetDelta == -1 (silent state corruption).
         [Fact]
-        public async Task AC1_DateSecured_DreadCanGoNegative()
+        public async Task AC1_DateSecured_DreadAtZero_ReductionFlooredNotNegative()
         {
             var shadows = MakeTracker(); // Dread starts at 0
             var session = BuildSession(
@@ -84,8 +92,14 @@ namespace Pinder.Core.Tests
             var result = await session.ResolveTurnAsync(0);
 
             Assert.Equal(GameOutcome.DateSecured, result.Outcome);
-            // Mutation: Fails if ApplyGrowth used (throws on negative) or reduction skipped when delta=0
-            Assert.Equal(-1, shadows.GetDelta(ShadowStatType.Dread));
+            // (#405) Effective shadow is floored at 0 — never negative.
+            Assert.Equal(0, shadows.GetEffectiveShadow(ShadowStatType.Dread));
+            // Stored delta should also not be negative when base is 0.
+            Assert.True(shadows.GetDelta(ShadowStatType.Dread) >= 0,
+                "#405: stored delta must not drive base+delta below 0");
+            // Audit log records what actually happened — a (floored) event.
+            Assert.Contains(result.ShadowGrowthEvents,
+                e => e.Contains("Dread") && e.Contains("(floored)"));
         }
 
         // What: AC-1 negative — Non-DateSecured game-over does NOT reduce Dread

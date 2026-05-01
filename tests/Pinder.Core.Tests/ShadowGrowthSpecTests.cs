@@ -1062,15 +1062,23 @@ namespace Pinder.Core.Tests
             Assert.Equal(0, shadows.GetDelta(ShadowStatType.Madness));
         }
 
-        // Mutation: would catch if negative shadow delta was rejected
+        // (#405 update) Pre-fix this test asserted GetDelta == -1 (i.e. effective shadow
+        // could be driven below 0). The floor-at-0 invariant means the reduction is
+        // suppressed at the boundary: the partial reduction down to 0 is applied, and the
+        // remainder is recorded as a (floored) event.
         [Fact]
-        public void Edge_NegativeShadowDelta_Allowed()
+        public void Edge_NegativeShadowDelta_FlooredAtZero()
         {
             var tracker = MakeTracker();
             tracker.ApplyGrowth(ShadowStatType.Fixation, 2, "growth");
+            // Effective is now 2. Requesting -3 would drive to -1 — floor at 0 instead.
             tracker.ApplyOffset(ShadowStatType.Fixation, -3, "big offset");
 
-            Assert.Equal(-1, tracker.GetDelta(ShadowStatType.Fixation));
+            Assert.Equal(0, tracker.GetEffectiveShadow(ShadowStatType.Fixation));
+            // Stored delta brings base+delta to 0, never below.
+            Assert.True(tracker.GetEffectiveShadow(ShadowStatType.Fixation) == 0
+                && tracker.GetDelta(ShadowStatType.Fixation) >= -tracker.GetEffectiveShadow(ShadowStatType.Fixation) - 0,
+                "#405: stored delta must not drive base+delta below 0");
         }
 
         // =====================================================================

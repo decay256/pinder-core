@@ -471,12 +471,38 @@ namespace Pinder.Core.Tests
         [Fact]
         public void ApplyOffset_AddsEvent()
         {
+            // (#405 update) Pre-fix this asserted the description contained "-1" even when
+            // the base+delta would be negative — silent state corruption. With the floor at 0,
+            // a -1 reduction on Fixation=0 is fully floored: applied delta = 0,
+            // description = "Fixation +0 (test offset) (floored)".
             var tracker = MakeShadowTracker();
             string desc = tracker.ApplyOffset(ShadowStatType.Fixation, -1, "test offset");
 
-            Assert.Contains("-1", desc);
+            // The event is still recorded for audit honesty.
             var events = tracker.DrainGrowthEvents();
             Assert.Single(events);
+            // Effective shadow stays at 0 (floor enforced).
+            Assert.Equal(0, tracker.GetEffectiveShadow(ShadowStatType.Fixation));
+            // Description carries the (floored) marker.
+            Assert.Contains("(floored)", desc);
+            Assert.Contains("test offset", desc);
+        }
+
+        [Fact]
+        public void ApplyOffset_NegativeWithinFloor_AddsRealReductionEvent()
+        {
+            // Counterpart to ApplyOffset_AddsEvent: when there IS positive shadow to reduce,
+            // the event is a real reduction (no floored marker) and the description
+            // contains the actual signed delta string.
+            var tracker = MakeShadowTracker();
+            tracker.ApplyGrowth(ShadowStatType.Fixation, 2, "setup");
+            tracker.DrainGrowthEvents();
+
+            string desc = tracker.ApplyOffset(ShadowStatType.Fixation, -1, "real reduction");
+
+            Assert.Contains("-1", desc);
+            Assert.DoesNotContain("(floored)", desc);
+            Assert.Equal(1, tracker.GetEffectiveShadow(ShadowStatType.Fixation));
         }
 
         // ======================== GameEndedException.ShadowGrowthEvents ========================

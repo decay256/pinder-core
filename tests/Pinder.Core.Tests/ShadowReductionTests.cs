@@ -49,10 +49,12 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public async Task DateSecured_DreadReductionCanGoNegative()
+        public async Task DateSecured_DreadReduction_FlooredAtZero()
         {
+            // (#405 update) Pre-fix this test asserted GetDelta == -1 (silent state
+            // corruption). The floor-at-0 invariant means the reduction is suppressed and
+            // recorded as a (floored) event when there is no positive shadow to reduce.
             var shadows = MakeTracker();
-            // No pre-growth — Dread delta starts at 0, reduction takes it to -1
             var session = BuildSession(
                 dice: Dice(15, 50),
                 playerStats: Stats(charm: 5),
@@ -64,7 +66,9 @@ namespace Pinder.Core.Tests
 
             Assert.True(result.IsGameOver);
             Assert.Equal(GameOutcome.DateSecured, result.Outcome);
-            Assert.Equal(-1, shadows.GetDelta(ShadowStatType.Dread));
+            Assert.Equal(0, shadows.GetEffectiveShadow(ShadowStatType.Dread));
+            Assert.True(shadows.GetDelta(ShadowStatType.Dread) >= 0,
+                "#405: stored delta must not drive base+delta below 0");
         }
 
         [Fact]
