@@ -563,20 +563,7 @@ namespace Pinder.Core.Conversation
                 throw new ArgumentOutOfRangeException(nameof(optionIndex),
                     $"Option index {optionIndex} is out of range. Valid range: 0–{_currentOptions.Length - 1}.");
 
-            // Consume 1 energy from clock if available
-            if (_clock != null && !_clock.ConsumeEnergy(1))
-            {
-                _ended = true;
-                _outcome = GameOutcome.Unmatched;
-                // End-of-game Dread +1: conversation ended without date (energy depleted)
-                if (_playerShadows != null)
-                {
-                    _playerShadows.ApplyGrowth(ShadowStatType.Dread, 1, "Conversation ended without date");
-                    var dreadEvents = _playerShadows.DrainGrowthEvents();
-                    throw new GameEndedException(GameOutcome.Unmatched, dreadEvents);
-                }
-                throw new GameEndedException(GameOutcome.Unmatched);
-            }
+            // Energy mechanics removed in #786 (deferred; blocked #393 fast-gameplay refactor).
 
             var chosenOption = _currentOptions[optionIndex];
 

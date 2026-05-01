@@ -7,6 +7,7 @@ namespace Pinder.Core.Tests
     /// <summary>
     /// Tests for the IGameClock interface contract via a minimal FixedGameClock test double.
     /// Validates the TimeOfDay enum values and horniness modifier mapping.
+    /// Energy mechanics were removed in #786.
     /// </summary>
     [Trait("Category", "Core")]
     public class IGameClockTests
@@ -123,22 +124,6 @@ namespace Pinder.Core.Tests
             Assert.Throws<ArgumentException>(() => clock.AdvanceTo(start));
         }
 
-        [Fact]
-        public void FixedGameClock_ConsumeEnergy_Succeeds()
-        {
-            var clock = new FixedGameClock(new DateTimeOffset(2024, 1, 1, 8, 0, 0, TimeSpan.Zero), energy: 10);
-            Assert.True(clock.ConsumeEnergy(5));
-            Assert.Equal(5, clock.RemainingEnergy);
-        }
-
-        [Fact]
-        public void FixedGameClock_ConsumeEnergy_Insufficient_ReturnsFalse()
-        {
-            var clock = new FixedGameClock(new DateTimeOffset(2024, 1, 1, 8, 0, 0, TimeSpan.Zero), energy: 3);
-            Assert.False(clock.ConsumeEnergy(5));
-            Assert.Equal(3, clock.RemainingEnergy); // no deduction
-        }
-
         /// <summary>
         /// Boundary: hour 6 is Morning start, hour 11 is still Morning
         /// </summary>
@@ -168,12 +153,10 @@ namespace Pinder.Core.Tests
     internal sealed class FixedGameClock : IGameClock
     {
         public DateTimeOffset Now { get; private set; }
-        public int RemainingEnergy { get; private set; }
 
-        public FixedGameClock(DateTimeOffset now, int energy = 10)
+        public FixedGameClock(DateTimeOffset now)
         {
             Now = now;
-            RemainingEnergy = energy;
         }
 
         public void Advance(TimeSpan amount) => Now = Now.Add(amount);
@@ -206,13 +189,6 @@ namespace Pinder.Core.Tests
                 case TimeOfDay.AfterTwoAm: return 5;
                 default: return 0;
             }
-        }
-
-        public bool ConsumeEnergy(int amount)
-        {
-            if (amount > RemainingEnergy) return false;
-            RemainingEnergy -= amount;
-            return true;
         }
     }
 }

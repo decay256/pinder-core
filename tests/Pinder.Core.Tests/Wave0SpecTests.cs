@@ -529,25 +529,6 @@ namespace Pinder.Core.Tests
             Assert.Equal(TimeOfDay.AfterTwoAm, clock.GetTimeOfDay());
         }
 
-        // Mutation: Fails if ConsumeEnergy with exact amount fails
-        [Fact]
-        public void FixedGameClock_ConsumeEnergy_ExactAmount_Succeeds()
-        {
-            var clock = new FixedGameClock(new DateTimeOffset(2024, 1, 1, 8, 0, 0, TimeSpan.Zero), energy: 5);
-            Assert.True(clock.ConsumeEnergy(5));
-            Assert.Equal(0, clock.RemainingEnergy);
-        }
-
-        // Mutation: Fails if ConsumeEnergy deducts on failure
-        [Fact]
-        public void FixedGameClock_ConsumeEnergy_Insufficient_NoDeduction()
-        {
-            var clock = new FixedGameClock(new DateTimeOffset(2024, 1, 1, 8, 0, 0, TimeSpan.Zero), energy: 3);
-            bool result = clock.ConsumeEnergy(4);
-            Assert.False(result);
-            Assert.Equal(3, clock.RemainingEnergy);
-        }
-
         // Mutation: Fails if Advance doesn't actually change Now
         [Fact]
         public void FixedGameClock_Advance_ChangesTimeOfDay()
@@ -646,12 +627,10 @@ namespace Pinder.Core.Tests
         private sealed class TestFixedClock : IGameClock
         {
             public DateTimeOffset Now => DateTimeOffset.UtcNow;
-            public int RemainingEnergy => 10;
             public void Advance(TimeSpan amount) { }
             public void AdvanceTo(DateTimeOffset target) { }
             public TimeOfDay GetTimeOfDay() => TimeOfDay.Morning;
             public int GetHorninessModifier() => -2;
-            public bool ConsumeEnergy(int amount) => true;
         }
     }
 }

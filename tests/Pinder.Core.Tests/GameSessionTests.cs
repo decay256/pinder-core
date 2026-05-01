@@ -420,12 +420,10 @@ namespace Pinder.Core.Tests
             private readonly int _mod;
             public ZeroModifierClock(int mod) => _mod = mod;
             public DateTimeOffset Now => DateTimeOffset.UtcNow;
-            public int RemainingEnergy => 100;
             public void Advance(TimeSpan amount) { }
             public void AdvanceTo(DateTimeOffset target) { }
             public Pinder.Core.Interfaces.TimeOfDay GetTimeOfDay() => Pinder.Core.Interfaces.TimeOfDay.Afternoon;
             public int GetHorninessModifier() => _mod;
-            public bool ConsumeEnergy(int amount) => true;
         }
 
         public static StatBlock MakeStatBlock(int allStats = 2, int allShadow = 0)

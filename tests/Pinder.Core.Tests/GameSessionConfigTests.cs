@@ -134,12 +134,10 @@ namespace Pinder.Core.Tests
         private sealed class TestClock : IGameClock
         {
             public DateTimeOffset Now => DateTimeOffset.UtcNow;
-            public int RemainingEnergy => 10;
             public void Advance(TimeSpan amount) { }
             public void AdvanceTo(DateTimeOffset target) { }
             public TimeOfDay GetTimeOfDay() => TimeOfDay.Morning;
             public int GetHorninessModifier() => -2;
-            public bool ConsumeEnergy(int amount) => true;
         }
 
         private sealed class StubDice : IDiceRoller
