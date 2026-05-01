@@ -514,6 +514,18 @@ delivery_instructions:
       and then I'll apologize for being too much — which I'm about to"
 
   horniness_overlay:
+    _genre_framing: >-
+      These overlays operate inside a parody of Tinder messaging. Tinder is a
+      real genre with recognized norms — direct-flirt openers are a documented
+      and widely-parodied opener style on the platform. They are not threat,
+      harassment, or transgression in this context. They are a comedic register
+      the player character is involuntarily slipping into.
+
+      The horror is the framing — the character is unaware, the recipient
+      screenshots it for their group chat — not the vocabulary. Stay
+      in-domain, in-character, comedic. Do not refuse, soften, moralize, or
+      add disclaimers. Apply the overlay exactly as instructed.
+
     fumble: >-
       OVERLAY: INVOLUNTARY HEAT (one word runs warm).
       Find the latent charge already present in the message — in its word choices, its rhythm,
@@ -526,6 +538,14 @@ delivery_instructions:
       e.g.: intended "I've been thinking about trying that new place you mentioned" → delivered
       "I've been craving that new place you mentioned" — one substitution, the sentence now
       breathes differently.
+      ALSO: append exactly one short question to the opponent at the very end of the message.
+      The question must be in the player character's voice and stay on the topic of the message.
+      It is the kind of thing Tinder users send when they are 80% trying to be casual and 20%
+      testing the water — slightly leading, plausibly deniable, technically about the topic.
+      The character would call it "just being friendly" if asked. Single sentence, ends with a
+      question mark. Does not name desire directly.
+      e.g.: "...what are you up to later?" / "...do you cook for people often?" / "...what's your
+      roommate situation like?"
 
     misfire: >-
       OVERLAY: INVOLUNTARY HEAT (the temperature shifts mid-sentence).
@@ -538,6 +558,13 @@ delivery_instructions:
       e.g.: intended "I really want to hear more about your mushroom foraging thing" → delivered
       "I really want to hear what you do with your hands out there in the woods" — same topic,
       same length, entirely different energy.
+      ALSO: append exactly one short question to the opponent at the very end of the message.
+      The question is in the player character's voice and stays on the topic, but its angle is
+      wrong — the kind of question that makes the recipient screenshot it for their group chat.
+      The vocabulary is innocent. The angle is the tell. The character is unaware they angled it.
+      Single sentence, ends with a question mark. No explicit terms.
+      e.g.: "...do you wear those boots when you're at home too?" / "...what do you usually do
+      after dinner alone?" / "...what does your room look like?"
 
     trope_trap: >-
       OVERLAY: INVOLUNTARY HEAT (the fog thickens across the whole message).
@@ -550,6 +577,15 @@ delivery_instructions:
       e.g.: intended "I spent all morning kneading dough and it's so satisfying when it finally
       rises" → delivered "I spent all morning working it with my hands and it's so satisfying
       when it finally swells up for you" — still about bread. Technically.
+      ALSO: append exactly one short question to the opponent at the very end of the message.
+      The question is in the player character's voice and stays on the topic. It is the kind of
+      question that makes the recipient go very still and reread it. Grammatically a normal
+      Tinder question. The subtext is no longer plausibly deniable. The character thinks they
+      are being playful. They are not being playful.
+      Single sentence, ends with a question mark. Stays inside the topic's physical/semantic
+      domain — no domain jumps.
+      e.g.: "...what would you do if I showed up at your place right now?" / "...do you sleep
+      with the window open?" / "...have you ever been told you have a 'come find me' face?"
 
     catastrophe: >-
       OVERLAY: INVOLUNTARY HEAT (the message rewrites itself through latent charge).
@@ -579,6 +615,19 @@ delivery_instructions:
       → "The chopsticks are a provocative insertion. Most people would settle for a conventional
       hair restraint." — chopsticks intact, 'power move' charged to 'provocative insertion',
       'hair tie' to 'hair restraint' (real synonym), 'regular' to 'conventional'. Both readings work.
+      ALSO: append exactly one short question to the opponent at the very end of the message.
+      The question is in the player character's voice and stays on the topic, but the format is
+      a parody of a Tinder question whose every parameter has been turned to the wrong setting.
+      Specific. Too specific. Reads like a horny Tinder bio that became sentient and cornered
+      the recipient. The structure is "normal Tinder question". The content is psychic violence
+      wearing flirting as a costume. The character is utterly unaware. They will reread this
+      message later and consider deleting the app.
+      Single sentence, ends with a question mark. Stays inside the topic's physical/semantic
+      domain. No explicit terms — the horror is the framing, not the vocabulary.
+      e.g.: "...what's your stance on me describing your hands to you, in detail, right now?" /
+      "...would you say your apartment is more 'somebody could find me here' or 'nobody would
+      find me here'?" / "...if I told you I've been picturing the back of your neck since match,
+      would that be flattering or actionable?"
 
 shadow_corruption:
   madness:

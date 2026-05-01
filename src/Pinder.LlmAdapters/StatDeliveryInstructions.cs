@@ -206,6 +206,40 @@ namespace Pinder.LlmAdapters
                     }
                 }
 
+                // Post-process horniness_overlay: prepend shared _genre_framing preamble to each
+                // tier instruction so the philosophy text reaches the LLM on every call.
+                // _genre_framing is a single source-of-truth key (leading underscore) that the
+                // strongly-typed caller methods never expose directly; we fold it in here at load
+                // time and then remove it so it doesn't appear as a tier.
+                //
+                // Catastrophe tier additionally receives a one-line tier-specific reinforcement
+                // appended after the preamble+instruction composite. Implemented here (engine-side)
+                // rather than duplicated in yaml, so both the preamble and the catastrophe extra
+                // live in one place and evolve together. Choice: loader constant (not inline yaml,
+                // not per-tier yaml map) — keeps yaml DRY and makes the reinforcement visible
+                // during C# code review alongside the prepend logic.
+                const string CatastropheReinforcement =
+                    "The structure is a normal Tinder question. The content is the joke. The character is utterly unaware.";
+
+                if (result.TryGetValue("horniness_overlay", out var horninessMap) &&
+                    horninessMap.TryGetValue("_genre_framing", out var genreFraming) &&
+                    !string.IsNullOrWhiteSpace(genreFraming))
+                {
+                    horninessMap.Remove("_genre_framing");
+                    string preamble = genreFraming.Trim();
+                    string[] horningTiers = new[] { "fumble", "misfire", "trope_trap", "catastrophe" };
+                    foreach (var t in horningTiers)
+                    {
+                        if (horninessMap.TryGetValue(t, out var existing))
+                        {
+                            string composed = preamble + "\n\n" + existing.TrimStart();
+                            if (t == "catastrophe")
+                                composed += "\n\n" + CatastropheReinforcement;
+                            horninessMap[t] = composed;
+                        }
+                    }
+                }
+
                 return new StatDeliveryInstructions(result);
             }
             catch
