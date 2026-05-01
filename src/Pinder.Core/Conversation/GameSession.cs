@@ -91,6 +91,15 @@ namespace Pinder.Core.Conversation
         private DialogueOption[]? _currentOptions;
         private bool _currentHasAdvantage;
         private bool _currentHasDisadvantage;
+        // #789 Phase 2 — pre-rolled dice pools, one per option index. Set by
+        // StartTurnAsync (display-time placeholders), filled lazily by
+        // ResolveTurnAsync via PlaybackDiceRoller. Null between turns.
+        private Pinder.Core.Rolls.PerOptionDicePool[]? _currentDicePools;
+        // #789 Phase 2 — single-use replay/test injection slot. When non-null,
+        // the next ResolveTurnAsync uses this pool verbatim instead of drawing
+        // a fresh one from _dice. Cleared after consumption. Set via
+        // <see cref="InjectNextDicePool"/>.
+        private Pinder.Core.Rolls.PerOptionDicePool? _injectedNextPool;
 
         // Extracted single-responsibility modules
         private readonly ShadowGrowthEvaluator? _shadowGrowthEvaluator;
@@ -531,8 +540,79 @@ namespace Pinder.Core.Conversation
             // Compute pending momentum bonus for the upcoming roll (#268)
             _pendingMomentumBonus = GetMomentumBonus(_momentumStreak);
 
+            // #789 Phase 2 (D1) — pre-rolled dice pools, one per option index.
+            //
+            // Design note: the spec asked for N pools "at display time, before
+            // any LLM fires." An eager fill (drawing N×budget from _dice during
+            // StartTurnAsync) is one literal reading; that would inflate the
+            // per-turn _dice budget from 3 → 1 + N×(2 or 3) and break Phase 0
+            // I2's fixture (only 3 _dice values prepared). The brief explicitly
+            // requires I2 to keep passing.
+            //
+            // Reconciled design (this PR): the per-option pools returned from
+            // StartTurnAsync are EMPTY placeholders — their dice are filled
+            // lazily inside ResolveTurnAsync, BEFORE any LLM call fires. That
+            // still satisfies the architectural goal ("all _dice draws happen
+            // before any LLM call on the resolve path") while preserving the
+            // 1+2 per-turn _dice budget. Only the chosen option's pool is ever
+            // filled, mirroring the natural usage pattern. See PR #789 body
+            // §"Eager vs. lazy pool fill" for full rationale.
+            _currentDicePools = new Pinder.Core.Rolls.PerOptionDicePool[options.Length];
+            for (int i = 0; i < options.Length; i++)
+                _currentDicePools[i] = new Pinder.Core.Rolls.PerOptionDicePool(i);
+
             var snapshot = CreateSnapshot();
-            return new TurnStart(options, snapshot);
+            return new TurnStart(options, snapshot, _currentDicePools);
+        }
+
+        /// <summary>
+        /// #789 Phase 2 (D1) — fill the chosen option's dice pool at the
+        /// start of <c>ResolveTurnAsync</c>, BEFORE any LLM call fires.
+        ///
+        /// <para>
+        /// Returns a <see cref="Pinder.Core.Rolls.PerOptionDicePool"/>
+        /// containing the exact per-option dice budget for the chosen option:
+        /// 1× d20 (main) + optional 1× d20 (advantage/disadvantage) +
+        /// 1× d100 (timing variance). Drawn from the underlying <c>_dice</c>
+        /// in the order <c>RollEngine</c> and <c>TimingProfile</c> will consume
+        /// them, so the wrapping <see cref="Pinder.Core.Rolls.PlaybackDiceRoller"/>
+        /// replays them in FIFO order.
+        /// </para>
+        ///
+        /// <para>
+        /// Lazy fill keeps the per-turn <c>_dice</c> budget at 1 + (2 or 3)
+        /// — unchanged from the pre-Phase-2 flow — so Phase 0 I2's fixture
+        /// keeps passing. Only the chosen pool is filled; the other
+        /// placeholders returned from <c>StartTurnAsync</c> remain empty.
+        /// </para>
+        /// </summary>
+        private Pinder.Core.Rolls.PerOptionDicePool FillChosenDicePool(
+            int optionIndex, DialogueOption chosenOption, bool resolveHasDisadvantage)
+        {
+            // Mirror RollEngine.Resolve's trap-derived disadvantage logic
+            // (RollEngine.cs:41-49). Single-slot trap state means the active
+            // trap may be on any stat; we only force disadvantage if the
+            // trap is active on THIS option's stat AND its effect is
+            // Disadvantage. The caller already factored shadow-pair
+            // disadvantage into <paramref name="resolveHasDisadvantage"/>.
+            bool trapDisadvantage = false;
+            var activeTrap = _traps.GetActive(chosenOption.Stat);
+            if (activeTrap != null
+                && activeTrap.Definition.Effect == Pinder.Core.Traps.TrapEffect.Disadvantage)
+                trapDisadvantage = true;
+
+            bool rollTwice = _currentHasAdvantage || resolveHasDisadvantage || trapDisadvantage;
+
+            // Worst-case-static budget: d20 [+ d20 if rollTwice] + d100.
+            int rolls = rollTwice ? 3 : 2;
+            var values = new int[rolls];
+            int idx = 0;
+            values[idx++] = _dice.Roll(20); // RollEngine.cs:52 main d20
+            if (rollTwice)
+                values[idx++] = _dice.Roll(20); // RollEngine.cs:53 second d20 (adv/disadv)
+            values[idx++] = _dice.Roll(100); // TimingProfile.cs:53 timing variance d100
+
+            return new Pinder.Core.Rolls.PerOptionDicePool(optionIndex, values);
         }
 
         /// <summary>
@@ -544,6 +624,28 @@ namespace Pinder.Core.Conversation
         /// <exception cref="InvalidOperationException">If StartTurnAsync was not called first or index is invalid.</exception>
         public Task<TurnResult> ResolveTurnAsync(int optionIndex)
             => ResolveTurnAsync(optionIndex, progress: null);
+
+        /// <summary>
+        /// #789 Phase 2 (D1) — inject a specific <see cref="Pinder.Core.Rolls.PerOptionDicePool"/>
+        /// for the next <c>ResolveTurnAsync</c> call, replacing the engine's
+        /// natural draw from <c>_dice</c>. Single-use: cleared after the next
+        /// resolve. Used by deterministic replay tooling and the W3B
+        /// determinism test ("two resolves with the same pool produce
+        /// byte-equivalent post-state").
+        ///
+        /// <para>
+        /// The injected pool must contain enough values to satisfy the
+        /// chosen option's runtime dice consumption (1× d20 + optional 1×
+        /// d20 + 1× d100). Under-allocation throws
+        /// <see cref="InvalidOperationException"/> from
+        /// <c>PlaybackDiceRoller</c>. Over-allocation leaves the pool
+        /// non-drained — the I2-equivalent invariant fails loudly.
+        /// </para>
+        /// </summary>
+        public void InjectNextDicePool(Pinder.Core.Rolls.PerOptionDicePool pool)
+        {
+            _injectedNextPool = pool ?? throw new ArgumentNullException(nameof(pool));
+        }
 
         /// <summary>
         /// Resolve the current turn with an optional progress reporter.
@@ -636,6 +738,21 @@ namespace Pinder.Core.Conversation
             }
 
             // 1. Roll dice
+            // #789 Phase 2 (D1) — fill the chosen option's pre-roll pool from
+            // _dice NOW (or use the externally-injected pool for deterministic
+            // replay), before any LLM call fires for this resolve. Then wrap
+            // it in a PlaybackDiceRoller and pass that to RollEngine.Resolve
+            // and TimingProfile.ComputeDelay. The engine never touches _dice
+            // again on this resolve path — ResolveTurnAsync's dice consumption
+            // is a pure function of (chosen option, pre-roll pool).
+            var chosenPool = _injectedNextPool != null
+                ? _injectedNextPool
+                : FillChosenDicePool(optionIndex, chosenOption, resolveHasDisadvantage);
+            _injectedNextPool = null; // single-use — the next resolve falls back to _dice unless re-injected.
+            if (_currentDicePools != null && optionIndex >= 0 && optionIndex < _currentDicePools.Length)
+                _currentDicePools[optionIndex] = chosenPool;
+            var resolveDice = (Pinder.Core.Interfaces.IDiceRoller)new Pinder.Core.Rolls.PlaybackDiceRoller(chosenPool);
+
             var rollResult = RollEngine.Resolve(
                 stat: chosenOption.Stat,
                 attacker: _player.Stats,
@@ -643,7 +760,7 @@ namespace Pinder.Core.Conversation
                 attackerTraps: _traps,
                 level: _player.Level,
                 trapRegistry: _trapRegistry,
-                dice: _dice,
+                dice: resolveDice,
                 hasAdvantage: _currentHasAdvantage,
                 hasDisadvantage: resolveHasDisadvantage,
                 externalBonus: externalBonus,
@@ -952,7 +1069,8 @@ namespace Pinder.Core.Conversation
             }
 
             // 10. Compute response delay
-            double responseDelayMinutes = _opponent.Timing.ComputeDelay(_interest.Current, _dice);
+            // #789 Phase 2 (D1) — same pre-rolled pool feeds TimingProfile's d100.
+            double responseDelayMinutes = _opponent.Timing.ComputeDelay(_interest.Current, resolveDice);
 
             // Per-turn Horniness overlay check (#709)
             string deliveredForHorniness = deliveredMessage;
@@ -1198,8 +1316,9 @@ namespace Pinder.Core.Conversation
             // 13. Increment turn number
             _turnNumber++;
 
-            // 14. Clear stored options
+            // 14. Clear stored options + pre-rolled dice pools
             _currentOptions = null;
+            _currentDicePools = null;
 
             // 15. Build result
             var stateSnapshot = CreateSnapshot();
