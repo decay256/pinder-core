@@ -994,19 +994,22 @@ namespace Pinder.Core.Conversation
                     }
                 }).ConfigureAwait(false);
 
-            // #743: Horniness penalty — when overlay fires and turn delta is positive, halve the delta
-            // e.g. +5 interest gained this turn → horniness fires → floor(5/2) = 2 net gain
+            // #743/#399: Horniness §15 interest-penalty halving is intentionally
+            // DEFERRED until AFTER the shadow check below. Reason: when a paired
+            // shadow check misses on a successful roll it demotes the success to
+            // a failure (negative) interest delta. Applying §15 here, before that
+            // demote, would charge the player a horniness penalty against a
+            // delta that the shadow then rewrites — leaving
+            // result.HorninessInterestPenalty out of sync with the final delta
+            // and producing the audit-log invariant break described in #399.
+            //
+            // The text-rewrite half of the horniness layer (the LLM overlay on
+            // deliveredMessage) has ALREADY run above as part of
+            // _horninessEngine.CheckAsync — message ordering (horniness text
+            // before shadow text) is preserved. Only the interest-delta halving
+            // moves; it now operates on the post-shadow-demote interestDelta.
             int horninessInterestPenalty = 0;
             int horninessInterestBefore = 0;
-            if (horninessCheckResult.OverlayApplied && interestDelta > 0)
-            {
-                horninessInterestBefore = _interest.Current;
-                int halvedDelta = (int)Math.Floor(interestDelta / 2.0);
-                int penalty = halvedDelta - interestDelta; // negative: e.g. 2 - 5 = -3
-                _interest.Apply(penalty);
-                horninessInterestPenalty = penalty;
-                interestDelta += penalty; // net delta = halvedDelta
-            }
 
             // #755: Shadow check — fires when using a stat with active paired shadow
             ShadowStatType? pairedShadow = GetPairedShadow(chosenOption.Stat);
@@ -1086,6 +1089,39 @@ namespace Pinder.Core.Conversation
                             true, pairedShadow.Value, shadowRoll, shadowDC, false, FailureTier.None, false);
                     }
                 }
+            }
+
+            // #399: Horniness §15 interest-penalty halving — applied here, AFTER
+            // the shadow check has had a chance to demote a successful roll's
+            // delta to a failure. This is the moved half of the original #743
+            // block (the text-rewrite half stayed above with the
+            // _horninessEngine.CheckAsync call so the message-overlay ordering
+            // — horniness text first, then shadow text — is preserved).
+            //
+            // Rule §15 (rules-v3-enriched.yaml — horniness-interest-penalty):
+            //   When a horniness overlay fires AND the turn's final interest
+            //   delta is positive, the delta is halved (floor). If the delta
+            //   is 0 or negative, no penalty.
+            //
+            // "Final" here = post-shadow-demote: if Denial/etc. demoted a
+            // Honesty success to a TropeTrap failure (-2), interestDelta is
+            // already negative and §15 is a no-op (penalty stays 0). If the
+            // demote left the delta non-positive but ≥ 0 the same is true.
+            // Only when the post-demote delta is strictly positive does §15
+            // halve it. result.HorninessInterestPenalty therefore always
+            // reflects the actually-applied penalty against the actually-final
+            // delta — restoring the audit-log invariant
+            // (delta_from_roll + horniness_penalty == delta_total) where
+            // delta_from_roll is the natural pre-§15 delta after any shadow
+            // demote.
+            if (horninessCheckResult.OverlayApplied && interestDelta > 0)
+            {
+                horninessInterestBefore = _interest.Current;
+                int halvedDelta = (int)Math.Floor(interestDelta / 2.0);
+                int penalty = halvedDelta - interestDelta; // negative: e.g. 2 - 5 = -3
+                _interest.Apply(penalty);
+                horninessInterestPenalty = penalty;
+                interestDelta += penalty; // net delta = halvedDelta
             }
 
             // Issue #339: same-turn callback-phrase strip. Runs after all
