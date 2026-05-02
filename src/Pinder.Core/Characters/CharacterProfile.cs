@@ -43,6 +43,17 @@ namespace Pinder.Core.Characters
         public string TextingStyleFragment { get; }
 
         /// <summary>
+        /// Issue #404: per-source breakdown of the texting-style fragments
+        /// that were joined into <see cref="TextingStyleFragment"/>. Each
+        /// entry pairs <c>(kind, source, fragment)</c>: kind is
+        /// <c>"item"</c> or <c>"anatomy"</c>, source is the item display
+        /// name or anatomy tier name, fragment is the contributed string.
+        /// Used by the Character Sheet 'Texting Style' tab. Items appear
+        /// before anatomy tiers — same injection order the assembler uses.
+        /// </summary>
+        public IReadOnlyList<TextingStyleFragmentSource> TextingStyleSources { get; }
+
+        /// <summary>
         /// The character's active archetype, or null if none resolved.
         /// Carries name, behavior directive, and interference level.
         /// </summary>
@@ -83,7 +94,8 @@ namespace Pinder.Core.Characters
             string bio = "",
             string textingStyleFragment = "",
             ActiveArchetype activeArchetype = null,
-            IReadOnlyList<string> equippedItemDisplayNames = null)
+            IReadOnlyList<string> equippedItemDisplayNames = null,
+            IReadOnlyList<TextingStyleFragmentSource> textingStyleSources = null)
         {
             Stats = stats ?? throw new ArgumentNullException(nameof(stats));
             AssembledSystemPrompt = assembledSystemPrompt ?? throw new ArgumentNullException(nameof(assembledSystemPrompt));
@@ -95,6 +107,7 @@ namespace Pinder.Core.Characters
             TextingStyleFragment = textingStyleFragment ?? string.Empty;
             ActiveArchetype = activeArchetype;
             EquippedItemDisplayNames = equippedItemDisplayNames ?? new System.Collections.Generic.List<string>();
+            TextingStyleSources = textingStyleSources ?? new System.Collections.Generic.List<TextingStyleFragmentSource>();
         }
     }
 }

@@ -114,7 +114,8 @@ namespace Pinder.SessionSetup
                     bio: bio,
                     textingStyleFragment: textingStyle,
                     activeArchetype: fragments.ActiveArchetype,
-                    equippedItemDisplayNames: itemDisplayNames);
+                    equippedItemDisplayNames: itemDisplayNames,
+                    textingStyleSources: fragments.TextingStyleSources);
             }
         }
 

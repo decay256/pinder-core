@@ -19,3 +19,10 @@ strings:
   character_sheet.shadow_started_at: "started at {starting}"
   character_sheet.trap_turns_remaining_one: "{stat} · {count} turn left"
   character_sheet.trap_turns_remaining_many: "{stat} · {count} turns left"
+
+  # ── #404 Texting Style tab ──────────────────────────────────────────
+  character_sheet.texting_style_joined_heading: "Texting style — as injected into the LLM prompt"
+  character_sheet.texting_style_joined_explainer: "Verbatim string from the TEXTING STYLE block of this character's system prompt. Fragments are joined with ' | '."
+  character_sheet.texting_style_sources_heading: "Sources"
+  character_sheet.texting_style_no_fragments: "(no texting style fragments — the prompt block is empty)"
+  character_sheet.texting_style_empty: "No texting style data is available for this session yet."
