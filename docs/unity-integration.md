@@ -157,21 +157,32 @@ public interface ILlmAdapter
 
 You have two choices:
 
-**(a) Reuse the OpenAI / Anthropic adapter shipped in
-`Pinder.LlmAdapters`.** It packages the prompt assembly, transport,
-and JSON parsing already used by `pinder-web`. You provide a
-`HttpClient` and an API key. Start at
-`Pinder.LlmAdapters.OpenAiLlmAdapter` /
-`Pinder.LlmAdapters.AnthropicLlmAdapter`. Wire `HttpClient` carefully
-on Unity — long-lived `HttpClient` survives domain reloads if you
-parent it to a non-static container; otherwise leak.
+**(a) Reuse `Pinder.LlmAdapters.PinderLlmAdapter`** — the production
+`ILlmAdapter` implementation used by `pinder-web` and the
+`session-runner` CLI. It owns prompt assembly, response parsing, and
+overlay handling. You provide an `ILlmTransport` (the thin
+provider-specific HTTP layer) plus a `PinderLlmAdapterOptions`. Two
+transports ship in the box:
+
+- `Pinder.LlmAdapters.OpenAi.OpenAiTransport` — OpenAI Chat
+  Completions API. Constructor takes an `HttpClient`, an API key,
+  and a model name.
+- `Pinder.LlmAdapters.Anthropic.AnthropicTransport` — Anthropic
+  Messages API. Same shape.
+
+Wire `HttpClient` carefully on Unity — long-lived `HttpClient`
+survives domain reloads if you parent it to a non-static container;
+otherwise leak.
 
 **(b) Write your own adapter.** Useful if you're routing through your
 own backend (e.g. a Cloud Run proxy that holds the API key) or if
-you're using a Unity-native LLM SDK. Implement the seven methods
-above. The shapes (`DialogueContext`, `OpponentResponse`, etc.) are
-all in `Pinder.Core.Conversation`. Keep it stateless across calls —
-the engine owns conversation history, not the adapter.
+you're using a Unity-native LLM SDK. The cheap version: implement
+`ILlmTransport` (one method, `SendAsync`) and let `PinderLlmAdapter`
+do the prompt assembly. The heavy version: implement `ILlmAdapter`
+directly (the seven methods above). The context/response shapes
+(`DialogueContext`, `OpponentResponse`, etc.) are all in
+`Pinder.Core.Conversation`. Keep it stateless across calls — the
+engine owns conversation history, not the adapter.
 
 For **offline play / unit tests** there's already a
 `Pinder.Core.Conversation.NullLlmAdapter` that returns canned
@@ -194,9 +205,9 @@ public interface IItemRepository {
 ```
 
 `Pinder.Core.Data` ships JSON-backed implementations
-(`JsonAnatomyRepository`, `JsonItemRepository`) inside the
-`Pinder.Core` assembly. Both take the **JSON string** in their
-constructor — read the file yourself, then hand off:
+(`JsonAnatomyRepository`, `JsonItemRepository`, `JsonTrapRepository`)
+inside the `Pinder.Core` assembly. All three take the **JSON string**
+in their constructor — read the file yourself, then hand off:
 
 ```csharp
 using Pinder.Core.Data;
@@ -208,6 +219,10 @@ IAnatomyRepository anatomy = new JsonAnatomyRepository(anatomyJson);
 var itemsJson = File.ReadAllText(Path.Combine(
     Application.streamingAssetsPath, "PinderData/items/starter-items.json"));
 IItemRepository items = new JsonItemRepository(itemsJson);
+
+var trapsJson = File.ReadAllText(Path.Combine(
+    Application.streamingAssetsPath, "PinderData/traps/traps.json"));
+ITrapRegistry traps = new JsonTrapRepository(trapsJson);
 ```
 
 On **Android** you must read through `UnityWebRequest` first
@@ -258,15 +273,20 @@ ScriptableObjects, not JSON.
 Minimal end-to-end with path (a):
 
 ```csharp
+using System.Net.Http;
 using Pinder.Core.Characters;
 using Pinder.Core.Conversation;
 using Pinder.Core.Data;
 using Pinder.Core.Interfaces;
 using Pinder.Core.Rolls;
+using Pinder.LlmAdapters;
+using Pinder.LlmAdapters.OpenAi;
 using Pinder.SessionSetup;
 
 public class PinderRunner : MonoBehaviour
 {
+    // Long-lived HttpClient — share across calls, dispose on app quit.
+    private static readonly HttpClient _http = new HttpClient();
     private GameSession _session;
 
     public async void StartGame(string playerSlug, string opponentSlug)
@@ -276,24 +296,29 @@ public class PinderRunner : MonoBehaviour
             await ReadStreamingAssetTextAsync("PinderData/anatomy/anatomy-parameters.json"));
         IItemRepository    items   = new JsonItemRepository(
             await ReadStreamingAssetTextAsync("PinderData/items/starter-items.json"));
+        ITrapRegistry      traps   = new JsonTrapRepository(
+            await ReadStreamingAssetTextAsync("PinderData/traps/traps.json"));
 
-        // 2. Wire your LLM adapter.
-        ILlmAdapter llm = new MyOpenAiAdapter(apiKey: "sk-...");
+        // 2. Wire the LLM adapter via PinderLlmAdapter + a transport.
+        var transport = new OpenAiTransport(_http, apiKey: "sk-...", model: "gpt-4o");
+        var options   = new PinderLlmAdapterOptions(/* see source for full list */);
+        ILlmAdapter llm = new PinderLlmAdapter(transport, options);
 
-        // 3. Load characters via SessionSetup.
-        //    CharacterDefinitionLoader.LoadFromFile reads the JSON,
-        //    runs CharacterAssembler, returns a CharacterProfile.
-        var loader   = new CharacterDefinitionLoader(items, anatomy, gameDefinition);
-        var player   = loader.LoadFromFile(
-            Path.Combine(Application.streamingAssetsPath, $"PinderData/characters/{playerSlug}.json"));
-        var opponent = loader.LoadFromFile(
-            Path.Combine(Application.streamingAssetsPath, $"PinderData/characters/{opponentSlug}.json"));
+        // 3. Load characters via SessionSetup. CharacterDefinitionLoader.Load
+        //    is a static helper: it reads the JSON, runs CharacterAssembler,
+        //    and returns a fully-built CharacterProfile.
+        var playerPath = Path.Combine(
+            Application.streamingAssetsPath, $"PinderData/characters/{playerSlug}.json");
+        var opponentPath = Path.Combine(
+            Application.streamingAssetsPath, $"PinderData/characters/{opponentSlug}.json");
+        CharacterProfile player   = CharacterDefinitionLoader.Load(playerPath, items, anatomy);
+        CharacterProfile opponent = CharacterDefinitionLoader.Load(opponentPath, items, anatomy);
 
-        // 4. Construct the session. `GameSessionConfig` is required —
-        //    the engine refuses silent defaults. See its source for
-        //    every knob (DC bias, clock, shadow trackers, RNG, etc.).
-        ITrapRegistry traps = LoadTrapRegistry();          // your code; see §3.8
-        var config = new GameSessionConfig(/* leave defaults or wire */);
+        // 4. Construct the session. `GameSessionConfig` is required — the
+        //    engine refuses silent defaults. The zero-arg call is fine for
+        //    bring-up; see GameSessionConfig.cs for every knob (DC bias,
+        //    clock, shadow trackers, RNG, etc.).
+        var config       = new GameSessionConfig();
         IDiceRoller dice = new SystemRandomDiceRoller(seed: null);  // null = nondeterministic
         _session = new GameSession(player, opponent, llm, dice, traps, config);
     }
@@ -301,11 +326,13 @@ public class PinderRunner : MonoBehaviour
     public async Task PickOption(int optionIndex, IProgress<TurnProgressEvent>? progress = null)
     {
         TurnResult result = await _session.ResolveTurnAsync(optionIndex, progress);
-        // result.PlayerMessage      ← post-roll-degraded player text
-        // result.OpponentMessage    ← opponent reply
-        // result.RollResult         ← d20, DC, fail tier, etc.
-        // result.InterestDelta      ← +/− interest change
-        // result.PlayerTurnId       ← stable id for replay/audit
+        // result.DeliveredMessage ← the player's outgoing message after roll degradation
+        // result.OpponentMessage  ← opponent reply
+        // result.Roll             ← RollResult: d20, DC, fail tier, etc.
+        // result.InterestDelta    ← +/− net interest change this turn
+        // result.IsGameOver       ← true when the conversation has ended
+        // result.Outcome          ← GameOutcome? when ended
+        // result.StateAfter       ← GameStateSnapshot of post-turn state
         UpdateUI(result);
     }
 }
@@ -574,7 +601,7 @@ Edit `data/traps/traps.json`. Each trap has a name, activation
 conditions, modification instruction (the LLM rewrite directive), and
 optional persistence rules. Schema is in `data/traps/trap-schema.json`.
 Adding/removing traps is data-only; the engine reads them through
-`ITrapRegistry` (default impl: `JsonTrapRegistry`).
+`ITrapRegistry` (default impl: `Pinder.Core.Data.JsonTrapRepository`).
 
 ### 3.9 You want different archetypes
 
