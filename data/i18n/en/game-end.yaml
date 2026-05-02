@@ -1,7 +1,20 @@
-# GameEndScreen copy.
-# Sprint: i18n string extraction (issue #435 Phase 1).
+# GameEndScreen + outcome labels (shared with replay surfaces).
+# Migrated #439 Phase 4.
 schema_version: 1
 locale: en
 strings:
+  # Short outcome labels (also used by ReplayPage, OwnerReplayPage, SharePage)
   game_end.outcome_date_secured: "Date secured"
   game_end.outcome_unmatched: "Unmatched"
+  game_end.outcome_ghosted: "Ghosted"
+
+  # Full sentence outcome labels for the GameEndScreen header.
+  game_end.outcome_date_secured_full: "Date secured — they want to meet up."
+  game_end.outcome_unmatched_full: "Unmatched — the conversation ended."
+  game_end.outcome_ghosted_full: "Ghosted — they stopped replying."
+
+  game_end.aria_game_over: "Game over"
+  game_end.turn_label: "Turn {turn}"
+  game_end.final_shadow_growth_heading: "⚫ Final Shadow Growth"
+  game_end.play_again_button: "↺ Play Again"
+  game_end.view_log_button: "📋 View Full Log"

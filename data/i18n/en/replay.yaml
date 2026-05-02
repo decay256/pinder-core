@@ -1,7 +1,32 @@
-# Session replay surface (public + owner).
-# Sprint: i18n string extraction (issue #435 Phase 1).
+# Session replay surface (public + owner). Migrated #439 Phase 4.
 schema_version: 1
 locale: en
 strings:
   replay.cta_try_pinder: "This was a Pinder game — try it yourself"
+  replay.cta_try_pinder_short: "Try Pinder"
   replay.transcript_button: "Transcript"
+  replay.transcript_button_emoji: "📄 Transcript"
+  replay.loading: "Loading replay…"
+  replay.error_could_not_load: "Could not load replay link."
+  replay.error_owner_could_not_load: "Could not load replay."
+  replay.aria_game_outcome: "Game outcome"
+  replay.aria_conversation: "Conversation"
+  replay.aria_replay_conversation: "Replay conversation"
+  replay.model_label: "Model: {model}"
+  replay.final_interest_prefix: "Final interest {interest}"
+  replay.turn_count_one: "{count} turn"
+  replay.turn_count_many: "{count} turns"
+  # Stepwise SPACE-driven hints
+  replay.kbd_space: "Space"
+  replay.hint_space_to_submit_prefix: "Press"
+  replay.hint_space_to_submit_suffix: "to submit the historically-chosen option."
+  replay.hint_space_to_continue_prefix: "Press"
+  replay.hint_space_to_continue_suffix: "to continue."
+  replay.hint_space_owner_submit_suffix: "to submit."
+  replay.back_to_sessions: "← Back to sessions"
+
+  # Progress indicator (#433 / #434)
+  replay.progress_aria: "Replay progress: turn {cursor} of {total}"
+  replay.jump_to_end_aria: "Skip to end of replay"
+  replay.jump_to_end_button: "⏭ Skip to end"
+  replay.progress_label: "Turn {cursor} of {total}"
