@@ -1,7 +1,19 @@
-# Setup / onboarding flow.
-# Sprint: i18n string extraction (issue #435 Phase 1).
+# Setup / onboarding flow. Migrated #440 Phase 5.
 schema_version: 1
 locale: en
 strings:
   session_setup.title: "Set up your session"
   session_setup.start_button: "Start the game"
+  session_setup.equipped_items_heading: "Equipped Items"
+  session_setup.loading_items: "Loading items…"
+  session_setup.no_items: "None"
+  session_setup.connecting: "Connecting…"
+  session_setup.heading: "Setting up your match…"
+  session_setup.generating_first_turn: "Generating first turn…"
+  session_setup.review_matchup_hint: "You can review the matchup analysis in your character sheet once the game starts."
+  session_setup.label_matchup_analysis: "Matchup Analysis"
+  session_setup.label_your_stake: "Your Psychological Stake"
+  session_setup.label_opponent_stake: "Opponent Psychological Stake"
+  session_setup.continue_button: "Continue to Game"
+  session_setup.stall_notice: "Still working — this is taking longer than usual. Will keep trying."
+  session_setup.session_id_label: "Session: {sessionId}"
