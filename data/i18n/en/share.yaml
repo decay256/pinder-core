@@ -1,7 +1,11 @@
-# Public share-page copy.
-# Sprint: i18n string extraction (issue #435 Phase 1).
+# Public share-page copy. Migrated #439 Phase 4.
 schema_version: 1
 locale: en
 strings:
   share.copy_link_button: "🔗 Copy link"
   share.link_copied: "Link copied!"
+  share.loading: "Loading share…"
+  share.unknown_error: "Unknown error"
+  share.watch_replay_button: "▶︎ Watch replay"
+  share.conversation_heading: "Conversation"
+  share.missing_token_error: "Missing share token"

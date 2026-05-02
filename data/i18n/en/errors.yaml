@@ -5,3 +5,4 @@ locale: en
 strings:
   errors.session_not_found: "Session not found."
   errors.failed_to_load_log: "Failed to load log ({status})."
+  errors.session_expired_redirect: "Your session expired — redirecting to login…"
