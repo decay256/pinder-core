@@ -1,7 +1,0 @@
-## Matchup Analysis
-
-**Gerald_42** (Level 5, Gym Bro/Charmer): Gerald's strongest approach is leveraging his exceptional Charm (+10) against Sable's weak Self-Awareness defense, giving him a solid 65% success rate on charm-based plays. His secondary Rizz game (60% success) provides reliable backup when charm fails. However, his moderate Madness (5) and Fixation (4) shadows create risk of coming across as overly intense or pushy, which could backfire against someone explicitly filtering for "boring" people.
-
-**Sable_xo** (Level 3, Selective Flirt): Sable's best defensive position is her strong Rizz (+8) which completely shuts down Gerald's Wit attempts (0% success rate) and her decent Honesty (+6) that makes his Self-Awareness plays nearly impossible (5% success). Her high Fixation shadow (5) suggests she may become obsessive if Gerald's charm works, while her moderate Madness (3) indicates potential for unpredictable responses. Her lower level and weaker Charm defense (+5) make her vulnerable to Gerald's primary attack vector.
-
-**Prediction:** Gerald holds a significant statistical advantage with his high-percentage Charm and Rizz plays against Sable's relatively weak defenses in those areas. However, the shadow interplay is concerning—his Madness/Fixation tendencies combined with her Fixation shadow could create an unstable dynamic if initial attraction develops. Expect Gerald to land early charm successes, but the relationship may quickly escalate into intense, potentially unhealthy territory due to their complementary shadow profiles.

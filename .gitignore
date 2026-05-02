@@ -10,3 +10,4 @@ rules/diffs/
 rules/extracted/
 rules/regenerated/
 __pycache__/
+.matchup-cache/

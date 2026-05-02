@@ -1,7 +1,0 @@
-## Matchup Analysis
-
-**Sable_xo** (Level 3, Confident Flirt/Social Butterfly): Sable's strongest approach is through Chaos attacks, exploiting Zyx's complete lack of Charm defense for a solid 60% success rate. Her secondary Rizz lane offers 55% odds against Zyx's modest Wit defense, making her a formidable social aggressor. However, her Fixation shadow (5) poses serious risks of becoming obsessively attached, while her moderate Madness could lead to erratic behavior if the match drags on.
-
-**Zyx_444** (Level 1, Cryptic Truth-Seeker/Chaotic Sage): Zyx's fortress-like Honesty (+13) creates an impenetrable wall against Sable's self-awareness attempts, reducing her to 0% success in that lane. Their high Chaos (+8) also provides strong defense against honest approaches, while their elevated Madness shadow (6) suggests they're already operating from an altered reality that could either fascinate or completely unnerve opponents. Their main vulnerability lies in their non-existent Charm, leaving them completely exposed to chaotic social attacks.
-
-**Prediction:** This will likely be a brief but intense encounter where Sable's social aggression meets Zyx's mystical weirdness head-on. Sable's Chaos attacks will probably land early and often, but Zyx's reality-bending Madness may either create an unexpectedly deep connection or cause Sable's Fixation to spiral out of control as she tries to decode their cryptic nature.
