@@ -1,0 +1,7 @@
+# Error toasts, empty states, failure banners.
+# Sprint: i18n string extraction (issue #435 Phase 1).
+schema_version: 1
+locale: en
+strings:
+  errors.session_not_found: "Session not found."
+  errors.failed_to_load_log: "Failed to load log ({status})."

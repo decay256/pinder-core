@@ -1,0 +1,15 @@
+# Event interpretations + titles. Consumed by event-box sprint (#442+).
+# Sprint: i18n string extraction (issue #435 Phase 1).
+# Variant rule (locked): 5 summary_variants per event_kind. Picker is
+# deterministic on (event_kind, turn_number).
+schema_version: 1
+locale: en
+events:
+  combo_hit:
+    title: "Combo!"
+    summary_variants:
+      - "You stacked the moment on top of the last one."
+      - "The thread you started two lines ago paid off."
+      - "Two beats in a row clicked into place."
+      - "Your last move set this one up. Both landed."
+      - "Pattern recognized. They felt the rhythm too."

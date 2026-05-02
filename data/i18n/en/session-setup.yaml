@@ -1,0 +1,7 @@
+# Setup / onboarding flow.
+# Sprint: i18n string extraction (issue #435 Phase 1).
+schema_version: 1
+locale: en
+strings:
+  session_setup.title: "Set up your session"
+  session_setup.start_button: "Start the game"

@@ -1,0 +1,7 @@
+# Public share-page copy.
+# Sprint: i18n string extraction (issue #435 Phase 1).
+schema_version: 1
+locale: en
+strings:
+  share.copy_link_button: "🔗 Copy link"
+  share.link_copied: "Link copied!"
