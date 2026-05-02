@@ -23,6 +23,22 @@ namespace Pinder.Core.Conversation
         }
 
         /// <summary>
+        /// #790 (Phase 4): expose the underlying steering RNG instance ONLY
+        /// to <see cref="GameSession.Clone"/> so it can be deep-cloned via
+        /// <see cref="RandomCloner"/>. The same RNG is shared with
+        /// <see cref="HorninessEngine"/> by construction in
+        /// <see cref="GameSession"/>'s public constructor; the clone path
+        /// preserves that sharing shape on the new session.
+        ///
+        /// <para>
+        /// Internal accessor; not part of the public API contract. Do not
+        /// use this in production game-logic code paths — use
+        /// <see cref="RollD20"/> / <see cref="AttemptSteeringRollAsync"/>.
+        /// </para>
+        /// </summary>
+        internal Random SteeringRngForCloneOnly => _steeringRng;
+
+        /// <summary>
         /// Rolls a d20 using the steering RNG (separate from game dice).
         /// Used by the shadow check mechanic to avoid consuming game dice values.
         /// </summary>

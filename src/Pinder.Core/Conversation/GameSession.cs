@@ -211,6 +211,173 @@ namespace Pinder.Core.Conversation
         }
 
         /// <summary>
+        /// #790 (Phase 4): private clone constructor used by
+        /// <see cref="Clone"/>. Copies <paramref name="src"/>'s state
+        /// field-by-field into the new instance, with all mutable engine
+        /// state deep-copied so the clone is fully independent of the parent.
+        ///
+        /// <para>
+        /// Sharing rules (categorised per plan v2 §2):
+        /// </para>
+        /// <list type="bullet">
+        ///   <item><b>Shared by reference (immutable / stateless / pure):</b>
+        ///     <see cref="_player"/>, <see cref="_opponent"/>,
+        ///     <see cref="_llm"/>, <see cref="_dice"/>,
+        ///     <see cref="_trapRegistry"/>, <see cref="_clock"/>,
+        ///     <see cref="_rules"/>, <see cref="_statDeliveryInstructions"/>,
+        ///     <see cref="_onTextLayerNoop"/>. The active fast-gameplay
+        ///     scheduler (#425) is expected to inject branch-specific
+        ///     <see cref="Pinder.Core.Rolls.PerOptionDicePool"/> via
+        ///     <see cref="InjectNextDicePool"/>; <see cref="_dice"/> itself
+        ///     is not consumed on the resolve path after Phase 2.</item>
+        ///   <item><b>Deep-copied (mutable engine state):</b> every other
+        ///     field. Includes value-type fields (turn number, momentum,
+        ///     pending bonuses, horniness session roll, etc.) and
+        ///     reference-type fields (interest meter, trap state, combo
+        ///     tracker, XP ledger, shadow trackers, shadow-growth
+        ///     evaluator, conversation history lists, topic list, etc.).</item>
+        ///   <item><b>Deep-copied via reflection:</b>
+        ///     <see cref="System.Random"/> RNGs (steering / stat-draw) via
+        ///     <see cref="RandomCloner"/>. The cloned RNGs produce the same
+        ///     next-sequence as the parent at clone-time but never share
+        ///     internal seed state.</item>
+        /// </list>
+        ///
+        /// <para>
+        /// Reflection-based completeness pin: <c>Phase4_GameSessionCloneTests</c>
+        /// enumerates every instance field on <see cref="GameSession"/> via
+        /// reflection and asserts each is either explicitly listed in this
+        /// constructor's allowlist or is a documented shared-by-reference
+        /// field. Adding a new mutable field to <see cref="GameSession"/>
+        /// without extending this constructor will fail-fast at test time.
+        /// </para>
+        /// </summary>
+        private GameSession(GameSession src)
+        {
+            // ── Shared-by-reference fields (Category B/C: immutable / stateless / pure adapters) ──
+            _player          = src._player;
+            _opponent        = src._opponent;
+            _llm             = src._llm;
+            _dice            = src._dice;
+            _trapRegistry    = src._trapRegistry;
+            _clock           = src._clock;
+            _rules           = src._rules;
+            _globalDcBias    = src._globalDcBias;
+            _statDeliveryInstructions = src._statDeliveryInstructions;
+            _onTextLayerNoop = src._onTextLayerNoop;
+
+            // ── Mutable engine state — deep copies (Category A) ──
+            _interest        = src._interest.Clone();
+            _traps           = src._traps.Clone();
+            _history         = new List<(string, string)>(src._history);
+            _opponentHistory = new List<ConversationMessage>(src._opponentHistory);
+            _comboTracker    = src._comboTracker.Clone();
+            _topics          = new List<CallbackOpportunity>(src._topics);
+            _xpLedger        = src._xpLedger.Clone();
+
+            _playerShadows   = src._playerShadows?.Clone();
+            _opponentShadows = src._opponentShadows?.Clone();
+            _shadowGrowthEvaluator = src._shadowGrowthEvaluator != null && _playerShadows != null
+                ? src._shadowGrowthEvaluator.Clone(_playerShadows)
+                : null;
+            _xpRecorder      = new SessionXpRecorder(_xpLedger, _rules);
+
+            // ── RNG state — deep-cloned for independent forks (§2.3) ──
+            // Steering RNG is shared between SteeringEngine and HorninessEngine
+            // in the public ctor; preserve that shape on the clone.
+            var clonedSteeringRng = RandomCloner.Clone(src._steeringEngine.SteeringRngForCloneOnly);
+            _steeringEngine  = new SteeringEngine(clonedSteeringRng);
+            _horninessEngine = new HorninessEngine(clonedSteeringRng);
+            _statDrawRng     = src._statDrawRng != null ? RandomCloner.Clone(src._statDrawRng) : null;
+
+            // ── Value-type / per-turn carry-over fields (Category A) ──
+            _momentumStreak           = src._momentumStreak;
+            _pendingMomentumBonus     = src._pendingMomentumBonus;
+            _turnNumber               = src._turnNumber;
+            _ended                    = src._ended;
+            _outcome                  = src._outcome;
+            _rizzCumulativeFailureCount = src._rizzCumulativeFailureCount;
+            _horninessRoll            = src._horninessRoll;
+            _horninessTimeModifier    = src._horninessTimeModifier;
+            _sessionHorniness         = src._sessionHorniness;
+            _pendingCritAdvantage     = src._pendingCritAdvantage;
+            _lastStatUsed             = src._lastStatUsed;
+            _activeWeakness           = src._activeWeakness; // immutable record
+            _activeTell               = src._activeTell;     // immutable record
+            _shadowDisadvantagedStats = src._shadowDisadvantagedStats != null
+                ? new HashSet<StatType>(src._shadowDisadvantagedStats)
+                : null;
+            _currentShadowThresholds  = src._currentShadowThresholds != null
+                ? new Dictionary<ShadowStatType, int>(src._currentShadowThresholds)
+                : null;
+
+            // ── Mid-turn carry-over from StartTurnAsync → ResolveTurnAsync (§2.4) ──
+            _currentOptions       = src._currentOptions != null
+                ? (DialogueOption[])src._currentOptions.Clone()
+                : null;
+            _currentHasAdvantage     = src._currentHasAdvantage;
+            _currentHasDisadvantage  = src._currentHasDisadvantage;
+            _currentDicePools = src._currentDicePools != null
+                ? (Pinder.Core.Rolls.PerOptionDicePool[])src._currentDicePools.Clone()
+                : null;
+            _injectedNextPool = src._injectedNextPool; // PerOptionDicePool: see clone-safety note below.
+        }
+
+        /// <summary>
+        /// #790 (Phase 4): produce a fully-independent <see cref="GameSession"/>
+        /// snapshot of the current engine state. The clone shares
+        /// configuration / character / adapter / clock references with the
+        /// parent (those are immutable or stateless), but every piece of
+        /// mutable game state — interest, traps, momentum, shadow trackers,
+        /// XP ledger, conversation histories, RNG state, per-turn carry-over
+        /// — is deep-copied. Mutating either side does not affect the other.
+        ///
+        /// <para>
+        /// <b>Use case (#393 Phase 5):</b> the fast-gameplay scheduler
+        /// (#425) calls <c>Clone()</c> three times per turn after
+        /// <see cref="StartTurnAsync"/> resolves but before the player
+        /// commits to an option, then runs <see cref="ResolveTurnAsync"/>
+        /// in parallel on each fork with a different
+        /// <see cref="Pinder.Core.Rolls.PerOptionDicePool"/> injected via
+        /// <see cref="InjectNextDicePool"/>. After the player commits, the
+        /// chosen branch's session replaces the parent; the other two are
+        /// discarded. This requires that:
+        /// </para>
+        /// <list type="number">
+        ///   <item>Mutating one branch (e.g. by running
+        ///     <see cref="ResolveTurnAsync"/>) does not perturb the parent
+        ///     or the other branches — the <i>independence</i> property,
+        ///     locked by <c>Phase4_GameSessionCloneTests.Clone_IsIndependent</c>.</item>
+        ///   <item>Running the same option through the parent and a clone
+        ///     with the same injected dice pool produces a byte-identical
+        ///     post-state (after <see cref="CreateSnapshot"/>) — the
+        ///     <i>determinism</i> property, locked by
+        ///     <c>Phase4_GameSessionCloneTests.Clone_IsDeterministic</c>.</item>
+        ///   <item>Adding a new mutable field on <see cref="GameSession"/>
+        ///     without extending the clone constructor fails fast — the
+        ///     <i>completeness</i> property, locked by
+        ///     <c>Phase4_GameSessionCloneTests.Clone_CoversEveryGameSessionField</c>.</item>
+        /// </list>
+        ///
+        /// <para>
+        /// <b>Path 1 vs Path 2 decision:</b> see PR #790 / fix/790-game-session-clone
+        /// body. Path 1 (explicit Clone()) chosen over Path 2
+        /// (snapshot-and-restore round-trip) because the existing
+        /// <see cref="CreateSnapshot"/> / <see cref="RestoreState"/> machinery
+        /// is materially incomplete (no XP ledger, no horniness session
+        /// roll, no opponent shadow tracker, no shadow-growth evaluator
+        /// counters, no per-turn carry-over). Path 2 would have required
+        /// expanding both Snapshot and RestoreState to full coverage — a
+        /// much larger blast radius on the production replay path. The
+        /// reflection-based completeness test guards against the Path 1
+        /// risk ("future PR adds field, forgets to extend Clone").
+        /// </para>
+        /// </summary>
+        /// <returns>An independent <see cref="GameSession"/> with a deep
+        /// copy of every piece of mutable engine state.</returns>
+        public GameSession Clone() => new GameSession(this);
+
+        /// <summary>
         /// Register a conversation topic for future callback opportunities.
         /// Called by the host or LLM adapter after each turn to seed topics.
         /// </summary>

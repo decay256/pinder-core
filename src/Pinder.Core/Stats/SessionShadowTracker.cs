@@ -182,5 +182,21 @@ namespace Pinder.Core.Stats
             _growthEvents.Clear();
             return events;
         }
+
+        /// <summary>
+        /// #790 (Phase 4): deep clone for fast-gameplay engine forking. Returns
+        /// an independent <see cref="SessionShadowTracker"/> wrapping the
+        /// same immutable base <see cref="StatBlock"/> and carrying a copy
+        /// of the in-session deltas + growth-event log. Mutating either side's
+        /// shadow growth does not affect the other.
+        /// </summary>
+        public SessionShadowTracker Clone()
+        {
+            var copy = new SessionShadowTracker(_baseStats);
+            foreach (var kv in _deltas)
+                copy._deltas[kv.Key] = kv.Value;
+            copy._growthEvents.AddRange(_growthEvents);
+            return copy;
+        }
     }
 }
