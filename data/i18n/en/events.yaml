@@ -1,10 +1,21 @@
-# Event interpretations + titles. Consumed by event-box sprint (#442+).
-# Sprint: i18n string extraction (issue #435 Phase 1).
-# Variant rule (locked): 5 summary_variants per event_kind. Picker is
-# deterministic on (event_kind, turn_number).
+# Event interpretations + titles. Consumed by event-box sprint
+# (#442+).
+#
+# Sprint: i18n string extraction (#435 Phase 1; populated #444 Phase 2c).
+#
+# Variant rule (locked): N summary_variants per event_kind, with 5 the
+# convention. Picker is deterministic on (event_kind, turn_number) via
+# FNV-1a-32 (see VariantPicker.PickIndex on the engine side and
+# variantIndex in frontend/src/i18n/useText.ts on the web side).
+#
+# ⚠️ COPY REVIEW REQUIRED — every line below is AI-drafted player-
+# facing micro-copy. Daniel edits in-place; do NOT merge this PR
+# without his explicit approval (#444 acceptance criteria).
 schema_version: 1
 locale: en
 events:
+  # ── Combat events ───────────────────────────────────────────────
+
   combo_hit:
     title: "Combo!"
     summary_variants:
@@ -13,3 +24,140 @@ events:
       - "Two beats in a row clicked into place."
       - "Your last move set this one up. Both landed."
       - "Pattern recognized. They felt the rhythm too."
+
+  tell_read:
+    title: "Tell read!"
+    summary_variants:
+      - "You spotted the cue and played to it. They felt seen."
+      - "The hint was in their last line. You picked it up."
+      - "Read between the lines, hit the soft spot."
+      - "You noticed what they didn't say out loud."
+      - "Eyes open. The tell paid out."
+
+  callback_hit:
+    title: "Callback"
+    summary_variants:
+      - "You pulled a thread from earlier; the call landed."
+      - "Five turns ago you planted this. It just bloomed."
+      - "Continuity points — you remembered, they noticed."
+      - "Old reference, fresh delivery. They liked the loop."
+      - "You called back to a moment they hadn't forgotten."
+
+  miss_by_1:
+    title: "Miss by 1"
+    summary_variants:
+      - "Closer than close — one tick short."
+      - "You felt the bullet whiff past. So did they."
+      - "Right read, fractional miss."
+      - "By a hair. The line almost landed."
+      - "One number from a hit. Frustrating, but recoverable."
+
+  miss_by_3:
+    title: "Miss by 3"
+    summary_variants:
+      - "The read was off — Misfire territory."
+      - "You leaned into it; it leaned back."
+      - "Solid attempt, wrong angle."
+      - "The vibe didn't catch. Worth the swing anyway."
+      - "Three short. You can recover, but they noticed."
+
+  miss_by_5:
+    title: "Miss by 5"
+    summary_variants:
+      - "Significantly off-key. They're cooling."
+      - "That landed sideways. Recover-mode now."
+      - "Big swing, big whiff. The room feels it."
+      - "You misread by a full beat."
+      - "Five-point miss — they're stepping back."
+
+  nat_20:
+    title: "Nat 20"
+    summary_variants:
+      - "Natural twenty. The dice loved you this turn."
+      - "Critical hit. Whatever you said, it sang."
+      - "Twenty on the d20. The line was a perfect tuning fork."
+      - "You rolled the ceiling. They felt it land."
+      - "Crit. They'll remember this exact line."
+
+  nat_1:
+    title: "Nat 1"
+    summary_variants:
+      - "Natural one. The dice picked the worst possible read."
+      - "Critical miss. Even the script flinched."
+      - "One on the d20 — automatic worst-case."
+      - "The line came out exactly wrong. Dice's choice."
+      - "Catastrophic roll. Nothing you could do."
+
+  crit_save:
+    title: "Crit save"
+    summary_variants:
+      - "You should have crashed. Something held."
+      - "Trap-tier setup, last-second read. You held the line."
+      - "Bad odds, good instincts. Saved it."
+      - "Critical save — the moment was a coin flip and you called it."
+      - "By the skin of your teeth. They didn't see how close that was."
+
+  # ── Corruption events ───────────────────────────────────────────
+
+  horniness_fail:
+    title: "Horniness fail"
+    summary_variants:
+      - "You misread the moment — wanting it too much made you clumsy."
+      - "Desire overran your read. The line came out too hot."
+      - "Horniness won the negotiation with your judgment. Predictably."
+      - "You leaned in when you should have hung back."
+      - "The hunger showed. They felt it before you said it."
+
+  shadow_tick_madness:
+    title: "Madness +1"
+    summary_variants:
+      - "The mask slipped a degree. They're starting to wonder."
+      - "Charm too often, too loud — Madness creeps up."
+      - "Performance fatigue. The seams are showing."
+      - "Madness +1: you're trying too hard, and it tells."
+      - "The persona's edges are fraying. Madness rises."
+
+  shadow_tick_despair:
+    title: "Despair +1"
+    summary_variants:
+      - "The string of misses is starting to weigh."
+      - "Despair settles in — you can hear it in your own voice now."
+      - "Cumulative failure tax. Despair grows."
+      - "You can feel the slump in your replies."
+      - "The hope reserve is lower. Despair +1."
+
+  shadow_tick_denial:
+    title: "Denial +1"
+    summary_variants:
+      - "You skipped the honest answer. Denial notices."
+      - "No Honesty all game — the shadow grows."
+      - "You deflected the real question. Denial +1."
+      - "Avoidance has a shape now. They can almost see it."
+      - "Denial creeps up. The truth keeps not-getting-said."
+
+  shadow_tick_dread:
+    title: "Dread +1"
+    summary_variants:
+      - "Something tightens in the chest. Dread grows."
+      - "The room got colder. Dread +1."
+      - "Bad feeling, no cause. Dread rising."
+      - "Dread settles a notch deeper."
+      - "The air thinned. Dread climbs."
+
+  shadow_tick_overthinking:
+    title: "Overthinking +1"
+    summary_variants:
+      - "Three Self-Awareness reads in a row. The loop tightens."
+      - "You're meta-ing too much. Overthinking +1."
+      - "Awareness is good; overthinking it is the cost."
+      - "You're inside your own head. They can tell."
+      - "The recursion is showing. Overthinking grows."
+
+  trap_activated:
+    title: "Trap"
+    summary_variants:
+      - "You stepped in it. The trap is live now."
+      - "Trap activated — the stat is locked while it ticks down."
+      - "That move had a hook. You're caught."
+      - "You walked into the trope. It's holding you for a few turns."
+      - "Trap snapped shut. Adjust."
