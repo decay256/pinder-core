@@ -252,12 +252,22 @@ namespace Pinder.Core.Conversation
         /// without extending this constructor will fail-fast at test time.
         /// </para>
         /// </summary>
-        private GameSession(GameSession src)
+        private GameSession(GameSession src) : this(src, src._llm) { }
+
+        /// <summary>
+        /// #425 (Phase 5): private clone constructor that swaps the LLM
+        /// adapter on the cloned instance. Used by the fast-gameplay
+        /// scheduler so each speculative branch can capture LLM I/O into
+        /// its own per-branch <c>ITurnSnapshotSink</c>: the adapter wraps
+        /// a per-branch transport that decorates the shared session
+        /// transport with a branch-scoped <c>SnapshotRecordingLlmTransport</c>.
+        /// </summary>
+        private GameSession(GameSession src, ILlmAdapter llmOverride)
         {
             // ── Shared-by-reference fields (Category B/C: immutable / stateless / pure adapters) ──
             _player          = src._player;
             _opponent        = src._opponent;
-            _llm             = src._llm;
+            _llm             = llmOverride ?? throw new ArgumentNullException(nameof(llmOverride));
             _dice            = src._dice;
             _trapRegistry    = src._trapRegistry;
             _clock           = src._clock;
@@ -376,6 +386,28 @@ namespace Pinder.Core.Conversation
         /// <returns>An independent <see cref="GameSession"/> with a deep
         /// copy of every piece of mutable engine state.</returns>
         public GameSession Clone() => new GameSession(this);
+
+        /// <summary>
+        /// #425 (Phase 5): produce an independent clone whose LLM adapter
+        /// is replaced by <paramref name="llm"/>. Every other piece of
+        /// state is deep-copied per the documented sharing rules on
+        /// <see cref="Clone()"/>; only the adapter reference is swapped.
+        /// Used by the fast-gameplay scheduler so each speculative
+        /// branch's LLM exchanges land in its own per-branch sink.
+        /// </summary>
+        /// <param name="llm">
+        /// Replacement LLM adapter. The caller is responsible for ensuring
+        /// the adapter is functionally equivalent to the parent's adapter
+        /// (same model, same prompt-assembly behaviour) — typically a
+        /// fresh <see cref="ILlmAdapter"/> wrapping a per-branch
+        /// <c>SnapshotRecordingLlmTransport</c> over the session's shared
+        /// inner transport. Must not be <c>null</c>.
+        /// </param>
+        public GameSession Clone(ILlmAdapter llm)
+        {
+            if (llm == null) throw new ArgumentNullException(nameof(llm));
+            return new GameSession(this, llm);
+        }
 
         /// <summary>
         /// Register a conversation topic for future callback opportunities.
