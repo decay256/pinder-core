@@ -123,24 +123,37 @@ namespace Pinder.Core.Characters
             var personality  = new List<string>();
             var backstory    = new List<string>();
             var texting      = new List<string>();
+            var textingSources = new List<TextingStyleFragmentSource>();
             var allArchetypes = new List<string>();
 
+            // Issue #404: AddFragments now also captures the (kind, sourceName)
+            // for each non-empty texting fragment so the Character Sheet
+            // 'Texting Style' tab can render a per-source breakdown without
+            // re-deriving from item / anatomy definitions on the controller side.
             void AddFragments(
-                string? pf, string? bf, string? tf, string[] archetypes)
+                string? pf, string? bf, string? tf, string[] archetypes,
+                string textingKind, string textingSourceName)
             {
                 if (!string.IsNullOrEmpty(pf)) personality.Add(pf!);
                 if (!string.IsNullOrEmpty(bf)) backstory.Add(bf!);
-                if (!string.IsNullOrEmpty(tf)) texting.Add(tf!);
+                if (!string.IsNullOrEmpty(tf))
+                {
+                    texting.Add(tf!);
+                    textingSources.Add(new TextingStyleFragmentSource(
+                        textingKind, textingSourceName, tf!));
+                }
                 allArchetypes.AddRange(archetypes);
             }
 
             foreach (var item in resolvedItems)
                 AddFragments(item.PersonalityFragment, item.BackstoryFragment,
-                             item.TextingStyleFragment, item.ArchetypeTendencies);
+                             item.TextingStyleFragment, item.ArchetypeTendencies,
+                             "item", item.DisplayName);
 
             foreach (var tier in resolvedTiers)
                 AddFragments(tier.PersonalityFragment, tier.BackstoryFragment,
-                             tier.TextingStyleFragment, tier.ArchetypeTendencies);
+                             tier.TextingStyleFragment, tier.ArchetypeTendencies,
+                             "anatomy", tier.TierName);
 
             // --- 6. Count and rank archetypes -------------------------------------
             // When characterLevel > 0, filter to archetypes whose level range
@@ -186,7 +199,8 @@ namespace Pinder.Core.Characters
                 ranked.AsReadOnly(),
                 timingProfile,
                 statBlock,
-                activeArchetype);
+                activeArchetype,
+                textingSources.AsReadOnly());
         }
 
         /// <summary>
