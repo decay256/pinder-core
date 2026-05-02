@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Pinder.Core.Conversation;
 using Pinder.Core.Interfaces;
@@ -27,29 +28,14 @@ namespace Pinder.LlmAdapters
         private readonly ILlmTransport _transport;
         private readonly PinderLlmAdapterOptions _options;
 
-        // Stateful opponent session
-        private ConversationSession? _opponentSession;
-        private string? _opponentSystemPrompt;
-        // Local parallel tracking for stateful history (for transports that lack multi-turn support)
-        private readonly List<(string Role, string Content)> _opponentHistory = new List<(string Role, string Content)>();
+        // #788: opponent conversation state lives on GameSession, not here.
+        // The adapter is pure-stateless and safe for concurrent reuse across sessions.
 
         public PinderLlmAdapter(ILlmTransport transport, PinderLlmAdapterOptions options)
         {
             _transport = transport ?? throw new ArgumentNullException(nameof(transport));
             _options = options ?? throw new ArgumentNullException(nameof(options));
         }
-
-        // ── IStatefulLlmAdapter ────────────────────────────────────────────
-
-        /// <inheritdoc />
-        public void StartOpponentSession(string opponentSystemPrompt)
-        {
-            _opponentSystemPrompt = opponentSystemPrompt ?? throw new ArgumentNullException(nameof(opponentSystemPrompt));
-            _opponentSession = new ConversationSession();
-        }
-
-        /// <inheritdoc />
-        public bool HasOpponentSession => _opponentSession != null;
 
         // ── ILlmAdapter ────────────────────────────────────────────────────
 
@@ -96,29 +82,52 @@ namespace Pinder.LlmAdapters
         /// <inheritdoc />
         public async Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context)
         {
+            // #788: stateless single-turn fallback path. Stateful callers route
+            // through the IStatefulLlmAdapter overload that takes a history.
+            var result = await GetOpponentResponseAsync(context, System.Array.Empty<ConversationMessage>(), default).ConfigureAwait(false);
+            return result.Response;
+        }
+
+        /// <inheritdoc />
+        public async Task<StatefulOpponentResult> GetOpponentResponseAsync(
+            OpponentContext context,
+            IReadOnlyList<ConversationMessage> history,
+            CancellationToken cancellationToken = default)
+        {
             if (context == null) throw new ArgumentNullException(nameof(context));
+            if (history == null) throw new ArgumentNullException(nameof(history));
 
             var userContent = SessionDocumentBuilder.BuildOpponentPrompt(context);
             var systemPrompt = SessionSystemPromptBuilder.BuildOpponent(context.OpponentPrompt, _options.GameDefinition);
             double temperature = _options.OpponentResponseTemperature ?? DefaultOpponentResponseTemperature;
 
             string responseText;
-            if (_opponentSession != null)
+            if (history.Count == 0)
             {
-                // Stateful: accumulate user message, send the full history
-                _opponentSession.AppendUser(userContent);
-                _opponentHistory.Add(("user", userContent));
-                responseText = await SendStatefulOpponentAsync(systemPrompt, temperature).ConfigureAwait(false);
-                _opponentSession.AppendAssistant(responseText);
-                _opponentHistory.Add(("assistant", responseText));
-            }
-            else
-            {
+                // No prior turns — single-shot.
                 responseText = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.OpponentResponse)
                     .ConfigureAwait(false);
             }
+            else
+            {
+                // Multi-turn: flatten the supplied history into the user content
+                // (the transport contract is single-turn). The current turn's
+                // user content is appended last, mirroring Anthropic/OpenAI
+                // wire ordering.
+                responseText = await SendStatefulOpponentAsync(systemPrompt, userContent, history, temperature)
+                    .ConfigureAwait(false);
+            }
 
-            return OpponentResponseParsers.ParseOpponentResponseText(responseText);
+            var parsed = OpponentResponseParsers.ParseOpponentResponseText(responseText);
+
+            // Hand the engine the two new history entries to append: the user
+            // prompt we just sent and the assistant response we got back.
+            var newEntries = new ConversationMessage[]
+            {
+                ConversationMessage.User(userContent),
+                ConversationMessage.Assistant(responseText ?? string.Empty),
+            };
+            return new StatefulOpponentResult(parsed, newEntries);
         }
 
         /// <inheritdoc />
@@ -366,43 +375,38 @@ namespace Pinder.LlmAdapters
         // ── Private helpers ────────────────────────────────────────────────
 
         /// <summary>
-        /// Sends a stateful opponent request by building a multi-turn conversation
-        /// from the accumulated history and sending it via the transport.
-        /// The transport's SendAsync only supports single-turn (system + user), so for
-        /// stateful mode we flatten the accumulated history into the user message.
+        /// Sends a stateful opponent request by flattening the supplied history
+        /// into the user message. The transport contract is single-turn
+        /// (system + user), so prior exchanges are prefixed into the user payload
+        /// before the current turn's content. Pure function of its inputs — no
+        /// adapter-side state is read or written.
         /// </summary>
-        private async Task<string> SendStatefulOpponentAsync(string systemPrompt, double temperature)
+        private Task<string> SendStatefulOpponentAsync(
+            string systemPrompt,
+            string currentUserContent,
+            IReadOnlyList<ConversationMessage> priorHistory,
+            double temperature)
         {
-            if (_opponentHistory.Count == 0)
-                return await _transport.SendAsync(systemPrompt, "", temperature, _options.MaxTokens, phase: LlmPhase.OpponentResponse)
-                    .ConfigureAwait(false);
-
-            // The last message is the current user message (just appended)
-            if (_opponentHistory.Count == 1)
-            {
-                // Single user message — just send it directly
-                return await _transport.SendAsync(systemPrompt, _opponentHistory[0].Content, temperature, _options.MaxTokens, phase: LlmPhase.OpponentResponse)
-                    .ConfigureAwait(false);
-            }
-
-            // Multi-turn: prefix prior exchanges into the user message for context
+            // Multi-turn: prefix prior exchanges into the user message for context.
             var contextBuilder = new StringBuilder();
             contextBuilder.AppendLine("[PREVIOUS CONVERSATION CONTEXT]");
-            for (int i = 0; i < _opponentHistory.Count - 1; i++)
+            for (int i = 0; i < priorHistory.Count; i++)
             {
-                var (role, content) = _opponentHistory[i];
-                string displayRole = string.Equals(role, "assistant", StringComparison.OrdinalIgnoreCase)
+                var msg = priorHistory[i];
+                string displayRole = string.Equals(msg.Role, ConversationMessage.AssistantRole, StringComparison.OrdinalIgnoreCase)
                     ? "OPPONENT" : "PLAYER";
-                contextBuilder.AppendLine($"[{displayRole}] {content}");
+                contextBuilder.AppendLine($"[{displayRole}] {msg.Content}");
             }
             contextBuilder.AppendLine();
             contextBuilder.AppendLine("[CURRENT TURN]");
+            contextBuilder.Append(currentUserContent);
 
-            // Last message is the current user prompt
-            contextBuilder.Append(_opponentHistory[_opponentHistory.Count - 1].Content);
-
-            return await _transport.SendAsync(systemPrompt, contextBuilder.ToString(), temperature, _options.MaxTokens, phase: LlmPhase.OpponentResponse)
-                .ConfigureAwait(false);
+            return _transport.SendAsync(
+                systemPrompt,
+                contextBuilder.ToString(),
+                temperature,
+                _options.MaxTokens,
+                phase: LlmPhase.OpponentResponse);
         }
 
         public void Dispose()

@@ -95,7 +95,8 @@ namespace Pinder.Core.Conversation
             int momentumStreak,
             TrapState traps,
             int turnNumber,
-            bool tripleBonusActive)
+            bool tripleBonusActive,
+            System.Collections.Generic.IReadOnlyList<ConversationMessage> opponentHistory = null)
         {
             var trapNames = traps.AllActive
                 .Select(t => t.Definition.Id)
@@ -109,6 +110,12 @@ namespace Pinder.Core.Conversation
                     penaltyDescription: FormatTrapPenalty(t.Definition)))
                 .ToArray();
 
+            // Snapshot a defensive copy of the opponent history so callers that
+            // hold the snapshot aren't observing later mutations.
+            ConversationMessage[] historySnapshot = opponentHistory == null
+                ? System.Array.Empty<ConversationMessage>()
+                : opponentHistory.ToArray();
+
             return new GameStateSnapshot(
                 interest: interest.Current,
                 state: state,
@@ -116,7 +123,8 @@ namespace Pinder.Core.Conversation
                 activeTrapNames: trapNames,
                 turnNumber: turnNumber,
                 tripleBonusActive: tripleBonusActive,
-                activeTrapDetails: trapDetails);
+                activeTrapDetails: trapDetails,
+                opponentHistory: historySnapshot);
         }
 
         /// <summary>

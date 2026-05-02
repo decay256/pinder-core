@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Pinder.Core.Interfaces;
 using Pinder.Core.Rolls;
@@ -11,15 +13,6 @@ namespace Pinder.Core.Conversation
     /// </summary>
     public sealed class NullLlmAdapter : ILlmAdapter, IStatefulLlmAdapter
     {
-        /// <inheritdoc />
-        public void StartOpponentSession(string opponentSystemPrompt)
-        {
-            // No-op: NullLlmAdapter does not maintain stateful sessions.
-        }
-
-        /// <inheritdoc />
-        public bool HasOpponentSession => false;
-
         /// <summary>
         /// Returns 4 generic dialogue options, one per stat family
         /// (Charm, Honesty, Wit, Chaos).
@@ -54,6 +47,24 @@ namespace Pinder.Core.Conversation
         public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context)
         {
             return Task.FromResult(new OpponentResponse("..."));
+        }
+
+        /// <inheritdoc />
+        public Task<StatefulOpponentResult> GetOpponentResponseAsync(
+            OpponentContext context,
+            IReadOnlyList<ConversationMessage> history,
+            CancellationToken cancellationToken = default)
+        {
+            var resp = new OpponentResponse("...");
+            // NullLlmAdapter still records placeholder history entries so engine
+            // round-trips (snapshot/restore) and Phase 0 invariants behave the
+            // same as a real adapter.
+            var entries = new ConversationMessage[]
+            {
+                ConversationMessage.User(string.Empty),
+                ConversationMessage.Assistant("..."),
+            };
+            return Task.FromResult(new StatefulOpponentResult(resp, entries));
         }
 
         /// <summary>

@@ -1303,7 +1303,8 @@ class Program
                     conversationHistory,
                     comboHistoryForSnapshot,
                     tellSnap,
-                    perTurnTextDiffs);
+                    perTurnTextDiffs,
+                    session.OpponentHistory);
 
                 string turnSnapPath = Path.Combine(playtestDir, $"{sessionSlug}.turn-{turn:D2}.snap.json");
                 File.WriteAllText(turnSnapPath, JsonSerializer.Serialize(turnSnap, new JsonSerializerOptions { WriteIndented = true }));
@@ -1602,7 +1603,8 @@ class Program
         List<(string Sender, string Text)> conversationHistory,
         List<(StatType Stat, bool Succeeded)> comboHistory,
         TellSnapshot? activeTell,
-        List<List<TextDiffSnapshot>>? perTurnTextDiffs = null)
+        List<List<TextDiffSnapshot>>? perTurnTextDiffs = null,
+        IReadOnlyList<Pinder.Core.Conversation.ConversationMessage>? opponentHistory = null)
     {
         var state = result.StateAfter;
 
@@ -1643,6 +1645,11 @@ class Program
             convEntries.Add(entry);
         }
 
+        // #788: project the engine-owned opponent history into the wire shape.
+        var opponentHistoryEntries = (opponentHistory ?? new List<Pinder.Core.Conversation.ConversationMessage>())
+            .Select(m => new OpponentHistoryEntry { Role = m.Role, Content = m.Content })
+            .ToList();
+
         return new TurnSnapshot
         {
             TurnNumber = turnNumber,
@@ -1661,6 +1668,7 @@ class Program
             SaOverthinkingTriggered = saOverthinkingTriggered,
             RizzCumulativeFailureCount = rizzCumulativeFailureCount,
             ConversationHistory = convEntries,
+            OpponentHistory = opponentHistoryEntries,
         };
     }
 
@@ -1724,6 +1732,7 @@ class Program
         snap.StatsUsedHistory ??= new List<string>();
         snap.HighestPctHistory ??= new List<bool>();
         snap.ConversationHistory ??= new List<ConversationEntry>();
+        snap.OpponentHistory ??= new List<OpponentHistoryEntry>();
 
         void Assume(string field, string defaultValue)
         {
@@ -1783,6 +1792,11 @@ class Program
                                      .ToList(),
             PendingTripleBonus   = snap.PendingTripleBonus,
             RizzCumulativeFailureCount = snap.RizzCumulativeFailureCount,
+            // #788: restore the engine-owned opponent LLM history so replay
+            // reproduces the same multi-turn context the original session ran with.
+            OpponentHistory      = (snap.OpponentHistory ?? new List<OpponentHistoryEntry>())
+                                     .Select(e => (e.Role, e.Content))
+                                     .ToList(),
         };
     }
 

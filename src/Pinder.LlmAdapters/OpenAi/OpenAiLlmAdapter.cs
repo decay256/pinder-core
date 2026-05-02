@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Pinder.Core.Conversation;
@@ -52,9 +53,8 @@ namespace Pinder.LlmAdapters.OpenAi
         private readonly OpenAiClient _client;
         private readonly OpenAiOptions _options;
 
-        // Stateful opponent session
-        private ConversationSession? _opponentSession;
-        private string? _opponentSystemPrompt;
+        // #788: opponent conversation state lives on GameSession, not here.
+        // The adapter is pure-stateless and safe for concurrent reuse across sessions.
 
         /// <summary>Creates adapter with internally-owned OpenAiClient.</summary>
         public OpenAiLlmAdapter(OpenAiOptions options)
@@ -71,15 +71,7 @@ namespace Pinder.LlmAdapters.OpenAi
             _client = new OpenAiClient(options.ApiKey, options.BaseUrl, httpClient);
         }
 
-        /// <inheritdoc />
-        public void StartOpponentSession(string opponentSystemPrompt)
-        {
-            _opponentSystemPrompt = opponentSystemPrompt ?? throw new ArgumentNullException(nameof(opponentSystemPrompt));
-            _opponentSession = new ConversationSession();
-        }
 
-        /// <inheritdoc />
-        public bool HasOpponentSession => _opponentSession != null;
 
         /// <inheritdoc />
         public async Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context)
@@ -113,31 +105,43 @@ namespace Pinder.LlmAdapters.OpenAi
         /// <inheritdoc />
         public async Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context)
         {
+            // #788: stateless single-turn fallback. Stateful callers route
+            // through the IStatefulLlmAdapter overload that takes a history.
+            var result = await GetOpponentResponseAsync(context, System.Array.Empty<ConversationMessage>(), default).ConfigureAwait(false);
+            return result.Response;
+        }
+
+        /// <inheritdoc />
+        public async Task<StatefulOpponentResult> GetOpponentResponseAsync(
+            OpponentContext context,
+            IReadOnlyList<ConversationMessage> history,
+            CancellationToken cancellationToken = default)
+        {
             if (context == null) throw new ArgumentNullException(nameof(context));
+            if (history == null) throw new ArgumentNullException(nameof(history));
 
             var userContent = SessionDocumentBuilder.BuildOpponentPrompt(context);
             var systemPrompt = SessionSystemPromptBuilder.BuildOpponent(context.OpponentPrompt, _options.GameDefinition);
 
             string requestJson;
-            if (_opponentSession != null)
-            {
-                // Stateful: accumulate messages
-                _opponentSession.AppendUser(userContent);
-                requestJson = BuildStatefulRequestJson(systemPrompt, _opponentSession, DefaultOpponentResponseTemperature);
-            }
-            else
+            if (history.Count == 0)
             {
                 requestJson = BuildRequestJson(systemPrompt, userContent, DefaultOpponentResponseTemperature);
             }
-
-            var responseText = await _client.SendChatCompletionAsync(requestJson).ConfigureAwait(false);
-
-            if (_opponentSession != null)
+            else
             {
-                _opponentSession.AppendAssistant(responseText);
+                requestJson = BuildStatefulRequestJson(systemPrompt, history, userContent, DefaultOpponentResponseTemperature);
             }
 
-            return ParseOpponentResponse(responseText);
+            var responseText = await _client.SendChatCompletionAsync(requestJson).ConfigureAwait(false);
+            var parsed = ParseOpponentResponse(responseText);
+
+            var newEntries = new ConversationMessage[]
+            {
+                ConversationMessage.User(userContent),
+                ConversationMessage.Assistant(responseText ?? string.Empty),
+            };
+            return new StatefulOpponentResult(parsed, newEntries);
         }
 
         /// <inheritdoc />
@@ -209,24 +213,26 @@ namespace Pinder.LlmAdapters.OpenAi
             return JsonConvert.SerializeObject(request);
         }
 
-        private string BuildStatefulRequestJson(string systemPrompt, ConversationSession session, double temperature)
+        /// <summary>
+        /// Builds a multi-turn /v1/chat/completions request from engine-supplied
+        /// history plus the current turn's user content. Pure function of inputs;
+        /// no adapter-side state read or written.
+        /// </summary>
+        private string BuildStatefulRequestJson(
+            string systemPrompt,
+            IReadOnlyList<ConversationMessage> priorHistory,
+            string currentUserContent,
+            double temperature)
         {
-            // Build messages array: system + all accumulated conversation messages
             var messages = new List<object>();
             messages.Add(new { role = "system", content = systemPrompt });
 
-            // Extract messages from the ConversationSession via its BuildRequest method
-            // We build an Anthropic request to get the messages, then translate
-            var anthropicRequest = session.BuildRequest(
-                _options.Model,
-                _options.MaxTokens,
-                temperature,
-                new ContentBlock[] { new ContentBlock { Type = "text", Text = systemPrompt } });
-
-            foreach (var msg in anthropicRequest.Messages)
+            for (int i = 0; i < priorHistory.Count; i++)
             {
+                var msg = priorHistory[i];
                 messages.Add(new { role = msg.Role, content = msg.Content });
             }
+            messages.Add(new { role = "user", content = currentUserContent });
 
             var request = new
             {
