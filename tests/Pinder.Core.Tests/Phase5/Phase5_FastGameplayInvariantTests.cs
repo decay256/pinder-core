@@ -15,6 +15,7 @@ namespace Pinder.Core.Tests.Phase5
     /// post-state to a session resolved without it, given the same
     /// dice seed and same chosen option.
     /// </summary>
+    [Trait("Category", "Phase5")]
     public sealed class Phase5_FastGameplayInvariantTests
     {
         // 1. Master invariant: same option + same dice POOL -> same post-state.
