@@ -40,3 +40,8 @@ strings:
 
   help_drawer.traps_heading: "Traps"
   help_drawer.traps_body: "Traps are stat-locked penalties triggered by certain options or run states. While a trap is active, rolls on the trapped stat suffer a flat penalty until the trap's timer runs out."
+
+  # ── Pro Mode toggle (#443 / event-box Phase 2b) ─────────────────
+  help_drawer.pro_mode_heading: "Pro Mode"
+  help_drawer.pro_mode_body: "When on, every event card defaults to expanded so you can see all the math at a glance. Saved per browser; toggle off any time."
+
