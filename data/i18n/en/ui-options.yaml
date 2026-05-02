@@ -1,0 +1,22 @@
+# OptionSelectionWidget — option-card chips, hints, explainers.
+# Migrated #440 Phase 5.
+schema_version: 1
+locale: en
+strings:
+  option_widget.heading: "Choose your move"
+  option_widget.tell_hint: "👁️ A tell hides in one of these options. Pick the right stat to land it."
+  option_widget.success_label: "success"
+  option_widget.resolving: "Resolving…"
+  option_widget.dc_chip: "DC {dc}"
+  option_widget.level_bonus_chip: "LVL +{bonus}"
+  option_widget.callback_turn_chip: "Callback T{turn}"
+  option_widget.window_chip: "🎯 Window"
+  option_widget.disarms_trap_chip: "🛡️ Disarms trap"
+  option_widget.disarms_trap_tooltip: "Disarms current trap on selection. Fail = Spiral."
+  option_widget.madness_overlay_tooltip: "Madness overlay"
+  option_widget.combo_reward_prefix: "⭐ Combo reward:"
+  option_widget.combo_reward_label: "Reward:"
+  option_widget.combo_trigger_prefix: "⭐ Combo: {name}"
+  option_widget.window_explainer_prefix: "🎯 Window —"
+  option_widget.callback_explainer_prefix: "🔗 Callback — +{bonus} to roll"
+  option_widget.madness_explainer_prefix: "🌀 Madness —"

@@ -12,6 +12,7 @@ strings:
 
   # ── Common (#439) ─────────────────────────────────────────────────
   common.loading: "Loading…"
+  common.sign_out: "Sign out"
 
   # ── Continue section (#106 / #322, migrated #439) ─────────────────
   continue.heading: "Continue"
@@ -32,6 +33,52 @@ strings:
   # ── LastOpponentReplyPanel (#187, #337, migrated #439) ────────────
   last_opponent_reply.replying_to_prefix: "Replying to"
   last_opponent_reply.opponent_fallback: "Opponent"
+
+  # ── ConversationLog (#345) ───────────────────────────────────────
+  conversation_log.empty: "No messages were exchanged."
+
+  # ── PlayPage (#329, migrated #440 Phase 5) ────────────────────────
+  play_page.loading: "Loading characters…"
+  play_page.title: "Select Characters"
+  play_page.subtitle: "Pick your character and your opponent, then start the match."
+  play_page.matchup_placeholder: "Select a player and an opponent to see the matchup preview."
+  play_page.model_label: "Model"
+  play_page.fast_gameplay_label: "fast ($$$)"
+  play_page.start_game_button: "Start Game"
+  play_page.starting_button: "Starting…"
+  play_page.player_label: "Player:"
+  play_page.opponent_label: "Opponent:"
+
+  # ── SessionsPage (migrated #440 Phase 5) ──────────────────────────
+  sessions_page.loading: "Loading sessions…"
+  sessions_page.title: "Sessions"
+  sessions_page.subtitle: "Resume an in-progress game or read back a past one."
+  sessions_page.past_heading: "Past sessions"
+  sessions_page.empty: "No sessions yet."
+  sessions_page.start_new_game: "Start a new game"
+  sessions_page.replay_button: "▶ Replay"
+
+  # ── SessionLogPage (#45, migrated #440 Phase 5) ──────────────────
+  session_log.loading: "Loading session log…"
+  session_log.heading: "Session Log"
+  session_log.back_button: "← Back"
+  session_log.back_to_select: "← Back to character select"
+  session_log.empty_heading: "No log entries yet."
+  session_log.empty_body: "The session may still be setting up, or no events have been recorded."
+
+  # ── MessageEffectsBar (#344) ──────────────────────────
+  message_effects.aria_label: "Effects that fired on this message"
+
+  # ── TurnDetailPopover (#336) ─────────────────────────
+  turn_detail.section_heading: "Turn details"
+  turn_detail.turn_label: "Turn {turn}"
+  turn_detail.close_aria: "Close turn details"
+  turn_detail.empty: "No turn details are available for this message."
+
+  # ── EndAndDeleteDialog (#327) ─────────────────────────
+  end_and_delete.title: "End and delete this date?"
+  end_and_delete.body: "The session and its full conversation log will be permanently deleted. This cannot be undone."
+  end_and_delete.cancel_button: "Cancel"
 
   # ── Display names — stats (#397, migrated #438 Phase 3) ────────────
   display_names.stat.charm: "Charm"

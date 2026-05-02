@@ -1,0 +1,50 @@
+# TurnResultDisplay — resolved-turn breakdown card.
+# Migrated #440 Phase 5.
+schema_version: 1
+locale: en
+strings:
+  turn_result.annotations_heading: "Annotations"
+  turn_result.steering_heading: "🧭 Steering"
+  turn_result.steering_explainer: "Steering: an extra roll that lets the player nudge the conversation by adding a follow-up question."
+  turn_result.vs_dc: "vs DC"
+
+  turn_result.outcome_summary: "Turn {turn} · {riskTier} · d20[{used}] {total}/{dc}"
+
+  turn_result.horniness_check_heading: "Horniness check"
+  turn_result.horniness_check_explainer: "Per-turn d20 vs DC {dc}: a miss may trigger a horniness overlay on the delivered message."
+
+  turn_result.shadow_check_heading: "Shadow check"
+  turn_result.shadow_check_explainer: "Per-turn d20 vs DC {dc}: a miss may force a successful action to fail via a shadow overlay."
+  turn_result.shadow_check_line: "⚫ Shadow check ({shadow}): d20 = {die} + 0 = {die} vs DC {dc} →"
+  turn_result.shadow_check_miss: "MISS ({tier})"
+  turn_result.shadow_check_miss_corruption: "MISS ({tier}) — corruption applied"
+  turn_result.shadow_check_success: "SUCCESS"
+  turn_result.shadow_override_line: "↳ Shadow override ({shadow} {tier}): success forced to fail"
+
+  turn_result.timeline_intended: "Intended"
+  turn_result.timeline_delivered: "Delivered"
+  turn_result.timeline_opponent: "Opponent replies"
+
+  turn_result.interest_breakdown.base: "Base: {value}"
+  turn_result.interest_breakdown.risk_bonus: "Risk bonus: +{value}"
+  turn_result.interest_breakdown.combo_bonus: "Combo bonus: {value}"
+  turn_result.interest_breakdown.horniness_penalty: "Horniness penalty: {value}"
+  turn_result.interest_breakdown.total: "= {value} (now {now})"
+
+  turn_result.annotation_triple: "⚡ Combo: The Triple — +{bonus} to this roll"
+  turn_result.annotation_combo_fires: "⭐ {name} combo fires!"
+  turn_result.annotation_tell_read: "📖 Tell read! +{bonus}"
+  turn_result.annotation_callback: "🔗 Callback +{bonus} to roll"
+  turn_result.callback_descriptor_with: "{descriptor} — bigger callbacks score more"
+  turn_result.callback_descriptor_default: "(callback bonus applied — bigger callbacks score more)"
+
+  turn_result.interest_chip: "❤️ Interest {delta} (now {now})"
+  turn_result.momentum_chip: "⚡ Momentum ×{streak}"
+  turn_result.triple_chip: "Triple +{bonus}"
+  turn_result.callback_chip: "Callback {bonus}"
+  turn_result.tell_chip: "Tell +{bonus}"
+
+  turn_result.shadow_growth_heading: "⚫ Shadow Growth"
+  turn_result.trap_cleared_prefix: "🛡️ Trap cleared:"
+  turn_result.trap_activated_legacy: "🪤 Trap activated: {name}"
+  turn_result.active_trap_prefix: "🪤 Active trap:"

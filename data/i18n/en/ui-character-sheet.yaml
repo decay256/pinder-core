@@ -1,0 +1,21 @@
+# CharacterSheetModal — character sheet modal copy.
+# Migrated #440 Phase 5.
+schema_version: 1
+locale: en
+strings:
+  character_sheet.close_aria: "Close character sheet"
+  character_sheet.tabs_aria: "Player sheet tabs"
+  character_sheet.loading: "Loading character sheet…"
+  character_sheet.loading_background: "Loading background…"
+  character_sheet.archetype_heading: "Active Archetype"
+  character_sheet.effective_stats_heading: "Effective Stats"
+  character_sheet.active_shadows_heading: "Active Shadows"
+  character_sheet.active_traps_heading: "Active Traps"
+  character_sheet.items_heading: "Items"
+  character_sheet.anatomy_heading: "Anatomy"
+  character_sheet.summary_heading: "Summary"
+  character_sheet.none: "None."
+  character_sheet.none_equipped: "None equipped."
+  character_sheet.shadow_started_at: "started at {starting}"
+  character_sheet.trap_turns_remaining_one: "{stat} · {count} turn left"
+  character_sheet.trap_turns_remaining_many: "{stat} · {count} turns left"

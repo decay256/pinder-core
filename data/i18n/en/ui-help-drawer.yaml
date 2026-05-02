@@ -1,0 +1,42 @@
+# GameplayHelpDrawer (#198) — slide-out help panel.
+# Migrated #440 Phase 5.
+schema_version: 1
+locale: en
+strings:
+  help_drawer.title: "How Pinder Works"
+  help_drawer.close_aria: "Close help"
+
+  help_drawer.risk_tiers_heading: "Risk Tiers"
+  help_drawer.risk_tiers_intro: "Each option carries a risk tier. Higher risk = lower success odds but bigger Interest payoff on success."
+  help_drawer.col_tier: "Tier"
+  help_drawer.col_success: "Success"
+  help_drawer.col_bonus: "Bonus"
+  help_drawer.col_gist: "Gist"
+
+  help_drawer.shadow_stats_heading: "Shadow Stats"
+  help_drawer.shadow_stats_intro: "Six shadows track corruption built up over the run. Each turn the engine inspects what you did and grows or reduces a shadow."
+  help_drawer.grows_when_label: "Grows when:"
+  help_drawer.reduces_when_label: "Reduces when:"
+
+  help_drawer.modifiers_heading: "Modifiers"
+  help_drawer.modifier_tell: "Tell"
+  help_drawer.modifier_weakness_window: "Weakness Window"
+  help_drawer.modifier_callback: "Callback"
+  help_drawer.modifier_callback_body: "Calling back to a previous turn's topic grants a roll bonus that scales with how far back the reference reaches. The further back, the bigger the bonus, capped at +3."
+  help_drawer.modifier_triple: "Triple"
+  help_drawer.modifier_triple_body: "Playing three different stats across three consecutive turns triggers Triple: {reward}."
+  help_drawer.modifier_combo: "Combo"
+  help_drawer.modifier_combo_body: "Specific stat sequences across two consecutive turns trigger named combos with bonus Interest on success."
+  help_drawer.combo_reward_inline: "(Reward: {reward})"
+
+  help_drawer.checks_heading: "Checks"
+  help_drawer.checks_intro: "On each turn the engine runs a few hidden checks beyond the primary stat roll."
+  help_drawer.check_steering: "Steering check"
+  help_drawer.check_steering_body: "Tracks how strongly the player is steering the conversation toward their preferred stats; a failed steer can stall Interest gains for the turn."
+  help_drawer.check_horniness: "Horniness check"
+  help_drawer.check_horniness_body: "Compares the opponent's current arousal level to the option's intensity; mismatched intensity dampens Interest, matched intensity amplifies it."
+  help_drawer.check_shadow: "Shadow check"
+  help_drawer.check_shadow_body: "Inspects the turn's outcome against every shadow rule (see Shadow Stats above) and grows or reduces shadows accordingly. High shadow totals unlock corruption events."
+
+  help_drawer.traps_heading: "Traps"
+  help_drawer.traps_body: "Traps are stat-locked penalties triggered by certain options or run states. While a trap is active, rolls on the trapped stat suffer a flat penalty until the trap's timer runs out."

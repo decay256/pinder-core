@@ -1,7 +1,8 @@
 # Sessions list page.
-# Sprint: i18n string extraction (issue #435 Phase 1).
+# Sprint: i18n string extraction (#435 Phase 1; Phase 5 strings live in
+# ui.yaml under the sessions_page.* namespace — this file kept as a
+# placeholder so the build script's per-file expectation list still
+# resolves).
 schema_version: 1
 locale: en
-strings:
-  sessions_page.title: "Sessions"
-  sessions_page.replay_button: "▶ Replay"
+strings: {}

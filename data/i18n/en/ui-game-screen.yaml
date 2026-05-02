@@ -1,0 +1,35 @@
+# GameScreen — live game UI chrome.
+# Migrated #440 Phase 5.
+schema_version: 1
+locale: en
+strings:
+  game_screen.interest_label: "Interest"
+  game_screen.you_label: "You:"
+  game_screen.opp_label: "Opp:"
+  game_screen.turn_prefix: "Turn"
+  game_screen.momentum_label: "Momentum"
+  game_screen.momentum_streak: "×{streak} streak"
+  game_screen.momentum_cold: "Cold"
+  game_screen.triple_bonus_active: "✨ Triple bonus active (+1 to next roll)"
+  game_screen.interest_state_label: "Interest state"
+  game_screen.active_trap_label: "Active Trap"
+  game_screen.loading_turn: "Loading turn…"
+
+  game_screen.conversation_heading: "Conversation"
+  game_screen.final_turn_heading: "Final Turn"
+  game_screen.result_heading: "Result"
+  game_screen.continue_button: "Continue"
+  game_screen.something_went_wrong: "⚠️ Something went wrong"
+  game_screen.dismiss_button: "Dismiss"
+  game_screen.retry_button: "Retry"
+  game_screen.turn_heading: "Turn {turn}"
+
+  game_screen.player_sheet_button: "Player Sheet"
+  game_screen.opponent_sheet_button: "Opponent Sheet"
+  game_screen.switch_session_button: "🏠 Switch"
+  game_screen.switch_session_aria: "Switch session"
+  game_screen.end_and_delete_aria: "End and delete session"
+  game_screen.end_button: "🗑️ End"
+  game_screen.open_help_aria: "Open help"
+  game_screen.scroll_to_newest_aria: "Scroll to newest message"
+  game_screen.scroll_to_newest_button: "↓ new"
