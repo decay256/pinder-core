@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 using Pinder.Core.Conversation;
 using Pinder.Core.Stats;
@@ -8,30 +9,38 @@ namespace Pinder.Core.Interfaces
     /// Abstraction layer for all LLM interactions during a Pinder conversation.
     /// The actual provider (EigenCore, OpenAI, Anthropic, etc.) is injected at runtime.
     /// </summary>
+    /// <remarks>
+    /// All methods accept an optional <see cref="CancellationToken"/> (default
+    /// <c>default</c>) so the engine can honour cancellation propagated through
+    /// <see cref="Pinder.Core.Conversation.GameSession.ResolveTurnAsync(int, System.IProgress{TurnProgressEvent}?, CancellationToken)"/>.
+    /// Implementations MUST forward the token to their underlying transport call
+    /// — see <see cref="ILlmTransport.SendAsync"/> (#794, prerequisite for the
+    /// fast-gameplay scheduler #425).
+    /// </remarks>
     public interface ILlmAdapter
     {
         /// <summary>
         /// Generate 4 dialogue options for the player's turn.
         /// </summary>
-        Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context);
+        Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, CancellationToken ct = default);
 
         /// <summary>
         /// Deliver the chosen option with outcome degradation applied.
         /// Returns the player's message text (post-degradation).
         /// </summary>
-        Task<string> DeliverMessageAsync(DeliveryContext context);
+        Task<string> DeliverMessageAsync(DeliveryContext context, CancellationToken ct = default);
 
         /// <summary>
         /// Generate the opponent's response to the player's delivered message.
         /// Returns an OpponentResponse containing the message text and optional gameplay signals.
         /// </summary>
-        Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context);
+        Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context, CancellationToken ct = default);
 
         /// <summary>
         /// Generate a narrative beat when interest crosses a threshold.
         /// Return null to skip the beat.
         /// </summary>
-        Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context);
+        Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, CancellationToken ct = default);
 
         /// <summary>
         /// Apply a horniness overlay to a delivered message.
@@ -44,7 +53,7 @@ namespace Pinder.Core.Interfaces
         /// (e.g. <c>"ACTIVE ARCHETYPE: The Peacock (clear)\n..."</c>) so the
         /// overlay rewrite respects the character's voice (#372).
         /// </param>
-        Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null);
+        Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null, CancellationToken ct = default);
 
         /// <summary>
         /// Apply a shadow corruption instruction to a delivered message.
@@ -56,7 +65,7 @@ namespace Pinder.Core.Interfaces
         /// Optional active archetype directive for the speaking character so
         /// the corrupted rewrite still sounds like the character (#372).
         /// </param>
-        Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow, string? archetypeDirective = null);
+        Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow, string? archetypeDirective = null, CancellationToken ct = default);
 
         /// <summary>
         /// Apply a trap overlay to a delivered message (issue #371). Called on
@@ -75,6 +84,6 @@ namespace Pinder.Core.Interfaces
         /// Optional active archetype directive for the speaking character so
         /// the trap-overlay rewrite still sounds like the character (#372 + #371 union).
         /// </param>
-        Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null);
+        Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null, CancellationToken ct = default);
     }
 }

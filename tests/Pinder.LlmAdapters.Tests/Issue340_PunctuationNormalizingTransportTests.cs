@@ -93,8 +93,10 @@ namespace Pinder.LlmAdapters.Tests
             }
 
             public Task<string> SendAsync(string systemPrompt, string userMessage,
-                double temperature = 0.9, int maxTokens = 1024, string? phase = null)
+                double temperature = 0.9, int maxTokens = 1024, string? phase = null,
+                CancellationToken ct = default)
             {
+                ct.ThrowIfCancellationRequested();
                 LastSystem = systemPrompt;
                 LastUser = userMessage;
                 LastPhase = phase;

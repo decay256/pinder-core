@@ -25,13 +25,13 @@ namespace Pinder.Core.Tests.Conversation
     {
         private sealed class DummyLlmAdapter : ILlmAdapter
         {
-            public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context) => Task.FromResult(new DialogueOption[0]);
-            public Task<string> DeliverMessageAsync(DeliveryContext context) => Task.FromResult("");
-            public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context) => Task.FromResult(new OpponentResponse("", null, null));
-            public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context) => Task.FromResult<string?>("");
-            public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null) => Task.FromResult(message);
-            public Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow, string? archetypeDirective = null) => Task.FromResult(message);
-            public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null) => Task.FromResult(message);
+            public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, System.Threading.CancellationToken ct = default) => Task.FromResult(new DialogueOption[0]);
+            public Task<string> DeliverMessageAsync(DeliveryContext context, System.Threading.CancellationToken ct = default) => Task.FromResult("");
+            public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context, System.Threading.CancellationToken ct = default) => Task.FromResult(new OpponentResponse("", null, null));
+            public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, System.Threading.CancellationToken ct = default) => Task.FromResult<string?>("");
+            public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => Task.FromResult(message);
+            public Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => Task.FromResult(message);
+            public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => Task.FromResult(message);
         }
 
         private sealed class StatefulDummyLlmAdapter : IStatefulLlmAdapter
@@ -40,9 +40,9 @@ namespace Pinder.Core.Tests.Conversation
             public int StatefulCallCount { get; private set; }
             public IReadOnlyList<ConversationMessage>? LastHistorySeen { get; private set; }
 
-            public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context) => Task.FromResult(new DialogueOption[0]);
-            public Task<string> DeliverMessageAsync(DeliveryContext context) => Task.FromResult("");
-            public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context) => Task.FromResult(new OpponentResponse("", null, null));
+            public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, System.Threading.CancellationToken ct = default) => Task.FromResult(new DialogueOption[0]);
+            public Task<string> DeliverMessageAsync(DeliveryContext context, System.Threading.CancellationToken ct = default) => Task.FromResult("");
+            public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context, System.Threading.CancellationToken ct = default) => Task.FromResult(new OpponentResponse("", null, null));
 
             public Task<StatefulOpponentResult> GetOpponentResponseAsync(
                 OpponentContext context,
@@ -60,11 +60,11 @@ namespace Pinder.Core.Tests.Conversation
                     }));
             }
 
-            public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context) => Task.FromResult<string?>("");
-            public Task<string> GetSteeringQuestionAsync(SteeringContext context) => Task.FromResult("test steering question");
-            public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null) => Task.FromResult(message);
-            public Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow, string? archetypeDirective = null) => Task.FromResult(message);
-            public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null) => Task.FromResult(message);
+            public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, System.Threading.CancellationToken ct = default) => Task.FromResult<string?>("");
+            public Task<string> GetSteeringQuestionAsync(SteeringContext context, System.Threading.CancellationToken ct = default) => Task.FromResult("test steering question");
+            public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => Task.FromResult(message);
+            public Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => Task.FromResult(message);
+            public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => Task.FromResult(message);
         }
 
         private sealed class DummyDice : IDiceRoller

@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Pinder.Core.Interfaces;
 using Pinder.Core.Rolls;
@@ -29,8 +30,10 @@ namespace Pinder.Core.Conversation
             string deliveredMessage,
             ILlmAdapter llm,
             object? statDeliveryInstructions,
-            Func<string, Task> applyOverlay)
+            Func<string, Task> applyOverlay,
+            CancellationToken ct = default)
         {
+            ct.ThrowIfCancellationRequested();
             if (sessionHorniness <= 0 || playerShadows == null)
                 return HorninessCheckResult.NotPerformed;
 

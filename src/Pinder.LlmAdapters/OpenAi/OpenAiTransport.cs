@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Pinder.Core.Interfaces;
@@ -37,7 +38,7 @@ namespace Pinder.LlmAdapters.OpenAi
         }
 
         /// <inheritdoc />
-        public async Task<string> SendAsync(string systemPrompt, string userMessage, double temperature = 0.9, int maxTokens = 1024, string? phase = null)
+        public async Task<string> SendAsync(string systemPrompt, string userMessage, double temperature = 0.9, int maxTokens = 1024, string? phase = null, CancellationToken ct = default)
         {
             // phase is metadata for decorators; the underlying provider has no use for it.
             _ = phase;
@@ -57,7 +58,9 @@ namespace Pinder.LlmAdapters.OpenAi
             };
 
             string requestJson = JsonConvert.SerializeObject(request);
-            return await _client.SendChatCompletionAsync(requestJson).ConfigureAwait(false);
+            // #794: forward the engine-level cancellation token to the underlying
+            // HTTP call so a mid-turn Cancel() halts the in-flight request.
+            return await _client.SendChatCompletionAsync(requestJson, ct).ConfigureAwait(false);
         }
 
         public void Dispose()

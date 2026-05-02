@@ -129,15 +129,16 @@ actually use; that's what we lock.
 
 **What it locks:** when an `ILlmTransport.SendAsync` call throws mid-resolve
 (simulated `OperationCanceledException`, simulated 429-style HTTP exception,
-simulated network reset), the exception propagates AND the engine's turn
-counter does NOT advance. `StartTurnAsync` failures don't leak `_currentOptions`.
+simulated network reset) OR when a real `CancellationToken` is cancelled
+mid-turn (#794), the exception propagates AND the engine's turn counter does
+NOT advance. `StartTurnAsync` failures don't leak `_currentOptions`.
 
-**Documented gap:** pinder-core's non-streaming path has NO `CancellationToken`
-plumbing on `ResolveTurnAsync` or `ILlmTransport.SendAsync`. Cancellation is
-effected today by throwing from inside the transport — a `CancellationToken`
-would be an engine-level API change. F3 (cancellation mid-stream) is therefore
-tested via "throw OCE during opponent_response phase," which is the closest
-fixture pinder-core can support.
+**Resolved gap (#794):** `GameSession.ResolveTurnAsync(int, IProgress?, CancellationToken)`
+and `ILlmTransport.SendAsync(..., CancellationToken)` now accept a token and
+thread it through every awaited LLM adapter call (delivery, steering, trap
+overlay, horniness overlay, shadow corruption, opponent response). I6.4–I6.6
+and F3b exercise real `CancellationTokenSource.Cancel()` mid-turn; the legacy
+throw-OCE shape is preserved as I6.3 / F3a so the contract covers both.
 
 **Existing engine behaviour finding (flagged here, NOT fixed in this PR):**
 when `ResolveTurnAsync` throws between the dice roll and the delivery LLM call,

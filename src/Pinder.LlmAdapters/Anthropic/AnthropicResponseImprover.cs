@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 using Pinder.LlmAdapters.Anthropic.Dto;
 
@@ -20,7 +21,8 @@ namespace Pinder.LlmAdapters.Anthropic
             ContentBlock[] systemBlocks,
             string originalUserContent,
             string draft,
-            double temperature)
+            double temperature,
+            CancellationToken ct = default)
         {
             var improvementPrompt = options.GameDefinition?.ImprovementPrompt;
             if (string.IsNullOrWhiteSpace(improvementPrompt)) return draft;
@@ -42,7 +44,7 @@ namespace Pinder.LlmAdapters.Anthropic
                 };
                 AnthropicRequestBuilders.AttachTool(improveRequest, ToolSchemas.Improvement);
 
-                var improveResponse = await client.SendMessagesAsync(improveRequest).ConfigureAwait(false);
+                var improveResponse = await client.SendMessagesAsync(improveRequest, ct).ConfigureAwait(false);
 
                 // Try structured tool_use first
                 var toolInput = improveResponse.GetToolInput();
@@ -60,6 +62,10 @@ namespace Pinder.LlmAdapters.Anthropic
                 // Strip evaluation block headers if the model included them in the output.
                 improvedText = StripImprovementEvaluation(improvedText, draft);
                 return string.IsNullOrWhiteSpace(improvedText) ? draft : improvedText;
+            }
+            catch (System.OperationCanceledException) when (ct.IsCancellationRequested)
+            {
+                throw; // #794: cancellation must propagate.
             }
             catch
             {

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Pinder.Core.Characters;
 using Pinder.Core.Interfaces;
@@ -425,9 +426,16 @@ namespace Pinder.Core.Conversation
         /// Start a new turn. Checks end conditions, determines advantage/disadvantage,
         /// and fetches dialogue options from the LLM adapter.
         /// </summary>
+        /// <param name="ct">
+        /// Cancellation token forwarded to the LLM adapter call (#794). Defaults to
+        /// <c>default</c> for backwards compatibility — existing callers that don't
+        /// pass a token continue to work unchanged.
+        /// </param>
         /// <exception cref="GameEndedException">If the game has already ended.</exception>
-        public async Task<TurnStart> StartTurnAsync()
+        /// <exception cref="OperationCanceledException">If <paramref name="ct"/> is cancelled.</exception>
+        public async Task<TurnStart> StartTurnAsync(CancellationToken ct = default)
         {
+            ct.ThrowIfCancellationRequested();
             // Check if game already ended
             if (_ended)
                 throw new GameEndedException(_outcome!.Value);
@@ -543,7 +551,7 @@ namespace Pinder.Core.Conversation
                 availableStats: availableStats);
 
             // Get dialogue options from LLM
-            var rawOptions = await _llm.GetDialogueOptionsAsync(context).ConfigureAwait(false);
+            var rawOptions = await _llm.GetDialogueOptionsAsync(context, ct).ConfigureAwait(false);
 
             // Peek combos for each option (#46), enrich with weakness window (#49) and tell bonus (#50)
             var options = new DialogueOption[rawOptions.Length];
@@ -657,7 +665,7 @@ namespace Pinder.Core.Conversation
         /// <exception cref="GameEndedException">If the game has already ended.</exception>
         /// <exception cref="InvalidOperationException">If StartTurnAsync was not called first or index is invalid.</exception>
         public Task<TurnResult> ResolveTurnAsync(int optionIndex)
-            => ResolveTurnAsync(optionIndex, progress: null);
+            => ResolveTurnAsync(optionIndex, progress: null, ct: default);
 
         /// <summary>
         /// #789 Phase 2 (D1) — inject a specific <see cref="Pinder.Core.Rolls.PerOptionDicePool"/>
@@ -687,8 +695,29 @@ namespace Pinder.Core.Conversation
         /// per coarse stage of the multi-LLM resolution pipeline. Intended for
         /// the web session-runner's SSE endpoint — see <see cref="TurnProgressStage"/>.
         /// </summary>
-        public async Task<TurnResult> ResolveTurnAsync(int optionIndex, System.IProgress<TurnProgressEvent>? progress)
+        /// <remarks>
+        /// This overload exists for backward compatibility with callers that
+        /// pre-date the cancellation-token thread (#794). It delegates to the
+        /// CT-aware overload with <c>ct = default</c>.
+        /// </remarks>
+        public Task<TurnResult> ResolveTurnAsync(int optionIndex, System.IProgress<TurnProgressEvent>? progress)
+            => ResolveTurnAsync(optionIndex, progress, ct: default);
+
+        /// <summary>
+        /// Resolve the current turn with an optional progress reporter and
+        /// cancellation token. The token is forwarded to every awaited LLM
+        /// adapter call inside the resolution pipeline (steering, delivery,
+        /// trap overlay, horniness overlay, shadow corruption, opponent
+        /// response). When the token is cancelled mid-turn the engine surfaces
+        /// <see cref="OperationCanceledException"/> at the next adapter call;
+        /// the post-cancel observable invariants are documented in
+        /// <c>docs/development/regression-pins-787.md</c> and locked by the
+        /// Phase 0 I6 / F3 invariant tests (#794, prerequisite for the
+        /// fast-gameplay scheduler #425).
+        /// </summary>
+        public async Task<TurnResult> ResolveTurnAsync(int optionIndex, System.IProgress<TurnProgressEvent>? progress, CancellationToken ct)
         {
+            ct.ThrowIfCancellationRequested();
             if (_ended)
                 throw new GameEndedException(_outcome!.Value);
 
@@ -966,7 +995,7 @@ namespace Pinder.Core.Conversation
             // named DeliveredMessage for backward compatibility with the LLM
             // adapter contract.
             SteeringRollResult steeringResult = await _steeringEngine.AttemptSteeringRollAsync(
-                originalIntendedText, _player, _opponent, _llm, BuildHistoryForLlmContext()).ConfigureAwait(false);
+                originalIntendedText, _player, _opponent, _llm, BuildHistoryForLlmContext(), ct).ConfigureAwait(false);
             progress?.Report(new TurnProgressEvent(
                 TurnProgressStage.SteeringCompleted,
                 steeringResult.SteeringSucceeded ? steeringResult.SteeringQuestion : null));
@@ -1029,7 +1058,7 @@ namespace Pinder.Core.Conversation
                 activeArchetypeDirective: playerArchetypeDirectiveForDelivery);
 
             progress?.Report(new TurnProgressEvent(TurnProgressStage.DeliveryStarted));
-            string deliveredMessage = await _llm.DeliverMessageAsync(deliveryContext).ConfigureAwait(false);
+            string deliveredMessage = await _llm.DeliverMessageAsync(deliveryContext, ct).ConfigureAwait(false);
             progress?.Report(new TurnProgressEvent(TurnProgressStage.DeliveryCompleted, deliveredMessage));
 
             // Tier modifier diff (SECOND per #364): intended+steering text vs
@@ -1076,7 +1105,7 @@ namespace Pinder.Core.Conversation
                     string opponentCtxForTrap = BuildOpponentContext(_opponent);
                     progress?.Report(new TurnProgressEvent(TurnProgressStage.TrapOverlayStarted));
                     deliveredMessage = await _llm.ApplyTrapOverlayAsync(
-                        deliveredMessage, trapInstruction, trapDisplayName, opponentCtxForTrap, playerArchetypeDirectiveForDelivery)
+                        deliveredMessage, trapInstruction, trapDisplayName, opponentCtxForTrap, playerArchetypeDirectiveForDelivery, ct)
                         .ConfigureAwait(false);
                     progress?.Report(new TurnProgressEvent(TurnProgressStage.TrapOverlayCompleted, deliveredMessage));
                     if (deliveredMessage != beforeTrap)
@@ -1119,7 +1148,7 @@ namespace Pinder.Core.Conversation
                     string beforeHorniness = deliveredMessage;
                     string opponentCtx = BuildOpponentContext(_opponent);
                     progress?.Report(new TurnProgressEvent(TurnProgressStage.HorninessOverlayStarted));
-                    deliveredMessage = await _llm.ApplyHorninessOverlayAsync(deliveredMessage, instruction, opponentCtx, playerArchetypeDirectiveForDelivery).ConfigureAwait(false);
+                    deliveredMessage = await _llm.ApplyHorninessOverlayAsync(deliveredMessage, instruction, opponentCtx, playerArchetypeDirectiveForDelivery, ct).ConfigureAwait(false);
                     progress?.Report(new TurnProgressEvent(TurnProgressStage.HorninessOverlayCompleted, deliveredMessage));
                     if (deliveredMessage != beforeHorniness)
                     {
@@ -1131,7 +1160,8 @@ namespace Pinder.Core.Conversation
                         // #314: layer ran but produced byte-identical output.
                         EmitTextLayerNoop("Horniness", beforeHorniness, deliveredMessage);
                     }
-                }).ConfigureAwait(false);
+                },
+                ct).ConfigureAwait(false);
 
             // #743/#399: Horniness §15 interest-penalty halving is intentionally
             // DEFERRED until AFTER the shadow check below. Reason: when a paired
@@ -1187,7 +1217,7 @@ namespace Pinder.Core.Conversation
                             string beforeShadow = deliveredMessage;
                             progress?.Report(new TurnProgressEvent(TurnProgressStage.ShadowCorruptionStarted));
                             deliveredMessage = await _llm.ApplyShadowCorruptionAsync(
-                                deliveredMessage, corruptionInstruction, pairedShadow.Value, playerArchetypeDirectiveForDelivery).ConfigureAwait(false);
+                                deliveredMessage, corruptionInstruction, pairedShadow.Value, playerArchetypeDirectiveForDelivery, ct).ConfigureAwait(false);
                             progress?.Report(new TurnProgressEvent(TurnProgressStage.ShadowCorruptionCompleted, deliveredMessage));
                             if (deliveredMessage != beforeShadow)
                             {
@@ -1327,13 +1357,14 @@ namespace Pinder.Core.Conversation
             // adapter can build a multi-turn wire payload from the engine-owned
             // _opponentHistory. The adapter returns the parsed response plus
             // the entries to append to history; the engine appends them.
+            // #794: thread cancellation token to underlying transport.
             OpponentResponse opponentResponse;
             if (_llm is Pinder.Core.Interfaces.IStatefulLlmAdapter statefulLlm)
             {
                 var statefulResult = await statefulLlm.GetOpponentResponseAsync(
                     opponentContext,
                     _opponentHistory,
-                    default).ConfigureAwait(false);
+                    ct).ConfigureAwait(false);
                 if (statefulResult == null)
                     throw new InvalidOperationException("LLM adapter returned null stateful opponent result");
                 opponentResponse = statefulResult.Response;
@@ -1350,7 +1381,7 @@ namespace Pinder.Core.Conversation
             }
             else
             {
-                opponentResponse = await _llm.GetOpponentResponseAsync(opponentContext).ConfigureAwait(false);
+                opponentResponse = await _llm.GetOpponentResponseAsync(opponentContext, ct).ConfigureAwait(false);
                 if (opponentResponse == null)
                     throw new InvalidOperationException("LLM adapter returned null opponent response");
             }
