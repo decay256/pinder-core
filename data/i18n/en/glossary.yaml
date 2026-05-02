@@ -1,7 +1,117 @@
-# Gameplay glossary — stat names, mechanic terms.
-# Sprint: i18n string extraction (issue #435 Phase 1). Migrated in Phase 3.
+# Gameplay glossary — stat names, mechanic terms, combo / shadow /
+# risk-tier / momentum / callback / tell / weakness / madness explainers.
+# Migrated from frontend/src/data/gameplayGlossary.ts in #438 Phase 3.
+# Source of truth for the canonical copy is
+# pinder-core/session-runner/PlaytestFormatter.cs; the entries here
+# mirror that copy verbatim.
 schema_version: 1
 locale: en
 strings:
+  # Foundation samples (Phase 1 — kept for the i18n pipeline self-test).
   glossary.charm: "Charm"
   glossary.rizz: "Rizz"
+
+  # ── Combo sequences (#186 / migrated #438) ────────────────────────
+  # Long-form description of how each combo is triggered.
+  glossary.combo.sequences.the_setup: "You played Wit last turn, then Charm this turn — the sequence earns +1 bonus interest."
+  glossary.combo.sequences.the_reveal: "You played Charm last turn, then Honesty this turn — the sequence earns +1 bonus interest."
+  glossary.combo.sequences.the_read: "You played Self-Awareness last turn, then Honesty this turn — the sequence earns +1 bonus interest."
+  glossary.combo.sequences.the_pivot: "You played Honesty last turn, then Chaos this turn — the sequence earns +1 bonus interest."
+  glossary.combo.sequences.the_escalation: "You played Chaos last turn, then Rizz this turn — the sequence earns +1 bonus interest."
+  glossary.combo.sequences.the_disarm: "You played Wit last turn, then Honesty this turn — the sequence earns +1 bonus interest."
+  glossary.combo.sequences.the_recovery: "You failed a roll last turn, then played Self-Awareness this turn — the sequence earns +2 bonus interest."
+  glossary.combo.sequences.the_triple: "You played 3 different stats in 3 consecutive turns — your next roll gains +1 bonus."
+
+  # ── Combo rewards (short reward summary) ──────────────────────────
+  glossary.combo.rewards.the_setup: "+1 Interest if success"
+  glossary.combo.rewards.the_reveal: "+1 Interest if success"
+  glossary.combo.rewards.the_read: "+1 Interest if success"
+  glossary.combo.rewards.the_pivot: "+1 Interest if success"
+  glossary.combo.rewards.the_escalation: "+1 Interest if success"
+  glossary.combo.rewards.the_disarm: "+1 Interest if success"
+  glossary.combo.rewards.the_recovery: "+2 Interest if success"
+  glossary.combo.rewards.the_triple: "+1 to ALL rolls next turn"
+
+  # ── Combo breakdowns (one-line stat-pair summary) ─────────────────
+  glossary.combo.breakdown.the_setup: "Wit→Charm sequence"
+  glossary.combo.breakdown.the_reveal: "Charm→Honesty sequence"
+  glossary.combo.breakdown.the_read: "Self-Awareness→Honesty sequence"
+  glossary.combo.breakdown.the_pivot: "Honesty→Chaos sequence"
+  glossary.combo.breakdown.the_escalation: "Chaos→Rizz sequence"
+  glossary.combo.breakdown.the_disarm: "Wit→Honesty sequence"
+  glossary.combo.breakdown.the_recovery: "fail→Self-Awareness sequence"
+  glossary.combo.breakdown.the_triple: "3 different stats in a row"
+
+  # ── Combo lookup fallbacks (#186) ────────────────────────────────
+  glossary.combo.fallback_sequence: "Unknown combo sequence."
+  glossary.combo.fallback_reward: "+1 Interest if success"
+
+  # ── Shadow reason explanations (#186 / mirrors PlaytestFormatter) ─
+  # Brief plain-English explanation paired with each shadow-growth
+  # trigger. Match keys mirror the engine reason format.
+  glossary.shadow.nat_one_paired: "Nat 1 grows paired shadow"
+  glossary.shadow.trope_trap_grows_madness: "every Trope Trap grows Madness"
+  glossary.shadow.rizz_trope_trap_grows_despair: "Rizz Trope Trap also grows Despair"
+  glossary.shadow.wit_catastrophe_grows_dread: "Wit catastrophe grows Dread"
+  glossary.shadow.same_stat_thrice_grows_fixation: "same stat 3x grows Fixation"
+  glossary.shadow.safe_picks_grow_fixation: "safe picks grow Fixation"
+  glossary.shadow.honesty_high_interest_reduces_denial: "Honesty success reduces Denial"
+  glossary.shadow.sa_honesty_high_interest_reduces_despair: "Self-Awareness/Honesty success reduces Despair"
+  glossary.shadow.unmatch_grows_dread: "unmatch grows Dread"
+  glossary.shadow.sa_overuse_grows_overthinking: "overusing Self-Awareness grows Overthinking"
+  glossary.shadow.charm_overuse_grows_madness: "overusing Charm grows Madness"
+  glossary.shadow.combo_success_reduces_madness: "combo success reduces Madness"
+  glossary.shadow.chaos_combo_reduces_fixation: "Chaos combo reduces Fixation"
+  glossary.shadow.tell_reduces_madness: "tell choice reduces Madness"
+  glossary.shadow.date_reduces_dread: "date secured reduces Dread"
+  glossary.shadow.no_honesty_grows_denial: "no Honesty grows Denial"
+  glossary.shadow.no_chaos_grows_fixation: "no Chaos grows Fixation"
+  glossary.shadow.variety_reduces_fixation: "variety reduces Fixation"
+  glossary.shadow.ghosting_grows_dread: "ghosting grows Dread"
+  glossary.shadow.repeated_rizz_fails_grow_despair: "repeated Rizz fails grow Despair"
+  glossary.shadow.wit_variety_reduces_overthinking: "Wit variety reduces Overthinking"
+  glossary.shadow.chaos_success_reduces_overthinking: "Chaos success reduces Overthinking"
+  glossary.shadow.rizz_success_reduces_dread: "Rizz success reduces Dread"
+  glossary.shadow.miss_acceptance_reduces_denial: "accepting failure reduces Denial"
+
+  # ── Risk-tier explainers (#186 / matches RiskTier.cs / RiskTierBonus.cs)
+  glossary.risk_tier.safe.success_pct: "70–100%"
+  glossary.risk_tier.safe.bonus: "+1 Interest on success"
+  glossary.risk_tier.safe.gist: "Low-variance, small payoff"
+  glossary.risk_tier.medium.success_pct: "50–65%"
+  glossary.risk_tier.medium.bonus: "+2 Interest on success"
+  glossary.risk_tier.medium.gist: "Balanced — most rolls live here"
+  glossary.risk_tier.hard.success_pct: "30–45%"
+  glossary.risk_tier.hard.bonus: "+3 Interest on success"
+  glossary.risk_tier.hard.gist: "Reach for it — modest payoff"
+  glossary.risk_tier.bold.success_pct: "10–25%"
+  glossary.risk_tier.bold.bonus: "+5 Interest on success"
+  glossary.risk_tier.bold.gist: "High-variance, big payoff"
+  glossary.risk_tier.reckless.success_pct: "0–5% (Nat 20 only)"
+  glossary.risk_tier.reckless.bonus: "+10 Interest on success"
+  glossary.risk_tier.reckless.gist: "Pure Hail Mary"
+
+  # ── Momentum (#186 / mirrors PlaytestFormatter.GetMomentumExplanation)
+  glossary.momentum.streak_5_plus: "5+ wins grant +3 bonus"
+  glossary.momentum.streak_3_plus: "3+ consecutive wins grant bonus"
+
+  # ── Callback descriptors (issue #225 — descriptor parenthetical only)
+  glossary.callback.descriptor_same_turn: "(refs turn {callbackTurn}, same turn)"
+  glossary.callback.descriptor_one_turn_ago: "(refs turn {callbackTurn}, 1 turn ago)"
+  glossary.callback.descriptor_n_turns_ago: "(refs turn {callbackTurn}, {distance} turns ago)"
+
+  # ── Tell explainer (#197) ─────────────────────────────────────────
+  glossary.tell.explainer: "A Tell is a hint baked into the option text that points at the opponent's currently-relevant stat. Picking a Tell-flagged option with the matching stat applies a hidden roll bonus on top of the visible stat modifier. Tells reflect close reading of the previous reply — they are not free-info; you have to spot them."
+
+  # ── Weakness window explainer (#197) ──────────────────────────────
+  glossary.weakness_window.explainer: "A Weakness Window opens when the opponent's last reply exposes a specific stat vulnerability for a limited number of turns. Playing into the window grants a roll bonus and amplified Interest on success; the window closes if you skip it. Use the chip's countdown to time your push."
+
+  # ── Madness overlay (UI-only) ─────────────────────────────────────
+  glossary.madness_overlay.explainer: "Madness overlay rewrote this option into an unhinged variant — high Madness shadow forces the rewrite when it triggers."
+
+  # ── Pre-resolution shadow-growth pre-warnings (#261) ──────────────
+  # Use {stat} placeholder for the stat name (Charm / Self-Awareness / etc.).
+  glossary.shadow_warning.same_stat_thrice: "⚠️ +1 Fixation — 3rd {stat} turn in a row"
+  glossary.shadow_warning.highest_pct_thrice: "⚠️ +1 Fixation — 3rd highest-% pick in a row"
+  glossary.shadow_warning.self_awareness_thrice: "⚠️ +1 Overthinking — 3rd Self-Awareness use this game"
+  glossary.shadow_warning.charm_thrice: "⚠️ +1 Madness — 3rd Charm use this game"
