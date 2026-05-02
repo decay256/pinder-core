@@ -1,0 +1,7 @@
+# GameEndScreen copy.
+# Sprint: i18n string extraction (issue #435 Phase 1).
+schema_version: 1
+locale: en
+strings:
+  game_end.outcome_date_secured: "Date secured"
+  game_end.outcome_unmatched: "Unmatched"

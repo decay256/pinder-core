@@ -1,0 +1,7 @@
+# Gameplay glossary — stat names, mechanic terms.
+# Sprint: i18n string extraction (issue #435 Phase 1). Migrated in Phase 3.
+schema_version: 1
+locale: en
+strings:
+  glossary.charm: "Charm"
+  glossary.rizz: "Rizz"

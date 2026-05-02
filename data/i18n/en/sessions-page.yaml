@@ -1,0 +1,7 @@
+# Sessions list page.
+# Sprint: i18n string extraction (issue #435 Phase 1).
+schema_version: 1
+locale: en
+strings:
+  sessions_page.title: "Sessions"
+  sessions_page.replay_button: "▶ Replay"

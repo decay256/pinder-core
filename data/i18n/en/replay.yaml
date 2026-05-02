@@ -1,0 +1,7 @@
+# Session replay surface (public + owner).
+# Sprint: i18n string extraction (issue #435 Phase 1).
+schema_version: 1
+locale: en
+strings:
+  replay.cta_try_pinder: "This was a Pinder game — try it yourself"
+  replay.transcript_button: "Transcript"

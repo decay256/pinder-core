@@ -1,0 +1,8 @@
+# UI chrome — buttons, labels, modals, navigation, generic chrome.
+# Sprint: i18n string extraction (issue #435 Phase 1).
+# Schema: docs/plans/sprint-i18n-string-extraction.md §3.2
+schema_version: 1
+locale: en
+strings:
+  topnav.open_player_sheet: "Open player sheet"
+  topnav.open_opponent_sheet: "Open opponent sheet"
