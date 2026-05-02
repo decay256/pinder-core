@@ -74,5 +74,13 @@ namespace Pinder.Core.Conversation
         /// Rules v3.4 §6.
         /// </summary>
         public bool GrantsDisadvantage => GetState() == InterestState.Bored;
+
+        /// <summary>
+        /// #790 (Phase 4): deep clone for fast-gameplay engine forking. Returns
+        /// a new <see cref="InterestMeter"/> with the same <see cref="Current"/>
+        /// value. The new meter is fully independent — mutating either side
+        /// does not affect the other.
+        /// </summary>
+        public InterestMeter Clone() => new InterestMeter(Current);
     }
 }

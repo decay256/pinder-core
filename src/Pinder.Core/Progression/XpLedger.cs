@@ -81,5 +81,21 @@ namespace Pinder.Core.Progression
             _drainCursor = _events.Count;
             return result;
         }
+
+        /// <summary>
+        /// #790 (Phase 4): deep clone for fast-gameplay engine forking. Returns
+        /// an independent <see cref="XpLedger"/> with the same recorded events
+        /// (each <see cref="XpEvent"/> is itself immutable), the same
+        /// <see cref="TotalXp"/>, and the same drain cursor. Mutating either
+        /// side (recording new events / draining) does not affect the other.
+        /// </summary>
+        public XpLedger Clone()
+        {
+            var copy = new XpLedger();
+            copy._events.AddRange(_events); // XpEvent is immutable.
+            copy.TotalXp = TotalXp;
+            copy._drainCursor = _drainCursor;
+            return copy;
+        }
     }
 }

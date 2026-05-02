@@ -255,5 +255,30 @@ namespace Pinder.Core.Conversation
         /// Delegate type for checking if a chosen option is the highest probability option.
         /// </summary>
         public delegate bool IsHighestProbabilityFunc(DialogueOption chosen, DialogueOption[] options);
+
+        /// <summary>
+        /// #790 (Phase 4): deep clone for fast-gameplay engine forking. Returns
+        /// an independent <see cref="ShadowGrowthEvaluator"/> bound to the
+        /// supplied <paramref name="clonedShadows"/> tracker (callers must
+        /// pass the cloned <see cref="SessionShadowTracker"/> so the two
+        /// branches don't share growth state) but carrying copies of every
+        /// per-turn / per-session counter the original holds. Mutating either
+        /// side's per-turn counters does not affect the other.
+        /// </summary>
+        public ShadowGrowthEvaluator Clone(SessionShadowTracker clonedShadows)
+        {
+            if (clonedShadows == null)
+                throw new System.ArgumentNullException(nameof(clonedShadows));
+            var copy = new ShadowGrowthEvaluator(clonedShadows);
+            copy._statsUsedPerTurn.AddRange(_statsUsedPerTurn);
+            copy._highestPctOptionPicked.AddRange(_highestPctOptionPicked);
+            copy._honestySuccessCount = _honestySuccessCount;
+            copy._saUsageCount = _saUsageCount;
+            copy._charmUsageCount = _charmUsageCount;
+            copy._charmMadnessTriggered = _charmMadnessTriggered;
+            copy._saOverthinkingTriggered = _saOverthinkingTriggered;
+            copy._rizzCumulativeFailureCount = _rizzCumulativeFailureCount;
+            return copy;
+        }
     }
 }

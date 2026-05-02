@@ -207,5 +207,20 @@ namespace Pinder.Core.Conversation
         {
             return !prev.Succeeded && current.Stat == StatType.SelfAwareness;
         }
+
+        /// <summary>
+        /// #790 (Phase 4): deep clone for fast-gameplay engine forking. Returns
+        /// an independent <see cref="ComboTracker"/> with the same recorded
+        /// turn history, last-combo cache, and pending-Triple-bonus flag.
+        /// Mutating either side does not affect the other.
+        /// </summary>
+        public ComboTracker Clone()
+        {
+            var copy = new ComboTracker();
+            copy._history.AddRange(_history);
+            copy._lastCombo = _lastCombo; // ComboResult is an immutable record-like object.
+            copy._pendingTripleBonus = _pendingTripleBonus;
+            return copy;
+        }
     }
 }

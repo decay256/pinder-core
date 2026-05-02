@@ -114,6 +114,24 @@ namespace Pinder.Core.Traps
         /// model this is identical to <see cref="Clear()"/>.
         /// </summary>
         public void ClearOldest() => _active = null;
+
+        /// <summary>
+        /// #790 (Phase 4): deep clone for fast-gameplay engine forking. Returns
+        /// a new <see cref="TrapState"/> with an independent <see cref="ActiveTrap"/>
+        /// instance carrying the same <see cref="TrapDefinition"/> reference
+        /// (definitions are immutable) and the same
+        /// <see cref="ActiveTrap.TurnsRemaining"/>. Mutating either side does
+        /// not affect the other.
+        /// </summary>
+        public TrapState Clone()
+        {
+            var copy = new TrapState();
+            if (_active != null)
+            {
+                copy._active = new ActiveTrap(_active.Definition, _active.TurnsRemaining);
+            }
+            return copy;
+        }
     }
 
     /// <summary>
