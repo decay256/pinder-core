@@ -1,8 +1,44 @@
 # UI chrome — buttons, labels, modals, navigation, generic chrome.
-# Sprint: i18n string extraction (issue #435 Phase 1).
+# Sprint: i18n string extraction (issue #435 Phase 1; expanded #438 Phase 3).
 # Schema: docs/plans/sprint-i18n-string-extraction.md §3.2
 schema_version: 1
 locale: en
 strings:
   topnav.open_player_sheet: "Open player sheet"
   topnav.open_opponent_sheet: "Open opponent sheet"
+
+  # ── Display names — stats (#397, migrated #438 Phase 3) ────────────
+  # Canonical full title-case name for each stat. Player-facing in
+  # card chips, modals, character sheets, tooltips, and any prose.
+  # Self-Awareness is hyphenated — never abbreviated as "SA".
+  display_names.stat.charm: "Charm"
+  display_names.stat.rizz: "Rizz"
+  display_names.stat.honesty: "Honesty"
+  display_names.stat.chaos: "Chaos"
+  display_names.stat.wit: "Wit"
+  display_names.stat.self_awareness: "Self-Awareness"
+
+  # ── Display names — failure tiers (#397, migrated #438 Phase 3) ────
+  # TropeTrap (CamelCase enum) → "Trope Trap" (two words).
+  # `Legendary` here is the plain tier label; the special-case
+  # "Legendary Fail" for NAT 1 is composed at the call-site.
+  display_names.failure_tier.none: "Success"
+  display_names.failure_tier.fumble: "Fumble"
+  display_names.failure_tier.misfire: "Misfire"
+  display_names.failure_tier.trope_trap: "Trope Trap"
+  display_names.failure_tier.catastrophe: "Catastrophe"
+  display_names.failure_tier.legendary: "Legendary"
+
+  # Fallback label when a failure-tier enum value is unrecognised.
+  display_names.failure_tier.fallback: "Failure"
+
+  # ── Display names — shadows (#397, migrated #438 Phase 3) ──────────
+  # Canonical title-case name per shadow type. Wire enum values are
+  # already title-case so the mapping is identity, but routing through
+  # the catalog gives a single place to change rendering.
+  display_names.shadow.madness: "Madness"
+  display_names.shadow.despair: "Despair"
+  display_names.shadow.denial: "Denial"
+  display_names.shadow.fixation: "Fixation"
+  display_names.shadow.dread: "Dread"
+  display_names.shadow.overthinking: "Overthinking"
