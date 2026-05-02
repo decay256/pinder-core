@@ -43,6 +43,9 @@ strings:
   turn_result.triple_chip: "Triple +{bonus}"
   turn_result.callback_chip: "Callback {bonus}"
   turn_result.tell_chip: "Tell +{bonus}"
+  turn_result.xp_chip: "+{xp} XP"
+  turn_result.chips_show_breakdown: "More ▸"
+  turn_result.chips_hide_breakdown: "Less ▾"
 
   turn_result.shadow_growth_heading: "⚫ Shadow Growth"
   turn_result.trap_cleared_prefix: "🛡️ Trap cleared:"
