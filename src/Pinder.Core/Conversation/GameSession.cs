@@ -28,26 +28,32 @@ namespace Pinder.Core.Conversation
         private readonly IDiceRoller _dice;
         private readonly ITrapRegistry _trapRegistry;
 
-        private readonly InterestMeter _interest;
-        private readonly TrapState _traps;
-        private readonly List<(string Sender, string Text)> _history;
+        // #425 (Phase 5): not strictly readonly. The clone+adopt cycle
+        // (parent.AdoptStateFrom(clone) after fast-gameplay branch
+        // adoption) reassigns the field references. Functionally
+        // equivalent to the pre-#425 readonly contract for non-fast-
+        // gameplay sessions — the field is set once in the ctor and
+        // never reassigned otherwise.
+        private InterestMeter _interest;
+        private TrapState _traps;
+        private List<(string Sender, string Text)> _history;
 
         // #788: opponent LLM conversation history lives here, not in the adapter.
         // The adapter is pure-stateless across calls; the engine passes this list
         // in on every opponent call and appends the new entries returned by the
         // adapter. Survives snapshot/restore via ResimulateData.OpponentHistory.
-        private readonly List<ConversationMessage> _opponentHistory = new List<ConversationMessage>();
+        private List<ConversationMessage> _opponentHistory = new List<ConversationMessage>();
 
         // Sprint 8 Wave 0: optional config fields
         private readonly IGameClock? _clock;
-        private readonly SessionShadowTracker? _playerShadows;
-        private readonly SessionShadowTracker? _opponentShadows;
+        private SessionShadowTracker? _playerShadows;
+        private SessionShadowTracker? _opponentShadows;
 
         // Combo tracking (#46)
-        private readonly ComboTracker _comboTracker;
+        private ComboTracker _comboTracker;
 
         // Callback tracking (#47)
-        private readonly List<CallbackOpportunity> _topics;
+        private List<CallbackOpportunity> _topics;
 
         // Despair (RIZZ failure shadow) tracking (#708, #717)
         private int _rizzCumulativeFailureCount;
@@ -59,7 +65,7 @@ namespace Pinder.Core.Conversation
         private GameOutcome? _outcome;
 
         // XP tracking (#48)
-        private readonly XpLedger _xpLedger;
+        private XpLedger _xpLedger;
 
         // Rule resolver for data-driven game constants (#463)
         private readonly IRuleResolver? _rules;
@@ -109,14 +115,14 @@ namespace Pinder.Core.Conversation
         private Pinder.Core.Rolls.PerOptionDicePool? _injectedNextPool;
 
         // Extracted single-responsibility modules
-        private readonly ShadowGrowthEvaluator? _shadowGrowthEvaluator;
-        private readonly SessionXpRecorder _xpRecorder;
-        private readonly SteeringEngine _steeringEngine;
-        private readonly HorninessEngine _horninessEngine;
+        private ShadowGrowthEvaluator? _shadowGrowthEvaluator;
+        private SessionXpRecorder _xpRecorder;
+        private SteeringEngine _steeringEngine;
+        private HorninessEngine _horninessEngine;
         // Dedicated RNG for OptionFilterEngine.DrawRandomStats. Kept separate from
         // the steering RNG so tests can queue exact steering values without our
         // stat-draw shuffle consuming them (see issue #130).
-        private readonly Random? _statDrawRng;
+        private Random? _statDrawRng;
 
         /// <summary>
         /// Creates a new GameSession with required configuration.
@@ -407,6 +413,92 @@ namespace Pinder.Core.Conversation
         {
             if (llm == null) throw new ArgumentNullException(nameof(llm));
             return new GameSession(this, llm);
+        }
+
+        /// <summary>
+        /// #425 (Phase 5): adopt the mutable engine state of
+        /// <paramref name="src"/> into this session, preserving this
+        /// session's <see cref="_llm"/> + dependency references. Inverse
+        /// of <see cref="Clone(ILlmAdapter)"/>: a parent session can call
+        /// <c>parent.AdoptStateFrom(chosenClone)</c> after the
+        /// fast-gameplay scheduler resolves three speculative branches
+        /// against three clones; the chosen branch's clone holds the
+        /// authoritative post-resolve state, which we transplant back
+        /// into the parent.
+        ///
+        /// <para>
+        /// The shared-by-reference fields documented on <see cref="Clone(ILlmAdapter)"/>
+        /// are <em>preserved</em> on the parent (LLM adapter, dice
+        /// roller, trap registry, clock, rules — these were already
+        /// shared with the source's parent at clone time, so no swap is
+        /// needed). Every mutable field is overwritten with a deep copy
+        /// (or, for value types, a copy by value) of <paramref name="src"/>'s
+        /// state.
+        /// </para>
+        ///
+        /// <para>
+        /// Mirrors the field-by-field assignment in the clone
+        /// constructor exactly so that
+        /// <c>parent.Clone() → clone.Resolve() → parent.AdoptStateFrom(clone)</c>
+        /// is byte-equivalent to <c>parent.Resolve()</c> on a session
+        /// with the same dice pool injected.
+        /// </para>
+        /// </summary>
+        public void AdoptStateFrom(GameSession src)
+        {
+            if (src == null) throw new ArgumentNullException(nameof(src));
+
+            // Mutable engine state (deep-copy) — mirror clone ctor.
+            _interest        = src._interest.Clone();
+            _traps           = src._traps.Clone();
+            _history.Clear(); _history.AddRange(src._history);
+            _opponentHistory.Clear(); _opponentHistory.AddRange(src._opponentHistory);
+            _comboTracker    = src._comboTracker.Clone();
+            _topics.Clear(); _topics.AddRange(src._topics);
+            _xpLedger        = src._xpLedger.Clone();
+            _playerShadows   = src._playerShadows?.Clone();
+            _opponentShadows = src._opponentShadows?.Clone();
+            _shadowGrowthEvaluator = src._shadowGrowthEvaluator != null && _playerShadows != null
+                ? src._shadowGrowthEvaluator.Clone(_playerShadows)
+                : null;
+            _xpRecorder      = new SessionXpRecorder(_xpLedger, _rules);
+
+            // RNGs (deep-clone to avoid sharing internal state with src).
+            var clonedSteeringRng = RandomCloner.Clone(src._steeringEngine.SteeringRngForCloneOnly);
+            _steeringEngine  = new SteeringEngine(clonedSteeringRng);
+            _horninessEngine = new HorninessEngine(clonedSteeringRng);
+            _statDrawRng     = src._statDrawRng != null ? RandomCloner.Clone(src._statDrawRng) : null;
+
+            // Value-type / per-turn carry-over.
+            _momentumStreak           = src._momentumStreak;
+            _pendingMomentumBonus     = src._pendingMomentumBonus;
+            _turnNumber               = src._turnNumber;
+            _ended                    = src._ended;
+            _outcome                  = src._outcome;
+            _rizzCumulativeFailureCount = src._rizzCumulativeFailureCount;
+            _horninessRoll            = src._horninessRoll;
+            _horninessTimeModifier    = src._horninessTimeModifier;
+            _sessionHorniness         = src._sessionHorniness;
+            _pendingCritAdvantage     = src._pendingCritAdvantage;
+            _lastStatUsed             = src._lastStatUsed;
+            _activeWeakness           = src._activeWeakness;
+            _activeTell               = src._activeTell;
+            _shadowDisadvantagedStats = src._shadowDisadvantagedStats != null
+                ? new HashSet<StatType>(src._shadowDisadvantagedStats)
+                : null;
+            _currentShadowThresholds  = src._currentShadowThresholds != null
+                ? new Dictionary<ShadowStatType, int>(src._currentShadowThresholds)
+                : null;
+
+            _currentOptions       = src._currentOptions != null
+                ? (DialogueOption[])src._currentOptions.Clone()
+                : null;
+            _currentHasAdvantage     = src._currentHasAdvantage;
+            _currentHasDisadvantage  = src._currentHasDisadvantage;
+            _currentDicePools = src._currentDicePools != null
+                ? (Pinder.Core.Rolls.PerOptionDicePool[])src._currentDicePools.Clone()
+                : null;
+            _injectedNextPool = src._injectedNextPool;
         }
 
         /// <summary>
@@ -827,6 +919,55 @@ namespace Pinder.Core.Conversation
         /// placeholders returned from <c>StartTurnAsync</c> remain empty.
         /// </para>
         /// </summary>
+        /// <summary>
+        /// #425 (Phase 5): pre-fill the per-option dice pools for every
+        /// option in the current turn, drawing from <c>_dice</c> in
+        /// option-index order. After this call <see cref="CurrentDicePools"/>
+        /// returns a fully populated pool for each option, suitable for
+        /// injection into a cloned <see cref="GameSession"/> via
+        /// <see cref="InjectNextDicePool"/>.
+        ///
+        /// <para>
+        /// Idempotent: if all pools are already populated (e.g. a prior
+        /// <c>EnsureAllDicePoolsFilled</c> call already ran for this
+        /// turn), this call is a no-op. The shared <c>_dice</c> source
+        /// is consumed once per option — N × (2-or-3 dice) per turn.
+        /// </para>
+        ///
+        /// <para>
+        /// MUST be called between <see cref="StartTurnAsync"/> and
+        /// <see cref="ResolveTurnAsync(int)"/>. Calling without an
+        /// active turn throws <see cref="InvalidOperationException"/>.
+        /// </para>
+        /// </summary>
+        /// <returns>
+        /// The fully-populated per-option pools. Same array as
+        /// <see cref="CurrentDicePools"/> after the call — returned for
+        /// caller convenience.
+        /// </returns>
+        public Pinder.Core.Rolls.PerOptionDicePool[] EnsureAllDicePoolsFilled()
+        {
+            if (_currentOptions == null || _currentDicePools == null)
+                throw new InvalidOperationException(
+                    "EnsureAllDicePoolsFilled requires an active turn (StartTurnAsync first).");
+
+            for (int i = 0; i < _currentOptions.Length; i++)
+            {
+                if (_currentDicePools[i].Count > 0) continue;
+                bool resolveHasDisadvantage = _currentHasDisadvantage;
+                _currentDicePools[i] = FillChosenDicePool(
+                    i, _currentOptions[i], resolveHasDisadvantage);
+            }
+            return _currentDicePools;
+        }
+
+        /// <summary>
+        /// #425 (Phase 5): read-only accessor for the current turn's
+        /// dice pools. Returns <c>null</c> when no turn is active.
+        /// </summary>
+        public IReadOnlyList<Pinder.Core.Rolls.PerOptionDicePool>? CurrentDicePools
+            => _currentDicePools;
+
         private Pinder.Core.Rolls.PerOptionDicePool FillChosenDicePool(
             int optionIndex, DialogueOption chosenOption, bool resolveHasDisadvantage)
         {
