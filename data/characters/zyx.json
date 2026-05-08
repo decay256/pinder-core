@@ -1,4 +1,6 @@
 {
+  "schema_version": 1,
+  "character_id": "e6a72ae2-d73a-4b44-a474-63b21e8084ec",
   "name": "Zyx_444",
   "gender_identity": "they/them",
   "bio": "the mushroom knows. you'll understand when you're ready.",
@@ -22,20 +24,23 @@
     "tattoos": "none",
     "eye_style": "soft"
   },
-  "build_points": {
-    "charm": 2,
-    "rizz": 2,
-    "honesty": 5,
-    "chaos": 5,
-    "wit": 4,
-    "self_awareness": 3
-  },
-  "shadows": {
-    "madness": 6,
-    "despair": 0,
-    "denial": 1,
-    "fixation": 2,
-    "dread": 4,
-    "overthinking": 3
+  "allocation": {
+    "spent": {
+      "charm": 2,
+      "rizz": 2,
+      "honesty": 5,
+      "chaos": 5,
+      "wit": 4,
+      "self_awareness": 3
+    },
+    "unspent_pool": 0,
+    "shadows": {
+      "madness": 6,
+      "despair": 0,
+      "denial": 1,
+      "fixation": 2,
+      "dread": 4,
+      "overthinking": 3
+    }
   }
 }

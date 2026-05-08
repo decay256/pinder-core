@@ -5,7 +5,6 @@ using Pinder.Core.Characters;
 using Pinder.Core.Data;
 using Pinder.Core.Interfaces;
 using Pinder.Core.Stats;
-using Pinder.SessionRunner;
 using Pinder.SessionSetup;
 using Xunit;
 
@@ -43,6 +42,33 @@ namespace Pinder.Core.Tests
             return new JsonAnatomyRepository(json);
         }
 
+        private static readonly string[] AllStarterSlugs =
+            { "brick", "gerald", "reuben", "sable", "velvet", "zyx" };
+
+        // Reusable v1 fixture string (a minimally-valid file). Tests mutate
+        // copies of this to provoke negative cases.
+        private const string ValidV1Json = @"{
+            ""schema_version"": 1,
+            ""character_id"": ""550e8400-e29b-41d4-a716-446655440000"",
+            ""name"": ""TestChar"",
+            ""gender_identity"": ""they/them"",
+            ""bio"": ""test bio"",
+            ""level"": 1,
+            ""items"": [],
+            ""anatomy"": {},
+            ""allocation"": {
+                ""spent"": {
+                    ""charm"": 1, ""rizz"": 1, ""honesty"": 1,
+                    ""chaos"": 1, ""wit"": 1, ""self_awareness"": 1
+                },
+                ""unspent_pool"": 0,
+                ""shadows"": {
+                    ""madness"": 0, ""despair"": 0, ""denial"": 0,
+                    ""fixation"": 0, ""dread"": 0, ""overthinking"": 0
+                }
+            }
+        }";
+
         [Fact]
         public void Load_GeraldDefinition_ProducesValidProfile()
         {
@@ -62,20 +88,60 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public void Load_AllFiveCharacters_Succeed()
+        public void Load_AllSixStarterCharacters_Succeed()
         {
             var itemRepo = LoadItemRepo();
             var anatomyRepo = LoadAnatomyRepo();
-            var names = new[] { "gerald", "velvet", "sable", "brick", "zyx" };
 
-            foreach (var name in names)
+            foreach (var slug in AllStarterSlugs)
             {
-                string path = Path.Combine(RepoRoot, "data", "characters", $"{name}.json");
+                string path = Path.Combine(RepoRoot, "data", "characters", $"{slug}.json");
                 var profile = CharacterDefinitionLoader.Load(path, itemRepo, anatomyRepo);
                 Assert.NotNull(profile);
-                Assert.False(string.IsNullOrEmpty(profile.DisplayName), $"{name} should have a display name");
-                Assert.True(profile.Level >= 1 && profile.Level <= 11, $"{name} level should be 1-11, got {profile.Level}");
+                Assert.False(string.IsNullOrEmpty(profile.DisplayName), $"{slug} should have a display name");
+                Assert.True(profile.Level >= 1 && profile.Level <= 11,
+                    $"{slug} level should be 1-11, got {profile.Level}");
             }
+        }
+
+        [Fact]
+        public void ParseDefinition_AllSixStarterFiles_ProduceWellFormedDefinitions()
+        {
+            foreach (var slug in AllStarterSlugs)
+            {
+                string path = Path.Combine(RepoRoot, "data", "characters", $"{slug}.json");
+                string json = File.ReadAllText(path);
+
+                var def = CharacterDefinitionLoader.ParseDefinition(json);
+
+                Assert.Equal(1, def.SchemaVersion);
+                Assert.NotEqual(Guid.Empty, def.CharacterId);
+                Assert.False(string.IsNullOrWhiteSpace(def.Name));
+                Assert.False(string.IsNullOrWhiteSpace(def.GenderIdentity));
+                Assert.NotNull(def.Bio);
+                Assert.True(def.Level >= 1 && def.Level <= 11);
+                Assert.NotNull(def.Items);
+                Assert.NotNull(def.Anatomy);
+                Assert.NotNull(def.Allocation);
+                Assert.NotNull(def.Allocation.Spent);
+                Assert.NotNull(def.Allocation.Shadows);
+            }
+        }
+
+        [Fact]
+        public void ParseDefinition_AllStarterCharacterIdsAreUnique()
+        {
+            var ids = new HashSet<Guid>();
+            foreach (var slug in AllStarterSlugs)
+            {
+                string path = Path.Combine(RepoRoot, "data", "characters", $"{slug}.json");
+                string json = File.ReadAllText(path);
+                var def = CharacterDefinitionLoader.ParseDefinition(json);
+
+                Assert.True(ids.Add(def.CharacterId),
+                    $"Duplicate character_id {def.CharacterId} found at {slug}.json");
+            }
+            Assert.Equal(AllStarterSlugs.Length, ids.Count);
         }
 
         [Fact]
@@ -87,11 +153,80 @@ namespace Pinder.Core.Tests
 
             var profile = CharacterDefinitionLoader.Load(path, itemRepo, anatomyRepo);
 
-            // Gerald has build_points: charm=6, rizz=5, etc.
-            // Plus item modifiers from his equipment
-            // The exact values depend on item data, but charm should be > 6 (build points + item mods)
+            // Gerald has allocation.spent.charm = 6, plus item modifiers from his
+            // equipment. The exact effective value depends on item data, but
+            // charm should be >= 6 (base allocation alone).
             int charm = profile.Stats.GetEffective(StatType.Charm);
             Assert.True(charm >= 6, $"Gerald's charm should be at least 6 (build points), got {charm}");
+        }
+
+        [Fact]
+        public void Parse_MissingSchemaVersion_ThrowsFormatException()
+        {
+            var itemRepo = LoadItemRepo();
+            var anatomyRepo = LoadAnatomyRepo();
+
+            string json = ValidV1Json.Replace("\"schema_version\": 1,", "");
+
+            var ex = Assert.Throws<FormatException>(() =>
+                CharacterDefinitionLoader.Parse(json, itemRepo, anatomyRepo));
+            Assert.Contains("schema_version", ex.Message);
+        }
+
+        [Fact]
+        public void Parse_UnknownSchemaVersion_ThrowsFormatException()
+        {
+            var itemRepo = LoadItemRepo();
+            var anatomyRepo = LoadAnatomyRepo();
+
+            string json = ValidV1Json.Replace("\"schema_version\": 1,", "\"schema_version\": 2,");
+
+            var ex = Assert.Throws<FormatException>(() =>
+                CharacterDefinitionLoader.Parse(json, itemRepo, anatomyRepo));
+            Assert.Contains("schema_version", ex.Message);
+            Assert.Contains("2", ex.Message);
+        }
+
+        [Fact]
+        public void Parse_MalformedSchemaVersion_ThrowsFormatException()
+        {
+            var itemRepo = LoadItemRepo();
+            var anatomyRepo = LoadAnatomyRepo();
+
+            string json = ValidV1Json.Replace("\"schema_version\": 1,", "\"schema_version\": \"v1\",");
+
+            var ex = Assert.Throws<FormatException>(() =>
+                CharacterDefinitionLoader.Parse(json, itemRepo, anatomyRepo));
+            Assert.Contains("schema_version", ex.Message);
+        }
+
+        [Fact]
+        public void Parse_MissingCharacterId_ThrowsFormatException()
+        {
+            var itemRepo = LoadItemRepo();
+            var anatomyRepo = LoadAnatomyRepo();
+
+            string json = ValidV1Json.Replace(
+                "\"character_id\": \"550e8400-e29b-41d4-a716-446655440000\",", "");
+
+            var ex = Assert.Throws<FormatException>(() =>
+                CharacterDefinitionLoader.Parse(json, itemRepo, anatomyRepo));
+            Assert.Contains("character_id", ex.Message);
+        }
+
+        [Fact]
+        public void Parse_MalformedCharacterId_ThrowsFormatException()
+        {
+            var itemRepo = LoadItemRepo();
+            var anatomyRepo = LoadAnatomyRepo();
+
+            string json = ValidV1Json.Replace(
+                "\"character_id\": \"550e8400-e29b-41d4-a716-446655440000\",",
+                "\"character_id\": \"not-a-uuid\",");
+
+            var ex = Assert.Throws<FormatException>(() =>
+                CharacterDefinitionLoader.Parse(json, itemRepo, anatomyRepo));
+            Assert.Contains("character_id", ex.Message);
         }
 
         [Fact]
@@ -100,16 +235,22 @@ namespace Pinder.Core.Tests
             var itemRepo = LoadItemRepo();
             var anatomyRepo = LoadAnatomyRepo();
 
+            // Construct a v1 file with allocation.shadows omitted entirely.
             string json = @"{
+                ""schema_version"": 1,
+                ""character_id"": ""550e8400-e29b-41d4-a716-446655440000"",
                 ""name"": ""TestChar"",
                 ""gender_identity"": ""they/them"",
                 ""bio"": ""test bio"",
                 ""level"": 1,
                 ""items"": [],
                 ""anatomy"": {},
-                ""build_points"": {
-                    ""charm"": 1, ""rizz"": 1, ""honesty"": 1,
-                    ""chaos"": 1, ""wit"": 1, ""self_awareness"": 1
+                ""allocation"": {
+                    ""spent"": {
+                        ""charm"": 1, ""rizz"": 1, ""honesty"": 1,
+                        ""chaos"": 1, ""wit"": 1, ""self_awareness"": 1
+                    },
+                    ""unspent_pool"": 0
                 }
             }";
 
@@ -117,7 +258,6 @@ namespace Pinder.Core.Tests
 
             Assert.Equal("TestChar", profile.DisplayName);
             Assert.Equal(1, profile.Level);
-            // Shadows default to 0
             Assert.Equal(0, profile.Stats.GetShadow(ShadowStatType.Madness));
             Assert.Equal(0, profile.Stats.GetShadow(ShadowStatType.Despair));
         }
@@ -128,15 +268,7 @@ namespace Pinder.Core.Tests
             var itemRepo = LoadItemRepo();
             var anatomyRepo = LoadAnatomyRepo();
 
-            // Missing "name" field
-            string json = @"{
-                ""gender_identity"": ""they/them"",
-                ""bio"": ""test"",
-                ""level"": 1,
-                ""items"": [],
-                ""anatomy"": {},
-                ""build_points"": { ""charm"": 1, ""rizz"": 1, ""honesty"": 1, ""chaos"": 1, ""wit"": 1, ""self_awareness"": 1 }
-            }";
+            string json = ValidV1Json.Replace("\"name\": \"TestChar\",", "");
 
             var ex = Assert.Throws<FormatException>(() =>
                 CharacterDefinitionLoader.Parse(json, itemRepo, anatomyRepo));
@@ -149,15 +281,7 @@ namespace Pinder.Core.Tests
             var itemRepo = LoadItemRepo();
             var anatomyRepo = LoadAnatomyRepo();
 
-            string json = @"{
-                ""name"": ""Test"",
-                ""gender_identity"": ""they/them"",
-                ""bio"": ""test"",
-                ""level"": 15,
-                ""items"": [],
-                ""anatomy"": {},
-                ""build_points"": { ""charm"": 1, ""rizz"": 1, ""honesty"": 1, ""chaos"": 1, ""wit"": 1, ""self_awareness"": 1 }
-            }";
+            string json = ValidV1Json.Replace("\"level\": 1,", "\"level\": 15,");
 
             var ex = Assert.Throws<FormatException>(() =>
                 CharacterDefinitionLoader.Parse(json, itemRepo, anatomyRepo));
@@ -170,15 +294,9 @@ namespace Pinder.Core.Tests
             var itemRepo = LoadItemRepo();
             var anatomyRepo = LoadAnatomyRepo();
 
-            string json = @"{
-                ""name"": ""Test"",
-                ""gender_identity"": ""they/them"",
-                ""bio"": ""test"",
-                ""level"": 1,
-                ""items"": [],
-                ""anatomy"": {},
-                ""build_points"": { ""charm"": 1, ""rizz"": 1, ""honesty"": 1, ""chaos"": 1, ""wit"": 1, ""invalid_stat"": 1 }
-            }";
+            string json = ValidV1Json.Replace(
+                "\"self_awareness\": 1\n                },",
+                "\"self_awareness\": 1, \"invalid_stat\": 1\n                },");
 
             var ex = Assert.Throws<FormatException>(() =>
                 CharacterDefinitionLoader.Parse(json, itemRepo, anatomyRepo));
@@ -191,16 +309,9 @@ namespace Pinder.Core.Tests
             var itemRepo = LoadItemRepo();
             var anatomyRepo = LoadAnatomyRepo();
 
-            string json = @"{
-                ""name"": ""Test"",
-                ""gender_identity"": ""they/them"",
-                ""bio"": ""test"",
-                ""level"": 1,
-                ""items"": [],
-                ""anatomy"": {},
-                ""build_points"": { ""charm"": 1, ""rizz"": 1, ""honesty"": 1, ""chaos"": 1, ""wit"": 1, ""self_awareness"": 1 },
-                ""shadows"": { ""invalid_shadow"": 5 }
-            }";
+            string json = ValidV1Json.Replace(
+                "\"overthinking\": 0\n                }\n            }",
+                "\"overthinking\": 0, \"invalid_shadow\": 5\n                }\n            }");
 
             var ex = Assert.Throws<FormatException>(() =>
                 CharacterDefinitionLoader.Parse(json, itemRepo, anatomyRepo));
@@ -252,15 +363,24 @@ namespace Pinder.Core.Tests
             var anatomyRepo = LoadAnatomyRepo();
 
             string json = @"{
+                ""schema_version"": 1,
+                ""character_id"": ""550e8400-e29b-41d4-a716-446655440000"",
                 ""name"": ""Bare"",
                 ""gender_identity"": ""they/them"",
                 ""bio"": ""naked and proud"",
                 ""level"": 1,
                 ""items"": [],
                 ""anatomy"": {},
-                ""build_points"": {
-                    ""charm"": 3, ""rizz"": 2, ""honesty"": 1,
-                    ""chaos"": 0, ""wit"": 4, ""self_awareness"": 1
+                ""allocation"": {
+                    ""spent"": {
+                        ""charm"": 3, ""rizz"": 2, ""honesty"": 1,
+                        ""chaos"": 0, ""wit"": 4, ""self_awareness"": 1
+                    },
+                    ""unspent_pool"": 0,
+                    ""shadows"": {
+                        ""madness"": 0, ""despair"": 0, ""denial"": 0,
+                        ""fixation"": 0, ""dread"": 0, ""overthinking"": 0
+                    }
                 }
             }";
 

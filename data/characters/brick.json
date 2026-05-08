@@ -1,4 +1,6 @@
 {
+  "schema_version": 1,
+  "character_id": "6fd5f147-6e7f-434a-a842-637049f71345",
   "name": "Brick_haus",
   "gender_identity": "she/her",
   "bio": "CEO of knowing my worth. Don't waste my time.",
@@ -21,20 +23,23 @@
     "tattoos": "none",
     "eye_style": "hooded"
   },
-  "build_points": {
-    "charm": 5,
-    "rizz": 4,
-    "honesty": 3,
-    "chaos": 2,
-    "wit": 5,
-    "self_awareness": 2
-  },
-  "shadows": {
-    "madness": 2,
-    "despair": 0,
-    "denial": 5,
-    "fixation": 3,
-    "dread": 2,
-    "overthinking": 4
+  "allocation": {
+    "spent": {
+      "charm": 5,
+      "rizz": 4,
+      "honesty": 3,
+      "chaos": 2,
+      "wit": 5,
+      "self_awareness": 2
+    },
+    "unspent_pool": 0,
+    "shadows": {
+      "madness": 2,
+      "despair": 0,
+      "denial": 5,
+      "fixation": 3,
+      "dread": 2,
+      "overthinking": 4
+    }
   }
 }

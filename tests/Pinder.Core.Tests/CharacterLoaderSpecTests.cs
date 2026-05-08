@@ -1011,10 +1011,14 @@ EFFECTIVE STATS
 
         private static string? FindPromptDir()
         {
+            // Walk up looking for a repo root marker. In a normal checkout
+            // `.git` is a directory; in a `git worktree` it is a regular
+            // file pointing at the parent's gitdir. Accept either.
             string? dir = AppContext.BaseDirectory;
             while (dir != null)
             {
-                if (Directory.Exists(Path.Combine(dir, ".git")))
+                string gitMarker = Path.Combine(dir, ".git");
+                if (Directory.Exists(gitMarker) || File.Exists(gitMarker))
                 {
                     string promptDir = Path.Combine(dir, "design", "examples");
                     return Directory.Exists(promptDir) ? promptDir : null;
