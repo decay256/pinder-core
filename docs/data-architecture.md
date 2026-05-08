@@ -167,7 +167,7 @@ Characters reference parameters by string id in their `anatomy` block:
    }
    ```
 2. Optionally update characters that should pick a tier on this parameter (`data/characters/<slug>.json` → add `"voice_pitch": "low"` under `anatomy`).
-3. If the host (Unity, web) renders an anatomy picker, expose the new parameter in its UI — see [HOSTING.md](HOSTING.md) for the recommended pattern.
+3. If the host (Unity, web) renders an anatomy picker, expose the new parameter in its UI — see [Unity Integration Guide](unity-integration.md) for the recommended pattern.
 
 #### Adding or removing tiers on an existing parameter
 
@@ -189,4 +189,4 @@ The **stats** (Charm, Rizz, Honesty, Chaos, Wit, Self-Awareness) and **shadows**
 | Date | Issue | Summary |
 |------|-------|---------|
 | 2026-04-07 | #655 | Initial creation — documented two-tier data model and extensibility approach |
-| 2026-04-30 | (this update) | Filled in the full configuration map (delivery-instructions, characters, anatomy, timing). Added per-file loader table, quick-reference, and the anatomy parameter extensibility section. Cross-linked to HOSTING.md for engine-host integration. |
+| 2026-04-30 | #812 | Filled in the full configuration map (delivery-instructions, characters, anatomy, timing). Added per-file loader table, quick-reference, and the anatomy parameter extensibility section. Cross-linked to [Unity Integration Guide](unity-integration.md) for engine-host integration. |
