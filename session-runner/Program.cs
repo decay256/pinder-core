@@ -91,6 +91,13 @@ class Program
     /// <summary>
     /// Load a character from either a definition file or a prompt file.
     /// Priority: --player-def path > --player name (try assembler first, then prompt file fallback).
+    ///
+    /// As of #816, the named-character path routes through
+    /// <see cref="DirectoryCharacterStore"/>: locate the slugged file under
+    /// <c>data/characters/</c>, load the parsed POCO via the store keyed by
+    /// <c>character_id</c>, and run it through the assembler. The explicit
+    /// <c>--player-def</c> path stays on the loader because it accepts
+    /// arbitrary absolute paths outside any single store directory.
     /// </summary>
     static CharacterProfile LoadCharacter(
         string? defPath,
@@ -106,7 +113,8 @@ class Program
             return CharacterDefinitionLoader.Load(defPath, itemRepo!, anatomyRepo!);
         }
 
-        // --player / --opponent name: try assembler pipeline first
+        // --player / --opponent name: try the data/characters store first,
+        // then fall back to the prompt-file loader.
         if (name != null)
         {
             string? charDefPath = DataFileLocator.FindDataFile(
@@ -118,7 +126,14 @@ class Program
                 try
                 {
                     EnsureReposLoaded(ref itemRepo, ref anatomyRepo);
-                    return CharacterDefinitionLoader.Load(charDefPath, itemRepo!, anatomyRepo!);
+                    string charactersDir = Path.GetDirectoryName(charDefPath)!;
+                    var store = new DirectoryCharacterStore(charactersDir);
+                    string id = ReadCharacterIdFromFile(charDefPath);
+                    CharacterDefinition? def = store.LoadAsync(id).GetAwaiter().GetResult();
+                    if (def == null)
+                        throw new InvalidOperationException(
+                            $"DirectoryCharacterStore at {charactersDir} did not surface character_id {id} from {charDefPath}");
+                    return CharacterDefinitionLoader.Assemble(def, itemRepo!, anatomyRepo!);
                 }
                 catch (Exception ex)
                 {
@@ -131,6 +146,24 @@ class Program
         }
 
         throw new InvalidOperationException("Neither definition path nor name provided");
+    }
+
+    /// <summary>
+    /// Reads only the <c>character_id</c> field out of a v1 character file.
+    /// Used to look the character up by id in a
+    /// <see cref="DirectoryCharacterStore"/> after we've already located it
+    /// by filename slug.
+    /// </summary>
+    static string ReadCharacterIdFromFile(string path)
+    {
+        using var stream = File.OpenRead(path);
+        using var doc = JsonDocument.Parse(stream);
+        if (!doc.RootElement.TryGetProperty("character_id", out var idProp)
+            || idProp.ValueKind != JsonValueKind.String)
+        {
+            throw new FormatException($"{path} is missing required field: character_id");
+        }
+        return idProp.GetString()!;
     }
 
     /// <summary>
