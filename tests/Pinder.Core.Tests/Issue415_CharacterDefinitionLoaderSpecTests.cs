@@ -50,6 +50,10 @@ namespace Pinder.Core.Tests
             return new JsonAnatomyRepository(json);
         }
 
+        // Builds a minimally-valid v1 character JSON. Defaults to a fixed test
+        // character_id; pass `characterId: null` to omit the field entirely
+        // (used for negative tests that target the v1 schema_version /
+        // character_id requirements).
         private static string BuildMinimalJson(
             string name = "TestChar",
             string genderIdentity = "they/them",
@@ -58,23 +62,25 @@ namespace Pinder.Core.Tests
             string itemsArray = "[]",
             string anatomyBlock = "{}",
             string? buildPointsInner = null,
-            string? shadowsInner = null)
+            string? shadowsInner = null,
+            string? schemaVersion = "1",
+            string? characterId = "550e8400-e29b-41d4-a716-446655440000")
         {
             buildPointsInner ??= @"""charm"": 1, ""rizz"": 1, ""honesty"": 1, ""chaos"": 1, ""wit"": 1, ""self_awareness"": 1";
+            shadowsInner ??= @"""madness"": 0, ""despair"": 0, ""denial"": 0, ""fixation"": 0, ""dread"": 0, ""overthinking"": 0";
 
-            var parts = new List<string>
-            {
-                $@"""name"": ""{name}""",
-                $@"""gender_identity"": ""{genderIdentity}""",
-                $@"""bio"": ""{bio}""",
-                $@"""level"": {level}",
-                $@"""items"": {itemsArray}",
-                $@"""anatomy"": {anatomyBlock}",
-                $@"""build_points"": {{ {buildPointsInner} }}"
-            };
-
-            if (shadowsInner != null)
-                parts.Add($@"""shadows"": {{ {shadowsInner} }}");
+            var parts = new List<string>();
+            if (schemaVersion != null)
+                parts.Add($@"""schema_version"": {schemaVersion}");
+            if (characterId != null)
+                parts.Add($@"""character_id"": ""{characterId}""");
+            parts.Add($@"""name"": ""{name}""");
+            parts.Add($@"""gender_identity"": ""{genderIdentity}""");
+            parts.Add($@"""bio"": ""{bio}""");
+            parts.Add($@"""level"": {level}");
+            parts.Add($@"""items"": {itemsArray}");
+            parts.Add($@"""anatomy"": {anatomyBlock}");
+            parts.Add($@"""allocation"": {{ ""spent"": {{ {buildPointsInner} }}, ""unspent_pool"": 0, ""shadows"": {{ {shadowsInner} }} }}");
 
             return "{ " + string.Join(", ", parts) + " }";
         }
@@ -192,6 +198,7 @@ namespace Pinder.Core.Tests
         [InlineData("sable")]
         [InlineData("brick")]
         [InlineData("zyx")]
+        [InlineData("reuben")]
         public void AC5_CharacterDefinitionFile_Exists(string name)
         {
             string path = Path.Combine(RepoRoot, "data", "characters", $"{name}.json");
@@ -205,6 +212,7 @@ namespace Pinder.Core.Tests
         [InlineData("sable")]
         [InlineData("brick")]
         [InlineData("zyx")]
+        [InlineData("reuben")]
         public void AC5_CharacterDefinition_LoadsSuccessfully(string name)
         {
             var itemRepo = LoadItemRepo();
@@ -233,6 +241,7 @@ namespace Pinder.Core.Tests
         [InlineData("sable")]
         [InlineData("brick")]
         [InlineData("zyx")]
+        [InlineData("reuben")]
         public void AC6_DataFileLocator_FindsCharacterDefinition(string name)
         {
             string relativePath = Path.Combine("data", "characters", $"{name}.json");
@@ -395,13 +404,16 @@ namespace Pinder.Core.Tests
             var itemRepo = LoadItemRepo();
             var anatomyRepo = LoadAnatomyRepo();
 
+            // v1 file with name field elided.
             string json = @"{
+                ""schema_version"": 1,
+                ""character_id"": ""550e8400-e29b-41d4-a716-446655440000"",
                 ""gender_identity"": ""they/them"",
                 ""bio"": ""test"",
                 ""level"": 1,
                 ""items"": [],
                 ""anatomy"": {},
-                ""build_points"": { ""charm"": 1, ""rizz"": 1, ""honesty"": 1, ""chaos"": 1, ""wit"": 1, ""self_awareness"": 1 }
+                ""allocation"": { ""spent"": { ""charm"": 1, ""rizz"": 1, ""honesty"": 1, ""chaos"": 1, ""wit"": 1, ""self_awareness"": 1 }, ""unspent_pool"": 0, ""shadows"": { ""madness"": 0, ""despair"": 0, ""denial"": 0, ""fixation"": 0, ""dread"": 0, ""overthinking"": 0 } }
             }";
 
             var ex = Assert.Throws<FormatException>(() =>
@@ -417,12 +429,14 @@ namespace Pinder.Core.Tests
             var anatomyRepo = LoadAnatomyRepo();
 
             string json = @"{
+                ""schema_version"": 1,
+                ""character_id"": ""550e8400-e29b-41d4-a716-446655440000"",
                 ""name"": ""Test"",
                 ""bio"": ""test"",
                 ""level"": 1,
                 ""items"": [],
                 ""anatomy"": {},
-                ""build_points"": { ""charm"": 1, ""rizz"": 1, ""honesty"": 1, ""chaos"": 1, ""wit"": 1, ""self_awareness"": 1 }
+                ""allocation"": { ""spent"": { ""charm"": 1, ""rizz"": 1, ""honesty"": 1, ""chaos"": 1, ""wit"": 1, ""self_awareness"": 1 }, ""unspent_pool"": 0, ""shadows"": { ""madness"": 0, ""despair"": 0, ""denial"": 0, ""fixation"": 0, ""dread"": 0, ""overthinking"": 0 } }
             }";
 
             var ex = Assert.Throws<FormatException>(() =>
@@ -438,12 +452,14 @@ namespace Pinder.Core.Tests
             var anatomyRepo = LoadAnatomyRepo();
 
             string json = @"{
+                ""schema_version"": 1,
+                ""character_id"": ""550e8400-e29b-41d4-a716-446655440000"",
                 ""name"": ""Test"",
                 ""gender_identity"": ""they/them"",
                 ""level"": 1,
                 ""items"": [],
                 ""anatomy"": {},
-                ""build_points"": { ""charm"": 1, ""rizz"": 1, ""honesty"": 1, ""chaos"": 1, ""wit"": 1, ""self_awareness"": 1 }
+                ""allocation"": { ""spent"": { ""charm"": 1, ""rizz"": 1, ""honesty"": 1, ""chaos"": 1, ""wit"": 1, ""self_awareness"": 1 }, ""unspent_pool"": 0, ""shadows"": { ""madness"": 0, ""despair"": 0, ""denial"": 0, ""fixation"": 0, ""dread"": 0, ""overthinking"": 0 } }
             }";
 
             var ex = Assert.Throws<FormatException>(() =>
@@ -459,12 +475,14 @@ namespace Pinder.Core.Tests
             var anatomyRepo = LoadAnatomyRepo();
 
             string json = @"{
+                ""schema_version"": 1,
+                ""character_id"": ""550e8400-e29b-41d4-a716-446655440000"",
                 ""name"": ""Test"",
                 ""gender_identity"": ""they/them"",
                 ""bio"": ""test"",
                 ""items"": [],
                 ""anatomy"": {},
-                ""build_points"": { ""charm"": 1, ""rizz"": 1, ""honesty"": 1, ""chaos"": 1, ""wit"": 1, ""self_awareness"": 1 }
+                ""allocation"": { ""spent"": { ""charm"": 1, ""rizz"": 1, ""honesty"": 1, ""chaos"": 1, ""wit"": 1, ""self_awareness"": 1 }, ""unspent_pool"": 0, ""shadows"": { ""madness"": 0, ""despair"": 0, ""denial"": 0, ""fixation"": 0, ""dread"": 0, ""overthinking"": 0 } }
             }";
 
             var ex = Assert.Throws<FormatException>(() =>
@@ -480,12 +498,14 @@ namespace Pinder.Core.Tests
             var anatomyRepo = LoadAnatomyRepo();
 
             string json = @"{
+                ""schema_version"": 1,
+                ""character_id"": ""550e8400-e29b-41d4-a716-446655440000"",
                 ""name"": ""Test"",
                 ""gender_identity"": ""they/them"",
                 ""bio"": ""test"",
                 ""level"": 1,
                 ""anatomy"": {},
-                ""build_points"": { ""charm"": 1, ""rizz"": 1, ""honesty"": 1, ""chaos"": 1, ""wit"": 1, ""self_awareness"": 1 }
+                ""allocation"": { ""spent"": { ""charm"": 1, ""rizz"": 1, ""honesty"": 1, ""chaos"": 1, ""wit"": 1, ""self_awareness"": 1 }, ""unspent_pool"": 0, ""shadows"": { ""madness"": 0, ""despair"": 0, ""denial"": 0, ""fixation"": 0, ""dread"": 0, ""overthinking"": 0 } }
             }";
 
             var ex = Assert.Throws<FormatException>(() =>
@@ -501,12 +521,14 @@ namespace Pinder.Core.Tests
             var anatomyRepo = LoadAnatomyRepo();
 
             string json = @"{
+                ""schema_version"": 1,
+                ""character_id"": ""550e8400-e29b-41d4-a716-446655440000"",
                 ""name"": ""Test"",
                 ""gender_identity"": ""they/them"",
                 ""bio"": ""test"",
                 ""level"": 1,
                 ""items"": [],
-                ""build_points"": { ""charm"": 1, ""rizz"": 1, ""honesty"": 1, ""chaos"": 1, ""wit"": 1, ""self_awareness"": 1 }
+                ""allocation"": { ""spent"": { ""charm"": 1, ""rizz"": 1, ""honesty"": 1, ""chaos"": 1, ""wit"": 1, ""self_awareness"": 1 }, ""unspent_pool"": 0, ""shadows"": { ""madness"": 0, ""despair"": 0, ""denial"": 0, ""fixation"": 0, ""dread"": 0, ""overthinking"": 0 } }
             }";
 
             var ex = Assert.Throws<FormatException>(() =>
@@ -514,14 +536,17 @@ namespace Pinder.Core.Tests
             Assert.Contains("anatomy", ex.Message, StringComparison.OrdinalIgnoreCase);
         }
 
-        // Fails if: Missing "build_points" field not detected
+        // v1: "build_points" was renamed to "allocation.spent". Missing the
+        // entire allocation block now triggers the corresponding format error.
         [Fact]
-        public void Error_MissingBuildPoints_ThrowsFormatException()
+        public void Error_MissingAllocation_ThrowsFormatException()
         {
             var itemRepo = LoadItemRepo();
             var anatomyRepo = LoadAnatomyRepo();
 
             string json = @"{
+                ""schema_version"": 1,
+                ""character_id"": ""550e8400-e29b-41d4-a716-446655440000"",
                 ""name"": ""Test"",
                 ""gender_identity"": ""they/them"",
                 ""bio"": ""test"",
@@ -532,7 +557,7 @@ namespace Pinder.Core.Tests
 
             var ex = Assert.Throws<FormatException>(() =>
                 CharacterDefinitionLoader.Parse(json, itemRepo, anatomyRepo));
-            Assert.Contains("build_points", ex.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("allocation", ex.Message, StringComparison.OrdinalIgnoreCase);
         }
 
         // Fails if: Level validation doesn't reject level 0

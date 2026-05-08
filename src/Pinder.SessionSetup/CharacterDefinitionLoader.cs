@@ -13,19 +13,33 @@ using Pinder.Core.Traps;
 namespace Pinder.SessionSetup
 {
     /// <summary>
-    /// Loads a character definition JSON file and runs the full
-    /// CharacterAssembler + PromptBuilder pipeline to produce a CharacterProfile.
+    /// Loads a v1 character definition JSON file and runs the full
+    /// <see cref="CharacterAssembler"/> + <see cref="PromptBuilder"/> pipeline
+    /// to produce a <see cref="CharacterProfile"/>.
+    ///
+    /// v1 contract (issue #814):
+    ///   - <c>schema_version: 1</c> is required. Missing or unknown values throw
+    ///     <see cref="FormatException"/>.
+    ///   - <c>character_id</c> is a required UUIDv4. Malformed values throw.
+    ///   - On-disk shape stores allocation only (<c>allocation.spent</c>,
+    ///     <c>allocation.unspent_pool</c>, <c>allocation.shadows</c>); item /
+    ///     anatomy bonuses are recomputed every load.
+    ///
+    /// No back-compat with the prototype format.
     /// </summary>
     public static class CharacterDefinitionLoader
     {
+        /// <summary>The schema version this loader understands.</summary>
+        public const int SupportedSchemaVersion = CharacterDefinition.CurrentSchemaVersion;
+
         /// <summary>
         /// Load a character definition from a JSON file and assemble it into
-        /// a CharacterProfile ready for GameSession.
+        /// a <see cref="CharacterProfile"/> ready for GameSession.
         /// </summary>
         /// <param name="jsonPath">Absolute or relative path to the character definition JSON file.</param>
-        /// <param name="itemRepo">An IItemRepository loaded from starter-items.json.</param>
-        /// <param name="anatomyRepo">An IAnatomyRepository loaded from anatomy-parameters.json.</param>
-        /// <returns>A fully assembled CharacterProfile.</returns>
+        /// <param name="itemRepo">An <see cref="IItemRepository"/> loaded from starter-items.json.</param>
+        /// <param name="anatomyRepo">An <see cref="IAnatomyRepository"/> loaded from anatomy-parameters.json.</param>
+        /// <returns>A fully assembled <see cref="CharacterProfile"/>.</returns>
         /// <exception cref="FileNotFoundException">The file does not exist.</exception>
         /// <exception cref="FormatException">The JSON is malformed or missing required fields.</exception>
         public static CharacterProfile Load(
@@ -41,15 +55,11 @@ namespace Pinder.SessionSetup
         }
 
         /// <summary>
-        /// Parse a character definition JSON string and assemble it into a CharacterProfile.
-        /// Exposed publicly so callers (e.g. the GameApi character generator,
-        /// issues #330/#331) can validate freshly composed JSON without first
-        /// writing it to disk.
+        /// Parse a v1 character definition JSON string into a strongly-typed
+        /// <see cref="CharacterDefinition"/>. Pure: no I/O, no assembler call.
         /// </summary>
-        public static CharacterProfile Parse(
-            string json,
-            IItemRepository itemRepo,
-            IAnatomyRepository anatomyRepo)
+        /// <exception cref="FormatException">The JSON is malformed or violates the v1 schema.</exception>
+        public static CharacterDefinition ParseDefinition(string json)
         {
             JsonDocument doc;
             try
@@ -64,8 +74,12 @@ namespace Pinder.SessionSetup
             using (doc)
             {
                 var root = doc.RootElement;
+                if (root.ValueKind != JsonValueKind.Object)
+                    throw new FormatException("Character definition root must be a JSON object.");
 
-                // Extract required fields
+                int schemaVersion = ParseSchemaVersion(root);
+                Guid characterId = ParseCharacterId(root);
+
                 string name = GetRequiredString(root, "name");
                 string genderIdentity = GetRequiredString(root, "gender_identity");
                 string bio = GetRequiredString(root, "bio");
@@ -74,49 +88,123 @@ namespace Pinder.SessionSetup
                 if (level < 1 || level > 11)
                     throw new FormatException($"Character level must be between 1 and 11, got: {level}");
 
-                // Parse items array
                 var items = ParseItemIds(root);
-
-                // Parse anatomy selections
                 var anatomy = ParseAnatomySelections(root);
+                var allocation = ParseAllocation(root);
 
-                // Parse build points
-                var buildPoints = ParseBuildPoints(root);
-
-                // Parse shadows (optional — defaults to all zeros)
-                var shadows = ParseShadows(root);
-
-                // Run assembly pipeline
-                var assembler = new CharacterAssembler(itemRepo, anatomyRepo);
-                var fragments = assembler.Assemble(items, anatomy, buildPoints, shadows, level);
-
-                // Build system prompt
-                string systemPrompt = PromptBuilder.BuildSystemPrompt(
-                    name, genderIdentity, bio, fragments, new TrapState());
-
-                // Join texting style fragments for voice reinforcement
-                string textingStyle = fragments.TextingStyleFragments.Count > 0
-                    ? string.Join(" | ", fragments.TextingStyleFragments)
-                    : string.Empty;
-
-                // Collect item display names for visible profile (shown to opposing player at T1)
-                var itemDisplayNames = new System.Collections.Generic.List<string>();
-                foreach (var itemId in items)
-                {
-                    var item = itemRepo.GetItem(itemId);
-                    if (item != null && !string.IsNullOrWhiteSpace(item.DisplayName))
-                        itemDisplayNames.Add(item.DisplayName);
-                }
-
-                // Construct CharacterProfile
-                return new CharacterProfile(
-                    fragments.Stats, systemPrompt, name, fragments.Timing, level,
-                    bio: bio,
-                    textingStyleFragment: textingStyle,
-                    activeArchetype: fragments.ActiveArchetype,
-                    equippedItemDisplayNames: itemDisplayNames,
-                    textingStyleSources: fragments.TextingStyleSources);
+                return new CharacterDefinition(
+                    schemaVersion,
+                    characterId,
+                    name,
+                    genderIdentity,
+                    bio,
+                    level,
+                    items,
+                    anatomy,
+                    allocation);
             }
+        }
+
+        /// <summary>
+        /// Parse a v1 character definition JSON string and assemble it into a
+        /// <see cref="CharacterProfile"/>. Exposed publicly so callers (e.g.
+        /// the GameApi character generator) can validate freshly composed JSON
+        /// without first writing it to disk.
+        /// </summary>
+        public static CharacterProfile Parse(
+            string json,
+            IItemRepository itemRepo,
+            IAnatomyRepository anatomyRepo)
+        {
+            if (itemRepo == null) throw new ArgumentNullException(nameof(itemRepo));
+            if (anatomyRepo == null) throw new ArgumentNullException(nameof(anatomyRepo));
+
+            CharacterDefinition def = ParseDefinition(json);
+            return Assemble(def, itemRepo, anatomyRepo);
+        }
+
+        /// <summary>
+        /// Run a parsed <see cref="CharacterDefinition"/> through the assembly
+        /// pipeline to produce a <see cref="CharacterProfile"/>. Bonuses are
+        /// derived from items / anatomy at this point and do NOT round-trip
+        /// back to the on-disk file.
+        /// </summary>
+        public static CharacterProfile Assemble(
+            CharacterDefinition def,
+            IItemRepository itemRepo,
+            IAnatomyRepository anatomyRepo)
+        {
+            if (def == null) throw new ArgumentNullException(nameof(def));
+            if (itemRepo == null) throw new ArgumentNullException(nameof(itemRepo));
+            if (anatomyRepo == null) throw new ArgumentNullException(nameof(anatomyRepo));
+
+            var assembler = new CharacterAssembler(itemRepo, anatomyRepo);
+            var fragments = assembler.Assemble(
+                def.Items,
+                def.Anatomy,
+                def.Allocation.Spent,
+                def.Allocation.Shadows,
+                def.Level);
+
+            string systemPrompt = PromptBuilder.BuildSystemPrompt(
+                def.Name, def.GenderIdentity, def.Bio, fragments, new TrapState());
+
+            string textingStyle = fragments.TextingStyleFragments.Count > 0
+                ? string.Join(" | ", fragments.TextingStyleFragments)
+                : string.Empty;
+
+            var itemDisplayNames = new List<string>();
+            foreach (var itemId in def.Items)
+            {
+                var item = itemRepo.GetItem(itemId);
+                if (item != null && !string.IsNullOrWhiteSpace(item.DisplayName))
+                    itemDisplayNames.Add(item.DisplayName);
+            }
+
+            return new CharacterProfile(
+                fragments.Stats, systemPrompt, def.Name, fragments.Timing, def.Level,
+                bio: def.Bio,
+                textingStyleFragment: textingStyle,
+                activeArchetype: fragments.ActiveArchetype,
+                equippedItemDisplayNames: itemDisplayNames,
+                textingStyleSources: fragments.TextingStyleSources);
+        }
+
+        // --- v1 schema parsing ------------------------------------------------
+
+        private static int ParseSchemaVersion(JsonElement root)
+        {
+            if (!root.TryGetProperty("schema_version", out var prop))
+            {
+                throw new FormatException(
+                    $"Character definition missing required field: schema_version (expected {SupportedSchemaVersion}).");
+            }
+            if (prop.ValueKind != JsonValueKind.Number || !prop.TryGetInt32(out int version))
+            {
+                throw new FormatException(
+                    $"Character definition schema_version must be an integer (expected {SupportedSchemaVersion}).");
+            }
+            if (version != SupportedSchemaVersion)
+            {
+                throw new FormatException(
+                    $"Unknown character schema_version: {version} (this loader supports v{SupportedSchemaVersion} only).");
+            }
+            return version;
+        }
+
+        private static Guid ParseCharacterId(JsonElement root)
+        {
+            if (!root.TryGetProperty("character_id", out var prop) ||
+                prop.ValueKind != JsonValueKind.String)
+            {
+                throw new FormatException("Character definition missing required field: character_id");
+            }
+            string raw = prop.GetString()!;
+            if (!Guid.TryParseExact(raw, "D", out var id))
+            {
+                throw new FormatException($"Character definition character_id is not a valid UUID: '{raw}'");
+            }
+            return id;
         }
 
         private static string GetRequiredString(JsonElement root, string fieldName)
@@ -173,35 +261,56 @@ namespace Pinder.SessionSetup
             return anatomy;
         }
 
-        private static Dictionary<StatType, int> ParseBuildPoints(JsonElement root)
+        private static AllocationBlock ParseAllocation(JsonElement root)
         {
-            if (!root.TryGetProperty("build_points", out var prop) ||
-                prop.ValueKind != JsonValueKind.Object)
+            if (!root.TryGetProperty("allocation", out var alloc) ||
+                alloc.ValueKind != JsonValueKind.Object)
             {
-                throw new FormatException("Character definition missing required field: build_points");
+                throw new FormatException("Character definition missing required field: allocation");
             }
 
-            var buildPoints = new Dictionary<StatType, int>();
+            var spent = ParseSpent(alloc);
+            int unspent = 0;
+            if (alloc.TryGetProperty("unspent_pool", out var pool))
+            {
+                if (pool.ValueKind != JsonValueKind.Number || !pool.TryGetInt32(out unspent))
+                    throw new FormatException("allocation.unspent_pool must be an integer.");
+                if (unspent < 0)
+                    throw new FormatException("allocation.unspent_pool must be non-negative.");
+            }
+            var shadows = ParseShadowsBlock(alloc);
+
+            return new AllocationBlock(spent, unspent, shadows);
+        }
+
+        private static Dictionary<StatType, int> ParseSpent(JsonElement alloc)
+        {
+            if (!alloc.TryGetProperty("spent", out var prop) ||
+                prop.ValueKind != JsonValueKind.Object)
+            {
+                throw new FormatException("Character definition missing required field: allocation.spent");
+            }
+
+            var spent = new Dictionary<StatType, int>();
             foreach (var kv in prop.EnumerateObject())
             {
                 if (!TryParseStatType(kv.Name, out var statType))
                     throw new FormatException($"Unknown stat type: {kv.Name}");
                 if (kv.Value.ValueKind != JsonValueKind.Number)
                     throw new FormatException($"Build point value for {kv.Name} must be a number");
-                buildPoints[statType] = kv.Value.GetInt32();
+                spent[statType] = kv.Value.GetInt32();
             }
-            return buildPoints;
+            return spent;
         }
 
-        private static Dictionary<ShadowStatType, int> ParseShadows(JsonElement root)
+        private static Dictionary<ShadowStatType, int> ParseShadowsBlock(JsonElement alloc)
         {
             var shadows = new Dictionary<ShadowStatType, int>();
-
             // Default all to 0
             foreach (ShadowStatType sst in Enum.GetValues(typeof(ShadowStatType)))
                 shadows[sst] = 0;
 
-            if (!root.TryGetProperty("shadows", out var prop) ||
+            if (!alloc.TryGetProperty("shadows", out var prop) ||
                 prop.ValueKind != JsonValueKind.Object)
             {
                 return shadows;

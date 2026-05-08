@@ -1,0 +1,100 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://pinder.dk-eigenvektor.de/schemas/character-v1.json",
+  "title": "Pinder Character v1",
+  "description": "On-disk shape of a Pinder character file. Describes player-authored allocation only; bonuses from items/anatomy are recomputed at load time and never serialised here.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "character_id",
+    "name",
+    "gender_identity",
+    "bio",
+    "level",
+    "items",
+    "anatomy",
+    "allocation"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "description": "Schema version. v1 files MUST be exactly 1.",
+      "const": 1
+    },
+    "character_id": {
+      "type": "string",
+      "description": "UUIDv4 identity. Stable across renames; the filename slug is presentation only.",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Display name shown to opposing player and used in prompts."
+    },
+    "gender_identity": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Free-form gender identity string (e.g. \"he/him\", \"they/them\")."
+    },
+    "bio": {
+      "type": "string",
+      "description": "Short bio shown to opposing player."
+    },
+    "level": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 11,
+      "description": "Character level used for archetype eligibility and starter-points budget."
+    },
+    "items": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "description": "Equipped item ids; resolved against IItemRepository at load."
+    },
+    "anatomy": {
+      "type": "object",
+      "additionalProperties": { "type": "string", "minLength": 1 },
+      "description": "Anatomy selections: parameter id (e.g. \"length\") -> tier id (e.g. \"short\")."
+    },
+    "allocation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["spent", "unspent_pool", "shadows"],
+      "description": "Player-authored build-point allocation block. Bonuses NOT included here.",
+      "properties": {
+        "spent": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["charm", "rizz", "honesty", "chaos", "wit", "self_awareness"],
+          "properties": {
+            "charm":          { "type": "integer", "minimum": 0 },
+            "rizz":           { "type": "integer", "minimum": 0 },
+            "honesty":        { "type": "integer", "minimum": 0 },
+            "chaos":          { "type": "integer", "minimum": 0 },
+            "wit":            { "type": "integer", "minimum": 0 },
+            "self_awareness": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "unspent_pool": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Build points not yet allocated. Starter files all set this to 0."
+        },
+        "shadows": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["madness", "despair", "denial", "fixation", "dread", "overthinking"],
+          "properties": {
+            "madness":      { "type": "integer", "minimum": 0 },
+            "despair":      { "type": "integer", "minimum": 0 },
+            "denial":       { "type": "integer", "minimum": 0 },
+            "fixation":     { "type": "integer", "minimum": 0 },
+            "dread":        { "type": "integer", "minimum": 0 },
+            "overthinking": { "type": "integer", "minimum": 0 }
+          }
+        }
+      }
+    }
+  }
+}

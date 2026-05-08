@@ -1,4 +1,6 @@
 {
+  "schema_version": 1,
+  "character_id": "f179a327-8aa5-443d-aa56-0e764f6ea3ce",
   "name": "Reuben_404",
   "gender_identity": "he/him",
   "bio": "accidentally deleted my thesis. starting fresh. no notes.",
@@ -21,20 +23,23 @@
     "tattoos": "one-meaningful",
     "eye_style": "soft"
   },
-  "build_points": {
-    "charm": 2,
-    "rizz": 3,
-    "honesty": 5,
-    "chaos": 6,
-    "wit": 4,
-    "self_awareness": 3
-  },
-  "shadows": {
-    "madness": 4,
-    "despair": 1,
-    "denial": 1,
-    "fixation": 3,
-    "dread": 5,
-    "overthinking": 7
+  "allocation": {
+    "spent": {
+      "charm": 2,
+      "rizz": 3,
+      "honesty": 5,
+      "chaos": 6,
+      "wit": 4,
+      "self_awareness": 3
+    },
+    "unspent_pool": 0,
+    "shadows": {
+      "madness": 4,
+      "despair": 1,
+      "denial": 1,
+      "fixation": 3,
+      "dread": 5,
+      "overthinking": 7
+    }
   }
 }

@@ -122,3 +122,33 @@ back if they appear without a `ConversationIndexing` call alongside.
 
 **Discovered in:** PR #767 brace-fix follow-up, surfaced in #769 and #774.
 Codified during the first pinder-core swarm-drain run.
+
+### GIT-WORKTREE-DOTGIT-IS-A-FILE
+
+**Symptom:** A test that walks up from `AppContext.BaseDirectory` looking
+for a repo-root marker `.git/` (as a directory) silently fails to find the
+root when the build runs inside a `git worktree` (such as the per-ticket
+worktrees this drain creates under `/tmp/work-*`). The test self-skips via
+`Assert.Fail("SKIPPED:")` and the implementer mistakes it for a "new"
+failure caused by their change.
+
+**Root cause:** In a primary checkout, `<repo-root>/.git` is a directory.
+In a worktree (`git worktree add ...`), `<worktree-root>/.git` is a regular
+*file* containing `gitdir: <path-to-real-gitdir>`. Code that uses
+`Directory.Exists(.git)` only to detect a repo root will return false in
+worktrees and never reach the resource it was looking for.
+
+**Fix:** Detect repo roots with `Directory.Exists(gitMarker) ||
+File.Exists(gitMarker)` (or use a different stable marker such as the
+project `.sln` file). Worktrees are the default execution environment for
+swarm-drain runs, so this matters every time.
+
+**Rule:** Any test or tool that walks up looking for a repo root MUST
+accept `.git` as either a directory or a file. Do not introduce new
+`.git`-as-directory-only checks. If a checkout-vs-worktree distinction is
+actually meaningful (rare), make the distinction explicit instead of
+letting it leak in via probing.
+
+**Discovered in:** #814 implementation run (sprint character-assets-v1).
+Six tests in `CharacterLoaderSpecTests` were spuriously failing in the
+worktree until `FindPromptDir()` was taught to accept the file form.

@@ -1,4 +1,6 @@
 {
+  "schema_version": 1,
+  "character_id": "8bde182a-9aec-4c15-b8f9-2f6edeb30752",
   "name": "Sable_xo",
   "gender_identity": "she/her",
   "bio": "looking for my person. if you're boring, swipe left babe.",
@@ -21,20 +23,23 @@
     "tattoos": "one-meaningful",
     "eye_style": "soft"
   },
-  "build_points": {
-    "charm": 4,
-    "rizz": 6,
-    "honesty": 3,
-    "chaos": 4,
-    "wit": 2,
-    "self_awareness": 2
-  },
-  "shadows": {
-    "madness": 3,
-    "despair": 0,
-    "denial": 2,
-    "fixation": 5,
-    "dread": 2,
-    "overthinking": 4
+  "allocation": {
+    "spent": {
+      "charm": 4,
+      "rizz": 6,
+      "honesty": 3,
+      "chaos": 4,
+      "wit": 2,
+      "self_awareness": 2
+    },
+    "unspent_pool": 0,
+    "shadows": {
+      "madness": 3,
+      "despair": 0,
+      "denial": 2,
+      "fixation": 5,
+      "dread": 2,
+      "overthinking": 4
+    }
   }
 }
