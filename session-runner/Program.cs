@@ -757,9 +757,17 @@ class Program
         // delivered message. Index = turn_number - 1. When resuming from a
         // resim snapshot we lift the diffs from the player entries (the
         // opponent entries always carry an empty list).
+        //
+        // Indexing rule (post #769 / #774): scene entries (issue #333,
+        // sender == "[scene]") and any future non-player-axis entries
+        // must be skipped so the resulting list is co-indexed by player
+        // entry only. We can't use ConversationIndexing here directly
+        // (it operates on the engine's (Sender, Text) tuple list, not
+        // the wire DTO), so we filter by sender on the wire shape —
+        // taking only entries that match the player's display name.
         var perTurnTextDiffs = isResimulation && resimTurnSnap != null
             ? resimTurnSnap.ConversationHistory
-                .Where((_, idx) => idx % 2 == 0)
+                .Where(e => e.Sender == player1)
                 .Select(e => e.TextDiffs ?? new List<TextDiffSnapshot>())
                 .ToList()
             : new List<List<TextDiffSnapshot>>();
@@ -1096,11 +1104,15 @@ class Program
                 // #305: stash this turn's TextDiffs (snapshot shape) so we can
                 // attach them to the player's history entry when building
                 // the turn snapshot below. Empty list when no layer
-                // transformed the text. MUST stay in lock-step with
-                // conversationHistory — BuildTurnSnapshot indexes
-                // perTurnTextDiffs[i/2] against the player entry at index i,
-                // so skipping a player entry without skipping the diffs entry
-                // (or vice versa) desyncs every subsequent turn's diffs.
+                // transformed the text. MUST stay in lock-step with the
+                // count of player entries appended to conversationHistory
+                // — BuildTurnSnapshot uses ConversationIndexing to match
+                // perTurnTextDiffs[turnNumber-1] to the player entry of
+                // turn N (post #769 / #774, scene-aware). If a player
+                // entry append is skipped, the diffs append must also
+                // be skipped (the brace-fix on #767 enforces that), and
+                // any future change to the player-axis pacing must keep
+                // these two `Add` calls under the same condition.
                 perTurnTextDiffs.Add(
                     (result.TextDiffs ?? Array.Empty<Pinder.Core.Text.TextDiff>())
                         .Select(d => new TextDiffSnapshot
@@ -1304,7 +1316,8 @@ class Program
                     comboHistoryForSnapshot,
                     tellSnap,
                     perTurnTextDiffs,
-                    session.OpponentHistory);
+                    session.OpponentHistory,
+                    playerSender: player1);
 
                 string turnSnapPath = Path.Combine(playtestDir, $"{sessionSlug}.turn-{turn:D2}.snap.json");
                 File.WriteAllText(turnSnapPath, JsonSerializer.Serialize(turnSnap, new JsonSerializerOptions { WriteIndented = true }));
@@ -1604,7 +1617,8 @@ class Program
         List<(StatType Stat, bool Succeeded)> comboHistory,
         TellSnapshot? activeTell,
         List<List<TextDiffSnapshot>>? perTurnTextDiffs = null,
-        IReadOnlyList<Pinder.Core.Conversation.ConversationMessage>? opponentHistory = null)
+        IReadOnlyList<Pinder.Core.Conversation.ConversationMessage>? opponentHistory = null,
+        string? playerSender = null)
     {
         var state = result.StateAfter;
 
@@ -1626,21 +1640,49 @@ class Program
 
         // Conversation history (#305: attach per-turn text_diffs[] to the
         // player's entry on each turn so the snapshot can be deserialised
-        // straight into a renderer / replay tool. Each resolved turn
-        // appends two entries — player then opponent — so player entries
-        // live at even indices and turn-N maps to history index 2*(N-1).)
+        // straight into a renderer / replay tool.
+        //
+        // Indexing rule (post #769 / #774): the conversation log is no
+        // longer a strict alternating (player, opponent, ...) sequence —
+        // it may be prefixed with [scene] entries (issue #333), and a
+        // skipped player turn (empty DeliveredMessage, post-#767) means
+        // a turn slot with no entry on the player axis at all. We use
+        // ConversationIndexing.EnumerateConversation to walk the history
+        // and classify each entry; perTurnTextDiffs is co-indexed by
+        // count of player entries (turn N's diffs live at
+        // perTurnTextDiffs[N-1]), which the helper hands us via the
+        // 1-based TurnNumber on each player view.
+        //
+        // When playerSender is supplied (the live engine path always
+        // passes it), we identify player entries directly by sender
+        // equality and walk a player-entry counter to index into
+        // perTurnTextDiffs. This is more robust than the helper's
+        // pair-math classification under the #769 "skipped player
+        // turn" perturbation: pair-math derives role from the count of
+        // non-scene entries seen so far, which silently flips when
+        // either side of a (player, opponent) pair is missing, while
+        // sender-match always identifies the right entry.
+        //
+        // When playerSender is null (legacy callers / older tests that
+        // don't know the display name) we fall back to the helper's
+        // IsPlayerEntry classification — correct under the strict
+        // pair invariant the engine maintained pre-#769.
         var convEntries = new List<ConversationEntry>(conversationHistory.Count);
-        for (int i = 0; i < conversationHistory.Count; i++)
+        int playerEntriesSeen = 0;
+        foreach (var view in Pinder.Core.Conversation.ConversationIndexing.EnumerateConversation(conversationHistory))
         {
-            var (sender, text) = conversationHistory[i];
-            var entry = new ConversationEntry { Sender = sender, Text = text };
-            bool isPlayerEntry = (i % 2) == 0;
-            int turnIdx = i / 2;
-            if (isPlayerEntry
-                && perTurnTextDiffs != null
-                && turnIdx < perTurnTextDiffs.Count)
+            var entry = new ConversationEntry { Sender = view.Sender, Text = view.Text };
+            bool isPlayerByIdentity = playerSender != null
+                ? (!view.IsScene && view.Sender == playerSender)
+                : view.IsPlayerEntry;
+            if (isPlayerByIdentity && perTurnTextDiffs != null)
             {
-                entry.TextDiffs = perTurnTextDiffs[turnIdx] ?? new List<TextDiffSnapshot>();
+                int turnIdx = playerEntriesSeen;
+                if (turnIdx >= 0 && turnIdx < perTurnTextDiffs.Count)
+                {
+                    entry.TextDiffs = perTurnTextDiffs[turnIdx] ?? new List<TextDiffSnapshot>();
+                }
+                playerEntriesSeen++;
             }
             convEntries.Add(entry);
         }
