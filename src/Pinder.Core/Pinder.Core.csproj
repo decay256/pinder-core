@@ -17,6 +17,13 @@
   <ItemGroup>
     <!-- IAsyncEnumerable<T> + [EnumeratorCancellation] for netstandard2.0 -->
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />
+    <!--
+      System.Text.Json provides Utf8JsonWriter for CharacterDefinitionWriter
+      (issue #815). Pinder.SessionSetup already takes the same dep at the
+      same version; this is not a new third-party library, only a
+      Microsoft Bcl already used by the solution.
+    -->
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
   </ItemGroup>
 
 </Project>
