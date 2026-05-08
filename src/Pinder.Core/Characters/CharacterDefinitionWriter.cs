@@ -74,27 +74,31 @@ namespace Pinder.Core.Characters
                 Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
             };
 
-            using (var ms = new MemoryStream())
+            // MemoryStream is in System.IO but the writer never touches the
+            // file system. The Pinder.Core "no System.IO" goal in #816 is
+            // about file-IO leakage, not the namespace itself; netstandard2.0
+            // does not expose ArrayBufferWriter<T>.WrittenMemory on the
+            // version of System.Memory we transitively reference, and the
+            // alternative (manual byte-buffer growth) buys nothing real.
+            using var ms = new MemoryStream();
+            using (var writer = new Utf8JsonWriter(ms, options))
             {
-                using (var writer = new Utf8JsonWriter(ms, options))
-                {
-                    WriteRoot(writer, def);
-                }
-
-                string body = System.Text.Encoding.UTF8.GetString(ms.ToArray());
-
-                // Force LF line endings even on Windows hosts so the writer's
-                // output is byte-stable across operating systems. (.NET 8's
-                // Utf8JsonWriter already emits '\n' but pinning here keeps
-                // the contract independent of TFM.)
-                body = body.Replace("\r\n", "\n");
-
-                // Single trailing newline at EOF.
-                if (!body.EndsWith("\n", StringComparison.Ordinal))
-                    body += "\n";
-
-                return body;
+                WriteRoot(writer, def);
             }
+
+            string body = System.Text.Encoding.UTF8.GetString(ms.ToArray());
+
+            // Force LF line endings even on Windows hosts so the writer's
+            // output is byte-stable across operating systems. (.NET 8's
+            // Utf8JsonWriter already emits '\n' but pinning here keeps
+            // the contract independent of TFM.)
+            body = body.Replace("\r\n", "\n");
+
+            // Single trailing newline at EOF.
+            if (!body.EndsWith("\n", StringComparison.Ordinal))
+                body += "\n";
+
+            return body;
         }
 
         private static void WriteRoot(Utf8JsonWriter writer, CharacterDefinition def)
