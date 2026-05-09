@@ -7,6 +7,15 @@ namespace Pinder.Core.Characters
     /// One selectable tier within an anatomy parameter (e.g. Length=Short).
     /// Produces the same six fragment types as an item.
     /// </summary>
+    /// <remarks>
+    /// As of #551, tiers within a numeric parameter carry a
+    /// <see cref="NumericBreakpoint"/> indicating where on the scale this tier
+    /// sits (e.g. for length=short the breakpoint might be 1, for length=long
+    /// it might be 3). Tiers within categorical parameters always have
+    /// <see cref="NumericBreakpoint"/> = null. The numeric breakpoint is
+    /// authoring metadata only — the engine doesn't currently read it; the
+    /// admin editor (#552) uses it to render the right ergonomics per tier.
+    /// </remarks>
     public sealed class AnatomyTierDefinition
     {
         public string ParameterId { get; }
@@ -26,6 +35,13 @@ namespace Pinder.Core.Characters
         /// <summary>Set for cosmetic-only tiers (Skin Tone). Null for all others.</summary>
         public string? VisualDescription { get; }
 
+        /// <summary>
+        /// Position on the numeric scale this tier represents. Non-null only
+        /// when the parent parameter's <see cref="AnatomyParameterDefinition.ScaleType"/>
+        /// is <c>"numeric"</c>; null for categorical parameters.
+        /// </summary>
+        public int? NumericBreakpoint { get; }
+
         public AnatomyTierDefinition(
             string parameterId,
             string tierId,
@@ -36,7 +52,8 @@ namespace Pinder.Core.Characters
             string? textingStyleFragment,
             string[] archetypeTendencies,
             TimingModifier responseTimingModifier,
-            string? visualDescription = null)
+            string? visualDescription = null,
+            int? numericBreakpoint = null)
         {
             ParameterId             = parameterId;
             TierId                  = tierId;
@@ -48,6 +65,7 @@ namespace Pinder.Core.Characters
             ArchetypeTendencies     = archetypeTendencies;
             ResponseTimingModifier  = responseTimingModifier;
             VisualDescription       = visualDescription;
+            NumericBreakpoint       = numericBreakpoint;
         }
     }
 }

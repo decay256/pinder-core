@@ -2,10 +2,13 @@
   {
     "id": "length",
     "name": "Length",
+    "scale_type": "numeric",
+    "numeric_range": { "min": 1, "max": 4, "unit": "tier" },
     "tiers": [
       {
         "id": "short",
         "name": "Short",
+        "numeric_breakpoint": 1,
         "stat_modifiers": { "self_awareness": 1, "honesty": 1 },
         "personality_fragment": "got to the jokes before anyone else; uses self-deprecation as both weapon and shield; has a particular wit that grew specifically in this soil",
         "backstory_fragment": "heard every short joke by age fourteen; got very good at landing the punchline before anyone else could; discovered that being the one who tells the joke first is better than being the one the joke is about; has since found this principle applies to most things in life",
@@ -21,6 +24,7 @@
       {
         "id": "medium",
         "name": "Medium",
+        "numeric_breakpoint": 2,
         "stat_modifiers": {},
         "personality_fragment": "comfortable in their own skin in a way that reads as unusual; not performing modesty, genuinely fine; this reads as confidence to some and blankness to others",
         "backstory_fragment": "grew up without this being a topic; no locker room trauma, no defining comparison moment that stuck, no incident that reordered things; had to build an identity around actual things rather than reactions to a physical fact; considers this lucky in retrospect",
@@ -36,6 +40,7 @@
       {
         "id": "long",
         "name": "Long",
+        "numeric_breakpoint": 3,
         "stat_modifiers": { "rizz": 1, "charm": 1, "self_awareness": -1 },
         "personality_fragment": "has a quiet awareness of their advantage that surfaces in unexpected ways; not a braggart — just knows; expects to be welcomed in a way that is mostly correct",
         "backstory_fragment": "the first time someone made a specific remark about it they were sixteen and had no idea how to respond; filed it as significant; learned to respond by twenty; have been responding with decreasing effort and increasing ease ever since",
@@ -51,6 +56,7 @@
       {
         "id": "legendary",
         "name": "Legendary",
+        "numeric_breakpoint": 4,
         "stat_modifiers": { "rizz": 2, "charm": 1, "self_awareness": -2 },
         "personality_fragment": "enters conversations at a slight offset to everyone else due to sheer presence; cannot fully diagnose why some exchanges go strangely; has been informed of the cause multiple times; it lands differently each time",
         "backstory_fragment": "found out at fifteen from a reaction rather than a conversation; spent the next several years figuring out what to do with the information; the answer changed three times; currently on version three; version three is the calmest version and the most functional",
@@ -68,10 +74,13 @@
   {
     "id": "girth",
     "name": "Girth",
+    "scale_type": "numeric",
+    "numeric_range": { "min": 1, "max": 4, "unit": "tier" },
     "tiers": [
       {
         "id": "slim",
         "name": "Slim",
+        "numeric_breakpoint": 1,
         "stat_modifiers": { "wit": 1 },
         "personality_fragment": "compensated through sharpness; makes up in precision what others have in mass; there's a specific vein of humor that only grows in this particular circumstance",
         "backstory_fragment": "the comparison happened at fourteen in a school changing room; the hierarchy was announced without words; went home that day and decided to be excellent at something else; they were; this is connected",
@@ -87,6 +96,7 @@
       {
         "id": "average",
         "name": "Average",
+        "numeric_breakpoint": 2,
         "stat_modifiers": {},
         "personality_fragment": "not particularly burdened or advantaged by this dimension; free to define themselves by other things; has taken advantage of this freedom to varying degrees",
         "backstory_fragment": "was never the subject of any category in any room they were in; this turned out to be an advantage nobody warned them about; the absence of a physical narrative forced them to build an actual one; they did",
@@ -102,6 +112,7 @@
       {
         "id": "thick",
         "name": "Thick",
+        "numeric_breakpoint": 3,
         "stat_modifiers": { "rizz": 1, "charm": 1 },
         "personality_fragment": "occupies space with authority without raising their voice; presence arrives before they do; has learned to be responsible with this",
         "backstory_fragment": "had an early relationship where the other person's primary reaction was surprise; they had been trying for connection and received awe instead; took a long time to understand those are different things; now manages the distinction deliberately",
@@ -117,6 +128,7 @@
       {
         "id": "extra-thick",
         "name": "Extra Thick",
+        "numeric_breakpoint": 4,
         "stat_modifiers": { "rizz": 2, "self_awareness": -1 },
         "personality_fragment": "experiences conversations as slightly off-rhythm from others in a way they haven't fully diagnosed; people react unusually; they've filed this under 'interesting' and continue",
         "backstory_fragment": "the first time someone had a visible physical reaction they were nineteen; they laughed; the other person didn't; stopped laughing; the subsequent years taught them that what reads as a compliment to one person reads as intimidation to another; this navigation is ongoing and imperfect",
@@ -314,10 +326,13 @@
   {
     "id": "ball_size",
     "name": "Ball Size",
+    "scale_type": "numeric",
+    "numeric_range": { "min": 1, "max": 4, "unit": "tier" },
     "tiers": [
       {
         "id": "modest",
         "name": "Modest",
+        "numeric_breakpoint": 1,
         "stat_modifiers": { "wit": 1, "self_awareness": 1 },
         "personality_fragment": "precision over spectacle; quality over scale; the value is in what they do, not how much space they require to do it",
         "backstory_fragment": "was asked once, early on, whether they were insecure about it; said no; the other person didn't believe them; they meant it; spent about ten minutes afterward quietly checking whether they meant it; still meant it; found this more telling about the person who asked than about themselves",
@@ -333,6 +348,7 @@
       {
         "id": "average",
         "name": "Average",
+        "numeric_breakpoint": 2,
         "stat_modifiers": {},
         "personality_fragment": "not defined by this dimension; defined by other things; the freedom from this particular definition is real and used",
         "backstory_fragment": "the first person who saw them fully was a partner at twenty-one who didn't react in any notable way; this non-reaction was one of the better moments of that year; has had low expectations of drama in this area ever since; those expectations have been consistently met",
@@ -348,6 +364,7 @@
       {
         "id": "substantial",
         "name": "Substantial",
+        "numeric_breakpoint": 3,
         "stat_modifiers": { "charm": 1, "rizz": 1 },
         "personality_fragment": "carries themselves with a ballast that reads as groundedness; gives the impression of someone who has seriously considered their position; mostly accurate",
         "backstory_fragment": "the awareness arrived at eighteen via a reaction they didn't expect and weren't prepared for; took about a year to calibrate; the calibration involved understanding that being noticed for a physical fact is not the same as being known; has been working on the distinction since; makes it the focus most of the time",
@@ -363,6 +380,7 @@
       {
         "id": "asymmetric",
         "name": "Asymmetric",
+        "numeric_breakpoint": 4,
         "stat_modifiers": { "chaos": 1, "self_awareness": 1, "charm": -1 },
         "personality_fragment": "has made peace with the irregular; can lead with it or leave it; the awareness of asymmetry has produced unusual self-knowledge; notices imbalance in other things too",
         "backstory_fragment": "didn't notice until a doctor pointed it out at twenty-five with no particular concern; spent the following week overthinking it; then stopped; the asymmetry had been there the whole time without consequence; learned from this that most things they'd been anxious about were similarly inert; this was worth knowing",
