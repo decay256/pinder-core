@@ -152,3 +152,47 @@ letting it leak in via probing.
 **Discovered in:** #814 implementation run (sprint character-assets-v1).
 Six tests in `CharacterLoaderSpecTests` were spuriously failing in the
 worktree until `FindPromptDir()` was taught to accept the file form.
+
+### NEVER-SILENTLY-TRUNCATE-LLM-INPUTS
+
+**Symptom:** Stake-generation samples for #826 were compared head-to-head
+between prompt variants for weeks before anyone noticed the prompts were
+being fed amputated character profiles. `LlmStakeGenerator.BuildUserMessage`
+was slicing `assembledSystemPrompt` to the first 4000 chars
+(`Math.Min(4000, ...Length)` + `Substring(0, ...)`), with no log line, no
+metric, no marker on the truncated string, and no marker in the resulting
+stake. The bug had been live since the stake generator was written. Every
+eval, every sample comparison, every dataset built off stake outputs had a
+silent ceiling baked in.
+
+**Root cause:** Defensive truncation written once for cost/latency reasons
+that (a) outlived its justification, (b) was never observable, and (c) was
+physically detached from the prompt design — so when the prompt was
+iterated, no one re-asked whether the cap still made sense.
+
+**Rule:** Never silently truncate any string that is going to an LLM. If a
+cap is genuinely required:
+
+1. The cap value lives in a single named constant with a comment explaining
+   *why* (cost, provider hard limit, snapshot column width — be specific).
+2. Every truncation event emits a log line at WARN with the original
+   length, the cap, and the call site.
+3. A metric or counter increments so we can see truncation frequency in
+   prod.
+4. The truncated string carries a visible marker (`...[truncated]` or
+   equivalent) so downstream consumers see that data was lost.
+5. Tests assert that under normal operation the cap is never hit. If it is,
+   that's a regression alert, not a steady state.
+
+**Better than capping:** structured summarisation (build a tighter version
+of the input upstream) or splitting the input across multiple LLM calls.
+Capping is a last resort; if it's the right call, it must be loud.
+
+**Code-review checklist:** any new `Substring(0, n)`, `[:n]` (Python),
+`Truncate`, `MaxLength`, or tokeniser-based shortening that lands on a
+prompt-bound or audit-bound string requires a comment block explaining
+which of the five rules above applies. PRs that quietly add such a slice
+without the comment block must be sent back.
+
+**Discovered in:** #834 audit, prompted by #826 stake-prompt re-spec
+discussion in the pinder Discord (2026-05-09).
