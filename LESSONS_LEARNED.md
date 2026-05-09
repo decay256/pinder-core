@@ -153,7 +153,10 @@ letting it leak in via probing.
 Six tests in `CharacterLoaderSpecTests` were spuriously failing in the
 worktree until `FindPromptDir()` was taught to accept the file form.
 
-### NEVER-SILENTLY-TRUNCATE-LLM-INPUTS
+### LLM-INPUT-SILENT-TRUNCATION-IS-ALWAYS-A-BUG
+
+*(also known as NEVER-SILENTLY-TRUNCATE-LLM-INPUTS — the canonical name as of #834.)*
+
 
 **Symptom:** Stake-generation samples for #826 were compared head-to-head
 between prompt variants for weeks before anyone noticed the prompts were
@@ -195,4 +198,10 @@ which of the five rules above applies. PRs that quietly add such a slice
 without the comment block must be sent back.
 
 **Discovered in:** #834 audit, prompted by #826 stake-prompt re-spec
-discussion in the pinder Discord (2026-05-09).
+discussion in the pinder Discord (2026-05-09). Fix landed in PR for #834 —
+removed the 4000-char cap in `LlmStakeGenerator.BuildUserMessage` and the
+500-char cap in `LlmPlayerAgent.BuildSystemMessage` (sim-tool path); audit
+documented in the PR body classified all remaining `Substring(0, n)` /
+`Math.Min(n, ...Length)` hits in the repo as either (a) deterministic
+parsing/display, (b) error-body excerpts with a visible `...[truncated]`
+marker (Anthropic/OpenAI transports), or (c) other non-LLM-bound display.
