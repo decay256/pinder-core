@@ -716,24 +716,16 @@ class Program
 
         if (!isResimulation)
         {
-            // ── Matchup Analysis ──────────────────────────────────────────
+            // ── Session setup ─────────────────────────────────────────────
             // Setup helpers live in Pinder.SessionSetup (Track B #114) and are
             // consumed by both session-runner and Pinder.GameApi.
-            Console.Error.WriteLine("Generating matchup analysis...");
+            // #827: matchup analysis + summary stages were removed in
+            // setup-trim phase 1. The pipeline is now stake-only (player
+            // stake → opponent stake), with the outfit-describer running in
+            // parallel inside Pinder.GameApi's ActiveSession (the runner here
+            // emits stakes only).
             string setupModel = Environment.GetEnvironmentVariable("PLAYER_AGENT_MODEL") ?? "claude-sonnet-4-20250514";
             using var setupTransport = new Pinder.LlmAdapters.Anthropic.AnthropicTransport(apiKey, setupModel);
-            var matchupAnalyzer = new Pinder.SessionSetup.LlmMatchupAnalyzer(
-                setupTransport,
-                new Pinder.SessionSetup.LlmMatchupAnalyzer.Options
-                {
-                    CacheDirectory = System.IO.Path.Combine(Environment.CurrentDirectory, ".matchup-cache"),
-                });
-            var analysis = await matchupAnalyzer.AnalyzeMatchupAsync(sable, brick);
-            if (!string.IsNullOrWhiteSpace(analysis))
-            {
-                Console.WriteLine(analysis);
-                Console.WriteLine();
-            }
 
             // ── Psychological Stakes ──────────────────────────────────
             Console.Error.WriteLine("Generating psychological stakes...");

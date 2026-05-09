@@ -43,16 +43,11 @@ namespace Pinder.Core.Interfaces
         /// </summary>
         public const string TrapOverlay = "trap_overlay";
 
-        /// <summary>Session-setup matchup analysis.</summary>
-        public const string MatchupAnalysis = "matchup_analysis";
-
-        /// <summary>
-        /// Session-setup short matchup summary (issue #332). A 1-2 paragraph
-        /// LLM-generated condensation of the long-form matchup analysis,
-        /// surfaced to the UI as a display-only affordance. NOT used as
-        /// input to any subsequent LLM prompt in the session.
-        /// </summary>
-        public const string MatchupSummary = "matchup_summary";
+        // #827: MatchupAnalysis ("matchup_analysis") and MatchupSummary
+        // ("matchup_summary") were removed in setup-trim phase 1. Existing
+        // historical audit/cost rows referencing those phase strings are
+        // rendered as untyped strings, which is acceptable for historical
+        // data per the ticket. Do not re-introduce these constants.
 
         /// <summary>Session-setup psychological-stake generation.</summary>
         public const string PsychologicalStake = "psychological_stake";

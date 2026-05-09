@@ -94,7 +94,7 @@ namespace Pinder.SessionSetup
         /// <summary>Tunable knobs for <see cref="LlmOutfitDescriber"/>.</summary>
         public sealed class Options
         {
-            /// <summary>Temperature. Default 0.8 \u2014 a touch warmer than matchup analysis.</summary>
+            /// <summary>Temperature. Default 0.8 \u2014 a touch warmer than stake generation.</summary>
             public double Temperature { get; set; } = 0.8;
 
             /// <summary>Max output tokens. Default 250 (paragraph-sized).</summary>
