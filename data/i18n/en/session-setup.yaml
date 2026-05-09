@@ -10,8 +10,6 @@ strings:
   session_setup.connecting: "Connecting…"
   session_setup.heading: "Setting up your match…"
   session_setup.generating_first_turn: "Generating first turn…"
-  session_setup.review_matchup_hint: "You can review the matchup analysis in your character sheet once the game starts."
-  session_setup.label_matchup_analysis: "Matchup Analysis"
   session_setup.label_your_stake: "Your Psychological Stake"
   session_setup.label_opponent_stake: "Opponent Psychological Stake"
   session_setup.continue_button: "Continue to Game"

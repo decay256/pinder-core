@@ -22,8 +22,9 @@ strings:
   continue.interest_aria: "Interest {interest}"
   continue.interest_label: "int {interest}"
 
-  # ── MatchupPreview (migrated #439) ────────────────────────────────
-  matchup_preview.heading: "Matchup Preview"
+  # ── MatchupPreview (#559: removed) ─────────────────────────────────
+  # The matchup_preview.heading key was retired with the
+  # MatchupPreview component (decay256/pinder-web#559).
 
   # ── CharacterCard / CharacterDetailCard (migrated #439) ───────────
   character_card.level_label: "Level {level}"
@@ -42,7 +43,6 @@ strings:
   play_page.loading: "Loading characters…"
   play_page.title: "Select Characters"
   play_page.subtitle: "Pick your character and your opponent, then start the match."
-  play_page.matchup_placeholder: "Select a player and an opponent to see the matchup preview."
   play_page.model_label: "Model"
   play_page.fast_gameplay_label: "fast ($$$)"
   play_page.start_game_button: "Start Game"
