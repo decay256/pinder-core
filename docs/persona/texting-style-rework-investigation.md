@@ -145,19 +145,19 @@ The schema is consistent and uniform:
 - 44 items. Pool sizes:
   - emoji: 11 bullets
   - shorthand: 13
-  - grammar: 17
+  - grammar: 16
   - structure: 12
   - length: 5
   - tics: 8
   - stance: 22
   - register: 21
   - pacing: 6
-- Total pool size: 115 bullets across 9 categories
+- Total pool size: 114 bullets across 9 categories
 - Per item: 6 syntax + 1 stance + 1 register + 1 pacing = **9 bullets per item**
 - Total bullet-uses across 44 items (with all axes filled): 44 × 9 = 396
 - Strategy: round-robin within each category, tracking usage. Categories
   smaller than 44 (length=5, pacing=6, tics=8, emoji=11, structure=12,
-  shorthand=13, grammar=17, register=21, stance=22) will all see every
+  shorthand=13, grammar=16, register=21, stance=22) will all see every
   bullet used at least once with comfortable headroom.
 - For the `length` (5 bullets) and `pacing` (6 bullets) categories, every
   bullet will be used roughly 44/5 ≈ 9 times and 44/6 ≈ 7 times
