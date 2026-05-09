@@ -9,6 +9,7 @@ strings:
   topnav.aria_primary: "Primary"
   topnav.play: "Play"
   topnav.sessions: "Sessions"
+  topnav.admin: "Admin"
 
   # ── Common (#439) ─────────────────────────────────────────────────
   common.loading: "Loading…"
