@@ -225,13 +225,15 @@ namespace Pinder.SessionRunner
 
             if (!string.IsNullOrEmpty(context.PlayerSystemPrompt))
             {
-                // Extract brief personality traits (first 500 chars to keep prompt lean)
-                string personality = context.PlayerSystemPrompt.Length > 500
-                    ? context.PlayerSystemPrompt.Substring(0, 500) + "..."
-                    : context.PlayerSystemPrompt;
+                // #834: pass the full assembled player system prompt. The previous 500-char
+                // "keep prompt lean" cap silently truncated the character's personality block,
+                // dropping anatomy/aesthetic/backstory fragments past the 500-char mark. Sim
+                // strategic reasoning is fine with the full character bible — this is a sim-tool,
+                // not a per-turn budget hotspot. See LESSONS_LEARNED
+                // LLM-INPUT-SILENT-TRUNCATION-IS-ALWAYS-A-BUG.
                 sb.AppendLine();
                 sb.AppendLine();
-                sb.Append($"Character personality (for voice, not strategy):\n{personality}");
+                sb.Append($"Character personality (for voice, not strategy):\n{context.PlayerSystemPrompt}");
             }
 
             return sb.ToString();

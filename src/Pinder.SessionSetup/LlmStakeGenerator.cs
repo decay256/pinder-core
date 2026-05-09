@@ -165,8 +165,11 @@ namespace Pinder.SessionSetup
 
         private static string BuildUserMessage(string assembledSystemPrompt)
         {
-            int promptWindow = Math.Min(4000, assembledSystemPrompt.Length);
-            string promptSlice = assembledSystemPrompt.Substring(0, promptWindow);
+            // #834: pass the full assembled system prompt — never silently truncate LLM input.
+            // Stake generation is once-per-character-per-session and the result is cached into the
+            // assembled system prompt prefix, so cost impact of full-profile input is one-time, not
+            // per-turn. See LESSONS_LEARNED LLM-INPUT-SILENT-TRUNCATION-IS-ALWAYS-A-BUG.
+            string promptSlice = assembledSystemPrompt;
 
             return
                 $@"Based on this character's assembled fragments, write a psychological portrait that a novelist would use to write their dialogue. Be creative and specific — fill in gaps based on what the fragments imply, don't summarize them.
