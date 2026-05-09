@@ -73,6 +73,19 @@ namespace Pinder.SessionRunner.Snapshot
     ///     same-turn callback phrases were stripped from the delivered message.
     ///   </description></item>
     ///   <item><description>
+    ///     <c>Events</c> (issue #474, deferred from i18n Phase 1.5
+    ///     #436): per-turn list of <see cref="EventSnapshot"/> entries
+    ///     covering <c>combo_hit</c>, <c>tell_read</c>, <c>callback_hit</c>,
+    ///     <c>nat_20</c>, <c>nat_1</c>, <c>miss_by_N</c>,
+    ///     <c>horniness_fail</c>, <c>shadow_tick_*</c>, <c>trap_activated</c>.
+    ///     Each entry carries the canonical kind, the turn number, and the
+    ///     human-readable interpretation string picked deterministically
+    ///     (FNV-1a-32 over <c>(kind, turn_number)</c>) from the
+    ///     <c>data/i18n/&lt;locale&gt;/events.yaml</c> catalog — byte-for-byte
+    ///     identical to the frontend's variantIndex, so engine-emit and
+    ///     web-render agree.
+    ///   </description></item>
+    ///   <item><description>
     ///     <c>OpponentHistory</c> (issue #788): engine-owned opponent-LLM
     ///     conversation history. Each entry carries <c>Role</c>
     ///     (<c>"user"</c> or <c>"assistant"</c>) and <c>Content</c>. Survives
@@ -126,6 +139,44 @@ namespace Pinder.SessionRunner.Snapshot
         /// have resolved yet.
         /// </summary>
         public List<OpponentHistoryEntry> OpponentHistory { get; set; } = new List<OpponentHistoryEntry>();
+
+        /// <summary>
+        /// Issue #474: events fired on this turn, with their deterministic
+        /// human-readable interpretation strings from the i18n catalog.
+        /// Empty list when no event-class condition was met (a fully
+        /// neutral turn). Order is the engine's emission order:
+        ///
+        /// <list type="number">
+        ///   <item><description>roll-class first (nat_20 / nat_1 / miss_by_N)</description></item>
+        ///   <item><description>combo / tell / callback bonuses</description></item>
+        ///   <item><description>horniness_fail</description></item>
+        ///   <item><description>shadow_tick_* (one per shadow that grew)</description></item>
+        ///   <item><description>trap_activated</description></item>
+        /// </list>
+        ///
+        /// <para>Pre-#474 snapshots persist without this field; replay
+        /// tooling treats it as optional. No data migration needed.</para>
+        /// </summary>
+        public List<EventSnapshot> Events { get; set; } = new List<EventSnapshot>();
+    }
+
+    /// <summary>
+    /// Issue #474: one event fired on a turn, with its deterministic
+    /// human-readable interpretation. <see cref="Kind"/> is the canonical
+    /// event kind (<c>combo_hit</c>, <c>nat_20</c>, etc. — the keys in
+    /// <c>data/i18n/&lt;locale&gt;/events.yaml</c>);
+    /// <see cref="EventInterpretation"/> is the chosen variant string,
+    /// picked deterministically by
+    /// <see cref="Pinder.Core.I18n.VariantPicker.PickIndex"/> on
+    /// <c>(Kind, TurnNumber)</c>. Empty interpretation when the catalog
+    /// has no entry for the kind (defensive fallback for forward
+    /// compatibility with new event kinds added engine-side before yaml).
+    /// </summary>
+    public sealed class EventSnapshot
+    {
+        public string Kind { get; set; } = string.Empty;
+        public int TurnNumber { get; set; }
+        public string EventInterpretation { get; set; } = string.Empty;
     }
 
     /// <summary>

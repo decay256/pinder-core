@@ -606,6 +606,32 @@ class Program
         // Load real trap definitions — fallback to NullTrapRegistry if file missing/corrupt
         ITrapRegistry trapRegistry = TrapRegistryLoader.Load(AppContext.BaseDirectory, Console.Error);
 
+        // Issue #474: load the i18n catalog so per-turn snapshots can
+        // embed deterministic interpretation strings on each event.
+        // Best-effort: if data/i18n is missing the simulator still runs
+        // but Events[].EventInterpretation is left empty (the kind
+        // strings still land, so a later pass with a fresh catalog can
+        // re-render). FindRepoRoot uses Directory.Exists checks (not
+        // .git probes) so it works correctly inside a git worktree.
+        Pinder.LlmAdapters.I18nCatalog? snapshotI18nCatalog = null;
+        try
+        {
+            string? repoRoot = DataFileLocator.FindRepoRoot(AppContext.BaseDirectory);
+            if (repoRoot != null)
+            {
+                string i18nDir = Path.Combine(repoRoot, "data", "i18n");
+                if (Directory.Exists(i18nDir))
+                {
+                    snapshotI18nCatalog = Pinder.LlmAdapters.I18nCatalog.LoadFromDirectory(i18nDir, "en");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"[WARN] Failed to load i18n catalog for event interpretations: {ex.Message}");
+            snapshotI18nCatalog = null;
+        }
+
         // Shadow tracking — wrap player's StatBlock so GameSession can track shadow growth
         var sableShadows = new SessionShadowTracker(sableStats);
 
@@ -1350,7 +1376,8 @@ class Program
                     tellSnap,
                     perTurnTextDiffs,
                     session.OpponentHistory,
-                    playerSender: player1);
+                    playerSender: player1,
+                    i18nCatalog: snapshotI18nCatalog);
 
                 string turnSnapPath = Path.Combine(playtestDir, $"{sessionSlug}.turn-{turn:D2}.snap.json");
                 File.WriteAllText(turnSnapPath, JsonSerializer.Serialize(turnSnap, new JsonSerializerOptions { WriteIndented = true }));
@@ -1651,7 +1678,8 @@ class Program
         TellSnapshot? activeTell,
         List<List<TextDiffSnapshot>>? perTurnTextDiffs = null,
         IReadOnlyList<Pinder.Core.Conversation.ConversationMessage>? opponentHistory = null,
-        string? playerSender = null)
+        string? playerSender = null,
+        Pinder.LlmAdapters.I18nCatalog? i18nCatalog = null)
     {
         var state = result.StateAfter;
 
@@ -1725,6 +1753,13 @@ class Program
             .Select(m => new OpponentHistoryEntry { Role = m.Role, Content = m.Content })
             .ToList();
 
+        // Issue #474: detect canonical event kinds fired this turn and
+        // resolve their interpretation strings via the (optional) i18n
+        // catalog. Empty list when no event-class condition was met,
+        // or when the catalog is null (sim runs without data/i18n).
+        var eventKinds = TurnEventDetector.DetectEventKinds(result);
+        var events = TurnEventInterpreter.Build(eventKinds, turnNumber, i18nCatalog);
+
         return new TurnSnapshot
         {
             TurnNumber = turnNumber,
@@ -1744,6 +1779,7 @@ class Program
             RizzCumulativeFailureCount = rizzCumulativeFailureCount,
             ConversationHistory = convEntries,
             OpponentHistory = opponentHistoryEntries,
+            Events = events,
         };
     }
 
