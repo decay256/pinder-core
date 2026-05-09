@@ -3,21 +3,30 @@
 Pre-session helpers that run after a `GameSession` is created but before the
 first turn:
 
-- **`IMatchupAnalyzer` / `LlmMatchupAnalyzer`** — narrative read of the
-  player vs opponent stat block.
 - **`IStakeGenerator` / `LlmStakeGenerator`** — novelist-style
   "psychological stake" character bible per character, appended to the
   character's assembled system prompt.
+- **`IOutfitDescriber` / `LlmOutfitDescriber`** — short visual scene
+  description used as the turn-0 scene-setting entry. Runs in parallel
+  with stake generation.
 - **`CharacterDefinitionLoader`** — reads the shared character JSONs from
   disk.
 
+> **Setup-trim phase 1 (#827):** The `IMatchupAnalyzer` /
+> `LlmMatchupAnalyzer` and `IMatchupSummarizer` / `LlmMatchupSummarizer`
+> stages were removed. Display-only output that was never threaded into
+> any subsequent prompt — its cost/value tradeoff did not justify keeping
+> it. Historical audit/cost rows still reference the old `matchup_analysis`
+> / `matchup_summary` `LlmPhase` values as untyped strings; those constants
+> have been deleted from `LlmPhase` and must not be re-introduced.
+
 All LLM I/O goes through `ILlmTransport` (provider-agnostic). The web tier
-(`Pinder.GameApi`) builds these analyzers around a per-session transport and
+(`Pinder.GameApi`) builds these helpers around a per-session transport and
 calls them from `ActiveSession.SetupAsync`.
 
 ## Plain-Text Output Contract
 
-**Both the matchup analysis and the per-character psychological stakes MUST
+**The per-character psychological stake and the outfit description MUST
 be emitted as plain prose. No markdown markers.**
 
 Forbidden:
@@ -34,7 +43,7 @@ preserved.
 
 ### Why
 
-The pinder-web frontend renders both fields directly with
+The pinder-web frontend renders the stake field directly with
 `whitespace-pre-wrap` into a plain `<p>` element. Markdown markers are not
 parsed — they appear verbatim to the user (literal asterisks, hashes, etc.).
 See `pinder-web/docs/modules/session-setup.md` for the full rendering
@@ -43,36 +52,31 @@ context.
 ### Defense in depth
 
 1. **Prompt-level constraint.** The system + user prompts in
-   `LlmMatchupAnalyzer` and `LlmStakeGenerator` explicitly forbid markdown
+   `LlmStakeGenerator` and `LlmOutfitDescriber` explicitly forbid markdown
    formatting (issue
    [pinder-web#136](https://github.com/decay256/pinder-web/issues/136)).
 2. **Backend sanitizer (web tier).** `Pinder.GameApi` runs the LLM output
    through a `MarkdownSanitizer` before storing it on the session, catching
    stray markers when the model ignores the prompt.
 3. **This README.** A reminder for any future engine-side change to either
-   analyzer.
+   helper.
 
-If you add a new analyzer in this folder that surfaces LLM output to the
+If you add a new helper in this folder that surfaces LLM output to the
 setup card, it inherits the same contract. Match the existing pattern:
 forbid markdown in the prompt, and trust the web tier to sanitize.
 
 ## Streaming Overloads
 
-Both `IMatchupAnalyzer` and `IStakeGenerator` ship two overloads:
+`IStakeGenerator` ships two overloads:
 
 | Overload                              | Transport(s) required                                | On LLM failure        |
 |---------------------------------------|------------------------------------------------------|-----------------------|
-| `AnalyzeMatchupAsync` / `GenerateAsync` | `ILlmTransport` only                                | **Swallows** — returns `null` (matchup) or `""` (stake) |
-| `StreamMatchupAsync` / `StreamStakeAsync` | `ILlmTransport` **and** `IStreamingLlmTransport`   | **Throws** `LlmTransportException` (or propagates `OperationCanceledException`) |
+| `GenerateAsync`                       | `ILlmTransport` only                                | **Swallows** — returns `""` |
+| `StreamStakeAsync`                    | `ILlmTransport` **and** `IStreamingLlmTransport`   | **Throws** `LlmTransportException` (or propagates `OperationCanceledException`) |
 
 ### Contract
 
 ```csharp
-IAsyncEnumerable<string> StreamMatchupAsync(
-    CharacterProfile player,
-    CharacterProfile opponent,
-    CancellationToken cancellationToken = default);
-
 IAsyncEnumerable<string> StreamStakeAsync(
     string characterDisplayName,
     string assembledSystemPrompt,
@@ -94,9 +98,9 @@ behaviour of the non-streaming overloads:
 - A transport / network / SSE-parse error during the stream surfaces as
   `LlmTransportException` (out of `MoveNextAsync`, in the consumer's
   `await foreach`). This lets the web-tier `ActiveSession.SetupAsync`
-  attribute the failure to a specific stage (`matchup_llm_failed` /
-  `stake_llm_failed`) and emit a stable `error` SSE event — something the
-  swallow-and-return-null shape can't express.
+  attribute the failure to a specific stage (`stake_llm_failed`) and
+  emit a stable `error` SSE event — something the swallow-and-return-null
+  shape can't express.
 - `OperationCanceledException` is propagated unchanged so that callers
   can wire client disconnect into the cancellation token.
 - Constructing the streaming overload without an `IStreamingLlmTransport`
@@ -113,18 +117,15 @@ the sanitizer is a defense-in-depth net for stray markers.
 
 ### Mapping to the SSE wire format
 
-The web tier translates these `IAsyncEnumerable<string>` overloads into
-the SSE event sequence emitted on
-`GET /sessions/{id}/setup-status/stream`:
+The web tier translates `IAsyncEnumerable<string>` into the SSE event
+sequence emitted on `GET /sessions/{id}/setup-status/stream`:
 
-- `StreamMatchupAsync` / `StreamStakeAsync` first yield  → `stage_start`
-- each yielded fragment                                  → `delta`
-- enumerator completes                                   → `stage_done`
-  (with the sanitized full text)
-- all three stages complete                              → `complete`
-- `LlmTransportException` mid-stream                     → `error` (with
-  the matching stable code: `matchup_llm_failed` for the matchup stage,
-  `stake_llm_failed` for either stake stage)
+- `StreamStakeAsync` first yield  → `stage_start`
+- each yielded fragment           → `delta`
+- enumerator completes            → `stage_done` (with the sanitized full text)
+- all stages complete             → `complete`
+- `LlmTransportException` mid-stream → `error` (with the matching stable
+  code: `stake_llm_failed` for either stake stage)
 
 See `pinder-web/docs/modules/session-setup.md §7` for the full event
 schema and reconnect semantics. The engine library is intentionally
@@ -137,3 +138,4 @@ contract that any consumer (web tier, CLI, tests) can drive.
 - Tracking issue: [pinder-web#138](https://github.com/decay256/pinder-web/issues/138)
 - Markdown contract issue: [pinder-web#136](https://github.com/decay256/pinder-web/issues/136)
 - Streaming protocol issues: [pinder-web#148](https://github.com/decay256/pinder-web/issues/148) (epic), #151–#156
+- Setup-trim phase 1 (matchup removal): [pinder-core#827](https://github.com/decay256/pinder-core/issues/827)

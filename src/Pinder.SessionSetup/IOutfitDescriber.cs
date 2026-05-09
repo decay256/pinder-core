@@ -8,12 +8,12 @@ namespace Pinder.SessionSetup
     /// <summary>
     /// Issue #333: produces a brief, human-readable paragraph describing
     /// what each character is wearing for the turn-0 scene-setting entry.
-    /// One LLM call per session, run in parallel with matchup analysis.
+    /// One LLM call per session, run in parallel with stake generation.
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Output contract (mirroring <see cref="IMatchupAnalyzer"/> and
-    /// <see cref="IStakeGenerator"/>): plain prose, paragraph breaks
+    /// Output contract (mirroring <see cref="IStakeGenerator"/>):
+    /// plain prose, paragraph breaks
     /// only \u2014 no markdown, no bullets, no headings. The web tier's
     /// <c>MarkdownSanitizer</c> runs as defence in depth.
     /// </para>
