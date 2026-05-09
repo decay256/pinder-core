@@ -204,7 +204,7 @@ Generate your next message.
 - React authentically to what was just said
 - If Interest dropped: show cooling without being melodramatic
 - If Interest rose: show warming without being gushing
-- Keep it to 1–3 sentences. Match the register.
+- Match the register exactly as established in your system prompt above. Length follows your character's texting style — one word, one sentence, several short fragments, or one long run-on thought, whichever your texting-style block calls for.
 
 Output format:
 Output your actual message text directly. Do not wrap it in quotes or [RESPONSE] tags.
