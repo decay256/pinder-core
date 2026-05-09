@@ -20,12 +20,21 @@ namespace Pinder.Core.Prompts
         /// <param name="bioOneLiner">Optional player-written bio line. Null → "none".</param>
         /// <param name="fragments">Assembled fragment collection from CharacterAssembler.</param>
         /// <param name="activeTraps">Current trap state. May have zero active traps.</param>
+        /// <param name="characterIdSeed">
+        /// Optional stable per-character seed used by the placeholder
+        /// texting-style aggregator (#836) to pick a deterministic subset
+        /// of item fragments. Pass the character UUID when available. When
+        /// null/empty, the aggregator falls back to a stable hash of the
+        /// fragment content itself, which is still deterministic for a
+        /// given configuration but not stable across reconfigurations.
+        /// </param>
         public static string BuildSystemPrompt(
             string displayName,
             string genderIdentity,
             string? bioOneLiner,
             FragmentCollection fragments,
-            TrapState activeTraps)
+            TrapState activeTraps,
+            string? characterIdSeed = null)
         {
             if (displayName  == null) throw new ArgumentNullException(nameof(displayName));
             if (genderIdentity == null) throw new ArgumentNullException(nameof(genderIdentity));
@@ -55,8 +64,14 @@ namespace Pinder.Core.Prompts
             sb.AppendLine();
 
             // TEXTING STYLE
+            // #836 placeholder aggregation: anatomy is excluded from this
+            // channel and only up to 2 item fragments are kept (deterministic
+            // pick keyed on characterIdSeed). The full per-source list on
+            // FragmentCollection.TextingStyleSources is unaffected — the
+            // Character Sheet UI still renders every fragment.
             sb.AppendLine("TEXTING STYLE");
-            sb.AppendLine(string.Join(" | ", fragments.TextingStyleFragments));
+            sb.AppendLine(TextingStyleAggregator.Aggregate(
+                fragments.TextingStyleSources, characterIdSeed));
             sb.AppendLine();
 
             // ARCHETYPES

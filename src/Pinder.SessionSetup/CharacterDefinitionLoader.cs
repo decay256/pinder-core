@@ -146,12 +146,19 @@ namespace Pinder.SessionSetup
                 def.Allocation.Shadows,
                 def.Level);
 
-            string systemPrompt = PromptBuilder.BuildSystemPrompt(
-                def.Name, def.GenderIdentity, def.Bio, fragments, new TrapState());
+            // #836 placeholder aggregation: use the character UUID as the
+            // stable seed so the system prompt and the runtime
+            // PlayerTextingStyle agree on which items were picked. Anatomy
+            // contributions are silenced in the texting-style channel by
+            // the aggregator.
+            string textingSeed = def.CharacterId.ToString("D");
 
-            string textingStyle = fragments.TextingStyleFragments.Count > 0
-                ? string.Join(" | ", fragments.TextingStyleFragments)
-                : string.Empty;
+            string systemPrompt = PromptBuilder.BuildSystemPrompt(
+                def.Name, def.GenderIdentity, def.Bio, fragments, new TrapState(),
+                characterIdSeed: textingSeed);
+
+            string textingStyle = TextingStyleAggregator.Aggregate(
+                fragments.TextingStyleSources, textingSeed);
 
             var itemDisplayNames = new List<string>();
             foreach (var itemId in def.Items)
