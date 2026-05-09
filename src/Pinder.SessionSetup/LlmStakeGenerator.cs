@@ -11,30 +11,42 @@ namespace Pinder.SessionSetup
     /// Default <see cref="IStakeGenerator"/> built on <see cref="ILlmTransport"/>
     /// (non-streaming) and optionally <see cref="IStreamingLlmTransport"/>
     /// (streaming overload).
-    /// Generates a novella-style "psychological stake" character bible.
+    /// Generates a tight 5-7 single-line riff-able stake fragment list.
     /// </summary>
     /// <remarks>
-    /// Output contract (issue pinder-web #136): the returned stake is plain
-    /// prose, paragraph breaks only — no markdown headings, bold, italics,
-    /// bullet or numbered lists, blockquotes, or code fences. Both the system
-    /// and user prompts forbid markdown explicitly. <c>Pinder.GameApi</c>
-    /// runs a <c>MarkdownSanitizer</c> as defence-in-depth before storing
-    /// the result.
-    ///
+    /// <para>
+    /// #826 (setup-trim phase 3): the previous novella-style 6-point
+    /// 2-3-paragraphs-each character bible has been replaced with a tight
+    /// 5-7 plain-text single-line fragment list. The output is injected
+    /// verbatim into every turn's system prompt via
+    /// <c>Player.AppendToSystemPrompt</c>, so each fragment costs per-turn
+    /// tokens; the slim shape cuts ~1000 input tokens per character per
+    /// turn relative to the legacy prompt.
+    /// </para>
+    /// <para>
+    /// Output contract (issue pinder-web #136): each yielded fragment is
+    /// plain text — no markdown headings, bold, italics, bullet or
+    /// numbered lists, blockquotes, or code fences. The transport sees
+    /// one fragment per line. Both the system and user prompts forbid
+    /// markdown explicitly. <c>Pinder.GameApi</c> runs a
+    /// <c>MarkdownSanitizer</c> as defence-in-depth before storing the
+    /// result.
+    /// </para>
+    /// <para>
     /// Streaming: when an <see cref="IStreamingLlmTransport"/> is supplied,
     /// <see cref="StreamStakeAsync"/> yields raw fragments as they arrive
     /// and propagates transport failures as
     /// <see cref="LlmTransportException"/> (deliberate departure from the
     /// non-streaming overload, which swallows).
+    /// </para>
     /// </remarks>
     public sealed class LlmStakeGenerator : IStakeGenerator
     {
         private const string SystemPrompt =
-            "You are a novelist writing a character bible for a comedy about online dating. " +
-            "Respond in plain prose only. Do NOT use markdown formatting of any kind: no " +
-            "headings (#, ##), no bold or italics (**, __, *, _), no bullet or numbered " +
-            "lists (-, *, +, 1., 2.), no blockquotes (>), and no inline or fenced code " +
-            "(`, ```). Separate paragraphs with blank lines.";
+            "You are a writer's-room script consultant for a comedy about online dating. " +
+            "Output a tight list of 5-7 single-line fragments. One fragment per line. " +
+            "Plain text only. No markdown, no leading dashes, no numbering, no headings. " +
+            "Each line ~10-15 words. Specific, vivid, slightly absurd, played straight.";
 
         private readonly ILlmTransport _transport;
         private readonly IStreamingLlmTransport? _streamingTransport;
@@ -169,22 +181,29 @@ namespace Pinder.SessionSetup
             // Stake generation is once-per-character-per-session and the result is cached into the
             // assembled system prompt prefix, so cost impact of full-profile input is one-time, not
             // per-turn. See LESSONS_LEARNED LLM-INPUT-SILENT-TRUNCATION-IS-ALWAYS-A-BUG.
+            //
+            // #826 (setup-trim phase 3): output is now 5-7 single-line fragments, one per line,
+            // plain text. The fragment list is injected into every turn's system prompt, so this
+            // shape directly reduces per-turn input tokens by ~1000 per character relative to the
+            // legacy 6-point novella prompt.
             string promptSlice = assembledSystemPrompt;
 
             return
-                $@"Based on this character's assembled fragments, write a psychological portrait that a novelist would use to write their dialogue. Be creative and specific — fill in gaps based on what the fragments imply, don't summarize them.
+                $@"Read this character profile and write 5-7 single-line riff-able fragments the dialogue model can latch onto. One per line. No prose, no markdown, no leading dashes, no numbering, no headings. ~10-15 words per line.
 
-TONAL INSTRUCTION: This is a comedy game about the absurdity of online dating. The psychological stakes should be over the top and slightly ridiculous — but the character treats them as completely, genuinely real. The comedy lives in the gap between how absurd the reason sounds stated plainly and how seriously the character feels it. A character who joined because they had a spiritual crisis in an IKEA and now believes their soulmate is someone who understands the existential weight of flat-pack furniture is funnier than a character who is simply 'looking for connection' — and no less emotionally true. Lean into specific absurdity. Make the precipitating events specific and a little unhinged. The character should never know they're funny.
+TONAL INSTRUCTION: This is a comedy game about the absurdity of online dating. Stakes are over the top and slightly ridiculous — but the character treats them as completely, genuinely real. The comedy lives in the gap between how absurd the line sounds stated plainly and how seriously the character feels it. Specific absurdity beats generic feeling. A character who joined because they had a spiritual crisis in an IKEA and now believes their soulmate is someone who understands the existential weight of flat-pack furniture is funnier than a character who is simply 'looking for connection' — and no less emotionally true. The character never knows they're funny.
 
-Cover six things, each in 2-3 paragraphs:
-1. Why they are on this app right now. Not a general 'looking for connection' — a specific, absurd, over-the-top emotional context. What ridiculous but emotionally real thing happened recently? Name the specific humiliating, strange, or unhinged moment that preceded this. Make it funny but play it straight.
-2. What they actually want from a match. Their real underlying need — and it should be slightly deranged in its specificity. What exact bizarre thing would having it feel like? What would they do the morning after?
-3. What they are secretly afraid of. The belief about themselves they are protecting — make it specific and a little ridiculous. What absurd thing would it confirm about them if they failed here?
-4. What winning this conversation would mean emotionally — not 'getting the date' but what specific, slightly unhinged thing it proves or heals or demonstrates.
-5. What losing would mean emotionally — not 'getting unmatched' but the specific catastrophic conclusion they would draw about themselves.
-6. Their biographical backstory: 3-5 specific, concrete, slightly unhinged events from the last 2-3 years of their life. These should be specific enough to be revealed in conversation and funny enough to belong in a comedy — not themes but events. A named relationship and the specific absurd way it ended. A job decision and what they did the week after (something strange). A specific moment of realisation in an unlikely location. A place they went alone and what they did there. These are the facts the character can share when the conversation gets real. Write them as vivid, specific narrative fragments. The more specific and slightly absurd, the better.
+Cover, in any order, 5-7 of these (pick whichever fit the character; the goal is a tight riff-able set, not exhaustive coverage):
+- why they are on the app right now (specific absurd recent moment that preceded this)
+- their secret fear about themselves (the belief they're protecting)
+- what they actually want (slightly deranged in its specificity)
+- what winning emotionally would prove, heal, or demonstrate (specific, unhinged)
+- what losing emotionally would conclude about them (specific catastrophe)
+- 2-3 backstory specifics: vivid concrete events from the last 2-3 years (a named relationship and the absurd way it ended; a job decision and what they did the week after; a specific moment of realisation in an unlikely location; a place they went alone and what they did there)
 
-Write 2-3 paragraphs per point. This is a novelist's character bible for a comedy. Write flowing prose only. Do NOT use markdown formatting of any kind: no headings (#, ##), no bold or italics (**, __, *, _), no bullet or numbered lists (-, *, +, 1., 2.), no blockquotes (>), no inline or fenced code (`, ```). Separate paragraphs with blank lines. Do not number the six points; let the prose flow from one to the next. The character is real, their feelings are genuine, their reasons are ridiculous.
+Write each fragment as one line, ~10-15 words, vivid and specific. No multi-sentence run-ons. No 'I am' or 'I want' framing — these are riff-able fragments, not first-person statements. Examples of the right shape: 'Quit a 9-year nonprofit job after fainting at a fundraiser and woke up convinced she was a saboteur.' / 'Believes the right partner will know how to fold a fitted sheet without crying.' / 'Last summer drove three hours to a town with no cell service to look at one specific oak tree.'
+
+OUTPUT: 5-7 lines. One fragment per line. Plain text. No markdown formatting of any kind: no headings (#, ##), no bold or italics (**, __, *, _), no bullet or numbered lists (-, *, +, 1., 2.), no blockquotes (>), no inline or fenced code (`, ```). No blank lines between fragments.
 
 CHARACTER PROFILE:
 {promptSlice}";
@@ -196,8 +215,12 @@ CHARACTER PROFILE:
             /// <summary>Temperature. Default 0.9 (matches the legacy helper).</summary>
             public double Temperature { get; set; } = 0.9;
 
-            /// <summary>Max output tokens. Default 800.</summary>
-            public int MaxTokens { get; set; } = 800;
+            /// <summary>
+            /// Max output tokens. Default 300 (#826: hard ceiling for the
+            /// 5-7 single-line-fragment shape; target output is ~250 tokens
+            /// per character, so 300 leaves a small safety margin).
+            /// </summary>
+            public int MaxTokens { get; set; } = 300;
         }
     }
 }

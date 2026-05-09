@@ -47,8 +47,11 @@ namespace Pinder.Core.Tests.SessionSetup
 
             Assert.NotNull(streaming.LastSystemPrompt);
             // Plain-text contract: the system prompt must explicitly forbid markdown.
-            Assert.Contains("plain prose", streaming.LastSystemPrompt!);
-            Assert.Contains("Do NOT use markdown", streaming.LastSystemPrompt!);
+            // #826 reshaped the prompt from prose to a 5-7 single-line fragment list, but
+            // the no-markdown contract is unchanged — just expressed as "plain text" /
+            // "no markdown" rather than the legacy "plain prose" / "Do NOT use markdown".
+            Assert.Contains("Plain text", streaming.LastSystemPrompt!);
+            Assert.Contains("No markdown", streaming.LastSystemPrompt!);
         }
 
         [Fact]

@@ -6,16 +6,24 @@ using Pinder.Core.Interfaces;
 namespace Pinder.SessionSetup
 {
     /// <summary>
-    /// Generates a "psychological stake" novella-style character bible for a
-    /// single character, derived from their assembled system prompt.
-    /// One call per character.
+    /// Generates a "psychological stake" tight 5-7 single-line riff-able
+    /// fragment list for a single character, derived from their assembled
+    /// system prompt. One call per character.
     /// </summary>
+    /// <remarks>
+    /// #826 (setup-trim phase 3): the previous novella-style 6-point
+    /// 2-3-paragraphs-each character bible was replaced with the slim
+    /// fragment shape because the stake is injected into every turn's
+    /// system prompt and the bigger shape was costing ~1500 input tokens
+    /// per turn per character with no demonstrated lift.
+    /// </remarks>
     public interface IStakeGenerator
     {
         /// <summary>
-        /// Generate a psychological-stake paragraph block (plain prose,
-        /// paragraph breaks only — see <c>Pinder.SessionSetup/README.md</c>)
-        /// for <paramref name="characterName"/>. Returns an empty string on
+        /// Generate a psychological-stake fragment list (plain text, one
+        /// fragment per line, 5-7 lines, ~10-15 words each — see
+        /// <c>Pinder.SessionSetup/README.md</c>) for
+        /// <paramref name="characterName"/>. Returns an empty string on
         /// transport failure — never throws.
         /// </summary>
         Task<string> GenerateAsync(
