@@ -102,50 +102,68 @@ class Program
     static CharacterProfile LoadCharacter(
         string? defPath,
         string? name,
-        string promptDir,
         ref IItemRepository? itemRepo,
         ref IAnatomyRepository? anatomyRepo)
     {
-        // Explicit --player-def / --opponent-def takes priority
+        // Explicit --player-def / --opponent-def takes priority.
         if (defPath != null)
         {
             EnsureReposLoaded(ref itemRepo, ref anatomyRepo);
             return CharacterDefinitionLoader.Load(defPath, itemRepo!, anatomyRepo!);
         }
 
-        // --player / --opponent name: try the data/characters store first,
-        // then fall back to the prompt-file loader.
+        // --player / --opponent name: resolve through DirectoryCharacterStore
+        // exclusively. #840 removed the prompt-file fallback; failure to find
+        // data/characters/{slug}.json is a user-facing error rather than a
+        // silent reach-for-stale-text-files.
         if (name != null)
         {
             string? charDefPath = DataFileLocator.FindDataFile(
                 AppContext.BaseDirectory,
                 Path.Combine("data", "characters", $"{name.ToLowerInvariant()}.json"));
 
-            if (charDefPath != null)
+            if (charDefPath == null)
             {
-                try
-                {
-                    EnsureReposLoaded(ref itemRepo, ref anatomyRepo);
-                    string charactersDir = Path.GetDirectoryName(charDefPath)!;
-                    var store = new DirectoryCharacterStore(charactersDir);
-                    string id = ReadCharacterIdFromFile(charDefPath);
-                    CharacterDefinition? def = store.LoadAsync(id).GetAwaiter().GetResult();
-                    if (def == null)
-                        throw new InvalidOperationException(
-                            $"DirectoryCharacterStore at {charactersDir} did not surface character_id {id} from {charDefPath}");
-                    return CharacterDefinitionLoader.Assemble(def, itemRepo!, anatomyRepo!);
-                }
-                catch (Exception ex)
-                {
-                    Console.Error.WriteLine($"[WARN] Failed to load {name} via assembler: {ex.Message} — falling back to prompt file");
-                }
+                string available = ListAvailableCharacters();
+                throw new FileNotFoundException(
+                    $"Character not found: {name} (no data/characters/{name.ToLowerInvariant()}.json on the locator paths).\n" +
+                    $"Available characters: {available}");
             }
 
-            // Fallback to prompt file loading
-            return CharacterLoader.Load(name, promptDir);
+            EnsureReposLoaded(ref itemRepo, ref anatomyRepo);
+            string charactersDir = Path.GetDirectoryName(charDefPath)!;
+            var store = new DirectoryCharacterStore(charactersDir);
+            string id = ReadCharacterIdFromFile(charDefPath);
+            CharacterDefinition? def = store.LoadAsync(id).GetAwaiter().GetResult();
+            if (def == null)
+                throw new InvalidOperationException(
+                    $"DirectoryCharacterStore at {charactersDir} did not surface character_id {id} from {charDefPath}");
+            return CharacterDefinitionLoader.Assemble(def, itemRepo!, anatomyRepo!);
         }
 
         throw new InvalidOperationException("Neither definition path nor name provided");
+    }
+
+    /// <summary>
+    /// Enumerate available character slugs from the data/characters/ store.
+    /// Used in usage-text and error messages. #840 replaced the legacy
+    /// directory-scan utility with this DirectoryCharacterStore-aware
+    /// enumeration.
+    /// </summary>
+    static string ListAvailableCharacters()
+    {
+        string? charactersDir = DataFileLocator.FindDataFile(
+            AppContext.BaseDirectory, Path.Combine("data", "characters"));
+        if (charactersDir == null || !Directory.Exists(charactersDir))
+            return "(no characters directory found)";
+        var slugs = new List<string>();
+        foreach (var f in Directory.EnumerateFiles(charactersDir, "*.json"))
+        {
+            var slug = Path.GetFileNameWithoutExtension(f);
+            if (!string.IsNullOrEmpty(slug)) slugs.Add(slug);
+        }
+        slugs.Sort(StringComparer.Ordinal);
+        return slugs.Count == 0 ? "(none)" : string.Join(", ", slugs);
     }
 
     /// <summary>
@@ -222,32 +240,7 @@ class Program
         return null;
     }
 
-    static string ResolvePromptDirectory(string baseDir)
-    {
-        // 1. Environment variable override
-        string? envPath = Environment.GetEnvironmentVariable("PINDER_PROMPTS_PATH");
-        if (!string.IsNullOrEmpty(envPath) && Directory.Exists(envPath))
-            return Path.GetFullPath(envPath!);
-
-        // 2. Walk up from baseDir looking for design/examples/
-        string? dir = baseDir;
-        while (dir != null)
-        {
-            string candidate = Path.Combine(dir, "design", "examples");
-            if (Directory.Exists(candidate))
-                return Path.GetFullPath(candidate);
-            dir = Directory.GetParent(dir)?.FullName;
-        }
-
-        // 3. Hardcoded fallback
-        const string fallback = "/root/.openclaw/agents-extra/pinder/design/examples";
-        if (Directory.Exists(fallback))
-            return fallback;
-
-        return Path.Combine(baseDir, "design", "examples");
-    }
-
-    static void PrintUsage(string promptDir)
+    static void PrintUsage()
     {
         Console.Error.WriteLine("Usage: dotnet run --project session-runner -- --player <name> --opponent <name> [--max-turns <n>] [--agent <scoring|llm>]");
         Console.Error.WriteLine("       dotnet run --project session-runner -- --player-def <path> --opponent-def <path> [--max-turns <n>] [--agent <scoring|llm>]");
@@ -264,7 +257,7 @@ class Program
         Console.Error.WriteLine("  --resimulate SLUG      Resume from an existing session snapshot (skips character loading)");
         Console.Error.WriteLine("  --from-turn N          Start from after turn N (default: last saved turn; requires --resimulate)");
         Console.Error.WriteLine();
-        string available = CharacterLoader.ListAvailable(promptDir);
+        string available = ListAvailableCharacters();
         Console.Error.WriteLine($"Available characters: {available}");
     }
 
@@ -297,8 +290,6 @@ class Program
             Console.Error.WriteLine($"Difficulty bias: {(difficultyPct > 0 ? "+" : "")}{difficultyPct}% → dcBias={difficultyBias}");
         }
 
-        string promptDir = ResolvePromptDirectory(AppContext.BaseDirectory);
-
         // Parse character name / definition args
         string? playerArg = ParseArg(args, "--player");
         string? opponentArg = ParseArg(args, "--opponent");
@@ -310,7 +301,7 @@ class Program
             ((playerArg == null && playerDefArg == null) ||
              (opponentArg == null && opponentDefArg == null)))
         {
-            PrintUsage(promptDir);
+            PrintUsage();
             return 1;
         }
 
@@ -395,8 +386,8 @@ class Program
 
             try
             {
-                sable = LoadCharacter(playerDefArg, playerArg, promptDir, ref itemRepo, ref anatomyRepo);
-                brick = LoadCharacter(opponentDefArg, opponentArg, promptDir, ref itemRepo, ref anatomyRepo);
+                sable = LoadCharacter(playerDefArg, playerArg, ref itemRepo, ref anatomyRepo);
+                brick = LoadCharacter(opponentDefArg, opponentArg, ref itemRepo, ref anatomyRepo);
             }
             catch (FileNotFoundException ex)
             {
