@@ -174,7 +174,12 @@ namespace Pinder.SessionSetup
                 textingStyleFragment: textingStyle,
                 activeArchetype: fragments.ActiveArchetype,
                 equippedItemDisplayNames: itemDisplayNames,
-                textingStyleSources: fragments.TextingStyleSources);
+                textingStyleSources: fragments.TextingStyleSources,
+                // #562: thread gender_identity through to the profile so
+                // the OpponentVisibleProfile DTO can surface it as a
+                // Tinder-card-equivalent field. Was previously read here
+                // and only used for the assembled system prompt.
+                genderIdentity: def.GenderIdentity);
         }
 
         // --- v1 schema parsing ------------------------------------------------

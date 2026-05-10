@@ -38,6 +38,14 @@ namespace Pinder.Core.Conversation
         private TrapState _traps;
         private List<(string Sender, string Text)> _history;
 
+        // #562: outfit / scene description set by SeedSceneEntries so the
+        // dialogue-options call site can surface it to the player as part
+        // of the opponent's visible-profile (Tinder-card-equivalent)
+        // payload, replacing the raw equipped-items list. Empty when no
+        // describer was wired or the call failed; renderer then falls
+        // back to the items list.
+        private string _opponentOutfitDescription = string.Empty;
+
         // #788: opponent LLM conversation history lives here, not in the adapter.
         // The adapter is pure-stateless across calls; the engine passes this list
         // in on every opponent call and appends the new entries returned by the
@@ -619,7 +627,16 @@ namespace Pinder.Core.Conversation
             if (!string.IsNullOrWhiteSpace(opponentBio))
                 _history.Add((Senders.Scene, opponentBio!.Trim()));
             if (!string.IsNullOrWhiteSpace(outfitDescription))
-                _history.Add((Senders.Scene, outfitDescription!.Trim()));
+            {
+                string trimmed = outfitDescription!.Trim();
+                _history.Add((Senders.Scene, trimmed));
+                // #562: also retain on the session so
+                // BuildOpponentVisibleProfile can surface it on every
+                // dialogue-options call. Scene-history entries are
+                // excluded from the LLM context view, so without this
+                // field the player-LLM never sees the outfit.
+                _opponentOutfitDescription = trimmed;
+            }
         }
 
         /// <summary>Session horniness value (d10 + clock modifier). Used for display.</summary>
@@ -824,7 +841,9 @@ namespace Pinder.Core.Conversation
 
             var context = new DialogueContext(
                 playerPrompt: _player.AssembledSystemPrompt,
-                opponentPrompt: GameSessionHelpers.BuildOpponentVisibleProfile(_opponent),
+                opponentPrompt: GameSessionHelpers
+                    .BuildOpponentVisibleProfile(_opponent, _opponentOutfitDescription)
+                    .Render(),
                 // #333: scene entries are excluded from the LLM context view.
                 conversationHistory: BuildHistoryForLlmContext(),
                 opponentLastMessage: GameSessionHelpers.GetLastOpponentMessage(_history, _opponent.DisplayName),

@@ -37,6 +37,15 @@ namespace Pinder.Core.Characters
         public string Bio { get; }
 
         /// <summary>
+        /// Issue #562: self-reported gender identity (e.g. "she/her",
+        /// "they/them"). Sourced from the <c>gender_identity</c> field in
+        /// the character JSON. Surfaced in the
+        /// <see cref="OpponentVisibleProfile"/> as a Tinder-card-equivalent
+        /// field. Empty when not set on the character file.
+        /// </summary>
+        public string GenderIdentity { get; }
+
+        /// <summary>
         /// The texting style fragment(s) joined, for injection into
         /// option-generation prompts. Empty string if not available.
         /// </summary>
@@ -95,7 +104,8 @@ namespace Pinder.Core.Characters
             string textingStyleFragment = "",
             ActiveArchetype activeArchetype = null,
             IReadOnlyList<string> equippedItemDisplayNames = null,
-            IReadOnlyList<TextingStyleFragmentSource> textingStyleSources = null)
+            IReadOnlyList<TextingStyleFragmentSource> textingStyleSources = null,
+            string genderIdentity = "")
         {
             Stats = stats ?? throw new ArgumentNullException(nameof(stats));
             AssembledSystemPrompt = assembledSystemPrompt ?? throw new ArgumentNullException(nameof(assembledSystemPrompt));
@@ -108,6 +118,9 @@ namespace Pinder.Core.Characters
             ActiveArchetype = activeArchetype;
             EquippedItemDisplayNames = equippedItemDisplayNames ?? new System.Collections.Generic.List<string>();
             TextingStyleSources = textingStyleSources ?? new System.Collections.Generic.List<TextingStyleFragmentSource>();
+            // #562: optional, defaults to "" so existing test fixtures
+            // and unit-test ctors work without modification.
+            GenderIdentity = genderIdentity ?? string.Empty;
         }
     }
 }

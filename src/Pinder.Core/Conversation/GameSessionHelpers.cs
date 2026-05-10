@@ -14,19 +14,36 @@ namespace Pinder.Core.Conversation
     internal static class GameSessionHelpers
     {
         /// <summary>
-        /// Builds the visible profile string passed to the player's options context.
-        /// Includes display name, bio, and equipped item display names (appearance).
-        /// This is what the player "sees" on the opponent's dating profile.
+        /// Builds a structured <see cref="OpponentVisibleProfile"/> for the
+        /// player's dialogue-options LLM context — the equivalent of a
+        /// Tinder profile card the player would see on the dating app.
+        ///
+        /// Issue #562: replaces the previous one-line
+        /// <c>name + ": \"bio\"" + " | Wearing: items"</c> concat which
+        /// (a) leaked the raw equipped-items list (including items that
+        /// wouldn't be visible from a single Tinder photo) and (b) omitted
+        /// self-reported demographic info (gender_identity).
         /// </summary>
-        public static string BuildOpponentVisibleProfile(CharacterProfile opponent)
+        /// <param name="opponent">The opponent's full profile.</param>
+        /// <param name="outfitDescription">
+        /// Optional LLM-generated outfit / scene description (#333) — the
+        /// closest thing in the engine to "what the photo looks like."
+        /// When non-empty, this replaces the equipped-items fallback in
+        /// the rendered profile. Pass an empty string (or omit) when no
+        /// describer was wired or the call failed; the renderer then
+        /// falls back to the items list as a degraded but still-bounded
+        /// signal.
+        /// </param>
+        public static OpponentVisibleProfile BuildOpponentVisibleProfile(
+            CharacterProfile opponent, string outfitDescription = "")
         {
-            var sb = new System.Text.StringBuilder();
-            sb.Append(opponent.DisplayName);
-            if (!string.IsNullOrWhiteSpace(opponent.Bio))
-                sb.Append(": \"").Append(opponent.Bio).Append('"');
-            if (opponent.EquippedItemDisplayNames != null && opponent.EquippedItemDisplayNames.Count > 0)
-                sb.Append(" | Wearing: ").Append(string.Join(", ", opponent.EquippedItemDisplayNames));
-            return sb.ToString();
+            if (opponent == null) throw new System.ArgumentNullException(nameof(opponent));
+            return new OpponentVisibleProfile(
+                displayName:                       opponent.DisplayName,
+                genderIdentity:                    opponent.GenderIdentity,
+                bio:                               opponent.Bio,
+                outfitDescription:                 outfitDescription,
+                equippedItemDisplayNamesFallback:  opponent.EquippedItemDisplayNames);
         }
 
         /// <summary>
