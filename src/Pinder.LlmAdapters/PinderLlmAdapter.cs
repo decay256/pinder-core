@@ -215,12 +215,12 @@ namespace Pinder.LlmAdapters
                     .ConfigureAwait(false);
 
                 if (string.IsNullOrWhiteSpace(result)) return message;
-                // #351: strip inline <thinking>...</thinking> /
-                // <reasoning>...</reasoning> blocks for prose-only surfaces
-                // before refusal-detection — a thinking block could otherwise
-                // contain phrases that look like refusal markers and trigger a
-                // spurious fallback to the un-overlaid message.
-                string trimmed = InlineThinkingStripper.Strip(result).Trim();
+                // #831: thinking-block stripping moved to
+                // ThinkingStrippingLlmTransport (transport decorator).
+                // The transport already strips, so we only trim here.
+                // Refusal detection sees the cleaned text the same way it
+                // did when the strip ran at this call site.
+                string trimmed = result.Trim();
 
                 // Detect refusal — fall back to original message silently
                 if (trimmed.StartsWith("I can't", StringComparison.OrdinalIgnoreCase) ||
@@ -277,9 +277,9 @@ namespace Pinder.LlmAdapters
                     .ConfigureAwait(false);
 
                 if (string.IsNullOrWhiteSpace(result)) return message;
-                // #351: strip inline thinking/reasoning blocks before refusal-
-                // detection so a thinking block can't trigger a false fallback.
-                string trimmed = InlineThinkingStripper.Strip(result).Trim();
+                // #831: thinking-block stripping moved to
+                // ThinkingStrippingLlmTransport (transport decorator).
+                string trimmed = result.Trim();
 
                 // Detect refusal — fall back to original message silently.
                 if (trimmed.StartsWith("I can't", StringComparison.OrdinalIgnoreCase) ||
@@ -325,9 +325,9 @@ namespace Pinder.LlmAdapters
                     .ConfigureAwait(false);
 
                 if (string.IsNullOrWhiteSpace(result)) return message;
-                // #351: strip inline thinking/reasoning blocks before refusal-
-                // detection so a thinking block can't trigger a false fallback.
-                string trimmed = InlineThinkingStripper.Strip(result).Trim();
+                // #831: thinking-block stripping moved to
+                // ThinkingStrippingLlmTransport (transport decorator).
+                string trimmed = result.Trim();
 
                 // Detect refusal — fall back to original message silently
                 if (trimmed.StartsWith("I can't", StringComparison.OrdinalIgnoreCase) ||
@@ -376,11 +376,11 @@ namespace Pinder.LlmAdapters
             var responseText = await _transport.SendAsync(systemPrompt, sb.ToString(), 0.9, _options.MaxTokens, phase: LlmPhase.Steering, ct: ct)
                 .ConfigureAwait(false);
 
-            // #351: strip inline <thinking>/<reasoning> blocks before any
-            // other shaping. This is a prose-only surface and the steering
-            // question is consumed verbatim by the player UI — a stray
-            // thinking block would corrupt the visible question.
-            var question = InlineThinkingStripper.Strip(responseText).Trim();
+            // #831: thinking-block stripping moved to
+            // ThinkingStrippingLlmTransport (transport decorator). The
+            // steering question now arrives already stripped, so we only
+            // trim here.
+            var question = (responseText ?? string.Empty).Trim();
             if (string.IsNullOrWhiteSpace(question))
                 return "so... when are we doing this?";
 

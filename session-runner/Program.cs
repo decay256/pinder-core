@@ -725,7 +725,12 @@ class Program
             // parallel inside Pinder.GameApi's ActiveSession (the runner here
             // emits stakes only).
             string setupModel = Environment.GetEnvironmentVariable("PLAYER_AGENT_MODEL") ?? "claude-sonnet-4-20250514";
-            using var setupTransport = new Pinder.LlmAdapters.Anthropic.AnthropicTransport(apiKey, setupModel);
+            using var setupRawTransport = new Pinder.LlmAdapters.Anthropic.AnthropicTransport(apiKey, setupModel);
+            // #831: wrap setup transport too. The psychological stake
+            // text is appended to the assembled system prompt and
+            // injected into every turn forever, so a single thinking
+            // block leak would persist for the entire session.
+            var setupTransport = new Pinder.LlmAdapters.ThinkingStrippingLlmTransport(setupRawTransport);
 
             // ── Psychological Stakes ──────────────────────────────────
             Console.Error.WriteLine("Generating psychological stakes...");
