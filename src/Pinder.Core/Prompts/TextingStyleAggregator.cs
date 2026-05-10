@@ -6,214 +6,333 @@ using Pinder.Core.Characters;
 namespace Pinder.Core.Prompts
 {
     /// <summary>
-    /// Placeholder aggregation for the texting-style channel that flows into
-    /// the LLM system prompt and runtime <c>PlayerTextingStyle</c>.
+    /// Aggregation for the texting-style channel that flows into the LLM
+    /// system prompt and runtime <c>PlayerTextingStyle</c>.
     ///
-    /// As of issue #836 the texting-style fragments on items + anatomy were
-    /// reworked into 9-axis blocks. Stacking 6 items + several anatomy tiers
-    /// and joining the raw fragments verbatim with " | " produces a long
-    /// list of contradictory rules ("never asks questions" + "only asks
-    /// questions"). The real aggregation rule design is tracked in #836.
+    /// As of issue #836, this class implements the discoverable v1 rule
+    /// documented in <c>docs/persona/texting-style-aggregation.md</c>:
     ///
-    /// This helper is a placeholder that ships immediately and does the
-    /// minimum to bound the noise:
+    ///   - The 6 item slots own the 6 syntax axes (1:1 mapping):
+    ///         shoes \u2192 emoji, hat \u2192 shorthand, shirt \u2192 grammar,
+    ///         trousers \u2192 structure, frame \u2192 length, accessory \u2192 tics.
+    ///     Each slot reads the ASSIGNED axis line from its equipped item's
+    ///     SYNTAX block; the other 5 lines on that item are ignored.
+    ///   - The 9 anatomy parameters partition into 3 groups of 3, one
+    ///     group per tone axis (stance, register, pacing). Each group
+    ///     decides its axis by majority vote across the equipped tiers'
+    ///     TONE block, ties broken by group order. Empty contributions
+    ///     are dropped.
+    ///   - Output is exactly 9 axes. Unfilled slots / silent groups drop
+    ///     their axis from the final list rather than back-filling.
     ///
-    ///   1. Anatomy contributions are excluded entirely from the
-    ///      texting-style channel. Anatomy still contributes to the
-    ///      personality / backstory channels — those are untouched.
-    ///   2. Of the remaining (item-only) fragments, exactly 2 are picked
-    ///      when 2 or more items are equipped. With fewer items, all
-    ///      available item fragments are used.
-    ///   3. The pick is deterministic per character: a stable seed (the
-    ///      character id when available, otherwise a stable hash of the
-    ///      fragment content itself) feeds <see cref="System.Random"/>.
-    ///      Same character configuration → same two items, every call.
+    /// Replaces the placeholder random-pick-2 aggregation. Personality /
+    /// backstory channels are unaffected \u2014 they remain a flat join across
+    /// items + anatomy and travel through different prompt sections.
     ///
-    /// The full <see cref="FragmentCollection.TextingStyleFragments"/> and
-    /// <see cref="FragmentCollection.TextingStyleSources"/> lists are NOT
-    /// modified — the Character Sheet 'Texting Style' tab (#404) keeps the
-    /// full per-source breakdown. Only the joined LLM-facing string is
-    /// trimmed.
+    /// Determinism: the rule is fully deterministic for a given
+    /// (character_id, equipped items, anatomy tiers). The
+    /// <paramref name="seedKey"/> parameter is retained on the public
+    /// surface for backward compatibility with callers that pass the
+    /// character UUID, but the rule itself no longer consults RNG \u2014
+    /// the seed is unused in v1. It may return as a tie-breaker in a
+    /// future revision.
     /// </summary>
     public static class TextingStyleAggregator
     {
-        /// <summary>How many item fragments the placeholder picks at most.</summary>
-        public const int PlaceholderItemPickCount = 2;
+        // ------------------------------------------------------------------
+        // Slot \u2192 syntax axis (1:1 fixed mapping, see
+        // docs/persona/texting-style-aggregation.md). Lookups are
+        // ordinal-case-insensitive so future content can use either
+        // "shoes" or "Shoes" without the aggregator silently dropping it.
+        // ------------------------------------------------------------------
+
+        internal static readonly IReadOnlyDictionary<string, string> SlotToSyntaxAxis =
+            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "shoes",     "emoji" },
+                { "hat",       "shorthand" },
+                { "shirt",     "grammar" },
+                { "trousers",  "structure" },
+                { "frame",     "length" },
+                { "accessory", "tics" },
+            };
+
+        // ------------------------------------------------------------------
+        // Anatomy parameter \u2192 tone axis groupings. The order of parameters
+        // inside each group is load-bearing: it's the tie-breaker when
+        // two distinct lines share the highest count. See the design doc
+        // for the rationale (size/shape \u2192 stance, surface \u2192 register,
+        // presentation \u2192 pacing).
+        // ------------------------------------------------------------------
+
+        internal static readonly IReadOnlyList<string> StanceGroup =
+            new[] { "length", "girth", "circumcision" };
+
+        internal static readonly IReadOnlyList<string> RegisterGroup =
+            new[] { "vein_definition", "skin_texture", "skin_tone" };
+
+        internal static readonly IReadOnlyList<string> PacingGroup =
+            new[] { "ball_size", "tattoos", "eye_style" };
+
+        // Canonical output order. Aggregate() emits axes in this order;
+        // missing axes are dropped, not preserved as gaps.
+        internal static readonly IReadOnlyList<string> CanonicalAxisOrder =
+            new[]
+            {
+                "emoji", "shorthand", "grammar", "structure", "length", "tics",
+                "stance", "register", "pacing",
+            };
+
+        // ------------------------------------------------------------------
+        // Public surface (unchanged signatures from the placeholder). The
+        // seedKey parameter is retained for callers but unused by the v1
+        // rule \u2014 deterministic by construction.
+        // ------------------------------------------------------------------
 
         /// <summary>
         /// Aggregate the texting-style sources into the joined string that
-        /// gets injected into the LLM system prompt / runtime player style.
-        ///
-        /// Anatomy entries are dropped. Up to <see cref="PlaceholderItemPickCount"/>
-        /// item entries are kept, picked deterministically from the seed.
-        /// Picked entries preserve their original order.
+        /// gets injected into the LLM system prompt / runtime player
+        /// style. Implements the #836 v1 rule.
         /// </summary>
-        /// <param name="sources">
-        /// Per-source breakdown from
-        /// <see cref="FragmentCollection.TextingStyleSources"/>. May be null
-        /// or empty.
-        /// </param>
-        /// <param name="seedKey">
-        /// Stable per-character seed (e.g. the character UUID). When null
-        /// or empty, a stable hash of the fragment content is used so the
-        /// pick is still deterministic for a given configuration.
-        /// </param>
-        /// <returns>The " | "-joined fragment string, or empty if no item fragments are available.</returns>
         public static string Aggregate(
             IReadOnlyList<TextingStyleFragmentSource> sources,
             string? seedKey)
         {
-            // Convenience wrapper for legacy callers that want the joined
-            // form (e.g. CharacterProfile.TextingStyleFragment passed into
-            // delivery context). #833 splits the same picking logic into
-            // AggregateAsList so PromptBuilder can bullet-format the
-            // assembled prompt without re-splitting the joined string.
             var picked = AggregateAsList(sources, seedKey);
             return picked.Count == 0 ? string.Empty : string.Join(" | ", picked);
         }
 
         /// <summary>
-        /// #833: same picking logic as <see cref="Aggregate"/> but returns
-        /// the picked fragments as an ordered list (in the same order
-        /// <see cref="Aggregate"/> would have joined them). Used by
-        /// <see cref="PromptBuilder"/> to emit the TEXTING STYLE section
-        /// as a bullet list rather than a pipe-joined prose blob.
+        /// Aggregate to an ordered list of axis-prefixed lines. Used by
+        /// <see cref="PromptBuilder"/> to bullet-format the TEXTING STYLE
+        /// section in the system prompt.
+        ///
+        /// Each emitted line has the shape <c>"&lt;axis&gt;: &lt;rule&gt;"</c>,
+        /// e.g. <c>"emoji: ends every sentence with an emoji that conveys
+        /// its emotion"</c>. Axes appear in the canonical order documented
+        /// in <c>texting-style-aggregation.md</c>; missing axes are
+        /// dropped.
         /// </summary>
-        /// <returns>
-        /// The picked fragments in deterministic order, or an empty list
-        /// when no item fragments are available. Never null.
-        /// </returns>
         public static IReadOnlyList<string> AggregateAsList(
             IReadOnlyList<TextingStyleFragmentSource> sources,
             string? seedKey)
         {
+            // seedKey is retained on the API surface for backward
+            // compatibility but unused by the v1 deterministic rule.
+            _ = seedKey;
+
             if (sources == null || sources.Count == 0)
-                return System.Array.Empty<string>();
+                return Array.Empty<string>();
 
-            // 1. Anatomy is silenced for now in the texting-style channel.
-            //    Personality / backstory fragments from anatomy are unaffected
-            //    because they enter the prompt through different lists.
-            var itemSources = new List<(int OriginalIndex, TextingStyleFragmentSource Src)>();
-            for (int i = 0; i < sources.Count; i++)
+            // Index syntax inputs by slot, tone inputs by parameter id.
+            // Multiple sources for the same slot would be a content bug
+            // (two items in one slot is not supposed to happen); first
+            // wins so the assembler's ordering decides.
+            var bySlot = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            var anatomyByParam = new List<(string ParamId, string Fragment)>();
+
+            foreach (var src in sources)
             {
-                var src = sources[i];
                 if (src == null) continue;
+                if (string.IsNullOrEmpty(src.Fragment)) continue;
+                if (string.IsNullOrEmpty(src.SlotOrParameter)) continue;
+
                 if (string.Equals(src.Kind, "item", StringComparison.Ordinal))
-                    itemSources.Add((i, src));
+                {
+                    if (!bySlot.ContainsKey(src.SlotOrParameter))
+                        bySlot[src.SlotOrParameter] = src.Fragment;
+                }
+                else if (string.Equals(src.Kind, "anatomy", StringComparison.Ordinal))
+                {
+                    anatomyByParam.Add((src.SlotOrParameter, src.Fragment));
+                }
             }
 
-            if (itemSources.Count == 0)
-                return System.Array.Empty<string>();
-
-            // 2. With 0..PlaceholderItemPickCount items, no sampling is
-            //    needed — just keep them all. The picked items preserve
-            //    their original assembly order.
-            List<(int OriginalIndex, TextingStyleFragmentSource Src)> picked;
-            if (itemSources.Count <= PlaceholderItemPickCount)
+            // Pre-parse each anatomy fragment into its TONE map so the
+            // group-vote step doesn't re-parse on every lookup.
+            var toneByParam = new Dictionary<string, IReadOnlyDictionary<string, string>>(
+                StringComparer.OrdinalIgnoreCase);
+            foreach (var (paramId, frag) in anatomyByParam)
             {
-                picked = itemSources;
-            }
-            else
-            {
-                picked = PickDeterministic(itemSources, PlaceholderItemPickCount, seedKey);
+                toneByParam[paramId] = ParseToneAxes(frag);
             }
 
-            // 3. Return the picked fragments in their preserved original
-            //    assembly order. Joining (with `" | "`) is now done by
-            //    the legacy Aggregate wrapper for callers that still want
-            //    the joined string; PromptBuilder consumes this list
-            //    directly and bullet-formats it.
-            var result = new List<string>(picked.Count);
-            foreach (var p in picked)
+            // Resolve axis-by-axis in canonical order. Missing axes drop.
+            var result = new List<string>(CanonicalAxisOrder.Count);
+
+            // Syntax axes \u2014 read from the slot's item, if equipped.
+            foreach (var kv in SlotToSyntaxAxis)
             {
-                if (p.Src.Fragment != null) result.Add(p.Src.Fragment);
+                string slot = kv.Key;
+                string axis = kv.Value;
+                if (!bySlot.TryGetValue(slot, out var fragment)) continue;
+                var syntax = ParseSyntaxAxes(fragment);
+                if (syntax.TryGetValue(axis, out var line) && !string.IsNullOrWhiteSpace(line))
+                {
+                    result.Add($"{axis}: {line}");
+                }
             }
+
+            // Tone axes \u2014 majority vote per group.
+            string? stance = MajorityVote("stance", StanceGroup, toneByParam);
+            if (stance != null) result.Add(stance);
+
+            string? register = MajorityVote("register", RegisterGroup, toneByParam);
+            if (register != null) result.Add(register);
+
+            string? pacing = MajorityVote("pacing", PacingGroup, toneByParam);
+            if (pacing != null) result.Add(pacing);
+
+            // Re-order to match the canonical sequence regardless of how
+            // the syntax/tone phases interleaved (current code emits in
+            // canonical order already, but the explicit sort future-
+            // proofs against reorderings).
+            return result
+                .OrderBy(line => CanonicalAxisOrder.ToList().IndexOf(AxisOf(line)))
+                .ToList();
+        }
+
+        // ------------------------------------------------------------------
+        // Parsing helpers \u2014 extract axis maps from a single
+        // texting_style_fragment block. The canonical block shape is:
+        //
+        //   SYNTAX:
+        //   - emoji: <line>
+        //   - shorthand: <line>
+        //   - grammar: <line>
+        //   - structure: <line>
+        //   - length: <line>
+        //   - tics: <line>
+        //   TONE:
+        //   - stance (<key>): <line>
+        //   - register (<key>): <line>
+        //   - pacing (<key>): <line>
+        //
+        // The parser is forgiving on whitespace and parenthesised
+        // sub-keys (e.g. "stance (escalator):") and silently drops lines
+        // it can't classify so future content additions don't crash the
+        // pipeline.
+        // ------------------------------------------------------------------
+
+        private static readonly string[] SyntaxAxisNames =
+        {
+            "emoji", "shorthand", "grammar", "structure", "length", "tics",
+        };
+
+        private static readonly string[] ToneAxisNames =
+        {
+            "stance", "register", "pacing",
+        };
+
+        internal static IReadOnlyDictionary<string, string> ParseSyntaxAxes(string fragment)
+            => ParseAxes(fragment, "SYNTAX:", "TONE:", SyntaxAxisNames);
+
+        internal static IReadOnlyDictionary<string, string> ParseToneAxes(string fragment)
+            => ParseAxes(fragment, "TONE:", null, ToneAxisNames);
+
+        private static IReadOnlyDictionary<string, string> ParseAxes(
+            string fragment,
+            string sectionHeader,
+            string? endHeader,
+            string[] axisNames)
+        {
+            var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            if (string.IsNullOrEmpty(fragment)) return result;
+
+            int sectionStart = fragment.IndexOf(sectionHeader, StringComparison.Ordinal);
+            if (sectionStart < 0) return result;
+            int bodyStart = sectionStart + sectionHeader.Length;
+
+            int bodyEnd = fragment.Length;
+            if (endHeader != null)
+            {
+                int endIdx = fragment.IndexOf(endHeader, bodyStart, StringComparison.Ordinal);
+                if (endIdx >= 0) bodyEnd = endIdx;
+            }
+
+            string body = fragment.Substring(bodyStart, bodyEnd - bodyStart);
+            var lines = body.Split('\n');
+            foreach (var rawLine in lines)
+            {
+                var line = rawLine.Trim();
+                if (line.Length == 0) continue;
+                if (!line.StartsWith("-", StringComparison.Ordinal)) continue;
+                line = line.Substring(1).Trim();
+
+                int colon = line.IndexOf(':');
+                if (colon <= 0) continue;
+                string axisToken = line.Substring(0, colon).Trim();
+                string value = line.Substring(colon + 1).Trim();
+                if (value.Length == 0) continue;
+
+                // axis token may carry a parenthesised sub-key, e.g.
+                // "stance (escalator)". Strip it.
+                int paren = axisToken.IndexOf('(');
+                if (paren > 0) axisToken = axisToken.Substring(0, paren).Trim();
+
+                foreach (var axis in axisNames)
+                {
+                    if (string.Equals(axisToken, axis, StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (!result.ContainsKey(axis))
+                            result[axis] = value;
+                        break;
+                    }
+                }
+            }
+
             return result;
         }
 
         // ------------------------------------------------------------------
+        // Tone aggregation \u2014 majority vote across an anatomy group.
+        // ------------------------------------------------------------------
 
-        /// <summary>
-        /// Pick exactly <paramref name="count"/> entries from
-        /// <paramref name="candidates"/> using a seeded RNG. Original order
-        /// of the picks is preserved.
-        /// </summary>
-        private static List<(int OriginalIndex, TextingStyleFragmentSource Src)> PickDeterministic(
-            List<(int OriginalIndex, TextingStyleFragmentSource Src)> candidates,
-            int count,
-            string? seedKey)
+        private static string? MajorityVote(
+            string axisName,
+            IReadOnlyList<string> groupParams,
+            IReadOnlyDictionary<string, IReadOnlyDictionary<string, string>> toneByParam)
         {
-            int seed = ResolveSeed(seedKey, candidates);
-            var rng = new Random(seed);
+            // Tally per text. Keep a parallel "first source rank" so the
+            // tie-break (group order) is correct: if two lines tie at the
+            // highest count, the one whose earliest source-param sits
+            // earlier in groupParams wins.
+            var counts = new Dictionary<string, int>(StringComparer.Ordinal);
+            var firstRank = new Dictionary<string, int>(StringComparer.Ordinal);
 
-            // Fisher-Yates partial shuffle: build an index permutation, then
-            // take the first <count> indices and re-sort them so the picked
-            // entries stay in original assembly order. This keeps the prompt
-            // section ordering legible even though the *which two* decision
-            // is randomized.
-            int n = candidates.Count;
-            var indices = new int[n];
-            for (int i = 0; i < n; i++) indices[i] = i;
-            for (int i = 0; i < count; i++)
+            for (int rank = 0; rank < groupParams.Count; rank++)
             {
-                int j = i + rng.Next(n - i);
-                (indices[i], indices[j]) = (indices[j], indices[i]);
+                var paramId = groupParams[rank];
+                if (!toneByParam.TryGetValue(paramId, out var tone)) continue;
+                if (!tone.TryGetValue(axisName, out var line)) continue;
+                if (string.IsNullOrWhiteSpace(line)) continue;
+
+                counts.TryGetValue(line, out int c);
+                counts[line] = c + 1;
+                if (!firstRank.ContainsKey(line))
+                    firstRank[line] = rank;
             }
 
-            var pickedIndices = indices.Take(count).OrderBy(x => x).ToList();
-            var result = new List<(int, TextingStyleFragmentSource)>(count);
-            foreach (var idx in pickedIndices)
-                result.Add(candidates[idx]);
-            return result;
+            if (counts.Count == 0) return null;
+
+            // Sort: most votes first, then earliest first-source rank.
+            var winner = counts
+                .OrderByDescending(kv => kv.Value)
+                .ThenBy(kv => firstRank[kv.Key])
+                .First()
+                .Key;
+
+            return $"{axisName}: {winner}";
         }
 
-        /// <summary>
-        /// Resolve a 32-bit RNG seed from the caller-supplied key (preferred)
-        /// or, when absent, a stable hash of the candidate fragments. Both
-        /// paths yield deterministic-per-configuration picks. The character
-        /// UUID is the canonical seed source.
-        /// </summary>
-        internal static int ResolveSeed(
-            string? seedKey,
-            IReadOnlyList<(int OriginalIndex, TextingStyleFragmentSource Src)> candidates)
-        {
-            if (!string.IsNullOrWhiteSpace(seedKey))
-                return StableStringHash(seedKey!);
+        // ------------------------------------------------------------------
+        // Output ordering helper.
+        // ------------------------------------------------------------------
 
-            // Fallback: stable hash of the candidate fragment content.
-            // Same configuration → same seed, even without a character id.
-            var sb = new System.Text.StringBuilder();
-            foreach (var c in candidates)
-            {
-                sb.Append(c.Src.Source ?? string.Empty);
-                sb.Append('\u001f');
-                sb.Append(c.Src.Fragment ?? string.Empty);
-                sb.Append('\u001e');
-            }
-            return StableStringHash(sb.ToString());
-        }
-
-        /// <summary>
-        /// Deterministic 32-bit string hash. .NET's <see cref="string.GetHashCode()"/>
-        /// is randomised per process, so we cannot use it as a stable seed.
-        /// FNV-1a 32-bit is small, stable, and good enough for picking 2
-        /// items out of N.
-        /// </summary>
-        private static int StableStringHash(string s)
+        private static string AxisOf(string axisPrefixedLine)
         {
-            unchecked
-            {
-                const uint FnvOffset = 2166136261u;
-                const uint FnvPrime  = 16777619u;
-                uint hash = FnvOffset;
-                for (int i = 0; i < s.Length; i++)
-                {
-                    hash ^= s[i];
-                    hash *= FnvPrime;
-                }
-                // Cast to int; Random(int) accepts the full int range.
-                return (int)hash;
-            }
+            int colon = axisPrefixedLine.IndexOf(':');
+            return colon > 0 ? axisPrefixedLine.Substring(0, colon) : axisPrefixedLine;
         }
     }
 }
