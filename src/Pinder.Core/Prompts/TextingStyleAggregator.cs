@@ -63,8 +63,32 @@ namespace Pinder.Core.Prompts
             IReadOnlyList<TextingStyleFragmentSource> sources,
             string? seedKey)
         {
+            // Convenience wrapper for legacy callers that want the joined
+            // form (e.g. CharacterProfile.TextingStyleFragment passed into
+            // delivery context). #833 splits the same picking logic into
+            // AggregateAsList so PromptBuilder can bullet-format the
+            // assembled prompt without re-splitting the joined string.
+            var picked = AggregateAsList(sources, seedKey);
+            return picked.Count == 0 ? string.Empty : string.Join(" | ", picked);
+        }
+
+        /// <summary>
+        /// #833: same picking logic as <see cref="Aggregate"/> but returns
+        /// the picked fragments as an ordered list (in the same order
+        /// <see cref="Aggregate"/> would have joined them). Used by
+        /// <see cref="PromptBuilder"/> to emit the TEXTING STYLE section
+        /// as a bullet list rather than a pipe-joined prose blob.
+        /// </summary>
+        /// <returns>
+        /// The picked fragments in deterministic order, or an empty list
+        /// when no item fragments are available. Never null.
+        /// </returns>
+        public static IReadOnlyList<string> AggregateAsList(
+            IReadOnlyList<TextingStyleFragmentSource> sources,
+            string? seedKey)
+        {
             if (sources == null || sources.Count == 0)
-                return string.Empty;
+                return System.Array.Empty<string>();
 
             // 1. Anatomy is silenced for now in the texting-style channel.
             //    Personality / backstory fragments from anatomy are unaffected
@@ -79,7 +103,7 @@ namespace Pinder.Core.Prompts
             }
 
             if (itemSources.Count == 0)
-                return string.Empty;
+                return System.Array.Empty<string>();
 
             // 2. With 0..PlaceholderItemPickCount items, no sampling is
             //    needed — just keep them all. The picked items preserve
@@ -94,8 +118,17 @@ namespace Pinder.Core.Prompts
                 picked = PickDeterministic(itemSources, PlaceholderItemPickCount, seedKey);
             }
 
-            // 3. Join with the existing " | " separator.
-            return string.Join(" | ", picked.Select(p => p.Src.Fragment));
+            // 3. Return the picked fragments in their preserved original
+            //    assembly order. Joining (with `" | "`) is now done by
+            //    the legacy Aggregate wrapper for callers that still want
+            //    the joined string; PromptBuilder consumes this list
+            //    directly and bullet-formats it.
+            var result = new List<string>(picked.Count);
+            foreach (var p in picked)
+            {
+                if (p.Src.Fragment != null) result.Add(p.Src.Fragment);
+            }
+            return result;
         }
 
         // ------------------------------------------------------------------

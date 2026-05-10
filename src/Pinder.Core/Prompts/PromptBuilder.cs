@@ -54,13 +54,21 @@ namespace Pinder.Core.Prompts
             sb.AppendLine();
 
             // PERSONALITY
+            // #833: emit as a bullet list (one fragment per line) instead
+            // of a `" | "`-joined prose blob. Easier for the LLM to scan,
+            // easier to provenance back to the originating item / anatomy
+            // when a fragment surfaces verbatim in delivered text.
             sb.AppendLine("PERSONALITY");
-            sb.AppendLine(string.Join(" | ", fragments.PersonalityFragments));
+            AppendBulletList(sb, fragments.PersonalityFragments);
             sb.AppendLine();
 
             // BACKSTORY
+            // #833: emit as a bullet list. Was newline-joined (closer to
+            // bulleted than the other sections) but make it explicit so
+            // the leading `- ` marker is consistent across every
+            // multi-fragment section.
             sb.AppendLine("BACKSTORY");
-            sb.AppendLine(string.Join(Environment.NewLine, fragments.BackstoryFragments));
+            AppendBulletList(sb, fragments.BackstoryFragments);
             sb.AppendLine();
 
             // TEXTING STYLE
@@ -69,8 +77,14 @@ namespace Pinder.Core.Prompts
             // pick keyed on characterIdSeed). The full per-source list on
             // FragmentCollection.TextingStyleSources is unaffected — the
             // Character Sheet UI still renders every fragment.
+            //
+            // #833: AggregateAsList returns the picked fragments as an
+            // ordered list so we can bullet-format them here, consistent
+            // with PERSONALITY / BACKSTORY. The legacy `Aggregate` (joined
+            // string) is still available for delivery context
+            // (CharacterProfile.TextingStyleFragment).
             sb.AppendLine("TEXTING STYLE");
-            sb.AppendLine(TextingStyleAggregator.Aggregate(
+            AppendBulletList(sb, TextingStyleAggregator.AggregateAsList(
                 fragments.TextingStyleSources, characterIdSeed));
             sb.AppendLine();
 
@@ -126,6 +140,27 @@ namespace Pinder.Core.Prompts
             }
 
             return sb.ToString().TrimEnd();
+        }
+
+        /// <summary>
+        /// #833: helper that emits a list of fragments as a bullet list,
+        /// one fragment per line with a leading <c>- </c> marker. Empty
+        /// or null entries are skipped (rather than emitted as an empty
+        /// bullet). When the input list itself is empty, no output is
+        /// written — callers can decide whether the section header alone
+        /// is meaningful for the empty case (e.g. PERSONALITY with no
+        /// items still emits the header for downstream parser stability).
+        /// </summary>
+        private static void AppendBulletList(StringBuilder sb, System.Collections.Generic.IReadOnlyList<string> fragments)
+        {
+            if (fragments == null) return;
+            for (int i = 0; i < fragments.Count; i++)
+            {
+                string fragment = fragments[i];
+                if (string.IsNullOrWhiteSpace(fragment)) continue;
+                sb.Append("- ");
+                sb.AppendLine(fragment);
+            }
         }
     }
 }

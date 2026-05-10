@@ -273,9 +273,15 @@ namespace Pinder.Core.Tests
             foreach (var anaFrag in anatomyTexting)
                 Assert.DoesNotContain(anaFrag, section);
 
-            // Exactly two item fragments joined with " | ".
-            var trimmed = section.Trim();
-            Assert.Equal(2, trimmed.Split(new[] { " | " }, StringSplitOptions.None).Length);
+            // #833: section emitted as a bullet list (one fragment per
+            // line, leading `- `) instead of `" | "`-joined prose. Count
+            // the bullets to verify exactly 2 item fragments survive
+            // the placeholder pick.
+            var bulletLines = section.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(l => l.Trim())
+                .Where(l => l.StartsWith("- "))
+                .ToList();
+            Assert.Equal(2, bulletLines.Count);
         }
 
         [Fact]
