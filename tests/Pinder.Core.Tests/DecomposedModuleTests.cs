@@ -239,10 +239,19 @@ namespace Pinder.Core.Tests
         {
             var profile = MakeProfile("Luna", bio: "Coffee addict");
 
-            var result = GameSessionHelpers.BuildOpponentVisibleProfile(profile);
+            // #562: BuildOpponentVisibleProfile now returns a structured
+            // DTO, not a string. The DTO carries the same fields and its
+            // Render() method produces the line that's dropped into the
+            // dialogue-options user message. Test the rendered shape so
+            // the structural-test intent (name + bio land in player
+            // context) is preserved.
+            var dto = GameSessionHelpers.BuildOpponentVisibleProfile(profile);
+            string rendered = dto.Render();
 
-            Assert.Contains("Luna", result);
-            Assert.Contains("Coffee addict", result);
+            Assert.Equal("Luna", dto.DisplayName);
+            Assert.Equal("Coffee addict", dto.Bio);
+            Assert.Contains("Luna", rendered);
+            Assert.Contains("Coffee addict", rendered);
         }
 
         [Fact]
