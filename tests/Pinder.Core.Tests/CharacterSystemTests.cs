@@ -176,7 +176,10 @@ namespace Pinder.Core.Tests
             Assert.Contains("PERSONALITY", prompt);
             Assert.Contains("BACKSTORY", prompt);
             Assert.Contains("TEXTING STYLE", prompt);
-            Assert.Contains("ARCHETYPES", prompt);
+            // #832: ARCHETYPES (tendency-order ranked list) replaced by
+            // ACTIVE ARCHETYPE (the level-eligible top-ranked archetype).
+            Assert.Contains("ACTIVE ARCHETYPE", prompt);
+            Assert.DoesNotContain("ARCHETYPES (tendency order", prompt);
             Assert.Contains("EFFECTIVE STATS", prompt);
             Assert.Contains("TestChar", prompt);
             Assert.Contains("she/her", prompt);

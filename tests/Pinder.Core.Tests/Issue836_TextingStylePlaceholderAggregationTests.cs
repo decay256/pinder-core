@@ -260,7 +260,9 @@ namespace Pinder.Core.Tests
             // Slice out the TEXTING STYLE section so we don't accidentally
             // hit anatomy strings that legitimately appear in PERSONALITY
             // or BACKSTORY.
-            string section = ExtractSection(prompt, "TEXTING STYLE", "ARCHETYPES");
+            // #832: ARCHETYPES (tendency-order ranked list) replaced by
+            // ACTIVE ARCHETYPE; use the new header as the boundary.
+            string section = ExtractSection(prompt, "TEXTING STYLE", "ACTIVE ARCHETYPE");
 
             // Anatomy texting-style fragments must NOT appear here.
             var anatomyTexting = fragments.TextingStyleSources
