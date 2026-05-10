@@ -5,16 +5,15 @@ The session runner orchestrates simulated playtest sessions between two `Charact
 
 ## Key Components
 
-- **`session-runner/Program.cs`** — Entry point. Parses CLI arguments (`--player`, `--opponent`, `--max-turns`, `--agent`), loads character profiles via `CharacterLoader`, configures `GameSession` with `GameSessionConfig`, runs the turn loop, and prints per-turn status and session summary markdown. Calls `PlaytestFormatter` to render pick reasoning and score tables. Resolves session number once at startup via `SessionFileCounter.ResolvePlaytestDirectory()` + `GetNextSessionNumber()`, then reuses that number for both the header and `WritePlaytestLog`.
-- **`session-runner/CharacterLoader.cs`** — Static utility that loads `CharacterProfile` instances from pre-assembled prompt markdown files (`{name}-prompt.md`). Parses display name, level, primary stats (EFFECTIVE STATS section), shadow stats, and assembled system prompt from code-fenced content. Also provides `ListAvailable()` to discover characters in a directory.
-- **`session-runner/CharacterDefinitionLoader.cs`** — Static utility that loads character definition JSON files and runs them through the full `CharacterAssembler` + `PromptBuilder` pipeline to produce `CharacterProfile` instances. Exposes `Load(path, itemRepo, anatomyRepo)` for file-based loading and internal `Parse(json, itemRepo, anatomyRepo)` for direct JSON string parsing (used in tests).
+- **`session-runner/Program.cs`** — Entry point. Parses CLI arguments (`--player`, `--opponent`, `--max-turns`, `--agent`), loads character profiles via `CharacterDefinitionLoader` (through `DirectoryCharacterStore`), configures `GameSession` with `GameSessionConfig`, runs the turn loop, and prints per-turn status and session summary markdown. Calls `PlaytestFormatter` to render pick reasoning and score tables. Resolves session number once at startup via `SessionFileCounter.ResolvePlaytestDirectory()` + `GetNextSessionNumber()`, then reuses that number for both the header and `WritePlaytestLog`. — #840: prompt-file fallback removed; `--player <name>` resolves exclusively through `data/characters/{slug}.json`.
+- **`src/Pinder.SessionSetup/CharacterDefinitionLoader.cs`** — Static utility that loads character definition JSON files and runs them through the full `CharacterAssembler` + `PromptBuilder` pipeline to produce `CharacterProfile` instances. Exposes `Load(path, itemRepo, anatomyRepo)` for file-based loading and internal `Parse(json, itemRepo, anatomyRepo)` for direct JSON string parsing (used in tests). Lives in `Pinder.SessionSetup`, not in `session-runner/` (the prior doc claim was incorrect).
+- **`src/Pinder.SessionSetup/DirectoryCharacterStore.cs`** — `ICharacterStore` implementation backed by a directory of `{slug}.json` v1 files. `LoadAsync(id)` resolves by `character_id`; `ListIdsAsync()` enumerates available ids. The single point of entry for slug-driven character resolution in session-runner and Pinder.GameApi.
 - **`session-runner/DataFileLocator.cs`** — Static utility that resolves paths to data files by walking up from a base directory. Checks `PINDER_DATA_PATH` env var first, then walks parent directories. Also provides `FindRepoRoot()` to locate the repo root (directory containing both `data/` and `src/`).
 - **`data/characters/*.json`** — Character definition JSON files (gerald, velvet, sable, brick, zyx). Each defines name, gender_identity, bio, level, item IDs, anatomy selections, build_points, and optional shadows.
 - **`data/items/starter-items.json`** — Item definitions consumed by `JsonItemRepository`. Contains stat modifiers, prompt fragments, archetype tendencies, and timing modifiers.
 - **`data/anatomy/anatomy-parameters.json`** — Anatomy parameter definitions consumed by `JsonAnatomyRepository`. Contains tier IDs, stat modifiers, fragments, and timing modifiers.
-- **`tests/Pinder.Core.Tests/CharacterLoaderTests.cs`** — Unit tests for `CharacterLoader.ParseBio` and `ParseLevel`: bio tests (unquoted, quoted, missing, parameterized starter characters, code fence); level tests (standard format, single-digit, double-digit, missing level line defaults to 1, parameterized all starter characters).
-- **`tests/Pinder.Core.Tests/CharacterLoaderSpecTests.cs`** — Comprehensive tests for `CharacterLoader`: prompt file parsing (stats, shadows, level, display name, system prompt extraction), error cases (missing file, missing stats, missing EFFECTIVE STATS section), edge cases (mixed case input, shadow lines with/without tilde prefix, parenthetical notes, multiple code fences, level from outside code fence), and conditional integration tests against real prompt files.
 - **`tests/Pinder.Core.Tests/Issue415_CharacterDefinitionLoaderSpecTests.cs`** — Spec-driven tests for `CharacterDefinitionLoader` and `DataFileLocator`: assembly pipeline (AC2–AC4), all 5 character definitions load successfully (AC5), `DataFileLocator` resolves character files (AC6), data file presence, edge cases (missing shadows, empty items/anatomy, special chars in name, unknown item IDs), error conditions (file not found, malformed JSON, missing required fields, level range, unknown stat/shadow types), shadow parsing, `DataFileLocator` walk-up and repo root discovery, integration tests for full pipeline across characters.
+- **`tests/Pinder.Core.Tests/Issue840_SingleLoaderPipelineTests.cs`** — Microbenchmark + structural tests for #840: enumerates the starter character store, asserts `CharacterDefinitionLoader.Assemble` p50/p99 over 1000 iterations stays under the documented threshold, and pins the structural rule that `session-runner/Program.cs` no longer references the legacy `CharacterLoader` symbol or the `design/examples/*-prompt.md` fallback path.
 - **`tests/Pinder.Core.Tests/Issue527_SessionRunnerBioFormatTests.cs`** — Tests for character bio output formatting in session runner, verifying bio row is removed from table and bios are printed as bold italic paragraphs (issue #527).
 - **`session-runner/MatchupAnalyzer.cs`** — Static utility that generates a pre-game LLM-backed character analysis using `AnthropicClient`. Analyzes player and opponent stats vs DC table to provide a brief strategic summary of best lanes and shadow risks. Outputs results under `## Matchup Analysis` header.
 - **`tests/Pinder.Core.Tests/Issue528_MatchupAnalyzerTests.cs`** — Tests for `MatchupAnalyzer`: verifies spec signature, prompt generation, edge cases (missing bio, mirror matches), error handling (graceful fallback on API failure), and `Program.cs` integration.
@@ -46,61 +45,27 @@ The session runner is a console application (`Program.cs`), not a library.
 Usage: dotnet run --project session-runner -- --player <name> --opponent <name> [--max-turns <n>] [--agent <scoring|llm>]
        dotnet run --project session-runner -- --player-def <path> --opponent-def <path> [--max-turns <n>] [--agent <scoring|llm>]
 
-  --player <name>        Player character name (tries data/characters/{name}.json first, falls back to prompt file)
+  --player <name>        Player character name (resolves data/characters/{name}.json via DirectoryCharacterStore)
   --opponent <name>      Opponent character name (same resolution as --player)
-  --player-def <path>    Player character definition JSON file (uses CharacterDefinitionLoader)
-  --opponent-def <path>  Opponent character definition JSON file (uses CharacterDefinitionLoader)
+  --player-def <path>    Player character definition JSON file (uses CharacterDefinitionLoader.Load)
+  --opponent-def <path>  Opponent character definition JSON file (uses CharacterDefinitionLoader.Load)
   --max-turns <n>        Maximum turns (default: 20)
   --agent <type>         Player agent: scoring or llm (default: scoring)
 ```
 
-`--player`/`--opponent` and `--player-def`/`--opponent-def` can be mixed freely. The `--player <name>` shorthand first attempts to resolve `data/characters/{name}.json` via `DataFileLocator`; if found, it delegates to `CharacterDefinitionLoader.Load()`. If not found, it falls back to `CharacterLoader.Load()` (prompt file parsing). Running with no args or invalid args prints usage and exits with code 1.
+`--player`/`--opponent` and `--player-def`/`--opponent-def` can be mixed freely. The `--player <name>` shorthand resolves `data/characters/{name}.json` via `DataFileLocator` and runs it through `CharacterDefinitionLoader.Assemble()`. As of #840 there is no prompt-file fallback: a missing `data/characters/{name}.json` raises a `FileNotFoundException` with the list of available slugs in the message. Running with no args or invalid args prints usage and exits with code 1.
 
 The `--agent` argument replaces the previous `PLAYER_AGENT` environment variable for agent selection.
 
-### CharacterLoader (static class)
+### CharacterDefinitionLoader (static class)
 
-Loads and parses pre-assembled prompt markdown files into `CharacterProfile` instances.
-
-```csharp
-public static class CharacterLoader
-{
-    /// Load a CharacterProfile by name from a prompt directory.
-    /// Resolves to {promptDirectory}/{name.ToLowerInvariant()}-prompt.md.
-    /// Throws FileNotFoundException (with path + available characters) if file missing.
-    /// Throws FormatException if file lacks EFFECTIVE STATS or required stats.
-    public static CharacterProfile Load(string name, string promptDirectory);
-
-    /// Parse prompt file content into a CharacterProfile.
-    /// fallbackName used as display name if no name= or role line found.
-    public static CharacterProfile Parse(string content, string fallbackName);
-
-    /// List available character names from *-prompt.md files in directory.
-    /// Returns sorted comma-separated names, or "(none)" if empty.
-    /// Does not throw on nonexistent directory.
-    public static string ListAvailable(string promptDirectory);
-
-    /// Parse the bio value from a "- Bio:" line in the content.
-    /// Returns text after "- Bio:" prefix, trimmed.
-    /// Strips surrounding double quotes if present. Returns "" if no bio line found.
-    internal static string ParseBio(string content);
-
-    /// Parse the level from a "- Level: N ..." line in the content.
-    /// Extracts leading digits after "- Level:" prefix.
-    /// Returns 1 (default) if no matching line found or number cannot be parsed.
-    /// Supports single and double-digit levels.
-    internal static int ParseLevel(string content);
-}
-```
-
-**Parsing logic:**
-- **DisplayName**: extracted from `name=<X>` in Inputs line, or `You are playing the role of <X>` in code fence, or capitalized fallback name.
-- **Level**: from `- Level: N` inside code fence first; falls back to `**Level N —` pattern outside.
-- **Bio**: from `- Bio:` line. Extracts text after the prefix, trims whitespace, and strips optional surrounding double quotes. Does not require quotes (fixes prior bug where unquoted bios returned empty).
-- **Stats**: 6 required stats from `EFFECTIVE STATS` section inside code fence (`Charm`, `Rizz`, `Honesty`, `Chaos`, `Wit`, `Self-Awareness`). Missing stats throw `FormatException`.
-- **Shadows**: from `Shadow state` section outside code fence. `~` prefix stripped. Missing section defaults all to 0. Parenthetical notes after values are ignored.
-- **SystemPrompt**: full text between first and last code fences.
-- **Timing**: default `TimingProfile(0, 1.0f, 0.0f, "neutral")` for all prompt-loaded characters.
+#840: as of 2026-05-10 the legacy `CharacterLoader` (which parsed pre-assembled
+`design/examples/{name}-prompt.md` markdown files) has been removed. Those
+files were stale demo artefacts — the on-disk text predates the current
+assembler (e.g. `gerald-prompt.md` still carried the pre-#836 multi-fragment
+TEXTING STYLE block). `CharacterDefinitionLoader` is now the **only**
+entry point for assembling `CharacterProfile` instances; `--player <name>`
+goes through `DirectoryCharacterStore` exclusively.
 
 ### CharacterDefinitionLoader (static class)
 

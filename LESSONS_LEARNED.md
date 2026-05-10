@@ -323,3 +323,53 @@ never drift behind the implementation.
 **Discovered in:** #836 (2026-05-10). Designed alongside the
 implementation, not after.
 
+### MEASURE-BEFORE-CACHING-AND-USE-P50-NOT-P99-WHEN-GC-DOMINATES-THE-TAIL
+
+**Symptom:** Issue #840 framed itself around "replace the dual loader
+with a single assemble-and-cache pipeline." The measurement gate
+introduced in the issue body was "if `CharacterDefinitionLoader.Assemble`
+p99 < 1ms, skip the cache." Measured numbers on the drain host:
+
+- mean ≈ 0.7-0.9 ms
+- p50 ≈ 0.45-0.50 ms
+- p99 ranges from 1.9 ms to 14.3 ms across runs (high variance)
+
+The p99 spikes correlated with mean being ~2× p50 — the classic GC
+tail-spike signature. The assembler itself is sub-millisecond; the
+p99 is GC pauses, not assembler cost. A `CharacterProfile` cache
+would not reduce GC pressure (it would cache the heap-allocated
+result, not change the allocation pattern); it would just shift the
+pauses elsewhere.
+
+**Root cause of the framing miss:** p99 sounds like a fair gate
+("how slow does the assembler get?") but in a GC'd runtime it's
+measuring "how often did the GC pause during this 1000-iteration
+benchmark?" That's a property of the benchmark loop's allocation
+rate, not of the assembler. p50 captures the question being asked
+("is the assembler intrinsically fast?") cleanly.
+
+**Rule:** When proposing a cache because of a perceived perf
+problem in a GC'd runtime, measure p50 first. If p50 is
+intrinsically cheap, p99 spikes that look like "slow tail" are
+almost always GC, not the code under test. Caching the result of a
+computation does not reduce GC pressure unless the cache itself
+allocates less than the original — which is rarely true for
+"return a cached complex object" patterns. Document p50/p99/mean
+side-by-side in the PR body so the reviewer can see whether the
+gate is firing on intrinsic cost or on tail noise.
+
+**Detection rule:** if mean is more than ~1.5× p50, the workload
+is tail-spike-dominated. The right next step is either to fix the
+allocation pattern (lower allocation → less GC → lower p99) or to
+accept that p99 is GC and reframe the perf question in terms of
+p50.
+
+**Discovered in:** #840 (2026-05-10). The decision to ship Step 1
+only (drop the dual-loader / fallback path) and skip Step 2 (the
+cache) was made on the basis of p50 sub-ms; p99 spikes were
+recorded but recognised as GC, not assembler cost. The full
+discussion lives in the drain's `questions.md` (Q1) and in the
+#840 PR body. If a future revision finds the assembler IS
+intrinsically slow (p50 > 1ms after a real change), Step 2 ships
+then — but not speculatively against GC noise.
+
