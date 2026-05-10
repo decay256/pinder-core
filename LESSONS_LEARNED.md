@@ -205,3 +205,66 @@ documented in the PR body classified all remaining `Substring(0, n)` /
 `Math.Min(n, ...Length)` hits in the repo as either (a) deterministic
 parsing/display, (b) error-body excerpts with a visible `...[truncated]`
 marker (Anthropic/OpenAI transports), or (c) other non-LLM-bound display.
+
+
+## Lesson — DRY post-processing belongs at the transport boundary
+
+When a post-processing step (strip-thinking-blocks, normalise-punctuation,
+audit-record, rate-limit, …) needs to apply to *every* LLM response
+regardless of which call site issued it, **do not implement it as a
+per-callsite helper that consumers must remember to call**. Wrap the
+`ILlmTransport` (and `IStreamingLlmTransport`) with a decorator and let
+the transport boundary enforce the invariant.
+
+The per-callsite pattern fails predictably:
+
+1. The list of call sites grows. Each new prose-only surface (delivery,
+   opponent reply, steering, overlays, stake, outfit, interest beat,
+   tomorrow's TBD surface) is a new place to remember the helper.
+2. Reviewers can't audit the absence of a helper. They see callers that
+   *do* call it; they don't notice the new caller that *doesn't*.
+3. Tests are noisy: every call site gets a near-identical "asserts the
+   strip happened" test. The decorator pattern lets the transport own
+   the invariant with one test pair (non-streaming + streaming) instead
+   of N.
+4. Subtle ordering bugs leak in. Example: refusal-detection runs after
+   strip-then-trim in three of the four call sites today. If a future
+   call site forgets to strip-before-detect, a thinking-block phrase
+   like "I cannot proceed without more context" inside the reasoning
+   trace triggers a spurious refusal fallback.
+
+**Streaming caveat.** Decorator semantics are easy for non-streaming
+(single string transform). For streaming, the post-processor must handle
+the case where a leading sentinel block (e.g. `<thinking>...</thinking>`)
+spans multiple fragments. Two acceptable approaches:
+
+  - **Buffer-then-flush** (used by `ThinkingStrippingLlmTransport`):
+    accumulate fragments while the buffer might still be a leading
+    block; flush either when the closing tag is seen (apply transform)
+    or when the leading characters definitively rule out a block (flush
+    as-is). A safety cap protects against unbounded buffering when the
+    closing tag never arrives.
+  - **Suppress-then-yield**: detect the opening tag at the start of the
+    buffer; suppress further yields until the closing tag is seen; then
+    yield the post-tag stream normally. Closer to streaming semantics
+    but more state.
+
+For most cases `buffer-then-flush` is preferred — simpler implementation,
+acceptable latency penalty (only on thinking-prefixed responses), and
+a clear safety bound.
+
+**Discovered in:** #831 (2026-05-10). The original
+`InlineThinkingStripper` was added in #351 with four explicit call
+sites in `PinderLlmAdapter.cs`. By the time the issue was filed, four
+*more* prose-only surfaces (opponent response, interest beat, stake,
+outfit) had accumulated without per-callsite calls — exactly the
+failure mode the lesson predicts. The fix lifted the strip to a
+transport-level decorator (`ThinkingStrippingLlmTransport`) registered
+in DI ahead of `PunctuationNormalizingTransport`.
+
+**Code-review checklist:** when reviewing a new
+`ILlmTransport`/`IStreamingLlmTransport` decorator, verify it is
+registered in DI in *both* pinder-core's `session-runner/Program.cs`
+*and* pinder-web's `LlmProviderFactory.cs`. Cross-repo wiring drift
+(decorator landed in core but never wired in web) is a real failure
+mode.

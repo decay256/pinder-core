@@ -4,15 +4,26 @@ using System.Text.RegularExpressions;
 namespace Pinder.LlmAdapters
 {
     /// <summary>
-    /// Issue #351: post-processor that strips inline <c>&lt;thinking&gt;...&lt;/thinking&gt;</c>
-    /// and <c>&lt;reasoning&gt;...&lt;/reasoning&gt;</c> blocks from prose-only LLM
-    /// surfaces.
+    /// Issue #351 (introduced) / #831 (DRY refactor): post-processor that
+    /// strips a leading <c>&lt;thinking&gt;...&lt;/thinking&gt;</c> or
+    /// <c>&lt;reasoning&gt;...&lt;/reasoning&gt;</c> block from LLM responses.
     ///
-    /// Applied to surfaces where the LLM response is consumed as raw player-visible
-    /// text (steering question, horniness/shadow/trap overlays). NOT applied to
-    /// structured surfaces (matchup analysis, dialogue option parsing) — those
-    /// already parse fields out of a known JSON / structured shape, so a stray
-    /// thinking block would either be ignored or break parsing on its own.
+    /// As of #831 this is invoked at the <see cref="Pinder.Core.Interfaces.ILlmTransport"/>
+    /// boundary by <see cref="ThinkingStrippingLlmTransport"/> (and its
+    /// streaming counterpart in the same class), not at individual call
+    /// sites. The transport decorator is registered as the outermost
+    /// transformation layer in pinder-core's <c>session-runner/Program.cs</c>
+    /// and pinder-web's <c>LlmProviderFactory</c>, so every prose-only and
+    /// structured surface (delivery, opponent reply, steering, overlays,
+    /// stake, outfit, interest beat, dialogue options, …) automatically
+    /// gets strip-on-output. New call sites added later cannot silently
+    /// leak thinking blocks into player-visible text or the persistent
+    /// system prompt.
+    ///
+    /// Structured surfaces (dialogue option parsing, opponent response
+    /// signals) parse fields out of a known shape after a marker line
+    /// (e.g. <c>OPTION_N</c> or <c>[SIGNALS]</c>); a stripped leading
+    /// thinking block leaves those parsers unchanged.
     ///
     /// Conservative behaviour:
     ///   * Strip the wrapped block when it spans the WHOLE response (model
@@ -23,8 +34,11 @@ namespace Pinder.LlmAdapters
     ///     leaving them in place is safer than silently mangling player
     ///     dialogue that legitimately contains an angle-bracket fragment.
     ///
-    /// Pattern is case-insensitive and dot-matches-newline so multi-line thinking
-    /// blocks are caught.
+    /// Pattern is case-insensitive and dot-matches-newline so multi-line
+    /// thinking blocks are caught. The static <see cref="Strip"/> method is
+    /// retained as the canonical pure-function form so the decorator and
+    /// any future direct caller (e.g. ad-hoc audit-log post-processing)
+    /// share the same regex.
     /// </summary>
     public static class InlineThinkingStripper
     {
