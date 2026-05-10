@@ -90,11 +90,39 @@ namespace Pinder.Core.Characters
         /// <summary>The fragment string this source contributed.</summary>
         public string Fragment { get; }
 
+        /// <summary>
+        /// #836: the slot (for items) or parameter id (for anatomy tiers)
+        /// the source occupies in the assembled character. Used by the
+        /// new texting-style aggregator to do the slot → syntax-axis and
+        /// anatomy-group → tone-axis lookups without re-deriving from
+        /// item / anatomy definitions.
+        ///
+        /// For items: the lowercase slot name from
+        /// <c>ItemDefinition.Slot</c> (e.g. <c>"shoes"</c>, <c>"hat"</c>).
+        /// For anatomy: the lowercase parameter id (e.g. <c>"length"</c>,
+        /// <c>"girth"</c>).
+        ///
+        /// May be null on legacy entries that pre-date #836; consumers
+        /// must guard. Wire DTOs do not surface this field today — it
+        /// is an engine-internal lookup key.
+        /// </summary>
+        public string SlotOrParameter { get; }
+
         public TextingStyleFragmentSource(string kind, string source, string fragment)
+            : this(kind, source, fragment, slotOrParameter: null)
+        {
+        }
+
+        public TextingStyleFragmentSource(
+            string kind,
+            string source,
+            string fragment,
+            string slotOrParameter)
         {
             Kind = kind;
             Source = source;
             Fragment = fragment;
+            SlotOrParameter = slotOrParameter;
         }
     }
 }

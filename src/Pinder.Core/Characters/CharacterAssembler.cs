@@ -132,7 +132,8 @@ namespace Pinder.Core.Characters
             // re-deriving from item / anatomy definitions on the controller side.
             void AddFragments(
                 string? pf, string? bf, string? tf, string[] archetypes,
-                string textingKind, string textingSourceName)
+                string textingKind, string textingSourceName,
+                string? slotOrParameter)
             {
                 if (!string.IsNullOrEmpty(pf)) personality.Add(pf!);
                 if (!string.IsNullOrEmpty(bf)) backstory.Add(bf!);
@@ -140,20 +141,26 @@ namespace Pinder.Core.Characters
                 {
                     texting.Add(tf!);
                     textingSources.Add(new TextingStyleFragmentSource(
-                        textingKind, textingSourceName, tf!));
+                        textingKind, textingSourceName, tf!, slotOrParameter));
                 }
                 allArchetypes.AddRange(archetypes);
             }
 
+            // #836: thread the item slot ("shoes", "hat", …) into the
+            // per-source breakdown so the new aggregator can do the
+            // slot → syntax-axis lookup without re-resolving the item.
             foreach (var item in resolvedItems)
                 AddFragments(item.PersonalityFragment, item.BackstoryFragment,
                              item.TextingStyleFragment, item.ArchetypeTendencies,
-                             "item", item.DisplayName);
+                             "item", item.DisplayName, item.Slot);
 
+            // #836: anatomy parameter id is the engine-side handle for
+            // the param (e.g. "length", "girth"); it's stable and
+            // grouped by the aggregator's tone-axis groups.
             foreach (var tier in resolvedTiers)
                 AddFragments(tier.PersonalityFragment, tier.BackstoryFragment,
                              tier.TextingStyleFragment, tier.ArchetypeTendencies,
-                             "anatomy", tier.TierName);
+                             "anatomy", tier.TierName, tier.ParameterId);
 
             // --- 6. Count and rank archetypes -------------------------------------
             // When characterLevel > 0, filter to archetypes whose level range

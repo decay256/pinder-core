@@ -268,3 +268,58 @@ registered in DI in *both* pinder-core's `session-runner/Program.cs`
 *and* pinder-web's `LlmProviderFactory.cs`. Cross-repo wiring drift
 (decorator landed in core but never wired in web) is a real failure
 mode.
+
+### LEGACY-DATA-FALLBACK-PATH-IS-A-TRAP
+
+**Symptom:** `Issue836_TextingStylePlaceholderAggregationTests.cs`
+(the predecessor of `Issue836_TextingStyleAggregationRuleTests.cs`)
+used a `LoadJson` helper that walked through several known roots
+before searching the test binary's ancestor directories. The first
+entry, `/root/.openclaw`, resolved to
+`agents-extra/pinder/data/items/starter-items.json` — a STALE mirror
+of the canonical `pinder-core/data/items/starter-items.json` from
+before the #834 texting-style-pool rework. Tests passed against the
+stale file because the placeholder aggregator didn't parse axes; it
+just picked two raw fragments. When the #836 v1 aggregator (which
+requires the new `SYNTAX:`/`TONE:` block format) shipped, the tests
+still loaded the stale file and silently produced empty axis maps,
+failing with `Expected: ["emoji", …] Actual: []`. Diagnosed only
+by probing what `JsonItemRepository` actually returned.
+
+**Root cause:** A multi-root `LoadJson` helper that prefers `~/.openclaw`
+or similar global locations over the in-repo path was useful when
+tests ran outside the repo. After the data files moved canonical
+location to `pinder-core/data/`, the global mirror went stale and the
+lookup order silently preferred stale data. There was no signal that
+the wrong file was loaded — just `Actual: []`.
+
+**Rule:** test data fixtures used by integration / parsing tests must
+load from a single, canonical, in-repo location. Don't allow fallbacks
+to out-of-repo mirrors. If tests must run outside the repo (CI without
+repo checkout), use embedded resources (`<EmbeddedResource>` in the
+csproj) instead of disk-walking lookups.
+
+**Adjacent rule:** when a parser-style aggregator's tests start
+failing with `Actual: []`, suspect input-loading first — not the
+parser. The parser is small and easy to print; the loader is the
+likely silent source of stale or wrong-format input.
+
+**Discovered in:** #836 (2026-05-10). The replacement test file
+(`Issue836_TextingStyleAggregationRuleTests.cs`) loads strictly from
+`<repo-root>/data/items/starter-items.json` via ancestor walk; no
+global-root fallbacks. The `agents-extra/pinder/data/` mirror was not
+updated to the new SYNTAX/TONE format because it's understood as a
+legacy mirror, but the tests no longer touch it.
+
+### TEXTING-STYLE-AGGREGATION-RULE-IS-DOCUMENTED-CANON
+
+**Rule:** the texting-style aggregation rule (slot → syntax-axis,
+anatomy-group → tone-axis) is documented in
+`docs/persona/texting-style-aggregation.md`. The doc is the
+source-of-truth for designers and operators. Code changes that
+affect the rule MUST update the doc in the same PR; the doc must
+never drift behind the implementation.
+
+**Discovered in:** #836 (2026-05-10). Designed alongside the
+implementation, not after.
+
