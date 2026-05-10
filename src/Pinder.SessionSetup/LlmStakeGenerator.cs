@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Pinder.Core.Interfaces;
+using Pinder.LlmAdapters;
 
 namespace Pinder.SessionSetup
 {
@@ -42,7 +43,15 @@ namespace Pinder.SessionSetup
     /// </remarks>
     public sealed class LlmStakeGenerator : IStakeGenerator
     {
-        private const string SystemPrompt =
+        // #843 Phase 1: SystemPrompt + UserTemplate fall back to these
+        // const defaults when no PromptCatalog is supplied. Phase 5 of
+        // the migration removes these fallbacks once every call-site
+        // has been wired with the catalog and the CI grep gate is in
+        // place. Strings here MUST stay byte-identical to the
+        // corresponding entries in <c>data/prompts/stake.yaml</c>;
+        // <see cref="Pinder.Core.Tests.Issue843_PromptCatalogPhase1Tests"/>
+        // pins that invariant.
+        internal const string DefaultSystemPrompt =
             "You are a writer's-room script consultant for a comedy about online dating. " +
             "Output a tight list of 5-7 single-line fragments. One fragment per line. " +
             "Plain text only. No markdown, no leading dashes, no numbering, no headings. " +
@@ -51,9 +60,10 @@ namespace Pinder.SessionSetup
         private readonly ILlmTransport _transport;
         private readonly IStreamingLlmTransport? _streamingTransport;
         private readonly Options _options;
+        private readonly PromptCatalog? _catalog;
 
         public LlmStakeGenerator(ILlmTransport transport, Options? options = null)
-            : this(transport, streamingTransport: null, options)
+            : this(transport, streamingTransport: null, options, catalog: null)
         {
         }
 
@@ -61,10 +71,41 @@ namespace Pinder.SessionSetup
             ILlmTransport transport,
             IStreamingLlmTransport? streamingTransport,
             Options? options = null)
+            : this(transport, streamingTransport, options, catalog: null)
+        {
+        }
+
+        /// <summary>
+        /// Issue #843: catalog-aware constructor. When
+        /// <paramref name="catalog"/> is non-null and contains a
+        /// <c>"stake"</c> entry, system + user templates are read from
+        /// it; otherwise the embedded const defaults are used.
+        /// </summary>
+        public LlmStakeGenerator(
+            ILlmTransport transport,
+            IStreamingLlmTransport? streamingTransport,
+            Options? options,
+            PromptCatalog? catalog)
         {
             _transport = transport ?? throw new ArgumentNullException(nameof(transport));
             _streamingTransport = streamingTransport;
             _options = options ?? new Options();
+            _catalog = catalog;
+        }
+
+        /// <summary>
+        /// Effective system prompt for the stake call — the catalog
+        /// entry if one is registered, otherwise the const default.
+        /// </summary>
+        private string SystemPrompt
+        {
+            get
+            {
+                var entry = _catalog?.TryGet("stake");
+                if (entry != null && !string.IsNullOrWhiteSpace(entry.SystemPrompt))
+                    return entry.SystemPrompt!;
+                return DefaultSystemPrompt;
+            }
         }
 
         public async Task<string> GenerateAsync(
@@ -73,7 +114,7 @@ namespace Pinder.SessionSetup
             CancellationToken cancellationToken = default)
         {
             ValidateInputs(characterName, assembledSystemPrompt);
-            string userMessage = BuildUserMessage(assembledSystemPrompt);
+            string userMessage = BuildUserMessage(assembledSystemPrompt, _catalog);
 
             try
             {
@@ -105,7 +146,7 @@ namespace Pinder.SessionSetup
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            string userMessage = BuildUserMessage(assembledSystemPrompt);
+            string userMessage = BuildUserMessage(assembledSystemPrompt, _catalog);
 
             IAsyncEnumerator<string> enumerator;
             try
@@ -175,7 +216,32 @@ namespace Pinder.SessionSetup
                 throw new ArgumentNullException(nameof(assembledSystemPrompt));
         }
 
-        private static string BuildUserMessage(string assembledSystemPrompt)
+        internal static string BuildUserMessage(
+            string assembledSystemPrompt,
+            PromptCatalog? catalog)
+        {
+            // #843 Phase 1: prefer the catalog template; fall back to the
+            // embedded const if the catalog is absent or doesn't carry a
+            // stake entry. Phase 5 deletes the const fallback.
+            var entry = catalog?.TryGet("stake");
+            if (entry != null && !string.IsNullOrWhiteSpace(entry.UserTemplate))
+            {
+                return PromptCatalog.Substitute(
+                    entry.UserTemplate!,
+                    new Dictionary<string, string>(StringComparer.Ordinal)
+                    {
+                        { "character_profile", assembledSystemPrompt },
+                    });
+            }
+            return BuildUserMessageFromConstFallback(assembledSystemPrompt);
+        }
+
+        /// <summary>
+        /// Pre-#843 user-message body. Kept as a private fallback during
+        /// the migration; removed in Phase 5 alongside the
+        /// <see cref="DefaultSystemPrompt"/> const.
+        /// </summary>
+        private static string BuildUserMessageFromConstFallback(string assembledSystemPrompt)
         {
             // #834: pass the full assembled system prompt — never silently truncate LLM input.
             // Stake generation is once-per-character-per-session and the result is cached into the
