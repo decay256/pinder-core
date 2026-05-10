@@ -74,12 +74,32 @@ namespace Pinder.Core.Prompts
                 fragments.TextingStyleSources, characterIdSeed));
             sb.AppendLine();
 
-            // ARCHETYPES
-            sb.AppendLine("ARCHETYPES (tendency order — most to least dominant)");
-            for (int i = 0; i < fragments.RankedArchetypes.Count; i++)
+            // ACTIVE ARCHETYPE (#832): emit only the level-eligible top-ranked
+            // archetype with its full behavior text. The ranked-list of every
+            // archetype the character has any tendency vote for was noise —
+            // the LLM had no way to tell which were level-eligible vs.
+            // pre-cap or post-cap, and the bare names without behavior text
+            // forced the model to use training-data priors. The active
+            // archetype's behavior block (sourced from
+            // ArchetypeCatalog._behaviors / archetypes-enriched.yaml §2) is
+            // rich, load-bearing, and includes sample lines — exactly the
+            // texture the dialogue model needs.
+            //
+            // Fallback: when ResolveActiveArchetype returns null (legacy /
+            // under-leveled / no archetype votes), emit a single-line
+            // marker so the prompt stays well-formed and downstream parsers
+            // (e.g. system-prompt-shape tests) still find the section.
+            sb.AppendLine("ACTIVE ARCHETYPE");
+            if (fragments.ActiveArchetype != null)
             {
-                var (archetype, count) = fragments.RankedArchetypes[i];
-                sb.AppendLine($"{i + 1}. {archetype} (x{count})");
+                var aa = fragments.ActiveArchetype;
+                sb.AppendLine($"- {aa.Name} ({aa.InterferenceLevel})");
+                if (!string.IsNullOrWhiteSpace(aa.Behavior))
+                    sb.AppendLine(aa.Behavior);
+            }
+            else
+            {
+                sb.AppendLine("(none resolved)");
             }
             sb.AppendLine();
 

@@ -353,7 +353,9 @@ namespace Pinder.Core.Tests
             Assert.Contains("he/him", profile.AssembledSystemPrompt);
             Assert.Contains("BACKSTORY", profile.AssembledSystemPrompt);
             Assert.Contains("TEXTING STYLE", profile.AssembledSystemPrompt);
-            Assert.Contains("ARCHETYPES", profile.AssembledSystemPrompt);
+            // #832: ARCHETYPES (tendency-order ranked list) replaced by
+            // ACTIVE ARCHETYPE (the level-eligible top-ranked archetype).
+            Assert.Contains("ACTIVE ARCHETYPE", profile.AssembledSystemPrompt);
         }
 
         [Fact]
