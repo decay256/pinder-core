@@ -1102,3 +1102,5 @@
 {"ts":"2026-05-08T21:45:54Z","agent":"orchestrator","issue":"#782","action":"closed","detail":"Refiled as decay256/pinder-web#518 — scope sits in pinder-web (TurnAuditWriter + ReplayTurnResultMapper)"}
 {"ts":"2026-05-08T21:45:54Z","agent":"orchestrator","action":"followup-filed","detail":"decay256/pinder-web#519 — submodule pointer bump to ed96c44"}
 {"agent":"backend-engineer","action":"started","ticket":"#851","worktree":"/tmp/work-851","ts":"2026-05-13T04:09:36Z"}
+{"ts":"2026-05-13T07:06:48Z","agent":"backend-engineer","issue":"#853","component":"Pinder.RemoteAssets","action":"started","detail":"Implementing #853 per branch fix/853-remoteassets-scaffold-readpath","commit":null}
+{"ts":"2026-05-13T07:18:32Z","agent":"backend-engineer","issue":"#853","component":"Pinder.RemoteAssets","action":"completed","detail":"PR #856 opened: https://github.com/decay256/pinder-core/pull/856","commit":"d09a276"}
