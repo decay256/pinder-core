@@ -19,6 +19,20 @@ namespace Pinder.RemoteAssets
     public delegate CharacterDefinition CharacterPayloadParser(byte[] payload);
 
     /// <summary>
+    /// Serialises a <see cref="CharacterDefinition"/> to the raw payload
+    /// bytes that ride in the <c>payload</c> part of a <c>POST /assets</c>
+    /// multipart request. The contract is byte-equal to the on-disk v1
+    /// character JSON — see <c>docs/specs/character-asset-vocabulary.md</c>
+    /// § Publish.
+    ///
+    /// If <see cref="Configuration.PayloadSerializer"/> is left null,
+    /// the store falls back to
+    /// <c>Pinder.Core.Characters.CharacterDefinitionWriter.Write</c>
+    /// (UTF-8 encoded). Tests can inject a stub that returns canned bytes.
+    /// </summary>
+    public delegate byte[] CharacterPayloadSerializer(CharacterDefinition def);
+
+    /// <summary>
     /// Configuration for <see cref="EigencoreCharacterStore"/> — the
     /// <see cref="IRemoteCharacterStore"/> implementation that talks HTTP to
     /// an eigencore-shaped asset backend.
@@ -88,13 +102,47 @@ namespace Pinder.RemoteAssets
         /// </summary>
         public TimeSpan DefaultRetryAfter { get; }
 
+        /// <summary>
+        /// Hard cap on the size of the serialized <c>metadata</c> part of
+        /// a <c>POST /assets</c> multipart request. Defaults to 4 KiB —
+        /// matches the reference backend's
+        /// <c>MAX_ASSET_METADATA_JSON_SIZE</c> (not env-overridable
+        /// server-side). Violations throw
+        /// <c>RemoteAssetTooLargeException(subject="metadata")</c> BEFORE
+        /// the HTTP request is sent (fail-fast — see
+        /// <c>docs/specs/character-asset-vocabulary.md</c> § Publish).
+        /// </summary>
+        public int MetadataSizeCapBytes { get; }
+
+        /// <summary>
+        /// Cap on the size of the <c>payload</c> part of a <c>POST /assets</c>
+        /// multipart request. Defaults to 256 KiB — matches the reference
+        /// backend's <c>max_asset_payload_size</c> default. Per-deployment
+        /// overrides on the server can raise / lower this; callers should
+        /// match the deployed value here when known. Violations throw
+        /// <c>RemoteAssetTooLargeException(subject="payload")</c> BEFORE
+        /// the HTTP request is sent.
+        /// </summary>
+        public int PayloadSizeCapBytes { get; }
+
+        /// <summary>
+        /// Serialises a <see cref="CharacterDefinition"/> to the bytes that
+        /// ride in the <c>payload</c> part of a <c>POST /assets</c>
+        /// multipart request. If null, the store falls back to
+        /// <c>CharacterDefinitionWriter.Write</c> + UTF-8 encoding.
+        /// </summary>
+        public CharacterPayloadSerializer? PayloadSerializer { get; }
+
         public Configuration(
             Uri baseUrl,
             HttpMessageHandler httpMessageHandler,
             Func<CancellationToken, Task<string>> authTokenProvider,
             CharacterPayloadParser payloadParser,
             TimeSpan? requestTimeout = null,
-            TimeSpan? defaultRetryAfter = null)
+            TimeSpan? defaultRetryAfter = null,
+            int? metadataSizeCapBytes = null,
+            int? payloadSizeCapBytes = null,
+            CharacterPayloadSerializer? payloadSerializer = null)
         {
             if (baseUrl == null) throw new ArgumentNullException(nameof(baseUrl));
             if (!baseUrl.IsAbsoluteUri)
@@ -105,10 +153,17 @@ namespace Pinder.RemoteAssets
             PayloadParser = payloadParser ?? throw new ArgumentNullException(nameof(payloadParser));
             RequestTimeout = requestTimeout ?? TimeSpan.FromSeconds(30);
             DefaultRetryAfter = defaultRetryAfter ?? TimeSpan.FromSeconds(1);
+            MetadataSizeCapBytes = metadataSizeCapBytes ?? 4 * 1024;       // 4 KiB
+            PayloadSizeCapBytes = payloadSizeCapBytes ?? 256 * 1024;       // 256 KiB
+            PayloadSerializer = payloadSerializer;
             if (RequestTimeout <= TimeSpan.Zero)
                 throw new ArgumentOutOfRangeException(nameof(requestTimeout), "RequestTimeout must be positive.");
             if (DefaultRetryAfter < TimeSpan.Zero)
                 throw new ArgumentOutOfRangeException(nameof(defaultRetryAfter), "DefaultRetryAfter must be non-negative.");
+            if (MetadataSizeCapBytes <= 0)
+                throw new ArgumentOutOfRangeException(nameof(metadataSizeCapBytes), "MetadataSizeCapBytes must be positive.");
+            if (PayloadSizeCapBytes <= 0)
+                throw new ArgumentOutOfRangeException(nameof(payloadSizeCapBytes), "PayloadSizeCapBytes must be positive.");
         }
     }
 }
