@@ -11,12 +11,14 @@ pinder-core/
 ├── src/
 │   ├── Pinder.Core/          # Domain model, game loop, interfaces (netstandard2.0)
 │   ├── Pinder.LlmAdapters/   # LLM provider integrations + prompt assembly (netstandard2.0)
+│   ├── Pinder.RemoteAssets/  # HTTP client for eigencore character-assets API (netstandard2.0)
 │   ├── Pinder.Rules/         # Data-driven rule resolution from YAML (netstandard2.0)
 │   └── Pinder.SessionSetup/  # Pre-session matchup + stake generation (netstandard2.0)
 ├── session-runner/            # CLI harness — runs a full game session (net8.0)
 ├── tests/
 │   ├── Pinder.Core.Tests/
 │   ├── Pinder.LlmAdapters.Tests/
+│   ├── Pinder.RemoteAssets.Tests/
 │   └── Pinder.Rules.Tests/
 ├── data/                      # YAML + JSON game data files
 ├── rules/tools/               # Python rules pipeline (YAML ↔ Markdown)
@@ -28,7 +30,9 @@ pinder-core/
 Consumers: the `session-runner` CLI harness uses Core + LlmAdapters + Rules.
 The web-tier `Pinder.GameApi` (separate repo `pinder-web`, mounts this repo as
 a git submodule) additionally uses `Pinder.SessionSetup` for matchup + stake
-generation outside the per-turn game loop.
+generation outside the per-turn game loop, and wires `Pinder.RemoteAssets` via
+DI as the `IRemoteCharacterStore` implementation for the eigencore character-assets
+API. `Pinder.RemoteAssets` is NOT used by the engine or the CLI harness directly.
 
 ## 2. Assembly Map
 
@@ -63,6 +67,21 @@ Prompt construction and LLM API integration. Depends on Pinder.Core and Pinder.R
 | | `RollContextBuilder.cs` — YAML-sourced roll flavor text |
 | | `Anthropic/AnthropicLlmAdapter.cs` — Claude adapter (implements IStatefulLlmAdapter) |
 | | `OpenAi/OpenAiLlmAdapter.cs` — OpenAI-compatible adapter (Groq, Together, OpenRouter, Ollama) |
+
+### Pinder.RemoteAssets
+
+Outbound HTTP client for the eigencore character-assets API. This is the **only** assembly in this repo that knows eigencore exists. `Pinder.Core` and all other assemblies have zero knowledge of eigencore; the dependency arrow is one-way. The module is consumed by `pinder-web`'s `Pinder.GameApi` via DI (injected as `IRemoteCharacterStore`); the engine itself does not reference it.
+
+| Depends on | Pinder.Core (for `IRemoteCharacterStore`, `CharacterAssetQuery`, `CharacterAssetPage`, `CharacterAssetMetadata`, `CharacterDefinition`) |
+|---|---|
+| **Purpose** | HTTP read/query/write against the eigencore character-assets API. Boundary-renames wire fields (`asset_id`) to Pinder POCO fields (`CharacterId`). Typed exception hierarchy for all HTTP error cases. |
+| **Key files** | `Configuration.cs` — DI configuration bag: BaseUrl, HttpMessageHandler, AuthTokenProvider, CharacterPayloadParser, size caps, DefaultRetryAfter |
+| | `EigencoreCharacterStore.cs` — `IRemoteCharacterStore` implementation. Read: `LoadAsync`/`GetMetadataAsync`/`ExistsAsync`. Query: `QueryAsync`. Write: `PublishAsync`/`SaveAsync`/`DeleteAsync`. `ListIdsAsync` throws `NotSupportedException` (no v1 list-all endpoint). |
+| | `CharacterAssetMetadataParser.cs` — wire→POCO, decodes RFC 4648 standard-padded base64 `X-Asset-Metadata` header, renames `asset_id`→`CharacterId` |
+| | `CharacterAssetMetadataSerializer.cs` — POCO→wire (write path), renames `CharacterId`→`asset_id`, never emits `character_id` |
+| | `Exceptions/*.cs` — typed exception hierarchy: `RemoteAssetException` (root) → Auth / Forbidden / Validation / InvalidCursor / TooLarge / MalformedMetadata / RateLimit / Server |
+
+See [`docs/modules/remote-assets.md`](modules/remote-assets.md) and [`docs/specs/character-asset-vocabulary.md`](specs/character-asset-vocabulary.md) for wire-contract details.
 
 ### Pinder.Rules
 

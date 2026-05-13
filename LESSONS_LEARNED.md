@@ -323,6 +323,29 @@ never drift behind the implementation.
 **Discovered in:** #836 (2026-05-10). Designed alongside the
 implementation, not after.
 
+### WIRE-CONTRACT-REGRESSION-TESTS
+
+**Pattern:** when a wire detail has a well-known implementer trap — one where the wrong implementation often works in the common case and silently succeeds — pin it with a regression test that uses inputs that would *pass* under the wrong implementation but *fail* correctly only under the right one.
+
+**Two canonical examples from #819 (`Pinder.RemoteAssets`):**
+
+**Base64 alphabet (`X-Asset-Metadata` header).**
+The spec requires RFC 4648 *standard padded* base64 (`Convert.FromBase64String`), not base64url (`WebEncoders.Base64UrlDecode`). The two alphabets differ only on two characters: `+`/`/` (standard) vs `-`/`_` (base64url). A developer reaching for the URL-safe variant is a natural mistake (the header travels in an HTTP response header, which feels "URL-adjacent"). Most test inputs happen to encode to only alphanumeric characters and never expose the difference.
+The regression test uses byte sequence `0xFB 0xFF 0xBF`, which encodes to `+/+/` in standard base64 and `-_-_` in base64url. The test:
+1. Asserts the standard base64 form (`+/+/=`) decodes without error.
+2. Asserts the base64url form (`-_-_`) throws `RemoteAssetMalformedMetadataException`.
+Any future refactor that swaps the decoder breaks the test immediately on a distinguishing input, not silently on production data.
+
+**Query parameter name (`tag` vs `tags`).**
+The eigencore asset-query endpoint uses the singular repeatable `tag=` parameter for multi-tag filtering. The plural `tags=` is not recognized; the backend silently drops unknown query parameters and returns unfiltered results with no error signal. This is exactly the class of bug that manual testing doesn't catch (results look correct for untagged or single-tag queries) and that only shows up in production as mysteriously unfiltered result sets.
+The regression test asserts `Assert.DoesNotContain("tags=", builtUrl)` on every code path in `BuildQueryUri`. The test is a canary: any future refactor that introduces a `tags=` emission fails immediately.
+
+**Rule:** when you implement against a wire contract and find yourself handling a detail that has a known "looks right but is wrong" alternative implementation, write the regression test first. The test documents the trap for the next developer and survives refactoring that the original author can no longer reason about.
+
+**Discovered in:** #819 sprint (sub-PRs #856/#857/#858, 2026-05-13). The base64url test and tags-regression test are in `Pinder.RemoteAssets.Tests`. See also pinder-core#851 — the May 2026 drift discovery that revealed both traps existed in the original Pinder-side implementation.
+
+---
+
 ### MEASURE-BEFORE-CACHING-AND-USE-P50-NOT-P99-WHEN-GC-DOMINATES-THE-TAIL
 
 **Symptom:** Issue #840 framed itself around "replace the dual loader
