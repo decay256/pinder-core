@@ -53,18 +53,62 @@ namespace Pinder.Core.Characters
         /// </summary>
         public string? Cursor { get; }
 
+        /// <summary>
+        /// Filter by asset-kind discriminator (e.g.
+        /// <see cref="CharacterAssetMetadata.AssetKindCharacterV1"/>).
+        /// <c>null</c> means "no asset-kind filter". The wrapper
+        /// implementation URL-encodes the value, so the canonical
+        /// <c>character/v1</c> ends up as <c>character%2Fv1</c> on the
+        /// wire.
+        /// </summary>
+        public string? AssetKind { get; }
+
+        /// <summary>
+        /// Half-open lower bound on <see cref="CharacterAssetMetadata.CreatedAt"/>
+        /// (inclusive). <c>null</c> means "no lower bound".
+        /// </summary>
+        public DateTimeOffset? CreatedAfter { get; }
+
+        /// <summary>
+        /// Half-open upper bound on <see cref="CharacterAssetMetadata.CreatedAt"/>
+        /// (exclusive). <c>null</c> means "no upper bound".
+        /// </summary>
+        public DateTimeOffset? CreatedBefore { get; }
+
+        /// <summary>
+        /// Half-open lower bound on <see cref="CharacterAssetMetadata.UpdatedAt"/>
+        /// (inclusive). <c>null</c> means "no lower bound".
+        /// </summary>
+        public DateTimeOffset? UpdatedAfter { get; }
+
+        /// <summary>
+        /// Half-open upper bound on <see cref="CharacterAssetMetadata.UpdatedAt"/>
+        /// (exclusive). <c>null</c> means "no upper bound".
+        /// </summary>
+        public DateTimeOffset? UpdatedBefore { get; }
+
         public CharacterAssetQuery(
             string? ownerId = null,
             IReadOnlyList<string>? tags = null,
             bool? isPublic = null,
             int limit = DefaultLimit,
-            string? cursor = null)
+            string? cursor = null,
+            string? assetKind = null,
+            DateTimeOffset? createdAfter = null,
+            DateTimeOffset? createdBefore = null,
+            DateTimeOffset? updatedAfter = null,
+            DateTimeOffset? updatedBefore = null)
         {
             OwnerId = ownerId;
             Tags = tags;
             IsPublic = isPublic;
             Limit = ClampLimit(limit);
             Cursor = cursor;
+            AssetKind = assetKind;
+            CreatedAfter = createdAfter;
+            CreatedBefore = createdBefore;
+            UpdatedAfter = updatedAfter;
+            UpdatedBefore = updatedBefore;
         }
 
         private static int ClampLimit(int requested)

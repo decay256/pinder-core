@@ -454,12 +454,11 @@ namespace Pinder.RemoteAssets.Tests
             await Assert.ThrowsAsync<NotSupportedException>(() => store.ListIdsAsync());
         }
 
-        [Fact]
-        public async Task QueryAsync_Throws_NotSupported_In_853()
-        {
-            var (store, _) = Make();
-            await Assert.ThrowsAsync<NotSupportedException>(() => store.QueryAsync(new CharacterAssetQuery(limit: 10)));
-        }
+        // QueryAsync_Throws_NotSupported_In_853 was removed in #854 —
+        // the query path is now implemented (see
+        // EigencoreCharacterStoreQueryTests). The remaining write-path
+        // members (SaveAsync, PublishAsync, DeleteAsync) still throw and
+        // are pinned by the tests below until #855 lands.
 
         [Fact]
         public async Task SaveAsync_Throws_NotSupported_In_853()
