@@ -28,9 +28,11 @@ namespace Pinder.RemoteAssets
     /// #853 — read path (<see cref="LoadAsync"/>, <see cref="GetMetadataAsync"/>,
     ///        <see cref="ExistsAsync"/>).
     /// #854 — query / paging path (<see cref="QueryAsync"/>).
-    /// The remaining members (Save / Publish / Delete / ListIds) still
-    /// throw <see cref="NotSupportedException"/> until sub-PR #855 wires
-    /// them up.
+    /// #855 — write path (<see cref="PublishAsync"/>,
+    ///        <see cref="SaveAsync"/>, <see cref="DeleteAsync"/>).
+    /// <see cref="ListIdsAsync"/> remains <see cref="NotSupportedException"/>:
+    /// the v1 wire contract has no list-all endpoint; discovery happens
+    /// via <see cref="QueryAsync"/>.
     /// </summary>
     public sealed class EigencoreCharacterStore : IRemoteCharacterStore
     {
@@ -117,14 +119,6 @@ namespace Pinder.RemoteAssets
             throw new NotSupportedException(
                 "ListIdsAsync is not part of the v1 eigencore wire contract. " +
                 "Discovery happens via QueryAsync (sub-PR #854) which returns metadata pages.");
-
-        public Task SaveAsync(CharacterDefinition def, CancellationToken ct = default) =>
-            throw new NotSupportedException(
-                "SaveAsync is reserved for sub-PR #855 (write path). " +
-                "On the remote store, save semantics map to PublishAsync.");
-
-        public Task<bool> DeleteAsync(string characterId, CancellationToken ct = default) =>
-            throw new NotSupportedException("DeleteAsync is reserved for sub-PR #855 (write path).");
 
         // ---- IRemoteCharacterStore query path (#854) ---------------------
 
@@ -243,11 +237,472 @@ namespace Pinder.RemoteAssets
             }
         }
 
-        public Task<CharacterAssetMetadata> PublishAsync(
+        // ---- IRemoteCharacterStore write path (#855) ---------------------
+
+        /// <summary>
+        /// <c>POST {baseUrl}/assets</c> as <c>multipart/form-data</c> with
+        /// exactly two parts named <c>metadata</c> and <c>payload</c>.
+        ///
+        /// Pre-validation: both parts are serialised and size-checked
+        /// BEFORE the HTTP request is sent. An oversized metadata
+        /// (>4 KiB by default) or payload (>256 KiB by default) throws
+        /// <see cref="RemoteAssetTooLargeException"/> with no network
+        /// round-trip. The reference backend would return 422 anyway,
+        /// but the local check is the better contract — callers get a
+        /// typed exception immediately.
+        ///
+        /// POST is upsert: publishing the same <c>asset_id</c> twice
+        /// overwrites. Both 201 (created) and 200 (overwritten) are
+        /// treated as success.
+        ///
+        /// Wire contract: see <c>docs/specs/character-asset-vocabulary.md</c>
+        /// § Publish. The serialised metadata uses <c>asset_id</c>, never
+        /// <c>character_id</c> — see
+        /// <see cref="CharacterAssetMetadataSerializer"/>.
+        /// </summary>
+        public async Task<CharacterAssetMetadata> PublishAsync(
             CharacterDefinition def,
             CharacterAssetMetadata metadata,
-            CancellationToken ct = default) =>
-            throw new NotSupportedException("PublishAsync is reserved for sub-PR #855 (write path).");
+            CancellationToken ct = default)
+        {
+            if (def == null) throw new ArgumentNullException(nameof(def));
+            if (metadata == null) throw new ArgumentNullException(nameof(metadata));
+
+            // --- 1. Serialise both sides and pre-validate caps ---------
+            byte[] metaBytes = CharacterAssetMetadataSerializer.SerializeBytes(metadata);
+            if (metaBytes.Length > _config.MetadataSizeCapBytes)
+            {
+                throw new RemoteAssetTooLargeException(
+                    $"Serialised metadata is {metaBytes.Length} bytes, exceeds cap {_config.MetadataSizeCapBytes} bytes. " +
+                    "No HTTP request was sent (pre-validation).",
+                    subject: "metadata");
+            }
+
+            byte[] payloadBytes = SerializePayload(def);
+            if (payloadBytes.Length > _config.PayloadSizeCapBytes)
+            {
+                throw new RemoteAssetTooLargeException(
+                    $"Serialised payload is {payloadBytes.Length} bytes, exceeds cap {_config.PayloadSizeCapBytes} bytes. " +
+                    "No HTTP request was sent (pre-validation).",
+                    subject: "payload");
+            }
+
+            // --- 2. Build + send the multipart request -----------------
+            bool retried = false;
+
+            while (true)
+            {
+                // Build a FRESH multipart per attempt; HttpContent is
+                // consumed on send and is not safely reusable for retry.
+                using (var content = BuildPublishMultipart(metaBytes, payloadBytes))
+                using (var req = new HttpRequestMessage(HttpMethod.Post, new Uri("assets", UriKind.Relative))
+                {
+                    Content = content,
+                })
+                {
+                    await AttachAuthAsync(req, ct).ConfigureAwait(false);
+
+                    HttpResponseMessage resp = await _http.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, ct)
+                        .ConfigureAwait(false);
+                    try
+                    {
+                        int status = (int)resp.StatusCode;
+
+                        // Upsert: 201 (newly created) and 200 (overwrote
+                        // an existing asset with the same asset_id) are
+                        // both success.
+                        if (status == 200 || status == 201)
+                        {
+                            byte[] body = await resp.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+                            return ParsePublishResponse(body);
+                        }
+
+                        if (status == 401)
+                        {
+                            string body401 = await SafeReadBodyAsync(resp).ConfigureAwait(false);
+                            throw new RemoteAssetAuthException(
+                                "Eigencore returned 401 for POST assets.",
+                                responseBody: body401);
+                        }
+
+                        if (status == 403)
+                        {
+                            string body403 = await SafeReadBodyAsync(resp).ConfigureAwait(false);
+                            throw BuildForbiddenException(body403, "POST assets");
+                        }
+
+                        if (status == 422)
+                        {
+                            string body422 = await SafeReadBodyAsync(resp).ConfigureAwait(false);
+                            (string? errorCode, IReadOnlyList<string> errors) = ParseValidationBody(body422);
+                            if (string.Equals(errorCode, "metadata_too_large", StringComparison.Ordinal))
+                            {
+                                throw new RemoteAssetTooLargeException(
+                                    "Eigencore returned 422 metadata_too_large for POST assets.",
+                                    subject: "metadata",
+                                    responseBody: body422);
+                            }
+                            if (string.Equals(errorCode, "payload_too_large", StringComparison.Ordinal))
+                            {
+                                throw new RemoteAssetTooLargeException(
+                                    "Eigencore returned 422 payload_too_large for POST assets.",
+                                    subject: "payload",
+                                    responseBody: body422);
+                            }
+                            // invalid_multipart and all other 422 codes
+                            // surface as a generic validation exception.
+                            throw new RemoteAssetValidationException(
+                                $"Eigencore returned 422 for POST assets (code={errorCode ?? "<none>"}).",
+                                errors: errors,
+                                responseBody: body422);
+                        }
+
+                        if (status == 429)
+                        {
+                            TimeSpan delay = ParseRetryAfter(resp) ?? _config.DefaultRetryAfter;
+                            string body429 = await SafeReadBodyAsync(resp).ConfigureAwait(false);
+                            if (retried)
+                            {
+                                throw new RemoteAssetRateLimitException(
+                                    "Eigencore returned 429 for POST assets after one retry.",
+                                    retryAfter: delay,
+                                    responseBody: body429);
+                            }
+                            retried = true;
+                            resp.Dispose();
+                            if (delay > TimeSpan.Zero)
+                                await Task.Delay(delay, ct).ConfigureAwait(false);
+                            continue;
+                        }
+
+                        if (status >= 500 && status <= 599)
+                        {
+                            string body5xx = await SafeReadBodyAsync(resp).ConfigureAwait(false);
+                            throw new RemoteAssetServerException(
+                                $"Eigencore returned {status} for POST assets.",
+                                statusCode: status,
+                                responseBody: body5xx);
+                        }
+
+                        string bodyOther = await SafeReadBodyAsync(resp).ConfigureAwait(false);
+                        throw new RemoteAssetServerException(
+                            $"Eigencore returned unexpected status {status} for POST assets.",
+                            statusCode: status,
+                            responseBody: bodyOther);
+                    }
+                    finally
+                    {
+                        resp.Dispose();
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Save = publish. Per the wire contract, <c>POST /assets</c> is
+        /// the upsert: two publishes with the same <c>asset_id</c>
+        /// overwrite. The base <see cref="ICharacterStore.SaveAsync"/>
+        /// surface takes only the <see cref="CharacterDefinition"/>; for
+        /// the remote store the metadata envelope is required, so this
+        /// method synthesises a minimal <see cref="CharacterAssetMetadata"/>
+        /// from the def (asset_id from CharacterId, empty owner, no tags,
+        /// is_public=false, timestamps stamped server-side) and delegates
+        /// to <see cref="PublishAsync"/>. Callers that need to control
+        /// tags / is_public / owner go through <see cref="PublishAsync"/>
+        /// directly.
+        /// </summary>
+        public Task SaveAsync(CharacterDefinition def, CancellationToken ct = default)
+        {
+            if (def == null) throw new ArgumentNullException(nameof(def));
+            // The wire wants asset_id in UUID 'D' form (lowercase,
+            // hyphenated). Guid.ToString("d") produces exactly that.
+            string assetId = def.CharacterId.ToString("d");
+            var metadata = new CharacterAssetMetadata(
+                characterId: assetId,
+                ownerId: string.Empty,
+                tags: Array.Empty<string>(),
+                isPublic: false,
+                // CreatedAt / UpdatedAt are server-stamped; the values
+                // here are NOT serialised (the metadata serialiser drops
+                // server-controlled fields). They satisfy the POCO ctor
+                // which forbids defaulted DateTimeOffset only by being
+                // present.
+                createdAt: DateTimeOffset.MinValue,
+                updatedAt: DateTimeOffset.MinValue,
+                assetKind: CharacterAssetMetadata.AssetKindCharacterV1);
+            return PublishAsync(def, metadata, ct);
+        }
+
+        /// <summary>
+        /// <c>DELETE {baseUrl}/assets/{asset_id}</c>. Returns <c>true</c>
+        /// when the server confirms the delete (200 or 204) and
+        /// <c>false</c> when the asset was already gone (404 — idempotent
+        /// delete is not an error). 403 means the caller is not the
+        /// asset owner; 401 means bad creds. Other status codes map per
+        /// the shared error policy.
+        /// </summary>
+        public async Task<bool> DeleteAsync(string characterId, CancellationToken ct = default)
+        {
+            ValidateId(characterId);
+
+            bool retried = false;
+
+            while (true)
+            {
+                using (var req = new HttpRequestMessage(HttpMethod.Delete, BuildAssetUri(characterId)))
+                {
+                    await AttachAuthAsync(req, ct).ConfigureAwait(false);
+
+                    HttpResponseMessage resp = await _http.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, ct)
+                        .ConfigureAwait(false);
+                    try
+                    {
+                        int status = (int)resp.StatusCode;
+
+                        if (status == 200 || status == 204)
+                        {
+                            // Drain to allow keep-alive reuse.
+                            if (resp.Content != null)
+                                await resp.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+                            return true;
+                        }
+
+                        if (status == 404)
+                        {
+                            // Idempotent delete: already gone is success-ish.
+                            if (resp.Content != null)
+                                await resp.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+                            return false;
+                        }
+
+                        if (status == 401)
+                        {
+                            string body401 = await SafeReadBodyAsync(resp).ConfigureAwait(false);
+                            throw new RemoteAssetAuthException(
+                                $"Eigencore returned 401 for DELETE assets/{characterId}.",
+                                responseBody: body401);
+                        }
+
+                        if (status == 403)
+                        {
+                            string body403 = await SafeReadBodyAsync(resp).ConfigureAwait(false);
+                            // On DELETE the only forbidden case is
+                            // not-owner; build a focused exception
+                            // message rather than the generic
+                            // BuildForbiddenException (which assumes a
+                            // reserved-prefix-or-not-owner discriminator
+                            // on the publish path).
+                            throw new RemoteAssetForbiddenException(
+                                $"Eigencore returned 403 for DELETE assets/{characterId} (caller is not the asset owner).",
+                                responseBody: body403);
+                        }
+
+                        if (status == 422)
+                        {
+                            string body422 = await SafeReadBodyAsync(resp).ConfigureAwait(false);
+                            (_, IReadOnlyList<string> errors) = ParseValidationBody(body422);
+                            throw new RemoteAssetValidationException(
+                                $"Eigencore returned 422 for DELETE assets/{characterId}.",
+                                errors: errors,
+                                responseBody: body422);
+                        }
+
+                        if (status == 429)
+                        {
+                            TimeSpan delay = ParseRetryAfter(resp) ?? _config.DefaultRetryAfter;
+                            string body429 = await SafeReadBodyAsync(resp).ConfigureAwait(false);
+                            if (retried)
+                            {
+                                throw new RemoteAssetRateLimitException(
+                                    $"Eigencore returned 429 for DELETE assets/{characterId} after one retry.",
+                                    retryAfter: delay,
+                                    responseBody: body429);
+                            }
+                            retried = true;
+                            resp.Dispose();
+                            if (delay > TimeSpan.Zero)
+                                await Task.Delay(delay, ct).ConfigureAwait(false);
+                            continue;
+                        }
+
+                        if (status >= 500 && status <= 599)
+                        {
+                            string body5xx = await SafeReadBodyAsync(resp).ConfigureAwait(false);
+                            throw new RemoteAssetServerException(
+                                $"Eigencore returned {status} for DELETE assets/{characterId}.",
+                                statusCode: status,
+                                responseBody: body5xx);
+                        }
+
+                        string bodyOther = await SafeReadBodyAsync(resp).ConfigureAwait(false);
+                        throw new RemoteAssetServerException(
+                            $"Eigencore returned unexpected status {status} for DELETE assets/{characterId}.",
+                            statusCode: status,
+                            responseBody: bodyOther);
+                    }
+                    finally
+                    {
+                        resp.Dispose();
+                    }
+                }
+            }
+        }
+
+        // ---- write-path internals -----------------------------------------
+
+        /// <summary>
+        /// Serialise the def to payload bytes, using the injected
+        /// <see cref="CharacterPayloadSerializer"/> if configured, otherwise
+        /// falling back to <see cref="CharacterDefinitionWriter.Write"/>
+        /// (UTF-8). Tests inject a stub to control the byte count.
+        /// </summary>
+        private byte[] SerializePayload(CharacterDefinition def)
+        {
+            if (_config.PayloadSerializer != null)
+                return _config.PayloadSerializer(def) ?? Array.Empty<byte>();
+            string json = CharacterDefinitionWriter.Write(def);
+            return new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetBytes(json);
+        }
+
+        /// <summary>
+        /// Construct a two-part multipart/form-data body with parts
+        /// exactly named <c>metadata</c> (application/json) and
+        /// <c>payload</c> (application/octet-stream). The boundary is
+        /// HttpClient-generated. The wire contract is strict: any other
+        /// part name, additional parts, or missing parts surface
+        /// server-side as 422 <c>invalid_multipart</c>.
+        /// </summary>
+        private static MultipartFormDataContent BuildPublishMultipart(byte[] metaBytes, byte[] payloadBytes)
+        {
+            var multipart = new MultipartFormDataContent();
+
+            var metaPart = new ByteArrayContent(metaBytes);
+            metaPart.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            // Form-data name MUST be exactly "metadata" (per spec). Pass
+            // unquoted; HttpClient quotes it on the wire as required by
+            // RFC 7578.
+            multipart.Add(metaPart, "metadata");
+
+            var payloadPart = new ByteArrayContent(payloadBytes);
+            // Spec calls the payload "any content-type, opaque bytes";
+            // application/octet-stream is the safest neutral choice.
+            payloadPart.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+            multipart.Add(payloadPart, "payload");
+
+            return multipart;
+        }
+
+        /// <summary>
+        /// Parse the POST /assets success body into a populated
+        /// <see cref="CharacterAssetMetadata"/>. The body is a single
+        /// metadata object (same shape as a query response item or the
+        /// X-Asset-Metadata header value), so we reuse the parser.
+        /// </summary>
+        private static CharacterAssetMetadata ParsePublishResponse(byte[] body)
+        {
+            if (body == null || body.Length == 0)
+                throw new RemoteAssetMalformedMetadataException(
+                    "Publish response body is empty.");
+            return CharacterAssetMetadataParser.ParseBytes(body);
+        }
+
+        /// <summary>
+        /// Build a focused <see cref="RemoteAssetForbiddenException"/>
+        /// for a 403 on the publish path. Eigencore returns
+        /// <c>code=permission_denied</c> for both reserved-prefix
+        /// violations (with the offending tag in the message or a
+        /// dedicated field) and not-owner overwrite attempts. We do a
+        /// best-effort body parse to surface the prefix when present
+        /// (the test asserts the offending prefix is in the message).
+        /// </summary>
+        private static RemoteAssetForbiddenException BuildForbiddenException(string body403, string opLabel)
+        {
+            // Try to dig the offending tag/prefix out of the body.
+            string? offendingPrefix = ExtractForbiddenPrefix(body403);
+            string msg = offendingPrefix != null
+                ? $"Eigencore returned 403 permission_denied for {opLabel}: reserved tag prefix '{offendingPrefix}' is not allowed for this caller."
+                : $"Eigencore returned 403 permission_denied for {opLabel}.";
+            return new RemoteAssetForbiddenException(msg, responseBody: body403);
+        }
+
+        /// <summary>
+        /// Best-effort extraction of the offending tag/prefix from a
+        /// 403 body. The spec text says the server returns
+        /// <c>code=permission_denied</c> plus enough context to identify
+        /// the prefix; the exact body shape isn't pinned by the spec.
+        /// We accept a few common shapes:
+        /// <list type="bullet">
+        ///   <item><c>{"detail": "reserved prefix 'auto-' is not allowed"}</c></item>
+        ///   <item><c>{"prefix": "auto-"}</c></item>
+        ///   <item><c>{"tag": "auto-foo"}</c> — we derive the prefix.</item>
+        /// </list>
+        /// Returns null when nothing matches — the exception message then
+        /// falls back to a generic form (the test for reserved-prefix
+        /// also asserts <see cref="RemoteAssetException.ResponseBody"/>,
+        /// which always contains the full body).
+        /// </summary>
+        private static string? ExtractForbiddenPrefix(string body)
+        {
+            if (string.IsNullOrWhiteSpace(body)) return null;
+            try
+            {
+                using (var doc = JsonDocument.Parse(body))
+                {
+                    var root = doc.RootElement;
+                    if (root.ValueKind != JsonValueKind.Object) return null;
+
+                    // Direct "prefix" field.
+                    if (root.TryGetProperty("prefix", out var pEl)
+                        && pEl.ValueKind == JsonValueKind.String)
+                    {
+                        var p = pEl.GetString();
+                        if (!string.IsNullOrEmpty(p)) return p;
+                    }
+
+                    // "tag" field — derive prefix up to the first '-' (inclusive).
+                    if (root.TryGetProperty("tag", out var tEl)
+                        && tEl.ValueKind == JsonValueKind.String)
+                    {
+                        var tag = tEl.GetString();
+                        if (!string.IsNullOrEmpty(tag))
+                        {
+                            int dash = tag!.IndexOf('-');
+                            if (dash > 0)
+                                return tag.Substring(0, dash + 1);
+                            return tag;
+                        }
+                    }
+
+                    // Scan "detail" / "message" for the reserved prefixes
+                    // we know about (auto- / official-).
+                    foreach (var key in new[] { "detail", "message", "error" })
+                    {
+                        if (root.TryGetProperty(key, out var mEl)
+                            && mEl.ValueKind == JsonValueKind.String)
+                        {
+                            var s = mEl.GetString() ?? string.Empty;
+                            foreach (var candidate in new[] { "auto-", "official-" })
+                            {
+                                if (s.IndexOf(candidate, StringComparison.OrdinalIgnoreCase) >= 0)
+                                    return candidate;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (JsonException)
+            {
+                // body wasn't JSON — fall through.
+            }
+
+            // Last-ditch: look for the literal prefixes in the raw body.
+            foreach (var candidate in new[] { "auto-", "official-" })
+            {
+                if (body.IndexOf(candidate, StringComparison.OrdinalIgnoreCase) >= 0)
+                    return candidate;
+            }
+            return null;
+        }
 
         // ---- internals -----------------------------------------------------
 

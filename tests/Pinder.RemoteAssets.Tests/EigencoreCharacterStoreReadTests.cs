@@ -456,16 +456,10 @@ namespace Pinder.RemoteAssets.Tests
 
         // QueryAsync_Throws_NotSupported_In_853 was removed in #854 —
         // the query path is now implemented (see
-        // EigencoreCharacterStoreQueryTests). The remaining write-path
-        // members (SaveAsync, PublishAsync, DeleteAsync) still throw and
-        // are pinned by the tests below until #855 lands.
-
-        [Fact]
-        public async Task SaveAsync_Throws_NotSupported_In_853()
-        {
-            var (store, _) = Make();
-            var def = StubParse(Array.Empty<byte>());
-            await Assert.ThrowsAsync<NotSupportedException>(() => store.SaveAsync(def));
-        }
+        // EigencoreCharacterStoreQueryTests).
+        // SaveAsync_Throws_NotSupported_In_853 was removed in #855 —
+        // the write path is now implemented (see
+        // EigencoreCharacterStoreWriteTests). ListIdsAsync stays
+        // NotSupported per the v1 wire contract (no list-all endpoint).
     }
 }
