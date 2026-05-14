@@ -149,23 +149,28 @@ namespace Pinder.LlmAdapters.Tests
             var playerResult = SessionSystemPromptBuilder.BuildPlayer("p", gd);
             var opponentResult = SessionSystemPromptBuilder.BuildOpponent("o", gd);
 
-            // BuildPlayer must NOT contain opponent-only sections.
+            // BuildPlayer must NOT contain opponent-only sections (OpponentFriction,
+            // OpponentCuriosity). ConversationArc IS shared structure relevant to
+            // both sides — kept in BuildPlayer. PlayerProbing IS player-specific guidance
+            // — kept in BuildPlayer.
             Assert.DoesNotContain("OPPONENT RESISTANCE", playerResult);
             Assert.DoesNotContain("OPPONENT CURIOSITY", playerResult);
             Assert.DoesNotContain("opponent resists", playerResult);
             Assert.DoesNotContain("opponent probes", playerResult);
 
-            // BuildOpponent MUST contain opponent-only sections.
+            // BuildOpponent MUST contain all opponent-side sections.
             Assert.Contains("OPPONENT RESISTANCE", opponentResult);
             Assert.Contains("OPPONENT CURIOSITY", opponentResult);
+            Assert.Contains("CONVERSATION ARC", opponentResult);
             Assert.Contains("opponent resists", opponentResult);
             Assert.Contains("opponent probes", opponentResult);
+            Assert.Contains("both sides move", opponentResult);
 
-            // BuildPlayer still has non-opponent sections.
-            Assert.Contains("PLAYER PROBING", playerResult);
-            Assert.Contains("player follows", playerResult);
+            // BuildPlayer keeps shared structure + player-side sections.
             Assert.Contains("CONVERSATION ARC", playerResult);
             Assert.Contains("both sides move", playerResult);
+            Assert.Contains("PLAYER PROBING", playerResult);
+            Assert.Contains("player follows", playerResult);
 
             // Token ceiling: BuildPlayer must be shorter than BuildOpponent
             // (it excludes the two opponent-only sections).

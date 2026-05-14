@@ -82,9 +82,12 @@ namespace Pinder.LlmAdapters
                 def.DramaticCraft != null ? def.DramaticCraft.BuildSection().TrimEnd() : "",
                 string.IsNullOrWhiteSpace(def.TextingPsychology) ? "" : "\n\n== TEXTING PSYCHOLOGY ==\n\n" + def.TextingPsychology.TrimEnd(),
                 string.IsNullOrWhiteSpace(def.RevelationOverStatement) ? "" : "\n\n== REVELATION OVER STATEMENT ==\n\n" + def.RevelationOverStatement.TrimEnd(),
-                // OpponentFriction, OpponentCuriosity, and ConversationArcProgression
-                // are opponent-only sections describing how the opponent should behave.
-                // Stripped from BuildPlayer (#867) to save ~1,400 tokens per call.
+                // #867: OpponentFriction and OpponentCuriosity describe how the
+                // opponent should behave — stripped from BuildPlayer to save
+                // ~1,000 tokens per delivery call. ConversationArcProgression
+                // is shared structure relevant to both sides, kept here.
+                // PlayerProbing is player-specific guidance, kept here.
+                string.IsNullOrWhiteSpace(def.ConversationArcProgression) ? "" : "\n\n== CONVERSATION ARC ==\n\n" + def.ConversationArcProgression.TrimEnd(),
                 string.IsNullOrWhiteSpace(def.PlayerProbing) ? "" : "\n\n== PLAYER PROBING ==\n\n" + def.PlayerProbing.TrimEnd(),
                 "\n");
         }
