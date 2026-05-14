@@ -128,8 +128,9 @@ namespace Pinder.LlmAdapters
         }
 
         /// <summary>
-        /// Register every archetype behavior found in <paramref name="catalog"/>
-        /// with <see cref="ArchetypeCatalog.RegisterBehavior"/>.
+        /// Wire <see cref="ArchetypeCatalog.BehaviorResolver"/> so
+        /// <see cref="ArchetypeCatalog.GetBehavior"/> prefers the yaml
+        /// catalog over the embedded const strings.
         /// </summary>
         /// <remarks>
         /// <para>
@@ -142,10 +143,16 @@ namespace Pinder.LlmAdapters
         /// <c>templates.yaml</c>) are silently skipped since they won't match
         /// any archetype name.
         /// </para>
+        /// <para>
+        /// The resolver delegate is the single source of truth — there is no
+        /// longer a bulk <c>RegisterBehavior</c> loop because the resolver
+        /// provides the same outcome with fewer mutation points. Callers that
+        /// need to reset state after testing should save and restore
+        /// <see cref="ArchetypeCatalog.BehaviorResolver"/>.
+        /// </para>
         /// </remarks>
         /// <param name="catalog">A fully-loaded <see cref="PromptCatalog"/>.</param>
-        /// <returns>The number of behaviors registered.</returns>
-        public static int LoadFromPromptCatalog(PromptCatalog catalog)
+        public static void LoadFromPromptCatalog(PromptCatalog catalog)
         {
             if (catalog is null) throw new ArgumentNullException(nameof(catalog));
 
@@ -154,20 +161,6 @@ namespace Pinder.LlmAdapters
             // boundary between Pinder.Core and Pinder.LlmAdapters).
             ArchetypeCatalog.BehaviorResolver = name =>
                 catalog.TryGet(name)?.SystemPrompt;
-
-            // Also bulk-register so the _behaviors dictionary stays
-            // up-to-date (belt-and-suspenders with the resolver).
-            int registered = 0;
-            foreach (var name in catalog.Names)
-            {
-                var entry = catalog.TryGet(name);
-                if (entry == null || string.IsNullOrWhiteSpace(entry.SystemPrompt))
-                    continue;
-
-                ArchetypeCatalog.RegisterBehavior(name, entry.SystemPrompt!);
-                registered++;
-            }
-            return registered;
         }
 
         private static string? GetScalar(YamlMappingNode mapping, string key)

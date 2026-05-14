@@ -26,10 +26,13 @@ namespace Pinder.Core.Tests
     /// parses <c>archetypes-enriched.yaml</c> (a sequence-based format);
     /// <see cref="ArchetypeYamlLoader.LoadFromPromptCatalog"/> is the new
     /// entrypoint for the consolidated <c>PromptCatalog</c>-format yaml under
-    /// <c>data/prompts/</c>. Both paths call <see cref="ArchetypeCatalog.RegisterBehavior"/>
-    /// which overwrites the static-initialiser entries. No duplicate path remains.
+    /// <c>data/prompts/</c>. The PromptCatalog path wires a
+    /// <see cref="ArchetypeCatalog.BehaviorResolver"/> delegate rather than
+    /// bulk-calling <see cref="ArchetypeCatalog.RegisterBehavior"/>, avoiding
+    /// duplicate state mutation.
     /// </summary>
     [Trait("Category", "PromptCatalog")]
+    [Collection("BehaviorResolver")]
     public class Issue873_ArchetypeCatalogPhase4Tests
     {
         // ----- repo helpers ---------------------------------------------------
@@ -100,18 +103,23 @@ namespace Pinder.Core.Tests
             Assert.NotNull(constBehavior);
             Assert.NotEmpty(constBehavior);
 
-            // Load from yaml via PromptCatalog.
-            var catalog = PromptCatalog.LoadFromDirectory(PromptsRoot);
-            int registered = ArchetypeYamlLoader.LoadFromPromptCatalog(catalog);
+            var prior = ArchetypeCatalog.BehaviorResolver;
+            try
+            {
+                // Load from yaml via PromptCatalog.
+                var catalog = PromptCatalog.LoadFromDirectory(PromptsRoot);
+                ArchetypeYamlLoader.LoadFromPromptCatalog(catalog);
 
-            Assert.True(registered >= 20,
-                $"expected >=20 registered behaviors, got {registered}");
+                // Read back — should be byte-identical to const fallback.
+                string fromYaml = ArchetypeCatalog.GetBehavior("The Hey Opener");
 
-            // Read back — should be byte-identical to const fallback.
-            string fromYaml = ArchetypeCatalog.GetBehavior("The Hey Opener");
-
-            // Exact byte-for-byte comparison — no whitespace normalisation.
-            Assert.Equal(constBehavior, fromYaml);
+                // Exact byte-for-byte comparison — no whitespace normalisation.
+                Assert.Equal(constBehavior, fromYaml);
+            }
+            finally
+            {
+                ArchetypeCatalog.BehaviorResolver = prior;
+            }
         }
 
         // ----- BehaviorResolver delegate (assembly-boundary crossing) --------
@@ -119,20 +127,28 @@ namespace Pinder.Core.Tests
         [Fact]
         public void BehaviorResolver_ReturnsYamlSourcedContent()
         {
-            var catalog = PromptCatalog.LoadFromDirectory(PromptsRoot);
-            ArchetypeYamlLoader.LoadFromPromptCatalog(catalog);
+            var prior = ArchetypeCatalog.BehaviorResolver;
+            try
+            {
+                var catalog = PromptCatalog.LoadFromDirectory(PromptsRoot);
+                ArchetypeYamlLoader.LoadFromPromptCatalog(catalog);
 
-            // After loading, the resolver should be wired.
-            Assert.NotNull(ArchetypeCatalog.BehaviorResolver);
+                // After loading, the resolver should be wired.
+                Assert.NotNull(ArchetypeCatalog.BehaviorResolver);
 
-            // The resolver delegate should return the yaml-sourced content.
-            string? resolved = ArchetypeCatalog.BehaviorResolver("The Ghost");
-            Assert.NotNull(resolved);
-            Assert.Contains("disappears without explanation", resolved);
+                // The resolver delegate should return the yaml-sourced content.
+                string? resolved = ArchetypeCatalog.BehaviorResolver("The Ghost");
+                Assert.NotNull(resolved);
+                Assert.Contains("disappears without explanation", resolved);
 
-            // Unknown archetype names should return null from the resolver
-            // (so GetBehavior falls through to the placeholder).
-            Assert.Null(ArchetypeCatalog.BehaviorResolver("NonexistentArchetype"));
+                // Unknown archetype names should return null from the resolver
+                // (so GetBehavior falls through to the placeholder).
+                Assert.Null(ArchetypeCatalog.BehaviorResolver("NonexistentArchetype"));
+            }
+            finally
+            {
+                ArchetypeCatalog.BehaviorResolver = prior;
+            }
         }
     }
 }
