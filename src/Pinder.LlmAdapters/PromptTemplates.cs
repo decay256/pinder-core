@@ -84,7 +84,7 @@ namespace Pinder.LlmAdapters
                 "MEDIUM RULE: " + mediumRule + "\n" +
                 "\n" +
                 registerInstruction + " Don't explain the success.\n" +
-                "HARD RULE: Do not append a new sentence or em-dash continuation to the end of the message. Do not make the message longer. Rewrite — do not extend.\n" +
+                "HARD RULE: Do not append a new sentence or em-dash continuation to the end of the message. Do not make the message longer. Do not split a single-paragraph message into multiple paragraphs. Rewrite — do not extend.\n" +
                 "Output only the message text.";
         }
 
