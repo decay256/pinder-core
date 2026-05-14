@@ -12,18 +12,16 @@ using Xunit;
 namespace Pinder.Core.Tests
 {
     /// <summary>
-    /// Issue #874 Phase 3: <see cref="PromptBuilder"/> structural strings
-    /// migrated to <c>data/prompts/structural.yaml</c>.
+    /// Issue #874 Phase 3 + #875 Phase 5: <see cref="PromptBuilder"/>
+    /// structural strings sourced exclusively from
+    /// <c>data/prompts/structural.yaml</c>.
     ///
-    /// What this file pins:
+    /// What this file pins (updated after Phase 5):
     /// - The loader parses <c>data/prompts/structural.yaml</c> into a
     ///   <see cref="PromptCatalog"/> with 7 expected entries.
-    /// - The yaml representation of
-    ///   <c>structural-identity</c> is byte-identical to the "IDENTITY"
-    ///   const (representative entry — the remaining 6 are caught by
-    ///   full-suite test coverage of the const-fallback code path).
-    /// - <see cref="PromptBuilder.StructuralFragmentLookup"/> prefers the
-    ///   catalog when set and falls back to the const otherwise.
+    /// - <see cref="PromptBuilder.StructuralFragmentLookup"/> MUST be wired
+    ///   before calling <see cref="PromptBuilder.BuildSystemPrompt"/> —
+    ///   a null or missing-key lookup throws <see cref="InvalidOperationException"/>.
     /// - When the lookup is wired, <see cref="PromptBuilder.BuildSystemPrompt"/>
     ///   emits the yaml-sourced section headers into the assembled prompt.
     /// </summary>
@@ -116,21 +114,23 @@ namespace Pinder.Core.Tests
             Assert.Equal(fromConst, fromYaml);
         }
 
-        // ----- StructuralFragmentLookup: fallback ----------------------------
+        // ----- StructuralFragmentLookup: must be wired (Phase 5) ------------
 
         [Fact]
-        public void BuildSystemPrompt_EmitsConstHeader_WhenLookupIsNull()
+        public void BuildSystemPrompt_Throws_WhenLookupIsNull()
         {
+            var prior = PromptBuilder.StructuralFragmentLookup;
             PromptBuilder.StructuralFragmentLookup = null;
-
-            string prompt = PromptBuilder.BuildSystemPrompt(
-                "TestChar", "they/them", null, EmptyFragments, new TrapState());
-
-            Assert.Contains("IDENTITY", prompt);
-            Assert.Contains("PERSONALITY", prompt);
-            Assert.Contains("BACKSTORY", prompt);
-            Assert.Contains("TEXTING STYLE", prompt);
-            Assert.Contains("ACTIVE ARCHETYPE", prompt);
+            try
+            {
+                Assert.Throws<InvalidOperationException>(() =>
+                    PromptBuilder.BuildSystemPrompt(
+                        "TestChar", "they/them", null, EmptyFragments, new TrapState()));
+            }
+            finally
+            {
+                PromptBuilder.StructuralFragmentLookup = prior;
+            }
         }
 
         // ----- StructuralFragmentLookup: catalog-sourced ---------------------
@@ -138,6 +138,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void BuildSystemPrompt_EmitsYamlHeader_WhenLookupIsSet()
         {
+            var prior = PromptBuilder.StructuralFragmentLookup;
             var catalog = LoadCatalog();
             PromptBuilder.StructuralFragmentLookup = key => catalog.TryGet(key)?.SystemPrompt;
 
@@ -146,7 +147,7 @@ namespace Pinder.Core.Tests
                 string prompt = PromptBuilder.BuildSystemPrompt(
                     "TestChar", "they/them", null, EmptyFragments, new TrapState());
 
-                // Headers from yaml must appear (byte-identical to consts).
+                // Headers from yaml must appear.
                 Assert.Contains("IDENTITY", prompt);
                 Assert.Contains("PERSONALITY", prompt);
                 Assert.Contains("BACKSTORY", prompt);
@@ -159,28 +160,26 @@ namespace Pinder.Core.Tests
             }
             finally
             {
-                PromptBuilder.StructuralFragmentLookup = null;
+                PromptBuilder.StructuralFragmentLookup = prior;
             }
         }
 
         [Fact]
-        public void BuildSystemPrompt_ReturnsFallback_WhenKeyNotFound()
+        public void BuildSystemPrompt_Throws_WhenKeyNotFound()
         {
+            var prior = PromptBuilder.StructuralFragmentLookup;
             // Simulate a catalog that doesn't have the structural keys.
             PromptBuilder.StructuralFragmentLookup = _ => null;
 
             try
             {
-                string prompt = PromptBuilder.BuildSystemPrompt(
-                    "TestChar", "they/them", null, EmptyFragments, new TrapState());
-
-                // Should emit const fallbacks.
-                Assert.Contains("IDENTITY", prompt);
-                Assert.Contains("PERSONALITY", prompt);
+                Assert.Throws<InvalidOperationException>(() =>
+                    PromptBuilder.BuildSystemPrompt(
+                        "TestChar", "they/them", null, EmptyFragments, new TrapState()));
             }
             finally
             {
-                PromptBuilder.StructuralFragmentLookup = null;
+                PromptBuilder.StructuralFragmentLookup = prior;
             }
         }
     }

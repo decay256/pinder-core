@@ -12,6 +12,9 @@ namespace Pinder.LlmAdapters.Tests
 {
     public class SessionDocumentBuilderTests
     {
+        // Catalog wiring lives in LlmAdaptersTestWiring.ModuleInitializer
+        // (runs at assembly load before any test).
+
         // ── Helpers ──
 
         private static DialogueContext MakeDialogueContext(

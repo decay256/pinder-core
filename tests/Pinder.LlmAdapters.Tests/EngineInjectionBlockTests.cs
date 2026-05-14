@@ -13,6 +13,28 @@ namespace Pinder.LlmAdapters.Tests
     /// </summary>
     public class EngineInjectionBlockTests
     {
+        // Wire prompt catalog once for all tests (Phase 5 of #871: no const fallbacks).
+        static EngineInjectionBlockTests()
+        {
+            var dir = AppDomain.CurrentDomain.BaseDirectory;
+            for (int i = 0; i < 10; i++)
+            {
+                var candidate = System.IO.Path.Combine(dir, "data", "prompts");
+                if (System.IO.Directory.Exists(candidate))
+                {
+                    var catalog = Pinder.LlmAdapters.PromptCatalog.LoadFromDirectory(candidate);
+                    Pinder.LlmAdapters.PromptTemplates.Catalog = catalog;
+                    Pinder.Core.Prompts.PromptBuilder.StructuralFragmentLookup =
+                        key => catalog.TryGet(key)?.SystemPrompt;
+                    Pinder.LlmAdapters.ArchetypeYamlLoader.LoadFromPromptCatalog(catalog);
+                    return;
+                }
+                var parent = System.IO.Path.GetDirectoryName(dir);
+                if (parent == null || parent == dir) break;
+                dir = parent;
+            }
+        }
+
         // ── Helpers ──
 
         private static DialogueContext MakeDialogueContext(

@@ -12,48 +12,48 @@ namespace Pinder.Core.Prompts
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Issue #874 Phase 3: structural prompt fragments (section headers +
-    /// lead-in line) have been lifted into
-    /// <c>data/prompts/structural.yaml</c>. When
-    /// <see cref="StructuralFragmentLookup"/> is set, fragments are sourced
-    /// from the yaml catalog; otherwise the embedded const strings serve as
-    /// the default. Phase 5 (#875) removes the const fallbacks once every
-    /// call-site is wired.
+    /// Issue #871 Phase 5 (#875): all const-string prompt content has been
+    /// deleted. Structural prompt fragments are now sourced exclusively from
+    /// the yaml catalog via the <see cref="StructuralFragmentLookup"/>
+    /// delegate, which MUST be wired at startup (typically by
+    /// <c>PromptWiring.Wire()</c>).
     /// </para>
     /// <para>
     /// Because PromptBuilder lives in <c>Pinder.Core</c> (which cannot
     /// reference <c>Pinder.LlmAdapters</c> without creating a circular
     /// dependency), the lookup is a delegate rather than a typed
-    /// <c>PromptCatalog</c> reference. The startup code in
-    /// <c>Pinder.SessionSetup</c> (which has access to the catalog) wires the
-    /// delegate at bootstrap time.
+    /// <c>PromptCatalog</c> reference.
     /// </para>
     /// </remarks>
     public static class PromptBuilder
     {
         /// <summary>
-        /// Optional catalog lookup for structural prompt fragments. Keys are
-        /// kebab-case (e.g. <c>"structural-lead-in"</c>,
-        /// <c>"structural-identity"</c>). Set this from startup code that has
-        /// access to <c>PromptCatalog</c>. When null or returns null/empty,
-        /// the embedded const strings in this class are used as fallbacks.
-        /// Phase 5 (#875) removes the const fallbacks.
+        /// Resolves structural prompt fragments from the yaml catalog.
+        /// Keys are kebab-case (e.g. <c>"structural-lead-in"</c>,
+        /// <c>"structural-identity"</c>). Set at startup (typically by
+        /// <c>PromptWiring.Wire()</c>). After Phase 5 of #871, null
+        /// or missing keys cause <see cref="BuildSystemPrompt"/> to throw
+        /// — there are no embedded const fallbacks.
         /// </summary>
-        /// <remarks>
-        /// Typical wiring from Pinder.SessionSetup startup:
-        /// <c>PromptBuilder.StructuralFragmentLookup = key => catalog?.TryGet(key)?.SystemPrompt;</c>
-        /// </remarks>
         public static Func<string, string?>? StructuralFragmentLookup { get; set; }
 
         /// <summary>
-        /// Resolve a structural fragment by name. Returns the yaml-sourced
-        /// string when the lookup delegate is set and the key exists;
-        /// otherwise returns <paramref name="constFallback"/>.
+        /// Resolve a structural fragment by name. Throws when the lookup
+        /// delegate is not wired or the key is missing — after Phase 5
+        /// there are no const fallbacks.
         /// </summary>
-        private static string TryGetHeader(string key, string constFallback)
+        private static string GetHeader(string key)
         {
-            var fromCatalog = StructuralFragmentLookup?.Invoke(key);
-            return !string.IsNullOrWhiteSpace(fromCatalog) ? fromCatalog! : constFallback;
+            var lookup = StructuralFragmentLookup
+                ?? throw new InvalidOperationException(
+                    $"PromptBuilder.StructuralFragmentLookup is not wired. " +
+                    $"Call PromptWiring.Wire() at startup. (key: '{key}')");
+            var value = lookup(key);
+            return !string.IsNullOrWhiteSpace(value)
+                ? value!
+                : throw new InvalidOperationException(
+                    $"prompt-catalog: missing required key '{key}'. " +
+                    $"Check data/prompts/structural.yaml.");
         }
 
         /// <summary>
@@ -87,70 +87,35 @@ namespace Pinder.Core.Prompts
 
             var sb = new StringBuilder();
 
-            // Header
-            const string fallbackLeadIn =
-                "You are playing the role of {name}, a sentient penis on the dating app Pinder.";
-            string leadInTemplate = TryGetHeader("structural-lead-in", fallbackLeadIn);
+            // Header — sourced from structural.yaml, no fallback.
+            string leadInTemplate = GetHeader("structural-lead-in");
             sb.AppendLine(leadInTemplate.Replace("{name}", displayName));
             sb.AppendLine();
 
             // IDENTITY
-            sb.AppendLine(TryGetHeader("structural-identity", "IDENTITY"));
+            sb.AppendLine(GetHeader("structural-identity"));
             sb.AppendLine($"- Gender identity: {genderIdentity}");
             sb.AppendLine($"- Bio: {(string.IsNullOrWhiteSpace(bioOneLiner) ? "none" : bioOneLiner)}");
             sb.AppendLine();
 
             // PERSONALITY
-            // #833: emit as a bullet list (one fragment per line) instead
-            // of a `" | "`-joined prose blob. Easier for the LLM to scan,
-            // easier to provenance back to the originating item / anatomy
-            // when a fragment surfaces verbatim in delivered text.
-            sb.AppendLine(TryGetHeader("structural-personality", "PERSONALITY"));
+            sb.AppendLine(GetHeader("structural-personality"));
             AppendBulletList(sb, fragments.PersonalityFragments);
             sb.AppendLine();
 
             // BACKSTORY
-            // #833: emit as a bullet list. Was newline-joined (closer to
-            // bulleted than the other sections) but make it explicit so
-            // the leading `- ` marker is consistent across every
-            // multi-fragment section.
-            sb.AppendLine(TryGetHeader("structural-backstory", "BACKSTORY"));
+            sb.AppendLine(GetHeader("structural-backstory"));
             AppendBulletList(sb, fragments.BackstoryFragments);
             sb.AppendLine();
 
             // TEXTING STYLE
-            // #836 placeholder aggregation: anatomy is excluded from this
-            // channel and only up to 2 item fragments are kept (deterministic
-            // pick keyed on characterIdSeed). The full per-source list on
-            // FragmentCollection.TextingStyleSources is unaffected — the
-            // Character Sheet UI still renders every fragment.
-            //
-            // #833: AggregateAsList returns the picked fragments as an
-            // ordered list so we can bullet-format them here, consistent
-            // with PERSONALITY / BACKSTORY. The legacy `Aggregate` (joined
-            // string) is still available for delivery context
-            // (CharacterProfile.TextingStyleFragment).
-            sb.AppendLine(TryGetHeader("structural-texting-style", "TEXTING STYLE"));
+            sb.AppendLine(GetHeader("structural-texting-style"));
             AppendBulletList(sb, TextingStyleAggregator.AggregateAsList(
                 fragments.TextingStyleSources, characterIdSeed));
             sb.AppendLine();
 
-            // ACTIVE ARCHETYPE (#832): emit only the level-eligible top-ranked
-            // archetype with its full behavior text. The ranked-list of every
-            // archetype the character has any tendency vote for was noise —
-            // the LLM had no way to tell which were level-eligible vs.
-            // pre-cap or post-cap, and the bare names without behavior text
-            // forced the model to use training-data priors. The active
-            // archetype's behavior block (sourced from
-            // ArchetypeCatalog._behaviors / archetypes-enriched.yaml §2) is
-            // rich, load-bearing, and includes sample lines — exactly the
-            // texture the dialogue model needs.
-            //
-            // Fallback: when ResolveActiveArchetype returns null (legacy /
-            // under-leveled / no archetype votes), emit a single-line
-            // marker so the prompt stays well-formed and downstream parsers
-            // (e.g. system-prompt-shape tests) still find the section.
-            sb.AppendLine(TryGetHeader("structural-active-archetype", "ACTIVE ARCHETYPE"));
+            // ACTIVE ARCHETYPE
+            sb.AppendLine(GetHeader("structural-active-archetype"));
             if (fragments.ActiveArchetype != null)
             {
                 var aa = fragments.ActiveArchetype;
@@ -180,7 +145,7 @@ namespace Pinder.Core.Prompts
                 if (!hasActiveHeader)
                 {
                     sb.AppendLine();
-                    sb.AppendLine(TryGetHeader("structural-active-trap-instructions", "ACTIVE TRAP INSTRUCTIONS"));
+                    sb.AppendLine(GetHeader("structural-active-trap-instructions"));
                     hasActiveHeader = true;
                 }
                 sb.AppendLine(trap.Definition.LlmInstruction);

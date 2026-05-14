@@ -148,11 +148,21 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public void ArchetypeCatalog_GetBehavior_ReturnsPlaceholderForUnknown()
+        public void ArchetypeCatalog_GetBehavior_ReturnsGenericInstruction_ForUnknown()
         {
-            var behavior = ArchetypeCatalog.GetBehavior("Unknown Archetype XYZ");
-            Assert.Contains("Unknown Archetype XYZ", behavior);
-            Assert.Contains("behavioral pattern", behavior);
+            // After Phase 5 of #871, unknown archetypes get a dynamic
+            // (non-const) generic instruction rather than a hardcoded placeholder.
+            var prior = ArchetypeCatalog.BehaviorResolver;
+            try
+            {
+                ArchetypeCatalog.BehaviorResolver = null;
+                var behavior = ArchetypeCatalog.GetBehavior("Unknown Archetype XYZ");
+                Assert.Contains("'Unknown Archetype XYZ'", behavior);
+            }
+            finally
+            {
+                ArchetypeCatalog.BehaviorResolver = prior;
+            }
         }
 
         [Fact]

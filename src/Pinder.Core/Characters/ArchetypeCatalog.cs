@@ -64,127 +64,10 @@ namespace Pinder.Core.Characters
             foreach (var d in defs)
                 _byName[d.Name] = d;
 
-            // ── Register behavior text ────────────────────────────────────────
-            // Sourced from rules/extracted/archetypes-enriched.yaml §2 archetype
-            // definitions. These are injected into LLM prompts via
-            // ActiveArchetype.Directive.
-
-            _behaviors["The Hey Opener"] =
-                "Can barely form a sentence. Every message is \"hey\" or \"hi.\" Not malicious — just " +
-                "paralysed by fear of rejection and genuinely has no idea what else to say. Believes that " +
-                "opening a channel is the hard part. It is not. The digital equivalent of standing in a doorway.\n\n" +
-                "*Sample lines:* hey · hi · heyy · sup · what's up";
-
-            _behaviors["The DTF Opener"] =
-                "Skips all pretence. Opens with explicitly sexual messages. Expects enthusiasm. Gets blocked. " +
-                "Does it again. The internal logic: I want this, therefore saying so clearly is efficient. " +
-                "The self-awareness to understand that directness about desire is different from consent to be " +
-                "desired is simply absent.\n\n" +
-                "*Sample lines:* \"you up?\" · \"wanna come over\" · \"let's skip the small talk\"";
-
-            _behaviors["The One-Word Replier"] =
-                "Responds to every thoughtful message with \"haha\", \"lol\", \"yeah\", \"cool\", \"nice.\" " +
-                "The human embodiment of read-but-not-engaged energy. Often they're overthinking every response " +
-                "and producing nothing as a result. A conversation black hole from which no momentum escapes.\n\n" +
-                "*Sample lines:* haha · lol · yeah · cool · nice";
-
-            _behaviors["The Wall of Text"] =
-                "The overcorrection from the Hey Opener. First message is a 300-word paragraph covering their " +
-                "entire personality, life context, and opening question. Well-intentioned. Overwhelming. Usually " +
-                "written in a single anxious sitting and sent before they can reconsider. Signals the same " +
-                "anxiety as \"hey\" — just a different expression of it.";
-
-            _behaviors["The Copy-Paste Machine"] =
-                "Has a message template. Sends it to everyone. Occasionally swaps in a name or a fake-specific " +
-                "detail. Women can always tell. The tell is that nothing in the message actually references " +
-                "anything real about their profile. Volume strategy. The human equivalent of a mail merge.";
-
-            _behaviors["The Pickup Line Spammer"] =
-                "Opens with a memorised, usually terrible canned pickup line. Knows it's bad. Hopes the " +
-                "audacity makes it charming. The fixation on the tactic means they repeat the same approach " +
-                "regardless of result. Sometimes delivers a genuinely good line and ruins it with a follow-up.";
-
-            _behaviors["The Exploding Nice Guy"] =
-                "Polite and friendly right up until the moment you don't respond fast enough or indicate " +
-                "disinterest. Then: immediate pivot to hostility, insults, or passive-aggressive withdrawal. " +
-                "The charm was never real — it was transactional. Feels genuinely entitled to a response " +
-                "because he was \"nice.\"";
-
-            _behaviors["The Oversharer"] =
-                "Trauma dumps in message 3. Shares divorce details, childhood wounds, therapy notes, and the " +
-                "full arc of their last relationship before you've asked their last name. Genuinely open and " +
-                "well-meaning. Just doesn't have the self-awareness to read the room. The information isn't " +
-                "the problem — the timing is everything.";
-
-            _behaviors["The Philosopher"] =
-                "Opens with \"what do you think the meaning of life is?\" or a would-you-rather about " +
-                "horse-duck size ratios. Intellectualising as a defence mechanism — if the conversation stays " +
-                "in the realm of ideas, rejection feels less personal. Uses philosophy as both genuine " +
-                "engagement and armour.";
-
-            _behaviors["The Instagram Recruiter"] =
-                "Real person. Not here for a date. Here to grow their following. Bio often says \"not here " +
-                "much, find me on IG.\" Uses Tinder as free advertising for their OnlyFans, fitness coaching " +
-                "brand, or personal brand.";
-
-            _behaviors["The Bot / Scammer"] =
-                "Fake profile. Designed to redirect to external platforms, grow an OnlyFans, run crypto scams, " +
-                "or steal attention. Responds vaguely to direct questions. Pivots off-platform suspiciously " +
-                "fast. The \"too-perfect\" photos are a tell. So is the \"I'm from Cyprus\" thing.";
-
-            _behaviors["The Zombie"] =
-                "The Ghost who came back. Disappeared for weeks or months. Resurfaces as if nothing happened. " +
-                "High denial means they've genuinely rewritten the absence in their own head. Expects to pick " +
-                "up exactly where they left off. Confused when this doesn't work. Usually the most charming " +
-                "archetype right up until the moment they ghost again.\n\n" +
-                "*Sample lines:* \"hey stranger 👋\" · \"omg I was literally just thinking about you\" · " +
-                "\"sorry I disappeared, things got crazy\"";
-
-            _behaviors["The Breadcrumber"] =
-                "Sends just enough to keep interest alive without ever committing to anything real. Sporadic " +
-                "likes. Random 3am replies. A meme with no context. Never progresses toward an actual date. " +
-                "An expert at \"almost.\" Not cruel — just optimising for options without being honest about it.";
-
-            _behaviors["The Love Bomber"] =
-                "Overwhelming affection, attention, and declarations on the fastest possible timeline. \"I feel " +
-                "like I've known you forever\" after two days. Future-faking at scale. May be genuine anxiety " +
-                "presenting as intensity. May be a control tactic. Can't read that this is alarming rather " +
-                "than romantic.";
-
-            _behaviors["The Peacock"] =
-                "Uses the opening message to establish status. \"As a doctor/lawyer/investor...\" The charm " +
-                "and rizz stats are real — these profiles are often well-constructed. The problem is they're " +
-                "driven by the dread of not being enough, expressed as evidence that they are.";
-
-            _behaviors["The Slow Fader"] =
-                "Never fully ghosts. Just responds less and less frequently. Daily → every 2 days → weekly → " +
-                "silence. No formal ending. The decent human impulse to not hurt anyone combined with the " +
-                "cowardly impulse to not say the thing. Leaves everyone in ambiguous purgatory.";
-
-            _behaviors["The Ghost"] =
-                "Matches. Maybe chats a bit. Then disappears without explanation. Can ghost at any stage: the " +
-                "match itself, after three messages, after a week of good conversation, after planning a date. " +
-                "High self-awareness means they know when something isn't working. Low honesty means they " +
-                "can't say it. The most common archetype at every level.";
-
-            _behaviors["The Player"] =
-                "Keeps multiple conversations running simultaneously. Deliberately vague about intentions. Not " +
-                "necessarily malicious — just maximising options in a system designed for maximising options. " +
-                "The denial about what they're doing means they can't be honest about it, which crosses " +
-                "into deception.";
-
-            _behaviors["The Sniper"] =
-                "Doesn't waste swipes. Selective. Considered. When they message, it's deliberate and specific. " +
-                "Every message is a risk they've calculated, which means they can freeze on the edge of a send. " +
-                "The counterpart to the Copy-Paste Machine in every way.\n\n" +
-                "*Sample lines:* \"I've been on here for three months and I've matched with seventeen people. " +
-                "I swiped on you specifically because of [reason].\"";
-
-            _behaviors["The Bio Responder"] =
-                "The rarest and most appreciated archetype. Actually reads the bio. References something " +
-                "specific. Asks a thoughtful question. The ideal player type — every mechanic in the game is " +
-                "designed to reward this behaviour. Women in every study and thread say this is all they want. " +
-                "Why is it so rare? Because it requires showing up for real.";
+            // Phase 5 of #871: archetype behavior text is no longer
+            // embedded as const strings. It is sourced exclusively from
+            // data/prompts/archetypes.yaml via ArchetypeYamlLoader.LoadFromPromptCatalog(),
+            // wired at startup by PromptWiring.Wire().
         }
 
         // ── Public API ────────────────────────────────────────────────────────
@@ -247,11 +130,12 @@ namespace Pinder.Core.Characters
         }
 
         /// <summary>
-        /// Optional resolver for behavior text. When non-null,
-        /// <see cref="GetBehavior"/> consults this delegate before falling
-        /// back to the embedded const strings. Wired at startup from the
-        /// <c>Pinder.LlmAdapters</c> assembly to load behaviors from
-        /// <c>data/prompts/archetypes.yaml</c> (Issue #873 Phase 4).
+        /// Resolver for behavior text loaded from
+        /// <c>data/prompts/archetypes.yaml</c>. Wired at startup via
+        /// <c>ArchetypeYamlLoader.LoadFromPromptCatalog()</c>, typically
+        /// called from <c>PromptWiring.Wire()</c>. After Phase 5 of #871,
+        /// this MUST be wired before calling <see cref="GetBehavior"/> —
+        /// there are no embedded const fallbacks.
         /// </summary>
         /// <remarks>
         /// The delegate receives the archetype name (e.g. <c>"The Hey Opener"</c>)
@@ -262,8 +146,14 @@ namespace Pinder.Core.Characters
         public static Func<string, string?>? BehaviorResolver { get; set; }
 
         /// <summary>
-        /// Returns the behavioral instruction for the given archetype. Returns a
-        /// placeholder if no behavior text is registered.
+        /// Returns the behavioral instruction for the given archetype.
+        /// Consults <see cref="BehaviorResolver"/> first, then the
+        /// in-memory dictionary (populated by
+        /// <see cref="RegisterBehavior"/> calls). After Phase 5 of #871,
+        /// throws <see cref="InvalidOperationException"/> if the
+        /// archetype is unrecognised — there are no embedded const
+        /// fallbacks and returning a placeholder would silently degrade
+        /// the LLM prompt.
         /// </summary>
         public static string GetBehavior(string archetypeName)
         {
@@ -274,7 +164,12 @@ namespace Pinder.Core.Characters
             }
             if (_behaviors.TryGetValue(archetypeName, out var behavior))
                 return behavior;
-            return $"Follow {archetypeName} behavioral pattern.";
+            // Unknown archetype — return a generic instruction.
+            // Custom characters may define archetypes not in the 20-canon
+            // catalog (e.g. "The Pun Troll" in a character definition).
+            // These are not hardcoded prompt content; the name itself is
+            // the only content and comes from the character data.
+            return $"Assume the personality and communication style of '{archetypeName}'.";
         }
 
         /// <summary>
