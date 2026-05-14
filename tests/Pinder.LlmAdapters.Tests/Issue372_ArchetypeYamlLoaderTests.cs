@@ -47,7 +47,7 @@ namespace Pinder.LlmAdapters.Tests
 
             // The non-archetype block must NOT have been registered.
             string headerBehavior = ArchetypeCatalog.GetBehavior("Header");
-            Assert.Contains("behavioral pattern", headerBehavior); // bare placeholder
+            Assert.Contains("Assume the personality", headerBehavior); // dynamic fallback
         }
 
         [Fact]

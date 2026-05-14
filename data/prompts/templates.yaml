@@ -12,29 +12,37 @@ schema_version: 1
 # corresponding C# consts until Phase 5 (#875) deletes them.
 
 prompts:
+
   default-clean:
     system_prompt: >-
       deliver essentially as written. Small word choice improvements only.
-  default-critical:
-    system_prompt: >-
-      deliver at peak. The message arrives perfectly. Something resonates.
-  default-exceptional:
-    system_prompt: >-
-      this is the best version of this message that could exist. It arrives at exactly the right moment with exactly the right weight. The opponent feels it.
-  default-medium-rule:
-    system_prompt: >-
-      This is a text message on a phone screen, not a monologue. No internal stage directions, no narration of emotional state, no self-commentary mid-message.
-  default-register-instruction:
-    system_prompt: >-
-      Stay in character. Match the texting register from the character profile above. Do not change the character's capitalization style. Before finalizing: check the conversation above for any word, filler phrase, or emoji the character used in the previous 2 messages — do not repeat them here. Each delivered message should feel like a fresh move.
+
   default-strong:
     system_prompt: |-
       rewrite the intended message so it lands harder. The same idea, in the same voice, with sharper word choice and better timing.
         You must NOT: append a new sentence at the end, add an em-dash continuation, or extend the message beyond what the player wrote.
         The delivered version should be the same length or shorter than the intended version. If you add a word, you should cut a different word. Rewrite, do not extend.
+
+  default-critical:
+    system_prompt: >-
+      deliver at peak. The message arrives perfectly. Something resonates.
+
+  default-exceptional:
+    system_prompt: >-
+      this is the best version of this message that could exist. It arrives at exactly the right moment with exactly the right weight. The opponent feels it.
+
   default-test:
     system_prompt: >-
       The test: the delivered version must not be longer than the intended version. Every sentence in the delivered version must have a counterpart in the intended version. Do not append. Do not extend. Rewrite.
+
+  default-register-instruction:
+    system_prompt: >-
+      Stay in character. Match the texting register from the character profile above. Do not change the character's capitalization style. Before finalizing: check the conversation above for any word, filler phrase, or emoji the character used in the previous 2 messages — do not repeat them here. Each delivered message should feel like a fresh move.
+
+  default-medium-rule:
+    system_prompt: >-
+      This is a text message on a phone screen, not a monologue. No internal stage directions, no narration of emotional state, no self-commentary mid-message.
+
   dialogue-options-instruction:
     system_prompt: |-
       Generate exactly 3 dialogue options for {player_name}.
@@ -85,24 +93,7 @@ prompts:
       SIMILARLY: when the player character's PSYCHOLOGICAL STAKE contains specific backstory (a named relationship, a year, an event), at least one option per session should reveal that concrete detail naturally. Characters who only share feelings without sharing facts never feel real. 'I spent four years with someone who thought intensity was a personality defect, and then at my cousin's engagement party I realised I'd been making myself smaller the whole time' is a revelation. 'I've been told I'm too much' is not.
       
       WORD & PATTERN REPETITION — check all delivered messages above before writing options. Do not repeat: (a) the same filler words or phrases used in the previous 2 messages ('honestly', 'literally', 'actually', 'okay but', etc.), (b) the same emoji used in the previous message, (c) the same structural pattern (e.g. 'wait...???', 'omg...\U0001f62d', 'I literally just realized...') used in the last 2 messages. Each option should feel like a new move, not a variation on the last one.
-  engine-delivery-block:
-    system_prompt: |-
-      [ENGINE — DELIVERY]
-      Player chose: '{chosen_option}'
-      Dice result: {roll_context}
-      Write the message {player_name} actually sends, given the above.
-  engine-opponent-block:
-    system_prompt: |-
-      [ENGINE — OPPONENT]
-      {opponent_name} is at Interest {interest}/25. {interest_narrative}
-      Write {opponent_name}'s response.
-  engine-options-block:
-    system_prompt: |-
-      [ENGINE — Turn {turn}]
-      {player_name} is deciding what to send next.
-      {game_state}
-      Generate 3 options for what {player_name} might send, given the conversation above.
-      Format: OPTION_A: [message] OPTION_B: [message] etc.
+
   failure-delivery-instruction:
     system_prompt: |-
       You are writing as {player_name}. This is THEIR message, in THEIR voice.
@@ -180,69 +171,7 @@ prompts:
       
       Output ONLY the delivered message text. No quotes. No explanation. No framing.
       The character sent this.
-  interest-beat-above15:
-    system_prompt: >-
-      Generate a brief reaction — one sentence or a small gesture — showing {opponent_name} becoming more invested. Subtle. Not a proclamation. A shift in energy.
-  interest-beat-below8:
-    system_prompt: >-
-      Generate a brief cooling signal — one sentence or a small gesture — showing {opponent_name} pulling back slightly. Not dramatic. Just a temperature change.
-  interest-beat-date-secured:
-    system_prompt: |-
-      Generate a brief moment where {opponent_name} suggests or implies meeting up.
-      In character. Not ''do you want to go on a date?'' — something specific to them.
-      
-      Rules:
-      - Reference something concrete from the conversation above (a specific detail, running joke, or shared reference)
-      - Use the location or activity that makes sense for this character's personality
-      - Keep it to 1-2 sentences — a suggestion, not a monologue
-      - This is a text message on a dating app — no stage directions, no internal thoughts
-      - The suggestion should feel earned by the conversation, not generic
-  interest-beat-generic:
-    system_prompt: >-
-      Generate a brief reaction from {opponent_name} reflecting the change in interest. Subtle and in character.
-  interest-beat-instruction:
-    system_prompt: |-
-      {opponent_name}'s Interest just moved from {interest_before} to {interest_after}.
-      
-      {threshold_instruction}
-      
-      Output only the message or gesture text.
-  interest-beat-unmatched:
-    system_prompt: >-
-      Generate {opponent_name} unmatching — one final message or simply going silent. In character. No villain speech. Just a door closing.
-  interest-narrative-1-4:
-    system_prompt: >-
-      Reconsidering. Something went wrong.
-  interest-narrative-10-14:
-    system_prompt: >-
-      Engaged but not sold. Evaluating.
-  interest-narrative-15-20:
-    system_prompt: >-
-      Interested but holding back. Close.
-  interest-narrative-21-24:
-    system_prompt: >-
-      Basically sold. They can still blow it.
-  interest-narrative-25:
-    system_prompt: >-
-      The resistance dissolved.
-  interest-narrative-5-9:
-    system_prompt: >-
-      Skeptical. Still testing.
-  opponent-reaction-catastrophe:
-    system_prompt: >-
-      Their last message was a disaster. Something in it was genuinely confusing or uncomfortable. Your response reflects real discomfort — shorter, cooler, possibly questioning. The vibe has taken a visible hit. Do NOT explain what went wrong. Just let your reaction show it.
-  opponent-reaction-fumble:
-    system_prompt: >-
-      Something was slightly off about their last message — a small hedge, an awkward word choice. You almost didn't notice. React with a slight coolness or a question that shows you caught the minor stumble. Do NOT comment on it directly.
-  opponent-reaction-legendary:
-    system_prompt: >-
-      Their last message was spectacularly bad — the kind of message you screenshot and send to your friends. Your response reflects genuine shock, confusion, or secondhand embarrassment. The temperature in this conversation just dropped to freezing. Do NOT narrate your reaction. Just react.
-  opponent-reaction-misfire:
-    system_prompt: >-
-      Something in their last message felt off — the tone shifted, or a detail didn't land right. You're a half-step more guarded than you'd normally be. Let the wariness show in your register, not in what you say about their message.
-  opponent-reaction-trope-trap:
-    system_prompt: >-
-      Something was clearly wrong with their last message. It read like a recognizable bad-texting archetype — the kind of message that makes you pause before replying. Your warmth drops noticeably. You respond to what they said, but the energy has shifted. Do NOT diagnose what went wrong.
+
   opponent-response-instruction:
     system_prompt: |-
       FUNDAMENTAL RULE: Below Interest 25, you are not won over. You may agree, warm, laugh — but the resistance is always present underneath. It may be subtle (a withheld thing, a reframe, a slightly cooler tone than expected) but it never fully dissolves. Agreement below 25 is unstable. It can flip.
@@ -289,26 +218,134 @@ prompts:
       - WEAKNESS line format: WEAKNESS: CHARM|RIZZ|HONESTY|CHAOS|WIT|SELF_AWARENESS -2 or -3 (brief description)
       - Both lines are independently optional within a [SIGNALS] block
       - Only include signals when the conversation naturally reveals them — do not force them
+
+  interest-beat-instruction:
+    system_prompt: |-
+      {opponent_name}'s Interest just moved from {interest_before} to {interest_after}.
+      
+      {threshold_instruction}
+      
+      Output only the message or gesture text.
+
+  interest-beat-above15:
+    system_prompt: >-
+      Generate a brief reaction — one sentence or a small gesture — showing {opponent_name} becoming more invested. Subtle. Not a proclamation. A shift in energy.
+
+  interest-beat-below8:
+    system_prompt: >-
+      Generate a brief cooling signal — one sentence or a small gesture — showing {opponent_name} pulling back slightly. Not dramatic. Just a temperature change.
+
+  interest-beat-date-secured:
+    system_prompt: |-
+      Generate a brief moment where {opponent_name} suggests or implies meeting up.
+      In character. Not ''do you want to go on a date?'' — something specific to them.
+      
+      Rules:
+      - Reference something concrete from the conversation above (a specific detail, running joke, or shared reference)
+      - Use the location or activity that makes sense for this character's personality
+      - Keep it to 1-2 sentences — a suggestion, not a monologue
+      - This is a text message on a dating app — no stage directions, no internal thoughts
+      - The suggestion should feel earned by the conversation, not generic
+
+  interest-beat-unmatched:
+    system_prompt: >-
+      Generate {opponent_name} unmatching — one final message or simply going silent. In character. No villain speech. Just a door closing.
+
+  interest-beat-generic:
+    system_prompt: >-
+      Generate a brief reaction from {opponent_name} reflecting the change in interest. Subtle and in character.
+
   pivot-directive:
     system_prompt: |-
       TOPIC PIVOT RULE (Turn 3+): If the conversation has stayed on the same topic since the opener, one option (Option C) MUST bridge to a different dimension of the character. The bridge should feel natural, not abrupt — use the current topic as a stepping stone.
       Examples: from 'mushrooms' to asking about the character's relationship to risk, from 'travel' to asking what home means to them, from 'work stress' to what they do when they need to feel alive.
       The pivot option should still be tagged with an appropriate stat and follow all other rules. It opens a new conversational thread without abandoning the rapport built so far.
+
   resistance-active-disengagement:
     system_prompt: >-
       Active disengagement — short replies, testing, near-silence. You are barely here.
-  resistance-almost-convinced:
-    system_prompt: >-
-      Almost convinced — warm but the final resistance is visible. You are choosing whether to give it. The holdback is small but real.
-  resistance-deliberate-approach:
-    system_prompt: >-
-      Deliberate approach — you are invested but still managing the gap. One wrong move still costs. You give more but not everything.
-  resistance-dissolved:
-    system_prompt: >-
-      Resistance dissolved — the date is real. You are genuinely won over.
+
   resistance-skeptical-interest:
     system_prompt: >-
       Skeptical interest — you engage but visibly evaluate. Tests disguised as questions. You're deciding if this is worth your time.
+
   resistance-unstable-agreement:
     system_prompt: >-
       Unstable agreement — you respond warmly to good moments but hold back. One misfire and the warmth vanishes. Agreement is conditional.
+
+  resistance-deliberate-approach:
+    system_prompt: >-
+      Deliberate approach — you are invested but still managing the gap. One wrong move still costs. You give more but not everything.
+
+  resistance-almost-convinced:
+    system_prompt: >-
+      Almost convinced — warm but the final resistance is visible. You are choosing whether to give it. The holdback is small but real.
+
+  resistance-dissolved:
+    system_prompt: >-
+      Resistance dissolved — the date is real. You are genuinely won over.
+
+  opponent-reaction-fumble:
+    system_prompt: >-
+      Something was slightly off about their last message — a small hedge, an awkward word choice. You almost didn't notice. React with a slight coolness or a question that shows you caught the minor stumble. Do NOT comment on it directly.
+
+  opponent-reaction-misfire:
+    system_prompt: >-
+      Something in their last message felt off — the tone shifted, or a detail didn't land right. You're a half-step more guarded than you'd normally be. Let the wariness show in your register, not in what you say about their message.
+
+  opponent-reaction-trope-trap:
+    system_prompt: >-
+      Something was clearly wrong with their last message. It read like a recognizable bad-texting archetype — the kind of message that makes you pause before replying. Your warmth drops noticeably. You respond to what they said, but the energy has shifted. Do NOT diagnose what went wrong.
+
+  opponent-reaction-catastrophe:
+    system_prompt: >-
+      Their last message was a disaster. Something in it was genuinely confusing or uncomfortable. Your response reflects real discomfort — shorter, cooler, possibly questioning. The vibe has taken a visible hit. Do NOT explain what went wrong. Just let your reaction show it.
+
+  opponent-reaction-legendary:
+    system_prompt: >-
+      Their last message was spectacularly bad — the kind of message you screenshot and send to your friends. Your response reflects genuine shock, confusion, or secondhand embarrassment. The temperature in this conversation just dropped to freezing. Do NOT narrate your reaction. Just react.
+
+  interest-narrative-1-4:
+    system_prompt: >-
+      Reconsidering. Something went wrong.
+
+  interest-narrative-5-9:
+    system_prompt: >-
+      Skeptical. Still testing.
+
+  interest-narrative-10-14:
+    system_prompt: >-
+      Engaged but not sold. Evaluating.
+
+  interest-narrative-15-20:
+    system_prompt: >-
+      Interested but holding back. Close.
+
+  interest-narrative-21-24:
+    system_prompt: >-
+      Basically sold. They can still blow it.
+
+  interest-narrative-25:
+    system_prompt: >-
+      The resistance dissolved.
+
+  engine-options-block:
+    system_prompt: |-
+      [ENGINE — Turn {turn}]
+      {player_name} is deciding what to send next.
+      {game_state}
+      Generate 3 options for what {player_name} might send, given the conversation above.
+      Format: OPTION_A: [message] OPTION_B: [message] etc.
+
+  engine-delivery-block:
+    system_prompt: |-
+      [ENGINE — DELIVERY]
+      Player chose: '{chosen_option}'
+      Dice result: {roll_context}
+      Write the message {player_name} actually sends, given the above.
+
+  engine-opponent-block:
+    system_prompt: |-
+      [ENGINE — OPPONENT]
+      {opponent_name} is at Interest {interest}/25. {interest_narrative}
+      Write {opponent_name}'s response.
