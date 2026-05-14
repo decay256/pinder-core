@@ -1070,7 +1070,7 @@ namespace Pinder.RemoteAssets
             {
                 return await resp.Content.ReadAsStringAsync().ConfigureAwait(false) ?? string.Empty;
             }
-            catch
+            catch (Exception ex) when (!(ex is HttpRequestException))
             {
                 return string.Empty;
             }

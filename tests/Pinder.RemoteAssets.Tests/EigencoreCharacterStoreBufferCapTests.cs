@@ -175,6 +175,28 @@ namespace Pinder.RemoteAssets.Tests
             Assert.Contains("maximum buffer size", ex.Message, StringComparison.OrdinalIgnoreCase);
         }
 
+        [Fact]
+        public async Task ErrorResponse_BufferCapExceeded_ThrowsHttpRequestException()
+        {
+            // Regression test for the bare-catch fix (rung 1). When a
+            // non-2xx response body exceeds the buffer cap, SafeReadBodyAsync
+            // must let HttpRequestException propagate — not swallow it into
+            // an empty-body ServerException. Uses QueryAsync which reads
+            // the error body via SafeReadBodyAsync on the 5xx path.
+            const long simulatedCap = 1024;
+            var (store, handler) = Make();
+            var resp = new HttpResponseMessage(HttpStatusCode.InternalServerError)
+            {
+                Content = new BufferCapExceededContent(simulatedCap),
+            };
+            handler.Enqueue(resp);
+
+            HttpRequestException ex = await Assert.ThrowsAsync<HttpRequestException>(
+                () => store.QueryAsync(new CharacterAssetQuery()));
+
+            Assert.Contains("maximum buffer size", ex.Message, StringComparison.OrdinalIgnoreCase);
+        }
+
         // -----------------------------------------------------------------
         // custom content — simulates a real-handler buffer-cap fault
         // -----------------------------------------------------------------
