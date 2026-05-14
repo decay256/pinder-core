@@ -4,8 +4,46 @@ namespace Pinder.LlmAdapters
     /// Static instruction templates sourced from character-construction.md §3.2–3.8.
     /// Each template uses {placeholder} tokens filled by SessionDocumentBuilder at call time.
     /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Issue #872 Phase 2: the const prompts in this class have been
+    /// lifted into <c>data/prompts/templates.yaml</c>. When
+    /// <see cref="Catalog"/> is set, consumers should prefer the catalog
+    /// entries via <see cref="TryGetFromCatalog"/>; otherwise the
+    /// embedded const strings serve as the default. Phase 5 (#875)
+    /// removes the const fallbacks once every call-site is wired.
+    /// </para>
+    /// </remarks>
     public static class PromptTemplates
     {
+        /// <summary>
+        /// Optional <see cref="PromptCatalog"/> providing yaml-sourced
+        /// prompt content. When non-null, call sites should prefer the
+        /// catalog entries (via <see cref="TryGetFromCatalog"/>) over the
+        /// embedded const strings.
+        /// </summary>
+        /// <remarks>
+        /// Issue #872 Phase 2: wired as a static set-once property.
+        /// Production startup code calls
+        /// <c>PromptTemplates.Catalog = PromptCatalog.LoadFromDirectory(...)</c>
+        /// after the service collection is built. Tests can leave it null
+        /// to exercise the const-fallback code path.
+        /// </remarks>
+        public static PromptCatalog? Catalog { get; set; }
+
+        /// <summary>
+        /// Look up a prompt by name (kebab-case, e.g.
+        /// <c>"dialogue-options-instruction"</c>). Returns the yaml-sourced
+        /// <c>system_prompt</c> when the catalog is present and the key
+        /// exists; otherwise returns <paramref name="constFallback"/>.
+        /// </summary>
+        internal static string TryGetFromCatalog(string key, string constFallback)
+        {
+            var entry = Catalog?.TryGet(key);
+            if (entry != null && !string.IsNullOrWhiteSpace(entry.SystemPrompt))
+                return entry.SystemPrompt!;
+            return constFallback;
+        }
         /// <summary>§3.2 — Instructs the LLM to generate exactly 3 dialogue options with metadata tags.</summary>
         public const string DialogueOptionsInstruction =
 @"Generate exactly 3 dialogue options for {player_name}.
