@@ -487,3 +487,46 @@ remove it from the method whose role doesn't match.
 **Discovered in:** #867 (2026-05-14). Token audit of session `707fca72`
 cosmetic phase prompted by the refiner agent.
 
+
+## PROMPT-ENFORCEMENT-PARITY
+
+When a discipline rule lands on one LLM surface, apply it
+symmetrically to every other surface in the same conversational
+direction.
+
+**Symptom:** `DialogueOptionsInstruction` (player options surface)
+included a `WORD & PATTERN REPETITION` block + a self-check
+verify-then-rewrite step. `OpponentResponseInstruction` had neither.
+Production opponent messages drifted into repeating fillers
+("honestly", "literally", "okay but", "interesting that"), emoji,
+and structural patterns across multi-turn sessions because the
+freshness discipline was player-only.
+
+**Rule:** A prompt-discipline rule that ships for one role's LLM
+call must be ported to the equivalent surface for the other role
+(or any other surface that produces text in the same conversational
+direction). The two main pairs in Pinder:
+
+- Player options ↔ opponent response: both produce conversational
+  turns in the same direction (player→opponent for the player's
+  intended text, opponent→player for the response). Repetition,
+  voice, and register rules apply to both symmetrically.
+- Player delivery rewrite ↔ shadow corruption ↔ horniness overlay:
+  all three transform a player message in-place. Length, structural
+  fidelity, and word-soup-prevention rules apply to all three.
+
+**Detection rule:** when a new prompt-discipline rule is added,
+review every other prompt that produces text in the same direction.
+File a parity ticket if any surface is missing the rule. The opposite
+direction (e.g. opponent → player) is a separate audit — voice bleed
+and resistance rules are direction-specific.
+
+**Fix (#869):** Ported `WORD & PATTERN REPETITION` + self-check
+verify-then-rewrite from `dialogue-options-instruction` to
+`opponent-response-instruction` in `data/prompts/templates.yaml`,
+adapted to "your own previous 2 messages" framing.
+
+**Discovered in:** #869 (2026-05-14). Originally identified in the
+2026-05-09 prompt-engineering audit (pinder · planning thread) but
+not filed as a ticket until session `707fca72` showed repeat fillers
+in prod.
