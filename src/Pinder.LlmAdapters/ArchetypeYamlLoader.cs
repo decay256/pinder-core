@@ -6,25 +6,39 @@ using YamlDotNet.RepresentationModel;
 namespace Pinder.LlmAdapters
 {
     /// <summary>
-    /// Loads <c>archetypes-enriched.yaml</c> at startup and registers each
-    /// archetype's <c>behavior</c> string with <see cref="ArchetypeCatalog"/>
-    /// so the LLM directive ("ACTIVE ARCHETYPE: ...") is sourced from the
-    /// canonical YAML rather than from hand-copied literals in
-    /// <see cref="ArchetypeCatalog"/>'s static initialiser (#372).
+    /// Loads archetype behavior text from yaml and registers it with
+    /// <see cref="ArchetypeCatalog"/> so the LLM directive
+    /// ("ACTIVE ARCHETYPE: ...") is sourced from the canonical yaml rather
+    /// than from hand-copied literals in <see cref="ArchetypeCatalog"/>'s
+    /// static initialiser.
     ///
     /// <para>
-    /// The YAML structure is a flat list of section blocks; each archetype is
-    /// a block with <c>type: archetype_definition</c>, a <c>title</c> field
-    /// (e.g. <c>"The Peacock"</c>), and a <c>behavior</c> field (the multi-line
-    /// behavioural-instruction text).
+    /// Two loading paths are supported:
+    /// </para>
+    ///
+    /// <para>
+    /// <b>Legacy (<see cref="LoadFromYaml"/>):</b> parses
+    /// <c>archetypes-enriched.yaml</c> — a flat list of section blocks where
+    /// each archetype is a block with <c>type: archetype_definition</c>,
+    /// a <c>title</c> field, and a <c>behavior</c> field.
+    /// </para>
+    ///
+    /// <para>
+    /// <b>Current (<see cref="LoadFromPromptCatalog"/>):</b> consumes a
+    /// <see cref="PromptCatalog"/> loaded from
+    /// <c>data/prompts/archetypes.yaml</c> (Issue #873 Phase 4). Each prompt
+    /// entry's key is the archetype name (e.g. <c>"The Hey Opener"</c>) and
+    /// its <c>system_prompt</c> is the behavioural instruction text. This
+    /// consolidates the inline const strings from
+    /// <see cref="ArchetypeCatalog"/>'s static initialiser into the same
+    /// <c>PromptCatalog</c>-format yaml family used by Phases 1–3 of #871.
     /// </para>
     ///
     /// <para>
     /// The hardcoded behaviour strings in <see cref="ArchetypeCatalog"/>'s
-    /// static initialiser remain as a degraded-mode fallback. If the YAML file
-    /// is missing, fails to parse, or lacks an entry for a given archetype,
-    /// the catalog falls back to the hand-copied literal (still better than
-    /// the bare placeholder <c>"Follow {Name} behavioral pattern."</c>).
+    /// static initialiser remain as a degraded-mode fallback. If the yaml
+    /// file is missing, fails to parse, or lacks an entry for a given
+    /// archetype, the catalog falls back to the hand-copied literal.
     /// </para>
     /// </summary>
     public static class ArchetypeYamlLoader
@@ -111,6 +125,49 @@ namespace Pinder.LlmAdapters
             {
                 return new LoadResult(0, skipped, ex.Message);
             }
+        }
+
+        /// <summary>
+        /// Register every archetype behavior found in <paramref name="catalog"/>
+        /// with <see cref="ArchetypeCatalog.RegisterBehavior"/>.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Issue #873 Phase 4: the catalog is loaded from
+        /// <c>data/prompts/archetypes.yaml</c> by
+        /// <c>PromptCatalog.LoadFromDirectory("data/prompts")</c> at startup.
+        /// Each prompt key is the archetype name (e.g. <c>"The Hey Opener"</c>)
+        /// and its <c>system_prompt</c> is the behavior text. Entries that are
+        /// already in the catalog (from other yaml files like
+        /// <c>templates.yaml</c>) are silently skipped since they won't match
+        /// any archetype name.
+        /// </para>
+        /// </remarks>
+        /// <param name="catalog">A fully-loaded <see cref="PromptCatalog"/>.</param>
+        /// <returns>The number of behaviors registered.</returns>
+        public static int LoadFromPromptCatalog(PromptCatalog catalog)
+        {
+            if (catalog is null) throw new ArgumentNullException(nameof(catalog));
+
+            // Wire the resolver so GetBehavior prefers the yaml catalog
+            // (Issue #873 Phase 4 — delegate pattern crosses the assembly
+            // boundary between Pinder.Core and Pinder.LlmAdapters).
+            ArchetypeCatalog.BehaviorResolver = name =>
+                catalog.TryGet(name)?.SystemPrompt;
+
+            // Also bulk-register so the _behaviors dictionary stays
+            // up-to-date (belt-and-suspenders with the resolver).
+            int registered = 0;
+            foreach (var name in catalog.Names)
+            {
+                var entry = catalog.TryGet(name);
+                if (entry == null || string.IsNullOrWhiteSpace(entry.SystemPrompt))
+                    continue;
+
+                ArchetypeCatalog.RegisterBehavior(name, entry.SystemPrompt!);
+                registered++;
+            }
+            return registered;
         }
 
         private static string? GetScalar(YamlMappingNode mapping, string key)
