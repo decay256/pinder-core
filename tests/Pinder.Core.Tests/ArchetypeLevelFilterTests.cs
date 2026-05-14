@@ -226,6 +226,10 @@ namespace Pinder.Core.Tests
         [Fact]
         public void Assemble_UnknownArchetypesKeptDuringFiltering()
         {
+            // Phase 5 (#875): unknown archetypes without a registered behavior
+            // cause GetBehavior to throw. Register the custom archetype first.
+            ArchetypeCatalog.RegisterBehavior("Custom Archetype", "test behavior for unknown archetype");
+
             // Unknown archetypes not in catalog are always eligible
             var items = new FakeItemRepo();
             items.Add("a", "Custom Archetype", "Custom Archetype");

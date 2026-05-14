@@ -1,125 +1,70 @@
+using System;
+
 namespace Pinder.LlmAdapters
 {
     /// <summary>
-    /// Static instruction templates sourced from character-construction.md §3.2–3.8.
+    /// Instruction templates loaded from <c>data/prompts/templates.yaml</c>.
     /// Each template uses {placeholder} tokens filled by SessionDocumentBuilder at call time.
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Issue #872 Phase 2: the const prompts in this class have been
-    /// lifted into <c>data/prompts/templates.yaml</c>. When
-    /// <see cref="Catalog"/> is set, consumers should prefer the catalog
-    /// entries via <see cref="TryGetFromCatalog"/>; otherwise the
-    /// embedded const strings serve as the default. Phase 5 (#875)
-    /// removes the const fallbacks once every call-site is wired.
+    /// Issue #871 Phase 5 (#875): all const-string prompt content has been
+    /// deleted. The yaml catalog is now the sole source of truth. Every
+    /// property below reads from the <see cref="Catalog"/>, which MUST be
+    /// wired at startup via <see cref="PromptWiring"/>. Accessing any
+    /// property without a wired catalog throws
+    /// <see cref="InvalidOperationException"/>.
     /// </para>
     /// </remarks>
     public static class PromptTemplates
     {
         /// <summary>
-        /// Optional <see cref="PromptCatalog"/> providing yaml-sourced
-        /// prompt content. When non-null, call sites should prefer the
-        /// catalog entries (via <see cref="TryGetFromCatalog"/>) over the
-        /// embedded const strings.
+        /// The unified <see cref="PromptCatalog"/> providing yaml-sourced
+        /// prompt content. Set by <c>PromptWiring.Wire()</c> at startup.
+        /// After Phase 5 there is no const fallback — every property
+        /// throws when the catalog is null.
         /// </summary>
-        /// <remarks>
-        /// Issue #872 Phase 2: wired as a static set-once property.
-        /// Production startup code calls
-        /// <c>PromptTemplates.Catalog = PromptCatalog.LoadFromDirectory(...)</c>
-        /// after the service collection is built. Tests can leave it null
-        /// to exercise the const-fallback code path.
-        /// </remarks>
         public static PromptCatalog? Catalog { get; set; }
 
-        /// <summary>
-        /// Look up a prompt by name (kebab-case, e.g.
-        /// <c>"dialogue-options-instruction"</c>). Returns the yaml-sourced
-        /// <c>system_prompt</c> when the catalog is present and the key
-        /// exists; otherwise returns <paramref name="constFallback"/>.
-        /// </summary>
-        internal static string TryGetFromCatalog(string key, string constFallback)
+        // ── helpers ───────────────────────────────────────────────────────────
+
+        private static string GetCatalogString(string key)
         {
-            var entry = Catalog?.TryGet(key);
-            if (entry != null && !string.IsNullOrWhiteSpace(entry.SystemPrompt))
-                return entry.SystemPrompt!;
-            return constFallback;
+            var catalog = Catalog
+                ?? throw new InvalidOperationException(
+                    "PromptTemplates.Catalog is not wired. Call PromptWiring.Wire() at startup.");
+            var entry = catalog.TryGet(key)
+                ?? throw new InvalidOperationException(
+                    $"prompt-catalog: missing required key '{key}'. The yaml file is incomplete or missing.");
+            return entry.SystemPrompt
+                ?? throw new InvalidOperationException(
+                    $"prompt-catalog: key '{key}' has no system_prompt. Check the yaml file.");
         }
-        /// <summary>§3.2 — Instructs the LLM to generate exactly 3 dialogue options with metadata tags.</summary>
-        public const string DialogueOptionsInstruction =
-@"Generate exactly 3 dialogue options for {player_name}.
 
-Each option must:
-1. Be tagged with one of the available stats for this turn: {available_stats}
-2. Show what the character INTENDS to say — this is their internal intended message, before any roll outcome is applied
-3. Reflect the player's personality and current shadow state (not the opponent's)
-4. Vary in tone and risk — include at least one safe and one bold option
-5. If a callback opportunity exists, make 1–2 options reference an earlier topic naturally
-6. If a combo is available, one option should use the completing stat
-7. Take the opponent's profile into account — their personality, archetypes, and texting style should inform what would land or fail
+        // ── §3.2 — Dialogue options instruction ─────────────────────────────
 
-For each option include metadata:
-[STAT: X] [CALLBACK: turn_N or none] [COMBO: name or none] [TELL_BONUS: yes/no]
+        public static string DialogueOptionsInstruction => GetCatalogString("dialogue-options-instruction");
 
-Keep options concise. One to three sentences. Match the opponent's register.
+        // ── §3.3 — Success delivery instruction ─────────────────────────────
 
-Output EXACTLY this format for each option (no deviations):
-
-OPTION_1
-[STAT: CHARM] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
-""The exact text the character would send""
-
-OPTION_2
-[STAT: HONESTY] [CALLBACK: turn_2] [COMBO: The Reveal] [TELL_BONUS: yes]
-""The exact text the character would send""
-
-(only OPTION_1, OPTION_2, OPTION_3)
-
-MEDIUM: This is a texting app. Options are messages the character could send.
-- Each option should read as something a person would actually text — not internal thoughts, not narration.
-- The character types, may hesitate, but what appears here is what they would choose to send.
-- No ""(thinking to self:..."" no stage directions, no meta-commentary within the message text.
-
-Rules:
-- STAT must be one of the available stats listed above: {available_stats}
-- Text must be in double quotes on the line immediately after the metadata
-- No extra text before OPTION_1 or after the last option
-
-Before writing each option, verify: does this sound exactly like
-the texting style above? If not, rewrite it.
-
-If a PSYCHOLOGICAL STAKE section is present in the character profile above, at least one option per turn should serve that stake — either protecting the character's fear or risking revealing it. Options that only respond to the surface topic without touching the emotional through-line are incomplete.
-
-BIOGRAPHICAL SPECIFICITY — critical: when the opponent has revealed a concrete biographical detail (a job they left, a place they went, a relationship, a specific event or year), at least one option should follow up on that specific detail — not the emotional theme, the actual fact. 'You mentioned leaving database engineering — what were you doing the following week?' is stronger than 'you seem like someone who takes big risks.' The conversation only advances when both parties are actually curious about each other's lives.
-
-SIMILARLY: when the player character's PSYCHOLOGICAL STAKE contains specific backstory (a named relationship, a year, an event), at least one option per session should reveal that concrete detail naturally. Characters who only share feelings without sharing facts never feel real. 'I spent four years with someone who thought intensity was a personality defect, and then at my cousin's engagement party I realised I'd been making myself smaller the whole time' is a revelation. 'I've been told I'm too much' is not.
-
-WORD & PATTERN REPETITION — check all delivered messages above before writing options. Do not repeat: (a) the same filler words or phrases used in the previous 2 messages ('honestly', 'literally', 'actually', 'okay but', etc.), (b) the same emoji used in the previous message, (c) the same structural pattern (e.g. 'wait...???', 'omg...\U0001f62d', 'I literally just realized...') used in the last 2 messages. Each option should feel like a new move, not a variation on the last one.";
-
-        /// <summary>§3.3 — Backward-compatible accessor that returns the default success delivery instruction.</summary>
         public static string SuccessDeliveryInstruction => BuildSuccessDeliveryInstruction(null);
 
-        // Default delivery rule strings used when no DeliveryRules object is provided.
-        private const string DefaultClean = "deliver essentially as written. Small word choice improvements only.";
-        private const string DefaultStrong = "rewrite the intended message so it lands harder. The same idea, in the same voice, with sharper word choice and better timing.\n  You must NOT: append a new sentence at the end, add an em-dash continuation, or extend the message beyond what the player wrote.\n  The delivered version should be the same length or shorter than the intended version. If you add a word, you should cut a different word. Rewrite, do not extend.";
-        private const string DefaultCritical = "deliver at peak. The message arrives perfectly. Something resonates.";
-        private const string DefaultExceptional = "this is the best version of this message that could exist. It arrives at exactly the right moment with exactly the right weight. The opponent feels it.";
-        private const string DefaultTest = "The test: the delivered version must not be longer than the intended version. Every sentence in the delivered version must have a counterpart in the intended version. Do not append. Do not extend. Rewrite.";
-        private const string DefaultRegisterInstruction = "Stay in character. Match the texting register from the character profile above. Do not change the character's capitalization style. Before finalizing: check the conversation above for any word, filler phrase, or emoji the character used in the previous 2 messages — do not repeat them here. Each delivered message should feel like a fresh move.";
-        private const string DefaultMediumRule = "This is a text message on a phone screen, not a monologue. No internal stage directions, no narration of emotional state, no self-commentary mid-message.";
-
-        /// <summary>
-        /// §3.3 — Build the success delivery instruction from configurable rules.
-        /// Falls back to hardcoded defaults when rules is null.
-        /// </summary>
         public static string BuildSuccessDeliveryInstruction(DeliveryRules rules)
         {
-            string clean = (rules != null && !string.IsNullOrEmpty(rules.Clean)) ? rules.Clean.TrimEnd() : DefaultClean;
-            string strong = (rules != null && !string.IsNullOrEmpty(rules.Strong)) ? rules.Strong.TrimEnd() : DefaultStrong;
-            string critical = (rules != null && !string.IsNullOrEmpty(rules.Critical)) ? rules.Critical.TrimEnd() : DefaultCritical;
-            string exceptional = (rules != null && !string.IsNullOrEmpty(rules.Exceptional)) ? rules.Exceptional.TrimEnd() : DefaultExceptional;
-            string test = (rules != null && !string.IsNullOrEmpty(rules.Test)) ? rules.Test.TrimEnd() : DefaultTest;
-            string registerInstruction = (rules != null && !string.IsNullOrEmpty(rules.RegisterInstruction)) ? rules.RegisterInstruction.TrimEnd() : DefaultRegisterInstruction;
-            string mediumRule = (rules != null && !string.IsNullOrEmpty(rules.MediumRule)) ? rules.MediumRule.TrimEnd() : DefaultMediumRule;
+            string clean = (rules != null && !string.IsNullOrEmpty(rules.Clean))
+                ? rules.Clean.TrimEnd() : GetCatalogString("default-clean");
+            string strong = (rules != null && !string.IsNullOrEmpty(rules.Strong))
+                ? rules.Strong.TrimEnd() : GetCatalogString("default-strong");
+            string critical = (rules != null && !string.IsNullOrEmpty(rules.Critical))
+                ? rules.Critical.TrimEnd() : GetCatalogString("default-critical");
+            string exceptional = (rules != null && !string.IsNullOrEmpty(rules.Exceptional))
+                ? rules.Exceptional.TrimEnd() : GetCatalogString("default-exceptional");
+            string test = (rules != null && !string.IsNullOrEmpty(rules.Test))
+                ? rules.Test.TrimEnd() : GetCatalogString("default-test");
+            string registerInstruction = (rules != null && !string.IsNullOrEmpty(rules.RegisterInstruction))
+                ? rules.RegisterInstruction.TrimEnd() : GetCatalogString("default-register-instruction");
+            string mediumRule = (rules != null && !string.IsNullOrEmpty(rules.MediumRule))
+                ? rules.MediumRule.TrimEnd() : GetCatalogString("default-medium-rule");
 
             return "Write as {player_name}.\n" +
                 "The intended message is the player's plan. Your job is to make it land.\n" +
@@ -143,247 +88,71 @@ WORD & PATTERN REPETITION — check all delivered messages above before writing 
                 "Output only the message text.";
         }
 
-        /// <summary>§3.4 — Degrade the intended message according to failure tier.</summary>
-        public const string FailureDeliveryInstruction =
-@"You are writing as {player_name}. This is THEIR message, in THEIR voice.
-Do NOT write as the opponent. The failure corrupts what {player_name} says.
+        // ── §3.4 — Failure delivery instruction ─────────────────────────────
 
-The player chose option: ""{intended_message}""
-Stat used: {stat}
-They rolled FAILED — missed DC by {miss_margin}.
-Failure tier: {tier}
+        public static string FailureDeliveryInstruction => GetCatalogString("failure-delivery-instruction");
 
-Failure principle: the character doesn't know it went wrong. They hit send on
-exactly the message they meant to send. The corruption happened inside — their
-shadow spoke through the same sentence structure, replacing the intended meaning
-with the thing they were trying not to say. The result is ONE coherent message
-that reads as intentional. The reader sees the break. The character never does.
+        // ── §3.5 — Opponent response instruction ────────────────────────────
 
-You are a writer. Your job is to rewrite the intended message so it arrives
-corrupted from within. The FORM stays. The CONTENT breaks.
+        public static string OpponentResponseInstruction => GetCatalogString("opponent-response-instruction");
 
-THE ABSOLUTE RULES:
-1. ONE MESSAGE. Not two messages stitched together. No asterisks, no italics
-   separating an ""original"" from a ""corruption."" One thing they sent.
-2. SAME LENGTH OR SHORTER. Never append. Never add a tail. If the intended
-   message is two sentences, the delivered message is two sentences or one.
-   Count the sentences. If yours is longer, cut until it isn't.
-3. NO SELF-AWARENESS. The character does not notice. No ""wait that came out
-   wrong,"" no ""omg why did I say that,"" no commenting on their own words.
-   They sent this on purpose. It IS what they meant to say (to them).
-4. NO META-COMMENTARY. No stage directions, no narration, no breaking the
-   fourth wall. This is a text message on a phone. That's all.
-5. THE SHADOW REPLACES, NEVER APPENDS. The corruption works by swapping
-   words and phrases inside the original structure. The sentence that was
-   there gets rewritten — it doesn't get a new sentence bolted on after it.
+        // ── §3.8 — Interest beat instruction ────────────────────────────────
 
-HOW CORRUPTION WORKS — by tier:
+        public static string InterestBeatInstruction => GetCatalogString("interest-beat-instruction");
 
-FUMBLE (miss 1–2): One small thing goes wrong. A single word gets swapped for
-the wrong one. A hedge appears that undermines the landing. A qualifier kills
-the punchline. The message is 95% the intended one — but that 5% changes
-everything. Same sentence count. Same length.
+        internal static string InterestBeatAbove15 => GetCatalogString("interest-beat-above15");
 
-MISFIRE (miss 3–5): The message starts as intended, then the shadow takes the
-steering wheel mid-sentence. The first half is recognizable. The second half
-has been replaced — not appended to, REPLACED — by the shadow's version.
-The intent is visible but the execution broke. Same sentence count.
+        internal static string InterestBeatBelow8 => GetCatalogString("interest-beat-below8");
 
-TROPE_TRAP (miss 6–9): The shadow stat fully wrote this message. The original
-intent is barely visible. A recognizable bad pattern has taken over — but the
-character delivered it with full conviction. They think this IS the good
-version. Same length or shorter than intended.
+        internal static string InterestBeatDateSecured => GetCatalogString("interest-beat-date-secured");
 
-CATASTROPHE (miss 10+): The thing they would never say. Sent with complete
-confidence. The shadow stat has fully possessed the message. The character's
-worst impulse speaks through their exact voice and texting style. Same length
-or shorter.
+        internal static string InterestBeatUnmatched => GetCatalogString("interest-beat-unmatched");
 
-LEGENDARY (Nat 1): The character's deepest wound surfaces, delivered as if
-completely normal. This is the message that makes the reader wince because
-the character has no idea what they just revealed. Their specific wound, in
-their specific voice, sent like a Tuesday afternoon text. Same length or
-shorter.
+        internal static string InterestBeatGeneric => GetCatalogString("interest-beat-generic");
 
-STAT SHADOWS — each stat fails differently:
-- CHARM → FIXATION: warm noticing curdles into cataloguing, tracking, dossier-building
-- RIZZ → HORNINESS: flirty subtext becomes explicitly physical too fast
-- HONESTY → DENIAL: performs vulnerability while protecting the real thing
-- CHAOS → MADNESS: one association leads to another until the wound surfaces
-- WIT → OVERTHINKING: explains the joke, qualifies everything, kills the timing
-- SA → DREAD: sees the failure coming and narrates the countdown while doing it
+        // ── Pivot directive ─────────────────────────────────────────────────
 
-STAT AND TIER INSTRUCTION:
-{tier_instruction}
+        internal static string PivotDirective => GetCatalogString("pivot-directive");
 
-{active_trap_llm_instructions}
+        // ── Resistance descriptors ──────────────────────────────────────────
 
-Output ONLY the delivered message text. No quotes. No explanation. No framing.
-The character sent this.";
+        internal static string ResistanceActiveDisengagement => GetCatalogString("resistance-active-disengagement");
 
-        /// <summary>
-        /// §3.5 — Generate opponent response with optional [SIGNALS] block.
-        /// Uses {placeholder} tokens for dynamic content.
-        /// </summary>
-        public const string OpponentResponseInstruction =
-@"FUNDAMENTAL RULE: Below Interest 25, you are not won over. You may agree, warm, laugh — but the resistance is always present underneath. It may be subtle (a withheld thing, a reframe, a slightly cooler tone than expected) but it never fully dissolves. Agreement below 25 is unstable. It can flip.
+        internal static string ResistanceSkepticalInterest => GetCatalogString("resistance-skeptical-interest");
 
-Your archetype determines HOW you resist, not WHETHER.
+        internal static string ResistanceUnstableAgreement => GetCatalogString("resistance-unstable-agreement");
 
-{resistance_block}
+        internal static string ResistanceDeliberateApproach => GetCatalogString("resistance-deliberate-approach");
 
-INTEREST CONSTRAINT:
-- Interest must reach 25 (DateSecured) before any concrete date plans are possible.
-- Below Interest 25: you may express interest, warmth, or curiosity, but NEVER commit to a specific time, place, or logistics. ""We should get coffee sometime"" is fine. ""Coffee shop on Fifth at 6pm Tuesday"" is NOT.
-- At Interest 25: the date is now real. You may suggest a specific venue or time that fits your character.
+        internal static string ResistanceAlmostConvinced => GetCatalogString("resistance-almost-convinced");
 
-Generate your next message.
-- Match your personality exactly as established in the system prompt
-- React authentically to what was just said
-- If Interest dropped: show cooling without being melodramatic
-- If Interest rose: show warming without being gushing
-- Match the register exactly as established in your system prompt above. Length follows your character's texting style — one word, one sentence, several short fragments, or one long run-on thought, whichever your texting-style block calls for.
+        internal static string ResistanceDissolved => GetCatalogString("resistance-dissolved");
 
-Output format:
-Output your actual message text directly. Do not wrap it in quotes or [RESPONSE] tags.
+        // ── Per-tier opponent reaction guidance ─────────────────────────────
 
-Occasionally (when it feels natural, roughly 30–40% of turns), include a signals block after your response:
+        internal static string OpponentReactionFumble => GetCatalogString("opponent-reaction-fumble");
 
-[SIGNALS]
-TELL: {STAT_NAME} ({description of what reveals the tell})
-WEAKNESS: {STAT_NAME} -{reduction} ({description of the opening})
+        internal static string OpponentReactionMisfire => GetCatalogString("opponent-reaction-misfire");
 
-When generating a TELL, use ONLY these category mappings:
-- Opponent compliments player → TELL: HONESTY
-- Opponent asks personal question → TELL: HONESTY or SELF_AWARENESS
-- Opponent makes joke → TELL: WIT or CHAOS
-- Opponent shares vulnerability → TELL: HONESTY
-- Opponent pulls back/guards → TELL: SELF_AWARENESS
-- Opponent tests/challenges → TELL: WIT or CHAOS
-- Opponent sends short reply → TELL: CHARM or CHAOS
-- Opponent flirts → TELL: RIZZ or CHARM
-- Opponent changes subject → TELL: CHAOS
-- Opponent goes quiet/silent → TELL: SELF_AWARENESS
+        internal static string OpponentReactionTropeTrap => GetCatalogString("opponent-reaction-trope-trap");
 
-Rules for signals:
-- TELL line format: TELL: CHARM|RIZZ|HONESTY|CHAOS|WIT|SELF_AWARENESS (brief description)
-- WEAKNESS line format: WEAKNESS: CHARM|RIZZ|HONESTY|CHAOS|WIT|SELF_AWARENESS -2 or -3 (brief description)
-- Both lines are independently optional within a [SIGNALS] block
-- Only include signals when the conversation naturally reveals them — do not force them";
+        internal static string OpponentReactionCatastrophe => GetCatalogString("opponent-reaction-catastrophe");
 
-        /// <summary>§3.8 — Generate a narrative beat when interest crosses a threshold.</summary>
-        public const string InterestBeatInstruction =
-@"{opponent_name}'s Interest just moved from {interest_before} to {interest_after}.
+        internal static string OpponentReactionLegendary => GetCatalogString("opponent-reaction-legendary");
 
-{threshold_instruction}
+        // ── Interest narrative bands ────────────────────────────────────────
 
-Output only the message or gesture text.";
+        internal static string InterestNarrative_1_4 => GetCatalogString("interest-narrative-1-4");
 
-        // Threshold-specific sub-instructions for InterestBeatInstruction
-        internal const string InterestBeatAbove15 =
-@"Generate a brief reaction — one sentence or a small gesture — showing {opponent_name} becoming more invested. Subtle. Not a proclamation. A shift in energy.";
+        internal static string InterestNarrative_5_9 => GetCatalogString("interest-narrative-5-9");
 
-        internal const string InterestBeatBelow8 =
-@"Generate a brief cooling signal — one sentence or a small gesture — showing {opponent_name} pulling back slightly. Not dramatic. Just a temperature change.";
+        internal static string InterestNarrative_10_14 => GetCatalogString("interest-narrative-10-14");
 
-        internal const string InterestBeatDateSecured =
-@"Generate a brief moment where {opponent_name} suggests or implies meeting up.
-In character. Not ''do you want to go on a date?'' — something specific to them.
+        internal static string InterestNarrative_15_20 => GetCatalogString("interest-narrative-15-20");
 
-Rules:
-- Reference something concrete from the conversation above (a specific detail, running joke, or shared reference)
-- Use the location or activity that makes sense for this character's personality
-- Keep it to 1-2 sentences — a suggestion, not a monologue
-- This is a text message on a dating app — no stage directions, no internal thoughts
-- The suggestion should feel earned by the conversation, not generic";
+        internal static string InterestNarrative_21_24 => GetCatalogString("interest-narrative-21-24");
 
-        internal const string InterestBeatUnmatched =
-@"Generate {opponent_name} unmatching — one final message or simply going silent. In character. No villain speech. Just a door closing.";
-
-        internal const string InterestBeatGeneric =
-@"Generate a brief reaction from {opponent_name} reflecting the change in interest. Subtle and in character.";
-
-        // ── Pivot directive for topic exploration at turn 3+ ──
-
-        /// <summary>Pivot directive injected at turn 3+ to ensure conversation explores new dimensions.</summary>
-        internal const string PivotDirective =
-@"TOPIC PIVOT RULE (Turn 3+): If the conversation has stayed on the same topic since the opener, one option (Option C) MUST bridge to a different dimension of the character. The bridge should feel natural, not abrupt — use the current topic as a stepping stone.
-Examples: from 'mushrooms' to asking about the character's relationship to risk, from 'travel' to asking what home means to them, from 'work stress' to what they do when they need to feel alive.
-The pivot option should still be tagged with an appropriate stat and follow all other rules. It opens a new conversational thread without abandoning the rapport built so far.";
-
-        // ── Resistance descriptors by interest range ──
-
-        /// <summary>Interest 1-4: Active disengagement.</summary>
-        internal const string ResistanceActiveDisengagement =
-            "Active disengagement — short replies, testing, near-silence. You are barely here.";
-
-        /// <summary>Interest 5-9: Skeptical interest.</summary>
-        internal const string ResistanceSkepticalInterest =
-            "Skeptical interest — you engage but visibly evaluate. Tests disguised as questions. You're deciding if this is worth your time.";
-
-        /// <summary>Interest 10-14: Unstable agreement.</summary>
-        internal const string ResistanceUnstableAgreement =
-            "Unstable agreement — you respond warmly to good moments but hold back. One misfire and the warmth vanishes. Agreement is conditional.";
-
-        /// <summary>Interest 15-20: Deliberate approach.</summary>
-        internal const string ResistanceDeliberateApproach =
-            "Deliberate approach — you are invested but still managing the gap. One wrong move still costs. You give more but not everything.";
-
-        /// <summary>Interest 21-24: Almost convinced.</summary>
-        internal const string ResistanceAlmostConvinced =
-            "Almost convinced — warm but the final resistance is visible. You are choosing whether to give it. The holdback is small but real.";
-
-        /// <summary>Interest 25: Resistance dissolved.</summary>
-        internal const string ResistanceDissolved =
-            "Resistance dissolved — the date is real. You are genuinely won over.";
-
-        // ── Per-tier opponent reaction guidance for failure degradation (#493) ──
-
-        /// <summary>Fumble (miss 1-2): barely noticeable.</summary>
-        internal const string OpponentReactionFumble =
-            "Something was slightly off about their last message — a small hedge, an awkward word choice. You almost didn't notice. React with a slight coolness or a question that shows you caught the minor stumble. Do NOT comment on it directly.";
-
-        /// <summary>Misfire (miss 3-5): something felt off.</summary>
-        internal const string OpponentReactionMisfire =
-            "Something in their last message felt off — the tone shifted, or a detail didn't land right. You're a half-step more guarded than you'd normally be. Let the wariness show in your register, not in what you say about their message.";
-
-        /// <summary>TropeTrap (miss 6-9): clearly wrong.</summary>
-        internal const string OpponentReactionTropeTrap =
-            "Something was clearly wrong with their last message. It read like a recognizable bad-texting archetype — the kind of message that makes you pause before replying. Your warmth drops noticeably. You respond to what they said, but the energy has shifted. Do NOT diagnose what went wrong.";
-
-        /// <summary>Catastrophe (miss 10+): genuine confusion or discomfort.</summary>
-        internal const string OpponentReactionCatastrophe =
-            "Their last message was a disaster. Something in it was genuinely confusing or uncomfortable. Your response reflects real discomfort — shorter, cooler, possibly questioning. The vibe has taken a visible hit. Do NOT explain what went wrong. Just let your reaction show it.";
-
-        /// <summary>Legendary (Nat 1): maximum cringe response.</summary>
-        internal const string OpponentReactionLegendary =
-            "Their last message was spectacularly bad — the kind of message you screenshot and send to your friends. Your response reflects genuine shock, confusion, or secondhand embarrassment. The temperature in this conversation just dropped to freezing. Do NOT narrate your reaction. Just react.";
-
-        // ── Interest narrative bands for [ENGINE — OPPONENT] blocks ──
-
-        /// <summary>Interest 1-4: reconsidering.</summary>
-        internal const string InterestNarrative_1_4 =
-            "Reconsidering. Something went wrong.";
-
-        /// <summary>Interest 5-9: skeptical.</summary>
-        internal const string InterestNarrative_5_9 =
-            "Skeptical. Still testing.";
-
-        /// <summary>Interest 10-14: engaged but not sold.</summary>
-        internal const string InterestNarrative_10_14 =
-            "Engaged but not sold. Evaluating.";
-
-        /// <summary>Interest 15-20: interested but holding back.</summary>
-        internal const string InterestNarrative_15_20 =
-            "Interested but holding back. Close.";
-
-        /// <summary>Interest 21-24: basically sold.</summary>
-        internal const string InterestNarrative_21_24 =
-            "Basically sold. They can still blow it.";
-
-        /// <summary>Interest 25: resistance dissolved.</summary>
-        internal const string InterestNarrative_25 =
-            "The resistance dissolved.";
+        internal static string InterestNarrative_25 => GetCatalogString("interest-narrative-25");
 
         /// <summary>
         /// Returns the interest narrative string for a given interest level.
@@ -400,27 +169,12 @@ The pivot option should still be tagged with an appropriate stat and follow all 
             return "Unmatched. The conversation is over.";
         }
 
-        // ── [ENGINE] block format templates ──
+        // ── [ENGINE] block format templates ─────────────────────────────────
 
-        /// <summary>[ENGINE — Turn N] injection block for options generation.</summary>
-        internal const string EngineOptionsBlock =
-@"[ENGINE — Turn {turn}]
-{player_name} is deciding what to send next.
-{game_state}
-Generate 3 options for what {player_name} might send, given the conversation above.
-Format: OPTION_A: [message] OPTION_B: [message] etc.";
+        internal static string EngineOptionsBlock => GetCatalogString("engine-options-block");
 
-        /// <summary>[ENGINE — DELIVERY] injection block for message delivery.</summary>
-        internal const string EngineDeliveryBlock =
-@"[ENGINE — DELIVERY]
-Player chose: '{chosen_option}'
-Dice result: {roll_context}
-Write the message {player_name} actually sends, given the above.";
+        internal static string EngineDeliveryBlock => GetCatalogString("engine-delivery-block");
 
-        /// <summary>[ENGINE — OPPONENT] injection block for opponent response.</summary>
-        internal const string EngineOpponentBlock =
-@"[ENGINE — OPPONENT]
-{opponent_name} is at Interest {interest}/25. {interest_narrative}
-Write {opponent_name}'s response.";
+        internal static string EngineOpponentBlock => GetCatalogString("engine-opponent-block");
     }
 }

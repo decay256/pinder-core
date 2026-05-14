@@ -314,6 +314,13 @@ class Program
 
         CharacterProfile sable, brick;
 
+        // Phase 5 of #871: wire prompt yaml infrastructure before any
+        // character profile is built. After this point there are no
+        // const fallbacks — the catalog must be present.
+        PromptWiring.Wire(
+            Path.Combine(AppContext.BaseDirectory, "data", "prompts"),
+            Console.Error);
+
         if (isResimulation)
         {
             string? resimDir = SessionFileCounter.ResolvePlaytestDirectory(AppContext.BaseDirectory);

@@ -21,6 +21,26 @@ namespace Pinder.Core.Tests
     [Trait("Category", "Core")]
     public class Issue649_TierBasedArchetypeSelectionTests
     {
+        // Wire BehaviorResolver so GetBehavior works without const fallbacks
+        // (Phase 5 of #871: no embedded behavior strings).
+        static Issue649_TierBasedArchetypeSelectionTests()
+        {
+            var dir = System.AppDomain.CurrentDomain.BaseDirectory;
+            for (int i = 0; i < 10; i++)
+            {
+                var candidate = System.IO.Path.Combine(dir, "data", "prompts");
+                if (System.IO.Directory.Exists(candidate))
+                {
+                    var catalog = Pinder.LlmAdapters.PromptCatalog.LoadFromDirectory(candidate);
+                    Pinder.LlmAdapters.ArchetypeYamlLoader.LoadFromPromptCatalog(catalog);
+                    return;
+                }
+                var parent = System.IO.Path.GetDirectoryName(dir);
+                if (parent == null || parent == dir) break;
+                dir = parent;
+            }
+        }
+
         // ── Tier assignment tests ─────────────────────────────────────────────
 
         [Theory]
