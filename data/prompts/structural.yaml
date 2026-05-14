@@ -1,0 +1,33 @@
+schema_version: 1
+
+# Pinder structural prompt catalog — structural.yaml
+#
+# Issue #874 Phase 3: lift PromptBuilder.cs structural strings
+# into yaml. Loaded at runtime by Pinder.LlmAdapters
+# PromptCatalog.LoadFromDirectory("data/prompts").
+#
+# Each entry is a bare textual fragment. The lead-in carries a
+# {name} placeholder that PromptBuilder substitutes at call time.
+# Most keys are section headers (single-word labels); the lead-in
+# is the only multi-word item.
+#
+# Substitution: {name} for the lead-in line only.
+#
+# IMPORTANT: keep these strings byte-equivalent to the
+# corresponding C# consts until Phase 5 (#875) deletes them.
+
+prompts:
+  structural-lead-in:
+    system_prompt: "You are playing the role of {name}, a sentient penis on the dating app Pinder."
+  structural-identity:
+    system_prompt: IDENTITY
+  structural-personality:
+    system_prompt: PERSONALITY
+  structural-backstory:
+    system_prompt: BACKSTORY
+  structural-texting-style:
+    system_prompt: TEXTING STYLE
+  structural-active-archetype:
+    system_prompt: ACTIVE ARCHETYPE
+  structural-active-trap-instructions:
+    system_prompt: ACTIVE TRAP INSTRUCTIONS
