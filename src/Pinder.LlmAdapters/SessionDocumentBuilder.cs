@@ -385,10 +385,29 @@ namespace Pinder.LlmAdapters
             sb.AppendLine();
 
             string resistanceBlock = GetResistanceBlock(context.InterestAfter);
+
+            // #866: compute reciprocal length ceiling and inject length hint
+            int playerLen = context.PlayerDeliveredMessage.Length;
+            int ceiling = ComputeResponseCeiling(playerLen);
+            string lengthHint = $"Aim for roughly {playerLen} characters (matching the player's message length). " +
+                $"Do not exceed {ceiling} characters regardless of your texting style.";
+
             sb.Append(PromptTemplates.OpponentResponseInstruction
-                .Replace("{resistance_block}", resistanceBlock));
+                .Replace("{resistance_block}", resistanceBlock)
+                .Replace("{length_hint}", lengthHint));
 
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// Computes the opponent response length ceiling from the player's message length.
+        /// Formula: ceiling = min(600, max(playerLen × 2, 80)).
+        /// #866: reciprocal length budget — opponent response shouldn't be wildly longer
+        /// than the player's message.
+        /// </summary>
+        public static int ComputeResponseCeiling(int playerMessageLength)
+        {
+            return Math.Min(600, Math.Max(playerMessageLength * 2, 80));
         }
 
         /// <summary>

@@ -396,3 +396,47 @@ discussion lives in the drain's `questions.md` (Q1) and in the
 intrinsically slow (p50 > 1ms after a real change), Step 2 ships
 then — but not speculatively against GC noise.
 
+
+### OPPONENT-LENGTH-RECIPROCITY
+
+**Symptom:** Opponent response length was governed entirely by the character's
+texting-style block, with no relative-length constraint. Observed in prod
+session `707fca72` turn 2: player sent 1054 chars (post-shadow-corruption),
+opponent replied with 957 chars — combined ~2000 chars in one turn, ~3 phone
+screens. A short player message ("k") could also trigger a full texting-style
+wall from a "long run-on" opponent.
+
+**Root cause:** The opponent-response prompt had a static length sentence
+("Length follows your character's texting style") with no reciprocal-length
+constraint tied to the player's message. This failed to model the implicit
+conversational norm of message-length convergence.
+
+**Fix (#866):** Replaced the static length sentence in
+`data/prompts/templates.yaml` → `opponent-response-instruction` with a
+`{length_hint}` placeholder. `SessionDocumentBuilder.BuildOpponentPrompt`
+computes `ceiling = min(600, max(playerLen × 2, 80))`, constructs a two-part
+hint ("Aim for roughly N characters... Do not exceed M characters..."), and
+injects it. Both `AnthropicLlmAdapter` and `OpenAiLlmAdapter` post-validate
+the LLM response length against `1.2 × ceiling` and log a `Console.Error`
+warning when exceeded (warn-only phase 1; no retry). The slop factor (20%)
+avoids noise from minor off-by-a-few-char cases. The 600-char absolute
+ceiling prevents essays regardless of player message length.
+
+**Rule:** Opponent response length must be reciprocally bounded to the
+player's message length with an absolute ceiling. The formula lives in
+`SessionDocumentBuilder.ComputeResponseCeiling` — any future tuning of the
+ceiling, floor, or multiplier should touch only that method. The
+`{length_hint}` placeholder in the prompt template is the inject point; the
+post-LLM warning is the observability hook.
+
+**Adjacent rule:** If the warn-only approach proves insufficient in
+production (frequent warnings), escalate to phase 2 (retry with
+length-clamped re-prompt) in a follow-up ticket. Do not silently add retry
+in a drive-by — it changes latency characteristics and should be tracked as
+a separate issue.
+
+**Discovered in:** #866 (2026-05-14). Full design discussion in the issue
+body; the chosen option (b) relative-window + 600-char-ceiling was resolved
+by the ticket-refiner agent. See also the 707fca72 session log that
+motivated the ticket.
+

@@ -219,6 +219,17 @@ namespace Pinder.LlmAdapters.Anthropic
                 assistantTextForHistory = responseText ?? string.Empty;
             }
 
+            // #866: post-LLM length validation (warn-only phase 1 — no retry)
+            int playerLen = context.PlayerDeliveredMessage.Length;
+            int ceiling = SessionDocumentBuilder.ComputeResponseCeiling(playerLen);
+            double slopCeiling = 1.2 * ceiling;
+            if (parsed.MessageText != null && parsed.MessageText.Length > slopCeiling)
+            {
+                Console.Error.WriteLine(
+                    $"[WARN] Opponent response over length ceiling (slop ceiling={slopCeiling:F0}): " +
+                    $"playerLen={playerLen} ceiling={ceiling} responseLen={parsed.MessageText.Length} character={context.OpponentName}");
+            }
+
             var newEntries = new ConversationMessage[]
             {
                 ConversationMessage.User(userContent),
