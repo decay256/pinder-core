@@ -74,6 +74,7 @@ prompts:
       - STAT must be one of the available stats listed above: {available_stats}
       - Text must be in double quotes on the line immediately after the metadata
       - No extra text before OPTION_1 or after the last option
+      - Do not add category labels, meta-prefixes, or classification words (e.g. CONTEXT:, QUESTION:, NOTE:, RECOGNITION:) before the message text. The double-quoted text must begin with the character's actual words.
       
       Before writing each option, verify: does this sound exactly like
       the texting style above? If not, rewrite it.

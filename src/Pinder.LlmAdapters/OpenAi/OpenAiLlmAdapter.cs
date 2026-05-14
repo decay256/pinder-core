@@ -40,6 +40,8 @@ namespace Pinder.LlmAdapters.OpenAi
             @"\[TELL_BONUS:\s*(\w+)\]", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         private static readonly Regex QuotedTextRegex = new Regex(
             @"""([^""]+)""", RegexOptions.Compiled);
+        private static readonly Regex MetaPrefix = new Regex(
+            @"^[A-Z][A-Z\s]+:\s*", RegexOptions.Compiled);
         private static readonly Regex TellSignalRegex = new Regex(
             @"TELL:\s*(\w+)\s*\(([^)]+)\)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         private static readonly Regex WeaknessSignalRegex = new Regex(
@@ -283,7 +285,7 @@ namespace Pinder.LlmAdapters.OpenAi
                         var textMatch = QuotedTextRegex.Match(section);
                         if (!textMatch.Success) continue;
 
-                        var text = textMatch.Groups[1].Value.Trim();
+                        var text = MetaPrefix.Replace(textMatch.Groups[1].Value.Trim(), "", 1);
                         if (string.IsNullOrEmpty(text)) continue;
 
                         int? callbackTurn = null;
