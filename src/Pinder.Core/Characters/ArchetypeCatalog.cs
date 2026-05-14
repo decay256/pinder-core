@@ -247,11 +247,31 @@ namespace Pinder.Core.Characters
         }
 
         /// <summary>
+        /// Optional resolver for behavior text. When non-null,
+        /// <see cref="GetBehavior"/> consults this delegate before falling
+        /// back to the embedded const strings. Wired at startup from the
+        /// <c>Pinder.LlmAdapters</c> assembly to load behaviors from
+        /// <c>data/prompts/archetypes.yaml</c> (Issue #873 Phase 4).
+        /// </summary>
+        /// <remarks>
+        /// The delegate receives the archetype name (e.g. <c>"The Hey Opener"</c>)
+        /// and returns the behavior string, or null if the name is unrecognised.
+        /// This indirection avoids a hard assembly reference from
+        /// <c>Pinder.Core</c> to <c>Pinder.LlmAdapters</c>.
+        /// </remarks>
+        public static Func<string, string?>? BehaviorResolver { get; set; }
+
+        /// <summary>
         /// Returns the behavioral instruction for the given archetype. Returns a
         /// placeholder if no behavior text is registered.
         /// </summary>
         public static string GetBehavior(string archetypeName)
         {
+            if (BehaviorResolver != null)
+            {
+                var resolved = BehaviorResolver(archetypeName);
+                if (resolved != null) return resolved;
+            }
             if (_behaviors.TryGetValue(archetypeName, out var behavior))
                 return behavior;
             return $"Follow {archetypeName} behavioral pattern.";
