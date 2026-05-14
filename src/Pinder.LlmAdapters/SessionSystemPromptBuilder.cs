@@ -52,6 +52,12 @@ namespace Pinder.LlmAdapters
                 def.DramaticCraft != null ? def.DramaticCraft.BuildSection().TrimEnd() : "",
                 string.IsNullOrWhiteSpace(def.TextingPsychology) ? "" : "\n\n== TEXTING PSYCHOLOGY ==\n\n" + def.TextingPsychology.TrimEnd(),
                 string.IsNullOrWhiteSpace(def.RevelationOverStatement) ? "" : "\n\n== REVELATION OVER STATEMENT ==\n\n" + def.RevelationOverStatement.TrimEnd(),
+                // Build() is the legacy joint prompt for callers that want both
+                // roles in one system block. Per #867 LESSONS_LEARNED, this method
+                // retains all sections (only BuildPlayer is trimmed).
+                string.IsNullOrWhiteSpace(def.OpponentFriction) ? "" : "\n\n== OPPONENT RESISTANCE ==\n\n" + def.OpponentFriction.TrimEnd(),
+                string.IsNullOrWhiteSpace(def.OpponentCuriosity) ? "" : "\n\n== OPPONENT CURIOSITY ==\n\n" + def.OpponentCuriosity.TrimEnd(),
+                string.IsNullOrWhiteSpace(def.ConversationArcProgression) ? "" : "\n\n== CONVERSATION ARC ==\n\n" + def.ConversationArcProgression.TrimEnd(),
                 string.IsNullOrWhiteSpace(def.PlayerProbing) ? "" : "\n\n== PLAYER PROBING ==\n\n" + def.PlayerProbing.TrimEnd(),
                 "\n");
         }
@@ -82,11 +88,11 @@ namespace Pinder.LlmAdapters
                 def.DramaticCraft != null ? def.DramaticCraft.BuildSection().TrimEnd() : "",
                 string.IsNullOrWhiteSpace(def.TextingPsychology) ? "" : "\n\n== TEXTING PSYCHOLOGY ==\n\n" + def.TextingPsychology.TrimEnd(),
                 string.IsNullOrWhiteSpace(def.RevelationOverStatement) ? "" : "\n\n== REVELATION OVER STATEMENT ==\n\n" + def.RevelationOverStatement.TrimEnd(),
-                // #867: OpponentFriction and OpponentCuriosity describe how the
-                // opponent should behave — stripped from BuildPlayer to save
-                // ~1,000 tokens per delivery call. ConversationArcProgression
-                // is shared structure relevant to both sides, kept here.
-                // PlayerProbing is player-specific guidance, kept here.
+                // #867: OpponentFriction and OpponentCuriosity describe opponent
+                // behavior — stripped from BuildPlayer to save ~1,000 tokens per
+                // delivery call. ConversationArcProgression is SHARED structure
+                // (both sides participate in arc progression) — kept here.
+                // PlayerProbing is player-specific guidance — kept here.
                 string.IsNullOrWhiteSpace(def.ConversationArcProgression) ? "" : "\n\n== CONVERSATION ARC ==\n\n" + def.ConversationArcProgression.TrimEnd(),
                 string.IsNullOrWhiteSpace(def.PlayerProbing) ? "" : "\n\n== PLAYER PROBING ==\n\n" + def.PlayerProbing.TrimEnd(),
                 "\n");

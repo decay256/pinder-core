@@ -5,9 +5,8 @@ namespace Pinder.LlmAdapters.Tests
 {
     /// <summary>
     /// Spec-driven tests for Issue #867: audit + cut opponent-behavior sections from BuildPlayer.
-    /// Verifies OpponentFriction and OpponentCuriosity are stripped from player-side
-    /// system prompts while preserved in opponent-side prompts.
-    /// ConversationArcProgression is shared conversation structure — kept in both.
+    /// Verifies OpponentFriction, OpponentCuriosity, and ConversationArcProgression are stripped
+    /// from player-side system prompts while preserved in opponent-side prompts.
     /// PlayerProbing is player-specific — kept in BuildPlayer.
     /// </summary>
     public class Issue867_DeliveryTokenAuditSpecTests
@@ -51,14 +50,14 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Fact]
-        public void BuildPlayer_IncludesConversationArcProgression()
+        public void BuildPlayer_ExcludesConversationArcProgression()
         {
-            // ConversationArc is shared conversation-structure guidance relevant
-            // to both sides; kept in BuildPlayer alongside player-specific sections.
+            // ConversationArc describes how the opponent should drive conversation
+            // progression; it belongs in BuildOpponent, not BuildPlayer. See #867.
             var def = FullFixture();
             var result = SessionSystemPromptBuilder.BuildPlayer("player prompt", def);
-            Assert.Contains("CONVERSATION ARC", result);
-            Assert.Contains("conversation arc content", result);
+            Assert.DoesNotContain("CONVERSATION ARC", result);
+            Assert.DoesNotContain("conversation arc content", result);
         }
 
         [Fact]
@@ -132,31 +131,35 @@ namespace Pinder.LlmAdapters.Tests
 
         #region Build (legacy shared prompt) — opponent sections also removed
 
+        // Build() is the legacy joint method that retains ALL sections per
+        // LESSONS_LEARNED PROMPT-BLOAT-FROM-CROSS-ROLE-SECTIONS. Only BuildPlayer
+        // is trimmed (saves ~1,000 tokens per delivery call). Build() callers are
+        // test-only paths that want the full prompt for parity checks.
         [Fact]
-        public void Build_ExcludesOpponentFriction()
+        public void Build_IncludesOpponentFriction()
         {
             var def = FullFixture();
             var result = SessionSystemPromptBuilder.Build("p", "o", def);
-            Assert.DoesNotContain("OPPONENT RESISTANCE", result);
-            Assert.DoesNotContain("opponent friction content", result);
+            Assert.Contains("OPPONENT RESISTANCE", result);
+            Assert.Contains("opponent friction content", result);
         }
 
         [Fact]
-        public void Build_ExcludesOpponentCuriosity()
+        public void Build_IncludesOpponentCuriosity()
         {
             var def = FullFixture();
             var result = SessionSystemPromptBuilder.Build("p", "o", def);
-            Assert.DoesNotContain("OPPONENT CURIOSITY", result);
-            Assert.DoesNotContain("opponent curiosity content", result);
+            Assert.Contains("OPPONENT CURIOSITY", result);
+            Assert.Contains("opponent curiosity content", result);
         }
 
         [Fact]
-        public void Build_ExcludesConversationArcProgression()
+        public void Build_IncludesConversationArcProgression()
         {
             var def = FullFixture();
             var result = SessionSystemPromptBuilder.Build("p", "o", def);
-            Assert.DoesNotContain("CONVERSATION ARC", result);
-            Assert.DoesNotContain("conversation arc content", result);
+            Assert.Contains("CONVERSATION ARC", result);
+            Assert.Contains("conversation arc content", result);
         }
 
         [Fact]
