@@ -327,7 +327,81 @@ vs DC `16 + opponent_defending_stat`. `level_bonus` is a flat +1 per level
 applied to all rolls — progression keeps scaling simple; shadows are the
 threat that actually eats into it.
 
-## 5. Data Files
+## 5. Prompt Catalog
+
+Prompt text that was previously scattered as `const string` values across
+`PromptTemplates.cs` and `SessionSystemPromptBuilder.cs` was migrated to
+YAML in sprint 2026-05-14-fa5abd (#872–#875). All prompt content now lives
+in `data/prompts/` and is loaded once at startup via
+`Pinder.LlmAdapters.PromptCatalog.LoadFromDirectory("data/prompts")`.
+
+### Files
+
+```
+data/prompts/
+├── templates.yaml    # 37 ENGINE injection blocks (dialogue-options-instruction,
+│                     #   delivery-instruction, opponent-response-instruction, etc.)
+├── structural.yaml   # 7 structural strings assembled into system prompts
+│                     #   (loaded via cross-assembly delegate from Pinder.LlmAdapters
+│                     #   into Pinder.SessionSetup; see §5a for the delegate pattern)
+├── archetypes.yaml   # 20 archetype directives (one per playable archetype)
+└── stake.yaml        # Stake generation prompt for Pinder.SessionSetup
+```
+
+### Loading and wiring
+
+`Pinder.SessionSetup.PromptWiring.Wire(promptsRoot, errorSink)` is the
+**single wiring entry point** for production. It is called once in
+`Pinder.GameApi/Program.cs` at startup and populates all static
+`PromptCatalog` fields before any request is served.
+
+Test wiring uses three helpers that call the same `Wire()` method with a
+discovered path:
+- `CoreTestWiring` — for `Pinder.Core.Tests`
+- `LlmAdaptersTestWiring` — for `Pinder.LlmAdapters.Tests`
+- Per-test `FindPromptsRoot()` patterns for integration tests
+
+**Fail-fast guarantee:** if `data/prompts/` is absent or any required key
+is missing, `Wire()` calls `errorSink(message)` for each missing entry.
+`Pinder.GameApi/Program.cs` uses a sink that throws
+`InvalidOperationException`, aborting startup immediately. No silent
+fallbacks, no empty strings.
+
+### Cross-assembly delegate pattern (structural.yaml)
+
+`structural.yaml` is owned by `Pinder.SessionSetup` but consumed by
+`Pinder.LlmAdapters`. To avoid a circular assembly dependency, loading is
+done via a delegate injected at wiring time. `PromptWiring.Wire()` reads
+`structural.yaml` and passes the parsed entries into
+`SessionSystemPromptBuilder` via a registered accessor delegate. Neither
+assembly holds a direct reference to the other's internals.
+
+### Role-affiliation rule (BuildPlayer vs BuildOpponent)
+
+Each `GameDefinition` section is **role-affiliated** — it belongs either to
+the player-builder path or the opponent-builder path, never both. This rule
+was formalized in #867 after a token-audit discovered that
+`BuildPlayer`/`Build()` were including `OpponentFriction` and
+`OpponentCuriosity` sections, bloating the player prompt with irrelevant
+material.
+
+Current split (as of #867):
+- **BuildPlayer** includes: `ConversationArc`, `PlayerProbing`, and all
+  player-facing delivery context.
+- **BuildOpponent** includes: `OpponentFriction`, `OpponentCuriosity`, and
+  all opponent-facing response context.
+- **Build()** (shared/base): only sections relevant to both roles (e.g.
+  meta contract, shared writing rules).
+
+**Rule for future additions:** before wiring a new `GameDefinition` section
+into any builder method, decide which role it belongs to and wire it
+exclusively there. If a section is genuinely shared, document why in a code
+comment. See `LESSONS_LEARNED.md §PROMPT-BLOAT-FROM-CROSS-ROLE-SECTIONS`
+for the full rationale.
+
+---
+
+## 5a. Data Files
 
 | File | Purpose | Loaded by | Key fields |
 |---|---|---|---|
