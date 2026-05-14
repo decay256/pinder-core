@@ -1105,3 +1105,4 @@
 {"ts":"2026-05-13T07:06:48Z","agent":"backend-engineer","issue":"#853","component":"Pinder.RemoteAssets","action":"started","detail":"Implementing #853 per branch fix/853-remoteassets-scaffold-readpath","commit":null}
 {"ts":"2026-05-13T07:18:32Z","agent":"backend-engineer","issue":"#853","component":"Pinder.RemoteAssets","action":"completed","detail":"PR #856 opened: https://github.com/decay256/pinder-core/pull/856","commit":"d09a276"}
 {"ts":"2026-05-13T08:30:37Z","agent":"orchestrator","issue":"#819","action":"docs-merged","detail":"PR #861 (sprint-end docs pass) squash-merged","pr":861,"commit":"d130f97"}
+{"ts":"2026-05-14T09:25:52Z","agent":"backend-engineer","action":"start","detail":"Implementing HTTPS enforcement in Pinder.RemoteAssets.Configuration (pinder-core#859)","issue":"GH-859"}

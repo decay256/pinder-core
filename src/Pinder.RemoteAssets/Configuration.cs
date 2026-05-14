@@ -51,7 +51,7 @@ namespace Pinder.RemoteAssets
         /// <c>/api/v1</c> (or future-rev) prefix here so the wire-level
         /// route code does NOT hard-code <c>/api/v1</c>. Example for the
         /// reference backend: <c>https://eigencore.example.com/api/v1</c>.
-        /// MUST be absolute. A trailing slash is tolerated either way.
+        /// MUST be absolute and use the HTTPS scheme.
         /// </summary>
         public Uri BaseUrl { get; }
 
@@ -142,11 +142,14 @@ namespace Pinder.RemoteAssets
             TimeSpan? defaultRetryAfter = null,
             int? metadataSizeCapBytes = null,
             int? payloadSizeCapBytes = null,
-            CharacterPayloadSerializer? payloadSerializer = null)
+            CharacterPayloadSerializer? payloadSerializer = null,
+            bool allowInsecureBaseUrl = false)
         {
             if (baseUrl == null) throw new ArgumentNullException(nameof(baseUrl));
             if (!baseUrl.IsAbsoluteUri)
                 throw new ArgumentException("BaseUrl must be absolute.", nameof(baseUrl));
+            if (!allowInsecureBaseUrl && baseUrl.Scheme != "https")
+                throw new ArgumentException($"BaseUrl must use the HTTPS scheme. Rejected scheme: {baseUrl.Scheme}.", nameof(baseUrl));
             BaseUrl = baseUrl;
             HttpMessageHandler = httpMessageHandler ?? throw new ArgumentNullException(nameof(httpMessageHandler));
             AuthTokenProvider = authTokenProvider ?? throw new ArgumentNullException(nameof(authTokenProvider));
