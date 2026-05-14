@@ -1,0 +1,16 @@
+{
+  "sprint_id": "2026-05-13-c34129",
+  "approved_by_human": false,
+  "rationale": "Three PRs is not enough signal to revise trigger thresholds. All triggers (3-strike-review, token-explosion, wall-clock-overrun) ran in seed-uncalibrated default state and zero of them fired. Observed values are well below the current thresholds: max tokens out ~52k vs threshold 200k; max wall-clock 15m vs threshold 90m; zero review rejections. Per TRIGGER-CONSERVATISM-UNTIL-CALIBRATED the right thing is to keep collecting data. Revisit after ~5 sprints under this skill version.",
+  "proposed_revisions": {},
+  "observed_values": {
+    "max_tokens_in_per_attempt": 84,
+    "max_tokens_out_per_attempt": 52100,
+    "max_wall_clock_minutes_per_pr": 15,
+    "review_rejections": 0,
+    "implementer_escalations": 0,
+    "ticket_count": 3,
+    "pr_count": 4,
+    "follow_ups_filed": 2
+  }
+}
