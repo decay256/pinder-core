@@ -440,3 +440,50 @@ body; the chosen option (b) relative-window + 600-char-ceiling was resolved
 by the ticket-refiner agent. See also the 707fca72 session log that
 motivated the ticket.
 
+### GAME-DEFINITION-SECTIONS-HAVE-ROLE-AFFILIATION
+
+**Symptom:** `BuildPlayer()` included opponent-behavior sections
+(OpponentFriction, OpponentCuriosity) that describe how the opponent
+should resist and probe — irrelevant to the player-side delivery prompt.
+This leaked ~705 tokens of noise into every player-side API call. The
+bug was invisible at the LLM output level (the delivery LLM just ignored
+the irrelevant sections) and only surfaced through a token audit of
+the delivery prompt size (#867).
+
+**Root cause:** When the `Build` → `BuildPlayer` / `BuildOpponent` split
+was introduced, every new GameDefinition section was mechanically added
+to all three methods without auditing which sections describe which
+role's behavior. The assumption was "more context is always better."
+
+**Fix (#867):** Removed `OpponentFriction` and `OpponentCuriosity` from
+`BuildPlayer()` (kept in `Build()` and `BuildOpponent()`). The audit:
+- OpponentFriction → opponent-only (how opponent resists) → cut
+- OpponentCuriosity → opponent-only (how opponent probes) → cut
+- ConversationArcProgression → mixed (conversation structure for both
+  sides) → keep in both
+- PlayerProbing → player-specific (what player should do) → keep in
+  BuildPlayer, correctly already absent from BuildOpponent
+
+The `Build()` combined variant (test-only callers) retains all sections
+since it assembles a joint system prompt for both characters.
+
+**Rule:** Every `GameDefinition` section has a role-affiliation: it
+describes either player behavior, opponent behavior, or shared
+conversation structure. When a new section is added:
+1. Declare its affiliation in the PR description.
+2. Add it only to the methods whose role it describes.
+3. Write a regression test that asserts BuildPlayer excludes
+   opponent-only sections and BuildOpponent excludes player-only
+   sections.
+The combined `Build()` method is test-only plumbing; do not adjust it
+for role-affiliation unless a production caller appears.
+
+**Detection rule:** any new `GameDefinition` property that appears in
+all three of `Build()` / `BuildPlayer()` / `BuildOpponent()` is a red
+flag in review — why was the section not role-affiliated? The author
+must either (a) justify why it's truly shared in the PR body, or (b)
+remove it from the method whose role doesn't match.
+
+**Discovered in:** #867 (2026-05-14). Token audit of session `707fca72`
+cosmetic phase prompted by the refiner agent.
+
