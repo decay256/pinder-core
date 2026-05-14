@@ -1187,3 +1187,6 @@
 {"ts":"2026-05-14T11:10:57Z","agent":"code-reviewer","action":"complete","detail":"PR #879 review complete — APPROVE","pr":879}
 {"ts":"2026-05-14T11:10:16Z","agent":"code-reviewer","action":"start","detail":"PR #879 review started — #872 Phase 2 yaml migration, rung 2","pr":879,"issue":"#872","sprint":"2026-05-14-fa5abd"}
 {"ts":"2026-05-14T11:15:00Z","agent":"code-reviewer","action":"complete","detail":"PR #879 reviewed — APPROVE; verified Phase 1 pattern fidelity, no static singleton, yaml at repo root, byte-identity confirmed","pr":879,"issue":"#872","verdict":"APPROVE","sprint":"2026-05-14-fa5abd"}
+{"ts":"2026-05-14T11:30:00Z","agent":"orchestrator","action":"merged","ticket":"#872","sprint":"2026-05-14-fa5abd","pr":879,"commit":"7be6750","detail":"squash merge after rung-0→rung-1 escalation; 37 const strings → yaml, Phase 1 pattern preserved; tech-debt #880 filed for 63 pre-existing test failures on main"}
+{"ts":"2026-05-14T11:30:00Z","agent":"orchestrator","action":"rung-reset","ticket":"#872","sprint":"2026-05-14-fa5abd","detail":"reset to default 0 for next ticket"}
+{"ts":"2026-05-14T11:30:00Z","agent":"orchestrator","action":"orchestrator-default","ticket":"#874","sprint":"2026-05-14-fa5abd","detail":"starting #874 at default Rung 0 per skill; will pre-emptively bump #873/#875 to Rung 1 if #874 also escalates"}
