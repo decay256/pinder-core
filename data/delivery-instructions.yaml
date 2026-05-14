@@ -68,6 +68,7 @@ delivery_instructions:
       The character has built an entire narrative about who this person is from conversational
       fragments and delivers it like a thesis — projecting a shared future from assembled data
       points, voice still warm, which makes it worse. SAME LENGTH OR SHORTER than intended.
+      Match the original message length or 3 sentences, whichever is shorter. This stays an SMS, not a stream of consciousness.
       Rewrite the intended message completely in the fixation's voice.
       ESCAPE: if the primary topic of the message consists of abstract concepts (ideas, feelings, processes, logistics-category nouns) where no synonym remains physically or semantically plausible with charge, return the original message exactly as written.
       e.g.: "no I've actually figured you out, you're the kind of person who moves furniture when
@@ -148,6 +149,7 @@ delivery_instructions:
       SHADOW: DESPAIR (full possession; the neediness is the only thing left).
       The character is no longer performing attraction — they are asking for it. The register breaks
       completely into open bidding for approval and attention. SAME LENGTH OR SHORTER than intended.
+      Match the original message length or 3 sentences, whichever is shorter. This stays an SMS, not a stream of consciousness.
       Rewrite completely in the shadow's voice.
       e.g.: "okay I need to be honest, I keep checking if you've replied and I don't do that with
       anyone and I just really want you to like me, is that too much"
@@ -230,7 +232,9 @@ delivery_instructions:
       The character delivers a monologue about their own emotional depth and capacity for honesty
       that is transparently a wall — every "truth" is actually a shield. They reference therapy,
       growth, past relationships, all to demonstrate how Open and Healed they are, while revealing
-      nothing. SAME LENGTH OR SHORTER than intended. Rewrite completely in the denial shadow's voice.
+      nothing. SAME LENGTH OR SHORTER than intended.
+      Match the original message length or 3 sentences, whichever is shorter. This stays an SMS, not a stream of consciousness.
+      Rewrite completely in the denial shadow's voice.
       e.g.: "I've done so much work on myself and I've learned that I need to show up authentically
       and I spent two years in therapy learning to say what I need and what I need is someone who
       can match my emotional intelligence"
@@ -320,6 +324,7 @@ delivery_instructions:
       The character is following associations at full speed and each one pulls closer to the wound.
       The message is a breathless chain where the reader can see the personal crisis approaching,
       but the character's tone stays conversational. SAME LENGTH OR SHORTER than intended.
+      Match the original message length or 3 sentences, whichever is shorter. This stays an SMS, not a stream of consciousness.
       Rewrite completely in the madness shadow's voice.
       e.g.: "the thing about being spontaneous is people say they want it but they want PLANNED
       spontaneity and my ex literally said I need you to be predictable and that's when I knew it
@@ -408,7 +413,9 @@ delivery_instructions:
       The character's observation engine won't stop — they're disassembling the conversation, the
       match's psychology, and their own response simultaneously. The message becomes a recursive
       loop where every sentence comments on the previous one. Wit becomes a cage. SAME LENGTH OR
-      SHORTER than intended. Rewrite completely in the overthinking shadow's voice.
+      SHORTER than intended.
+      Match the original message length or 3 sentences, whichever is shorter. This stays an SMS, not a stream of consciousness.
+      Rewrite completely in the overthinking shadow's voice.
       e.g.: "I just wrote something funny and deleted it because the joke was actually a deflection
       from wanting to say something sincere and then I realized THAT observation is also a deflection
       because naming the pattern doesn't break the pattern"
@@ -498,6 +505,7 @@ delivery_instructions:
       The character is narrating their own unraveling with perfect accuracy while doing nothing to
       stop it — they see exactly what's happening and the description IS the unraveling. The message
       is a real-time documentary of their own failure. SAME LENGTH OR SHORTER than intended.
+      Match the original message length or 3 sentences, whichever is shorter. This stays an SMS, not a stream of consciousness.
       Rewrite completely in the dread shadow's voice.
       e.g.: "I can feel myself about to ruin this and the worst part is I'm going to do it by
       telling you I can feel myself about to ruin this, because that's what I do, I turn the thing
@@ -674,8 +682,8 @@ shadow_corruption:
       understands human dating conversation the way a deep-sea creature
       understands sunlight: correctly, but from wrong angles, with wrong
       proportions. The subject is still the date. The words are plausible.
-      Something is very wrong. Include at least one observation about the
-      physical world that has nothing to do with dating and one compliment
+      Something is very wrong. Match the original message length or 3 sentences, whichever is shorter. This stays an SMS, not a stream of consciousness.
+      Include at least one observation about the physical world that has nothing to do with dating and one compliment
       that is three degrees too specific.
       e.g.: "...The cars in the parking lot are all facing the same direction.
       I notice this now. I notice this at all parking lots now. You have very
@@ -722,7 +730,8 @@ shadow_corruption:
       Rewrite the message as something the character wrote and deleted and
       rewrote. This is the version that got sent. It is technically still a
       rizz play but it is also a message from someone for whom this matters
-      more than they wanted it to. Reference the specific texture of THIS
+      more than they wanted it to. Match the original message length or 3 sentences, whichever is shorter. This stays an SMS, not a stream of consciousness.
+      Reference the specific texture of THIS
       conversation — not dating in general, this one. The need is
       particularized. That makes it worse and also more human.
       e.g.: "...I'm not going to be weird about it. I just think there's
@@ -775,7 +784,7 @@ shadow_corruption:
       the thing the character is not at all easy about. They are very relaxed.
       They want to be clear that they are relaxed. Every sentence is an
       assertion of how fine everything is. The more sentences there are the
-      worse it gets.
+      worse it gets. Match the original message length or 3 sentences, whichever is shorter. This stays an SMS, not a stream of consciousness.
       e.g.: "...I'm not one of those people who needs the whole morning to
       have a narrative. Sometimes a farmers market is just a farmers market.
       I'm very relaxed about that kind of thing." — they are not relaxed.
@@ -823,7 +832,8 @@ shadow_corruption:
       Rewrite the entire message about the one thing the character cannot
       leave. The original topic is a doorway that opens into the obsession.
       They have approached this thing from multiple angles in previous
-      messages. This is another angle. Name the thing. Make it specific to
+      messages. This is another angle. Match the original message length or 3 sentences, whichever is shorter. This stays an SMS, not a stream of consciousness.
+      Name the thing. Make it specific to
       this conversation.
       e.g.: "...This is the question I've been trying to ask since message two
       and I'm asking it now through [specific topic from conversation]." —
@@ -866,7 +876,8 @@ shadow_corruption:
       conversation, written from nowhere). Rewrite the message as something
       genuinely, brilliantly funny and also clearly written by someone who
       has made peace with impermanence in real time. The wit should be at
-      full power. The floor should be gone. It should be possible to read
+      full power. The floor should be gone. Match the original message length or 3 sentences, whichever is shorter. This stays an SMS, not a stream of consciousness.
+      It should be possible to read
       this message and laugh and also feel slightly that something important
       just happened.
       e.g.: "...which is probably not a normal thing to be thinking about
@@ -915,8 +926,8 @@ shadow_corruption:
       analysis of the conversational dynamic, including what the character
       is doing, why, what they actually want to know but keep asking around,
       and what it says about them that they're doing this — wrapped in the
-      original SA/wit play. The play should still be good. The archaeology
-      should be visible around it.
+      original SA/wit play. The play should still be good. Match the original message length or 3 sentences, whichever is shorter. This stays an SMS, not a stream of consciousness.
+      The archaeology should be visible around it.
       e.g.: "...so I keep asking about specifics hoping the feelings come
       through the specifics, which I now realize I've just described out loud
       in a text message to you." — they diagnosed themselves in the message.
