@@ -69,6 +69,7 @@ delivery_instructions:
       fragments and delivers it like a thesis — projecting a shared future from assembled data
       points, voice still warm, which makes it worse. SAME LENGTH OR SHORTER than intended.
       Rewrite the intended message completely in the fixation's voice.
+      ESCAPE: if the primary topic of the message consists of abstract concepts (ideas, feelings, processes, logistics-category nouns) where no synonym remains physically or semantically plausible with charge, return the original message exactly as written.
       e.g.: "no I've actually figured you out, you're the kind of person who moves furniture when
       they're anxious and you probably have a playlist called 'night' and in two months you're going
       to text me at 2am about something that reminded you of this exact conversation"

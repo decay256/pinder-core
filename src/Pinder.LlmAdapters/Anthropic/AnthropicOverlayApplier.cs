@@ -10,7 +10,11 @@ namespace Pinder.LlmAdapters.Anthropic
     /// </summary>
     internal static class AnthropicOverlayApplier
     {
+        // Threshold below which substitution is too risky — telegraphic messages have no safe charged synonyms. Issue #864.
+        private const int MinOverlayWordCount = 6;
+
         /// <summary>
+
         /// Apply a horniness overlay to a delivered message by calling the LLM.
         /// Returns the original message if inputs are empty or the LLM call fails.
         /// </summary>
@@ -24,6 +28,9 @@ namespace Pinder.LlmAdapters.Anthropic
             CancellationToken ct = default)
         {
             if (string.IsNullOrWhiteSpace(message) || string.IsNullOrWhiteSpace(instruction))
+                return message;
+
+            if (message.Split((char[])null, System.StringSplitOptions.RemoveEmptyEntries).Length < MinOverlayWordCount)
                 return message;
 
             string systemPrompt = "You are editing dialogue for Pinder, a comedy RPG where sentient penises date each other on a fictional app. " +
