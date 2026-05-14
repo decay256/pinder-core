@@ -58,6 +58,13 @@ namespace Pinder.RemoteAssets
             if (!baseStr.EndsWith("/", StringComparison.Ordinal))
                 baseStr += "/";
             _http.BaseAddress = new Uri(baseStr, UriKind.Absolute);
+
+            // Cap response buffer size proportional to PayloadSizeCapBytes
+            // (defence-in-depth against a compromised or misconfigured
+            // eigencore — the contract allows at most PayloadSizeCapBytes
+            // plus metadata envelope + HTTP framing; *4 gives generous
+            // headroom without permitting unbounded responses).
+            _http.MaxResponseContentBufferSize = Math.Max(_config.PayloadSizeCapBytes, 1024 * 1024) * 4;
         }
 
         // ---- IRemoteCharacterStore read path (this PR) ---------------------
@@ -1063,7 +1070,7 @@ namespace Pinder.RemoteAssets
             {
                 return await resp.Content.ReadAsStringAsync().ConfigureAwait(false) ?? string.Empty;
             }
-            catch
+            catch (Exception ex) when (!(ex is HttpRequestException))
             {
                 return string.Empty;
             }
