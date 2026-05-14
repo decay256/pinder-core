@@ -5,8 +5,9 @@ namespace Pinder.LlmAdapters.Tests
 {
     /// <summary>
     /// Spec-driven tests for Issue #867: audit + cut opponent-behavior sections from BuildPlayer.
-    /// Verifies OpponentFriction, OpponentCuriosity, and ConversationArcProgression are stripped
-    /// from player-side system prompts while preserved in opponent-side prompts.
+    /// Verifies OpponentFriction and OpponentCuriosity are stripped from player-side
+    /// system prompts while preserved in opponent-side prompts.
+    /// ConversationArcProgression is shared conversation structure — kept in both.
     /// PlayerProbing is player-specific — kept in BuildPlayer.
     /// </summary>
     public class Issue867_DeliveryTokenAuditSpecTests
@@ -50,14 +51,14 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Fact]
-        public void BuildPlayer_ExcludesConversationArcProgression()
+        public void BuildPlayer_IncludesConversationArcProgression()
         {
-            // ConversationArc describes how the opponent should drive conversation
-            // progression; it belongs in BuildOpponent, not BuildPlayer. See #867.
+            // ConversationArc is shared conversation-structure guidance relevant
+            // to both sides; kept in BuildPlayer per #867 LESSONS_LEARNED rule.
             var def = FullFixture();
             var result = SessionSystemPromptBuilder.BuildPlayer("player prompt", def);
-            Assert.DoesNotContain("CONVERSATION ARC", result);
-            Assert.DoesNotContain("conversation arc content", result);
+            Assert.Contains("CONVERSATION ARC", result);
+            Assert.Contains("conversation arc content", result);
         }
 
         [Fact]

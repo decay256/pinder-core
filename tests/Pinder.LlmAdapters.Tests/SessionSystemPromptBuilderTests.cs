@@ -150,11 +150,10 @@ namespace Pinder.LlmAdapters.Tests
             var opponentResult = SessionSystemPromptBuilder.BuildOpponent("o", gd);
 
             // BuildPlayer must NOT contain opponent-only sections (OpponentFriction,
-            // OpponentCuriosity, ConversationArcProgression — all three describe
-            // how the opponent should behave). PlayerProbing IS player-specific guidance
-            // — kept in BuildPlayer. See #867.
-            // ConversationArc is SHARED structure — kept in both. Only opponent-only
-            // sections (OpponentFriction, OpponentCuriosity) are stripped.
+            // OpponentCuriosity). ConversationArcProgression is SHARED structure —
+            // both sides participate in arc progression — kept in BuildPlayer.
+            // PlayerProbing is player-specific guidance — kept in BuildPlayer.
+            // See #867 LESSONS_LEARNED PROMPT-BLOAT-FROM-CROSS-ROLE-SECTIONS.
             Assert.DoesNotContain("OPPONENT RESISTANCE", playerResult);
             Assert.DoesNotContain("OPPONENT CURIOSITY", playerResult);
             Assert.DoesNotContain("opponent resists", playerResult);
