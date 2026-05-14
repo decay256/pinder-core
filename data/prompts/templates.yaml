@@ -257,6 +257,8 @@ prompts:
       - Below Interest 25: you may express interest, warmth, or curiosity, but NEVER commit to a specific time, place, or logistics. "We should get coffee sometime" is fine. "Coffee shop on Fifth at 6pm Tuesday" is NOT.
       - At Interest 25: the date is now real. You may suggest a specific venue or time that fits your character.
       
+      WORD & PATTERN REPETITION — check your own previous messages in the conversation above before writing this one. Do not repeat: (a) the same filler words or phrases you used in your previous 2 messages ('honestly', 'literally', 'actually', 'okay but', 'interesting that', 'slay', 'omg', etc.), (b) the same emoji you used in your previous message, (c) the same structural pattern (e.g. 'wait...???', 'omg...😭', 'I literally just realized...', 'interesting that you mention...') used in your last 2 messages. Each message should feel like a fresh move, not a variation on the last one.
+      
       Generate your next message.
       - Match your personality exactly as established in the system prompt
       - React authentically to what was just said
@@ -264,6 +266,8 @@ prompts:
       - If Interest rose: show warming without being gushing
       - Match the register exactly as established in your system prompt above.
       - {length_hint}
+      
+      Before sending: verify your message sounds exactly like the texting style established in your system prompt above. Verify you haven't reused fillers, emoji, or structural patterns from your last 2 messages. If either check fails, rewrite.
       
       Output format:
       Output your actual message text directly. Do not wrap it in quotes or [RESPONSE] tags.
