@@ -134,5 +134,49 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("MetaSection", afterMeta);
             Assert.Contains("WritingSection", afterMeta);
         }
+
+        // Regression: #867 — opponent-only sections must NOT leak into BuildPlayer.
+        [Fact]
+        public void BuildPlayer_ExcludesOpponentOnlySections()
+        {
+            var gd = new GameDefinition(
+                "T", "V", "W", "P", "O", "M", "WR",
+                opponentFriction: "opponent resists the player",
+                opponentCuriosity: "opponent probes player's bio",
+                conversationArcProgression: "both sides move the convo forward",
+                playerProbing: "player follows up on opponent's reveals");
+
+            var playerResult = SessionSystemPromptBuilder.BuildPlayer("p", gd);
+            var opponentResult = SessionSystemPromptBuilder.BuildOpponent("o", gd);
+
+            // BuildPlayer must NOT contain opponent-only sections (OpponentFriction,
+            // OpponentCuriosity). ConversationArcProgression is SHARED structure —
+            // both sides participate in arc progression — kept in BuildPlayer.
+            // PlayerProbing is player-specific guidance — kept in BuildPlayer.
+            // See #867 LESSONS_LEARNED PROMPT-BLOAT-FROM-CROSS-ROLE-SECTIONS.
+            Assert.DoesNotContain("OPPONENT RESISTANCE", playerResult);
+            Assert.DoesNotContain("OPPONENT CURIOSITY", playerResult);
+            Assert.DoesNotContain("opponent resists", playerResult);
+            Assert.DoesNotContain("opponent probes", playerResult);
+
+            // BuildOpponent MUST contain all opponent-side sections.
+            Assert.Contains("OPPONENT RESISTANCE", opponentResult);
+            Assert.Contains("OPPONENT CURIOSITY", opponentResult);
+            Assert.Contains("CONVERSATION ARC", opponentResult);
+            Assert.Contains("opponent resists", opponentResult);
+            Assert.Contains("opponent probes", opponentResult);
+            Assert.Contains("both sides move", opponentResult);
+
+            // BuildPlayer keeps shared structure + player-side sections.
+            Assert.Contains("CONVERSATION ARC", playerResult);
+            Assert.Contains("both sides move", playerResult);
+            Assert.Contains("PLAYER PROBING", playerResult);
+            Assert.Contains("player follows", playerResult);
+
+            // Token ceiling: BuildPlayer must be shorter than BuildOpponent
+            // (it excludes the two opponent-only sections).
+            Assert.True(playerResult.Length < opponentResult.Length,
+                $"BuildPlayer ({playerResult.Length} chars) should be shorter than BuildOpponent ({opponentResult.Length} chars)");
+        }
     }
 }
