@@ -1435,6 +1435,22 @@ namespace Pinder.Core.Conversation
                 textDiffs.Add(new TextDiff(layerLabel, tierSpans, intendedTextForDelivery, deliveredMessage));
             }
 
+            // #902: Meta-prefix strip after delivery LLM call.
+            // Runs after the tier modifier diff so the audit log captures
+            // the raw LLM output, then strips any LABEL: artifact before
+            // subsequent overlays see the text.
+            {
+                string beforeMetaStrip = deliveredMessage;
+                deliveredMessage = MetaPrefixStripper.Strip(deliveredMessage);
+                if (deliveredMessage != beforeMetaStrip)
+                {
+                    var stripSpans = WordDiff.Compute(beforeMetaStrip, deliveredMessage);
+                    textDiffs.Add(new TextDiff(
+                        MetaPrefixStripper.LayerName, stripSpans,
+                        beforeMetaStrip, deliveredMessage));
+                }
+            }
+
             // ---- Trap LLM overlay (issue #371) ----
             // Fires only on PERSISTENCE turns: when a trap is currently active AND
             // it was NOT activated this turn. The activation turn (turn 1 of 3) is
@@ -1480,6 +1496,19 @@ namespace Pinder.Core.Conversation
                         // "layer didn't run".
                         EmitTextLayerNoop($"Trap ({trapDisplayName})", beforeTrap, deliveredMessage);
                     }
+
+                    // #902: Meta-prefix strip after trap overlay.
+                    {
+                        string beforeMetaStrip = deliveredMessage;
+                        deliveredMessage = MetaPrefixStripper.Strip(deliveredMessage);
+                        if (deliveredMessage != beforeMetaStrip)
+                        {
+                            var stripSpans = WordDiff.Compute(beforeMetaStrip, deliveredMessage);
+                            textDiffs.Add(new TextDiff(
+                                MetaPrefixStripper.LayerName, stripSpans,
+                                beforeMetaStrip, deliveredMessage));
+                        }
+                    }
                 }
             }
 
@@ -1518,6 +1547,19 @@ namespace Pinder.Core.Conversation
                     {
                         // #314: layer ran but produced byte-identical output.
                         EmitTextLayerNoop("Horniness", beforeHorniness, deliveredMessage);
+                    }
+
+                    // #902: Meta-prefix strip after horniness overlay.
+                    {
+                        string beforeMetaStrip = deliveredMessage;
+                        deliveredMessage = MetaPrefixStripper.Strip(deliveredMessage);
+                        if (deliveredMessage != beforeMetaStrip)
+                        {
+                            var stripSpans = WordDiff.Compute(beforeMetaStrip, deliveredMessage);
+                            textDiffs.Add(new TextDiff(
+                                MetaPrefixStripper.LayerName, stripSpans,
+                                beforeMetaStrip, deliveredMessage));
+                        }
                     }
                 },
                 ct).ConfigureAwait(false);
@@ -1587,6 +1629,19 @@ namespace Pinder.Core.Conversation
                             {
                                 // #314: layer ran but produced byte-identical output.
                                 EmitTextLayerNoop($"Shadow ({pairedShadow.Value})", beforeShadow, deliveredMessage);
+                            }
+
+                            // #902: Meta-prefix strip after shadow corruption overlay.
+                            {
+                                string beforeMetaStrip = deliveredMessage;
+                                deliveredMessage = MetaPrefixStripper.Strip(deliveredMessage);
+                                if (deliveredMessage != beforeMetaStrip)
+                                {
+                                    var stripSpans = WordDiff.Compute(beforeMetaStrip, deliveredMessage);
+                                    textDiffs.Add(new TextDiff(
+                                        MetaPrefixStripper.LayerName, stripSpans,
+                                        beforeMetaStrip, deliveredMessage));
+                                }
                             }
 
                             // Interest-delta override only applies when the main
