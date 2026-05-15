@@ -13,6 +13,7 @@ namespace Pinder.LlmAdapters.Tests
         [InlineData("GENUINE QUESTION: Is this real?", "Is this real?")]
         [InlineData("RECOGNITION: I see you.", "I see you.")]
         [InlineData("NOTE: just a thought", "just a thought")]
+        [InlineData("WOULD-YOU-RATHER: duck vs horse", "duck vs horse")]
         [InlineData("hey, how was your day?", "hey, how was your day?")]
         public void DialogueOptionParsers_StripsMetaPrefix_Correctly(string input, string expected)
         {
