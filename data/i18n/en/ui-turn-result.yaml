@@ -51,3 +51,6 @@ strings:
   turn_result.trap_cleared_prefix: "🛡️ Trap cleared:"
   turn_result.trap_activated_legacy: "🪤 Trap activated: {name}"
   turn_result.active_trap_prefix: "🪤 Active trap:"
+
+  turn_result.nat20_explainer: "🎲 NAT 20 — automatic crit success. Grants advantage on the next roll."
+  turn_result.nat1_explainer: "🎲 NAT 1 — automatic miss (regardless of total)"
