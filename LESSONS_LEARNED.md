@@ -556,3 +556,43 @@ stake, stat distribution, shadow state, backstory fragments,
 archetype, anatomy) as authorial context not character knowledge.
 
 **Discovered in:** #870 (2026-05-14).
+
+### SANITIZATION-INVARIANTS-MUST-RUN-AFTER-EACH-STAGE
+
+**Symptom:** #862 added a meta-prefix strip (`^[A-Z][A-Z\s]+:\s*`) to the
+option-generation parser path (`DialogueOptionParsers`). The strip only ran
+ONCE, at the moment the option-generation LLM response was parsed. Staging
+session `ce5a6f82` (2026-05-15) showed a `WOULD-YOU-RATHER:` artifact
+surviving through the pipeline because a downstream LLM overlay (Misfire tier,
+`DeliverMessageAsync`) re-introduced the label after the parser-level strip had
+already run. The artifact only disappeared by accident when the shadow
+corruption layer happened to rewrite the same span.
+
+**Root cause:** The delivered message passes through N sequential LLM stages
+(delivery, trap overlay, horniness overlay, shadow corruption overlay). A
+sanitization invariant applied at only one entry point leaves N-1 downstream
+entry points unprotected. Any LLM call can re-introduce an artifact that a
+previous strip pass already cleaned up.
+
+**Rule:** When a sanitization invariant is introduced for LLM-produced
+player-visible text (callback strip, meta-prefix strip, any future
+normalization pass), it MUST run after EVERY stage that produces or
+rewrites the text — not just once at the pipeline entry point. Extract
+the sanitizer into a shared class, apply it after each LLM call, and
+emit a separate `TextDiff` layer for each successful strip so the audit
+log records every firing.
+
+**Anchors:**
+- `MetaPrefixStripper` in `Pinder.Core.Text` — the shared strip class.
+- `GameSession.ResolveTurnAsync` — four strip call sites (after
+  `DeliverMessageAsync`, `ApplyTrapOverlayAsync`,
+  `ApplyHorninessOverlayAsync`, `ApplyShadowCorruptionAsync`).
+- Each strip emits `"Meta-Prefix Strip"` `TextDiff` layer with before/after
+  spans, matching the `CallbackStripper` pattern.
+
+**Adjacent rule:** When a new LLM stage is added to the pipeline, audit
+whether it can re-introduce labellling artifacts. If yes, add a sticky
+note in `GameSession.ResolveTurnAsync` next to the new call site so the
+next developer remembers the strip.
+
+**Discovered in:** #902 (2026-05-15).
