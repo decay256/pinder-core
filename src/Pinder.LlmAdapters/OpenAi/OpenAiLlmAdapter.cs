@@ -11,6 +11,7 @@ using Newtonsoft.Json;
 using Pinder.Core.Conversation;
 using Pinder.Core.Interfaces;
 using Pinder.Core.Stats;
+using Pinder.Core.Text;
 using Pinder.LlmAdapters.Anthropic;
 using Pinder.LlmAdapters.Anthropic.Dto;
 
@@ -40,8 +41,6 @@ namespace Pinder.LlmAdapters.OpenAi
             @"\[TELL_BONUS:\s*(\w+)\]", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         private static readonly Regex QuotedTextRegex = new Regex(
             @"""([^""]+)""", RegexOptions.Compiled);
-        private static readonly Regex MetaPrefix = new Regex(
-            @"^[A-Z][A-Z\s]+:\s*", RegexOptions.Compiled);
         private static readonly Regex TellSignalRegex = new Regex(
             @"TELL:\s*(\w+)\s*\(([^)]+)\)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         private static readonly Regex WeaknessSignalRegex = new Regex(
@@ -296,7 +295,7 @@ namespace Pinder.LlmAdapters.OpenAi
                         var textMatch = QuotedTextRegex.Match(section);
                         if (!textMatch.Success) continue;
 
-                        var text = MetaPrefix.Replace(textMatch.Groups[1].Value.Trim(), "", 1);
+                        var text = MetaPrefixStripper.Strip(textMatch.Groups[1].Value.Trim());
                         if (string.IsNullOrEmpty(text)) continue;
 
                         int? callbackTurn = null;
