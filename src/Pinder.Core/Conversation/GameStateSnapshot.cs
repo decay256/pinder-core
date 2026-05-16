@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Pinder.Core.Conversation
 {
@@ -29,6 +30,15 @@ namespace Pinder.Core.Conversation
         public bool TripleBonusActive { get; }
 
         /// <summary>
+        /// #905: Probability (0.0..1.0) that the opponent will ghost on this turn.
+        /// Derived from interest state: 0.25 when Bored, 0.0 otherwise.
+        /// Exposed on the wire so the frontend can surface ghost-risk UI without
+        /// needing to know the interest-threshold thresholds itself.
+        /// </summary>
+        [JsonPropertyName("ghost_probability_per_turn")]
+        public double GhostProbabilityPerTurn { get; }
+
+        /// <summary>
         /// #788: snapshot of the engine-owned opponent LLM conversation
         /// history at the time the snapshot was taken. Each entry's role is
         /// <c>"user"</c> or <c>"assistant"</c>. Always non-null — empty list
@@ -44,7 +54,8 @@ namespace Pinder.Core.Conversation
             int turnNumber,
             bool tripleBonusActive = false,
             TrapDetail[] activeTrapDetails = null,
-            IReadOnlyList<ConversationMessage> opponentHistory = null)
+            IReadOnlyList<ConversationMessage> opponentHistory = null,
+            double ghostProbabilityPerTurn = 0.0)
         {
             Interest = interest;
             State = state;
@@ -54,6 +65,7 @@ namespace Pinder.Core.Conversation
             TurnNumber = turnNumber;
             TripleBonusActive = tripleBonusActive;
             OpponentHistory = opponentHistory ?? System.Array.Empty<ConversationMessage>();
+            GhostProbabilityPerTurn = ghostProbabilityPerTurn;
         }
     }
 }

@@ -133,6 +133,12 @@ namespace Pinder.Core.Conversation
                 ? System.Array.Empty<ConversationMessage>()
                 : opponentHistory.ToArray();
 
+            // #905: Derive ghost probability from interest state.
+            // When Bored, the ghost-trigger check fires with 25% probability (dice.Roll(4)==1).
+            // All other states have 0% probability. Exposed on the snapshot so the frontend
+            // can display ghost-risk indicators without knowing the interest thresholds.
+            double ghostProbabilityPerTurn = state == InterestState.Bored ? 0.25 : 0.0;
+
             return new GameStateSnapshot(
                 interest: interest.Current,
                 state: state,
@@ -141,7 +147,8 @@ namespace Pinder.Core.Conversation
                 turnNumber: turnNumber,
                 tripleBonusActive: tripleBonusActive,
                 activeTrapDetails: trapDetails,
-                opponentHistory: historySnapshot);
+                opponentHistory: historySnapshot,
+                ghostProbabilityPerTurn: ghostProbabilityPerTurn);
         }
 
         /// <summary>
