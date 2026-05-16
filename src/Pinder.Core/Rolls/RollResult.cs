@@ -26,6 +26,7 @@ namespace Pinder.Core.Rolls
         /// Always populated for option-roll results; use StatBlock.DefenceTable[Stat] as the canonical source.
         /// </summary>
         [JsonPropertyName("defending_stat")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public StatType DefendingStat { get; }
 
         /// <summary>Effective stat modifier at time of roll (after shadow penalty + traps).</summary>
