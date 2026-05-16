@@ -100,6 +100,13 @@ namespace Pinder.SessionRunner.Snapshot
     ///     0.0 otherwise). Added explicitly since <c>TurnSnapshot</c> does
     ///     not inline <c>GameStateSnapshot</c>.
     ///   </description></item>
+    ///   <item><description>
+    ///     <c>OpponentDefenseSnapshot</c> (issue #903): the opponent's defense
+    ///     posture at the start of this turn. Dictionary keyed on attacker stat
+    ///     name (PascalCase), each entry carrying <c>DefendingStat</c>,
+    ///     <c>EffectiveModifier</c>, and <c>BaseModifier</c>. Null when not
+    ///     available (legacy snapshots before #903).
+    ///   </description></item>
     /// </list>
     /// </summary>
     public sealed class TurnSnapshot
@@ -137,6 +144,15 @@ namespace Pinder.SessionRunner.Snapshot
         /// otherwise. Copied from <see cref="Pinder.Core.Conversation.GameStateSnapshot.GhostProbabilityPerTurn"/>.
         /// </summary>
         public double GhostProbabilityPerTurn { get; set; }
+
+        /// <summary>
+        /// Issue #903: opponent defense posture at the start of this turn.
+        /// Dictionary keyed on attacker stat name (PascalCase). Each value
+        /// carries <c>DefendingStat</c>, <c>EffectiveModifier</c> (shadow-
+        /// adjusted + trap DC bonus), and <c>BaseModifier</c> (raw base stat).
+        /// Null on legacy snapshots taken before #903.
+        /// </summary>
+        public Dictionary<string, TurnDefenseEntry>? OpponentDefenseSnapshot { get; set; }
 
         /// <summary>
         /// Full conversation history up to and including this turn.
@@ -217,6 +233,16 @@ namespace Pinder.SessionRunner.Snapshot
     {
         public string Stat { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
+    }
+
+    /// <summary>
+    /// Issue #903: one entry in the <see cref="TurnSnapshot.OpponentDefenseSnapshot"/> dictionary.
+    /// </summary>
+    public sealed class TurnDefenseEntry
+    {
+        public string DefendingStat      { get; set; } = string.Empty;
+        public int    EffectiveModifier  { get; set; }
+        public int    BaseModifier       { get; set; }
     }
 
     /// <summary>One entry in the combo history window (last 3 turns).</summary>
