@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Pinder.Core.Conversation;
 using Pinder.Core.Stats;
+using Pinder.Core.Text;
 
 namespace Pinder.LlmAdapters.Anthropic
 {
@@ -39,9 +40,7 @@ namespace Pinder.LlmAdapters.Anthropic
             @"""([^""]+)""",
             RegexOptions.Compiled);
 
-        private static readonly Regex MetaPrefix = new Regex(
-            @"^[A-Z][A-Z\s]+:\s*",
-            RegexOptions.Compiled);
+
 
         // Default padding stats for ParseDialogueOptions fallback
         private static readonly StatType[] DefaultPaddingStats = new[]
@@ -86,7 +85,7 @@ namespace Pinder.LlmAdapters.Anthropic
                         var textMatch = QuotedTextRegex.Match(section);
                         if (!textMatch.Success) continue; // No text = invalid option
 
-                        var text = MetaPrefix.Replace(textMatch.Groups[1].Value.Trim(), "", 1);
+                        var text = MetaPrefixStripper.Strip(textMatch.Groups[1].Value.Trim());
                         if (string.IsNullOrEmpty(text)) continue;
 
                         // Parse optional metadata
@@ -172,7 +171,7 @@ namespace Pinder.LlmAdapters.Anthropic
                     var text = item.Value<string>("text");
                     if (string.IsNullOrWhiteSpace(text)) continue;
 
-                    text = MetaPrefix.Replace(text.Trim(), "", 1);
+                    text = MetaPrefixStripper.Strip(text.Trim());
 
                     // Parse callback
                     int? callbackTurn = null;
