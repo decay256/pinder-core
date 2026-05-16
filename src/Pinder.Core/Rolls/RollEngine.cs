@@ -270,17 +270,18 @@ namespace Pinder.Core.Rolls
                 missMargin:  checkMissMargin);
 
             return new RollResult(
-                dieRoll:       roll1,
-                secondDieRoll: roll2,
-                usedDieRoll:   usedRoll,
-                stat:          stat,
-                statModifier:  statMod,
-                levelBonus:    levelBonus,
-                dc:            dc,
-                tier:          tier,
-                activatedTrap: newTrap,
-                externalBonus: externalBonus,
-                check:         check);
+                dieRoll:        roll1,
+                secondDieRoll:  roll2,
+                usedDieRoll:    usedRoll,
+                stat:           stat,
+                statModifier:   statMod,
+                levelBonus:     levelBonus,
+                dc:             dc,
+                tier:           tier,
+                activatedTrap:  newTrap,
+                externalBonus:  externalBonus,
+                check:          check,
+                defendingStat:  StatBlock.DefenceTable[stat]);
         }
     }
 }
