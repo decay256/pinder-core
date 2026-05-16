@@ -13,8 +13,8 @@ namespace Pinder.Core.Prompts
     /// documented in <c>docs/persona/texting-style-aggregation.md</c>:
     ///
     ///   - The 6 item slots own the 6 syntax axes (1:1 mapping):
-    ///         shoes \u2192 emoji, hat \u2192 shorthand, shirt \u2192 grammar,
-    ///         trousers \u2192 structure, frame \u2192 length, accessory \u2192 tics.
+    ///         shoes → emoji, hat → shorthand, shirt → grammar,
+    ///         trousers → structure, frame → length, accessory → tics.
     ///     Each slot reads the ASSIGNED axis line from its equipped item's
     ///     SYNTAX block; the other 5 lines on that item are ignored.
     ///   - The 9 anatomy parameters partition into 3 groups of 3, one
@@ -25,28 +25,36 @@ namespace Pinder.Core.Prompts
     ///   - Output is exactly 9 axes. Unfilled slots / silent groups drop
     ///     their axis from the final list rather than back-filling.
     ///
+    /// As of issue #907, the aggregator also applies a <em>conflict
+    /// matrix</em> loaded from <c>data/persona/texting-style-conflicts.yaml</c>
+    /// via <see cref="TextingStyleConflicts"/>. When two picked
+    /// <c>(axis, value)</c> pairs are mutually exclusive, the later-picked
+    /// value is dropped and the drop is recorded in the audit log that is
+    /// returned via <see cref="AggregateWithAudit"/>. Callers that only
+    /// need the string output can use <see cref="Aggregate"/> as before.
+    ///
     /// Replaces the placeholder random-pick-2 aggregation. Personality /
-    /// backstory channels are unaffected \u2014 they remain a flat join across
+    /// backstory channels are unaffected — they remain a flat join across
     /// items + anatomy and travel through different prompt sections.
     ///
     /// Determinism: the rule is fully deterministic for a given
     /// (character_id, equipped items, anatomy tiers). The
     /// <paramref name="seedKey"/> parameter is retained on the public
     /// surface for backward compatibility with callers that pass the
-    /// character UUID, but the rule itself no longer consults RNG \u2014
+    /// character UUID, but the rule itself no longer consults RNG —
     /// the seed is unused in v1. It may return as a tie-breaker in a
     /// future revision.
     /// </summary>
     public static class TextingStyleAggregator
     {
         // ------------------------------------------------------------------
-        // Slot \u2192 syntax axis (1:1 fixed mapping, see
+        // Slot → syntax axis (1:1 fixed mapping, see
         // docs/persona/texting-style-aggregation.md). Lookups are
         // ordinal-case-insensitive so future content can use either
         // "shoes" or "Shoes" without the aggregator silently dropping it.
         // ------------------------------------------------------------------
 
-        internal static readonly IReadOnlyDictionary<string, string> SlotToSyntaxAxis =
+        public static readonly IReadOnlyDictionary<string, string> SlotToSyntaxAxis =
             new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 { "shoes",     "emoji" },
@@ -58,11 +66,11 @@ namespace Pinder.Core.Prompts
             };
 
         // ------------------------------------------------------------------
-        // Anatomy parameter \u2192 tone axis groupings. The order of parameters
+        // Anatomy parameter → tone axis groupings. The order of parameters
         // inside each group is load-bearing: it's the tie-breaker when
         // two distinct lines share the highest count. See the design doc
-        // for the rationale (size/shape \u2192 stance, surface \u2192 register,
-        // presentation \u2192 pacing).
+        // for the rationale (size/shape → stance, surface → register,
+        // presentation → pacing).
         // ------------------------------------------------------------------
 
         internal static readonly IReadOnlyList<string> StanceGroup =
@@ -84,22 +92,123 @@ namespace Pinder.Core.Prompts
             };
 
         // ------------------------------------------------------------------
+        // Audit log entry — one per dropped (axis, value) pair.
+        // #907: surfaced so callers can log which fragments were rejected
+        // at session-creation time.
+        // ------------------------------------------------------------------
+
+        /// <summary>
+        /// Records a single fragment that was rejected by the conflict resolver.
+        /// </summary>
+        public sealed class ConflictDropEntry
+        {
+            /// <summary>Character id (the <c>seedKey</c> passed by the caller).</summary>
+            public string? CharacterId   { get; }
+            /// <summary>The axis whose value was dropped.</summary>
+            public string  Axis          { get; }
+            /// <summary>The value that was dropped.</summary>
+            public string  DroppedValue  { get; }
+            /// <summary>The axis whose kept value triggered the drop.</summary>
+            public string  ConflictAxis  { get; }
+            /// <summary>The value that was already kept when the conflict fired.</summary>
+            public string  KeptValue     { get; }
+            /// <summary>Human-readable reason from the conflict matrix.</summary>
+            public string  Reason        { get; }
+
+            public ConflictDropEntry(
+                string? characterId,
+                string  axis,
+                string  droppedValue,
+                string  conflictAxis,
+                string  keptValue,
+                string  reason)
+            {
+                CharacterId  = characterId;
+                Axis         = axis;
+                DroppedValue = droppedValue;
+                ConflictAxis = conflictAxis;
+                KeptValue    = keptValue;
+                Reason       = reason;
+            }
+
+            public override string ToString() =>
+                $"[ConflictDrop] char={CharacterId ?? "(unknown)"} " +
+                $"dropped={Axis}:{DroppedValue} " +
+                $"conflict_with={ConflictAxis}:{KeptValue} " +
+                $"reason=\"{Reason}\"";
+        }
+
+        /// <summary>
+        /// Result of conflict-aware aggregation: the resolved axis lines
+        /// plus the audit log of dropped fragments.
+        /// </summary>
+        public sealed class AggregationResult
+        {
+            public IReadOnlyList<string>           Lines   { get; }
+            public IReadOnlyList<ConflictDropEntry> Drops  { get; }
+
+            public AggregationResult(
+                IReadOnlyList<string>           lines,
+                IReadOnlyList<ConflictDropEntry> drops)
+            {
+                Lines = lines;
+                Drops = drops;
+            }
+        }
+
+        // ------------------------------------------------------------------
+        // #907: Production conflict catalog. Loaded once at startup by
+        // PromptWiring.Wire() from data/persona/texting-style-conflicts.yaml.
+        // The 2-arg overloads below use this catalog automatically so all
+        // existing callsites get conflict resolution without signature changes.
+        // Defaults to Empty (no-op) until Wire() assigns the loaded catalog.
+        // ------------------------------------------------------------------
+
+        /// <summary>
+        /// The globally-loaded conflict catalog. Assigned by
+        /// <c>PromptWiring.Wire()</c> at startup. Falls back to
+        /// <see cref="TextingStyleConflicts.Empty"/> if not yet assigned.
+        /// Tests that need an isolated catalog should use the 3-arg overloads
+        /// directly.
+        /// </summary>
+        public static TextingStyleConflicts? ConflictCatalog { get; set; }
+
+        // ------------------------------------------------------------------
         // Public surface (unchanged signatures from the placeholder). The
         // seedKey parameter is retained for callers but unused by the v1
-        // rule \u2014 deterministic by construction.
+        // rule — deterministic by construction.
         // ------------------------------------------------------------------
 
         /// <summary>
         /// Aggregate the texting-style sources into the joined string that
         /// gets injected into the LLM system prompt / runtime player
-        /// style. Implements the #836 v1 rule.
+        /// style. Implements the #836 v1 rule with #907 conflict resolution.
+        ///
+        /// Uses <see cref="ConflictCatalog"/> when set (assigned by
+        /// <c>PromptWiring.Wire()</c>), otherwise falls back to
+        /// <see cref="TextingStyleConflicts.Empty"/>. Pass an explicit
+        /// catalog via
+        /// <see cref="Aggregate(IReadOnlyList{TextingStyleFragmentSource}, string?, TextingStyleConflicts)"/>
+        /// to override for a specific call.
         /// </summary>
         public static string Aggregate(
             IReadOnlyList<TextingStyleFragmentSource> sources,
             string? seedKey)
+            => Aggregate(sources, seedKey, ConflictCatalog ?? TextingStyleConflicts.Empty);
+
+        /// <summary>
+        /// Aggregate with conflict resolution. Dropped fragments are silently
+        /// discarded; use <see cref="AggregateWithAudit"/> to capture them.
+        /// </summary>
+        public static string Aggregate(
+            IReadOnlyList<TextingStyleFragmentSource> sources,
+            string? seedKey,
+            TextingStyleConflicts conflicts)
         {
-            var picked = AggregateAsList(sources, seedKey);
-            return picked.Count == 0 ? string.Empty : string.Join(" | ", picked);
+            var result = AggregateWithAudit(sources, seedKey, conflicts);
+            return result.Lines.Count == 0
+                ? string.Empty
+                : string.Join(" | ", result.Lines);
         }
 
         /// <summary>
@@ -112,17 +221,46 @@ namespace Pinder.Core.Prompts
         /// its emotion"</c>. Axes appear in the canonical order documented
         /// in <c>texting-style-aggregation.md</c>; missing axes are
         /// dropped.
+        ///
+        /// Uses <see cref="ConflictCatalog"/> when set (assigned by
+        /// <c>PromptWiring.Wire()</c>), otherwise falls back to
+        /// <see cref="TextingStyleConflicts.Empty"/>.
         /// </summary>
         public static IReadOnlyList<string> AggregateAsList(
             IReadOnlyList<TextingStyleFragmentSource> sources,
             string? seedKey)
+            => AggregateAsList(sources, seedKey, ConflictCatalog ?? TextingStyleConflicts.Empty);
+
+        /// <summary>
+        /// Aggregate to a list with conflict resolution. Dropped fragments
+        /// are silently discarded; use <see cref="AggregateWithAudit"/> for
+        /// the full result including the audit log.
+        /// </summary>
+        public static IReadOnlyList<string> AggregateAsList(
+            IReadOnlyList<TextingStyleFragmentSource> sources,
+            string? seedKey,
+            TextingStyleConflicts conflicts)
+            => AggregateWithAudit(sources, seedKey, conflicts).Lines;
+
+        /// <summary>
+        /// Full conflict-aware aggregation with audit log. Returns both the
+        /// resolved axis lines and the list of dropped fragments (one entry
+        /// per conflict fired). Callers at session-creation time should log
+        /// the <see cref="AggregationResult.Drops"/> so content authors can
+        /// detect problematic item combinations.
+        /// </summary>
+        public static AggregationResult AggregateWithAudit(
+            IReadOnlyList<TextingStyleFragmentSource> sources,
+            string? seedKey,
+            TextingStyleConflicts conflicts)
         {
             // seedKey is retained on the API surface for backward
             // compatibility but unused by the v1 deterministic rule.
+            // It IS used as CharacterId in audit-log entries.
             _ = seedKey;
 
             if (sources == null || sources.Count == 0)
-                return Array.Empty<string>();
+                return new AggregationResult(Array.Empty<string>(), Array.Empty<ConflictDropEntry>());
 
             // Index syntax inputs by slot, tone inputs by parameter id.
             // Multiple sources for the same slot would be a content bug
@@ -158,9 +296,11 @@ namespace Pinder.Core.Prompts
             }
 
             // Resolve axis-by-axis in canonical order. Missing axes drop.
-            var result = new List<string>(CanonicalAxisOrder.Count);
+            // Collect as (axis, value) pairs first so we can run conflict
+            // resolution across all picked values before emitting strings.
+            var pickedPairs = new List<(string axis, string value)>();
 
-            // Syntax axes \u2014 read from the slot's item, if equipped.
+            // Syntax axes — read from the slot's item, if equipped.
             foreach (var kv in SlotToSyntaxAxis)
             {
                 string slot = kv.Key;
@@ -169,31 +309,74 @@ namespace Pinder.Core.Prompts
                 var syntax = ParseSyntaxAxes(fragment);
                 if (syntax.TryGetValue(axis, out var line) && !string.IsNullOrWhiteSpace(line))
                 {
-                    result.Add($"{axis}: {line}");
+                    pickedPairs.Add((axis, line));
                 }
             }
 
-            // Tone axes \u2014 majority vote per group.
-            string? stance = MajorityVote("stance", StanceGroup, toneByParam);
-            if (stance != null) result.Add(stance);
+            // Tone axes — majority vote per group.
+            string? stanceLine   = MajorityVote("stance",   StanceGroup,   toneByParam);
+            string? registerLine = MajorityVote("register", RegisterGroup, toneByParam);
+            string? pacingLine   = MajorityVote("pacing",   PacingGroup,   toneByParam);
 
-            string? register = MajorityVote("register", RegisterGroup, toneByParam);
-            if (register != null) result.Add(register);
+            if (stanceLine   != null) pickedPairs.Add(AxisValuePairOf(stanceLine));
+            if (registerLine != null) pickedPairs.Add(AxisValuePairOf(registerLine));
+            if (pacingLine   != null) pickedPairs.Add(AxisValuePairOf(pacingLine));
 
-            string? pacing = MajorityVote("pacing", PacingGroup, toneByParam);
-            if (pacing != null) result.Add(pacing);
+            // ------------------------------------------------------------------
+            // #907: Conflict resolution.
+            //
+            // Walk the picked set; on conflict, drop the LATER-picked value
+            // (the one that conflicts with an already-kept earlier value).
+            // The resolver is O(n²) over the picked set — fine for n ≤ 9.
+            // ------------------------------------------------------------------
+            var kept  = new List<(string axis, string value)>(pickedPairs.Count);
+            var drops = new List<ConflictDropEntry>();
 
-            // Re-order to match the canonical sequence regardless of how
-            // the syntax/tone phases interleaved (current code emits in
-            // canonical order already, but the explicit sort future-
-            // proofs against reorderings).
-            return result
-                .OrderBy(line => CanonicalAxisOrder.ToList().IndexOf(AxisOf(line)))
+            foreach (var candidate in pickedPairs)
+            {
+                string? conflictReason = null;
+                (string axis, string value) conflictKept = default;
+
+                foreach (var alreadyKept in kept)
+                {
+                    var reason = conflicts.GetReason(alreadyKept, candidate);
+                    if (reason != null)
+                    {
+                        conflictReason = reason;
+                        conflictKept   = alreadyKept;
+                        break;
+                    }
+                }
+
+                if (conflictReason != null)
+                {
+                    drops.Add(new ConflictDropEntry(
+                        characterId:  seedKey,
+                        axis:         candidate.axis,
+                        droppedValue: candidate.value,
+                        conflictAxis: conflictKept.axis,
+                        keptValue:    conflictKept.value,
+                        reason:       conflictReason));
+                    // Do NOT add to kept — this axis is silenced for this character.
+                }
+                else
+                {
+                    kept.Add(candidate);
+                }
+            }
+
+            // Re-order to match the canonical sequence.
+            var canonicalList = CanonicalAxisOrder.ToList();
+            var result = kept
+                .Select(p => $"{p.axis}: {p.value}")
+                .OrderBy(line => canonicalList.IndexOf(AxisOf(line)))
                 .ToList();
+
+            return new AggregationResult(result, drops);
         }
 
         // ------------------------------------------------------------------
-        // Parsing helpers \u2014 extract axis maps from a single
+        // Parsing helpers — extract axis maps from a single
         // texting_style_fragment block. The canonical block shape is:
         //
         //   SYNTAX:
@@ -285,7 +468,7 @@ namespace Pinder.Core.Prompts
         }
 
         // ------------------------------------------------------------------
-        // Tone aggregation \u2014 majority vote across an anatomy group.
+        // Tone aggregation — majority vote across an anatomy group.
         // ------------------------------------------------------------------
 
         private static string? MajorityVote(
@@ -326,13 +509,23 @@ namespace Pinder.Core.Prompts
         }
 
         // ------------------------------------------------------------------
-        // Output ordering helper.
+        // Output ordering helpers.
         // ------------------------------------------------------------------
 
         private static string AxisOf(string axisPrefixedLine)
         {
             int colon = axisPrefixedLine.IndexOf(':');
             return colon > 0 ? axisPrefixedLine.Substring(0, colon) : axisPrefixedLine;
+        }
+
+        private static (string axis, string value) AxisValuePairOf(string axisPrefixedLine)
+        {
+            int colon = axisPrefixedLine.IndexOf(':');
+            if (colon <= 0) return (axisPrefixedLine, string.Empty);
+            return (
+                axisPrefixedLine.Substring(0, colon).Trim(),
+                axisPrefixedLine.Substring(colon + 1).Trim()
+            );
         }
     }
 }

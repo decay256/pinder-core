@@ -1,0 +1,68 @@
+# Texting-style conflict matrix.
+#
+# Each entry encodes a pair of (axis, value) tuples that MUST NOT co-occur
+# in the same aggregated profile. The constraint is bidirectional — the
+# resolver checks both orderings.
+#
+# IMPORTANT: values here must match the PARSED value from the
+# texting_style_fragment block — i.e. the text after the ":" in each
+# "- <axis>: <value>" line. For tone axes (stance, register, pacing),
+# the parenthetical key is stripped from the axis name and the value
+# is everything after the colon. For example:
+#   "- pacing (dry-pacing): minimal, sparse, long pauses implied"
+#   → axis: pacing, value: "minimal, sparse, long pauses implied"
+#
+# Schema:
+#   axis_a: { axis: <name>, value: <string> }
+#   axis_b: { axis: <name>, value: <string> }
+#   reason: <human-readable explanation>
+#
+# Adding a new conflict: encode the pair once. The resolver applies it
+# bidirectionally. Include a reason string — it surfaces in audit logs.
+#
+# See docs/persona/texting-style-aggregation.md for the full design and
+# pinder-core#907 for the root-cause analysis.
+
+conflicts:
+  # --- length × length (mutually exclusive length rules) ---
+  - axis_a: { axis: length, value: "never sends more than 5 words" }
+    axis_b: { axis: length, value: "minimum 80 words per message, no exceptions" }
+    reason: "Mutually exclusive length rules — hard 5-word cap vs. 80-word floor"
+
+  # --- structure × length (wall-of-text incompatible with 5-word cap) ---
+  - axis_a: { axis: structure, value: "wall-of-text (one paragraph, no breaks, comma splices throughout)" }
+    axis_b: { axis: length, value: "never sends more than 5 words" }
+    reason: "Wall-of-text structure requires multiple sentences; hard 5-word cap makes that impossible"
+
+  # --- structure × pacing (wall-of-text incompatible with sparse pacing) ---
+  # pacing value: "minimal, sparse, long pauses implied" = dry-pacing archetype
+  - axis_a: { axis: structure, value: "wall-of-text (one paragraph, no breaks, comma splices throughout)" }
+    axis_b: { axis: pacing, value: "minimal, sparse, long pauses implied" }
+    reason: "Wall-of-text density is incompatible with minimal/sparse pacing — one demands continuous flow, the other demands restraint"
+
+  # --- structure × pacing (measured whitespace incompatible with hectic) ---
+  # pacing value: "fast, breathless, low-edit, thoughts overlapping" = hectic archetype
+  - axis_a: { axis: pacing, value: "fast, breathless, low-edit, thoughts overlapping" }
+    axis_b: { axis: structure, value: "measured whitespace (3-5 short lines, blank between)" }
+    reason: "Hectic pacing (fast, breathless, low-edit) is incompatible with the deliberate spacing of measured whitespace"
+
+  # --- tics × tics (direct contradiction on question-asking) ---
+  - axis_a: { axis: tics, value: "never asks questions, only states" }
+    axis_b: { axis: tics, value: "always ends with a question, even when not asking" }
+    reason: "Direct contradiction — never-questions vs. always-ends-with-question on the same character"
+
+  # --- stance × stance (mutually exclusive interpersonal stances) ---
+  # stance values are the full parsed text after the colon (parenthetical stripped from axis)
+  - axis_a: { axis: stance, value: '"omg same" energy, can''t disagree, vaguely unsettling' }
+    axis_b: { axis: stance, value: "mild disagreement with everything, even compliments" }
+    reason: "Mutually exclusive stances — can't simultaneously always-agree and mildly-disagree-with-everything"
+
+  # --- length × pacing (minimum 80 words incompatible with sparse pacing) ---
+  - axis_a: { axis: length, value: "minimum 80 words per message, no exceptions" }
+    axis_b: { axis: pacing, value: "minimal, sparse, long pauses implied" }
+    reason: "80-word floor is semantically incompatible with minimal/sparse pacing"
+
+  # --- length × structure (5-word cap incompatible with measured whitespace) ---
+  - axis_a: { axis: length, value: "never sends more than 5 words" }
+    axis_b: { axis: structure, value: "measured whitespace (3-5 short lines, blank between)" }
+    reason: "Hard 5-word cap prevents the multi-line structure that measured whitespace requires"

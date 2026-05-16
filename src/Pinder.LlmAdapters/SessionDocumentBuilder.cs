@@ -386,11 +386,19 @@ namespace Pinder.LlmAdapters
 
             string resistanceBlock = GetResistanceBlock(context.InterestAfter);
 
-            // #866: compute reciprocal length ceiling and inject length hint
+            // #866: compute reciprocal length ceiling and inject length hint.
+            // #907 (defensive): the length hint asserts priority over style-rule length axes
+            // so that a conflicting texting-style "never sends more than 5 words" cannot
+            // silently override the engine-specified length floor.
             int playerLen = context.PlayerDeliveredMessage.Length;
             int ceiling = ComputeResponseCeiling(playerLen);
-            string lengthHint = $"Aim for roughly {playerLen} characters (matching the player's message length). " +
-                $"Do not exceed {ceiling} characters regardless of your texting style.";
+            string lengthHint =
+                $"Aim for roughly {playerLen} characters (matching the player's message length). " +
+                $"Do not exceed {ceiling} characters regardless of your texting style. " +
+                $"The texting-style length axis in your system prompt is a stylistic guideline, NOT a hard engine cap \u2014 " +
+                $"the engine-specified length above takes precedence. " +
+                $"For this message, aim for ~{playerLen} characters as the engine specifies. " +
+                $"Style-rule length axes apply ONLY when they are compatible with the engine-specified length.";
 
             sb.Append(PromptTemplates.OpponentResponseInstruction
                 .Replace("{resistance_block}", resistanceBlock)
