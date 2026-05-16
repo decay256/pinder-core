@@ -93,6 +93,13 @@ namespace Pinder.SessionRunner.Snapshot
     ///     multi-turn opponent context the original session ran with. Empty
     ///     list when no opponent calls have resolved yet.
     ///   </description></item>
+    ///   <item><description>
+    ///     <c>GhostProbabilityPerTurn</c> (issue #905): probability (0.0..1.0)
+    ///     that the opponent ghosts on this turn. Derived from
+    ///     <c>GameStateSnapshot.GhostProbabilityPerTurn</c> (0.25 when Bored,
+    ///     0.0 otherwise). Added explicitly since <c>TurnSnapshot</c> does
+    ///     not inline <c>GameStateSnapshot</c>.
+    ///   </description></item>
     /// </list>
     /// </summary>
     public sealed class TurnSnapshot
@@ -123,6 +130,13 @@ namespace Pinder.SessionRunner.Snapshot
         public int SaUsageCount { get; set; }
         public bool SaOverthinkingTriggered { get; set; }
         public int RizzCumulativeFailureCount { get; set; }
+
+        /// <summary>
+        /// Issue #905: probability (0.0..1.0) that the opponent will ghost on
+        /// this turn. 0.25 when the session's interest state is Bored, 0.0
+        /// otherwise. Copied from <see cref="Pinder.Core.Conversation.GameStateSnapshot.GhostProbabilityPerTurn"/>.
+        /// </summary>
+        public double GhostProbabilityPerTurn { get; set; }
 
         /// <summary>
         /// Full conversation history up to and including this turn.

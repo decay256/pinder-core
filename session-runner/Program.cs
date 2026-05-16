@@ -1775,6 +1775,7 @@ class Program
             ConversationHistory = convEntries,
             OpponentHistory = opponentHistoryEntries,
             Events = events,
+            GhostProbabilityPerTurn = state.GhostProbabilityPerTurn,
         };
     }
 
