@@ -11,3 +11,7 @@ rules/extracted/
 rules/regenerated/
 __pycache__/
 .matchup-cache/
+
+# eigentakt orchestration artifacts (per-worktree, regenerated)
+.eigentakt-bin/
+agent.log
