@@ -596,3 +596,53 @@ note in `GameSession.ResolveTurnAsync` next to the new call site so the
 next developer remembers the strip.
 
 **Discovered in:** #902 (2026-05-15).
+
+### 65. TEXT-STYLE: cross-axis conflict resolution for texting-style aggregation (#907)
+
+**Symptom:** Texting-style content can produce internally-contradictory
+profiles when two axes (e.g. structure=wall-of-text + length=≤5 words)
+land in the same aggregated output. The LLM has no rule for resolving
+such conflicts and tends to hybridise them badly.
+
+**Root cause:** The aggregation rule picks per-axis values
+deterministically from the seed but has no awareness of whether the
+picked values are pairwise coherent.
+
+**Fix:**
+1. Encode known conflicting (axis, value) pairs in a YAML matrix at
+   `data/persona/texting-style-conflicts.yaml`. Pairs are bidirectional
+   by construction; every entry must carry a non-empty `reason`.
+2. `TextingStyleConflicts` loads the matrix at startup (YamlDotNet,
+   `YamlDotNet.RepresentationModel`, same pattern as ArchetypeYamlLoader).
+3. `TextingStyleAggregator` accepts `TextingStyleConflicts?` as an
+   optional parameter on `AggregateAsList()` / `Aggregate()`. When non-null:
+   - After the v1 per-axis picks are assembled, walk them in canonical
+     axis order.
+   - For each later axis that conflicts with an earlier-kept axis, drop
+     the later axis's value (deterministic, replayable).
+   - For tone axes: attempt re-pick from ranked majority-vote candidates
+     before silently dropping.
+   - Emit one `AggregationAuditEntry` per dropped fragment.
+   When null (or via the backward-compat overloads): v1 behavior is preserved exactly.
+4. A length-hint defensive rule was added to the opponent system prompt
+   (`data/prompts/templates.yaml`) declaring that the character's texting-style
+   length directive always takes priority over the generic response-length budget.
+5. Auditor tool (`tools/TextingStyleAuditor/`) walks all starter items and
+   reports any internally-coherent item whose fragment contains conflicting
+   axis pairs.
+
+**Rule:** When new texting-style content is added, run the auditor:
+`dotnet run --project tools/TextingStyleAuditor`. If it reports incoherent
+items, fix the content before merging. When a new conflict pair is discovered
+(through playtesting or content iteration), add it to the YAML matrix — do NOT
+add validation code directly in the aggregator. Conflicts are data, not code.
+
+**Anchors:**
+- Matrix: `data/persona/texting-style-conflicts.yaml`.
+- Conflict loader: `TextingStyleConflicts`.
+- Aggregator: `TextingStyleAggregator.ResolveConflicts`.
+- Auditor: `tools/TextingStyleAuditor/Program.cs`.
+- System-prompt rule: `LENGTH DIRECTIVE PRIORITY` block in
+  `data/prompts/templates.yaml` (opponent-response-instruction section).
+
+**Discovered in:** #907 (2026-05-16).

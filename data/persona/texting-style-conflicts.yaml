@@ -1,0 +1,34 @@
+# Pairs of (axis, value) tuples that MUST NOT co-occur in the same
+# aggregated texting-style profile. Bidirectional by construction:
+# every pair is symmetric — the aggregator checks both directions.
+#
+# Schema:
+#   axis_a: { axis: <axis-name>, value: <value-string> }
+#   axis_b: { axis: <axis-name>, value: <value-string> }
+#   reason: <human-readable explanation>
+#
+# See #907 and docs/persona/texting-style-aggregation.md.
+conflicts:
+  - axis_a: { axis: length, value: "never sends more than 5 words" }
+    axis_b: { axis: length, value: "minimum 80 words per message, no exceptions" }
+    reason: "Mutually exclusive length rules"
+
+  - axis_a: { axis: structure, value: "wall-of-text (one paragraph, no breaks, comma splices throughout)" }
+    axis_b: { axis: length, value: "never sends more than 5 words" }
+    reason: "Wall-of-text is incompatible with hard 5-word cap"
+
+  - axis_a: { axis: structure, value: "wall-of-text (one paragraph, no breaks, comma splices throughout)" }
+    axis_b: { axis: pacing, value: "minimal, sparse, long pauses implied" }
+    reason: "Wall-of-text incompatible with dry-pacing (sparse, minimal)"
+
+  - axis_a: { axis: pacing, value: "fast, breathless, low-edit, thoughts overlapping" }
+    axis_b: { axis: structure, value: "measured whitespace (3-5 short lines, blank between)" }
+    reason: "Hectic pacing incompatible with measured whitespace structure"
+
+  - axis_a: { axis: tics, value: "never asks questions, only states" }
+    axis_b: { axis: tics, value: "always ends with a question, even when not asking" }
+    reason: "Direct contradiction on question-asking behavior"
+
+  - axis_a: { axis: stance, value: '"omg same" energy, can''t disagree, vaguely unsettling' }
+    axis_b: { axis: stance, value: "mild disagreement with everything, even compliments" }
+    reason: "Mutually exclusive stances (agreer vs contrarian)"

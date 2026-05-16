@@ -12,6 +12,9 @@
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
       <_Parameter1>Pinder.Core.Tests</_Parameter1>
     </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>TextingStyleAuditor</_Parameter1>
+    </AssemblyAttribute>
   </ItemGroup>
 
   <ItemGroup>
@@ -24,6 +27,11 @@
       Microsoft Bcl already used by the solution.
     -->
     <PackageReference Include="System.Text.Json" Version="8.0.5" />
+    <!--
+      YamlDotNet for loading data/persona/texting-style-conflicts.yaml (#907).
+      Same version used by Pinder.LlmAdapters and Pinder.Rules.
+    -->
+    <PackageReference Include="YamlDotNet" Version="16.3.0" />
   </ItemGroup>
 
 </Project>

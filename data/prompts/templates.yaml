@@ -280,6 +280,7 @@ prompts:
       - If Interest dropped: show cooling without being melodramatic
       - If Interest rose: show warming without being gushing
       - Match the register exactly as established in your system prompt above.
+      - LENGTH DIRECTIVE PRIORITY: Your character's texting-style length directive (established in your system prompt above) overrides any generic response-length budget. If your style dictates terse, one-line messages, follow that — the length budget below is a ceiling, not a floor. A wall-of-text character should still write at length even when the budget says "short." Your texting style IS your voice; the budget only exists to prevent runaway output that has no stylistic justification.
       - {length_hint}
       
       Before sending: verify your message sounds exactly like the texting style established in your system prompt above. Verify you haven't reused fillers, emoji, or structural patterns from your last 2 messages. If either check fails, rewrite.
