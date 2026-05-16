@@ -24,13 +24,22 @@ namespace Pinder.Core.Conversation
         /// <summary>The steering question text, or null if the roll failed.</summary>
         public string SteeringQuestion { get; }
 
+        /// <summary>
+        /// Canonical check result from <see cref="RollEngine.ResolveCheck"/>.
+        /// Captures the raw roll before LLM success/failure affects <see cref="SteeringSucceeded"/>.
+        /// Phase 1 (additive): attached alongside existing bespoke fields.
+        /// Null only for the <see cref="NotAttempted"/> sentinel.
+        /// </summary>
+        public Pinder.Core.Rolls.RollCheckResult? Check { get; }
+
         public SteeringRollResult(
             bool steeringAttempted,
             bool steeringSucceeded,
             int steeringRoll,
             int steeringMod,
             int steeringDC,
-            string steeringQuestion)
+            string steeringQuestion,
+            Pinder.Core.Rolls.RollCheckResult? check = null)
         {
             SteeringAttempted = steeringAttempted;
             SteeringSucceeded = steeringSucceeded;
@@ -38,6 +47,7 @@ namespace Pinder.Core.Conversation
             SteeringMod = steeringMod;
             SteeringDC = steeringDC;
             SteeringQuestion = steeringQuestion;
+            Check = check;
         }
 
         /// <summary>A no-op result when steering was not attempted.</summary>
