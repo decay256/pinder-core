@@ -3,6 +3,9 @@ using Pinder.Core.Rolls;
 
 namespace Pinder.Core.Conversation
 {
+    // Fields covered by TurnSnapshot (session-runner/Snapshot/SessionSnapshot.cs):
+    //   Options, State, DicePools, OpponentDefenseSnapshot (#903)
+    //
     /// <summary>
     /// Result of starting a turn: the dialogue options, current game state, and
     /// per-option pre-rolled dice pools (#789, Phase 2).
@@ -14,6 +17,14 @@ namespace Pinder.Core.Conversation
 
         /// <summary>Snapshot of game state at the start of this turn.</summary>
         public GameStateSnapshot State { get; }
+
+        /// <summary>
+        /// #903: Snapshot of the opponent's defense posture at the start of this turn.
+        /// Contains one entry per <see cref="Pinder.Core.Stats.StatType"/> (6 total),
+        /// mapping each possible attacking stat to the defending stat and effective
+        /// modifier the opponent will use when resisting that attack.
+        /// </summary>
+        public OpponentDefenseSnapshot OpponentDefenseSnapshot { get; }
 
         /// <summary>
         /// Pre-rolled dice pools, one per option index. Issue #789, Phase 2 (D1).
@@ -35,11 +46,13 @@ namespace Pinder.Core.Conversation
         /// </summary>
         public PerOptionDicePool[] DicePools { get; }
 
-        public TurnStart(DialogueOption[] options, GameStateSnapshot state, PerOptionDicePool[] dicePools)
+        public TurnStart(DialogueOption[] options, GameStateSnapshot state, PerOptionDicePool[] dicePools,
+            OpponentDefenseSnapshot opponentDefenseSnapshot = null)
         {
             Options = options ?? throw new ArgumentNullException(nameof(options));
             State = state ?? throw new ArgumentNullException(nameof(state));
             DicePools = dicePools ?? throw new ArgumentNullException(nameof(dicePools));
+            OpponentDefenseSnapshot = opponentDefenseSnapshot;
 
             if (dicePools.Length != options.Length)
                 throw new ArgumentException(

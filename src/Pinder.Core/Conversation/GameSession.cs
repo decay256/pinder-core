@@ -914,7 +914,26 @@ namespace Pinder.Core.Conversation
                 _currentDicePools[i] = new Pinder.Core.Rolls.PerOptionDicePool(i);
 
             var snapshot = CreateSnapshot();
-            return new TurnStart(options, snapshot, _currentDicePools);
+
+            // #903 — build opponent defense snapshot (6 entries, one per StatType).
+            var defenseEntries = new System.Collections.Generic.Dictionary<Pinder.Core.Stats.StatType, OpponentDefenseEntry>();
+            foreach (Pinder.Core.Stats.StatType attackerStat in System.Enum.GetValues(typeof(Pinder.Core.Stats.StatType)))
+            {
+                var defenderStat = Pinder.Core.Stats.StatBlock.DefenceTable[attackerStat];
+                int baseModifier = _opponent.Stats.GetBase(defenderStat);
+                int effectiveModifier = _opponent.Stats.GetEffective(defenderStat);
+
+                // Include any active OpponentDCIncrease trap bonus for this attacker stat.
+                var activeTrap = _traps.GetActive(attackerStat);
+                if (activeTrap != null && activeTrap.Definition.Effect == Pinder.Core.Traps.TrapEffect.OpponentDCIncrease)
+                    effectiveModifier += activeTrap.Definition.EffectValue;
+
+                defenseEntries[attackerStat] = new OpponentDefenseEntry(defenderStat, effectiveModifier, baseModifier);
+            }
+            var defenseSnapshot = new OpponentDefenseSnapshot(
+                new System.Collections.ObjectModel.ReadOnlyDictionary<Pinder.Core.Stats.StatType, OpponentDefenseEntry>(defenseEntries));
+
+            return new TurnStart(options, snapshot, _currentDicePools, defenseSnapshot);
         }
 
         /// <summary>
