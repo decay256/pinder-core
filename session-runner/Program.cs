@@ -1373,7 +1373,8 @@ class Program
                     session.OpponentHistory,
                     playerSender: player1,
                     i18nCatalog: snapshotI18nCatalog,
-                    opponentDefenseSnapshot: turnStart.OpponentDefenseSnapshot);
+                    opponentDefenseSnapshot: turnStart.OpponentDefenseSnapshot,
+                    weaknessDcReduction: turnStart.WeaknessDcReduction);
 
                 string turnSnapPath = Path.Combine(playtestDir, $"{sessionSlug}.turn-{turn:D2}.snap.json");
                 File.WriteAllText(turnSnapPath, JsonSerializer.Serialize(turnSnap, new JsonSerializerOptions { WriteIndented = true }));
@@ -1676,7 +1677,8 @@ class Program
         IReadOnlyList<Pinder.Core.Conversation.ConversationMessage>? opponentHistory = null,
         string? playerSender = null,
         Pinder.LlmAdapters.I18nCatalog? i18nCatalog = null,
-        Pinder.Core.Conversation.OpponentDefenseSnapshot? opponentDefenseSnapshot = null)
+        Pinder.Core.Conversation.OpponentDefenseSnapshot? opponentDefenseSnapshot = null,
+        int? weaknessDcReduction = null)
     {
         var state = result.StateAfter;
 
@@ -1789,6 +1791,7 @@ class Program
                         BaseModifier      = kvp.Value.BaseModifier,
                     })
                 : null,
+            WeaknessDcReduction = weaknessDcReduction,
         };
     }
 
