@@ -33,9 +33,32 @@ namespace Pinder.Core.Conversation
             Func<string, Task> applyOverlay,
             CancellationToken ct = default)
         {
+            HorninessCheckResult result;
+            string? instruction;
+            (result, instruction) = PeekAsync(sessionHorniness, playerShadows, statDeliveryInstructions, ct);
+            if (instruction != null)
+                await applyOverlay(instruction).ConfigureAwait(false);
+            return result;
+        }
+
+        /// <summary>
+        /// Performs the per-turn horniness overlay check and returns both the result
+        /// and the overlay instruction (if any), WITHOUT applying the text overlay.
+        /// Use when the text rewrite must be deferred to a later point in the pipeline
+        /// (e.g. after shadow corruption — see #899).
+        /// The returned <see cref="HorninessCheckResult.OverlayApplied"/> is true when
+        /// an instruction was found; the caller is responsible for applying the overlay.
+        /// Returns (NotPerformed, null) when no check should be run.
+        /// </summary>
+        public (HorninessCheckResult Result, string? OverlayInstruction) PeekAsync(
+            int sessionHorniness,
+            SessionShadowTracker? playerShadows,
+            object? statDeliveryInstructions,
+            CancellationToken ct = default)
+        {
             ct.ThrowIfCancellationRequested();
             if (sessionHorniness <= 0 || playerShadows == null)
-                return HorninessCheckResult.NotPerformed;
+                return (HorninessCheckResult.NotPerformed, null);
 
             int horninessRoll = _rng.Next(1, 21);
             int horninessModifier = 0;
@@ -45,27 +68,19 @@ namespace Pinder.Core.Conversation
 
             if (!horninessMiss)
             {
-                return new HorninessCheckResult(
+                return (new HorninessCheckResult(
                     horninessRoll, horninessModifier, horninessTotal, horninessDC,
-                    false, FailureTier.None, false);
+                    false, FailureTier.None, false), null);
             }
 
             int missMargin = horninessDC - horninessTotal;
             FailureTier horninessTier = DetermineHorninessTier(missMargin);
             string? overlayInstruction = GetHorninessOverlayInstruction(statDeliveryInstructions, horninessTier);
 
-            if (overlayInstruction != null)
-            {
-                // Caller applies the overlay via the LLM
-                await applyOverlay(overlayInstruction).ConfigureAwait(false);
-                return new HorninessCheckResult(
-                    horninessRoll, horninessModifier, horninessTotal, horninessDC,
-                    true, horninessTier, true);
-            }
-
-            return new HorninessCheckResult(
+            bool overlayApplied = overlayInstruction != null;
+            return (new HorninessCheckResult(
                 horninessRoll, horninessModifier, horninessTotal, horninessDC,
-                true, horninessTier, false);
+                true, horninessTier, overlayApplied), overlayInstruction);
         }
 
         /// <summary>
