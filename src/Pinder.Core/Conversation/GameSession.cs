@@ -1593,7 +1593,7 @@ namespace Pinder.Core.Conversation
                     if (shadowMiss)
                     {
                         int missMargin = shadowDC - shadowRoll;
-                        FailureTier shadowTier = HorninessEngine.DetermineHorninessTier(missMargin);
+                        FailureTier shadowTier = FailureTierLadder.FromMissMargin(missMargin); // #901
                         string? corruptionInstruction = HorninessEngine.GetShadowCorruptionInstruction(
                             _statDeliveryInstructions, pairedShadow.Value, shadowTier);
 

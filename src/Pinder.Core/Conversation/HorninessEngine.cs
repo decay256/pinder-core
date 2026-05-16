@@ -60,40 +60,32 @@ namespace Pinder.Core.Conversation
             if (sessionHorniness <= 0 || playerShadows == null)
                 return (HorninessCheckResult.NotPerformed, null);
 
-            int horninessRoll = _rng.Next(1, 21);
-            int horninessModifier = 0;
-            int horninessTotal = horninessRoll + horninessModifier;
             int horninessDC = 20 - sessionHorniness;
-            bool horninessMiss = horninessTotal < horninessDC;
+            // #901: route through single entry point — dice consumption is identical (one Roll(20))
+            var check = RollEngine.ResolveCheck(
+                RollCheckKind.Horniness,
+                new RandomDiceRollerAdapter(_rng),
+                System.Array.Empty<NamedModifier>(),
+                horninessDC);
+
+            bool horninessMiss = !check.IsSuccess;
 
             if (!horninessMiss)
             {
                 return (new HorninessCheckResult(
-                    horninessRoll, horninessModifier, horninessTotal, horninessDC,
-                    false, FailureTier.None, false), null);
+                    check.DieRoll, 0, check.Total, horninessDC,
+                    false, FailureTier.None, false, check), null);
             }
 
-            int missMargin = horninessDC - horninessTotal;
-            FailureTier horninessTier = DetermineHorninessTier(missMargin);
+            FailureTier horninessTier = check.Tier;
             string? overlayInstruction = GetHorninessOverlayInstruction(statDeliveryInstructions, horninessTier);
 
             bool overlayApplied = overlayInstruction != null;
             return (new HorninessCheckResult(
-                horninessRoll, horninessModifier, horninessTotal, horninessDC,
-                true, horninessTier, overlayApplied), overlayInstruction);
+                check.DieRoll, 0, check.Total, horninessDC,
+                true, horninessTier, overlayApplied, check), overlayInstruction);
         }
-
-        /// <summary>
-        /// Determines the horniness overlay failure tier from miss margin.
-        /// Uses same thresholds as normal failure tiers.
-        /// </summary>
-        internal static FailureTier DetermineHorninessTier(int missMargin)
-        {
-            if (missMargin <= 2) return FailureTier.Fumble;
-            if (missMargin <= 5) return FailureTier.Misfire;
-            if (missMargin <= 9) return FailureTier.TropeTrap;
-            return FailureTier.Catastrophe;
-        }
+        // DetermineHorninessTier deleted — #901: use FailureTierLadder.FromMissMargin instead.
 
         /// <summary>
         /// Retrieves the horniness overlay instruction from the stat delivery instructions.

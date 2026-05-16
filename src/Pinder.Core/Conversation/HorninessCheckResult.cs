@@ -28,7 +28,18 @@ namespace Pinder.Core.Conversation
         /// <summary>Whether an overlay was actually applied (miss + instruction found + shadows present).</summary>
         public bool OverlayApplied { get; }
 
-        public HorninessCheckResult(int roll, int modifier, int total, int dc, bool isMiss, FailureTier tier, bool overlayApplied)
+        /// <summary>
+        /// Canonical check result from <see cref="RollEngine.ResolveCheck"/>.
+        /// Phase 1 (additive): attached alongside existing bespoke fields.
+        /// Phase 2 will replace the bespoke duplicate fields with <c>Check.*</c> projections.
+        /// Null only for the <see cref="NotPerformed"/> sentinel.
+        /// </summary>
+        public RollCheckResult? Check { get; }
+
+        public HorninessCheckResult(
+            int roll, int modifier, int total, int dc,
+            bool isMiss, FailureTier tier, bool overlayApplied,
+            RollCheckResult? check = null)
         {
             Roll = roll;
             Modifier = modifier;
@@ -37,6 +48,7 @@ namespace Pinder.Core.Conversation
             IsMiss = isMiss;
             Tier = tier;
             OverlayApplied = overlayApplied;
+            Check = check;
         }
 
         /// <summary>A result for when no check was performed (sessionHorniness = 0 or no shadows).</summary>
