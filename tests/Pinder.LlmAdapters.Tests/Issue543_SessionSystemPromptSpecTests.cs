@@ -193,6 +193,12 @@ player_role_description: p
 opponent_role_description: o
 meta_contract: m
 writing_rules: wr
+global_dc_bias: 0
+horniness_time_modifiers:
+  morning: 3
+  afternoon: 0
+  evening: 2
+  overnight: 5
 ";
             var ex = Assert.Throws<FormatException>(() =>
                 GameDefinition.LoadFrom(yaml));
@@ -211,6 +217,12 @@ player_role_description: p
 opponent_role_description: o
 meta_contract: m
 writing_rules: wr
+global_dc_bias: 0
+horniness_time_modifiers:
+  morning: 3
+  afternoon: 0
+  evening: 2
+  overnight: 5
 ";
             var ex = Assert.Throws<FormatException>(() =>
                 GameDefinition.LoadFrom(yaml));
@@ -225,11 +237,17 @@ writing_rules: wr
             var yaml = @"
 name: Test
 vision: ~
-world_description: w
+world_description: wd
 player_role_description: p
 opponent_role_description: o
 meta_contract: m
-writing_rules: wr
+writing_rules: w
+global_dc_bias: 0
+horniness_time_modifiers:
+  morning: 3
+  afternoon: 0
+  evening: 2
+  overnight: 5
 ";
             var ex = Assert.Throws<FormatException>(() =>
                 GameDefinition.LoadFrom(yaml));
@@ -249,6 +267,12 @@ player_role_description: p
 opponent_role_description: o
 meta_contract: m
 writing_rules: wr
+global_dc_bias: 0
+horniness_time_modifiers:
+  morning: 3
+  afternoon: 0
+  evening: 2
+  overnight: 5
 extra_unknown_key: should be silently ignored
 another_one: also ignored
 ";
@@ -272,6 +296,12 @@ player_role_description: p
 opponent_role_description: o
 meta_contract: m
 writing_rules: wr
+global_dc_bias: 0
+horniness_time_modifiers:
+  morning: 3
+  afternoon: 0
+  evening: 2
+  overnight: 5
 ";
             var gd = GameDefinition.LoadFrom(yaml);
             Assert.Contains("Line one.", gd.Vision);
@@ -611,6 +641,12 @@ world_description: w
 player_role_description: p
 opponent_role_description: o
 meta_contract: m
+global_dc_bias: 0
+horniness_time_modifiers:
+  morning: 3
+  afternoon: 0
+  evening: 2
+  overnight: 5
 ";
             var ex = Assert.Throws<FormatException>(() =>
                 GameDefinition.LoadFrom(yaml));

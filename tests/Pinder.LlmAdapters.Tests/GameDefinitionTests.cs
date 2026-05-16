@@ -93,9 +93,9 @@ horniness_time_modifiers:
         public void LoadFrom_MissingKey_ThrowsFormatException()
         {
             var yaml = "name: Test\n";
-            var ex = Assert.Throws<FormatException>(() =>
+            var ex = Assert.Throws<InvalidOperationException>(() =>
                 GameDefinition.LoadFrom(yaml));
-            Assert.Contains("vision", ex.Message);
+            Assert.Contains("horniness_time_modifiers", ex.Message);
         }
 
         [Fact]
@@ -122,7 +122,7 @@ horniness_time_modifiers:
         }
 
         [Fact]
-        public void LoadFrom_ExtraKeys_AreIgnored()
+        public void LoadFrom_ExtraYamlKeys_AreIgnored()
         {
             var yaml = @"
 name: Test
