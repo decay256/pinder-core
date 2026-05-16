@@ -70,9 +70,9 @@ namespace Pinder.Core.Tests
         [Fact]
         public void Strip_WhitespaceOnlyLabel_ReturnsEmpty()
         {
-            // Label with nothing after the colon+space.
+            // Label with nothing after the colon — entire string is consumed.
             string result = MetaPrefixStripper.Strip("CONTEXT:  ");
-            Assert.Equal(" ", result); // regex consumes up to one space via \s*; trailing stays
+            Assert.Equal(string.Empty, result);
         }
     }
 }
