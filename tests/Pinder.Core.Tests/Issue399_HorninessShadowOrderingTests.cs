@@ -22,8 +22,9 @@ namespace Pinder.Core.Tests
     /// |horniness_penalty| > |floor(delta/2) - delta| on the live audit log.
     ///
     /// The fix is an ordering change in GameSession.cs: the §15 halving block
-    /// is moved AFTER the shadow check (the message-rewrite half stays before
-    /// — horniness text first, then shadow text — that ordering is intentional).
+    /// is moved AFTER the shadow check (the message-rewrite half also now runs
+    /// after shadow — see #899 which moved the horniness text overlay to fire
+    /// LAST, after both trap and shadow corruption).
     /// </summary>
     [Trait("Category", "Core")]
     public class Issue399_HorninessShadowOrderingTests

@@ -641,3 +641,44 @@ conflicts:
 **Discovered in:** #907 (2026-05-16). Reported by Daniel after staging session
 `ce5a6f82` showed opponent always replied with 3-10 words regardless of player
 message length.
+
+### HORNINESS-OVERLAY-MUST-BE-LAST-TEXT-LAYER
+
+**Title:** The horniness overlay must be the last text-rewrite layer, after shadow corruption.
+
+**Symptom:** After sprint work that expanded individual overlay layers (#866, #868, #862), shadow
+corruption was rewriting the delivered text AFTER horniness, silently flattening or contradicting
+horniness flavor before the player saw it. The player-visible message was shaped by shadow rather
+than the player's in-the-moment loss of control that horniness represents.
+
+**Root cause:** The original pipeline order — `Trap → Horniness text → Shadow text → §15 halving`
+— was set when overlays were short and their interaction was negligible. When overlay outputs
+grew longer and more distinctive, the shadow pass could overwrite horniness flavor entirely,
+defeating the intent of the horniness layer.
+
+**Rule:** Horniness is the overlay that represents the player's immediate loss of delivery control.
+It MUST be the last text-rewrite layer so it has final say over the message the player actually
+reads. The §15 interest-delta halving is a separate concern and remains last in the interest
+pipeline (not the text pipeline).
+
+**Correct pipeline order (post-#899):**
+  1. Trap overlay
+  2. Shadow corruption (text)
+  3. Horniness overlay (text)  ← LAST text layer
+  4. Horniness §15 interest-delta halving (still last in interest pipeline)
+
+**Implementation:** Use `HorninessEngine.PeekAsync()` to do the roll and obtain the
+instruction early (before shadow), then apply the text rewrite manually after shadow.
+`CheckAsync` is kept for backward compat but delegates to `PeekAsync` internally.
+
+**Invariant to never flip back:** The comment block in `GameSession.ResolveTurnAsync`
+(search "New invariant (post-#899)") documents this. If a future agent sees a comment
+saying "horniness before shadow" anywhere, that is stale and must be updated.
+
+**Anchors:**
+- `src/Pinder.Core/Conversation/HorninessEngine.cs` — `PeekAsync()` method.
+- `src/Pinder.Core/Conversation/GameSession.cs` — `ResolveTurnAsync`, search "#899".
+- `tests/Pinder.Core.Tests/Issue399_HorninessShadowOrderingTests.cs` — regression coverage.
+- `docs/ARCHITECTURE.md` steps 10, 10a, 10b, 10c.
+
+**Discovered in:** #899 (2026-05-16).
