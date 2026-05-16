@@ -193,6 +193,8 @@ namespace Pinder.Core.Rolls
 
         /// <summary>
         /// Shared failure-tier determination and RollResult construction used by both Resolve and ResolveFixedDC.
+        /// Routes the miss-margin tier ladder through <see cref="FailureTierLadder.FromMissMargin"/> (#901)
+        /// and attaches a <see cref="RollCheckResult"/> on the returned <see cref="RollResult"/>.
         /// </summary>
         private static RollResult ResolveFromComponents(
             StatType stat,
@@ -232,27 +234,40 @@ namespace Pinder.Core.Rolls
             else
             {
                 int miss = dc - finalTotal;
-
-                if      (miss <= 2) tier = FailureTier.Fumble;
-                else if (miss <= 5) tier = FailureTier.Misfire;
-                else if (miss <= 9)
+                // #901: single tier-ladder source of truth
+                tier = FailureTierLadder.FromMissMargin(miss);
+                if (tier == FailureTier.TropeTrap || tier == FailureTier.Catastrophe)
                 {
-                    tier = FailureTier.TropeTrap;
                     // Activate the stat's trap (single-slot replacement, #371).
                     newTrap = trapRegistry.GetTrap(stat);
                     if (newTrap != null)
                         attackerTraps.Activate(newTrap);
                 }
-                else
-                {
-                    tier = FailureTier.Catastrophe;
-                    // Catastrophe also activates trap (rules §5: miss 10+ = -3 + trap).
-                    // Single-slot replacement under #371.
-                    newTrap = trapRegistry.GetTrap(stat);
-                    if (newTrap != null)
-                        attackerTraps.Activate(newTrap);
-                }
             }
+
+            // #901: build canonical RollCheckResult (modifier bag view of this roll).
+            // Note: Check.Tier uses FailureTierLadder only (no Legendary); RollResult.Tier
+            // applies the nat-1 → Legendary game-rule override above.
+            var checkModifiers = new NamedModifier[]
+            {
+                new NamedModifier("stat",  statMod),
+                new NamedModifier("level", levelBonus),
+            };
+            int checkMissMargin = (usedRoll == 20 || total + externalBonus >= dc) ? 0 : dc - (total + externalBonus);
+            bool checkIsSuccess = (total + externalBonus) >= dc;
+            FailureTier checkTier = checkIsSuccess ? FailureTier.None : FailureTierLadder.FromMissMargin(checkMissMargin);
+            var check = new RollCheckResult(
+                RollCheckKind.OptionRoll,
+                roll1, roll2, usedRoll,
+                checkModifiers,
+                modifierSum: statMod + levelBonus,
+                total:       total + externalBonus,
+                dc:          dc,
+                isSuccess:   checkIsSuccess,
+                isNatOne:    usedRoll == 1,
+                isNatTwenty: usedRoll == 20,
+                tier:        checkTier,
+                missMargin:  checkMissMargin);
 
             return new RollResult(
                 dieRoll:       roll1,
@@ -264,7 +279,8 @@ namespace Pinder.Core.Rolls
                 dc:            dc,
                 tier:          tier,
                 activatedTrap: newTrap,
-                externalBonus: externalBonus);
+                externalBonus: externalBonus,
+                check:         check);
         }
     }
 }

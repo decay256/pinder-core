@@ -71,6 +71,15 @@ namespace Pinder.Core.Rolls
         public TrapDefinition? ActivatedTrap { get; }
 
         /// <summary>
+        /// Canonical check result produced by <see cref="RollEngine.ResolveCheck"/>.
+        /// Contains the raw d20 mechanics (roll, modifier bag, total, tier-from-miss-margin).
+        /// Note: <c>Check.Tier</c> is from <see cref="FailureTierLadder.FromMissMargin"/> only;
+        /// it will differ from <see cref="Tier"/> when UsedDieRoll == 1 (Legendary in Tier,
+        /// Catastrophe in Check.Tier). Phase 2 will wire this to the DTO.
+        /// </summary>
+        public RollCheckResult Check { get; }
+
+        /// <summary>
         /// Risk tier derived from the "need" value (dc - statMod - levelBonus).
         /// Safe (≤5), Medium (6–10), Hard (11–15), Bold (≥16).
         /// </summary>
@@ -89,7 +98,8 @@ namespace Pinder.Core.Rolls
             int dc,
             FailureTier tier,
             TrapDefinition? activatedTrap = null,
-            int externalBonus = 0)
+            int externalBonus = 0,
+            RollCheckResult? check = null)
         {
             DieRoll        = dieRoll;
             SecondDieRoll  = secondDieRoll;
@@ -106,6 +116,7 @@ namespace Pinder.Core.Rolls
             Tier           = IsSuccess ? FailureTier.None : tier;
             ActivatedTrap  = activatedTrap;
             RiskTier       = ComputeRiskTier(dc, statModifier, levelBonus);
+            Check          = check!;
         }
 
         /// <summary>
