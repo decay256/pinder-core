@@ -166,5 +166,54 @@ namespace Pinder.Core.Tests
             Assert.Equal(19, result.Steering.SteeringDC);
             Assert.Null(result.Steering.SteeringQuestion);
         }
+
+        /// <summary>
+        /// #932 DI/wiring integration test: assert that AttackerGroup, DefenderGroup,
+        /// and DcBase are populated correctly by SteeringEngine when a roll is attempted.
+        /// Reverse-verify: stripping the populate-from-engine wiring must make this test fail.
+        /// </summary>
+        [Fact]
+        public async Task SteeringRoll_ExposesGroupAndBase()
+        {
+            // Player stats: Charm=5, Wit=5, SA=5 → steering mod = 5
+            var playerStats = MakeStatBlockWithValues(charm: 5, wit: 5, sa: 5);
+            // Opponent stats: SA=0, Rizz=0, Honesty=0 → steering DC = 16
+            var opponentStats = MakeStatBlockWithValues(sa: 0, rizz: 0, honesty: 0);
+
+            var player = new CharacterProfile(
+                playerStats, "You are Player.", "Player",
+                new TimingProfile(5, 0.0f, 0.0f, "neutral"), 1);
+            var opponent = new CharacterProfile(
+                opponentStats, "You are Opponent.", "Opponent",
+                new TimingProfile(5, 0.0f, 0.0f, "neutral"), 1);
+
+            var dice = new FixedDice(1, 15, 50);
+            var steeringRng = new FixedRandom(20);
+
+            var llm = new NullLlmAdapter();
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), steeringRng: steeringRng);
+            var session = new GameSession(player, opponent, llm, dice, new NullTrapRegistry(), config);
+
+            var turnStart = await session.StartTurnAsync();
+            var result = await session.ResolveTurnAsync(0);
+
+            // Assert new fields (TitleCase StatType.ToString())
+            Assert.Equal(new[] { "Charm", "Wit", "SelfAwareness" }, result.Steering.AttackerGroup);
+            Assert.Equal(new[] { "SelfAwareness", "Rizz", "Honesty" }, result.Steering.DefenderGroup);
+            Assert.Equal(16, result.Steering.DcBase);
+        }
+
+        /// <summary>
+        /// #932: the NotAttempted sentinel returns empty lists and DcBase=0.
+        /// </summary>
+        [Fact]
+        public void SteeringRoll_NotAttempted_ReturnsZeroedGroupsAndBase()
+        {
+            var result = SteeringRollResult.NotAttempted;
+
+            Assert.Empty(result.AttackerGroup);
+            Assert.Empty(result.DefenderGroup);
+            Assert.Equal(0, result.DcBase);
+        }
     }
 }

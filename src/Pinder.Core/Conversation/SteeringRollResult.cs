@@ -1,6 +1,9 @@
 namespace Pinder.Core.Conversation
 {
+    using System.Collections.Generic;
+
     /// <summary>
+
     /// Result of the steering roll that determines whether the player character
     /// appends a date-steering question to their delivered message.
     /// </summary>
@@ -24,8 +27,18 @@ namespace Pinder.Core.Conversation
         /// <summary>The steering question text, or null if the roll failed.</summary>
         public string SteeringQuestion { get; }
 
+        /// <summary>Stat names contributing to the steering modifier.</summary>
+        public IReadOnlyList<string> AttackerGroup { get; }
+
+        /// <summary>Stat names contributing to the steering DC.</summary>
+        public IReadOnlyList<string> DefenderGroup { get; }
+
+        /// <summary>The base DC before the opponent's stat average is added.</summary>
+        public int DcBase { get; }
+
         /// <summary>
         /// Canonical check result from <see cref="RollEngine.ResolveCheck"/>.
+
         /// Captures the raw roll before LLM success/failure affects <see cref="SteeringSucceeded"/>.
         /// Phase 1 (additive): attached alongside existing bespoke fields.
         /// Null only for the <see cref="NotAttempted"/> sentinel.
@@ -39,7 +52,10 @@ namespace Pinder.Core.Conversation
             int steeringMod,
             int steeringDC,
             string steeringQuestion,
-            Pinder.Core.Rolls.RollCheckResult? check = null)
+            Pinder.Core.Rolls.RollCheckResult? check = null,
+            IReadOnlyList<string>? attackerGroup = null,
+            IReadOnlyList<string>? defenderGroup = null,
+            int dcBase = 0)
         {
             SteeringAttempted = steeringAttempted;
             SteeringSucceeded = steeringSucceeded;
@@ -48,9 +64,22 @@ namespace Pinder.Core.Conversation
             SteeringDC = steeringDC;
             SteeringQuestion = steeringQuestion;
             Check = check;
+            AttackerGroup = attackerGroup ?? new List<string>().AsReadOnly();
+            DefenderGroup = defenderGroup ?? new List<string>().AsReadOnly();
+            DcBase = dcBase;
         }
 
         /// <summary>A no-op result when steering was not attempted.</summary>
-        public static SteeringRollResult NotAttempted { get; } = new SteeringRollResult(false, false, 0, 0, 0, null);
+        public static SteeringRollResult NotAttempted { get; } = new SteeringRollResult(
+            steeringAttempted: false,
+            steeringSucceeded: false,
+            steeringRoll: 0,
+            steeringMod: 0,
+            steeringDC: 0,
+            steeringQuestion: null,
+            check: null,
+            attackerGroup: null,
+            defenderGroup: null,
+            dcBase: 0);
     }
 }

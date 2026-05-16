@@ -121,7 +121,10 @@ namespace Pinder.Core.Conversation
                 steeringMod: steeringMod,
                 steeringDC: steeringDC,
                 steeringQuestion: steeringQuestion,
-                check: check);
+                check: check,
+                attackerGroup: new[] { "Charm", "Wit", "SelfAwareness" },
+                defenderGroup: new[] { "SelfAwareness", "Rizz", "Honesty" },
+                dcBase: 16);
         }
     }
 }
