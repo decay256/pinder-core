@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using Pinder.Core.Interfaces;
 using Pinder.Core.Progression;
 using Pinder.Core.Stats;
@@ -12,6 +14,52 @@ namespace Pinder.Core.Rolls
     /// </summary>
     public static class RollEngine
     {
+        /// <summary>
+        /// Single entry point for all d20 checks.
+        /// Rolls a d20 (with optional advantage/disadvantage), sums the modifier bag,
+        /// computes total vs DC, and returns a canonical <see cref="RollCheckResult"/>.
+        /// </summary>
+        /// <remarks>
+        /// <c>IsSuccess = Total >= Dc</c> — nat-20 auto-success and nat-1 auto-fail (Legendary)
+        /// are game-rule overrides that live in <see cref="ResolveFromComponents"/> for the
+        /// main option-roll only. Informational <c>IsNatOne</c>/<c>IsNatTwenty</c> flags are
+        /// always populated.
+        /// </remarks>
+        public static RollCheckResult ResolveCheck(
+            RollCheckKind kind,
+            IDiceRoller dice,
+            IReadOnlyList<NamedModifier> modifiers,
+            int dc,
+            bool hasAdvantage    = false,
+            bool hasDisadvantage = false)
+        {
+            if (dice == null) throw new ArgumentNullException(nameof(dice));
+            if (modifiers == null) throw new ArgumentNullException(nameof(modifiers));
+
+            bool rollTwice = hasAdvantage || hasDisadvantage;
+            int roll1 = dice.Roll(20);
+            int? roll2 = rollTwice ? (int?)dice.Roll(20) : null;
+
+            int usedRoll;
+            if (!rollTwice)           usedRoll = roll1;
+            else if (hasDisadvantage) usedRoll = roll2.HasValue ? Math.Min(roll1, roll2.Value) : roll1;
+            else                      usedRoll = roll2.HasValue ? Math.Max(roll1, roll2.Value) : roll1;
+
+            int modSum = 0;
+            foreach (var m in modifiers) modSum += m.Value;
+
+            int total      = usedRoll + modSum;
+            bool isSuccess = total >= dc;
+            bool isNatOne  = usedRoll == 1;
+            bool isNatTwenty = usedRoll == 20;
+            int missMargin = isSuccess ? 0 : dc - total;
+            FailureTier tier = isSuccess ? FailureTier.None : FailureTierLadder.FromMissMargin(missMargin);
+
+            return new RollCheckResult(
+                kind, roll1, roll2, usedRoll, modifiers, modSum, total, dc,
+                isSuccess, isNatOne, isNatTwenty, tier, missMargin);
+        }
+
         /// <summary>
         /// Resolve a full roll.
         /// </summary>
