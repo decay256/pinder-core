@@ -100,6 +100,12 @@ attributes for all snake_case keys. The outer key `by_attacker_stat` maps to a
 dictionary; each nested entry has `defending_stat`, `effective_modifier`, and
 `base_modifier`.
 
+Note: `TurnStart` is rebuilt by `SessionsController.BuildTurnState` before serialization
+to the SPA; the wire key is set explicitly in the controller mapping. The
+`[JsonPropertyName("opponent_defense_snapshot")]` attribute on `TurnStart.OpponentDefenseSnapshot`
+is added for consistency with the rest of the class's wire-attribute discipline,
+rather than as a primary wire-shape fix.
+
 `StatType` enum keys in the dictionary serialize using their default enum serializer
 (integer-keyed). Callers that need string keys should serialize via a custom
 converter or use `ByAttackerStat.ToDictionary(kvp => kvp.Key.ToString(), ...)`.

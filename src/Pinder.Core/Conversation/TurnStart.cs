@@ -24,6 +24,7 @@ namespace Pinder.Core.Conversation
         /// mapping each possible attacking stat to the defending stat and effective
         /// modifier the opponent will use when resisting that attack.
         /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("opponent_defense_snapshot")]
         public OpponentDefenseSnapshot OpponentDefenseSnapshot { get; }
 
         /// <summary>
