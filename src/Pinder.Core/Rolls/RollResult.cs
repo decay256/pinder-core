@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Pinder.Core.Stats;
 using Pinder.Core.Traps;
 
@@ -19,6 +20,14 @@ namespace Pinder.Core.Rolls
 
         /// <summary>The stat used for the roll.</summary>
         public StatType Stat { get; }
+
+        /// <summary>
+        /// The defending stat (opponent's stat used to compute the DC via StatBlock.DefenceTable[Stat]).
+        /// Always populated for option-roll results; use StatBlock.DefenceTable[Stat] as the canonical source.
+        /// </summary>
+        [JsonPropertyName("defending_stat")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public StatType DefendingStat { get; }
 
         /// <summary>Effective stat modifier at time of roll (after shadow penalty + traps).</summary>
         public int StatModifier { get; }
@@ -99,12 +108,14 @@ namespace Pinder.Core.Rolls
             FailureTier tier,
             TrapDefinition? activatedTrap = null,
             int externalBonus = 0,
-            RollCheckResult? check = null)
+            RollCheckResult? check = null,
+            StatType defendingStat = default)
         {
             DieRoll        = dieRoll;
             SecondDieRoll  = secondDieRoll;
             UsedDieRoll    = usedDieRoll;
             Stat           = stat;
+            DefendingStat  = defendingStat;
             StatModifier   = statModifier;
             LevelBonus     = levelBonus;
             Total          = usedDieRoll + statModifier + levelBonus;

@@ -1777,6 +1777,7 @@ class Program
             ConversationHistory = convEntries,
             OpponentHistory = opponentHistoryEntries,
             Events = events,
+            DefendingRollStat = result.Roll.DefendingStat.ToString(),
             GhostProbabilityPerTurn = state.GhostProbabilityPerTurn,
             OpponentDefenseSnapshot = opponentDefenseSnapshot != null
                 ? opponentDefenseSnapshot.ByAttackerStat.ToDictionary(

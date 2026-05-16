@@ -94,6 +94,11 @@ namespace Pinder.SessionRunner.Snapshot
     ///     list when no opponent calls have resolved yet.
     ///   </description></item>
     ///   <item><description>
+    ///     <c>DefendingRollStat</c> (issue #906): the defending stat used in
+    ///     the option roll on this turn (<c>StatBlock.DefenceTable[Stat]</c>).
+    ///     Empty string on turns with no roll.
+    ///   </description></item>
+    ///   <item><description>
     ///     <c>GhostProbabilityPerTurn</c> (issue #905): probability (0.0..1.0)
     ///     that the opponent ghosts on this turn. Derived from
     ///     <c>GameStateSnapshot.GhostProbabilityPerTurn</c> (0.25 when Bored,
@@ -137,6 +142,13 @@ namespace Pinder.SessionRunner.Snapshot
         public int SaUsageCount { get; set; }
         public bool SaOverthinkingTriggered { get; set; }
         public int RizzCumulativeFailureCount { get; set; }
+
+        /// <summary>
+        /// Issue #906: defending stat used in the roll for this turn.
+        /// Derived from <c>StatBlock.DefenceTable[Stat]</c>. Empty string on turns
+        /// with no roll (ghosted / skipped). Populated in <c>BuildTurnSnapshot</c>.
+        /// </summary>
+        public string DefendingRollStat { get; set; } = string.Empty;
 
         /// <summary>
         /// Issue #905: probability (0.0..1.0) that the opponent will ghost on

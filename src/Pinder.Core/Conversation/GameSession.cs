@@ -2124,7 +2124,8 @@ namespace Pinder.Core.Conversation
                 dc: original.DC,
                 tier: shadowTier,
                 activatedTrap: null,
-                externalBonus: 0);
+                externalBonus: 0,
+                defendingStat: Pinder.Core.Stats.StatBlock.DefenceTable[original.Stat]);
         }
 
         /// <summary>
