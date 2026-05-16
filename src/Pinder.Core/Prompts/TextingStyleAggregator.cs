@@ -54,7 +54,7 @@ namespace Pinder.Core.Prompts
         // "shoes" or "Shoes" without the aggregator silently dropping it.
         // ------------------------------------------------------------------
 
-        internal static readonly IReadOnlyDictionary<string, string> SlotToSyntaxAxis =
+        public static readonly IReadOnlyDictionary<string, string> SlotToSyntaxAxis =
             new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 { "shoes",     "emoji" },
@@ -386,10 +386,10 @@ namespace Pinder.Core.Prompts
             "stance", "register", "pacing",
         };
 
-        internal static IReadOnlyDictionary<string, string> ParseSyntaxAxes(string fragment)
+        public static IReadOnlyDictionary<string, string> ParseSyntaxAxes(string fragment)
             => ParseAxes(fragment, "SYNTAX:", "TONE:", SyntaxAxisNames);
 
-        internal static IReadOnlyDictionary<string, string> ParseToneAxes(string fragment)
+        public static IReadOnlyDictionary<string, string> ParseToneAxes(string fragment)
             => ParseAxes(fragment, "TONE:", null, ToneAxisNames);
 
         private static IReadOnlyDictionary<string, string> ParseAxes(

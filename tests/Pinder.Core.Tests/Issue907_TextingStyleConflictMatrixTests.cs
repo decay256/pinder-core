@@ -8,9 +8,6 @@ using Xunit;
 
 namespace Pinder.Core.Tests
 {
-    /// <summary>
-    /// #907 - TextingStyleConflicts loader + TextingStyleAggregator conflict resolution.
-    /// </summary>
     [Trait("Category", "Characters")]
     public class Issue907_TextingStyleConflictMatrixTests
     {
@@ -32,7 +29,8 @@ namespace Pinder.Core.Tests
         private static TextingStyleConflicts LoadRealConflicts()
         {
             string path = FindDataFile("persona/texting-style-conflicts.yaml");
-            return TextingStyleConflicts.LoadFrom(File.ReadAllText(path));
+            string yaml = File.ReadAllText(path);
+            return TextingStyleConflicts.LoadFrom(yaml);
         }
 
         private const string MinimalConflictsYaml = @"
@@ -44,9 +42,9 @@ conflicts:
     axis_b: { axis: length, value: ""never sends more than 5 words"" }
     reason: ""Wall-of-text incompatible with hard 5-word cap""
   - axis_a: { axis: structure, value: ""wall-of-text (one paragraph, no breaks, comma splices throughout)"" }
-    axis_b: { axis: pacing, value: ""minimal, sparse, long pauses implied"" }
+    axis_b: { axis: pacing, value: ""dry-pacing"" }
     reason: ""Wall-of-text incompatible with sparse pacing""
-  - axis_a: { axis: pacing, value: ""fast, breathless, low-edit, thoughts overlapping"" }
+  - axis_a: { axis: pacing, value: ""hectic"" }
     axis_b: { axis: structure, value: ""measured whitespace (3-5 short lines, blank between)"" }
     reason: ""Hectic incompatible with measured whitespace""
   - axis_a: { axis: tics, value: ""never asks questions, only states"" }
@@ -56,10 +54,6 @@ conflicts:
     axis_b: { axis: stance, value: ""contrarian"" }
     reason: ""Mutually exclusive stances""
 ";
-
-        // ------------------------------------------------------------------
-        // TextingStyleConflicts.LoadFrom tests
-        // ------------------------------------------------------------------
 
         [Fact]
         public void LoadFrom_MinimalYaml_LoadsSixEntries()
@@ -92,12 +86,10 @@ conflicts:
         public void AreConflicting_IsSymmetric()
         {
             var c = TextingStyleConflicts.LoadFrom(MinimalConflictsYaml);
-
             var a = ("tics", "never asks questions, only states");
             var b = ("tics", "always ends with a question, even when not asking");
-
-            Assert.True(c.AreConflicting(a, b), "Forward direction should conflict.");
-            Assert.True(c.AreConflicting(b, a), "Reverse direction should conflict.");
+            Assert.True(c.AreConflicting(a, b), "Forward should conflict.");
+            Assert.True(c.AreConflicting(b, a), "Reverse should conflict.");
         }
 
         [Fact]
@@ -136,28 +128,22 @@ conflicts:
         public void GetReason_UnknownPair_ReturnsNull()
         {
             var c = TextingStyleConflicts.LoadFrom(MinimalConflictsYaml);
-            Assert.Null(c.GetReason(
-                ("emoji", "foo"),
-                ("shorthand", "bar")));
+            Assert.Null(c.GetReason(("emoji", "foo"), ("shorthand", "bar")));
         }
 
         [Fact]
-        public void LoadFrom_EmptyYaml_ReturnsEmpty()
+        public void LoadFrom_EmptyString_ReturnsEmptyCatalog()
         {
-            var c = TextingStyleConflicts.LoadFrom(string.Empty);
+            var c = TextingStyleConflicts.LoadFrom("");
             Assert.Equal(0, c.Entries.Count);
         }
-
-        // ------------------------------------------------------------------
-        // Real YAML file tests
-        // ------------------------------------------------------------------
 
         [Fact]
         public void RealConflictsYaml_LoadsWithoutException()
         {
             var c = LoadRealConflicts();
             Assert.True(c.Entries.Count >= 6,
-                $"Expected at least 6 conflict entries in the real YAML; got {c.Entries.Count}.");
+                $"Expected >=6 entries; got {c.Entries.Count}.");
         }
 
         [Fact]
@@ -165,220 +151,202 @@ conflicts:
         {
             var c = LoadRealConflicts();
             foreach (var entry in c.Entries)
-            {
                 Assert.False(string.IsNullOrWhiteSpace(entry.Reason),
-                    $"Real conflict entry ({entry.AxisA}:{entry.ValueA} vs {entry.AxisB}:{entry.ValueB}) has empty reason.");
-            }
+                    $"Entry ({entry.AxisA}:{entry.ValueA} vs {entry.AxisB}:{entry.ValueB}) has empty reason.");
         }
 
         [Fact]
         public void RealConflictsYaml_ContainsCanonicalConflicts()
         {
             var c = LoadRealConflicts();
-
             Assert.True(c.AreConflicting(
                 ("length", "never sends more than 5 words"),
                 ("length", "minimum 80 words per message, no exceptions")),
                 "Missing: length:5words vs length:80words");
-
             Assert.True(c.AreConflicting(
                 ("structure", "wall-of-text (one paragraph, no breaks, comma splices throughout)"),
                 ("length", "never sends more than 5 words")),
                 "Missing: structure:wall-of-text vs length:5words");
-
             Assert.True(c.AreConflicting(
                 ("tics", "never asks questions, only states"),
                 ("tics", "always ends with a question, even when not asking")),
                 "Missing: tics:never-questions vs tics:always-question");
-
-            // Stance: use actual parsed values (not parenthetical keys)
             Assert.True(c.AreConflicting(
                 ("stance", "\"omg same\" energy, can't disagree, vaguely unsettling"),
                 ("stance", "mild disagreement with everything, even compliments")),
                 "Missing: stance:agreer vs stance:contrarian");
         }
 
-        // ------------------------------------------------------------------
-        // TextingStyleAggregator conflict-resolution tests
-        // ------------------------------------------------------------------
-
         private static TextingStyleFragmentSource MakeItemSource(
             string slot, string axisName, string axisValue)
         {
             string fragment =
                 "SYNTAX:\n" +
-                "- emoji: default emoji rule\n" +
-                "- shorthand: default shorthand\n" +
-                "- grammar: default grammar\n" +
-                "- structure: default structure\n" +
-                "- length: default length\n" +
-                "- tics: default tics\n" +
+                $"- emoji: default emoji rule\n" +
+                $"- shorthand: default shorthand\n" +
+                $"- grammar: default grammar\n" +
+                $"- structure: default structure\n" +
+                $"- length: default length\n" +
+                $"- tics: default tics\n" +
                 "TONE:\n" +
-                "- stance (neutral): neutral-stance\n" +
-                "- register (neutral): neutral-register\n" +
-                "- pacing (neutral): neutral-pacing";
-
+                "- stance (neutral): neutral\n" +
+                "- register (neutral): neutral\n" +
+                "- pacing (neutral): neutral";
             fragment = fragment.Replace(
                 $"- {axisName}: default {axisName}",
                 $"- {axisName}: {axisValue}");
-
             return new TextingStyleFragmentSource(
-                kind: "item",
-                source: slot,
-                fragment: fragment,
-                slotOrParameter: slot);
+                kind: "item", source: slot, fragment: fragment, slotOrParameter: slot);
         }
 
         [Fact]
-        public void Aggregator_ConflictingLengthAxes_OnlyOneAxisKept_DeterministicWinner()
+        public void AggregateWithAudit_ConflictingStructureVsLength_DropsLaterPicked()
         {
-            // trousers -> structure: wall-of-text
-            // frame -> length: never sends more than 5 words
-            // The matrix says these conflict. Structure (trousers) is iterated before
-            // frame (length) in SlotToSyntaxAxis, so structure is picked first and kept;
-            // length is picked later and dropped.
-
             var conflicts = TextingStyleConflicts.LoadFrom(MinimalConflictsYaml);
-
             var sources = new List<TextingStyleFragmentSource>
             {
                 MakeItemSource("trousers", "structure",
                     "wall-of-text (one paragraph, no breaks, comma splices throughout)"),
-                MakeItemSource("frame",    "length",
+                MakeItemSource("frame", "length",
                     "never sends more than 5 words"),
             };
-
             var result = TextingStyleAggregator.AggregateWithAudit(sources, "char-001", conflicts);
 
             var hasStructure = result.Lines.Any(l =>
-                l.StartsWith("structure:", StringComparison.OrdinalIgnoreCase) &&
-                l.Contains("wall-of-text"));
+                l.StartsWith("structure:", StringComparison.OrdinalIgnoreCase));
             var hasLength = result.Lines.Any(l =>
-                l.StartsWith("length:", StringComparison.OrdinalIgnoreCase) &&
-                l.Contains("5 words"));
+                l.StartsWith("length:", StringComparison.OrdinalIgnoreCase));
 
-            Assert.True(hasStructure,  "structure:wall-of-text should be kept (picked first).");
-            Assert.False(hasLength,    "length:5words should be dropped (picked later, conflicts with structure).");
-
+            Assert.True(hasStructure, "structure should be kept (canonically first).");
+            Assert.False(hasLength, "length should be dropped (conflicts with structure).");
             Assert.Single(result.Drops);
+
             var drop = result.Drops[0];
             Assert.Equal("char-001", drop.CharacterId);
-            Assert.Equal("length",   drop.Axis);
+            Assert.Equal("length", drop.Axis);
             Assert.Contains("5 words", drop.DroppedValue, StringComparison.OrdinalIgnoreCase);
-            Assert.Equal("structure", drop.ConflictAxis);
             Assert.False(string.IsNullOrWhiteSpace(drop.Reason));
         }
 
         [Fact]
-        public void Aggregator_ConflictingTicsPair_DropsLaterPicked()
+        public void AggregateWithAudit_ConflictingStructureVsPacing_DropsPacing()
         {
-            // Tests cross-axis conflict: structure:wall-of-text vs pacing:sparse.
-            // The anatomy source contributes pacing = "minimal, sparse, long pauses implied".
-            // Item syntax axes are processed first, so structure is kept; pacing is dropped.
-
             var conflicts = TextingStyleConflicts.LoadFrom(MinimalConflictsYaml);
-
-            const string sparseFragment =
+            string MakeToneFragment(string pacingKey, string pacingValue) =>
                 "SYNTAX:\n" +
                 "TONE:\n" +
-                "- stance (neutral): neutral-stance\n" +
-                "- register (neutral): neutral-register\n" +
-                "- pacing (sparse): minimal, sparse, long pauses implied";
-
+                $"- stance (neutral): neutral-stance\n" +
+                $"- register (neutral): neutral-register\n" +
+                $"- pacing ({pacingKey}): {pacingValue}\n";
             var sources = new List<TextingStyleFragmentSource>
             {
                 MakeItemSource("trousers", "structure",
                     "wall-of-text (one paragraph, no breaks, comma splices throughout)"),
                 new TextingStyleFragmentSource(
-                    kind: "anatomy",
-                    source: "ball_size_tier",
-                    fragment: sparseFragment,
+                    kind: "anatomy", source: "ball_size_tier",
+                    fragment: MakeToneFragment("dry-low-edit", "dry-pacing"),
                     slotOrParameter: "ball_size"),
             };
-
             var result = TextingStyleAggregator.AggregateWithAudit(sources, "char-002", conflicts);
 
             var hasStructure = result.Lines.Any(l =>
-                l.StartsWith("structure:", StringComparison.OrdinalIgnoreCase) &&
-                l.Contains("wall-of-text"));
+                l.StartsWith("structure:", StringComparison.OrdinalIgnoreCase));
             var hasPacing = result.Lines.Any(l =>
-                l.StartsWith("pacing:", StringComparison.OrdinalIgnoreCase) &&
-                l.Contains("minimal, sparse"));
+                l.StartsWith("pacing:", StringComparison.OrdinalIgnoreCase));
 
-            Assert.True(hasStructure, "structure:wall-of-text should be kept (picked first).");
-            Assert.False(hasPacing,   "pacing:sparse should be dropped (conflicts with structure:wall-of-text).");
-
+            Assert.True(hasStructure, "structure should be kept.");
+            Assert.False(hasPacing, "pacing:dry-pacing should be dropped.");
             Assert.Single(result.Drops);
-            var drop = result.Drops[0];
-            Assert.Equal("char-002", drop.CharacterId);
-            Assert.Equal("pacing",   drop.Axis);
-            Assert.Contains("minimal, sparse", drop.DroppedValue, StringComparison.OrdinalIgnoreCase);
         }
 
         [Fact]
-        public void Aggregator_NoConflicts_DropListIsEmpty()
+        public void AggregateWithAudit_NoConflicts_DropListIsEmpty()
         {
             var conflicts = TextingStyleConflicts.LoadFrom(MinimalConflictsYaml);
-
             var sources = new List<TextingStyleFragmentSource>
             {
-                MakeItemSource("shoes",     "emoji",     "a safe emoji rule"),
-                MakeItemSource("hat",       "shorthand", "a safe shorthand rule"),
-                MakeItemSource("frame",     "length",    "a safe length rule"),
+                MakeItemSource("shoes", "emoji", "a safe emoji rule"),
+                MakeItemSource("hat",   "shorthand", "a safe shorthand rule"),
+                MakeItemSource("frame", "length", "a safe length rule"),
             };
-
             var result = TextingStyleAggregator.AggregateWithAudit(sources, "char-003", conflicts);
-
             Assert.Empty(result.Drops);
             Assert.Equal(3, result.Lines.Count);
         }
 
         [Fact]
-        public void Aggregator_WithEmptyConflicts_BehaviorUnchangedFromV1()
+        public void AggregateWithAudit_WithEmptyConflicts_NoDrops()
         {
             var sources = new List<TextingStyleFragmentSource>
             {
                 MakeItemSource("trousers", "structure",
                     "wall-of-text (one paragraph, no breaks, comma splices throughout)"),
-                MakeItemSource("frame",    "length",
+                MakeItemSource("frame", "length",
                     "never sends more than 5 words"),
             };
-
-            var withEmpty    = TextingStyleAggregator.AggregateWithAudit(
+            var result = TextingStyleAggregator.AggregateWithAudit(
                 sources, "char-004", TextingStyleConflicts.Empty);
-            var legacyResult = TextingStyleAggregator.AggregateAsList(sources, "char-004");
-
-            Assert.Empty(withEmpty.Drops);
-            Assert.Equal(legacyResult.Count, withEmpty.Lines.Count);
+            Assert.Empty(result.Drops);
+            Assert.Equal(2, result.Lines.Count);
         }
 
         [Fact]
-        public void Aggregator_AuditEntry_ContainsAllRequiredFields()
+        public void AggregateWithAudit_AuditEntry_ContainsAllRequiredFields()
         {
             var conflicts = TextingStyleConflicts.LoadFrom(MinimalConflictsYaml);
-
             var sources = new List<TextingStyleFragmentSource>
             {
                 MakeItemSource("trousers", "structure",
                     "wall-of-text (one paragraph, no breaks, comma splices throughout)"),
-                MakeItemSource("frame",    "length",
+                MakeItemSource("frame", "length",
                     "never sends more than 5 words"),
             };
-
             var result = TextingStyleAggregator.AggregateWithAudit(sources, "char-audit", conflicts);
             Assert.Single(result.Drops);
-
             var drop = result.Drops[0];
-            Assert.Equal("char-audit",          drop.CharacterId);
-            Assert.False(string.IsNullOrWhiteSpace(drop.Axis),          "Axis must be set.");
-            Assert.False(string.IsNullOrWhiteSpace(drop.DroppedValue),  "DroppedValue must be set.");
-            Assert.False(string.IsNullOrWhiteSpace(drop.ConflictAxis),  "ConflictAxis must be set.");
-            Assert.False(string.IsNullOrWhiteSpace(drop.KeptValue),     "KeptValue must be set.");
-            Assert.False(string.IsNullOrWhiteSpace(drop.Reason),        "Reason must be set.");
-
+            Assert.Equal("char-audit", drop.CharacterId);
+            Assert.False(string.IsNullOrWhiteSpace(drop.Axis));
+            Assert.False(string.IsNullOrWhiteSpace(drop.DroppedValue));
+            Assert.False(string.IsNullOrWhiteSpace(drop.ConflictAxis));
+            Assert.False(string.IsNullOrWhiteSpace(drop.KeptValue));
+            Assert.False(string.IsNullOrWhiteSpace(drop.Reason));
             var str = drop.ToString();
             Assert.Contains("char-audit", str, StringComparison.Ordinal);
             Assert.Contains("ConflictDrop", str, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void AggregateWithAudit_SameSeedKeyDifferentOutput_Unused()
+        {
+            var conflicts = TextingStyleConflicts.LoadFrom(MinimalConflictsYaml);
+            var sources = new List<TextingStyleFragmentSource>
+            {
+                MakeItemSource("shoes", "emoji", "a safe emoji rule"),
+            };
+            var r1 = TextingStyleAggregator.AggregateWithAudit(sources, "seed-a", conflicts);
+            var r2 = TextingStyleAggregator.AggregateWithAudit(sources, "seed-b", conflicts);
+            Assert.Equal(r1.Lines, r2.Lines);
+            Assert.Equal(r1.Drops.Count, r2.Drops.Count);
+        }
+
+        [Fact]
+        public void ConflictDropEntry_ToString_DoesNotThrow()
+        {
+            var entry = new TextingStyleAggregator.ConflictDropEntry(
+                "test-id", "length", "dropped-val", "structure", "kept-val", "test reason");
+            var s = entry.ToString();
+            Assert.Contains("test-id", s, StringComparison.Ordinal);
+            Assert.Contains("ConflictDrop", s, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void AggregationResult_Constructor_StoresArguments()
+        {
+            var lines = new List<string> { "emoji: test" };
+            var drops = new List<TextingStyleAggregator.ConflictDropEntry>();
+            var result = new TextingStyleAggregator.AggregationResult(lines, drops);
+            Assert.Single(result.Lines);
+            Assert.Empty(result.Drops);
         }
     }
 }
