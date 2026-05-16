@@ -1372,7 +1372,8 @@ class Program
                     perTurnTextDiffs,
                     session.OpponentHistory,
                     playerSender: player1,
-                    i18nCatalog: snapshotI18nCatalog);
+                    i18nCatalog: snapshotI18nCatalog,
+                    opponentDefenseSnapshot: turnStart.OpponentDefenseSnapshot);
 
                 string turnSnapPath = Path.Combine(playtestDir, $"{sessionSlug}.turn-{turn:D2}.snap.json");
                 File.WriteAllText(turnSnapPath, JsonSerializer.Serialize(turnSnap, new JsonSerializerOptions { WriteIndented = true }));
@@ -1674,7 +1675,8 @@ class Program
         List<List<TextDiffSnapshot>>? perTurnTextDiffs = null,
         IReadOnlyList<Pinder.Core.Conversation.ConversationMessage>? opponentHistory = null,
         string? playerSender = null,
-        Pinder.LlmAdapters.I18nCatalog? i18nCatalog = null)
+        Pinder.LlmAdapters.I18nCatalog? i18nCatalog = null,
+        Pinder.Core.Conversation.OpponentDefenseSnapshot? opponentDefenseSnapshot = null)
     {
         var state = result.StateAfter;
 
@@ -1776,6 +1778,16 @@ class Program
             OpponentHistory = opponentHistoryEntries,
             Events = events,
             GhostProbabilityPerTurn = state.GhostProbabilityPerTurn,
+            OpponentDefenseSnapshot = opponentDefenseSnapshot != null
+                ? opponentDefenseSnapshot.ByAttackerStat.ToDictionary(
+                    kvp => kvp.Key.ToString(),
+                    kvp => new TurnDefenseEntry
+                    {
+                        DefendingStat     = kvp.Value.DefendingStat.ToString(),
+                        EffectiveModifier = kvp.Value.EffectiveModifier,
+                        BaseModifier      = kvp.Value.BaseModifier,
+                    })
+                : null,
         };
     }
 
