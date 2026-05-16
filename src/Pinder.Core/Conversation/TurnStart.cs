@@ -4,7 +4,7 @@ using Pinder.Core.Rolls;
 namespace Pinder.Core.Conversation
 {
     // Fields covered by TurnSnapshot (session-runner/Snapshot/SessionSnapshot.cs):
-    //   Options, State, DicePools, OpponentDefenseSnapshot (#903)
+    //   Options, State, DicePools, OpponentDefenseSnapshot (#903), WeaknessDcReduction (#593)
     //
     /// <summary>
     /// Result of starting a turn: the dialogue options, current game state, and
@@ -27,6 +27,15 @@ namespace Pinder.Core.Conversation
         public OpponentDefenseSnapshot OpponentDefenseSnapshot { get; }
 
         /// <summary>
+        /// #593: The active weakness window's DC reduction at the start of this turn,
+        /// or <c>null</c> when no window is open. Emitted to the frontend so the
+        /// <c>FoldableHintBanner</c> can display the magnitude (e.g. "DC -3") without
+        /// the SPA re-implementing active-window state.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("weakness_dc_reduction")]
+        public int? WeaknessDcReduction { get; }
+
+        /// <summary>
         /// Pre-rolled dice pools, one per option index. Issue #789, Phase 2 (D1).
         ///
         /// <para>
@@ -47,12 +56,14 @@ namespace Pinder.Core.Conversation
         public PerOptionDicePool[] DicePools { get; }
 
         public TurnStart(DialogueOption[] options, GameStateSnapshot state, PerOptionDicePool[] dicePools,
-            OpponentDefenseSnapshot opponentDefenseSnapshot = null)
+            OpponentDefenseSnapshot opponentDefenseSnapshot = null,
+            int? weaknessDcReduction = null)
         {
             Options = options ?? throw new ArgumentNullException(nameof(options));
             State = state ?? throw new ArgumentNullException(nameof(state));
             DicePools = dicePools ?? throw new ArgumentNullException(nameof(dicePools));
             OpponentDefenseSnapshot = opponentDefenseSnapshot;
+            WeaknessDcReduction = weaknessDcReduction;
 
             if (dicePools.Length != options.Length)
                 throw new ArgumentException(

@@ -937,7 +937,11 @@ namespace Pinder.Core.Conversation
             var defenseSnapshot = new OpponentDefenseSnapshot(
                 new System.Collections.ObjectModel.ReadOnlyDictionary<Pinder.Core.Stats.StatType, OpponentDefenseEntry>(defenseEntries));
 
-            return new TurnStart(options, snapshot, _currentDicePools, defenseSnapshot);
+            // #593: expose the active weakness window's DC reduction so the frontend
+            // can render the magnitude on its FoldableHintBanner.
+            int? weaknessDcReduction = _activeWeakness?.DcReduction;
+
+            return new TurnStart(options, snapshot, _currentDicePools, defenseSnapshot, weaknessDcReduction);
         }
 
         /// <summary>
