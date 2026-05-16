@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using Pinder.Core.Characters;
 using Pinder.Core.Prompts;
 using Pinder.LlmAdapters;
+using Pinder.SessionSetup;
 
 namespace Pinder.Core.Tests
 {
@@ -33,6 +34,17 @@ namespace Pinder.Core.Tests
                     PromptBuilder.StructuralFragmentLookup =
                         key => catalog.TryGet(key)?.SystemPrompt;
                     ArchetypeYamlLoader.LoadFromPromptCatalog(catalog);
+
+                    // #907: Also load the conflict matrix so integration tests
+                    // that exercise the production path get conflict resolution.
+                    var dataRoot = Path.GetDirectoryName(candidate); // data/
+                    if (dataRoot != null)
+                    {
+                        var conflictsPath = Path.Combine(dataRoot, "persona", "texting-style-conflicts.yaml");
+                        if (File.Exists(conflictsPath))
+                            TextingStyleAggregator.ConflictCatalog =
+                                TextingStyleConflicts.LoadFrom(File.ReadAllText(conflictsPath));
+                    }
                     return;
                 }
                 var parent = Path.GetDirectoryName(dir);

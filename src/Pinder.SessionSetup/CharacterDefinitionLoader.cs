@@ -157,8 +157,18 @@ namespace Pinder.SessionSetup
                 def.Name, def.GenderIdentity, def.Bio, fragments, new TrapState(),
                 characterIdSeed: textingSeed);
 
-            string textingStyle = TextingStyleAggregator.Aggregate(
-                fragments.TextingStyleSources, textingSeed);
+            // #907: Use AggregateWithAudit so conflict drops are visible at
+            // session-creation time. ConflictCatalog is loaded by PromptWiring.Wire();
+            // if Wire() was not called (e.g. some test contexts) it falls back to Empty.
+            var aggregationResult = TextingStyleAggregator.AggregateWithAudit(
+                fragments.TextingStyleSources,
+                textingSeed,
+                TextingStyleAggregator.ConflictCatalog ?? TextingStyleConflicts.Empty);
+            foreach (var drop in aggregationResult.Drops)
+                Console.Error.WriteLine(drop.ToString());
+            string textingStyle = aggregationResult.Lines.Count == 0
+                ? string.Empty
+                : string.Join(" | ", aggregationResult.Lines);
 
             var itemDisplayNames = new List<string>();
             foreach (var itemId in def.Items)

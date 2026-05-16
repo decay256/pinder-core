@@ -97,6 +97,29 @@ namespace Pinder.SessionSetup
             // Wire ArchetypeCatalog's behavior resolver.
             ArchetypeYamlLoader.LoadFromPromptCatalog(catalog);
 
+            // #907: Load the texting-style conflict matrix so the production
+            // aggregator resolves conflicts at character-load time.
+            // data/persona sits alongside data/prompts under the same data/ root.
+            var dataRoot = Path.GetDirectoryName(resolved);
+            if (dataRoot != null)
+            {
+                var conflictsPath = Path.Combine(dataRoot, "persona", "texting-style-conflicts.yaml");
+                if (File.Exists(conflictsPath))
+                {
+                    TextingStyleAggregator.ConflictCatalog =
+                        TextingStyleConflicts.LoadFrom(File.ReadAllText(conflictsPath));
+                    errorSink?.WriteLine(
+                        $"[INFO] PromptWiring: loaded {TextingStyleAggregator.ConflictCatalog.Entries.Count} " +
+                        $"conflict entries from {conflictsPath}");
+                }
+                else
+                {
+                    errorSink?.WriteLine(
+                        $"[WARN] PromptWiring: texting-style-conflicts.yaml not found at {conflictsPath} " +
+                        "— conflict resolution disabled");
+                }
+            }
+
             errorSink?.WriteLine(
                 $"[INFO] PromptWiring: loaded {catalog.Names.Count()} keys from {promptsRoot}");
         }

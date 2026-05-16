@@ -157,6 +157,23 @@ namespace Pinder.Core.Prompts
         }
 
         // ------------------------------------------------------------------
+        // #907: Production conflict catalog. Loaded once at startup by
+        // PromptWiring.Wire() from data/persona/texting-style-conflicts.yaml.
+        // The 2-arg overloads below use this catalog automatically so all
+        // existing callsites get conflict resolution without signature changes.
+        // Defaults to Empty (no-op) until Wire() assigns the loaded catalog.
+        // ------------------------------------------------------------------
+
+        /// <summary>
+        /// The globally-loaded conflict catalog. Assigned by
+        /// <c>PromptWiring.Wire()</c> at startup. Falls back to
+        /// <see cref="TextingStyleConflicts.Empty"/> if not yet assigned.
+        /// Tests that need an isolated catalog should use the 3-arg overloads
+        /// directly.
+        /// </summary>
+        public static TextingStyleConflicts? ConflictCatalog { get; set; }
+
+        // ------------------------------------------------------------------
         // Public surface (unchanged signatures from the placeholder). The
         // seedKey parameter is retained for callers but unused by the v1
         // rule — deterministic by construction.
@@ -167,14 +184,17 @@ namespace Pinder.Core.Prompts
         /// gets injected into the LLM system prompt / runtime player
         /// style. Implements the #836 v1 rule with #907 conflict resolution.
         ///
-        /// Uses <see cref="TextingStyleConflicts.Empty"/> (no conflict
-        /// checking). To enable conflict resolution pass a loaded catalog via
-        /// <see cref="Aggregate(IReadOnlyList{TextingStyleFragmentSource}, string?, TextingStyleConflicts)"/>.
+        /// Uses <see cref="ConflictCatalog"/> when set (assigned by
+        /// <c>PromptWiring.Wire()</c>), otherwise falls back to
+        /// <see cref="TextingStyleConflicts.Empty"/>. Pass an explicit
+        /// catalog via
+        /// <see cref="Aggregate(IReadOnlyList{TextingStyleFragmentSource}, string?, TextingStyleConflicts)"/>
+        /// to override for a specific call.
         /// </summary>
         public static string Aggregate(
             IReadOnlyList<TextingStyleFragmentSource> sources,
             string? seedKey)
-            => Aggregate(sources, seedKey, TextingStyleConflicts.Empty);
+            => Aggregate(sources, seedKey, ConflictCatalog ?? TextingStyleConflicts.Empty);
 
         /// <summary>
         /// Aggregate with conflict resolution. Dropped fragments are silently
@@ -202,13 +222,14 @@ namespace Pinder.Core.Prompts
         /// in <c>texting-style-aggregation.md</c>; missing axes are
         /// dropped.
         ///
-        /// Conflict resolution is disabled (uses <see cref="TextingStyleConflicts.Empty"/>).
-        /// Use <see cref="AggregateWithAudit"/> for conflict-aware aggregation.
+        /// Uses <see cref="ConflictCatalog"/> when set (assigned by
+        /// <c>PromptWiring.Wire()</c>), otherwise falls back to
+        /// <see cref="TextingStyleConflicts.Empty"/>.
         /// </summary>
         public static IReadOnlyList<string> AggregateAsList(
             IReadOnlyList<TextingStyleFragmentSource> sources,
             string? seedKey)
-            => AggregateAsList(sources, seedKey, TextingStyleConflicts.Empty);
+            => AggregateAsList(sources, seedKey, ConflictCatalog ?? TextingStyleConflicts.Empty);
 
         /// <summary>
         /// Aggregate to a list with conflict resolution. Dropped fragments
