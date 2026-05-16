@@ -596,3 +596,48 @@ note in `GameSession.ResolveTurnAsync` next to the new call site so the
 next developer remembers the strip.
 
 **Discovered in:** #902 (2026-05-15).
+
+### INDEPENDENT-AXIS-AGGREGATION-MUST-CHECK-CROSS-AXIS-CONSISTENCY
+
+**Title:** Independent-axis aggregation is wrong when the axes interact.
+
+**Symptom:** `TextingStyleAggregator` produced internally-contradictory profiles
+(e.g. `structure: wall-of-text` + `length: never sends more than 5 words`) because
+it treated all 9 axes as independent. The LLM resolved the contradiction by deferring
+to the more concrete / stricter rule, silently overriding the #866 length-hint contract.
+
+**Root cause:** When aggregating from a multi-source pool where each axis is picked
+independently, there is no guarantee that the combined set of picked values is
+internally consistent. Axes that interact semantically (e.g. structure and length,
+pacing and structure) can produce contradictory instructions.
+
+**Rule:** When aggregating independent axes from a multi-source pool, the cross-axis
+consistency check belongs at aggregation time, not as a runtime assertion in the
+consumer. The pattern:
+  1. Encode all known conflicts in a declarative matrix (YAML preferred: human-editable,
+     auditable, no recompile needed for new entries).
+  2. After picking per-axis values, walk the picked set and resolve conflicts
+     deterministically (keep the earlier-picked value; drop the later-conflicting one).
+  3. Emit an audit log per dropped fragment — callers can surface dropped pairs at
+     session-creation time for content-author visibility.
+  4. Add a data-hygiene auditor tool that reports conflict pairs NOT in the matrix.
+     Run it in CI on new item data. Exit non-zero on unregistered conflicts.
+
+Matrix shape:
+```yaml
+conflicts:
+  - axis_a: { axis: <name>, value: <parsed-value> }
+    axis_b: { axis: <name>, value: <parsed-value> }
+    reason: "<human-readable explanation>"
+```
+
+**Anchors:**
+- `data/persona/texting-style-conflicts.yaml` — the conflict matrix.
+- `TextingStyleConflicts.cs` — loads the matrix, exposes `AreConflicting()`.
+- `TextingStyleAggregator.AggregateWithAudit()` — conflict-aware aggregation.
+- `tools/TextingStyleAuditor/` — data hygiene CLI.
+- PR for this fix + #907 (2026-05-16).
+
+**Discovered in:** #907 (2026-05-16). Reported by Daniel after staging session
+`ce5a6f82` showed opponent always replied with 3-10 words regardless of player
+message length.

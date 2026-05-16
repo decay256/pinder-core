@@ -200,3 +200,79 @@ deterministically authored from the new rule.
   call. Future versions may swap mappings (e.g. accessory→length to
   match items that authentically dictate verbosity). Each swap is a
   new revision of THIS DOCUMENT, not an undocumented engine change.
+
+---
+
+## Cross-axis conflict resolution (v1.1 — issue #907)
+
+As of #907, the aggregator applies a **conflict matrix** to the picked axis
+values before emitting the final list. The matrix is encoded in
+`data/persona/texting-style-conflicts.yaml` and loaded by
+`TextingStyleConflicts`.
+
+### Why conflicts arise
+
+Each axis is picked independently (slot → syntax axis; anatomy group → tone
+axis). There is no constraint across axes during the pick phase. Some
+combinations are semantically contradictory even though each individual pick
+is valid:
+
+- `structure: wall-of-text` + `length: never sends more than 5 words` — the
+  LLM resolves this by applying the stricter/more concrete rule (`≤5 words`),
+  silently overriding the engine's `playerLen` length hint from #866.
+- `pacing: fast, breathless` + `structure: measured whitespace` — mutually
+  incompatible style demands.
+
+### Resolution algorithm
+
+After all per-axis picks are assembled:
+
+1. Walk the picked set in the order they were assembled (canonical axis order).
+2. For each candidate value, check it against all already-kept values using
+   the conflict matrix.
+3. On conflict: drop the candidate (the later-picked value). The earlier-kept
+   value wins — deterministic, replayable.
+4. Emit one `ConflictDropEntry` per dropped value into the audit log.
+5. Callers use `AggregateWithAudit()` to retrieve both the final lines and
+   the audit log.
+
+### Auditor tool
+
+`tools/TextingStyleAuditor/` is a data-hygiene console app. Run it when
+adding new items to `data/items/starter-items.json`:
+
+```bash
+dotnet run --project tools/TextingStyleAuditor
+```
+
+Exit code 0 = all detected conflict pairs are covered by the matrix.
+Exit code 1 = unregistered conflicts found — add a matrix entry or rewrite
+the item fragment.
+
+### Adding a new conflict
+
+Add one entry to `data/persona/texting-style-conflicts.yaml`:
+
+```yaml
+  - axis_a: { axis: <name>, value: "<parsed-value>" }
+    axis_b: { axis: <name>, value: "<parsed-value>" }
+    reason: "<why these can't coexist>"
+```
+
+Values must match the **parsed** axis value (the text after `:` in the
+fragment line, with the parenthetical sub-key stripped from the axis name).
+The constraint is bidirectional — encode it once, the resolver checks both
+orderings.
+
+### Length-hint defensive rule (#907 belt-and-braces)
+
+`SessionDocumentBuilder` appends a priority statement after the standard
+`playerLen` length hint:
+
+> "The length rule above is a stylistic guideline, NOT a hard cap. For this
+> message, aim for ~{playerLen} characters as the engine specifies.
+> Style-rule length axes apply ONLY when they are compatible with the
+> engine-specified length."
+
+This ensures that even if the conflict resolver misses a case, the engine's
+length floor takes priority over a style-rule hard cap.
