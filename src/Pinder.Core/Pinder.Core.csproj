@@ -24,8 +24,7 @@
       Microsoft Bcl already used by the solution.
     -->
     <PackageReference Include="System.Text.Json" Version="8.0.5" />
-    <!-- YamlDotNet for TextingStyleConflicts (#907) — same version as Pinder.LlmAdapters -->
-    <PackageReference Include="YamlDotNet" Version="16.3.0" />
+
   </ItemGroup>
 
 </Project>
