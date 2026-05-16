@@ -283,17 +283,27 @@ namespace Pinder.Core.Prompts
         }
 
         /// <summary>
-        /// Strips surrounding YAML quotes (' or ") if present.
+        /// Strips surrounding YAML quotes (' or ") if present, and
+        /// un-escapes standard YAML escape sequences:
+        ///   - Single-quoted: '' -> ' (YAML 7.3.3)
+        ///   - Double-quoted: \" -> " and \\ -> \
         /// </summary>
         private static string UnquoteYamlString(string s)
         {
             s = s.Trim();
             if (s.Length >= 2)
             {
-                if ((s[0] == '"' && s[s.Length - 1] == '"') ||
-                    (s[0] == '\'' && s[s.Length - 1] == '\''))
+                if (s[0] == '\'' && s[s.Length - 1] == '\'')
                 {
-                    return s.Substring(1, s.Length - 2);
+                    // Single-quoted: '' is the escape for ' (YAML 7.3.3)
+                    return s.Substring(1, s.Length - 2).Replace("''", "'");
+                }
+                if (s[0] == '"' && s[s.Length - 1] == '"')
+                {
+                    // Double-quoted: basic \" and \\ unescaping
+                    return s.Substring(1, s.Length - 2)
+                        .Replace("\\\"", "\"")
+                        .Replace("\\\\", "\\");
                 }
             }
             return s;

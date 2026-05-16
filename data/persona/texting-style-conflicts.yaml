@@ -4,15 +4,18 @@
 # in the same aggregated profile. The constraint is bidirectional — the
 # resolver checks both orderings.
 #
+# IMPORTANT: values here must match the PARSED value from the
+# texting_style_fragment block — i.e. the text after the ":" in each
+# "- <axis>: <value>" line. For tone axes (stance, register, pacing),
+# the parenthetical key is stripped from the axis name and the value
+# is everything after the colon. For example:
+#   "- pacing (dry-pacing): minimal, sparse, long pauses implied"
+#   → axis: pacing, value: "minimal, sparse, long pauses implied"
+#
 # Schema:
 #   axis_a: { axis: <name>, value: <string> }
 #   axis_b: { axis: <name>, value: <string> }
 #   reason: <human-readable explanation>
-#
-# When the aggregator picks a value for axis_b that conflicts with an
-# already-kept value for axis_a, it drops the axis_b pick and attempts
-# a re-pick from remaining candidates (if any). The dropped fragment is
-# recorded in the aggregation audit log.
 #
 # Adding a new conflict: encode the pair once. The resolver applies it
 # bidirectionally. Include a reason string — it surfaces in audit logs.
@@ -31,13 +34,15 @@ conflicts:
     axis_b: { axis: length, value: "never sends more than 5 words" }
     reason: "Wall-of-text structure requires multiple sentences; hard 5-word cap makes that impossible"
 
-  # --- structure × pacing (wall-of-text incompatible with sparse dry-pacing) ---
+  # --- structure × pacing (wall-of-text incompatible with sparse pacing) ---
+  # pacing value: "minimal, sparse, long pauses implied" = dry-pacing archetype
   - axis_a: { axis: structure, value: "wall-of-text (one paragraph, no breaks, comma splices throughout)" }
-    axis_b: { axis: pacing, value: "dry-pacing" }
-    reason: "Wall-of-text incompatible with sparse/dry pacing — one demands density, the other demands restraint"
+    axis_b: { axis: pacing, value: "minimal, sparse, long pauses implied" }
+    reason: "Wall-of-text density is incompatible with minimal/sparse pacing — one demands continuous flow, the other demands restraint"
 
   # --- structure × pacing (measured whitespace incompatible with hectic) ---
-  - axis_a: { axis: pacing, value: "hectic" }
+  # pacing value: "fast, breathless, low-edit, thoughts overlapping" = hectic archetype
+  - axis_a: { axis: pacing, value: "fast, breathless, low-edit, thoughts overlapping" }
     axis_b: { axis: structure, value: "measured whitespace (3-5 short lines, blank between)" }
     reason: "Hectic pacing (fast, breathless, low-edit) is incompatible with the deliberate spacing of measured whitespace"
 
@@ -47,14 +52,15 @@ conflicts:
     reason: "Direct contradiction — never-questions vs. always-ends-with-question on the same character"
 
   # --- stance × stance (mutually exclusive interpersonal stances) ---
-  - axis_a: { axis: stance, value: "agreer" }
-    axis_b: { axis: stance, value: "contrarian" }
+  # stance values are the full parsed text after the colon (parenthetical stripped from axis)
+  - axis_a: { axis: stance, value: '"omg same" energy, can''t disagree, vaguely unsettling' }
+    axis_b: { axis: stance, value: "mild disagreement with everything, even compliments" }
     reason: "Mutually exclusive stances — can't simultaneously always-agree and mildly-disagree-with-everything"
 
-  # --- length × pacing (minimum 80 words incompatible with dry-pacing) ---
+  # --- length × pacing (minimum 80 words incompatible with sparse pacing) ---
   - axis_a: { axis: length, value: "minimum 80 words per message, no exceptions" }
-    axis_b: { axis: pacing, value: "dry-pacing" }
-    reason: "80-word floor is semantically incompatible with minimal/sparse dry-pacing"
+    axis_b: { axis: pacing, value: "minimal, sparse, long pauses implied" }
+    reason: "80-word floor is semantically incompatible with minimal/sparse pacing"
 
   # --- length × structure (5-word cap incompatible with measured whitespace) ---
   - axis_a: { axis: length, value: "never sends more than 5 words" }

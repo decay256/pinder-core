@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>TextingStyleAuditor</AssemblyName>
+    <RootNamespace>Pinder.Tools.TextingStyleAuditor</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- System.Text.Json for starter-items.json parsing -->
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Pinder.Core\Pinder.Core.csproj" />
+  </ItemGroup>
+
+</Project>
