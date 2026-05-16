@@ -112,6 +112,10 @@ namespace Pinder.SessionRunner.Snapshot
     ///     <c>EffectiveModifier</c>, and <c>BaseModifier</c>. Null when not
     ///     available (legacy snapshots before #903).
     ///   </description></item>
+    ///   <item><description>
+    ///     <c>WeaknessDcReduction</c> (issue #593): the active weakness window's
+    ///     DC reduction at the start of this turn. Null when no window was open.
+    ///   </description></item>
     /// </list>
     /// </summary>
     public sealed class TurnSnapshot
@@ -165,6 +169,12 @@ namespace Pinder.SessionRunner.Snapshot
         /// Null on legacy snapshots taken before #903.
         /// </summary>
         public Dictionary<string, TurnDefenseEntry>? OpponentDefenseSnapshot { get; set; }
+
+        /// <summary>
+        /// Issue #593: DC reduction from the active weakness window at the start
+        /// of this turn. Null when no window was active.
+        /// </summary>
+        public int? WeaknessDcReduction { get; set; }
 
         /// <summary>
         /// Full conversation history up to and including this turn.
