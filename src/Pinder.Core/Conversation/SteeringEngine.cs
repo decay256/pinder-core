@@ -34,16 +34,10 @@ namespace Pinder.Core.Conversation
         /// <para>
         /// Internal accessor; not part of the public API contract. Do not
         /// use this in production game-logic code paths — use
-        /// <see cref="RollD20"/> / <see cref="AttemptSteeringRollAsync"/>.
+        /// <see cref="AttemptSteeringRollAsync"/>.
         /// </para>
         /// </summary>
         internal Random SteeringRngForCloneOnly => _steeringRng;
-
-        /// <summary>
-        /// Rolls a d20 using the steering RNG (separate from game dice).
-        /// Used by the shadow check mechanic to avoid consuming game dice values.
-        /// </summary>
-        public int RollD20() => _steeringRng.Next(1, 21);
 
         /// <summary>
         /// Attempts a steering roll after message delivery.
