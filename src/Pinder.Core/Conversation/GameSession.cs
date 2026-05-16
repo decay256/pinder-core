@@ -1523,46 +1523,26 @@ namespace Pinder.Core.Conversation
             // #789 Phase 2 (D1) — same pre-rolled pool feeds TimingProfile's d100.
             double responseDelayMinutes = _opponent.Timing.ComputeDelay(_interest.Current, resolveDice);
 
-            // Per-turn Horniness overlay check (#709)
+            // Per-turn Horniness overlay check — PEEK only (#709, #899).
+            // #899: The horniness TEXT OVERLAY now runs LAST, after shadow corruption,
+            // so horniness has final say over the delivered text the player sees.
+            // We use PeekAsync here to determine whether the overlay should fire and
+            // obtain the instruction, but defer the actual LLM text rewrite until
+            // after the shadow corruption block below.
+            // The §15 interest-delta halving remains AFTER shadow (unchanged from
+            // #743/#399) — it still operates on the post-shadow-demote interestDelta.
+            //
+            // New invariant (post-#899):
+            //   Trap overlay → Shadow corruption (text) → Horniness overlay (text)
+            //   → Horniness §15 interest-delta halving
             string deliveredForHorniness = deliveredMessage;
-            HorninessCheckResult horninessCheckResult = await _horninessEngine.CheckAsync(
+            string? horninessOverlayInstruction;
+            HorninessCheckResult horninessCheckResult;
+            (horninessCheckResult, horninessOverlayInstruction) = _horninessEngine.PeekAsync(
                 _sessionHorniness,
                 _playerShadows,
-                deliveredMessage,
-                _llm,
                 _statDeliveryInstructions,
-                async (instruction) =>
-                {
-                    string beforeHorniness = deliveredMessage;
-                    string opponentCtx = BuildOpponentContext(_opponent);
-                    progress?.Report(new TurnProgressEvent(TurnProgressStage.HorninessOverlayStarted));
-                    deliveredMessage = await _llm.ApplyHorninessOverlayAsync(deliveredMessage, instruction, opponentCtx, playerArchetypeDirectiveForDelivery, ct).ConfigureAwait(false);
-                    progress?.Report(new TurnProgressEvent(TurnProgressStage.HorninessOverlayCompleted, deliveredMessage));
-                    if (deliveredMessage != beforeHorniness)
-                    {
-                        var horninessSpans = WordDiff.Compute(beforeHorniness, deliveredMessage);
-                        textDiffs.Add(new TextDiff("Horniness", horninessSpans, beforeHorniness, deliveredMessage));
-                    }
-                    else
-                    {
-                        // #314: layer ran but produced byte-identical output.
-                        EmitTextLayerNoop("Horniness", beforeHorniness, deliveredMessage);
-                    }
-
-                    // #902: Meta-prefix strip after horniness overlay.
-                    {
-                        string beforeMetaStrip = deliveredMessage;
-                        deliveredMessage = MetaPrefixStripper.Strip(deliveredMessage);
-                        if (deliveredMessage != beforeMetaStrip)
-                        {
-                            var stripSpans = WordDiff.Compute(beforeMetaStrip, deliveredMessage);
-                            textDiffs.Add(new TextDiff(
-                                MetaPrefixStripper.LayerName, stripSpans,
-                                beforeMetaStrip, deliveredMessage));
-                        }
-                    }
-                },
-                ct).ConfigureAwait(false);
+                ct);
 
             // #743/#399: Horniness §15 interest-penalty halving is intentionally
             // DEFERRED until AFTER the shadow check below. Reason: when a paired
@@ -1573,11 +1553,8 @@ namespace Pinder.Core.Conversation
             // result.HorninessInterestPenalty out of sync with the final delta
             // and producing the audit-log invariant break described in #399.
             //
-            // The text-rewrite half of the horniness layer (the LLM overlay on
-            // deliveredMessage) has ALREADY run above as part of
-            // _horninessEngine.CheckAsync — message ordering (horniness text
-            // before shadow text) is preserved. Only the interest-delta halving
-            // moves; it now operates on the post-shadow-demote interestDelta.
+            // #899: The text-rewrite half also moves after shadow (see below).
+            // Both halves now run post-shadow-demote.
             int horninessInterestPenalty = 0;
             int horninessInterestBefore = 0;
 
@@ -1674,12 +1651,46 @@ namespace Pinder.Core.Conversation
                 }
             }
 
+            // #899: Horniness TEXT OVERLAY — runs here, AFTER shadow corruption,
+            // so horniness has final say over the delivered text (#899).
+            // The instruction was pre-fetched by PeekAsync above.
+            if (horninessOverlayInstruction != null)
+            {
+                string beforeHorniness = deliveredMessage;
+                string opponentCtx = BuildOpponentContext(_opponent);
+                progress?.Report(new TurnProgressEvent(TurnProgressStage.HorninessOverlayStarted));
+                deliveredMessage = await _llm.ApplyHorninessOverlayAsync(deliveredMessage, horninessOverlayInstruction, opponentCtx, playerArchetypeDirectiveForDelivery, ct).ConfigureAwait(false);
+                progress?.Report(new TurnProgressEvent(TurnProgressStage.HorninessOverlayCompleted, deliveredMessage));
+                if (deliveredMessage != beforeHorniness)
+                {
+                    var horninessSpans = WordDiff.Compute(beforeHorniness, deliveredMessage);
+                    textDiffs.Add(new TextDiff("Horniness", horninessSpans, beforeHorniness, deliveredMessage));
+                }
+                else
+                {
+                    // #314: layer ran but produced byte-identical output.
+                    EmitTextLayerNoop("Horniness", beforeHorniness, deliveredMessage);
+                }
+
+                // #902: Meta-prefix strip after horniness overlay.
+                {
+                    string beforeMetaStrip = deliveredMessage;
+                    deliveredMessage = MetaPrefixStripper.Strip(deliveredMessage);
+                    if (deliveredMessage != beforeMetaStrip)
+                    {
+                        var stripSpans = WordDiff.Compute(beforeMetaStrip, deliveredMessage);
+                        textDiffs.Add(new TextDiff(
+                            MetaPrefixStripper.LayerName, stripSpans,
+                            beforeMetaStrip, deliveredMessage));
+                    }
+                }
+            }
+
             // #399: Horniness §15 interest-penalty halving — applied here, AFTER
             // the shadow check has had a chance to demote a successful roll's
-            // delta to a failure. This is the moved half of the original #743
-            // block (the text-rewrite half stayed above with the
-            // _horninessEngine.CheckAsync call so the message-overlay ordering
-            // — horniness text first, then shadow text — is preserved).
+            // delta to a failure (#743/#399). The text-rewrite half also now
+            // runs after shadow (#899). Both halves operate on the
+            // post-shadow-demote state.
             //
             // Rule §15 (rules-v3-enriched.yaml — horniness-interest-penalty):
             //   When a horniness overlay fires AND the turn's final interest
