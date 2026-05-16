@@ -407,10 +407,10 @@ namespace Pinder.Core.Prompts
             "stance", "register", "pacing",
         };
 
-        public static IReadOnlyDictionary<string, string> ParseSyntaxAxes(string fragment)
+        internal static IReadOnlyDictionary<string, string> ParseSyntaxAxes(string fragment)
             => ParseAxes(fragment, "SYNTAX:", "TONE:", SyntaxAxisNames);
 
-        public static IReadOnlyDictionary<string, string> ParseToneAxes(string fragment)
+        internal static IReadOnlyDictionary<string, string> ParseToneAxes(string fragment)
             => ParseAxes(fragment, "TONE:", null, ToneAxisNames);
 
         private static IReadOnlyDictionary<string, string> ParseAxes(
