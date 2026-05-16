@@ -682,3 +682,32 @@ saying "horniness before shadow" anywhere, that is stale and must be updated.
 - `docs/ARCHITECTURE.md` steps 10, 10a, 10b, 10c.
 
 **Discovered in:** #899 (2026-05-16).
+
+### ALL-DICE-CHECKS-THROUGH-ROLLENGINE-RESOLVECHECK
+
+**Title:** All dice checks go through RollEngine.ResolveCheck
+
+The tier ladder lives in `FailureTierLadder.FromMissMargin`. Do not
+re-implement either. New check kinds add a value to `RollCheckKind`
+and route through `ResolveCheck` — no bespoke d20 + ladder code
+outside `Pinder.Core/Rolls/`.
+
+**Rule:** If a new game mechanic needs a d20 vs DC resolution:
+1. Add a value to `RollCheckKind`.
+2. Call `RollEngine.ResolveCheck(kind, dice, modifiers, dc)`.
+3. Attach the returned `RollCheckResult` as a `Check` property on the mechanic's
+   result wrapper.
+4. Do NOT write `_rng.Next(1, 21)` or `if (miss <= 2)` anywhere else.
+
+**Engines that share the steering RNG** (must keep sharing to preserve dice
+consumption order): `SteeringEngine`, `HorninessEngine`, `ShadowCheckEngine`.
+All three are initialised from the same `steeringRng` in `GameSession`'s
+constructor and clone constructors.
+
+**Anchors:**
+- `src/Pinder.Core/Rolls/RollEngine.cs` — `ResolveCheck` method.
+- `src/Pinder.Core/Rolls/FailureTierLadder.cs` — sole tier ladder.
+- `src/Pinder.Core/Conversation/ShadowCheckEngine.cs` — extracted shadow check.
+- `tests/Pinder.Core.Tests/Rolls/TierLadderAuditTest.cs` — audit gate.
+
+**Discovered in:** #901 (2026-05-16).

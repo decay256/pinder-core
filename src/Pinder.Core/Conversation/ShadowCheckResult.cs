@@ -34,6 +34,13 @@ namespace Pinder.Core.Conversation
         /// </summary>
         public bool OverlayApplied { get; }
 
+        /// <summary>
+        /// Canonical check result from <see cref="RollEngine.ResolveCheck"/>.
+        /// Phase 1 (additive): attached alongside existing bespoke fields.
+        /// Null only for the <see cref="NotPerformed"/> sentinel.
+        /// </summary>
+        public RollCheckResult? Check { get; }
+
         public ShadowCheckResult(
             bool checkPerformed,
             ShadowStatType shadow,
@@ -41,7 +48,8 @@ namespace Pinder.Core.Conversation
             int dc,
             bool isMiss,
             FailureTier tier,
-            bool overlayApplied)
+            bool overlayApplied,
+            RollCheckResult? check = null)
         {
             CheckPerformed = checkPerformed;
             Shadow = shadow;
@@ -50,6 +58,7 @@ namespace Pinder.Core.Conversation
             IsMiss = isMiss;
             Tier = tier;
             OverlayApplied = overlayApplied;
+            Check = check;
         }
 
         /// <summary>A sentinel value representing "no shadow check was performed this turn".</summary>

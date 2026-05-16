@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using Pinder.Core.Interfaces;
 using Pinder.Core.Progression;
 using Pinder.Core.Stats;
@@ -12,6 +14,52 @@ namespace Pinder.Core.Rolls
     /// </summary>
     public static class RollEngine
     {
+        /// <summary>
+        /// Single entry point for all d20 checks.
+        /// Rolls a d20 (with optional advantage/disadvantage), sums the modifier bag,
+        /// computes total vs DC, and returns a canonical <see cref="RollCheckResult"/>.
+        /// </summary>
+        /// <remarks>
+        /// <c>IsSuccess = Total >= Dc</c> — nat-20 auto-success and nat-1 auto-fail (Legendary)
+        /// are game-rule overrides that live in <see cref="ResolveFromComponents"/> for the
+        /// main option-roll only. Informational <c>IsNatOne</c>/<c>IsNatTwenty</c> flags are
+        /// always populated.
+        /// </remarks>
+        public static RollCheckResult ResolveCheck(
+            RollCheckKind kind,
+            IDiceRoller dice,
+            IReadOnlyList<NamedModifier> modifiers,
+            int dc,
+            bool hasAdvantage    = false,
+            bool hasDisadvantage = false)
+        {
+            if (dice == null) throw new ArgumentNullException(nameof(dice));
+            if (modifiers == null) throw new ArgumentNullException(nameof(modifiers));
+
+            bool rollTwice = hasAdvantage || hasDisadvantage;
+            int roll1 = dice.Roll(20);
+            int? roll2 = rollTwice ? (int?)dice.Roll(20) : null;
+
+            int usedRoll;
+            if (!rollTwice)           usedRoll = roll1;
+            else if (hasDisadvantage) usedRoll = roll2.HasValue ? Math.Min(roll1, roll2.Value) : roll1;
+            else                      usedRoll = roll2.HasValue ? Math.Max(roll1, roll2.Value) : roll1;
+
+            int modSum = 0;
+            foreach (var m in modifiers) modSum += m.Value;
+
+            int total      = usedRoll + modSum;
+            bool isSuccess = total >= dc;
+            bool isNatOne  = usedRoll == 1;
+            bool isNatTwenty = usedRoll == 20;
+            int missMargin = isSuccess ? 0 : dc - total;
+            FailureTier tier = isSuccess ? FailureTier.None : FailureTierLadder.FromMissMargin(missMargin);
+
+            return new RollCheckResult(
+                kind, roll1, roll2, usedRoll, modifiers, modSum, total, dc,
+                isSuccess, isNatOne, isNatTwenty, tier, missMargin);
+        }
+
         /// <summary>
         /// Resolve a full roll.
         /// </summary>
@@ -145,6 +193,8 @@ namespace Pinder.Core.Rolls
 
         /// <summary>
         /// Shared failure-tier determination and RollResult construction used by both Resolve and ResolveFixedDC.
+        /// Routes the miss-margin tier ladder through <see cref="FailureTierLadder.FromMissMargin"/> (#901)
+        /// and attaches a <see cref="RollCheckResult"/> on the returned <see cref="RollResult"/>.
         /// </summary>
         private static RollResult ResolveFromComponents(
             StatType stat,
@@ -184,27 +234,40 @@ namespace Pinder.Core.Rolls
             else
             {
                 int miss = dc - finalTotal;
-
-                if      (miss <= 2) tier = FailureTier.Fumble;
-                else if (miss <= 5) tier = FailureTier.Misfire;
-                else if (miss <= 9)
+                // #901: single tier-ladder source of truth
+                tier = FailureTierLadder.FromMissMargin(miss);
+                if (tier == FailureTier.TropeTrap || tier == FailureTier.Catastrophe)
                 {
-                    tier = FailureTier.TropeTrap;
                     // Activate the stat's trap (single-slot replacement, #371).
                     newTrap = trapRegistry.GetTrap(stat);
                     if (newTrap != null)
                         attackerTraps.Activate(newTrap);
                 }
-                else
-                {
-                    tier = FailureTier.Catastrophe;
-                    // Catastrophe also activates trap (rules §5: miss 10+ = -3 + trap).
-                    // Single-slot replacement under #371.
-                    newTrap = trapRegistry.GetTrap(stat);
-                    if (newTrap != null)
-                        attackerTraps.Activate(newTrap);
-                }
             }
+
+            // #901: build canonical RollCheckResult (modifier bag view of this roll).
+            // Note: Check.Tier uses FailureTierLadder only (no Legendary); RollResult.Tier
+            // applies the nat-1 → Legendary game-rule override above.
+            var checkModifiers = new NamedModifier[]
+            {
+                new NamedModifier("stat",  statMod),
+                new NamedModifier("level", levelBonus),
+            };
+            int checkMissMargin = (usedRoll == 20 || total + externalBonus >= dc) ? 0 : dc - (total + externalBonus);
+            bool checkIsSuccess = (total + externalBonus) >= dc;
+            FailureTier checkTier = checkIsSuccess ? FailureTier.None : FailureTierLadder.FromMissMargin(checkMissMargin);
+            var check = new RollCheckResult(
+                RollCheckKind.OptionRoll,
+                roll1, roll2, usedRoll,
+                checkModifiers,
+                modifierSum: statMod + levelBonus,
+                total:       total + externalBonus,
+                dc:          dc,
+                isSuccess:   checkIsSuccess,
+                isNatOne:    usedRoll == 1,
+                isNatTwenty: usedRoll == 20,
+                tier:        checkTier,
+                missMargin:  checkMissMargin);
 
             return new RollResult(
                 dieRoll:       roll1,
@@ -216,7 +279,8 @@ namespace Pinder.Core.Rolls
                 dc:            dc,
                 tier:          tier,
                 activatedTrap: newTrap,
-                externalBonus: externalBonus);
+                externalBonus: externalBonus,
+                check:         check);
         }
     }
 }

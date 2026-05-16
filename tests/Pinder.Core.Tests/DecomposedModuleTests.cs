@@ -211,7 +211,8 @@ namespace Pinder.Core.Tests
         [InlineData(15, FailureTier.Catastrophe)]
         public void HorninessEngine_DetermineHorninessTier_ReturnsCorrectTier(int missMargin, FailureTier expected)
         {
-            var result = HorninessEngine.DetermineHorninessTier(missMargin);
+            // #901: DetermineHorninessTier deleted; same behaviour lives in FailureTierLadder.FromMissMargin.
+            var result = FailureTierLadder.FromMissMargin(missMargin);
 
             Assert.Equal(expected, result);
         }

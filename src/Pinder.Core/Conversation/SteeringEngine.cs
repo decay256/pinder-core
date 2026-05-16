@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Pinder.Core.Characters;
 using Pinder.Core.Interfaces;
+using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
 
 namespace Pinder.Core.Conversation
@@ -71,11 +72,19 @@ namespace Pinder.Core.Conversation
             int opponentHonesty = opponent.Stats.GetEffective(StatType.Honesty);
             int steeringDC = 16 + (opponentSA + opponentRizz + opponentHonesty) / 3;
 
-            // Roll d20 using a separate RNG.
-            int roll = _steeringRng.Next(1, 21);
+            // #901: route through single entry point.
+            // Modifier bag: one named entry for the composite steering modifier.
+            // Dice consumption: one Roll(20) with no adv/dis — identical to old _steeringRng.Next(1,21).
+            var checkModifiers = new NamedModifier[] { new NamedModifier("steering", steeringMod) };
+            var check = RollEngine.ResolveCheck(
+                RollCheckKind.Steering,
+                new RandomDiceRollerAdapter(_steeringRng),
+                checkModifiers,
+                steeringDC);
 
-            int total = roll + steeringMod;
-            bool success = total >= steeringDC;
+            int roll = check.DieRoll;
+            int total = check.Total;
+            bool success = check.IsSuccess;
 
             string? steeringQuestion = null;
             if (success && llm is IStatefulLlmAdapter stateful)
@@ -117,7 +126,8 @@ namespace Pinder.Core.Conversation
                 steeringRoll: roll,
                 steeringMod: steeringMod,
                 steeringDC: steeringDC,
-                steeringQuestion: steeringQuestion);
+                steeringQuestion: steeringQuestion,
+                check: check);
         }
     }
 }
