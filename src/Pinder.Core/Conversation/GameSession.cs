@@ -126,6 +126,7 @@ namespace Pinder.Core.Conversation
         private ShadowGrowthEvaluator? _shadowGrowthEvaluator;
         private SessionXpRecorder _xpRecorder;
         private SteeringEngine _steeringEngine;
+        private ShadowCheckEngine _shadowCheckEngine;
         private HorninessEngine _horninessEngine;
         // Dedicated RNG for OptionFilterEngine.DrawRandomStats. Kept separate from
         // the steering RNG so tests can queue exact steering values without our
@@ -216,6 +217,7 @@ namespace Pinder.Core.Conversation
             _xpRecorder = new SessionXpRecorder(_xpLedger, _rules);
             _steeringEngine = new SteeringEngine(steeringRng);
             _horninessEngine = new HorninessEngine(steeringRng);
+            _shadowCheckEngine = new ShadowCheckEngine(steeringRng);
 
             // #788: stateful opponent context now lives on this GameSession
             // (_opponentHistory). The adapter is pure-stateless and is fed the
@@ -312,6 +314,7 @@ namespace Pinder.Core.Conversation
             var clonedSteeringRng = RandomCloner.Clone(src._steeringEngine.SteeringRngForCloneOnly);
             _steeringEngine  = new SteeringEngine(clonedSteeringRng);
             _horninessEngine = new HorninessEngine(clonedSteeringRng);
+            _shadowCheckEngine = new ShadowCheckEngine(clonedSteeringRng);
             _statDrawRng     = src._statDrawRng != null ? RandomCloner.Clone(src._statDrawRng) : null;
 
             // ── Value-type / per-turn carry-over fields (Category A) ──
@@ -475,6 +478,7 @@ namespace Pinder.Core.Conversation
             var clonedSteeringRng = RandomCloner.Clone(src._steeringEngine.SteeringRngForCloneOnly);
             _steeringEngine  = new SteeringEngine(clonedSteeringRng);
             _horninessEngine = new HorninessEngine(clonedSteeringRng);
+            _shadowCheckEngine = new ShadowCheckEngine(clonedSteeringRng);
             _statDrawRng     = src._statDrawRng != null ? RandomCloner.Clone(src._statDrawRng) : null;
 
             // Value-type / per-turn carry-over.
@@ -1586,14 +1590,15 @@ namespace Pinder.Core.Conversation
                 int shadowValue = _playerShadows.GetEffectiveShadow(pairedShadow.Value);
                 if (shadowValue > 0)
                 {
-                    int shadowRoll = _steeringEngine.RollD20(); // use steering rng so it doesn't consume game dice
-                    int shadowDC = 20 - shadowValue;
-                    bool shadowMiss = shadowRoll < shadowDC;
+                    // #901: extracted into ShadowCheckEngine (dice consumption unchanged).
+                    var rawShadowResult = _shadowCheckEngine.Check(pairedShadow.Value, shadowValue);
+                    int shadowRoll = rawShadowResult.Roll;
+                    int shadowDC   = rawShadowResult.DC;
+                    bool shadowMiss = rawShadowResult.IsMiss;
 
                     if (shadowMiss)
                     {
-                        int missMargin = shadowDC - shadowRoll;
-                        FailureTier shadowTier = FailureTierLadder.FromMissMargin(missMargin); // #901
+                        FailureTier shadowTier = rawShadowResult.Tier;
                         string? corruptionInstruction = HorninessEngine.GetShadowCorruptionInstruction(
                             _statDeliveryInstructions, pairedShadow.Value, shadowTier);
 
@@ -1659,13 +1664,16 @@ namespace Pinder.Core.Conversation
                             overlayApplied = true;
                         }
 
+                        // Re-construct with overlayApplied filled in; attach canonical Check from engine.
                         shadowCheckResult = new ShadowCheckResult(
-                            true, pairedShadow.Value, shadowRoll, shadowDC, true, shadowTier, overlayApplied);
+                            true, pairedShadow.Value, shadowRoll, shadowDC, true, shadowTier, overlayApplied,
+                            rawShadowResult.Check);
                     }
                     else
                     {
                         shadowCheckResult = new ShadowCheckResult(
-                            true, pairedShadow.Value, shadowRoll, shadowDC, false, FailureTier.None, false);
+                            true, pairedShadow.Value, shadowRoll, shadowDC, false, FailureTier.None, false,
+                            rawShadowResult.Check);
                     }
                 }
             }
