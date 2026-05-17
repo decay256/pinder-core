@@ -190,7 +190,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             Assert.NotNull(messages);
             var userContent = messages![0]["content"]?.ToString() ?? "";
             Assert.Contains("Velvet", userContent);
-            Assert.Contains("OPPONENT PROFILE", userContent);
+            Assert.Contains("YOU ARE TALKING TO", userContent);
         }
 
         // ======================================================================

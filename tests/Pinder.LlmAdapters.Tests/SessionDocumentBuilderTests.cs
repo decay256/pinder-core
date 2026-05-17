@@ -110,9 +110,9 @@ namespace Pinder.LlmAdapters.Tests
                 MakeDialogueContext(playerName: "GERALD_42", opponentName: "VELVET"));
 
             // Opponent profile appears as informational context in user message
-            Assert.Contains("OPPONENT PROFILE", result);
+            Assert.Contains("YOU ARE TALKING TO", result);
             Assert.Contains("opponent prompt", result);
-            Assert.Contains("NOT who you are", result);
+            Assert.Contains("Do NOT reference anything you would only know from inside knowledge", result);
         }
 
         [Fact]
@@ -130,7 +130,7 @@ namespace Pinder.LlmAdapters.Tests
 
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(ctx);
 
-            Assert.DoesNotContain("OPPONENT PROFILE", result);
+            Assert.DoesNotContain("YOU ARE TALKING TO", result);
         }
 
         [Fact]
@@ -139,7 +139,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
                 MakeDialogueContext(playerName: "GERALD_42", opponentName: "VELVET"));
 
-            int opponentIdx = result.IndexOf("OPPONENT PROFILE");
+            int opponentIdx = result.IndexOf("YOU ARE TALKING TO");
             int historyIdx = result.IndexOf("[CONVERSATION_START]");
             Assert.True(opponentIdx < historyIdx,
                 "Opponent profile should appear before conversation history");
@@ -519,7 +519,7 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("[CALLBACK:", PromptTemplates.DialogueOptionsInstruction);
             Assert.Contains("[COMBO:", PromptTemplates.DialogueOptionsInstruction);
             Assert.Contains("[TELL_BONUS:", PromptTemplates.DialogueOptionsInstruction);
-            Assert.Contains("exactly 3", PromptTemplates.DialogueOptionsInstruction);
+            Assert.Contains("exactly 4", PromptTemplates.DialogueOptionsInstruction);
         }
 
         [Fact]

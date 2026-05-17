@@ -30,8 +30,9 @@ prompts:
   default-strong:
     system_prompt: |-
       rewrite the intended message so it lands harder. The same idea, in the same voice, with sharper word choice and better timing.
-        You must NOT: append a new sentence at the end, add an em-dash continuation, or extend the message beyond what the player wrote.
-        The delivered version should be the same length or shorter than the intended version. If you add a word, you should cut a different word. Rewrite, do not extend.
+      You must NOT: append a new sentence at the end, add an em-dash continuation, or extend the message beyond what the player wrote.
+      The delivered version should be the same length or shorter than the intended version. If you add a word, you should cut a different word. Rewrite, do not extend.
+      Goal: sharpen, not expand. Add ONE word or phrase only if it makes the existing sentiment more precise; otherwise, cut.
   default-test:
     system_prompt: >-
       The test: the delivered version must not be longer than the intended version. Every sentence in the delivered version must have a counterpart in the intended version. Do not append. Do not extend. Rewrite.
