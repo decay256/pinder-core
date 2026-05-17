@@ -36,7 +36,7 @@ After this sprint merges and re-deploys:
 
 ## Scope — 14 tickets
 
-### Lane A — P0 root-cause + wire-DTO audit pass (5 tickets, pinder-core)
+### Lane A — P0 root-cause + wire-DTO audit pass (4 tickets, pinder-core; #946 closed)
 
 The P0 must land first. The 4 P1 wire-field tickets are best done as
 ONE audit-pass PR (or 2 closely-paced PRs) because they touch the same
@@ -54,12 +54,10 @@ DTO mapper.
 4. **core#945** [P1] `OfferedOption.dc` / `modifier` null on every
    offered option; breaks `ModifierBagRollFormula` pre-pick.
    *Estimated 1.5h. Wire serializer.*
-5. **core#946** [P1] Stat `Chaos` offered on turn 3 — not in canonical
-   stat list. *Investigation note: the prompt template explicitly
-   lists `CHAOS` as a canonical TELL stat (templates.yaml line ~150).
-   This may be a 6th-stat reconciliation, not a hallucination. Decide:
-   add Chaos to StatType enum + i18n + StatChip mapping, OR remove
-   from prompt template. ≤1h once direction picked.*
+5. ~~**core#946** [P1] Stat `Chaos` offered on turn 3.~~
+   **CLOSED as not-a-bug 2026-05-17** — codebase grep confirmed Chaos
+   is canonical (StatType has 6 values; pinder-web already maps it).
+   No action needed this sprint.
 
 ### Lane B — P1 engine + DB integrity (3 tickets, pinder-core)
 
@@ -111,7 +109,7 @@ the dep graph below. Visual parity check on staging before merge.
     SPA needs to surface the replay link from the session-list DTO.
     ~45min after #948 lands.*
 
-### **Total: 14 tickets in scope.**
+### **Total: 13 tickets in scope.** (#946 dropped — not-a-bug.)
 
 ---
 
@@ -129,7 +127,7 @@ core#948 (outcome NULL) ────→ web#651 (replays unavailable)
 
 core#943 (roll.tier)      \
 core#945 (option dc/mod)   ──→ web#648 / #649 / #652 / #655
-core#946 (Chaos stat)     /     SPA EventBox surface depends on full wire payload
+                          /     SPA EventBox surface depends on full wire payload
 
 web#647 (silent diffs) ───→ web#648 ───→ web#655 (specific case)
                             └─→ web#649 (expanded structure)
@@ -151,8 +149,7 @@ core#951 (scene placeholder) ── independent
 | 3     | core#951 | B | 45m | R1 | Small, atomic |
 | 4     | core#943 | A | 1h | R1 | DTO additive |
 | 5     | core#945 | A | 1.5h | R1 | DTO additive |
-| 6     | core#946 | A | 1h | R1 | Decision-fork ticket (Chaos in or out) |
-| 7     | core#944 | A | 30m | R0 | Audit-first: probably closes as fixed-by-#942 |
+| 6     | core#944 | A | 30m | R0 | Audit-first: probably closes as fixed-by-#942 |
 | 8     | core#950 | B | 2h | R2 | Prompt + stake-generator audit |
 | 9     | web#651 | D | 45m | R0 | Depends on #948 |
 | 10    | web#647 | C | 1h | R0 | Visibility table foundation |
@@ -161,7 +158,7 @@ core#951 (scene placeholder) ── independent
 | 13    | web#652 | C | 1h | R0 | Layout |
 | 14    | web#649 | C | 2.5h | R0 | Expanded structure — last; pulls everything together |
 
-**Total estimate: ~22 hours sequential work.** Realistic completion
+**Total estimate: ~21 hours sequential work** (Chaos hour reclaimed). Realistic completion
 window (sequential drain with sub-agent latency overhead): one focused
 day with the orchestrator running unattended.
 
@@ -193,28 +190,29 @@ day with the orchestrator running unattended.
 
 ## Open questions
 
-**Q1 — Chaos stat: add or remove?** Per the investigation note in #946,
-the prompt template already lists `CHAOS` as a canonical TELL stat
-mapping. Two options:
+**Q1 — Chaos stat: RESOLVED 2026-05-17.** Codebase grep confirms
+Chaos is canonical (StatType enum has 6 values; pinder-web i18n,
+StatChip, and guardrail tests already map it). **#946 closed as
+not-a-bug.** Original observation was correct behaviour, not a
+regression. Sprint scope reduced to 13 tickets.
 
-- **A: Add Chaos to `StatType` enum** + i18n + `wireStatToChipStat`
-  + `StatChip`. Pick if the design intent is a 6-stat system.
-- **B: Remove `CHAOS` from the prompt template** and constrain the
-  option-stream parser to reject unknown stats. Pick if the design
-  intent is a strict 5-stat system.
+**Q2 — Stake-surfacing: RESOLVED 2026-05-17.** Investigation pulled
+the actual stake from `llm_exchanges[0].system_prompt` — it's vivid
+and concrete (Pret A Manger, €42 Camino map, 17 tabs about the band,
+deleted thesis, etc.). 1 of 9 offered options across 3 turns
+referenced a stake line; gap is in the option-generator's use, not
+stake content quality. **Both A + B accepted** per Daniel:
 
-**Default if not answered by sprint start: B** (strict 5-stat). The
-docs and engine type are the source of truth; the prompt template is
-the surface that should conform.
+- **A:** Tighten `engine-options-block` prompt to: 'OPTION_C MUST
+  quote or paraphrase one of the numbered stake lines verbatim.'
+- **B:** Per-session stake-line reference-count tracker; per-turn
+  prompt renders 'already referenced / untouched' lists; engine state
+  carries `stakeLineReferenceCount: int[]`.
+- Integration test: 5-turn synthetic playthrough hits ≥3 distinct
+  stake-line references.
+- Telemetry: emit `stake_lines_referenced_this_session` in turn audit.
 
-**Q2 — Stake-surfacing root cause (per #950).** When the implementer
-investigates the actual stake content for `b79b6331-...`, two outcomes:
-- If concrete (named events, specific facts): fix the option-generator
-  prompt to enforce stake reference.
-- If too generic: fix `LlmStakeGenerator` prompt to insist on concrete
-  biographical anchors.
-
-No default needed — the investigation decides.
+Full ACs on #950.
 
 ---
 
@@ -269,7 +267,7 @@ Clean ground.
 ## Companion goals
 
 1. **Validate the NEVER-EXIT-MID-DRAIN + structured-completion contract
-   on a complex 14-ticket sprint** with cross-repo + sequential dep
+   on a complex 13-ticket sprint** with cross-repo + sequential dep
    graph. Previous sprint f57876 ran 17 actions in ~3h and held the
    contract; this one is bigger, with real C# engine work and a real
    P0.
