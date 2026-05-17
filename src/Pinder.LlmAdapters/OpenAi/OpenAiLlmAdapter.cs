@@ -48,7 +48,7 @@ namespace Pinder.LlmAdapters.OpenAi
 
         private static readonly StatType[] DefaultPaddingStats = new[]
         {
-            StatType.Charm, StatType.Honesty, StatType.Wit, StatType.Chaos
+            StatType.Charm, StatType.Honesty, StatType.Wit, StatType.Chaos, StatType.Rizz, StatType.SelfAwareness
         };
 
         private readonly OpenAiClient _client;
