@@ -3,15 +3,15 @@ using Pinder.Core.Rolls;
 
 namespace Pinder.Core.Conversation
 {
-    // Fields covered by TurnSnapshot (session-runner/Snapshot/SessionSnapshot.cs):
-    //   Options, State, DicePools, OpponentDefenseSnapshot (#903), WeaknessDcReduction (#593)
-    //
     /// <summary>
     /// Result of starting a turn: the dialogue options, current game state, and
     /// per-option pre-rolled dice pools (#789, Phase 2).
     /// </summary>
     public sealed class TurnStart
     {
+        // Fields covered by TurnSnapshot (session-runner/Snapshot/SessionSnapshot.cs):
+        //   Options, State, DicePools, OpponentDefenseSnapshot (#903), WeaknessDcReduction (#593)
+
         /// <summary>The dialogue options available to the player.</summary>
         public DialogueOption[] Options { get; }
 
