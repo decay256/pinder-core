@@ -37,7 +37,7 @@ prompts:
       The test: the delivered version must not be longer than the intended version. Every sentence in the delivered version must have a counterpart in the intended version. Do not append. Do not extend. Rewrite.
   dialogue-options-instruction:
     system_prompt: |-
-      Generate exactly 3 dialogue options for {player_name}.
+      Generate exactly 4 dialogue options for {player_name}.
       
       Each option must:
       1. Be tagged with one of the available stats for this turn: {available_stats}
@@ -63,7 +63,7 @@ prompts:
       [STAT: HONESTY] [CALLBACK: turn_2] [COMBO: The Reveal] [TELL_BONUS: yes]
       "The exact text the character would send"
       
-      (only OPTION_1, OPTION_2, OPTION_3)
+      (only OPTION_1, OPTION_2, OPTION_3, OPTION_4)
       
       MEDIUM: This is a texting app. Options are messages the character could send.
       - Each option should read as something a person would actually text — not internal thoughts, not narration.
@@ -102,7 +102,7 @@ prompts:
       [ENGINE — Turn {turn}]
       {player_name} is deciding what to send next.
       {game_state}
-      Generate 3 options for what {player_name} might send, given the conversation above.
+      Generate 4 options for what {player_name} might send, given the conversation above.
       Format: OPTION_A: [message] OPTION_B: [message] etc.
   failure-delivery-instruction:
     system_prompt: |-

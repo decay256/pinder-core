@@ -474,7 +474,7 @@ OPTION_2
             var result = AnthropicLlmAdapter.ParseDialogueOptions(input);
             Assert.Equal(4, result.Length);
             Assert.Equal(StatType.Charm, result[0].Stat);
-            // Padding from {Charm, Honesty, Wit, Chaos} skipping Charm → Honesty, Wit, Chaos
+            // Padding from {Charm, Honesty, Wit, Chaos, Rizz, SelfAwareness} skipping Charm → Honesty, Wit, Chaos
             var paddedStats = result.Skip(1).Select(o => o.Stat).ToArray();
             Assert.Equal(StatType.Honesty, paddedStats[0]);
             Assert.Equal(StatType.Wit, paddedStats[1]);
