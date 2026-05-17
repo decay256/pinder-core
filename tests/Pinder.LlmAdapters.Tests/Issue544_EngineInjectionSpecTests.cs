@@ -810,7 +810,7 @@ namespace Pinder.LlmAdapters.Tests
         public void AC6_OptionsPrompt_IncludesOpponentProfile()
         {
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(MakeDialogueContext());
-            Assert.Contains("OPPONENT PROFILE", result);
+            Assert.Contains("YOU ARE TALKING TO", result);
         }
 
         // Mutation: would catch if delivery prompt lost conversation history

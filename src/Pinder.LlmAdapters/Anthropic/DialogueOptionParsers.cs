@@ -45,12 +45,12 @@ namespace Pinder.LlmAdapters.Anthropic
         // Default padding stats for ParseDialogueOptions fallback
         private static readonly StatType[] DefaultPaddingStats = new[]
         {
-            StatType.Charm, StatType.Honesty, StatType.Wit, StatType.Chaos
+            StatType.Charm, StatType.Honesty, StatType.Wit, StatType.Chaos, StatType.Rizz, StatType.SelfAwareness
         };
 
         /// <summary>
         /// Parses structured LLM text output into DialogueOption array.
-        /// Never throws — returns 3 options, padding with defaults if needed.
+        /// Never throws — returns 4 options, padding with defaults if needed.
         /// </summary>
         public static DialogueOption[] ParseDialogueOptionsText(string? llmResponse)
         {
@@ -66,7 +66,7 @@ namespace Pinder.LlmAdapters.Anthropic
                     foreach (var section in sections)
                     {
                         if (string.IsNullOrWhiteSpace(section)) continue;
-                        if (parsed.Count >= 3) break;
+                        if (parsed.Count >= 4) break;
 
                         var statMatch = StatRegex.Match(section);
                         if (!statMatch.Success) continue;
@@ -137,7 +137,7 @@ namespace Pinder.LlmAdapters.Anthropic
                 }
             }
 
-            return PadDialogueOptionsToThree(parsed);
+            return PadDialogueOptionsToFour(parsed);
         }
 
         /// <summary>
@@ -155,7 +155,7 @@ namespace Pinder.LlmAdapters.Anthropic
                 var parsed = new List<DialogueOption>();
                 foreach (var item in optionsArray)
                 {
-                    if (parsed.Count >= 3) break;
+                    if (parsed.Count >= 4) break;
 
                     var statStr = StatNameNormalizer.NormalizeStatName(item.Value<string>("stat") ?? "");
                     StatType stat;
@@ -209,7 +209,7 @@ namespace Pinder.LlmAdapters.Anthropic
                 }
 
                 if (parsed.Count == 0) return null;
-                return PadDialogueOptionsToThree(parsed);
+                return PadDialogueOptionsToFour(parsed);
             }
             catch
             {
@@ -217,12 +217,11 @@ namespace Pinder.LlmAdapters.Anthropic
             }
         }
 
-        /// <summary>Pads parsed options to exactly 3 using default stats not already present.</summary>
-        public static DialogueOption[] PadDialogueOptionsToThree(List<DialogueOption> parsed)
+        public static DialogueOption[] PadDialogueOptionsToFour(List<DialogueOption> parsed)
         {
-            if (parsed.Count >= 3)
+            if (parsed.Count >= 4)
             {
-                return parsed.GetRange(0, 3).ToArray();
+                return parsed.GetRange(0, 4).ToArray();
             }
 
             var usedStats = new HashSet<StatType>();
@@ -234,16 +233,16 @@ namespace Pinder.LlmAdapters.Anthropic
             var result = new List<DialogueOption>(parsed);
             foreach (var defaultStat in DefaultPaddingStats)
             {
-                if (result.Count >= 3) break;
+                if (result.Count >= 4) break;
                 if (usedStats.Contains(defaultStat)) continue;
                 result.Add(new DialogueOption(defaultStat, "...",
                     callbackTurnNumber: null, comboName: null,
                     hasTellBonus: false, hasWeaknessWindow: false));
             }
 
-            // If we still need more (e.g., all 3 default stats were used), just pad with Charm
-            while (result.Count < 3)
+            while (result.Count < 4)
             {
+                // If we still need more, just pad with Charm (or any valid stat)
                 result.Add(new DialogueOption(StatType.Charm, "...",
                     callbackTurnNumber: null, comboName: null,
                     hasTellBonus: false, hasWeaknessWindow: false));

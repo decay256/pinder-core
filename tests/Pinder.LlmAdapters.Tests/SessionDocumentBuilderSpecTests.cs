@@ -371,7 +371,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildDeliveryPrompt(
                 MakeDeliveryContext(chosenOption: option, outcome: FailureTier.Catastrophe, beatDcBy: -12));
 
-            Assert.Contains("corrupt the CONTENT", result);
+            Assert.Contains("FORM stays. The CONTENT breaks", result);
         }
 
         [Fact]
@@ -869,22 +869,22 @@ namespace Pinder.LlmAdapters.Tests
         public void PromptTemplates_SuccessDelivery_ContainsSharpenNotExpandConstraint()
         {
             var t = PromptTemplates.SuccessDeliveryInstruction;
-            Assert.Contains("sharpen, not expand", t);
-            Assert.Contains("every idea in the delivered version should have a counterpart in the intended version", t);
+            Assert.Contains("Rewrite — do not extend", t);
+            Assert.Contains("Every sentence in the delivered version must have a counterpart in the intended version", t);
         }
 
         [Fact]
         public void PromptTemplates_SuccessDelivery_StrongSuccessAllowsOneAddition()
         {
             var t = PromptTemplates.SuccessDeliveryInstruction;
-            Assert.Contains("add ONE word or phrase that makes the existing sentiment more precise", t);
+            Assert.Contains("If you add a word, you should cut a different word", t);
         }
 
         [Fact]
         public void PromptTemplates_SuccessDelivery_StrongSuccessProhibitsNewIdeas()
         {
             var t = PromptTemplates.SuccessDeliveryInstruction;
-            Assert.Contains("must not: add new sentences that introduce ideas not in the intended message", t);
+            Assert.Contains("You must NOT: append a new sentence at the end", t);
         }
     }
 }

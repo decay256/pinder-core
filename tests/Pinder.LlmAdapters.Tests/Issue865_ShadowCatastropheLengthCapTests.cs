@@ -11,8 +11,8 @@ namespace Pinder.LlmAdapters.Tests
 
         public Issue865_ShadowCatastropheLengthCapTests()
         {
-            // Use absolute path to ensure the test finds the YAML regardless of where the binary is run from
-            string yamlPath = "/tmp/work-865/data/delivery-instructions.yaml";
+            var projectRoot = System.IO.Path.GetFullPath(System.IO.Path.Combine(AppContext.BaseDirectory, "../../../../../"));
+            string yamlPath = System.IO.Path.Combine(projectRoot, "data", "delivery-instructions.yaml");
             string yaml = System.IO.File.ReadAllText(yamlPath);
             _instructions = StatDeliveryInstructions.LoadFrom(yaml); 
         }

@@ -11,18 +11,19 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         public void ParseDialogueOptionsText_NullInput_ReturnsPaddedDefaults()
         {
             var result = DialogueOptionParsers.ParseDialogueOptionsText(null);
-            Assert.Equal(3, result.Length);
-            // Defaults should use Charm, Honesty, Wit
+            Assert.Equal(4, result.Length);
+            // Defaults should use Charm, Honesty, Wit, Chaos
             Assert.Equal(StatType.Charm, result[0].Stat);
             Assert.Equal(StatType.Honesty, result[1].Stat);
             Assert.Equal(StatType.Wit, result[2].Stat);
+            Assert.Equal(StatType.Chaos, result[3].Stat);
         }
 
         [Fact]
         public void ParseDialogueOptionsText_EmptyInput_ReturnsPaddedDefaults()
         {
             var result = DialogueOptionParsers.ParseDialogueOptionsText("");
-            Assert.Equal(3, result.Length);
+            Assert.Equal(4, result.Length);
         }
 
         [Fact]
@@ -33,7 +34,7 @@ OPTION_2 [STAT: Wit] ""Did it hurt when you fell from heaven?"" [CALLBACK: 3] [C
 OPTION_3 [STAT: Honesty] ""I just wanted to say hi."" [CALLBACK: turn_5] [COMBO: none] [TELL_BONUS: no]";
 
             var result = DialogueOptionParsers.ParseDialogueOptionsText(input);
-            Assert.Equal(3, result.Length);
+            Assert.Equal(4, result.Length);
 
             Assert.Equal(StatType.Charm, result[0].Stat);
             Assert.Equal("Hey there, looking good!", result[0].IntendedText);
@@ -51,17 +52,18 @@ OPTION_3 [STAT: Honesty] ""I just wanted to say hi."" [CALLBACK: turn_5] [COMBO:
         }
 
         [Fact]
-        public void ParseDialogueOptionsText_PartialInput_PadsToThree()
+        public void ParseDialogueOptionsText_PartialInput_PadsToFour()
         {
             var input = @"OPTION_1 [STAT: Charm] ""Hello!"" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]";
 
             var result = DialogueOptionParsers.ParseDialogueOptionsText(input);
-            Assert.Equal(3, result.Length);
+            Assert.Equal(4, result.Length);
             Assert.Equal(StatType.Charm, result[0].Stat);
             Assert.Equal("Hello!", result[0].IntendedText);
-            // Padding fills with Honesty, Wit (since Charm is used)
+            // Padding fills with Honesty, Wit, Chaos (since Charm is used)
             Assert.Equal(StatType.Honesty, result[1].Stat);
             Assert.Equal(StatType.Wit, result[2].Stat);
+            Assert.Equal(StatType.Chaos, result[3].Stat);
         }
 
         [Fact]
@@ -77,7 +79,7 @@ OPTION_3 [STAT: Honesty] ""I just wanted to say hi."" [CALLBACK: turn_5] [COMBO:
 
             var result = DialogueOptionParsers.ParseDialogueOptionsTool(json);
             Assert.NotNull(result);
-            Assert.Equal(3, result!.Length);
+            Assert.Equal(4, result!.Length);
 
             Assert.Equal(StatType.Charm, result[0].Stat);
             Assert.Equal("Hey!", result[0].IntendedText);

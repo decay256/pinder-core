@@ -48,7 +48,7 @@ namespace Pinder.LlmAdapters.OpenAi
 
         private static readonly StatType[] DefaultPaddingStats = new[]
         {
-            StatType.Charm, StatType.Honesty, StatType.Wit, StatType.Chaos
+            StatType.Charm, StatType.Honesty, StatType.Wit, StatType.Chaos, StatType.Rizz, StatType.SelfAwareness
         };
 
         private readonly OpenAiClient _client;
@@ -276,7 +276,7 @@ namespace Pinder.LlmAdapters.OpenAi
                     foreach (var section in sections)
                     {
                         if (string.IsNullOrWhiteSpace(section)) continue;
-                        if (parsed.Count >= 3) break;
+                        if (parsed.Count >= 4) break;
 
                         var statMatch = StatRegex.Match(section);
                         if (!statMatch.Success) continue;

@@ -556,7 +556,7 @@ OPTION_4
             // Opponent profile appears in user message, not system
             Assert.Single(body.Messages);
             Assert.Contains("Velvet", body.Messages[0].Content);
-            Assert.Contains("OPPONENT PROFILE", body.Messages[0].Content);
+            Assert.Contains("YOU ARE TALKING TO", body.Messages[0].Content);
         }
 
         [Fact]

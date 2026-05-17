@@ -120,9 +120,13 @@ namespace Pinder.LlmAdapters.Tests
             // The prompt must tell the LLM to use ONLY these mappings
             Assert.Contains("ONLY", _instruction);
             // Verify it's in the context of tell category usage
+            // The first "ONLY" is in the context-boundary section; the second is the tell-category mapping instruction
+            var firstOnlyIdx = _instruction.IndexOf("ONLY");
+            var secondOnlyIdx = _instruction.IndexOf("ONLY", firstOnlyIdx + 1);
+            Assert.True(secondOnlyIdx > firstOnlyIdx, "Expected at least two 'ONLY' occurrences in OpponentResponseInstruction");
             Assert.Contains("these", _instruction.Substring(
-                _instruction.IndexOf("ONLY") - 20 < 0 ? 0 : _instruction.IndexOf("ONLY") - 20,
-                40 + (_instruction.IndexOf("ONLY") - 20 < 0 ? _instruction.IndexOf("ONLY") : 20)));
+                secondOnlyIdx - 20 < 0 ? 0 : secondOnlyIdx - 20,
+                Math.Min(40 + (secondOnlyIdx - 20 < 0 ? secondOnlyIdx : 20), _instruction.Length - (secondOnlyIdx - 20 < 0 ? 0 : secondOnlyIdx - 20))));
         }
 
         // --- AC1: All 6 stat names in uppercase format ---
