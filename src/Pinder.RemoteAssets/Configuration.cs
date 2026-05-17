@@ -133,6 +133,12 @@ namespace Pinder.RemoteAssets
         /// </summary>
         public CharacterPayloadSerializer? PayloadSerializer { get; }
 
+        /// <param name="allowInsecureBaseUrl">
+        /// Defaults to <c>false</c>. When <c>true</c>, permits <c>http://</c>
+        /// URIs in <see cref="BaseUrl"/> instead of enforcing the HTTPS
+        /// scheme. Intended ONLY for tests against local fake servers; never
+        /// used in production code.
+        /// </param>
         public Configuration(
             Uri baseUrl,
             HttpMessageHandler httpMessageHandler,
