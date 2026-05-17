@@ -8,6 +8,7 @@ using Xunit;
 namespace Pinder.Core.Tests
 {
     [Trait("Category", "SessionRunner")]
+    [Collection("SessionRunnerReflection")]
     public sealed class Issue527_SessionRunnerBioFormatTests
     {
         [Fact]
