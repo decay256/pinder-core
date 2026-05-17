@@ -1,3 +1,6 @@
+> **SUPERSEDED 2026-05-17 21:45 UTC** by sprint `2026-05-17-bignight`. Daniel asked for a longer sprint; the 13-ticket version was rewritten. See `docs/sprint-runs/2026-05-17-bignight/kickoff.md`.
+
+
 # Sprint 2026-05-17-280cc8 — Staging-Test Fallout: User-Visible Fixes
 
 **Authorization:** Daniel — "list open tickets and plan a sprint." (2026-05-17 20:47 UTC, #pinder).
