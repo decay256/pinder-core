@@ -1,4 +1,8 @@
-# Lessons — sprint 2026-05-16-d1d40c (draft, captured during run)
+# Lessons — sprint 2026-05-16-d1d40c
+
+_Final. Captured during the run; promoted from `lessons-draft.md` at Phase 7 close._
+
+_Scope: all three lessons below are about eigentakt / orchestrator behaviour, not pinder-{core,web} game/architecture. They are intentionally NOT promoted to the project LESSONS_LEARNED.md files — see `~/.openclaw/agents-extra/pinder/AGENTS.md` for where this kind of lesson lives in this org._
 
 ## L1 — `agent.log` is project-tracked, not orchestrator-private
 
@@ -34,7 +38,7 @@
 
 ---
 
-## L? — OpenRouter Gemma availability cascade on #603
+## L3 — OpenRouter Gemma availability cascade on #603
 
 **Sprint:** 2026-05-16-d1d40c. **Ticket:** #603 (pinder-web frontend mirror of FailureTierDisplay.Label per-kind).
 
