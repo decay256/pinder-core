@@ -276,7 +276,7 @@ namespace Pinder.LlmAdapters.OpenAi
                     foreach (var section in sections)
                     {
                         if (string.IsNullOrWhiteSpace(section)) continue;
-                        if (parsed.Count >= 3) break;
+                        if (parsed.Count >= 4) break;
 
                         var statMatch = StatRegex.Match(section);
                         if (!statMatch.Success) continue;

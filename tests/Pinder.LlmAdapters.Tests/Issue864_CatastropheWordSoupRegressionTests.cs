@@ -46,7 +46,7 @@ namespace Pinder.LlmAdapters.Tests
         {
             // Arrange
             // Use absolute path to the data file relative to project root
-            var projectRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../"));
+            var projectRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../"));
             var yamlPath = Path.Combine(projectRoot, "data", "delivery-instructions.yaml");
             
             // Fallback for different build environments
@@ -56,8 +56,7 @@ namespace Pinder.LlmAdapters.Tests
             }
             if (!File.Exists(yamlPath))
             {
-                // Absolute path for the worktree we know it's in
-                yamlPath = "/tmp/work-864/data/delivery-instructions.yaml";
+                throw new FileNotFoundException($"Cannot find delivery-instructions.yaml. Tried: {projectRoot}/data/ and {projectRoot}/src/Pinder.LlmAdapters/data/");
             }
 
             var content = File.ReadAllText(yamlPath);
