@@ -71,3 +71,33 @@ The orchestrator caught this at Phase 0 because the `git status` check was perfo
 **Class:** Phase 0 hygiene. Same shape as "trust but verify."
 
 **Lesson id:** EIGENTAKT-PHASE0-ALWAYS-VERIFY-CLONES
+
+## L5 — Dead-code deletions require cross-repo greps, not single-repo greps
+
+**Observation:** sprint f57876's #883 (PR #939, commit bb0d01a) deleted `ArchetypeYamlLoader.LoadFromYaml(string)` + the nested `LoadResult` class from `Pinder.LlmAdapters`, classifying them as dead code. The implementer's grep was scoped to the pinder-core repo only and found `Issue372_ArchetypeYamlLoaderTests` as the sole caller. Conclusion: dead. Action: deleted both. PR reviewer approved, sprint orchestrator merged, sprint closed.
+
+The grep missed the live caller in the **sister repo**: `pinder-web/src/Pinder.GameApi/Program.cs` lines ~421–449 invokes `Pinder.LlmAdapters.ArchetypeYamlLoader.LoadFromYaml(...)` as part of the Issue #372 hot-fix path (defence-in-depth `archetypes-enriched.yaml` loader). The caller reads all three fields of the returned `LoadResult` (`.Error`, `.Registered`, `.SkippedMissingBehavior`) for startup logging.
+
+**Result:** pinder-web staging deploy build failed immediately after the f57876 sprint closed with `error CS0117: 'ArchetypeYamlLoader' does not contain a definition for 'LoadFromYaml'`. Hot-fix PR #940 (commit 1710c6b) restored the deleted surface byte-identically (orphan-test deletion kept) within ~20 minutes of detection, but the deploy window was lost and the sprint scoreboard's claim of "11 PRs merged green, 0 regressions" turned out to be subtly false — the regression was real, just invisible from inside pinder-core.
+
+**Failure mode:** the implementer prompt for any "delete dead-code X" ticket implicitly authorizes the implementer to declare X dead based on a grep across whatever repo is currently checked out. For symbols whose containing assembly is consumed by ≥1 sister repo, that grep is insufficient by definition.
+
+**Affected scope:** every `Pinder.LlmAdapters`, `Pinder.Core`, and `Pinder.Game` public symbol is potentially consumed by pinder-web. The reverse is not true (pinder-web has no consumers). So this lesson applies to dead-code deletions in pinder-core only, not pinder-web.
+
+**Fix:** dead-code-deletion implementer task templates targeting pinder-core MUST include a cross-repo grep step. Concretely, the orchestrator's spawn prompt for any `chore(#NNN): delete dead-code X` ticket in pinder-core MUST include this block verbatim:
+
+> ## CROSS-REPO DEAD-CODE GREP (mandatory before declaring X unused)
+> Before claiming X is dead in pinder-core, you must also run:
+>
+> ```
+> grep -rn "X" /root/projects/pinder-web/src 2>/dev/null
+> grep -rn "X" /root/projects/pinder-web/tests 2>/dev/null
+> ```
+>
+> If either grep returns any hit outside a comment, X is NOT dead — stop and report. Do not proceed to delete.
+
+The reviewer's checklist must also gain a corresponding bullet: "for dead-code deletions in pinder-core, did the implementer's research log show the cross-repo grep against pinder-web?" If not, the reviewer must REQUEST_CHANGES.
+
+**Class:** prompt-template gap with deploy-time consequences. High blast radius — every future dead-code ticket in pinder-core is vulnerable until this lesson lands in the templates.
+
+**Lesson id:** EIGENTAKT-DEAD-CODE-NEEDS-CROSS-REPO-GREP
