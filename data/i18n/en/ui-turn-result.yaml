@@ -3,7 +3,10 @@
 schema_version: 1
 locale: en
 strings:
-  turn_result.annotations_heading: "Annotations"
+  # #596: turn_result.annotations_heading removed — the outer
+  # <TurnAnnotations> frame was dropped and the four annotation events
+  # (triple / combo / tell / callback) now render as sibling EventBox
+  # nodes without a section heading.
   turn_result.steering_heading: "🧭 Steering"
   turn_result.steering_explainer: "Steering: an extra roll that lets the player nudge the conversation by adding a follow-up question."
   turn_result.vs_dc: "vs DC"
