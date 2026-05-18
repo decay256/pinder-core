@@ -97,6 +97,13 @@ namespace Pinder.Core.Rolls
         /// <summary>By how much the roll missed the DC (using FinalTotal). 0 on success.</summary>
         public int MissMargin => IsSuccess ? 0 : DC - FinalTotal;
 
+        /// <summary>
+        /// Primary constructor. <paramref name="check"/> is required and stored verbatim on
+        /// <see cref="Check"/>; callers outside <see cref="RollEngine"/> typically build it
+        /// via <see cref="RollCheckResult.Synthesise"/>. The parameter order matches the
+        /// pre-#920 signature so existing positional callers stay compatible — the only
+        /// change is that <paramref name="check"/> is now non-nullable and required.
+        /// </summary>
         public RollResult(
             int dieRoll,
             int? secondDieRoll,
@@ -106,9 +113,9 @@ namespace Pinder.Core.Rolls
             int levelBonus,
             int dc,
             FailureTier tier,
-            TrapDefinition? activatedTrap = null,
-            int externalBonus = 0,
-            RollCheckResult? check = null,
+            TrapDefinition? activatedTrap,
+            int externalBonus,
+            RollCheckResult check,
             StatType defendingStat = default)
         {
             DieRoll        = dieRoll;
@@ -127,7 +134,49 @@ namespace Pinder.Core.Rolls
             Tier           = IsSuccess ? FailureTier.Success : tier;
             ActivatedTrap  = activatedTrap;
             RiskTier       = ComputeRiskTier(dc, statModifier, levelBonus);
-            Check          = check!;
+            Check          = check ?? throw new System.ArgumentNullException(nameof(check));
+        }
+
+        /// <summary>
+        /// Convenience overload that synthesises <see cref="Check"/> from the bespoke fields
+        /// via <see cref="RollCheckResult.Synthesise"/>. Use this when you don't already have
+        /// a <see cref="RollCheckResult"/> from <see cref="RollEngine.ResolveCheck"/> — e.g.
+        /// <c>GameSession.CreateForcedFailResult</c> and test fixtures that exercise the
+        /// bespoke-field code paths without going through <see cref="RollEngine"/>.
+        /// </summary>
+        public RollResult(
+            int dieRoll,
+            int? secondDieRoll,
+            int usedDieRoll,
+            StatType stat,
+            int statModifier,
+            int levelBonus,
+            int dc,
+            FailureTier tier,
+            TrapDefinition? activatedTrap = null,
+            int externalBonus = 0,
+            StatType defendingStat = default)
+            : this(
+                dieRoll,
+                secondDieRoll,
+                usedDieRoll,
+                stat,
+                statModifier,
+                levelBonus,
+                dc,
+                tier,
+                activatedTrap,
+                externalBonus,
+                RollCheckResult.Synthesise(
+                    dieRoll,
+                    secondDieRoll,
+                    usedDieRoll,
+                    statModifier,
+                    levelBonus,
+                    dc,
+                    externalBonus),
+                defendingStat)
+        {
         }
 
         /// <summary>

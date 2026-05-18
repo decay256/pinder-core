@@ -2128,23 +2128,37 @@ namespace Pinder.Core.Conversation
         /// Creates a synthetic RollResult that represents a forced failure at the given tier.
         /// Used by the shadow check to compute the failure interest delta when overriding a success.
         /// </summary>
+        /// <remarks>
+        /// #920: explicitly synthesises a <see cref="Pinder.Core.Rolls.RollCheckResult"/> via
+        /// <see cref="Pinder.Core.Rolls.RollCheckResult.Synthesise"/> so the returned
+        /// <see cref="Pinder.Core.Rolls.RollResult.Check"/> is never null — prerequisite for the
+        /// Phase 2 wire-DTO serializer which will read <c>Check.*</c>.
+        /// </remarks>
         private static RollResult CreateForcedFailResult(RollResult original, FailureTier shadowTier)
         {
             // Build a result that looks like a miss at the given tier.
             // We derive a miss margin that maps to the tier, then compute a die roll that misses DC.
             int fakeDie = original.DC > 1 ? original.DC - 1 : 1; // just below DC
-            return new RollResult(
-                dieRoll: fakeDie,
+            var check = Pinder.Core.Rolls.RollCheckResult.Synthesise(
+                dieRoll:       fakeDie,
                 secondDieRoll: null,
-                usedDieRoll: fakeDie,
-                stat: original.Stat,
-                statModifier: 0,
-                levelBonus: 0,
-                dc: original.DC,
-                tier: shadowTier,
-                activatedTrap: null,
-                externalBonus: 0,
-                defendingStat: Pinder.Core.Stats.StatBlock.DefenceTable[original.Stat]);
+                usedDieRoll:   fakeDie,
+                statModifier:  0,
+                levelBonus:    0,
+                dc:            original.DC);
+            return new RollResult(
+                dieRoll:        fakeDie,
+                secondDieRoll:  null,
+                usedDieRoll:    fakeDie,
+                stat:           original.Stat,
+                statModifier:   0,
+                levelBonus:     0,
+                dc:             original.DC,
+                tier:           shadowTier,
+                activatedTrap:  null,
+                externalBonus:  0,
+                check:          check,
+                defendingStat:  Pinder.Core.Stats.StatBlock.DefenceTable[original.Stat]);
         }
 
         /// <summary>
