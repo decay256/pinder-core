@@ -56,7 +56,12 @@ namespace Pinder.SessionSetup
             "Read the character profile and produce exactly 15 lines — one for each numbered stem below — written in the character's first-person voice. " +
             "Each line completes the stem with one specific, concrete, slightly absurd, embodied answer that the character believes completely and would never realise is funny. " +
             "Plain text only. One stem-completion per line. Include the stem prefix. ~10-15 words per line. No markdown, no dashes, no numbering, no headings. " +
-            "The character treats absurd things as completely real. Specific over generic. Embodied over emotional-meta. Undignified is a feature.";
+            "The character treats absurd things as completely real. Specific over generic. Embodied over emotional-meta. Undignified is a feature. " +
+            "BIOGRAPHICAL ANCHOR REQUIREMENT: every completed stem MUST contain at least one of the following — " +
+            "(a) a proper name (e.g. 'Margot', not 'an ex'), " +
+            "(b) a specific year or date (e.g. '2019', not 'a few years ago'), " +
+            "(c) a concrete named place or event (e.g. 'the Pret A Manger on Euston Road', not 'a coffee shop'). " +
+            "Avoid abstract emotional themes ('fear of abandonment', 'feeling lost'); use concrete biography ('the night Margot left in 2019, I binged 14 episodes of Planet Earth alone').";
 
         private readonly ILlmTransport _transport;
         private readonly IStreamingLlmTransport? _streamingTransport;

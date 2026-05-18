@@ -63,6 +63,21 @@ namespace Pinder.Core.Conversation
         /// <summary>Active archetype directive for the player character, or null if none.</summary>
         public string ActiveArchetypeDirective { get; }
 
+        /// <summary>
+        /// #950: parsed stake lines (one entry per numbered line from the PSYCHOLOGICAL STAKE block).
+        /// When non-empty, SessionDocumentBuilder injects a per-turn stake-coverage summary so the
+        /// option generator knows which lines are still untouched.
+        /// Null or empty means no stake is available (skip coverage injection).
+        /// </summary>
+        public string[]? StakeLines { get; }
+
+        /// <summary>
+        /// #950: 0-based indices of stake lines already referenced in a chosen option this session.
+        /// Used with <see cref="StakeLines"/> to build the untouched-lines list injected per turn.
+        /// Null or empty means no lines have been referenced yet.
+        /// </summary>
+        public System.Collections.Generic.IReadOnlyCollection<int>? StakeLinesReferenced { get; }
+
         public DialogueContext(
             string playerPrompt,
             string opponentPrompt,
@@ -81,7 +96,9 @@ namespace Pinder.Core.Conversation
             string playerTextingStyle = "",
             Tell? activeTell = null,
             StatType[]? availableStats = null,
-            string activeArchetypeDirective = null)
+            string activeArchetypeDirective = null,
+            string[]? stakeLines = null,
+            System.Collections.Generic.IReadOnlyCollection<int>? stakeLinesReferenced = null)
         {
             PlayerPrompt = playerPrompt ?? throw new System.ArgumentNullException(nameof(playerPrompt));
             OpponentPrompt = opponentPrompt ?? throw new System.ArgumentNullException(nameof(opponentPrompt));
@@ -101,6 +118,8 @@ namespace Pinder.Core.Conversation
             ActiveTell = activeTell;
             AvailableStats = availableStats;
             ActiveArchetypeDirective = activeArchetypeDirective;
+            StakeLines = stakeLines;
+            StakeLinesReferenced = stakeLinesReferenced;
         }
     }
 }

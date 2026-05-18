@@ -57,8 +57,17 @@ namespace Pinder.LlmAdapters
             {
                 var capped = new DialogueOption[maxOptions];
                 System.Array.Copy(parsedOptions, capped, maxOptions);
-                return capped;
+                parsedOptions = capped;
             }
+
+            // #950: warn when the option generator skips all stake content.
+            // Lightweight check: split stake lines on sentence/clause boundaries,
+            // discard fragments shorter than 8 chars, look for any fragment in any option.
+            if (context.StakeLines != null && context.StakeLines.Length > 0 && parsedOptions.Length > 0)
+            {
+                WarnIfStakeSkipped(context, parsedOptions);
+            }
+
             return parsedOptions;
         }
 
@@ -427,6 +436,54 @@ namespace Pinder.LlmAdapters
                 _options.MaxTokens,
                 phase: LlmPhase.OpponentResponse,
                 ct: ct);
+        }
+
+        /// <summary>
+        /// #950: emits a trace warning (and fires <see cref="PinderLlmAdapterOptions.OnStakeSkipWarning"/>)
+        /// when none of the generated options contain any token from the active stake lines.
+        /// Matching strategy: extract all whitespace/punctuation-delimited tokens ≥ 5 chars from stake
+        /// lines (covers named fragments such as "Margot", "deleted", "drummer", "thesis", specific years,
+        /// etc.) and do a case-insensitive substring check against each option's text.
+        /// Intentionally lightweight — no regex, no per-fragment allocation inside the option loop.
+        /// </summary>
+        private void WarnIfStakeSkipped(DialogueContext context, DialogueOption[] options)
+        {
+            // Split each stake line on all non-alphanumeric characters to extract meaningful tokens.
+            // Minimum 5 chars to filter stop-words; keeps names, verbs, years, nouns.
+            var tokens = new System.Collections.Generic.HashSet<string>(System.StringComparer.OrdinalIgnoreCase);
+            foreach (var line in context.StakeLines!)
+            {
+                foreach (var part in line.Split(new[] { ' ', ',', '.', '\n', '\r', ';', ':', '!', '?', '(', ')' }, System.StringSplitOptions.RemoveEmptyEntries))
+                {
+                    var trimmed = part.Trim();
+                    if (trimmed.Length >= 5)
+                        tokens.Add(trimmed.ToLowerInvariant());
+                }
+            }
+
+            if (tokens.Count == 0) return;
+
+            bool anyHit = false;
+            foreach (var opt in options)
+            {
+                string optLower = opt.IntendedText.ToLowerInvariant();
+                foreach (var token in tokens)
+                {
+                    if (optLower.IndexOf(token, System.StringComparison.Ordinal) >= 0)
+                    {
+                        anyHit = true;
+                        break;
+                    }
+                }
+                if (anyHit) break;
+            }
+
+            if (!anyHit)
+            {
+                string warning = $"option_generator_skipped_stake turn={context.CurrentTurn} stake_lines={context.StakeLines!.Length} stake_hits=0";
+                System.Diagnostics.Trace.TraceWarning(warning);
+                _options.OnStakeSkipWarning?.Invoke(warning);
+            }
         }
 
         public void Dispose()
