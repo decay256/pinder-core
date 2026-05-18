@@ -1,0 +1,48 @@
+# consequences.yaml — plain-language consequence strings for the expanded EventBox.
+# Companion to pinder-web #649.
+#
+# Per-kind/per-tier consequence strings rendered as Section 1 of the expanded
+# EventBox: "what happened in plain English".
+#
+# Key structure:
+#   consequence.<kind>.<outcome>[.<detail>]
+#
+# Slot substitutions:
+#   {stat}      — StatName, e.g. "Honesty"
+#   {trap_name} — trap display name, e.g. "Pretentious"
+#
+# Kinds covered:
+#   roll       — option_roll (standard stat check)
+#   shadow     — shadow check (per named shadow)
+#   horniness  — horniness check (per failure tier)
+#   steering   — steering check
+#   trap       — trap_activated
+schema_version: 1
+locale: en
+strings:
+  # ── option_roll ───────────────────────────────────────────────────────────
+  consequence.roll.pass: "Your {stat} roll landed — the message reads sincere and lands well."
+  consequence.roll.miss.fumble: "Your {stat} roll fumbled — the message reads awkward and off-putting."
+  consequence.roll.miss.misfire: "Your {stat} roll misfired — the message lands flat and slightly off."
+  consequence.roll.miss.tropetrap: "Your {stat} roll walked into a trope trap — the message reads as a cliché instead of fresh."
+  consequence.roll.miss.catastrophe: "Your {stat} roll bombed catastrophically — the message lands very poorly."
+
+  # ── shadow ────────────────────────────────────────────────────────────────
+  consequence.shadow.miss.dread: "Your Dread shadow took over — the message comes out anxious and over-explaining."
+  consequence.shadow.miss.denial: "Your Denial shadow took over — the message dodges what you really wanted to say."
+  consequence.shadow.miss.fixation: "Your Fixation shadow took over — the message obsesses over a detail and misses the moment."
+  consequence.shadow.miss.madness: "Your Madness shadow took over — the message reads chaotic and unhinged."
+  consequence.shadow.miss.despair: "Your Despair shadow took over — the message reads hopeless and unflirty."
+  consequence.shadow.miss.overthinking: "Your Overthinking shadow took over — the message reads as second-guessing on display."
+
+  # ── horniness ─────────────────────────────────────────────────────────────
+  consequence.horniness.miss.fumble: "Horniness checked out — the message lost its edge."
+  consequence.horniness.miss.misfire: "Horniness misfired — the message reads slightly more thirsty than intended."
+  consequence.horniness.miss.tropetrap: "Horniness walked into a trope trap — the flirt pattern backfired."
+  consequence.horniness.miss.catastrophe: "Horniness misfired catastrophically — the message reads thirsty in a cringey way."
+
+  # ── steering ─────────────────────────────────────────────────────────────
+  consequence.steering.miss: "Steering missed — the pivot didn't land and the message stays on the rejected topic."
+
+  # ── trap ──────────────────────────────────────────────────────────────────
+  consequence.trap.activated: "You walked into the {trap_name} trap — your message will follow that pattern instead of your intended one."
