@@ -106,3 +106,12 @@ strings:
   display_names.shadow.fixation: "Fixation"
   display_names.shadow.dread: "Dread"
   display_names.shadow.overthinking: "Overthinking"
+
+  # ── TurnProgressIndicator re-estimate states (web#654) ────────────
+  # The progress bar re-estimates ETA when elapsed > 1.2× the initial
+  # estimate and surfaces a "longer than usual" line past 2× without
+  # completion. Keep the slot names ({elapsed}, {avg}) stable so the
+  # frontend can interpolate without touching the catalogue again.
+  turn_progress.fill_status: "Generating turn… ({elapsed} / ~{avg} avg)"
+  turn_progress.reestimated_status: "Generating turn… (re-estimating, {elapsed} elapsed)"
+  turn_progress.longer_than_usual: "Still working — this is taking longer than usual ({elapsed})"
