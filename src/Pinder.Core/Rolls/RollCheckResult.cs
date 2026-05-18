@@ -85,5 +85,61 @@ namespace Pinder.Core.Rolls
             Tier         = tier;
             MissMargin   = missMargin;
         }
+
+        /// <summary>
+        /// Synthesise a <see cref="RollCheckResult"/> from the bespoke fields a
+        /// <see cref="RollResult"/> already carries. Used by callers that build a
+        /// <see cref="RollResult"/> outside <see cref="RollEngine"/> (e.g.
+        /// <c>GameSession.CreateForcedFailResult</c>, test fixtures) so the
+        /// <c>Check</c> property is never null. Modifier bag is reconstructed as
+        /// <c>[stat, level]</c> from <paramref name="statModifier"/> /
+        /// <paramref name="levelBonus"/>; <paramref name="externalBonus"/> is folded
+        /// into <c>Total</c> the same way <see cref="RollEngine.ResolveCheck"/> would.
+        /// </summary>
+        /// <remarks>
+        /// <c>Tier</c> here is derived from <see cref="FailureTierLadder.FromMissMargin"/>
+        /// only — it can differ from the bespoke <see cref="RollResult.Tier"/> on a
+        /// nat-1 (Legendary in RollResult.Tier vs. Catastrophe here). This mirrors the
+        /// behaviour documented on <see cref="RollResult.Check"/>.
+        /// </remarks>
+        public static RollCheckResult Synthesise(
+            int dieRoll,
+            int? secondDieRoll,
+            int usedDieRoll,
+            int statModifier,
+            int levelBonus,
+            int dc,
+            int externalBonus = 0,
+            RollCheckKind kind = RollCheckKind.OptionRoll)
+        {
+            var modifiers = new NamedModifier[]
+            {
+                new NamedModifier("stat",  statModifier),
+                new NamedModifier("level", levelBonus),
+            };
+            int total       = usedDieRoll + statModifier + levelBonus + externalBonus;
+            bool isNatOne   = usedDieRoll == 1;
+            bool isNatTwenty = usedDieRoll == 20;
+            bool isSuccess  = total >= dc;
+            int missMargin  = isSuccess ? 0 : dc - total;
+            FailureTier tier = isSuccess
+                ? FailureTier.Success
+                : FailureTierLadder.FromMissMargin(missMargin);
+
+            return new RollCheckResult(
+                kind,
+                dieRoll,
+                secondDieRoll,
+                usedDieRoll,
+                modifiers,
+                modifierSum: statModifier + levelBonus,
+                total:       total,
+                dc:          dc,
+                isSuccess:   isSuccess,
+                isNatOne:    isNatOne,
+                isNatTwenty: isNatTwenty,
+                tier:        tier,
+                missMargin:  missMargin);
+        }
     }
 }
