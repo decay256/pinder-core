@@ -57,10 +57,11 @@ namespace Pinder.LlmAdapters.OpenAi
         private readonly string _model;
         private readonly HttpClient _httpClient;
         private readonly bool _ownsHttpClient;
+        private readonly bool _useAnthropicCacheControl;
         private bool _disposed;
 
         /// <summary>Creates transport with internally-owned HttpClient.</summary>
-        public OpenAiStreamingTransport(string apiKey, string baseUrl, string model)
+        public OpenAiStreamingTransport(string apiKey, string baseUrl, string model, bool useAnthropicCacheControl = true)
         {
             if (string.IsNullOrWhiteSpace(apiKey))
                 throw new ArgumentException("API key must not be null, empty, or whitespace.", nameof(apiKey));
@@ -73,10 +74,11 @@ namespace Pinder.LlmAdapters.OpenAi
                 Timeout = Timeout.InfiniteTimeSpan,
             };
             _ownsHttpClient = true;
+            _useAnthropicCacheControl = useAnthropicCacheControl;
         }
 
         /// <summary>Creates transport with an externally-provided HttpClient (for testing).</summary>
-        public OpenAiStreamingTransport(string apiKey, string baseUrl, string model, HttpClient httpClient)
+        public OpenAiStreamingTransport(string apiKey, string baseUrl, string model, HttpClient httpClient, bool useAnthropicCacheControl = true)
         {
             if (string.IsNullOrWhiteSpace(apiKey))
                 throw new ArgumentException("API key must not be null, empty, or whitespace.", nameof(apiKey));
@@ -85,6 +87,7 @@ namespace Pinder.LlmAdapters.OpenAi
             _baseUrl = (baseUrl ?? "https://api.openai.com").TrimEnd('/');
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             _ownsHttpClient = false;
+            _useAnthropicCacheControl = useAnthropicCacheControl;
         }
 
         /// <inheritdoc />
@@ -101,15 +104,22 @@ namespace Pinder.LlmAdapters.OpenAi
             if (systemPrompt == null) throw new ArgumentNullException(nameof(systemPrompt));
             if (userMessage == null) throw new ArgumentNullException(nameof(userMessage));
 
+            // #947: see OpenAiCacheControl. Wrap the system prompt in a
+            // content-block with cache_control: ephemeral so the OpenRouter
+            // → Anthropic streaming path can register a prompt-cache
+            // breakpoint. Plain string content cannot carry the marker.
+            var systemContent = OpenAiCacheControl.BuildSystemContent(
+                systemPrompt, _useAnthropicCacheControl);
+
             var request = new
             {
                 model = _model,
                 max_tokens = maxTokens,
                 temperature = temperature,
                 stream = true,
-                messages = new[]
+                messages = new object[]
                 {
-                    new { role = "system", content = systemPrompt },
+                    new { role = "system", content = systemContent },
                     new { role = "user", content = userMessage }
                 }
             };

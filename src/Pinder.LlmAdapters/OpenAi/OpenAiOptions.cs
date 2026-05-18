@@ -26,5 +26,19 @@ namespace Pinder.LlmAdapters.OpenAi
         /// When set, overrides the hardcoded tier instructions in SessionDocumentBuilder.
         /// </summary>
         public StatDeliveryInstructions? StatDeliveryInstructions { get; set; }
+
+        /// <summary>
+        /// Issue #947 — when true (default), emits the system prompt as a
+        /// single-element <c>text</c> content-block with an inline
+        /// <c>cache_control: { type: "ephemeral" }</c> breakpoint. This is the
+        /// shape Anthropic prompt-caching requires and that OpenRouter passes
+        /// through verbatim to Anthropic-family models (Sonnet 4.6 included).
+        ///
+        /// Set to false when routing to a provider that rejects unknown fields
+        /// on content blocks. Native OpenAI tolerates the marker (uses automatic
+        /// caching regardless), so leaving this on is safe for the common
+        /// OpenAI / OpenRouter-Anthropic / OpenRouter-OpenAI routes.
+        /// </summary>
+        public bool UseAnthropicCacheControl { get; set; } = true;
     }
 }
