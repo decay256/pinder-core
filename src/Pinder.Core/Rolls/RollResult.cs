@@ -19,6 +19,8 @@ namespace Pinder.Core.Rolls
         public int UsedDieRoll { get; }
 
         /// <summary>The stat used for the roll.</summary>
+        [JsonPropertyName("stat")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public StatType Stat { get; }
 
         /// <summary>
@@ -71,6 +73,8 @@ namespace Pinder.Core.Rolls
         public bool IsNatTwenty { get; }
 
         /// <summary>Failure tier. None on success.</summary>
+        [JsonPropertyName("tier")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public FailureTier Tier { get; }
 
         /// <summary>
@@ -92,6 +96,8 @@ namespace Pinder.Core.Rolls
         /// Risk tier derived from the "need" value (dc - statMod - levelBonus).
         /// Safe (≤5), Medium (6–10), Hard (11–15), Bold (≥16).
         /// </summary>
+        [JsonPropertyName("risk_tier")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public RiskTier RiskTier { get; }
 
         /// <summary>By how much the roll missed the DC (using FinalTotal). 0 on success.</summary>
