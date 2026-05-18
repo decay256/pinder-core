@@ -14,11 +14,11 @@ namespace Pinder.Core.Rolls
     {
         /// <summary>
         /// Maps a miss margin to a <see cref="FailureTier"/>.
-        /// Returns <see cref="FailureTier.None"/> when <paramref name="missMargin"/> ≤ 0 (success).
+        /// Returns <see cref="FailureTier.Success"/> when <paramref name="missMargin"/> ≤ 0 (success).
         /// </summary>
         public static FailureTier FromMissMargin(int missMargin)
         {
-            if (missMargin <= 0) return FailureTier.None;
+            if (missMargin <= 0) return FailureTier.Success;
             if (missMargin <= 2) return FailureTier.Fumble;
             if (missMargin <= 5) return FailureTier.Misfire;
             if (missMargin <= 9) return FailureTier.TropeTrap;

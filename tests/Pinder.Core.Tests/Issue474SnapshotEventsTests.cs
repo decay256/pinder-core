@@ -54,7 +54,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void Detector_Nat20_EmitsNat20()
         {
-            var roll = new RollResult(20, null, 20, StatType.Charm, 2, 0, 13, FailureTier.None);
+            var roll = new RollResult(20, null, 20, StatType.Charm, 2, 0, 13, FailureTier.Success);
             var result = MakeResult(roll: roll);
             var kinds = TurnEventDetector.DetectEventKinds(result);
             Assert.Equal(new[] { "nat_20" }, kinds);
@@ -98,7 +98,7 @@ namespace Pinder.Core.Tests
             // A turn that triggered a combo, read a tell, and applied
             // a callback bonus emits all three kinds in canonical order
             // alongside the roll's nat_20.
-            var roll = new RollResult(20, null, 20, StatType.Charm, 2, 0, 13, FailureTier.None);
+            var roll = new RollResult(20, null, 20, StatType.Charm, 2, 0, 13, FailureTier.Success);
             var result = MakeResult(
                 roll: roll,
                 comboTriggered: "ice-breaker",
@@ -221,7 +221,7 @@ namespace Pinder.Core.Tests
             // Schema discipline: every TurnSnapshot built going forward
             // carries the Events array (possibly empty) so replay
             // tooling can rely on it.
-            var roll = new RollResult(20, null, 20, StatType.Charm, 2, 0, 13, FailureTier.None);
+            var roll = new RollResult(20, null, 20, StatType.Charm, 2, 0, 13, FailureTier.Success);
             var result = new TurnResult(
                 roll: roll, deliveredMessage: "msg", opponentMessage: "...",
                 narrativeBeat: null, interestDelta: 1,
@@ -276,7 +276,7 @@ namespace Pinder.Core.Tests
             // interpretation drawn deterministically from the variant
             // catalog.
             var catalog = LoadCatalog();
-            var roll = new RollResult(20, null, 20, StatType.Charm, 2, 0, 13, FailureTier.None);
+            var roll = new RollResult(20, null, 20, StatType.Charm, 2, 0, 13, FailureTier.Success);
             var result = new TurnResult(
                 roll: roll, deliveredMessage: "msg", opponentMessage: "...",
                 narrativeBeat: null, interestDelta: 1,
@@ -347,7 +347,7 @@ namespace Pinder.Core.Tests
             // with WriteIndented = true) and asserts the disk shape is
             // what replay tooling will see.
             var catalog = LoadCatalog();
-            var roll = new RollResult(20, null, 20, StatType.Charm, 2, 0, 13, FailureTier.None);
+            var roll = new RollResult(20, null, 20, StatType.Charm, 2, 0, 13, FailureTier.Success);
             var result = new TurnResult(
                 roll: roll, deliveredMessage: "msg", opponentMessage: "...",
                 narrativeBeat: null, interestDelta: 1,
@@ -426,7 +426,7 @@ namespace Pinder.Core.Tests
             });
 
         private static RollResult MakeSuccessRoll() =>
-            new RollResult(15, null, 15, StatType.Charm, 2, 0, 13, FailureTier.None);
+            new RollResult(15, null, 15, StatType.Charm, 2, 0, 13, FailureTier.Success);
 
         private static TurnResult MakeResult(
             RollResult? roll = null,

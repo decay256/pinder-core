@@ -41,12 +41,12 @@ namespace Pinder.Core.Tests.RulesSpec
         {
             int dc = 13;
             if (nat20)
-                return new RollResult(20, null, 20, StatType.Charm, 0, 0, dc, FailureTier.None, null, 0);
+                return new RollResult(20, null, 20, StatType.Charm, 0, 0, dc, FailureTier.Success, null, 0);
 
             int total = dc + beatMargin;
             int roll = System.Math.Min(19, total);
             int mod = total - roll;
-            return new RollResult(roll, null, roll, StatType.Charm, mod, 0, dc, FailureTier.None, null, 0);
+            return new RollResult(roll, null, roll, StatType.Charm, mod, 0, dc, FailureTier.Success, null, 0);
         }
 
         // =====================================================================
@@ -57,7 +57,7 @@ namespace Pinder.Core.Tests.RulesSpec
             int dc = 13;
             int statMod = dc - need;
             int roll = success ? 19 : 2;
-            var tier = success ? FailureTier.None : FailureTier.Fumble;
+            var tier = success ? FailureTier.Success : FailureTier.Fumble;
             return new RollResult(roll, null, roll, StatType.Charm, statMod, 0, dc, tier, null, 0);
         }
 

@@ -66,7 +66,7 @@ namespace Pinder.Core.Tests
 
             Assert.True(result.IsNatTwenty);
             Assert.True(result.IsSuccess);
-            Assert.Equal(FailureTier.None, result.Tier);
+            Assert.Equal(FailureTier.Success, result.Tier);
         }
 
         [Fact]

@@ -60,7 +60,7 @@ namespace Pinder.Core.Tests
             var result = new RollResult(
                 dieRoll: 10, secondDieRoll: null, usedDieRoll: 10,
                 stat: StatType.Charm, statModifier: 4, levelBonus: 0,
-                dc: 13, tier: FailureTier.None, externalBonus: 5);
+                dc: 13, tier: FailureTier.Success, externalBonus: 5);
 
             Assert.True(result.IsSuccess);
             Assert.Equal(14, result.Total);
@@ -79,7 +79,7 @@ namespace Pinder.Core.Tests
             var result = new RollResult(
                 dieRoll: 10, secondDieRoll: null, usedDieRoll: 10,
                 stat: StatType.Charm, statModifier: 4, levelBonus: 0,
-                dc: 13, tier: FailureTier.None, externalBonus: 10);
+                dc: 13, tier: FailureTier.Success, externalBonus: 10);
 
             Assert.Equal(3, SuccessScale.GetInterestDelta(result));
         }
@@ -91,7 +91,7 @@ namespace Pinder.Core.Tests
             var result = new RollResult(
                 dieRoll: 15, secondDieRoll: null, usedDieRoll: 15,
                 stat: StatType.Charm, statModifier: 3, levelBonus: 0,
-                dc: 13, tier: FailureTier.None, externalBonus: 0);
+                dc: 13, tier: FailureTier.Success, externalBonus: 0);
 
             // Total = 18, FinalTotal = 18, margin = 5 → +2
             Assert.Equal(2, SuccessScale.GetInterestDelta(result));
@@ -172,7 +172,7 @@ namespace Pinder.Core.Tests
                 externalBonus: 6);
 
             Assert.True(result.IsSuccess);
-            Assert.Equal(FailureTier.None, result.Tier);
+            Assert.Equal(FailureTier.Success, result.Tier);
         }
 
         // --- MissMargin uses FinalTotal ---
@@ -197,7 +197,7 @@ namespace Pinder.Core.Tests
             var result = new RollResult(
                 dieRoll: 15, secondDieRoll: null, usedDieRoll: 15,
                 stat: StatType.Charm, statModifier: 0, levelBonus: 0,
-                dc: 13, tier: FailureTier.None, externalBonus: 0);
+                dc: 13, tier: FailureTier.Success, externalBonus: 0);
 
             Assert.True(result.IsSuccess);
             Assert.Equal(0, result.MissMargin);

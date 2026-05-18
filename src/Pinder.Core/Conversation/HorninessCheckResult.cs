@@ -53,6 +53,6 @@ namespace Pinder.Core.Conversation
 
         /// <summary>A result for when no check was performed (sessionHorniness = 0 or no shadows).</summary>
         public static HorninessCheckResult NotPerformed { get; } =
-            new HorninessCheckResult(0, 0, 0, 0, false, FailureTier.None, false);
+            new HorninessCheckResult(0, 0, 0, 0, false, FailureTier.Success, false);
     }
 }

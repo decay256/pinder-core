@@ -59,7 +59,7 @@ namespace Pinder.Core.Tests.RulesSpec
                 return new RollResult(
                     dieRoll: 20, secondDieRoll: null, usedDieRoll: 20,
                     stat: StatType.Charm, statModifier: 0, levelBonus: 0,
-                    dc: dc, tier: FailureTier.None, activatedTrap: null, externalBonus: 0
+                    dc: dc, tier: FailureTier.Success, activatedTrap: null, externalBonus: 0
                 );
             }
             int total = dc + beatMargin;
@@ -68,7 +68,7 @@ namespace Pinder.Core.Tests.RulesSpec
             return new RollResult(
                 dieRoll: usedDieRoll, secondDieRoll: null, usedDieRoll: usedDieRoll,
                 stat: StatType.Charm, statModifier: statModifier, levelBonus: 0,
-                dc: dc, tier: FailureTier.None, activatedTrap: null, externalBonus: 0
+                dc: dc, tier: FailureTier.Success, activatedTrap: null, externalBonus: 0
             );
         }
 
@@ -77,7 +77,7 @@ namespace Pinder.Core.Tests.RulesSpec
             int dc = 13;
             int statModifier = dc - need;
             int usedDieRoll = isSuccess ? 19 : 2;
-            var tier = isSuccess ? FailureTier.None : FailureTier.Fumble;
+            var tier = isSuccess ? FailureTier.Success : FailureTier.Fumble;
             return new RollResult(
                 dieRoll: usedDieRoll, secondDieRoll: null, usedDieRoll: usedDieRoll,
                 stat: StatType.Charm, statModifier: statModifier, levelBonus: 0,

@@ -37,7 +37,7 @@ namespace Pinder.Core.Conversation
         public Task<string> DeliverMessageAsync(DeliveryContext context, CancellationToken ct = default)
         {
             ct.ThrowIfCancellationRequested();
-            string message = context.Outcome == FailureTier.None
+            string message = context.Outcome == FailureTier.Success
                 ? context.ChosenOption.IntendedText
                 : $"[{context.Outcome}] {context.ChosenOption.IntendedText}";
             return Task.FromResult(message);

@@ -5,7 +5,7 @@ namespace Pinder.Core.Rolls
     /// </summary>
     public enum FailureTier
     {
-        None,           // Not a failure
+        Success,       // Not a failure
         Fumble,         // Missed by 1–2:  minor awkwardness
         Misfire,        // Missed by 3–5:  message goes sideways
         TropeTrap,      // Missed by 6–9:  activates a Trap on the stat used

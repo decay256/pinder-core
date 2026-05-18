@@ -338,7 +338,7 @@ namespace Pinder.Core.Tests
             // For success: use high stat modifier so RiskTier = Safe (need <= 5)
             // For failure: use 0 stat modifier so FinalTotal < dc
             int statMod = isSuccess ? (dc - 3) : 0;
-            var tier = isSuccess ? FailureTier.None : FailureTier.Fumble;
+            var tier = isSuccess ? FailureTier.Success : FailureTier.Fumble;
 
             return new RollResult(
                 dieRoll: usedDie,

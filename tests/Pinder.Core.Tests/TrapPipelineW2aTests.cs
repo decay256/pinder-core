@@ -73,7 +73,7 @@ namespace Pinder.Core.Tests
                 DeliveryContexts.Add(context);
                 // Tag the message with the tier so it is observably different
                 // from the IntendedText (so a TextDiff is emitted on failure).
-                string text = context.Outcome == FailureTier.None
+                string text = context.Outcome == FailureTier.Success
                     ? context.ChosenOption.IntendedText
                     : $"[{context.Outcome}] {context.ChosenOption.IntendedText}";
                 return Task.FromResult(text);

@@ -85,7 +85,7 @@ namespace Pinder.Core.Tests
                 conversationHistory: new List<(string, string)>(),
                 opponentLastMessage: "",
                 chosenOption: option,
-                outcome: FailureTier.None,
+                outcome: FailureTier.Success,
                 beatDcBy: 3,
                 activeTraps: new List<string>()
             );

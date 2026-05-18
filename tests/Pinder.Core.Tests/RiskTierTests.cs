@@ -198,7 +198,7 @@ namespace Pinder.Core.Tests
             // Stat +2, level +1, DC 18 → need=15 → Hard
             // Roll 16 → total=19 → success, margin=1 → SuccessScale +1
             // RiskTierBonus: Hard=+3. Total = +4
-            var r = new RollResult(16, null, 16, StatType.Charm, 2, 1, 18, FailureTier.None);
+            var r = new RollResult(16, null, 16, StatType.Charm, 2, 1, 18, FailureTier.Success);
             Assert.True(r.IsSuccess);
             Assert.Equal(RiskTier.Hard, r.RiskTier);
             Assert.Equal(1, SuccessScale.GetInterestDelta(r));
@@ -211,7 +211,7 @@ namespace Pinder.Core.Tests
             // Stat +0, level +0, DC 20 → need=20 → Reckless (≥20)
             // Roll 20 → nat-20 → success → SuccessScale +4
             // RiskTierBonus: Reckless=+10. Total = +14
-            var r = new RollResult(20, null, 20, StatType.Charm, 0, 0, 20, FailureTier.None);
+            var r = new RollResult(20, null, 20, StatType.Charm, 0, 0, 20, FailureTier.Success);
             Assert.True(r.IsSuccess);
             Assert.Equal(RiskTier.Reckless, r.RiskTier);
             Assert.Equal(4, SuccessScale.GetInterestDelta(r));
@@ -224,7 +224,7 @@ namespace Pinder.Core.Tests
             // Stat +4, level +2, DC 10 → need=4 → Safe (≤7)
             // Roll 8 → total=14 → success, margin=4 → SuccessScale +1
             // RiskTierBonus: Safe=+1
-            var r = new RollResult(8, null, 8, StatType.Charm, 4, 2, 10, FailureTier.None);
+            var r = new RollResult(8, null, 8, StatType.Charm, 4, 2, 10, FailureTier.Success);
             Assert.True(r.IsSuccess);
             Assert.Equal(RiskTier.Safe, r.RiskTier);
             Assert.Equal(1, SuccessScale.GetInterestDelta(r));

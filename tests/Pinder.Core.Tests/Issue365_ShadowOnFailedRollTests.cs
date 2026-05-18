@@ -253,7 +253,7 @@ namespace Pinder.Core.Tests
             public Task<string> DeliverMessageAsync(DeliveryContext context, System.Threading.CancellationToken ct = default)
             {
                 string intended = context.ChosenOption.IntendedText;
-                return Task.FromResult(context.Outcome == FailureTier.None
+                return Task.FromResult(context.Outcome == FailureTier.Success
                     ? intended
                     : $"[{context.Outcome}] {intended}");
             }

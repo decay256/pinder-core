@@ -53,7 +53,7 @@ namespace Pinder.Core.Rolls
             bool isNatOne  = usedRoll == 1;
             bool isNatTwenty = usedRoll == 20;
             int missMargin = isSuccess ? 0 : dc - total;
-            FailureTier tier = isSuccess ? FailureTier.None : FailureTierLadder.FromMissMargin(missMargin);
+            FailureTier tier = isSuccess ? FailureTier.Success : FailureTierLadder.FromMissMargin(missMargin);
 
             return new RollCheckResult(
                 kind, roll1, roll2, usedRoll, modifiers, modSum, total, dc,
@@ -229,7 +229,7 @@ namespace Pinder.Core.Rolls
             }
             else if (usedRoll == 20 || finalTotal >= dc)
             {
-                tier = FailureTier.None; // success
+                tier = FailureTier.Success; // success
             }
             else
             {
@@ -255,7 +255,7 @@ namespace Pinder.Core.Rolls
             };
             int checkMissMargin = (usedRoll == 20 || total + externalBonus >= dc) ? 0 : dc - (total + externalBonus);
             bool checkIsSuccess = (total + externalBonus) >= dc;
-            FailureTier checkTier = checkIsSuccess ? FailureTier.None : FailureTierLadder.FromMissMargin(checkMissMargin);
+            FailureTier checkTier = checkIsSuccess ? FailureTier.Success : FailureTierLadder.FromMissMargin(checkMissMargin);
             var check = new RollCheckResult(
                 RollCheckKind.OptionRoll,
                 roll1, roll2, usedRoll,

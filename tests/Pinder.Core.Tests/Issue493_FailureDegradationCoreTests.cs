@@ -90,7 +90,7 @@ namespace Pinder.Core.Tests
             Assert.Equal(FailureTier.TropeTrap, context.DeliveryTier);
         }
 
-        // Mutation: would catch if default value is something other than FailureTier.None
+        // Mutation: would catch if default value is something other than FailureTier.Success
         [Fact]
         public void AC1_OpponentContext_DeliveryTier_DefaultsToNone()
         {
@@ -106,12 +106,12 @@ namespace Pinder.Core.Tests
                 interestAfter: 10,
                 responseDelayMinutes: 1.0);
 
-            Assert.Equal(FailureTier.None, context.DeliveryTier);
+            Assert.Equal(FailureTier.Success, context.DeliveryTier);
         }
 
         // Mutation: would catch if DeliveryTier stores wrong enum value (e.g. always Fumble)
         [Theory]
-        [InlineData(FailureTier.None)]
+        [InlineData(FailureTier.Success)]
         [InlineData(FailureTier.Fumble)]
         [InlineData(FailureTier.Misfire)]
         [InlineData(FailureTier.TropeTrap)]
@@ -139,7 +139,7 @@ namespace Pinder.Core.Tests
 
         #region AC2: GameSession passes roll tier to OpponentContext
 
-        // Mutation: would catch if GameSession passes FailureTier.None instead of rollResult.Tier on failure
+        // Mutation: would catch if GameSession passes FailureTier.Success instead of rollResult.Tier on failure
         [Fact]
         public async Task AC2_GameSession_PassesFailureTier_OnFailedRoll()
         {
@@ -160,7 +160,7 @@ namespace Pinder.Core.Tests
             await session.ResolveTurnAsync(0);
 
             Assert.NotNull(llm.CapturedOpponentContext);
-            Assert.NotEqual(FailureTier.None, llm.CapturedOpponentContext!.DeliveryTier);
+            Assert.NotEqual(FailureTier.Success, llm.CapturedOpponentContext!.DeliveryTier);
         }
 
         // Mutation: would catch if GameSession passes a failure tier when the roll is actually a success
@@ -183,7 +183,7 @@ namespace Pinder.Core.Tests
             await session.ResolveTurnAsync(0);
 
             Assert.NotNull(llm.CapturedOpponentContext);
-            Assert.Equal(FailureTier.None, llm.CapturedOpponentContext!.DeliveryTier);
+            Assert.Equal(FailureTier.Success, llm.CapturedOpponentContext!.DeliveryTier);
         }
 
         // Mutation: would catch if GameSession hardcodes a specific FailureTier instead of reading from rollResult.Tier
@@ -232,7 +232,7 @@ namespace Pinder.Core.Tests
                 responseDelayMinutes: 0);
 
             // Should default to None (success)
-            Assert.Equal(FailureTier.None, context.DeliveryTier);
+            Assert.Equal(FailureTier.Success, context.DeliveryTier);
         }
 
         // Mutation: would catch if DeliveryTier interacts with other optional params incorrectly

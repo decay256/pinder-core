@@ -35,7 +35,7 @@ namespace Pinder.Core.Tests
             Assert.Equal(15, check.Total);
             Assert.Equal(15, check.Dc);
             Assert.True(check.IsSuccess);
-            Assert.Equal(FailureTier.None, check.Tier);
+            Assert.Equal(FailureTier.Success, check.Tier);
             Assert.Equal(0, check.MissMargin);
         }
 

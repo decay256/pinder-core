@@ -16,7 +16,7 @@ namespace Pinder.Core.Tests
     {
         // Helpers — create minimal valid instances for required constructor params
         private static RollResult MakeRoll() =>
-            new RollResult(10, null, 10, StatType.Charm, 2, 0, 13, FailureTier.None);
+            new RollResult(10, null, 10, StatType.Charm, 2, 0, 13, FailureTier.Success);
 
         private static GameStateSnapshot MakeSnapshot() =>
             new GameStateSnapshot(10, InterestState.Interested, 0, Array.Empty<string>(), 1);

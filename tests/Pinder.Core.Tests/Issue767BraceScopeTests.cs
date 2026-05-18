@@ -59,7 +59,7 @@ namespace Pinder.Core.Tests
             });
 
         private static RollResult MakeRoll() =>
-            new RollResult(10, null, 10, StatType.Charm, 2, 0, 13, FailureTier.None);
+            new RollResult(10, null, 10, StatType.Charm, 2, 0, 13, FailureTier.Success);
 
         private static GameStateSnapshot MakeState() =>
             new GameStateSnapshot(10, InterestState.Interested, 0, Array.Empty<string>(), 1);

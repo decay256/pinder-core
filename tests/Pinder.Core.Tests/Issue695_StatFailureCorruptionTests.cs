@@ -60,7 +60,7 @@ namespace Pinder.Core.Tests
             var ctx = llm.CapturedDeliveryContext;
 
             // Should be a failure
-            Assert.NotEqual(FailureTier.None, ctx.Outcome);
+            Assert.NotEqual(FailureTier.Success, ctx.Outcome);
 
             // StatFailureInstruction should be populated with RIZZ-specific text
             Assert.NotNull(ctx.StatFailureInstruction);
@@ -88,7 +88,7 @@ namespace Pinder.Core.Tests
             Assert.NotNull(llm.CapturedDeliveryContext);
             var ctx = llm.CapturedDeliveryContext;
 
-            Assert.NotEqual(FailureTier.None, ctx.Outcome);
+            Assert.NotEqual(FailureTier.Success, ctx.Outcome);
             Assert.NotNull(ctx.StatFailureInstruction);
             Assert.Contains("OVERTHINKING", ctx.StatFailureInstruction);
         }
@@ -113,7 +113,7 @@ namespace Pinder.Core.Tests
             Assert.NotNull(llm.CapturedDeliveryContext);
             var sctx = llm.CapturedDeliveryContext;
             // Nat 20 should always be success
-            Assert.Equal(FailureTier.None, sctx.Outcome);
+            Assert.Equal(FailureTier.Success, sctx.Outcome);
             Assert.Null(sctx.StatFailureInstruction);
         }
 
