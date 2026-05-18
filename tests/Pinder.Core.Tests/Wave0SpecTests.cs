@@ -296,7 +296,7 @@ namespace Pinder.Core.Tests
         {
             // Total < DC but FinalTotal >= DC
             var result = new RollResult(10, null, 10, StatType.Charm, 2, 0, 14,
-                FailureTier.None, externalBonus: 3);
+                FailureTier.Success, externalBonus: 3);
             // Total = 10 + 2 + 0 = 12... wait, dieRoll=10 is used for UsedDieRoll
             // Actually, the RollResult constructor: Total = usedDieRoll + statModifier + levelBonus = 10 + 2 + 0 = 12
             // FinalTotal = 12 + 3 = 15 >= 14 → success
@@ -331,7 +331,7 @@ namespace Pinder.Core.Tests
         public void RollResult_Nat20_WithNegativeBonus_StillSucceeds()
         {
             var result = new RollResult(20, null, 20, StatType.Charm, 0, 0, 50,
-                FailureTier.None, externalBonus: -100);
+                FailureTier.Success, externalBonus: -100);
             Assert.True(result.IsNatTwenty);
             Assert.True(result.IsSuccess);
         }
@@ -589,7 +589,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void RollResult_DefaultExternalBonus_IsZero()
         {
-            var result = new RollResult(15, null, 15, StatType.Charm, 3, 0, 13, FailureTier.None);
+            var result = new RollResult(15, null, 15, StatType.Charm, 3, 0, 13, FailureTier.Success);
             Assert.Equal(0, result.ExternalBonus);
             Assert.Equal(result.Total, result.FinalTotal);
             Assert.True(result.IsSuccess); // 18 >= 13

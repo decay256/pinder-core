@@ -76,7 +76,7 @@ namespace Pinder.Core.Conversation
             string playerName = "",
             string opponentName = "",
             int currentTurn = 0,
-            FailureTier deliveryTier = FailureTier.None,
+            FailureTier deliveryTier = FailureTier.Success,
             string activeArchetypeDirective = null)
         {
             PlayerPrompt = playerPrompt ?? throw new System.ArgumentNullException(nameof(playerPrompt));

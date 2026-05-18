@@ -52,7 +52,7 @@ namespace Pinder.Core.Tests
     public class FailureScaleTests
     {
         [Theory]
-        [InlineData(FailureTier.None, 0)]
+        [InlineData(FailureTier.Success, 0)]
         [InlineData(FailureTier.Fumble, -1)]
         [InlineData(FailureTier.Misfire, -1)]
         [InlineData(FailureTier.TropeTrap, -2)]

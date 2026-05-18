@@ -124,7 +124,7 @@ namespace Pinder.Core.Rolls
             IsNatOne       = usedDieRoll == 1;
             IsNatTwenty    = usedDieRoll == 20;
             IsSuccess      = IsNatTwenty || (!IsNatOne && FinalTotal >= dc);
-            Tier           = IsSuccess ? FailureTier.None : tier;
+            Tier           = IsSuccess ? FailureTier.Success : tier;
             ActivatedTrap  = activatedTrap;
             RiskTier       = ComputeRiskTier(dc, statModifier, levelBonus);
             Check          = check!;

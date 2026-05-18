@@ -70,7 +70,7 @@ namespace Pinder.Core.Tests
             Assert.True(result.IsSuccess);
             Assert.Equal(14, result.Total);
             Assert.Equal(12, result.DC);
-            Assert.Equal(FailureTier.None, result.Tier);
+            Assert.Equal(FailureTier.Success, result.Tier);
         }
 
         [Fact]
@@ -298,7 +298,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void RollResult_Constructor_ExternalBonus_Default()
         {
-            var result = new RollResult(10, null, 10, StatType.Charm, 0, 0, 8, FailureTier.None);
+            var result = new RollResult(10, null, 10, StatType.Charm, 0, 0, 8, FailureTier.Success);
             Assert.Equal(0, result.ExternalBonus);
             Assert.Equal(result.Total, result.FinalTotal);
         }

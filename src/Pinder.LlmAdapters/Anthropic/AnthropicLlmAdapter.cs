@@ -129,7 +129,7 @@ namespace Pinder.LlmAdapters.Anthropic
 
             // Only apply improvement on notable outcomes
             bool applyImprovement = context.CurrentTurn > 1 && (
-                context.Outcome == Pinder.Core.Rolls.FailureTier.None
+                context.Outcome == Pinder.Core.Rolls.FailureTier.Success
                     ? context.BeatDcBy >= 5 || context.IsNat20
                     : context.Outcome >= Pinder.Core.Rolls.FailureTier.Misfire);
 

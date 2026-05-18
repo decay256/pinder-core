@@ -63,6 +63,6 @@ namespace Pinder.Core.Conversation
 
         /// <summary>A sentinel value representing "no shadow check was performed this turn".</summary>
         public static readonly ShadowCheckResult NotPerformed =
-            new ShadowCheckResult(false, ShadowStatType.Madness, 0, 0, false, FailureTier.None, false);
+            new ShadowCheckResult(false, ShadowStatType.Madness, 0, 0, false, FailureTier.Success, false);
     }
 }

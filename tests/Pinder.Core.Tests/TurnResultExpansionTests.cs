@@ -15,7 +15,7 @@ namespace Pinder.Core.Tests
     {
         // Helper to create a minimal valid RollResult
         private static RollResult MakeRoll() =>
-            new RollResult(10, null, 10, StatType.Charm, 2, 0, 13, FailureTier.None);
+            new RollResult(10, null, 10, StatType.Charm, 2, 0, 13, FailureTier.Success);
 
         // Helper to create a minimal valid GameStateSnapshot
         private static GameStateSnapshot MakeSnapshot() =>

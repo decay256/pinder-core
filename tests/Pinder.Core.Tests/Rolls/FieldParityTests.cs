@@ -83,8 +83,8 @@ namespace Pinder.Core.Tests
             Assert.Equal(result.DC, result.Check.Dc);
             Assert.True(result.IsSuccess);
             Assert.True(result.Check.IsSuccess);
-            Assert.Equal(FailureTier.None, result.Tier);
-            Assert.Equal(FailureTier.None, result.Check.Tier);
+            Assert.Equal(FailureTier.Success, result.Tier);
+            Assert.Equal(FailureTier.Success, result.Check.Tier);
         }
 
         [Fact]

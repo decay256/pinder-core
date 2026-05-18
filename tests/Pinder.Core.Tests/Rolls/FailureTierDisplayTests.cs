@@ -18,7 +18,7 @@ namespace Pinder.Core.Tests
             => Assert.Equal("Severe", FailureTierDisplay.Label(FailureTier.TropeTrap, kind));
 
         [Theory]
-        [InlineData(FailureTier.None)]
+        [InlineData(FailureTier.Success)]
         [InlineData(FailureTier.Fumble)]
         [InlineData(FailureTier.Misfire)]
         [InlineData(FailureTier.Catastrophe)]

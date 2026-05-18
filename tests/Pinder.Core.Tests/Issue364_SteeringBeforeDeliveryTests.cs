@@ -268,7 +268,7 @@ namespace Pinder.Core.Tests
             {
                 CapturedDeliveryContext = context;
                 string intended = context.ChosenOption.IntendedText;
-                if (context.Outcome == FailureTier.None)
+                if (context.Outcome == FailureTier.Success)
                     return Task.FromResult(intended);
                 // Failure: degrade by uppercasing the WHOLE intended text
                 // (which now includes the steering question per #364).

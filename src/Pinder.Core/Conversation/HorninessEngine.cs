@@ -74,7 +74,7 @@ namespace Pinder.Core.Conversation
             {
                 return (new HorninessCheckResult(
                     check.DieRoll, 0, check.Total, horninessDC,
-                    false, FailureTier.None, false, check), null);
+                    false, FailureTier.Success, false, check), null);
             }
 
             FailureTier horninessTier = check.Tier;

@@ -176,7 +176,7 @@ namespace Pinder.Core.Tests
                 conversationHistory: new List<(string, string)>(),
                 opponentLastMessage: "",
                 chosenOption: option,
-                outcome: Rolls.FailureTier.None,
+                outcome: Rolls.FailureTier.Success,
                 beatDcBy: 3,
                 activeTraps: new List<string>());
 
@@ -198,7 +198,7 @@ namespace Pinder.Core.Tests
                 conversationHistory: new List<(string, string)>(),
                 opponentLastMessage: "",
                 chosenOption: option,
-                outcome: Rolls.FailureTier.None,
+                outcome: Rolls.FailureTier.Success,
                 beatDcBy: 3,
                 activeTraps: new List<string>(),
                 shadowThresholds: shadows,

@@ -193,7 +193,7 @@ namespace Pinder.LlmAdapters
 
             // Build roll context narrative from YAML or fallback
             string rollContext;
-            if (context.Outcome == FailureTier.None)
+            if (context.Outcome == FailureTier.Success)
             {
                 rollContext = builder.GetSuccessContext(context.BeatDcBy, false);
             }
@@ -211,7 +211,7 @@ namespace Pinder.LlmAdapters
             sb.AppendLine();
 
             // Additional context for the LLM based on outcome
-            if (context.Outcome == FailureTier.None)
+            if (context.Outcome == FailureTier.Success)
             {
                 string nat20Str = context.IsNat20 ? " (NAT 20)" : "";
                 string beatDcByStr = $"{context.BeatDcBy}{nat20Str}";
@@ -314,7 +314,7 @@ namespace Pinder.LlmAdapters
             sb.AppendLine();
 
             // Player's last message with failure context if applicable
-            if (context.DeliveryTier != FailureTier.None)
+            if (context.DeliveryTier != FailureTier.Success)
             {
                 string tierLabel = GetFailureTierName(context.DeliveryTier);
                 sb.AppendLine($"PLAYER'S LAST MESSAGE (delivered after a {tierLabel}):");

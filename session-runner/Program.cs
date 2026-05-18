@@ -1028,7 +1028,7 @@ class Program
             string rollResult;
             if (roll.IsNatTwenty)     rollResult = "NAT 20 ⭐ — always succeeds";
             else if (roll.IsNatOne)   rollResult = "NAT 1 💀 — always fails";
-            else if (roll.Tier == FailureTier.None) rollResult = $"SUCCESS";
+            else if (roll.Tier == FailureTier.Success) rollResult = $"SUCCESS";
             else                      rollResult = roll.Tier.ToString().ToUpperInvariant();
 
             string marginText;

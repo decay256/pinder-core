@@ -42,7 +42,7 @@ namespace Pinder.Core.Conversation
                 shadowDC);
 
             bool isMiss = !check.IsSuccess;
-            FailureTier tier = isMiss ? check.Tier : FailureTier.None;
+            FailureTier tier = isMiss ? check.Tier : FailureTier.Success;
 
             return new ShadowCheckResult(
                 checkPerformed: true,

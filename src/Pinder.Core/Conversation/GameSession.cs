@@ -1458,7 +1458,7 @@ namespace Pinder.Core.Conversation
             {
                 string layerLabel = rollResult.IsNatTwenty ? "Nat 20" :
                                     rollResult.IsNatOne    ? "Nat 1"  :
-                                    rollResult.Tier == Rolls.FailureTier.None ? "Strong success" :
+                                    rollResult.Tier == Rolls.FailureTier.Success ? "Strong success" :
                                     rollResult.Tier.ToString();
                 var tierSpans = WordDiff.Compute(intendedTextForDelivery, deliveredMessage);
                 textDiffs.Add(new TextDiff(layerLabel, tierSpans, intendedTextForDelivery, deliveredMessage));
@@ -1678,7 +1678,7 @@ namespace Pinder.Core.Conversation
                     else
                     {
                         shadowCheckResult = new ShadowCheckResult(
-                            true, pairedShadow.Value, shadowRoll, shadowDC, false, FailureTier.None, false,
+                            true, pairedShadow.Value, shadowRoll, shadowDC, false, FailureTier.Success, false,
                             rawShadowResult.Check);
                     }
                 }

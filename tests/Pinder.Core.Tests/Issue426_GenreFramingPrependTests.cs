@@ -160,7 +160,7 @@ namespace Pinder.Core.Tests
 
             foreach (FailureTier tier in System.Enum.GetValues(typeof(FailureTier)))
             {
-                if (tier == FailureTier.None || tier == FailureTier.Legendary)
+                if (tier == FailureTier.Success || tier == FailureTier.Legendary)
                     continue;
 
                 string? composed = instructions.GetHorninessOverlayInstruction(tier);

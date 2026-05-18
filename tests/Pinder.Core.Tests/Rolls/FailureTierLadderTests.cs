@@ -10,9 +10,9 @@ namespace Pinder.Core.Tests
     public class FailureTierLadderTests
     {
         [Theory]
-        [InlineData(0,  FailureTier.None)]         // success boundary
-        [InlineData(-1, FailureTier.None)]          // success (negative miss)
-        [InlineData(-99, FailureTier.None)]         // large success
+        [InlineData(0,  FailureTier.Success)]         // success boundary
+        [InlineData(-1, FailureTier.Success)]          // success (negative miss)
+        [InlineData(-99, FailureTier.Success)]         // large success
         public void FromMissMargin_SuccessCases_ReturnNone(int missMargin, FailureTier expected)
         {
             Assert.Equal(expected, FailureTierLadder.FromMissMargin(missMargin));
