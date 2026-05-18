@@ -753,15 +753,21 @@ namespace Pinder.Core.Conversation
                 throw new GameEndedException(_outcome!.Value);
 
             // Check end conditions: interest at 0 or 25
+            //
+            // Issue #942: StartTurnAsync must be transactional — no observable state
+            // mutation (_ended, _outcome, shadow) when it throws GameEndedException.
+            // Callers (e.g. web prefetch/drain fallback) catch the exception and call
+            // session.MarkEnded(ex.Outcome) explicitly; they must not observe partial
+            // state from the failed call.
+            //
+            // Shadow growth events are still included in the exception for the SPA to
+            // display, but are NOT committed to _playerShadows before the throw.
             if (_interest.IsZero)
             {
-                _ended = true;
-                _outcome = GameOutcome.Unmatched;
-                // End-of-game Dread +1: conversation ended without date
+                // End-of-game Dread +1 event: compute description WITHOUT applying to tracker.
                 if (_playerShadows != null)
                 {
-                    _playerShadows.ApplyGrowth(ShadowStatType.Dread, 1, "Conversation ended without date");
-                    var dreadEvents = _playerShadows.DrainGrowthEvents();
+                    var dreadEvents = new[] { $"{ShadowStatType.Dread} +1 (Conversation ended without date)" };
                     throw new GameEndedException(GameOutcome.Unmatched, dreadEvents);
                 }
                 throw new GameEndedException(GameOutcome.Unmatched);
@@ -769,8 +775,6 @@ namespace Pinder.Core.Conversation
 
             if (_interest.IsMaxed)
             {
-                _ended = true;
-                _outcome = GameOutcome.DateSecured;
                 throw new GameEndedException(GameOutcome.DateSecured);
             }
 
@@ -780,14 +784,12 @@ namespace Pinder.Core.Conversation
                 int ghostRoll = _dice.Roll(4);
                 if (ghostRoll == 1)
                 {
-                    _ended = true;
-                    _outcome = GameOutcome.Ghosted;
-
-                    // Shadow growth: Ghosted → +1 Dread (#44 trigger 8)
+                    // Shadow growth: Ghosted → +1 Dread (#44 trigger 8).
+                    // Event description is surfaced via the exception for SPA display;
+                    // tracker state is NOT mutated (transactional — #942).
                     if (_playerShadows != null)
                     {
-                        _playerShadows.ApplyGrowth(ShadowStatType.Dread, 1, "Ghosted");
-                        var events = _playerShadows.DrainGrowthEvents();
+                        var events = new[] { $"{ShadowStatType.Dread} +1 (Ghosted)" };
                         throw new GameEndedException(GameOutcome.Ghosted, events);
                     }
 
@@ -1871,6 +1873,19 @@ namespace Pinder.Core.Conversation
             _currentDicePools = null;
 
             // 15. Build result
+
+            // Issue #942 invariant guard: a successful roll MUST NOT produce a negative
+            // base interest delta. SuccessScale always returns ≥ 1 for success; a negative
+            // baseInterestDelta here means the session state was pre-corrupted (e.g. by a
+            // phantom turn from the prefetch/fallback bug). Fail loudly rather than persist
+            // an incoherent turn record.
+            if (rollResult.IsSuccess && baseInterestDelta < 0)
+                throw new InvariantViolationException(
+                    $"#942 invariant violated on turn {_turnNumber}: roll.IsSuccess=true " +
+                    $"but baseInterestDelta={baseInterestDelta} (expected ≥0). " +
+                    "SuccessScale cannot produce a negative delta for a success roll. " +
+                    "This indicates a phantom turn produced from a pre-corrupted session state.");
+
             var stateSnapshot = CreateSnapshot();
 
             return new TurnResult(
