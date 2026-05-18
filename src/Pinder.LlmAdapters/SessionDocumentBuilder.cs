@@ -439,10 +439,17 @@ namespace Pinder.LlmAdapters
             if (conversationHistory != null && conversationHistory.Count > 0)
             {
                 sb.AppendLine("RECENT CONVERSATION (for context — reference specific details in your response):");
-                int start = Math.Max(0, conversationHistory.Count - 6);
-                for (int i = start; i < conversationHistory.Count; i++)
+                // #951: skip scene entries (sender == "[scene]") before computing
+                // the last-6 window so turn-0 bios and outfit descriptions never
+                // appear as [OPPONENT] lines that confuse the LLM about the
+                // opponent's character name.
+                var filtered = new System.Collections.Generic.List<(string Sender, string Text)>(conversationHistory.Count);
+                foreach (var e in conversationHistory)
+                    if (!Senders.IsScene(e.Sender)) filtered.Add(e);
+                int start = Math.Max(0, filtered.Count - 6);
+                for (int i = start; i < filtered.Count; i++)
                 {
-                    var entry = conversationHistory[i];
+                    var entry = filtered[i];
                     string role = (!string.IsNullOrEmpty(playerName) && entry.Sender == playerName) ? "PLAYER" : "OPPONENT";
                     sb.AppendLine($"[{role}] \"{entry.Text}\"");
                 }
@@ -469,12 +476,21 @@ namespace Pinder.LlmAdapters
         {
             sb.AppendLine("[CONVERSATION_START]");
 
+            // #951: turn index must count only real conversational entries.
+            // Scene entries (sender == "[scene]") must never appear in the
+            // LLM context — GameSession.BuildHistoryForLlmContext() normally
+            // filters them, but a defense-in-depth guard here prevents any
+            // caller from accidentally passing an unfiltered list and having
+            // the LLM confuse "[scene]" for the opponent's character name.
+            int filteredIndex = 0;
             for (int i = 0; i < history.Count; i++)
             {
-                int turn = (i / 2) + 1;
                 var entry = history[i];
+                if (Senders.IsScene(entry.Sender)) continue;
+                int turn = (filteredIndex / 2) + 1;
                 string role = entry.Sender == playerName ? "PLAYER" : "OPPONENT";
                 sb.AppendLine($"[T{turn}|{role}|{entry.Sender}] \"{entry.Text}\"");
+                filteredIndex++;
             }
 
             sb.AppendLine("[CURRENT_TURN]");
