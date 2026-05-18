@@ -94,9 +94,11 @@ namespace Pinder.SessionRunner.Snapshot
     ///     list when no opponent calls have resolved yet.
     ///   </description></item>
     ///   <item><description>
-    ///     <c>DefendingRollStat</c> (issue #906): the defending stat used in
+    ///     <c>DefendingStat</c> (issue #906): the defending stat used in
     ///     the option roll on this turn (<c>StatBlock.DefenceTable[Stat]</c>).
-    ///     Empty string on turns with no roll.
+    ///     Empty string on turns with no roll. (Renamed from
+    ///     <c>DefendingRollStat</c> in #925; no collision with
+    ///     <c>TurnDefenseEntry.DefendingStat</c> — different class.)
     ///   </description></item>
     ///   <item><description>
     ///     <c>GhostProbabilityPerTurn</c> (issue #905): probability (0.0..1.0)
@@ -151,8 +153,11 @@ namespace Pinder.SessionRunner.Snapshot
         /// Issue #906: defending stat used in the roll for this turn.
         /// Derived from <c>StatBlock.DefenceTable[Stat]</c>. Empty string on turns
         /// with no roll (ghosted / skipped). Populated in <c>BuildTurnSnapshot</c>.
+        /// Renamed from <c>DefendingRollStat</c> in #925 to match the wire field
+        /// name (<c>defending_stat</c>). Lives on a different class from
+        /// <c>TurnDefenseEntry.DefendingStat</c>, so there is no collision.
         /// </summary>
-        public string DefendingRollStat { get; set; } = string.Empty;
+        public string DefendingStat { get; set; } = string.Empty;
 
         /// <summary>
         /// Issue #905: probability (0.0..1.0) that the opponent will ghost on
