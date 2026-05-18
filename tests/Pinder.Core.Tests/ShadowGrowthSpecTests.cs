@@ -140,7 +140,8 @@ namespace Pinder.Core.Tests
             Assert.True(shadows.GetDelta(ShadowStatType.Dread) >= 2);
         }
 
-        // Mutation: would catch if ghost didn't apply Dread growth
+        // #942 transactional fix: shadow tracker must NOT be mutated when StartTurnAsync throws;
+        // Dread growth is surfaced via the exception's ShadowGrowthEvents instead.
         [Fact]
         public async Task AC1_Ghosted_GrowsDread1()
         {
@@ -150,7 +151,9 @@ namespace Pinder.Core.Tests
 
             var ex = await Assert.ThrowsAsync<GameEndedException>(() => session.StartTurnAsync());
             Assert.Equal(GameOutcome.Ghosted, ex.Outcome);
-            Assert.Equal(1, shadows.GetDelta(ShadowStatType.Dread));
+            // Tracker must be unchanged (#942): caller applies MarkEnded after catching.
+            Assert.Equal(0, shadows.GetDelta(ShadowStatType.Dread));
+            // Exception still carries the Dread growth event for the SPA to display.
             Assert.Contains(ex.ShadowGrowthEvents, e => e.Contains("Ghosted") && e.Contains("Dread"));
         }
 

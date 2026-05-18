@@ -263,6 +263,8 @@ namespace Pinder.Core.Tests
 
         // ======================== Trigger 8: Ghost → +1 Dread ========================
 
+        // #942 transactional fix: tracker is NOT mutated when StartTurnAsync throws.
+        // The exception carries the event description; tracker unchanged.
         [Fact]
         public async Task Ghost_GrowsDread()
         {
@@ -277,7 +279,8 @@ namespace Pinder.Core.Tests
             var ex = await Assert.ThrowsAsync<GameEndedException>(() => session.StartTurnAsync());
             Assert.Equal(GameOutcome.Ghosted, ex.Outcome);
             Assert.Contains(ex.ShadowGrowthEvents, e => e.Contains("Dread") && e.Contains("Ghosted"));
-            Assert.Equal(1, shadows.GetDelta(ShadowStatType.Dread));
+            // Tracker unchanged (#942 transactional contract): caller uses MarkEnded after catch.
+            Assert.Equal(0, shadows.GetDelta(ShadowStatType.Dread));
         }
 
         // ======================== Trigger 9: SA used 3+ times → +1 Overthinking ========================

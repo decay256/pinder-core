@@ -579,9 +579,14 @@ namespace Pinder.Core.Tests.Integration
             var session = new GameSession(gerald, velvet, llm, dice, new NullTrapRegistry(), config);
 
             // First call triggers ghost
-            await Assert.ThrowsAsync<GameEndedException>(() => session.StartTurnAsync());
+            var ghostEx = await Assert.ThrowsAsync<GameEndedException>(() => session.StartTurnAsync());
+            Assert.Equal(GameOutcome.Ghosted, ghostEx.Outcome);
 
-            // Mutation: Fails if ended game allows further actions
+            // #942 transactional contract: StartTurnAsync does NOT set _ended on throw.
+            // Caller must call MarkEnded after catching so the session is properly closed.
+            session.MarkEnded(ghostEx.Outcome);
+
+            // Subsequent call on a MarkEnded session throws immediately.
             await Assert.ThrowsAsync<GameEndedException>(() => session.StartTurnAsync());
         }
 
