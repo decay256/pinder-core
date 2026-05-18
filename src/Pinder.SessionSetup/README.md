@@ -24,10 +24,12 @@ All LLM I/O goes through `ILlmTransport` (provider-agnostic). The web tier
 (`Pinder.GameApi`) builds these helpers around a per-session transport and
 calls them from `ActiveSession.SetupAsync`.
 
-## Plain-Text Output Contract
+## Output Contracts
 
-**The per-character psychological stake and the outfit description MUST
-be emitted as plain prose. No markdown markers.**
+### Outfit description — plain prose
+
+**The outfit description MUST be emitted as plain prose. No markdown
+markers.**
 
 Forbidden:
 
@@ -37,6 +39,21 @@ Forbidden:
 - Numbered lists (`1. `, `2. ` …)
 - Fenced code (```` ``` ````) and inline code (backticks)
 - Blockquotes (`> `)
+
+### Psychological stake — markdown bullet list (#949)
+
+**The per-character psychological stake MUST be emitted as a 15-item
+markdown bullet list, one `- `-prefixed bullet per stem-completion.**
+From #949 onward, the SPA renders the stake as a bullet list and the
+`MarkdownSanitizer` preserves `- ` line prefixes unchanged.
+
+Still forbidden for the stake field:
+
+- Headings (`#`, `##`, `###`)
+- Bold / italic emphasis
+- Nested bullets
+- Numbered lists
+- Fenced code, inline code, blockquotes
 
 Paragraph breaks (blank lines between paragraphs) and inline punctuation are
 preserved.
@@ -51,13 +68,16 @@ context.
 
 ### Defense in depth
 
-1. **Prompt-level constraint.** The system + user prompts in
-   `LlmStakeGenerator` and `LlmOutfitDescriber` explicitly forbid markdown
-   formatting (issue
-   [pinder-web#136](https://github.com/decay256/pinder-web/issues/136)).
+1. **Prompt-level constraint.** The outfit prompt forbids all markdown
+   (issue
+   [pinder-web#136](https://github.com/decay256/pinder-web/issues/136));
+   the stake prompt requests a `- `-prefixed bullet list and forbids
+   every other marker (#949).
 2. **Backend sanitizer (web tier).** `Pinder.GameApi` runs the LLM output
-   through a `MarkdownSanitizer` before storing it on the session, catching
-   stray markers when the model ignores the prompt.
+   through a `MarkdownSanitizer` before storing it on the session. Per
+   #949 the sanitizer preserves `- ` line prefixes so the stake bullets
+   survive, while still stripping headings, emphasis, code fences, and
+   blockquotes.
 3. **This README.** A reminder for any future engine-side change to either
    helper.
 

@@ -25,13 +25,13 @@ namespace Pinder.SessionSetup
     /// turn relative to the legacy prompt.
     /// </para>
     /// <para>
-    /// Output contract (issue pinder-web #136): each yielded fragment is
-    /// plain text — no markdown headings, bold, italics, bullet or
-    /// numbered lists, blockquotes, or code fences. The transport sees
-    /// one fragment per line. Both the system and user prompts forbid
-    /// markdown explicitly. <c>Pinder.GameApi</c> runs a
-    /// <c>MarkdownSanitizer</c> as defence-in-depth before storing the
-    /// result.
+    /// Output contract (issue pinder-web #136, refined by #949): the
+    /// model emits a 15-item markdown bullet list — one <c>- </c>-
+    /// prefixed bullet per stem-completion. No headings, bold, italics,
+    /// nested bullets, numbered lists, blockquotes, or code fences.
+    /// <c>Pinder.GameApi</c> runs a <c>MarkdownSanitizer</c> as defence-
+    /// in-depth; per #949 that sanitizer preserves the <c>- </c> bullets
+    /// unchanged so the stake renders as a bullet list in the SPA.
     /// </para>
     /// <para>
     /// Streaming: when an <see cref="IStreamingLlmTransport"/> is supplied,
@@ -55,7 +55,7 @@ namespace Pinder.SessionSetup
             "You are a sentence-completion engine for a comedy hookup-app simulator where the protagonists are sentient penises. " +
             "Read the character profile and produce exactly 15 lines — one for each numbered stem below — written in the character's first-person voice. " +
             "Each line completes the stem with one specific, concrete, slightly absurd, embodied answer that the character believes completely and would never realise is funny. " +
-            "Plain text only. One stem-completion per line. Include the stem prefix. ~10-15 words per line. No markdown, no dashes, no numbering, no headings. " +
+            "Output a markdown bullet list. One bullet per stem-completion. Each line starts with `- ` (dash + space). Include the stem prefix in the bullet body. ~10-15 words per bullet. No nested bullets. No numbering. No headings. " +
             "The character treats absurd things as completely real. Specific over generic. Embodied over emotional-meta. Undignified is a feature. " +
             "BIOGRAPHICAL ANCHOR REQUIREMENT: every completed stem MUST contain at least one of the following — " +
             "(a) a proper name (e.g. 'Margot', not 'an ex'), " +
