@@ -1666,6 +1666,14 @@ namespace Pinder.Core.Conversation
                                 int correction = shadowFailDelta - interestDelta; // usually negative
                                 _interest.Apply(correction);
                                 interestDelta = shadowFailDelta;
+
+                                // #927: shadow-corruption demoted a success to a miss.
+                                // FinalVerdict/FinalTier on the main option-roll Check are the
+                                // engine-side single source of truth for post-shadow verdict.
+                                // Existing IsSuccess / Tier stay pre-demotion (back-compat).
+                                rollResult.Check.ApplyFinalOverride(
+                                    Pinder.Core.Rolls.RollVerdict.Miss,
+                                    shadowTier);
                             }
                             overlayApplied = true;
                         }

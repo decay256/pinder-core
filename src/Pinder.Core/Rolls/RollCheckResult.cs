@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Pinder.Core.Rolls
 {
@@ -56,6 +57,34 @@ namespace Pinder.Core.Rolls
         /// <summary>By how much the roll missed the DC. 0 on success.</summary>
         public int MissMargin { get; }
 
+        /// <summary>
+        /// Post-resolution verdict, after every in-engine override (shadow-corruption demotion etc.)
+        /// has been applied (#927). Defaults to <see cref="RollVerdict.Success"/> / <see cref="RollVerdict.Miss"/>
+        /// matching <see cref="IsSuccess"/> at construction time. Engine code with extra context
+        /// (e.g. <c>GameSession</c>'s shadow-corruption block) overrides this via
+        /// <see cref="ApplyFinalOverride"/>.
+        ///
+        /// Single source of truth for downstream consumers (frontend, replay tool, simulator) —
+        /// they must NOT re-derive demotion from <c>shadow_check.is_miss && shadow_check.overlay_applied
+        /// && roll.is_success</c>. See #927.
+        /// </summary>
+        [JsonPropertyName("final_verdict")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public RollVerdict FinalVerdict { get; private set; }
+
+        /// <summary>
+        /// Post-resolution failure tier, after every in-engine override has been applied (#927).
+        /// Defaults to <see cref="Tier"/> at construction time. <see cref="FailureTier.Success"/>
+        /// when the final verdict is <see cref="RollVerdict.Success"/>.
+        ///
+        /// Single source of truth for the post-shadow-corruption failure tier — frontend and
+        /// replay code MUST NOT read <c>shadow_check.tier</c> when <c>shadow_check.overlay_applied</c>
+        /// to figure out the "real" tier. See #927.
+        /// </summary>
+        [JsonPropertyName("final_tier")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public FailureTier FinalTier { get; private set; }
+
         public RollCheckResult(
             RollCheckKind kind,
             int dieRoll,
@@ -84,6 +113,29 @@ namespace Pinder.Core.Rolls
             IsNatTwenty  = isNatTwenty;
             Tier         = tier;
             MissMargin   = missMargin;
+
+            // #927: FinalVerdict / FinalTier default to the pre-shadow values.
+            // GameSession's shadow-corruption block overrides via ApplyFinalOverride.
+            FinalVerdict = isSuccess ? RollVerdict.Success : RollVerdict.Miss;
+            FinalTier    = tier;
+        }
+
+        /// <summary>
+        /// Override <see cref="FinalVerdict"/> + <see cref="FinalTier"/> to reflect a
+        /// post-resolution outcome (shadow-corruption demotion, etc.). Engine-internal —
+        /// callers OUTSIDE the engine (frontend, replay, simulator) must read the fields,
+        /// not write them. See #927.
+        /// </summary>
+        /// <remarks>
+        /// This mutates an otherwise-immutable record. The two fields are deliberately
+        /// the only mutable surface on <see cref="RollCheckResult"/>; everything else
+        /// remains constructor-set. Existing <see cref="IsSuccess"/> / <see cref="Tier"/>
+        /// semantics are preserved (back-compat is load-bearing).
+        /// </remarks>
+        internal void ApplyFinalOverride(RollVerdict verdict, FailureTier tier)
+        {
+            FinalVerdict = verdict;
+            FinalTier    = tier;
         }
 
         /// <summary>
