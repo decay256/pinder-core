@@ -58,6 +58,7 @@ strings:
   sessions_page.empty: "No sessions yet."
   sessions_page.start_new_game: "Start a new game"
   sessions_page.replay_button: "▶ Replay"
+  sessions_page.replay_pending: "Replay generation pending"
 
   # ── SessionLogPage (#45, migrated #440 Phase 5) ──────────────────
   session_log.loading: "Loading session log…"
