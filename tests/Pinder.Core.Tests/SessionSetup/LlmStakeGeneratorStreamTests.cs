@@ -38,7 +38,7 @@ namespace Pinder.Core.Tests.SessionSetup
         }
 
         [Fact]
-        public async Task StreamStakeAsync_ForwardsPlainTextSystemPrompt()
+        public async Task StreamStakeAsync_ForwardsBulletListSystemPrompt()
         {
             var streaming = new FakeStreamingTransport(new[] { "ok" });
             var gen = new LlmStakeGenerator(new StubLlmTransport(), streaming);
@@ -46,12 +46,12 @@ namespace Pinder.Core.Tests.SessionSetup
             await foreach (var _ in gen.StreamStakeAsync("Alice", Prompt)) { }
 
             Assert.NotNull(streaming.LastSystemPrompt);
-            // Plain-text contract: the system prompt must explicitly forbid markdown.
-            // #826 reshaped the prompt from prose to a 5-7 single-line fragment list, but
-            // the no-markdown contract is unchanged — just expressed as "plain text" /
-            // "no markdown" rather than the legacy "plain prose" / "Do NOT use markdown".
-            Assert.Contains("Plain text", streaming.LastSystemPrompt!);
-            Assert.Contains("No markdown", streaming.LastSystemPrompt!);
+            // Bullet-list contract (#949): the system prompt must explicitly
+            // request a markdown bullet list, one `- `-prefixed bullet per
+            // stem-completion. This inverts the legacy "plain text / no markdown"
+            // contract enforced before #949.
+            Assert.Contains("markdown bullet list", streaming.LastSystemPrompt!);
+            Assert.Contains("- ", streaming.LastSystemPrompt!);
         }
 
         [Fact]
