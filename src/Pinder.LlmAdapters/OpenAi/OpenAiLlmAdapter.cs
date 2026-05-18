@@ -212,14 +212,21 @@ namespace Pinder.LlmAdapters.OpenAi
 
         private string BuildRequestJson(string systemPrompt, string userContent, double temperature)
         {
+            // #947: wrap the (byte-stable, large) system prompt in a content
+            // block with cache_control: ephemeral so the Anthropic /
+            // OpenRouter→Anthropic path can register a prompt-cache breakpoint.
+            // OpenAI accepts the content-block shape and ignores the marker.
+            var systemContent = OpenAiCacheControl.BuildSystemContent(
+                systemPrompt, _options.UseAnthropicCacheControl);
+
             var request = new
             {
                 model = _options.Model,
                 max_tokens = _options.MaxTokens,
                 temperature = temperature,
-                messages = new[]
+                messages = new object[]
                 {
-                    new { role = "system", content = systemPrompt },
+                    new { role = "system", content = systemContent },
                     new { role = "user", content = userContent }
                 }
             };
@@ -237,8 +244,14 @@ namespace Pinder.LlmAdapters.OpenAi
             string currentUserContent,
             double temperature)
         {
+            // #947: same cache_control wrapping as BuildRequestJson — the
+            // stateful path is the one used for multi-turn opponent-response
+            // exchanges, which is exactly where prompt-cache hits matter most.
+            var systemContent = OpenAiCacheControl.BuildSystemContent(
+                systemPrompt, _options.UseAnthropicCacheControl);
+
             var messages = new List<object>();
-            messages.Add(new { role = "system", content = systemPrompt });
+            messages.Add(new { role = "system", content = systemContent });
 
             for (int i = 0; i < priorHistory.Count; i++)
             {

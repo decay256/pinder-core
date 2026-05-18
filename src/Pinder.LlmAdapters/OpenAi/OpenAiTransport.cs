@@ -17,24 +17,27 @@ namespace Pinder.LlmAdapters.OpenAi
     {
         private readonly OpenAiClient _client;
         private readonly string _model;
+        private readonly bool _useAnthropicCacheControl;
         private bool _disposed;
 
         /// <summary>Creates transport with internally-owned OpenAiClient.</summary>
-        public OpenAiTransport(string apiKey, string baseUrl, string model)
+        public OpenAiTransport(string apiKey, string baseUrl, string model, bool useAnthropicCacheControl = true)
         {
             if (string.IsNullOrWhiteSpace(apiKey))
                 throw new ArgumentException("API key must not be null, empty, or whitespace.", nameof(apiKey));
             _model = model ?? throw new ArgumentNullException(nameof(model));
             _client = new OpenAiClient(apiKey, baseUrl);
+            _useAnthropicCacheControl = useAnthropicCacheControl;
         }
 
         /// <summary>Creates transport with externally-provided HttpClient (for testing).</summary>
-        public OpenAiTransport(string apiKey, string baseUrl, string model, System.Net.Http.HttpClient httpClient)
+        public OpenAiTransport(string apiKey, string baseUrl, string model, System.Net.Http.HttpClient httpClient, bool useAnthropicCacheControl = true)
         {
             if (string.IsNullOrWhiteSpace(apiKey))
                 throw new ArgumentException("API key must not be null, empty, or whitespace.", nameof(apiKey));
             _model = model ?? throw new ArgumentNullException(nameof(model));
             _client = new OpenAiClient(apiKey, baseUrl, httpClient);
+            _useAnthropicCacheControl = useAnthropicCacheControl;
         }
 
         /// <inheritdoc />
@@ -45,14 +48,21 @@ namespace Pinder.LlmAdapters.OpenAi
             if (systemPrompt == null) throw new ArgumentNullException(nameof(systemPrompt));
             if (userMessage == null) throw new ArgumentNullException(nameof(userMessage));
 
+            // #947: emit the system prompt as a content-block with
+            // cache_control: ephemeral so OpenRouter→Anthropic / direct
+            // Anthropic-compatible routes can hit the prompt cache. See
+            // OpenAiCacheControl for the rationale.
+            var systemContent = OpenAiCacheControl.BuildSystemContent(
+                systemPrompt, _useAnthropicCacheControl);
+
             var request = new
             {
                 model = _model,
                 max_tokens = maxTokens,
                 temperature = temperature,
-                messages = new[]
+                messages = new object[]
                 {
-                    new { role = "system", content = systemPrompt },
+                    new { role = "system", content = systemContent },
                     new { role = "user", content = userMessage }
                 }
             };
