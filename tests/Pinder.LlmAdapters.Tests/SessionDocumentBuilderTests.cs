@@ -584,5 +584,66 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(ctx);
             Assert.Contains("Turn 4", result);
         }
+
+        // ── Issue #951 regression: scene entries must never leak as the opponent name ──
+
+        [Fact]
+        public void BuildOpponentPrompt_SceneEntriesInHistory_AreFiltered()
+        {
+            // Arrange: history contains turn-0 scene entries followed by real conversation.
+            // Scene entries must not appear in the built prompt, and the opponent character
+            // name ("SABLE_XO") must be present instead of the literal word "scene".
+            var historyWithScenes = new List<(string, string)>
+            {
+                (Senders.Scene, "Player bio text."),
+                (Senders.Scene, "Opponent bio text."),
+                (Senders.Scene, "Both wear something quietly out of fashion."),
+                ("GERALD_42", "Hey there, I noticed your bio."),
+            };
+
+            var result = SessionDocumentBuilder.BuildOpponentPrompt(
+                MakeOpponentContext(
+                    conversationHistory: historyWithScenes,
+                    playerDeliveredMessage: "Hey there, I noticed your bio.",
+                    playerName: "GERALD_42",
+                    opponentName: "SABLE_XO"));
+
+            // Scene entries must not appear as [OPPONENT|[scene]] labels.
+            Assert.DoesNotContain("[scene]", result);
+            // The opponent’s real name must be present (substituted into engine block).
+            Assert.Contains("SABLE_XO", result);
+            // Standalone word “scene” must not appear as a whole word where it could
+            // be mistaken for a character name. (Use whole-word check to avoid false
+            // positives on words like "obscene".)
+            Assert.DoesNotMatch(@"(?i)\bscene\b", result);
+        }
+
+        [Fact]
+        public void BuildInterestChangeBeatPrompt_SceneEntriesInHistory_AreFiltered()
+        {
+            // Arrange: history with turn-0 scene entries.
+            var historyWithScenes = new List<(string, string)>
+            {
+                (Senders.Scene, "Player bio text."),
+                (Senders.Scene, "Opponent bio text."),
+                (Senders.Scene, "Both wear something out of fashion."),
+                ("GERALD_42", "Hey there!"),
+                ("SABLE_XO",  "Hi!"),
+            };
+
+            var result = SessionDocumentBuilder.BuildInterestChangeBeatPrompt(
+                opponentName: "SABLE_XO",
+                interestBefore: 5,
+                interestAfter: 10,
+                newState: InterestState.Interested,
+                conversationHistory: historyWithScenes,
+                playerName: "GERALD_42");
+
+            // Scene entries must not appear in the RECENT CONVERSATION block.
+            Assert.DoesNotContain("[scene]", result);
+            Assert.DoesNotMatch(@"(?i)\bscene\b", result);
+            // Opponent name must be substituted correctly.
+            Assert.Contains("SABLE_XO", result);
+        }
     }
 }
