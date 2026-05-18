@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Pinder.Core.Conversation;
 using Pinder.Core.Rolls;
@@ -121,6 +122,37 @@ namespace Pinder.LlmAdapters
             if (context.CurrentTurn >= 3)
             {
                 sb.AppendLine(PromptTemplates.PivotDirective);
+                sb.AppendLine();
+            }
+
+            // #950: per-turn stake-coverage block — tells the option generator which
+            // stake lines are still untouched so it can pick one for OPTION_C.
+            if (context.StakeLines != null && context.StakeLines.Length > 0)
+            {
+                var referenced = context.StakeLinesReferenced;
+                var untouchedIndices = new System.Collections.Generic.List<int>();
+                for (int i = 0; i < context.StakeLines.Length; i++)
+                {
+                    if (referenced == null || !referenced.Contains(i))
+                        untouchedIndices.Add(i);
+                }
+
+                int referencedCount = context.StakeLines.Length - untouchedIndices.Count;
+                sb.AppendLine($"STAKE COVERAGE — {referencedCount} line(s) referenced this session, {untouchedIndices.Count} untouched.");
+                if (untouchedIndices.Count > 0)
+                {
+                    sb.AppendLine("Untouched stake lines (OPTION_C must reference one):");
+                    foreach (int idx in untouchedIndices)
+                    {
+                        string preview = context.StakeLines[idx];
+                        if (preview.Length > 80) preview = preview.Substring(0, 80) + "…";
+                        sb.AppendLine($"  Line {idx + 1}: \"{preview}\"");
+                    }
+                }
+                else
+                {
+                    sb.AppendLine("All stake lines referenced — OPTION_C may continue the most recent stake thread.");
+                }
                 sb.AppendLine();
             }
 

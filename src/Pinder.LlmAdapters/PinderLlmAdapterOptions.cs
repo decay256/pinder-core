@@ -49,5 +49,14 @@ namespace Pinder.LlmAdapters
         /// When null, overlay calls use the primary transport.
         /// </summary>
         public string? OverlayGroqModel { get; set; }
+
+        /// <summary>
+        /// #950: optional callback invoked when the option generator returns N options with
+        /// zero references to the active stake content. Receives a diagnostic string of the
+        /// form "option_generator_skipped_stake turn={N} stake_lines={M} stake_hits=0".
+        /// Use for alerting, telemetry, or test assertions. When null, no callback fires
+        /// (a Trace warning is still emitted regardless).
+        /// </summary>
+        public System.Action<string>? OnStakeSkipWarning { get; set; }
     }
 }
