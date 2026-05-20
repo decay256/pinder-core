@@ -768,7 +768,8 @@ namespace Pinder.Core.Conversation
                 if (_playerShadows != null)
                 {
                     var dreadEvents = new[] { $"{ShadowStatType.Dread} +1 (Conversation ended without date)" };
-                    throw new GameEndedException(GameOutcome.Unmatched, dreadEvents);
+                    var dreadEffects = new[] { new ShadowGrowthEffect(ShadowStatType.Dread, 1, "Conversation ended without date") };
+                    throw new GameEndedException(GameOutcome.Unmatched, dreadEvents, dreadEffects);
                 }
                 throw new GameEndedException(GameOutcome.Unmatched);
             }
@@ -790,7 +791,8 @@ namespace Pinder.Core.Conversation
                     if (_playerShadows != null)
                     {
                         var events = new[] { $"{ShadowStatType.Dread} +1 (Ghosted)" };
-                        throw new GameEndedException(GameOutcome.Ghosted, events);
+                        var effects = new[] { new ShadowGrowthEffect(ShadowStatType.Dread, 1, "Ghosted") };
+                        throw new GameEndedException(GameOutcome.Ghosted, events, effects);
                     }
 
                     throw new GameEndedException(GameOutcome.Ghosted);
@@ -2077,7 +2079,8 @@ namespace Pinder.Core.Conversation
                 {
                     _playerShadows.ApplyGrowth(ShadowStatType.Dread, 1, "Conversation ended without date");
                     var dreadEvents = _playerShadows.DrainGrowthEvents();
-                    throw new GameEndedException(GameOutcome.Unmatched, dreadEvents);
+                    var dreadEffects = _playerShadows.DrainGrowthEffects();
+                    throw new GameEndedException(GameOutcome.Unmatched, dreadEvents, dreadEffects);
                 }
                 throw new GameEndedException(GameOutcome.Unmatched);
             }
@@ -2107,7 +2110,8 @@ namespace Pinder.Core.Conversation
                     {
                         _playerShadows.ApplyGrowth(ShadowStatType.Dread, 1, "Ghosted");
                         var events = _playerShadows.DrainGrowthEvents();
-                        throw new GameEndedException(GameOutcome.Ghosted, events);
+                        var effects = _playerShadows.DrainGrowthEffects();
+                        throw new GameEndedException(GameOutcome.Ghosted, events, effects);
                     }
 
                     throw new GameEndedException(GameOutcome.Ghosted);

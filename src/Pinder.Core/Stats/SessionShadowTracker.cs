@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Pinder.Core.Conversation;
 
 namespace Pinder.Core.Stats
 {
@@ -19,6 +20,7 @@ namespace Pinder.Core.Stats
         private readonly StatBlock _baseStats;
         private readonly Dictionary<ShadowStatType, int> _deltas;
         private readonly List<string> _growthEvents;
+        private readonly List<ShadowGrowthEffect> _growthEffects;
 
         /// <summary>
         /// Wraps an immutable StatBlock for mutable shadow tracking.
@@ -30,6 +32,7 @@ namespace Pinder.Core.Stats
             _baseStats = baseStats ?? throw new ArgumentNullException(nameof(baseStats));
             _deltas = new Dictionary<ShadowStatType, int>();
             _growthEvents = new List<string>();
+            _growthEffects = new List<ShadowGrowthEffect>();
         }
 
         /// <summary>
@@ -62,6 +65,7 @@ namespace Pinder.Core.Stats
 
             string description = $"{shadow} +{amount} ({reason})";
             _growthEvents.Add(description);
+            _growthEffects.Add(new ShadowGrowthEffect(shadow, amount, reason));
             return description;
         }
 
@@ -137,6 +141,7 @@ namespace Pinder.Core.Stats
                 ? $"{shadow} {sign} ({reason}) (floored)"
                 : $"{shadow} {sign} ({reason})";
             _growthEvents.Add(description);
+            _growthEffects.Add(new ShadowGrowthEffect(shadow, appliedDelta, floored ? $"{reason} (floored)" : reason));
             return description;
         }
 
@@ -156,6 +161,7 @@ namespace Pinder.Core.Stats
             if (targetValues == null) return;
             _deltas.Clear();
             _growthEvents.Clear();
+            _growthEffects.Clear();
 
             foreach (ShadowStatType shadow in System.Enum.GetValues(typeof(ShadowStatType)))
             {
@@ -184,6 +190,18 @@ namespace Pinder.Core.Stats
         }
 
         /// <summary>
+        /// Returns all typed shadow growth effects accumulated since last drain, then clears the internal log.
+        /// Parallel to <see cref="DrainGrowthEvents"/> — same events, same order, typed form.
+        /// Added per #956 for structured reapplication by callers.
+        /// </summary>
+        public IReadOnlyList<ShadowGrowthEffect> DrainGrowthEffects()
+        {
+            var effects = new List<ShadowGrowthEffect>(_growthEffects);
+            _growthEffects.Clear();
+            return effects;
+        }
+
+        /// <summary>
         /// #790 (Phase 4): deep clone for fast-gameplay engine forking. Returns
         /// an independent <see cref="SessionShadowTracker"/> wrapping the
         /// same immutable base <see cref="StatBlock"/> and carrying a copy
@@ -196,6 +214,7 @@ namespace Pinder.Core.Stats
             foreach (var kv in _deltas)
                 copy._deltas[kv.Key] = kv.Value;
             copy._growthEvents.AddRange(_growthEvents);
+            copy._growthEffects.AddRange(_growthEffects);
             return copy;
         }
     }
