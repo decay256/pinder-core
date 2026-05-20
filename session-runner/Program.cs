@@ -664,7 +664,12 @@ class Program
 
         int yamlDcBias = gameDef.GlobalDcBias;
         int totalDcBias = difficultyBias + yamlDcBias;
-        var config = new GameSessionConfig(clock: clock, playerShadows: sableShadows, globalDcBias: totalDcBias, statDeliveryInstructions: statDeliveryInstructions);
+        // #976: wire consequence catalogue for engine-side Consequence population.
+        Pinder.LlmAdapters.ConsequenceCatalog? consequenceCatalog = null;
+        if (snapshotI18nCatalog != null)
+            consequenceCatalog = new Pinder.LlmAdapters.ConsequenceCatalog(snapshotI18nCatalog);
+
+        var config = new GameSessionConfig(clock: clock, playerShadows: sableShadows, globalDcBias: totalDcBias, statDeliveryInstructions: statDeliveryInstructions, consequenceCatalog: consequenceCatalog);
         int? diceSeed = null;
         { if (ParseArg(args, "--seed") is string s2 && int.TryParse(s2, out int s3)) diceSeed = s3; }
         var session = new GameSession(sable, brick, llm, new SystemRandomDiceRoller(diceSeed), trapRegistry, config);

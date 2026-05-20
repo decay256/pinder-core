@@ -1,4 +1,5 @@
 using System;
+using Pinder.Core.I18n;
 using Pinder.Core.Interfaces;
 using Pinder.Core.Stats;
 
@@ -84,6 +85,13 @@ namespace Pinder.Core.Conversation
         /// </summary>
         public Action<TextLayerNoopEvent>? OnTextLayerNoop { get; }
 
+        /// <summary>
+        /// Consequence catalogue for engine-side population of
+        /// Consequence fields on roll/shadow/horniness result DTOs (#976).
+        /// When null, engines leave <c>Consequence</c> null.
+        /// </summary>
+        public IConsequenceCatalog? ConsequenceCatalog { get; }
+
         public GameSessionConfig(
             IGameClock? clock = null,
             SessionShadowTracker? playerShadows = null,
@@ -96,7 +104,8 @@ namespace Pinder.Core.Conversation
             object? statDeliveryInstructions = null,
             IDiceRoller? diceRoller = null,
             Random? statDrawRng = null,
-            Action<TextLayerNoopEvent>? onTextLayerNoop = null)
+            Action<TextLayerNoopEvent>? onTextLayerNoop = null,
+            IConsequenceCatalog? consequenceCatalog = null)
         {
             Clock = clock;
             PlayerShadows = playerShadows;
@@ -110,6 +119,7 @@ namespace Pinder.Core.Conversation
             DiceRoller = diceRoller;
             StatDrawRng = statDrawRng;
             OnTextLayerNoop = onTextLayerNoop;
+            ConsequenceCatalog = consequenceCatalog;
         }
     }
 }
