@@ -28,13 +28,63 @@ namespace Pinder.Rules.Tests
             return File.ReadAllText(Path.Combine(dir, "data", "game-definition.yaml"));
         }
 
+        /// <summary>
+        /// Recursively convert YamlDotNet's Dictionary&lt;object,object&gt; nodes
+        /// (and scalar integer values) into Dictionary&lt;string,object?&gt;.
+        /// Needed because Deserialize&lt;Dictionary&lt;string,object?&gt;&gt; fails when
+        /// nested mappings contain integer values (horniness_time_modifiers).
+        /// </summary>
+        private static object? ConvertYamlNode(object? node)
+        {
+            if (node == null) return null;
+            if (node is string s) return s;
+            if (node is int i) return i;
+            if (node is long l) return l;
+            if (node is Dictionary<object, object> dict)
+            {
+                var result = new Dictionary<string, object?>();
+                foreach (var kvp in dict)
+                    result[kvp.Key.ToString()!] = ConvertYamlNode(kvp.Value);
+                return result;
+            }
+            return node.ToString();
+        }
+
         private static Dictionary<string, string> ParseYaml()
         {
             var content = LoadYamlContent();
             var deserializer = new DeserializerBuilder()
                 .WithNamingConvention(UnderscoredNamingConvention.Instance)
                 .Build();
-            return deserializer.Deserialize<Dictionary<string, string>>(content);
+            var rawDict = deserializer.Deserialize<Dictionary<object, object>>(content);
+            var raw = new Dictionary<string, object?>();
+            foreach (var kvp in rawDict)
+                raw[kvp.Key.ToString()!] = ConvertYamlNode(kvp.Value);
+            var result = new Dictionary<string, string>();
+            foreach (var kvp in raw)
+            {
+                if (kvp.Value == null) continue;
+                if (kvp.Value is string s)
+                {
+                    result[kvp.Key] = s;
+                }
+                else if (kvp.Value is int i)
+                {
+                    result[kvp.Key] = i.ToString();
+                }
+                else if (kvp.Value is Dictionary<string, object?> dict)
+                {
+                    var sb = new StringBuilder();
+                    foreach (var dk in dict.Values)
+                    {
+                        if (dk != null) sb.AppendLine(dk.ToString());
+                    }
+                    var flat = sb.ToString().TrimEnd();
+                    if (!string.IsNullOrEmpty(flat))
+                        result[kvp.Key] = flat;
+                }
+            }
+            return result;
         }
 
         // ===== AC1: File location and format =====
@@ -65,28 +115,47 @@ namespace Pinder.Rules.Tests
             }
         }
 
-        // Mutation: would catch if all 7 values aren't scalar strings (e.g. nested objects)
+        // Mutation: would catch if any content value is something other than string, int, or nested string/int dict
         [Fact]
-        public void YamlFile_AllValuesAreScalarStrings()
+        public void YamlFile_AllContentValuesAreStringIntOrNestedDict()
         {
             var content = LoadYamlContent();
             var deserializer = new DeserializerBuilder()
                 .WithNamingConvention(UnderscoredNamingConvention.Instance)
                 .Build();
-            // Parse as Dictionary<string, object> to detect non-string values
-            var data = deserializer.Deserialize<Dictionary<string, object>>(content);
+            var dataRaw = deserializer.Deserialize<Dictionary<object, object>>(content);
+            var data = new Dictionary<string, object?>();
+            foreach (var kvp in dataRaw)
+                data[kvp.Key.ToString()!] = ConvertYamlNode(kvp.Value);
             foreach (var kvp in data)
             {
-                Assert.IsType<string>(kvp.Value);
+                if (kvp.Value is Dictionary<string, object?> dict)
+                {
+                    foreach (var dkv in dict.Values)
+                    {
+                        if (dkv != null && dkv is not string && dkv is not int && dkv is not long)
+                            Assert.Fail($"Nested value in '{kvp.Key}' is not a string or integer: {dkv.GetType()}");
+                    }
+                }
+                else if (kvp.Value is not string && kvp.Value is not int && kvp.Value is not long)
+                {
+                    Assert.Fail($"Value for '{kvp.Key}' is not a string or integer: {kvp.Value?.GetType()}");
+                }
             }
         }
 
-        // Mutation: would catch if exactly 7 top-level keys aren't present
         [Fact]
-        public void YamlFile_HasExactly7Keys()
+        public void YamlFile_HasRequiredContentKeys()
         {
             var data = ParseYaml();
-            Assert.Equal(7, data.Count);
+            // The YAML now contains many more keys than the original 7;
+            // verify the core content sections are still present.
+            string[] required = { "name", "vision", "world_description", "player_role_description",
+                "opponent_role_description", "meta_contract", "writing_rules" };
+            foreach (var key in required)
+            {
+                Assert.True(data.ContainsKey(key), $"Missing required content key: {key}");
+            }
         }
 
         // ===== AC2 / AC4: Vision content requirements =====
@@ -190,18 +259,16 @@ namespace Pinder.Rules.Tests
 
         // ===== AC2 / AC4: Player role description content requirements =====
 
-        // Mutation: would catch if player role omits 4 dialogue options per turn
         [Fact]
         public void PlayerRole_MentionsDialogueOptionCount()
         {
             var data = ParseYaml();
             var player = data["player_role_description"];
+            // The count is now parameterized via max_dialogue_options rather than hardcoded; assert the concept is present.
             Assert.True(
-                player.Contains("4 option", StringComparison.OrdinalIgnoreCase) ||
-                player.Contains("four option", StringComparison.OrdinalIgnoreCase) ||
-                player.Contains("4 dialogue", StringComparison.OrdinalIgnoreCase) ||
-                player.Contains("four dialogue", StringComparison.OrdinalIgnoreCase),
-                "Player role must mention generating 4 dialogue options per turn");
+                player.Contains("dialogue options", StringComparison.OrdinalIgnoreCase) ||
+                player.Contains("max_dialogue_options", StringComparison.OrdinalIgnoreCase),
+                "Player role must mention generating dialogue options per turn");
         }
 
         // Mutation: would catch if player role omits texting style reference
