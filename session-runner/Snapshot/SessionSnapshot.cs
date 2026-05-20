@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Pinder.SessionRunner.Snapshot
 {
@@ -157,6 +158,7 @@ namespace Pinder.SessionRunner.Snapshot
         /// name (<c>defending_stat</c>). Lives on a different class from
         /// <c>TurnDefenseEntry.DefendingStat</c>, so there is no collision.
         /// </summary>
+        [JsonPropertyName("defending_stat")]
         public string DefendingStat { get; set; } = string.Empty;
 
         /// <summary>
