@@ -66,25 +66,40 @@ namespace Pinder.Core.Tests
 
         // What: Edge case §5.3 — Wait when interest=1 drops to 0, game ends (Unmatched)
         // Mutation: Fails if end condition check missing after Apply(-1)
+        // #957: updated to catch GameEndedException and call MarkEnded (uniform contract)
         [Fact]
         public void Wait_InterestHitsZero_GameEnds()
         {
             var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 1);
             var session = MakeSession(diceValue: 10, saModifier: 0, config: config);
 
-            session.Wait(); // interest 1→0
+            // Wait() throws GameEndedException(Unmatched) under #957
+            GameEndedException? ex = null;
+            try { session.Wait(); } catch (GameEndedException e) { ex = e; }
+            Assert.NotNull(ex);
+            Assert.Equal(GameOutcome.Unmatched, ex!.Outcome);
 
+            // Caller marks ended per uniform contract
+            session.MarkEnded(ex.Outcome);
+
+            // Now session is ended — subsequent Wait() must throw
             Assert.Throws<GameEndedException>(() => session.Wait());
         }
 
         // What: Edge case §5.1 — Wait on ended game throws GameEndedException
         // Mutation: Fails if _ended check is missing at start of Wait
+        // #957: updated to catch GameEndedException and call MarkEnded (uniform contract)
         [Fact]
         public void Wait_OnEndedGame_ThrowsGameEndedException()
         {
             var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 1);
             var session = MakeSession(diceValue: 10, saModifier: 0, config: config);
-            session.Wait(); // ends game
+
+            // Wait() throws under #957; caller marks ended
+            GameEndedException? ex = null;
+            try { session.Wait(); } catch (GameEndedException e) { ex = e; }
+            Assert.NotNull(ex);
+            session.MarkEnded(ex!.Outcome);
 
             Assert.Throws<GameEndedException>(() => session.Wait());
         }
