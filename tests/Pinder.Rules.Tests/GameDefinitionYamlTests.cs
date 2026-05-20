@@ -64,13 +64,39 @@ namespace Pinder.Rules.Tests
             return File.ReadAllText(Path.Combine(dir, "data", "game-definition.yaml"));
         }
 
+        /// <summary>
+        /// Recursively convert YamlDotNet's Dictionary&lt;object,object&gt; nodes
+        /// (and scalar integer values) into Dictionary&lt;string,object?&gt;.
+        /// Needed because Deserialize&lt;Dictionary&lt;string,object?&gt;&gt; fails when
+        /// nested mappings contain integer values (horniness_time_modifiers).
+        /// </summary>
+        private static object? ConvertYamlNode(object? node)
+        {
+            if (node == null) return null;
+            if (node is string s) return s;
+            if (node is int i) return i;
+            if (node is long l) return l;
+            if (node is Dictionary<object, object> dict)
+            {
+                var result = new Dictionary<string, object?>();
+                foreach (var kvp in dict)
+                    result[kvp.Key.ToString()!] = ConvertYamlNode(kvp.Value);
+                return result;
+            }
+            return node.ToString();
+        }
+
         private static Dictionary<string, object?> ParseYamlRaw()
         {
             var content = LoadYamlContent();
             var deserializer = new DeserializerBuilder()
                 .WithNamingConvention(UnderscoredNamingConvention.Instance)
                 .Build();
-            return deserializer.Deserialize<Dictionary<string, object?>>(content);
+            var raw = deserializer.Deserialize<Dictionary<object, object>>(content);
+            var result = new Dictionary<string, object?>();
+            foreach (var kvp in raw)
+                result[kvp.Key.ToString()!] = ConvertYamlNode(kvp.Value);
+            return result;
         }
 
         /// <summary>
@@ -93,7 +119,7 @@ namespace Pinder.Rules.Tests
                 {
                     result[kvp.Key] = i.ToString();
                 }
-                else if (kvp.Value is Dictionary<object, object> dict)
+                else if (kvp.Value is Dictionary<string, object?> dict)
                 {
                     var sb = new System.Text.StringBuilder();
                     foreach (var dk in dict.Values)

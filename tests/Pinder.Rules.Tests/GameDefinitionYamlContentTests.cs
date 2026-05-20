@@ -28,13 +28,38 @@ namespace Pinder.Rules.Tests
             return File.ReadAllText(Path.Combine(dir, "data", "game-definition.yaml"));
         }
 
+        /// <summary>
+        /// Recursively convert YamlDotNet's Dictionary&lt;object,object&gt; nodes
+        /// (and scalar integer values) into Dictionary&lt;string,object?&gt;.
+        /// Needed because Deserialize&lt;Dictionary&lt;string,object?&gt;&gt; fails when
+        /// nested mappings contain integer values (horniness_time_modifiers).
+        /// </summary>
+        private static object? ConvertYamlNode(object? node)
+        {
+            if (node == null) return null;
+            if (node is string s) return s;
+            if (node is int i) return i;
+            if (node is long l) return l;
+            if (node is Dictionary<object, object> dict)
+            {
+                var result = new Dictionary<string, object?>();
+                foreach (var kvp in dict)
+                    result[kvp.Key.ToString()!] = ConvertYamlNode(kvp.Value);
+                return result;
+            }
+            return node.ToString();
+        }
+
         private static Dictionary<string, string> ParseYaml()
         {
             var content = LoadYamlContent();
             var deserializer = new DeserializerBuilder()
                 .WithNamingConvention(UnderscoredNamingConvention.Instance)
                 .Build();
-            var raw = deserializer.Deserialize<Dictionary<string, object?>>(content);
+            var rawDict = deserializer.Deserialize<Dictionary<object, object>>(content);
+            var raw = new Dictionary<string, object?>();
+            foreach (var kvp in rawDict)
+                raw[kvp.Key.ToString()!] = ConvertYamlNode(kvp.Value);
             var result = new Dictionary<string, string>();
             foreach (var kvp in raw)
             {
@@ -47,7 +72,7 @@ namespace Pinder.Rules.Tests
                 {
                     result[kvp.Key] = i.ToString();
                 }
-                else if (kvp.Value is Dictionary<object, object> dict)
+                else if (kvp.Value is Dictionary<string, object?> dict)
                 {
                     var sb = new StringBuilder();
                     foreach (var dk in dict.Values)
@@ -98,10 +123,13 @@ namespace Pinder.Rules.Tests
             var deserializer = new DeserializerBuilder()
                 .WithNamingConvention(UnderscoredNamingConvention.Instance)
                 .Build();
-            var data = deserializer.Deserialize<Dictionary<string, object>>(content);
+            var dataRaw = deserializer.Deserialize<Dictionary<object, object>>(content);
+            var data = new Dictionary<string, object?>();
+            foreach (var kvp in dataRaw)
+                data[kvp.Key.ToString()!] = ConvertYamlNode(kvp.Value);
             foreach (var kvp in data)
             {
-                if (kvp.Value is Dictionary<object, object> dict)
+                if (kvp.Value is Dictionary<string, object?> dict)
                 {
                     foreach (var dkv in dict.Values)
                     {
