@@ -14,7 +14,7 @@ namespace Pinder.Rules.Tests
     /// </summary>
     public class GameDefinitionYamlTests
     {
-        private static readonly string[] RequiredKeys = new[]
+        private static readonly string[] RequiredContentKeys = new[]
         {
             "name",
             "vision",
@@ -23,6 +23,32 @@ namespace Pinder.Rules.Tests
             "opponent_role_description",
             "meta_contract",
             "writing_rules"
+        };
+
+        /// <summary>All top-level keys expected in the current game-definition.yaml.</summary>
+        private static readonly string[] AllExpectedKeys = new[]
+        {
+            "name",
+            "max_turns",
+            "max_dialogue_options",
+            "vision",
+            "world_description",
+            "texting_psychology",
+            "player_role_description",
+            "opponent_role_description",
+            "opponent_friction",
+            "opponent_curiosity",
+            "player_probing",
+            "meta_contract",
+            "writing_rules",
+            "revelation_over_statement",
+            "delivery_rules",
+            "conversation_arc",
+            "dramatic_craft",
+            "improvement_prompt",
+            "global_dc_bias",
+            "horniness_time_modifiers",
+            "steering_prompt"
         };
 
         private static string LoadYamlContent()
@@ -38,13 +64,48 @@ namespace Pinder.Rules.Tests
             return File.ReadAllText(Path.Combine(dir, "data", "game-definition.yaml"));
         }
 
-        private static Dictionary<string, string> ParseYaml()
+        private static Dictionary<string, object?> ParseYamlRaw()
         {
             var content = LoadYamlContent();
             var deserializer = new DeserializerBuilder()
                 .WithNamingConvention(UnderscoredNamingConvention.Instance)
                 .Build();
-            return deserializer.Deserialize<Dictionary<string, string>>(content);
+            return deserializer.Deserialize<Dictionary<string, object?>>(content);
+        }
+
+        /// <summary>
+        /// Parse YAML and return string values for content-section keys.
+        /// Nested dicts are flattened by concatenating their values; integers are stringified.
+        /// Null-valued keys are omitted from the result.
+        /// </summary>
+        private static Dictionary<string, string> ParseYaml()
+        {
+            var raw = ParseYamlRaw();
+            var result = new Dictionary<string, string>();
+            foreach (var kvp in raw)
+            {
+                if (kvp.Value == null) continue;
+                if (kvp.Value is string s)
+                {
+                    result[kvp.Key] = s;
+                }
+                else if (kvp.Value is int i)
+                {
+                    result[kvp.Key] = i.ToString();
+                }
+                else if (kvp.Value is Dictionary<object, object> dict)
+                {
+                    var sb = new System.Text.StringBuilder();
+                    foreach (var dk in dict.Values)
+                    {
+                        if (dk != null) sb.AppendLine(dk.ToString());
+                    }
+                    var flat = sb.ToString().TrimEnd();
+                    if (!string.IsNullOrEmpty(flat))
+                        result[kvp.Key] = flat;
+                }
+            }
+            return result;
         }
 
         [Fact]
@@ -58,19 +119,23 @@ namespace Pinder.Rules.Tests
         [Fact]
         public void YamlFile_ContainsAllRequiredKeys()
         {
-            var data = ParseYaml();
-            foreach (var key in RequiredKeys)
+            var raw = ParseYamlRaw();
+            foreach (var key in RequiredContentKeys)
             {
-                Assert.True(data.ContainsKey(key), $"Missing required key: {key}");
+                Assert.True(raw.ContainsKey(key), $"Missing required key: {key}");
             }
         }
 
         [Fact]
         public void YamlFile_HasNoExtraKeys()
         {
-            var data = ParseYaml();
-            var extraKeys = data.Keys.Except(RequiredKeys).ToList();
-            Assert.Empty(extraKeys);
+            var raw = ParseYamlRaw();
+            var extraKeys = raw.Keys.Except(AllExpectedKeys).ToList();
+            if (extraKeys.Count > 0)
+            {
+                Assert.Fail($"Unexpected top-level key(s): {string.Join(", ", extraKeys)}. " +
+                    "Update AllExpectedKeys if this addition is intentional.");
+            }
         }
 
         [Theory]
@@ -83,9 +148,10 @@ namespace Pinder.Rules.Tests
         [InlineData("writing_rules")]
         public void YamlFile_ValueIsNonEmpty(string key)
         {
-            var data = ParseYaml();
-            Assert.True(data.ContainsKey(key), $"Missing key: {key}");
-            Assert.False(string.IsNullOrWhiteSpace(data[key]), $"Value for '{key}' is empty or whitespace");
+            var raw = ParseYamlRaw();
+            Assert.True(raw.ContainsKey(key), $"Missing key: {key}");
+            Assert.True(raw[key] is string s && !string.IsNullOrWhiteSpace(s),
+                $"Value for '{key}' is not a non-empty string (type: {raw[key]?.GetType().Name ?? "null"})");
         }
 
         [Fact]
@@ -161,8 +227,9 @@ namespace Pinder.Rules.Tests
         {
             var data = ParseYaml();
             // Each content section should be substantial (> 200 chars)
-            foreach (var key in RequiredKeys.Where(k => k != "name"))
+            foreach (var key in RequiredContentKeys.Where(k => k != "name"))
             {
+                Assert.True(data.ContainsKey(key), $"Section '{key}' not found in parsed YAML");
                 Assert.True(data[key].Length > 200,
                     $"Section '{key}' is only {data[key].Length} chars — expected substantial content (>200)");
             }
