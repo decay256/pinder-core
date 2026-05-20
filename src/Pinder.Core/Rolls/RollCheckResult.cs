@@ -139,6 +139,24 @@ namespace Pinder.Core.Rolls
         }
 
         /// <summary>
+        /// Human-readable consequence text for this check result (#964).
+        /// Population deferred to follow-up. SPA falls back to client-side i18n catalogue when null.
+        /// </summary>
+        [JsonPropertyName("consequence")]
+        public string? Consequence { get; private set; }
+
+        /// <summary>
+        /// Apply an engine-populated consequence string. Idempotent — throws
+        /// <see cref="System.InvalidOperationException"/> if already set (#964).
+        /// </summary>
+        public void ApplyConsequence(string consequence)
+        {
+            if (Consequence != null)
+                throw new System.InvalidOperationException("Consequence already applied");
+            Consequence = consequence;
+        }
+
+        /// <summary>
         /// Synthesise a <see cref="RollCheckResult"/> from the bespoke fields a
         /// <see cref="RollResult"/> already carries. Used by callers that build a
         /// <see cref="RollResult"/> outside <see cref="RollEngine"/> (e.g.
