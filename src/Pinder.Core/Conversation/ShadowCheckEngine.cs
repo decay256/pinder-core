@@ -1,4 +1,5 @@
 using System;
+using Pinder.Core.I18n;
 using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
 
@@ -13,10 +14,12 @@ namespace Pinder.Core.Conversation
     internal sealed class ShadowCheckEngine
     {
         private readonly Random _rng;
+        private readonly IConsequenceCatalog? _consequenceCatalog;
 
-        public ShadowCheckEngine(Random rng)
+        public ShadowCheckEngine(Random rng, IConsequenceCatalog? consequenceCatalog = null)
         {
             _rng = rng ?? throw new ArgumentNullException(nameof(rng));
+            _consequenceCatalog = consequenceCatalog;
         }
 
         /// <summary>
@@ -44,7 +47,7 @@ namespace Pinder.Core.Conversation
             bool isMiss = !check.IsSuccess;
             FailureTier tier = isMiss ? check.Tier : FailureTier.Success;
 
-            return new ShadowCheckResult(
+            var result = new ShadowCheckResult(
                 checkPerformed: true,
                 shadow:         shadow,
                 roll:           check.DieRoll,
@@ -53,6 +56,19 @@ namespace Pinder.Core.Conversation
                 tier:           tier,
                 overlayApplied: false,
                 check:          check);
+
+            // #976: populate Consequence from i18n catalogue.
+            if (isMiss && _consequenceCatalog != null)
+            {
+                string key = ConsequenceKeys.ForShadowMiss(shadow);
+                string? template = _consequenceCatalog.Lookup(key);
+                if (template != null)
+                {
+                    result.ApplyConsequence(ConsequenceKeys.ApplySlots(template));
+                }
+            }
+
+            return result;
         }
     }
 }

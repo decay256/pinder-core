@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Pinder.Core.I18n;
 using Pinder.Core.Interfaces;
 using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
@@ -14,10 +15,12 @@ namespace Pinder.Core.Conversation
     internal sealed class HorninessEngine
     {
         private readonly Random _rng;
+        private readonly IConsequenceCatalog? _consequenceCatalog;
 
-        public HorninessEngine(Random rng)
+        public HorninessEngine(Random rng, IConsequenceCatalog? consequenceCatalog = null)
         {
             _rng = rng ?? throw new ArgumentNullException(nameof(rng));
+            _consequenceCatalog = consequenceCatalog;
         }
 
         /// <summary>
@@ -81,9 +84,22 @@ namespace Pinder.Core.Conversation
             string? overlayInstruction = GetHorninessOverlayInstruction(statDeliveryInstructions, horninessTier);
 
             bool overlayApplied = overlayInstruction != null;
-            return (new HorninessCheckResult(
+            var result = new HorninessCheckResult(
                 check.DieRoll, 0, check.Total, horninessDC,
-                true, horninessTier, overlayApplied, check), overlayInstruction);
+                true, horninessTier, overlayApplied, check);
+
+            // #976: populate Consequence from i18n catalogue.
+            if (_consequenceCatalog != null)
+            {
+                string key = ConsequenceKeys.ForHorninessMiss(horninessTier);
+                string? template = _consequenceCatalog.Lookup(key);
+                if (template != null)
+                {
+                    result.ApplyConsequence(ConsequenceKeys.ApplySlots(template));
+                }
+            }
+
+            return (result, overlayInstruction);
         }
         // DetermineHorninessTier deleted — #901: use FailureTierLadder.FromMissMargin instead.
 

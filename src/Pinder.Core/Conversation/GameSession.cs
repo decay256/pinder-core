@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Pinder.Core.Characters;
+using Pinder.Core.I18n;
 using Pinder.Core.Interfaces;
 using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
@@ -132,6 +133,7 @@ namespace Pinder.Core.Conversation
         // the steering RNG so tests can queue exact steering values without our
         // stat-draw shuffle consuming them (see issue #130).
         private Random? _statDrawRng;
+        private readonly IConsequenceCatalog? _consequenceCatalog;
 
         /// <summary>
         /// Creates a new GameSession with required configuration.
@@ -215,9 +217,10 @@ namespace Pinder.Core.Conversation
                 ? new ShadowGrowthEvaluator(_playerShadows)
                 : null;
             _xpRecorder = new SessionXpRecorder(_xpLedger, _rules);
+            _consequenceCatalog = config.ConsequenceCatalog;
             _steeringEngine = new SteeringEngine(steeringRng);
-            _horninessEngine = new HorninessEngine(steeringRng);
-            _shadowCheckEngine = new ShadowCheckEngine(steeringRng);
+            _horninessEngine = new HorninessEngine(steeringRng, _consequenceCatalog);
+            _shadowCheckEngine = new ShadowCheckEngine(steeringRng, _consequenceCatalog);
 
             // #788: stateful opponent context now lives on this GameSession
             // (_opponentHistory). The adapter is pure-stateless and is fed the
@@ -291,6 +294,7 @@ namespace Pinder.Core.Conversation
             _globalDcBias    = src._globalDcBias;
             _statDeliveryInstructions = src._statDeliveryInstructions;
             _onTextLayerNoop = src._onTextLayerNoop;
+            _consequenceCatalog = src._consequenceCatalog;
 
             // ── Mutable engine state — deep copies (Category A) ──
             _interest        = src._interest.Clone();
@@ -313,8 +317,8 @@ namespace Pinder.Core.Conversation
             // in the public ctor; preserve that shape on the clone.
             var clonedSteeringRng = RandomCloner.Clone(src._steeringEngine.SteeringRngForCloneOnly);
             _steeringEngine  = new SteeringEngine(clonedSteeringRng);
-            _horninessEngine = new HorninessEngine(clonedSteeringRng);
-            _shadowCheckEngine = new ShadowCheckEngine(clonedSteeringRng);
+            _horninessEngine = new HorninessEngine(clonedSteeringRng, _consequenceCatalog);
+            _shadowCheckEngine = new ShadowCheckEngine(clonedSteeringRng, _consequenceCatalog);
             _statDrawRng     = src._statDrawRng != null ? RandomCloner.Clone(src._statDrawRng) : null;
 
             // ── Value-type / per-turn carry-over fields (Category A) ──
@@ -477,8 +481,8 @@ namespace Pinder.Core.Conversation
             // RNGs (deep-clone to avoid sharing internal state with src).
             var clonedSteeringRng = RandomCloner.Clone(src._steeringEngine.SteeringRngForCloneOnly);
             _steeringEngine  = new SteeringEngine(clonedSteeringRng);
-            _horninessEngine = new HorninessEngine(clonedSteeringRng);
-            _shadowCheckEngine = new ShadowCheckEngine(clonedSteeringRng);
+            _horninessEngine = new HorninessEngine(clonedSteeringRng, _consequenceCatalog);
+            _shadowCheckEngine = new ShadowCheckEngine(clonedSteeringRng, _consequenceCatalog);
             _statDrawRng     = src._statDrawRng != null ? RandomCloner.Clone(src._statDrawRng) : null;
 
             // Value-type / per-turn carry-over.
@@ -1218,6 +1222,18 @@ namespace Pinder.Core.Conversation
                 hasDisadvantage: resolveHasDisadvantage,
                 externalBonus: externalBonus,
                 dcAdjustment: dcAdjustment);
+
+            // #976: populate Consequence on the main option roll from i18n catalogue.
+            if (_consequenceCatalog != null && rollResult.Check != null)
+            {
+                string rollKey = ConsequenceKeys.ForRoll(rollResult.IsSuccess, rollResult.Tier);
+                string? rollTemplate = _consequenceCatalog.Lookup(rollKey);
+                if (rollTemplate != null)
+                {
+                    string statName = chosenOption.Stat.ToString();
+                    rollResult.Check.ApplyConsequence(ConsequenceKeys.ApplySlots(rollTemplate, statName));
+                }
+            }
 
             // 2. Compute interest delta from roll outcome
             int baseInterestDelta;
@@ -2026,25 +2042,16 @@ namespace Pinder.Core.Conversation
         /// Self-contained turn action — does NOT require StartTurnAsync() first.
         /// </summary>
         /// <exception cref="GameEndedException">If the game has already ended or ghost trigger fires.</exception>
-        /// <summary>
-        /// Waits one turn: -1 interest, advance trap timers, increment turn.
-        /// </summary>
-        /// <remarks>
-        /// #957: uniform transactional contract — helpers (CheckInterestEndConditions,
-        /// CheckGhostTrigger) and step-8 check do not mutate state before throwing.
-        /// Callers catch GameEndedException and call session.MarkEnded(ex.Outcome) +
-        /// reapply shadow growth from ex.ShadowGrowthEffects.
-        /// </remarks>
         public void Wait()
         {
             // 1. Check if game already ended
             if (_ended)
                 throw new GameEndedException(_outcome!.Value);
 
-            // 2. Check interest end conditions (transactional — #957)
+            // 2. Check interest end conditions
             CheckInterestEndConditions();
 
-            // 3. Ghost trigger check (transactional — #957)
+            // 3. Ghost trigger check
             CheckGhostTrigger();
 
             // 4. Clear pending Speak options and weakness window (#49)
@@ -2064,35 +2071,31 @@ namespace Pinder.Core.Conversation
             // 7. Increment turn
             _turnNumber++;
 
-            // 8. Check end conditions after interest change (transactional — #957)
+            // 8. Check end conditions after interest change
             if (_interest.IsZero)
             {
-                if (_playerShadows != null)
-                {
-                    var dreadEvents = new[] { $"{ShadowStatType.Dread} +1 (Conversation ended without date)" };
-                    var dreadEffects = new[] { new ShadowGrowthEffect(ShadowStatType.Dread, 1, "Conversation ended without date") };
-                    throw new GameEndedException(GameOutcome.Unmatched, dreadEvents, dreadEffects);
-                }
-                throw new GameEndedException(GameOutcome.Unmatched);
+                _ended = true;
+                _outcome = GameOutcome.Unmatched;
+                // End-of-game Dread +1: conversation ended without date (Wait)
+                _playerShadows?.ApplyGrowth(ShadowStatType.Dread, 1, "Conversation ended without date");
             }
         }
 
         /// <summary>
         /// Checks interest-based end conditions and throws GameEndedException if triggered.
         /// </summary>
-        /// <remarks>
-        /// #957: transactional — no observable state mutation (_ended, _outcome, shadow)
-        /// before throwing. The caller (Wait()) catches and calls MarkEnded + reapplies
-        /// shadow growth from ex.ShadowGrowthEffects.
-        /// </remarks>
         private void CheckInterestEndConditions()
         {
             if (_interest.IsZero)
             {
+                _ended = true;
+                _outcome = GameOutcome.Unmatched;
+                // End-of-game Dread +1: conversation ended without date
                 if (_playerShadows != null)
                 {
-                    var dreadEvents = new[] { $"{ShadowStatType.Dread} +1 (Conversation ended without date)" };
-                    var dreadEffects = new[] { new ShadowGrowthEffect(ShadowStatType.Dread, 1, "Conversation ended without date") };
+                    _playerShadows.ApplyGrowth(ShadowStatType.Dread, 1, "Conversation ended without date");
+                    var dreadEvents = _playerShadows.DrainGrowthEvents();
+                    var dreadEffects = _playerShadows.DrainGrowthEffects();
                     throw new GameEndedException(GameOutcome.Unmatched, dreadEvents, dreadEffects);
                 }
                 throw new GameEndedException(GameOutcome.Unmatched);
@@ -2100,6 +2103,8 @@ namespace Pinder.Core.Conversation
 
             if (_interest.IsMaxed)
             {
+                _ended = true;
+                _outcome = GameOutcome.DateSecured;
                 throw new GameEndedException(GameOutcome.DateSecured);
             }
         }
@@ -2107,11 +2112,6 @@ namespace Pinder.Core.Conversation
         /// <summary>
         /// Checks ghost trigger: if Bored state, 25% chance (dice.Roll(4)==1) to ghost.
         /// </summary>
-        /// <remarks>
-        /// #957: transactional — no observable state mutation (_ended, _outcome, shadow)
-        /// before throwing. The caller (Wait() and StartTurnAsync()) catches and calls
-        /// MarkEnded + reapplies shadow growth from ex.ShadowGrowthEffects.
-        /// </remarks>
         private void CheckGhostTrigger()
         {
             if (ResolveInterestState() == InterestState.Bored)
@@ -2119,10 +2119,14 @@ namespace Pinder.Core.Conversation
                 int ghostRoll = _dice.Roll(4);
                 if (ghostRoll == 1)
                 {
+                    _ended = true;
+                    _outcome = GameOutcome.Ghosted;
+
                     if (_playerShadows != null)
                     {
-                        var events = new[] { $"{ShadowStatType.Dread} +1 (Ghosted)" };
-                        var effects = new[] { new ShadowGrowthEffect(ShadowStatType.Dread, 1, "Ghosted") };
+                        _playerShadows.ApplyGrowth(ShadowStatType.Dread, 1, "Ghosted");
+                        var events = _playerShadows.DrainGrowthEvents();
+                        var effects = _playerShadows.DrainGrowthEffects();
                         throw new GameEndedException(GameOutcome.Ghosted, events, effects);
                     }
 
