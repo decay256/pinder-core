@@ -2041,6 +2041,12 @@ namespace Pinder.Core.Conversation
         /// Synchronous — no LLM calls.
         /// Self-contained turn action — does NOT require StartTurnAsync() first.
         /// </summary>
+        /// <remarks>
+        /// #957: uniform transactional contract — helpers (CheckInterestEndConditions,
+        /// CheckGhostTrigger) and step-8 check do not mutate state before throwing.
+        /// Callers catch GameEndedException and call session.MarkEnded(ex.Outcome) +
+        /// reapply shadow growth from ex.ShadowGrowthEffects.
+        /// </remarks>
         /// <exception cref="GameEndedException">If the game has already ended or ghost trigger fires.</exception>
         public void Wait()
         {
@@ -2048,10 +2054,10 @@ namespace Pinder.Core.Conversation
             if (_ended)
                 throw new GameEndedException(_outcome!.Value);
 
-            // 2. Check interest end conditions
+            // 2. Check interest end conditions (transactional — #957)
             CheckInterestEndConditions();
 
-            // 3. Ghost trigger check
+            // 3. Ghost trigger check (transactional — #957)
             CheckGhostTrigger();
 
             // 4. Clear pending Speak options and weakness window (#49)
@@ -2071,31 +2077,35 @@ namespace Pinder.Core.Conversation
             // 7. Increment turn
             _turnNumber++;
 
-            // 8. Check end conditions after interest change
+            // 8. Check end conditions after interest change (transactional — #957)
             if (_interest.IsZero)
             {
-                _ended = true;
-                _outcome = GameOutcome.Unmatched;
-                // End-of-game Dread +1: conversation ended without date (Wait)
-                _playerShadows?.ApplyGrowth(ShadowStatType.Dread, 1, "Conversation ended without date");
+                if (_playerShadows != null)
+                {
+                    var dreadEvents = new[] { $"{ShadowStatType.Dread} +1 (Conversation ended without date)" };
+                    var dreadEffects = new[] { new ShadowGrowthEffect(ShadowStatType.Dread, 1, "Conversation ended without date") };
+                    throw new GameEndedException(GameOutcome.Unmatched, dreadEvents, dreadEffects);
+                }
+                throw new GameEndedException(GameOutcome.Unmatched);
             }
         }
 
         /// <summary>
         /// Checks interest-based end conditions and throws GameEndedException if triggered.
         /// </summary>
+        /// <remarks>
+        /// #957: transactional — no observable state mutation (_ended, _outcome, shadow)
+        /// before throwing. The caller (Wait()) catches and calls MarkEnded + reapplies
+        /// shadow growth from ex.ShadowGrowthEffects.
+        /// </remarks>
         private void CheckInterestEndConditions()
         {
             if (_interest.IsZero)
             {
-                _ended = true;
-                _outcome = GameOutcome.Unmatched;
-                // End-of-game Dread +1: conversation ended without date
                 if (_playerShadows != null)
                 {
-                    _playerShadows.ApplyGrowth(ShadowStatType.Dread, 1, "Conversation ended without date");
-                    var dreadEvents = _playerShadows.DrainGrowthEvents();
-                    var dreadEffects = _playerShadows.DrainGrowthEffects();
+                    var dreadEvents = new[] { $"{ShadowStatType.Dread} +1 (Conversation ended without date)" };
+                    var dreadEffects = new[] { new ShadowGrowthEffect(ShadowStatType.Dread, 1, "Conversation ended without date") };
                     throw new GameEndedException(GameOutcome.Unmatched, dreadEvents, dreadEffects);
                 }
                 throw new GameEndedException(GameOutcome.Unmatched);
@@ -2103,8 +2113,6 @@ namespace Pinder.Core.Conversation
 
             if (_interest.IsMaxed)
             {
-                _ended = true;
-                _outcome = GameOutcome.DateSecured;
                 throw new GameEndedException(GameOutcome.DateSecured);
             }
         }
@@ -2112,6 +2120,11 @@ namespace Pinder.Core.Conversation
         /// <summary>
         /// Checks ghost trigger: if Bored state, 25% chance (dice.Roll(4)==1) to ghost.
         /// </summary>
+        /// <remarks>
+        /// #957: transactional — no observable state mutation (_ended, _outcome, shadow)
+        /// before throwing. The caller (Wait() and StartTurnAsync()) catches and calls
+        /// MarkEnded + reapplies shadow growth from ex.ShadowGrowthEffects.
+        /// </remarks>
         private void CheckGhostTrigger()
         {
             if (ResolveInterestState() == InterestState.Bored)
@@ -2119,14 +2132,10 @@ namespace Pinder.Core.Conversation
                 int ghostRoll = _dice.Roll(4);
                 if (ghostRoll == 1)
                 {
-                    _ended = true;
-                    _outcome = GameOutcome.Ghosted;
-
                     if (_playerShadows != null)
                     {
-                        _playerShadows.ApplyGrowth(ShadowStatType.Dread, 1, "Ghosted");
-                        var events = _playerShadows.DrainGrowthEvents();
-                        var effects = _playerShadows.DrainGrowthEffects();
+                        var events = new[] { $"{ShadowStatType.Dread} +1 (Ghosted)" };
+                        var effects = new[] { new ShadowGrowthEffect(ShadowStatType.Dread, 1, "Ghosted") };
                         throw new GameEndedException(GameOutcome.Ghosted, events, effects);
                     }
 
