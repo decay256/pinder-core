@@ -1157,6 +1157,56 @@ namespace Pinder.Core.Tests
             Assert.Equal(0, tracker.GetDelta(ShadowStatType.Overthinking));
         }
 
+        // #956: ShadowGrowthEffects typed record list must be populated and consistent
+        // with ShadowGrowthEvents on a Ghosted throw.
+        [Fact]
+        public async Task GhostedException_CarriesTypedShadowGrowthEffects()
+        {
+            var shadows = MakeTracker();
+            var session = BuildSession(dice: Dice(1), shadows: shadows, startingInterest: 1);
+
+            var ex = await Assert.ThrowsAsync<GameEndedException>(() => session.StartTurnAsync());
+
+            Assert.Equal(GameOutcome.Ghosted, ex.Outcome);
+            Assert.Equal(0, shadows.GetDelta(ShadowStatType.Dread));
+            Assert.Contains(ex.ShadowGrowthEvents, e => e.Contains("Ghosted") && e.Contains("Dread"));
+
+            Assert.NotNull(ex.ShadowGrowthEffects);
+            Assert.NotEmpty(ex.ShadowGrowthEffects);
+            Assert.Equal(ex.ShadowGrowthEvents.Count, ex.ShadowGrowthEffects.Count);
+
+            var effect = ex.ShadowGrowthEffects[0];
+            Assert.Equal(ShadowStatType.Dread, effect.Stat);
+            Assert.Equal(1, effect.Amount);
+            Assert.Equal("Ghosted", effect.Reason);
+        }
+
+        [Fact]
+        public void GameEndedException_DefaultCtor_HasEmptyEffects()
+        {
+            var ex = new GameEndedException(GameOutcome.Ghosted);
+            Assert.NotNull(ex.ShadowGrowthEffects);
+            Assert.Empty(ex.ShadowGrowthEffects);
+        }
+
+        [Fact]
+        public void GameEndedException_ThreeParamCtor_CarriesBothLists()
+        {
+            var events = new[] { "Dread +1 (Ghosted)", "Madness +1 (Nat 1)" };
+            var effects = new[]
+            {
+                new ShadowGrowthEffect(ShadowStatType.Dread, 1, "Ghosted"),
+                new ShadowGrowthEffect(ShadowStatType.Madness, 1, "Nat 1")
+            };
+
+            var ex = new GameEndedException(GameOutcome.Ghosted, events, effects);
+
+            Assert.Equal(2, ex.ShadowGrowthEvents.Count);
+            Assert.Equal(2, ex.ShadowGrowthEffects.Count);
+            Assert.Equal(ShadowStatType.Dread, ex.ShadowGrowthEffects[0].Stat);
+            Assert.Equal(ShadowStatType.Madness, ex.ShadowGrowthEffects[1].Stat);
+        }
+
         // =====================================================================
         // Helpers — test-only utilities (no production code copied)
         // =====================================================================
