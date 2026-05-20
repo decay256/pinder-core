@@ -34,6 +34,15 @@ events:
       - "You noticed what they didn't say out loud."
       - "Eyes open. The tell paid out."
 
+  triple_hit:
+    title: "Triple bonus"
+    summary_variants:
+      - "All three landed. Full coverage, full impact."
+      - "Combo, tell, and callback — the trifecta hit."
+      - "Three separate reads, one perfect moment."
+      - "They felt it from three angles at once."
+      - "Triple simultaneous — they didn't see it coming."
+
   callback_hit:
     title: "Callback"
     summary_variants:
