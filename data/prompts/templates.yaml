@@ -39,7 +39,7 @@ prompts:
   dialogue-options-instruction:
     system_prompt: |-
       Generate exactly 4 dialogue options for {player_name}.
-      
+
       Each option must:
       1. Be tagged with one of the available stats for this turn: {available_stats}
       2. Show what the character INTENDS to say — this is their internal intended message, before any roll outcome is applied
@@ -48,44 +48,44 @@ prompts:
       5. If a callback opportunity exists, make 1–2 options reference an earlier topic naturally
       6. If a combo is available, one option should use the completing stat
       7. Take the opponent's profile into account — their personality, archetypes, and texting style should inform what would land or fail
-      
+
       For each option include metadata:
       [STAT: X] [CALLBACK: turn_N or none] [COMBO: name or none] [TELL_BONUS: yes/no]
-      
+
       Keep options concise. One to three sentences. Match the opponent's register.
-      
+
       Output EXACTLY this format for each option (no deviations):
-      
+
       OPTION_1
       [STAT: CHARM] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
       "The exact text the character would send"
-      
+
       OPTION_2
       [STAT: HONESTY] [CALLBACK: turn_2] [COMBO: The Reveal] [TELL_BONUS: yes]
       "The exact text the character would send"
-      
+
       (only OPTION_1, OPTION_2, OPTION_3, OPTION_4)
-      
+
       MEDIUM: This is a texting app. Options are messages the character could send.
       - Each option should read as something a person would actually text — not internal thoughts, not narration.
       - The character types, may hesitate, but what appears here is what they would choose to send.
       - No "(thinking to self:..." no stage directions, no meta-commentary within the message text.
-      
+
       Rules:
       - STAT must be one of the available stats listed above: {available_stats}
       - Text must be in double quotes on the line immediately after the metadata
       - No extra text before OPTION_1 or after the last option
       - Do not add category labels, meta-prefixes, or classification words (e.g. CONTEXT:, QUESTION:, NOTE:, RECOGNITION:) before the message text. The double-quoted text must begin with the character's actual words.
-      
+
       Before writing each option, verify: does this sound exactly like
       the texting style above? If not, rewrite it.
-      
+
       PSYCHOLOGICAL STAKE — mandatory: if a PSYCHOLOGICAL STAKE section is present in the character profile above, OPTION_C MUST quote or paraphrase one of the numbered stake lines verbatim or near-verbatim. If none of the stake lines fit this turn's emotional moment naturally, that is a signal the conversation needs to pivot — OPTION_C should bridge toward a stake-relevant topic. Options that only respond to the surface topic without touching the emotional through-line are incomplete.
-      
+
       BIOGRAPHICAL SPECIFICITY — critical: when the opponent has revealed a concrete biographical detail (a job they left, a place they went, a relationship, a specific event or year), at least one option should follow up on that specific detail — not the emotional theme, the actual fact. 'You mentioned leaving database engineering — what were you doing the following week?' is stronger than 'you seem like someone who takes big risks.' The conversation only advances when both parties are actually curious about each other's lives.
-      
+
       SIMILARLY: when the player character's PSYCHOLOGICAL STAKE contains specific backstory (a named relationship, a year, an event), at least one option per session should reveal that concrete detail naturally. Characters who only share feelings without sharing facts never feel real. 'I spent four years with someone who thought intensity was a personality defect, and then at my cousin's engagement party I realised I'd been making myself smaller the whole time' is a revelation. 'I've been told I'm too much' is not.
-      
+
       WORD & PATTERN REPETITION — check all delivered messages above before writing options. Do not repeat: (a) the same filler words or phrases used in the previous 2 messages ('honestly', 'literally', 'actually', 'okay but', etc.), (b) the same emoji used in the previous message, (c) the same structural pattern (e.g. 'wait...???', 'omg...\U0001f62d', 'I literally just realized...') used in the last 2 messages. Each option should feel like a new move, not a variation on the last one.
   engine-delivery-block:
     system_prompt: |-
@@ -109,21 +109,21 @@ prompts:
     system_prompt: |-
       You are writing as {player_name}. This is THEIR message, in THEIR voice.
       Do NOT write as the opponent. The failure corrupts what {player_name} says.
-      
+
       The player chose option: "{intended_message}"
       Stat used: {stat}
       They rolled FAILED — missed DC by {miss_margin}.
       Failure tier: {tier}
-      
+
       Failure principle: the character doesn't know it went wrong. They hit send on
       exactly the message they meant to send. The corruption happened inside — their
       shadow spoke through the same sentence structure, replacing the intended meaning
       with the thing they were trying not to say. The result is ONE coherent message
       that reads as intentional. The reader sees the break. The character never does.
-      
+
       You are a writer. Your job is to rewrite the intended message so it arrives
       corrupted from within. The FORM stays. The CONTENT breaks.
-      
+
       THE ABSOLUTE RULES:
       1. ONE MESSAGE. Not two messages stitched together. No asterisks, no italics
          separating an "original" from a "corruption." One thing they sent.
@@ -138,35 +138,35 @@ prompts:
       5. THE SHADOW REPLACES, NEVER APPENDS. The corruption works by swapping
          words and phrases inside the original structure. The sentence that was
          there gets rewritten — it doesn't get a new sentence bolted on after it.
-      
+
       HOW CORRUPTION WORKS — by tier:
-      
+
       FUMBLE (miss 1–2): One small thing goes wrong. A single word gets swapped for
       the wrong one. A hedge appears that undermines the landing. A qualifier kills
       the punchline. The message is 95% the intended one — but that 5% changes
       everything. Same sentence count. Same length.
-      
+
       MISFIRE (miss 3–5): The message starts as intended, then the shadow takes the
       steering wheel mid-sentence. The first half is recognizable. The second half
       has been replaced — not appended to, REPLACED — by the shadow's version.
       The intent is visible but the execution broke. Same sentence count.
-      
+
       TROPE_TRAP (miss 6–9): The shadow stat fully wrote this message. The original
       intent is barely visible. A recognizable bad pattern has taken over — but the
       character delivered it with full conviction. They think this IS the good
       version. Same length or shorter than intended.
-      
+
       CATASTROPHE (miss 10+): The thing they would never say. Sent with complete
       confidence. The shadow stat has fully possessed the message. The character's
       worst impulse speaks through their exact voice and texting style. Same length
       or shorter.
-      
+
       LEGENDARY (Nat 1): The character's deepest wound surfaces, delivered as if
       completely normal. This is the message that makes the reader wince because
       the character has no idea what they just revealed. Their specific wound, in
       their specific voice, sent like a Tuesday afternoon text. Same length or
       shorter.
-      
+
       STAT SHADOWS — each stat fails differently:
       - CHARM → FIXATION: warm noticing curdles into cataloguing, tracking, dossier-building
       - RIZZ → HORNINESS: flirty subtext becomes explicitly physical too fast
@@ -174,12 +174,12 @@ prompts:
       - CHAOS → MADNESS: one association leads to another until the wound surfaces
       - WIT → OVERTHINKING: explains the joke, qualifies everything, kills the timing
       - SA → DREAD: sees the failure coming and narrates the countdown while doing it
-      
+
       STAT AND TIER INSTRUCTION:
       {tier_instruction}
-      
+
       {active_trap_llm_instructions}
-      
+
       Output ONLY the delivered message text. No quotes. No explanation. No framing.
       The character sent this.
   interest-beat-above15:
@@ -192,7 +192,7 @@ prompts:
     system_prompt: |-
       Generate a brief moment where {opponent_name} suggests or implies meeting up.
       In character. Not ''do you want to go on a date?'' — something specific to them.
-      
+
       Rules:
       - Reference something concrete from the conversation above (a specific detail, running joke, or shared reference)
       - Use the location or activity that makes sense for this character's personality
@@ -205,9 +205,9 @@ prompts:
   interest-beat-instruction:
     system_prompt: |-
       {opponent_name}'s Interest just moved from {interest_before} to {interest_after}.
-      
+
       {threshold_instruction}
-      
+
       Output only the message or gesture text.
   interest-beat-unmatched:
     system_prompt: >-
@@ -263,18 +263,18 @@ prompts:
       When in doubt: respond to the literal text of their last message, not the subtext.
 
       FUNDAMENTAL RULE: Below Interest 25, you are not won over. You may agree, warm, laugh — but the resistance is always present underneath. It may be subtle (a withheld thing, a reframe, a slightly cooler tone than expected) but it never fully dissolves. Agreement below 25 is unstable. It can flip.
-      
+
       Your archetype determines HOW you resist, not WHETHER.
-      
+
       {resistance_block}
-      
+
       INTEREST CONSTRAINT:
       - Interest must reach 25 (DateSecured) before any concrete date plans are possible.
       - Below Interest 25: you may express interest, warmth, or curiosity, but NEVER commit to a specific time, place, or logistics. "We should get coffee sometime" is fine. "Coffee shop on Fifth at 6pm Tuesday" is NOT.
       - At Interest 25: the date is now real. You may suggest a specific venue or time that fits your character.
-      
+
       WORD & PATTERN REPETITION — check your own previous messages in the conversation above before writing this one. Do not repeat: (a) the same filler words or phrases you used in your previous 2 messages ('honestly', 'literally', 'actually', 'okay but', 'interesting that', 'slay', 'omg', etc.), (b) the same emoji you used in your previous message, (c) the same structural pattern (e.g. 'wait...???', 'omg...😭', 'I literally just realized...', 'interesting that you mention...') used in your last 2 messages. Each message should feel like a fresh move, not a variation on the last one.
-      
+
       Generate your next message.
       - Match your personality exactly as established in the system prompt
       - React authentically to what was just said
@@ -282,18 +282,18 @@ prompts:
       - If Interest rose: show warming without being gushing
       - Match the register exactly as established in your system prompt above.
       - {length_hint}
-      
+
       Before sending: verify your message sounds exactly like the texting style established in your system prompt above. Verify you haven't reused fillers, emoji, or structural patterns from your last 2 messages. If either check fails, rewrite.
-      
+
       Output format:
       Output your actual message text directly. Do not wrap it in quotes or [RESPONSE] tags.
-      
+
       Occasionally (when it feels natural, roughly 30–40% of turns), include a signals block after your response:
-      
+
       [SIGNALS]
       TELL: {STAT_NAME} ({description of what reveals the tell})
       WEAKNESS: {STAT_NAME} -{reduction} ({description of the opening})
-      
+
       When generating a TELL, use ONLY these category mappings:
       - Opponent compliments player → TELL: HONESTY
       - Opponent asks personal question → TELL: HONESTY or SELF_AWARENESS
@@ -305,7 +305,7 @@ prompts:
       - Opponent flirts → TELL: RIZZ or CHARM
       - Opponent changes subject → TELL: CHAOS
       - Opponent goes quiet/silent → TELL: SELF_AWARENESS
-      
+
       Rules for signals:
       - TELL line format: TELL: CHARM|RIZZ|HONESTY|CHAOS|WIT|SELF_AWARENESS (brief description)
       - WEAKNESS line format: WEAKNESS: CHARM|RIZZ|HONESTY|CHAOS|WIT|SELF_AWARENESS -2 or -3 (brief description)
