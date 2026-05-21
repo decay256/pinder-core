@@ -10,3 +10,6 @@ test_commands:
   - cmd: "dotnet test"
     transition: TESTS_RAN
     output_parser: dotnet
+  - cmd: "bash scripts/check-prompt-content.sh"
+    transition: TESTS_RAN
+
