@@ -111,6 +111,7 @@ namespace Pinder.LlmAdapters
             if (context.CurrentTurn == 1)
             {
                 sb.AppendLine("COLD OPENER RULE: This is Turn 1. You have never spoken to this person before.");
+                sb.AppendLine("Since you are initiating the contact and sending the very first message, you MUST NOT say \"interesting that you mention\", \"since you said\", \"you mentioned\", or use any other phrasing that assumes the opponent has already spoken or sent a message in this conversation. The opponent has sent ZERO messages.");
                 sb.AppendLine("Your only knowledge of them is their dating profile: bio text AND visible appearance (items listed after 'Wearing:' in the profile above).");
                 sb.AppendLine("Do NOT reference anything you would only know from inside knowledge of the character — only what is visible on their public profile.");
                 sb.AppendLine("A strong opener can react to their bio, their look, or both. Something specific beats something generic.");

@@ -87,6 +87,7 @@ prompts:
       SIMILARLY: when the player character's PSYCHOLOGICAL STAKE contains specific backstory (a named relationship, a year, an event), at least one option per session should reveal that concrete detail naturally. Characters who only share feelings without sharing facts never feel real. 'I spent four years with someone who thought intensity was a personality defect, and then at my cousin's engagement party I realised I'd been making myself smaller the whole time' is a revelation. 'I've been told I'm too much' is not.
 
       WORD & PATTERN REPETITION — check all delivered messages above before writing options. Do not repeat: (a) the same filler words or phrases used in the previous 2 messages ('honestly', 'literally', 'actually', 'okay but', etc.), (b) the same emoji used in the previous message, (c) the same structural pattern (e.g. 'wait...???', 'omg...\U0001f62d', 'I literally just realized...') used in the last 2 messages. Each option should feel like a new move, not a variation on the last one.
+      - Since Turn 1 has empty conversation history, options generated for Turn 1 must never assume the opponent has already spoken (never say 'you mentioned', 'since you said', 'interesting that you mention', etc.). You are initiating the contact.
   engine-delivery-block:
     system_prompt: |-
       [ENGINE — DELIVERY]
