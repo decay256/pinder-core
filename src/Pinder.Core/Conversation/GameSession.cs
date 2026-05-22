@@ -1467,6 +1467,19 @@ namespace Pinder.Core.Conversation
             string deliveredMessage = await _llm.DeliverMessageAsync(deliveryContext, ct).ConfigureAwait(false);
             progress?.Report(new TurnProgressEvent(TurnProgressStage.DeliveryCompleted, deliveredMessage));
 
+            // #902: Meta-prefix strip immediately after delivery LLM call.
+            {
+                string rawDelivered = deliveredMessage;
+                deliveredMessage = MetaPrefixStripper.Strip(rawDelivered);
+                if (deliveredMessage != rawDelivered)
+                {
+                    var stripSpans = WordDiff.Compute(rawDelivered, deliveredMessage);
+                    textDiffs.Add(new TextDiff(
+                        MetaPrefixStripper.LayerName, stripSpans,
+                        rawDelivered, deliveredMessage));
+                }
+            }
+
             // Tier modifier diff (SECOND per #364): intended+steering text vs
             // delivered-after-LLM rewrite. The LLM now degrades the combined
             // intended+steering string when the roll is a failure tier.
@@ -1480,22 +1493,6 @@ namespace Pinder.Core.Conversation
                                     rollResult.Tier.ToString();
                 var tierSpans = WordDiff.Compute(intendedTextForDelivery, deliveredMessage);
                 textDiffs.Add(new TextDiff(layerLabel, tierSpans, intendedTextForDelivery, deliveredMessage));
-            }
-
-            // #902: Meta-prefix strip after delivery LLM call.
-            // Runs after the tier modifier diff so the audit log captures
-            // the raw LLM output, then strips any LABEL: artifact before
-            // subsequent overlays see the text.
-            {
-                string beforeMetaStrip = deliveredMessage;
-                deliveredMessage = MetaPrefixStripper.Strip(deliveredMessage);
-                if (deliveredMessage != beforeMetaStrip)
-                {
-                    var stripSpans = WordDiff.Compute(beforeMetaStrip, deliveredMessage);
-                    textDiffs.Add(new TextDiff(
-                        MetaPrefixStripper.LayerName, stripSpans,
-                        beforeMetaStrip, deliveredMessage));
-                }
             }
 
             // ---- Trap LLM overlay (issue #371) ----
@@ -1526,10 +1523,23 @@ namespace Pinder.Core.Conversation
                     string beforeTrap = deliveredMessage;
                     string opponentCtxForTrap = BuildOpponentContext(_opponent);
                     progress?.Report(new TurnProgressEvent(TurnProgressStage.TrapOverlayStarted));
-                    deliveredMessage = await _llm.ApplyTrapOverlayAsync(
+                    string rawTrapOutput = await _llm.ApplyTrapOverlayAsync(
                         deliveredMessage, trapInstruction, trapDisplayName, opponentCtxForTrap, playerArchetypeDirectiveForDelivery, ct)
                         .ConfigureAwait(false);
-                    progress?.Report(new TurnProgressEvent(TurnProgressStage.TrapOverlayCompleted, deliveredMessage));
+                    progress?.Report(new TurnProgressEvent(TurnProgressStage.TrapOverlayCompleted, rawTrapOutput));
+
+                    // Immediately run MetaPrefixStripper.Strip to sanitize any non-narrative prefixes
+                    string sanitizedTrapOutput = MetaPrefixStripper.Strip(rawTrapOutput);
+                    if (sanitizedTrapOutput != rawTrapOutput)
+                    {
+                        var stripSpans = WordDiff.Compute(rawTrapOutput, sanitizedTrapOutput);
+                        textDiffs.Add(new TextDiff(
+                            MetaPrefixStripper.LayerName, stripSpans,
+                            rawTrapOutput, sanitizedTrapOutput));
+                    }
+
+                    deliveredMessage = sanitizedTrapOutput;
+
                     if (deliveredMessage != beforeTrap)
                     {
                         var trapSpans = WordDiff.Compute(beforeTrap, deliveredMessage);
@@ -1542,19 +1552,6 @@ namespace Pinder.Core.Conversation
                         // a structured breadcrumb so the audit can distinguish it from
                         // "layer didn't run".
                         EmitTextLayerNoop($"Trap ({trapDisplayName})", beforeTrap, deliveredMessage);
-                    }
-
-                    // #902: Meta-prefix strip after trap overlay.
-                    {
-                        string beforeMetaStrip = deliveredMessage;
-                        deliveredMessage = MetaPrefixStripper.Strip(deliveredMessage);
-                        if (deliveredMessage != beforeMetaStrip)
-                        {
-                            var stripSpans = WordDiff.Compute(beforeMetaStrip, deliveredMessage);
-                            textDiffs.Add(new TextDiff(
-                                MetaPrefixStripper.LayerName, stripSpans,
-                                beforeMetaStrip, deliveredMessage));
-                        }
                     }
                 }
             }
@@ -1642,9 +1639,22 @@ namespace Pinder.Core.Conversation
                             // Rewrite the delivered message with shadow corruption
                             string beforeShadow = deliveredMessage;
                             progress?.Report(new TurnProgressEvent(TurnProgressStage.ShadowCorruptionStarted));
-                            deliveredMessage = await _llm.ApplyShadowCorruptionAsync(
+                            string rawShadowOutput = await _llm.ApplyShadowCorruptionAsync(
                                 deliveredMessage, corruptionInstruction, pairedShadow.Value, playerArchetypeDirectiveForDelivery, ct).ConfigureAwait(false);
-                            progress?.Report(new TurnProgressEvent(TurnProgressStage.ShadowCorruptionCompleted, deliveredMessage));
+                            progress?.Report(new TurnProgressEvent(TurnProgressStage.ShadowCorruptionCompleted, rawShadowOutput));
+
+                            // Immediately run MetaPrefixStripper.Strip to sanitize any non-narrative prefixes
+                            string sanitizedShadowOutput = MetaPrefixStripper.Strip(rawShadowOutput);
+                            if (sanitizedShadowOutput != rawShadowOutput)
+                            {
+                                var stripSpans = WordDiff.Compute(rawShadowOutput, sanitizedShadowOutput);
+                                textDiffs.Add(new TextDiff(
+                                    MetaPrefixStripper.LayerName, stripSpans,
+                                    rawShadowOutput, sanitizedShadowOutput));
+                            }
+
+                            deliveredMessage = sanitizedShadowOutput;
+
                             if (deliveredMessage != beforeShadow)
                             {
                                 var shadowSpans = WordDiff.Compute(beforeShadow, deliveredMessage);
@@ -1654,19 +1664,6 @@ namespace Pinder.Core.Conversation
                             {
                                 // #314: layer ran but produced byte-identical output.
                                 EmitTextLayerNoop($"Shadow ({pairedShadow.Value})", beforeShadow, deliveredMessage);
-                            }
-
-                            // #902: Meta-prefix strip after shadow corruption overlay.
-                            {
-                                string beforeMetaStrip = deliveredMessage;
-                                deliveredMessage = MetaPrefixStripper.Strip(deliveredMessage);
-                                if (deliveredMessage != beforeMetaStrip)
-                                {
-                                    var stripSpans = WordDiff.Compute(beforeMetaStrip, deliveredMessage);
-                                    textDiffs.Add(new TextDiff(
-                                        MetaPrefixStripper.LayerName, stripSpans,
-                                        beforeMetaStrip, deliveredMessage));
-                                }
                             }
 
                             // Interest-delta override only applies when the main
@@ -1718,8 +1715,21 @@ namespace Pinder.Core.Conversation
                 string beforeHorniness = deliveredMessage;
                 string opponentCtx = BuildOpponentContext(_opponent);
                 progress?.Report(new TurnProgressEvent(TurnProgressStage.HorninessOverlayStarted));
-                deliveredMessage = await _llm.ApplyHorninessOverlayAsync(deliveredMessage, horninessOverlayInstruction, opponentCtx, playerArchetypeDirectiveForDelivery, ct).ConfigureAwait(false);
-                progress?.Report(new TurnProgressEvent(TurnProgressStage.HorninessOverlayCompleted, deliveredMessage));
+                string rawHorninessOutput = await _llm.ApplyHorninessOverlayAsync(deliveredMessage, horninessOverlayInstruction, opponentCtx, playerArchetypeDirectiveForDelivery, ct).ConfigureAwait(false);
+                progress?.Report(new TurnProgressEvent(TurnProgressStage.HorninessOverlayCompleted, rawHorninessOutput));
+
+                // Immediately run MetaPrefixStripper.Strip to sanitize any non-narrative prefixes
+                string sanitizedHorninessOutput = MetaPrefixStripper.Strip(rawHorninessOutput);
+                if (sanitizedHorninessOutput != rawHorninessOutput)
+                {
+                    var stripSpans = WordDiff.Compute(rawHorninessOutput, sanitizedHorninessOutput);
+                    textDiffs.Add(new TextDiff(
+                        MetaPrefixStripper.LayerName, stripSpans,
+                        rawHorninessOutput, sanitizedHorninessOutput));
+                }
+
+                deliveredMessage = sanitizedHorninessOutput;
+
                 if (deliveredMessage != beforeHorniness)
                 {
                     var horninessSpans = WordDiff.Compute(beforeHorniness, deliveredMessage);
@@ -1729,19 +1739,6 @@ namespace Pinder.Core.Conversation
                 {
                     // #314: layer ran but produced byte-identical output.
                     EmitTextLayerNoop("Horniness", beforeHorniness, deliveredMessage);
-                }
-
-                // #902: Meta-prefix strip after horniness overlay.
-                {
-                    string beforeMetaStrip = deliveredMessage;
-                    deliveredMessage = MetaPrefixStripper.Strip(deliveredMessage);
-                    if (deliveredMessage != beforeMetaStrip)
-                    {
-                        var stripSpans = WordDiff.Compute(beforeMetaStrip, deliveredMessage);
-                        textDiffs.Add(new TextDiff(
-                            MetaPrefixStripper.LayerName, stripSpans,
-                            beforeMetaStrip, deliveredMessage));
-                    }
                 }
             }
 
