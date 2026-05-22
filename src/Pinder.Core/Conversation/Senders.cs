@@ -34,7 +34,7 @@ namespace Pinder.Core.Conversation
         /// </summary>
         public static bool IsScene(string? sender)
         {
-            return sender == Scene;
+            return sender != null && sender.StartsWith(Scene);
         }
     }
 }

@@ -631,9 +631,9 @@ namespace Pinder.Core.Conversation
                     "SeedSceneEntries must be called before the first turn is resolved.");
             }
             if (!string.IsNullOrWhiteSpace(playerBio))
-                _history.Add((Senders.Scene, playerBio!.Trim()));
+                _history.Add(($"{Senders.Scene}:{_player.DisplayName}", playerBio!.Trim()));
             if (!string.IsNullOrWhiteSpace(opponentBio))
-                _history.Add((Senders.Scene, opponentBio!.Trim()));
+                _history.Add(($"{Senders.Scene}:{_opponent.DisplayName}", opponentBio!.Trim()));
             if (!string.IsNullOrWhiteSpace(outfitDescription))
             {
                 string trimmed = outfitDescription!.Trim();

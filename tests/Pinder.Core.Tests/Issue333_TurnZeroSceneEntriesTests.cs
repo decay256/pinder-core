@@ -32,7 +32,7 @@ namespace Pinder.Core.Tests
 
             var history = session.ConversationHistory;
             Assert.Equal(3, history.Count);
-            Assert.All(history, e => Assert.Equal(Senders.Scene, e.Sender));
+            Assert.All(history, e => Assert.True(Senders.IsScene(e.Sender)));
             Assert.Equal("Player bio text.",                                history[0].Text);
             Assert.Equal("Opponent bio text.",                              history[1].Text);
             Assert.Equal("Both wear something quietly out of fashion.",    history[2].Text);
@@ -81,10 +81,10 @@ namespace Pinder.Core.Tests
             Assert.NotNull(llm.CapturedDeliveryContext);
             Assert.DoesNotContain(
                 llm.CapturedDeliveryContext!.ConversationHistory,
-                e => e.Sender == Senders.Scene);
+                e => Senders.IsScene(e.Sender));
 
             // BUT the public ConversationHistory still includes them.
-            Assert.Contains(session.ConversationHistory, e => e.Sender == Senders.Scene);
+            Assert.Contains(session.ConversationHistory, e => Senders.IsScene(e.Sender));
         }
 
         [Fact]
@@ -108,7 +108,7 @@ namespace Pinder.Core.Tests
 
             Assert.Equal(3, freshSession.ConversationHistory.Count);
             Assert.All(freshSession.ConversationHistory,
-                e => Assert.Equal(Senders.Scene, e.Sender));
+                e => Assert.True(Senders.IsScene(e.Sender)));
         }
 
         // ── helpers ──────────────────────────────────────────────────────
