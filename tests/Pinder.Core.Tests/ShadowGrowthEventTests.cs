@@ -630,11 +630,8 @@ namespace Pinder.Core.Tests
 
         private static void ActivateTrap(GameSession session)
         {
-            var trapsField = typeof(GameSession).GetField("_traps",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var trapState = (TrapState)trapsField!.GetValue(session)!;
             var trap = new TrapDefinition("test-trap", StatType.Charm, TrapEffect.Disadvantage, 1, 3, "test instruction", "clear", "");
-            trapState.Activate(trap);
+            session.State.Traps.Activate(trap);
         }
 
         /// <summary>Dice that returns values from a queue.</summary>

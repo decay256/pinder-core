@@ -184,25 +184,17 @@ namespace Pinder.Core.Tests
 
         private static int GetInterest(GameSession session)
         {
-            var field = typeof(GameSession).GetField("_interest",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var interest = field!.GetValue(session)!;
-            var currentProp = interest.GetType().GetProperty("Current");
-            return (int)currentProp!.GetValue(interest)!;
+            return session.State.Interest.Current;
         }
 
         private static int GetTurnNumber(GameSession session)
         {
-            var field = typeof(GameSession).GetField("_turnNumber",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            return (int)field!.GetValue(session)!;
+            return session.State.TurnNumber;
         }
 
         private static TrapState GetTrapState(GameSession session)
         {
-            var field = typeof(GameSession).GetField("_traps",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            return (TrapState)field!.GetValue(session)!;
+            return session.State.Traps;
         }
 
         private static GameSession MakeSession(
@@ -245,10 +237,7 @@ namespace Pinder.Core.Tests
 
         private static void ActivateTrapOnSession(GameSession session, TrapDefinition trap)
         {
-            var trapsField = typeof(GameSession).GetField("_traps",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var trapState = (TrapState)trapsField!.GetValue(session)!;
-            trapState.Activate(trap);
+            session.State.Traps.Activate(trap);
         }
 
         private static StatBlock MakeStatBlock(int sa = 2)

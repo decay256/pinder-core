@@ -201,11 +201,8 @@ namespace Pinder.Core.Tests
 
         private static void ActivateTrap(GameSession session, StatType stat = StatType.Charm)
         {
-            var trapsField = typeof(GameSession).GetField("_traps",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var trapState = (TrapState)trapsField!.GetValue(session)!;
             var trap = new TrapDefinition("test_trap", stat, TrapEffect.Disadvantage, -1, 3, "llm", "clear", "nat1");
-            trapState.Activate(trap);
+            session.State.Traps.Activate(trap);
         }
 
         /// <summary>

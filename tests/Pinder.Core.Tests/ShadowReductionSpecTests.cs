@@ -610,10 +610,7 @@ namespace Pinder.Core.Tests
 
             if (trapDef != null)
             {
-                var trapsField = typeof(GameSession).GetField("_traps",
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                var trapState = (TrapState)trapsField!.GetValue(session)!;
-                trapState.Activate(trapDef);
+                session.State.Traps.Activate(trapDef);
             }
 
             return session;
