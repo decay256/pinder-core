@@ -245,40 +245,15 @@ namespace Pinder.LlmAdapters
             }
 
             DeliveryRules deliveryRules = null;
-            if (parsed.TryGetValue("delivery_rules", out var drObj) && drObj is Dictionary<object, object> drDict)
+            if (parsed.TryGetValue("delivery_rules", out var drObj))
             {
-                string DrGet(string key)
-                {
-                    if (drDict.TryGetValue(key, out var v) && v != null)
-                        return v.ToString();
-                    return "";
-                }
-                deliveryRules = new DeliveryRules(
-                    clean: DrGet("clean"),
-                    strong: DrGet("strong"),
-                    critical: DrGet("critical"),
-                    exceptional: DrGet("exceptional"),
-                    test: DrGet("test"),
-                    registerInstruction: DrGet("register_instruction"),
-                    mediumRule: DrGet("medium_rule"));
+                deliveryRules = CatalogParser.ParseDeliveryRules(drObj);
             }
 
             DramaticCraft dramaticCraft = null;
-            if (parsed.TryGetValue("dramatic_craft", out var dcObj) && dcObj is Dictionary<object, object> dcDict)
+            if (parsed.TryGetValue("dramatic_craft", out var dcObj))
             {
-                string DcGet(string key)
-                {
-                    if (dcDict.TryGetValue(key, out var v) && v != null)
-                        return v.ToString();
-                    return "";
-                }
-                dramaticCraft = new DramaticCraft(
-                    goal: DcGet("goal"),
-                    opponentWant: DcGet("opponent_want"),
-                    revelationBudget: DcGet("revelation_budget"),
-                    directnessDial: DcGet("directness_dial"),
-                    failureCost: DcGet("failure_cost"),
-                    earningTheClose: DcGet("earning_the_close"));
+                dramaticCraft = CatalogParser.ParseDramaticCraft(dcObj);
             }
 
             // Parse optional prose fields
@@ -297,26 +272,8 @@ namespace Pinder.LlmAdapters
             }
 
             // Parse required horniness_time_modifiers
-            if (!parsed.TryGetValue("horniness_time_modifiers", out var htmObj) || htmObj == null)
-                throw new InvalidOperationException("game-definition.yaml is missing required key: horniness_time_modifiers");
-
-            if (!(htmObj is Dictionary<object, object> htmDict))
-                throw new InvalidOperationException("game-definition.yaml is missing required key: horniness_time_modifiers");
-
-            int ParseHtmInt(string key)
-            {
-                if (!htmDict.TryGetValue(key, out var v) || v == null)
-                    throw new InvalidOperationException($"game-definition.yaml horniness_time_modifiers is missing required sub-key: {key}");
-                if (!int.TryParse(v.ToString(), out int result))
-                    throw new InvalidOperationException($"game-definition.yaml horniness_time_modifiers.{key} must be an integer");
-                return result;
-            }
-
-            var horninessTimeModifiers = new HorninessTimeModifiers(
-                morning: ParseHtmInt("morning"),
-                afternoon: ParseHtmInt("afternoon"),
-                evening: ParseHtmInt("evening"),
-                overnight: ParseHtmInt("overnight"));
+            parsed.TryGetValue("horniness_time_modifiers", out var htmObj);
+            var horninessTimeModifiers = CatalogParser.ParseHorninessTimeModifiers(htmObj);
 
             // Validate core required keys first (throws FormatException)
             var name = GetRequired("name");
