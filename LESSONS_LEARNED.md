@@ -8,7 +8,7 @@ extend the canonical hazard catalogue.
 
 - **Canonical patterns** are referenced by NAME (e.g. `WORKSPACE-ISOLATION`,
   `SUBMODULE-SYNC-AFTER-REBASE`). The full body lives in
-  `~/.openclaw/skills/swarm-drain/references/canonical-lessons.md`. Subagents
+  `~/.openclaw/skills/eigentakt/references/canonical-lessons.md`. Subagents
   and reviewers should look the body up there if they need it.
 - **Project-specific lessons** are written here in full, in the same shape as
   canonical lessons (Symptom / Root cause / Fix / Rule). Add new ones at the
@@ -53,7 +53,7 @@ enforce them.
   follow-up docs PR before the next ticket starts.
 - `AGENT-LOG-EVERYTHING` — every implementer/reviewer/fix/security/docs
   subagent appends to `agent.log` (JSONL, schema in
-  `~/.openclaw/workspace/skills/swarm-dev/agents/LOGGING.md`). Orchestrator
+  `~/.openclaw/skills/eigentakt/agents/LOGGING.md`). Orchestrator
   logs `merged`, `closed`, `consolidated`. End-of-run summaries read from
   `agent.log`, not chat scrollback.
 - `BUILD-PIPELINE-DISCIPLINE` — DoD evidence MUST include the output of the
@@ -93,7 +93,7 @@ enforce them.
 ## Project-specific lessons
 
 (None yet. Append new ones below this line as they accumulate. Use the
-template from `~/.openclaw/skills/swarm-drain/templates/lesson-template.md`.)
+template from `~/.openclaw/skills/eigentakt/templates/lesson-template.md`.)
 
 ### CONVERSATION-INDEXING-IS-CANONICAL
 
@@ -711,3 +711,15 @@ constructor and clone constructors.
 - `tests/Pinder.Core.Tests/Rolls/TierLadderAuditTest.cs` — audit gate.
 
 **Discovered in:** #901 (2026-05-16).
+
+### RESOURCE-EXHAUSTED-PROVIDERS-ESCALATION
+
+**Title:** Google direct API 429 quota/resource exhaustion escalation.
+
+**Symptom:** Subagent run fails with `RESOURCE_EXHAUSTED` (Google direct API 429 quota exceeded error).
+
+**Root cause:** Shared-key direct Google API billing/quota was temporarily exhausted, blocking subsequent Rung 0 and Rung 1 calls.
+
+**Rule:** When direct Google API 429 quota/resource exhaustion errors are encountered, immediately escalate the default rung of the role in `model-routing.yaml` to Rung 2 (`anthropic/claude-sonnet-4-6`) to route requests to the direct Anthropic API, bypassing the exhausted Google provider. Restoring the original model-routing settings at the end of the wave ensures subsequent sprints remain properly calibrated.
+
+**Discovered in:** Web-2/3 UI Extraction (2026-05-23).
