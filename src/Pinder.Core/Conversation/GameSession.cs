@@ -1468,17 +1468,7 @@ namespace Pinder.Core.Conversation
             progress?.Report(new TurnProgressEvent(TurnProgressStage.DeliveryCompleted, deliveredMessage));
 
             // #902: Meta-prefix strip immediately after delivery LLM call.
-            {
-                string rawDelivered = deliveredMessage;
-                deliveredMessage = MetaPrefixStripper.Strip(rawDelivered);
-                if (deliveredMessage != rawDelivered)
-                {
-                    var stripSpans = WordDiff.Compute(rawDelivered, deliveredMessage);
-                    textDiffs.Add(new TextDiff(
-                        MetaPrefixStripper.LayerName, stripSpans,
-                        rawDelivered, deliveredMessage));
-                }
-            }
+            deliveredMessage = TextSanitizer.Sanitize(deliveredMessage, MetaPrefixStripper.LayerName, textDiffs);
 
             // Tier modifier diff (SECOND per #364): intended+steering text vs
             // delivered-after-LLM rewrite. The LLM now degrades the combined
@@ -1529,16 +1519,7 @@ namespace Pinder.Core.Conversation
                     progress?.Report(new TurnProgressEvent(TurnProgressStage.TrapOverlayCompleted, rawTrapOutput));
 
                     // Immediately run MetaPrefixStripper.Strip to sanitize any non-narrative prefixes
-                    string sanitizedTrapOutput = MetaPrefixStripper.Strip(rawTrapOutput);
-                    if (sanitizedTrapOutput != rawTrapOutput)
-                    {
-                        var stripSpans = WordDiff.Compute(rawTrapOutput, sanitizedTrapOutput);
-                        textDiffs.Add(new TextDiff(
-                            MetaPrefixStripper.LayerName, stripSpans,
-                            rawTrapOutput, sanitizedTrapOutput));
-                    }
-
-                    deliveredMessage = sanitizedTrapOutput;
+                    deliveredMessage = TextSanitizer.Sanitize(rawTrapOutput, MetaPrefixStripper.LayerName, textDiffs);
 
                     if (deliveredMessage != beforeTrap)
                     {
@@ -1644,16 +1625,7 @@ namespace Pinder.Core.Conversation
                             progress?.Report(new TurnProgressEvent(TurnProgressStage.ShadowCorruptionCompleted, rawShadowOutput));
 
                             // Immediately run MetaPrefixStripper.Strip to sanitize any non-narrative prefixes
-                            string sanitizedShadowOutput = MetaPrefixStripper.Strip(rawShadowOutput);
-                            if (sanitizedShadowOutput != rawShadowOutput)
-                            {
-                                var stripSpans = WordDiff.Compute(rawShadowOutput, sanitizedShadowOutput);
-                                textDiffs.Add(new TextDiff(
-                                    MetaPrefixStripper.LayerName, stripSpans,
-                                    rawShadowOutput, sanitizedShadowOutput));
-                            }
-
-                            deliveredMessage = sanitizedShadowOutput;
+                            deliveredMessage = TextSanitizer.Sanitize(rawShadowOutput, MetaPrefixStripper.LayerName, textDiffs);
 
                             if (deliveredMessage != beforeShadow)
                             {
@@ -1719,16 +1691,7 @@ namespace Pinder.Core.Conversation
                 progress?.Report(new TurnProgressEvent(TurnProgressStage.HorninessOverlayCompleted, rawHorninessOutput));
 
                 // Immediately run MetaPrefixStripper.Strip to sanitize any non-narrative prefixes
-                string sanitizedHorninessOutput = MetaPrefixStripper.Strip(rawHorninessOutput);
-                if (sanitizedHorninessOutput != rawHorninessOutput)
-                {
-                    var stripSpans = WordDiff.Compute(rawHorninessOutput, sanitizedHorninessOutput);
-                    textDiffs.Add(new TextDiff(
-                        MetaPrefixStripper.LayerName, stripSpans,
-                        rawHorninessOutput, sanitizedHorninessOutput));
-                }
-
-                deliveredMessage = sanitizedHorninessOutput;
+                deliveredMessage = TextSanitizer.Sanitize(rawHorninessOutput, MetaPrefixStripper.LayerName, textDiffs);
 
                 if (deliveredMessage != beforeHorniness)
                 {
@@ -1779,19 +1742,7 @@ namespace Pinder.Core.Conversation
             // text. Emits a TextDiff layer when it actually changes the
             // message so the audit log / replay tool / UI can render the
             // before/after just like Steering / Horniness / Shadow.
-            {
-                string beforeCallbackStrip = deliveredMessage;
-                string strippedMessage = CallbackStripper.Strip(beforeCallbackStrip);
-                if (!ReferenceEquals(strippedMessage, beforeCallbackStrip)
-                    && strippedMessage != beforeCallbackStrip)
-                {
-                    deliveredMessage = strippedMessage;
-                    var stripSpans = WordDiff.Compute(beforeCallbackStrip, deliveredMessage);
-                    textDiffs.Add(new TextDiff(
-                        CallbackStripper.LayerName, stripSpans,
-                        beforeCallbackStrip, deliveredMessage));
-                }
-            }
+            deliveredMessage = TextSanitizer.Sanitize(deliveredMessage, CallbackStripper.LayerName, textDiffs);
 
             _history.Add((_player.DisplayName, deliveredMessage));
 
