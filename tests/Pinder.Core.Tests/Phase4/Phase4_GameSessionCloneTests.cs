@@ -277,6 +277,47 @@ namespace Pinder.Core.Tests.Phase4
                 }
             }
 
+            // Enumerate properties of GameSessionState to ensure they are also covered.
+            // This prevents the completeness test from falsely passing when fields are moved
+            // to GameSessionState.
+            var stateProperties = typeof(GameSessionState).GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            var sharedStatePropertiesByReference = new HashSet<string>
+            {
+                "ActiveWeakness",   // immutable WeaknessWindow
+                "ActiveTell",       // immutable Tell
+                "InjectedNextPool"  // PerOptionDicePool: single-use reference
+            };
+
+            foreach (var p in stateProperties)
+            {
+                if (sharedStatePropertiesByReference.Contains(p.Name)) continue;
+
+                object? parentVal = p.GetValue(parent.State);
+                object? cloneVal = p.GetValue(clone.State);
+
+                // For value types and strings: equal value is the contract.
+                if (p.PropertyType.IsValueType || p.PropertyType == typeof(string))
+                {
+                    if (!Equals(parentVal, cloneVal))
+                        missing.Add($"GameSessionState.{p.Name}: value-type property differs after clone (parent={parentVal}, clone={cloneVal})");
+                    continue;
+                }
+
+                // Reference types:
+                if (parentVal == null && cloneVal == null) continue; // null-on-both is fine.
+                if (parentVal == null || cloneVal == null)
+                {
+                    missing.Add($"GameSessionState.{p.Name}: null-mismatch after clone (parentNull={parentVal == null}, cloneNull={cloneVal == null})");
+                    continue;
+                }
+                if (ReferenceEquals(parentVal, cloneVal))
+                {
+                    missing.Add(
+                        $"GameSessionState.{p.Name}: shared by reference after clone, but is not on the documented allowlist. " +
+                        $"Either deep-copy this property in GameSessionState.Clone, or add it to the sharedStatePropertiesByReference set in this test.");
+                }
+            }
+
             Assert.Empty(missing);
         }
 
