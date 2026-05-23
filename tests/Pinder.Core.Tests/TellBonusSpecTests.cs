@@ -281,10 +281,7 @@ namespace Pinder.Core.Tests
         {
             var trapDef = new TrapDefinition("TestTrap", StatType.Charm,
                 TrapEffect.Disadvantage, 0, 5, "trap", "clear", "nat1");
-            var trapsField = typeof(GameSession).GetField("_traps",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var trapState = (TrapState)trapsField!.GetValue(session)!;
-            trapState.Activate(trapDef);
+            session.State.Traps.Activate(trapDef);
         }
 
         private static CharacterProfile MakeProfile(string name, int allStats = 2)

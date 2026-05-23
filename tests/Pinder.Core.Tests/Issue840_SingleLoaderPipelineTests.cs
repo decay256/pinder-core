@@ -184,6 +184,25 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task AssembleMicrobenchmark_P50_UnderOneMillisecond()
         {
+            // Ensure prompt wiring is statically loaded for order-independent execution
+            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            for (int i = 0; i < 10; i++)
+            {
+                var candidate = Path.Combine(baseDir, "data", "prompts");
+                if (Directory.Exists(candidate))
+                {
+                    var catalog = Pinder.LlmAdapters.PromptCatalog.LoadFromDirectory(candidate);
+                    Pinder.LlmAdapters.PromptTemplates.Catalog = catalog;
+                    Pinder.Core.Prompts.PromptBuilder.StructuralFragmentLookup =
+                        key => catalog.TryGet(key)?.SystemPrompt;
+                    Pinder.LlmAdapters.ArchetypeYamlLoader.LoadFromPromptCatalog(catalog);
+                    break;
+                }
+                var parent = Path.GetDirectoryName(baseDir);
+                if (parent == null || parent == baseDir) break;
+                baseDir = parent;
+            }
+
             var itemRepo = BuildItemRepo();
             var anatomyRepo = BuildAnatomyRepo();
 

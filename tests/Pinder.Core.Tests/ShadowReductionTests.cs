@@ -603,12 +603,7 @@ namespace Pinder.Core.Tests
             // Activate a trap so Recover is possible
             if (trapDef != null)
             {
-                // Use reflection to access private _traps field, or use a Speak turn to trigger trap
-                // Instead, let's manually activate via TrapState
-                var trapsField = typeof(GameSession).GetField("_traps",
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                var trapState = (TrapState)trapsField!.GetValue(session)!;
-                trapState.Activate(trapDef);
+                session.State.Traps.Activate(trapDef);
             }
 
             return session;

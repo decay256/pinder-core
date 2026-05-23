@@ -29,15 +29,11 @@ namespace Pinder.Core.Conversation
         private readonly IDiceRoller _dice;
         private readonly ITrapRegistry _trapRegistry;
 
-        // #425 (Phase 5): not strictly readonly. The clone+adopt cycle
-        // (parent.AdoptStateFrom(clone) after fast-gameplay branch
-        // adoption) reassigns the field references. Functionally
-        // equivalent to the pre-#425 readonly contract for non-fast-
-        // gameplay sessions — the field is set once in the ctor and
-        // never reassigned otherwise.
-        private InterestMeter _interest;
-        private TrapState _traps;
-        private List<(string Sender, string Text)> _history;
+        private readonly GameSessionState _state;
+
+        private InterestMeter _interest { get => _state.Interest; set => _state.Interest = value; }
+        private TrapState _traps { get => _state.Traps; set => _state.Traps = value; }
+        private List<(string Sender, string Text)> _history { get => _state.History; set => _state.History = value; }
 
         // #562: outfit / scene description set by SeedSceneEntries so the
         // dialogue-options call site can surface it to the player as part
@@ -45,59 +41,59 @@ namespace Pinder.Core.Conversation
         // payload, replacing the raw equipped-items list. Empty when no
         // describer was wired or the call failed; renderer then falls
         // back to the items list.
-        private string _opponentOutfitDescription = string.Empty;
+        private string _opponentOutfitDescription { get => _state.OpponentOutfitDescription; set => _state.OpponentOutfitDescription = value; }
 
         // #788: opponent LLM conversation history lives here, not in the adapter.
         // The adapter is pure-stateless across calls; the engine passes this list
         // in on every opponent call and appends the new entries returned by the
         // adapter. Survives snapshot/restore via ResimulateData.OpponentHistory.
-        private List<ConversationMessage> _opponentHistory = new List<ConversationMessage>();
+        private List<ConversationMessage> _opponentHistory { get => _state.OpponentHistory; set => _state.OpponentHistory = value; }
 
         // Sprint 8 Wave 0: optional config fields
         private readonly IGameClock? _clock;
-        private SessionShadowTracker? _playerShadows;
-        private SessionShadowTracker? _opponentShadows;
+        private SessionShadowTracker? _playerShadows { get => _state.PlayerShadows; set => _state.PlayerShadows = value; }
+        private SessionShadowTracker? _opponentShadows { get => _state.OpponentShadows; set => _state.OpponentShadows = value; }
 
         // Combo tracking (#46)
-        private ComboTracker _comboTracker;
+        private ComboTracker _comboTracker { get => _state.ComboTracker; set => _state.ComboTracker = value; }
 
         // Callback tracking (#47)
-        private List<CallbackOpportunity> _topics;
+        private List<CallbackOpportunity> _topics { get => _state.Topics; set => _state.Topics = value; }
 
         // Despair (RIZZ failure shadow) tracking (#708, #717)
-        private int _rizzCumulativeFailureCount;
+        private int _rizzCumulativeFailureCount { get => _state.RizzCumulativeFailureCount; set => _state.RizzCumulativeFailureCount = value; }
 
-        private int _momentumStreak;
-        private int _pendingMomentumBonus;
-        private int _turnNumber;
-        private bool _ended;
-        private GameOutcome? _outcome;
+        private int _momentumStreak { get => _state.MomentumStreak; set => _state.MomentumStreak = value; }
+        private int _pendingMomentumBonus { get => _state.PendingMomentumBonus; set => _state.PendingMomentumBonus = value; }
+        private int _turnNumber { get => _state.TurnNumber; set => _state.TurnNumber = value; }
+        private bool _ended { get => _state.Ended; set => _state.Ended = value; }
+        private GameOutcome? _outcome { get => _state.Outcome; set => _state.Outcome = value; }
 
         // XP tracking (#48)
-        private XpLedger _xpLedger;
+        private XpLedger _xpLedger { get => _state.XpLedger; set => _state.XpLedger = value; }
 
         // Rule resolver for data-driven game constants (#463)
         private readonly IRuleResolver? _rules;
         private readonly int _globalDcBias;
 
         // Weakness window from opponent's last response (#49)
-        private WeaknessWindow? _activeWeakness;
+        private WeaknessWindow? _activeWeakness { get => _state.ActiveWeakness; set => _state.ActiveWeakness = value; }
 
         // Tell from opponent's last response (#50)
-        private Tell? _activeTell;
+        private Tell? _activeTell { get => _state.ActiveTell; set => _state.ActiveTell = value; }
 
         // Horniness session roll (#45)
-        private int _sessionHorniness;
-        private int _horninessRoll;
-        private int _horninessTimeModifier;
+        private int _sessionHorniness { get => _state.SessionHorniness; set => _state.SessionHorniness = value; }
+        private int _horninessRoll { get => _state.HorninessRoll; set => _state.HorninessRoll = value; }
+        private int _horninessTimeModifier { get => _state.HorninessTimeModifier; set => _state.HorninessTimeModifier = value; }
 
         // Nat 20 crit advantage (#271) — §4: previous crit grants advantage for 1 roll
-        private bool _pendingCritAdvantage;
+        private bool _pendingCritAdvantage { get => _state.PendingCritAdvantage; set => _state.PendingCritAdvantage = value; }
 
         // Shadow threshold tracking (#45)
-        private StatType? _lastStatUsed;
-        private HashSet<StatType>? _shadowDisadvantagedStats;
-        private Dictionary<ShadowStatType, int>? _currentShadowThresholds;
+        private StatType? _lastStatUsed { get => _state.LastStatUsed; set => _state.LastStatUsed = value; }
+        private HashSet<StatType>? _shadowDisadvantagedStats { get => _state.ShadowDisadvantagedStats; set => _state.ShadowDisadvantagedStats = value; }
+        private Dictionary<ShadowStatType, int>? _currentShadowThresholds { get => _state.CurrentShadowThresholds; set => _state.CurrentShadowThresholds = value; }
 
         // Stat delivery instructions for horniness overlay tier lookups (#709)
         private readonly object? _statDeliveryInstructions;
@@ -110,18 +106,18 @@ namespace Pinder.Core.Conversation
         private readonly Action<TextLayerNoopEvent>? _onTextLayerNoop;
 
         // Stored between StartTurnAsync and ResolveTurnAsync
-        private DialogueOption[]? _currentOptions;
-        private bool _currentHasAdvantage;
-        private bool _currentHasDisadvantage;
+        private DialogueOption[]? _currentOptions { get => _state.CurrentOptions; set => _state.CurrentOptions = value; }
+        private bool _currentHasAdvantage { get => _state.CurrentHasAdvantage; set => _state.CurrentHasAdvantage = value; }
+        private bool _currentHasDisadvantage { get => _state.CurrentHasDisadvantage; set => _state.CurrentHasDisadvantage = value; }
         // #789 Phase 2 — pre-rolled dice pools, one per option index. Set by
         // StartTurnAsync (display-time placeholders), filled lazily by
         // ResolveTurnAsync via PlaybackDiceRoller. Null between turns.
-        private Pinder.Core.Rolls.PerOptionDicePool[]? _currentDicePools;
+        private Pinder.Core.Rolls.PerOptionDicePool[]? _currentDicePools { get => _state.CurrentDicePools; set => _state.CurrentDicePools = value; }
         // #789 Phase 2 — single-use replay/test injection slot. When non-null,
         // the next ResolveTurnAsync uses this pool verbatim instead of drawing
         // a fresh one from _dice. Cleared after consumption. Set via
         // <see cref="InjectNextDicePool"/>.
-        private Pinder.Core.Rolls.PerOptionDicePool? _injectedNextPool;
+        private Pinder.Core.Rolls.PerOptionDicePool? _injectedNextPool { get => _state.InjectedNextPool; set => _state.InjectedNextPool = value; }
 
         // Extracted single-responsibility modules
         private ShadowGrowthEvaluator? _shadowGrowthEvaluator;
@@ -135,6 +131,8 @@ namespace Pinder.Core.Conversation
         private Random? _statDrawRng;
         private readonly IConsequenceCatalog? _consequenceCatalog;
 
+        internal GameSessionState State => _state;
+
         /// <summary>
         /// Creates a new GameSession with required configuration.
         /// Config must be non-null — no silent fallbacks.
@@ -147,6 +145,8 @@ namespace Pinder.Core.Conversation
             ITrapRegistry trapRegistry,
             GameSessionConfig config)
         {
+            _state = new GameSessionState();
+
             _player = player ?? throw new ArgumentNullException(nameof(player));
             _opponent = opponent ?? throw new ArgumentNullException(nameof(opponent));
             _llm = llm ?? throw new ArgumentNullException(nameof(llm));
@@ -297,20 +297,12 @@ namespace Pinder.Core.Conversation
             _consequenceCatalog = src._consequenceCatalog;
 
             // ── Mutable engine state — deep copies (Category A) ──
-            _interest        = src._interest.Clone();
-            _traps           = src._traps.Clone();
-            _history         = new List<(string, string)>(src._history);
-            _opponentHistory = new List<ConversationMessage>(src._opponentHistory);
-            _comboTracker    = src._comboTracker.Clone();
-            _topics          = new List<CallbackOpportunity>(src._topics);
-            _xpLedger        = src._xpLedger.Clone();
+            _state           = src._state.Clone();
 
-            _playerShadows   = src._playerShadows?.Clone();
-            _opponentShadows = src._opponentShadows?.Clone();
-            _shadowGrowthEvaluator = src._shadowGrowthEvaluator != null && _playerShadows != null
-                ? src._shadowGrowthEvaluator.Clone(_playerShadows)
+            _shadowGrowthEvaluator = src._shadowGrowthEvaluator != null && _state.PlayerShadows != null
+                ? src._shadowGrowthEvaluator.Clone(_state.PlayerShadows)
                 : null;
-            _xpRecorder      = new SessionXpRecorder(_xpLedger, _rules);
+            _xpRecorder      = new SessionXpRecorder(_state.XpLedger, _rules);
 
             // ── RNG state — deep-cloned for independent forks (§2.3) ──
             // Steering RNG is shared between SteeringEngine and HorninessEngine
@@ -320,38 +312,6 @@ namespace Pinder.Core.Conversation
             _horninessEngine = new HorninessEngine(clonedSteeringRng, _consequenceCatalog);
             _shadowCheckEngine = new ShadowCheckEngine(clonedSteeringRng, _consequenceCatalog);
             _statDrawRng     = src._statDrawRng != null ? RandomCloner.Clone(src._statDrawRng) : null;
-
-            // ── Value-type / per-turn carry-over fields (Category A) ──
-            _momentumStreak           = src._momentumStreak;
-            _pendingMomentumBonus     = src._pendingMomentumBonus;
-            _turnNumber               = src._turnNumber;
-            _ended                    = src._ended;
-            _outcome                  = src._outcome;
-            _rizzCumulativeFailureCount = src._rizzCumulativeFailureCount;
-            _horninessRoll            = src._horninessRoll;
-            _horninessTimeModifier    = src._horninessTimeModifier;
-            _sessionHorniness         = src._sessionHorniness;
-            _pendingCritAdvantage     = src._pendingCritAdvantage;
-            _lastStatUsed             = src._lastStatUsed;
-            _activeWeakness           = src._activeWeakness; // immutable record
-            _activeTell               = src._activeTell;     // immutable record
-            _shadowDisadvantagedStats = src._shadowDisadvantagedStats != null
-                ? new HashSet<StatType>(src._shadowDisadvantagedStats)
-                : null;
-            _currentShadowThresholds  = src._currentShadowThresholds != null
-                ? new Dictionary<ShadowStatType, int>(src._currentShadowThresholds)
-                : null;
-
-            // ── Mid-turn carry-over from StartTurnAsync → ResolveTurnAsync (§2.4) ──
-            _currentOptions       = src._currentOptions != null
-                ? (DialogueOption[])src._currentOptions.Clone()
-                : null;
-            _currentHasAdvantage     = src._currentHasAdvantage;
-            _currentHasDisadvantage  = src._currentHasDisadvantage;
-            _currentDicePools = src._currentDicePools != null
-                ? (Pinder.Core.Rolls.PerOptionDicePool[])src._currentDicePools.Clone()
-                : null;
-            _injectedNextPool = src._injectedNextPool; // PerOptionDicePool: see clone-safety note below.
         }
 
         /// <summary>
@@ -463,20 +423,14 @@ namespace Pinder.Core.Conversation
         {
             if (src == null) throw new ArgumentNullException(nameof(src));
 
-            // Mutable engine state (deep-copy) — mirror clone ctor.
-            _interest        = src._interest.Clone();
-            _traps           = src._traps.Clone();
-            _history.Clear(); _history.AddRange(src._history);
-            _opponentHistory.Clear(); _opponentHistory.AddRange(src._opponentHistory);
-            _comboTracker    = src._comboTracker.Clone();
-            _topics.Clear(); _topics.AddRange(src._topics);
-            _xpLedger        = src._xpLedger.Clone();
-            _playerShadows   = src._playerShadows?.Clone();
-            _opponentShadows = src._opponentShadows?.Clone();
-            _shadowGrowthEvaluator = src._shadowGrowthEvaluator != null && _playerShadows != null
-                ? src._shadowGrowthEvaluator.Clone(_playerShadows)
+            // Delegate core mutable state adoption to GameSessionState
+            _state.AdoptStateFrom(src._state);
+
+            // Re-initialize/adopt the retained single-responsibility modules
+            _shadowGrowthEvaluator = src._shadowGrowthEvaluator != null && _state.PlayerShadows != null
+                ? src._shadowGrowthEvaluator.Clone(_state.PlayerShadows)
                 : null;
-            _xpRecorder      = new SessionXpRecorder(_xpLedger, _rules);
+            _xpRecorder      = new SessionXpRecorder(_state.XpLedger, _rules);
 
             // RNGs (deep-clone to avoid sharing internal state with src).
             var clonedSteeringRng = RandomCloner.Clone(src._steeringEngine.SteeringRngForCloneOnly);
@@ -484,37 +438,6 @@ namespace Pinder.Core.Conversation
             _horninessEngine = new HorninessEngine(clonedSteeringRng, _consequenceCatalog);
             _shadowCheckEngine = new ShadowCheckEngine(clonedSteeringRng, _consequenceCatalog);
             _statDrawRng     = src._statDrawRng != null ? RandomCloner.Clone(src._statDrawRng) : null;
-
-            // Value-type / per-turn carry-over.
-            _momentumStreak           = src._momentumStreak;
-            _pendingMomentumBonus     = src._pendingMomentumBonus;
-            _turnNumber               = src._turnNumber;
-            _ended                    = src._ended;
-            _outcome                  = src._outcome;
-            _rizzCumulativeFailureCount = src._rizzCumulativeFailureCount;
-            _horninessRoll            = src._horninessRoll;
-            _horninessTimeModifier    = src._horninessTimeModifier;
-            _sessionHorniness         = src._sessionHorniness;
-            _pendingCritAdvantage     = src._pendingCritAdvantage;
-            _lastStatUsed             = src._lastStatUsed;
-            _activeWeakness           = src._activeWeakness;
-            _activeTell               = src._activeTell;
-            _shadowDisadvantagedStats = src._shadowDisadvantagedStats != null
-                ? new HashSet<StatType>(src._shadowDisadvantagedStats)
-                : null;
-            _currentShadowThresholds  = src._currentShadowThresholds != null
-                ? new Dictionary<ShadowStatType, int>(src._currentShadowThresholds)
-                : null;
-
-            _currentOptions       = src._currentOptions != null
-                ? (DialogueOption[])src._currentOptions.Clone()
-                : null;
-            _currentHasAdvantage     = src._currentHasAdvantage;
-            _currentHasDisadvantage  = src._currentHasDisadvantage;
-            _currentDicePools = src._currentDicePools != null
-                ? (Pinder.Core.Rolls.PerOptionDicePool[])src._currentDicePools.Clone()
-                : null;
-            _injectedNextPool = src._injectedNextPool;
         }
 
         /// <summary>
@@ -668,74 +591,7 @@ namespace Pinder.Core.Conversation
         /// <param name="trapRegistry">Used to look up trap definitions by stat.</param>
         public void RestoreState(ResimulateData data, ITrapRegistry trapRegistry)
         {
-            if (data == null) throw new ArgumentNullException(nameof(data));
-            if (trapRegistry == null) throw new ArgumentNullException(nameof(trapRegistry));
-
-            // Interest: apply delta to reach the target value
-            int interestDelta = data.TargetInterest - _interest.Current;
-            if (interestDelta != 0)
-                _interest.Apply(interestDelta);
-
-            // Shadow tracker: set deltas so effective values match the snapshot
-            if (_playerShadows != null && data.ShadowValues != null)
-                _playerShadows.RestoreFromSnapshot(data.ShadowValues);
-
-            // Momentum
-            _momentumStreak = data.MomentumStreak;
-
-            // Traps: clear and re-activate with original remaining durations
-            _traps.ClearAll();
-            if (data.ActiveTraps != null)
-            {
-                foreach (var (statName, turnsRemaining) in data.ActiveTraps)
-                {
-                    // #369: parse case-insensitively. Snapshots have historically
-                    // stored stat names in lowercase ("selfawareness") in some
-                    // environments and TitleCase ("SelfAwareness") in others.
-                    // The TrapState round-trip must survive both.
-                    if (Enum.TryParse<StatType>(statName, ignoreCase: true, out var stat))
-                    {
-                        var definition = trapRegistry.GetTrap(stat);
-                        if (definition != null)
-                            _traps.Activate(definition, turnsRemaining);
-                    }
-                }
-            }
-
-            // Conversation history
-            _history.Clear();
-            if (data.ConversationHistory != null)
-                _history.AddRange(data.ConversationHistory);
-
-            // Opponent LLM conversation history (#788)
-            _opponentHistory.Clear();
-            if (data.OpponentHistory != null)
-            {
-                foreach (var (role, content) in data.OpponentHistory)
-                {
-                    if (string.IsNullOrEmpty(role)) continue;
-                    try
-                    {
-                        _opponentHistory.Add(new ConversationMessage(role, content ?? string.Empty));
-                    }
-                    catch (ArgumentException)
-                    {
-                        // Skip entries with unrecognized roles — forward-compatible
-                        // with snapshots that may have stored other role labels.
-                    }
-                }
-            }
-
-            // Turn number
-            _turnNumber = data.TurnNumber;
-
-            // Combo tracker
-            _comboTracker.RestoreFromSnapshot(
-                data.ComboHistory ?? new List<(string StatName, bool Succeeded)>(),
-                data.PendingTripleBonus);
-
-            // Rizz cumulative failure count (drives Despair shadow growth)
-            _rizzCumulativeFailureCount = data.RizzCumulativeFailureCount;
+            _state.RestoreFromSnapshot(data, trapRegistry);
         }
 
         /// <summary>

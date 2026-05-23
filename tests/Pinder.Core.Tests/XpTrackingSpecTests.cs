@@ -868,11 +868,8 @@ namespace Pinder.Core.Tests
 
         private static void ActivateTrap(GameSession session)
         {
-            var trapsField = typeof(GameSession).GetField("_traps",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var trapState = (TrapState)trapsField!.GetValue(session)!;
             var trapDef = new TrapDefinition("test-trap", StatType.Charm, TrapEffect.Disadvantage, 0, 3, "Test trap instruction", "clear", "");
-            trapState.Activate(trapDef);
+            session.State.Traps.Activate(trapDef);
         }
 
         /// <summary>Always returns the same value for every Roll call.</summary>

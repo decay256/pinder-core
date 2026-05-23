@@ -400,10 +400,7 @@ namespace Pinder.Core.Tests
             var trapDef = new TrapDefinition(
                 "TestTrap", StatType.Honesty,
                 TrapEffect.Disadvantage, 0, 3, "trap", "clear", "nat1");
-            var trapsField = typeof(GameSession).GetField("_traps",
-                BindingFlags.NonPublic | BindingFlags.Instance);
-            var trapState = (TrapState)trapsField!.GetValue(session)!;
-            trapState.Activate(trapDef);
+            session.State.Traps.Activate(trapDef);
         }
 
         /// <summary>
