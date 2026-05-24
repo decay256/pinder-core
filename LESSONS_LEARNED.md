@@ -723,3 +723,15 @@ constructor and clone constructors.
 **Rule:** When direct Google API 429 quota/resource exhaustion errors are encountered, immediately escalate the default rung of the role in `model-routing.yaml` to Rung 2 (`anthropic/claude-sonnet-4-6`) to route requests to the direct Anthropic API, bypassing the exhausted Google provider. Restoring the original model-routing settings at the end of the wave ensures subsequent sprints remain properly calibrated.
 
 **Discovered in:** Web-2/3 UI Extraction (2026-05-23).
+
+### SUBAGENT-RUN-MODE-TIMEOUTS-DISCORD-THREADS
+
+**Title:** Spawning long-running subagents on Discord in persistent session mode with threads
+
+**Symptom:** Subagent spawned with `mode="run"` fails or gets killed immediately due to a timeout of ~90 seconds.
+
+**Root cause:** OpenClaw's default subagent execution timeout for one-shot `mode="run"` is relatively short, leading to timeouts during complex refactoring or review tasks.
+
+**Rule:** Always spawn complex, multi-step backend/frontend development or code review subagents in Discord-enabled channels using `mode="session"` and `thread=true`. This isolates the subagent's conversation into a dedicated thread and ensures persistent execution without short timeouts.
+
+**Discovered in:** Monolith Decomposition Phase 1 (2026-05-24).
