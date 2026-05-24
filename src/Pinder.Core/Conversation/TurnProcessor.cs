@@ -605,45 +605,24 @@ namespace Pinder.Core.Conversation
                 textDiffs.Add(new TextDiff(layerLabel, tierSpans, intendedTextForDelivery, deliveredMessage));
             }
 
-            // ---- Trap LLM overlay (issue #371) ----
-            if (state.Traps.HasActive && rollResult.ActivatedTrap == null)
+                        // ---- Speculative Overlay Dispatcher ----
+            bool runTrap = state.Traps.HasActive && rollResult.ActivatedTrap == null;
+            string trapInstruction = "";
+            string trapDisplayName = "";
+            string opponentCtxForTrap = "";
+
+            if (runTrap)
             {
                 var activeTrap = state.Traps.Active!;
-                string trapInstruction = activeTrap.Definition.LlmInstruction;
-                string trapDisplayName = activeTrap.Definition.DisplayName;
-                if (!string.IsNullOrWhiteSpace(trapInstruction)
-                    && !string.IsNullOrEmpty(deliveredMessage)
-                    && deliveredMessage != "...")
+                trapInstruction = activeTrap.Definition.LlmInstruction;
+                trapDisplayName = activeTrap.Definition.DisplayName;
+                opponentCtxForTrap = BuildOpponentContext(opponent);
+
+                if (string.IsNullOrWhiteSpace(trapInstruction)
+                    || string.IsNullOrEmpty(deliveredMessage)
+                    || deliveredMessage == "...")
                 {
-                    string beforeTrap = deliveredMessage;
-                    string opponentCtxForTrap = BuildOpponentContext(opponent);
-                    progress?.Report(new TurnProgressEvent(TurnProgressStage.TrapOverlayStarted));
-                    string rawTrapOutput = await llm.ApplyTrapOverlayAsync(
-                        deliveredMessage, trapInstruction, trapDisplayName, opponentCtxForTrap, playerArchetypeDirectiveForDelivery, ct)
-                        .ConfigureAwait(false);
-                    progress?.Report(new TurnProgressEvent(TurnProgressStage.TrapOverlayCompleted, rawTrapOutput));
-
-                    string sanitizedTrapOutput = MetaPrefixStripper.Strip(rawTrapOutput);
-                    if (sanitizedTrapOutput != rawTrapOutput)
-                    {
-                        var stripSpans = WordDiff.Compute(rawTrapOutput, sanitizedTrapOutput);
-                        textDiffs.Add(new TextDiff(
-                            MetaPrefixStripper.LayerName, stripSpans,
-                            rawTrapOutput, sanitizedTrapOutput));
-                    }
-
-                    deliveredMessage = sanitizedTrapOutput;
-
-                    if (deliveredMessage != beforeTrap)
-                    {
-                        var trapSpans = WordDiff.Compute(beforeTrap, deliveredMessage);
-                        textDiffs.Add(new TextDiff(
-                            $"Trap ({trapDisplayName})", trapSpans, beforeTrap, deliveredMessage));
-                    }
-                    else
-                    {
-                        EmitTextLayerNoop(onTextLayerNoop, state.TurnNumber, $"Trap ({trapDisplayName})", beforeTrap, deliveredMessage);
-                    }
+                    runTrap = false;
                 }
             }
 
@@ -657,7 +636,6 @@ namespace Pinder.Core.Conversation
             // 10. Compute response delay
             double responseDelayMinutes = opponent.Timing.ComputeDelay(state.Interest.Current, resolveDice);
 
-            string deliveredForHorniness = deliveredMessage;
             string? horninessOverlayInstruction;
             HorninessCheckResult horninessCheckResult;
             (horninessCheckResult, horninessOverlayInstruction) = horninessEngine.PeekAsync(
@@ -673,76 +651,90 @@ namespace Pinder.Core.Conversation
             ShadowStatType? pairedShadow = GetPairedShadow(chosenOption.Stat);
             ShadowCheckResult shadowCheckResult = ShadowCheckResult.NotPerformed;
 
+            bool runShadow = false;
+            string corruptionInstruction = "";
+            int shadowRoll = 0;
+            int shadowDC = 0;
+            bool shadowMiss = false;
+            FailureTier shadowTier = FailureTier.Success;
+            RollCheckResult? rawShadowCheck = null;
+
             if (pairedShadow.HasValue && state.PlayerShadows != null)
             {
                 int shadowValue = state.PlayerShadows.GetEffectiveShadow(pairedShadow.Value);
                 if (shadowValue > 0)
                 {
                     var rawShadowResult = shadowCheckEngine.Check(pairedShadow.Value, shadowValue);
-                    int shadowRoll = rawShadowResult.Roll;
-                    int shadowDC   = rawShadowResult.DC;
-                    bool shadowMiss = rawShadowResult.IsMiss;
+                    shadowRoll = rawShadowResult.Roll;
+                    shadowDC   = rawShadowResult.DC;
+                    shadowMiss = rawShadowResult.IsMiss;
+                    rawShadowCheck = rawShadowResult.Check;
 
                     if (shadowMiss)
                     {
-                        FailureTier shadowTier = rawShadowResult.Tier;
-                        string? corruptionInstruction = HorninessEngine.GetShadowCorruptionInstruction(
+                        shadowTier = rawShadowResult.Tier;
+                        string? instruction = HorninessEngine.GetShadowCorruptionInstruction(
                             statDeliveryInstructions, pairedShadow.Value, shadowTier);
 
-                        bool overlayApplied = false;
-                        if (corruptionInstruction != null)
+                        if (instruction != null)
                         {
-                            string beforeShadow = deliveredMessage;
-                            progress?.Report(new TurnProgressEvent(TurnProgressStage.ShadowCorruptionStarted));
-                            string rawShadowOutput = await llm.ApplyShadowCorruptionAsync(
-                                deliveredMessage, corruptionInstruction, pairedShadow.Value, playerArchetypeDirectiveForDelivery, ct).ConfigureAwait(false);
-                            progress?.Report(new TurnProgressEvent(TurnProgressStage.ShadowCorruptionCompleted, rawShadowOutput));
+                            runShadow = true;
+                            corruptionInstruction = instruction;
+                        }
+                    }
+                }
+            }
 
-                            string sanitizedShadowOutput = MetaPrefixStripper.Strip(rawShadowOutput);
-                            if (sanitizedShadowOutput != rawShadowOutput)
-                            {
-                                var stripSpans = WordDiff.Compute(rawShadowOutput, sanitizedShadowOutput);
-                                textDiffs.Add(new TextDiff(
-                                    MetaPrefixStripper.LayerName, stripSpans,
-                                    rawShadowOutput, sanitizedShadowOutput));
-                            }
+            // Dispatch speculative LLM calls in parallel
+            var dispatchResult = await LlmDispatcher.DispatchSpeculativeCallsAsync(
+                llm,
+                deliveredMessage,
+                runTrap,
+                trapInstruction,
+                trapDisplayName,
+                opponentCtxForTrap,
+                runShadow,
+                corruptionInstruction,
+                pairedShadow ?? ShadowStatType.Dread,
+                playerArchetypeDirectiveForDelivery,
+                textDiffs,
+                onTextLayerNoop,
+                state.TurnNumber,
+                progress,
+                ct).ConfigureAwait(false);
 
-                            deliveredMessage = sanitizedShadowOutput;
+            deliveredMessage = dispatchResult.FinalMessage;
+            bool shadowOverlayApplied = dispatchResult.ShadowOverlayApplied;
 
-                            if (deliveredMessage != beforeShadow)
-                            {
-                                var shadowSpans = WordDiff.Compute(beforeShadow, deliveredMessage);
-                                textDiffs.Add(new TextDiff($"Shadow ({pairedShadow.Value})", shadowSpans, beforeShadow, deliveredMessage));
-                            }
-                            else
-                            {
-                                EmitTextLayerNoop(onTextLayerNoop, state.TurnNumber, $"Shadow ({pairedShadow.Value})", beforeShadow, deliveredMessage);
-                            }
+            if (pairedShadow.HasValue && state.PlayerShadows != null)
+            {
+                int shadowValue = state.PlayerShadows.GetEffectiveShadow(pairedShadow.Value);
+                if (shadowValue > 0)
+                {
+                    if (shadowMiss)
+                    {
+                        if (shadowOverlayApplied && rollResult.IsSuccess)
+                        {
+                            var forcedFailResult = CreateForcedFailResult(rollResult, shadowTier);
+                            int shadowFailDelta = ResolveFailureInterestDelta(forcedFailResult, rules);
+                            int correction = shadowFailDelta - interestDelta;
+                            state.Interest.Apply(correction);
+                            interestDelta = shadowFailDelta;
 
-                            if (rollResult.IsSuccess)
-                            {
-                                var forcedFailResult = CreateForcedFailResult(rollResult, shadowTier);
-                                int shadowFailDelta = ResolveFailureInterestDelta(forcedFailResult, rules);
-                                int correction = shadowFailDelta - interestDelta;
-                                state.Interest.Apply(correction);
-                                interestDelta = shadowFailDelta;
-
-                                rollResult.Check.ApplyFinalOverride(
-                                    Pinder.Core.Rolls.RollVerdict.Miss,
-                                    shadowTier);
-                            }
-                            overlayApplied = true;
+                            rollResult.Check.ApplyFinalOverride(
+                                Pinder.Core.Rolls.RollVerdict.Miss,
+                                shadowTier);
                         }
 
                         shadowCheckResult = new ShadowCheckResult(
-                            true, pairedShadow.Value, shadowRoll, shadowDC, true, shadowTier, overlayApplied,
-                            rawShadowResult.Check);
+                            true, pairedShadow.Value, shadowRoll, shadowDC, true, shadowTier, shadowOverlayApplied,
+                            rawShadowCheck);
                     }
                     else
                     {
                         shadowCheckResult = new ShadowCheckResult(
                             true, pairedShadow.Value, shadowRoll, shadowDC, false, FailureTier.Success, false,
-                            rawShadowResult.Check);
+                            rawShadowCheck);
                     }
                 }
             }
