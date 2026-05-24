@@ -1,4 +1,5 @@
 using System.IO;
+using System.Linq;
 using Xunit;
 using Pinder.SessionRunner;
 
@@ -56,7 +57,8 @@ namespace Pinder.Core.Tests
         public void ProgramCs_OptionList_UsesRequiredPrefix()
         {
             string programPath = FindProgramCs();
-            string content = File.ReadAllText(programPath);
+            string sessionRunnerDir = Path.GetDirectoryName(programPath)!;
+            string content = string.Join("\n", Directory.GetFiles(sessionRunnerDir, "Program*.cs").Select(File.ReadAllText));
 
             // Verify it uses the blockquote and italics format for combo name and description
             Assert.Contains("> *{opt.ComboName}: {PlaytestFormatter.GetComboSequenceDescription(opt.ComboName)}*", content);
@@ -68,7 +70,8 @@ namespace Pinder.Core.Tests
         public void ProgramCs_CallsGetComboSequenceDescription()
         {
             string programPath = FindProgramCs();
-            string content = File.ReadAllText(programPath);
+            string sessionRunnerDir = Path.GetDirectoryName(programPath)!;
+            string content = string.Join("\n", Directory.GetFiles(sessionRunnerDir, "Program*.cs").Select(File.ReadAllText));
 
             Assert.Contains("PlaytestFormatter.GetComboSequenceDescription", content);
             

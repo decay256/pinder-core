@@ -98,7 +98,8 @@ namespace Pinder.Core.Tests
         public void ProgramCs_UsesRiskLabelHelper_InsteadOfInlineTernary()
         {
             string programPath = FindProgramCs();
-            string content = File.ReadAllText(programPath);
+            string sessionRunnerDir = Path.GetDirectoryName(programPath)!;
+            string content = string.Join("\n", Directory.GetFiles(sessionRunnerDir, "Program*.cs").Select(File.ReadAllText));
 
             // The old hardcoded string should NOT appear
             Assert.DoesNotContain("need <= 5 ? \"[Safe]\" : need <= 10 ? \"[Medium]\" : need <= 15 ? \"[Hard]\" : \"[Bold]\"", content);

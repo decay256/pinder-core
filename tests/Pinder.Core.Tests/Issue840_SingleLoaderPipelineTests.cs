@@ -129,7 +129,7 @@ namespace Pinder.Core.Tests
             Assert.True(File.Exists(programCs),
                 $"session-runner/Program.cs not found at {programCs}");
 
-            string src = File.ReadAllText(programCs);
+            string src = string.Join("\n", Directory.GetFiles(sessionRunnerDir, "Program*.cs").Select(File.ReadAllText));
 
             // The legacy CharacterLoader symbol must not appear; nor
             // should the `design/examples` fallback walk-up or the

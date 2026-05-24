@@ -1,3 +1,5 @@
+using System.IO;
+using System.Linq;
 using Xunit;
 
 namespace Pinder.Core.Tests
@@ -50,7 +52,8 @@ namespace Pinder.Core.Tests
         {
             // Read the actual source file and verify no hardcoded header remains
             string programPath = FindProgramCs();
-            string content = System.IO.File.ReadAllText(programPath);
+            string sessionRunnerDir = Path.GetDirectoryName(programPath)!;
+            string content = string.Join("\n", Directory.GetFiles(sessionRunnerDir, "Program*.cs").Select(File.ReadAllText));
 
             // The old hardcoded strings should NOT appear
             Assert.DoesNotContain("\"## DC Reference (Sable attacking, Brick defending)\"", content);
