@@ -735,3 +735,16 @@ constructor and clone constructors.
 **Rule:** Always spawn complex, multi-step backend/frontend development or code review subagents in Discord-enabled channels using `mode="session"` and `thread=true`. This isolates the subagent's conversation into a dedicated thread and ensures persistent execution without short timeouts.
 
 **Discovered in:** Monolith Decomposition Phase 1 (2026-05-24).
+
+### EIGENTAKT-TRACKED-LOG-RESET-HAZARD
+
+**Title:** Tracked log files get reverted on main-branch checkout/reset operations.
+
+**Symptom:** Orchestrator pre_spawn_estimate and attempt-end log lines disappear from `agent.log`.
+
+**Root cause:** Because `agent.log` is a tracked file in `pinder-core`, any uncommitted writes to it in `/root/projects/pinder-core/agent.log` are reverted or discarded when subagents or other tools run git operations (like checkout, reset, or worktree add from origin/main) on the main repository.
+
+**Rule:** Always write/append orchestrator logs and run status updates to `/root/.openclaw/agents-extra/pinder/agent.log` (the untracked/safe agent directory) or ensure any changes to `agent.log` are staged/committed if they are in the active development workspace to avoid git reset loss.
+
+**Discovered in:** Monolith Decomposition Phase 3 — Refactor-3 (2026-05-24).
+
