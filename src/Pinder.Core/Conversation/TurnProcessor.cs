@@ -338,38 +338,20 @@ namespace Pinder.Core.Conversation
             }
 
             // 1. Roll dice
-            var chosenPool = state.InjectedNextPool != null
-                ? state.InjectedNextPool
-                : FillChosenDicePool(optionIndex, chosenOption, resolveHasDisadvantage, state.CurrentHasAdvantage, state.Traps, dice);
-            state.InjectedNextPool = null; // single-use
-            if (state.CurrentDicePools != null && optionIndex >= 0 && optionIndex < state.CurrentDicePools.Length)
-                state.CurrentDicePools[optionIndex] = chosenPool;
-            var resolveDice = (Pinder.Core.Interfaces.IDiceRoller)new Pinder.Core.Rolls.PlaybackDiceRoller(chosenPool);
-
-            var rollResult = RollEngine.Resolve(
-                stat: chosenOption.Stat,
-                attacker: player.Stats,
-                defender: opponent.Stats,
-                attackerTraps: state.Traps,
-                level: player.Level,
-                trapRegistry: trapRegistry,
-                dice: resolveDice,
-                hasAdvantage: state.CurrentHasAdvantage,
-                hasDisadvantage: resolveHasDisadvantage,
-                externalBonus: externalBonus,
-                dcAdjustment: dcAdjustment);
-
-            // #976: populate Consequence on the main option roll from i18n catalogue.
-            if (consequenceCatalog != null && rollResult.Check != null)
-            {
-                string rollKey = ConsequenceKeys.ForRoll(rollResult.IsSuccess, rollResult.Tier);
-                string? rollTemplate = consequenceCatalog.Lookup(rollKey);
-                if (rollTemplate != null)
-                {
-                    string statName = chosenOption.Stat.ToString();
-                    rollResult.Check.ApplyConsequence(ConsequenceKeys.ApplySlots(rollTemplate, statName));
-                }
-            }
+            IDiceRoller resolveDice;
+            RollResult rollResult;
+            (rollResult, resolveDice) = TurnDiceEvaluator.EvaluateRolls(
+                state,
+                optionIndex,
+                chosenOption,
+                player,
+                opponent,
+                dice,
+                trapRegistry,
+                consequenceCatalog,
+                externalBonus,
+                dcAdjustment,
+                resolveHasDisadvantage);
 
             // 2. Compute interest delta from roll outcome
             int baseInterestDelta;
@@ -1081,28 +1063,6 @@ namespace Pinder.Core.Conversation
                 }
                 return sb.ToString();
             }
-        }
-
-        private static Pinder.Core.Rolls.PerOptionDicePool FillChosenDicePool(
-            int optionIndex, DialogueOption chosenOption, bool resolveHasDisadvantage, bool currentHasAdvantage, TrapState traps, IDiceRoller dice)
-        {
-            bool trapDisadvantage = false;
-            var activeTrap = traps.GetActive(chosenOption.Stat);
-            if (activeTrap != null
-                && activeTrap.Definition.Effect == Pinder.Core.Traps.TrapEffect.Disadvantage)
-                trapDisadvantage = true;
-
-            bool rollTwice = currentHasAdvantage || resolveHasDisadvantage || trapDisadvantage;
-
-            int rolls = rollTwice ? 3 : 2;
-            var values = new int[rolls];
-            int idx = 0;
-            values[idx++] = dice.Roll(20);
-            if (rollTwice)
-                values[idx++] = dice.Roll(20);
-            values[idx++] = dice.Roll(100);
-
-            return new Pinder.Core.Rolls.PerOptionDicePool(optionIndex, values);
         }
     }
 }
