@@ -29,21 +29,31 @@ namespace Pinder.Core.Tests
                 "/home/openclaw/.openclaw",
                 Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".openclaw")
             };
-            foreach (var root in knownRoots)
+            
+            var pathsToTry = new List<string> { relativePath };
+            if (relativePath.StartsWith("agents-extra/pinder/"))
             {
-                var candidate = Path.Combine(root, relativePath);
-                if (File.Exists(candidate)) return File.ReadAllText(candidate);
+                pathsToTry.Add(relativePath.Substring("agents-extra/pinder/".Length));
             }
 
-            // Walk up from test output directory looking for .openclaw parent
-            var dir = AppDomain.CurrentDomain.BaseDirectory;
-            for (int i = 0; i < 10; i++)
+            foreach (var path in pathsToTry)
             {
-                var candidate = Path.Combine(dir, relativePath);
-                if (File.Exists(candidate)) return File.ReadAllText(candidate);
-                var parent = Path.GetDirectoryName(dir);
-                if (parent == null || parent == dir) break;
-                dir = parent;
+                foreach (var root in knownRoots)
+                {
+                    var candidate = Path.Combine(root, path);
+                    if (File.Exists(candidate)) return File.ReadAllText(candidate);
+                }
+
+                // Walk up from test output directory
+                var dir = AppDomain.CurrentDomain.BaseDirectory;
+                for (int i = 0; i < 10; i++)
+                {
+                    var candidate = Path.Combine(dir, path);
+                    if (File.Exists(candidate)) return File.ReadAllText(candidate);
+                    var parent = Path.GetDirectoryName(dir);
+                    if (parent == null || parent == dir) break;
+                    dir = parent;
+                }
             }
 
             throw new FileNotFoundException($"Could not locate {relativePath} (searched known roots and walked up from {AppDomain.CurrentDomain.BaseDirectory})");
