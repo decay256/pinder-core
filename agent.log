@@ -1851,3 +1851,4 @@ started
 {"ts":"2026-05-25T11:25:00Z","agent":"backend-engineer","action":"commit","detail":"refactor(tests): decompose AnthropicClientSpecTests monolith into partial files","issue":"Refactor-27","ref":"2557c9c"}
 {"ts":"2026-05-25T11:26:00Z","agent":"backend-engineer","action":"pr-opened","detail":"PR #1015: refactor(tests): decompose AnthropicClientSpecTests monolith into partial files","issue":"Refactor-27"}
 {"ts":"2026-05-25T11:27:00Z","agent":"backend-engineer","action":"complete","detail":"Successfully implemented Refactor-27, decomposed AnthropicClientSpecTests","issue":"Refactor-27"}
+{"ts":"2026-05-25T11:33:16Z","agent":"subagent","action":"transition","transition":"IMPL_STARTED"}
