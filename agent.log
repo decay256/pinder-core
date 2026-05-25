@@ -1833,3 +1833,4 @@ started
 {"ts":"2026-05-24T09:08:03Z","agent":"backend-engineer","action":"transition","transition":"IMPL_STARTED","ticket":"#Refactor-1","sprint_id":"2026-05-24-a7b213","correlation_id":"2026-05-24-a7b213-1-backend-engineer-8127a065"}
 {"ts":"2026-05-24T09:10:00Z","agent":"orchestrator","sprint_id":"2026-05-24-a7b213","action":"final-scoreboard","detail":"Sprint closed. 2/2 tickets completed and merged. 0 open PRs. 0 questions. LESSONS_LEARNED.md committed."}
 {"ts":"2026-05-25T03:59:01Z","agent":"subagent","action":"transition","transition":"IMPL_STARTED"}
+{"ts":"2026-05-25T07:39:00Z","agent":"backend-engineer","action":"start","detail":"Decomposing XpTrackingSpecTests.cs into partial class files under 500 lines"}
