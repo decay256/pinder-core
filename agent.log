@@ -1846,3 +1846,8 @@ started
 {"ts":"2026-05-25T11:11:50Z","agent":"subagent","action":"transition","transition":"IMPL_DONE"}
 {"ts":"2026-05-25T11:13:00Z","agent":"backend-engineer","action":"pr-opened","detail":"PR #1014: refactor(tests): decompose ShadowThresholdSpecTests monolith into partial files","issue":"Refactor-26"}
 {"ts":"2026-05-25T11:14:00Z","agent":"backend-engineer","action":"complete","detail":"Successfully implemented Refactor-26, decomposed ShadowThresholdSpecTests","issue":"Refactor-26"}
+{"ts":"2026-05-25T11:20:00Z","agent":"backend-engineer","action":"start","detail":"Starting implementation for Refactor-27: Decompose AnthropicClientSpecTests","issue":"Refactor-27"}
+{"ts":"2026-05-25T11:24:00Z","agent":"backend-engineer","action":"test-run","detail":"dotnet test passed: 1093 passed, 9 skipped, 1102 total","issue":"Refactor-27"}
+{"ts":"2026-05-25T11:25:00Z","agent":"backend-engineer","action":"commit","detail":"refactor(tests): decompose AnthropicClientSpecTests monolith into partial files","issue":"Refactor-27","ref":"2557c9c"}
+{"ts":"2026-05-25T11:26:00Z","agent":"backend-engineer","action":"pr-opened","detail":"PR #1015: refactor(tests): decompose AnthropicClientSpecTests monolith into partial files","issue":"Refactor-27"}
+{"ts":"2026-05-25T11:27:00Z","agent":"backend-engineer","action":"complete","detail":"Successfully implemented Refactor-27, decomposed AnthropicClientSpecTests","issue":"Refactor-27"}
