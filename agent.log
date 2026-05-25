@@ -1834,3 +1834,8 @@ started
 {"ts":"2026-05-24T09:10:00Z","agent":"orchestrator","sprint_id":"2026-05-24-a7b213","action":"final-scoreboard","detail":"Sprint closed. 2/2 tickets completed and merged. 0 open PRs. 0 questions. LESSONS_LEARNED.md committed."}
 {"ts":"2026-05-25T03:59:01Z","agent":"subagent","action":"transition","transition":"IMPL_STARTED"}
 {"ts":"2026-05-25T07:39:00Z","agent":"backend-engineer","action":"start","detail":"Decomposing XpTrackingSpecTests.cs into partial class files under 500 lines"}
+{"ts":"2026-05-25T10:55:58Z","agent":"backend-engineer","action":"start","detail":"Starting implementation for Refactor-25: Decompose PlayerResponseDelaySpecTests","issue":"Refactor-25"}
+{"ts":"2026-05-25T10:56:01Z","agent":"backend-engineer","action":"test-run","detail":"dotnet test passed: 2867 passed, 18 skipped, 2885 total","issue":"Refactor-25"}
+{"ts":"2026-05-25T10:56:16Z","agent":"backend-engineer","action":"commit","detail":"refactor(tests): decompose PlayerResponseDelaySpecTests monolith into partial files","issue":"Refactor-25","ref":"50cd89d"}
+{"ts":"2026-05-25T10:56:42Z","agent":"backend-engineer","action":"pr-opened","detail":"PR #1013: refactor(tests): decompose PlayerResponseDelaySpecTests monolith into partial files","issue":"Refactor-25"}
+{"ts":"2026-05-25T10:56:46Z","agent":"backend-engineer","action":"complete","detail":"Successfully implemented Refactor-25, decomposed PlayerResponseDelaySpecTests","issue":"Refactor-25"}
