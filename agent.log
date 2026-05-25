@@ -1839,3 +1839,10 @@ started
 {"ts":"2026-05-25T10:56:16Z","agent":"backend-engineer","action":"commit","detail":"refactor(tests): decompose PlayerResponseDelaySpecTests monolith into partial files","issue":"Refactor-25","ref":"50cd89d"}
 {"ts":"2026-05-25T10:56:42Z","agent":"backend-engineer","action":"pr-opened","detail":"PR #1013: refactor(tests): decompose PlayerResponseDelaySpecTests monolith into partial files","issue":"Refactor-25"}
 {"ts":"2026-05-25T10:56:46Z","agent":"backend-engineer","action":"complete","detail":"Successfully implemented Refactor-25, decomposed PlayerResponseDelaySpecTests","issue":"Refactor-25"}
+{"ts":"2026-05-25T11:04:29Z","agent":"subagent","action":"transition","transition":"IMPL_STARTED"}
+{"ts":"2026-05-25T11:05:00Z","agent":"backend-engineer","action":"start","detail":"Starting implementation for Refactor-26: Decompose ShadowThresholdSpecTests","issue":"Refactor-26"}
+{"ts":"2026-05-25T11:07:00Z","agent":"backend-engineer","action":"test-run","detail":"dotnet test passed: 2867 passed, 18 skipped, 2885 total","issue":"Refactor-26"}
+{"ts":"2026-05-25T11:10:00Z","agent":"backend-engineer","action":"commit","detail":"refactor(tests): decompose ShadowThresholdSpecTests monolith into partial files","issue":"Refactor-26","ref":"088349c"}
+{"ts":"2026-05-25T11:11:50Z","agent":"subagent","action":"transition","transition":"IMPL_DONE"}
+{"ts":"2026-05-25T11:13:00Z","agent":"backend-engineer","action":"pr-opened","detail":"PR #1014: refactor(tests): decompose ShadowThresholdSpecTests monolith into partial files","issue":"Refactor-26"}
+{"ts":"2026-05-25T11:14:00Z","agent":"backend-engineer","action":"complete","detail":"Successfully implemented Refactor-26, decomposed ShadowThresholdSpecTests","issue":"Refactor-26"}
