@@ -1853,3 +1853,4 @@ started
 {"ts":"2026-05-25T11:27:00Z","agent":"backend-engineer","action":"complete","detail":"Successfully implemented Refactor-27, decomposed AnthropicClientSpecTests","issue":"Refactor-27"}
 {"ts":"2026-05-25T11:33:16Z","agent":"subagent","action":"transition","transition":"IMPL_STARTED"}
 {"ts":"2026-05-25T11:50:34Z","agent":"subagent","action":"transition","transition":"IMPL_STARTED"}
+{"ts":"2026-05-25T15:16:36Z","agent":"backend-engineer","issue":"#Refactor-30","component":"tests","action":"started","detail":"Implementing ticket Refactor-30 per branch fix/Refactor-30-decompose-integration-tests","commit":null}
