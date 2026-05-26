@@ -30,6 +30,10 @@ namespace Pinder.Core.Conversation
         private readonly Random? _statDrawRng;
         private readonly int _globalDcBias;
 
+        private readonly RollResolutionStage _rollResolutionStage;
+        private readonly DeliveryStage _deliveryStage;
+        private readonly OpponentResponseStage _opponentResponseStage;
+
         public TurnOrchestrator(
             ILlmAdapter llm,
             IDiceRoller dice,
@@ -44,7 +48,10 @@ namespace Pinder.Core.Conversation
             object? statDeliveryInstructions,
             Action<TextLayerNoopEvent>? onTextLayerNoop,
             Random? statDrawRng,
-            int globalDcBias)
+            int globalDcBias,
+            RollResolutionStage rollResolutionStage,
+            DeliveryStage deliveryStage,
+            OpponentResponseStage opponentResponseStage)
         {
             _llm = llm ?? throw new ArgumentNullException(nameof(llm));
             _dice = dice ?? throw new ArgumentNullException(nameof(dice));
@@ -60,6 +67,10 @@ namespace Pinder.Core.Conversation
             _onTextLayerNoop = onTextLayerNoop;
             _statDrawRng = statDrawRng;
             _globalDcBias = globalDcBias;
+
+            _rollResolutionStage = rollResolutionStage ?? throw new ArgumentNullException(nameof(rollResolutionStage));
+            _deliveryStage = deliveryStage ?? throw new ArgumentNullException(nameof(deliveryStage));
+            _opponentResponseStage = opponentResponseStage ?? throw new ArgumentNullException(nameof(opponentResponseStage));
         }
 
         internal async Task<TurnStart> StartTurnAsync(

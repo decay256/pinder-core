@@ -234,6 +234,25 @@ namespace Pinder.Core.Conversation
 
         private TurnOrchestrator BuildTurnOrchestrator()
         {
+            var rollResolutionStage = new RollResolutionStage(
+                _dice,
+                _trapRegistry,
+                _rules,
+                _shadowGrowthEvaluator,
+                _xpRecorder,
+                _globalDcBias);
+
+            var deliveryStage = new DeliveryStage(
+                _llm,
+                _rules,
+                _steeringEngine,
+                _horninessEngine,
+                _shadowCheckEngine,
+                _statDeliveryInstructions,
+                _onTextLayerNoop);
+
+            var opponentResponseStage = new OpponentResponseStage(_llm);
+
             return new TurnOrchestrator(
                 _llm,
                 _dice,
@@ -248,7 +267,10 @@ namespace Pinder.Core.Conversation
                 _statDeliveryInstructions,
                 _onTextLayerNoop,
                 _statDrawRng,
-                _globalDcBias);
+                _globalDcBias,
+                rollResolutionStage,
+                deliveryStage,
+                opponentResponseStage);
         }
     }
 }

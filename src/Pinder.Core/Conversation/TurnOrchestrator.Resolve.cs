@@ -34,14 +34,14 @@ namespace Pinder.Core.Conversation
                     $"Option index {optionIndex} is out of range. Valid range: 0–{state.CurrentOptions.Length - 1}.");
 
             // Execute Roll Stage
-            var rollStage = ExecuteRollStage(
+            var rollStage = _rollResolutionStage.Execute(
                 state,
                 optionIndex,
                 player,
                 opponent);
 
             // Execute Delivery/Overlay Stage
-            var deliveryStage = await ExecuteDeliveryStageAsync(
+            var deliveryStage = await _deliveryStage.ExecuteAsync(
                 state,
                 rollStage.ChosenOption,
                 rollStage.RollResult,
@@ -60,78 +60,21 @@ namespace Pinder.Core.Conversation
                 narrativeBeat = $"*** Interest state changed to {rollStage.StateAfter} ***";
             }
 
-            // 10. Compute response delay
-            double responseDelayMinutes = opponent.Timing.ComputeDelay(state.Interest.Current, rollStage.ResolveDice);
-
             // Opponent Response and Turn Assembly
             state.History.Add((player.DisplayName, deliveryStage.DeliveredMessage));
 
-            // Generate opponent response
-            var opponentTrapInstructions = GameSessionHelpers.GetActiveTrapInstructions(state.Traps);
+            // Execute Opponent Response Stage
+            var opponentStageResult = await _opponentResponseStage.ExecuteAsync(
+                state,
+                rollStage,
+                deliveryStage,
+                player,
+                opponent,
+                progress,
+                ct).ConfigureAwait(false);
 
-            Dictionary<ShadowStatType, int>? opponentShadowThresholds = null;
-            if (state.OpponentShadows != null)
-            {
-                opponentShadowThresholds = new Dictionary<ShadowStatType, int>();
-                foreach (ShadowStatType shadow in Enum.GetValues(typeof(ShadowStatType)))
-                {
-                    opponentShadowThresholds[shadow] = state.OpponentShadows.GetEffectiveShadow(shadow);
-                }
-            }
-
-            string opponentArchetypeDirective = opponent.ActiveArchetype?.Directive;
-
-            var opponentContext = new OpponentContext(
-                playerPrompt: player.AssembledSystemPrompt,
-                opponentPrompt: opponent.AssembledSystemPrompt,
-                conversationHistory: BuildHistoryForLlmContext(state),
-                opponentLastMessage: GameSessionHelpers.GetLastOpponentMessage(state.History, opponent.DisplayName),
-                activeTraps: GameSessionHelpers.GetActiveTrapNames(state.Traps),
-                currentInterest: state.Interest.Current,
-                playerDeliveredMessage: deliveryStage.DeliveredMessage,
-                interestBefore: rollStage.InterestBefore,
-                interestAfter: rollStage.InterestAfter,
-                responseDelayMinutes: responseDelayMinutes,
-                activeTrapInstructions: opponentTrapInstructions,
-                playerName: player.DisplayName,
-                opponentName: opponent.DisplayName,
-                currentTurn: state.TurnNumber,
-                shadowThresholds: opponentShadowThresholds,
-                deliveryTier: rollStage.RollResult.Tier,
-                activeArchetypeDirective: opponentArchetypeDirective);
-
-            progress?.Report(new TurnProgressEvent(TurnProgressStage.OpponentResponseStarted));
-
-            OpponentResponse opponentResponse;
-            if (_llm is Pinder.Core.Interfaces.IStatefulLlmAdapter statefulLlm)
-            {
-                var statefulResult = await statefulLlm.GetOpponentResponseAsync(
-                    opponentContext,
-                    state.OpponentHistory,
-                    ct).ConfigureAwait(false);
-                if (statefulResult == null)
-                    throw new InvalidOperationException("LLM adapter returned null stateful opponent result");
-                opponentResponse = statefulResult.Response;
-                if (opponentResponse == null)
-                    throw new InvalidOperationException("LLM adapter returned null opponent response");
-                if (statefulResult.NewHistoryEntries != null)
-                {
-                    foreach (var entry in statefulResult.NewHistoryEntries)
-                    {
-                        if (entry != null)
-                            state.OpponentHistory.Add(entry);
-                    }
-                }
-            }
-            else
-            {
-                opponentResponse = await _llm.GetOpponentResponseAsync(opponentContext, ct).ConfigureAwait(false);
-                if (opponentResponse == null)
-                    throw new InvalidOperationException("LLM adapter returned null opponent response");
-            }
-
-            string opponentMessage = opponentResponse.MessageText;
-            progress?.Report(new TurnProgressEvent(TurnProgressStage.OpponentResponseCompleted, opponentMessage));
+            var opponentResponse = opponentStageResult.OpponentResponse;
+            string opponentMessage = opponentStageResult.OpponentMessage;
 
             state.ActiveWeakness = opponentResponse.WeaknessWindow;
             state.ActiveTell = opponentResponse.DetectedTell;
