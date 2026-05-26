@@ -154,8 +154,10 @@ namespace Pinder.Core.Tests.Conversation
         public void PinderLlmAdapter_HasNoOpponentSessionFields()
         {
             var adapterType = typeof(Pinder.LlmAdapters.PinderLlmAdapter);
+#pragma warning disable CS0618
             var anthropicType = typeof(Pinder.LlmAdapters.Anthropic.AnthropicLlmAdapter);
             var openAiType = typeof(Pinder.LlmAdapters.OpenAi.OpenAiLlmAdapter);
+#pragma warning restore CS0618
 
             string[] forbidden = { "_opponentHistory", "_opponentSession", "_opponentSystemPrompt" };
 

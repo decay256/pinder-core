@@ -1,4 +1,4 @@
-// Pinder Session Runner — real GameSession + AnthropicLlmAdapter
+// Pinder Session Runner — real GameSession + PinderLlmAdapter
 // Outputs markdown matching the session-001 playtest format
 using System;
 using System.Threading.Tasks;
