@@ -17,49 +17,33 @@ namespace Pinder.Core.Conversation
     {
         private readonly ILlmAdapter _llm;
         private readonly IDiceRoller _dice;
-        private readonly ITrapRegistry _trapRegistry;
         private readonly IGameClock? _clock;
         private readonly IRuleResolver? _rules;
-        private readonly ShadowGrowthEvaluator? _shadowGrowthEvaluator;
-        private readonly SessionXpRecorder _xpRecorder;
-        private readonly SteeringEngine _steeringEngine;
-        private readonly HorninessEngine _horninessEngine;
-        private readonly ShadowCheckEngine _shadowCheckEngine;
-        private readonly object? _statDeliveryInstructions;
-        private readonly Action<TextLayerNoopEvent>? _onTextLayerNoop;
         private readonly Random? _statDrawRng;
-        private readonly int _globalDcBias;
+
+        private readonly RollResolutionStage _rollResolutionStage;
+        private readonly DeliveryStage _deliveryStage;
+        private readonly OpponentResponseStage _opponentResponseStage;
 
         public TurnOrchestrator(
             ILlmAdapter llm,
             IDiceRoller dice,
-            ITrapRegistry trapRegistry,
             IGameClock? clock,
             IRuleResolver? rules,
-            ShadowGrowthEvaluator? shadowGrowthEvaluator,
-            SessionXpRecorder xpRecorder,
-            SteeringEngine steeringEngine,
-            HorninessEngine horninessEngine,
-            ShadowCheckEngine shadowCheckEngine,
-            object? statDeliveryInstructions,
-            Action<TextLayerNoopEvent>? onTextLayerNoop,
             Random? statDrawRng,
-            int globalDcBias)
+            RollResolutionStage rollResolutionStage,
+            DeliveryStage deliveryStage,
+            OpponentResponseStage opponentResponseStage)
         {
             _llm = llm ?? throw new ArgumentNullException(nameof(llm));
             _dice = dice ?? throw new ArgumentNullException(nameof(dice));
-            _trapRegistry = trapRegistry ?? throw new ArgumentNullException(nameof(trapRegistry));
             _clock = clock;
             _rules = rules;
-            _shadowGrowthEvaluator = shadowGrowthEvaluator;
-            _xpRecorder = xpRecorder ?? throw new ArgumentNullException(nameof(xpRecorder));
-            _steeringEngine = steeringEngine ?? throw new ArgumentNullException(nameof(steeringEngine));
-            _horninessEngine = horninessEngine ?? throw new ArgumentNullException(nameof(horninessEngine));
-            _shadowCheckEngine = shadowCheckEngine ?? throw new ArgumentNullException(nameof(shadowCheckEngine));
-            _statDeliveryInstructions = statDeliveryInstructions;
-            _onTextLayerNoop = onTextLayerNoop;
             _statDrawRng = statDrawRng;
-            _globalDcBias = globalDcBias;
+
+            _rollResolutionStage = rollResolutionStage ?? throw new ArgumentNullException(nameof(rollResolutionStage));
+            _deliveryStage = deliveryStage ?? throw new ArgumentNullException(nameof(deliveryStage));
+            _opponentResponseStage = opponentResponseStage ?? throw new ArgumentNullException(nameof(opponentResponseStage));
         }
 
         internal async Task<TurnStart> StartTurnAsync(

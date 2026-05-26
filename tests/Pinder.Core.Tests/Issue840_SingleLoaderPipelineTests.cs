@@ -35,6 +35,7 @@ namespace Pinder.Core.Tests
     /// refactor silently re-introduces the prompt-file fallback path.
     /// </summary>
     [Trait("Category", "SessionSetup")]
+    [Collection("StaticWiring")]
     public class Issue840_SingleLoaderPipelineTests
     {
         private readonly ITestOutputHelper _output;

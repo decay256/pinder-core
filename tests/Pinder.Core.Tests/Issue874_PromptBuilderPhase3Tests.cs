@@ -26,6 +26,7 @@ namespace Pinder.Core.Tests
     ///   emits the yaml-sourced section headers into the assembled prompt.
     /// </summary>
     [Trait("Category", "PromptCatalog")]
+    [Collection("StaticWiring")]
     public class Issue874_PromptBuilderPhase3Tests
     {
         // ----- repo helpers ---------------------------------------------------
