@@ -256,18 +256,9 @@ namespace Pinder.Core.Conversation
             return new TurnOrchestrator(
                 _llm,
                 _dice,
-                _trapRegistry,
                 _clock,
                 _rules,
-                _shadowGrowthEvaluator,
-                _xpRecorder,
-                _steeringEngine,
-                _horninessEngine,
-                _shadowCheckEngine,
-                _statDeliveryInstructions,
-                _onTextLayerNoop,
                 _statDrawRng,
-                _globalDcBias,
                 rollResolutionStage,
                 deliveryStage,
                 opponentResponseStage);
