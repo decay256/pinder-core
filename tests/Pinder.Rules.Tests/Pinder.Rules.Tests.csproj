@@ -24,6 +24,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Pinder.Rules\Pinder.Rules.csproj" />
     <ProjectReference Include="..\..\src\Pinder.Core\Pinder.Core.csproj" />
+    <ProjectReference Include="..\Pinder.Core.TestCommon\Pinder.Core.TestCommon.csproj" />
   </ItemGroup>
 
 </Project>
