@@ -99,6 +99,8 @@ namespace Pinder.Core.Conversation
             _horninessEngine = new HorninessEngine(clonedSteeringRng, _consequenceCatalog);
             _shadowCheckEngine = new ShadowCheckEngine(clonedSteeringRng, _consequenceCatalog);
             _statDrawRng     = src._statDrawRng != null ? RandomCloner.Clone(src._statDrawRng) : null;
+
+            _turnOrchestrator = BuildTurnOrchestrator();
         }
 
         /// <summary>
@@ -225,6 +227,8 @@ namespace Pinder.Core.Conversation
             _horninessEngine = new HorninessEngine(clonedSteeringRng, _consequenceCatalog);
             _shadowCheckEngine = new ShadowCheckEngine(clonedSteeringRng, _consequenceCatalog);
             _statDrawRng     = src._statDrawRng != null ? RandomCloner.Clone(src._statDrawRng) : null;
+
+            _turnOrchestrator = BuildTurnOrchestrator();
         }
     }
 }

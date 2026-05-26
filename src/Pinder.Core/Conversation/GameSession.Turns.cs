@@ -29,19 +29,10 @@ namespace Pinder.Core.Conversation
         /// <exception cref="OperationCanceledException">If <paramref name="ct"/> is cancelled.</exception>
         public async Task<TurnStart> StartTurnAsync(CancellationToken ct = default)
         {
-            return await TurnProcessor.StartTurnAsync(
+            return await _turnOrchestrator.StartTurnAsync(
                 _state,
                 _player,
                 _opponent,
-                _llm,
-                _dice,
-                _trapRegistry,
-                _clock,
-                _rules,
-                _statDeliveryInstructions,
-                _onTextLayerNoop,
-                _statDrawRng,
-                _globalDcBias,
                 ct).ConfigureAwait(false);
         }
 
@@ -204,25 +195,12 @@ namespace Pinder.Core.Conversation
         /// </summary>
         public async Task<TurnResult> ResolveTurnAsync(int optionIndex, System.IProgress<TurnProgressEvent>? progress, CancellationToken ct)
         {
-            return await TurnProcessor.ResolveTurnAsync(
+            return await _turnOrchestrator.ResolveTurnAsync(
                 _state,
                 optionIndex,
                 _player,
                 _opponent,
-                _llm,
-                _dice,
-                _trapRegistry,
-                _rules,
-                _consequenceCatalog,
-                _shadowGrowthEvaluator,
-                _xpRecorder,
-                _steeringEngine,
-                _horninessEngine,
-                _shadowCheckEngine,
                 progress,
-                _statDeliveryInstructions,
-                _onTextLayerNoop,
-                _globalDcBias,
                 ct).ConfigureAwait(false);
         }
 

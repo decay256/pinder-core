@@ -10,7 +10,7 @@ using Pinder.Core.Traps;
 
 namespace Pinder.Core.Conversation
 {
-    internal static partial class TurnProcessor
+    internal partial class TurnOrchestrator
     {
         private struct RollStageResult
         {
@@ -36,17 +36,11 @@ namespace Pinder.Core.Conversation
             public IReadOnlyList<string> ShadowGrowthEvents { get; set; }
         }
 
-        private static RollStageResult ExecuteRollStage(
+        private RollStageResult ExecuteRollStage(
             GameSessionState state,
             int optionIndex,
             CharacterProfile player,
-            CharacterProfile opponent,
-            IDiceRoller dice,
-            ITrapRegistry trapRegistry,
-            IRuleResolver? rules,
-            ShadowGrowthEvaluator? shadowGrowthEvaluator,
-            SessionXpRecorder xpRecorder,
-            int globalDcBias)
+            CharacterProfile opponent)
         {
             var chosenOption = state.CurrentOptions![optionIndex];
 
@@ -95,8 +89,8 @@ namespace Pinder.Core.Conversation
             {
                 dcAdjustment = state.ActiveWeakness.DcReduction;
             }
-            if (globalDcBias != 0)
-                dcAdjustment -= globalDcBias;
+            if (_globalDcBias != 0)
+                dcAdjustment -= _globalDcBias;
 
             // Clear weakness window — consumed this turn regardless of match (#49)
             state.ActiveWeakness = null;
@@ -120,8 +114,8 @@ namespace Pinder.Core.Conversation
                 chosenOption,
                 player,
                 opponent,
-                dice,
-                trapRegistry,
+                _dice,
+                _trapRegistry,
                 null, // consequenceCatalog is not needed inside EvaluateRolls
                 externalBonus,
                 dcAdjustment,
@@ -132,12 +126,12 @@ namespace Pinder.Core.Conversation
             int riskBonusDelta = 0;
             if (rollResult.IsSuccess)
             {
-                baseInterestDelta = ResolveSuccessInterestDelta(rollResult, rules);
+                baseInterestDelta = ResolveSuccessInterestDelta(rollResult, _rules);
                 riskBonusDelta = RiskTierBonus.GetInterestBonus(rollResult);
             }
             else
             {
-                baseInterestDelta = ResolveFailureInterestDelta(rollResult, rules);
+                baseInterestDelta = ResolveFailureInterestDelta(rollResult, _rules);
             }
             int interestDelta = baseInterestDelta + riskBonusDelta;
 
@@ -185,20 +179,20 @@ namespace Pinder.Core.Conversation
             }
 
             // 3d. Record roll XP (#48)
-            xpRecorder.RecordRollXp(rollResult);
+            _xpRecorder.RecordRollXp(rollResult);
 
             // 4. Record interest before applying delta
             int interestBefore = state.Interest.Current;
-            InterestState stateBefore = ResolveInterestState(state, rules);
+            InterestState stateBefore = ResolveInterestState(state, _rules);
 
             // 5. Apply interest delta
             state.Interest.Apply(interestDelta);
 
             int interestAfter = state.Interest.Current;
-            InterestState stateAfter = ResolveInterestState(state, rules);
+            InterestState stateAfter = ResolveInterestState(state, _rules);
 
             // ---- Shadow growth evaluation (#44) ----
-            shadowGrowthEvaluator?.EvaluatePerTurn(
+            _shadowGrowthEvaluator?.EvaluatePerTurn(
                 chosenOption, optionIndex, rollResult, interestAfter, comboTriggered, hasTellOption,
                 state.CurrentOptions,
                 (chosen, opts) => GameSessionHelpers.IsHighestProbabilityOption(chosen, opts, player, opponent));
@@ -245,8 +239,8 @@ namespace Pinder.Core.Conversation
             // End-of-game shadow growth checks
             if (isGameOver)
             {
-                shadowGrowthEvaluator?.EvaluateEndOfGame(outcome!.Value);
-                xpRecorder.RecordEndOfGameXp(outcome!.Value);
+                _shadowGrowthEvaluator?.EvaluateEndOfGame(outcome!.Value);
+                _xpRecorder.RecordEndOfGameXp(outcome!.Value);
             }
 
             // Drain XP events for this turn (#48)

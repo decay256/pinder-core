@@ -125,6 +125,7 @@ namespace Pinder.Core.Conversation
         private SteeringEngine _steeringEngine;
         private ShadowCheckEngine _shadowCheckEngine;
         private HorninessEngine _horninessEngine;
+        private TurnOrchestrator _turnOrchestrator;
         // Dedicated RNG for OptionFilterEngine.DrawRandomStats. Kept separate from
         // the steering RNG so tests can queue exact steering values without our
         // stat-draw shuffle consuming them (see issue #130).
@@ -222,11 +223,32 @@ namespace Pinder.Core.Conversation
             _horninessEngine = new HorninessEngine(steeringRng, _consequenceCatalog);
             _shadowCheckEngine = new ShadowCheckEngine(steeringRng, _consequenceCatalog);
 
+            _turnOrchestrator = BuildTurnOrchestrator();
+
             // #788: stateful opponent context now lives on this GameSession
             // (_opponentHistory). The adapter is pure-stateless and is fed the
             // history on each opponent call. No initialisation needed here —
             // the list starts empty and grows after every successful opponent
             // call in ResolveTurnAsync.
+        }
+
+        private TurnOrchestrator BuildTurnOrchestrator()
+        {
+            return new TurnOrchestrator(
+                _llm,
+                _dice,
+                _trapRegistry,
+                _clock,
+                _rules,
+                _shadowGrowthEvaluator,
+                _xpRecorder,
+                _steeringEngine,
+                _horninessEngine,
+                _shadowCheckEngine,
+                _statDeliveryInstructions,
+                _onTextLayerNoop,
+                _statDrawRng,
+                _globalDcBias);
         }
     }
 }
