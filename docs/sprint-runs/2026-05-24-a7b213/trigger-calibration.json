@@ -1,0 +1,24 @@
+{
+  "observed_distributions": {
+    "tokens_in": {
+      "p50": 250000,
+      "p90": 412800,
+      "max": 412800
+    },
+    "tokens_out": {
+      "p50": 15000,
+      "p90": 26700,
+      "max": 26700
+    },
+    "wall_clock_seconds": {
+      "p50": 268,
+      "p90": 527,
+      "max": 527
+    }
+  },
+  "proposed_thresholds": {
+    "token_explosion": 600000,
+    "wall_clock_overrun": 900
+  },
+  "approved_by_human": false
+}
