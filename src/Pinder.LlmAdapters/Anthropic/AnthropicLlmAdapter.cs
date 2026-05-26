@@ -26,6 +26,7 @@ namespace Pinder.LlmAdapters.Anthropic
     /// - AnthropicDebugLogger
     /// - AnthropicOverlayApplier
     /// </summary>
+    [Obsolete("AnthropicLlmAdapter is deprecated. Use PinderLlmAdapter instead.")]
     public sealed class AnthropicLlmAdapter : IStatefulLlmAdapter, IDisposable
     {
         // Default temperatures per method (used when AnthropicOptions override is null)
