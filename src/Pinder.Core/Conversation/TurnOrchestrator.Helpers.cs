@@ -8,9 +8,9 @@ using Pinder.Core.Traps;
 
 namespace Pinder.Core.Conversation
 {
-    internal static partial class TurnProcessor
+    internal partial class TurnOrchestrator
     {
-        private static int GetMomentumBonus(int streak, IRuleResolver? rules)
+        private int GetMomentumBonus(int streak, IRuleResolver? rules)
         {
             if (rules != null)
             {
@@ -23,7 +23,7 @@ namespace Pinder.Core.Conversation
             return 0;
         }
 
-        private static int ResolveFailureInterestDelta(RollResult rollResult, IRuleResolver? rules)
+        private int ResolveFailureInterestDelta(RollResult rollResult, IRuleResolver? rules)
         {
             if (rules != null)
             {
@@ -34,7 +34,7 @@ namespace Pinder.Core.Conversation
             return FailureScale.GetInterestDelta(rollResult);
         }
 
-        private static int ResolveSuccessInterestDelta(RollResult rollResult, IRuleResolver? rules)
+        private int ResolveSuccessInterestDelta(RollResult rollResult, IRuleResolver? rules)
         {
             if (rules != null)
             {
@@ -46,7 +46,7 @@ namespace Pinder.Core.Conversation
             return SuccessScale.GetInterestDelta(rollResult);
         }
 
-        private static InterestState ResolveInterestState(GameSessionState state, IRuleResolver? rules)
+        private InterestState ResolveInterestState(GameSessionState state, IRuleResolver? rules)
         {
             if (rules != null)
             {
@@ -57,7 +57,7 @@ namespace Pinder.Core.Conversation
             return state.Interest.GetState();
         }
 
-        private static int ResolveThresholdLevel(int shadowValue, IRuleResolver? rules)
+        private int ResolveThresholdLevel(int shadowValue, IRuleResolver? rules)
         {
             if (rules != null)
             {
@@ -68,7 +68,7 @@ namespace Pinder.Core.Conversation
             return ShadowThresholdEvaluator.GetThresholdLevel(shadowValue);
         }
 
-        private static GameStateSnapshot CreateSnapshot(GameSessionState state, IRuleResolver? rules)
+        private GameStateSnapshot CreateSnapshot(GameSessionState state, IRuleResolver? rules)
         {
             return GameSessionHelpers.CreateSnapshot(
                 state.Interest,
@@ -80,7 +80,7 @@ namespace Pinder.Core.Conversation
                 state.OpponentHistory);
         }
 
-        private static System.Collections.Generic.IReadOnlyList<(string Sender, string Text)> BuildHistoryForLlmContext(GameSessionState state)
+        private System.Collections.Generic.IReadOnlyList<(string Sender, string Text)> BuildHistoryForLlmContext(GameSessionState state)
         {
             var history = state.History;
             bool anyScene = false;
@@ -100,7 +100,7 @@ namespace Pinder.Core.Conversation
             return view.AsReadOnly();
         }
 
-        private static ShadowStatType? GetPairedShadow(StatType stat)
+        private ShadowStatType? GetPairedShadow(StatType stat)
         {
             switch (stat)
             {
@@ -114,7 +114,7 @@ namespace Pinder.Core.Conversation
             }
         }
 
-        private static RollResult CreateForcedFailResult(RollResult original, FailureTier shadowTier)
+        private RollResult CreateForcedFailResult(RollResult original, FailureTier shadowTier)
         {
             int fakeDie = original.DC > 1 ? original.DC - 1 : 1;
             var check = Pinder.Core.Rolls.RollCheckResult.Synthesise(
@@ -139,7 +139,7 @@ namespace Pinder.Core.Conversation
                 defendingStat:  Pinder.Core.Stats.StatBlock.DefenceTable[original.Stat]);
         }
 
-        private static string BuildOpponentContext(CharacterProfile opponent)
+        private string BuildOpponentContext(CharacterProfile opponent)
         {
             if (opponent == null) return string.Empty;
             string bio = string.IsNullOrWhiteSpace(opponent.Bio) ? "(no bio)" : opponent.Bio;
@@ -149,7 +149,7 @@ namespace Pinder.Core.Conversation
             return $"Opponent: {opponent.DisplayName} | Bio: \"{bio}\" | Wearing: {items}";
         }
 
-        private static void EmitTextLayerNoop(Action<TextLayerNoopEvent>? onTextLayerNoop, int turnNumber, string layer, string beforeText, string afterText)
+        private void EmitTextLayerNoop(Action<TextLayerNoopEvent>? onTextLayerNoop, int turnNumber, string layer, string beforeText, string afterText)
         {
             if (onTextLayerNoop == null) return;
             try
@@ -164,7 +164,7 @@ namespace Pinder.Core.Conversation
             }
         }
 
-        private static string ComputeStableHash(string? text)
+        private string ComputeStableHash(string? text)
         {
             if (text == null) return "";
             using (var sha = System.Security.Cryptography.SHA256.Create())

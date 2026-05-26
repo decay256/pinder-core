@@ -12,67 +12,14 @@ using Pinder.Core.Traps;
 
 namespace Pinder.Core.Conversation
 {
-    internal static partial class TurnProcessor
+    internal partial class TurnOrchestrator
     {
-        internal static async Task<TurnResult> ResolveTurnAsync(
+        internal async Task<TurnResult> ResolveTurnAsync(
             GameSessionState state,
             int optionIndex,
             CharacterProfile player,
             CharacterProfile opponent,
-            ILlmAdapter llm,
-            IDiceRoller dice,
-            ITrapRegistry trapRegistry,
-            IRuleResolver? rules,
-            IConsequenceCatalog? consequenceCatalog,
-            ShadowGrowthEvaluator? shadowGrowthEvaluator,
-            SessionXpRecorder xpRecorder,
-            SteeringEngine steeringEngine,
-            HorninessEngine horninessEngine,
-            ShadowCheckEngine shadowCheckEngine,
             System.IProgress<TurnProgressEvent>? progress,
-            CancellationToken ct)
-        {
-            return await ResolveTurnAsync(
-                state,
-                optionIndex,
-                player,
-                opponent,
-                llm,
-                dice,
-                trapRegistry,
-                rules,
-                consequenceCatalog,
-                shadowGrowthEvaluator,
-                xpRecorder,
-                steeringEngine,
-                horninessEngine,
-                shadowCheckEngine,
-                progress,
-                statDeliveryInstructions: null,
-                onTextLayerNoop: null,
-                globalDcBias: 0,
-                ct).ConfigureAwait(false);
-        }
-
-        internal static async Task<TurnResult> ResolveTurnAsync(
-            GameSessionState state,
-            int optionIndex,
-            CharacterProfile player,
-            CharacterProfile opponent,
-            ILlmAdapter llm,
-            IDiceRoller dice,
-            ITrapRegistry trapRegistry,
-            IRuleResolver? rules,
-            IConsequenceCatalog? consequenceCatalog,
-            ShadowGrowthEvaluator? shadowGrowthEvaluator,
-            SessionXpRecorder xpRecorder,
-            SteeringEngine steeringEngine,
-            HorninessEngine horninessEngine,
-            ShadowCheckEngine shadowCheckEngine,
-            System.IProgress<TurnProgressEvent>? progress,
-            object? statDeliveryInstructions,
-            Action<TextLayerNoopEvent>? onTextLayerNoop,
-            int globalDcBias,
             CancellationToken ct)
         {
             ct.ThrowIfCancellationRequested();
@@ -91,13 +38,7 @@ namespace Pinder.Core.Conversation
                 state,
                 optionIndex,
                 player,
-                opponent,
-                dice,
-                trapRegistry,
-                rules,
-                shadowGrowthEvaluator,
-                xpRecorder,
-                globalDcBias);
+                opponent);
 
             // Execute Delivery/Overlay Stage
             var deliveryStage = await ExecuteDeliveryStageAsync(
@@ -106,13 +47,6 @@ namespace Pinder.Core.Conversation
                 rollStage.RollResult,
                 player,
                 opponent,
-                llm,
-                rules,
-                steeringEngine,
-                horninessEngine,
-                shadowCheckEngine,
-                statDeliveryInstructions,
-                onTextLayerNoop,
                 progress,
                 rollStage.InterestDelta,
                 ct).ConfigureAwait(false);
@@ -169,7 +103,7 @@ namespace Pinder.Core.Conversation
             progress?.Report(new TurnProgressEvent(TurnProgressStage.OpponentResponseStarted));
 
             OpponentResponse opponentResponse;
-            if (llm is Pinder.Core.Interfaces.IStatefulLlmAdapter statefulLlm)
+            if (_llm is Pinder.Core.Interfaces.IStatefulLlmAdapter statefulLlm)
             {
                 var statefulResult = await statefulLlm.GetOpponentResponseAsync(
                     opponentContext,
@@ -191,7 +125,7 @@ namespace Pinder.Core.Conversation
             }
             else
             {
-                opponentResponse = await llm.GetOpponentResponseAsync(opponentContext, ct).ConfigureAwait(false);
+                opponentResponse = await _llm.GetOpponentResponseAsync(opponentContext, ct).ConfigureAwait(false);
                 if (opponentResponse == null)
                     throw new InvalidOperationException("LLM adapter returned null opponent response");
             }
@@ -218,7 +152,7 @@ namespace Pinder.Core.Conversation
                     "SuccessScale cannot produce a negative delta for a success roll. " +
                     "This indicates a phantom turn produced from a pre-corrupted session state.");
 
-            var stateSnapshot = CreateSnapshot(state, rules);
+            var stateSnapshot = CreateSnapshot(state, _rules);
 
             return new TurnResult(
                 roll: rollStage.RollResult,

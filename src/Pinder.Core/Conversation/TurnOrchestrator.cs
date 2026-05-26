@@ -9,24 +9,66 @@ using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
 using Pinder.Core.Progression;
 using Pinder.Core.Traps;
+using Pinder.Core.I18n;
 
 namespace Pinder.Core.Conversation
 {
-    internal static partial class TurnProcessor
+    internal partial class TurnOrchestrator
     {
-        internal static async Task<TurnStart> StartTurnAsync(
-            GameSessionState state,
-            CharacterProfile player,
-            CharacterProfile opponent,
+        private readonly ILlmAdapter _llm;
+        private readonly IDiceRoller _dice;
+        private readonly ITrapRegistry _trapRegistry;
+        private readonly IGameClock? _clock;
+        private readonly IRuleResolver? _rules;
+        private readonly IConsequenceCatalog? _consequenceCatalog;
+        private readonly ShadowGrowthEvaluator? _shadowGrowthEvaluator;
+        private readonly SessionXpRecorder _xpRecorder;
+        private readonly SteeringEngine _steeringEngine;
+        private readonly HorninessEngine _horninessEngine;
+        private readonly ShadowCheckEngine _shadowCheckEngine;
+        private readonly object? _statDeliveryInstructions;
+        private readonly Action<TextLayerNoopEvent>? _onTextLayerNoop;
+        private readonly Random? _statDrawRng;
+        private readonly int _globalDcBias;
+
+        public TurnOrchestrator(
             ILlmAdapter llm,
             IDiceRoller dice,
             ITrapRegistry trapRegistry,
             IGameClock? clock,
             IRuleResolver? rules,
+            IConsequenceCatalog? consequenceCatalog,
+            ShadowGrowthEvaluator? shadowGrowthEvaluator,
+            SessionXpRecorder xpRecorder,
+            SteeringEngine steeringEngine,
+            HorninessEngine horninessEngine,
+            ShadowCheckEngine shadowCheckEngine,
             object? statDeliveryInstructions,
             Action<TextLayerNoopEvent>? onTextLayerNoop,
             Random? statDrawRng,
-            int globalDcBias,
+            int globalDcBias)
+        {
+            _llm = llm ?? throw new ArgumentNullException(nameof(llm));
+            _dice = dice ?? throw new ArgumentNullException(nameof(dice));
+            _trapRegistry = trapRegistry ?? throw new ArgumentNullException(nameof(trapRegistry));
+            _clock = clock;
+            _rules = rules;
+            _consequenceCatalog = consequenceCatalog;
+            _shadowGrowthEvaluator = shadowGrowthEvaluator;
+            _xpRecorder = xpRecorder ?? throw new ArgumentNullException(nameof(xpRecorder));
+            _steeringEngine = steeringEngine ?? throw new ArgumentNullException(nameof(steeringEngine));
+            _horninessEngine = horninessEngine ?? throw new ArgumentNullException(nameof(horninessEngine));
+            _shadowCheckEngine = shadowCheckEngine ?? throw new ArgumentNullException(nameof(shadowCheckEngine));
+            _statDeliveryInstructions = statDeliveryInstructions;
+            _onTextLayerNoop = onTextLayerNoop;
+            _statDrawRng = statDrawRng;
+            _globalDcBias = globalDcBias;
+        }
+
+        internal async Task<TurnStart> StartTurnAsync(
+            GameSessionState state,
+            CharacterProfile player,
+            CharacterProfile opponent,
             CancellationToken ct)
         {
             ct.ThrowIfCancellationRequested();
@@ -52,9 +94,9 @@ namespace Pinder.Core.Conversation
             }
 
             // Ghost trigger: if Bored state, 25% chance per turn
-            if (ResolveInterestState(state, rules) == InterestState.Bored)
+            if (ResolveInterestState(state, _rules) == InterestState.Bored)
             {
-                int ghostRoll = dice.Roll(4);
+                int ghostRoll = _dice.Roll(4);
                 if (ghostRoll == 1)
                 {
                     if (state.PlayerShadows != null)
@@ -96,7 +138,7 @@ namespace Pinder.Core.Conversation
                 {
                     int effectiveVal = state.PlayerShadows.GetEffectiveShadow(shadow);
                     shadowThresholds[shadow] = effectiveVal;
-                    int tier = ResolveThresholdLevel(effectiveVal, rules);
+                    int tier = ResolveThresholdLevel(effectiveVal, _rules);
                     // T2+ disadvantage for paired stats is removed: shadow check IS the disadvantage (#755)
                     _ = tier; // suppress unused warning
                 }
@@ -114,7 +156,7 @@ namespace Pinder.Core.Conversation
 
             // Draw 3 random stats for this turn's options
             var allStats = new[] { StatType.Charm, StatType.Rizz, StatType.Honesty, StatType.Chaos, StatType.Wit, StatType.SelfAwareness };
-            var availableStats = OptionFilterEngine.DrawRandomStats(allStats, 3, shadowThresholds, statDrawRng);
+            var availableStats = OptionFilterEngine.DrawRandomStats(allStats, 3, shadowThresholds, _statDrawRng);
 
             var context = new DialogueContext(
                 playerPrompt: player.AssembledSystemPrompt,
@@ -138,7 +180,7 @@ namespace Pinder.Core.Conversation
                 availableStats: availableStats);
 
             // Get dialogue options from LLM
-            var rawOptions = await llm.GetDialogueOptionsAsync(context, ct).ConfigureAwait(false);
+            var rawOptions = await _llm.GetDialogueOptionsAsync(context, ct).ConfigureAwait(false);
 
             // Peek combos for each option (#46), enrich with weakness window (#49) and tell bonus (#50)
             var options = new DialogueOption[rawOptions.Length];
@@ -161,19 +203,19 @@ namespace Pinder.Core.Conversation
             // T3 option filtering (#45)
             if (state.PlayerShadows != null && shadowThresholds != null)
             {
-                options = OptionFilterEngine.ApplyT3Filters(options, shadowThresholds, state.LastStatUsed, dice);
+                options = OptionFilterEngine.ApplyT3Filters(options, shadowThresholds, state.LastStatUsed, _dice);
             }
 
             state.CurrentOptions = options;
 
             // Compute pending momentum bonus for the upcoming roll (#268)
-            state.PendingMomentumBonus = GetMomentumBonus(state.MomentumStreak, rules);
+            state.PendingMomentumBonus = GetMomentumBonus(state.MomentumStreak, _rules);
 
             state.CurrentDicePools = new Pinder.Core.Rolls.PerOptionDicePool[options.Length];
             for (int i = 0; i < options.Length; i++)
                 state.CurrentDicePools[i] = new Pinder.Core.Rolls.PerOptionDicePool(i);
 
-            var snapshot = CreateSnapshot(state, rules);
+            var snapshot = CreateSnapshot(state, _rules);
 
             // #903 — build opponent defense snapshot (6 entries, one per StatType).
             var defenseEntries = new System.Collections.Generic.Dictionary<Pinder.Core.Stats.StatType, OpponentDefenseEntry>();

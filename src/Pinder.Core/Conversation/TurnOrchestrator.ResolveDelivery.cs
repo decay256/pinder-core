@@ -11,7 +11,7 @@ using Pinder.Core.Text;
 
 namespace Pinder.Core.Conversation
 {
-    internal static partial class TurnProcessor
+    internal partial class TurnOrchestrator
     {
         private struct DeliveryStageResult
         {
@@ -25,19 +25,12 @@ namespace Pinder.Core.Conversation
             public int FinalInterestDelta { get; set; }
         }
 
-        private static async Task<DeliveryStageResult> ExecuteDeliveryStageAsync(
+        private async Task<DeliveryStageResult> ExecuteDeliveryStageAsync(
             GameSessionState state,
             DialogueOption chosenOption,
             RollResult rollResult,
             CharacterProfile player,
             CharacterProfile opponent,
-            ILlmAdapter llm,
-            IRuleResolver? rules,
-            SteeringEngine steeringEngine,
-            HorninessEngine horninessEngine,
-            ShadowCheckEngine shadowCheckEngine,
-            object? statDeliveryInstructions,
-            Action<TextLayerNoopEvent>? onTextLayerNoop,
             System.IProgress<TurnProgressEvent>? progress,
             int interestDelta,
             CancellationToken ct)
@@ -52,17 +45,17 @@ namespace Pinder.Core.Conversation
 
             // Resolve stat-specific failure instruction when the roll failed (#695)
             string? statFailureInstruction = null;
-            if (!rollResult.IsSuccess && statDeliveryInstructions != null)
+            if (!rollResult.IsSuccess && _statDeliveryInstructions != null)
             {
                 statFailureInstruction = HorninessEngine.GetStatFailureInstruction(
-                    statDeliveryInstructions, chosenOption.Stat, rollResult.Tier);
+                    _statDeliveryInstructions, chosenOption.Stat, rollResult.Tier);
             }
 
             // 10b. Steering roll
             string originalIntendedText = chosenOption.IntendedText ?? "";
             progress?.Report(new TurnProgressEvent(TurnProgressStage.SteeringStarted));
-            SteeringRollResult steeringResult = await steeringEngine.AttemptSteeringRollAsync(
-                originalIntendedText, player, opponent, llm, BuildHistoryForLlmContext(state), ct).ConfigureAwait(false);
+            SteeringRollResult steeringResult = await _steeringEngine.AttemptSteeringRollAsync(
+                originalIntendedText, player, opponent, _llm, BuildHistoryForLlmContext(state), ct).ConfigureAwait(false);
             progress?.Report(new TurnProgressEvent(
                 TurnProgressStage.SteeringCompleted,
                 steeringResult.SteeringSucceeded ? steeringResult.SteeringQuestion : null));
@@ -114,7 +107,7 @@ namespace Pinder.Core.Conversation
                 activeArchetypeDirective: playerArchetypeDirectiveForDelivery);
 
             progress?.Report(new TurnProgressEvent(TurnProgressStage.DeliveryStarted));
-            string deliveredMessage = await llm.DeliverMessageAsync(deliveryContext, ct).ConfigureAwait(false);
+            string deliveredMessage = await _llm.DeliverMessageAsync(deliveryContext, ct).ConfigureAwait(false);
             progress?.Report(new TurnProgressEvent(TurnProgressStage.DeliveryCompleted, deliveredMessage));
 
             // #902: Meta-prefix strip immediately after delivery LLM call.
@@ -181,7 +174,7 @@ namespace Pinder.Core.Conversation
                 int shadowValue = state.PlayerShadows.GetEffectiveShadow(pairedShadow.Value);
                 if (shadowValue > 0)
                 {
-                    var rawShadowResult = shadowCheckEngine.Check(pairedShadow.Value, shadowValue);
+                    var rawShadowResult = _shadowCheckEngine.Check(pairedShadow.Value, shadowValue);
                     shadowRoll = rawShadowResult.Roll;
                     shadowDC   = rawShadowResult.DC;
                     shadowMiss = rawShadowResult.IsMiss;
@@ -191,7 +184,7 @@ namespace Pinder.Core.Conversation
                     {
                         shadowTier = rawShadowResult.Tier;
                         string? instruction = HorninessEngine.GetShadowCorruptionInstruction(
-                            statDeliveryInstructions, pairedShadow.Value, shadowTier);
+                            _statDeliveryInstructions, pairedShadow.Value, shadowTier);
 
                         if (instruction != null)
                         {
@@ -204,7 +197,7 @@ namespace Pinder.Core.Conversation
 
             // Dispatch speculative LLM calls in parallel
             var dispatchResult = await LlmDispatcher.DispatchSpeculativeCallsAsync(
-                llm,
+                _llm,
                 deliveredMessage,
                 runTrap,
                 trapInstruction,
@@ -215,7 +208,7 @@ namespace Pinder.Core.Conversation
                 pairedShadow ?? ShadowStatType.Dread,
                 playerArchetypeDirectiveForDelivery,
                 textDiffs,
-                onTextLayerNoop,
+                _onTextLayerNoop,
                 state.TurnNumber,
                 progress,
                 ct).ConfigureAwait(false);
@@ -233,7 +226,7 @@ namespace Pinder.Core.Conversation
                         if (shadowOverlayApplied && rollResult.IsSuccess)
                         {
                             var forcedFailResult = CreateForcedFailResult(rollResult, shadowTier);
-                            int shadowFailDelta = ResolveFailureInterestDelta(forcedFailResult, rules);
+                            int shadowFailDelta = ResolveFailureInterestDelta(forcedFailResult, _rules);
                             int correction = shadowFailDelta - interestDelta;
                             state.Interest.Apply(correction);
                             interestDelta = shadowFailDelta;
@@ -258,10 +251,10 @@ namespace Pinder.Core.Conversation
 
             string? horninessOverlayInstruction;
             HorninessCheckResult horninessCheckResult;
-            (horninessCheckResult, horninessOverlayInstruction) = horninessEngine.PeekAsync(
+            (horninessCheckResult, horninessOverlayInstruction) = _horninessEngine.PeekAsync(
                 state.SessionHorniness,
                 state.PlayerShadows,
-                statDeliveryInstructions,
+                _statDeliveryInstructions,
                 ct);
 
             int horninessInterestPenalty = 0;
@@ -273,7 +266,7 @@ namespace Pinder.Core.Conversation
                 string beforeHorniness = deliveredMessage;
                 string opponentCtx = BuildOpponentContext(opponent);
                 progress?.Report(new TurnProgressEvent(TurnProgressStage.HorninessOverlayStarted));
-                string rawHorninessOutput = await llm.ApplyHorninessOverlayAsync(deliveredMessage, horninessOverlayInstruction, opponentCtx, playerArchetypeDirectiveForDelivery, ct).ConfigureAwait(false);
+                string rawHorninessOutput = await _llm.ApplyHorninessOverlayAsync(deliveredMessage, horninessOverlayInstruction, opponentCtx, playerArchetypeDirectiveForDelivery, ct).ConfigureAwait(false);
                 progress?.Report(new TurnProgressEvent(TurnProgressStage.HorninessOverlayCompleted, rawHorninessOutput));
 
                 string sanitizedHorninessOutput = MetaPrefixStripper.Strip(rawHorninessOutput);
@@ -294,7 +287,7 @@ namespace Pinder.Core.Conversation
                 }
                 else
                 {
-                    EmitTextLayerNoop(onTextLayerNoop, state.TurnNumber, "Horniness", beforeHorniness, deliveredMessage);
+                    EmitTextLayerNoop(_onTextLayerNoop, state.TurnNumber, "Horniness", beforeHorniness, deliveredMessage);
                 }
             }
 
