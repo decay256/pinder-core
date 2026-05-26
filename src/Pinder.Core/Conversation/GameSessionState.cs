@@ -13,36 +13,36 @@ namespace Pinder.Core.Conversation
 {
     public sealed class GameSessionState
     {
-        public InterestMeter Interest { get; set; } = new InterestMeter();
-        public TrapState Traps { get; set; } = new TrapState();
-        public List<(string Sender, string Text)> History { get; set; } = new List<(string Sender, string Text)>();
-        public string OpponentOutfitDescription { get; set; } = string.Empty;
-        public List<ConversationMessage> OpponentHistory { get; set; } = new List<ConversationMessage>();
-        public SessionShadowTracker? PlayerShadows { get; set; }
-        public SessionShadowTracker? OpponentShadows { get; set; }
-        public ComboTracker ComboTracker { get; set; } = new ComboTracker();
-        public List<CallbackOpportunity> Topics { get; set; } = new List<CallbackOpportunity>();
-        public int RizzCumulativeFailureCount { get; set; }
-        public int MomentumStreak { get; set; }
-        public int PendingMomentumBonus { get; set; }
-        public int TurnNumber { get; set; }
-        public bool Ended { get; set; }
-        public GameOutcome? Outcome { get; set; }
-        public XpLedger XpLedger { get; set; } = new XpLedger();
-        public WeaknessWindow? ActiveWeakness { get; set; }
-        public Tell? ActiveTell { get; set; }
-        public int SessionHorniness { get; set; }
-        public int HorninessRoll { get; set; }
-        public int HorninessTimeModifier { get; set; }
-        public bool PendingCritAdvantage { get; set; }
-        public StatType? LastStatUsed { get; set; }
-        public HashSet<StatType>? ShadowDisadvantagedStats { get; set; }
-        public Dictionary<ShadowStatType, int>? CurrentShadowThresholds { get; set; }
-        public DialogueOption[]? CurrentOptions { get; set; }
-        public bool CurrentHasAdvantage { get; set; }
-        public bool CurrentHasDisadvantage { get; set; }
-        public Pinder.Core.Rolls.PerOptionDicePool[]? CurrentDicePools { get; set; }
-        public Pinder.Core.Rolls.PerOptionDicePool? InjectedNextPool { get; set; }
+        public InterestMeter Interest { get; internal set; } = new InterestMeter();
+        public TrapState Traps { get; internal set; } = new TrapState();
+        public List<(string Sender, string Text)> History { get; internal set; } = new List<(string Sender, string Text)>();
+        public string OpponentOutfitDescription { get; internal set; } = string.Empty;
+        public List<ConversationMessage> OpponentHistory { get; internal set; } = new List<ConversationMessage>();
+        public SessionShadowTracker? PlayerShadows { get; internal set; }
+        public SessionShadowTracker? OpponentShadows { get; internal set; }
+        public ComboTracker ComboTracker { get; internal set; } = new ComboTracker();
+        public List<CallbackOpportunity> Topics { get; internal set; } = new List<CallbackOpportunity>();
+        public int RizzCumulativeFailureCount { get; internal set; }
+        public int MomentumStreak { get; internal set; }
+        public int PendingMomentumBonus { get; internal set; }
+        public int TurnNumber { get; internal set; }
+        public bool Ended { get; internal set; }
+        public GameOutcome? Outcome { get; internal set; }
+        public XpLedger XpLedger { get; internal set; } = new XpLedger();
+        public WeaknessWindow? ActiveWeakness { get; internal set; }
+        public Tell? ActiveTell { get; internal set; }
+        public int SessionHorniness { get; internal set; }
+        public int HorninessRoll { get; internal set; }
+        public int HorninessTimeModifier { get; internal set; }
+        public bool PendingCritAdvantage { get; internal set; }
+        public StatType? LastStatUsed { get; internal set; }
+        public HashSet<StatType>? ShadowDisadvantagedStats { get; internal set; }
+        public Dictionary<ShadowStatType, int>? CurrentShadowThresholds { get; internal set; }
+        public DialogueOption[]? CurrentOptions { get; internal set; }
+        public bool CurrentHasAdvantage { get; internal set; }
+        public bool CurrentHasDisadvantage { get; internal set; }
+        public Pinder.Core.Rolls.PerOptionDicePool[]? CurrentDicePools { get; internal set; }
+        public Pinder.Core.Rolls.PerOptionDicePool? InjectedNextPool { get; internal set; }
 
         public GameSessionState()
         {
