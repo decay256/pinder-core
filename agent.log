@@ -2003,3 +2003,4 @@ started
 {"ts":"2026-05-26T22:47:35Z","agent":"subagent","action":"transition","transition":"IMPL_DONE"}
 {"ts":"2026-05-26T22:47:40Z","agent":"backend-engineer","action":"complete","detail":"Extracted stateless pipeline stages (RollResolutionStage, DeliveryStage, OpponentResponseStage) from TurnOrchestrator to separate classes; used constructor injection and updated TurnOrchestrator coordination. Tests successfully pass.","commit":"4b1002a"}
 {"ts":"2026-05-26T22:57:44Z","agent":"backend-engineer","action":"start","detail":"Addressing reviewer feedback for #1044: removing 9 dead instance fields/parameters from TurnOrchestrator and updating GameSession.BuildTurnOrchestrator","issue":"1044"}
+{"ts":"2026-05-26T23:01:21Z","agent":"backend-engineer","action":"commit","detail":"Removed 9 dead fields/parameters from TurnOrchestrator and simplified GameSession.BuildTurnOrchestrator","ref":"4658706"}
