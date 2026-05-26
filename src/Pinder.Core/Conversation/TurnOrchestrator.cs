@@ -20,6 +20,7 @@ namespace Pinder.Core.Conversation
         private readonly ITrapRegistry _trapRegistry;
         private readonly IGameClock? _clock;
         private readonly IRuleResolver? _rules;
+        // Dead state: preserved for constructor signature compatibility but unused in TurnOrchestrator
         private readonly IConsequenceCatalog? _consequenceCatalog;
         private readonly ShadowGrowthEvaluator? _shadowGrowthEvaluator;
         private readonly SessionXpRecorder _xpRecorder;

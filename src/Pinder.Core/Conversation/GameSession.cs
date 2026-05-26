@@ -125,7 +125,7 @@ namespace Pinder.Core.Conversation
         private SteeringEngine _steeringEngine;
         private ShadowCheckEngine _shadowCheckEngine;
         private HorninessEngine _horninessEngine;
-        private readonly TurnOrchestrator _turnOrchestrator;
+        private TurnOrchestrator _turnOrchestrator;
         // Dedicated RNG for OptionFilterEngine.DrawRandomStats. Kept separate from
         // the steering RNG so tests can queue exact steering values without our
         // stat-draw shuffle consuming them (see issue #130).

@@ -135,6 +135,34 @@ namespace Pinder.Core.Tests.Phase5
             Assert.Equal(sA.MomentumStreak, sB.MomentumStreak);
             Assert.Equal(sA.OpponentHistory.Count, sB.OpponentHistory.Count);
             Assert.Equal(direct.DeliveredMessage, viaClone.DeliveredMessage);
+
+            // ─── Second Turn ───
+            tA.QueueDialogueOptions(Phase0Fixtures.CannedDialogueOptions);
+            tA.QueueDelivery("d-B");
+            tA.QueueOpponent("o-B");
+            tB.QueueDialogueOptions(Phase0Fixtures.CannedDialogueOptions);
+            tB.QueueDelivery("d-B");
+            tB.QueueOpponent("o-B");
+
+            await pA.StartTurnAsync();
+            await pB.StartTurnAsync();
+
+            const int idx2 = 1;
+            var secondSharedPool = new Pinder.Core.Rolls.PerOptionDicePool(idx2, 18, 60);
+
+            pA.InjectNextDicePool(secondSharedPool);
+            var direct2 = await pA.ResolveTurnAsync(idx2);
+
+            pB.InjectNextDicePool(secondSharedPool);
+            var viaClone2 = await pB.ResolveTurnAsync(idx2);
+
+            var sA2 = pA.CreateSnapshot();
+            var sB2 = pB.CreateSnapshot();
+            Assert.Equal(sA2.Interest, sB2.Interest);
+            Assert.Equal(sA2.TurnNumber, sB2.TurnNumber);
+            Assert.Equal(sA2.MomentumStreak, sB2.MomentumStreak);
+            Assert.Equal(sA2.OpponentHistory.Count, sB2.OpponentHistory.Count);
+            Assert.Equal(direct2.DeliveredMessage, viaClone2.DeliveredMessage);
         }
 
         // 4. Distinct clones with distinct adapters route to own transports
