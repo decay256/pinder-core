@@ -15,6 +15,7 @@ namespace Pinder.LlmAdapters.OpenAi
     /// Supports OpenAI, Groq, Together, OpenRouter, Ollama, and any provider
     /// that implements the /v1/chat/completions endpoint.
     /// </summary>
+    [Obsolete("OpenAiLlmAdapter is deprecated. Use PinderLlmAdapter instead.")]
     public sealed partial class OpenAiLlmAdapter : IStatefulLlmAdapter, IDisposable
     {
         private const double DefaultDialogueOptionsTemperature = 0.9;
