@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Pinder.Core.Interfaces;
 using Pinder.Core.Stats;
 
-namespace Pinder.Core.Tests
+namespace Pinder.Core.TestCommon
 {
     public static class TestHelpers
     {

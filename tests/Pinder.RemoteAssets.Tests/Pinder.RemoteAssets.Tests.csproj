@@ -25,7 +25,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Pinder.Core\Pinder.Core.csproj" />
     <ProjectReference Include="..\..\src\Pinder.RemoteAssets\Pinder.RemoteAssets.csproj" />
-    <ProjectReference Include="..\Pinder.Core.TestCommon\Pinder.Core.TestCommon.csproj" />
   </ItemGroup>
 
 </Project>

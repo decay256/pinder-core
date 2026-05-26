@@ -12,14 +12,11 @@ namespace Pinder.Core.TestCommon
         public static void Initialize()
         {
             var dir = AppDomain.CurrentDomain.BaseDirectory;
-            Console.WriteLine($"[PromptCatalogInitializer] Starting search from: {dir}");
             for (int i = 0; i < 10; i++)
             {
                 var candidate = Path.Combine(dir, "data", "prompts");
-                Console.WriteLine($"[PromptCatalogInitializer] Checking candidate {i}: {candidate}");
                 if (Directory.Exists(candidate))
                 {
-                    Console.WriteLine($"[PromptCatalogInitializer] Found candidate at: {candidate}");
                     var catalog = PromptCatalog.LoadFromDirectory(candidate);
                     PromptTemplates.Catalog = catalog;
                     PromptBuilder.StructuralFragmentLookup =
@@ -36,7 +33,6 @@ namespace Pinder.Core.TestCommon
                         {
                             TextingStyleAggregator.ConflictCatalog =
                                 TextingStyleConflicts.LoadFrom(File.ReadAllText(conflictsPath));
-                            Console.WriteLine($"[PromptCatalogInitializer] Loaded conflict matrix from: {conflictsPath}");
                         }
                     }
                     return;

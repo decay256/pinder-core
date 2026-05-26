@@ -13,6 +13,19 @@ namespace Pinder.Core.TestCommon
     public class StubLlmAdapter : ILlmAdapter
     {
         private readonly Queue<DialogueOption[]> _optionSets = new Queue<DialogueOption[]>();
+        private DialogueOption[]? _lastOptions;
+
+        public StubLlmAdapter()
+        {
+        }
+
+        public StubLlmAdapter(params DialogueOption[] initialOptions)
+        {
+            if (initialOptions != null && initialOptions.Length > 0)
+            {
+                EnqueueOptions(initialOptions);
+            }
+        }
 
         public void EnqueueOptions(params DialogueOption[] options)
         {
@@ -22,7 +35,14 @@ namespace Pinder.Core.TestCommon
         public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, CancellationToken ct = default)
         {
             if (_optionSets.Count > 0)
-                return Task.FromResult(_optionSets.Dequeue());
+            {
+                _lastOptions = _optionSets.Dequeue();
+                return Task.FromResult(_lastOptions);
+            }
+            if (_lastOptions != null)
+            {
+                return Task.FromResult(_lastOptions);
+            }
             return Task.FromResult(new[] { new DialogueOption(StatType.Charm, "Default") });
         }
 
