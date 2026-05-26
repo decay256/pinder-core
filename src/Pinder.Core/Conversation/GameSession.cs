@@ -223,13 +223,23 @@ namespace Pinder.Core.Conversation
             _horninessEngine = new HorninessEngine(steeringRng, _consequenceCatalog);
             _shadowCheckEngine = new ShadowCheckEngine(steeringRng, _consequenceCatalog);
 
-            _turnOrchestrator = new TurnOrchestrator(
+            _turnOrchestrator = BuildTurnOrchestrator();
+
+            // #788: stateful opponent context now lives on this GameSession
+            // (_opponentHistory). The adapter is pure-stateless and is fed the
+            // history on each opponent call. No initialisation needed here —
+            // the list starts empty and grows after every successful opponent
+            // call in ResolveTurnAsync.
+        }
+
+        private TurnOrchestrator BuildTurnOrchestrator()
+        {
+            return new TurnOrchestrator(
                 _llm,
                 _dice,
                 _trapRegistry,
                 _clock,
                 _rules,
-                _consequenceCatalog,
                 _shadowGrowthEvaluator,
                 _xpRecorder,
                 _steeringEngine,
@@ -239,12 +249,6 @@ namespace Pinder.Core.Conversation
                 _onTextLayerNoop,
                 _statDrawRng,
                 _globalDcBias);
-
-            // #788: stateful opponent context now lives on this GameSession
-            // (_opponentHistory). The adapter is pure-stateless and is fed the
-            // history on each opponent call. No initialisation needed here —
-            // the list starts empty and grows after every successful opponent
-            // call in ResolveTurnAsync.
         }
     }
 }

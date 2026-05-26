@@ -100,22 +100,7 @@ namespace Pinder.Core.Conversation
             _shadowCheckEngine = new ShadowCheckEngine(clonedSteeringRng, _consequenceCatalog);
             _statDrawRng     = src._statDrawRng != null ? RandomCloner.Clone(src._statDrawRng) : null;
 
-            _turnOrchestrator = new TurnOrchestrator(
-                _llm,
-                _dice,
-                _trapRegistry,
-                _clock,
-                _rules,
-                _consequenceCatalog,
-                _shadowGrowthEvaluator,
-                _xpRecorder,
-                _steeringEngine,
-                _horninessEngine,
-                _shadowCheckEngine,
-                _statDeliveryInstructions,
-                _onTextLayerNoop,
-                _statDrawRng,
-                _globalDcBias);
+            _turnOrchestrator = BuildTurnOrchestrator();
         }
 
         /// <summary>
@@ -243,22 +228,7 @@ namespace Pinder.Core.Conversation
             _shadowCheckEngine = new ShadowCheckEngine(clonedSteeringRng, _consequenceCatalog);
             _statDrawRng     = src._statDrawRng != null ? RandomCloner.Clone(src._statDrawRng) : null;
 
-            _turnOrchestrator = new TurnOrchestrator(
-                _llm,
-                _dice,
-                _trapRegistry,
-                _clock,
-                _rules,
-                _consequenceCatalog,
-                _shadowGrowthEvaluator,
-                _xpRecorder,
-                _steeringEngine,
-                _horninessEngine,
-                _shadowCheckEngine,
-                _statDeliveryInstructions,
-                _onTextLayerNoop,
-                _statDrawRng,
-                _globalDcBias);
+            _turnOrchestrator = BuildTurnOrchestrator();
         }
     }
 }

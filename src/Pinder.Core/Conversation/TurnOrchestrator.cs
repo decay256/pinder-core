@@ -20,8 +20,6 @@ namespace Pinder.Core.Conversation
         private readonly ITrapRegistry _trapRegistry;
         private readonly IGameClock? _clock;
         private readonly IRuleResolver? _rules;
-        // Dead state: preserved for constructor signature compatibility but unused in TurnOrchestrator
-        private readonly IConsequenceCatalog? _consequenceCatalog;
         private readonly ShadowGrowthEvaluator? _shadowGrowthEvaluator;
         private readonly SessionXpRecorder _xpRecorder;
         private readonly SteeringEngine _steeringEngine;
@@ -38,7 +36,6 @@ namespace Pinder.Core.Conversation
             ITrapRegistry trapRegistry,
             IGameClock? clock,
             IRuleResolver? rules,
-            IConsequenceCatalog? consequenceCatalog,
             ShadowGrowthEvaluator? shadowGrowthEvaluator,
             SessionXpRecorder xpRecorder,
             SteeringEngine steeringEngine,
@@ -54,7 +51,6 @@ namespace Pinder.Core.Conversation
             _trapRegistry = trapRegistry ?? throw new ArgumentNullException(nameof(trapRegistry));
             _clock = clock;
             _rules = rules;
-            _consequenceCatalog = consequenceCatalog;
             _shadowGrowthEvaluator = shadowGrowthEvaluator;
             _xpRecorder = xpRecorder ?? throw new ArgumentNullException(nameof(xpRecorder));
             _steeringEngine = steeringEngine ?? throw new ArgumentNullException(nameof(steeringEngine));
