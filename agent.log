@@ -1939,3 +1939,23 @@ started
 {"ts":"2026-05-25T18:52:00Z","agent":"orchestrator","action":"merged","sprint_id":"2026-05-24-a7b213","ticket":"Refactor-38","detail":"PR #1025 merged into main"}
 {"ts":"2026-05-25T19:54:22Z","agent":"subagent","action":"transition","transition":"IMPL_STARTED"}
 {"ts":"2026-05-25T19:54:26Z","agent":"backend-engineer","issue":"Refactor-40","component":"tests","action":"started","detail":"Implementing ticket Refactor-40 per branch fix/Refactor-40-decompose-shadow-growth-event-tests","commit":null}
+{"ts":"2026-05-26T08:05:29Z","agent":"subagent","action":"transition","transition":"REVIEW_VERDICT","ticket":"Refactor-47","extras":{"verdict":"APPROVE"}}
+{"ts":"2026-05-26T08:02:00Z","agent":"orchestrator","action":"merged","sprint_id":"2026-05-24-a7b213","ticket":"Refactor-47","detail":"PR #1032 merged into main"}
+{"ts":"2026-05-26T08:14:00Z","agent":"orchestrator","action":"merged","sprint_id":"2026-05-24-a7b213","ticket":"Refactor-48","detail":"PR #719 merged into main"}
+{"ts":"2026-05-26T08:42:00Z","agent":"orchestrator","action":"merged","sprint_id":"2026-05-24-a7b213","ticket":"Refactor-49","detail":"PR #720 merged into main"}
+{"ts":"2026-05-26T08:42:00Z","agent":"orchestrator","action":"merged","sprint_id":"2026-05-24-a7b213","ticket":"Refactor-51","detail":"PR #720 merged into main"}
+{"ts":"2026-05-26T08:42:00Z","agent":"orchestrator","action":"merged","sprint_id":"2026-05-24-a7b213","ticket":"Refactor-53","detail":"PR #720 merged into main"}
+{"ts":"2026-05-26T08:42:00Z","agent":"orchestrator","action":"merged","sprint_id":"2026-05-24-a7b213","ticket":"Refactor-56","detail":"PR #720 merged into main"}
+{"ts":"2026-05-26T08:42:00Z","agent":"orchestrator","action":"merged","sprint_id":"2026-05-24-a7b213","ticket":"Refactor-57","detail":"PR #720 merged into main"}
+{"ts":"2026-05-26T08:42:00Z","agent":"orchestrator","action":"merged","sprint_id":"2026-05-24-a7b213","ticket":"Refactor-66","detail":"PR #720 merged into main"}
+{"ts":"2026-05-26T08:42:00Z","agent":"orchestrator","action":"merged","sprint_id":"2026-05-24-a7b213","ticket":"Refactor-79","detail":"PR #720 merged into main"}
+{"ts":"2026-05-26T09:02:00Z","agent":"orchestrator","action":"merged","sprint_id":"2026-05-24-a7b213","ticket":"Refactor-50","detail":"PR #721 merged into main"}
+{"ts":"2026-05-26T09:02:00Z","agent":"orchestrator","action":"merged","sprint_id":"2026-05-24-a7b213","ticket":"Refactor-52","detail":"PR #721 merged into main"}
+{"ts":"2026-05-26T09:02:00Z","agent":"orchestrator","action":"merged","sprint_id":"2026-05-24-a7b213","ticket":"Refactor-65","detail":"PR #721 merged into main"}
+{"ts":"2026-05-26T09:02:00Z","agent":"orchestrator","action":"merged","sprint_id":"2026-05-24-a7b213","ticket":"Refactor-68","detail":"PR #721 merged into main"}
+{"ts":"2026-05-26T09:02:00Z","agent":"orchestrator","action":"merged","sprint_id":"2026-05-24-a7b213","ticket":"Refactor-69","detail":"PR #721 merged into main"}
+{"ts":"2026-05-26T09:02:00Z","agent":"orchestrator","action":"merged","sprint_id":"2026-05-24-a7b213","ticket":"Refactor-73","detail":"PR #721 merged into main"}
+{"ts":"2026-05-26T09:19:00Z","agent":"orchestrator","action":"merged","sprint_id":"2026-05-24-a7b213","ticket":"Refactor-54","detail":"PR #722 merged into main"}
+{"ts":"2026-05-26T09:19:00Z","agent":"orchestrator","action":"merged","sprint_id":"2026-05-24-a7b213","ticket":"Refactor-59","detail":"PR #722 merged into main"}
+{"ts":"2026-05-26T09:19:00Z","agent":"orchestrator","action":"merged","sprint_id":"2026-05-24-a7b213","ticket":"Refactor-74","detail":"PR #722 merged into main"}
+{"ts":"2026-05-26T09:19:00Z","agent":"orchestrator","action":"merged","sprint_id":"2026-05-24-a7b213","ticket":"Refactor-76","detail":"PR #722 merged into main"}
