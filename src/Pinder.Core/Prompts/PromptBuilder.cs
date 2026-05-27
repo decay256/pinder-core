@@ -3,6 +3,7 @@ using System.Text;
 using Pinder.Core.Characters;
 using Pinder.Core.Stats;
 using Pinder.Core.Traps;
+using Pinder.Core.Text;
 
 namespace Pinder.Core.Prompts
 {
@@ -38,22 +39,45 @@ namespace Pinder.Core.Prompts
         public static Func<string, string?>? StructuralFragmentLookup { get; set; }
 
         /// <summary>
+        /// Enhanced structural fragment resolver that also yields the source file path.
+        /// </summary>
+        public static Func<string, StructuralPromptResult?>? StructuralFragmentLookupEx { get; set; }
+
+        /// <summary>
         /// Resolve a structural fragment by name. Throws when the lookup
         /// delegate is not wired or the key is missing — after Phase 5
         /// there are no const fallbacks.
         /// </summary>
         private static string GetHeader(string key)
         {
+            return GetHeaderEx(key).Content;
+        }
+
+        private static (string Content, string SourceFile) GetHeaderEx(string key)
+        {
             var lookup = StructuralFragmentLookup
                 ?? throw new InvalidOperationException(
                     $"PromptBuilder.StructuralFragmentLookup is not wired. " +
                     $"Call PromptWiring.Wire() at startup. (key: '{key}')");
             var value = lookup(key);
-            return !string.IsNullOrWhiteSpace(value)
-                ? value!
-                : throw new InvalidOperationException(
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                throw new InvalidOperationException(
                     $"prompt-catalog: missing required key '{key}'. " +
                     $"Check data/prompts/structural.yaml.");
+            }
+
+            string sourceFile = "data/prompts/structural.yaml";
+            if (StructuralFragmentLookupEx != null)
+            {
+                var result = StructuralFragmentLookupEx(key);
+                if (result != null && !string.IsNullOrWhiteSpace(result.SourceFile))
+                {
+                    sourceFile = result.SourceFile;
+                }
+            }
+
+            return (value, sourceFile);
         }
 
         /// <summary>
@@ -72,7 +96,24 @@ namespace Pinder.Core.Prompts
         /// fragment content itself, which is still deterministic for a
         /// given configuration but not stable across reconfigurations.
         /// </param>
+        /// <summary>
+        /// Assemble the full system prompt for a character.
+        /// </summary>
         public static string BuildSystemPrompt(
+            string displayName,
+            string genderIdentity,
+            string? bioOneLiner,
+            FragmentCollection fragments,
+            TrapState activeTraps,
+            string? characterIdSeed = null)
+        {
+            return BuildSystemPromptEx(displayName, genderIdentity, bioOneLiner, fragments, activeTraps, characterIdSeed).Text;
+        }
+
+        /// <summary>
+        /// Assemble the full system prompt for a character, returning trace data.
+        /// </summary>
+        public static PromptTraceResult BuildSystemPromptEx(
             string displayName,
             string genderIdentity,
             string? bioOneLiner,
@@ -85,37 +126,42 @@ namespace Pinder.Core.Prompts
             if (fragments    == null) throw new ArgumentNullException(nameof(fragments));
             if (activeTraps  == null) throw new ArgumentNullException(nameof(activeTraps));
 
-            var sb = new StringBuilder();
+            var sb = new AnnotatedStringBuilder();
 
             // Header — sourced from structural.yaml, no fallback.
-            string leadInTemplate = GetHeader("structural-lead-in");
-            sb.AppendLine(leadInTemplate.Replace("{name}", displayName));
+            var leadIn = GetHeaderEx("structural-lead-in");
+            sb.AppendLine(leadIn.Content.Replace("{name}", displayName), leadIn.SourceFile, "structural-lead-in");
             sb.AppendLine();
 
             // IDENTITY
-            sb.AppendLine(GetHeader("structural-identity"));
+            var identity = GetHeaderEx("structural-identity");
+            sb.AppendLine(identity.Content, identity.SourceFile, "structural-identity");
             sb.AppendLine($"- Gender identity: {genderIdentity}");
             sb.AppendLine($"- Bio: {(string.IsNullOrWhiteSpace(bioOneLiner) ? "none" : bioOneLiner)}");
             sb.AppendLine();
 
             // PERSONALITY
-            sb.AppendLine(GetHeader("structural-personality"));
+            var personality = GetHeaderEx("structural-personality");
+            sb.AppendLine(personality.Content, personality.SourceFile, "structural-personality");
             AppendBulletList(sb, fragments.PersonalityFragments);
             sb.AppendLine();
 
             // BACKSTORY
-            sb.AppendLine(GetHeader("structural-backstory"));
+            var backstory = GetHeaderEx("structural-backstory");
+            sb.AppendLine(backstory.Content, backstory.SourceFile, "structural-backstory");
             AppendBulletList(sb, fragments.BackstoryFragments);
             sb.AppendLine();
 
             // TEXTING STYLE
-            sb.AppendLine(GetHeader("structural-texting-style"));
+            var textingStyle = GetHeaderEx("structural-texting-style");
+            sb.AppendLine(textingStyle.Content, textingStyle.SourceFile, "structural-texting-style");
             AppendBulletList(sb, TextingStyleAggregator.AggregateAsList(
                 fragments.TextingStyleSources, characterIdSeed));
             sb.AppendLine();
 
             // ACTIVE ARCHETYPE
-            sb.AppendLine(GetHeader("structural-active-archetype"));
+            var activeArchetype = GetHeaderEx("structural-active-archetype");
+            sb.AppendLine(activeArchetype.Content, activeArchetype.SourceFile, "structural-active-archetype");
             if (fragments.ActiveArchetype != null)
             {
                 var aa = fragments.ActiveArchetype;
@@ -145,25 +191,17 @@ namespace Pinder.Core.Prompts
                 if (!hasActiveHeader)
                 {
                     sb.AppendLine();
-                    sb.AppendLine(GetHeader("structural-active-trap-instructions"));
+                    var activeTrapHeader = GetHeaderEx("structural-active-trap-instructions");
+                    sb.AppendLine(activeTrapHeader.Content, activeTrapHeader.SourceFile, "structural-active-trap-instructions");
                     hasActiveHeader = true;
                 }
                 sb.AppendLine(trap.Definition.LlmInstruction);
             }
 
-            return sb.ToString().TrimEnd();
+            return new PromptTraceResult(sb.ToString().TrimEnd(), sb.Spans);
         }
 
-        /// <summary>
-        /// #833: helper that emits a list of fragments as a bullet list,
-        /// one fragment per line with a leading <c>- </c> marker. Empty
-        /// or null entries are skipped (rather than emitted as an empty
-        /// bullet). When the input list itself is empty, no output is
-        /// written — callers can decide whether the section header alone
-        /// is meaningful for the empty case (e.g. PERSONALITY with no
-        /// items still emits the header for downstream parser stability).
-        /// </summary>
-        private static void AppendBulletList(StringBuilder sb, System.Collections.Generic.IReadOnlyList<string> fragments)
+        private static void AppendBulletList(AnnotatedStringBuilder sb, System.Collections.Generic.IReadOnlyList<string> fragments)
         {
             if (fragments == null) return;
             for (int i = 0; i < fragments.Count; i++)

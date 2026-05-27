@@ -94,6 +94,13 @@ namespace Pinder.SessionSetup
             PromptBuilder.StructuralFragmentLookup = key =>
                 catalog.TryGet(key)?.SystemPrompt;
 
+            PromptBuilder.StructuralFragmentLookupEx = key =>
+            {
+                var entry = catalog.TryGet(key);
+                if (entry == null) return null;
+                return new StructuralPromptResult(entry.SystemPrompt, entry.SourceFile);
+            };
+
             // Wire ArchetypeCatalog's behavior resolver.
             ArchetypeYamlLoader.LoadFromPromptCatalog(catalog);
 

@@ -21,6 +21,12 @@ namespace Pinder.Core.TestCommon
                     PromptTemplates.Catalog = catalog;
                     PromptBuilder.StructuralFragmentLookup =
                         key => catalog.TryGet(key)?.SystemPrompt;
+                    PromptBuilder.StructuralFragmentLookupEx = key =>
+                    {
+                        var entry = catalog.TryGet(key);
+                        if (entry == null) return null;
+                        return new StructuralPromptResult(entry.SystemPrompt, entry.SourceFile);
+                    };
                     ArchetypeYamlLoader.LoadFromPromptCatalog(catalog);
 
                     // #907: Also load the conflict matrix so integration tests
