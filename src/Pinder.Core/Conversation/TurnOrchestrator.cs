@@ -17,7 +17,6 @@ namespace Pinder.Core.Conversation
     {
         private readonly ILlmAdapter _llm;
         private readonly IDiceRoller _dice;
-        private readonly IGameClock? _clock;
         private readonly IRuleResolver? _rules;
         private readonly Random? _statDrawRng;
 
@@ -28,7 +27,6 @@ namespace Pinder.Core.Conversation
         public TurnOrchestrator(
             ILlmAdapter llm,
             IDiceRoller dice,
-            IGameClock? clock,
             IRuleResolver? rules,
             Random? statDrawRng,
             RollResolutionStage rollResolutionStage,
@@ -37,7 +35,6 @@ namespace Pinder.Core.Conversation
         {
             _llm = llm ?? throw new ArgumentNullException(nameof(llm));
             _dice = dice ?? throw new ArgumentNullException(nameof(dice));
-            _clock = clock;
             _rules = rules;
             _statDrawRng = statDrawRng;
 
@@ -75,7 +72,7 @@ namespace Pinder.Core.Conversation
             }
 
             // Ghost trigger: if Bored state, 25% chance per turn
-            if (ResolveInterestState(state, _rules) == InterestState.Bored)
+            if (TurnOrchestratorHelpers.ResolveInterestState(state, _rules) == InterestState.Bored)
             {
                 int ghostRoll = _dice.Roll(4);
                 if (ghostRoll == 1)
@@ -119,7 +116,7 @@ namespace Pinder.Core.Conversation
                 {
                     int effectiveVal = state.PlayerShadows.GetEffectiveShadow(shadow);
                     shadowThresholds[shadow] = effectiveVal;
-                    int tier = ResolveThresholdLevel(effectiveVal, _rules);
+                    int tier = TurnOrchestratorHelpers.ResolveThresholdLevel(effectiveVal, _rules);
                     // T2+ disadvantage for paired stats is removed: shadow check IS the disadvantage (#755)
                     _ = tier; // suppress unused warning
                 }
@@ -145,7 +142,7 @@ namespace Pinder.Core.Conversation
                     .BuildOpponentVisibleProfile(opponent, state.OpponentOutfitDescription)
                     .Render(),
                 // #333: scene entries are excluded from the LLM context view.
-                conversationHistory: BuildHistoryForLlmContext(state),
+                conversationHistory: TurnOrchestratorHelpers.BuildHistoryForLlmContext(state),
                 opponentLastMessage: GameSessionHelpers.GetLastOpponentMessage(state.History, opponent.DisplayName),
                 activeTraps: activeTrapNames,
                 currentInterest: state.Interest.Current,
@@ -190,13 +187,13 @@ namespace Pinder.Core.Conversation
             state.CurrentOptions = options;
 
             // Compute pending momentum bonus for the upcoming roll (#268)
-            state.PendingMomentumBonus = GetMomentumBonus(state.MomentumStreak, _rules);
+            state.PendingMomentumBonus = TurnOrchestratorHelpers.GetMomentumBonus(state.MomentumStreak, _rules);
 
             state.CurrentDicePools = new Pinder.Core.Rolls.PerOptionDicePool[options.Length];
             for (int i = 0; i < options.Length; i++)
                 state.CurrentDicePools[i] = new Pinder.Core.Rolls.PerOptionDicePool(i);
 
-            var snapshot = CreateSnapshot(state, _rules);
+            var snapshot = TurnOrchestratorHelpers.CreateSnapshot(state, _rules);
 
             // #903 — build opponent defense snapshot (6 entries, one per StatType).
             var defenseEntries = new System.Collections.Generic.Dictionary<Pinder.Core.Stats.StatType, OpponentDefenseEntry>();

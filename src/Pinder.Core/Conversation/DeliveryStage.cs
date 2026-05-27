@@ -21,6 +21,7 @@ namespace Pinder.Core.Conversation
         public int HorninessInterestPenalty { get; set; }
         public int HorninessInterestBefore { get; set; }
         public int FinalInterestDelta { get; set; }
+        public int ShadowCorrection { get; set; }
     }
 
     internal class DeliveryStage
@@ -81,7 +82,7 @@ namespace Pinder.Core.Conversation
             string originalIntendedText = chosenOption.IntendedText ?? "";
             progress?.Report(new TurnProgressEvent(TurnProgressStage.SteeringStarted));
             SteeringRollResult steeringResult = await _steeringEngine.AttemptSteeringRollAsync(
-                originalIntendedText, player, opponent, _llm, TurnOrchestrator.BuildHistoryForLlmContext(state), ct).ConfigureAwait(false);
+                originalIntendedText, player, opponent, _llm, TurnOrchestratorHelpers.BuildHistoryForLlmContext(state), ct).ConfigureAwait(false);
             progress?.Report(new TurnProgressEvent(
                 TurnProgressStage.SteeringCompleted,
                 steeringResult.SteeringSucceeded ? steeringResult.SteeringQuestion : null));
@@ -117,7 +118,7 @@ namespace Pinder.Core.Conversation
             var deliveryContext = new DeliveryContext(
                 playerPrompt: player.AssembledSystemPrompt,
                 opponentPrompt: opponent.AssembledSystemPrompt,
-                conversationHistory: TurnOrchestrator.BuildHistoryForLlmContext(state),
+                conversationHistory: TurnOrchestratorHelpers.BuildHistoryForLlmContext(state),
                 opponentLastMessage: GameSessionHelpers.GetLastOpponentMessage(state.History, opponent.DisplayName),
                 chosenOption: deliveryOption,
                 outcome: rollResult.Tier,
@@ -163,7 +164,7 @@ namespace Pinder.Core.Conversation
                 var activeTrap = state.Traps.Active!;
                 trapInstruction = activeTrap.Definition.LlmInstruction;
                 trapDisplayName = activeTrap.Definition.DisplayName;
-                opponentCtxForTrap = TurnOrchestrator.BuildOpponentContext(opponent);
+                opponentCtxForTrap = TurnOrchestratorHelpers.BuildOpponentContext(opponent);
 
                 if (string.IsNullOrWhiteSpace(trapInstruction)
                     || string.IsNullOrEmpty(deliveredMessage)
@@ -174,7 +175,7 @@ namespace Pinder.Core.Conversation
             }
 
             // #755: Shadow check
-            ShadowStatType? pairedShadow = TurnOrchestrator.GetPairedShadow(chosenOption.Stat);
+            ShadowStatType? pairedShadow = TurnOrchestratorHelpers.GetPairedShadow(chosenOption.Stat);
             ShadowCheckResult shadowCheckResult = ShadowCheckResult.NotPerformed;
 
             bool runShadow = false;
@@ -233,6 +234,7 @@ namespace Pinder.Core.Conversation
             deliveredMessage = dispatchResult.FinalMessage;
             bool shadowOverlayApplied = dispatchResult.ShadowOverlayApplied;
 
+            int shadowCorrection = 0;
             if (pairedShadow.HasValue && state.PlayerShadows != null)
             {
                 int shadowValue = state.PlayerShadows.GetEffectiveShadow(pairedShadow.Value);
@@ -242,15 +244,10 @@ namespace Pinder.Core.Conversation
                     {
                         if (shadowOverlayApplied && rollResult.IsSuccess)
                         {
-                            var forcedFailResult = TurnOrchestrator.CreateForcedFailResult(rollResult, shadowTier);
-                            int shadowFailDelta = TurnOrchestrator.ResolveFailureInterestDelta(forcedFailResult, _rules);
-                            int correction = shadowFailDelta - interestDelta;
-                            state.Interest.Apply(correction);
+                            var forcedFailResult = TurnOrchestratorHelpers.CreateForcedFailResult(rollResult, shadowTier);
+                            int shadowFailDelta = TurnOrchestratorHelpers.ResolveFailureInterestDelta(forcedFailResult, _rules);
+                            shadowCorrection = shadowFailDelta - interestDelta;
                             interestDelta = shadowFailDelta;
-
-                            rollResult.Check.ApplyFinalOverride(
-                                Pinder.Core.Rolls.RollVerdict.Miss,
-                                shadowTier);
                         }
 
                         shadowCheckResult = new ShadowCheckResult(
@@ -281,7 +278,7 @@ namespace Pinder.Core.Conversation
             if (horninessOverlayInstruction != null)
             {
                 string beforeHorniness = deliveredMessage;
-                string opponentCtx = TurnOrchestrator.BuildOpponentContext(opponent);
+                string opponentCtx = TurnOrchestratorHelpers.BuildOpponentContext(opponent);
                 progress?.Report(new TurnProgressEvent(TurnProgressStage.HorninessOverlayStarted));
                 string rawHorninessOutput = await _llm.ApplyHorninessOverlayAsync(deliveredMessage, horninessOverlayInstruction, opponentCtx, playerArchetypeDirectiveForDelivery, ct).ConfigureAwait(false);
                 progress?.Report(new TurnProgressEvent(TurnProgressStage.HorninessOverlayCompleted, rawHorninessOutput));
@@ -304,16 +301,15 @@ namespace Pinder.Core.Conversation
                 }
                 else
                 {
-                    TurnOrchestrator.EmitTextLayerNoop(_onTextLayerNoop, state.TurnNumber, "Horniness", beforeHorniness, deliveredMessage);
+                    TurnOrchestratorHelpers.EmitTextLayerNoop(_onTextLayerNoop, state.TurnNumber, "Horniness", beforeHorniness, deliveredMessage);
                 }
             }
 
             if (horninessCheckResult.OverlayApplied && interestDelta > 0)
             {
-                horninessInterestBefore = state.Interest.Current;
+                horninessInterestBefore = state.Interest.Current + shadowCorrection;
                 int halvedDelta = (int)Math.Floor(interestDelta / 2.0);
                 int penalty = halvedDelta - interestDelta;
-                state.Interest.Apply(penalty);
                 horninessInterestPenalty = penalty;
                 interestDelta += penalty;
             }
@@ -333,7 +329,8 @@ namespace Pinder.Core.Conversation
                 HorninessCheckResult = horninessCheckResult,
                 HorninessInterestPenalty = horninessInterestPenalty,
                 HorninessInterestBefore = horninessInterestBefore,
-                FinalInterestDelta = interestDelta
+                FinalInterestDelta = interestDelta,
+                ShadowCorrection = shadowCorrection
             };
         }
     }

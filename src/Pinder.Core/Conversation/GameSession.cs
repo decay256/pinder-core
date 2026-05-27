@@ -256,7 +256,6 @@ namespace Pinder.Core.Conversation
             return new TurnOrchestrator(
                 _llm,
                 _dice,
-                _clock,
                 _rules,
                 _statDrawRng,
                 rollResolutionStage,
