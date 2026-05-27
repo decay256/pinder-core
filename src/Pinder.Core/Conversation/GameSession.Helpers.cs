@@ -171,67 +171,6 @@ namespace Pinder.Core.Conversation
         }
 
         /// <summary>
-        /// Get momentum bonus for the current streak length.
-        /// Uses rule resolver if available, falls back to hardcoded values.
-        /// 3-streak → +2, 4-streak → +2, 5+ → +3.
-        /// </summary>
-        private int GetMomentumBonus(int streak)
-        {
-            if (_rules != null)
-            {
-                var resolved = _rules.GetMomentumBonus(streak);
-                if (resolved.HasValue)
-                    return resolved.Value;
-            }
-            if (streak >= 5) return 3;
-            if (streak >= 3) return 2;
-            return 0;
-        }
-
-        /// <summary>
-        /// Get failure interest delta, using rule resolver if available.
-        /// </summary>
-        private int ResolveFailureInterestDelta(RollResult rollResult)
-        {
-            if (_rules != null)
-            {
-                var resolved = _rules.GetFailureInterestDelta(rollResult.MissMargin, rollResult.UsedDieRoll);
-                if (resolved.HasValue)
-                    return resolved.Value;
-            }
-            return FailureScale.GetInterestDelta(rollResult);
-        }
-
-        /// <summary>
-        /// Get success interest delta, using rule resolver if available.
-        /// </summary>
-        private int ResolveSuccessInterestDelta(RollResult rollResult)
-        {
-            if (_rules != null)
-            {
-                int beatMargin = rollResult.FinalTotal - rollResult.DC;
-                var resolved = _rules.GetSuccessInterestDelta(beatMargin, rollResult.UsedDieRoll);
-                if (resolved.HasValue)
-                    return resolved.Value;
-            }
-            return SuccessScale.GetInterestDelta(rollResult);
-        }
-
-        /// <summary>
-        /// Get interest state, using rule resolver if available.
-        /// </summary>
-        private InterestState ResolveInterestState()
-        {
-            if (_rules != null)
-            {
-                var resolved = _rules.GetInterestState(_interest.Current);
-                if (resolved.HasValue)
-                    return resolved.Value;
-            }
-            return _interest.GetState();
-        }
-
-        /// <summary>
         /// Get shadow threshold level, using rule resolver if available.
         /// </summary>
         private int ResolveThresholdLevel(int shadowValue)
@@ -254,127 +193,12 @@ namespace Pinder.Core.Conversation
         {
             return GameSessionHelpers.CreateSnapshot(
                 _interest,
-                ResolveInterestState(),
+                _interest.GetState(),
                 _momentumStreak,
                 _traps,
                 _turnNumber,
                 _comboTracker.HasTripleBonus,
                 _opponentHistory);
-        }
-
-        /// <summary>
-        /// Returns the shadow stat paired with the given positive stat, or null if unrecognised.
-        /// </summary>
-        private static ShadowStatType? GetPairedShadow(StatType stat)
-        {
-            switch (stat)
-            {
-                case StatType.Charm:         return ShadowStatType.Madness;
-                case StatType.Rizz:          return ShadowStatType.Despair;
-                case StatType.Honesty:       return ShadowStatType.Denial;
-                case StatType.Chaos:         return ShadowStatType.Fixation;
-                case StatType.Wit:           return ShadowStatType.Dread;
-                case StatType.SelfAwareness: return ShadowStatType.Overthinking;
-                default:                     return null;
-            }
-        }
-
-        /// <summary>
-        /// Creates a synthetic RollResult that represents a forced failure at the given tier.
-        /// Used by the shadow check to compute the failure interest delta when overriding a success.
-        /// </summary>
-        /// <remarks>
-        /// #920: explicitly synthesises a <see cref="Pinder.Core.Rolls.RollCheckResult"/> via
-        /// <see cref="Pinder.Core.Rolls.RollCheckResult.Synthesise"/> so the returned
-        /// <see cref="Pinder.Core.Rolls.RollResult.Check"/> is never null — prerequisite for the
-        /// Phase 2 wire-DTO serializer which will read <c>Check.*</c>.
-        /// </remarks>
-        private static RollResult CreateForcedFailResult(RollResult original, FailureTier shadowTier)
-        {
-            // Build a result that looks like a miss at the given tier.
-            // We derive a miss margin that maps to the tier, then compute a die roll that misses DC.
-            int fakeDie = original.DC > 1 ? original.DC - 1 : 1; // just below DC
-            var check = Pinder.Core.Rolls.RollCheckResult.Synthesise(
-                dieRoll:       fakeDie,
-                secondDieRoll: null,
-                usedDieRoll:   fakeDie,
-                statModifier:  0,
-                levelBonus:    0,
-                dc:            original.DC);
-            return new RollResult(
-                dieRoll:        fakeDie,
-                secondDieRoll:  null,
-                usedDieRoll:    fakeDie,
-                stat:           original.Stat,
-                statModifier:   0,
-                levelBonus:     0,
-                dc:             original.DC,
-                tier:           shadowTier,
-                activatedTrap:  null,
-                externalBonus:  0,
-                check:          check,
-                defendingStat:  Pinder.Core.Stats.StatBlock.DefenceTable[original.Stat]);
-        }
-
-        /// <summary>
-        /// Builds a compact opponent context string for the horniness overlay system prompt.
-        /// Format: Opponent: [DisplayName] | Bio: "[bio]" | Wearing: [items]
-        /// </summary>
-        private static string BuildOpponentContext(CharacterProfile opponent)
-        {
-            if (opponent == null) return string.Empty;
-            string bio = string.IsNullOrWhiteSpace(opponent.Bio) ? "(no bio)" : opponent.Bio;
-            string items = opponent.EquippedItemDisplayNames != null && opponent.EquippedItemDisplayNames.Count > 0
-                ? string.Join(", ", opponent.EquippedItemDisplayNames)
-                : "(none)";
-            return $"Opponent: {opponent.DisplayName} | Bio: \"{bio}\" | Wearing: {items}";
-        }
-
-        // ── #314: text-layer no-op breadcrumb ─────────────────────────────
-
-        /// <summary>
-        /// Issue #314: emit a structured event when a text-transform layer
-        /// (Horniness / Shadow / Trap overlay) ran an LLM call but produced
-        /// byte-identical output. The diff is silently dropped from
-        /// <c>TextDiffs</c> in that case (correctly — there's nothing to
-        /// render), but without this breadcrumb the audit cannot tell
-        /// "layer ran and produced no delta" apart from "layer didn't run
-        /// at all". Hosts that wire <c>OnTextLayerNoop</c> can log a
-        /// structured INFO line with <c>{turn, layer, before_hash,
-        /// after_hash}</c>.
-        /// </summary>
-        private void EmitTextLayerNoop(string layer, string beforeText, string afterText)
-        {
-            if (_onTextLayerNoop == null) return;
-            try
-            {
-                string beforeHash = ComputeStableHash(beforeText);
-                string afterHash = ComputeStableHash(afterText);
-                _onTextLayerNoop(new TextLayerNoopEvent(_turnNumber, layer, beforeHash, afterHash));
-            }
-            catch
-            {
-                // Diagnostic-only path — never let a logging failure break
-                // the turn. Swallow and move on.
-            }
-        }
-
-        /// <summary>
-        /// Stable, non-cryptographic, run-independent hash for the layer-noop
-        /// breadcrumb. Uses SHA-256 truncated to 16 hex chars; the value is
-        /// an audit identifier, not a security primitive.
-        /// </summary>
-        private static string ComputeStableHash(string? text)
-        {
-            if (text == null) return "";
-            using (var sha = System.Security.Cryptography.SHA256.Create())
-            {
-                byte[] bytes = sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(text));
-                var sb = new System.Text.StringBuilder(16);
-                for (int i = 0; i < 8 && i < bytes.Length; i++)
-                    sb.Append(bytes[i].ToString("x2"));
-                return sb.ToString();
-            }
         }
     }
 }
