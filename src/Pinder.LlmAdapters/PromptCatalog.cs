@@ -245,10 +245,18 @@ namespace Pinder.LlmAdapters
                         $"(also defined in {prior})");
                 }
 
+                string normalizedPath = path.Replace('\\', '/');
+                int idx = normalizedPath.IndexOf("data/prompts", StringComparison.OrdinalIgnoreCase);
+                if (idx >= 0)
+                {
+                    normalizedPath = normalizedPath.Substring(idx);
+                }
+
                 origin[name] = path;
                 entries[name] = new PromptEntry(
                     systemPrompt: systemPrompt,
-                    userTemplate: userTemplate);
+                    userTemplate: userTemplate,
+                    sourceFile: normalizedPath);
             }
         }
 
@@ -299,11 +307,13 @@ namespace Pinder.LlmAdapters
     {
         public string? SystemPrompt { get; }
         public string? UserTemplate { get; }
+        public string? SourceFile { get; }
 
-        public PromptEntry(string? systemPrompt, string? userTemplate)
+        public PromptEntry(string? systemPrompt, string? userTemplate, string? sourceFile = null)
         {
             SystemPrompt = systemPrompt;
             UserTemplate = userTemplate;
+            SourceFile = sourceFile;
         }
     }
 }
