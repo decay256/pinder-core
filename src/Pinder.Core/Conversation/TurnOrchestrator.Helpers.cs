@@ -8,7 +8,7 @@ using Pinder.Core.Traps;
 
 namespace Pinder.Core.Conversation
 {
-    internal partial class TurnOrchestrator
+    internal static class TurnOrchestratorHelpers
     {
         internal static int GetMomentumBonus(int streak, IRuleResolver? rules)
         {

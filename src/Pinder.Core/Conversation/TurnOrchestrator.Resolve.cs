@@ -51,6 +51,19 @@ namespace Pinder.Core.Conversation
                 rollStage.InterestDelta,
                 ct).ConfigureAwait(false);
 
+            // Centrally apply proposed state mutations from DeliveryStage
+            if (deliveryStage.ShadowCorrection != 0)
+            {
+                state.Interest.Apply(deliveryStage.ShadowCorrection);
+                rollStage.RollResult.Check.ApplyFinalOverride(
+                    Pinder.Core.Rolls.RollVerdict.Miss,
+                    deliveryStage.ShadowCheckResult.Tier);
+            }
+            if (deliveryStage.HorninessInterestPenalty != 0)
+            {
+                state.Interest.Apply(deliveryStage.HorninessInterestPenalty);
+            }
+
             int interestDelta = deliveryStage.FinalInterestDelta;
 
             // 9. Check interest threshold crossing → narrative beat
@@ -95,7 +108,7 @@ namespace Pinder.Core.Conversation
                     "SuccessScale cannot produce a negative delta for a success roll. " +
                     "This indicates a phantom turn produced from a pre-corrupted session state.");
 
-            var stateSnapshot = CreateSnapshot(state, _rules);
+            var stateSnapshot = TurnOrchestratorHelpers.CreateSnapshot(state, _rules);
 
             return new TurnResult(
                 roll: rollStage.RollResult,

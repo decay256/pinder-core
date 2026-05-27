@@ -63,7 +63,7 @@ namespace Pinder.Core.Conversation
             var opponentContext = new OpponentContext(
                 playerPrompt: player.AssembledSystemPrompt,
                 opponentPrompt: opponent.AssembledSystemPrompt,
-                conversationHistory: TurnOrchestrator.BuildHistoryForLlmContext(state),
+                conversationHistory: TurnOrchestratorHelpers.BuildHistoryForLlmContext(state),
                 opponentLastMessage: GameSessionHelpers.GetLastOpponentMessage(state.History, opponent.DisplayName),
                 activeTraps: GameSessionHelpers.GetActiveTrapNames(state.Traps),
                 currentInterest: state.Interest.Current,
