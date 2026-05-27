@@ -12,6 +12,24 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
 {
     public partial class AnthropicStreamingTransportTests
     {
+        [Fact]
+        public async Task SendStreamAsync_SystemBlocks_HaveCacheControlEphemeral()
+        {
+            var frames = SsePayload(
+                "event: message_stop\ndata: {\"type\":\"message_stop\"}\n\n"
+            );
+            var handler = new SseHandler(HttpStatusCode.OK, frames);
+            using var http = new HttpClient(handler);
+            using var transport = new AnthropicStreamingTransport(TestApiKey, TestModel, http);
+
+            await foreach (var _ in transport.SendStreamAsync("sysprompt-stream", "usermsg-stream")) { }
+
+            Assert.NotNull(handler.LastRequestBody);
+            Assert.Contains("\"cache_control\"", handler.LastRequestBody);
+            Assert.Contains("\"type\":\"ephemeral\"", handler.LastRequestBody);
+            Assert.Contains("sysprompt-stream", handler.LastRequestBody);
+        }
+
         // ─── Happy path: tokens arrive in order, multi-chunk reassembly ──
 
         [Fact]

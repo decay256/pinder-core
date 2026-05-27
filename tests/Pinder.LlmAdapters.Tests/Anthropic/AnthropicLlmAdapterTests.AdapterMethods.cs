@@ -51,8 +51,8 @@ OPTION_4
             Assert.Contains("Thundercock", body.System[0].Text);
             // Opponent profile appears in user message, not system
             Assert.Single(body.Messages);
-            Assert.Contains("Velvet", body.Messages[0].Content);
-            Assert.Contains("YOU ARE TALKING TO", body.Messages[0].Content);
+            Assert.Contains("Velvet", body.Messages[0].Content.ToString());
+            Assert.Contains("YOU ARE TALKING TO", body.Messages[0].Content.ToString());
         }
 
         [Fact]
