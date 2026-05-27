@@ -87,7 +87,7 @@ namespace Pinder.LlmAdapters.Anthropic
                         {
                             if (string.Equals(request.Messages[i].Role, "user", StringComparison.OrdinalIgnoreCase))
                             {
-                                lastUserMsg = request.Messages[i].Content;
+                                lastUserMsg = request.Messages[i].Content?.ToString() ?? "";
                                 break;
                             }
                         }
@@ -102,7 +102,7 @@ namespace Pinder.LlmAdapters.Anthropic
                     // Options/Delivery: show full user message
                     string userMsg = "";
                     if (request.Messages != null && request.Messages.Length > 0)
-                        userMsg = request.Messages[0].Content ?? "";
+                        userMsg = request.Messages[0].Content?.ToString() ?? "";
                     sb.AppendLine("**User message:**");
                     sb.AppendLine("```");
                     sb.AppendLine(userMsg);

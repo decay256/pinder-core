@@ -36,6 +36,6 @@ namespace Pinder.LlmAdapters.Anthropic.Dto
         public string Role { get; set; } = "";
 
         [JsonProperty("content")]
-        public string Content { get; set; } = "";
+        public object Content { get; set; } = "";
     }
 }
