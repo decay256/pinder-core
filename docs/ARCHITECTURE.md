@@ -16,6 +16,7 @@ pinder-core/
 │   └── Pinder.SessionSetup/  # Pre-session matchup + stake generation (netstandard2.0)
 ├── session-runner/            # CLI harness — runs a full game session (net8.0)
 ├── tests/
+│   ├── Pinder.Core.TestCommon/ # Shared test boilerplate and mock stubs (net8.0)
 │   ├── Pinder.Core.Tests/
 │   ├── Pinder.LlmAdapters.Tests/
 │   ├── Pinder.RemoteAssets.Tests/
@@ -43,9 +44,13 @@ The domain kernel. Zero external dependencies — no NuGet packages, no I/O.
 | Depends on | Nothing |
 |---|---|
 | **Purpose** | Game loop, stat model, roll engine, interest meter, shadow tracking, traps, XP, combos |
-| **Key files** | `Conversation/GameSession.cs` — the game loop orchestrator |
+| **Key files** | `Conversation/GameSession.cs` — the game session host |
+| | `Conversation/TurnOrchestrator.cs` — instance-based turn orchestrator orchestrating stage-based execution |
+| | `Conversation/RollResolutionStage.cs` — stateless pipeline stage for d20 roll evaluation |
+| | `Conversation/DeliveryStage.cs` — stateless pipeline stage for choice delivery and overlays |
+| | `Conversation/OpponentResponseStage.cs` — stateless pipeline stage for opponent reaction and tells |
 | | `Interfaces/` — ILlmAdapter, IStatefulLlmAdapter, IGameClock, ITrapRegistry, IDiceRoller, IRuleResolver |
-| | `Rolls/RollEngine.cs` — stateless d20 resolution |
+| | `Rolls/RollEngine.cs` — d20 resolution logic |
 | | `Stats/StatBlock.cs` — stat model + shadow pairing table |
 | | `Conversation/GameClock.cs` — simulated clock with energy + horniness modifiers |
 | | `Characters/CharacterProfile.cs` — assembled character data |
@@ -59,14 +64,27 @@ Prompt construction and LLM API integration. Depends on Pinder.Core and Pinder.R
 | Depends on | Pinder.Core, Pinder.Rules, Newtonsoft.Json, YamlDotNet |
 |---|---|
 | **Purpose** | Build prompts from game state, call LLM APIs, parse responses |
-| **Key files** | `SessionDocumentBuilder.cs` — static prompt builder for all 4 call types |
+| **Key files** | `PinderLlmAdapter.cs` — unified provider-agnostic LLM adapter implementing `ILlmAdapter` and `IStatefulLlmAdapter`, delegating wire I/O to low-level transports |
+| | `Anthropic/AnthropicTransport.cs` / `AnthropicStreamingTransport.cs` — direct Anthropic wire transports with prompt-caching (system & context history) |
+| | `OpenAi/OpenAiTransport.cs` / `OpenAiStreamingTransport.cs` — OpenAI-compatible wire transports (Groq, Together, OpenRouter, Ollama) |
+| | `SessionDocumentBuilder.cs` — static prompt builder for all call types |
 | | `SessionSystemPromptBuilder.cs` — system prompt assembly from GameDefinition |
 | | `StatDeliveryInstructions.cs` — per-stat, per-tier delivery instructions from YAML |
 | | `GameDefinition.cs` — game-level creative direction loaded from YAML |
 | | `PromptTemplates.cs` — template strings for ENGINE injection blocks |
 | | `RollContextBuilder.cs` — YAML-sourced roll flavor text |
-| | `Anthropic/AnthropicLlmAdapter.cs` — Claude adapter (implements IStatefulLlmAdapter) |
-| | `OpenAi/OpenAiLlmAdapter.cs` — OpenAI-compatible adapter (Groq, Together, OpenRouter, Ollama) |
+| | `Anthropic/AnthropicLlmAdapter.cs` — deprecated Claude adapter |
+| | `OpenAi/OpenAiLlmAdapter.cs` — deprecated OpenAI adapter |
+
+### Pinder.Core.TestCommon
+
+Shared testing library. Consolidates stubs and mock setups to deduplicate unit test boilerplate.
+
+| Depends on | Pinder.Core, Pinder.LlmAdapters |
+|---|---|
+| **Purpose** | Centrally provide helper mocks and test stubs to clean up testing boilerplates |
+| **Key files** | `StubLlmAdapter.cs` — shared stub LLM adapter returning pre-configured dialogue options and response text |
+| | `TestHelpers.cs` — shared mock builders (e.g. `MakeStatBlock`, `MakeClock`) |
 
 ### Pinder.RemoteAssets
 
