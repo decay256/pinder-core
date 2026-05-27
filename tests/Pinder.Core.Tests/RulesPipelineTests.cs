@@ -99,6 +99,45 @@ public class RulesPipelineTests
             $"Round-trip diff is {diffCount} lines (threshold: 30). Output:\n{stdout}");
     }
 
+    /// <summary>
+    /// Issue #1041 (Tier C): Verify that generate_tests.py exists and that
+    /// RulesSpecTests.cs is up to date with the enriched YAML source.
+    /// Runs <c>python3 rules/tools/generate_tests.py --check</c>.
+    /// </summary>
+    [Fact]
+    public void CodegenCheck_GenerateTestsScript_IsUpToDate()
+    {
+        var repoRoot = FindRepoRoot();
+        var generateScript = Path.Combine(repoRoot, "rules", "tools", "generate_tests.py");
+        Assert.True(File.Exists(generateScript),
+            $"generate_tests.py not found at expected location: {generateScript}");
+
+        var psi = new ProcessStartInfo
+        {
+            FileName = "python3",
+            Arguments = $"{generateScript} --check",
+            WorkingDirectory = repoRoot,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+        };
+
+        using var process = Process.Start(psi)!;
+        var stdout = process.StandardOutput.ReadToEnd();
+        var stderr = process.StandardError.ReadToEnd();
+        process.WaitForExit(30000);
+
+        _output.WriteLine(stdout);
+        if (!string.IsNullOrEmpty(stderr))
+            _output.WriteLine($"STDERR: {stderr}");
+
+        Assert.True(process.ExitCode == 0,
+            $"generate_tests.py --check exited {process.ExitCode}. " +
+            $"RulesSpecTests.cs may be out of date with the YAML source.\n" +
+            $"Re-run: python3 rules/tools/generate_tests.py\nStdErr:\n{stderr}");
+    }
+
     [Fact]
     public void CheckDiff_LlmClassifiesAsFormattingOnly()
     {

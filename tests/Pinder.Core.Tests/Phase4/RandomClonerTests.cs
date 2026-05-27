@@ -90,5 +90,31 @@ namespace Pinder.Core.Tests.Phase4
         {
             Assert.Throws<ArgumentNullException>(() => RandomCloner.Clone(null!));
         }
+
+        /// <summary>
+        /// Issue #1041 (Tier C): Regression guard for the field-cache optimisation.
+        /// Verifies that repeated Clone() calls on the same source (hitting the
+        /// ConcurrentDictionary warm-cache path) still produce identical sequences
+        /// to the parent at each clone-time, and remain fully independent.
+        /// </summary>
+        [Fact]
+        public void Clone_RepeatedCalls_CachedPathPreservesCorrectness()
+        {
+            var src = new Random(5678);
+            for (int i = 0; i < 20; i++) src.Next();
+
+            // 10 rapid clones — all should hit the warm cache after the first.
+            for (int run = 0; run < 10; run++)
+            {
+                var parent = RandomCloner.Clone(src);
+                var clone  = RandomCloner.Clone(parent);
+
+                // Clone must produce same sequence as parent at clone-time.
+                for (int i = 0; i < 8; i++)
+                {
+                    Assert.Equal(parent.Next(int.MaxValue), clone.Next(int.MaxValue));
+                }
+            }
+        }
     }
 }

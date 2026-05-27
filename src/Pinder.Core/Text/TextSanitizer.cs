@@ -28,6 +28,11 @@ namespace Pinder.Core.Text
             {
                 sanitizedText = CallbackStripper.Strip(rawText);
             }
+            else if (layerName == MarkdownSanitizer.LayerName)
+            {
+                // #1041 (Tier C): markdown-stripping pass for surfaces that expect plain prose.
+                sanitizedText = MarkdownSanitizer.Strip(rawText);
+            }
             else
             {
                 throw new ArgumentException($"Unknown sanitization layer: '{layerName}'", nameof(layerName));

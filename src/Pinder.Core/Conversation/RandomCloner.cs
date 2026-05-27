@@ -1,5 +1,6 @@
 using System;
-using System.Collections;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Reflection;
 
 namespace Pinder.Core.Conversation
@@ -53,6 +54,56 @@ namespace Pinder.Core.Conversation
         private static readonly MethodInfo? _memberwiseClone =
             typeof(object).GetMethod("MemberwiseClone", BindingFlags.Instance | BindingFlags.NonPublic);
 
+        // #1041 (Tier C): Cache GetFields() results per type to avoid repeated reflection
+        // allocations on each Clone() invocation. Random._impl is always the same BCL
+        // type (Net5CompatSeedImpl) so the cache will have at most 2-3 entries total
+        // (impl type + any struct field types it contains). ConcurrentDictionary gives
+        // thread-safe lazy population without a lock on the hot read path.
+        private static readonly ConcurrentDictionary<Type, FieldInfo[]> _fieldCache =
+            new ConcurrentDictionary<Type, FieldInfo[]>();
+
+        // Pre-populate the cache at class-init time so the very first Clone() call
+        // runs fully cached. We need a live Random instance to discover the impl type.
+        private static readonly Type? _implType;
+
+        static RandomCloner()
+        {
+            try
+            {
+                if (_implField != null)
+                {
+                    var probe = new Random(42);
+                    var probeImpl = _implField.GetValue(probe);
+                    if (probeImpl != null)
+                    {
+                        _implType = probeImpl.GetType();
+                        // Warm the cache for the impl type and any struct field types it contains.
+                        WarmFieldCache(_implType);
+                    }
+                }
+            }
+            catch
+            {
+                // Static init must not throw — if probing fails we fall back to
+                // on-demand GetOrAdd population in GetCachedFields().
+            }
+        }
+
+        private static void WarmFieldCache(Type type)
+        {
+            var fields = GetCachedFields(type);
+            foreach (var f in fields)
+            {
+                var ft = f.FieldType;
+                if (ft.IsValueType && !ft.IsPrimitive && !ft.IsEnum)
+                    GetCachedFields(ft); // pre-populate inner struct type
+            }
+        }
+
+        private static FieldInfo[] GetCachedFields(Type type)
+            => _fieldCache.GetOrAdd(type, t =>
+                t.GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public));
+
         /// <summary>
         /// Deep-clone a <see cref="Random"/> instance so the resulting Random
         /// produces the same sequence as <paramref name="src"/> would have at
@@ -94,12 +145,15 @@ namespace Pinder.Core.Conversation
         private static void DeepCopyImplReferenceState(Type implType, object clonedImpl)
         {
             // Walk every instance field on the impl. For:
-            //   - reference fields holding arrays \u2192 clone the array.
-            //   - value-type (struct) fields \u2192 box, recursively walk their
+            //   - reference fields holding arrays → clone the array.
+            //   - value-type (struct) fields → box, recursively walk their
             //     fields, clone any arrays we find, write the boxed copy back.
-            //   - other reference fields \u2192 leave alone (immutable enough for
+            //   - other reference fields → leave alone (immutable enough for
             //     our purposes; the impl types we know about don't carry any).
-            foreach (var f in implType.GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public))
+            //
+            // #1041 (Tier C): use GetCachedFields() instead of GetFields() to
+            // avoid repeated reflection allocations on the hot Clone() path.
+            foreach (var f in GetCachedFields(implType))
             {
                 var current = f.GetValue(clonedImpl);
                 if (current == null) continue;
@@ -116,8 +170,8 @@ namespace Pinder.Core.Conversation
                 {
                     // Box the struct so we can mutate it via reflection, then write back.
                     var boxed = current;
-                    foreach (var inner in ft.GetFields(
-                                 BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public))
+                    // #1041 (Tier C): use GetCachedFields() for inner struct fields too.
+                    foreach (var inner in GetCachedFields(ft))
                     {
                         var iv = inner.GetValue(boxed);
                         if (iv == null) continue;
