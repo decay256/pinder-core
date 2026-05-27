@@ -8,6 +8,7 @@ using Pinder.Core.Interfaces;
 using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
 using Pinder.Core.Traps;
+using Pinder.Core.TestCommon;
 using Xunit;
 
 namespace Pinder.Core.Tests
@@ -109,25 +110,6 @@ namespace Pinder.Core.Tests
 
             public int Roll(int sides)
                 => _values.Count > 0 ? _values.Dequeue() : 10;
-        }
-
-        /// <summary>LLM adapter returning fixed options.</summary>
-        private sealed class StubLlmAdapter : ILlmAdapter
-        {
-            private readonly DialogueOption[] _options;
-            public StubLlmAdapter(DialogueOption[] options) => _options = options;
-
-            public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, System.Threading.CancellationToken ct = default)
-                => Task.FromResult(_options);
-            public Task<string> DeliverMessageAsync(DeliveryContext context, System.Threading.CancellationToken ct = default)
-                => Task.FromResult(context.ChosenOption.IntendedText);
-            public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context, System.Threading.CancellationToken ct = default)
-                => Task.FromResult(new OpponentResponse("..."));
-            public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, System.Threading.CancellationToken ct = default)
-                => Task.FromResult<string?>(null);
-            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
-            public System.Threading.Tasks.Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
-            public System.Threading.Tasks.Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
         }
 
         /// <summary>LLM adapter that returns a Tell on the opponent's response for a specific stat.</summary>

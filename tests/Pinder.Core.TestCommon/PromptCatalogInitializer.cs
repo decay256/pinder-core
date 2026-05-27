@@ -41,7 +41,7 @@ namespace Pinder.Core.TestCommon
                 if (parent == null || parent == dir) break;
                 dir = parent;
             }
-            Console.WriteLine("[PromptCatalogInitializer] WARNING: Did not find prompts directory!");
+            throw new InvalidOperationException("[PromptCatalogInitializer] ERROR: Did not find prompts directory!");
         }
     }
 }
