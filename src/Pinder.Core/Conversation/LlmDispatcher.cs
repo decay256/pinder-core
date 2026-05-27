@@ -14,8 +14,15 @@ namespace Pinder.Core.Conversation
     public static class LlmDispatcher
     {
         /// <summary>
-        /// Dispatches speculative Trap and Shadow overlay calls in parallel, handles strip/noop logic, and returns the final message and whether shadow overlay was applied.
+        /// Dispatches speculative Trap and Shadow overlay calls, handles strip/noop
+        /// logic, and returns the final message and whether shadow overlay was applied.
         /// </summary>
+        /// <param name="wasteTracker">
+        /// #1041 (Tier C): Optional <see cref="SpeculativeWasteTracker"/> that
+        /// monitors shadow-call waste (when trap fires and shadow result is discarded)
+        /// and adapts dispatch mode to avoid repeated wasted token consumption.
+        /// Pass <c>null</c> to always use parallel speculative dispatch (legacy behaviour).
+        /// </param>
         public static async Task<(string FinalMessage, bool ShadowOverlayApplied)> DispatchSpeculativeCallsAsync(
             ILlmAdapter llm,
             string deliveredMessage,
@@ -34,7 +41,8 @@ namespace Pinder.Core.Conversation
             Action<TextLayerNoopEvent>? onTextLayerNoop,
             int turnNumber,
             IProgress<TurnProgressEvent>? progress,
-            CancellationToken ct)
+            CancellationToken ct,
+            SpeculativeWasteTracker? wasteTracker = null)
         {
             ct.ThrowIfCancellationRequested();
 
@@ -71,6 +79,68 @@ namespace Pinder.Core.Conversation
                 }, ct);
             }
 
+            // #1041 (Tier C): When both Trap and Shadow are requested, check whether
+            // the waste tracker recommends sequential dispatch. In sequential mode we
+            // run Trap first; if it fires (changes the message) we skip the speculative
+            // shadow task entirely and re-run shadow on the trap result, eliminating
+            // the wasted parallel call. If Trap does not fire, shadow's speculative
+            // result is valid and we proceed as in parallel mode.
+            bool useParallel = (wasteTracker == null || wasteTracker.ShouldRunParallel);
+
+            if (runTrap && runShadow && !useParallel)
+            {
+                // Sequential mode: run Trap, check if it changed the message,
+                // then run Shadow on whichever message is current.
+                string rawTrapResult = await trapTask!.ConfigureAwait(false);
+                string sanitizedTrapResult = MetaPrefixStripper.Strip(rawTrapResult);
+                if (sanitizedTrapResult != rawTrapResult)
+                {
+                    var stripSpans = WordDiff.Compute(rawTrapResult, sanitizedTrapResult);
+                    textDiffs.Add(new TextDiff(
+                        MetaPrefixStripper.LayerName, stripSpans,
+                        rawTrapResult, sanitizedTrapResult));
+                }
+                string trapResult = sanitizedTrapResult;
+                if (trapResult != deliveredMessage)
+                {
+                    var trapSpans = WordDiff.Compute(deliveredMessage, trapResult);
+                    textDiffs.Add(new TextDiff(
+                        $"Trap ({trapDisplayName})", trapSpans, deliveredMessage, trapResult));
+                }
+                else
+                {
+                    EmitTextLayerNoop(onTextLayerNoop, turnNumber, $"Trap ({trapDisplayName})", deliveredMessage, trapResult);
+                }
+
+                // Shadow always runs on the (possibly trap-modified) message — no waste.
+                progress?.Report(new TurnProgressEvent(TurnProgressStage.ShadowCorruptionStarted));
+                string rawShadowResult = await llm.ApplyShadowCorruptionAsync(
+                    trapResult, corruptionInstruction, shadowType,
+                    playerArchetypeDirectiveForDelivery, ct).ConfigureAwait(false);
+                progress?.Report(new TurnProgressEvent(TurnProgressStage.ShadowCorruptionCompleted, rawShadowResult));
+
+                string sanitizedShadow = MetaPrefixStripper.Strip(rawShadowResult);
+                if (sanitizedShadow != rawShadowResult)
+                {
+                    var stripSpans = WordDiff.Compute(rawShadowResult, sanitizedShadow);
+                    textDiffs.Add(new TextDiff(
+                        MetaPrefixStripper.LayerName, stripSpans,
+                        rawShadowResult, sanitizedShadow));
+                }
+                bool shadowApplied = sanitizedShadow != trapResult;
+                if (shadowApplied)
+                {
+                    var shadowSpans = WordDiff.Compute(trapResult, sanitizedShadow);
+                    textDiffs.Add(new TextDiff($"Shadow ({shadowType})", shadowSpans, trapResult, sanitizedShadow));
+                }
+                else
+                {
+                    EmitTextLayerNoop(onTextLayerNoop, turnNumber, $"Shadow ({shadowType})", trapResult, sanitizedShadow);
+                }
+                wasteTracker.RecordNonWaste();
+                return (sanitizedShadow, shadowApplied);
+            }
+
             if (trapTask != null && shadowTask != null)
             {
                 // Run concurrently (speculatively parallel)
@@ -104,7 +174,9 @@ namespace Pinder.Core.Conversation
                 // 2. Process Shadow Output
                 // If trap had a change, then the speculative shadow output on the original deliveredMessage is stale.
                 // In that case, we re-run shadow corruption sequentially on the trap result.
-                if (trapResult == deliveredMessage)
+                // #1041 (Tier C): record waste outcome so the tracker can adapt future dispatch mode.
+                bool trapChanged = trapResult != deliveredMessage;
+                if (!trapChanged)
                 {
                     string sanitizedShadowResult = MetaPrefixStripper.Strip(rawShadowResult);
                     if (sanitizedShadowResult != rawShadowResult)
@@ -128,11 +200,13 @@ namespace Pinder.Core.Conversation
                         EmitTextLayerNoop(onTextLayerNoop, turnNumber, $"Shadow ({shadowType})", trapResult, shadowResult);
                     }
 
+                    wasteTracker?.RecordNonWaste();
                     return (shadowResult, applied);
                 }
                 else
                 {
-                    // Re-run sequentially on the trap result for accuracy
+                    // Speculative shadow result is stale — record waste and re-run sequentially.
+                    wasteTracker?.RecordWaste();
                     progress?.Report(new TurnProgressEvent(TurnProgressStage.ShadowCorruptionStarted));
                     string rawReRunShadowOutput = await llm.ApplyShadowCorruptionAsync(
                         trapResult, corruptionInstruction, shadowType, playerArchetypeDirectiveForDelivery, ct).ConfigureAwait(false);
