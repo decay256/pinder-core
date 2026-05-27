@@ -45,7 +45,12 @@ namespace Pinder.LlmAdapters.Anthropic
 
             var systemBlocks = new[]
             {
-                new ContentBlock { Type = "text", Text = systemPrompt }
+                new ContentBlock
+                {
+                    Type = "text",
+                    Text = systemPrompt,
+                    CacheControl = new CacheControl { Type = "ephemeral" }
+                }
             };
 
             var request = AnthropicRequestBuilders.BuildMessagesRequest(
