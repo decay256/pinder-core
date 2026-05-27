@@ -79,6 +79,18 @@ namespace Pinder.Core.Conversation
             _counter = 0;
         }
 
+        private SpeculativeWasteTracker(int wasteThreshold, int recoveryThreshold, int counter)
+        {
+            WasteThreshold = wasteThreshold;
+            RecoveryThreshold = recoveryThreshold;
+            _counter = counter;
+        }
+
+        public SpeculativeWasteTracker Clone()
+        {
+            return new SpeculativeWasteTracker(WasteThreshold, RecoveryThreshold, DiagnosticCounter);
+        }
+
         /// <summary>
         /// Returns <c>true</c> when the tracker recommends running Trap and
         /// Shadow in parallel (normal speculative mode). Returns <c>false</c>
