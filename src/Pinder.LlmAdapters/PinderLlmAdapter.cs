@@ -52,7 +52,7 @@ namespace Pinder.LlmAdapters
                 .ConfigureAwait(false);
 
             var parsedOptions = DialogueOptionParsers.ParseDialogueOptionsText(responseText);
-            int maxOptions = _options.GameDefinition?.MaxDialogueOptions ?? 3;
+            int maxOptions = _options.GameDefinition?.MaxDialogueOptions ?? 99;
             if (parsedOptions.Length > maxOptions)
             {
                 var capped = new DialogueOption[maxOptions];
