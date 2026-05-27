@@ -43,6 +43,7 @@ namespace Pinder.Core.Conversation
         public bool CurrentHasDisadvantage { get; internal set; }
         public Pinder.Core.Rolls.PerOptionDicePool[]? CurrentDicePools { get; internal set; }
         public Pinder.Core.Rolls.PerOptionDicePool? InjectedNextPool { get; internal set; }
+        public SpeculativeWasteTracker SpeculativeWasteTracker { get; internal set; } = new SpeculativeWasteTracker();
 
         public GameSessionState()
         {
@@ -89,6 +90,7 @@ namespace Pinder.Core.Conversation
                 ? (Pinder.Core.Rolls.PerOptionDicePool[])CurrentDicePools.Clone()
                 : null;
             clone.InjectedNextPool = InjectedNextPool;
+            clone.SpeculativeWasteTracker = SpeculativeWasteTracker.Clone();
             return clone;
         }
 
@@ -135,6 +137,7 @@ namespace Pinder.Core.Conversation
                 ? (Pinder.Core.Rolls.PerOptionDicePool[])src.CurrentDicePools.Clone()
                 : null;
             InjectedNextPool = src.InjectedNextPool;
+            SpeculativeWasteTracker = src.SpeculativeWasteTracker.Clone();
         }
 
         public void RestoreFromSnapshot(ResimulateData data, ITrapRegistry trapRegistry)

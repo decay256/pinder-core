@@ -92,15 +92,7 @@ namespace Pinder.Core.Conversation
                 // Sequential mode: run Trap, check if it changed the message,
                 // then run Shadow on whichever message is current.
                 string rawTrapResult = await trapTask!.ConfigureAwait(false);
-                string sanitizedTrapResult = MetaPrefixStripper.Strip(rawTrapResult);
-                if (sanitizedTrapResult != rawTrapResult)
-                {
-                    var stripSpans = WordDiff.Compute(rawTrapResult, sanitizedTrapResult);
-                    textDiffs.Add(new TextDiff(
-                        MetaPrefixStripper.LayerName, stripSpans,
-                        rawTrapResult, sanitizedTrapResult));
-                }
-                string trapResult = sanitizedTrapResult;
+                string trapResult = TextSanitizer.Sanitize(rawTrapResult, MetaPrefixStripper.LayerName, textDiffs);
                 if (trapResult != deliveredMessage)
                 {
                     var trapSpans = WordDiff.Compute(deliveredMessage, trapResult);
@@ -119,14 +111,7 @@ namespace Pinder.Core.Conversation
                     playerArchetypeDirectiveForDelivery, ct).ConfigureAwait(false);
                 progress?.Report(new TurnProgressEvent(TurnProgressStage.ShadowCorruptionCompleted, rawShadowResult));
 
-                string sanitizedShadow = MetaPrefixStripper.Strip(rawShadowResult);
-                if (sanitizedShadow != rawShadowResult)
-                {
-                    var stripSpans = WordDiff.Compute(rawShadowResult, sanitizedShadow);
-                    textDiffs.Add(new TextDiff(
-                        MetaPrefixStripper.LayerName, stripSpans,
-                        rawShadowResult, sanitizedShadow));
-                }
+                string sanitizedShadow = TextSanitizer.Sanitize(rawShadowResult, MetaPrefixStripper.LayerName, textDiffs);
                 bool shadowApplied = sanitizedShadow != trapResult;
                 if (shadowApplied)
                 {
@@ -149,16 +134,7 @@ namespace Pinder.Core.Conversation
                 string rawShadowResult = await shadowTask.ConfigureAwait(false);
 
                 // 1. Process Trap Output
-                string sanitizedTrapResult = MetaPrefixStripper.Strip(rawTrapResult);
-                if (sanitizedTrapResult != rawTrapResult)
-                {
-                    var stripSpans = WordDiff.Compute(rawTrapResult, sanitizedTrapResult);
-                    textDiffs.Add(new TextDiff(
-                        MetaPrefixStripper.LayerName, stripSpans,
-                        rawTrapResult, sanitizedTrapResult));
-                }
-
-                string trapResult = sanitizedTrapResult;
+                string trapResult = TextSanitizer.Sanitize(rawTrapResult, MetaPrefixStripper.LayerName, textDiffs);
 
                 if (trapResult != deliveredMessage)
                 {
@@ -178,16 +154,7 @@ namespace Pinder.Core.Conversation
                 bool trapChanged = trapResult != deliveredMessage;
                 if (!trapChanged)
                 {
-                    string sanitizedShadowResult = MetaPrefixStripper.Strip(rawShadowResult);
-                    if (sanitizedShadowResult != rawShadowResult)
-                    {
-                        var stripSpans = WordDiff.Compute(rawShadowResult, sanitizedShadowResult);
-                        textDiffs.Add(new TextDiff(
-                            MetaPrefixStripper.LayerName, stripSpans,
-                            rawShadowResult, sanitizedShadowResult));
-                    }
-
-                    string shadowResult = sanitizedShadowResult;
+                    string shadowResult = TextSanitizer.Sanitize(rawShadowResult, MetaPrefixStripper.LayerName, textDiffs);
                     bool applied = shadowResult != trapResult;
 
                     if (applied)
@@ -212,16 +179,7 @@ namespace Pinder.Core.Conversation
                         trapResult, corruptionInstruction, shadowType, playerArchetypeDirectiveForDelivery, ct).ConfigureAwait(false);
                     progress?.Report(new TurnProgressEvent(TurnProgressStage.ShadowCorruptionCompleted, rawReRunShadowOutput));
 
-                    string sanitizedShadowOutput = MetaPrefixStripper.Strip(rawReRunShadowOutput);
-                    if (sanitizedShadowOutput != rawReRunShadowOutput)
-                    {
-                        var stripSpans = WordDiff.Compute(rawReRunShadowOutput, sanitizedShadowOutput);
-                        textDiffs.Add(new TextDiff(
-                            MetaPrefixStripper.LayerName, stripSpans,
-                            rawReRunShadowOutput, sanitizedShadowOutput));
-                    }
-
-                    string finalShadowResult = sanitizedShadowOutput;
+                    string finalShadowResult = TextSanitizer.Sanitize(rawReRunShadowOutput, MetaPrefixStripper.LayerName, textDiffs);
                     bool applied = finalShadowResult != trapResult;
 
                     if (applied)
@@ -240,16 +198,7 @@ namespace Pinder.Core.Conversation
             else if (trapTask != null)
             {
                 string rawTrapResult = await trapTask.ConfigureAwait(false);
-                string sanitizedTrapResult = MetaPrefixStripper.Strip(rawTrapResult);
-                if (sanitizedTrapResult != rawTrapResult)
-                {
-                    var stripSpans = WordDiff.Compute(rawTrapResult, sanitizedTrapResult);
-                    textDiffs.Add(new TextDiff(
-                        MetaPrefixStripper.LayerName, stripSpans,
-                        rawTrapResult, sanitizedTrapResult));
-                }
-
-                string trapResult = sanitizedTrapResult;
+                string trapResult = TextSanitizer.Sanitize(rawTrapResult, MetaPrefixStripper.LayerName, textDiffs);
 
                 if (trapResult != deliveredMessage)
                 {
@@ -267,16 +216,7 @@ namespace Pinder.Core.Conversation
             else if (shadowTask != null)
             {
                 string rawShadowResult = await shadowTask.ConfigureAwait(false);
-                string sanitizedShadowResult = MetaPrefixStripper.Strip(rawShadowResult);
-                if (sanitizedShadowResult != rawShadowResult)
-                {
-                    var stripSpans = WordDiff.Compute(rawShadowResult, sanitizedShadowResult);
-                    textDiffs.Add(new TextDiff(
-                        MetaPrefixStripper.LayerName, stripSpans,
-                        rawShadowResult, sanitizedShadowResult));
-                }
-
-                string shadowResult = sanitizedShadowResult;
+                string shadowResult = TextSanitizer.Sanitize(rawShadowResult, MetaPrefixStripper.LayerName, textDiffs);
                 bool applied = shadowResult != deliveredMessage;
 
                 if (applied)

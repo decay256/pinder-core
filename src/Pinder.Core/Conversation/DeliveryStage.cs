@@ -137,17 +137,7 @@ namespace Pinder.Core.Conversation
             progress?.Report(new TurnProgressEvent(TurnProgressStage.DeliveryCompleted, deliveredMessage));
 
             // #902: Meta-prefix strip immediately after delivery LLM call.
-            {
-                string rawDelivered = deliveredMessage;
-                deliveredMessage = MetaPrefixStripper.Strip(rawDelivered);
-                if (deliveredMessage != rawDelivered)
-                {
-                    var stripSpans = WordDiff.Compute(rawDelivered, deliveredMessage);
-                    textDiffs.Add(new TextDiff(
-                        MetaPrefixStripper.LayerName, stripSpans,
-                        rawDelivered, deliveredMessage));
-                }
-            }
+            deliveredMessage = TextSanitizer.Sanitize(deliveredMessage, MetaPrefixStripper.LayerName, textDiffs);
 
             // Tier modifier diff
             if (deliveredMessage != intendedTextForDelivery
@@ -237,7 +227,8 @@ namespace Pinder.Core.Conversation
                 _onTextLayerNoop,
                 state.TurnNumber,
                 progress,
-                ct).ConfigureAwait(false);
+                ct,
+                state.SpeculativeWasteTracker).ConfigureAwait(false);
 
             deliveredMessage = dispatchResult.FinalMessage;
             bool shadowOverlayApplied = dispatchResult.ShadowOverlayApplied;
@@ -328,19 +319,10 @@ namespace Pinder.Core.Conversation
             }
 
             // Issue #339: same-turn callback-phrase strip
-            {
-                string beforeCallbackStrip = deliveredMessage;
-                string strippedMessage = CallbackStripper.Strip(beforeCallbackStrip);
-                if (!ReferenceEquals(strippedMessage, beforeCallbackStrip)
-                    && strippedMessage != beforeCallbackStrip)
-                {
-                    deliveredMessage = strippedMessage;
-                    var stripSpans = WordDiff.Compute(beforeCallbackStrip, deliveredMessage);
-                    textDiffs.Add(new TextDiff(
-                        CallbackStripper.LayerName, stripSpans,
-                        beforeCallbackStrip, deliveredMessage));
-                }
-            }
+            deliveredMessage = TextSanitizer.Sanitize(deliveredMessage, CallbackStripper.LayerName, textDiffs);
+
+            // #1041 (Tier C): markdown-stripping pass for surfaces that expect plain prose.
+            deliveredMessage = TextSanitizer.Sanitize(deliveredMessage, MarkdownSanitizer.LayerName, textDiffs);
 
             return new DeliveryStageResult
             {
