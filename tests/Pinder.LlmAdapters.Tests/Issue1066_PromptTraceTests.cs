@@ -38,7 +38,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void Test_InMemoryPromptTraceService_RecordingAndRetrieval()
         {
-            var service = InMemoryPromptTraceService.Instance;
+            var service = new InMemoryPromptTraceService();
             service.Clear();
 
             var spans = new List<AnnotatedSpan> { new AnnotatedSpan(0, 10, "file.yaml", "key") };

@@ -1,4 +1,5 @@
 using System;
+using Pinder.Core.Text;
 
 namespace Pinder.LlmAdapters
 {
@@ -68,34 +69,65 @@ namespace Pinder.LlmAdapters
         /// </summary>
         public static string BuildPlayer(string playerPrompt, GameDefinition? gameDef = null)
         {
+            var result = BuildPlayerEx(playerPrompt, gameDef);
+            InMemoryPromptTraceService.Instance.RecordTrace("dialogue-options-system", result);
+            return result.Text;
+        }
+
+        public static PromptTraceResult BuildPlayerEx(string playerPrompt, GameDefinition? gameDef = null)
+        {
             if (playerPrompt == null) throw new ArgumentNullException(nameof(playerPrompt));
             var def = gameDef ?? GameDefinition.PinderDefaults;
 
-            return string.Concat(
-                "== GAME VISION ==\n\n",
-                def.Vision.TrimEnd(),
-                "\n\n== WORLD RULES ==\n\n",
-                def.WorldDescription.TrimEnd(),
-                "\n\n== PLAYER CHARACTER ==\n\n",
-                def.PlayerRoleDescription.TrimEnd(),
-                "\n\n",
-                playerPrompt.TrimEnd(),
-                "\n\n== META CONTRACT ==\n\n",
-                def.MetaContract.TrimEnd(),
-                "\n\n",
-                def.WritingRules.TrimEnd(),
-                "\n\n== DRAMATIC CRAFT ==\n\n",
-                def.DramaticCraft != null ? def.DramaticCraft.BuildSection().TrimEnd() : "",
-                string.IsNullOrWhiteSpace(def.TextingPsychology) ? "" : "\n\n== TEXTING PSYCHOLOGY ==\n\n" + def.TextingPsychology.TrimEnd(),
-                string.IsNullOrWhiteSpace(def.RevelationOverStatement) ? "" : "\n\n== REVELATION OVER STATEMENT ==\n\n" + def.RevelationOverStatement.TrimEnd(),
-                // #867: OpponentFriction and OpponentCuriosity describe opponent
-                // behavior — stripped from BuildPlayer to save ~1,000 tokens per
-                // delivery call. ConversationArcProgression is SHARED structure
-                // (both sides participate in arc progression) — kept here.
-                // PlayerProbing is player-specific guidance — kept here.
-                string.IsNullOrWhiteSpace(def.ConversationArcProgression) ? "" : "\n\n== CONVERSATION ARC ==\n\n" + def.ConversationArcProgression.TrimEnd(),
-                string.IsNullOrWhiteSpace(def.PlayerProbing) ? "" : "\n\n== PLAYER PROBING ==\n\n" + def.PlayerProbing.TrimEnd(),
-                "\n");
+            var sb = new AnnotatedStringBuilder();
+
+            sb.Append("== GAME VISION ==\n\n");
+            sb.AppendLine(def.Vision.TrimEnd(), "game-definition.yaml", "vision");
+            sb.Append("\n== WORLD RULES ==\n\n");
+            sb.AppendLine(def.WorldDescription.TrimEnd(), "game-definition.yaml", "world_description");
+            sb.Append("\n== PLAYER CHARACTER ==\n\n");
+            sb.AppendLine(def.PlayerRoleDescription.TrimEnd(), "game-definition.yaml", "player_role_description");
+            sb.Append("\n");
+            sb.AppendLine(playerPrompt.TrimEnd(), "character-profile", "assembled-profile");
+
+            sb.Append("\n== META CONTRACT ==\n\n");
+            sb.AppendLine(def.MetaContract.TrimEnd(), "game-definition.yaml", "meta_contract");
+            sb.Append("\n");
+            sb.AppendLine(def.WritingRules.TrimEnd(), "game-definition.yaml", "writing_rules");
+
+            if (def.DramaticCraft != null)
+            {
+                sb.Append("\n== DRAMATIC CRAFT ==\n\n");
+                sb.AppendLine(def.DramaticCraft.BuildSection().TrimEnd(), "game-definition.yaml", "dramatic_craft");
+            }
+
+            if (!string.IsNullOrWhiteSpace(def.TextingPsychology))
+            {
+                sb.Append("\n== TEXTING PSYCHOLOGY ==\n\n");
+                sb.AppendLine(def.TextingPsychology.TrimEnd(), "game-definition.yaml", "texting_psychology");
+            }
+
+            if (!string.IsNullOrWhiteSpace(def.RevelationOverStatement))
+            {
+                sb.Append("\n== REVELATION OVER STATEMENT ==\n\n");
+                sb.AppendLine(def.RevelationOverStatement.TrimEnd(), "game-definition.yaml", "revelation_over_statement");
+            }
+
+            if (!string.IsNullOrWhiteSpace(def.ConversationArcProgression))
+            {
+                sb.Append("\n== CONVERSATION ARC ==\n\n");
+                sb.AppendLine(def.ConversationArcProgression.TrimEnd(), "game-definition.yaml", "conversation_arc_progression");
+            }
+
+            if (!string.IsNullOrWhiteSpace(def.PlayerProbing))
+            {
+                sb.Append("\n== PLAYER PROBING ==\n\n");
+                sb.AppendLine(def.PlayerProbing.TrimEnd(), "game-definition.yaml", "player_probing");
+            }
+
+            sb.Append("\n");
+
+            return new PromptTraceResult(sb.ToString(), sb.Spans);
         }
 
         /// <summary>
@@ -104,30 +136,71 @@ namespace Pinder.LlmAdapters
         /// </summary>
         public static string BuildOpponent(string opponentPrompt, GameDefinition? gameDef = null)
         {
+            var result = BuildOpponentEx(opponentPrompt, gameDef);
+            InMemoryPromptTraceService.Instance.RecordTrace("opponent-system", result);
+            return result.Text;
+        }
+
+        public static PromptTraceResult BuildOpponentEx(string opponentPrompt, GameDefinition? gameDef = null)
+        {
             if (opponentPrompt == null) throw new ArgumentNullException(nameof(opponentPrompt));
             var def = gameDef ?? GameDefinition.PinderDefaults;
 
-            return string.Concat(
-                "== GAME VISION ==\n\n",
-                def.Vision.TrimEnd(),
-                "\n\n== WORLD RULES ==\n\n",
-                def.WorldDescription.TrimEnd(),
-                "\n\n== OPPONENT CHARACTER ==\n\n",
-                def.OpponentRoleDescription.TrimEnd(),
-                "\n\n",
-                opponentPrompt.TrimEnd(),
-                "\n\n== META CONTRACT ==\n\n",
-                def.MetaContract.TrimEnd(),
-                "\n\n",
-                def.WritingRules.TrimEnd(),
-                "\n\n== DRAMATIC CRAFT ==\n\n",
-                def.DramaticCraft != null ? def.DramaticCraft.BuildSection().TrimEnd() : "",
-                string.IsNullOrWhiteSpace(def.TextingPsychology) ? "" : "\n\n== TEXTING PSYCHOLOGY ==\n\n" + def.TextingPsychology.TrimEnd(),
-                string.IsNullOrWhiteSpace(def.RevelationOverStatement) ? "" : "\n\n== REVELATION OVER STATEMENT ==\n\n" + def.RevelationOverStatement.TrimEnd(),
-                string.IsNullOrWhiteSpace(def.OpponentFriction) ? "" : "\n\n== OPPONENT RESISTANCE ==\n\n" + def.OpponentFriction.TrimEnd(),
-                string.IsNullOrWhiteSpace(def.OpponentCuriosity) ? "" : "\n\n== OPPONENT CURIOSITY ==\n\n" + def.OpponentCuriosity.TrimEnd(),
-                string.IsNullOrWhiteSpace(def.ConversationArcProgression) ? "" : "\n\n== CONVERSATION ARC ==\n\n" + def.ConversationArcProgression.TrimEnd(),
-                "\n");
+            var sb = new AnnotatedStringBuilder();
+
+            sb.Append("== GAME VISION ==\n\n");
+            sb.AppendLine(def.Vision.TrimEnd(), "game-definition.yaml", "vision");
+            sb.Append("\n== WORLD RULES ==\n\n");
+            sb.AppendLine(def.WorldDescription.TrimEnd(), "game-definition.yaml", "world_description");
+            sb.Append("\n== OPPONENT CHARACTER ==\n\n");
+            sb.AppendLine(def.OpponentRoleDescription.TrimEnd(), "game-definition.yaml", "opponent_role_description");
+            sb.Append("\n");
+            sb.AppendLine(opponentPrompt.TrimEnd(), "character-profile", "assembled-profile");
+
+            sb.Append("\n== META CONTRACT ==\n\n");
+            sb.AppendLine(def.MetaContract.TrimEnd(), "game-definition.yaml", "meta_contract");
+            sb.Append("\n");
+            sb.AppendLine(def.WritingRules.TrimEnd(), "game-definition.yaml", "writing_rules");
+
+            if (def.DramaticCraft != null)
+            {
+                sb.Append("\n== DRAMATIC CRAFT ==\n\n");
+                sb.AppendLine(def.DramaticCraft.BuildSection().TrimEnd(), "game-definition.yaml", "dramatic_craft");
+            }
+
+            if (!string.IsNullOrWhiteSpace(def.TextingPsychology))
+            {
+                sb.Append("\n== TEXTING PSYCHOLOGY ==\n\n");
+                sb.AppendLine(def.TextingPsychology.TrimEnd(), "game-definition.yaml", "texting_psychology");
+            }
+
+            if (!string.IsNullOrWhiteSpace(def.RevelationOverStatement))
+            {
+                sb.Append("\n== REVELATION OVER STATEMENT ==\n\n");
+                sb.AppendLine(def.RevelationOverStatement.TrimEnd(), "game-definition.yaml", "revelation_over_statement");
+            }
+
+            if (!string.IsNullOrWhiteSpace(def.OpponentFriction))
+            {
+                sb.Append("\n== OPPONENT RESISTANCE ==\n\n");
+                sb.AppendLine(def.OpponentFriction.TrimEnd(), "game-definition.yaml", "opponent_friction");
+            }
+
+            if (!string.IsNullOrWhiteSpace(def.OpponentCuriosity))
+            {
+                sb.Append("\n== OPPONENT CURIOSITY ==\n\n");
+                sb.AppendLine(def.OpponentCuriosity.TrimEnd(), "game-definition.yaml", "opponent_curiosity");
+            }
+
+            if (!string.IsNullOrWhiteSpace(def.ConversationArcProgression))
+            {
+                sb.Append("\n== CONVERSATION ARC ==\n\n");
+                sb.AppendLine(def.ConversationArcProgression.TrimEnd(), "game-definition.yaml", "conversation_arc_progression");
+            }
+
+            sb.Append("\n");
+
+            return new PromptTraceResult(sb.ToString(), sb.Spans);
         }
     }
 }
