@@ -23,6 +23,11 @@ namespace Pinder.Core.Text
         IReadOnlyDictionary<string, PromptTraceResult> GetAllTraces();
 
         /// <summary>
+        /// Retrieves the chronological sequence of all recorded traces.
+        /// </summary>
+        IReadOnlyList<(string PromptType, PromptTraceResult Trace, System.DateTime Timestamp)> GetSequence();
+
+        /// <summary>
         /// Clears all recorded traces.
         /// </summary>
         void Clear();

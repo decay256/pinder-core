@@ -21,11 +21,20 @@ namespace Pinder.Core.Text
         private readonly ConcurrentDictionary<string, PromptTraceResult> _traces =
             new ConcurrentDictionary<string, PromptTraceResult>(StringComparer.OrdinalIgnoreCase);
 
+        private readonly List<(string PromptType, PromptTraceResult Trace, DateTime Timestamp)> _sequence =
+            new List<(string PromptType, PromptTraceResult Trace, DateTime Timestamp)>();
+        private readonly object _lock = new object();
+
         /// <inheritdoc />
         public void RecordTrace(string promptType, PromptTraceResult trace)
         {
             if (string.IsNullOrEmpty(promptType)) throw new ArgumentException("Prompt type cannot be null or empty.", nameof(promptType));
-            _traces[promptType] = trace ?? throw new ArgumentNullException(nameof(trace));
+            var nonNullTrace = trace ?? throw new ArgumentNullException(nameof(trace));
+            _traces[promptType] = nonNullTrace;
+            lock (_lock)
+            {
+                _sequence.Add((promptType, nonNullTrace, DateTime.UtcNow));
+            }
         }
 
         /// <inheritdoc />
@@ -42,9 +51,22 @@ namespace Pinder.Core.Text
         }
 
         /// <inheritdoc />
+        public IReadOnlyList<(string PromptType, PromptTraceResult Trace, DateTime Timestamp)> GetSequence()
+        {
+            lock (_lock)
+            {
+                return _sequence.ToArray();
+            }
+        }
+
+        /// <inheritdoc />
         public void Clear()
         {
             _traces.Clear();
+            lock (_lock)
+            {
+                _sequence.Clear();
+            }
         }
     }
 }
