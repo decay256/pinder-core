@@ -123,5 +123,27 @@ namespace Pinder.SessionSetup
             errorSink?.WriteLine(
                 $"[INFO] PromptWiring: loaded {catalog.Names.Count()} keys from {promptsRoot}");
         }
+
+        private static readonly object _reloadLock = new object();
+
+        /// <summary>
+        /// Forces a reload of the prompt catalog and re-wires all static delegates/catalogs.
+        /// Thread-safe and atomic to minimize the window where catalogs are null.
+        /// </summary>
+        public static void ReloadForce(string promptsRoot, TextWriter? errorSink = null)
+        {
+            if (promptsRoot is null)
+                throw new ArgumentNullException(nameof(promptsRoot));
+
+            lock (_reloadLock)
+            {
+                PromptTemplates.Catalog = null;
+                PromptBuilder.StructuralFragmentLookup = null;
+                ArchetypeCatalog.BehaviorResolver = null;
+                TextingStyleAggregator.ConflictCatalog = null;
+
+                Wire(promptsRoot, errorSink);
+            }
+        }
     }
 }
