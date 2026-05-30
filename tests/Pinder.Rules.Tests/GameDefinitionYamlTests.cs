@@ -193,10 +193,10 @@ namespace Pinder.Rules.Tests
             var data = ParseYaml();
             var vision = data["vision"];
             // Must reference the core premise
-            Assert.Contains("sentient peni", vision, StringComparison.OrdinalIgnoreCase);
-            Assert.Contains("dating", vision, StringComparison.OrdinalIgnoreCase);
-            Assert.Contains("comedy", vision, StringComparison.OrdinalIgnoreCase);
-            Assert.Contains("shadow", vision, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("sentient penis", vision, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("game master", vision, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("RPG", vision, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("dialogue", vision, StringComparison.OrdinalIgnoreCase);
         }
 
         [Fact]
@@ -224,10 +224,12 @@ namespace Pinder.Rules.Tests
         {
             var data = ParseYaml();
             var world = data["world_description"];
-            Assert.Contains("Interest", world);
-            Assert.Contains("25", world);
-            Assert.Contains("Bored", world);
-            Assert.Contains("Date Secured", world);
+            var playerRole = data["player_role_description"];
+            var opponentRole = data["opponent_role_description"];
+            Assert.Contains("Interest", world, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("25", playerRole);
+            Assert.Contains("Bored", opponentRole);
+            Assert.Contains("Date Secured", playerRole);
         }
 
         [Fact]

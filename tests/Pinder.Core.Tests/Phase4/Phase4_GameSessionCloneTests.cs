@@ -364,6 +364,21 @@ namespace Pinder.Core.Tests.Phase4
             Assert.Equal(originalHorniness, clone.SessionHorniness);
         }
 
+        [Fact]
+        public void Clone_MaxDialogueOptions_PreservedExactly()
+        {
+            var (parent, _) = MakeFreshSessionWithTurnsQueued(turnsToQueue: 0);
+            var clone = parent.Clone();
+
+            var field = typeof(GameSession).GetField("_maxDialogueOptions", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            Assert.NotNull(field);
+            var parentVal = (int)field.GetValue(parent)!;
+            var cloneVal = (int)field.GetValue(clone)!;
+
+            Assert.Equal(parentVal, cloneVal);
+            Assert.True(cloneVal > 0, "maxDialogueOptions should be positive");
+        }
+
         // ---- helpers --------------------------------------------------------------
         //
         // Reuses Phase0Fixtures (canned LLM transport, deterministic dice

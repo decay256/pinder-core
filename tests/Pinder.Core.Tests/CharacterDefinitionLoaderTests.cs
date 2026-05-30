@@ -349,7 +349,7 @@ namespace Pinder.Core.Tests
             var profile = CharacterDefinitionLoader.Parse(json, itemRepo, anatomyRepo);
 
             // Should contain assembled fragments, not be empty
-            Assert.Contains("You are playing the role of Gerald_42", profile.AssembledSystemPrompt);
+            Assert.Contains("The character named Gerald_42 is actually the Player.", profile.AssembledSystemPrompt);
             Assert.Contains("he/him", profile.AssembledSystemPrompt);
             Assert.Contains("BACKSTORY", profile.AssembledSystemPrompt);
             Assert.Contains("TEXTING STYLE", profile.AssembledSystemPrompt);
