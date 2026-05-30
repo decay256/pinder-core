@@ -240,7 +240,7 @@ namespace Pinder.LlmAdapters.Tests
 
             Assert.DoesNotContain("YOUR TEXTING STYLE", result);
             // YOUR TASK should still appear
-            Assert.Contains("Generate exactly 4 dialogue options", result);
+            Assert.Contains("Generate exactly 3 dialogue options", result);
         }
 
         // ══════════════════════════════════════════════════════════════
@@ -349,7 +349,7 @@ namespace Pinder.LlmAdapters.Tests
 
             Assert.DoesNotContain("YOUR TEXTING STYLE", result);
             // YOUR TASK should still be present
-            Assert.Contains("Generate exactly 4 dialogue options", result);
+            Assert.Contains("Generate exactly 3 dialogue options", result);
         }
 
         // ══════════════════════════════════════════════════════════════
@@ -385,7 +385,7 @@ namespace Pinder.LlmAdapters.Tests
             var ctx = MakeContext(playerTextingStyle: style);
             string result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(ctx);
 
-            Assert.Contains("Generate exactly 4 dialogue options", result);
+            Assert.Contains("Generate exactly 3 dialogue options", result);
         }
     }
 }

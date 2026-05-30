@@ -142,7 +142,7 @@ namespace Pinder.LlmAdapters.Tests
                 MakeDialogueContext(playerName: "MEGA_CHAD"));
 
             Assert.Contains("MEGA_CHAD", result);
-            Assert.Contains("Generate exactly 4 dialogue options", result);
+            Assert.Contains("Generate exactly 3 dialogue options", result);
         }
 
         // ═══════════════════════════════════════════════════════════════

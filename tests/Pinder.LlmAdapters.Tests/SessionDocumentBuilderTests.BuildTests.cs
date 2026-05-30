@@ -41,7 +41,7 @@ namespace Pinder.LlmAdapters.Tests
                 MakeDialogueContext(playerName: "GERALD", opponentName: "VELVET"));
 
             Assert.Contains("[ENGINE — Turn", result);
-            Assert.Contains("Generate exactly 4 dialogue options for GERALD", result);
+            Assert.Contains("Generate exactly 3 dialogue options for GERALD", result);
         }
 
         [Fact]
@@ -303,7 +303,7 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("[CALLBACK:", PromptTemplates.DialogueOptionsInstruction);
             Assert.Contains("[COMBO:", PromptTemplates.DialogueOptionsInstruction);
             Assert.Contains("[TELL_BONUS:", PromptTemplates.DialogueOptionsInstruction);
-            Assert.Contains("exactly 4", PromptTemplates.DialogueOptionsInstruction);
+            Assert.Contains("exactly {options_count}", PromptTemplates.DialogueOptionsInstruction);
         }
 
         [Fact]

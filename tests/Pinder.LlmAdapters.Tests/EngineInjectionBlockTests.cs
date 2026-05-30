@@ -42,14 +42,14 @@ namespace Pinder.LlmAdapters.Tests
         public void OptionsPrompt_ContainsGenerateInstruction()
         {
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(MakeDialogueContext());
-            Assert.Contains("Generate 4 options for what Velvet might send", result);
+            Assert.Contains("Generate 3 options for what Velvet might send", result);
         }
 
         [Fact]
         public void OptionsPrompt_ContainsFormatInstruction()
         {
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(MakeDialogueContext());
-            Assert.Contains("Format: OPTION_A: [message] OPTION_B: [message] etc.", result);
+            Assert.Contains("Format: OPTION_A: [message] OPTION_B: [message] OPTION_C: [message]", result);
         }
 
         [Theory]

@@ -212,7 +212,7 @@ OPTION_2
         public void Instruction_preserves_original_guidelines()
         {
             // Verify original instructional content was not removed
-            Assert.Contains("Generate exactly 4 dialogue options", PromptTemplates.DialogueOptionsInstruction);
+            Assert.Contains("Generate exactly {options_count} dialogue options", PromptTemplates.DialogueOptionsInstruction);
             Assert.Contains("{available_stats}", PromptTemplates.DialogueOptionsInstruction); // stat list is now injected at runtime
             Assert.Contains("Keep options concise", PromptTemplates.DialogueOptionsInstruction);
         }

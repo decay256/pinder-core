@@ -3,6 +3,15 @@ using Newtonsoft.Json;
 
 namespace Pinder.LlmAdapters.Anthropic.Dto
 {
+    public sealed class ThinkingConfig
+    {
+        [JsonProperty("type")]
+        public string Type { get; set; } = "enabled";
+
+        [JsonProperty("budget_tokens")]
+        public int BudgetTokens { get; set; }
+    }
+
     /// <summary>
     /// Serializes to the Anthropic Messages API request body.
     /// </summary>
@@ -28,5 +37,8 @@ namespace Pinder.LlmAdapters.Anthropic.Dto
 
         [JsonProperty("tool_choice", NullValueHandling = NullValueHandling.Ignore)]
         public ToolChoiceOption ToolChoice { get; set; }
+
+        [JsonProperty("thinking", NullValueHandling = NullValueHandling.Ignore)]
+        public ThinkingConfig Thinking { get; set; }
     }
 }

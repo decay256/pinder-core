@@ -22,8 +22,6 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             var instruction = PromptTemplates.DialogueOptionsInstruction;
             Assert.Contains("OPTION_1", instruction);
             Assert.Contains("OPTION_2", instruction);
-            Assert.Contains("OPTION_3", instruction);
-            Assert.Contains("OPTION_4", instruction);
         }
 
         // Mutation: Would catch if [STAT: X] format was missing from the instruction
@@ -50,7 +48,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         {
             var instruction = PromptTemplates.DialogueOptionsInstruction;
             // Must still contain the original guidelines
-            Assert.Contains("Generate exactly 4 dialogue options", instruction);
+            Assert.Contains("Generate exactly {options_count} dialogue options", instruction);
             Assert.Contains("{available_stats}", instruction); // stat list injected at runtime
         }
 

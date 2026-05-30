@@ -137,7 +137,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
                 MakeDialogueContext(playerName: "Brick"));
             Assert.Contains("Brick is deciding what to send next", result);
-            Assert.Contains("Generate 4 options for what Brick might send", result);
+            Assert.Contains("Generate 3 options for what Brick might send", result);
         }
 
         // Mutation: would catch if interest value was omitted or hardcoded
