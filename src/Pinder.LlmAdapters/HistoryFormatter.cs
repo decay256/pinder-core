@@ -36,8 +36,8 @@ namespace Pinder.LlmAdapters
                 var entry = history[i];
                 if (Senders.IsScene(entry.Sender)) continue;
                 int turn = (filteredIndex / 2) + 1;
-                string role = entry.Sender == playerName ? "PLAYER" : "OPPONENT";
-                sb.AppendLine($"[T{turn}|{role}|{entry.Sender}] \"{entry.Text}\"");
+                string role = entry.Sender == playerName ? "PLAYER AVATAR" : "DATEE";
+                sb.AppendLine($"[T{turn}|{role}] \"{entry.Text}\"");
                 filteredIndex++;
             }
 
@@ -73,7 +73,7 @@ namespace Pinder.LlmAdapters
             for (int i = start; i < filtered.Count; i++)
             {
                 var entry = filtered[i];
-                string role = (!string.IsNullOrEmpty(playerName) && entry.Sender == playerName) ? "PLAYER" : "OPPONENT";
+                string role = (!string.IsNullOrEmpty(playerName) && entry.Sender == playerName) ? "PLAYER AVATAR" : "DATEE";
                 sb.AppendLine($"[{role}] \"{entry.Text}\"");
             }
         }

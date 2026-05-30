@@ -27,8 +27,8 @@ namespace Pinder.LlmAdapters.Tests
 
             // Assert
             Assert.Contains("[CONVERSATION_START]", result);
-            Assert.Contains("[T1|OPPONENT|O] \"Hello, how are you?\"", result);
-            Assert.Contains("[T1|PLAYER|P] \"I am good!\"", result);
+            Assert.Contains("[T1|DATEE] \"Hello, how are you?\"", result);
+            Assert.Contains("[T1|PLAYER AVATAR] \"I am good!\"", result);
             Assert.DoesNotContain("[scene]", result);
             Assert.Contains("[CURRENT_TURN]", result);
         }
@@ -60,13 +60,13 @@ namespace Pinder.LlmAdapters.Tests
             // The filtered entries would be: O:Hi, P:Hey, O:How's your day, P:Good, O:Great, P:Awesome, O:Are you free? (total 7 entries)
             // The last 6 would be: P:Hey, O:How's your day, P:Good, O:Great, P:Awesome, O:Are you free?
             Assert.DoesNotContain("Outfit context", result);
-            Assert.DoesNotContain("[OPPONENT] \"Hi\"", result); // First entry is truncated
-            Assert.Contains("[PLAYER] \"Hey\"", result);
-            Assert.Contains("[OPPONENT] \"How's your day?\"", result);
-            Assert.Contains("[PLAYER] \"Good, you?\"", result);
-            Assert.Contains("[OPPONENT] \"Great\"", result);
-            Assert.Contains("[PLAYER] \"Awesome\"", result);
-            Assert.Contains("[OPPONENT] \"Are you free?\"", result);
+            Assert.DoesNotContain("[DATEE] \"Hi\"", result); // First entry is truncated
+            Assert.Contains("[PLAYER AVATAR] \"Hey\"", result);
+            Assert.Contains("[DATEE] \"How's your day?\"", result);
+            Assert.Contains("[PLAYER AVATAR] \"Good, you?\"", result);
+            Assert.Contains("[DATEE] \"Great\"", result);
+            Assert.Contains("[PLAYER AVATAR] \"Awesome\"", result);
+            Assert.Contains("[DATEE] \"Are you free?\"", result);
         }
     }
 }

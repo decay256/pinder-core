@@ -92,12 +92,12 @@ namespace Pinder.LlmAdapters.Tests
                 MakeDialogueContext(conversationHistory: history, opponentLastMessage: "Indeed",
                     currentInterest: 12, currentTurn: 4, playerName: "GERALD_42", opponentName: "VELVET"));
 
-            Assert.Contains("[T1|PLAYER|GERALD_42] \"Hey\"", result);
-            Assert.Contains("[T1|OPPONENT|VELVET] \"Hi\"", result);
-            Assert.Contains("[T2|PLAYER|GERALD_42] \"How are you?\"", result);
-            Assert.Contains("[T2|OPPONENT|VELVET] \"Good\"", result);
-            Assert.Contains("[T3|PLAYER|GERALD_42] \"Cool\"", result);
-            Assert.Contains("[T3|OPPONENT|VELVET] \"Indeed\"", result);
+            Assert.Contains("[T1|PLAYER AVATAR] \"Hey\"", result);
+            Assert.Contains("[T1|DATEE] \"Hi\"", result);
+            Assert.Contains("[T2|PLAYER AVATAR] \"How are you?\"", result);
+            Assert.Contains("[T2|DATEE] \"Good\"", result);
+            Assert.Contains("[T3|PLAYER AVATAR] \"Cool\"", result);
+            Assert.Contains("[T3|DATEE] \"Indeed\"", result);
         }
 
         [Fact]
@@ -116,8 +116,8 @@ namespace Pinder.LlmAdapters.Tests
 
             for (int turn = 1; turn <= 8; turn++)
             {
-                Assert.Contains($"[T{turn}|PLAYER|PLAYER_A]", result);
-                Assert.Contains($"[T{turn}|OPPONENT|OPP_B]", result);
+                Assert.Contains($"[T{turn}|PLAYER AVATAR]", result);
+                Assert.Contains($"[T{turn}|DATEE]", result);
             }
         }
 
@@ -135,9 +135,9 @@ namespace Pinder.LlmAdapters.Tests
                 MakeDialogueContext(conversationHistory: history, opponentLastMessage: "Hi",
                     currentTurn: 2, playerName: "GERALD", opponentName: "VELVET"));
 
-            Assert.Contains("[T1|PLAYER|GERALD] \"Hey\"", result);
-            Assert.Contains("[T1|OPPONENT|VELVET] \"Hi\"", result);
-            Assert.Contains("[T2|PLAYER|GERALD] \"So anyway...\"", result);
+            Assert.Contains("[T1|PLAYER AVATAR] \"Hey\"", result);
+            Assert.Contains("[T1|DATEE] \"Hi\"", result);
+            Assert.Contains("[T2|PLAYER AVATAR] \"So anyway...\"", result);
         }
     }
 }
