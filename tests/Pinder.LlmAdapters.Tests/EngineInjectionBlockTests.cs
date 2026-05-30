@@ -77,7 +77,7 @@ namespace Pinder.LlmAdapters.Tests
         public void DeliveryPrompt_ContainsChosenOption()
         {
             var result = SessionDocumentBuilder.BuildDeliveryPrompt(MakeDeliveryContext());
-            Assert.Contains("Player chose: 'you remind me of a song I can't quite place'", result);
+            Assert.Contains("PLAYER AVATAR chose: 'you remind me of a song I can't quite place'", result);
         }
 
         [Fact]

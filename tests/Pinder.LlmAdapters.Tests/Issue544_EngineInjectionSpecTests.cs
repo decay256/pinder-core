@@ -312,12 +312,12 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("you have great taste in music", result);
         }
 
-        // Mutation: would catch if "Player chose:" prefix was missing
+        // Mutation: would catch if "PLAYER AVATAR chose:" prefix was missing
         [Fact]
         public void AC2_DeliveryInjection_HasPlayerChosePrefix()
         {
             var result = SessionDocumentBuilder.BuildDeliveryPrompt(MakeDeliveryContext());
-            Assert.Contains("Player chose:", result);
+            Assert.Contains("PLAYER AVATAR chose:", result);
         }
 
         // Mutation: would catch if "Dice result:" prefix was missing

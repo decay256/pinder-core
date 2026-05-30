@@ -42,8 +42,6 @@ namespace Pinder.LlmAdapters.Anthropic
 
             if (modelSpec.Contains("claude-opus-4.8"))
             {
-                request.Model = "claude-3-opus-20240229";
-
                 int budget = 0;
                 if (modelSpec.EndsWith("-thinking-low", StringComparison.OrdinalIgnoreCase))
                 {
@@ -60,9 +58,14 @@ namespace Pinder.LlmAdapters.Anthropic
 
                 if (budget > 0)
                 {
+                    request.Model = "claude-3-7-sonnet-20250219";
                     request.Thinking = new ThinkingConfig { BudgetTokens = budget };
                     request.Temperature = 1.0;
                     request.MaxTokens = Math.Max(request.MaxTokens, budget + 1024);
+                }
+                else
+                {
+                    request.Model = "claude-3-opus-20240229";
                 }
             }
         }

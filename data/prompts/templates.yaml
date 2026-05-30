@@ -20,7 +20,7 @@ prompts:
       deliver at peak. The message arrives perfectly. Something resonates.
   default-exceptional:
     system_prompt: >-
-      this is the best version of this message that could exist. It arrives at exactly the right moment with exactly the right weight. The opponent feels it.
+      this is the best version of this message that could exist. It arrives at exactly the right moment with exactly the right weight. The DATEE feels it.
   default-medium-rule:
     system_prompt: >-
       This is a text message on a phone screen, not a monologue. No internal stage directions, no narration of emotional state, no self-commentary mid-message.
@@ -30,7 +30,7 @@ prompts:
   default-strong:
     system_prompt: |-
       rewrite the intended message so it lands harder. The same idea, in the same voice, with sharper word choice and better timing.
-      You must NOT: append a new sentence at the end, add an em-dash continuation, or extend the message beyond what the player wrote.
+      You must NOT: append a new sentence at the end, add an em-dash continuation, or extend the message beyond what the PLAYER AVATAR wrote.
       The delivered version should be the same length or shorter than the intended version. If you add a word, you should cut a different word. Rewrite, do not extend.
       Goal: sharpen, not expand. Add ONE word or phrase only if it makes the existing sentiment more precise; otherwise, cut.
   default-test:
@@ -43,16 +43,16 @@ prompts:
       Each option must:
       1. Be tagged with one of the available stats for this turn: {available_stats}
       2. Show what the character INTENDS to say — this is their internal intended message, before any roll outcome is applied
-      3. Reflect the player's personality and current shadow state (not the opponent's)
+      3. Reflect the PLAYER AVATAR's personality and current shadow state (not the DATEE's)
       4. Vary in tone and risk — include at least one safe and one bold option
       5. If a callback opportunity exists, make 1–2 options reference an earlier topic naturally
       6. If a combo is available, one option should use the completing stat
-      7. Take the opponent's profile into account — their personality, archetypes, and texting style should inform what would land or fail
+      7. Take the DATEE's profile into account — their personality, archetypes, and texting style should inform what would land or fail
 
       For each option include metadata:
       [STAT: X] [CALLBACK: turn_N or none] [COMBO: name or none] [TELL_BONUS: yes/no]
 
-      Keep options concise. One to three sentences. Match the opponent's register.
+      Keep options concise. One to three sentences. Match the DATEE's register.
 
       Output EXACTLY this format for each option (no deviations):
 
@@ -82,16 +82,16 @@ prompts:
 
       PSYCHOLOGICAL STAKE — mandatory: if a PSYCHOLOGICAL STAKE section is present in the character profile above, OPTION_C MUST quote or paraphrase one of the numbered stake lines verbatim or near-verbatim. If none of the stake lines fit this turn's emotional moment naturally, that is a signal the conversation needs to pivot — OPTION_C should bridge toward a stake-relevant topic. Options that only respond to the surface topic without touching the emotional through-line are incomplete.
 
-      BIOGRAPHICAL SPECIFICITY — critical: when the opponent has revealed a concrete biographical detail (a job they left, a place they went, a relationship, a specific event or year), at least one option should follow up on that specific detail — not the emotional theme, the actual fact. 'You mentioned leaving database engineering — what were you doing the following week?' is stronger than 'you seem like someone who takes big risks.' The conversation only advances when both parties are actually curious about each other's lives.
+      BIOGRAPHICAL SPECIFICITY — critical: when the DATEE has revealed a concrete biographical detail (a job they left, a place they went, a relationship, a specific event or year), at least one option should follow up on that specific detail — not the emotional theme, the actual fact. 'You mentioned leaving database engineering — what were you doing the following week?' is stronger than 'you seem like someone who takes big risks.' The conversation only advances when both parties are actually curious about each other's lives.
 
-      SIMILARLY: when the player character's PSYCHOLOGICAL STAKE contains specific backstory (a named relationship, a year, an event), at least one option per session should reveal that concrete detail naturally. Characters who only share feelings without sharing facts never feel real. 'I spent four years with someone who thought intensity was a personality defect, and then at my cousin's engagement party I realised I'd been making myself smaller the whole time' is a revelation. 'I've been told I'm too much' is not.
+      SIMILARLY: when the PLAYER AVATAR's PSYCHOLOGICAL STAKE contains specific backstory (a named relationship, a year, an event), at least one option per session should reveal that concrete detail naturally. Characters who only share feelings without sharing facts never feel real. 'I spent four years with someone who thought intensity was a personality defect, and then at my cousin's engagement party I realised I'd been making myself smaller the whole time' is a revelation. 'I've been told I'm too much' is not.
 
       WORD & PATTERN REPETITION — check all delivered messages above before writing options. Do not repeat: (a) the same filler words or phrases used in the previous 2 messages ('honestly', 'literally', 'actually', 'okay but', etc.), (b) the same emoji used in the previous message, (c) the same structural pattern (e.g. 'wait...???', 'omg...\U0001f62d', 'I literally just realized...') used in the last 2 messages. Each option should feel like a new move, not a variation on the last one.
-      - Since Turn 1 has empty conversation history, options generated for Turn 1 must never assume the opponent has already spoken (never say 'you mentioned', 'since you said', 'interesting that you mention', etc.). You are initiating the contact.
+      - Since Turn 1 has empty conversation history, options generated for Turn 1 must never assume the DATEE has already spoken (never say 'you mentioned', 'since you said', 'interesting that you mention', etc.). You are initiating the contact.
   engine-delivery-block:
     system_prompt: |-
       [ENGINE — DELIVERY]
-      Player chose: '{chosen_option}'
+      PLAYER AVATAR chose: '{chosen_option}'
       Dice result: {roll_context}
       Write the message {player_name} actually sends, given the above.
   engine-opponent-block:
@@ -109,9 +109,9 @@ prompts:
   failure-delivery-instruction:
     system_prompt: |-
       You are writing as {player_name}. This is THEIR message, in THEIR voice.
-      Do NOT write as the opponent. The failure corrupts what {player_name} says.
+      Do NOT write as the DATEE. The failure corrupts what {player_name} says.
 
-      The player chose option: "{intended_message}"
+      The PLAYER AVATAR chose option: "{intended_message}"
       Stat used: {stat}
       They rolled FAILED — missed DC by {miss_margin}.
       Failure tier: {tier}
@@ -250,16 +250,16 @@ prompts:
     system_prompt: |-
       CONTEXT BOUNDARY (read first):
 
-      The player profile below is for you (the LLM) as **external authorial context** — it helps you predict what the player character is likely to say, write, and respond to. It is **NOT** knowledge that your character has access to in this fictional conversation.
+      The PLAYER AVATAR profile below is for you (the LLM) as **external authorial context** — it helps you predict what the PLAYER AVATAR is likely to say, write, and respond to. It is **NOT** knowledge that your character has access to in this fictional conversation.
 
-      Your character knows ONLY what the player has literally typed in the messages above. You do not know:
+      Your character knows ONLY what the PLAYER AVATAR has literally typed in the messages above. You do not know:
       - their psychological stake (their fears, what they want, what they're afraid of)
       - their stat distribution or shadow state
       - their backstory fragments
       - their archetype, anatomy block, or assembled profile
       - anything not present in the visible message history
 
-      If the player mentions a fact about themselves in a message, you may respond to that fact. If a fact appears only in their profile and not in their messages, **the fact does not exist** from your character's perspective. Do not refer to it. Do not respond to motivations they haven't expressed. Do not "see through them" to fears they haven't said.
+      If the PLAYER AVATAR mentions a fact about themselves in a message, you may respond to that fact. If a fact appears only in their profile and not in their messages, **the fact does not exist** from your character's perspective. Do not refer to it. Do not respond to motivations they haven't expressed. Do not "see through them" to fears they haven't said.
 
       When in doubt: respond to the literal text of their last message, not the subtext.
 
@@ -296,16 +296,16 @@ prompts:
       WEAKNESS: {STAT_NAME} -{reduction} ({description of the opening})
 
       When generating a TELL, use ONLY these category mappings:
-      - Opponent compliments player → TELL: HONESTY
-      - Opponent asks personal question → TELL: HONESTY or SELF_AWARENESS
-      - Opponent makes joke → TELL: WIT or CHAOS
-      - Opponent shares vulnerability → TELL: HONESTY
-      - Opponent pulls back/guards → TELL: SELF_AWARENESS
-      - Opponent tests/challenges → TELL: WIT or CHAOS
-      - Opponent sends short reply → TELL: CHARM or CHAOS
-      - Opponent flirts → TELL: RIZZ or CHARM
-      - Opponent changes subject → TELL: CHAOS
-      - Opponent goes quiet/silent → TELL: SELF_AWARENESS
+      - DATEE compliments PLAYER AVATAR → TELL: HONESTY
+      - DATEE asks personal question → TELL: HONESTY or SELF_AWARENESS
+      - DATEE makes joke → TELL: WIT or CHAOS
+      - DATEE shares vulnerability → TELL: HONESTY
+      - DATEE pulls back/guards → TELL: SELF_AWARENESS
+      - DATEE tests/challenges → TELL: WIT or CHAOS
+      - DATEE sends short reply → TELL: CHARM or CHAOS
+      - DATEE flirts → TELL: RIZZ or CHARM
+      - DATEE changes subject → TELL: CHAOS
+      - DATEE goes quiet/silent → TELL: SELF_AWARENESS
 
       Rules for signals:
       - TELL line format: TELL: CHARM|RIZZ|HONESTY|CHAOS|WIT|SELF_AWARENESS (brief description)
