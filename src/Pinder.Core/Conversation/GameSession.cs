@@ -131,6 +131,7 @@ namespace Pinder.Core.Conversation
         // stat-draw shuffle consuming them (see issue #130).
         private Random? _statDrawRng;
         private readonly IConsequenceCatalog? _consequenceCatalog;
+        private readonly int _maxDialogueOptions;
 
         internal GameSessionState State => _state;
 
@@ -219,6 +220,7 @@ namespace Pinder.Core.Conversation
                 : null;
             _xpRecorder = new SessionXpRecorder(_xpLedger, _rules);
             _consequenceCatalog = config.ConsequenceCatalog;
+            _maxDialogueOptions = config.MaxDialogueOptions ?? 3;
             _steeringEngine = new SteeringEngine(steeringRng);
             _horninessEngine = new HorninessEngine(steeringRng, _consequenceCatalog);
             _shadowCheckEngine = new ShadowCheckEngine(steeringRng, _consequenceCatalog);
@@ -260,7 +262,8 @@ namespace Pinder.Core.Conversation
                 _statDrawRng,
                 rollResolutionStage,
                 deliveryStage,
-                opponentResponseStage);
+                opponentResponseStage,
+                _maxDialogueOptions);
         }
     }
 }

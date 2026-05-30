@@ -92,6 +92,9 @@ namespace Pinder.Core.Conversation
         /// </summary>
         public IConsequenceCatalog? ConsequenceCatalog { get; }
 
+        /// <summary>Max dialogue options configured in GameDefinition. Null means default 3.</summary>
+        public int? MaxDialogueOptions { get; }
+
         public GameSessionConfig(
             IGameClock? clock = null,
             SessionShadowTracker? playerShadows = null,
@@ -105,7 +108,8 @@ namespace Pinder.Core.Conversation
             IDiceRoller? diceRoller = null,
             Random? statDrawRng = null,
             Action<TextLayerNoopEvent>? onTextLayerNoop = null,
-            IConsequenceCatalog? consequenceCatalog = null)
+            IConsequenceCatalog? consequenceCatalog = null,
+            int? maxDialogueOptions = null)
         {
             Clock = clock;
             PlayerShadows = playerShadows;
@@ -120,6 +124,7 @@ namespace Pinder.Core.Conversation
             StatDrawRng = statDrawRng;
             OnTextLayerNoop = onTextLayerNoop;
             ConsequenceCatalog = consequenceCatalog;
+            MaxDialogueOptions = maxDialogueOptions;
         }
     }
 }

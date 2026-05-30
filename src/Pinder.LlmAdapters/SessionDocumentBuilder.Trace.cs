@@ -157,14 +157,22 @@ namespace Pinder.LlmAdapters
 
             int optionCount = context.AvailableStats != null
                 ? context.AvailableStats.Length
-                : 4;
+                : context.MaxDialogueOptions;
+
+            string optionsCountStr = optionCount.ToString();
+            string optionsListStr = string.Join(", ", Enumerable.Range(1, optionCount).Select(i => $"OPTION_{i}"));
+            string optionsFormatListStr = string.Join(" ", Enumerable.Range(0, optionCount).Select(i => $"OPTION_{(char)('A' + i)}: [message]"));
 
             // [ENGINE — Turn N] injection block
             string engineBlock = PromptTemplates.EngineOptionsBlock
                 .Replace("{turn}", context.CurrentTurn.ToString())
                 .Replace("{player_name}", playerName)
                 .Replace("{game_state}", gameState.ToString().TrimEnd())
-                .Replace("Generate 4 options", $"Generate {optionCount} options");
+                .Replace("{options_count}", optionsCountStr)
+                .Replace("{options_format_list}", optionsFormatListStr)
+                // Fallback for non-updated/legacy template yaml
+                .Replace("Generate 4 options", $"Generate {optionCount} options")
+                .Replace("OPTION_A: [message] OPTION_B: [message] etc.", optionsFormatListStr);
             sb.Append(engineBlock, GetTemplateSource("engine-options-block"), "engine-options-block");
 
             sb.AppendLine();
@@ -177,8 +185,11 @@ namespace Pinder.LlmAdapters
             string dialogueOptionsInstruction = PromptTemplates.DialogueOptionsInstruction
                 .Replace("{player_name}", playerName)
                 .Replace("{available_stats}", availableStatsStr)
+                .Replace("{options_count}", optionsCountStr)
+                .Replace("{options_list}", optionsListStr)
+                // Fallback for non-updated/legacy template yaml
                 .Replace("Generate exactly 4 dialogue options", $"Generate exactly {optionCount} dialogue options")
-                .Replace("only OPTION_1, OPTION_2, OPTION_3, OPTION_4", "only " + string.Join(", ", Enumerable.Range(1, optionCount).Select(i => $"OPTION_{i}")))
+                .Replace("only OPTION_1, OPTION_2, OPTION_3, OPTION_4", "only " + optionsListStr)
                 .Replace("OPTION_4", $"OPTION_{optionCount}");
             sb.Append(dialogueOptionsInstruction, GetTemplateSource("dialogue-options-instruction"), "dialogue-options-instruction");
 

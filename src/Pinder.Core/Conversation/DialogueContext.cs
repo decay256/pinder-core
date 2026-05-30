@@ -63,6 +63,9 @@ namespace Pinder.Core.Conversation
         /// <summary>Active archetype directive for the player character, or null if none.</summary>
         public string ActiveArchetypeDirective { get; }
 
+        /// <summary>Max dialogue options configured in GameDefinition. Default 3.</summary>
+        public int MaxDialogueOptions { get; }
+
         /// <summary>
         /// #950: parsed stake lines (one entry per numbered line from the PSYCHOLOGICAL STAKE block).
         /// When non-empty, SessionDocumentBuilder injects a per-turn stake-coverage summary so the
@@ -98,7 +101,8 @@ namespace Pinder.Core.Conversation
             StatType[]? availableStats = null,
             string activeArchetypeDirective = null,
             string[]? stakeLines = null,
-            System.Collections.Generic.IReadOnlyCollection<int>? stakeLinesReferenced = null)
+            System.Collections.Generic.IReadOnlyCollection<int>? stakeLinesReferenced = null,
+            int maxDialogueOptions = 3)
         {
             PlayerPrompt = playerPrompt ?? throw new System.ArgumentNullException(nameof(playerPrompt));
             OpponentPrompt = opponentPrompt ?? throw new System.ArgumentNullException(nameof(opponentPrompt));
@@ -120,6 +124,7 @@ namespace Pinder.Core.Conversation
             ActiveArchetypeDirective = activeArchetypeDirective;
             StakeLines = stakeLines;
             StakeLinesReferenced = stakeLinesReferenced;
+            MaxDialogueOptions = maxDialogueOptions;
         }
     }
 }

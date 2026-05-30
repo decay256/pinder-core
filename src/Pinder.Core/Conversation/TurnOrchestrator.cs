@@ -23,6 +23,7 @@ namespace Pinder.Core.Conversation
         private readonly RollResolutionStage _rollResolutionStage;
         private readonly DeliveryStage _deliveryStage;
         private readonly OpponentResponseStage _opponentResponseStage;
+        private readonly int _maxDialogueOptions;
 
         public TurnOrchestrator(
             ILlmAdapter llm,
@@ -31,7 +32,8 @@ namespace Pinder.Core.Conversation
             Random? statDrawRng,
             RollResolutionStage rollResolutionStage,
             DeliveryStage deliveryStage,
-            OpponentResponseStage opponentResponseStage)
+            OpponentResponseStage opponentResponseStage,
+            int maxDialogueOptions)
         {
             _llm = llm ?? throw new ArgumentNullException(nameof(llm));
             _dice = dice ?? throw new ArgumentNullException(nameof(dice));
@@ -41,6 +43,7 @@ namespace Pinder.Core.Conversation
             _rollResolutionStage = rollResolutionStage ?? throw new ArgumentNullException(nameof(rollResolutionStage));
             _deliveryStage = deliveryStage ?? throw new ArgumentNullException(nameof(deliveryStage));
             _opponentResponseStage = opponentResponseStage ?? throw new ArgumentNullException(nameof(opponentResponseStage));
+            _maxDialogueOptions = maxDialogueOptions;
         }
 
         internal async Task<TurnStart> StartTurnAsync(
@@ -132,9 +135,9 @@ namespace Pinder.Core.Conversation
             // Build dialogue context — pass callback topics (#47) and shadow thresholds (#45)
             string playerArchetypeDirective = player.ActiveArchetype?.Directive;
 
-            // Draw 3 random stats for this turn's options
+            // Draw N random stats for this turn's options
             var allStats = new[] { StatType.Charm, StatType.Rizz, StatType.Honesty, StatType.Chaos, StatType.Wit, StatType.SelfAwareness };
-            var availableStats = OptionFilterEngine.DrawRandomStats(allStats, 3, shadowThresholds, _statDrawRng);
+            var availableStats = OptionFilterEngine.DrawRandomStats(allStats, _maxDialogueOptions, shadowThresholds, _statDrawRng);
 
             var context = new DialogueContext(
                 playerPrompt: player.AssembledSystemPrompt,
@@ -154,8 +157,11 @@ namespace Pinder.Core.Conversation
                 currentTurn: state.TurnNumber,
                 playerTextingStyle: player.TextingStyleFragment,
                 activeTell: state.ActiveTell,
+                availableStats: availableStats,
                 activeArchetypeDirective: playerArchetypeDirective,
-                availableStats: availableStats);
+                stakeLines: null,
+                stakeLinesReferenced: null,
+                maxDialogueOptions: _maxDialogueOptions);
 
             // Get dialogue options from LLM
             var rawOptions = await _llm.GetDialogueOptionsAsync(context, ct).ConfigureAwait(false);
