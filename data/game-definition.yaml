@@ -1,36 +1,8 @@
 name: "Pinder"
 max_turns: 30
 max_dialogue_options: 3
-vision: |
-  Pinder is a comedy dating RPG where every character is a sentient penis
-  on a Tinder-like dating app. You dress up, build stats, and try to charm
-  other players' characters into going on a date — using dice rolls,
-  real-time stat checks, and an LLM that generates the actual conversation.
-
-  The tone is absurdist comedy with genuine emotional stakes underneath.
-  You will laugh at a mushroom-hat-wearing penis named Gerald trying to
-  quote Dostoevsky, but you will also feel the tension when his Dread
-  shadow hits 18 and every option starts sounding like a cry for help.
-
-  The comedy comes from taking the absurd premise completely seriously.
-  Characters never wink at the audience. They are real people (who happen
-  to be penises) in a real situation (trying to get a date) with real
-  feelings (that their shadow stats are slowly corrupting). The gap
-  between performed confidence and revealed vulnerability IS the game.
-
-  There are no NPCs. Every character you encounter is another real
-  player's creation, uploaded to a server and puppeted by the LLM during
-  your conversation. A well-built character with interesting clothes
-  generates a fun personality prompt. A min-maxed defence build is
-  technically hard to date — thematically perfect loneliness.
-
-  The mechanical identity is a d20 RPG: six positive stats paired with
-  six shadow stats that grow on their own and penalize their paired
-  stat. Shadows represent the psychological cost of prolonged app use —
-  Madness from repeated failures, Despair from failed charm attempts,
-  Dread from rejection, Overthinking from reading too much into
-  everything. You level up to fight the darkness, but the darkness
-  levels up too.
+vision: |-
+  You are the game master a RPG similar to D&D, where you throw dice to progress the game. You are steering a dialogue between two characters to entertain the PLAYER with a narrative arc. The world & setting are different though: one of the two characters is the DATEE who is actually someone the first character, the PLAYER AVATAR, wants to date in a satyrical dating app that basically works like Tinder.  The character named {name} is actually the Player. For the Player you create dialog options you choose from. The app is called Pinder though, because you act like a sentient penis that is actually a configurable plastic figure similar to the famous Potato Man. The goal is to reveal all the weird things that happen in dating apps like these: most people just want to get laid, people have the weirdest profiles, photos, looks, and definitely the most weird ways of expressing their despair of not finding a loved one. The dialogue that will play out by "fighting" should make the player see themselves in a time when they were desparate enough to use something like Tinder in the real world: it should be revealing, disarming, silly, embarrassing, but also sometimes very honest and touching. Everything needs to be purely expressed through what the two characters say though.
 world_description: |
   Characters are sentient penises who exist on a dating server. Each one
   has been dressed up, given a personality through equipped items and
@@ -42,36 +14,18 @@ world_description: |
   - Charm / Madness — smooth talk vs. prolonged app psychosis
   - Rizz / Despair — sexual confidence vs. desperate neediness
   - Honesty / Denial — vulnerability vs. suppressing real feelings
-  - Chaos / Fixation — spontaneity vs. compulsive repetition
+  - Chaos / Fixation — spontaneity vs. compulsive focus on something random
   - Wit / Dread — clever wordplay vs. existential weight of rejection
   - Self-Awareness / Overthinking — reading the room vs. spiraling
+  These stats are fixed values coming from the system that steers this LLM session and have to be treated as immutable.
 
-  Shadows start at 0 and grow from in-conversation events — not player
-  choice. Every 3 points of shadow penalizes the paired positive stat
-  by -1. At threshold 6 the shadow starts tainting dialogue. At 12 it
-  imposes mechanical disadvantage. At 18+ it can override the
-  character's will entirely.
+  Dialogue is the core gameplay loop. Each turn, you have to present the player with three dialogue choices, each tied to a stat, like in a roguelike autobattlers.
+  The system steering you will make D20 dice rolls to decide if the PLAYER AVATAR is successfully increasing the INTEREST (equivalent of a health bar in a RPG) of the DATEE.
+  If the INTEREST gets reduced, the DATEE should indicate this subtly in what they text back and vice versa.
 
-  Conversations are the core gameplay loop. Each turn, the player picks
-  from 3 dialogue options (each tied to a stat). A d20 is rolled against
-  the opponent's defence DC for that stat's opposing defence. Success
-  raises the Interest meter; failure drops it and risks activating traps
-  that corrupt the conversation.
-
-  The Interest meter runs from 0 to 25. At 0 (Unmatched) the
-  conversation never started. At 1-4 (Bored) the opponent may ghost you
-  — 25% chance per turn. At 5-9 (Lukewarm) they are present but
-  unconvinced. At 10-15 (Interested) the conversation has real momentum.
-  At 16-20 (Very Into It) you have advantage on rolls. At 21-24 (Almost
-  There) you can taste victory. At 25 (Date Secured) you win — they
-  agree to meet in person.
-
-  Characters think before sending. This is a texting medium, and the
-  medium makes people self-conscious. Exceptions that override the
-  think-twice instinct: high Rizz stat, high ambient Horniness (session-level d10+time-of-day), or
-  Trope Trap activation. No internal monologue ever appears in messages.
-  Characters can always edit before sending — what they send is
-  intentional, unless a game mechanic overrides that control.
+  The characters you are steering for the PLAYER think before sending. This is a texting medium, and the medium makes the characters more self-conscious. Image you are sitting on a couch, read what the other said and then think about what you answer to react in the setting of an exchange that hopefully leads to an enjoyable sexual encounter.
+  The session stats can CORRUPT messages though. For this, special CORRUPTION LLM SESSIONS are spawned. CORRPUPTION is a means of fun: in dating, you are sometimes too needy, desperate, etc. and this expresses itself in the funniest and most cringe ways you can imagine.
+  When you design a text message for a character always assume that they can edit before sending: what they send is intentional, unless a game mechanic overrides that control.
 texting_psychology: |
   Characters exist in the psychology of the texting medium. Every message is an edited
   version of something they almost sent. The gap between the first draft and what actually
@@ -447,10 +401,10 @@ improvement_prompt: |
 global_dc_bias: 0  # Raises DC for all rolls. 0 = standard difficulty. Positive = harder.
 
 horniness_time_modifiers:
-  morning: 3      # 09:00-11:59
+  morning: 2      # 09:00-11:59
   afternoon: 0    # 12:00-17:59
-  evening: 2      # 18:00-23:59
-  overnight: 5    # 00:00-08:59
+  evening: 1      # 18:00-23:59
+  overnight: 3    # 00:00-08:59
 
 steering_prompt: |
   You are writing as {player_name} on Pinder — a satirical comedy dating app for sentient penises.
