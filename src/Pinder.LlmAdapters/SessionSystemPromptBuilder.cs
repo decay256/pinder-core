@@ -88,7 +88,7 @@ namespace Pinder.LlmAdapters
             sb.Append("\n== PLAYER CHARACTER ==\n\n");
             sb.AppendLine(def.PlayerRoleDescription.TrimEnd(), "game-definition.yaml", "player_role_description");
             sb.Append("\n");
-            sb.AppendLine(playerPrompt.TrimEnd(), "character-profile", "assembled-profile");
+            sb.AppendLine(playerPrompt.TrimEnd(), "character-profile", "player-profile");
 
             sb.Append("\n== META CONTRACT ==\n\n");
             sb.AppendLine(def.MetaContract.TrimEnd(), "game-definition.yaml", "meta_contract");
@@ -155,7 +155,7 @@ namespace Pinder.LlmAdapters
             sb.Append("\n== OPPONENT CHARACTER ==\n\n");
             sb.AppendLine(def.OpponentRoleDescription.TrimEnd(), "game-definition.yaml", "opponent_role_description");
             sb.Append("\n");
-            sb.AppendLine(opponentPrompt.TrimEnd(), "character-profile", "assembled-profile");
+            sb.AppendLine(opponentPrompt.TrimEnd(), "character-profile", "opponent-profile");
 
             sb.Append("\n== META CONTRACT ==\n\n");
             sb.AppendLine(def.MetaContract.TrimEnd(), "game-definition.yaml", "meta_contract");

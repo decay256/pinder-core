@@ -84,6 +84,12 @@ namespace Pinder.Core.Characters
                 AssembledSystemPrompt += text;
         }
 
+        /// <summary>Overwrites the assembled system prompt with a new value.</summary>
+        public void UpdateSystemPrompt(string newPrompt)
+        {
+            AssembledSystemPrompt = newPrompt ?? "";
+        }
+
         /// <summary>
         /// Freezes BaseSystemPrompt to the current AssembledSystemPrompt value.
         /// Call this immediately before appending the psychological stake so the
