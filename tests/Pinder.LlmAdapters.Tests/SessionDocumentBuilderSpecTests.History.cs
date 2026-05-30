@@ -43,10 +43,10 @@ namespace Pinder.LlmAdapters.Tests
                 MakeDialogueContext(conversationHistory: history, opponentLastMessage: "msg3",
                     currentTurn: 3, playerName: "ALICE", opponentName: "BOB"));
 
-            Assert.Contains("[T1|PLAYER|ALICE] \"msg0\"", result);
-            Assert.Contains("[T1|OPPONENT|BOB] \"msg1\"", result);
-            Assert.Contains("[T2|PLAYER|ALICE] \"msg2\"", result);
-            Assert.Contains("[T2|OPPONENT|BOB] \"msg3\"", result);
+            Assert.Contains("[T1|PLAYER AVATAR] \"msg0\"", result);
+            Assert.Contains("[T1|DATEE] \"msg1\"", result);
+            Assert.Contains("[T2|PLAYER AVATAR] \"msg2\"", result);
+            Assert.Contains("[T2|DATEE] \"msg3\"", result);
             Assert.DoesNotContain("[T3|", result);
             Assert.DoesNotContain("[T4|", result);
         }
@@ -67,8 +67,8 @@ namespace Pinder.LlmAdapters.Tests
 
             for (int turn = 1; turn <= 20; turn++)
             {
-                Assert.Contains($"[T{turn}|PLAYER|PLAYER_X]", result);
-                Assert.Contains($"[T{turn}|OPPONENT|OPP_Y]", result);
+                Assert.Contains($"[T{turn}|PLAYER AVATAR]", result);
+                Assert.Contains($"[T{turn}|DATEE]", result);
             }
         }
 
@@ -80,7 +80,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
                 MakeDialogueContext(conversationHistory: history, playerName: "GERALD", opponentName: "V"));
 
-            Assert.Contains("[T1|PLAYER|GERALD] \"Hello!\"", result);
+            Assert.Contains("[T1|PLAYER AVATAR] \"Hello!\"", result);
             Assert.Contains("[CURRENT_TURN]", result);
         }
 
@@ -111,7 +111,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
                 MakeDialogueContext(conversationHistory: history, opponentLastMessage: "response", currentTurn: 2));
 
-            Assert.Contains("[T1|PLAYER|P] \"\"", result);
+            Assert.Contains("[T1|PLAYER AVATAR] \"\"", result);
         }
 
         [Fact]
@@ -127,8 +127,8 @@ namespace Pinder.LlmAdapters.Tests
                 MakeDialogueContext(conversationHistory: history, opponentLastMessage: "Hi",
                     currentTurn: 2, playerName: "Big Gerald", opponentName: "Lady V"));
 
-            Assert.Contains("[T1|PLAYER|Big Gerald] \"Hey\"", result);
-            Assert.Contains("[T1|OPPONENT|Lady V] \"Hi\"", result);
+            Assert.Contains("[T1|PLAYER AVATAR] \"Hey\"", result);
+            Assert.Contains("[T1|DATEE] \"Hi\"", result);
         }
 
         [Fact]
@@ -144,8 +144,8 @@ namespace Pinder.LlmAdapters.Tests
                 MakeDialogueContext(conversationHistory: history, opponentLastMessage: "Hi",
                     currentTurn: 2, playerName: "Gerald", opponentName: "gerald"));
 
-            Assert.Contains("[T1|PLAYER|Gerald] \"Hey\"", result);
-            Assert.Contains("[T1|OPPONENT|gerald] \"Hi\"", result);
+            Assert.Contains("[T1|PLAYER AVATAR] \"Hey\"", result);
+            Assert.Contains("[T1|DATEE] \"Hi\"", result);
         }
 
         [Fact]
@@ -161,8 +161,8 @@ namespace Pinder.LlmAdapters.Tests
                 MakeOpponentContext(conversationHistory: history, playerDeliveredMessage: "Turn2Player",
                     interestBefore: 10, interestAfter: 12, responseDelayMinutes: 3.0));
 
-            Assert.Contains("[T1|PLAYER|P] \"Turn1Player\"", result);
-            Assert.Contains("[T1|OPPONENT|O] \"Turn1Opp\"", result);
+            Assert.Contains("[T1|PLAYER AVATAR] \"Turn1Player\"", result);
+            Assert.Contains("[T1|DATEE] \"Turn1Opp\"", result);
             Assert.Contains("PLAYER'S LAST MESSAGE", result);
             Assert.Contains("\"Turn2Player\"", result);
         }
