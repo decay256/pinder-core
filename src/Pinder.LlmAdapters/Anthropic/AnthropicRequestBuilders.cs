@@ -56,16 +56,21 @@ namespace Pinder.LlmAdapters.Anthropic
                     budget = 8192;
                 }
 
+                // Anthropic's API model id uses dashes (claude-opus-4-8), not the
+                // dotted internal alias (claude-opus-4.8). Sending the dotted form
+                // returns HTTP 404 not_found_error, surfacing as stake_llm_failed.
+                const string ApiModelId = "claude-opus-4-8";
+
                 if (budget > 0)
                 {
-                    request.Model = "claude-opus-4.8";
+                    request.Model = ApiModelId;
                     request.Thinking = new ThinkingConfig { BudgetTokens = budget };
                     request.Temperature = 1.0;
                     request.MaxTokens = Math.Max(request.MaxTokens, budget + 1024);
                 }
                 else
                 {
-                    request.Model = "claude-opus-4.8";
+                    request.Model = ApiModelId;
                 }
             }
         }
