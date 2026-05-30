@@ -18,9 +18,9 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void TellCategory_ComplimentsPlayer_MapsToHonesty()
         {
-            Assert.Contains("Opponent compliments player", _instruction);
+            Assert.Contains("DATEE compliments PLAYER AVATAR", _instruction);
             // Verify the stat appears on the same logical line as the behavior
-            var line = FindLineContaining("Opponent compliments player");
+            var line = FindLineContaining("DATEE compliments PLAYER AVATAR");
             Assert.Contains("HONESTY", line);
         }
 
@@ -29,7 +29,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void TellCategory_AsksPersonalQuestion_MapsToHonestyOrSelfAwareness()
         {
-            var line = FindLineContaining("Opponent asks personal question");
+            var line = FindLineContaining("DATEE asks personal question");
             Assert.Contains("HONESTY", line);
             Assert.Contains("SELF_AWARENESS", line);
         }
@@ -39,7 +39,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void TellCategory_MakesJoke_MapsToWitOrChaos()
         {
-            var line = FindLineContaining("Opponent makes joke");
+            var line = FindLineContaining("DATEE makes joke");
             Assert.Contains("WIT", line);
             Assert.Contains("CHAOS", line);
         }
@@ -49,7 +49,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void TellCategory_SharesVulnerability_MapsToHonesty()
         {
-            var line = FindLineContaining("Opponent shares vulnerability");
+            var line = FindLineContaining("DATEE shares vulnerability");
             Assert.Contains("HONESTY", line);
         }
 
@@ -58,7 +58,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void TellCategory_PullsBackGuards_MapsToSelfAwareness()
         {
-            var line = FindLineContaining("Opponent pulls back/guards");
+            var line = FindLineContaining("DATEE pulls back/guards");
             Assert.Contains("SELF_AWARENESS", line);
         }
 
@@ -67,7 +67,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void TellCategory_TestsChallenges_MapsToWitOrChaos()
         {
-            var line = FindLineContaining("Opponent tests/challenges");
+            var line = FindLineContaining("DATEE tests/challenges");
             Assert.Contains("WIT", line);
             Assert.Contains("CHAOS", line);
         }
@@ -77,7 +77,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void TellCategory_SendsShortReply_MapsToCharmOrChaos()
         {
-            var line = FindLineContaining("Opponent sends short reply");
+            var line = FindLineContaining("DATEE sends short reply");
             Assert.Contains("CHARM", line);
             Assert.Contains("CHAOS", line);
         }
@@ -87,7 +87,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void TellCategory_Flirts_MapsToRizzOrCharm()
         {
-            var line = FindLineContaining("Opponent flirts");
+            var line = FindLineContaining("DATEE flirts");
             Assert.Contains("RIZZ", line);
             Assert.Contains("CHARM", line);
         }
@@ -97,7 +97,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void TellCategory_ChangesSubject_MapsToChaos()
         {
-            var line = FindLineContaining("Opponent changes subject");
+            var line = FindLineContaining("DATEE changes subject");
             Assert.Contains("CHAOS", line);
         }
 
@@ -106,7 +106,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void TellCategory_GoesQuietSilent_MapsToSelfAwareness()
         {
-            var line = FindLineContaining("Opponent goes quiet/silent");
+            var line = FindLineContaining("DATEE goes quiet/silent");
             Assert.Contains("SELF_AWARENESS", line);
         }
 
@@ -154,16 +154,16 @@ namespace Pinder.LlmAdapters.Tests
         {
             string[] expectedBehaviors = new[]
             {
-                "Opponent compliments player",
-                "Opponent asks personal question",
-                "Opponent makes joke",
-                "Opponent shares vulnerability",
-                "Opponent pulls back/guards",
-                "Opponent tests/challenges",
-                "Opponent sends short reply",
-                "Opponent flirts",
-                "Opponent changes subject",
-                "Opponent goes quiet/silent"
+                "DATEE compliments PLAYER AVATAR",
+                "DATEE asks personal question",
+                "DATEE makes joke",
+                "DATEE shares vulnerability",
+                "DATEE pulls back/guards",
+                "DATEE tests/challenges",
+                "DATEE sends short reply",
+                "DATEE flirts",
+                "DATEE changes subject",
+                "DATEE goes quiet/silent"
             };
 
             int foundCount = 0;

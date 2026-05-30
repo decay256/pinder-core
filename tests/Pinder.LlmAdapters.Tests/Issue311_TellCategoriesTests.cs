@@ -17,16 +17,16 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Theory]
-        [InlineData("Opponent compliments player", "TELL: HONESTY")]
-        [InlineData("Opponent asks personal question", "TELL: HONESTY or SELF_AWARENESS")]
-        [InlineData("Opponent makes joke", "TELL: WIT or CHAOS")]
-        [InlineData("Opponent shares vulnerability", "TELL: HONESTY")]
-        [InlineData("Opponent pulls back/guards", "TELL: SELF_AWARENESS")]
-        [InlineData("Opponent tests/challenges", "TELL: WIT or CHAOS")]
-        [InlineData("Opponent sends short reply", "TELL: CHARM or CHAOS")]
-        [InlineData("Opponent flirts", "TELL: RIZZ or CHARM")]
-        [InlineData("Opponent changes subject", "TELL: CHAOS")]
-        [InlineData("Opponent goes quiet/silent", "TELL: SELF_AWARENESS")]
+        [InlineData("DATEE compliments PLAYER AVATAR", "TELL: HONESTY")]
+        [InlineData("DATEE asks personal question", "TELL: HONESTY or SELF_AWARENESS")]
+        [InlineData("DATEE makes joke", "TELL: WIT or CHAOS")]
+        [InlineData("DATEE shares vulnerability", "TELL: HONESTY")]
+        [InlineData("DATEE pulls back/guards", "TELL: SELF_AWARENESS")]
+        [InlineData("DATEE tests/challenges", "TELL: WIT or CHAOS")]
+        [InlineData("DATEE sends short reply", "TELL: CHARM or CHAOS")]
+        [InlineData("DATEE flirts", "TELL: RIZZ or CHARM")]
+        [InlineData("DATEE changes subject", "TELL: CHAOS")]
+        [InlineData("DATEE goes quiet/silent", "TELL: SELF_AWARENESS")]
         public void OpponentResponseInstruction_ContainsTellCategory(string behavior, string expectedTell)
         {
             // Each mapping should appear as "- {behavior} → {expectedTell}"
@@ -39,12 +39,12 @@ namespace Pinder.LlmAdapters.Tests
         {
             var instruction = PromptTemplates.OpponentResponseInstruction;
 
-            // Count the number of tell category mapping lines (lines starting with "- Opponent")
+            // Count the number of tell category mapping lines (lines starting with "- DATEE")
             var lines = instruction.Split('\n');
             var categoryLines = 0;
             foreach (var line in lines)
             {
-                if (line.TrimStart().StartsWith("- Opponent"))
+                if (line.TrimStart().StartsWith("- DATEE"))
                     categoryLines++;
             }
 

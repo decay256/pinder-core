@@ -61,7 +61,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         public void AC1_FailureInstruction_contains_do_not_write_as_opponent()
         {
             var instruction = PromptTemplates.FailureDeliveryInstruction;
-            Assert.Contains("Do NOT write as the opponent", instruction);
+            Assert.Contains("Do NOT write as the DATEE", instruction);
         }
 
         [Fact]
@@ -184,7 +184,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
                     playerName: "Blaze", opponentName: "Jade"));
 
             Assert.Contains("You are writing as Blaze", prompt);
-            Assert.Contains("Do NOT write as the opponent", prompt);
+            Assert.Contains("Do NOT write as the DATEE", prompt);
         }
 
         [Fact]
