@@ -82,6 +82,7 @@ namespace Pinder.Core.Conversation
             _statDeliveryInstructions = src._statDeliveryInstructions;
             _onTextLayerNoop = src._onTextLayerNoop;
             _consequenceCatalog = src._consequenceCatalog;
+            _maxDialogueOptions = src._maxDialogueOptions;
 
             // ── Mutable engine state — deep copies (Category A) ──
             _state           = src._state.Clone();

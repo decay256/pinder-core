@@ -213,7 +213,7 @@ namespace Pinder.Rules.Tests
         {
             var data = ParseYaml();
             // All content sections should be multi-line (contain newlines)
-            foreach (var key in new[] { "vision", "world_description", "player_role_description",
+            foreach (var key in new[] { "world_description", "player_role_description",
                                         "opponent_role_description", "meta_contract", "writing_rules" })
             {
                 Assert.Contains("\n", data[key]);

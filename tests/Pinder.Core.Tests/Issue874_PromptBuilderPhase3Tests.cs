@@ -110,7 +110,7 @@ namespace Pinder.Core.Tests
 
             string fromYaml = entry.SystemPrompt!;
             const string fromConst =
-                "You are playing the role of {name}, a sentient penis on the dating app Pinder.";
+                "You are the game master a RPG similar to D&D, where you throw dice to progress the game. You are steering two characters. The world & setting are different though: one of the two characters is the \"opponent\"/monster who is actually someone the first character wants to date in a satyrical dating app that basically works like Tinder.  The character named {name} is actually the Player. For the Player you create dialog options you choose from. The app is called Pinder though, because you act like a sentient penis that is actually a configurable plastic figure similar to the famous Potato Man. The goal is to reveal all the weird things that happen in dating apps like these: most people just want to get laid, people have the weirdest profiles, photos, looks, and definitely the most weird ways of expressing their despair of not finding a loved one. The dialogue that will play out by \"fighting\" should make the player see themselves in a time when they were desparate enough to use something like Tinder in the real world: it should be revealing, disarming, silly, embarrassing, but also sometimes very honest and touching. Everything needs to be purely expressed through what the two characters say though.";
 
             Assert.Equal(fromConst, fromYaml);
         }
@@ -156,8 +156,8 @@ namespace Pinder.Core.Tests
                 Assert.Contains("ACTIVE ARCHETYPE", prompt);
 
                 // Lead-in with substituted name.
-                Assert.Contains("You are playing the role of TestChar", prompt);
-                Assert.Contains("a sentient penis on the dating app Pinder.", prompt);
+                Assert.Contains("The character named TestChar is actually the Player.", prompt);
+                Assert.Contains("The app is called Pinder though, because you act like a sentient penis that is actually", prompt);
             }
             finally
             {

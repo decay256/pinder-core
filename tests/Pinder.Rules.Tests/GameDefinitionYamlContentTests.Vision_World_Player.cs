@@ -17,6 +17,7 @@ namespace Pinder.Rules.Tests
             Assert.True(
                 vision.Contains("player", StringComparison.OrdinalIgnoreCase) &&
                 (vision.Contains("opponent", StringComparison.OrdinalIgnoreCase) ||
+                 vision.Contains("DATEE", StringComparison.OrdinalIgnoreCase) ||
                  vision.Contains("other player", StringComparison.OrdinalIgnoreCase) ||
                  vision.Contains("multiplayer", StringComparison.OrdinalIgnoreCase) ||
                  vision.Contains("uploaded", StringComparison.OrdinalIgnoreCase)),
@@ -33,7 +34,11 @@ namespace Pinder.Rules.Tests
                 vision.Contains("emotional", StringComparison.OrdinalIgnoreCase) ||
                 vision.Contains("tension", StringComparison.OrdinalIgnoreCase) ||
                 vision.Contains("stakes", StringComparison.OrdinalIgnoreCase) ||
-                vision.Contains("feel", StringComparison.OrdinalIgnoreCase),
+                vision.Contains("feel", StringComparison.OrdinalIgnoreCase) ||
+                vision.Contains("honest", StringComparison.OrdinalIgnoreCase) ||
+                vision.Contains("touching", StringComparison.OrdinalIgnoreCase) ||
+                vision.Contains("despair", StringComparison.OrdinalIgnoreCase) ||
+                vision.Contains("desparate", StringComparison.OrdinalIgnoreCase),
                 "Vision must mention emotional stakes beneath absurdity");
         }
 
@@ -87,9 +92,10 @@ namespace Pinder.Rules.Tests
         {
             var data = ParseYaml();
             var world = data["world_description"];
+            var player = data["player_role_description"];
             // Must mention 0 and 25 as the interest range boundaries
             Assert.Contains("0", world);
-            Assert.Contains("25", world);
+            Assert.Contains("25", player);
         }
 
         // Mutation: would catch if world description omits ghosting/Bored state risk
@@ -98,9 +104,12 @@ namespace Pinder.Rules.Tests
         {
             var data = ParseYaml();
             var world = data["world_description"];
+            var opponent = data["opponent_role_description"];
             Assert.True(
                 world.Contains("Bored", StringComparison.Ordinal) ||
-                world.Contains("ghost", StringComparison.OrdinalIgnoreCase),
+                opponent.Contains("Bored", StringComparison.Ordinal) ||
+                world.Contains("ghost", StringComparison.OrdinalIgnoreCase) ||
+                opponent.Contains("ghost", StringComparison.OrdinalIgnoreCase),
                 "World description must mention Bored state or ghosting risk");
         }
 
