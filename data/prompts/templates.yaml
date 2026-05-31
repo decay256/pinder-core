@@ -105,6 +105,7 @@ prompts:
       {player_name} is deciding what to send next.
       {game_state}
       Generate {options_count} options for what {player_name} might send, given the conversation above.
+      Use 30 to 50 words max.
       Format: {options_format_list}
   failure-delivery-instruction:
     system_prompt: |-
