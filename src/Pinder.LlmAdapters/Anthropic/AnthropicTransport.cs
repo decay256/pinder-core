@@ -18,11 +18,11 @@ namespace Pinder.LlmAdapters.Anthropic
         private bool _disposed;
 
         /// <summary>Creates transport with internally-owned AnthropicClient.</summary>
-        public AnthropicTransport(string apiKey, string model = "claude-sonnet-4-20250514")
+        public AnthropicTransport(string apiKey, string model = AnthropicModelIds.DefaultModel)
         {
             if (string.IsNullOrWhiteSpace(apiKey))
                 throw new ArgumentException("API key must not be null, empty, or whitespace.", nameof(apiKey));
-            _model = model ?? throw new ArgumentNullException(nameof(model));
+            _model = AnthropicModelIds.ToApiId(model ?? throw new ArgumentNullException(nameof(model)));
             _client = new AnthropicClient(apiKey);
         }
 
@@ -31,7 +31,7 @@ namespace Pinder.LlmAdapters.Anthropic
         {
             if (string.IsNullOrWhiteSpace(apiKey))
                 throw new ArgumentException("API key must not be null, empty, or whitespace.", nameof(apiKey));
-            _model = model ?? throw new ArgumentNullException(nameof(model));
+            _model = AnthropicModelIds.ToApiId(model ?? throw new ArgumentNullException(nameof(model)));
             _client = new AnthropicClient(apiKey, httpClient);
         }
 

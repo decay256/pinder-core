@@ -40,38 +40,27 @@ namespace Pinder.LlmAdapters.Anthropic
             string modelSpec = request.Model;
             if (string.IsNullOrEmpty(modelSpec)) return;
 
-            if (modelSpec.Contains("claude-opus-4.8"))
+            int budget = 0;
+            if (modelSpec.EndsWith("-thinking-low", StringComparison.OrdinalIgnoreCase))
             {
-                int budget = 0;
-                if (modelSpec.EndsWith("-thinking-low", StringComparison.OrdinalIgnoreCase))
-                {
-                    budget = 2048;
-                }
-                else if (modelSpec.EndsWith("-thinking-mid", StringComparison.OrdinalIgnoreCase))
-                {
-                    budget = 4096;
-                }
-                else if (modelSpec.EndsWith("-thinking-high", StringComparison.OrdinalIgnoreCase))
-                {
-                    budget = 8192;
-                }
+                budget = 2048;
+            }
+            else if (modelSpec.EndsWith("-thinking-mid", StringComparison.OrdinalIgnoreCase))
+            {
+                budget = 4096;
+            }
+            else if (modelSpec.EndsWith("-thinking-high", StringComparison.OrdinalIgnoreCase))
+            {
+                budget = 8192;
+            }
 
-                // Anthropic's API model id uses dashes (claude-opus-4-8), not the
-                // dotted internal alias (claude-opus-4.8). Sending the dotted form
-                // returns HTTP 404 not_found_error, surfacing as stake_llm_failed.
-                const string ApiModelId = "claude-opus-4-8";
+            request.Model = AnthropicModelIds.ToApiId(modelSpec);
 
-                if (budget > 0)
-                {
-                    request.Model = ApiModelId;
-                    request.Thinking = new ThinkingConfig { BudgetTokens = budget };
-                    request.Temperature = 1.0;
-                    request.MaxTokens = Math.Max(request.MaxTokens, budget + 1024);
-                }
-                else
-                {
-                    request.Model = ApiModelId;
-                }
+            if (budget > 0)
+            {
+                request.Thinking = new ThinkingConfig { BudgetTokens = budget };
+                request.Temperature = 1.0;
+                request.MaxTokens = Math.Max(request.MaxTokens, budget + 1024);
             }
         }
 

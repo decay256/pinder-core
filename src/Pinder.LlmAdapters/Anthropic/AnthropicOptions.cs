@@ -7,7 +7,7 @@ namespace Pinder.LlmAdapters.Anthropic
     public sealed class AnthropicOptions
     {
         public string ApiKey { get; set; } = "";
-        public string Model { get; set; } = "claude-sonnet-4-20250514";
+        public string Model { get; set; } = AnthropicModelIds.DefaultModel;
         public int MaxTokens { get; set; } = 1024;
         public double Temperature { get; set; } = 0.9;
         public double? DialogueOptionsTemperature { get; set; }
