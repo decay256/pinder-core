@@ -3,6 +3,18 @@ using System;
 namespace Pinder.Core.Interfaces
 {
     /// <summary>
+    /// Classifies the failure cause of an LLM transport call.
+    /// </summary>
+    public enum LlmFailureKind
+    {
+        Unknown,
+        ModelNotFound,
+        Unauthorized,
+        RateLimited,
+        Network
+    }
+
+    /// <summary>
     /// Thrown by streaming LLM transports (and by streaming consumers that
     /// wrap them) when the provider call fails for transport-level reasons:
     /// network errors, non-2xx HTTP, malformed SSE frames, provider errors.
@@ -23,9 +35,26 @@ namespace Pinder.Core.Interfaces
     /// </remarks>
     public sealed class LlmTransportException : Exception
     {
+        /// <summary>
+        /// Gets the classified failure kind.
+        /// </summary>
+        public LlmFailureKind FailureKind { get; } = LlmFailureKind.Unknown;
+
         public LlmTransportException(string message) : base(message) { }
 
         public LlmTransportException(string message, Exception innerException)
             : base(message, innerException) { }
+
+        public LlmTransportException(string message, LlmFailureKind failureKind)
+            : base(message)
+        {
+            FailureKind = failureKind;
+        }
+
+        public LlmTransportException(string message, LlmFailureKind failureKind, Exception innerException)
+            : base(message, innerException)
+        {
+            FailureKind = failureKind;
+        }
     }
 }

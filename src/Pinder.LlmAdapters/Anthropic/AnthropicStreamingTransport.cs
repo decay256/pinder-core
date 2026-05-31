@@ -179,7 +179,7 @@ namespace Pinder.LlmAdapters.Anthropic
             catch (Exception ex)
             {
                 throw new LlmTransportException(
-                    "Anthropic streaming request failed before headers: " + ex.Message, ex);
+                    "Anthropic streaming request failed before headers: " + ex.Message, LlmFailureKind.Network, ex);
             }
 
             try
@@ -198,8 +198,58 @@ namespace Pinder.LlmAdapters.Anthropic
                     var excerpt = body.Length > MaxBodyExcerptBytes
                         ? body.Substring(0, MaxBodyExcerptBytes) + "…[truncated]"
                         : body;
-                    throw new LlmTransportException(
-                        $"Anthropic streaming request failed: HTTP {(int)response.StatusCode} {response.StatusCode}. Body: {excerpt}");
+
+                    LlmFailureKind failureKind = LlmFailureKind.Unknown;
+                    string errorType = null;
+                    try
+                    {
+                        if (!string.IsNullOrWhiteSpace(body))
+                        {
+                            var jsonObj = Newtonsoft.Json.Linq.JObject.Parse(body);
+                            errorType = jsonObj["error"]?["type"]?.ToString();
+                        }
+                    }
+                    catch
+                    {
+                        // ignore parsing failures
+                    }
+
+                    if (response.StatusCode == System.Net.HttpStatusCode.NotFound || errorType == "not_found_error")
+                    {
+                        failureKind = LlmFailureKind.ModelNotFound;
+                    }
+                    else if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized || errorType == "authentication_error")
+                    {
+                        failureKind = LlmFailureKind.Unauthorized;
+                    }
+                    else if ((int)response.StatusCode == 429 || errorType == "rate_limit_error")
+                    {
+                        failureKind = LlmFailureKind.RateLimited;
+                    }
+
+                    string message;
+                    if (failureKind == LlmFailureKind.ModelNotFound)
+                    {
+                        message = $"Anthropic streaming request failed: HTTP {(int)response.StatusCode} {response.StatusCode} (not_found_error). " +
+                                  $"Offending model ID: '{_model}'. Operator hint: Ensure that the model ID is typed correctly and is active on your Anthropic account/plan. " +
+                                  $"Body: {excerpt}";
+                    }
+                    else if (failureKind == LlmFailureKind.Unauthorized)
+                    {
+                        message = $"Anthropic streaming request failed: HTTP {(int)response.StatusCode} {response.StatusCode} (authentication_error). " +
+                                  $"Operator hint: Check your API key. Body: {excerpt}";
+                    }
+                    else if (failureKind == LlmFailureKind.RateLimited)
+                    {
+                        message = $"Anthropic streaming request failed: HTTP {(int)response.StatusCode} {response.StatusCode} (rate_limit_error). " +
+                                  $"Operator hint: Requests have been throttled. Body: {excerpt}";
+                    }
+                    else
+                    {
+                        message = $"Anthropic streaming request failed: HTTP {(int)response.StatusCode} {response.StatusCode}. Body: {excerpt}";
+                    }
+
+                    throw new LlmTransportException(message, failureKind);
                 }
 
                 await foreach (var fragment in ReadSseAsync(response, cancellationToken).ConfigureAwait(false))
@@ -232,7 +282,7 @@ namespace Pinder.LlmAdapters.Anthropic
             catch (Exception ex)
             {
                 throw new LlmTransportException(
-                    "Anthropic streaming request failed reading response stream: " + ex.Message, ex);
+                    "Anthropic streaming request failed reading response stream: " + ex.Message, LlmFailureKind.Network, ex);
             }
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -269,12 +319,12 @@ namespace Pinder.LlmAdapters.Anthropic
                     {
                         cancellationToken.ThrowIfCancellationRequested();
                         throw new LlmTransportException(
-                            "Anthropic streaming I/O failure: " + ioex.Message, ioex);
+                            "Anthropic streaming I/O failure: " + ioex.Message, LlmFailureKind.Network, ioex);
                     }
                     catch (Exception ex)
                     {
                         throw new LlmTransportException(
-                            "Anthropic streaming I/O failure: " + ex.Message, ex);
+                            "Anthropic streaming I/O failure: " + ex.Message, LlmFailureKind.Network, ex);
                     }
 
                     if (line == null)
