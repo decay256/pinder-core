@@ -278,6 +278,7 @@ prompts:
       WORD & PATTERN REPETITION — check your own previous messages in the conversation above before writing this one. Do not repeat: (a) the same filler words or phrases you used in your previous 2 messages ('honestly', 'literally', 'actually', 'okay but', 'interesting that', 'slay', 'omg', etc.), (b) the same emoji you used in your previous message, (c) the same structural pattern (e.g. 'wait...???', 'omg...😭', 'I literally just realized...', 'interesting that you mention...') used in your last 2 messages. Each message should feel like a fresh move, not a variation on the last one.
 
       Generate your next message.
+      - Use less then 50 words, unless it fits the character better to use more.
       - Match your personality exactly as established in the system prompt
       - React authentically to what was just said
       - If Interest dropped: show cooling without being melodramatic
