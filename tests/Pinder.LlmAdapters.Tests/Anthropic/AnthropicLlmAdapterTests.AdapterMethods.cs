@@ -44,7 +44,7 @@ OPTION_4
             var body = JsonConvert.DeserializeObject<MessagesRequest>(handler.CapturedRequestBody!);
             Assert.NotNull(body);
             Assert.Equal("claude-sonnet-4-20250514", body!.Model);
-            Assert.Equal(0.9, body.Temperature, 2);
+            Assert.Equal(0.9, body.Temperature!.Value, 2);
             // Only player prompt in system (fix for voice bleed #487)
             Assert.Single(body.System);
             Assert.Equal("ephemeral", body.System[0].CacheControl?.Type);
@@ -69,7 +69,7 @@ OPTION_4
 
             Assert.Equal("Delivered message text", result);
             var body = JsonConvert.DeserializeObject<MessagesRequest>(handler.CapturedRequestBody!);
-            Assert.Equal(0.7, body!.Temperature, 2);
+            Assert.Equal(0.7, body!.Temperature!.Value, 2);
             Assert.Equal(1, body.System.Length); // Player-only prompt cached
         }
 
@@ -88,7 +88,7 @@ OPTION_4
 
             Assert.Equal("That's sweet, tell me more", result.MessageText);
             var body = JsonConvert.DeserializeObject<MessagesRequest>(handler.CapturedRequestBody!);
-            Assert.Equal(0.85, body!.Temperature, 2);
+            Assert.Equal(0.85, body!.Temperature!.Value, 2);
             // Only 1 system block — opponent only
             Assert.Single(body.System);
             Assert.Contains("Velvet", body.System[0].Text);
@@ -111,7 +111,7 @@ OPTION_4
 
             Assert.Equal("Velvet leans closer to her phone.", result);
             var body = JsonConvert.DeserializeObject<MessagesRequest>(handler.CapturedRequestBody!);
-            Assert.Equal(0.8, body!.Temperature, 2);
+            Assert.Equal(0.8, body!.Temperature!.Value, 2);
             Assert.Empty(body.System); // No system blocks
         }
 
@@ -157,7 +157,7 @@ OPTION_4
             await adapter.GetDialogueOptionsAsync(MakeDialogueContext());
 
             var body = JsonConvert.DeserializeObject<MessagesRequest>(handler.CapturedRequestBody!);
-            Assert.Equal(0.5, body!.Temperature, 2);
+            Assert.Equal(0.5, body!.Temperature!.Value, 2);
         }
 
         [Fact]

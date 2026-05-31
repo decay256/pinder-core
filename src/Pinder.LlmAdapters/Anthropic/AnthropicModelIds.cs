@@ -65,5 +65,24 @@ namespace Pinder.LlmAdapters.Anthropic
                     return processed.Replace('.', '-');
             }
         }
+
+        /// <summary>
+        /// Returns true if the given model rejects the `temperature` request parameter.
+        /// Anthropic deprecated `temperature` for claude-opus-4-8 (and later opus models);
+        /// sending it yields HTTP 400 invalid_request_error. Accepts either an internal
+        /// spec or an already-dashed API id.
+        /// </summary>
+        public static bool RejectsTemperature(string modelSpecOrApiId)
+        {
+            if (string.IsNullOrEmpty(modelSpecOrApiId)) return false;
+            string apiId = ToApiId(modelSpecOrApiId);
+            switch (apiId.ToLowerInvariant())
+            {
+                case "claude-opus-4-8":
+                    return true;
+                default:
+                    return false;
+            }
+        }
     }
 }

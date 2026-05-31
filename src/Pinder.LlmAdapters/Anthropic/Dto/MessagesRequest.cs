@@ -23,8 +23,10 @@ namespace Pinder.LlmAdapters.Anthropic.Dto
         [JsonProperty("max_tokens")]
         public int MaxTokens { get; set; } = 1024;
 
-        [JsonProperty("temperature")]
-        public double Temperature { get; set; } = 0.9;
+        // Nullable + omitted when null: some models (e.g. claude-opus-4-8) reject
+        // the `temperature` parameter outright with a 400 invalid_request_error.
+        [JsonProperty("temperature", NullValueHandling = NullValueHandling.Ignore)]
+        public double? Temperature { get; set; } = 0.9;
 
         [JsonProperty("system")]
         public ContentBlock[] System { get; set; } = Array.Empty<ContentBlock>();

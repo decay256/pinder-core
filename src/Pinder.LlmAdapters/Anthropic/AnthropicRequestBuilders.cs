@@ -62,6 +62,14 @@ namespace Pinder.LlmAdapters.Anthropic
                 request.Temperature = 1.0;
                 request.MaxTokens = Math.Max(request.MaxTokens, budget + 1024);
             }
+
+            // Some models (e.g. claude-opus-4-8) reject the `temperature` parameter
+            // with HTTP 400. Omit it entirely for those. This runs after id resolution
+            // so it also covers the thinking-variant temperature set above.
+            if (AnthropicModelIds.RejectsTemperature(request.Model))
+            {
+                request.Temperature = null;
+            }
         }
 
         /// <summary>
