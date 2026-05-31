@@ -30,7 +30,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             await adapter.GetOpponentResponseAsync(MakeOpponentContext());
 
             var body = JsonConvert.DeserializeObject<MessagesRequest>(handler.RequestBodies[0]);
-            Assert.Equal(0.6, body!.Temperature, 2);
+            Assert.Equal(0.6, body!.Temperature!.Value, 2);
         }
 
         // What: AC7 - Temperature override for InterestChangeBeat method
@@ -48,7 +48,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             await adapter.GetInterestChangeBeatAsync(ctx);
 
             var body = JsonConvert.DeserializeObject<MessagesRequest>(handler.RequestBodies[0]);
-            Assert.Equal(0.4, body!.Temperature, 2);
+            Assert.Equal(0.4, body!.Temperature!.Value, 2);
         }
 
         // What: AC7 - Temperature override for DeliverMessage method
@@ -65,7 +65,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             await adapter.DeliverMessageAsync(MakeDeliveryContext());
 
             var body = JsonConvert.DeserializeObject<MessagesRequest>(handler.RequestBodies[0]);
-            Assert.Equal(0.3, body!.Temperature, 2);
+            Assert.Equal(0.3, body!.Temperature!.Value, 2);
         }
 
         // What: AC7 - When no override set, default temperatures are used
@@ -87,7 +87,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
 
             await adapter.GetDialogueOptionsAsync(MakeDialogueContext());
             var dialogueBody = JsonConvert.DeserializeObject<MessagesRequest>(handler.RequestBodies[0]);
-            Assert.Equal(0.9, dialogueBody!.Temperature, 2);
+            Assert.Equal(0.9, dialogueBody!.Temperature!.Value, 2);
         }
 
         // ==============================================================================
