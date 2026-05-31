@@ -97,11 +97,11 @@ namespace Pinder.LlmAdapters.Anthropic
         /// </summary>
         /// <param name="apiKey">Anthropic API key. Must not be null/empty/whitespace.</param>
         /// <param name="model">Model identifier (e.g. <c>claude-sonnet-4-20250514</c>).</param>
-        public AnthropicStreamingTransport(string apiKey, string model = "claude-sonnet-4-20250514")
+        public AnthropicStreamingTransport(string apiKey, string model = AnthropicModelIds.DefaultModel)
         {
             if (string.IsNullOrWhiteSpace(apiKey))
                 throw new ArgumentException("API key must not be null, empty, or whitespace.", nameof(apiKey));
-            _model = model ?? throw new ArgumentNullException(nameof(model));
+            _model = AnthropicModelIds.ToApiId(model ?? throw new ArgumentNullException(nameof(model)));
             _httpClient = new HttpClient();
             ConfigureHeaders(_httpClient, apiKey);
             _ownsHttpClient = true;
@@ -116,7 +116,7 @@ namespace Pinder.LlmAdapters.Anthropic
         {
             if (string.IsNullOrWhiteSpace(apiKey))
                 throw new ArgumentException("API key must not be null, empty, or whitespace.", nameof(apiKey));
-            _model = model ?? throw new ArgumentNullException(nameof(model));
+            _model = AnthropicModelIds.ToApiId(model ?? throw new ArgumentNullException(nameof(model)));
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             ConfigureHeaders(_httpClient, apiKey);
             _ownsHttpClient = false;
