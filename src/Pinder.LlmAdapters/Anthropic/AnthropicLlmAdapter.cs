@@ -27,7 +27,7 @@ namespace Pinder.LlmAdapters.Anthropic
     /// - AnthropicOverlayApplier
     /// </summary>
     [Obsolete("AnthropicLlmAdapter is deprecated. Use PinderLlmAdapter instead.")]
-    public sealed class AnthropicLlmAdapter : IStatefulLlmAdapter, IDisposable
+    public sealed class AnthropicLlmAdapter : IStatefulLlmAdapter, ITokenUsageProvider, IDisposable
     {
         // Default temperatures per method (used when AnthropicOptions override is null)
         private const double DefaultDialogueOptionsTemperature = 0.9;
@@ -289,6 +289,8 @@ namespace Pinder.LlmAdapters.Anthropic
 
         /// <summary>Returns a read-only view of all per-call token stats collected during the session.</summary>
         public IReadOnlyList<CallSummaryStat> GetCallStats() => _debugLogger.GetCallStats();
+
+        public SessionTokenUsage GetSessionUsage() => _debugLogger.GetSessionUsage();
 
         /// <summary>Writes the token summary table to the end of the debug transcript.</summary>
         public void WriteDebugSummary()
