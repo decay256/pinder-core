@@ -137,7 +137,9 @@ namespace Pinder.Core.Conversation
                 horninessInterestBefore: deliveryStage.HorninessInterestBefore,
                 textDiffs: deliveryStage.TextDiffs.Count > 0 ? deliveryStage.TextDiffs : null,
                 shadowCheck: deliveryStage.ShadowCheckResult,
-                trapClearedDisplayName: rollStage.TrapClearedDisplayName);
+                trapClearedDisplayName: rollStage.TrapClearedDisplayName,
+                shadowInterestDelta: deliveryStage.ShadowCorrection,
+                delayPenalty: 0);
         }
     }
 }
