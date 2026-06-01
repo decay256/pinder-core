@@ -31,6 +31,7 @@ strings:
   turn_result.interest_breakdown.base: "Base: {value}"
   turn_result.interest_breakdown.risk_bonus: "Risk bonus: +{value}"
   turn_result.interest_breakdown.combo_bonus: "Combo bonus: {value}"
+  turn_result.interest_breakdown.shadow_misfire: "Shadow misfire: {value}"
   turn_result.interest_breakdown.horniness_penalty: "Horniness penalty: {value}"
   turn_result.interest_breakdown.total: "= {value} (now {now})"
 
