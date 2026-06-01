@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Pinder.Core.Rolls;
 using Pinder.Core.Text;
 
@@ -24,6 +25,13 @@ namespace Pinder.Core.Conversation
 
         /// <summary>Net interest delta applied this turn (includes momentum).</summary>
         public int InterestDelta { get; }
+
+        /// <summary>
+        /// Interest delta contributed by the shadow-misfire correction (DeliveryStage).
+        /// Non-zero only when a shadow overlay fired on a successful roll and forced
+        /// the interest delta down to the failure scale. 0 if no shadow correction fired.
+        /// </summary>
+        public int ShadowInterestDelta { get; }
 
         /// <summary>Base interest delta from success scale or failure scale (before risk/combo bonuses).</summary>
         public int BaseInterestDelta { get; }
@@ -106,6 +114,16 @@ namespace Pinder.Core.Conversation
         public IReadOnlyList<TextDiff> TextDiffs { get; }
 
         /// <summary>
+        /// Itemized per-source interest breakdown for this turn.
+        /// Only non-zero components are included. The sum of all
+        /// <see cref="InterestBreakdownItem.Delta"/> values equals
+        /// <see cref="InterestDelta"/> (sum invariant).
+        /// Sources: base_roll, risk_tier, combo, shadow_misfire,
+        /// horniness_trope_trap, delay_penalty.
+        /// </summary>
+        public IReadOnlyList<InterestBreakdownItem> InterestBreakdown { get; }
+
+        /// <summary>
         /// Display name of the trap that was disarmed at the start of this turn
         /// by the player selecting a Self-Awareness option (issue #371). Null when
         /// no SA-disarm fired (no trap was active, or chosen option was not SA).
@@ -140,7 +158,9 @@ namespace Pinder.Core.Conversation
             int horninessInterestBefore = 0,
             IReadOnlyList<TextDiff>? textDiffs = null,
             ShadowCheckResult shadowCheck = null,
-            string? trapClearedDisplayName = null)
+            string? trapClearedDisplayName = null,
+            int shadowInterestDelta = 0,
+            int delayPenalty = 0)
         {
             Roll = roll ?? throw new ArgumentNullException(nameof(roll));
             DeliveredMessage = deliveredMessage ?? throw new ArgumentNullException(nameof(deliveredMessage));
@@ -169,6 +189,34 @@ namespace Pinder.Core.Conversation
             TextDiffs = textDiffs ?? Array.Empty<TextDiff>();
             ShadowCheck = shadowCheck ?? ShadowCheckResult.NotPerformed;
             TrapClearedDisplayName = trapClearedDisplayName;
+            ShadowInterestDelta = shadowInterestDelta;
+            InterestBreakdown = BuildBreakdown(
+                baseInterestDelta, riskBonusDelta, comboBonusDelta,
+                shadowInterestDelta, horninessInterestPenalty, delayPenalty);
+        }
+
+        private static IReadOnlyList<InterestBreakdownItem> BuildBreakdown(
+            int baseDelta,
+            int riskBonus,
+            int comboBonus,
+            int shadowDelta,
+            int horninesspenalty,
+            int delayPenalty)
+        {
+            var items = new List<InterestBreakdownItem>(6);
+            if (baseDelta != 0)
+                items.Add(new InterestBreakdownItem("base_roll", "Base roll", baseDelta));
+            if (riskBonus != 0)
+                items.Add(new InterestBreakdownItem("risk_tier", "Risk tier bonus", riskBonus));
+            if (comboBonus != 0)
+                items.Add(new InterestBreakdownItem("combo", "Combo bonus", comboBonus));
+            if (shadowDelta != 0)
+                items.Add(new InterestBreakdownItem("shadow_misfire", "Shadow misfire correction", shadowDelta));
+            if (horninesspenalty != 0)
+                items.Add(new InterestBreakdownItem("horniness_trope_trap", "Horniness trope-trap", horninesspenalty));
+            if (delayPenalty != 0)
+                items.Add(new InterestBreakdownItem("delay_penalty", "Delay penalty", delayPenalty));
+            return items.AsReadOnly();
         }
     }
 }
