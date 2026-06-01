@@ -53,6 +53,18 @@ namespace Pinder.LlmAdapters.OpenAi
         /// <returns>The text content of choices[0].message.content.</returns>
         public async Task<string> SendChatCompletionAsync(string requestJson, CancellationToken ct = default)
         {
+            var (text, _) = await SendChatCompletionWithUsageAsync(requestJson, ct).ConfigureAwait(false);
+            return text;
+        }
+
+        /// <summary>
+        /// Sends a chat completions request and returns both the assistant message content and the raw JObject parsed response.
+        /// </summary>
+        /// <param name="requestJson">Serialized JSON request body.</param>
+        /// <param name="ct">Cancellation token.</param>
+        /// <returns>A tuple containing the text content of choices[0].message.content and the raw parsed response.</returns>
+        public async Task<(string text, JObject rawJson)> SendChatCompletionWithUsageAsync(string requestJson, CancellationToken ct = default)
+        {
             if (requestJson == null) throw new ArgumentNullException(nameof(requestJson));
 
             string url = _baseUrl + "/v1/chat/completions";
@@ -74,7 +86,8 @@ namespace Pinder.LlmAdapters.OpenAi
                         try
                         {
                             var json = JObject.Parse(body);
-                            return ExtractAssistantText(json);
+                            string text = ExtractAssistantText(json);
+                            return (text, json);
                         }
                         catch (InvalidOperationException)
                         {
