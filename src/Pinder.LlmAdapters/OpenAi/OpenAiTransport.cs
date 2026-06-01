@@ -13,11 +13,12 @@ namespace Pinder.LlmAdapters.OpenAi
     /// Supports any provider with an OpenAI-compatible API (OpenAI, Groq, Together,
     /// OpenRouter, Ollama, etc.).
     /// </summary>
-    public sealed class OpenAiTransport : ILlmTransport, IDisposable
+    public sealed class OpenAiTransport : ILlmTransport, ITokenUsageProvider, IDisposable
     {
         private readonly OpenAiClient _client;
         private readonly string _model;
         private readonly bool _useAnthropicCacheControl;
+        private readonly OpenAiUsageCollector _usageCollector = new OpenAiUsageCollector();
         private bool _disposed;
 
         /// <summary>Creates transport with internally-owned OpenAiClient.</summary>
@@ -70,8 +71,13 @@ namespace Pinder.LlmAdapters.OpenAi
             string requestJson = JsonConvert.SerializeObject(request);
             // #794: forward the engine-level cancellation token to the underlying
             // HTTP call so a mid-turn Cancel() halts the in-flight request.
-            return await _client.SendChatCompletionAsync(requestJson, ct).ConfigureAwait(false);
+            var (text, rawJson) = await _client.SendChatCompletionWithUsageAsync(requestJson, ct).ConfigureAwait(false);
+            _usageCollector.Collect(rawJson);
+            return text;
         }
+
+        /// <inheritdoc />
+        public SessionTokenUsage GetSessionUsage() => _usageCollector.GetSessionUsage();
 
         public void Dispose()
         {
