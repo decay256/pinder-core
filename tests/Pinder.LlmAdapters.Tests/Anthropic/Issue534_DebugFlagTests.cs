@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Pinder.Core.Conversation;
+using Pinder.Core.Interfaces;
 using Pinder.Core.Stats;
 using Pinder.LlmAdapters.Anthropic;
 using Pinder.LlmAdapters.Anthropic.Dto;
@@ -270,6 +271,69 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
 
             var content = File.ReadAllText(_debugFile);
             Assert.Contains("**System prompt:**", content);
+        }
+
+        [Fact]
+        public async Task GetSessionUsage_AccumulatesCorrectly_WhenDebugDirectoryIsNull()
+        {
+            var handler = new MockHttpMessageHandler((req, count) => 
+                count == 1 ? MakeOptionsSuccessResponse() : MakeDeliverySuccessResponse());
+            var httpClient = new HttpClient(handler);
+            var options = new AnthropicOptions { ApiKey = "test", DebugDirectory = null };
+            
+            using var adapter = new AnthropicLlmAdapter(options, httpClient);
+            
+            await adapter.GetDialogueOptionsAsync(MakeContext());
+            await adapter.DeliverMessageAsync(MakeDeliveryContext());
+
+            var usage = adapter.GetSessionUsage();
+
+            Assert.NotNull(usage);
+            Assert.Equal(25, usage.InputTokens);
+            Assert.Equal(15, usage.OutputTokens);
+            Assert.Equal(80, usage.CacheReadInputTokens);
+            Assert.Equal(20, usage.CacheCreationInputTokens);
+            Assert.Equal(2, usage.CallCount);
+        }
+
+        [Fact]
+        public async Task GetSessionUsage_TotalBilledInput_ExcludesCacheRead()
+        {
+            var handler = new MockHttpMessageHandler((req, count) => 
+                count == 1 ? MakeOptionsSuccessResponse() : MakeDeliverySuccessResponse());
+            var httpClient = new HttpClient(handler);
+            var options = new AnthropicOptions { ApiKey = "test", DebugDirectory = null };
+            
+            using var adapter = new AnthropicLlmAdapter(options, httpClient);
+            
+            await adapter.GetDialogueOptionsAsync(MakeContext());
+            await adapter.DeliverMessageAsync(MakeDeliveryContext());
+
+            var usage = adapter.GetSessionUsage();
+
+            Assert.Equal(45, usage.TotalBilledInput); // 25 (InputTokens) + 20 (CacheCreationInputTokens)
+            Assert.NotEqual(125, usage.TotalBilledInput); // 45 + 80 (CacheReadInputTokens)
+        }
+
+        [Fact]
+        public async Task GetSessionUsage_TotalsMatch_WriteDebugSummaryTable()
+        {
+            var handler = new MockHttpMessageHandler((req, count) => 
+                count == 1 ? MakeOptionsSuccessResponse() : MakeDeliverySuccessResponse());
+            var httpClient = new HttpClient(handler);
+            var options = new AnthropicOptions { ApiKey = "test", DebugDirectory = _debugFile };
+            
+            using var adapter = new AnthropicLlmAdapter(options, httpClient);
+            
+            await adapter.GetDialogueOptionsAsync(MakeContext());
+            await adapter.DeliverMessageAsync(MakeDeliveryContext());
+            adapter.WriteDebugSummary();
+
+            var usage = adapter.GetSessionUsage();
+            var content = File.ReadAllText(_debugFile);
+
+            // Verify totals match what was written in the table
+            Assert.Contains($"| **Total** | | **{usage.InputTokens}** | **{usage.OutputTokens}** | **{usage.CacheReadInputTokens}** | **{usage.CacheCreationInputTokens}** |", content);
         }
     }
 }

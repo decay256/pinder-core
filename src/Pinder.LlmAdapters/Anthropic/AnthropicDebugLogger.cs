@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Pinder.Core.Interfaces;
 using Pinder.LlmAdapters.Anthropic.Dto;
 
 namespace Pinder.LlmAdapters.Anthropic
@@ -18,6 +19,18 @@ namespace Pinder.LlmAdapters.Anthropic
 
         /// <summary>Returns a read-only view of all per-call token stats collected during the session.</summary>
         public IReadOnlyList<CallSummaryStat> GetCallStats() => _callStats.AsReadOnly();
+
+        public SessionTokenUsage GetSessionUsage()
+        {
+            return new SessionTokenUsage
+            {
+                InputTokens               = _callStats.Sum(s => s.InputTokens),
+                OutputTokens              = _callStats.Sum(s => s.OutputTokens),
+                CacheReadInputTokens      = _callStats.Sum(s => s.CacheReadInputTokens),
+                CacheCreationInputTokens  = _callStats.Sum(s => s.CacheCreationInputTokens),
+                CallCount                 = _callStats.Count
+            };
+        }
 
         /// <summary>Appends a markdown section for one LLM call to the debug transcript file.</summary>
         public void LogDebug(string callType, int turn, MessagesRequest request, MessagesResponse response, string? debugDirectory)
