@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "character_id": "a5be0d29-96c5-469b-921a-3ec075639828",
+  "name": "Marisol_Tides",
+  "gender_identity": "she/her",
+  "bio": "marine bio dropout now selling hand-strung anklets at the pier. my dog picks who i date.",
+  "level": 6,
+  "items": [
+    "beach-waves",
+    "anklet-star-charm",
+    "friendship-bracelet-handmade",
+    "harem-pants",
+    "barefoot",
+    "oakley-sunglasses-forehead"
+  ],
+  "anatomy": {
+    "length": "medium",
+    "girth": "average",
+    "circumcision": "circumcised",
+    "vein_definition": "subtle",
+    "skin_texture": "natural",
+    "skin_tone": "warm",
+    "ball_size": "average",
+    "tattoos": "one-meaningful",
+    "eye_style": "soft"
+  },
+  "allocation": {
+    "spent": {
+      "charm": 4,
+      "rizz": 2,
+      "honesty": 5,
+      "chaos": 2,
+      "wit": 1,
+      "self_awareness": 0
+    },
+    "unspent_pool": 0,
+    "shadows": {
+      "madness": 1,
+      "despair": 2,
+      "denial": 3,
+      "fixation": 2,
+      "dread": 1,
+      "overthinking": 1
+    }
+  }
+}
