@@ -50,21 +50,21 @@ namespace Pinder.LlmAdapters.Tests
                 StringComparison.OrdinalIgnoreCase);
         }
 
-        // What: AC3 — PinderDefaults.MetaContract specifies never break character
-        // Mutation: would catch if MetaContract lacked immersion rules
+        // What: AC3 — PinderDefaults.NarrativeDoctrine specifies never break character
+        // Mutation: would catch if NarrativeDoctrine lacked immersion rules
         [Fact]
         public void PinderDefaults_MetaContractMentionsBreakCharacter()
         {
-            Assert.Contains("break character", GameDefinition.PinderDefaults.MetaContract,
+            Assert.Contains("break character", GameDefinition.PinderDefaults.NarrativeDoctrine,
                 StringComparison.OrdinalIgnoreCase);
         }
 
-        // What: AC3 — PinderDefaults.WritingRules specifies texting register
-        // Mutation: would catch if WritingRules lacked texting register directive
+        // What: AC3 — PinderDefaults.NarrativeDoctrine specifies texting register
+        // Mutation: would catch if NarrativeDoctrine lacked texting register directive
         [Fact]
         public void PinderDefaults_WritingRulesMentionsTextingRegister()
         {
-            Assert.Contains("texting register", GameDefinition.PinderDefaults.WritingRules,
+            Assert.Contains("texting register", GameDefinition.PinderDefaults.NarrativeDoctrine,
                 StringComparison.OrdinalIgnoreCase);
         }
 
@@ -89,8 +89,7 @@ namespace Pinder.LlmAdapters.Tests
             Assert.NotNull(gd.WorldDescription);
             Assert.NotNull(gd.PlayerRoleDescription);
             Assert.NotNull(gd.OpponentRoleDescription);
-            Assert.NotNull(gd.MetaContract);
-            Assert.NotNull(gd.WritingRules);
+            Assert.NotNull(gd.NarrativeDoctrine);
         }
 
         #endregion
@@ -107,7 +106,7 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("== WORLD RULES ==", result);
             Assert.Contains("== PLAYER CHARACTER ==", result);
             Assert.Contains("== OPPONENT CHARACTER ==", result);
-            Assert.Contains("== META CONTRACT ==", result);
+            Assert.Contains("== NARRATIVE DOCTRINE ==", result);
         }
 
         // What: AC4 — Sections are in correct order: Vision < World < Player < Opponent < Meta
@@ -120,12 +119,12 @@ namespace Pinder.LlmAdapters.Tests
             var worldIdx = result.IndexOf("== WORLD RULES ==");
             var playerIdx = result.IndexOf("== PLAYER CHARACTER ==");
             var opponentIdx = result.IndexOf("== OPPONENT CHARACTER ==");
-            var metaIdx = result.IndexOf("== META CONTRACT ==");
+            var metaIdx = result.IndexOf("== NARRATIVE DOCTRINE ==");
 
             Assert.True(visionIdx < worldIdx, "GAME VISION must precede WORLD RULES");
             Assert.True(worldIdx < playerIdx, "WORLD RULES must precede PLAYER CHARACTER");
             Assert.True(playerIdx < opponentIdx, "PLAYER CHARACTER must precede OPPONENT CHARACTER");
-            Assert.True(opponentIdx < metaIdx, "OPPONENT CHARACTER must precede META CONTRACT");
+            Assert.True(opponentIdx < metaIdx, "OPPONENT CHARACTER must precede NARRATIVE DOCTRINE");
         }
 
         // What: AC4 — GAME VISION section sourced from gameDef.Vision
@@ -134,7 +133,7 @@ namespace Pinder.LlmAdapters.Tests
         public void Build_GameVisionSectionContainsGameDefVision()
         {
             var custom = new GameDefinition(
-                "G", "UNIQUE_VISION_XYZ", "W", "P", "O", "M", "WR");
+                "G", "UNIQUE_VISION_XYZ", "W", "P", "O", "ND");
             var result = SessionSystemPromptBuilder.Build("player", "opponent", custom);
 
             var visionIdx = result.IndexOf("== GAME VISION ==");
@@ -149,7 +148,7 @@ namespace Pinder.LlmAdapters.Tests
         public void Build_WorldRulesSectionContainsWorldDescription()
         {
             var custom = new GameDefinition(
-                "G", "V", "UNIQUE_WORLD_ABC", "P", "O", "M", "WR");
+                "G", "V", "UNIQUE_WORLD_ABC", "P", "O", "ND");
             var result = SessionSystemPromptBuilder.Build("player", "opponent", custom);
 
             var worldIdx = result.IndexOf("== WORLD RULES ==");
@@ -181,23 +180,22 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionSystemPromptBuilder.Build("player", opponentText);
 
             var opponentIdx = result.IndexOf("== OPPONENT CHARACTER ==");
-            var metaIdx = result.IndexOf("== META CONTRACT ==");
+            var metaIdx = result.IndexOf("== NARRATIVE DOCTRINE ==");
             var opponentSection = result.Substring(opponentIdx, metaIdx - opponentIdx);
             Assert.Contains(opponentText, opponentSection);
         }
 
-        // What: AC4 — META CONTRACT section contains both MetaContract and WritingRules
-        // Mutation: would catch if WritingRules was omitted from the meta contract section
+        // What: AC4 — NARRATIVE DOCTRINE section contains the merged doctrine body
+        // Mutation: would catch if NarrativeDoctrine was omitted from the doctrine section
         [Fact]
         public void Build_MetaContractSectionContainsBothMetaAndWritingRules()
         {
             var custom = new GameDefinition(
                 "G", "V", "W", "P", "O",
-                "UNIQUE_META_CONTRACT_123",
-                "UNIQUE_WRITING_RULES_456");
+                "UNIQUE_META_CONTRACT_123 UNIQUE_WRITING_RULES_456");
 
             var result = SessionSystemPromptBuilder.Build("p", "o", custom);
-            var metaIdx = result.IndexOf("== META CONTRACT ==");
+            var metaIdx = result.IndexOf("== NARRATIVE DOCTRINE ==");
             var afterMeta = result.Substring(metaIdx);
             Assert.Contains("UNIQUE_META_CONTRACT_123", afterMeta);
             Assert.Contains("UNIQUE_WRITING_RULES_456", afterMeta);
@@ -286,7 +284,7 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("== WORLD RULES ==", result);
             Assert.Contains("== PLAYER CHARACTER ==", result);
             Assert.Contains("== OPPONENT CHARACTER ==", result);
-            Assert.Contains("== META CONTRACT ==", result);
+            Assert.Contains("== NARRATIVE DOCTRINE ==", result);
         }
 
         // What: Edge case — empty GameDefinition fields produce sections with empty bodies
@@ -294,10 +292,10 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void Build_EmptyGameDefFields_ProducesAllSections()
         {
-            var emptyDef = new GameDefinition("", "", "", "", "", "", "");
+            var emptyDef = new GameDefinition("", "", "", "", "", "");
             var result = SessionSystemPromptBuilder.Build("player", "opponent", emptyDef);
             Assert.Contains("== GAME VISION ==", result);
-            Assert.Contains("== META CONTRACT ==", result);
+            Assert.Contains("== NARRATIVE DOCTRINE ==", result);
             Assert.Contains("player", result);
             Assert.Contains("opponent", result);
         }
@@ -333,7 +331,6 @@ vision: v
 world_description: w
 player_role_description: p
 opponent_role_description: o
-meta_contract: m
 global_dc_bias: 0
 horniness_time_modifiers:
   morning: 3
@@ -343,7 +340,7 @@ horniness_time_modifiers:
 ";
             var ex = Assert.Throws<FormatException>(() =>
                 GameDefinition.LoadFrom(yaml));
-            Assert.Contains("writing_rules", ex.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("narrative_doctrine", ex.Message, StringComparison.OrdinalIgnoreCase);
         }
 
         // What: Error condition — completely empty YAML
@@ -370,7 +367,7 @@ horniness_time_modifiers:
 
             var playerIdx = result.IndexOf("== PLAYER CHARACTER ==");
             var opponentIdx = result.IndexOf("== OPPONENT CHARACTER ==");
-            var metaIdx = result.IndexOf("== META CONTRACT ==");
+            var metaIdx = result.IndexOf("== NARRATIVE DOCTRINE ==");
 
             var playerSection = result.Substring(playerIdx, opponentIdx - playerIdx);
             var opponentSection = result.Substring(opponentIdx, metaIdx - opponentIdx);
@@ -399,8 +396,7 @@ horniness_time_modifiers:
                 "CUSTOM_WORLD_TEXT",
                 "CUSTOM_PLAYER_ROLE",
                 "CUSTOM_OPPONENT_ROLE",
-                "CUSTOM_META_CONTRACT",
-                "CUSTOM_WRITING_RULES");
+                "CUSTOM_META_CONTRACT CUSTOM_WRITING_RULES");
 
             var result = SessionSystemPromptBuilder.Build("p", "o", custom);
 

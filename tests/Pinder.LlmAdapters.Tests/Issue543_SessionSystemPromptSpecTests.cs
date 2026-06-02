@@ -11,21 +11,20 @@ namespace Pinder.LlmAdapters.Tests
     {
         #region AC1: GameDefinition class with all fields
 
-        // What: AC1 — GameDefinition sealed class with 7 read-only string properties
+        // What: AC1 — GameDefinition sealed class with read-only string properties
         // Mutation: would catch if any property was omitted or mapped to wrong constructor param
         [Fact]
         public void GameDefinition_Constructor_SetsAll7Properties()
         {
             var gd = new GameDefinition(
-                "MyGame", "Vision1", "World1", "Player1", "Opponent1", "Meta1", "Writing1");
+                "MyGame", "Vision1", "World1", "Player1", "Opponent1", "Doctrine1");
 
             Assert.Equal("MyGame", gd.Name);
             Assert.Equal("Vision1", gd.Vision);
             Assert.Equal("World1", gd.WorldDescription);
             Assert.Equal("Player1", gd.PlayerRoleDescription);
             Assert.Equal("Opponent1", gd.OpponentRoleDescription);
-            Assert.Equal("Meta1", gd.MetaContract);
-            Assert.Equal("Writing1", gd.WritingRules);
+            Assert.Equal("Doctrine1", gd.NarrativeDoctrine);
         }
 
         // What: AC1 — constructor throws ArgumentNullException for null name
@@ -34,7 +33,7 @@ namespace Pinder.LlmAdapters.Tests
         public void GameDefinition_Constructor_NullName_ThrowsArgumentNullException()
         {
             var ex = Assert.Throws<ArgumentNullException>(() =>
-                new GameDefinition(null!, "V", "W", "P", "O", "M", "WR"));
+                new GameDefinition(null!, "V", "W", "P", "O", "ND"));
             Assert.Equal("name", ex.ParamName);
         }
 
@@ -44,7 +43,7 @@ namespace Pinder.LlmAdapters.Tests
         public void GameDefinition_Constructor_NullVision_ThrowsArgumentNullException()
         {
             var ex = Assert.Throws<ArgumentNullException>(() =>
-                new GameDefinition("N", null!, "W", "P", "O", "M", "WR"));
+                new GameDefinition("N", null!, "W", "P", "O", "ND"));
             Assert.Equal("vision", ex.ParamName);
         }
 
@@ -54,7 +53,7 @@ namespace Pinder.LlmAdapters.Tests
         public void GameDefinition_Constructor_NullWorldDescription_ThrowsArgumentNullException()
         {
             var ex = Assert.Throws<ArgumentNullException>(() =>
-                new GameDefinition("N", "V", null!, "P", "O", "M", "WR"));
+                new GameDefinition("N", "V", null!, "P", "O", "ND"));
             Assert.Equal("worldDescription", ex.ParamName);
         }
 
@@ -64,7 +63,7 @@ namespace Pinder.LlmAdapters.Tests
         public void GameDefinition_Constructor_NullPlayerRoleDescription_ThrowsArgumentNullException()
         {
             var ex = Assert.Throws<ArgumentNullException>(() =>
-                new GameDefinition("N", "V", "W", null!, "O", "M", "WR"));
+                new GameDefinition("N", "V", "W", null!, "O", "ND"));
             Assert.Equal("playerRoleDescription", ex.ParamName);
         }
 
@@ -74,28 +73,18 @@ namespace Pinder.LlmAdapters.Tests
         public void GameDefinition_Constructor_NullOpponentRoleDescription_ThrowsArgumentNullException()
         {
             var ex = Assert.Throws<ArgumentNullException>(() =>
-                new GameDefinition("N", "V", "W", "P", null!, "M", "WR"));
+                new GameDefinition("N", "V", "W", "P", null!, "ND"));
             Assert.Equal("opponentRoleDescription", ex.ParamName);
         }
 
-        // What: AC1 — constructor throws ArgumentNullException for null metaContract
-        // Mutation: would catch if null check on metaContract was removed
+        // What: AC1 — constructor throws ArgumentNullException for null narrativeDoctrine
+        // Mutation: would catch if null check on narrativeDoctrine was removed
         [Fact]
         public void GameDefinition_Constructor_NullMetaContract_ThrowsArgumentNullException()
         {
             var ex = Assert.Throws<ArgumentNullException>(() =>
-                new GameDefinition("N", "V", "W", "P", "O", null!, "WR"));
-            Assert.Equal("metaContract", ex.ParamName);
-        }
-
-        // What: AC1 — constructor throws ArgumentNullException for null writingRules
-        // Mutation: would catch if null check on writingRules was removed
-        [Fact]
-        public void GameDefinition_Constructor_NullWritingRules_ThrowsArgumentNullException()
-        {
-            var ex = Assert.Throws<ArgumentNullException>(() =>
-                new GameDefinition("N", "V", "W", "P", "O", "M", null!));
-            Assert.Equal("writingRules", ex.ParamName);
+                new GameDefinition("N", "V", "W", "P", "O", null!));
+            Assert.Equal("narrativeDoctrine", ex.ParamName);
         }
 
         // What: Edge case — empty strings are allowed (not null)
@@ -103,14 +92,13 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void GameDefinition_Constructor_AllowsEmptyStrings()
         {
-            var gd = new GameDefinition("", "", "", "", "", "", "");
+            var gd = new GameDefinition("", "", "", "", "", "");
             Assert.Equal("", gd.Name);
             Assert.Equal("", gd.Vision);
             Assert.Equal("", gd.WorldDescription);
             Assert.Equal("", gd.PlayerRoleDescription);
             Assert.Equal("", gd.OpponentRoleDescription);
-            Assert.Equal("", gd.MetaContract);
-            Assert.Equal("", gd.WritingRules);
+            Assert.Equal("", gd.NarrativeDoctrine);
         }
 
         #endregion
@@ -129,9 +117,8 @@ player_role_description: |
   You are the player's character.
 opponent_role_description: |
   You are the opponent.
-meta_contract: |
+narrative_doctrine: |
   Never break character.
-writing_rules: |
   Write in texting register.
 global_dc_bias: 0
 horniness_time_modifiers:
@@ -154,8 +141,8 @@ horniness_time_modifiers:
             Assert.Contains("absurdist", gd.WorldDescription);
             Assert.Contains("player's character", gd.PlayerRoleDescription);
             Assert.Contains("opponent", gd.OpponentRoleDescription);
-            Assert.Contains("break character", gd.MetaContract);
-            Assert.Contains("texting register", gd.WritingRules);
+            Assert.Contains("break character", gd.NarrativeDoctrine);
+            Assert.Contains("texting register", gd.NarrativeDoctrine);
         }
 
         // What: AC2 — LoadFrom throws ArgumentNullException for null input
@@ -191,8 +178,7 @@ name: Test
 world_description: w
 player_role_description: p
 opponent_role_description: o
-meta_contract: m
-writing_rules: wr
+narrative_doctrine: nd
 global_dc_bias: 0
 horniness_time_modifiers:
   morning: 3
@@ -215,8 +201,7 @@ vision: v
 world_description: w
 player_role_description: p
 opponent_role_description: o
-meta_contract: m
-writing_rules: wr
+narrative_doctrine: nd
 global_dc_bias: 0
 horniness_time_modifiers:
   morning: 3
@@ -240,8 +225,7 @@ vision: ~
 world_description: wd
 player_role_description: p
 opponent_role_description: o
-meta_contract: m
-writing_rules: w
+narrative_doctrine: nd
 global_dc_bias: 0
 horniness_time_modifiers:
   morning: 3
@@ -265,8 +249,7 @@ vision: v
 world_description: w
 player_role_description: p
 opponent_role_description: o
-meta_contract: m
-writing_rules: wr
+narrative_doctrine: nd
 global_dc_bias: 0
 horniness_time_modifiers:
   morning: 3
@@ -294,8 +277,7 @@ vision: |
 world_description: w
 player_role_description: p
 opponent_role_description: o
-meta_contract: m
-writing_rules: wr
+narrative_doctrine: nd
 global_dc_bias: 0
 horniness_time_modifiers:
   morning: 3

@@ -23,17 +23,9 @@ namespace Pinder.LlmAdapters
         /// <summary>Opponent character role description.</summary>
         public string OpponentRoleDescription { get; }
 
-        /// <summary>Immersion rules: never break character, [ENGINE] blocks.</summary>
-        public string MetaContract { get; }
-
-        /// <summary>Writing style rules: texting register, brevity, etc.</summary>
-        public string WritingRules { get; }
-
-        /// <summary>Additional world rules about texting psychology.</summary>
-        public string TextingPsychology { get; }
-
-        /// <summary>Show-don't-tell writing principle for character revelation.</summary>
-        public string RevelationOverStatement { get; }
+        /// <summary>Combined narrative doctrine: meta contract, writing rules, texting
+        /// psychology, and revelation-over-statement — always assembled together.</summary>
+        public string NarrativeDoctrine { get; }
 
         /// <summary>Opponent friction / resistance framing.</summary>
         public string OpponentFriction { get; }
@@ -77,12 +69,9 @@ namespace Pinder.LlmAdapters
             string worldDescription,
             string playerRoleDescription,
             string opponentRoleDescription,
-            string metaContract,
-            string writingRules,
+            string narrativeDoctrine,
             DeliveryRules deliveryRules = null,
             DramaticCraft dramaticCraft = null,
-            string textingPsychology = null,
-            string revelationOverStatement = null,
             string opponentFriction = null,
             string opponentCuriosity = null,
             string conversationArcProgression = null,
@@ -99,10 +88,7 @@ namespace Pinder.LlmAdapters
             WorldDescription = worldDescription ?? throw new ArgumentNullException(nameof(worldDescription));
             PlayerRoleDescription = playerRoleDescription ?? throw new ArgumentNullException(nameof(playerRoleDescription));
             OpponentRoleDescription = opponentRoleDescription ?? throw new ArgumentNullException(nameof(opponentRoleDescription));
-            MetaContract = metaContract ?? throw new ArgumentNullException(nameof(metaContract));
-            WritingRules = writingRules ?? throw new ArgumentNullException(nameof(writingRules));
-            TextingPsychology = textingPsychology ?? "";
-            RevelationOverStatement = revelationOverStatement ?? "";
+            NarrativeDoctrine = narrativeDoctrine ?? throw new ArgumentNullException(nameof(narrativeDoctrine));
             OpponentFriction = opponentFriction ?? "";
             OpponentCuriosity = opponentCuriosity ?? "";
             ConversationArcProgression = conversationArcProgression ?? "";
