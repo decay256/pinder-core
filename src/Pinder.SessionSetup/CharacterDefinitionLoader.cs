@@ -200,7 +200,11 @@ namespace Pinder.SessionSetup
                 // the OpponentVisibleProfile DTO can surface it as a
                 // Tinder-card-equivalent field. Was previously read here
                 // and only used for the assembled system prompt.
-                genderIdentity: def.GenderIdentity);
+                genderIdentity: def.GenderIdentity,
+                // #781: expose the final aggregated texting-style lines
+                // so the admin-facing character sheet can show the full
+                // composed template without re-running the aggregator.
+                textingStyleLines: aggregationResult.Lines);
 
             // Issue #779: propagate the permanent stake from the definition
             // to the profile so setup can read it without an LLM call.
