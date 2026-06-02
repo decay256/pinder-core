@@ -60,6 +60,13 @@ namespace Pinder.Core.Characters
         /// <summary>Player-authored build-point allocation block.</summary>
         public AllocationBlock Allocation { get; }
 
+        /// <summary>
+        /// Issue #779: permanent psychological stake generated at character-creation
+        /// time. Markdown bullet list of core emotional motivations and
+        /// vulnerabilities. Null when absent (legacy files not yet regenerated).
+        /// </summary>
+        public string? PsychologicalStake { get; }
+
         public CharacterDefinition(
             int schemaVersion,
             Guid characterId,
@@ -69,7 +76,8 @@ namespace Pinder.Core.Characters
             int level,
             IReadOnlyList<string> items,
             IReadOnlyDictionary<string, string> anatomy,
-            AllocationBlock allocation)
+            AllocationBlock allocation,
+            string? psychologicalStake = null)
         {
             SchemaVersion = schemaVersion;
             CharacterId = characterId;
@@ -80,6 +88,7 @@ namespace Pinder.Core.Characters
             Items = items ?? throw new ArgumentNullException(nameof(items));
             Anatomy = anatomy ?? throw new ArgumentNullException(nameof(anatomy));
             Allocation = allocation ?? throw new ArgumentNullException(nameof(allocation));
+            PsychologicalStake = psychologicalStake;
         }
     }
 

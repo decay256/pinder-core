@@ -68,7 +68,12 @@ namespace Pinder.Core.Characters
         /// </summary>
         public ActiveArchetype ActiveArchetype { get; }
 
-        /// <summary>LLM-generated psychological portrait. Set at session start.</summary>
+        /// <summary>
+        /// Issue #779: permanent psychological stake loaded from the character JSON.
+        /// Populated from the on-disk <c>psychological_stake</c> field at load time.
+        /// Kept settable so legacy test paths (and the admin regenerate endpoint)
+        /// can still overwrite it without a new constructor signature.
+        /// </summary>
         public string? PsychologicalStake { get; set; }
 
         /// <summary>

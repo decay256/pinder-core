@@ -92,6 +92,16 @@ namespace Pinder.SessionSetup
                 var anatomy = ParseAnatomySelections(root);
                 var allocation = ParseAllocation(root);
 
+                // Issue #779: optional permanent psychological stake.
+                string? psychologicalStake = null;
+                if (root.TryGetProperty("psychological_stake", out var stakeProp) &&
+                    stakeProp.ValueKind == JsonValueKind.String)
+                {
+                    string raw = stakeProp.GetString() ?? string.Empty;
+                    if (!string.IsNullOrWhiteSpace(raw))
+                        psychologicalStake = raw.Trim();
+                }
+
                 return new CharacterDefinition(
                     schemaVersion,
                     characterId,
@@ -101,7 +111,8 @@ namespace Pinder.SessionSetup
                     level,
                     items,
                     anatomy,
-                    allocation);
+                    allocation,
+                    psychologicalStake);
             }
         }
 
@@ -178,7 +189,7 @@ namespace Pinder.SessionSetup
                     itemDisplayNames.Add(item.DisplayName);
             }
 
-            return new CharacterProfile(
+            var profile = new CharacterProfile(
                 fragments.Stats, systemPrompt, def.Name, fragments.Timing, def.Level,
                 bio: def.Bio,
                 textingStyleFragment: textingStyle,
@@ -190,6 +201,12 @@ namespace Pinder.SessionSetup
                 // Tinder-card-equivalent field. Was previously read here
                 // and only used for the assembled system prompt.
                 genderIdentity: def.GenderIdentity);
+
+            // Issue #779: propagate the permanent stake from the definition
+            // to the profile so setup can read it without an LLM call.
+            profile.PsychologicalStake = def.PsychologicalStake;
+
+            return profile;
         }
 
         // --- v1 schema parsing ------------------------------------------------

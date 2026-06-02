@@ -133,6 +133,12 @@ namespace Pinder.Core.Characters
             WriteShadows(writer, def.Allocation);
             writer.WriteEndObject();
 
+            // Issue #779: write the permanent stake if present.
+            // Omitted (not written as null) when absent so legacy files
+            // without it are not dirtied by a round-trip.
+            if (!string.IsNullOrWhiteSpace(def.PsychologicalStake))
+                writer.WriteString("psychological_stake", def.PsychologicalStake);
+
             writer.WriteEndObject();
         }
 

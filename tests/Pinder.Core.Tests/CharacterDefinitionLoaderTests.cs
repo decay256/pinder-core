@@ -396,5 +396,119 @@ namespace Pinder.Core.Tests
             Assert.Equal(4, profile.Stats.GetEffective(StatType.Wit));
             Assert.Equal(1, profile.Stats.GetEffective(StatType.SelfAwareness));
         }
+
+        // ── Issue #779: psychological_stake field ───────────────────────────
+
+        /// <summary>
+        /// Issue #779: when the on-disk character JSON carries a
+        /// <c>psychological_stake</c> string, the parsed
+        /// <see cref="CharacterDefinition"/> exposes it on
+        /// <see cref="CharacterDefinition.PsychologicalStake"/> and the
+        /// assembled <see cref="CharacterProfile"/> propagates it to
+        /// <see cref="CharacterProfile.PsychologicalStake"/>.
+        /// </summary>
+        [Fact]
+        public void ParseDefinition_WithPsychologicalStake_PopulatesField()
+        {
+            const string stake = "- The most humiliating thing was X.\n- Y.";
+            string json = ValidV1Json.Replace(
+                "\"anatomy\": {},",
+                "\"anatomy\": {}, \"psychological_stake\": \"- The most humiliating thing was X.\\n- Y.\",");
+
+            var def = CharacterDefinitionLoader.ParseDefinition(json);
+
+            Assert.Equal(stake, def.PsychologicalStake);
+        }
+
+        /// <summary>
+        /// Issue #779: a missing <c>psychological_stake</c> field is
+        /// legal — the loader returns null and the parse succeeds. Mirrors
+        /// legacy character files prior to the backfill.
+        /// </summary>
+        [Fact]
+        public void ParseDefinition_WithoutPsychologicalStake_ReturnsNull()
+        {
+            var def = CharacterDefinitionLoader.ParseDefinition(ValidV1Json);
+            Assert.Null(def.PsychologicalStake);
+        }
+
+        /// <summary>
+        /// Issue #779: an explicit empty / whitespace-only stake is also
+        /// treated as absent so the engine doesn't inject an empty
+        /// <c>== PSYCHOLOGICAL STAKE ==</c> block.
+        /// </summary>
+        [Fact]
+        public void ParseDefinition_WithBlankPsychologicalStake_ReturnsNull()
+        {
+            string json = ValidV1Json.Replace(
+                "\"anatomy\": {},",
+                "\"anatomy\": {}, \"psychological_stake\": \"   \",");
+
+            var def = CharacterDefinitionLoader.ParseDefinition(json);
+            Assert.Null(def.PsychologicalStake);
+        }
+
+        /// <summary>
+        /// Issue #779: surrounding whitespace on a real stake value is
+        /// trimmed so the on-disk format can be hand-edited freely.
+        /// </summary>
+        [Fact]
+        public void ParseDefinition_TrimsSurroundingWhitespace()
+        {
+            string json = ValidV1Json.Replace(
+                "\"anatomy\": {},",
+                "\"anatomy\": {}, \"psychological_stake\": \"\\n  - bullet one\\n\",");
+
+            var def = CharacterDefinitionLoader.ParseDefinition(json);
+            Assert.Equal("- bullet one", def.PsychologicalStake);
+        }
+
+        /// <summary>
+        /// Issue #779: after the canonical backfill, every starter
+        /// character on disk carries a non-empty markdown-bullet stake.
+        /// This is the regression guard that the backfill commit doesn't
+        /// silently lose any of the six entries.
+        /// </summary>
+        [Fact]
+        public void AllSixStarterCharacters_HavePsychologicalStakeOnDisk()
+        {
+            foreach (var slug in AllStarterSlugs)
+            {
+                string path = Path.Combine(RepoRoot, "data", "characters", $"{slug}.json");
+                string json = File.ReadAllText(path);
+
+                var def = CharacterDefinitionLoader.ParseDefinition(json);
+
+                Assert.False(
+                    string.IsNullOrWhiteSpace(def.PsychologicalStake),
+                    $"{slug}: psychological_stake must be a non-empty markdown bullet list (Issue #779)");
+                // Must look like a markdown bullet list — every starter
+                // character should at minimum start with a `- ` bullet.
+                Assert.StartsWith("- ", def.PsychologicalStake!.TrimStart());
+            }
+        }
+
+        /// <summary>
+        /// Issue #779: the assembled <see cref="CharacterProfile"/> for a
+        /// real on-disk character carries the same stake the definition
+        /// loader parsed — i.e. the assembler propagates it to the profile
+        /// where <c>ActiveSession.Setup</c> reads it.
+        /// </summary>
+        [Fact]
+        public void Load_StarterCharacters_PropagatesStakeToProfile()
+        {
+            var itemRepo = LoadItemRepo();
+            var anatomyRepo = LoadAnatomyRepo();
+
+            foreach (var slug in AllStarterSlugs)
+            {
+                string path = Path.Combine(RepoRoot, "data", "characters", $"{slug}.json");
+                var profile = CharacterDefinitionLoader.Load(path, itemRepo, anatomyRepo);
+
+                Assert.False(
+                    string.IsNullOrWhiteSpace(profile.PsychologicalStake),
+                    $"{slug}: CharacterProfile.PsychologicalStake must be populated from the on-disk JSON (Issue #779)");
+            }
+        }
     }
 }
