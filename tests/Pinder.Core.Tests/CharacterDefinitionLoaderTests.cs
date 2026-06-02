@@ -82,7 +82,6 @@ namespace Pinder.Core.Tests
             Assert.Equal(5, profile.Level);
             Assert.NotNull(profile.Stats);
             Assert.NotNull(profile.AssembledSystemPrompt);
-            Assert.Contains("Gerald_42", profile.AssembledSystemPrompt);
             Assert.Contains("PERSONALITY", profile.AssembledSystemPrompt);
             Assert.Contains("EFFECTIVE STATS", profile.AssembledSystemPrompt);
         }
@@ -349,7 +348,8 @@ namespace Pinder.Core.Tests
             var profile = CharacterDefinitionLoader.Parse(json, itemRepo, anatomyRepo);
 
             // Should contain assembled fragments, not be empty
-            Assert.Contains("The character named Gerald_42 is actually the Player.", profile.AssembledSystemPrompt);
+            // Lead-in is now RULES token; character name no longer in character-level prompt (RULES migration).
+            Assert.Contains("RULES", profile.AssembledSystemPrompt);
             Assert.Contains("he/him", profile.AssembledSystemPrompt);
             Assert.Contains("BACKSTORY", profile.AssembledSystemPrompt);
             Assert.Contains("TEXTING STYLE", profile.AssembledSystemPrompt);
