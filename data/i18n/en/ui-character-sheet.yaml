@@ -26,3 +26,7 @@ strings:
   character_sheet.texting_style_sources_heading: "Sources"
   character_sheet.texting_style_no_fragments: "(no texting style fragments — the prompt block is empty)"
   character_sheet.texting_style_empty: "No texting style data is available for this session yet."
+  # #781: Final template section (admin-only)
+  character_sheet.texting_style_final_template_heading: "Final texting-style template (admin)"
+  character_sheet.texting_style_final_template_explainer: "Aggregated axis lines as computed by TextingStyleAggregator. Each line: axis: rule. Admin-facing only."
+  character_sheet.texting_style_final_template_empty: "(no aggregated lines — no items or anatomy configured for this character)"
