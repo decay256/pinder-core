@@ -20,10 +20,9 @@ namespace Pinder.LlmAdapters.Tests
                 "World description text here.",
                 "Player role description here.",
                 "Opponent role description here.",
-                "Meta contract text here.",
-                "Writing rules text here.",
-                textingPsychology: "texting psych content",
-                revelationOverStatement: "revelation content",
+                "Meta contract text here.\n\n== WRITING RULES ==\n\nWriting rules text here.\n\n" +
+                "== TEXTING PSYCHOLOGY ==\n\ntexting psych content\n\n" +
+                "== REVELATION OVER STATEMENT ==\n\nrevelation content",
                 opponentFriction: "opponent friction content",
                 opponentCuriosity: "opponent curiosity content",
                 conversationArcProgression: "conversation arc content",
@@ -73,6 +72,8 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void BuildPlayer_StillIncludesTextingPsychology()
         {
+            // texting psychology is now a sub-section folded into the merged
+            // narrative_doctrine body; it must still surface in BuildPlayer output.
             var def = FullFixture();
             var result = SessionSystemPromptBuilder.BuildPlayer("player prompt", def);
             Assert.Contains("TEXTING PSYCHOLOGY", result);
@@ -82,6 +83,8 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void BuildPlayer_StillIncludesRevelationOverStatement()
         {
+            // revelation-over-statement is now a sub-section folded into the merged
+            // narrative_doctrine body; it must still surface in BuildPlayer output.
             var def = FullFixture();
             var result = SessionSystemPromptBuilder.BuildPlayer("player prompt", def);
             Assert.Contains("REVELATION OVER STATEMENT", result);

@@ -67,7 +67,7 @@ namespace Pinder.Rules.Tests
         public void MetaContract_ForbidsReferencingGameMechanics()
         {
             var data = ParseYaml();
-            var meta = data["meta_contract"];
+            var meta = data["narrative_doctrine"];
             Assert.True(
                 (meta.Contains("dice", StringComparison.OrdinalIgnoreCase) ||
                  meta.Contains("DC", StringComparison.Ordinal) ||
@@ -82,7 +82,7 @@ namespace Pinder.Rules.Tests
         public void MetaContract_ForbidsAddingContent()
         {
             var data = ParseYaml();
-            var meta = data["meta_contract"];
+            var meta = data["narrative_doctrine"];
             Assert.True(
                 meta.Contains("add", StringComparison.OrdinalIgnoreCase) &&
                 (meta.Contains("didn't choose", StringComparison.OrdinalIgnoreCase) ||
@@ -98,7 +98,7 @@ namespace Pinder.Rules.Tests
         public void MetaContract_ForbidsEarlyDateResolution()
         {
             var data = ParseYaml();
-            var meta = data["meta_contract"];
+            var meta = data["narrative_doctrine"];
             Assert.True(
                 (meta.Contains("resolve", StringComparison.OrdinalIgnoreCase) ||
                  meta.Contains("date", StringComparison.OrdinalIgnoreCase)) &&
@@ -113,7 +113,7 @@ namespace Pinder.Rules.Tests
         public void MetaContract_RequiresDistinctVoices()
         {
             var data = ParseYaml();
-            var meta = data["meta_contract"];
+            var meta = data["narrative_doctrine"];
             Assert.True(
                 meta.Contains("distinct", StringComparison.OrdinalIgnoreCase) ||
                 meta.Contains("voice", StringComparison.OrdinalIgnoreCase) ||
@@ -126,7 +126,7 @@ namespace Pinder.Rules.Tests
         public void MetaContract_MentionsEngineBlocks()
         {
             var data = ParseYaml();
-            var meta = data["meta_contract"];
+            var meta = data["narrative_doctrine"];
             Assert.Contains("ENGINE", meta);
         }
 
@@ -137,7 +137,7 @@ namespace Pinder.Rules.Tests
         public void WritingRules_MentionsMessageLength()
         {
             var data = ParseYaml();
-            var rules = data["writing_rules"];
+            var rules = data["narrative_doctrine"];
             Assert.True(
                 rules.Contains("sentence", StringComparison.OrdinalIgnoreCase) ||
                 rules.Contains("short", StringComparison.OrdinalIgnoreCase) ||
@@ -150,7 +150,7 @@ namespace Pinder.Rules.Tests
         public void WritingRules_MentionsEmojiUsage()
         {
             var data = ParseYaml();
-            var rules = data["writing_rules"];
+            var rules = data["narrative_doctrine"];
             Assert.True(
                 rules.Contains("emoji", StringComparison.OrdinalIgnoreCase),
                 "Writing rules must mention emoji usage conventions");
@@ -161,7 +161,7 @@ namespace Pinder.Rules.Tests
         public void WritingRules_ForbidsAsteriskActions()
         {
             var data = ParseYaml();
-            var rules = data["writing_rules"];
+            var rules = data["narrative_doctrine"];
             Assert.Contains("asterisk", rules, StringComparison.OrdinalIgnoreCase);
         }
 
@@ -170,7 +170,7 @@ namespace Pinder.Rules.Tests
         public void WritingRules_MentionsComedyThroughVoice()
         {
             var data = ParseYaml();
-            var rules = data["writing_rules"];
+            var rules = data["narrative_doctrine"];
             Assert.True(
                 rules.Contains("comedy", StringComparison.OrdinalIgnoreCase) &&
                 rules.Contains("voice", StringComparison.OrdinalIgnoreCase),
@@ -182,7 +182,7 @@ namespace Pinder.Rules.Tests
         public void WritingRules_MentionsStrongRollSharpening()
         {
             var data = ParseYaml();
-            var rules = data["writing_rules"];
+            var rules = data["narrative_doctrine"];
             Assert.True(
                 rules.Contains("sharpen", StringComparison.OrdinalIgnoreCase) ||
                 rules.Contains("improve", StringComparison.OrdinalIgnoreCase) ||
@@ -195,7 +195,7 @@ namespace Pinder.Rules.Tests
         public void WritingRules_MentionsFailureCorruption()
         {
             var data = ParseYaml();
-            var rules = data["writing_rules"];
+            var rules = data["narrative_doctrine"];
             Assert.True(
                 rules.Contains("fail", StringComparison.OrdinalIgnoreCase) &&
                 (rules.Contains("corrupt", StringComparison.OrdinalIgnoreCase) ||
@@ -214,7 +214,7 @@ namespace Pinder.Rules.Tests
             var data = ParseYaml();
             // All content sections should be multi-line (contain newlines)
             foreach (var key in new[] { "world_description", "player_role_description",
-                                        "opponent_role_description", "meta_contract", "writing_rules" })
+                                        "opponent_role_description", "narrative_doctrine" })
             {
                 Assert.Contains("\n", data[key]);
             }

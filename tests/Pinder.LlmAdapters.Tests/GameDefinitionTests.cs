@@ -15,9 +15,8 @@ player_role_description: |
   Player role.
 opponent_role_description: |
   Opponent role.
-meta_contract: |
+narrative_doctrine: |
   Meta contract text.
-writing_rules: |
   Writing rules text.
 global_dc_bias: 0
 horniness_time_modifiers:
@@ -30,34 +29,33 @@ horniness_time_modifiers:
         [Fact]
         public void Constructor_SetsAllProperties()
         {
-            var gd = new GameDefinition("N", "V", "W", "P", "O", "M", "WR");
+            var gd = new GameDefinition("N", "V", "W", "P", "O", "ND");
             Assert.Equal("N", gd.Name);
             Assert.Equal("V", gd.Vision);
             Assert.Equal("W", gd.WorldDescription);
             Assert.Equal("P", gd.PlayerRoleDescription);
             Assert.Equal("O", gd.OpponentRoleDescription);
-            Assert.Equal("M", gd.MetaContract);
-            Assert.Equal("WR", gd.WritingRules);
+            Assert.Equal("ND", gd.NarrativeDoctrine);
         }
 
         [Fact]
         public void Constructor_ThrowsOnNullName()
         {
             Assert.Throws<ArgumentNullException>(() =>
-                new GameDefinition(null!, "V", "W", "P", "O", "M", "WR"));
+                new GameDefinition(null!, "V", "W", "P", "O", "ND"));
         }
 
         [Fact]
         public void Constructor_ThrowsOnNullVision()
         {
             Assert.Throws<ArgumentNullException>(() =>
-                new GameDefinition("N", null!, "W", "P", "O", "M", "WR"));
+                new GameDefinition("N", null!, "W", "P", "O", "ND"));
         }
 
         [Fact]
         public void Constructor_AllowsEmptyStrings()
         {
-            var gd = new GameDefinition("", "", "", "", "", "", "");
+            var gd = new GameDefinition("", "", "", "", "", "");
             Assert.Equal("", gd.Name);
         }
 
@@ -70,8 +68,8 @@ horniness_time_modifiers:
             Assert.Contains("test world description", gd.WorldDescription);
             Assert.Contains("Player role", gd.PlayerRoleDescription);
             Assert.Contains("Opponent role", gd.OpponentRoleDescription);
-            Assert.Contains("Meta contract", gd.MetaContract);
-            Assert.Contains("Writing rules", gd.WritingRules);
+            Assert.Contains("Meta contract", gd.NarrativeDoctrine);
+            Assert.Contains("Writing rules", gd.NarrativeDoctrine);
         }
 
         [Fact]
@@ -107,8 +105,7 @@ vision: ~
 world_description: wd
 player_role_description: p
 opponent_role_description: o
-meta_contract: m
-writing_rules: w
+narrative_doctrine: m
 global_dc_bias: 0
 horniness_time_modifiers:
   morning: 3
@@ -130,8 +127,7 @@ vision: v
 world_description: w
 player_role_description: p
 opponent_role_description: o
-meta_contract: m
-writing_rules: wr
+narrative_doctrine: nd
 global_dc_bias: 0
 horniness_time_modifiers:
   morning: 3
@@ -155,8 +151,8 @@ another: also ignored
             Assert.Contains("dating server", gd.WorldDescription);
             Assert.Contains("player character", gd.PlayerRoleDescription, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("opponent", gd.OpponentRoleDescription, StringComparison.OrdinalIgnoreCase);
-            Assert.Contains("break character", gd.MetaContract, StringComparison.OrdinalIgnoreCase);
-            Assert.Contains("texting register", gd.WritingRules, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("break character", gd.NarrativeDoctrine, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("texting register", gd.NarrativeDoctrine, StringComparison.OrdinalIgnoreCase);
         }
 
         [Fact]

@@ -16,8 +16,7 @@ vision: v
 world_description: w
 player_role_description: p
 opponent_role_description: o
-meta_contract: m
-writing_rules: wr
+narrative_doctrine: nd
 global_dc_bias: 0
 horniness_time_modifiers:
   morning: 3
@@ -66,8 +65,7 @@ vision: v
 world_description: w
 player_role_description: p
 opponent_role_description: o
-meta_contract: m
-writing_rules: wr
+narrative_doctrine: nd
 global_dc_bias: 0
 horniness_time_modifiers:
   morning: 10
@@ -93,8 +91,7 @@ vision: v
 world_description: w
 player_role_description: p
 opponent_role_description: o
-meta_contract: m
-writing_rules: wr
+narrative_doctrine: nd
 global_dc_bias: 0
 ";
             var ex = Assert.Throws<InvalidOperationException>(
@@ -111,8 +108,7 @@ vision: v
 world_description: w
 player_role_description: p
 opponent_role_description: o
-meta_contract: m
-writing_rules: wr
+narrative_doctrine: nd
 global_dc_bias: 0
 ";
             var ex = Assert.Throws<InvalidOperationException>(
@@ -129,8 +125,7 @@ vision: v
 world_description: w
 player_role_description: p
 opponent_role_description: o
-meta_contract: m
-writing_rules: wr
+narrative_doctrine: nd
 global_dc_bias: 0
 horniness_time_modifiers: ~
 ";
@@ -149,8 +144,7 @@ vision: v
 world_description: w
 player_role_description: p
 opponent_role_description: o
-meta_contract: m
-writing_rules: wr
+narrative_doctrine: nd
 global_dc_bias: 0
 horniness_time_modifiers:
   morning: -3
@@ -174,8 +168,7 @@ vision: v
 world_description: w
 player_role_description: p
 opponent_role_description: o
-meta_contract: m
-writing_rules: wr
+narrative_doctrine: nd
 global_dc_bias: 0
 horniness_time_modifiers:
   morning: 0

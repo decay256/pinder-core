@@ -80,8 +80,7 @@ namespace Pinder.LlmAdapters
             var worldDescription = GetRequired("world_description");
             var playerRoleDescription = GetRequired("player_role_description");
             var opponentRoleDescription = GetRequired("opponent_role_description");
-            var metaContract = GetRequired("meta_contract");
-            var writingRules = GetRequired("writing_rules");
+            var narrativeDoctrine = GetRequired("narrative_doctrine");
 
             // Parse required global_dc_bias
             if (!parsed.TryGetValue("global_dc_bias", out var gdcbObj) || gdcbObj == null)
@@ -95,12 +94,9 @@ namespace Pinder.LlmAdapters
                 worldDescription: worldDescription,
                 playerRoleDescription: playerRoleDescription,
                 opponentRoleDescription: opponentRoleDescription,
-                metaContract: metaContract,
-                writingRules: writingRules,
+                narrativeDoctrine: narrativeDoctrine,
                 deliveryRules: deliveryRules,
                 dramaticCraft: dramaticCraft,
-                textingPsychology: GetOptional("texting_psychology"),
-                revelationOverStatement: GetOptional("revelation_over_statement"),
                 opponentFriction: GetOptional("opponent_friction"),
                 opponentCuriosity: GetOptional("opponent_curiosity"),
                 conversationArcProgression: conversationArcProgression,

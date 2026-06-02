@@ -64,7 +64,7 @@ create conversational disruptions the opponent responds to naturally.
 
 The opponent has their own texting style that must remain distinct from
 the player's at all times.",
-            metaContract: @"Characters believe they are real people in a real situation. They cannot
+            narrativeDoctrine: @"Characters believe they are real people in a real situation. They cannot
 see dice, DCs, stat modifiers, interest meters, shadow thresholds,
 failure tiers, combo trackers, or any game mechanic. All of these exist
 beneath the conversation, not inside it.
@@ -76,18 +76,11 @@ no narrator, no aside, no wink to the audience.
 Never add ideas the player didn't choose. Success delivery improves
 phrasing — it does not introduce new topics, jokes, or emotional content.
 Never resolve the date before Interest reaches 25 mechanically.
-Maintain two distinct character voices throughout the entire conversation.",
-            deliveryRules: new DeliveryRules(
-                clean: "Deliver essentially as written. Small word choice improvements only.",
-                strong: "Improve the phrasing, timing, or rhythm of what's already there.\n" +
-                    "You may: rearrange for better flow, sharpen word choice, add ONE word or phrase that makes the existing sentiment more precise.\n" +
-                    "You must not: add new sentences that introduce ideas not in the intended message, change the emotional register, or make the message say something the player didn't intend.",
-                critical: "Deliver at peak. The message arrives perfectly. Something resonates.",
-                exceptional: "This is the best version of this message that could exist. It arrives at exactly the right moment with exactly the right weight. The opponent feels it.",
-                test: "The test: every idea in the delivered version should have a counterpart in the intended version. New additions should sharpen, not expand.",
-                registerInstruction: "Stay in character. Match the texting register from the character profile above. Do not change the character's capitalization style.",
-                mediumRule: "This is a text message on a phone screen, not a monologue. No internal stage directions, no narration of emotional state, no self-commentary mid-message."),
-            writingRules: @"All dialogue is texting register. Short, informal, platform-appropriate.
+Maintain two distinct character voices throughout the entire conversation.
+
+== WRITING RULES ==
+
+All dialogue is texting register. Short, informal, platform-appropriate.
 Message length: typically 1-3 sentences for player options, 1-4 sentences
 for opponent responses. Brevity is a feature.
 
@@ -101,6 +94,16 @@ message proportional to the failure tier.
 Subtext over text. Reveal through choices, not statements. Every message
 should sound like something a real person would actually send on a dating
 app at 1 AM.",
+            deliveryRules: new DeliveryRules(
+                clean: "Deliver essentially as written. Small word choice improvements only.",
+                strong: "Improve the phrasing, timing, or rhythm of what's already there.\n" +
+                    "You may: rearrange for better flow, sharpen word choice, add ONE word or phrase that makes the existing sentiment more precise.\n" +
+                    "You must not: add new sentences that introduce ideas not in the intended message, change the emotional register, or make the message say something the player didn't intend.",
+                critical: "Deliver at peak. The message arrives perfectly. Something resonates.",
+                exceptional: "This is the best version of this message that could exist. It arrives at exactly the right moment with exactly the right weight. The opponent feels it.",
+                test: "The test: every idea in the delivered version should have a counterpart in the intended version. New additions should sharpen, not expand.",
+                registerInstruction: "Stay in character. Match the texting register from the character profile above. Do not change the character's capitalization style.",
+                mediumRule: "This is a text message on a phone screen, not a monologue. No internal stage directions, no narration of emotional state, no self-commentary mid-message."),
             dramaticCraft: new DramaticCraft(
                 goal: @"Every conversation should produce emotional investment, tension, and payoff.
 Not just a pleasant exchange — a story the player felt. The player should be

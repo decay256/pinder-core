@@ -21,8 +21,7 @@ namespace Pinder.Rules.Tests
             "world_description",
             "player_role_description",
             "opponent_role_description",
-            "meta_contract",
-            "writing_rules"
+            "narrative_doctrine"
         };
 
         /// <summary>All top-level keys expected in the current game-definition.yaml.</summary>
@@ -33,15 +32,12 @@ namespace Pinder.Rules.Tests
             "max_dialogue_options",
             "vision",
             "world_description",
-            "texting_psychology",
             "player_role_description",
             "opponent_role_description",
             "opponent_friction",
             "opponent_curiosity",
             "player_probing",
-            "meta_contract",
-            "writing_rules",
-            "revelation_over_statement",
+            "narrative_doctrine",
             "delivery_rules",
             "conversation_arc",
             "dramatic_craft",
@@ -170,8 +166,7 @@ namespace Pinder.Rules.Tests
         [InlineData("world_description")]
         [InlineData("player_role_description")]
         [InlineData("opponent_role_description")]
-        [InlineData("meta_contract")]
-        [InlineData("writing_rules")]
+        [InlineData("narrative_doctrine")]
         public void YamlFile_ValueIsNonEmpty(string key)
         {
             var raw = ParseYamlRaw();
@@ -236,7 +231,7 @@ namespace Pinder.Rules.Tests
         public void YamlFile_MetaContractMentionsNeverBreakCharacter()
         {
             var data = ParseYaml();
-            var meta = data["meta_contract"];
+            var meta = data["narrative_doctrine"];
             Assert.Contains("Never break character", meta);
             Assert.Contains("ENGINE", meta);
         }
@@ -245,7 +240,7 @@ namespace Pinder.Rules.Tests
         public void YamlFile_WritingRulesMentionsTextingRegister()
         {
             var data = ParseYaml();
-            var rules = data["writing_rules"];
+            var rules = data["narrative_doctrine"];
             Assert.Contains("texting", rules, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("asterisk", rules, StringComparison.OrdinalIgnoreCase);
         }

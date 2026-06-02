@@ -26,13 +26,6 @@ world_description: |
   they send is what they chose to send — unless a game mechanic overrides that control.
   Session stats can CORRUPT messages (handled by separate corruption sessions): neediness,
   desperation, etc. leaking out in the funniest, most cringe ways.
-texting_psychology: |
-  Every message is an edited version of something they almost sent; character lives in
-  the gap between first draft and what sends. High Rizz = edits less (confidence is sending
-  the first draft). High Overthinking = edits too much. High Honesty = sends things they
-  should have edited out. Texting on a dating app is slightly performative — even authentic
-  characters build a version of themselves message by message, and the gap between that
-  performance and the reality is where shadow growth happens.
 player_role_description: |
   The PLAYER AVATAR genuinely wants the date; their goal is to raise Interest to 25 ("Date Secured"). The human PLAYER also earns XP, but the character doesn't know about XP — they
   just want it to go well.
@@ -64,7 +57,7 @@ player_probing: |
   relationship that ended over a spreadsheet, a job quit on a Tuesday and hidden for weeks).
   The PLAYER AVATAR probes the absurd detail with complete sincerity. The absurdity is never
   acknowledged — it's treated as the normal texture of a life, because to them it is.
-meta_contract: |
+narrative_doctrine: |
   Characters believe they are real people in a real situation. They cannot see dice, DCs,
   modifiers, the interest meter, shadow thresholds, failure tiers, or combo trackers. All of
   these exist beneath the conversation, never inside it, and manifest only through HOW
@@ -85,7 +78,9 @@ meta_contract: |
   Maintain two distinct voices throughout: PLAYER AVATAR and DATEE must never converge in
   register, vocabulary, emoji use, or sentence structure. If one texts lowercase with no
   punctuation, the other does not drift to match.
-writing_rules: |
+
+  == WRITING RULES ==
+
   Texting register only — messages on a dating app, not letters/speeches/narration. Short,
   informal, platform-appropriate: fragments, strategic punctuation, words chosen for how they
   read on a screen. Length: PLAYER AVATAR options ~1-3 sentences, DATEE responses ~1-4.
@@ -112,6 +107,21 @@ writing_rules: |
   silences exist. The best moments reveal something the character didn't intend to. The human
   PLAYER is watching: every message should sound like something a real person would actually
   send on a dating app at 1 AM.
+
+  == TEXTING PSYCHOLOGY ==
+
+  Every message is an edited version of something they almost sent; character lives in
+  the gap between first draft and what sends. High Rizz = edits less (confidence is sending
+  the first draft). High Overthinking = edits too much. High Honesty = sends things they
+  should have edited out. Texting on a dating app is slightly performative — even authentic
+  characters build a version of themselves message by message, and the gap between that
+  performance and the reality is where shadow growth happens.
+
+  == REVELATION OVER STATEMENT ==
+
+  Reveal through choices, not statements; show, don't tell. The best moments reveal something
+  the character didn't intend (a Peacock doesn't announce success — they mention the deal they
+  closed as context, and the brag is in the framing).
 conversation_arc:
   progression: |
     Conversations move — they don't loop on one topic forever; even a great topic is a door,
@@ -244,10 +254,6 @@ delivery_rules:
   medium_rule: |
     A text message on a phone screen, not a monologue. No stage directions, no narration of
     emotional state, no self-commentary mid-message.
-revelation_over_statement: |
-  Reveal through choices, not statements; show, don't tell. The best moments reveal something
-  the character didn't intend (a Peacock doesn't announce success — they mention the deal they
-  closed as context, and the brag is in the framing).
 improvement_prompt: |
   Silently check whether what you just wrote has any of these problems:
   - Topics looping without moving forward, or not about their actual lives

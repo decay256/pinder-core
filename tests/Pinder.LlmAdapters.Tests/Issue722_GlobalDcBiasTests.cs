@@ -15,9 +15,8 @@ player_role_description: |
   Player role.
 opponent_role_description: |
   Opponent role.
-meta_contract: |
+narrative_doctrine: |
   Meta contract text.
-writing_rules: |
   Writing rules text.
 horniness_time_modifiers:
   morning: 3
@@ -63,14 +62,14 @@ horniness_time_modifiers:
         [Fact]
         public void Constructor_DefaultGlobalDcBias_IsZero()
         {
-            var gd = new GameDefinition("N", "V", "W", "P", "O", "M", "WR");
+            var gd = new GameDefinition("N", "V", "W", "P", "O", "ND");
             Assert.Equal(0, gd.GlobalDcBias);
         }
 
         [Fact]
         public void Constructor_ExplicitGlobalDcBias_IsSet()
         {
-            var gd = new GameDefinition("N", "V", "W", "P", "O", "M", "WR", globalDcBias: 7);
+            var gd = new GameDefinition("N", "V", "W", "P", "O", "ND", globalDcBias: 7);
             Assert.Equal(7, gd.GlobalDcBias);
         }
     }
