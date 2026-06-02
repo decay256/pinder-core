@@ -52,6 +52,19 @@ namespace Pinder.Core.Characters
         public string TextingStyleFragment { get; }
 
         /// <summary>
+        /// Issue #781: the final aggregated texting-style axis lines as
+        /// computed by <c>TextingStyleAggregator.AggregateWithAudit</c>.
+        /// Each line has the shape <c>&quot;axis: rule&quot;</c>
+        /// (e.g. <c>"emoji: ends every sentence with an emoji"</c>).
+        /// Lines are in canonical axis order (emoji, shorthand, grammar,
+        /// structure, length, tics, stance, register, pacing); missing
+        /// axes are dropped rather than back-filled.
+        /// Empty when the aggregator produced no output (no items / anatomy
+        /// configured for this character).
+        /// </summary>
+        public IReadOnlyList<string> TextingStyleLines { get; }
+
+        /// <summary>
         /// Issue #404: per-source breakdown of the texting-style fragments
         /// that were joined into <see cref="TextingStyleFragment"/>. Each
         /// entry pairs <c>(kind, source, fragment)</c>: kind is
@@ -116,7 +129,8 @@ namespace Pinder.Core.Characters
             ActiveArchetype activeArchetype = null,
             IReadOnlyList<string> equippedItemDisplayNames = null,
             IReadOnlyList<TextingStyleFragmentSource> textingStyleSources = null,
-            string genderIdentity = "")
+            string genderIdentity = "",
+            IReadOnlyList<string> textingStyleLines = null)
         {
             Stats = stats ?? throw new ArgumentNullException(nameof(stats));
             AssembledSystemPrompt = assembledSystemPrompt ?? throw new ArgumentNullException(nameof(assembledSystemPrompt));
@@ -132,6 +146,9 @@ namespace Pinder.Core.Characters
             // #562: optional, defaults to "" so existing test fixtures
             // and unit-test ctors work without modification.
             GenderIdentity = genderIdentity ?? string.Empty;
+            // #781: final aggregated texting-style lines. Defaults to empty
+            // list so existing callers (test fixtures) don't need to pass it.
+            TextingStyleLines = textingStyleLines ?? new System.Collections.Generic.List<string>();
         }
     }
 }
