@@ -26,8 +26,8 @@
 conflicts:
   # --- length × length (mutually exclusive length rules) ---
   - axis_a: { axis: length, value: "never sends more than 5 words" }
-    axis_b: { axis: length, value: "minimum 80 words per message, no exceptions" }
-    reason: "Mutually exclusive length rules — hard 5-word cap vs. 80-word floor"
+    axis_b: { axis: length, value: "compact but layered — 1-2 sentences, several ideas packed in, never padded" }
+    reason: "Mutually exclusive length rules — hard 5-word cap cannot hold several packed ideas"
 
   # --- structure × length (wall-of-text incompatible with 5-word cap) ---
   - axis_a: { axis: structure, value: "wall-of-text (one paragraph, no breaks, comma splices throughout)" }
@@ -56,11 +56,6 @@ conflicts:
   - axis_a: { axis: stance, value: '"omg same" energy, can''t disagree, vaguely unsettling' }
     axis_b: { axis: stance, value: "mild disagreement with everything, even compliments" }
     reason: "Mutually exclusive stances — can't simultaneously always-agree and mildly-disagree-with-everything"
-
-  # --- length × pacing (minimum 80 words incompatible with sparse pacing) ---
-  - axis_a: { axis: length, value: "minimum 80 words per message, no exceptions" }
-    axis_b: { axis: pacing, value: "minimal, sparse, long pauses implied" }
-    reason: "80-word floor is semantically incompatible with minimal/sparse pacing"
 
   # --- length × structure (5-word cap incompatible with measured whitespace) ---
   - axis_a: { axis: length, value: "never sends more than 5 words" }
