@@ -101,10 +101,12 @@ namespace Pinder.Core.Tests
         // ─── Integration-level: GameSession shadow-corruption populates fields ─
 
         [Fact]
-        public async Task GameSession_SuccessDemotedByShadow_PopulatesFinalMissAndFinalTier()
+        public async Task GameSession_SuccessShadowTrap_FinalVerdictStaysSuccess()
         {
-            // Mirrors Issue365_ShadowOnFailedRollTests.SuccessRoll_ShadowMiss…
-            // — d20=20 success demoted by shadow miss.
+            // #1095: a shadow trap (success roll + paired-shadow MISS with overlay)
+            // NO LONGER demotes the turn to a forced Miss. The overlay still fires
+            // (the message is tainted, the delta is capped at 1), but FinalVerdict /
+            // FinalTier stay on the SUCCESS path — the turn is not a failure.
             var instructions = LoadYaml();
 
             var playerStats = MakeStats(allStats: 5, shadowOnPair: 10, pairStat: ShadowStatType.Despair);
@@ -129,21 +131,23 @@ namespace Pinder.Core.Tests
             int rizzIdx = FindIndex(llm.LastOptions, StatType.Rizz);
             var result = await session.ResolveTurnAsync(rizzIdx);
 
-            // Pre-demotion fields stay TRUE / Success (back-compat).
+            // Pre-shadow fields stay TRUE / Success (back-compat).
             Assert.True(result.Roll.IsSuccess);
             Assert.Equal(FailureTier.Success, result.Roll.Tier);
             Assert.True(result.Roll.Check.IsSuccess);
             Assert.Equal(FailureTier.Success, result.Roll.Check.Tier);
 
-            // Shadow overlay fired.
+            // Shadow overlay fired (message tainted, delta capped).
             Assert.True(result.ShadowCheck.OverlayApplied);
 
-            // #927: FinalVerdict / FinalTier on the option-roll's Check reflect
-            // the post-shadow demotion. The shadow tier is whatever the shadow
-            // ladder produced for missMargin=9 (DC=10 - roll=1 = 9 → TropeTrap).
-            Assert.Equal(RollVerdict.Miss, result.Roll.Check.FinalVerdict);
-            Assert.Equal(result.ShadowCheck.Tier, result.Roll.Check.FinalTier);
-            Assert.NotEqual(FailureTier.Success, result.Roll.Check.FinalTier);
+            // #1095: FinalVerdict / FinalTier are NOT demoted — the verdict stays
+            // Success because a shadow trap is no longer a turn failure.
+            Assert.Equal(RollVerdict.Success, result.Roll.Check.FinalVerdict);
+            Assert.Equal(FailureTier.Success, result.Roll.Check.FinalTier);
+
+            // The interest delta is capped at a maximum of 1 (a positive success
+            // delta, truncated by the shadow trap; horniness may floor it further).
+            Assert.InRange(result.InterestDelta, 0, 1);
         }
 
         [Fact]
@@ -224,11 +228,11 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public async Task GameSession_MultipleTurns_OnlyTurnWithOverlayHasFinalDemoted()
+        public async Task GameSession_MultipleTurns_ShadowTrapTurnStaysSuccess()
         {
             // Run two consecutive turns. Turn 1: success with no shadow.
-            // Turn 2: success demoted by shadow. The two turns' RollCheckResult
-            // instances are independent — only turn 2 has FinalVerdict=Miss.
+            // Turn 2: success + shadow trap. #1095: the shadow trap no longer
+            // demotes turn 2 to a Miss — both turns' FinalVerdict stay Success.
             var instructions = LoadYaml();
 
             // Player starts WITHOUT shadow; we'll bump shadow between turns.
@@ -255,12 +259,15 @@ namespace Pinder.Core.Tests
             // Turn 1.
             await session.StartTurnAsync();
             int rizzIdx1 = FindIndex(llm.LastOptions, StatType.Rizz);
+            int momentumBefore = session.CreateSnapshot().MomentumStreak;
             var turn1 = await session.ResolveTurnAsync(rizzIdx1);
+            int momentumAfterTurn1 = session.CreateSnapshot().MomentumStreak;
 
             Assert.True(turn1.Roll.IsSuccess);
             Assert.False(turn1.ShadowCheck.OverlayApplied);
             Assert.Equal(RollVerdict.Success, turn1.Roll.Check.FinalVerdict);
             Assert.Equal(FailureTier.Success, turn1.Roll.Check.FinalTier);
+            Assert.Equal(momentumBefore + 1, momentumAfterTurn1);
 
             // Bump shadow so turn 2 has an active paired shadow.
             playerShadows.ApplyGrowth(ShadowStatType.Despair, +10, "test setup");
@@ -269,11 +276,16 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
             int rizzIdx2 = FindIndex(llm.LastOptions, StatType.Rizz);
             var turn2 = await session.ResolveTurnAsync(rizzIdx2);
+            int momentumAfterTurn2 = session.CreateSnapshot().MomentumStreak;
 
             Assert.True(turn2.Roll.IsSuccess);
             Assert.True(turn2.ShadowCheck.OverlayApplied);
-            Assert.Equal(RollVerdict.Miss, turn2.Roll.Check.FinalVerdict);
-            Assert.Equal(turn2.ShadowCheck.Tier, turn2.Roll.Check.FinalTier);
+
+            // #1095: a shadow trap is NOT a turn failure — verdict stays Success
+            // and momentum continues to increment through the trap turn.
+            Assert.Equal(RollVerdict.Success, turn2.Roll.Check.FinalVerdict);
+            Assert.Equal(FailureTier.Success, turn2.Roll.Check.FinalTier);
+            Assert.Equal(momentumAfterTurn1 + 1, momentumAfterTurn2);
 
             // Turn 1's Check is independent — was NOT retroactively mutated.
             Assert.Equal(RollVerdict.Success, turn1.Roll.Check.FinalVerdict);

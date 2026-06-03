@@ -1,4 +1,7 @@
 delivery_instructions:
+  # Revision log:
+  #   2026-06-03 (#1095): shadow corruption is a "tainted, capped" message, not a
+  #   failed turn — the shadow-trap consequence reads neutral-to-slightly-negative.
   charm:
     clean: >-
       Check the character's observation style in their profile. Deliver the player's message as-written but

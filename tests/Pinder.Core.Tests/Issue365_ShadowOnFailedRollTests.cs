@@ -170,12 +170,13 @@ namespace Pinder.Core.Tests
         }
 
         /// <summary>
-        /// AC: On a SUCCESS roll + shadow miss, the existing override behavior
-        /// still kicks in — interest delta is replaced with the failure delta.
-        /// (#365 fix preserves this on success rolls.)
+        /// #1095: On a SUCCESS roll + shadow miss (a "shadow trap"), the turn is
+        /// NO LONGER demoted to a forced failure. The positive interest delta is
+        /// truncated to a maximum of 1 (then horniness may floor it to 0), but the
+        /// roll stays a SUCCESS — the verdict is not overridden to Miss.
         /// </summary>
         [Fact]
-        public async Task SuccessRoll_ShadowMiss_StillOverridesInterestDeltaToFailure()
+        public async Task SuccessRoll_ShadowMiss_TruncatesInterestDeltaToOne_StaysSuccess()
         {
             var instructions = LoadYaml();
 
@@ -204,9 +205,13 @@ namespace Pinder.Core.Tests
             Assert.True(result.Roll.IsSuccess);
             Assert.True(result.ShadowCheck.OverlayApplied);
             Assert.True(llm.ShadowCorruptionCalled);
-            // The success was demoted to a failure delta — non-positive.
-            Assert.True(result.InterestDelta <= 0,
-                $"Success demoted by shadow should yield non-positive delta; got {result.InterestDelta}");
+
+            // #1095: the success is NOT demoted — the FINAL verdict stays Success.
+            Assert.Equal(Pinder.Core.Rolls.RollVerdict.Success, result.Roll.Check.FinalVerdict);
+
+            // #1095: the positive delta is truncated to a max of 1 (horniness may
+            // floor it further to 0), so the final delta is in [0, 1].
+            Assert.InRange(result.InterestDelta, 0, 1);
         }
 
         private static int FindIndex(DialogueOption[] options, StatType stat)

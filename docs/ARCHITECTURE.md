@@ -171,11 +171,11 @@ A single turn flows through two phases: `StartTurnAsync` (generate options) and 
 
 10. **Horniness check (roll only)** — Separate RNG. DC = 20 − session horniness. On miss, records the overlay instruction via `HorninessEngine.PeekAsync()` but defers the text rewrite until after shadow corruption (#899).
 
-10a. **Shadow corruption** — If the chosen stat has an active paired shadow and the shadow check misses, calls `ILlmAdapter.ApplyShadowCorruptionAsync()` to rewrite the message with shadow flavor. On a successful main roll, also demotes the interest delta to the shadow-tier failure delta (#365).
+10a. **Shadow corruption** — If the chosen stat has an active paired shadow and the shadow check misses, calls `ILlmAdapter.ApplyShadowCorruptionAsync()` to rewrite the message with shadow flavor. On a successful main roll (a "shadow trap"), the turn is **NOT** demoted to a failure: instead the positive interest delta is **truncated to a maximum of 1** (`finalDelta = min(positiveDelta, 1)`, #1095). The roll verdict stays SUCCESS — `ApplyFinalOverride(Miss, …)` is **not** called for the shadow-trap case — so momentum keeps incrementing and success-gated downstream stays on the success path. The DATEE reacts neutrally / slightly negatively to the tainted message (a tone nuance, not a failure beat). *(Superseded #365, which previously demoted the success to a shadow-tier failure delta.)*
 
 10b. **Horniness text overlay** — Applies the pre-fetched horniness overlay instruction (step 10) via `ILlmAdapter.ApplyHorninessOverlayAsync()`. Runs AFTER shadow corruption so horniness has final say over the delivered text (#899). If no overlay instruction, skipped.
 
-10c. **Horniness §15 interest-delta halving** — When the horniness overlay fired and the post-shadow interest delta is strictly positive, the delta is halved (floor). This is deferred to operate on the post-shadow-demote delta (#743/#399).
+10c. **Horniness §15 interest-delta halving** — When the horniness overlay fired and the post-shadow interest delta is strictly positive, the delta is halved (floor). This is deferred to operate on the post-shadow (truncated) delta (#743/#399). Worked shadow-trap interaction (#1095): a success with base delta = e.g. 4 → shadow trap truncates to **1** → horniness halves `floor(1/2) = 0`. Net interest delta is **0**, but the turn is **STILL NOT a failure** — the verdict stays SUCCESS and the momentum streak still increments.
 
 11. **Shadow growth** — `EvaluatePerTurnShadowGrowth()` evaluates 15+ triggers: Nat 1 → paired shadow +1, same stat 3× → Fixation +1, Charm 3× → Madness +1, RIZZ failures → Despair, etc. Also evaluates reductions (combo success → Madness −1, Honesty success at high interest → Denial −1).
 
@@ -478,7 +478,7 @@ Called only on successful steering roll via `IStatefulLlmAdapter`. Receives play
 
 Called on failed horniness check. Receives the delivered message + tier-specific overlay instruction. Returns the rewritten message with involuntary heat. Runs AFTER shadow corruption (#899) so horniness has final say over the delivered text.
 
-> When a horniness overlay fires, if the post-shadow-demote interest delta is > 0, it is halved (floor, §15). This represents the character losing track of the connection in the heat of arousal.
+> When a horniness overlay fires, if the post-shadow interest delta is > 0, it is halved (floor, §15). This represents the character losing track of the connection in the heat of arousal. Note (#1095): the shadow trap first truncates a positive delta to 1, so on a shadow-trap success that also fires horniness the net is `floor(1/2) = 0` — but the turn is still a SUCCESS (verdict not demoted) and momentum still increments.
 
 ## 7. Constraints & Best Practices
 

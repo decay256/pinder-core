@@ -159,10 +159,16 @@ conflicts:
         public void RealConflictsYaml_ContainsCanonicalConflicts()
         {
             var c = LoadRealConflicts();
+            // #1094 (commit 8d054c7) retired the "minimum 80 words per message" length
+            // floor in favour of a brevity-compatible "compact but layered" axis and
+            // updated the conflict matrix accordingly. The canonical length×length
+            // conflict is now 5-word-cap vs. "compact but layered", not vs. the old
+            // 80-word floor. (This assertion was left stale by #1094, which shipped
+            // without CI — see #1095 PR notes.)
             Assert.True(c.AreConflicting(
                 ("length", "never sends more than 5 words"),
-                ("length", "minimum 80 words per message, no exceptions")),
-                "Missing: length:5words vs length:80words");
+                ("length", "compact but layered — 1-2 sentences, several ideas packed in, never padded")),
+                "Missing: length:5words vs length:compact-but-layered");
             Assert.True(c.AreConflicting(
                 ("structure", "wall-of-text (one paragraph, no breaks, comma splices throughout)"),
                 ("length", "never sends more than 5 words")),

@@ -1,5 +1,9 @@
 # TurnResultDisplay — resolved-turn breakdown card.
 # Migrated #440 Phase 5.
+# Revision log:
+#   2026-06-03 (#1095): shadow check explainer + override line reworded — a shadow
+#   trap taints the message and caps a success's interest gain at +1; it does NOT
+#   force a success to fail.
 schema_version: 1
 locale: en
 strings:
@@ -17,12 +21,12 @@ strings:
   turn_result.horniness_check_explainer: "Per-turn d20 vs DC {dc}: a miss may trigger a horniness overlay on the delivered message."
 
   turn_result.shadow_check_heading: "Shadow check"
-  turn_result.shadow_check_explainer: "Per-turn d20 vs DC {dc}: a miss may force a successful action to fail via a shadow overlay."
+  turn_result.shadow_check_explainer: "Per-turn d20 vs DC {dc}: a miss taints the delivered message via a shadow overlay and caps a successful action's interest gain at +1 (it does NOT fail the turn)."
   turn_result.shadow_check_line: "⚫ Shadow check ({shadow}): d20 = {die} + 0 = {die} vs DC {dc} →"
   turn_result.shadow_check_miss: "MISS ({tier})"
   turn_result.shadow_check_miss_corruption: "MISS ({tier}) — corruption applied"
   turn_result.shadow_check_success: "SUCCESS"
-  turn_result.shadow_override_line: "↳ Shadow override ({shadow} {tier}): success forced to fail"
+  turn_result.shadow_override_line: "↳ Shadow trap ({shadow} {tier}): success tainted, interest capped at +1"
 
   turn_result.timeline_intended: "Intended"
   turn_result.timeline_delivered: "Delivered"

@@ -54,10 +54,11 @@ namespace Pinder.Core.Conversation
             // Centrally apply proposed state mutations from DeliveryStage
             if (deliveryStage.ShadowCorrection != 0)
             {
+                // #1095: A shadow trap caps the positive interest delta at 1; it is NOT a
+                // turn failure. Apply the (signed) truncation adjustment to interest, but do
+                // NOT override the roll verdict to Miss — the verdict/momentum stay SUCCESS.
+                // (Previously this called ApplyFinalOverride(Miss, tier), demoting the turn.)
                 state.Interest.Apply(deliveryStage.ShadowCorrection);
-                rollStage.RollResult.Check.ApplyFinalOverride(
-                    Pinder.Core.Rolls.RollVerdict.Miss,
-                    deliveryStage.ShadowCheckResult.Tier);
             }
             if (deliveryStage.HorninessInterestPenalty != 0)
             {
