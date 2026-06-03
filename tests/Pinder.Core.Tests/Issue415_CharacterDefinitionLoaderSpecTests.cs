@@ -168,12 +168,11 @@ namespace Pinder.Core.Tests
             var profile = CharacterDefinitionLoader.Parse(json, itemRepo, anatomyRepo);
 
             Assert.False(string.IsNullOrWhiteSpace(profile.AssembledSystemPrompt));
-            // PromptBuilder produces sections like PERSONALITY, BACKSTORY, TEXTING STYLE, etc.
-            Assert.Contains("Gerald_42", profile.AssembledSystemPrompt);
+            // PromptBuilder produces sections like PERSONALITY, BACKSTORY, TEXTING STYLE, etc. (name removed from lead-in after RULES migration)
             Assert.Contains("PERSONALITY", profile.AssembledSystemPrompt);
         }
 
-        // Fails if: Name or gender_identity not passed to PromptBuilder
+        // Fails if: gender_identity not passed to PromptBuilder (name removed from lead-in after RULES migration)
         [Fact]
         public void AC4_Parse_SystemPrompt_ContainsNameAndGender()
         {
@@ -183,7 +182,6 @@ namespace Pinder.Core.Tests
             string json = BuildMinimalJson(name: "SpecialName", genderIdentity: "xe/xem");
             var profile = CharacterDefinitionLoader.Parse(json, itemRepo, anatomyRepo);
 
-            Assert.Contains("SpecialName", profile.AssembledSystemPrompt);
             Assert.Contains("xe/xem", profile.AssembledSystemPrompt);
         }
 
