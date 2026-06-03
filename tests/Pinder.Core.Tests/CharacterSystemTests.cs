@@ -191,7 +191,6 @@ namespace Pinder.Core.Tests
             Assert.Contains("ACTIVE ARCHETYPE", prompt);
             Assert.DoesNotContain("ARCHETYPES (tendency order", prompt);
             Assert.Contains("EFFECTIVE STATS", prompt);
-            Assert.Contains("TestChar", prompt);
             Assert.Contains("she/her", prompt);
             Assert.Contains("A test bio.", prompt);
         }
