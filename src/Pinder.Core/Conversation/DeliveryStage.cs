@@ -244,10 +244,18 @@ namespace Pinder.Core.Conversation
                     {
                         if (shadowOverlayApplied && rollResult.IsSuccess)
                         {
-                            var forcedFailResult = TurnOrchestratorHelpers.CreateForcedFailResult(rollResult, shadowTier);
-                            int shadowFailDelta = TurnOrchestratorHelpers.ResolveFailureInterestDelta(forcedFailResult, _rules);
-                            shadowCorrection = shadowFailDelta - interestDelta;
-                            interestDelta = shadowFailDelta;
+                            // #1095: A shadow trap (success roll + paired-shadow MISS with overlay)
+                            // no longer demotes the turn to a forced FAILURE. Instead it TRUNCATES
+                            // the positive interest delta to a maximum of 1 ("tainted, capped").
+                            // The roll verdict stays SUCCESS (no ApplyFinalOverride to Miss in
+                            // TurnOrchestrator), momentum keeps incrementing, and success-gated
+                            // downstream effects stay on the success path. The DATEE reacts
+                            // neutrally / slightly negatively, not with a hard-rejection failure beat.
+                            // shadowCorrection stays the signed adjustment so the central
+                            // state.Interest.Apply(ShadowCorrection) remains correct.
+                            int truncated = Math.Min(interestDelta, 1);
+                            shadowCorrection = truncated - interestDelta;
+                            interestDelta = truncated;
                         }
 
                         shadowCheckResult = new ShadowCheckResult(

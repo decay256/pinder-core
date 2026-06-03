@@ -19,6 +19,8 @@
 #   trap       — trap_activated
 schema_version: 1
 locale: en
+# Revision log:
+#   2026-06-03 (#1095): a shadow trap is a capped/tainted SUCCESS, not a failed turn.
 strings:
   # ── option_roll ───────────────────────────────────────────────────────────
   consequence.roll.pass: "Your {stat} roll landed — the message reads sincere and lands well."

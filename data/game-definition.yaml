@@ -1,4 +1,8 @@
 name: "Pinder"
+# Revision log:
+#   2026-06-03 (#1095): shadow trap caps a positive interest delta at +1 and is
+#   NOT a turn failure — DATEE reacts neutrally/slightly negatively, momentum
+#   continues; horniness then halves the post-shadow delta (floor).
 max_turns: 30
 max_dialogue_options: 3
 vision: |-
@@ -25,7 +29,11 @@ world_description: |
   then answer, aiming toward an enjoyable encounter. A message is intentional — what
   they send is what they chose to send — unless a game mechanic overrides that control.
   Session stats can CORRUPT messages (handled by separate corruption sessions): neediness,
-  desperation, etc. leaking out in the funniest, most cringe ways.
+  desperation, etc. leaking out in the funniest, most cringe ways. A "shadow trap" — when an
+  otherwise-good message is tainted by a missed shadow check — is NOT a failed turn: the message
+  still lands, the DATEE reacts neutrally or only slightly negatively (mild coolness, interest
+  barely moves), the positive interest gain is capped at +1, and momentum continues. It is a
+  small tainting, never a hard rejection.
 player_role_description: |
   The PLAYER AVATAR genuinely wants the date; their goal is to raise Interest to 25 ("Date Secured"). The human PLAYER also earns XP, but the character doesn't know about XP — they
   just want it to go well.
@@ -62,8 +70,9 @@ narrative_doctrine: |
   modifiers, the interest meter, shadow thresholds, failure tiers, or combo trackers. All of
   these exist beneath the conversation, never inside it, and manifest only through HOW
   characters speak — never through commentary. (A Trope Trap makes the character accidentally
-  use a cliche; a shadow at threshold makes messages sound slightly off; a Nat 20 just lands
-  perfectly.)
+  use a cliche; a shadow at threshold makes messages sound slightly off — a shadow trap lands a
+  little off and the DATEE responds neutrally or with mild coolness, never a hard rejection; a
+  Nat 20 just lands perfectly.)
 
   Never break character: always in-world, no narrator, no aside, no wink to the audience.
   [ENGINE] blocks are out-of-character and must never be quoted, referenced, or acknowledged

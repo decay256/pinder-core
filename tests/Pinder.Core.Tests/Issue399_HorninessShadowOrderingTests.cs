@@ -76,24 +76,6 @@ namespace Pinder.Core.Tests
                 new TimingProfile(5, 0.0f, 0.0f, "neutral"), level: 1);
         }
 
-        // Mirror of GameSession.CreateForcedFailResult so the test can derive
-        // the post-demote delta the engine will produce for a given shadow tier.
-        private static RollResult MakeForcedFailRollResult(RollResult original, FailureTier tier)
-        {
-            int fakeDie = original.DC > 1 ? original.DC - 1 : 1;
-            return new RollResult(
-                dieRoll: fakeDie,
-                secondDieRoll: null,
-                usedDieRoll: fakeDie,
-                stat: original.Stat,
-                statModifier: 0,
-                levelBonus: 0,
-                dc: original.DC,
-                tier: tier,
-                activatedTrap: null,
-                externalBonus: 0);
-        }
-
         private static int FindIndex(DialogueOption[] options, StatType stat)
         {
             for (int i = 0; i < options.Length; i++)
@@ -102,11 +84,17 @@ namespace Pinder.Core.Tests
         }
 
         // -----------------------------------------------------------------
-        // Test 1 — Honesty success + horniness miss + Denial demote → final
-        // delta NEGATIVE. §15 must NOT charge a penalty (rule premise fails).
+        // Test 1 — Honesty success + horniness miss + Denial shadow trap.
+        //
+        // #1095 rule change: a shadow trap (success roll + paired-shadow MISS
+        // with overlay) NO LONGER demotes the turn to a forced failure. It
+        // TRUNCATES the positive interest delta to a max of 1, then horniness
+        // halves (floor) the post-shadow delta: floor(1/2) = 0. Net delta = 0,
+        // but the turn is STILL a SUCCESS (verdict not Miss) and momentum keeps
+        // incrementing.
         // -----------------------------------------------------------------
         [Fact]
-        public async Task HonestySuccess_HorninessMiss_DenialDemote_NegativeFinal_NoHorninessPenalty()
+        public async Task HonestySuccess_HorninessMiss_DenialShadowTrap_CapsToOneThenHorninessToZero_StaysSuccess()
         {
             var instructions = LoadYaml();
 
@@ -114,13 +102,8 @@ namespace Pinder.Core.Tests
             // (paired with Honesty — moderate shadow).  Opponent: weak.
             //
             // shadow check DC = 20 - 10 = 10 → miss when shadow d20 < 10.
-            // We force shadow d20 = 1 → missMargin = 9 → TropeTrap tier
-            // (per HorninessEngine.DetermineHorninessTier: missMargin 6..9 → TropeTrap).
-            // TropeTrap failure delta = -2 (FailureScale).
-            //
-            // Honesty success on a Nat 20 → success delta = 4 (per SuccessScale)
-            // + risk bonus (Nat 20 → +0 unless RiskTierBonus says otherwise).
-            // Either way pre-demote delta is positive; post-demote is -2.
+            // We force shadow d20 = 1 → missMargin = 9 → TropeTrap tier.
+            // Honesty success on a Nat 20 → positive pre-shadow delta.
             var playerStats = MakeStats(allStats: 5,
                 pairStat: ShadowStatType.Denial, shadowOnPair: 10);
             var player = MakeProfile("PlayerH", playerStats);
@@ -130,13 +113,8 @@ namespace Pinder.Core.Tests
             // (Nat 20 success), timing = 50.
             var dice = new FixedDice(5, 20, 50);
 
-            // SteeringRng feeds: steering d20 (we don't care — just non-zero),
-            // horniness d20 (force MISS: roll < 15), shadow d20 (force MISS: < 10).
-            //   1st = steering: 1 (fail steering)
-            //   2nd = horniness: 1 (DC=15, miss, missMargin=14 → Catastrophe;
-            //                     either tier triggers an overlay instruction
-            //                     in the YAML so OverlayApplied=true)
-            //   3rd = shadow: 1 (DC=10, miss, missMargin=9 → TropeTrap)
+            // SteeringRng feeds: steering d20, horniness d20 (force MISS: < 15),
+            // shadow d20 (force MISS: < 10).
             var steeringRng = new FixedRandom(1, 1, 1);
 
             var llm = new HorninessShadowCapturingLlm();
@@ -152,8 +130,10 @@ namespace Pinder.Core.Tests
             int honestyIdx = FindIndex(llm.LastOptions, StatType.Honesty);
 
             int interestBefore = session.CreateSnapshot().Interest;
+            int momentumBefore = session.CreateSnapshot().MomentumStreak;
             var result = await session.ResolveTurnAsync(honestyIdx);
             int interestAfter = session.CreateSnapshot().Interest;
+            int momentumAfter = session.CreateSnapshot().MomentumStreak;
 
             // Sanity: roll succeeded, horniness fired, shadow check fired and missed,
             // shadow corruption ran (overlay applied).
@@ -165,21 +145,17 @@ namespace Pinder.Core.Tests
             Assert.True(result.ShadowCheck.OverlayApplied,
                 "Shadow corruption overlay must apply on Honesty/Denial TropeTrap");
 
-            // The shadow demote rewrites interestDelta to the failure delta
-            // for the resolved shadow tier. That tier-specific delta is
-            // negative (Fumble/-1, Misfire/-1, TropeTrap/-2, Catastrophe/-3,
-            // Legendary/-4 per FailureScale). Therefore §15 must NOT have
-            // applied any penalty (rule premise: delta > 0 fails).
-            int expectedFailureDelta = FailureScale.GetInterestDelta(
-                MakeForcedFailRollResult(result.Roll, result.ShadowCheck.Tier));
-            Assert.True(expectedFailureDelta < 0,
-                $"shadow tier {result.ShadowCheck.Tier} must yield negative failure delta");
-            Assert.Equal(expectedFailureDelta, result.InterestDelta);
-            Assert.Equal(0, result.HorninessInterestPenalty);
+            // #1095: shadow trap truncates the positive delta to 1, then horniness
+            // halves (floor) → floor(1/2) = 0. Net final delta == 0.
+            Assert.Equal(0, result.InterestDelta);
 
-            // Audit invariant: before + final_delta == after. Since
-            // HorninessInterestPenalty == 0, delta_from_roll (the natural
-            // pre-§15 delta after any shadow demote) == delta_total == -2.
+            // #1095: the turn is STILL a success — the FINAL verdict is NOT a miss.
+            Assert.Equal(Pinder.Core.Rolls.RollVerdict.Success, result.Roll.Check.FinalVerdict);
+
+            // #1095: momentum keeps incrementing through a shadow-trap success.
+            Assert.Equal(momentumBefore + 1, momentumAfter);
+
+            // Audit invariant: before + final_delta == after (net 0 here).
             Assert.Equal(interestBefore + result.InterestDelta, interestAfter);
         }
 

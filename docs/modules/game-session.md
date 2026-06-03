@@ -53,7 +53,7 @@ public sealed class GameSession
 
 ### Momentum System (rules §15)
 
-Momentum is tracked as a streak counter (`_momentumStreak`) that increments on each consecutive success and resets to 0 on any failure.
+Momentum is tracked as a streak counter (`_momentumStreak`) that increments on each consecutive success and resets to 0 on any failure. A **shadow trap** on a *successful* roll (#1095) is **not** a failure for momentum purposes — the roll verdict stays SUCCESS even though the message is shadow-tainted and the interest delta is capped at 1, so the streak continues to increment.
 
 **Bonus computation** (`GetMomentumBonus`):
 
@@ -115,3 +115,4 @@ Interest is clamped to [0, 25] by `GameSession` / `InterestMeter`. Individual de
 | 2026-04-03 | #312 | Bug fix: Triple combo bonus (+1) now actually applied to Read/Recover rolls. Previously `ConsumeTripleBonus()` was called but the bonus value was never passed to `RollEngine.ResolveFixedDC`. Now `HasTripleBonus` is captured before consumption and passed as `externalBonus`. Two new test files: `TripleBonusReadRecoverTests.cs` and `TripleBonusReadRecoverEdgeCaseTests.cs` (486 lines total). |
 | 2026-04-03 | #308 | Shadow threshold wiring: confirmed `GameSession` routes player shadows to `DeliveryContext` and opponent shadows to `OpponentContext`. `GameSessionConfig` accepts `opponentShadows` parameter. New test file `Issue308_ShadowThresholdWiringSpecTests.cs` (443 lines, 13 tests). |
 | 2026-04-03 | #315 | Vision concern — added tier boundary tests for Triple combo bonus on Read/Recover. Tests verify +1 external bonus softens every failure tier boundary: Catastrophe→TropeTrap (miss 10→9), Misfire→Fumble (miss 3→2), Fumble→Success (miss 1→0), plus Recover path equivalents. New test file `Issue315_VisionTierBoundaryTests.cs` (242 lines, 10 tests). Test-only change; no production code modified. |
+| 2026-06-03 | #1095 | Shadow trap rule change: a shadow trap (success roll + paired-shadow MISS with overlay) NO LONGER demotes the turn to a forced failure. The positive interest delta is truncated to a max of 1; the roll verdict stays SUCCESS and the momentum streak keeps incrementing. Horniness §15 halving then runs on the truncated delta (shadow→1, floor(1/2)=0), still not a failure. Momentum section clarified. |
