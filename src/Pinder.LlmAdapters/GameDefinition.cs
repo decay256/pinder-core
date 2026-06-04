@@ -60,6 +60,9 @@ namespace Pinder.LlmAdapters
         /// <summary>Maximum number of dialogue options per turn. Default 3 if not set in YAML.</summary>
         public int MaxDialogueOptions { get; }
 
+        /// <summary>Maximum words allowed for a single delivered message. Default 80 if not set in YAML.</summary>
+        public int MaxDeliveryWords { get; }
+
         /// <summary>Time-of-day horniness modifiers loaded from game-definition.yaml.</summary>
         public HorninessTimeModifiers HorninessTimeModifiers { get; }
 
@@ -81,7 +84,8 @@ namespace Pinder.LlmAdapters
             HorninessTimeModifiers horninessTimeModifiers = null,
             int globalDcBias = 0,
             int maxTurns = 30,
-            int maxDialogueOptions = 3)
+            int maxDialogueOptions = 3,
+            int maxDeliveryWords = 80)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Vision = vision ?? throw new ArgumentNullException(nameof(vision));
@@ -101,6 +105,7 @@ namespace Pinder.LlmAdapters
             GlobalDcBias = globalDcBias;
             MaxTurns = maxTurns > 0 ? maxTurns : 30;
             MaxDialogueOptions = maxDialogueOptions > 0 ? maxDialogueOptions : 3;
+            MaxDeliveryWords = maxDeliveryWords > 0 ? maxDeliveryWords : 80;
         }
     }
 }

@@ -30,6 +30,7 @@ namespace Pinder.Rules.Tests
             "name",
             "max_turns",
             "max_dialogue_options",
+            "max_delivery_words",
             "vision",
             "world_description",
             "player_role_description",

@@ -132,6 +132,7 @@ namespace Pinder.Core.Conversation
         private Random? _statDrawRng;
         private readonly IConsequenceCatalog? _consequenceCatalog;
         private readonly int _maxDialogueOptions;
+        private readonly int _maxDeliveryWords;
 
         internal GameSessionState State => _state;
 
@@ -221,6 +222,7 @@ namespace Pinder.Core.Conversation
             _xpRecorder = new SessionXpRecorder(_xpLedger, _rules);
             _consequenceCatalog = config.ConsequenceCatalog;
             _maxDialogueOptions = config.MaxDialogueOptions ?? 3;
+            _maxDeliveryWords = config.MaxDeliveryWords ?? 80;
             _steeringEngine = new SteeringEngine(steeringRng);
             _horninessEngine = new HorninessEngine(steeringRng, _consequenceCatalog);
             _shadowCheckEngine = new ShadowCheckEngine(steeringRng, _consequenceCatalog);
@@ -251,7 +253,8 @@ namespace Pinder.Core.Conversation
                 _horninessEngine,
                 _shadowCheckEngine,
                 _statDeliveryInstructions,
-                _onTextLayerNoop);
+                _onTextLayerNoop,
+                _maxDeliveryWords);
 
             var opponentResponseStage = new OpponentResponseStage(_llm);
 
