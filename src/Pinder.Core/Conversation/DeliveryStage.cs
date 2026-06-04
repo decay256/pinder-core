@@ -144,6 +144,18 @@ namespace Pinder.Core.Conversation
             // #902: Meta-prefix strip immediately after delivery LLM call.
             deliveredMessage = TextSanitizer.Sanitize(deliveredMessage, MetaPrefixStripper.LayerName, textDiffs);
 
+            // #825: LengthClamp pass moved BEFORE corruption layers (Misfire/Spiral/Horniness)
+            // so that the word budget is enforced on clean text, and corruption layers operate
+            // within budget without being truncated by sentence-based clamping.
+            string beforeClampEarly = deliveredMessage;
+            bool clampedEarly;
+            deliveredMessage = ClampMessageToWordLimit(deliveredMessage, _maxDeliveryWords, out clampedEarly);
+            if (clampedEarly)
+            {
+                var clampSpans = WordDiff.Compute(beforeClampEarly, deliveredMessage);
+                textDiffs.Add(new TextDiff("LengthClamp", clampSpans, beforeClampEarly, deliveredMessage));
+            }
+
             // Tier modifier diff
             if (deliveredMessage != intendedTextForDelivery
                 && !string.IsNullOrEmpty(intendedTextForDelivery)
@@ -341,16 +353,6 @@ namespace Pinder.Core.Conversation
 
             // #1041 (Tier C): markdown-stripping pass for surfaces that expect plain prose.
             deliveredMessage = TextSanitizer.Sanitize(deliveredMessage, MarkdownSanitizer.LayerName, textDiffs);
-
-            // AC-B1: Final LengthClamp pass
-            string beforeClamp = deliveredMessage;
-            bool clamped;
-            deliveredMessage = ClampMessageToWordLimit(deliveredMessage, _maxDeliveryWords, out clamped);
-            if (clamped)
-            {
-                var clampSpans = WordDiff.Compute(beforeClamp, deliveredMessage);
-                textDiffs.Add(new TextDiff("LengthClamp", clampSpans, beforeClamp, deliveredMessage));
-            }
 
             return new DeliveryStageResult
             {
