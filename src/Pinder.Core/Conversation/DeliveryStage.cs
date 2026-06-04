@@ -366,6 +366,13 @@ namespace Pinder.Core.Conversation
             };
         }
 
+                /// <summary>
+        /// Clamps a message to a maximum word limit, preserving sentence boundaries where possible.
+        /// </summary>
+        /// <param name="message">The delivered message string to clamp.</param>
+        /// <param name="maxWords">The maximum allowed words.</param>
+        /// <param name="clamped">Outputs true if the message was actually clamped; otherwise false.</param>
+        /// <returns>The clamped message string.</returns>
         private string ClampMessageToWordLimit(string message, int maxWords, out bool clamped)
         {
             clamped = false;
