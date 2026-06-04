@@ -95,6 +95,9 @@ namespace Pinder.Core.Conversation
         /// <summary>Max dialogue options configured in GameDefinition. Null means default 3.</summary>
         public int? MaxDialogueOptions { get; }
 
+        /// <summary>Max delivery words configured in GameDefinition. Null means default 80.</summary>
+        public int? MaxDeliveryWords { get; }
+
         public GameSessionConfig(
             IGameClock? clock = null,
             SessionShadowTracker? playerShadows = null,
@@ -109,7 +112,8 @@ namespace Pinder.Core.Conversation
             Random? statDrawRng = null,
             Action<TextLayerNoopEvent>? onTextLayerNoop = null,
             IConsequenceCatalog? consequenceCatalog = null,
-            int? maxDialogueOptions = null)
+            int? maxDialogueOptions = null,
+            int? maxDeliveryWords = null)
         {
             Clock = clock;
             PlayerShadows = playerShadows;
@@ -125,6 +129,7 @@ namespace Pinder.Core.Conversation
             OnTextLayerNoop = onTextLayerNoop;
             ConsequenceCatalog = consequenceCatalog;
             MaxDialogueOptions = maxDialogueOptions;
+            MaxDeliveryWords = maxDeliveryWords;
         }
     }
 }

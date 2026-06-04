@@ -196,6 +196,12 @@ namespace Pinder.Core.Tests
                     Pinder.LlmAdapters.PromptTemplates.Catalog = catalog;
                     Pinder.Core.Prompts.PromptBuilder.StructuralFragmentLookup =
                         key => catalog.TryGet(key)?.SystemPrompt;
+                    Pinder.Core.Prompts.PromptBuilder.StructuralFragmentLookupEx = key =>
+                    {
+                        var entry = catalog.TryGet(key);
+                        if (entry == null) return null;
+                        return new Pinder.Core.Prompts.StructuralPromptResult(entry.SystemPrompt, entry.SourceFile);
+                    };
                     Pinder.LlmAdapters.ArchetypeYamlLoader.LoadFromPromptCatalog(catalog);
                     break;
                 }

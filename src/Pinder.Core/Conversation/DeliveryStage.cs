@@ -33,6 +33,7 @@ namespace Pinder.Core.Conversation
         private readonly ShadowCheckEngine _shadowCheckEngine;
         private readonly object? _statDeliveryInstructions;
         private readonly Action<TextLayerNoopEvent>? _onTextLayerNoop;
+        private readonly int _maxDeliveryWords;
 
         public DeliveryStage(
             ILlmAdapter llm,
@@ -41,7 +42,8 @@ namespace Pinder.Core.Conversation
             HorninessEngine horninessEngine,
             ShadowCheckEngine shadowCheckEngine,
             object? statDeliveryInstructions,
-            Action<TextLayerNoopEvent>? onTextLayerNoop)
+            Action<TextLayerNoopEvent>? onTextLayerNoop,
+            int maxDeliveryWords)
         {
             _llm = llm ?? throw new ArgumentNullException(nameof(llm));
             _rules = rules;
@@ -50,6 +52,7 @@ namespace Pinder.Core.Conversation
             _shadowCheckEngine = shadowCheckEngine ?? throw new ArgumentNullException(nameof(shadowCheckEngine));
             _statDeliveryInstructions = statDeliveryInstructions;
             _onTextLayerNoop = onTextLayerNoop;
+            _maxDeliveryWords = maxDeliveryWords;
         }
 
         public async Task<DeliveryStageResult> ExecuteAsync(
@@ -89,7 +92,8 @@ namespace Pinder.Core.Conversation
 
             string intendedTextForDelivery = originalIntendedText;
             DialogueOption deliveryOption = chosenOption;
-            if (steeringResult.SteeringSucceeded && steeringResult.SteeringQuestion != null)
+            var originalWords = originalIntendedText.Split(new[] { ' ', '\r', '\n', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+            if (steeringResult.SteeringSucceeded && steeringResult.SteeringQuestion != null && originalWords.Length < _maxDeliveryWords)
             {
                 intendedTextForDelivery = originalIntendedText.Length == 0
                     ? steeringResult.SteeringQuestion
@@ -287,8 +291,18 @@ namespace Pinder.Core.Conversation
             {
                 string beforeHorniness = deliveredMessage;
                 string opponentCtx = TurnOrchestratorHelpers.BuildOpponentContext(opponent);
+
+                // AC-B2: Add remaining budget hint to Horniness overlay instruction if tight.
+                int currentWords = deliveredMessage.Split(new[] { ' ', '\r', '\n', '\t' }, StringSplitOptions.RemoveEmptyEntries).Length;
+                int remainingBudget = Math.Max(0, _maxDeliveryWords - currentWords);
+                string finalInstruction = horninessOverlayInstruction;
+                if (remainingBudget < 25)
+                {
+                    finalInstruction += $"\nLength constraint: Keep it extremely brief (max {remainingBudget} words). Do not append long sentences.";
+                }
+
                 progress?.Report(new TurnProgressEvent(TurnProgressStage.HorninessOverlayStarted));
-                string rawHorninessOutput = await _llm.ApplyHorninessOverlayAsync(deliveredMessage, horninessOverlayInstruction, opponentCtx, playerArchetypeDirectiveForDelivery, ct).ConfigureAwait(false);
+                string rawHorninessOutput = await _llm.ApplyHorninessOverlayAsync(deliveredMessage, finalInstruction, opponentCtx, playerArchetypeDirectiveForDelivery, ct).ConfigureAwait(false);
                 progress?.Report(new TurnProgressEvent(TurnProgressStage.HorninessOverlayCompleted, rawHorninessOutput));
 
                 string sanitizedHorninessOutput = MetaPrefixStripper.Strip(rawHorninessOutput);
@@ -328,6 +342,16 @@ namespace Pinder.Core.Conversation
             // #1041 (Tier C): markdown-stripping pass for surfaces that expect plain prose.
             deliveredMessage = TextSanitizer.Sanitize(deliveredMessage, MarkdownSanitizer.LayerName, textDiffs);
 
+            // AC-B1: Final LengthClamp pass
+            string beforeClamp = deliveredMessage;
+            bool clamped;
+            deliveredMessage = ClampMessageToWordLimit(deliveredMessage, _maxDeliveryWords, out clamped);
+            if (clamped)
+            {
+                var clampSpans = WordDiff.Compute(beforeClamp, deliveredMessage);
+                textDiffs.Add(new TextDiff("LengthClamp", clampSpans, beforeClamp, deliveredMessage));
+            }
+
             return new DeliveryStageResult
             {
                 DeliveredMessage = deliveredMessage,
@@ -340,6 +364,61 @@ namespace Pinder.Core.Conversation
                 FinalInterestDelta = interestDelta,
                 ShadowCorrection = shadowCorrection
             };
+        }
+
+        private string ClampMessageToWordLimit(string message, int maxWords, out bool clamped)
+        {
+            clamped = false;
+            if (string.IsNullOrWhiteSpace(message)) return message;
+            
+            var words = message.Split(new[] { ' ', '\r', '\n', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+            if (words.Length <= maxWords) return message;
+
+            // Split into sentences using punctuation markers
+            var sentences = new List<string>();
+            var currentSentence = new System.Text.StringBuilder();
+            
+            for (int i = 0; i < message.Length; i++)
+            {
+                char c = message[i];
+                currentSentence.Append(c);
+                if (c == '.' || c == '?' || c == '!')
+                {
+                    // Check if next char is whitespace or end of string to confirm sentence boundary
+                    if (i + 1 == message.Length || char.IsWhiteSpace(message[i + 1]))
+                    {
+                        sentences.Add(currentSentence.ToString().Trim());
+                        currentSentence.Clear();
+                    }
+                }
+            }
+            if (currentSentence.Length > 0)
+            {
+                sentences.Add(currentSentence.ToString().Trim());
+            }
+
+            var result = new System.Text.StringBuilder();
+            int currentWordCount = 0;
+            bool addedAny = false;
+
+            foreach (var sentence in sentences)
+            {
+                var sentenceWords = sentence.Split(new[] { ' ', '\r', '\n', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+                if (currentWordCount + sentenceWords.Length <= maxWords || !addedAny)
+                {
+                    if (addedAny) result.Append(" ");
+                    result.Append(sentence);
+                    currentWordCount += sentenceWords.Length;
+                    addedAny = true;
+                }
+                else
+                {
+                    clamped = true;
+                    break;
+                }
+            }
+
+            return result.ToString().Trim();
         }
     }
 }
