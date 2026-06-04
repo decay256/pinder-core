@@ -33,10 +33,11 @@ strings:
   turn_result.timeline_opponent: "Opponent replies"
 
   turn_result.interest_breakdown.base: "Base: {value}"
-  turn_result.interest_breakdown.risk_bonus: "Risk bonus: +{value}"
+  turn_result.interest_breakdown.risk_bonus: "Risk bonus: {value}"
   turn_result.interest_breakdown.combo_bonus: "Combo bonus: {value}"
-  turn_result.interest_breakdown.shadow_misfire: "Shadow misfire: {value}"
-  turn_result.interest_breakdown.horniness_penalty: "Horniness penalty: {value}"
+  turn_result.interest_breakdown.shadow_misfire: "Shadow: {original} → capped to +1"
+  turn_result.interest_breakdown.horniness_penalty: "Horniness: floor({original} / 2) = {value}"
+  turn_result.interest_breakdown.delay_penalty: "Delay penalty: {value}"
   turn_result.interest_breakdown.total: "= {value} (now {now})"
 
   turn_result.annotation_triple: "⚡ Combo: The Triple — +{bonus} to this roll"
