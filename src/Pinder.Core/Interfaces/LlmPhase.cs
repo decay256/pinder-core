@@ -69,6 +69,14 @@ namespace Pinder.Core.Interfaces
         /// </summary>
         public const string OutfitDescription = "outfit_description";
 
+        /// <summary>
+        /// Session-setup dramatic-arc generation (issue #821).
+        /// One LLM call per session that produces a 3-5 sentence
+        /// narrative arc (setup, escalation, turning point, resolution)
+        /// appended to the opponent system prompt as soft guardrails.
+        /// </summary>
+        public const string DramaticArc = "dramatic_arc";
+
         /// <summary>Phase could not be determined (decorators may use this when no phase was supplied).</summary>
         public const string Unknown = "unknown";
     }
