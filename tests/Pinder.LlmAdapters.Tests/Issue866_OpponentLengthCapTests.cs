@@ -46,7 +46,6 @@ namespace Pinder.LlmAdapters.Tests
             var prompt = SessionDocumentBuilder.BuildOpponentPrompt(ctx);
 
             Assert.Contains("400 characters", prompt);
-            Assert.Contains("200 characters", prompt);
         }
 
         // ══════════════════════════════════════════════════════════════

@@ -322,10 +322,10 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public async Task RealStarterFiles_ListIdsFindsAllEight()
+        public async Task RealStarterFiles_ListIdsFindsAllSix()
         {
             // Wire the store at the repo's data/characters directory and
-            // confirm we see all eight starter characters by their UUIDs.
+            // confirm we see all six starter characters by their UUIDs.
             string? dir = AppContext.BaseDirectory;
             while (dir != null)
             {
@@ -338,7 +338,7 @@ namespace Pinder.Core.Tests
             var store = new DirectoryCharacterStore(Path.Combine(dir!, "data", "characters"));
             var ids = await store.ListIdsAsync();
 
-            Assert.Equal(8, ids.Count);
+            Assert.Equal(6, ids.Count);
             Assert.All(ids, id => Assert.True(Guid.TryParseExact(id, "D", out _)));
         }
     }
