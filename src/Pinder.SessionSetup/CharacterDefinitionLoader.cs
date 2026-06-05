@@ -102,6 +102,16 @@ namespace Pinder.SessionSetup
                         psychologicalStake = raw.Trim();
                 }
 
+                // Issue #820: optional narrative background story.
+                string? backgroundStory = null;
+                if (root.TryGetProperty("background_story", out var storyProp) &&
+                    storyProp.ValueKind == JsonValueKind.String)
+                {
+                    string raw = storyProp.GetString() ?? string.Empty;
+                    if (!string.IsNullOrWhiteSpace(raw))
+                        backgroundStory = raw.Trim();
+                }
+
                 return new CharacterDefinition(
                     schemaVersion,
                     characterId,
@@ -112,7 +122,8 @@ namespace Pinder.SessionSetup
                     items,
                     anatomy,
                     allocation,
-                    psychologicalStake);
+                    psychologicalStake,
+                    backgroundStory);
             }
         }
 

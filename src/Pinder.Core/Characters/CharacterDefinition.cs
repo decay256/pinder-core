@@ -67,6 +67,13 @@ namespace Pinder.Core.Characters
         /// </summary>
         public string? PsychologicalStake { get; }
 
+        /// <summary>
+        /// Issue #820: cohesive narrative background story generated at
+        /// character-creation time from assembled background fragments.
+        /// 3-5 sentence prose. Null when absent (legacy files not yet regenerated).
+        /// </summary>
+        public string? BackgroundStory { get; }
+
         public CharacterDefinition(
             int schemaVersion,
             Guid characterId,
@@ -77,7 +84,8 @@ namespace Pinder.Core.Characters
             IReadOnlyList<string> items,
             IReadOnlyDictionary<string, string> anatomy,
             AllocationBlock allocation,
-            string? psychologicalStake = null)
+            string? psychologicalStake = null,
+            string? backgroundStory = null)
         {
             SchemaVersion = schemaVersion;
             CharacterId = characterId;
@@ -89,6 +97,7 @@ namespace Pinder.Core.Characters
             Anatomy = anatomy ?? throw new ArgumentNullException(nameof(anatomy));
             Allocation = allocation ?? throw new ArgumentNullException(nameof(allocation));
             PsychologicalStake = psychologicalStake;
+            BackgroundStory = backgroundStory;
         }
     }
 
