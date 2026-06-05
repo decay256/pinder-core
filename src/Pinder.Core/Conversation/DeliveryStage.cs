@@ -92,8 +92,7 @@ namespace Pinder.Core.Conversation
 
             string intendedTextForDelivery = originalIntendedText;
             DialogueOption deliveryOption = chosenOption;
-            var originalWords = originalIntendedText.Split(new[] { ' ', '\r', '\n', '\t' }, StringSplitOptions.RemoveEmptyEntries);
-            if (steeringResult.SteeringSucceeded && steeringResult.SteeringQuestion != null && originalWords.Length < _maxDeliveryWords)
+            if (steeringResult.SteeringSucceeded && steeringResult.SteeringQuestion != null)
             {
                 intendedTextForDelivery = originalIntendedText.Length == 0
                     ? steeringResult.SteeringQuestion
@@ -143,18 +142,6 @@ namespace Pinder.Core.Conversation
 
             // #902: Meta-prefix strip immediately after delivery LLM call.
             deliveredMessage = TextSanitizer.Sanitize(deliveredMessage, MetaPrefixStripper.LayerName, textDiffs);
-
-            // #825: LengthClamp pass moved BEFORE corruption layers (Misfire/Spiral/Horniness)
-            // so that the word budget is enforced on clean text, and corruption layers operate
-            // within budget without being truncated by sentence-based clamping.
-            string beforeClampEarly = deliveredMessage;
-            bool clampedEarly;
-            deliveredMessage = ClampMessageToWordLimit(deliveredMessage, _maxDeliveryWords, out clampedEarly);
-            if (clampedEarly)
-            {
-                var clampSpans = WordDiff.Compute(beforeClampEarly, deliveredMessage);
-                textDiffs.Add(new TextDiff("LengthClamp", clampSpans, beforeClampEarly, deliveredMessage));
-            }
 
             // Tier modifier diff
             if (deliveredMessage != intendedTextForDelivery
@@ -368,59 +355,5 @@ namespace Pinder.Core.Conversation
             };
         }
 
-        private string ClampMessageToWordLimit(string message, int maxWords, out bool clamped)
-        {
-            clamped = false;
-            if (string.IsNullOrWhiteSpace(message)) return message;
-            
-            var words = message.Split(new[] { ' ', '\r', '\n', '\t' }, StringSplitOptions.RemoveEmptyEntries);
-            if (words.Length <= maxWords) return message;
-
-            // Split into sentences using punctuation markers
-            var sentences = new List<string>();
-            var currentSentence = new System.Text.StringBuilder();
-            
-            for (int i = 0; i < message.Length; i++)
-            {
-                char c = message[i];
-                currentSentence.Append(c);
-                if (c == '.' || c == '?' || c == '!')
-                {
-                    // Check if next char is whitespace or end of string to confirm sentence boundary
-                    if (i + 1 == message.Length || char.IsWhiteSpace(message[i + 1]))
-                    {
-                        sentences.Add(currentSentence.ToString().Trim());
-                        currentSentence.Clear();
-                    }
-                }
-            }
-            if (currentSentence.Length > 0)
-            {
-                sentences.Add(currentSentence.ToString().Trim());
-            }
-
-            var result = new System.Text.StringBuilder();
-            int currentWordCount = 0;
-            bool addedAny = false;
-
-            foreach (var sentence in sentences)
-            {
-                var sentenceWords = sentence.Split(new[] { ' ', '\r', '\n', '\t' }, StringSplitOptions.RemoveEmptyEntries);
-                if (currentWordCount + sentenceWords.Length <= maxWords || !addedAny)
-                {
-                    if (addedAny) result.Append(" ");
-                    result.Append(sentence);
-                    currentWordCount += sentenceWords.Length;
-                    addedAny = true;
-                }
-                else
-                {
-                    clamped = true;
-                    break;
-                }
-            }
-
-            return result.ToString().Trim();
-        }
     }
 }
