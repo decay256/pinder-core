@@ -77,6 +77,14 @@ namespace Pinder.Core.Interfaces
         /// </summary>
         public const string DramaticArc = "dramatic_arc";
 
+        /// <summary>
+        /// Session-setup background-story generation (issue #820).
+        /// One LLM call per character at creation time that weaves
+        /// assembled background fragments into a 3-5 sentence cohesive
+        /// narrative stored on-disk and surfaced on the Character Sheet.
+        /// </summary>
+        public const string BackgroundStory = "background_story";
+
         /// <summary>Phase could not be determined (decorators may use this when no phase was supplied).</summary>
         public const string Unknown = "unknown";
     }

@@ -139,6 +139,11 @@ namespace Pinder.Core.Characters
             if (!string.IsNullOrWhiteSpace(def.PsychologicalStake))
                 writer.WriteString("psychological_stake", def.PsychologicalStake);
 
+            // Issue #820: write the narrative background story if present.
+            // Omitted when absent, same hygiene as stake.
+            if (!string.IsNullOrWhiteSpace(def.BackgroundStory))
+                writer.WriteString("background_story", def.BackgroundStory);
+
             writer.WriteEndObject();
         }
 
