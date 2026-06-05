@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>NarrativeHarness</AssemblyName>
+    <RootNamespace>Pinder.Tools.NarrativeHarness</RootNamespace>
+  </PropertyGroup>
+
+  <!--
+    ZERO rule code paths (issue #843 hard requirement):
+    This tool deliberately does NOT reference Pinder.Rules. It drives only
+    SessionSystemPromptBuilder -> AnthropicTransport. Do not add a
+    Pinder.Rules ProjectReference here.
+  -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Pinder.Core\Pinder.Core.csproj" />
+    <ProjectReference Include="..\..\src\Pinder.LlmAdapters\Pinder.LlmAdapters.csproj" />
+    <ProjectReference Include="..\..\src\Pinder.SessionSetup\Pinder.SessionSetup.csproj" />
+  </ItemGroup>
+
+</Project>
