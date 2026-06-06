@@ -16,9 +16,7 @@
     Pinder.Rules ProjectReference here.
   -->
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Pinder.Core\Pinder.Core.csproj" />
-    <ProjectReference Include="..\..\src\Pinder.LlmAdapters\Pinder.LlmAdapters.csproj" />
-    <ProjectReference Include="..\..\src\Pinder.SessionSetup\Pinder.SessionSetup.csproj" />
+    <ProjectReference Include="..\..\src\Pinder.NarrativeHarness\Pinder.NarrativeHarness.csproj" />
   </ItemGroup>
 
 </Project>
