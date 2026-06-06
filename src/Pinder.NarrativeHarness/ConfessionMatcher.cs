@@ -29,7 +29,7 @@ namespace Pinder.Tools.NarrativeHarness
     public static class ConfessionMatcher
     {
         // Common words that should not count as evidence of a specific confession.
-        private static readonly HashSet<string> Stop = new(StringComparer.OrdinalIgnoreCase)
+        private static readonly HashSet<string> Stop = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
             "the","a","an","and","or","but","is","was","were","are","i","you","my","me","to",
             "of","in","on","at","it","that","this","with","for","when","what","most","thing",
