@@ -52,15 +52,37 @@ It is labelled HEURISTIC everywhere — not ground truth.
 ## Flags
 
 ```
---character <slug>      e.g. brick, velvet (default: brick)
---arc-shape <shape>     ingestion | romcom (default: ingestion)
---polarity <on|off>     enforce per-beat direction-of-change (default: off)
---turns <n|range>       e.g. 14 or 10-20 (range → high end, or seeded) (default: 14)
---player-script <file>  scripted pursuer lines (one per line; # = comment);
-                        alternative to the LLM pursuer
---seed <int>            seed for range resolution
---out <file>            output markdown path
+--character <slug>         OPPONENT character to load, e.g. brick, velvet (default: brick)
+--pursuer-character <slug> OPTIONAL second real character driven as the pursuer
+                           (default: none → see fallback below)
+--arc-shape <shape>        ingestion | romcom (default: ingestion)
+--polarity <on|off>        enforce per-beat direction-of-change (default: off)
+--turns <n|range>          e.g. 14 or 10-20 (range → high end, or seeded) (default: 14)
+--player-script <file>     scripted pursuer lines (one per line; # = comment);
+                           alternative to the LLM pursuer
+--seed <int>               seed for range resolution
+--out <file>               output markdown path (default: narrative-harness-out.md)
 ```
+
+### `--pursuer-character <slug>` — a real second character as the pursuer
+
+By default the pursuer side is *not* a real Pinder character: it is either a
+scripted reader (`--player-script`) or a generic lightweight LLM persona.
+`--pursuer-character <slug>` instead loads a **second real Pinder character**
+and drives it as the pursuer through the **SAME production prompt path** as the
+opponent — `SessionSystemPromptBuilder.BuildOpponent(...)` with its own
+assembled system prompt — so it **stays in character for the whole transcript**.
+
+`--character` remains the **opponent** character.
+
+Precedence / back-compat: when `--pursuer-character` is set it takes precedence;
+when it is omitted the pursuer falls back to `--player-script` (if given) or the
+generic lightweight LLM persona, exactly as before.
+
+The pursuer side is **REACTIVE**: it receives **no** arc / confession injection
+(it is built from the base `GameDefinition`, with no `== CONVERSATION ARC ==`
+slot populated). Only the **opponent** side gets the per-beat arc directive, so
+the opponent's arc stays the single independent variable.
 
 ## Build & run (no host dotnet — use the cached SDK container)
 
@@ -76,6 +98,16 @@ docker run --rm --network host -e ANTHROPIC_API_KEY="$KEY" \
   dotnet run --project tools/NarrativeHarness -c Release -- \
   --character brick --arc-shape ingestion --polarity off --turns 12 \
   --out /build/out.md
+```
+
+### Two real characters (opponent vs. pursuer)
+
+Drive a second real character as the pursuer through the same production prompt
+path. The opponent (`--character`) still carries the arc; the pursuer
+(`--pursuer-character`) is reactive:
+
+```bash
+dotnet run -- --character brick --pursuer-character velvet --turns 10
 ```
 
 ## Samples
