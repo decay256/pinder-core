@@ -85,7 +85,31 @@ namespace Pinder.Tools.NarrativeHarness
                     .ToList();
             }
 
-            var runner = new HarnessRunner(transport, character, menu, baseDef, strategy, opts, scriptedLines);
+            // ── Optional REAL pursuer character (#855) ────────────────────
+            // When --pursuer-character is set, the pursuer is a real Pinder
+            // character driven through the SAME production prompt path as the
+            // opponent (BuildOpponent). It takes precedence over both the
+            // scripted and the generic-LLM pursuer.
+            LoadedCharacter? pursuerCharacter = null;
+            if (opts.PursuerCharacterSlug != null)
+            {
+                try { pursuerCharacter = HarnessCharacterLoader.Load(opts.PursuerCharacterSlug); }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine("[ERROR] Pursuer character load failed: " + ex.Message);
+                    return 1;
+                }
+            }
+
+            IPursuerActor pursuer = PursuerActorFactory.Create(
+                transport,
+                scriptedLines,
+                pursuerCharacter?.AssembledSystemPrompt,
+                pursuerCharacter?.Name,
+                opts.PursuerCharacterSlug,
+                baseDef);
+
+            var runner = new HarnessRunner(transport, character, menu, baseDef, strategy, opts, pursuer);
             string transcript = await runner.RunAsync();
 
             // ── Write out ─────────────────────────────────────────────────
