@@ -15,17 +15,20 @@ namespace Pinder.Tools.NarrativeHarness
     /// </summary>
     public sealed class HarnessRunner
     {
+        /// <summary>Speaker key used for the pursuer side in the transcript.</summary>
+        public const string PursuerSpeaker = "Pursuer";
+
         private readonly ILlmTransport _transport;
         private readonly LoadedCharacter _character;
         private readonly ConfessionMenu _menu;
         private readonly GameDefinition _baseDef;
         private readonly IArcStrategy _strategy;
         private readonly HarnessOptions _opts;
-        private readonly List<string>? _scripted;
+        private readonly IPursuerActor _pursuer;
 
         public HarnessRunner(ILlmTransport transport, LoadedCharacter character,
             ConfessionMenu menu, GameDefinition baseDef, IArcStrategy strategy,
-            HarnessOptions opts, List<string>? scripted)
+            HarnessOptions opts, IPursuerActor pursuer)
         {
             _transport = transport;
             _character = character;
@@ -33,7 +36,7 @@ namespace Pinder.Tools.NarrativeHarness
             _baseDef = baseDef;
             _strategy = strategy;
             _opts = opts;
-            _scripted = scripted;
+            _pursuer = pursuer ?? throw new ArgumentNullException(nameof(pursuer));
         }
 
         public async Task<string> RunAsync()
@@ -45,11 +48,11 @@ namespace Pinder.Tools.NarrativeHarness
             // ── Header ────────────────────────────────────────────────────
             doc.AppendLine($"# Narrative Harness Transcript — {_character.Name}");
             doc.AppendLine();
-            doc.AppendLine($"- **Character:** {_opts.CharacterSlug} ({_character.Name})");
+            doc.AppendLine($"- **Opponent character:** {_opts.CharacterSlug} ({_character.Name}) — replies via SessionSystemPromptBuilder.BuildOpponent (arc-injected)");
+            doc.AppendLine($"- **Pursuer side:** {_pursuer.HeaderLabel}");
             doc.AppendLine($"- **Arc shape:** {_strategy.Name}");
             doc.AppendLine($"- **Polarity:** {(_opts.PolarityOn ? "on" : "off")}");
             doc.AppendLine($"- **Turns:** {_opts.Turns}");
-            doc.AppendLine($"- **Pursuer:** {(_scripted != null ? "scripted (--player-script)" : "LLM")}");
             doc.AppendLine($"- **Model:** claude-opus-4-8 (real Anthropic adapter)");
             doc.AppendLine($"- **Rule paths:** NONE — SessionSystemPromptBuilder → AnthropicTransport only (no Pinder.Rules).");
             doc.AppendLine($"- **Generated:** {DateTime.UtcNow:yyyy-MM-dd HH:mm}Z");
@@ -73,10 +76,9 @@ namespace Pinder.Tools.NarrativeHarness
             doc.AppendLine("## Conversation");
             doc.AppendLine();
 
-            // Pursuer opens with a neutral hook.
-            string pursuerLine = _scripted != null && _scripted.Count > 0
-                ? _scripted[0]
-                : "hey — your profile actually made me laugh out loud, which never happens. so what's the most ridiculous thing that's happened to you this week?";
+            // Pursuer opens with its own opening line (character / scripted / generic).
+            string pursuerLine = await _pursuer.OpeningLineAsync()
+                ?? "hey — your profile actually made me laugh out loud, which never happens. so what's the most ridiculous thing that's happened to you this week?";
 
             for (int turn = 1; turn <= _opts.Turns; turn++)
             {
@@ -84,7 +86,7 @@ namespace Pinder.Tools.NarrativeHarness
                 ArcDirective directive = _strategy.DirectiveFor(ctx);
 
                 // ── PURSUER turn (record the line we're sending in) ───────
-                transcript.Add(("Pursuer", pursuerLine));
+                transcript.Add((PursuerSpeaker, pursuerLine));
 
                 // ── CHARACTER turn via REAL builder + REAL transport ──────
                 GameDefinition turnDef = GameDefinitionArcInjector.WithArc(_baseDef, directive.ArcText);
@@ -116,16 +118,10 @@ namespace Pinder.Tools.NarrativeHarness
 
                 if (turn >= _opts.Turns) break;
 
-                // ── Next pursuer line: scripted or LLM ────────────────────
-                if (_scripted != null)
-                {
-                    if (turn < _scripted.Count) pursuerLine = _scripted[turn];
-                    else break; // ran out of scripted lines
-                }
-                else
-                {
-                    pursuerLine = await GeneratePursuerLineAsync(transcript, turn);
-                }
+                // ── Next pursuer line: character / scripted / generic LLM ──
+                string? next = await _pursuer.NextLineAsync(transcript, turn);
+                if (next == null) break; // pursuer has nothing more (e.g. scripted ran out)
+                pursuerLine = next;
             }
 
             // ── Footer summary ────────────────────────────────────────────
@@ -196,59 +192,23 @@ namespace Pinder.Tools.NarrativeHarness
         }
 
         /// <summary>
-        /// User-message turn the character model answers: the running conversation
-        /// rendered as a chat log, ending on the pursuer's latest line. This is
-        /// the only "state" — no engine state, no rolls.
+        /// User-message turn the character (opponent) model answers: the running
+        /// conversation rendered as a chat log, ending on the pursuer's latest
+        /// line. This is the only "state" — no engine state, no rolls. The
+        /// pursuer side mirrors this in <see cref="CharacterPursuerActor"/>.
         /// </summary>
-        private string BuildCharacterUserMessage(List<(string Speaker, string Text)> transcript, string latestPursuer)
+        internal string BuildCharacterUserMessage(List<(string Speaker, string Text)> transcript, string latestPursuer)
         {
             var sb = new StringBuilder();
             sb.AppendLine("You are texting on a dating app. This is the conversation so far. "
                 + "Reply ONLY as yourself, in one natural text message (1-4 sentences). "
                 + "Do not narrate or use stage directions.");
             sb.AppendLine();
-            // Replay everything except the just-added latest pursuer line, which
-            // we present as the prompt to answer.
-            var history = transcript.Take(transcript.Count).ToList();
-            foreach (var (speaker, text) in history)
+            foreach (var (speaker, text) in transcript)
                 sb.AppendLine($"{speaker}: {text}");
             sb.AppendLine();
             sb.AppendLine($"{_character.Name}:");
             return sb.ToString();
-        }
-
-        /// <summary>
-        /// Simulated pursuer: a lightweight standalone persona (NOT the real
-        /// builder — only the CHARACTER side must go through the production
-        /// builder). Keeps the conversation dynamic.
-        /// </summary>
-        private async Task<string> GeneratePursuerLineAsync(List<(string Speaker, string Text)> transcript, int turn)
-        {
-            string pursuerSystem =
-                "You are a witty, curious person texting someone on a dating app. You find them "
-                + "intriguing and you gently dig deeper — ask real questions, share a little, tease, "
-                + "and follow the emotional thread. Reply ONLY as yourself in one short text message "
-                + "(1-2 sentences). No narration, no stage directions.";
-
-            var sb = new StringBuilder();
-            sb.AppendLine("Conversation so far:");
-            foreach (var (speaker, text) in transcript)
-                sb.AppendLine($"{speaker}: {text}");
-            sb.AppendLine();
-            sb.AppendLine("Pursuer:");
-
-            try
-            {
-                string line = await _transport.SendAsync(
-                    pursuerSystem, sb.ToString(), temperature: 0.95, maxTokens: 200,
-                    phase: $"harness-pursuer-{turn}");
-                line = (line ?? "").Trim();
-                return line.Length > 0 ? line : "tell me more — i mean it.";
-            }
-            catch (Exception ex)
-            {
-                return $"[pursuer transport error: {ex.Message}]";
-            }
         }
     }
 }

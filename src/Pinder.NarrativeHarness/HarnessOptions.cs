@@ -7,6 +7,7 @@ namespace Pinder.Tools.NarrativeHarness
     public sealed class HarnessOptions
     {
         public string CharacterSlug { get; private set; } = "brick";
+        public string? PursuerCharacterSlug { get; private set; }     // --pursuer-character (opt; real 2nd char)
         public string ArcShape { get; private set; } = "ingestion"; // ingestion | romcom
         public bool PolarityOn { get; private set; } = false;        // --polarity on|off
         public int Turns { get; private set; } = 14;                 // resolved from <n|range>
@@ -20,7 +21,13 @@ namespace Pinder.Tools.NarrativeHarness
 @"NarrativeHarness — rules-free narrative testbed (#843)
 
 Usage:
-  --character <slug>        Character to load (e.g. brick, velvet). Default: brick
+  --character <slug>        Opponent character to load (e.g. brick, velvet). Default: brick
+  --pursuer-character <slug> OPTIONAL second real character driven as the pursuer
+                            through the SAME production prompt path (BuildOpponent).
+                            When set, the pursuer stays in character for the whole
+                            transcript (REACTIVE — no arc injection). When omitted,
+                            the pursuer falls back to --player-script (if given) or
+                            the generic lightweight LLM persona.
   --arc-shape <shape>       ingestion | romcom. Default: ingestion
   --polarity <on|off>       Enforce per-beat direction-of-change. Default: off
   --turns <n|range>         Turn count, e.g. 14 or 10-20 (range picks the high end,
@@ -42,6 +49,7 @@ Usage:
             }
 
             if (Get("--character") is string c) o.CharacterSlug = c;
+            if (Get("--pursuer-character") is string pc) o.PursuerCharacterSlug = pc;
 
             if (Get("--arc-shape") is string shape)
             {
