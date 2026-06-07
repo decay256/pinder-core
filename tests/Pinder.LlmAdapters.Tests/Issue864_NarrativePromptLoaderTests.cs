@@ -19,7 +19,7 @@ namespace Pinder.LlmAdapters.Tests
             Assert.False(string.IsNullOrWhiteSpace(prompt));
             // Multi-line block.
             Assert.Contains("\n", prompt);
-            // Stable substrings migrated from the IngestionArcStrategy prose.
+            // Stable substrings expected in the default narrative_prompt block.
             Assert.Contains("Opportunistic confession arc", prompt);
             Assert.Contains("Never dump the list", prompt);
         }

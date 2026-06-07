@@ -12,6 +12,10 @@ namespace Pinder.Tools.NarrativeHarness
     /// Drives the dynamic two-LLM (or LLM + scripted) conversation and emits the
     /// annotated transcript. ZERO rule paths: each character turn is
     /// build-prompt -&gt; SendAsync -&gt; record.
+    ///
+    /// The == CONVERSATION ARC == slot is populated each turn with the static
+    /// narrative prompt loaded from data/prompts/narrative.yaml, followed by
+    /// the rendered confession menu. Both are computed once before the loop.
     /// </summary>
     public sealed class HarnessRunner
     {
@@ -22,21 +26,23 @@ namespace Pinder.Tools.NarrativeHarness
         private readonly LoadedCharacter _character;
         private readonly ConfessionMenu _menu;
         private readonly GameDefinition _baseDef;
-        private readonly IArcStrategy _strategy;
         private readonly HarnessOptions _opts;
         private readonly IPursuerActor _pursuer;
+        private readonly string _narrativePrompt;
 
         public HarnessRunner(ILlmTransport transport, LoadedCharacter character,
-            ConfessionMenu menu, GameDefinition baseDef, IArcStrategy strategy,
+            ConfessionMenu menu, GameDefinition baseDef,
             HarnessOptions opts, IPursuerActor pursuer)
         {
             _transport = transport;
             _character = character;
             _menu = menu;
             _baseDef = baseDef;
-            _strategy = strategy;
             _opts = opts;
             _pursuer = pursuer ?? throw new ArgumentNullException(nameof(pursuer));
+
+            // Load the static narrative prompt once (data/prompts/narrative.yaml).
+            _narrativePrompt = NarrativePromptLoader.Load(AppContext.BaseDirectory);
         }
 
         public async Task<string> RunAsync()
@@ -50,19 +56,10 @@ namespace Pinder.Tools.NarrativeHarness
             doc.AppendLine();
             doc.AppendLine($"- **Opponent character:** {_opts.CharacterSlug} ({_character.Name}) — replies via SessionSystemPromptBuilder.BuildOpponent (arc-injected)");
             doc.AppendLine($"- **Pursuer side:** {_pursuer.HeaderLabel}");
-            doc.AppendLine($"- **Arc shape:** {_strategy.Name}");
-            doc.AppendLine($"- **Polarity:** {(_opts.PolarityOn ? "on" : "off")}");
             doc.AppendLine($"- **Turns:** {_opts.Turns}");
             doc.AppendLine($"- **Model:** claude-opus-4-8 (real Anthropic adapter)");
             doc.AppendLine($"- **Rule paths:** NONE — SessionSystemPromptBuilder → AnthropicTransport only (no Pinder.Rules).");
             doc.AppendLine($"- **Generated:** {DateTime.UtcNow:yyyy-MM-dd HH:mm}Z");
-            doc.AppendLine();
-
-            doc.AppendLine("## Arc plan");
-            doc.AppendLine();
-            doc.AppendLine("```");
-            doc.AppendLine(_strategy.DescribePlan().TrimEnd());
-            doc.AppendLine("```");
             doc.AppendLine();
 
             // ── Confession menu (visibly derived) ─────────────────────────
@@ -76,20 +73,21 @@ namespace Pinder.Tools.NarrativeHarness
             doc.AppendLine("## Conversation");
             doc.AppendLine();
 
+            // ── Arc text: static narrative prompt + confession menu ────────
+            // Computed once; injected verbatim into == CONVERSATION ARC == every turn.
+            string arcText = _narrativePrompt + "\n\n" + _menu.RenderMarkdown();
+
             // Pursuer opens with its own opening line (character / scripted / generic).
             string pursuerLine = await _pursuer.OpeningLineAsync()
                 ?? "hey — your profile actually made me laugh out loud, which never happens. so what's the most ridiculous thing that's happened to you this week?";
 
             for (int turn = 1; turn <= _opts.Turns; turn++)
             {
-                var ctx = new ArcTurnContext(turn, _opts.Turns, _opts.PolarityOn);
-                ArcDirective directive = _strategy.DirectiveFor(ctx);
-
                 // ── PURSUER turn (record the line we're sending in) ───────
                 transcript.Add((PursuerSpeaker, pursuerLine));
 
                 // ── CHARACTER turn via REAL builder + REAL transport ──────
-                GameDefinition turnDef = GameDefinitionArcInjector.WithArc(_baseDef, directive.ArcText);
+                GameDefinition turnDef = GameDefinitionArcInjector.WithArc(_baseDef, arcText);
                 string systemPrompt = SessionSystemPromptBuilder.BuildOpponent(
                     _character.AssembledSystemPrompt, turnDef);
 
@@ -114,7 +112,7 @@ namespace Pinder.Tools.NarrativeHarness
                 foreach (var h in hits) usedConfessions.Add(h.Entry.Index);
 
                 // ── Annotate this turn ────────────────────────────────────
-                AppendTurnAnnotation(doc, turn, directive, pursuerLine, reply, hits, usedConfessions);
+                AppendTurnAnnotation(doc, turn, pursuerLine, reply, hits, usedConfessions);
 
                 if (turn >= _opts.Turns) break;
 
@@ -147,7 +145,7 @@ namespace Pinder.Tools.NarrativeHarness
             return doc.ToString();
         }
 
-        private void AppendTurnAnnotation(StringBuilder doc, int turn, ArcDirective directive,
+        private void AppendTurnAnnotation(StringBuilder doc, int turn,
             string pursuerLine, string reply, IReadOnlyList<ConfessionHit> hits, SortedSet<int> usedSet)
         {
             doc.AppendLine($"### Turn {turn} / {_opts.Turns}");
@@ -156,12 +154,8 @@ namespace Pinder.Tools.NarrativeHarness
             doc.AppendLine();
             doc.AppendLine($"**{_character.Name}:** {reply}");
             doc.AppendLine();
-            doc.AppendLine("<details><summary>injected arc directive + annotation</summary>");
+            doc.AppendLine("<details><summary>annotation</summary>");
             doc.AppendLine();
-            doc.AppendLine($"- **Beat/window:** {directive.BeatLabel}");
-            doc.AppendLine($"- **Soft bias:** {directive.SoftBias}");
-            doc.AppendLine($"- **Register guidance:** {directive.Register}");
-            doc.AppendLine($"- **Polarity:** {(_opts.PolarityOn ? "on" : "off")}");
             if (hits.Count > 0)
             {
                 var top = hits.Take(3).Select(h =>
@@ -174,17 +168,11 @@ namespace Pinder.Tools.NarrativeHarness
             }
             doc.AppendLine($"- **Used-set so far:** {(usedSet.Count == 0 ? "—" : string.Join(", ", usedSet.Select(i => "#" + i)))}");
             doc.AppendLine();
-            doc.AppendLine("Arc text injected into `== CONVERSATION ARC ==` this turn:");
-            doc.AppendLine();
-            doc.AppendLine("```");
-            doc.AppendLine(directive.ArcText.TrimEnd());
-            doc.AppendLine("```");
-            doc.AppendLine();
             doc.AppendLine("</details>");
             doc.AppendLine();
 
             // Live stdout trace.
-            Console.WriteLine($"── Turn {turn}/{_opts.Turns} [{directive.BeatLabel}] ──");
+            Console.WriteLine($"── Turn {turn}/{_opts.Turns} ──");
             Console.WriteLine($"Pursuer: {pursuerLine}");
             Console.WriteLine($"{_character.Name}: {reply}");
             Console.WriteLine($"  detected: {(hits.Count == 0 ? "none" : string.Join(", ", hits.Take(3).Select(h => "#" + h.Entry.Index)))}");

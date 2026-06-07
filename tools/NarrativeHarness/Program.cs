@@ -62,11 +62,6 @@ namespace Pinder.Tools.NarrativeHarness
                 return 1;
             }
 
-            // ── Select arc strategy (strategy interface, not hardcoded) ───
-            IArcStrategy strategy = opts.ArcShape == "romcom"
-                ? new RomComArcStrategy()
-                : new IngestionArcStrategy(menu);
-
             // ── Real transport (dashed model id; ctor maps to API id) ─────
             using var transport = new AnthropicTransport(apiKey, "claude-opus-4-8");
 
@@ -109,7 +104,7 @@ namespace Pinder.Tools.NarrativeHarness
                 opts.PursuerCharacterSlug,
                 baseDef);
 
-            var runner = new HarnessRunner(transport, character, menu, baseDef, strategy, opts, pursuer);
+            var runner = new HarnessRunner(transport, character, menu, baseDef, opts, pursuer);
             string transcript = await runner.RunAsync();
 
             // ── Write out ─────────────────────────────────────────────────
