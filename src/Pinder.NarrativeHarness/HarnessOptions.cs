@@ -8,8 +8,6 @@ namespace Pinder.Tools.NarrativeHarness
     {
         public string CharacterSlug { get; private set; } = "brick";
         public string? PursuerCharacterSlug { get; private set; }     // --pursuer-character (opt; real 2nd char)
-        public string ArcShape { get; private set; } = "ingestion"; // ingestion | romcom
-        public bool PolarityOn { get; private set; } = false;        // --polarity on|off
         public int Turns { get; private set; } = 14;                 // resolved from <n|range>
         public string? PlayerScriptPath { get; private set; }
         public int? Seed { get; private set; }
@@ -28,8 +26,6 @@ Usage:
                             transcript (REACTIVE — no arc injection). When omitted,
                             the pursuer falls back to --player-script (if given) or
                             the generic lightweight LLM persona.
-  --arc-shape <shape>       ingestion | romcom. Default: ingestion
-  --polarity <on|off>       Enforce per-beat direction-of-change. Default: off
   --turns <n|range>         Turn count, e.g. 14 or 10-20 (range picks the high end,
                             seeded if --seed given). Default: 14
   --player-script <file>    Scripted pursuer lines (one per line; # = comment).
@@ -51,22 +47,6 @@ Usage:
             if (Get("--character") is string c) o.CharacterSlug = c;
             if (Get("--pursuer-character") is string pc) o.PursuerCharacterSlug = pc;
 
-            if (Get("--arc-shape") is string shape)
-            {
-                shape = shape.ToLowerInvariant();
-                if (shape != "ingestion" && shape != "romcom")
-                    throw new ArgumentException($"--arc-shape must be 'ingestion' or 'romcom', got '{shape}'.");
-                o.ArcShape = shape;
-            }
-
-            if (Get("--polarity") is string pol)
-            {
-                pol = pol.ToLowerInvariant();
-                if (pol != "on" && pol != "off")
-                    throw new ArgumentException($"--polarity must be 'on' or 'off', got '{pol}'.");
-                o.PolarityOn = pol == "on";
-            }
-
             if (Get("--seed") is string seedStr && int.TryParse(seedStr, out int seed))
                 o.Seed = seed;
 
@@ -81,7 +61,7 @@ Usage:
         }
 
         /// <summary>
-        /// Resolve "<n>" to n, or "lo-hi" to a value in [lo,hi] (seeded if a seed
+        /// Resolve "&lt;n&gt;" to n, or "lo-hi" to a value in [lo,hi] (seeded if a seed
         /// is present, else the high end so a 10-20 request runs a full arc).
         /// </summary>
         public static int ResolveTurns(string spec, int? seed)
