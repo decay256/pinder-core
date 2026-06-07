@@ -45,7 +45,7 @@ namespace Pinder.Tools.NarrativeHarness
             _narrativePrompt = NarrativePromptLoader.Load(AppContext.BaseDirectory);
         }
 
-        public async Task<string> RunAsync()
+        public async Task<HarnessRunResult> RunAsync()
         {
             var doc = new StringBuilder();
             var transcript = new List<(string Speaker, string Text)>();
@@ -142,7 +142,14 @@ namespace Pinder.Tools.NarrativeHarness
             }
             doc.AppendLine();
 
-            return doc.ToString();
+            // ── Collect raw sessions from a RecordingLlmTransport ────────────
+            IReadOnlyList<RawLlmSession> rawSessions;
+            if (_transport is RecordingLlmTransport rec)
+                rawSessions = rec.Sessions;
+            else
+                rawSessions = new RawLlmSession[0];
+
+            return new HarnessRunResult(doc.ToString(), rawSessions);
         }
 
         private void AppendTurnAnnotation(StringBuilder doc, int turn,

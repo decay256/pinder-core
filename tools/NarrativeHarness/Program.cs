@@ -105,7 +105,8 @@ namespace Pinder.Tools.NarrativeHarness
                 baseDef);
 
             var runner = new HarnessRunner(transport, character, menu, baseDef, opts, pursuer);
-            string transcript = await runner.RunAsync();
+            var result = await runner.RunAsync();
+            string transcript = result.Transcript;
 
             // ── Write out ─────────────────────────────────────────────────
             File.WriteAllText(opts.OutPath, transcript);
