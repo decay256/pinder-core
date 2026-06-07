@@ -62,6 +62,10 @@
       "type": "string",
       "description": "Issue #779: permanent psychological stake generated at character-creation time. Markdown bullet list of the character's core emotional motivations and vulnerabilities as injected into their LLM system prompt. Optional — absent on legacy files until regenerated."
     },
+    "background_story": {
+      "type": "string",
+      "description": "Issue #820: permanent narrative background story generated at character-creation time via LlmBackgroundGenerator. Optional — absent on legacy files until backfilled/regenerated. Same hygiene as psychological_stake: omitted from required so legacy files without it remain valid."
+    },
     "allocation": {
       "type": "object",
       "additionalProperties": false,
