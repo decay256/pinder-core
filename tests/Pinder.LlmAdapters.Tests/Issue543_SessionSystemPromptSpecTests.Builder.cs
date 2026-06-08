@@ -121,10 +121,12 @@ namespace Pinder.LlmAdapters.Tests
             var opponentIdx = result.IndexOf("== OPPONENT CHARACTER ==");
             var metaIdx = result.IndexOf("== NARRATIVE DOCTRINE ==");
 
+            // Variable character sections come LAST: static game/doctrine material first,
+            // then PLAYER CHARACTER and OPPONENT CHARACTER at the tail.
             Assert.True(visionIdx < worldIdx, "GAME VISION must precede WORLD RULES");
-            Assert.True(worldIdx < playerIdx, "WORLD RULES must precede PLAYER CHARACTER");
+            Assert.True(worldIdx < metaIdx, "WORLD RULES must precede NARRATIVE DOCTRINE");
+            Assert.True(metaIdx < playerIdx, "NARRATIVE DOCTRINE must precede PLAYER CHARACTER");
             Assert.True(playerIdx < opponentIdx, "PLAYER CHARACTER must precede OPPONENT CHARACTER");
-            Assert.True(opponentIdx < metaIdx, "OPPONENT CHARACTER must precede NARRATIVE DOCTRINE");
         }
 
         // What: AC4 — GAME VISION section sourced from gameDef.Vision
@@ -179,9 +181,9 @@ namespace Pinder.LlmAdapters.Tests
             var opponentText = "You are Sable. Fast-talking. Uses omg and emoji. Level 5.";
             var result = SessionSystemPromptBuilder.Build("player", opponentText);
 
+            // OPPONENT CHARACTER is now the final section; it runs to the end of the prompt.
             var opponentIdx = result.IndexOf("== OPPONENT CHARACTER ==");
-            var metaIdx = result.IndexOf("== NARRATIVE DOCTRINE ==");
-            var opponentSection = result.Substring(opponentIdx, metaIdx - opponentIdx);
+            var opponentSection = result.Substring(opponentIdx);
             Assert.Contains(opponentText, opponentSection);
         }
 
@@ -367,10 +369,10 @@ horniness_time_modifiers:
 
             var playerIdx = result.IndexOf("== PLAYER CHARACTER ==");
             var opponentIdx = result.IndexOf("== OPPONENT CHARACTER ==");
-            var metaIdx = result.IndexOf("== NARRATIVE DOCTRINE ==");
 
+            // PLAYER CHARACTER and OPPONENT CHARACTER are the final two sections.
             var playerSection = result.Substring(playerIdx, opponentIdx - playerIdx);
-            var opponentSection = result.Substring(opponentIdx, metaIdx - opponentIdx);
+            var opponentSection = result.Substring(opponentIdx);
 
             // Player marker in player section, not in opponent section
             Assert.Contains("PLAYER_UNIQUE_MARKER_111", playerSection);

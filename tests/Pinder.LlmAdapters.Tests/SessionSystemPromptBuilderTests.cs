@@ -72,10 +72,12 @@ namespace Pinder.LlmAdapters.Tests
             var opponentIdx = result.IndexOf("== OPPONENT CHARACTER ==");
             var metaIdx = result.IndexOf("== NARRATIVE DOCTRINE ==");
 
+            // Variable character sections come LAST: static game/doctrine material first,
+            // then PLAYER CHARACTER and OPPONENT CHARACTER at the tail.
             Assert.True(visionIdx < worldIdx, "GAME VISION should come before WORLD RULES");
-            Assert.True(worldIdx < playerIdx, "WORLD RULES should come before PLAYER CHARACTER");
+            Assert.True(worldIdx < metaIdx, "WORLD RULES should come before NARRATIVE DOCTRINE");
+            Assert.True(metaIdx < playerIdx, "NARRATIVE DOCTRINE should come before PLAYER CHARACTER");
             Assert.True(playerIdx < opponentIdx, "PLAYER CHARACTER should come before OPPONENT CHARACTER");
-            Assert.True(opponentIdx < metaIdx, "OPPONENT CHARACTER should come before NARRATIVE DOCTRINE");
         }
 
         [Fact]

@@ -5,8 +5,11 @@ namespace Pinder.LlmAdapters
 {
     /// <summary>
     /// Assembles a session-level system prompt from character profiles and game definition.
-    /// The output contains 5 clearly delineated sections: game vision, world rules,
-    /// player character, opponent character, and meta contract (with writing rules).
+    /// Section ordering places the STATIC, session-invariant material (game vision, world
+    /// rules, narrative doctrine, dramatic craft, structural sections) FIRST, and the
+    /// CHARACTER-SPECIFIC / VARIABLE material (the assembled player/opponent profiles) LAST.
+    /// Keeping the variable character block at the tail maximizes the stable, cacheable
+    /// prompt prefix across sessions and keeps role-specific content closest to the turn.
     /// </summary>
     public static class SessionSystemPromptBuilder
     {
@@ -37,14 +40,11 @@ namespace Pinder.LlmAdapters
             var def = gameDef ?? GameDefinition.PinderDefaults;
 
             return string.Concat(
+                // --- STATIC, session-invariant sections first (cacheable prefix) ---
                 "== GAME VISION ==\n\n",
                 def.Vision.TrimEnd(),
                 "\n\n== WORLD RULES ==\n\n",
                 def.WorldDescription.TrimEnd(),
-                "\n\n== PLAYER CHARACTER ==\n\n",
-                playerPrompt.TrimEnd(),
-                "\n\n== OPPONENT CHARACTER ==\n\n",
-                opponentPrompt.TrimEnd(),
                 "\n\n== NARRATIVE DOCTRINE ==\n\n",
                 def.NarrativeDoctrine.TrimEnd(),
                 "\n\n== DRAMATIC CRAFT ==\n\n",
@@ -56,6 +56,11 @@ namespace Pinder.LlmAdapters
                 string.IsNullOrWhiteSpace(def.OpponentCuriosity) ? "" : "\n\n== OPPONENT CURIOSITY ==\n\n" + def.OpponentCuriosity.TrimEnd(),
                 string.IsNullOrWhiteSpace(def.ConversationArcProgression) ? "" : "\n\n== CONVERSATION ARC ==\n\n" + def.ConversationArcProgression.TrimEnd(),
                 string.IsNullOrWhiteSpace(def.PlayerProbing) ? "" : "\n\n== PLAYER PROBING ==\n\n" + def.PlayerProbing.TrimEnd(),
+                // --- CHARACTER-SPECIFIC / VARIABLE sections LAST ---
+                "\n\n== PLAYER CHARACTER ==\n\n",
+                playerPrompt.TrimEnd(),
+                "\n\n== OPPONENT CHARACTER ==\n\n",
+                opponentPrompt.TrimEnd(),
                 "\n");
         }
 
@@ -77,14 +82,11 @@ namespace Pinder.LlmAdapters
 
             var sb = new AnnotatedStringBuilder();
 
+            // --- STATIC, session-invariant sections first (cacheable prefix) ---
             sb.Append("== GAME VISION ==\n\n");
             sb.AppendLine(def.Vision.TrimEnd(), "game-definition.yaml", "vision");
             sb.Append("\n== WORLD RULES ==\n\n");
             sb.AppendLine(def.WorldDescription.TrimEnd(), "game-definition.yaml", "world_description");
-            sb.Append("\n== PLAYER CHARACTER ==\n\n");
-            sb.AppendLine(def.PlayerRoleDescription.TrimEnd(), "game-definition.yaml", "player_role_description");
-            sb.Append("\n");
-            sb.AppendLine(playerPrompt.TrimEnd(), "character-profile", "player-profile");
 
             sb.Append("\n== NARRATIVE DOCTRINE ==\n\n");
             sb.AppendLine(def.NarrativeDoctrine.TrimEnd(), "game-definition.yaml", "narrative_doctrine");
@@ -106,6 +108,12 @@ namespace Pinder.LlmAdapters
                 sb.Append("\n== PLAYER PROBING ==\n\n");
                 sb.AppendLine(def.PlayerProbing.TrimEnd(), "game-definition.yaml", "player_probing");
             }
+
+            // --- CHARACTER-SPECIFIC / VARIABLE section LAST ---
+            sb.Append("\n== PLAYER CHARACTER ==\n\n");
+            sb.AppendLine(def.PlayerRoleDescription.TrimEnd(), "game-definition.yaml", "player_role_description");
+            sb.Append("\n");
+            sb.AppendLine(playerPrompt.TrimEnd(), "character-profile", "player-profile");
 
             sb.Append("\n");
 
@@ -130,14 +138,11 @@ namespace Pinder.LlmAdapters
 
             var sb = new AnnotatedStringBuilder();
 
+            // --- STATIC, session-invariant sections first (cacheable prefix) ---
             sb.Append("== GAME VISION ==\n\n");
             sb.AppendLine(def.Vision.TrimEnd(), "game-definition.yaml", "vision");
             sb.Append("\n== WORLD RULES ==\n\n");
             sb.AppendLine(def.WorldDescription.TrimEnd(), "game-definition.yaml", "world_description");
-            sb.Append("\n== OPPONENT CHARACTER ==\n\n");
-            sb.AppendLine(def.OpponentRoleDescription.TrimEnd(), "game-definition.yaml", "opponent_role_description");
-            sb.Append("\n");
-            sb.AppendLine(opponentPrompt.TrimEnd(), "character-profile", "opponent-profile");
 
             sb.Append("\n== NARRATIVE DOCTRINE ==\n\n");
             sb.AppendLine(def.NarrativeDoctrine.TrimEnd(), "game-definition.yaml", "narrative_doctrine");
@@ -165,6 +170,12 @@ namespace Pinder.LlmAdapters
                 sb.Append("\n== CONVERSATION ARC ==\n\n");
                 sb.AppendLine(def.ConversationArcProgression.TrimEnd(), "game-definition.yaml", "conversation_arc_progression");
             }
+
+            // --- CHARACTER-SPECIFIC / VARIABLE section LAST ---
+            sb.Append("\n== OPPONENT CHARACTER ==\n\n");
+            sb.AppendLine(def.OpponentRoleDescription.TrimEnd(), "game-definition.yaml", "opponent_role_description");
+            sb.Append("\n");
+            sb.AppendLine(opponentPrompt.TrimEnd(), "character-profile", "opponent-profile");
 
             sb.Append("\n");
 
