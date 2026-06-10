@@ -153,7 +153,7 @@ Instructions for adding new entries:
 - always ends with a question, even when not asking
 - never asks questions, only states
 - references the time of day mid-message ("it's 2am why am i telling you this")
-- self-tag suffix on rants ("/rant", "/end")
+- self-tag suffix on rants — only ever as a clean terminal suffix at the very end of the message ("/rant")
 
 ### TONE — STANCE (what they're doing)
 - **dry** — flat, deadpan, one-word replies as a love language

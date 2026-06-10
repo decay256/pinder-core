@@ -22,6 +22,49 @@ namespace Pinder.LlmAdapters.Anthropic
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         /// <summary>
+        /// Defensively removes the persona "self-tag" tics ("/end", "/rant") that the
+        /// model is instructed to use as a terminal suffix but frequently misplaces
+        /// mid-message (e.g. inside a parenthetical: "...leave that one open /end)\n\n...").
+        /// These tags are meta markers, not chat content, so they must never be persisted
+        /// to the saved chat history. Only the exact literal tokens are removed; legitimate
+        /// prose is left untouched.
+        /// </summary>
+        internal static string StripPersonaSelfTags(string? text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return text ?? string.Empty;
+
+            var result = text!;
+
+            // Mid-text tag immediately before a closing paren: "...open /end)" -> "...open)".
+            // Handle the spaced form first so we don't leave a stray space before ')'.
+            result = result.Replace(" /end)", ")").Replace(" /rant)", ")");
+            result = result.Replace("/end)", ")").Replace("/rant)", ")");
+
+            // Mid-text tag surrounded by spaces: "blah /end blah" -> "blah blah".
+            result = result.Replace(" /end ", " ").Replace(" /rant ", " ");
+
+            // Trailing tag suffix: "...anyway. /end" -> "...anyway.".
+            result = StripTrailingTag(result, " /end");
+            result = StripTrailingTag(result, " /rant");
+
+            // The ordered replacements above never introduce double spaces, so a final
+            // Trim() is sufficient; we deliberately do NOT collapse runs of spaces here
+            // to avoid mangling the legitimate "double space after periods" persona tic.
+            return result.Trim();
+        }
+
+        private static string StripTrailingTag(string text, string tag)
+        {
+            var trimmedEnd = text.TrimEnd();
+            if (trimmedEnd.EndsWith(tag, StringComparison.Ordinal))
+            {
+                return trimmedEnd.Substring(0, trimmedEnd.Length - tag.Length);
+            }
+            return text;
+        }
+
+        /// <summary>
         /// Parses structured LLM text output with optional [SIGNALS] blocks.
         /// Never throws — returns OpponentResponse with null signals on parse failure.
         /// </summary>
@@ -76,6 +119,9 @@ namespace Pinder.LlmAdapters.Anthropic
                 {
                     messageText = messageText.Substring(1, messageText.Length - 2).Trim();
                 }
+
+                // Strip persona self-tag tics ("/end", "/rant") that must never persist to chat history.
+                messageText = StripPersonaSelfTags(messageText);
 
                 // Parse optional [SIGNALS] block
                 var signalsIndex = response.IndexOf("[SIGNALS]", StringComparison.OrdinalIgnoreCase);
@@ -139,6 +185,9 @@ namespace Pinder.LlmAdapters.Anthropic
                 var message = toolInput.Value<string>("message");
                 if (string.IsNullOrWhiteSpace(message))
                     return null;
+
+                // Strip persona self-tag tics ("/end", "/rant") that must never persist to chat history.
+                message = StripPersonaSelfTags(message);
 
                 Tell? tell = null;
                 var tellObj = toolInput["tell"] as JObject;
