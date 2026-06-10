@@ -311,17 +311,19 @@ OPTION_2
             Assert.All(result, o => Assert.False(o.HasWeaknessWindow));
         }
 
-        // What: Spec edge case — multiple quoted strings, first one used
-        // Mutation: Would catch if last quoted string is used instead of first
+        // What: Spec edge case — inner quotes within a single option are preserved (issue #1117)
+        // Mutation: Would catch if the option text is truncated at the first inner quote
         [Fact]
-        public void ParseDialogueOptions_MultipleQuotedStrings_UsesFirst()
+        public void ParseDialogueOptions_MultipleQuotedStrings_CapturesFullText()
         {
             var input = @"OPTION_1
 [STAT: CHARM] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
 ""First quote"" and then ""second quote""";
 
             var result = AnthropicLlmAdapter.ParseDialogueOptions(input);
-            Assert.Equal("First quote", result[0].IntendedText);
+            // Issue #1117: full text captured including inner quotes, not the
+            // leading fragment ("First quote") the old regex produced.
+            Assert.Equal(@"First quote"" and then ""second quote", result[0].IntendedText);
         }
 
         // What: Spec edge case — padding skips stats already present

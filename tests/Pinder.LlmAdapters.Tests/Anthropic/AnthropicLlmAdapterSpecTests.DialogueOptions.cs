@@ -72,10 +72,10 @@ OPTION_2
             }
         }
 
-        // What: AC4 Spec edge - Multiple quoted strings: first one is used
-        // Mutation: Would catch if last quoted string is used instead of first
+        // What: AC4 Spec edge - inner quotes within a single option are preserved (issue #1117)
+        // Mutation: Would catch if the option text is truncated at the first inner quote
         [Fact]
-        public void ParseDialogueOptions_MultipleQuotedStrings_UsesFirst()
+        public void ParseDialogueOptions_MultipleQuotedStrings_CapturesFullText()
         {
             var input = @"OPTION_1
 [STAT: CHARM] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
@@ -83,18 +83,22 @@ OPTION_2
 
 OPTION_2
 [STAT: RIZZ] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
-""text""
+""text option two""
 
 OPTION_3
 [STAT: WIT] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
-""text""
+""text option three""
 
 OPTION_4
 [STAT: HONESTY] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
-""text""";
+""text option four""";
 
             var result = AnthropicLlmAdapter.ParseDialogueOptions(input);
-            Assert.Equal("First quoted string", result[0].IntendedText);
+            // Issue #1117: the full text (inner quotes included) is captured,
+            // not just the leading fragment up to the first inner quote.
+            Assert.Equal(
+                @"First quoted string"" and then ""second quoted string",
+                result[0].IntendedText);
         }
 
         // What: AC4 Spec edge - HasWeaknessWindow always false from adapter parsing

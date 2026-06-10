@@ -111,24 +111,24 @@ OPTION_4
         {
             var input = @"OPTION_1
 [STAT: CHARM] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
-""One""
+""Option one""
 OPTION_2
 [STAT: RIZZ] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
-""Two""
+""Option two""
 OPTION_3
 [STAT: WIT] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
-""Three""
+""Option three""
 OPTION_4
 [STAT: HONESTY] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
-""Four""
+""Option four""
 OPTION_5
 [STAT: CHAOS] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
-""Five""";
+""Option five""";
 
             var result = AnthropicLlmAdapter.ParseDialogueOptions(input);
             Assert.Equal(4, result.Length);
-            Assert.Equal("One", result[0].IntendedText);
-            Assert.Equal("Four", result[3].IntendedText);
+            Assert.Equal("Option one", result[0].IntendedText);
+            Assert.Equal("Option four", result[3].IntendedText);
         }
 
         [Fact]
