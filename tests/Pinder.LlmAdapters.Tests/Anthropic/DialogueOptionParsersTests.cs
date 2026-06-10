@@ -115,5 +115,57 @@ OPTION_3 [STAT: Honesty] ""I just wanted to say hi."" [CALLBACK: turn_5] [COMBO:
             var result = DialogueOptionParsers.ParseDialogueOptionsText(input);
             Assert.Equal(StatType.SelfAwareness, result[0].Stat);
         }
+
+        // --- Issue #1117 regression coverage ---
+
+        [Fact]
+        public void ParseDialogueOptionsText_InnerDoubleQuotes_ParsesFullText()
+        {
+            // The model quotes the opponent back inside the option's intended text.
+            // Previously the leading-fragment regex truncated this at the first
+            // inner double-quote (observed fragments like "see you said it's").
+            var input = @"OPTION_1 [STAT: Wit] ""Interesting that you said ""it's a lot"" earlier — care to unpack that?"" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]";
+
+            var result = DialogueOptionParsers.ParseDialogueOptionsText(input);
+
+            Assert.Equal(StatType.Wit, result[0].Stat);
+            Assert.Equal(
+                @"Interesting that you said ""it's a lot"" earlier — care to unpack that?",
+                result[0].IntendedText);
+        }
+
+        [Fact]
+        public void ParseDialogueOptionsText_MultipleOptions_OneWithInnerQuotes_AllParseFully()
+        {
+            var input = @"OPTION_1 [STAT: Charm] ""Hey there, looking good!"" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
+OPTION_2 [STAT: Honesty] ""You literally said ""I never text first"" two minutes ago."" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
+OPTION_3 [STAT: Wit] ""Bold of you to assume I read."" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]";
+
+            var result = DialogueOptionParsers.ParseDialogueOptionsText(input);
+
+            Assert.Equal(4, result.Length);
+            Assert.Equal("Hey there, looking good!", result[0].IntendedText);
+            Assert.Equal(
+                @"You literally said ""I never text first"" two minutes ago.",
+                result[1].IntendedText);
+            Assert.Equal("Bold of you to assume I read.", result[2].IntendedText);
+        }
+
+        [Fact]
+        public void ParseDialogueOptionsText_DegenerateFragment_NotSurfacedAsPlayableOption()
+        {
+            // A truncated tiny stub ("the") must NOT be surfaced as a playable
+            // option — it is dropped and the slot is backfilled by padding.
+            var input = @"OPTION_1 [STAT: Charm] ""the"" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
+OPTION_2 [STAT: Wit] ""That's a genuinely funny take, I'll give you that."" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]";
+
+            var result = DialogueOptionParsers.ParseDialogueOptionsText(input);
+
+            Assert.Equal(4, result.Length);
+            // The degenerate "the" fragment must not appear as any option's text.
+            Assert.DoesNotContain(result, o => o.IntendedText == "the");
+            // The real option is still parsed and surfaced.
+            Assert.Contains(result, o => o.IntendedText == "That's a genuinely funny take, I'll give you that.");
+        }
     }
 }

@@ -36,9 +36,24 @@ namespace Pinder.LlmAdapters.Anthropic
             @"\[TELL_BONUS:\s*(\w+)\]",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
+        // Captures the FULL intended text of an option (issue #1117).
+        // The previous pattern @"""([^""]+)""" stopped at the first inner
+        // double-quote, so an option that quotes the opponent back
+        // (e.g. the model writes:  said "it's a lot")  got truncated to a
+        // leading fragment. Because each per-option section (split out by the
+        // OPTION_N header) only ever contains this single quoted block followed
+        // by bracketed [CALLBACK]/[COMBO]/[TELL_BONUS] metadata tags — none of
+        // which contain double-quotes — a greedy capture to the LAST quote on
+        // the line reconstructs the complete text, inner quotes included.
         private static readonly Regex QuotedTextRegex = new Regex(
-            @"""([^""]+)""",
+            @"""(.+)""",
             RegexOptions.Compiled);
+
+        // Minimum length (after meta-prefix stripping/trim) for a parsed option
+        // to be treated as a playable dialogue line. Degenerate stubs such as
+        // "the" or "..." that slip through are dropped here so they are never
+        // surfaced; PadDialogueOptionsToFour then backfills a proper placeholder.
+        private const int MinPlayableOptionLength = 4;
 
 
 
@@ -87,6 +102,11 @@ namespace Pinder.LlmAdapters.Anthropic
 
                         var text = MetaPrefixStripper.Strip(textMatch.Groups[1].Value.Trim());
                         if (string.IsNullOrEmpty(text)) continue;
+
+                        // Issue #1117 sanity guard: reject sub-threshold/degenerate
+                        // fragments (e.g. "the", "...") so they are never surfaced as
+                        // playable options. PadDialogueOptionsToFour backfills instead.
+                        if (text.Length < MinPlayableOptionLength) continue;
 
                         // Parse optional metadata
                         int? callbackTurn = null;
