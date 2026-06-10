@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -63,9 +64,18 @@ namespace Pinder.LlmAdapters.Anthropic
     ///   <c>delta.type == "text_delta"</c> — the <c>delta.text</c> field, in
     ///   arrival order. Multi-chunk text reassembles by concatenation at the
     ///   call-site.</item>
-    ///   <item>All other event types (<c>message_start</c>,
-    ///   <c>content_block_start</c>, <c>ping</c>, <c>content_block_stop</c>,
-    ///   <c>message_delta</c>, <c>message_stop</c>, unknown) are silently
+    ///   <item><c>message_start</c> and <c>message_delta</c> frames are not
+    ///   yielded as text, but their <c>usage</c> blocks are captured for
+    ///   token/cost telemetry (issue #1115): <c>message_start</c> carries
+    ///   <c>usage.input_tokens</c>, <c>usage.cache_creation_input_tokens</c>
+    ///   and <c>usage.cache_read_input_tokens</c>; <c>message_delta</c>
+    ///   carries the final cumulative <c>usage.output_tokens</c>. The
+    ///   accumulated usage is exposed via
+    ///   <see cref="ITokenUsageProvider.GetSessionUsage"/> and
+    ///   <see cref="GetCallStats"/>, mirroring the non-streaming
+    ///   <c>AnthropicLlmAdapter</c>.</item>
+    ///   <item>All other event types (<c>content_block_start</c>, <c>ping</c>,
+    ///   <c>content_block_stop</c>, <c>message_stop</c>, unknown) are silently
     ///   ignored. The stream terminates when the underlying response stream
     ///   ends; no sentinel is required (Anthropic does not send <c>[DONE]</c>).</item>
     ///   <item>An open-time non-2xx HTTP response throws
@@ -81,7 +91,7 @@ namespace Pinder.LlmAdapters.Anthropic
     ///   <see cref="OperationCanceledException"/> (not a transport failure).</item>
     /// </list>
     /// </remarks>
-    public sealed class AnthropicStreamingTransport : IStreamingLlmTransport, IDisposable
+    public sealed class AnthropicStreamingTransport : IStreamingLlmTransport, ITokenUsageProvider, IDisposable
     {
         private const string ApiUrl = "https://api.anthropic.com/v1/messages";
         private const string AnthropicVersion = "2023-06-01";
@@ -91,6 +101,15 @@ namespace Pinder.LlmAdapters.Anthropic
         private readonly bool _ownsHttpClient;
         private readonly string _model;
         private bool _disposed;
+
+        // Issue #1115: token usage captured from message_start / message_delta
+        // SSE frames. One CallSummaryStat is committed per completed stream,
+        // mirroring how the non-streaming AnthropicDebugLogger records usage
+        // per call. Exposed via ITokenUsageProvider / GetCallStats so the same
+        // downstream telemetry path that consumes the non-streaming adapter
+        // sees real (non-zero) numbers for the streaming path.
+        private readonly List<CallSummaryStat> _callStats = new List<CallSummaryStat>();
+        private readonly object _statsLock = new object();
 
         /// <summary>
         /// Creates a transport with an internally-owned <see cref="HttpClient"/>.
@@ -182,6 +201,10 @@ namespace Pinder.LlmAdapters.Anthropic
                     "Anthropic streaming request failed before headers: " + ex.Message, LlmFailureKind.Network, ex);
             }
 
+            // Issue #1115: accumulate usage across this stream's SSE frames so
+            // we can commit one per-call telemetry row once the stream ends.
+            var usage = new StreamUsageAccumulator();
+            bool streamCompleted = false;
             try
             {
                 if (!response.IsSuccessStatusCode)
@@ -252,19 +275,29 @@ namespace Pinder.LlmAdapters.Anthropic
                     throw new LlmTransportException(message, failureKind);
                 }
 
-                await foreach (var fragment in ReadSseAsync(response, cancellationToken).ConfigureAwait(false))
+                await foreach (var fragment in ReadSseAsync(response, usage, cancellationToken).ConfigureAwait(false))
                 {
                     yield return fragment;
                 }
+                streamCompleted = true;
             }
             finally
             {
+                // Commit usage telemetry only when the stream ran to a clean
+                // completion (mirrors the non-streaming path, which records
+                // usage only on a successful response). On exceptions /
+                // cancellation we skip so we never record a partial/zero row.
+                if (streamCompleted && usage.HasUsage)
+                {
+                    CommitUsage(usage);
+                }
                 response.Dispose();
             }
         }
 
         private static async IAsyncEnumerable<string> ReadSseAsync(
             HttpResponseMessage response,
+            StreamUsageAccumulator usage,
             [EnumeratorCancellation] CancellationToken cancellationToken)
         {
             // Honour pre-cancellation deterministically before we touch the
@@ -332,7 +365,7 @@ namespace Pinder.LlmAdapters.Anthropic
                         // End of stream. If we have a buffered data line, dispatch it.
                         if (dataBuffer.Length > 0)
                         {
-                            var emitFinal = TryHandleDataFrame(dataBuffer.ToString(), out var frag, out var errMsg);
+                            var emitFinal = TryHandleDataFrame(dataBuffer.ToString(), usage, out var frag, out var errMsg);
                             dataBuffer.Clear();
                             if (errMsg != null)
                                 throw new LlmTransportException("Anthropic streaming error: " + errMsg);
@@ -347,7 +380,7 @@ namespace Pinder.LlmAdapters.Anthropic
                         // Frame boundary. Process whatever we accumulated.
                         if (dataBuffer.Length > 0)
                         {
-                            var emit = TryHandleDataFrame(dataBuffer.ToString(), out var frag, out var errMsg);
+                            var emit = TryHandleDataFrame(dataBuffer.ToString(), usage, out var frag, out var errMsg);
                             dataBuffer.Clear();
                             if (errMsg != null)
                                 throw new LlmTransportException("Anthropic streaming error: " + errMsg);
@@ -385,9 +418,12 @@ namespace Pinder.LlmAdapters.Anthropic
         /// Parse one SSE data frame. Returns true when a text fragment should
         /// be yielded (with <paramref name="fragment"/> set). Sets
         /// <paramref name="errorMessage"/> when the frame represents an
-        /// Anthropic <c>error</c> event; the caller must throw.
+        /// Anthropic <c>error</c> event; the caller must throw. Side-effect:
+        /// folds any <c>usage</c> block on <c>message_start</c> /
+        /// <c>message_delta</c> frames into <paramref name="usage"/> (issue
+        /// #1115).
         /// </summary>
-        private static bool TryHandleDataFrame(string data, out string? fragment, out string? errorMessage)
+        private static bool TryHandleDataFrame(string data, StreamUsageAccumulator usage, out string? fragment, out string? errorMessage)
         {
             fragment = null;
             errorMessage = null;
@@ -429,6 +465,23 @@ namespace Pinder.LlmAdapters.Anthropic
                     }
                     return false;
                 }
+                case "message_start":
+                {
+                    // message_start carries the prompt-side usage:
+                    // input_tokens + cache_creation_input_tokens +
+                    // cache_read_input_tokens (and an initial output_tokens
+                    // value that message_delta later supersedes).
+                    var messageUsage = obj["message"]?["usage"] as JObject;
+                    usage.ApplyMessageStart(messageUsage);
+                    return false;
+                }
+                case "message_delta":
+                {
+                    // message_delta carries the final cumulative output_tokens.
+                    var deltaUsage = obj["usage"] as JObject;
+                    usage.ApplyMessageDelta(deltaUsage);
+                    return false;
+                }
                 case "error":
                 {
                     var err = obj["error"] as JObject;
@@ -440,10 +493,101 @@ namespace Pinder.LlmAdapters.Anthropic
                     return false;
                 }
                 default:
-                    // message_start, content_block_start, ping,
-                    // content_block_stop, message_delta, message_stop,
-                    // and any future event types — ignore.
+                    // content_block_start, ping, content_block_stop,
+                    // message_stop, and any future event types — ignore.
                     return false;
+            }
+        }
+
+        /// <summary>
+        /// Returns a read-only snapshot of the per-stream token stats captured
+        /// during this transport's lifetime (issue #1115). Mirrors
+        /// <c>AnthropicLlmAdapter.GetCallStats</c> for the streaming path.
+        /// </summary>
+        public IReadOnlyList<CallSummaryStat> GetCallStats()
+        {
+            lock (_statsLock)
+            {
+                return _callStats.ToArray();
+            }
+        }
+
+        /// <inheritdoc />
+        public SessionTokenUsage GetSessionUsage()
+        {
+            lock (_statsLock)
+            {
+                return new SessionTokenUsage
+                {
+                    InputTokens              = _callStats.Sum(s => s.InputTokens),
+                    OutputTokens             = _callStats.Sum(s => s.OutputTokens),
+                    CacheReadInputTokens     = _callStats.Sum(s => s.CacheReadInputTokens),
+                    CacheCreationInputTokens = _callStats.Sum(s => s.CacheCreationInputTokens),
+                    CallCount                = _callStats.Count
+                };
+            }
+        }
+
+        private void CommitUsage(StreamUsageAccumulator usage)
+        {
+            var stat = new CallSummaryStat
+            {
+                Turn = 0,
+                Type = "stream",
+                InputTokens = usage.InputTokens,
+                OutputTokens = usage.OutputTokens,
+                CacheReadInputTokens = usage.CacheReadInputTokens,
+                CacheCreationInputTokens = usage.CacheCreationInputTokens
+            };
+            lock (_statsLock)
+            {
+                _callStats.Add(stat);
+            }
+        }
+
+        /// <summary>
+        /// Mutable accumulator for the usage fields scattered across an
+        /// Anthropic streaming response. Anthropic splits usage between the
+        /// <c>message_start</c> frame (prompt + cache tokens) and the final
+        /// <c>message_delta</c> frame (output tokens), so we fold both into a
+        /// single record (issue #1115).
+        /// </summary>
+        private sealed class StreamUsageAccumulator
+        {
+            public int InputTokens { get; private set; }
+            public int OutputTokens { get; private set; }
+            public int CacheReadInputTokens { get; private set; }
+            public int CacheCreationInputTokens { get; private set; }
+
+            /// <summary>True once any usage frame has contributed a value.</summary>
+            public bool HasUsage { get; private set; }
+
+            public void ApplyMessageStart(JObject? usage)
+            {
+                if (usage == null) return;
+                InputTokens = (int?)usage["input_tokens"] ?? InputTokens;
+                CacheCreationInputTokens = (int?)usage["cache_creation_input_tokens"] ?? CacheCreationInputTokens;
+                CacheReadInputTokens = (int?)usage["cache_read_input_tokens"] ?? CacheReadInputTokens;
+                // message_start also reports an initial output_tokens (usually 1);
+                // message_delta supersedes it with the final cumulative count.
+                OutputTokens = (int?)usage["output_tokens"] ?? OutputTokens;
+                HasUsage = true;
+            }
+
+            public void ApplyMessageDelta(JObject? usage)
+            {
+                if (usage == null) return;
+                // Anthropic emits the cumulative output_tokens on message_delta;
+                // take it as authoritative when present. Input/cache fields may
+                // also appear on later frames; fold them if present.
+                OutputTokens = (int?)usage["output_tokens"] ?? OutputTokens;
+                var input = (int?)usage["input_tokens"];
+                if (input.HasValue) InputTokens = input.Value;
+                var cacheCreate = (int?)usage["cache_creation_input_tokens"];
+                if (cacheCreate.HasValue) CacheCreationInputTokens = cacheCreate.Value;
+                var cacheRead = (int?)usage["cache_read_input_tokens"];
+                if (cacheRead.HasValue) CacheReadInputTokens = cacheRead.Value;
+                HasUsage = true;
             }
         }
 
