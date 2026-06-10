@@ -121,5 +121,78 @@ TELL: SELF_AWARENESS (knows her flaws)";
             Assert.NotNull(result.DetectedTell);
             Assert.Equal(StatType.SelfAwareness, result.DetectedTell!.Stat);
         }
+
+        // --- Issue #1116: persona "/end" / "/rant" self-tag tics must never persist ---
+
+        [Fact]
+        public void ParseOpponentResponseText_MisplacedEndTagInParenthetical_StripsTag()
+        {
+            // The model misplaces "/end" mid-message, inside a parenthetical with more
+            // sentences after it. The saved message must not contain the tag.
+            var input = "i'll leave that one open /end)\n\nI don't want to get into it now";
+
+            var result = OpponentResponseParsers.ParseOpponentResponseText(input);
+
+            Assert.DoesNotContain("/end", result.MessageText);
+            Assert.Equal("i'll leave that one open)\n\nI don't want to get into it now", result.MessageText);
+        }
+
+        [Fact]
+        public void ParseOpponentResponseText_TrailingEndTag_StripsTag()
+        {
+            var input = "anyway that's my whole thing about it /end";
+            var result = OpponentResponseParsers.ParseOpponentResponseText(input);
+            Assert.DoesNotContain("/end", result.MessageText);
+            Assert.Equal("anyway that's my whole thing about it", result.MessageText);
+        }
+
+        [Fact]
+        public void ParseOpponentResponseText_TrailingRantTag_StripsTag()
+        {
+            // Policy: "/rant" is kept in persona guidance only as a clean terminal
+            // suffix, but it is still a meta marker and is stripped from chat content.
+            var input = "...anyway. /rant";
+            var result = OpponentResponseParsers.ParseOpponentResponseText(input);
+            Assert.DoesNotContain("/rant", result.MessageText);
+            Assert.Equal("...anyway.", result.MessageText);
+        }
+
+        [Fact]
+        public void ParseOpponentResponseText_MidTextRantTag_StripsTag()
+        {
+            var input = "ok so /rant the food was cold and nobody cared";
+            var result = OpponentResponseParsers.ParseOpponentResponseText(input);
+            Assert.DoesNotContain("/rant", result.MessageText);
+            Assert.Equal("ok so the food was cold and nobody cared", result.MessageText);
+        }
+
+        [Fact]
+        public void ParseOpponentResponseText_LegitimateSlashText_NotMangled()
+        {
+            // Only the exact self-tag tokens are removed; legitimate slash-bearing prose stays.
+            var input = "the and/or thing is fine and the date is 06/10 ok";
+            var result = OpponentResponseParsers.ParseOpponentResponseText(input);
+            Assert.Equal("the and/or thing is fine and the date is 06/10 ok", result.MessageText);
+        }
+
+        [Fact]
+        public void ParseOpponentResponseTool_MisplacedEndTag_StripsTag()
+        {
+            var json = JObject.Parse(@"{ ""message"": ""i'll leave that one open /end) and move on"" }");
+            var result = OpponentResponseParsers.ParseOpponentResponseTool(json);
+            Assert.NotNull(result);
+            Assert.DoesNotContain("/end", result!.MessageText);
+            Assert.Equal("i'll leave that one open) and move on", result.MessageText);
+        }
+
+        [Fact]
+        public void ParseOpponentResponseTool_TrailingRantTag_StripsTag()
+        {
+            var json = JObject.Parse(@"{ ""message"": ""...that's the post /rant"" }");
+            var result = OpponentResponseParsers.ParseOpponentResponseTool(json);
+            Assert.NotNull(result);
+            Assert.DoesNotContain("/rant", result!.MessageText);
+            Assert.Equal("...that's the post", result.MessageText);
+        }
     }
 }
