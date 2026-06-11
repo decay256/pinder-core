@@ -9,7 +9,14 @@ namespace Pinder.LlmAdapters.Anthropic
     /// Encapsulates the logic for constructing Anthropic API MessagesRequest objects
     /// and attaching tool definitions.
     /// </summary>
-    internal static class AnthropicRequestBuilders
+    /// <remarks>
+    /// Public so the game-api-side usage-capturing transport
+    /// (<c>UsageCapturingAnthropicTransport</c>, #1115 follow-up) can build a
+    /// request identical to <see cref="AnthropicTransport"/> without
+    /// re-implementing the <c>[PREVIOUS CONVERSATION CONTEXT]</c> message
+    /// splitting in <see cref="BuildMessages"/>.
+    /// </remarks>
+    public static class AnthropicRequestBuilders
     {
         /// <summary>
         /// Builds a single-user-message MessagesRequest with the given system blocks,
