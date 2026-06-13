@@ -28,9 +28,7 @@ ranges, archetypes) doesn't map cleanly onto the defaults shipped in
 > throughout the engine. Unity-side callers must apply the rename map in
 > [§A](#a-terminology--field-rename-map-opponentdatee-playerplayer-avatar).
 > Mapping the gameplay model onto the engine's prompt graph is covered
-> in [`docs/prompt-graph.md`](prompt-graph.md) *(forthcoming — owned by
-> #1130; the link is intentionally forward-pending until that doc
-> lands)*.
+> in [`docs/prompt-graph.md`](prompt-graph.md).
 
 ---
 
@@ -305,7 +303,6 @@ abstraction `Pinder.Core.Interfaces.ILlmAdapter` (full surface in
 public interface ILlmAdapter
 {
     Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext c, CancellationToken ct = default);
-    Task<string>           DeliverMessageAsync   (DeliveryContext  c, CancellationToken ct = default);
     Task<DateeResponse> GetDateeResponseAsync(DateeContext c, CancellationToken ct = default);
     Task<string?>          GetInterestChangeBeatAsync(InterestChangeContext c, CancellationToken ct = default);
     Task<string>           ApplyHorninessOverlayAsync(string msg, string instruction, string? oc, string? ad, CancellationToken ct = default);

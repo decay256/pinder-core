@@ -165,7 +165,7 @@ A single turn flows through two phases: `StartTurnAsync` (generate options) and 
 
 7. **Nat 20 effects** — Sets `_pendingCritAdvantage` for next roll. Chaos Nat 20 → Madness −1. Any Nat 20 → Dread −1.
 
-8. **Delivery** — Build `DeliveryContext`. Call `ILlmAdapter.DeliverMessageAsync()` → returns the player's message text with outcome-appropriate degradation (success improves phrasing, failure corrupts it).
+8. **Delivery (Commit Step)** — The chosen option's full line is committed. On a success, it is sent verbatim. On a failure, it is degraded deterministically via `DeliveryOverlay.Apply` based on the failure tier. There is **no creative delivery LLM call** — option generation and this commit overlay are ephemeral, preserving the clean-history rule.
 
 9. **Steering roll** — Separate RNG. DC = 16 + average(datee SA, Rizz, Honesty). On success, calls `IStatefulLlmAdapter.GetSteeringQuestionAsync()` → appends a date-nudge question.
 
@@ -218,11 +218,12 @@ Core abstraction for all LLM interactions. Stateless per-call.
 
 | Method | Purpose |
 |---|---|
-| `GetDialogueOptionsAsync(DialogueContext)` | Generate 3–4 dialogue options for the player |
-| `DeliverMessageAsync(DeliveryContext)` | Deliver chosen option with outcome degradation |
+| `GetDialogueOptionsAsync(DialogueContext)` | Generate 3–4 full-line dialogue options for the player |
 | `GetDateeResponseAsync(DateeContext)` | Generate datee's reply |
 | `GetInterestChangeBeatAsync(InterestChangeContext)` | Narrative beat on interest threshold crossing |
 | `ApplyHorninessOverlayAsync(message, instruction)` | Rewrite message with horniness overlay |
+| `ApplyShadowCorruptionAsync(message, instruction, ...)` | Rewrite message with shadow corruption |
+| `ApplyTrapOverlayAsync(message, ...)` | Rewrite message with trap taint |
 
 **Implementations:** `AnthropicLlmAdapter`, `OpenAiLlmAdapter` (both in Pinder.LlmAdapters)
 
@@ -442,27 +443,29 @@ for the full rationale.
 
 GameSession makes 4 primary LLM calls per turn (plus 2 conditional), all routed through `ILlmAdapter`. Prompts are assembled by `SessionDocumentBuilder`.
 
+> **Note:** For a visual mapping of the two-session prompt layout, bleed isolation, and ephemeral pruning, see [`prompt-graph.md`](prompt-graph.md).
+
 ### 1. Dialogue Options (`GetDialogueOptionsAsync`)
 
 | Aspect | Detail |
 |---|---|
-| **Context** | Player system prompt, datee visible profile (name + bio only), full conversation history, shadow thresholds, active traps + LLM instructions, horniness level, callback opportunities, active tell, archetype directive, 3 drawn stats |
-| **Returns** | Array of `DialogueOption` (stat, intended text, optional callback turn) |
+| **Context** | Player system prompt, datee visible profile (name + bio only), full conversation history, shadow thresholds, active traps + LLM instructions, horniness level, callback opportunities, active tell, archetype directive, 3 drawn stats (Avatar Session) |
+| **Returns** | Array of `DialogueOption` (stat, intended text containing the **full, sendable line**, optional callback turn) |
 | **Prompt builder** | `SessionDocumentBuilder.BuildDialogueOptionsPrompt()` |
 
-### 2. Delivery (`DeliverMessageAsync`)
+### 2. Delivery (Deterministic Commit)
 
-| Aspect | Detail |
-|---|---|
-| **Context** | Player + datee prompts, conversation history, chosen option, roll outcome (success tier / failure tier + miss margin), beat-DC-by, active traps, shadow thresholds, stat-specific delivery instruction |
-| **Returns** | `string` — the delivered message text (improved on success, corrupted on failure) |
-| **Prompt builder** | `SessionDocumentBuilder.BuildDeliveryPrompt()` |
+No creative LLM call fires here. The chosen full line from option generation is committed:
+- On **Success**: The line is sent verbatim.
+- On **Failure**: The line is degraded deterministically via `DeliveryOverlay.Apply` based on the miss margin and failure tier.
+
+Option-generation and this commit step execute on an ephemeral branch. Only the final committed line is persisted, keeping the avatar session history clean.
 
 ### 3. Datee Response (`GetDateeResponseAsync`)
 
 | Aspect | Detail |
 |---|---|
-| **Context** | Both prompts, full history, player's delivered message, interest before/after, response delay, active traps, datee shadow thresholds, delivery tier, archetype directive, resistance level |
+| **Context** | Datee system prompt, full history, player's delivered message (with any failure/overlay contexts), interest before/after, response delay, active traps, datee shadow thresholds, delivery tier, archetype directive, resistance level (Datee Session) |
 | **Returns** | `DateeResponse` — message text + optional `WeaknessWindow` + optional `Tell` |
 | **Prompt builder** | `SessionDocumentBuilder.BuildDateePrompt()` |
 
