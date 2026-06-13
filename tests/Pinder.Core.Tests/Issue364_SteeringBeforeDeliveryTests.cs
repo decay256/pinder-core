@@ -216,9 +216,11 @@ namespace Pinder.Core.Tests
             Assert.False(result.Steering.SteeringSucceeded);
             Assert.Null(result.Steering.SteeringQuestion);
 
-            // No steering was folded in; a SUCCESS roll commits the picked line verbatim.
-            Assert.True(result.Roll.IsSuccess);
-            Assert.Equal(PickedOption, result.DeliveredMessage);
+            // No steering question was folded in: the committed line is the PLAIN
+            // picked option run through the deterministic overlay for whatever
+            // tier the roll produced (no steering text anywhere).
+            string expected = DeliveryOverlay.Apply(PickedOption, result.Roll.Tier, result.Roll.MissMargin);
+            Assert.Equal(expected, result.DeliveredMessage);
 
             if (result.TextDiffs != null)
             {

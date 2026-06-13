@@ -39,8 +39,11 @@ namespace Pinder.Core.Tests.Phase0
             var result = await session.ResolveTurnAsync(0);
 
             Assert.NotNull(result);
-            Assert.True(transport.Exchanges.Count >= 3,
-                $"Expected at least 3 LLM exchanges (options/delivery/datee), got {transport.Exchanges.Count}.");
+            // #1125: the delivery LLM call was collapsed into the deterministic,
+            // non-LLM DeliveryOverlay commit step, so a minimal turn now makes
+            // 2 LLM exchanges (options + datee), not 3.
+            Assert.True(transport.Exchanges.Count >= 2,
+                $"Expected at least 2 LLM exchanges (options/datee), got {transport.Exchanges.Count}.");
         }
     }
 }

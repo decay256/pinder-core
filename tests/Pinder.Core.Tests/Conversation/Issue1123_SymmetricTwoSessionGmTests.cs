@@ -16,28 +16,24 @@ namespace Pinder.Core.Tests.Conversation
     /// Issue #1123 — Symmetric two-session GM acceptance tests.
     ///
     /// <para>
-    /// The avatar (delivery) session is now stateful + cached + bleed-isolated,
-    /// structurally identical to the datee session. These tests lock the three
-    /// mandatory acceptance criteria:
+    /// #1125 supersedes the avatar (delivery) <em>session</em>: the delivery LLM
+    /// call was collapsed into the deterministic, non-LLM DeliveryOverlay commit
+    /// step, so there is no longer an avatar GM session, no avatar LLM call, and
+    /// no avatar history accumulation. The clean-history rule the avatar session
+    /// once upheld is now trivially satisfied — only the committed line is
+    /// persisted. These tests are updated to lock the post-#1125 contract:
     /// </para>
     /// <list type="number">
     ///   <item><description>
-    ///     <b>Avatar history accumulation</b>: the engine owns
-    ///     <see cref="GameSession.AvatarHistory"/> and threads the accumulated
-    ///     prior turns into the stateful avatar adapter on each subsequent turn —
-    ///     the mirror of the existing datee-history contract.
+    ///     <b>No avatar session</b>: <see cref="GameSession.AvatarHistory"/> stays
+    ///     EMPTY across turns and no stateful avatar (delivery) LLM call fires.
     ///   </description></item>
     ///   <item><description>
-    ///     <b>Bidirectional bleed isolation</b>: the datee session's context never
-    ///     carries the avatar's full private system prompt, and the avatar
-    ///     session's context never carries the datee's full private system prompt.
-    ///     Each session sees only its OWN private stake plus the opposing
-    ///     character's PUBLIC dating-app card.
+    ///     <b>Datee bleed isolation (unchanged)</b>: the datee session's context
+    ///     still carries only its OWN private stake plus the player avatar's
+    ///     PUBLIC dating-app card, never the player's full private system prompt.
     ///   </description></item>
     /// </list>
-    /// (The third criterion — caching of the avatar stateful path — lives in
-    /// <c>Pinder.LlmAdapters.Tests/Anthropic/AnthropicTransportCachingTests.cs</c>
-    /// alongside the rest of the cache-block coverage.)
     /// </summary>
     [Trait("Category", "Core")]
     public class Issue1123_SymmetricTwoSessionGmTests
@@ -100,23 +96,11 @@ namespace Pinder.Core.Tests.Conversation
             public Task<string> DeliverMessageAsync(DeliveryContext context, CancellationToken ct = default)
                 => Task.FromResult("delivered");
 
-            public Task<StatefulAvatarResult> DeliverMessageAsync(
-                DeliveryContext context,
-                IReadOnlyList<ConversationMessage> history,
-                CancellationToken ct = default)
-            {
-                // Snapshot the history as the engine handed it to us this turn.
-                AvatarHistoriesSeen.Add(history.ToArray());
-                AvatarPromptsSeen.Add(context.PlayerAvatarPrompt);
-                AvatarDateeCardsSeen.Add(context.DateeCard);
-                int callNo = ++_avatarCallCount;
-                string delivered = context.ChosenOption.IntendedText ?? "delivered";
-                return Task.FromResult(new StatefulAvatarResult(delivered, new ConversationMessage[]
-                {
-                    ConversationMessage.User($"avatar-prompt-call-{callNo}"),
-                    ConversationMessage.Assistant(delivered),
-                }));
-            }
+            // #1125: the stateful avatar (delivery) call no longer exists on the
+            // interface and the engine never invokes it. Kept as a guard: if the
+            // engine ever routed through an avatar call again, _avatarCallCount
+            // would be observed non-zero by the AC-1 test below.
+            public bool AvatarCallFired => _avatarCallCount > 0;
 
             public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, CancellationToken ct = default)
                 => Task.FromResult(new DateeResponse("response"));
@@ -156,59 +140,35 @@ namespace Pinder.Core.Tests.Conversation
                 new NullTrapRegistry(),
                 new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
-        // AC-1: Avatar GM response at turn N includes turns 1..N-1 from its
-        // persistent history — the engine accumulates AvatarHistory and threads
-        // it into the stateful avatar adapter, mirroring the datee-history test.
+        // AC-1 (post-#1125): there is no avatar (delivery) session anymore, so the
+        // engine accumulates NO avatar history across turns and never fires a
+        // stateful avatar call. (Was: avatar history accumulation.)
         [Fact]
-        public async Task AvatarSession_AccumulatesHistory_AndThreadsItIntoSubsequentTurns()
+        public async Task AvatarSession_IsGone_NoHistoryAccumulated_NoAvatarCall()
         {
             var adapter = new RecordingStatefulAdapter();
             // ctor d10 + per-turn (d20 main + d100 timing) for 3 turns.
             var session = MakeSession(adapter, new FixedDice(5, 15, 50, 15, 50, 15, 50));
 
-            // Engine starts with empty avatar history.
             Assert.Empty(session.AvatarHistory);
 
-            // Turn 1.
-            await session.StartTurnAsync();
-            await session.ResolveTurnAsync(0);
+            for (int turn = 0; turn < 3; turn++)
+            {
+                await session.StartTurnAsync();
+                await session.ResolveTurnAsync(0);
+            }
 
-            // First avatar call saw an EMPTY history (no prior turns).
-            Assert.Single(adapter.AvatarHistoriesSeen);
-            Assert.Empty(adapter.AvatarHistoriesSeen[0]);
-            // Engine appended the one user + one assistant entry the adapter returned.
-            Assert.Equal(2, session.AvatarHistory.Count);
-            Assert.Equal(ConversationMessage.UserRole, session.AvatarHistory[0].Role);
-            Assert.Equal(ConversationMessage.AssistantRole, session.AvatarHistory[1].Role);
-
-            // Turn 2.
-            await session.StartTurnAsync();
-            await session.ResolveTurnAsync(0);
-
-            // Second avatar call saw the 2 entries accumulated from turn 1.
-            Assert.Equal(2, adapter.AvatarHistoriesSeen.Count);
-            Assert.Equal(2, adapter.AvatarHistoriesSeen[1].Count);
-            Assert.Equal("avatar-prompt-call-1", adapter.AvatarHistoriesSeen[1][0].Content);
-            Assert.Equal(4, session.AvatarHistory.Count);
-
-            // Turn 3.
-            await session.StartTurnAsync();
-            await session.ResolveTurnAsync(0);
-
-            // Third avatar call saw all 4 entries from turns 1..2.
-            Assert.Equal(3, adapter.AvatarHistoriesSeen.Count);
-            Assert.Equal(4, adapter.AvatarHistoriesSeen[2].Count);
-            Assert.Equal("avatar-prompt-call-1", adapter.AvatarHistoriesSeen[2][0].Content);
-            Assert.Equal("avatar-prompt-call-2", adapter.AvatarHistoriesSeen[2][2].Content);
-            Assert.Equal(6, session.AvatarHistory.Count); // 3 turns × (user + assistant)
+            // No avatar GM session: history stays empty and no avatar call fired.
+            Assert.Empty(session.AvatarHistory);
+            Assert.Empty(adapter.AvatarHistoriesSeen);
+            Assert.False(adapter.AvatarCallFired);
         }
 
-        // AC-2: Bidirectional bleed isolation. The datee session's context never
-        // carries the avatar's full private system prompt, AND the avatar
-        // session's context never carries the datee's full private system prompt.
-        // Each session sees only its own private stake + the opposing PUBLIC card.
+        // AC-2 (post-#1125): the surviving datee session's context still carries
+        // only its OWN private stake plus the player avatar's PUBLIC card, never
+        // the player's full private system prompt.
         [Fact]
-        public async Task BothSessions_AreBleedIsolated_FromEachOthersPrivateStake()
+        public async Task DateeSession_IsBleedIsolated_FromPlayerPrivateStake()
         {
             var adapter = new RecordingStatefulAdapter();
             var session = MakeSession(adapter, new FixedDice(5, 15, 50));
@@ -216,20 +176,9 @@ namespace Pinder.Core.Tests.Conversation
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0);
 
-            Assert.NotEmpty(adapter.AvatarPromptsSeen);
             Assert.NotEmpty(adapter.DateePromptsSeen);
-
-            // --- Avatar (delivery) session ---
-            string avatarPrompt = adapter.AvatarPromptsSeen[0];
-            // Sees its OWN private stake...
-            Assert.Contains(AvatarPrivateStake, avatarPrompt);
-            // ...but NOT the datee's private stake.
-            Assert.DoesNotContain(DateePrivateStake, avatarPrompt);
-            // The datee appears ONLY as its public dating-app card (no full spec).
-            PublicProfileCard dateeCard = adapter.AvatarDateeCardsSeen[0];
-            Assert.Equal("Dakota", dateeCard.DisplayName);
-            Assert.DoesNotContain(DateePrivateStake, dateeCard.Render());
-            Assert.DoesNotContain(DateePrivateStake, dateeCard.Bio);
+            // No avatar session fired, so no avatar prompt was ever built.
+            Assert.Empty(adapter.AvatarPromptsSeen);
 
             // --- Datee session ---
             string dateePrompt = adapter.DateePromptsSeen[0];

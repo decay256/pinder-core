@@ -125,22 +125,24 @@ namespace Pinder.Core.Tests.Phase0
 
         // ── #794 — strengthened with real CancellationToken.Cancel() ───────
 
-        // I6.4 — real cancellation between stage 2 (delivery) and stage 3
-        // (datee_response). The transport calls cts.Cancel() from inside
-        // the delivery phase callback so that the engine's NEXT awaited
-        // transport call (the trap/horniness overlay or datee_response,
-        // depending on fixture) sees a cancelled token and surfaces OCE.
+        // I6.4 — real cancellation after the options call, before the engine
+        // reaches the datee_response call. #1125: the delivery LLM call was
+        // collapsed into the deterministic, non-LLM DeliveryOverlay commit step,
+        // so there is no `delivery` transport phase to cancel on. The transport
+        // therefore calls cts.Cancel() from inside the dialogue_options phase
+        // callback (which completes successfully during StartTurnAsync); the
+        // engine's CT-aware ResolveTurnAsync then observes the cancelled token
+        // before it ever reaches the datee_response call.
         // Asserts:
         //   (a) OCE propagates from ResolveTurnAsync.
         //   (b) The turn counter does NOT advance.
-        //   (c) The datee_response phase was never invoked (since the
-        //       cancellation fires before the engine reaches it).
+        //   (c) The datee_response phase was never invoked.
         [Fact]
-        public async Task RealCancel_AfterDeliveryBeforeDatee_PropagatesOCE_NoTurnAdvance()
+        public async Task RealCancel_AfterOptionsBeforeDatee_PropagatesOCE_NoTurnAdvance()
         {
             var cts = new CancellationTokenSource();
             var transport = new CancellingTransport(
-                cancelOnPhase: LlmPhase.Delivery,
+                cancelOnPhase: LlmPhase.DialogueOptions,
                 cts: cts);
             var adapter = Phase0Fixtures.MakeAdapter(transport);
             var dice = new PlaybackDiceRoller(5, 15, 50);
@@ -152,9 +154,12 @@ namespace Pinder.Core.Tests.Phase0
                 Phase0Fixtures.MakeConfig());
 
             int turnBefore = session.TurnNumber;
-            await session.StartTurnAsync(cts.Token);
+            // StartTurn's options call completes, then the transport cancels the CTS.
+            await session.StartTurnAsync();
 
-            // The CT-aware overload is what this test specifically validates.
+            // The CT-aware overload is what this test specifically validates: it
+            // must observe the already-cancelled token and surface OCE before the
+            // datee call.
             await Assert.ThrowsAnyAsync<OperationCanceledException>(
                 () => session.ResolveTurnAsync(0, progress: null, ct: cts.Token));
 

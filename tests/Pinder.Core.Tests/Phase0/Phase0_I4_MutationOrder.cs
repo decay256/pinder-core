@@ -98,12 +98,14 @@ namespace Pinder.Core.Tests.Phase0
         }
 
         // I4.3 — relative phase ordering at the LLM transport level: dialogue_options
-        // strictly precedes delivery; delivery strictly precedes datee_response.
-        // This is the CONTRACT the upstream consumer (UI streaming, audit log) relies
-        // on to attribute exchanges to a turn. Phase 5 fast-gameplay scheduling MUST
+        // strictly precedes datee_response. #1125: the delivery LLM call was
+        // collapsed into the deterministic, non-LLM DeliveryOverlay commit step, so
+        // NO `delivery` LLM exchange is emitted at the transport level. This is the
+        // CONTRACT the upstream consumer (UI streaming, audit log) relies on to
+        // attribute exchanges to a turn. Phase 5 fast-gameplay scheduling MUST
         // preserve this within a single (player_choice, adopted_branch) commit.
         [Fact]
-        public async Task LlmTransport_PhaseOrder_OptionsBeforeDeliveryBeforeDatee()
+        public async Task LlmTransport_PhaseOrder_OptionsBeforeDatee_NoDeliveryExchange()
         {
             var transport = new RecordingLlmTransport { DefaultResponse = "" };
             transport.QueueDialogueOptions(Phase0Fixtures.CannedDialogueOptions);
@@ -131,12 +133,11 @@ namespace Pinder.Core.Tests.Phase0
                 if (ph == LlmPhase.DateeResponse && idxDatee < 0) idxDatee = i;
             }
             Assert.True(idxOptions >= 0, "dialogue_options call missing");
-            Assert.True(idxDelivery >= 0, "delivery call missing");
             Assert.True(idxDatee >= 0, "datee_response call missing");
-            Assert.True(idxOptions < idxDelivery,
-                $"dialogue_options ({idxOptions}) must precede delivery ({idxDelivery}).");
-            Assert.True(idxDelivery < idxDatee,
-                $"delivery ({idxDelivery}) must precede datee_response ({idxDatee}).");
+            // #1125: no delivery LLM exchange is emitted.
+            Assert.True(idxDelivery < 0, "delivery LLM exchange must NOT be emitted post-#1125");
+            Assert.True(idxOptions < idxDatee,
+                $"dialogue_options ({idxOptions}) must precede datee_response ({idxDatee}).");
         }
 
         // I4.4 — interest delta and turn-number increment happen exactly once per

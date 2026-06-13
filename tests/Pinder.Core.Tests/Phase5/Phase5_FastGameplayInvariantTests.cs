@@ -190,8 +190,13 @@ namespace Pinder.Core.Tests.Phase5
             c2.InjectNextDicePool(pools[1]);
             var r2 = await c2.ResolveTurnAsync(1);
 
-            Assert.Equal("d-clone1", r1.DeliveredMessage);
-            Assert.Equal("d-clone2", r2.DeliveredMessage);
+            // #1125: the delivery LLM call was collapsed into the deterministic,
+            // non-LLM DeliveryOverlay commit step, so DeliveredMessage no longer
+            // comes from the transport (it is the picked option committed locally).
+            // Transport routing is proven via the datee reply, which still differs
+            // per transport.
+            Assert.Equal("o-clone1", r1.DateeMessage);
+            Assert.Equal("o-clone2", r2.DateeMessage);
         }
 
         // 5. Concurrency stress: independent clones, parallel resolves, no corruption
@@ -221,7 +226,10 @@ namespace Pinder.Core.Tests.Phase5
             Assert.Equal(8, results.Length);
             for (int i = 0; i < 8; i++)
             {
-                Assert.Equal($"d{i}", results[i].DeliveredMessage);
+                // #1125: route-isolation is proven via the per-transport datee
+                // reply (DeliveredMessage is now committed locally from the picked
+                // option, identical across clones with identical dice).
+                Assert.Equal($"o{i}", results[i].DateeMessage);
             }
 
             // Parent untouched.

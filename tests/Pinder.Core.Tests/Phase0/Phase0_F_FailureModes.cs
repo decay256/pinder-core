@@ -99,17 +99,19 @@ namespace Pinder.Core.Tests.Phase0
             Assert.Empty(inner.ExchangesByPhase(LlmPhase.DateeResponse));
         }
 
-        // F3b — real cancellation. CancellationTokenSource.Cancel() fires
-        // after the delivery phase completes; the engine's next awaited
-        // adapter call (overlay or datee_response) sees the cancelled
-        // token and propagates OCE. This is the post-#794 invariant
-        // strengthened from a weaker "OCE-from-transport" smoke check.
+        // F3b — real cancellation. CancellationTokenSource.Cancel() fires after
+        // the dialogue_options phase completes (during StartTurnAsync); the
+        // engine's CT-aware ResolveTurnAsync then sees the cancelled token and
+        // propagates OCE before the datee_response call. #1125: the delivery LLM
+        // call was collapsed into the deterministic, non-LLM DeliveryOverlay
+        // commit step, so there is no `delivery` transport phase to cancel on;
+        // the options phase is the surviving pre-datee hook.
         [Fact]
-        public async Task F3b_RealCancel_AfterDelivery_FailsCleanly_NoHalfWrittenAudit()
+        public async Task F3b_RealCancel_AfterOptions_FailsCleanly_NoHalfWrittenAudit()
         {
             var cts = new CancellationTokenSource();
             var transport = new CancelOnPhaseTransport(
-                cancelOnPhase: LlmPhase.Delivery,
+                cancelOnPhase: LlmPhase.DialogueOptions,
                 cts: cts);
 
             var adapter = Phase0Fixtures.MakeAdapter(transport);
@@ -121,7 +123,7 @@ namespace Pinder.Core.Tests.Phase0
                 Phase0Fixtures.MakeConfig());
 
             int turnBefore = session.TurnNumber;
-            await session.StartTurnAsync(cts.Token);
+            await session.StartTurnAsync();
             await Assert.ThrowsAnyAsync<OperationCanceledException>(
                 () => session.ResolveTurnAsync(0, progress: null, ct: cts.Token));
 
@@ -141,22 +143,21 @@ namespace Pinder.Core.Tests.Phase0
         // combo, XP) BEFORE the delivery LLM call, so a delivery-phase
         // throw leaves a partial mutation footprint on the session.
         //
-        // FINDING (flagged in PR body): when ResolveTurnAsync throws between
-        // the dice roll and the delivery LLM call, interest / momentum /
-        // combo / XP have already been applied. The session is not in a
-        // "clean rollback" state. This is the current contract; the
-        // post-throw session is observably mutated. The Phase 1 / Phase 2
-        // refactors (#788, #789) will not narrow this window by themselves;
-        // a separate cancellation-rollback story (filed as a follow-up issue
-        // when this is reviewed) is needed if rollback semantics are wanted.
-        // For now, the strongest invariant we can lock cleanly at this
-        // layer is: "the failure propagates and turn-number does not
-        // advance."
+        // FINDING (flagged in PR body): when ResolveTurnAsync throws before the
+        // datee_response LLM call, interest / momentum / combo / XP have already
+        // been applied. The session is not in a "clean rollback" state. This is
+        // the current contract; the post-throw session is observably mutated.
+        // For now, the strongest invariant we can lock cleanly at this layer is:
+        // "the failure propagates and turn-number does not advance."
+        //
+        // #1125: the delivery LLM call was collapsed into the deterministic,
+        // non-LLM DeliveryOverlay commit step, so this throws on the surviving
+        // datee_response phase instead of the (removed) delivery phase.
         [Fact]
         public async Task F4_DiskFull_DuringAuditWrite_PropagatesAndDoesNotAdvanceTurn()
         {
             var transport = new ExceptionInjectingTransport(
-                throwOnPhase: LlmPhase.Delivery,
+                throwOnPhase: LlmPhase.DateeResponse,
                 exFactory: () => new System.IO.IOException(
                     "Simulated disk full during audit write"));
 
