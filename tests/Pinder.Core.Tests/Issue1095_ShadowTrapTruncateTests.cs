@@ -263,6 +263,16 @@ namespace Pinder.Core.Tests
                     : $"[{context.Outcome}] {intended}");
             }
 
+            public async Task<StatefulAvatarResult> DeliverMessageAsync(DeliveryContext context, IReadOnlyList<ConversationMessage> history, System.Threading.CancellationToken ct = default)
+            {
+                string delivered = await DeliverMessageAsync(context, ct).ConfigureAwait(false);
+                return new StatefulAvatarResult(delivered, new ConversationMessage[]
+                {
+                    ConversationMessage.User(string.Empty),
+                    ConversationMessage.Assistant(delivered),
+                });
+            }
+
             public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult(new DateeResponse("..."));
 

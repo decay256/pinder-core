@@ -51,5 +51,23 @@ namespace Pinder.Core.Conversation
         /// with. Empty list = no prior turns.
         /// </summary>
         public List<(string Role, string Content)> DateeHistory { get; set; } = new List<(string, string)>();
+
+        /// <summary>
+        /// Engine-owned avatar LLM conversation history (#1123) — the symmetric
+        /// sibling of <see cref="DateeHistory"/>. Each entry is a (role, content)
+        /// pair where role is <c>"user"</c> or <c>"assistant"</c>. Survives
+        /// snapshot/restore so a replayed session reproduces the same multi-turn
+        /// avatar context the original ran with. Empty list = no prior turns.
+        ///
+        /// <para>
+        /// Deploy-ordering note (#1129): this is a NEW persisted field added with
+        /// NO back-compat, on the same convention #1121 used for the renamed
+        /// persisted keys — the data wipe is owned by #1129. Pre-#1123 snapshots
+        /// deserialise this as an empty list (the replay then starts the avatar
+        /// session statelessly from turn 1, which is the correct degraded
+        /// behaviour for old snapshots).
+        /// </para>
+        /// </summary>
+        public List<(string Role, string Content)> AvatarHistory { get; set; } = new List<(string, string)>();
     }
 }

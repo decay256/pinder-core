@@ -200,6 +200,18 @@ namespace Pinder.SessionRunner.Snapshot
         public List<DateeHistoryEntry> DateeHistory { get; set; } = new List<DateeHistoryEntry>();
 
         /// <summary>
+        /// Issue #1123: engine-owned avatar-LLM conversation history at the time
+        /// of snapshot — the symmetric sibling of <see cref="DateeHistory"/>.
+        /// Each entry's <see cref="DateeHistoryEntry.Role"/> is <c>"user"</c> or
+        /// <c>"assistant"</c>. Empty when no avatar calls have resolved yet.
+        ///
+        /// <para>New persisted field added with NO back-compat (deploy/data wipe
+        /// owned by #1129, per the #1121 convention). Pre-#1123 snapshots
+        /// deserialise this as empty.</para>
+        /// </summary>
+        public List<DateeHistoryEntry> AvatarHistory { get; set; } = new List<DateeHistoryEntry>();
+
+        /// <summary>
         /// Issue #474: events fired on this turn, with their deterministic
         /// human-readable interpretation strings from the i18n catalog.
         /// Empty list when no event-class condition was met (a fully

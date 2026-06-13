@@ -21,7 +21,6 @@ namespace Pinder.LlmAdapters.Tests
         {
             return new DeliveryContext(
                 playerAvatarPrompt: "player prompt",
-                dateePrompt: "datee prompt",
                 conversationHistory: new List<(string, string)> { ("P", "hey"), ("O", "hi") },
                 dateeLastMessage: "hi",
                 chosenOption: new DialogueOption(StatType.Charm, "honestly? you're kind of funny"),
@@ -206,7 +205,6 @@ namespace Pinder.LlmAdapters.Tests
         {
             var ctx = new DeliveryContext(
                 playerAvatarPrompt: "player prompt",
-                dateePrompt: "datee prompt",
                 conversationHistory: new List<(string, string)> { ("P", "hey"), ("O", "hi") },
                 dateeLastMessage: "hi",
                 chosenOption: new DialogueOption(StatType.Charm, "test message"),

@@ -27,7 +27,6 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         {
             return new DeliveryContext(
                 playerAvatarPrompt: "player prompt",
-                dateePrompt: "datee prompt",
                 conversationHistory: conversationHistory ?? new List<(string, string)>(),
                 dateeLastMessage: "",
                 chosenOption: chosenOption ?? new DialogueOption(StatType.Charm, "default"),

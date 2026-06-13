@@ -219,7 +219,6 @@ namespace Pinder.LlmAdapters.Tests
         {
             return new DeliveryContext(
                 playerAvatarPrompt: "player prompt",
-                dateePrompt: "datee prompt",
                 conversationHistory: new List<(string, string)> { ("Datee", "Hey") },
                 dateeLastMessage: "Hey",
                 chosenOption: option,
@@ -235,7 +234,6 @@ namespace Pinder.LlmAdapters.Tests
             Dictionary<ShadowStatType, int>? shadowThresholds)
         {
             return new DateeContext(
-                playerAvatarPrompt: "player prompt",
                 dateePrompt: "datee prompt",
                 conversationHistory: new List<(string, string)> { ("Datee", "Hey") },
                 dateeLastMessage: "Hey",

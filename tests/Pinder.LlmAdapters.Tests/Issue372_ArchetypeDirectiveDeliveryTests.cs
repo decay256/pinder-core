@@ -28,7 +28,6 @@ namespace Pinder.LlmAdapters.Tests
         {
             return new DeliveryContext(
                 playerAvatarPrompt: "player prompt",
-                dateePrompt: "datee prompt",
                 conversationHistory: new List<(string Sender, string Text)>(),
                 dateeLastMessage: "",
                 chosenOption: new DialogueOption(StatType.Charm, "ok cool"),

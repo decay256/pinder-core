@@ -18,7 +18,6 @@ namespace Pinder.LlmAdapters.Tests
         private static DateeContext MakeContext(FailureTier tier)
         {
             return new DateeContext(
-                playerAvatarPrompt: "player prompt",
                 dateePrompt: "datee prompt",
                 conversationHistory: new List<(string, string)> { ("Player", "hey"), ("Datee", "hi") },
                 dateeLastMessage: "hi",
@@ -106,7 +105,6 @@ namespace Pinder.LlmAdapters.Tests
         {
             // Backward compatibility: DateeContext without deliveryTier defaults to None
             var context = new DateeContext(
-                playerAvatarPrompt: "p",
                 dateePrompt: "o",
                 conversationHistory: new List<(string, string)> { ("P", "hey") },
                 dateeLastMessage: "hi",

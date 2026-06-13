@@ -157,6 +157,13 @@ partial class Program
             .Select(m => new DateeHistoryEntry { Role = m.Role, Content = m.Content })
             .ToList();
 
+        // #1123: project the engine-owned avatar history into the wire shape
+        // (symmetric to the datee history). Sourced from the post-turn snapshot
+        // so it reflects the avatar entry appended during this turn's delivery.
+        var avatarHistoryEntries = (state.AvatarHistory ?? new List<Pinder.Core.Conversation.ConversationMessage>())
+            .Select(m => new DateeHistoryEntry { Role = m.Role, Content = m.Content })
+            .ToList();
+
         // Issue #474: detect canonical event kinds fired this turn and
         // resolve their interpretation strings via the (optional) i18n
         // catalog. Empty list when no event-class condition was met,
@@ -183,6 +190,7 @@ partial class Program
             RizzCumulativeFailureCount = rizzCumulativeFailureCount,
             ConversationHistory = convEntries,
             DateeHistory = dateeHistoryEntries,
+            AvatarHistory = avatarHistoryEntries,
             Events = events,
             DefendingStat = result.Roll.DefendingStat.ToString(),
             GhostProbabilityPerTurn = state.GhostProbabilityPerTurn,
@@ -245,6 +253,7 @@ partial class Program
         snap.HighestPctHistory ??= new List<bool>();
         snap.ConversationHistory ??= new List<ConversationEntry>();
         snap.DateeHistory ??= new List<DateeHistoryEntry>();
+        snap.AvatarHistory ??= new List<DateeHistoryEntry>();
 
         void Assume(string field, string defaultValue)
         {
@@ -298,6 +307,9 @@ partial class Program
             PendingTripleBonus   = snap.PendingTripleBonus,
             RizzCumulativeFailureCount = snap.RizzCumulativeFailureCount,
             DateeHistory      = (snap.DateeHistory ?? new List<DateeHistoryEntry>())
+                                     .Select(e => (e.Role, e.Content))
+                                     .ToList(),
+            AvatarHistory     = (snap.AvatarHistory ?? new List<DateeHistoryEntry>())
                                      .Select(e => (e.Role, e.Content))
                                      .ToList(),
         };

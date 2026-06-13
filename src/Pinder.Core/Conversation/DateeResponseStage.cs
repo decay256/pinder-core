@@ -61,7 +61,6 @@ namespace Pinder.Core.Conversation
             string dateeArchetypeDirective = datee.ActiveArchetype?.Directive;
 
             var dateeContext = new DateeContext(
-                playerAvatarPrompt: player.AssembledSystemPrompt,
                 dateePrompt: datee.AssembledSystemPrompt,
                 conversationHistory: TurnOrchestratorHelpers.BuildHistoryForLlmContext(state),
                 dateeLastMessage: GameSessionHelpers.GetLastDateeMessage(state.History, datee.DisplayName),
@@ -77,7 +76,11 @@ namespace Pinder.Core.Conversation
                 currentTurn: state.TurnNumber,
                 shadowThresholds: dateeShadowThresholds,
                 deliveryTier: rollStage.RollResult.Tier,
-                activeArchetypeDirective: dateeArchetypeDirective);
+                activeArchetypeDirective: dateeArchetypeDirective,
+                // #1123 strict bleed isolation: the datee session sees ONLY the
+                // avatar's public dating-app card, never the avatar's full
+                // private system prompt.
+                playerAvatarCard: GameSessionHelpers.BuildPublicProfileCard(player));
 
             progress?.Report(new TurnProgressEvent(TurnProgressStage.DateeResponseStarted));
 

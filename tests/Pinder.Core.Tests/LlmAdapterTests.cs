@@ -81,7 +81,6 @@ namespace Pinder.Core.Tests
             var option = new DialogueOption(StatType.Charm, "Hello there!");
             var ctx = new DeliveryContext(
                 playerAvatarPrompt: "p",
-                dateePrompt: "o",
                 conversationHistory: new List<(string, string)>(),
                 dateeLastMessage: "",
                 chosenOption: option,
@@ -107,7 +106,6 @@ namespace Pinder.Core.Tests
             var option = new DialogueOption(StatType.Wit, "Clever line.");
             var ctx = new DeliveryContext(
                 playerAvatarPrompt: "p",
-                dateePrompt: "o",
                 conversationHistory: new List<(string, string)>(),
                 dateeLastMessage: "",
                 chosenOption: option,
@@ -129,7 +127,6 @@ namespace Pinder.Core.Tests
         public async Task GetDateeResponseAsync_Returns_NonNull()
         {
             var ctx = new DateeContext(
-                playerAvatarPrompt: "p",
                 dateePrompt: "o",
                 conversationHistory: new List<(string, string)>(),
                 dateeLastMessage: "",

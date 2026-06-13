@@ -72,7 +72,6 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
 
         private static DeliveryContext MakeDeliveryContext() => new DeliveryContext(
             playerAvatarPrompt: "You are Thundercock",
-            dateePrompt: "You are Velvet",
             conversationHistory: new List<(string, string)> { ("Velvet", "Hey") },
             dateeLastMessage: "Hey",
             chosenOption: new DialogueOption(StatType.Charm, "Nice to meet you"),
@@ -83,7 +82,6 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             dateeName: "Velvet");
 
         private static DateeContext MakeDateeContext() => new DateeContext(
-            playerAvatarPrompt: "You are Thundercock",
             dateePrompt: "You are Velvet",
             conversationHistory: new List<(string, string)> { ("Velvet", "Hey") },
             dateeLastMessage: "Hey",

@@ -18,6 +18,11 @@ namespace Pinder.Core.Conversation
         public List<(string Sender, string Text)> History { get; internal set; } = new List<(string Sender, string Text)>();
         public string DateeOutfitDescription { get; internal set; } = string.Empty;
         public List<ConversationMessage> DateeHistory { get; internal set; } = new List<ConversationMessage>();
+        // #1123: avatar-session LLM conversation history, the symmetric sibling
+        // of DateeHistory. The avatar (delivery) session is now stateful and
+        // cached just like the datee session — the engine owns this list and
+        // threads it through the stateful avatar adapter overload on each turn.
+        public List<ConversationMessage> AvatarHistory { get; internal set; } = new List<ConversationMessage>();
         public SessionShadowTracker? PlayerShadows { get; internal set; }
         public SessionShadowTracker? DateeShadows { get; internal set; }
         public ComboTracker ComboTracker { get; internal set; } = new ComboTracker();
@@ -57,6 +62,7 @@ namespace Pinder.Core.Conversation
             clone.History = new List<(string Sender, string Text)>(History);
             clone.DateeOutfitDescription = DateeOutfitDescription;
             clone.DateeHistory = new List<ConversationMessage>(DateeHistory);
+            clone.AvatarHistory = new List<ConversationMessage>(AvatarHistory);
             clone.PlayerShadows = PlayerShadows?.Clone();
             clone.DateeShadows = DateeShadows?.Clone();
             clone.ComboTracker = ComboTracker.Clone();
@@ -102,6 +108,7 @@ namespace Pinder.Core.Conversation
             Traps = src.Traps.Clone();
             History.Clear(); History.AddRange(src.History);
             DateeHistory.Clear(); DateeHistory.AddRange(src.DateeHistory);
+            AvatarHistory.Clear(); AvatarHistory.AddRange(src.AvatarHistory);
             ComboTracker = src.ComboTracker.Clone();
             Topics.Clear(); Topics.AddRange(src.Topics);
             XpLedger = src.XpLedger.Clone();
@@ -181,6 +188,22 @@ namespace Pinder.Core.Conversation
                     try
                     {
                         DateeHistory.Add(new ConversationMessage(role, content ?? string.Empty));
+                    }
+                    catch (ArgumentException)
+                    {
+                    }
+                }
+            }
+
+            AvatarHistory.Clear();
+            if (data.AvatarHistory != null)
+            {
+                foreach (var (role, content) in data.AvatarHistory)
+                {
+                    if (string.IsNullOrEmpty(role)) continue;
+                    try
+                    {
+                        AvatarHistory.Add(new ConversationMessage(role, content ?? string.Empty));
                     }
                     catch (ArgumentException)
                     {

@@ -49,6 +49,13 @@ namespace Pinder.Core.Conversation
         // adapter. Survives snapshot/restore via ResimulateData.DateeHistory.
         private List<ConversationMessage> _dateeHistory { get => _state.DateeHistory; set => _state.DateeHistory = value; }
 
+        // #1123: avatar LLM conversation history lives here, symmetric to
+        // _dateeHistory. The avatar (delivery) session is now stateful — the
+        // engine passes this list in on every avatar call and appends the new
+        // entries returned by the adapter. Survives snapshot/restore via
+        // ResimulateData.AvatarHistory.
+        private List<ConversationMessage> _avatarHistory { get => _state.AvatarHistory; set => _state.AvatarHistory = value; }
+
         // Sprint 8 Wave 0: optional config fields
         private readonly IGameClock? _clock;
         private SessionShadowTracker? _playerShadows { get => _state.PlayerShadows; set => _state.PlayerShadows = value; }

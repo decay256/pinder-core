@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Pinder.Core.Characters;
 using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
 
@@ -10,11 +11,19 @@ namespace Pinder.Core.Conversation
     /// </summary>
     public sealed class DeliveryContext
     {
-        /// <summary>Assembled system prompt for the player avatar (the in-game character the human portrays).</summary>
+        /// <summary>Assembled system prompt for the player avatar (the in-game character the human portrays) — this session's own character.</summary>
         public string PlayerAvatarPrompt { get; }
 
-        /// <summary>Assembled system prompt for the datee character.</summary>
-        public string DateePrompt { get; }
+        /// <summary>
+        /// Issue #1123 — strict bleed isolation. The avatar (delivery) session
+        /// carries ONLY the datee's PUBLIC dating-app card (name + public
+        /// profile fields), never the datee's full assembled system prompt
+        /// (private stake, stat block, archetype directives, voice spec). The
+        /// datee otherwise appears only as sent messages in the labelled
+        /// transcript. Never null; <see cref="PublicProfileCard.Empty"/> when no
+        /// card is supplied.
+        /// </summary>
+        public PublicProfileCard DateeCard { get; }
 
         /// <summary>Conversation history as (sender, text) pairs in order.</summary>
         public IReadOnlyList<(string Sender, string Text)> ConversationHistory { get; }
@@ -71,7 +80,6 @@ namespace Pinder.Core.Conversation
 
         public DeliveryContext(
             string playerAvatarPrompt,
-            string dateePrompt,
             IReadOnlyList<(string Sender, string Text)> conversationHistory,
             string dateeLastMessage,
             DialogueOption chosenOption,
@@ -85,10 +93,11 @@ namespace Pinder.Core.Conversation
             int currentTurn = 0,
             bool isNat20 = false,
             string statFailureInstruction = null,
-            string activeArchetypeDirective = null)
+            string activeArchetypeDirective = null,
+            PublicProfileCard? dateeCard = null)
         {
             PlayerAvatarPrompt = playerAvatarPrompt ?? throw new System.ArgumentNullException(nameof(playerAvatarPrompt));
-            DateePrompt = dateePrompt ?? throw new System.ArgumentNullException(nameof(dateePrompt));
+            DateeCard = dateeCard ?? PublicProfileCard.Empty;
             ConversationHistory = conversationHistory ?? throw new System.ArgumentNullException(nameof(conversationHistory));
             DateeLastMessage = dateeLastMessage ?? throw new System.ArgumentNullException(nameof(dateeLastMessage));
             ChosenOption = chosenOption ?? throw new System.ArgumentNullException(nameof(chosenOption));

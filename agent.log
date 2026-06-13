@@ -2036,3 +2036,6 @@ started
 {"ts": "2026-06-13T09:17:08Z", "agent": "orchestrator", "action": "merged", "sprint_id": "2026-06-13-e33d7d", "ticket": "1122", "pr": 1132, "commit": "aa87956ff04320154009ab6f173337023ae63c4b", "closed_issues": [1122]}
 {"ts": "2026-06-13T09:17:08Z", "agent": "orchestrator", "action": "docs-not-required", "sprint_id": "2026-06-13-e33d7d", "ticket": "1122", "pr": 1132, "rationale": "Rename internal to engine; prompt-string surface already PLAYER AVATAR. Comprehensive docs sweep is ticket #1130."}
 {"ts": "2026-06-13T09:17:08Z", "agent": "orchestrator", "action": "followup-filed", "sprint_id": "2026-06-13-e33d7d", "ticket": "1122", "followup": 1133, "detail": "deferred yaml-key alignment player_role_description->player_avatar_role_description"}
+{"ts":"2026-06-13T09:38:22Z","agent":"backend-engineer","action":"start","detail":"begin #1123 symmetric two-session GM"}
+{"ts":"2026-06-13T10:21:21Z","ticket":1123,"event":"started","agent":"backend-engineer-subagent"}
+{"event":"started","ticket":1123,"agent":"backend-engineer-cont","ts":"2026-06-13T11:02:07Z","branch":"fix/1123-symmetric-two-session-gm"}

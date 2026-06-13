@@ -30,7 +30,6 @@ namespace Pinder.LlmAdapters.Tests
         private static DateeContext MakeDateeContext(string activeArchetypeDirective = null)
         {
             return new DateeContext(
-                playerAvatarPrompt: "You are a test player.",
                 dateePrompt: "You are a test datee.",
                 conversationHistory: Array.Empty<(string, string)>(),
                 dateeLastMessage: "",

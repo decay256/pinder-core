@@ -82,7 +82,6 @@ namespace Pinder.LlmAdapters.Tests
         {
             return new DeliveryContext(
                 playerAvatarPrompt: "velvet system prompt",
-                dateePrompt: "sable system prompt",
                 conversationHistory: new List<(string, string)>
                 {
                     ("Velvet", "hey there"),
@@ -111,7 +110,6 @@ namespace Pinder.LlmAdapters.Tests
             FailureTier deliveryTier = FailureTier.None)
         {
             return new DateeContext(
-                playerAvatarPrompt: "velvet system prompt",
                 dateePrompt: "sable system prompt",
                 conversationHistory: new List<(string, string)>
                 {
