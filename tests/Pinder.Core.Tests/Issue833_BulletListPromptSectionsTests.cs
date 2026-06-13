@@ -24,6 +24,7 @@ namespace Pinder.Core.Tests
     /// updated to use #836-conformant SYNTAX/TONE-formatted fragments.
     /// </summary>
     [Trait("Category", "Characters")]
+    [Collection("StaticWiring")]
     public class Issue833_BulletListPromptSectionsTests
     {
         private static readonly Dictionary<StatType, int> ZeroBaseStats =

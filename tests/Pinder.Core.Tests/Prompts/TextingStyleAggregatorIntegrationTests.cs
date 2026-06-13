@@ -30,6 +30,7 @@ namespace Pinder.Core.Tests.Prompts
     /// <see cref="TextingStyleAggregator.AggregateWithAudit"/> and logs drops.
     /// </summary>
     [Trait("Category", "Prompts")]
+    [Collection("StaticWiring")]
     public class TextingStyleAggregatorIntegrationTests
     {
         // ------------------------------------------------------------------

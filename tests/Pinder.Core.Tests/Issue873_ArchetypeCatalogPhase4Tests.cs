@@ -21,7 +21,7 @@ namespace Pinder.Core.Tests
     ///   the resolver nor the in-memory dictionary can satisfy a lookup.
     /// </summary>
     [Trait("Category", "PromptCatalog")]
-    [Collection("SessionRunnerReflection")]
+    [Collection("StaticWiring")]
     public class Issue873_ArchetypeCatalogPhase4Tests
     {
         // ----- repo helpers ---------------------------------------------------

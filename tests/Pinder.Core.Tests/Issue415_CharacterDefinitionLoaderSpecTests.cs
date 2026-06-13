@@ -18,6 +18,7 @@ namespace Pinder.Core.Tests
     /// Tests verify behavior from docs/specs/issue-415-spec.md only.
     /// </summary>
     [Trait("Category", "Characters")]
+    [Collection("StaticWiring")]
     public partial class Issue415_CharacterDefinitionLoaderSpecTests
     {
         #region Helpers
