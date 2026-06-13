@@ -154,23 +154,24 @@ OPTION_4
         // AC2: cache_control on system blocks — deeper verification
         // ==============================================================================
 
-        // What: AC2 - DeliverMessageAsync also uses cached system blocks with both prompts
-        // Mutation: Would catch if delivery skips caching or uses wrong builder
+        // What: AC2 (#1125) — the delivery LLM call was removed. Only the datee
+        // (and options) calls compile system blocks now; the avatar/delivery
+        // session no longer issues a wire request. Verify the datee call still
+        // uses cached system blocks (cache-prefix stability preserved).
+        // Mutation: Would catch if datee skips caching or uses wrong builder.
         [Fact]
-        public async Task DeliverMessageAsync_SystemBlocks_HavePlayerOnlyPromptWithCacheControl()
+        public async Task GetDateeResponseAsync_SystemBlocks_HaveCacheControl()
         {
-            var handler = new CapturingHttpHandler("Delivered text");
+            var handler = new CapturingHttpHandler("Datee reply");
             using var client = new HttpClient(handler);
             using var adapter = new AnthropicLlmAdapter(DefaultOptions(), client);
 
-            await adapter.DeliverMessageAsync(MakeDeliveryContext());
+            await adapter.GetDateeResponseAsync(MakeDateeContext());
 
             Assert.Single(handler.RequestBodies);
             var body = JsonConvert.DeserializeObject<MessagesRequest>(handler.RequestBodies[0]);
             Assert.NotNull(body);
-            // Issue #241: delivery uses player-only system blocks to prevent voice contamination
-            Assert.Equal(1, body!.System.Length);
-            Assert.All(body.System, block =>
+            Assert.All(body!.System, block =>
             {
                 Assert.NotNull(block.CacheControl);
                 Assert.Equal("ephemeral", block.CacheControl!.Type);

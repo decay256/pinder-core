@@ -58,52 +58,6 @@ namespace Pinder.LlmAdapters.OpenAi
         }
 
         /// <inheritdoc />
-        public async Task<string> DeliverMessageAsync(DeliveryContext context, CancellationToken ct = default)
-        {
-            // #1123: stateless single-turn fallback. Stateful callers route
-            // through the IStatefulLlmAdapter overload that takes a history.
-            var result = await DeliverMessageAsync(context, System.Array.Empty<ConversationMessage>(), ct).ConfigureAwait(false);
-            return result.DeliveredMessage;
-        }
-
-        /// <inheritdoc />
-        public async Task<StatefulAvatarResult> DeliverMessageAsync(
-            DeliveryContext context,
-            IReadOnlyList<ConversationMessage> history,
-            CancellationToken cancellationToken = default)
-        {
-            if (context == null) throw new ArgumentNullException(nameof(context));
-            if (history == null) throw new ArgumentNullException(nameof(history));
-
-            var deliveryRules = _options.GameDefinition?.DeliveryRules;
-            var userContent = SessionDocumentBuilder.BuildDeliveryPrompt(context, deliveryRules: deliveryRules, statDeliveryInstructions: _options.StatDeliveryInstructions);
-            // #1123: shared compile path — system prompt + character spec cached
-            // as the static prefix (via cache_control wrapping), transcript as
-            // the volatile suffix; symmetric to the datee stateful path.
-            var systemPrompt = SessionSystemPromptBuilder.BuildPlayerAvatar(context.PlayerAvatarPrompt, _options.GameDefinition);
-
-            string requestJson;
-            if (history.Count == 0)
-            {
-                requestJson = BuildRequestJson(systemPrompt, userContent, DefaultDeliveryTemperature);
-            }
-            else
-            {
-                requestJson = BuildStatefulRequestJson(systemPrompt, history, userContent, DefaultDeliveryTemperature);
-            }
-
-            var responseText = await _client.SendChatCompletionAsync(requestJson, cancellationToken).ConfigureAwait(false);
-            string delivered = responseText ?? string.Empty;
-
-            var newEntries = new ConversationMessage[]
-            {
-                ConversationMessage.User(userContent),
-                ConversationMessage.Assistant(delivered),
-            };
-            return new StatefulAvatarResult(delivered, newEntries);
-        }
-
-        /// <inheritdoc />
         public async Task<DateeResponse> GetDateeResponseAsync(DateeContext context, CancellationToken ct = default)
         {
             // #788: stateless single-turn fallback. Stateful callers route

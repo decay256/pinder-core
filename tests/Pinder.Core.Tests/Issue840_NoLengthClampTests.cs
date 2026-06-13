@@ -112,20 +112,20 @@ namespace Pinder.Core.Tests
             // Assert steering succeeded
             Assert.True(result.Steering.SteeringSucceeded);
             Assert.Equal("how about now?", result.Steering.SteeringQuestion);
+            Assert.True(result.Roll.IsSuccess);
 
-            // Verify steering question was appended to the intended text despite being > 80 words
-            Assert.NotNull(llm.CapturedDeliveryContext);
-            string deliveryIntended = llm.CapturedDeliveryContext!.ChosenOption.IntendedText;
-            Assert.Contains("how about now?", deliveryIntended);
-            Assert.StartsWith("word1", deliveryIntended);
+            // #1125: no DeliveryContext to capture — a SUCCESS roll commits the
+            // combined line verbatim, so the steering question must be present in
+            // the COMMITTED line even though the picked line already exceeded
+            // maxDeliveryWords (no length clamp, no truncation).
+            Assert.Contains("how about now?", result.DeliveredMessage);
+            Assert.StartsWith("word1", result.DeliveredMessage);
         }
 
         private sealed class CapturingLlmWithLongOutput : ILlmAdapter, IStatefulLlmAdapter
         {
             private readonly string _longMessage;
             private readonly string _steeringQuestion;
-
-            public DeliveryContext? CapturedDeliveryContext { get; private set; }
 
             public CapturingLlmWithLongOutput(string longMessage, string steeringQuestion = "how about now?")
             {
@@ -150,22 +150,6 @@ namespace Pinder.Core.Tests
                 return Task.FromResult(new[]
                 {
                     new DialogueOption(StatType.Charm, _longMessage),
-                });
-            }
-
-            public Task<string> DeliverMessageAsync(DeliveryContext context, System.Threading.CancellationToken ct = default)
-            {
-                CapturedDeliveryContext = context;
-                return Task.FromResult(context.ChosenOption.IntendedText);
-            }
-
-            public async Task<StatefulAvatarResult> DeliverMessageAsync(DeliveryContext context, System.Collections.Generic.IReadOnlyList<ConversationMessage> history, System.Threading.CancellationToken ct = default)
-            {
-                string delivered = await DeliverMessageAsync(context, ct).ConfigureAwait(false);
-                return new StatefulAvatarResult(delivered, new ConversationMessage[]
-                {
-                    ConversationMessage.User(string.Empty),
-                    ConversationMessage.Assistant(delivered),
                 });
             }
 

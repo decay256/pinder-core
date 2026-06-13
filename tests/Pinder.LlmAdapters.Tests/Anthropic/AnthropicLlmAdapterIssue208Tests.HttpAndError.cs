@@ -48,11 +48,13 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         {
             var options = DefaultOptions();
             options.Model = "claude-test-model";
-            var handler = new MockHttpHandler { ResponseBody = MakeApiResponse("\"test\"") };
+            var handler = new MockHttpHandler { ResponseBody = MakeApiResponse("[RESPONSE]\n\"test\"") };
             using var client = new HttpClient(handler);
             using var adapter = new AnthropicLlmAdapter(options, client);
 
-            await adapter.DeliverMessageAsync(MakeDeliveryContext());
+            // #1125: delivery surface removed — exercise the model-string transport
+            // contract through the datee response call instead.
+            await adapter.GetDateeResponseAsync(MakeDateeContext());
 
             var body = JObject.Parse(handler.LastRequestBody!);
             Assert.Equal("claude-test-model", body["model"]!.ToString());
@@ -76,20 +78,9 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             Assert.Equal(0.9, body["temperature"]!.Value<double>(), 2);
         }
 
-        // What: AC7 — DeliverMessage temperature is 0.7 by default
-        // Mutation: Would catch if delivery uses wrong temperature (e.g., 0.9)
-        [Fact]
-        public async Task AC7_DeliverMessage_DefaultTemperature_0_7()
-        {
-            var handler = new MockHttpHandler { ResponseBody = MakeApiResponse("\"Delivered\"") };
-            using var client = new HttpClient(handler);
-            using var adapter = new AnthropicLlmAdapter(DefaultOptions(), client);
-
-            await adapter.DeliverMessageAsync(MakeDeliveryContext());
-
-            var body = JObject.Parse(handler.LastRequestBody!);
-            Assert.Equal(0.7, body["temperature"]!.Value<double>(), 2);
-        }
+        // #1125: AC7_DeliverMessage_DefaultTemperature_0_7 removed — the delivery
+        // LLM call was collapsed into the deterministic, non-LLM DeliveryOverlay
+        // commit step, so there is no delivery request temperature to assert.
 
         // What: AC7 — DateeResponse temperature is 0.85 by default
         // Mutation: Would catch if datee response uses wrong temperature
@@ -197,8 +188,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
 
             await Assert.ThrowsAsync<ArgumentNullException>(() =>
                 adapter.GetDialogueOptionsAsync(null!));
-            await Assert.ThrowsAsync<ArgumentNullException>(() =>
-                adapter.DeliverMessageAsync(null!));
+            // #1125: delivery surface removed — no DeliverMessageAsync(null!) assertion.
             await Assert.ThrowsAsync<ArgumentNullException>(() =>
                 adapter.GetDateeResponseAsync(null!));
             await Assert.ThrowsAsync<ArgumentNullException>(() =>
@@ -228,19 +218,9 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
                 adapter.GetDialogueOptionsAsync(MakeDialogueContext()));
         }
 
-        // What: Spec — LLM empty response for DeliverMessageAsync returns empty string
-        // Mutation: Would catch if empty response returns null instead of ""
-        [Fact]
-        public async Task Error_EmptyLlmResponse_DeliverReturnsEmptyString()
-        {
-            var handler = new MockHttpHandler { ResponseBody = MakeApiResponse("") };
-            using var client = new HttpClient(handler);
-            using var adapter = new AnthropicLlmAdapter(DefaultOptions(), client);
-
-            var result = await adapter.DeliverMessageAsync(MakeDeliveryContext());
-            Assert.NotNull(result);
-            Assert.Equal("", result);
-        }
+        // #1125: Error_EmptyLlmResponse_DeliverReturnsEmptyString removed — the
+        // delivery LLM surface no longer exists; empty-response transport handling
+        // for the remaining calls (options/datee) is covered by their own specs.
 
         // What: Spec — LLM empty response for GetDateeResponseAsync
         // Mutation: Would catch if empty response throws instead of returning default
@@ -355,22 +335,9 @@ WEAKNESS: WIT -2 (overthinking their responses)";
             Assert.Equal(2, result.WeaknessWindow.DcReduction);
         }
 
-        // What: AC1 — DeliverMessageAsync returns the response text
-        // Mutation: Would catch if deliver returns empty string instead of LLM response
-        [Fact]
-        public async Task FullFlow_DeliverMessageAsync_ReturnsResponseText()
-        {
-            var handler = new MockHttpHandler
-            {
-                ResponseBody = MakeApiResponse("Thanks! You're not so bad yourself. What brings you to Pinder?")
-            };
-            using var client = new HttpClient(handler);
-            using var adapter = new AnthropicLlmAdapter(DefaultOptions(), client);
-
-            var result = await adapter.DeliverMessageAsync(MakeDeliveryContext());
-
-            Assert.Contains("What brings you to Pinder", result);
-        }
+        // #1125: FullFlow_DeliverMessageAsync_ReturnsResponseText removed — the
+        // delivery LLM call was collapsed into the deterministic, non-LLM
+        // DeliveryOverlay commit step (covered by Issue1125_CollapseDeliveryTests).
 
         // What: AC1 — GetInterestChangeBeatAsync returns narrative beat
         // Mutation: Would catch if interest change beat returns null for valid response

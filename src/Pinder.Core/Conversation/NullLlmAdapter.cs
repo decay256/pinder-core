@@ -31,39 +31,6 @@ namespace Pinder.Core.Conversation
         }
 
         /// <summary>
-        /// Echoes the intended text with a failure tier prefix.
-        /// Format: "[{tier}] {intendedText}" for failures, or the intended text as-is for success.
-        /// </summary>
-        public Task<string> DeliverMessageAsync(DeliveryContext context, CancellationToken ct = default)
-        {
-            ct.ThrowIfCancellationRequested();
-            string message = context.Outcome == FailureTier.Success
-                ? context.ChosenOption.IntendedText
-                : $"[{context.Outcome}] {context.ChosenOption.IntendedText}";
-            return Task.FromResult(message);
-        }
-
-        /// <inheritdoc />
-        public Task<StatefulAvatarResult> DeliverMessageAsync(
-            DeliveryContext context,
-            IReadOnlyList<ConversationMessage> history,
-            CancellationToken cancellationToken = default)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            string message = context.Outcome == FailureTier.Success
-                ? context.ChosenOption.IntendedText
-                : $"[{context.Outcome}] {context.ChosenOption.IntendedText}";
-            // NullLlmAdapter still records placeholder history entries so engine
-            // round-trips (snapshot/restore) behave the same as a real adapter.
-            var entries = new ConversationMessage[]
-            {
-                ConversationMessage.User(string.Empty),
-                ConversationMessage.Assistant(message ?? string.Empty),
-            };
-            return Task.FromResult(new StatefulAvatarResult(message ?? string.Empty, entries));
-        }
-
-        /// <summary>
         /// Returns a minimal placeholder DateeResponse with "..." text and no signals.
         /// </summary>
         public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, CancellationToken ct = default)
