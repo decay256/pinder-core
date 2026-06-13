@@ -45,19 +45,16 @@ namespace Pinder.LlmAdapters
 
         public static string DialogueOptionsInstruction => GetCatalogString("dialogue-options-instruction");
 
-        // ── §3.3 — Success delivery instruction (REMOVED, #1125/#1138) ───────
+        // ── §3.3/§3.4 — Delivery instructions (REMOVED, #1125/#1138) ─────────
         //
-        // SuccessDeliveryInstruction / BuildSuccessDeliveryInstruction were only
-        // ever consumed by SessionDocumentBuilder.BuildDeliveryPromptEx, the
-        // creative delivery-prompt formatter. #1125 collapsed delivery into a
+        // SuccessDeliveryInstruction / BuildSuccessDeliveryInstruction and
+        // FailureDeliveryInstruction were only ever consumed by
+        // SessionDocumentBuilder.BuildDeliveryPrompt(Ex), the creative
+        // delivery-prompt formatter. #1125 collapsed delivery into a
         // deterministic, non-LLM overlay/commit step (DeliveryOverlay), and
-        // #1138 removed the prompt builders, so this instruction is fully dead.
-        // DeliveryRules itself is retained — it is still parsed from the game
-        // definition and surfaced elsewhere.
-
-        // ── §3.4 — Failure delivery instruction ─────────────────────────────
-
-        public static string FailureDeliveryInstruction => GetCatalogString("failure-delivery-instruction");
+        // #1138 removed the prompt builders, so these instructions are fully
+        // dead and have been removed. DeliveryRules itself is retained — it is
+        // still parsed from the game definition and surfaced elsewhere.
 
         // ── §3.5 — Datee response instruction ────────────────────────────
 
