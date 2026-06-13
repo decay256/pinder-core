@@ -181,5 +181,63 @@ namespace Pinder.Core.Tests.Conversation
                 Assert.Equal(historyA[i].Content, sessionB.DateeHistory[i].Content);
             }
         }
+
+        /// <summary>
+        /// #1123 review blocker: the public <see cref="GameSession.CreateSnapshot"/>
+        /// must populate <see cref="GameStateSnapshot.AvatarHistory"/> symmetrically
+        /// with <see cref="GameStateSnapshot.DateeHistory"/>. The instance method
+        /// previously omitted the avatar-history argument, so the returned snapshot's
+        /// AvatarHistory was silently always empty. This drives avatar history onto a
+        /// session via RestoreState, calls the PUBLIC CreateSnapshot(), and asserts the
+        /// snapshot round-trips the avatar history (NOT empty).
+        /// </summary>
+        [Fact]
+        public void CreateSnapshot_PopulatesAvatarHistory_FromRestoredState()
+        {
+            var session = new GameSession(
+                MakeProfile("P1"),
+                MakeProfile("P2"),
+                new NullLlmAdapter(),
+                new FixedDice(5),
+                new NullTrapRegistry(),
+                new GameSessionConfig(clock: TestHelpers.MakeClock()));
+
+            // Engine starts with empty avatar history -> snapshot reflects empty.
+            Assert.Empty(session.CreateSnapshot().AvatarHistory);
+
+            session.RestoreState(new ResimulateData
+            {
+                TargetInterest = session.CreateSnapshot().Interest,
+                TurnNumber = 2,
+                MomentumStreak = 0,
+                ShadowValues = new Dictionary<string, int>(),
+                ActiveTraps = new List<(string, int)>(),
+                ConversationHistory = new List<(string, string)>(),
+                ComboHistory = new List<(string, bool)>(),
+                PendingTripleBonus = false,
+                RizzCumulativeFailureCount = 0,
+                AvatarHistory = new List<(string, string)>
+                {
+                    ("user", "first avatar prompt"),
+                    ("assistant", "first avatar reply"),
+                    ("user", "second avatar prompt"),
+                    ("assistant", "second avatar reply"),
+                },
+            }, new NullTrapRegistry());
+
+            // The live engine view reflects the restored avatar history.
+            Assert.Equal(4, session.AvatarHistory.Count);
+
+            // The PUBLIC CreateSnapshot() must round-trip the avatar history, not drop it.
+            var snap = session.CreateSnapshot();
+            Assert.Equal(4, snap.AvatarHistory.Count);
+            Assert.Equal("user", snap.AvatarHistory[0].Role);
+            Assert.Equal("first avatar prompt", snap.AvatarHistory[0].Content);
+            Assert.Equal("assistant", snap.AvatarHistory[1].Role);
+            Assert.Equal("first avatar reply", snap.AvatarHistory[1].Content);
+            Assert.Equal("user", snap.AvatarHistory[2].Role);
+            Assert.Equal("assistant", snap.AvatarHistory[3].Role);
+            Assert.Equal("second avatar reply", snap.AvatarHistory[3].Content);
+        }
     }
 }

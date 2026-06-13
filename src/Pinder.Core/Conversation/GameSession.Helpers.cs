@@ -208,7 +208,8 @@ namespace Pinder.Core.Conversation
                 _traps,
                 _turnNumber,
                 _comboTracker.HasTripleBonus,
-                _dateeHistory);
+                _dateeHistory,
+                _avatarHistory);
         }
     }
 }
