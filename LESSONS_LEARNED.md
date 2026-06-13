@@ -814,3 +814,26 @@ result envelope.
 the rung-0 slug (e.g. provider-side billing, or a probe spawn that echoes
 its own model). If routing did NOT apply, this is a real cost regression
 and the plugin needs a fix. Filed as an after-sprint concern for Daniel.
+
+
+## PRICING-SNAPSHOT-ABSENT (sprint 2026-06-13-e33d7d, segment 3)
+
+**Hazard.** The run identity references a pricing snapshot at
+`docs/sprint-runs/2026-06-13-e33d7d/pricing-snapshot.jsonl`, but the file
+was never created. `scripts/spawn-recover.sh` aborts with **exit 22**
+("pricing-snapshot has no entry for sprint … rung …") — but ONLY on the
+code path where numeric `--tokens-in` / `--tokens-out` are supplied (it
+tries to compute cost and fails to find a price line).
+
+**Mitigation applied.** Close every spawn's logging loop by passing
+`--runtime-seconds <N>` and OMITTING `--tokens-in` / `--tokens-out`. With
+null tokens the cost branch is skipped, the synthetic `attempt-end` writes
+`tokens_in:null, tokens_out:null, cost_usd:null`, and the loop closes
+(exit 0). Record the real envelope token volumes in the `--reason` string
+for the audit trail instead. NOTE: the `--pricing-snapshot <path>` CLI arg
+is still REQUIRED (the script validates the flag's presence even though
+the file is absent) — pass the path even though the file doesn't exist.
+
+**Follow-up.** Create the pricing snapshot for this sprint so cost lines
+stop being null, OR teach spawn-recover to no-op cost (not abort) when the
+snapshot file is missing. Carried forward in continuation-context.md.
