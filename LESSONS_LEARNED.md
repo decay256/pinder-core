@@ -784,3 +784,33 @@ constructor and clone constructors.
 
 **Discovered in:** Sprint 13 (2026-05-27).
 
+
+## EIGENTAKT-DELEGATE-MODEL-OPACITY (sprint 2026-06-13-e33d7d)
+
+**Hazard.** When eigentakt runs on Hermes via `delegate_task` (the
+sanctioned subagent mapping for `sessions_spawn`), the child task's
+result envelope reports `model: claude-opus-4-8` (the orchestrator's
+pinned model) even when the spawn was routed to a rung-0 model
+(`gemini-3.1-pro-preview` via `delegate_task(model=..., provider=google)`).
+The envelope's `model` field reflects the *delegating* agent's model, not
+the resolved child model. This means:
+
+1. Per-spawn cost calibration cannot trust the result envelope's `model`
+   field — it must trust the `pre_spawn_estimate` written by
+   `spawn-with-routing.sh` (which records `model_requested` correctly).
+2. We cannot confirm from the envelope alone whether the
+   delegate-model-routing plugin actually applied the rung-0 model or
+   silently inherited the parent's model (the hazard #23 failure mode one
+   layer down). The token counts (1.35M in for #1121 impl) are plausible
+   for either model, so they don't disambiguate.
+
+**Mitigation applied this sprint.** Logged the discrepancy in every
+`spawn-recover.sh --reason` and in the synthetic `attempt-end`
+(`model_resolved: null`, `EIGENTAKT-MODEL-RESOLVED-GAP`). The authoritative
+record of intended routing is the `pre_spawn_estimate` line, not the
+result envelope.
+
+**Follow-up.** Verify out-of-band whether delegate-model-routing applied
+the rung-0 slug (e.g. provider-side billing, or a probe spawn that echoes
+its own model). If routing did NOT apply, this is a real cost regression
+and the plugin needs a fix. Filed as an after-sprint concern for Daniel.

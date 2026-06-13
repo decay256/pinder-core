@@ -1,0 +1,4 @@
+{"sprint_id":"2026-06-13-e33d7d","rung":0,"provider":"google","model_id":"gemini-3.1-pro-preview","prompt_per_mtok":0.0,"completion_per_mtok":0.0,"cache_read_per_mtok":0.0,"source":"from model-routing.yaml ladder"}
+{"sprint_id":"2026-06-13-e33d7d","rung":1,"provider":"google","model_id":"gemini-3.5-flash","prompt_per_mtok":1.5,"completion_per_mtok":9.0,"cache_read_per_mtok":0.15,"source":"from model-routing.yaml ladder"}
+{"sprint_id":"2026-06-13-e33d7d","rung":2,"provider":"google","model_id":"gemini-3.1-pro-preview","prompt_per_mtok":0.0,"completion_per_mtok":0.0,"cache_read_per_mtok":0.0,"source":"from model-routing.yaml ladder"}
+{"sprint_id":"2026-06-13-e33d7d","rung":3,"provider":"anthropic","model_id":"claude-opus-4-8","prompt_per_mtok":5.0,"completion_per_mtok":25.0,"cache_read_per_mtok":0.5,"source":"from model-routing.yaml ladder"}
