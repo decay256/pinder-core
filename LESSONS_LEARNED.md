@@ -868,3 +868,22 @@ cost branch cleanly (exit 0) when you don't want a priced line.
 2. Make `spawn-recover.sh` resolve the snapshot path absolutely from
    sprint-id so a continuation orchestrator started from a different cwd
    can't false-alarm "absent" again.
+
+### TWO-SESSION-COMMIT-MODEL-INVARIANTS
+
+**Title:** Clean-history and two-session bleed isolation in the Commit Model.
+
+**Symptom:** Voice bleed between the player character and datee, or the datee "remembering" unchosen options or internal monologue that should have been ephemeral.
+
+**Root cause:** A single-session history or a pipeline that commits all generated LLM outputs to the main conversation log breaks narrative bounds. The datee LLM sees the player's options and the raw degradation inputs, while the player's option-generation LLM gets tainted by the datee's systemic reactions. 
+
+**Rule:** Pinder operates on a strict **Two-Session / Commit Model**.
+1. **Bleed Isolation:** The Player (Avatar) session and the Datee session are entirely separate. Option generation happens in the Avatar session; the Datee's response happens in the Datee session. Neither session sees the other's system prompt or internal workings.
+2. **Clean-History Rule:** Only COMMITTED lines persist in the conversation history. The process of generating options, steering nudges, and applying overlays (Trap, Shadow, Horniness) happens on an **ephemeral branch**. Unchosen options, original pre-degradation texts, and the overlays' instructions MUST NOT be committed to the main session history. The datee sees ONLY the final, fully-resolved delivered message.
+
+**Anchors:**
+- `docs/prompt-graph.md` — Canonical map of the two-session flow.
+- `GameSession.ResolveTurnAsync` — Orchestrates the ephemeral commit step and final history append.
+- `DeliveryStage.cs` — The deterministic non-LLM commit step that replaced the old `DeliverMessageAsync` call.
+
+**Discovered in:** #1125 / #1130 (Two-session-GM sprint).
