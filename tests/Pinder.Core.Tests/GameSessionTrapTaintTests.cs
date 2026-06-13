@@ -165,8 +165,8 @@ namespace Pinder.Core.Tests
             // Choose option 2 (Wit) — triggers TropeTrap tier, activates wit_trap
             await session.ResolveTurnAsync(2);
 
-            // #1125: no DeliveryContext is built anymore.
-            Assert.Empty(capturingLlm.DeliveryContexts);
+            // #1125: no delivery LLM call / DeliveryContext exists anymore — the
+            // commit step is the deterministic, non-LLM DeliveryOverlay.
 
             // Check datee context had trap instructions (trap was activated during
             // RollEngine.Resolve; AdvanceTurn runs AFTER the datee call (#692), so
@@ -199,7 +199,6 @@ namespace Pinder.Core.Tests
             await session.ResolveTurnAsync(0);
 
             // #1125: no DeliveryContext is built; assert on the surviving datee context.
-            Assert.Empty(capturingLlm.DeliveryContexts);
             var oppCtx = capturingLlm.DateeContexts[0];
             Assert.Null(oppCtx.ActiveTrapInstructions);
         }

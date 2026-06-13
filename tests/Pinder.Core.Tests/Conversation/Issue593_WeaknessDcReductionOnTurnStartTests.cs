@@ -181,11 +181,6 @@ namespace Pinder.Core.Tests.Conversation
                 return Task.FromResult(options);
             }
 
-            public Task<string> DeliverMessageAsync(DeliveryContext context, CancellationToken ct = default)
-            {
-                ct.ThrowIfCancellationRequested();
-                return Task.FromResult(context.ChosenOption.IntendedText);
-            }
 
             public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, CancellationToken ct = default)
             {

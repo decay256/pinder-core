@@ -26,7 +26,6 @@ namespace Pinder.Core.Tests.Conversation
         private sealed class DummyLlmAdapter : ILlmAdapter
         {
             public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, System.Threading.CancellationToken ct = default) => Task.FromResult(new DialogueOption[0]);
-            public Task<string> DeliverMessageAsync(DeliveryContext context, System.Threading.CancellationToken ct = default) => Task.FromResult("");
             public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default) => Task.FromResult(new DateeResponse("", null, null));
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, System.Threading.CancellationToken ct = default) => Task.FromResult<string?>("");
             public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => Task.FromResult(message);
@@ -41,18 +40,7 @@ namespace Pinder.Core.Tests.Conversation
             public IReadOnlyList<ConversationMessage>? LastHistorySeen { get; private set; }
 
             public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, System.Threading.CancellationToken ct = default) => Task.FromResult(new DialogueOption[0]);
-            public Task<string> DeliverMessageAsync(DeliveryContext context, System.Threading.CancellationToken ct = default) => Task.FromResult("");
             public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default) => Task.FromResult(new DateeResponse("", null, null));
-
-            public Task<StatefulAvatarResult> DeliverMessageAsync(
-                DeliveryContext context,
-                IReadOnlyList<ConversationMessage> history,
-                System.Threading.CancellationToken ct = default)
-                => Task.FromResult(new StatefulAvatarResult("", new ConversationMessage[]
-                {
-                    ConversationMessage.User("u"),
-                    ConversationMessage.Assistant("a"),
-                }));
 
             public Task<StatefulDateeResult> GetDateeResponseAsync(
                 DateeContext context,

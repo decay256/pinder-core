@@ -118,8 +118,6 @@ namespace Pinder.Core.Tests
 
             public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult(_options);
-            public Task<string> DeliverMessageAsync(DeliveryContext context, System.Threading.CancellationToken ct = default)
-                => Task.FromResult(context.ChosenOption.IntendedText);
             public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult(new DateeResponse("..."));
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, System.Threading.CancellationToken ct = default)
@@ -144,8 +142,6 @@ namespace Pinder.Core.Tests
                     new DialogueOption(StatType.Wit, "Clever")
                 });
             }
-            public Task<string> DeliverMessageAsync(DeliveryContext context, System.Threading.CancellationToken ct = default)
-                => Task.FromResult(context.ChosenOption.IntendedText);
             public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult(new DateeResponse("..."));
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, System.Threading.CancellationToken ct = default)

@@ -60,15 +60,23 @@ namespace Pinder.Core.Tests
 
         /// <summary>
         /// LLM adapter that emits a single FULL-text option (so we control the
-        /// picked line) and HARD-FAILS if any creative delivery call is made.
-        /// Overlays (trap/shadow/horniness) and steering are no-ops here so the
-        /// only transform that can touch the committed line is the deterministic
-        /// <see cref="DeliveryOverlay"/>.
+        /// picked line). Overlays (trap/shadow/horniness) and steering are no-ops
+        /// here so the only transform that can touch the committed line is the
+        /// deterministic <see cref="DeliveryOverlay"/>.
+        ///
+        /// <para>
+        /// #1125/#1137: the old delivery LLM surface (a <c>DeliverMessageAsync</c>
+        /// overload) was removed from the adapter contract entirely, so there is
+        /// no longer a method this adapter could implement to "forbid" — the
+        /// guarantee that no creative delivery call fires is now a COMPILE-TIME
+        /// property of <see cref="ILlmAdapter"/>/<see cref="IStatefulLlmAdapter"/>,
+        /// not a runtime throw. The remaining regression coverage asserts that no
+        /// <c>"delivery"</c> prompt-trace is compiled during a full turn.
+        /// </para>
         /// </summary>
         private sealed class DeliveryForbiddenAdapter : ILlmAdapter, IStatefulLlmAdapter
         {
             private readonly string _optionText;
-            public bool DeliverMessageCalled { get; private set; }
 
             public DeliveryForbiddenAdapter(string optionText)
             {
@@ -77,23 +85,6 @@ namespace Pinder.Core.Tests
 
             public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, CancellationToken ct = default)
                 => Task.FromResult(new[] { new DialogueOption(StatType.Charm, _optionText) });
-
-            // The collapsed delivery surface — must NEVER be invoked by the engine
-            // post-#1125. Both the stateless and stateful overloads fail loudly.
-            public Task<string> DeliverMessageAsync(DeliveryContext context, CancellationToken ct = default)
-            {
-                DeliverMessageCalled = true;
-                throw new InvalidOperationException(
-                    "#1125 regression: the engine invoked the delivery LLM call, which must be collapsed.");
-            }
-
-            public Task<StatefulAvatarResult> DeliverMessageAsync(
-                DeliveryContext context, IReadOnlyList<ConversationMessage> history, CancellationToken cancellationToken = default)
-            {
-                DeliverMessageCalled = true;
-                throw new InvalidOperationException(
-                    "#1125 regression: the engine invoked the stateful delivery LLM call, which must be collapsed.");
-            }
 
             public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, CancellationToken ct = default)
                 => Task.FromResult(new DateeResponse("ok, go on..."));
@@ -221,8 +212,9 @@ namespace Pinder.Core.Tests
 
         // ── Regression 3: no delivery LLM call / prompt-trace fires ──────────
 
-        // A full turn must not invoke DeliverMessageAsync, and the prompt-trace
-        // set must not include a "delivery" creative compilation.
+        // A full turn must not compile a "delivery" creative prompt-trace. (The
+        // delivery LLM call itself no longer exists on the adapter contract, so
+        // "no delivery call fires" is enforced at compile time — #1137.)
         [Fact]
         public async Task FullTurn_FiresNoDeliveryLlmCall_NorDeliveryPromptTrace()
         {
@@ -233,12 +225,10 @@ namespace Pinder.Core.Tests
             var session = NewSession(llm, dice);
 
             await session.StartTurnAsync();
-            // Would throw from DeliveryForbiddenAdapter.DeliverMessageAsync if the
-            // engine still routed through the delivery LLM surface.
             await session.ResolveTurnAsync(0);
 
-            Assert.False(llm.DeliverMessageCalled,
-                "The engine must not invoke the delivery LLM call after #1125.");
+            // No "delivery" creative prompt is compiled — the delivery LLM call
+            // was collapsed into the deterministic DeliveryOverlay commit step.
             Assert.Null(InMemoryPromptTraceService.Instance.GetLastTrace("delivery"));
         }
     }

@@ -275,8 +275,6 @@ namespace Pinder.Core.Tests
             public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, System.Threading.CancellationToken ct = default)
                 => throw new InvalidOperationException("LLM should not be called for Wait");
 
-            public Task<string> DeliverMessageAsync(DeliveryContext context, System.Threading.CancellationToken ct = default)
-                => throw new InvalidOperationException("LLM should not be called for Wait");
 
             public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
                 => throw new InvalidOperationException("LLM should not be called for Wait");

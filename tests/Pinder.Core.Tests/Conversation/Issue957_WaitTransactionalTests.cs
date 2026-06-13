@@ -342,8 +342,6 @@ namespace Pinder.Core.Tests.Conversation
             public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult(Array.Empty<DialogueOption>());
 
-            public Task<string> DeliverMessageAsync(DeliveryContext context, System.Threading.CancellationToken ct = default)
-                => Task.FromResult("delivered message");
 
             public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult(new DateeResponse("datee reply"));

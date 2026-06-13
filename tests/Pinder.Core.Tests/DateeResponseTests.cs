@@ -166,45 +166,15 @@ namespace Pinder.Core.Tests
             Assert.Single(ctx.ActiveTrapInstructions!);
         }
 
-        [Fact]
-        public void DeliveryContext_New_Fields_Default_To_Null()
-        {
-            var option = new DialogueOption(StatType.Charm, "Hi");
-            var ctx = new DeliveryContext(
-                playerAvatarPrompt: "p",
-                conversationHistory: new List<(string, string)>(),
-                dateeLastMessage: "",
-                chosenOption: option,
-                outcome: Rolls.FailureTier.Success,
-                beatDcBy: 3,
-                activeTraps: new List<string>());
-
-            Assert.Null(ctx.ShadowThresholds);
-            Assert.Null(ctx.ActiveTrapInstructions);
-        }
-
-        [Fact]
-        public void DeliveryContext_Accepts_New_Optional_Fields()
-        {
-            var shadows = new Dictionary<ShadowStatType, int>
-            {
-                { ShadowStatType.Madness, 4 }
-            };
-            var option = new DialogueOption(StatType.Charm, "Hi");
-            var ctx = new DeliveryContext(
-                playerAvatarPrompt: "p",
-                conversationHistory: new List<(string, string)>(),
-                dateeLastMessage: "",
-                chosenOption: option,
-                outcome: Rolls.FailureTier.Success,
-                beatDcBy: 3,
-                activeTraps: new List<string>(),
-                shadowThresholds: shadows,
-                activeTrapInstructions: new[] { "Be creepy" });
-
-            Assert.NotNull(ctx.ShadowThresholds);
-            Assert.NotNull(ctx.ActiveTrapInstructions);
-        }
+        // #1125/#1137: the two DeliveryContext field-default tests
+        // (DeliveryContext_New_Fields_Default_To_Null /
+        // DeliveryContext_Accepts_New_Optional_Fields) were DELETED. They only
+        // exercised the constructor of the removed `DeliveryContext` type (the
+        // delivery LLM call was collapsed into the deterministic, non-LLM
+        // DeliveryOverlay commit step). There is no overlay/commit equivalent to
+        // re-point them at — DeliveryContext carried no behaviour, just the
+        // payload for the deleted call — so they have no successor assertion.
+        // The surviving DateeContext field-default coverage remains below.
 
         [Fact]
         public void DateeContext_New_Fields_Default_To_Null()

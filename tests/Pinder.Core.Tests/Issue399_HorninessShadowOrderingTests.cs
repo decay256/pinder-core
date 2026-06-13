@@ -337,23 +337,6 @@ namespace Pinder.Core.Tests
                 return Task.FromResult(LastOptions);
             }
 
-            public Task<string> DeliverMessageAsync(DeliveryContext context, System.Threading.CancellationToken ct = default)
-            {
-                string intended = context.ChosenOption.IntendedText;
-                return Task.FromResult(context.Outcome == FailureTier.Success
-                    ? intended
-                    : $"[{context.Outcome}] {intended}");
-            }
-
-            public async Task<StatefulAvatarResult> DeliverMessageAsync(DeliveryContext context, System.Collections.Generic.IReadOnlyList<ConversationMessage> history, System.Threading.CancellationToken ct = default)
-            {
-                string delivered = await DeliverMessageAsync(context, ct).ConfigureAwait(false);
-                return new StatefulAvatarResult(delivered, new ConversationMessage[]
-                {
-                    ConversationMessage.User(string.Empty),
-                    ConversationMessage.Assistant(delivered),
-                });
-            }
 
             public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult(new DateeResponse("..."));

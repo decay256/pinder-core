@@ -51,7 +51,6 @@ namespace Pinder.Core.Tests
         private sealed class W2aTrapLlmAdapter : ILlmAdapter
         {
             public List<DialogueContext> DialogueContexts { get; } = new();
-            public List<DeliveryContext> DeliveryContexts { get; } = new();
             public List<DateeContext> DateeContexts { get; } = new();
             public int TrapOverlayCalls { get; private set; }
 
@@ -66,17 +65,6 @@ namespace Pinder.Core.Tests
                     new DialogueOption(StatType.SelfAwareness, "SA option"),
                 };
                 return Task.FromResult(options);
-            }
-
-            public Task<string> DeliverMessageAsync(DeliveryContext context, System.Threading.CancellationToken ct = default)
-            {
-                DeliveryContexts.Add(context);
-                // Tag the message with the tier so it is observably different
-                // from the IntendedText (so a TextDiff is emitted on failure).
-                string text = context.Outcome == FailureTier.Success
-                    ? context.ChosenOption.IntendedText
-                    : $"[{context.Outcome}] {context.ChosenOption.IntendedText}";
-                return Task.FromResult(text);
             }
 
             public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
