@@ -17,7 +17,18 @@ namespace Pinder.Core.Interfaces
         /// <summary>Player dialogue-options generation.</summary>
         public const string DialogueOptions = "dialogue_options";
 
-        /// <summary>Player message delivery (final transformation of the chosen option).</summary>
+        /// <summary>
+        /// RETIRED — no longer emitted (#1125/#1129). The standalone "delivery"
+        /// creative LLM call was collapsed into the deterministic
+        /// <see cref="Pinder.Core.Conversation.DeliveryOverlay"/> commit step:
+        /// the avatar GM now returns full, sendable candidate lines, so there is
+        /// no second "delivery" LLM call to label. This constant is RETAINED (not
+        /// renamed/removed) only so historical audit/cost rows that reference the
+        /// <c>"delivery"</c> phase string still render with a typed label —
+        /// mirroring the #827 MatchupAnalysis/MatchupSummary precedent below.
+        /// Phase strings are a public decorator contract; do not re-purpose this
+        /// value for a new LLM phase.
+        /// </summary>
         public const string Delivery = "delivery";
 
         /// <summary>Steering question for the player.</summary>
