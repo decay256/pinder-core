@@ -28,7 +28,7 @@ namespace Pinder.LlmAdapters.Tests
                 dateeFriction: "datee friction content",
                 dateeCuriosity: "datee curiosity content",
                 conversationArcProgression: "conversation arc content",
-                playerProbing: "player probing content");
+                playerAvatarProbing: "player probing content");
         }
 
         #region Shared GM base is identical for both sessions (#1124)

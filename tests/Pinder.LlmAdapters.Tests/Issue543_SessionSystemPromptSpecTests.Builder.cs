@@ -33,12 +33,12 @@ namespace Pinder.LlmAdapters.Tests
             Assert.False(string.IsNullOrWhiteSpace(GameDefinition.PinderDefaults.WorldDescription));
         }
 
-        // What: AC3 — PinderDefaults.PlayerRoleDescription describes player role
+        // What: AC3 — PinderDefaults.PlayerAvatarRoleDescription describes player role
         // Mutation: would catch if player role was empty
         [Fact]
-        public void PinderDefaults_PlayerRoleDescriptionIsNotEmpty()
+        public void PinderDefaults_PlayerAvatarRoleDescriptionIsNotEmpty()
         {
-            Assert.False(string.IsNullOrWhiteSpace(GameDefinition.PinderDefaults.PlayerRoleDescription));
+            Assert.False(string.IsNullOrWhiteSpace(GameDefinition.PinderDefaults.PlayerAvatarRoleDescription));
         }
 
         // What: AC3 — PinderDefaults.DateeRoleDescription describes datee role
@@ -87,7 +87,7 @@ namespace Pinder.LlmAdapters.Tests
             Assert.NotNull(gd.Name);
             Assert.NotNull(gd.Vision);
             Assert.NotNull(gd.WorldDescription);
-            Assert.NotNull(gd.PlayerRoleDescription);
+            Assert.NotNull(gd.PlayerAvatarRoleDescription);
             Assert.NotNull(gd.DateeRoleDescription);
             Assert.NotNull(gd.NarrativeDoctrine);
         }
@@ -322,7 +322,7 @@ namespace Pinder.LlmAdapters.Tests
 name: Test
 vision: v
 world_description: w
-player_role_description: p
+player_avatar_role_description: p
 datee_role_description: o
 global_dc_bias: 0
 horniness_time_modifiers:

@@ -149,7 +149,7 @@ namespace Pinder.Rules.Tests
             var data = ParseYaml();
             // The YAML now contains many more keys than the original 7;
             // verify the core content sections are still present.
-            string[] required = { "name", "vision", "world_description", "player_role_description",
+            string[] required = { "name", "vision", "world_description", "player_avatar_role_description",
                 "datee_role_description", "narrative_doctrine" };
             foreach (var key in required)
             {

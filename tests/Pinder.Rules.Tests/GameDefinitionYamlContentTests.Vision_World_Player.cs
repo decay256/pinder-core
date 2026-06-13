@@ -92,7 +92,7 @@ namespace Pinder.Rules.Tests
         {
             var data = ParseYaml();
             var world = data["world_description"];
-            var player = data["player_role_description"];
+            var player = data["player_avatar_role_description"];
             // Must mention 0 and 25 as the interest range boundaries
             Assert.Contains("0", world);
             Assert.Contains("25", player);
@@ -119,7 +119,7 @@ namespace Pinder.Rules.Tests
         public void PlayerRole_MentionsDialogueOptionCount()
         {
             var data = ParseYaml();
-            var player = data["player_role_description"];
+            var player = data["player_avatar_role_description"];
             // The count is now parameterized via max_dialogue_options rather than hardcoded; assert the concept is present.
             Assert.True(
                 player.Contains("dialogue options", StringComparison.OrdinalIgnoreCase) ||
@@ -132,7 +132,7 @@ namespace Pinder.Rules.Tests
         public void PlayerRole_MentionsTextingStyle()
         {
             var data = ParseYaml();
-            var player = data["player_role_description"];
+            var player = data["player_avatar_role_description"];
             Assert.True(
                 player.Contains("texting style", StringComparison.OrdinalIgnoreCase) ||
                 player.Contains("voice", StringComparison.OrdinalIgnoreCase),
@@ -144,7 +144,7 @@ namespace Pinder.Rules.Tests
         public void PlayerRole_MentionsStatTiedOptions()
         {
             var data = ParseYaml();
-            var player = data["player_role_description"];
+            var player = data["player_avatar_role_description"];
             Assert.True(
                 player.Contains("stat", StringComparison.OrdinalIgnoreCase) &&
                 (player.Contains("tied", StringComparison.OrdinalIgnoreCase) ||
@@ -158,7 +158,7 @@ namespace Pinder.Rules.Tests
         public void PlayerRole_MentionsHorninessRizzMechanic()
         {
             var data = ParseYaml();
-            var player = data["player_role_description"];
+            var player = data["player_avatar_role_description"];
             Assert.True(
                 player.Contains("Horniness", StringComparison.Ordinal) ||
                 player.Contains("Rizz", StringComparison.Ordinal),

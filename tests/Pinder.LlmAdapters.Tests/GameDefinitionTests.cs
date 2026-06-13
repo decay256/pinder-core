@@ -11,7 +11,7 @@ vision: |
   A test game vision.
 world_description: |
   A test world description.
-player_role_description: |
+player_avatar_role_description: |
   Player role.
 datee_role_description: |
   Datee role.
@@ -33,7 +33,7 @@ horniness_time_modifiers:
             Assert.Equal("N", gd.Name);
             Assert.Equal("V", gd.Vision);
             Assert.Equal("W", gd.WorldDescription);
-            Assert.Equal("P", gd.PlayerRoleDescription);
+            Assert.Equal("P", gd.PlayerAvatarRoleDescription);
             Assert.Equal("O", gd.DateeRoleDescription);
             Assert.Equal("ND", gd.NarrativeDoctrine);
         }
@@ -66,7 +66,7 @@ horniness_time_modifiers:
             Assert.Equal("TestGame", gd.Name);
             Assert.Contains("test game vision", gd.Vision);
             Assert.Contains("test world description", gd.WorldDescription);
-            Assert.Contains("Player role", gd.PlayerRoleDescription);
+            Assert.Contains("Player role", gd.PlayerAvatarRoleDescription);
             Assert.Contains("Datee role", gd.DateeRoleDescription);
             Assert.Contains("Meta contract", gd.NarrativeDoctrine);
             Assert.Contains("Writing rules", gd.NarrativeDoctrine);
@@ -103,7 +103,7 @@ horniness_time_modifiers:
 name: Test
 vision: ~
 world_description: wd
-player_role_description: p
+player_avatar_role_description: p
 datee_role_description: o
 narrative_doctrine: m
 global_dc_bias: 0
@@ -125,7 +125,7 @@ horniness_time_modifiers:
 name: Test
 vision: v
 world_description: w
-player_role_description: p
+player_avatar_role_description: p
 datee_role_description: o
 narrative_doctrine: nd
 global_dc_bias: 0
@@ -149,7 +149,7 @@ another: also ignored
             Assert.Contains("comedy dating RPG", gd.Vision);
             Assert.Contains("sentient penis", gd.Vision);
             Assert.Contains("dating server", gd.WorldDescription);
-            Assert.Contains("player character", gd.PlayerRoleDescription, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("player character", gd.PlayerAvatarRoleDescription, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("datee", gd.DateeRoleDescription, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("break character", gd.NarrativeDoctrine, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("texting register", gd.NarrativeDoctrine, StringComparison.OrdinalIgnoreCase);
@@ -168,6 +168,89 @@ another: also ignored
             var gd = GameDefinition.LoadFrom(content);
             Assert.Equal("Pinder", gd.Name);
             Assert.Contains("RPG similar to D&D", gd.Vision);
+        }
+
+        [Fact]
+        public void LoadFrom_LegacyYamlKeys_BackwardCompatibility_Regression1133()
+        {
+            // 1. Only old keys
+            var yamlOld = @"
+name: Test
+vision: v
+world_description: w
+player_role_description: old_role
+datee_role_description: o
+narrative_doctrine: nd
+global_dc_bias: 0
+player_probing: old_probing
+horniness_time_modifiers:
+  morning: 3
+  afternoon: 0
+  evening: 2
+  overnight: 5
+";
+            var gdOld = GameDefinition.LoadFrom(yamlOld);
+            Assert.Equal("old_role", gdOld.PlayerAvatarRoleDescription);
+            Assert.Equal("old_probing", gdOld.PlayerAvatarProbing);
+
+            // 2. Only new keys
+            var yamlNew = @"
+name: Test
+vision: v
+world_description: w
+player_avatar_role_description: new_role
+datee_role_description: o
+narrative_doctrine: nd
+global_dc_bias: 0
+player_avatar_probing: new_probing
+horniness_time_modifiers:
+  morning: 3
+  afternoon: 0
+  evening: 2
+  overnight: 5
+";
+            var gdNew = GameDefinition.LoadFrom(yamlNew);
+            Assert.Equal("new_role", gdNew.PlayerAvatarRoleDescription);
+            Assert.Equal("new_probing", gdNew.PlayerAvatarProbing);
+
+            // 3. Both keys present - prefers new
+            var yamlBoth = @"
+name: Test
+vision: v
+world_description: w
+player_role_description: old_role
+player_avatar_role_description: new_role
+datee_role_description: o
+narrative_doctrine: nd
+global_dc_bias: 0
+player_probing: old_probing
+player_avatar_probing: new_probing
+horniness_time_modifiers:
+  morning: 3
+  afternoon: 0
+  evening: 2
+  overnight: 5
+";
+            var gdBoth = GameDefinition.LoadFrom(yamlBoth);
+            Assert.Equal("new_role", gdBoth.PlayerAvatarRoleDescription);
+            Assert.Equal("new_probing", gdBoth.PlayerAvatarProbing);
+            
+            // 4. Fallback behavior handles missing key gracefully
+            var yamlMissing = @"
+name: Test
+vision: v
+world_description: w
+datee_role_description: o
+narrative_doctrine: nd
+global_dc_bias: 0
+horniness_time_modifiers:
+  morning: 3
+  afternoon: 0
+  evening: 2
+  overnight: 5
+";
+            var ex = Assert.Throws<FormatException>(() => GameDefinition.LoadFrom(yamlMissing));
+            Assert.Contains("player_avatar_role_description", ex.Message);
         }
     }
 }

@@ -60,7 +60,7 @@ namespace Pinder.LlmAdapters
 
             var sb = new AnnotatedStringBuilder();
             AppendGmBase(sb, def);
-            AppendCharacterSpec(sb, def.PlayerRoleDescription, "player_role_description",
+            AppendCharacterSpec(sb, def.PlayerAvatarRoleDescription, "player_avatar_role_description",
                 playerAvatarPrompt, "player-profile");
 
             return new PromptTraceResult(sb.ToString(), sb.Spans);
@@ -139,10 +139,10 @@ namespace Pinder.LlmAdapters
                 sb.AppendLine(def.ConversationArcProgression.TrimEnd(), "game-definition.yaml", "conversation_arc_progression");
             }
 
-            if (!string.IsNullOrWhiteSpace(def.PlayerProbing))
+            if (!string.IsNullOrWhiteSpace(def.PlayerAvatarProbing))
             {
                 sb.Append("\n== PLAYER PROBING ==\n\n");
-                sb.AppendLine(def.PlayerProbing.TrimEnd(), "game-definition.yaml", "player_probing");
+                sb.AppendLine(def.PlayerAvatarProbing.TrimEnd(), "game-definition.yaml", "player_avatar_probing");
             }
         }
 
