@@ -14,6 +14,7 @@ using Xunit;
 namespace Pinder.Core.Tests
 {
     [Trait("Category", "Characters")]
+    [Collection("StaticWiring")]
     public class CharacterSystemTests
     {
         // -----------------------------------------------------------------------

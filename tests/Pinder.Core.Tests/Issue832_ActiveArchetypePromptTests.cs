@@ -16,6 +16,7 @@ namespace Pinder.Core.Tests
     /// (a numbered list of every archetype name with vote counts).
     /// </summary>
     [Trait("Category", "Characters")]
+    [Collection("StaticWiring")]
     public class Issue832_ActiveArchetypePromptTests
     {
         private static readonly Dictionary<StatType, int> ZeroBaseStats =

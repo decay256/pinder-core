@@ -30,6 +30,7 @@ namespace Pinder.Core.Tests
     /// design rationale.
     /// </summary>
     [Trait("Category", "Characters")]
+    [Collection("StaticWiring")]
     public partial class Issue836_TextingStyleAggregationRuleTests
     {
         // ----- repo helpers ---------------------------------------------------

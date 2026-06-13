@@ -11,6 +11,7 @@ using Xunit;
 namespace Pinder.Core.Tests
 {
     [Trait("Category", "Characters")]
+    [Collection("StaticWiring")]
     public class CharacterDefinitionLoaderTests
     {
         // Locate data files relative to repo root
