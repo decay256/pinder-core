@@ -1,0 +1,38 @@
+{
+  "sprint_id": "2026-06-13-e33d7d",
+  "generated_at_utc": "2026-06-13",
+  "generated_by": "eigentakt orchestrator (segment-5, final)",
+  "policy_in_effect": {
+    "model_routing_yaml_version": 10,
+    "yaml_sha256": "30119b81ca167f1cd0b8fcbfe01f650ba6cfc2335a25de5bae24eb721eb0c70f",
+    "ladder": "flat-gemini: rung0/1/2 = gemini-3.1-pro-preview / gemini-3.5-flash / gemini-3.1-pro-preview; rung3 = claude-opus-4-8",
+    "escalation_enabled": false,
+    "orchestrator_pinned_model": "claude-opus-4-8"
+  },
+  "observed_summary": {
+    "note": "Flat-gemini sprint with escalation OFF. Every implementer/QA/reviewer ran rung 0 (gemini-3.1-pro-preview); technical-writer ran its pinned gemini-3.1-pro-preview. No escalation ladder was active, so no enforced trigger could change a rung. ZERO trigger-detected events were recorded for this sprint_id across all segments. All 19 recorded pre_spawn_estimates resolved model_requested=gemini-3.1-pro-preview.",
+    "pre_spawn_estimates_total": 19,
+    "by_role": {"backend-engineer": 11, "code-reviewer": 7, "technical-writer": 1},
+    "by_model_requested": {"gemini-3.1-pro-preview": 19},
+    "attempt_end_outcomes": {"success": 16, "partial": 1, "killed_no_progress": 4},
+    "killed_no_progress_explanation": "The 4 killed_no_progress rows are auto-heal synthetic attempt-ends written by spawn-with-routing.sh when a prior orchestrator segment crashed mid-loop before its spawn-recover.sh ran; they are logging-loop closures, NOT real model failures. All real worker outcomes this segment were success.",
+    "triggers_fired": 0
+  },
+  "triggers": {
+    "token-explosion":       {"enforced": true,  "seed_value": 3.0, "observed_p50": null, "observed_p90": null, "observed_max": null, "fired_count": 0, "proposed_threshold": 3.0, "rationale": "No data — escalation off, never evaluated. Keep seed."},
+    "wall-clock-overrun":    {"enforced": true,  "seed_value": 2.0, "observed_p50": null, "observed_p90": null, "observed_max": null, "fired_count": 0, "proposed_threshold": 2.0, "rationale": "No data. Keep seed."},
+    "3-strike-review":       {"enforced": true,  "seed_value": 3,   "observed_max_strikes_same_ticket": 1, "fired_count": 0, "proposed_threshold": 3, "rationale": "Max observed review passes on any ticket = 1 (all single-pass APPROVE). Seed is conservative and correct."},
+    "no-progress":           {"enforced": false, "seed_value": "30m", "fired_count": 0, "proposed_threshold": "30m", "rationale": "Longest worker run this sprint ~585s (<10m). Seed never approached."},
+    "test-thrash":           {"enforced": false, "seed_value": 6, "fired_count": 0, "proposed_threshold": 6, "rationale": "No thrash observed; implementers ran the suite 1-3x. Keep seed."},
+    "out-of-scope-drift":    {"enforced": false, "seed_value": 5, "fired_count": 0, "proposed_threshold": 5, "rationale": "Largest diff (#1133) touched ~17 files but all within ticket component (yaml-key rename ripple); not drift. Keep seed."},
+    "reviewer-pile-up":      {"enforced": false, "seed_value": 4, "fired_count": 0, "proposed_threshold": 4, "rationale": "Max review passes per PR = 1. Keep seed."},
+    "repeated-security-flag":{"enforced": false, "seed_value": 2, "fired_count": 0, "proposed_threshold": 2, "rationale": "No security reviews spawned (no security-relevant tickets). Keep seed."}
+  },
+  "recommendations": {
+    "default_rung": "Keep rung 0 (gemini-3.1-pro-preview). Every ticket — including the wire-contract ticket #1127 and the docs sweep #1130 — succeeded single-pass at rung 0 with reviewer APPROVE and 0 blockers across the whole sprint. No evidence to raise default_rung.",
+    "escalation": "Remained OFF the entire sprint with no adverse outcome. No reason to enable for a similar flat refactor backlog.",
+    "thresholds": "Insufficient data to recalibrate any trigger (0 fired, escalation off). All proposals = keep seed. trigger-calibration remains seed-uncalibrated in spirit.",
+    "pinned_model_artifact": "MINOR PARSER BUG: spawn-with-routing.sh read_role_field awk fallback does not strip inline ' # comment' from pinned_model values; the technical-writer envelope model field emitted 'gemini-3.1-pro-preview  # FLAT-GEMINI ...'. Routing intent was correct (pinned gemini-3.1-pro-preview); the orchestrator passed the clean slug to delegate_task. Recommend stripping '#...' in read_role_field. Filed as a process note, not a routing failure."
+  },
+  "approved_by_human": false
+}
