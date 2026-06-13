@@ -579,3 +579,8 @@ For an agent / engineer picking up this repo cold, read in this order:
 
 When working from the web tier (`pinder-web`), also read that repo's
 `docs/ARCHITECTURE.md` for how `Pinder.GameApi` wraps this engine.
+
+For dropping this engine into a Unity client — assembly layout, the
+`ILlmAdapter` you must implement, the two-session Game-Master model, the
+GM output-format contract, and the `apiVersion` handshake — see
+[`docs/unity-integration.md`](unity-integration.md).
