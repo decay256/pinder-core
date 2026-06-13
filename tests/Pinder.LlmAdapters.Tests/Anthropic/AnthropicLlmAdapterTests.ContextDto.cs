@@ -23,20 +23,10 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             Assert.Equal(0, ctx.CurrentTurn);
         }
 
-        [Fact]
-        public void DeliveryContext_defaults_backward_compatible()
-        {
-            var ctx = new DeliveryContext(
-                "player",
-                new List<(string, string)>(), "last",
-                new DialogueOption(StatType.Charm, "test"),
-                FailureTier.None, 5,
-                new string[0]);
-
-            Assert.Equal("", ctx.PlayerName);
-            Assert.Equal("", ctx.DateeName);
-            Assert.Equal(0, ctx.CurrentTurn);
-        }
+        // #1138: DeliveryContext_defaults_backward_compatible removed — it only
+        // exercised the removed DeliveryContext ctor; delivery is now the
+        // deterministic DeliveryOverlay (#1125). DialogueContext/DateeContext
+        // backward-compat tests above/below still guard the surviving DTOs.
 
         [Fact]
         public void DateeContext_defaults_backward_compatible()
