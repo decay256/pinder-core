@@ -98,16 +98,8 @@ OPTION_4
             dateeName: "Velvet",
             currentTurn: 1);
 
-        private static DeliveryContext MakeDeliveryContext() => new DeliveryContext(
-            playerAvatarPrompt: "You are Thundercock",
-            conversationHistory: new List<(string, string)> { ("Velvet", "Hey") },
-            dateeLastMessage: "Hey",
-            chosenOption: new DialogueOption(StatType.Charm, "Nice to meet you"),
-            outcome: FailureTier.None,
-            beatDcBy: 5,
-            activeTraps: new string[0],
-            playerName: "Thundercock",
-            dateeName: "Velvet");
+        // #1138: MakeDeliveryContext()/DeliveryContext removed — delivery prompt
+        // surface was collapsed into the deterministic DeliveryOverlay (#1125).
 
         private static DateeContext MakeDateeContext() => new DateeContext(
             dateePrompt: "You are Velvet",
@@ -269,23 +261,10 @@ OPTION_4
             Assert.Equal(0, ctx.CurrentTurn);
         }
 
-        // What: AC8 - DeliveryContext new fields have correct defaults
-        // Mutation: Would catch if defaults changed
-        [Fact]
-        public void DeliveryContext_NewFieldsDefaultCorrectly()
-        {
-            var ctx = new DeliveryContext(
-                "player",
-                new List<(string, string)>(),
-                "last",
-                new DialogueOption(StatType.Charm, "text"),
-                FailureTier.None, 5,
-                new string[0]);
-
-            Assert.Equal("", ctx.PlayerName);
-            Assert.Equal("", ctx.DateeName);
-            Assert.Equal(0, ctx.CurrentTurn);
-        }
+        // #1138: DeliveryContext_NewFieldsDefaultCorrectly removed — it only
+        // exercised the removed DeliveryContext ctor defaults; the delivery LLM
+        // call no longer exists (collapsed into DeliveryOverlay, #1125). The
+        // surviving DateeContext default test above still guards that contract.
 
         // ==============================================================================
         // Helpers

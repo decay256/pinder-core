@@ -70,16 +70,9 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             dateeName: "Velvet",
             currentTurn: 1);
 
-        private static DeliveryContext MakeDeliveryContext() => new DeliveryContext(
-            playerAvatarPrompt: "You are Thundercock",
-            conversationHistory: new List<(string, string)> { ("Velvet", "Hey") },
-            dateeLastMessage: "Hey",
-            chosenOption: new DialogueOption(StatType.Charm, "Nice to meet you"),
-            outcome: FailureTier.None,
-            beatDcBy: 5,
-            activeTraps: new string[0],
-            playerName: "Thundercock",
-            dateeName: "Velvet");
+        // #1138: MakeDeliveryContext()/DeliveryContext removed — the creative
+        // delivery LLM call was collapsed into the deterministic DeliveryOverlay
+        // (#1125); no surviving test in this suite drives the delivery prompt.
 
         private static DateeContext MakeDateeContext() => new DateeContext(
             dateePrompt: "You are Velvet",

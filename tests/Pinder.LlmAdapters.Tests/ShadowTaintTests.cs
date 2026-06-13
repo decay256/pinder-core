@@ -25,22 +25,8 @@ namespace Pinder.LlmAdapters.Tests
                 currentTurn: 1);
         }
 
-        private static DeliveryContext MakeDeliveryContext(
-            DialogueOption option,
-            Dictionary<ShadowStatType, int> shadowThresholds = null)
-        {
-            return new DeliveryContext(
-                playerAvatarPrompt: "player prompt",
-                conversationHistory: new List<(string, string)> { ("Datee", "Hey there") },
-                dateeLastMessage: "Hey there",
-                chosenOption: option,
-                outcome: FailureTier.None,
-                beatDcBy: 3,
-                activeTraps: Array.Empty<string>(),
-                shadowThresholds: shadowThresholds,
-                playerName: "Player",
-                dateeName: "Datee");
-        }
+        // #1138: MakeDeliveryContext() removed — BuildDeliveryPrompt no longer
+        // exists (delivery collapsed into DeliveryOverlay, #1125).
 
         private static DateeContext MakeDateeContext(
             Dictionary<ShadowStatType, int> shadowThresholds = null)
@@ -146,22 +132,9 @@ namespace Pinder.LlmAdapters.Tests
             Assert.DoesNotContain("SHADOW STATE", result);
         }
 
-        [Fact]
-        public void DeliveryPrompt_HighShadow_ContainsShadowStateSection()
-        {
-            var shadows = new Dictionary<ShadowStatType, int>
-            {
-                { ShadowStatType.Overthinking, 7 }
-            };
-            var option = new DialogueOption(
-                StatType.Wit, "Test message", null, null, false, false);
-
-            var result = SessionDocumentBuilder.BuildDeliveryPrompt(
-                MakeDeliveryContext(option, shadowThresholds: shadows));
-
-            Assert.Contains("SHADOW STATE", result);
-            Assert.Contains("Your Overthinking is elevated", result);
-        }
+        // #1138: DeliveryPrompt_HighShadow_ContainsShadowStateSection removed —
+        // BuildDeliveryPrompt is gone (#1125 DeliveryOverlay). Shadow-state
+        // injection is still covered on the Dialogue and Datee prompt types.
 
         [Fact]
         public void DateePrompt_HighShadow_ContainsShadowStateSection()

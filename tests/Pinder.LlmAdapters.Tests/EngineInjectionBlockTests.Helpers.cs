@@ -71,32 +71,9 @@ namespace Pinder.LlmAdapters.Tests
                 playerTextingStyle: playerTextingStyle);
         }
 
-        private static DeliveryContext MakeDeliveryContext(
-            DialogueOption? chosenOption = null,
-            FailureTier outcome = FailureTier.None,
-            int beatDcBy = 5,
-            string playerName = "Velvet",
-            string dateeName = "Sable",
-            Dictionary<ShadowStatType, int>? shadowThresholds = null,
-            string[]? activeTrapInstructions = null)
-        {
-            return new DeliveryContext(
-                playerAvatarPrompt: "velvet system prompt",
-                conversationHistory: new List<(string, string)>
-                {
-                    ("Velvet", "hey there"),
-                    ("Sable", "omg hi!!")
-                },
-                dateeLastMessage: "omg hi!!",
-                chosenOption: chosenOption ?? new DialogueOption(StatType.Wit, "you remind me of a song I can't quite place"),
-                outcome: outcome,
-                beatDcBy: beatDcBy,
-                activeTraps: Array.Empty<string>(),
-                shadowThresholds: shadowThresholds,
-                activeTrapInstructions: activeTrapInstructions,
-                playerName: playerName,
-                dateeName: dateeName);
-        }
+        // #1138: MakeDeliveryContext() removed — the delivery prompt builder it
+        // fed (SessionDocumentBuilder.BuildDeliveryPrompt) no longer exists;
+        // delivery is now the deterministic DeliveryOverlay (#1125).
 
         private static DateeContext MakeDateeContext(
             int interestBefore = 12,

@@ -118,23 +118,10 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("Despair", result);
         }
 
-        // ============== Taint fires on Delivery prompt too ==============
-
-        // Mutation: would catch if delivery prompt doesn't pass shadows through to taint builder
-        [Fact]
-        public void DeliveryPrompt_Madness8_ContainsShadowState()
-        {
-            var shadows = new Dictionary<ShadowStatType, int>
-            {
-                { ShadowStatType.Madness, 8 }
-            };
-            var option = new DialogueOption(StatType.Charm, "Hello");
-
-            var result = SessionDocumentBuilder.BuildDeliveryPrompt(
-                MakeDeliveryContext(option, shadows));
-
-            Assert.Contains("SHADOW STATE", result);
-        }
+        // #1138: DeliveryPrompt_Madness8_ContainsShadowState removed —
+        // BuildDeliveryPrompt is gone (delivery collapsed into DeliveryOverlay,
+        // #1125). Shadow-taint pass-through is still covered on the Dialogue and
+        // Datee prompt types below.
 
         // ============== Taint fires on Datee prompt too ==============
 
@@ -164,11 +151,7 @@ namespace Pinder.LlmAdapters.Tests
                 MakeDialogueContext(null));
             Assert.DoesNotContain("SHADOW STATE", dialogue);
 
-            var option = new DialogueOption(StatType.Charm, "Hello");
-            var delivery = SessionDocumentBuilder.BuildDeliveryPrompt(
-                MakeDeliveryContext(option, null));
-            Assert.DoesNotContain("SHADOW STATE", delivery);
-
+            // #1138: delivery branch removed — BuildDeliveryPrompt is gone (#1125).
             var datee = SessionDocumentBuilder.BuildDateePrompt(
                 MakeDateeContext(null));
             Assert.DoesNotContain("SHADOW STATE", datee);
@@ -213,22 +196,8 @@ namespace Pinder.LlmAdapters.Tests
                 currentTurn: 1);
         }
 
-        private static DeliveryContext MakeDeliveryContext(
-            DialogueOption option,
-            Dictionary<ShadowStatType, int>? shadowThresholds)
-        {
-            return new DeliveryContext(
-                playerAvatarPrompt: "player prompt",
-                conversationHistory: new List<(string, string)> { ("Datee", "Hey") },
-                dateeLastMessage: "Hey",
-                chosenOption: option,
-                outcome: FailureTier.None,
-                beatDcBy: 3,
-                activeTraps: Array.Empty<string>(),
-                shadowThresholds: shadowThresholds,
-                playerName: "Player",
-                dateeName: "Datee");
-        }
+        // #1138: MakeDeliveryContext() removed — BuildDeliveryPrompt no longer
+        // exists (delivery collapsed into DeliveryOverlay, #1125).
 
         private static DateeContext MakeDateeContext(
             Dictionary<ShadowStatType, int>? shadowThresholds)

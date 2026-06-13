@@ -64,92 +64,15 @@ namespace Pinder.LlmAdapters.Tests
 
         // ═══════════════════════════════════════════════════════════════
         // AC2: Delivery injection format — [ENGINE — DELIVERY]
+        //
+        // #1138: the BuildDeliveryPrompt-based facts (DeliveryPrompt_*,
+        // DeliveryPrompt_WithRollContextBuilder_*) were removed — the creative
+        // delivery LLM call / prompt builder no longer exists (collapsed into
+        // the deterministic DeliveryOverlay in #1125). RollContextBuilder's own
+        // behaviour is still covered directly by the AC5 fallback/override
+        // tests below (GetSuccessContext/GetFailureContext), which do not route
+        // through the removed delivery prompt.
         // ═══════════════════════════════════════════════════════════════
-
-        [Fact]
-        public void DeliveryPrompt_ContainsEngineDeliveryBlock()
-        {
-            var result = SessionDocumentBuilder.BuildDeliveryPrompt(MakeDeliveryContext());
-            Assert.Contains("[ENGINE — DELIVERY]", result);
-        }
-
-        [Fact]
-        public void DeliveryPrompt_ContainsChosenOption()
-        {
-            var result = SessionDocumentBuilder.BuildDeliveryPrompt(MakeDeliveryContext());
-            Assert.Contains("PLAYER AVATAR chose: 'you remind me of a song I can't quite place'", result);
-        }
-
-        [Fact]
-        public void DeliveryPrompt_Success_ContainsDiceResult()
-        {
-            var result = SessionDocumentBuilder.BuildDeliveryPrompt(MakeDeliveryContext(beatDcBy: 7));
-            Assert.Contains("Dice result:", result);
-        }
-
-        [Fact]
-        public void DeliveryPrompt_Success_ContainsWriteInstruction()
-        {
-            var result = SessionDocumentBuilder.BuildDeliveryPrompt(MakeDeliveryContext());
-            Assert.Contains("Write the message Velvet actually sends", result);
-        }
-
-        [Fact]
-        public void DeliveryPrompt_Failure_ContainsFailureContext()
-        {
-            var result = SessionDocumentBuilder.BuildDeliveryPrompt(
-                MakeDeliveryContext(outcome: FailureTier.Misfire, beatDcBy: -4));
-            Assert.Contains("Dice result:", result);
-            Assert.Contains("MISFIRE", result);
-        }
-
-        [Fact]
-        public void DeliveryPrompt_CleanSuccess_HasLandedNarrative()
-        {
-            var result = SessionDocumentBuilder.BuildDeliveryPrompt(
-                MakeDeliveryContext(beatDcBy: 3));
-            Assert.Contains("landed", result);
-        }
-
-        [Fact]
-        public void DeliveryPrompt_CriticalSuccess_HasBestVersionNarrative()
-        {
-            var result = SessionDocumentBuilder.BuildDeliveryPrompt(
-                MakeDeliveryContext(beatDcBy: 12));
-            Assert.Contains("best version", result);
-        }
-
-        // ═══════════════════════════════════════════════════════════════
-        // AC2: Roll context from YAML — RollContextBuilder
-        // ═══════════════════════════════════════════════════════════════
-
-        [Fact]
-        public void DeliveryPrompt_WithRollContextBuilder_UsesCustomContext()
-        {
-            var flavors = new Dictionary<string, string>
-            {
-                { "§7.success-scale.5-9", "Custom: strong success flavor text" }
-            };
-            var builder = new RollContextBuilder(flavors);
-
-            var result = SessionDocumentBuilder.BuildDeliveryPrompt(
-                MakeDeliveryContext(beatDcBy: 7), builder);
-
-            Assert.Contains("Custom: strong success flavor text", result);
-        }
-
-        [Fact]
-        public void DeliveryPrompt_WithRollContextBuilder_FallsBackForMissing()
-        {
-            var flavors = new Dictionary<string, string>();
-            var builder = new RollContextBuilder(flavors);
-
-            var result = SessionDocumentBuilder.BuildDeliveryPrompt(
-                MakeDeliveryContext(beatDcBy: 2), builder);
-
-            // Should use hardcoded fallback
-            Assert.Contains(RollContextBuilder.FallbackCleanSuccess, result);
-        }
 
         // ═══════════════════════════════════════════════════════════════
         // AC3: Datee injection format — [ENGINE — DATEE]
@@ -349,17 +272,10 @@ namespace Pinder.LlmAdapters.Tests
             Assert.True(historyIdx < engineIdx, "Conversation history must precede ENGINE block");
         }
 
-        [Fact]
-        public void DeliveryPrompt_ConversationHistoryPrecedesEngineBlock()
-        {
-            var result = SessionDocumentBuilder.BuildDeliveryPrompt(MakeDeliveryContext());
-
-            int historyIdx = result.IndexOf("[CONVERSATION_START]");
-            int engineIdx = result.IndexOf("[ENGINE — DELIVERY]");
-            Assert.True(historyIdx >= 0);
-            Assert.True(engineIdx >= 0);
-            Assert.True(historyIdx < engineIdx);
-        }
+        // #1138: DeliveryPrompt_ConversationHistoryPrecedesEngineBlock removed —
+        // BuildDeliveryPrompt is gone (delivery collapsed into DeliveryOverlay,
+        // #1125). The Options/Datee history-ordering guarantees above/below are
+        // retained.
 
         [Fact]
         public void DateePrompt_EngineBlockPresentInOutput()

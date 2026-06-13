@@ -196,126 +196,14 @@ namespace Pinder.LlmAdapters
             return new PromptTraceResult(sb.ToString(), sb.Spans);
         }
 
-        /// <summary>
-        /// Builds the user-message content for DeliverMessageAsync and returns the trace data.
-        /// </summary>
-        public static PromptTraceResult BuildDeliveryPromptEx(
-            DeliveryContext context,
-            RollContextBuilder? rollContextBuilder = null,
-            DeliveryRules? deliveryRules = null,
-            StatDeliveryInstructions? statDeliveryInstructions = null)
-        {
-            if (context == null) throw new ArgumentNullException(nameof(context));
-
-            var playerName = FallbackName(context.PlayerName, "Player");
-            var dateeName = FallbackName(context.DateeName, "Datee");
-            var builder = rollContextBuilder ?? new RollContextBuilder();
-
-            var sb = new AnnotatedStringBuilder();
-
-            // Conversation history
-            var historySb = new StringBuilder();
-            HistoryFormatter.Format(historySb, context.ConversationHistory, playerName);
-            sb.Append(historySb.ToString(), "conversation-history", "conversation-history");
-
-            string deliveryTaint = BuildShadowTaintBlock(context.ShadowThresholds);
-            if (!string.IsNullOrEmpty(deliveryTaint))
-            {
-                sb.AppendLine();
-                sb.AppendLine("SHADOW STATE (corrupting forces on your communication)");
-                sb.AppendLine(deliveryTaint);
-            }
-
-            if (!string.IsNullOrEmpty(context.ActiveArchetypeDirective))
-            {
-                sb.AppendLine();
-                sb.AppendLine(context.ActiveArchetypeDirective, "data/prompts/archetypes.yaml", "active-archetype-directive");
-            }
-
-            sb.AppendLine();
-
-            // Build roll context narrative
-            string rollContext = context.Outcome == FailureTier.Success
-                ? builder.GetSuccessContext(context.BeatDcBy, false)
-                : builder.GetFailureContext(context.Outcome);
-
-            // [ENGINE — DELIVERY] injection block
-            string deliveryBlock = PromptTemplates.EngineDeliveryBlock
-                .Replace("{chosen_option}", context.ChosenOption.IntendedText)
-                .Replace("{roll_context}", rollContext)
-                .Replace("{player_name}", playerName);
-            sb.AppendLine(deliveryBlock, GetTemplateSource("engine-delivery-block"), "engine-delivery-block");
-
-            sb.AppendLine();
-
-            // Additional context for the LLM based on outcome
-            if (context.Outcome == FailureTier.Success)
-            {
-                string nat20Str = context.IsNat20 ? " (NAT 20)" : "";
-                string beatDcByStr = $"{context.BeatDcBy}{nat20Str}";
-
-                string tierKey = StatDeliveryInstructions.SuccessTierKey(context.BeatDcBy, context.IsNat20);
-                string configuredInstruction = statDeliveryInstructions != null
-                    ? statDeliveryInstructions.Get(context.ChosenOption.Stat, tierKey)
-                    : null;
-
-                string tierLabel = !string.IsNullOrWhiteSpace(configuredInstruction)
-                    ? configuredInstruction
-                    : context.IsNat20
-                    ? $"Nat 20 — legendary. One sentence can be more effective than a paragraph if it's exactly right. {GetStatSuccessVoice(context.ChosenOption.Stat)}"
-                    : context.BeatDcBy >= 15
-                    ? $"Exceptional (margin 15+) — this is the best version of this message that could exist. {GetStatSuccessVoice(context.ChosenOption.Stat)}"
-                    : context.BeatDcBy >= 10
-                    ? $"Critical success (margin 10-14) — deliver at peak. {GetStatSuccessVoice(context.ChosenOption.Stat)}"
-                    : context.BeatDcBy >= 5
-                    ? $"Strong success (margin 5-9) — the message lands better than planned. {GetStatSuccessVoice(context.ChosenOption.Stat)}"
-                    : "Clean success (margin 1-4) — deliver essentially as written. Small word choice improvements only.";
-
-                sb.AppendLine($"Stat: {context.ChosenOption.Stat.ToString().ToUpperInvariant()} | Beat DC by {beatDcByStr}");
-                
-                string successInstruction = PromptTemplates.BuildSuccessDeliveryInstruction(deliveryRules)
-                    .Replace("{player_name}", playerName)
-                    .Replace("{beat_dc_by}", beatDcByStr)
-                    .Replace("{tier_instruction}", tierLabel);
-                sb.Append(successInstruction, GetTemplateSource("default-clean"), "success-delivery-instruction");
-            }
-            else
-            {
-                int missMargin = Math.Abs(context.BeatDcBy);
-                string tierName = GetFailureTierName(context.Outcome);
-
-                string tierInstruction = !string.IsNullOrWhiteSpace(context.StatFailureInstruction)
-                    ? context.StatFailureInstruction
-                    : (statDeliveryInstructions != null && !string.IsNullOrWhiteSpace(statDeliveryInstructions.Get(context.ChosenOption.Stat, StatDeliveryInstructions.FailureTierKey(context.Outcome))))
-                    ? statDeliveryInstructions.Get(context.ChosenOption.Stat, StatDeliveryInstructions.FailureTierKey(context.Outcome))
-                    : GetTierInstruction(context.Outcome);
-
-                sb.AppendLine($"Stat: {context.ChosenOption.Stat.ToString().ToUpperInvariant()} | Missed DC by {missMargin} | Tier: {tierName}");
-
-                string failureText = PromptTemplates.FailureDeliveryInstruction
-                    .Replace("{player_name}", playerName)
-                    .Replace("{intended_message}", context.ChosenOption.IntendedText)
-                    .Replace("{stat}", context.ChosenOption.Stat.ToString().ToUpperInvariant())
-                    .Replace("{miss_margin}", missMargin.ToString())
-                    .Replace("{tier}", tierName)
-                    .Replace("{tier_instruction}", tierInstruction);
-
-                if (context.ActiveTrapInstructions != null && context.ActiveTrapInstructions.Length > 0)
-                {
-                    failureText = failureText.Replace("{active_trap_llm_instructions}",
-                        "Active trap instructions:\n" + string.Join("\n", context.ActiveTrapInstructions));
-                }
-                else
-                {
-                    failureText = failureText.Replace("{active_trap_llm_instructions}", "");
-                }
-
-                sb.Append(failureText, GetTemplateSource("failure-delivery-instruction"), "failure-delivery-instruction");
-            }
-
-            return new PromptTraceResult(sb.ToString(), sb.Spans);
-        }
-
+        // #1125 (final, #1138): the creative "delivery" LLM call was collapsed
+        // into a deterministic, non-LLM commit/overlay step
+        // (Pinder.Core.Conversation.DeliveryOverlay). The delivery prompt
+        // builders (BuildDeliveryPrompt / BuildDeliveryPromptEx) and their
+        // DeliveryContext input have been removed — there is no longer any
+        // delivery prompt compiled or sent on a live turn. Overlay/commit
+        // parity is pinned by Issue1125_CollapseDeliveryTests in
+        // Pinder.Core.Tests.
         /// <summary>
         /// Builds the user-message content for GetDateeResponseAsync and returns the trace data.
         /// </summary>

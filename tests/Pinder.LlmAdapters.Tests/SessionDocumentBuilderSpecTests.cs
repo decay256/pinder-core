@@ -39,29 +39,9 @@ namespace Pinder.LlmAdapters.Tests
                 currentTurn: currentTurn);
         }
 
-        private static DeliveryContext MakeDeliveryContext(
-            IReadOnlyList<(string Sender, string Text)> conversationHistory = null,
-            DialogueOption chosenOption = null,
-            FailureTier outcome = FailureTier.None,
-            int beatDcBy = 0,
-            string[] activeTrapInstructions = null,
-            string playerName = "P",
-            string dateeName = "O",
-            Dictionary<ShadowStatType, int> shadowThresholds = null)
-        {
-            return new DeliveryContext(
-                playerAvatarPrompt: "player prompt",
-                conversationHistory: conversationHistory ?? new List<(string, string)>(),
-                dateeLastMessage: "",
-                chosenOption: chosenOption ?? new DialogueOption(StatType.Charm, "default"),
-                outcome: outcome,
-                beatDcBy: beatDcBy,
-                activeTraps: Array.Empty<string>(),
-                shadowThresholds: shadowThresholds,
-                activeTrapInstructions: activeTrapInstructions,
-                playerName: playerName,
-                dateeName: dateeName);
-        }
+        // #1138: MakeDeliveryContext() removed — the delivery prompt builder it
+        // fed (BuildDeliveryPrompt) no longer exists; delivery is now the
+        // deterministic DeliveryOverlay (#1125).
 
         private static DateeContext MakeDateeContext(
             IReadOnlyList<(string Sender, string Text)> conversationHistory = null,
@@ -148,11 +128,11 @@ namespace Pinder.LlmAdapters.Tests
         // ═══════════════════════════════════════════════════════════════
 
         [Fact]
-        public void PromptTemplates_AllFiveFieldsAreNonEmpty()
+        public void PromptTemplates_SurvivingFieldsAreNonEmpty()
         {
             Assert.False(string.IsNullOrEmpty(PromptTemplates.DialogueOptionsInstruction));
-            Assert.False(string.IsNullOrEmpty(PromptTemplates.SuccessDeliveryInstruction));
-            Assert.False(string.IsNullOrEmpty(PromptTemplates.FailureDeliveryInstruction));
+            // #1138: Success/FailureDeliveryInstruction removed (delivery prompt
+            // collapsed into DeliveryOverlay, #1125).
             Assert.False(string.IsNullOrEmpty(PromptTemplates.DateeResponseInstruction));
             Assert.False(string.IsNullOrEmpty(PromptTemplates.InterestBeatInstruction));
         }
@@ -167,30 +147,11 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("[TELL_BONUS:", t);
         }
 
-        [Fact]
-        public void PromptTemplates_SuccessDelivery_ContainsSuccessTierInfo()
-        {
-            var t = PromptTemplates.SuccessDeliveryInstruction;
-            Assert.False(string.IsNullOrWhiteSpace(t));
-            Assert.Contains("Output only the message text", t);
-        }
-
-        [Fact]
-        public void PromptTemplates_FailureDelivery_ContainsAllFiveTiers()
-        {
-            var t = PromptTemplates.FailureDeliveryInstruction;
-            Assert.Contains("FUMBLE", t);
-            Assert.Contains("MISFIRE", t);
-            Assert.Contains("TROPE_TRAP", t);
-            Assert.Contains("CATASTROPHE", t);
-            Assert.Contains("LEGENDARY", t);
-        }
-
-        [Fact]
-        public void PromptTemplates_FailureDelivery_ContainsCorruptionPrinciple()
-        {
-            Assert.Contains("The CONTENT breaks", PromptTemplates.FailureDeliveryInstruction);
-        }
+        // #1138: PromptTemplates_SuccessDelivery_* / _FailureDelivery_* removed —
+        // SuccessDeliveryInstruction/FailureDeliveryInstruction were deleted; the
+        // creative delivery prompt was collapsed into the deterministic
+        // DeliveryOverlay (#1125), whose corruption/tier behaviour is covered by
+        // the Issue1125 regression tests in Pinder.Core.Tests.
 
         [Fact]
         public void PromptTemplates_DateeResponse_ContainsSignalFormat()
@@ -284,12 +245,8 @@ namespace Pinder.LlmAdapters.Tests
                 SessionDocumentBuilder.BuildDialogueOptionsPrompt((DialogueContext)null!));
         }
 
-        [Fact]
-        public void BuildDeliveryPrompt_NullContext_ThrowsArgumentNull()
-        {
-            Assert.Throws<ArgumentNullException>(() =>
-                SessionDocumentBuilder.BuildDeliveryPrompt((DeliveryContext)null!));
-        }
+        // #1138: BuildDeliveryPrompt_NullContext_ThrowsArgumentNull removed —
+        // BuildDeliveryPrompt is gone (#1125 DeliveryOverlay).
 
         [Fact]
         public void BuildDateePrompt_NullContext_ThrowsArgumentNull()
