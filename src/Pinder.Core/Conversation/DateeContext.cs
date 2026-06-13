@@ -5,21 +5,21 @@ using Pinder.Core.Stats;
 namespace Pinder.Core.Conversation
 {
     /// <summary>
-    /// Context passed to the LLM when generating the opponent's response.
+    /// Context passed to the LLM when generating the datee's response.
     /// </summary>
-    public sealed class OpponentContext
+    public sealed class DateeContext
     {
         /// <summary>Assembled system prompt for the player character.</summary>
         public string PlayerPrompt { get; }
 
-        /// <summary>Assembled system prompt for the opponent character.</summary>
-        public string OpponentPrompt { get; }
+        /// <summary>Assembled system prompt for the datee character.</summary>
+        public string DateePrompt { get; }
 
         /// <summary>Conversation history as (sender, text) pairs in order.</summary>
         public IReadOnlyList<(string Sender, string Text)> ConversationHistory { get; }
 
-        /// <summary>The opponent's last message, or empty if first turn.</summary>
-        public string OpponentLastMessage { get; }
+        /// <summary>The datee's last message, or empty if first turn.</summary>
+        public string DateeLastMessage { get; }
 
         /// <summary>Names of currently active traps.</summary>
         public IReadOnlyList<string> ActiveTraps { get; }
@@ -36,7 +36,7 @@ namespace Pinder.Core.Conversation
         /// <summary>Interest value after this turn's roll.</summary>
         public int InterestAfter { get; }
 
-        /// <summary>Opponent's simulated response delay in minutes (from timing profile).</summary>
+        /// <summary>Datee's simulated response delay in minutes (from timing profile).</summary>
         public double ResponseDelayMinutes { get; }
 
         /// <summary>Shadow stat thresholds for the player, or null if not applicable.</summary>
@@ -48,8 +48,8 @@ namespace Pinder.Core.Conversation
         /// <summary>Display name of the player character. Default empty for backward compatibility.</summary>
         public string PlayerName { get; }
 
-        /// <summary>Display name of the opponent character. Default empty for backward compatibility.</summary>
-        public string OpponentName { get; }
+        /// <summary>Display name of the datee character. Default empty for backward compatibility.</summary>
+        public string DateeName { get; }
 
         /// <summary>Current turn number (1-based). Default 0 for backward compatibility.</summary>
         public int CurrentTurn { get; }
@@ -57,14 +57,14 @@ namespace Pinder.Core.Conversation
         /// <summary>Failure tier of the player's last roll. None means success. Default None for backward compatibility.</summary>
         public FailureTier DeliveryTier { get; }
 
-        /// <summary>Active archetype directive for the opponent character, or null if none.</summary>
+        /// <summary>Active archetype directive for the datee character, or null if none.</summary>
         public string ActiveArchetypeDirective { get; }
 
-        public OpponentContext(
+        public DateeContext(
             string playerPrompt,
-            string opponentPrompt,
+            string dateePrompt,
             IReadOnlyList<(string Sender, string Text)> conversationHistory,
-            string opponentLastMessage,
+            string dateeLastMessage,
             IReadOnlyList<string> activeTraps,
             int currentInterest,
             string playerDeliveredMessage,
@@ -74,15 +74,15 @@ namespace Pinder.Core.Conversation
             Dictionary<ShadowStatType, int>? shadowThresholds = null,
             string[]? activeTrapInstructions = null,
             string playerName = "",
-            string opponentName = "",
+            string dateeName = "",
             int currentTurn = 0,
             FailureTier deliveryTier = FailureTier.Success,
             string activeArchetypeDirective = null)
         {
             PlayerPrompt = playerPrompt ?? throw new System.ArgumentNullException(nameof(playerPrompt));
-            OpponentPrompt = opponentPrompt ?? throw new System.ArgumentNullException(nameof(opponentPrompt));
+            DateePrompt = dateePrompt ?? throw new System.ArgumentNullException(nameof(dateePrompt));
             ConversationHistory = conversationHistory ?? throw new System.ArgumentNullException(nameof(conversationHistory));
-            OpponentLastMessage = opponentLastMessage ?? throw new System.ArgumentNullException(nameof(opponentLastMessage));
+            DateeLastMessage = dateeLastMessage ?? throw new System.ArgumentNullException(nameof(dateeLastMessage));
             ActiveTraps = activeTraps ?? throw new System.ArgumentNullException(nameof(activeTraps));
             CurrentInterest = currentInterest;
             PlayerDeliveredMessage = playerDeliveredMessage ?? throw new System.ArgumentNullException(nameof(playerDeliveredMessage));
@@ -92,7 +92,7 @@ namespace Pinder.Core.Conversation
             ShadowThresholds = shadowThresholds;
             ActiveTrapInstructions = activeTrapInstructions;
             PlayerName = playerName ?? "";
-            OpponentName = opponentName ?? "";
+            DateeName = dateeName ?? "";
             CurrentTurn = currentTurn;
             DeliveryTier = deliveryTier;
             ActiveArchetypeDirective = activeArchetypeDirective;

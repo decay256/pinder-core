@@ -107,10 +107,10 @@ strings:
   glossary.callback.descriptor_n_turns_ago: "(refs turn {callbackTurn}, {distance} turns ago)"
 
   # ── Tell explainer (#197) ─────────────────────────────────────────
-  glossary.tell.explainer: "A Tell is a hint baked into the option text that points at the opponent's currently-relevant stat. Picking a Tell-flagged option with the matching stat applies a hidden roll bonus on top of the visible stat modifier. Tells reflect close reading of the previous reply — they are not free-info; you have to spot them."
+  glossary.tell.explainer: "A Tell is a hint baked into the option text that points at the datee's currently-relevant stat. Picking a Tell-flagged option with the matching stat applies a hidden roll bonus on top of the visible stat modifier. Tells reflect close reading of the previous reply — they are not free-info; you have to spot them."
 
   # ── Weakness window explainer (#197) ──────────────────────────────
-  glossary.weakness_window.explainer: "A Weakness Window opens when the opponent's last reply exposes a specific stat vulnerability for a limited number of turns. Playing into the window grants a roll bonus and amplified Interest on success; the window closes if you skip it. Use the chip's countdown to time your push."
+  glossary.weakness_window.explainer: "A Weakness Window opens when the datee's last reply exposes a specific stat vulnerability for a limited number of turns. Playing into the window grants a roll bonus and amplified Interest on success; the window closes if you skip it. Use the chip's countdown to time your push."
 
   # ── Madness overlay (UI-only) ─────────────────────────────────────
   glossary.madness_overlay.explainer: "Madness overlay rewrote this option into an unhinged variant — high Madness shadow forces the rewrite when it triggers."

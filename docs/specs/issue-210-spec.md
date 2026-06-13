@@ -29,7 +29,7 @@ namespace Pinder.Core.Tests.Integration
 
 No new public library APIs are created. The test exercises these existing public APIs:
 
-- `new GameSession(CharacterProfile player, CharacterProfile opponent, ILlmAdapter llm, IDiceRoller dice, ITrapRegistry trapRegistry, GameSessionConfig? config)` — constructor
+- `new GameSession(CharacterProfile player, CharacterProfile datee, ILlmAdapter llm, IDiceRoller dice, ITrapRegistry trapRegistry, GameSessionConfig? config)` — constructor
 - `Task<TurnStart> GameSession.StartTurnAsync()` — begin a Speak turn; returns dialogue options
 - `Task<TurnResult> GameSession.ResolveTurnAsync(int optionIndex)` — resolve the chosen option
 - `Task<RecoverResult> GameSession.RecoverAsync()` — self-contained Recover action (SA vs DC 12)
@@ -61,7 +61,7 @@ private sealed class ScriptedLlmAdapter : ILlmAdapter
 {
     // Accepts a queue/list of DialogueOption[] arrays, one per StartTurnAsync call
     // Allows SA and Rizz options that NullLlmAdapter doesn't provide
-    // DeliverMessageAsync, GetOpponentResponseAsync, GetInterestChangeBeatAsync behave like NullLlmAdapter
+    // DeliverMessageAsync, GetDateeResponseAsync, GetInterestChangeBeatAsync behave like NullLlmAdapter
 }
 ```
 
@@ -84,7 +84,7 @@ private sealed class ScriptedLlmAdapter : ILlmAdapter
 
 Level 5 → `LevelTable.GetBonus(5)` = **+2** level bonus on all rolls.
 
-**Opponent — "Velvet" (Level 7):**
+**Datee — "Velvet" (Level 7):**
 
 | Stat | Base Value | Shadow | Effective |
 |------|-----------|--------|-----------|
@@ -101,7 +101,7 @@ Both use placeholder `AssembledSystemPrompt` strings (e.g., `"Test system prompt
 
 ### DC Calculations
 
-The DC formula is `13 + opponent.GetEffective(defenceStat)` where the defence stat is looked up from `StatBlock.DefenceTable`:
+The DC formula is `13 + datee.GetEffective(defenceStat)` where the defence stat is looked up from `StatBlock.DefenceTable`:
 
 | Gerald's Attack Stat | Velvet's Defence Stat | Velvet Defence Value | DC |
 |---------------------|-----------------------|---------------------|-----|
@@ -123,7 +123,7 @@ For **Recover** action: fixed DC = 12, stat = SelfAwareness. Gerald needs `d20 +
 The `ScriptedLlmAdapter` must:
 - Accept a sequence of `DialogueOption[]` arrays (one per `GetDialogueOptionsAsync` call)
 - Return the next array in sequence on each call
-- Behave identically to `NullLlmAdapter` for `DeliverMessageAsync` (echo text, prefix failure tier on failure), `GetOpponentResponseAsync` (return `OpponentResponse("...")` with null Tell/WeaknessWindow), and `GetInterestChangeBeatAsync` (return null)
+- Behave identically to `NullLlmAdapter` for `DeliverMessageAsync` (echo text, prefix failure tier on failure), `GetDateeResponseAsync` (return `DateeResponse("...")` with null Tell/WeaknessWindow), and `GetInterestChangeBeatAsync` (return null)
 
 Alternatively, the implementer may restructure the turn plan to avoid SelfAwareness Speak actions entirely (see "Alternative Turn Plan" in Edge Cases).
 
@@ -152,7 +152,7 @@ All other stats return `null` from `GetTrap()`.
 var config = new GameSessionConfig(
     clock: null,            // no time-based mechanics in this test
     playerShadows: new SessionShadowTracker(geraldStats),
-    opponentShadows: new SessionShadowTracker(velvetStats),
+    dateeShadows: new SessionShadowTracker(velvetStats),
     startingInterest: null, // default 10
     previousOpener: null
 );
@@ -264,7 +264,7 @@ The issue says Charm→Wit triggers "The Setup", but `ComboTracker` code defines
 - Interest: no interest change on successful Recover (per rules §8, Recover success clears trap only). **However**, per `GameSession.RecoverAsync()` implementation: on failure, interest −1. On success, no interest change.
 - Verify: interest stays at **14**.
 - XP: 15 (Recovery success).
-- Dice: d20(10). No d100 for timing (Recover doesn't call GetOpponentResponseAsync timing).
+- Dice: d20(10). No d100 for timing (Recover doesn't call GetDateeResponseAsync timing).
 
 **Turn 7 — Speak CHARM (Success):**
 - DC: 18. `d20 + 13 + 2 = d20 + 15`. Need d20 ≥ 3.

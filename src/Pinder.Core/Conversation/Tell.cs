@@ -3,8 +3,8 @@ using Pinder.Core.Stats;
 namespace Pinder.Core.Conversation
 {
     /// <summary>
-    /// A behavioural tell detected in an opponent's response.
-    /// Indicates which stat the opponent revealed vulnerability in.
+    /// A behavioural tell detected in an datee's response.
+    /// Indicates which stat the datee revealed vulnerability in.
     /// Stub type — feature PRs will flesh out usage.
     /// </summary>
     public sealed class Tell

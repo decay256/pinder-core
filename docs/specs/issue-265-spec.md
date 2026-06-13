@@ -22,7 +22,7 @@ The parser (`src/Pinder.Core/Data/JsonTrapRepository.cs`) reads **flat fields** 
 |-------|------|----------|---------|-------------|
 | `id` | `string` | Yes | — | Unique trap identifier (e.g., `"cringe"`) |
 | `stat` | `string` | Yes | — | Lowercase stat key: `"charm"`, `"rizz"`, `"honesty"`, `"chaos"`, `"wit"`, `"self_awareness"` |
-| `effect` | `string` | Yes | — | Effect type: `"disadvantage"`, `"stat_penalty"`, `"opponent_dc_increase"` |
+| `effect` | `string` | Yes | — | Effect type: `"disadvantage"`, `"stat_penalty"`, `"datee_dc_increase"` |
 | `effect_value` | `int` | Yes | — | Magnitude of the effect (0 for Disadvantage, positive int for penalties/DC increases) |
 | `duration_turns` | `int` | No | `3` | Number of turns the trap lasts |
 | `llm_instruction` | `string` | Yes | — | Prompt taint text passed to the LLM layer |
@@ -46,7 +46,7 @@ These are the exact string values accepted by `JsonTrapRepository.TryParseTrapEf
 
 - `"disadvantage"` → `TrapEffect.Disadvantage`
 - `"stat_penalty"` → `TrapEffect.StatPenalty`
-- `"opponent_dc_increase"` → `TrapEffect.OpponentDCIncrease`
+- `"datee_dc_increase"` → `TrapEffect.DateeDCIncrease`
 
 ---
 
@@ -136,9 +136,9 @@ All 6 traps that MUST appear in `data/traps/traps.json`:
 |----|------|--------|-------------|----------------|--------------|---------------------------|
 | `cringe` | `charm` | `disadvantage` | `0` | `1` | `SA vs DC 12` | Over-explained, self-undermined messages |
 | `creep` | `rizz` | `stat_penalty` | `2` | `2` | `SA vs DC 12` | Subtle "agenda" quality in messages |
-| `overshare` | `honesty` | `opponent_dc_increase` | `2` | `1` | `SA vs DC 12` | Accidental personal details intrude |
+| `overshare` | `honesty` | `datee_dc_increase` | `2` | `1` | `SA vs DC 12` | Accidental personal details intrude |
 | `unhinged` | `chaos` | `disadvantage` | `0` | `1` | `SA vs DC 12` | Momentum/acceleration, messages derail |
-| `pretentious` | `wit` | `opponent_dc_increase` | `3` | `1` | `SA vs DC 12` | Condescending, over-explanatory tone |
+| `pretentious` | `wit` | `datee_dc_increase` | `3` | `1` | `SA vs DC 12` | Condescending, over-explanatory tone |
 | `spiral` | `self_awareness` | `disadvantage` | `0` | `2` | `SA vs DC 12` | Meta-commentary, recursive self-awareness |
 
 ### Full LLM Instruction Text (verbatim from design/settings/traps.md)
@@ -147,7 +147,7 @@ All 6 traps that MUST appear in `data/traps/traps.json`:
 2. **creep**: `"Inject a subtle 'agenda' quality into ALL generated messages. On success: one line that could be read two ways. On failure: the entire message feels like it's leading somewhere uncomfortable."`
 3. **overshare**: `"Inject an accidental personal detail into ALL generated messages. On success: one parenthetical that reveals something private. On failure: multiple personal details intrude and derail the message."`
 4. **unhinged**: `"Inject momentum/acceleration into ALL generated messages. On success: one extra clause or tangent at the end. On failure: the message progressively derails, starting controlled and ending somewhere completely different."`
-5. **pretentious**: `"Inject a condescending or over-explanatory quality into ALL generated messages. On success: one unnecessary clarification or reference. On failure: the message becomes pedagogical — explaining things the opponent didn't ask about."`
+5. **pretentious**: `"Inject a condescending or over-explanatory quality into ALL generated messages. On success: one unnecessary clarification or reference. On failure: the message becomes pedagogical — explaining things the datee didn't ask about."`
 6. **spiral**: `"Inject meta-commentary into ALL generated messages. On success: one aside that acknowledges the conversation dynamic. On failure: the character narrates their own failure, creating a recursive self-awareness loop."`
 
 ---

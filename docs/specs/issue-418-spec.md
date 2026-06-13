@@ -13,7 +13,7 @@
 
 ## Background
 
-The session runner writes playtest markdown files to an external directory (`/root/.openclaw/agents-extra/pinder/design/playtests/`). Files follow the naming convention `session-NNN-<player>-vs-<opponent>.md` where `NNN` is a zero-padded integer (e.g., `session-005-sable-vs-brick.md`).
+The session runner writes playtest markdown files to an external directory (`/root/.openclaw/agents-extra/pinder/design/playtests/`). Files follow the naming convention `session-NNN-<player>-vs-<datee>.md` where `NNN` is a zero-padded integer (e.g., `session-005-sable-vs-brick.md`).
 
 `SessionFileCounter.GetNextSessionNumber(string directory)` scans that directory for `session-*.md` files, extracts the numeric portion from the filename, and returns `max(existing) + 1`.
 

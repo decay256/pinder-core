@@ -38,7 +38,7 @@ namespace Pinder.Core.Tests.Conversation
         {
             return new GameSession(
                 MakeProfile("Player"),
-                MakeProfile("Opponent"),
+                MakeProfile("Datee"),
                 llm ?? new NullLlmAdapter(),
                 new FixedDice593(5, 5),
                 new NullTrapRegistry593(),
@@ -67,7 +67,7 @@ namespace Pinder.Core.Tests.Conversation
             var llm = new WindowInjectingLlmAdapter593(window);
             var session = MakeSession(llm);
 
-            // Turn 1: LLM returns a weakness window in the opponent response.
+            // Turn 1: LLM returns a weakness window in the datee response.
             // The window becomes active for the NEXT turn's StartTurnAsync.
             // We must call ResolveTurnAsync (turn 1) then StartTurnAsync again (turn 2).
             await session.StartTurnAsync();
@@ -158,13 +158,13 @@ namespace Pinder.Core.Tests.Conversation
         }
 
         /// <summary>
-        /// LLM adapter that injects a WeaknessWindow on the first opponent response,
+        /// LLM adapter that injects a WeaknessWindow on the first datee response,
         /// then returns no window on subsequent calls.
         /// </summary>
         private sealed class WindowInjectingLlmAdapter593 : ILlmAdapter
         {
             private readonly WeaknessWindow _window;
-            private int _opponentCallCount;
+            private int _dateeCallCount;
 
             public WindowInjectingLlmAdapter593(WeaknessWindow window) => _window = window;
 
@@ -187,12 +187,12 @@ namespace Pinder.Core.Tests.Conversation
                 return Task.FromResult(context.ChosenOption.IntendedText);
             }
 
-            public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context, CancellationToken ct = default)
+            public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, CancellationToken ct = default)
             {
                 ct.ThrowIfCancellationRequested();
-                var weakness = _opponentCallCount == 0 ? _window : null;
-                _opponentCallCount++;
-                return Task.FromResult(new OpponentResponse("Test response", weaknessWindow: weakness));
+                var weakness = _dateeCallCount == 0 ? _window : null;
+                _dateeCallCount++;
+                return Task.FromResult(new DateeResponse("Test response", weaknessWindow: weakness));
             }
 
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, CancellationToken ct = default)
@@ -201,7 +201,7 @@ namespace Pinder.Core.Tests.Conversation
                 return Task.FromResult<string?>(null);
             }
 
-            public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null, CancellationToken ct = default)
+            public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, CancellationToken ct = default)
             {
                 ct.ThrowIfCancellationRequested();
                 return Task.FromResult(message);
@@ -213,7 +213,7 @@ namespace Pinder.Core.Tests.Conversation
                 return Task.FromResult(message);
             }
 
-            public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null, CancellationToken ct = default)
+            public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, CancellationToken ct = default)
             {
                 ct.ThrowIfCancellationRequested();
                 return Task.FromResult(message);

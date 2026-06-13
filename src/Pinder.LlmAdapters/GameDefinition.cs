@@ -20,18 +20,18 @@ namespace Pinder.LlmAdapters
         /// <summary>Player character role description.</summary>
         public string PlayerRoleDescription { get; }
 
-        /// <summary>Opponent character role description.</summary>
-        public string OpponentRoleDescription { get; }
+        /// <summary>Datee character role description.</summary>
+        public string DateeRoleDescription { get; }
 
         /// <summary>Combined narrative doctrine: meta contract, writing rules, texting
         /// psychology, and revelation-over-statement — always assembled together.</summary>
         public string NarrativeDoctrine { get; }
 
-        /// <summary>Opponent friction / resistance framing.</summary>
-        public string OpponentFriction { get; }
+        /// <summary>Datee friction / resistance framing.</summary>
+        public string DateeFriction { get; }
 
-        /// <summary>Opponent curiosity / reciprocal questions direction.</summary>
-        public string OpponentCuriosity { get; }
+        /// <summary>Datee curiosity / reciprocal questions direction.</summary>
+        public string DateeCuriosity { get; }
 
         /// <summary>Conversation arc / topic progression guidance.</summary>
         public string ConversationArcProgression { get; }
@@ -42,7 +42,7 @@ namespace Pinder.LlmAdapters
         /// <summary>Two-stage improvement prompt — appended after initial generation to trigger self-critique and rewrite.</summary>
         public string ImprovementPrompt { get; }
 
-        /// <summary>Steering question prompt template. Placeholders: {player_name}, {opponent_name}, {delivered_message}.</summary>
+        /// <summary>Steering question prompt template. Placeholders: {player_name}, {datee_name}, {delivered_message}.</summary>
         public string SteeringPrompt { get; }
 
         /// <summary>Configurable delivery prompt rules, or null for hardcoded defaults.</summary>
@@ -71,12 +71,12 @@ namespace Pinder.LlmAdapters
             string vision,
             string worldDescription,
             string playerRoleDescription,
-            string opponentRoleDescription,
+            string dateeRoleDescription,
             string narrativeDoctrine,
             DeliveryRules deliveryRules = null,
             DramaticCraft dramaticCraft = null,
-            string opponentFriction = null,
-            string opponentCuriosity = null,
+            string dateeFriction = null,
+            string dateeCuriosity = null,
             string conversationArcProgression = null,
             string playerProbing = null,
             string improvementPrompt = null,
@@ -91,10 +91,10 @@ namespace Pinder.LlmAdapters
             Vision = vision ?? throw new ArgumentNullException(nameof(vision));
             WorldDescription = worldDescription ?? throw new ArgumentNullException(nameof(worldDescription));
             PlayerRoleDescription = playerRoleDescription ?? throw new ArgumentNullException(nameof(playerRoleDescription));
-            OpponentRoleDescription = opponentRoleDescription ?? throw new ArgumentNullException(nameof(opponentRoleDescription));
+            DateeRoleDescription = dateeRoleDescription ?? throw new ArgumentNullException(nameof(dateeRoleDescription));
             NarrativeDoctrine = narrativeDoctrine ?? throw new ArgumentNullException(nameof(narrativeDoctrine));
-            OpponentFriction = opponentFriction ?? "";
-            OpponentCuriosity = opponentCuriosity ?? "";
+            DateeFriction = dateeFriction ?? "";
+            DateeCuriosity = dateeCuriosity ?? "";
             ConversationArcProgression = conversationArcProgression ?? "";
             PlayerProbing = playerProbing ?? "";
             ImprovementPrompt = improvementPrompt ?? "";

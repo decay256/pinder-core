@@ -6,84 +6,84 @@ namespace Pinder.LlmAdapters.Tests
     public class SessionSystemPromptBuilderTests
     {
         private const string PlayerPrompt = "You are Velvet. Lowercase-with-intent. Ironic. Level 7 Veteran.";
-        private const string OpponentPrompt = "You are Sable. Fast-talking. Uses omg and emoji. Level 5 Journeyman.";
+        private const string DateePrompt = "You are Sable. Fast-talking. Uses omg and emoji. Level 5 Journeyman.";
 
         [Fact]
         public void Build_ContainsBothCharacterPrompts()
         {
-            var result = SessionSystemPromptBuilder.Build(PlayerPrompt, OpponentPrompt);
+            var result = SessionSystemPromptBuilder.Build(PlayerPrompt, DateePrompt);
             Assert.Contains(PlayerPrompt, result);
-            Assert.Contains(OpponentPrompt, result);
+            Assert.Contains(DateePrompt, result);
         }
 
         [Fact]
         public void Build_ContainsGameVision()
         {
-            var result = SessionSystemPromptBuilder.Build(PlayerPrompt, OpponentPrompt);
+            var result = SessionSystemPromptBuilder.Build(PlayerPrompt, DateePrompt);
             Assert.Contains("comedy dating RPG", result);
         }
 
         [Fact]
         public void Build_ContainsWorldDescription()
         {
-            var result = SessionSystemPromptBuilder.Build(PlayerPrompt, OpponentPrompt);
+            var result = SessionSystemPromptBuilder.Build(PlayerPrompt, DateePrompt);
             Assert.Contains("dating server", result);
         }
 
         [Fact]
         public void Build_ContainsMetaContract()
         {
-            var result = SessionSystemPromptBuilder.Build(PlayerPrompt, OpponentPrompt);
+            var result = SessionSystemPromptBuilder.Build(PlayerPrompt, DateePrompt);
             Assert.Contains("break character", result);
         }
 
         [Fact]
         public void Build_ContainsWritingRules()
         {
-            var result = SessionSystemPromptBuilder.Build(PlayerPrompt, OpponentPrompt);
+            var result = SessionSystemPromptBuilder.Build(PlayerPrompt, DateePrompt);
             Assert.Contains("texting register", result);
         }
 
         [Fact]
         public void Build_ContainsNarrativeDoctrineHeader()
         {
-            var result = SessionSystemPromptBuilder.Build(PlayerPrompt, OpponentPrompt);
+            var result = SessionSystemPromptBuilder.Build(PlayerPrompt, DateePrompt);
             Assert.Contains("== NARRATIVE DOCTRINE ==", result);
         }
 
         [Fact]
         public void Build_HasFiveSections()
         {
-            var result = SessionSystemPromptBuilder.Build(PlayerPrompt, OpponentPrompt);
+            var result = SessionSystemPromptBuilder.Build(PlayerPrompt, DateePrompt);
             Assert.Contains("== GAME VISION ==", result);
             Assert.Contains("== WORLD RULES ==", result);
             Assert.Contains("== PLAYER CHARACTER ==", result);
-            Assert.Contains("== OPPONENT CHARACTER ==", result);
+            Assert.Contains("== DATEE CHARACTER ==", result);
             Assert.Contains("== NARRATIVE DOCTRINE ==", result);
         }
 
         [Fact]
         public void Build_SectionsInCorrectOrder()
         {
-            var result = SessionSystemPromptBuilder.Build(PlayerPrompt, OpponentPrompt);
+            var result = SessionSystemPromptBuilder.Build(PlayerPrompt, DateePrompt);
             var visionIdx = result.IndexOf("== GAME VISION ==");
             var worldIdx = result.IndexOf("== WORLD RULES ==");
             var playerIdx = result.IndexOf("== PLAYER CHARACTER ==");
-            var opponentIdx = result.IndexOf("== OPPONENT CHARACTER ==");
+            var dateeIdx = result.IndexOf("== DATEE CHARACTER ==");
             var metaIdx = result.IndexOf("== NARRATIVE DOCTRINE ==");
 
             // Variable character sections come LAST: static game/doctrine material first,
-            // then PLAYER CHARACTER and OPPONENT CHARACTER at the tail.
+            // then PLAYER CHARACTER and DATEE CHARACTER at the tail.
             Assert.True(visionIdx < worldIdx, "GAME VISION should come before WORLD RULES");
             Assert.True(worldIdx < metaIdx, "WORLD RULES should come before NARRATIVE DOCTRINE");
             Assert.True(metaIdx < playerIdx, "NARRATIVE DOCTRINE should come before PLAYER CHARACTER");
-            Assert.True(playerIdx < opponentIdx, "PLAYER CHARACTER should come before OPPONENT CHARACTER");
+            Assert.True(playerIdx < dateeIdx, "PLAYER CHARACTER should come before DATEE CHARACTER");
         }
 
         [Fact]
         public void Build_NullGameDef_UsesPinderDefaults()
         {
-            var result = SessionSystemPromptBuilder.Build(PlayerPrompt, OpponentPrompt, null);
+            var result = SessionSystemPromptBuilder.Build(PlayerPrompt, DateePrompt, null);
             Assert.Contains("Pinder", result);
             Assert.Contains("comedy dating RPG", result);
         }
@@ -96,10 +96,10 @@ namespace Pinder.LlmAdapters.Tests
                 "Custom vision text",
                 "Custom world desc",
                 "Custom player role",
-                "Custom opponent role",
+                "Custom datee role",
                 "Custom meta contract Custom writing rules");
 
-            var result = SessionSystemPromptBuilder.Build(PlayerPrompt, OpponentPrompt, custom);
+            var result = SessionSystemPromptBuilder.Build(PlayerPrompt, DateePrompt, custom);
             Assert.Contains("Custom vision text", result);
             Assert.Contains("Custom world desc", result);
             Assert.Contains("Custom meta contract", result);
@@ -110,11 +110,11 @@ namespace Pinder.LlmAdapters.Tests
         public void Build_NullPlayerPrompt_ThrowsArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>(() =>
-                SessionSystemPromptBuilder.Build(null!, OpponentPrompt));
+                SessionSystemPromptBuilder.Build(null!, DateePrompt));
         }
 
         [Fact]
-        public void Build_NullOpponentPrompt_ThrowsArgumentNullException()
+        public void Build_NullDateePrompt_ThrowsArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>(() =>
                 SessionSystemPromptBuilder.Build(PlayerPrompt, null!));
@@ -125,7 +125,7 @@ namespace Pinder.LlmAdapters.Tests
         {
             var result = SessionSystemPromptBuilder.Build("", "");
             Assert.Contains("== PLAYER CHARACTER ==", result);
-            Assert.Contains("== OPPONENT CHARACTER ==", result);
+            Assert.Contains("== DATEE CHARACTER ==", result);
         }
 
         [Fact]
@@ -142,37 +142,37 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("WritingSection", afterMeta);
         }
 
-        // Regression: #867 — opponent-only sections must NOT leak into BuildPlayer.
+        // Regression: #867 — datee-only sections must NOT leak into BuildPlayer.
         [Fact]
-        public void BuildPlayer_ExcludesOpponentOnlySections()
+        public void BuildPlayer_ExcludesDateeOnlySections()
         {
             var gd = new GameDefinition(
                 "T", "V", "W", "P", "O", "ND",
-                opponentFriction: "opponent resists the player",
-                opponentCuriosity: "opponent probes player's bio",
+                dateeFriction: "datee resists the player",
+                dateeCuriosity: "datee probes player's bio",
                 conversationArcProgression: "both sides move the convo forward",
-                playerProbing: "player follows up on opponent's reveals");
+                playerProbing: "player follows up on datee's reveals");
 
             var playerResult = SessionSystemPromptBuilder.BuildPlayer("p", gd);
-            var opponentResult = SessionSystemPromptBuilder.BuildOpponent("o", gd);
+            var dateeResult = SessionSystemPromptBuilder.BuildDatee("o", gd);
 
-            // BuildPlayer must NOT contain opponent-only sections (OpponentFriction,
-            // OpponentCuriosity). ConversationArcProgression is SHARED structure —
+            // BuildPlayer must NOT contain datee-only sections (DateeFriction,
+            // DateeCuriosity). ConversationArcProgression is SHARED structure —
             // both sides participate in arc progression — kept in BuildPlayer.
             // PlayerProbing is player-specific guidance — kept in BuildPlayer.
             // See #867 LESSONS_LEARNED PROMPT-BLOAT-FROM-CROSS-ROLE-SECTIONS.
-            Assert.DoesNotContain("OPPONENT RESISTANCE", playerResult);
-            Assert.DoesNotContain("OPPONENT CURIOSITY", playerResult);
-            Assert.DoesNotContain("opponent resists", playerResult);
-            Assert.DoesNotContain("opponent probes", playerResult);
+            Assert.DoesNotContain("DATEE RESISTANCE", playerResult);
+            Assert.DoesNotContain("DATEE CURIOSITY", playerResult);
+            Assert.DoesNotContain("datee resists", playerResult);
+            Assert.DoesNotContain("datee probes", playerResult);
 
-            // BuildOpponent MUST contain all opponent-side sections.
-            Assert.Contains("OPPONENT RESISTANCE", opponentResult);
-            Assert.Contains("OPPONENT CURIOSITY", opponentResult);
-            Assert.Contains("CONVERSATION ARC", opponentResult);
-            Assert.Contains("opponent resists", opponentResult);
-            Assert.Contains("opponent probes", opponentResult);
-            Assert.Contains("both sides move", opponentResult);
+            // BuildDatee MUST contain all datee-side sections.
+            Assert.Contains("DATEE RESISTANCE", dateeResult);
+            Assert.Contains("DATEE CURIOSITY", dateeResult);
+            Assert.Contains("CONVERSATION ARC", dateeResult);
+            Assert.Contains("datee resists", dateeResult);
+            Assert.Contains("datee probes", dateeResult);
+            Assert.Contains("both sides move", dateeResult);
 
             // BuildPlayer keeps shared structure + player-side sections.
             Assert.Contains("CONVERSATION ARC", playerResult);
@@ -180,10 +180,10 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("PLAYER PROBING", playerResult);
             Assert.Contains("player follows", playerResult);
 
-            // Token ceiling: BuildPlayer must be shorter than BuildOpponent
-            // (it excludes the two opponent-only sections).
-            Assert.True(playerResult.Length < opponentResult.Length,
-                $"BuildPlayer ({playerResult.Length} chars) should be shorter than BuildOpponent ({opponentResult.Length} chars)");
+            // Token ceiling: BuildPlayer must be shorter than BuildDatee
+            // (it excludes the two datee-only sections).
+            Assert.True(playerResult.Length < dateeResult.Length,
+                $"BuildPlayer ({playerResult.Length} chars) should be shorter than BuildDatee ({dateeResult.Length} chars)");
         }
     }
 }

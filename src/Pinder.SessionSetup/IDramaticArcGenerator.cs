@@ -18,7 +18,7 @@ namespace Pinder.SessionSetup
     /// in depth.
     /// </para>
     /// <para>
-    /// The arc is appended to the opponent system prompt after the
+    /// The arc is appended to the datee system prompt after the
     /// psychological stake and provides soft narrative direction. It does
     /// NOT hard-gate turns; the interest/stake simulation remains
     /// authoritative. The arc may describe mood or tension arc but must
@@ -36,17 +36,17 @@ namespace Pinder.SessionSetup
         /// <param name="playerName">Player display name.</param>
         /// <param name="playerStake">Player's psychological stake (plain text).</param>
         /// <param name="playerBio">Player's bio (plain text).</param>
-        /// <param name="opponentName">Opponent display name.</param>
-        /// <param name="opponentStake">Opponent's psychological stake (plain text).</param>
-        /// <param name="opponentBio">Opponent's bio (plain text).</param>
+        /// <param name="dateeName">Datee display name.</param>
+        /// <param name="dateeStake">Datee's psychological stake (plain text).</param>
+        /// <param name="dateeBio">Datee's bio (plain text).</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         Task<string> GenerateAsync(
             string playerName,
             string playerStake,
             string playerBio,
-            string opponentName,
-            string opponentStake,
-            string opponentBio,
+            string dateeName,
+            string dateeStake,
+            string dateeBio,
             CancellationToken cancellationToken = default);
     }
 }

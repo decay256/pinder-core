@@ -31,7 +31,7 @@ namespace Pinder.Core.Tests
                 });
         }
 
-        private static StatBlock MakeOpponentStats()
+        private static StatBlock MakeDateeStats()
         {
             return new StatBlock(
                 new Dictionary<StatType, int>
@@ -47,10 +47,10 @@ namespace Pinder.Core.Tests
                 });
         }
 
-        private static PlayerAgentContext MakeContext(StatBlock player, StatBlock opponent,
+        private static PlayerAgentContext MakeContext(StatBlock player, StatBlock datee,
             int interest = 12, InterestState state = InterestState.Interested, int momentum = 0)
         {
-            return new PlayerAgentContext(player, opponent, interest, state, momentum,
+            return new PlayerAgentContext(player, datee, interest, state, momentum,
                 Array.Empty<string>(), 0, null, 1);
         }
 
@@ -78,7 +78,7 @@ namespace Pinder.Core.Tests
             var agent = new HighestModAgent();
             var options = new[] { new DialogueOption(StatType.Charm, "hi") };
             var turn = MakeTurn(options);
-            var ctx = MakeContext(MakePlayerStats(), MakeOpponentStats());
+            var ctx = MakeContext(MakePlayerStats(), MakeDateeStats());
 
             var decision = await agent.DecideAsync(turn, ctx);
             Assert.NotNull(decision);
@@ -98,7 +98,7 @@ namespace Pinder.Core.Tests
                 new DialogueOption(StatType.Honesty, "mid"),   // mod +3
             };
             var turn = MakeTurn(options);
-            var ctx = MakeContext(player, MakeOpponentStats());
+            var ctx = MakeContext(player, MakeDateeStats());
 
             var decision = await agent.DecideAsync(turn, ctx);
 
@@ -119,7 +119,7 @@ namespace Pinder.Core.Tests
                 new DialogueOption(StatType.Chaos, "d"),
             };
             var turn = MakeTurn(options);
-            var ctx = MakeContext(MakePlayerStats(), MakeOpponentStats());
+            var ctx = MakeContext(MakePlayerStats(), MakeDateeStats());
 
             var decision = await agent.DecideAsync(turn, ctx);
 
@@ -134,7 +134,7 @@ namespace Pinder.Core.Tests
             var agent = new HighestModAgent();
             var options = new[] { new DialogueOption(StatType.Wit, "only") };
             var turn = MakeTurn(options);
-            var ctx = MakeContext(MakePlayerStats(), MakeOpponentStats());
+            var ctx = MakeContext(MakePlayerStats(), MakeDateeStats());
 
             var decision = await agent.DecideAsync(turn, ctx);
 
@@ -167,7 +167,7 @@ namespace Pinder.Core.Tests
                 new DialogueOption(StatType.Wit, "c"),
             };
             var turn = MakeTurn(options);
-            var ctx = MakeContext(equalStats, MakeOpponentStats());
+            var ctx = MakeContext(equalStats, MakeDateeStats());
 
             var decision = await agent.DecideAsync(turn, ctx);
 

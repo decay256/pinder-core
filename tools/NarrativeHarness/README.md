@@ -7,7 +7,7 @@ does not reference `Pinder.Rules` (it flows in transitively via
 `Pinder.LlmAdapters`, but no rule type is ever constructed or called).
 
 A turn is exactly: build the system prompt with
-`SessionSystemPromptBuilder.BuildOpponent(...)` (the `== CONVERSATION ARC ==`
+`SessionSystemPromptBuilder.BuildDatee(...)` (the `== CONVERSATION ARC ==`
 slot populated by the harness) → `AnthropicTransport.SendAsync(...)` → record
 the raw output. That's it.
 
@@ -46,7 +46,7 @@ It is labelled HEURISTIC everywhere — not ground truth.
 ## Flags
 
 ```
---character <slug>         OPPONENT character to load, e.g. brick, velvet (default: brick)
+--character <slug>         DATEE character to load, e.g. brick, velvet (default: brick)
 --pursuer-character <slug> OPTIONAL second real character driven as the pursuer
                            (default: none → see fallback below)
 --turns <n|range>          e.g. 14 or 10-20 (range → high end, or seeded) (default: 14)
@@ -62,10 +62,10 @@ By default the pursuer side is *not* a real Pinder character: it is either a
 scripted reader (`--player-script`) or a generic lightweight LLM persona.
 `--pursuer-character <slug>` instead loads a **second real Pinder character**
 and drives it as the pursuer through the **SAME production prompt path** as the
-opponent — `SessionSystemPromptBuilder.BuildOpponent(...)` with its own
+datee — `SessionSystemPromptBuilder.BuildDatee(...)` with its own
 assembled system prompt — so it **stays in character for the whole transcript**.
 
-`--character` remains the **opponent** character.
+`--character` remains the **datee** character.
 
 Precedence / back-compat: when `--pursuer-character` is set it takes precedence;
 when it is omitted the pursuer falls back to `--player-script` (if given) or the
@@ -73,8 +73,8 @@ generic lightweight LLM persona, exactly as before.
 
 The pursuer side is **REACTIVE**: it receives **no** arc injection
 (it is built from the base `GameDefinition`, with no `== CONVERSATION ARC ==`
-slot populated). Only the **opponent** side gets the narrative prompt + confession
-menu, so the opponent's arc stays the single independent variable.
+slot populated). Only the **datee** side gets the narrative prompt + confession
+menu, so the datee's arc stays the single independent variable.
 
 ## Build & run (no host dotnet — use the cached SDK container)
 
@@ -92,10 +92,10 @@ docker run --rm --network host -e ANTHROPIC_API_KEY="$KEY" \
   --out /build/out.md
 ```
 
-### Two real characters (opponent vs. pursuer)
+### Two real characters (datee vs. pursuer)
 
 Drive a second real character as the pursuer through the same production prompt
-path. The opponent (`--character`) still carries the arc; the pursuer
+path. The datee (`--character`) still carries the arc; the pursuer
 (`--pursuer-character`) is reactive:
 
 ```bash

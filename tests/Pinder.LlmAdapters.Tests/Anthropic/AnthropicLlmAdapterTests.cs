@@ -61,32 +61,32 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
 
         private static DialogueContext MakeDialogueContext() => new DialogueContext(
             playerPrompt: "You are Thundercock",
-            opponentPrompt: "You are Velvet",
+            dateePrompt: "You are Velvet",
             conversationHistory: new List<(string, string)> { ("Velvet", "Hey there") },
-            opponentLastMessage: "Hey there",
+            dateeLastMessage: "Hey there",
             activeTraps: new string[0],
             currentInterest: 10,
             playerName: "Thundercock",
-            opponentName: "Velvet",
+            dateeName: "Velvet",
             currentTurn: 1);
 
         private static DeliveryContext MakeDeliveryContext() => new DeliveryContext(
             playerPrompt: "You are Thundercock",
-            opponentPrompt: "You are Velvet",
+            dateePrompt: "You are Velvet",
             conversationHistory: new List<(string, string)> { ("Velvet", "Hey") },
-            opponentLastMessage: "Hey",
+            dateeLastMessage: "Hey",
             chosenOption: new DialogueOption(StatType.Charm, "Nice to meet you"),
             outcome: FailureTier.None,
             beatDcBy: 5,
             activeTraps: new string[0],
             playerName: "Thundercock",
-            opponentName: "Velvet");
+            dateeName: "Velvet");
 
-        private static OpponentContext MakeOpponentContext() => new OpponentContext(
+        private static DateeContext MakeDateeContext() => new DateeContext(
             playerPrompt: "You are Thundercock",
-            opponentPrompt: "You are Velvet",
+            dateePrompt: "You are Velvet",
             conversationHistory: new List<(string, string)> { ("Velvet", "Hey") },
-            opponentLastMessage: "Hey",
+            dateeLastMessage: "Hey",
             activeTraps: new string[0],
             currentInterest: 12,
             playerDeliveredMessage: "Nice to meet you too!",
@@ -94,6 +94,6 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             interestAfter: 12,
             responseDelayMinutes: 2.0,
             playerName: "Thundercock",
-            opponentName: "Velvet");
+            dateeName: "Velvet");
     }
 }

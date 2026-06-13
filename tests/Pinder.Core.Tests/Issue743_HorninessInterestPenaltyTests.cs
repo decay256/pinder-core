@@ -69,7 +69,7 @@ namespace Pinder.Core.Tests
                 statDeliveryInstructions: instructions);
 
             return new GameSession(
-                MakeProfile("Player"), MakeProfile("Opponent"),
+                MakeProfile("Player"), MakeProfile("Datee"),
                 new NullLlmAdapter(), dice, new NullTrapRegistry(), config);
         }
 
@@ -127,7 +127,7 @@ namespace Pinder.Core.Tests
                 statDeliveryInstructions: instructions);
 
             var session = new GameSession(
-                MakeProfile("Player"), MakeProfile("Opponent"),
+                MakeProfile("Player"), MakeProfile("Datee"),
                 new NullLlmAdapter(), dice, new NullTrapRegistry(), config);
 
             var turn = await session.StartTurnAsync();

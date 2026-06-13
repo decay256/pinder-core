@@ -47,7 +47,7 @@ namespace Pinder.Core.Tests.Integration
             var config = new GameSessionConfig(
                 clock: TestHelpers.MakeClock(),
                 playerShadows: new SessionShadowTracker(geraldStats),
-                opponentShadows: new SessionShadowTracker(velvetStats),
+                dateeShadows: new SessionShadowTracker(velvetStats),
                 startingInterest: 5,
                 previousOpener: null);
 
@@ -127,7 +127,7 @@ namespace Pinder.Core.Tests.Integration
             var config = new GameSessionConfig(
                 clock: TestHelpers.MakeClock(),
                 playerShadows: new SessionShadowTracker(geraldStats),
-                opponentShadows: new SessionShadowTracker(velvetStats),
+                dateeShadows: new SessionShadowTracker(velvetStats),
                 startingInterest: 4,
                 previousOpener: null);
 
@@ -163,7 +163,7 @@ namespace Pinder.Core.Tests.Integration
             var config = new GameSessionConfig(
                 clock: TestHelpers.MakeClock(),
                 playerShadows: new SessionShadowTracker(geraldStats),
-                opponentShadows: new SessionShadowTracker(velvetStats),
+                dateeShadows: new SessionShadowTracker(velvetStats),
                 startingInterest: 4,
                 previousOpener: null);
 
@@ -207,7 +207,7 @@ namespace Pinder.Core.Tests.Integration
             var config = new GameSessionConfig(
                 clock: TestHelpers.MakeClock(),
                 playerShadows: new SessionShadowTracker(geraldStats),
-                opponentShadows: new SessionShadowTracker(velvetStats),
+                dateeShadows: new SessionShadowTracker(velvetStats),
                 startingInterest: 1,
                 previousOpener: null);
 
@@ -257,7 +257,7 @@ namespace Pinder.Core.Tests.Integration
                 var config = new GameSessionConfig(
                     clock: TestHelpers.MakeClock(),
                     playerShadows: new SessionShadowTracker(geraldStats),
-                    opponentShadows: new SessionShadowTracker(velvetStats),
+                    dateeShadows: new SessionShadowTracker(velvetStats),
                     startingInterest: 10,
                     previousOpener: null);
 
@@ -308,7 +308,7 @@ namespace Pinder.Core.Tests.Integration
             var config = new GameSessionConfig(
                 clock: TestHelpers.MakeClock(),
                 playerShadows: new SessionShadowTracker(geraldStats),
-                opponentShadows: new SessionShadowTracker(velvetStats),
+                dateeShadows: new SessionShadowTracker(velvetStats),
                 startingInterest: 4,
                 previousOpener: null);
 
@@ -353,7 +353,7 @@ namespace Pinder.Core.Tests.Integration
             var config = new GameSessionConfig(
                 clock: TestHelpers.MakeClock(),
                 playerShadows: new SessionShadowTracker(geraldStats),
-                opponentShadows: new SessionShadowTracker(velvetStats),
+                dateeShadows: new SessionShadowTracker(velvetStats),
                 startingInterest: 10,
                 previousOpener: null);
 

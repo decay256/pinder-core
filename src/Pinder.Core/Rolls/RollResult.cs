@@ -24,7 +24,7 @@ namespace Pinder.Core.Rolls
         public StatType Stat { get; }
 
         /// <summary>
-        /// The defending stat (opponent's stat used to compute the DC via StatBlock.DefenceTable[Stat]).
+        /// The defending stat (datee's stat used to compute the DC via StatBlock.DefenceTable[Stat]).
         /// Always populated for option-roll results; use StatBlock.DefenceTable[Stat] as the canonical source.
         /// </summary>
         [JsonPropertyName("defending_stat")]

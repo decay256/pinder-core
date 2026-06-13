@@ -82,19 +82,19 @@ namespace Pinder.LlmAdapters.Anthropic
         };
 
         /// <summary>
-        /// Tool for GetOpponentResponseAsync — returns the opponent's message and optional signals.
+        /// Tool for GetDateeResponseAsync — returns the datee's message and optional signals.
         /// Schema: {message, tell?, weakness?}
         /// </summary>
-        public static readonly ToolDefinition OpponentResponse = new ToolDefinition
+        public static readonly ToolDefinition DateeResponse = new ToolDefinition
         {
-            Name = "submit_opponent_response",
-            Description = "Submit the opponent's response message and any detected gameplay signals.",
+            Name = "submit_datee_response",
+            Description = "Submit the datee's response message and any detected gameplay signals.",
             InputSchema = JObject.Parse(@"{
                 ""type"": ""object"",
                 ""properties"": {
                     ""message"": {
                         ""type"": ""string"",
-                        ""description"": ""The opponent's message text.""
+                        ""description"": ""The datee's message text.""
                     },
                     ""tell"": {
                         ""type"": [""object"", ""null""],

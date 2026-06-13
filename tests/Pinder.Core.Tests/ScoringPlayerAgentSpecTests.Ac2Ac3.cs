@@ -53,11 +53,11 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task SuccessChance_ClampedTo01Range()
         {
-            // Easy option: player has very high stat, opponent has 0 defence
+            // Easy option: player has very high stat, datee has 0 defence
             var playerStats = MakeStats(charm: 10);
-            var opponentStats = MakeStats(selfAwareness: 0);
+            var dateeStats = MakeStats(selfAwareness: 0);
             var turn = MakeTurn(new DialogueOption(StatType.Charm, "easy"));
-            var ctx = MakeContext(playerStats: playerStats, opponentStats: opponentStats);
+            var ctx = MakeContext(playerStats: playerStats, dateeStats: dateeStats);
             var result = await _agent.DecideAsync(turn, ctx);
 
             Assert.InRange(result.Scores[0].SuccessChance, 0.0f, 1.0f);
@@ -67,7 +67,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task HigherAttackerMod_GivesHigherSuccessChance()
         {
-            var opponentStats = MakeStats(selfAwareness: 2); // Charm → SA defence, DC = 16 + 2 = 15
+            var dateeStats = MakeStats(selfAwareness: 2); // Charm → SA defence, DC = 16 + 2 = 15
 
             var weakPlayer = MakeStats(charm: 1); // need = 15 - 1 = 14, chance = 7/20
             var strongPlayer = MakeStats(charm: 5); // need = 15 - 5 = 10, chance = 11/20
@@ -75,9 +75,9 @@ namespace Pinder.Core.Tests
             var option = new DialogueOption(StatType.Charm, "test");
 
             var weakResult = await _agent.DecideAsync(
-                MakeTurn(option), MakeContext(playerStats: weakPlayer, opponentStats: opponentStats));
+                MakeTurn(option), MakeContext(playerStats: weakPlayer, dateeStats: dateeStats));
             var strongResult = await _agent.DecideAsync(
-                MakeTurn(option), MakeContext(playerStats: strongPlayer, opponentStats: opponentStats));
+                MakeTurn(option), MakeContext(playerStats: strongPlayer, dateeStats: dateeStats));
 
             Assert.True(strongResult.Scores[0].SuccessChance > weakResult.Scores[0].SuccessChance,
                 $"Strong ({strongResult.Scores[0].SuccessChance}) should be > Weak ({weakResult.Scores[0].SuccessChance})");
@@ -90,7 +90,7 @@ namespace Pinder.Core.Tests
             // Two options: one easy (Charm with high mod), one hard (Rizz with low mod)
             // Both against same defence
             var playerStats = MakeStats(charm: 5, rizz: 0);
-            var opponentStats = MakeStats(); // all 0 defence stats → DC = 13 for all
+            var dateeStats = MakeStats(); // all 0 defence stats → DC = 13 for all
 
             var options = new[]
             {
@@ -98,7 +98,7 @@ namespace Pinder.Core.Tests
                 new DialogueOption(StatType.Rizz, "hard")    // need=13, ~40%
             };
             var turn = MakeTurn(options);
-            var ctx = MakeContext(playerStats: playerStats, opponentStats: opponentStats);
+            var ctx = MakeContext(playerStats: playerStats, dateeStats: dateeStats);
             var result = await _agent.DecideAsync(turn, ctx);
 
             // Easy option should have higher EV
@@ -117,7 +117,7 @@ namespace Pinder.Core.Tests
             // Option A: safe (high success), lower raw EV
             // Option B: bold (low success), higher raw EV
             var playerStats = MakeStats(charm: 5, rizz: 0);
-            var opponentStats = MakeStats(); // all 0 → DC=13
+            var dateeStats = MakeStats(); // all 0 → DC=13
 
             var options = new[]
             {
@@ -127,7 +127,7 @@ namespace Pinder.Core.Tests
             var turn = MakeTurn(options);
             var ctx = MakeContext(
                 playerStats: playerStats,
-                opponentStats: opponentStats,
+                dateeStats: dateeStats,
                 momentumStreak: 2);
 
             var result = await _agent.DecideAsync(turn, ctx);
@@ -143,7 +143,7 @@ namespace Pinder.Core.Tests
         {
             // Both options have low success chances
             var playerStats = MakeStats(charm: 0, rizz: 0);
-            var opponentStats = MakeStats(selfAwareness: 5, wit: 5); // high defence → hard to hit
+            var dateeStats = MakeStats(selfAwareness: 5, wit: 5); // high defence → hard to hit
 
             var options = new[]
             {
@@ -153,7 +153,7 @@ namespace Pinder.Core.Tests
             var turn = MakeTurn(options);
             var ctx = MakeContext(
                 playerStats: playerStats,
-                opponentStats: opponentStats,
+                dateeStats: dateeStats,
                 momentumStreak: 2);
 
             var result = await _agent.DecideAsync(turn, ctx);
@@ -169,7 +169,7 @@ namespace Pinder.Core.Tests
         public async Task NearWin_Interest19_PrefersSafeOption()
         {
             var playerStats = MakeStats(charm: 5, chaos: 0);
-            var opponentStats = MakeStats(); // all 0 → DC=13
+            var dateeStats = MakeStats(); // all 0 → DC=13
 
             var options = new[]
             {
@@ -179,7 +179,7 @@ namespace Pinder.Core.Tests
             var turn = MakeTurn(options);
             var ctx = MakeContext(
                 playerStats: playerStats,
-                opponentStats: opponentStats,
+                dateeStats: dateeStats,
                 currentInterest: 19,
                 interestState: InterestState.VeryIntoIt);
 
@@ -195,7 +195,7 @@ namespace Pinder.Core.Tests
         public async Task NearWin_Interest18_DoesNotApplyBias()
         {
             var playerStats = MakeStats(charm: 5, chaos: 0);
-            var opponentStats = MakeStats();
+            var dateeStats = MakeStats();
 
             var options = new[]
             {
@@ -206,12 +206,12 @@ namespace Pinder.Core.Tests
 
             var ctxAt18 = MakeContext(
                 playerStats: playerStats,
-                opponentStats: opponentStats,
+                dateeStats: dateeStats,
                 currentInterest: 18,
                 interestState: InterestState.VeryIntoIt);
             var ctxAt19 = MakeContext(
                 playerStats: playerStats,
-                opponentStats: opponentStats,
+                dateeStats: dateeStats,
                 currentInterest: 19,
                 interestState: InterestState.VeryIntoIt);
 
@@ -229,18 +229,18 @@ namespace Pinder.Core.Tests
         {
             // Verify Bold options get a score boost when Bored
             var playerStats = MakeStats(chaos: 2);
-            var opponentStats = MakeStats(charm: 3); // Chaos→Charm, DC=16, need=14 → Bold
+            var dateeStats = MakeStats(charm: 3); // Chaos→Charm, DC=16, need=14 → Bold
 
             var turn = MakeTurn(new DialogueOption(StatType.Chaos, "bold")); // need=14, Bold
 
             var ctxBored = MakeContext(
                 playerStats: playerStats,
-                opponentStats: opponentStats,
+                dateeStats: dateeStats,
                 currentInterest: 3,
                 interestState: InterestState.Bored);
             var ctxNeutral = MakeContext(
                 playerStats: playerStats,
-                opponentStats: opponentStats,
+                dateeStats: dateeStats,
                 currentInterest: 12,
                 interestState: InterestState.Interested);
 
@@ -258,7 +258,7 @@ namespace Pinder.Core.Tests
         {
             // Spec Example 5: Madness trap on Charm → -2.0 penalty
             var playerStats = MakeStats(charm: 5, wit: 3);
-            var opponentStats = MakeStats(); // all 0
+            var dateeStats = MakeStats(); // all 0
 
             var options = new[]
             {
@@ -268,7 +268,7 @@ namespace Pinder.Core.Tests
             var turn = MakeTurn(options);
             var ctx = MakeContext(
                 playerStats: playerStats,
-                opponentStats: opponentStats,
+                dateeStats: dateeStats,
                 activeTrapNames: new[] { "Madness" });
 
             var result = await _agent.DecideAsync(turn, ctx);
@@ -284,7 +284,7 @@ namespace Pinder.Core.Tests
         public async Task ActiveTrap_RizzMapsToDespair()
         {
             var playerStats = MakeStats(rizz: 5, honesty: 3);
-            var opponentStats = MakeStats();
+            var dateeStats = MakeStats();
 
             var options = new[]
             {
@@ -294,7 +294,7 @@ namespace Pinder.Core.Tests
             var turn = MakeTurn(options);
             var ctx = MakeContext(
                 playerStats: playerStats,
-                opponentStats: opponentStats,
+                dateeStats: dateeStats,
                 activeTrapNames: new[] { "Despair" });
 
             var result = await _agent.DecideAsync(turn, ctx);
@@ -315,7 +315,7 @@ namespace Pinder.Core.Tests
             var playerStats = MakeStats(charm: 2, rizz: 2);
             // Charm→SA, Rizz→Wit
             // Set defences so one is Safe, one is Hard
-            var opponentStats = MakeStats(selfAwareness: 0, wit: 5);
+            var dateeStats = MakeStats(selfAwareness: 0, wit: 5);
             // Charm: need = 13-2=11, Hard tier → +1 risk bonus
             // Rizz: need = 18-2=16, Bold tier → +2 risk bonus
 
@@ -325,7 +325,7 @@ namespace Pinder.Core.Tests
                 new DialogueOption(StatType.Rizz, "bold")
             };
             var turn = MakeTurn(options);
-            var ctx = MakeContext(playerStats: playerStats, opponentStats: opponentStats);
+            var ctx = MakeContext(playerStats: playerStats, dateeStats: dateeStats);
             var result = await _agent.DecideAsync(turn, ctx);
 
             // Hard (need=11) has higher success chance than Bold (need=16)

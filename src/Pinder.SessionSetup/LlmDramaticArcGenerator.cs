@@ -40,20 +40,20 @@ namespace Pinder.SessionSetup
             string playerName,
             string playerStake,
             string playerBio,
-            string opponentName,
-            string opponentStake,
-            string opponentBio,
+            string dateeName,
+            string dateeStake,
+            string dateeBio,
             CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(playerName))
                 throw new ArgumentException("playerName must not be null or whitespace.", nameof(playerName));
-            if (string.IsNullOrWhiteSpace(opponentName))
-                throw new ArgumentException("opponentName must not be null or whitespace.", nameof(opponentName));
+            if (string.IsNullOrWhiteSpace(dateeName))
+                throw new ArgumentException("dateeName must not be null or whitespace.", nameof(dateeName));
             // Stakes and bios are allowed to be empty/whitespace (character might not have them yet)
 
             string userMessage = BuildUserMessage(
                 playerName, playerStake ?? string.Empty, playerBio ?? string.Empty,
-                opponentName, opponentStake ?? string.Empty, opponentBio ?? string.Empty);
+                dateeName, dateeStake ?? string.Empty, dateeBio ?? string.Empty);
 
             try
             {
@@ -72,16 +72,16 @@ namespace Pinder.SessionSetup
 
         private static string BuildUserMessage(
             string playerName, string playerStake, string playerBio,
-            string opponentName, string opponentStake, string opponentBio)
+            string dateeName, string dateeStake, string dateeBio)
         {
             var sb = new StringBuilder();
             sb.AppendLine($"Player: {playerName}");
             sb.AppendLine($"Psychological stake: {(string.IsNullOrWhiteSpace(playerStake) ? "(none)" : playerStake)}");
             sb.AppendLine($"Bio: {(string.IsNullOrWhiteSpace(playerBio) ? "(none)" : playerBio)}");
             sb.AppendLine();
-            sb.AppendLine($"Opponent: {opponentName}");
-            sb.AppendLine($"Psychological stake: {(string.IsNullOrWhiteSpace(opponentStake) ? "(none)" : opponentStake)}");
-            sb.AppendLine($"Bio: {(string.IsNullOrWhiteSpace(opponentBio) ? "(none)" : opponentBio)}");
+            sb.AppendLine($"Datee: {dateeName}");
+            sb.AppendLine($"Psychological stake: {(string.IsNullOrWhiteSpace(dateeStake) ? "(none)" : dateeStake)}");
+            sb.AppendLine($"Bio: {(string.IsNullOrWhiteSpace(dateeBio) ? "(none)" : dateeBio)}");
             sb.AppendLine();
             sb.AppendLine(
                 "Sketch a light dramatic arc for their conversation in 3-5 sentences of plain prose: " +

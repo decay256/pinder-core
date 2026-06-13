@@ -239,7 +239,7 @@ There are no new exception types or error paths introduced by this feature. All 
 
 | Dependency | Type | Details |
 |------------|------|---------|
-| Issue #487 (voice bleed fix) | Must be implemented first | #487 switches `GetDialogueOptionsAsync` to player-only system blocks and moves opponent profile to user message. Texting style reinforcement (#489) layers on top of this prompt structure. Without #487, the texting style block would compete with the opponent's voice in the system prompt. |
+| Issue #487 (voice bleed fix) | Must be implemented first | #487 switches `GetDialogueOptionsAsync` to player-only system blocks and moves datee profile to user message. Texting style reinforcement (#489) layers on top of this prompt structure. Without #487, the texting style block would compete with the datee's voice in the system prompt. |
 | `Pinder.Core.Characters.CharacterProfile` | Modified | Gains `TextingStyleFragment` property |
 | `Pinder.Core.Conversation.DialogueContext` | Modified | Gains `PlayerTextingStyle` property |
 | `Pinder.Core.Conversation.GameSession` | Modified | Wires `_player.TextingStyleFragment` to `DialogueContext` |

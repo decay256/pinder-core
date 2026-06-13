@@ -33,7 +33,7 @@ namespace Pinder.Core.Tests
             var config = new GameSessionConfig(clock: clock);
             var session = new GameSession(
                 MakeProfile("Player"),
-                MakeProfile("Opponent"),
+                MakeProfile("Datee"),
                 new NullLlmAdapter(),
                 dice,
                 new NullTrapRegistry(),
@@ -69,7 +69,7 @@ namespace Pinder.Core.Tests
             var config = new GameSessionConfig(clock: clock);
             var session = new GameSession(
                 MakeProfile("Player"),
-                MakeProfile("Opponent"),
+                MakeProfile("Datee"),
                 new NullLlmAdapter(),
                 dice,
                 new NullTrapRegistry(),
@@ -103,7 +103,7 @@ namespace Pinder.Core.Tests
             var config = new GameSessionConfig(clock: clock);
             var session = new GameSession(
                 MakeProfile("Player"),
-                MakeProfile("Opponent"),
+                MakeProfile("Datee"),
                 new NullLlmAdapter(),
                 dice,
                 new NullTrapRegistry(),
@@ -138,7 +138,7 @@ namespace Pinder.Core.Tests
 
             var session = new GameSession(
                 MakeProfile("Player"),
-                MakeProfile("Opponent"),
+                MakeProfile("Datee"),
                 new NullLlmAdapter(),
                 dice,
                 new NullTrapRegistry(),
@@ -164,7 +164,7 @@ namespace Pinder.Core.Tests
 
             var session = new GameSession(
                 MakeProfile("Player"),
-                MakeProfile("Opponent"),
+                MakeProfile("Datee"),
                 new NullLlmAdapter(),
                 dice,
                 new NullTrapRegistry(),

@@ -77,7 +77,7 @@ namespace Pinder.Core.Conversation
                 state.Traps,
                 state.TurnNumber,
                 state.ComboTracker.HasTripleBonus,
-                state.OpponentHistory);
+                state.DateeHistory);
         }
 
         internal static System.Collections.Generic.IReadOnlyList<(string Sender, string Text)> BuildHistoryForLlmContext(GameSessionState state)
@@ -139,14 +139,14 @@ namespace Pinder.Core.Conversation
                 defendingStat:  Pinder.Core.Stats.StatBlock.DefenceTable[original.Stat]);
         }
 
-        internal static string BuildOpponentContext(CharacterProfile opponent)
+        internal static string BuildDateeContext(CharacterProfile datee)
         {
-            if (opponent == null) return string.Empty;
-            string bio = string.IsNullOrWhiteSpace(opponent.Bio) ? "(no bio)" : opponent.Bio;
-            string items = opponent.EquippedItemDisplayNames != null && opponent.EquippedItemDisplayNames.Count > 0
-                ? string.Join(", ", opponent.EquippedItemDisplayNames)
+            if (datee == null) return string.Empty;
+            string bio = string.IsNullOrWhiteSpace(datee.Bio) ? "(no bio)" : datee.Bio;
+            string items = datee.EquippedItemDisplayNames != null && datee.EquippedItemDisplayNames.Count > 0
+                ? string.Join(", ", datee.EquippedItemDisplayNames)
                 : "(none)";
-            return $"Opponent: {opponent.DisplayName} | Bio: \"{bio}\" | Wearing: {items}";
+            return $"Datee: {datee.DisplayName} | Bio: \"{bio}\" | Wearing: {items}";
         }
 
         internal static void EmitTextLayerNoop(Action<TextLayerNoopEvent>? onTextLayerNoop, int turnNumber, string layer, string beforeText, string afterText)

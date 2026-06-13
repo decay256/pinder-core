@@ -20,12 +20,12 @@ namespace Pinder.LlmAdapters.OpenAi
     {
         private const double DefaultDialogueOptionsTemperature = 0.9;
         private const double DefaultDeliveryTemperature = 0.7;
-        private const double DefaultOpponentResponseTemperature = 0.85;
+        private const double DefaultDateeResponseTemperature = 0.85;
 
         private readonly OpenAiClient _client;
         private readonly OpenAiOptions _options;
 
-        // #788: opponent conversation state lives on GameSession, not here.
+        // #788: datee conversation state lives on GameSession, not here.
         // The adapter is pure-stateless and safe for concurrent reuse across sessions.
 
         /// <summary>Creates adapter with internally-owned OpenAiClient.</summary>
@@ -73,38 +73,38 @@ namespace Pinder.LlmAdapters.OpenAi
         }
 
         /// <inheritdoc />
-        public async Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context, CancellationToken ct = default)
+        public async Task<DateeResponse> GetDateeResponseAsync(DateeContext context, CancellationToken ct = default)
         {
             // #788: stateless single-turn fallback. Stateful callers route
             // through the IStatefulLlmAdapter overload that takes a history.
-            var result = await GetOpponentResponseAsync(context, System.Array.Empty<ConversationMessage>(), ct).ConfigureAwait(false);
+            var result = await GetDateeResponseAsync(context, System.Array.Empty<ConversationMessage>(), ct).ConfigureAwait(false);
             return result.Response;
         }
 
         /// <inheritdoc />
-        public async Task<StatefulOpponentResult> GetOpponentResponseAsync(
-            OpponentContext context,
+        public async Task<StatefulDateeResult> GetDateeResponseAsync(
+            DateeContext context,
             IReadOnlyList<ConversationMessage> history,
             CancellationToken cancellationToken = default)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             if (history == null) throw new ArgumentNullException(nameof(history));
 
-            var userContent = SessionDocumentBuilder.BuildOpponentPrompt(context);
-            var systemPrompt = SessionSystemPromptBuilder.BuildOpponent(context.OpponentPrompt, _options.GameDefinition);
+            var userContent = SessionDocumentBuilder.BuildDateePrompt(context);
+            var systemPrompt = SessionSystemPromptBuilder.BuildDatee(context.DateePrompt, _options.GameDefinition);
 
             string requestJson;
             if (history.Count == 0)
             {
-                requestJson = BuildRequestJson(systemPrompt, userContent, DefaultOpponentResponseTemperature);
+                requestJson = BuildRequestJson(systemPrompt, userContent, DefaultDateeResponseTemperature);
             }
             else
             {
-                requestJson = BuildStatefulRequestJson(systemPrompt, history, userContent, DefaultOpponentResponseTemperature);
+                requestJson = BuildStatefulRequestJson(systemPrompt, history, userContent, DefaultDateeResponseTemperature);
             }
 
             var responseText = await _client.SendChatCompletionAsync(requestJson, cancellationToken).ConfigureAwait(false);
-            var parsed = ParseOpponentResponse(responseText);
+            var parsed = ParseDateeResponse(responseText);
 
             // #866: post-LLM length validation (warn-only phase 1 — no retry)
             int playerLen = context.PlayerDeliveredMessage.Length;
@@ -113,8 +113,8 @@ namespace Pinder.LlmAdapters.OpenAi
             if (parsed.MessageText != null && parsed.MessageText.Length > slopCeiling)
             {
                 Console.Error.WriteLine(
-                    $"[WARN] Opponent response over length ceiling (slop ceiling={slopCeiling:F0}): " +
-                    $"playerLen={playerLen} ceiling={ceiling} responseLen={parsed.MessageText.Length} character={context.OpponentName}");
+                    $"[WARN] Datee response over length ceiling (slop ceiling={slopCeiling:F0}): " +
+                    $"playerLen={playerLen} ceiling={ceiling} responseLen={parsed.MessageText.Length} character={context.DateeName}");
             }
 
             var newEntries = new ConversationMessage[]
@@ -122,7 +122,7 @@ namespace Pinder.LlmAdapters.OpenAi
                 ConversationMessage.User(userContent),
                 ConversationMessage.Assistant(responseText ?? string.Empty),
             };
-            return new StatefulOpponentResult(parsed, newEntries);
+            return new StatefulDateeResult(parsed, newEntries);
         }
 
         /// <inheritdoc />
@@ -136,7 +136,7 @@ namespace Pinder.LlmAdapters.OpenAi
 
             string prompt = template
                 .Replace("{player_name}", context.PlayerName)
-                .Replace("{opponent_name}", context.OpponentName)
+                .Replace("{datee_name}", context.DateeName)
                 .Replace("{delivered_message}", context.DeliveredMessage);
 
             var sb = new System.Text.StringBuilder();
@@ -214,7 +214,7 @@ namespace Pinder.LlmAdapters.OpenAi
             double temperature)
         {
             // #947: same cache_control wrapping as BuildRequestJson — the
-            // stateful path is the one used for multi-turn opponent-response
+            // stateful path is the one used for multi-turn datee-response
             // exchanges, which is exactly where prompt-cache hits matter most.
             var systemContent = OpenAiCacheControl.BuildSystemContent(
                 systemPrompt, _options.UseAnthropicCacheControl);

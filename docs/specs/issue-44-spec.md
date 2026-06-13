@@ -103,7 +103,7 @@ public int GetShadowDelta(ShadowStatType shadow)
 ```csharp
 public GameSession(
     CharacterProfile player,
-    CharacterProfile opponent,
+    CharacterProfile datee,
     ILlmAdapter llm,
     IDiceRoller dice,
     ITrapRegistry trapRegistry,

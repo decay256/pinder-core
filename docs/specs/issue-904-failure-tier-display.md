@@ -56,8 +56,8 @@ unambiguous across all check kinds.
 `SessionDocumentBuilder.GetFailureTierName()` (line 554) and `GetTierInstruction()`
 (line 567) return LLM-internal prompt codes (`"TROPE_TRAP"` with underscore, all-caps),
 not player-facing labels. These are exclusively called from `BuildDeliveryPrompt` and
-`BuildOpponentPrompt`, both of which are pure option-roll paths (`DeliveryContext`
-carries `ChosenOption`; `OpponentContext` carries `DeliveryTier` from a completed
+`BuildDateePrompt`, both of which are pure option-roll paths (`DeliveryContext`
+carries `ChosenOption`; `DateeContext` carries `DeliveryTier` from a completed
 option roll). Routing these through `FailureTierDisplay.Label()` would change the
 LLM instruction format (from `"TROPE_TRAP"` to `"TropeTrap"` / `"Severe"`) and
 would be a behavior change for the option-roll prompt, not a display fix.

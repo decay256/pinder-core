@@ -40,8 +40,8 @@ namespace Pinder.LlmAdapters.Tests
             };
 
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
-                MakeDialogueContext(conversationHistory: history, opponentLastMessage: "msg3",
-                    currentTurn: 3, playerName: "ALICE", opponentName: "BOB"));
+                MakeDialogueContext(conversationHistory: history, dateeLastMessage: "msg3",
+                    currentTurn: 3, playerName: "ALICE", dateeName: "BOB"));
 
             Assert.Contains("[T1|PLAYER AVATAR] \"msg0\"", result);
             Assert.Contains("[T1|DATEE] \"msg1\"", result);
@@ -62,8 +62,8 @@ namespace Pinder.LlmAdapters.Tests
             }
 
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
-                MakeDialogueContext(conversationHistory: history, opponentLastMessage: "msg39",
-                    currentTurn: 21, playerName: "PLAYER_X", opponentName: "OPP_Y"));
+                MakeDialogueContext(conversationHistory: history, dateeLastMessage: "msg39",
+                    currentTurn: 21, playerName: "PLAYER_X", dateeName: "OPP_Y"));
 
             for (int turn = 1; turn <= 20; turn++)
             {
@@ -78,7 +78,7 @@ namespace Pinder.LlmAdapters.Tests
             var history = new List<(string, string)> { ("GERALD", "Hello!") };
 
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
-                MakeDialogueContext(conversationHistory: history, playerName: "GERALD", opponentName: "V"));
+                MakeDialogueContext(conversationHistory: history, playerName: "GERALD", dateeName: "V"));
 
             Assert.Contains("[T1|PLAYER AVATAR] \"Hello!\"", result);
             Assert.Contains("[CURRENT_TURN]", result);
@@ -94,7 +94,7 @@ namespace Pinder.LlmAdapters.Tests
             };
 
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
-                MakeDialogueContext(conversationHistory: history, opponentLastMessage: "Really?", currentTurn: 2));
+                MakeDialogueContext(conversationHistory: history, dateeLastMessage: "Really?", currentTurn: 2));
 
             Assert.Contains("She said \"wow\" to me", result);
         }
@@ -109,7 +109,7 @@ namespace Pinder.LlmAdapters.Tests
             };
 
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
-                MakeDialogueContext(conversationHistory: history, opponentLastMessage: "response", currentTurn: 2));
+                MakeDialogueContext(conversationHistory: history, dateeLastMessage: "response", currentTurn: 2));
 
             Assert.Contains("[T1|PLAYER AVATAR] \"\"", result);
         }
@@ -124,8 +124,8 @@ namespace Pinder.LlmAdapters.Tests
             };
 
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
-                MakeDialogueContext(conversationHistory: history, opponentLastMessage: "Hi",
-                    currentTurn: 2, playerName: "Big Gerald", opponentName: "Lady V"));
+                MakeDialogueContext(conversationHistory: history, dateeLastMessage: "Hi",
+                    currentTurn: 2, playerName: "Big Gerald", dateeName: "Lady V"));
 
             Assert.Contains("[T1|PLAYER AVATAR] \"Hey\"", result);
             Assert.Contains("[T1|DATEE] \"Hi\"", result);
@@ -141,15 +141,15 @@ namespace Pinder.LlmAdapters.Tests
             };
 
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
-                MakeDialogueContext(conversationHistory: history, opponentLastMessage: "Hi",
-                    currentTurn: 2, playerName: "Gerald", opponentName: "gerald"));
+                MakeDialogueContext(conversationHistory: history, dateeLastMessage: "Hi",
+                    currentTurn: 2, playerName: "Gerald", dateeName: "gerald"));
 
             Assert.Contains("[T1|PLAYER AVATAR] \"Hey\"", result);
             Assert.Contains("[T1|DATEE] \"Hi\"", result);
         }
 
         [Fact]
-        public void BuildOpponentPrompt_HistoryExcludesCurrentPlayerMessage()
+        public void BuildDateePrompt_HistoryExcludesCurrentPlayerMessage()
         {
             var history = new List<(string, string)>
             {
@@ -157,8 +157,8 @@ namespace Pinder.LlmAdapters.Tests
                 ("O", "Turn1Opp")
             };
 
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(conversationHistory: history, playerDeliveredMessage: "Turn2Player",
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(conversationHistory: history, playerDeliveredMessage: "Turn2Player",
                     interestBefore: 10, interestAfter: 12, responseDelayMinutes: 3.0));
 
             Assert.Contains("[T1|PLAYER AVATAR] \"Turn1Player\"", result);

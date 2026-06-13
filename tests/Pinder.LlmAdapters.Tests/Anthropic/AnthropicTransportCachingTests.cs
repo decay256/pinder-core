@@ -24,9 +24,9 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         {
             var userMessage = "[PREVIOUS CONVERSATION CONTEXT]\n" +
                               "[PLAYER] Hello there\n" +
-                              "[OPPONENT] Hey back!\n" +
+                              "[DATEE] Hey back!\n" +
                               "[PLAYER] What's up?\n" +
-                              "[OPPONENT] Not much\n" +
+                              "[DATEE] Not much\n" +
                               "\n" +
                               "[CURRENT TURN]\n" +
                               "Let's play a game!";
@@ -35,9 +35,9 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
 
             // Expecting:
             // Message 0 (PLAYER/user): "Hello there"
-            // Message 1 (OPPONENT/assistant): "Hey back!"
+            // Message 1 (DATEE/assistant): "Hey back!"
             // Message 2 (PLAYER/user): "What's up?" (with cache_control)
-            // Message 3 (OPPONENT/assistant): "Not much"
+            // Message 3 (DATEE/assistant): "Not much"
             // Message 4 (PLAYER/user): "Let's play a game!" (with cache_control)
             Assert.Equal(5, messages.Length);
 

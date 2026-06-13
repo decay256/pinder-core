@@ -44,12 +44,12 @@ namespace Pinder.Core.Conversation
         public int RizzCumulativeFailureCount { get; set; }
 
         /// <summary>
-        /// Engine-owned opponent LLM conversation history (#788). Each entry is
+        /// Engine-owned datee LLM conversation history (#788). Each entry is
         /// a (role, content) pair where role is <c>"user"</c> or
         /// <c>"assistant"</c>. Survives snapshot/restore so a replayed session
-        /// can reproduce the same multi-turn opponent context the original ran
+        /// can reproduce the same multi-turn datee context the original ran
         /// with. Empty list = no prior turns.
         /// </summary>
-        public List<(string Role, string Content)> OpponentHistory { get; set; } = new List<(string, string)>();
+        public List<(string Role, string Content)> DateeHistory { get; set; } = new List<(string, string)>();
     }
 }

@@ -22,7 +22,7 @@ namespace Pinder.Core.Tests.Phase0
             };
             transport.QueueDialogueOptions(Phase0Fixtures.CannedDialogueOptions);
             transport.QueueDelivery(Phase0Fixtures.CannedDelivery);
-            transport.QueueOpponent(Phase0Fixtures.CannedOpponent);
+            transport.QueueDatee(Phase0Fixtures.CannedDatee);
 
             var adapter = Phase0Fixtures.MakeAdapter(transport);
             var dice = new PlaybackDiceRoller(
@@ -32,7 +32,7 @@ namespace Pinder.Core.Tests.Phase0
 
             var session = new GameSession(
                 Phase0Fixtures.MakeProfile("Player"),
-                Phase0Fixtures.MakeProfile("Opponent"),
+                Phase0Fixtures.MakeProfile("Datee"),
                 adapter, dice, new NullTrapRegistry(), Phase0Fixtures.MakeConfig());
 
             await session.StartTurnAsync();
@@ -40,7 +40,7 @@ namespace Pinder.Core.Tests.Phase0
 
             Assert.NotNull(result);
             Assert.True(transport.Exchanges.Count >= 3,
-                $"Expected at least 3 LLM exchanges (options/delivery/opponent), got {transport.Exchanges.Count}.");
+                $"Expected at least 3 LLM exchanges (options/delivery/datee), got {transport.Exchanges.Count}.");
         }
     }
 }

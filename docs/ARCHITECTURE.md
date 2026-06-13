@@ -48,7 +48,7 @@ The domain kernel. Zero external dependencies — no NuGet packages, no I/O.
 | | `Conversation/TurnOrchestrator.cs` — instance-based turn orchestrator orchestrating stage-based execution |
 | | `Conversation/RollResolutionStage.cs` — stateless pipeline stage for d20 roll evaluation |
 | | `Conversation/DeliveryStage.cs` — stateless pipeline stage for choice delivery and overlays |
-| | `Conversation/OpponentResponseStage.cs` — stateless pipeline stage for opponent reaction and tells |
+| | `Conversation/DateeResponseStage.cs` — stateless pipeline stage for datee reaction and tells |
 | | `Interfaces/` — ILlmAdapter, IStatefulLlmAdapter, IGameClock, ITrapRegistry, IDiceRoller, IRuleResolver |
 | | `Rolls/RollEngine.cs` — d20 resolution logic |
 | | `Stats/StatBlock.cs` — stat model + shadow pairing table |
@@ -124,7 +124,7 @@ skips it or runs a lighter version.
 |---|---|
 | **Purpose** | Matchup preview + stake copy at session boot time |
 | **Key files** | `IMatchupAnalyzer.cs` / `LlmMatchupAnalyzer.cs` — matchup narrative |
-| | `IStakeGenerator.cs` / `LlmStakeGenerator.cs` — player + opponent stake strings |
+| | `IStakeGenerator.cs` / `LlmStakeGenerator.cs` — player + datee stake strings |
 | | `CharacterDefinitionLoader.cs` — shared character JSON loader |
 
 Ported into this library in #756 (`569b9f9`). Previously inlined in
@@ -157,7 +157,7 @@ A single turn flows through two phases: `StartTurnAsync` (generate options) and 
 
 3. **ResolveTurnAsync(optionIndex)** — Consumes 1 energy from the game clock. Computes external bonuses: tell (+2), callback (distance-based), momentum (streak 3→+2, 5→+3), triple combo (+1).
 
-4. **Roll** — `RollEngine.Resolve()` rolls d20 + stat modifier + level bonus + external bonus vs DC (16 + opponent defending stat). Advantage/disadvantage from interest state, shadow T2+, or crit carry-over.
+4. **Roll** — `RollEngine.Resolve()` rolls d20 + stat modifier + level bonus + external bonus vs DC (16 + datee defending stat). Advantage/disadvantage from interest state, shadow T2+, or crit carry-over.
 
 5. **Interest delta** — Success: base delta from beat margin (+1 to +4) + risk tier bonus. Failure: negative delta from miss margin (−1 to −3). Combo bonus added. Interest meter updated (range 0–25).
 
@@ -167,7 +167,7 @@ A single turn flows through two phases: `StartTurnAsync` (generate options) and 
 
 8. **Delivery** — Build `DeliveryContext`. Call `ILlmAdapter.DeliverMessageAsync()` → returns the player's message text with outcome-appropriate degradation (success improves phrasing, failure corrupts it).
 
-9. **Steering roll** — Separate RNG. DC = 16 + average(opponent SA, Rizz, Honesty). On success, calls `IStatefulLlmAdapter.GetSteeringQuestionAsync()` → appends a date-nudge question.
+9. **Steering roll** — Separate RNG. DC = 16 + average(datee SA, Rizz, Honesty). On success, calls `IStatefulLlmAdapter.GetSteeringQuestionAsync()` → appends a date-nudge question.
 
 10. **Horniness check (roll only)** — Separate RNG. DC = 20 − session horniness. On miss, records the overlay instruction via `HorninessEngine.PeekAsync()` but defers the text rewrite until after shadow corruption (#899).
 
@@ -179,7 +179,7 @@ A single turn flows through two phases: `StartTurnAsync` (generate options) and 
 
 11. **Shadow growth** — `EvaluatePerTurnShadowGrowth()` evaluates 15+ triggers: Nat 1 → paired shadow +1, same stat 3× → Fixation +1, Charm 3× → Madness +1, RIZZ failures → Despair, etc. Also evaluates reductions (combo success → Madness −1, Honesty success at high interest → Denial −1).
 
-12. **Opponent response** — Build `OpponentContext` with full conversation history, interest narrative, resistance level, delivery tier, shadow taint. Call `ILlmAdapter.GetOpponentResponseAsync()` → returns message + optional weakness window + tell.
+12. **Datee response** — Build `DateeContext` with full conversation history, interest narrative, resistance level, delivery tier, shadow taint. Call `ILlmAdapter.GetDateeResponseAsync()` → returns message + optional weakness window + tell.
 
 13. **Cleanup** — Advance trap timers. Increment turn. Clear stored options. Return `TurnResult` with roll, messages, interest delta, shadow events, combo/callback/tell info.
 
@@ -220,7 +220,7 @@ Core abstraction for all LLM interactions. Stateless per-call.
 |---|---|
 | `GetDialogueOptionsAsync(DialogueContext)` | Generate 3–4 dialogue options for the player |
 | `DeliverMessageAsync(DeliveryContext)` | Deliver chosen option with outcome degradation |
-| `GetOpponentResponseAsync(OpponentContext)` | Generate opponent's reply |
+| `GetDateeResponseAsync(DateeContext)` | Generate datee's reply |
 | `GetInterestChangeBeatAsync(InterestChangeContext)` | Narrative beat on interest threshold crossing |
 | `ApplyHorninessOverlayAsync(message, instruction)` | Rewrite message with horniness overlay |
 
@@ -228,11 +228,11 @@ Core abstraction for all LLM interactions. Stateless per-call.
 
 ### IStatefulLlmAdapter : ILlmAdapter
 
-Extends ILlmAdapter with persistent opponent session for memory continuity across turns. Options and delivery remain stateless to prevent voice bleed between player/opponent roles.
+Extends ILlmAdapter with persistent datee session for memory continuity across turns. Options and delivery remain stateless to prevent voice bleed between player/datee roles.
 
 | Method | Purpose |
 |---|---|
-| `StartOpponentSession(systemPrompt)` | Initialize persistent opponent conversation |
+| `StartDateeSession(systemPrompt)` | Initialize persistent datee conversation |
 | `GetSteeringQuestionAsync(SteeringContext)` | Generate steering question after successful roll |
 
 **Implementations:** `AnthropicLlmAdapter`, `OpenAiLlmAdapter`
@@ -305,7 +305,7 @@ not raw margin.
 
 ### Success path (RiskTier)
 
-Attack d20 + stat mod + level bonus + external bonuses vs DC (16 + opponent
+Attack d20 + stat mod + level bonus + external bonuses vs DC (16 + datee
 defending stat). Risk tier is derived from the attempt's **effective need**
 (i.e., the gap between the player's modifier total and the DC) — not from the
 post-roll margin. This keeps "risk" a property of the choice, not of luck.
@@ -347,7 +347,7 @@ Hollow, Obsession). Shadows corrupt by stat-usage patterns (§7) and, past
 threshold T2, impose disadvantage on the paired stat's rolls.
 
 Roll formula (attempt side): `d20 + stat_mod + level_bonus + external_bonus`
-vs DC `16 + opponent_defending_stat`. `level_bonus` is a flat +1 per level
+vs DC `16 + datee_defending_stat`. `level_bonus` is a flat +1 per level
 applied to all rolls — progression keeps scaling simple; shadows are the
 threat that actually eats into it.
 
@@ -364,7 +364,7 @@ in `data/prompts/` and is loaded once at startup via
 ```
 data/prompts/
 ├── templates.yaml    # 37 ENGINE injection blocks (dialogue-options-instruction,
-│                     #   delivery-instruction, opponent-response-instruction, etc.)
+│                     #   delivery-instruction, datee-response-instruction, etc.)
 ├── structural.yaml   # 7 structural strings assembled into system prompts
 │                     #   (loaded via cross-assembly delegate from Pinder.LlmAdapters
 │                     #   into Pinder.SessionSetup; see §5a for the delegate pattern)
@@ -400,20 +400,20 @@ done via a delegate injected at wiring time. `PromptWiring.Wire()` reads
 `SessionSystemPromptBuilder` via a registered accessor delegate. Neither
 assembly holds a direct reference to the other's internals.
 
-### Role-affiliation rule (BuildPlayer vs BuildOpponent)
+### Role-affiliation rule (BuildPlayer vs BuildDatee)
 
 Each `GameDefinition` section is **role-affiliated** — it belongs either to
-the player-builder path or the opponent-builder path, never both. This rule
+the player-builder path or the datee-builder path, never both. This rule
 was formalized in #867 after a token-audit discovered that
-`BuildPlayer`/`Build()` were including `OpponentFriction` and
-`OpponentCuriosity` sections, bloating the player prompt with irrelevant
+`BuildPlayer`/`Build()` were including `DateeFriction` and
+`DateeCuriosity` sections, bloating the player prompt with irrelevant
 material.
 
 Current split (as of #867):
 - **BuildPlayer** includes: `ConversationArc`, `PlayerProbing`, and all
   player-facing delivery context.
-- **BuildOpponent** includes: `OpponentFriction`, `OpponentCuriosity`, and
-  all opponent-facing response context.
+- **BuildDatee** includes: `DateeFriction`, `DateeCuriosity`, and
+  all datee-facing response context.
 - **Build()** (shared/base): only sections relevant to both roles (e.g.
   meta contract, shared writing rules).
 
@@ -436,7 +436,7 @@ for the full rationale.
 | `data/characters/*.json` | Character definitions (items, anatomy, stats) | `CharacterDefinitionLoader` | `displayName`, `stats`, `equippedItems`, `anatomy`, `textingStyle` |
 | `data/items/starter-items.json` | Item catalog (stat modifiers, fragments) | `JsonItemRepository` | `id`, `statModifiers`, `promptFragment` |
 | `data/anatomy/anatomy-parameters.json` | Anatomy options (stat modifiers, fragments) | `JsonAnatomyRepository` | `id`, `statModifiers`, `promptFragment` |
-| `data/timing/response-profiles.json` | Opponent response delay curves | `CharacterProfile.Timing` | `baseDelay`, `interestMultiplier` |
+| `data/timing/response-profiles.json` | Datee response delay curves | `CharacterProfile.Timing` | `baseDelay`, `interestMultiplier` |
 
 ## 6. LLM Call Types
 
@@ -446,7 +446,7 @@ GameSession makes 4 primary LLM calls per turn (plus 2 conditional), all routed 
 
 | Aspect | Detail |
 |---|---|
-| **Context** | Player system prompt, opponent visible profile (name + bio only), full conversation history, shadow thresholds, active traps + LLM instructions, horniness level, callback opportunities, active tell, archetype directive, 3 drawn stats |
+| **Context** | Player system prompt, datee visible profile (name + bio only), full conversation history, shadow thresholds, active traps + LLM instructions, horniness level, callback opportunities, active tell, archetype directive, 3 drawn stats |
 | **Returns** | Array of `DialogueOption` (stat, intended text, optional callback turn) |
 | **Prompt builder** | `SessionDocumentBuilder.BuildDialogueOptionsPrompt()` |
 
@@ -454,17 +454,17 @@ GameSession makes 4 primary LLM calls per turn (plus 2 conditional), all routed 
 
 | Aspect | Detail |
 |---|---|
-| **Context** | Player + opponent prompts, conversation history, chosen option, roll outcome (success tier / failure tier + miss margin), beat-DC-by, active traps, shadow thresholds, stat-specific delivery instruction |
+| **Context** | Player + datee prompts, conversation history, chosen option, roll outcome (success tier / failure tier + miss margin), beat-DC-by, active traps, shadow thresholds, stat-specific delivery instruction |
 | **Returns** | `string` — the delivered message text (improved on success, corrupted on failure) |
 | **Prompt builder** | `SessionDocumentBuilder.BuildDeliveryPrompt()` |
 
-### 3. Opponent Response (`GetOpponentResponseAsync`)
+### 3. Datee Response (`GetDateeResponseAsync`)
 
 | Aspect | Detail |
 |---|---|
-| **Context** | Both prompts, full history, player's delivered message, interest before/after, response delay, active traps, opponent shadow thresholds, delivery tier, archetype directive, resistance level |
-| **Returns** | `OpponentResponse` — message text + optional `WeaknessWindow` + optional `Tell` |
-| **Prompt builder** | `SessionDocumentBuilder.BuildOpponentPrompt()` |
+| **Context** | Both prompts, full history, player's delivered message, interest before/after, response delay, active traps, datee shadow thresholds, delivery tier, archetype directive, resistance level |
+| **Returns** | `DateeResponse` — message text + optional `WeaknessWindow` + optional `Tell` |
+| **Prompt builder** | `SessionDocumentBuilder.BuildDateePrompt()` |
 
 ### 4. Improvement Pass (two-stage rewrite)
 
@@ -472,7 +472,7 @@ Configured via `GameDefinition.ImprovementPrompt`. Appended after initial genera
 
 ### 5. Steering Question (`GetSteeringQuestionAsync`) — conditional
 
-Called only on successful steering roll via `IStatefulLlmAdapter`. Receives player/opponent names, delivered message, conversation history. Returns a single question to append.
+Called only on successful steering roll via `IStatefulLlmAdapter`. Receives player/datee names, delivered message, conversation history. Returns a single question to append.
 
 ### 6. Horniness Overlay (`ApplyHorninessOverlayAsync`) — conditional
 
@@ -512,7 +512,7 @@ Called on failed horniness check. Receives the delivered message + tier-specific
 
 ## Progression
 
-**Level Bonus**: Each level grants a flat +1 bonus to ALL rolls (not per-stat). This is intentional: players outscale opponent DCs over time, but shadows remain threatening even at high level because they eat into the level bonus. Keeping it flat (not per-stat) avoids complex stat-specific levelling decisions and keeps progression simple.
+**Level Bonus**: Each level grants a flat +1 bonus to ALL rolls (not per-stat). This is intentional: players outscale datee DCs over time, but shadows remain threatening even at high level because they eat into the level bonus. Keeping it flat (not per-stat) avoids complex stat-specific levelling decisions and keeps progression simple.
 
 ### Testing
 - **0 test failures before any merge**

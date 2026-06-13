@@ -30,7 +30,7 @@ strings:
 
   turn_result.timeline_intended: "Intended"
   turn_result.timeline_delivered: "Delivered"
-  turn_result.timeline_opponent: "Opponent replies"
+  turn_result.timeline_datee: "Datee replies"
 
   turn_result.interest_breakdown.base: "Base: {value}"
   turn_result.interest_breakdown.risk_bonus: "Risk bonus: {value}"

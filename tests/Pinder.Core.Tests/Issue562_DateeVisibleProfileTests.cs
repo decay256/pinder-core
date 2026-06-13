@@ -7,20 +7,20 @@ using Xunit;
 namespace Pinder.Core.Tests
 {
     /// <summary>
-    /// Issue #562: opponent context bleed fix. The dialogue-options call
+    /// Issue #562: datee context bleed fix. The dialogue-options call
     /// now sees a structured Tinder-card-equivalent visible profile
     /// (display name + gender identity + bio + outfit description), NOT
     /// the raw equipped-items list nor the full system prompt.
     /// </summary>
     [Trait("Category", "Characters")]
-    public class Issue562_OpponentVisibleProfileTests
+    public class Issue562_DateeVisibleProfileTests
     {
         // ── Render: outfit-description path ──────────────────────────────
 
         [Fact]
         public void Render_WithOutfitDescription_OmitsItemsList()
         {
-            var profile = new OpponentVisibleProfile(
+            var profile = new DateeVisibleProfile(
                 displayName: "Sable_xo",
                 genderIdentity: "she/her",
                 bio: "looking for my person.",
@@ -46,7 +46,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void Render_WithoutOutfitDescription_FallsBackToItemsList()
         {
-            var profile = new OpponentVisibleProfile(
+            var profile = new DateeVisibleProfile(
                 displayName: "Brick_haus",
                 genderIdentity: "he/him",
                 bio: "yacht club enjoyer",
@@ -67,7 +67,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void Render_EmptyGenderIdentity_OmitsParenthesisedSegment()
         {
-            var profile = new OpponentVisibleProfile(
+            var profile = new DateeVisibleProfile(
                 displayName: "TestChar",
                 genderIdentity: "",
                 bio: "bio",
@@ -83,7 +83,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void Render_EmptyBio_OmitsBioSegment()
         {
-            var profile = new OpponentVisibleProfile(
+            var profile = new DateeVisibleProfile(
                 displayName: "TestChar",
                 genderIdentity: "they/them",
                 bio: "",
@@ -99,7 +99,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void Render_AllFieldsEmpty_StillEmitsDisplayName()
         {
-            var profile = new OpponentVisibleProfile(
+            var profile = new DateeVisibleProfile(
                 displayName: "Anon",
                 genderIdentity: "",
                 bio: "",
@@ -111,15 +111,15 @@ namespace Pinder.Core.Tests
             Assert.Equal("Anon", rendered);
         }
 
-        // ── BuildOpponentVisibleProfile factory ──────────────────────────
+        // ── BuildDateeVisibleProfile factory ──────────────────────────
 
         [Fact]
-        public void BuildOpponentVisibleProfile_PopulatesAllFieldsFromCharacterProfile()
+        public void BuildDateeVisibleProfile_PopulatesAllFieldsFromCharacterProfile()
         {
             var profile = BuildProfile("Sable_xo", "she/her", "bio text",
                 items: new[] { "rolex", "blazer" });
 
-            var dto = GameSessionHelpers.BuildOpponentVisibleProfile(profile,
+            var dto = GameSessionHelpers.BuildDateeVisibleProfile(profile,
                 outfitDescription: "scene description");
 
             Assert.Equal("Sable_xo", dto.DisplayName);
@@ -130,20 +130,20 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public void BuildOpponentVisibleProfile_DefaultOutfitDescription_IsEmpty()
+        public void BuildDateeVisibleProfile_DefaultOutfitDescription_IsEmpty()
         {
             var profile = BuildProfile("X", "they/them", "b", items: new[] { "i" });
 
-            var dto = GameSessionHelpers.BuildOpponentVisibleProfile(profile);
+            var dto = GameSessionHelpers.BuildDateeVisibleProfile(profile);
 
             Assert.Equal("", dto.OutfitDescription);
         }
 
         [Fact]
-        public void BuildOpponentVisibleProfile_NullOpponent_Throws()
+        public void BuildDateeVisibleProfile_NullDatee_Throws()
         {
             Assert.Throws<System.ArgumentNullException>(() =>
-                GameSessionHelpers.BuildOpponentVisibleProfile(null!));
+                GameSessionHelpers.BuildDateeVisibleProfile(null!));
         }
 
         // ── Helpers ──────────────────────────────────────────────────────

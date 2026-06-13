@@ -54,7 +54,7 @@ namespace Pinder.Core.Tests
         public async Task Long_message_delivered_intact_without_length_clamp()
         {
             var player = MakeProfile("Sable", MakeStats(charm: 5, wit: 5, sa: 5));
-            var opponent = MakeProfile("Brick", MakeStats(charm: 0, rizz: 0, honesty: 0, chaos: 0, wit: 0, sa: 0));
+            var datee = MakeProfile("Brick", MakeStats(charm: 0, rizz: 0, honesty: 0, chaos: 0, wit: 0, sa: 0));
 
             // Generate a 120-word string
             var longWords = Enumerable.Range(1, 120).Select(i => $"word{i}").ToArray();
@@ -70,7 +70,7 @@ namespace Pinder.Core.Tests
                 steeringRng: steeringRng, 
                 maxDeliveryWords: 80 // Max words is 80, but message is 120!
             );
-            var session = new GameSession(player, opponent, llm, dice, new NullTrapRegistry(), config);
+            var session = new GameSession(player, datee, llm, dice, new NullTrapRegistry(), config);
 
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
@@ -88,7 +88,7 @@ namespace Pinder.Core.Tests
         public async Task Steering_question_appended_even_when_intended_text_exceeds_max_delivery_words()
         {
             var player = MakeProfile("Sable", MakeStats(charm: 5, wit: 5, sa: 5));
-            var opponent = MakeProfile("Brick", MakeStats(charm: 0, rizz: 0, honesty: 0, chaos: 0, wit: 0, sa: 0));
+            var datee = MakeProfile("Brick", MakeStats(charm: 0, rizz: 0, honesty: 0, chaos: 0, wit: 0, sa: 0));
 
             // Intended text is 100 words (exceeds maxDeliveryWords of 80)
             var longWords = Enumerable.Range(1, 100).Select(i => $"word{i}").ToArray();
@@ -104,7 +104,7 @@ namespace Pinder.Core.Tests
                 steeringRng: steeringRng, 
                 maxDeliveryWords: 80
             );
-            var session = new GameSession(player, opponent, llm, dice, new NullTrapRegistry(), config);
+            var session = new GameSession(player, datee, llm, dice, new NullTrapRegistry(), config);
 
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
@@ -133,12 +133,12 @@ namespace Pinder.Core.Tests
                 _steeringQuestion = steeringQuestion;
             }
 
-            public Task<StatefulOpponentResult> GetOpponentResponseAsync(
-                OpponentContext context,
+            public Task<StatefulDateeResult> GetDateeResponseAsync(
+                DateeContext context,
                 System.Collections.Generic.IReadOnlyList<ConversationMessage> history,
                 System.Threading.CancellationToken ct = default)
-                => Task.FromResult(new StatefulOpponentResult(
-                    new OpponentResponse("..."),
+                => Task.FromResult(new StatefulDateeResult(
+                    new DateeResponse("..."),
                     new ConversationMessage[]
                     {
                         ConversationMessage.User(string.Empty),
@@ -159,18 +159,18 @@ namespace Pinder.Core.Tests
                 return Task.FromResult(context.ChosenOption.IntendedText);
             }
 
-            public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context, System.Threading.CancellationToken ct = default)
-                => Task.FromResult(new OpponentResponse("..."));
+            public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
+                => Task.FromResult(new DateeResponse("..."));
 
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult<string?>(null);
 
-            public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
+            public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
                 => Task.FromResult(message);
 
             public Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
                 => Task.FromResult(message);
-            public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => Task.FromResult(message);
+            public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => Task.FromResult(message);
 
             public Task<string> GetSteeringQuestionAsync(SteeringContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult(_steeringQuestion);

@@ -19,13 +19,13 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
     public partial class AnthropicLlmAdapterIssue208Tests
     {
         // ======================================================================
-        // AC3: Opponent response uses ONLY OpponentPrompt in system
+        // AC3: Datee response uses ONLY DateePrompt in system
         // ======================================================================
 
-        // What: AC3 — GetOpponentResponseAsync system blocks contain only opponent prompt
-        // Mutation: Would catch if player prompt is included in opponent response system blocks
+        // What: AC3 — GetDateeResponseAsync system blocks contain only datee prompt
+        // Mutation: Would catch if player prompt is included in datee response system blocks
         [Fact]
-        public async Task AC3_OpponentResponse_OnlyOpponentPromptInSystem()
+        public async Task AC3_DateeResponse_OnlyDateePromptInSystem()
         {
             var handler = new MockHttpHandler
             {
@@ -34,7 +34,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             using var client = new HttpClient(handler);
             using var adapter = new AnthropicLlmAdapter(DefaultOptions(), client);
 
-            await adapter.GetOpponentResponseAsync(MakeOpponentContext());
+            await adapter.GetDateeResponseAsync(MakeDateeContext());
 
             var body = JObject.Parse(handler.LastRequestBody!);
             var system = body["system"] as JArray;
@@ -45,26 +45,26 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         }
 
         // ======================================================================
-        // ParseOpponentResponse edge cases
+        // ParseDateeResponse edge cases
         // ======================================================================
 
-        // What: Spec — null input returns empty OpponentResponse
+        // What: Spec — null input returns empty DateeResponse
         // Mutation: Would catch if null throws instead of returning default
         [Fact]
-        public void ParseOpponentResponse_Null_ReturnsEmpty()
+        public void ParseDateeResponse_Null_ReturnsEmpty()
         {
-            var result = AnthropicLlmAdapter.ParseOpponentResponse(null!);
+            var result = AnthropicLlmAdapter.ParseDateeResponse(null!);
             Assert.Equal("", result.MessageText);
             Assert.Null(result.DetectedTell);
             Assert.Null(result.WeaknessWindow);
         }
 
-        // What: Spec — empty input returns empty OpponentResponse
+        // What: Spec — empty input returns empty DateeResponse
         // Mutation: Would catch if empty string is not handled
         [Fact]
-        public void ParseOpponentResponse_Empty_ReturnsEmpty()
+        public void ParseDateeResponse_Empty_ReturnsEmpty()
         {
-            var result = AnthropicLlmAdapter.ParseOpponentResponse("");
+            var result = AnthropicLlmAdapter.ParseDateeResponse("");
             Assert.Equal("", result.MessageText);
             Assert.Null(result.DetectedTell);
             Assert.Null(result.WeaknessWindow);
@@ -73,9 +73,9 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         // What: Spec — no [RESPONSE] marker, plain text used as message
         // Mutation: Would catch if absence of marker causes empty message
         [Fact]
-        public void ParseOpponentResponse_NoMarker_PlainTextUsedAsMessage()
+        public void ParseDateeResponse_NoMarker_PlainTextUsedAsMessage()
         {
-            var result = AnthropicLlmAdapter.ParseOpponentResponse("Just some plain text response");
+            var result = AnthropicLlmAdapter.ParseDateeResponse("Just some plain text response");
             Assert.Equal("Just some plain text response", result.MessageText.Trim());
             Assert.Null(result.DetectedTell);
             Assert.Null(result.WeaknessWindow);
@@ -84,10 +84,10 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         // What: Spec — [RESPONSE] present, no [SIGNALS]
         // Mutation: Would catch if missing signals block causes exception
         [Fact]
-        public void ParseOpponentResponse_ResponseOnly_NoSignals()
+        public void ParseDateeResponse_ResponseOnly_NoSignals()
         {
             var input = "[RESPONSE]\n\"Hey there, nice to meet you!\"";
-            var result = AnthropicLlmAdapter.ParseOpponentResponse(input);
+            var result = AnthropicLlmAdapter.ParseDateeResponse(input);
             Assert.Equal("Hey there, nice to meet you!", result.MessageText);
             Assert.Null(result.DetectedTell);
             Assert.Null(result.WeaknessWindow);
@@ -96,7 +96,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         // What: Spec — both TELL and WEAKNESS parsed
         // Mutation: Would catch if only one signal type is parsed
         [Fact]
-        public void ParseOpponentResponse_BothSignals_Parsed()
+        public void ParseDateeResponse_BothSignals_Parsed()
         {
             var input = @"[RESPONSE]
 ""Great conversation!""
@@ -105,7 +105,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
 TELL: CHARM (flustered by compliments)
 WEAKNESS: WIT -2 (overthinking responses)";
 
-            var result = AnthropicLlmAdapter.ParseOpponentResponse(input);
+            var result = AnthropicLlmAdapter.ParseDateeResponse(input);
             Assert.Equal("Great conversation!", result.MessageText);
             Assert.NotNull(result.DetectedTell);
             Assert.Equal(StatType.Charm, result.DetectedTell!.Stat);
@@ -117,7 +117,7 @@ WEAKNESS: WIT -2 (overthinking responses)";
         // What: Spec — WEAKNESS: WIT -3 parsed correctly
         // Mutation: Would catch if dc reduction is hardcoded to 2
         [Fact]
-        public void ParseOpponentResponse_WeaknessMinusThree_Parsed()
+        public void ParseDateeResponse_WeaknessMinusThree_Parsed()
         {
             var input = @"[RESPONSE]
 ""OK""
@@ -125,7 +125,7 @@ WEAKNESS: WIT -2 (overthinking responses)";
 [SIGNALS]
 WEAKNESS: WIT -3 (deep crack)";
 
-            var result = AnthropicLlmAdapter.ParseOpponentResponse(input);
+            var result = AnthropicLlmAdapter.ParseDateeResponse(input);
             Assert.NotNull(result.WeaknessWindow);
             Assert.Equal(3, result.WeaknessWindow!.DcReduction);
         }
@@ -133,7 +133,7 @@ WEAKNESS: WIT -3 (deep crack)";
         // What: Spec — WEAKNESS with zero reduction returns null
         // Mutation: Would catch if zero reduction is accepted as valid
         [Fact]
-        public void ParseOpponentResponse_WeaknessZero_ReturnsNull()
+        public void ParseDateeResponse_WeaknessZero_ReturnsNull()
         {
             var input = @"[RESPONSE]
 ""OK""
@@ -141,14 +141,14 @@ WEAKNESS: WIT -3 (deep crack)";
 [SIGNALS]
 WEAKNESS: WIT -0 (no actual weakness)";
 
-            var result = AnthropicLlmAdapter.ParseOpponentResponse(input);
+            var result = AnthropicLlmAdapter.ParseDateeResponse(input);
             Assert.Null(result.WeaknessWindow);
         }
 
         // What: Spec — invalid tell stat returns null tell
         // Mutation: Would catch if invalid Enum.Parse propagates exception
         [Fact]
-        public void ParseOpponentResponse_InvalidTellStat_ReturnsNullTell()
+        public void ParseDateeResponse_InvalidTellStat_ReturnsNullTell()
         {
             var input = @"[RESPONSE]
 ""OK""
@@ -156,14 +156,14 @@ WEAKNESS: WIT -0 (no actual weakness)";
 [SIGNALS]
 TELL: INVALID_STAT (some description)";
 
-            var result = AnthropicLlmAdapter.ParseOpponentResponse(input);
+            var result = AnthropicLlmAdapter.ParseDateeResponse(input);
             Assert.Null(result.DetectedTell);
         }
 
         // What: Spec — malformed [SIGNALS] block returns null signals
         // Mutation: Would catch if malformed signals cause exception
         [Fact]
-        public void ParseOpponentResponse_MalformedSignals_ReturnsNullSignals()
+        public void ParseDateeResponse_MalformedSignals_ReturnsNullSignals()
         {
             var input = @"[RESPONSE]
 ""Some response""
@@ -171,7 +171,7 @@ TELL: INVALID_STAT (some description)";
 [SIGNALS]
 completely garbage that is not parseable at all !!!";
 
-            var result = AnthropicLlmAdapter.ParseOpponentResponse(input);
+            var result = AnthropicLlmAdapter.ParseDateeResponse(input);
             Assert.Equal("Some response", result.MessageText);
             Assert.Null(result.DetectedTell);
             Assert.Null(result.WeaknessWindow);
@@ -180,7 +180,7 @@ completely garbage that is not parseable at all !!!";
         // What: Spec — only TELL in signals
         // Mutation: Would catch if presence of TELL requires WEAKNESS to also be present
         [Fact]
-        public void ParseOpponentResponse_OnlyTell_WeaknessNull()
+        public void ParseDateeResponse_OnlyTell_WeaknessNull()
         {
             var input = @"[RESPONSE]
 ""Hey""
@@ -188,7 +188,7 @@ completely garbage that is not parseable at all !!!";
 [SIGNALS]
 TELL: CHARM (flustered)";
 
-            var result = AnthropicLlmAdapter.ParseOpponentResponse(input);
+            var result = AnthropicLlmAdapter.ParseDateeResponse(input);
             Assert.NotNull(result.DetectedTell);
             Assert.Equal(StatType.Charm, result.DetectedTell!.Stat);
             Assert.Null(result.WeaknessWindow);
@@ -197,7 +197,7 @@ TELL: CHARM (flustered)";
         // What: Spec — only WEAKNESS in signals
         // Mutation: Would catch if presence of WEAKNESS requires TELL to also be present
         [Fact]
-        public void ParseOpponentResponse_OnlyWeakness_TellNull()
+        public void ParseDateeResponse_OnlyWeakness_TellNull()
         {
             var input = @"[RESPONSE]
 ""Hey""
@@ -205,7 +205,7 @@ TELL: CHARM (flustered)";
 [SIGNALS]
 WEAKNESS: HONESTY -2 (opening)";
 
-            var result = AnthropicLlmAdapter.ParseOpponentResponse(input);
+            var result = AnthropicLlmAdapter.ParseDateeResponse(input);
             Assert.Null(result.DetectedTell);
             Assert.NotNull(result.WeaknessWindow);
             Assert.Equal(StatType.Honesty, result.WeaknessWindow!.DefendingStat);

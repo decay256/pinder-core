@@ -2,7 +2,7 @@
 
 ## Overview
 
-`AnthropicLlmAdapter` is the first real `ILlmAdapter` implementation in the Pinder engine. It translates the four `ILlmAdapter` method calls into Anthropic Claude Messages API requests, using `AnthropicClient` for HTTP transport, `SessionDocumentBuilder` for prompt formatting, and `CacheBlockBuilder` for prompt caching. It also owns response parsing — converting structured LLM text output into `DialogueOption[]` and `OpponentResponse` (with Tell/WeaknessWindow signals). The adapter lives in the separate `Pinder.LlmAdapters` project to keep `Pinder.Core` zero-dependency.
+`AnthropicLlmAdapter` is the first real `ILlmAdapter` implementation in the Pinder engine. It translates the four `ILlmAdapter` method calls into Anthropic Claude Messages API requests, using `AnthropicClient` for HTTP transport, `SessionDocumentBuilder` for prompt formatting, and `CacheBlockBuilder` for prompt caching. It also owns response parsing — converting structured LLM text output into `DialogueOption[]` and `DateeResponse` (with Tell/WeaknessWindow signals). The adapter lives in the separate `Pinder.LlmAdapters` project to keep `Pinder.Core` zero-dependency.
 
 ---
 
@@ -22,7 +22,7 @@ public sealed class AnthropicLlmAdapter : ILlmAdapter, IDisposable
     // ILlmAdapter
     public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context);
     public Task<string> DeliverMessageAsync(DeliveryContext context);
-    public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context);
+    public Task<DateeResponse> GetDateeResponseAsync(DateeContext context);
     public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context);
 
     // IDisposable
@@ -39,7 +39,7 @@ public sealed class AnthropicLlmAdapter : ILlmAdapter, IDisposable
 ```csharp
 // Visible as internal for unit testing via [InternalsVisibleTo]
 internal static DialogueOption[] ParseDialogueOptions(string llmResponse);
-internal static OpponentResponse ParseOpponentResponse(string llmResponse);
+internal static DateeResponse ParseDateeResponse(string llmResponse);
 ```
 
 ---
@@ -50,18 +50,18 @@ internal static OpponentResponse ParseOpponentResponse(string llmResponse);
 
 **Input:** A `DialogueContext` with:
 - `PlayerPrompt`: `"You are Thundercock, a bold confident penis..."`
-- `OpponentPrompt`: `"You are Velvet, a mysterious and alluring match..."`
+- `DateePrompt`: `"You are Velvet, a mysterious and alluring match..."`
 - `ConversationHistory`: `[("Velvet", "Hey there, nice profile pic 😏")]`
-- `OpponentLastMessage`: `"Hey there, nice profile pic 😏"`
+- `DateeLastMessage`: `"Hey there, nice profile pic 😏"`
 - `ActiveTraps`: `[]`
 - `CurrentInterest`: `10`
 - `PlayerName`: `"Thundercock"` (Sprint 9 DTO extension, default `""`)
-- `OpponentName`: `"Velvet"` (Sprint 9 DTO extension, default `""`)
+- `DateeName`: `"Velvet"` (Sprint 9 DTO extension, default `""`)
 - `CurrentTurn`: `1` (Sprint 9 DTO extension, default `0`)
 
 **Internal flow:**
 1. `CacheBlockBuilder.BuildCachedSystemBlocks("You are Thundercock...", "You are Velvet...")` → system content blocks with `cache_control: ephemeral`
-2. `SessionDocumentBuilder.BuildDialogueOptionsPrompt(history, traps, interest:10, turn:1, playerName:"Thundercock", opponentName:"Velvet")` → user content string
+2. `SessionDocumentBuilder.BuildDialogueOptionsPrompt(history, traps, interest:10, turn:1, playerName:"Thundercock", dateeName:"Velvet")` → user content string
 3. `MessagesRequest` built with model from `options.Model` (default `"claude-sonnet-4-20250514"`), temperature `0.9`, max_tokens from `options.MaxTokens` (default `1024`)
 4. POST via `_client.SendMessagesAsync(request)`
 
@@ -105,7 +105,7 @@ OPTION_2
 - `CallbackTurnNumber`: derived from callback topic tracking (the int value extracted from the topic key lookup, or `null` if not resolvable from context)
 - `ComboName`: `"The Setup"`
 - `HasTellBonus`: `true`
-- `HasWeaknessWindow`: `false` (weakness windows are set by GameSession from OpponentResponse, not from dialogue option generation)
+- `HasWeaknessWindow`: `false` (weakness windows are set by GameSession from DateeResponse, not from dialogue option generation)
 
 ### DeliverMessageAsync
 
@@ -116,12 +116,12 @@ OPTION_2
 "Thanks! You're not so bad yourself. What brings you to Pinder? I hear the penguin section is wild this time of year."
 ```
 
-### GetOpponentResponseAsync
+### GetDateeResponseAsync
 
-**Input:** An `OpponentContext` with `PlayerDeliveredMessage`, `InterestBefore = 10`, `InterestAfter = 12`.
+**Input:** An `DateeContext` with `PlayerDeliveredMessage`, `InterestBefore = 10`, `InterestAfter = 12`.
 
 **Internal flow:**
-1. System blocks use **only** `context.OpponentPrompt` — NOT `PlayerPrompt`. Uses `CacheBlockBuilder.BuildOpponentOnlySystemBlocks(context.OpponentPrompt)`.
+1. System blocks use **only** `context.DateePrompt` — NOT `PlayerPrompt`. Uses `CacheBlockBuilder.BuildDateeOnlySystemBlocks(context.DateePrompt)`.
 2. Temperature: `0.85`
 
 **LLM response text (example with signals):**
@@ -130,16 +130,16 @@ OPTION_2
 "Haha the penguin section! I actually went there once. It was... an experience. So what's YOUR type then? 👀"
 
 [SIGNALS]
-TELL: CHARM (opponent seems genuinely flustered by direct compliments)
-WEAKNESS: WIT -2 (opponent is clearly overthinking their responses, opening for wit)
+TELL: CHARM (datee seems genuinely flustered by direct compliments)
+WEAKNESS: WIT -2 (datee is clearly overthinking their responses, opening for wit)
 ```
 
-**Output:** `OpponentResponse`:
+**Output:** `DateeResponse`:
 - `MessageText`: `"Haha the penguin section! I actually went there once. It was... an experience. So what's YOUR type then? 👀"`
-- `DetectedTell`: `Tell(StatType.Charm, "opponent seems genuinely flustered by direct compliments")`
+- `DetectedTell`: `Tell(StatType.Charm, "datee seems genuinely flustered by direct compliments")`
 - `WeaknessWindow`: `WeaknessWindow(StatType.Wit, 2)`
 
-### GetOpponentResponseAsync — no signals
+### GetDateeResponseAsync — no signals
 
 **LLM response text:**
 ```
@@ -147,7 +147,7 @@ WEAKNESS: WIT -2 (opponent is clearly overthinking their responses, opening for 
 "Haha yeah, it's pretty wild out there."
 ```
 
-**Output:** `OpponentResponse`:
+**Output:** `DateeResponse`:
 - `MessageText`: `"Haha yeah, it's pretty wild out there."`
 - `DetectedTell`: `null`
 - `WeaknessWindow`: `null`
@@ -167,22 +167,22 @@ WEAKNESS: WIT -2 (opponent is clearly overthinking their responses, opening for 
 `AnthropicLlmAdapter` must implement all four methods of `ILlmAdapter`:
 - `GetDialogueOptionsAsync(DialogueContext) → Task<DialogueOption[]>`
 - `DeliverMessageAsync(DeliveryContext) → Task<string>`
-- `GetOpponentResponseAsync(OpponentContext) → Task<OpponentResponse>`
+- `GetDateeResponseAsync(DateeContext) → Task<DateeResponse>`
 - `GetInterestChangeBeatAsync(InterestChangeContext) → Task<string?>`
 
 Each method must build the appropriate system blocks and user content via the helper classes, create a `MessagesRequest`, call `AnthropicClient.SendMessagesAsync`, and parse/return the result.
 
 ### AC2: `cache_control: ephemeral` on both character prompts in system blocks
 
-For `GetDialogueOptionsAsync` and `DeliverMessageAsync`, the system content must include **both** `PlayerPrompt` and `OpponentPrompt` as separate content blocks, each annotated with `cache_control: { type: "ephemeral" }`. This is achieved via `CacheBlockBuilder.BuildCachedSystemBlocks(playerPrompt, opponentPrompt)`.
+For `GetDialogueOptionsAsync` and `DeliverMessageAsync`, the system content must include **both** `PlayerPrompt` and `DateePrompt` as separate content blocks, each annotated with `cache_control: { type: "ephemeral" }`. This is achieved via `CacheBlockBuilder.BuildCachedSystemBlocks(playerPrompt, dateePrompt)`.
 
-For `GetOpponentResponseAsync`, **only** `OpponentPrompt` is included in the system blocks (via `CacheBlockBuilder.BuildOpponentOnlySystemBlocks(opponentPrompt)`), also with `cache_control: ephemeral`.
+For `GetDateeResponseAsync`, **only** `DateePrompt` is included in the system blocks (via `CacheBlockBuilder.BuildDateeOnlySystemBlocks(dateePrompt)`), also with `cache_control: ephemeral`.
 
 For `GetInterestChangeBeatAsync`, the system array is **empty** — no cached system blocks.
 
-### AC3: Opponent response call uses ONLY OpponentPrompt in system
+### AC3: Datee response call uses ONLY DateePrompt in system
 
-The `GetOpponentResponseAsync` method must call `CacheBlockBuilder.BuildOpponentOnlySystemBlocks(context.OpponentPrompt)` — it must NOT include `context.PlayerPrompt` anywhere in the system content. This is per §3.5 design: the opponent "plays themselves" without knowledge of the player's character sheet.
+The `GetDateeResponseAsync` method must call `CacheBlockBuilder.BuildDateeOnlySystemBlocks(context.DateePrompt)` — it must NOT include `context.PlayerPrompt` anywhere in the system content. This is per §3.5 design: the datee "plays themselves" without knowledge of the player's character sheet.
 
 ### AC4: `ParseDialogueOptions` falls back gracefully (never throws)
 
@@ -216,9 +216,9 @@ Unit tests must:
 - Capture the HTTP request and assert:
   - Correct URL (`https://api.anthropic.com/v1/messages`)
   - Correct model string in request body
-  - Correct temperature per method (0.9 for dialogue options, 0.7 for delivery, 0.85 for opponent response, 0.8 for interest change beat)
+  - Correct temperature per method (0.9 for dialogue options, 0.7 for delivery, 0.85 for datee response, 0.8 for interest change beat)
   - System blocks contain `cache_control` with `type: "ephemeral"`
-  - Opponent response request system blocks contain only one prompt (opponent)
+  - Datee response request system blocks contain only one prompt (datee)
 
 ### AC8: Build clean
 
@@ -247,12 +247,12 @@ The solution must build without errors or warnings under .NET Standard 2.0 with 
 | Text has extra whitespace/newlines | Trimmed appropriately |
 | Text has multiple quoted strings per option | First quoted string used |
 
-### ParseOpponentResponse
+### ParseDateeResponse
 
 | Input | Expected Output |
 |-------|----------------|
-| `null` | `OpponentResponse("", null, null)` — empty message, no signals |
-| `""` (empty string) | `OpponentResponse("", null, null)` |
+| `null` | `DateeResponse("", null, null)` — empty message, no signals |
+| `""` (empty string) | `DateeResponse("", null, null)` |
 | No `[RESPONSE]` marker, just plain text | Entire text used as `MessageText`, no signals |
 | `[RESPONSE]` present, no `[SIGNALS]` | Message text extracted, `DetectedTell = null`, `WeaknessWindow = null` |
 | `[SIGNALS]` with only TELL | `DetectedTell` populated, `WeaknessWindow = null` |
@@ -269,7 +269,7 @@ The solution must build without errors or warnings under .NET Standard 2.0 with 
 |--------------------------|---------|--------|
 | `DialogueOptionsTemperature` | `0.9` | `GetDialogueOptionsAsync` |
 | `DeliveryTemperature` | `0.7` | `DeliverMessageAsync` |
-| `OpponentResponseTemperature` | `0.85` | `GetOpponentResponseAsync` |
+| `DateeResponseTemperature` | `0.85` | `GetDateeResponseAsync` |
 | `InterestChangeBeatTemperature` | `0.8` | `GetInterestChangeBeatAsync` |
 
 If an `AnthropicOptions` per-method temperature is set, it overrides the default. If not set (null), use the default listed above.
@@ -293,11 +293,11 @@ If an `AnthropicOptions` per-method temperature is set, it overrides the default
 | `AnthropicClient` throws `AnthropicApiException` (4xx/5xx after retries) | Exception propagates to caller (`GameSession`). The adapter does **not** catch API exceptions — the caller decides how to handle them. |
 | `AnthropicClient` throws `HttpRequestException` (network failure) | Exception propagates to caller. |
 | `AnthropicClient` throws `TaskCanceledException` (timeout) | Exception propagates to caller. |
-| LLM returns empty response body | `GetDialogueOptionsAsync` returns 4 default options. `DeliverMessageAsync` returns `""`. `GetOpponentResponseAsync` returns `OpponentResponse("", null, null)`. `GetInterestChangeBeatAsync` returns `null`. |
+| LLM returns empty response body | `GetDialogueOptionsAsync` returns 4 default options. `DeliverMessageAsync` returns `""`. `GetDateeResponseAsync` returns `DateeResponse("", null, null)`. `GetInterestChangeBeatAsync` returns `null`. |
 | LLM returns completely unparseable response | Same as empty response — graceful fallback, never throw from parsing. |
 | `options.ApiKey` is null or empty | `AnthropicClient` constructor should throw `ArgumentNullException`. |
 | `context` parameter is null | Throw `ArgumentNullException` with parameter name. |
-| `Enum.Parse` fails on invalid stat string | Caught internally in `ParseDialogueOptions`/`ParseOpponentResponse`, that option/signal is skipped (returns null/default). |
+| `Enum.Parse` fails on invalid stat string | Caught internally in `ParseDialogueOptions`/`ParseDateeResponse`, that option/signal is skipped (returns null/default). |
 
 ---
 
@@ -309,15 +309,15 @@ If an `AnthropicOptions` per-method temperature is set, it overrides the default
 |-----------|-------|-----------------|
 | `Pinder.LlmAdapters` project scaffold | #205 | `.csproj`, namespace, `AnthropicOptions`, DTO types (`MessagesRequest`, `MessagesResponse`, `ContentBlock`) |
 | `AnthropicClient` | #206 | `SendMessagesAsync(MessagesRequest) → Task<MessagesResponse>`, HTTP transport, retry logic (429/529/5xx) |
-| `SessionDocumentBuilder` | #207 | `BuildDialogueOptionsPrompt(...)`, `BuildDeliveryPrompt(...)`, `BuildOpponentPrompt(...)`, `BuildInterestChangeBeatPrompt(...)` — static string formatting methods |
-| `CacheBlockBuilder` | #207 | `BuildCachedSystemBlocks(playerPrompt, opponentPrompt)`, `BuildOpponentOnlySystemBlocks(opponentPrompt)` — returns `ContentBlock[]` with `cache_control` |
+| `SessionDocumentBuilder` | #207 | `BuildDialogueOptionsPrompt(...)`, `BuildDeliveryPrompt(...)`, `BuildDateePrompt(...)`, `BuildInterestChangeBeatPrompt(...)` — static string formatting methods |
+| `CacheBlockBuilder` | #207 | `BuildCachedSystemBlocks(playerPrompt, dateePrompt)`, `BuildDateeOnlySystemBlocks(dateePrompt)` — returns `ContentBlock[]` with `cache_control` |
 | `PromptTemplates` | #207 | Static §3.2–3.8 instruction strings (consumed by `SessionDocumentBuilder`) |
 
 ### Pinder.Core types consumed (no changes needed)
 
 - `ILlmAdapter` — interface being implemented
-- `DialogueContext`, `DeliveryContext`, `OpponentContext`, `InterestChangeContext` — method parameter types
-- `DialogueOption`, `OpponentResponse`, `Tell`, `WeaknessWindow` — return types
+- `DialogueContext`, `DeliveryContext`, `DateeContext`, `InterestChangeContext` — method parameter types
+- `DialogueOption`, `DateeResponse`, `Tell`, `WeaknessWindow` — return types
 - `StatType` — for `Enum.Parse` during response parsing
 - `FailureTier` — for delivery outcome context
 - `InterestState` — for interest change beat context
@@ -325,7 +325,7 @@ If an `AnthropicOptions` per-method temperature is set, it overrides the default
 
 ### Context DTO extensions (Vision #211 — implemented as part of #208 or as prerequisite)
 
-`DialogueContext`, `DeliveryContext`, and `OpponentContext` gain optional fields for `PlayerName` (`string`, default `""`), `OpponentName` (`string`, default `""`), and `CurrentTurn` (`int`, default `0`). These are backward-compatible additions (new optional constructor parameters with defaults). These fields are needed by `SessionDocumentBuilder` for turn markers like `[T{n}|PLAYER|name]`.
+`DialogueContext`, `DeliveryContext`, and `DateeContext` gain optional fields for `PlayerName` (`string`, default `""`), `DateeName` (`string`, default `""`), and `CurrentTurn` (`int`, default `0`). These are backward-compatible additions (new optional constructor parameters with defaults). These fields are needed by `SessionDocumentBuilder` for turn markers like `[T{n}|PLAYER|name]`.
 
 ### External services
 
@@ -348,7 +348,7 @@ public sealed class AnthropicOptions
     public double Temperature { get; set; }                     // Global default: 0.9
     public double? DialogueOptionsTemperature { get; set; }     // Override for GetDialogueOptionsAsync
     public double? DeliveryTemperature { get; set; }            // Override for DeliverMessageAsync
-    public double? OpponentResponseTemperature { get; set; }    // Override for GetOpponentResponseAsync
+    public double? DateeResponseTemperature { get; set; }    // Override for GetDateeResponseAsync
     public double? InterestChangeBeatTemperature { get; set; }  // Override for GetInterestChangeBeatAsync
 }
 ```

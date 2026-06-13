@@ -20,14 +20,14 @@ namespace Pinder.Core.Tests
             // Equal mods (charm=3, honesty=3) → equal base EV.
             // With Fixation penalty (-0.5) on Honesty and variety bonus (+0.1) on Charm, Charm wins.
             var player = MakeStats(charm: 3, honesty: 3);
-            var opponent = MakeStats();
+            var datee = MakeStats();
 
             var turn = MakeTurn(
                 MakeOption(StatType.Honesty),
                 MakeOption(StatType.Charm));
 
             var context = MakeContext(
-                player: player, opponent: opponent,
+                player: player, datee: datee,
                 lastStatUsed: StatType.Honesty,
                 secondLastStatUsed: StatType.Honesty);
 
@@ -127,7 +127,7 @@ namespace Pinder.Core.Tests
                 { ShadowStatType.Overthinking, 0 }
             };
             var player = MakeStats(charm: 3, chaos: 3, honesty: 2);
-            var opponent = MakeStats();
+            var datee = MakeStats();
 
             var turn = MakeTurn(
                 MakeOption(StatType.Charm),
@@ -135,7 +135,7 @@ namespace Pinder.Core.Tests
                 MakeOption(StatType.Honesty));
 
             var context = MakeContext(
-                player: player, opponent: opponent,
+                player: player, datee: datee,
                 shadowValues: shadows,
                 lastStatUsed: StatType.Charm,
                 secondLastStatUsed: StatType.Charm);

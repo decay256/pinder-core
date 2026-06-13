@@ -19,7 +19,7 @@ namespace Pinder.Core.Tests
         /// Creates a StatBlock with configurable Chaos base and shadow stats.
         /// All other stats default to 2 / 0.
         /// </summary>
-        private static StatBlock MakeOpponent(
+        private static StatBlock MakeDatee(
             int chaosBase = 2,
             int fixation = 0,
             int overthinking = 0,
@@ -46,7 +46,7 @@ namespace Pinder.Core.Tests
                 });
         }
 
-        private static StatBlock DefaultOpponent => MakeOpponent();
+        private static StatBlock DefaultDatee => MakeDatee();
 
         #endregion
 
@@ -57,7 +57,7 @@ namespace Pinder.Core.Tests
         public void Evaluate_ReturnsDelayPenaltyInstance()
         {
             var result = PlayerResponseDelayEvaluator.Evaluate(
-                TimeSpan.FromMinutes(5), DefaultOpponent, InterestState.Interested);
+                TimeSpan.FromMinutes(5), DefaultDatee, InterestState.Interested);
 
             Assert.NotNull(result);
             Assert.IsType<DelayPenalty>(result);
@@ -72,7 +72,7 @@ namespace Pinder.Core.Tests
         public void Bucket_LessThan1Min_ZeroPenalty()
         {
             var result = PlayerResponseDelayEvaluator.Evaluate(
-                TimeSpan.FromSeconds(30), DefaultOpponent, InterestState.Interested);
+                TimeSpan.FromSeconds(30), DefaultDatee, InterestState.Interested);
 
             Assert.Equal(0, result.InterestDelta);
         }
@@ -82,7 +82,7 @@ namespace Pinder.Core.Tests
         public void Bucket_Zero_ZeroPenalty()
         {
             var result = PlayerResponseDelayEvaluator.Evaluate(
-                TimeSpan.Zero, DefaultOpponent, InterestState.Interested);
+                TimeSpan.Zero, DefaultDatee, InterestState.Interested);
 
             Assert.Equal(0, result.InterestDelta);
         }
@@ -92,7 +92,7 @@ namespace Pinder.Core.Tests
         public void Bucket_59Seconds_ZeroPenalty()
         {
             var result = PlayerResponseDelayEvaluator.Evaluate(
-                TimeSpan.FromSeconds(59), DefaultOpponent, InterestState.Interested);
+                TimeSpan.FromSeconds(59), DefaultDatee, InterestState.Interested);
 
             Assert.Equal(0, result.InterestDelta);
         }
@@ -102,7 +102,7 @@ namespace Pinder.Core.Tests
         public void Bucket_1To15Min_ZeroPenalty()
         {
             var result = PlayerResponseDelayEvaluator.Evaluate(
-                TimeSpan.FromMinutes(1), DefaultOpponent, InterestState.Interested);
+                TimeSpan.FromMinutes(1), DefaultDatee, InterestState.Interested);
 
             Assert.Equal(0, result.InterestDelta);
         }
@@ -112,7 +112,7 @@ namespace Pinder.Core.Tests
         public void Bucket_Exactly1Min_ZeroPenalty()
         {
             var result = PlayerResponseDelayEvaluator.Evaluate(
-                TimeSpan.FromMinutes(1), DefaultOpponent, InterestState.VeryIntoIt);
+                TimeSpan.FromMinutes(1), DefaultDatee, InterestState.VeryIntoIt);
 
             Assert.Equal(0, result.InterestDelta);
         }
@@ -122,7 +122,7 @@ namespace Pinder.Core.Tests
         public void Bucket_Just_Under15Min_ZeroPenalty()
         {
             var result = PlayerResponseDelayEvaluator.Evaluate(
-                TimeSpan.FromMinutes(14.999), DefaultOpponent, InterestState.VeryIntoIt);
+                TimeSpan.FromMinutes(14.999), DefaultDatee, InterestState.VeryIntoIt);
 
             Assert.Equal(0, result.InterestDelta);
         }
@@ -132,7 +132,7 @@ namespace Pinder.Core.Tests
         public void Bucket_Exactly15Min_VeryIntoIt_MinusOne()
         {
             var result = PlayerResponseDelayEvaluator.Evaluate(
-                TimeSpan.FromMinutes(15), DefaultOpponent, InterestState.VeryIntoIt);
+                TimeSpan.FromMinutes(15), DefaultDatee, InterestState.VeryIntoIt);
 
             Assert.Equal(-1, result.InterestDelta);
         }
@@ -142,7 +142,7 @@ namespace Pinder.Core.Tests
         public void Bucket_15Min_Interested_ZeroPenalty()
         {
             var result = PlayerResponseDelayEvaluator.Evaluate(
-                TimeSpan.FromMinutes(15), DefaultOpponent, InterestState.Interested);
+                TimeSpan.FromMinutes(15), DefaultDatee, InterestState.Interested);
 
             Assert.Equal(0, result.InterestDelta);
         }
@@ -152,7 +152,7 @@ namespace Pinder.Core.Tests
         public void Bucket_30Min_AlmostThere_MinusOne()
         {
             var result = PlayerResponseDelayEvaluator.Evaluate(
-                TimeSpan.FromMinutes(30), DefaultOpponent, InterestState.AlmostThere);
+                TimeSpan.FromMinutes(30), DefaultDatee, InterestState.AlmostThere);
 
             Assert.Equal(-1, result.InterestDelta);
         }
@@ -162,7 +162,7 @@ namespace Pinder.Core.Tests
         public void Bucket_JustUnder60Min_VeryIntoIt_MinusOne()
         {
             var result = PlayerResponseDelayEvaluator.Evaluate(
-                TimeSpan.FromMinutes(59.999), DefaultOpponent, InterestState.VeryIntoIt);
+                TimeSpan.FromMinutes(59.999), DefaultDatee, InterestState.VeryIntoIt);
 
             Assert.Equal(-1, result.InterestDelta);
         }
@@ -172,7 +172,7 @@ namespace Pinder.Core.Tests
         public void Bucket_Exactly60Min_MinusTwo()
         {
             var result = PlayerResponseDelayEvaluator.Evaluate(
-                TimeSpan.FromMinutes(60), DefaultOpponent, InterestState.Interested);
+                TimeSpan.FromMinutes(60), DefaultDatee, InterestState.Interested);
 
             Assert.Equal(-2, result.InterestDelta);
         }
@@ -182,7 +182,7 @@ namespace Pinder.Core.Tests
         public void Bucket_3Hours_MinusTwo()
         {
             var result = PlayerResponseDelayEvaluator.Evaluate(
-                TimeSpan.FromHours(3), DefaultOpponent, InterestState.Interested);
+                TimeSpan.FromHours(3), DefaultDatee, InterestState.Interested);
 
             Assert.Equal(-2, result.InterestDelta);
         }
@@ -192,7 +192,7 @@ namespace Pinder.Core.Tests
         public void Bucket_JustUnder6Hours_MinusTwo()
         {
             var result = PlayerResponseDelayEvaluator.Evaluate(
-                TimeSpan.FromHours(5.999), DefaultOpponent, InterestState.Interested);
+                TimeSpan.FromHours(5.999), DefaultDatee, InterestState.Interested);
 
             Assert.Equal(-2, result.InterestDelta);
         }
@@ -202,7 +202,7 @@ namespace Pinder.Core.Tests
         public void Bucket_Exactly6Hours_MinusThree()
         {
             var result = PlayerResponseDelayEvaluator.Evaluate(
-                TimeSpan.FromHours(6), DefaultOpponent, InterestState.Interested);
+                TimeSpan.FromHours(6), DefaultDatee, InterestState.Interested);
 
             Assert.Equal(-3, result.InterestDelta);
         }
@@ -212,7 +212,7 @@ namespace Pinder.Core.Tests
         public void Bucket_JustUnder24Hours_MinusThree()
         {
             var result = PlayerResponseDelayEvaluator.Evaluate(
-                TimeSpan.FromHours(23.999), DefaultOpponent, InterestState.Interested);
+                TimeSpan.FromHours(23.999), DefaultDatee, InterestState.Interested);
 
             Assert.Equal(-3, result.InterestDelta);
         }
@@ -222,7 +222,7 @@ namespace Pinder.Core.Tests
         public void Bucket_Exactly24Hours_MinusFive()
         {
             var result = PlayerResponseDelayEvaluator.Evaluate(
-                TimeSpan.FromHours(24), DefaultOpponent, InterestState.Interested);
+                TimeSpan.FromHours(24), DefaultDatee, InterestState.Interested);
 
             Assert.Equal(-5, result.InterestDelta);
         }
@@ -232,7 +232,7 @@ namespace Pinder.Core.Tests
         public void Bucket_48Hours_MinusFive()
         {
             var result = PlayerResponseDelayEvaluator.Evaluate(
-                TimeSpan.FromHours(48), DefaultOpponent, InterestState.Bored);
+                TimeSpan.FromHours(48), DefaultDatee, InterestState.Bored);
 
             Assert.Equal(-5, result.InterestDelta);
         }
@@ -242,7 +242,7 @@ namespace Pinder.Core.Tests
         public void Bucket_30Days_MinusFive()
         {
             var result = PlayerResponseDelayEvaluator.Evaluate(
-                TimeSpan.FromDays(30), DefaultOpponent, InterestState.Interested);
+                TimeSpan.FromDays(30), DefaultDatee, InterestState.Interested);
 
             Assert.Equal(-5, result.InterestDelta);
         }

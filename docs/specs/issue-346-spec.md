@@ -96,8 +96,8 @@ public sealed class PlayerAgentContext
     /// <summary>The player character's stat block (immutable).</summary>
     public StatBlock PlayerStats { get; }
 
-    /// <summary>The opponent character's stat block (immutable).</summary>
-    public StatBlock OpponentStats { get; }
+    /// <summary>The datee character's stat block (immutable).</summary>
+    public StatBlock DateeStats { get; }
 
     /// <summary>Current interest meter value (0-25).</summary>
     public int CurrentInterest { get; }
@@ -122,7 +122,7 @@ public sealed class PlayerAgentContext
 
     public PlayerAgentContext(
         StatBlock playerStats,
-        StatBlock opponentStats,
+        StatBlock dateeStats,
         int currentInterest,
         InterestState interestState,
         int momentumStreak,
@@ -134,7 +134,7 @@ public sealed class PlayerAgentContext
 ```
 
 **Invariants:**
-- `PlayerStats` and `OpponentStats` are never null.
+- `PlayerStats` and `DateeStats` are never null.
 - `ActiveTrapNames` is never null (may be empty array).
 - `CurrentInterest` is in `[0, 25]`.
 - `MomentumStreak` is `>= 0`.
@@ -157,7 +157,7 @@ public sealed class PlayerAgentContext
 **Input — PlayerAgentContext:**
 
 - PlayerStats: Charm +4, Rizz +1, Honesty +3, Chaos +2, Wit +2, SA +3 (shadows all 0)
-- OpponentStats: Charm +2, Rizz +3, Honesty +1, Chaos +2, Wit +1, SA +2 (shadows all 0)
+- DateeStats: Charm +2, Rizz +3, Honesty +1, Chaos +2, Wit +1, SA +2 (shadows all 0)
 - CurrentInterest: 12
 - InterestState: Interested
 - MomentumStreak: 2
@@ -167,10 +167,10 @@ public sealed class PlayerAgentContext
 - TurnNumber: 5
 
 **DC calculations (for reference):**
-- Charm attacks, opponent defends with SA: DC = 13 + 2 = 15. Player mod = +4. Need = 11. Success% = 50%
-- Rizz attacks, opponent defends with Wit: DC = 13 + 1 = 14. Player mod = +1. Need = 13. Success% = 40%
-- Honesty attacks, opponent defends with Chaos: DC = 13 + 2 = 15. Player mod = +3. Need = 12. Success% = 45%
-- Chaos attacks, opponent defends with Charm: DC = 13 + 2 = 15. Player mod = +2. Need = 13. Success% = 40%
+- Charm attacks, datee defends with SA: DC = 13 + 2 = 15. Player mod = +4. Need = 11. Success% = 50%
+- Rizz attacks, datee defends with Wit: DC = 13 + 1 = 14. Player mod = +1. Need = 13. Success% = 40%
+- Honesty attacks, datee defends with Chaos: DC = 13 + 2 = 15. Player mod = +3. Need = 12. Success% = 45%
+- Chaos attacks, datee defends with Charm: DC = 13 + 2 = 15. Player mod = +2. Need = 13. Success% = 40%
 
 **Expected output — PlayerDecision:**
 
@@ -230,7 +230,7 @@ Both must be `sealed class` types (not records — LangVersion 8.0) with:
 
 Must be a `sealed class` with:
 - All properties shown above, with types exactly as specified.
-- Constructor that validates non-null for `PlayerStats`, `OpponentStats`, `ActiveTrapNames`.
+- Constructor that validates non-null for `PlayerStats`, `DateeStats`, `ActiveTrapNames`.
 - `ShadowValues` is nullable (null when shadow tracking is not wired).
 
 **Referenced types from Pinder.Core:**
@@ -246,7 +246,7 @@ The `BestOption()` static method in `session-runner/Program.cs` must be replaced
 var snapshot = turnStart.State;
 var agentContext = new PlayerAgentContext(
     playerStats: sableStats,
-    opponentStats: brickStats,
+    dateeStats: brickStats,
     currentInterest: snapshot.Interest,
     interestState: snapshot.State,
     momentumStreak: snapshot.MomentumStreak,
@@ -312,7 +312,7 @@ If `OptionIndex >= scores.Length` or `scores` is null, the constructor must thro
 | `PlayerDecision` scores is null | Constructor throws `ArgumentNullException("scores")` |
 | `OptionScore` bonusesApplied is null | Constructor throws `ArgumentNullException("bonusesApplied")` |
 | `PlayerAgentContext` playerStats is null | Constructor throws `ArgumentNullException("playerStats")` |
-| `PlayerAgentContext` opponentStats is null | Constructor throws `ArgumentNullException("opponentStats")` |
+| `PlayerAgentContext` dateeStats is null | Constructor throws `ArgumentNullException("dateeStats")` |
 | `PlayerAgentContext` activeTrapNames is null | Constructor throws `ArgumentNullException("activeTrapNames")` |
 
 ---

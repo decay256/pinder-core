@@ -21,7 +21,7 @@ namespace Pinder.Core.Conversation
         /// <summary>Steering modifier: average of (CHARM + WIT + SA) effective modifiers.</summary>
         public int SteeringMod { get; }
 
-        /// <summary>Steering DC: 16 + average of opponent's (SA + RIZZ + HONESTY) effective modifiers.</summary>
+        /// <summary>Steering DC: 16 + average of datee's (SA + RIZZ + HONESTY) effective modifiers.</summary>
         public int SteeringDC { get; }
 
         /// <summary>The steering question text, or null if the roll failed.</summary>
@@ -33,7 +33,7 @@ namespace Pinder.Core.Conversation
         /// <summary>Stat names contributing to the steering DC.</summary>
         public IReadOnlyList<string> DefenderGroup { get; }
 
-        /// <summary>The base DC before the opponent's stat average is added.</summary>
+        /// <summary>The base DC before the datee's stat average is added.</summary>
         public int DcBase { get; }
 
         /// <summary>

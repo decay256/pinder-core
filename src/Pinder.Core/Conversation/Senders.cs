@@ -2,14 +2,14 @@ namespace Pinder.Core.Conversation
 {
     /// <summary>
     /// Conventional sender tags used in <c>GameSession.ConversationHistory</c>
-    /// for non-conversational entries. Player and opponent senders are
+    /// for non-conversational entries. Player and datee senders are
     /// the characters' display names (free strings) — these constants
     /// cover the synthetic, scene-setting tags that have no character
     /// behind them.
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Issue #333: turn-0 scene entries (player bio, opponent bio,
+    /// Issue #333: turn-0 scene entries (player bio, datee bio,
     /// LLM-generated outfit description) are appended to the conversation
     /// log with <see cref="Scene"/> as their sender. The frontend renders
     /// these distinctly (italics / indented / different tint) — that's

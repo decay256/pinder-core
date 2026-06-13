@@ -86,9 +86,9 @@ namespace Pinder.LlmAdapters.Anthropic
                 }
                 sb.AppendLine();
 
-                if (string.Equals(callType, "opponent", StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(callType, "datee", StringComparison.OrdinalIgnoreCase))
                 {
-                    // Opponent: show message count + only the last user message
+                    // Datee: show message count + only the last user message
                     int msgCount = request.Messages != null ? request.Messages.Length : 0;
                     sb.AppendLine($"**Context window:** {msgCount} messages accumulated");
                     sb.AppendLine();

@@ -5,7 +5,7 @@ The session runner orchestrates simulated playtest sessions between two `Charact
 
 ## Key Components
 
-- **`session-runner/Program.cs`** — Entry point. Parses CLI arguments (`--player`, `--opponent`, `--max-turns`, `--agent`), loads character profiles via `CharacterDefinitionLoader` (through `DirectoryCharacterStore`), configures `GameSession` with `GameSessionConfig`, runs the turn loop, and prints per-turn status and session summary markdown. Calls `PlaytestFormatter` to render pick reasoning and score tables. Resolves session number once at startup via `SessionFileCounter.ResolvePlaytestDirectory()` + `GetNextSessionNumber()`, then reuses that number for both the header and `WritePlaytestLog`. — #840: prompt-file fallback removed; `--player <name>` resolves exclusively through `data/characters/{slug}.json`.
+- **`session-runner/Program.cs`** — Entry point. Parses CLI arguments (`--player`, `--datee`, `--max-turns`, `--agent`), loads character profiles via `CharacterDefinitionLoader` (through `DirectoryCharacterStore`), configures `GameSession` with `GameSessionConfig`, runs the turn loop, and prints per-turn status and session summary markdown. Calls `PlaytestFormatter` to render pick reasoning and score tables. Resolves session number once at startup via `SessionFileCounter.ResolvePlaytestDirectory()` + `GetNextSessionNumber()`, then reuses that number for both the header and `WritePlaytestLog`. — #840: prompt-file fallback removed; `--player <name>` resolves exclusively through `data/characters/{slug}.json`.
 - **`src/Pinder.SessionSetup/CharacterDefinitionLoader.cs`** — Static utility that loads character definition JSON files and runs them through the full `CharacterAssembler` + `PromptBuilder` pipeline to produce `CharacterProfile` instances. Exposes `Load(path, itemRepo, anatomyRepo)` for file-based loading and internal `Parse(json, itemRepo, anatomyRepo)` for direct JSON string parsing (used in tests). Lives in `Pinder.SessionSetup`, not in `session-runner/` (the prior doc claim was incorrect).
 - **`src/Pinder.SessionSetup/DirectoryCharacterStore.cs`** — `ICharacterStore` implementation backed by a directory of `{slug}.json` v1 files. `LoadAsync(id)` resolves by `character_id`; `ListIdsAsync()` enumerates available ids. The single point of entry for slug-driven character resolution in session-runner and Pinder.GameApi.
 - **`session-runner/DataFileLocator.cs`** — Static utility that resolves paths to data files by walking up from a base directory. Checks `PINDER_DATA_PATH` env var first, then walks parent directories. Also provides `FindRepoRoot()` to locate the repo root (directory containing both `data/` and `src/`).
@@ -15,7 +15,7 @@ The session runner orchestrates simulated playtest sessions between two `Charact
 - **`tests/Pinder.Core.Tests/Issue415_CharacterDefinitionLoaderSpecTests.cs`** — Spec-driven tests for `CharacterDefinitionLoader` and `DataFileLocator`: assembly pipeline (AC2–AC4), all 5 character definitions load successfully (AC5), `DataFileLocator` resolves character files (AC6), data file presence, edge cases (missing shadows, empty items/anatomy, special chars in name, unknown item IDs), error conditions (file not found, malformed JSON, missing required fields, level range, unknown stat/shadow types), shadow parsing, `DataFileLocator` walk-up and repo root discovery, integration tests for full pipeline across characters.
 - **`tests/Pinder.Core.Tests/Issue840_SingleLoaderPipelineTests.cs`** — Microbenchmark + structural tests for #840: enumerates the starter character store, asserts `CharacterDefinitionLoader.Assemble` p50/p99 over 1000 iterations stays under the documented threshold, and pins the structural rule that `session-runner/Program.cs` no longer references the legacy `CharacterLoader` symbol or the `design/examples/*-prompt.md` fallback path.
 - **`tests/Pinder.Core.Tests/Issue527_SessionRunnerBioFormatTests.cs`** — Tests for character bio output formatting in session runner, verifying bio row is removed from table and bios are printed as bold italic paragraphs (issue #527).
-- **`session-runner/MatchupAnalyzer.cs`** — Static utility that generates a pre-game LLM-backed character analysis using `AnthropicClient`. Analyzes player and opponent stats vs DC table to provide a brief strategic summary of best lanes and shadow risks. Outputs results under `## Matchup Analysis` header.
+- **`session-runner/MatchupAnalyzer.cs`** — Static utility that generates a pre-game LLM-backed character analysis using `AnthropicClient`. Analyzes player and datee stats vs DC table to provide a brief strategic summary of best lanes and shadow risks. Outputs results under `## Matchup Analysis` header.
 - **`tests/Pinder.Core.Tests/Issue528_MatchupAnalyzerTests.cs`** — Tests for `MatchupAnalyzer`: verifies spec signature, prompt generation, edge cases (missing bio, mirror matches), error handling (graceful fallback on API failure), and `Program.cs` integration.
 - **`tests/Pinder.Core.Tests/Issue529_EmojiRiskColorsTests.cs`** — Tests for emoji risk color restoration in `session-runner/Program.cs`: verifies `RiskLabel` helper returns correct emoji and text (`🟢 Safe`, `🟡 Medium`, `🟠 Hard`, `🔴 Bold`), handles negative and extreme values, preserves accessibility text, and verifies the inline ternary was replaced with the helper call.
 - **`tests/Pinder.Core.Tests/Issue486_SessionRunnerDiffTests.cs`** — Tests for the inline markdown diff logic `FormatDeliveredAdditions` and `WrapAdditions` in `Program.cs`.
@@ -23,7 +23,7 @@ The session runner orchestrates simulated playtest sessions between two `Charact
 - **`session-runner/PlaytestFormatter.cs`** — Static utility class for formatting player agent reasoning blocks, option score tables, and message diffs as markdown. Contains `FormatReasoningBlock`, `FormatScoreTable`, and `FormatMessageDiff`.
 - **`session-runner/LlmPlayerAgent.cs`** — LLM-backed player agent with character context. Sends game state, character personality, conversation history, and scoring advisory to Anthropic Claude, parses `PICK:` response, falls back to `ScoringPlayerAgent` on failure. Implements `IDisposable`. Uses character-aware system message when `playerSystemPrompt` or `playerTextingStyle` is provided; falls back to generic strategic prompt otherwise.
 - **`tests/Pinder.Core.Tests/LlmPlayerAgentTests.cs`** — Tests for `LlmPlayerAgent`: adjusted probability display (tell/momentum/callback bonuses), no-bonus raw percentage, dispose idempotency.
-- **`tests/Pinder.Core.Tests/LlmPlayerAgentSpecTests.cs`** — Spec tests for issue #492: character-aware system message (player name, opponent name, system prompt, texting style, generic fallback), conversation history in prompt (inclusion, sender names, null/empty omission), scoring advisory section (header, scorer pick marker, omission when null), task instruction (player name, narrative mention, PICK format), fallback behavior (valid index, scores array, reasoning marker), game state in prompt.
+- **`tests/Pinder.Core.Tests/LlmPlayerAgentSpecTests.cs`** — Spec tests for issue #492: character-aware system message (player name, datee name, system prompt, texting style, generic fallback), conversation history in prompt (inclusion, sender names, null/empty omission), scoring advisory section (header, scorer pick marker, omission when null), task instruction (player name, narrative mention, PICK format), fallback behavior (valid index, scores array, reasoning marker), game state in prompt.
 - **`tests/Pinder.Core.Tests/Issue350_ShadowTrackingSpecTests.cs`** — Spec tests verifying shadow tracking wiring: `SessionShadowTracker` wraps `StatBlock`, `GameSessionConfig` passes player shadows into `GameSession`, delta accumulation, edge cases (negative deltas, multiple events per turn, game-end readability).
 - **`tests/Pinder.Core.Tests/Issue351_PickReasoningTests.cs`** — Tests for `PlaytestFormatter`: reasoning block formatting, score table columns/checkmarks/bold/bonuses, edge cases (null decision, NaN values, empty reasoning, score mismatch, fewer options).
 - **`session-runner/SessionFileCounter.cs`** — Static utility class that scans a directory for `session-*.md` files and returns the next available session number (`max + 1`). Also provides `ResolvePlaytestDirectory()` with 3-tier directory resolution: env var override → walk-up search for `design/playtests/` → hardcoded fallback path.
@@ -42,18 +42,18 @@ The session runner is a console application (`Program.cs`), not a library.
 ### CLI Interface
 
 ```
-Usage: dotnet run --project session-runner -- --player <name> --opponent <name> [--max-turns <n>] [--agent <scoring|llm>]
-       dotnet run --project session-runner -- --player-def <path> --opponent-def <path> [--max-turns <n>] [--agent <scoring|llm>]
+Usage: dotnet run --project session-runner -- --player <name> --datee <name> [--max-turns <n>] [--agent <scoring|llm>]
+       dotnet run --project session-runner -- --player-def <path> --datee-def <path> [--max-turns <n>] [--agent <scoring|llm>]
 
   --player <name>        Player character name (resolves data/characters/{name}.json via DirectoryCharacterStore)
-  --opponent <name>      Opponent character name (same resolution as --player)
+  --datee <name>      Datee character name (same resolution as --player)
   --player-def <path>    Player character definition JSON file (uses CharacterDefinitionLoader.Load)
-  --opponent-def <path>  Opponent character definition JSON file (uses CharacterDefinitionLoader.Load)
+  --datee-def <path>  Datee character definition JSON file (uses CharacterDefinitionLoader.Load)
   --max-turns <n>        Maximum turns (default: 20)
   --agent <type>         Player agent: scoring or llm (default: scoring)
 ```
 
-`--player`/`--opponent` and `--player-def`/`--opponent-def` can be mixed freely. The `--player <name>` shorthand resolves `data/characters/{name}.json` via `DataFileLocator` and runs it through `CharacterDefinitionLoader.Assemble()`. As of #840 there is no prompt-file fallback: a missing `data/characters/{name}.json` raises a `FileNotFoundException` with the list of available slugs in the message. Running with no args or invalid args prints usage and exits with code 1.
+`--player`/`--datee` and `--player-def`/`--datee-def` can be mixed freely. The `--player <name>` shorthand resolves `data/characters/{name}.json` via `DataFileLocator` and runs it through `CharacterDefinitionLoader.Assemble()`. As of #840 there is no prompt-file fallback: a missing `data/characters/{name}.json` raises a `FileNotFoundException` with the list of available slugs in the message. Running with no args or invalid args prints usage and exits with code 1.
 
 The `--agent` argument replaces the previous `PLAYER_AGENT` environment variable for agent selection.
 
@@ -117,7 +117,7 @@ public static class DataFileLocator
 ```csharp
 var sableShadows = new SessionShadowTracker(sableStats);   // wraps player's StatBlock
 var config = new GameSessionConfig(playerShadows: sableShadows);
-var session = new GameSession(player, opponent, llm, dice, traps, config);
+var session = new GameSession(player, datee, llm, dice, traps, config);
 ```
 
 ### Per-Turn Shadow Output
@@ -175,7 +175,7 @@ Called at the beginning of a playtest session to provide strategic context.
 ```csharp
 public static class MatchupAnalyzer
 {
-    /// Analyzes the player and opponent stats, shadow traits, and bios alongside the DC table.
+    /// Analyzes the player and datee stats, shadow traits, and bios alongside the DC table.
     /// Uses Anthropic API with zero-shot prompting to provide a brief strategic summary,
     /// best lanes, shadow risks, and a matchup prediction.
     /// Caches the output in `.matchup-cache/` locally (hashed by character stats) to save API calls.
@@ -183,7 +183,7 @@ public static class MatchupAnalyzer
     public static async Task<string?> AnalyzeMatchupAsync(
         AnthropicOptions options,
         CharacterProfile player,
-        CharacterProfile opponent);
+        CharacterProfile datee);
 }
 ```
 
@@ -295,7 +295,7 @@ When all optional fields are at defaults, scoring behavior is identical to pre-#
 | Type | Namespace | Role |
 |------|-----------|------|
 | `SessionShadowTracker` | `Pinder.Core.Stats` | Wraps `StatBlock`, tracks per-session shadow deltas |
-| `GameSessionConfig` | `Pinder.Core.Conversation` | Carries optional `PlayerShadows`, `OpponentShadows`, clock, etc. |
+| `GameSessionConfig` | `Pinder.Core.Conversation` | Carries optional `PlayerShadows`, `DateeShadows`, clock, etc. |
 | `GameSession` | `Pinder.Core.Conversation` | Core turn-based session engine |
 | `TurnResult.ShadowGrowthEvents` | `Pinder.Core.Conversation` | `IReadOnlyList<string>` populated when `PlayerShadows` is non-null |
 | `ShadowStatType` | `Pinder.Core.Stats` | Enum: Madness, Horniness, Denial, Fixation, Dread, Overthinking |
@@ -305,9 +305,9 @@ When all optional fields are at defaults, scoring behavior is identical to pre-#
 
 - **Shadow tracking is opt-in**: passing `GameSessionConfig` with a `SessionShadowTracker` enables shadow growth events. Without config (or with `playerShadows: null`), `TurnResult.ShadowGrowthEvents` is empty and no shadow output is produced.
 - **Retained reference pattern**: the session runner keeps a reference to the `SessionShadowTracker` it passes into `GameSessionConfig`. After the game loop exits (normally or via `GameEndedException`), it reads delta/effective values from that same reference for the summary table.
-- **`OpponentShadows` is optional**: the config only wires `playerShadows`; opponent shadow tracking is not used by the session runner currently.
+- **`DateeShadows` is optional**: the config only wires `playerShadows`; datee shadow tracking is not used by the session runner currently.
 - **Shadow growth triggers** (e.g., Nat 1 → Madness, 3 consecutive same-stat picks → Fixation) are handled inside `GameSession`; the session runner only reads and displays results.
-- **Character loading (dual path)**: Characters can be loaded two ways: (1) **CharacterDefinitionLoader** reads JSON definition files and runs the full `CharacterAssembler` + `PromptBuilder` pipeline — this is the preferred path that exercises real item/anatomy data. (2) **CharacterLoader** reads pre-assembled prompt markdown files — retained as a fallback. CLI args `--player-def`/`--opponent-def` use the definition loader directly; `--player`/`--opponent` shorthand tries `data/characters/{name}.json` via `DataFileLocator` first, falling back to `CharacterLoader` if not found.
+- **Character loading (dual path)**: Characters can be loaded two ways: (1) **CharacterDefinitionLoader** reads JSON definition files and runs the full `CharacterAssembler` + `PromptBuilder` pipeline — this is the preferred path that exercises real item/anatomy data. (2) **CharacterLoader** reads pre-assembled prompt markdown files — retained as a fallback. CLI args `--player-def`/`--datee-def` use the definition loader directly; `--player`/`--datee` shorthand tries `data/characters/{name}.json` via `DataFileLocator` first, falling back to `CharacterLoader` if not found.
 - **Data file resolution**: `DataFileLocator` walks up from the working directory to find `data/items/starter-items.json` and `data/anatomy/anatomy-parameters.json`. Also checks the `PINDER_DATA_PATH` env var. If data files cannot be resolved, the runner warns and falls back to prompt file loading.
 - **CLI-driven configuration**: The session runner uses positional CLI arguments instead of environment variables for character selection and agent type. The `--max-turns` default is 20 (previously hardcoded as 15).
 - **Playtest directory resolution** uses a 3-tier strategy: (1) `PINDER_PLAYTESTS_PATH` env var override, (2) walk up from `AppContext.BaseDirectory` looking for `design/playtests/`, (3) hardcoded fallback. This replaced a previously hardcoded absolute path in `Program.cs` that caused `GetNextSessionNumber` to scan the wrong directory when the working directory didn't match expectations.
@@ -349,12 +349,12 @@ LlmPlayerAgent(
     AnthropicOptions options,
     ScoringPlayerAgent fallback,
     string playerName = "the player",
-    string opponentName = "the opponent",
+    string dateeName = "the datee",
     string playerSystemPrompt = "",
     string playerTextingStyle = "")
 ```
 
-**System message (`BuildSystemMessage()`):** When `playerSystemPrompt` or `playerTextingStyle` is non-empty, builds a character-aware system message containing the player/opponent names, the character's assembled system prompt, texting style fragment, and an instruction that character fit and narrative moment take priority over pure optimization. When both are empty, falls back to a generic strategic prompt (backward-compatible).
+**System message (`BuildSystemMessage()`):** When `playerSystemPrompt` or `playerTextingStyle` is non-empty, builds a character-aware system message containing the player/datee names, the character's assembled system prompt, texting style fragment, and an instruction that character fit and narrative moment take priority over pure optimization. When both are empty, falls back to a generic strategic prompt (backward-compatible).
 
 **User prompt (`BuildPrompt()`):** Sections in order:
 1. **Conversation So Far** — from `PlayerAgentContext.ConversationHistory` (omitted if null/empty)
@@ -369,7 +369,7 @@ LlmPlayerAgent(
 ### Supporting Types
 - **`PlayerDecision`** — result type: `OptionIndex`, `Reasoning` (string), `Scores` (OptionScore[])
 - **`OptionScore`** — per-option breakdown: `Score`, `SuccessChance`, `ExpectedInterestGain`, `BonusesApplied`
-- **`PlayerAgentContext`** — input context: player/opponent stats, interest, momentum, traps, shadows, turn number, stat history (`LastStatUsed`, `SecondLastStatUsed`), `HonestyAvailableLastTurn`, `ConversationHistory`
+- **`PlayerAgentContext`** — input context: player/datee stats, interest, momentum, traps, shadows, turn number, stat history (`LastStatUsed`, `SecondLastStatUsed`), `HonestyAvailableLastTurn`, `ConversationHistory`
 
 ## Change Log
 | Date | Issue | Summary |
@@ -380,15 +380,15 @@ LlmPlayerAgent(
 | 2026-04-04 | #386 | Added engine-constant sync tests to `ScoringPlayerAgentTests.cs`: callback bonus (opener +3, mid-distance +1) via `CallbackBonus.Compute()`, momentum threshold verification at all streak values (§15), and tell bonus exactness (+2 → 0.1 success chance delta). Guards against silent drift between agent scoring and engine rules. |
 | 2026-04-04 | #418 | Fixed `SessionFileCounter` to correctly find existing session files. Added `ResolvePlaytestDirectory(string baseDir)` with 3-tier resolution (env var → walk-up → fallback). `Program.WritePlaytestLog` now uses `ResolvePlaytestDirectory(AppContext.BaseDirectory)` instead of a hardcoded path. Added `SessionFileCounterSpecTests.cs` (25 tests) and extended `SessionFileCounterTests.cs` with AC coverage, edge cases, and resolution tests. |
 | 2026-04-04 | #417 | Added `OutcomeProjector` static class for projecting game outcome on turn-cap cutoff. Uses `InterestState`-based dispatch (diverges from spec's pure numeric thresholds but covers same ranges). Session summary shows ⏸️ Incomplete header with projected outcome when no natural game-over reached. Rewrote `OutcomeProjectorTests.cs` with comprehensive coverage: all five decision tiers, boundary values, momentum display, degenerate cases, pure function guarantees. |
-| 2026-04-04 | #414 | Added `CharacterLoader` to load characters from prompt files. Replaced all hardcoded stat blocks in `Program.cs` with `CharacterLoader.Load()` calls. Added CLI argument parsing (`--player`, `--opponent`, `--max-turns` default 20, `--agent` replacing `PLAYER_AGENT` env var). Usage/error messages printed to stderr with exit code 1. Added `CharacterLoaderSpecTests.cs` with comprehensive parsing, error, and edge-case coverage. |
+| 2026-04-04 | #414 | Added `CharacterLoader` to load characters from prompt files. Replaced all hardcoded stat blocks in `Program.cs` with `CharacterLoader.Load()` calls. Added CLI argument parsing (`--player`, `--datee`, `--max-turns` default 20, `--agent` replacing `PLAYER_AGENT` env var). Usage/error messages printed to stderr with exit code 1. Added `CharacterLoaderSpecTests.cs` with comprehensive parsing, error, and edge-case coverage. |
 | 2026-04-04 | #416 | Added shadow growth risk scoring to `ScoringPlayerAgent`: fixation growth penalty (−0.5 for 3x same stat), denial growth penalty (−0.3 for skipping Honesty), fixation threshold EV reduction (T1: 0.8× gain, T2+: success chance squared for Chaos), stat variety bonus (+0.1 for unused stats). Added `LastStatUsed`, `SecondLastStatUsed`, `HonestyAvailableLastTurn` optional fields to `PlayerAgentContext` (backward-compatible). Note: spec's `HonestyAvailableLastTurn` field exists but denial penalty is evaluated on current-turn options, not previous turn. 922-line test file `ScoringPlayerAgentShadowRiskTests.cs` covers all ACs and edge cases. |
-| 2026-04-04 | #415 | Added `CharacterDefinitionLoader` and `DataFileLocator` to enable loading characters from JSON definition files through the full `CharacterAssembler` + `PromptBuilder` pipeline. Added `--player-def`/`--opponent-def` CLI args and shorthand resolution (`--player gerald` → `data/characters/gerald.json`). Copied `starter-items.json` and `anatomy-parameters.json` data files into repo. Created 5 starter character definitions (gerald, velvet, sable, brick, zyx). 736-line spec test file covers assembly pipeline, data file presence, edge cases, error conditions, and integration tests. |
+| 2026-04-04 | #415 | Added `CharacterDefinitionLoader` and `DataFileLocator` to enable loading characters from JSON definition files through the full `CharacterAssembler` + `PromptBuilder` pipeline. Added `--player-def`/`--datee-def` CLI args and shorthand resolution (`--player gerald` → `data/characters/gerald.json`). Copied `starter-items.json` and `anatomy-parameters.json` data files into repo. Created 5 starter character definitions (gerald, velvet, sable, brick, zyx). 736-line spec test file covers assembly pipeline, data file presence, edge cases, error conditions, and integration tests. |
 | 2026-04-05 | #513 | Fixed `CharacterLoader.ParseBio` bug: bio lines without surrounding quotes previously returned empty string. Changed parsing to extract text after `- Bio:` prefix and optionally strip quotes instead of requiring them. Changed `ParseBio` visibility from `private` to `internal`. Added 5 test methods in `CharacterLoaderTests.cs` covering unquoted, quoted, missing, parameterized starter characters, and code-fence scenarios. |
 | 2026-04-05 | #514 | Fixed hardcoded "Sable"/"Brick" names in DC Reference table header and column header in `Program.cs`. Now uses `player1`/`player2` string interpolation for dynamic character names. Added `DcTableHeaderTests.cs` (4 tests) verifying interpolation with custom names, default names, and source file assertion that no hardcoded header remains. |
 | 2026-04-05 | #516 | Fixed `CharacterLoader.ParseLevel` bug: corrected stale level values in character JSON files (velvet: 4→7, brick: 6→9, zyx: 4→1). Added `ParseLevel` tests to `CharacterLoaderTests.cs` (standard format, single/double digit, missing line default, parameterized starter characters). Made `ParseLevel` visible as `internal static`. |
 | 2026-04-05 | #515 | Fixed session number duplication bug: session number is now resolved once at startup (`ResolvePlaytestDirectory` + `GetNextSessionNumber`) and reused for both the header (`# Playtest Session {N:D3}`) and file write. Previously, header was hardcoded to "006" and `WritePlaytestLog` called `GetNextSessionNumber` independently, causing header/filename mismatch. `WritePlaytestLog` signature changed to accept pre-resolved `dir` and `sessionNum` parameters. Added `ConsecutiveSessions_ProduceDifferentNumbers` test to `SessionFileCounterTests.cs`. |
 | 2026-04-06 | #527 | Updated character stats output formatting in `Program.cs`. Character bios are now rendered as bold italic paragraphs (`***{Player} bio:*** *{Bio text}*`) immediately above the stats table, and the "Bio" row has been removed from the markdown table. Added `Issue527_SessionRunnerBioFormatTests.cs` to verify formatting and edge cases. |
-| 2026-04-06 | #528 | Added `MatchupAnalyzer` to provide a pre-game LLM-generated character analysis (best lane, shadow risks, prediction) at the start of a playtest session. Uses `AnthropicClient` and caches results based on stat hashes to avoid redundant API calls. Analysis is printed under `## Matchup Analysis` before Turn 1. Added comprehensive tests in `Issue528_MatchupAnalyzerTests.cs`. Note: Implemented as `AnalyzeMatchupAsync(AnthropicOptions options, CharacterProfile player, CharacterProfile opponent)` as a static class, diverging slightly from the spec's instance method signature. |
+| 2026-04-06 | #528 | Added `MatchupAnalyzer` to provide a pre-game LLM-generated character analysis (best lane, shadow risks, prediction) at the start of a playtest session. Uses `AnthropicClient` and caches results based on stat hashes to avoid redundant API calls. Analysis is printed under `## Matchup Analysis` before Turn 1. Added comprehensive tests in `Issue528_MatchupAnalyzerTests.cs`. Note: Implemented as `AnalyzeMatchupAsync(AnthropicOptions options, CharacterProfile player, CharacterProfile datee)` as a static class, diverging slightly from the spec's instance method signature. |
 | 2026-04-06 | #529 | Restored visual `🟢🟡🟠🔴` emoji prefixes for dialogue option risk tiers in `Program.cs` by reusing the `RiskLabel` helper method. Added `Issue529_EmojiRiskColorsTests.cs` to verify emoji rendering, text fallbacks, and boundary conditions. |
 | 2026-04-06 | #486 | Updated session runner to display both intended and delivered messages when the LLM modifies text based on roll outcomes (strong success/fail/Nat 1/Nat 20). Diverges slightly from the spec: implemented both `PlaytestFormatter.FormatMessageDiff` for clear block separation as well as an inline text diff algorithm in `Program.cs` (`FormatDeliveredAdditions`, `WrapAdditions`) to apply strikethrough/italics to transformed parts of the delivered text. Added tests in `Issue486_SessionRunnerDiffTests.cs` and `Issue486_SpecDiffTests.cs`. |
 | 2026-04-07 | #632 | Fixed roll result display logic in `Program.cs` to correctly show 'Beat by N' for successful rolls and 'Miss by N' for failures, instead of 'Miss: -N'. Also added special margin text handling for Natural 1 overrides. |

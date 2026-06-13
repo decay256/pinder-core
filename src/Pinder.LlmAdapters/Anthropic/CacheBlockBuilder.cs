@@ -15,12 +15,12 @@ namespace Pinder.LlmAdapters.Anthropic
         /// Used by dialogue options and delivery calls.
         /// </summary>
         /// <param name="playerPrompt">The player's assembled §3.1 system prompt.</param>
-        /// <param name="opponentPrompt">The opponent's assembled §3.1 system prompt.</param>
+        /// <param name="dateePrompt">The datee's assembled §3.1 system prompt.</param>
         /// <returns>Two ContentBlocks, both with cache_control: ephemeral.</returns>
-        public static ContentBlock[] BuildCachedSystemBlocks(string playerPrompt, string opponentPrompt)
+        public static ContentBlock[] BuildCachedSystemBlocks(string playerPrompt, string dateePrompt)
         {
             if (playerPrompt == null) throw new ArgumentNullException(nameof(playerPrompt));
-            if (opponentPrompt == null) throw new ArgumentNullException(nameof(opponentPrompt));
+            if (dateePrompt == null) throw new ArgumentNullException(nameof(dateePrompt));
 
             return new[]
             {
@@ -33,7 +33,7 @@ namespace Pinder.LlmAdapters.Anthropic
                 new ContentBlock
                 {
                     Type = "text",
-                    Text = opponentPrompt,
+                    Text = dateePrompt,
                     CacheControl = new CacheControl { Type = "ephemeral" }
                 }
             };
@@ -61,21 +61,21 @@ namespace Pinder.LlmAdapters.Anthropic
         }
 
         /// <summary>
-        /// Builds system blocks with only the opponent prompt cached.
-        /// Used by opponent response calls.
+        /// Builds system blocks with only the datee prompt cached.
+        /// Used by datee response calls.
         /// </summary>
-        /// <param name="opponentPrompt">The opponent's assembled §3.1 system prompt.</param>
+        /// <param name="dateePrompt">The datee's assembled §3.1 system prompt.</param>
         /// <returns>One ContentBlock with cache_control: ephemeral.</returns>
-        public static ContentBlock[] BuildOpponentOnlySystemBlocks(string opponentPrompt)
+        public static ContentBlock[] BuildDateeOnlySystemBlocks(string dateePrompt)
         {
-            if (opponentPrompt == null) throw new ArgumentNullException(nameof(opponentPrompt));
+            if (dateePrompt == null) throw new ArgumentNullException(nameof(dateePrompt));
 
             return new[]
             {
                 new ContentBlock
                 {
                     Type = "text",
-                    Text = opponentPrompt,
+                    Text = dateePrompt,
                     CacheControl = new CacheControl { Type = "ephemeral" }
                 }
             };

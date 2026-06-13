@@ -47,7 +47,7 @@ partial class Program
                 .ToList()
             : new List<List<TextDiffSnapshot>>();
 
-        string lastOpponentMsg = setup.IsResimulation && resimTurnSnap != null
+        string lastDateeMsg = setup.IsResimulation && resimTurnSnap != null
             ? (resimTurnSnap.ConversationHistory.LastOrDefault(e => e.Sender == setup.Player2)?.Text ?? "")
             : "";
 
@@ -92,14 +92,14 @@ partial class Program
             Console.WriteLine($"---");
             Console.WriteLine();
             Console.WriteLine($"## ═══ TURN {loopResult.Turn} ═══  [{DateTime.UtcNow.ToString("HH:mm:ss")} UTC]");
-            if (!string.IsNullOrEmpty(lastOpponentMsg))
+            if (!string.IsNullOrEmpty(lastDateeMsg))
                 Console.WriteLine($"**Responding to {setup.Player2}'s T{loopResult.Turn-1} reply**");
             else
                 Console.WriteLine($"**{setup.Player1}'s opener | {setup.Player2}'s bio**");
             Console.WriteLine();
 
-            if (!string.IsNullOrEmpty(lastOpponentMsg)) {
-                Console.WriteLine($"**{setup.Player2}:** *\"{lastOpponentMsg}\"*");
+            if (!string.IsNullOrEmpty(lastDateeMsg)) {
+                Console.WriteLine($"**{setup.Player2}:** *\"{lastDateeMsg}\"*");
                 Console.WriteLine();
             }
             var statusParts = new List<string>();
@@ -119,7 +119,7 @@ partial class Program
 
             var agentContext = new PlayerAgentContext(
                 playerStats: setup.SableStats,
-                opponentStats: setup.BrickStats,
+                dateeStats: setup.BrickStats,
                 currentInterest: snap.Interest,
                 interestState: snap.State,
                 momentumStreak: snap.MomentumStreak,
@@ -129,7 +129,7 @@ partial class Program
                 turnNumber: snap.TurnNumber,
                 playerSystemPrompt: setup.Sable.AssembledSystemPrompt,
                 playerName: setup.Player1,
-                opponentName: setup.Player2,
+                dateeName: setup.Player2,
                 recentHistory: loopResult.ConversationHistory.Count > 0 ? loopResult.ConversationHistory.AsReadOnly() : null,
                 playerLevelBonus: setup.P1LevelBonus);
             var decision = await setup.Agent.DecideAsync(turnStart, agentContext);
@@ -146,7 +146,7 @@ partial class Program
             catch (GameEndedException ex) { loopResult.FinalOutcome = ex.Outcome; break; }
 
             PrintTurnResultRollAndChecks(result, setup, chosen);
-            PrintMessagesInterestAndShadow(result, setup, chosen, ref lastOpponentMsg, loopResult);
+            PrintMessagesInterestAndShadow(result, setup, chosen, ref lastDateeMsg, loopResult);
             PrintTrapsAndInterestChange(result, snap, setup, loopResult, result.StateAfter.Interest);
 
             loopResult.Interest = result.StateAfter.Interest;
@@ -203,10 +203,10 @@ partial class Program
                     loopResult.ComboHistoryForSnapshot,
                     tellSnap,
                     loopResult.PerTurnTextDiffs,
-                    setup.Session.OpponentHistory,
+                    setup.Session.DateeHistory,
                     playerSender: setup.Player1,
                     i18nCatalog: setup.SnapshotI18nCatalog,
-                    opponentDefenseSnapshot: turnStart.OpponentDefenseSnapshot,
+                    dateeDefenseSnapshot: turnStart.DateeDefenseSnapshot,
                     weaknessDcReduction: turnStart.WeaknessDcReduction);
 
                 string turnSnapPath = Path.Combine(setup.PlaytestDir, $"{setup.SessionSlug}.turn-{loopResult.Turn:D2}.snap.json");

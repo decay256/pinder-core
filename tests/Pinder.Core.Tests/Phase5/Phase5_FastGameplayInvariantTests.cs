@@ -30,10 +30,10 @@ namespace Pinder.Core.Tests.Phase5
 
             transportA.QueueDialogueOptions(Phase0Fixtures.CannedDialogueOptions);
             transportA.QueueDelivery("d-T0");
-            transportA.QueueOpponent("o-T0");
+            transportA.QueueDatee("o-T0");
             transportB.QueueDialogueOptions(Phase0Fixtures.CannedDialogueOptions);
             transportB.QueueDelivery("d-T0");
-            transportB.QueueOpponent("o-T0");
+            transportB.QueueDatee("o-T0");
 
             var startA = await parentA.StartTurnAsync();
             var startB = await parentB.StartTurnAsync();
@@ -64,7 +64,7 @@ namespace Pinder.Core.Tests.Phase5
             Assert.Equal(snapA.MomentumStreak, snapB.MomentumStreak);
             Assert.Equal(snapA.TurnNumber, snapB.TurnNumber);
             Assert.Equal(snapA.TripleBonusActive, snapB.TripleBonusActive);
-            Assert.Equal(snapA.OpponentHistory.Count, snapB.OpponentHistory.Count);
+            Assert.Equal(snapA.DateeHistory.Count, snapB.DateeHistory.Count);
             Assert.Equal(resultA.IsGameOver, resultB.IsGameOver);
             Assert.Equal(resultA.DeliveredMessage, resultB.DeliveredMessage);
         }
@@ -78,7 +78,7 @@ namespace Pinder.Core.Tests.Phase5
             for (int i = 0; i < 3; i++)
             {
                 transport.QueueDelivery($"d-discard-{i}");
-                transport.QueueOpponent($"o-discard-{i}");
+                transport.QueueDatee($"o-discard-{i}");
             }
 
             await parent.StartTurnAsync();
@@ -97,7 +97,7 @@ namespace Pinder.Core.Tests.Phase5
             Assert.Equal(preSnap.Interest, postSnap.Interest);
             Assert.Equal(preSnap.TurnNumber, postSnap.TurnNumber);
             Assert.Equal(preSnap.MomentumStreak, postSnap.MomentumStreak);
-            Assert.Equal(preSnap.OpponentHistory.Count, postSnap.OpponentHistory.Count);
+            Assert.Equal(preSnap.DateeHistory.Count, postSnap.DateeHistory.Count);
         }
 
         // 3. AdoptStateFrom round-trip
@@ -109,10 +109,10 @@ namespace Pinder.Core.Tests.Phase5
 
             tA.QueueDialogueOptions(Phase0Fixtures.CannedDialogueOptions);
             tA.QueueDelivery("d-A");
-            tA.QueueOpponent("o-A");
+            tA.QueueDatee("o-A");
             tB.QueueDialogueOptions(Phase0Fixtures.CannedDialogueOptions);
             tB.QueueDelivery("d-A");
-            tB.QueueOpponent("o-A");
+            tB.QueueDatee("o-A");
 
             await pA.StartTurnAsync();
             await pB.StartTurnAsync();
@@ -133,16 +133,16 @@ namespace Pinder.Core.Tests.Phase5
             Assert.Equal(sA.Interest, sB.Interest);
             Assert.Equal(sA.TurnNumber, sB.TurnNumber);
             Assert.Equal(sA.MomentumStreak, sB.MomentumStreak);
-            Assert.Equal(sA.OpponentHistory.Count, sB.OpponentHistory.Count);
+            Assert.Equal(sA.DateeHistory.Count, sB.DateeHistory.Count);
             Assert.Equal(direct.DeliveredMessage, viaClone.DeliveredMessage);
 
             // ─── Second Turn ───
             tA.QueueDialogueOptions(Phase0Fixtures.CannedDialogueOptions);
             tA.QueueDelivery("d-B");
-            tA.QueueOpponent("o-B");
+            tA.QueueDatee("o-B");
             tB.QueueDialogueOptions(Phase0Fixtures.CannedDialogueOptions);
             tB.QueueDelivery("d-B");
-            tB.QueueOpponent("o-B");
+            tB.QueueDatee("o-B");
 
             await pA.StartTurnAsync();
             await pB.StartTurnAsync();
@@ -161,7 +161,7 @@ namespace Pinder.Core.Tests.Phase5
             Assert.Equal(sA2.Interest, sB2.Interest);
             Assert.Equal(sA2.TurnNumber, sB2.TurnNumber);
             Assert.Equal(sA2.MomentumStreak, sB2.MomentumStreak);
-            Assert.Equal(sA2.OpponentHistory.Count, sB2.OpponentHistory.Count);
+            Assert.Equal(sA2.DateeHistory.Count, sB2.DateeHistory.Count);
             Assert.Equal(direct2.DeliveredMessage, viaClone2.DeliveredMessage);
         }
 
@@ -175,10 +175,10 @@ namespace Pinder.Core.Tests.Phase5
 
             var t1 = new RecordingLlmTransport { DefaultResponse = "" };
             t1.QueueDelivery("d-clone1");
-            t1.QueueOpponent("o-clone1");
+            t1.QueueDatee("o-clone1");
             var t2 = new RecordingLlmTransport { DefaultResponse = "" };
             t2.QueueDelivery("d-clone2");
-            t2.QueueOpponent("o-clone2");
+            t2.QueueDatee("o-clone2");
 
             var pools = parent.EnsureAllDicePoolsFilled();
 
@@ -208,7 +208,7 @@ namespace Pinder.Core.Tests.Phase5
             {
                 var t = new RecordingLlmTransport { DefaultResponse = "" };
                 t.QueueDelivery($"d{i}");
-                t.QueueOpponent($"o{i}");
+                t.QueueDatee($"o{i}");
                 var c = parent.Clone(Phase0Fixtures.MakeAdapter(t));
                 c.InjectNextDicePool(pools[i % pools.Length]);
                 clones.Add(c);

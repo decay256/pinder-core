@@ -1,8 +1,8 @@
-# Spec: Issue #49 — Weakness Windows (§15 Opponent Crack Detection)
+# Spec: Issue #49 — Weakness Windows (§15 Datee Crack Detection)
 
 ## Overview
 
-Weakness windows are a one-turn DC reduction mechanic triggered when the opponent's last message reveals a "crack" — a contradiction, genuine laugh, personal overshare, flustered reply, risky joke, or personal question. When the LLM detects a crack in the opponent's response, it returns a `WeaknessWindow` via `OpponentResponse`. On the next turn, the matching stat's DC is reduced, and the corresponding `DialogueOption` is flagged with `HasWeaknessWindow = true` so the UI can display a 🔓 icon. The window expires after exactly one turn whether exploited or not.
+Weakness windows are a one-turn DC reduction mechanic triggered when the datee's last message reveals a "crack" — a contradiction, genuine laugh, personal overshare, flustered reply, risky joke, or personal question. When the LLM detects a crack in the datee's response, it returns a `WeaknessWindow` via `DateeResponse`. On the next turn, the matching stat's DC is reduced, and the corresponding `DialogueOption` is flagged with `HasWeaknessWindow = true` so the UI can display a 🔓 icon. The window expires after exactly one turn whether exploited or not.
 
 This implements rules v3.4 §15.
 
@@ -10,7 +10,7 @@ This implements rules v3.4 §15.
 
 ## Crack Trigger Table (from §15)
 
-| Opponent Behaviour                     | Defending Stat  | DC Reduction |
+| Datee Behaviour                     | Defending Stat  | DC Reduction |
 |---------------------------------------|-----------------|-------------|
 | Contradicts themselves                 | Honesty         | −2          |
 | Laughs genuinely                       | Charm           | −2          |
@@ -43,22 +43,22 @@ public sealed class WeaknessWindow
 
 **Required change**: The constructor must validate `dcReduction > 0` and throw `ArgumentOutOfRangeException` if violated. The current stub has no validation.
 
-**Semantics**: `DefendingStat` is the stat used for *defence* by the opponent. The *attacker* benefits when attacking with the stat whose defence pairing is `DefendingStat`. For example, if `DefendingStat = StatType.Honesty`, the attacking stat that benefits is `SelfAwareness` (because `DefenceTable[SelfAwareness] = Honesty`).
+**Semantics**: `DefendingStat` is the stat used for *defence* by the datee. The *attacker* benefits when attacking with the stat whose defence pairing is `DefendingStat`. For example, if `DefendingStat = StatType.Honesty`, the attacking stat that benefits is `SelfAwareness` (because `DefenceTable[SelfAwareness] = Honesty`).
 
-### `OpponentResponse`
+### `DateeResponse`
 
 **Namespace**: `Pinder.Core.Conversation`
-**File**: `src/Pinder.Core/Conversation/OpponentResponse.cs`
+**File**: `src/Pinder.Core/Conversation/DateeResponse.cs`
 **Status**: Already exists with correct shape.
 
 ```csharp
-public sealed class OpponentResponse
+public sealed class DateeResponse
 {
     public string MessageText { get; }
     public Tell? DetectedTell { get; }
     public WeaknessWindow? WeaknessWindow { get; }
 
-    public OpponentResponse(
+    public DateeResponse(
         string messageText,
         Tell? detectedTell = null,
         WeaknessWindow? weaknessWindow = null);
@@ -67,13 +67,13 @@ public sealed class OpponentResponse
 
 **No changes needed.** Constructor already validates `messageText` non-null.
 
-### `ILlmAdapter.GetOpponentResponseAsync`
+### `ILlmAdapter.GetDateeResponseAsync`
 
 **File**: `src/Pinder.Core/Interfaces/ILlmAdapter.cs`
-**Status**: Already returns `Task<OpponentResponse>`. No changes needed.
+**Status**: Already returns `Task<DateeResponse>`. No changes needed.
 
 ```csharp
-Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context);
+Task<DateeResponse> GetDateeResponseAsync(DateeContext context);
 ```
 
 ---
@@ -142,11 +142,11 @@ The `RollResult.DC` property must reflect the **adjusted** DC (i.e., the DC the 
 
 **File**: `src/Pinder.Core/Conversation/TurnResult.cs`
 
-Add a new property to communicate the weakness window detected in the *current* turn's opponent response back to the host/UI:
+Add a new property to communicate the weakness window detected in the *current* turn's datee response back to the host/UI:
 
 ```csharp
 /// <summary>
-/// Weakness window detected in the opponent's response this turn, if any.
+/// Weakness window detected in the datee's response this turn, if any.
 /// The caller (UI) may use this to preview the next turn's opportunity.
 /// </summary>
 public WeaknessWindow? DetectedWindow { get; }
@@ -167,16 +167,16 @@ public TurnResult(
 #### New Field
 
 ```csharp
-private WeaknessWindow? _activeWeakness;  // set after opponent response, consumed on next turn
+private WeaknessWindow? _activeWeakness;  // set after datee response, consumed on next turn
 ```
 
 Initial value: `null`.
 
 #### Changes to `ResolveTurnAsync`
 
-At the end of `ResolveTurnAsync`, after calling `_llm.GetOpponentResponseAsync(...)`:
+At the end of `ResolveTurnAsync`, after calling `_llm.GetDateeResponseAsync(...)`:
 
-1. Read `OpponentResponse.WeaknessWindow` from the response.
+1. Read `DateeResponse.WeaknessWindow` from the response.
 2. Store it as `_activeWeakness` for the *next* turn.
 3. Include the detected window in the returned `TurnResult.DetectedWindow`.
 
@@ -188,7 +188,7 @@ When resolving the chosen option's roll:
 4. Pass `dcAdjustment` to `RollEngine.Resolve(dcAdjustment: dcAdjustment)`.
 5. **After** the roll resolves (regardless of which option was chosen, regardless of success/failure), clear `_activeWeakness = null`.
 
-**Important ordering**: The `_activeWeakness` from the *previous* turn's opponent response is consumed during *this* turn's roll. Then the *current* turn's opponent response may set a *new* `_activeWeakness` for the *next* turn.
+**Important ordering**: The `_activeWeakness` from the *previous* turn's datee response is consumed during *this* turn's roll. Then the *current* turn's datee response may set a *new* `_activeWeakness` for the *next* turn.
 
 #### Changes to `StartTurnAsync`
 
@@ -230,8 +230,8 @@ The DC displayed in the option (if the option carries a displayed DC) must alrea
 | Type | Member | Notes |
 |------|--------|-------|
 | `WeaknessWindow` | `DefendingStat`, `DcReduction` | Properties already exist |
-| `OpponentResponse` | `WeaknessWindow` | Property already exists |
-| `ILlmAdapter` | `GetOpponentResponseAsync` | Already returns `Task<OpponentResponse>` |
+| `DateeResponse` | `WeaknessWindow` | Property already exists |
+| `ILlmAdapter` | `GetDateeResponseAsync` | Already returns `Task<DateeResponse>` |
 
 ---
 
@@ -239,12 +239,12 @@ The DC displayed in the option (if the option carries a displayed DC) must alrea
 
 ### Example 1: Crack Detected → Window Applied Next Turn
 
-**Turn N — Opponent response contains a crack:**
+**Turn N — Datee response contains a crack:**
 
-The LLM detects the opponent contradicted themselves. `GetOpponentResponseAsync` returns:
+The LLM detects the datee contradicted themselves. `GetDateeResponseAsync` returns:
 
 ```
-OpponentResponse(
+DateeResponse(
     messageText: "Wait, I said I hated pineapple pizza but... okay fine I had some last week.",
     detectedTell: null,
     weaknessWindow: WeaknessWindow(StatType.Honesty, dcReduction: 2)
@@ -266,7 +266,7 @@ The `SelfAwareness` option gets the 🔓 icon.
 
 **Turn N+1 — ResolveTurnAsync (player picks SelfAwareness):**
 
-Normal DC: `13 + opponent.GetBase(Honesty)` (e.g., if opponent Honesty modifier = 2, DC = 15).
+Normal DC: `13 + datee.GetBase(Honesty)` (e.g., if datee Honesty modifier = 2, DC = 15).
 With window: `DC = 15 - 2 = 13`.
 
 `RollEngine.Resolve(..., dcAdjustment: 2)` is called. After the roll, `_activeWeakness = null`.
@@ -277,14 +277,14 @@ Same setup — `_activeWeakness = WeaknessWindow(Honesty, 2)`. Player picks `Cha
 
 ### Example 3: No Crack Detected
 
-`GetOpponentResponseAsync` returns `OpponentResponse("...", weaknessWindow: null)`. `_activeWeakness` is set to `null`. Next turn: all `HasWeaknessWindow = false`, no DC modifications.
+`GetDateeResponseAsync` returns `DateeResponse("...", weaknessWindow: null)`. `_activeWeakness` is set to `null`. Next turn: all `HasWeaknessWindow = false`, no DC modifications.
 
 ### Example 4: SelfAwareness Overshare (DC −3)
 
-Opponent shares something personal unprompted. LLM returns:
+Datee shares something personal unprompted. LLM returns:
 
 ```
-OpponentResponse(
+DateeResponse(
     messageText: "I haven't told anyone this but... I was actually born in a petri dish.",
     weaknessWindow: WeaknessWindow(StatType.SelfAwareness, dcReduction: 3)
 )
@@ -294,12 +294,12 @@ On the next turn: `DefenceTable[Charm] = SelfAwareness` → **Charm** option get
 
 ### Example 5: Consecutive Cracks (Replacement, Not Stacking)
 
-Turn N opponent response: `WeaknessWindow(Honesty, 2)` → stored as `_activeWeakness`.
+Turn N datee response: `WeaknessWindow(Honesty, 2)` → stored as `_activeWeakness`.
 Turn N+1: `_activeWeakness` consumed (applied or not), cleared.
-Turn N+1 opponent response: `WeaknessWindow(Charm, 2)` → new `_activeWeakness`.
+Turn N+1 datee response: `WeaknessWindow(Charm, 2)` → new `_activeWeakness`.
 Turn N+2: the Charm window is active, not Honesty.
 
-There is no stacking. Each turn's opponent response replaces any prior stored window.
+There is no stacking. Each turn's datee response replaces any prior stored window.
 
 ---
 
@@ -311,16 +311,16 @@ There is no stacking. Each turn's opponent response replaces any prior stored wi
 - Has `StatType DefendingStat` (read-only) and `int DcReduction` (read-only) properties (already exist).
 - Constructor validates `dcReduction > 0`; throws `ArgumentOutOfRangeException` if violated (**needs adding**).
 
-### AC2: `OpponentResponse` carries optional `WeaknessWindow`
+### AC2: `DateeResponse` carries optional `WeaknessWindow`
 
-- `OpponentResponse` class exists with `WeaknessWindow? WeaknessWindow` property (**already exists**).
-- `ILlmAdapter.GetOpponentResponseAsync` returns `Task<OpponentResponse>` (**already exists**).
+- `DateeResponse` class exists with `WeaknessWindow? WeaknessWindow` property (**already exists**).
+- `ILlmAdapter.GetDateeResponseAsync` returns `Task<DateeResponse>` (**already exists**).
 - All `ILlmAdapter` implementations compile with the existing signature.
 
 ### AC3: `GameSession` stores active window, applies DC reduction for one turn, clears after turn
 
 - `GameSession` has a `_activeWeakness` field of type `WeaknessWindow?`.
-- After `GetOpponentResponseAsync` returns, the session stores `response.WeaknessWindow` as `_activeWeakness`.
+- After `GetDateeResponseAsync` returns, the session stores `response.WeaknessWindow` as `_activeWeakness`.
 - In the next `ResolveTurnAsync`, if `_activeWeakness != null` and `StatBlock.DefenceTable[chosenOption.Stat] == _activeWeakness.DefendingStat`, then `RollEngine.Resolve` is called with `dcAdjustment = _activeWeakness.DcReduction`.
 - If the defending stat does NOT match, `dcAdjustment = 0`.
 - After the roll (regardless of which option was chosen or the outcome), `_activeWeakness` is set to `null`.
@@ -359,16 +359,16 @@ Required test scenarios (see Test Scenarios section below for details):
 ### T1: Window Applied for One Turn Then Cleared
 
 1. Create a `GameSession` with a mock `ILlmAdapter`.
-2. Mock `GetOpponentResponseAsync` to return `OpponentResponse("msg", weaknessWindow: new WeaknessWindow(StatType.Honesty, 2))` on turn 0.
+2. Mock `GetDateeResponseAsync` to return `DateeResponse("msg", weaknessWindow: new WeaknessWindow(StatType.Honesty, 2))` on turn 0.
 3. Complete turn 0 (StartTurnAsync → ResolveTurnAsync).
 4. On turn 1, `StartTurnAsync` should show `HasWeaknessWindow = true` for the option whose defending stat is Honesty (attacking stat = SelfAwareness).
-5. Mock `GetOpponentResponseAsync` to return `OpponentResponse("msg", weaknessWindow: null)` on turn 1.
+5. Mock `GetDateeResponseAsync` to return `DateeResponse("msg", weaknessWindow: null)` on turn 1.
 6. Complete turn 1 (ResolveTurnAsync with any option).
 7. On turn 2, `StartTurnAsync` should show `HasWeaknessWindow = false` for all options.
 
 ### T2: Correct Stat DC Reduced
 
-1. Set up opponent with known stat values (e.g., Honesty base modifier = 2, so DC = 15).
+1. Set up datee with known stat values (e.g., Honesty base modifier = 2, so DC = 15).
 2. Set `_activeWeakness = WeaknessWindow(Honesty, 2)`.
 3. Player picks `SelfAwareness` (defended by Honesty).
 4. Verify `RollEngine.Resolve` is called with `dcAdjustment = 2`.
@@ -376,7 +376,7 @@ Required test scenarios (see Test Scenarios section below for details):
 
 ### T3: No Window → No Reduction
 
-1. Complete a turn where opponent returns no window.
+1. Complete a turn where datee returns no window.
 2. Verify all options have `HasWeaknessWindow = false`.
 3. Verify `RollEngine.Resolve` is called with `dcAdjustment = 0`.
 
@@ -395,10 +395,10 @@ Required test scenarios (see Test Scenarios section below for details):
 
 ### T6: DetectedWindow in TurnResult
 
-1. Mock opponent response with a weakness window.
+1. Mock datee response with a weakness window.
 2. Complete a turn via `ResolveTurnAsync`.
-3. Verify `TurnResult.DetectedWindow` equals the window from the opponent response.
-4. When opponent returns no window, verify `TurnResult.DetectedWindow` is null.
+3. Verify `TurnResult.DetectedWindow` equals the window from the datee response.
+4. When datee returns no window, verify `TurnResult.DetectedWindow` is null.
 
 ### T7: Window Does Not Apply to Read/Recover/Wait
 
@@ -411,11 +411,11 @@ Required test scenarios (see Test Scenarios section below for details):
 
 ## Edge Cases
 
-1. **Multiple cracks in sequence**: If the opponent's response on turn N detects a crack, and the opponent's response on turn N+1 also detects a crack, the new window **replaces** the old one. There is no stacking. `_activeWeakness` is simply overwritten after the old one is consumed/cleared.
+1. **Multiple cracks in sequence**: If the datee's response on turn N detects a crack, and the datee's response on turn N+1 also detects a crack, the new window **replaces** the old one. There is no stacking. `_activeWeakness` is simply overwritten after the old one is consumed/cleared.
 
 2. **Window on first turn**: `_activeWeakness` is `null` at game start. Turn 0's `StartTurnAsync` has no window active. This is the normal starting case.
 
-3. **Game ends on the turn a window is set**: If interest hits 0 or 25 during `ResolveTurnAsync`, the game ends. The window stored from the opponent's response is irrelevant — there is no next turn. No special handling needed.
+3. **Game ends on the turn a window is set**: If interest hits 0 or 25 during `ResolveTurnAsync`, the game ends. The window stored from the datee's response is irrelevant — there is no next turn. No special handling needed.
 
 4. **DC reduced below 1**: If `dcAdjustment` is large enough that the effective DC drops below 1, the roll still uses that DC. No clamping. A d20 roll of 1 (nat 1) is still auto-fail per existing rules; anything else beats the low DC trivially.
 
@@ -429,7 +429,7 @@ Required test scenarios (see Test Scenarios section below for details):
 
 6. **LLM adapter returns unexpected stat**: The engine does not validate that the window's stat matches the §15 crack table. The LLM is trusted. The engine only cares about `DefendingStat` and `DcReduction`.
 
-7. **NullLlmAdapter**: Always returns `OpponentResponse` with `WeaknessWindow = null`. No crack detection in null/test adapter by default.
+7. **NullLlmAdapter**: Always returns `DateeResponse` with `WeaknessWindow = null`. No crack detection in null/test adapter by default.
 
 8. **DialogueOption enrichment is done by GameSession**: The LLM returns `DialogueOption[]` from `GetDialogueOptionsAsync`. These do NOT have `HasWeaknessWindow` set by the LLM. `GameSession` enriches them by checking `_activeWeakness` against each option's defending stat. GameSession is authoritative.
 
@@ -442,8 +442,8 @@ Required test scenarios (see Test Scenarios section below for details):
 | Condition | Error Type | Message |
 |-----------|-----------|---------|
 | `WeaknessWindow` constructed with `dcReduction <= 0` | `ArgumentOutOfRangeException` | "dcReduction must be greater than zero" |
-| `OpponentResponse` constructed with null `messageText` | `ArgumentNullException` | (already implemented) |
-| `ILlmAdapter` implementation returns null `OpponentResponse` | `NullReferenceException` | GameSession should guard against null response; throw `InvalidOperationException` with message "LLM adapter returned null opponent response" |
+| `DateeResponse` constructed with null `messageText` | `ArgumentNullException` | (already implemented) |
+| `ILlmAdapter` implementation returns null `DateeResponse` | `NullReferenceException` | GameSession should guard against null response; throw `InvalidOperationException` with message "LLM adapter returned null datee response" |
 
 No new exception types are introduced.
 
@@ -457,8 +457,8 @@ No new exception types are introduced.
 | Issue #63 (Architecture) | Code | **Merged** | Sprint architecture context |
 | Issue #139 Wave 0 | Code | **Required** | `RollEngine.Resolve(dcAdjustment)` parameter — if not yet merged, this issue must add the parameter or wait |
 | `WeaknessWindow` class | Code | **Exists** (stub) | Needs validation added |
-| `OpponentResponse` class | Code | **Exists** | No changes needed |
-| `ILlmAdapter` interface | Code | **Exists** | Already returns `Task<OpponentResponse>` |
+| `DateeResponse` class | Code | **Exists** | No changes needed |
+| `ILlmAdapter` interface | Code | **Exists** | Already returns `Task<DateeResponse>` |
 | `StatBlock.DefenceTable` | Code | **Exists** | Used for attack→defence stat mapping |
 | `DialogueOption` class | Code | **Exists** | Needs `HasWeaknessWindow` property added |
 | `TurnResult` class | Code | **Exists** | Needs `DetectedWindow` property added |

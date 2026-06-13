@@ -91,16 +91,16 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             Assert.Equal(0.7, body["temperature"]!.Value<double>(), 2);
         }
 
-        // What: AC7 — OpponentResponse temperature is 0.85 by default
-        // Mutation: Would catch if opponent response uses wrong temperature
+        // What: AC7 — DateeResponse temperature is 0.85 by default
+        // Mutation: Would catch if datee response uses wrong temperature
         [Fact]
-        public async Task AC7_OpponentResponse_DefaultTemperature_0_85()
+        public async Task AC7_DateeResponse_DefaultTemperature_0_85()
         {
             var handler = new MockHttpHandler { ResponseBody = MakeApiResponse("[RESPONSE]\n\"Hey\"") };
             using var client = new HttpClient(handler);
             using var adapter = new AnthropicLlmAdapter(DefaultOptions(), client);
 
-            await adapter.GetOpponentResponseAsync(MakeOpponentContext());
+            await adapter.GetDateeResponseAsync(MakeDateeContext());
 
             var body = JObject.Parse(handler.LastRequestBody!);
             Assert.Equal(0.85, body["temperature"]!.Value<double>(), 2);
@@ -200,7 +200,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             await Assert.ThrowsAsync<ArgumentNullException>(() =>
                 adapter.DeliverMessageAsync(null!));
             await Assert.ThrowsAsync<ArgumentNullException>(() =>
-                adapter.GetOpponentResponseAsync(null!));
+                adapter.GetDateeResponseAsync(null!));
             await Assert.ThrowsAsync<ArgumentNullException>(() =>
                 adapter.GetInterestChangeBeatAsync(null!));
         }
@@ -242,16 +242,16 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             Assert.Equal("", result);
         }
 
-        // What: Spec — LLM empty response for GetOpponentResponseAsync
+        // What: Spec — LLM empty response for GetDateeResponseAsync
         // Mutation: Would catch if empty response throws instead of returning default
         [Fact]
-        public async Task Error_EmptyLlmResponse_OpponentReturnsEmptyMessage()
+        public async Task Error_EmptyLlmResponse_DateeReturnsEmptyMessage()
         {
             var handler = new MockHttpHandler { ResponseBody = MakeApiResponse("") };
             using var client = new HttpClient(handler);
             using var adapter = new AnthropicLlmAdapter(DefaultOptions(), client);
 
-            var result = await adapter.GetOpponentResponseAsync(MakeOpponentContext());
+            var result = await adapter.GetDateeResponseAsync(MakeDateeContext());
             Assert.Equal("", result.MessageText);
             Assert.Null(result.DetectedTell);
             Assert.Null(result.WeaknessWindow);
@@ -328,10 +328,10 @@ OPTION_4
             Assert.Equal(2, result[3].CallbackTurnNumber);
         }
 
-        // What: AC1 — GetOpponentResponseAsync full happy path with signals
+        // What: AC1 — GetDateeResponseAsync full happy path with signals
         // Mutation: Would catch if signal parsing is not wired up in the adapter method
         [Fact]
-        public async Task FullFlow_GetOpponentResponseAsync_ParsesSignals()
+        public async Task FullFlow_GetDateeResponseAsync_ParsesSignals()
         {
             var responseText = @"[RESPONSE]
 ""Haha the penguin section! So what's YOUR type then?""
@@ -344,7 +344,7 @@ WEAKNESS: WIT -2 (overthinking their responses)";
             using var client = new HttpClient(handler);
             using var adapter = new AnthropicLlmAdapter(DefaultOptions(), client);
 
-            var result = await adapter.GetOpponentResponseAsync(MakeOpponentContext());
+            var result = await adapter.GetDateeResponseAsync(MakeDateeContext());
 
             Assert.Contains("penguin section", result.MessageText);
             Assert.NotNull(result.DetectedTell);

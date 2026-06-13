@@ -8,7 +8,7 @@
 > The tests and implementation for this issue **MUST** revert stateful sessions and assert their absence.
 > **DO NOT REJECT PRs for Issue #536 because they "contradict the issue title".** The title is wrong. This spec is the single source of truth. The correct implementation is to make the LLM adapter strictly stateless.
 
-Issue #536 was originally conceived to switch the LLM adapter to a stateful conversation accumulation pattern. However, per CPO Vision Concern #583, this approach has been explicitly rejected and reverted. Mixing meta-engine option generation, player dialogue, and opponent responses into a single Anthropic `messages[]` array causes catastrophic voice bleed, fundamentally breaking the LLM's understanding of its role. This specification mandates the complete removal of the `IStatefulLlmAdapter` interface and associated stateful logic, restoring a strictly stateless, zero-dependency pattern for `GameSession` and `AnthropicLlmAdapter`.
+Issue #536 was originally conceived to switch the LLM adapter to a stateful conversation accumulation pattern. However, per CPO Vision Concern #583, this approach has been explicitly rejected and reverted. Mixing meta-engine option generation, player dialogue, and datee responses into a single Anthropic `messages[]` array causes catastrophic voice bleed, fundamentally breaking the LLM's understanding of its role. This specification mandates the complete removal of the `IStatefulLlmAdapter` interface and associated stateful logic, restoring a strictly stateless, zero-dependency pattern for `GameSession` and `AnthropicLlmAdapter`.
 
 ## Function Signatures
 
@@ -26,7 +26,7 @@ Removed fields/properties:
 Removed methods:
 - `public void StartConversation(string systemPrompt)`
 
-All internal branching based on `if (_session != null)` in `GetDialogueOptionsAsync`, `DeliverMessageAsync`, `GetOpponentResponseAsync`, and `GetInterestChangeBeatAsync` is removed, leaving only the stateless request path.
+All internal branching based on `if (_session != null)` in `GetDialogueOptionsAsync`, `DeliverMessageAsync`, `GetDateeResponseAsync`, and `GetInterestChangeBeatAsync` is removed, leaving only the stateless request path.
 
 ### Modified Class: `GameSession`
 In the constructor:
@@ -38,11 +38,11 @@ The block initializing stateful sessions via `if (_llm is IStatefulLlmAdapter st
 **GameSession Constructor Execution**
 ```csharp
 // Before:
-var session = new GameSession(player, opponent, llm, dice, trapRegistry, rules);
+var session = new GameSession(player, datee, llm, dice, trapRegistry, rules);
 // Would check if llm is IStatefulLlmAdapter and call StartConversation()
 
 // After:
-var session = new GameSession(player, opponent, llm, dice, trapRegistry, rules);
+var session = new GameSession(player, datee, llm, dice, trapRegistry, rules);
 // Standard initialization completes. No LLM state initialization occurs.
 ```
 

@@ -56,7 +56,7 @@ data/
     traps.json                 — trap definitions (one per StatType)
     trap-schema.json           — JSON Schema for validation
   timing/
-    response-profiles.json     — opponent reply timing profiles
+    response-profiles.json     — datee reply timing profiles
 ```
 
 #### File-by-file map
@@ -70,7 +70,7 @@ data/
 | `anatomy/anatomy-parameters.json` | `JsonAnatomyRepository` | Anatomy parameters × tiers. Each tier carries the same fragment/modifier shape as items. The number and names of parameters are fully data-driven — see "Anatomy parameter extensibility" below. |
 | `traps/traps.json` | `JsonTrapRepository` (`ITrapRegistry`) | Trap definitions (one per stat). Fields: `stat`, `effect`, `effect_value`, `duration_turns`, `llm_instruction` (the trap overlay prompt used on persistence turns), `clear_method`, `nat1_bonus`. |
 | `traps/trap-schema.json` | (validation only) | JSON Schema documenting trap structure. |
-| `timing/response-profiles.json` | response-timing layer | Base profiles for opponent reply timing; combined with item/anatomy `response_timing_modifier` deltas. |
+| `timing/response-profiles.json` | response-timing layer | Base profiles for datee reply timing; combined with item/anatomy `response_timing_modifier` deltas. |
 
 All character / item / anatomy fields above are concatenated by `CharacterAssembler` into a `FragmentCollection`, which `PromptBuilder` then renders into the `TEXTING STYLE`, `PERSONALITY`, `BACKSTORY`, `ARCHETYPES`, `EFFECTIVE STATS` blocks of the per-character system prompt.
 

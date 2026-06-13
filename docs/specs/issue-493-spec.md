@@ -1,4 +1,4 @@
-# Issue #493 — Mechanic: Failure Degradation Legible to Opponent
+# Issue #493 — Mechanic: Failure Degradation Legible to Datee
 
 **Module**: `docs/modules/llm-adapters.md` (update existing), `docs/modules/conversation-game-session.md` (update existing)
 
@@ -6,32 +6,32 @@
 
 ## Overview
 
-When a player's roll fails, the opponent currently has no awareness of what went wrong — the opponent's response is generated without knowledge of the failure tier. This feature passes the `FailureTier` from the roll result into `OpponentContext` and injects per-tier reaction guidance into the opponent's LLM prompt, so the opponent reacts proportionally to how badly the player's message was corrupted. A Fumble produces slight coolness; a Catastrophe or Legendary failure produces visible discomfort or confusion.
+When a player's roll fails, the datee currently has no awareness of what went wrong — the datee's response is generated without knowledge of the failure tier. This feature passes the `FailureTier` from the roll result into `DateeContext` and injects per-tier reaction guidance into the datee's LLM prompt, so the datee reacts proportionally to how badly the player's message was corrupted. A Fumble produces slight coolness; a Catastrophe or Legendary failure produces visible discomfort or confusion.
 
 ---
 
 ## Function Signatures
 
-### Pinder.Core — `OpponentContext` (DTO extension)
+### Pinder.Core — `DateeContext` (DTO extension)
 
 ```csharp
 namespace Pinder.Core.Conversation
 {
-    public sealed class OpponentContext
+    public sealed class DateeContext
     {
         // ... all existing properties unchanged ...
 
         /// <summary>
         /// The failure tier of the player's roll. None means success.
-        /// Used by the opponent prompt to calibrate reaction to corrupted messages.
+        /// Used by the datee prompt to calibrate reaction to corrupted messages.
         /// </summary>
         public FailureTier DeliveryTier { get; }
 
-        public OpponentContext(
+        public DateeContext(
             string playerPrompt,
-            string opponentPrompt,
+            string dateePrompt,
             IReadOnlyList<(string Sender, string Text)> conversationHistory,
-            string opponentLastMessage,
+            string dateeLastMessage,
             IReadOnlyList<string> activeTraps,
             int currentInterest,
             string playerDeliveredMessage,
@@ -41,7 +41,7 @@ namespace Pinder.Core.Conversation
             Dictionary<ShadowStatType, int>? shadowThresholds = null,
             string[]? activeTrapInstructions = null,
             string playerName = "",
-            string opponentName = "",
+            string dateeName = "",
             int currentTurn = 0,
             FailureTier deliveryTier = FailureTier.None)  // NEW — backward-compatible default
         {
@@ -56,12 +56,12 @@ namespace Pinder.Core.Conversation
 
 ### Pinder.Core — `GameSession.ResolveTurnAsync()` (wiring change)
 
-The existing `OpponentContext` construction site (around line 651 of `GameSession.cs`) gains one new argument:
+The existing `DateeContext` construction site (around line 651 of `GameSession.cs`) gains one new argument:
 
 ```csharp
-var opponentContext = new OpponentContext(
+var dateeContext = new DateeContext(
     // ... all existing params unchanged ...
-    shadowThresholds: opponentShadowThresholds,
+    shadowThresholds: dateeShadowThresholds,
     deliveryTier: rollResult.Tier);  // NEW — passes the roll's FailureTier
 ```
 
@@ -76,28 +76,28 @@ namespace Pinder.LlmAdapters
     {
         // ... existing constants unchanged ...
 
-        /// <summary>Opponent reaction guidance for Fumble (miss by 1-2).</summary>
-        public const string OpponentFumbleGuidance;     // string constant
+        /// <summary>Datee reaction guidance for Fumble (miss by 1-2).</summary>
+        public const string DateeFumbleGuidance;     // string constant
 
-        /// <summary>Opponent reaction guidance for Misfire (miss by 3-5).</summary>
-        public const string OpponentMisfireGuidance;    // string constant
+        /// <summary>Datee reaction guidance for Misfire (miss by 3-5).</summary>
+        public const string DateeMisfireGuidance;    // string constant
 
-        /// <summary>Opponent reaction guidance for TropeTrap (miss by 6-9).</summary>
-        public const string OpponentTropeTrapGuidance;  // string constant
+        /// <summary>Datee reaction guidance for TropeTrap (miss by 6-9).</summary>
+        public const string DateeTropeTrapGuidance;  // string constant
 
-        /// <summary>Opponent reaction guidance for Catastrophe (miss by 10+).</summary>
-        public const string OpponentCatastropheGuidance; // string constant
+        /// <summary>Datee reaction guidance for Catastrophe (miss by 10+).</summary>
+        public const string DateeCatastropheGuidance; // string constant
 
-        /// <summary>Opponent reaction guidance for Legendary (Nat 1).</summary>
-        public const string OpponentLegendaryGuidance;  // string constant
+        /// <summary>Datee reaction guidance for Legendary (Nat 1).</summary>
+        public const string DateeLegendaryGuidance;  // string constant
 
         /// <summary>
-        /// Returns the per-tier opponent reaction guidance text.
+        /// Returns the per-tier datee reaction guidance text.
         /// Returns empty string for FailureTier.None (success).
         /// </summary>
         /// <param name="tier">The failure tier from the player's roll.</param>
         /// <returns>Guidance string for the LLM, or empty string on success.</returns>
-        public static string GetOpponentFailureGuidance(FailureTier tier);
+        public static string GetDateeFailureGuidance(FailureTier tier);
     }
 }
 ```
@@ -106,9 +106,9 @@ namespace Pinder.LlmAdapters
 
 **Required import**: `using Pinder.Core.Rolls;` (LlmAdapters already references Pinder.Core).
 
-### Pinder.LlmAdapters — `SessionDocumentBuilder.BuildOpponentPrompt()` (prompt injection)
+### Pinder.LlmAdapters — `SessionDocumentBuilder.BuildDateePrompt()` (prompt injection)
 
-The existing `BuildOpponentPrompt(OpponentContext context)` method gains a new section in the assembled prompt. **No signature change** — the `DeliveryTier` is read from the existing `context` parameter.
+The existing `BuildDateePrompt(DateeContext context)` method gains a new section in the assembled prompt. **No signature change** — the `DeliveryTier` is read from the existing `context` parameter.
 
 ```csharp
 // Injected after "PLAYER'S LAST MESSAGE" section, before "INTEREST CHANGE":
@@ -116,7 +116,7 @@ if (context.DeliveryTier != FailureTier.None)
 {
     sb.AppendLine();
     sb.AppendLine("DELIVERY NOTE");
-    sb.AppendLine(PromptTemplates.GetOpponentFailureGuidance(context.DeliveryTier));
+    sb.AppendLine(PromptTemplates.GetDateeFailureGuidance(context.DeliveryTier));
 }
 ```
 
@@ -132,7 +132,7 @@ if (context.DeliveryTier != FailureTier.None)
 - `rollResult.Tier` = `FailureTier.Fumble`
 - `interestBefore` = 12, `interestAfter` = 11
 
-**OpponentContext constructed with**:
+**DateeContext constructed with**:
 - `deliveryTier: FailureTier.Fumble`
 
 **Prompt section injected after PLAYER'S LAST MESSAGE**:
@@ -164,7 +164,7 @@ short, clipped response that signals "that was NOT it."
 **Input state**:
 - `rollResult.Tier` = `FailureTier.None` (success)
 
-**Result**: No "DELIVERY NOTE" section is injected into the opponent prompt. The prompt structure is identical to the current behavior.
+**Result**: No "DELIVERY NOTE" section is injected into the datee prompt. The prompt structure is identical to the current behavior.
 
 ### Example 4: Legendary (Nat 1) — maximum embarrassment
 
@@ -185,47 +185,47 @@ chat. A "..." or "wow" or stunned silence is appropriate.
 
 ## Acceptance Criteria
 
-### AC1: OpponentContext includes DeliveryTier
+### AC1: DateeContext includes DeliveryTier
 
-**Given** a roll fails, **when** `OpponentContext` is constructed in `GameSession.ResolveTurnAsync()`, **then** it includes a `DeliveryTier` property set to the `FailureTier` enum value from the roll result. The property defaults to `FailureTier.None` for backward compatibility.
+**Given** a roll fails, **when** `DateeContext` is constructed in `GameSession.ResolveTurnAsync()`, **then** it includes a `DeliveryTier` property set to the `FailureTier` enum value from the roll result. The property defaults to `FailureTier.None` for backward compatibility.
 
-**Verification**: Construct `OpponentContext` with `deliveryTier: FailureTier.TropeTrap`. Assert `context.DeliveryTier == FailureTier.TropeTrap`. Construct without the parameter. Assert `context.DeliveryTier == FailureTier.None`.
+**Verification**: Construct `DateeContext` with `deliveryTier: FailureTier.TropeTrap`. Assert `context.DeliveryTier == FailureTier.TropeTrap`. Construct without the parameter. Assert `context.DeliveryTier == FailureTier.None`.
 
-### AC2: GameSession passes roll tier to OpponentContext
+### AC2: GameSession passes roll tier to DateeContext
 
-**Given** `GameSession` resolves a turn with a failed roll, **when** opponent context is built, **then** `rollResult.Tier` is passed as the `deliveryTier` argument.
+**Given** `GameSession` resolves a turn with a failed roll, **when** datee context is built, **then** `rollResult.Tier` is passed as the `deliveryTier` argument.
 
-**Verification**: Mock `ILlmAdapter.GetOpponentResponseAsync()` to capture the `OpponentContext` argument. Inject a dice roller that produces a known failure. Assert the captured context's `DeliveryTier` matches the expected `FailureTier`.
+**Verification**: Mock `ILlmAdapter.GetDateeResponseAsync()` to capture the `DateeContext` argument. Inject a dice roller that produces a known failure. Assert the captured context's `DeliveryTier` matches the expected `FailureTier`.
 
-### AC3: BuildOpponentPrompt injects failure context for non-None tiers
+### AC3: BuildDateePrompt injects failure context for non-None tiers
 
-**Given** `BuildOpponentPrompt` receives an `OpponentContext` with `DeliveryTier != FailureTier.None`, **when** the prompt is assembled, **then** a "DELIVERY NOTE" section is injected containing per-tier guidance text from `PromptTemplates.GetOpponentFailureGuidance()`.
+**Given** `BuildDateePrompt` receives an `DateeContext` with `DeliveryTier != FailureTier.None`, **when** the prompt is assembled, **then** a "DELIVERY NOTE" section is injected containing per-tier guidance text from `PromptTemplates.GetDateeFailureGuidance()`.
 
-**Verification**: Call `SessionDocumentBuilder.BuildOpponentPrompt()` with a context having `DeliveryTier = FailureTier.Misfire`. Assert the returned string contains `"DELIVERY NOTE"`. Assert it contains the Misfire-specific guidance text.
+**Verification**: Call `SessionDocumentBuilder.BuildDateePrompt()` with a context having `DeliveryTier = FailureTier.Misfire`. Assert the returned string contains `"DELIVERY NOTE"`. Assert it contains the Misfire-specific guidance text.
 
 ### AC4: Fumble produces slight coolness guidance
 
-**Given** a Fumble tier (miss by 1-2), **when** `GetOpponentFailureGuidance(FailureTier.Fumble)` is called, **then** the returned text instructs the opponent to show slight coolness without explicit acknowledgment of failure.
+**Given** a Fumble tier (miss by 1-2), **when** `GetDateeFailureGuidance(FailureTier.Fumble)` is called, **then** the returned text instructs the datee to show slight coolness without explicit acknowledgment of failure.
 
-**Verification**: Assert `PromptTemplates.GetOpponentFailureGuidance(FailureTier.Fumble)` returns a non-empty string that does NOT contain words like "failed" or "messed up" (the opponent shouldn't break the fourth wall).
+**Verification**: Assert `PromptTemplates.GetDateeFailureGuidance(FailureTier.Fumble)` returns a non-empty string that does NOT contain words like "failed" or "messed up" (the datee shouldn't break the fourth wall).
 
 ### AC5: TropeTrap/Catastrophe produces visible discomfort guidance
 
-**Given** a TropeTrap or Catastrophe tier, **when** `GetOpponentFailureGuidance()` is called, **then** the returned text instructs the opponent to show visible discomfort or confusion.
+**Given** a TropeTrap or Catastrophe tier, **when** `GetDateeFailureGuidance()` is called, **then** the returned text instructs the datee to show visible discomfort or confusion.
 
 **Verification**: Assert the guidance strings for `FailureTier.TropeTrap` and `FailureTier.Catastrophe` are both non-empty and distinct from each other (different tiers produce different guidance).
 
 ### AC6: Success (None) produces no failure context
 
-**Given** a success (tier = `FailureTier.None`), **when** `BuildOpponentPrompt` is called, **then** no "DELIVERY NOTE" section appears in the assembled prompt.
+**Given** a success (tier = `FailureTier.None`), **when** `BuildDateePrompt` is called, **then** no "DELIVERY NOTE" section appears in the assembled prompt.
 
-**Verification**: Call `BuildOpponentPrompt()` with `DeliveryTier = FailureTier.None`. Assert the result does NOT contain `"DELIVERY NOTE"`.
+**Verification**: Call `BuildDateePrompt()` with `DeliveryTier = FailureTier.None`. Assert the result does NOT contain `"DELIVERY NOTE"`.
 
 ### AC7: Per-tier guidance text exists in PromptTemplates
 
-All five failure tiers have corresponding guidance constants and the `GetOpponentFailureGuidance()` method maps each tier correctly.
+All five failure tiers have corresponding guidance constants and the `GetDateeFailureGuidance()` method maps each tier correctly.
 
-**Verification**: For each value in `{ Fumble, Misfire, TropeTrap, Catastrophe, Legendary }`, call `GetOpponentFailureGuidance()` and assert the return is non-empty and distinct.
+**Verification**: For each value in `{ Fumble, Misfire, TropeTrap, Catastrophe, Legendary }`, call `GetDateeFailureGuidance()` and assert the return is non-empty and distinct.
 
 ### AC8: Build clean, all tests pass
 
@@ -236,16 +236,16 @@ All existing tests (2295+) must continue to pass. The solution must compile with
 ## Edge Cases
 
 ### Default value backward compatibility
-All existing code that constructs `OpponentContext` without a `deliveryTier` argument must compile and behave identically to current behavior. The default `FailureTier.None` means no "DELIVERY NOTE" is injected.
+All existing code that constructs `DateeContext` without a `deliveryTier` argument must compile and behave identically to current behavior. The default `FailureTier.None` means no "DELIVERY NOTE" is injected.
 
 ### Success roll passes FailureTier.None
-When a roll succeeds, `rollResult.Tier` is `FailureTier.None`. GameSession passes this value. `BuildOpponentPrompt` sees `None` and skips the DELIVERY NOTE section entirely.
+When a roll succeeds, `rollResult.Tier` is `FailureTier.None`. GameSession passes this value. `BuildDateePrompt` sees `None` and skips the DELIVERY NOTE section entirely.
 
 ### Legendary failure (Nat 1)
 Legendary is the most severe tier. The guidance should be the most extreme reaction. It must NOT be confused with Catastrophe — Legendary is a Nat 1 regardless of DC, while Catastrophe is miss by 10+.
 
 ### All FailureTier enum values covered
-`GetOpponentFailureGuidance()` must handle every value in the `FailureTier` enum:
+`GetDateeFailureGuidance()` must handle every value in the `FailureTier` enum:
 - `None` → returns `""` (empty string)
 - `Fumble` → Fumble guidance
 - `Misfire` → Misfire guidance
@@ -256,23 +256,23 @@ Legendary is the most severe tier. The guidance should be the most extreme react
 If a new enum value is added in the future, the method should return `""` (safe default) rather than throw.
 
 ### Read/Recover/Wait actions
-`ReadAsync()`, `RecoverAsync()`, and `Wait()` do NOT call `GetOpponentResponseAsync` — they are self-contained actions. This feature only applies to the Speak path (`StartTurnAsync` → `ResolveTurnAsync`). No changes needed for non-Speak actions.
+`ReadAsync()`, `RecoverAsync()`, and `Wait()` do NOT call `GetDateeResponseAsync` — they are self-contained actions. This feature only applies to the Speak path (`StartTurnAsync` → `ResolveTurnAsync`). No changes needed for non-Speak actions.
 
 ### NullLlmAdapter
-`NullLlmAdapter` ignores the `OpponentContext` contents and returns a hardcoded response. The `DeliveryTier` field has no effect when using `NullLlmAdapter`. This is correct and expected.
+`NullLlmAdapter` ignores the `DateeContext` contents and returns a hardcoded response. The `DeliveryTier` field has no effect when using `NullLlmAdapter`. This is correct and expected.
 
 ---
 
 ## Error Conditions
 
 ### Invalid FailureTier value
-If an unrecognized `FailureTier` integer is cast to the enum and passed to `GetOpponentFailureGuidance()`, the method should return `""` (empty string). Do not throw — degrade gracefully.
+If an unrecognized `FailureTier` integer is cast to the enum and passed to `GetDateeFailureGuidance()`, the method should return `""` (empty string). Do not throw — degrade gracefully.
 
-### Null OpponentContext
-`BuildOpponentPrompt` already throws `ArgumentNullException` if `context` is null. No change needed.
+### Null DateeContext
+`BuildDateePrompt` already throws `ArgumentNullException` if `context` is null. No change needed.
 
-### Missing FailureTier import in OpponentContext
-`OpponentContext.cs` must add `using Pinder.Core.Rolls;` for the `FailureTier` type. This is a Core-to-Core namespace reference (both in `Pinder.Core` assembly), which is permitted.
+### Missing FailureTier import in DateeContext
+`DateeContext.cs` must add `using Pinder.Core.Rolls;` for the `FailureTier` type. This is a Core-to-Core namespace reference (both in `Pinder.Core` assembly), which is permitted.
 
 ---
 
@@ -282,11 +282,11 @@ If an unrecognized `FailureTier` integer is cast to the enum and passed to `GetO
 - `FailureTier` enum (`Pinder.Core.Rolls`) — already exists, no changes needed
 - `RollResult.Tier` property (`Pinder.Core.Rolls`) — already exists, already populated by `RollEngine.Resolve()`
 - `GameSession.ResolveTurnAsync()` (`Pinder.Core.Conversation`) — existing method, wiring change only
-- `OpponentContext` (`Pinder.Core.Conversation`) — DTO extension (new optional parameter)
+- `DateeContext` (`Pinder.Core.Conversation`) — DTO extension (new optional parameter)
 
 ### Internal (Pinder.LlmAdapters)
 - `PromptTemplates` (`Pinder.LlmAdapters`) — new constants + method
-- `SessionDocumentBuilder.BuildOpponentPrompt()` (`Pinder.LlmAdapters`) — prompt injection
+- `SessionDocumentBuilder.BuildDateePrompt()` (`Pinder.LlmAdapters`) — prompt injection
 
 ### External
 - None. No new NuGet packages. No new projects. No external service changes.

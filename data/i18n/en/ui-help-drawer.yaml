@@ -34,7 +34,7 @@ strings:
   help_drawer.check_steering: "Steering check"
   help_drawer.check_steering_body: "Tracks how strongly the player is steering the conversation toward their preferred stats; a failed steer can stall Interest gains for the turn."
   help_drawer.check_horniness: "Horniness check"
-  help_drawer.check_horniness_body: "Compares the opponent's current arousal level to the option's intensity; mismatched intensity dampens Interest, matched intensity amplifies it."
+  help_drawer.check_horniness_body: "Compares the datee's current arousal level to the option's intensity; mismatched intensity dampens Interest, matched intensity amplifies it."
   help_drawer.check_shadow: "Shadow check"
   help_drawer.check_shadow_body: "Inspects the turn's outcome against every shadow rule (see Shadow Stats above) and grows or reduces shadows accordingly. High shadow totals unlock corruption events."
 

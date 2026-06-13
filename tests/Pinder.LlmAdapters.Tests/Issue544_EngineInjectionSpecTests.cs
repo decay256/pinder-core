@@ -12,7 +12,7 @@ namespace Pinder.LlmAdapters.Tests
     /// Tests verify all 7 acceptance criteria from the spec:
     ///   AC1: Options injection format replaces current BuildDialogueOptionsPrompt user content
     ///   AC2: Delivery injection format includes roll context from rule YAML
-    ///   AC3: Opponent injection format includes Interest narrative per band
+    ///   AC3: Datee injection format includes Interest narrative per band
     ///   AC4: Interest narratives configurable (6 bands defined)
     ///   AC5: Roll context narratives sourced from enriched YAML flavor fields
     ///   AC6: Unit tests verify injection format correctness
@@ -25,10 +25,10 @@ namespace Pinder.LlmAdapters.Tests
         private static DialogueContext MakeDialogueContext(
             int currentTurn = 3,
             string playerName = "Velvet",
-            string opponentName = "Sable",
+            string dateeName = "Sable",
             int currentInterest = 14,
             IReadOnlyList<(string Sender, string Text)>? conversationHistory = null,
-            string opponentLastMessage = "hey",
+            string dateeLastMessage = "hey",
             Dictionary<ShadowStatType, int>? shadowThresholds = null,
             List<CallbackOpportunity>? callbackOpportunities = null,
             int horninessLevel = 0,
@@ -39,13 +39,13 @@ namespace Pinder.LlmAdapters.Tests
         {
             return new DialogueContext(
                 playerPrompt: "player system prompt",
-                opponentPrompt: "opponent system prompt",
+                dateePrompt: "datee system prompt",
                 conversationHistory: conversationHistory ?? new List<(string, string)>
                 {
                     ("Velvet", "hey there"),
                     ("Sable", "omg hi!!")
                 },
-                opponentLastMessage: opponentLastMessage,
+                dateeLastMessage: dateeLastMessage,
                 activeTraps: activeTraps ?? Array.Empty<string>(),
                 currentInterest: currentInterest,
                 shadowThresholds: shadowThresholds,
@@ -54,7 +54,7 @@ namespace Pinder.LlmAdapters.Tests
                 requiresRizzOption: requiresRizzOption,
                 activeTrapInstructions: activeTrapInstructions,
                 playerName: playerName,
-                opponentName: opponentName,
+                dateeName: dateeName,
                 currentTurn: currentTurn,
                 playerTextingStyle: playerTextingStyle);
         }
@@ -64,45 +64,45 @@ namespace Pinder.LlmAdapters.Tests
             FailureTier outcome = FailureTier.None,
             int beatDcBy = 5,
             string playerName = "Velvet",
-            string opponentName = "Sable",
+            string dateeName = "Sable",
             Dictionary<ShadowStatType, int>? shadowThresholds = null)
         {
             return new DeliveryContext(
                 playerPrompt: "player system prompt",
-                opponentPrompt: "opponent system prompt",
+                dateePrompt: "datee system prompt",
                 conversationHistory: new List<(string, string)>
                 {
                     ("Velvet", "hey there"),
                     ("Sable", "omg hi!!")
                 },
-                opponentLastMessage: "omg hi!!",
+                dateeLastMessage: "omg hi!!",
                 chosenOption: chosenOption ?? new DialogueOption(StatType.Wit, "clever line here"),
                 outcome: outcome,
                 beatDcBy: beatDcBy,
                 activeTraps: Array.Empty<string>(),
                 shadowThresholds: shadowThresholds,
                 playerName: playerName,
-                opponentName: opponentName);
+                dateeName: dateeName);
         }
 
-        private static OpponentContext MakeOpponentContext(
+        private static DateeContext MakeDateeContext(
             int interestBefore = 12,
             int interestAfter = 14,
             string playerDeliveredMessage = "clever line here",
             double responseDelayMinutes = 2.5,
             string playerName = "Velvet",
-            string opponentName = "Sable",
+            string dateeName = "Sable",
             FailureTier deliveryTier = FailureTier.None)
         {
-            return new OpponentContext(
+            return new DateeContext(
                 playerPrompt: "player system prompt",
-                opponentPrompt: "opponent system prompt",
+                dateePrompt: "datee system prompt",
                 conversationHistory: new List<(string, string)>
                 {
                     ("Velvet", "hey there"),
                     ("Sable", "omg hi!!")
                 },
-                opponentLastMessage: "omg hi!!",
+                dateeLastMessage: "omg hi!!",
                 activeTraps: Array.Empty<string>(),
                 currentInterest: interestAfter,
                 playerDeliveredMessage: playerDeliveredMessage,
@@ -110,7 +110,7 @@ namespace Pinder.LlmAdapters.Tests
                 interestAfter: interestAfter,
                 responseDelayMinutes: responseDelayMinutes,
                 playerName: playerName,
-                opponentName: opponentName,
+                dateeName: dateeName,
                 deliveryTier: deliveryTier);
         }
 
@@ -405,51 +405,51 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         // ═══════════════════════════════════════════════════════════════
-        // AC3: Opponent injection — [ENGINE — OPPONENT] block
+        // AC3: Datee injection — [ENGINE — DATEE] block
         // ═══════════════════════════════════════════════════════════════
 
-        // Mutation: would catch if ENGINE — OPPONENT header was missing
+        // Mutation: would catch if ENGINE — DATEE header was missing
         [Fact]
-        public void AC3_OpponentInjection_HasEngineOpponentHeader()
+        public void AC3_DateeInjection_HasEngineDateeHeader()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(MakeOpponentContext());
-            Assert.Contains("[ENGINE — OPPONENT]", result);
+            var result = SessionDocumentBuilder.BuildDateePrompt(MakeDateeContext());
+            Assert.Contains("[ENGINE — DATEE]", result);
         }
 
-        // Mutation: would catch if opponent name was hardcoded
+        // Mutation: would catch if datee name was hardcoded
         [Fact]
-        public void AC3_OpponentInjection_UsesActualOpponentName()
+        public void AC3_DateeInjection_UsesActualDateeName()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(opponentName: "Brick"));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(dateeName: "Brick"));
             Assert.Contains("Brick is at Interest", result);
             Assert.Contains("Write Brick's response", result);
         }
 
         // Mutation: would catch if interest level was not interpolated
         [Fact]
-        public void AC3_OpponentInjection_ShowsInterestLevel()
+        public void AC3_DateeInjection_ShowsInterestLevel()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(interestAfter: 19));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(interestAfter: 19));
             Assert.Contains("Interest 19/25", result);
         }
 
         // Mutation: would catch if interest delta was not shown
         [Fact]
-        public void AC3_OpponentInjection_ShowsInterestDelta()
+        public void AC3_DateeInjection_ShowsInterestDelta()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(interestBefore: 10, interestAfter: 13));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(interestBefore: 10, interestAfter: 13));
             Assert.Contains("+3", result);
         }
 
         // Mutation: would catch if negative delta didn't show minus sign
         [Fact]
-        public void AC3_OpponentInjection_ShowsNegativeDelta()
+        public void AC3_DateeInjection_ShowsNegativeDelta()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(interestBefore: 15, interestAfter: 12));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(interestBefore: 15, interestAfter: 12));
             Assert.Contains("-3", result);
         }
     }

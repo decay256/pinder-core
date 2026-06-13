@@ -89,7 +89,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         {
             var history = new System.Collections.Generic.List<(string, string)>();
             return new DialogueContext(
-                "Player Prompt", "Opponent Prompt", history, "Last message",
+                "Player Prompt", "Datee Prompt", history, "Last message",
                 new System.Collections.Generic.List<string>(), 10);
         }
 
@@ -98,7 +98,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             var history = new System.Collections.Generic.List<(string, string)>();
             var option = new DialogueOption(StatType.Charm, "Test", 0, null, false);
             return new DeliveryContext(
-                "Player Prompt", "Opponent Prompt", history, "Last message", option, Pinder.Core.Rolls.FailureTier.None, 5, new System.Collections.Generic.List<string>());
+                "Player Prompt", "Datee Prompt", history, "Last message", option, Pinder.Core.Rolls.FailureTier.None, 5, new System.Collections.Generic.List<string>());
         }
 
         [Fact]

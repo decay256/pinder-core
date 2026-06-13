@@ -20,7 +20,7 @@ namespace Pinder.Rules.Tests
             "vision",
             "world_description",
             "player_role_description",
-            "opponent_role_description",
+            "datee_role_description",
             "narrative_doctrine"
         };
 
@@ -34,9 +34,9 @@ namespace Pinder.Rules.Tests
             "vision",
             "world_description",
             "player_role_description",
-            "opponent_role_description",
-            "opponent_friction",
-            "opponent_curiosity",
+            "datee_role_description",
+            "datee_friction",
+            "datee_curiosity",
             "player_probing",
             "narrative_doctrine",
             "delivery_rules",
@@ -166,7 +166,7 @@ namespace Pinder.Rules.Tests
         [InlineData("vision")]
         [InlineData("world_description")]
         [InlineData("player_role_description")]
-        [InlineData("opponent_role_description")]
+        [InlineData("datee_role_description")]
         [InlineData("narrative_doctrine")]
         public void YamlFile_ValueIsNonEmpty(string key)
         {
@@ -221,10 +221,10 @@ namespace Pinder.Rules.Tests
             var data = ParseYaml();
             var world = data["world_description"];
             var playerRole = data["player_role_description"];
-            var opponentRole = data["opponent_role_description"];
+            var dateeRole = data["datee_role_description"];
             Assert.Contains("Interest", world, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("25", playerRole);
-            Assert.Contains("Bored", opponentRole);
+            Assert.Contains("Bored", dateeRole);
             Assert.Contains("Date Secured", playerRole);
         }
 

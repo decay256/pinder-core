@@ -15,19 +15,19 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         // AC7: Temperature verification for all methods
         // ==============================================================================
 
-        // What: AC7 - Temperature override for OpponentResponse method
-        // Mutation: Would catch if opponent response ignores its specific override
+        // What: AC7 - Temperature override for DateeResponse method
+        // Mutation: Would catch if datee response ignores its specific override
         [Fact]
-        public async Task GetOpponentResponseAsync_TemperatureOverride_Used()
+        public async Task GetDateeResponseAsync_TemperatureOverride_Used()
         {
             var handler = new CapturingHttpHandler(@"[RESPONSE]
 ""text""");
             using var client = new HttpClient(handler);
             var options = DefaultOptions();
-            options.OpponentResponseTemperature = 0.6;
+            options.DateeResponseTemperature = 0.6;
             using var adapter = new AnthropicLlmAdapter(options, client);
 
-            await adapter.GetOpponentResponseAsync(MakeOpponentContext());
+            await adapter.GetDateeResponseAsync(MakeDateeContext());
 
             var body = JsonConvert.DeserializeObject<MessagesRequest>(handler.RequestBodies[0]);
             Assert.Equal(0.6, body!.Temperature!.Value, 2);
@@ -78,7 +78,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             // Explicitly ensure all overrides are null
             options.DialogueOptionsTemperature = null;
             options.DeliveryTemperature = null;
-            options.OpponentResponseTemperature = null;
+            options.DateeResponseTemperature = null;
             options.InterestChangeBeatTemperature = null;
 
             var handler = new CapturingHttpHandler(FourOptionResponse);
@@ -155,16 +155,16 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             Assert.Equal("", result);
         }
 
-        // What: Spec error - GetOpponentResponseAsync on empty LLM response returns empty message
+        // What: Spec error - GetDateeResponseAsync on empty LLM response returns empty message
         // Mutation: Would catch if empty response causes null message or throws
         [Fact]
-        public async Task GetOpponentResponseAsync_EmptyResponse_ReturnsEmptyMessage()
+        public async Task GetDateeResponseAsync_EmptyResponse_ReturnsEmptyMessage()
         {
             var handler = new CapturingHttpHandler("");
             using var client = new HttpClient(handler);
             using var adapter = new AnthropicLlmAdapter(DefaultOptions(), client);
 
-            var result = await adapter.GetOpponentResponseAsync(MakeOpponentContext());
+            var result = await adapter.GetDateeResponseAsync(MakeDateeContext());
 
             Assert.NotNull(result);
             Assert.Equal("", result.MessageText);

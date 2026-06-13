@@ -61,10 +61,10 @@ namespace Pinder.Core.Tests.Phase0
         public const string CannedDelivery = "Hey, you come here often?";
 
         /// <summary>
-        /// Canned opponent response. Bare message with no signals — the parser
-        /// returns this as the opponent message text.
+        /// Canned datee response. Bare message with no signals — the parser
+        /// returns this as the datee message text.
         /// </summary>
-        public const string CannedOpponent = "Maybe.";
+        public const string CannedDatee = "Maybe.";
 
         /// <summary>
         /// Build a <see cref="PinderLlmAdapter"/> wired to the given transport, with the

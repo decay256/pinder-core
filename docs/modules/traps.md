@@ -1,13 +1,13 @@
 # Traps
 
 ## Overview
-The traps module defines trap mechanics for Pinder conversations. Each stat has one associated trap that imposes mechanical penalties (disadvantage, stat penalty, or opponent DC increase) and taints LLM-generated messages with flavored instructions. Traps are loaded from `data/traps/traps.json` using a flat JSON schema.
+The traps module defines trap mechanics for Pinder conversations. Each stat has one associated trap that imposes mechanical penalties (disadvantage, stat penalty, or datee DC increase) and taints LLM-generated messages with flavored instructions. Traps are loaded from `data/traps/traps.json` using a flat JSON schema.
 
 ## Key Components
 
 | File | Description |
 |------|-------------|
-| `src/Pinder.Core/Traps/TrapDefinition.cs` | `TrapDefinition` data model and `TrapEffect` enum (Disadvantage, StatPenalty, OpponentDCIncrease) |
+| `src/Pinder.Core/Traps/TrapDefinition.cs` | `TrapDefinition` data model and `TrapEffect` enum (Disadvantage, StatPenalty, DateeDCIncrease) |
 | `src/Pinder.Core/Traps/TrapState.cs` | `TrapState` — tracks active traps per character; `ActiveTrap` — countdown wrapper |
 | `src/Pinder.Core/Data/JsonTrapRepository.cs` | `JsonTrapRepository` — parses flat-schema JSON into `TrapDefinition` objects; implements `ITrapRegistry` |
 | `data/traps/traps.json` | Trap data file — flat array of 6 trap objects, one per `StatType` |
@@ -37,7 +37,7 @@ public sealed class TrapDefinition
 ### `TrapEffect` (enum)
 - `Disadvantage` — roll stat at disadvantage
 - `StatPenalty` — flat penalty to stat modifier
-- `OpponentDCIncrease` — raises opponent's DC
+- `DateeDCIncrease` — raises datee's DC
 
 ### `TrapState` (class)
 ```csharp
@@ -81,7 +81,7 @@ Each trap object in the top-level array:
 }
 ```
 
-**Critical**: Stat keys must be lowercase snake_case (`charm`, `rizz`, `honesty`, `chaos`, `wit`, `self_awareness`). Effect keys must be lowercase snake_case (`disadvantage`, `stat_penalty`, `opponent_dc_increase`). PascalCase is rejected.
+**Critical**: Stat keys must be lowercase snake_case (`charm`, `rizz`, `honesty`, `chaos`, `wit`, `self_awareness`). Effect keys must be lowercase snake_case (`disadvantage`, `stat_penalty`, `datee_dc_increase`). PascalCase is rejected.
 
 ## Architecture Notes
 - **Flat schema**: `traps.json` uses flat top-level fields (`stat`, `effect`, `effect_value`, etc.). A previous nested schema (with `triggered_by_stat`, `mechanical_effect`, `prompt_taint` sub-objects) caused parser crashes — issue #306 fixed this by migrating to the flat schema the parser expects.

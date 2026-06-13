@@ -32,7 +32,7 @@ namespace Pinder.Core.Conversation
             return await _turnOrchestrator.StartTurnAsync(
                 _state,
                 _player,
-                _opponent,
+                _datee,
                 ct).ConfigureAwait(false);
         }
 
@@ -137,7 +137,7 @@ namespace Pinder.Core.Conversation
 
         /// <summary>
         /// Resolve a turn after the player selects an option.
-        /// Sequences: roll → interest delta → momentum → shadow growth → trap advance → deliver → opponent response.
+        /// Sequences: roll → interest delta → momentum → shadow growth → trap advance → deliver → datee response.
         /// </summary>
         /// <param name="optionIndex">Index into the options array from StartTurnAsync.</param>
         /// <exception cref="GameEndedException">If the game has already ended.</exception>
@@ -185,7 +185,7 @@ namespace Pinder.Core.Conversation
         /// Resolve the current turn with an optional progress reporter and
         /// cancellation token. The token is forwarded to every awaited LLM
         /// adapter call inside the resolution pipeline (steering, delivery,
-        /// trap overlay, horniness overlay, shadow corruption, opponent
+        /// trap overlay, horniness overlay, shadow corruption, datee
         /// response). When the token is cancelled mid-turn the engine surfaces
         /// <see cref="OperationCanceledException"/> at the next adapter call;
         /// the post-cancel observable invariants are documented in
@@ -199,7 +199,7 @@ namespace Pinder.Core.Conversation
                 _state,
                 optionIndex,
                 _player,
-                _opponent,
+                _datee,
                 progress,
                 ct).ConfigureAwait(false);
         }

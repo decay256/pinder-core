@@ -53,7 +53,7 @@ public sealed class TrapDefinition
 |-------|------|----------|---------|-------|
 | `id` | string | Yes | — | Unique trap identifier |
 | `stat` | string | Yes | — | Lowercase: `charm`, `rizz`, `honesty`, `chaos`, `wit`, `self_awareness` |
-| `effect` | string | Yes | — | `disadvantage`, `stat_penalty`, `opponent_dc_increase` |
+| `effect` | string | Yes | — | `disadvantage`, `stat_penalty`, `datee_dc_increase` |
 | `effect_value` | int | Yes | — | 0 for Disadvantage effects |
 | `duration_turns` | int | No | 3 | Explicit in all 6 canonical traps |
 | `llm_instruction` | string | Yes | — | Prompt taint text |
@@ -66,9 +66,9 @@ public sealed class TrapDefinition
 |----|------|--------|-------------|----------------|
 | `cringe` | `charm` | `disadvantage` | 0 | 1 |
 | `creep` | `rizz` | `stat_penalty` | 2 | 2 |
-| `overshare` | `honesty` | `opponent_dc_increase` | 2 | 1 |
+| `overshare` | `honesty` | `datee_dc_increase` | 2 | 1 |
 | `unhinged` | `chaos` | `disadvantage` | 0 | 1 |
-| `pretentious` | `wit` | `opponent_dc_increase` | 3 | 1 |
+| `pretentious` | `wit` | `datee_dc_increase` | 3 | 1 |
 | `spiral` | `self_awareness` | `disadvantage` | 0 | 2 |
 
 ## Architecture Notes

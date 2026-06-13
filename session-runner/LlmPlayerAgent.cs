@@ -87,7 +87,7 @@ namespace Pinder.SessionRunner
         private readonly ScoringPlayerAgent _fallback;
         private readonly string _model;
         private readonly string _playerName;
-        private readonly string _opponentName;
+        private readonly string _dateeName;
         private bool _disposed;
         private readonly List<CallSummaryStat> _tokenStats = new List<CallSummaryStat>();
 
@@ -105,18 +105,18 @@ namespace Pinder.SessionRunner
         /// <param name="options">Anthropic API configuration (API key, model, etc.).</param>
         /// <param name="fallback">Deterministic scoring agent used on LLM failure.</param>
         /// <param name="playerName">Player character display name (optional, for prompt immersion).</param>
-        /// <param name="opponentName">Opponent character display name (optional, for prompt immersion).</param>
+        /// <param name="dateeName">Datee character display name (optional, for prompt immersion).</param>
         /// <exception cref="ArgumentNullException">If options or fallback is null.</exception>
         public LlmPlayerAgent(
             AnthropicOptions options,
             ScoringPlayerAgent fallback,
             string playerName = "the player",
-            string opponentName = "the opponent")
+            string dateeName = "the datee")
         {
             if (options == null) throw new ArgumentNullException(nameof(options));
             _fallback = fallback ?? throw new ArgumentNullException(nameof(fallback));
             _playerName = playerName ?? "the player";
-            _opponentName = opponentName ?? "the opponent";
+            _dateeName = dateeName ?? "the datee";
             _model = options.Model;
             _client = new AnthropicClient(options.ApiKey);
         }
@@ -247,9 +247,9 @@ namespace Pinder.SessionRunner
             var sb = new System.Text.StringBuilder(2048);
 
             string playerLabel = !string.IsNullOrEmpty(context.PlayerName) ? context.PlayerName : _playerName;
-            string opponentLabel = !string.IsNullOrEmpty(context.OpponentName) ? context.OpponentName : _opponentName;
+            string dateeLabel = !string.IsNullOrEmpty(context.DateeName) ? context.DateeName : _dateeName;
 
-            sb.AppendLine($"You are {playerLabel} talking to {opponentLabel}. Choose a dialogue option.");
+            sb.AppendLine($"You are {playerLabel} talking to {dateeLabel}. Choose a dialogue option.");
             sb.AppendLine();
 
             // Recent conversation context
@@ -310,7 +310,7 @@ namespace Pinder.SessionRunner
             {
                 DialogueOption opt = turn.Options[i];
                 int modifier = context.PlayerStats.GetEffective(opt.Stat);
-                int dc = context.OpponentStats.GetDefenceDC(opt.Stat);
+                int dc = context.DateeStats.GetDefenceDC(opt.Stat);
                 int need = dc - modifier;
                 int pct = Math.Max(0, Math.Min(100, (21 - need) * 5));
                 string riskTier = GetRiskTier(need);

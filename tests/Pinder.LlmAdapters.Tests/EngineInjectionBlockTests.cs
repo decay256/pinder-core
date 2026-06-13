@@ -9,7 +9,7 @@ namespace Pinder.LlmAdapters.Tests
 {
     /// <summary>
     /// Tests for [ENGINE] injection block format in SessionDocumentBuilder.
-    /// Verifies AC from Issue #544: options, delivery, and opponent injection formats.
+    /// Verifies AC from Issue #544: options, delivery, and datee injection formats.
     /// </summary>
     public partial class EngineInjectionBlockTests
     {
@@ -152,28 +152,28 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         // ═══════════════════════════════════════════════════════════════
-        // AC3: Opponent injection format — [ENGINE — OPPONENT]
+        // AC3: Datee injection format — [ENGINE — DATEE]
         // ═══════════════════════════════════════════════════════════════
 
         [Fact]
-        public void OpponentPrompt_ContainsEngineOpponentBlock()
+        public void DateePrompt_ContainsEngineDateeBlock()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(MakeOpponentContext());
-            Assert.Contains("[ENGINE — OPPONENT]", result);
+            var result = SessionDocumentBuilder.BuildDateePrompt(MakeDateeContext());
+            Assert.Contains("[ENGINE — DATEE]", result);
         }
 
         [Fact]
-        public void OpponentPrompt_ContainsOpponentNameAndInterest()
+        public void DateePrompt_ContainsDateeNameAndInterest()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(interestAfter: 14));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(interestAfter: 14));
             Assert.Contains("Sable is at Interest 14/25", result);
         }
 
         [Fact]
-        public void OpponentPrompt_ContainsWriteInstruction()
+        public void DateePrompt_ContainsWriteInstruction()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(MakeOpponentContext());
+            var result = SessionDocumentBuilder.BuildDateePrompt(MakeDateeContext());
             Assert.Contains("Write Sable's response", result);
         }
 
@@ -193,18 +193,18 @@ namespace Pinder.LlmAdapters.Tests
         [InlineData(21, "Basically sold")]
         [InlineData(24, "Basically sold")]
         [InlineData(25, "resistance dissolved")]
-        public void OpponentPrompt_InterestNarrativeMatchesBand(int interest, string expectedFragment)
+        public void DateePrompt_InterestNarrativeMatchesBand(int interest, string expectedFragment)
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(interestAfter: interest));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(interestAfter: interest));
             Assert.Contains(expectedFragment, result);
         }
 
         [Fact]
-        public void OpponentPrompt_Interest0_ShowsUnmatched()
+        public void DateePrompt_Interest0_ShowsUnmatched()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(interestBefore: 2, interestAfter: 0));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(interestBefore: 2, interestAfter: 0));
             Assert.Contains("Unmatched", result);
         }
 
@@ -362,12 +362,12 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Fact]
-        public void OpponentPrompt_EngineBlockPresentInOutput()
+        public void DateePrompt_EngineBlockPresentInOutput()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(MakeOpponentContext());
+            var result = SessionDocumentBuilder.BuildDateePrompt(MakeDateeContext());
 
-            int engineIdx = result.IndexOf("[ENGINE — OPPONENT]");
-            Assert.True(engineIdx >= 0, "[ENGINE — OPPONENT] block must be present");
+            int engineIdx = result.IndexOf("[ENGINE — DATEE]");
+            Assert.True(engineIdx >= 0, "[ENGINE — DATEE] block must be present");
         }
     }
 }

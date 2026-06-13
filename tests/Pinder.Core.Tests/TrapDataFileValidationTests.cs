@@ -158,12 +158,12 @@ namespace Pinder.Core.Tests
             Assert.Equal(TrapEffect.StatPenalty, repo.GetTrap(StatType.Rizz)!.Effect);
         }
 
-        // Mutation: would catch if overshare effect is disadvantage instead of opponent_dc_increase
+        // Mutation: would catch if overshare effect is disadvantage instead of datee_dc_increase
         [Fact]
-        public void Overshare_Effect_Is_OpponentDCIncrease()
+        public void Overshare_Effect_Is_DateeDCIncrease()
         {
             var repo = CreateRepo();
-            Assert.Equal(TrapEffect.OpponentDCIncrease, repo.GetTrap(StatType.Honesty)!.Effect);
+            Assert.Equal(TrapEffect.DateeDCIncrease, repo.GetTrap(StatType.Honesty)!.Effect);
         }
 
         // Mutation: would catch if unhinged effect is stat_penalty instead of disadvantage
@@ -174,12 +174,12 @@ namespace Pinder.Core.Tests
             Assert.Equal(TrapEffect.Disadvantage, repo.GetTrap(StatType.Chaos)!.Effect);
         }
 
-        // Mutation: would catch if pretentious effect is disadvantage instead of opponent_dc_increase
+        // Mutation: would catch if pretentious effect is disadvantage instead of datee_dc_increase
         [Fact]
-        public void Pretentious_Effect_Is_OpponentDCIncrease()
+        public void Pretentious_Effect_Is_DateeDCIncrease()
         {
             var repo = CreateRepo();
-            Assert.Equal(TrapEffect.OpponentDCIncrease, repo.GetTrap(StatType.Wit)!.Effect);
+            Assert.Equal(TrapEffect.DateeDCIncrease, repo.GetTrap(StatType.Wit)!.Effect);
         }
 
         // Mutation: would catch if spiral effect is stat_penalty instead of disadvantage

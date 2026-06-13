@@ -12,9 +12,9 @@ namespace Pinder.Core.Tests.Phase0
     ///
     /// <para>
     /// I1 is BEHAVIOR-BASED (not storage-based): the test asserts that the
-    /// opponent-response prompt sequence preserves continuity (assistant content
+    /// datee-response prompt sequence preserves continuity (assistant content
     /// from call N appears in call N+1's user message), which is the externally
-    /// observable contract of stateful opponent history. Phase 1 (#788) will
+    /// observable contract of stateful datee history. Phase 1 (#788) will
     /// move that state into <c>GameSession</c>; this test continues to pass
     /// without modification because it observes only what crosses the transport
     /// wire, not internal field names.
@@ -85,8 +85,8 @@ namespace Pinder.Core.Tests.Phase0
         public RecordingLlmTransport QueueDelivery(string response)
             => Queue(LlmPhase.Delivery, response);
 
-        public RecordingLlmTransport QueueOpponent(string response)
-            => Queue(LlmPhase.OpponentResponse, response);
+        public RecordingLlmTransport QueueDatee(string response)
+            => Queue(LlmPhase.DateeResponse, response);
 
         public Task<string> SendAsync(
             string systemPrompt,

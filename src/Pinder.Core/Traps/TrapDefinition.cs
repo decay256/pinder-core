@@ -66,7 +66,7 @@ namespace Pinder.Core.Traps
         /// <summary>Flat penalty to the stat modifier.</summary>
         StatPenalty,
 
-        /// <summary>Increases opponent's DC by raising their defending stat.</summary>
-        OpponentDCIncrease
+        /// <summary>Increases datee's DC by raising their defending stat.</summary>
+        DateeDCIncrease
     }
 }

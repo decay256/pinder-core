@@ -56,7 +56,7 @@ namespace Pinder.Core.Tests.Phase4
             var clone = parent.Clone();
             var cloneSnapshotBefore = clone.CreateSnapshot();
             var cloneHistoryBefore = clone.ConversationHistory.Select(e => (e.Sender, e.Text)).ToList();
-            var cloneOpponentHistoryBefore = clone.OpponentHistory
+            var cloneDateeHistoryBefore = clone.DateeHistory
                 .Select(m => (m.Role.ToString(), m.Content)).ToList();
 
             // Mutate the PARENT only.
@@ -67,7 +67,7 @@ namespace Pinder.Core.Tests.Phase4
             Assert.Equal(1, parent.TurnNumber);
             Assert.NotEmpty(parent.ConversationHistory);
 
-            // Clone unchanged -- snapshot, history, and opponent history all
+            // Clone unchanged -- snapshot, history, and datee history all
             // identical to the pre-mutation capture.
             var cloneSnapshotAfter = clone.CreateSnapshot();
             Assert.Equal(cloneSnapshotBefore.Interest, cloneSnapshotAfter.Interest);
@@ -78,9 +78,9 @@ namespace Pinder.Core.Tests.Phase4
             var cloneHistoryAfter = clone.ConversationHistory.Select(e => (e.Sender, e.Text)).ToList();
             Assert.Equal(cloneHistoryBefore.Count, cloneHistoryAfter.Count);
 
-            var cloneOpponentHistoryAfter = clone.OpponentHistory
+            var cloneDateeHistoryAfter = clone.DateeHistory
                 .Select(m => (m.Role.ToString(), m.Content)).ToList();
-            Assert.Equal(cloneOpponentHistoryBefore.Count, cloneOpponentHistoryAfter.Count);
+            Assert.Equal(cloneDateeHistoryBefore.Count, cloneDateeHistoryAfter.Count);
         }
 
         [Fact]
@@ -125,7 +125,7 @@ namespace Pinder.Core.Tests.Phase4
             {
                 transport.QueueDialogueOptions(Phase0Fixtures.CannedDialogueOptions);
                 transport.QueueDelivery("delivered-msg");
-                transport.QueueOpponent("opponent-reply");
+                transport.QueueDatee("datee-reply");
             }
             var adapter = Phase0Fixtures.MakeAdapter(transport);
             // Plenty of dice slack -- resolves use the injected pool, but the
@@ -135,7 +135,7 @@ namespace Pinder.Core.Tests.Phase4
 
             var sessionA = new GameSession(
                 Phase0Fixtures.MakeProfile("Player"),
-                Phase0Fixtures.MakeProfile("Opponent"),
+                Phase0Fixtures.MakeProfile("Datee"),
                 adapter, dice, new NullTrapRegistry(),
                 Phase0Fixtures.MakeConfig());
 
@@ -168,7 +168,7 @@ namespace Pinder.Core.Tests.Phase4
             Assert.Equal(snapA.TripleBonusActive, snapB.TripleBonusActive);
             Assert.Equal(snapA.ActiveTrapNames.Length, snapB.ActiveTrapNames.Length);
 
-            // Conversation history identical (delivered + opponent reply).
+            // Conversation history identical (delivered + datee reply).
             var histA = sessionA.ConversationHistory.Select(e => (e.Sender, e.Text)).ToList();
             var histB = sessionB.ConversationHistory.Select(e => (e.Sender, e.Text)).ToList();
             Assert.Equal(histA.Count, histB.Count);
@@ -178,9 +178,9 @@ namespace Pinder.Core.Tests.Phase4
                 Assert.Equal(histA[i].Text, histB[i].Text);
             }
 
-            // Opponent history identical.
-            var oppA = sessionA.OpponentHistory.Select(m => (m.Role.ToString(), m.Content)).ToList();
-            var oppB = sessionB.OpponentHistory.Select(m => (m.Role.ToString(), m.Content)).ToList();
+            // Datee history identical.
+            var oppA = sessionA.DateeHistory.Select(m => (m.Role.ToString(), m.Content)).ToList();
+            var oppB = sessionB.DateeHistory.Select(m => (m.Role.ToString(), m.Content)).ToList();
             Assert.Equal(oppA.Count, oppB.Count);
             for (int i = 0; i < oppA.Count; i++)
             {
@@ -205,7 +205,7 @@ namespace Pinder.Core.Tests.Phase4
         //     does not affect the other.
         //   - SHARED_BY_REFERENCE: documented reference-share -- by design
         //     points at the same instance on parent and clone (e.g. _llm,
-        //     _player, _opponent, _clock, _rules, _dice, _trapRegistry,
+        //     _player, _datee, _clock, _rules, _dice, _trapRegistry,
         //     _statDeliveryInstructions, _onTextLayerNoop).
         //
         // Any field NOT in either bucket is a regression: either the clone
@@ -234,7 +234,7 @@ namespace Pinder.Core.Tests.Phase4
             var sharedByReference = new HashSet<string>
             {
                 "_player",                  // immutable CharacterProfile
-                "_opponent",                // immutable CharacterProfile
+                "_datee",                // immutable CharacterProfile
                 "_llm",                     // adapter (stateless after #788)
                 "_dice",                    // shared dice; per-branch dice via InjectNextDicePool
                 "_trapRegistry",            // immutable
@@ -340,7 +340,7 @@ namespace Pinder.Core.Tests.Phase4
             Assert.Equal(snapP.TurnNumber, snapC.TurnNumber);
             Assert.Equal(snapP.TripleBonusActive, snapC.TripleBonusActive);
             Assert.Equal(snapP.ActiveTrapNames.Length, snapC.ActiveTrapNames.Length);
-            Assert.Equal(snapP.OpponentHistory.Count, snapC.OpponentHistory.Count);
+            Assert.Equal(snapP.DateeHistory.Count, snapC.DateeHistory.Count);
         }
 
         [Fact]
@@ -392,7 +392,7 @@ namespace Pinder.Core.Tests.Phase4
             {
                 transport.QueueDialogueOptions(Phase0Fixtures.CannedDialogueOptions);
                 transport.QueueDelivery($"delivered-msg-T{t}");
-                transport.QueueOpponent($"opponent-reply-T{t}");
+                transport.QueueDatee($"datee-reply-T{t}");
             }
             var adapter = Phase0Fixtures.MakeAdapter(transport);
 
@@ -412,7 +412,7 @@ namespace Pinder.Core.Tests.Phase4
 
             var session = new GameSession(
                 Phase0Fixtures.MakeProfile("Player"),
-                Phase0Fixtures.MakeProfile("Opponent"),
+                Phase0Fixtures.MakeProfile("Datee"),
                 adapter, dice, new NullTrapRegistry(),
                 Phase0Fixtures.MakeConfig());
             return (session, transport);

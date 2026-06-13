@@ -4,10 +4,10 @@
   type: definition
   blocks:
   - kind: paragraph
-    text: You have multiple active conversations simultaneously. Each has its own simulated timeline. Messages have timestamps. Opponents reply at different speeds. You fast-forward to the next incoming
+    text: You have multiple active conversations simultaneously. Each has its own simulated timeline. Messages have timestamps. Datees reply at different speeds. You fast-forward to the next incoming
       message across all chats. Just like real Tinder — but you're a penis.
   - kind: hr
-  description: You have multiple active conversations simultaneously. Each has its own simulated timeline. Messages have timestamps. Opponents reply at different speeds. You fast-forward to the next incoming
+  description: You have multiple active conversations simultaneously. Each has its own simulated timeline. Messages have timestamps. Datees reply at different speeds. You fast-forward to the next incoming
     message across all chats. Just like real Tinder — but you're a penis.
   heading_level: 1
 - id: §1.the-phone-ui
@@ -101,19 +101,19 @@
     text: 'Every message gets an in-game timestamp:'
   - kind: code
     text: "```json\n{\n  \"conversation_id\": \"conv_velvet_001\",\n  \"messages\": [\n    {\n      \"sender\": \"player\",\n      \"text\": \"...\",\n      \"timestamp\": \"2026-03-10T14:28:00\",\n   \
-      \   \"stat_used\": \"charm\",\n      \"roll\": 16,\n      \"result\": \"success\"\n    },\n    {\n      \"sender\": \"opponent\",\n      \"text\": \"...\",\n      \"timestamp\": \"2026-03-10T14:31:00\"\
+      \   \"stat_used\": \"charm\",\n      \"roll\": 16,\n      \"result\": \"success\"\n    },\n    {\n      \"sender\": \"datee\",\n      \"text\": \"...\",\n      \"timestamp\": \"2026-03-10T14:31:00\"\
       ,\n      \"response_delay_min\": 3\n    }\n  ]\n}\n```"
   - kind: hr
   description: 'Every message gets an in-game timestamp:'
   heading_level: 2
-- id: §3.opponent-response-timing
+- id: §3.datee-response-timing
   section: §3
-  title: Opponent Response Timing
+  title: Datee Response Timing
   type: interest_change
   blocks:
   - kind: paragraph
-    text: Each opponent's response speed is derived from their stats and current Interest level.
-  description: Each opponent's response speed is derived from their stats and current Interest level.
+    text: Each datee's response speed is derived from their stats and current Interest level.
+  description: Each datee's response speed is derived from their stats and current Interest level.
   heading_level: 2
 - id: §3.response-time.high-charm
   section: §3
@@ -121,7 +121,7 @@
   type: interest_change
   description: 'High Charm: 1–5 min (socially engaged, responsive).'
   condition:
-    opponent_trait: High Charm
+    datee_trait: High Charm
   outcome:
     base_response_time: 1–5 min (socially engaged, responsive)
     response_time_range_min:
@@ -133,7 +133,7 @@
   type: interest_change
   description: 'High Self-Awareness: 3–10 min (considers their reply carefully).'
   condition:
-    opponent_trait: High Self-Awareness
+    datee_trait: High Self-Awareness
   outcome:
     base_response_time: 3–10 min (considers their reply carefully)
     response_time_range_min:
@@ -145,7 +145,7 @@
   type: interest_change
   description: 'High Chaos: Random: 30 sec OR 3 hours (no in between).'
   condition:
-    opponent_trait: High Chaos
+    datee_trait: High Chaos
   outcome:
     base_response_time: 'Random: 30 sec OR 3 hours (no in between)'
 - id: §3.response-time.high-honesty
@@ -154,7 +154,7 @@
   type: interest_change
   description: 'High Honesty: 5–15 min (thinking about what to actually say).'
   condition:
-    opponent_trait: High Honesty
+    datee_trait: High Honesty
   outcome:
     base_response_time: 5–15 min (thinking about what to actually say)
     response_time_range_min:
@@ -166,7 +166,7 @@
   type: interest_change
   description: 'High Wit: 2–8 min (crafting their reply).'
   condition:
-    opponent_trait: High Wit
+    datee_trait: High Wit
   outcome:
     base_response_time: 2–8 min (crafting their reply)
     response_time_range_min:
@@ -178,7 +178,7 @@
   type: interest_change
   description: 'Low everything: 30 min – 2 hours (the "hey" person).'
   condition:
-    opponent_trait: Low everything
+    datee_trait: Low everything
   outcome:
     base_response_time: 30 min – 2 hours (the "hey" person)
 - id: §3.base-response-time-by-trait
@@ -188,17 +188,17 @@
   blocks:
   - kind: table
     rows:
-    - Opponent Trait: High Charm
+    - Datee Trait: High Charm
       Base Response Time: 1–5 min (socially engaged, responsive)
-    - Opponent Trait: High Self-Awareness
+    - Datee Trait: High Self-Awareness
       Base Response Time: 3–10 min (considers their reply carefully)
-    - Opponent Trait: High Chaos
+    - Datee Trait: High Chaos
       Base Response Time: 'Random: 30 sec OR 3 hours (no in between)'
-    - Opponent Trait: High Honesty
+    - Datee Trait: High Honesty
       Base Response Time: 5–15 min (thinking about what to actually say)
-    - Opponent Trait: High Wit
+    - Datee Trait: High Wit
       Base Response Time: 2–8 min (crafting their reply)
-    - Opponent Trait: Low everything
+    - Datee Trait: Low everything
       Base Response Time: 30 min – 2 hours (the "hey" person)
     sep_cells:
     - '---'
@@ -378,7 +378,7 @@
       : 1.0, \"low\": 1.0, \"bored\": 1.0 },\n    \"stat_triggers\": { \"high_chaos\": true, \"high_madness\": true },\n    \"description\": \"Could be 30 seconds. Could be 8 hours. Interest doesn't move\
       \ the chaos, only the floor.\"\n  }\n]\n```"
   - kind: paragraph
-    text: Modders can add new profiles. The engine matches opponent stat profiles to timing profiles automatically.
+    text: Modders can add new profiles. The engine matches datee stat profiles to timing profiles automatically.
   - kind: hr
   description: 'Timing profiles live in `/data/timing/response-profiles.json`:'
   heading_level: 3
@@ -392,8 +392,8 @@
   - kind: paragraph
     text: 'When pressed:'
   - kind: paragraph
-    text: "1. Check all active conversations for pending opponent replies\n2. Advance game clock to the **earliest** incoming message\n3. Deliver that message and open that conversation\n4. While time advanced,\
-      \ other things may have happened:\n   - Another opponent may have also replied (multiple notifications)\n   - A low-Interest chat may have ghosted (Dread +1)\n   - New match notifications may have\
+    text: "1. Check all active conversations for pending datee replies\n2. Advance game clock to the **earliest** incoming message\n3. Deliver that message and open that conversation\n4. While time advanced,\
+      \ other things may have happened:\n   - Another datee may have also replied (multiple notifications)\n   - A low-Interest chat may have ghosted (Dread +1)\n   - New match notifications may have\
       \ arrived\n   - Horniness may have shifted if enough time passed (time-of-day re-check)"
   - kind: paragraph
     text: You don't wait in real time. You play one conversation, fast-forward to the next reply, play that, fast-forward again.
@@ -404,7 +404,7 @@
   section: §5
   title: Response Delay — < 1 min
   type: interest_change
-  description: '< 1 min: Eager. No penalty. Some opponents find it intense..'
+  description: '< 1 min: Eager. No penalty. Some datees find it intense..'
   condition:
     timing_range:
     - 0
@@ -479,7 +479,7 @@
   - kind: table
     rows:
     - Your response delay: < 1 min
-      Effect: Eager. No penalty. Some opponents find it intense.
+      Effect: Eager. No penalty. Some datees find it intense.
     - Your response delay: 1–15 min
       Effect: Normal. No effect.
     - Your response delay: 15–60 min
@@ -576,7 +576,7 @@
   - kind: paragraph
     text: This stacks with the session roll. A Horniness roll of 6 at 11PM = effective Horniness 9. Your Rizz is destroyed. The LLM knows it's late and generates accordingly.
   - kind: paragraph
-    text: '**Opponent behavior also shifts by time of day:**'
+    text: '**Datee behavior also shifts by time of day:**'
   - kind: paragraph
     text: '- Late-night messages are more informal
 

@@ -13,114 +13,114 @@ namespace Pinder.LlmAdapters.Tests
     public partial class SessionDocumentBuilderSpecTests
     {
         // ═══════════════════════════════════════════════════════════════
-        // BuildOpponentPrompt
+        // BuildDateePrompt
         // ═══════════════════════════════════════════════════════════════
 
         [Fact]
-        public void BuildOpponentPrompt_PositiveDelta_ShowsPlusSign()
+        public void BuildDateePrompt_PositiveDelta_ShowsPlusSign()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(interestBefore: 8, interestAfter: 11, responseDelayMinutes: 2.0));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(interestBefore: 8, interestAfter: 11, responseDelayMinutes: 2.0));
 
             Assert.Contains("Interest moved from 8 to 11 (+3)", result);
         }
 
         [Fact]
-        public void BuildOpponentPrompt_ZeroDelta_ShowsPlusZero()
+        public void BuildDateePrompt_ZeroDelta_ShowsPlusZero()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(interestBefore: 10, interestAfter: 10, responseDelayMinutes: 2.0));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(interestBefore: 10, interestAfter: 10, responseDelayMinutes: 2.0));
 
             Assert.Contains("Interest moved from 10 to 10 (+0)", result);
         }
 
         [Fact]
-        public void BuildOpponentPrompt_ShowsCurrentInterestOutOf25()
+        public void BuildDateePrompt_ShowsCurrentInterestOutOf25()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(interestBefore: 10, interestAfter: 15));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(interestBefore: 10, interestAfter: 15));
 
             Assert.Contains("Interest 15/25", result);
         }
 
         [Fact]
-        public void BuildOpponentPrompt_NormalDelay_ShowsApproximateMinutes()
+        public void BuildDateePrompt_NormalDelay_ShowsApproximateMinutes()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(responseDelayMinutes: 5.5));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(responseDelayMinutes: 5.5));
 
             Assert.Contains("approximately 5.5 minutes", result);
         }
 
         [Fact]
-        public void BuildOpponentPrompt_SubMinuteDelay_ShowsLessThanOneMinute()
+        public void BuildDateePrompt_SubMinuteDelay_ShowsLessThanOneMinute()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(responseDelayMinutes: 0.3));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(responseDelayMinutes: 0.3));
 
             Assert.Contains("less than 1 minute", result);
         }
 
         [Fact]
-        public void BuildOpponentPrompt_Interest21_ExtremelyInterested()
+        public void BuildDateePrompt_Interest21_ExtremelyInterested()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(interestBefore: 20, interestAfter: 21));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(interestBefore: 20, interestAfter: 21));
 
             Assert.Contains("Basically sold", result);
         }
 
         [Fact]
-        public void BuildOpponentPrompt_Interest13_Engaged()
+        public void BuildDateePrompt_Interest13_Engaged()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(interestBefore: 10, interestAfter: 13));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(interestBefore: 10, interestAfter: 13));
 
             Assert.Contains("Engaged but not sold", result);
         }
 
         [Fact]
-        public void BuildOpponentPrompt_Interest9_Lukewarm()
+        public void BuildDateePrompt_Interest9_Lukewarm()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(interestBefore: 10, interestAfter: 9));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(interestBefore: 10, interestAfter: 9));
 
             Assert.Contains("Skeptical", result);
         }
 
         [Fact]
-        public void BuildOpponentPrompt_Interest5_Cooling()
+        public void BuildDateePrompt_Interest5_Cooling()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(interestBefore: 10, interestAfter: 5));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(interestBefore: 10, interestAfter: 5));
 
             Assert.Contains("Skeptical", result);
         }
 
         [Fact]
-        public void BuildOpponentPrompt_Interest0_Unmatching()
+        public void BuildDateePrompt_Interest0_Unmatching()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(interestBefore: 2, interestAfter: 0));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(interestBefore: 2, interestAfter: 0));
 
             Assert.Contains("Unmatched", result);
         }
 
         [Fact]
-        public void BuildOpponentPrompt_ContainsSignalsInstruction()
+        public void BuildDateePrompt_ContainsSignalsInstruction()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(interestBefore: 10, interestAfter: 12));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(interestBefore: 10, interestAfter: 12));
 
             Assert.Contains("[RESPONSE]", result);
             Assert.Contains("[SIGNALS]", result);
         }
 
         [Fact]
-        public void BuildOpponentPrompt_WithTrapInstructions_IncludesThem()
+        public void BuildDateePrompt_WithTrapInstructions_IncludesThem()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(activeTrapInstructions: new[] { "Trap effect: cringe aura" }));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(activeTrapInstructions: new[] { "Trap effect: cringe aura" }));
 
             Assert.Contains("Trap effect: cringe aura", result);
         }
@@ -200,64 +200,64 @@ namespace Pinder.LlmAdapters.Tests
         // ═══════════════════════════════════════════════════════════════
 
         [Fact]
-        public void BuildOpponentPrompt_Interest16_Engaged()
+        public void BuildDateePrompt_Interest16_Engaged()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(interestBefore: 10, interestAfter: 16));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(interestBefore: 10, interestAfter: 16));
 
             Assert.Contains("Interested but holding back", result);
         }
 
         [Fact]
-        public void BuildOpponentPrompt_Interest17_VeryInterested()
+        public void BuildDateePrompt_Interest17_VeryInterested()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(interestBefore: 10, interestAfter: 17));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(interestBefore: 10, interestAfter: 17));
 
             Assert.Contains("Interested but holding back", result);
         }
 
         [Fact]
-        public void BuildOpponentPrompt_Interest12_Lukewarm()
+        public void BuildDateePrompt_Interest12_Lukewarm()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(interestBefore: 10, interestAfter: 12));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(interestBefore: 10, interestAfter: 12));
 
             Assert.Contains("Engaged but not sold", result);
         }
 
         [Fact]
-        public void BuildOpponentPrompt_Interest8_Cooling()
+        public void BuildDateePrompt_Interest8_Cooling()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(interestBefore: 10, interestAfter: 8));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(interestBefore: 10, interestAfter: 8));
 
             Assert.Contains("Skeptical", result);
         }
 
         [Fact]
-        public void BuildOpponentPrompt_Interest4_Disengaged()
+        public void BuildDateePrompt_Interest4_Disengaged()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(interestBefore: 10, interestAfter: 4));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(interestBefore: 10, interestAfter: 4));
 
             Assert.Contains("Reconsidering", result);
         }
 
         [Fact]
-        public void BuildOpponentPrompt_Interest25_ExtremelyInterested()
+        public void BuildDateePrompt_Interest25_ExtremelyInterested()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(interestBefore: 10, interestAfter: 25));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(interestBefore: 10, interestAfter: 25));
 
             Assert.Contains("resistance dissolved", result);
         }
 
         [Fact]
-        public void BuildOpponentPrompt_Interest1_Disengaged_NotUnmatching()
+        public void BuildDateePrompt_Interest1_Disengaged_NotUnmatching()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(interestBefore: 2, interestAfter: 1));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(interestBefore: 2, interestAfter: 1));
 
             Assert.Contains("Reconsidering", result);
             Assert.DoesNotContain("Unmatched", result);

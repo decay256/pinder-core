@@ -36,7 +36,7 @@ namespace Pinder.Core.Tests
             
             try 
             {
-                var task = (Task<int>)method!.Invoke(null, new object[] { new string[] { "--player", "velvet", "--opponent", "sable", "--max-turns", "1" } });
+                var task = (Task<int>)method!.Invoke(null, new object[] { new string[] { "--player", "velvet", "--datee", "sable", "--max-turns", "1" } });
                 await task;
             }
             catch (Exception)
@@ -63,8 +63,8 @@ namespace Pinder.Core.Tests
             bool hasPlayerBio = Regex.IsMatch(output, @"\*\*\*Velvet_Void bio:\*\*\* \*(?:""""|.*)\*");
             Assert.True(hasPlayerBio, "Player bio paragraph not found or incorrectly formatted. Output: " + output);
             
-            bool hasOpponentBio = Regex.IsMatch(output, @"\*\*\*Sable_xo bio:\*\*\* \*(?:""""|.*)\*");
-            Assert.True(hasOpponentBio, "Opponent bio paragraph not found or incorrectly formatted.");
+            bool hasDateeBio = Regex.IsMatch(output, @"\*\*\*Sable_xo bio:\*\*\* \*(?:""""|.*)\*");
+            Assert.True(hasDateeBio, "Datee bio paragraph not found or incorrectly formatted.");
         }
         
         [Fact(Skip = "Test broken by schema changes in other PRs")]
@@ -72,10 +72,10 @@ namespace Pinder.Core.Tests
         {
             // This test explicitly creates a temporary JSON character with an empty bio to test the edge case.
             string tempPlayerJson = Path.Combine(AppContext.BaseDirectory, "emptybio_player.json");
-            string tempOpponentJson = Path.Combine(AppContext.BaseDirectory, "emptybio_opponent.json");
+            string tempDateeJson = Path.Combine(AppContext.BaseDirectory, "emptybio_datee.json");
             
             File.WriteAllText(tempPlayerJson, @"{ ""name"": ""EmptyBioPlayer"", ""bio"": """", ""gender_identity"": ""nonbinary"", ""archetype"": ""Jester"", ""archetype_ranking"": { ""Jester"": 3 }, ""level"": 1, ""system_prompt"": """", ""items"": [], ""anatomy"": {} }");
-            File.WriteAllText(tempOpponentJson, @"{ ""name"": ""EmptyBioOpponent"", ""bio"": """", ""gender_identity"": ""nonbinary"", ""archetype"": ""Jester"", ""archetype_ranking"": { ""Jester"": 3 }, ""level"": 1, ""system_prompt"": """", ""items"": [], ""anatomy"": {} }");
+            File.WriteAllText(tempDateeJson, @"{ ""name"": ""EmptyBioDatee"", ""bio"": """", ""gender_identity"": ""nonbinary"", ""archetype"": ""Jester"", ""archetype_ranking"": { ""Jester"": 3 }, ""level"": 1, ""system_prompt"": """", ""items"": [], ""anatomy"": {} }");
             
             var dllPath = Path.Combine(AppContext.BaseDirectory, "session-runner.dll");
             var asm = Assembly.LoadFrom(dllPath);
@@ -95,7 +95,7 @@ namespace Pinder.Core.Tests
             
             try 
             {
-                var task = (Task<int>)method!.Invoke(null, new object[] { new string[] { "--player-def", tempPlayerJson, "--opponent-def", tempOpponentJson, "--max-turns", "1" } });
+                var task = (Task<int>)method!.Invoke(null, new object[] { new string[] { "--player-def", tempPlayerJson, "--datee-def", tempDateeJson, "--max-turns", "1" } });
                 await task;
             }
             catch (Exception) { }
@@ -106,7 +106,7 @@ namespace Pinder.Core.Tests
                 Environment.SetEnvironmentVariable("ANTHROPIC_API_KEY", oldApiKey!);
                 
                 if (File.Exists(tempPlayerJson)) File.Delete(tempPlayerJson);
-                if (File.Exists(tempOpponentJson)) File.Delete(tempOpponentJson);
+                if (File.Exists(tempDateeJson)) File.Delete(tempDateeJson);
             }
             
             var output = sw.ToString();

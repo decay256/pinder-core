@@ -12,7 +12,7 @@
 
 Currently `GameSession` only supports the **Speak** action (the `StartTurnAsync` → `ResolveTurnAsync` flow). Rules v3.4 §8 defines three additional turn actions: **Read**, **Recover**, and **Wait**. This feature adds three new public methods to `GameSession` that implement these actions, each consuming the player's turn and advancing game state accordingly. Two new result types (`ReadResult`, `RecoverResult`) are also introduced.
 
-Read lets the player attempt to reveal the opponent's exact interest level. Recover lets the player attempt to clear an active trap. Wait skips the turn but lets active traps expire naturally. All three actions use a fixed DC of 12 (where applicable) and the SelfAwareness stat.
+Read lets the player attempt to reveal the datee's exact interest level. Recover lets the player attempt to clear an active trap. Wait skips the turn but lets active traps expire naturally. All three actions use a fixed DC of 12 (where applicable) and the SelfAwareness stat.
 
 ---
 
@@ -389,7 +389,7 @@ These MUST be available before implementation can begin:
 | `ActiveTrap` | Individual trap entry (`Definition.Id`, `Definition.Stat`) |
 | `IDiceRoller` | Injected dice roller (`Roll(int sides)`) |
 | `ITrapRegistry` | Injected trap definitions (for TropeTrap activation during roll) |
-| `CharacterProfile` | Player/opponent profiles (`.Stats` → `StatBlock`, `.Level` → `int`) |
+| `CharacterProfile` | Player/datee profiles (`.Stats` → `StatBlock`, `.Level` → `int`) |
 
 ### Optional dependencies (Sprint 8, may not be present yet)
 
@@ -430,7 +430,7 @@ After this feature, a player turn can be one of four actions:
 
 | Action | Roll? | Stat | DC | Success Effect | Failure Effect | Momentum? | XP |
 |--------|-------|------|----|---------------|---------------|-----------|-----|
-| **Speak** | Yes | Varies (chosen option) | Opponent-derived (13 + defender mod) | +interest (SuccessScale + risk bonus) | −interest (FailureScale) | Yes | 5/10/15 by scale |
+| **Speak** | Yes | Varies (chosen option) | Datee-derived (13 + defender mod) | +interest (SuccessScale + risk bonus) | −interest (FailureScale) | Yes | 5/10/15 by scale |
 | **Read** | Yes | SelfAwareness | Fixed 12 | Reveal interest value | −1 interest, +1 Overthinking | No | 5 success / 2 fail |
 | **Recover** | Yes | SelfAwareness | Fixed 12 | Clear one active trap | −1 interest | No | 15 success / 2 fail |
 | **Wait** | No | — | — | — | −1 interest, traps tick down | No | 0 |

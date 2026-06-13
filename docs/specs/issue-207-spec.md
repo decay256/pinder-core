@@ -23,12 +23,12 @@ public static class SessionDocumentBuilder
     /// </summary>
     public static string BuildDialogueOptionsPrompt(
         IReadOnlyList<(string Sender, string Text)> conversationHistory,
-        string opponentLastMessage,
+        string dateeLastMessage,
         string[] activeTraps,
         int currentInterest,
         int currentTurn,
         string playerName,
-        string opponentName);
+        string dateeName);
 
     /// <summary>
     /// Builds the user-message content for DeliverMessageAsync (§3.3 success / §3.4 failure).
@@ -41,9 +41,9 @@ public static class SessionDocumentBuilder
         string[]? activeTrapInstructions);
 
     /// <summary>
-    /// Builds the user-message content for GetOpponentResponseAsync (§3.5).
+    /// Builds the user-message content for GetDateeResponseAsync (§3.5).
     /// </summary>
-    public static string BuildOpponentPrompt(
+    public static string BuildDateePrompt(
         IReadOnlyList<(string Sender, string Text)> conversationHistory,
         string playerDeliveredMessage,
         int interestBefore,
@@ -55,7 +55,7 @@ public static class SessionDocumentBuilder
     /// Builds the user-message content for GetInterestChangeBeatAsync (§3.8).
     /// </summary>
     public static string BuildInterestChangeBeatPrompt(
-        string opponentName,
+        string dateeName,
         int interestBefore,
         int interestAfter,
         InterestState newState);
@@ -78,7 +78,7 @@ public static class PromptTemplates
     public const string DialogueOptionsInstruction;    // §3.2
     public const string SuccessDeliveryInstruction;    // §3.3
     public const string FailureDeliveryInstruction;    // §3.4
-    public const string OpponentResponseInstruction;   // §3.5 (includes [SIGNALS] block)
+    public const string DateeResponseInstruction;   // §3.5 (includes [SIGNALS] block)
     public const string InterestBeatInstruction;       // §3.8
 }
 ```
@@ -96,14 +96,14 @@ public static class CacheBlockBuilder
     /// Used by dialogue options and delivery calls.
     /// </summary>
     public static ContentBlock[] BuildCachedSystemBlocks(
-        string playerPrompt, string opponentPrompt);
+        string playerPrompt, string dateePrompt);
 
     /// <summary>
-    /// Builds system blocks with only the opponent prompt cached.
-    /// Used by opponent response calls.
+    /// Builds system blocks with only the datee prompt cached.
+    /// Used by datee response calls.
     /// </summary>
-    public static ContentBlock[] BuildOpponentOnlySystemBlocks(
-        string opponentPrompt);
+    public static ContentBlock[] BuildDateeOnlySystemBlocks(
+        string dateePrompt);
 }
 ```
 
@@ -121,12 +121,12 @@ public static class CacheBlockBuilder
 **Input:**
 ```
 conversationHistory: [] (empty list)
-opponentLastMessage: ""
+dateeLastMessage: ""
 activeTraps: [] (empty array)
 currentInterest: 10
 currentTurn: 1
 playerName: "GERALD_42"
-opponentName: "VELVET"
+dateeName: "VELVET"
 ```
 
 **Output (string):**
@@ -135,7 +135,7 @@ CONVERSATION HISTORY
 [CONVERSATION_START]
 [CURRENT_TURN]
 
-OPPONENT'S LAST MESSAGE
+DATEE'S LAST MESSAGE
 ""
 
 GAME STATE
@@ -156,12 +156,12 @@ conversationHistory: [
   ("GERALD_42", "Same, honestly. I'm Gerald."),
   ("VELVET", "I can see that from your name.")
 ]
-opponentLastMessage: "I can see that from your name."
+dateeLastMessage: "I can see that from your name."
 activeTraps: ["Cringe"]
 currentInterest: 12
 currentTurn: 3
 playerName: "GERALD_42"
-opponentName: "VELVET"
+dateeName: "VELVET"
 ```
 
 **Output (conversation history section):**
@@ -169,12 +169,12 @@ opponentName: "VELVET"
 CONVERSATION HISTORY
 [CONVERSATION_START]
 [T1|PLAYER|GERALD_42] "Hey, you come here often?"
-[T1|OPPONENT|VELVET] "Only when I want to regret my choices"
+[T1|DATEE|VELVET] "Only when I want to regret my choices"
 [T2|PLAYER|GERALD_42] "Same, honestly. I'm Gerald."
-[T2|OPPONENT|VELVET] "I can see that from your name."
+[T2|DATEE|VELVET] "I can see that from your name."
 [CURRENT_TURN]
 
-OPPONENT'S LAST MESSAGE
+DATEE'S LAST MESSAGE
 "I can see that from your name."
 
 GAME STATE
@@ -183,11 +183,11 @@ GAME STATE
 ```
 
 **History formatting rules:**
-- Each pair of entries (player message + opponent message) constitutes one turn.
+- Each pair of entries (player message + datee message) constitutes one turn.
 - Turn numbers are 1-indexed and increment per pair.
-- Entry `i` at index 0 is turn 1 player, index 1 is turn 1 opponent, index 2 is turn 2 player, etc.
-- The sender name from the tuple determines `PLAYER` vs `OPPONENT` label. The first sender in history is always the player.
-- Marker format: `[T{turn}|{PLAYER or OPPONENT}|{name}] "{text}"`
+- Entry `i` at index 0 is turn 1 player, index 1 is turn 1 datee, index 2 is turn 2 player, etc.
+- The sender name from the tuple determines `PLAYER` vs `DATEE` label. The first sender in history is always the player.
+- Marker format: `[T{turn}|{PLAYER or DATEE}|{name}] "{text}"`
 - Text is wrapped in double quotes.
 
 ### Example 3: BuildDeliveryPrompt — Success
@@ -233,7 +233,7 @@ Active trap instructions:
 You are aware of how you're coming across, which is making it worse.
 ```
 
-### Example 5: BuildOpponentPrompt
+### Example 5: BuildDateePrompt
 
 **Input:**
 ```
@@ -250,7 +250,7 @@ activeTrapInstructions: null
 CONVERSATION HISTORY
 [CONVERSATION_START]
 [T1|PLAYER|GERALD_42] "Hey, you come here often?"
-[T1|OPPONENT|VELVET] "Only when I want to regret my choices"
+[T1|DATEE|VELVET] "Only when I want to regret my choices"
 [CURRENT_TURN]
 
 PLAYER'S LAST MESSAGE
@@ -263,14 +263,14 @@ Current Interest: 12/25
 RESPONSE TIMING
 Your reply arrives in approximately 3.5 minutes.
 
-{OpponentResponseInstruction template text including interest behaviour block and [SIGNALS] instruction}
+{DateeResponseInstruction template text including interest behaviour block and [SIGNALS] instruction}
 ```
 
 ### Example 6: BuildInterestChangeBeatPrompt
 
 **Input:**
 ```
-opponentName: "VELVET"
+dateeName: "VELVET"
 interestBefore: 14
 interestAfter: 16
 newState: InterestState.VeryIntoIt
@@ -290,28 +290,28 @@ Output only the message or gesture text.
 **Input:**
 ```
 playerPrompt: "You are playing the role of Gerald_42, a sentient penis on the dating app Pinder..."
-opponentPrompt: "You are playing the role of Velvet, a sentient penis on the dating app Pinder..."
+dateePrompt: "You are playing the role of Velvet, a sentient penis on the dating app Pinder..."
 ```
 
 **Output:**
 ```csharp
 ContentBlock[] {
   [0] = { Type = "text", Text = playerPrompt, CacheControl = { Type = "ephemeral" } },
-  [1] = { Type = "text", Text = opponentPrompt, CacheControl = { Type = "ephemeral" } }
+  [1] = { Type = "text", Text = dateePrompt, CacheControl = { Type = "ephemeral" } }
 }
 ```
 
-### Example 8: BuildOpponentOnlySystemBlocks
+### Example 8: BuildDateeOnlySystemBlocks
 
 **Input:**
 ```
-opponentPrompt: "You are playing the role of Velvet..."
+dateePrompt: "You are playing the role of Velvet..."
 ```
 
 **Output:**
 ```csharp
 ContentBlock[] {
-  [0] = { Type = "text", Text = opponentPrompt, CacheControl = { Type = "ephemeral" } }
+  [0] = { Type = "text", Text = dateePrompt, CacheControl = { Type = "ephemeral" } }
 }
 ```
 
@@ -333,19 +333,19 @@ The conversation history formatting must follow these rules exactly:
 1. History always begins with `[CONVERSATION_START]` on its own line.
 2. Each history entry is formatted as: `[T{turn}|{role}|{name}] "{text}"`
    - `turn` is 1-indexed, incrementing every 2 entries (indices 0–1 = turn 1, 2–3 = turn 2, etc.)
-   - `role` is `PLAYER` if the sender matches `playerName`, otherwise `OPPONENT`
+   - `role` is `PLAYER` if the sender matches `playerName`, otherwise `DATEE`
    - `name` is the sender's display name (from the tuple, or from method params)
    - `text` is the message text, wrapped in double quotes
 3. History always ends with `[CURRENT_TURN]` on its own line.
 4. Empty history produces exactly: `[CONVERSATION_START]\n[CURRENT_TURN]`
 5. **History is NEVER truncated.** All entries must be present regardless of count. This is critical because callbacks can reference the opener (+3 bonus) and the model needs the full conversational arc.
-6. The `BuildOpponentPrompt` method formats history up to but NOT including the current player message (since that is supplied separately as `playerDeliveredMessage`).
+6. The `BuildDateePrompt` method formats history up to but NOT including the current player message (since that is supplied separately as `playerDeliveredMessage`).
 
 ### AC3: PromptTemplates with all 5 instruction templates sourced from character-construction.md
 
 `PromptTemplates` must be a `public static class` in namespace `Pinder.LlmAdapters` with five `public const string` fields:
 
-1. **`DialogueOptionsInstruction`** — sourced from §3.2. Must instruct the LLM to generate exactly 4 dialogue options, each tagged with `[STAT: X]`, `[CALLBACK: turn_N or none]`, `[COMBO: name or none]`, `[TELL_BONUS: yes/no]` metadata. Must include instructions about varying tone/risk, callbacks, combos, and considering the opponent's profile.
+1. **`DialogueOptionsInstruction`** — sourced from §3.2. Must instruct the LLM to generate exactly 4 dialogue options, each tagged with `[STAT: X]`, `[CALLBACK: turn_N or none]`, `[COMBO: name or none]`, `[TELL_BONUS: yes/no]` metadata. Must include instructions about varying tone/risk, callbacks, combos, and considering the datee's profile.
 
 2. **`SuccessDeliveryInstruction`** — sourced from §3.3. Must include the three success tiers:
    - Clean success (margin 1–5): deliver essentially as written
@@ -361,10 +361,10 @@ The conversation history formatting must follow these rules exactly:
    - Legendary (Nat 1): maximum humiliation
    Must instruct output to be only the message text.
 
-4. **`OpponentResponseInstruction`** — sourced from §3.5. Must include interest behaviour blocks (dynamically selected based on interest range), response timing instruction, and the `[SIGNALS]` block instruction per #214. The signals instruction must tell the LLM to optionally include:
+4. **`DateeResponseInstruction`** — sourced from §3.5. Must include interest behaviour blocks (dynamically selected based on interest range), response timing instruction, and the `[SIGNALS]` block instruction per #214. The signals instruction must tell the LLM to optionally include:
    ```
    [RESPONSE]
-   "actual opponent message text"
+   "actual datee message text"
 
    [SIGNALS]
    TELL: {STAT} ({description})
@@ -384,8 +384,8 @@ Templates use `{placeholder}` tokens that `SessionDocumentBuilder` fills at call
 
 `CacheBlockBuilder` must be a `public static class` in namespace `Pinder.LlmAdapters.Anthropic` with two methods:
 
-1. `BuildCachedSystemBlocks(string playerPrompt, string opponentPrompt)` returns `ContentBlock[]` with exactly 2 elements, both having `CacheControl.Type = "ephemeral"`.
-2. `BuildOpponentOnlySystemBlocks(string opponentPrompt)` returns `ContentBlock[]` with exactly 1 element having `CacheControl.Type = "ephemeral"`.
+1. `BuildCachedSystemBlocks(string playerPrompt, string dateePrompt)` returns `ContentBlock[]` with exactly 2 elements, both having `CacheControl.Type = "ephemeral"`.
+2. `BuildDateeOnlySystemBlocks(string dateePrompt)` returns `ContentBlock[]` with exactly 1 element having `CacheControl.Type = "ephemeral"`.
 
 ### AC5: Unit tests
 
@@ -394,7 +394,7 @@ Tests at `tests/Pinder.LlmAdapters.Tests/SessionDocumentBuilderTests.cs` must ve
 2. 3-turn history (6 entries) → markers correctly show `[T1|...]`, `[T2|...]`, `[T3|...]`.
 3. 8-turn history (16 entries) → all 8 turns present, no truncation.
 4. `BuildCachedSystemBlocks` returns 2 blocks both with `cache_control` set to ephemeral.
-5. `BuildOpponentOnlySystemBlocks` returns 1 block with `cache_control` set to ephemeral.
+5. `BuildDateeOnlySystemBlocks` returns 1 block with `cache_control` set to ephemeral.
 
 ### AC6: Build clean
 
@@ -407,7 +407,7 @@ The `Pinder.LlmAdapters` project must compile without errors or warnings under `
 ### Conversation History
 
 - **Empty history:** `conversationHistory` is an empty list. Output: `[CONVERSATION_START]\n[CURRENT_TURN]` — no message lines.
-- **Odd number of entries:** If history has an odd number of entries (e.g., player spoke but opponent hasn't replied yet), the last entry is a lone player message. The turn number for it is `(index / 2) + 1`. Format it normally.
+- **Odd number of entries:** If history has an odd number of entries (e.g., player spoke but datee hasn't replied yet), the last entry is a lone player message. The turn number for it is `(index / 2) + 1`. Format it normally.
 - **Single entry (turn 1 player only):** `[T1|PLAYER|name] "text"` followed by `[CURRENT_TURN]`.
 - **Very long history (e.g., 20+ turns, 40+ entries):** Must never truncate. All entries are present. No sliding window. No summarization.
 - **Messages containing double quotes:** The text should be wrapped in double quotes. Interior quotes should be included as-is (no escaping) — the LLM handles them naturally.
@@ -418,20 +418,20 @@ The `Pinder.LlmAdapters` project must compile without errors or warnings under `
 
 - **Names with spaces:** Use as-is in markers: `[T1|PLAYER|Big Gerald]`.
 - **Names with special characters:** Use as-is. No sanitization.
-- **`playerName` matches no sender in history:** This shouldn't happen in normal usage but if it does, all entries would be labeled `OPPONENT`. No crash.
+- **`playerName` matches no sender in history:** This shouldn't happen in normal usage but if it does, all entries would be labeled `DATEE`. No crash.
 
 ### Active Traps
 
 - **Empty traps array:** Output `Active traps: none` (or omit the traps line).
 - **Multiple traps:** Join with comma: `Active traps: Cringe, Spiral, Overexplain`.
-- **Null trap instructions (in delivery/opponent prompts):** Omit the trap instructions section entirely.
+- **Null trap instructions (in delivery/datee prompts):** Omit the trap instructions section entirely.
 
 ### Interest Values
 
 - **Interest at boundaries (0, 25):** Format normally. The interest state enum handles the semantics.
 - **Interest delta of 0 (no change):** `interestBefore == interestAfter`. Still format: "Interest moved from 10 to 10 (+0)."
 
-### BuildOpponentPrompt — responseDelayMinutes
+### BuildDateePrompt — responseDelayMinutes
 
 - **Very small delay (< 1 minute):** Format as fractional minutes or convert to a human-readable form like "less than 1 minute" or "0.5 minutes".
 - **Very large delay (> 1440 = 24 hours):** Format normally. The evaluator handles the semantics.
@@ -454,14 +454,14 @@ The `Pinder.LlmAdapters` project must compile without errors or warnings under `
 |-----------|-------------------|
 | `conversationHistory` is `null` | Throw `ArgumentNullException` |
 | `playerName` is `null` or empty | Throw `ArgumentNullException` (or `ArgumentException`) |
-| `opponentName` is `null` or empty | Throw `ArgumentNullException` (or `ArgumentException`) |
-| `opponentLastMessage` is `null` | Throw `ArgumentNullException` |
+| `dateeName` is `null` or empty | Throw `ArgumentNullException` (or `ArgumentException`) |
+| `dateeLastMessage` is `null` | Throw `ArgumentNullException` |
 | `chosenOption` is `null` (in BuildDeliveryPrompt) | Throw `ArgumentNullException` |
-| `playerDeliveredMessage` is `null` (in BuildOpponentPrompt) | Throw `ArgumentNullException` |
-| `opponentName` is `null` (in BuildInterestChangeBeatPrompt) | Throw `ArgumentNullException` |
-| `playerPrompt` or `opponentPrompt` is `null` (in CacheBlockBuilder) | Throw `ArgumentNullException` |
+| `playerDeliveredMessage` is `null` (in BuildDateePrompt) | Throw `ArgumentNullException` |
+| `dateeName` is `null` (in BuildInterestChangeBeatPrompt) | Throw `ArgumentNullException` |
+| `playerPrompt` or `dateePrompt` is `null` (in CacheBlockBuilder) | Throw `ArgumentNullException` |
 | `activeTraps` is `null` (in BuildDialogueOptionsPrompt) | Throw `ArgumentNullException` |
-| `activeTrapInstructions` is `null` (in delivery/opponent prompts) | Allowed — omit trap instructions section |
+| `activeTrapInstructions` is `null` (in delivery/datee prompts) | Allowed — omit trap instructions section |
 | Unknown `FailureTier` enum value | Default to generic failure instruction (do not throw) |
 | Unknown `InterestState` enum value | Default to generic interest beat (do not throw) |
 
@@ -499,12 +499,12 @@ The conversation history formatter is shared across all four builder methods (th
 ### Algorithm
 
 ```
-Given: IReadOnlyList<(string Sender, string Text)> history, string playerName, string opponentName
+Given: IReadOnlyList<(string Sender, string Text)> history, string playerName, string dateeName
 
 1. Emit "[CONVERSATION_START]\n"
 2. For each entry at index i:
    a. turn = (i / 2) + 1
-   b. role = (entry.Sender == playerName) ? "PLAYER" : "OPPONENT"
+   b. role = (entry.Sender == playerName) ? "PLAYER" : "DATEE"
    c. name = entry.Sender
    d. Emit "[T{turn}|{role}|{name}] \"{entry.Text}\"\n"
 3. Emit "[CURRENT_TURN]\n"
@@ -512,13 +512,13 @@ Given: IReadOnlyList<(string Sender, string Text)> history, string playerName, s
 
 ### Name resolution for role
 
-The `Sender` field in each history tuple is compared to `playerName` to determine the role. If the sender matches `playerName`, it's `PLAYER`; otherwise it's `OPPONENT`. The comparison should be ordinal (exact match, case-sensitive).
+The `Sender` field in each history tuple is compared to `playerName` to determine the role. If the sender matches `playerName`, it's `PLAYER`; otherwise it's `DATEE`. The comparison should be ordinal (exact match, case-sensitive).
 
 ---
 
-## Interest Behaviour Block Selection (for OpponentResponseInstruction)
+## Interest Behaviour Block Selection (for DateeResponseInstruction)
 
-The opponent response prompt must include a dynamically selected interest behaviour block. Selection is based on `interestAfter`:
+The datee response prompt must include a dynamically selected interest behaviour block. Selection is based on `interestAfter`:
 
 | Interest Range | Behaviour Block |
 |---|---|
@@ -530,17 +530,17 @@ The opponent response prompt must include a dynamically selected interest behavi
 | 0 | "You have lost all interest. You are unmatching." |
 | 21–25 | "You are extremely interested. You're looking for excuses to keep talking. The date is basically happening." |
 
-These blocks are selected at runtime by `SessionDocumentBuilder.BuildOpponentPrompt()` based on `interestAfter`, not stored in `PromptTemplates`.
+These blocks are selected at runtime by `SessionDocumentBuilder.BuildDateePrompt()` based on `interestAfter`, not stored in `PromptTemplates`.
 
 ---
 
-## [SIGNALS] Block Specification (in OpponentResponseInstruction)
+## [SIGNALS] Block Specification (in DateeResponseInstruction)
 
-The `OpponentResponseInstruction` template must include instructions for optional signal generation. The LLM outputs:
+The `DateeResponseInstruction` template must include instructions for optional signal generation. The LLM outputs:
 
 ```
 [RESPONSE]
-"the opponent's actual message text"
+"the datee's actual message text"
 
 [SIGNALS]
 TELL: CHARM (she laughed a little too hard at the charm attempt — she's susceptible)
@@ -576,8 +576,8 @@ Must include three success tiers and instruct output-only-message-text.
 ### FailureDeliveryInstruction (§3.4)
 Must include the "corrupt the CONTENT not the delivery" principle, all five tier instructions, and support for active trap injection. Uses `{placeholder}` tokens for `intended_message`, `stat`, `miss_margin`, `tier`, `tier_instruction`, and `active_trap_llm_instructions`.
 
-### OpponentResponseInstruction (§3.5)
+### DateeResponseInstruction (§3.5)
 Must include interest change info, response timing, interest behaviour block, the generate-your-next-message instruction, and the `[SIGNALS]` output format instruction.
 
 ### InterestBeatInstruction (§3.8)
-Must include threshold-conditional variants (above 15, below 8, reached 25, reached 0). Uses `{placeholder}` tokens for `opponent_name`, `interest_before`, `interest_after`.
+Must include threshold-conditional variants (above 15, below 8, reached 25, reached 0). Uses `{placeholder}` tokens for `datee_name`, `interest_before`, `interest_after`.

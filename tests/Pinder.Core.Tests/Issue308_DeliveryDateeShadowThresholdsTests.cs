@@ -12,12 +12,12 @@ using Xunit;
 namespace Pinder.Core.Tests
 {
     /// <summary>
-    /// Issue #308: GameSession must pass shadowThresholds to DeliveryContext and OpponentContext,
-    /// not just DialogueContext. Player shadows go to DeliveryContext, opponent shadows to OpponentContext.
+    /// Issue #308: GameSession must pass shadowThresholds to DeliveryContext and DateeContext,
+    /// not just DialogueContext. Player shadows go to DeliveryContext, datee shadows to DateeContext.
     /// Maturity: Prototype (happy-path per AC).
     /// </summary>
     [Trait("Category", "Core")]
-    public class Issue308_DeliveryOpponentShadowThresholdsTests
+    public class Issue308_DeliveryDateeShadowThresholdsTests
     {
         // AC: DeliveryContext receives player shadowThresholds
         [Fact]
@@ -37,37 +37,37 @@ namespace Pinder.Core.Tests
             Assert.Equal(8, capturedDelivery[ShadowStatType.Madness]);
         }
 
-        // AC: OpponentContext receives opponent shadowThresholds
+        // AC: DateeContext receives datee shadowThresholds
         [Fact]
-        public async Task OpponentContext_ReceivesOpponentShadowThresholds_WhenMadness8()
+        public async Task DateeContext_ReceivesDateeShadowThresholds_WhenMadness8()
         {
-            Dictionary<ShadowStatType, int>? capturedOpponent = null;
-            var opponentShadows = MakeShadowTracker(madness: 8);
+            Dictionary<ShadowStatType, int>? capturedDatee = null;
+            var dateeShadows = MakeShadowTracker(madness: 8);
             var llm = new FullCapturingLlmAdapter(
-                onOpponent: ctx => capturedOpponent = ctx.ShadowThresholds);
+                onDatee: ctx => capturedDatee = ctx.ShadowThresholds);
 
-            var session = MakeSession(new[] { 5, 15, 15 }, null, opponentShadows, llm);
+            var session = MakeSession(new[] { 5, 15, 15 }, null, dateeShadows, llm);
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0);
 
-            Assert.NotNull(capturedOpponent);
-            Assert.True(capturedOpponent!.ContainsKey(ShadowStatType.Madness));
-            Assert.Equal(8, capturedOpponent[ShadowStatType.Madness]);
+            Assert.NotNull(capturedDatee);
+            Assert.True(capturedDatee!.ContainsKey(ShadowStatType.Madness));
+            Assert.Equal(8, capturedDatee[ShadowStatType.Madness]);
         }
 
-        // Edge: DeliveryContext gets player shadows, OpponentContext gets opponent shadows (different values)
+        // Edge: DeliveryContext gets player shadows, DateeContext gets datee shadows (different values)
         [Fact]
-        public async Task DeliveryAndOpponent_GetDifferentShadows()
+        public async Task DeliveryAndDatee_GetDifferentShadows()
         {
             Dictionary<ShadowStatType, int>? capturedDelivery = null;
-            Dictionary<ShadowStatType, int>? capturedOpponent = null;
+            Dictionary<ShadowStatType, int>? capturedDatee = null;
             var playerShadows = MakeShadowTracker(madness: 10, dread: 5);
-            var opponentShadows = MakeShadowTracker(madness: 3, dread: 14);
+            var dateeShadows = MakeShadowTracker(madness: 3, dread: 14);
             var llm = new FullCapturingLlmAdapter(
                 onDeliver: ctx => capturedDelivery = ctx.ShadowThresholds,
-                onOpponent: ctx => capturedOpponent = ctx.ShadowThresholds);
+                onDatee: ctx => capturedDatee = ctx.ShadowThresholds);
 
-            var session = MakeSession(new[] { 5, 15, 15 }, playerShadows, opponentShadows, llm);
+            var session = MakeSession(new[] { 5, 15, 15 }, playerShadows, dateeShadows, llm);
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0);
 
@@ -76,10 +76,10 @@ namespace Pinder.Core.Tests
             Assert.Equal(10, capturedDelivery![ShadowStatType.Madness]);
             Assert.Equal(5, capturedDelivery[ShadowStatType.Dread]);
 
-            // Opponent shadows in opponent context
-            Assert.NotNull(capturedOpponent);
-            Assert.Equal(3, capturedOpponent![ShadowStatType.Madness]);
-            Assert.Equal(14, capturedOpponent[ShadowStatType.Dread]);
+            // Datee shadows in datee context
+            Assert.NotNull(capturedDatee);
+            Assert.Equal(3, capturedDatee![ShadowStatType.Madness]);
+            Assert.Equal(14, capturedDatee[ShadowStatType.Dread]);
         }
 
         // Edge: No player shadows -> DeliveryContext.ShadowThresholds is null
@@ -99,21 +99,21 @@ namespace Pinder.Core.Tests
             Assert.Null(capturedDelivery);
         }
 
-        // Edge: No opponent shadows -> OpponentContext.ShadowThresholds is null
+        // Edge: No datee shadows -> DateeContext.ShadowThresholds is null
         [Fact]
-        public async Task NoOpponentShadows_OpponentContextThresholdsNull()
+        public async Task NoDateeShadows_DateeContextThresholdsNull()
         {
-            Dictionary<ShadowStatType, int>? capturedOpponent = null;
+            Dictionary<ShadowStatType, int>? capturedDatee = null;
             bool called = false;
             var llm = new FullCapturingLlmAdapter(
-                onOpponent: ctx => { capturedOpponent = ctx.ShadowThresholds; called = true; });
+                onDatee: ctx => { capturedDatee = ctx.ShadowThresholds; called = true; });
 
             var session = MakeSession(new[] { 5, 15, 15 }, null, null, llm);
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0);
 
             Assert.True(called);
-            Assert.Null(capturedOpponent);
+            Assert.Null(capturedDatee);
         }
 
         // AC: All shadow stats pass through to DeliveryContext
@@ -186,11 +186,11 @@ namespace Pinder.Core.Tests
         private static GameSession MakeSession(
             int[] diceValues,
             SessionShadowTracker? playerShadows,
-            SessionShadowTracker? opponentShadows,
+            SessionShadowTracker? dateeShadows,
             ILlmAdapter llm)
         {
             var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: playerShadows,
-                opponentShadows: opponentShadows);
+                dateeShadows: dateeShadows);
 
             // dice[0] = ghost check, rest = roll dice
             var allDice = new int[diceValues.Length + 1];
@@ -199,7 +199,7 @@ namespace Pinder.Core.Tests
 
             return new GameSession(
                 MakeProfile("player"),
-                MakeProfile("opponent"),
+                MakeProfile("datee"),
                 llm,
                 new SafeQueueDice(allDice),
                 new NullTrapRegistry(),
@@ -214,19 +214,19 @@ namespace Pinder.Core.Tests
         }
 
         /// <summary>
-        /// LLM adapter that captures DeliveryContext and OpponentContext for assertion.
+        /// LLM adapter that captures DeliveryContext and DateeContext for assertion.
         /// </summary>
         private sealed class FullCapturingLlmAdapter : ILlmAdapter
         {
             private readonly Action<DeliveryContext>? _onDeliver;
-            private readonly Action<OpponentContext>? _onOpponent;
+            private readonly Action<DateeContext>? _onDatee;
 
             public FullCapturingLlmAdapter(
                 Action<DeliveryContext>? onDeliver = null,
-                Action<OpponentContext>? onOpponent = null)
+                Action<DateeContext>? onDatee = null)
             {
                 _onDeliver = onDeliver;
-                _onOpponent = onOpponent;
+                _onDatee = onDatee;
             }
 
             public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, System.Threading.CancellationToken ct = default)
@@ -244,19 +244,19 @@ namespace Pinder.Core.Tests
                 return Task.FromResult(context.ChosenOption.IntendedText);
             }
 
-            public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context, System.Threading.CancellationToken ct = default)
+            public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
             {
-                _onOpponent?.Invoke(context);
-                return Task.FromResult(new OpponentResponse("reply"));
+                _onDatee?.Invoke(context);
+                return Task.FromResult(new DateeResponse("reply"));
             }
 
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, System.Threading.CancellationToken ct = default)
             {
                 return Task.FromResult<string?>(null);
             }
-            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
+            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
             public System.Threading.Tasks.Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
-            public System.Threading.Tasks.Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
+            public System.Threading.Tasks.Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
         }
     }
 }

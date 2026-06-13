@@ -27,7 +27,7 @@ namespace Pinder.Core.Conversation
         /// </para>
         /// <list type="bullet">
         ///   <item><b>Shared by reference (immutable / stateless / pure):</b>
-        ///     <see cref="_player"/>, <see cref="_opponent"/>,
+        ///     <see cref="_player"/>, <see cref="_datee"/>,
         ///     <see cref="_llm"/>, <see cref="_dice"/>,
         ///     <see cref="_trapRegistry"/>, <see cref="_clock"/>,
         ///     <see cref="_rules"/>, <see cref="_statDeliveryInstructions"/>,
@@ -72,7 +72,7 @@ namespace Pinder.Core.Conversation
         {
             // ── Shared-by-reference fields (Category B/C: immutable / stateless / pure adapters) ──
             _player          = src._player;
-            _opponent        = src._opponent;
+            _datee        = src._datee;
             _llm             = llmOverride ?? throw new ArgumentNullException(nameof(llmOverride));
             _dice            = src._dice;
             _trapRegistry    = src._trapRegistry;
@@ -147,7 +147,7 @@ namespace Pinder.Core.Conversation
         /// (snapshot-and-restore round-trip) because the existing
         /// <see cref="CreateSnapshot"/> / <see cref="RestoreState"/> machinery
         /// is materially incomplete (no XP ledger, no horniness session
-        /// roll, no opponent shadow tracker, no shadow-growth evaluator
+        /// roll, no datee shadow tracker, no shadow-growth evaluator
         /// counters, no per-turn carry-over). Path 2 would have required
         /// expanding both Snapshot and RestoreState to full coverage — a
         /// much larger blast radius on the production replay path. The

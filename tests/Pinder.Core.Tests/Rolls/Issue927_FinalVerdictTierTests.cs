@@ -111,7 +111,7 @@ namespace Pinder.Core.Tests
 
             var playerStats = MakeStats(allStats: 5, shadowOnPair: 10, pairStat: ShadowStatType.Despair);
             var player = MakeProfile("Sable", playerStats);
-            var opponent = MakeProfile("Brick", MakeStats(allStats: 0));
+            var datee = MakeProfile("Brick", MakeStats(allStats: 0));
 
             // horniness=5, main d20=20 (auto-success / Nat 20), timing=50
             var dice = new FixedDice(5, 20, 50);
@@ -125,7 +125,7 @@ namespace Pinder.Core.Tests
                 steeringRng: steeringRng,
                 statDeliveryInstructions: instructions,
                 playerShadows: playerShadows);
-            var session = new GameSession(player, opponent, llm, dice, new NullTrapRegistry(), config);
+            var session = new GameSession(player, datee, llm, dice, new NullTrapRegistry(), config);
 
             await session.StartTurnAsync();
             int rizzIdx = FindIndex(llm.LastOptions, StatType.Rizz);
@@ -161,7 +161,7 @@ namespace Pinder.Core.Tests
 
             var playerStats = MakeStats(allStats: 2, shadowOnPair: 10, pairStat: ShadowStatType.Despair);
             var player = MakeProfile("Sable", playerStats);
-            var opponent = MakeProfile("Brick", MakeStats(allStats: 2));
+            var datee = MakeProfile("Brick", MakeStats(allStats: 2));
 
             // d20=1 (Nat 1 — guaranteed failure)
             var dice = new FixedDice(5, 1, 50);
@@ -174,7 +174,7 @@ namespace Pinder.Core.Tests
                 steeringRng: steeringRng,
                 statDeliveryInstructions: instructions,
                 playerShadows: playerShadows);
-            var session = new GameSession(player, opponent, llm, dice, new NullTrapRegistry(), config);
+            var session = new GameSession(player, datee, llm, dice, new NullTrapRegistry(), config);
 
             await session.StartTurnAsync();
             int rizzIdx = FindIndex(llm.LastOptions, StatType.Rizz);
@@ -200,7 +200,7 @@ namespace Pinder.Core.Tests
 
             var playerStats = MakeStats(allStats: 5, shadowOnPair: 0, pairStat: ShadowStatType.Despair);
             var player = MakeProfile("Sable", playerStats);
-            var opponent = MakeProfile("Brick", MakeStats(allStats: 0));
+            var datee = MakeProfile("Brick", MakeStats(allStats: 0));
 
             // d20=20 (auto-success)
             var dice = new FixedDice(5, 20, 50);
@@ -213,7 +213,7 @@ namespace Pinder.Core.Tests
                 steeringRng: steeringRng,
                 statDeliveryInstructions: instructions,
                 playerShadows: playerShadows);
-            var session = new GameSession(player, opponent, llm, dice, new NullTrapRegistry(), config);
+            var session = new GameSession(player, datee, llm, dice, new NullTrapRegistry(), config);
 
             await session.StartTurnAsync();
             int rizzIdx = FindIndex(llm.LastOptions, StatType.Rizz);
@@ -238,7 +238,7 @@ namespace Pinder.Core.Tests
             // Player starts WITHOUT shadow; we'll bump shadow between turns.
             var playerStats = MakeStats(allStats: 5, shadowOnPair: 0, pairStat: ShadowStatType.Despair);
             var player = MakeProfile("Sable", playerStats);
-            var opponent = MakeProfile("Brick", MakeStats(allStats: 0));
+            var datee = MakeProfile("Brick", MakeStats(allStats: 0));
 
             // Turn 1 dice: horniness=5, d20=20, timing=50.
             // Turn 2 dice: horniness=5, d20=20, timing=50.
@@ -254,7 +254,7 @@ namespace Pinder.Core.Tests
                 steeringRng: steeringRng,
                 statDeliveryInstructions: instructions,
                 playerShadows: playerShadows);
-            var session = new GameSession(player, opponent, llm, dice, new NullTrapRegistry(), config);
+            var session = new GameSession(player, datee, llm, dice, new NullTrapRegistry(), config);
 
             // Turn 1.
             await session.StartTurnAsync();
@@ -352,12 +352,12 @@ namespace Pinder.Core.Tests
             public bool ShadowCorruptionCalled { get; private set; }
             public DialogueOption[] LastOptions { get; private set; } = System.Array.Empty<DialogueOption>();
 
-            public Task<StatefulOpponentResult> GetOpponentResponseAsync(
-                OpponentContext context,
+            public Task<StatefulDateeResult> GetDateeResponseAsync(
+                DateeContext context,
                 IReadOnlyList<ConversationMessage> history,
                 CancellationToken ct = default)
-                => Task.FromResult(new StatefulOpponentResult(
-                    new OpponentResponse("..."),
+                => Task.FromResult(new StatefulDateeResult(
+                    new DateeResponse("..."),
                     new ConversationMessage[]
                     {
                         ConversationMessage.User(string.Empty),
@@ -384,13 +384,13 @@ namespace Pinder.Core.Tests
                     : $"[{context.Outcome}] {intended}");
             }
 
-            public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context, CancellationToken ct = default)
-                => Task.FromResult(new OpponentResponse("..."));
+            public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, CancellationToken ct = default)
+                => Task.FromResult(new DateeResponse("..."));
 
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, CancellationToken ct = default)
                 => Task.FromResult<string?>(null);
 
-            public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null, CancellationToken ct = default)
+            public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, CancellationToken ct = default)
                 => Task.FromResult(message);
 
             public Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow, string? archetypeDirective = null, CancellationToken ct = default)
@@ -399,7 +399,7 @@ namespace Pinder.Core.Tests
                 return Task.FromResult(message + " [shadow:" + shadow + "]");
             }
 
-            public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null, CancellationToken ct = default)
+            public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, CancellationToken ct = default)
                 => Task.FromResult(message);
 
             public Task<string> GetSteeringQuestionAsync(SteeringContext context, CancellationToken ct = default)

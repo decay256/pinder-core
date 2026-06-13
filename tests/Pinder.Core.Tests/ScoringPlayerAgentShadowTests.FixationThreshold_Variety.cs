@@ -16,7 +16,7 @@ namespace Pinder.Core.Tests
         public async Task FixationT1_ChaosEvReduced20Percent()
         {
             var player = MakeStats(chaos: 3, charm: 3);
-            var opponent = MakeStats();
+            var datee = MakeStats();
 
             var shadowsT1 = new Dictionary<ShadowStatType, int>
             {
@@ -40,9 +40,9 @@ namespace Pinder.Core.Tests
             var turnChaos = MakeTurn(MakeOption(StatType.Chaos));
 
             var resultT1 = await _agent.DecideAsync(turnChaos,
-                MakeContext(player: player, opponent: opponent, shadowValues: shadowsT1));
+                MakeContext(player: player, datee: datee, shadowValues: shadowsT1));
             var resultNone = await _agent.DecideAsync(turnChaos,
-                MakeContext(player: player, opponent: opponent, shadowValues: shadowsNone));
+                MakeContext(player: player, datee: datee, shadowValues: shadowsNone));
 
             // Chaos EV should be lower with Fixation T1
             Assert.True(resultT1.Scores[0].Score < resultNone.Scores[0].Score,
@@ -54,7 +54,7 @@ namespace Pinder.Core.Tests
         public async Task FixationT2_ChaosDisadvantageApplied()
         {
             var player = MakeStats(chaos: 3, charm: 3);
-            var opponent = MakeStats();
+            var datee = MakeStats();
 
             var shadowsT2 = new Dictionary<ShadowStatType, int>
             {
@@ -78,9 +78,9 @@ namespace Pinder.Core.Tests
             var turnChaos = MakeTurn(MakeOption(StatType.Chaos));
 
             var resultT2 = await _agent.DecideAsync(turnChaos,
-                MakeContext(player: player, opponent: opponent, shadowValues: shadowsT2));
+                MakeContext(player: player, datee: datee, shadowValues: shadowsT2));
             var resultT1 = await _agent.DecideAsync(turnChaos,
-                MakeContext(player: player, opponent: opponent, shadowValues: shadowsT1));
+                MakeContext(player: player, datee: datee, shadowValues: shadowsT1));
 
             // T2 disadvantage should reduce score more than T1 reduction
             Assert.True(resultT2.Scores[0].Score < resultT1.Scores[0].Score,
@@ -92,7 +92,7 @@ namespace Pinder.Core.Tests
         public async Task FixationThreshold_DoesNotAffectNonChaosOptions()
         {
             var player = MakeStats(charm: 3);
-            var opponent = MakeStats();
+            var datee = MakeStats();
 
             var shadowsT2 = new Dictionary<ShadowStatType, int>
             {
@@ -116,9 +116,9 @@ namespace Pinder.Core.Tests
             var turnCharm = MakeTurn(MakeOption(StatType.Charm));
 
             var resultT2 = await _agent.DecideAsync(turnCharm,
-                MakeContext(player: player, opponent: opponent, shadowValues: shadowsT2));
+                MakeContext(player: player, datee: datee, shadowValues: shadowsT2));
             var resultNone = await _agent.DecideAsync(turnCharm,
-                MakeContext(player: player, opponent: opponent, shadowValues: shadowsNone));
+                MakeContext(player: player, datee: datee, shadowValues: shadowsNone));
 
             // Charm score should be identical regardless of Fixation level
             Assert.Equal((double)resultT2.Scores[0].Score, (double)resultNone.Scores[0].Score, 4);
@@ -129,13 +129,13 @@ namespace Pinder.Core.Tests
         public async Task FixationThreshold_SkippedWhenShadowValuesNull()
         {
             var player = MakeStats(chaos: 3);
-            var opponent = MakeStats();
+            var datee = MakeStats();
 
             var turnChaos = MakeTurn(MakeOption(StatType.Chaos));
 
             // No shadow values (null) — should not crash or apply any reduction
             var result = await _agent.DecideAsync(turnChaos,
-                MakeContext(player: player, opponent: opponent, shadowValues: null));
+                MakeContext(player: player, datee: datee, shadowValues: null));
 
             Assert.NotNull(result);
             Assert.Equal(0, result.OptionIndex);
@@ -150,7 +150,7 @@ namespace Pinder.Core.Tests
         public async Task StatVarietyBonus_AppliedToUnusedStat()
         {
             var player = MakeStats(charm: 3, rizz: 3, wit: 3);
-            var opponent = MakeStats();
+            var datee = MakeStats();
 
             var turn = MakeTurn(
                 MakeOption(StatType.Charm),
@@ -159,7 +159,7 @@ namespace Pinder.Core.Tests
 
             // Last two turns: Charm, Rizz
             var context = MakeContext(
-                player: player, opponent: opponent,
+                player: player, datee: datee,
                 lastStatUsed: StatType.Charm,
                 secondLastStatUsed: StatType.Rizz);
 
@@ -183,14 +183,14 @@ namespace Pinder.Core.Tests
         public async Task StatVarietyBonus_NotAppliedWhenNoHistory()
         {
             var player = MakeStats(charm: 3, rizz: 3);
-            var opponent = MakeStats();
+            var datee = MakeStats();
 
             var turn = MakeTurn(
                 MakeOption(StatType.Charm),
                 MakeOption(StatType.Rizz));
 
             // No stat history
-            var context = MakeContext(player: player, opponent: opponent);
+            var context = MakeContext(player: player, datee: datee);
 
             var decision = await _agent.DecideAsync(turn, context);
 

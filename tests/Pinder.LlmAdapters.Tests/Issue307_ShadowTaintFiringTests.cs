@@ -136,19 +136,19 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("SHADOW STATE", result);
         }
 
-        // ============== Taint fires on Opponent prompt too ==============
+        // ============== Taint fires on Datee prompt too ==============
 
-        // Mutation: would catch if opponent prompt doesn't pass shadows through to taint builder
+        // Mutation: would catch if datee prompt doesn't pass shadows through to taint builder
         [Fact]
-        public void OpponentPrompt_Dread10_ContainsShadowState()
+        public void DateePrompt_Dread10_ContainsShadowState()
         {
             var shadows = new Dictionary<ShadowStatType, int>
             {
                 { ShadowStatType.Dread, 10 }
             };
 
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(shadows));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(shadows));
 
             Assert.Contains("SHADOW STATE", result);
             Assert.Contains("Dread", result);
@@ -169,9 +169,9 @@ namespace Pinder.LlmAdapters.Tests
                 MakeDeliveryContext(option, null));
             Assert.DoesNotContain("SHADOW STATE", delivery);
 
-            var opponent = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(null));
-            Assert.DoesNotContain("SHADOW STATE", opponent);
+            var datee = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(null));
+            Assert.DoesNotContain("SHADOW STATE", datee);
         }
 
         // ============== Multiple shadows above threshold ==============
@@ -202,14 +202,14 @@ namespace Pinder.LlmAdapters.Tests
         {
             return new DialogueContext(
                 playerPrompt: "player prompt",
-                opponentPrompt: "opponent prompt",
-                conversationHistory: new List<(string, string)> { ("Opponent", "Hey") },
-                opponentLastMessage: "Hey",
+                dateePrompt: "datee prompt",
+                conversationHistory: new List<(string, string)> { ("Datee", "Hey") },
+                dateeLastMessage: "Hey",
                 activeTraps: Array.Empty<string>(),
                 currentInterest: 10,
                 shadowThresholds: shadowThresholds,
                 playerName: "Player",
-                opponentName: "Opponent",
+                dateeName: "Datee",
                 currentTurn: 1);
         }
 
@@ -219,26 +219,26 @@ namespace Pinder.LlmAdapters.Tests
         {
             return new DeliveryContext(
                 playerPrompt: "player prompt",
-                opponentPrompt: "opponent prompt",
-                conversationHistory: new List<(string, string)> { ("Opponent", "Hey") },
-                opponentLastMessage: "Hey",
+                dateePrompt: "datee prompt",
+                conversationHistory: new List<(string, string)> { ("Datee", "Hey") },
+                dateeLastMessage: "Hey",
                 chosenOption: option,
                 outcome: FailureTier.None,
                 beatDcBy: 3,
                 activeTraps: Array.Empty<string>(),
                 shadowThresholds: shadowThresholds,
                 playerName: "Player",
-                opponentName: "Opponent");
+                dateeName: "Datee");
         }
 
-        private static OpponentContext MakeOpponentContext(
+        private static DateeContext MakeDateeContext(
             Dictionary<ShadowStatType, int>? shadowThresholds)
         {
-            return new OpponentContext(
+            return new DateeContext(
                 playerPrompt: "player prompt",
-                opponentPrompt: "opponent prompt",
-                conversationHistory: new List<(string, string)> { ("Opponent", "Hey") },
-                opponentLastMessage: "Hey",
+                dateePrompt: "datee prompt",
+                conversationHistory: new List<(string, string)> { ("Datee", "Hey") },
+                dateeLastMessage: "Hey",
                 activeTraps: Array.Empty<string>(),
                 currentInterest: 10,
                 playerDeliveredMessage: "Hello",
@@ -247,7 +247,7 @@ namespace Pinder.LlmAdapters.Tests
                 responseDelayMinutes: 2.0,
                 shadowThresholds: shadowThresholds,
                 playerName: "Player",
-                opponentName: "Opponent");
+                dateeName: "Datee");
         }
     }
 }

@@ -2,7 +2,7 @@
 """
 Overlay model test v3.
 Section A: Delivery with CORRECT intended message (chopsticks, WIT Strong success Beat+8).
-Section B: Overlay with short system + opponent context.
+Section B: Overlay with short system + datee context.
 Delivery prompt extracted from debug for structure, but user message constructed for chopsticks.
 """
 
@@ -63,14 +63,14 @@ YOUR TIER: Read the match's last message for something unintentionally funny or 
 MEDIUM RULE: This is a text message on a phone screen. No internal stage directions, no narration. Match Brick_haus's texting register exactly.
 HARD RULE: Do not add new sentences. Rewrite the intended message. Output only the message text."""
 
-OPPONENT_CONTEXT = 'Opponent: Velvet_Void | Bio: "I will absolutely judge your taste in music." | Wearing: messy-bun-chopsticks, oversized-band-tee, fishnets-with-rips, platform-doc-martens, nose-ring-septum, tote-bag-ironic-slogan, thick-winged-eyeliner'
+DATEE_CONTEXT = 'Datee: Velvet_Void | Bio: "I will absolutely judge your taste in music." | Wearing: messy-bun-chopsticks, oversized-band-tee, fishnets-with-rips, platform-doc-martens, nose-ring-septum, tote-bag-ironic-slogan, thick-winged-eyeliner'
 
 OVERLAY_SYSTEM = (
     "You are editing dialogue for Pinder, a comedy RPG where sentient penises date each other on a fictional app. "
     "The humour is absurdist and satirical — characters are oblivious to double-entendre, not explicit. "
     "Apply the overlay instruction to rewrite the message with the requested tonal shift. "
     "Return ONLY the rewritten message text. No commentary, no refusals, no preamble."
-    f"\n\nThe message being sent is directed at this character:\n{OPPONENT_CONTEXT}"
+    f"\n\nThe message being sent is directed at this character:\n{DATEE_CONTEXT}"
 )
 
 def call_anthropic(system, user):
@@ -132,7 +132,7 @@ for name, model in [("llama-3.3-70b (compact system)", "llama-3.3-70b-versatile"
 BASE = claude_delivery if not claude_delivery.startswith("[") else \
     "The chopsticks are a power move. Most people would settle for whatever elastic they find in their junk drawer."
 
-banner(f"B: Catastrophe overlay | System: {len(OVERLAY_SYSTEM):,} chars | Opponent context included")
+banner(f"B: Catastrophe overlay | System: {len(OVERLAY_SYSTEM):,} chars | Datee context included")
 print(f'Base: "{BASE}"\n')
 
 overlay_user = f"OVERLAY INSTRUCTION:\n{CATASTROPHE}\n\nORIGINAL MESSAGE:\n{BASE}\n\nApply the overlay and return the modified message."

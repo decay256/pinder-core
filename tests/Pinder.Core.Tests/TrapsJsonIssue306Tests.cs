@@ -115,9 +115,9 @@ namespace Pinder.Core.Tests
         [Theory]
         [InlineData(StatType.Charm, TrapEffect.Disadvantage)]
         [InlineData(StatType.Rizz, TrapEffect.StatPenalty)]
-        [InlineData(StatType.Honesty, TrapEffect.OpponentDCIncrease)]
+        [InlineData(StatType.Honesty, TrapEffect.DateeDCIncrease)]
         [InlineData(StatType.Chaos, TrapEffect.Disadvantage)]
-        [InlineData(StatType.Wit, TrapEffect.OpponentDCIncrease)]
+        [InlineData(StatType.Wit, TrapEffect.DateeDCIncrease)]
         [InlineData(StatType.SelfAwareness, TrapEffect.Disadvantage)]
         public void Trap_Effect_MatchesExpected(StatType stat, TrapEffect expectedEffect)
         {

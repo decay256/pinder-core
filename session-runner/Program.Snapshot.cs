@@ -16,9 +16,9 @@ partial class Program
 {
     internal static InitialSessionSnapshot BuildInitialSnapshot(
         CharacterProfile player,
-        CharacterProfile opponent,
+        CharacterProfile datee,
         int playerLevelBonus,
-        int opponentLevelBonus,
+        int dateeLevelBonus,
         GameSession session,
         int startingInterest,
         int maxTurns,
@@ -29,7 +29,7 @@ partial class Program
         return new InitialSessionSnapshot
         {
             Player = BuildCharacterSnapshot(player, playerLevelBonus),
-            Opponent = BuildCharacterSnapshot(opponent, opponentLevelBonus),
+            Datee = BuildCharacterSnapshot(datee, dateeLevelBonus),
             SessionHorniness = session.SessionHorniness,
             HorninessRoll = session.HorninessRoll,
             HorninessTimeModifier = session.HorninessTimeModifier,
@@ -38,7 +38,7 @@ partial class Program
             ModelSpec = modelSpec,
             SessionStartedAt = DateTime.UtcNow.ToString("o"),
             PlayerPsychologicalStake = player.PsychologicalStake ?? string.Empty,
-            OpponentPsychologicalStake = opponent.PsychologicalStake ?? string.Empty,
+            DateePsychologicalStake = datee.PsychologicalStake ?? string.Empty,
             GlobalDcBias = globalDcBias,
             MaxDialogueOptions = maxDialogueOptions,
         };
@@ -79,10 +79,10 @@ partial class Program
         List<(StatType Stat, bool Succeeded)> comboHistory,
         TellSnapshot? activeTell,
         List<List<TextDiffSnapshot>>? perTurnTextDiffs = null,
-        IReadOnlyList<Pinder.Core.Conversation.ConversationMessage>? opponentHistory = null,
+        IReadOnlyList<Pinder.Core.Conversation.ConversationMessage>? dateeHistory = null,
         string? playerSender = null,
         Pinder.LlmAdapters.I18nCatalog? i18nCatalog = null,
-        Pinder.Core.Conversation.OpponentDefenseSnapshot? opponentDefenseSnapshot = null,
+        Pinder.Core.Conversation.DateeDefenseSnapshot? dateeDefenseSnapshot = null,
         int? weaknessDcReduction = null)
     {
         var state = result.StateAfter;
@@ -108,7 +108,7 @@ partial class Program
         // straight into a renderer / replay tool.
         //
         // Indexing rule (post #769 / #774): the conversation log is no
-        // longer a strict alternating (player, opponent, ...) sequence —
+        // longer a strict alternating (player, datee, ...) sequence —
         // it may be prefixed with [scene] entries (issue #333), and a
         // skipped player turn (empty DeliveredMessage, post-#767) means
         // a turn slot with no entry on the player axis at all. We use
@@ -125,7 +125,7 @@ partial class Program
         // pair-math classification under the #769 "skipped player
         // turn" perturbation: pair-math derives role from the count of
         // non-scene entries seen so far, which silently flips when
-        // either side of a (player, opponent) pair is missing, while
+        // either side of a (player, datee) pair is missing, while
         // sender-match always identifies the right entry.
         //
         // When playerSender is null (legacy callers / older tests that
@@ -152,9 +152,9 @@ partial class Program
             convEntries.Add(entry);
         }
 
-        // #788: project the engine-owned opponent history into the wire shape.
-        var opponentHistoryEntries = (opponentHistory ?? new List<Pinder.Core.Conversation.ConversationMessage>())
-            .Select(m => new OpponentHistoryEntry { Role = m.Role, Content = m.Content })
+        // #788: project the engine-owned datee history into the wire shape.
+        var dateeHistoryEntries = (dateeHistory ?? new List<Pinder.Core.Conversation.ConversationMessage>())
+            .Select(m => new DateeHistoryEntry { Role = m.Role, Content = m.Content })
             .ToList();
 
         // Issue #474: detect canonical event kinds fired this turn and
@@ -182,12 +182,12 @@ partial class Program
             SaOverthinkingTriggered = saOverthinkingTriggered,
             RizzCumulativeFailureCount = rizzCumulativeFailureCount,
             ConversationHistory = convEntries,
-            OpponentHistory = opponentHistoryEntries,
+            DateeHistory = dateeHistoryEntries,
             Events = events,
             DefendingStat = result.Roll.DefendingStat.ToString(),
             GhostProbabilityPerTurn = state.GhostProbabilityPerTurn,
-            OpponentDefenseSnapshot = opponentDefenseSnapshot != null
-                ? opponentDefenseSnapshot.ByAttackerStat.ToDictionary(
+            DateeDefenseSnapshot = dateeDefenseSnapshot != null
+                ? dateeDefenseSnapshot.ByAttackerStat.ToDictionary(
                     kvp => kvp.Key.ToString(),
                     kvp => new TurnDefenseEntry
                     {
@@ -244,7 +244,7 @@ partial class Program
         snap.StatsUsedHistory ??= new List<string>();
         snap.HighestPctHistory ??= new List<bool>();
         snap.ConversationHistory ??= new List<ConversationEntry>();
-        snap.OpponentHistory ??= new List<OpponentHistoryEntry>();
+        snap.DateeHistory ??= new List<DateeHistoryEntry>();
 
         void Assume(string field, string defaultValue)
         {
@@ -297,7 +297,7 @@ partial class Program
                                      .ToList(),
             PendingTripleBonus   = snap.PendingTripleBonus,
             RizzCumulativeFailureCount = snap.RizzCumulativeFailureCount,
-            OpponentHistory      = (snap.OpponentHistory ?? new List<OpponentHistoryEntry>())
+            DateeHistory      = (snap.DateeHistory ?? new List<DateeHistoryEntry>())
                                      .Select(e => (e.Role, e.Content))
                                      .ToList(),
         };

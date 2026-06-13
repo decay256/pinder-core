@@ -23,10 +23,10 @@ namespace Pinder.Core.Interfaces
         /// <summary>Steering question for the player.</summary>
         public const string Steering = "steering";
 
-        /// <summary>Opponent reply to the delivered player message.</summary>
-        public const string OpponentResponse = "opponent_response";
+        /// <summary>Datee reply to the delivered player message.</summary>
+        public const string DateeResponse = "datee_response";
 
-        /// <summary>Optional narrative beat emitted when opponent interest changes.</summary>
+        /// <summary>Optional narrative beat emitted when datee interest changes.</summary>
         public const string InterestChangeBeat = "interest_change_beat";
 
         /// <summary>Horniness overlay rewrite of a delivered message.</summary>
@@ -73,7 +73,7 @@ namespace Pinder.Core.Interfaces
         /// Session-setup dramatic-arc generation (issue #821).
         /// One LLM call per session that produces a 3-5 sentence
         /// narrative arc (setup, escalation, turning point, resolution)
-        /// appended to the opponent system prompt as soft guardrails.
+        /// appended to the datee system prompt as soft guardrails.
         /// </summary>
         public const string DramaticArc = "dramatic_arc";
 

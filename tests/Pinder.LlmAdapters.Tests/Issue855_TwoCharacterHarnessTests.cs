@@ -14,7 +14,7 @@ namespace Pinder.LlmAdapters.Tests
     /// characters that stay in character for the whole conversation. These
     /// regression tests pin the pursuer-side wiring:
     ///   • two-character mode → the pursuer is a real character driven through
-    ///     the SAME production prompt path as the opponent (BuildOpponent);
+    ///     the SAME production prompt path as the datee (BuildDatee);
     ///   • single-character fallback → the generic lightweight LLM persona
     ///     (NOT a real character) is used, exactly as before;
     ///   • scripted mode (--player-script) → fixed lines, no transport calls.
@@ -26,11 +26,11 @@ namespace Pinder.LlmAdapters.Tests
     {
         // A small but recognizable "assembled system prompt" for the pursuer
         // character — its presence in the system prompt proves the production
-        // BuildOpponent path was used.
+        // BuildDatee path was used.
         private const string PursuerAssembledPrompt =
             "You are Velvet_99, a velvet-voiced romantic who never breaks character.";
 
-        // ── 1. Two-character mode: pursuer uses the BuildOpponent path ────────
+        // ── 1. Two-character mode: pursuer uses the BuildDatee path ────────
 
         [Fact]
         public void Factory_with_pursuer_character_returns_character_actor()
@@ -44,11 +44,11 @@ namespace Pinder.LlmAdapters.Tests
 
             Assert.IsType<CharacterPursuerActor>(actor);
             Assert.Contains("velvet", actor.HeaderLabel);
-            Assert.Contains("BuildOpponent", actor.HeaderLabel);
+            Assert.Contains("BuildDatee", actor.HeaderLabel);
         }
 
         [Fact]
-        public async Task Character_pursuer_drives_BuildOpponent_system_prompt_with_its_own_profile()
+        public async Task Character_pursuer_drives_BuildDatee_system_prompt_with_its_own_profile()
         {
             var transport = new RecordingTransport("hey, I noticed you too.");
             IPursuerActor actor = PursuerActorFactory.Create(
@@ -60,16 +60,16 @@ namespace Pinder.LlmAdapters.Tests
             var transcript = new List<(string, string)>
             {
                 ("Pursuer", "opening"),
-                ("Opponent", "a reply from the opponent"),
+                ("Datee", "a reply from the datee"),
             };
             string? line = await actor.NextLineAsync(transcript, turn: 1);
 
             Assert.Equal("hey, I noticed you too.", line);
-            // The system prompt is the REAL production opponent prompt for the
-            // pursuer character — proven by the OPPONENT CHARACTER section and
+            // The system prompt is the REAL production datee prompt for the
+            // pursuer character — proven by the DATEE CHARACTER section and
             // the pursuer's own assembled profile text appearing in it.
             Assert.NotNull(transport.LastSystem);
-            Assert.Contains("== OPPONENT CHARACTER ==", transport.LastSystem!);
+            Assert.Contains("== DATEE CHARACTER ==", transport.LastSystem!);
             Assert.Contains(PursuerAssembledPrompt, transport.LastSystem!);
             // It is NOT the generic-persona prompt.
             Assert.DoesNotContain("witty, curious person texting", transport.LastSystem!);
@@ -80,7 +80,7 @@ namespace Pinder.LlmAdapters.Tests
         {
             // ARC DESIGN DECISION (#855): the pursuer is REACTIVE — built from the
             // BASE game definition with NO arc text, so its system prompt carries
-            // no "== CONVERSATION ARC ==" section. Only the opponent carries the
+            // no "== CONVERSATION ARC ==" section. Only the datee carries the
             // experiment's arc. This pins that reversible default.
             var transport = new RecordingTransport("reactive line");
             IPursuerActor actor = PursuerActorFactory.Create(
@@ -99,7 +99,7 @@ namespace Pinder.LlmAdapters.Tests
         public async Task Character_pursuer_relabels_its_own_lines_to_its_name_in_its_view()
         {
             // Each side maintains its OWN conversation view: the pursuer sees its
-            // own "Pursuer"-keyed lines under its display name, the opponent's
+            // own "Pursuer"-keyed lines under its display name, the datee's
             // lines as the inbound messages.
             var transport = new RecordingTransport("ok");
             IPursuerActor actor = PursuerActorFactory.Create(
@@ -111,13 +111,13 @@ namespace Pinder.LlmAdapters.Tests
             var transcript = new List<(string, string)>
             {
                 ("Pursuer", "my earlier line"),
-                ("Brick_77", "the opponent answered"),
+                ("Brick_77", "the datee answered"),
             };
             await actor.NextLineAsync(transcript, turn: 2);
 
             Assert.NotNull(transport.LastUser);
             Assert.Contains("Velvet_99: my earlier line", transport.LastUser!);
-            Assert.Contains("Brick_77: the opponent answered", transport.LastUser!);
+            Assert.Contains("Brick_77: the datee answered", transport.LastUser!);
             Assert.DoesNotContain("Pursuer: my earlier line", transport.LastUser!);
         }
 
@@ -146,13 +146,13 @@ namespace Pinder.LlmAdapters.Tests
                 pursuerSlug: null, baseDef: GameDefinition.PinderDefaults);
 
             string? line = await actor.NextLineAsync(
-                new List<(string, string)> { ("Pursuer", "hi"), ("Opponent", "hey") }, turn: 1);
+                new List<(string, string)> { ("Pursuer", "hi"), ("Datee", "hey") }, turn: 1);
 
             Assert.Equal("tell me more", line);
             // The generic persona — NOT a production character prompt.
             Assert.NotNull(transport.LastSystem);
             Assert.Contains("witty, curious person texting", transport.LastSystem!);
-            Assert.DoesNotContain("== OPPONENT CHARACTER ==", transport.LastSystem!);
+            Assert.DoesNotContain("== DATEE CHARACTER ==", transport.LastSystem!);
         }
 
         // ── 3. Scripted mode still works ─────────────────────────────────────

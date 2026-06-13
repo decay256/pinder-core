@@ -19,7 +19,7 @@ def enrich_rules_v3_part1(e: Dict[str, Any], eid: str, desc: str, blocks: List[D
 
     elif eid == '§5.dc-examples':
         e['condition'] = {'formula': 'defense_dc'}
-        e['outcome'] = {'base_dc': 13, 'addend': 'opponent_stat_modifier'}
+        e['outcome'] = {'base_dc': 13, 'addend': 'datee_stat_modifier'}
         return [e]
 
     elif eid == '§6.basic-roll':

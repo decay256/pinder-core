@@ -17,17 +17,17 @@ namespace Pinder.LlmAdapters.Tests
             int currentInterest = 10,
             int currentTurn = 3,
             IReadOnlyList<(string Sender, string Text)> conversationHistory = null,
-            string opponentLastMessage = "hey",
+            string dateeLastMessage = "hey",
             string[] activeTraps = null,
             string playerName = "Player",
-            string opponentName = "Opponent",
+            string dateeName = "Datee",
             Dictionary<ShadowStatType, int> shadowThresholds = null)
         {
             return new DialogueContext(
                 playerPrompt: "player prompt",
-                opponentPrompt: "opponent prompt",
+                dateePrompt: "datee prompt",
                 conversationHistory: conversationHistory ?? Array.Empty<(string, string)>(),
-                opponentLastMessage: opponentLastMessage,
+                dateeLastMessage: dateeLastMessage,
                 activeTraps: activeTraps ?? Array.Empty<string>(),
                 currentInterest: currentInterest,
                 shadowThresholds: shadowThresholds,
@@ -36,7 +36,7 @@ namespace Pinder.LlmAdapters.Tests
                 requiresRizzOption: requiresRizzOption,
                 activeTrapInstructions: activeTrapInstructions,
                 playerName: playerName,
-                opponentName: opponentName,
+                dateeName: dateeName,
                 currentTurn: currentTurn);
         }
 

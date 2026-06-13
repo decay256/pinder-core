@@ -2,7 +2,7 @@
 
 ## 1. Overview
 
-`ConversationRegistry` is the multi-session scheduler for Pinder.Core. It manages a collection of active conversations (each backed by a `GameSession`), determines when opponent replies arrive, advances the game clock to deliver them, and propagates cross-chat shadow events (ghost triggers, fizzle, interest decay, and shadow bleed). The registry **does not** make LLM calls or execute turns — it schedules time and applies side-effects; the host is responsible for calling `GameSession` methods to execute actual turns.
+`ConversationRegistry` is the multi-session scheduler for Pinder.Core. It manages a collection of active conversations (each backed by a `GameSession`), determines when datee replies arrive, advances the game clock to deliver them, and propagates cross-chat shadow events (ghost triggers, fizzle, interest decay, and shadow bleed). The registry **does not** make LLM calls or execute turns — it schedules time and applies side-effects; the host is responsible for calling `GameSession` methods to execute actual turns.
 
 This component lives in `Pinder.Core.Conversation` and depends on `IGameClock` (issue #54), `SessionShadowTracker` (issue #130 / Wave 0), and shadow growth mechanics (issue #44).
 
@@ -31,7 +31,7 @@ namespace Pinder.Core.Conversation
 
 - `Active` — conversation is ongoing; eligible for FastForward, decay, ghost, fizzle checks.
 - `Paused` — temporarily suspended; excluded from scheduling but retained in registry.
-- `Ghosted` — opponent ghosted (Interest ≤ 4 + 24h silence). Terminal state.
+- `Ghosted` — datee ghosted (Interest ≤ 4 + 24h silence). Terminal state.
 - `Fizzled` — conversation died naturally (Interest 5–9 + 24h silence). Terminal state.
 - `DateSecured` — player secured a date (Interest hit 25). Terminal state.
 - `Unmatched` — conversation ended at Interest 0. Terminal state.
@@ -84,8 +84,8 @@ namespace Pinder.Core.Conversation
 | Property | Type | Description |
 |---|---|---|
 | `Session` | `GameSession` | The game session this entry wraps. Set at construction, never null. |
-| `PendingReplyAt` | `DateTimeOffset?` | When the opponent's reply is expected. `null` means no pending reply (player's turn or idle). |
-| `LastInteractionAt` | `DateTimeOffset` | Timestamp of the most recent interaction (player or opponent). Used for silence duration calculations. Updated by `ScheduleOpponentReply` and by `FastForward` when a reply is delivered. |
+| `PendingReplyAt` | `DateTimeOffset?` | When the datee's reply is expected. `null` means no pending reply (player's turn or idle). |
+| `LastInteractionAt` | `DateTimeOffset` | Timestamp of the most recent interaction (player or datee). Used for silence duration calculations. Updated by `ScheduleDateeReply` and by `FastForward` when a reply is delivered. |
 | `Status` | `ConversationLifecycle` | Current lifecycle state. Mutable — changed by FastForward (ghost/fizzle) or by host. |
 
 **Constructor behavior:**
@@ -122,10 +122,10 @@ public sealed class ConversationRegistry
     /// <param name="entry">Must not be null. Must not already be registered (same Session reference).</param>
     public void Register(ConversationEntry entry);
 
-    /// <summary>Schedule when the opponent will reply to the given session.</summary>
+    /// <summary>Schedule when the datee will reply to the given session.</summary>
     /// <param name="session">Must be a registered session.</param>
     /// <param name="delayMinutes">Minutes from clock.Now until reply arrives. Must be > 0.</param>
-    public void ScheduleOpponentReply(GameSession session, double delayMinutes);
+    public void ScheduleDateeReply(GameSession session, double delayMinutes);
 
     /// <summary>
     /// Advance the clock to the next pending reply. Applies ghost, fizzle, and decay
@@ -252,7 +252,7 @@ This is a trivial addition that can be implemented alongside or before the regis
 ### AC-1: ConversationEntry is a sealed class, NOT a record
 `ConversationEntry` must be declared as `public sealed class` per netstandard2.0 / C# 8.0 constraint. It must have the properties `Session`, `PendingReplyAt`, `LastInteractionAt`, and `Status` as defined in §2.3.
 
-### AC-2: ConversationRegistry with ScheduleOpponentReply, FastForward, ApplyCrossChatEvent, ConsumeEnergy
+### AC-2: ConversationRegistry with ScheduleDateeReply, FastForward, ApplyCrossChatEvent, ConsumeEnergy
 All four methods must exist with the signatures defined in §3.1. Additionally `Register`, `GetByStatus`, `GetAllEntries`, and the `Entries` property must be present.
 
 ### AC-3: ConversationRegistry accepts IGameClock (not concrete GameClock)
@@ -292,7 +292,7 @@ Required test scenarios:
 - Fizzle: entry with Interest 5–9 and 24h+ silence becomes Fizzled, no shadow penalty
 - Interest decay: correct amount based on full days of silence
 - `FastForward` returns null when no pending replies exist
-- `ScheduleOpponentReply` sets correct `PendingReplyAt` and updates `LastInteractionAt`
+- `ScheduleDateeReply` sets correct `PendingReplyAt` and updates `LastInteractionAt`
 
 ### AC-12: Build clean
 Solution must compile with zero warnings under netstandard2.0 with nullable reference types enabled.
@@ -354,7 +354,7 @@ Solution must compile with zero warnings under netstandard2.0 with nullable refe
 | `ThreeDeadToday` | ALL active sessions | `ApplyGrowth(ShadowStatType.Dread, 3, "3 dead conversations today")` AND `ApplyGrowth(ShadowStatType.Madness, 1, "3 dead conversations today")` on each session's player tracker. |
 | `DoubleDateToday` | ALL active sessions | `ApplyGrowth(ShadowStatType.Overthinking, 2, "Double-booked dates")` on each session's player tracker. |
 
-### 6.3 ScheduleOpponentReply Behavior
+### 6.3 ScheduleDateeReply Behavior
 
 1. Find the `ConversationEntry` whose `Session` matches the given `session` parameter (reference equality).
 2. If not found, throw `InvalidOperationException("Session is not registered")`.
@@ -403,9 +403,9 @@ Implementation note: The registry either receives the shadow trackers at registr
 | Silence of 23h 59m 59s | < 24h → neither ghost nor fizzle triggers |
 | Decay with silence < 24h | `floor(TotalDays)` = 0 → no decay applied |
 | Decay reduces interest below ghost/fizzle threshold | Ghost/fizzle are checked BEFORE decay. If pre-decay interest is 10, it won't trigger fizzle even if post-decay interest is 8. |
-| `ScheduleOpponentReply` on unregistered session | Throws `InvalidOperationException` |
-| `ScheduleOpponentReply` with `delayMinutes = 0` | Throws `ArgumentOutOfRangeException` |
-| `ScheduleOpponentReply` with negative delay | Throws `ArgumentOutOfRangeException` |
+| `ScheduleDateeReply` on unregistered session | Throws `InvalidOperationException` |
+| `ScheduleDateeReply` with `delayMinutes = 0` | Throws `ArgumentOutOfRangeException` |
+| `ScheduleDateeReply` with negative delay | Throws `ArgumentOutOfRangeException` |
 | `Register` same session twice | Throws `InvalidOperationException` |
 | `Register` null entry | Throws `ArgumentNullException` |
 | Null `IGameClock` in constructor | Throws `ArgumentNullException` |
@@ -424,8 +424,8 @@ Implementation note: The registry either receives the shadow trackers at registr
 | Null clock in constructor | `ArgumentNullException` | `"clock"` | `new ConversationRegistry(null)` |
 | Null entry in Register | `ArgumentNullException` | `"entry"` | `Register(null)` |
 | Duplicate session in Register | `InvalidOperationException` | `"Session is already registered"` | `Register(entry)` where `entry.Session` is already in registry |
-| Unregistered session in ScheduleOpponentReply | `InvalidOperationException` | `"Session is not registered"` | `ScheduleOpponentReply(unknownSession, 5.0)` |
-| Non-positive delay | `ArgumentOutOfRangeException` | `"delayMinutes"` | `ScheduleOpponentReply(session, 0)` or negative value |
+| Unregistered session in ScheduleDateeReply | `InvalidOperationException` | `"Session is not registered"` | `ScheduleDateeReply(unknownSession, 5.0)` |
+| Non-positive delay | `ArgumentOutOfRangeException` | `"delayMinutes"` | `ScheduleDateeReply(session, 0)` or negative value |
 | Null session in ConversationEntry constructor | `ArgumentNullException` | `"session"` | `new ConversationEntry(null, ...)` |
 
 ---
@@ -449,7 +449,7 @@ This component depends on implementation from:
 - **#54** — `IGameClock` interface and `GameClock` implementation (provides `.Now`, `.AdvanceTo()`, `.ConsumeEnergy()`)
 - **#44** — Shadow growth mechanics (`SessionShadowTracker.ApplyGrowth()`)
 - **#130** — Wave 0 infrastructure (SessionShadowTracker creation)
-- **#53** — `OpponentTimingCalculator` (computes delay values passed to `ScheduleOpponentReply`)
+- **#53** — `DateeTimingCalculator` (computes delay values passed to `ScheduleDateeReply`)
 
 ---
 
@@ -462,7 +462,7 @@ The Sprint 8 architecture contract (`contracts/sprint-8-conversation-registry.md
 | String-based `ConversationId` on entry and `Add(string, GameSession)` | Not adopted — use reference-based `Register(ConversationEntry)` | The issue defines `ConversationEntry` without an ID field. IDs can be added later if needed. Reference equality is simpler for prototype maturity. |
 | `CrossChatEvent` as sealed class with Source/Target/Shadow fields | Not adopted — keep as enum | Issue defines 5 fixed event types with predetermined effects. Per-instance parameterization is not needed. |
 | Separate `CheckLifecycleEvents()` and `ApplyShadowBleed()` methods | Not adopted — lifecycle checks are integrated into `FastForward()` | The issue's `FastForward` definition explicitly includes ghost/fizzle/decay logic. Splitting would duplicate clock advancement logic. |
-| `Lifecycle` / `NextOpponentReplyAt` / `LastActivity` property names | Use issue names: `Status` / `PendingReplyAt` / `LastInteractionAt` | Consistency with issue definition and review-approved naming. |
+| `Lifecycle` / `NextDateeReplyAt` / `LastActivity` property names | Use issue names: `Status` / `PendingReplyAt` / `LastInteractionAt` | Consistency with issue definition and review-approved naming. |
 | Ghost at interest < 10, Fizzle at 48h | Use issue rules: Ghost at interest ≤ 4 + 24h, Fizzle at interest 5–9 + 24h | Issue and rules §async-time are authoritative for game mechanics. |
 
 Implementers should follow **this spec** (aligned with the issue) rather than the contract where they differ. The contract reflects an earlier architectural sketch; the issue and code review feedback are more recent.

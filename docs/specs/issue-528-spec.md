@@ -2,7 +2,7 @@
 
 ## Overview
 
-This feature adds a pre-game LLM-generated character analysis at the start of an automated playtest session. It leverages the Anthropic API in a zero-shot manner to analyze the player and opponent's stats, shadow traits, and bios alongside the matchup's DC table, providing a brief strategic summary of the matchup, best lanes, and shadow risks to give playtesters immediate strategic context.
+This feature adds a pre-game LLM-generated character analysis at the start of an automated playtest session. It leverages the Anthropic API in a zero-shot manner to analyze the player and datee's stats, shadow traits, and bios alongside the matchup's DC table, providing a brief strategic summary of the matchup, best lanes, and shadow risks to give playtesters immediate strategic context.
 
 ## Function Signatures
 
@@ -11,7 +11,7 @@ This feature adds a pre-game LLM-generated character analysis at the start of an
 public sealed class MatchupAnalyzer
 {
     public MatchupAnalyzer(AnthropicOptions options, HttpClient? httpClient = null);
-    public Task<string> AnalyzeAsync(CharacterProfile player, CharacterProfile opponent);
+    public Task<string> AnalyzeAsync(CharacterProfile player, CharacterProfile datee);
 }
 ```
 
@@ -41,7 +41,7 @@ Dread 6 (T1) means her wit options will carry melancholy undertones.
 In `session-runner/Program.cs`, the output of `MatchupAnalyzer.AnalyzeAsync` must be printed to the session log output after the Characters section, but before Turn 1 commences, under the header `## Matchup Analysis`. This call must happen exactly once per session.
 
 ### Covers: best lane, shadow risks, matchup prediction
-The system prompt passed to the LLM must explicitly ask for the characters' best lanes (factoring in the opponent's defense stats and DC table), their shadow state implications/risks, and a strategic prediction of the matchup. The DC table and both character profiles must be included in the LLM context.
+The system prompt passed to the LLM must explicitly ask for the characters' best lanes (factoring in the datee's defense stats and DC table), their shadow state implications/risks, and a strategic prediction of the matchup. The DC table and both character profiles must be included in the LLM context.
 
 ### ~3-4 sentences per character
 The system prompt must explicitly limit the response length to approximately 3 to 4 sentences per character, plus a short prediction block, to keep the analysis brief and readable (~100-150 tokens).
@@ -52,7 +52,7 @@ The solution must compile successfully without warnings, and all existing and ne
 ## Edge Cases
 
 - **Missing Bio or Fields**: If a `CharacterProfile` has an empty bio or missing archetype, the prompt should still format properly and the LLM should infer based on the raw stats.
-- **Identical Characters**: If the player and opponent are the same character build (e.g., mirror match), the analyzer should still provide valid tactical insights based on the stats vs defense.
+- **Identical Characters**: If the player and datee are the same character build (e.g., mirror match), the analyzer should still provide valid tactical insights based on the stats vs defense.
 
 ## Error Conditions
 

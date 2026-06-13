@@ -179,7 +179,7 @@ namespace Pinder.Core.Tests
             var session = BuildSession(
                 dice: new TestDice(diceValues.ToArray()),
                 playerStats: Stats(charm: 0),
-                opponentStats: Stats(sa: 0),
+                dateeStats: Stats(sa: 0),
                 shadows: shadows,
                 startingInterest: 15,
                 options: new[]

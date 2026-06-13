@@ -125,7 +125,7 @@ These keys describe **what happens** when a rule fires:
 | `stat_penalty_per_step` | `int` | Stat penalty amount | `-1` |
 | `level_bonus` | `int` | Level-derived roll bonus | `+3` |
 | `base_dc` | `int` | Base DC value in formula | `13` |
-| `addend` | `string` | Formula addend | `"opponent_stat_modifier"` |
+| `addend` | `string` | Formula addend | `"datee_stat_modifier"` |
 | `starting_interest` | `int` | Override starting interest | `5` |
 | `ghost_chance_percent` | `int` | Ghosting probability | `25` |
 | `duration_turns` | `int` | Duration of effect | `2` |

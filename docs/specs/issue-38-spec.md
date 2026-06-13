@@ -22,8 +22,8 @@ This issue is a dedicated QA pass across the entire Pinder.Core test suite (curr
 | `TrapTaintInjectionTests.cs` | 19 | JsonTrapRepository parsing, trap registration, error handling |
 | `TurnResultExpansionTests.cs` | 12 | TurnResult expanded fields (shadow, combo, XP, tell, weakness) |
 | `TurnResultExpansionSpecTests.cs` | 33 | TurnResult spec compliance, DialogueOption expanded fields |
-| `OpponentTimingCalculatorTests.cs` | 29 | Opponent reply delay calculation |
-| `OpponentResponseTests.cs` | 17 | OpponentResponse type, Tell, WeaknessWindow, CallbackOpportunity |
+| `DateeTimingCalculatorTests.cs` | 29 | Datee reply delay calculation |
+| `DateeResponseTests.cs` | 17 | DateeResponse type, Tell, WeaknessWindow, CallbackOpportunity |
 | `JsonTimingRepositoryTests.cs` | 6 | TimingProfile JSON loading |
 
 **Total**: 254 tests.
@@ -33,7 +33,7 @@ This issue is a dedicated QA pass across the entire Pinder.Core test suite (curr
 | Contract File | Key Clauses to Check |
 |---------------|---------------------|
 | `contracts/issue-26-llm-adapter.md` | `ILlmAdapter` 4 methods; `NullLlmAdapter` behavioural contract (4 options, distinct stats, non-null text, failure prefix, null narrative beat); context type immutability |
-| `contracts/issue-27-game-session.md` | `GameSession` constructor, `StartTurnAsync` sequence (end checks, ghost trigger, adv/disadv, pending options), `ResolveTurnAsync` sequence (validation, roll, interest delta, momentum, trap advance, deliver, opponent, history, turn increment); `FailureScale` deltas; `CharacterProfile` construction; `GameEndedException`; alternating call contract |
+| `contracts/issue-27-game-session.md` | `GameSession` constructor, `StartTurnAsync` sequence (end checks, ghost trigger, adv/disadv, pending options), `ResolveTurnAsync` sequence (validation, roll, interest delta, momentum, trap advance, deliver, datee, history, turn increment); `FailureScale` deltas; `CharacterProfile` construction; `GameEndedException`; alternating call contract |
 | `contracts/issue-6-interest-state.md` | `InterestState` enum (6 values), `GetState()` boundaries, `GrantsAdvantage`/`GrantsDisadvantage` logic, exhaustive non-overlapping ranges |
 | `contracts/issue-7-rules-constants-tests.md` | Every rules-v3.4 numeric constant has a corresponding assertion |
 | `contracts/sprint-7-qa-review.md` | Meta-contract defining QA scope and deliverables |
@@ -52,7 +52,7 @@ This issue is a dedicated QA pass across the entire Pinder.Core test suite (curr
 | `src/Pinder.Core/Conversation/GameSession.cs` | Session orchestrator: `StartTurnAsync()`, `ResolveTurnAsync()`, momentum, ghost trigger |
 | `src/Pinder.Core/Conversation/NullLlmAdapter.cs` | Test-only `ILlmAdapter` implementation |
 | `src/Pinder.Core/Conversation/TurnResult.cs` | Extended with shadow events, combo, XP, tell, weakness fields |
-| `src/Pinder.Core/Conversation/OpponentTimingCalculator.cs` | Static `ComputeDelayMinutes()` |
+| `src/Pinder.Core/Conversation/DateeTimingCalculator.cs` | Static `ComputeDelayMinutes()` |
 | `src/Pinder.Core/Interfaces/IRollDataProvider.cs` | `IDiceRoller`, `IFailurePool`, `ITrapRegistry` interfaces |
 | `src/Pinder.Core/Interfaces/ILlmAdapter.cs` | LLM adapter interface (4 async methods) |
 
@@ -76,7 +76,7 @@ There are no new public production functions introduced by this issue. The work 
 
 #### 2.2.1 GameSession: Full 3-Turn Successful Conversation
 
-**What to verify**: A `GameSession` with `NullLlmAdapter` and a `FixedDice` producing high rolls runs 3 turns. After 3 turns: interest has risen above `InterestMeter.StartingValue` (10), `TurnNumber` is 3, `DeliveredMessage` and `OpponentMessage` are populated each turn.
+**What to verify**: A `GameSession` with `NullLlmAdapter` and a `FixedDice` producing high rolls runs 3 turns. After 3 turns: interest has risen above `InterestMeter.StartingValue` (10), `TurnNumber` is 3, `DeliveredMessage` and `DateeMessage` are populated each turn.
 
 **Existing coverage**: `GameSessionTests.ThreeTurnSession_HighRolls_SuccessfulTurns` — verify it asserts interest change AND turn count. If history length is accessible via `GameStateSnapshot`, assert that too.
 
@@ -195,7 +195,7 @@ Per rules §5:
 - `GetDialogueOptionsAsync`: returns exactly 4 options, each with a distinct `StatType` from {Charm, Honesty, Wit, Chaos}, each with non-null non-empty `IntendedText`
 - `DeliverMessageAsync` success: returns `IntendedText` verbatim
 - `DeliverMessageAsync` failure: returns string prefixed with `[{FailureTier}] `
-- `GetOpponentResponseAsync`: returns non-null, non-empty string
+- `GetDateeResponseAsync`: returns non-null, non-empty string
 - `GetInterestChangeBeatAsync`: returns null
 
 **Existing coverage**: `LlmAdapterTests` covers all of the above. Already adequate.
@@ -304,7 +304,7 @@ Read contracts in `contracts/` and verify every contract clause has at least one
 
 ### AC-2: Happy Path — GameSession 3-Turn Conversation
 
-Verify `GameSessionTests.ThreeTurnSession_HighRolls_SuccessfulTurns` asserts: (a) interest rose above starting value, (b) turn number is 3, (c) `DeliveredMessage` and `OpponentMessage` are non-null each turn. Add missing assertions if needed.
+Verify `GameSessionTests.ThreeTurnSession_HighRolls_SuccessfulTurns` asserts: (a) interest rose above starting value, (b) turn number is 3, (c) `DeliveredMessage` and `DateeMessage` are non-null each turn. Add missing assertions if needed.
 
 ### AC-3: Happy Path — RollEngine Success Margins
 

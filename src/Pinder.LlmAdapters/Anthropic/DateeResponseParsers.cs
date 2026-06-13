@@ -7,11 +7,11 @@ using Pinder.Core.Stats;
 namespace Pinder.LlmAdapters.Anthropic
 {
     /// <summary>
-    /// Contains logic for parsing Anthropic LLM responses into OpponentResponse DTOs,
+    /// Contains logic for parsing Anthropic LLM responses into DateeResponse DTOs,
     /// including the main message and embedded signals like Tell and WeaknessWindow,
     /// from both raw text and structured tool_use JSON.
     /// </summary>
-    internal static class OpponentResponseParsers
+    internal static class DateeResponseParsers
     {
         private static readonly Regex TellSignalRegex = new Regex(
             @"TELL:\s*(\w+)\s*\(([^)]+)\)",
@@ -66,13 +66,13 @@ namespace Pinder.LlmAdapters.Anthropic
 
         /// <summary>
         /// Parses structured LLM text output with optional [SIGNALS] blocks.
-        /// Never throws — returns OpponentResponse with null signals on parse failure.
+        /// Never throws — returns DateeResponse with null signals on parse failure.
         /// </summary>
-        public static OpponentResponse ParseOpponentResponseText(string? llmResponse)
+        public static DateeResponse ParseDateeResponseText(string? llmResponse)
         {
             if (string.IsNullOrWhiteSpace(llmResponse))
             {
-                return new OpponentResponse("", null, null);
+                return new DateeResponse("", null, null);
             }
 
             var response = llmResponse!;
@@ -168,17 +168,17 @@ namespace Pinder.LlmAdapters.Anthropic
             catch
             {
                 // Any unexpected error — return empty response
-                return new OpponentResponse(response.Trim(), null, null);
+                return new DateeResponse(response.Trim(), null, null);
             }
 
-            return new OpponentResponse(messageText, tell, weakness);
+            return new DateeResponse(messageText, tell, weakness);
         }
 
         /// <summary>
-        /// Parses opponent response from a tool_use JSON input.
+        /// Parses datee response from a tool_use JSON input.
         /// Returns null if the input is malformed (caller should fall back to text parsing).
         /// </summary>
-        public static OpponentResponse? ParseOpponentResponseTool(JObject toolInput)
+        public static DateeResponse? ParseDateeResponseTool(JObject toolInput)
         {
             try
             {
@@ -226,7 +226,7 @@ namespace Pinder.LlmAdapters.Anthropic
                     }
                 }
 
-                return new OpponentResponse(message, tell, weakness);
+                return new DateeResponse(message, tell, weakness);
             }
             catch
             {

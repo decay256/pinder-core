@@ -16,14 +16,14 @@ partial class Program
         ref IItemRepository? itemRepo,
         ref IAnatomyRepository? anatomyRepo)
     {
-        // Explicit --player-def / --opponent-def takes priority.
+        // Explicit --player-def / --datee-def takes priority.
         if (defPath != null)
         {
             EnsureReposLoaded(ref itemRepo, ref anatomyRepo);
             return CharacterDefinitionLoader.Load(defPath, itemRepo!, anatomyRepo!);
         }
 
-        // --player / --opponent name: resolve through DirectoryCharacterStore
+        // --player / --datee name: resolve through DirectoryCharacterStore
         // exclusively. #840 removed the prompt-file fallback; failure to find
         // data/characters/{slug}.json is a user-facing error rather than a
         // silent reach-for-stale-text-files.

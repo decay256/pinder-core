@@ -17,8 +17,8 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void AC4_InterestNarrative_Band0_Unmatched()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(interestBefore: 1, interestAfter: 0));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(interestBefore: 1, interestAfter: 0));
             Assert.Contains("Unmatched", result);
         }
 
@@ -26,8 +26,8 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void AC4_InterestNarrative_Band1_LowerBoundary()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(interestAfter: 1));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(interestAfter: 1));
             Assert.Contains("Reconsidering", result);
         }
 
@@ -35,8 +35,8 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void AC4_InterestNarrative_Band4_UpperBoundary()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(interestAfter: 4));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(interestAfter: 4));
             Assert.Contains("Reconsidering", result);
         }
 
@@ -44,8 +44,8 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void AC4_InterestNarrative_Band5_LowerBoundary()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(interestAfter: 5));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(interestAfter: 5));
             Assert.Contains("Skeptical", result);
         }
 
@@ -53,8 +53,8 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void AC4_InterestNarrative_Band9_UpperBoundary()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(interestAfter: 9));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(interestAfter: 9));
             Assert.Contains("Skeptical", result);
         }
 
@@ -62,8 +62,8 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void AC4_InterestNarrative_Band10_LowerBoundary()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(interestAfter: 10));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(interestAfter: 10));
             Assert.Contains("Engaged but not sold", result);
         }
 
@@ -71,8 +71,8 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void AC4_InterestNarrative_Band14_UpperBoundary()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(interestAfter: 14));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(interestAfter: 14));
             Assert.Contains("Engaged but not sold", result);
         }
 
@@ -80,8 +80,8 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void AC4_InterestNarrative_Band15_LowerBoundary()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(interestAfter: 15));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(interestAfter: 15));
             Assert.Contains("Interested but holding back", result);
         }
 
@@ -89,8 +89,8 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void AC4_InterestNarrative_Band20_UpperBoundary()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(interestAfter: 20));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(interestAfter: 20));
             Assert.Contains("Interested but holding back", result);
         }
 
@@ -98,8 +98,8 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void AC4_InterestNarrative_Band21_LowerBoundary()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(interestAfter: 21));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(interestAfter: 21));
             Assert.Contains("Basically sold", result);
         }
 
@@ -107,8 +107,8 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void AC4_InterestNarrative_Band24_UpperBoundary()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(interestAfter: 24));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(interestAfter: 24));
             Assert.Contains("Basically sold", result);
         }
 
@@ -116,8 +116,8 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void AC4_InterestNarrative_Band25_DateSecured()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(interestAfter: 25));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(interestAfter: 25));
             Assert.Contains("resistance dissolved", result);
         }
 
@@ -129,8 +129,8 @@ namespace Pinder.LlmAdapters.Tests
             int[] representatives = { 0, 2, 7, 12, 18, 22, 25 };
             foreach (int i in representatives)
             {
-                var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                    MakeOpponentContext(interestBefore: i, interestAfter: i));
+                var result = SessionDocumentBuilder.BuildDateePrompt(
+                    MakeDateeContext(interestBefore: i, interestAfter: i));
                 // Extract the narrative portion - each should be unique
                 narratives.Add(result);
             }

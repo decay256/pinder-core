@@ -157,7 +157,7 @@ dramatic_craft:
     - TENSION: something is at stake; they're unsure how the next message lands.
     - PAYOFF: win or loss lands with weight. DateSecured feels earned; Unmatched stings.
       Neither should feel like a probability resolving.
-  opponent_want: |
+  datee_want: |
     The DATEE actively wants something, by interest band:
     - 10-14: find out if anything real is here or it's another performance. Questions are
       tests, humor is a filter — efficient, not hostile.
@@ -195,7 +195,7 @@ dramatic_craft:
     DATEE probes, repeat), the pattern itself becomes the content — break it. The DATEE
     changes register: warmer, weirder, quieter, tells something about themselves, or remarks
     on the conversation itself. Structural repetition kills dramatic tension.
-opponent_role_description: |
+datee_role_description: |
   The DATEE is another PLAYER's character puppeted by the LLM; their personality prompt is
   the character bible — everything they say stays consistent with their assembled identity
   (stats, items, anatomy, texting style).
@@ -213,12 +213,12 @@ opponent_role_description: |
   messages land awkwardly (proportional to tier); shadow taint shifts the PLAYER's tone in
   ways they notice but can't name; traps create disruptions they respond to naturally. Their
   texting style stays distinct from the PLAYER's at all times — the two never sound alike.
-opponent_friction: |
+datee_friction: |
   The DATEE's resistance is self-protection, not hostility — they're evaluating whether this
   person is worth the risk of being seen. Low interest: answer without giving. Mid: give but
   stay slightly ahead. High: closest to yes, and most careful. Friction, not a wall — the
   PLAYER should feel they're earning something, not grinding a meter.
-opponent_curiosity: |
+datee_curiosity: |
   A warming character wants to know the other person — genuine curiosity, not interrogation.
   At Interest 10-15, ask at least one real question per exchange; at 16+, actively probe for
   who's underneath the performance.
@@ -288,7 +288,7 @@ steering_prompt: |
   You are writing as {player_name} on Pinder — a satirical comedy dating app for sentient penises.
   The character just sent: "{delivered_message}"
 
-  Based specifically on what {opponent_name} has revealed in the conversation above, write ONE question to append to this message. The question must:
+  Based specifically on what {datee_name} has revealed in the conversation above, write ONE question to append to this message. The question must:
   1. Reference something specific the DATEE actually said or revealed. If no conversation has happened yet and only their bio or profile is visible, ask a question about something specific in their bio or items — not a generic question.
   2. Gently nudge toward meeting up or closing a date (this is a dating app; connection is the goal)
   3. Be slightly too specific or too eager in a charming, slightly unhinged way — we want comedy

@@ -18,15 +18,15 @@ namespace Pinder.Core.Tests
         public async Task TellBonus_LowersNeedBy2()
         {
             var playerStats = MakeStats(honesty: 3);
-            var opponentStats = MakeStats(chaos: 2); // Honesty→Chaos, DC = 13+2=15
+            var dateeStats = MakeStats(chaos: 2); // Honesty→Chaos, DC = 13+2=15
 
             // Without tell: need = 15 - 3 = 12, chance = 9/20 = 0.45
             // With tell: need = 15 - (3+2) = 10, chance = 11/20 = 0.55
             var withTell = new DialogueOption(StatType.Honesty, "tell", hasTellBonus: true);
             var withoutTell = new DialogueOption(StatType.Honesty, "plain");
 
-            var resultTell = await _agent.DecideAsync(MakeTurn(withTell), MakeContext(playerStats: playerStats, opponentStats: opponentStats));
-            var resultPlain = await _agent.DecideAsync(MakeTurn(withoutTell), MakeContext(playerStats: playerStats, opponentStats: opponentStats));
+            var resultTell = await _agent.DecideAsync(MakeTurn(withTell), MakeContext(playerStats: playerStats, dateeStats: dateeStats));
+            var resultPlain = await _agent.DecideAsync(MakeTurn(withoutTell), MakeContext(playerStats: playerStats, dateeStats: dateeStats));
 
             Assert.True(resultTell.Scores[0].SuccessChance > resultPlain.Scores[0].SuccessChance,
                 $"Tell should increase success chance: {resultTell.Scores[0].SuccessChance} > {resultPlain.Scores[0].SuccessChance}");
@@ -40,13 +40,13 @@ namespace Pinder.Core.Tests
         public async Task ComboBonus_IncreasesExpectedGainOnSuccess()
         {
             var playerStats = MakeStats(charm: 3);
-            var opponentStats = MakeStats();
+            var dateeStats = MakeStats();
 
             var withCombo = new DialogueOption(StatType.Charm, "combo", comboName: "The Switcheroo");
             var withoutCombo = new DialogueOption(StatType.Charm, "plain");
 
-            var resultCombo = await _agent.DecideAsync(MakeTurn(withCombo), MakeContext(playerStats: playerStats, opponentStats: opponentStats));
-            var resultPlain = await _agent.DecideAsync(MakeTurn(withoutCombo), MakeContext(playerStats: playerStats, opponentStats: opponentStats));
+            var resultCombo = await _agent.DecideAsync(MakeTurn(withCombo), MakeContext(playerStats: playerStats, dateeStats: dateeStats));
+            var resultPlain = await _agent.DecideAsync(MakeTurn(withoutCombo), MakeContext(playerStats: playerStats, dateeStats: dateeStats));
 
             // Combo adds +1 interest on success → higher EV
             Assert.True(resultCombo.Scores[0].ExpectedInterestGain > resultPlain.Scores[0].ExpectedInterestGain,
@@ -58,7 +58,7 @@ namespace Pinder.Core.Tests
         public async Task CallbackBonus_LowersNeed()
         {
             var playerStats = MakeStats(charm: 3);
-            var opponentStats = MakeStats();
+            var dateeStats = MakeStats();
 
             // CallbackBonus.Compute(5, 2) should return 1 (gap of 3, ≥ 2)
             var withCallback = new DialogueOption(StatType.Charm, "callback", callbackTurnNumber: 2);
@@ -66,10 +66,10 @@ namespace Pinder.Core.Tests
 
             var resultCallback = await _agent.DecideAsync(
                 MakeTurn(withCallback),
-                MakeContext(playerStats: playerStats, opponentStats: opponentStats, turnNumber: 5));
+                MakeContext(playerStats: playerStats, dateeStats: dateeStats, turnNumber: 5));
             var resultPlain = await _agent.DecideAsync(
                 MakeTurn(withoutCallback),
-                MakeContext(playerStats: playerStats, opponentStats: opponentStats, turnNumber: 5));
+                MakeContext(playerStats: playerStats, dateeStats: dateeStats, turnNumber: 5));
 
             Assert.True(resultCallback.Scores[0].SuccessChance > resultPlain.Scores[0].SuccessChance,
                 $"Callback should increase success chance: {resultCallback.Scores[0].SuccessChance} > {resultPlain.Scores[0].SuccessChance}");
@@ -81,7 +81,7 @@ namespace Pinder.Core.Tests
         {
             // Strong Charm vs weak Rizz — no adjustments
             var playerStats = MakeStats(charm: 6, rizz: 0);
-            var opponentStats = MakeStats(); // all 0, DC=13 for all
+            var dateeStats = MakeStats(); // all 0, DC=13 for all
 
             var options = new[]
             {
@@ -89,7 +89,7 @@ namespace Pinder.Core.Tests
                 new DialogueOption(StatType.Rizz, "weak")      // need=13, ~40%
             };
             var turn = MakeTurn(options);
-            var ctx = MakeContext(playerStats: playerStats, opponentStats: opponentStats);
+            var ctx = MakeContext(playerStats: playerStats, dateeStats: dateeStats);
             var result = await _agent.DecideAsync(turn, ctx);
 
             Assert.Equal(0, result.OptionIndex);
@@ -127,7 +127,7 @@ namespace Pinder.Core.Tests
             // Two identical options → identical scores → first wins
             var playerStats = MakeStats(charm: 3, rizz: 3);
             // Need same defence for both: Charm→SA, Rizz→Wit
-            var opponentStats = MakeStats(selfAwareness: 0, wit: 0);
+            var dateeStats = MakeStats(selfAwareness: 0, wit: 0);
 
             var options = new[]
             {
@@ -135,7 +135,7 @@ namespace Pinder.Core.Tests
                 new DialogueOption(StatType.Rizz, "b")
             };
             var turn = MakeTurn(options);
-            var ctx = MakeContext(playerStats: playerStats, opponentStats: opponentStats);
+            var ctx = MakeContext(playerStats: playerStats, dateeStats: dateeStats);
             var result = await _agent.DecideAsync(turn, ctx);
 
             // Both have identical stats/defences → tied → pick index 0
@@ -147,10 +147,10 @@ namespace Pinder.Core.Tests
         public async Task VeryHighDc_SuccessChanceClampedTo0()
         {
             var playerStats = MakeStats(charm: 0);
-            var opponentStats = MakeStats(selfAwareness: 10); // DC = 16 + 10 = 23, need = 23
+            var dateeStats = MakeStats(selfAwareness: 10); // DC = 16 + 10 = 23, need = 23
 
             var turn = MakeTurn(new DialogueOption(StatType.Charm, "impossible"));
-            var ctx = MakeContext(playerStats: playerStats, opponentStats: opponentStats);
+            var ctx = MakeContext(playerStats: playerStats, dateeStats: dateeStats);
             var result = await _agent.DecideAsync(turn, ctx);
 
             Assert.Equal(0.0f, result.Scores[0].SuccessChance);
@@ -161,10 +161,10 @@ namespace Pinder.Core.Tests
         public async Task VeryLowDc_SuccessChanceClampedTo1()
         {
             var playerStats = MakeStats(charm: 15);
-            var opponentStats = MakeStats(selfAwareness: 0); // DC = 13, need = 13 - 15 = -2
+            var dateeStats = MakeStats(selfAwareness: 0); // DC = 13, need = 13 - 15 = -2
 
             var turn = MakeTurn(new DialogueOption(StatType.Charm, "guaranteed"));
-            var ctx = MakeContext(playerStats: playerStats, opponentStats: opponentStats);
+            var ctx = MakeContext(playerStats: playerStats, dateeStats: dateeStats);
             var result = await _agent.DecideAsync(turn, ctx);
 
             Assert.Equal(1.0f, result.Scores[0].SuccessChance);
@@ -190,7 +190,7 @@ namespace Pinder.Core.Tests
         public async Task CallbackOpener_HighestBonus()
         {
             var playerStats = MakeStats(charm: 3);
-            var opponentStats = MakeStats();
+            var dateeStats = MakeStats();
 
             // Opener callback: callbackTurnNumber=0, currentTurn=5
             // CallbackBonus.Compute(5, 0) should return 3 (opener with gap >= 2)
@@ -199,10 +199,10 @@ namespace Pinder.Core.Tests
 
             var resultOpener = await _agent.DecideAsync(
                 MakeTurn(openerCallback),
-                MakeContext(playerStats: playerStats, opponentStats: opponentStats, turnNumber: 5));
+                MakeContext(playerStats: playerStats, dateeStats: dateeStats, turnNumber: 5));
             var resultNormal = await _agent.DecideAsync(
                 MakeTurn(normalCallback),
-                MakeContext(playerStats: playerStats, opponentStats: opponentStats, turnNumber: 5));
+                MakeContext(playerStats: playerStats, dateeStats: dateeStats, turnNumber: 5));
 
             Assert.True(resultOpener.Scores[0].SuccessChance > resultNormal.Scores[0].SuccessChance,
                 "Opener callback (+3) should give higher success than normal callback (+1)");
@@ -213,18 +213,18 @@ namespace Pinder.Core.Tests
         public async Task NearWin_Interest24_AppliesBias()
         {
             var playerStats = MakeStats(charm: 5);
-            var opponentStats = MakeStats();
+            var dateeStats = MakeStats();
 
             var turn = MakeTurn(new DialogueOption(StatType.Charm, "safe")); // Safe tier
 
             var ctxAt24 = MakeContext(
                 playerStats: playerStats,
-                opponentStats: opponentStats,
+                dateeStats: dateeStats,
                 currentInterest: 24,
                 interestState: InterestState.AlmostThere);
             var ctxAt12 = MakeContext(
                 playerStats: playerStats,
-                opponentStats: opponentStats,
+                dateeStats: dateeStats,
                 currentInterest: 12,
                 interestState: InterestState.Interested);
 
@@ -241,18 +241,18 @@ namespace Pinder.Core.Tests
         public async Task Interest5_IsLukewarm_NoBoredBias()
         {
             var playerStats = MakeStats(chaos: 0);
-            var opponentStats = MakeStats(charm: 3); // Chaos→Charm, DC=16+3=19 → Bold (need=19)
+            var dateeStats = MakeStats(charm: 3); // Chaos→Charm, DC=16+3=19 → Bold (need=19)
 
             var turn = MakeTurn(new DialogueOption(StatType.Chaos, "bold"));
 
             var ctxBored = MakeContext(
                 playerStats: playerStats,
-                opponentStats: opponentStats,
+                dateeStats: dateeStats,
                 currentInterest: 3,
                 interestState: InterestState.Bored);
             var ctxLukewarm = MakeContext(
                 playerStats: playerStats,
-                opponentStats: opponentStats,
+                dateeStats: dateeStats,
                 currentInterest: 5,
                 interestState: InterestState.Lukewarm);
 

@@ -86,7 +86,7 @@ def enrich_character_construction(entries: List[Dict[str, Any]]) -> List[Dict[st
             result.append(e)
             continue
 
-        elif eid == '§3.35-opponent-message-generation':
+        elif eid == '§3.35-datee-message-generation':
             for b in blocks:
                 if b.get('kind') == 'table':
                     for row in b.get('rows', []):
@@ -98,9 +98,9 @@ def enrich_character_construction(entries: List[Dict[str, Any]]) -> List[Dict[st
                         if m:
                             slug = f'{m.group(1)}-{m.group(2)}'
                             sub = {
-                                'id': f'§3.opponent-tone.{slug}',
+                                'id': f'§3.datee-tone.{slug}',
                                 'section': '§3',
-                                'title': f'Opponent Tone — Interest {interest}',
+                                'title': f'Datee Tone — Interest {interest}',
                                 'type': 'template',
                                 'description': f'Interest {interest}: {block_text}',
                                 'condition': {'interest_range': [int(m.group(1)), int(m.group(2))]},

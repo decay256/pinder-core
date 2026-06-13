@@ -303,15 +303,15 @@ namespace Pinder.Core.Tests
             Assert.Throws<ArgumentNullException>(() => new SessionShadowTracker(null!));
         }
 
-        // ── Error Condition: PlayerShadows without OpponentShadows is valid ──
+        // ── Error Condition: PlayerShadows without DateeShadows is valid ──
 
         // Mutation: would catch if GameSession required both shadows or null
         [Fact]
-        public async Task ErrorCondition_PlayerShadowsOnly_NoOpponentShadows_IsValid()
+        public async Task ErrorCondition_PlayerShadowsOnly_NoDateeShadows_IsValid()
         {
             var stats = BuildStatBlock();
             var shadows = new SessionShadowTracker(stats);
-            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: shadows); // no opponentShadows
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: shadows); // no dateeShadows
 
             var session = BuildSession(stats, config, diceRolls: new[] { 5, 15, 50 });
 
@@ -356,12 +356,12 @@ namespace Pinder.Core.Tests
             GameSessionConfig? config,
             int[] diceRolls)
         {
-            var opponentStats = BuildStatBlock();
+            var dateeStats = BuildStatBlock();
             // Clock is required; if config has no clock, provide a default.
             config = config ?? new GameSessionConfig(clock: TestHelpers.MakeClock());
             return new GameSession(
                 BuildProfile("player", playerStats),
-                BuildProfile("opponent", opponentStats),
+                BuildProfile("datee", dateeStats),
                 new NullLlmAdapter(),
                 new SequenceDice(diceRolls),
                 new EmptyTrapRegistry(),

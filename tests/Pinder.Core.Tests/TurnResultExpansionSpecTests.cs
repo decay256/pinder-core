@@ -147,11 +147,11 @@ namespace Pinder.Core.Tests
         {
             var roll = MakeRoll();
             var snap = MakeSnapshot();
-            var result = new TurnResult(roll, "delivered", "opponent", "beat", 5, snap, true, GameOutcome.DateSecured);
+            var result = new TurnResult(roll, "delivered", "datee", "beat", 5, snap, true, GameOutcome.DateSecured);
 
             Assert.Same(roll, result.Roll);
             Assert.Equal("delivered", result.DeliveredMessage);
-            Assert.Equal("opponent", result.OpponentMessage);
+            Assert.Equal("datee", result.DateeMessage);
             Assert.Equal("beat", result.NarrativeBeat);
             Assert.Equal(5, result.InterestDelta);
             Assert.Same(snap, result.StateAfter);
@@ -294,7 +294,7 @@ namespace Pinder.Core.Tests
             // Existing fields should be exactly as passed
             Assert.Same(roll, result.Roll);
             Assert.Equal("msg", result.DeliveredMessage);
-            Assert.Equal("reply", result.OpponentMessage);
+            Assert.Equal("reply", result.DateeMessage);
             Assert.Null(result.NarrativeBeat);
             Assert.Equal(-3, result.InterestDelta);
             Assert.Same(snap, result.StateAfter);
@@ -343,14 +343,14 @@ namespace Pinder.Core.Tests
             Assert.Equal("deliveredMessage", ex.ParamName);
         }
 
-        // What: Error — null opponentMessage throws ArgumentNullException (§6)
+        // What: Error — null dateeMessage throws ArgumentNullException (§6)
         // Mutation: would catch if null check was removed
         [Fact]
-        public void Error_NullOpponentMessage_ThrowsArgumentNullException()
+        public void Error_NullDateeMessage_ThrowsArgumentNullException()
         {
             var ex = Assert.Throws<ArgumentNullException>(() =>
                 new TurnResult(MakeRoll(), "a", null!, null, 0, MakeSnapshot(), false, null));
-            Assert.Equal("opponentMessage", ex.ParamName);
+            Assert.Equal("dateeMessage", ex.ParamName);
         }
 
         // What: Error — null stateAfter throws ArgumentNullException (§6)

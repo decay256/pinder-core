@@ -35,8 +35,8 @@ namespace Pinder.LlmAdapters
         /// <summary>Per-method temperature override for DeliverMessageAsync.</summary>
         public double? DeliveryTemperature { get; set; }
 
-        /// <summary>Per-method temperature override for GetOpponentResponseAsync.</summary>
-        public double? OpponentResponseTemperature { get; set; }
+        /// <summary>Per-method temperature override for GetDateeResponseAsync.</summary>
+        public double? DateeResponseTemperature { get; set; }
 
         /// <summary>
         /// Optional Groq API key for routing horniness overlay calls to Groq.

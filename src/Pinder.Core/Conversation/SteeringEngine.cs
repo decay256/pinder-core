@@ -42,13 +42,13 @@ namespace Pinder.Core.Conversation
         /// <summary>
         /// Attempts a steering roll after message delivery.
         /// Steering modifier = average of (CHARM + WIT + SA) effective modifiers (integer division).
-        /// Steering DC = 16 + average of opponent's (SA + RIZZ + HONESTY) effective modifiers.
+        /// Steering DC = 16 + average of datee's (SA + RIZZ + HONESTY) effective modifiers.
         /// On success, calls LLM to generate a steering question.
         /// </summary>
         public async Task<SteeringRollResult> AttemptSteeringRollAsync(
             string deliveredMessage,
             CharacterProfile player,
-            CharacterProfile opponent,
+            CharacterProfile datee,
             ILlmAdapter llm,
             IReadOnlyList<(string Sender, string Text)> history,
             CancellationToken ct = default)
@@ -60,11 +60,11 @@ namespace Pinder.Core.Conversation
             int playerSA = player.Stats.GetEffective(StatType.SelfAwareness);
             int steeringMod = (playerCharm + playerWit + playerSA) / 3;
 
-            // Compute steering DC: 16 + (opponentSA + opponentRizz + opponentHonesty) / 3
-            int opponentSA = opponent.Stats.GetEffective(StatType.SelfAwareness);
-            int opponentRizz = opponent.Stats.GetEffective(StatType.Rizz);
-            int opponentHonesty = opponent.Stats.GetEffective(StatType.Honesty);
-            int steeringDC = 16 + (opponentSA + opponentRizz + opponentHonesty) / 3;
+            // Compute steering DC: 16 + (dateeSA + dateeRizz + dateeHonesty) / 3
+            int dateeSA = datee.Stats.GetEffective(StatType.SelfAwareness);
+            int dateeRizz = datee.Stats.GetEffective(StatType.Rizz);
+            int dateeHonesty = datee.Stats.GetEffective(StatType.Honesty);
+            int steeringDC = 16 + (dateeSA + dateeRizz + dateeHonesty) / 3;
 
             // #901: route through single entry point.
             // Modifier bag: one named entry for the composite steering modifier.
@@ -85,7 +85,7 @@ namespace Pinder.Core.Conversation
             {
                 var steeringContext = new SteeringContext(
                     playerPrompt: player.AssembledSystemPrompt,
-                    opponentName: opponent.DisplayName,
+                    dateeName: datee.DisplayName,
                     playerName: player.DisplayName,
                     deliveredMessage: deliveredMessage,
                     conversationHistory: history);

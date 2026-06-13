@@ -133,7 +133,7 @@ class TestRiskRewardValues:
 
     def test_tells(self):
         entries = _load('risk-reward-and-hidden-depth-enriched.yaml')
-        e = _find(entries, '§7.opponent-tells-post-roll-feedback')
+        e = _find(entries, '§7.datee-tells-post-roll-feedback')
         assert e is not None
         assert e['outcome']['roll_bonus'] == 2
 

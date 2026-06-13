@@ -145,7 +145,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task InterestProgression_ThreeSuccessfulTurns_ReachesVeryIntoIt()
         {
-            // Player allStats=9, opponent allStats=0, DC=16. Roll 8: total=17, beat by 1 → +1 success + Safe(+1).
+            // Player allStats=9, datee allStats=0, DC=16. Roll 8: total=17, beat by 1 → +1 success + Safe(+1).
             // Momentum is a roll bonus (#268), not interest delta. Streak < 3 at start of each turn → no momentum bonus.
             // Turn 1: +2 → 12, Turn 2: +2 → 14, Turn 3: +2 → 16 (VeryIntoIt)
             var dice = new FixedDice(

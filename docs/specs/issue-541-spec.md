@@ -106,7 +106,7 @@ public bool HasActiveConversation { get; }
 - `ContentBlock` (`Pinder.LlmAdapters.Anthropic.Dto`) — system block with optional `CacheControl`.
 - `Message` (`Pinder.LlmAdapters.Anthropic.Dto`) — `{ Role: string, Content: string }`.
 - `MessagesRequest` (`Pinder.LlmAdapters.Anthropic.Dto`) — `{ Model, MaxTokens, Temperature, System: ContentBlock[], Messages: Message[] }`.
-- `ILlmAdapter` (`Pinder.Core.Interfaces`) — `GetDialogueOptionsAsync`, `DeliverMessageAsync`, `GetOpponentResponseAsync`, `GetInterestChangeBeatAsync`.
+- `ILlmAdapter` (`Pinder.Core.Interfaces`) — `GetDialogueOptionsAsync`, `DeliverMessageAsync`, `GetDateeResponseAsync`, `GetInterestChangeBeatAsync`.
 
 ## Input/Output Examples
 
@@ -310,8 +310,8 @@ When `HasActiveConversation` is `false`, each `ILlmAdapter` method must execute 
 ### Internal (Pinder.Core)
 
 - `ILlmAdapter` — interface that `AnthropicLlmAdapter` implements. NOT modified.
-- `DialogueContext`, `DeliveryContext`, `OpponentContext`, `InterestChangeContext` — context DTOs passed to each `ILlmAdapter` method.
-- `DialogueOption`, `OpponentResponse` — return types from adapter methods.
+- `DialogueContext`, `DeliveryContext`, `DateeContext`, `InterestChangeContext` — context DTOs passed to each `ILlmAdapter` method.
+- `DialogueOption`, `DateeResponse` — return types from adapter methods.
 
 ### External
 

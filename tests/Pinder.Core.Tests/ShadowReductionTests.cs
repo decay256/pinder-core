@@ -82,7 +82,7 @@ namespace Pinder.Core.Tests
             var session = BuildSession(
                 dice: Dice(2, 50),
                 playerStats: Stats(charm: 0),
-                opponentStats: Stats(sa: 0),
+                dateeStats: Stats(sa: 0),
                 shadows: shadows,
                 startingInterest: 1);
 
@@ -137,7 +137,7 @@ namespace Pinder.Core.Tests
             var session = BuildSession(
                 dice: Dice(14, 50), // roll 14 + honesty 5 = 19 vs DC 17 → beats by 2 → scale=+1
                 playerStats: Stats(honesty: 5),
-                opponentStats: Stats(chaos: 1), // defence for Honesty is Chaos → DC = 16 + 1 = 17
+                dateeStats: Stats(chaos: 1), // defence for Honesty is Chaos → DC = 16 + 1 = 17
                 shadows: shadows,
                 startingInterest: 10, // after +4 = 14 < 15
                 options: new[] { new DialogueOption(StatType.Honesty, "truth") });

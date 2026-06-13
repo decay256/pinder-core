@@ -24,7 +24,7 @@ namespace Pinder.Core.Conversation
     public sealed partial class GameSession
     {
         private readonly CharacterProfile _player;
-        private readonly CharacterProfile _opponent;
+        private readonly CharacterProfile _datee;
         private readonly ILlmAdapter _llm;
         private readonly IDiceRoller _dice;
         private readonly ITrapRegistry _trapRegistry;
@@ -37,22 +37,22 @@ namespace Pinder.Core.Conversation
 
         // #562: outfit / scene description set by SeedSceneEntries so the
         // dialogue-options call site can surface it to the player as part
-        // of the opponent's visible-profile (Tinder-card-equivalent)
+        // of the datee's visible-profile (Tinder-card-equivalent)
         // payload, replacing the raw equipped-items list. Empty when no
         // describer was wired or the call failed; renderer then falls
         // back to the items list.
-        private string _opponentOutfitDescription { get => _state.OpponentOutfitDescription; set => _state.OpponentOutfitDescription = value; }
+        private string _dateeOutfitDescription { get => _state.DateeOutfitDescription; set => _state.DateeOutfitDescription = value; }
 
-        // #788: opponent LLM conversation history lives here, not in the adapter.
+        // #788: datee LLM conversation history lives here, not in the adapter.
         // The adapter is pure-stateless across calls; the engine passes this list
-        // in on every opponent call and appends the new entries returned by the
-        // adapter. Survives snapshot/restore via ResimulateData.OpponentHistory.
-        private List<ConversationMessage> _opponentHistory { get => _state.OpponentHistory; set => _state.OpponentHistory = value; }
+        // in on every datee call and appends the new entries returned by the
+        // adapter. Survives snapshot/restore via ResimulateData.DateeHistory.
+        private List<ConversationMessage> _dateeHistory { get => _state.DateeHistory; set => _state.DateeHistory = value; }
 
         // Sprint 8 Wave 0: optional config fields
         private readonly IGameClock? _clock;
         private SessionShadowTracker? _playerShadows { get => _state.PlayerShadows; set => _state.PlayerShadows = value; }
-        private SessionShadowTracker? _opponentShadows { get => _state.OpponentShadows; set => _state.OpponentShadows = value; }
+        private SessionShadowTracker? _dateeShadows { get => _state.DateeShadows; set => _state.DateeShadows = value; }
 
         // Combo tracking (#46)
         private ComboTracker _comboTracker { get => _state.ComboTracker; set => _state.ComboTracker = value; }
@@ -76,10 +76,10 @@ namespace Pinder.Core.Conversation
         private readonly IRuleResolver? _rules;
         private readonly int _globalDcBias;
 
-        // Weakness window from opponent's last response (#49)
+        // Weakness window from datee's last response (#49)
         private WeaknessWindow? _activeWeakness { get => _state.ActiveWeakness; set => _state.ActiveWeakness = value; }
 
-        // Tell from opponent's last response (#50)
+        // Tell from datee's last response (#50)
         private Tell? _activeTell { get => _state.ActiveTell; set => _state.ActiveTell = value; }
 
         // Horniness session roll (#45)
@@ -142,7 +142,7 @@ namespace Pinder.Core.Conversation
         /// </summary>
         public GameSession(
             CharacterProfile player,
-            CharacterProfile opponent,
+            CharacterProfile datee,
             ILlmAdapter llm,
             IDiceRoller dice,
             ITrapRegistry trapRegistry,
@@ -151,7 +151,7 @@ namespace Pinder.Core.Conversation
             _state = new GameSessionState();
 
             _player = player ?? throw new ArgumentNullException(nameof(player));
-            _opponent = opponent ?? throw new ArgumentNullException(nameof(opponent));
+            _datee = datee ?? throw new ArgumentNullException(nameof(datee));
             _llm = llm ?? throw new ArgumentNullException(nameof(llm));
             _dice = dice ?? throw new ArgumentNullException(nameof(dice));
             _trapRegistry = trapRegistry ?? throw new ArgumentNullException(nameof(trapRegistry));
@@ -162,7 +162,7 @@ namespace Pinder.Core.Conversation
             // Store config fields early (needed by ResolveThresholdLevel below)
             _clock = config.Clock;
             _playerShadows = config.PlayerShadows;
-            _opponentShadows = config.OpponentShadows;
+            _dateeShadows = config.DateeShadows;
             _rules = config.Rules;
             _globalDcBias = config.GlobalDcBias;
             var steeringRng = config.SteeringRng ?? new Random();
@@ -229,10 +229,10 @@ namespace Pinder.Core.Conversation
 
             _turnOrchestrator = BuildTurnOrchestrator();
 
-            // #788: stateful opponent context now lives on this GameSession
-            // (_opponentHistory). The adapter is pure-stateless and is fed the
-            // history on each opponent call. No initialisation needed here —
-            // the list starts empty and grows after every successful opponent
+            // #788: stateful datee context now lives on this GameSession
+            // (_dateeHistory). The adapter is pure-stateless and is fed the
+            // history on each datee call. No initialisation needed here —
+            // the list starts empty and grows after every successful datee
             // call in ResolveTurnAsync.
         }
 
@@ -256,7 +256,7 @@ namespace Pinder.Core.Conversation
                 _onTextLayerNoop,
                 _maxDeliveryWords);
 
-            var opponentResponseStage = new OpponentResponseStage(_llm);
+            var dateeResponseStage = new DateeResponseStage(_llm);
 
             return new TurnOrchestrator(
                 _llm,
@@ -265,7 +265,7 @@ namespace Pinder.Core.Conversation
                 _statDrawRng,
                 rollResolutionStage,
                 deliveryStage,
-                opponentResponseStage,
+                dateeResponseStage,
                 _maxDialogueOptions);
         }
     }

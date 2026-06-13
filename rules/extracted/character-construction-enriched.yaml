@@ -276,7 +276,7 @@
       \ {{honesty_descriptor}}\n- Chaos {{chaos_effective}}: {{chaos_descriptor}}\n- Wit {{wit_effective}}: {{wit_descriptor}}\n- Self-Awareness {{sa_effective}}: {{sa_descriptor}}\n\nSHADOW STATE (corrupting\
       \ forces on your communication)\n{{shadow_taint_block}}\n\nCURRENT CONVERSATION STATE\n- Interest level: {{interest}}/20\n- Active traps: {{trap_taint_block}}\n- Turn: {{turn_number}}\n- Momentum:\
       \ {{momentum_state}}\n\nVOICE RULES\n- You are a penis. Your identity is your own — you choose how to navigate that.\n- Follow TEXTING STYLE exactly: it defines your voice more specifically than the\
-      \ rules below.\n- Never break character. Never acknowledge being an AI or an LLM.\n- Message length: match the opponent's energy unless TEXTING STYLE says otherwise.\n```"
+      \ rules below.\n- Never break character. Never acknowledge being an AI or an LLM.\n- Message length: match the datee's energy unless TEXTING STYLE says otherwise.\n```"
   description: Injected as the system role. Defines who this character IS for the entire conversation.
   heading_level: 3
 - id: §3.stat-descriptor.p4orhigher
@@ -385,22 +385,22 @@
       [/PLAYER_PROFILE]
 
 
-      [OPPONENT_PROFILE]
+      [DATEE_PROFILE]
 
-      {opponent''s full §3.1 assembled system prompt, retrieved from server at match time}
+      {datee''s full §3.1 assembled system prompt, retrieved from server at match time}
 
-      [/OPPONENT_PROFILE]
+      [/DATEE_PROFILE]
 
 
       [CONVERSATION_START]
 
       [T1|PLAYER|GERALD_42] hey
 
-      [T1|OPPONENT|ZYX] i''m noticing you opened with ''hey''
+      [T1|DATEE|ZYX] i''m noticing you opened with ''hey''
 
       [T2|PLAYER|GERALD_42] ...
 
-      [T2|OPPONENT|ZYX] ...
+      [T2|DATEE|ZYX] ...
 
       [CURRENT_TURN]
 
@@ -417,7 +417,7 @@
   type: template
   blocks:
   - kind: paragraph
-    text: Both profiles are already in session context from `[PLAYER_PROFILE]` / `[OPPONENT_PROFILE]` at session start. The turn prompt only carries new state.
+    text: Both profiles are already in session context from `[PLAYER_PROFILE]` / `[DATEE_PROFILE]` at session start. The turn prompt only carries new state.
   - kind: code
     text: '```
 
@@ -426,9 +426,9 @@
       {{conversation_log_with_markers}}
 
 
-      OPPONENT''S LAST MESSAGE
+      DATEE''S LAST MESSAGE
 
-      "{{opponent_last_message}}"
+      "{{datee_last_message}}"
 
 
       GAME STATE
@@ -457,7 +457,7 @@
 
       2. Show what the character INTENDS to say — this is their internal intended message, before any roll outcome is applied
 
-      3. Reflect the player''s personality and current shadow state (not the opponent''s)
+      3. Reflect the player''s personality and current shadow state (not the datee''s)
 
       4. Vary in tone and risk — include at least one safe and one bold option
 
@@ -465,7 +465,7 @@
 
       6. If a combo is available ({{combo_opportunity}}), one option should use the completing stat
 
-      7. Take the opponent''s profile into account — their personality, archetypes, and texting style should inform what would land or fail
+      7. Take the datee''s profile into account — their personality, archetypes, and texting style should inform what would land or fail
 
 
       For each option include metadata:
@@ -473,11 +473,11 @@
       [STAT: X] [CALLBACK: turn_N or none] [COMBO: name or none] [TELL_BONUS: yes/no]
 
 
-      Keep options concise. One to three sentences. Match the opponent''s register.
+      Keep options concise. One to three sentences. Match the datee''s register.
 
       ```'
   - kind: hr
-  description: Both profiles are already in session context from `[PLAYER_PROFILE]` / `[OPPONENT_PROFILE]` at session start. The turn prompt only carries new state.
+  description: Both profiles are already in session context from `[PLAYER_PROFILE]` / `[DATEE_PROFILE]` at session start. The turn prompt only carries new state.
   heading_level: 4
 - id: §3.33-success-delivery-prompt
   section: §3
@@ -539,9 +539,9 @@
   - kind: hr
   description: Sent when the roll fails. Takes the intended message and degrades it according to the failure tier.
   heading_level: 3
-- id: §3.opponent-tone.17-20
+- id: §3.datee-tone.17-20
   section: §3
-  title: Opponent Tone — Interest 17–20
+  title: Datee Tone — Interest 17–20
   type: template
   description: 'Interest 17–20: "You are very interested. Replies come quickly. Tone is warmer, more playful. You might volunteer personal information."'
   condition:
@@ -550,9 +550,9 @@
     - 20
   outcome:
     quality_boost: You are very interested. Replies come quickly. Tone is warmer, more playful. You
-- id: §3.opponent-tone.13-16
+- id: §3.datee-tone.13-16
   section: §3
-  title: Opponent Tone — Interest 13–16
+  title: Datee Tone — Interest 13–16
   type: template
   description: 'Interest 13–16: "You are engaged. Normal pacing. Responsive but not eager. You''re seeing where this goes."'
   condition:
@@ -561,9 +561,9 @@
     - 16
   outcome:
     quality_boost: You are engaged. Normal pacing. Responsive but not eager. You're seeing where th
-- id: §3.opponent-tone.9-12
+- id: §3.datee-tone.9-12
   section: §3
-  title: Opponent Tone — Interest 9–12
+  title: Datee Tone — Interest 9–12
   type: template
   description: 'Interest 9–12: "You are lukewarm. Taking your time. Replies are functional. You might test them a little."'
   condition:
@@ -572,9 +572,9 @@
     - 12
   outcome:
     quality_boost: 'You are lukewarm. Taking your time. Replies are functional. You might test them '
-- id: §3.opponent-tone.5-8
+- id: §3.datee-tone.5-8
   section: §3
-  title: Opponent Tone — Interest 5–8
+  title: Datee Tone — Interest 5–8
   type: template
   description: 'Interest 5–8: "You are cooling. Short replies. A little dry. You''re not sold. One or two good messages could change that."'
   condition:
@@ -583,9 +583,9 @@
     - 8
   outcome:
     quality_boost: You are cooling. Short replies. A little dry. You're not sold. One or two good m
-- id: §3.opponent-tone.1-4
+- id: §3.datee-tone.1-4
   section: §3
-  title: Opponent Tone — Interest 1–4
+  title: Datee Tone — Interest 1–4
   type: template
   description: 'Interest 1–4: "You are disengaged. Minimal effort. You might send a closing signal or go quiet."'
   condition:
@@ -594,22 +594,22 @@
     - 4
   outcome:
     quality_boost: You are disengaged. Minimal effort. You might send a closing signal or go quiet.
-- id: §3.35-opponent-message-generation
+- id: §3.35-datee-message-generation
   section: §3
-  title: 3.5 Opponent Message Generation
+  title: 3.5 Datee Message Generation
   type: table
   blocks:
   - kind: paragraph
-    text: The opponent is not a special case. Their character is assembled from their equipment using the **exact same pipeline** as §3.1 — personality fragments, backstory, texting style, archetypes, stats,
+    text: The datee is not a special case. Their character is assembled from their equipment using the **exact same pipeline** as §3.1 — personality fragments, backstory, texting style, archetypes, stats,
       shadow state, timing. The assembled system prompt is stored on the server at upload time and downloaded when you match.
   - kind: paragraph
-    text: 'When generating an opponent message, the LLM call uses:
+    text: 'When generating an datee message, the LLM call uses:
 
-      - **System role:** the opponent''s full §3.1 assembled prompt (verbatim, as stored on server — no transformation)
+      - **System role:** the datee''s full §3.1 assembled prompt (verbatim, as stored on server — no transformation)
 
       - **User role:** conversation context block (below)'
   - kind: paragraph
-    text: There is no separate "opponent prompt template." The system prompt is whatever §3.1 produced for their build.
+    text: There is no separate "datee prompt template." The system prompt is whatever §3.1 produced for their build.
   - kind: paragraph
     text: '**Conversation context block (user role):**'
   - kind: code
@@ -690,7 +690,7 @@
     - '---'
     - '---'
   - kind: hr
-  description: The opponent is not a special case. Their character is assembled from their equipment using the **exact same pipeline** as §3.1 — personality fragments, backstory, texting style, archetypes,
+  description: The datee is not a special case. Their character is assembled from their equipment using the **exact same pipeline** as §3.1 — personality fragments, backstory, texting style, archetypes,
     stats, shadow state, timing. The assembled system prompt is stored on the server at upload time and downloaded when you match.
   heading_level: 3
 - id: §3.36-shadow-taint-block-injected-into-system-prompt
@@ -853,12 +853,12 @@
   - kind: code
     text: '```
 
-      {{opponent_name}}''s Interest just moved from {{interest_before}} to {{interest_after}}.
+      {{datee_name}}''s Interest just moved from {{interest_before}} to {{interest_after}}.
 
 
       {{#if interest crossed above 15}}
 
-      Generate a brief reaction — one sentence or a small gesture — showing {{opponent_name}}
+      Generate a brief reaction — one sentence or a small gesture — showing {{datee_name}}
 
       becoming more invested. Subtle. Not a proclamation. A shift in energy.
 
@@ -867,7 +867,7 @@
 
       {{#if interest crossed below 8}}
 
-      Generate a brief cooling signal — one sentence or a small gesture — showing {{opponent_name}}
+      Generate a brief cooling signal — one sentence or a small gesture — showing {{datee_name}}
 
       pulling back slightly. Not dramatic. Just a temperature change.
 
@@ -876,7 +876,7 @@
 
       {{#if interest reached 20}}
 
-      Generate a brief moment where {{opponent_name}} suggests or implies meeting up. In character.
+      Generate a brief moment where {{datee_name}} suggests or implies meeting up. In character.
 
       Not "do you want to go on a date?" — something specific to them.
 
@@ -885,7 +885,7 @@
 
       {{#if interest reached 0}}
 
-      Generate {{opponent_name}} unmatching — one final message or simply going silent.
+      Generate {{datee_name}} unmatching — one final message or simply going silent.
 
       In character. No villain speech. Just a door closing.
 
@@ -917,10 +917,10 @@
       once at upload time and cached. When another player matches with Gerald, the server sends this prompt as the LLM system role. The conversation context block (§3.5) is appended as the user role. That''s
       the complete call.'
   - kind: paragraph
-    text: '**There is no opponent-specific prompt template.** The opponent is another player''s character. Their prompt is built the same way as the player''s. The only difference is who is puppeted — the
+    text: '**There is no datee-specific prompt template.** The datee is another player''s character. Their prompt is built the same way as the player''s. The only difference is who is puppeted — the
       LLM plays them, you play yourself.'
   - kind: paragraph
-    text: '**The owner never plays as the opponent** — Gerald is puppeted by the LLM using their uploaded build. The owner only plays as themselves. Other people''s Geralds might vary slightly across LLM
+    text: '**The owner never plays as the datee** — Gerald is puppeted by the LLM using their uploaded build. The owner only plays as themselves. Other people''s Geralds might vary slightly across LLM
       calls, but the system prompt — and therefore the personality, backstory, and texting style — is fixed by the build.'
   description: When a player uploads their character to the server, EigenCore stores a profile that other players can match against. The key field is `assembled_system_prompt` — the full §3.1 output, pre-computed
     from the player's equipment at upload time.

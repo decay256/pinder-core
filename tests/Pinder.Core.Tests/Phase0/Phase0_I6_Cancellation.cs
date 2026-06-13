@@ -33,7 +33,7 @@ namespace Pinder.Core.Tests.Phase0
     /// happen, and (c) interest-meter mutations from the same turn do NOT persist
     /// (the meter is rolled back to the pre-resolve state because the exception
     /// fires before <c>_turnNumber++</c>). Steering / horniness / shadow rolls
-    /// already mutate as part of the pre-opponent pipeline; that scope is
+    /// already mutate as part of the pre-datee pipeline; that scope is
     /// documented in <c>regression-pins-787.md</c> and is the subject of Phase 1's
     /// #788 refactor.
     /// </para>
@@ -41,19 +41,19 @@ namespace Pinder.Core.Tests.Phase0
     [Trait("Category", "Phase0")]
     public class Phase0_I6_Cancellation
     {
-        // I6.1 — transport throws DURING opponent_response phase.
+        // I6.1 — transport throws DURING datee_response phase.
         // The exception must surface, and the turn counter must NOT have been
         // advanced (the increment is the LAST mutation in ResolveTurnAsync).
         [Fact]
-        public async Task TransportThrowsDuringOpponentResponse_TurnNumberDoesNotAdvance()
+        public async Task TransportThrowsDuringDateeResponse_TurnNumberDoesNotAdvance()
         {
-            var transport = new ThrowingTransport(throwOnPhase: LlmPhase.OpponentResponse);
+            var transport = new ThrowingTransport(throwOnPhase: LlmPhase.DateeResponse);
             var adapter = Phase0Fixtures.MakeAdapter(transport);
             var dice = new PlaybackDiceRoller(5, 15, 50);
 
             var session = new GameSession(
                 Phase0Fixtures.MakeProfile("Player"),
-                Phase0Fixtures.MakeProfile("Opponent"),
+                Phase0Fixtures.MakeProfile("Datee"),
                 adapter, dice, new NullTrapRegistry(),
                 Phase0Fixtures.MakeConfig());
 
@@ -78,7 +78,7 @@ namespace Pinder.Core.Tests.Phase0
 
             var session = new GameSession(
                 Phase0Fixtures.MakeProfile("Player"),
-                Phase0Fixtures.MakeProfile("Opponent"),
+                Phase0Fixtures.MakeProfile("Datee"),
                 adapter, dice, new NullTrapRegistry(),
                 Phase0Fixtures.MakeConfig());
 
@@ -104,14 +104,14 @@ namespace Pinder.Core.Tests.Phase0
         public async Task TransportThrowsOperationCanceled_PropagatesAndDoesNotAdvanceTurn()
         {
             var transport = new ThrowingTransport(
-                throwOnPhase: LlmPhase.OpponentResponse,
+                throwOnPhase: LlmPhase.DateeResponse,
                 exceptionFactory: () => new OperationCanceledException("simulated cancellation"));
             var adapter = Phase0Fixtures.MakeAdapter(transport);
             var dice = new PlaybackDiceRoller(5, 15, 50);
 
             var session = new GameSession(
                 Phase0Fixtures.MakeProfile("Player"),
-                Phase0Fixtures.MakeProfile("Opponent"),
+                Phase0Fixtures.MakeProfile("Datee"),
                 adapter, dice, new NullTrapRegistry(),
                 Phase0Fixtures.MakeConfig());
 
@@ -126,17 +126,17 @@ namespace Pinder.Core.Tests.Phase0
         // ── #794 — strengthened with real CancellationToken.Cancel() ───────
 
         // I6.4 — real cancellation between stage 2 (delivery) and stage 3
-        // (opponent_response). The transport calls cts.Cancel() from inside
+        // (datee_response). The transport calls cts.Cancel() from inside
         // the delivery phase callback so that the engine's NEXT awaited
-        // transport call (the trap/horniness overlay or opponent_response,
+        // transport call (the trap/horniness overlay or datee_response,
         // depending on fixture) sees a cancelled token and surfaces OCE.
         // Asserts:
         //   (a) OCE propagates from ResolveTurnAsync.
         //   (b) The turn counter does NOT advance.
-        //   (c) The opponent_response phase was never invoked (since the
+        //   (c) The datee_response phase was never invoked (since the
         //       cancellation fires before the engine reaches it).
         [Fact]
-        public async Task RealCancel_AfterDeliveryBeforeOpponent_PropagatesOCE_NoTurnAdvance()
+        public async Task RealCancel_AfterDeliveryBeforeDatee_PropagatesOCE_NoTurnAdvance()
         {
             var cts = new CancellationTokenSource();
             var transport = new CancellingTransport(
@@ -147,7 +147,7 @@ namespace Pinder.Core.Tests.Phase0
 
             var session = new GameSession(
                 Phase0Fixtures.MakeProfile("Player"),
-                Phase0Fixtures.MakeProfile("Opponent"),
+                Phase0Fixtures.MakeProfile("Datee"),
                 adapter, dice, new NullTrapRegistry(),
                 Phase0Fixtures.MakeConfig());
 
@@ -161,8 +161,8 @@ namespace Pinder.Core.Tests.Phase0
             // Turn counter unchanged: cancellation fired before _turnNumber++.
             Assert.Equal(turnBefore, session.TurnNumber);
 
-            // Opponent_response was never invoked.
-            Assert.Empty(transport.Inner.ExchangesByPhase(LlmPhase.OpponentResponse));
+            // Datee_response was never invoked.
+            Assert.Empty(transport.Inner.ExchangesByPhase(LlmPhase.DateeResponse));
         }
 
         // I6.5 — cancellation BEFORE the engine even starts the resolution
@@ -173,13 +173,13 @@ namespace Pinder.Core.Tests.Phase0
             var transport = new RecordingLlmTransport { DefaultResponse = "" };
             transport.QueueDialogueOptions(Phase0Fixtures.CannedDialogueOptions);
             transport.QueueDelivery(Phase0Fixtures.CannedDelivery);
-            transport.QueueOpponent(Phase0Fixtures.CannedOpponent);
+            transport.QueueDatee(Phase0Fixtures.CannedDatee);
             var adapter = Phase0Fixtures.MakeAdapter(transport);
             var dice = new PlaybackDiceRoller(5, 15, 50);
 
             var session = new GameSession(
                 Phase0Fixtures.MakeProfile("Player"),
-                Phase0Fixtures.MakeProfile("Opponent"),
+                Phase0Fixtures.MakeProfile("Datee"),
                 adapter, dice, new NullTrapRegistry(),
                 Phase0Fixtures.MakeConfig());
 
@@ -211,10 +211,10 @@ namespace Pinder.Core.Tests.Phase0
             var transport1 = new RecordingLlmTransport { DefaultResponse = "" };
             transport1.QueueDialogueOptions(Phase0Fixtures.CannedDialogueOptions);
             transport1.QueueDelivery(Phase0Fixtures.CannedDelivery);
-            transport1.QueueOpponent(Phase0Fixtures.CannedOpponent);
+            transport1.QueueDatee(Phase0Fixtures.CannedDatee);
             var session1 = new GameSession(
                 Phase0Fixtures.MakeProfile("Player"),
-                Phase0Fixtures.MakeProfile("Opponent"),
+                Phase0Fixtures.MakeProfile("Datee"),
                 Phase0Fixtures.MakeAdapter(transport1),
                 new PlaybackDiceRoller(5, 15, 50),
                 new NullTrapRegistry(),
@@ -226,10 +226,10 @@ namespace Pinder.Core.Tests.Phase0
             var transport2 = new RecordingLlmTransport { DefaultResponse = "" };
             transport2.QueueDialogueOptions(Phase0Fixtures.CannedDialogueOptions);
             transport2.QueueDelivery(Phase0Fixtures.CannedDelivery);
-            transport2.QueueOpponent(Phase0Fixtures.CannedOpponent);
+            transport2.QueueDatee(Phase0Fixtures.CannedDatee);
             var session2 = new GameSession(
                 Phase0Fixtures.MakeProfile("Player"),
-                Phase0Fixtures.MakeProfile("Opponent"),
+                Phase0Fixtures.MakeProfile("Datee"),
                 Phase0Fixtures.MakeAdapter(transport2),
                 new PlaybackDiceRoller(5, 15, 50),
                 new NullTrapRegistry(),
@@ -243,7 +243,7 @@ namespace Pinder.Core.Tests.Phase0
             Assert.Equal(session1.TurnNumber, session2.TurnNumber);
             Assert.Equal(result1.IsGameOver, result2.IsGameOver);
             Assert.Equal(result1.DeliveredMessage, result2.DeliveredMessage);
-            Assert.Equal(result1.OpponentMessage, result2.OpponentMessage);
+            Assert.Equal(result1.DateeMessage, result2.DateeMessage);
             Assert.Equal(result1.InterestDelta, result2.InterestDelta);
             Assert.Equal(result1.Roll.FinalTotal, result2.Roll.FinalTotal);
             // Same set of LLM phases invoked, same number of times, same order.
@@ -270,7 +270,7 @@ namespace Pinder.Core.Tests.Phase0
                 _inner = new RecordingLlmTransport { DefaultResponse = "" };
                 _inner.QueueDialogueOptions(Phase0Fixtures.CannedDialogueOptions);
                 _inner.QueueDelivery(Phase0Fixtures.CannedDelivery);
-                _inner.QueueOpponent(Phase0Fixtures.CannedOpponent);
+                _inner.QueueDatee(Phase0Fixtures.CannedDatee);
             }
 
             public Task<string> SendAsync(
@@ -309,7 +309,7 @@ namespace Pinder.Core.Tests.Phase0
                 Inner = new RecordingLlmTransport { DefaultResponse = "" };
                 Inner.QueueDialogueOptions(Phase0Fixtures.CannedDialogueOptions);
                 Inner.QueueDelivery(Phase0Fixtures.CannedDelivery);
-                Inner.QueueOpponent(Phase0Fixtures.CannedOpponent);
+                Inner.QueueDatee(Phase0Fixtures.CannedDatee);
             }
 
             public async Task<string> SendAsync(

@@ -169,7 +169,7 @@ namespace Pinder.Core.Tests
                     { ShadowStatType.Dread, 0 }, { ShadowStatType.Overthinking, 0 }
                 });
 
-            var opponentStats = new StatBlock(
+            var dateeStats = new StatBlock(
                 new Dictionary<StatType, int>
                 {
                     { StatType.Charm, 2 }, { StatType.Rizz, 2 }, { StatType.Honesty, 2 },
@@ -184,12 +184,12 @@ namespace Pinder.Core.Tests
 
             var timing = new TimingProfile(5, 1.0f, 0.0f, "neutral");
             var player = new CharacterProfile(stats, "system prompt", "Player", timing, 1);
-            var opponent = new CharacterProfile(opponentStats, "system prompt", "Opponent", timing, 1);
+            var datee = new CharacterProfile(dateeStats, "system prompt", "Datee", timing, 1);
             var llm = new ScriptedLlm();
             var trapRegistry = new NullTrapRegistry();
 
             config = config ?? new GameSessionConfig(clock: TestHelpers.MakeClock());
-            return new GameSession(player, opponent, llm, dice, trapRegistry, config);
+            return new GameSession(player, datee, llm, dice, trapRegistry, config);
         }
 
         private static ILlmAdapter GetLlm(GameSession session)
@@ -226,18 +226,18 @@ namespace Pinder.Core.Tests
                 return Task.FromResult("delivered");
             }
 
-            public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context, System.Threading.CancellationToken ct = default)
+            public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
             {
-                return Task.FromResult(new OpponentResponse("response"));
+                return Task.FromResult(new DateeResponse("response"));
             }
 
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, System.Threading.CancellationToken ct = default)
             {
                 return Task.FromResult<string?>(null);
             }
-            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
+            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
             public System.Threading.Tasks.Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
-            public System.Threading.Tasks.Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
+            public System.Threading.Tasks.Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
         }
     }
 }

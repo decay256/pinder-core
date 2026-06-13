@@ -127,12 +127,12 @@ partial class Program
 
     internal static string GetInterestStateDescription(InterestState state) => state switch
     {
-        InterestState.Bored => "Ghost risk: 25% per turn. Opponent may stop responding.",
-        InterestState.Lukewarm => "Opponent is present but unconvinced. No ghost risk.",
-        InterestState.Interested => "Conversation has traction. Opponent is engaged.",
-        InterestState.VeryIntoIt => "Opponent is genuinely interested. +advantage on rolls.",
-        InterestState.AlmostThere => "One step from the date. Opponent is deciding.",
-        InterestState.DateSecured => "Date secured. Opponent agreed to meet.",
+        InterestState.Bored => "Ghost risk: 25% per turn. Datee may stop responding.",
+        InterestState.Lukewarm => "Datee is present but unconvinced. No ghost risk.",
+        InterestState.Interested => "Conversation has traction. Datee is engaged.",
+        InterestState.VeryIntoIt => "Datee is genuinely interested. +advantage on rolls.",
+        InterestState.AlmostThere => "One step from the date. Datee is deciding.",
+        InterestState.DateSecured => "Date secured. Datee agreed to meet.",
         _ => ""
     };
 

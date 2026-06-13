@@ -12,7 +12,7 @@ namespace Pinder.Core.Tests
 {
     /// <summary>
     /// Regression: a freshly-activated trap must still be visible to delivery and
-    /// opponent LLM contexts on the turn it activates. Before #692, AdvanceTurn was
+    /// datee LLM contexts on the turn it activates. Before #692, AdvanceTurn was
     /// called before delivery, expiring short-duration traps immediately.
     ///
     /// Per #371 (W2a) every trap is now fixed at 3 turns regardless of the
@@ -48,7 +48,7 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public async Task Duration1Trap_VisibleInDeliveryAndOpponentContexts()
+        public async Task Duration1Trap_VisibleInDeliveryAndDateeContexts()
         {
             // Duration=1 trap (like Cringe in production data)
             var trapDef = new TrapDefinition(
@@ -68,7 +68,7 @@ namespace Pinder.Core.Tests
             );
 
             var session = new GameSession(
-                MakeProfile("Player"), MakeProfile("Opponent"),
+                MakeProfile("Player"), MakeProfile("Datee"),
                 capturingLlm, dice, trapRegistry,
                 new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
@@ -81,8 +81,8 @@ namespace Pinder.Core.Tests
             Assert.Contains("You become extremely awkward and self-undermining.",
                 delivCtx.ActiveTrapInstructions!);
 
-            // Opponent context must see the trap
-            var oppCtx = capturingLlm.OpponentContexts[0];
+            // Datee context must see the trap
+            var oppCtx = capturingLlm.DateeContexts[0];
             Assert.NotNull(oppCtx.ActiveTrapInstructions);
             Assert.Contains("You become extremely awkward and self-undermining.",
                 oppCtx.ActiveTrapInstructions!);

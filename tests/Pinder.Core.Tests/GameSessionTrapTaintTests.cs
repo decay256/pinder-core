@@ -78,7 +78,7 @@ namespace Pinder.Core.Tests
             );
 
             var session = new GameSession(
-                MakeProfile("Player"), MakeProfile("Opponent"),
+                MakeProfile("Player"), MakeProfile("Datee"),
                 capturingLlm, dice, trapRegistry,
                 new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
@@ -113,7 +113,7 @@ namespace Pinder.Core.Tests
             var dice = new FixedDice(5, 20); // just need one roll
 
             var session = new GameSession(
-                MakeProfile("Player"), MakeProfile("Opponent"),
+                MakeProfile("Player"), MakeProfile("Datee"),
                 capturingLlm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             await session.StartTurnAsync();
@@ -123,12 +123,12 @@ namespace Pinder.Core.Tests
         }
 
         /// <summary>
-        /// DeliveryContext and OpponentContext should also get trap instructions
+        /// DeliveryContext and DateeContext should also get trap instructions
         /// when a trap is active (from the same turn's resolution, after trap activation
         /// but before delivery).
         /// </summary>
         [Fact]
-        public async Task ResolveTurnAsync_WithPreExistingTrap_PassesInstructionsToDeliveryAndOpponentContexts()
+        public async Task ResolveTurnAsync_WithPreExistingTrap_PassesInstructionsToDeliveryAndDateeContexts()
         {
             // Set up a trap that's already active by manually using TrapState
             // We'll use a trap registry that has a charm trap, and we need the trap to be
@@ -145,7 +145,7 @@ namespace Pinder.Core.Tests
 
             // Turn 1: We need Wit option chosen, roll that hits TropeTrap tier
             // With allStats=2: DC=15, roll of 4 => total=6, miss by 9 => TropeTrap
-            // After trap activation, the trap is active for delivery and opponent contexts
+            // After trap activation, the trap is active for delivery and datee contexts
             var dice = new FixedDice(
                 5,  // Constructor: horniness roll (1d10)
                 4,  // Turn 1 roll: TropeTrap on Wit
@@ -153,7 +153,7 @@ namespace Pinder.Core.Tests
             );
 
             var session = new GameSession(
-                MakeProfile("Player"), MakeProfile("Opponent"),
+                MakeProfile("Player"), MakeProfile("Datee"),
                 capturingLlm, dice, trapRegistry,
                 new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
@@ -164,22 +164,22 @@ namespace Pinder.Core.Tests
 
             // Check delivery context had trap instructions
             // Note: trap was activated during RollEngine.Resolve. AdvanceTurn is now called
-            // AFTER delivery + opponent LLM calls (#692), so the trap is still at full
-            // duration (5) during this turn's delivery and opponent contexts.
+            // AFTER delivery + datee LLM calls (#692), so the trap is still at full
+            // duration (5) during this turn's delivery and datee contexts.
             Assert.Single(capturingLlm.DeliveryContexts);
             var delivCtx = capturingLlm.DeliveryContexts[0];
             Assert.NotNull(delivCtx.ActiveTrapInstructions);
             Assert.Contains("Only speak in terrible puns.", delivCtx.ActiveTrapInstructions!);
 
-            // Check opponent context had trap instructions
-            Assert.Single(capturingLlm.OpponentContexts);
-            var oppCtx = capturingLlm.OpponentContexts[0];
+            // Check datee context had trap instructions
+            Assert.Single(capturingLlm.DateeContexts);
+            var oppCtx = capturingLlm.DateeContexts[0];
             Assert.NotNull(oppCtx.ActiveTrapInstructions);
             Assert.Contains("Only speak in terrible puns.", oppCtx.ActiveTrapInstructions!);
         }
 
         /// <summary>
-        /// When no traps are active, delivery and opponent contexts should have null instructions.
+        /// When no traps are active, delivery and datee contexts should have null instructions.
         /// </summary>
         [Fact]
         public async Task ResolveTurnAsync_NoTraps_InstructionsAreNull()
@@ -193,7 +193,7 @@ namespace Pinder.Core.Tests
             );
 
             var session = new GameSession(
-                MakeProfile("Player"), MakeProfile("Opponent"),
+                MakeProfile("Player"), MakeProfile("Datee"),
                 capturingLlm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             await session.StartTurnAsync();
@@ -202,7 +202,7 @@ namespace Pinder.Core.Tests
             var delivCtx = capturingLlm.DeliveryContexts[0];
             Assert.Null(delivCtx.ActiveTrapInstructions);
 
-            var oppCtx = capturingLlm.OpponentContexts[0];
+            var oppCtx = capturingLlm.DateeContexts[0];
             Assert.Null(oppCtx.ActiveTrapInstructions);
         }
     }

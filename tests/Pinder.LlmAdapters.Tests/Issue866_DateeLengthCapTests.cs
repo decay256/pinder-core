@@ -8,22 +8,22 @@ using Xunit;
 namespace Pinder.LlmAdapters.Tests
 {
     /// <summary>
-    /// Tests for Issue #866: opponent response length cap (relative window + 600-char ceiling).
+    /// Tests for Issue #866: datee response length cap (relative window + 600-char ceiling).
     /// Four prompt-injection tests verify the length hint is injected correctly across
     /// the formula's boundary cases. One formula test verifies ComputeResponseCeiling at
     /// the boundary values and the regression scenario from session 707fca72.
     /// </summary>
-    public class Issue866_OpponentLengthCapTests
+    public class Issue866_DateeLengthCapTests
     {
         // ── Helpers ──
 
-        private static OpponentContext MakeOpponentContext(string playerDeliveredMessage)
+        private static DateeContext MakeDateeContext(string playerDeliveredMessage)
         {
-            return new OpponentContext(
+            return new DateeContext(
                 playerPrompt: "player system prompt",
-                opponentPrompt: "opponent system prompt",
+                dateePrompt: "datee system prompt",
                 conversationHistory: new List<(string, string)> { ("P", "hey"), ("O", "hi") },
-                opponentLastMessage: "hi",
+                dateeLastMessage: "hi",
                 activeTraps: Array.Empty<string>(),
                 currentInterest: 15,
                 playerDeliveredMessage: playerDeliveredMessage,
@@ -31,7 +31,7 @@ namespace Pinder.LlmAdapters.Tests
                 interestAfter: 15,
                 responseDelayMinutes: 2.0,
                 playerName: "Velvet",
-                opponentName: "Sable");
+                dateeName: "Sable");
         }
 
         // ══════════════════════════════════════════════════════════════
@@ -39,11 +39,11 @@ namespace Pinder.LlmAdapters.Tests
         // ══════════════════════════════════════════════════════════════
 
         [Fact]
-        public void OpponentPrompt_200CharPlayer_HasCeiling400()
+        public void DateePrompt_200CharPlayer_HasCeiling400()
         {
             var msg = new string('x', 200);
-            var ctx = MakeOpponentContext(msg);
-            var prompt = SessionDocumentBuilder.BuildOpponentPrompt(ctx);
+            var ctx = MakeDateeContext(msg);
+            var prompt = SessionDocumentBuilder.BuildDateePrompt(ctx);
 
             Assert.Contains("400 characters", prompt);
         }
@@ -53,11 +53,11 @@ namespace Pinder.LlmAdapters.Tests
         // ══════════════════════════════════════════════════════════════
 
         [Fact]
-        public void OpponentPrompt_1CharPlayer_HasFloor80()
+        public void DateePrompt_1CharPlayer_HasFloor80()
         {
             var msg = "x"; // 1 char
-            var ctx = MakeOpponentContext(msg);
-            var prompt = SessionDocumentBuilder.BuildOpponentPrompt(ctx);
+            var ctx = MakeDateeContext(msg);
+            var prompt = SessionDocumentBuilder.BuildDateePrompt(ctx);
 
             Assert.Contains("80 characters", prompt);
         }
@@ -67,11 +67,11 @@ namespace Pinder.LlmAdapters.Tests
         // ══════════════════════════════════════════════════════════════
 
         [Fact]
-        public void OpponentPrompt_500CharPlayer_HasCap600()
+        public void DateePrompt_500CharPlayer_HasCap600()
         {
             var msg = new string('y', 500);
-            var ctx = MakeOpponentContext(msg);
-            var prompt = SessionDocumentBuilder.BuildOpponentPrompt(ctx);
+            var ctx = MakeDateeContext(msg);
+            var prompt = SessionDocumentBuilder.BuildDateePrompt(ctx);
 
             Assert.Contains("600 characters", prompt);
         }
@@ -81,11 +81,11 @@ namespace Pinder.LlmAdapters.Tests
         // ══════════════════════════════════════════════════════════════
 
         [Fact]
-        public void OpponentPrompt_RegressionScenario_1054CharPlayer_HasCap600()
+        public void DateePrompt_RegressionScenario_1054CharPlayer_HasCap600()
         {
             var msg = new string('z', 1054);
-            var ctx = MakeOpponentContext(msg);
-            var prompt = SessionDocumentBuilder.BuildOpponentPrompt(ctx);
+            var ctx = MakeDateeContext(msg);
+            var prompt = SessionDocumentBuilder.BuildDateePrompt(ctx);
 
             Assert.Contains("600 characters", prompt);
         }

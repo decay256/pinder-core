@@ -40,18 +40,18 @@ namespace Pinder.SessionSetup
         public async Task<string> GenerateAsync(
             string playerName,
             IReadOnlyList<string> playerItems,
-            string opponentName,
-            IReadOnlyList<string> opponentItems,
+            string dateeName,
+            IReadOnlyList<string> dateeItems,
             CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(playerName))
                 throw new ArgumentException("playerName must not be null or whitespace.", nameof(playerName));
-            if (string.IsNullOrWhiteSpace(opponentName))
-                throw new ArgumentException("opponentName must not be null or whitespace.", nameof(opponentName));
+            if (string.IsNullOrWhiteSpace(dateeName))
+                throw new ArgumentException("dateeName must not be null or whitespace.", nameof(dateeName));
             if (playerItems == null) throw new ArgumentNullException(nameof(playerItems));
-            if (opponentItems == null) throw new ArgumentNullException(nameof(opponentItems));
+            if (dateeItems == null) throw new ArgumentNullException(nameof(dateeItems));
 
-            string userMessage = BuildUserMessage(playerName, playerItems, opponentName, opponentItems);
+            string userMessage = BuildUserMessage(playerName, playerItems, dateeName, dateeItems);
 
             try
             {
@@ -70,7 +70,7 @@ namespace Pinder.SessionSetup
 
         private static string BuildUserMessage(
             string playerName, IReadOnlyList<string> playerItems,
-            string opponentName, IReadOnlyList<string> opponentItems)
+            string dateeName, IReadOnlyList<string> dateeItems)
         {
             var sb = new StringBuilder();
             sb.AppendLine($"Player ({playerName}) is wearing:");
@@ -79,10 +79,10 @@ namespace Pinder.SessionSetup
                 foreach (var i in playerItems)
                     sb.AppendLine($"- {i}");
             sb.AppendLine();
-            sb.AppendLine($"Opponent ({opponentName}) is wearing:");
-            if (opponentItems.Count == 0) sb.AppendLine("- (no items recorded)");
+            sb.AppendLine($"Datee ({dateeName}) is wearing:");
+            if (dateeItems.Count == 0) sb.AppendLine("- (no items recorded)");
             else
-                foreach (var i in opponentItems)
+                foreach (var i in dateeItems)
                     sb.AppendLine($"- {i}");
             sb.AppendLine();
             sb.AppendLine(

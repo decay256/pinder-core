@@ -20,22 +20,22 @@ namespace Pinder.LlmAdapters.Tests
 
         private static DialogueContext MakeDialogueContext(
             IReadOnlyList<(string Sender, string Text)> conversationHistory = null,
-            string opponentLastMessage = "",
+            string dateeLastMessage = "",
             string[] activeTraps = null,
             int currentInterest = 10,
             int currentTurn = 1,
             string playerName = "P",
-            string opponentName = "O")
+            string dateeName = "O")
         {
             return new DialogueContext(
                 playerPrompt: "player prompt",
-                opponentPrompt: "opponent prompt",
+                dateePrompt: "datee prompt",
                 conversationHistory: conversationHistory ?? new List<(string, string)>(),
-                opponentLastMessage: opponentLastMessage,
+                dateeLastMessage: dateeLastMessage,
                 activeTraps: activeTraps ?? Array.Empty<string>(),
                 currentInterest: currentInterest,
                 playerName: playerName,
-                opponentName: opponentName,
+                dateeName: dateeName,
                 currentTurn: currentTurn);
         }
 
@@ -46,14 +46,14 @@ namespace Pinder.LlmAdapters.Tests
             int beatDcBy = 0,
             string[] activeTrapInstructions = null,
             string playerName = "P",
-            string opponentName = "O",
+            string dateeName = "O",
             Dictionary<ShadowStatType, int> shadowThresholds = null)
         {
             return new DeliveryContext(
                 playerPrompt: "player prompt",
-                opponentPrompt: "opponent prompt",
+                dateePrompt: "datee prompt",
                 conversationHistory: conversationHistory ?? new List<(string, string)>(),
-                opponentLastMessage: "",
+                dateeLastMessage: "",
                 chosenOption: chosenOption ?? new DialogueOption(StatType.Charm, "default"),
                 outcome: outcome,
                 beatDcBy: beatDcBy,
@@ -61,10 +61,10 @@ namespace Pinder.LlmAdapters.Tests
                 shadowThresholds: shadowThresholds,
                 activeTrapInstructions: activeTrapInstructions,
                 playerName: playerName,
-                opponentName: opponentName);
+                dateeName: dateeName);
         }
 
-        private static OpponentContext MakeOpponentContext(
+        private static DateeContext MakeDateeContext(
             IReadOnlyList<(string Sender, string Text)> conversationHistory = null,
             string playerDeliveredMessage = "Hey",
             int interestBefore = 10,
@@ -72,14 +72,14 @@ namespace Pinder.LlmAdapters.Tests
             double responseDelayMinutes = 1.0,
             string[] activeTrapInstructions = null,
             string playerName = "P",
-            string opponentName = "O",
+            string dateeName = "O",
             Dictionary<ShadowStatType, int> shadowThresholds = null)
         {
-            return new OpponentContext(
+            return new DateeContext(
                 playerPrompt: "player prompt",
-                opponentPrompt: "opponent prompt",
+                dateePrompt: "datee prompt",
                 conversationHistory: conversationHistory ?? new List<(string, string)>(),
-                opponentLastMessage: "",
+                dateeLastMessage: "",
                 activeTraps: Array.Empty<string>(),
                 currentInterest: interestAfter,
                 playerDeliveredMessage: playerDeliveredMessage,
@@ -89,7 +89,7 @@ namespace Pinder.LlmAdapters.Tests
                 shadowThresholds: shadowThresholds,
                 activeTrapInstructions: activeTrapInstructions,
                 playerName: playerName,
-                opponentName: opponentName);
+                dateeName: dateeName);
         }
 
         // ═══════════════════════════════════════════════════════════════
@@ -104,7 +104,7 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Fact]
-        public void BuildDialogueOptionsPrompt_ContainsOpponentLastMessage()
+        public void BuildDialogueOptionsPrompt_ContainsDateeLastMessage()
         {
             var history = new List<(string, string)>
             {
@@ -113,9 +113,9 @@ namespace Pinder.LlmAdapters.Tests
             };
 
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
-                MakeDialogueContext(conversationHistory: history, opponentLastMessage: "Whatever", currentTurn: 2));
+                MakeDialogueContext(conversationHistory: history, dateeLastMessage: "Whatever", currentTurn: 2));
 
-            // Opponent's last message is part of conversation history
+            // Datee's last message is part of conversation history
             Assert.Contains("\"Whatever\"", result);
         }
 
@@ -155,7 +155,7 @@ namespace Pinder.LlmAdapters.Tests
             Assert.False(string.IsNullOrEmpty(PromptTemplates.DialogueOptionsInstruction));
             Assert.False(string.IsNullOrEmpty(PromptTemplates.SuccessDeliveryInstruction));
             Assert.False(string.IsNullOrEmpty(PromptTemplates.FailureDeliveryInstruction));
-            Assert.False(string.IsNullOrEmpty(PromptTemplates.OpponentResponseInstruction));
+            Assert.False(string.IsNullOrEmpty(PromptTemplates.DateeResponseInstruction));
             Assert.False(string.IsNullOrEmpty(PromptTemplates.InterestBeatInstruction));
         }
 
@@ -195,9 +195,9 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Fact]
-        public void PromptTemplates_OpponentResponse_ContainsSignalFormat()
+        public void PromptTemplates_DateeResponse_ContainsSignalFormat()
         {
-            var t = PromptTemplates.OpponentResponseInstruction;
+            var t = PromptTemplates.DateeResponseInstruction;
             Assert.Contains("[RESPONSE]", t);
             Assert.Contains("[SIGNALS]", t);
             Assert.Contains("TELL:", t);
@@ -205,9 +205,9 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Fact]
-        public void PromptTemplates_OpponentResponse_MentionsStatNames()
+        public void PromptTemplates_DateeResponse_MentionsStatNames()
         {
-            var t = PromptTemplates.OpponentResponseInstruction;
+            var t = PromptTemplates.DateeResponseInstruction;
             Assert.Contains("CHARM", t);
         }
 
@@ -225,9 +225,9 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void CacheBlockBuilder_TwoPrompts_CorrectOrder()
         {
-            var blocks = CacheBlockBuilder.BuildCachedSystemBlocks("PLAYER_PROMPT", "OPPONENT_PROMPT");
+            var blocks = CacheBlockBuilder.BuildCachedSystemBlocks("PLAYER_PROMPT", "DATEE_PROMPT");
             Assert.Equal("PLAYER_PROMPT", blocks[0].Text);
-            Assert.Equal("OPPONENT_PROMPT", blocks[1].Text);
+            Assert.Equal("DATEE_PROMPT", blocks[1].Text);
         }
 
         [Fact]
@@ -249,16 +249,16 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Fact]
-        public void CacheBlockBuilder_OpponentOnly_ReturnsSingleBlock()
+        public void CacheBlockBuilder_DateeOnly_ReturnsSingleBlock()
         {
-            var blocks = CacheBlockBuilder.BuildOpponentOnlySystemBlocks("o");
+            var blocks = CacheBlockBuilder.BuildDateeOnlySystemBlocks("o");
             Assert.Single(blocks);
         }
 
         [Fact]
-        public void CacheBlockBuilder_OpponentOnly_HasCorrectContentAndCache()
+        public void CacheBlockBuilder_DateeOnly_HasCorrectContentAndCache()
         {
-            var blocks = CacheBlockBuilder.BuildOpponentOnlySystemBlocks("MY_PROMPT");
+            var blocks = CacheBlockBuilder.BuildDateeOnlySystemBlocks("MY_PROMPT");
             Assert.Equal("text", blocks[0].Type);
             Assert.Equal("MY_PROMPT", blocks[0].Text);
             Assert.NotNull(blocks[0].CacheControl);
@@ -294,14 +294,14 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Fact]
-        public void BuildOpponentPrompt_NullContext_ThrowsArgumentNull()
+        public void BuildDateePrompt_NullContext_ThrowsArgumentNull()
         {
             Assert.Throws<ArgumentNullException>(() =>
-                SessionDocumentBuilder.BuildOpponentPrompt((OpponentContext)null!));
+                SessionDocumentBuilder.BuildDateePrompt((DateeContext)null!));
         }
 
         [Fact]
-        public void BuildInterestChangeBeatPrompt_NullOpponentName_ThrowsArgumentNull()
+        public void BuildInterestChangeBeatPrompt_NullDateeName_ThrowsArgumentNull()
         {
             Assert.Throws<ArgumentNullException>(() =>
                 SessionDocumentBuilder.BuildInterestChangeBeatPrompt(
@@ -316,17 +316,17 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Fact]
-        public void CacheBlockBuilder_NullOpponentPrompt_Throws()
+        public void CacheBlockBuilder_NullDateePrompt_Throws()
         {
             Assert.Throws<ArgumentNullException>(() =>
                 CacheBlockBuilder.BuildCachedSystemBlocks("p", null!));
         }
 
         [Fact]
-        public void CacheBlockBuilder_OpponentOnly_NullPrompt_Throws()
+        public void CacheBlockBuilder_DateeOnly_NullPrompt_Throws()
         {
             Assert.Throws<ArgumentNullException>(() =>
-                CacheBlockBuilder.BuildOpponentOnlySystemBlocks(null!));
+                CacheBlockBuilder.BuildDateeOnlySystemBlocks(null!));
         }
     }
 }

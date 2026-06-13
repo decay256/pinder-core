@@ -60,7 +60,7 @@ namespace Pinder.Core.Conversation
             DialogueOption chosenOption,
             RollResult rollResult,
             CharacterProfile player,
-            CharacterProfile opponent,
+            CharacterProfile datee,
             System.IProgress<TurnProgressEvent>? progress,
             int interestDelta,
             CancellationToken ct)
@@ -85,7 +85,7 @@ namespace Pinder.Core.Conversation
             string originalIntendedText = chosenOption.IntendedText ?? "";
             progress?.Report(new TurnProgressEvent(TurnProgressStage.SteeringStarted));
             SteeringRollResult steeringResult = await _steeringEngine.AttemptSteeringRollAsync(
-                originalIntendedText, player, opponent, _llm, TurnOrchestratorHelpers.BuildHistoryForLlmContext(state), ct).ConfigureAwait(false);
+                originalIntendedText, player, datee, _llm, TurnOrchestratorHelpers.BuildHistoryForLlmContext(state), ct).ConfigureAwait(false);
             progress?.Report(new TurnProgressEvent(
                 TurnProgressStage.SteeringCompleted,
                 steeringResult.SteeringSucceeded ? steeringResult.SteeringQuestion : null));
@@ -120,16 +120,16 @@ namespace Pinder.Core.Conversation
 
             var deliveryContext = new DeliveryContext(
                 playerPrompt: player.AssembledSystemPrompt,
-                opponentPrompt: opponent.AssembledSystemPrompt,
+                dateePrompt: datee.AssembledSystemPrompt,
                 conversationHistory: TurnOrchestratorHelpers.BuildHistoryForLlmContext(state),
-                opponentLastMessage: GameSessionHelpers.GetLastOpponentMessage(state.History, opponent.DisplayName),
+                dateeLastMessage: GameSessionHelpers.GetLastDateeMessage(state.History, datee.DisplayName),
                 chosenOption: deliveryOption,
                 outcome: rollResult.Tier,
                 beatDcBy: beatDcBy,
                 activeTraps: deliveryTrapNames,
                 activeTrapInstructions: deliveryTrapInstructions,
                 playerName: player.DisplayName,
-                opponentName: opponent.DisplayName,
+                dateeName: datee.DisplayName,
                 currentTurn: state.TurnNumber,
                 shadowThresholds: state.CurrentShadowThresholds,
                 isNat20: rollResult.IsNatTwenty,
@@ -160,14 +160,14 @@ namespace Pinder.Core.Conversation
             bool runTrap = state.Traps.HasActive && rollResult.ActivatedTrap == null;
             string trapInstruction = "";
             string trapDisplayName = "";
-            string opponentCtxForTrap = "";
+            string dateeCtxForTrap = "";
 
             if (runTrap)
             {
                 var activeTrap = state.Traps.Active!;
                 trapInstruction = activeTrap.Definition.LlmInstruction;
                 trapDisplayName = activeTrap.Definition.DisplayName;
-                opponentCtxForTrap = TurnOrchestratorHelpers.BuildOpponentContext(opponent);
+                dateeCtxForTrap = TurnOrchestratorHelpers.BuildDateeContext(datee);
 
                 if (string.IsNullOrWhiteSpace(trapInstruction)
                     || string.IsNullOrEmpty(deliveredMessage)
@@ -222,7 +222,7 @@ namespace Pinder.Core.Conversation
                 runTrap,
                 trapInstruction,
                 trapDisplayName,
-                opponentCtxForTrap,
+                dateeCtxForTrap,
                 runShadow,
                 corruptionInstruction,
                 pairedShadow ?? ShadowStatType.Dread,
@@ -289,7 +289,7 @@ namespace Pinder.Core.Conversation
             if (horninessOverlayInstruction != null)
             {
                 string beforeHorniness = deliveredMessage;
-                string opponentCtx = TurnOrchestratorHelpers.BuildOpponentContext(opponent);
+                string dateeCtx = TurnOrchestratorHelpers.BuildDateeContext(datee);
 
                 // AC-B2: Add remaining budget hint to Horniness overlay instruction if tight.
                 int currentWords = deliveredMessage.Split(new[] { ' ', '\r', '\n', '\t' }, StringSplitOptions.RemoveEmptyEntries).Length;
@@ -301,7 +301,7 @@ namespace Pinder.Core.Conversation
                 }
 
                 progress?.Report(new TurnProgressEvent(TurnProgressStage.HorninessOverlayStarted));
-                string rawHorninessOutput = await _llm.ApplyHorninessOverlayAsync(deliveredMessage, finalInstruction, opponentCtx, playerArchetypeDirectiveForDelivery, ct).ConfigureAwait(false);
+                string rawHorninessOutput = await _llm.ApplyHorninessOverlayAsync(deliveredMessage, finalInstruction, dateeCtx, playerArchetypeDirectiveForDelivery, ct).ConfigureAwait(false);
                 progress?.Report(new TurnProgressEvent(TurnProgressStage.HorninessOverlayCompleted, rawHorninessOutput));
 
                 string sanitizedHorninessOutput = MetaPrefixStripper.Strip(rawHorninessOutput);

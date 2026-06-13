@@ -236,17 +236,17 @@ namespace Pinder.Core.Tests
         // ---- GameSessionHelpers ----
 
         [Fact]
-        public void GameSessionHelpers_BuildOpponentVisibleProfile_IncludesNameAndBio()
+        public void GameSessionHelpers_BuildDateeVisibleProfile_IncludesNameAndBio()
         {
             var profile = MakeProfile("Luna", bio: "Coffee addict");
 
-            // #562: BuildOpponentVisibleProfile now returns a structured
+            // #562: BuildDateeVisibleProfile now returns a structured
             // DTO, not a string. The DTO carries the same fields and its
             // Render() method produces the line that's dropped into the
             // dialogue-options user message. Test the rendered shape so
             // the structural-test intent (name + bio land in player
             // context) is preserved.
-            var dto = GameSessionHelpers.BuildOpponentVisibleProfile(profile);
+            var dto = GameSessionHelpers.BuildDateeVisibleProfile(profile);
             string rendered = dto.Render();
 
             Assert.Equal("Luna", dto.DisplayName);
@@ -256,7 +256,7 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public void GameSessionHelpers_GetLastOpponentMessage_ReturnsLastMatch()
+        public void GameSessionHelpers_GetLastDateeMessage_ReturnsLastMatch()
         {
             var history = new List<(string Sender, string Text)>
             {
@@ -266,17 +266,17 @@ namespace Pinder.Core.Tests
                 ("Luna", "I'm great!")
             };
 
-            var result = GameSessionHelpers.GetLastOpponentMessage(history, "Luna");
+            var result = GameSessionHelpers.GetLastDateeMessage(history, "Luna");
 
             Assert.Equal("I'm great!", result);
         }
 
         [Fact]
-        public void GameSessionHelpers_GetLastOpponentMessage_Empty_ReturnsEmptyString()
+        public void GameSessionHelpers_GetLastDateeMessage_Empty_ReturnsEmptyString()
         {
             var history = new List<(string Sender, string Text)>();
 
-            var result = GameSessionHelpers.GetLastOpponentMessage(history, "Luna");
+            var result = GameSessionHelpers.GetLastDateeMessage(history, "Luna");
 
             Assert.Equal(string.Empty, result);
         }
@@ -287,12 +287,12 @@ namespace Pinder.Core.Tests
         public void GameSession_Constructor_StillWorks()
         {
             var player = MakeProfile("Player");
-            var opponent = MakeProfile("Opponent");
+            var datee = MakeProfile("Datee");
             var llm = new NullLlmAdapter();
             var dice = new FixedDice(5);
             var config = new GameSessionConfig(clock: TestHelpers.MakeClock());
 
-            var session = new GameSession(player, opponent, llm, dice, new NullTrapRegistry(), config);
+            var session = new GameSession(player, datee, llm, dice, new NullTrapRegistry(), config);
 
             // Session created successfully, XP starts at 0
             Assert.Equal(0, session.TotalXpEarned);
@@ -302,12 +302,12 @@ namespace Pinder.Core.Tests
         public void GameSession_Wait_StillWorks()
         {
             var player = MakeProfile("Player");
-            var opponent = MakeProfile("Opponent");
+            var datee = MakeProfile("Datee");
             var llm = new NullLlmAdapter();
             var dice = new FixedDice(5); // Not 1, so ghost trigger won't fire
             var config = new GameSessionConfig(clock: TestHelpers.MakeClock());
 
-            var session = new GameSession(player, opponent, llm, dice, new NullTrapRegistry(), config);
+            var session = new GameSession(player, datee, llm, dice, new NullTrapRegistry(), config);
 
             // Wait should not throw
             session.Wait();

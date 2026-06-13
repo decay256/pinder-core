@@ -32,17 +32,17 @@ namespace Pinder.LlmAdapters.Tests
         {
             return new DialogueContext(
                 playerPrompt: "PSYCHOLOGICAL STAKE:\n" + string.Join("\n", stakeLines ?? MakeStakeLines()),
-                opponentPrompt: "opponent prompt",
+                dateePrompt: "datee prompt",
                 conversationHistory: new List<(string, string)>
                 {
                     ("O", "Hi"),
                     ("P", "Hey there"),
                 },
-                opponentLastMessage: "Hi",
+                dateeLastMessage: "Hi",
                 activeTraps: Array.Empty<string>(),
                 currentInterest: 12,
                 playerName: "P",
-                opponentName: "O",
+                dateeName: "O",
                 currentTurn: turn,
                 stakeLines: stakeLines ?? MakeStakeLines(),
                 stakeLinesReferenced: stakeLinesReferenced);

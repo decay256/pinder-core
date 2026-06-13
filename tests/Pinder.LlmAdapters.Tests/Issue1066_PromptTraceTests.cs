@@ -61,9 +61,9 @@ namespace Pinder.LlmAdapters.Tests
 
             var context = new DialogueContext(
                 playerPrompt: "You are reuben.",
-                opponentPrompt: "You are talking to velvet.",
+                dateePrompt: "You are talking to velvet.",
                 conversationHistory: new List<(string Sender, string Text)> { ("Velvet", "Hello") },
-                opponentLastMessage: "Hello",
+                dateeLastMessage: "Hello",
                 activeTraps: new List<string>(),
                 currentInterest: 10,
                 currentTurn: 3

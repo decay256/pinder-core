@@ -102,7 +102,7 @@ and choose the optimal dialogue option each turn. Your goal is to reach Interest
 
 ```
 You are playing as {player_character_name}, a sentient penis on a dating app.
-You are talking to {opponent_character_name}. Choose one of the dialogue options below.
+You are talking to {datee_character_name}. Choose one of the dialogue options below.
 
 ## Current State
 - Interest: {interest}/25 ({interest_state_name}) — {modifier_note}
@@ -147,7 +147,7 @@ PICK: [A/B/C/D]
 | `{turn_number}` | Integer | `context.TurnNumber` |
 | `{STAT_NAME}` | Uppercase stat name (e.g. "CHARM") | `option.Stat.ToString().ToUpperInvariant()` |
 | `{modifier}` | Signed integer | `context.PlayerStats.GetEffective(option.Stat)` |
-| `{dc}` | Integer | `context.OpponentStats.GetDefenceDC(option.Stat)` |
+| `{dc}` | Integer | `context.DateeStats.GetDefenceDC(option.Stat)` |
 | `{need}` | Integer | `dc - modifier` (before hidden bonuses) |
 | `{pct}` | Integer 0–100 | `Math.Max(0, Math.Min(100, (21 - need) * 5))` |
 | `{risk_tier}` | "Safe" / "Medium" / "Hard" / "Bold" | Based on `need`: ≤5 Safe, 6–10 Medium, 11–15 Hard, ≥16 Bold |
@@ -252,7 +252,7 @@ This means the `Scores` array is always available for the playtest output table 
 
 **Input — PlayerAgentContext:**
 - PlayerStats: Charm +4, Rizz +1, Honesty +3, Chaos +2, Wit +2, SA +3
-- OpponentStats: (defences yield DCs: Charm→15, Rizz→14, Honesty→13, Chaos→15)
+- DateeStats: (defences yield DCs: Charm→15, Rizz→14, Honesty→13, Chaos→15)
 - CurrentInterest: 12
 - InterestState: Interested
 - MomentumStreak: 2

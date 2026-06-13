@@ -89,32 +89,32 @@ OPTION_4
 
         private static DialogueContext MakeDialogueContext() => new DialogueContext(
             playerPrompt: "You are Thundercock",
-            opponentPrompt: "You are Velvet",
+            dateePrompt: "You are Velvet",
             conversationHistory: new List<(string, string)> { ("Velvet", "Hey there") },
-            opponentLastMessage: "Hey there",
+            dateeLastMessage: "Hey there",
             activeTraps: new string[0],
             currentInterest: 10,
             playerName: "Thundercock",
-            opponentName: "Velvet",
+            dateeName: "Velvet",
             currentTurn: 1);
 
         private static DeliveryContext MakeDeliveryContext() => new DeliveryContext(
             playerPrompt: "You are Thundercock",
-            opponentPrompt: "You are Velvet",
+            dateePrompt: "You are Velvet",
             conversationHistory: new List<(string, string)> { ("Velvet", "Hey") },
-            opponentLastMessage: "Hey",
+            dateeLastMessage: "Hey",
             chosenOption: new DialogueOption(StatType.Charm, "Nice to meet you"),
             outcome: FailureTier.None,
             beatDcBy: 5,
             activeTraps: new string[0],
             playerName: "Thundercock",
-            opponentName: "Velvet");
+            dateeName: "Velvet");
 
-        private static OpponentContext MakeOpponentContext() => new OpponentContext(
+        private static DateeContext MakeDateeContext() => new DateeContext(
             playerPrompt: "You are Thundercock",
-            opponentPrompt: "You are Velvet",
+            dateePrompt: "You are Velvet",
             conversationHistory: new List<(string, string)> { ("Velvet", "Hey") },
-            opponentLastMessage: "Hey",
+            dateeLastMessage: "Hey",
             activeTraps: new string[0],
             currentInterest: 12,
             playerDeliveredMessage: "Nice to meet you too!",
@@ -122,7 +122,7 @@ OPTION_4
             interestAfter: 12,
             responseDelayMinutes: 2.0,
             playerName: "Thundercock",
-            opponentName: "Velvet");
+            dateeName: "Velvet");
 
         // ==============================================================================
         // AC1: All 4 ILlmAdapter methods implemented — behavioral integration
@@ -195,20 +195,20 @@ OPTION_4
             Assert.Empty(body!.System);
         }
 
-        // AC3: Opponent response uses ONLY OpponentPrompt
+        // AC3: Datee response uses ONLY DateePrompt
         // ==============================================================================
 
-        // What: AC3 - Opponent system has exactly 1 block
-        // Mutation: Would catch if 2 blocks sent (player + opponent) instead of opponent-only
+        // What: AC3 - Datee system has exactly 1 block
+        // Mutation: Would catch if 2 blocks sent (player + datee) instead of datee-only
         [Fact]
-        public async Task GetOpponentResponseAsync_ExactlyOneSystemBlock()
+        public async Task GetDateeResponseAsync_ExactlyOneSystemBlock()
         {
             var handler = new CapturingHttpHandler(@"[RESPONSE]
 ""text""");
             using var client = new HttpClient(handler);
             using var adapter = new AnthropicLlmAdapter(DefaultOptions(), client);
 
-            await adapter.GetOpponentResponseAsync(MakeOpponentContext());
+            await adapter.GetDateeResponseAsync(MakeDateeContext());
 
             var body = JsonConvert.DeserializeObject<MessagesRequest>(handler.RequestBodies[0]);
             Assert.Single(body!.System);
@@ -245,28 +245,28 @@ OPTION_4
         {
             // This is a compile-time check + runtime defaults check
             var ctx = new DialogueContext(
-                "player", "opponent",
+                "player", "datee",
                 new List<(string, string)>(),
                 "last", new string[0], 10);
 
             Assert.Equal("", ctx.PlayerName);
-            Assert.Equal("", ctx.OpponentName);
+            Assert.Equal("", ctx.DateeName);
             Assert.Equal(0, ctx.CurrentTurn);
         }
 
-        // What: AC8 - OpponentContext new fields have correct defaults
+        // What: AC8 - DateeContext new fields have correct defaults
         // Mutation: Would catch if defaults are non-empty string or non-zero
         [Fact]
-        public void OpponentContext_NewFieldsDefaultCorrectly()
+        public void DateeContext_NewFieldsDefaultCorrectly()
         {
-            var ctx = new OpponentContext(
-                "player", "opponent",
+            var ctx = new DateeContext(
+                "player", "datee",
                 new List<(string, string)>(),
                 "last", new string[0], 10, "msg",
                 10, 12, 2.0);
 
             Assert.Equal("", ctx.PlayerName);
-            Assert.Equal("", ctx.OpponentName);
+            Assert.Equal("", ctx.DateeName);
             Assert.Equal(0, ctx.CurrentTurn);
         }
 
@@ -276,7 +276,7 @@ OPTION_4
         public void DeliveryContext_NewFieldsDefaultCorrectly()
         {
             var ctx = new DeliveryContext(
-                "player", "opponent",
+                "player", "datee",
                 new List<(string, string)>(),
                 "last",
                 new DialogueOption(StatType.Charm, "text"),
@@ -284,7 +284,7 @@ OPTION_4
                 new string[0]);
 
             Assert.Equal("", ctx.PlayerName);
-            Assert.Equal("", ctx.OpponentName);
+            Assert.Equal("", ctx.DateeName);
             Assert.Equal(0, ctx.CurrentTurn);
         }
 

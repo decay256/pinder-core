@@ -29,7 +29,7 @@ namespace Pinder.LlmAdapters
             // LLM context — GameSession.BuildHistoryForLlmContext() normally
             // filters them, but a defense-in-depth guard here prevents any
             // caller from accidentally passing an unfiltered list and having
-            // the LLM confuse "[scene]" for the opponent's character name.
+            // the LLM confuse "[scene]" for the datee's character name.
             int filteredIndex = 0;
             for (int i = 0; i < history.Count; i++)
             {
@@ -58,8 +58,8 @@ namespace Pinder.LlmAdapters
 
             // #951: skip scene entries (sender == "[scene]") before computing
             // the last-6 window so turn-0 bios and outfit descriptions never
-            // appear as [OPPONENT] lines that confuse the LLM about the
-            // opponent's character name.
+            // appear as [DATEE] lines that confuse the LLM about the
+            // datee's character name.
             var filtered = new List<(string Sender, string Text)>(history.Count);
             foreach (var e in history)
             {

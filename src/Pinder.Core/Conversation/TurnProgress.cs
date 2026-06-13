@@ -38,11 +38,11 @@ namespace Pinder.Core.Conversation
         /// <summary>Trap overlay LLM returned; Text carries the rewritten message.</summary>
         TrapOverlayCompleted,
 
-        /// <summary>About to call the opponent-response LLM.</summary>
-        OpponentResponseStarted,
+        /// <summary>About to call the datee-response LLM.</summary>
+        DateeResponseStarted,
 
-        /// <summary>Opponent response LLM returned; Text carries the opponent message.</summary>
-        OpponentResponseCompleted,
+        /// <summary>Datee response LLM returned; Text carries the datee message.</summary>
+        DateeResponseCompleted,
     }
 
     /// <summary>
@@ -55,7 +55,7 @@ namespace Pinder.Core.Conversation
 
         /// <summary>
         /// Optional string payload (e.g. the delivered message for DeliveryCompleted,
-        /// or the opponent reply for OpponentResponseCompleted). May be <c>null</c>
+        /// or the datee reply for DateeResponseCompleted). May be <c>null</c>
         /// for "started" stages.
         /// </summary>
         public string? Text { get; }

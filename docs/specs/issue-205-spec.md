@@ -148,7 +148,7 @@ public sealed class AnthropicOptions
     public double Temperature { get; set; }                         // default: 0.9
     public double? DialogueOptionsTemperature { get; set; }         // default: null
     public double? DeliveryTemperature { get; set; }                // default: null
-    public double? OpponentResponseTemperature { get; set; }        // default: null
+    public double? DateeResponseTemperature { get; set; }        // default: null
     public double? InterestChangeBeatTemperature { get; set; }      // default: null
 }
 ```

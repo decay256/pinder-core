@@ -47,19 +47,19 @@ namespace Pinder.LlmAdapters.Tests
         private static DialogueContext MakeContext(
             string playerTextingStyle = "",
             string playerName = "Velvet",
-            string opponentName = "Sable",
+            string dateeName = "Sable",
             int currentInterest = 10,
             int currentTurn = 1)
         {
             return new DialogueContext(
                 playerPrompt: "player system prompt",
-                opponentPrompt: "opponent system prompt",
+                dateePrompt: "datee system prompt",
                 conversationHistory: new List<(string, string)>(),
-                opponentLastMessage: "hey there",
+                dateeLastMessage: "hey there",
                 activeTraps: Array.Empty<string>(),
                 currentInterest: currentInterest,
                 playerName: playerName,
-                opponentName: opponentName,
+                dateeName: dateeName,
                 currentTurn: currentTurn,
                 playerTextingStyle: playerTextingStyle);
         }
@@ -123,9 +123,9 @@ namespace Pinder.LlmAdapters.Tests
         {
             var ctx = new DialogueContext(
                 playerPrompt: "p",
-                opponentPrompt: "o",
+                dateePrompt: "o",
                 conversationHistory: new List<(string, string)>(),
-                opponentLastMessage: "",
+                dateeLastMessage: "",
                 activeTraps: Array.Empty<string>(),
                 currentInterest: 10);
 
@@ -227,13 +227,13 @@ namespace Pinder.LlmAdapters.Tests
         {
             var ctx = new DialogueContext(
                 playerPrompt: "p",
-                opponentPrompt: "o",
+                dateePrompt: "o",
                 conversationHistory: new List<(string, string)>(),
-                opponentLastMessage: "hello",
+                dateeLastMessage: "hello",
                 activeTraps: Array.Empty<string>(),
                 currentInterest: 10,
                 playerName: "Velvet",
-                opponentName: "Sable",
+                dateeName: "Sable",
                 currentTurn: 1);
 
             string result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(ctx);
@@ -293,21 +293,21 @@ namespace Pinder.LlmAdapters.Tests
         //  (structural test: Velvet's style appears, not Sable's)
         // ══════════════════════════════════════════════════════════════
 
-        // Mutation: would catch if opponent's style leaks into the prompt instead of player's
+        // Mutation: would catch if datee's style leaks into the prompt instead of player's
         [Fact]
-        public void BuildDialogueOptionsPrompt_UsesPlayerStyle_NotOpponentStyle()
+        public void BuildDialogueOptionsPrompt_UsesPlayerStyle_NotDateeStyle()
         {
             string velvetStyle = "lowercase-with-intent, precise, ironic";
             var ctx = MakeContext(
                 playerTextingStyle: velvetStyle,
                 playerName: "Velvet",
-                opponentName: "Sable");
+                dateeName: "Sable");
 
             string result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(ctx);
 
             Assert.Contains(velvetStyle, result);
-            // The opponent's style text shouldn't appear in the TEXTING STYLE block
-            // (opponent's prompt is separate context, not a texting style directive)
+            // The datee's style text shouldn't appear in the TEXTING STYLE block
+            // (datee's prompt is separate context, not a texting style directive)
         }
 
         // ══════════════════════════════════════════════════════════════
@@ -322,7 +322,7 @@ namespace Pinder.LlmAdapters.Tests
             var ctx = MakeContext(
                 playerTextingStyle: velvetStyle,
                 playerName: "Velvet",
-                opponentName: "Sable");
+                dateeName: "Sable");
 
             string result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(ctx);
 
@@ -364,7 +364,7 @@ namespace Pinder.LlmAdapters.Tests
             var ctx = MakeContext(
                 playerTextingStyle: sableStyle,
                 playerName: "Sable",
-                opponentName: "Velvet");
+                dateeName: "Velvet");
 
             string result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(ctx);
 

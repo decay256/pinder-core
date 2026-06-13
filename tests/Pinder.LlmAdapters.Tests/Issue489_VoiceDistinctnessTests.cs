@@ -23,13 +23,13 @@ namespace Pinder.LlmAdapters.Tests
         {
             return new DialogueContext(
                 playerPrompt: "player prompt",
-                opponentPrompt: "opponent prompt",
+                dateePrompt: "datee prompt",
                 conversationHistory: new List<(string, string)>(),
-                opponentLastMessage: "hey",
+                dateeLastMessage: "hey",
                 activeTraps: Array.Empty<string>(),
                 currentInterest: currentInterest,
                 playerName: "Velvet",
-                opponentName: "Sable",
+                dateeName: "Sable",
                 currentTurn: currentTurn,
                 playerTextingStyle: playerTextingStyle);
         }
@@ -78,9 +78,9 @@ namespace Pinder.LlmAdapters.Tests
         {
             var ctx = new DialogueContext(
                 playerPrompt: "p",
-                opponentPrompt: "o",
+                dateePrompt: "o",
                 conversationHistory: new List<(string, string)>(),
-                opponentLastMessage: "",
+                dateeLastMessage: "",
                 activeTraps: Array.Empty<string>(),
                 currentInterest: 10);
 
@@ -128,13 +128,13 @@ namespace Pinder.LlmAdapters.Tests
             // Default constructor — no playerTextingStyle param
             var ctx = new DialogueContext(
                 playerPrompt: "p",
-                opponentPrompt: "o",
+                dateePrompt: "o",
                 conversationHistory: new List<(string, string)>(),
-                opponentLastMessage: "hi",
+                dateeLastMessage: "hi",
                 activeTraps: Array.Empty<string>(),
                 currentInterest: 10,
                 playerName: "V",
-                opponentName: "S",
+                dateeName: "S",
                 currentTurn: 1);
             string result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(ctx);
 

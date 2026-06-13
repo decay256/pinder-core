@@ -11,12 +11,12 @@ namespace Pinder.LlmAdapters.Tests
     {
         private static DialogueContext MakeDialogueContext(
             IReadOnlyList<(string Sender, string Text)> conversationHistory = null,
-            string opponentLastMessage = "",
+            string dateeLastMessage = "",
             string[] activeTraps = null,
             int currentInterest = 10,
             int currentTurn = 1,
             string playerName = "P",
-            string opponentName = "O",
+            string dateeName = "O",
             Dictionary<ShadowStatType, int> shadowThresholds = null,
             List<CallbackOpportunity> callbackOpportunities = null,
             string[] activeTrapInstructions = null,
@@ -25,9 +25,9 @@ namespace Pinder.LlmAdapters.Tests
         {
             return new DialogueContext(
                 playerPrompt: "player prompt",
-                opponentPrompt: "opponent prompt",
+                dateePrompt: "datee prompt",
                 conversationHistory: conversationHistory ?? new List<(string, string)>(),
-                opponentLastMessage: opponentLastMessage,
+                dateeLastMessage: dateeLastMessage,
                 activeTraps: activeTraps ?? Array.Empty<string>(),
                 currentInterest: currentInterest,
                 shadowThresholds: shadowThresholds,
@@ -36,7 +36,7 @@ namespace Pinder.LlmAdapters.Tests
                 requiresRizzOption: requiresRizzOption,
                 activeTrapInstructions: activeTrapInstructions,
                 playerName: playerName,
-                opponentName: opponentName,
+                dateeName: dateeName,
                 currentTurn: currentTurn);
         }
 
@@ -47,14 +47,14 @@ namespace Pinder.LlmAdapters.Tests
             int beatDcBy = 0,
             string[] activeTrapInstructions = null,
             string playerName = "P",
-            string opponentName = "O",
+            string dateeName = "O",
             Dictionary<ShadowStatType, int> shadowThresholds = null)
         {
             return new DeliveryContext(
                 playerPrompt: "player prompt",
-                opponentPrompt: "opponent prompt",
+                dateePrompt: "datee prompt",
                 conversationHistory: conversationHistory ?? new List<(string, string)>(),
-                opponentLastMessage: "",
+                dateeLastMessage: "",
                 chosenOption: chosenOption ?? new DialogueOption(StatType.Charm, "default"),
                 outcome: outcome,
                 beatDcBy: beatDcBy,
@@ -62,10 +62,10 @@ namespace Pinder.LlmAdapters.Tests
                 shadowThresholds: shadowThresholds,
                 activeTrapInstructions: activeTrapInstructions,
                 playerName: playerName,
-                opponentName: opponentName);
+                dateeName: dateeName);
         }
 
-        private static OpponentContext MakeOpponentContext(
+        private static DateeContext MakeDateeContext(
             IReadOnlyList<(string Sender, string Text)> conversationHistory = null,
             string playerDeliveredMessage = "Hey",
             int interestBefore = 10,
@@ -73,14 +73,14 @@ namespace Pinder.LlmAdapters.Tests
             double responseDelayMinutes = 1.0,
             string[] activeTrapInstructions = null,
             string playerName = "P",
-            string opponentName = "O",
+            string dateeName = "O",
             Dictionary<ShadowStatType, int> shadowThresholds = null)
         {
-            return new OpponentContext(
+            return new DateeContext(
                 playerPrompt: "player prompt",
-                opponentPrompt: "opponent prompt",
+                dateePrompt: "datee prompt",
                 conversationHistory: conversationHistory ?? new List<(string, string)>(),
-                opponentLastMessage: "",
+                dateeLastMessage: "",
                 activeTraps: Array.Empty<string>(),
                 currentInterest: interestAfter,
                 playerDeliveredMessage: playerDeliveredMessage,
@@ -90,7 +90,7 @@ namespace Pinder.LlmAdapters.Tests
                 shadowThresholds: shadowThresholds,
                 activeTrapInstructions: activeTrapInstructions,
                 playerName: playerName,
-                opponentName: opponentName);
+                dateeName: dateeName);
         }
     }
 }

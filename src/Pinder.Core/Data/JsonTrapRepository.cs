@@ -135,7 +135,7 @@ namespace Pinder.Core.Data
             {
                 case "disadvantage":        effect = TrapEffect.Disadvantage;      return true;
                 case "stat_penalty":        effect = TrapEffect.StatPenalty;        return true;
-                case "opponent_dc_increase": effect = TrapEffect.OpponentDCIncrease; return true;
+                case "datee_dc_increase": effect = TrapEffect.DateeDCIncrease; return true;
                 default:                    effect = default;                       return false;
             }
         }

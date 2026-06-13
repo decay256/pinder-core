@@ -14,13 +14,13 @@ namespace Pinder.LlmAdapters
     /// sites. The transport decorator is registered as the outermost
     /// transformation layer in pinder-core's <c>session-runner/Program.cs</c>
     /// and pinder-web's <c>LlmProviderFactory</c>, so every prose-only and
-    /// structured surface (delivery, opponent reply, steering, overlays,
+    /// structured surface (delivery, datee reply, steering, overlays,
     /// stake, outfit, interest beat, dialogue options, …) automatically
     /// gets strip-on-output. New call sites added later cannot silently
     /// leak thinking blocks into player-visible text or the persistent
     /// system prompt.
     ///
-    /// Structured surfaces (dialogue option parsing, opponent response
+    /// Structured surfaces (dialogue option parsing, datee response
     /// signals) parse fields out of a known shape after a marker line
     /// (e.g. <c>OPTION_N</c> or <c>[SIGNALS]</c>); a stripped leading
     /// thinking block leaves those parsers unchanged.

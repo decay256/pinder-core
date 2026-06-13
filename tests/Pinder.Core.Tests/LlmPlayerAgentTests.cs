@@ -57,7 +57,7 @@ namespace Pinder.Core.Tests
         {
             return new PlayerAgentContext(
                 playerStats: MakeStats(),
-                opponentStats: MakeStats(charm: 2, rizz: 3, honesty: 2, chaos: 2, wit: 2, sa: 2),
+                dateeStats: MakeStats(charm: 2, rizz: 3, honesty: 2, chaos: 2, wit: 2, sa: 2),
                 currentInterest: 12,
                 interestState: InterestState.Interested,
                 momentumStreak: 2,

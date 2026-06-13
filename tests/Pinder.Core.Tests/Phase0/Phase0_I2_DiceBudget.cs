@@ -38,7 +38,7 @@ namespace Pinder.Core.Tests.Phase0
     ///         <c>hasAdvantage \|\| hasDisadvantage</c>. Not present in
     ///         this fixture (Lukewarm = no advantage, no disadvantage).</item>
     ///   <item><c>TimingProfile.ComputeDelay</c> — <c>TimingProfile.cs:53</c> —
-    ///         <c>dice.Roll(100)</c> for opponent reply variance.</item>
+    ///         <c>dice.Roll(100)</c> for datee reply variance.</item>
     /// </list>
     /// Steering / shadow / horniness rolls use a SEPARATE <c>Random</c>
     /// instance owned by <c>SteeringEngine</c> / <c>HorninessEngine</c> and do
@@ -85,7 +85,7 @@ namespace Pinder.Core.Tests.Phase0
             var transport = new RecordingLlmTransport { DefaultResponse = "" };
             transport.QueueDialogueOptions(Phase0Fixtures.CannedDialogueOptions);
             transport.QueueDelivery(Phase0Fixtures.CannedDelivery);
-            transport.QueueOpponent(Phase0Fixtures.CannedOpponent);
+            transport.QueueDatee(Phase0Fixtures.CannedDatee);
 
             var adapter = Phase0Fixtures.MakeAdapter(transport);
             // Over-allocate: prepare 4 draws for a turn that only consumes 3.
@@ -93,7 +93,7 @@ namespace Pinder.Core.Tests.Phase0
 
             var session = new GameSession(
                 Phase0Fixtures.MakeProfile("Player"),
-                Phase0Fixtures.MakeProfile("Opponent"),
+                Phase0Fixtures.MakeProfile("Datee"),
                 adapter, dice, new NullTrapRegistry(), Phase0Fixtures.MakeConfig());
 
             await session.StartTurnAsync();
@@ -112,7 +112,7 @@ namespace Pinder.Core.Tests.Phase0
             var transport = new RecordingLlmTransport { DefaultResponse = "" };
             transport.QueueDialogueOptions(Phase0Fixtures.CannedDialogueOptions);
             transport.QueueDelivery(Phase0Fixtures.CannedDelivery);
-            transport.QueueOpponent(Phase0Fixtures.CannedOpponent);
+            transport.QueueDatee(Phase0Fixtures.CannedDatee);
 
             var adapter = Phase0Fixtures.MakeAdapter(transport);
             // Under-allocate: prepare only 2 draws. Constructor consumes 1; the d20
@@ -121,7 +121,7 @@ namespace Pinder.Core.Tests.Phase0
 
             var session = new GameSession(
                 Phase0Fixtures.MakeProfile("Player"),
-                Phase0Fixtures.MakeProfile("Opponent"),
+                Phase0Fixtures.MakeProfile("Datee"),
                 adapter, dice, new NullTrapRegistry(), Phase0Fixtures.MakeConfig());
 
             await session.StartTurnAsync();
@@ -136,7 +136,7 @@ namespace Pinder.Core.Tests.Phase0
             var transport = new RecordingLlmTransport { DefaultResponse = "" };
             transport.QueueDialogueOptions(Phase0Fixtures.CannedDialogueOptions);
             transport.QueueDelivery(Phase0Fixtures.CannedDelivery);
-            transport.QueueOpponent(Phase0Fixtures.CannedOpponent);
+            transport.QueueDatee(Phase0Fixtures.CannedDatee);
 
             var adapter = Phase0Fixtures.MakeAdapter(transport);
 
@@ -151,7 +151,7 @@ namespace Pinder.Core.Tests.Phase0
 
             var session = new GameSession(
                 Phase0Fixtures.MakeProfile("Player"),
-                Phase0Fixtures.MakeProfile("Opponent"),
+                Phase0Fixtures.MakeProfile("Datee"),
                 adapter, dice, new NullTrapRegistry(), Phase0Fixtures.MakeConfig());
 
             await session.StartTurnAsync();

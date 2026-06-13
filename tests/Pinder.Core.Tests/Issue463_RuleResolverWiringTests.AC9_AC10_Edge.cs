@@ -25,7 +25,7 @@ namespace Pinder.Core.Tests
 
             var dice = new FixedDice(1, 20, 50, 50, 50, 50, 50, 50, 50, 50, 50);
             var session = new GameSession(
-                MakeProfile("Player"), MakeProfile("Opponent"),
+                MakeProfile("Player"), MakeProfile("Datee"),
                 new NullLlmAdapter(), dice, new NullTrapRegistry(), config);
 
             var start = await session.StartTurnAsync();
@@ -45,7 +45,7 @@ namespace Pinder.Core.Tests
             var dice = new FixedDice(1, 20, 50, 50, 50, 50, 50, 50, 50, 50, 50);
             var config = new GameSessionConfig(clock: TestHelpers.MakeClock());
             var session = new GameSession(
-                MakeProfile("Player"), MakeProfile("Opponent"),
+                MakeProfile("Player"), MakeProfile("Datee"),
                 new NullLlmAdapter(), dice, new NullTrapRegistry(), config);
 
             var start = await session.StartTurnAsync();
@@ -70,7 +70,7 @@ namespace Pinder.Core.Tests
             // Nat 20 → success
             var dice = new FixedDice(1, 20, 50, 50, 50, 50, 50, 50, 50, 50, 50);
             var session = new GameSession(
-                MakeProfile("Player"), MakeProfile("Opponent"),
+                MakeProfile("Player"), MakeProfile("Datee"),
                 new NullLlmAdapter(), dice, new NullTrapRegistry(), config);
 
             await session.StartTurnAsync();
@@ -92,7 +92,7 @@ namespace Pinder.Core.Tests
 
             var dice = new FixedDice(1, 20, 50, 50, 50, 50, 50, 50, 50, 50, 50);
             var session = new GameSession(
-                MakeProfile("Player"), MakeProfile("Opponent"),
+                MakeProfile("Player"), MakeProfile("Datee"),
                 new NullLlmAdapter(), dice, new NullTrapRegistry(), config);
 
             await session.StartTurnAsync();
@@ -115,7 +115,7 @@ namespace Pinder.Core.Tests
             var config1 = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 10);
             var dice1 = new FixedDice(1, 20, 50, 50, 50, 50, 50, 50, 50, 50, 50);
             var session1 = new GameSession(
-                MakeProfile("Player"), MakeProfile("Opponent"),
+                MakeProfile("Player"), MakeProfile("Datee"),
                 new NullLlmAdapter(), dice1, new NullTrapRegistry(), config1);
             await session1.StartTurnAsync();
             var result1 = await session1.ResolveTurnAsync(0);
@@ -125,7 +125,7 @@ namespace Pinder.Core.Tests
             var config2 = new GameSessionConfig(clock: TestHelpers.MakeClock(), rules: resolver, startingInterest: 10);
             var dice2 = new FixedDice(1, 20, 50, 50, 50, 50, 50, 50, 50, 50, 50);
             var session2 = new GameSession(
-                MakeProfile("Player"), MakeProfile("Opponent"),
+                MakeProfile("Player"), MakeProfile("Datee"),
                 new NullLlmAdapter(), dice2, new NullTrapRegistry(), config2);
             await session2.StartTurnAsync();
             var result2 = await session2.ResolveTurnAsync(0);
@@ -146,7 +146,7 @@ namespace Pinder.Core.Tests
 
             var dice = new FixedDice(1, 4);
             var session = new GameSession(
-                MakeProfile("Player"), MakeProfile("Opponent"),
+                MakeProfile("Player"), MakeProfile("Datee"),
                 new NullLlmAdapter(), dice, new NullTrapRegistry(), config);
 
             await session.StartTurnAsync();
@@ -172,7 +172,7 @@ namespace Pinder.Core.Tests
 
             var dice = new FixedDice(1);
             var session = new GameSession(
-                MakeProfile("Player"), MakeProfile("Opponent"),
+                MakeProfile("Player"), MakeProfile("Datee"),
                 new NullLlmAdapter(), dice, new NullTrapRegistry(), config);
 
             // With all zeros, Dread check should pass 0 for Dread shadow value

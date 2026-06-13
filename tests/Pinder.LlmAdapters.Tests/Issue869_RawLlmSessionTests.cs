@@ -61,7 +61,7 @@ namespace Pinder.LlmAdapters.Tests
         [InlineData("")]
         [InlineData("dialogue_options")]
         [InlineData("delivery")]
-        [InlineData("opponent_response")]
+        [InlineData("datee_response")]
         public void ParsePhase_unknown_phases_yield_Unknown_speaker_and_null_turn(string? phase)
         {
             var (speaker, turn) = RawLlmSession.ParsePhase(phase);

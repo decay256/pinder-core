@@ -24,8 +24,8 @@ CONDITION_KEYS = {
     'timing_range', 'natural_roll', 'miss_minimum', 'streak', 'streak_minimum',
     'action', 'stat', 'failed_stat', 'shadow', 'threshold', 'conversation_start',
     'formula', 'shadow_points_per_penalty', 'dc', 'time_of_day', 'energy_below',
-    'trap_active', 'combo_sequence', 'callback_distance', 'opponent_behaviour',
-    'opponent_trait', 'active_conversations_range', 'cross_chat_event',
+    'trap_active', 'combo_sequence', 'callback_distance', 'datee_behaviour',
+    'datee_trait', 'active_conversations_range', 'cross_chat_event',
     'item', 'tier', 'slot', 'parameter', 'levels', 'anatomy_tier',
     'fragment_type', 'stat_range', 'effect',
 }
@@ -49,7 +49,7 @@ OUTCOME_KEYS = {
     'archetype_stat_weight', 'effect_value',
     'shadow_dread', 'shadow_madness', 'shadow_overthinking',
     'high_stats', 'key_stats', 'key_shadow',
-    'mod_path', 'opponent_action', 'actions', 'tier_stat_range',
+    'mod_path', 'datee_action', 'actions', 'tier_stat_range',
 }
 
 RANGE_KEYS = {

@@ -14,8 +14,8 @@ namespace Pinder.SessionRunner
         /// <summary>The player character's stat block (immutable).</summary>
         public StatBlock PlayerStats { get; }
 
-        /// <summary>The opponent character's stat block (immutable).</summary>
-        public StatBlock OpponentStats { get; }
+        /// <summary>The datee character's stat block (immutable).</summary>
+        public StatBlock DateeStats { get; }
 
         /// <summary>Current interest meter value (0-25).</summary>
         public int CurrentInterest { get; }
@@ -56,15 +56,15 @@ namespace Pinder.SessionRunner
         /// <summary>The player character's display name.</summary>
         public string PlayerName { get; }
 
-        /// <summary>The opponent character's display name.</summary>
-        public string OpponentName { get; }
+        /// <summary>The datee character's display name.</summary>
+        public string DateeName { get; }
 
         /// <summary>Recent conversation history as (sender, text) pairs. Null or empty on first turn.</summary>
         public IReadOnlyList<(string Sender, string Text)> RecentHistory { get; }
 
         public PlayerAgentContext(
             StatBlock playerStats,
-            StatBlock opponentStats,
+            StatBlock dateeStats,
             int currentInterest,
             InterestState interestState,
             int momentumStreak,
@@ -77,12 +77,12 @@ namespace Pinder.SessionRunner
             bool honestyAvailableLastTurn = false,
             string playerSystemPrompt = "",
             string playerName = "",
-            string opponentName = "",
+            string dateeName = "",
             IReadOnlyList<(string Sender, string Text)> recentHistory = null,
             int playerLevelBonus = 0)
         {
             PlayerStats = playerStats ?? throw new ArgumentNullException(nameof(playerStats));
-            OpponentStats = opponentStats ?? throw new ArgumentNullException(nameof(opponentStats));
+            DateeStats = dateeStats ?? throw new ArgumentNullException(nameof(dateeStats));
             ActiveTrapNames = activeTrapNames ?? throw new ArgumentNullException(nameof(activeTrapNames));
             CurrentInterest = currentInterest;
             InterestState = interestState;
@@ -95,7 +95,7 @@ namespace Pinder.SessionRunner
             HonestyAvailableLastTurn = honestyAvailableLastTurn;
             PlayerSystemPrompt = playerSystemPrompt ?? "";
             PlayerName = playerName ?? "";
-            OpponentName = opponentName ?? "";
+            DateeName = dateeName ?? "";
             RecentHistory = recentHistory;
             PlayerLevelBonus = playerLevelBonus;
         }

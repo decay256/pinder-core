@@ -13,14 +13,14 @@ namespace Pinder.Core.Conversation
         /// <summary>Assembled system prompt for the player character.</summary>
         public string PlayerPrompt { get; }
 
-        /// <summary>Assembled system prompt for the opponent character.</summary>
-        public string OpponentPrompt { get; }
+        /// <summary>Assembled system prompt for the datee character.</summary>
+        public string DateePrompt { get; }
 
         /// <summary>Conversation history as (sender, text) pairs in order.</summary>
         public IReadOnlyList<(string Sender, string Text)> ConversationHistory { get; }
 
-        /// <summary>The opponent's last message, or empty if first turn.</summary>
-        public string OpponentLastMessage { get; }
+        /// <summary>The datee's last message, or empty if first turn.</summary>
+        public string DateeLastMessage { get; }
 
         /// <summary>The dialogue option the player chose.</summary>
         public DialogueOption ChosenOption { get; }
@@ -46,8 +46,8 @@ namespace Pinder.Core.Conversation
         /// <summary>Display name of the player character. Default empty for backward compatibility.</summary>
         public string PlayerName { get; }
 
-        /// <summary>Display name of the opponent character. Default empty for backward compatibility.</summary>
-        public string OpponentName { get; }
+        /// <summary>Display name of the datee character. Default empty for backward compatibility.</summary>
+        public string DateeName { get; }
 
         /// <summary>Current turn number (1-based). Default 0 for backward compatibility.</summary>
         public int CurrentTurn { get; }
@@ -71,9 +71,9 @@ namespace Pinder.Core.Conversation
 
         public DeliveryContext(
             string playerPrompt,
-            string opponentPrompt,
+            string dateePrompt,
             IReadOnlyList<(string Sender, string Text)> conversationHistory,
-            string opponentLastMessage,
+            string dateeLastMessage,
             DialogueOption chosenOption,
             FailureTier outcome,
             int beatDcBy,
@@ -81,16 +81,16 @@ namespace Pinder.Core.Conversation
             Dictionary<ShadowStatType, int>? shadowThresholds = null,
             string[]? activeTrapInstructions = null,
             string playerName = "",
-            string opponentName = "",
+            string dateeName = "",
             int currentTurn = 0,
             bool isNat20 = false,
             string statFailureInstruction = null,
             string activeArchetypeDirective = null)
         {
             PlayerPrompt = playerPrompt ?? throw new System.ArgumentNullException(nameof(playerPrompt));
-            OpponentPrompt = opponentPrompt ?? throw new System.ArgumentNullException(nameof(opponentPrompt));
+            DateePrompt = dateePrompt ?? throw new System.ArgumentNullException(nameof(dateePrompt));
             ConversationHistory = conversationHistory ?? throw new System.ArgumentNullException(nameof(conversationHistory));
-            OpponentLastMessage = opponentLastMessage ?? throw new System.ArgumentNullException(nameof(opponentLastMessage));
+            DateeLastMessage = dateeLastMessage ?? throw new System.ArgumentNullException(nameof(dateeLastMessage));
             ChosenOption = chosenOption ?? throw new System.ArgumentNullException(nameof(chosenOption));
             Outcome = outcome;
             BeatDcBy = beatDcBy;
@@ -98,7 +98,7 @@ namespace Pinder.Core.Conversation
             ShadowThresholds = shadowThresholds;
             ActiveTrapInstructions = activeTrapInstructions;
             PlayerName = playerName ?? "";
-            OpponentName = opponentName ?? "";
+            DateeName = dateeName ?? "";
             CurrentTurn = currentTurn;
             IsNat20 = isNat20;
             StatFailureInstruction = statFailureInstruction;

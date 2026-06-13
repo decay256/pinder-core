@@ -21,15 +21,15 @@ namespace Pinder.LlmAdapters.Tests
         {
             return new DeliveryContext(
                 playerPrompt: "player prompt",
-                opponentPrompt: "opponent prompt",
+                dateePrompt: "datee prompt",
                 conversationHistory: new List<(string, string)> { ("P", "hey"), ("O", "hi") },
-                opponentLastMessage: "hi",
+                dateeLastMessage: "hi",
                 chosenOption: new DialogueOption(StatType.Charm, "honestly? you're kind of funny"),
                 outcome: FailureTier.None,
                 beatDcBy: beatDcBy,
                 activeTraps: Array.Empty<string>(),
                 playerName: playerName,
-                opponentName: "Sable");
+                dateeName: "Sable");
         }
 
         // ══════════════════════════════════════════════════════════════
@@ -206,15 +206,15 @@ namespace Pinder.LlmAdapters.Tests
         {
             var ctx = new DeliveryContext(
                 playerPrompt: "player prompt",
-                opponentPrompt: "opponent prompt",
+                dateePrompt: "datee prompt",
                 conversationHistory: new List<(string, string)> { ("P", "hey"), ("O", "hi") },
-                opponentLastMessage: "hi",
+                dateeLastMessage: "hi",
                 chosenOption: new DialogueOption(StatType.Charm, "test message"),
                 outcome: FailureTier.Misfire,
                 beatDcBy: -4,
                 activeTraps: Array.Empty<string>(),
                 playerName: "Velvet",
-                opponentName: "Sable");
+                dateeName: "Sable");
 
             var result = SessionDocumentBuilder.BuildDeliveryPrompt(ctx);
 

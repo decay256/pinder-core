@@ -64,32 +64,32 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
 
         private static DialogueContext MakeDialogueContext() => new DialogueContext(
             playerPrompt: "You are Thundercock, a bold confident penis",
-            opponentPrompt: "You are Velvet, a mysterious and alluring match",
+            dateePrompt: "You are Velvet, a mysterious and alluring match",
             conversationHistory: new List<(string, string)> { ("Velvet", "Hey there, nice profile pic") },
-            opponentLastMessage: "Hey there, nice profile pic",
+            dateeLastMessage: "Hey there, nice profile pic",
             activeTraps: new string[0],
             currentInterest: 10,
             playerName: "Thundercock",
-            opponentName: "Velvet",
+            dateeName: "Velvet",
             currentTurn: 1);
 
         private static DeliveryContext MakeDeliveryContext() => new DeliveryContext(
             playerPrompt: "You are Thundercock",
-            opponentPrompt: "You are Velvet",
+            dateePrompt: "You are Velvet",
             conversationHistory: new List<(string, string)> { ("Velvet", "Hey") },
-            opponentLastMessage: "Hey",
+            dateeLastMessage: "Hey",
             chosenOption: new DialogueOption(StatType.Charm, "Nice to meet you"),
             outcome: FailureTier.None,
             beatDcBy: 7,
             activeTraps: new string[0],
             playerName: "Thundercock",
-            opponentName: "Velvet");
+            dateeName: "Velvet");
 
-        private static OpponentContext MakeOpponentContext() => new OpponentContext(
+        private static DateeContext MakeDateeContext() => new DateeContext(
             playerPrompt: "You are Thundercock",
-            opponentPrompt: "You are Velvet",
+            dateePrompt: "You are Velvet",
             conversationHistory: new List<(string, string)> { ("Velvet", "Hey") },
-            opponentLastMessage: "Hey",
+            dateeLastMessage: "Hey",
             activeTraps: new string[0],
             currentInterest: 12,
             playerDeliveredMessage: "Nice to meet you!",
@@ -97,7 +97,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             interestAfter: 12,
             responseDelayMinutes: 2.0,
             playerName: "Thundercock",
-            opponentName: "Velvet");
+            dateeName: "Velvet");
 
         private static InterestChangeContext MakeInterestChangeContext() =>
             new InterestChangeContext("Velvet", 15, 17, InterestState.VeryIntoIt);

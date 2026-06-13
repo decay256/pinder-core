@@ -3,17 +3,17 @@ using Xunit;
 namespace Pinder.LlmAdapters.Tests
 {
     /// <summary>
-    /// Issue #311: Verify that OpponentResponseInstruction includes all 10 tell category mappings
-    /// from rules §15, so the LLM uses the correct stat for each opponent behavior.
+    /// Issue #311: Verify that DateeResponseInstruction includes all 10 tell category mappings
+    /// from rules §15, so the LLM uses the correct stat for each datee behavior.
     /// </summary>
     public class Issue311_TellCategoriesTests
     {
         [Fact]
-        public void OpponentResponseInstruction_ContainsTellCategoryHeader()
+        public void DateeResponseInstruction_ContainsTellCategoryHeader()
         {
             Assert.Contains(
                 "When generating a TELL, use ONLY these category mappings:",
-                PromptTemplates.OpponentResponseInstruction);
+                PromptTemplates.DateeResponseInstruction);
         }
 
         [Theory]
@@ -27,17 +27,17 @@ namespace Pinder.LlmAdapters.Tests
         [InlineData("DATEE flirts", "TELL: RIZZ or CHARM")]
         [InlineData("DATEE changes subject", "TELL: CHAOS")]
         [InlineData("DATEE goes quiet/silent", "TELL: SELF_AWARENESS")]
-        public void OpponentResponseInstruction_ContainsTellCategory(string behavior, string expectedTell)
+        public void DateeResponseInstruction_ContainsTellCategory(string behavior, string expectedTell)
         {
             // Each mapping should appear as "- {behavior} → {expectedTell}"
             var expectedMapping = $"- {behavior} \u2192 {expectedTell}";
-            Assert.Contains(expectedMapping, PromptTemplates.OpponentResponseInstruction);
+            Assert.Contains(expectedMapping, PromptTemplates.DateeResponseInstruction);
         }
 
         [Fact]
-        public void OpponentResponseInstruction_ContainsAll10TellCategories()
+        public void DateeResponseInstruction_ContainsAll10TellCategories()
         {
-            var instruction = PromptTemplates.OpponentResponseInstruction;
+            var instruction = PromptTemplates.DateeResponseInstruction;
 
             // Count the number of tell category mapping lines (lines starting with "- DATEE")
             var lines = instruction.Split('\n');

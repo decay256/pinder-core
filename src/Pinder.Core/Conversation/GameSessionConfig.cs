@@ -17,8 +17,8 @@ namespace Pinder.Core.Conversation
         /// <summary>Mutable shadow tracker for the player character.</summary>
         public SessionShadowTracker? PlayerShadows { get; }
 
-        /// <summary>Mutable shadow tracker for the opponent character.</summary>
-        public SessionShadowTracker? OpponentShadows { get; }
+        /// <summary>Mutable shadow tracker for the datee character.</summary>
+        public SessionShadowTracker? DateeShadows { get; }
 
         /// <summary>Override the default starting interest value (normally 10).</summary>
         public int? StartingInterest { get; }
@@ -101,7 +101,7 @@ namespace Pinder.Core.Conversation
         public GameSessionConfig(
             IGameClock? clock = null,
             SessionShadowTracker? playerShadows = null,
-            SessionShadowTracker? opponentShadows = null,
+            SessionShadowTracker? dateeShadows = null,
             int? startingInterest = null,
             string? previousOpener = null,
             IRuleResolver? rules = null,
@@ -117,7 +117,7 @@ namespace Pinder.Core.Conversation
         {
             Clock = clock;
             PlayerShadows = playerShadows;
-            OpponentShadows = opponentShadows;
+            DateeShadows = dateeShadows;
             StartingInterest = startingInterest;
             PreviousOpener = previousOpener;
             Rules = rules;

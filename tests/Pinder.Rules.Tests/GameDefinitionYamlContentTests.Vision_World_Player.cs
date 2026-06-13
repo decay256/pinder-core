@@ -13,10 +13,10 @@ namespace Pinder.Rules.Tests
         {
             var data = ParseYaml();
             var vision = data["vision"];
-            // Must mention that opponents are other players' characters
+            // Must mention that datees are other players' characters
             Assert.True(
                 vision.Contains("player", StringComparison.OrdinalIgnoreCase) &&
-                (vision.Contains("opponent", StringComparison.OrdinalIgnoreCase) ||
+                (vision.Contains("datee", StringComparison.OrdinalIgnoreCase) ||
                  vision.Contains("DATEE", StringComparison.OrdinalIgnoreCase) ||
                  vision.Contains("other player", StringComparison.OrdinalIgnoreCase) ||
                  vision.Contains("multiplayer", StringComparison.OrdinalIgnoreCase) ||
@@ -104,12 +104,12 @@ namespace Pinder.Rules.Tests
         {
             var data = ParseYaml();
             var world = data["world_description"];
-            var opponent = data["opponent_role_description"];
+            var datee = data["datee_role_description"];
             Assert.True(
                 world.Contains("Bored", StringComparison.Ordinal) ||
-                opponent.Contains("Bored", StringComparison.Ordinal) ||
+                datee.Contains("Bored", StringComparison.Ordinal) ||
                 world.Contains("ghost", StringComparison.OrdinalIgnoreCase) ||
-                opponent.Contains("ghost", StringComparison.OrdinalIgnoreCase),
+                datee.Contains("ghost", StringComparison.OrdinalIgnoreCase),
                 "World description must mention Bored state or ghosting risk");
         }
 

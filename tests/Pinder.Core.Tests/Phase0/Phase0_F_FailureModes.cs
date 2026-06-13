@@ -37,7 +37,7 @@ namespace Pinder.Core.Tests.Phase0
         public async Task F1_RateLimit429_DuringTurn_FailsCleanly_TurnCounterUnchanged()
         {
             var transport = new ExceptionInjectingTransport(
-                throwOnPhase: LlmPhase.OpponentResponse,
+                throwOnPhase: LlmPhase.DateeResponse,
                 exFactory: () => new HttpRequestExceptionShim(
                     "Simulated 429 Too Many Requests"));
 
@@ -50,14 +50,14 @@ namespace Pinder.Core.Tests.Phase0
             Assert.Equal(turnBefore, session.TurnNumber);
         }
 
-        // F2 — network blip during opponent reply.
+        // F2 — network blip during datee reply.
         // Same shape as F1 but with a different exception type to prove the
         // engine doesn't conditionally swallow specific exception types.
         [Fact]
-        public async Task F2_NetworkBlip_DuringOpponentReply_FailsCleanly_TurnCounterUnchanged()
+        public async Task F2_NetworkBlip_DuringDateeReply_FailsCleanly_TurnCounterUnchanged()
         {
             var transport = new ExceptionInjectingTransport(
-                throwOnPhase: LlmPhase.OpponentResponse,
+                throwOnPhase: LlmPhase.DateeResponse,
                 exFactory: () => new System.Net.Sockets.SocketException(
                     (int)System.Net.Sockets.SocketError.ConnectionReset));
 
@@ -74,7 +74,7 @@ namespace Pinder.Core.Tests.Phase0
         // plumbing. F3 was a thin wrapper around "transport throws OCE".
         // Post-#794: the engine accepts a real CancellationToken on
         // ResolveTurnAsync. F3 now exercises both shapes:
-        //   F3a (legacy): transport throws OCE during opponent_response.
+        //   F3a (legacy): transport throws OCE during datee_response.
         //   F3b (new):    real CancellationTokenSource.Cancel() fires after
         //                 delivery completes; the next awaited LLM call sees
         //                 the cancelled token and surfaces OCE.
@@ -83,7 +83,7 @@ namespace Pinder.Core.Tests.Phase0
         public async Task F3a_TransportThrowsOCE_MidStream_FailsCleanly_NoHalfWrittenAudit()
         {
             var transport = new ExceptionInjectingTransport(
-                throwOnPhase: LlmPhase.OpponentResponse,
+                throwOnPhase: LlmPhase.DateeResponse,
                 exFactory: () => new OperationCanceledException("simulated cancellation mid-stream"));
 
             var session = MakeSession(transport, out var inner);
@@ -94,14 +94,14 @@ namespace Pinder.Core.Tests.Phase0
 
             // Audit "half-written" check (pinder-core surface): the wrapped
             // RecordingLlmTransport recorded the calls that did succeed
-            // BEFORE the throw, but no opponent_response exchange was
+            // BEFORE the throw, but no datee_response exchange was
             // committed because the throwing transport never delegated.
-            Assert.Empty(inner.ExchangesByPhase(LlmPhase.OpponentResponse));
+            Assert.Empty(inner.ExchangesByPhase(LlmPhase.DateeResponse));
         }
 
         // F3b — real cancellation. CancellationTokenSource.Cancel() fires
         // after the delivery phase completes; the engine's next awaited
-        // adapter call (overlay or opponent_response) sees the cancelled
+        // adapter call (overlay or datee_response) sees the cancelled
         // token and propagates OCE. This is the post-#794 invariant
         // strengthened from a weaker "OCE-from-transport" smoke check.
         [Fact]
@@ -116,7 +116,7 @@ namespace Pinder.Core.Tests.Phase0
             var dice = new PlaybackDiceRoller(5, 15, 50);
             var session = new GameSession(
                 Phase0Fixtures.MakeProfile("Player"),
-                Phase0Fixtures.MakeProfile("Opponent"),
+                Phase0Fixtures.MakeProfile("Datee"),
                 adapter, dice, new NullTrapRegistry(),
                 Phase0Fixtures.MakeConfig());
 
@@ -125,9 +125,9 @@ namespace Pinder.Core.Tests.Phase0
             await Assert.ThrowsAnyAsync<OperationCanceledException>(
                 () => session.ResolveTurnAsync(0, progress: null, ct: cts.Token));
 
-            // No turn advancement, no opponent_response written.
+            // No turn advancement, no datee_response written.
             Assert.Equal(turnBefore, session.TurnNumber);
-            Assert.Empty(transport.Inner.ExchangesByPhase(LlmPhase.OpponentResponse));
+            Assert.Empty(transport.Inner.ExchangesByPhase(LlmPhase.DateeResponse));
         }
 
         // F4 — disk-full during audit write.
@@ -188,7 +188,7 @@ namespace Pinder.Core.Tests.Phase0
 
             return new GameSession(
                 Phase0Fixtures.MakeProfile("Player"),
-                Phase0Fixtures.MakeProfile("Opponent"),
+                Phase0Fixtures.MakeProfile("Datee"),
                 adapter, dice, new NullTrapRegistry(),
                 Phase0Fixtures.MakeConfig());
         }
@@ -222,7 +222,7 @@ namespace Pinder.Core.Tests.Phase0
                 Inner = new RecordingLlmTransport { DefaultResponse = "" };
                 Inner.QueueDialogueOptions(Phase0Fixtures.CannedDialogueOptions);
                 Inner.QueueDelivery(Phase0Fixtures.CannedDelivery);
-                Inner.QueueOpponent(Phase0Fixtures.CannedOpponent);
+                Inner.QueueDatee(Phase0Fixtures.CannedDatee);
             }
 
             public async Task<string> SendAsync(
@@ -258,7 +258,7 @@ namespace Pinder.Core.Tests.Phase0
                 Inner = new RecordingLlmTransport { DefaultResponse = "" };
                 Inner.QueueDialogueOptions(Phase0Fixtures.CannedDialogueOptions);
                 Inner.QueueDelivery(Phase0Fixtures.CannedDelivery);
-                Inner.QueueOpponent(Phase0Fixtures.CannedOpponent);
+                Inner.QueueDatee(Phase0Fixtures.CannedDatee);
             }
 
             public Task<string> SendAsync(

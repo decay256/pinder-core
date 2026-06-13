@@ -37,8 +37,8 @@ partial class Program
     internal static void PrintUsage()
     {
         Console.Error.WriteLine("Usage:");
-        Console.Error.WriteLine("  session-runner --player <name> --opponent <name> [options]");
-        Console.Error.WriteLine("  session-runner --player-def <path> --opponent-def <path> [options]");
+        Console.Error.WriteLine("  session-runner --player <name> --datee <name> [options]");
+        Console.Error.WriteLine("  session-runner --player-def <path> --datee-def <path> [options]");
         Console.Error.WriteLine("  session-runner --resimulate <slug> [--from-turn <N>] [options]");
         Console.Error.WriteLine();
         Console.Error.WriteLine("Options:");

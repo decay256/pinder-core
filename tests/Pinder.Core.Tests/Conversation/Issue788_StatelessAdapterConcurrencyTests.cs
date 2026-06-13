@@ -23,7 +23,7 @@ namespace Pinder.Core.Tests.Conversation
     ///
     /// <para>
     /// Before #788 this test would have failed: the adapter held
-    /// <c>_opponentHistory</c> as a private field, so two concurrent calls
+    /// <c>_dateeHistory</c> as a private field, so two concurrent calls
     /// would race-mutate it and each would see the other's appended
     /// user/assistant turns. After #788 the adapter is stateless and the
     /// engine owns the history list \u2014 calls are independent.
@@ -47,8 +47,8 @@ namespace Pinder.Core.Tests.Conversation
                 => Task.FromResult(System.Array.Empty<DialogueOption>());
             public Task<string> DeliverMessageAsync(DeliveryContext context, CancellationToken ct = default)
                 => Task.FromResult(string.Empty);
-            public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context, CancellationToken ct = default)
-                => Task.FromResult(new OpponentResponse(string.Empty));
+            public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, CancellationToken ct = default)
+                => Task.FromResult(new DateeResponse(string.Empty));
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, CancellationToken ct = default)
                 => Task.FromResult<string?>(null);
             public Task<string> GetSteeringQuestionAsync(SteeringContext context, CancellationToken ct = default)
@@ -57,8 +57,8 @@ namespace Pinder.Core.Tests.Conversation
             public Task<string> ApplyShadowCorruptionAsync(string m, string i, ShadowStatType s, string? ad = null, CancellationToken ct = default) => Task.FromResult(m);
             public Task<string> ApplyTrapOverlayAsync(string m, string i, string n, string? oc = null, string? ad = null, CancellationToken ct = default) => Task.FromResult(m);
 
-            public async Task<StatefulOpponentResult> GetOpponentResponseAsync(
-                OpponentContext context,
+            public async Task<StatefulDateeResult> GetDateeResponseAsync(
+                DateeContext context,
                 IReadOnlyList<ConversationMessage> history,
                 CancellationToken cancellationToken = default)
             {
@@ -78,13 +78,13 @@ namespace Pinder.Core.Tests.Conversation
                     string echoed = string.Join(
                         " | ",
                         history.Select(h => $"{h.Role}:{h.Content}"));
-                    var response = new OpponentResponse($"ECHO[{echoed}]");
+                    var response = new DateeResponse($"ECHO[{echoed}]");
                     var entries = new ConversationMessage[]
                     {
                         ConversationMessage.User($"call-{context.PlayerName}"),
                         ConversationMessage.Assistant(response.MessageText),
                     };
-                    return new StatefulOpponentResult(response, entries);
+                    return new StatefulDateeResult(response, entries);
                 }
                 finally
                 {
@@ -93,12 +93,12 @@ namespace Pinder.Core.Tests.Conversation
             }
         }
 
-        private static OpponentContext MakeContext(string playerLabel) =>
-            new OpponentContext(
+        private static DateeContext MakeContext(string playerLabel) =>
+            new DateeContext(
                 playerPrompt: "p",
-                opponentPrompt: "o",
+                dateePrompt: "o",
                 conversationHistory: System.Array.Empty<(string, string)>(),
-                opponentLastMessage: string.Empty,
+                dateeLastMessage: string.Empty,
                 activeTraps: System.Array.Empty<string>(),
                 currentInterest: 12,
                 playerDeliveredMessage: string.Empty,
@@ -121,9 +121,9 @@ namespace Pinder.Core.Tests.Conversation
             var historyC = new[] { ConversationMessage.User("uC"), ConversationMessage.Assistant("aC") };
 
             // Fire all three concurrently.
-            var taskA = adapter.GetOpponentResponseAsync(MakeContext("A"), historyA);
-            var taskB = adapter.GetOpponentResponseAsync(MakeContext("B"), historyB);
-            var taskC = adapter.GetOpponentResponseAsync(MakeContext("C"), historyC);
+            var taskA = adapter.GetDateeResponseAsync(MakeContext("A"), historyA);
+            var taskB = adapter.GetDateeResponseAsync(MakeContext("B"), historyB);
+            var taskC = adapter.GetDateeResponseAsync(MakeContext("C"), historyC);
 
             var results = await Task.WhenAll(taskA, taskB, taskC).ConfigureAwait(false);
 
@@ -147,11 +147,11 @@ namespace Pinder.Core.Tests.Conversation
         }
 
         // Static-shape lock: no public mutable instance field on PinderLlmAdapter
-        // (or its sibling adapters) should match the old opponent-session names
-        // (_opponentHistory, _opponentSession, _opponentSystemPrompt). If a
+        // (or its sibling adapters) should match the old datee-session names
+        // (_dateeHistory, _dateeSession, _dateeSystemPrompt). If a
         // regression re-introduces them, this catches it before runtime tests.
         [Fact]
-        public void PinderLlmAdapter_HasNoOpponentSessionFields()
+        public void PinderLlmAdapter_HasNoDateeSessionFields()
         {
             var adapterType = typeof(Pinder.LlmAdapters.PinderLlmAdapter);
 #pragma warning disable CS0618
@@ -159,7 +159,7 @@ namespace Pinder.Core.Tests.Conversation
             var openAiType = typeof(Pinder.LlmAdapters.OpenAi.OpenAiLlmAdapter);
 #pragma warning restore CS0618
 
-            string[] forbidden = { "_opponentHistory", "_opponentSession", "_opponentSystemPrompt" };
+            string[] forbidden = { "_dateeHistory", "_dateeSession", "_dateeSystemPrompt" };
 
             foreach (var t in new[] { adapterType, anthropicType, openAiType })
             {
@@ -170,8 +170,8 @@ namespace Pinder.Core.Tests.Conversation
                         System.Reflection.BindingFlags.NonPublic |
                         System.Reflection.BindingFlags.Public);
                     Assert.True(field == null,
-                        $"{t.FullName} still has forbidden opponent-session field '{name}'. " +
-                        "Per #788, opponent conversation state lives on GameSession, not the adapter.");
+                        $"{t.FullName} still has forbidden datee-session field '{name}'. " +
+                        "Per #788, datee conversation state lives on GameSession, not the adapter.");
                 }
             }
         }

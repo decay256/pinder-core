@@ -75,13 +75,13 @@ namespace Pinder.Core.Tests
             var session = MakeSession(
                 diceValues: new[] { 2, 50 },
                 playerStats: MakeStatBlock(wit: 0),
-                opponentStats: MakeStatBlock(rizz: 0), // Defence for Wit is Rizz
+                dateeStats: MakeStatBlock(rizz: 0), // Defence for Wit is Rizz
                 shadows: shadows);
 
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(2); // Wit option
 
-            // Roll: d20=2 + 0 (wit) + 0 (level bonus at level 1) = 2, DC = 16 + opponent's Rizz effective
+            // Roll: d20=2 + 0 (wit) + 0 (level bonus at level 1) = 2, DC = 16 + datee's Rizz effective
             // Miss margin = DC - Total, need >= 10 for Catastrophe
             Assert.Contains(result.ShadowGrowthEvents, e => e.Contains("Catastrophic Wit failure"));
         }
@@ -97,7 +97,7 @@ namespace Pinder.Core.Tests
             var dice = new QueueDice(new[] { 6, 50, 6, 50, 6, 50 });
             var session = MakeSessionWithDice(dice,
                 playerStats: MakeStatBlock(honesty: 0),
-                opponentStats: MakeStatBlock(charm: 0), // Honesty defence = Charm
+                dateeStats: MakeStatBlock(charm: 0), // Honesty defence = Charm
                 shadows: shadows,
                 llmOptions: new[] { new DialogueOption(StatType.Honesty, "truth") },
                 startingInterest: 15);
@@ -156,7 +156,7 @@ namespace Pinder.Core.Tests
             // Charm at index 1 to avoid highest-% trigger
             var session = MakeSessionWithDice(dice,
                 playerStats: MakeStatBlock(charm: 0),
-                opponentStats: MakeStatBlock(sa: 0), // DC=13
+                dateeStats: MakeStatBlock(sa: 0), // DC=13
                 shadows: shadows,
                 startingInterest: 15,
                 llmOptions: new[]
@@ -190,7 +190,7 @@ namespace Pinder.Core.Tests
             // All stats tied: picking any counts as "highest-%" per tie-breaking rule
             var session = MakeSessionWithDice(dice,
                 playerStats: MakeStatBlock(charm: 5, honesty: 5, wit: 5),
-                opponentStats: MakeStatBlock(sa: 0, chaos: 0, rizz: 0),
+                dateeStats: MakeStatBlock(sa: 0, chaos: 0, rizz: 0),
                 shadows: shadows,
                 llmOptions: new[]
                 {

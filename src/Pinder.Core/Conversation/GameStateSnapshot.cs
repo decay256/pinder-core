@@ -30,7 +30,7 @@ namespace Pinder.Core.Conversation
         public bool TripleBonusActive { get; }
 
         /// <summary>
-        /// #905: Probability (0.0..1.0) that the opponent will ghost on this turn.
+        /// #905: Probability (0.0..1.0) that the datee will ghost on this turn.
         /// Derived from interest state: 0.25 when Bored, 0.0 otherwise.
         /// Exposed on the wire so the frontend can surface ghost-risk UI without
         /// needing to know the interest-threshold thresholds itself.
@@ -39,12 +39,12 @@ namespace Pinder.Core.Conversation
         public double GhostProbabilityPerTurn { get; }
 
         /// <summary>
-        /// #788: snapshot of the engine-owned opponent LLM conversation
+        /// #788: snapshot of the engine-owned datee LLM conversation
         /// history at the time the snapshot was taken. Each entry's role is
         /// <c>"user"</c> or <c>"assistant"</c>. Always non-null — empty list
-        /// when no opponent calls have resolved yet.
+        /// when no datee calls have resolved yet.
         /// </summary>
-        public IReadOnlyList<ConversationMessage> OpponentHistory { get; }
+        public IReadOnlyList<ConversationMessage> DateeHistory { get; }
 
         public GameStateSnapshot(
             int interest,
@@ -54,7 +54,7 @@ namespace Pinder.Core.Conversation
             int turnNumber,
             bool tripleBonusActive = false,
             TrapDetail[] activeTrapDetails = null,
-            IReadOnlyList<ConversationMessage> opponentHistory = null,
+            IReadOnlyList<ConversationMessage> dateeHistory = null,
             double ghostProbabilityPerTurn = 0.0)
         {
             Interest = interest;
@@ -64,7 +64,7 @@ namespace Pinder.Core.Conversation
             ActiveTrapDetails = activeTrapDetails ?? System.Array.Empty<TrapDetail>();
             TurnNumber = turnNumber;
             TripleBonusActive = tripleBonusActive;
-            OpponentHistory = opponentHistory ?? System.Array.Empty<ConversationMessage>();
+            DateeHistory = dateeHistory ?? System.Array.Empty<ConversationMessage>();
             GhostProbabilityPerTurn = ghostProbabilityPerTurn;
         }
     }

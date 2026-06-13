@@ -94,7 +94,7 @@ namespace Pinder.SessionRunner
 
                 // Step 1: Compute need
                 int attackerMod = context.PlayerStats.GetEffective(option.Stat);
-                int defenceDC = context.OpponentStats.GetDefenceDC(option.Stat);
+                int defenceDC = context.DateeStats.GetDefenceDC(option.Stat);
 
                 // Callback bonus — MUST call CallbackBonus.Compute() directly (per #386 ADR)
                 int callbackBonus = option.CallbackTurnNumber.HasValue

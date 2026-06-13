@@ -14,7 +14,7 @@ namespace Pinder.Core.Conversation
     internal static class GameSessionHelpers
     {
         /// <summary>
-        /// Builds a structured <see cref="OpponentVisibleProfile"/> for the
+        /// Builds a structured <see cref="DateeVisibleProfile"/> for the
         /// player's dialogue-options LLM context — the equivalent of a
         /// Tinder profile card the player would see on the dating app.
         ///
@@ -24,7 +24,7 @@ namespace Pinder.Core.Conversation
         /// wouldn't be visible from a single Tinder photo) and (b) omitted
         /// self-reported demographic info (gender_identity).
         /// </summary>
-        /// <param name="opponent">The opponent's full profile.</param>
+        /// <param name="datee">The datee's full profile.</param>
         /// <param name="outfitDescription">
         /// Optional LLM-generated outfit / scene description (#333) — the
         /// closest thing in the engine to "what the photo looks like."
@@ -34,16 +34,16 @@ namespace Pinder.Core.Conversation
         /// falls back to the items list as a degraded but still-bounded
         /// signal.
         /// </param>
-        public static OpponentVisibleProfile BuildOpponentVisibleProfile(
-            CharacterProfile opponent, string outfitDescription = "")
+        public static DateeVisibleProfile BuildDateeVisibleProfile(
+            CharacterProfile datee, string outfitDescription = "")
         {
-            if (opponent == null) throw new System.ArgumentNullException(nameof(opponent));
-            return new OpponentVisibleProfile(
-                displayName:                       opponent.DisplayName,
-                genderIdentity:                    opponent.GenderIdentity,
-                bio:                               opponent.Bio,
+            if (datee == null) throw new System.ArgumentNullException(nameof(datee));
+            return new DateeVisibleProfile(
+                displayName:                       datee.DisplayName,
+                genderIdentity:                    datee.GenderIdentity,
+                bio:                               datee.Bio,
                 outfitDescription:                 outfitDescription,
-                equippedItemDisplayNamesFallback:  opponent.EquippedItemDisplayNames);
+                equippedItemDisplayNamesFallback:  datee.EquippedItemDisplayNames);
         }
 
         /// <summary>
@@ -57,24 +57,24 @@ namespace Pinder.Core.Conversation
                     return $"stat penalty -{def.EffectValue}";
                 case TrapEffect.Disadvantage:
                     return "roll at disadvantage";
-                case TrapEffect.OpponentDCIncrease:
-                    return $"opponent DC +{def.EffectValue}";
+                case TrapEffect.DateeDCIncrease:
+                    return $"datee DC +{def.EffectValue}";
                 default:
                     return def.Effect.ToString();
             }
         }
 
         /// <summary>
-        /// Gets the last opponent message from the conversation history.
-        /// Returns empty string if no opponent messages found.
+        /// Gets the last datee message from the conversation history.
+        /// Returns empty string if no datee messages found.
         /// </summary>
-        public static string GetLastOpponentMessage(
+        public static string GetLastDateeMessage(
             IReadOnlyList<(string Sender, string Text)> history,
-            string opponentName)
+            string dateeName)
         {
             for (int i = history.Count - 1; i >= 0; i--)
             {
-                if (history[i].Sender == opponentName)
+                if (history[i].Sender == dateeName)
                     return history[i].Text;
             }
             return string.Empty;
@@ -113,7 +113,7 @@ namespace Pinder.Core.Conversation
             TrapState traps,
             int turnNumber,
             bool tripleBonusActive,
-            System.Collections.Generic.IReadOnlyList<ConversationMessage> opponentHistory = null)
+            System.Collections.Generic.IReadOnlyList<ConversationMessage> dateeHistory = null)
         {
             var trapNames = traps.AllActive
                 .Select(t => t.Definition.Id)
@@ -127,11 +127,11 @@ namespace Pinder.Core.Conversation
                     penaltyDescription: FormatTrapPenalty(t.Definition)))
                 .ToArray();
 
-            // Snapshot a defensive copy of the opponent history so callers that
+            // Snapshot a defensive copy of the datee history so callers that
             // hold the snapshot aren't observing later mutations.
-            ConversationMessage[] historySnapshot = opponentHistory == null
+            ConversationMessage[] historySnapshot = dateeHistory == null
                 ? System.Array.Empty<ConversationMessage>()
-                : opponentHistory.ToArray();
+                : dateeHistory.ToArray();
 
             // #905: Derive ghost probability from interest state.
             // When Bored, the ghost-trigger check fires with 25% probability (dice.Roll(4)==1).
@@ -147,7 +147,7 @@ namespace Pinder.Core.Conversation
                 turnNumber: turnNumber,
                 tripleBonusActive: tripleBonusActive,
                 activeTrapDetails: trapDetails,
-                opponentHistory: historySnapshot,
+                dateeHistory: historySnapshot,
                 ghostProbabilityPerTurn: ghostProbabilityPerTurn);
         }
 
@@ -159,17 +159,17 @@ namespace Pinder.Core.Conversation
             DialogueOption chosen,
             DialogueOption[] options,
             CharacterProfile player,
-            CharacterProfile opponent)
+            CharacterProfile datee)
         {
             int levelBonus = LevelTable.GetBonus(player.Level);
 
             int chosenMargin = player.Stats.GetEffective(chosen.Stat) + levelBonus
-                               - opponent.Stats.GetDefenceDC(chosen.Stat);
+                               - datee.Stats.GetDefenceDC(chosen.Stat);
 
             for (int i = 0; i < options.Length; i++)
             {
                 int margin = player.Stats.GetEffective(options[i].Stat) + levelBonus
-                             - opponent.Stats.GetDefenceDC(options[i].Stat);
+                             - datee.Stats.GetDefenceDC(options[i].Stat);
                 if (margin > chosenMargin)
                     return false;
             }

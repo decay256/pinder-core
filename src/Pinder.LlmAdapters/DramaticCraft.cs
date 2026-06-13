@@ -8,17 +8,17 @@ namespace Pinder.LlmAdapters
     public sealed class DramaticCraft
     {
         public string Goal { get; }
-        public string OpponentWant { get; }
+        public string DateeWant { get; }
         public string RevelationBudget { get; }
         public string DirectnessDial { get; }
         public string FailureCost { get; }
         public string EarningTheClose { get; }
 
-        public DramaticCraft(string goal, string opponentWant, string revelationBudget,
+        public DramaticCraft(string goal, string dateeWant, string revelationBudget,
             string directnessDial, string failureCost, string earningTheClose)
         {
             Goal = goal ?? "";
-            OpponentWant = opponentWant ?? "";
+            DateeWant = dateeWant ?? "";
             RevelationBudget = revelationBudget ?? "";
             DirectnessDial = directnessDial ?? "";
             FailureCost = failureCost ?? "";
@@ -29,7 +29,7 @@ namespace Pinder.LlmAdapters
         {
             var sb = new StringBuilder();
             if (!string.IsNullOrWhiteSpace(Goal)) { sb.AppendLine("DRAMATIC GOAL"); sb.AppendLine(Goal.TrimEnd()); sb.AppendLine(); }
-            if (!string.IsNullOrWhiteSpace(OpponentWant)) { sb.AppendLine("OPPONENT'S WANT"); sb.AppendLine(OpponentWant.TrimEnd()); sb.AppendLine(); }
+            if (!string.IsNullOrWhiteSpace(DateeWant)) { sb.AppendLine("DATEE'S WANT"); sb.AppendLine(DateeWant.TrimEnd()); sb.AppendLine(); }
             if (!string.IsNullOrWhiteSpace(RevelationBudget)) { sb.AppendLine("REVELATION BUDGET"); sb.AppendLine(RevelationBudget.TrimEnd()); sb.AppendLine(); }
             if (!string.IsNullOrWhiteSpace(DirectnessDial)) { sb.AppendLine("DIRECTNESS CALIBRATION"); sb.AppendLine(DirectnessDial.TrimEnd()); sb.AppendLine(); }
             if (!string.IsNullOrWhiteSpace(FailureCost)) { sb.AppendLine("FAILURE COST"); sb.AppendLine(FailureCost.TrimEnd()); sb.AppendLine(); }

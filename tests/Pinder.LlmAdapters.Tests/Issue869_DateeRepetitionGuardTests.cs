@@ -9,10 +9,10 @@ namespace Pinder.LlmAdapters.Tests
     /// <summary>
     /// Issue #869: porting the WORD & PATTERN REPETITION block + self-check
     /// from <c>dialogue-options-instruction</c> to
-    /// <c>opponent-response-instruction</c>. These tests pin the prompt
+    /// <c>datee-response-instruction</c>. These tests pin the prompt
     /// contract so future yaml edits can't silently regress the parity.
     /// </summary>
-    public class Issue869_OpponentRepetitionGuardTests
+    public class Issue869_DateeRepetitionGuardTests
     {
         // Walks up from the test binary's BaseDirectory looking for
         // data/prompts so the catalog can be loaded in test runs.
@@ -29,40 +29,40 @@ namespace Pinder.LlmAdapters.Tests
                 "Could not locate data/prompts in any ancestor of the test binary.");
         }
 
-        private static string LoadOpponentResponsePrompt()
+        private static string LoadDateeResponsePrompt()
         {
             var catalog = PromptCatalog.LoadFromDirectory(FindPromptsRoot());
-            var entry = catalog.Get("opponent-response-instruction");
+            var entry = catalog.Get("datee-response-instruction");
             return entry.SystemPrompt ?? string.Empty;
         }
 
         [Fact]
-        public void OpponentResponseInstruction_ContainsRepetitionGuard()
+        public void DateeResponseInstruction_ContainsRepetitionGuard()
         {
-            var prompt = LoadOpponentResponsePrompt();
+            var prompt = LoadDateeResponsePrompt();
 
             Assert.Contains("WORD & PATTERN REPETITION", prompt);
             Assert.Contains("fresh move", prompt);
-            // The opponent path checks the opponent's OWN previous messages,
+            // The datee path checks the datee's OWN previous messages,
             // not the full conversation above (which is the player-side framing).
             Assert.Contains("your own previous messages", prompt);
         }
 
         [Fact]
-        public void OpponentResponseInstruction_ContainsSelfCheck()
+        public void DateeResponseInstruction_ContainsSelfCheck()
         {
-            var prompt = LoadOpponentResponsePrompt();
+            var prompt = LoadDateeResponsePrompt();
 
             Assert.Contains("Before sending: verify", prompt);
             Assert.Contains("rewrite", prompt);
         }
 
         [Fact]
-        public void OpponentResponseInstruction_RepetitionGuard_ListsCommonFillers()
+        public void DateeResponseInstruction_RepetitionGuard_ListsCommonFillers()
         {
             // Pin the specific fillers called out in the refined ticket
             // so reviewers can confirm the wording survives future edits.
-            var prompt = LoadOpponentResponsePrompt();
+            var prompt = LoadDateeResponsePrompt();
 
             Assert.Contains("honestly", prompt);
             Assert.Contains("literally", prompt);

@@ -212,7 +212,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task EdgeCase9_TellMatchedButRollStillFails_BonusRecorded()
         {
-            // Player has allStats=2, opponent allStats=2, so DC = 16 + 2 = 15
+            // Player has allStats=2, datee allStats=2, so DC = 16 + 2 = 15
             // d20=10, mod=2, total=12, externalBonus=2, finalTotal=14 < 15 → still fails
             var llm = new TellTestLlm();
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Setup"));
@@ -266,11 +266,11 @@ namespace Pinder.Core.Tests
         }
 
         // ================================================================
-        // Edge Case 11: Opponent response has no tell → null stored
+        // Edge Case 11: Datee response has no tell → null stored
         // ================================================================
 
         [Fact]
-        public async Task EdgeCase11_OpponentNoTell_NoBonusNextTurn()
+        public async Task EdgeCase11_DateeNoTell_NoBonusNextTurn()
         {
             var llm = new TellTestLlm();
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Hey"));

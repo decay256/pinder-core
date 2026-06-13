@@ -102,7 +102,7 @@ namespace Pinder.Core.Tests.Conversation
 
             var session = new GameSession(
                 MakeProfile("player"),
-                MakeProfile("opponent"),
+                MakeProfile("datee"),
                 new NullLlmAdapter(),
                 dice,
                 new NullTrapRegistry(),
@@ -205,7 +205,7 @@ namespace Pinder.Core.Tests.Conversation
 
             var session = new GameSession(
                 MakeProfile("player"),
-                MakeProfile("opponent"),
+                MakeProfile("datee"),
                 new NullLlmAdapter(),
                 dice,
                 new NullTrapRegistry(),

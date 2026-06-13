@@ -38,7 +38,7 @@ namespace Pinder.LlmAdapters.Tests
             var cat = I18nCatalog.LoadFromDirectory(I18nRoot(), "en");
             Assert.Equal("en", cat.Locale);
             Assert.Equal("Open player sheet", cat.T("topnav.open_player_sheet"));
-            Assert.Equal("Open opponent sheet", cat.T("topnav.open_opponent_sheet"));
+            Assert.Equal("Open datee sheet", cat.T("topnav.open_datee_sheet"));
         }
 
         [Fact]

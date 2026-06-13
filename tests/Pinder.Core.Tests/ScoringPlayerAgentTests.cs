@@ -68,7 +68,7 @@ namespace Pinder.Core.Tests
 
         private static PlayerAgentContext MakeContext(
             StatBlock? player = null,
-            StatBlock? opponent = null,
+            StatBlock? datee = null,
             int interest = 10,
             InterestState state = InterestState.Interested,
             int momentum = 0,
@@ -77,7 +77,7 @@ namespace Pinder.Core.Tests
         {
             return new PlayerAgentContext(
                 player ?? MakeStats(charm: 3, rizz: 2, honesty: 1, chaos: 2, wit: 2, sa: 1),
-                opponent ?? MakeStats(charm: 1, rizz: 1, honesty: 1, chaos: 1, wit: 1, sa: 1),
+                datee ?? MakeStats(charm: 1, rizz: 1, honesty: 1, chaos: 1, wit: 1, sa: 1),
                 interest,
                 state,
                 momentum,
@@ -143,14 +143,14 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task DecideAsync_PicksHighestEV_WhenNoStrategicAdjustments()
         {
-            // Player has Charm=5, all others=0. Opponent all=0.
+            // Player has Charm=5, all others=0. Datee all=0.
             // Charm should have best success chance and highest EV.
             var player = MakeStats(charm: 5, rizz: 0, honesty: 0, chaos: 0);
-            var opponent = MakeStats(); // all 0 → DC = 13 for all
+            var datee = MakeStats(); // all 0 → DC = 13 for all
             var turn = MakeTurn(
                 MakeOption(StatType.Charm),
                 MakeOption(StatType.Rizz));
-            var context = MakeContext(player: player, opponent: opponent);
+            var context = MakeContext(player: player, datee: datee);
 
             var decision = await _agent.DecideAsync(turn, context);
 
@@ -163,15 +163,15 @@ namespace Pinder.Core.Tests
         public async Task DecideAsync_MomentumStreak2_PrefersSafeOption()
         {
             // Make one option safe (high successChance) and one bold (low successChance but higher raw EV)
-            // Player: Charm=5 (safe against weak opponent), Rizz=0 (bold against strong opponent)
+            // Player: Charm=5 (safe against weak datee), Rizz=0 (bold against strong datee)
             var player = MakeStats(charm: 8, rizz: 2);
-            // Opponent: SA=0 (Charm defence DC=13), Wit=5 (Rizz defence DC=18)
-            var opponent = MakeStats(sa: 0, wit: 5);
+            // Datee: SA=0 (Charm defence DC=13), Wit=5 (Rizz defence DC=18)
+            var datee = MakeStats(sa: 0, wit: 5);
             var turn = MakeTurn(
                 MakeOption(StatType.Charm),   // need=13-8=5, Safe, successChance=0.80
                 MakeOption(StatType.Rizz));    // need=18-2=16, Bold, successChance=0.25
 
-            var context = MakeContext(player: player, opponent: opponent, momentum: 2);
+            var context = MakeContext(player: player, datee: datee, momentum: 2);
 
             var decision = await _agent.DecideAsync(turn, context);
 
@@ -187,14 +187,14 @@ namespace Pinder.Core.Tests
         {
             // Low interest, Bored state
             var player = MakeStats(charm: 2, rizz: 2);
-            // Opponent: SA=0 (DC 13 for Charm), Wit=5 (DC 18 for Rizz)
-            var opponent = MakeStats(sa: 0, wit: 5);
+            // Datee: SA=0 (DC 13 for Charm), Wit=5 (DC 18 for Rizz)
+            var datee = MakeStats(sa: 0, wit: 5);
             var turn = MakeTurn(
                 MakeOption(StatType.Charm),   // need=13-2=11, Hard
                 MakeOption(StatType.Rizz));    // need=18-2=16, Bold
 
             var context = MakeContext(
-                player: player, opponent: opponent,
+                player: player, datee: datee,
                 interest: 3, state: InterestState.Bored);
 
             var decision = await _agent.DecideAsync(turn, context);
@@ -202,13 +202,13 @@ namespace Pinder.Core.Tests
             // Both Hard and Bold get Bored bias, but let's make a clear case:
             // Make Charm Safe and Rizz Bold
             var player2 = MakeStats(charm: 10, rizz: 2);
-            var opponent2 = MakeStats(sa: 0, wit: 5);
+            var datee2 = MakeStats(sa: 0, wit: 5);
             var turn2 = MakeTurn(
                 MakeOption(StatType.Charm),   // need=13-10=3, Safe → no Bored bias
                 MakeOption(StatType.Rizz));    // need=18-2=16, Bold → +1.0 bias
 
             var decision2 = await _agent.DecideAsync(turn2,
-                MakeContext(player: player2, opponent: opponent2,
+                MakeContext(player: player2, datee: datee2,
                     interest: 3, state: InterestState.Bored));
 
             // Without Bored bias, Charm (safe, high EV) would win.
@@ -233,13 +233,13 @@ namespace Pinder.Core.Tests
         {
             // Charm has Madness trap active
             var player = MakeStats(charm: 5, rizz: 3);
-            var opponent = MakeStats(); // all 0, DC=13
+            var datee = MakeStats(); // all 0, DC=13
             var turn = MakeTurn(
                 MakeOption(StatType.Charm),
                 MakeOption(StatType.Rizz));
 
             var context = MakeContext(
-                player: player, opponent: opponent,
+                player: player, datee: datee,
                 traps: new[] { "Madness" }); // Madness = Charm's shadow
 
             var decision = await _agent.DecideAsync(turn, context);
@@ -255,14 +255,14 @@ namespace Pinder.Core.Tests
         public async Task DecideAsync_NearWin_PrefersSafeOption()
         {
             var player = MakeStats(charm: 10, rizz: 2);
-            // Opponent: SA=0 (DC 13 for Charm), Wit=5 (DC 18 for Rizz)
-            var opponent = MakeStats(sa: 0, wit: 5);
+            // Datee: SA=0 (DC 13 for Charm), Wit=5 (DC 18 for Rizz)
+            var datee = MakeStats(sa: 0, wit: 5);
             var turn = MakeTurn(
                 MakeOption(StatType.Charm),   // need=13-10=3, Safe → +2.0 near-win bias
                 MakeOption(StatType.Rizz));    // need=18-2=16, Bold → no near-win bias
 
             var context = MakeContext(
-                player: player, opponent: opponent,
+                player: player, datee: datee,
                 interest: 20, state: InterestState.VeryIntoIt);
 
             var decision = await _agent.DecideAsync(turn, context);

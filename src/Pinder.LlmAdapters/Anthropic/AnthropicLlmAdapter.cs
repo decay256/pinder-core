@@ -20,7 +20,7 @@ namespace Pinder.LlmAdapters.Anthropic
     /// are delegated to single-responsibility modules:
     /// - AnthropicRequestBuilders
     /// - DialogueOptionParsers
-    /// - OpponentResponseParsers
+    /// - DateeResponseParsers
     /// - StatNameNormalizer
     /// - AnthropicResponseImprover
     /// - AnthropicDebugLogger
@@ -32,13 +32,13 @@ namespace Pinder.LlmAdapters.Anthropic
         // Default temperatures per method (used when AnthropicOptions override is null)
         private const double DefaultDialogueOptionsTemperature = 0.9;
         private const double DefaultDeliveryTemperature = 0.7;
-        private const double DefaultOpponentResponseTemperature = 0.85;
+        private const double DefaultDateeResponseTemperature = 0.85;
 
         private readonly AnthropicClient _client;
         private readonly AnthropicOptions _options;
         private readonly AnthropicDebugLogger _debugLogger = new AnthropicDebugLogger();
 
-        // #788: opponent conversation state lives on GameSession, not here.
+        // #788: datee conversation state lives on GameSession, not here.
         // The adapter is pure-stateless and safe for concurrent reuse across sessions.
 
         /// <summary>
@@ -142,33 +142,33 @@ namespace Pinder.LlmAdapters.Anthropic
         }
 
         /// <inheritdoc />
-        public async Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context, CancellationToken ct = default)
+        public async Task<DateeResponse> GetDateeResponseAsync(DateeContext context, CancellationToken ct = default)
         {
             // #788: stateless single-turn fallback. Stateful callers route
             // through the IStatefulLlmAdapter overload that takes a history.
-            var result = await GetOpponentResponseAsync(context, System.Array.Empty<ConversationMessage>(), ct).ConfigureAwait(false);
+            var result = await GetDateeResponseAsync(context, System.Array.Empty<ConversationMessage>(), ct).ConfigureAwait(false);
             return result.Response;
         }
 
         /// <inheritdoc />
-        public async Task<StatefulOpponentResult> GetOpponentResponseAsync(
-            OpponentContext context,
+        public async Task<StatefulDateeResult> GetDateeResponseAsync(
+            DateeContext context,
             IReadOnlyList<ConversationMessage> history,
             CancellationToken cancellationToken = default)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             if (history == null) throw new ArgumentNullException(nameof(history));
 
-            var userContent = SessionDocumentBuilder.BuildOpponentPrompt(context);
-            var fullOpponentPrompt = SessionSystemPromptBuilder.BuildOpponent(context.OpponentPrompt, _options.GameDefinition);
-            var systemBlocks = CacheBlockBuilder.BuildOpponentOnlySystemBlocks(fullOpponentPrompt);
+            var userContent = SessionDocumentBuilder.BuildDateePrompt(context);
+            var fullDateePrompt = SessionSystemPromptBuilder.BuildDatee(context.DateePrompt, _options.GameDefinition);
+            var systemBlocks = CacheBlockBuilder.BuildDateeOnlySystemBlocks(fullDateePrompt);
 
             MessagesRequest request;
             if (history.Count == 0)
             {
                 request = AnthropicRequestBuilders.BuildMessagesRequest(
                     _options.Model, _options.MaxTokens, systemBlocks, userContent,
-                    _options.OpponentResponseTemperature ?? DefaultOpponentResponseTemperature);
+                    _options.DateeResponseTemperature ?? DefaultDateeResponseTemperature);
             }
             else
             {
@@ -188,21 +188,21 @@ namespace Pinder.LlmAdapters.Anthropic
                 request = ephemeral.BuildRequest(
                     _options.Model,
                     _options.MaxTokens,
-                    _options.OpponentResponseTemperature ?? DefaultOpponentResponseTemperature,
+                    _options.DateeResponseTemperature ?? DefaultDateeResponseTemperature,
                     systemBlocks);
             }
-            AnthropicRequestBuilders.AttachTool(request, ToolSchemas.OpponentResponse);
+            AnthropicRequestBuilders.AttachTool(request, ToolSchemas.DateeResponse);
 
             var response = await _client.SendMessagesAsync(request, cancellationToken).ConfigureAwait(false);
-            _debugLogger.LogDebug("opponent", context.CurrentTurn, request, response, _options.DebugDirectory);
+            _debugLogger.LogDebug("datee", context.CurrentTurn, request, response, _options.DebugDirectory);
 
-            OpponentResponse parsed;
+            DateeResponse parsed;
             string assistantTextForHistory;
 
             // Try structured tool_use first
             var toolInput = response.GetToolInput();
             var toolParsed = toolInput != null
-                ? OpponentResponseParsers.ParseOpponentResponseTool(toolInput)
+                ? DateeResponseParsers.ParseDateeResponseTool(toolInput)
                 : null;
             if (toolParsed != null)
             {
@@ -215,8 +215,8 @@ namespace Pinder.LlmAdapters.Anthropic
                 var responseText = response.GetText();
                 responseText = await AnthropicResponseImprover.ApplyImprovementAsync(
                     _client, _options, systemBlocks, userContent, responseText,
-                    _options.OpponentResponseTemperature ?? DefaultOpponentResponseTemperature, cancellationToken).ConfigureAwait(false);
-                parsed = OpponentResponseParsers.ParseOpponentResponseText(responseText);
+                    _options.DateeResponseTemperature ?? DefaultDateeResponseTemperature, cancellationToken).ConfigureAwait(false);
+                parsed = DateeResponseParsers.ParseDateeResponseText(responseText);
                 assistantTextForHistory = responseText ?? string.Empty;
             }
 
@@ -227,8 +227,8 @@ namespace Pinder.LlmAdapters.Anthropic
             if (parsed.MessageText != null && parsed.MessageText.Length > slopCeiling)
             {
                 Console.Error.WriteLine(
-                    $"[WARN] Opponent response over length ceiling (slop ceiling={slopCeiling:F0}): " +
-                    $"playerLen={playerLen} ceiling={ceiling} responseLen={parsed.MessageText.Length} character={context.OpponentName}");
+                    $"[WARN] Datee response over length ceiling (slop ceiling={slopCeiling:F0}): " +
+                    $"playerLen={playerLen} ceiling={ceiling} responseLen={parsed.MessageText.Length} character={context.DateeName}");
             }
 
             var newEntries = new ConversationMessage[]
@@ -236,7 +236,7 @@ namespace Pinder.LlmAdapters.Anthropic
                 ConversationMessage.User(userContent),
                 ConversationMessage.Assistant(assistantTextForHistory),
             };
-            return new StatefulOpponentResult(parsed, newEntries);
+            return new StatefulDateeResult(parsed, newEntries);
         }
 
         /// <inheritdoc />
@@ -250,7 +250,7 @@ namespace Pinder.LlmAdapters.Anthropic
 
             string prompt = template
                 .Replace("{player_name}", context.PlayerName)
-                .Replace("{opponent_name}", context.OpponentName)
+                .Replace("{datee_name}", context.DateeName)
                 .Replace("{delivered_message}", context.DeliveredMessage);
 
             var sb = new System.Text.StringBuilder();
@@ -302,16 +302,16 @@ namespace Pinder.LlmAdapters.Anthropic
         /// Apply a horniness overlay to a delivered message by calling the LLM.
         /// Routes to Groq when OverlayGroqModel and OverlayGroqApiKey are configured.
         /// </summary>
-        public async Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null, CancellationToken ct = default)
+        public async Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, CancellationToken ct = default)
         {
             if (!string.IsNullOrWhiteSpace(_options.OverlayGroqModel) && !string.IsNullOrWhiteSpace(_options.OverlayGroqApiKey))
             {
                 return await GroqOverlayApplier.ApplyHorninessOverlayAsync(
-                    _options.OverlayGroqApiKey, _options.OverlayGroqModel, message, instruction, opponentContext, archetypeDirective, ct)
+                    _options.OverlayGroqApiKey, _options.OverlayGroqModel, message, instruction, dateeContext, archetypeDirective, ct)
                     .ConfigureAwait(false);
             }
             return await AnthropicOverlayApplier.ApplyHorninessOverlayAsync(
-                _client, _options, message, instruction, opponentContext, archetypeDirective, ct).ConfigureAwait(false);
+                _client, _options, message, instruction, dateeContext, archetypeDirective, ct).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
@@ -367,7 +367,7 @@ namespace Pinder.LlmAdapters.Anthropic
         /// trap-overlay system prompt. Returns the message unchanged on transport
         /// failure or detected refusal.
         /// </summary>
-        public async Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null, CancellationToken ct = default)
+        public async Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, CancellationToken ct = default)
         {
             if (string.IsNullOrWhiteSpace(message) || string.IsNullOrWhiteSpace(trapInstruction))
                 return message;
@@ -375,7 +375,7 @@ namespace Pinder.LlmAdapters.Anthropic
             if (!string.IsNullOrWhiteSpace(_options.OverlayGroqModel) && !string.IsNullOrWhiteSpace(_options.OverlayGroqApiKey))
             {
                 return await GroqOverlayApplier.ApplyTrapOverlayAsync(
-                    _options.OverlayGroqApiKey, _options.OverlayGroqModel, message, trapInstruction, trapName, opponentContext, archetypeDirective, ct)
+                    _options.OverlayGroqApiKey, _options.OverlayGroqModel, message, trapInstruction, trapName, dateeContext, archetypeDirective, ct)
                     .ConfigureAwait(false);
             }
 
@@ -384,8 +384,8 @@ namespace Pinder.LlmAdapters.Anthropic
                 "Apply the trap instruction to rewrite the delivered message so the trap's signature taint is visible. " +
                 "Return ONLY the rewritten message text. No commentary, no preamble, no refusals.";
 
-            if (!string.IsNullOrWhiteSpace(opponentContext))
-                systemPrompt += $"\n\nThe message being sent is directed at this character:\n{opponentContext}";
+            if (!string.IsNullOrWhiteSpace(dateeContext))
+                systemPrompt += $"\n\nThe message being sent is directed at this character:\n{dateeContext}";
 
             // Inject the speaker's active archetype directive (#372 + #371 union) so the
             // trap-overlay rewrite still sounds like the character.
@@ -422,7 +422,7 @@ namespace Pinder.LlmAdapters.Anthropic
         }
 
         // Backward-compatibility: expose static parse methods for tests
-        // that reference AnthropicLlmAdapter.ParseDialogueOptions / ParseOpponentResponse
+        // that reference AnthropicLlmAdapter.ParseDialogueOptions / ParseDateeResponse
 
         /// <summary>
         /// Parses structured LLM output into DialogueOption array.
@@ -433,10 +433,10 @@ namespace Pinder.LlmAdapters.Anthropic
 
         /// <summary>
         /// Parses structured LLM output with optional [SIGNALS] blocks.
-        /// Delegates to OpponentResponseParsers.ParseOpponentResponseText.
+        /// Delegates to DateeResponseParsers.ParseDateeResponseText.
         /// </summary>
-        internal static OpponentResponse ParseOpponentResponse(string? llmResponse)
-            => OpponentResponseParsers.ParseOpponentResponseText(llmResponse);
+        internal static DateeResponse ParseDateeResponse(string? llmResponse)
+            => DateeResponseParsers.ParseDateeResponseText(llmResponse);
 
         public void Dispose()
         {

@@ -54,7 +54,7 @@ namespace Pinder.Tools.NarrativeHarness
             // ── Header ────────────────────────────────────────────────────
             doc.AppendLine($"# Narrative Harness Transcript — {_character.Name}");
             doc.AppendLine();
-            doc.AppendLine($"- **Opponent character:** {_opts.CharacterSlug} ({_character.Name}) — replies via SessionSystemPromptBuilder.BuildOpponent (arc-injected)");
+            doc.AppendLine($"- **Datee character:** {_opts.CharacterSlug} ({_character.Name}) — replies via SessionSystemPromptBuilder.BuildDatee (arc-injected)");
             doc.AppendLine($"- **Pursuer side:** {_pursuer.HeaderLabel}");
             doc.AppendLine($"- **Turns:** {_opts.Turns}");
             doc.AppendLine($"- **Model:** claude-opus-4-8 (real Anthropic adapter)");
@@ -88,7 +88,7 @@ namespace Pinder.Tools.NarrativeHarness
 
                 // ── CHARACTER turn via REAL builder + REAL transport ──────
                 GameDefinition turnDef = GameDefinitionArcInjector.WithArc(_baseDef, arcText);
-                string systemPrompt = SessionSystemPromptBuilder.BuildOpponent(
+                string systemPrompt = SessionSystemPromptBuilder.BuildDatee(
                     _character.AssembledSystemPrompt, turnDef);
 
                 string userMessage = BuildCharacterUserMessage(transcript, pursuerLine);
@@ -187,7 +187,7 @@ namespace Pinder.Tools.NarrativeHarness
         }
 
         /// <summary>
-        /// User-message turn the character (opponent) model answers: the running
+        /// User-message turn the character (datee) model answers: the running
         /// conversation rendered as a chat log, ending on the pursuer's latest
         /// line. This is the only "state" — no engine state, no rolls. The
         /// pursuer side mirrors this in <see cref="CharacterPursuerActor"/>.

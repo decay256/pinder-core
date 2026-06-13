@@ -25,7 +25,7 @@ public sealed class LlmPlayerAgent : IPlayerAgent, IDisposable
     /// <param name="options">Anthropic API configuration (API key, model, etc.).</param>
     /// <param name="fallback">Deterministic scoring agent used on LLM failure.</param>
     /// <param name="playerName">Player character display name.</param>
-    /// <param name="opponentName">Opponent character display name.</param>
+    /// <param name="dateeName">Datee character display name.</param>
     /// <param name="playerSystemPrompt">
     ///   The player character's full assembled system prompt (from CharacterProfile.AssembledSystemPrompt).
     ///   Empty string if not available. Used to give the LLM the character's personality and voice.
@@ -38,7 +38,7 @@ public sealed class LlmPlayerAgent : IPlayerAgent, IDisposable
         AnthropicOptions options,
         ScoringPlayerAgent fallback,
         string playerName = "the player",
-        string opponentName = "the opponent",
+        string dateeName = "the datee",
         string playerSystemPrompt = "",
         string playerTextingStyle = "")
 ```
@@ -64,7 +64,7 @@ public sealed class PlayerAgentContext
 
     public PlayerAgentContext(
         StatBlock playerStats,
-        StatBlock opponentStats,
+        StatBlock dateeStats,
         int currentInterest,
         InterestState interestState,
         int momentumStreak,
@@ -86,7 +86,7 @@ agent = new LlmPlayerAgent(
     agentOptions,
     new ScoringPlayerAgent(),
     playerName: sable.DisplayName,
-    opponentName: brick.DisplayName,
+    dateeName: brick.DisplayName,
     playerSystemPrompt: sable.AssembledSystemPrompt,
     playerTextingStyle: sable.TextingStyleFragment);  // requires #489
 
@@ -159,7 +159,7 @@ PICK: D
 
 When the session runner is invoked with `--agent llm`, the `LlmPlayerAgent` instance is created and used for all option selection decisions. The existing `--agent scoring` (default) continues to use `ScoringPlayerAgent` exclusively.
 
-**Verification:** Running `dotnet run --project session-runner -- --player velvet --opponent brick --agent llm` uses `LlmPlayerAgent` for every turn's `DecideAsync` call.
+**Verification:** Running `dotnet run --project session-runner -- --player velvet --datee brick --agent llm` uses `LlmPlayerAgent` for every turn's `DecideAsync` call.
 
 ### AC2: Reasoning block appears in playtest output
 
@@ -195,7 +195,7 @@ The system message gains character identity:
 
 ```
 You are playing as {playerName} in Pinder, a comedy dating RPG.
-You are talking to {opponentName}.
+You are talking to {dateeName}.
 
 {playerSystemPrompt — if non-empty, trimmed/summarized to key personality traits}
 
@@ -326,7 +326,7 @@ agent = new LlmPlayerAgent(
     agentOptions,
     new ScoringPlayerAgent(),
     playerName: sable.DisplayName,
-    opponentName: brick.DisplayName,
+    dateeName: brick.DisplayName,
     playerSystemPrompt: sable.AssembledSystemPrompt,
     playerTextingStyle: sable.TextingStyleFragment);  // empty string until #489
 ```
@@ -343,9 +343,9 @@ var conversationHistory = new List<(string Sender, string Text)>();
 // After each turn resolves (inside the turn loop):
 // Add the player's chosen message
 conversationHistory.Add((player1, chosenOption.IntendedText));
-// Add the opponent's response (from TurnResult)
-if (turnResult.OpponentResponse != null)
-    conversationHistory.Add((player2, turnResult.OpponentResponse));
+// Add the datee's response (from TurnResult)
+if (turnResult.DateeResponse != null)
+    conversationHistory.Add((player2, turnResult.DateeResponse));
 
 // Pass to agent context:
 var agentContext = new PlayerAgentContext(

@@ -60,10 +60,10 @@ namespace Pinder.Core.Tests
         [InlineData(0, 0, 0, 16)]    // 16 + (0+0+0)/3 = 16
         [InlineData(6, 3, 0, 19)]    // 16 + (6+3+0)/3 = 16 + 3 = 19
         [InlineData(5, 5, 5, 21)]    // 16 + (5+5+5)/3 = 16 + 5 = 21
-        public void SteeringDC_Is16PlusAverageOfOpponentSARizzHonesty(
-            int opponentSA, int opponentRizz, int opponentHonesty, int expectedDC)
+        public void SteeringDC_Is16PlusAverageOfDateeSARizzHonesty(
+            int dateeSA, int dateeRizz, int dateeHonesty, int expectedDC)
         {
-            int computed = 16 + (opponentSA + opponentRizz + opponentHonesty) / 3;
+            int computed = 16 + (dateeSA + dateeRizz + dateeHonesty) / 3;
             Assert.Equal(expectedDC, computed);
         }
 
@@ -87,14 +87,14 @@ namespace Pinder.Core.Tests
         {
             // Player stats: Charm=5, Wit=5, SA=5 → steering mod = 5
             var playerStats = MakeStatBlockWithValues(charm: 5, wit: 5, sa: 5);
-            // Opponent stats: SA=0, Rizz=0, Honesty=0 → steering DC = 16
-            var opponentStats = MakeStatBlockWithValues(sa: 0, rizz: 0, honesty: 0);
+            // Datee stats: SA=0, Rizz=0, Honesty=0 → steering DC = 16
+            var dateeStats = MakeStatBlockWithValues(sa: 0, rizz: 0, honesty: 0);
 
             var player = new CharacterProfile(
                 playerStats, "You are Player.", "Player",
                 new TimingProfile(5, 0.0f, 0.0f, "neutral"), 1);
-            var opponent = new CharacterProfile(
-                opponentStats, "You are Opponent.", "Opponent",
+            var datee = new CharacterProfile(
+                dateeStats, "You are Datee.", "Datee",
                 new TimingProfile(5, 0.0f, 0.0f, "neutral"), 1);
 
             // Game dice: horniness + main d20 + response delay d100
@@ -109,7 +109,7 @@ namespace Pinder.Core.Tests
 
             var llm = new NullLlmAdapter();
             var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), steeringRng: steeringRng);
-            var session = new GameSession(player, opponent, llm, dice, new NullTrapRegistry(), config);
+            var session = new GameSession(player, datee, llm, dice, new NullTrapRegistry(), config);
 
             var turnStart = await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
@@ -132,14 +132,14 @@ namespace Pinder.Core.Tests
         {
             // Player stats: Charm=2, Wit=2, SA=2 → steering mod = 2
             var playerStats = MakeStatBlockWithValues(charm: 2, wit: 2, sa: 2);
-            // Opponent stats: SA=3, Rizz=3, Honesty=3 → steering DC = 16 + 3 = 19
-            var opponentStats = MakeStatBlockWithValues(sa: 3, rizz: 3, honesty: 3);
+            // Datee stats: SA=3, Rizz=3, Honesty=3 → steering DC = 16 + 3 = 19
+            var dateeStats = MakeStatBlockWithValues(sa: 3, rizz: 3, honesty: 3);
 
             var player = new CharacterProfile(
                 playerStats, "You are Player.", "Player",
                 new TimingProfile(5, 0.0f, 0.0f, "neutral"), 1);
-            var opponent = new CharacterProfile(
-                opponentStats, "You are Opponent.", "Opponent",
+            var datee = new CharacterProfile(
+                dateeStats, "You are Datee.", "Datee",
                 new TimingProfile(5, 0.0f, 0.0f, "neutral"), 1);
 
             // Game dice: horniness + main d20 + response delay d100
@@ -154,7 +154,7 @@ namespace Pinder.Core.Tests
 
             var llm = new NullLlmAdapter();
             var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), steeringRng: steeringRng);
-            var session = new GameSession(player, opponent, llm, dice, new NullTrapRegistry(), config);
+            var session = new GameSession(player, datee, llm, dice, new NullTrapRegistry(), config);
 
             var turnStart = await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
@@ -177,14 +177,14 @@ namespace Pinder.Core.Tests
         {
             // Player stats: Charm=5, Wit=5, SA=5 → steering mod = 5
             var playerStats = MakeStatBlockWithValues(charm: 5, wit: 5, sa: 5);
-            // Opponent stats: SA=0, Rizz=0, Honesty=0 → steering DC = 16
-            var opponentStats = MakeStatBlockWithValues(sa: 0, rizz: 0, honesty: 0);
+            // Datee stats: SA=0, Rizz=0, Honesty=0 → steering DC = 16
+            var dateeStats = MakeStatBlockWithValues(sa: 0, rizz: 0, honesty: 0);
 
             var player = new CharacterProfile(
                 playerStats, "You are Player.", "Player",
                 new TimingProfile(5, 0.0f, 0.0f, "neutral"), 1);
-            var opponent = new CharacterProfile(
-                opponentStats, "You are Opponent.", "Opponent",
+            var datee = new CharacterProfile(
+                dateeStats, "You are Datee.", "Datee",
                 new TimingProfile(5, 0.0f, 0.0f, "neutral"), 1);
 
             var dice = new FixedDice(1, 15, 50);
@@ -192,7 +192,7 @@ namespace Pinder.Core.Tests
 
             var llm = new NullLlmAdapter();
             var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), steeringRng: steeringRng);
-            var session = new GameSession(player, opponent, llm, dice, new NullTrapRegistry(), config);
+            var session = new GameSession(player, datee, llm, dice, new NullTrapRegistry(), config);
 
             var turnStart = await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);

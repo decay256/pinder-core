@@ -14,14 +14,14 @@ namespace Pinder.Tools.NarrativeHarness
     ///
     /// Three implementations exist:
     ///   • <see cref="CharacterPursuerActor"/> — a REAL Pinder character driven
-    ///     through the SAME production prompt path the opponent uses
-    ///     (<see cref="SessionSystemPromptBuilder.BuildOpponent"/>), staying in
+    ///     through the SAME production prompt path the datee uses
+    ///     (<see cref="SessionSystemPromptBuilder.BuildDatee"/>), staying in
     ///     character for the whole transcript.
     ///   • <see cref="ScriptedPursuerActor"/> — fixed lines from --player-script.
     ///   • <see cref="GenericLlmPursuerActor"/> — the legacy lightweight standalone
     ///     persona (NOT a real character); the single-character fallback.
     ///
-    /// ZERO rule paths: identical contract to the opponent side
+    /// ZERO rule paths: identical contract to the datee side
     /// (build-prompt -&gt; SendAsync -&gt; record). Nothing here references
     /// Pinder.Rules.
     /// </summary>
@@ -42,17 +42,17 @@ namespace Pinder.Tools.NarrativeHarness
     }
 
     /// <summary>
-    /// REAL second character. Driven through the production opponent prompt path
-    /// (BuildOpponent) with its OWN assembled system prompt, so it stays in
+    /// REAL second character. Driven through the production datee prompt path
+    /// (BuildDatee) with its OWN assembled system prompt, so it stays in
     /// character across the whole transcript. It maintains its own conversation
-    /// view: its own opponent-style system prompt, with the OTHER side's lines
-    /// fed in as the inbound messages — mirroring the opponent side exactly.
+    /// view: its own datee-style system prompt, with the OTHER side's lines
+    /// fed in as the inbound messages — mirroring the datee side exactly.
     ///
     /// ARC DESIGN DECISION (#855): the pursuer is REACTIVE — it gets NO separate
     /// arc / confession-menu injection. It is built from the BASE GameDefinition
-    /// (no <c>== CONVERSATION ARC ==</c> slot populated), so only the OPPONENT
+    /// (no <c>== CONVERSATION ARC ==</c> slot populated), so only the DATEE
     /// carries the experiment's arc. This is the cleanest REVERSIBLE default:
-    /// the opponent's arc remains the single independent variable (no confound
+    /// the datee's arc remains the single independent variable (no confound
     /// from two simultaneously-driven arcs), and a symmetric pursuer arc can be
     /// added later by passing an arc-injected GameDefinition here instead of the
     /// base one — a one-line change. See the PR body for the full rationale.
@@ -76,14 +76,14 @@ namespace Pinder.Tools.NarrativeHarness
         }
 
         public string HeaderLabel =>
-            $"LLM character — {_slug} ({_displayName}) via SessionSystemPromptBuilder.BuildOpponent (REACTIVE, no arc injection)";
+            $"LLM character — {_slug} ({_displayName}) via SessionSystemPromptBuilder.BuildDatee (REACTIVE, no arc injection)";
 
         /// <summary>
-        /// The opponent-style system prompt for the pursuer character. Built from
+        /// The datee-style system prompt for the pursuer character. Built from
         /// the BASE game definition (no arc text) — see the arc design note above.
         /// </summary>
         private string SystemPrompt() =>
-            SessionSystemPromptBuilder.BuildOpponent(_assembledSystemPrompt, _baseDef);
+            SessionSystemPromptBuilder.BuildDatee(_assembledSystemPrompt, _baseDef);
 
         public async Task<string?> OpeningLineAsync()
         {
@@ -104,8 +104,8 @@ namespace Pinder.Tools.NarrativeHarness
         /// <summary>
         /// The pursuer's conversation view: the running transcript rendered as a
         /// chat log from the pursuer's perspective (its own "Pursuer"-keyed lines
-        /// relabelled to its name; the opponent's lines kept as the inbound
-        /// messages), ending on the pursuer's name prompt. Mirrors the opponent
+        /// relabelled to its name; the datee's lines kept as the inbound
+        /// messages), ending on the pursuer's name prompt. Mirrors the datee
         /// side's <see cref="HarnessRunner.BuildCharacterUserMessage"/>.
         /// </summary>
         private string BuildPursuerUserMessage(IReadOnlyList<(string Speaker, string Text)> transcript)

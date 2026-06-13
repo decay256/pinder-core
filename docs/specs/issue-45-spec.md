@@ -71,7 +71,7 @@ No new public methods are added. The following existing methods gain shadow thre
 ```csharp
 public GameSession(
     CharacterProfile player,
-    CharacterProfile opponent,
+    CharacterProfile datee,
     ILlmAdapter llm,
     IDiceRoller dice,
     ITrapRegistry trapRegistry,
@@ -105,7 +105,7 @@ Each shadow stat has effects at three threshold tiers. T0 (0–5) has no mechani
 | Madness | Charm | UI glitches (cosmetic — host responsibility) | **Charm rolls have disadvantage** | One option/turn replaced with unhinged text (cosmetic — LLM uses `ShadowThresholds`) |
 | Denial | Honesty | "I'm fine" leaks into messages (cosmetic — LLM) | **Honesty rolls have disadvantage** | **Honesty options removed** from returned options |
 | Fixation | Chaos | Options start repeating patterns (cosmetic — LLM) | **Chaos rolls have disadvantage** | **Must pick same stat as last turn** (forced stat) |
-| Overthinking | SelfAwareness | Always see Interest number (host responsibility) | **SA rolls have disadvantage** | See opponent's inner monologue (cosmetic — LLM) |
+| Overthinking | SelfAwareness | Always see Interest number (host responsibility) | **SA rolls have disadvantage** | See datee's inner monologue (cosmetic — LLM) |
 | Horniness | Rizz | Rizz options appear more (handled by issue #51) | One option always unwanted Rizz (handled by #51) | All options become Rizz (handled by #51) |
 
 ### 3.1 Cosmetic Effects (T1, some T3)

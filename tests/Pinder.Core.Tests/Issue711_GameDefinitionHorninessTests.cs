@@ -15,7 +15,7 @@ name: TestGame
 vision: v
 world_description: w
 player_role_description: p
-opponent_role_description: o
+datee_role_description: o
 narrative_doctrine: nd
 global_dc_bias: 0
 horniness_time_modifiers:
@@ -64,7 +64,7 @@ name: TestGame
 vision: v
 world_description: w
 player_role_description: p
-opponent_role_description: o
+datee_role_description: o
 narrative_doctrine: nd
 global_dc_bias: 0
 horniness_time_modifiers:
@@ -90,7 +90,7 @@ name: TestGame
 vision: v
 world_description: w
 player_role_description: p
-opponent_role_description: o
+datee_role_description: o
 narrative_doctrine: nd
 global_dc_bias: 0
 ";
@@ -107,7 +107,7 @@ name: TestGame
 vision: v
 world_description: w
 player_role_description: p
-opponent_role_description: o
+datee_role_description: o
 narrative_doctrine: nd
 global_dc_bias: 0
 ";
@@ -124,7 +124,7 @@ name: TestGame
 vision: v
 world_description: w
 player_role_description: p
-opponent_role_description: o
+datee_role_description: o
 narrative_doctrine: nd
 global_dc_bias: 0
 horniness_time_modifiers: ~
@@ -143,7 +143,7 @@ name: TestGame
 vision: v
 world_description: w
 player_role_description: p
-opponent_role_description: o
+datee_role_description: o
 narrative_doctrine: nd
 global_dc_bias: 0
 horniness_time_modifiers:
@@ -167,7 +167,7 @@ name: TestGame
 vision: v
 world_description: w
 player_role_description: p
-opponent_role_description: o
+datee_role_description: o
 narrative_doctrine: nd
 global_dc_bias: 0
 horniness_time_modifiers:

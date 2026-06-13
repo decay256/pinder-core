@@ -67,7 +67,7 @@ public int GetDelta(ShadowStatType shadow);
 ### Stateful LLM Session Wiring
 
 - **Detection via interface check:** `GameSession`'s 6-parameter constructor checks `_llm is IStatefulLlmAdapter stateful` at the end of initialization. The 5-parameter constructor delegates to the 6-parameter constructor, so the check runs for both.
-- **System prompt assembly:** When the adapter is stateful, the constructor builds a system prompt by concatenating `_player.AssembledSystemPrompt + "\n\n---\n\n" + _opponent.AssembledSystemPrompt` and passes it to `stateful.StartConversation(systemPrompt)`. This is a temporary format — issue #543 introduces `SessionSystemPromptBuilder` with structured game vision/rules/meta-contract.
+- **System prompt assembly:** When the adapter is stateful, the constructor builds a system prompt by concatenating `_player.AssembledSystemPrompt + "\n\n---\n\n" + _datee.AssembledSystemPrompt` and passes it to `stateful.StartConversation(systemPrompt)`. This is a temporary format — issue #543 introduces `SessionSystemPromptBuilder` with structured game vision/rules/meta-contract.
 - **Transparent to callers:** No `GameSession` method bodies changed. The adapter internally routes calls through the accumulated `ConversationSession` when active. `GameSession` continues calling `_llm.GetDialogueOptionsAsync(context)` etc. as before.
 - **Backward compatibility:** `NullLlmAdapter` implements only `ILlmAdapter` (not `IStatefulLlmAdapter`), so the `is` check returns `false` for all existing tests. Zero behavioral change on the stateless path.
 - **One adapter per session:** Architecture assumes 1:1 adapter-to-GameSession relationship. Sharing an adapter across sessions silently replaces the conversation (documented as unsupported).
@@ -84,4 +84,4 @@ public int GetDelta(ShadowStatType shadow);
 | Date | Issue | Summary |
 |------|-------|---------|
 | 2026-04-03 | #270 | Initial creation — documented 4 new shadow reduction events (Dread, Denial, Madness, Overthinking) added to `GameSession`. Two new test files (1202 lines). |
-| 2026-04-05 | #542 | Stateful LLM session wiring — `IStatefulLlmAdapter` interface added to `Pinder.Core.Interfaces`. `GameSession` constructor detects stateful adapters and calls `StartConversation` with player + opponent system prompts (separated by `\n\n---\n\n`). `NullLlmAdapter` unchanged (stateless path preserved). Test file: `Issue542_StatefulSession_TestEngineerTests.cs`. |
+| 2026-04-05 | #542 | Stateful LLM session wiring — `IStatefulLlmAdapter` interface added to `Pinder.Core.Interfaces`. `GameSession` constructor detects stateful adapters and calls `StartConversation` with player + datee system prompts (separated by `\n\n---\n\n`). `NullLlmAdapter` unchanged (stateless path preserved). Test file: `Issue542_StatefulSession_TestEngineerTests.cs`. |

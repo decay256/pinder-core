@@ -19,9 +19,9 @@ namespace Pinder.Tools.NarrativeHarness
 @"NarrativeHarness — rules-free narrative testbed (#843)
 
 Usage:
-  --character <slug>        Opponent character to load (e.g. brick, velvet). Default: brick
+  --character <slug>        Datee character to load (e.g. brick, velvet). Default: brick
   --pursuer-character <slug> OPTIONAL second real character driven as the pursuer
-                            through the SAME production prompt path (BuildOpponent).
+                            through the SAME production prompt path (BuildDatee).
                             When set, the pursuer stays in character for the whole
                             transcript (REACTIVE — no arc injection). When omitted,
                             the pursuer falls back to --player-script (if given) or

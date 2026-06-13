@@ -19,8 +19,8 @@ namespace Pinder.Core.Characters
 
         /// <summary>
         /// The base system prompt before psychological stake was appended.
-        /// Used when building opponent context for the player agent — the player
-        /// should not see the opponent's generated stake as prior knowledge.
+        /// Used when building datee context for the player agent — the player
+        /// should not see the datee's generated stake as prior knowledge.
         /// </summary>
         public string BaseSystemPrompt { get; private set; }
 
@@ -40,7 +40,7 @@ namespace Pinder.Core.Characters
         /// Issue #562: self-reported gender identity (e.g. "she/her",
         /// "they/them"). Sourced from the <c>gender_identity</c> field in
         /// the character JSON. Surfaced in the
-        /// <see cref="OpponentVisibleProfile"/> as a Tinder-card-equivalent
+        /// <see cref="DateeVisibleProfile"/> as a Tinder-card-equivalent
         /// field. Empty when not set on the character file.
         /// </summary>
         public string GenderIdentity { get; }
@@ -111,7 +111,7 @@ namespace Pinder.Core.Characters
         /// <summary>
         /// Freezes BaseSystemPrompt to the current AssembledSystemPrompt value.
         /// Call this immediately before appending the psychological stake so the
-        /// base prompt remains clean for opponent profile injection.
+        /// base prompt remains clean for datee profile injection.
         /// </summary>
         public void FreezeBasePrompt()
         {

@@ -16,7 +16,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             Assert.Equal(0.9, options.Temperature);
             Assert.Null(options.DialogueOptionsTemperature);
             Assert.Null(options.DeliveryTemperature);
-            Assert.Null(options.OpponentResponseTemperature);
+            Assert.Null(options.DateeResponseTemperature);
             Assert.Null(options.InterestChangeBeatTemperature);
         }
 
@@ -31,7 +31,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
                 Temperature = 0.7,
                 DialogueOptionsTemperature = 1.0,
                 DeliveryTemperature = 0.5,
-                OpponentResponseTemperature = 0.8,
+                DateeResponseTemperature = 0.8,
                 InterestChangeBeatTemperature = 0.6
             };
 
@@ -41,7 +41,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             Assert.Equal(0.7, options.Temperature);
             Assert.Equal(1.0, options.DialogueOptionsTemperature);
             Assert.Equal(0.5, options.DeliveryTemperature);
-            Assert.Equal(0.8, options.OpponentResponseTemperature);
+            Assert.Equal(0.8, options.DateeResponseTemperature);
             Assert.Equal(0.6, options.InterestChangeBeatTemperature);
         }
     }

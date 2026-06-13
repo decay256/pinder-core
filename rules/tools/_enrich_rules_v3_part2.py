@@ -12,7 +12,7 @@ def enrich_rules_v3_part2(e: Dict[str, Any], eid: str, desc: str, blocks: List[D
         e['outcome'] = {'actions': ['Speak', 'Read', 'Recover', 'Wait']}
         return [e]
 
-    elif eid == '§10.opponents-turn-llm-controlled':
+    elif eid == '§10.datees-turn-llm-controlled':
         for b in blocks:
             if b.get('kind') == 'table':
                 for row in b.get('rows', []):
@@ -23,13 +23,13 @@ def enrich_rules_v3_part2(e: Dict[str, Any], eid: str, desc: str, blocks: List[D
                     m = re.search(r'(\d+)\s*[–-]\s*(\d+)', str(interest))
                     if m:
                         sub = {
-                            'id': f'§10.opponent-turn.interest-{m.group(1)}-{m.group(2)}',
+                            'id': f'§10.datee-turn.interest-{m.group(1)}-{m.group(2)}',
                             'section': '§10',
-                            'title': f'Opponent Turn — Interest {interest}',
+                            'title': f'Datee Turn — Interest {interest}',
                             'type': 'interest_change',
                             'description': f'At interest {interest}: {action}.',
                             'condition': {'interest_range': [int(m.group(1)), int(m.group(2))]},
-                            'outcome': {'opponent_action': action},
+                            'outcome': {'datee_action': action},
                         }
                         res.append(sub)
         res.append(e)
@@ -209,7 +209,7 @@ def enrich_rules_v3_part2(e: Dict[str, Any], eid: str, desc: str, blocks: List[D
         res.append(e)
         return res
 
-    elif eid == '§5.level-bonus-vs-opponent-dc-the-spread':
+    elif eid == '§5.level-bonus-vs-datee-dc-the-spread':
         for b in blocks:
             if b.get('kind') == 'table':
                 for row in b.get('rows', []):

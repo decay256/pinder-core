@@ -15,13 +15,13 @@ namespace Pinder.LlmAdapters.Tests
     /// </summary>
     public class Issue493_FailureDegradationSpecTests
     {
-        private static OpponentContext MakeContext(FailureTier tier, int interestBefore = 12, int interestAfter = 11)
+        private static DateeContext MakeContext(FailureTier tier, int interestBefore = 12, int interestAfter = 11)
         {
-            return new OpponentContext(
+            return new DateeContext(
                 playerPrompt: "player prompt",
-                opponentPrompt: "opponent prompt",
-                conversationHistory: new List<(string, string)> { ("Player", "hey"), ("Opponent", "hi") },
-                opponentLastMessage: "hi",
+                dateePrompt: "datee prompt",
+                conversationHistory: new List<(string, string)> { ("Player", "hey"), ("Datee", "hi") },
+                dateeLastMessage: "hi",
                 activeTraps: Array.Empty<string>(),
                 currentInterest: interestAfter,
                 playerDeliveredMessage: "so uh yeah you seem cool",
@@ -29,7 +29,7 @@ namespace Pinder.LlmAdapters.Tests
                 interestAfter: interestAfter,
                 responseDelayMinutes: 2.0,
                 playerName: "Player",
-                opponentName: "Opponent",
+                dateeName: "Datee",
                 currentTurn: 3,
                 deliveryTier: tier);
         }
@@ -40,8 +40,8 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void AC5_TropeTrap_And_Catastrophe_ProduceDistinctGuidance()
         {
-            var tropeTrapPrompt = SessionDocumentBuilder.BuildOpponentPrompt(MakeContext(FailureTier.TropeTrap));
-            var catastrophePrompt = SessionDocumentBuilder.BuildOpponentPrompt(MakeContext(FailureTier.Catastrophe));
+            var tropeTrapPrompt = SessionDocumentBuilder.BuildDateePrompt(MakeContext(FailureTier.TropeTrap));
+            var catastrophePrompt = SessionDocumentBuilder.BuildDateePrompt(MakeContext(FailureTier.Catastrophe));
 
             // Both should contain FAILURE CONTEXT but with different content
             Assert.Contains("FAILURE CONTEXT", tropeTrapPrompt);
@@ -58,7 +58,7 @@ namespace Pinder.LlmAdapters.Tests
         public void AC6_Success_NoFailureContext_InPrompt()
         {
             var context = MakeContext(FailureTier.None, interestBefore: 12, interestAfter: 13);
-            var prompt = SessionDocumentBuilder.BuildOpponentPrompt(context);
+            var prompt = SessionDocumentBuilder.BuildDateePrompt(context);
 
             Assert.DoesNotContain("FAILURE CONTEXT", prompt);
         }
@@ -84,7 +84,7 @@ namespace Pinder.LlmAdapters.Tests
 
             foreach (var tier in tiers)
             {
-                var guidance = SessionDocumentBuilder.GetOpponentReactionGuidance(tier);
+                var guidance = SessionDocumentBuilder.GetDateeReactionGuidance(tier);
                 Assert.False(string.IsNullOrEmpty(guidance), $"Guidance for {tier} should not be empty");
                 Assert.True(guidanceTexts.Add(guidance), $"Guidance for {tier} should be distinct from others");
             }
@@ -98,9 +98,9 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void AC4_Fumble_Guidance_DoesNotBreakFourthWall()
         {
-            var guidance = SessionDocumentBuilder.GetOpponentReactionGuidance(FailureTier.Fumble);
+            var guidance = SessionDocumentBuilder.GetDateeReactionGuidance(FailureTier.Fumble);
 
-            // Per spec: "the opponent shouldn't break the fourth wall"
+            // Per spec: "the datee shouldn't break the fourth wall"
             // Guidance should NOT contain meta-game language like "failed" or "messed up"
             Assert.DoesNotContain("failed", guidance.ToLowerInvariant());
             Assert.DoesNotContain("messed up", guidance.ToLowerInvariant());
@@ -116,7 +116,7 @@ namespace Pinder.LlmAdapters.Tests
         public void EdgeCase_InvalidTierValue_ReturnsEmptyString()
         {
             var invalidTier = (FailureTier)999;
-            var guidance = SessionDocumentBuilder.GetOpponentReactionGuidance(invalidTier);
+            var guidance = SessionDocumentBuilder.GetDateeReactionGuidance(invalidTier);
 
             Assert.Equal(string.Empty, guidance);
         }
@@ -126,7 +126,7 @@ namespace Pinder.LlmAdapters.Tests
         public void EdgeCase_FailureContext_AppearsAfterPlayerMessage()
         {
             var context = MakeContext(FailureTier.Catastrophe);
-            var prompt = SessionDocumentBuilder.BuildOpponentPrompt(context);
+            var prompt = SessionDocumentBuilder.BuildDateePrompt(context);
 
             int playerMessageIndex = prompt.IndexOf("PLAYER'S LAST MESSAGE", StringComparison.Ordinal);
             int failureContextIndex = prompt.IndexOf("FAILURE CONTEXT", StringComparison.Ordinal);
@@ -142,8 +142,8 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void EdgeCase_Legendary_DistinctFromCatastrophe()
         {
-            var legendary = SessionDocumentBuilder.GetOpponentReactionGuidance(FailureTier.Legendary);
-            var catastrophe = SessionDocumentBuilder.GetOpponentReactionGuidance(FailureTier.Catastrophe);
+            var legendary = SessionDocumentBuilder.GetDateeReactionGuidance(FailureTier.Legendary);
+            var catastrophe = SessionDocumentBuilder.GetDateeReactionGuidance(FailureTier.Catastrophe);
 
             Assert.NotEqual(legendary, catastrophe);
         }
@@ -153,11 +153,11 @@ namespace Pinder.LlmAdapters.Tests
         public void EdgeCase_GuidanceSeverity_Escalates()
         {
             // Legendary should be the most extreme — check it references embarrassment/shock
-            var legendary = SessionDocumentBuilder.GetOpponentReactionGuidance(FailureTier.Legendary);
+            var legendary = SessionDocumentBuilder.GetDateeReactionGuidance(FailureTier.Legendary);
             Assert.Contains("embarrassment", legendary.ToLowerInvariant());
 
             // Fumble should be the mildest — check it references subtle/slight
-            var fumble = SessionDocumentBuilder.GetOpponentReactionGuidance(FailureTier.Fumble);
+            var fumble = SessionDocumentBuilder.GetDateeReactionGuidance(FailureTier.Fumble);
             Assert.Contains("slight", fumble.ToLowerInvariant());
         }
 

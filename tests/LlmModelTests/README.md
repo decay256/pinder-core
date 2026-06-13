@@ -20,7 +20,7 @@ Full 33k-char engine system prompt + delivery user message.
 Only models with >8k context: Claude Sonnet, llama-3.3-70b, kimi-k2.
 
 **Section B — Overlay (all models)**
-Short ~700-char system prompt with opponent context (bio + items).
+Short ~700-char system prompt with datee context (bio + items).
 Uses updated A+C latent-heat instruction from delivery-instructions.yaml.
 All Groq models + Claude.
 
@@ -36,7 +36,7 @@ not the tier-modified version.
 
 ## Overlay prompt design (A+C)
 
-- **A**: Opponent context (bio + items) injected into overlay system prompt
+- **A**: Datee context (bio + items) injected into overlay system prompt
 - **C**: Latent-heat instruction: surface charge with minimum word changes, stay in physical domain. No fire/heat metaphors. Synonyms must remain plausible for the original object.
 
 ## CI note

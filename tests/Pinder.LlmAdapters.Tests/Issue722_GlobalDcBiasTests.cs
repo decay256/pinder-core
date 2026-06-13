@@ -13,8 +13,8 @@ world_description: |
   A test world description.
 player_role_description: |
   Player role.
-opponent_role_description: |
-  Opponent role.
+datee_role_description: |
+  Datee role.
 narrative_doctrine: |
   Meta contract text.
   Writing rules text.

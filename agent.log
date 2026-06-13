@@ -2014,3 +2014,4 @@ started
 {"ts":"2026-05-27T12:17:11Z","agent":"orchestrator","issue":"1059","component":"docs","action":"completed","detail":"Successfully updated ARCHITECTURE.md to document TurnOrchestrator, extracted pipeline stages, PinderLlmAdapter, and Pinder.Core.TestCommon.","commit":null}
 {"ts":"2026-06-01T02:27:41Z","agent":"backend-engineer","issue":"1080","component":"Anthropic","action":"started","detail":"Implementing token usage aggregation per branch fix/1080-token-usage-aggregation","commit":null}
 {"ts":"2026-06-01T02:33:27Z","agent":"backend-engineer","issue":"1080","component":"Anthropic","action":"completed","detail":"PR opened","commit":"e97f9bb"}
+{"ts":"2026-06-13T08:42:52Z","agent":"backend-engineer","action":"start","ticket":1121,"detail":"Rename OPPONENT->DATEE across live pinder-core src/contracts/docs (pure rename)"}

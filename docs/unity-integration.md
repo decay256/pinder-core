@@ -147,7 +147,7 @@ public interface ILlmAdapter
 {
     Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext c, CancellationToken ct = default);
     Task<string>           DeliverMessageAsync   (DeliveryContext  c, CancellationToken ct = default);
-    Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext c, CancellationToken ct = default);
+    Task<DateeResponse> GetDateeResponseAsync(DateeContext c, CancellationToken ct = default);
     Task<string?>          GetInterestChangeBeatAsync(InterestChangeContext c, CancellationToken ct = default);
     Task<string>           ApplyHorninessOverlayAsync(string msg, string instruction, string? oc, string? ad, CancellationToken ct = default);
     Task<string>           ApplyShadowCorruptionAsync(string msg, string instruction, ShadowStatType s, string? ad, CancellationToken ct = default);
@@ -180,7 +180,7 @@ you're using a Unity-native LLM SDK. The cheap version: implement
 `ILlmTransport` (one method, `SendAsync`) and let `PinderLlmAdapter`
 do the prompt assembly. The heavy version: implement `ILlmAdapter`
 directly (the seven methods above). The context/response shapes
-(`DialogueContext`, `OpponentResponse`, etc.) are all in
+(`DialogueContext`, `DateeResponse`, etc.) are all in
 `Pinder.Core.Conversation`. Keep it stateless across calls — the
 engine owns conversation history, not the adapter.
 
@@ -289,7 +289,7 @@ public class PinderRunner : MonoBehaviour
     private static readonly HttpClient _http = new HttpClient();
     private GameSession _session;
 
-    public async void StartGame(string playerSlug, string opponentSlug)
+    public async void StartGame(string playerSlug, string dateeSlug)
     {
         // 1. Load data repositories.
         IAnatomyRepository anatomy = new JsonAnatomyRepository(
@@ -309,10 +309,10 @@ public class PinderRunner : MonoBehaviour
         //    and returns a fully-built CharacterProfile.
         var playerPath = Path.Combine(
             Application.streamingAssetsPath, $"PinderData/characters/{playerSlug}.json");
-        var opponentPath = Path.Combine(
-            Application.streamingAssetsPath, $"PinderData/characters/{opponentSlug}.json");
+        var dateePath = Path.Combine(
+            Application.streamingAssetsPath, $"PinderData/characters/{dateeSlug}.json");
         CharacterProfile player   = CharacterDefinitionLoader.Load(playerPath, items, anatomy);
-        CharacterProfile opponent = CharacterDefinitionLoader.Load(opponentPath, items, anatomy);
+        CharacterProfile datee = CharacterDefinitionLoader.Load(dateePath, items, anatomy);
 
         // 4. Construct the session. `GameSessionConfig` is required — the
         //    engine refuses silent defaults. The zero-arg call is fine for
@@ -320,14 +320,14 @@ public class PinderRunner : MonoBehaviour
         //    clock, shadow trackers, RNG, etc.).
         var config       = new GameSessionConfig();
         IDiceRoller dice = new SystemRandomDiceRoller(seed: null);  // null = nondeterministic
-        _session = new GameSession(player, opponent, llm, dice, traps, config);
+        _session = new GameSession(player, datee, llm, dice, traps, config);
     }
 
     public async Task PickOption(int optionIndex, IProgress<TurnProgressEvent>? progress = null)
     {
         TurnResult result = await _session.ResolveTurnAsync(optionIndex, progress);
         // result.DeliveredMessage ← the player's outgoing message after roll degradation
-        // result.OpponentMessage  ← opponent reply
+        // result.DateeMessage  ← datee reply
         // result.Roll             ← RollResult: d20, DC, fail tier, etc.
         // result.InterestDelta    ← +/− net interest change this turn
         // result.IsGameOver       ← true when the conversation has ended
@@ -339,7 +339,7 @@ public class PinderRunner : MonoBehaviour
 ```
 
 The `IProgress<TurnProgressEvent>` callback fires during the turn:
-options ready → option picked → resolution rolling → opponent
+options ready → option picked → resolution rolling → datee
 streaming → done. Subscribe to drive a progress bar or to surface
 early text. A complete event taxonomy is at the top of
 [`src/Pinder.Core/Conversation/TurnProgress.cs`](../src/Pinder.Core/Conversation/TurnProgress.cs).
@@ -364,11 +364,11 @@ var json = JsonConvert.SerializeObject(snap);
 PlayerPrefs.SetString("pinder.session", json);
 // ...later...
 var restored = GameSession.Restore(JsonConvert.DeserializeObject<GameStateSnapshot>(json),
-                                   player, opponent, llm, dice, trapRegistry);
+                                   player, datee, llm, dice, trapRegistry);
 ```
 
 The snapshot covers all engine-owned state: interest, traps, momentum,
-combo state, shadows, weakness windows, tells, opponent LLM history,
+combo state, shadows, weakness windows, tells, datee LLM history,
 horniness rolls, callback opportunities. **It does not cover client
 state** — your UI is responsible for re-rendering from the snapshot's
 public fields (`InterestState`, `TurnNumber`, etc.).
@@ -455,7 +455,7 @@ upper bound, or wants `level` to add +2 not +1 per level.
 
 ```
 d20 + statModifier + levelBonus + externalBonus >= DC
-DC = 16 + opponent's defending stat modifier
+DC = 16 + datee's defending stat modifier
 ```
 
 `statModifier` is the raw value from `build_points` (no ability-score
@@ -657,7 +657,7 @@ Three tiers, in the order you should add them:
    pinned conversation through your adapter and compare the LLM
    prompts to a fixture file. Any drift means your adapter is
    building prompts differently from `pinder-web`'s adapter — usually
-   a missing field on `DialogueContext` or `OpponentContext`.
+   a missing field on `DialogueContext` or `DateeContext`.
 3. **End-to-end** (run before release). Full session against the live
    LLM, human-reviewed. There's no way to automate this — comedy
    tone is the QA criterion.
@@ -675,8 +675,8 @@ the engine itself is healthy before chasing Unity-side issues.
 |---|---|
 | Character won't load (`ArgumentException`) | `CharacterAssembler.Assemble` — names the missing id |
 | Roll computes the wrong DC | `RollEngine` + `_globalDcBias` parameter on `GameSession` |
-| Opponent never replies | Your `ILlmAdapter.GetOpponentResponseAsync` — engine does not retry adapter errors |
-| Snapshot won't restore | `GameStateSnapshot.cs` schema; check that `ResimulateData.OpponentHistory` survived your serialiser |
+| Datee never replies | Your `ILlmAdapter.GetDateeResponseAsync` — engine does not retry adapter errors |
+| Snapshot won't restore | `GameStateSnapshot.cs` schema; check that `ResimulateData.DateeHistory` survived your serialiser |
 | Replay shows different text from live | You re-executed the engine on replay. Don't. Read the stored `TurnResult` payload. |
 | Items don't affect the prompt | Item is in `IItemRepository.GetItem` returning null. Check the id casing. |
 | Mood / horniness overlay never fires | Adapter returned the unmodified message. Confirm the overlay methods on your adapter actually rewrite. |
