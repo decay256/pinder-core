@@ -46,8 +46,13 @@ namespace Pinder.Core.TestCommon
             return Task.FromResult(new[] { new DialogueOption(StatType.Charm, "Default") });
         }
 
-        public Task<string> DeliverMessageAsync(DeliveryContext context, CancellationToken ct = default)
-            => Task.FromResult(context.ChosenOption.IntendedText);
+        // #1125 — delivery collapsed: the creative "delivery" LLM call was
+        // removed from ILlmAdapter. Dialogue options now carry the FULL sendable
+        // line and the engine commits it via the deterministic, non-LLM
+        // DeliveryOverlay. This stub therefore no longer implements a
+        // DeliverMessageAsync(DeliveryContext) surface — there is none to
+        // implement. (Keystone for #1136: both downstream test projects compile
+        // against this contract.)
 
         public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, CancellationToken ct = default)
             => Task.FromResult(new DateeResponse("..."));

@@ -61,25 +61,11 @@ namespace Pinder.LlmAdapters.Anthropic
             }")
         };
 
-        /// <summary>
-        /// Tool for DeliverMessageAsync — returns the delivered message text.
-        /// Schema: {delivered: string}
-        /// </summary>
-        public static readonly ToolDefinition Delivery = new ToolDefinition
-        {
-            Name = "submit_delivery",
-            Description = "Submit the delivered message text.",
-            InputSchema = JObject.Parse(@"{
-                ""type"": ""object"",
-                ""properties"": {
-                    ""delivered"": {
-                        ""type"": ""string"",
-                        ""description"": ""The delivered message text after applying the roll outcome.""
-                    }
-                },
-                ""required"": [""delivered""]
-            }")
-        };
+        // #1125 — the "submit_delivery" tool schema was removed along with the
+        // collapsed delivery LLM call (DeliverMessageAsync is gone from the
+        // adapter surface). Options now carry the full sendable line and the
+        // engine commits it deterministically via DeliveryOverlay, so no
+        // structured-output tool for delivery is needed.
 
         /// <summary>
         /// Tool for GetDateeResponseAsync — returns the datee's message and optional signals.
