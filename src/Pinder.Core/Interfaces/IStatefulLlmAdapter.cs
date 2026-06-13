@@ -54,6 +54,34 @@ namespace Pinder.Core.Interfaces
             CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// #1123: Deliver the chosen option as the avatar, given the prior
+        /// avatar conversation history accumulated by the engine. The symmetric
+        /// sibling of <see cref="GetDateeResponseAsync(DateeContext, IReadOnlyList{ConversationMessage}, CancellationToken)"/>:
+        /// the avatar session is now stateful and cached just like the datee
+        /// session. Stateless: implementations MUST NOT retain any avatar-session
+        /// field across calls.
+        /// </summary>
+        /// <param name="context">Delivery context for the current turn (system prompt, chosen option, outcome, etc.).</param>
+        /// <param name="history">
+        /// Prior avatar conversation, in chronological order. Each entry's
+        /// <see cref="ConversationMessage.Role"/> is one of <c>"user"</c> or
+        /// <c>"assistant"</c>. The current-turn user prompt is NOT included —
+        /// the implementation derives it from <paramref name="context"/> and
+        /// appends it after the supplied history.
+        /// </param>
+        /// <param name="cancellationToken">Cooperative cancellation (#794 alignment).</param>
+        /// <returns>
+        /// A <see cref="StatefulAvatarResult"/> bundling the delivered message
+        /// with the new history entries the engine should append to its avatar
+        /// history (typically one user-role entry followed by one
+        /// assistant-role entry).
+        /// </returns>
+        Task<StatefulAvatarResult> DeliverMessageAsync(
+            DeliveryContext context,
+            IReadOnlyList<ConversationMessage> history,
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Generate a steering question to append to the player's delivered message.
         /// Called after a successful steering roll. The question should reference
         /// specifics from the conversation and nudge toward meeting up.

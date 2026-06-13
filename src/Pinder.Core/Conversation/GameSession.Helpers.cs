@@ -85,6 +85,16 @@ namespace Pinder.Core.Conversation
             => _dateeHistory;
 
         /// <summary>
+        /// #1123: avatar-LLM conversation history owned by the engine, the
+        /// symmetric sibling of <see cref="DateeHistory"/>. Each entry's role is
+        /// <c>"user"</c> or <c>"assistant"</c>. Read-only view over the live
+        /// mutable list so callers see updates as turns resolve. Survives
+        /// snapshot/restore via <see cref="ResimulateData.AvatarHistory"/>.
+        /// </summary>
+        public System.Collections.Generic.IReadOnlyList<ConversationMessage> AvatarHistory
+            => _avatarHistory;
+
+        /// <summary>
         /// Build the conversation history view fed to subsequent LLM calls.
         /// Excludes synthetic scene-setting entries (issue #333) so the
         /// matchup analyser / delivery LLM / datee-response LLM never
@@ -198,7 +208,8 @@ namespace Pinder.Core.Conversation
                 _traps,
                 _turnNumber,
                 _comboTracker.HasTripleBonus,
-                _dateeHistory);
+                _dateeHistory,
+                _avatarHistory);
         }
     }
 }

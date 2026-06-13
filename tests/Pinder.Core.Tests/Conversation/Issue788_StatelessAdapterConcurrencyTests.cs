@@ -47,6 +47,12 @@ namespace Pinder.Core.Tests.Conversation
                 => Task.FromResult(System.Array.Empty<DialogueOption>());
             public Task<string> DeliverMessageAsync(DeliveryContext context, CancellationToken ct = default)
                 => Task.FromResult(string.Empty);
+            public Task<StatefulAvatarResult> DeliverMessageAsync(DeliveryContext context, IReadOnlyList<ConversationMessage> history, CancellationToken ct = default)
+                => Task.FromResult(new StatefulAvatarResult(string.Empty, new ConversationMessage[]
+                {
+                    ConversationMessage.User("u"),
+                    ConversationMessage.Assistant("a"),
+                }));
             public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, CancellationToken ct = default)
                 => Task.FromResult(new DateeResponse(string.Empty));
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, CancellationToken ct = default)
@@ -95,7 +101,6 @@ namespace Pinder.Core.Tests.Conversation
 
         private static DateeContext MakeContext(string playerLabel) =>
             new DateeContext(
-                playerAvatarPrompt: "p",
                 dateePrompt: "o",
                 conversationHistory: System.Array.Empty<(string, string)>(),
                 dateeLastMessage: string.Empty,

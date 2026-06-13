@@ -77,7 +77,8 @@ namespace Pinder.Core.Conversation
                 state.Traps,
                 state.TurnNumber,
                 state.ComboTracker.HasTripleBonus,
-                state.DateeHistory);
+                state.DateeHistory,
+                state.AvatarHistory);
         }
 
         internal static System.Collections.Generic.IReadOnlyList<(string Sender, string Text)> BuildHistoryForLlmContext(GameSessionState state)

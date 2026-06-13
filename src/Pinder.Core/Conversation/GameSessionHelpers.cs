@@ -47,6 +47,38 @@ namespace Pinder.Core.Conversation
         }
 
         /// <summary>
+        /// Issue #1123: builds the minimal, public dating-app card for a
+        /// character so the OTHER two-session GM session can reference it
+        /// without ever seeing the character's full private system prompt
+        /// (psychological stake, stat block, archetype directives, voice spec).
+        ///
+        /// <para>
+        /// This is the symmetric, role-neutral card used for strict bleed
+        /// isolation between the avatar session and the datee session. It
+        /// carries the SAME fields a real dating-app profile view would show —
+        /// name, self-reported gender identity, bio, and an outfit/scene
+        /// signal — and nothing else.
+        /// </para>
+        /// </summary>
+        /// <param name="character">The character whose public card to build.</param>
+        /// <param name="outfitDescription">
+        /// Optional LLM-generated outfit / scene description. When non-empty it
+        /// replaces the equipped-items fallback in the rendered card. Pass an
+        /// empty string when no describer was wired or the call failed.
+        /// </param>
+        public static PublicProfileCard BuildPublicProfileCard(
+            CharacterProfile character, string outfitDescription = "")
+        {
+            if (character == null) throw new System.ArgumentNullException(nameof(character));
+            return new PublicProfileCard(
+                displayName:                       character.DisplayName,
+                genderIdentity:                    character.GenderIdentity,
+                bio:                               character.Bio,
+                outfitDescription:                 outfitDescription,
+                equippedItemDisplayNamesFallback:  character.EquippedItemDisplayNames);
+        }
+
+        /// <summary>
         /// Formats a trap definition's penalty for display.
         /// </summary>
         public static string FormatTrapPenalty(TrapDefinition def)
@@ -113,7 +145,8 @@ namespace Pinder.Core.Conversation
             TrapState traps,
             int turnNumber,
             bool tripleBonusActive,
-            System.Collections.Generic.IReadOnlyList<ConversationMessage> dateeHistory = null)
+            System.Collections.Generic.IReadOnlyList<ConversationMessage> dateeHistory = null,
+            System.Collections.Generic.IReadOnlyList<ConversationMessage> avatarHistory = null)
         {
             var trapNames = traps.AllActive
                 .Select(t => t.Definition.Id)
@@ -133,6 +166,11 @@ namespace Pinder.Core.Conversation
                 ? System.Array.Empty<ConversationMessage>()
                 : dateeHistory.ToArray();
 
+            // #1123: same defensive copy for the avatar history.
+            ConversationMessage[] avatarHistorySnapshot = avatarHistory == null
+                ? System.Array.Empty<ConversationMessage>()
+                : avatarHistory.ToArray();
+
             // #905: Derive ghost probability from interest state.
             // When Bored, the ghost-trigger check fires with 25% probability (dice.Roll(4)==1).
             // All other states have 0% probability. Exposed on the snapshot so the frontend
@@ -148,7 +186,8 @@ namespace Pinder.Core.Conversation
                 tripleBonusActive: tripleBonusActive,
                 activeTrapDetails: trapDetails,
                 dateeHistory: historySnapshot,
-                ghostProbabilityPerTurn: ghostProbabilityPerTurn);
+                ghostProbabilityPerTurn: ghostProbabilityPerTurn,
+                avatarHistory: avatarHistorySnapshot);
         }
 
         /// <summary>

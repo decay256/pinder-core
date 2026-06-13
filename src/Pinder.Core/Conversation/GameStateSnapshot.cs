@@ -46,6 +46,15 @@ namespace Pinder.Core.Conversation
         /// </summary>
         public IReadOnlyList<ConversationMessage> DateeHistory { get; }
 
+        /// <summary>
+        /// #1123: snapshot of the engine-owned avatar LLM conversation history
+        /// at the time the snapshot was taken — the symmetric sibling of
+        /// <see cref="DateeHistory"/>. Each entry's role is <c>"user"</c> or
+        /// <c>"assistant"</c>. Always non-null — empty list when no avatar calls
+        /// have resolved yet.
+        /// </summary>
+        public IReadOnlyList<ConversationMessage> AvatarHistory { get; }
+
         public GameStateSnapshot(
             int interest,
             InterestState state,
@@ -55,7 +64,8 @@ namespace Pinder.Core.Conversation
             bool tripleBonusActive = false,
             TrapDetail[] activeTrapDetails = null,
             IReadOnlyList<ConversationMessage> dateeHistory = null,
-            double ghostProbabilityPerTurn = 0.0)
+            double ghostProbabilityPerTurn = 0.0,
+            IReadOnlyList<ConversationMessage> avatarHistory = null)
         {
             Interest = interest;
             State = state;
@@ -65,6 +75,7 @@ namespace Pinder.Core.Conversation
             TurnNumber = turnNumber;
             TripleBonusActive = tripleBonusActive;
             DateeHistory = dateeHistory ?? System.Array.Empty<ConversationMessage>();
+            AvatarHistory = avatarHistory ?? System.Array.Empty<ConversationMessage>();
             GhostProbabilityPerTurn = ghostProbabilityPerTurn;
         }
     }

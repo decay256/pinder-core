@@ -120,7 +120,6 @@ namespace Pinder.Core.Conversation
 
             var deliveryContext = new DeliveryContext(
                 playerAvatarPrompt: player.AssembledSystemPrompt,
-                dateePrompt: datee.AssembledSystemPrompt,
                 conversationHistory: TurnOrchestratorHelpers.BuildHistoryForLlmContext(state),
                 dateeLastMessage: GameSessionHelpers.GetLastDateeMessage(state.History, datee.DisplayName),
                 chosenOption: deliveryOption,
@@ -134,10 +133,40 @@ namespace Pinder.Core.Conversation
                 shadowThresholds: state.CurrentShadowThresholds,
                 isNat20: rollResult.IsNatTwenty,
                 statFailureInstruction: statFailureInstruction,
-                activeArchetypeDirective: playerArchetypeDirectiveForDelivery);
+                activeArchetypeDirective: playerArchetypeDirectiveForDelivery,
+                // #1123 strict bleed isolation: the avatar (delivery) session
+                // sees ONLY the datee's public dating-app card, never the
+                // datee's full private system prompt.
+                dateeCard: GameSessionHelpers.BuildPublicProfileCard(datee, state.DateeOutfitDescription));
 
             progress?.Report(new TurnProgressEvent(TurnProgressStage.DeliveryStarted));
-            string deliveredMessage = await _llm.DeliverMessageAsync(deliveryContext, ct).ConfigureAwait(false);
+            // #1123: the avatar (delivery) session is now stateful like the datee
+            // session — the engine owns AvatarHistory and threads it through the
+            // stateful avatar adapter overload, appending the new entries the
+            // adapter returns. Stateless adapters fall back to the one-shot path.
+            string deliveredMessage;
+            if (_llm is Pinder.Core.Interfaces.IStatefulLlmAdapter statefulAvatarLlm)
+            {
+                var avatarResult = await statefulAvatarLlm.DeliverMessageAsync(
+                    deliveryContext,
+                    state.AvatarHistory,
+                    ct).ConfigureAwait(false);
+                if (avatarResult == null)
+                    throw new InvalidOperationException("LLM adapter returned null stateful avatar result");
+                deliveredMessage = avatarResult.DeliveredMessage ?? string.Empty;
+                if (avatarResult.NewHistoryEntries != null)
+                {
+                    foreach (var entry in avatarResult.NewHistoryEntries)
+                    {
+                        if (entry != null)
+                            state.AvatarHistory.Add(entry);
+                    }
+                }
+            }
+            else
+            {
+                deliveredMessage = await _llm.DeliverMessageAsync(deliveryContext, ct).ConfigureAwait(false);
+            }
             progress?.Report(new TurnProgressEvent(TurnProgressStage.DeliveryCompleted, deliveredMessage));
 
             // #902: Meta-prefix strip immediately after delivery LLM call.

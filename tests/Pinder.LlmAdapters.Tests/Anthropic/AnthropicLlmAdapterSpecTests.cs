@@ -100,7 +100,6 @@ OPTION_4
 
         private static DeliveryContext MakeDeliveryContext() => new DeliveryContext(
             playerAvatarPrompt: "You are Thundercock",
-            dateePrompt: "You are Velvet",
             conversationHistory: new List<(string, string)> { ("Velvet", "Hey") },
             dateeLastMessage: "Hey",
             chosenOption: new DialogueOption(StatType.Charm, "Nice to meet you"),
@@ -111,7 +110,6 @@ OPTION_4
             dateeName: "Velvet");
 
         private static DateeContext MakeDateeContext() => new DateeContext(
-            playerAvatarPrompt: "You are Thundercock",
             dateePrompt: "You are Velvet",
             conversationHistory: new List<(string, string)> { ("Velvet", "Hey") },
             dateeLastMessage: "Hey",
@@ -260,7 +258,7 @@ OPTION_4
         public void DateeContext_NewFieldsDefaultCorrectly()
         {
             var ctx = new DateeContext(
-                "player", "datee",
+                "datee",
                 new List<(string, string)>(),
                 "last", new string[0], 10, "msg",
                 10, 12, 2.0);
@@ -276,7 +274,7 @@ OPTION_4
         public void DeliveryContext_NewFieldsDefaultCorrectly()
         {
             var ctx = new DeliveryContext(
-                "player", "datee",
+                "player",
                 new List<(string, string)>(),
                 "last",
                 new DialogueOption(StatType.Charm, "text"),

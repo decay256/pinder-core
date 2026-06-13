@@ -264,6 +264,16 @@ namespace Pinder.Core.Tests
                 });
             }
 
+            public async Task<StatefulAvatarResult> DeliverMessageAsync(DeliveryContext context, IReadOnlyList<ConversationMessage> history, System.Threading.CancellationToken ct = default)
+            {
+                string delivered = await DeliverMessageAsync(context, ct).ConfigureAwait(false);
+                return new StatefulAvatarResult(delivered, new ConversationMessage[]
+                {
+                    ConversationMessage.User(string.Empty),
+                    ConversationMessage.Assistant(delivered ?? string.Empty),
+                });
+            }
+
             public Task<string> DeliverMessageAsync(DeliveryContext context, System.Threading.CancellationToken ct = default)
             {
                 CapturedDeliveryContext = context;

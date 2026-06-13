@@ -172,7 +172,6 @@ namespace Pinder.Core.Tests
             var option = new DialogueOption(StatType.Charm, "Hi");
             var ctx = new DeliveryContext(
                 playerAvatarPrompt: "p",
-                dateePrompt: "o",
                 conversationHistory: new List<(string, string)>(),
                 dateeLastMessage: "",
                 chosenOption: option,
@@ -194,7 +193,6 @@ namespace Pinder.Core.Tests
             var option = new DialogueOption(StatType.Charm, "Hi");
             var ctx = new DeliveryContext(
                 playerAvatarPrompt: "p",
-                dateePrompt: "o",
                 conversationHistory: new List<(string, string)>(),
                 dateeLastMessage: "",
                 chosenOption: option,
@@ -212,7 +210,6 @@ namespace Pinder.Core.Tests
         public void DateeContext_New_Fields_Default_To_Null()
         {
             var ctx = new DateeContext(
-                playerAvatarPrompt: "p",
                 dateePrompt: "o",
                 conversationHistory: new List<(string, string)>(),
                 dateeLastMessage: "",
@@ -235,7 +232,6 @@ namespace Pinder.Core.Tests
                 { ShadowStatType.Dread, 6 }
             };
             var ctx = new DateeContext(
-                playerAvatarPrompt: "p",
                 dateePrompt: "o",
                 conversationHistory: new List<(string, string)>(),
                 dateeLastMessage: "",

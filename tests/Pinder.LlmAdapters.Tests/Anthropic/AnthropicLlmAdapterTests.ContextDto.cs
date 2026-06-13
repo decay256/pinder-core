@@ -27,7 +27,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         public void DeliveryContext_defaults_backward_compatible()
         {
             var ctx = new DeliveryContext(
-                "player", "datee",
+                "player",
                 new List<(string, string)>(), "last",
                 new DialogueOption(StatType.Charm, "test"),
                 FailureTier.None, 5,
@@ -42,7 +42,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         public void DateeContext_defaults_backward_compatible()
         {
             var ctx = new DateeContext(
-                "player", "datee",
+                "datee",
                 new List<(string, string)>(), "last",
                 new string[0], 10, "delivered",
                 10, 12, 2.0);
