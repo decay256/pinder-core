@@ -44,50 +44,10 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("Generate exactly 3 dialogue options for GERALD", result);
         }
 
-        [Fact]
-        public void BuildDeliveryPrompt_Success_ContainsSuccessInstruction()
-        {
-            var option = new DialogueOption(StatType.Wit, "Something clever");
-
-            var result = SessionDocumentBuilder.BuildDeliveryPrompt(
-                MakeDeliveryContext(chosenOption: option, outcome: FailureTier.None, beatDcBy: 4,
-                    playerName: "GERALD", dateeName: "VELVET"));
-
-            Assert.Contains("[ENGINE — DELIVERY]", result);
-            Assert.Contains("Beat DC by 4", result);
-            Assert.Contains("Stat: WIT", result);
-            Assert.Contains("Output only the message text", result);
-        }
-
-        [Fact]
-        public void BuildDeliveryPrompt_Misfire_ContainsFailureInstruction()
-        {
-            var option = new DialogueOption(StatType.Charm, "Tell me more");
-
-            var result = SessionDocumentBuilder.BuildDeliveryPrompt(
-                MakeDeliveryContext(chosenOption: option, outcome: FailureTier.Misfire, beatDcBy: -4,
-                    activeTrapInstructions: new[] { "You are aware of how you're coming across." },
-                    playerName: "GERALD", dateeName: "VELVET"));
-
-            Assert.Contains("FAILED", result);
-            Assert.Contains("missed DC by 4", result);
-            Assert.Contains("MISFIRE", result);
-            Assert.Contains("The FORM stays. The CONTENT breaks.", result);
-            Assert.Contains("Active trap instructions:", result);
-            Assert.Contains("You are aware of how you're coming across.", result);
-        }
-
-        [Fact]
-        public void BuildDeliveryPrompt_NullTrapInstructions_OmitsTrapSection()
-        {
-            var option = new DialogueOption(StatType.Honesty, "I'm just honest");
-
-            var result = SessionDocumentBuilder.BuildDeliveryPrompt(
-                MakeDeliveryContext(chosenOption: option, outcome: FailureTier.Fumble, beatDcBy: -1,
-                    playerName: "GERALD", dateeName: "VELVET"));
-
-            Assert.DoesNotContain("Active trap instructions:", result);
-        }
+        // #1138: BuildDeliveryPrompt_* delivery facts removed — the delivery
+        // prompt builder no longer exists (delivery collapsed into the
+        // deterministic DeliveryOverlay, #1125). Overlay/trap behaviour is
+        // covered by the Issue1125 regression tests in Pinder.Core.Tests.
 
         [Fact]
         public void BuildDateePrompt_ContainsAllSections()
@@ -262,12 +222,8 @@ namespace Pinder.LlmAdapters.Tests
                 SessionDocumentBuilder.BuildDialogueOptionsPrompt((DialogueContext)null!));
         }
 
-        [Fact]
-        public void BuildDeliveryPrompt_NullContext_Throws()
-        {
-            Assert.Throws<ArgumentNullException>(() =>
-                SessionDocumentBuilder.BuildDeliveryPrompt((DeliveryContext)null!));
-        }
+        // #1138: BuildDeliveryPrompt_NullContext_Throws removed —
+        // BuildDeliveryPrompt is gone (#1125 DeliveryOverlay).
 
         [Fact]
         public void BuildDateePrompt_NullContext_Throws()
@@ -290,8 +246,8 @@ namespace Pinder.LlmAdapters.Tests
         public void PromptTemplates_AllFieldsAreDefined()
         {
             Assert.False(string.IsNullOrEmpty(PromptTemplates.DialogueOptionsInstruction));
-            Assert.False(string.IsNullOrEmpty(PromptTemplates.SuccessDeliveryInstruction));
-            Assert.False(string.IsNullOrEmpty(PromptTemplates.FailureDeliveryInstruction));
+            // #1138: Success/FailureDeliveryInstruction removed (delivery prompt
+            // collapsed into DeliveryOverlay, #1125).
             Assert.False(string.IsNullOrEmpty(PromptTemplates.DateeResponseInstruction));
             Assert.False(string.IsNullOrEmpty(PromptTemplates.InterestBeatInstruction));
         }
@@ -306,15 +262,9 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("exactly {options_count}", PromptTemplates.DialogueOptionsInstruction);
         }
 
-        [Fact]
-        public void PromptTemplates_FailureDeliveryInstruction_ContainsAllTiers()
-        {
-            Assert.Contains("FUMBLE", PromptTemplates.FailureDeliveryInstruction);
-            Assert.Contains("MISFIRE", PromptTemplates.FailureDeliveryInstruction);
-            Assert.Contains("TROPE_TRAP", PromptTemplates.FailureDeliveryInstruction);
-            Assert.Contains("CATASTROPHE", PromptTemplates.FailureDeliveryInstruction);
-            Assert.Contains("LEGENDARY", PromptTemplates.FailureDeliveryInstruction);
-        }
+        // #1138: PromptTemplates_FailureDeliveryInstruction_ContainsAllTiers
+        // removed — FailureDeliveryInstruction was deleted (delivery prompt
+        // collapsed into DeliveryOverlay, #1125).
 
         [Fact]
         public void PromptTemplates_DateeResponseInstruction_ContainsSignalsBlock()
