@@ -18,7 +18,7 @@ namespace Pinder.LlmAdapters
         public string WorldDescription { get; }
 
         /// <summary>Player character role description.</summary>
-        public string PlayerRoleDescription { get; }
+        public string PlayerAvatarRoleDescription { get; }
 
         /// <summary>Datee character role description.</summary>
         public string DateeRoleDescription { get; }
@@ -37,7 +37,7 @@ namespace Pinder.LlmAdapters
         public string ConversationArcProgression { get; }
 
         /// <summary>Player options probing directive — biographical follow-up instruction.</summary>
-        public string PlayerProbing { get; }
+        public string PlayerAvatarProbing { get; }
 
         /// <summary>Two-stage improvement prompt — appended after initial generation to trigger self-critique and rewrite.</summary>
         public string ImprovementPrompt { get; }
@@ -70,7 +70,7 @@ namespace Pinder.LlmAdapters
             string name,
             string vision,
             string worldDescription,
-            string playerRoleDescription,
+            string playerAvatarRoleDescription,
             string dateeRoleDescription,
             string narrativeDoctrine,
             DeliveryRules deliveryRules = null,
@@ -78,7 +78,7 @@ namespace Pinder.LlmAdapters
             string dateeFriction = null,
             string dateeCuriosity = null,
             string conversationArcProgression = null,
-            string playerProbing = null,
+            string playerAvatarProbing = null,
             string improvementPrompt = null,
             string steeringPrompt = null,
             HorninessTimeModifiers horninessTimeModifiers = null,
@@ -90,13 +90,13 @@ namespace Pinder.LlmAdapters
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Vision = vision ?? throw new ArgumentNullException(nameof(vision));
             WorldDescription = worldDescription ?? throw new ArgumentNullException(nameof(worldDescription));
-            PlayerRoleDescription = playerRoleDescription ?? throw new ArgumentNullException(nameof(playerRoleDescription));
+            PlayerAvatarRoleDescription = playerAvatarRoleDescription ?? throw new ArgumentNullException(nameof(playerAvatarRoleDescription));
             DateeRoleDescription = dateeRoleDescription ?? throw new ArgumentNullException(nameof(dateeRoleDescription));
             NarrativeDoctrine = narrativeDoctrine ?? throw new ArgumentNullException(nameof(narrativeDoctrine));
             DateeFriction = dateeFriction ?? "";
             DateeCuriosity = dateeCuriosity ?? "";
             ConversationArcProgression = conversationArcProgression ?? "";
-            PlayerProbing = playerProbing ?? "";
+            PlayerAvatarProbing = playerAvatarProbing ?? "";
             ImprovementPrompt = improvementPrompt ?? "";
             SteeringPrompt = steeringPrompt ?? "";
             DeliveryRules = deliveryRules;

@@ -22,7 +22,7 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Equal("MyGame", gd.Name);
             Assert.Equal("Vision1", gd.Vision);
             Assert.Equal("World1", gd.WorldDescription);
-            Assert.Equal("Player1", gd.PlayerRoleDescription);
+            Assert.Equal("Player1", gd.PlayerAvatarRoleDescription);
             Assert.Equal("Datee1", gd.DateeRoleDescription);
             Assert.Equal("Doctrine1", gd.NarrativeDoctrine);
         }
@@ -57,14 +57,14 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Equal("worldDescription", ex.ParamName);
         }
 
-        // What: AC1 — constructor throws ArgumentNullException for null playerRoleDescription
-        // Mutation: would catch if null check on playerRoleDescription was removed
+        // What: AC1 — constructor throws ArgumentNullException for null playerAvatarRoleDescription
+        // Mutation: would catch if null check on playerAvatarRoleDescription was removed
         [Fact]
-        public void GameDefinition_Constructor_NullPlayerRoleDescription_ThrowsArgumentNullException()
+        public void GameDefinition_Constructor_NullPlayerAvatarRoleDescription_ThrowsArgumentNullException()
         {
             var ex = Assert.Throws<ArgumentNullException>(() =>
                 new GameDefinition("N", "V", "W", null!, "O", "ND"));
-            Assert.Equal("playerRoleDescription", ex.ParamName);
+            Assert.Equal("playerAvatarRoleDescription", ex.ParamName);
         }
 
         // What: AC1 — constructor throws ArgumentNullException for null dateeRoleDescription
@@ -96,7 +96,7 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Equal("", gd.Name);
             Assert.Equal("", gd.Vision);
             Assert.Equal("", gd.WorldDescription);
-            Assert.Equal("", gd.PlayerRoleDescription);
+            Assert.Equal("", gd.PlayerAvatarRoleDescription);
             Assert.Equal("", gd.DateeRoleDescription);
             Assert.Equal("", gd.NarrativeDoctrine);
         }
@@ -113,7 +113,7 @@ vision: |
 world_description: |
   The world of Pinder is absurdist. Characters are anatomical
   beings navigating modern dating culture.
-player_role_description: |
+player_avatar_role_description: |
   You are the player's character.
 datee_role_description: |
   You are the datee.
@@ -139,7 +139,7 @@ horniness_time_modifiers:
             Assert.Contains("comedy dating RPG", gd.Vision);
             Assert.Contains("sentient penises", gd.Vision);
             Assert.Contains("absurdist", gd.WorldDescription);
-            Assert.Contains("player's character", gd.PlayerRoleDescription);
+            Assert.Contains("player's character", gd.PlayerAvatarRoleDescription);
             Assert.Contains("datee", gd.DateeRoleDescription);
             Assert.Contains("break character", gd.NarrativeDoctrine);
             Assert.Contains("texting register", gd.NarrativeDoctrine);
@@ -176,7 +176,7 @@ horniness_time_modifiers:
             var yaml = @"
 name: Test
 world_description: w
-player_role_description: p
+player_avatar_role_description: p
 datee_role_description: o
 narrative_doctrine: nd
 global_dc_bias: 0
@@ -199,7 +199,7 @@ horniness_time_modifiers:
             var yaml = @"
 vision: v
 world_description: w
-player_role_description: p
+player_avatar_role_description: p
 datee_role_description: o
 narrative_doctrine: nd
 global_dc_bias: 0
@@ -223,7 +223,7 @@ horniness_time_modifiers:
 name: Test
 vision: ~
 world_description: wd
-player_role_description: p
+player_avatar_role_description: p
 datee_role_description: o
 narrative_doctrine: nd
 global_dc_bias: 0
@@ -247,7 +247,7 @@ horniness_time_modifiers:
 name: TestGame
 vision: v
 world_description: w
-player_role_description: p
+player_avatar_role_description: p
 datee_role_description: o
 narrative_doctrine: nd
 global_dc_bias: 0
@@ -275,7 +275,7 @@ vision: |
   Line one.
   Line two.
 world_description: w
-player_role_description: p
+player_avatar_role_description: p
 datee_role_description: o
 narrative_doctrine: nd
 global_dc_bias: 0

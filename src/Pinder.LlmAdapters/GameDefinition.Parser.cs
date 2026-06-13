@@ -43,6 +43,21 @@ namespace Pinder.LlmAdapters
                 return value.ToString()!;
             }
 
+            string GetRequiredWithFallback(string newKey, string oldKey)
+            {
+                if (parsed.TryGetValue(newKey, out var val))
+                {
+                    if (val == null) throw new FormatException($"Key \"{newKey}\" has a null value.");
+                    return val.ToString()!;
+                }
+                if (parsed.TryGetValue(oldKey, out val))
+                {
+                    if (val == null) throw new FormatException($"Key \"{oldKey}\" has a null value.");
+                    return val.ToString()!;
+                }
+                throw new FormatException($"Missing required key: \"{newKey}\"");
+            }
+
             DeliveryRules deliveryRules = null;
             if (parsed.TryGetValue("delivery_rules", out var drObj))
             {
@@ -62,6 +77,16 @@ namespace Pinder.LlmAdapters
                     return v.ToString();
                 return null;
             }
+            
+            string GetOptionalWithFallback(string newKey, string oldKey)
+            {
+                if (parsed.TryGetValue(newKey, out var v) && v != null)
+                    return v.ToString();
+                if (parsed.TryGetValue(oldKey, out v) && v != null)
+                    return v.ToString();
+                return null;
+            }
+            
             // conversation_arc is a dict with a "progression" key
             string conversationArcProgression = null;
             if (parsed.TryGetValue("conversation_arc", out var caObj) && caObj is Dictionary<object, object> caDict)
@@ -78,7 +103,7 @@ namespace Pinder.LlmAdapters
             var name = GetRequired("name");
             var vision = GetRequired("vision");
             var worldDescription = GetRequired("world_description");
-            var playerRoleDescription = GetRequired("player_role_description");
+            var playerAvatarRoleDescription = GetRequiredWithFallback("player_avatar_role_description", "player_role_description");
             var dateeRoleDescription = GetRequired("datee_role_description");
             var narrativeDoctrine = GetRequired("narrative_doctrine");
 
@@ -92,7 +117,7 @@ namespace Pinder.LlmAdapters
                 name: name,
                 vision: vision,
                 worldDescription: worldDescription,
-                playerRoleDescription: playerRoleDescription,
+                playerAvatarRoleDescription: playerAvatarRoleDescription,
                 dateeRoleDescription: dateeRoleDescription,
                 narrativeDoctrine: narrativeDoctrine,
                 deliveryRules: deliveryRules,
@@ -100,7 +125,7 @@ namespace Pinder.LlmAdapters
                 dateeFriction: GetOptional("datee_friction"),
                 dateeCuriosity: GetOptional("datee_curiosity"),
                 conversationArcProgression: conversationArcProgression,
-                playerProbing: GetOptional("player_probing"),
+                playerAvatarProbing: GetOptionalWithFallback("player_avatar_probing", "player_probing"),
                 improvementPrompt: GetOptional("improvement_prompt"),
                 steeringPrompt: GetOptional("steering_prompt"),
                 horninessTimeModifiers: horninessTimeModifiers,

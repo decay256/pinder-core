@@ -44,7 +44,7 @@ drops it and risks activating traps.
 The Interest meter runs from 0 to 25. At 25 (Date Secured) you win.
 Characters think before sending — this is a texting medium that makes
 people self-conscious.",
-            playerRoleDescription: @"The player character is genuinely trying to get a date. Their goal is to
+            playerAvatarRoleDescription: @"The player character is genuinely trying to get a date. Their goal is to
 raise the Interest meter to 25 (Date Secured). Each turn, generate 4
 dialogue options tied to the character's stats. Options must reflect the
 player character's personality as assembled from their items, anatomy

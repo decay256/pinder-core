@@ -35,7 +35,7 @@ world_description: |
   still lands, the DATEE reacts neutrally or only slightly negatively (mild coolness, interest
   barely moves), the positive interest gain is capped at +1, and momentum continues. It is a
   small tainting, never a hard rejection.
-player_role_description: |
+player_avatar_role_description: |
   The PLAYER AVATAR genuinely wants the date; their goal is to raise Interest to 25 ("Date Secured"). The human PLAYER also earns XP, but the character doesn't know about XP — they
   just want it to go well.
 
@@ -53,7 +53,7 @@ player_role_description: |
   If a combo opportunity exists (last two stats set up a named combo), one option should
   naturally complete it. If a callback opportunity exists (something said 2+ turns ago),
   one option should weave it in. Keep it organic — clever, not visibly gaming a system.
-player_probing: |
+player_avatar_probing: |
   When the DATEE reveals a specific biographical detail (a job they left, a trip, a
   relationship that shaped them, an event), at least one option that turn should follow up
   on that concrete fact — not the emotional theme. Specific beats generic: "you mentioned

@@ -17,7 +17,7 @@ namespace Pinder.Tools.NarrativeHarness
                 name: baseDef.Name,
                 vision: baseDef.Vision,
                 worldDescription: baseDef.WorldDescription,
-                playerRoleDescription: baseDef.PlayerRoleDescription,
+                playerAvatarRoleDescription: baseDef.PlayerAvatarRoleDescription,
                 dateeRoleDescription: baseDef.DateeRoleDescription,
                 narrativeDoctrine: baseDef.NarrativeDoctrine,
                 deliveryRules: baseDef.DeliveryRules,
@@ -25,7 +25,7 @@ namespace Pinder.Tools.NarrativeHarness
                 dateeFriction: baseDef.DateeFriction,
                 dateeCuriosity: baseDef.DateeCuriosity,
                 conversationArcProgression: arcText, // ← the only override
-                playerProbing: baseDef.PlayerProbing,
+                playerAvatarProbing: baseDef.PlayerAvatarProbing,
                 improvementPrompt: baseDef.ImprovementPrompt,
                 steeringPrompt: baseDef.SteeringPrompt,
                 horninessTimeModifiers: baseDef.HorninessTimeModifiers,

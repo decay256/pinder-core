@@ -11,7 +11,7 @@ vision: |
   A test game vision.
 world_description: |
   A test world description.
-player_role_description: |
+player_avatar_role_description: |
   Player role.
 datee_role_description: |
   Datee role.
