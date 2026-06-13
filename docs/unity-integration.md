@@ -15,6 +15,165 @@ ranges, archetypes) doesn't map cleanly onto the defaults shipped in
 > `IAnatomyRepository`, `IItemRepository`, `GameSession`) are stable
 > enough to consume but not yet versioned.
 
+> **API contract version: `1`.** This guide is stamped to the
+> `apiVersion` handshake contract value `1`, defined canonically in
+> [`src/Pinder.Core/Contracts/ApiContract.cs`](../src/Pinder.Core/Contracts/ApiContract.cs)
+> (`ApiContract.ApiContractVersion = 1`). That constant is the single
+> source of truth; this doc mirrors it. See [§8](#8-the-apiversion-handshake-contract-version-1)
+> for the handshake and the mismatch error shape.
+>
+> This revision also brings the guide in line with the two-session
+> Game-Master refactor (#1121–#1124, #1127, #1133): the old
+> `OPPONENT`/`PLAYER` vocabulary is now `DATEE`/`PLAYER AVATAR`
+> throughout the engine. Unity-side callers must apply the rename map in
+> [§A](#a-terminology--field-rename-map-opponentdatee-playerplayer-avatar).
+> Mapping the gameplay model onto the engine's prompt graph is covered
+> in [`docs/prompt-graph.md`](prompt-graph.md) *(forthcoming — owned by
+> #1130; the link is intentionally forward-pending until that doc
+> lands)*.
+
+---
+
+## A. Terminology & field-rename map (OPPONENT→DATEE, PLAYER→PLAYER AVATAR)
+
+The two-session Game-Master refactor renamed the two characters
+everywhere in the engine. The character the player is talking *to* is
+now the **DATEE** (was "opponent"); the player-controlled persona is
+now the **PLAYER AVATAR** (was "player"). This is a breaking,
+identifier-level rename — Unity code that referenced the old names will
+not compile against current `pinder-core`. Apply this map client-side
+(owned by Martin; Unity lives in GitLab `Diego_Quarantine/p-game` and
+is read-only from this repo — this doc only *describes* what the Unity
+client must change).
+
+### A.1 Concept rename
+
+| Old concept | New concept | Meaning |
+|---|---|---|
+| OPPONENT | **DATEE** | The character the player is dating / talking to. The GM puppeteers this character in the *datee session*. |
+| PLAYER | **PLAYER AVATAR** | The player-controlled persona whose outgoing messages the GM voices in the *avatar session*. |
+
+### A.2 Identifier rename map (spot-checked against `src/` at this HEAD)
+
+Every "new" identifier below is present in the engine at the same
+commit this doc merges into (verified against `src/`). Old identifiers
+no longer exist in `src/` (a repo-wide search for `Opponent`/`OPPONENT`
+returns zero hits in `src/`).
+
+| Old (pre-refactor) | New (current `src/`) | Kind / location |
+|---|---|---|
+| `OpponentContext` | `DateeContext` | class — [`src/Pinder.Core/Conversation/DateeContext.cs`](../src/Pinder.Core/Conversation/DateeContext.cs) |
+| `OpponentResponse` | `DateeResponse` | class — `src/Pinder.Core/Conversation/DateeResponse.cs` |
+| `GetOpponentResponseAsync` | `GetDateeResponseAsync` | `ILlmAdapter` method |
+| `OpponentPrompt` | `DateePrompt` | property on `DateeContext` / `DialogueContext` |
+| `OpponentName` | `DateeName` | property on `DateeContext` / `DialogueContext` |
+| `OpponentLastMessage` | `DateeLastMessage` | property on `DateeContext` |
+| `BuildOpponentPrompt` | `BuildDateePrompt` | `SessionDocumentBuilder` method |
+| `opponent_role_description` | `datee_role_description` | `data/game-definition.yaml` key |
+| `opponent_friction` / `opponent_curiosity` / `opponent_want` | `datee_friction` / `datee_curiosity` / `datee_want` | `data/game-definition.yaml` keys |
+| `PlayerPrompt` | `PlayerAvatarPrompt` | property on `DialogueContext` |
+| `BuildPlayer` (system prompt) | `BuildPlayerAvatar` / `BuildPlayerAvatarEx` | `SessionSystemPromptBuilder` methods |
+| `BuildPlayerOnlySystemBlocks` | `BuildPlayerAvatarOnlySystemBlocks` | `CacheBlockBuilder` method |
+| `player_role_description` | `player_avatar_role_description` | `data/game-definition.yaml` key (renamed in #1133) |
+| `player_probing` | `player_avatar_probing` | `data/game-definition.yaml` key |
+| `PlayerRoleDescription` | `PlayerAvatarRoleDescription` | `GameDefinition` property |
+| *(none — new in #1123)* | `DateeContext.PlayerAvatarCard` | the avatar's PUBLIC dating-app card (`PublicProfileCard`) handed to the datee session for bleed isolation |
+
+> **Backward-compat note (#1133).** The YAML parser still accepts the
+> legacy `player_role_description` key as a fallback for
+> `player_avatar_role_description`
+> ([`GameDefinition.Parser.cs`](../src/Pinder.LlmAdapters/GameDefinition.Parser.cs),
+> `GetRequiredWithFallback`). New content should use the new key; the
+> fallback exists only so unmigrated data files don't hard-fail. There
+> is no compatibility shim for the C# identifiers — those are renamed
+> outright.
+>
+> **No `DateeCard`.** There is deliberately no `DateeCard` type. The
+> datee never receives a card *for the player* beyond the public
+> `PublicProfileCard` (carried as `DateeContext.PlayerAvatarCard`); the
+> datee's own character is supplied as a full system prompt
+> (`DateePrompt`), not a card. Don't synthesise a `DateeCard` symbol on
+> the Unity side.
+
+---
+
+## B. The two-session Game-Master model
+
+`pinder-core` runs one turn as **two independent LLM sessions**, each
+with the Game Master acting as a puppeteer voicing exactly **one**
+character:
+
+1. **Avatar session** — the GM voices the **PLAYER AVATAR**. It
+   produces the player's dialogue options and the delivered outgoing
+   message. System prompt assembled by
+   `SessionSystemPromptBuilder.BuildPlayerAvatar(...)`; context type is
+   `DialogueContext` (carries `PlayerAvatarPrompt`).
+2. **Datee session** — the GM voices the **DATEE**. It produces the
+   datee's reply plus optional gameplay signals (a tell, a weakness
+   window). Context type is `DateeContext` (carries `DateePrompt`).
+
+**GM-as-puppeteer, one character per session.** Each session's prompt
+contains the role spec for *only* the character that session voices
+(`player_avatar_role_description` for the avatar session,
+`datee_role_description` for the datee session). The GM is instructed to
+stay in-character for that one role and never to speak for the other.
+
+**Bleed isolation (#1123).** The datee session must not see the
+avatar's private state. `DateeContext` deliberately carries only the
+avatar's **public** dating-app card — `PlayerAvatarCard`
+(`PublicProfileCard`, name + public profile fields) — and the labelled
+transcript of sent messages. It never receives the avatar's full
+assembled system prompt (private stake, stat block, archetype
+directives, voice spec). On the Unity side, never pass the avatar's
+private prompt material into anything that feeds the datee session — the
+engine's two-session split is what keeps the datee from "knowing" the
+player's hidden stats.
+
+---
+
+## C. The GM output-format contract (what Unity parses)
+
+Both sessions emit a single canonical text format that `pinder-core`
+parses deterministically. The contract lives in
+[`src/Pinder.LlmAdapters/GmOutputContract.cs`](../src/Pinder.LlmAdapters/GmOutputContract.cs)
+(`GmOutputContract.Emit` / `GmOutputContract.Parse`), and the parsed
+shape is `GmTurnOutput`
+([`src/Pinder.LlmAdapters/GmTurnOutput.cs`](../src/Pinder.LlmAdapters/GmTurnOutput.cs)).
+
+### C.1 Wire shape
+
+```
+<message text — one or more lines>
+[SIGNALS]
+TELL: <Stat> (<description>)
+WEAKNESS: <Stat> -<n> (<description>)
+```
+
+Rules Unity must honour when parsing GM output:
+
+- **Message text** is everything *before* the optional `[SIGNALS]`
+  marker. It is always present (may be empty on malformed input).
+- **The `[SIGNALS]` block is OPTIONAL.** When present it may carry a
+  `TELL:` line and/or a `WEAKNESS:` line, in any order.
+- **`TELL:`** names the revealed stat and a parenthetical description,
+  e.g. `TELL: Charm (she lights up when teased)`.
+- **`WEAKNESS:`** names the defending stat, a `-n` DC reduction, and a
+  parenthetical description, e.g. `WEAKNESS: Honesty -3 (overshares
+  when flattered)`.
+- **Stat spelling.** Stats are emitted as the enum name; the
+  six-letter `SelfAwareness` stat is written on the wire as
+  `SELF_AWARENESS`.
+- **Graceful degradation.** Parsing never throws. Malformed or partial
+  input, an unknown stat, or a missing field collapses to a
+  message-only result (null signals). `Parse(Emit(x))` round-trips for
+  any well-formed `GmTurnOutput`.
+
+`SignalsMarker` is the literal string `[SIGNALS]`. If your Unity client
+parses GM output itself (rather than receiving the already-parsed
+`GmTurnOutput` from the engine), mirror these rules exactly — especially
+the "message is everything before `[SIGNALS]`" and the graceful-degrade
+behaviour.
+
 ---
 
 ## 0. What you're integrating
@@ -705,3 +864,97 @@ Recommended workflow:
    engine doesn't yet have its own changelog).
 4. Plan integration upgrades in dedicated PRs — never roll the engine
    commit forward in a content PR.
+
+---
+
+## 8. The `apiVersion` handshake (contract version `1`)
+
+Every Unity client ⇆ game-api request carries an **`apiVersion`** field
+declaring the wire-contract version the client speaks. The canonical
+definition lives in pinder-core at
+[`src/Pinder.Core/Contracts/ApiContract.cs`](../src/Pinder.Core/Contracts/ApiContract.cs)
+and the request/error shapes at
+[`ApiRequestContract.cs`](../src/Pinder.Core/Contracts/ApiRequestContract.cs)
+and
+[`ApiVersionMismatchError.cs`](../src/Pinder.Core/Contracts/ApiVersionMismatchError.cs).
+
+### 8.1 The current version
+
+```
+ApiContract.ApiContractVersion = 1
+```
+
+**This doc is stamped to contract version `1`.** That constant is the
+single source of truth; this number mirrors it and the engine's
+contract tests assert the two stay in lock-step, so a drift breaks the
+build rather than silently shipping a wrong doc.
+
+`ApiContractVersion` is a **monotonic integer**. It is incremented by
+exactly one on any *breaking* wire change (a renamed/removed field, a
+changed type, a changed required-ness, a changed semantic). Purely
+additive, backwards-compatible changes (a new optional field old
+clients may omit) do **not** bump it. There is no semver "minor
+compatible" notion — a version is either in `SupportedVersions` (today
+exactly `[1]`) or it is rejected.
+
+### 8.2 What Unity must send
+
+The request envelope serializes the field as `apiVersion` (camelCase,
+pinned by `ApiRequestContract.ApiVersionFieldName`):
+
+```jsonc
+{
+  "apiVersion": 1
+  // ... rest of the request payload
+}
+```
+
+- The field is **mandatory.** A request that omits it deserializes to
+  `null` and is rejected by the handshake — a missing version is a
+  mismatch, not a silent default.
+- **Sending `apiVersion` is a Unity-side change owned by Martin.** The
+  Unity client must add the field to its request envelope. (Unity lives
+  in GitLab `Diego_Quarantine/p-game`, read-only from this repo; this
+  doc only describes the required change.)
+
+### 8.3 The mismatch error shape
+
+When the version is missing or unsupported, the server emits
+`ApiVersionMismatchError`. Wire body (System.Text.Json, camelCase):
+
+```jsonc
+{
+  "code": "api_version_mismatch",
+  "message": "Unsupported apiVersion 2; this server supports [1].",
+  "received": 2,        // the version the client sent; null if omitted
+  "supported": [1]      // the versions this server accepts
+}
+```
+
+Contract details Unity must rely on:
+
+| Field | Type | Meaning |
+|---|---|---|
+| `code` | string | Always the literal `api_version_mismatch`. Switch on this. |
+| `message` | string | Human-readable diagnostic. **Not** a stable surface — do not parse it. |
+| `received` | int \| null | The version the client sent, echoed back; `null` when the request omitted `apiVersion`. |
+| `supported` | int[] | The versions the server accepts (mirrors `ApiContract.SupportedVersions`). |
+
+The `code` string and the four field names (`code`, `message`,
+`received`, `supported`) are the pinned wire contract; the engine's
+regression tests pin them so a rename breaks the build.
+
+### 8.4 Where validation runs
+
+`ApiContract.Validate(request)` is the contract **definition** of the
+check (returns `null` when accepted, or a populated
+`ApiVersionMismatchError`). **pinder-core does not itself reject
+requests on the wire** — the actual server-side validation (rejecting
+the request in game-api on port 5101) is a **pinder-web follow-up**, not
+part of this engine. Unity should:
+
+1. Always send `apiVersion: 1` on every request.
+2. Be prepared to parse an `api_version_mismatch` error body (HTTP
+   error response) and surface a "client/server version mismatch — your
+   build supports `received`, the server supports `supported`" message
+   to the player, prompting an update.
