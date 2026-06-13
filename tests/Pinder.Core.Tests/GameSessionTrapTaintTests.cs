@@ -123,12 +123,15 @@ namespace Pinder.Core.Tests
         }
 
         /// <summary>
-        /// DeliveryContext and DateeContext should also get trap instructions
-        /// when a trap is active (from the same turn's resolution, after trap activation
-        /// but before delivery).
+        /// The DateeContext should get trap instructions when a trap is active
+        /// (from the same turn's resolution, after trap activation).
+        /// #1125: the delivery LLM call (and DeliveryContext) were collapsed into
+        /// the deterministic, non-LLM DeliveryOverlay commit step, so trap taint
+        /// no longer flows through a DeliveryContext; the datee context (and the
+        /// trap OVERLAY) remain the consumers. Assertion narrowed to DateeContext.
         /// </summary>
         [Fact]
-        public async Task ResolveTurnAsync_WithPreExistingTrap_PassesInstructionsToDeliveryAndDateeContexts()
+        public async Task ResolveTurnAsync_WithPreExistingTrap_PassesInstructionsToDateeContext()
         {
             // Set up a trap that's already active by manually using TrapState
             // We'll use a trap registry that has a charm trap, and we need the trap to be
@@ -162,16 +165,12 @@ namespace Pinder.Core.Tests
             // Choose option 2 (Wit) — triggers TropeTrap tier, activates wit_trap
             await session.ResolveTurnAsync(2);
 
-            // Check delivery context had trap instructions
-            // Note: trap was activated during RollEngine.Resolve. AdvanceTurn is now called
-            // AFTER delivery + datee LLM calls (#692), so the trap is still at full
-            // duration (5) during this turn's delivery and datee contexts.
-            Assert.Single(capturingLlm.DeliveryContexts);
-            var delivCtx = capturingLlm.DeliveryContexts[0];
-            Assert.NotNull(delivCtx.ActiveTrapInstructions);
-            Assert.Contains("Only speak in terrible puns.", delivCtx.ActiveTrapInstructions!);
+            // #1125: no DeliveryContext is built anymore.
+            Assert.Empty(capturingLlm.DeliveryContexts);
 
-            // Check datee context had trap instructions
+            // Check datee context had trap instructions (trap was activated during
+            // RollEngine.Resolve; AdvanceTurn runs AFTER the datee call (#692), so
+            // the trap is still at full duration during this turn's datee context).
             Assert.Single(capturingLlm.DateeContexts);
             var oppCtx = capturingLlm.DateeContexts[0];
             Assert.NotNull(oppCtx.ActiveTrapInstructions);
@@ -199,9 +198,8 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0);
 
-            var delivCtx = capturingLlm.DeliveryContexts[0];
-            Assert.Null(delivCtx.ActiveTrapInstructions);
-
+            // #1125: no DeliveryContext is built; assert on the surviving datee context.
+            Assert.Empty(capturingLlm.DeliveryContexts);
             var oppCtx = capturingLlm.DateeContexts[0];
             Assert.Null(oppCtx.ActiveTrapInstructions);
         }

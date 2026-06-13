@@ -32,7 +32,20 @@ namespace Pinder.LlmAdapters
         /// <summary>Per-method temperature override for GetDialogueOptionsAsync.</summary>
         public double? DialogueOptionsTemperature { get; set; }
 
-        /// <summary>Per-method temperature override for DeliverMessageAsync.</summary>
+        /// <summary>
+        /// Sampling-temperature override for the deterministic overlay rewrite
+        /// calls (horniness/shadow/trap overlays).
+        ///
+        /// <para>
+        /// #1125 — the standalone "delivery" creative LLM call this option once
+        /// tuned was collapsed into the non-LLM <c>DeliveryOverlay</c>, so this
+        /// no longer governs a delivery prompt. The name is retained because the
+        /// adapters (Anthropic/OpenAi/Pinder overlay appliers) still read this as
+        /// the temperature for the text-overlay rewrites that DO remain. Renaming
+        /// it would be a parallel-field churn out of this child's scope; it is
+        /// kept as the overlay-rewrite temperature knob.
+        /// </para>
+        /// </summary>
         public double? DeliveryTemperature { get; set; }
 
         /// <summary>Per-method temperature override for GetDateeResponseAsync.</summary>

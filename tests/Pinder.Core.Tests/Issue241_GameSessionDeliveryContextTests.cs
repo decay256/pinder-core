@@ -12,13 +12,15 @@ namespace Pinder.Core.Tests
 {
     /// <summary>
     /// Issue #241 AC3: Verify GameSession populates PlayerName, DateeName, CurrentTurn
-    /// on DeliveryContext and DateeContext when calling ILlmAdapter methods.
+    /// on the LLM contexts. #1125: the delivery LLM call (and its DeliveryContext)
+    /// were collapsed into the deterministic, non-LLM DeliveryOverlay commit step,
+    /// so the name/turn wiring is now asserted on the surviving DateeContext.
     /// </summary>
     [Trait("Category", "Core")]
     public class Issue241_GameSessionDeliveryContextTests
     {
         [Fact]
-        public async Task ResolveTurnAsync_DeliveryContext_has_player_and_datee_names()
+        public async Task ResolveTurnAsync_DateeContext_has_player_and_datee_names_AfterCommit()
         {
             var llm = new CapturingLlm();
             var dice = new FixedDice(15, 5); // d20=15 (success), timing=5
@@ -29,9 +31,12 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0);
 
-            Assert.NotNull(llm.CapturedDeliveryContext);
-            Assert.Equal("Sable", llm.CapturedDeliveryContext!.PlayerName);
-            Assert.Equal("Brick", llm.CapturedDeliveryContext.DateeName);
+            // #1125: no DeliveryContext is built anymore; the wiring lives on the
+            // surviving DateeContext.
+            Assert.Null(llm.CapturedDeliveryContext);
+            Assert.NotNull(llm.CapturedDateeContext);
+            Assert.Equal("Sable", llm.CapturedDateeContext!.PlayerName);
+            Assert.Equal("Brick", llm.CapturedDateeContext.DateeName);
         }
 
         [Fact]
@@ -52,7 +57,7 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public async Task ResolveTurnAsync_DeliveryContext_has_nonzero_turn_on_second_turn()
+        public async Task ResolveTurnAsync_DateeContext_has_nonzero_turn_on_second_turn()
         {
             var llm = new CapturingLlm();
             // Two turns: d20=15, timing=5 each
@@ -69,8 +74,9 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0);
 
-            Assert.NotNull(llm.CapturedDeliveryContext);
-            Assert.True(llm.CapturedDeliveryContext!.CurrentTurn > 0,
+            // #1125: assert the non-zero turn wiring on the surviving DateeContext.
+            Assert.NotNull(llm.CapturedDateeContext);
+            Assert.True(llm.CapturedDateeContext!.CurrentTurn > 0,
                 "CurrentTurn should be non-zero on second turn");
         }
 

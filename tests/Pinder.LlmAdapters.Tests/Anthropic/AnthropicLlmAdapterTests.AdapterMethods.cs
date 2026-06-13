@@ -55,23 +55,10 @@ OPTION_4
             Assert.Contains("YOU ARE TALKING TO", body.Messages[0].Content.ToString());
         }
 
-        [Fact]
-        public async Task DeliverMessageAsync_sends_correct_temperature()
-        {
-            var handler = new FakeHttpHandler
-            {
-                ResponseBody = MakeApiResponse("Delivered message text")
-            };
-            using var client = new HttpClient(handler);
-            using var adapter = new AnthropicLlmAdapter(DefaultOptions(), client);
-
-            var result = await adapter.DeliverMessageAsync(MakeDeliveryContext());
-
-            Assert.Equal("Delivered message text", result);
-            var body = JsonConvert.DeserializeObject<MessagesRequest>(handler.CapturedRequestBody!);
-            Assert.Equal(0.7, body!.Temperature!.Value, 2);
-            Assert.Equal(1, body.System.Length); // Player-only prompt cached
-        }
+        // #1125: DeliverMessageAsync_sends_correct_temperature removed — the
+        // delivery LLM call was collapsed into the deterministic, non-LLM
+        // DeliveryOverlay commit step, so the adapter no longer exposes a
+        // delivery surface to assert request shape/temperature on.
 
         [Fact]
         public async Task GetDateeResponseAsync_uses_only_datee_prompt()
@@ -169,8 +156,7 @@ OPTION_4
 
             await Assert.ThrowsAsync<ArgumentNullException>(() =>
                 adapter.GetDialogueOptionsAsync(null!));
-            await Assert.ThrowsAsync<ArgumentNullException>(() =>
-                adapter.DeliverMessageAsync(null!));
+            // #1125: delivery surface removed — no DeliverMessageAsync(null!) assertion.
             await Assert.ThrowsAsync<ArgumentNullException>(() =>
                 adapter.GetDateeResponseAsync(null!));
             await Assert.ThrowsAsync<ArgumentNullException>(() =>

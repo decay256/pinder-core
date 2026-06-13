@@ -56,20 +56,25 @@ namespace Pinder.Core.Tests.Phase0
         }
 
         // I3.2 — phase ordering on a single happy-path turn is exactly the canonical
-        // sequence: dialogue_options → delivery → datee_response.
+        // sequence. #1125: the delivery LLM call was collapsed into the
+        // deterministic, non-LLM DeliveryOverlay commit step, so NO `delivery`
+        // LLM phase fires — the canonical sequence is now
+        // dialogue_options → datee_response.
         [Fact]
-        public async Task SingleTurn_PhaseOrder_IsExactlyOptionsThenDeliveryThenDatee()
+        public async Task SingleTurn_PhaseOrder_IsExactlyOptionsThenDatee()
         {
             var exchanges = await ExecuteFixtureRunAsync();
             var phases = exchanges.Select(e => e.Phase).ToArray();
 
             // The fixture (no shadow ≥1, no horniness check fires, no traps,
-            // steering rng seeded to fail) collapses to the minimal three-call
-            // sequence. Any new always-on phase would land here and fail this
+            // steering rng seeded to fail) collapses to the minimal two-call
+            // sequence post-#1125. Any new always-on phase — or a regression that
+            // reintroduces a `delivery` LLM call — would land here and fail this
             // test, prompting an explicit decision instead of a silent leak.
             Assert.Equal(
-                new[] { LlmPhase.DialogueOptions, LlmPhase.Delivery, LlmPhase.DateeResponse },
+                new[] { LlmPhase.DialogueOptions, LlmPhase.DateeResponse },
                 phases);
+            Assert.DoesNotContain(LlmPhase.Delivery, phases);
         }
 
         // I3.3 — the SHA-256 hash of the per-exchange (phase, system, user, response)

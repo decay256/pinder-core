@@ -13,8 +13,16 @@ using Xunit;
 namespace Pinder.Core.Tests
 {
     /// <summary>
-    /// Issue #695: Verify that stat-specific failure corruption instructions
-    /// from delivery-instructions.yaml reach DeliveryContext on failure.
+    /// Issue #695: stat-specific failure corruption instructions from
+    /// delivery-instructions.yaml.
+    ///
+    /// #1125: the delivery LLM call (and DeliveryContext) were collapsed into the
+    /// deterministic, non-LLM DeliveryOverlay commit step, so the instruction is
+    /// no longer threaded into a creative "delivery" prompt. The data-layer
+    /// lookup (StatDeliveryInstructions.GetStatFailureInstruction) is retained
+    /// and still covered here; the prior DeliveryContext-wiring tests were
+    /// rewritten to assert (a) a failed turn still commits a degraded line and
+    /// (b) the per-stat instruction the engine would have surfaced is correct.
     /// </summary>
     [Trait("Category", "Core")]
     public class Issue695_StatFailureCorruptionTests
@@ -37,7 +45,7 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public async Task Failure_RIZZ_delivers_RIZZ_specific_instruction()
+        public async Task Failure_RIZZ_turn_commits_degraded_line_and_RIZZ_instruction_is_correct()
         {
             var instructions = LoadYaml();
             var llm = new CapturingLlm(StatType.Rizz);
@@ -52,23 +60,20 @@ namespace Pinder.Core.Tests
 
             await session.StartTurnAsync();
 
-            // Pick the RIZZ option (index depends on what CapturingLlm returns)
             int rizzIndex = FindOptionIndex(llm.LastOptions, StatType.Rizz);
-            await session.ResolveTurnAsync(rizzIndex);
+            var result = await session.ResolveTurnAsync(rizzIndex);
 
-            Assert.NotNull(llm.CapturedDeliveryContext);
-            var ctx = llm.CapturedDeliveryContext;
-
-            // Should be a failure
-            Assert.NotEqual(FailureTier.Success, ctx.Outcome);
-
-            // StatFailureInstruction should be populated with RIZZ-specific text
-            Assert.NotNull(ctx.StatFailureInstruction);
-            Assert.Contains("DESPAIR", ctx.StatFailureInstruction);
+            // #1125: no DeliveryContext is built; the failed roll still commits a
+            // deterministically degraded line, and the per-stat instruction the
+            // engine surfaces for RIZZ failures remains correct.
+            Assert.False(result.Roll.IsSuccess);
+            Assert.NotEqual("Nice vibes", result.DeliveredMessage);
+            Assert.Contains("DESPAIR",
+                instructions.GetStatFailureInstruction(StatType.Rizz, result.Roll.Tier));
         }
 
         [Fact]
-        public async Task Failure_WIT_delivers_WIT_specific_instruction()
+        public async Task Failure_WIT_turn_commits_degraded_line_and_WIT_instruction_is_correct()
         {
             var instructions = LoadYaml();
             var llm = new CapturingLlm(StatType.Wit);
@@ -83,18 +88,16 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
 
             int witIndex = FindOptionIndex(llm.LastOptions, StatType.Wit);
-            await session.ResolveTurnAsync(witIndex);
+            var result = await session.ResolveTurnAsync(witIndex);
 
-            Assert.NotNull(llm.CapturedDeliveryContext);
-            var ctx = llm.CapturedDeliveryContext;
-
-            Assert.NotEqual(FailureTier.Success, ctx.Outcome);
-            Assert.NotNull(ctx.StatFailureInstruction);
-            Assert.Contains("OVERTHINKING", ctx.StatFailureInstruction);
+            Assert.False(result.Roll.IsSuccess);
+            Assert.NotEqual("Clever remark", result.DeliveredMessage);
+            Assert.Contains("OVERTHINKING",
+                instructions.GetStatFailureInstruction(StatType.Wit, result.Roll.Tier));
         }
 
         [Fact]
-        public async Task Success_has_no_failure_instruction()
+        public async Task Success_commits_picked_line_verbatim_noDegradation()
         {
             var instructions = LoadYaml();
             var llm = new CapturingLlm(StatType.Charm);
@@ -108,13 +111,12 @@ namespace Pinder.Core.Tests
                 llm, dice, new NullTrapRegistry(), config);
 
             await session.StartTurnAsync();
-            await session.ResolveTurnAsync(0);
+            var result = await session.ResolveTurnAsync(0);
 
-            Assert.NotNull(llm.CapturedDeliveryContext);
-            var sctx = llm.CapturedDeliveryContext;
-            // Nat 20 should always be success
-            Assert.Equal(FailureTier.Success, sctx.Outcome);
-            Assert.Null(sctx.StatFailureInstruction);
+            // Nat 20 should always be success → picked line commits verbatim,
+            // no failure degradation.
+            Assert.Equal(FailureTier.Success, result.Roll.Tier);
+            Assert.Equal("Hey there", result.DeliveredMessage);
         }
 
         [Fact]
@@ -157,7 +159,6 @@ namespace Pinder.Core.Tests
         private sealed class CapturingLlm : ILlmAdapter
         {
             private readonly StatType _targetStat;
-            public DeliveryContext CapturedDeliveryContext { get; private set; }
             public DialogueOption[] LastOptions { get; private set; }
 
             public CapturingLlm(StatType targetStat)
@@ -175,12 +176,6 @@ namespace Pinder.Core.Tests
                     new DialogueOption(StatType.Honesty, "Real talk")
                 };
                 return Task.FromResult(LastOptions);
-            }
-
-            public Task<string> DeliverMessageAsync(DeliveryContext context, System.Threading.CancellationToken ct = default)
-            {
-                CapturedDeliveryContext = context;
-                return Task.FromResult(context.ChosenOption.IntendedText);
             }
 
             public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)

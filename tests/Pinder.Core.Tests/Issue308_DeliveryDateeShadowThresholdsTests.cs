@@ -12,30 +12,22 @@ using Xunit;
 namespace Pinder.Core.Tests
 {
     /// <summary>
-    /// Issue #308: GameSession must pass shadowThresholds to DeliveryContext and DateeContext,
-    /// not just DialogueContext. Player shadows go to DeliveryContext, datee shadows to DateeContext.
+    /// Issue #308: GameSession must pass shadowThresholds to the LLM contexts.
+    /// #1125: the delivery LLM call (and DeliveryContext) were collapsed into the
+    /// deterministic, non-LLM DeliveryOverlay commit step, so player-shadow text
+    /// effects now reach the model only via the shadow-corruption OVERLAY
+    /// (ApplyShadowCorruptionAsync, driven by state.PlayerShadows), not a
+    /// DeliveryContext. The DateeContext shadow-threshold wiring is unchanged and
+    /// remains covered here.
     /// Maturity: Prototype (happy-path per AC).
     /// </summary>
     [Trait("Category", "Core")]
     public class Issue308_DeliveryDateeShadowThresholdsTests
     {
-        // AC: DeliveryContext receives player shadowThresholds
-        [Fact]
-        public async Task DeliveryContext_ReceivesPlayerShadowThresholds_WhenMadness8()
-        {
-            Dictionary<ShadowStatType, int>? capturedDelivery = null;
-            var playerShadows = MakeShadowTracker(madness: 8);
-            var llm = new FullCapturingLlmAdapter(
-                onDeliver: ctx => capturedDelivery = ctx.ShadowThresholds);
-
-            var session = MakeSession(new[] { 5, 15, 15 }, playerShadows, null, llm);
-            await session.StartTurnAsync();
-            await session.ResolveTurnAsync(0);
-
-            Assert.NotNull(capturedDelivery);
-            Assert.True(capturedDelivery!.ContainsKey(ShadowStatType.Madness));
-            Assert.Equal(8, capturedDelivery[ShadowStatType.Madness]);
-        }
+        // #1125: DeliveryContext player-shadow wiring tests removed — there is no
+        // DeliveryContext. Player shadows now reach text via the shadow-corruption
+        // overlay; covered by Issue365_ShadowOnFailedRollTests /
+        // Issue307_ShadowTaintRawValueTests.
 
         // AC: DateeContext receives datee shadowThresholds
         [Fact]
@@ -55,48 +47,24 @@ namespace Pinder.Core.Tests
             Assert.Equal(8, capturedDatee[ShadowStatType.Madness]);
         }
 
-        // Edge: DeliveryContext gets player shadows, DateeContext gets datee shadows (different values)
+        // Edge: datee context still gets datee shadows distinct from player shadows.
         [Fact]
-        public async Task DeliveryAndDatee_GetDifferentShadows()
+        public async Task Datee_GetsItsOwnShadows_NotPlayerShadows()
         {
-            Dictionary<ShadowStatType, int>? capturedDelivery = null;
             Dictionary<ShadowStatType, int>? capturedDatee = null;
             var playerShadows = MakeShadowTracker(madness: 10, dread: 5);
             var dateeShadows = MakeShadowTracker(madness: 3, dread: 14);
             var llm = new FullCapturingLlmAdapter(
-                onDeliver: ctx => capturedDelivery = ctx.ShadowThresholds,
                 onDatee: ctx => capturedDatee = ctx.ShadowThresholds);
 
             var session = MakeSession(new[] { 5, 15, 15 }, playerShadows, dateeShadows, llm);
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0);
 
-            // Player shadows in delivery
-            Assert.NotNull(capturedDelivery);
-            Assert.Equal(10, capturedDelivery![ShadowStatType.Madness]);
-            Assert.Equal(5, capturedDelivery[ShadowStatType.Dread]);
-
-            // Datee shadows in datee context
+            // Datee shadows in datee context (NOT the player's 10/5).
             Assert.NotNull(capturedDatee);
             Assert.Equal(3, capturedDatee![ShadowStatType.Madness]);
             Assert.Equal(14, capturedDatee[ShadowStatType.Dread]);
-        }
-
-        // Edge: No player shadows -> DeliveryContext.ShadowThresholds is null
-        [Fact]
-        public async Task NoPlayerShadows_DeliveryContextThresholdsNull()
-        {
-            Dictionary<ShadowStatType, int>? capturedDelivery = null;
-            bool called = false;
-            var llm = new FullCapturingLlmAdapter(
-                onDeliver: ctx => { capturedDelivery = ctx.ShadowThresholds; called = true; });
-
-            var session = MakeSession(new[] { 5, 15, 15 }, null, null, llm);
-            await session.StartTurnAsync();
-            await session.ResolveTurnAsync(0);
-
-            Assert.True(called);
-            Assert.Null(capturedDelivery);
         }
 
         // Edge: No datee shadows -> DateeContext.ShadowThresholds is null
@@ -116,28 +84,28 @@ namespace Pinder.Core.Tests
             Assert.Null(capturedDatee);
         }
 
-        // AC: All shadow stats pass through to DeliveryContext
+        // AC: All shadow stats pass through to the datee context.
         [Fact]
-        public async Task AllShadowStats_PassedToDeliveryContext()
+        public async Task AllShadowStats_PassedToDateeContext()
         {
-            Dictionary<ShadowStatType, int>? capturedDelivery = null;
-            var playerShadows = MakeShadowTracker(
+            Dictionary<ShadowStatType, int>? capturedDatee = null;
+            var dateeShadows = MakeShadowTracker(
                 dread: 14, denial: 7, fixation: 3,
                 madness: 10, overthinking: 5, horniness: 12);
             var llm = new FullCapturingLlmAdapter(
-                onDeliver: ctx => capturedDelivery = ctx.ShadowThresholds);
+                onDatee: ctx => capturedDatee = ctx.ShadowThresholds);
 
-            var session = MakeSession(new[] { 5, 15, 15 }, playerShadows, null, llm);
+            var session = MakeSession(new[] { 5, 15, 15 }, null, dateeShadows, llm);
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0);
 
-            Assert.NotNull(capturedDelivery);
-            Assert.Equal(14, capturedDelivery![ShadowStatType.Dread]);
-            Assert.Equal(7, capturedDelivery[ShadowStatType.Denial]);
-            Assert.Equal(3, capturedDelivery[ShadowStatType.Fixation]);
-            Assert.Equal(10, capturedDelivery[ShadowStatType.Madness]);
-            Assert.Equal(5, capturedDelivery[ShadowStatType.Overthinking]);
-            Assert.Equal(12, capturedDelivery[ShadowStatType.Despair]);
+            Assert.NotNull(capturedDatee);
+            Assert.Equal(14, capturedDatee![ShadowStatType.Dread]);
+            Assert.Equal(7, capturedDatee[ShadowStatType.Denial]);
+            Assert.Equal(3, capturedDatee[ShadowStatType.Fixation]);
+            Assert.Equal(10, capturedDatee[ShadowStatType.Madness]);
+            Assert.Equal(5, capturedDatee[ShadowStatType.Overthinking]);
+            Assert.Equal(12, capturedDatee[ShadowStatType.Despair]);
         }
 
         // ============ Helpers ============
@@ -218,14 +186,11 @@ namespace Pinder.Core.Tests
         /// </summary>
         private sealed class FullCapturingLlmAdapter : ILlmAdapter
         {
-            private readonly Action<DeliveryContext>? _onDeliver;
             private readonly Action<DateeContext>? _onDatee;
 
             public FullCapturingLlmAdapter(
-                Action<DeliveryContext>? onDeliver = null,
                 Action<DateeContext>? onDatee = null)
             {
-                _onDeliver = onDeliver;
                 _onDatee = onDatee;
             }
 
@@ -236,12 +201,6 @@ namespace Pinder.Core.Tests
                     new DialogueOption(StatType.Charm, "Hey there"),
                     new DialogueOption(StatType.Wit, "Clever line")
                 });
-            }
-
-            public Task<string> DeliverMessageAsync(DeliveryContext context, System.Threading.CancellationToken ct = default)
-            {
-                _onDeliver?.Invoke(context);
-                return Task.FromResult(context.ChosenOption.IntendedText);
             }
 
             public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)

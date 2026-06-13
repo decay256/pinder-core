@@ -72,62 +72,6 @@ namespace Pinder.LlmAdapters
         }
 
         /// <inheritdoc />
-        public async Task<string> DeliverMessageAsync(DeliveryContext context, CancellationToken ct = default)
-        {
-            // #1123: stateless single-turn fallback path. Stateful callers route
-            // through the IStatefulLlmAdapter overload that takes a history.
-            var result = await DeliverMessageAsync(context, System.Array.Empty<ConversationMessage>(), ct).ConfigureAwait(false);
-            return result.DeliveredMessage;
-        }
-
-        /// <inheritdoc />
-        public async Task<StatefulAvatarResult> DeliverMessageAsync(
-            DeliveryContext context,
-            IReadOnlyList<ConversationMessage> history,
-            CancellationToken cancellationToken = default)
-        {
-            if (context == null) throw new ArgumentNullException(nameof(context));
-            if (history == null) throw new ArgumentNullException(nameof(history));
-
-            var deliveryRules = _options.GameDefinition?.DeliveryRules;
-            var userContent = SessionDocumentBuilder.BuildDeliveryPrompt(
-                context, deliveryRules: deliveryRules, statDeliveryInstructions: _options.StatDeliveryInstructions);
-            // #1123 shared compile path: GM system prompt + character spec, with
-            // the running transcript as the volatile suffix. The injected
-            // character spec (the avatar's PlayerAvatarPrompt) is the only delta
-            // vs the datee session, which injects DateePrompt instead.
-            var systemPrompt = SessionSystemPromptBuilder.BuildPlayerAvatar(context.PlayerAvatarPrompt, _options.GameDefinition);
-            double temperature = _options.DeliveryTemperature ?? DefaultDeliveryTemperature;
-
-            string responseText;
-            if (history.Count == 0)
-            {
-                // No prior turns — single-shot.
-                responseText = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.Delivery, ct: cancellationToken)
-                    .ConfigureAwait(false);
-            }
-            else
-            {
-                // Multi-turn: flatten the supplied avatar history into the user
-                // content (the transport contract is single-turn), mirroring the
-                // datee stateful path exactly.
-                responseText = await SendStatefulAvatarAsync(systemPrompt, userContent, history, temperature, cancellationToken)
-                    .ConfigureAwait(false);
-            }
-
-            string delivered = responseText ?? "";
-
-            // Hand the engine the two new history entries to append: the user
-            // prompt we just sent and the assistant response we got back.
-            var newEntries = new ConversationMessage[]
-            {
-                ConversationMessage.User(userContent),
-                ConversationMessage.Assistant(delivered),
-            };
-            return new StatefulAvatarResult(delivered, newEntries);
-        }
-
-        /// <inheritdoc />
         public async Task<DateeResponse> GetDateeResponseAsync(DateeContext context, CancellationToken ct = default)
         {
             // #788: stateless single-turn fallback path. Stateful callers route
@@ -457,26 +401,6 @@ namespace Pinder.LlmAdapters
             return SendStatefulAsync(
                 systemPrompt, currentUserContent, priorHistory, temperature,
                 LlmPhase.DateeResponse, ct);
-        }
-
-        /// <summary>
-        /// #1123: Sends a stateful avatar (delivery) request by flattening the
-        /// supplied avatar history into the user message. The exact symmetric
-        /// sibling of <see cref="SendStatefulDateeAsync"/> — the avatar session
-        /// is compiled via the same path; only the injected character spec (and
-        /// the <see cref="LlmPhase"/> tag) differ. Pure function of its inputs —
-        /// no adapter-side state is read or written.
-        /// </summary>
-        private Task<string> SendStatefulAvatarAsync(
-            string systemPrompt,
-            string currentUserContent,
-            IReadOnlyList<ConversationMessage> priorHistory,
-            double temperature,
-            CancellationToken ct = default)
-        {
-            return SendStatefulAsync(
-                systemPrompt, currentUserContent, priorHistory, temperature,
-                LlmPhase.Delivery, ct);
         }
 
         /// <summary>

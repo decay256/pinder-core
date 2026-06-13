@@ -13,10 +13,19 @@ using Xunit;
 namespace Pinder.Core.Tests
 {
     /// <summary>
-    /// Regression tests for #364 — Steering question must be appended to the
-    /// intended text BEFORE DeliverMessageAsync is called, so the LLM degrades
-    /// the combined intended+steering text on a failed roll instead of producing
-    /// a perfectly lucid question after a Catastrophe-degraded message.
+    /// Regression tests for #364 — the steering question must be appended to the
+    /// picked line BEFORE the delivery degradation runs, so a failed roll degrades
+    /// the combined intended+steering text instead of leaving a perfectly lucid
+    /// question after a degraded message.
+    ///
+    /// <para>
+    /// #1125: the "delivery" step is now the deterministic, non-LLM
+    /// <see cref="DeliveryOverlay"/> commit (no <c>DeliverMessageAsync</c> LLM
+    /// call). The #364 ordering invariant is unchanged — steering still appends
+    /// first, then the tier overlay degrades the whole combined line — so these
+    /// tests now assert against <see cref="DeliveryOverlay.Apply"/> instead of a
+    /// captured DeliveryContext / an LLM uppercase stub.
+    /// </para>
     ///
     /// Also verifies the textDiffs ordering: Steering layer is emitted FIRST,
     /// the tier-modifier layer is emitted SECOND.
@@ -24,6 +33,8 @@ namespace Pinder.Core.Tests
     [Trait("Category", "Core")]
     public class Issue364_SteeringBeforeDeliveryTests
     {
+        private const string PickedOption = "Hey there";
+
         private static StatBlock MakeStats(
             int charm = 2, int rizz = 2, int honesty = 2,
             int chaos = 2, int wit = 2, int sa = 2)
@@ -60,96 +71,79 @@ namespace Pinder.Core.Tests
         }
 
         /// <summary>
-        /// AC: When steering succeeds, the question is appended to the intended
-        /// text BEFORE DeliverMessageAsync is invoked. The LLM sees the combined
-        /// text and can degrade the whole thing for a failed roll.
+        /// AC: When steering succeeds, the question is appended to the picked
+        /// line BEFORE the delivery overlay runs. On a SUCCESS roll the overlay
+        /// commits verbatim, so the committed line is exactly "picked + question".
         /// </summary>
         [Fact]
-        public async Task Steering_success_appends_question_to_intended_text_before_delivery()
+        public async Task Steering_success_appends_question_to_picked_line_before_delivery()
         {
-            // Player Charm/Wit/SA = 5 → steering mod 5
-            // Datee SA/Rizz/Honesty = 0 → steering DC 16
             var player = MakeProfile("Sable", MakeStats(charm: 5, wit: 5, sa: 5));
             var datee = MakeProfile("Brick", MakeStats(charm: 0, rizz: 0, honesty: 0, chaos: 0, wit: 0, sa: 0));
 
             // Game dice: horniness=1, main d20=15 (success), response delay=50
             var dice = new FixedDice(1, 15, 50);
-            // Steering RNG: roll 20 → 20+5=25 ≥ DC 16 → success
             var steeringRng = new FixedRandom(20);
 
-            var llm = new CapturingLlm();
+            var llm = new SteeringLlm();
             var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), steeringRng: steeringRng);
             var session = new GameSession(player, datee, llm, dice, new NullTrapRegistry(), config);
 
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
-            // Steering succeeded
             Assert.True(result.Steering.SteeringSucceeded);
             Assert.NotNull(result.Steering.SteeringQuestion);
+            Assert.True(result.Roll.IsSuccess);
 
-            // The DeliveryContext seen by the LLM must already contain the
-            // combined intended + steering question — that's the whole point
-            // of #364.
-            Assert.NotNull(llm.CapturedDeliveryContext);
-            string intendedSeenByLlm = llm.CapturedDeliveryContext!.ChosenOption.IntendedText;
-            Assert.Contains(result.Steering.SteeringQuestion!, intendedSeenByLlm);
-            // It should NOT be just the original intended text without steering.
-            Assert.NotEqual("Hey there", intendedSeenByLlm);
-            Assert.StartsWith("Hey there", intendedSeenByLlm);
+            // Success commits the combined picked+question line verbatim.
+            string combined = PickedOption + " " + result.Steering.SteeringQuestion;
+            Assert.Equal(combined, result.DeliveredMessage);
+            Assert.Contains(result.Steering.SteeringQuestion!, result.DeliveredMessage);
+            Assert.StartsWith(PickedOption, result.DeliveredMessage);
         }
 
         /// <summary>
-        /// AC: On a Catastrophe-tier failure with a successful steering roll,
-        /// the LLM receives intended+steering and degrades the whole thing.
-        /// The final delivered text is the catastrophe-degraded version,
-        /// containing no original lucid steering question.
+        /// AC: On a Nat-1/Catastrophe-tier failure with a successful steering
+        /// roll, the deterministic overlay degrades the WHOLE combined
+        /// intended+steering line — the committed text is the overlay output of
+        /// "picked + question", proving the question was folded in before
+        /// degradation (no lucid question survives intact).
         /// </summary>
         [Fact]
         public async Task Catastrophe_with_steering_success_degrades_combined_text()
         {
-            // Player charm=2, wit=5, sa=5 (steering mod = (2+5+5)/3 = 4)
-            // Datee stats=0 → steering DC = 16
             var player = MakeProfile("Sable", MakeStats(charm: 2, wit: 5, sa: 5));
             var datee = MakeProfile("Brick", MakeStats(charm: 0, rizz: 0, honesty: 0, chaos: 0, wit: 0, sa: 0));
 
-            // Catastrophe: with stat mod 2 vs DC ~10+, a d20=1 (Nat 1) yields
-            // catastrophe-tier failure. (NB: Nat 1 is itself a special tier;
-            // the assertion tolerates either Catastrophe or Nat1 because both
-            // are heavy degradation tiers and either proves the point.)
+            // d20=1 → Nat 1 (Legendary failure tier), steering rolls 20 → succeeds
             var dice = new FixedDice(1, 1, 50);
-            // Steering RNG: roll 20 → 20+4=24 ≥ DC 16 → success
             var steeringRng = new FixedRandom(20);
 
-            var llm = new CapturingLlm();
+            var llm = new SteeringLlm();
             var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), steeringRng: steeringRng);
             var session = new GameSession(player, datee, llm, dice, new NullTrapRegistry(), config);
 
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
-            // Steering succeeded
             Assert.True(result.Steering.SteeringSucceeded);
             Assert.NotNull(result.Steering.SteeringQuestion);
-            // Roll was a failure tier
             Assert.False(result.Roll.IsSuccess);
 
-            // The DeliveryContext that hit the LLM had the combined text
-            Assert.NotNull(llm.CapturedDeliveryContext);
-            string combined = llm.CapturedDeliveryContext!.ChosenOption.IntendedText;
-            Assert.Contains(result.Steering.SteeringQuestion!, combined);
+            // The committed line is the deterministic overlay of the COMBINED line.
+            string combined = PickedOption + " " + result.Steering.SteeringQuestion;
+            string expected = DeliveryOverlay.Apply(combined, result.Roll.Tier, result.Roll.MissMargin);
+            Assert.Equal(expected, result.DeliveredMessage);
 
-            // The CapturingLlm degrades by uppercasing on failure tiers.
-            // The final delivered message is the degraded combined text,
-            // i.e. it should be uppercased (proving the LLM rewrote it
-            // including the steering question).
-            Assert.Equal(combined.ToUpperInvariant(), result.DeliveredMessage);
+            // And it actually degraded (differs from the clean combined line).
+            Assert.NotEqual(combined, result.DeliveredMessage);
         }
 
         /// <summary>
         /// AC: textDiffs are emitted in order Steering FIRST, tier modifier
-        /// SECOND. The Steering diff goes intended → intended+question; the
-        /// tier diff goes intended+question → delivered.
+        /// SECOND. The Steering diff goes picked → picked+question; the tier diff
+        /// goes picked+question → committed (overlay output).
         /// </summary>
         [Fact]
         public async Task TextDiffs_ordering_steering_first_then_tier_modifier()
@@ -161,7 +155,7 @@ namespace Pinder.Core.Tests
             var dice = new FixedDice(1, 1, 50);
             var steeringRng = new FixedRandom(20);
 
-            var llm = new CapturingLlm();
+            var llm = new SteeringLlm();
             var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), steeringRng: steeringRng);
             var session = new GameSession(player, datee, llm, dice, new NullTrapRegistry(), config);
 
@@ -186,19 +180,21 @@ namespace Pinder.Core.Tests
             Assert.True(tierIdx >= 0, "Tier-modifier diff layer must be present");
             Assert.True(steeringIdx < tierIdx, $"Steering diff (idx {steeringIdx}) must appear before tier diff (idx {tierIdx})");
 
-            // Steering diff goes intended → intended+question
-            Assert.Equal("Hey there", diffs[steeringIdx].Before);
+            // Steering diff goes picked → picked+question
+            Assert.Equal(PickedOption, diffs[steeringIdx].Before);
             Assert.Contains(result.Steering.SteeringQuestion!, diffs[steeringIdx].After);
 
-            // Tier diff goes intended+question → delivered (i.e. uppercased)
+            // Tier diff goes picked+question → committed (deterministic overlay output)
             Assert.Equal(diffs[steeringIdx].After, diffs[tierIdx].Before);
-            Assert.Equal(diffs[steeringIdx].After.ToUpperInvariant(), diffs[tierIdx].After);
+            Assert.Equal(
+                DeliveryOverlay.Apply(diffs[steeringIdx].After, result.Roll.Tier, result.Roll.MissMargin),
+                diffs[tierIdx].After);
         }
 
         /// <summary>
-        /// AC: When steering FAILS, the pipeline behaves as before: no
-        /// steering diff, no question appended, only the tier-modifier
-        /// diff (if any).
+        /// AC: When steering FAILS, the pipeline behaves as before: no steering
+        /// diff, no question appended; the committed line is the plain picked
+        /// option degraded by the tier overlay (if the roll failed).
         /// </summary>
         [Fact]
         public async Task Steering_failure_no_steering_diff_no_question_appended()
@@ -207,10 +203,10 @@ namespace Pinder.Core.Tests
             var datee = MakeProfile("Brick", MakeStats(charm: 3, rizz: 3, honesty: 3, chaos: 3, wit: 3, sa: 3));
 
             var dice = new FixedDice(1, 15, 50);
-            // Steering: roll 1 → 1+2=3 < DC 19 → miss
+            // Steering: roll 1 → miss
             var steeringRng = new FixedRandom(1);
 
-            var llm = new CapturingLlm();
+            var llm = new SteeringLlm();
             var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), steeringRng: steeringRng);
             var session = new GameSession(player, datee, llm, dice, new NullTrapRegistry(), config);
 
@@ -220,9 +216,11 @@ namespace Pinder.Core.Tests
             Assert.False(result.Steering.SteeringSucceeded);
             Assert.Null(result.Steering.SteeringQuestion);
 
-            // Delivery context's intended text is unchanged
-            Assert.NotNull(llm.CapturedDeliveryContext);
-            Assert.Equal("Hey there", llm.CapturedDeliveryContext!.ChosenOption.IntendedText);
+            // No steering question was folded in: the committed line is the PLAIN
+            // picked option run through the deterministic overlay for whatever
+            // tier the roll produced (no steering text anywhere).
+            string expected = DeliveryOverlay.Apply(PickedOption, result.Roll.Tier, result.Roll.MissMargin);
+            Assert.Equal(expected, result.DeliveredMessage);
 
             if (result.TextDiffs != null)
             {
@@ -231,19 +229,17 @@ namespace Pinder.Core.Tests
         }
 
         /// <summary>
-        /// LLM stub that captures the DeliveryContext and degrades the message
-        /// on failure tiers by uppercasing it. Implements IStatefulLlmAdapter
-        /// so steering's "is the adapter stateful?" check passes and a
-        /// steering question is generated.
+        /// LLM stub providing dialogue options, a steering question, and a datee
+        /// reply. #1125: there is no delivery LLM call to stub — degradation is
+        /// the engine's deterministic <see cref="DeliveryOverlay"/>. Implements
+        /// IStatefulLlmAdapter so steering's "is the adapter stateful?" check
+        /// passes and a steering question is generated.
         /// </summary>
-        private sealed class CapturingLlm : ILlmAdapter, IStatefulLlmAdapter
+        private sealed class SteeringLlm : ILlmAdapter, IStatefulLlmAdapter
         {
-            public DeliveryContext? CapturedDeliveryContext { get; private set; }
-
-            // #788: stateful LLM adapter is now history-passing and stateless.
             public Task<StatefulDateeResult> GetDateeResponseAsync(
                 DateeContext context,
-                System.Collections.Generic.IReadOnlyList<ConversationMessage> history,
+                IReadOnlyList<ConversationMessage> history,
                 System.Threading.CancellationToken ct = default)
                 => Task.FromResult(new StatefulDateeResult(
                     new DateeResponse("..."),
@@ -257,32 +253,11 @@ namespace Pinder.Core.Tests
             {
                 return Task.FromResult(new[]
                 {
-                    new DialogueOption(StatType.Charm, "Hey there"),
+                    new DialogueOption(StatType.Charm, PickedOption),
                     new DialogueOption(StatType.Rizz, "Nice"),
                     new DialogueOption(StatType.Wit, "Clever"),
                     new DialogueOption(StatType.Honesty, "Real talk")
                 });
-            }
-
-            public async Task<StatefulAvatarResult> DeliverMessageAsync(DeliveryContext context, IReadOnlyList<ConversationMessage> history, System.Threading.CancellationToken ct = default)
-            {
-                string delivered = await DeliverMessageAsync(context, ct).ConfigureAwait(false);
-                return new StatefulAvatarResult(delivered, new ConversationMessage[]
-                {
-                    ConversationMessage.User(string.Empty),
-                    ConversationMessage.Assistant(delivered ?? string.Empty),
-                });
-            }
-
-            public Task<string> DeliverMessageAsync(DeliveryContext context, System.Threading.CancellationToken ct = default)
-            {
-                CapturedDeliveryContext = context;
-                string intended = context.ChosenOption.IntendedText;
-                if (context.Outcome == FailureTier.Success)
-                    return Task.FromResult(intended);
-                // Failure: degrade by uppercasing the WHOLE intended text
-                // (which now includes the steering question per #364).
-                return Task.FromResult(intended.ToUpperInvariant());
             }
 
             public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
@@ -296,7 +271,9 @@ namespace Pinder.Core.Tests
 
             public Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
                 => Task.FromResult(message);
-            public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => Task.FromResult(message);
+
+            public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
+                => Task.FromResult(message);
 
             public Task<string> GetSteeringQuestionAsync(SteeringContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult("so when are we doing this?");

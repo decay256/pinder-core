@@ -93,12 +93,21 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
                 new System.Collections.Generic.List<string>(), 10);
         }
 
-        private static DeliveryContext MakeDeliveryContext()
+        // #1125: the delivery LLM surface was removed; the "second call" in the
+        // multi-call usage/debug tests below is now the datee response call.
+        private static DateeContext MakeDateeContext()
         {
             var history = new System.Collections.Generic.List<(string, string)>();
-            var option = new DialogueOption(StatType.Charm, "Test", 0, null, false);
-            return new DeliveryContext(
-                "Player Prompt", history, "Last message", option, Pinder.Core.Rolls.FailureTier.None, 5, new System.Collections.Generic.List<string>());
+            return new DateeContext(
+                dateePrompt: "Datee Prompt",
+                conversationHistory: history,
+                dateeLastMessage: "Last message",
+                activeTraps: new System.Collections.Generic.List<string>(),
+                currentInterest: 10,
+                playerDeliveredMessage: "hello",
+                interestBefore: 10,
+                interestAfter: 11,
+                responseDelayMinutes: 1.0);
         }
 
         [Fact]
@@ -125,28 +134,6 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         }
 
         [Fact]
-        public async Task DeliverMessageAsync_WithDebugFile_WritesMarkdown()
-        {
-            // What: Delivery call also writes markdown sections
-            // Mutation: Fails if only options call writes content.
-            var handler = new MockHttpMessageHandler((_, __) => MakeDeliverySuccessResponse());
-            var httpClient = new HttpClient(handler);
-            var options = new AnthropicOptions { ApiKey = "test", DebugDirectory = _debugFile };
-            
-            using var adapter = new AnthropicLlmAdapter(options, httpClient);
-            var ctx = MakeDeliveryContext();
-            
-            await adapter.DeliverMessageAsync(ctx);
-
-            Assert.True(File.Exists(_debugFile));
-            
-            var content = File.ReadAllText(_debugFile);
-            Assert.Contains("### DELIVERY REQUEST", content);
-            Assert.Contains("### DELIVERY RESPONSE", content);
-            Assert.Contains("Delivered message", content);
-        }
-
-        [Fact]
         public async Task MultipleCalls_AccumulateStats_InSummaryTable()
         {
             // What: WriteDebugSummary produces a markdown token table with correct totals
@@ -159,14 +146,14 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             using var adapter = new AnthropicLlmAdapter(options, httpClient);
             
             await adapter.GetDialogueOptionsAsync(MakeContext());
-            await adapter.DeliverMessageAsync(MakeDeliveryContext());
+            await adapter.GetDateeResponseAsync(MakeDateeContext());
             adapter.WriteDebugSummary();
 
             var content = File.ReadAllText(_debugFile);
 
             Assert.Contains("## Token Summary", content);
             Assert.Contains("| options |", content);
-            Assert.Contains("| delivery |", content);
+            Assert.Contains("| datee |", content);
             // Totals: input 10+15=25, output 5+10=15, cache read 30+50=80, cache write 20+0=20
             Assert.Contains("**25**", content);
             Assert.Contains("**15**", content);
@@ -284,7 +271,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             using var adapter = new AnthropicLlmAdapter(options, httpClient);
             
             await adapter.GetDialogueOptionsAsync(MakeContext());
-            await adapter.DeliverMessageAsync(MakeDeliveryContext());
+            await adapter.GetDateeResponseAsync(MakeDateeContext());
 
             var usage = adapter.GetSessionUsage();
 
@@ -307,7 +294,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             using var adapter = new AnthropicLlmAdapter(options, httpClient);
             
             await adapter.GetDialogueOptionsAsync(MakeContext());
-            await adapter.DeliverMessageAsync(MakeDeliveryContext());
+            await adapter.GetDateeResponseAsync(MakeDateeContext());
 
             var usage = adapter.GetSessionUsage();
 
@@ -326,7 +313,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             using var adapter = new AnthropicLlmAdapter(options, httpClient);
             
             await adapter.GetDialogueOptionsAsync(MakeContext());
-            await adapter.DeliverMessageAsync(MakeDeliveryContext());
+            await adapter.GetDateeResponseAsync(MakeDateeContext());
             adapter.WriteDebugSummary();
 
             var usage = adapter.GetSessionUsage();

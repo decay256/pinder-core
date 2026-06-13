@@ -73,26 +73,20 @@ namespace Pinder.Core.Tests
             Assert.Contains(StatType.Chaos, stats);
         }
 
-        // --- DeliverMessageAsync ---
+        // --- DeliverMessageAsync (REMOVED in #1125) ---
+        // The delivery LLM surface (NullLlmAdapter.DeliverMessageAsync) was
+        // collapsed into the deterministic, non-LLM DeliveryOverlay commit step.
+        // The old "echo intended text on success / [tier]-prefix on failure"
+        // behaviour these tests pinned no longer exists; DeliveryOverlay's own
+        // determinism + parity is covered by Issue1125_CollapseDeliveryTests and
+        // DeliveryOverlayTests. Coverage retained here for the post-#1125
+        // contract: a successful commit is verbatim, a failed commit is mutated.
 
         [Fact]
-        public async Task DeliverMessageAsync_Success_Returns_IntendedText()
+        public void DeliveryOverlay_Success_CommitsVerbatim()
         {
-            var option = new DialogueOption(StatType.Charm, "Hello there!");
-            var ctx = new DeliveryContext(
-                playerAvatarPrompt: "p",
-                conversationHistory: new List<(string, string)>(),
-                dateeLastMessage: "",
-                chosenOption: option,
-                outcome: FailureTier.Success,
-                beatDcBy: 3,
-                activeTraps: new List<string>()
-            );
-
-            var result = await _adapter.DeliverMessageAsync(ctx);
-
-            Assert.NotNull(result);
-            Assert.Equal("Hello there!", result);
+            string committed = DeliveryOverlay.Apply("Hello there!", FailureTier.Success, missMargin: 0);
+            Assert.Equal("Hello there!", committed);
         }
 
         [Theory]
@@ -101,24 +95,10 @@ namespace Pinder.Core.Tests
         [InlineData(FailureTier.TropeTrap)]
         [InlineData(FailureTier.Catastrophe)]
         [InlineData(FailureTier.Legendary)]
-        public async Task DeliverMessageAsync_Failure_Prefixes_Tier(FailureTier tier)
+        public void DeliveryOverlay_Failure_MutatesCommittedLine(FailureTier tier)
         {
-            var option = new DialogueOption(StatType.Wit, "Clever line.");
-            var ctx = new DeliveryContext(
-                playerAvatarPrompt: "p",
-                conversationHistory: new List<(string, string)>(),
-                dateeLastMessage: "",
-                chosenOption: option,
-                outcome: tier,
-                beatDcBy: -2,
-                activeTraps: new List<string>()
-            );
-
-            var result = await _adapter.DeliverMessageAsync(ctx);
-
-            Assert.NotNull(result);
-            Assert.StartsWith($"[{tier}]", result);
-            Assert.Contains("Clever line.", result);
+            string committed = DeliveryOverlay.Apply("Clever line goes here.", tier, missMargin: 2);
+            Assert.NotEqual("Clever line goes here.", committed);
         }
 
         // --- GetDateeResponseAsync ---

@@ -10,7 +10,22 @@ namespace Pinder.Core.Conversation
         /// <summary>The stat used for this option's roll.</summary>
         public StatType Stat { get; }
 
-        /// <summary>The intended message text before degradation.</summary>
+        /// <summary>
+        /// The candidate line for this option.
+        ///
+        /// <para>
+        /// #1125 — semantics changed: this is now the <b>full, sendable</b>
+        /// line the avatar GM produced, NOT a gist/intent to be expanded by a
+        /// second "delivery" LLM call. The delivery LLM call was collapsed into
+        /// a deterministic, non-LLM commit/overlay step
+        /// (<see cref="DeliveryOverlay"/>): on a success the picked line commits
+        /// verbatim; on a failure it is degraded deterministically. The property
+        /// name is retained (rather than introducing a parallel <c>FullText</c>
+        /// field) to keep the option DTO non-jagged and avoid a dual-field
+        /// migration — the field simply now carries the final line. A steering
+        /// question, when one fires, is appended to this line before the overlay.
+        /// </para>
+        /// </summary>
         public string IntendedText { get; }
 
         /// <summary>Turn number for callback bonus, if applicable.</summary>

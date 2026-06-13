@@ -20,15 +20,13 @@ namespace Pinder.Core.Interfaces
     public interface ILlmAdapter
     {
         /// <summary>
-        /// Generate 4 dialogue options for the player's turn.
+        /// Generate the player's candidate dialogue options for the turn. As of
+        /// #1125 each option carries the FULL, sendable line (not a gist) — there
+        /// is no longer a second "delivery" LLM call to expand it. The engine
+        /// commits the picked line, applying a deterministic non-LLM
+        /// <see cref="Pinder.Core.Conversation.DeliveryOverlay"/> on a failed roll.
         /// </summary>
         Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, CancellationToken ct = default);
-
-        /// <summary>
-        /// Deliver the chosen option with outcome degradation applied.
-        /// Returns the player's message text (post-degradation).
-        /// </summary>
-        Task<string> DeliverMessageAsync(DeliveryContext context, CancellationToken ct = default);
 
         /// <summary>
         /// Generate the datee's response to the player's delivered message.

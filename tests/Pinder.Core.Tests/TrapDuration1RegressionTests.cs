@@ -11,9 +11,12 @@ using Xunit;
 namespace Pinder.Core.Tests
 {
     /// <summary>
-    /// Regression: a freshly-activated trap must still be visible to delivery and
-    /// datee LLM contexts on the turn it activates. Before #692, AdvanceTurn was
+    /// Regression: a freshly-activated trap must still be visible to the datee
+    /// LLM context on the turn it activates. Before #692, AdvanceTurn was
     /// called before delivery, expiring short-duration traps immediately.
+    /// #1125: the delivery LLM call (and DeliveryContext) were collapsed into the
+    /// deterministic, non-LLM DeliveryOverlay commit step, so this now asserts
+    /// trap visibility on the surviving DateeContext only.
     ///
     /// Per #371 (W2a) every trap is now fixed at 3 turns regardless of the
     /// definition's DurationTurns; these tests use definition.DurationTurns=1 to
@@ -48,7 +51,7 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public async Task Duration1Trap_VisibleInDeliveryAndDateeContexts()
+        public async Task Duration1Trap_VisibleInDateeContext()
         {
             // Duration=1 trap (like Cringe in production data)
             var trapDef = new TrapDefinition(
@@ -75,11 +78,8 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0); // option 0 = Charm
 
-            // Delivery context must see the trap
-            var delivCtx = capturingLlm.DeliveryContexts[0];
-            Assert.NotNull(delivCtx.ActiveTrapInstructions);
-            Assert.Contains("You become extremely awkward and self-undermining.",
-                delivCtx.ActiveTrapInstructions!);
+            // #1125: no DeliveryContext is built anymore.
+            Assert.Empty(capturingLlm.DeliveryContexts);
 
             // Datee context must see the trap
             var oppCtx = capturingLlm.DateeContexts[0];

@@ -67,20 +67,6 @@ namespace Pinder.Core.Conversation
         {
             var textDiffs = new List<TextDiff>();
 
-            // 6. Deliver message via LLM
-            var deliveryTrapNames = GameSessionHelpers.GetActiveTrapNames(state.Traps);
-            var deliveryTrapInstructions = GameSessionHelpers.GetActiveTrapInstructions(state.Traps);
-
-            int beatDcBy = rollResult.IsSuccess ? rollResult.FinalTotal - rollResult.DC : 0;
-
-            // Resolve stat-specific failure instruction when the roll failed (#695)
-            string? statFailureInstruction = null;
-            if (!rollResult.IsSuccess && _statDeliveryInstructions != null)
-            {
-                statFailureInstruction = HorninessEngine.GetStatFailureInstruction(
-                    _statDeliveryInstructions, chosenOption.Stat, rollResult.Tier);
-            }
-
             // 10b. Steering roll
             string originalIntendedText = chosenOption.IntendedText ?? "";
             progress?.Report(new TurnProgressEvent(TurnProgressStage.SteeringStarted));
@@ -90,99 +76,66 @@ namespace Pinder.Core.Conversation
                 TurnProgressStage.SteeringCompleted,
                 steeringResult.SteeringSucceeded ? steeringResult.SteeringQuestion : null));
 
-            string intendedTextForDelivery = originalIntendedText;
-            DialogueOption deliveryOption = chosenOption;
+            // #1125 — the picked option now carries the FULL sendable line
+            // (avatar GM emits final candidate lines; no second "delivery" LLM
+            // call expands a gist). Steering, when it fires, appends its
+            // question to that full line; this stays the pre-overlay "picked
+            // line".
+            string pickedLine = originalIntendedText;
             if (steeringResult.SteeringSucceeded && steeringResult.SteeringQuestion != null)
             {
-                intendedTextForDelivery = originalIntendedText.Length == 0
+                pickedLine = originalIntendedText.Length == 0
                     ? steeringResult.SteeringQuestion
                     : originalIntendedText.TrimEnd() + " " + steeringResult.SteeringQuestion;
 
-                if (intendedTextForDelivery != originalIntendedText
+                if (pickedLine != originalIntendedText
                     && !string.IsNullOrEmpty(originalIntendedText)
                     && originalIntendedText != "...")
                 {
-                    var steeringSpans = WordDiff.Compute(originalIntendedText, intendedTextForDelivery);
-                    textDiffs.Add(new TextDiff("Steering", steeringSpans, originalIntendedText, intendedTextForDelivery));
+                    var steeringSpans = WordDiff.Compute(originalIntendedText, pickedLine);
+                    textDiffs.Add(new TextDiff("Steering", steeringSpans, originalIntendedText, pickedLine));
                 }
-
-                deliveryOption = new DialogueOption(
-                    chosenOption.Stat,
-                    intendedTextForDelivery,
-                    chosenOption.CallbackTurnNumber,
-                    chosenOption.ComboName,
-                    chosenOption.HasTellBonus,
-                    chosenOption.HasWeaknessWindow,
-                    chosenOption.IsUnhingedReplacement);
             }
 
             string playerArchetypeDirectiveForDelivery = player.ActiveArchetype?.Directive;
+            // #1125: the stat-specific failure instruction and trap/beatDcBy
+            // inputs that previously fed the creative delivery PROMPT are gone —
+            // there is no delivery LLM call. Failure flavour now reaches the
+            // datee via DateeContext.DeliveryTier (set in DateeResponseStage),
+            // and the actual text degradation is deterministic (DeliveryOverlay)
+            // below. Trap/shadow taint still fire as their own overlays further
+            // down (LlmDispatcher), unchanged.
 
-            var deliveryContext = new DeliveryContext(
-                playerAvatarPrompt: player.AssembledSystemPrompt,
-                conversationHistory: TurnOrchestratorHelpers.BuildHistoryForLlmContext(state),
-                dateeLastMessage: GameSessionHelpers.GetLastDateeMessage(state.History, datee.DisplayName),
-                chosenOption: deliveryOption,
-                outcome: rollResult.Tier,
-                beatDcBy: beatDcBy,
-                activeTraps: deliveryTrapNames,
-                activeTrapInstructions: deliveryTrapInstructions,
-                playerName: player.DisplayName,
-                dateeName: datee.DisplayName,
-                currentTurn: state.TurnNumber,
-                shadowThresholds: state.CurrentShadowThresholds,
-                isNat20: rollResult.IsNatTwenty,
-                statFailureInstruction: statFailureInstruction,
-                activeArchetypeDirective: playerArchetypeDirectiveForDelivery,
-                // #1123 strict bleed isolation: the avatar (delivery) session
-                // sees ONLY the datee's public dating-app card, never the
-                // datee's full private system prompt.
-                dateeCard: GameSessionHelpers.BuildPublicProfileCard(datee, state.DateeOutfitDescription));
-
+            // #1125 — "DELIVERY" is now a NON-LLM commit/overlay step. Instead of
+            // a creative LLM call that expanded a gist and degraded it per the
+            // roll, the picked full line is committed verbatim on success and
+            // degraded deterministically on a failure tier (parity with the old
+            // delivery-LLM degradation, but pure and reproducible). No
+            // `delivery`/`DeliverMessageAsync` LLM call fires in the turn, and
+            // the avatar session history is NOT written here — option-generation
+            // and this commit overlay are ephemeral; only the committed line is
+            // persisted (by TurnOrchestrator), preserving the clean-history rule.
             progress?.Report(new TurnProgressEvent(TurnProgressStage.DeliveryStarted));
-            // #1123: the avatar (delivery) session is now stateful like the datee
-            // session — the engine owns AvatarHistory and threads it through the
-            // stateful avatar adapter overload, appending the new entries the
-            // adapter returns. Stateless adapters fall back to the one-shot path.
-            string deliveredMessage;
-            if (_llm is Pinder.Core.Interfaces.IStatefulLlmAdapter statefulAvatarLlm)
-            {
-                var avatarResult = await statefulAvatarLlm.DeliverMessageAsync(
-                    deliveryContext,
-                    state.AvatarHistory,
-                    ct).ConfigureAwait(false);
-                if (avatarResult == null)
-                    throw new InvalidOperationException("LLM adapter returned null stateful avatar result");
-                deliveredMessage = avatarResult.DeliveredMessage ?? string.Empty;
-                if (avatarResult.NewHistoryEntries != null)
-                {
-                    foreach (var entry in avatarResult.NewHistoryEntries)
-                    {
-                        if (entry != null)
-                            state.AvatarHistory.Add(entry);
-                    }
-                }
-            }
-            else
-            {
-                deliveredMessage = await _llm.DeliverMessageAsync(deliveryContext, ct).ConfigureAwait(false);
-            }
+            string deliveredMessage = DeliveryOverlay.Apply(pickedLine, rollResult.Tier, rollResult.MissMargin);
             progress?.Report(new TurnProgressEvent(TurnProgressStage.DeliveryCompleted, deliveredMessage));
 
-            // #902: Meta-prefix strip immediately after delivery LLM call.
+            // #902 / SANITIZATION-INVARIANTS-MUST-RUN-AFTER-EACH-STAGE: meta-prefix
+            // strip still runs after the (now deterministic) delivery stage, so a
+            // labelling artifact carried in the picked option line is stripped
+            // before downstream overlays. Emits a TextDiff layer when it fires.
             deliveredMessage = TextSanitizer.Sanitize(deliveredMessage, MetaPrefixStripper.LayerName, textDiffs);
 
-            // Tier modifier diff
-            if (deliveredMessage != intendedTextForDelivery
-                && !string.IsNullOrEmpty(intendedTextForDelivery)
-                && intendedTextForDelivery != "...")
+            // Tier modifier diff: the deterministic degrade vs the picked line.
+            if (deliveredMessage != pickedLine
+                && !string.IsNullOrEmpty(pickedLine)
+                && pickedLine != "...")
             {
                 string layerLabel = rollResult.IsNatTwenty ? "Nat 20" :
                                     rollResult.IsNatOne    ? "Nat 1"  :
                                     rollResult.Tier == Rolls.FailureTier.Success ? "Strong success" :
                                     rollResult.Tier.ToString();
-                var tierSpans = WordDiff.Compute(intendedTextForDelivery, deliveredMessage);
-                textDiffs.Add(new TextDiff(layerLabel, tierSpans, intendedTextForDelivery, deliveredMessage));
+                var tierSpans = WordDiff.Compute(pickedLine, deliveredMessage);
+                textDiffs.Add(new TextDiff(layerLabel, tierSpans, pickedLine, deliveredMessage));
             }
 
             // ---- Speculative Overlay Dispatcher ----

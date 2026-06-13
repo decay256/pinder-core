@@ -51,18 +51,19 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             Assert.Equal(0.4, body!.Temperature!.Value, 2);
         }
 
-        // What: AC7 - Temperature override for DeliverMessage method
-        // Mutation: Would catch if delivery uses dialogue options temp instead of its own
+        // What: AC7 (#1125) — the delivery LLM call was removed; per-method
+        // temperature override is now exercised via the datee response call.
+        // Mutation: Would catch if datee uses the wrong temperature default/override.
         [Fact]
-        public async Task DeliverMessageAsync_TemperatureOverride_Used()
+        public async Task DateeResponseAsync_TemperatureOverride_Used()
         {
             var handler = new CapturingHttpHandler("text");
             using var client = new HttpClient(handler);
             var options = DefaultOptions();
-            options.DeliveryTemperature = 0.3;
+            options.DateeResponseTemperature = 0.3;
             using var adapter = new AnthropicLlmAdapter(options, client);
 
-            await adapter.DeliverMessageAsync(MakeDeliveryContext());
+            await adapter.GetDateeResponseAsync(MakeDateeContext());
 
             var body = JsonConvert.DeserializeObject<MessagesRequest>(handler.RequestBodies[0]);
             Assert.Equal(0.3, body!.Temperature!.Value, 2);
@@ -138,21 +139,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             using var adapter = new AnthropicLlmAdapter(DefaultOptions(), client);
 
             await Assert.ThrowsAsync<TaskCanceledException>(
-                () => adapter.DeliverMessageAsync(MakeDeliveryContext()));
-        }
-
-        // What: Spec error - DeliverMessageAsync returns "" on empty LLM response
-        // Mutation: Would catch if empty deliver response throws or returns null
-        [Fact]
-        public async Task DeliverMessageAsync_EmptyResponse_ReturnsEmptyString()
-        {
-            var handler = new CapturingHttpHandler("");
-            using var client = new HttpClient(handler);
-            using var adapter = new AnthropicLlmAdapter(DefaultOptions(), client);
-
-            var result = await adapter.DeliverMessageAsync(MakeDeliveryContext());
-
-            Assert.Equal("", result);
+                () => adapter.GetDateeResponseAsync(MakeDateeContext()));
         }
 
         // What: Spec error - GetDateeResponseAsync on empty LLM response returns empty message

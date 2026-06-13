@@ -76,11 +76,12 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0);
 
-            // The DeliveryContext capture is the proof: scene entries
-            // must NOT appear in the conversation history fed to the LLM.
-            Assert.NotNull(llm.CapturedDeliveryContext);
+            // #1125: no DeliveryContext is built anymore. The DateeContext capture
+            // is the proof: scene entries must NOT appear in the conversation
+            // history fed to the LLM.
+            Assert.NotNull(llm.CapturedDateeContext);
             Assert.DoesNotContain(
-                llm.CapturedDeliveryContext!.ConversationHistory,
+                llm.CapturedDateeContext!.ConversationHistory,
                 e => Senders.IsScene(e.Sender));
 
             // BUT the public ConversationHistory still includes them.
