@@ -154,8 +154,6 @@ namespace Pinder.Core.Tests
                 });
             }
 
-            public Task<string> DeliverMessageAsync(DeliveryContext context, System.Threading.CancellationToken ct = default)
-                => Task.FromResult(context.ChosenOption.IntendedText);
 
             public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult(new DateeResponse("..."));

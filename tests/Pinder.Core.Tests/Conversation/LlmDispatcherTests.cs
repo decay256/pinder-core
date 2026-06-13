@@ -22,7 +22,6 @@ namespace Pinder.Core.Tests.Conversation
             public string ShadowResponse { get; set; } = "Shadow Response";
 
             public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, CancellationToken ct = default) => throw new NotImplementedException();
-            public Task<string> DeliverMessageAsync(DeliveryContext context, CancellationToken ct = default) => throw new NotImplementedException();
             public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, CancellationToken ct = default) => throw new NotImplementedException();
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, CancellationToken ct = default) => throw new NotImplementedException();
             public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, CancellationToken ct = default) => throw new NotImplementedException();

@@ -129,8 +129,6 @@ namespace Pinder.Core.Tests
                 };
                 return Task.FromResult(options);
             }
-            public Task<string> DeliverMessageAsync(DeliveryContext context, System.Threading.CancellationToken ct = default)
-                => Task.FromResult(context.ChosenOption.IntendedText);
             public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult(new DateeResponse("...",
                     detectedTell: new Tell(_tellStat, $"Tell on {_tellStat}")));
@@ -154,8 +152,6 @@ namespace Pinder.Core.Tests
                 _call++;
                 return Task.FromResult(_optionSets[idx]);
             }
-            public Task<string> DeliverMessageAsync(DeliveryContext context, System.Threading.CancellationToken ct = default)
-                => Task.FromResult(context.ChosenOption.IntendedText);
             public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult(new DateeResponse("..."));
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, System.Threading.CancellationToken ct = default)

@@ -221,10 +221,6 @@ namespace Pinder.Core.Tests
                 });
             }
 
-            public Task<string> DeliverMessageAsync(DeliveryContext context, System.Threading.CancellationToken ct = default)
-            {
-                return Task.FromResult("delivered");
-            }
 
             public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
             {

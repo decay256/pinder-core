@@ -141,13 +141,6 @@ namespace Pinder.Core.Tests.Integration
                 return Task.FromResult(_optionSets.Dequeue());
             }
 
-            public Task<string> DeliverMessageAsync(DeliveryContext context, System.Threading.CancellationToken ct = default)
-            {
-                string message = context.Outcome == FailureTier.Success
-                    ? context.ChosenOption.IntendedText
-                    : $"[{context.Outcome}] {context.ChosenOption.IntendedText}";
-                return Task.FromResult(message);
-            }
 
             public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
             {

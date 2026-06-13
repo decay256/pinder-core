@@ -31,9 +31,8 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0);
 
-            // #1125: no DeliveryContext is built anymore; the wiring lives on the
-            // surviving DateeContext.
-            Assert.Null(llm.CapturedDeliveryContext);
+            // #1125: no delivery LLM call / DeliveryContext exists anymore; the
+            // name/turn wiring lives on the surviving DateeContext.
             Assert.NotNull(llm.CapturedDateeContext);
             Assert.Equal("Sable", llm.CapturedDateeContext!.PlayerName);
             Assert.Equal("Brick", llm.CapturedDateeContext.DateeName);
@@ -91,11 +90,10 @@ namespace Pinder.Core.Tests
         }
 
         /// <summary>
-        /// LLM adapter that captures the DeliveryContext and DateeContext for assertion.
+        /// LLM adapter that captures the DateeContext for assertion.
         /// </summary>
         private sealed class CapturingLlm : ILlmAdapter
         {
-            public DeliveryContext? CapturedDeliveryContext { get; private set; }
             public DateeContext? CapturedDateeContext { get; private set; }
 
             public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, System.Threading.CancellationToken ct = default)
@@ -107,12 +105,6 @@ namespace Pinder.Core.Tests
                     new DialogueOption(StatType.Honesty, "Real talk"),
                     new DialogueOption(StatType.Wit, "Clever")
                 });
-            }
-
-            public Task<string> DeliverMessageAsync(DeliveryContext context, System.Threading.CancellationToken ct = default)
-            {
-                CapturedDeliveryContext = context;
-                return Task.FromResult(context.ChosenOption.IntendedText);
             }
 
             public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)

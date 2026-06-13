@@ -20,7 +20,6 @@ namespace Pinder.Core.Tests
     public sealed class CapturingLlmAdapter : ILlmAdapter
     {
         public List<DialogueContext> DialogueContexts { get; } = new List<DialogueContext>();
-        public List<DeliveryContext> DeliveryContexts { get; } = new List<DeliveryContext>();
         public List<DateeContext> DateeContexts { get; } = new List<DateeContext>();
 
         public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, System.Threading.CancellationToken ct = default)
@@ -34,15 +33,6 @@ namespace Pinder.Core.Tests
                 new DialogueOption(StatType.Chaos, "I once ate a whole pizza in a bouncy castle.")
             };
             return Task.FromResult(options);
-        }
-
-        public Task<string> DeliverMessageAsync(DeliveryContext context, System.Threading.CancellationToken ct = default)
-        {
-            DeliveryContexts.Add(context);
-            string message = context.Outcome == FailureTier.Success
-                ? context.ChosenOption.IntendedText
-                : $"[{context.Outcome}] {context.ChosenOption.IntendedText}";
-            return Task.FromResult(message);
         }
 
         public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)

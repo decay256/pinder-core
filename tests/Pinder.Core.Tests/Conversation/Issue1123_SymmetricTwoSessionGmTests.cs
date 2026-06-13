@@ -66,10 +66,11 @@ namespace Pinder.Core.Tests.Conversation
 
         /// <summary>
         /// Recording adapter: implements the full stateful surface and captures the
-        /// avatar history it is handed on every <see cref="DeliverMessageAsync(DeliveryContext, IReadOnlyList{ConversationMessage}, CancellationToken)"/>
-        /// call, plus the system prompts/context seen by both the avatar (delivery)
-        /// and datee paths. Contributes one user + one assistant entry per stateful
-        /// call so the engine's owned history grows across turns.
+        /// system prompts/context seen by the datee path. The avatar (delivery)
+        /// path no longer exists (#1125 collapsed the delivery LLM call), so the
+        /// avatar observation lists stay empty — the AC-1 test below asserts that.
+        /// Contributes one user + one assistant entry per stateful datee call so
+        /// the engine's owned history grows across turns.
         /// </summary>
         private sealed class RecordingStatefulAdapter : IStatefulLlmAdapter
         {
@@ -93,10 +94,7 @@ namespace Pinder.Core.Tests.Conversation
                     new DialogueOption(StatType.Wit, "option 4"),
                 });
 
-            public Task<string> DeliverMessageAsync(DeliveryContext context, CancellationToken ct = default)
-                => Task.FromResult("delivered");
-
-            // #1125: the stateful avatar (delivery) call no longer exists on the
+            // #1125: the avatar (delivery) LLM call no longer exists on the
             // interface and the engine never invokes it. Kept as a guard: if the
             // engine ever routed through an avatar call again, _avatarCallCount
             // would be observed non-zero by the AC-1 test below.

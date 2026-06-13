@@ -78,8 +78,9 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0); // option 0 = Charm
 
-            // #1125: no DeliveryContext is built anymore.
-            Assert.Empty(capturingLlm.DeliveryContexts);
+            // #1125: no delivery LLM call / DeliveryContext exists anymore — the
+            // commit step is the deterministic, non-LLM DeliveryOverlay. Nothing
+            // to assert here (no captured delivery contexts to inspect).
 
             // Datee context must see the trap
             var oppCtx = capturingLlm.DateeContexts[0];

@@ -145,7 +145,6 @@ namespace Pinder.Core.Tests
 
         private sealed class CapturingLlm : ILlmAdapter
         {
-            public DeliveryContext? CapturedDeliveryContext { get; private set; }
             public DateeContext? CapturedDateeContext { get; private set; }
 
             public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, System.Threading.CancellationToken ct = default)
@@ -156,12 +155,6 @@ namespace Pinder.Core.Tests
                     new DialogueOption(StatType.Honesty, "Real talk"),
                     new DialogueOption(StatType.Wit, "Clever")
                 });
-
-            public Task<string> DeliverMessageAsync(DeliveryContext context, System.Threading.CancellationToken ct = default)
-            {
-                CapturedDeliveryContext = context;
-                return Task.FromResult(context.ChosenOption.IntendedText);
-            }
 
             public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
             {
