@@ -31,13 +31,9 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("YOU ARE TALKING TO", result);
         }
 
-        // Mutation: would catch if delivery prompt lost conversation history
-        [Fact]
-        public void AC6_DeliveryPrompt_IncludesConversationHistory()
-        {
-            var result = SessionDocumentBuilder.BuildDeliveryPrompt(MakeDeliveryContext());
-            Assert.Contains("[CONVERSATION_START]", result);
-        }
+        // #1138: AC6_DeliveryPrompt_IncludesConversationHistory removed —
+        // BuildDeliveryPrompt is gone (delivery collapsed into DeliveryOverlay,
+        // #1125). Options/Datee conversation-history coverage is retained.
 
         // Mutation: would catch if datee prompt lost conversation history
         [Fact]
@@ -101,12 +97,9 @@ namespace Pinder.LlmAdapters.Tests
                 SessionDocumentBuilder.BuildDialogueOptionsPrompt(null!));
         }
 
-        [Fact]
-        public void AC7_BuildDeliveryPrompt_NullContextThrows()
-        {
-            Assert.Throws<ArgumentNullException>(() =>
-                SessionDocumentBuilder.BuildDeliveryPrompt(null!));
-        }
+        // #1138: AC7_BuildDeliveryPrompt_NullContextThrows removed —
+        // BuildDeliveryPrompt is gone (#1125 DeliveryOverlay). Options/Datee
+        // null-context guards are retained.
 
         [Fact]
         public void AC7_BuildDateePrompt_NullContextThrows()

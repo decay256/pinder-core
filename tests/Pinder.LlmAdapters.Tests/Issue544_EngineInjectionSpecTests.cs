@@ -59,30 +59,9 @@ namespace Pinder.LlmAdapters.Tests
                 playerTextingStyle: playerTextingStyle);
         }
 
-        private static DeliveryContext MakeDeliveryContext(
-            DialogueOption? chosenOption = null,
-            FailureTier outcome = FailureTier.None,
-            int beatDcBy = 5,
-            string playerName = "Velvet",
-            string dateeName = "Sable",
-            Dictionary<ShadowStatType, int>? shadowThresholds = null)
-        {
-            return new DeliveryContext(
-                playerAvatarPrompt: "player system prompt",
-                conversationHistory: new List<(string, string)>
-                {
-                    ("Velvet", "hey there"),
-                    ("Sable", "omg hi!!")
-                },
-                dateeLastMessage: "omg hi!!",
-                chosenOption: chosenOption ?? new DialogueOption(StatType.Wit, "clever line here"),
-                outcome: outcome,
-                beatDcBy: beatDcBy,
-                activeTraps: Array.Empty<string>(),
-                shadowThresholds: shadowThresholds,
-                playerName: playerName,
-                dateeName: dateeName);
-        }
+        // #1138: MakeDeliveryContext() removed — the delivery prompt builder it
+        // fed (BuildDeliveryPrompt) no longer exists; delivery is now the
+        // deterministic DeliveryOverlay (#1125).
 
         private static DateeContext MakeDateeContext(
             int interestBefore = 12,
@@ -290,117 +269,16 @@ namespace Pinder.LlmAdapters.Tests
 
         // ═══════════════════════════════════════════════════════════════
         // AC2: Delivery injection — [ENGINE — DELIVERY] block
+        //
+        // #1138: the entire AC2_DeliveryInjection_* block was removed — it
+        // asserted on SessionDocumentBuilder.BuildDeliveryPrompt output, but the
+        // creative delivery LLM call / prompt builder no longer exists (delivery
+        // was collapsed into the deterministic, non-LLM DeliveryOverlay in
+        // #1125, and #1138 removed the builder). Overlay parity is covered by
+        // the Issue1125 regression tests in Pinder.Core.Tests. RollContextBuilder
+        // narrative selection itself is still covered directly by the
+        // RollContextBuilder fallback/override tests in EngineInjectionBlockTests.
         // ═══════════════════════════════════════════════════════════════
-
-        // Mutation: would catch if ENGINE — DELIVERY block was missing
-        [Fact]
-        public void AC2_DeliveryInjection_HasEngineDeliveryHeader()
-        {
-            var result = SessionDocumentBuilder.BuildDeliveryPrompt(MakeDeliveryContext());
-            Assert.Contains("[ENGINE — DELIVERY]", result);
-        }
-
-        // Mutation: would catch if chosen option text was not included verbatim
-        [Fact]
-        public void AC2_DeliveryInjection_ContainsChosenOptionText()
-        {
-            var option = new DialogueOption(StatType.Charm, "you have great taste in music");
-            var result = SessionDocumentBuilder.BuildDeliveryPrompt(
-                MakeDeliveryContext(chosenOption: option));
-            Assert.Contains("you have great taste in music", result);
-        }
-
-        // Mutation: would catch if "PLAYER AVATAR chose:" prefix was missing
-        [Fact]
-        public void AC2_DeliveryInjection_HasPlayerChosePrefix()
-        {
-            var result = SessionDocumentBuilder.BuildDeliveryPrompt(MakeDeliveryContext());
-            Assert.Contains("PLAYER AVATAR chose:", result);
-        }
-
-        // Mutation: would catch if "Dice result:" prefix was missing
-        [Fact]
-        public void AC2_DeliveryInjection_HasDiceResultPrefix()
-        {
-            var result = SessionDocumentBuilder.BuildDeliveryPrompt(MakeDeliveryContext());
-            Assert.Contains("Dice result:", result);
-        }
-
-        // Mutation: would catch if "Write the message" instruction was missing
-        [Fact]
-        public void AC2_DeliveryInjection_HasWriteInstruction()
-        {
-            var result = SessionDocumentBuilder.BuildDeliveryPrompt(
-                MakeDeliveryContext(playerName: "Gerald"));
-            Assert.Contains("Write the message Gerald actually sends", result);
-        }
-
-        // Mutation: would catch if success roll context used wrong tier text
-        [Fact]
-        public void AC2_DeliveryInjection_CleanSuccess_HasLandedText()
-        {
-            var result = SessionDocumentBuilder.BuildDeliveryPrompt(
-                MakeDeliveryContext(beatDcBy: 2, outcome: FailureTier.None));
-            Assert.Contains("landed", result);
-        }
-
-        // Mutation: would catch if strong success (5-9) used clean success text
-        [Fact]
-        public void AC2_DeliveryInjection_StrongSuccess_DifferentFromClean()
-        {
-            var clean = SessionDocumentBuilder.BuildDeliveryPrompt(
-                MakeDeliveryContext(beatDcBy: 3, outcome: FailureTier.None));
-            var strong = SessionDocumentBuilder.BuildDeliveryPrompt(
-                MakeDeliveryContext(beatDcBy: 7, outcome: FailureTier.None));
-            // The roll context text should differ between clean and strong
-            Assert.NotEqual(clean, strong);
-        }
-
-        // Mutation: would catch if critical success (10+) text was same as strong
-        [Fact]
-        public void AC2_DeliveryInjection_CriticalSuccess_HasBestVersionText()
-        {
-            var result = SessionDocumentBuilder.BuildDeliveryPrompt(
-                MakeDeliveryContext(beatDcBy: 12, outcome: FailureTier.None));
-            Assert.Contains("best version", result);
-        }
-
-        // Mutation: would catch if failure tier name was not present in delivery
-        [Theory]
-        [InlineData(FailureTier.Fumble, "FUMBLE")]
-        [InlineData(FailureTier.Misfire, "MISFIRE")]
-        [InlineData(FailureTier.TropeTrap, "TROPE")]
-        [InlineData(FailureTier.Catastrophe, "CATASTROPHE")]
-        [InlineData(FailureTier.Legendary, "LEGENDARY")]
-        public void AC2_DeliveryInjection_FailureTier_ShowsTierName(FailureTier tier, string expectedFragment)
-        {
-            var result = SessionDocumentBuilder.BuildDeliveryPrompt(
-                MakeDeliveryContext(outcome: tier, beatDcBy: -5));
-            Assert.Contains(expectedFragment, result, StringComparison.OrdinalIgnoreCase);
-        }
-
-        // Mutation: would catch if RollContextBuilder was ignored when provided
-        [Fact]
-        public void AC2_DeliveryInjection_WithRollContextBuilder_UsesCustomNarrative()
-        {
-            var flavors = new Dictionary<string, string>
-            {
-                { "§7.success-scale.1-4", "CUSTOM: clean shot" }
-            };
-            var builder = new RollContextBuilder(flavors);
-            var result = SessionDocumentBuilder.BuildDeliveryPrompt(
-                MakeDeliveryContext(beatDcBy: 2), builder);
-            Assert.Contains("CUSTOM: clean shot", result);
-        }
-
-        // Mutation: would catch if null rollContextBuilder caused exception instead of fallback
-        [Fact]
-        public void AC2_DeliveryInjection_NullRollContextBuilder_UsesFallback()
-        {
-            var result = SessionDocumentBuilder.BuildDeliveryPrompt(
-                MakeDeliveryContext(beatDcBy: 3), null);
-            Assert.Contains(RollContextBuilder.FallbackCleanSuccess, result);
-        }
 
         // ═══════════════════════════════════════════════════════════════
         // AC3: Datee injection — [ENGINE — DATEE] block
