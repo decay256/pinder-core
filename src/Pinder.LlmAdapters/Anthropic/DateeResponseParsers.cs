@@ -1,6 +1,5 @@
 using Newtonsoft.Json.Linq;
 using System;
-using System.Text.RegularExpressions;
 using Pinder.Core.Conversation;
 using Pinder.Core.Stats;
 
@@ -13,13 +12,10 @@ namespace Pinder.LlmAdapters.Anthropic
     /// </summary>
     internal static class DateeResponseParsers
     {
-        private static readonly Regex TellSignalRegex = new Regex(
-            @"TELL:\s*(\w+)\s*\(([^)]+)\)",
-            RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
-        private static readonly Regex WeaknessSignalRegex = new Regex(
-            @"WEAKNESS:\s*(\w+)\s*-(\d+)\s*\(([^)]+)\)",
-            RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        // #1124: the [SIGNALS] block (TELL/WEAKNESS) is parsed via the single
+        // canonical GmOutputContract — the ONE output-format contract shared by
+        // both GM sessions — rather than a duplicate regex here. The datee path
+        // keeps its own message-cleaning (eval headers, quotes, persona tags).
 
         /// <summary>
         /// Defensively removes the persona "self-tag" tics ("/end", "/rant") that the
@@ -123,47 +119,11 @@ namespace Pinder.LlmAdapters.Anthropic
                 // Strip persona self-tag tics ("/end", "/rant") that must never persist to chat history.
                 messageText = StripPersonaSelfTags(messageText);
 
-                // Parse optional [SIGNALS] block
-                var signalsIndex = response.IndexOf("[SIGNALS]", StringComparison.OrdinalIgnoreCase);
-                if (signalsIndex >= 0)
-                {
-                    var signalsBlock = response.Substring(signalsIndex);
-
-                    var tellMatch = TellSignalRegex.Match(signalsBlock);
-                    if (tellMatch.Success)
-                    {
-                        var statStr = StatNameNormalizer.NormalizeStatName(tellMatch.Groups[1].Value.Trim());
-                        try
-                        {
-                            var stat = (StatType)Enum.Parse(typeof(StatType), statStr, true);
-                            var description = tellMatch.Groups[2].Value.Trim();
-                            tell = new Tell(stat, description);
-                        }
-                        catch (ArgumentException)
-                        {
-                            // Invalid stat — tell stays null
-                        }
-                    }
-
-                    var weaknessMatch = WeaknessSignalRegex.Match(signalsBlock);
-                    if (weaknessMatch.Success)
-                    {
-                        var statStr = StatNameNormalizer.NormalizeStatName(weaknessMatch.Groups[1].Value.Trim());
-                        try
-                        {
-                            var stat = (StatType)Enum.Parse(typeof(StatType), statStr, true);
-                            var reduction = int.Parse(weaknessMatch.Groups[2].Value.Trim());
-                            if (reduction > 0)
-                            {
-                                weakness = new WeaknessWindow(stat, reduction);
-                            }
-                        }
-                        catch (Exception)
-                        {
-                            // Invalid stat or reduction — weakness stays null
-                        }
-                    }
-                }
+                // #1124: parse the optional [SIGNALS] block via the single
+                // canonical contract shared by both GM sessions.
+                var signals = GmOutputContract.Parse(response);
+                tell = signals.Tell;
+                weakness = signals.Weakness;
             }
             catch
             {

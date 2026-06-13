@@ -99,8 +99,9 @@ fallback is still present (Phase 1-4).
 - `prompt_builder_section_labels` —
   `PromptBuilder.BuildSystemPrompt` headers + glyphs — **status:
   const** (Phase 3).
-- `session_system_prompt` — `SessionSystemPromptBuilder.Build` /
-  `BuildPlayer` / `BuildDatee` — **status: const** (Phase 3).
+- `session_system_prompt` — `SessionSystemPromptBuilder.BuildPlayerAvatar` /
+  `BuildDatee` — shared GM puppeteer template + injected character spec
+  (#1124) — **status: const** (Phase 3).
 - `archetype_catalog` — `ArchetypeCatalog._behaviors` (12 archetypes)
   — **status: const** (Phase 4).
 - `player_response_delay` —

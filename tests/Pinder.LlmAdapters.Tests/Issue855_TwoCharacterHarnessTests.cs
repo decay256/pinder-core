@@ -66,10 +66,10 @@ namespace Pinder.LlmAdapters.Tests
 
             Assert.Equal("hey, I noticed you too.", line);
             // The system prompt is the REAL production datee prompt for the
-            // pursuer character — proven by the DATEE CHARACTER section and
-            // the pursuer's own assembled profile text appearing in it.
+            // pursuer character — proven by the shared GM character-spec block
+            // and the pursuer's own assembled profile text appearing in it.
             Assert.NotNull(transport.LastSystem);
-            Assert.Contains("== DATEE CHARACTER ==", transport.LastSystem!);
+            Assert.Contains(SessionSystemPromptBuilder.CharacterSpecHeader, transport.LastSystem!);
             Assert.Contains(PursuerAssembledPrompt, transport.LastSystem!);
             // It is NOT the generic-persona prompt.
             Assert.DoesNotContain("witty, curious person texting", transport.LastSystem!);

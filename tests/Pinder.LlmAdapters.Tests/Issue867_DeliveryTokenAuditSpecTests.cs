@@ -4,11 +4,13 @@ using Xunit;
 namespace Pinder.LlmAdapters.Tests
 {
     /// <summary>
-    /// Spec-driven tests for Issue #867: audit + cut datee-behavior sections from BuildPlayerAvatar.
-    /// Verifies DateeFriction and DateeCuriosity are stripped from player-side
-    /// system prompts while preserved in datee-side prompts.
-    /// ConversationArcProgression is shared conversation structure — kept in both.
-    /// PlayerProbing is player-specific — kept in BuildPlayerAvatar.
+    /// #1124 supersedes #867: the two sessions now share ONE canonical GM
+    /// puppeteer template, so the shared GM base (including the conversation-
+    /// dynamic sections) is identical for both BuildPlayerAvatar and BuildDatee.
+    /// The only per-session difference is the injected character-spec block.
+    ///
+    /// These tests pin the new shared-base contract and keep the original
+    /// token-ceiling sanity check.
     /// </summary>
     public class Issue867_DeliveryTokenAuditSpecTests
     {
@@ -29,170 +31,96 @@ namespace Pinder.LlmAdapters.Tests
                 playerProbing: "player probing content");
         }
 
-        #region BuildPlayerAvatar: datee sections removed
+        #region Shared GM base is identical for both sessions (#1124)
 
         [Fact]
-        public void BuildPlayer_ExcludesDateeFriction()
+        public void SharedBase_IdenticalForBothSessions()
         {
             var def = FullFixture();
-            var result = SessionSystemPromptBuilder.BuildPlayerAvatar("player prompt", def);
-            Assert.DoesNotContain("DATEE RESISTANCE", result);
-            Assert.DoesNotContain("datee friction content", result);
+            var player = SessionSystemPromptBuilder.BuildPlayerAvatar("player prompt", def);
+            var datee = SessionSystemPromptBuilder.BuildDatee("datee prompt", def);
+
+            var header = SessionSystemPromptBuilder.CharacterSpecHeader;
+            var playerBase = player.Substring(0, player.IndexOf(header, StringComparison.Ordinal));
+            var dateeBase = datee.Substring(0, datee.IndexOf(header, StringComparison.Ordinal));
+
+            Assert.Equal(dateeBase, playerBase);
         }
 
         [Fact]
-        public void BuildPlayer_ExcludesDateeCuriosity()
+        public void SharedBase_IncludesConversationDynamicSections()
         {
+            // Under the single-puppeteer model the GM needs the full conversation
+            // dynamic regardless of which character it portrays, so these live in
+            // the shared base and appear in BOTH sessions.
             var def = FullFixture();
-            var result = SessionSystemPromptBuilder.BuildPlayerAvatar("player prompt", def);
-            Assert.DoesNotContain("DATEE CURIOSITY", result);
-            Assert.DoesNotContain("datee curiosity content", result);
+            foreach (var result in new[]
+            {
+                SessionSystemPromptBuilder.BuildPlayerAvatar("player prompt", def),
+                SessionSystemPromptBuilder.BuildDatee("datee prompt", def),
+            })
+            {
+                Assert.Contains("DATEE RESISTANCE", result);
+                Assert.Contains("datee friction content", result);
+                Assert.Contains("DATEE CURIOSITY", result);
+                Assert.Contains("datee curiosity content", result);
+                Assert.Contains("CONVERSATION ARC", result);
+                Assert.Contains("conversation arc content", result);
+                Assert.Contains("PLAYER PROBING", result);
+                Assert.Contains("player probing content", result);
+            }
         }
 
         [Fact]
-        public void BuildPlayer_IncludesConversationArcProgression()
+        public void SharedBase_IncludesNarrativeDoctrineSubSections()
         {
-            // ConversationArc is shared conversation-structure guidance relevant
-            // to both sides; kept in BuildPlayerAvatar per #867 LESSONS_LEARNED rule.
-            var def = FullFixture();
-            var result = SessionSystemPromptBuilder.BuildPlayerAvatar("player prompt", def);
-            Assert.Contains("CONVERSATION ARC", result);
-            Assert.Contains("conversation arc content", result);
-        }
-
-        [Fact]
-        public void BuildPlayer_StillIncludesPlayerProbing()
-        {
-            var def = FullFixture();
-            var result = SessionSystemPromptBuilder.BuildPlayerAvatar("player prompt", def);
-            Assert.Contains("PLAYER PROBING", result);
-            Assert.Contains("player probing content", result);
-        }
-
-        [Fact]
-        public void BuildPlayer_StillIncludesTextingPsychology()
-        {
-            // texting psychology is now a sub-section folded into the merged
-            // narrative_doctrine body; it must still surface in BuildPlayerAvatar output.
+            // texting psychology + revelation-over-statement are folded into the
+            // merged narrative_doctrine body; they must surface in both sessions.
             var def = FullFixture();
             var result = SessionSystemPromptBuilder.BuildPlayerAvatar("player prompt", def);
             Assert.Contains("TEXTING PSYCHOLOGY", result);
             Assert.Contains("texting psych content", result);
-        }
-
-        [Fact]
-        public void BuildPlayer_StillIncludesRevelationOverStatement()
-        {
-            // revelation-over-statement is now a sub-section folded into the merged
-            // narrative_doctrine body; it must still surface in BuildPlayerAvatar output.
-            var def = FullFixture();
-            var result = SessionSystemPromptBuilder.BuildPlayerAvatar("player prompt", def);
             Assert.Contains("REVELATION OVER STATEMENT", result);
             Assert.Contains("revelation content", result);
         }
 
         #endregion
 
-        #region BuildDatee: datee sections preserved
+        #region Character spec only contains its own profile
 
         [Fact]
-        public void BuildDatee_IncludesDateeFriction()
+        public void PlayerSession_SpecContainsPlayerRoleAndProfile()
         {
             var def = FullFixture();
-            var result = SessionSystemPromptBuilder.BuildDatee("datee prompt", def);
-            Assert.Contains("DATEE RESISTANCE", result);
-            Assert.Contains("datee friction content", result);
+            var result = SessionSystemPromptBuilder.BuildPlayerAvatar("PLAYER_PROFILE_MARKER", def);
+            var specIdx = result.IndexOf(SessionSystemPromptBuilder.CharacterSpecHeader, StringComparison.Ordinal);
+            var spec = result.Substring(specIdx);
+            Assert.Contains("Player role description here.", spec);
+            Assert.Contains("PLAYER_PROFILE_MARKER", spec);
         }
 
         [Fact]
-        public void BuildDatee_IncludesDateeCuriosity()
+        public void DateeSession_SpecContainsDateeRoleAndProfile()
         {
             var def = FullFixture();
-            var result = SessionSystemPromptBuilder.BuildDatee("datee prompt", def);
-            Assert.Contains("DATEE CURIOSITY", result);
-            Assert.Contains("datee curiosity content", result);
-        }
-
-        [Fact]
-        public void BuildDatee_IncludesConversationArcProgression()
-        {
-            var def = FullFixture();
-            var result = SessionSystemPromptBuilder.BuildDatee("datee prompt", def);
-            Assert.Contains("CONVERSATION ARC", result);
-            Assert.Contains("conversation arc content", result);
-        }
-
-        [Fact]
-        public void BuildDatee_ExcludesPlayerProbing()
-        {
-            var def = FullFixture();
-            var result = SessionSystemPromptBuilder.BuildDatee("datee prompt", def);
-            Assert.DoesNotContain("PLAYER PROBING", result);
-            Assert.DoesNotContain("player probing content", result);
+            var result = SessionSystemPromptBuilder.BuildDatee("DATEE_PROFILE_MARKER", def);
+            var specIdx = result.IndexOf(SessionSystemPromptBuilder.CharacterSpecHeader, StringComparison.Ordinal);
+            var spec = result.Substring(specIdx);
+            Assert.Contains("Datee role description here.", spec);
+            Assert.Contains("DATEE_PROFILE_MARKER", spec);
         }
 
         #endregion
 
-        #region Build (legacy shared prompt) — datee sections also removed
-
-        // Build() is the legacy joint method that retains ALL sections per
-        // LESSONS_LEARNED PROMPT-BLOAT-FROM-CROSS-ROLE-SECTIONS. Only BuildPlayerAvatar
-        // is trimmed (saves ~1,000 tokens per delivery call). Build() callers are
-        // test-only paths that want the full prompt for parity checks.
-        [Fact]
-        public void Build_IncludesDateeFriction()
-        {
-            var def = FullFixture();
-            var result = SessionSystemPromptBuilder.Build("p", "o", def);
-            Assert.Contains("DATEE RESISTANCE", result);
-            Assert.Contains("datee friction content", result);
-        }
+        #region Token savings / bounding-box sanity
 
         [Fact]
-        public void Build_IncludesDateeCuriosity()
-        {
-            var def = FullFixture();
-            var result = SessionSystemPromptBuilder.Build("p", "o", def);
-            Assert.Contains("DATEE CURIOSITY", result);
-            Assert.Contains("datee curiosity content", result);
-        }
-
-        [Fact]
-        public void Build_IncludesConversationArcProgression()
-        {
-            var def = FullFixture();
-            var result = SessionSystemPromptBuilder.Build("p", "o", def);
-            Assert.Contains("CONVERSATION ARC", result);
-            Assert.Contains("conversation arc content", result);
-        }
-
-        [Fact]
-        public void Build_StillIncludesPlayerProbing()
-        {
-            var def = FullFixture();
-            var result = SessionSystemPromptBuilder.Build("p", "o", def);
-            Assert.Contains("PLAYER PROBING", result);
-            Assert.Contains("player probing content", result);
-        }
-
-        #endregion
-
-        #region Token savings estimate
-
-        [Fact]
-        public void BuildPlayer_WithFullGameDefinition_IsSmallerThanBefore()
+        public void BuildPlayer_WithFullGameDefinition_StaysUnderCeiling()
         {
             var def = FullFixture();
             var result = SessionSystemPromptBuilder.BuildPlayerAvatar("player prompt", def);
-            // With the three datee sections removed, BuildPlayerAvatar should be
-            // measurably smaller. This is a coarse sanity check.
-            // The three removed sections + headers total ~1,400 tokens (~5,600 chars).
-            // Even with a minimal GameDefinition, we'd expect at least 5K chars.
             Assert.True(result.Length > 0);
-            // It must not exceed an arbitrary safe ceiling (full game-definition.yaml
-            // is the largest admissible input; we set the ceiling at 20,000 chars as
-            // a bounding-box sanity check that no accidental bloater section gets
-            // added back).
+            // Bounding-box sanity check: no accidental bloater section creeps in.
             Assert.True(result.Length < 20_000,
                 $"BuildPlayerAvatar output length {result.Length} exceeds safety ceiling of 20,000 chars.");
         }
