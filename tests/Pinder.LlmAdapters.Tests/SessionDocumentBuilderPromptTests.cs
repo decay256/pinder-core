@@ -7,6 +7,7 @@ using Xunit;
 
 namespace Pinder.LlmAdapters.Tests
 {
+    [Collection("PromptTraceSingleton")]
     public class SessionDocumentBuilderPromptTests
     {
         private static DialogueContext MakeDialogueContext(

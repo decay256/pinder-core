@@ -34,6 +34,7 @@ namespace Pinder.LlmAdapters.Tests
     ///       throw a missing-required for it, the catalog no longer exposes it,
     ///       and the builder emits no empty/dead section for it.
     /// </summary>
+    [Collection("PromptTraceSingleton")]
     public class Issue1126_SlimPromptConfigTests
     {
         public Issue1126_SlimPromptConfigTests()

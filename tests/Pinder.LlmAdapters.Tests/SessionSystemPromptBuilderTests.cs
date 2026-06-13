@@ -8,6 +8,7 @@ namespace Pinder.LlmAdapters.Tests
     /// template; only the injected character-spec block differs. The legacy
     /// combined Build(player, datee) path has been removed.
     /// </summary>
+    [Collection("PromptTraceSingleton")]
     public class SessionSystemPromptBuilderTests
     {
         private const string PlayerAvatarPrompt = "You are Velvet. Lowercase-with-intent. Ironic. Level 7 Veteran.";

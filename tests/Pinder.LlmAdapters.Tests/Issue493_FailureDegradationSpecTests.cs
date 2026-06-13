@@ -13,6 +13,7 @@ namespace Pinder.LlmAdapters.Tests
     /// Supplements the existing Issue493_FailureDegradationTests with edge cases
     /// and additional acceptance criteria coverage.
     /// </summary>
+    [Collection("PromptTraceSingleton")]
     public class Issue493_FailureDegradationSpecTests
     {
         private static DateeContext MakeContext(FailureTier tier, int interestBefore = 12, int interestAfter = 11)

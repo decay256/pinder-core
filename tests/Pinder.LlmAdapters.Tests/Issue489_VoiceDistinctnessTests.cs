@@ -12,6 +12,7 @@ namespace Pinder.LlmAdapters.Tests
     /// Tests for Issue #489: voice distinctness — explicit texting style constraint
     /// before option generation.
     /// </summary>
+    [Collection("PromptTraceSingleton")]
     public class Issue489_VoiceDistinctnessTests
     {
         // ── Helpers ──

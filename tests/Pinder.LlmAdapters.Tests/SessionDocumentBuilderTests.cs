@@ -8,6 +8,7 @@ using Xunit;
 
 namespace Pinder.LlmAdapters.Tests
 {
+    [Collection("PromptTraceSingleton")]
     public partial class SessionDocumentBuilderTests
     {
         // Catalog wiring lives in LlmAdaptersTestWiring.ModuleInitializer

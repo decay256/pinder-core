@@ -14,6 +14,7 @@ namespace Pinder.LlmAdapters.Tests
     /// These tests verify the builder side with raw values as input.
     /// Maturity: Prototype (happy-path per AC).
     /// </summary>
+    [Collection("PromptTraceSingleton")]
     public class Issue307_ShadowTaintFiringTests
     {
         // ============== AC: Madness=8 → SHADOW STATE section present ==============
