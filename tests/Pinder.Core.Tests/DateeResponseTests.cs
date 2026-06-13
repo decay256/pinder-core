@@ -117,7 +117,7 @@ namespace Pinder.Core.Tests
         public void DialogueContext_New_Fields_Default_To_Null_Or_Zero()
         {
             var ctx = new DialogueContext(
-                playerPrompt: "p",
+                playerAvatarPrompt: "p",
                 dateePrompt: "o",
                 conversationHistory: new List<(string, string)>(),
                 dateeLastMessage: "",
@@ -144,7 +144,7 @@ namespace Pinder.Core.Tests
             };
 
             var ctx = new DialogueContext(
-                playerPrompt: "p",
+                playerAvatarPrompt: "p",
                 dateePrompt: "o",
                 conversationHistory: new List<(string, string)>(),
                 dateeLastMessage: "",
@@ -171,7 +171,7 @@ namespace Pinder.Core.Tests
         {
             var option = new DialogueOption(StatType.Charm, "Hi");
             var ctx = new DeliveryContext(
-                playerPrompt: "p",
+                playerAvatarPrompt: "p",
                 dateePrompt: "o",
                 conversationHistory: new List<(string, string)>(),
                 dateeLastMessage: "",
@@ -193,7 +193,7 @@ namespace Pinder.Core.Tests
             };
             var option = new DialogueOption(StatType.Charm, "Hi");
             var ctx = new DeliveryContext(
-                playerPrompt: "p",
+                playerAvatarPrompt: "p",
                 dateePrompt: "o",
                 conversationHistory: new List<(string, string)>(),
                 dateeLastMessage: "",
@@ -212,7 +212,7 @@ namespace Pinder.Core.Tests
         public void DateeContext_New_Fields_Default_To_Null()
         {
             var ctx = new DateeContext(
-                playerPrompt: "p",
+                playerAvatarPrompt: "p",
                 dateePrompt: "o",
                 conversationHistory: new List<(string, string)>(),
                 dateeLastMessage: "",
@@ -235,7 +235,7 @@ namespace Pinder.Core.Tests
                 { ShadowStatType.Dread, 6 }
             };
             var ctx = new DateeContext(
-                playerPrompt: "p",
+                playerAvatarPrompt: "p",
                 dateePrompt: "o",
                 conversationHistory: new List<(string, string)>(),
                 dateeLastMessage: "",

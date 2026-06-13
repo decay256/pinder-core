@@ -24,7 +24,7 @@ namespace Pinder.LlmAdapters.Tests
             bool requiresRizzOption = false)
         {
             return new DialogueContext(
-                playerPrompt: "player prompt",
+                playerAvatarPrompt: "player prompt",
                 dateePrompt: "datee prompt",
                 conversationHistory: conversationHistory ?? new List<(string, string)>(),
                 dateeLastMessage: dateeLastMessage,
@@ -51,7 +51,7 @@ namespace Pinder.LlmAdapters.Tests
             Dictionary<ShadowStatType, int> shadowThresholds = null)
         {
             return new DeliveryContext(
-                playerPrompt: "player prompt",
+                playerAvatarPrompt: "player prompt",
                 dateePrompt: "datee prompt",
                 conversationHistory: conversationHistory ?? new List<(string, string)>(),
                 dateeLastMessage: "",
@@ -77,7 +77,7 @@ namespace Pinder.LlmAdapters.Tests
             Dictionary<ShadowStatType, int> shadowThresholds = null)
         {
             return new DateeContext(
-                playerPrompt: "player prompt",
+                playerAvatarPrompt: "player prompt",
                 dateePrompt: "datee prompt",
                 conversationHistory: conversationHistory ?? new List<(string, string)>(),
                 dateeLastMessage: "",

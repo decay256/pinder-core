@@ -45,7 +45,7 @@ namespace Pinder.LlmAdapters
             if (context == null) throw new ArgumentNullException(nameof(context));
 
             var userContent = SessionDocumentBuilder.BuildDialogueOptionsPrompt(context);
-            var systemPrompt = SessionSystemPromptBuilder.BuildPlayer(context.PlayerPrompt, _options.GameDefinition);
+            var systemPrompt = SessionSystemPromptBuilder.BuildPlayerAvatar(context.PlayerAvatarPrompt, _options.GameDefinition);
             double temperature = _options.DialogueOptionsTemperature ?? DefaultDialogueOptionsTemperature;
 
             var responseText = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.DialogueOptions, ct: ct)
@@ -79,7 +79,7 @@ namespace Pinder.LlmAdapters
             var deliveryRules = _options.GameDefinition?.DeliveryRules;
             var userContent = SessionDocumentBuilder.BuildDeliveryPrompt(
                 context, deliveryRules: deliveryRules, statDeliveryInstructions: _options.StatDeliveryInstructions);
-            var systemPrompt = SessionSystemPromptBuilder.BuildPlayer(context.PlayerPrompt, _options.GameDefinition);
+            var systemPrompt = SessionSystemPromptBuilder.BuildPlayerAvatar(context.PlayerAvatarPrompt, _options.GameDefinition);
             double temperature = _options.DeliveryTemperature ?? DefaultDeliveryTemperature;
 
             var responseText = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.Delivery, ct: ct)
@@ -380,7 +380,7 @@ namespace Pinder.LlmAdapters
             sb.AppendLine();
             sb.AppendLine(prompt);
 
-            string systemPrompt = SessionSystemPromptBuilder.BuildPlayer(context.PlayerPrompt, _options.GameDefinition);
+            string systemPrompt = SessionSystemPromptBuilder.BuildPlayerAvatar(context.PlayerAvatarPrompt, _options.GameDefinition);
 
             var responseText = await _transport.SendAsync(systemPrompt, sb.ToString(), 0.9, _options.MaxTokens, phase: LlmPhase.Steering, ct: ct)
                 .ConfigureAwait(false);

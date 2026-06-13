@@ -15,7 +15,7 @@ namespace Pinder.LlmAdapters.Tests
         private static DialogueContext MakeDialogueContext(string activeArchetypeDirective = null)
         {
             return new DialogueContext(
-                playerPrompt: "You are a test player.",
+                playerAvatarPrompt: "You are a test player.",
                 dateePrompt: "You are a test datee.",
                 conversationHistory: Array.Empty<(string, string)>(),
                 dateeLastMessage: "",
@@ -30,7 +30,7 @@ namespace Pinder.LlmAdapters.Tests
         private static DateeContext MakeDateeContext(string activeArchetypeDirective = null)
         {
             return new DateeContext(
-                playerPrompt: "You are a test player.",
+                playerAvatarPrompt: "You are a test player.",
                 dateePrompt: "You are a test datee.",
                 conversationHistory: Array.Empty<(string, string)>(),
                 dateeLastMessage: "",

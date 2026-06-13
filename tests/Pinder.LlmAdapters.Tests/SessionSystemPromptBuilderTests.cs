@@ -5,56 +5,56 @@ namespace Pinder.LlmAdapters.Tests
 {
     public class SessionSystemPromptBuilderTests
     {
-        private const string PlayerPrompt = "You are Velvet. Lowercase-with-intent. Ironic. Level 7 Veteran.";
+        private const string PlayerAvatarPrompt = "You are Velvet. Lowercase-with-intent. Ironic. Level 7 Veteran.";
         private const string DateePrompt = "You are Sable. Fast-talking. Uses omg and emoji. Level 5 Journeyman.";
 
         [Fact]
         public void Build_ContainsBothCharacterPrompts()
         {
-            var result = SessionSystemPromptBuilder.Build(PlayerPrompt, DateePrompt);
-            Assert.Contains(PlayerPrompt, result);
+            var result = SessionSystemPromptBuilder.Build(PlayerAvatarPrompt, DateePrompt);
+            Assert.Contains(PlayerAvatarPrompt, result);
             Assert.Contains(DateePrompt, result);
         }
 
         [Fact]
         public void Build_ContainsGameVision()
         {
-            var result = SessionSystemPromptBuilder.Build(PlayerPrompt, DateePrompt);
+            var result = SessionSystemPromptBuilder.Build(PlayerAvatarPrompt, DateePrompt);
             Assert.Contains("comedy dating RPG", result);
         }
 
         [Fact]
         public void Build_ContainsWorldDescription()
         {
-            var result = SessionSystemPromptBuilder.Build(PlayerPrompt, DateePrompt);
+            var result = SessionSystemPromptBuilder.Build(PlayerAvatarPrompt, DateePrompt);
             Assert.Contains("dating server", result);
         }
 
         [Fact]
         public void Build_ContainsMetaContract()
         {
-            var result = SessionSystemPromptBuilder.Build(PlayerPrompt, DateePrompt);
+            var result = SessionSystemPromptBuilder.Build(PlayerAvatarPrompt, DateePrompt);
             Assert.Contains("break character", result);
         }
 
         [Fact]
         public void Build_ContainsWritingRules()
         {
-            var result = SessionSystemPromptBuilder.Build(PlayerPrompt, DateePrompt);
+            var result = SessionSystemPromptBuilder.Build(PlayerAvatarPrompt, DateePrompt);
             Assert.Contains("texting register", result);
         }
 
         [Fact]
         public void Build_ContainsNarrativeDoctrineHeader()
         {
-            var result = SessionSystemPromptBuilder.Build(PlayerPrompt, DateePrompt);
+            var result = SessionSystemPromptBuilder.Build(PlayerAvatarPrompt, DateePrompt);
             Assert.Contains("== NARRATIVE DOCTRINE ==", result);
         }
 
         [Fact]
         public void Build_HasFiveSections()
         {
-            var result = SessionSystemPromptBuilder.Build(PlayerPrompt, DateePrompt);
+            var result = SessionSystemPromptBuilder.Build(PlayerAvatarPrompt, DateePrompt);
             Assert.Contains("== GAME VISION ==", result);
             Assert.Contains("== WORLD RULES ==", result);
             Assert.Contains("== PLAYER CHARACTER ==", result);
@@ -65,7 +65,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void Build_SectionsInCorrectOrder()
         {
-            var result = SessionSystemPromptBuilder.Build(PlayerPrompt, DateePrompt);
+            var result = SessionSystemPromptBuilder.Build(PlayerAvatarPrompt, DateePrompt);
             var visionIdx = result.IndexOf("== GAME VISION ==");
             var worldIdx = result.IndexOf("== WORLD RULES ==");
             var playerIdx = result.IndexOf("== PLAYER CHARACTER ==");
@@ -83,7 +83,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void Build_NullGameDef_UsesPinderDefaults()
         {
-            var result = SessionSystemPromptBuilder.Build(PlayerPrompt, DateePrompt, null);
+            var result = SessionSystemPromptBuilder.Build(PlayerAvatarPrompt, DateePrompt, null);
             Assert.Contains("Pinder", result);
             Assert.Contains("comedy dating RPG", result);
         }
@@ -99,7 +99,7 @@ namespace Pinder.LlmAdapters.Tests
                 "Custom datee role",
                 "Custom meta contract Custom writing rules");
 
-            var result = SessionSystemPromptBuilder.Build(PlayerPrompt, DateePrompt, custom);
+            var result = SessionSystemPromptBuilder.Build(PlayerAvatarPrompt, DateePrompt, custom);
             Assert.Contains("Custom vision text", result);
             Assert.Contains("Custom world desc", result);
             Assert.Contains("Custom meta contract", result);
@@ -117,7 +117,7 @@ namespace Pinder.LlmAdapters.Tests
         public void Build_NullDateePrompt_ThrowsArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>(() =>
-                SessionSystemPromptBuilder.Build(PlayerPrompt, null!));
+                SessionSystemPromptBuilder.Build(PlayerAvatarPrompt, null!));
         }
 
         [Fact]
@@ -142,7 +142,7 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("WritingSection", afterMeta);
         }
 
-        // Regression: #867 — datee-only sections must NOT leak into BuildPlayer.
+        // Regression: #867 — datee-only sections must NOT leak into BuildPlayerAvatar.
         [Fact]
         public void BuildPlayer_ExcludesDateeOnlySections()
         {
@@ -153,13 +153,13 @@ namespace Pinder.LlmAdapters.Tests
                 conversationArcProgression: "both sides move the convo forward",
                 playerProbing: "player follows up on datee's reveals");
 
-            var playerResult = SessionSystemPromptBuilder.BuildPlayer("p", gd);
+            var playerResult = SessionSystemPromptBuilder.BuildPlayerAvatar("p", gd);
             var dateeResult = SessionSystemPromptBuilder.BuildDatee("o", gd);
 
-            // BuildPlayer must NOT contain datee-only sections (DateeFriction,
+            // BuildPlayerAvatar must NOT contain datee-only sections (DateeFriction,
             // DateeCuriosity). ConversationArcProgression is SHARED structure —
-            // both sides participate in arc progression — kept in BuildPlayer.
-            // PlayerProbing is player-specific guidance — kept in BuildPlayer.
+            // both sides participate in arc progression — kept in BuildPlayerAvatar.
+            // PlayerProbing is player-specific guidance — kept in BuildPlayerAvatar.
             // See #867 LESSONS_LEARNED PROMPT-BLOAT-FROM-CROSS-ROLE-SECTIONS.
             Assert.DoesNotContain("DATEE RESISTANCE", playerResult);
             Assert.DoesNotContain("DATEE CURIOSITY", playerResult);
@@ -174,16 +174,16 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("datee probes", dateeResult);
             Assert.Contains("both sides move", dateeResult);
 
-            // BuildPlayer keeps shared structure + player-side sections.
+            // BuildPlayerAvatar keeps shared structure + player-side sections.
             Assert.Contains("CONVERSATION ARC", playerResult);
             Assert.Contains("both sides move", playerResult);
             Assert.Contains("PLAYER PROBING", playerResult);
             Assert.Contains("player follows", playerResult);
 
-            // Token ceiling: BuildPlayer must be shorter than BuildDatee
+            // Token ceiling: BuildPlayerAvatar must be shorter than BuildDatee
             // (it excludes the two datee-only sections).
             Assert.True(playerResult.Length < dateeResult.Length,
-                $"BuildPlayer ({playerResult.Length} chars) should be shorter than BuildDatee ({dateeResult.Length} chars)");
+                $"BuildPlayerAvatar ({playerResult.Length} chars) should be shorter than BuildDatee ({dateeResult.Length} chars)");
         }
     }
 }

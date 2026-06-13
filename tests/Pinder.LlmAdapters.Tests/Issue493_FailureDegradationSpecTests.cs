@@ -18,7 +18,7 @@ namespace Pinder.LlmAdapters.Tests
         private static DateeContext MakeContext(FailureTier tier, int interestBefore = 12, int interestAfter = 11)
         {
             return new DateeContext(
-                playerPrompt: "player prompt",
+                playerAvatarPrompt: "player prompt",
                 dateePrompt: "datee prompt",
                 conversationHistory: new List<(string, string)> { ("Player", "hey"), ("Datee", "hi") },
                 dateeLastMessage: "hi",

@@ -63,7 +63,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             });
 
         private static DialogueContext MakeDialogueContext() => new DialogueContext(
-            playerPrompt: "You are Thundercock, a bold confident penis",
+            playerAvatarPrompt: "You are Thundercock, a bold confident penis",
             dateePrompt: "You are Velvet, a mysterious and alluring match",
             conversationHistory: new List<(string, string)> { ("Velvet", "Hey there, nice profile pic") },
             dateeLastMessage: "Hey there, nice profile pic",
@@ -74,7 +74,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             currentTurn: 1);
 
         private static DeliveryContext MakeDeliveryContext() => new DeliveryContext(
-            playerPrompt: "You are Thundercock",
+            playerAvatarPrompt: "You are Thundercock",
             dateePrompt: "You are Velvet",
             conversationHistory: new List<(string, string)> { ("Velvet", "Hey") },
             dateeLastMessage: "Hey",
@@ -86,7 +86,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             dateeName: "Velvet");
 
         private static DateeContext MakeDateeContext() => new DateeContext(
-            playerPrompt: "You are Thundercock",
+            playerAvatarPrompt: "You are Thundercock",
             dateePrompt: "You are Velvet",
             conversationHistory: new List<(string, string)> { ("Velvet", "Hey") },
             dateeLastMessage: "Hey",

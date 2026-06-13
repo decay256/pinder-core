@@ -48,7 +48,7 @@ namespace Pinder.LlmAdapters.Tests
             string playerTextingStyle = "")
         {
             return new DialogueContext(
-                playerPrompt: "velvet system prompt",
+                playerAvatarPrompt: "velvet system prompt",
                 dateePrompt: "sable system prompt",
                 conversationHistory: conversationHistory ?? new List<(string, string)>
                 {
@@ -81,7 +81,7 @@ namespace Pinder.LlmAdapters.Tests
             string[]? activeTrapInstructions = null)
         {
             return new DeliveryContext(
-                playerPrompt: "velvet system prompt",
+                playerAvatarPrompt: "velvet system prompt",
                 dateePrompt: "sable system prompt",
                 conversationHistory: new List<(string, string)>
                 {
@@ -111,7 +111,7 @@ namespace Pinder.LlmAdapters.Tests
             FailureTier deliveryTier = FailureTier.None)
         {
             return new DateeContext(
-                playerPrompt: "velvet system prompt",
+                playerAvatarPrompt: "velvet system prompt",
                 dateePrompt: "sable system prompt",
                 conversationHistory: new List<(string, string)>
                 {

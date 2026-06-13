@@ -84,7 +84,7 @@ namespace Pinder.Core.Conversation
             if (success && llm is IStatefulLlmAdapter stateful)
             {
                 var steeringContext = new SteeringContext(
-                    playerPrompt: player.AssembledSystemPrompt,
+                    playerAvatarPrompt: player.AssembledSystemPrompt,
                     dateeName: datee.DisplayName,
                     playerName: player.DisplayName,
                     deliveredMessage: deliveredMessage,

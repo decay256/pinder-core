@@ -10,7 +10,7 @@ namespace Pinder.Core.Conversation
     public sealed class SteeringContext
     {
         /// <summary>The player character's system prompt (for voice consistency).</summary>
-        public string PlayerPrompt { get; }
+        public string PlayerAvatarPrompt { get; }
 
         /// <summary>The datee character's display name.</summary>
         public string DateeName { get; }
@@ -25,13 +25,13 @@ namespace Pinder.Core.Conversation
         public IReadOnlyList<(string Sender, string Text)> ConversationHistory { get; }
 
         public SteeringContext(
-            string playerPrompt,
+            string playerAvatarPrompt,
             string dateeName,
             string playerName,
             string deliveredMessage,
             IReadOnlyList<(string Sender, string Text)> conversationHistory)
         {
-            PlayerPrompt = playerPrompt ?? "";
+            PlayerAvatarPrompt = playerAvatarPrompt ?? "";
             DateeName = dateeName ?? "";
             PlayerName = playerName ?? "";
             DeliveredMessage = deliveredMessage ?? "";

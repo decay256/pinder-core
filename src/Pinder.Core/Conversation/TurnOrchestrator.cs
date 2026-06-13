@@ -140,7 +140,7 @@ namespace Pinder.Core.Conversation
             var availableStats = OptionFilterEngine.DrawRandomStats(allStats, _maxDialogueOptions, shadowThresholds, _statDrawRng);
 
             var context = new DialogueContext(
-                playerPrompt: player.AssembledSystemPrompt,
+                playerAvatarPrompt: player.AssembledSystemPrompt,
                 dateePrompt: GameSessionHelpers
                     .BuildDateeVisibleProfile(datee, state.DateeOutfitDescription)
                     .Render(),

@@ -4,11 +4,11 @@ using Xunit;
 namespace Pinder.LlmAdapters.Tests
 {
     /// <summary>
-    /// Spec-driven tests for Issue #867: audit + cut datee-behavior sections from BuildPlayer.
+    /// Spec-driven tests for Issue #867: audit + cut datee-behavior sections from BuildPlayerAvatar.
     /// Verifies DateeFriction and DateeCuriosity are stripped from player-side
     /// system prompts while preserved in datee-side prompts.
     /// ConversationArcProgression is shared conversation structure — kept in both.
-    /// PlayerProbing is player-specific — kept in BuildPlayer.
+    /// PlayerProbing is player-specific — kept in BuildPlayerAvatar.
     /// </summary>
     public class Issue867_DeliveryTokenAuditSpecTests
     {
@@ -29,13 +29,13 @@ namespace Pinder.LlmAdapters.Tests
                 playerProbing: "player probing content");
         }
 
-        #region BuildPlayer: datee sections removed
+        #region BuildPlayerAvatar: datee sections removed
 
         [Fact]
         public void BuildPlayer_ExcludesDateeFriction()
         {
             var def = FullFixture();
-            var result = SessionSystemPromptBuilder.BuildPlayer("player prompt", def);
+            var result = SessionSystemPromptBuilder.BuildPlayerAvatar("player prompt", def);
             Assert.DoesNotContain("DATEE RESISTANCE", result);
             Assert.DoesNotContain("datee friction content", result);
         }
@@ -44,7 +44,7 @@ namespace Pinder.LlmAdapters.Tests
         public void BuildPlayer_ExcludesDateeCuriosity()
         {
             var def = FullFixture();
-            var result = SessionSystemPromptBuilder.BuildPlayer("player prompt", def);
+            var result = SessionSystemPromptBuilder.BuildPlayerAvatar("player prompt", def);
             Assert.DoesNotContain("DATEE CURIOSITY", result);
             Assert.DoesNotContain("datee curiosity content", result);
         }
@@ -53,9 +53,9 @@ namespace Pinder.LlmAdapters.Tests
         public void BuildPlayer_IncludesConversationArcProgression()
         {
             // ConversationArc is shared conversation-structure guidance relevant
-            // to both sides; kept in BuildPlayer per #867 LESSONS_LEARNED rule.
+            // to both sides; kept in BuildPlayerAvatar per #867 LESSONS_LEARNED rule.
             var def = FullFixture();
-            var result = SessionSystemPromptBuilder.BuildPlayer("player prompt", def);
+            var result = SessionSystemPromptBuilder.BuildPlayerAvatar("player prompt", def);
             Assert.Contains("CONVERSATION ARC", result);
             Assert.Contains("conversation arc content", result);
         }
@@ -64,7 +64,7 @@ namespace Pinder.LlmAdapters.Tests
         public void BuildPlayer_StillIncludesPlayerProbing()
         {
             var def = FullFixture();
-            var result = SessionSystemPromptBuilder.BuildPlayer("player prompt", def);
+            var result = SessionSystemPromptBuilder.BuildPlayerAvatar("player prompt", def);
             Assert.Contains("PLAYER PROBING", result);
             Assert.Contains("player probing content", result);
         }
@@ -73,9 +73,9 @@ namespace Pinder.LlmAdapters.Tests
         public void BuildPlayer_StillIncludesTextingPsychology()
         {
             // texting psychology is now a sub-section folded into the merged
-            // narrative_doctrine body; it must still surface in BuildPlayer output.
+            // narrative_doctrine body; it must still surface in BuildPlayerAvatar output.
             var def = FullFixture();
-            var result = SessionSystemPromptBuilder.BuildPlayer("player prompt", def);
+            var result = SessionSystemPromptBuilder.BuildPlayerAvatar("player prompt", def);
             Assert.Contains("TEXTING PSYCHOLOGY", result);
             Assert.Contains("texting psych content", result);
         }
@@ -84,9 +84,9 @@ namespace Pinder.LlmAdapters.Tests
         public void BuildPlayer_StillIncludesRevelationOverStatement()
         {
             // revelation-over-statement is now a sub-section folded into the merged
-            // narrative_doctrine body; it must still surface in BuildPlayer output.
+            // narrative_doctrine body; it must still surface in BuildPlayerAvatar output.
             var def = FullFixture();
-            var result = SessionSystemPromptBuilder.BuildPlayer("player prompt", def);
+            var result = SessionSystemPromptBuilder.BuildPlayerAvatar("player prompt", def);
             Assert.Contains("REVELATION OVER STATEMENT", result);
             Assert.Contains("revelation content", result);
         }
@@ -136,7 +136,7 @@ namespace Pinder.LlmAdapters.Tests
         #region Build (legacy shared prompt) — datee sections also removed
 
         // Build() is the legacy joint method that retains ALL sections per
-        // LESSONS_LEARNED PROMPT-BLOAT-FROM-CROSS-ROLE-SECTIONS. Only BuildPlayer
+        // LESSONS_LEARNED PROMPT-BLOAT-FROM-CROSS-ROLE-SECTIONS. Only BuildPlayerAvatar
         // is trimmed (saves ~1,000 tokens per delivery call). Build() callers are
         // test-only paths that want the full prompt for parity checks.
         [Fact]
@@ -183,8 +183,8 @@ namespace Pinder.LlmAdapters.Tests
         public void BuildPlayer_WithFullGameDefinition_IsSmallerThanBefore()
         {
             var def = FullFixture();
-            var result = SessionSystemPromptBuilder.BuildPlayer("player prompt", def);
-            // With the three datee sections removed, BuildPlayer should be
+            var result = SessionSystemPromptBuilder.BuildPlayerAvatar("player prompt", def);
+            // With the three datee sections removed, BuildPlayerAvatar should be
             // measurably smaller. This is a coarse sanity check.
             // The three removed sections + headers total ~1,400 tokens (~5,600 chars).
             // Even with a minimal GameDefinition, we'd expect at least 5K chars.
@@ -194,7 +194,7 @@ namespace Pinder.LlmAdapters.Tests
             // a bounding-box sanity check that no accidental bloater section gets
             // added back).
             Assert.True(result.Length < 20_000,
-                $"BuildPlayer output length {result.Length} exceeds safety ceiling of 20,000 chars.");
+                $"BuildPlayerAvatar output length {result.Length} exceeds safety ceiling of 20,000 chars.");
         }
 
         #endregion

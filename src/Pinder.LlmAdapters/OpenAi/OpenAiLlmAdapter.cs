@@ -49,7 +49,7 @@ namespace Pinder.LlmAdapters.OpenAi
             if (context == null) throw new ArgumentNullException(nameof(context));
 
             var userContent = SessionDocumentBuilder.BuildDialogueOptionsPrompt(context);
-            var systemPrompt = SessionSystemPromptBuilder.BuildPlayer(context.PlayerPrompt, _options.GameDefinition);
+            var systemPrompt = SessionSystemPromptBuilder.BuildPlayerAvatar(context.PlayerAvatarPrompt, _options.GameDefinition);
 
             var requestJson = BuildRequestJson(systemPrompt, userContent, DefaultDialogueOptionsTemperature);
             var responseText = await _client.SendChatCompletionAsync(requestJson, ct).ConfigureAwait(false);
@@ -64,7 +64,7 @@ namespace Pinder.LlmAdapters.OpenAi
 
             var deliveryRules = _options.GameDefinition?.DeliveryRules;
             var userContent = SessionDocumentBuilder.BuildDeliveryPrompt(context, deliveryRules: deliveryRules, statDeliveryInstructions: _options.StatDeliveryInstructions);
-            var systemPrompt = SessionSystemPromptBuilder.BuildPlayer(context.PlayerPrompt, _options.GameDefinition);
+            var systemPrompt = SessionSystemPromptBuilder.BuildPlayerAvatar(context.PlayerAvatarPrompt, _options.GameDefinition);
 
             var requestJson = BuildRequestJson(systemPrompt, userContent, DefaultDeliveryTemperature);
             var responseText = await _client.SendChatCompletionAsync(requestJson, ct).ConfigureAwait(false);
@@ -148,8 +148,8 @@ namespace Pinder.LlmAdapters.OpenAi
             sb.AppendLine();
             sb.AppendLine(prompt);
 
-            string fullPlayerPrompt = SessionSystemPromptBuilder.BuildPlayer(context.PlayerPrompt, _options.GameDefinition);
-            var requestJson = BuildRequestJson(fullPlayerPrompt, sb.ToString(), 0.9);
+            string fullPlayerAvatarPrompt = SessionSystemPromptBuilder.BuildPlayerAvatar(context.PlayerAvatarPrompt, _options.GameDefinition);
+            var requestJson = BuildRequestJson(fullPlayerAvatarPrompt, sb.ToString(), 0.9);
             var responseText = await _client.SendChatCompletionAsync(requestJson, ct).ConfigureAwait(false);
 
             // #351: strip inline <thinking>/<reasoning> blocks — the steering

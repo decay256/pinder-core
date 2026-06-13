@@ -26,7 +26,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             string dateeName = "O")
         {
             return new DeliveryContext(
-                playerPrompt: "player prompt",
+                playerAvatarPrompt: "player prompt",
                 dateePrompt: "datee prompt",
                 conversationHistory: conversationHistory ?? new List<(string, string)>(),
                 dateeLastMessage: "",
@@ -88,13 +88,13 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         }
 
         // ==========================================================
-        // AC2: BuildPlayerOnlySystemBlocks returns single block
+        // AC2: BuildPlayerAvatarOnlySystemBlocks returns single block
         // ==========================================================
 
         [Fact]
         public void AC2_BuildPlayerOnlySystemBlocks_returns_single_block()
         {
-            var blocks = CacheBlockBuilder.BuildPlayerOnlySystemBlocks("You are Sable...");
+            var blocks = CacheBlockBuilder.BuildPlayerAvatarOnlySystemBlocks("You are Sable...");
             Assert.Single(blocks);
         }
 
@@ -102,7 +102,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         public void AC2_BuildPlayerOnlySystemBlocks_contains_player_prompt_text()
         {
             const string prompt = "You are Sable, a Scorpio sun with Love Bomber energy.";
-            var blocks = CacheBlockBuilder.BuildPlayerOnlySystemBlocks(prompt);
+            var blocks = CacheBlockBuilder.BuildPlayerAvatarOnlySystemBlocks(prompt);
             Assert.Equal("text", blocks[0].Type);
             Assert.Equal(prompt, blocks[0].Text);
         }
@@ -110,7 +110,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         [Fact]
         public void AC2_BuildPlayerOnlySystemBlocks_has_ephemeral_cache_control()
         {
-            var blocks = CacheBlockBuilder.BuildPlayerOnlySystemBlocks("prompt");
+            var blocks = CacheBlockBuilder.BuildPlayerAvatarOnlySystemBlocks("prompt");
             Assert.NotNull(blocks[0].CacheControl);
             Assert.Equal("ephemeral", blocks[0].CacheControl!.Type);
         }
@@ -119,7 +119,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         public void AC2_BuildPlayerOnlySystemBlocks_throws_on_null()
         {
             Assert.Throws<System.ArgumentNullException>(() =>
-                CacheBlockBuilder.BuildPlayerOnlySystemBlocks(null!));
+                CacheBlockBuilder.BuildPlayerAvatarOnlySystemBlocks(null!));
         }
 
         // ==========================================================

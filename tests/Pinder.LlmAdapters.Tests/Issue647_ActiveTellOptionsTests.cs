@@ -14,7 +14,7 @@ namespace Pinder.LlmAdapters.Tests
             // Arrange
             var activeTell = new Tell(StatType.Charm, "They look flustered.");
             var context = new DialogueContext(
-                playerPrompt: "Player prompt",
+                playerAvatarPrompt: "Player prompt",
                 dateePrompt: "Datee prompt",
                 conversationHistory: new List<(string, string)>(),
                 dateeLastMessage: "Last msg",
@@ -37,7 +37,7 @@ namespace Pinder.LlmAdapters.Tests
         {
             // Arrange
             var context = new DialogueContext(
-                playerPrompt: "Player prompt",
+                playerAvatarPrompt: "Player prompt",
                 dateePrompt: "Datee prompt",
                 conversationHistory: new List<(string, string)>(),
                 dateeLastMessage: "Last msg",

@@ -70,8 +70,8 @@ namespace Pinder.LlmAdapters.Anthropic
             if (context == null) throw new ArgumentNullException(nameof(context));
 
             var userContent = SessionDocumentBuilder.BuildDialogueOptionsPrompt(context);
-            var fullPlayerPrompt = SessionSystemPromptBuilder.BuildPlayer(context.PlayerPrompt, _options.GameDefinition);
-            var systemBlocks = CacheBlockBuilder.BuildPlayerOnlySystemBlocks(fullPlayerPrompt);
+            var fullPlayerAvatarPrompt = SessionSystemPromptBuilder.BuildPlayerAvatar(context.PlayerAvatarPrompt, _options.GameDefinition);
+            var systemBlocks = CacheBlockBuilder.BuildPlayerAvatarOnlySystemBlocks(fullPlayerAvatarPrompt);
 
             var request = AnthropicRequestBuilders.BuildMessagesRequest(
                 _options.Model, _options.MaxTokens, systemBlocks, userContent,
@@ -106,8 +106,8 @@ namespace Pinder.LlmAdapters.Anthropic
 
             var deliveryRules = _options.GameDefinition?.DeliveryRules;
             var userContent = SessionDocumentBuilder.BuildDeliveryPrompt(context, deliveryRules: deliveryRules, statDeliveryInstructions: _options.StatDeliveryInstructions);
-            var fullPlayerPrompt = SessionSystemPromptBuilder.BuildPlayer(context.PlayerPrompt, _options.GameDefinition);
-            var systemBlocks = CacheBlockBuilder.BuildPlayerOnlySystemBlocks(fullPlayerPrompt);
+            var fullPlayerAvatarPrompt = SessionSystemPromptBuilder.BuildPlayerAvatar(context.PlayerAvatarPrompt, _options.GameDefinition);
+            var systemBlocks = CacheBlockBuilder.BuildPlayerAvatarOnlySystemBlocks(fullPlayerAvatarPrompt);
 
             var request = AnthropicRequestBuilders.BuildMessagesRequest(
                 _options.Model, _options.MaxTokens, systemBlocks, userContent,
@@ -262,8 +262,8 @@ namespace Pinder.LlmAdapters.Anthropic
             sb.AppendLine();
             sb.AppendLine(prompt);
 
-            var fullPlayerPrompt = SessionSystemPromptBuilder.BuildPlayer(context.PlayerPrompt, _options.GameDefinition);
-            var systemBlocks = CacheBlockBuilder.BuildPlayerOnlySystemBlocks(fullPlayerPrompt);
+            var fullPlayerAvatarPrompt = SessionSystemPromptBuilder.BuildPlayerAvatar(context.PlayerAvatarPrompt, _options.GameDefinition);
+            var systemBlocks = CacheBlockBuilder.BuildPlayerAvatarOnlySystemBlocks(fullPlayerAvatarPrompt);
 
             var request = AnthropicRequestBuilders.BuildMessagesRequest(
                 _options.Model, _options.MaxTokens, systemBlocks, sb.ToString(), 0.9);
@@ -334,7 +334,7 @@ namespace Pinder.LlmAdapters.Anthropic
 
             try
             {
-                var systemBlocks = CacheBlockBuilder.BuildPlayerOnlySystemBlocks(systemPrompt);
+                var systemBlocks = CacheBlockBuilder.BuildPlayerAvatarOnlySystemBlocks(systemPrompt);
                 var request = AnthropicRequestBuilders.BuildMessagesRequest(
                     _options.Model, _options.MaxTokens, systemBlocks, userContent,
                     _options.DeliveryTemperature ?? 0.7);
@@ -395,7 +395,7 @@ namespace Pinder.LlmAdapters.Anthropic
 
             try
             {
-                var systemBlocks = CacheBlockBuilder.BuildPlayerOnlySystemBlocks(systemPrompt);
+                var systemBlocks = CacheBlockBuilder.BuildPlayerAvatarOnlySystemBlocks(systemPrompt);
                 var request = AnthropicRequestBuilders.BuildMessagesRequest(
                     _options.Model, _options.MaxTokens, systemBlocks, userContent,
                     _options.DeliveryTemperature ?? 0.7);

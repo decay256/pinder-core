@@ -16,7 +16,7 @@ namespace Pinder.LlmAdapters
         /// <summary>
         /// Build the full session system prompt.
         /// </summary>
-        /// <param name="playerPrompt">
+        /// <param name="playerAvatarPrompt">
         /// Player's assembled character system prompt (from CharacterProfile.AssembledSystemPrompt).
         /// </param>
         /// <param name="dateePrompt">
@@ -28,12 +28,12 @@ namespace Pinder.LlmAdapters
         /// </param>
         /// <returns>A single string containing the full session system prompt.</returns>
         public static string Build(
-            string playerPrompt,
+            string playerAvatarPrompt,
             string dateePrompt,
             GameDefinition? gameDef = null)
         {
-            if (playerPrompt == null)
-                throw new ArgumentNullException(nameof(playerPrompt));
+            if (playerAvatarPrompt == null)
+                throw new ArgumentNullException(nameof(playerAvatarPrompt));
             if (dateePrompt == null)
                 throw new ArgumentNullException(nameof(dateePrompt));
 
@@ -51,33 +51,34 @@ namespace Pinder.LlmAdapters
                 def.DramaticCraft != null ? def.DramaticCraft.BuildSection().TrimEnd() : "",
                 // Build() is the legacy joint prompt for callers that want both
                 // roles in one system block. Per #867 LESSONS_LEARNED, this method
-                // retains all sections (only BuildPlayer is trimmed).
+                // retains all sections (only BuildPlayerAvatar is trimmed).
                 string.IsNullOrWhiteSpace(def.DateeFriction) ? "" : "\n\n== DATEE RESISTANCE ==\n\n" + def.DateeFriction.TrimEnd(),
                 string.IsNullOrWhiteSpace(def.DateeCuriosity) ? "" : "\n\n== DATEE CURIOSITY ==\n\n" + def.DateeCuriosity.TrimEnd(),
                 string.IsNullOrWhiteSpace(def.ConversationArcProgression) ? "" : "\n\n== CONVERSATION ARC ==\n\n" + def.ConversationArcProgression.TrimEnd(),
                 string.IsNullOrWhiteSpace(def.PlayerProbing) ? "" : "\n\n== PLAYER PROBING ==\n\n" + def.PlayerProbing.TrimEnd(),
                 // --- CHARACTER-SPECIFIC / VARIABLE sections LAST ---
                 "\n\n== PLAYER CHARACTER ==\n\n",
-                playerPrompt.TrimEnd(),
+                playerAvatarPrompt.TrimEnd(),
                 "\n\n== DATEE CHARACTER ==\n\n",
                 dateePrompt.TrimEnd(),
                 "\n");
         }
 
         /// <summary>
-        /// Build a system prompt containing only the player's character profile and game definition.
+        /// Build a system prompt containing only the player avatar's character profile and game definition.
+        /// (The "player avatar" is the in-game character the human portrays — distinct from the human user.)
         /// Used to prevent voice bleed when generating dialogue options or delivering messages.
         /// </summary>
-        public static string BuildPlayer(string playerPrompt, GameDefinition? gameDef = null)
+        public static string BuildPlayerAvatar(string playerAvatarPrompt, GameDefinition? gameDef = null)
         {
-            var result = BuildPlayerEx(playerPrompt, gameDef);
+            var result = BuildPlayerAvatarEx(playerAvatarPrompt, gameDef);
             InMemoryPromptTraceService.Instance.RecordTrace("dialogue-options-system", result);
             return result.Text;
         }
 
-        public static PromptTraceResult BuildPlayerEx(string playerPrompt, GameDefinition? gameDef = null)
+        public static PromptTraceResult BuildPlayerAvatarEx(string playerAvatarPrompt, GameDefinition? gameDef = null)
         {
-            if (playerPrompt == null) throw new ArgumentNullException(nameof(playerPrompt));
+            if (playerAvatarPrompt == null) throw new ArgumentNullException(nameof(playerAvatarPrompt));
             var def = gameDef ?? GameDefinition.PinderDefaults;
 
             var sb = new AnnotatedStringBuilder();
@@ -113,7 +114,7 @@ namespace Pinder.LlmAdapters
             sb.Append("\n== PLAYER CHARACTER ==\n\n");
             sb.AppendLine(def.PlayerRoleDescription.TrimEnd(), "game-definition.yaml", "player_role_description");
             sb.Append("\n");
-            sb.AppendLine(playerPrompt.TrimEnd(), "character-profile", "player-profile");
+            sb.AppendLine(playerAvatarPrompt.TrimEnd(), "character-profile", "player-profile");
 
             sb.Append("\n");
 

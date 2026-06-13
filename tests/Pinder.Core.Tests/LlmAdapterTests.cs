@@ -20,7 +20,7 @@ namespace Pinder.Core.Tests
         private DialogueContext MakeDialogueContext()
         {
             return new DialogueContext(
-                playerPrompt: "You are a charming penis.",
+                playerAvatarPrompt: "You are a charming penis.",
                 dateePrompt: "You are a shy penis.",
                 conversationHistory: new List<(string, string)>(),
                 dateeLastMessage: "",
@@ -80,7 +80,7 @@ namespace Pinder.Core.Tests
         {
             var option = new DialogueOption(StatType.Charm, "Hello there!");
             var ctx = new DeliveryContext(
-                playerPrompt: "p",
+                playerAvatarPrompt: "p",
                 dateePrompt: "o",
                 conversationHistory: new List<(string, string)>(),
                 dateeLastMessage: "",
@@ -106,7 +106,7 @@ namespace Pinder.Core.Tests
         {
             var option = new DialogueOption(StatType.Wit, "Clever line.");
             var ctx = new DeliveryContext(
-                playerPrompt: "p",
+                playerAvatarPrompt: "p",
                 dateePrompt: "o",
                 conversationHistory: new List<(string, string)>(),
                 dateeLastMessage: "",
@@ -129,7 +129,7 @@ namespace Pinder.Core.Tests
         public async Task GetDateeResponseAsync_Returns_NonNull()
         {
             var ctx = new DateeContext(
-                playerPrompt: "p",
+                playerAvatarPrompt: "p",
                 dateePrompt: "o",
                 conversationHistory: new List<(string, string)>(),
                 dateeLastMessage: "",

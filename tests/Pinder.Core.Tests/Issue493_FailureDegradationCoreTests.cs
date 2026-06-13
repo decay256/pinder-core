@@ -75,7 +75,7 @@ namespace Pinder.Core.Tests
         public void AC1_DateeContext_DeliveryTier_SetFromConstructor()
         {
             var context = new DateeContext(
-                playerPrompt: "p",
+                playerAvatarPrompt: "p",
                 dateePrompt: "o",
                 conversationHistory: new List<(string, string)> { ("P", "hi") },
                 dateeLastMessage: "hi",
@@ -95,7 +95,7 @@ namespace Pinder.Core.Tests
         public void AC1_DateeContext_DeliveryTier_DefaultsToNone()
         {
             var context = new DateeContext(
-                playerPrompt: "p",
+                playerAvatarPrompt: "p",
                 dateePrompt: "o",
                 conversationHistory: new List<(string, string)> { ("P", "hi") },
                 dateeLastMessage: "hi",
@@ -120,7 +120,7 @@ namespace Pinder.Core.Tests
         public void AC1_DateeContext_PreservesAllTierValues(FailureTier tier)
         {
             var context = new DateeContext(
-                playerPrompt: "p",
+                playerAvatarPrompt: "p",
                 dateePrompt: "o",
                 conversationHistory: new List<(string, string)> { ("P", "hi") },
                 dateeLastMessage: "hi",
@@ -220,7 +220,7 @@ namespace Pinder.Core.Tests
         {
             // This test verifies the constructor compiles and works without deliveryTier
             var context = new DateeContext(
-                playerPrompt: "p",
+                playerAvatarPrompt: "p",
                 dateePrompt: "o",
                 conversationHistory: new List<(string, string)>(),
                 dateeLastMessage: "",
@@ -245,7 +245,7 @@ namespace Pinder.Core.Tests
             };
 
             var context = new DateeContext(
-                playerPrompt: "p",
+                playerAvatarPrompt: "p",
                 dateePrompt: "o",
                 conversationHistory: new List<(string, string)> { ("P", "hi") },
                 dateeLastMessage: "hi",

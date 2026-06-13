@@ -38,7 +38,7 @@ namespace Pinder.LlmAdapters.Tests
             string playerTextingStyle = "")
         {
             return new DialogueContext(
-                playerPrompt: "player system prompt",
+                playerAvatarPrompt: "player system prompt",
                 dateePrompt: "datee system prompt",
                 conversationHistory: conversationHistory ?? new List<(string, string)>
                 {
@@ -68,7 +68,7 @@ namespace Pinder.LlmAdapters.Tests
             Dictionary<ShadowStatType, int>? shadowThresholds = null)
         {
             return new DeliveryContext(
-                playerPrompt: "player system prompt",
+                playerAvatarPrompt: "player system prompt",
                 dateePrompt: "datee system prompt",
                 conversationHistory: new List<(string, string)>
                 {
@@ -95,7 +95,7 @@ namespace Pinder.LlmAdapters.Tests
             FailureTier deliveryTier = FailureTier.None)
         {
             return new DateeContext(
-                playerPrompt: "player system prompt",
+                playerAvatarPrompt: "player system prompt",
                 dateePrompt: "datee system prompt",
                 conversationHistory: new List<(string, string)>
                 {

@@ -88,7 +88,7 @@ OPTION_4
 ""Fourth""";
 
         private static DialogueContext MakeDialogueContext() => new DialogueContext(
-            playerPrompt: "You are Thundercock",
+            playerAvatarPrompt: "You are Thundercock",
             dateePrompt: "You are Velvet",
             conversationHistory: new List<(string, string)> { ("Velvet", "Hey there") },
             dateeLastMessage: "Hey there",
@@ -99,7 +99,7 @@ OPTION_4
             currentTurn: 1);
 
         private static DeliveryContext MakeDeliveryContext() => new DeliveryContext(
-            playerPrompt: "You are Thundercock",
+            playerAvatarPrompt: "You are Thundercock",
             dateePrompt: "You are Velvet",
             conversationHistory: new List<(string, string)> { ("Velvet", "Hey") },
             dateeLastMessage: "Hey",
@@ -111,7 +111,7 @@ OPTION_4
             dateeName: "Velvet");
 
         private static DateeContext MakeDateeContext() => new DateeContext(
-            playerPrompt: "You are Thundercock",
+            playerAvatarPrompt: "You are Thundercock",
             dateePrompt: "You are Velvet",
             conversationHistory: new List<(string, string)> { ("Velvet", "Hey") },
             dateeLastMessage: "Hey",

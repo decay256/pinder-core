@@ -52,7 +52,7 @@ namespace Pinder.LlmAdapters.Tests
             int currentTurn = 1)
         {
             return new DialogueContext(
-                playerPrompt: "player system prompt",
+                playerAvatarPrompt: "player system prompt",
                 dateePrompt: "datee system prompt",
                 conversationHistory: new List<(string, string)>(),
                 dateeLastMessage: "hey there",
@@ -122,7 +122,7 @@ namespace Pinder.LlmAdapters.Tests
         public void DialogueContext_PlayerTextingStyle_DefaultsToEmpty()
         {
             var ctx = new DialogueContext(
-                playerPrompt: "p",
+                playerAvatarPrompt: "p",
                 dateePrompt: "o",
                 conversationHistory: new List<(string, string)>(),
                 dateeLastMessage: "",
@@ -226,7 +226,7 @@ namespace Pinder.LlmAdapters.Tests
         public void BuildDialogueOptionsPrompt_WorksWithDefaultContext_NoStyleBlock()
         {
             var ctx = new DialogueContext(
-                playerPrompt: "p",
+                playerAvatarPrompt: "p",
                 dateePrompt: "o",
                 conversationHistory: new List<(string, string)>(),
                 dateeLastMessage: "hello",
