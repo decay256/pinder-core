@@ -11,14 +11,14 @@ using Xunit;
 namespace Pinder.Core.Tests
 {
     /// <summary>
-    /// Issue #241 AC3: Verify GameSession populates PlayerName, OpponentName, CurrentTurn
-    /// on DeliveryContext and OpponentContext when calling ILlmAdapter methods.
+    /// Issue #241 AC3: Verify GameSession populates PlayerName, DateeName, CurrentTurn
+    /// on DeliveryContext and DateeContext when calling ILlmAdapter methods.
     /// </summary>
     [Trait("Category", "Core")]
     public class Issue241_GameSessionDeliveryContextTests
     {
         [Fact]
-        public async Task ResolveTurnAsync_DeliveryContext_has_player_and_opponent_names()
+        public async Task ResolveTurnAsync_DeliveryContext_has_player_and_datee_names()
         {
             var llm = new CapturingLlm();
             var dice = new FixedDice(15, 5); // d20=15 (success), timing=5
@@ -31,11 +31,11 @@ namespace Pinder.Core.Tests
 
             Assert.NotNull(llm.CapturedDeliveryContext);
             Assert.Equal("Sable", llm.CapturedDeliveryContext!.PlayerName);
-            Assert.Equal("Brick", llm.CapturedDeliveryContext.OpponentName);
+            Assert.Equal("Brick", llm.CapturedDeliveryContext.DateeName);
         }
 
         [Fact]
-        public async Task ResolveTurnAsync_OpponentContext_has_player_and_opponent_names()
+        public async Task ResolveTurnAsync_DateeContext_has_player_and_datee_names()
         {
             var llm = new CapturingLlm();
             var dice = new FixedDice(15, 5);
@@ -46,9 +46,9 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0);
 
-            Assert.NotNull(llm.CapturedOpponentContext);
-            Assert.Equal("Sable", llm.CapturedOpponentContext!.PlayerName);
-            Assert.Equal("Brick", llm.CapturedOpponentContext.OpponentName);
+            Assert.NotNull(llm.CapturedDateeContext);
+            Assert.Equal("Sable", llm.CapturedDateeContext!.PlayerName);
+            Assert.Equal("Brick", llm.CapturedDateeContext.DateeName);
         }
 
         [Fact]
@@ -85,12 +85,12 @@ namespace Pinder.Core.Tests
         }
 
         /// <summary>
-        /// LLM adapter that captures the DeliveryContext and OpponentContext for assertion.
+        /// LLM adapter that captures the DeliveryContext and DateeContext for assertion.
         /// </summary>
         private sealed class CapturingLlm : ILlmAdapter
         {
             public DeliveryContext? CapturedDeliveryContext { get; private set; }
-            public OpponentContext? CapturedOpponentContext { get; private set; }
+            public DateeContext? CapturedDateeContext { get; private set; }
 
             public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, System.Threading.CancellationToken ct = default)
             {
@@ -109,17 +109,17 @@ namespace Pinder.Core.Tests
                 return Task.FromResult(context.ChosenOption.IntendedText);
             }
 
-            public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context, System.Threading.CancellationToken ct = default)
+            public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
             {
-                CapturedOpponentContext = context;
-                return Task.FromResult(new OpponentResponse("Reply from opponent"));
+                CapturedDateeContext = context;
+                return Task.FromResult(new DateeResponse("Reply from datee"));
             }
 
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult<string?>(null);
-            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
+            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
             public System.Threading.Tasks.Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
-            public System.Threading.Tasks.Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
+            public System.Threading.Tasks.Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
         }
 
                 private sealed class FixedDice : IDiceRoller

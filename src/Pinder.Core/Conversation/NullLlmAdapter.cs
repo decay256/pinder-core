@@ -44,21 +44,21 @@ namespace Pinder.Core.Conversation
         }
 
         /// <summary>
-        /// Returns a minimal placeholder OpponentResponse with "..." text and no signals.
+        /// Returns a minimal placeholder DateeResponse with "..." text and no signals.
         /// </summary>
-        public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context, CancellationToken ct = default)
+        public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, CancellationToken ct = default)
         {
             ct.ThrowIfCancellationRequested();
-            return Task.FromResult(new OpponentResponse("..."));
+            return Task.FromResult(new DateeResponse("..."));
         }
 
         /// <inheritdoc />
-        public Task<StatefulOpponentResult> GetOpponentResponseAsync(
-            OpponentContext context,
+        public Task<StatefulDateeResult> GetDateeResponseAsync(
+            DateeContext context,
             IReadOnlyList<ConversationMessage> history,
             CancellationToken cancellationToken = default)
         {
-            var resp = new OpponentResponse("...");
+            var resp = new DateeResponse("...");
             // NullLlmAdapter still records placeholder history entries so engine
             // round-trips (snapshot/restore) and Phase 0 invariants behave the
             // same as a real adapter.
@@ -67,7 +67,7 @@ namespace Pinder.Core.Conversation
                 ConversationMessage.User(string.Empty),
                 ConversationMessage.Assistant("..."),
             };
-            return Task.FromResult(new StatefulOpponentResult(resp, entries));
+            return Task.FromResult(new StatefulDateeResult(resp, entries));
         }
 
         /// <summary>
@@ -91,7 +91,7 @@ namespace Pinder.Core.Conversation
         /// <summary>
         /// Returns the message unchanged (no LLM overlay in test mode).
         /// </summary>
-        public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null, CancellationToken ct = default)
+        public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, CancellationToken ct = default)
         {
             ct.ThrowIfCancellationRequested();
             return Task.FromResult(message);
@@ -111,7 +111,7 @@ namespace Pinder.Core.Conversation
         /// Used by the deterministic test harness so engine flow can be exercised
         /// without an actual LLM round-trip.
         /// </summary>
-        public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null, CancellationToken ct = default)
+        public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, CancellationToken ct = default)
         {
             ct.ThrowIfCancellationRequested();
             return Task.FromResult(message);

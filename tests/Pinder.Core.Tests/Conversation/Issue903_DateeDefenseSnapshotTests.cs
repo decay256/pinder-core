@@ -15,14 +15,14 @@ using Xunit;
 namespace Pinder.Core.Tests.Conversation
 {
     /// <summary>
-    /// Issue #903: <see cref="OpponentDefenseSnapshot"/> — one entry per
+    /// Issue #903: <see cref="DateeDefenseSnapshot"/> — one entry per
     /// <see cref="StatType"/>, keyed on attacking stat; each entry carries
-    /// <see cref="OpponentDefenseEntry.DefendingStat"/>,
-    /// <see cref="OpponentDefenseEntry.EffectiveModifier"/>, and
-    /// <see cref="OpponentDefenseEntry.BaseModifier"/>.
+    /// <see cref="DateeDefenseEntry.DefendingStat"/>,
+    /// <see cref="DateeDefenseEntry.EffectiveModifier"/>, and
+    /// <see cref="DateeDefenseEntry.BaseModifier"/>.
     /// </summary>
     [Trait("Category", "Core")]
-    public class Issue903_OpponentDefenseSnapshotTests
+    public class Issue903_DateeDefenseSnapshotTests
     {
         // ── Helpers ──────────────────────────────────────────────────────────
 
@@ -37,12 +37,12 @@ namespace Pinder.Core.Tests.Conversation
                 level: 1);
         }
 
-        private static GameSession MakeSession(CharacterProfile? opponent = null, int startingInterest = 10)
+        private static GameSession MakeSession(CharacterProfile? datee = null, int startingInterest = 10)
         {
-            opponent ??= MakeProfile("Opponent");
+            datee ??= MakeProfile("Datee");
             return new GameSession(
                 MakeProfile("Player"),
-                opponent,
+                datee,
                 new NullLlmAdapter(),
                 new FixedDice903(5, 5),
                 new NullTrapRegistry903(),
@@ -57,8 +57,8 @@ namespace Pinder.Core.Tests.Conversation
             var session = MakeSession();
             var turnStart = await session.StartTurnAsync();
 
-            Assert.NotNull(turnStart.OpponentDefenseSnapshot);
-            var entries = turnStart.OpponentDefenseSnapshot!.ByAttackerStat;
+            Assert.NotNull(turnStart.DateeDefenseSnapshot);
+            var entries = turnStart.DateeDefenseSnapshot!.ByAttackerStat;
             var allStats = (StatType[])Enum.GetValues(typeof(StatType));
 
             Assert.Equal(allStats.Length, entries.Count);
@@ -73,7 +73,7 @@ namespace Pinder.Core.Tests.Conversation
         {
             var session = MakeSession();
             var turnStart = await session.StartTurnAsync();
-            var entries = turnStart.OpponentDefenseSnapshot!.ByAttackerStat;
+            var entries = turnStart.DateeDefenseSnapshot!.ByAttackerStat;
 
             foreach (var (attackerStat, entry) in entries)
             {
@@ -89,8 +89,8 @@ namespace Pinder.Core.Tests.Conversation
         {
             // Charm attacks → SelfAwareness defends.
             // SelfAwareness's shadow pair = Overthinking.
-            // Give opponent SelfAwareness=3, Overthinking=6 → penalty = 6/3 = 2 → Effective=1.
-            var opponentStats = new StatBlock(
+            // Give datee SelfAwareness=3, Overthinking=6 → penalty = 6/3 = 2 → Effective=1.
+            var dateeStats = new StatBlock(
                 new Dictionary<StatType, int>
                 {
                     { StatType.Charm,         2 },
@@ -109,9 +109,9 @@ namespace Pinder.Core.Tests.Conversation
                     { ShadowStatType.Dread,        0 },
                     { ShadowStatType.Overthinking, 6 }, // pairs with SelfAwareness
                 });
-            var session = MakeSession(MakeProfile("Opponent", opponentStats));
+            var session = MakeSession(MakeProfile("Datee", dateeStats));
             var turnStart = await session.StartTurnAsync();
-            var entry = turnStart.OpponentDefenseSnapshot!.ByAttackerStat[StatType.Charm];
+            var entry = turnStart.DateeDefenseSnapshot!.ByAttackerStat[StatType.Charm];
 
             // BaseModifier is the raw stat value
             Assert.Equal(3, entry.BaseModifier);
@@ -120,18 +120,18 @@ namespace Pinder.Core.Tests.Conversation
             Assert.NotEqual(entry.BaseModifier, entry.EffectiveModifier);
         }
 
-        // ── AC4: trap-reflected — OpponentDCIncrease trap adds to EffectiveModifier
+        // ── AC4: trap-reflected — DateeDCIncrease trap adds to EffectiveModifier
 
         [Fact]
         public async Task StartTurnAsync_DefenseSnapshot_TrapDcBonusReflectedInEffectiveModifier()
         {
-            // Set up a Rizz trap with OpponentDCIncrease +3.
+            // Set up a Rizz trap with DateeDCIncrease +3.
             // Rizz attacks → Wit defends.
             // With no shadow, BaseModifier = Wit base = 2, EffectiveModifier = 2.
             // With the trap active: EffectiveModifier = 2 + 3 = 5 > 2 = BaseModifier.
             var trapDef = new TrapDefinition(
                 "rizz-dc-trap", StatType.Rizz,
-                TrapEffect.OpponentDCIncrease, effectValue: 3,
+                TrapEffect.DateeDCIncrease, effectValue: 3,
                 durationTurns: 3, llmInstruction: "test",
                 clearMethod: "", nat1Bonus: "");
 
@@ -139,7 +139,7 @@ namespace Pinder.Core.Tests.Conversation
 
             var session = new GameSession(
                 MakeProfile("Player"),
-                MakeProfile("Opponent"),
+                MakeProfile("Datee"),
                 new NullLlmAdapter(),
                 new FixedDice903(5, 5),
                 trapRegistry,
@@ -156,20 +156,20 @@ namespace Pinder.Core.Tests.Conversation
             session.RestoreState(restoreData, trapRegistry);
 
             var turnStart = await session.StartTurnAsync();
-            var rizzEntry = turnStart.OpponentDefenseSnapshot!.ByAttackerStat[StatType.Rizz];
+            var rizzEntry = turnStart.DateeDefenseSnapshot!.ByAttackerStat[StatType.Rizz];
 
-            // The Rizz trap with OpponentDCIncrease +3 should be reflected.
+            // The Rizz trap with DateeDCIncrease +3 should be reflected.
             Assert.Equal(2, rizzEntry.BaseModifier);                  // raw Wit base
             Assert.Equal(5, rizzEntry.EffectiveModifier);             // 2 + trap +3
             Assert.True(rizzEntry.EffectiveModifier > rizzEntry.BaseModifier,
-                "EffectiveModifier should exceed BaseModifier when an OpponentDCIncrease trap is active.");
+                "EffectiveModifier should exceed BaseModifier when an DateeDCIncrease trap is active.");
 
             // Confirm the trap only affects the Rizz row, not others.
-            var charmEntry = turnStart.OpponentDefenseSnapshot!.ByAttackerStat[StatType.Charm];
+            var charmEntry = turnStart.DateeDefenseSnapshot!.ByAttackerStat[StatType.Charm];
             Assert.Equal(charmEntry.BaseModifier, charmEntry.EffectiveModifier);
         }
 
-        // ── AC5: serialization — JSON key is opponent_defense_snapshot ────────
+        // ── AC5: serialization — JSON key is datee_defense_snapshot ────────
 
         [Fact]
         public async Task StartTurnAsync_TurnStart_SerializesWithSnakeCaseKey()
@@ -180,7 +180,7 @@ namespace Pinder.Core.Tests.Conversation
             // Serialize TurnStart using System.Text.Json. We need the snapshot
             // accessible as a property; serialize the snapshot directly since
             // TurnStart is a class without [JsonPropertyName] on its own fields.
-            var snap = turnStart.OpponentDefenseSnapshot!;
+            var snap = turnStart.DateeDefenseSnapshot!;
             string json = JsonSerializer.Serialize(snap);
 
             Assert.Contains("\"by_attacker_stat\"", json);
@@ -194,7 +194,7 @@ namespace Pinder.Core.Tests.Conversation
         {
             var session = MakeSession();
             var turnStart = await session.StartTurnAsync();
-            var snap = turnStart.OpponentDefenseSnapshot!;
+            var snap = turnStart.DateeDefenseSnapshot!;
             string json = JsonSerializer.Serialize(snap);
 
             // All six StatType values should appear in the serialized output.

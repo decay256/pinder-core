@@ -49,19 +49,19 @@ namespace Pinder.Core.TestCommon
         public Task<string> DeliverMessageAsync(DeliveryContext context, CancellationToken ct = default)
             => Task.FromResult(context.ChosenOption.IntendedText);
 
-        public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context, CancellationToken ct = default)
-            => Task.FromResult(new OpponentResponse("..."));
+        public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, CancellationToken ct = default)
+            => Task.FromResult(new DateeResponse("..."));
 
         public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, CancellationToken ct = default)
             => Task.FromResult<string?>(null);
 
-        public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null, CancellationToken ct = default)
+        public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, CancellationToken ct = default)
             => Task.FromResult(message);
 
         public Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow, string? archetypeDirective = null, CancellationToken ct = default)
             => Task.FromResult(message);
 
-        public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null, CancellationToken ct = default)
+        public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, CancellationToken ct = default)
             => Task.FromResult(message);
 
         public static StatBlock MakeStatBlock(int allStats = 2, int allShadow = 0)

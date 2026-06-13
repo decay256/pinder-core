@@ -8,20 +8,20 @@ using Xunit;
 namespace Pinder.LlmAdapters.Tests
 {
     /// <summary>
-    /// Tests for Issue #490: opponent resistance descriptors based on interest level.
-    /// Verifies that BuildOpponentPrompt includes the fundamental resistance rule
+    /// Tests for Issue #490: datee resistance descriptors based on interest level.
+    /// Verifies that BuildDateePrompt includes the fundamental resistance rule
     /// and interest-appropriate resistance descriptors.
     /// </summary>
     public class Issue490_ResistanceDescriptorTests
     {
-        private static OpponentContext MakeOpponentContext(int interestAfter, int interestBefore = -1)
+        private static DateeContext MakeDateeContext(int interestAfter, int interestBefore = -1)
         {
             if (interestBefore < 0) interestBefore = interestAfter;
-            return new OpponentContext(
+            return new DateeContext(
                 playerPrompt: "player prompt",
-                opponentPrompt: "opponent prompt",
+                dateePrompt: "datee prompt",
                 conversationHistory: new List<(string, string)> { ("P", "hey"), ("O", "hi") },
-                opponentLastMessage: "hi",
+                dateeLastMessage: "hi",
                 activeTraps: Array.Empty<string>(),
                 currentInterest: interestAfter,
                 playerDeliveredMessage: "hey there",
@@ -29,25 +29,25 @@ namespace Pinder.LlmAdapters.Tests
                 interestAfter: interestAfter,
                 responseDelayMinutes: 2.0,
                 playerName: "P",
-                opponentName: "O");
+                dateeName: "O");
         }
 
         // ── Fundamental resistance rule present ──
 
         [Fact]
-        public void BuildOpponentPrompt_ContainsFundamentalResistanceRule()
+        public void BuildDateePrompt_ContainsFundamentalResistanceRule()
         {
-            var ctx = MakeOpponentContext(12);
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(ctx);
+            var ctx = MakeDateeContext(12);
+            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
 
             Assert.Contains("FUNDAMENTAL RULE: Below Interest 25, you are not won over", result);
         }
 
         [Fact]
-        public void BuildOpponentPrompt_ContainsArchetypeResistanceGuidance()
+        public void BuildDateePrompt_ContainsArchetypeResistanceGuidance()
         {
-            var ctx = MakeOpponentContext(12);
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(ctx);
+            var ctx = MakeDateeContext(12);
+            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
 
             Assert.Contains("Your archetype determines HOW you resist, not WHETHER", result);
         }
@@ -58,10 +58,10 @@ namespace Pinder.LlmAdapters.Tests
         [InlineData(1)]
         [InlineData(2)]
         [InlineData(4)]
-        public void BuildOpponentPrompt_Interest1To4_ActiveDisengagement(int interest)
+        public void BuildDateePrompt_Interest1To4_ActiveDisengagement(int interest)
         {
-            var ctx = MakeOpponentContext(interest);
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(ctx);
+            var ctx = MakeDateeContext(interest);
+            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
 
             Assert.Contains("Active disengagement", result);
             Assert.Contains($"Current interest: {interest}/25", result);
@@ -73,10 +73,10 @@ namespace Pinder.LlmAdapters.Tests
         [InlineData(5)]
         [InlineData(7)]
         [InlineData(9)]
-        public void BuildOpponentPrompt_Interest5To9_SkepticalInterest(int interest)
+        public void BuildDateePrompt_Interest5To9_SkepticalInterest(int interest)
         {
-            var ctx = MakeOpponentContext(interest);
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(ctx);
+            var ctx = MakeDateeContext(interest);
+            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
 
             Assert.Contains("Skeptical interest", result);
             Assert.Contains($"Current interest: {interest}/25", result);
@@ -88,10 +88,10 @@ namespace Pinder.LlmAdapters.Tests
         [InlineData(10)]
         [InlineData(12)]
         [InlineData(14)]
-        public void BuildOpponentPrompt_Interest10To14_UnstableAgreement(int interest)
+        public void BuildDateePrompt_Interest10To14_UnstableAgreement(int interest)
         {
-            var ctx = MakeOpponentContext(interest);
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(ctx);
+            var ctx = MakeDateeContext(interest);
+            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
 
             Assert.Contains("Unstable agreement", result);
             Assert.Contains($"Current interest: {interest}/25", result);
@@ -103,10 +103,10 @@ namespace Pinder.LlmAdapters.Tests
         [InlineData(15)]
         [InlineData(17)]
         [InlineData(20)]
-        public void BuildOpponentPrompt_Interest15To20_DeliberateApproach(int interest)
+        public void BuildDateePrompt_Interest15To20_DeliberateApproach(int interest)
         {
-            var ctx = MakeOpponentContext(interest);
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(ctx);
+            var ctx = MakeDateeContext(interest);
+            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
 
             Assert.Contains("Deliberate approach", result);
             Assert.Contains($"Current interest: {interest}/25", result);
@@ -118,10 +118,10 @@ namespace Pinder.LlmAdapters.Tests
         [InlineData(21)]
         [InlineData(23)]
         [InlineData(24)]
-        public void BuildOpponentPrompt_Interest21To24_AlmostConvinced(int interest)
+        public void BuildDateePrompt_Interest21To24_AlmostConvinced(int interest)
         {
-            var ctx = MakeOpponentContext(interest);
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(ctx);
+            var ctx = MakeDateeContext(interest);
+            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
 
             Assert.Contains("Almost convinced", result);
             Assert.Contains($"Current interest: {interest}/25", result);
@@ -130,10 +130,10 @@ namespace Pinder.LlmAdapters.Tests
         // ── Interest 25: Resistance dissolved ──
 
         [Fact]
-        public void BuildOpponentPrompt_Interest25_ResistanceDissolved()
+        public void BuildDateePrompt_Interest25_ResistanceDissolved()
         {
-            var ctx = MakeOpponentContext(25);
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(ctx);
+            var ctx = MakeDateeContext(25);
+            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
 
             Assert.Contains("Resistance dissolved", result);
             Assert.Contains("Current interest: 25/25", result);
@@ -142,10 +142,10 @@ namespace Pinder.LlmAdapters.Tests
         // ── Interest 0: Active disengagement (edge case) ──
 
         [Fact]
-        public void BuildOpponentPrompt_Interest0_ActiveDisengagement()
+        public void BuildDateePrompt_Interest0_ActiveDisengagement()
         {
-            var ctx = MakeOpponentContext(0);
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(ctx);
+            var ctx = MakeDateeContext(0);
+            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
 
             Assert.Contains("Active disengagement", result);
         }
@@ -153,50 +153,50 @@ namespace Pinder.LlmAdapters.Tests
         // ── Boundary tests ──
 
         [Fact]
-        public void BuildOpponentPrompt_BoundaryAt5_SkepticalNotActive()
+        public void BuildDateePrompt_BoundaryAt5_SkepticalNotActive()
         {
-            var ctx = MakeOpponentContext(5);
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(ctx);
+            var ctx = MakeDateeContext(5);
+            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
 
             Assert.Contains("Skeptical interest", result);
             Assert.DoesNotContain("Active disengagement", result);
         }
 
         [Fact]
-        public void BuildOpponentPrompt_BoundaryAt10_UnstableNotSkeptical()
+        public void BuildDateePrompt_BoundaryAt10_UnstableNotSkeptical()
         {
-            var ctx = MakeOpponentContext(10);
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(ctx);
+            var ctx = MakeDateeContext(10);
+            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
 
             Assert.Contains("Unstable agreement", result);
             Assert.DoesNotContain("Skeptical interest", result);
         }
 
         [Fact]
-        public void BuildOpponentPrompt_BoundaryAt15_DeliberateNotUnstable()
+        public void BuildDateePrompt_BoundaryAt15_DeliberateNotUnstable()
         {
-            var ctx = MakeOpponentContext(15);
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(ctx);
+            var ctx = MakeDateeContext(15);
+            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
 
             Assert.Contains("Deliberate approach", result);
             Assert.DoesNotContain("Unstable agreement", result);
         }
 
         [Fact]
-        public void BuildOpponentPrompt_BoundaryAt21_AlmostNotDeliberate()
+        public void BuildDateePrompt_BoundaryAt21_AlmostNotDeliberate()
         {
-            var ctx = MakeOpponentContext(21);
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(ctx);
+            var ctx = MakeDateeContext(21);
+            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
 
             Assert.Contains("Almost convinced", result);
             Assert.DoesNotContain("Deliberate approach", result);
         }
 
         [Fact]
-        public void BuildOpponentPrompt_BoundaryAt25_DissolvedNotAlmost()
+        public void BuildDateePrompt_BoundaryAt25_DissolvedNotAlmost()
         {
-            var ctx = MakeOpponentContext(25);
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(ctx);
+            var ctx = MakeDateeContext(25);
+            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
 
             Assert.Contains("Resistance dissolved", result);
             Assert.DoesNotContain("Almost convinced", result);

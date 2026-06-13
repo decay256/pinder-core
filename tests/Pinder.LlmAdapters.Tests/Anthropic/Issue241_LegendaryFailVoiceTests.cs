@@ -23,20 +23,20 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             int beatDcBy = 0,
             string[] activeTrapInstructions = null,
             string playerName = "P",
-            string opponentName = "O")
+            string dateeName = "O")
         {
             return new DeliveryContext(
                 playerPrompt: "player prompt",
-                opponentPrompt: "opponent prompt",
+                dateePrompt: "datee prompt",
                 conversationHistory: conversationHistory ?? new List<(string, string)>(),
-                opponentLastMessage: "",
+                dateeLastMessage: "",
                 chosenOption: chosenOption ?? new DialogueOption(StatType.Charm, "default"),
                 outcome: outcome,
                 beatDcBy: beatDcBy,
                 activeTraps: Array.Empty<string>(),
                 activeTrapInstructions: activeTrapInstructions,
                 playerName: playerName,
-                opponentName: opponentName);
+                dateeName: dateeName);
         }
 
         // ==========================================================
@@ -58,7 +58,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         }
 
         [Fact]
-        public void AC1_FailureInstruction_contains_do_not_write_as_opponent()
+        public void AC1_FailureInstruction_contains_do_not_write_as_datee()
         {
             var instruction = PromptTemplates.FailureDeliveryInstruction;
             Assert.Contains("Do NOT write as the DATEE", instruction);
@@ -142,7 +142,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             string prompt = SessionDocumentBuilder.BuildDeliveryPrompt(
                 MakeDeliveryContext(conversationHistory: history, chosenOption: option,
                     outcome: FailureTier.Legendary, beatDcBy: 0,
-                    playerName: "Sable", opponentName: "Brick"));
+                    playerName: "Sable", dateeName: "Brick"));
 
             Assert.Contains("You are writing as Sable", prompt);
             Assert.Contains("The failure corrupts what Sable says", prompt);
@@ -165,7 +165,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             string prompt = SessionDocumentBuilder.BuildDeliveryPrompt(
                 MakeDeliveryContext(conversationHistory: history, chosenOption: option,
                     outcome: FailureTier.None, beatDcBy: 5,
-                    playerName: "Sable", opponentName: "Brick"));
+                    playerName: "Sable", dateeName: "Brick"));
 
             Assert.Contains("Write as Sable", prompt);
             Assert.DoesNotContain("{player_name}", prompt);
@@ -181,7 +181,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
 
             string prompt = SessionDocumentBuilder.BuildDeliveryPrompt(
                 MakeDeliveryContext(chosenOption: option, outcome: FailureTier.Catastrophe,
-                    playerName: "Blaze", opponentName: "Jade"));
+                    playerName: "Blaze", dateeName: "Jade"));
 
             Assert.Contains("You are writing as Blaze", prompt);
             Assert.Contains("Do NOT write as the DATEE", prompt);
@@ -198,7 +198,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             string prompt = SessionDocumentBuilder.BuildDeliveryPrompt(
                 MakeDeliveryContext(chosenOption: option, outcome: FailureTier.TropeTrap,
                     activeTrapInstructions: new[] { "Overthinking trap active" },
-                    playerName: "Sable", opponentName: "Brick"));
+                    playerName: "Sable", dateeName: "Brick"));
 
             Assert.Contains("You are writing as Sable", prompt);
             Assert.Contains("Overthinking trap active", prompt);

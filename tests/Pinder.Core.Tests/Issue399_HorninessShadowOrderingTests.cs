@@ -99,7 +99,7 @@ namespace Pinder.Core.Tests
             var instructions = LoadYaml();
 
             // Player: Honesty 5 (so a roll passes easily), Denial shadow 10
-            // (paired with Honesty — moderate shadow).  Opponent: weak.
+            // (paired with Honesty — moderate shadow).  Datee: weak.
             //
             // shadow check DC = 20 - 10 = 10 → miss when shadow d20 < 10.
             // We force shadow d20 = 1 → missMargin = 9 → TropeTrap tier.
@@ -107,7 +107,7 @@ namespace Pinder.Core.Tests
             var playerStats = MakeStats(allStats: 5,
                 pairStat: ShadowStatType.Denial, shadowOnPair: 10);
             var player = MakeProfile("PlayerH", playerStats);
-            var opponent = MakeProfile("OppH", MakeStats(allStats: 0));
+            var datee = MakeProfile("OppH", MakeStats(allStats: 0));
 
             // Game dice: horniness session value = 5 (DC=15), main d20 = 20
             // (Nat 20 success), timing = 50.
@@ -124,7 +124,7 @@ namespace Pinder.Core.Tests
                 steeringRng: steeringRng,
                 statDeliveryInstructions: instructions,
                 playerShadows: playerShadows);
-            var session = new GameSession(player, opponent, llm, dice, new NullTrapRegistry(), config);
+            var session = new GameSession(player, datee, llm, dice, new NullTrapRegistry(), config);
 
             await session.StartTurnAsync();
             int honestyIdx = FindIndex(llm.LastOptions, StatType.Honesty);
@@ -211,7 +211,7 @@ namespace Pinder.Core.Tests
             var playerStats = MakeStats(allStats: 5,
                 pairStat: ShadowStatType.Denial, shadowOnPair: 0);
             var player = MakeProfile("PlayerH", playerStats);
-            var opponent = MakeProfile("OppH", MakeStats(allStats: 0));
+            var datee = MakeProfile("OppH", MakeStats(allStats: 0));
 
             // Dice: horniness=5, d20=20 (Nat 20 success), timing=50
             var dice = new FixedDice(5, 20, 50);
@@ -226,7 +226,7 @@ namespace Pinder.Core.Tests
                 steeringRng: steeringRng,
                 statDeliveryInstructions: instructions,
                 playerShadows: playerShadows);
-            var session = new GameSession(player, opponent, llm, dice, new NullTrapRegistry(), config);
+            var session = new GameSession(player, datee, llm, dice, new NullTrapRegistry(), config);
 
             await session.StartTurnAsync();
             int honestyIdx = FindIndex(llm.LastOptions, StatType.Honesty);
@@ -265,7 +265,7 @@ namespace Pinder.Core.Tests
             var playerStats = MakeStats(allStats: 2,
                 pairStat: ShadowStatType.Denial, shadowOnPair: 10);
             var player = MakeProfile("PlayerH", playerStats);
-            var opponent = MakeProfile("OppH", MakeStats(allStats: 2));
+            var datee = MakeProfile("OppH", MakeStats(allStats: 2));
 
             // Dice: horniness=5, d20=1 (Nat 1 — guaranteed failure), timing=50
             var dice = new FixedDice(5, 1, 50);
@@ -280,7 +280,7 @@ namespace Pinder.Core.Tests
                 steeringRng: steeringRng,
                 statDeliveryInstructions: instructions,
                 playerShadows: playerShadows);
-            var session = new GameSession(player, opponent, llm, dice, new NullTrapRegistry(), config);
+            var session = new GameSession(player, datee, llm, dice, new NullTrapRegistry(), config);
 
             await session.StartTurnAsync();
             int honestyIdx = FindIndex(llm.LastOptions, StatType.Honesty);
@@ -313,12 +313,12 @@ namespace Pinder.Core.Tests
             public DialogueOption[] LastOptions { get; private set; } = System.Array.Empty<DialogueOption>();
 
             // #788: stateful LLM adapter is now history-passing and stateless.
-            public Task<StatefulOpponentResult> GetOpponentResponseAsync(
-                OpponentContext context,
+            public Task<StatefulDateeResult> GetDateeResponseAsync(
+                DateeContext context,
                 System.Collections.Generic.IReadOnlyList<ConversationMessage> history,
                 System.Threading.CancellationToken ct = default)
-                => Task.FromResult(new StatefulOpponentResult(
-                    new OpponentResponse("..."),
+                => Task.FromResult(new StatefulDateeResult(
+                    new DateeResponse("..."),
                     new ConversationMessage[]
                     {
                         ConversationMessage.User(string.Empty),
@@ -345,14 +345,14 @@ namespace Pinder.Core.Tests
                     : $"[{context.Outcome}] {intended}");
             }
 
-            public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context, System.Threading.CancellationToken ct = default)
-                => Task.FromResult(new OpponentResponse("..."));
+            public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
+                => Task.FromResult(new DateeResponse("..."));
 
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult<string?>(null);
 
             public Task<string> ApplyHorninessOverlayAsync(string message, string instruction,
-                string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
+                string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
             {
                 HorninessOverlayCalled = true;
                 return Task.FromResult(message + " [horniness-overlay]");
@@ -366,7 +366,7 @@ namespace Pinder.Core.Tests
             }
 
             public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction,
-                string trapName, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
+                string trapName, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
                 => Task.FromResult(message);
 
             public Task<string> GetSteeringQuestionAsync(SteeringContext context, System.Threading.CancellationToken ct = default)

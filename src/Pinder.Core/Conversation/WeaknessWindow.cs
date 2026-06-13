@@ -3,7 +3,7 @@ using Pinder.Core.Stats;
 namespace Pinder.Core.Conversation
 {
     /// <summary>
-    /// A temporary weakness window opened by the opponent's response.
+    /// A temporary weakness window opened by the datee's response.
     /// Reduces the DC for a specific defending stat.
     /// Stub type — feature PRs will flesh out usage.
     /// </summary>

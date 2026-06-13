@@ -17,7 +17,7 @@ Targets **netstandard2.0** / **C# 8.0**. Zero external dependencies in the core 
 
 ```
 d20 + statModifier + levelBonus + externalBonus >= DC
-DC = 16 + opponent's defending stat modifier
+DC = 16 + datee's defending stat modifier
 ```
 
 ### Fail Tiers (miss margin = DC − roll)

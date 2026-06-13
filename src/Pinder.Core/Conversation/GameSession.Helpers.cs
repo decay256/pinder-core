@@ -75,19 +75,19 @@ namespace Pinder.Core.Conversation
             => _history;
 
         /// <summary>
-        /// #788: opponent-LLM conversation history owned by the engine. Each
+        /// #788: datee-LLM conversation history owned by the engine. Each
         /// entry's role is <c>"user"</c> or <c>"assistant"</c>. Read-only view
         /// over the live mutable list so callers see updates as turns resolve.
         /// Survives snapshot/restore via
-        /// <see cref="ResimulateData.OpponentHistory"/>.
+        /// <see cref="ResimulateData.DateeHistory"/>.
         /// </summary>
-        public System.Collections.Generic.IReadOnlyList<ConversationMessage> OpponentHistory
-            => _opponentHistory;
+        public System.Collections.Generic.IReadOnlyList<ConversationMessage> DateeHistory
+            => _dateeHistory;
 
         /// <summary>
         /// Build the conversation history view fed to subsequent LLM calls.
         /// Excludes synthetic scene-setting entries (issue #333) so the
-        /// matchup analyser / delivery LLM / opponent-response LLM never
+        /// matchup analyser / delivery LLM / datee-response LLM never
         /// sees its own scene-description output as prior conversation.
         /// </summary>
         private System.Collections.Generic.IReadOnlyList<(string Sender, string Text)> BuildHistoryForLlmContext()
@@ -113,16 +113,16 @@ namespace Pinder.Core.Conversation
 
         /// <summary>
         /// Issue #333: append the three turn-0 scene-setting entries
-        /// (player bio, opponent bio, LLM-generated outfit description) to
+        /// (player bio, datee bio, LLM-generated outfit description) to
         /// the conversation log BEFORE the first player turn. Sender for
         /// each entry is <see cref="Senders.Scene"/>; the frontend renders
-        /// these distinctly from player/opponent dialogue.
+        /// these distinctly from player/datee dialogue.
         /// </summary>
         /// <param name="playerBio">Player bio text. Empty entries are skipped.</param>
-        /// <param name="opponentBio">Opponent bio text. Empty entries are skipped.</param>
+        /// <param name="dateeBio">Datee bio text. Empty entries are skipped.</param>
         /// <param name="outfitDescription">LLM-generated outfit description. Empty entries are skipped.</param>
         /// <exception cref="InvalidOperationException">If any turn has already been resolved.</exception>
-        public void SeedSceneEntries(string? playerBio, string? opponentBio, string? outfitDescription)
+        public void SeedSceneEntries(string? playerBio, string? dateeBio, string? outfitDescription)
         {
             if (_turnNumber > 0)
             {
@@ -131,18 +131,18 @@ namespace Pinder.Core.Conversation
             }
             if (!string.IsNullOrWhiteSpace(playerBio))
                 _history.Add(($"{Senders.Scene}:{_player.DisplayName}", playerBio!.Trim()));
-            if (!string.IsNullOrWhiteSpace(opponentBio))
-                _history.Add(($"{Senders.Scene}:{_opponent.DisplayName}", opponentBio!.Trim()));
+            if (!string.IsNullOrWhiteSpace(dateeBio))
+                _history.Add(($"{Senders.Scene}:{_datee.DisplayName}", dateeBio!.Trim()));
             if (!string.IsNullOrWhiteSpace(outfitDescription))
             {
                 string trimmed = outfitDescription!.Trim();
                 _history.Add((Senders.Scene, trimmed));
                 // #562: also retain on the session so
-                // BuildOpponentVisibleProfile can surface it on every
+                // BuildDateeVisibleProfile can surface it on every
                 // dialogue-options call. Scene-history entries are
                 // excluded from the LLM context view, so without this
                 // field the player-LLM never sees the outfit.
-                _opponentOutfitDescription = trimmed;
+                _dateeOutfitDescription = trimmed;
             }
         }
 
@@ -198,7 +198,7 @@ namespace Pinder.Core.Conversation
                 _traps,
                 _turnNumber,
                 _comboTracker.HasTripleBonus,
-                _opponentHistory);
+                _dateeHistory);
         }
     }
 }

@@ -11,8 +11,8 @@ using Xunit;
 namespace Pinder.LlmAdapters.Tests.Anthropic
 {
     /// <summary>
-    /// Tests for issue #352: InterestChangeBeat should include opponent system prompt
-    /// so the LLM generates beats in the opponent's character voice.
+    /// Tests for issue #352: InterestChangeBeat should include datee system prompt
+    /// so the LLM generates beats in the datee's character voice.
     /// </summary>
     public class InterestChangeBeatVoiceTests
     {
@@ -31,7 +31,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             });
 
         [Fact(Skip = "Removed in #573")]
-        public async Task GetInterestChangeBeatAsync_with_opponent_prompt_includes_system_blocks()
+        public async Task GetInterestChangeBeatAsync_with_datee_prompt_includes_system_blocks()
         {
             var handler = new VoiceTestHandler
             {
@@ -45,7 +45,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
                 20,
                 25,
                 InterestState.DateSecured,
-                opponentPrompt: "You are Brick, a Level 9 M&A professional who color-codes her planner.");
+                dateePrompt: "You are Brick, a Level 9 M&A professional who color-codes her planner.");
 
             var result = await adapter.GetInterestChangeBeatAsync(context);
 
@@ -54,14 +54,14 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             var body = JsonConvert.DeserializeObject<MessagesRequest>(handler.CapturedRequestBody!);
             Assert.NotNull(body);
             Assert.NotNull(body!.System);
-            Assert.Single(body.System); // Opponent-only system block
+            Assert.Single(body.System); // Datee-only system block
             Assert.Contains("Brick", body.System[0].Text);
             Assert.Contains("M&A professional", body.System[0].Text);
             Assert.Equal("ephemeral", body.System[0].CacheControl?.Type);
         }
 
         [Fact(Skip = "Removed in #573")]
-        public async Task GetInterestChangeBeatAsync_without_opponent_prompt_has_no_system_blocks()
+        public async Task GetInterestChangeBeatAsync_without_datee_prompt_has_no_system_blocks()
         {
             var handler = new VoiceTestHandler
             {
@@ -70,7 +70,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             using var client = new HttpClient(handler);
             using var adapter = new AnthropicLlmAdapter(DefaultOptions(), client);
 
-            // No opponentPrompt (default null) — backward compatible
+            // No dateePrompt (default null) — backward compatible
             var context = new InterestChangeContext("Velvet", 15, 17, InterestState.VeryIntoIt);
 
             var result = await adapter.GetInterestChangeBeatAsync(context);
@@ -83,7 +83,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         }
 
         [Fact(Skip = "Removed in #573")]
-        public async Task GetInterestChangeBeatAsync_empty_opponent_prompt_has_no_system_blocks()
+        public async Task GetInterestChangeBeatAsync_empty_datee_prompt_has_no_system_blocks()
         {
             var handler = new VoiceTestHandler
             {
@@ -92,7 +92,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             using var client = new HttpClient(handler);
             using var adapter = new AnthropicLlmAdapter(DefaultOptions(), client);
 
-            var context = new InterestChangeContext("Test", 10, 16, InterestState.VeryIntoIt, opponentPrompt: "");
+            var context = new InterestChangeContext("Test", 10, 16, InterestState.VeryIntoIt, dateePrompt: "");
 
             var result = await adapter.GetInterestChangeBeatAsync(context);
 
@@ -102,20 +102,20 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         }
 
         [Fact]
-        public void InterestChangeContext_stores_opponent_prompt()
+        public void InterestChangeContext_stores_datee_prompt()
         {
             var ctx = new InterestChangeContext("Brick", 20, 25, InterestState.DateSecured,
-                opponentPrompt: "You are Brick.");
+                dateePrompt: "You are Brick.");
 
-            Assert.Equal("You are Brick.", ctx.OpponentPrompt);
+            Assert.Equal("You are Brick.", ctx.DateePrompt);
         }
 
         [Fact]
-        public void InterestChangeContext_opponent_prompt_defaults_to_null()
+        public void InterestChangeContext_datee_prompt_defaults_to_null()
         {
             var ctx = new InterestChangeContext("Brick", 20, 25, InterestState.DateSecured);
 
-            Assert.Null(ctx.OpponentPrompt);
+            Assert.Null(ctx.DateePrompt);
         }
 
         /// <summary>Local fake handler to avoid internal visibility issues.</summary>

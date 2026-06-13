@@ -12,7 +12,7 @@ namespace Pinder.LlmAdapters.Anthropic
         public double Temperature { get; set; } = 0.9;
         public double? DialogueOptionsTemperature { get; set; }
         public double? DeliveryTemperature { get; set; }
-        public double? OpponentResponseTemperature { get; set; }
+        public double? DateeResponseTemperature { get; set; }
         public double? InterestChangeBeatTemperature { get; set; }
         
         /// <summary>

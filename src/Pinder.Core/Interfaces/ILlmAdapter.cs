@@ -31,10 +31,10 @@ namespace Pinder.Core.Interfaces
         Task<string> DeliverMessageAsync(DeliveryContext context, CancellationToken ct = default);
 
         /// <summary>
-        /// Generate the opponent's response to the player's delivered message.
-        /// Returns an OpponentResponse containing the message text and optional gameplay signals.
+        /// Generate the datee's response to the player's delivered message.
+        /// Returns an DateeResponse containing the message text and optional gameplay signals.
         /// </summary>
-        Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context, CancellationToken ct = default);
+        Task<DateeResponse> GetDateeResponseAsync(DateeContext context, CancellationToken ct = default);
 
         /// <summary>
         /// Generate a narrative beat when interest crosses a threshold.
@@ -47,13 +47,13 @@ namespace Pinder.Core.Interfaces
         /// The instruction describes how to rewrite the message with involuntary heat.
         /// Returns the modified message text.
         /// </summary>
-        /// <param name="opponentContext">Optional compact opponent context (name, bio, items) to ground the overlay.</param>
+        /// <param name="dateeContext">Optional compact datee context (name, bio, items) to ground the overlay.</param>
         /// <param name="archetypeDirective">
         /// Optional active archetype directive for the speaking character
         /// (e.g. <c>"ACTIVE ARCHETYPE: The Peacock (clear)\n..."</c>) so the
         /// overlay rewrite respects the character's voice (#372).
         /// </param>
-        Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null, CancellationToken ct = default);
+        Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, CancellationToken ct = default);
 
         /// <summary>
         /// Apply a shadow corruption instruction to a delivered message.
@@ -79,11 +79,11 @@ namespace Pinder.Core.Interfaces
         /// <param name="message">The current delivered message (post roll modification).</param>
         /// <param name="trapInstruction">The active trap's <c>llm_instruction</c>.</param>
         /// <param name="trapName">Display name of the active trap (used for logging / refusal-detection labelling).</param>
-        /// <param name="opponentContext">Optional compact opponent context (name, bio, items) to ground the overlay.</param>
+        /// <param name="dateeContext">Optional compact datee context (name, bio, items) to ground the overlay.</param>
         /// <param name="archetypeDirective">
         /// Optional active archetype directive for the speaking character so
         /// the trap-overlay rewrite still sounds like the character (#372 + #371 union).
         /// </param>
-        Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null, CancellationToken ct = default);
+        Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, CancellationToken ct = default);
     }
 }

@@ -22,7 +22,7 @@ namespace Pinder.Core.Conversation
             int optionIndex,
             DialogueOption chosenOption,
             CharacterProfile player,
-            CharacterProfile opponent,
+            CharacterProfile datee,
             IDiceRoller dice,
             ITrapRegistry trapRegistry,
             IConsequenceCatalog? consequenceCatalog,
@@ -43,7 +43,7 @@ namespace Pinder.Core.Conversation
             var rollResult = RollEngine.Resolve(
                 stat: chosenOption.Stat,
                 attacker: player.Stats,
-                defender: opponent.Stats,
+                defender: datee.Stats,
                 attackerTraps: state.Traps,
                 level: player.Level,
                 trapRegistry: trapRegistry,

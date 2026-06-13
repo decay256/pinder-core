@@ -23,9 +23,9 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("hey there", result);
         }
 
-        // Mutation: would catch if opponent profile was removed from options prompt
+        // Mutation: would catch if datee profile was removed from options prompt
         [Fact]
-        public void AC6_OptionsPrompt_IncludesOpponentProfile()
+        public void AC6_OptionsPrompt_IncludesDateeProfile()
         {
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(MakeDialogueContext());
             Assert.Contains("YOU ARE TALKING TO", result);
@@ -39,39 +39,39 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("[CONVERSATION_START]", result);
         }
 
-        // Mutation: would catch if opponent prompt lost conversation history
+        // Mutation: would catch if datee prompt lost conversation history
         [Fact]
-        public void AC6_OpponentPrompt_IncludesConversationHistory()
+        public void AC6_DateePrompt_IncludesConversationHistory()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(MakeOpponentContext());
+            var result = SessionDocumentBuilder.BuildDateePrompt(MakeDateeContext());
             Assert.Contains("[CONVERSATION_START]", result);
         }
 
-        // Mutation: would catch if opponent prompt didn't include interest change direction
+        // Mutation: would catch if datee prompt didn't include interest change direction
         [Fact]
-        public void AC6_OpponentPrompt_ShowsInterestMovement()
+        public void AC6_DateePrompt_ShowsInterestMovement()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(interestBefore: 10, interestAfter: 14));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(interestBefore: 10, interestAfter: 14));
             Assert.Contains("from 10 to 14", result);
         }
 
-        // Mutation: would catch if response timing was removed from opponent prompt
+        // Mutation: would catch if response timing was removed from datee prompt
         [Fact]
-        public void AC6_OpponentPrompt_IncludesResponseTiming()
+        public void AC6_DateePrompt_IncludesResponseTiming()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(responseDelayMinutes: 5.0));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(responseDelayMinutes: 5.0));
             Assert.Contains("RESPONSE TIMING", result);
             Assert.Contains("5.0 minutes", result);
         }
 
         // Mutation: would catch if sub-minute delay didn't indicate rapid response
         [Fact]
-        public void AC6_OpponentPrompt_SubMinuteDelay_IndicatesRapidResponse()
+        public void AC6_DateePrompt_SubMinuteDelay_IndicatesRapidResponse()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(responseDelayMinutes: 0.5));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(responseDelayMinutes: 0.5));
             Assert.Contains("less than 1 minute", result);
         }
 
@@ -109,10 +109,10 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Fact]
-        public void AC7_BuildOpponentPrompt_NullContextThrows()
+        public void AC7_BuildDateePrompt_NullContextThrows()
         {
             Assert.Throws<ArgumentNullException>(() =>
-                SessionDocumentBuilder.BuildOpponentPrompt(null!));
+                SessionDocumentBuilder.BuildDateePrompt(null!));
         }
     }
 }

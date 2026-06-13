@@ -92,9 +92,9 @@ namespace Pinder.LlmAdapters
 
         public static string FailureDeliveryInstruction => GetCatalogString("failure-delivery-instruction");
 
-        // ── §3.5 — Opponent response instruction ────────────────────────────
+        // ── §3.5 — Datee response instruction ────────────────────────────
 
-        public static string OpponentResponseInstruction => GetCatalogString("opponent-response-instruction");
+        public static string DateeResponseInstruction => GetCatalogString("datee-response-instruction");
 
         // ── §3.8 — Interest beat instruction ────────────────────────────────
 
@@ -128,17 +128,17 @@ namespace Pinder.LlmAdapters
 
         internal static string ResistanceDissolved => GetCatalogString("resistance-dissolved");
 
-        // ── Per-tier opponent reaction guidance ─────────────────────────────
+        // ── Per-tier datee reaction guidance ─────────────────────────────
 
-        internal static string OpponentReactionFumble => GetCatalogString("opponent-reaction-fumble");
+        internal static string DateeReactionFumble => GetCatalogString("datee-reaction-fumble");
 
-        internal static string OpponentReactionMisfire => GetCatalogString("opponent-reaction-misfire");
+        internal static string DateeReactionMisfire => GetCatalogString("datee-reaction-misfire");
 
-        internal static string OpponentReactionTropeTrap => GetCatalogString("opponent-reaction-trope-trap");
+        internal static string DateeReactionTropeTrap => GetCatalogString("datee-reaction-trope-trap");
 
-        internal static string OpponentReactionCatastrophe => GetCatalogString("opponent-reaction-catastrophe");
+        internal static string DateeReactionCatastrophe => GetCatalogString("datee-reaction-catastrophe");
 
-        internal static string OpponentReactionLegendary => GetCatalogString("opponent-reaction-legendary");
+        internal static string DateeReactionLegendary => GetCatalogString("datee-reaction-legendary");
 
         // ── Interest narrative bands ────────────────────────────────────────
 
@@ -175,6 +175,6 @@ namespace Pinder.LlmAdapters
 
         internal static string EngineDeliveryBlock => GetCatalogString("engine-delivery-block");
 
-        internal static string EngineOpponentBlock => GetCatalogString("engine-opponent-block");
+        internal static string EngineDateeBlock => GetCatalogString("engine-datee-block");
     }
 }

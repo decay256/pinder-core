@@ -120,7 +120,7 @@ namespace Pinder.Core.Tests
             // Dice: horniness(1d10)=1, d20=2 (low roll, likely fail)
             var dice = new FixedDice(1, 2, 50, 50, 50, 50, 50, 50, 50, 50, 50);
             var session = new GameSession(
-                MakeProfile("Player"), MakeProfile("Opponent"),
+                MakeProfile("Player"), MakeProfile("Datee"),
                 new NullLlmAdapter(), dice, new NullTrapRegistry(), config);
 
             await session.StartTurnAsync();
@@ -142,7 +142,7 @@ namespace Pinder.Core.Tests
             // d20=2, very likely to fail against DC 13+
             var dice = new FixedDice(1, 2, 50, 50, 50, 50, 50, 50, 50, 50, 50);
             var session = new GameSession(
-                MakeProfile("Player"), MakeProfile("Opponent"),
+                MakeProfile("Player"), MakeProfile("Datee"),
                 new NullLlmAdapter(), dice, new NullTrapRegistry(), config);
 
             await session.StartTurnAsync();
@@ -170,7 +170,7 @@ namespace Pinder.Core.Tests
             // Nat 20 = guaranteed success
             var dice = new FixedDice(1, 20, 50, 50, 50, 50, 50, 50, 50, 50, 50);
             var session = new GameSession(
-                MakeProfile("Player"), MakeProfile("Opponent"),
+                MakeProfile("Player"), MakeProfile("Datee"),
                 new NullLlmAdapter(), dice, new NullTrapRegistry(), config);
 
             await session.StartTurnAsync();
@@ -191,7 +191,7 @@ namespace Pinder.Core.Tests
             // Nat 20 = guaranteed success
             var dice = new FixedDice(1, 20, 50, 50, 50, 50, 50, 50, 50, 50, 50);
             var session = new GameSession(
-                MakeProfile("Player"), MakeProfile("Opponent"),
+                MakeProfile("Player"), MakeProfile("Datee"),
                 new NullLlmAdapter(), dice, new NullTrapRegistry(), config);
 
             await session.StartTurnAsync();

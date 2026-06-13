@@ -13,7 +13,7 @@ using Xunit;
 namespace Pinder.Core.Tests
 {
     /// <summary>
-    /// Tests for Issue #49: Weakness Windows — §15 opponent crack detection.
+    /// Tests for Issue #49: Weakness Windows — §15 datee crack detection.
     /// Covers AC1–AC7 and test scenarios T1–T7 from docs/specs/issue-49-spec.md.
     /// </summary>
     [Trait("Category", "Core")]
@@ -60,15 +60,15 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task T1_WindowAppliedOneTurnThenCleared()
         {
-            // Turn 0: opponent returns a weakness window (Honesty, 2)
+            // Turn 0: datee returns a weakness window (Honesty, 2)
             // Turn 1: SA option should have HasWeaknessWindow=true, window consumed
             // Turn 2: no window active
 
             var llm = new WeaknessTestLlm();
-            // Turn 0: return Charm option, opponent response has weakness window
+            // Turn 0: return Charm option, datee response has weakness window
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Hey"));
             llm.EnqueueWeaknessWindow(new WeaknessWindow(StatType.Honesty, 2));
-            // Turn 1: return SA and Charm options, no window from opponent
+            // Turn 1: return SA and Charm options, no window from datee
             llm.EnqueueOptions(
                 new DialogueOption(StatType.SelfAwareness, "I see"),
                 new DialogueOption(StatType.Charm, "Cool"));
@@ -106,11 +106,11 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task T2_CorrectStatDcReduced()
         {
-            // Opponent has allStats=2, so Honesty mod = 2 → DC = 16+2 = 18
+            // Datee has allStats=2, so Honesty mod = 2 → DC = 16+2 = 18
             // With weakness window DcReduction=2 → DC should be 16
 
             var llm = new WeaknessTestLlm();
-            // Turn 0: Charm option, opponent returns window(Honesty, 2)
+            // Turn 0: Charm option, datee returns window(Honesty, 2)
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Hey"));
             llm.EnqueueWeaknessWindow(new WeaknessWindow(StatType.Honesty, 2));
             // Turn 1: SA option (defended by Honesty → window applies)
@@ -143,7 +143,7 @@ namespace Pinder.Core.Tests
         public async Task T3_NoWindowNoReduction()
         {
             var llm = new WeaknessTestLlm();
-            // Turn 0: no window from opponent
+            // Turn 0: no window from datee
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Hey"));
             llm.EnqueueWeaknessWindow(null);
 
@@ -169,7 +169,7 @@ namespace Pinder.Core.Tests
             // Window should still clear after turn.
 
             var llm = new WeaknessTestLlm();
-            // Turn 0: opponent returns window(Honesty, 2)
+            // Turn 0: datee returns window(Honesty, 2)
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Hey"));
             llm.EnqueueWeaknessWindow(new WeaknessWindow(StatType.Honesty, 2));
             // Turn 1: Charm option (doesn't match window)
@@ -205,7 +205,7 @@ namespace Pinder.Core.Tests
         public async Task T6_DetectedWindowInTurnResult()
         {
             var llm = new WeaknessTestLlm();
-            // Turn 0: opponent returns window
+            // Turn 0: datee returns window
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Hey"));
             llm.EnqueueWeaknessWindow(new WeaknessWindow(StatType.Wit, 2));
 
@@ -302,7 +302,7 @@ namespace Pinder.Core.Tests
             // Turn 0: window on Honesty
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Hey"));
             llm.EnqueueWeaknessWindow(new WeaknessWindow(StatType.Honesty, 2));
-            // Turn 1: use SA (matches Honesty), opponent returns window on Charm
+            // Turn 1: use SA (matches Honesty), datee returns window on Charm
             llm.EnqueueOptions(new DialogueOption(StatType.SelfAwareness, "Deep"));
             llm.EnqueueWeaknessWindow(new WeaknessWindow(StatType.Charm, 2));
             // Turn 2: should have Charm window (not Honesty)
@@ -431,17 +431,17 @@ namespace Pinder.Core.Tests
             public Task<string> DeliverMessageAsync(DeliveryContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult(context.ChosenOption.IntendedText);
 
-            public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context, System.Threading.CancellationToken ct = default)
+            public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
             {
                 var window = _weaknessWindows.Count > 0 ? _weaknessWindows.Dequeue() : null;
-                return Task.FromResult(new OpponentResponse("...", weaknessWindow: window));
+                return Task.FromResult(new DateeResponse("...", weaknessWindow: window));
             }
 
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult<string?>(null);
-            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
+            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
             public System.Threading.Tasks.Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
-            public System.Threading.Tasks.Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
+            public System.Threading.Tasks.Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
         }
     }
 }

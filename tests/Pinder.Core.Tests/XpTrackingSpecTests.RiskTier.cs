@@ -25,7 +25,7 @@ namespace Pinder.Core.Tests
         {
             // Player stat 10 → need = 13 - 10 = 3 → Safe (≤5)
             // DC = 13, base XP = 5, multiplier 1x → 5 XP
-            var session = MakeSession(diceRoll: 15, opponentStatValue: 0, playerStatValue: 10);
+            var session = MakeSession(diceRoll: 15, dateeStatValue: 0, playerStatValue: 10);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -41,7 +41,7 @@ namespace Pinder.Core.Tests
         {
             // Player stat 6 → need = 16 - 6 = 10 → Medium (8–11)
             // DC = 16, base XP = 5, multiplier 1.5x → 8
-            var session = MakeSession(diceRoll: 15, opponentStatValue: 0, playerStatValue: 6);
+            var session = MakeSession(diceRoll: 15, dateeStatValue: 0, playerStatValue: 6);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -57,7 +57,7 @@ namespace Pinder.Core.Tests
         {
             // Player stat 3 → need = 14 - 3 = 11 → Hard (11–15)
             // DC = 14, base XP = 10, multiplier 2x → 20
-            var session = MakeSession(diceRoll: 18, opponentStatValue: 1, playerStatValue: 3);
+            var session = MakeSession(diceRoll: 18, dateeStatValue: 1, playerStatValue: 3);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -72,8 +72,8 @@ namespace Pinder.Core.Tests
         public async Task RiskTierXp_Bold_3xMultiplier()
         {
             // Player stat 3 → need = 22 - 3 = 19 → Bold (16–19)
-            // DC = 22 (opponent=6), base XP = 15 (DC>20), multiplier 3x → 45
-            var session = MakeSession(diceRoll: 19, opponentStatValue: 6, playerStatValue: 3);
+            // DC = 22 (datee=6), base XP = 15 (DC>20), multiplier 3x → 45
+            var session = MakeSession(diceRoll: 19, dateeStatValue: 6, playerStatValue: 3);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -87,7 +87,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task RiskTierXp_Nat20_NoMultiplier()
         {
-            var session = MakeSession(diceRoll: 20, opponentStatValue: 0, playerStatValue: 3);
+            var session = MakeSession(diceRoll: 20, dateeStatValue: 0, playerStatValue: 3);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -100,7 +100,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task RiskTierXp_Nat1_NoMultiplier()
         {
-            var session = MakeSession(diceRoll: 1, opponentStatValue: 0, playerStatValue: 3);
+            var session = MakeSession(diceRoll: 1, dateeStatValue: 0, playerStatValue: 3);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -113,7 +113,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task RiskTierXp_Failure_NoMultiplier()
         {
-            var session = MakeSession(diceRoll: 5, opponentStatValue: 0, playerStatValue: 3);
+            var session = MakeSession(diceRoll: 5, dateeStatValue: 0, playerStatValue: 3);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -127,8 +127,8 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task RiskTierXp_Medium_RoundsCorrectly()
         {
-            // base 5 * 1.5 = 7.5, Math.Round → 8. Player stat 6, opponent 0 → DC=16, need=10 → Medium
-            var session = MakeSession(diceRoll: 15, opponentStatValue: 0, playerStatValue: 6);
+            // base 5 * 1.5 = 7.5, Math.Round → 8. Player stat 6, datee 0 → DC=16, need=10 → Medium
+            var session = MakeSession(diceRoll: 15, dateeStatValue: 0, playerStatValue: 6);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -143,7 +143,7 @@ namespace Pinder.Core.Tests
         {
             // Player stat 6 → need = 14 - 6 = 8 → Medium (6–10)
             // DC = 14, base XP = 10, multiplier 1.5x → 15
-            var session = MakeSession(diceRoll: 15, opponentStatValue: 1, playerStatValue: 6);
+            var session = MakeSession(diceRoll: 15, dateeStatValue: 1, playerStatValue: 6);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 

@@ -3,13 +3,13 @@ using Xunit;
 namespace Pinder.LlmAdapters.Tests
 {
     /// <summary>
-    /// Issue #311 spec-driven tests: Verify OpponentResponseInstruction includes all 10 tell
+    /// Issue #311 spec-driven tests: Verify DateeResponseInstruction includes all 10 tell
     /// category mappings from rules §15 with correct stat associations.
     /// These tests supplement Issue311_TellCategoriesTests with additional mutation coverage.
     /// </summary>
     public class Issue311_TellCategoriesSpecTests
     {
-        private readonly string _instruction = PromptTemplates.OpponentResponseInstruction;
+        private readonly string _instruction = PromptTemplates.DateeResponseInstruction;
 
         // --- AC1: All 10 tell category mappings present with correct stats ---
 
@@ -123,7 +123,7 @@ namespace Pinder.LlmAdapters.Tests
             // The first "ONLY" is in the context-boundary section; the second is the tell-category mapping instruction
             var firstOnlyIdx = _instruction.IndexOf("ONLY");
             var secondOnlyIdx = _instruction.IndexOf("ONLY", firstOnlyIdx + 1);
-            Assert.True(secondOnlyIdx > firstOnlyIdx, "Expected at least two 'ONLY' occurrences in OpponentResponseInstruction");
+            Assert.True(secondOnlyIdx > firstOnlyIdx, "Expected at least two 'ONLY' occurrences in DateeResponseInstruction");
             Assert.Contains("these", _instruction.Substring(
                 secondOnlyIdx - 20 < 0 ? 0 : secondOnlyIdx - 20,
                 Math.Min(40 + (secondOnlyIdx - 20 < 0 ? secondOnlyIdx : 20), _instruction.Length - (secondOnlyIdx - 20 < 0 ? 0 : secondOnlyIdx - 20))));
@@ -202,7 +202,7 @@ namespace Pinder.LlmAdapters.Tests
                 if (line.Contains(text))
                     return line;
             }
-            Assert.Fail($"No line found containing '{text}' in OpponentResponseInstruction");
+            Assert.Fail($"No line found containing '{text}' in DateeResponseInstruction");
             return string.Empty; // unreachable
         }
     }

@@ -13,8 +13,8 @@ world_description: |
   A test world description.
 player_role_description: |
   Player role.
-opponent_role_description: |
-  Opponent role.
+datee_role_description: |
+  Datee role.
 narrative_doctrine: |
   Meta contract text.
   Writing rules text.
@@ -34,7 +34,7 @@ horniness_time_modifiers:
             Assert.Equal("V", gd.Vision);
             Assert.Equal("W", gd.WorldDescription);
             Assert.Equal("P", gd.PlayerRoleDescription);
-            Assert.Equal("O", gd.OpponentRoleDescription);
+            Assert.Equal("O", gd.DateeRoleDescription);
             Assert.Equal("ND", gd.NarrativeDoctrine);
         }
 
@@ -67,7 +67,7 @@ horniness_time_modifiers:
             Assert.Contains("test game vision", gd.Vision);
             Assert.Contains("test world description", gd.WorldDescription);
             Assert.Contains("Player role", gd.PlayerRoleDescription);
-            Assert.Contains("Opponent role", gd.OpponentRoleDescription);
+            Assert.Contains("Datee role", gd.DateeRoleDescription);
             Assert.Contains("Meta contract", gd.NarrativeDoctrine);
             Assert.Contains("Writing rules", gd.NarrativeDoctrine);
         }
@@ -104,7 +104,7 @@ name: Test
 vision: ~
 world_description: wd
 player_role_description: p
-opponent_role_description: o
+datee_role_description: o
 narrative_doctrine: m
 global_dc_bias: 0
 horniness_time_modifiers:
@@ -126,7 +126,7 @@ name: Test
 vision: v
 world_description: w
 player_role_description: p
-opponent_role_description: o
+datee_role_description: o
 narrative_doctrine: nd
 global_dc_bias: 0
 horniness_time_modifiers:
@@ -150,7 +150,7 @@ another: also ignored
             Assert.Contains("sentient penis", gd.Vision);
             Assert.Contains("dating server", gd.WorldDescription);
             Assert.Contains("player character", gd.PlayerRoleDescription, StringComparison.OrdinalIgnoreCase);
-            Assert.Contains("opponent", gd.OpponentRoleDescription, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("datee", gd.DateeRoleDescription, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("break character", gd.NarrativeDoctrine, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("texting register", gd.NarrativeDoctrine, StringComparison.OrdinalIgnoreCase);
         }

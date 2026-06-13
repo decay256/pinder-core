@@ -30,7 +30,7 @@ namespace Pinder.Core.Conversation
             bool runTrap,
             string trapInstruction,
             string trapDisplayName,
-            string opponentCtxForTrap,
+            string dateeCtxForTrap,
             // Shadow parameters
             bool runShadow,
             string corruptionInstruction,
@@ -60,7 +60,7 @@ namespace Pinder.Core.Conversation
                 {
                     progress?.Report(new TurnProgressEvent(TurnProgressStage.TrapOverlayStarted));
                     string rawTrapOutput = await llm.ApplyTrapOverlayAsync(
-                        deliveredMessage, trapInstruction, trapDisplayName, opponentCtxForTrap, playerArchetypeDirectiveForDelivery, ct)
+                        deliveredMessage, trapInstruction, trapDisplayName, dateeCtxForTrap, playerArchetypeDirectiveForDelivery, ct)
                         .ConfigureAwait(false);
                     progress?.Report(new TurnProgressEvent(TurnProgressStage.TrapOverlayCompleted, rawTrapOutput));
                     return rawTrapOutput;

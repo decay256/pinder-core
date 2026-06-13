@@ -11,7 +11,7 @@ sequenced the migration into 5 phases, each shipping as its own PR:
    loader, the substitution helper, and migrate `LlmStakeGenerator`.
    Const fallback retained for backward compat. **Status: shipped.**
 2. **Phase 2 — `PromptTemplates` batch.** Migrate
-   `DialogueOptionsInstruction`, `OpponentResponseInstruction`,
+   `DialogueOptionsInstruction`, `DateeResponseInstruction`,
    `InterestBeatInstruction`, `FailureDeliveryInstruction`, and the
    delivery-tier defaults (`DefaultClean`, `DefaultStrong`, etc).
 3. **Phase 3 — `PromptBuilder` + `SessionSystemPromptBuilder` structural
@@ -86,7 +86,7 @@ fallback is still present (Phase 1-4).
   (Phase 2 candidate).
 - `dialogue_options` — `PromptTemplates.DialogueOptionsInstruction`
   — **status: const** (Phase 2).
-- `opponent_response` — `PromptTemplates.OpponentResponseInstruction`
+- `datee_response` — `PromptTemplates.DateeResponseInstruction`
   — **status: const** (Phase 2).
 - `interest_beat` — `PromptTemplates.InterestBeatInstruction` —
   **status: const** (Phase 2).
@@ -100,7 +100,7 @@ fallback is still present (Phase 1-4).
   `PromptBuilder.BuildSystemPrompt` headers + glyphs — **status:
   const** (Phase 3).
 - `session_system_prompt` — `SessionSystemPromptBuilder.Build` /
-  `BuildPlayer` / `BuildOpponent` — **status: const** (Phase 3).
+  `BuildPlayer` / `BuildDatee` — **status: const** (Phase 3).
 - `archetype_catalog` — `ArchetypeCatalog._behaviors` (12 archetypes)
   — **status: const** (Phase 4).
 - `player_response_delay` —
@@ -114,7 +114,7 @@ data/prompts/
   stake.yaml                 (Phase 1)
   outfit.yaml                (Phase 2 candidate)
   dialogue-options.yaml      (Phase 2)
-  opponent-response.yaml     (Phase 2)
+  datee-response.yaml     (Phase 2)
   interest-beat.yaml         (Phase 2)
   delivery.yaml              (Phase 2; delivery-tier defaults)
   prompt-builder.yaml        (Phase 3; section labels + glyphs)

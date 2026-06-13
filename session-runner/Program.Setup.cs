@@ -60,14 +60,14 @@ partial class Program
 
         // Parse character name / definition args
         string? playerArg = ParseArg(args, "--player");
-        string? opponentArg = ParseArg(args, "--opponent");
+        string? dateeArg = ParseArg(args, "--datee");
         string? playerDefArg = ParseArg(args, "--player-def");
-        string? opponentDefArg = ParseArg(args, "--opponent-def");
+        string? dateeDefArg = ParseArg(args, "--datee-def");
 
         // Must have at least one identifier per side (skipped for --resimulate)
         if (!result.IsResimulation &&
             ((playerArg == null && playerDefArg == null) ||
-             (opponentArg == null && opponentDefArg == null)))
+             (dateeArg == null && dateeDefArg == null)))
         {
             PrintUsage();
             result.ShouldExit = true;
@@ -107,7 +107,7 @@ partial class Program
             try
             {
                 result.Sable = LoadCharacter(playerDefArg, playerArg, ref itemRepo, ref anatomyRepo);
-                result.Brick = LoadCharacter(opponentDefArg, opponentArg, ref itemRepo, ref anatomyRepo);
+                result.Brick = LoadCharacter(dateeDefArg, dateeArg, ref itemRepo, ref anatomyRepo);
             }
             catch (FileNotFoundException ex)
             {
@@ -149,7 +149,7 @@ partial class Program
         // Engine line printed below after adapter is resolved
         string p1Archetype = result.Sable.ActiveArchetype != null ? $" | Archetype: {result.Sable.ActiveArchetype.Name} ({result.Sable.ActiveArchetype.InterferenceLevel})" : "";
         string p2Archetype = result.Brick.ActiveArchetype != null ? $" | Archetype: {result.Brick.ActiveArchetype.Name} ({result.Brick.ActiveArchetype.InterferenceLevel})" : "";
-        Console.WriteLine($"**Player:** {result.Player1} (Level {result.P1Level}, +{result.P1LevelBonus} level bonus{p1Archetype}) | **Opponent:** {result.Player2} (Level {result.P2Level}, +{result.P2LevelBonus} level bonus, LLM puppet{p2Archetype})");
+        Console.WriteLine($"**Player:** {result.Player1} (Level {result.P1Level}, +{result.P1LevelBonus} level bonus{p1Archetype}) | **Datee:** {result.Player2} (Level {result.P2Level}, +{result.P2LevelBonus} level bonus, LLM puppet{p2Archetype})");
         Console.WriteLine();
 
         // Retrieve the deserialized turn snapshot if we are in resimulation
@@ -302,7 +302,7 @@ partial class Program
                 Model = Environment.GetEnvironmentVariable("PLAYER_AGENT_MODEL") ?? "claude-sonnet-4-20250514"
             };
             result.Agent = new LlmPlayerAgent(agentOptions, new ScoringPlayerAgent(),
-                playerName: result.Sable.DisplayName, opponentName: result.Brick.DisplayName);
+                playerName: result.Sable.DisplayName, dateeName: result.Brick.DisplayName);
         }
         else if (agentType.Equals("human", StringComparison.OrdinalIgnoreCase))
         {

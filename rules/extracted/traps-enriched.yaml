@@ -21,7 +21,7 @@
   blocks:
   - kind: paragraph
     text: "**Trigger:** Miss a roll by 6–9 (Trope Trap fail tier). The trap for the stat you rolled activates.  \n**Duration:** 3 turns (fixed for all traps; activation turn counts as turn 1 of 3).  \n**Effect:** Two layers:\n1. **Mechanical**\
-      \ — disadvantage on the triggering stat, or opponent's defense stat boosted\n2. **Prompt taint** — `llm_instruction` injected into the character system prompt for the duration; taints all generated\
+      \ — disadvantage on the triggering stat, or datee's defense stat boosted\n2. **Prompt taint** — `llm_instruction` injected into the character system prompt for the duration; taints all generated\
       \ messages regardless of what stat is being rolled"
   - kind: paragraph
     text: '**Disarm:** selecting any SA-stat option disarms the active trap immediately, before the SA roll resolves. Disarm fires regardless of whether the SA roll succeeds. A failed SA roll then triggers Spiral as the new active trap (this turn is Spiral''s turn 1 of 3, taint via roll-modification, no separate trap LLM call this turn).'
@@ -33,7 +33,7 @@
     text: '**Nat 1 bonus:** Rolling a natural 1 on any roll while a trap is active escalates the trap''s DC modifier and adds a shadow stat bonus.'
   - kind: hr
   description: "**Trigger:** Miss a roll by 6–9 (Trope Trap fail tier). The trap for the stat you rolled activates.  \n**Duration:** 3 turns (fixed for all traps; activation turn counts as turn 1 of 3).  \n**Effect:** Two layers:\n1. **Mechanical**\
-    \ — disadvantage on the triggering stat, or opponent's defense stat boosted\n2. **Prompt taint** — `llm_instruction` injected into the character system prompt for the duration; taints all generated\
+    \ — disadvantage on the triggering stat, or datee's defense stat boosted\n2. **Prompt taint** — `llm_instruction` injected into the character system prompt for the duration; taints all generated\
     \ messages regardless of what stat is being rolled"
   heading_level: 2
   condition:
@@ -61,7 +61,7 @@
   - kind: table
     rows:
     - Condition: On success
-      Taint behaviour: One slightly forced qualifier or emoji — the player notices, the opponent might not
+      Taint behaviour: One slightly forced qualifier or emoji — the player notices, the datee might not
     - Condition: On failure
       Taint behaviour: Try-hard energy overtakes the message; a misfired Rizz line that also begs for validation
     sep_cells:
@@ -127,7 +127,7 @@
   type: table
   blocks:
   - kind: paragraph
-    text: "**Triggered by:** Honesty miss by 6+  \n**Duration:** 3 turns  \n**Mechanical effect:** Opponent's Chaos defense +2 (Honesty DC increases by 2 — they've seen the overshare, they're braced for\
+    text: "**Triggered by:** Honesty miss by 6+  \n**Duration:** 3 turns  \n**Mechanical effect:** Datee's Chaos defense +2 (Honesty DC increases by 2 — they've seen the overshare, they're braced for\
       \ more chaos from you)  \n**Clears:** Pick any Self-Awareness option (selection disarms; SA fail triggers Spiral)"
   - kind: paragraph
     text: '**What it does:** Personal details leak into unrelated topics. A Wit message about mycelium accidentally includes a confession. A Charm compliment trails off into a memory. You can''t keep the
@@ -148,7 +148,7 @@
     text: "*\"You meant to share one thing. You shared everything. The divorce. The therapist. The Costco membership. Steve.\"*  \n*Expiry: \"The overshare impulse subsides. You can hold a thought without\
       \ it trailing into confession.\"*"
   - kind: hr
-  description: "**Triggered by:** Honesty miss by 6+  \n**Duration:** 3 turns  \n**Mechanical effect:** Opponent's Chaos defense +2 (Honesty DC increases by 2 — they've seen the overshare, they're braced\
+  description: "**Triggered by:** Honesty miss by 6+  \n**Duration:** 3 turns  \n**Mechanical effect:** Datee's Chaos defense +2 (Honesty DC increases by 2 — they've seen the overshare, they're braced\
     \ for more chaos from you)  \n**Clears:** Pick any Self-Awareness option (selection disarms; SA fail triggers Spiral)"
   heading_level: 3
   compact_heading: true
@@ -158,7 +158,7 @@
   outcome:
     trap_name: the-overshare
     duration_turns: 3
-    effect: opponent_dc_increase
+    effect: datee_dc_increase
     stat: Chaos
     effect_value: 2
 - id: §2.the-unhinged
@@ -203,7 +203,7 @@
   type: table
   blocks:
   - kind: paragraph
-    text: "**Triggered by:** Wit miss by 6+  \n**Duration:** 3 turns  \n**Mechanical effect:** Opponent's Rizz defense +3 (Rizz DC increases by 3 — they become dismissive rather than impressed)  \n**Clears:**\
+    text: "**Triggered by:** Wit miss by 6+  \n**Duration:** 3 turns  \n**Mechanical effect:** Datee's Rizz defense +3 (Rizz DC increases by 3 — they become dismissive rather than impressed)  \n**Clears:**\
       \ Pick any Self-Awareness option (selection disarms; SA fail triggers Spiral)"
   - kind: paragraph
     text: '**What it does:** Condescension leaks in everywhere. References feel like showing off. A Rizz line sounds like a TED talk. An Honesty moment sounds like a lecture. You can''t stop explaining.'
@@ -212,18 +212,18 @@
     - Condition: On success
       Taint behaviour: One reference or explanation that wasn't needed — the message works but has a whiff of "well actually"
     - Condition: On failure
-      Taint behaviour: The message becomes a lecture; multiple unnecessary references; the opponent feels taught, not talked to
+      Taint behaviour: The message becomes a lecture; multiple unnecessary references; the datee feels taught, not talked to
     sep_cells:
     - '---'
     - '---'
   - kind: paragraph
     text: '**LLM instruction:** Inject a condescending or over-explanatory quality into ALL generated messages. On success: one unnecessary clarification or reference. On failure: the message becomes pedagogical
-      — explaining things the opponent didn''t ask about.'
+      — explaining things the datee didn''t ask about.'
   - kind: blockquote
     text: "*\"You tried clever. You got condescending. There may be a TED talk reference. There was definitely a TED talk reference.\"*  \n*Expiry: \"The urge to explain subsides. You can make a point without\
       \ citing a source.\"*"
   - kind: hr
-  description: "**Triggered by:** Wit miss by 6+  \n**Duration:** 3 turns  \n**Mechanical effect:** Opponent's Rizz defense +3 (Rizz DC increases by 3 — they become dismissive rather than impressed)  \n\
+  description: "**Triggered by:** Wit miss by 6+  \n**Duration:** 3 turns  \n**Mechanical effect:** Datee's Rizz defense +3 (Rizz DC increases by 3 — they become dismissive rather than impressed)  \n\
     **Clears:** Pick any Self-Awareness option (selection disarms; SA fail triggers Spiral)"
   heading_level: 3
   compact_heading: true
@@ -233,7 +233,7 @@
   outcome:
     trap_name: the-pretentious
     duration_turns: 3
-    effect: opponent_dc_increase
+    effect: datee_dc_increase
     stat: Rizz
     effect_value: 3
 - id: §2.the-spiral
@@ -293,7 +293,7 @@
     - Trap: The Overshare
       Stat: Honesty
       Duration: 3 turns
-      Mechanical effect: Opponent Chaos +2
+      Mechanical effect: Datee Chaos +2
       Taint quality: Personal details leak
     - Trap: The Unhinged
       Stat: Chaos
@@ -303,7 +303,7 @@
     - Trap: The Pretentious
       Stat: Wit
       Duration: 3 turns
-      Mechanical effect: Opponent Rizz +3
+      Mechanical effect: Datee Rizz +3
       Taint quality: Condescension / over-explains
     - Trap: The Spiral
       Stat: Self-Awareness

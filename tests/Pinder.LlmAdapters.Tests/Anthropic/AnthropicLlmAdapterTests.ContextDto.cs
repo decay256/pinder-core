@@ -12,14 +12,14 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         [Fact]
         public void DialogueContext_defaults_backward_compatible()
         {
-            // Old call site — no playerName/opponentName/currentTurn
+            // Old call site — no playerName/dateeName/currentTurn
             var ctx = new DialogueContext(
-                "player", "opponent",
+                "player", "datee",
                 new List<(string, string)>(), "last",
                 new string[0], 10);
 
             Assert.Equal("", ctx.PlayerName);
-            Assert.Equal("", ctx.OpponentName);
+            Assert.Equal("", ctx.DateeName);
             Assert.Equal(0, ctx.CurrentTurn);
         }
 
@@ -27,28 +27,28 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         public void DeliveryContext_defaults_backward_compatible()
         {
             var ctx = new DeliveryContext(
-                "player", "opponent",
+                "player", "datee",
                 new List<(string, string)>(), "last",
                 new DialogueOption(StatType.Charm, "test"),
                 FailureTier.None, 5,
                 new string[0]);
 
             Assert.Equal("", ctx.PlayerName);
-            Assert.Equal("", ctx.OpponentName);
+            Assert.Equal("", ctx.DateeName);
             Assert.Equal(0, ctx.CurrentTurn);
         }
 
         [Fact]
-        public void OpponentContext_defaults_backward_compatible()
+        public void DateeContext_defaults_backward_compatible()
         {
-            var ctx = new OpponentContext(
-                "player", "opponent",
+            var ctx = new DateeContext(
+                "player", "datee",
                 new List<(string, string)>(), "last",
                 new string[0], 10, "delivered",
                 10, 12, 2.0);
 
             Assert.Equal("", ctx.PlayerName);
-            Assert.Equal("", ctx.OpponentName);
+            Assert.Equal("", ctx.DateeName);
             Assert.Equal(0, ctx.CurrentTurn);
         }
 
@@ -56,15 +56,15 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         public void DialogueContext_new_fields_settable()
         {
             var ctx = new DialogueContext(
-                "player", "opponent",
+                "player", "datee",
                 new List<(string, string)>(), "last",
                 new string[0], 10,
                 playerName: "Thundercock",
-                opponentName: "Velvet",
+                dateeName: "Velvet",
                 currentTurn: 3);
 
             Assert.Equal("Thundercock", ctx.PlayerName);
-            Assert.Equal("Velvet", ctx.OpponentName);
+            Assert.Equal("Velvet", ctx.DateeName);
             Assert.Equal(3, ctx.CurrentTurn);
         }
     }

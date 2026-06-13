@@ -8,7 +8,7 @@ namespace Pinder.Core.Text
     public interface IPromptTraceService
     {
         /// <summary>
-        /// Record a build trace for a prompt type (e.g., "dialogue-options", "delivery", "opponent").
+        /// Record a build trace for a prompt type (e.g., "dialogue-options", "delivery", "datee").
         /// </summary>
         void RecordTrace(string promptType, PromptTraceResult trace);
 

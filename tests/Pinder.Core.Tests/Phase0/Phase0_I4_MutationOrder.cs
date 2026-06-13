@@ -26,7 +26,7 @@ namespace Pinder.Core.Tests.Phase0
     ///
     /// <para>
     /// Phase 1-4 refactors (#788-#790, #424) MUST keep the canonical sequence
-    /// stable. If a future PR moves opponent-response BEFORE delivery, this
+    /// stable. If a future PR moves datee-response BEFORE delivery, this
     /// test fails immediately, prompting an explicit decision instead of a
     /// silent ordering change.
     /// </para>
@@ -35,7 +35,7 @@ namespace Pinder.Core.Tests.Phase0
     public class Phase0_I4_MutationOrder
     {
         // I4.1 — happy-path turn: progress event order must be exactly the canonical
-        // sequence steering → delivery → opponent_response. (Horniness, shadow,
+        // sequence steering → delivery → datee_response. (Horniness, shadow,
         // trap overlay don't fire on this fixture; they appear conditionally.)
         [Fact]
         public async Task HappyPathTurn_ProgressStageOrder_IsCanonical()
@@ -50,14 +50,14 @@ namespace Pinder.Core.Tests.Phase0
             var transport = new RecordingLlmTransport { DefaultResponse = "" };
             transport.QueueDialogueOptions(Phase0Fixtures.CannedDialogueOptions);
             transport.QueueDelivery(Phase0Fixtures.CannedDelivery);
-            transport.QueueOpponent(Phase0Fixtures.CannedOpponent);
+            transport.QueueDatee(Phase0Fixtures.CannedDatee);
 
             var adapter = Phase0Fixtures.MakeAdapter(transport);
             var dice = new PlaybackDiceRoller(5, 15, 50);
 
             var session = new GameSession(
                 Phase0Fixtures.MakeProfile("Player"),
-                Phase0Fixtures.MakeProfile("Opponent"),
+                Phase0Fixtures.MakeProfile("Datee"),
                 adapter, dice, new NullTrapRegistry(),
                 Phase0Fixtures.MakeConfig());
 
@@ -70,7 +70,7 @@ namespace Pinder.Core.Tests.Phase0
             //   SteeringStarted → SteeringCompleted
             //   DeliveryStarted → DeliveryCompleted
             //   (no horniness, no shadow, no trap overlay on this fixture)
-            //   OpponentResponseStarted → OpponentResponseCompleted
+            //   DateeResponseStarted → DateeResponseCompleted
             // Locking the (started, completed) PAIR ordering catches any reorder
             // that bisects a stage; locking the inter-stage order catches any
             // reorder that swaps phases.
@@ -80,8 +80,8 @@ namespace Pinder.Core.Tests.Phase0
                 TurnProgressStage.SteeringCompleted,
                 TurnProgressStage.DeliveryStarted,
                 TurnProgressStage.DeliveryCompleted,
-                TurnProgressStage.OpponentResponseStarted,
-                TurnProgressStage.OpponentResponseCompleted,
+                TurnProgressStage.DateeResponseStarted,
+                TurnProgressStage.DateeResponseCompleted,
             };
             Assert.Equal(expected, stages);
         }
@@ -98,45 +98,45 @@ namespace Pinder.Core.Tests.Phase0
         }
 
         // I4.3 — relative phase ordering at the LLM transport level: dialogue_options
-        // strictly precedes delivery; delivery strictly precedes opponent_response.
+        // strictly precedes delivery; delivery strictly precedes datee_response.
         // This is the CONTRACT the upstream consumer (UI streaming, audit log) relies
         // on to attribute exchanges to a turn. Phase 5 fast-gameplay scheduling MUST
         // preserve this within a single (player_choice, adopted_branch) commit.
         [Fact]
-        public async Task LlmTransport_PhaseOrder_OptionsBeforeDeliveryBeforeOpponent()
+        public async Task LlmTransport_PhaseOrder_OptionsBeforeDeliveryBeforeDatee()
         {
             var transport = new RecordingLlmTransport { DefaultResponse = "" };
             transport.QueueDialogueOptions(Phase0Fixtures.CannedDialogueOptions);
             transport.QueueDelivery(Phase0Fixtures.CannedDelivery);
-            transport.QueueOpponent(Phase0Fixtures.CannedOpponent);
+            transport.QueueDatee(Phase0Fixtures.CannedDatee);
 
             var adapter = Phase0Fixtures.MakeAdapter(transport);
             var dice = new PlaybackDiceRoller(5, 15, 50);
 
             var session = new GameSession(
                 Phase0Fixtures.MakeProfile("Player"),
-                Phase0Fixtures.MakeProfile("Opponent"),
+                Phase0Fixtures.MakeProfile("Datee"),
                 adapter, dice, new NullTrapRegistry(),
                 Phase0Fixtures.MakeConfig());
 
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0);
 
-            int idxOptions = -1, idxDelivery = -1, idxOpponent = -1;
+            int idxOptions = -1, idxDelivery = -1, idxDatee = -1;
             for (int i = 0; i < transport.Exchanges.Count; i++)
             {
                 var ph = transport.Exchanges[i].Phase;
                 if (ph == LlmPhase.DialogueOptions && idxOptions < 0) idxOptions = i;
                 if (ph == LlmPhase.Delivery && idxDelivery < 0) idxDelivery = i;
-                if (ph == LlmPhase.OpponentResponse && idxOpponent < 0) idxOpponent = i;
+                if (ph == LlmPhase.DateeResponse && idxDatee < 0) idxDatee = i;
             }
             Assert.True(idxOptions >= 0, "dialogue_options call missing");
             Assert.True(idxDelivery >= 0, "delivery call missing");
-            Assert.True(idxOpponent >= 0, "opponent_response call missing");
+            Assert.True(idxDatee >= 0, "datee_response call missing");
             Assert.True(idxOptions < idxDelivery,
                 $"dialogue_options ({idxOptions}) must precede delivery ({idxDelivery}).");
-            Assert.True(idxDelivery < idxOpponent,
-                $"delivery ({idxDelivery}) must precede opponent_response ({idxOpponent}).");
+            Assert.True(idxDelivery < idxDatee,
+                $"delivery ({idxDelivery}) must precede datee_response ({idxDatee}).");
         }
 
         // I4.4 — interest delta and turn-number increment happen exactly once per
@@ -149,14 +149,14 @@ namespace Pinder.Core.Tests.Phase0
             var transport = new RecordingLlmTransport { DefaultResponse = "" };
             transport.QueueDialogueOptions(Phase0Fixtures.CannedDialogueOptions);
             transport.QueueDelivery(Phase0Fixtures.CannedDelivery);
-            transport.QueueOpponent(Phase0Fixtures.CannedOpponent);
+            transport.QueueDatee(Phase0Fixtures.CannedDatee);
 
             var adapter = Phase0Fixtures.MakeAdapter(transport);
             var dice = new PlaybackDiceRoller(5, 15, 50);
 
             var session = new GameSession(
                 Phase0Fixtures.MakeProfile("Player"),
-                Phase0Fixtures.MakeProfile("Opponent"),
+                Phase0Fixtures.MakeProfile("Datee"),
                 adapter, dice, new NullTrapRegistry(),
                 Phase0Fixtures.MakeConfig());
 
@@ -185,14 +185,14 @@ namespace Pinder.Core.Tests.Phase0
             var transport = new RecordingLlmTransport { DefaultResponse = "" };
             transport.QueueDialogueOptions(Phase0Fixtures.CannedDialogueOptions);
             transport.QueueDelivery(Phase0Fixtures.CannedDelivery);
-            transport.QueueOpponent(Phase0Fixtures.CannedOpponent);
+            transport.QueueDatee(Phase0Fixtures.CannedDatee);
 
             var adapter = Phase0Fixtures.MakeAdapter(transport);
             var dice = new PlaybackDiceRoller(5, 15, 50);
 
             var session = new GameSession(
                 Phase0Fixtures.MakeProfile("Player"),
-                Phase0Fixtures.MakeProfile("Opponent"),
+                Phase0Fixtures.MakeProfile("Datee"),
                 adapter, dice, new NullTrapRegistry(),
                 Phase0Fixtures.MakeConfig(steeringSeed: 99, statDrawSeed: 99));
 

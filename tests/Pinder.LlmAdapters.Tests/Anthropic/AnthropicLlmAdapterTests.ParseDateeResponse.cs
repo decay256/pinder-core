@@ -10,7 +10,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         [Fact]
         public void Null_input_returns_empty_response()
         {
-            var result = AnthropicLlmAdapter.ParseOpponentResponse(null);
+            var result = AnthropicLlmAdapter.ParseDateeResponse(null);
             Assert.Equal("", result.MessageText);
             Assert.Null(result.DetectedTell);
             Assert.Null(result.WeaknessWindow);
@@ -19,14 +19,14 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         [Fact]
         public void Empty_input_returns_empty_response()
         {
-            var result = AnthropicLlmAdapter.ParseOpponentResponse("");
+            var result = AnthropicLlmAdapter.ParseDateeResponse("");
             Assert.Equal("", result.MessageText);
         }
 
         [Fact]
         public void Plain_text_without_markers_used_as_message()
         {
-            var result = AnthropicLlmAdapter.ParseOpponentResponse("Just a plain message");
+            var result = AnthropicLlmAdapter.ParseDateeResponse("Just a plain message");
             Assert.Equal("Just a plain message", result.MessageText);
             Assert.Null(result.DetectedTell);
             Assert.Null(result.WeaknessWindow);
@@ -37,7 +37,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         {
             var input = @"[RESPONSE]
 ""Haha yeah, it's pretty wild out there.""";
-            var result = AnthropicLlmAdapter.ParseOpponentResponse(input);
+            var result = AnthropicLlmAdapter.ParseDateeResponse(input);
             Assert.Equal("Haha yeah, it's pretty wild out there.", result.MessageText);
             Assert.Null(result.DetectedTell);
             Assert.Null(result.WeaknessWindow);
@@ -50,10 +50,10 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
 ""Haha the penguin section! So what's YOUR type then?""
 
 [SIGNALS]
-TELL: CHARM (opponent seems genuinely flustered by direct compliments)
-WEAKNESS: WIT -2 (opponent is clearly overthinking their responses)";
+TELL: CHARM (datee seems genuinely flustered by direct compliments)
+WEAKNESS: WIT -2 (datee is clearly overthinking their responses)";
 
-            var result = AnthropicLlmAdapter.ParseOpponentResponse(input);
+            var result = AnthropicLlmAdapter.ParseDateeResponse(input);
             Assert.Equal("Haha the penguin section! So what's YOUR type then?", result.MessageText);
             Assert.NotNull(result.DetectedTell);
             Assert.Equal(StatType.Charm, result.DetectedTell!.Stat);
@@ -72,7 +72,7 @@ WEAKNESS: WIT -2 (opponent is clearly overthinking their responses)";
 [SIGNALS]
 TELL: RIZZ (they keep making flirty comments)";
 
-            var result = AnthropicLlmAdapter.ParseOpponentResponse(input);
+            var result = AnthropicLlmAdapter.ParseDateeResponse(input);
             Assert.NotNull(result.DetectedTell);
             Assert.Equal(StatType.Rizz, result.DetectedTell!.Stat);
             Assert.Null(result.WeaknessWindow);
@@ -87,7 +87,7 @@ TELL: RIZZ (they keep making flirty comments)";
 [SIGNALS]
 WEAKNESS: HONESTY -3 (they seem to be hiding something)";
 
-            var result = AnthropicLlmAdapter.ParseOpponentResponse(input);
+            var result = AnthropicLlmAdapter.ParseDateeResponse(input);
             Assert.Null(result.DetectedTell);
             Assert.NotNull(result.WeaknessWindow);
             Assert.Equal(StatType.Honesty, result.WeaknessWindow!.DefendingStat);
@@ -103,7 +103,7 @@ WEAKNESS: HONESTY -3 (they seem to be hiding something)";
 [SIGNALS]
 TELL: INVALID_STAT (desc)";
 
-            var result = AnthropicLlmAdapter.ParseOpponentResponse(input);
+            var result = AnthropicLlmAdapter.ParseDateeResponse(input);
             Assert.Null(result.DetectedTell);
         }
 
@@ -117,7 +117,7 @@ TELL: INVALID_STAT (desc)";
 [SIGNALS]
 WEAKNESS: WIT -0 (desc)";
 
-            var result = AnthropicLlmAdapter.ParseOpponentResponse(input);
+            var result = AnthropicLlmAdapter.ParseDateeResponse(input);
             Assert.Null(result.WeaknessWindow);
         }
 
@@ -130,7 +130,7 @@ WEAKNESS: WIT -0 (desc)";
 [SIGNALS]
 TELL: SELF_AWARENESS (very self-reflective)";
 
-            var result = AnthropicLlmAdapter.ParseOpponentResponse(input);
+            var result = AnthropicLlmAdapter.ParseDateeResponse(input);
             Assert.NotNull(result.DetectedTell);
             Assert.Equal(StatType.SelfAwareness, result.DetectedTell!.Stat);
         }
@@ -144,7 +144,7 @@ TELL: SELF_AWARENESS (very self-reflective)";
 [SIGNALS]
 garbage data that makes no sense";
 
-            var result = AnthropicLlmAdapter.ParseOpponentResponse(input);
+            var result = AnthropicLlmAdapter.ParseDateeResponse(input);
             Assert.Equal("Some response", result.MessageText);
             Assert.Null(result.DetectedTell);
             Assert.Null(result.WeaknessWindow);

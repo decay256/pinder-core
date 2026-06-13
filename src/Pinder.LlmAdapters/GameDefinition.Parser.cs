@@ -79,7 +79,7 @@ namespace Pinder.LlmAdapters
             var vision = GetRequired("vision");
             var worldDescription = GetRequired("world_description");
             var playerRoleDescription = GetRequired("player_role_description");
-            var opponentRoleDescription = GetRequired("opponent_role_description");
+            var dateeRoleDescription = GetRequired("datee_role_description");
             var narrativeDoctrine = GetRequired("narrative_doctrine");
 
             // Parse required global_dc_bias
@@ -93,12 +93,12 @@ namespace Pinder.LlmAdapters
                 vision: vision,
                 worldDescription: worldDescription,
                 playerRoleDescription: playerRoleDescription,
-                opponentRoleDescription: opponentRoleDescription,
+                dateeRoleDescription: dateeRoleDescription,
                 narrativeDoctrine: narrativeDoctrine,
                 deliveryRules: deliveryRules,
                 dramaticCraft: dramaticCraft,
-                opponentFriction: GetOptional("opponent_friction"),
-                opponentCuriosity: GetOptional("opponent_curiosity"),
+                dateeFriction: GetOptional("datee_friction"),
+                dateeCuriosity: GetOptional("datee_curiosity"),
                 conversationArcProgression: conversationArcProgression,
                 playerProbing: GetOptional("player_probing"),
                 improvementPrompt: GetOptional("improvement_prompt"),

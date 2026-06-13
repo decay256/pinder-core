@@ -34,7 +34,7 @@ namespace Pinder.Core.Tests
         public void Constructor_SetsAllProperties()
         {
             var player = MakeStats(charm: 4);
-            var opponent = MakeStats(charm: 2);
+            var datee = MakeStats(charm: 2);
             var shadows = new Dictionary<ShadowStatType, int>
             {
                 { ShadowStatType.Despair, 6 },
@@ -42,11 +42,11 @@ namespace Pinder.Core.Tests
             };
 
             var ctx = new PlayerAgentContext(
-                player, opponent, 15, InterestState.VeryIntoIt, 3,
+                player, datee, 15, InterestState.VeryIntoIt, 3,
                 new[] { "IckTrap", "Cringe" }, 6, shadows, 8);
 
             Assert.Same(player, ctx.PlayerStats);
-            Assert.Same(opponent, ctx.OpponentStats);
+            Assert.Same(datee, ctx.DateeStats);
             Assert.Equal(15, ctx.CurrentInterest);
             Assert.Equal(InterestState.VeryIntoIt, ctx.InterestState);
             Assert.Equal(3, ctx.MomentumStreak);
@@ -68,7 +68,7 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public void Constructor_NullOpponentStats_Throws()
+        public void Constructor_NullDateeStats_Throws()
         {
             Assert.Throws<ArgumentNullException>(() =>
                 new PlayerAgentContext(MakeStats(), null!, 10, InterestState.Interested,

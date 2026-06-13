@@ -30,7 +30,7 @@ namespace Pinder.SessionRunner
             {
                 StatType stat = options[i].Stat;
                 int mod = context.PlayerStats.GetEffective(stat);
-                int dc = context.OpponentStats.GetDefenceDC(stat);
+                int dc = context.DateeStats.GetDefenceDC(stat);
                 int need = dc - mod;
                 // need is the minimum d20 roll required to succeed
                 // successChance = (21 - need) / 20, clamped to [0, 1]

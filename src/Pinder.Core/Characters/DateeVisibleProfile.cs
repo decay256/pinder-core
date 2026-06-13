@@ -4,14 +4,14 @@ namespace Pinder.Core.Characters
 {
     /// <summary>
     /// Issue #562: structured representation of what the player can see
-    /// about the opponent — the equivalent of a Tinder profile card.
+    /// about the datee — the equivalent of a Tinder profile card.
     /// Strict contract: this is what a real dating-app user could plausibly
     /// see from a single profile view. NOT the full LLM system prompt
     /// (psychological stake, full stat block, archetype directives, etc.
-    /// stay private to the opponent's own assembled prompt).
+    /// stay private to the datee's own assembled prompt).
     ///
     /// Replaces the previous one-line <c>"name: \"bio\" | Wearing: items"</c>
-    /// concat in <see cref="Conversation.GameSessionHelpers.BuildOpponentVisibleProfile(CharacterProfile)"/>,
+    /// concat in <see cref="Conversation.GameSessionHelpers.BuildDateeVisibleProfile(CharacterProfile)"/>,
     /// which leaked the raw equipped-items list (including items that
     /// wouldn't be visible from a single Tinder photo) and omitted
     /// self-reported demographic info that real Tinder cards do show.
@@ -34,7 +34,7 @@ namespace Pinder.Core.Characters
     /// schema-extension to a separate follow-up.
     /// </para>
     /// </remarks>
-    public sealed class OpponentVisibleProfile
+    public sealed class DateeVisibleProfile
     {
         /// <summary>Display name (e.g. "Sable_xo").</summary>
         public string DisplayName { get; }
@@ -60,7 +60,7 @@ namespace Pinder.Core.Characters
         /// </summary>
         public System.Collections.Generic.IReadOnlyList<string> EquippedItemDisplayNamesFallback { get; }
 
-        public OpponentVisibleProfile(
+        public DateeVisibleProfile(
             string displayName,
             string genderIdentity,
             string bio,

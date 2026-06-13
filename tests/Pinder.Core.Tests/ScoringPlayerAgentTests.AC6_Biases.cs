@@ -15,7 +15,7 @@ namespace Pinder.Core.Tests
         public async Task DecideAsync_TellBonus_LowersNeedBy2()
         {
             var player = MakeStats(charm: 3);
-            var opponent = MakeStats(); // DC=13 for Charm
+            var datee = MakeStats(); // DC=13 for Charm
             // Without tell: need = 13 - 3 = 10, successChance = 11/20 = 0.55
             // With tell: need = 13 - (3+2) = 8, successChance = 13/20 = 0.65
             var optionNoTell = MakeOption(StatType.Charm, hasTellBonus: false);
@@ -23,7 +23,7 @@ namespace Pinder.Core.Tests
 
             var turnNoTell = MakeTurn(optionNoTell);
             var turnWithTell = MakeTurn(optionWithTell);
-            var context = MakeContext(player: player, opponent: opponent);
+            var context = MakeContext(player: player, datee: datee);
 
             var dNoTell = await _agent.DecideAsync(turnNoTell, context);
             var dWithTell = await _agent.DecideAsync(turnWithTell, context);
@@ -39,13 +39,13 @@ namespace Pinder.Core.Tests
         public async Task DecideAsync_ComboBonus_IncreasesExpectedGain()
         {
             var player = MakeStats(charm: 3);
-            var opponent = MakeStats();
+            var datee = MakeStats();
             var optionNoCombo = MakeOption(StatType.Charm);
             var optionWithCombo = MakeOption(StatType.Charm, comboName: "The Switcheroo");
 
             var turnNoCombo = MakeTurn(optionNoCombo);
             var turnWithCombo = MakeTurn(optionWithCombo);
-            var context = MakeContext(player: player, opponent: opponent);
+            var context = MakeContext(player: player, datee: datee);
 
             var dNoCombo = await _agent.DecideAsync(turnNoCombo, context);
             var dWithCombo = await _agent.DecideAsync(turnWithCombo, context);
@@ -60,14 +60,14 @@ namespace Pinder.Core.Tests
         public async Task DecideAsync_CallbackBonus_LowersNeed()
         {
             var player = MakeStats(charm: 3);
-            var opponent = MakeStats();
+            var datee = MakeStats();
             // Turn 5, callback to turn 0 (opener) → CallbackBonus.Compute(5, 0) = 3
             var optionWithCallback = MakeOption(StatType.Charm, callbackTurn: 0);
             var optionNoCallback = MakeOption(StatType.Charm);
 
             var turnCallback = MakeTurn(optionWithCallback);
             var turnNoCallback = MakeTurn(optionNoCallback);
-            var context = MakeContext(player: player, opponent: opponent, turnNumber: 5);
+            var context = MakeContext(player: player, datee: datee, turnNumber: 5);
 
             var dCallback = await _agent.DecideAsync(turnCallback, context);
             var dNoCallback = await _agent.DecideAsync(turnNoCallback, context);
@@ -126,10 +126,10 @@ namespace Pinder.Core.Tests
         public async Task DecideAsync_BonusesApplied_IncludesTellAndCombo()
         {
             var player = MakeStats(charm: 3);
-            var opponent = MakeStats();
+            var datee = MakeStats();
             var turn = MakeTurn(
                 MakeOption(StatType.Charm, hasTellBonus: true, comboName: "TestCombo", callbackTurn: 0));
-            var context = MakeContext(player: player, opponent: opponent, turnNumber: 5);
+            var context = MakeContext(player: player, datee: datee, turnNumber: 5);
 
             var decision = await _agent.DecideAsync(turn, context);
 
@@ -157,12 +157,12 @@ namespace Pinder.Core.Tests
         {
             // Two identical options should produce identical scores, first wins
             var player = MakeStats(charm: 3, rizz: 3);
-            // Need same DC for both — opponent SA = opponent Wit
-            var opponent = MakeStats(sa: 2, wit: 2);
+            // Need same DC for both — datee SA = datee Wit
+            var datee = MakeStats(sa: 2, wit: 2);
             var turn = MakeTurn(
                 MakeOption(StatType.Charm),
                 MakeOption(StatType.Rizz));
-            var context = MakeContext(player: player, opponent: opponent);
+            var context = MakeContext(player: player, datee: datee);
 
             var decision = await _agent.DecideAsync(turn, context);
 

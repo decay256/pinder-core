@@ -5,30 +5,30 @@ namespace Pinder.Core.Conversation
 {
     /// <summary>
     /// Pure function: evaluates the interest penalty for the player taking too long
-    /// to respond. Penalty is modified by the opponent's personality stats.
+    /// to respond. Penalty is modified by the datee's personality stats.
     /// </summary>
     public static class PlayerResponseDelayEvaluator
     {
-        private const string DefaultTestPrompt = "Opponent noticed the long gap between replies";
+        private const string DefaultTestPrompt = "Datee noticed the long gap between replies";
 
         /// <summary>
         /// Evaluates the interest penalty for the player taking <paramref name="delay"/>
-        /// to respond. The penalty is modified by the opponent's personality stats.
+        /// to respond. The penalty is modified by the datee's personality stats.
         /// </summary>
-        /// <param name="delay">Time elapsed since the opponent's last message.
+        /// <param name="delay">Time elapsed since the datee's last message.
         ///     Provided by GameClock (issue #54). Must be non-negative.</param>
-        /// <param name="opponentStats">The opponent's full StatBlock, used to check
+        /// <param name="dateeStats">The datee's full StatBlock, used to check
         ///     Chaos base stat and shadow stat values (Fixation, Overthinking).</param>
         /// <param name="currentInterest">The current InterestState of the conversation,
         ///     used to gate the 15–60 min penalty bucket.</param>
         /// <returns>A DelayPenalty describing the interest delta and optional test trigger.</returns>
         public static DelayPenalty Evaluate(
             TimeSpan delay,
-            StatBlock opponentStats,
+            StatBlock dateeStats,
             InterestState currentInterest)
         {
-            if (opponentStats == null)
-                throw new ArgumentNullException(nameof(opponentStats));
+            if (dateeStats == null)
+                throw new ArgumentNullException(nameof(dateeStats));
 
             // Negative delay = no time has passed
             if (delay.Ticks < 0)
@@ -43,16 +43,16 @@ namespace Pinder.Core.Conversation
                 return new DelayPenalty(0, false, null);
 
             // Step 3: Chaos override — base stat >= 4 zeroes everything
-            if (opponentStats.GetBase(StatType.Chaos) >= 4)
+            if (dateeStats.GetBase(StatType.Chaos) >= 4)
                 return new DelayPenalty(0, false, null);
 
             // Step 4: Fixation doubling
             int penalty = basePenalty;
-            if (opponentStats.GetShadow(ShadowStatType.Fixation) >= 6)
+            if (dateeStats.GetShadow(ShadowStatType.Fixation) >= 6)
                 penalty *= 2;
 
             // Step 5: Overthinking +1 additional penalty
-            if (opponentStats.GetShadow(ShadowStatType.Overthinking) >= 6)
+            if (dateeStats.GetShadow(ShadowStatType.Overthinking) >= 6)
                 penalty -= 1;
 
             // Step 6: Trigger test only in 1-6h bucket with non-zero penalty

@@ -69,7 +69,7 @@ namespace Pinder.Core.Tests
 
         private static PlayerAgentContext MakeContext(
             StatBlock? player = null,
-            StatBlock? opponent = null,
+            StatBlock? datee = null,
             int interest = 10,
             InterestState state = InterestState.Interested,
             int momentum = 0,
@@ -82,7 +82,7 @@ namespace Pinder.Core.Tests
         {
             return new PlayerAgentContext(
                 player ?? MakeStats(charm: 3, rizz: 3, honesty: 3, chaos: 3, wit: 3, sa: 3),
-                opponent ?? MakeStats(),
+                datee ?? MakeStats(),
                 interest,
                 state,
                 momentum,
@@ -105,7 +105,7 @@ namespace Pinder.Core.Tests
         {
             // Both options have similar base EV, but Charm would trigger Fixation growth
             var player = MakeStats(charm: 3, rizz: 3);
-            var opponent = MakeStats(); // all 0 → DC=13
+            var datee = MakeStats(); // all 0 → DC=13
 
             var turn = MakeTurn(
                 MakeOption(StatType.Charm),
@@ -113,7 +113,7 @@ namespace Pinder.Core.Tests
 
             // Last two turns both used Charm → picking Charm again triggers Fixation
             var context = MakeContext(
-                player: player, opponent: opponent,
+                player: player, datee: datee,
                 lastStatUsed: StatType.Charm,
                 secondLastStatUsed: StatType.Charm);
 
@@ -128,7 +128,7 @@ namespace Pinder.Core.Tests
         public async Task FixationGrowthPenalty_DoesNotApplyWhenOnlyOneMatch()
         {
             var player = MakeStats(charm: 3, wit: 3);
-            var opponent = MakeStats();
+            var datee = MakeStats();
 
             var turn = MakeTurn(
                 MakeOption(StatType.Charm),
@@ -136,7 +136,7 @@ namespace Pinder.Core.Tests
 
             // Only last turn was Charm, second-last was Rizz (different)
             var context = MakeContext(
-                player: player, opponent: opponent,
+                player: player, datee: datee,
                 lastStatUsed: StatType.Charm,
                 secondLastStatUsed: StatType.Rizz);
 
@@ -159,14 +159,14 @@ namespace Pinder.Core.Tests
         public async Task FixationGrowthPenalty_SkippedWhenLastStatNull()
         {
             var player = MakeStats(charm: 3, rizz: 3);
-            var opponent = MakeStats();
+            var datee = MakeStats();
 
             var turn = MakeTurn(
                 MakeOption(StatType.Charm),
                 MakeOption(StatType.Rizz));
 
             // First turn — no history
-            var context = MakeContext(player: player, opponent: opponent);
+            var context = MakeContext(player: player, datee: datee);
 
             var decision = await _agent.DecideAsync(turn, context);
 
@@ -184,13 +184,13 @@ namespace Pinder.Core.Tests
         public async Task DenialPenalty_AppliedWhenSkippingHonesty()
         {
             var player = MakeStats(charm: 3, honesty: 3);
-            var opponent = MakeStats();
+            var datee = MakeStats();
 
             var turn = MakeTurn(
                 MakeOption(StatType.Charm),
                 MakeOption(StatType.Honesty));
 
-            var context = MakeContext(player: player, opponent: opponent);
+            var context = MakeContext(player: player, datee: datee);
 
             var decision = await _agent.DecideAsync(turn, context);
 
@@ -205,17 +205,17 @@ namespace Pinder.Core.Tests
         public async Task DenialPenalty_NotAppliedWhenNoHonestyInOptions()
         {
             var player = MakeStats(charm: 3, rizz: 3);
-            var opponent = MakeStats();
+            var datee = MakeStats();
 
             var turn = MakeTurn(
                 MakeOption(StatType.Charm),
                 MakeOption(StatType.Rizz));
 
             var contextWithHistory = MakeContext(
-                player: player, opponent: opponent,
+                player: player, datee: datee,
                 lastStatUsed: StatType.Charm);
             var contextWithout = MakeContext(
-                player: player, opponent: opponent);
+                player: player, datee: datee);
 
             var decisionWith = await _agent.DecideAsync(turn, contextWithHistory);
             var decisionWithout = await _agent.DecideAsync(turn, contextWithout);

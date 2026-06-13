@@ -7,7 +7,7 @@ namespace Pinder.LlmAdapters
     /// Assembles a session-level system prompt from character profiles and game definition.
     /// Section ordering places the STATIC, session-invariant material (game vision, world
     /// rules, narrative doctrine, dramatic craft, structural sections) FIRST, and the
-    /// CHARACTER-SPECIFIC / VARIABLE material (the assembled player/opponent profiles) LAST.
+    /// CHARACTER-SPECIFIC / VARIABLE material (the assembled player/datee profiles) LAST.
     /// Keeping the variable character block at the tail maximizes the stable, cacheable
     /// prompt prefix across sessions and keeps role-specific content closest to the turn.
     /// </summary>
@@ -19,8 +19,8 @@ namespace Pinder.LlmAdapters
         /// <param name="playerPrompt">
         /// Player's assembled character system prompt (from CharacterProfile.AssembledSystemPrompt).
         /// </param>
-        /// <param name="opponentPrompt">
-        /// Opponent's assembled character system prompt (from CharacterProfile.AssembledSystemPrompt).
+        /// <param name="dateePrompt">
+        /// Datee's assembled character system prompt (from CharacterProfile.AssembledSystemPrompt).
         /// </param>
         /// <param name="gameDef">
         /// Game definition containing vision, world rules, meta contract.
@@ -29,13 +29,13 @@ namespace Pinder.LlmAdapters
         /// <returns>A single string containing the full session system prompt.</returns>
         public static string Build(
             string playerPrompt,
-            string opponentPrompt,
+            string dateePrompt,
             GameDefinition? gameDef = null)
         {
             if (playerPrompt == null)
                 throw new ArgumentNullException(nameof(playerPrompt));
-            if (opponentPrompt == null)
-                throw new ArgumentNullException(nameof(opponentPrompt));
+            if (dateePrompt == null)
+                throw new ArgumentNullException(nameof(dateePrompt));
 
             var def = gameDef ?? GameDefinition.PinderDefaults;
 
@@ -52,15 +52,15 @@ namespace Pinder.LlmAdapters
                 // Build() is the legacy joint prompt for callers that want both
                 // roles in one system block. Per #867 LESSONS_LEARNED, this method
                 // retains all sections (only BuildPlayer is trimmed).
-                string.IsNullOrWhiteSpace(def.OpponentFriction) ? "" : "\n\n== OPPONENT RESISTANCE ==\n\n" + def.OpponentFriction.TrimEnd(),
-                string.IsNullOrWhiteSpace(def.OpponentCuriosity) ? "" : "\n\n== OPPONENT CURIOSITY ==\n\n" + def.OpponentCuriosity.TrimEnd(),
+                string.IsNullOrWhiteSpace(def.DateeFriction) ? "" : "\n\n== DATEE RESISTANCE ==\n\n" + def.DateeFriction.TrimEnd(),
+                string.IsNullOrWhiteSpace(def.DateeCuriosity) ? "" : "\n\n== DATEE CURIOSITY ==\n\n" + def.DateeCuriosity.TrimEnd(),
                 string.IsNullOrWhiteSpace(def.ConversationArcProgression) ? "" : "\n\n== CONVERSATION ARC ==\n\n" + def.ConversationArcProgression.TrimEnd(),
                 string.IsNullOrWhiteSpace(def.PlayerProbing) ? "" : "\n\n== PLAYER PROBING ==\n\n" + def.PlayerProbing.TrimEnd(),
                 // --- CHARACTER-SPECIFIC / VARIABLE sections LAST ---
                 "\n\n== PLAYER CHARACTER ==\n\n",
                 playerPrompt.TrimEnd(),
-                "\n\n== OPPONENT CHARACTER ==\n\n",
-                opponentPrompt.TrimEnd(),
+                "\n\n== DATEE CHARACTER ==\n\n",
+                dateePrompt.TrimEnd(),
                 "\n");
         }
 
@@ -121,19 +121,19 @@ namespace Pinder.LlmAdapters
         }
 
         /// <summary>
-        /// Build a system prompt containing only the opponent's character profile and game definition.
-        /// Used to prevent voice bleed when generating opponent responses.
+        /// Build a system prompt containing only the datee's character profile and game definition.
+        /// Used to prevent voice bleed when generating datee responses.
         /// </summary>
-        public static string BuildOpponent(string opponentPrompt, GameDefinition? gameDef = null)
+        public static string BuildDatee(string dateePrompt, GameDefinition? gameDef = null)
         {
-            var result = BuildOpponentEx(opponentPrompt, gameDef);
-            InMemoryPromptTraceService.Instance.RecordTrace("opponent-system", result);
+            var result = BuildDateeEx(dateePrompt, gameDef);
+            InMemoryPromptTraceService.Instance.RecordTrace("datee-system", result);
             return result.Text;
         }
 
-        public static PromptTraceResult BuildOpponentEx(string opponentPrompt, GameDefinition? gameDef = null)
+        public static PromptTraceResult BuildDateeEx(string dateePrompt, GameDefinition? gameDef = null)
         {
-            if (opponentPrompt == null) throw new ArgumentNullException(nameof(opponentPrompt));
+            if (dateePrompt == null) throw new ArgumentNullException(nameof(dateePrompt));
             var def = gameDef ?? GameDefinition.PinderDefaults;
 
             var sb = new AnnotatedStringBuilder();
@@ -153,16 +153,16 @@ namespace Pinder.LlmAdapters
                 sb.AppendLine(def.DramaticCraft.BuildSection().TrimEnd(), "game-definition.yaml", "dramatic_craft");
             }
 
-            if (!string.IsNullOrWhiteSpace(def.OpponentFriction))
+            if (!string.IsNullOrWhiteSpace(def.DateeFriction))
             {
-                sb.Append("\n== OPPONENT RESISTANCE ==\n\n");
-                sb.AppendLine(def.OpponentFriction.TrimEnd(), "game-definition.yaml", "opponent_friction");
+                sb.Append("\n== DATEE RESISTANCE ==\n\n");
+                sb.AppendLine(def.DateeFriction.TrimEnd(), "game-definition.yaml", "datee_friction");
             }
 
-            if (!string.IsNullOrWhiteSpace(def.OpponentCuriosity))
+            if (!string.IsNullOrWhiteSpace(def.DateeCuriosity))
             {
-                sb.Append("\n== OPPONENT CURIOSITY ==\n\n");
-                sb.AppendLine(def.OpponentCuriosity.TrimEnd(), "game-definition.yaml", "opponent_curiosity");
+                sb.Append("\n== DATEE CURIOSITY ==\n\n");
+                sb.AppendLine(def.DateeCuriosity.TrimEnd(), "game-definition.yaml", "datee_curiosity");
             }
 
             if (!string.IsNullOrWhiteSpace(def.ConversationArcProgression))
@@ -172,10 +172,10 @@ namespace Pinder.LlmAdapters
             }
 
             // --- CHARACTER-SPECIFIC / VARIABLE section LAST ---
-            sb.Append("\n== OPPONENT CHARACTER ==\n\n");
-            sb.AppendLine(def.OpponentRoleDescription.TrimEnd(), "game-definition.yaml", "opponent_role_description");
+            sb.Append("\n== DATEE CHARACTER ==\n\n");
+            sb.AppendLine(def.DateeRoleDescription.TrimEnd(), "game-definition.yaml", "datee_role_description");
             sb.Append("\n");
-            sb.AppendLine(opponentPrompt.TrimEnd(), "character-profile", "opponent-profile");
+            sb.AppendLine(dateePrompt.TrimEnd(), "character-profile", "datee-profile");
 
             sb.Append("\n");
 

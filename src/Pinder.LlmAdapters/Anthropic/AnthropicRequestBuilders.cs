@@ -121,14 +121,14 @@ namespace Pinder.LlmAdapters.Anthropic
                     }
                     currentMsg = new Message { Role = "user", Content = line.Substring("[PLAYER] ".Length) };
                 }
-                else if (line.StartsWith("[OPPONENT] "))
+                else if (line.StartsWith("[DATEE] "))
                 {
                     if (currentMsg != null)
                     {
                         currentMsg.Content = ((string)currentMsg.Content).TrimEnd('\r', '\n');
                         messages.Add(currentMsg);
                     }
-                    currentMsg = new Message { Role = "assistant", Content = line.Substring("[OPPONENT] ".Length) };
+                    currentMsg = new Message { Role = "assistant", Content = line.Substring("[DATEE] ".Length) };
                 }
                 else
                 {

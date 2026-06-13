@@ -121,7 +121,7 @@ OPTION_3 [STAT: Honesty] ""I just wanted to say hi."" [CALLBACK: turn_5] [COMBO:
         [Fact]
         public void ParseDialogueOptionsText_InnerDoubleQuotes_ParsesFullText()
         {
-            // The model quotes the opponent back inside the option's intended text.
+            // The model quotes the datee back inside the option's intended text.
             // Previously the leading-fragment regex truncated this at the first
             // inner double-quote (observed fragments like "see you said it's").
             var input = @"OPTION_1 [STAT: Wit] ""Interesting that you said ""it's a lot"" earlier — care to unpack that?"" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]";

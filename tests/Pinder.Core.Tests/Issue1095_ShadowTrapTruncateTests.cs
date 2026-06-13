@@ -82,7 +82,7 @@ namespace Pinder.Core.Tests
             var instructions = LoadYaml();
             var playerStats = MakeStats(allStats: 5, shadowOnPair: 10, pairStat: ShadowStatType.Despair);
             var player = MakeProfile("Sable", playerStats);
-            var opponent = MakeProfile("Brick", MakeStats(allStats: 0));
+            var datee = MakeProfile("Brick", MakeStats(allStats: 0));
 
             // Game dice (consumed in order): horniness 1d10, main d20, timing.
             //  - horninessDie == 0  → SessionHorniness = 0 → horniness overlay does NOT
@@ -102,7 +102,7 @@ namespace Pinder.Core.Tests
                 steeringRng: steeringRng,
                 statDeliveryInstructions: instructions,
                 playerShadows: playerShadows);
-            var session = new GameSession(player, opponent, llm, dice, new NullTrapRegistry(), config);
+            var session = new GameSession(player, datee, llm, dice, new NullTrapRegistry(), config);
             return (session, llm);
         }
 
@@ -231,12 +231,12 @@ namespace Pinder.Core.Tests
             public bool ShadowCorruptionCalled { get; private set; }
             public DialogueOption[] LastOptions { get; private set; } = System.Array.Empty<DialogueOption>();
 
-            public Task<StatefulOpponentResult> GetOpponentResponseAsync(
-                OpponentContext context,
+            public Task<StatefulDateeResult> GetDateeResponseAsync(
+                DateeContext context,
                 IReadOnlyList<ConversationMessage> history,
                 System.Threading.CancellationToken ct = default)
-                => Task.FromResult(new StatefulOpponentResult(
-                    new OpponentResponse("..."),
+                => Task.FromResult(new StatefulDateeResult(
+                    new DateeResponse("..."),
                     new ConversationMessage[]
                     {
                         ConversationMessage.User(string.Empty),
@@ -263,13 +263,13 @@ namespace Pinder.Core.Tests
                     : $"[{context.Outcome}] {intended}");
             }
 
-            public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context, System.Threading.CancellationToken ct = default)
-                => Task.FromResult(new OpponentResponse("..."));
+            public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
+                => Task.FromResult(new DateeResponse("..."));
 
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult<string?>(null);
 
-            public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
+            public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
                 => Task.FromResult(message);
 
             public Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
@@ -278,7 +278,7 @@ namespace Pinder.Core.Tests
                 return Task.FromResult(message + " [shadow:" + shadow + "]");
             }
 
-            public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
+            public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
                 => Task.FromResult(message);
 
             public Task<string> GetSteeringQuestionAsync(SteeringContext context, System.Threading.CancellationToken ct = default)

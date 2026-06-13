@@ -18,7 +18,7 @@ namespace Pinder.Core.Tests.Phase0
     /// The "externally observable state" being locked here is the public surface of
     /// <see cref="GameStateSnapshot"/>: interest, momentum streak, active traps,
     /// turn number, pending triple bonus. Internal/private fields are out of scope
-    /// (Phase 1's #788 will refactor opponent-conversation state out of the adapter,
+    /// (Phase 1's #788 will refactor datee-conversation state out of the adapter,
     /// changing internal layout but not <c>GameStateSnapshot</c>).
     /// </para>
     ///
@@ -67,7 +67,7 @@ namespace Pinder.Core.Tests.Phase0
             {
                 transportB2.QueueDialogueOptions(Phase0Fixtures.CannedDialogueOptions);
                 transportB2.QueueDelivery($"delivered-msg-T{t}");
-                transportB2.QueueOpponent($"opponent-reply-T{t}");
+                transportB2.QueueDatee($"datee-reply-T{t}");
             }
             var adapterB2 = Phase0Fixtures.MakeAdapter(transportB2);
             var diceB2 = new PlaybackDiceRoller(
@@ -76,7 +76,7 @@ namespace Pinder.Core.Tests.Phase0
                 15, 50);     // turn 3
             var sessionB2 = new GameSession(
                 Phase0Fixtures.MakeProfile("Player"),
-                Phase0Fixtures.MakeProfile("Opponent"),
+                Phase0Fixtures.MakeProfile("Datee"),
                 adapterB2, diceB2, new NullTrapRegistry(),
                 Phase0Fixtures.MakeConfig());
 
@@ -144,7 +144,7 @@ namespace Pinder.Core.Tests.Phase0
             {
                 transport.QueueDialogueOptions(Phase0Fixtures.CannedDialogueOptions);
                 transport.QueueDelivery($"delivered-msg-T{t}");
-                transport.QueueOpponent($"opponent-reply-T{t}");
+                transport.QueueDatee($"datee-reply-T{t}");
             }
 
             var adapter = Phase0Fixtures.MakeAdapter(transport);
@@ -158,7 +158,7 @@ namespace Pinder.Core.Tests.Phase0
 
             return new GameSession(
                 Phase0Fixtures.MakeProfile("Player"),
-                Phase0Fixtures.MakeProfile("Opponent"),
+                Phase0Fixtures.MakeProfile("Datee"),
                 adapter, dice, new NullTrapRegistry(),
                 Phase0Fixtures.MakeConfig());
         }

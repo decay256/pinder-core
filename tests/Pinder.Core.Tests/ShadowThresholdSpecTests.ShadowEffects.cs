@@ -290,7 +290,7 @@ namespace Pinder.Core.Tests
             var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: null);
             var session = new GameSession(
                 MakeProfile("player"),
-                MakeProfile("opponent"),
+                MakeProfile("datee"),
                 new NullLlmAdapter(),
                 new QueueDice(new[] { 15, 50 }),
                 new EmptyTrapRegistry(),

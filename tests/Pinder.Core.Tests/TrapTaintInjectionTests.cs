@@ -21,7 +21,7 @@ namespace Pinder.Core.Tests
     {
         public List<DialogueContext> DialogueContexts { get; } = new List<DialogueContext>();
         public List<DeliveryContext> DeliveryContexts { get; } = new List<DeliveryContext>();
-        public List<OpponentContext> OpponentContexts { get; } = new List<OpponentContext>();
+        public List<DateeContext> DateeContexts { get; } = new List<DateeContext>();
 
         public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, System.Threading.CancellationToken ct = default)
         {
@@ -45,19 +45,19 @@ namespace Pinder.Core.Tests
             return Task.FromResult(message);
         }
 
-        public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context, System.Threading.CancellationToken ct = default)
+        public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
         {
-            OpponentContexts.Add(context);
-            return Task.FromResult(new OpponentResponse("..."));
+            DateeContexts.Add(context);
+            return Task.FromResult(new DateeResponse("..."));
         }
 
         public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, System.Threading.CancellationToken ct = default)
         {
             return Task.FromResult<string?>(null);
         }
-        public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
+        public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
         public System.Threading.Tasks.Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
-        public System.Threading.Tasks.Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
+        public System.Threading.Tasks.Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
     }
 
     // ---------------------------------------------------------------
@@ -168,7 +168,7 @@ namespace Pinder.Core.Tests
                 {
                     ""id"": ""custom_rizz_trap"",
                     ""stat"": ""rizz"",
-                    ""effect"": ""opponent_dc_increase"",
+                    ""effect"": ""datee_dc_increase"",
                     ""effect_value"": 3,
                     ""duration_turns"": 4,
                     ""llm_instruction"": ""Your rizz has been tainted by custom trap."",
@@ -255,13 +255,13 @@ namespace Pinder.Core.Tests
             var json = @"[
                 { ""id"": ""t1"", ""stat"": ""charm"", ""effect"": ""disadvantage"", ""effect_value"": 0, ""duration_turns"": 1, ""llm_instruction"": ""i1"" },
                 { ""id"": ""t2"", ""stat"": ""rizz"", ""effect"": ""stat_penalty"", ""effect_value"": 2, ""duration_turns"": 1, ""llm_instruction"": ""i2"" },
-                { ""id"": ""t3"", ""stat"": ""wit"", ""effect"": ""opponent_dc_increase"", ""effect_value"": 3, ""duration_turns"": 1, ""llm_instruction"": ""i3"" }
+                { ""id"": ""t3"", ""stat"": ""wit"", ""effect"": ""datee_dc_increase"", ""effect_value"": 3, ""duration_turns"": 1, ""llm_instruction"": ""i3"" }
             ]";
 
             var repo = new JsonTrapRepository(json);
             Assert.Equal(TrapEffect.Disadvantage, repo.GetTrap(StatType.Charm)!.Effect);
             Assert.Equal(TrapEffect.StatPenalty, repo.GetTrap(StatType.Rizz)!.Effect);
-            Assert.Equal(TrapEffect.OpponentDCIncrease, repo.GetTrap(StatType.Wit)!.Effect);
+            Assert.Equal(TrapEffect.DateeDCIncrease, repo.GetTrap(StatType.Wit)!.Effect);
         }
 
         [Fact]

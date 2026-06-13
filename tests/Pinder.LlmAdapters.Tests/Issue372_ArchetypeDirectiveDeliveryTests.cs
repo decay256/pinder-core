@@ -12,7 +12,7 @@ namespace Pinder.LlmAdapters.Tests
     /// #372 / #375 \u2014 the active archetype directive must be injected into
     /// the <c>delivery</c> LLM user prompt for any character with a non-null
     /// ActiveArchetype. Before this fix, the directive only reached
-    /// <c>dialogue_options</c> + <c>opponent_response</c>, so the rewrite that
+    /// <c>dialogue_options</c> + <c>datee_response</c>, so the rewrite that
     /// produces the actually-sent message scrubbed the archetype voice.
     /// </summary>
     [Trait("Category", "LlmAdapters")]
@@ -28,15 +28,15 @@ namespace Pinder.LlmAdapters.Tests
         {
             return new DeliveryContext(
                 playerPrompt: "player prompt",
-                opponentPrompt: "opponent prompt",
+                dateePrompt: "datee prompt",
                 conversationHistory: new List<(string Sender, string Text)>(),
-                opponentLastMessage: "",
+                dateeLastMessage: "",
                 chosenOption: new DialogueOption(StatType.Charm, "ok cool"),
                 outcome: outcome,
                 beatDcBy: beatDcBy,
                 activeTraps: Array.Empty<string>(),
                 playerName: "P",
-                opponentName: "O",
+                dateeName: "O",
                 activeArchetypeDirective: activeArchetypeDirective);
         }
 

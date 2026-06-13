@@ -128,7 +128,7 @@ namespace Pinder.Core.Tests
         public async Task ThreeTurnSession_HighRolls_SuccessfulTurns()
         {
             // Each turn needs: d20 roll for RollEngine, d100 for TimingProfile.ComputeDelay
-            // With player stat mod +2, opponent allStats=0 → DC = 16 + 0 = 16
+            // With player stat mod +2, datee allStats=0 → DC = 16 + 0 = 16
             // Roll of 15: 15 + 2 + 0 = 17 >= 16 → success, beat by 1 → SuccessScale +1
             // need = 16 - 2 = 14 → Hard → RiskTierBonus +3. Total delta = 4.
             // Turn 3 starts at VeryIntoIt (interest=18) → advantage → 2 d20 rolls
@@ -143,11 +143,11 @@ namespace Pinder.Core.Tests
             );
 
             var player = MakeProfile("Player");
-            var opponent = MakeProfile("Opponent", 0);
+            var datee = MakeProfile("Datee", 0);
             var llm = new NullLlmAdapter();
             var traps = new NullTrapRegistry();
 
-            var session = new GameSession(player, opponent, llm, dice, traps,
+            var session = new GameSession(player, datee, llm, dice, traps,
                 new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             // Turn 1
@@ -281,7 +281,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task MomentumBonus_AppliedAsRollBonus()
         {
-            // 5 consecutive successes with player allStats=9, opponent allStats=0 → DC=16
+            // 5 consecutive successes with player allStats=9, datee allStats=0 → DC=16
             // roll=8: 8+9=17 ≥ 16 → success, margin=1 → scale=+1. need=7 → Safe → +1 risk bonus.
             // Momentum is a roll bonus (ExternalBonus), not an interest delta (#268).
             // streak 0→1: pending momentum=0, interestDelta = +1 scale +1 safe = 2
@@ -325,7 +325,7 @@ namespace Pinder.Core.Tests
         public async Task MomentumBonus_CanChangeOutcomeTier()
         {
             // AC: 3-win streak → next roll has +2 external bonus → can change outcome tier
-            // Player allStats=9, opponent allStats=0 → DC=16.
+            // Player allStats=9, datee allStats=0 → DC=16.
             // Setup: 3 successes with roll=8 (Total=17, DC=16, success), then
             // turn 4 with roll=5 (Total=14, DC=16 → normally fail). With +2 momentum,
             // FinalTotal=16 → success.
@@ -394,7 +394,7 @@ namespace Pinder.Core.Tests
                 clock: TestHelpers.MakeClock(),
                 steeringRng: new Random(0)); // seed 0 produces low roll → steering miss
             var session = new GameSession(
-                MakeProfile("Player"), MakeProfile("Opponent"),
+                MakeProfile("Player"), MakeProfile("Datee"),
                 new NullLlmAdapter(), dice, new NullTrapRegistry(), config);
 
             await session.StartTurnAsync();
@@ -403,7 +403,7 @@ namespace Pinder.Core.Tests
             // NullLlmAdapter echoes the intended text for success.
             // Steering may append a question; verify the base message is present.
             Assert.Contains("Hey, you come here often?", result.DeliveredMessage);
-            Assert.Equal("...", result.OpponentMessage);
+            Assert.Equal("...", result.DateeMessage);
         }
     }
 

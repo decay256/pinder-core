@@ -63,7 +63,7 @@ namespace Pinder.Core.Conversation
             GameSessionState state,
             int optionIndex,
             CharacterProfile player,
-            CharacterProfile opponent)
+            CharacterProfile datee)
         {
             var chosenOption = state.CurrentOptions![optionIndex];
 
@@ -136,7 +136,7 @@ namespace Pinder.Core.Conversation
                 optionIndex,
                 chosenOption,
                 player,
-                opponent,
+                datee,
                 _dice,
                 _trapRegistry,
                 null, // consequenceCatalog is not needed inside EvaluateRolls
@@ -218,7 +218,7 @@ namespace Pinder.Core.Conversation
             _shadowGrowthEvaluator?.EvaluatePerTurn(
                 chosenOption, optionIndex, rollResult, interestAfter, comboTriggered, hasTellOption,
                 state.CurrentOptions,
-                (chosen, opts) => GameSessionHelpers.IsHighestProbabilityOption(chosen, opts, player, opponent));
+                (chosen, opts) => GameSessionHelpers.IsHighestProbabilityOption(chosen, opts, player, datee));
 
             // Shadow reduction: Winning despite Overthinking disadvantage → Overthinking −1
             if (rollResult.IsSuccess

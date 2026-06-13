@@ -23,8 +23,8 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task ResolveTurn_SuccessDcLow_AwardsMultipliedXp()
         {
-            // Opponent stat 0 → DC = 16 + 0 = 16, need=16-3=13 → Hard (2x), base 5 → 10
-            var session = MakeSession(diceRoll: 15, opponentStatValue: 0);
+            // Datee stat 0 → DC = 16 + 0 = 16, need=16-3=13 → Hard (2x), base 5 → 10
+            var session = MakeSession(diceRoll: 15, dateeStatValue: 0);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -41,8 +41,8 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task ResolveTurn_SuccessDcMid_AwardsMultipliedXp()
         {
-            // Opponent stat 1 → DC = 16 + 1 = 17, need=17-3=14 → Hard (2x), base 10 → 20
-            var session = MakeSession(diceRoll: 18, opponentStatValue: 1);
+            // Datee stat 1 → DC = 16 + 1 = 17, need=17-3=14 → Hard (2x), base 10 → 20
+            var session = MakeSession(diceRoll: 18, dateeStatValue: 1);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -59,8 +59,8 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task ResolveTurn_SuccessDcHigh_AwardsMultipliedXp()
         {
-            // Opponent stat 5 → DC = 16 + 5 = 21, need=21-3=18 → Bold (3x), base 15 → 45
-            var session = MakeSession(diceRoll: 19, opponentStatValue: 5);
+            // Datee stat 5 → DC = 16 + 5 = 21, need=21-3=18 → Bold (3x), base 15 → 45
+            var session = MakeSession(diceRoll: 19, dateeStatValue: 5);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -79,7 +79,7 @@ namespace Pinder.Core.Tests
         public async Task ResolveTurn_Failure_Awards2Xp()
         {
             // Roll 5 + 3 = 8 < 13 → fail, not nat 1
-            var session = MakeSession(diceRoll: 5, opponentStatValue: 0);
+            var session = MakeSession(diceRoll: 5, dateeStatValue: 0);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -95,7 +95,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task ResolveTurn_Nat20_Awards25Xp_ReplacesSuccessTier()
         {
-            var session = MakeSession(diceRoll: 20, opponentStatValue: 0);
+            var session = MakeSession(diceRoll: 20, dateeStatValue: 0);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -112,7 +112,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task ResolveTurn_Nat1_Awards10Xp_ReplacesFailureXp()
         {
-            var session = MakeSession(diceRoll: 1, opponentStatValue: 0);
+            var session = MakeSession(diceRoll: 1, dateeStatValue: 0);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -131,7 +131,7 @@ namespace Pinder.Core.Tests
         {
             // Start at 24 interest, success pushes to 25+ → DateSecured
             var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 24);
-            var session = MakeSession(diceRoll: 15, opponentStatValue: 0, config: config);
+            var session = MakeSession(diceRoll: 15, dateeStatValue: 0, config: config);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -152,7 +152,7 @@ namespace Pinder.Core.Tests
         {
             // Start at 1 interest, failure drops to 0 → Unmatched
             var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 1);
-            var session = MakeSession(diceRoll: 2, opponentStatValue: 0, config: config);
+            var session = MakeSession(diceRoll: 2, dateeStatValue: 0, config: config);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -168,7 +168,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void Wait_Awards0Xp()
         {
-            var session = MakeSession(diceRoll: 15, opponentStatValue: 0);
+            var session = MakeSession(diceRoll: 15, dateeStatValue: 0);
             session.Wait();
             Assert.Equal(0, session.TotalXpEarned);
             Assert.Empty(session.XpLedger.Events);
@@ -179,7 +179,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task ResolveTurn_XpEarnedPopulatedEveryTurn()
         {
-            var session = MakeSession(diceRoll: 15, opponentStatValue: 0);
+            var session = MakeSession(diceRoll: 15, dateeStatValue: 0);
 
             await session.StartTurnAsync();
             var t1 = await session.ResolveTurnAsync(0);
@@ -195,7 +195,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task MultiTurn_TotalXpEarned_MatchesSumOfTurnXp()
         {
-            var session = MakeSession(diceRoll: 15, opponentStatValue: 0);
+            var session = MakeSession(diceRoll: 15, dateeStatValue: 0);
 
             await session.StartTurnAsync();
             var t1 = await session.ResolveTurnAsync(0);
@@ -214,7 +214,7 @@ namespace Pinder.Core.Tests
         public async Task ResolveTurn_DcExactly13_IsLowTier()
         {
             // need=16-3=13 → Hard (2x), base 5 → 10 (DC base is now 16)
-            var session = MakeSession(diceRoll: 15, opponentStatValue: 0); // DC = 16+0 = 16
+            var session = MakeSession(diceRoll: 15, dateeStatValue: 0); // DC = 16+0 = 16
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -228,7 +228,7 @@ namespace Pinder.Core.Tests
         public async Task ResolveTurn_DcExactly14_IsMidTier()
         {
             // need=17-3=14 → Hard (2x), base 10 → 20 (DC base is now 16)
-            var session = MakeSession(diceRoll: 18, opponentStatValue: 1); // DC = 16+1 = 17
+            var session = MakeSession(diceRoll: 18, dateeStatValue: 1); // DC = 16+1 = 17
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -241,8 +241,8 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task ResolveTurn_DcExactly17_IsMidTier()
         {
-            // need=20-3=17 → Bold (3x), base 10 → 30 (DC base is now 16, opponentStat=4 → DC=20)
-            var session2 = MakeSession(diceRoll: 18, opponentStatValue: 4); // DC = 16+4 = 20
+            // need=20-3=17 → Bold (3x), base 10 → 30 (DC base is now 16, dateeStat=4 → DC=20)
+            var session2 = MakeSession(diceRoll: 18, dateeStatValue: 4); // DC = 16+4 = 20
             await session2.StartTurnAsync();
             var result = await session2.ResolveTurnAsync(0);
 
@@ -258,8 +258,8 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task ResolveTurn_DcExactly18_IsHighTier()
         {
-            // need=21-3=18 → Bold (3x), base 15 → 45 (DC base is now 16, opponentStat=5 → DC=21)
-            var session = MakeSession(diceRoll: 19, opponentStatValue: 5); // DC = 16+5 = 21
+            // need=21-3=18 → Bold (3x), base 15 → 45 (DC base is now 16, dateeStat=5 → DC=21)
+            var session = MakeSession(diceRoll: 19, dateeStatValue: 5); // DC = 16+5 = 21
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -275,8 +275,8 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task ResolveTurn_DcAbove20_IsHighTier()
         {
-            // need=22-3=19 → Bold (3x), base 15 → 45 (DC base 16, opponentStat=6 → DC=22)
-            var session = MakeSession(diceRoll: 19, opponentStatValue: 6); // DC = 16+6 = 22
+            // need=22-3=19 → Bold (3x), base 15 → 45 (DC base 16, dateeStat=6 → DC=22)
+            var session = MakeSession(diceRoll: 19, dateeStatValue: 6); // DC = 16+6 = 22
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -293,7 +293,7 @@ namespace Pinder.Core.Tests
         public async Task ResolveTurn_DcBelow13_IsLowTier()
         {
             // need=16-3=13 → Hard (2x), base 5 → 10 (DC base is now 16)
-            var session = MakeSession(diceRoll: 15, opponentStatValue: 0);
+            var session = MakeSession(diceRoll: 15, dateeStatValue: 0);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -308,7 +308,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task ResolveTurn_Nat20LowDc_Awards25Not5()
         {
-            var session = MakeSession(diceRoll: 20, opponentStatValue: 0); // DC=16
+            var session = MakeSession(diceRoll: 20, dateeStatValue: 0); // DC=16
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -323,7 +323,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task ResolveTurn_Nat20HighDc_Awards25Not15()
         {
-            var session = MakeSession(diceRoll: 20, opponentStatValue: 5); // DC=18
+            var session = MakeSession(diceRoll: 20, dateeStatValue: 5); // DC=18
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -340,7 +340,7 @@ namespace Pinder.Core.Tests
         public async Task ResolveTurn_DateSecuredFinalTurn_XpEarnedIncludesBoth()
         {
             var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 24);
-            var session = MakeSession(diceRoll: 15, opponentStatValue: 0, config: config);
+            var session = MakeSession(diceRoll: 15, dateeStatValue: 0, config: config);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -358,7 +358,7 @@ namespace Pinder.Core.Tests
         public async Task ResolveTurn_FailurePlusUnmatched_BothXpRecorded()
         {
             var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 1);
-            var session = MakeSession(diceRoll: 2, opponentStatValue: 0, config: config);
+            var session = MakeSession(diceRoll: 2, dateeStatValue: 0, config: config);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -376,7 +376,7 @@ namespace Pinder.Core.Tests
         public async Task ResolveTurn_GameEndsFirstTurn_BothXpTypes()
         {
             var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 24);
-            var session = MakeSession(diceRoll: 15, opponentStatValue: 0, config: config);
+            var session = MakeSession(diceRoll: 15, dateeStatValue: 0, config: config);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -392,7 +392,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void GameSession_ExposesXpLedger()
         {
-            var session = MakeSession(diceRoll: 15, opponentStatValue: 0);
+            var session = MakeSession(diceRoll: 15, dateeStatValue: 0);
             Assert.NotNull(session.XpLedger);
         }
 
@@ -401,7 +401,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void GameSession_TotalXpEarned_StartsAtZero()
         {
-            var session = MakeSession(diceRoll: 15, opponentStatValue: 0);
+            var session = MakeSession(diceRoll: 15, dateeStatValue: 0);
             Assert.Equal(0, session.TotalXpEarned);
         }
 
@@ -412,7 +412,7 @@ namespace Pinder.Core.Tests
         {
             // All turns succeed with DC 16, Hard risk (2x), base 5 → 10 each
             // 3 turns = 30 XP total
-            var session = MakeSession(diceRoll: 15, opponentStatValue: 0);
+            var session = MakeSession(diceRoll: 15, dateeStatValue: 0);
 
             int totalFromTurns = 0;
 
@@ -442,25 +442,25 @@ namespace Pinder.Core.Tests
         public async Task SourceLabels_MatchSpecLabels()
         {
             // Verify Success_DC_Low label
-            var s1 = MakeSession(diceRoll: 15, opponentStatValue: 0);
+            var s1 = MakeSession(diceRoll: 15, dateeStatValue: 0);
             await s1.StartTurnAsync();
             await s1.ResolveTurnAsync(0);
             Assert.Contains(s1.XpLedger.Events, e => e.Source == "Success_DC_Low");
 
             // Verify Nat20 label
-            var s2 = MakeSession(diceRoll: 20, opponentStatValue: 0);
+            var s2 = MakeSession(diceRoll: 20, dateeStatValue: 0);
             await s2.StartTurnAsync();
             await s2.ResolveTurnAsync(0);
             Assert.Contains(s2.XpLedger.Events, e => e.Source == "Nat20");
 
             // Verify Failure label
-            var s3 = MakeSession(diceRoll: 5, opponentStatValue: 0);
+            var s3 = MakeSession(diceRoll: 5, dateeStatValue: 0);
             await s3.StartTurnAsync();
             await s3.ResolveTurnAsync(0);
             Assert.Contains(s3.XpLedger.Events, e => e.Source == "Failure");
 
             // Verify Nat1 label
-            var s4 = MakeSession(diceRoll: 1, opponentStatValue: 0);
+            var s4 = MakeSession(diceRoll: 1, dateeStatValue: 0);
             await s4.StartTurnAsync();
             await s4.ResolveTurnAsync(0);
             Assert.Contains(s4.XpLedger.Events, e => e.Source == "Nat1");

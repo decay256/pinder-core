@@ -62,7 +62,7 @@ def enrich_risk_reward(entries: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             for b in blocks:
                 if b.get('kind') == 'table':
                     for row in b.get('rows', []):
-                        behaviour = row.get('Opponent Behaviour', '')
+                        behaviour = row.get('Datee Behaviour', '')
                         defense = row.get('Defense Window', '')
                         reduction = row.get('DC Reduction', '')
                         if not behaviour:
@@ -78,16 +78,16 @@ def enrich_risk_reward(entries: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
                             'section': '§3',
                             'title': f'Weakness Trigger — {behaviour}',
                             'type': 'roll_modifier',
-                            'description': f'When opponent {behaviour.lower()}: {defense} DC {reduction}.',
-                            'condition': {'opponent_behaviour': behaviour},
+                            'description': f'When datee {behaviour.lower()}: {defense} DC {reduction}.',
+                            'condition': {'datee_behaviour': behaviour},
                             'outcome': {'dc_adjustment': dc_adj, 'defence_window': defense},
                         }
                         result.append(sub)
             result.append(e)
             continue
 
-        elif eid == '§3.opponent-weakness-window':
-            e['condition'] = {'opponent_behaviour': 'crack'}
+        elif eid == '§3.datee-weakness-window':
+            e['condition'] = {'datee_behaviour': 'crack'}
             e['outcome'] = {'dc_adjustment': -2}
 
         elif eid == '§4.callback-bonus':
@@ -215,7 +215,7 @@ def enrich_risk_reward(entries: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             result.append(e)
             continue
 
-        elif eid == '§7.opponent-tells-post-roll-feedback':
+        elif eid == '§7.datee-tells-post-roll-feedback':
             e['condition'] = {'action': 'tell_read'}
             e['outcome'] = {'roll_bonus': 2}
 
@@ -223,7 +223,7 @@ def enrich_risk_reward(entries: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             for b in blocks:
                 if b.get('kind') == 'table':
                     for row in b.get('rows', []):
-                        says = row.get('Opponent says/does', '')
+                        says = row.get('Datee says/does', '')
                         tell_stat = row.get('Tell stat (+2)', '')
                         if not says:
                             continue
@@ -233,8 +233,8 @@ def enrich_risk_reward(entries: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
                             'section': '§7',
                             'title': f'Tell — {says}',
                             'type': 'roll_modifier',
-                            'description': f'Opponent {says.lower()}: Tell stat {tell_stat} (+2).',
-                            'condition': {'opponent_behaviour': says},
+                            'description': f'Datee {says.lower()}: Tell stat {tell_stat} (+2).',
+                            'condition': {'datee_behaviour': says},
                             'outcome': {'roll_bonus': 2, 'tell_stat': tell_stat},
                         }
                         result.append(sub)

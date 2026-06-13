@@ -5,7 +5,7 @@ namespace Pinder.Core.Rolls
     /// </summary>
     public enum RollCheckKind
     {
-        /// <summary>Main option-roll check (d20 + stat mod + level vs opponent DC).</summary>
+        /// <summary>Main option-roll check (d20 + stat mod + level vs datee DC).</summary>
         OptionRoll,
 
         /// <summary>Steering roll that attempts to append a date-steering question.</summary>

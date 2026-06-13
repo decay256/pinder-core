@@ -16,24 +16,24 @@ namespace Pinder.LlmAdapters.Tests
         {
             return new DialogueContext(
                 playerPrompt: "You are a test player.",
-                opponentPrompt: "You are a test opponent.",
+                dateePrompt: "You are a test datee.",
                 conversationHistory: Array.Empty<(string, string)>(),
-                opponentLastMessage: "",
+                dateeLastMessage: "",
                 activeTraps: Array.Empty<string>(),
                 currentInterest: 12,
                 playerName: "TestPlayer",
-                opponentName: "TestOpponent",
+                dateeName: "TestDatee",
                 currentTurn: 1,
                 activeArchetypeDirective: activeArchetypeDirective);
         }
 
-        private static OpponentContext MakeOpponentContext(string activeArchetypeDirective = null)
+        private static DateeContext MakeDateeContext(string activeArchetypeDirective = null)
         {
-            return new OpponentContext(
+            return new DateeContext(
                 playerPrompt: "You are a test player.",
-                opponentPrompt: "You are a test opponent.",
+                dateePrompt: "You are a test datee.",
                 conversationHistory: Array.Empty<(string, string)>(),
-                opponentLastMessage: "",
+                dateeLastMessage: "",
                 activeTraps: Array.Empty<string>(),
                 currentInterest: 12,
                 playerDeliveredMessage: "hey",
@@ -41,7 +41,7 @@ namespace Pinder.LlmAdapters.Tests
                 interestAfter: 12,
                 responseDelayMinutes: 2.0,
                 playerName: "TestPlayer",
-                opponentName: "TestOpponent",
+                dateeName: "TestDatee",
                 currentTurn: 1,
                 activeArchetypeDirective: activeArchetypeDirective);
         }
@@ -64,19 +64,19 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Fact]
-        public void BuildOpponentPrompt_WithArchetypeDirective_InjectsIt()
+        public void BuildDateePrompt_WithArchetypeDirective_InjectsIt()
         {
-            var ctx = MakeOpponentContext("ACTIVE ARCHETYPE: The Love Bomber (dominant)\nOverwhelming affection.");
-            string prompt = SessionDocumentBuilder.BuildOpponentPrompt(ctx);
+            var ctx = MakeDateeContext("ACTIVE ARCHETYPE: The Love Bomber (dominant)\nOverwhelming affection.");
+            string prompt = SessionDocumentBuilder.BuildDateePrompt(ctx);
             Assert.Contains("ACTIVE ARCHETYPE: The Love Bomber (dominant)", prompt);
             Assert.Contains("Overwhelming affection.", prompt);
         }
 
         [Fact]
-        public void BuildOpponentPrompt_WithoutArchetypeDirective_DoesNotInject()
+        public void BuildDateePrompt_WithoutArchetypeDirective_DoesNotInject()
         {
-            var ctx = MakeOpponentContext(null);
-            string prompt = SessionDocumentBuilder.BuildOpponentPrompt(ctx);
+            var ctx = MakeDateeContext(null);
+            string prompt = SessionDocumentBuilder.BuildDateePrompt(ctx);
             Assert.DoesNotContain("ACTIVE ARCHETYPE:", prompt);
         }
     }

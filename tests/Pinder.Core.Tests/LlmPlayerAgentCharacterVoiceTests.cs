@@ -51,7 +51,7 @@ namespace Pinder.Core.Tests
                 Array.Empty<string>(), 0, null, 3,
                 playerSystemPrompt: "You are Gerald, a nervous overachiever.",
                 playerName: "Gerald",
-                opponentName: "Velvet");
+                dateeName: "Velvet");
 
             string prompt = agent.BuildPrompt(turn, context);
 
@@ -77,7 +77,7 @@ namespace Pinder.Core.Tests
                 MakeStats(), MakeStats(), 12, InterestState.Interested, 0,
                 Array.Empty<string>(), 0, null, 3,
                 playerName: "Gerald",
-                opponentName: "Velvet",
+                dateeName: "Velvet",
                 recentHistory: history.AsReadOnly());
 
             string prompt = agent.BuildPrompt(turn, context);

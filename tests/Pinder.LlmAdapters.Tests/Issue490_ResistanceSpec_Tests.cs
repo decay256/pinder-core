@@ -8,23 +8,23 @@ using Xunit;
 namespace Pinder.LlmAdapters.Tests
 {
     /// <summary>
-    /// Spec-driven tests for Issue #490: opponent resistance below Interest 25.
+    /// Spec-driven tests for Issue #490: datee resistance below Interest 25.
     /// Tests verify behavior described in docs/specs/issue-490-spec.md.
     /// Each test has a mutation comment explaining what code change would cause failure.
     /// </summary>
     public class Issue490_ResistanceSpec_Tests
     {
         /// <summary>
-        /// Helper to construct a minimal OpponentContext with the given interest.
+        /// Helper to construct a minimal DateeContext with the given interest.
         /// </summary>
-        private static OpponentContext MakeContext(int interestAfter, int interestBefore = -1)
+        private static DateeContext MakeContext(int interestAfter, int interestBefore = -1)
         {
             if (interestBefore < 0) interestBefore = interestAfter;
-            return new OpponentContext(
+            return new DateeContext(
                 playerPrompt: "player prompt",
-                opponentPrompt: "opponent prompt",
-                conversationHistory: new List<(string, string)> { ("Player", "hey"), ("Opponent", "hi") },
-                opponentLastMessage: "hi",
+                dateePrompt: "datee prompt",
+                conversationHistory: new List<(string, string)> { ("Player", "hey"), ("Datee", "hi") },
+                dateeLastMessage: "hi",
                 activeTraps: Array.Empty<string>(),
                 currentInterest: interestAfter,
                 playerDeliveredMessage: "hey there",
@@ -32,19 +32,19 @@ namespace Pinder.LlmAdapters.Tests
                 interestAfter: interestAfter,
                 responseDelayMinutes: 1.0,
                 playerName: "Player",
-                opponentName: "Opponent");
+                dateeName: "Datee");
         }
 
         // ═══════════════════════════════════════════════════════════
         // AC1: Fundamental resistance rule is included in prompt
         // ═══════════════════════════════════════════════════════════
 
-        // Fails if: the resistance rule constant is removed or not injected into BuildOpponentPrompt
+        // Fails if: the resistance rule constant is removed or not injected into BuildDateePrompt
         [Fact]
-        public void AC1_BuildOpponentPrompt_ContainsFundamentalResistanceRule()
+        public void AC1_BuildDateePrompt_ContainsFundamentalResistanceRule()
         {
             var ctx = MakeContext(12);
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(ctx);
+            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
 
             Assert.Contains("Below Interest 25, you are not won over", result);
         }
@@ -57,7 +57,7 @@ namespace Pinder.LlmAdapters.Tests
         public void AC1_ResistanceRulePresent_BelowDateSecured(int interest)
         {
             var ctx = MakeContext(interest);
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(ctx);
+            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
 
             Assert.Contains("resistance is always present underneath", result);
         }
@@ -75,7 +75,7 @@ namespace Pinder.LlmAdapters.Tests
         public void AC2_Interest1To4_ShowsActiveDisengagement(int interest)
         {
             var ctx = MakeContext(interest);
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(ctx);
+            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
 
             Assert.Contains("Active disengagement", result);
             Assert.Contains($"Current interest: {interest}/25", result);
@@ -93,7 +93,7 @@ namespace Pinder.LlmAdapters.Tests
         public void AC3_Interest10To14_ShowsUnstableAgreement(int interest)
         {
             var ctx = MakeContext(interest);
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(ctx);
+            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
 
             Assert.Contains("Unstable agreement", result);
             Assert.Contains($"Current interest: {interest}/25", result);
@@ -111,7 +111,7 @@ namespace Pinder.LlmAdapters.Tests
         public void AC4_Interest21To24_ShowsSubtleResistance(int interest)
         {
             var ctx = MakeContext(interest);
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(ctx);
+            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
 
             Assert.Contains("Almost convinced", result);
             Assert.Contains($"Current interest: {interest}/25", result);
@@ -126,7 +126,7 @@ namespace Pinder.LlmAdapters.Tests
         public void AC5_Interest25_ResistanceDissolves()
         {
             var ctx = MakeContext(25);
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(ctx);
+            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
 
             Assert.Contains("Resistance dissolved", result);
             Assert.Contains("Current interest: 25/25", result);
@@ -137,9 +137,9 @@ namespace Pinder.LlmAdapters.Tests
         public void AC5_Interest25_DoesNotContainNotWonOverLanguage()
         {
             var ctx = MakeContext(25);
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(ctx);
+            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
 
-            // At 25 the opponent IS won over, so "not won over" should not appear
+            // At 25 the datee IS won over, so "not won over" should not appear
             // (The fundamental rule says "Below Interest 25, you are not won over")
             // At 25, a different framing should be used.
             Assert.DoesNotContain("Active disengagement", result);
@@ -158,7 +158,7 @@ namespace Pinder.LlmAdapters.Tests
         public void Interest5To9_ShowsSkepticalInterest(int interest)
         {
             var ctx = MakeContext(interest);
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(ctx);
+            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
 
             Assert.Contains("Skeptical interest", result);
             Assert.Contains($"Current interest: {interest}/25", result);
@@ -176,7 +176,7 @@ namespace Pinder.LlmAdapters.Tests
         public void Interest15To20_ShowsDeliberateApproach(int interest)
         {
             var ctx = MakeContext(interest);
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(ctx);
+            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
 
             Assert.Contains("Deliberate approach", result);
             Assert.Contains($"Current interest: {interest}/25", result);
@@ -191,7 +191,7 @@ namespace Pinder.LlmAdapters.Tests
         public void Interest0_ReturnsDisengagement()
         {
             var ctx = MakeContext(0);
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(ctx);
+            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
 
             Assert.Contains("Active disengagement", result);
             Assert.Contains("Current interest: 0/25", result);
@@ -308,7 +308,7 @@ namespace Pinder.LlmAdapters.Tests
         public void SectionPlacement_FundamentalRulePresent()
         {
             var ctx = MakeContext(12);
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(ctx);
+            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
 
             Assert.Contains("FUNDAMENTAL RULE", result);
         }
@@ -352,7 +352,7 @@ namespace Pinder.LlmAdapters.Tests
         public void ResistanceBlock_AlwaysPresent_AtEveryInterestLevel(int interest)
         {
             var ctx = MakeContext(interest);
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(ctx);
+            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
 
             // The prompt should always contain the resistance section
             Assert.Contains("FUNDAMENTAL RULE", result);

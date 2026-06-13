@@ -56,9 +56,9 @@ namespace Pinder.Core.Tests.Phase0
         }
 
         // I3.2 — phase ordering on a single happy-path turn is exactly the canonical
-        // sequence: dialogue_options → delivery → opponent_response.
+        // sequence: dialogue_options → delivery → datee_response.
         [Fact]
-        public async Task SingleTurn_PhaseOrder_IsExactlyOptionsThenDeliveryThenOpponent()
+        public async Task SingleTurn_PhaseOrder_IsExactlyOptionsThenDeliveryThenDatee()
         {
             var exchanges = await ExecuteFixtureRunAsync();
             var phases = exchanges.Select(e => e.Phase).ToArray();
@@ -68,7 +68,7 @@ namespace Pinder.Core.Tests.Phase0
             // sequence. Any new always-on phase would land here and fail this
             // test, prompting an explicit decision instead of a silent leak.
             Assert.Equal(
-                new[] { LlmPhase.DialogueOptions, LlmPhase.Delivery, LlmPhase.OpponentResponse },
+                new[] { LlmPhase.DialogueOptions, LlmPhase.Delivery, LlmPhase.DateeResponse },
                 phases);
         }
 
@@ -110,14 +110,14 @@ namespace Pinder.Core.Tests.Phase0
             var transport = new RecordingLlmTransport { DefaultResponse = "" };
             transport.QueueDialogueOptions(Phase0Fixtures.CannedDialogueOptions);
             transport.QueueDelivery(Phase0Fixtures.CannedDelivery);
-            transport.QueueOpponent(Phase0Fixtures.CannedOpponent);
+            transport.QueueDatee(Phase0Fixtures.CannedDatee);
 
             var adapter = Phase0Fixtures.MakeAdapter(transport);
             var dice = new PlaybackDiceRoller(5, 15, 50);
 
             var session = new GameSession(
                 Phase0Fixtures.MakeProfile("Player"),
-                Phase0Fixtures.MakeProfile("Opponent"),
+                Phase0Fixtures.MakeProfile("Datee"),
                 adapter, dice, new NullTrapRegistry(),
                 Phase0Fixtures.MakeConfig(steeringSeed: 12345));
 

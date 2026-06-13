@@ -5,59 +5,59 @@ namespace Pinder.Rules.Tests
 {
     public partial class GameDefinitionYamlContentTests
     {
-        // ===== AC2 / AC4: Opponent role description content requirements =====
+        // ===== AC2 / AC4: Datee role description content requirements =====
 
-        // Mutation: would catch if opponent role omits resistance below Interest 25
+        // Mutation: would catch if datee role omits resistance below Interest 25
         [Fact]
-        public void OpponentRole_MentionsResistanceBelowTwentyFive()
+        public void DateeRole_MentionsResistanceBelowTwentyFive()
         {
             var data = ParseYaml();
-            var opponent = data["opponent_role_description"];
+            var datee = data["datee_role_description"];
             Assert.True(
-                opponent.Contains("resist", StringComparison.OrdinalIgnoreCase) ||
-                opponent.Contains("not won over", StringComparison.OrdinalIgnoreCase) ||
-                opponent.Contains("holdback", StringComparison.OrdinalIgnoreCase),
-                "Opponent role must establish resistance below Interest 25");
+                datee.Contains("resist", StringComparison.OrdinalIgnoreCase) ||
+                datee.Contains("not won over", StringComparison.OrdinalIgnoreCase) ||
+                datee.Contains("holdback", StringComparison.OrdinalIgnoreCase),
+                "Datee role must establish resistance below Interest 25");
         }
 
-        // Mutation: would catch if opponent role omits that it's another player's character
+        // Mutation: would catch if datee role omits that it's another player's character
         [Fact]
-        public void OpponentRole_MentionsOtherPlayerCharacter()
+        public void DateeRole_MentionsOtherPlayerCharacter()
         {
             var data = ParseYaml();
-            var opponent = data["opponent_role_description"];
+            var datee = data["datee_role_description"];
             Assert.True(
-                opponent.Contains("player", StringComparison.OrdinalIgnoreCase) &&
-                (opponent.Contains("uploaded", StringComparison.OrdinalIgnoreCase) ||
-                 opponent.Contains("puppet", StringComparison.OrdinalIgnoreCase) ||
-                 opponent.Contains("another", StringComparison.OrdinalIgnoreCase) ||
-                 opponent.Contains("other", StringComparison.OrdinalIgnoreCase)),
-                "Opponent role must mention the opponent is another player's uploaded character");
+                datee.Contains("player", StringComparison.OrdinalIgnoreCase) &&
+                (datee.Contains("uploaded", StringComparison.OrdinalIgnoreCase) ||
+                 datee.Contains("puppet", StringComparison.OrdinalIgnoreCase) ||
+                 datee.Contains("another", StringComparison.OrdinalIgnoreCase) ||
+                 datee.Contains("other", StringComparison.OrdinalIgnoreCase)),
+                "Datee role must mention the datee is another player's uploaded character");
         }
 
-        // Mutation: would catch if opponent role omits failure tier reaction guidance
+        // Mutation: would catch if datee role omits failure tier reaction guidance
         [Fact]
-        public void OpponentRole_MentionsFailureReactions()
+        public void DateeRole_MentionsFailureReactions()
         {
             var data = ParseYaml();
-            var opponent = data["opponent_role_description"];
+            var datee = data["datee_role_description"];
             Assert.True(
-                opponent.Contains("fail", StringComparison.OrdinalIgnoreCase) ||
-                opponent.Contains("tier", StringComparison.OrdinalIgnoreCase),
-                "Opponent role must mention reacting to failure tiers");
+                datee.Contains("fail", StringComparison.OrdinalIgnoreCase) ||
+                datee.Contains("tier", StringComparison.OrdinalIgnoreCase),
+                "Datee role must mention reacting to failure tiers");
         }
 
-        // Mutation: would catch if opponent role omits Date Secured at 25
+        // Mutation: would catch if datee role omits Date Secured at 25
         [Fact]
-        public void OpponentRole_MentionsDateSecured()
+        public void DateeRole_MentionsDateSecured()
         {
             var data = ParseYaml();
-            var opponent = data["opponent_role_description"];
+            var datee = data["datee_role_description"];
             Assert.True(
-                opponent.Contains("Date Secured", StringComparison.Ordinal) ||
-                (opponent.Contains("25", StringComparison.Ordinal) &&
-                 opponent.Contains("resist", StringComparison.OrdinalIgnoreCase)),
-                "Opponent role must mention Date Secured / resistance dissolving at 25");
+                datee.Contains("Date Secured", StringComparison.Ordinal) ||
+                (datee.Contains("25", StringComparison.Ordinal) &&
+                 datee.Contains("resist", StringComparison.OrdinalIgnoreCase)),
+                "Datee role must mention Date Secured / resistance dissolving at 25");
         }
 
         // ===== AC2 / AC4: Meta contract content requirements =====
@@ -214,7 +214,7 @@ namespace Pinder.Rules.Tests
             var data = ParseYaml();
             // All content sections should be multi-line (contain newlines)
             foreach (var key in new[] { "world_description", "player_role_description",
-                                        "opponent_role_description", "narrative_doctrine" })
+                                        "datee_role_description", "narrative_doctrine" })
             {
                 Assert.Contains("\n", data[key]);
             }

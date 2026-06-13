@@ -123,17 +123,17 @@ namespace Pinder.Core.Tests
         }
 
         // ──────────────────────────────────────────────────────────────────────────
-        // Bug 2: opponent_dc_increase trap effect should raise effective DC
+        // Bug 2: datee_dc_increase trap effect should raise effective DC
         // ──────────────────────────────────────────────────────────────────────────
 
         [Fact]
-        public void Bug2_OpponentDCIncrease_RaisesEffectiveDC()
+        public void Bug2_DateeDCIncrease_RaisesEffectiveDC()
         {
             // Charm=0, defender SA=0 → base DC=16
-            // Active trap with OpponentDCIncrease +3 → effective DC=19
+            // Active trap with DateeDCIncrease +3 → effective DC=19
             // Roll 17: 17+0+0=17 beats base DC 16 but misses DC 19
             var trapDef = new TrapDefinition("dc-trap", StatType.Charm,
-                TrapEffect.OpponentDCIncrease, 3, 2, "instruction", "clear", "nat1");
+                TrapEffect.DateeDCIncrease, 3, 2, "instruction", "clear", "nat1");
             var traps = new TrapState();
             traps.Activate(trapDef);
 
@@ -151,12 +151,12 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public void Bug2_OpponentDCIncrease_AppliesInFixedDcPath()
+        public void Bug2_DateeDCIncrease_AppliesInFixedDcPath()
         {
             // Fixed DC path: fixedDc=14, trap adds +3 → effective DC=17
             // Roll 15: 15+0+0=15 < 17 → failure
             var trapDef = new TrapDefinition("dc-trap", StatType.Charm,
-                TrapEffect.OpponentDCIncrease, 3, 2, "instruction", "clear", "nat1");
+                TrapEffect.DateeDCIncrease, 3, 2, "instruction", "clear", "nat1");
             var traps = new TrapState();
             traps.Activate(trapDef);
 

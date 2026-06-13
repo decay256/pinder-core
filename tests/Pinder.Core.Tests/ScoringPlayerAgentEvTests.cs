@@ -69,7 +69,7 @@ namespace Pinder.Core.Tests
 
         private static PlayerAgentContext MakeContext(
             StatBlock? player = null,
-            StatBlock? opponent = null,
+            StatBlock? datee = null,
             int interest = 10,
             InterestState state = InterestState.Interested,
             int momentum = 0,
@@ -78,7 +78,7 @@ namespace Pinder.Core.Tests
         {
             return new PlayerAgentContext(
                 player ?? MakeStats(charm: 3, rizz: 2, honesty: 1, chaos: 2, wit: 2, sa: 1),
-                opponent ?? MakeStats(charm: 1, rizz: 1, honesty: 1, chaos: 1, wit: 1, sa: 1),
+                datee ?? MakeStats(charm: 1, rizz: 1, honesty: 1, chaos: 1, wit: 1, sa: 1),
                 interest,
                 state,
                 momentum,
@@ -99,16 +99,16 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task LowSuccess_WithCombo_ScoresLowerThanHighSuccess_WithCombo()
         {
-            // Option A: high success (~55%). Player charm=3, opponent SA=0 → DC=13, need=10
-            // Option B: low success (~15%). Player rizz=0, opponent Wit=5 → DC=18, need=18
+            // Option A: high success (~55%). Player charm=3, datee SA=0 → DC=13, need=10
+            // Option B: low success (~15%). Player rizz=0, datee Wit=5 → DC=18, need=18
             var player = MakeStats(charm: 3, rizz: 0);
-            var opponent = MakeStats(sa: 0, wit: 5);
+            var datee = MakeStats(sa: 0, wit: 5);
 
             var highSuccessCombo = MakeOption(StatType.Charm, comboName: "TheCombo");
             var lowSuccessCombo = MakeOption(StatType.Rizz, comboName: "TheCombo");
 
             var turn = MakeTurn(highSuccessCombo, lowSuccessCombo);
-            var context = MakeContext(player: player, opponent: opponent);
+            var context = MakeContext(player: player, datee: datee);
 
             var decision = await _agent.DecideAsync(turn, context);
 
@@ -129,16 +129,16 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task ComboBonus_ScaledDown_WhenSuccessBelow20Percent()
         {
-            // Player SA=0, opponent Honesty=5 → DC=18, need=18 → success=15%
+            // Player SA=0, datee Honesty=5 → DC=18, need=18 → success=15%
             var player = MakeStats(sa: 0);
-            var opponent = MakeStats(honesty: 5);
+            var datee = MakeStats(honesty: 5);
 
             var withCombo = MakeOption(StatType.SelfAwareness, comboName: "SomeCombo");
             var withoutCombo = MakeOption(StatType.SelfAwareness);
 
             var turnCombo = MakeTurn(withCombo);
             var turnNoCombo = MakeTurn(withoutCombo);
-            var context = MakeContext(player: player, opponent: opponent);
+            var context = MakeContext(player: player, datee: datee);
 
             var decisionCombo = await _agent.DecideAsync(turnCombo, context);
             var decisionNoCombo = await _agent.DecideAsync(turnNoCombo, context);
@@ -161,16 +161,16 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task ComboBonus_NotScaled_WhenSuccessAbove20Percent()
         {
-            // Player charm=6, opponent SA=0 → DC=16, need=10 → success=55%
+            // Player charm=6, datee SA=0 → DC=16, need=10 → success=55%
             var player = MakeStats(charm: 6);
-            var opponent = MakeStats(sa: 0);
+            var datee = MakeStats(sa: 0);
 
             var withCombo = MakeOption(StatType.Charm, comboName: "SomeCombo");
             var withoutCombo = MakeOption(StatType.Charm);
 
             var turnCombo = MakeTurn(withCombo);
             var turnNoCombo = MakeTurn(withoutCombo);
-            var context = MakeContext(player: player, opponent: opponent);
+            var context = MakeContext(player: player, datee: datee);
 
             var decisionCombo = await _agent.DecideAsync(turnCombo, context);
             var decisionNoCombo = await _agent.DecideAsync(turnNoCombo, context);
@@ -199,14 +199,14 @@ namespace Pinder.Core.Tests
             // Both have same success chance area, but B's failures are more costly.
             var playerA = MakeStats(charm: 10);
             var playerB = MakeStats(rizz: 3);
-            var opponent = MakeStats(sa: 0, wit: 0); // DC=13 for both
+            var datee = MakeStats(sa: 0, wit: 0); // DC=13 for both
 
             // Charm: need=13-10=3, success=90%, failures are miss 1-2 (Fumble only)
             // Rizz: need=13-3=10, success=55%, failures span all tiers up to TropeTrap
             var turnA = MakeTurn(MakeOption(StatType.Charm));
             var turnB = MakeTurn(MakeOption(StatType.Rizz));
-            var contextA = MakeContext(player: playerA, opponent: opponent);
-            var contextB = MakeContext(player: playerB, opponent: opponent);
+            var contextA = MakeContext(player: playerA, datee: datee);
+            var contextB = MakeContext(player: playerB, datee: datee);
 
             var decisionA = await _agent.DecideAsync(turnA, contextA);
             var decisionB = await _agent.DecideAsync(turnB, contextB);
@@ -224,13 +224,13 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task HighNeed_WeightedFailCost_MakesEvStronglyNegative()
         {
-            // Player SA=0, opponent Honesty=5 → DC=18, need=18 → success=15%
+            // Player SA=0, datee Honesty=5 → DC=18, need=18 → success=15%
             // Most failures (rolls 2-17) miss by 1..17 → spans all tiers including Catastrophe
             var player = MakeStats(sa: 0);
-            var opponent = MakeStats(honesty: 5);
+            var datee = MakeStats(honesty: 5);
 
             var turn = MakeTurn(MakeOption(StatType.SelfAwareness));
-            var context = MakeContext(player: player, opponent: opponent);
+            var context = MakeContext(player: player, datee: datee);
 
             var decision = await _agent.DecideAsync(turn, context);
 
@@ -250,19 +250,19 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task Option15Pct_TropeTrapRange_ScoresLowerThan_Option50Pct()
         {
-            // Option with ~15% success: need=18 (DC=18, player charm=0, opponent SA=2)
+            // Option with ~15% success: need=18 (DC=18, player charm=0, datee SA=2)
             // Failures at need=18 include TropeTrap range (miss 6-9 for rolls 9-12)
             var playerLow = MakeStats(charm: 0);
-            var opponentHigh = MakeStats(sa: 2); // DC=16+2=18
+            var dateeHigh = MakeStats(sa: 2); // DC=16+2=18
 
-            // Option with ~50% success: need=11 (DC=16, player charm=5, opponent SA=0)
+            // Option with ~50% success: need=11 (DC=16, player charm=5, datee SA=0)
             var playerHigh = MakeStats(charm: 5);
-            var opponentLow = MakeStats(sa: 0); // DC=16
+            var dateeLow = MakeStats(sa: 0); // DC=16
 
             var turnLow = MakeTurn(MakeOption(StatType.Charm));
             var turnHigh = MakeTurn(MakeOption(StatType.Charm));
-            var contextLow = MakeContext(player: playerLow, opponent: opponentHigh);
-            var contextHigh = MakeContext(player: playerHigh, opponent: opponentLow);
+            var contextLow = MakeContext(player: playerLow, datee: dateeHigh);
+            var contextHigh = MakeContext(player: playerHigh, datee: dateeLow);
 
             var decisionLow = await _agent.DecideAsync(turnLow, contextLow);
             var decisionHigh = await _agent.DecideAsync(turnHigh, contextHigh);
@@ -288,11 +288,11 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task LowSuccess_WithTellAndCombo_StillNegativeEv()
         {
-            // Player SA=0, opponent Honesty=5 → DC=18
+            // Player SA=0, datee Honesty=5 → DC=18
             // With tell (+2): need=18-2=16 → success=25%
             // Without tell: need=18 → success=15%
             var player = MakeStats(sa: 0);
-            var opponent = MakeStats(honesty: 5);
+            var datee = MakeStats(honesty: 5);
 
             var optionWithBonuses = MakeOption(StatType.SelfAwareness,
                 comboName: "RecoveryCombo", hasTellBonus: true);
@@ -300,7 +300,7 @@ namespace Pinder.Core.Tests
 
             var turnBonuses = MakeTurn(optionWithBonuses);
             var turnPlain = MakeTurn(optionPlain);
-            var context = MakeContext(player: player, opponent: opponent);
+            var context = MakeContext(player: player, datee: datee);
 
             var decisionBonuses = await _agent.DecideAsync(turnBonuses, context);
             var decisionPlain = await _agent.DecideAsync(turnPlain, context);
@@ -326,16 +326,16 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task HighSuccess_ComboBonus_AppliedNormally()
         {
-            // Player charm=11, opponent SA=0 → DC=16, need=5 → success=80%
+            // Player charm=11, datee SA=0 → DC=16, need=5 → success=80%
             var player = MakeStats(charm: 11);
-            var opponent = MakeStats(sa: 0);
+            var datee = MakeStats(sa: 0);
 
             var withCombo = MakeOption(StatType.Charm, comboName: "SomeCombo");
             var withoutCombo = MakeOption(StatType.Charm);
 
             var turnCombo = MakeTurn(withCombo);
             var turnNoCombo = MakeTurn(withoutCombo);
-            var context = MakeContext(player: player, opponent: opponent);
+            var context = MakeContext(player: player, datee: datee);
 
             var decisionCombo = await _agent.DecideAsync(turnCombo, context);
             var decisionNoCombo = await _agent.DecideAsync(turnNoCombo, context);

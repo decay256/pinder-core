@@ -87,7 +87,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void BuildTurnSnapshot_AttachesPerTurnDiffsToCorrectPlayerEntry()
         {
-            // 3 turns, all with non-empty DeliveredMessage and OpponentMessage
+            // 3 turns, all with non-empty DeliveredMessage and DateeMessage
             // → conversationHistory has 6 entries (alternating P1/P2),
             // → perTurnTextDiffs has 3 entries.
             var conversationHistory = new List<(string Sender, string Text)>
@@ -124,7 +124,7 @@ namespace Pinder.Core.Tests
             Assert.Equal("turn2", Assert.Single(snap.ConversationHistory[2].TextDiffs).Layer);
             Assert.Equal("turn3", Assert.Single(snap.ConversationHistory[4].TextDiffs).Layer);
 
-            // Opponent entries (odd indices) carry no diffs.
+            // Datee entries (odd indices) carry no diffs.
             Assert.Empty(snap.ConversationHistory[1].TextDiffs);
             Assert.Empty(snap.ConversationHistory[3].TextDiffs);
             Assert.Empty(snap.ConversationHistory[5].TextDiffs);
@@ -151,19 +151,19 @@ namespace Pinder.Core.Tests
             // Turn 1 — both adds happen.
             ApplyTurn(conversationHistory, perTurnTextDiffs,
                 deliveredMessage: "p1 turn 1",
-                opponentMessage: "p2 turn 1",
+                dateeMessage: "p2 turn 1",
                 turnDiffs: Diffs("turn1"));
 
             // Turn 2 — empty DeliveredMessage; player entry skipped.
             ApplyTurn(conversationHistory, perTurnTextDiffs,
                 deliveredMessage: "",
-                opponentMessage: "p2 turn 2",
+                dateeMessage: "p2 turn 2",
                 turnDiffs: Diffs("turn2-should-not-appear"));
 
             // Turn 3 — both adds happen.
             ApplyTurn(conversationHistory, perTurnTextDiffs,
                 deliveredMessage: "p1 turn 3",
-                opponentMessage: "p2 turn 3",
+                dateeMessage: "p2 turn 3",
                 turnDiffs: Diffs("turn3"));
 
             // Core invariant the fix guarantees.
@@ -216,7 +216,7 @@ namespace Pinder.Core.Tests
             List<(string Sender, string Text)> conversationHistory,
             List<List<TextDiffSnapshot>> perTurnTextDiffs,
             string deliveredMessage,
-            string opponentMessage,
+            string dateeMessage,
             List<TextDiffSnapshot> turnDiffs)
         {
             if (!string.IsNullOrEmpty(deliveredMessage))
@@ -224,9 +224,9 @@ namespace Pinder.Core.Tests
                 conversationHistory.Add(("P1", deliveredMessage));
                 perTurnTextDiffs.Add(turnDiffs);
             }
-            if (!string.IsNullOrEmpty(opponentMessage))
+            if (!string.IsNullOrEmpty(dateeMessage))
             {
-                conversationHistory.Add(("P2", opponentMessage));
+                conversationHistory.Add(("P2", dateeMessage));
             }
         }
 
@@ -241,7 +241,7 @@ namespace Pinder.Core.Tests
             List<(string Sender, string Text)> conversationHistory,
             List<List<TextDiffSnapshot>> perTurnTextDiffs,
             string deliveredMessage,
-            string opponentMessage,
+            string dateeMessage,
             List<TextDiffSnapshot> turnDiffs)
         {
             if (!string.IsNullOrEmpty(deliveredMessage))
@@ -249,9 +249,9 @@ namespace Pinder.Core.Tests
             // Indented as if nested but actually outside the `if` —
             // exactly the bug.
                 perTurnTextDiffs.Add(turnDiffs);
-            if (!string.IsNullOrEmpty(opponentMessage))
+            if (!string.IsNullOrEmpty(dateeMessage))
             {
-                conversationHistory.Add(("P2", opponentMessage));
+                conversationHistory.Add(("P2", dateeMessage));
             }
         }
     }

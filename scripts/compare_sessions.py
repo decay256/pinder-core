@@ -82,9 +82,9 @@ def parse_turns(path):
             reply = " ".join(l.strip() for l in lines).strip()
         
         # Clean up model metadata leakage artifacts
-        # Remove [OPPONENT] tags
-        sent = re.sub(r'\[OPPONENT\]\s*', '', sent or '').strip()
-        reply = re.sub(r'\[OPPONENT\]\s*', '', reply or '').strip()
+        # Remove [DATEE] tags
+        sent = re.sub(r'\[DATEE\]\s*', '', sent or '').strip()
+        reply = re.sub(r'\[DATEE\]\s*', '', reply or '').strip()
         # Remove visible [Overlay applied: ...] reasoning text from models like Qwen3
         sent = re.sub(r'\n?>?\s*\[Overlay applied[^\]]*\]\s*', '', sent).strip()
         sent = re.sub(r'\n?>?\s*\[.+? applied[^\]]*\]\s*', '', sent).strip()

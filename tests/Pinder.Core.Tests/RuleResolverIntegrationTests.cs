@@ -106,7 +106,7 @@ namespace Pinder.Core.Tests
             // Dice: horniness roll (1d10) = 1, ghost check needs d4 (enqueue 4 = no ghost)
             var dice = new FixedDice(1, 4);
             var session = new GameSession(
-                MakeProfile("Player"), MakeProfile("Opponent"),
+                MakeProfile("Player"), MakeProfile("Datee"),
                 new NullLlmAdapter(), dice, new NullTrapRegistry(), config);
 
             // StartTurnAsync checks interest state for Bored check
@@ -125,10 +125,10 @@ namespace Pinder.Core.Tests
                 startingInterest: 10);
 
             // Dice: horniness (1d10)=1, d20 roll = 20 (auto-success, nat 20),
-            // then extra dice for timing delay, opponent response, etc.
+            // then extra dice for timing delay, datee response, etc.
             var dice = new FixedDice(1, 20, 50, 50, 50, 50, 50, 50);
             var session = new GameSession(
-                MakeProfile("Player"), MakeProfile("Opponent"),
+                MakeProfile("Player"), MakeProfile("Datee"),
                 new NullLlmAdapter(), dice, new NullTrapRegistry(), config);
 
             var start = await session.StartTurnAsync();
@@ -155,10 +155,10 @@ namespace Pinder.Core.Tests
                 startingInterest: 15);
 
             // Dice: horniness (1d10)=1, d20 roll = 2 (very likely to fail),
-            // plus extra for timing/opponent
+            // plus extra for timing/datee
             var dice = new FixedDice(1, 2, 50, 50, 50, 50, 50, 50);
             var session = new GameSession(
-                MakeProfile("Player"), MakeProfile("Opponent"),
+                MakeProfile("Player"), MakeProfile("Datee"),
                 new NullLlmAdapter(), dice, new NullTrapRegistry(), config);
 
             var start = await session.StartTurnAsync();
@@ -180,7 +180,7 @@ namespace Pinder.Core.Tests
             var dice = new FixedDice(1, 20, 50, 50, 50, 50, 50, 50);
             var config = new GameSessionConfig(clock: TestHelpers.MakeClock());
             var session = new GameSession(
-                MakeProfile("Player"), MakeProfile("Opponent"),
+                MakeProfile("Player"), MakeProfile("Datee"),
                 new NullLlmAdapter(), dice, new NullTrapRegistry(), config);
 
             var start = await session.StartTurnAsync();
@@ -200,7 +200,7 @@ namespace Pinder.Core.Tests
 
             var dice = new FixedDice(1, 20, 50, 50, 50, 50, 50, 50);
             var session = new GameSession(
-                MakeProfile("Player"), MakeProfile("Opponent"),
+                MakeProfile("Player"), MakeProfile("Datee"),
                 new NullLlmAdapter(), dice, new NullTrapRegistry(), config);
 
             var start = await session.StartTurnAsync();
@@ -229,7 +229,7 @@ namespace Pinder.Core.Tests
 
             var dice = new FixedDice(1); // horniness roll
             var session = new GameSession(
-                MakeProfile("Player"), MakeProfile("Opponent"),
+                MakeProfile("Player"), MakeProfile("Datee"),
                 new NullLlmAdapter(), dice, new NullTrapRegistry(), config);
 
             // The resolver returns T3 for any shadow value, so Dread T3 should trigger
@@ -254,7 +254,7 @@ namespace Pinder.Core.Tests
                 18, 50, 50, 50, 50, 50      // turn 3 if needed
             );
             var session = new GameSession(
-                MakeProfile("Player", 5), MakeProfile("Opponent"),
+                MakeProfile("Player", 5), MakeProfile("Datee"),
                 new NullLlmAdapter(), dice, new NullTrapRegistry(), config);
 
             // Turn 1

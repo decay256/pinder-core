@@ -109,12 +109,12 @@ namespace Pinder.Core.Tests
         public void Constructor_ValidArgs_SetsProperties()
         {
             var player = MakeStats();
-            var opponent = MakeStats();
-            var ctx = new PlayerAgentContext(player, opponent, 12, InterestState.Interested, 2,
+            var datee = MakeStats();
+            var ctx = new PlayerAgentContext(player, datee, 12, InterestState.Interested, 2,
                 new[] { "IckTrap" }, 4, null, 5);
 
             Assert.Same(player, ctx.PlayerStats);
-            Assert.Same(opponent, ctx.OpponentStats);
+            Assert.Same(datee, ctx.DateeStats);
             Assert.Equal(12, ctx.CurrentInterest);
             Assert.Equal(InterestState.Interested, ctx.InterestState);
             Assert.Equal(2, ctx.MomentumStreak);
@@ -133,7 +133,7 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public void Constructor_NullOpponentStats_Throws()
+        public void Constructor_NullDateeStats_Throws()
         {
             Assert.Throws<ArgumentNullException>(() =>
                 new PlayerAgentContext(MakeStats(), null!, 10, InterestState.Interested, 0,
@@ -168,7 +168,7 @@ namespace Pinder.Core.Tests
                 });
         }
 
-        private static StatBlock MakeOpponentStats()
+        private static StatBlock MakeDateeStats()
         {
             return new StatBlock(
                 new Dictionary<StatType, int>
@@ -184,9 +184,9 @@ namespace Pinder.Core.Tests
                 });
         }
 
-        private static PlayerAgentContext MakeContext(StatBlock player, StatBlock opponent)
+        private static PlayerAgentContext MakeContext(StatBlock player, StatBlock datee)
         {
-            return new PlayerAgentContext(player, opponent, 12, InterestState.Interested, 0,
+            return new PlayerAgentContext(player, datee, 12, InterestState.Interested, 0,
                 Array.Empty<string>(), 0, null, 1);
         }
 
@@ -195,7 +195,7 @@ namespace Pinder.Core.Tests
         {
             var agent = new HighestModAgent();
             var player = MakePlayerStats();
-            var opponent = MakeOpponentStats();
+            var datee = MakeDateeStats();
             var options = new[]
             {
                 new DialogueOption(StatType.Rizz, "rizz line"),   // mod +1
@@ -203,7 +203,7 @@ namespace Pinder.Core.Tests
                 new DialogueOption(StatType.Chaos, "chaos line"),  // mod +2
             };
             var turn = new TurnStart(options, new GameStateSnapshot(12, InterestState.Interested, 0, Array.Empty<string>(), 1));
-            var ctx = MakeContext(player, opponent);
+            var ctx = MakeContext(player, datee);
 
             var decision = await agent.DecideAsync(turn, ctx);
 
@@ -217,10 +217,10 @@ namespace Pinder.Core.Tests
         {
             var agent = new HighestModAgent();
             var player = MakePlayerStats();
-            var opponent = MakeOpponentStats();
+            var datee = MakeDateeStats();
             var options = new[] { new DialogueOption(StatType.Wit, "wit line") };
             var turn = new TurnStart(options, new GameStateSnapshot(10, InterestState.Interested, 0, Array.Empty<string>(), 1));
-            var ctx = MakeContext(player, opponent);
+            var ctx = MakeContext(player, datee);
 
             var decision = await agent.DecideAsync(turn, ctx);
 
@@ -233,9 +233,9 @@ namespace Pinder.Core.Tests
         {
             var agent = new HighestModAgent();
             var player = MakePlayerStats();
-            var opponent = MakeOpponentStats();
+            var datee = MakeDateeStats();
             var turn = new TurnStart(Array.Empty<DialogueOption>(), new GameStateSnapshot(10, InterestState.Interested, 0, Array.Empty<string>(), 1));
-            var ctx = MakeContext(player, opponent);
+            var ctx = MakeContext(player, datee);
 
             await Assert.ThrowsAsync<InvalidOperationException>(() => agent.DecideAsync(turn, ctx));
         }
@@ -244,7 +244,7 @@ namespace Pinder.Core.Tests
         public async Task DecideAsync_NullTurn_Throws()
         {
             var agent = new HighestModAgent();
-            var ctx = MakeContext(MakePlayerStats(), MakeOpponentStats());
+            var ctx = MakeContext(MakePlayerStats(), MakeDateeStats());
 
             await Assert.ThrowsAsync<ArgumentNullException>(() => agent.DecideAsync(null!, ctx));
         }
@@ -265,11 +265,11 @@ namespace Pinder.Core.Tests
         {
             var agent = new HighestModAgent();
             var player = MakePlayerStats();
-            var opponent = MakeOpponentStats();
+            var datee = MakeDateeStats();
             // Charm +4 vs SA defence DC = 16 + 2 = 18. Need 14. Success = (21-14)/20 = 0.35
             var options = new[] { new DialogueOption(StatType.Charm, "charm") };
             var turn = new TurnStart(options, new GameStateSnapshot(10, InterestState.Interested, 0, Array.Empty<string>(), 1));
-            var ctx = MakeContext(player, opponent);
+            var ctx = MakeContext(player, datee);
 
             var decision = await agent.DecideAsync(turn, ctx);
 
@@ -300,7 +300,7 @@ namespace Pinder.Core.Tests
                 new DialogueOption(StatType.Rizz, "b"),
             };
             var turn = new TurnStart(options, new GameStateSnapshot(10, InterestState.Interested, 0, Array.Empty<string>(), 1));
-            var ctx = MakeContext(equalStats, MakeOpponentStats());
+            var ctx = MakeContext(equalStats, MakeDateeStats());
 
             var decision = await agent.DecideAsync(turn, ctx);
 

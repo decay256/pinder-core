@@ -17,13 +17,13 @@ namespace Pinder.LlmAdapters.Tests
         public void GameDefinition_Constructor_SetsAll7Properties()
         {
             var gd = new GameDefinition(
-                "MyGame", "Vision1", "World1", "Player1", "Opponent1", "Doctrine1");
+                "MyGame", "Vision1", "World1", "Player1", "Datee1", "Doctrine1");
 
             Assert.Equal("MyGame", gd.Name);
             Assert.Equal("Vision1", gd.Vision);
             Assert.Equal("World1", gd.WorldDescription);
             Assert.Equal("Player1", gd.PlayerRoleDescription);
-            Assert.Equal("Opponent1", gd.OpponentRoleDescription);
+            Assert.Equal("Datee1", gd.DateeRoleDescription);
             Assert.Equal("Doctrine1", gd.NarrativeDoctrine);
         }
 
@@ -67,14 +67,14 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Equal("playerRoleDescription", ex.ParamName);
         }
 
-        // What: AC1 — constructor throws ArgumentNullException for null opponentRoleDescription
-        // Mutation: would catch if null check on opponentRoleDescription was removed
+        // What: AC1 — constructor throws ArgumentNullException for null dateeRoleDescription
+        // Mutation: would catch if null check on dateeRoleDescription was removed
         [Fact]
-        public void GameDefinition_Constructor_NullOpponentRoleDescription_ThrowsArgumentNullException()
+        public void GameDefinition_Constructor_NullDateeRoleDescription_ThrowsArgumentNullException()
         {
             var ex = Assert.Throws<ArgumentNullException>(() =>
                 new GameDefinition("N", "V", "W", "P", null!, "ND"));
-            Assert.Equal("opponentRoleDescription", ex.ParamName);
+            Assert.Equal("dateeRoleDescription", ex.ParamName);
         }
 
         // What: AC1 — constructor throws ArgumentNullException for null narrativeDoctrine
@@ -97,7 +97,7 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Equal("", gd.Vision);
             Assert.Equal("", gd.WorldDescription);
             Assert.Equal("", gd.PlayerRoleDescription);
-            Assert.Equal("", gd.OpponentRoleDescription);
+            Assert.Equal("", gd.DateeRoleDescription);
             Assert.Equal("", gd.NarrativeDoctrine);
         }
 
@@ -115,8 +115,8 @@ world_description: |
   beings navigating modern dating culture.
 player_role_description: |
   You are the player's character.
-opponent_role_description: |
-  You are the opponent.
+datee_role_description: |
+  You are the datee.
 narrative_doctrine: |
   Never break character.
   Write in texting register.
@@ -140,7 +140,7 @@ horniness_time_modifiers:
             Assert.Contains("sentient penises", gd.Vision);
             Assert.Contains("absurdist", gd.WorldDescription);
             Assert.Contains("player's character", gd.PlayerRoleDescription);
-            Assert.Contains("opponent", gd.OpponentRoleDescription);
+            Assert.Contains("datee", gd.DateeRoleDescription);
             Assert.Contains("break character", gd.NarrativeDoctrine);
             Assert.Contains("texting register", gd.NarrativeDoctrine);
         }
@@ -177,7 +177,7 @@ horniness_time_modifiers:
 name: Test
 world_description: w
 player_role_description: p
-opponent_role_description: o
+datee_role_description: o
 narrative_doctrine: nd
 global_dc_bias: 0
 horniness_time_modifiers:
@@ -200,7 +200,7 @@ horniness_time_modifiers:
 vision: v
 world_description: w
 player_role_description: p
-opponent_role_description: o
+datee_role_description: o
 narrative_doctrine: nd
 global_dc_bias: 0
 horniness_time_modifiers:
@@ -224,7 +224,7 @@ name: Test
 vision: ~
 world_description: wd
 player_role_description: p
-opponent_role_description: o
+datee_role_description: o
 narrative_doctrine: nd
 global_dc_bias: 0
 horniness_time_modifiers:
@@ -248,7 +248,7 @@ name: TestGame
 vision: v
 world_description: w
 player_role_description: p
-opponent_role_description: o
+datee_role_description: o
 narrative_doctrine: nd
 global_dc_bias: 0
 horniness_time_modifiers:
@@ -276,7 +276,7 @@ vision: |
   Line two.
 world_description: w
 player_role_description: p
-opponent_role_description: o
+datee_role_description: o
 narrative_doctrine: nd
 global_dc_bias: 0
 horniness_time_modifiers:

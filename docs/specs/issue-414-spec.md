@@ -7,7 +7,7 @@
 
 ## Overview
 
-Replace the hardcoded character stat blocks and prompt-file paths in `session-runner/Program.cs` with command-line argument parsing and a new `CharacterLoader` utility class. The runner should accept `--player <name>` and `--opponent <name>` arguments, resolve the corresponding prompt files from `design/examples/`, parse them into `CharacterProfile` instances, and wire them into `GameSession`. This also adds `--max-turns` (default 20) and `--agent` arguments to the CLI. Running with no args or invalid args prints usage and lists available characters.
+Replace the hardcoded character stat blocks and prompt-file paths in `session-runner/Program.cs` with command-line argument parsing and a new `CharacterLoader` utility class. The runner should accept `--player <name>` and `--datee <name>` arguments, resolve the corresponding prompt files from `design/examples/`, parse them into `CharacterProfile` instances, and wire them into `GameSession`. This also adds `--max-turns` (default 20) and `--agent` arguments to the CLI. Running with no args or invalid args prints usage and lists available characters.
 
 ---
 
@@ -62,13 +62,13 @@ The `Main(string[] args)` method is modified to:
 ```
 CLI usage:
   dotnet run --project session-runner -- \
-    --player <name> --opponent <name> \
+    --player <name> --datee <name> \
     [--max-turns <n>] [--agent scoring|llm]
 
 Examples:
-  dotnet run --project session-runner -- --player gerald --opponent velvet
-  dotnet run --project session-runner -- --player sable --opponent brick --max-turns 30
-  dotnet run --project session-runner -- --player gerald --opponent zyx --agent llm
+  dotnet run --project session-runner -- --player gerald --datee velvet
+  dotnet run --project session-runner -- --player sable --datee brick --max-turns 30
+  dotnet run --project session-runner -- --player gerald --datee zyx --agent llm
 ```
 
 No new public C# method signatures are added to `Program`; the CLI contract is the public interface.
@@ -81,7 +81,7 @@ No new public C# method signatures are added to `Program`; the CLI contract is t
 
 **Input (CLI):**
 ```
-dotnet run --project session-runner -- --player gerald --opponent velvet
+dotnet run --project session-runner -- --player gerald --datee velvet
 ```
 
 **Behavior:**
@@ -100,7 +100,7 @@ dotnet run --project session-runner
 
 **Output (stderr, exit code 1):**
 ```
-Usage: dotnet run --project session-runner -- --player <name> --opponent <name> [--max-turns <n>] [--agent scoring|llm]
+Usage: dotnet run --project session-runner -- --player <name> --datee <name> [--max-turns <n>] [--agent scoring|llm]
 
 Available characters: brick, gerald, sable, velvet, zyx
 ```
@@ -111,7 +111,7 @@ The available characters list is generated dynamically by scanning `*-prompt.md`
 
 **Input (CLI):**
 ```
-dotnet run --project session-runner -- --player chad --opponent velvet
+dotnet run --project session-runner -- --player chad --datee velvet
 ```
 
 **Output (stderr, exit code 1):**
@@ -172,9 +172,9 @@ EFFECTIVE STATS
 
 ## Acceptance Criteria
 
-### AC1: `--player` and `--opponent` CLI arguments
+### AC1: `--player` and `--datee` CLI arguments
 
-The session runner accepts `--player <name>` and `--opponent <name>` as required command-line arguments. Both are case-insensitive. The `<name>` value maps to a prompt file at `{basePath}/{name.ToLower()}-prompt.md`.
+The session runner accepts `--player <name>` and `--datee <name>` as required command-line arguments. Both are case-insensitive. The `<name>` value maps to a prompt file at `{basePath}/{name.ToLower()}-prompt.md`.
 
 All hardcoded stat blocks (`sableStats`, `brickStats`), hardcoded names (`"Gerald_42"`, `"Velvet"`), hardcoded levels (`p1Level = 5`, `p2Level = 7`), and hardcoded `File.ReadAllText` calls for prompt files are removed from `Program.cs`. Character data comes exclusively from `CharacterLoader.Load()`.
 
@@ -188,7 +188,7 @@ The runner accepts `--agent scoring|llm` with a default of `scoring`. This repla
 
 ### AC4: Usage + available characters on bad input
 
-When run with no arguments, missing required arguments (`--player` or `--opponent`), or unrecognized arguments, the runner prints a usage message to stderr listing all available options and dynamically-discovered character names, then exits with code 1.
+When run with no arguments, missing required arguments (`--player` or `--datee`), or unrecognized arguments, the runner prints a usage message to stderr listing all available options and dynamically-discovered character names, then exits with code 1.
 
 ### AC5: `CharacterLoader.Load` parses prompt files correctly
 
@@ -248,8 +248,8 @@ Print error `"--max-turns must be a positive integer"` and exit 1.
 ### `--max-turns` not a number
 Print error `"--max-turns must be a positive integer"` and exit 1.
 
-### Same player and opponent
-Allowed. `--player gerald --opponent gerald` is a valid invocation (Gerald talking to himself). No special handling needed.
+### Same player and datee
+Allowed. `--player gerald --datee gerald` is a valid invocation (Gerald talking to himself). No special handling needed.
 
 ### Base path resolution
 The examples directory path should be resolved similarly to the existing pattern in `Program.cs` (currently hardcoded as `/root/.openclaw/agents-extra/pinder/design/examples`). The path can remain hardcoded for prototype maturity or be resolved via `DataFileLocator` if #415 has merged. If the directory does not exist, print an error with the attempted path and exit 1.
@@ -262,7 +262,7 @@ The examples directory path should be resolved similarly to the existing pattern
 |---|---|---|
 | `ANTHROPIC_API_KEY` not set | stderr + exit 1 | `"ANTHROPIC_API_KEY not set"` (unchanged) |
 | Missing `--player` | stderr + exit 1 | `"Missing required argument: --player\n{usage}"` |
-| Missing `--opponent` | stderr + exit 1 | `"Missing required argument: --opponent\n{usage}"` |
+| Missing `--datee` | stderr + exit 1 | `"Missing required argument: --datee\n{usage}"` |
 | Unknown argument | stderr + exit 1 | `"Unknown argument: --foo\n{usage}"` |
 | Character not found | `FileNotFoundException` → stderr + exit 1 | `"Character '{name}' not found at {path}\nAvailable characters: {list}"` |
 | Prompt file parse failure | `FormatException` → stderr + exit 1 | `"Failed to parse character '{name}': {detail}"` |
@@ -297,7 +297,7 @@ All error paths write to `Console.Error` (stderr) and return exit code `1`. Exce
 
 3. **Level bonus computation:** `CharacterProfile` does not expose `LevelBonus` directly. Compute it from the level via `Pinder.Core.Progression.LevelTable.GetLevelBonus(level)` if that method is available, or parse the `Level bonus: +N` line from the prompt file.
 
-4. **The header output section** (character table, DC reference table) currently references `sableStats`/`brickStats` directly. After this change, use `playerProfile.Stats` and `opponentProfile.Stats`. Level and level bonus come from the profile.
+4. **The header output section** (character table, DC reference table) currently references `sableStats`/`brickStats` directly. After this change, use `playerProfile.Stats` and `dateeProfile.Stats`. Level and level bonus come from the profile.
 
 5. **`--agent` supersedes `PLAYER_AGENT` env var.** The env var check (`Environment.GetEnvironmentVariable("PLAYER_AGENT")`) is removed. The `--agent` CLI argument is the sole source.
 

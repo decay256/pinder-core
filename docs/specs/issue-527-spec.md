@@ -39,7 +39,7 @@ This feature does not introduce new classes or functions; it modifies the inline
 
 ## Acceptance Criteria
 
-- **Bio as bold italic paragraph**: The player and opponent bios are printed immediately before the stat table using the exact format specified by the architecture contract: `***{Player} bio:*** *{Bio text}*`. (If quotes are desired, `***{Player} bio:*** *"{Bio text}"*` is acceptable).
+- **Bio as bold italic paragraph**: The player and datee bios are printed immediately before the stat table using the exact format specified by the architecture contract: `***{Player} bio:*** *{Bio text}*`. (If quotes are desired, `***{Player} bio:*** *"{Bio text}"*` is acceptable).
 - **Bio row removed**: The `| Bio | "{bio}" | "{bio}" |` row is removed entirely from the `## Characters` markdown table.
 - **Build clean**: The changes compile without warnings or errors.
 

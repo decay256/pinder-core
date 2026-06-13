@@ -25,7 +25,7 @@ namespace Pinder.Core.Tests
             shadows.ApplyGrowth(ShadowStatType.Despair, 3, "setup");
             shadows.DrainGrowthEvents();
 
-            // Interest starts at 19, SA success. SA=5, opponent wit=0 → DC=16.
+            // Interest starts at 19, SA success. SA=5, datee wit=0 → DC=16.
             // Roll 18 + 5 = 23 vs 16 → success. Interest should go up (still >18 after).
             var session = BuildSession(
                 dice: Dice(18, 50),
@@ -73,7 +73,7 @@ namespace Pinder.Core.Tests
             shadows.DrainGrowthEvents();
 
             // Interest starts low so even with bonuses interestAfter stays ≤18.
-            // SA=5, opponent wit=0 → DC=16. Roll 12+5=17 vs DC 16 → success, beat by 1.
+            // SA=5, datee wit=0 → DC=16. Roll 12+5=17 vs DC 16 → success, beat by 1.
             // Start at 5 → interestAfter = 5 + delta (at most ~5), well below 18.
             var session = BuildSession(
                 dice: Dice(12, 50),
@@ -97,11 +97,11 @@ namespace Pinder.Core.Tests
             shadows.ApplyGrowth(ShadowStatType.Despair, 3, "setup");
             shadows.DrainGrowthEvents();
 
-            // SA=0, opponent wit=0 → DC=16. Roll 5+0=5 vs 16 → miss. No reduction.
+            // SA=0, datee wit=0 → DC=16. Roll 5+0=5 vs 16 → miss. No reduction.
             var session = BuildSession(
                 dice: Dice(5, 50),
                 playerStats: Stats(sa: 0),
-                opponentStats: Stats(wit: 0),
+                dateeStats: Stats(wit: 0),
                 shadows: shadows,
                 startingInterest: 19,
                 options: new[] { new DialogueOption(StatType.SelfAwareness, "reflect") });
@@ -136,7 +136,7 @@ namespace Pinder.Core.Tests
             shadows.ApplyGrowth(ShadowStatType.Overthinking, 3, "setup");
             shadows.DrainGrowthEvents();
 
-            // Interest starts at 20, Charm=5, opponent wit=0 → DC=16.
+            // Interest starts at 20, Charm=5, datee wit=0 → DC=16.
             // Roll 18+5=23 vs 16 → success. interestAfter ≥ 20.
             var session = BuildSession(
                 dice: Dice(18, 50),
@@ -183,7 +183,7 @@ namespace Pinder.Core.Tests
             shadows.DrainGrowthEvents();
 
             // Interest starts at 20 (VeryIntoIt → advantage, rolls 2 d20s).
-            // SA=0, opponent honesty=1 → DC=14. Both d20s must be low.
+            // SA=0, datee honesty=1 → DC=14. Both d20s must be low.
             // Dice: d20a=2, d20b=3, d100(delay)=50.
             var session = BuildSession(
                 dice: Dice(2, 3, 50),

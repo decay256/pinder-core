@@ -296,7 +296,7 @@
   type: table
   blocks:
   - kind: paragraph
-    text: As you level up, you get a flat bonus to ALL rolls. This is how you outscale opponent defenses over time — and how shadows remain threatening even at high level (they eat into the bonus).
+    text: As you level up, you get a flat bonus to ALL rolls. This is how you outscale datee defenses over time — and how shadows remain threatening even at high level (they eat into the bonus).
   - kind: table
     rows:
     - Level: 1-2
@@ -316,7 +316,7 @@
     - '-------'
   - kind: paragraph
     text: '**Your roll = d20 + stat modifier + level bonus**'
-  description: As you level up, you get a flat bonus to ALL rolls. This is how you outscale opponent defenses over time — and how shadows remain threatening even at high level (they eat into the bonus).
+  description: As you level up, you get a flat bonus to ALL rolls. This is how you outscale datee defenses over time — and how shadows remain threatening even at high level (they eat into the bonus).
   heading_level: 3
   compact_heading: true
 - id: §4.effective-stats-example
@@ -404,13 +404,13 @@
 
     Base Charm 13 (gear included), Madness 4'
   heading_level: 3
-- id: §3.3-the-other-character-opponent
+- id: §3.3-the-other-character-datee
   section: §3
-  title: 3. The Other Character (Opponent)
+  title: 3. The Other Character (Datee)
   type: table
   blocks:
   - kind: paragraph
-    text: The opponent is another player's uploaded character. Their stats determine **defense DCs.**
+    text: The datee is another player's uploaded character. Their stats determine **defense DCs.**
   - kind: paragraph
     text: '**Defense DC = 16 + their stat modifier**'
   - kind: table
@@ -437,7 +437,7 @@
     - '----------'
     - '-----------------'
     - '-----'
-  description: The opponent is another player's uploaded character. Their stats determine **defense DCs.**
+  description: The datee is another player's uploaded character. Their stats determine **defense DCs.**
   heading_level: 2
 - id: §5.dc-examples
   section: §5
@@ -445,42 +445,42 @@
   type: interest_change
   blocks:
   - kind: paragraph
-    text: 'Opponent Velvet: Self-Awareness 12 (mod +1) → **DC to Charm her = 17**. Velvet''s Chaos 14 (mod +1) → **DC for Honesty = 17** (she can receive vulnerability; she''s been through enough to not
+    text: 'Datee Velvet: Self-Awareness 12 (mod +1) → **DC to Charm her = 17**. Velvet''s Chaos 14 (mod +1) → **DC for Honesty = 17** (she can receive vulnerability; she''s been through enough to not
       flinch).
 
-      Opponent Gerald: SA 4 (mod -3) → **DC to Charm him = 13** (easy — he doesn''t see through flattery). Gerald''s Rizz 11 (mod +0) → **DC for Wit = 16** (average — he can hold his own against cleverness
+      Datee Gerald: SA 4 (mod -3) → **DC to Charm him = 13** (easy — he doesn''t see through flattery). Gerald''s Rizz 11 (mod +0) → **DC for Wit = 16** (average — he can hold his own against cleverness
       but won''t dominate it).'
   - kind: paragraph
-    text: '**The opponent''s build creates their personality AND their mechanical difficulty.** A character with max Denial is hard to reach emotionally. A character with low Wit is easy to impress with
+    text: '**The datee''s build creates their personality AND their mechanical difficulty.** A character with max Denial is hard to reach emotionally. A character with low Wit is easy to impress with
       cleverness. Their build IS their dating personality.'
-  description: 'Opponent Velvet: Self-Awareness 12 (mod +1) → **DC to Charm her = 17**. Velvet''s Chaos 14 (mod +1) → **DC for Honesty = 17** (she can receive vulnerability; she''s been through enough to
+  description: 'Datee Velvet: Self-Awareness 12 (mod +1) → **DC to Charm her = 17**. Velvet''s Chaos 14 (mod +1) → **DC for Honesty = 17** (she can receive vulnerability; she''s been through enough to
     not flinch).
 
-    Opponent Gerald: SA 4 (mod -3) → **DC to Charm him = 13** (easy — he doesn''t see through flattery). Gerald''s Rizz 11 (mod +0) → **DC for Wit = 16** (average — he can hold his own against cleverness
+    Datee Gerald: SA 4 (mod -3) → **DC to Charm him = 13** (easy — he doesn''t see through flattery). Gerald''s Rizz 11 (mod +0) → **DC for Wit = 16** (average — he can hold his own against cleverness
     but won''t dominate it).'
   heading_level: 3
   condition:
     formula: defense_dc
   outcome:
     base_dc: 16
-    addend: opponent_stat_modifier
-- id: §5.level-bonus-vs-opponent-dc-the-spread
+    addend: datee_stat_modifier
+- id: §5.level-bonus-vs-datee-dc-the-spread
   section: §5
-  title: Level Bonus vs Opponent DC — The Spread
+  title: Level Bonus vs Datee DC — The Spread
   type: table
   blocks:
   - kind: table
     rows:
     - Your level bonus: +0 (Lvl 1-2)
-      Opponent DC 11 (weak defender): Need 11+ (50%)
+      Datee DC 11 (weak defender): Need 11+ (50%)
       DC 17 (average): Need 17+ (20%)
       DC 17 (strong): Need 17+ (20%)
     - Your level bonus: +2 (Lvl 5-6)
-      Opponent DC 11 (weak defender): Need 9+ (60%)
+      Datee DC 11 (weak defender): Need 9+ (60%)
       DC 17 (average): Need 15+ (30%)
       DC 17 (strong): Need 15+ (30%)
     - Your level bonus: +4 (Lvl 9-10)
-      Opponent DC 11 (weak defender): Need 7+ (70%)
+      Datee DC 11 (weak defender): Need 7+ (70%)
       DC 17 (average): Need 13+ (40%)
       DC 17 (strong): Need 13+ (40%)
     sep_cells:
@@ -502,7 +502,7 @@
     - '-------'
     - '-------'
   - kind: paragraph
-    text: '**That''s real progression.** Level 1 with no build points is genuinely hard — most rolls below 50%. A maxed Level 10 with heavy investment feels powerful against average opponents but still
+    text: '**That''s real progression.** Level 1 with no build points is genuinely hard — most rolls below 50%. A maxed Level 10 with heavy investment feels powerful against average datees but still
       sweats against strong ones. And shadows can drag that +6 down to +3 or worse.'
   - kind: blank_lines
     count: 3
@@ -521,8 +521,8 @@
   type: shadow_growth
   blocks:
   - kind: paragraph
-    text: '**d20 + stat modifier (after shadow) + level bonus ≥ opponent''s defense DC**'
-  description: '**d20 + stat modifier (after shadow) + level bonus ≥ opponent''s defense DC**'
+    text: '**d20 + stat modifier (after shadow) + level bonus ≥ datee''s defense DC**'
+  description: '**d20 + stat modifier (after shadow) + level bonus ≥ datee''s defense DC**'
   heading_level: 3
   compact_heading: true
   condition:
@@ -540,7 +540,7 @@
 
       ╔══════════════════════════════════════════════════╗
 
-      ║  🎭 Opponent: Velvet (uploaded by player#4821)   ║
+      ║  🎭 Datee: Velvet (uploaded by player#4821)   ║
 
       ║  "what''s your take on pineapple pizza            ║
 
@@ -834,7 +834,7 @@
   section: §7
   title: Trope Trap — Honesty
   type: trap_activation
-  description: 'Honesty miss by 6+: The Overshare. Opponent''s Chaos defense +2 (they become harder to reach with honesty — they''ve seen your chaos, they''re braced for more), 1 turn.'
+  description: 'Honesty miss by 6+: The Overshare. Datee''s Chaos defense +2 (they become harder to reach with honesty — they''ve seen your chaos, they''re braced for more), 1 turn.'
   condition:
     failed_stat: Honesty
     miss_minimum: 6
@@ -860,7 +860,7 @@
   section: §7
   title: Trope Trap — Wit
   type: trap_activation
-  description: 'Wit miss by 6+: The Pretentious. Opponent''s Rizz defense +3 (they stop being impressed and start being dismissive — boldness beats condescension), 1 turn.'
+  description: 'Wit miss by 6+: The Pretentious. Datee''s Rizz defense +3 (they stop being impressed and start being dismissive — boldness beats condescension), 1 turn.'
   condition:
     failed_stat: Wit
     miss_minimum: 6
@@ -900,7 +900,7 @@
     - Failed Stat: Honesty
       Trap: '**The Overshare**'
       What Your Message Becomes: You meant to share one thing. You shared everything. The divorce. The therapist. The Costco membership. Steve.
-      Status Effect: Opponent's Chaos defense +2 (they become harder to reach with honesty — they've seen your chaos, they're braced for more), 1 turn
+      Status Effect: Datee's Chaos defense +2 (they become harder to reach with honesty — they've seen your chaos, they're braced for more), 1 turn
     - Failed Stat: Chaos
       Trap: '**The Unhinged**'
       What Your Message Becomes: Your random humor isn't random-fun. It's random-concerning.
@@ -908,7 +908,7 @@
     - Failed Stat: Wit
       Trap: '**The Pretentious**'
       What Your Message Becomes: You tried clever. You got condescending. There may be a TED talk reference.
-      Status Effect: Opponent's Rizz defense +3 (they stop being impressed and start being dismissive — boldness beats condescension), 1 turn
+      Status Effect: Datee's Rizz defense +3 (they stop being impressed and start being dismissive — boldness beats condescension), 1 turn
     - Failed Stat: Self-Awareness
       Trap: '**The Spiral**'
       What Your Message Becomes: You started acknowledging the awkwardness and couldn't stop. You narrated your own failure. In real time. For three messages.
@@ -1614,7 +1614,7 @@
   description: >
     After a successful delivery, a steering roll fires automatically.
     Modifier: average of player (SA + CHARM + WIT) / 3.
-    DC: 16 + average of opponent (SA + RIZZ + HONESTY) / 3.
+    DC: 16 + average of datee (SA + RIZZ + HONESTY) / 3.
     On success: LLM generates a date-steering question appended to the delivered message.
     Uses a separate RNG (does not consume game dice).
   condition:
@@ -1624,7 +1624,7 @@
     on_failure: no effect
   formula:
     modifier: (player.SA + player.CHARM + player.WIT) / 3
-    dc: 16 + (opponent.SA + opponent.RIZZ + opponent.HONESTY) / 3
+    dc: 16 + (datee.SA + datee.RIZZ + datee.HONESTY) / 3
     rng: separate (non-game dice)
 - id: §9.horniness-ambient-overlay
   section: §9
@@ -1810,12 +1810,12 @@
   section: §9
   title: Shadow Threshold — Overthinking T3
   type: shadow_growth
-  description: 'Overthinking at 18: You see opponent''s inner monologue (freeze).'
+  description: 'Overthinking at 18: You see datee''s inner monologue (freeze).'
   condition:
     shadow: Overthinking
     threshold: 18
   outcome:
-    effect: You see opponent's inner monologue (freeze)
+    effect: You see datee's inner monologue (freeze)
 - id: §9.shadow-threshold.despair.t1
   section: §9
   title: Shadow Threshold — Despair T1
@@ -1898,7 +1898,7 @@
     - Shadow: '**Overthinking**'
       At 6: You see Interest number always (TMI)
       At 12: Self-Awareness has disadvantage
-      At 18+: You see opponent's inner monologue (freeze)
+      At 18+: You see datee's inner monologue (freeze)
     - Shadow: '**Despair**'
       At 6: Shadow check DC 14 (30% fail) — neediness leaks into messages
       At 12: Shadow check DC 8 (65% fail) — performed magnetism overtakes message
@@ -1937,9 +1937,9 @@
     actions:
     - Speak
     - Wait
-- id: §10.opponent-turn.interest-1-4
+- id: §10.datee-turn.interest-1-4
   section: §10
-  title: Opponent Turn — Interest 1-4
+  title: Datee Turn — Interest 1-4
   type: interest_change
   description: 'At interest 1-4: .'
   condition:
@@ -1947,10 +1947,10 @@
     - 1
     - 4
   outcome:
-    opponent_action: ''
-- id: §10.opponent-turn.interest-5-9
+    datee_action: ''
+- id: §10.datee-turn.interest-5-9
   section: §10
-  title: Opponent Turn — Interest 5-9
+  title: Datee Turn — Interest 5-9
   type: interest_change
   description: 'At interest 5-9: .'
   condition:
@@ -1958,10 +1958,10 @@
     - 5
     - 9
   outcome:
-    opponent_action: ''
-- id: §10.opponent-turn.interest-10-14
+    datee_action: ''
+- id: §10.datee-turn.interest-10-14
   section: §10
-  title: Opponent Turn — Interest 10-14
+  title: Datee Turn — Interest 10-14
   type: interest_change
   description: 'At interest 10-14: .'
   condition:
@@ -1969,10 +1969,10 @@
     - 10
     - 14
   outcome:
-    opponent_action: ''
-- id: §10.opponent-turn.interest-15-18
+    datee_action: ''
+- id: §10.datee-turn.interest-15-18
   section: §10
-  title: Opponent Turn — Interest 15-18
+  title: Datee Turn — Interest 15-18
   type: interest_change
   description: 'At interest 15-18: .'
   condition:
@@ -1980,10 +1980,10 @@
     - 15
     - 18
   outcome:
-    opponent_action: ''
-- id: §10.opponents-turn-llm-controlled
+    datee_action: ''
+- id: §10.datees-turn-llm-controlled
   section: §10
-  title: Opponent's Turn (LLM-controlled)
+  title: Datee's Turn (LLM-controlled)
   type: table
   blocks:
   - kind: paragraph
@@ -2402,7 +2402,7 @@
       Playstyle: No weakness, no strength. Survives everything, excels at nothing.
     - Build: Smooth Criminal
       Allocation: Charm +4, Rizz +4, Wit +2, Honesty +1, SA +1
-      Playstyle: High floor against most opponents. Collapses if they see through you.
+      Playstyle: High floor against most datees. Collapses if they see through you.
     - Build: Authentic Intellectual
       Allocation: Wit +4, Honesty +4, SA +4
       Playstyle: High ceiling on emotional connection. Terrible at pure seduction.
@@ -2411,7 +2411,7 @@
       Playstyle: Volatile. Explosive upside, spectacular failures. Traps constantly.
     - Build: The Mirror
       Allocation: SA +4, Honesty +4, Wit +3, Charm +1
-      Playstyle: Great at reading opponents and adapting. Terrible opener.
+      Playstyle: Great at reading datees and adapting. Terrible opener.
     sep_cells:
     - '---'
     - '---'
@@ -2437,11 +2437,11 @@
     - Combo: '**Wit + Honesty**'
       Synergy: '"Authentic Intellectual" — wit sets up honest moments; both benefit from The Disarm combo'
     - Combo: '**Charm + Rizz**'
-      Synergy: '"Smooth Criminal" — most options feel natural; vulnerable to Self-Awareness opponents'
+      Synergy: '"Smooth Criminal" — most options feel natural; vulnerable to Self-Awareness datees'
     - Combo: '**Chaos + Rizz**'
       Synergy: '"Chaos Seduction" — activates The Escalation combo; Trope Trap fires often but can recover'
     - Combo: '**SA + Honesty**'
-      Synergy: '"The Reader" — activates The Read combo; great against low-Honesty opponents whose reads are unreliable'
+      Synergy: '"The Reader" — activates The Read combo; great against low-Honesty datees whose reads are unreliable'
     - Combo: '**Wit + Charm**'
       Synergy: '"The Comedian" — activates The Setup combo; charming people who''ve already laughed'
     sep_cells:
@@ -2461,7 +2461,7 @@
   - kind: blockquote
     text: '**Full prompt templates → [[character-construction]]**
 
-      All 8 LLM prompts: character system prompt, dialogue option generation, success delivery, failure degradation (with stat-specific tier instructions from delivery-instructions.yaml), opponent message generation, shadow taint block, trap taint
+      All 8 LLM prompts: character system prompt, dialogue option generation, success delivery, failure degradation (with stat-specific tier instructions from delivery-instructions.yaml), datee message generation, shadow taint block, trap taint
       block, and interest change beats. Failure delivery uses the stat''s paired shadow voice (e.g. RIZZ → DESPAIR, WIT → OVERTHINKING) at the appropriate tier (fumble/misfire/trope_trap/catastrophe/nat1).'
   description: ''
   heading_level: 2
@@ -2471,14 +2471,14 @@
   type: interest_change
   blocks:
   - kind: paragraph
-    text: '1. **Opponent''s messages** — from their uploaded personality prompt (equipment fragments + stats), Interest level, convo history
+    text: '1. **Datee''s messages** — from their uploaded personality prompt (equipment fragments + stats), Interest level, convo history
 
       2. **Your dialogue options** — 3-4 per turn, each tagged with a stat. The player sees what they INTEND to say.
 
       3. **What actually comes out** — on success: the intended message, delivered well. On fail: a degraded version scaled to fail severity.
 
       4. **Trap descriptions** — on 6+ miss: the stat-specific trope trap moment'
-  description: '1. **Opponent''s messages** — from their uploaded personality prompt (equipment fragments + stats), Interest level, convo history
+  description: '1. **Datee''s messages** — from their uploaded personality prompt (equipment fragments + stats), Interest level, convo history
 
     2. **Your dialogue options** — 3-4 per turn, each tagged with a stat. The player sees what they INTEND to say.
 
@@ -2549,7 +2549,7 @@
     text: '**Async multi-chat & time system → [[async-time]]**
 
       Energy budget (15-20 turns/day), simulated timestamps, time-of-day Despair modifiers, response delay as Interest signal, cross-chat shadow bleed. Conversations run asynchronously with simulated
-      time — you can fast-forward, but the opponent''s timing profile (set by their equipment) shapes how and when they reply.'
+      time — you can fast-forward, but the datee''s timing profile (set by their equipment) shapes how and when they reply.'
   description: ''
   heading_level: 2
 - id: §14.character-upload

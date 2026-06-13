@@ -10,9 +10,9 @@ namespace Pinder.LlmAdapters
     public static partial class SessionDocumentBuilder
     {
         /// <summary>
-        /// Computes the opponent response length ceiling from the player's message length.
+        /// Computes the datee response length ceiling from the player's message length.
         /// Formula: ceiling = min(600, max(playerLen × 2, 80)).
-        /// #866: reciprocal length budget — opponent response shouldn't be wildly longer
+        /// #866: reciprocal length budget — datee response shouldn't be wildly longer
         /// than the player's message.
         /// </summary>
         public static int ComputeResponseCeiling(int playerMessageLength)
@@ -58,18 +58,18 @@ namespace Pinder.LlmAdapters
             return "Unmatched \U0001f480";
         }
 
-        private static string GetThresholdInstruction(int before, int after, InterestState newState, string opponentName)
+        private static string GetThresholdInstruction(int before, int after, InterestState newState, string dateeName)
         {
             if (newState == InterestState.Unmatched)
-                return PromptTemplates.InterestBeatUnmatched.Replace("{opponent_name}", opponentName);
+                return PromptTemplates.InterestBeatUnmatched.Replace("{datee_name}", dateeName);
             if (newState == InterestState.DateSecured)
-                return PromptTemplates.InterestBeatDateSecured.Replace("{opponent_name}", opponentName);
+                return PromptTemplates.InterestBeatDateSecured.Replace("{datee_name}", dateeName);
             if (after > before && after > 15 && before <= 15)
-                return PromptTemplates.InterestBeatAbove15.Replace("{opponent_name}", opponentName);
+                return PromptTemplates.InterestBeatAbove15.Replace("{datee_name}", dateeName);
             if (after < before && after < 8 && before >= 8)
-                return PromptTemplates.InterestBeatBelow8.Replace("{opponent_name}", opponentName);
+                return PromptTemplates.InterestBeatBelow8.Replace("{datee_name}", dateeName);
 
-            return PromptTemplates.InterestBeatGeneric.Replace("{opponent_name}", opponentName);
+            return PromptTemplates.InterestBeatGeneric.Replace("{datee_name}", dateeName);
         }
 
         private static string BuildShadowTaintBlock(Dictionary<ShadowStatType, int>? thresholds)
@@ -125,7 +125,7 @@ namespace Pinder.LlmAdapters
 
         /// <summary>
         /// Returns a resistance descriptor block based on current interest level.
-        /// Below 25, the opponent always maintains some form of resistance.
+        /// Below 25, the datee always maintains some form of resistance.
         /// </summary>
         internal static string GetResistanceBlock(int interest)
         {
@@ -149,17 +149,17 @@ namespace Pinder.LlmAdapters
         }
 
         /// <summary>
-        /// Returns per-tier opponent reaction guidance for failure degradation (#493).
+        /// Returns per-tier datee reaction guidance for failure degradation (#493).
         /// </summary>
-        internal static string GetOpponentReactionGuidance(FailureTier tier)
+        internal static string GetDateeReactionGuidance(FailureTier tier)
         {
             switch (tier)
             {
-                case FailureTier.Fumble: return PromptTemplates.OpponentReactionFumble;
-                case FailureTier.Misfire: return PromptTemplates.OpponentReactionMisfire;
-                case FailureTier.TropeTrap: return PromptTemplates.OpponentReactionTropeTrap;
-                case FailureTier.Catastrophe: return PromptTemplates.OpponentReactionCatastrophe;
-                case FailureTier.Legendary: return PromptTemplates.OpponentReactionLegendary;
+                case FailureTier.Fumble: return PromptTemplates.DateeReactionFumble;
+                case FailureTier.Misfire: return PromptTemplates.DateeReactionMisfire;
+                case FailureTier.TropeTrap: return PromptTemplates.DateeReactionTropeTrap;
+                case FailureTier.Catastrophe: return PromptTemplates.DateeReactionCatastrophe;
+                case FailureTier.Legendary: return PromptTemplates.DateeReactionLegendary;
                 default: return string.Empty;
             }
         }

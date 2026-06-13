@@ -12,7 +12,7 @@ namespace Pinder.SessionRunner.Snapshot
     {
         // ── Character snapshots ───────────────────────────────────────────
         public CharacterSnapshot Player { get; set; } = null!;
-        public CharacterSnapshot Opponent { get; set; } = null!;
+        public CharacterSnapshot Datee { get; set; } = null!;
 
         // ── Session config ────────────────────────────────────────────────
         public int SessionHorniness { get; set; }
@@ -25,7 +25,7 @@ namespace Pinder.SessionRunner.Snapshot
 
         // ── Psychological stakes (save so reruns don't regenerate) ────────
         public string PlayerPsychologicalStake { get; set; } = string.Empty;
-        public string OpponentPsychologicalStake { get; set; } = string.Empty;
+        public string DateePsychologicalStake { get; set; } = string.Empty;
 
         // ── Game definition values at time of run ─────────────────────────
         public int GlobalDcBias { get; set; }
@@ -68,7 +68,7 @@ namespace Pinder.SessionRunner.Snapshot
     ///     <c>ConversationHistory</c> (per-entry sender + text + per-layer text_diffs[]
     ///     — issue #305). Includes the turn-0 scene-setting entries seeded by
     ///     <c>GameSession.SeedSceneEntries</c> (issue #333): three entries with
-    ///     sender == <c>"[scene]"</c> for player bio, opponent bio, and the
+    ///     sender == <c>"[scene]"</c> for player bio, datee bio, and the
     ///     LLM-generated outfit description. The <c>callback_strip</c> layer
     ///     (issue #339) appears as one more entry in <c>TextDiffs</c> when
     ///     same-turn callback phrases were stripped from the delivered message.
@@ -87,12 +87,12 @@ namespace Pinder.SessionRunner.Snapshot
     ///     web-render agree.
     ///   </description></item>
     ///   <item><description>
-    ///     <c>OpponentHistory</c> (issue #788): engine-owned opponent-LLM
+    ///     <c>DateeHistory</c> (issue #788): engine-owned datee-LLM
     ///     conversation history. Each entry carries <c>Role</c>
     ///     (<c>"user"</c> or <c>"assistant"</c>) and <c>Content</c>. Survives
     ///     snapshot/restore so a replayed session can reproduce the same
-    ///     multi-turn opponent context the original session ran with. Empty
-    ///     list when no opponent calls have resolved yet.
+    ///     multi-turn datee context the original session ran with. Empty
+    ///     list when no datee calls have resolved yet.
     ///   </description></item>
     ///   <item><description>
     ///     <c>DefendingStat</c> (issue #906): the defending stat used in
@@ -103,13 +103,13 @@ namespace Pinder.SessionRunner.Snapshot
     ///   </description></item>
     ///   <item><description>
     ///     <c>GhostProbabilityPerTurn</c> (issue #905): probability (0.0..1.0)
-    ///     that the opponent ghosts on this turn. Derived from
+    ///     that the datee ghosts on this turn. Derived from
     ///     <c>GameStateSnapshot.GhostProbabilityPerTurn</c> (0.25 when Bored,
     ///     0.0 otherwise). Added explicitly since <c>TurnSnapshot</c> does
     ///     not inline <c>GameStateSnapshot</c>.
     ///   </description></item>
     ///   <item><description>
-    ///     <c>OpponentDefenseSnapshot</c> (issue #903): the opponent's defense
+    ///     <c>DateeDefenseSnapshot</c> (issue #903): the datee's defense
     ///     posture at the start of this turn. Dictionary keyed on attacker stat
     ///     name (PascalCase), each entry carrying <c>DefendingStat</c>,
     ///     <c>EffectiveModifier</c>, and <c>BaseModifier</c>. Null when not
@@ -162,20 +162,20 @@ namespace Pinder.SessionRunner.Snapshot
         public string DefendingStat { get; set; } = string.Empty;
 
         /// <summary>
-        /// Issue #905: probability (0.0..1.0) that the opponent will ghost on
+        /// Issue #905: probability (0.0..1.0) that the datee will ghost on
         /// this turn. 0.25 when the session's interest state is Bored, 0.0
         /// otherwise. Copied from <see cref="Pinder.Core.Conversation.GameStateSnapshot.GhostProbabilityPerTurn"/>.
         /// </summary>
         public double GhostProbabilityPerTurn { get; set; }
 
         /// <summary>
-        /// Issue #903: opponent defense posture at the start of this turn.
+        /// Issue #903: datee defense posture at the start of this turn.
         /// Dictionary keyed on attacker stat name (PascalCase). Each value
         /// carries <c>DefendingStat</c>, <c>EffectiveModifier</c> (shadow-
         /// adjusted + trap DC bonus), and <c>BaseModifier</c> (raw base stat).
         /// Null on legacy snapshots taken before #903.
         /// </summary>
-        public Dictionary<string, TurnDefenseEntry>? OpponentDefenseSnapshot { get; set; }
+        public Dictionary<string, TurnDefenseEntry>? DateeDefenseSnapshot { get; set; }
 
         /// <summary>
         /// Issue #593: DC reduction from the active weakness window at the start
@@ -187,17 +187,17 @@ namespace Pinder.SessionRunner.Snapshot
         /// Full conversation history up to and including this turn.
         /// Per #305 each entry now carries optional <see cref="ConversationEntry.TextDiffs"/>
         /// for the player's delivered message (Misfire / Steering /
-        /// Horniness / Shadow layers); opponent entries leave it empty.
+        /// Horniness / Shadow layers); datee entries leave it empty.
         /// </summary>
         public List<ConversationEntry> ConversationHistory { get; set; } = new List<ConversationEntry>();
 
         /// <summary>
-        /// Issue #788: engine-owned opponent-LLM conversation history at the
-        /// time of snapshot. Each entry's <see cref="OpponentHistoryEntry.Role"/>
-        /// is <c>"user"</c> or <c>"assistant"</c>. Empty when no opponent calls
+        /// Issue #788: engine-owned datee-LLM conversation history at the
+        /// time of snapshot. Each entry's <see cref="DateeHistoryEntry.Role"/>
+        /// is <c>"user"</c> or <c>"assistant"</c>. Empty when no datee calls
         /// have resolved yet.
         /// </summary>
-        public List<OpponentHistoryEntry> OpponentHistory { get; set; } = new List<OpponentHistoryEntry>();
+        public List<DateeHistoryEntry> DateeHistory { get; set; } = new List<DateeHistoryEntry>();
 
         /// <summary>
         /// Issue #474: events fired on this turn, with their deterministic
@@ -239,11 +239,11 @@ namespace Pinder.SessionRunner.Snapshot
     }
 
     /// <summary>
-    /// Issue #788: one entry of opponent-LLM conversation history. <c>Role</c>
+    /// Issue #788: one entry of datee-LLM conversation history. <c>Role</c>
     /// is the OpenAI/Anthropic wire role (<c>"user"</c> or <c>"assistant"</c>);
     /// <c>Content</c> is the raw text content.
     /// </summary>
-    public sealed class OpponentHistoryEntry
+    public sealed class DateeHistoryEntry
     {
         public string Role { get; set; } = string.Empty;
         public string Content { get; set; } = string.Empty;
@@ -265,7 +265,7 @@ namespace Pinder.SessionRunner.Snapshot
     }
 
     /// <summary>
-    /// Issue #903: one entry in the <see cref="TurnSnapshot.OpponentDefenseSnapshot"/> dictionary.
+    /// Issue #903: one entry in the <see cref="TurnSnapshot.DateeDefenseSnapshot"/> dictionary.
     /// </summary>
     public sealed class TurnDefenseEntry
     {
@@ -290,7 +290,7 @@ namespace Pinder.SessionRunner.Snapshot
         /// <summary>
         /// Issue #305: per-layer word-level diffs for the player's
         /// delivered message on this turn (Misfire / Steering / Horniness
-        /// / Shadow). Empty list for opponent entries and for player
+        /// / Shadow). Empty list for datee entries and for player
         /// entries with no recorded transformations. Mirrors the wire
         /// <c>TextDiffDto</c> shape so the snapshot can be deserialised
         /// straight into a renderer / replay tool.

@@ -2,7 +2,7 @@
 
 ## Overview
 
-When a player triggers a Legendary Fail (Nat 1), the LLM-generated delivery message is written in the **opponent's** voice instead of the **player's** voice. This happens because (1) `DeliverMessageAsync` sends both character system prompts to the LLM, causing voice contamination, (2) `FailureDeliveryInstruction` does not explicitly identify which character the LLM should write as, and (3) `GameSession` does not populate `playerName`/`opponentName`/`currentTurn` on the `DeliveryContext` or `OpponentContext` DTOs, leaving them at their empty-string defaults.
+When a player triggers a Legendary Fail (Nat 1), the LLM-generated delivery message is written in the **datee's** voice instead of the **player's** voice. This happens because (1) `DeliverMessageAsync` sends both character system prompts to the LLM, causing voice contamination, (2) `FailureDeliveryInstruction` does not explicitly identify which character the LLM should write as, and (3) `GameSession` does not populate `playerName`/`dateeName`/`currentTurn` on the `DeliveryContext` or `DateeContext` DTOs, leaving them at their empty-string defaults.
 
 The fix requires changes in five files across `Pinder.Core` and `Pinder.LlmAdapters`: wiring name fields in `GameSession`, adding a player-only cache block builder method, switching the adapter's delivery call to player-only system blocks, adding player identity framing to the failure template, and adding `{player_name}` substitution in the delivery prompt builder.
 
@@ -26,7 +26,7 @@ public static ContentBlock[] BuildPlayerOnlySystemBlocks(string playerPrompt)
 
 **Return type:** `ContentBlock[]` (length 1). The single element has `Type = "text"`, `Text = playerPrompt`, `CacheControl = new CacheControl { Type = "ephemeral" }`.
 
-This mirrors the existing `BuildOpponentOnlySystemBlocks(string opponentPrompt)` method exactly, but for the player prompt.
+This mirrors the existing `BuildDateeOnlySystemBlocks(string dateePrompt)` method exactly, but for the player prompt.
 
 ### AnthropicLlmAdapter.DeliverMessageAsync (behavioral change)
 
@@ -36,12 +36,12 @@ This mirrors the existing `BuildOpponentOnlySystemBlocks(string opponentPrompt)`
 public async Task<string> DeliverMessageAsync(DeliveryContext context)
 ```
 
-**Behavioral change:** The `systemBlocks` variable must be built using `CacheBlockBuilder.BuildPlayerOnlySystemBlocks(context.PlayerPrompt)` instead of `CacheBlockBuilder.BuildCachedSystemBlocks(context.PlayerPrompt, context.OpponentPrompt)`.
+**Behavioral change:** The `systemBlocks` variable must be built using `CacheBlockBuilder.BuildPlayerOnlySystemBlocks(context.PlayerPrompt)` instead of `CacheBlockBuilder.BuildCachedSystemBlocks(context.PlayerPrompt, context.DateePrompt)`.
 
 Before (current):
 ```csharp
 var systemBlocks = CacheBlockBuilder.BuildCachedSystemBlocks(
-    context.PlayerPrompt, context.OpponentPrompt);
+    context.PlayerPrompt, context.DateePrompt);
 ```
 
 After (required):
@@ -60,7 +60,7 @@ var systemBlocks = CacheBlockBuilder.BuildPlayerOnlySystemBlocks(context.PlayerP
 
 ```
 You are writing as {player_name}. This is THEIR message, in THEIR voice.
-Do NOT write as the opponent. The failure corrupts what {player_name} says.
+Do NOT write as the datee. The failure corrupts what {player_name} says.
 
 ```
 
@@ -87,7 +87,7 @@ public static string BuildDeliveryPrompt(
     int beatDcBy,
     string[]? activeTrapInstructions,
     string playerName,
-    string opponentName)
+    string dateeName)
 ```
 
 **Behavioral change:** After performing all existing `{placeholder}` replacements on the failure template text, also replace `{player_name}` with the `playerName` parameter value. Similarly, apply `{player_name}` replacement to the success template text.
@@ -108,21 +108,21 @@ public async Task<TurnResult> ResolveTurnAsync(int optionIndex)
 var deliveryContext = new DeliveryContext(
     // ... existing params ...
     playerName: _player.DisplayName,
-    opponentName: _opponent.DisplayName,
+    dateeName: _datee.DisplayName,
     currentTurn: _turnNumber);
 ```
 
-**Behavioral change at ~line 538:** The `OpponentContext` constructor call must similarly pass:
+**Behavioral change at ~line 538:** The `DateeContext` constructor call must similarly pass:
 
 ```csharp
-var opponentContext = new OpponentContext(
+var dateeContext = new DateeContext(
     // ... existing params ...
     playerName: _player.DisplayName,
-    opponentName: _opponent.DisplayName,
+    dateeName: _datee.DisplayName,
     currentTurn: _turnNumber);
 ```
 
-**Note:** Both `DeliveryContext` and `OpponentContext` already have `playerName`, `opponentName`, and `currentTurn` as optional constructor parameters with empty-string/zero defaults. No structural change to the DTO classes is needed.
+**Note:** Both `DeliveryContext` and `DateeContext` already have `playerName`, `dateeName`, and `currentTurn` as optional constructor parameters with empty-string/zero defaults. No structural change to the DTO classes is needed.
 
 ## Input/Output Examples
 
@@ -130,7 +130,7 @@ var opponentContext = new OpponentContext(
 
 **Setup:**
 - Player character: "Sable" (Scorpio, Love Bomber, omg energy)
-- Opponent character: "Brick" (analytical, M&A background)
+- Datee character: "Brick" (analytical, M&A background)
 - Player chose option: "omg you actually work in M&A?? that's so hot in a scary way"
 - Roll result: Nat 1 (Legendary Fail), missed DC by 20
 
@@ -142,7 +142,7 @@ The system prompt sent to the LLM contains BOTH Sable's and Brick's character pr
 This is clearly Brick's voice (analytical, professional), not Sable's.
 
 **Expected behavior (fixed):**
-The system prompt contains ONLY Sable's character prompt. The failure instruction begins with "You are writing as Sable. This is THEIR message, in THEIR voice. Do NOT write as the opponent." The LLM generates something like:
+The system prompt contains ONLY Sable's character prompt. The failure instruction begins with "You are writing as Sable. This is THEIR message, in THEIR voice. Do NOT write as the datee." The LLM generates something like:
 
 > "omg wait sorry that was so weird lmao i just sent you my entire astrological compatibility analysis for us and then immediately followed it with a screenshot of my ex's linkedin?? im literally spiraling"
 
@@ -167,7 +167,7 @@ The `{player_name}` token appears in the template. After `BuildDeliveryPrompt` s
 
 ```
 You are writing as Sable. This is THEIR message, in THEIR voice.
-Do NOT write as the opponent. The failure corrupts what Sable says.
+Do NOT write as the datee. The failure corrupts what Sable says.
 
 The player chose option: "omg you actually work in M&A?? that's so hot in a scary way"
 ...
@@ -177,18 +177,18 @@ The player chose option: "omg you actually work in M&A?? that's so hot in a scar
 
 After the fix, the `DeliveryContext` passed to `DeliverMessageAsync` has:
 - `PlayerName = "Sable"` (was: `""`)
-- `OpponentName = "Brick"` (was: `""`)
+- `DateeName = "Brick"` (was: `""`)
 - `CurrentTurn = 3` (was: `0`)
 
 ## Acceptance Criteria
 
 ### AC1: `FailureDeliveryInstruction` explicitly identifies the player character role
 
-The `PromptTemplates.FailureDeliveryInstruction` constant must contain `{player_name}` tokens and text that explicitly instructs the LLM to write as the player character and NOT as the opponent. The identity framing must appear before any failure-tier instructions.
+The `PromptTemplates.FailureDeliveryInstruction` constant must contain `{player_name}` tokens and text that explicitly instructs the LLM to write as the player character and NOT as the datee. The identity framing must appear before any failure-tier instructions.
 
-**Verification:** Read the constant string; confirm it contains `{player_name}` and language like "You are writing as {player_name}" and "Do NOT write as the opponent."
+**Verification:** Read the constant string; confirm it contains `{player_name}` and language like "You are writing as {player_name}" and "Do NOT write as the datee."
 
-### AC2: Legendary fail delivery sounds like the player character, not the opponent
+### AC2: Legendary fail delivery sounds like the player character, not the datee
 
 This is a systemic fix with three parts:
 1. `DeliverMessageAsync` sends only the player's system prompt (not both) — verified by checking `BuildPlayerOnlySystemBlocks` is called instead of `BuildCachedSystemBlocks`.
@@ -200,11 +200,11 @@ This is a systemic fix with three parts:
 ### AC3: Unit test with mock LLM verifies player name is in the delivery context
 
 A test must:
-1. Create a `GameSession` with a mock `ILlmAdapter` and named player/opponent characters.
+1. Create a `GameSession` with a mock `ILlmAdapter` and named player/datee characters.
 2. Execute `StartTurnAsync()` followed by `ResolveTurnAsync(0)`.
 3. Capture the `DeliveryContext` passed to the mock's `DeliverMessageAsync`.
 4. Assert `DeliveryContext.PlayerName` equals the player's `DisplayName`.
-5. Assert `DeliveryContext.OpponentName` equals the opponent's `DisplayName`.
+5. Assert `DeliveryContext.DateeName` equals the datee's `DisplayName`.
 6. Assert `DeliveryContext.CurrentTurn` is non-zero.
 
 ### AC4: Integration test — Legendary fail delivery passes a character voice check
@@ -231,11 +231,11 @@ The `SuccessDeliveryInstruction` should also include `{player_name}` substitutio
 
 ### Null playerPrompt
 
-`CacheBlockBuilder.BuildPlayerOnlySystemBlocks` must throw `ArgumentNullException` when `playerPrompt` is null, matching the existing pattern in `BuildOpponentOnlySystemBlocks` and `BuildCachedSystemBlocks`.
+`CacheBlockBuilder.BuildPlayerOnlySystemBlocks` must throw `ArgumentNullException` when `playerPrompt` is null, matching the existing pattern in `BuildDateeOnlySystemBlocks` and `BuildCachedSystemBlocks`.
 
 ### Backward compatibility of existing tests
 
-All changes use optional constructor parameters with defaults. The ~1118+ existing tests do not pass `playerName`/`opponentName`/`currentTurn` to context DTOs and will continue to compile and pass with empty-string/zero defaults. No existing test behavior changes.
+All changes use optional constructor parameters with defaults. The ~1118+ existing tests do not pass `playerName`/`dateeName`/`currentTurn` to context DTOs and will continue to compile and pass with empty-string/zero defaults. No existing test behavior changes.
 
 ## Error Conditions
 
@@ -244,14 +244,14 @@ All changes use optional constructor parameters with defaults. The ~1118+ existi
 | `BuildPlayerOnlySystemBlocks(null)` | Throws `ArgumentNullException` with parameter name `"playerPrompt"` |
 | `BuildDeliveryPrompt` with empty `playerName` | Throws `ArgumentNullException` (existing validation: `string.IsNullOrEmpty(playerName)`) |
 | `_player.DisplayName` is null in GameSession | Depends on `CharacterProfile` validation — if null, `DeliveryContext` constructor stores `""` (its null-coalescing default). Adapter's `FallbackName` then returns `"Player"`. |
-| `_player` or `_opponent` is null in GameSession | Would throw `NullReferenceException` before reaching context construction — this is an existing invariant, not new. |
+| `_player` or `_datee` is null in GameSession | Would throw `NullReferenceException` before reaching context construction — this is an existing invariant, not new. |
 
 ## Dependencies
 
 ### Internal Dependencies
 - **Issue #240** (options format fix) — must land first. The delivery path depends on valid dialogue options being generated. The issue explicitly states: "Depends on: #240."
-- **`Pinder.Core.Conversation.DeliveryContext`** — already has `PlayerName`, `OpponentName`, `CurrentTurn` as optional constructor params. No change needed.
-- **`Pinder.Core.Conversation.OpponentContext`** — same; already has the optional fields.
+- **`Pinder.Core.Conversation.DeliveryContext`** — already has `PlayerName`, `DateeName`, `CurrentTurn` as optional constructor params. No change needed.
+- **`Pinder.Core.Conversation.DateeContext`** — same; already has the optional fields.
 - **`Pinder.Core.Conversation.GameSession`** — the orchestrator that must wire names/turn into context DTOs.
 - **`Pinder.LlmAdapters.Anthropic.Dto.ContentBlock`** — existing DTO used by `CacheBlockBuilder`.
 - **`Pinder.LlmAdapters.Anthropic.Dto.CacheControl`** — existing DTO for `cache_control: ephemeral`.
@@ -263,7 +263,7 @@ All changes use optional constructor parameters with defaults. The ~1118+ existi
 
 | File | Change Type | Description |
 |---|---|---|
-| `src/Pinder.Core/Conversation/GameSession.cs` | Wiring | Pass `_player.DisplayName`, `_opponent.DisplayName`, `_turnNumber` to `DeliveryContext` and `OpponentContext` constructors |
+| `src/Pinder.Core/Conversation/GameSession.cs` | Wiring | Pass `_player.DisplayName`, `_datee.DisplayName`, `_turnNumber` to `DeliveryContext` and `DateeContext` constructors |
 | `src/Pinder.LlmAdapters/PromptTemplates.cs` | Content | Add player identity framing with `{player_name}` to `FailureDeliveryInstruction`; add `{player_name}` to `SuccessDeliveryInstruction` |
 | `src/Pinder.LlmAdapters/SessionDocumentBuilder.cs` | Logic | Add `{player_name}` substitution in both success and failure paths of `BuildDeliveryPrompt` |
 | `src/Pinder.LlmAdapters/Anthropic/CacheBlockBuilder.cs` | New method | Add `BuildPlayerOnlySystemBlocks(string playerPrompt)` |

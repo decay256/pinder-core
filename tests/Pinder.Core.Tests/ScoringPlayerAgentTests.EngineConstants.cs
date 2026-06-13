@@ -27,11 +27,11 @@ namespace Pinder.Core.Tests
             var optionWithOpenerCallback = MakeOption(StatType.Charm, callbackTurn: 0);
             var optionPlain = MakeOption(StatType.Charm);
             var player = MakeStats(charm: 3);
-            var opponent = MakeStats(sa: 2);
+            var datee = MakeStats(sa: 2);
 
             var turnCb = MakeTurn(optionWithOpenerCallback);
             var turnPlain = MakeTurn(optionPlain);
-            var context = MakeContext(player: player, opponent: opponent, turnNumber: 5);
+            var context = MakeContext(player: player, datee: datee, turnNumber: 5);
 
             var decisionCb = await _agent.DecideAsync(turnCb, context);
             var decisionPlain = await _agent.DecideAsync(turnPlain, context);
@@ -50,9 +50,9 @@ namespace Pinder.Core.Tests
 
             var option = MakeOption(StatType.Charm, callbackTurn: 3);
             var player = MakeStats(charm: 3);
-            var opponent = MakeStats(sa: 2);
+            var datee = MakeStats(sa: 2);
             var turn = MakeTurn(option);
-            var context = MakeContext(player: player, opponent: opponent, turnNumber: 5);
+            var context = MakeContext(player: player, datee: datee, turnNumber: 5);
 
             var decision = await _agent.DecideAsync(turn, context);
             Assert.Contains(decision.Scores[0].BonusesApplied,
@@ -98,10 +98,10 @@ namespace Pinder.Core.Tests
             var optionWithTell = MakeOption(StatType.Charm, hasTellBonus: true);
             var optionPlain = MakeOption(StatType.Charm);
             var player = MakeStats(charm: 3);
-            var opponent = MakeStats(sa: 5);
+            var datee = MakeStats(sa: 5);
             var turnTell = MakeTurn(optionWithTell);
             var turnPlain = MakeTurn(optionPlain);
-            var context = MakeContext(player: player, opponent: opponent);
+            var context = MakeContext(player: player, datee: datee);
 
             var decisionTell = await _agent.DecideAsync(turnTell, context);
             var decisionPlain = await _agent.DecideAsync(turnPlain, context);

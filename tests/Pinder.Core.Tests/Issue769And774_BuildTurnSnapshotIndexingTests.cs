@@ -23,7 +23,7 @@ namespace Pinder.Core.Tests
     /// int turnIdx = i / 2;
     /// </code>
     /// which assumes the <c>ConversationHistory</c> list is a strict
-    /// alternating <c>(player, opponent, player, opponent, ...)</c>
+    /// alternating <c>(player, datee, player, datee, ...)</c>
     /// sequence. That assumption breaks for two distinct triggers:
     /// </para>
     /// <list type="number">
@@ -52,7 +52,7 @@ namespace Pinder.Core.Tests
     /// are transparently skipped, AND identifies player entries by
     /// sender equality with the supplied <c>playerSender</c> argument
     /// (live-engine path always passes it) so a desync on either side
-    /// of a (player, opponent) pair never misattributes a diff.
+    /// of a (player, datee) pair never misattributes a diff.
     /// </para>
     /// </summary>
     [Trait("Category", "SessionRunner")]
@@ -119,7 +119,7 @@ namespace Pinder.Core.Tests
                 comboHistory: new List<(StatType Stat, bool Succeeded)>(),
                 activeTell: null,
                 perTurnTextDiffs: perTurnTextDiffs,
-                opponentHistory: null,
+                dateeHistory: null,
                 playerSender: playerSender);
         }
 
@@ -129,16 +129,16 @@ namespace Pinder.Core.Tests
         public void Snapshot_AttachesDiffsToCorrectPlayerEntry_WhenSceneEntriesPrefixHistory()
         {
             // Mirrors the post-#333 reality: three [scene] entries at
-            // the front (player bio, opponent bio, outfit description),
+            // the front (player bio, datee bio, outfit description),
             // then real turns. The buggy pair-math (i % 2 == 0) would
             // identify indices 0, 2, 4 as "player" — but indices 0 and
-            // 2 are scenes, and index 4 is the OPPONENT's turn-1 entry.
+            // 2 are scenes, and index 4 is the DATEE's turn-1 entry.
             // So turn-1's diffs would attach to scene entries, never
             // reaching the real player turn-1 entry at index 3.
             var conversationHistory = new List<(string Sender, string Text)>
             {
                 (Senders.Scene, "player bio"),                       // 0
-                (Senders.Scene, "opponent bio"),                     // 1
+                (Senders.Scene, "datee bio"),                     // 1
                 (Senders.Scene, "outfit description"),               // 2
                 ("Sable", "p1 turn 1"),                              // 3
                 ("Brick", "p2 turn 1"),                              // 4
@@ -172,7 +172,7 @@ namespace Pinder.Core.Tests
 
             // Turn-1's diffs land on the actual player turn-1 entry
             // (index 3), turn-2's diffs on the player turn-2 entry
-            // (index 5). Opponent entries (indices 4, 6) carry no
+            // (index 5). Datee entries (indices 4, 6) carry no
             // diffs.
             Assert.Equal("turn1", Assert.Single(snap.ConversationHistory[3].TextDiffs).Layer);
             Assert.Empty(snap.ConversationHistory[4].TextDiffs);
@@ -213,7 +213,7 @@ namespace Pinder.Core.Tests
                 Assert.Equal("turn1",
                     Assert.Single(snap.ConversationHistory[sceneCount].TextDiffs).Layer);
 
-                // Opponent turn-1 entry (the very last) carries none.
+                // Datee turn-1 entry (the very last) carries none.
                 Assert.Empty(snap.ConversationHistory[sceneCount + 1].TextDiffs);
             }
         }
@@ -226,7 +226,7 @@ namespace Pinder.Core.Tests
             // Reproduces the #769 trigger on top of the #767 brace fix.
             // Three turns total. Turn 2's DeliveredMessage was empty,
             // so turn 2 produced NO player entry on the conversation
-            // log AND NO entry on perTurnTextDiffs. The opponent reply
+            // log AND NO entry on perTurnTextDiffs. The datee reply
             // for turn 2 still landed on the log.
             //
             // Resulting conversationHistory has 5 entries in order:
@@ -238,10 +238,10 @@ namespace Pinder.Core.Tests
             //
             // The pair-math heuristic (turnIdx = i / 2) would attach:
             //   index 0 → diffs[0] = turn1   ✓ accidentally right
-            //   index 2 → diffs[1] = turn3   ✗ but index 2 is P2 turn 2 (opponent!)
+            //   index 2 → diffs[1] = turn3   ✗ but index 2 is P2 turn 2 (datee!)
             //   index 4 → OOB                ✗
             // So the buggy code would attribute turn3's diffs to the
-            // OPPONENT entry of turn 2, and the player's turn-3 entry
+            // DATEE entry of turn 2, and the player's turn-3 entry
             // would carry no diffs at all.
             var conversationHistory = new List<(string Sender, string Text)>
             {
@@ -297,7 +297,7 @@ namespace Pinder.Core.Tests
             var snapshotConversationHistory = new List<ConversationEntry>
             {
                 new ConversationEntry { Sender = Senders.Scene, Text = "player bio" },
-                new ConversationEntry { Sender = Senders.Scene, Text = "opponent bio" },
+                new ConversationEntry { Sender = Senders.Scene, Text = "datee bio" },
                 new ConversationEntry { Sender = Senders.Scene, Text = "outfit" },
                 new ConversationEntry { Sender = "Sable", Text = "p1 turn 1",
                     TextDiffs = Diffs("turn1") },
@@ -321,7 +321,7 @@ namespace Pinder.Core.Tests
             // test pin the contract clearly): `idx % 2 == 0` lifts
             // indices 0, 2, 4, 6 from the snapshot — three of which
             // are scenes (empty TextDiffs) and one of which is an
-            // opponent entry. The resulting list has 4 entries, two
+            // datee entry. The resulting list has 4 entries, two
             // empty, instead of the correct 2 entries with both diffs.
             var buggy = snapshotConversationHistory
                 .Where((_, idx) => idx % 2 == 0)
@@ -343,7 +343,7 @@ namespace Pinder.Core.Tests
             var conversationHistory = new List<(string Sender, string Text)>
             {
                 (Senders.Scene, "player bio"),
-                (Senders.Scene, "opponent bio"),
+                (Senders.Scene, "datee bio"),
                 (Senders.Scene, "outfit description"),
                 ("Sable", "p1 turn 1"),
                 ("Brick", "p2 turn 1"),
@@ -367,7 +367,7 @@ namespace Pinder.Core.Tests
             for (int i = 0; i < 3; i++)
                 Assert.Empty(snap.ConversationHistory[i].TextDiffs);
 
-            // Opponent entries: never carry diffs, regardless of
+            // Datee entries: never carry diffs, regardless of
             // surrounding desync.
             Assert.Empty(snap.ConversationHistory[4].TextDiffs); // P2 turn 1
             Assert.Empty(snap.ConversationHistory[5].TextDiffs); // P2 turn 2 (no preceding P1 entry)
@@ -379,7 +379,7 @@ namespace Pinder.Core.Tests
                 Assert.Single(snap.ConversationHistory[3].TextDiffs).Layer);
             // turn-3 diffs land on the actual Sable turn-3 entry (index 6).
             // The pair-math+skipped-turn perturbation would have tried
-            // to attach turn-3's diffs to the Brick p2 turn-2 opponent
+            // to attach turn-3's diffs to the Brick p2 turn-2 datee
             // entry at index 5, but the playerSender guard catches
             // that misattribution — only entries whose sender matches
             // playerSender ("Sable") are eligible.

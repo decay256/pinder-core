@@ -38,7 +38,7 @@ namespace Pinder.LlmAdapters.Anthropic
 
         // Captures the FULL intended text of an option (issue #1117).
         // The previous pattern @"""([^""]+)""" stopped at the first inner
-        // double-quote, so an option that quotes the opponent back
+        // double-quote, so an option that quotes the datee back
         // (e.g. the model writes:  said "it's a lot")  got truncated to a
         // leading fragment. Because each per-option section (split out by the
         // OPTION_N header) only ever contains this single quoted block followed

@@ -30,8 +30,8 @@ world_description: |
   <multi-line world rules text>
 player_role_description: |
   <multi-line player role text>
-opponent_role_description: |
-  <multi-line opponent role text>
+datee_role_description: |
+  <multi-line datee role text>
 meta_contract: |
   <multi-line meta contract text>
 writing_rules: |
@@ -46,7 +46,7 @@ writing_rules: |
 | `vision` | `string` (multi-line) | The game's creative premise and tonal identity. Establishes what Pinder is, the comedy register, and the emotional core beneath the absurdity. |
 | `world_description` | `string` (multi-line) | The rules of Pinder's world. Describes the multiplayer structure, what characters are (sentient penises on a dating app), the stat/shadow system, and how conversations work mechanically. |
 | `player_role_description` | `string` (multi-line) | Instructions for how the LLM should generate content from the player's perspective. Covers: the player is the one initiating, their dialogue options should reflect their character build (stats, items, personality fragments), and their voice must match their texting style. |
-| `opponent_role_description` | `string` (multi-line) | Instructions for how the LLM should portray the opponent character. Covers: the opponent is another player's uploaded character being puppeted by the LLM, they maintain resistance below Interest 25, their personality comes from their own items/anatomy/fragments, and they react to game events (failures, traps, shadow taint). |
+| `datee_role_description` | `string` (multi-line) | Instructions for how the LLM should portray the datee character. Covers: the datee is another player's uploaded character being puppeted by the LLM, they maintain resistance below Interest 25, their personality comes from their own items/anatomy/fragments, and they react to game events (failures, traps, shadow taint). |
 | `meta_contract` | `string` (multi-line) | Rules the LLM must never break. Covers: never break character, never reference game mechanics explicitly in dialogue, never add content the player didn't choose, never resolve the date before Interest 25, maintain two distinct character voices throughout. |
 | `writing_rules` | `string` (multi-line) | Stylistic constraints for all LLM-generated text. Covers: texting register (not formal prose), message length limits, emoji usage conventions, no asterisk actions, comedy through character voice not narration, and the principle that strong rolls improve phrasing rather than adding ideas. |
 
@@ -67,14 +67,14 @@ Must establish:
 - The tone: comedy first, but with genuine emotional stakes underneath the absurdity
 - The mechanical identity: RPG with dice rolls, stats, and shadows that corrupt your best qualities
 - The social contract: it's funny AND it matters — players should laugh but also feel tension when shadows grow or interest drops
-- That this is a multiplayer structure: every opponent is another real player's uploaded character, puppeted by the LLM
+- That this is a multiplayer structure: every datee is another real player's uploaded character, puppeted by the LLM
 
 ### `world_description`
 
 Must establish:
 - Characters are sentient penises who dress up, build stats, and upload themselves to a dating server
 - The stat/shadow pair system (6 positive stats, 6 shadows that grow and penalize their paired stat)
-- The dating conversation structure: d20 rolls against opponent's defence DC, success/failure scale, interest meter (0–25)
+- The dating conversation structure: d20 rolls against datee's defence DC, success/failure scale, interest meter (0–25)
 - The multiplayer async structure: your character exists on a server and other players encounter it independently
 - Shadows grow from in-conversation events (not player choice) and represent the character's psychological state
 - The interest meter is the conversation's health bar — Bored (1–4) risks ghosting, Date Secured (25) is victory
@@ -88,13 +88,13 @@ Must establish:
 - Horniness mechanics can force Rizz options (at shadow threshold ≥6, ≥12, ≥18)
 - Combo and callback opportunities should appear naturally in option content when available
 
-### `opponent_role_description`
+### `datee_role_description`
 
 Must establish:
-- The opponent is another player's character being puppeted — their personality prompt is their bible
-- Below Interest 25, the opponent maintains resistance proportional to their current interest state
-- The opponent reacts to mechanical events: failure tiers affect their response tone, shadow taint affects their perception
-- The opponent has their own texting style that must remain distinct from the player's
+- The datee is another player's character being puppeted — their personality prompt is their bible
+- Below Interest 25, the datee maintains resistance proportional to their current interest state
+- The datee reacts to mechanical events: failure tiers affect their response tone, shadow taint affects their perception
+- The datee has their own texting style that must remain distinct from the player's
 - At Date Secured (Interest 25), resistance dissolves genuinely — not abruptly, but as earned warmth
 
 ### `meta_contract`
@@ -104,14 +104,14 @@ Must establish:
 - Never reference dice, DCs, stats, interest meters, or any game mechanic in dialogue text
 - Never add ideas the player didn't choose — success delivery improves phrasing, doesn't expand content
 - Never resolve the date early — Interest must reach 25 mechanically
-- Maintain two distinct character voices — the player and opponent should never sound alike
+- Maintain two distinct character voices — the player and datee should never sound alike
 - [ENGINE] blocks are out-of-character mechanical context — never quote or reference them in dialogue
 
 ### `writing_rules`
 
 Must establish:
 - All dialogue is texting register — short messages, informal, platform-appropriate
-- Message length: typically 1–3 sentences for options, 1–4 for opponent responses
+- Message length: typically 1–3 sentences for options, 1–4 for datee responses
 - Emoji: use sparingly and only when it matches the character's texting style fragment
 - No asterisk actions (`*walks over*`) — this is a text-based dating app, not roleplay
 - Comedy comes from character voice, not narration or winking at the audience
@@ -147,8 +147,8 @@ player_role_description: |
   4 options, each tied to one of the 6 stats. Options must sound like the
   player's character — use their texting style fragment as the voice bible.
   ...
-opponent_role_description: |
-  You portray the opponent character — another player's uploaded creation
+datee_role_description: |
+  You portray the datee character — another player's uploaded creation
   being puppeted by you. Their personality prompt is your character bible.
   ...
 meta_contract: |
@@ -170,7 +170,7 @@ GameDefinition.Name           → "Pinder"
 GameDefinition.Vision         → "Pinder is a comedy dating RPG where every character is a sentient penis\non a Tinder-like app..."
 GameDefinition.WorldDescription → "Characters are sentient penises who exist on a dating server..."
 GameDefinition.PlayerRoleDescription → "You generate dialogue options for the player character..."
-GameDefinition.OpponentRoleDescription → "You portray the opponent character..."
+GameDefinition.DateeRoleDescription → "You portray the datee character..."
 GameDefinition.MetaContract   → "Never break character. Never reference dice..."
 GameDefinition.WritingRules   → "All dialogue uses texting register..."
 ```
@@ -185,7 +185,7 @@ The file MUST be created at `/root/.openclaw/agents-extra/pinder/data/game-defin
 
 ### AC2: All 5 sections present with Pinder-specific content
 
-All 7 YAML keys (`name`, `vision`, `world_description`, `player_role_description`, `opponent_role_description`, `meta_contract`, `writing_rules`) must be present. Note: while the issue AC says "5 sections", the contract specifies 7 keys — `name` and `writing_rules` are in addition to the 5 content sections (vision, world, player role, opponent role, meta contract). All values must contain substantive, Pinder-specific content — not placeholder text or generic game design boilerplate.
+All 7 YAML keys (`name`, `vision`, `world_description`, `player_role_description`, `datee_role_description`, `meta_contract`, `writing_rules`) must be present. Note: while the issue AC says "5 sections", the contract specifies 7 keys — `name` and `writing_rules` are in addition to the 5 content sections (vision, world, player role, datee role, meta contract). All values must contain substantive, Pinder-specific content — not placeholder text or generic game design boilerplate.
 
 ### AC3: `GameDefinition.LoadFrom` can parse it successfully
 

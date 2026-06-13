@@ -62,7 +62,7 @@ public sealed class OptionScore
 public sealed class PlayerAgentContext
 {
     public StatBlock PlayerStats { get; }
-    public StatBlock OpponentStats { get; }
+    public StatBlock DateeStats { get; }
     public int CurrentInterest { get; }
     public InterestState InterestState { get; }
     public int MomentumStreak { get; }
@@ -83,8 +83,8 @@ For each `DialogueOption` in `TurnStart.Options`, compute the following steps:
 
 ```
 attackerMod = context.PlayerStats.GetEffective(option.Stat)
-defenceDC   = context.OpponentStats.GetDefenceDC(option.Stat)
-              // = 13 + opponentStats.GetEffective(DefenceTable[option.Stat])
+defenceDC   = context.DateeStats.GetDefenceDC(option.Stat)
+              // = 13 + dateeStats.GetEffective(DefenceTable[option.Stat])
 ```
 
 **Callback bonus — MUST call `CallbackBonus.Compute()` directly (per #386 ADR):**
@@ -268,7 +268,7 @@ The SYNC comments flag potential drift during code review. This is acceptable at
 
 ```
 PlayerStats: Charm=4, Rizz=2, Honesty=1, Chaos=3, Wit=2, SA=1 (all shadows 0)
-OpponentStats: SA=2, Wit=1, Chaos=0, Charm=1, Rizz=2, Honesty=3 (all shadows 0)
+DateeStats: SA=2, Wit=1, Chaos=0, Charm=1, Rizz=2, Honesty=3 (all shadows 0)
 CurrentInterest: 12
 InterestState: Interested
 MomentumStreak: 0
@@ -285,7 +285,7 @@ Options:
 **Computation for Option 0 (Charm):**
 ```
 attackerMod = 4
-defenceDC = 13 + 2 = 15  (opponent SA=2, Charm→SA defence)
+defenceDC = 13 + 2 = 15  (datee SA=2, Charm→SA defence)
 momentumBonus = 0, tellBonus = 0, callbackBonus = 0
 need = 15 - 4 = 11
 successChance = (21 - 11) / 20.0 = 0.50
@@ -301,7 +301,7 @@ score = 0.25
 **Computation for Option 2 (Honesty, with Tell):**
 ```
 attackerMod = 1
-defenceDC = 13 + 0 = 13  (opponent Chaos=0, Honesty→Chaos defence)
+defenceDC = 13 + 0 = 13  (datee Chaos=0, Honesty→Chaos defence)
 tellBonus = 2
 need = 13 - (1 + 0 + 2 + 0) = 10
 successChance = (21 - 10) / 20.0 = 0.55
@@ -476,7 +476,7 @@ Zero warnings, zero errors. All existing tests (1977+) continue to pass.
 | `context` is null | Throw `ArgumentNullException("context")` |
 | `turn.Options` is null | Throw `ArgumentNullException` (defensive — `TurnStart` constructor already prevents this) |
 | `context.PlayerStats` is null | Throw `ArgumentNullException` (defensive) |
-| `context.OpponentStats` is null | Throw `ArgumentNullException` (defensive) |
+| `context.DateeStats` is null | Throw `ArgumentNullException` (defensive) |
 | Float overflow in score computation | Not expected given value ranges (interest 0–25, bonuses ±5). No special handling needed. |
 
 ---

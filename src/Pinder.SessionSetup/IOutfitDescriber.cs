@@ -42,14 +42,14 @@ namespace Pinder.SessionSetup
         /// the item display name and its description, e.g.
         /// <c>"Battered jeans: faded indigo, knee-blown, smells of pine."</c>.
         /// </param>
-        /// <param name="opponentName">Opponent display name.</param>
-        /// <param name="opponentItems">Same shape as <paramref name="playerItems"/>.</param>
+        /// <param name="dateeName">Datee display name.</param>
+        /// <param name="dateeItems">Same shape as <paramref name="playerItems"/>.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         Task<string> GenerateAsync(
             string playerName,
             IReadOnlyList<string> playerItems,
-            string opponentName,
-            IReadOnlyList<string> opponentItems,
+            string dateeName,
+            IReadOnlyList<string> dateeItems,
             CancellationToken cancellationToken = default);
     }
 }

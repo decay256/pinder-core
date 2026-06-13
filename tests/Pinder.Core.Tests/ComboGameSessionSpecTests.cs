@@ -144,7 +144,7 @@ namespace Pinder.Core.Tests
         public async Task AC4_Integration_TripleBonusAppliedAsExternalBonus()
         {
             // 3 turns with distinct non-overlapping stats, then check external bonus on turn 4
-            // Opponent allStats=0 → DC=16. Turn 2 reaches VeryIntoIt (interest 10+4+4=18) → advantage from turn 3.
+            // Datee allStats=0 → DC=16. Turn 2 reaches VeryIntoIt (interest 10+4+4=18) → advantage from turn 3.
             var dice = new FixedDice(
                 5,  // Constructor: horniness roll (1d10)
                 15, 50,      // Turn 1: Rizz (d20, d100)

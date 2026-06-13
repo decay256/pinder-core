@@ -12,7 +12,7 @@ using Xunit;
 namespace Pinder.Core.Tests
 {
     /// <summary>
-    /// Additional spec-driven tests for Issue #50: Tells — §15 opponent tell detection and hidden roll bonus.
+    /// Additional spec-driven tests for Issue #50: Tells — §15 datee tell detection and hidden roll bonus.
     /// Covers edge case 10 (HasTellBonus true but player picks different option),
     /// edge case 3 (explicit matching stat test), and edge case 12 (game ends during turn with tell).
     /// </summary>
@@ -163,7 +163,7 @@ namespace Pinder.Core.Tests
             var dice = new FixedDice(5, 15, 5);
             var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
-            // First turn, no prior opponent response → _activeTell is null
+            // First turn, no prior datee response → _activeTell is null
             var start = await session.StartTurnAsync();
 
             // Mutation: catches if HasTellBonus is ever true when no tell is active
@@ -322,17 +322,17 @@ namespace Pinder.Core.Tests
             public Task<string> DeliverMessageAsync(DeliveryContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult(context.ChosenOption.IntendedText);
 
-            public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context, System.Threading.CancellationToken ct = default)
+            public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
             {
                 var tell = _tells.Count > 0 ? _tells.Dequeue() : null;
-                return Task.FromResult(new OpponentResponse("...", detectedTell: tell));
+                return Task.FromResult(new DateeResponse("...", detectedTell: tell));
             }
 
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult<string?>(null);
-            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
+            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
             public System.Threading.Tasks.Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
-            public System.Threading.Tasks.Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
+            public System.Threading.Tasks.Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
         }
     }
 }

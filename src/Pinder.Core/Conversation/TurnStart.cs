@@ -10,7 +10,7 @@ namespace Pinder.Core.Conversation
     public sealed class TurnStart
     {
         // Fields covered by TurnSnapshot (session-runner/Snapshot/SessionSnapshot.cs):
-        //   Options, State, DicePools, OpponentDefenseSnapshot (#903), WeaknessDcReduction (#593)
+        //   Options, State, DicePools, DateeDefenseSnapshot (#903), WeaknessDcReduction (#593)
 
         /// <summary>The dialogue options available to the player.</summary>
         public DialogueOption[] Options { get; }
@@ -19,13 +19,13 @@ namespace Pinder.Core.Conversation
         public GameStateSnapshot State { get; }
 
         /// <summary>
-        /// #903: Snapshot of the opponent's defense posture at the start of this turn.
+        /// #903: Snapshot of the datee's defense posture at the start of this turn.
         /// Contains one entry per <see cref="Pinder.Core.Stats.StatType"/> (6 total),
         /// mapping each possible attacking stat to the defending stat and effective
-        /// modifier the opponent will use when resisting that attack.
+        /// modifier the datee will use when resisting that attack.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("opponent_defense_snapshot")]
-        public OpponentDefenseSnapshot OpponentDefenseSnapshot { get; }
+        [System.Text.Json.Serialization.JsonPropertyName("datee_defense_snapshot")]
+        public DateeDefenseSnapshot DateeDefenseSnapshot { get; }
 
         /// <summary>
         /// #593: The active weakness window's DC reduction at the start of this turn,
@@ -57,13 +57,13 @@ namespace Pinder.Core.Conversation
         public PerOptionDicePool[] DicePools { get; }
 
         public TurnStart(DialogueOption[] options, GameStateSnapshot state, PerOptionDicePool[] dicePools,
-            OpponentDefenseSnapshot opponentDefenseSnapshot = null,
+            DateeDefenseSnapshot dateeDefenseSnapshot = null,
             int? weaknessDcReduction = null)
         {
             Options = options ?? throw new ArgumentNullException(nameof(options));
             State = state ?? throw new ArgumentNullException(nameof(state));
             DicePools = dicePools ?? throw new ArgumentNullException(nameof(dicePools));
-            OpponentDefenseSnapshot = opponentDefenseSnapshot;
+            DateeDefenseSnapshot = dateeDefenseSnapshot;
             WeaknessDcReduction = weaknessDcReduction;
 
             if (dicePools.Length != options.Length)

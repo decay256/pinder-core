@@ -16,29 +16,29 @@ namespace Pinder.LlmAdapters.Tests
         // ── AC2: Conversation history formatting ──
 
         [Fact]
-        public void BuildDialogueOptionsPrompt_OpponentProfileInUserMessage_NotSystem()
+        public void BuildDialogueOptionsPrompt_DateeProfileInUserMessage_NotSystem()
         {
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
-                MakeDialogueContext(playerName: "GERALD_42", opponentName: "VELVET"));
+                MakeDialogueContext(playerName: "GERALD_42", dateeName: "VELVET"));
 
-            // Opponent profile appears as informational context in user message
+            // Datee profile appears as informational context in user message
             Assert.Contains("YOU ARE TALKING TO", result);
-            Assert.Contains("opponent prompt", result);
+            Assert.Contains("datee prompt", result);
             Assert.Contains("Do NOT reference anything you would only know from inside knowledge", result);
         }
 
         [Fact]
-        public void BuildDialogueOptionsPrompt_EmptyOpponentPrompt_OmitsOpponentProfile()
+        public void BuildDialogueOptionsPrompt_EmptyDateePrompt_OmitsDateeProfile()
         {
             var ctx = new DialogueContext(
                 playerPrompt: "player prompt",
-                opponentPrompt: "",
+                dateePrompt: "",
                 conversationHistory: new List<(string, string)>(),
-                opponentLastMessage: "",
+                dateeLastMessage: "",
                 activeTraps: Array.Empty<string>(),
                 currentInterest: 10,
                 playerName: "P",
-                opponentName: "O");
+                dateeName: "O");
 
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(ctx);
 
@@ -46,22 +46,22 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Fact]
-        public void BuildDialogueOptionsPrompt_OpponentProfileBeforeConversationHistory()
+        public void BuildDialogueOptionsPrompt_DateeProfileBeforeConversationHistory()
         {
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
-                MakeDialogueContext(playerName: "GERALD_42", opponentName: "VELVET"));
+                MakeDialogueContext(playerName: "GERALD_42", dateeName: "VELVET"));
 
-            int opponentIdx = result.IndexOf("YOU ARE TALKING TO");
+            int dateeIdx = result.IndexOf("YOU ARE TALKING TO");
             int historyIdx = result.IndexOf("[CONVERSATION_START]");
-            Assert.True(opponentIdx < historyIdx,
-                "Opponent profile should appear before conversation history");
+            Assert.True(dateeIdx < historyIdx,
+                "Datee profile should appear before conversation history");
         }
 
         [Fact]
         public void BuildDialogueOptionsPrompt_EmptyHistory_ContainsConversationStartAndCurrentTurn()
         {
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
-                MakeDialogueContext(playerName: "GERALD_42", opponentName: "VELVET"));
+                MakeDialogueContext(playerName: "GERALD_42", dateeName: "VELVET"));
 
             Assert.Contains("[CONVERSATION_START]", result);
             Assert.Contains("[CURRENT_TURN]", result);
@@ -89,8 +89,8 @@ namespace Pinder.LlmAdapters.Tests
             };
 
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
-                MakeDialogueContext(conversationHistory: history, opponentLastMessage: "Indeed",
-                    currentInterest: 12, currentTurn: 4, playerName: "GERALD_42", opponentName: "VELVET"));
+                MakeDialogueContext(conversationHistory: history, dateeLastMessage: "Indeed",
+                    currentInterest: 12, currentTurn: 4, playerName: "GERALD_42", dateeName: "VELVET"));
 
             Assert.Contains("[T1|PLAYER AVATAR] \"Hey\"", result);
             Assert.Contains("[T1|DATEE] \"Hi\"", result);
@@ -111,8 +111,8 @@ namespace Pinder.LlmAdapters.Tests
             }
 
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
-                MakeDialogueContext(conversationHistory: history, opponentLastMessage: "Message 15",
-                    currentTurn: 9, playerName: "PLAYER_A", opponentName: "OPP_B"));
+                MakeDialogueContext(conversationHistory: history, dateeLastMessage: "Message 15",
+                    currentTurn: 9, playerName: "PLAYER_A", dateeName: "OPP_B"));
 
             for (int turn = 1; turn <= 8; turn++)
             {
@@ -132,8 +132,8 @@ namespace Pinder.LlmAdapters.Tests
             };
 
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
-                MakeDialogueContext(conversationHistory: history, opponentLastMessage: "Hi",
-                    currentTurn: 2, playerName: "GERALD", opponentName: "VELVET"));
+                MakeDialogueContext(conversationHistory: history, dateeLastMessage: "Hi",
+                    currentTurn: 2, playerName: "GERALD", dateeName: "VELVET"));
 
             Assert.Contains("[T1|PLAYER AVATAR] \"Hey\"", result);
             Assert.Contains("[T1|DATEE] \"Hi\"", result);

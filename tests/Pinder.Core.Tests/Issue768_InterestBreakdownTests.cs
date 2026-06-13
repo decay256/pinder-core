@@ -62,7 +62,7 @@ namespace Pinder.Core.Tests
             return new TurnResult(
                 roll: roll ?? MakeSuccessRoll(),
                 deliveredMessage: "hello",
-                opponentMessage: "hi",
+                dateeMessage: "hi",
                 narrativeBeat: null,
                 interestDelta: interestDelta,
                 stateAfter: stateAfter ?? MakeSnapshot(),
@@ -363,7 +363,7 @@ namespace Pinder.Core.Tests
             var result = new TurnResult(
                 roll: roll,
                 deliveredMessage: "hi",
-                opponentMessage: "reply",
+                dateeMessage: "reply",
                 narrativeBeat: null,
                 interestDelta: expectedInterestDelta,
                 stateAfter: MakeSnapshot(interest: 9), // after: 10 → 9

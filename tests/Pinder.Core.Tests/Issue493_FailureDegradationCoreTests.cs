@@ -12,8 +12,8 @@ using Xunit;
 namespace Pinder.Core.Tests
 {
     /// <summary>
-    /// Tests for Issue #493: Mechanic — failure degradation should be legible to the opponent.
-    /// Covers OpponentContext DTO extension and GameSession wiring of FailureTier.
+    /// Tests for Issue #493: Mechanic — failure degradation should be legible to the datee.
+    /// Covers DateeContext DTO extension and GameSession wiring of FailureTier.
     /// </summary>
     [Trait("Category", "Core")]
     public class Issue493_FailureDegradationCoreTests
@@ -36,11 +36,11 @@ namespace Pinder.Core.Tests
         }
 
         /// <summary>
-        /// LLM adapter that captures the OpponentContext passed to GetOpponentResponseAsync.
+        /// LLM adapter that captures the DateeContext passed to GetDateeResponseAsync.
         /// </summary>
         private sealed class CapturingLlmAdapter : ILlmAdapter
         {
-            public OpponentContext? CapturedOpponentContext { get; private set; }
+            public DateeContext? CapturedDateeContext { get; private set; }
 
             public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, System.Threading.CancellationToken ct = default)
             {
@@ -53,32 +53,32 @@ namespace Pinder.Core.Tests
             public Task<string> DeliverMessageAsync(DeliveryContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult(context.ChosenOption.IntendedText);
 
-            public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context, System.Threading.CancellationToken ct = default)
+            public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
             {
-                CapturedOpponentContext = context;
-                return Task.FromResult(new OpponentResponse("response"));
+                CapturedDateeContext = context;
+                return Task.FromResult(new DateeResponse("response"));
             }
 
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult<string?>(null);
-            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
+            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
             public System.Threading.Tasks.Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
-            public System.Threading.Tasks.Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
+            public System.Threading.Tasks.Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
         }
 
                 #endregion
 
-        #region AC1: OpponentContext includes DeliveryTier
+        #region AC1: DateeContext includes DeliveryTier
 
         // Mutation: would catch if DeliveryTier property is missing or not assigned from constructor param
         [Fact]
-        public void AC1_OpponentContext_DeliveryTier_SetFromConstructor()
+        public void AC1_DateeContext_DeliveryTier_SetFromConstructor()
         {
-            var context = new OpponentContext(
+            var context = new DateeContext(
                 playerPrompt: "p",
-                opponentPrompt: "o",
+                dateePrompt: "o",
                 conversationHistory: new List<(string, string)> { ("P", "hi") },
-                opponentLastMessage: "hi",
+                dateeLastMessage: "hi",
                 activeTraps: Array.Empty<string>(),
                 currentInterest: 12,
                 playerDeliveredMessage: "hello",
@@ -92,13 +92,13 @@ namespace Pinder.Core.Tests
 
         // Mutation: would catch if default value is something other than FailureTier.Success
         [Fact]
-        public void AC1_OpponentContext_DeliveryTier_DefaultsToNone()
+        public void AC1_DateeContext_DeliveryTier_DefaultsToNone()
         {
-            var context = new OpponentContext(
+            var context = new DateeContext(
                 playerPrompt: "p",
-                opponentPrompt: "o",
+                dateePrompt: "o",
                 conversationHistory: new List<(string, string)> { ("P", "hi") },
-                opponentLastMessage: "hi",
+                dateeLastMessage: "hi",
                 activeTraps: Array.Empty<string>(),
                 currentInterest: 10,
                 playerDeliveredMessage: "hello",
@@ -117,13 +117,13 @@ namespace Pinder.Core.Tests
         [InlineData(FailureTier.TropeTrap)]
         [InlineData(FailureTier.Catastrophe)]
         [InlineData(FailureTier.Legendary)]
-        public void AC1_OpponentContext_PreservesAllTierValues(FailureTier tier)
+        public void AC1_DateeContext_PreservesAllTierValues(FailureTier tier)
         {
-            var context = new OpponentContext(
+            var context = new DateeContext(
                 playerPrompt: "p",
-                opponentPrompt: "o",
+                dateePrompt: "o",
                 conversationHistory: new List<(string, string)> { ("P", "hi") },
-                opponentLastMessage: "hi",
+                dateeLastMessage: "hi",
                 activeTraps: Array.Empty<string>(),
                 currentInterest: 10,
                 playerDeliveredMessage: "hello",
@@ -137,7 +137,7 @@ namespace Pinder.Core.Tests
 
         #endregion
 
-        #region AC2: GameSession passes roll tier to OpponentContext
+        #region AC2: GameSession passes roll tier to DateeContext
 
         // Mutation: would catch if GameSession passes FailureTier.Success instead of rollResult.Tier on failure
         [Fact]
@@ -159,8 +159,8 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0);
 
-            Assert.NotNull(llm.CapturedOpponentContext);
-            Assert.NotEqual(FailureTier.Success, llm.CapturedOpponentContext!.DeliveryTier);
+            Assert.NotNull(llm.CapturedDateeContext);
+            Assert.NotEqual(FailureTier.Success, llm.CapturedDateeContext!.DeliveryTier);
         }
 
         // Mutation: would catch if GameSession passes a failure tier when the roll is actually a success
@@ -182,8 +182,8 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0);
 
-            Assert.NotNull(llm.CapturedOpponentContext);
-            Assert.Equal(FailureTier.Success, llm.CapturedOpponentContext!.DeliveryTier);
+            Assert.NotNull(llm.CapturedDateeContext);
+            Assert.Equal(FailureTier.Success, llm.CapturedDateeContext!.DeliveryTier);
         }
 
         // Mutation: would catch if GameSession hardcodes a specific FailureTier instead of reading from rollResult.Tier
@@ -206,8 +206,8 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0);
 
-            Assert.NotNull(llm.CapturedOpponentContext);
-            Assert.Equal(FailureTier.Fumble, llm.CapturedOpponentContext!.DeliveryTier);
+            Assert.NotNull(llm.CapturedDateeContext);
+            Assert.Equal(FailureTier.Fumble, llm.CapturedDateeContext!.DeliveryTier);
         }
 
         #endregion
@@ -219,11 +219,11 @@ namespace Pinder.Core.Tests
         public void EdgeCase_BackwardCompatibility_OldConstructorStillWorks()
         {
             // This test verifies the constructor compiles and works without deliveryTier
-            var context = new OpponentContext(
+            var context = new DateeContext(
                 playerPrompt: "p",
-                opponentPrompt: "o",
+                dateePrompt: "o",
                 conversationHistory: new List<(string, string)>(),
-                opponentLastMessage: "",
+                dateeLastMessage: "",
                 activeTraps: Array.Empty<string>(),
                 currentInterest: 10,
                 playerDeliveredMessage: "",
@@ -244,11 +244,11 @@ namespace Pinder.Core.Tests
                 { ShadowStatType.Fixation, 8 }
             };
 
-            var context = new OpponentContext(
+            var context = new DateeContext(
                 playerPrompt: "p",
-                opponentPrompt: "o",
+                dateePrompt: "o",
                 conversationHistory: new List<(string, string)> { ("P", "hi") },
-                opponentLastMessage: "hi",
+                dateeLastMessage: "hi",
                 activeTraps: Array.Empty<string>(),
                 currentInterest: 10,
                 playerDeliveredMessage: "hello",
@@ -258,13 +258,13 @@ namespace Pinder.Core.Tests
                 shadowThresholds: shadows,
                 activeTrapInstructions: new[] { "trap1" },
                 playerName: "Gerald",
-                opponentName: "Velvet",
+                dateeName: "Velvet",
                 currentTurn: 5,
                 deliveryTier: FailureTier.Legendary);
 
             Assert.Equal(FailureTier.Legendary, context.DeliveryTier);
             Assert.Equal("Gerald", context.PlayerName);
-            Assert.Equal("Velvet", context.OpponentName);
+            Assert.Equal("Velvet", context.DateeName);
         }
 
         #endregion

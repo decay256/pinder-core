@@ -109,7 +109,7 @@ public sealed class ConversationIndexingTests
         var history = new[]
         {
             Scene("player bio"),
-            Scene("opponent bio"),
+            Scene("datee bio"),
             Scene("outfit description"),
             Player("p1"), Opp("o1"),
             Player("p2"), Opp("o2"),
@@ -140,7 +140,7 @@ public sealed class ConversationIndexingTests
         var history = new[]
         {
             Scene("player bio"),
-            Scene("opponent bio"),
+            Scene("datee bio"),
             Scene("outfit description"),
             Player("p1"), Opp("o1"),
             Player("p2"), Opp("o2"),
@@ -165,7 +165,7 @@ public sealed class ConversationIndexingTests
         var history = new[]
         {
             Scene("player bio"),
-            Scene("opponent bio"),
+            Scene("datee bio"),
             Player("p1"), Opp("o1"),
         };
 
@@ -188,7 +188,7 @@ public sealed class ConversationIndexingTests
         var history = new[]
         {
             Scene("player bio"),
-            Scene("opponent bio"),
+            Scene("datee bio"),
             Player("p1"), Opp("o1"),
             Player("p2"), Opp("o2"),
         };
@@ -214,12 +214,12 @@ public sealed class ConversationIndexingTests
         Assert.Equal(2, views[2].PhysicalIndex);
         Assert.Equal("p1", views[2].Text);
 
-        // Turn 1 opponent
+        // Turn 1 datee
         Assert.False(views[3].IsScene);
         Assert.Equal(1, views[3].TurnNumber);
         Assert.False(views[3].IsPlayerEntry);
 
-        // Turn 2 player + opponent
+        // Turn 2 player + datee
         Assert.Equal(2, views[4].TurnNumber);
         Assert.True(views[4].IsPlayerEntry);
         Assert.Equal(2, views[5].TurnNumber);
@@ -240,7 +240,7 @@ public sealed class ConversationIndexingTests
         var history = new[]
         {
             Scene("player bio"),
-            Scene("opponent bio"),
+            Scene("datee bio"),
             Scene("outfit description"),
         };
 

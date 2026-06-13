@@ -75,11 +75,11 @@ partial class Program
 
         // Reconstruct CharacterProfile objects from frozen snapshot data
         result.Sable = BuildProfileFromSnapshot(resimInitialSnap.Player);
-        result.Brick = BuildProfileFromSnapshot(resimInitialSnap.Opponent);
+        result.Brick = BuildProfileFromSnapshot(resimInitialSnap.Datee);
 
         // Restore psychological stakes from snapshot (no API calls needed)
         result.Sable.PsychologicalStake = resimInitialSnap.PlayerPsychologicalStake;
-        result.Brick.PsychologicalStake = resimInitialSnap.OpponentPsychologicalStake;
+        result.Brick.PsychologicalStake = resimInitialSnap.DateePsychologicalStake;
 
         // Parse original session number from slug (format: session-NNN-...)
         result.ResimOriginalSessionNum = ParseSessionNumberFromSlug(result.ResimulateSlug!);

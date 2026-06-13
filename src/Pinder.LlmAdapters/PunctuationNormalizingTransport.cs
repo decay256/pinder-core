@@ -11,7 +11,7 @@ namespace Pinder.LlmAdapters
     /// space-em-dash-space (` — `) into semicolon-space (`; `) on every
     /// LLM response. Wraps an underlying <see cref="ILlmTransport"/> (and
     /// optionally <see cref="IStreamingLlmTransport"/>) so all engine
-    /// consumers — delivery, opponent reply, steering, horniness overlay,
+    /// consumers — delivery, datee reply, steering, horniness overlay,
     /// shadow corruption, matchup analysis, psychological stake, etc. —
     /// pick up the cleanup automatically without each call site having to
     /// remember.

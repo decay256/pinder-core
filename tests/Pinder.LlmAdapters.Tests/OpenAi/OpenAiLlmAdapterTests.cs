@@ -48,9 +48,9 @@ OPTION_4
         }
 
         [Fact]
-        public void OpenAiLlmAdapter_ParsesOpponentResponse_FromChatResponse()
+        public void OpenAiLlmAdapter_ParsesDateeResponse_FromChatResponse()
         {
-            // Arrange: opponent response with signals
+            // Arrange: datee response with signals
             var llmOutput = @"Oh wow, you actually noticed Biscuit! Most people just swipe past. His name's Biscuit and he's basically my emotional support goblin.
 
 [SIGNALS]
@@ -58,7 +58,7 @@ TELL: Charm (responds warmly to genuine interest in personal details)
 WEAKNESS: Honesty-2 (gets flustered when people are direct about attraction)";
 
             // Act
-            var result = OpenAiLlmAdapter.ParseOpponentResponse(llmOutput);
+            var result = OpenAiLlmAdapter.ParseDateeResponse(llmOutput);
 
             // Assert
             Assert.Contains("Biscuit", result.MessageText);
@@ -80,9 +80,9 @@ WEAKNESS: Honesty-2 (gets flustered when people are direct about attraction)";
         }
 
         [Fact]
-        public void ParseOpponentResponse_EmptyInput_ReturnsEmptyMessage()
+        public void ParseDateeResponse_EmptyInput_ReturnsEmptyMessage()
         {
-            var result = OpenAiLlmAdapter.ParseOpponentResponse("");
+            var result = OpenAiLlmAdapter.ParseDateeResponse("");
             Assert.Equal("", result.MessageText);
             Assert.Null(result.DetectedTell);
             Assert.Null(result.WeaknessWindow);

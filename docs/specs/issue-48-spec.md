@@ -354,7 +354,7 @@ Unit tests must cover:
 | DC exactly 17 | Mid tier: 10 XP |
 | DC exactly 18 | High tier: 15 XP |
 | DC < 13 (e.g., DC 10 from base 13 minus modifiers) | Low tier: 5 XP |
-| DC > 20 (theoretically possible with high opponent stats) | High tier: 15 XP |
+| DC > 20 (theoretically possible with high datee stats) | High tier: 15 XP |
 | Nat 20 with DC ≤ 13 | 25 XP (nat-20 overrides, NOT 5 + 25) |
 | Nat 1 when roll would have succeeded | 10 XP (nat-1 is auto-fail, gets nat-1 XP) |
 | Game ends on first turn (interest starts at 10, delta pushes to 0 or 25) | Turn XP + end-game XP both recorded; `TurnResult.XpEarned` includes both |
@@ -389,24 +389,24 @@ No new exception types are introduced. Existing `GameEndedException`, `InvalidOp
 
 Issues #46, #49, and #50 (all in the same sprint) introduce changes to shared API surfaces that overlap. This section documents the conflicts and clarifies how issue #48 should be implemented regardless of resolution order.
 
-### 12.1 `OpponentResponse` Class — Conflicting Shapes (#49 vs #50)
+### 12.1 `DateeResponse` Class — Conflicting Shapes (#49 vs #50)
 
-Issue #49 (Weakness Windows) and Issue #50 (Tell Detection) both independently define an `OpponentResponse` class. The class already exists at `src/Pinder.Core/Conversation/OpponentResponse.cs`.
+Issue #49 (Weakness Windows) and Issue #50 (Tell Detection) both independently define an `DateeResponse` class. The class already exists at `src/Pinder.Core/Conversation/DateeResponse.cs`.
 
-**Merged API recommendation:** The final `OpponentResponse` class should carry **both** optional payloads:
+**Merged API recommendation:** The final `DateeResponse` class should carry **both** optional payloads:
 
 ```csharp
-public sealed class OpponentResponse
+public sealed class DateeResponse
 {
     public string Text { get; }
     public WeaknessWindow? Window { get; }
     public Tell? DetectedTell { get; }
 
-    public OpponentResponse(string text, WeaknessWindow? window = null, Tell? detectedTell = null);
+    public DateeResponse(string text, WeaknessWindow? window = null, Tell? detectedTell = null);
 }
 ```
 
-**Impact on issue #48:** None. XP tracking does not read from `OpponentResponse`.
+**Impact on issue #48:** None. XP tracking does not read from `DateeResponse`.
 
 ### 12.2 `RollEngine.Resolve` — Conflicting New Parameters (#46, #49, #50)
 
@@ -477,7 +477,7 @@ The XP recording step slots into the existing flow after roll resolution and bef
 4. Apply interest delta → `InterestMeter.Apply()`
 5. Advance traps
 6. Deliver message via LLM
-7. Opponent response via LLM
+7. Datee response via LLM
 8. Check end conditions
 9. **Record end-of-game XP if game ended** (DateSecured 50, or ConversationComplete 5)
 10. **Drain turn events → sum → `TurnResult.XpEarned`**

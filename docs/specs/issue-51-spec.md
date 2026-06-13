@@ -52,7 +52,7 @@ The distinction between threshold 1 and 2 is subtle: at threshold 1, the LLM is 
 ```csharp
 public GameSession(
     CharacterProfile player,
-    CharacterProfile opponent,
+    CharacterProfile datee,
     ILlmAdapter llm,
     IDiceRoller dice,
     ITrapRegistry trapRegistry,
@@ -107,9 +107,9 @@ Constructor gains two new parameters:
 ```csharp
 public DialogueContext(
     string playerPrompt,
-    string opponentPrompt,
+    string dateePrompt,
     IReadOnlyList<(string Sender, string Text)> conversationHistory,
-    string opponentLastMessage,
+    string dateeLastMessage,
     IReadOnlyList<string> activeTraps,
     int currentInterest,
     int horninessLevel,          // NEW
@@ -218,9 +218,9 @@ All options replaced with `Stat = StatType.Rizz`, `IsHorninessForced = true`. Te
 ```csharp
 var context = new DialogueContext(
     playerPrompt: "...",
-    opponentPrompt: "...",
+    dateePrompt: "...",
     conversationHistory: history,
-    opponentLastMessage: "...",
+    dateeLastMessage: "...",
     activeTraps: trapNames,
     currentInterest: 10,
     horninessLevel: 8,         // NEW

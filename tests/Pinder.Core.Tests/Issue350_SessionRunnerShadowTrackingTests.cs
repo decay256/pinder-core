@@ -184,11 +184,11 @@ namespace Pinder.Core.Tests
         private static GameSession MakeSession(
             int[] diceValues,
             StatBlock? playerStats = null,
-            StatBlock? opponentStats = null,
+            StatBlock? dateeStats = null,
             SessionShadowTracker? shadows = null)
         {
             playerStats = playerStats ?? MakeStatBlock();
-            opponentStats = opponentStats ?? MakeStatBlock();
+            dateeStats = dateeStats ?? MakeStatBlock();
 
             var config = shadows != null
                 ? new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: shadows)
@@ -201,7 +201,7 @@ namespace Pinder.Core.Tests
 
             return new GameSession(
                 MakeProfile("player", playerStats),
-                MakeProfile("opponent", opponentStats),
+                MakeProfile("datee", dateeStats),
                 new NullLlmAdapter(),
                 new QueueDice(allDice),
                 new NullTrapRegistryImpl(),

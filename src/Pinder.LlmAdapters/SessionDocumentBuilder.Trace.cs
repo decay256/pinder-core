@@ -24,15 +24,15 @@ namespace Pinder.LlmAdapters
             if (context == null) throw new ArgumentNullException(nameof(context));
 
             var playerName = FallbackName(context.PlayerName, "Player");
-            var opponentName = FallbackName(context.OpponentName, "Opponent");
+            var dateeName = FallbackName(context.DateeName, "Datee");
 
             var sb = new AnnotatedStringBuilder();
 
-            // Opponent bio
-            if (!string.IsNullOrWhiteSpace(context.OpponentPrompt))
+            // Datee bio
+            if (!string.IsNullOrWhiteSpace(context.DateePrompt))
             {
                 sb.Append("YOU ARE TALKING TO: ");
-                sb.AppendLine(context.OpponentPrompt, "data/prompts/structural.yaml", "opponent-prompt");
+                sb.AppendLine(context.DateePrompt, "data/prompts/structural.yaml", "datee-prompt");
                 sb.AppendLine();
             }
 
@@ -86,7 +86,7 @@ namespace Pinder.LlmAdapters
 
             if (context.ActiveTell != null)
             {
-                gameState.AppendLine($"📡 TELL DETECTED: The opponent revealed a vulnerability around {context.ActiveTell.Stat}.");
+                gameState.AppendLine($"📡 TELL DETECTED: The datee revealed a vulnerability around {context.ActiveTell.Stat}.");
                 gameState.AppendLine($"One option using {context.ActiveTell.Stat} should explicitly capitalize on this moment —");
                 gameState.AppendLine("it landed differently than intended. The player read the room.");
             }
@@ -110,7 +110,7 @@ namespace Pinder.LlmAdapters
             if (context.CurrentTurn == 1)
             {
                 sb.AppendLine("COLD OPENER RULE: This is Turn 1. You have never spoken to this person before.");
-                sb.AppendLine("Since you are initiating the contact and sending the very first message, you MUST NOT say \"interesting that you mention\", \"since you said\", \"you mentioned\", or use any other phrasing that assumes the opponent has already spoken or sent a message in this conversation. The opponent has sent ZERO messages.");
+                sb.AppendLine("Since you are initiating the contact and sending the very first message, you MUST NOT say \"interesting that you mention\", \"since you said\", \"you mentioned\", or use any other phrasing that assumes the datee has already spoken or sent a message in this conversation. The datee has sent ZERO messages.");
                 sb.AppendLine("Your only knowledge of them is their dating profile: bio text AND visible appearance (items listed after 'Wearing:' in the profile above).");
                 sb.AppendLine("Do NOT reference anything you would only know from inside knowledge of the character — only what is visible on their public profile.");
                 sb.AppendLine("A strong opener can react to their bio, their look, or both. Something specific beats something generic.");
@@ -208,7 +208,7 @@ namespace Pinder.LlmAdapters
             if (context == null) throw new ArgumentNullException(nameof(context));
 
             var playerName = FallbackName(context.PlayerName, "Player");
-            var opponentName = FallbackName(context.OpponentName, "Opponent");
+            var dateeName = FallbackName(context.DateeName, "Datee");
             var builder = rollContextBuilder ?? new RollContextBuilder();
 
             var sb = new AnnotatedStringBuilder();
@@ -317,14 +317,14 @@ namespace Pinder.LlmAdapters
         }
 
         /// <summary>
-        /// Builds the user-message content for GetOpponentResponseAsync and returns the trace data.
+        /// Builds the user-message content for GetDateeResponseAsync and returns the trace data.
         /// </summary>
-        public static PromptTraceResult BuildOpponentPromptEx(OpponentContext context)
+        public static PromptTraceResult BuildDateePromptEx(DateeContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
             var playerName = FallbackName(context.PlayerName, "Player");
-            var opponentName = FallbackName(context.OpponentName, "Opponent");
+            var dateeName = FallbackName(context.DateeName, "Datee");
 
             var sb = new AnnotatedStringBuilder();
 
@@ -342,7 +342,7 @@ namespace Pinder.LlmAdapters
                 sb.AppendLine($"\"{context.PlayerDeliveredMessage}\"");
                 sb.AppendLine();
                 sb.AppendLine("FAILURE CONTEXT");
-                sb.AppendLine(GetOpponentReactionGuidance(context.DeliveryTier));
+                sb.AppendLine(GetDateeReactionGuidance(context.DeliveryTier));
             }
             else
             {
@@ -352,13 +352,13 @@ namespace Pinder.LlmAdapters
 
             sb.AppendLine();
 
-            // [ENGINE — OPPONENT] injection block with interest narrative
+            // [ENGINE — DATEE] injection block with interest narrative
             string interestNarrative = PromptTemplates.GetInterestNarrative(context.InterestAfter);
-            string opponentBlock = PromptTemplates.EngineOpponentBlock
-                .Replace("{opponent_name}", opponentName)
+            string dateeBlock = PromptTemplates.EngineDateeBlock
+                .Replace("{datee_name}", dateeName)
                 .Replace("{interest}", context.InterestAfter.ToString())
                 .Replace("{interest_narrative}", interestNarrative);
-            sb.AppendLine(opponentBlock, GetTemplateSource("engine-opponent-block"), "engine-opponent-block");
+            sb.AppendLine(dateeBlock, GetTemplateSource("engine-datee-block"), "engine-datee-block");
 
             sb.AppendLine();
 
@@ -389,15 +389,15 @@ namespace Pinder.LlmAdapters
                 }
             }
 
-            string opponentTaint = BuildShadowTaintBlock(context.ShadowThresholds);
-            if (!string.IsNullOrEmpty(opponentTaint))
+            string dateeTaint = BuildShadowTaintBlock(context.ShadowThresholds);
+            if (!string.IsNullOrEmpty(dateeTaint))
             {
                 sb.AppendLine();
                 sb.AppendLine("SHADOW STATE (corrupting forces on your communication)");
-                sb.AppendLine(opponentTaint);
+                sb.AppendLine(dateeTaint);
             }
 
-            // Inject active archetype directive for opponent
+            // Inject active archetype directive for datee
             if (!string.IsNullOrEmpty(context.ActiveArchetypeDirective))
             {
                 sb.AppendLine();
@@ -415,10 +415,10 @@ namespace Pinder.LlmAdapters
                 $"The texting-style length axis in your system prompt is a stylistic guideline, NOT a hard engine cap — " +
                 $"the engine-specified ceiling above takes precedence over any style axis that would run longer.";
 
-            string opponentResponseInstruction = PromptTemplates.OpponentResponseInstruction
+            string dateeResponseInstruction = PromptTemplates.DateeResponseInstruction
                 .Replace("{resistance_block}", resistanceBlock)
                 .Replace("{length_hint}", lengthHint);
-            sb.Append(opponentResponseInstruction, GetTemplateSource("opponent-response-instruction"), "opponent-response-instruction");
+            sb.Append(dateeResponseInstruction, GetTemplateSource("datee-response-instruction"), "datee-response-instruction");
 
             return new PromptTraceResult(sb.ToString(), sb.Spans);
         }

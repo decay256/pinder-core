@@ -50,13 +50,13 @@ namespace Pinder.LlmAdapters
         }
 
         /// <summary>
-        /// Builds the user-message content for GetOpponentResponseAsync.
-        /// Uses [ENGINE — OPPONENT] injection block format.
+        /// Builds the user-message content for GetDateeResponseAsync.
+        /// Uses [ENGINE — DATEE] injection block format.
         /// </summary>
-        public static string BuildOpponentPrompt(OpponentContext context)
+        public static string BuildDateePrompt(DateeContext context)
         {
-            var result = BuildOpponentPromptEx(context);
-            Pinder.Core.Text.InMemoryPromptTraceService.Instance.RecordTrace("opponent", result);
+            var result = BuildDateePromptEx(context);
+            Pinder.Core.Text.InMemoryPromptTraceService.Instance.RecordTrace("datee", result);
             return result.Text;
         }
 
@@ -66,16 +66,16 @@ namespace Pinder.LlmAdapters
         /// Builds the user-message content for GetInterestChangeBeatAsync (§3.8).
         /// </summary>
         public static string BuildInterestChangeBeatPrompt(
-            string opponentName,
+            string dateeName,
             int interestBefore,
             int interestAfter,
             InterestState newState,
             IReadOnlyList<(string Sender, string Text)>? conversationHistory = null,
             string? playerName = null)
         {
-            if (opponentName == null) throw new ArgumentNullException(nameof(opponentName));
+            if (dateeName == null) throw new ArgumentNullException(nameof(dateeName));
 
-            string thresholdInstruction = GetThresholdInstruction(interestBefore, interestAfter, newState, opponentName);
+            string thresholdInstruction = GetThresholdInstruction(interestBefore, interestAfter, newState, dateeName);
 
             var sb = new StringBuilder();
 
@@ -88,7 +88,7 @@ namespace Pinder.LlmAdapters
             }
 
             sb.Append(PromptTemplates.InterestBeatInstruction
-                .Replace("{opponent_name}", opponentName)
+                .Replace("{datee_name}", dateeName)
                 .Replace("{interest_before}", interestBefore.ToString())
                 .Replace("{interest_after}", interestAfter.ToString())
                 .Replace("{threshold_instruction}", thresholdInstruction));

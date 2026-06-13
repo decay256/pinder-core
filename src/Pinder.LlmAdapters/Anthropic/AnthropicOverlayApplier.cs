@@ -23,7 +23,7 @@ namespace Pinder.LlmAdapters.Anthropic
             AnthropicOptions options,
             string message,
             string instruction,
-            string? opponentContext = null,
+            string? dateeContext = null,
             string? archetypeDirective = null,
             CancellationToken ct = default)
         {
@@ -38,8 +38,8 @@ namespace Pinder.LlmAdapters.Anthropic
                 "Apply the overlay instruction to rewrite the message with the requested tonal shift. " +
                 "Return ONLY the rewritten message text. No commentary, no refusals, no preamble.";
 
-            if (!string.IsNullOrWhiteSpace(opponentContext))
-                systemPrompt += $"\n\nThe message being sent is directed at this character:\n{opponentContext}";
+            if (!string.IsNullOrWhiteSpace(dateeContext))
+                systemPrompt += $"\n\nThe message being sent is directed at this character:\n{dateeContext}";
             var systemBlocks = new ContentBlock[]
             {
                 new ContentBlock { Type = "text", Text = systemPrompt }

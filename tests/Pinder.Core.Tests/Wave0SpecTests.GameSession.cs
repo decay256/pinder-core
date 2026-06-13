@@ -34,7 +34,7 @@ namespace Pinder.Core.Tests
         {
             var session = new GameSession(
                 MakeProfile("player"),
-                MakeProfile("opponent"),
+                MakeProfile("datee"),
                 new StubLlmAdapter(),
                 new FixedDice(10),
                 new NullTrapRegistry(),
@@ -53,7 +53,7 @@ namespace Pinder.Core.Tests
             // Negative should be clamped by InterestMeter(int) to 0
             var session = new GameSession(
                 MakeProfile("player"),
-                MakeProfile("opponent"),
+                MakeProfile("datee"),
                 new StubLlmAdapter(),
                 new FixedDice(10),
                 new NullTrapRegistry(),
@@ -73,13 +73,13 @@ namespace Pinder.Core.Tests
             var config = new GameSessionConfig(
                 clock: clock,
                 playerShadows: pShadows,
-                opponentShadows: oShadows,
+                dateeShadows: oShadows,
                 startingInterest: 15,
                 previousOpener: "opener");
 
             Assert.Same(clock, config.Clock);
             Assert.Same(pShadows, config.PlayerShadows);
-            Assert.Same(oShadows, config.OpponentShadows);
+            Assert.Same(oShadows, config.DateeShadows);
             Assert.Equal(15, config.StartingInterest);
             Assert.Equal("opener", config.PreviousOpener);
         }

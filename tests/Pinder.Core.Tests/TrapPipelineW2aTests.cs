@@ -52,7 +52,7 @@ namespace Pinder.Core.Tests
         {
             public List<DialogueContext> DialogueContexts { get; } = new();
             public List<DeliveryContext> DeliveryContexts { get; } = new();
-            public List<OpponentContext> OpponentContexts { get; } = new();
+            public List<DateeContext> DateeContexts { get; } = new();
             public int TrapOverlayCalls { get; private set; }
 
             public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, System.Threading.CancellationToken ct = default)
@@ -79,22 +79,22 @@ namespace Pinder.Core.Tests
                 return Task.FromResult(text);
             }
 
-            public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context, System.Threading.CancellationToken ct = default)
+            public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
             {
-                OpponentContexts.Add(context);
-                return Task.FromResult(new OpponentResponse("..."));
+                DateeContexts.Add(context);
+                return Task.FromResult(new DateeResponse("..."));
             }
 
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult<string?>(null);
 
-            public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
+            public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
                 => Task.FromResult(message);
 
             public Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
                 => Task.FromResult(message);
 
-            public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
+            public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
             {
                 TrapOverlayCalls++;
                 // Mark the message so a Trap (X) text-diff is emitted.
@@ -220,7 +220,7 @@ namespace Pinder.Core.Tests
             );
 
             var session = new GameSession(
-                MakeProfile("Player"), MakeProfile("Opponent"),
+                MakeProfile("Player"), MakeProfile("Datee"),
                 llm, dice, registry,
                 new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
@@ -261,7 +261,7 @@ namespace Pinder.Core.Tests
             );
 
             var session = new GameSession(
-                MakeProfile("Player"), MakeProfile("Opponent"),
+                MakeProfile("Player"), MakeProfile("Datee"),
                 llm, dice, registry,
                 new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
@@ -304,7 +304,7 @@ namespace Pinder.Core.Tests
             );
 
             var session = new GameSession(
-                MakeProfile("Player"), MakeProfile("Opponent"),
+                MakeProfile("Player"), MakeProfile("Datee"),
                 llm, dice, registry,
                 new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
@@ -351,7 +351,7 @@ namespace Pinder.Core.Tests
             );
 
             var session = new GameSession(
-                MakeProfile("Player"), MakeProfile("Opponent"),
+                MakeProfile("Player"), MakeProfile("Datee"),
                 llm, dice, registry,
                 new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
@@ -406,7 +406,7 @@ namespace Pinder.Core.Tests
             );
 
             var session = new GameSession(
-                MakeProfile("Player"), MakeProfile("Opponent"),
+                MakeProfile("Player"), MakeProfile("Datee"),
                 llm, dice, registry,
                 new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
@@ -441,7 +441,7 @@ namespace Pinder.Core.Tests
             var llm = new W2aTrapLlmAdapter();
             var registry = new StubTrapRegistry();
             var session = new GameSession(
-                MakeProfile("Player"), MakeProfile("Opponent"),
+                MakeProfile("Player"), MakeProfile("Datee"),
                 llm, new FixedDice(5, 18, 18), registry,
                 new GameSessionConfig(clock: TestHelpers.MakeClock()));
 

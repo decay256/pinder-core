@@ -89,7 +89,7 @@ namespace Pinder.Core.Tests.Conversation
 
             var session = new GameSession(
                 MakeProfile("player"),
-                MakeProfile("opponent"),
+                MakeProfile("datee"),
                 new NullLlmAdapter(),
                 dice,
                 new NullTrapRegistry(),
@@ -114,7 +114,7 @@ namespace Pinder.Core.Tests.Conversation
 
             var session = new GameSession(
                 MakeProfile("player"),
-                MakeProfile("opponent"),
+                MakeProfile("datee"),
                 new NullLlmAdapter(),
                 dice,
                 new NullTrapRegistry(),
@@ -134,7 +134,7 @@ namespace Pinder.Core.Tests.Conversation
 
             var session = new GameSession(
                 MakeProfile("player"),
-                MakeProfile("opponent"),
+                MakeProfile("datee"),
                 new NullLlmAdapter(),
                 new StubDice(10),
                 new NullTrapRegistry(),
@@ -345,19 +345,19 @@ namespace Pinder.Core.Tests.Conversation
             public Task<string> DeliverMessageAsync(DeliveryContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult("delivered message");
 
-            public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context, System.Threading.CancellationToken ct = default)
-                => Task.FromResult(new OpponentResponse("opponent reply"));
+            public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
+                => Task.FromResult(new DateeResponse("datee reply"));
 
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult<string?>(null);
 
-            public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
+            public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
                 => Task.FromResult(message);
 
             public Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
                 => Task.FromResult(message);
 
-            public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
+            public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
                 => Task.FromResult(message);
         }
 

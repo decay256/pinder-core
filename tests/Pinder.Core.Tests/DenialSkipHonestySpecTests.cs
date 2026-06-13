@@ -269,7 +269,7 @@ namespace Pinder.Core.Tests
 
             return new GameSession(
                 MakeProfile("player"),
-                MakeProfile("opponent"),
+                MakeProfile("datee"),
                 llm,
                 wrappedDice,
                 new NullTrapRegistry(),

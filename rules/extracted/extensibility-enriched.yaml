@@ -19,7 +19,7 @@
     text: "```\n/data/\n  failure-pools/\n    {stat}-tier{1-4}-{name}.json       ← Drop a new file, it's live\n  success-pools/\n    {stat}-success.json\n  archetypes/\n    stat-to-archetype.json\n    custom/\
       \                             ← User-created archetypes\n  conversation-arcs/\n    interest-patterns.json\n    custom/                             ← User-created arcs\n  items/\n    common.json\n\
       \    uncommon.json\n    rare.json\n    legendary.json\n    custom/                             ← User-created items\n  clothing-prompts/\n    {slot}-{item-id}.json              ← Personality fragment\
-      \ per item\n    custom/\n  events/\n    shadow-growth.json\n    shadow-reduction.json\n  achievements/\n    achievements.json\n    custom/\n  timing/\n    response-profiles.json             ← Opponent\
+      \ per item\n    custom/\n  events/\n    shadow-growth.json\n    shadow-reduction.json\n  achievements/\n    achievements.json\n    custom/\n  timing/\n    response-profiles.json             ← Datee\
       \ response timing personalities\n    custom/\n  schemas/\n    failure-entry.schema.json\n    item.schema.json\n    archetype.schema.json\n    conversation-arc.schema.json\n    achievement.schema.json\n\
       ```"
   - kind: hr
@@ -105,7 +105,7 @@
   - kind: paragraph
     text: 'Add to `conversation-arcs/custom/my-arc.json`:'
   - kind: code
-    text: "```json\n{\n  \"name\": \"The Boomerang\",\n  \"trigger\": \"Interest drops below 5 then recovers above 12 in 3 turns\",\n  \"opponent_behavior\": \"Surprised and slightly suspicious. Recalibrating.\
+    text: "```json\n{\n  \"name\": \"The Boomerang\",\n  \"trigger\": \"Interest drops below 5 then recovers above 12 in 3 turns\",\n  \"datee_behavior\": \"Surprised and slightly suspicious. Recalibrating.\
       \ Guard goes back up even as interest rises.\",\n  \"player_experience\": \"You were losing them and pulled off a comeback.\",\n  \"recovery_possible\": true,\n  \"recovery_stat\": \"any — the comeback\
       \ itself is the arc\",\n  \"source_trope\": \"Community-created\"\n}\n```"
   - kind: hr
@@ -150,7 +150,7 @@
 
       3. **Player''s stats + shadows** → calculate effective modifiers
 
-      4. **Opponent''s profile** → their personality prompt + defence DCs
+      4. **Datee''s profile** → their personality prompt + defence DCs
 
       5. **Active conversation arc** → inject arc context from `interest-patterns.json`
 

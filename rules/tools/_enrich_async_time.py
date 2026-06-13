@@ -18,7 +18,7 @@ def enrich_async_time(entries: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             for b in blocks:
                 if b.get('kind') == 'table':
                     for row in b.get('rows', []):
-                        trait = row.get('Opponent Trait', '')
+                        trait = row.get('Datee Trait', '')
                         resp_time = row.get('Base Response Time', '')
                         if not trait:
                             continue
@@ -40,7 +40,7 @@ def enrich_async_time(entries: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
                             'title': f'Response Time — {trait}',
                             'type': 'interest_change',
                             'description': f'{trait}: {resp_time}.',
-                            'condition': {'opponent_trait': trait},
+                            'condition': {'datee_trait': trait},
                             'outcome': outcome,
                         }
                         result.append(sub)

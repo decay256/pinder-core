@@ -61,7 +61,7 @@ namespace Pinder.Core.Tests.Phase2
             Assert.Equal(resultA.Roll.DC, resultB.Roll.DC);
             Assert.Equal(resultA.InterestDelta, resultB.InterestDelta);
             Assert.Equal(resultA.DeliveredMessage, resultB.DeliveredMessage);
-            Assert.Equal(resultA.OpponentMessage, resultB.OpponentMessage);
+            Assert.Equal(resultA.DateeMessage, resultB.DateeMessage);
             Assert.Equal(resultA.StateAfter.Interest, resultB.StateAfter.Interest);
             Assert.Equal(resultA.StateAfter.MomentumStreak, resultB.StateAfter.MomentumStreak);
             Assert.Equal(resultA.StateAfter.TurnNumber, resultB.StateAfter.TurnNumber);
@@ -174,7 +174,7 @@ namespace Pinder.Core.Tests.Phase2
             var transport = new RecordingLlmTransport { DefaultResponse = "" };
             transport.QueueDialogueOptions(Phase0Fixtures.CannedDialogueOptions);
             transport.QueueDelivery(Phase0Fixtures.CannedDelivery);
-            transport.QueueOpponent(Phase0Fixtures.CannedOpponent);
+            transport.QueueDatee(Phase0Fixtures.CannedDatee);
 
             var adapter = Phase0Fixtures.MakeAdapter(transport);
             // _dice budget: 1 (ctor d10). The d20+d100 are now consumed via
@@ -184,7 +184,7 @@ namespace Pinder.Core.Tests.Phase2
 
             var session = new GameSession(
                 Phase0Fixtures.MakeProfile("Player"),
-                Phase0Fixtures.MakeProfile("Opponent"),
+                Phase0Fixtures.MakeProfile("Datee"),
                 adapter, dice, new NullTrapRegistry(), Phase0Fixtures.MakeConfig());
 
             var start = await session.StartTurnAsync();

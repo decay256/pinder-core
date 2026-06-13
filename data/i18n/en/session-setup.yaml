@@ -11,7 +11,7 @@ strings:
   session_setup.heading: "Setting up your match…"
   session_setup.generating_first_turn: "Generating first turn…"
   session_setup.label_your_stake: "Your Psychological Stake"
-  session_setup.label_opponent_stake: "Opponent Psychological Stake"
+  session_setup.label_datee_stake: "Datee Psychological Stake"
   session_setup.continue_button: "Continue to Game"
   session_setup.stall_notice: "Still working — this is taking longer than usual. Will keep trying."
   session_setup.session_id_label: "Session: {sessionId}"

@@ -8,7 +8,7 @@ using Xunit;
 namespace Pinder.Core.Tests
 {
     [Trait("Category", "Core")]
-    public class OpponentTimingCalculatorTests
+    public class DateeTimingCalculatorTests
     {
         /// <summary>
         /// Deterministic dice that returns a fixed sequence of values.
@@ -54,7 +54,7 @@ namespace Pinder.Core.Tests
             var profile = MakeProfile(baseDelay: 10, variance: 0.0f);
             var dice = new FixedDice(50); // midpoint
 
-            double result = OpponentTimingCalculator.ComputeDelayMinutes(
+            double result = DateeTimingCalculator.ComputeDelayMinutes(
                 profile, InterestState.Interested, NoShadows, dice);
 
             Assert.Equal(10.0, result, precision: 1);
@@ -70,7 +70,7 @@ namespace Pinder.Core.Tests
             var profile = MakeProfile(baseDelay: 10, variance: 0.0f);
             var dice = new FixedDice(50);
 
-            double result = OpponentTimingCalculator.ComputeDelayMinutes(
+            double result = DateeTimingCalculator.ComputeDelayMinutes(
                 profile, InterestState.Bored, NoShadows, dice);
 
             Assert.Equal(50.0, result, precision: 1);
@@ -82,7 +82,7 @@ namespace Pinder.Core.Tests
             var profile = MakeProfile(baseDelay: 10, variance: 0.0f);
             var dice = new FixedDice(50);
 
-            double result = OpponentTimingCalculator.ComputeDelayMinutes(
+            double result = DateeTimingCalculator.ComputeDelayMinutes(
                 profile, InterestState.VeryIntoIt, NoShadows, dice);
 
             Assert.Equal(5.0, result, precision: 1);
@@ -94,7 +94,7 @@ namespace Pinder.Core.Tests
             var profile = MakeProfile(baseDelay: 10, variance: 0.0f);
             var dice = new FixedDice(50);
 
-            double result = OpponentTimingCalculator.ComputeDelayMinutes(
+            double result = DateeTimingCalculator.ComputeDelayMinutes(
                 profile, InterestState.AlmostThere, NoShadows, dice);
 
             Assert.Equal(3.0, result, precision: 1);
@@ -110,7 +110,7 @@ namespace Pinder.Core.Tests
             var profile = MakeProfile(baseDelay: 10);
             var dice = new FixedDice(50);
 
-            double result = OpponentTimingCalculator.ComputeDelayMinutes(
+            double result = DateeTimingCalculator.ComputeDelayMinutes(
                 profile, InterestState.Unmatched, NoShadows, dice);
 
             Assert.Equal(999999.0, result);
@@ -122,7 +122,7 @@ namespace Pinder.Core.Tests
             var profile = MakeProfile(baseDelay: 10);
             var dice = new FixedDice(50);
 
-            double result = OpponentTimingCalculator.ComputeDelayMinutes(
+            double result = DateeTimingCalculator.ComputeDelayMinutes(
                 profile, InterestState.DateSecured, NoShadows, dice);
 
             Assert.Equal(1.0, result);
@@ -139,7 +139,7 @@ namespace Pinder.Core.Tests
             var dice = new FixedDice(50);
             var shadows = new Dictionary<ShadowStatType, int> { { ShadowStatType.Overthinking, 8 } };
 
-            double result = OpponentTimingCalculator.ComputeDelayMinutes(
+            double result = DateeTimingCalculator.ComputeDelayMinutes(
                 profile, InterestState.Interested, shadows, dice);
 
             Assert.Equal(15.0, result, precision: 1);
@@ -152,7 +152,7 @@ namespace Pinder.Core.Tests
             var dice = new FixedDice(50);
             var shadows = new Dictionary<ShadowStatType, int> { { ShadowStatType.Overthinking, 5 } };
 
-            double result = OpponentTimingCalculator.ComputeDelayMinutes(
+            double result = DateeTimingCalculator.ComputeDelayMinutes(
                 profile, InterestState.Interested, shadows, dice);
 
             Assert.Equal(10.0, result, precision: 1);
@@ -170,7 +170,7 @@ namespace Pinder.Core.Tests
             var dice = new FixedDice(50);
             var shadows = new Dictionary<ShadowStatType, int> { { ShadowStatType.Denial, 7 } };
 
-            double result = OpponentTimingCalculator.ComputeDelayMinutes(
+            double result = DateeTimingCalculator.ComputeDelayMinutes(
                 profile, InterestState.Interested, shadows, dice);
 
             Assert.Equal(5.0, result);
@@ -183,7 +183,7 @@ namespace Pinder.Core.Tests
             var dice = new FixedDice(50);
             var shadows = new Dictionary<ShadowStatType, int> { { ShadowStatType.Denial, 6 } };
 
-            double result = OpponentTimingCalculator.ComputeDelayMinutes(
+            double result = DateeTimingCalculator.ComputeDelayMinutes(
                 profile, InterestState.VeryIntoIt, shadows, dice);
 
             // 10 * 0.5 = 5.0, snaps to 5.0
@@ -198,7 +198,7 @@ namespace Pinder.Core.Tests
             var dice = new FixedDice(50);
             var shadows = new Dictionary<ShadowStatType, int> { { ShadowStatType.Denial, 6 } };
 
-            double result = OpponentTimingCalculator.ComputeDelayMinutes(
+            double result = DateeTimingCalculator.ComputeDelayMinutes(
                 profile, InterestState.AlmostThere, shadows, dice);
 
             Assert.Equal(5.0, result);
@@ -215,7 +215,7 @@ namespace Pinder.Core.Tests
             var dice = new FixedDice(50);
             var shadows = new Dictionary<ShadowStatType, int> { { ShadowStatType.Fixation, 6 } };
 
-            double result = OpponentTimingCalculator.ComputeDelayMinutes(
+            double result = DateeTimingCalculator.ComputeDelayMinutes(
                 profile, InterestState.Interested, shadows, dice, previousDelay: 42.0);
 
             Assert.Equal(42.0, result);
@@ -228,7 +228,7 @@ namespace Pinder.Core.Tests
             var dice = new FixedDice(50);
             var shadows = new Dictionary<ShadowStatType, int> { { ShadowStatType.Fixation, 6 } };
 
-            double result = OpponentTimingCalculator.ComputeDelayMinutes(
+            double result = DateeTimingCalculator.ComputeDelayMinutes(
                 profile, InterestState.Interested, shadows, dice, previousDelay: null);
 
             Assert.Equal(10.0, result, precision: 1);
@@ -246,7 +246,7 @@ namespace Pinder.Core.Tests
             var profile = MakeProfile(baseDelay: 10, variance: 0.0f);
             var shadows = new Dictionary<ShadowStatType, int> { { ShadowStatType.Madness, 6 } };
 
-            double result = OpponentTimingCalculator.ComputeDelayMinutes(
+            double result = DateeTimingCalculator.ComputeDelayMinutes(
                 profile, InterestState.Interested, shadows, dice);
 
             Assert.Equal(1.0, result);
@@ -260,7 +260,7 @@ namespace Pinder.Core.Tests
             var profile = MakeProfile(baseDelay: 10, variance: 0.0f);
             var shadows = new Dictionary<ShadowStatType, int> { { ShadowStatType.Madness, 6 } };
 
-            double result = OpponentTimingCalculator.ComputeDelayMinutes(
+            double result = DateeTimingCalculator.ComputeDelayMinutes(
                 profile, InterestState.Interested, shadows, dice);
 
             // 240 + 1 - 1 = 240
@@ -275,7 +275,7 @@ namespace Pinder.Core.Tests
             var profile = MakeProfile(baseDelay: 10, variance: 0.0f);
             var shadows = new Dictionary<ShadowStatType, int> { { ShadowStatType.Madness, 6 } };
 
-            double result = OpponentTimingCalculator.ComputeDelayMinutes(
+            double result = DateeTimingCalculator.ComputeDelayMinutes(
                 profile, InterestState.Interested, shadows, dice);
 
             Assert.Equal(10.0, result, precision: 1);
@@ -292,7 +292,7 @@ namespace Pinder.Core.Tests
             var dice = new SequenceDice(50, 20, 1);
             var profile = MakeProfile(baseDelay: 5, variance: 0.0f, drySpell: 0.25f);
 
-            double result = OpponentTimingCalculator.ComputeDelayMinutes(
+            double result = DateeTimingCalculator.ComputeDelayMinutes(
                 profile, InterestState.Interested, NoShadows, dice);
 
             // 120 + 1 - 1 = 120
@@ -306,7 +306,7 @@ namespace Pinder.Core.Tests
             var dice = new SequenceDice(50, 26);
             var profile = MakeProfile(baseDelay: 5, variance: 0.0f, drySpell: 0.25f);
 
-            double result = OpponentTimingCalculator.ComputeDelayMinutes(
+            double result = DateeTimingCalculator.ComputeDelayMinutes(
                 profile, InterestState.Interested, NoShadows, dice);
 
             Assert.Equal(5.0, result, precision: 1);
@@ -318,7 +318,7 @@ namespace Pinder.Core.Tests
             var dice = new FixedDice(1); // would trigger if checked
             var profile = MakeProfile(baseDelay: 10, variance: 0.0f, drySpell: 0.0f);
 
-            double result = OpponentTimingCalculator.ComputeDelayMinutes(
+            double result = DateeTimingCalculator.ComputeDelayMinutes(
                 profile, InterestState.Interested, NoShadows, dice);
 
             Assert.Equal(10.0, result, precision: 1);
@@ -335,7 +335,7 @@ namespace Pinder.Core.Tests
             var dice = new FixedDice(100);
             var profile = MakeProfile(baseDelay: 10, variance: 0.5f);
 
-            double result = OpponentTimingCalculator.ComputeDelayMinutes(
+            double result = DateeTimingCalculator.ComputeDelayMinutes(
                 profile, InterestState.Interested, NoShadows, dice);
 
             Assert.Equal(12.5, result, precision: 1);
@@ -348,7 +348,7 @@ namespace Pinder.Core.Tests
             var dice = new FixedDice(1);
             var profile = MakeProfile(baseDelay: 10, variance: 0.5f);
 
-            double result = OpponentTimingCalculator.ComputeDelayMinutes(
+            double result = DateeTimingCalculator.ComputeDelayMinutes(
                 profile, InterestState.Interested, NoShadows, dice);
 
             Assert.Equal(7.5, result, precision: 1);
@@ -370,7 +370,7 @@ namespace Pinder.Core.Tests
                 { ShadowStatType.Denial, 6 }
             };
 
-            double result = OpponentTimingCalculator.ComputeDelayMinutes(
+            double result = DateeTimingCalculator.ComputeDelayMinutes(
                 profile, InterestState.Interested, shadows, dice);
 
             Assert.Equal(10.0, result);
@@ -388,7 +388,7 @@ namespace Pinder.Core.Tests
             var dice = new FixedDice(50);
             var shadows = new Dictionary<ShadowStatType, int> { { ShadowStatType.Overthinking, 8 } };
 
-            double result = OpponentTimingCalculator.ComputeDelayMinutes(
+            double result = DateeTimingCalculator.ComputeDelayMinutes(
                 profile, InterestState.Bored, shadows, dice);
 
             Assert.Equal(75.0, result);
@@ -404,7 +404,7 @@ namespace Pinder.Core.Tests
             var profile = MakeProfile(baseDelay: 0, variance: 0.0f);
             var dice = new FixedDice(50);
 
-            double result = OpponentTimingCalculator.ComputeDelayMinutes(
+            double result = DateeTimingCalculator.ComputeDelayMinutes(
                 profile, InterestState.Interested, NoShadows, dice);
 
             Assert.True(result >= 1.0);
@@ -418,21 +418,21 @@ namespace Pinder.Core.Tests
         public void NullProfile_Throws()
         {
             Assert.Throws<ArgumentNullException>(() =>
-                OpponentTimingCalculator.ComputeDelayMinutes(null!, InterestState.Interested, NoShadows, new FixedDice(50)));
+                DateeTimingCalculator.ComputeDelayMinutes(null!, InterestState.Interested, NoShadows, new FixedDice(50)));
         }
 
         [Fact]
         public void NullDice_Throws()
         {
             Assert.Throws<ArgumentNullException>(() =>
-                OpponentTimingCalculator.ComputeDelayMinutes(MakeProfile(), InterestState.Interested, NoShadows, null!));
+                DateeTimingCalculator.ComputeDelayMinutes(MakeProfile(), InterestState.Interested, NoShadows, null!));
         }
 
         [Fact]
         public void InvalidInterestState_Throws()
         {
             Assert.Throws<ArgumentOutOfRangeException>(() =>
-                OpponentTimingCalculator.ComputeDelayMinutes(MakeProfile(), (InterestState)99, NoShadows, new FixedDice(50)));
+                DateeTimingCalculator.ComputeDelayMinutes(MakeProfile(), (InterestState)99, NoShadows, new FixedDice(50)));
         }
 
         [Fact]
@@ -441,7 +441,7 @@ namespace Pinder.Core.Tests
             var profile = MakeProfile(baseDelay: 10, variance: 0.0f);
             var dice = new FixedDice(50);
 
-            double result = OpponentTimingCalculator.ComputeDelayMinutes(
+            double result = DateeTimingCalculator.ComputeDelayMinutes(
                 profile, InterestState.Interested, null!, dice);
 
             Assert.Equal(10.0, result, precision: 1);
@@ -462,7 +462,7 @@ namespace Pinder.Core.Tests
                 { ShadowStatType.Dread, 10 }
             };
 
-            double result = OpponentTimingCalculator.ComputeDelayMinutes(
+            double result = DateeTimingCalculator.ComputeDelayMinutes(
                 profile, InterestState.Interested, shadows, dice);
 
             Assert.Equal(10.0, result, precision: 1);

@@ -6,18 +6,18 @@ using Pinder.Core.Stats;
 namespace Pinder.Core.Conversation
 {
     /// <summary>
-    /// Computes simulated opponent reply delay from TimingProfile, interest state,
+    /// Computes simulated datee reply delay from TimingProfile, interest state,
     /// and shadow stat modifiers. Pure computation — no side effects, no clock.
     /// </summary>
-    public static class OpponentTimingCalculator
+    public static class DateeTimingCalculator
     {
         /// <summary>
-        /// Computes the opponent's reply delay in minutes.
+        /// Computes the datee's reply delay in minutes.
         /// </summary>
-        /// <param name="profile">The opponent's assembled TimingProfile.</param>
+        /// <param name="profile">The datee's assembled TimingProfile.</param>
         /// <param name="interest">Current InterestState of the conversation.</param>
         /// <param name="shadows">
-        ///   Map of the opponent's current shadow stat values.
+        ///   Map of the datee's current shadow stat values.
         ///   Only keys with value ≥ 6 affect the result. Missing keys treated as 0.
         ///   Null is treated as empty (no modifiers).
         /// </param>

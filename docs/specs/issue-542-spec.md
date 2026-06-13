@@ -51,7 +51,7 @@ namespace Pinder.Core.Interfaces
 ```
 
 **Key constraints:**
-- `IStatefulLlmAdapter` inherits all four methods from `ILlmAdapter` (`GetDialogueOptionsAsync`, `DeliverMessageAsync`, `GetOpponentResponseAsync`, `GetInterestChangeBeatAsync`).
+- `IStatefulLlmAdapter` inherits all four methods from `ILlmAdapter` (`GetDialogueOptionsAsync`, `DeliverMessageAsync`, `GetDateeResponseAsync`, `GetInterestChangeBeatAsync`).
 - `StartConversation(string)` returns `void` — the adapter internally owns the `ConversationSession` (#541). GameSession does not hold or pass a session reference.
 - Calling `StartConversation` when a session is already active replaces the existing session (no error thrown).
 - `HasActiveConversation` returns `false` before `StartConversation` is called, `true` after.
@@ -95,7 +95,7 @@ No new public methods or properties. The change is inside the existing 6-paramet
 ```csharp
 public GameSession(
     CharacterProfile player,
-    CharacterProfile opponent,
+    CharacterProfile datee,
     ILlmAdapter llm,
     IDiceRoller dice,
     ITrapRegistry trapRegistry,
@@ -106,7 +106,7 @@ public GameSession(
 
 ```
 if _llm is IStatefulLlmAdapter stateful:
-    build system prompt string from player and opponent profiles
+    build system prompt string from player and datee profiles
     call stateful.StartConversation(systemPrompt)
 ```
 
@@ -117,7 +117,7 @@ The system prompt assembly for this issue is a simple concatenation:
 
 ---
 
-{opponent.AssembledSystemPrompt}
+{datee.AssembledSystemPrompt}
 ```
 
 > **Note:** Issue #543 (`SessionSystemPromptBuilder`) replaces this simple concatenation with a structured prompt including game vision, world rules, and meta contract. The #542 implementer should use the simple concatenation above and expect #543 to replace it.
@@ -160,11 +160,11 @@ var session = new GameSession(velvet, sable, adapter, dice, trapReg, config);
 //     → sends accumulated messages[] (now includes option generation exchange)
 //     → appends assistant response
 //     → returns delivered text
-//   Then → adapter.GetOpponentResponseAsync(context)
-//     → adapter appends user message (opponent context)
+//   Then → adapter.GetDateeResponseAsync(context)
+//     → adapter appends user message (datee context)
 //     → sends accumulated messages[] (now includes delivery exchange)
 //     → appends assistant response
-//     → returns OpponentResponse
+//     → returns DateeResponse
 ```
 
 ### Example 2: Stateless adapter (NullLlmAdapter)
@@ -188,7 +188,7 @@ var session = new GameSession(velvet, sable, adapter, dice, trapReg, config);
 
 Given:
 - `player.AssembledSystemPrompt` = `"You are Velvet — lowercase-with-intent, precise, ironic..."`
-- `opponent.AssembledSystemPrompt` = `"You are Sable — omg, 😭, fast-talk energy..."`
+- `datee.AssembledSystemPrompt` = `"You are Sable — omg, 😭, fast-talk energy..."`
 
 The system prompt passed to `StartConversation` is:
 
@@ -224,7 +224,7 @@ The interface lives in namespace `Pinder.Core.Interfaces`, in the `Pinder.Core` 
 
 In `GameSession`'s 6-parameter constructor, after all existing initialization:
 1. Check if `_llm is IStatefulLlmAdapter stateful`
-2. If true: build system prompt from `_player.AssembledSystemPrompt` and `_opponent.AssembledSystemPrompt`, call `stateful.StartConversation(systemPrompt)`
+2. If true: build system prompt from `_player.AssembledSystemPrompt` and `_datee.AssembledSystemPrompt`, call `stateful.StartConversation(systemPrompt)`
 3. If false: do nothing (stateless path)
 
 No changes to any `GameSession` method bodies (`StartTurnAsync`, `ResolveTurnAsync`, `ReadAsync`, `RecoverAsync`, `Wait`). The adapter itself handles routing through the session internally—GameSession continues calling `_llm.GetDialogueOptionsAsync(context)` etc. as before.
@@ -233,7 +233,7 @@ No changes to any `GameSession` method bodies (`StartTurnAsync`, `ResolveTurnAsy
 
 The system prompt passed to `StartConversation` must contain:
 - The player character's full assembled system prompt (`_player.AssembledSystemPrompt`)
-- The opponent character's full assembled system prompt (`_opponent.AssembledSystemPrompt`)
+- The datee character's full assembled system prompt (`_datee.AssembledSystemPrompt`)
 - Separated by `"\n\n---\n\n"`
 
 This is a temporary format. Issue #543 introduces `SessionSystemPromptBuilder` which produces a structured prompt with game vision, world rules, and meta contract.
@@ -251,7 +251,7 @@ The solution (`Pinder.Core`, `Pinder.LlmAdapters`, `Pinder.Rules`, all test proj
 ## Edge Cases
 
 ### Null or empty system prompt
-- If `_player.AssembledSystemPrompt` or `_opponent.AssembledSystemPrompt` is empty string (never null per `CharacterProfile` constructor validation), `StartConversation` receives a prompt with one empty section. The `ConversationSession` should accept any non-null string. GameSession does not guard against empty prompts—`CharacterProfile` guarantees non-null via its constructor.
+- If `_player.AssembledSystemPrompt` or `_datee.AssembledSystemPrompt` is empty string (never null per `CharacterProfile` constructor validation), `StartConversation` receives a prompt with one empty section. The `ConversationSession` should accept any non-null string. GameSession does not guard against empty prompts—`CharacterProfile` guarantees non-null via its constructor.
 
 ### Adapter is IStatefulLlmAdapter but StartConversation fails
 - `StartConversation` creates a `ConversationSession` object (no I/O, no network call). It should not throw under normal circumstances. If `systemPrompt` is null, `ConversationSession` constructor should throw `ArgumentNullException`. Since GameSession builds the prompt from non-null `AssembledSystemPrompt` values, this should never happen in practice.

@@ -21,9 +21,9 @@ namespace Pinder.Core.Tests
         {
             return new DialogueContext(
                 playerPrompt: "You are a charming penis.",
-                opponentPrompt: "You are a shy penis.",
+                dateePrompt: "You are a shy penis.",
                 conversationHistory: new List<(string, string)>(),
-                opponentLastMessage: "",
+                dateeLastMessage: "",
                 activeTraps: new List<string>(),
                 currentInterest: 10
             );
@@ -81,9 +81,9 @@ namespace Pinder.Core.Tests
             var option = new DialogueOption(StatType.Charm, "Hello there!");
             var ctx = new DeliveryContext(
                 playerPrompt: "p",
-                opponentPrompt: "o",
+                dateePrompt: "o",
                 conversationHistory: new List<(string, string)>(),
-                opponentLastMessage: "",
+                dateeLastMessage: "",
                 chosenOption: option,
                 outcome: FailureTier.Success,
                 beatDcBy: 3,
@@ -107,9 +107,9 @@ namespace Pinder.Core.Tests
             var option = new DialogueOption(StatType.Wit, "Clever line.");
             var ctx = new DeliveryContext(
                 playerPrompt: "p",
-                opponentPrompt: "o",
+                dateePrompt: "o",
                 conversationHistory: new List<(string, string)>(),
-                opponentLastMessage: "",
+                dateeLastMessage: "",
                 chosenOption: option,
                 outcome: tier,
                 beatDcBy: -2,
@@ -123,16 +123,16 @@ namespace Pinder.Core.Tests
             Assert.Contains("Clever line.", result);
         }
 
-        // --- GetOpponentResponseAsync ---
+        // --- GetDateeResponseAsync ---
 
         [Fact]
-        public async Task GetOpponentResponseAsync_Returns_NonNull()
+        public async Task GetDateeResponseAsync_Returns_NonNull()
         {
-            var ctx = new OpponentContext(
+            var ctx = new DateeContext(
                 playerPrompt: "p",
-                opponentPrompt: "o",
+                dateePrompt: "o",
                 conversationHistory: new List<(string, string)>(),
-                opponentLastMessage: "",
+                dateeLastMessage: "",
                 activeTraps: new List<string>(),
                 currentInterest: 10,
                 playerDeliveredMessage: "Hello!",
@@ -141,7 +141,7 @@ namespace Pinder.Core.Tests
                 responseDelayMinutes: 1.5
             );
 
-            var result = await _adapter.GetOpponentResponseAsync(ctx);
+            var result = await _adapter.GetDateeResponseAsync(ctx);
 
             Assert.NotNull(result);
             Assert.Equal("...", result.MessageText);
@@ -155,7 +155,7 @@ namespace Pinder.Core.Tests
         public async Task GetInterestChangeBeatAsync_Returns_Null()
         {
             var ctx = new InterestChangeContext(
-                opponentName: "TestOpponent",
+                dateeName: "TestDatee",
                 interestBefore: 10,
                 interestAfter: 16,
                 newState: InterestState.VeryIntoIt
@@ -203,7 +203,7 @@ namespace Pinder.Core.Tests
         {
             var ctx = new InterestChangeContext("Bob", 5, 16, InterestState.VeryIntoIt);
 
-            Assert.Equal("Bob", ctx.OpponentName);
+            Assert.Equal("Bob", ctx.DateeName);
             Assert.Equal(5, ctx.InterestBefore);
             Assert.Equal(16, ctx.InterestAfter);
             Assert.Equal(InterestState.VeryIntoIt, ctx.NewState);

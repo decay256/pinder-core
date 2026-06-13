@@ -7,34 +7,34 @@ using Xunit;
 namespace Pinder.Core.Tests
 {
     /// <summary>
-    /// Tests for OpponentResponse, Tell, WeaknessWindow, and CallbackOpportunity types.
+    /// Tests for DateeResponse, Tell, WeaknessWindow, and CallbackOpportunity types.
     /// Prototype maturity: happy-path construction and property tests.
     /// </summary>
     [Trait("Category", "Core")]
-    public class OpponentResponseTests
+    public class DateeResponseTests
     {
-        // --- OpponentResponse ---
+        // --- DateeResponse ---
 
         [Fact]
-        public void OpponentResponse_Stores_MessageText()
+        public void DateeResponse_Stores_MessageText()
         {
-            var response = new OpponentResponse("Hello back!");
+            var response = new DateeResponse("Hello back!");
             Assert.Equal("Hello back!", response.MessageText);
         }
 
         [Fact]
-        public void OpponentResponse_Defaults_Optional_Fields_To_Null()
+        public void DateeResponse_Defaults_Optional_Fields_To_Null()
         {
-            var response = new OpponentResponse("Hi");
+            var response = new DateeResponse("Hi");
             Assert.Null(response.DetectedTell);
             Assert.Null(response.WeaknessWindow);
         }
 
         [Fact]
-        public void OpponentResponse_Stores_DetectedTell()
+        public void DateeResponse_Stores_DetectedTell()
         {
             var tell = new Tell(StatType.Charm, "They blushed");
-            var response = new OpponentResponse("Hi", detectedTell: tell);
+            var response = new DateeResponse("Hi", detectedTell: tell);
 
             Assert.NotNull(response.DetectedTell);
             Assert.Equal(StatType.Charm, response.DetectedTell!.Stat);
@@ -42,10 +42,10 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public void OpponentResponse_Stores_WeaknessWindow()
+        public void DateeResponse_Stores_WeaknessWindow()
         {
             var window = new WeaknessWindow(StatType.Wit, 3);
-            var response = new OpponentResponse("Hmm", weaknessWindow: window);
+            var response = new DateeResponse("Hmm", weaknessWindow: window);
 
             Assert.NotNull(response.WeaknessWindow);
             Assert.Equal(StatType.Wit, response.WeaknessWindow!.DefendingStat);
@@ -53,20 +53,20 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public void OpponentResponse_Stores_Both_Tell_And_WeaknessWindow()
+        public void DateeResponse_Stores_Both_Tell_And_WeaknessWindow()
         {
             var tell = new Tell(StatType.Honesty, "Nervous laugh");
             var window = new WeaknessWindow(StatType.Honesty, 2);
-            var response = new OpponentResponse("Uh...", tell, window);
+            var response = new DateeResponse("Uh...", tell, window);
 
             Assert.NotNull(response.DetectedTell);
             Assert.NotNull(response.WeaknessWindow);
         }
 
         [Fact]
-        public void OpponentResponse_Throws_On_Null_MessageText()
+        public void DateeResponse_Throws_On_Null_MessageText()
         {
-            Assert.Throws<ArgumentNullException>(() => new OpponentResponse(null!));
+            Assert.Throws<ArgumentNullException>(() => new DateeResponse(null!));
         }
 
         // --- Tell ---
@@ -118,9 +118,9 @@ namespace Pinder.Core.Tests
         {
             var ctx = new DialogueContext(
                 playerPrompt: "p",
-                opponentPrompt: "o",
+                dateePrompt: "o",
                 conversationHistory: new List<(string, string)>(),
-                opponentLastMessage: "",
+                dateeLastMessage: "",
                 activeTraps: new List<string>(),
                 currentInterest: 10);
 
@@ -145,9 +145,9 @@ namespace Pinder.Core.Tests
 
             var ctx = new DialogueContext(
                 playerPrompt: "p",
-                opponentPrompt: "o",
+                dateePrompt: "o",
                 conversationHistory: new List<(string, string)>(),
-                opponentLastMessage: "",
+                dateeLastMessage: "",
                 activeTraps: new List<string>(),
                 currentInterest: 10,
                 shadowThresholds: shadows,
@@ -172,9 +172,9 @@ namespace Pinder.Core.Tests
             var option = new DialogueOption(StatType.Charm, "Hi");
             var ctx = new DeliveryContext(
                 playerPrompt: "p",
-                opponentPrompt: "o",
+                dateePrompt: "o",
                 conversationHistory: new List<(string, string)>(),
-                opponentLastMessage: "",
+                dateeLastMessage: "",
                 chosenOption: option,
                 outcome: Rolls.FailureTier.Success,
                 beatDcBy: 3,
@@ -194,9 +194,9 @@ namespace Pinder.Core.Tests
             var option = new DialogueOption(StatType.Charm, "Hi");
             var ctx = new DeliveryContext(
                 playerPrompt: "p",
-                opponentPrompt: "o",
+                dateePrompt: "o",
                 conversationHistory: new List<(string, string)>(),
-                opponentLastMessage: "",
+                dateeLastMessage: "",
                 chosenOption: option,
                 outcome: Rolls.FailureTier.Success,
                 beatDcBy: 3,
@@ -209,13 +209,13 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public void OpponentContext_New_Fields_Default_To_Null()
+        public void DateeContext_New_Fields_Default_To_Null()
         {
-            var ctx = new OpponentContext(
+            var ctx = new DateeContext(
                 playerPrompt: "p",
-                opponentPrompt: "o",
+                dateePrompt: "o",
                 conversationHistory: new List<(string, string)>(),
-                opponentLastMessage: "",
+                dateeLastMessage: "",
                 activeTraps: new List<string>(),
                 currentInterest: 10,
                 playerDeliveredMessage: "Hello!",
@@ -228,17 +228,17 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public void OpponentContext_Accepts_New_Optional_Fields()
+        public void DateeContext_Accepts_New_Optional_Fields()
         {
             var shadows = new Dictionary<ShadowStatType, int>
             {
                 { ShadowStatType.Dread, 6 }
             };
-            var ctx = new OpponentContext(
+            var ctx = new DateeContext(
                 playerPrompt: "p",
-                opponentPrompt: "o",
+                dateePrompt: "o",
                 conversationHistory: new List<(string, string)>(),
-                opponentLastMessage: "",
+                dateeLastMessage: "",
                 activeTraps: new List<string>(),
                 currentInterest: 10,
                 playerDeliveredMessage: "Hello!",

@@ -19,9 +19,9 @@ def enrich_traps(entries: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         trap_map = {
             '§2.the-cringe': ('Charm', 6, 1, 'disadvantage', 'Charm', 0),
             '§2.the-creep': ('Rizz', 6, 2, 'stat_penalty', 'Rizz', -2),
-            '§2.the-overshare': ('Honesty', 6, 1, 'opponent_dc_increase', 'Chaos', 2),
+            '§2.the-overshare': ('Honesty', 6, 1, 'datee_dc_increase', 'Chaos', 2),
             '§2.the-unhinged': ('Chaos', 6, 1, 'disadvantage', 'Chaos', 0),
-            '§2.the-pretentious': ('Wit', 6, 1, 'opponent_dc_increase', 'Rizz', 3),
+            '§2.the-pretentious': ('Wit', 6, 1, 'datee_dc_increase', 'Rizz', 3),
             '§2.the-spiral': ('Self-Awareness', 6, 2, 'disadvantage', 'Self-Awareness', 0),
         }
 

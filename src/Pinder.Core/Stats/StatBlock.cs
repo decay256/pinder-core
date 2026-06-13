@@ -13,7 +13,7 @@ namespace Pinder.Core.Stats
         private readonly Dictionary<StatType, int> _base;
         private readonly Dictionary<ShadowStatType, int> _shadow;
 
-        // Defence: which stat the opponent uses to resist each attack stat
+        // Defence: which stat the datee uses to resist each attack stat
         public static readonly Dictionary<StatType, StatType> DefenceTable = new Dictionary<StatType, StatType>
         {
             { StatType.Charm,         StatType.SelfAwareness },

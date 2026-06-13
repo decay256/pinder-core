@@ -39,7 +39,7 @@ partial class Program
             Console.WriteLine($"| {StatLabel(stat)} | {atkMod:+#;-#;0} | {StatLabel(defStat)} {defMod:+#;-#;0} | {dc} | {need}+ | {pct}% | {RiskLabel(need)} |");
         }
         Console.WriteLine();
-        Console.WriteLine("> DC = 16 + opponent defending stat modifier. Miss by 1–2 = Fumble | 3–5 = Misfire | 6–9 = Trope Trap | 10+ = Catastrophe | Nat 1 = Legendary.");
+        Console.WriteLine("> DC = 16 + datee defending stat modifier. Miss by 1–2 = Fumble | 3–5 = Misfire | 6–9 = Trope Trap | 10+ = Catastrophe | Nat 1 = Legendary.");
         Console.WriteLine();
 
         // ── archetype directives ──────────────────────────────────────────
@@ -69,7 +69,7 @@ partial class Program
         int steeringMod = (result.SableStats.GetEffective(StatType.Charm) + result.SableStats.GetEffective(StatType.Wit) + result.SableStats.GetEffective(StatType.SelfAwareness)) / 3;
         int steeringDC = 16 + (result.BrickStats.GetEffective(StatType.SelfAwareness) + result.BrickStats.GetEffective(StatType.Rizz) + result.BrickStats.GetEffective(StatType.Honesty)) / 3;
         Console.WriteLine($"> 🧭 **Steering**: After each delivery, {result.Player1} may append a follow-up sentence.");
-        Console.WriteLine($"> Roll: d20 + (CHARM+WIT+SA)/3 = +{steeringMod} vs DC = 16 + (opponent SA+RIZZ+HONESTY)/3 = {steeringDC}");
+        Console.WriteLine($"> Roll: d20 + (CHARM+WIT+SA)/3 = +{steeringMod} vs DC = 16 + (datee SA+RIZZ+HONESTY)/3 = {steeringDC}");
         Console.WriteLine("> On success: adds a steering question. No interest effect — purely narrative.");
         Console.WriteLine();
     }

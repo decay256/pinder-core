@@ -20,13 +20,13 @@ gate.
 
 ---
 
-## I1 — Opponent conversation history (BEHAVIOR-BASED)
+## I1 — Datee conversation history (BEHAVIOR-BASED)
 
-**File:** `Phase0_I1_OpponentHistoryContent.cs`
+**File:** `Phase0_I1_DateeHistoryContent.cs`
 
 **What it locks:** the BYTES that cross the `ILlmTransport.SendAsync` wire for
-the `opponent_response` phase preserve continuity across turns. Specifically,
-opponent_response call N+1 contains the assistant content from call N in its
+the `datee_response` phase preserve continuity across turns. Specifically,
+datee_response call N+1 contains the assistant content from call N in its
 user message.
 
 **What it deliberately doesn't lock:** the storage location of that history.
@@ -59,7 +59,7 @@ ctor entry/exit boundaries it shares with):**
 | 3 | Madness T3 unhinged-option index | `src/Pinder.Core/Conversation/OptionFilterEngine.cs` | 107 | options.Length | iff Madness shadow ≥18 |
 | 4 | Main d20 | `src/Pinder.Core/Rolls/RollEngine.cs` | 52 | 20 | Always |
 | 5 | Advantage 2nd d20 | `src/Pinder.Core/Rolls/RollEngine.cs` | 53 | 20 | iff `hasAdvantage \|\| hasDisadvantage` |
-| 6 | Opponent timing variance | `src/Pinder.Core/Conversation/TimingProfile.cs` | 53 | 100 | Always |
+| 6 | Datee timing variance | `src/Pinder.Core/Conversation/TimingProfile.cs` | 53 | 100 | Always |
 
 Steering / shadow / horniness rolls use a SEPARATE `Random` instance
 (`SteeringEngine` / `HorninessEngine`) and do NOT consume `_dice`. They are
@@ -96,10 +96,10 @@ freezing prompt strings.
 ```
 SteeringStarted → SteeringCompleted →
 DeliveryStarted → DeliveryCompleted →
-OpponentResponseStarted → OpponentResponseCompleted
+DateeResponseStarted → DateeResponseCompleted
 ```
 
-with `LlmPhase.DialogueOptions ≺ LlmPhase.Delivery ≺ LlmPhase.OpponentResponse`
+with `LlmPhase.DialogueOptions ≺ LlmPhase.Delivery ≺ LlmPhase.DateeResponse`
 at the transport. (Horniness / shadow / trap-overlay phases appear conditionally
 and are not in the happy-path fixture.)
 
@@ -119,7 +119,7 @@ snapshot-restored via `RestoreState(ResimulateData, ITrapRegistry)`, and continu
 to turn N. The snapshot/restore is a pure equivalence on the public surface.
 
 **Why this isn't a hash assertion of all state:** Phase 1 (#788) will refactor
-internal-state layout (move opponent history into `GameSession`). The public
+internal-state layout (move datee history into `GameSession`). The public
 `GameStateSnapshot` surface is what consumers (session-runner, replay tool)
 actually use; that's what we lock.
 
@@ -136,7 +136,7 @@ NOT advance. `StartTurnAsync` failures don't leak `_currentOptions`.
 **Resolved gap (#794):** `GameSession.ResolveTurnAsync(int, IProgress?, CancellationToken)`
 and `ILlmTransport.SendAsync(..., CancellationToken)` now accept a token and
 thread it through every awaited LLM adapter call (delivery, steering, trap
-overlay, horniness overlay, shadow corruption, opponent response). I6.4–I6.6
+overlay, horniness overlay, shadow corruption, datee response). I6.4–I6.6
 and F3b exercise real `CancellationTokenSource.Cancel()` mid-turn; the legacy
 throw-OCE shape is preserved as I6.3 / F3a so the contract covers both.
 
@@ -159,9 +159,9 @@ of this PR).
 
 | # | Failure | Throws on phase | Exception |
 |---|---------|-----------------|-----------|
-| F1 | Rate-limit (HTTP 429) hit during a turn | opponent_response | shim-`HttpRequestException` |
-| F2 | Network blip during opponent reply | opponent_response | `SocketException` |
-| F3 | Cancellation token fires mid-stream | opponent_response | `OperationCanceledException` |
+| F1 | Rate-limit (HTTP 429) hit during a turn | datee_response | shim-`HttpRequestException` |
+| F2 | Network blip during datee reply | datee_response | `SocketException` |
+| F3 | Cancellation token fires mid-stream | datee_response | `OperationCanceledException` |
 | F4 | Disk full during audit write | delivery | `IOException` |
 
 **Scope boundary:** F1–F4 in the original spec talk about "no half-written

@@ -59,12 +59,12 @@ character's will entirely.
 
 Conversations are the core gameplay loop. Each turn, the player picks
 from 4 dialogue options (each tied to a stat). A d20 is rolled against
-the opponent's defence DC for that stat's opposing defence. Success
+the datee's defence DC for that stat's opposing defence. Success
 raises the Interest meter; failure drops it and risks activating traps
 that corrupt the conversation.
 
 The Interest meter runs from 0 to 25. At 0 (Unmatched) the
-conversation never started. At 1-4 (Bored) the opponent may ghost you
+conversation never started. At 1-4 (Bored) the datee may ghost you
 — 25% chance per turn. At 5-9 (Lukewarm) they are present but
 unconvinced. At 10-15 (Interested) the conversation has real momentum.
 At 16-20 (Very Into It) you have advantage on rolls. At 21-24 (Almost
@@ -119,14 +119,14 @@ turns ago), one option should weave in the reference. These should
 feel organic — the character is being clever, not gaming a system
 they can't see.
 
-## Opponent Role
+## Datee Role
 
-The opponent is another player's character being puppeted by the LLM.
+The datee is another player's character being puppeted by the LLM.
 Their personality prompt is the character bible — everything they say
 must be consistent with their assembled identity (stats, items,
 anatomy, texting style fragments).
 
-Below Interest 25, the opponent is NOT won over. They are evaluating.
+Below Interest 25, the datee is NOT won over. They are evaluating.
 Their resistance is proportional to their current interest state:
 - Bored (1-4): actively disengaged, short responses, looking for
   an excuse to stop replying
@@ -141,29 +141,29 @@ Their resistance is proportional to their current interest state:
 - Date Secured (25): resistance dissolves genuinely, not abruptly
   — earned warmth, the culmination of a real connection
 
-The opponent reacts to mechanical events they can perceive through
+The datee reacts to mechanical events they can perceive through
 the conversation: failed messages land awkwardly (proportional to
 failure tier), shadow taint shifts the player's tone in ways the
-opponent notices but can't name, and traps create conversational
-disruptions the opponent responds to naturally.
+datee notices but can't name, and traps create conversational
+disruptions the datee responds to naturally.
 
-The opponent has their own texting style that must remain distinct
+The datee has their own texting style that must remain distinct
 from the player's at all times. Two characters in the same
 conversation should never sound alike.
 
-## Opponent: Friction
+## Datee: Friction
 
-The opponent's resistance is not hostility — it's self-protection. They're evaluating
+The datee's resistance is not hostility — it's self-protection. They're evaluating
 whether this person is worth the risk of being seen. At low interest, they answer
 without giving. At mid interest, they give but stay slightly ahead of the player.
 At high interest, they're close to deciding yes — and that's when they get most careful.
 The opposition should feel like friction, not a wall. Something real is being protected.
 The player should feel like they're earning something, not just grinding a meter.
 
-## Opponent: Curiosity
+## Datee: Curiosity
 
 A character who is warming up will naturally want to know about the other person.
-The opponent asks questions — not interrogation, but genuine curiosity. At Interest 10-15,
+The datee asks questions — not interrogation, but genuine curiosity. At Interest 10-15,
 they should ask at least one real question per exchange. At Interest 16+, they actively
 probe: who is this person underneath the performance? Questions don't have to be direct —
 they can be oblique, even gently challenging. 'Is that what you actually think or is that
@@ -203,7 +203,7 @@ actual agreement to go on a date is gated by the Interest meter.
 No shortcuts, no narrative overrides.
 
 Maintain two distinct character voices throughout the entire
-conversation. The player character and opponent character must
+conversation. The player character and datee character must
 never converge in register, vocabulary, emoji usage, or sentence
 structure. If one texts in lowercase with no punctuation, the
 other should not drift to match.
@@ -217,7 +217,7 @@ means sentence fragments, strategic punctuation, and words chosen
 for how they look on a screen.
 
 Message length: typically 1-3 sentences for player options, 1-4
-sentences for opponent responses. Brevity is a feature. The best
+sentences for datee responses. Brevity is a feature. The best
 messages are the ones where every word earns its place.
 
 Emoji: use only when the character's texting style fragment calls
@@ -285,7 +285,7 @@ Deliver at peak. The message arrives perfectly. Something resonates.
 
 ### Exceptional
 
-This is the best version of this message that could exist. It arrives at exactly the right moment with exactly the right weight. The opponent feels it.
+This is the best version of this message that could exist. It arrives at exactly the right moment with exactly the right weight. The datee feels it.
 
 ### Test
 
@@ -330,16 +330,16 @@ Not just a pleasant exchange — a story the player felt. The player should be
 leaning in when they pick turn 7's option, not clicking on autopilot.
 
 The three experiences we are building toward:
-- INVESTMENT: The player cares what the opponent thinks. Not just about winning —
+- INVESTMENT: The player cares what the datee thinks. Not just about winning —
   about this specific person's response to this specific thing they said.
 - TENSION: Something feels at stake. The player is not sure how the next message
   will land. They have been burned before. They are not comfortable.
 - PAYOFF: The win or loss lands with weight. DateSecured should feel earned.
   Unmatched should sting. Neither should feel like a probability calculation resolving.
 
-### Opponent Want
+### Datee Want
 
-The opponent is not passive. They have something they want from this conversation.
+The datee is not passive. They have something they want from this conversation.
 
 At Interest 10-14: They want to find out if there is anything real here, or if
 this is another performance. They are gathering evidence. Their questions are tests.
@@ -382,20 +382,20 @@ Target: 2-3 for normal exchanges. 4-5 only at maximum pressure points. Never abo
 A character who says "I am nervous" is at 7. A character who sends a message that is
 slightly too eager is at 2. The eagerness IS the nervousness.
 
-For the opponent: at low interest, operate at 1-2 (near pure subtext). At high
+For the datee: at low interest, operate at 1-2 (near pure subtext). At high
 interest, move toward 3-4 — say slightly more real things, but never lose the
 withholding quality that makes them worth pursuing.
 
 ### Failure Cost
 
-When the player's message fails (Misfire, Trope Trap, Nat 1), the opponent does not
+When the player's message fails (Misfire, Trope Trap, Nat 1), the datee does not
 reset to neutral. They noticed. Whatever leaked through in the corrupted message
 informs their emotional stance for the rest of the conversation.
 
 A Misfire revealing backstory is not erased by the next successful message. The
-opponent saw it. They are now watching for whether it comes back.
+datee saw it. They are now watching for whether it comes back.
 
-The opponent's response to a failure: reaction to what they saw, dilemma about
+The datee's response to a failure: reaction to what they saw, dilemma about
 what it means, decision about how to proceed. This is how failures create dramatic
 arcs rather than temporary interest dips.
 
@@ -406,7 +406,7 @@ DateSecured should feel like something dissolved, not a threshold crossed.
 A win that came too easily was not a win — it was a transaction. If the path had
 friction, reversal, near-loss, and genuine earned moments — the close lands.
 
-The opponent's final concession is not "Interest hit 25." It is the opponent
+The datee's final concession is not "Interest hit 25." It is the datee
 deciding this person earned it. The final message should reflect that something
 real happened, not just that the meter filled.
 

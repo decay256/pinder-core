@@ -68,9 +68,9 @@ namespace Pinder.Core.Tests
         public async Task Steering_success_appends_question_to_intended_text_before_delivery()
         {
             // Player Charm/Wit/SA = 5 → steering mod 5
-            // Opponent SA/Rizz/Honesty = 0 → steering DC 16
+            // Datee SA/Rizz/Honesty = 0 → steering DC 16
             var player = MakeProfile("Sable", MakeStats(charm: 5, wit: 5, sa: 5));
-            var opponent = MakeProfile("Brick", MakeStats(charm: 0, rizz: 0, honesty: 0, chaos: 0, wit: 0, sa: 0));
+            var datee = MakeProfile("Brick", MakeStats(charm: 0, rizz: 0, honesty: 0, chaos: 0, wit: 0, sa: 0));
 
             // Game dice: horniness=1, main d20=15 (success), response delay=50
             var dice = new FixedDice(1, 15, 50);
@@ -79,7 +79,7 @@ namespace Pinder.Core.Tests
 
             var llm = new CapturingLlm();
             var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), steeringRng: steeringRng);
-            var session = new GameSession(player, opponent, llm, dice, new NullTrapRegistry(), config);
+            var session = new GameSession(player, datee, llm, dice, new NullTrapRegistry(), config);
 
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
@@ -109,9 +109,9 @@ namespace Pinder.Core.Tests
         public async Task Catastrophe_with_steering_success_degrades_combined_text()
         {
             // Player charm=2, wit=5, sa=5 (steering mod = (2+5+5)/3 = 4)
-            // Opponent stats=0 → steering DC = 16
+            // Datee stats=0 → steering DC = 16
             var player = MakeProfile("Sable", MakeStats(charm: 2, wit: 5, sa: 5));
-            var opponent = MakeProfile("Brick", MakeStats(charm: 0, rizz: 0, honesty: 0, chaos: 0, wit: 0, sa: 0));
+            var datee = MakeProfile("Brick", MakeStats(charm: 0, rizz: 0, honesty: 0, chaos: 0, wit: 0, sa: 0));
 
             // Catastrophe: with stat mod 2 vs DC ~10+, a d20=1 (Nat 1) yields
             // catastrophe-tier failure. (NB: Nat 1 is itself a special tier;
@@ -123,7 +123,7 @@ namespace Pinder.Core.Tests
 
             var llm = new CapturingLlm();
             var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), steeringRng: steeringRng);
-            var session = new GameSession(player, opponent, llm, dice, new NullTrapRegistry(), config);
+            var session = new GameSession(player, datee, llm, dice, new NullTrapRegistry(), config);
 
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
@@ -155,7 +155,7 @@ namespace Pinder.Core.Tests
         public async Task TextDiffs_ordering_steering_first_then_tier_modifier()
         {
             var player = MakeProfile("Sable", MakeStats(charm: 5, wit: 5, sa: 5));
-            var opponent = MakeProfile("Brick", MakeStats(charm: 0, rizz: 0, honesty: 0, chaos: 0, wit: 0, sa: 0));
+            var datee = MakeProfile("Brick", MakeStats(charm: 0, rizz: 0, honesty: 0, chaos: 0, wit: 0, sa: 0));
 
             // d20=1 is Nat 1 (always failure), steering rolls 20 → succeeds
             var dice = new FixedDice(1, 1, 50);
@@ -163,7 +163,7 @@ namespace Pinder.Core.Tests
 
             var llm = new CapturingLlm();
             var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), steeringRng: steeringRng);
-            var session = new GameSession(player, opponent, llm, dice, new NullTrapRegistry(), config);
+            var session = new GameSession(player, datee, llm, dice, new NullTrapRegistry(), config);
 
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
@@ -204,7 +204,7 @@ namespace Pinder.Core.Tests
         public async Task Steering_failure_no_steering_diff_no_question_appended()
         {
             var player = MakeProfile("Sable", MakeStats(charm: 2, wit: 2, sa: 2));
-            var opponent = MakeProfile("Brick", MakeStats(charm: 3, rizz: 3, honesty: 3, chaos: 3, wit: 3, sa: 3));
+            var datee = MakeProfile("Brick", MakeStats(charm: 3, rizz: 3, honesty: 3, chaos: 3, wit: 3, sa: 3));
 
             var dice = new FixedDice(1, 15, 50);
             // Steering: roll 1 → 1+2=3 < DC 19 → miss
@@ -212,7 +212,7 @@ namespace Pinder.Core.Tests
 
             var llm = new CapturingLlm();
             var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), steeringRng: steeringRng);
-            var session = new GameSession(player, opponent, llm, dice, new NullTrapRegistry(), config);
+            var session = new GameSession(player, datee, llm, dice, new NullTrapRegistry(), config);
 
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
@@ -241,12 +241,12 @@ namespace Pinder.Core.Tests
             public DeliveryContext? CapturedDeliveryContext { get; private set; }
 
             // #788: stateful LLM adapter is now history-passing and stateless.
-            public Task<StatefulOpponentResult> GetOpponentResponseAsync(
-                OpponentContext context,
+            public Task<StatefulDateeResult> GetDateeResponseAsync(
+                DateeContext context,
                 System.Collections.Generic.IReadOnlyList<ConversationMessage> history,
                 System.Threading.CancellationToken ct = default)
-                => Task.FromResult(new StatefulOpponentResult(
-                    new OpponentResponse("..."),
+                => Task.FromResult(new StatefulDateeResult(
+                    new DateeResponse("..."),
                     new ConversationMessage[]
                     {
                         ConversationMessage.User(string.Empty),
@@ -275,18 +275,18 @@ namespace Pinder.Core.Tests
                 return Task.FromResult(intended.ToUpperInvariant());
             }
 
-            public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context, System.Threading.CancellationToken ct = default)
-                => Task.FromResult(new OpponentResponse("..."));
+            public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
+                => Task.FromResult(new DateeResponse("..."));
 
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult<string?>(null);
 
-            public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
+            public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
                 => Task.FromResult(message);
 
             public Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
                 => Task.FromResult(message);
-            public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => Task.FromResult(message);
+            public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => Task.FromResult(message);
 
             public Task<string> GetSteeringQuestionAsync(SteeringContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult("so when are we doing this?");

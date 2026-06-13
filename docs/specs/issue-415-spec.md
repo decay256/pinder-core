@@ -87,7 +87,7 @@ namespace Pinder.SessionRunner
 No new public methods. `Program.Main` gains support for:
 
 - `--player-def <path>` — load player character from a definition JSON file via `CharacterDefinitionLoader.Load()`
-- `--opponent-def <path>` — load opponent character from a definition JSON file via `CharacterDefinitionLoader.Load()`
+- `--datee-def <path>` — load datee character from a definition JSON file via `CharacterDefinitionLoader.Load()`
 - `--player <name>` shorthand resolves to `data/characters/{name}.json` via `DataFileLocator`, then delegates to `CharacterDefinitionLoader.Load()`
 
 ---
@@ -167,7 +167,7 @@ Each character definition file lives at `data/characters/{name}.json` and has th
 
 **Input (CLI):**
 ```bash
-dotnet run --project session-runner -- --player-def data/characters/gerald.json --opponent-def data/characters/velvet.json
+dotnet run --project session-runner -- --player-def data/characters/gerald.json --datee-def data/characters/velvet.json
 ```
 
 **Behavior:**
@@ -177,14 +177,14 @@ dotnet run --project session-runner -- --player-def data/characters/gerald.json 
    - `AssembledSystemPrompt` = full prompt built from assembled fragments
    - `Level` = `5`
    - `Timing` = `TimingProfile` computed from item + anatomy timing modifiers
-2. Same for velvet.json → opponent `CharacterProfile`
+2. Same for velvet.json → datee `CharacterProfile`
 3. Both profiles passed to `GameSession` constructor
 
 ### Example 2: Load via `--player` shorthand
 
 **Input (CLI):**
 ```bash
-dotnet run --project session-runner -- --player gerald --opponent velvet
+dotnet run --project session-runner -- --player gerald --datee velvet
 ```
 
 **Behavior:**
@@ -209,9 +209,9 @@ Also checks `PINDER_DATA_PATH` env var first if set.
 
 ## Acceptance Criteria
 
-### AC1: Runner accepts `--player-def <path>` and `--opponent-def <path>` args
+### AC1: Runner accepts `--player-def <path>` and `--datee-def <path>` args
 
-`Program.Main` must parse `--player-def` and `--opponent-def` command-line arguments. Each takes a file path (absolute or relative) pointing to a character definition JSON file. When both are provided, the runner loads characters via `CharacterDefinitionLoader` instead of `CharacterLoader`. If only one is `--player-def` and the other is `--player`, that is valid — they can be mixed.
+`Program.Main` must parse `--player-def` and `--datee-def` command-line arguments. Each takes a file path (absolute or relative) pointing to a character definition JSON file. When both are provided, the runner loads characters via `CharacterDefinitionLoader` instead of `CharacterLoader`. If only one is `--player-def` and the other is `--player`, that is valid — they can be mixed.
 
 ### AC2: CharacterAssembler is called with real item/anatomy data
 
@@ -243,7 +243,7 @@ When `--player <name>` is used (without `--player-def`), the runner must:
 2. If found, load via `CharacterDefinitionLoader.Load()`
 3. If NOT found, fall back to `CharacterLoader.Load()` (prompt file parsing from #414)
 
-Same behavior for `--opponent <name>`.
+Same behavior for `--datee <name>`.
 
 ### AC7: Build clean, all tests pass
 
@@ -321,5 +321,5 @@ Five new files (one per starter character), conforming to the schema above. Valu
 - **Pinder.Core.Stats.StatType** — enum: `Charm, Rizz, Honesty, Chaos, Wit, SelfAwareness`.
 - **Pinder.Core.Stats.ShadowStatType** — enum: `Madness, Horniness, Denial, Fixation, Dread, Overthinking`.
 - **System.Text.Json** — available in session-runner (net8.0). Used for parsing character definition JSON. Do NOT add to Pinder.Core.
-- **#414 (CLI arg parsing + CharacterLoader)** — must be merged first. Provides the `--player`/`--opponent` arg parsing infrastructure and `CharacterLoader` as fallback.
+- **#414 (CLI arg parsing + CharacterLoader)** — must be merged first. Provides the `--player`/`--datee` arg parsing infrastructure and `CharacterLoader` as fallback.
 - **External data files** — `starter-items.json` and `anatomy-parameters.json` from `/root/.openclaw/agents-extra/pinder/data/`.

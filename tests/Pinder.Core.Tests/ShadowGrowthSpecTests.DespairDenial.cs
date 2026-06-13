@@ -53,13 +53,13 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task AC708_RizzTropeTrap_GrowsDespair1()
         {
-            // RIZZ=0, Wit defence=Rizz attack → opponent Wit=0 → DC=16.
+            // RIZZ=0, Wit defence=Rizz attack → datee Wit=0 → DC=16.
             // d20=7 → miss by 9 → TropeTrap (6-9)
             var shadows = MakeTracker();
             var session = BuildSession(
                 dice: Dice(7, 50),
                 playerStats: Stats(rizz: 0),
-                opponentStats: Stats(wit: 0),
+                dateeStats: Stats(wit: 0),
                 shadows: shadows,
                 options: new[] { new DialogueOption(StatType.Rizz, "smooth") },
                 startingInterest: 15);
@@ -82,7 +82,7 @@ namespace Pinder.Core.Tests
             var session = BuildSession(
                 dice: new TestDice(diceValues.ToArray()),
                 playerStats: Stats(rizz: 0),
-                opponentStats: Stats(wit: 0),
+                dateeStats: Stats(wit: 0),
                 shadows: shadows,
                 options: new[] { new DialogueOption(StatType.Rizz, "smooth") },
                 startingInterest: 13);
@@ -123,7 +123,7 @@ namespace Pinder.Core.Tests
             var session = BuildSession(
                 dice: new TestDice(diceValues.ToArray()),
                 playerStats: Stats(rizz: 0),
-                opponentStats: Stats(wit: 0),
+                dateeStats: Stats(wit: 0),
                 shadows: shadows,
                 options: new[] { new DialogueOption(StatType.Rizz, "smooth") },
                 startingInterest: 13);
@@ -152,7 +152,7 @@ namespace Pinder.Core.Tests
             var session = BuildSession(
                 dice: new TestDice(diceValues.ToArray()),
                 playerStats: Stats(rizz: 0),
-                opponentStats: Stats(wit: 0),
+                dateeStats: Stats(wit: 0),
                 shadows: shadows,
                 options: new[] { new DialogueOption(StatType.Rizz, "smooth") },
                 startingInterest: 20);
@@ -181,7 +181,7 @@ namespace Pinder.Core.Tests
             var session = BuildSession(
                 dice: new TestDice(diceValues.ToArray()),
                 playerStats: Stats(rizz: 0),
-                opponentStats: Stats(wit: 0),
+                dateeStats: Stats(wit: 0),
                 shadows: shadows,
                 options: new[] { new DialogueOption(StatType.Rizz, "smooth") },
                 startingInterest: 13);
@@ -287,7 +287,7 @@ namespace Pinder.Core.Tests
             var shadows = MakeTracker();
             var diceValues = new List<int>();
             for (int i = 0; i < 3; i++) { diceValues.Add(15); diceValues.Add(50); }
-            // Opponent has Chaos=0 → Honesty defence DC is low (13+0=13)
+            // Datee has Chaos=0 → Honesty defence DC is low (13+0=13)
             // Player Honesty=5 → margin = 5-13 = -8 (best available)
             // Put Honesty at index 1 each turn, lower-prob stat at index 0
             // Charm vs SA defence: 3 - (13+2) = -12 (worse)

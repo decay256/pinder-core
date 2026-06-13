@@ -49,7 +49,7 @@ namespace Pinder.LlmAdapters
                 }
                 return new DramaticCraft(
                     goal: DcGet("goal"),
-                    opponentWant: DcGet("opponent_want"),
+                    dateeWant: DcGet("datee_want"),
                     revelationBudget: DcGet("revelation_budget"),
                     directnessDial: DcGet("directness_dial"),
                     failureCost: DcGet("failure_cost"),

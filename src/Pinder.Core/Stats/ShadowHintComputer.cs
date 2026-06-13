@@ -40,8 +40,8 @@ namespace Pinder.Core.Stats
         /// <summary>Player stat block for computing margins.</summary>
         public StatBlock PlayerStats { get; set; }
 
-        /// <summary>Opponent stat block for computing DCs.</summary>
-        public StatBlock OpponentStats { get; set; }
+        /// <summary>Datee stat block for computing DCs.</summary>
+        public StatBlock DateeStats { get; set; }
 
         /// <summary>Player level bonus.</summary>
         public int PlayerLevelBonus { get; set; }
@@ -145,10 +145,10 @@ namespace Pinder.Core.Stats
 
             // 9. Nat 20 always possible → Dread -1 hint (shown for all risky options)
             //    Only show for options where DC is high enough that nat 20 matters
-            if (ctx.PlayerStats != null && ctx.OpponentStats != null)
+            if (ctx.PlayerStats != null && ctx.DateeStats != null)
             {
                 int mod = ctx.PlayerStats.GetEffective(option.Stat);
-                int dc = ctx.OpponentStats.GetDefenceDC(option.Stat);
+                int dc = ctx.DateeStats.GetDefenceDC(option.Stat);
                 int need = dc - (mod + ctx.PlayerLevelBonus);
                 if (need >= 16)
                 {
@@ -172,16 +172,16 @@ namespace Pinder.Core.Stats
 
         private static bool IsHighestProbabilityOption(DialogueOption option, ShadowHintContext ctx)
         {
-            if (ctx.PlayerStats == null || ctx.OpponentStats == null || ctx.CurrentOptions == null)
+            if (ctx.PlayerStats == null || ctx.DateeStats == null || ctx.CurrentOptions == null)
                 return false;
 
             int optionMargin = ctx.PlayerStats.GetEffective(option.Stat) + ctx.PlayerLevelBonus
-                               - ctx.OpponentStats.GetDefenceDC(option.Stat);
+                               - ctx.DateeStats.GetDefenceDC(option.Stat);
 
             for (int i = 0; i < ctx.CurrentOptions.Length; i++)
             {
                 int margin = ctx.PlayerStats.GetEffective(ctx.CurrentOptions[i].Stat) + ctx.PlayerLevelBonus
-                             - ctx.OpponentStats.GetDefenceDC(ctx.CurrentOptions[i].Stat);
+                             - ctx.DateeStats.GetDefenceDC(ctx.CurrentOptions[i].Stat);
                 if (margin > optionMargin)
                     return false;
             }

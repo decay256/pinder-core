@@ -18,7 +18,7 @@ namespace Pinder.Core.Conversation
             GameSessionState state,
             int optionIndex,
             CharacterProfile player,
-            CharacterProfile opponent,
+            CharacterProfile datee,
             System.IProgress<TurnProgressEvent>? progress,
             CancellationToken ct)
         {
@@ -38,7 +38,7 @@ namespace Pinder.Core.Conversation
                 state,
                 optionIndex,
                 player,
-                opponent);
+                datee);
 
             // Execute Delivery/Overlay Stage
             var deliveryStage = await _deliveryStage.ExecuteAsync(
@@ -46,7 +46,7 @@ namespace Pinder.Core.Conversation
                 rollStage.ChosenOption,
                 rollStage.RollResult,
                 player,
-                opponent,
+                datee,
                 progress,
                 rollStage.InterestDelta,
                 ct).ConfigureAwait(false);
@@ -74,26 +74,26 @@ namespace Pinder.Core.Conversation
                 narrativeBeat = $"*** Interest state changed to {rollStage.StateAfter} ***";
             }
 
-            // Opponent Response and Turn Assembly
+            // Datee Response and Turn Assembly
             state.History.Add((player.DisplayName, deliveryStage.DeliveredMessage));
 
-            // Execute Opponent Response Stage
-            var opponentStageResult = await _opponentResponseStage.ExecuteAsync(
+            // Execute Datee Response Stage
+            var dateeStageResult = await _dateeResponseStage.ExecuteAsync(
                 state,
                 rollStage,
                 deliveryStage,
                 player,
-                opponent,
+                datee,
                 progress,
                 ct).ConfigureAwait(false);
 
-            var opponentResponse = opponentStageResult.OpponentResponse;
-            string opponentMessage = opponentStageResult.OpponentMessage;
+            var dateeResponse = dateeStageResult.DateeResponse;
+            string dateeMessage = dateeStageResult.DateeMessage;
 
-            state.ActiveWeakness = opponentResponse.WeaknessWindow;
-            state.ActiveTell = opponentResponse.DetectedTell;
+            state.ActiveWeakness = dateeResponse.WeaknessWindow;
+            state.ActiveTell = dateeResponse.DetectedTell;
 
-            state.History.Add((opponent.DisplayName, opponentMessage));
+            state.History.Add((datee.DisplayName, dateeMessage));
 
             state.Traps.AdvanceTurn();
 
@@ -114,7 +114,7 @@ namespace Pinder.Core.Conversation
             return new TurnResult(
                 roll: rollStage.RollResult,
                 deliveredMessage: deliveryStage.DeliveredMessage,
-                opponentMessage: opponentMessage,
+                dateeMessage: dateeMessage,
                 narrativeBeat: narrativeBeat,
                 interestDelta: interestDelta,
                 stateAfter: stateSnapshot,
@@ -130,7 +130,7 @@ namespace Pinder.Core.Conversation
                 riskBonusDelta: rollStage.RiskBonusDelta,
                 riskTier: rollStage.RollResult.RiskTier,
                 comboBonusDelta: rollStage.ComboBonusDelta,
-                detectedWindow: opponentResponse.WeaknessWindow,
+                detectedWindow: dateeResponse.WeaknessWindow,
                 steering: deliveryStage.SteeringResult,
                 horninessCheck: deliveryStage.HorninessCheckResult,
                 tripleBonusApplied: rollStage.TripleBonusApplied,

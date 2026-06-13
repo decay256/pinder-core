@@ -23,12 +23,12 @@ namespace Pinder.LlmAdapters
     {
         private const double DefaultDialogueOptionsTemperature = 0.9;
         private const double DefaultDeliveryTemperature = 0.7;
-        private const double DefaultOpponentResponseTemperature = 0.85;
+        private const double DefaultDateeResponseTemperature = 0.85;
 
         private readonly ILlmTransport _transport;
         private readonly PinderLlmAdapterOptions _options;
 
-        // #788: opponent conversation state lives on GameSession, not here.
+        // #788: datee conversation state lives on GameSession, not here.
         // The adapter is pure-stateless and safe for concurrent reuse across sessions.
 
         public PinderLlmAdapter(ILlmTransport transport, PinderLlmAdapterOptions options)
@@ -89,32 +89,32 @@ namespace Pinder.LlmAdapters
         }
 
         /// <inheritdoc />
-        public async Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context, CancellationToken ct = default)
+        public async Task<DateeResponse> GetDateeResponseAsync(DateeContext context, CancellationToken ct = default)
         {
             // #788: stateless single-turn fallback path. Stateful callers route
             // through the IStatefulLlmAdapter overload that takes a history.
-            var result = await GetOpponentResponseAsync(context, System.Array.Empty<ConversationMessage>(), ct).ConfigureAwait(false);
+            var result = await GetDateeResponseAsync(context, System.Array.Empty<ConversationMessage>(), ct).ConfigureAwait(false);
             return result.Response;
         }
 
         /// <inheritdoc />
-        public async Task<StatefulOpponentResult> GetOpponentResponseAsync(
-            OpponentContext context,
+        public async Task<StatefulDateeResult> GetDateeResponseAsync(
+            DateeContext context,
             IReadOnlyList<ConversationMessage> history,
             CancellationToken cancellationToken = default)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             if (history == null) throw new ArgumentNullException(nameof(history));
 
-            var userContent = SessionDocumentBuilder.BuildOpponentPrompt(context);
-            var systemPrompt = SessionSystemPromptBuilder.BuildOpponent(context.OpponentPrompt, _options.GameDefinition);
-            double temperature = _options.OpponentResponseTemperature ?? DefaultOpponentResponseTemperature;
+            var userContent = SessionDocumentBuilder.BuildDateePrompt(context);
+            var systemPrompt = SessionSystemPromptBuilder.BuildDatee(context.DateePrompt, _options.GameDefinition);
+            double temperature = _options.DateeResponseTemperature ?? DefaultDateeResponseTemperature;
 
             string responseText;
             if (history.Count == 0)
             {
                 // No prior turns — single-shot.
-                responseText = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.OpponentResponse, ct: cancellationToken)
+                responseText = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.DateeResponse, ct: cancellationToken)
                     .ConfigureAwait(false);
             }
             else
@@ -123,11 +123,11 @@ namespace Pinder.LlmAdapters
                 // (the transport contract is single-turn). The current turn's
                 // user content is appended last, mirroring Anthropic/OpenAI
                 // wire ordering.
-                responseText = await SendStatefulOpponentAsync(systemPrompt, userContent, history, temperature, cancellationToken)
+                responseText = await SendStatefulDateeAsync(systemPrompt, userContent, history, temperature, cancellationToken)
                     .ConfigureAwait(false);
             }
 
-            var parsed = OpponentResponseParsers.ParseOpponentResponseText(responseText);
+            var parsed = DateeResponseParsers.ParseDateeResponseText(responseText);
 
             // Hand the engine the two new history entries to append: the user
             // prompt we just sent and the assistant response we got back.
@@ -136,7 +136,7 @@ namespace Pinder.LlmAdapters
                 ConversationMessage.User(userContent),
                 ConversationMessage.Assistant(responseText ?? string.Empty),
             };
-            return new StatefulOpponentResult(parsed, newEntries);
+            return new StatefulDateeResult(parsed, newEntries);
         }
 
         /// <inheritdoc />
@@ -146,17 +146,17 @@ namespace Pinder.LlmAdapters
 
             // Build user content with history context
             var userContent = SessionDocumentBuilder.BuildInterestChangeBeatPrompt(
-                context.OpponentName,
+                context.DateeName,
                 context.InterestBefore,
                 context.InterestAfter,
                 context.NewState,
                 context.ConversationHistory,
                 context.PlayerName);
 
-            // Use opponent system prompt if provided, otherwise skip system prompt
-            string systemPrompt = string.IsNullOrWhiteSpace(context.OpponentPrompt)
-                ? SessionSystemPromptBuilder.BuildOpponent("", _options.GameDefinition)
-                : SessionSystemPromptBuilder.BuildOpponent(context.OpponentPrompt, _options.GameDefinition);
+            // Use datee system prompt if provided, otherwise skip system prompt
+            string systemPrompt = string.IsNullOrWhiteSpace(context.DateePrompt)
+                ? SessionSystemPromptBuilder.BuildDatee("", _options.GameDefinition)
+                : SessionSystemPromptBuilder.BuildDatee(context.DateePrompt, _options.GameDefinition);
 
             double temperature = _options.Temperature;
 
@@ -188,7 +188,7 @@ namespace Pinder.LlmAdapters
         }
 
         /// <inheritdoc />
-        public async Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null, CancellationToken ct = default)
+        public async Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, CancellationToken ct = default)
         {
             if (string.IsNullOrWhiteSpace(message) || string.IsNullOrWhiteSpace(instruction))
                 return message;
@@ -197,7 +197,7 @@ namespace Pinder.LlmAdapters
             if (!string.IsNullOrWhiteSpace(_options.OverlayGroqModel) && !string.IsNullOrWhiteSpace(_options.OverlayGroqApiKey))
             {
                 return await GroqOverlayApplier.ApplyHorninessOverlayAsync(
-                    _options.OverlayGroqApiKey, _options.OverlayGroqModel, message, instruction, opponentContext, archetypeDirective, ct)
+                    _options.OverlayGroqApiKey, _options.OverlayGroqModel, message, instruction, dateeContext, archetypeDirective, ct)
                     .ConfigureAwait(false);
             }
 
@@ -207,8 +207,8 @@ namespace Pinder.LlmAdapters
                 "Apply the overlay instruction to rewrite the message with the requested tonal shift. " +
                 "Return ONLY the rewritten message text. No commentary, no refusals, no preamble.";
 
-            if (!string.IsNullOrWhiteSpace(opponentContext))
-                systemPrompt += $"\n\nThe message being sent is directed at this character:\n{opponentContext}";
+            if (!string.IsNullOrWhiteSpace(dateeContext))
+                systemPrompt += $"\n\nThe message being sent is directed at this character:\n{dateeContext}";
 
             // Inject the speaker's active archetype directive (#372) so the
             // overlay rewrite stays in the character's voice instead of
@@ -251,7 +251,7 @@ namespace Pinder.LlmAdapters
         }
 
         /// <inheritdoc />
-        public async Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null, CancellationToken ct = default)
+        public async Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, CancellationToken ct = default)
         {
             if (string.IsNullOrWhiteSpace(message) || string.IsNullOrWhiteSpace(trapInstruction))
                 return message;
@@ -260,7 +260,7 @@ namespace Pinder.LlmAdapters
             if (!string.IsNullOrWhiteSpace(_options.OverlayGroqModel) && !string.IsNullOrWhiteSpace(_options.OverlayGroqApiKey))
             {
                 return await GroqOverlayApplier.ApplyTrapOverlayAsync(
-                    _options.OverlayGroqApiKey, _options.OverlayGroqModel, message, trapInstruction, trapName, opponentContext, archetypeDirective, ct)
+                    _options.OverlayGroqApiKey, _options.OverlayGroqModel, message, trapInstruction, trapName, dateeContext, archetypeDirective, ct)
                     .ConfigureAwait(false);
             }
 
@@ -270,8 +270,8 @@ namespace Pinder.LlmAdapters
                 "Apply the trap instruction to rewrite the message so the trap's signature taint is visible. " +
                 "Return ONLY the rewritten message text. No commentary, no refusals, no preamble.";
 
-            if (!string.IsNullOrWhiteSpace(opponentContext))
-                systemPrompt += $"\n\nThe message being sent is directed at this character:\n{opponentContext}";
+            if (!string.IsNullOrWhiteSpace(dateeContext))
+                systemPrompt += $"\n\nThe message being sent is directed at this character:\n{dateeContext}";
 
             // Inject the speaker's active archetype directive (#372 + #371 union) so the
             // trap-overlay rewrite still sounds like the character.
@@ -368,7 +368,7 @@ namespace Pinder.LlmAdapters
 
             string prompt = template
                 .Replace("{player_name}", context.PlayerName)
-                .Replace("{opponent_name}", context.OpponentName)
+                .Replace("{datee_name}", context.DateeName)
                 .Replace("{delivered_message}", context.DeliveredMessage);
 
             var sb = new StringBuilder();
@@ -402,13 +402,13 @@ namespace Pinder.LlmAdapters
         // ── Private helpers ────────────────────────────────────────────────
 
         /// <summary>
-        /// Sends a stateful opponent request by flattening the supplied history
+        /// Sends a stateful datee request by flattening the supplied history
         /// into the user message. The transport contract is single-turn
         /// (system + user), so prior exchanges are prefixed into the user payload
         /// before the current turn's content. Pure function of its inputs — no
         /// adapter-side state is read or written.
         /// </summary>
-        private Task<string> SendStatefulOpponentAsync(
+        private Task<string> SendStatefulDateeAsync(
             string systemPrompt,
             string currentUserContent,
             IReadOnlyList<ConversationMessage> priorHistory,
@@ -422,7 +422,7 @@ namespace Pinder.LlmAdapters
             {
                 var msg = priorHistory[i];
                 string displayRole = string.Equals(msg.Role, ConversationMessage.AssistantRole, StringComparison.OrdinalIgnoreCase)
-                    ? "OPPONENT" : "PLAYER";
+                    ? "DATEE" : "PLAYER";
                 contextBuilder.AppendLine($"[{displayRole}] {msg.Content}");
             }
             contextBuilder.AppendLine();
@@ -434,7 +434,7 @@ namespace Pinder.LlmAdapters
                 contextBuilder.ToString(),
                 temperature,
                 _options.MaxTokens,
-                phase: LlmPhase.OpponentResponse,
+                phase: LlmPhase.DateeResponse,
                 ct: ct);
         }
 

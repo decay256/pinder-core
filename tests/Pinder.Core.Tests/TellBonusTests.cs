@@ -12,20 +12,20 @@ using Xunit;
 namespace Pinder.Core.Tests
 {
     /// <summary>
-    /// Tests for Issue #50: Tells — §15 opponent tell detection and hidden roll bonus.
+    /// Tests for Issue #50: Tells — §15 datee tell detection and hidden roll bonus.
     /// Covers AC1–AC7 and edge cases 1–12 from docs/specs/issue-50-spec.md.
     /// </summary>
     [Trait("Category", "Core")]
     public partial class TellBonusTests
     {
         // ================================================================
-        // AC1: GameSession stores active tell from OpponentResponse.DetectedTell
+        // AC1: GameSession stores active tell from DateeResponse.DetectedTell
         // ================================================================
 
         [Fact]
-        public async Task AC1_TellStoredFromOpponentResponse()
+        public async Task AC1_TellStoredFromDateeResponse()
         {
-            // Turn 0: opponent returns a tell for Wit
+            // Turn 0: datee returns a tell for Wit
             // Turn 1: Wit option should have HasTellBonus=true
             var llm = new TellTestLlm();
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Hey"));
@@ -55,7 +55,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task AC2_MatchingStatAppliesTellBonusViaExternalBonus()
         {
-            // Set up: opponent gives Wit tell, player picks Wit
+            // Set up: datee gives Wit tell, player picks Wit
             var llm = new TellTestLlm();
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Hey"));
             llm.EnqueueTell(new Tell(StatType.Wit, "Makes a joke"));
@@ -199,17 +199,17 @@ namespace Pinder.Core.Tests
             public Task<string> DeliverMessageAsync(DeliveryContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult(context.ChosenOption.IntendedText);
 
-            public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context, System.Threading.CancellationToken ct = default)
+            public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
             {
                 var tell = _tells.Count > 0 ? _tells.Dequeue() : null;
-                return Task.FromResult(new OpponentResponse("...", detectedTell: tell));
+                return Task.FromResult(new DateeResponse("...", detectedTell: tell));
             }
 
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult<string?>(null);
-            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
+            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
             public System.Threading.Tasks.Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
-            public System.Threading.Tasks.Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
+            public System.Threading.Tasks.Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
         }
     }
 }

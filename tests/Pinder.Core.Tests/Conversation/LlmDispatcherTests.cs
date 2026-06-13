@@ -23,9 +23,9 @@ namespace Pinder.Core.Tests.Conversation
 
             public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, CancellationToken ct = default) => throw new NotImplementedException();
             public Task<string> DeliverMessageAsync(DeliveryContext context, CancellationToken ct = default) => throw new NotImplementedException();
-            public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context, CancellationToken ct = default) => throw new NotImplementedException();
+            public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, CancellationToken ct = default) => throw new NotImplementedException();
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, CancellationToken ct = default) => throw new NotImplementedException();
-            public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null, CancellationToken ct = default) => throw new NotImplementedException();
+            public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, CancellationToken ct = default) => throw new NotImplementedException();
 
             public Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow, string? archetypeDirective = null, CancellationToken ct = default)
             {
@@ -33,7 +33,7 @@ namespace Pinder.Core.Tests.Conversation
                 return Task.FromResult(ShadowResponse == "ECHO" ? message : ShadowResponse);
             }
 
-            public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null, CancellationToken ct = default)
+            public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, CancellationToken ct = default)
             {
                 TrapCalls++;
                 return Task.FromResult(TrapResponse == "ECHO" ? message : TrapResponse);
@@ -68,7 +68,7 @@ namespace Pinder.Core.Tests.Conversation
             var result = await LlmDispatcher.DispatchSpeculativeCallsAsync(
                 llm,
                 "Original",
-                runTrap: true, "instruction", "trap-name", "opponent-context",
+                runTrap: true, "instruction", "trap-name", "datee-context",
                 runShadow: false, "", ShadowStatType.Dread,
                 "", textDiffs, null, 1, null, CancellationToken.None);
 
@@ -110,7 +110,7 @@ namespace Pinder.Core.Tests.Conversation
             var result = await LlmDispatcher.DispatchSpeculativeCallsAsync(
                 llm,
                 "Original",
-                runTrap: true, "trap-instruction", "trap-name", "opponent-context",
+                runTrap: true, "trap-instruction", "trap-name", "datee-context",
                 runShadow: true, "shadow-instruction", ShadowStatType.Dread,
                 "", textDiffs, null, 1, null, CancellationToken.None);
 
@@ -133,7 +133,7 @@ namespace Pinder.Core.Tests.Conversation
             var result = await LlmDispatcher.DispatchSpeculativeCallsAsync(
                 llm,
                 "Original",
-                runTrap: true, "trap-instruction", "trap-name", "opponent-context",
+                runTrap: true, "trap-instruction", "trap-name", "datee-context",
                 runShadow: true, "shadow-instruction", ShadowStatType.Dread,
                 "", textDiffs, null, 1, null, CancellationToken.None);
 

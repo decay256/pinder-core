@@ -8,13 +8,13 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
     public partial class AnthropicLlmAdapterSpecTests
     {
         // ==============================================================================
-        // ParseOpponentResponse — additional edge cases
+        // ParseDateeResponse — additional edge cases
         // ==============================================================================
 
         // What: Spec edge - Tell description is extracted from parenthesized text
         // Mutation: Would catch if description is empty or includes the stat name
         [Fact]
-        public void ParseOpponentResponse_TellDescription_ExtractedFromParens()
+        public void ParseDateeResponse_TellDescription_ExtractedFromParens()
         {
             var input = @"[RESPONSE]
 ""some text""
@@ -22,7 +22,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
 [SIGNALS]
 TELL: CHARM (they blush easily at compliments)";
 
-            var result = AnthropicLlmAdapter.ParseOpponentResponse(input);
+            var result = AnthropicLlmAdapter.ParseDateeResponse(input);
             Assert.NotNull(result.DetectedTell);
             Assert.Contains("blush", result.DetectedTell!.Description);
         }
@@ -30,7 +30,7 @@ TELL: CHARM (they blush easily at compliments)";
         // What: Spec edge - WEAKNESS with -2 DC reduction
         // Mutation: Would catch if DcReduction is always 3 or hardcoded
         [Fact]
-        public void ParseOpponentResponse_WeaknessMinusTwo_ParsedCorrectly()
+        public void ParseDateeResponse_WeaknessMinusTwo_ParsedCorrectly()
         {
             var input = @"[RESPONSE]
 ""some text""
@@ -38,7 +38,7 @@ TELL: CHARM (they blush easily at compliments)";
 [SIGNALS]
 WEAKNESS: CHARM -2 (opening for charm plays)";
 
-            var result = AnthropicLlmAdapter.ParseOpponentResponse(input);
+            var result = AnthropicLlmAdapter.ParseDateeResponse(input);
             Assert.NotNull(result.WeaknessWindow);
             Assert.Equal(StatType.Charm, result.WeaknessWindow!.DefendingStat);
             Assert.Equal(2, result.WeaknessWindow.DcReduction);
@@ -47,7 +47,7 @@ WEAKNESS: CHARM -2 (opening for charm plays)";
         // What: Spec edge - WEAKNESS with -3 DC reduction
         // Mutation: Would catch if -3 is parsed as 2 or some other value
         [Fact]
-        public void ParseOpponentResponse_WeaknessMinusThree_ParsedCorrectly()
+        public void ParseDateeResponse_WeaknessMinusThree_ParsedCorrectly()
         {
             var input = @"[RESPONSE]
 ""some text""
@@ -55,7 +55,7 @@ WEAKNESS: CHARM -2 (opening for charm plays)";
 [SIGNALS]
 WEAKNESS: HONESTY -3 (clearly deflecting)";
 
-            var result = AnthropicLlmAdapter.ParseOpponentResponse(input);
+            var result = AnthropicLlmAdapter.ParseDateeResponse(input);
             Assert.NotNull(result.WeaknessWindow);
             Assert.Equal(3, result.WeaknessWindow!.DcReduction);
         }
@@ -63,12 +63,12 @@ WEAKNESS: HONESTY -3 (clearly deflecting)";
         // What: Spec edge - Response with quotes extracted properly
         // Mutation: Would catch if outer quotes are included in MessageText
         [Fact]
-        public void ParseOpponentResponse_QuotesStrippedFromMessage()
+        public void ParseDateeResponse_QuotesStrippedFromMessage()
         {
             var input = @"[RESPONSE]
 ""Hello there, nice to meet you""";
 
-            var result = AnthropicLlmAdapter.ParseOpponentResponse(input);
+            var result = AnthropicLlmAdapter.ParseDateeResponse(input);
             Assert.Equal("Hello there, nice to meet you", result.MessageText);
             Assert.DoesNotContain("\"\"", result.MessageText);
         }

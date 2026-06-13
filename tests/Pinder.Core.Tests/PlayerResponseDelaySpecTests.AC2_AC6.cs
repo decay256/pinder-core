@@ -14,7 +14,7 @@ namespace Pinder.Core.Tests
         public void Gate_15Min_Unmatched_ZeroPenalty()
         {
             var result = PlayerResponseDelayEvaluator.Evaluate(
-                TimeSpan.FromMinutes(30), DefaultOpponent, InterestState.Unmatched);
+                TimeSpan.FromMinutes(30), DefaultDatee, InterestState.Unmatched);
 
             Assert.Equal(0, result.InterestDelta);
         }
@@ -24,7 +24,7 @@ namespace Pinder.Core.Tests
         public void Gate_15Min_Bored_ZeroPenalty()
         {
             var result = PlayerResponseDelayEvaluator.Evaluate(
-                TimeSpan.FromMinutes(30), DefaultOpponent, InterestState.Bored);
+                TimeSpan.FromMinutes(30), DefaultDatee, InterestState.Bored);
 
             Assert.Equal(0, result.InterestDelta);
         }
@@ -34,7 +34,7 @@ namespace Pinder.Core.Tests
         public void Gate_15Min_DateSecured_MinusOne()
         {
             var result = PlayerResponseDelayEvaluator.Evaluate(
-                TimeSpan.FromMinutes(30), DefaultOpponent, InterestState.DateSecured);
+                TimeSpan.FromMinutes(30), DefaultDatee, InterestState.DateSecured);
 
             Assert.Equal(-1, result.InterestDelta);
         }
@@ -47,7 +47,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void Chaos4_ZeroesPenalty()
         {
-            var stats = MakeOpponent(chaosBase: 4);
+            var stats = MakeDatee(chaosBase: 4);
             var result = PlayerResponseDelayEvaluator.Evaluate(
                 TimeSpan.FromHours(3), stats, InterestState.Interested);
 
@@ -60,7 +60,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void Chaos3_PenaltyStillApplies()
         {
-            var stats = MakeOpponent(chaosBase: 3);
+            var stats = MakeDatee(chaosBase: 3);
             var result = PlayerResponseDelayEvaluator.Evaluate(
                 TimeSpan.FromHours(3), stats, InterestState.Interested);
 
@@ -71,7 +71,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void Chaos5_OverridesAllModifiers()
         {
-            var stats = MakeOpponent(chaosBase: 5, fixation: 10, overthinking: 10);
+            var stats = MakeDatee(chaosBase: 5, fixation: 10, overthinking: 10);
             var result = PlayerResponseDelayEvaluator.Evaluate(
                 TimeSpan.FromHours(12), stats, InterestState.Interested);
 
@@ -84,7 +84,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void Chaos4_NoTriggerTest_Even1to6hBucket()
         {
-            var stats = MakeOpponent(chaosBase: 4);
+            var stats = MakeDatee(chaosBase: 4);
             var result = PlayerResponseDelayEvaluator.Evaluate(
                 TimeSpan.FromHours(2), stats, InterestState.Interested);
 
@@ -100,7 +100,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void Fixation6_DoublesPenalty()
         {
-            var stats = MakeOpponent(fixation: 6);
+            var stats = MakeDatee(fixation: 6);
             var result = PlayerResponseDelayEvaluator.Evaluate(
                 TimeSpan.FromHours(12), stats, InterestState.Interested);
 
@@ -112,7 +112,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void Fixation5_NoDoubling()
         {
-            var stats = MakeOpponent(fixation: 5);
+            var stats = MakeDatee(fixation: 5);
             var result = PlayerResponseDelayEvaluator.Evaluate(
                 TimeSpan.FromHours(12), stats, InterestState.Interested);
 
@@ -123,7 +123,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void Fixation6_Doubles_1to6hBucket()
         {
-            var stats = MakeOpponent(fixation: 6);
+            var stats = MakeDatee(fixation: 6);
             var result = PlayerResponseDelayEvaluator.Evaluate(
                 TimeSpan.FromHours(2), stats, InterestState.Interested);
 
@@ -139,7 +139,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void Overthinking6_AddsOne()
         {
-            var stats = MakeOpponent(overthinking: 6);
+            var stats = MakeDatee(overthinking: 6);
             var result = PlayerResponseDelayEvaluator.Evaluate(
                 TimeSpan.FromHours(2), stats, InterestState.Interested);
 
@@ -151,7 +151,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void Overthinking5_NoExtraPenalty()
         {
-            var stats = MakeOpponent(overthinking: 5);
+            var stats = MakeDatee(overthinking: 5);
             var result = PlayerResponseDelayEvaluator.Evaluate(
                 TimeSpan.FromHours(2), stats, InterestState.Interested);
 
@@ -164,7 +164,7 @@ namespace Pinder.Core.Tests
         {
             // Spec: base=-2, Fixation doubles to -4, Overthinking adds -1 = -5
             // Wrong order: base=-2, Overthinking adds -1=-3, Fixation doubles=-6
-            var stats = MakeOpponent(fixation: 7, overthinking: 8);
+            var stats = MakeDatee(fixation: 7, overthinking: 8);
             var result = PlayerResponseDelayEvaluator.Evaluate(
                 TimeSpan.FromHours(2), stats, InterestState.Interested);
 
@@ -180,7 +180,7 @@ namespace Pinder.Core.Tests
         public void TriggerTest_1to6hBucket_True()
         {
             var result = PlayerResponseDelayEvaluator.Evaluate(
-                TimeSpan.FromHours(3), DefaultOpponent, InterestState.Interested);
+                TimeSpan.FromHours(3), DefaultDatee, InterestState.Interested);
 
             Assert.True(result.TriggerTest);
             Assert.NotNull(result.TestPrompt);
@@ -191,7 +191,7 @@ namespace Pinder.Core.Tests
         public void TriggerTest_1to6h_TestPromptNonEmpty()
         {
             var result = PlayerResponseDelayEvaluator.Evaluate(
-                TimeSpan.FromHours(2), DefaultOpponent, InterestState.Interested);
+                TimeSpan.FromHours(2), DefaultDatee, InterestState.Interested);
 
             Assert.True(result.TriggerTest);
             Assert.False(string.IsNullOrEmpty(result.TestPrompt));
@@ -202,7 +202,7 @@ namespace Pinder.Core.Tests
         public void TriggerTest_Under1h_False()
         {
             var result = PlayerResponseDelayEvaluator.Evaluate(
-                TimeSpan.FromMinutes(30), DefaultOpponent, InterestState.VeryIntoIt);
+                TimeSpan.FromMinutes(30), DefaultDatee, InterestState.VeryIntoIt);
 
             Assert.False(result.TriggerTest);
             Assert.Null(result.TestPrompt);
@@ -213,7 +213,7 @@ namespace Pinder.Core.Tests
         public void TriggerTest_6to24hBucket_False()
         {
             var result = PlayerResponseDelayEvaluator.Evaluate(
-                TimeSpan.FromHours(12), DefaultOpponent, InterestState.Interested);
+                TimeSpan.FromHours(12), DefaultDatee, InterestState.Interested);
 
             Assert.False(result.TriggerTest);
             Assert.Null(result.TestPrompt);
@@ -224,7 +224,7 @@ namespace Pinder.Core.Tests
         public void TriggerTest_24PlusBucket_False()
         {
             var result = PlayerResponseDelayEvaluator.Evaluate(
-                TimeSpan.FromHours(48), DefaultOpponent, InterestState.Interested);
+                TimeSpan.FromHours(48), DefaultDatee, InterestState.Interested);
 
             Assert.False(result.TriggerTest);
             Assert.Null(result.TestPrompt);
@@ -235,7 +235,7 @@ namespace Pinder.Core.Tests
         public void TriggerTest_LessThan1Min_False()
         {
             var result = PlayerResponseDelayEvaluator.Evaluate(
-                TimeSpan.FromSeconds(30), DefaultOpponent, InterestState.Interested);
+                TimeSpan.FromSeconds(30), DefaultDatee, InterestState.Interested);
 
             Assert.False(result.TriggerTest);
             Assert.Null(result.TestPrompt);
@@ -245,7 +245,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void TriggerTest_ChaosZeroesPenalty_NoTrigger()
         {
-            var stats = MakeOpponent(chaosBase: 4);
+            var stats = MakeDatee(chaosBase: 4);
             var result = PlayerResponseDelayEvaluator.Evaluate(
                 TimeSpan.FromHours(3), stats, InterestState.Interested);
 
@@ -257,7 +257,7 @@ namespace Pinder.Core.Tests
         public void TriggerTest_Exactly1Hour_True()
         {
             var result = PlayerResponseDelayEvaluator.Evaluate(
-                TimeSpan.FromHours(1), DefaultOpponent, InterestState.Interested);
+                TimeSpan.FromHours(1), DefaultDatee, InterestState.Interested);
 
             Assert.True(result.TriggerTest);
         }
@@ -267,7 +267,7 @@ namespace Pinder.Core.Tests
         public void TriggerTest_JustUnder6Hours_True()
         {
             var result = PlayerResponseDelayEvaluator.Evaluate(
-                TimeSpan.FromHours(5.999), DefaultOpponent, InterestState.Interested);
+                TimeSpan.FromHours(5.999), DefaultDatee, InterestState.Interested);
 
             Assert.True(result.TriggerTest);
         }

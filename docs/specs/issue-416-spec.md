@@ -46,7 +46,7 @@ namespace Pinder.SessionRunner
         // (appended to existing params, all with defaults):
         public PlayerAgentContext(
             StatBlock playerStats,
-            StatBlock opponentStats,
+            StatBlock dateeStats,
             int currentInterest,
             InterestState interestState,
             int momentumStreak,

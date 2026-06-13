@@ -48,9 +48,9 @@ namespace Pinder.Core.Tests
         [Theory]
         [InlineData(StatType.Charm, "cringe", TrapEffect.Disadvantage, 0)]
         [InlineData(StatType.Rizz, "creep", TrapEffect.StatPenalty, 2)]
-        [InlineData(StatType.Honesty, "overshare", TrapEffect.OpponentDCIncrease, 2)]
+        [InlineData(StatType.Honesty, "overshare", TrapEffect.DateeDCIncrease, 2)]
         [InlineData(StatType.Chaos, "unhinged", TrapEffect.Disadvantage, 0)]
-        [InlineData(StatType.Wit, "pretentious", TrapEffect.OpponentDCIncrease, 3)]
+        [InlineData(StatType.Wit, "pretentious", TrapEffect.DateeDCIncrease, 3)]
         [InlineData(StatType.SelfAwareness, "spiral", TrapEffect.Disadvantage, 0)]
         public void TrapsJson_TrapDefinition_MatchesExpected(
             StatType stat, string expectedId, TrapEffect expectedEffect, int expectedValue)

@@ -50,8 +50,8 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             }
         }
 
-        // What: AC2 — Both player and opponent prompts in system for dialogue options
-        // Mutation: Would catch if opponent prompt leaks into system blocks (voice bleed fix #487)
+        // What: AC2 — Both player and datee prompts in system for dialogue options
+        // Mutation: Would catch if datee prompt leaks into system blocks (voice bleed fix #487)
         [Fact]
         public async Task AC2_DialogueOptions_SystemBlocks_ContainPlayerOnly()
         {
@@ -69,12 +69,12 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             var body = JObject.Parse(handler.LastRequestBody!);
             var system = body["system"] as JArray;
             Assert.NotNull(system);
-            // Only player prompt in system — opponent is in user message
+            // Only player prompt in system — datee is in user message
             Assert.Single(system!);
             var systemText = string.Join(" ", system!.Select(s => s["text"]?.ToString() ?? ""));
             Assert.Contains("Thundercock", systemText);
             Assert.DoesNotContain("Velvet", systemText);
-            // Opponent profile is in user message instead
+            // Datee profile is in user message instead
             var messages = body["messages"] as JArray;
             Assert.NotNull(messages);
             var userContent = messages![0]["content"]?.ToString() ?? "";

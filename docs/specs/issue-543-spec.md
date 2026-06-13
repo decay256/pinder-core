@@ -24,7 +24,7 @@ namespace Pinder.LlmAdapters
         public string Vision { get; }
         public string WorldDescription { get; }
         public string PlayerRoleDescription { get; }
-        public string OpponentRoleDescription { get; }
+        public string DateeRoleDescription { get; }
         public string MetaContract { get; }
         public string WritingRules { get; }
 
@@ -34,7 +34,7 @@ namespace Pinder.LlmAdapters
             string vision,
             string worldDescription,
             string playerRoleDescription,
-            string opponentRoleDescription,
+            string dateeRoleDescription,
             string metaContract,
             string writingRules);
 
@@ -62,8 +62,8 @@ namespace Pinder.LlmAdapters
         /// <param name="playerPrompt">
         ///   Player's assembled character system prompt (from CharacterProfile.AssembledSystemPrompt).
         /// </param>
-        /// <param name="opponentPrompt">
-        ///   Opponent's assembled character system prompt (from CharacterProfile.AssembledSystemPrompt).
+        /// <param name="dateePrompt">
+        ///   Datee's assembled character system prompt (from CharacterProfile.AssembledSystemPrompt).
         /// </param>
         /// <param name="gameDef">
         ///   Game definition containing vision, world rules, meta contract.
@@ -72,7 +72,7 @@ namespace Pinder.LlmAdapters
         /// <returns>A single string containing the full session system prompt.</returns>
         public static string Build(
             string playerPrompt,
-            string opponentPrompt,
+            string dateePrompt,
             GameDefinition? gameDef = null);
     }
 }
@@ -96,8 +96,8 @@ world_description: |
 player_role_description: |
   You are the player's character — a sentient being trying to
   secure a date through wit, charm, and questionable decisions.
-opponent_role_description: |
-  You are the opponent — an NPC on the other side of the chat.
+datee_role_description: |
+  You are the datee — an NPC on the other side of the chat.
   You have your own personality, boundaries, and interest level.
 meta_contract: |
   Never break character. Never acknowledge the game engine.
@@ -121,7 +121,7 @@ Returns a `GameDefinition` with all 7 fields populated with hardcoded Pinder-spe
 
 **Input**:
 - `playerPrompt`: `"You are Velvet. Lowercase-with-intent. Ironic. Level 7 Veteran..."`
-- `opponentPrompt`: `"You are Sable. Fast-talking. Uses omg and 😭. Level 5 Journeyman..."`
+- `dateePrompt`: `"You are Sable. Fast-talking. Uses omg and 😭. Level 5 Journeyman..."`
 - `gameDef`: `GameDefinition.PinderDefaults`
 
 **Output** (string with 5 clearly delineated sections):
@@ -142,7 +142,7 @@ beings navigating modern dating culture.
 
 You are Velvet. Lowercase-with-intent. Ironic. Level 7 Veteran...
 
-== OPPONENT CHARACTER ==
+== DATEE CHARACTER ==
 
 You are Sable. Fast-talking. Uses omg and 😭. Level 5 Journeyman...
 
@@ -161,10 +161,10 @@ The section headers use `== SECTION NAME ==` format (or similar clear delimiters
 
 **Input**:
 - `playerPrompt`: `"You are Gerald. Anxious. Overthinks everything..."`
-- `opponentPrompt`: `"You are Brick. Blunt. Minimal words..."`
+- `dateePrompt`: `"You are Brick. Blunt. Minimal words..."`
 - `gameDef`: `null`
 
-**Output**: Same 5-section structure, but game vision / world rules / meta contract / writing rules sourced from `GameDefinition.PinderDefaults`. Player and opponent character sections contain the provided prompt strings verbatim.
+**Output**: Same 5-section structure, but game vision / world rules / meta contract / writing rules sourced from `GameDefinition.PinderDefaults`. Player and datee character sections contain the provided prompt strings verbatim.
 
 ---
 
@@ -172,7 +172,7 @@ The section headers use `== SECTION NAME ==` format (or similar clear delimiters
 
 ### AC1: GameDefinition class with all fields
 
-`GameDefinition` must be a `sealed class` in the `Pinder.LlmAdapters` namespace with exactly 7 read-only string properties: `Name`, `Vision`, `WorldDescription`, `PlayerRoleDescription`, `OpponentRoleDescription`, `MetaContract`, `WritingRules`. The constructor accepts all 7 as required `string` parameters (no nulls allowed — throw `ArgumentNullException` for any null argument).
+`GameDefinition` must be a `sealed class` in the `Pinder.LlmAdapters` namespace with exactly 7 read-only string properties: `Name`, `Vision`, `WorldDescription`, `PlayerRoleDescription`, `DateeRoleDescription`, `MetaContract`, `WritingRules`. The constructor accepts all 7 as required `string` parameters (no nulls allowed — throw `ArgumentNullException` for any null argument).
 
 ### AC2: GameDefinition.LoadFrom(yamlContent) parses YAML
 
@@ -181,7 +181,7 @@ The section headers use `== SECTION NAME ==` format (or similar clear delimiters
 - `vision` → `Vision`
 - `world_description` → `WorldDescription`
 - `player_role_description` → `PlayerRoleDescription`
-- `opponent_role_description` → `OpponentRoleDescription`
+- `datee_role_description` → `DateeRoleDescription`
 - `meta_contract` → `MetaContract`
 - `writing_rules` → `WritingRules`
 
@@ -194,7 +194,7 @@ YAML parsing requires a library. The architect decision is to add `YamlDotNet 16
 - Describe it as a comedy dating RPG with sentient penises on a dating app (Vision)
 - Describe the absurdist world setting (WorldDescription)
 - Describe the player's role as the character trying to get a date (PlayerRoleDescription)
-- Describe the opponent's role as the NPC with independent personality and boundaries (OpponentRoleDescription)
+- Describe the datee's role as the NPC with independent personality and boundaries (DateeRoleDescription)
 - Specify immersion rules: never break character, treat [ENGINE] blocks as stage directions (MetaContract)
 - Specify texting register, short messages, character voice fidelity (WritingRules)
 
@@ -206,7 +206,7 @@ This is a genuine creative direction fallback, not placeholder text. It must be 
 1. **GAME VISION** — sourced from `gameDef.Vision`
 2. **WORLD RULES** — sourced from `gameDef.WorldDescription`
 3. **PLAYER CHARACTER** — the `playerPrompt` string passed verbatim
-4. **OPPONENT CHARACTER** — the `opponentPrompt` string passed verbatim
+4. **DATEE CHARACTER** — the `dateePrompt` string passed verbatim
 5. **META CONTRACT** — sourced from `gameDef.MetaContract` concatenated with `gameDef.WritingRules`
 
 Each section is separated by clear delimiters (e.g., `== SECTION NAME ==` headers). The character prompts appear verbatim — they are not summarized, trimmed, or modified.
@@ -214,9 +214,9 @@ Each section is separated by clear delimiters (e.g., `== SECTION NAME ==` header
 ### AC5: Unit test — prompt contains both character names, game vision, world rules
 
 At least one unit test must:
-1. Call `SessionSystemPromptBuilder.Build(playerPrompt, opponentPrompt, gameDef)` with known inputs
+1. Call `SessionSystemPromptBuilder.Build(playerPrompt, dateePrompt, gameDef)` with known inputs
 2. Assert the output contains the player prompt text
-3. Assert the output contains the opponent prompt text
+3. Assert the output contains the datee prompt text
 4. Assert the output contains the game vision text
 5. Assert the output contains the world description text
 6. Assert the output contains the meta contract text
@@ -235,7 +235,7 @@ At least one unit test must:
 ### Empty strings
 
 - `GameDefinition` constructor: passing `""` (empty string) for any property is allowed — it is not null. The builder will produce a section with an empty body. This is not an error.
-- `SessionSystemPromptBuilder.Build`: passing `""` for `playerPrompt` or `opponentPrompt` produces sections with empty bodies. No error.
+- `SessionSystemPromptBuilder.Build`: passing `""` for `playerPrompt` or `dateePrompt` produces sections with empty bodies. No error.
 
 ### Very large prompts
 
@@ -259,11 +259,11 @@ At least one unit test must:
 
 ### Null gameDef parameter
 
-- `SessionSystemPromptBuilder.Build(player, opponent, null)` uses `GameDefinition.PinderDefaults`. This is documented and intentional.
+- `SessionSystemPromptBuilder.Build(player, datee, null)` uses `GameDefinition.PinderDefaults`. This is documented and intentional.
 
-### Null playerPrompt or opponentPrompt
+### Null playerPrompt or dateePrompt
 
-- Passing `null` for `playerPrompt` or `opponentPrompt` throws `ArgumentNullException`. These are required parameters.
+- Passing `null` for `playerPrompt` or `dateePrompt` throws `ArgumentNullException`. These are required parameters.
 
 ---
 
@@ -277,7 +277,7 @@ At least one unit test must:
 | Null value for key | `GameDefinition.LoadFrom("name: Pinder\nvision: ~\n...")` | `FormatException` | Contains `"vision"` |
 | Null constructor arg | `new GameDefinition(null, ...)` | `ArgumentNullException` | Parameter name |
 | Null playerPrompt | `SessionSystemPromptBuilder.Build(null, "opp")` | `ArgumentNullException` | `"playerPrompt"` |
-| Null opponentPrompt | `SessionSystemPromptBuilder.Build("player", null)` | `ArgumentNullException` | `"opponentPrompt"` |
+| Null dateePrompt | `SessionSystemPromptBuilder.Build("player", null)` | `ArgumentNullException` | `"dateePrompt"` |
 
 ---
 
@@ -294,7 +294,7 @@ At least one unit test must:
 
 | Component | Relationship |
 |-----------|-------------|
-| `Pinder.Core.Characters.CharacterProfile` | `AssembledSystemPrompt` property provides the `playerPrompt` and `opponentPrompt` strings passed to `Build` |
+| `Pinder.Core.Characters.CharacterProfile` | `AssembledSystemPrompt` property provides the `playerPrompt` and `dateePrompt` strings passed to `Build` |
 | `IStatefulLlmAdapter` (#542) | `GameSession` calls `void StartConversation(string systemPrompt)` with the output of `Build`. **Note:** The canonical return type is `void` per the #542 contract (`contracts/sprint-session-architecture-archetype.md`) and ADR ("ConversationSession is internal to LlmAdapters"). The adapter internally tracks the active session — GameSession does not hold or pass a session object. One architecture briefing line incorrectly describes a `ConversationSession?` return; that is superseded by the ADR decision. |
 | `ConversationSession` (#541) | Stores the system prompt produced by `Build` as system blocks |
 | `game-definition.yaml` (#545) | External data file parsed by `GameDefinition.LoadFrom` |
@@ -307,12 +307,12 @@ This issue is Wave 3 in the sprint ordering:
 
 ### Integration Point
 
-After #543 is implemented, the GameSession constructor wiring from #542 (which uses a placeholder `playerPrompt + "\n\n---\n\n" + opponentPrompt` concatenation) should be updated to call:
+After #543 is implemented, the GameSession constructor wiring from #542 (which uses a placeholder `playerPrompt + "\n\n---\n\n" + dateePrompt` concatenation) should be updated to call:
 
 ```csharp
 string systemPrompt = SessionSystemPromptBuilder.Build(
     _player.AssembledSystemPrompt,
-    _opponent.AssembledSystemPrompt,
+    _datee.AssembledSystemPrompt,
     config?.GameDefinition);  // or however GameDefinition is provided
 ```
 

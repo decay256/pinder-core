@@ -110,7 +110,7 @@ namespace Pinder.Core.Tests
             var session = BuildSession(
                 dice: Dice(2, 50),
                 playerStats: Stats(wit: 0),
-                opponentStats: Stats(rizz: 0), // Wit defence is Rizz
+                dateeStats: Stats(rizz: 0), // Wit defence is Rizz
                 shadows: shadows);
 
             await session.StartTurnAsync();
@@ -128,7 +128,7 @@ namespace Pinder.Core.Tests
             var session = BuildSession(
                 dice: Dice(2, 50),
                 playerStats: Stats(charm: 0),
-                opponentStats: Stats(sa: 0),
+                dateeStats: Stats(sa: 0),
                 shadows: shadows,
                 startingInterest: 1);
 
@@ -170,7 +170,7 @@ namespace Pinder.Core.Tests
             var session = BuildSession(
                 dice: new TestDice(diceValues.ToArray()),
                 playerStats: Stats(honesty: 0),
-                opponentStats: Stats(charm: 0),
+                dateeStats: Stats(charm: 0),
                 shadows: shadows,
                 options: new[] { new DialogueOption(StatType.Honesty, "truth") },
                 startingInterest: 15);
@@ -193,7 +193,7 @@ namespace Pinder.Core.Tests
             var session = BuildSession(
                 dice: new TestDice(new[] { 6, 50 }),
                 playerStats: Stats(charm: 0),
-                opponentStats: Stats(sa: 0),
+                dateeStats: Stats(sa: 0),
                 shadows: shadows,
                 startingInterest: 15);
 
@@ -323,7 +323,7 @@ namespace Pinder.Core.Tests
             var shadows = MakeTracker();
             shadows.ApplyGrowth(ShadowStatType.Madness, 2, "setup");
 
-            // Use TellLlmAdapter: turn 1 opponent response reveals a Charm tell.
+            // Use TellLlmAdapter: turn 1 datee response reveals a Charm tell.
             // Turn 2: player picks Charm → HasTellBonus = true.
             var diceValues = new List<int> { 15, 50, 15, 50, 15, 50, 15, 50 };
             var session = BuildSessionWithLlm(

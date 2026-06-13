@@ -14,14 +14,14 @@ namespace Pinder.LlmAdapters.Tests
         {
             return new DialogueContext(
                 playerPrompt: "player prompt",
-                opponentPrompt: "opponent prompt",
-                conversationHistory: new List<(string, string)> { ("Opponent", "Hey there") },
-                opponentLastMessage: "Hey there",
+                dateePrompt: "datee prompt",
+                conversationHistory: new List<(string, string)> { ("Datee", "Hey there") },
+                dateeLastMessage: "Hey there",
                 activeTraps: Array.Empty<string>(),
                 currentInterest: 10,
                 shadowThresholds: shadowThresholds,
                 playerName: "Player",
-                opponentName: "Opponent",
+                dateeName: "Datee",
                 currentTurn: 1);
         }
 
@@ -31,26 +31,26 @@ namespace Pinder.LlmAdapters.Tests
         {
             return new DeliveryContext(
                 playerPrompt: "player prompt",
-                opponentPrompt: "opponent prompt",
-                conversationHistory: new List<(string, string)> { ("Opponent", "Hey there") },
-                opponentLastMessage: "Hey there",
+                dateePrompt: "datee prompt",
+                conversationHistory: new List<(string, string)> { ("Datee", "Hey there") },
+                dateeLastMessage: "Hey there",
                 chosenOption: option,
                 outcome: FailureTier.None,
                 beatDcBy: 3,
                 activeTraps: Array.Empty<string>(),
                 shadowThresholds: shadowThresholds,
                 playerName: "Player",
-                opponentName: "Opponent");
+                dateeName: "Datee");
         }
 
-        private static OpponentContext MakeOpponentContext(
+        private static DateeContext MakeDateeContext(
             Dictionary<ShadowStatType, int> shadowThresholds = null)
         {
-            return new OpponentContext(
+            return new DateeContext(
                 playerPrompt: "player prompt",
-                opponentPrompt: "opponent prompt",
-                conversationHistory: new List<(string, string)> { ("Opponent", "Hey there") },
-                opponentLastMessage: "Hey there",
+                dateePrompt: "datee prompt",
+                conversationHistory: new List<(string, string)> { ("Datee", "Hey there") },
+                dateeLastMessage: "Hey there",
                 activeTraps: Array.Empty<string>(),
                 currentInterest: 10,
                 playerDeliveredMessage: "Hello",
@@ -59,7 +59,7 @@ namespace Pinder.LlmAdapters.Tests
                 responseDelayMinutes: 2.0,
                 shadowThresholds: shadowThresholds,
                 playerName: "Player",
-                opponentName: "Opponent");
+                dateeName: "Datee");
         }
 
         [Fact]
@@ -166,15 +166,15 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Fact]
-        public void OpponentPrompt_HighShadow_ContainsShadowStateSection()
+        public void DateePrompt_HighShadow_ContainsShadowStateSection()
         {
             var shadows = new Dictionary<ShadowStatType, int>
             {
                 { ShadowStatType.Fixation, 9 }
             };
 
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(shadowThresholds: shadows));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(shadowThresholds: shadows));
 
             Assert.Contains("SHADOW STATE", result);
             Assert.Contains("Your Fixation is elevated", result);

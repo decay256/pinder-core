@@ -29,14 +29,14 @@ public int GetShadow(ShadowStatType shadow);
 public GameSessionConfig(
     IGameClock? clock = null,
     SessionShadowTracker? playerShadows = null,
-    SessionShadowTracker? opponentShadows = null,
+    SessionShadowTracker? dateeShadows = null,
     int? startingInterest = null,
     string? previousOpener = null);
 
 // Pinder.Core.Conversation.GameSession (existing constructor with config)
 public GameSession(
     CharacterProfile player,
-    CharacterProfile opponent,
+    CharacterProfile datee,
     ILlmAdapter llm,
     IDiceRoller dice,
     ITrapRegistry traps,
@@ -168,7 +168,7 @@ This is a behavioral acceptance criterion for manual/integration testing. The se
 
 1. **`sableStats` is null**: `SessionShadowTracker` constructor throws `ArgumentNullException`. This cannot happen in the current session runner because `sableStats` is constructed inline above.
 
-2. **`GameSessionConfig` with `PlayerShadows` but no `OpponentShadows`**: Valid. The opponent's shadow tracking is optional. `GameSession` handles null `OpponentShadows` gracefully (opponent shadow growth is simply not tracked).
+2. **`GameSessionConfig` with `PlayerShadows` but no `DateeShadows`**: Valid. The datee's shadow tracking is optional. `GameSession` handles null `DateeShadows` gracefully (datee shadow growth is simply not tracked).
 
 3. **Build failure if `SessionShadowTracker` or `GameSessionConfig` types are missing**: Would indicate a broken `Pinder.Core` dependency. Not expected — these types exist and are tested.
 

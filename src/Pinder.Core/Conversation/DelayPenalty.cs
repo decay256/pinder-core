@@ -13,7 +13,7 @@ namespace Pinder.Core.Conversation
 
         /// <summary>
         /// True when the delay is long enough to trigger a conversational test
-        /// (e.g. opponent sends "thought you ghosted me").
+        /// (e.g. datee sends "thought you ghosted me").
         /// </summary>
         public bool TriggerTest { get; }
 

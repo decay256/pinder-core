@@ -49,7 +49,7 @@ OPTION_4
             Assert.Single(body.System);
             Assert.Equal("ephemeral", body.System[0].CacheControl?.Type);
             Assert.Contains("Thundercock", body.System[0].Text);
-            // Opponent profile appears in user message, not system
+            // Datee profile appears in user message, not system
             Assert.Single(body.Messages);
             Assert.Contains("Velvet", body.Messages[0].Content.ToString());
             Assert.Contains("YOU ARE TALKING TO", body.Messages[0].Content.ToString());
@@ -74,7 +74,7 @@ OPTION_4
         }
 
         [Fact]
-        public async Task GetOpponentResponseAsync_uses_only_opponent_prompt()
+        public async Task GetDateeResponseAsync_uses_only_datee_prompt()
         {
             var handler = new FakeHttpHandler
             {
@@ -84,12 +84,12 @@ OPTION_4
             using var client = new HttpClient(handler);
             using var adapter = new AnthropicLlmAdapter(DefaultOptions(), client);
 
-            var result = await adapter.GetOpponentResponseAsync(MakeOpponentContext());
+            var result = await adapter.GetDateeResponseAsync(MakeDateeContext());
 
             Assert.Equal("That's sweet, tell me more", result.MessageText);
             var body = JsonConvert.DeserializeObject<MessagesRequest>(handler.CapturedRequestBody!);
             Assert.Equal(0.85, body!.Temperature!.Value, 2);
-            // Only 1 system block — opponent only
+            // Only 1 system block — datee only
             Assert.Single(body.System);
             Assert.Contains("Velvet", body.System[0].Text);
             Assert.DoesNotContain("Thundercock", body.System[0].Text);
@@ -172,7 +172,7 @@ OPTION_4
             await Assert.ThrowsAsync<ArgumentNullException>(() =>
                 adapter.DeliverMessageAsync(null!));
             await Assert.ThrowsAsync<ArgumentNullException>(() =>
-                adapter.GetOpponentResponseAsync(null!));
+                adapter.GetDateeResponseAsync(null!));
             await Assert.ThrowsAsync<ArgumentNullException>(() =>
                 adapter.GetInterestChangeBeatAsync(null!));
         }
@@ -198,7 +198,7 @@ OPTION_4
         }
 
         [Fact]
-        public async Task GetOpponentResponseAsync_with_signals_parsed()
+        public async Task GetDateeResponseAsync_with_signals_parsed()
         {
             var handler = new FakeHttpHandler
             {
@@ -212,7 +212,7 @@ WEAKNESS: HONESTY -3 (clearly deflecting personal questions)")
             using var client = new HttpClient(handler);
             using var adapter = new AnthropicLlmAdapter(DefaultOptions(), client);
 
-            var result = await adapter.GetOpponentResponseAsync(MakeOpponentContext());
+            var result = await adapter.GetDateeResponseAsync(MakeDateeContext());
 
             Assert.Equal("Nice one! Tell me more about yourself", result.MessageText);
             Assert.NotNull(result.DetectedTell);

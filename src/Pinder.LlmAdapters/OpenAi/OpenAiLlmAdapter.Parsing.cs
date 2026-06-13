@@ -120,12 +120,12 @@ namespace Pinder.LlmAdapters.OpenAi
 
         /// <summary>
         /// Parses structured LLM output with optional [SIGNALS] blocks.
-        /// Never throws — returns OpponentResponse with null signals on parse failure.
+        /// Never throws — returns DateeResponse with null signals on parse failure.
         /// </summary>
-        internal static OpponentResponse ParseOpponentResponse(string? llmResponse)
+        internal static DateeResponse ParseDateeResponse(string? llmResponse)
         {
             if (string.IsNullOrWhiteSpace(llmResponse))
-                return new OpponentResponse("", null, null);
+                return new DateeResponse("", null, null);
 
             var response = llmResponse!;
             string messageText;
@@ -181,10 +181,10 @@ namespace Pinder.LlmAdapters.OpenAi
             }
             catch
             {
-                return new OpponentResponse(response.Trim(), null, null);
+                return new DateeResponse(response.Trim(), null, null);
             }
 
-            return new OpponentResponse(messageText, tell, weakness);
+            return new DateeResponse(messageText, tell, weakness);
         }
 
         private static string NormalizeStatName(string raw)

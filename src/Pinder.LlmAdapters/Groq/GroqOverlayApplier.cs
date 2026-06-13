@@ -17,7 +17,7 @@ namespace Pinder.LlmAdapters.Groq
             string model,
             string message,
             string instruction,
-            string? opponentContext = null,
+            string? dateeContext = null,
             string? archetypeDirective = null,
             CancellationToken ct = default)
         {
@@ -29,8 +29,8 @@ namespace Pinder.LlmAdapters.Groq
                 "Apply the overlay instruction to rewrite the message with the requested tonal shift. " +
                 "Return ONLY the rewritten message text. No commentary, no refusals, no preamble.";
 
-            if (!string.IsNullOrWhiteSpace(opponentContext))
-                systemPrompt += $"\n\nThe message being sent is directed at this character:\n{opponentContext}";
+            if (!string.IsNullOrWhiteSpace(dateeContext))
+                systemPrompt += $"\n\nThe message being sent is directed at this character:\n{dateeContext}";
 
             // Inject the speaker's active archetype directive (#372) so the
             // overlay rewrite stays in the character's voice.
@@ -93,7 +93,7 @@ namespace Pinder.LlmAdapters.Groq
             string message,
             string trapInstruction,
             string trapName,
-            string? opponentContext = null,
+            string? dateeContext = null,
             string? archetypeDirective = null,
             CancellationToken ct = default)
         {
@@ -106,8 +106,8 @@ namespace Pinder.LlmAdapters.Groq
                 "Apply the trap instruction to rewrite the message so the trap's signature taint is visible. " +
                 "Return ONLY the rewritten message text. No commentary, no refusals, no preamble.";
 
-            if (!string.IsNullOrWhiteSpace(opponentContext))
-                systemPrompt += $"\n\nThe message being sent is directed at this character:\n{opponentContext}";
+            if (!string.IsNullOrWhiteSpace(dateeContext))
+                systemPrompt += $"\n\nThe message being sent is directed at this character:\n{dateeContext}";
 
             // Inject the speaker's active archetype directive (#372 + #371 union) so the
             // trap-overlay rewrite still sounds like the character.

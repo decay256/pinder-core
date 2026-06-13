@@ -60,7 +60,7 @@ namespace Pinder.Core.Tests
 
         private static PlayerAgentContext MakeContext(
             StatBlock? playerStats = null,
-            StatBlock? opponentStats = null,
+            StatBlock? dateeStats = null,
             int currentInterest = 12,
             InterestState interestState = InterestState.Interested,
             int momentumStreak = 0,
@@ -71,7 +71,7 @@ namespace Pinder.Core.Tests
         {
             return new PlayerAgentContext(
                 playerStats ?? MakeStats(charm: 3, rizz: 3, honesty: 3, chaos: 3, wit: 3, selfAwareness: 3),
-                opponentStats ?? MakeStats(),
+                dateeStats ?? MakeStats(),
                 currentInterest,
                 interestState,
                 momentumStreak,
@@ -128,7 +128,7 @@ namespace Pinder.Core.Tests
         public async Task Determinism_SameInputsSameOutput()
         {
             var playerStats = MakeStats(charm: 4, rizz: 2, honesty: 1, chaos: 3);
-            var opponentStats = MakeStats(selfAwareness: 2, wit: 1, chaos: 0, charm: 1);
+            var dateeStats = MakeStats(selfAwareness: 2, wit: 1, chaos: 0, charm: 1);
 
             var options = new[]
             {
@@ -139,7 +139,7 @@ namespace Pinder.Core.Tests
             };
 
             var turn = MakeTurn(options);
-            var ctx = MakeContext(playerStats: playerStats, opponentStats: opponentStats);
+            var ctx = MakeContext(playerStats: playerStats, dateeStats: dateeStats);
 
             var result1 = await _agent.DecideAsync(turn, ctx);
             var result2 = await _agent.DecideAsync(turn, ctx);

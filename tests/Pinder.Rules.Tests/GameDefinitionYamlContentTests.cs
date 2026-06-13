@@ -150,7 +150,7 @@ namespace Pinder.Rules.Tests
             // The YAML now contains many more keys than the original 7;
             // verify the core content sections are still present.
             string[] required = { "name", "vision", "world_description", "player_role_description",
-                "opponent_role_description", "narrative_doctrine" };
+                "datee_role_description", "narrative_doctrine" };
             foreach (var key in required)
             {
                 Assert.True(data.ContainsKey(key), $"Missing required content key: {key}");

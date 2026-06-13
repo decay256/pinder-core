@@ -69,7 +69,7 @@ namespace Pinder.Core.Tests
 
             Assert.Same(roll, result.Roll);
             Assert.Equal("msg", result.DeliveredMessage);
-            Assert.Equal("reply", result.OpponentMessage);
+            Assert.Equal("reply", result.DateeMessage);
             Assert.Equal("beat", result.NarrativeBeat);
             Assert.Equal(-2, result.InterestDelta);
             Assert.Same(snap, result.StateAfter);
@@ -151,7 +151,7 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public void TurnResult_ThrowsOnNullOpponentMessage()
+        public void TurnResult_ThrowsOnNullDateeMessage()
         {
             Assert.Throws<ArgumentNullException>(() =>
                 new TurnResult(MakeRoll(), "a", null!, null, 0, MakeSnapshot(), false, null));

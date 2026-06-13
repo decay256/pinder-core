@@ -53,7 +53,7 @@ namespace Pinder.LlmAdapters.Tests
             var dict = new Dictionary<object, object>
             {
                 { "goal", "goal-val" },
-                { "opponent_want", "want-val" },
+                { "datee_want", "want-val" },
                 { "revelation_budget", "budget-val" },
                 { "directness_dial", "dial-val" },
                 { "failure_cost", "cost-val" },
@@ -66,7 +66,7 @@ namespace Pinder.LlmAdapters.Tests
             // Assert
             Assert.NotNull(result);
             Assert.Equal("goal-val", result.Goal);
-            Assert.Equal("want-val", result.OpponentWant);
+            Assert.Equal("want-val", result.DateeWant);
             Assert.Equal("budget-val", result.RevelationBudget);
             Assert.Equal("dial-val", result.DirectnessDial);
             Assert.Equal("cost-val", result.FailureCost);

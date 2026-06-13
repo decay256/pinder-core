@@ -4,7 +4,7 @@ namespace Pinder.Core.Text
 {
     /// <summary>
     /// Issue #1041 (Tier C): Strips markdown formatting from LLM output for surfaces
-    /// that expect plain text (e.g. outfit descriptions, opponent responses). Compiled
+    /// that expect plain text (e.g. outfit descriptions, datee responses). Compiled
     /// regex patterns are used to avoid repeated JIT overhead on the hot-path per-turn
     /// calls. Bullet-list markers (<c>- </c>) are intentionally preserved so the stake
     /// and other bullet-list surfaces render correctly in the SPA (per issue #949).

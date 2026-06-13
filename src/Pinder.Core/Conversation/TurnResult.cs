@@ -17,8 +17,8 @@ namespace Pinder.Core.Conversation
         /// <summary>The player's message text after degradation.</summary>
         public string DeliveredMessage { get; }
 
-        /// <summary>The opponent's response message.</summary>
-        public string OpponentMessage { get; }
+        /// <summary>The datee's response message.</summary>
+        public string DateeMessage { get; }
 
         /// <summary>Narrative beat text if an interest threshold was crossed, null otherwise.</summary>
         public string? NarrativeBeat { get; }
@@ -73,7 +73,7 @@ namespace Pinder.Core.Conversation
         public int XpEarned { get; }
 
         /// <summary>
-        /// Weakness window detected in the opponent's response this turn, if any.
+        /// Weakness window detected in the datee's response this turn, if any.
         /// The caller (UI) may use this to preview the next turn's opportunity.
         /// </summary>
         public WeaknessWindow? DetectedWindow { get; }
@@ -134,7 +134,7 @@ namespace Pinder.Core.Conversation
         public TurnResult(
             RollResult roll,
             string deliveredMessage,
-            string opponentMessage,
+            string dateeMessage,
             string? narrativeBeat,
             int interestDelta,
             GameStateSnapshot stateAfter,
@@ -164,7 +164,7 @@ namespace Pinder.Core.Conversation
         {
             Roll = roll ?? throw new ArgumentNullException(nameof(roll));
             DeliveredMessage = deliveredMessage ?? throw new ArgumentNullException(nameof(deliveredMessage));
-            OpponentMessage = opponentMessage ?? throw new ArgumentNullException(nameof(opponentMessage));
+            DateeMessage = dateeMessage ?? throw new ArgumentNullException(nameof(dateeMessage));
             NarrativeBeat = narrativeBeat;
             InterestDelta = interestDelta;
             StateAfter = stateAfter ?? throw new ArgumentNullException(nameof(stateAfter));

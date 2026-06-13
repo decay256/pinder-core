@@ -16,10 +16,10 @@ namespace Pinder.Core.Conversation
         public InterestMeter Interest { get; internal set; } = new InterestMeter();
         public TrapState Traps { get; internal set; } = new TrapState();
         public List<(string Sender, string Text)> History { get; internal set; } = new List<(string Sender, string Text)>();
-        public string OpponentOutfitDescription { get; internal set; } = string.Empty;
-        public List<ConversationMessage> OpponentHistory { get; internal set; } = new List<ConversationMessage>();
+        public string DateeOutfitDescription { get; internal set; } = string.Empty;
+        public List<ConversationMessage> DateeHistory { get; internal set; } = new List<ConversationMessage>();
         public SessionShadowTracker? PlayerShadows { get; internal set; }
-        public SessionShadowTracker? OpponentShadows { get; internal set; }
+        public SessionShadowTracker? DateeShadows { get; internal set; }
         public ComboTracker ComboTracker { get; internal set; } = new ComboTracker();
         public List<CallbackOpportunity> Topics { get; internal set; } = new List<CallbackOpportunity>();
         public int RizzCumulativeFailureCount { get; internal set; }
@@ -55,10 +55,10 @@ namespace Pinder.Core.Conversation
             clone.Interest = Interest.Clone();
             clone.Traps = Traps.Clone();
             clone.History = new List<(string Sender, string Text)>(History);
-            clone.OpponentOutfitDescription = OpponentOutfitDescription;
-            clone.OpponentHistory = new List<ConversationMessage>(OpponentHistory);
+            clone.DateeOutfitDescription = DateeOutfitDescription;
+            clone.DateeHistory = new List<ConversationMessage>(DateeHistory);
             clone.PlayerShadows = PlayerShadows?.Clone();
-            clone.OpponentShadows = OpponentShadows?.Clone();
+            clone.DateeShadows = DateeShadows?.Clone();
             clone.ComboTracker = ComboTracker.Clone();
             clone.Topics = new List<CallbackOpportunity>(Topics);
             clone.RizzCumulativeFailureCount = RizzCumulativeFailureCount;
@@ -101,12 +101,12 @@ namespace Pinder.Core.Conversation
             Interest = src.Interest.Clone();
             Traps = src.Traps.Clone();
             History.Clear(); History.AddRange(src.History);
-            OpponentHistory.Clear(); OpponentHistory.AddRange(src.OpponentHistory);
+            DateeHistory.Clear(); DateeHistory.AddRange(src.DateeHistory);
             ComboTracker = src.ComboTracker.Clone();
             Topics.Clear(); Topics.AddRange(src.Topics);
             XpLedger = src.XpLedger.Clone();
             PlayerShadows = src.PlayerShadows?.Clone();
-            OpponentShadows = src.OpponentShadows?.Clone();
+            DateeShadows = src.DateeShadows?.Clone();
 
             MomentumStreak = src.MomentumStreak;
             PendingMomentumBonus = src.PendingMomentumBonus;
@@ -172,15 +172,15 @@ namespace Pinder.Core.Conversation
             if (data.ConversationHistory != null)
                 History.AddRange(data.ConversationHistory);
 
-            OpponentHistory.Clear();
-            if (data.OpponentHistory != null)
+            DateeHistory.Clear();
+            if (data.DateeHistory != null)
             {
-                foreach (var (role, content) in data.OpponentHistory)
+                foreach (var (role, content) in data.DateeHistory)
                 {
                     if (string.IsNullOrEmpty(role)) continue;
                     try
                     {
-                        OpponentHistory.Add(new ConversationMessage(role, content ?? string.Empty));
+                        DateeHistory.Add(new ConversationMessage(role, content ?? string.Empty));
                     }
                     catch (ArgumentException)
                     {

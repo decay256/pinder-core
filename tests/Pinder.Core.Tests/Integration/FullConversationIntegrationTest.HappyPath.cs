@@ -43,12 +43,12 @@ namespace Pinder.Core.Tests.Integration
             var velvet = new CharacterProfile(velvetStats, "Test system prompt", "Velvet", timing, level: 7);
 
             var playerShadows = new SessionShadowTracker(geraldStats);
-            var opponentShadows = new SessionShadowTracker(velvetStats);
+            var dateeShadows = new SessionShadowTracker(velvetStats);
 
             var config = new GameSessionConfig(
                 clock: TestHelpers.MakeClock(),
                 playerShadows: playerShadows,
-                opponentShadows: opponentShadows,
+                dateeShadows: dateeShadows,
                 startingInterest: 5,  // low start to stay in range with new higher risk bonuses
                 previousOpener: null);
 

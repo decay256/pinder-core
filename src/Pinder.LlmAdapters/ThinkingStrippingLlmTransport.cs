@@ -14,7 +14,7 @@ namespace Pinder.LlmAdapters
     /// underlying transport(s).
     ///
     /// Replaces the per-callsite <see cref="InlineThinkingStripper.Strip"/>
-    /// pattern: instead of every prose-only consumer (delivery, opponent
+    /// pattern: instead of every prose-only consumer (delivery, datee
     /// reply, steering, horniness/shadow/trap overlays, stake, outfit,
     /// interest beat, …) remembering to call the stripper, the strip
     /// happens at the transport boundary so all consumers automatically

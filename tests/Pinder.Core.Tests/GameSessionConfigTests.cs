@@ -19,7 +19,7 @@ namespace Pinder.Core.Tests
             var config = new GameSessionConfig();
             Assert.Null(config.Clock);
             Assert.Null(config.PlayerShadows);
-            Assert.Null(config.OpponentShadows);
+            Assert.Null(config.DateeShadows);
             Assert.Null(config.StartingInterest);
             Assert.Null(config.PreviousOpener);
         }
@@ -29,19 +29,19 @@ namespace Pinder.Core.Tests
         {
             var stats = MakeStatBlock();
             var playerShadows = new SessionShadowTracker(stats);
-            var opponentShadows = new SessionShadowTracker(stats);
+            var dateeShadows = new SessionShadowTracker(stats);
             var clock = new TestClock();
 
             var config = new GameSessionConfig(
                 clock: clock,
                 playerShadows: playerShadows,
-                opponentShadows: opponentShadows,
+                dateeShadows: dateeShadows,
                 startingInterest: 5,
                 previousOpener: "hey there");
 
             Assert.Same(clock, config.Clock);
             Assert.Same(playerShadows, config.PlayerShadows);
-            Assert.Same(opponentShadows, config.OpponentShadows);
+            Assert.Same(dateeShadows, config.DateeShadows);
             Assert.Equal(5, config.StartingInterest);
             Assert.Equal("hey there", config.PreviousOpener);
         }
@@ -52,7 +52,7 @@ namespace Pinder.Core.Tests
             // Config is required — null config must throw before any field access
             Assert.Throws<ArgumentNullException>(() => new GameSession(
                 MakeProfile("player"),
-                MakeProfile("opponent"),
+                MakeProfile("datee"),
                 new StubLlmAdapter(),
                 new StubDice(),
                 new StubTrapRegistry(),
@@ -65,7 +65,7 @@ namespace Pinder.Core.Tests
             // Clock is required — GameSessionConfig without clock → must throw
             Assert.Throws<InvalidOperationException>(() => new GameSession(
                 MakeProfile("player"),
-                MakeProfile("opponent"),
+                MakeProfile("datee"),
                 new StubLlmAdapter(),
                 new StubDice(),
                 new StubTrapRegistry(),
@@ -78,7 +78,7 @@ namespace Pinder.Core.Tests
             // Verify the exact exception message
             var ex = Assert.Throws<InvalidOperationException>(() => new GameSession(
                 MakeProfile("player"),
-                MakeProfile("opponent"),
+                MakeProfile("datee"),
                 new StubLlmAdapter(),
                 new StubDice(),
                 new StubTrapRegistry(),
@@ -93,7 +93,7 @@ namespace Pinder.Core.Tests
             var llm = new StubLlmAdapter();
             var session = new GameSession(
                 MakeProfile("player"),
-                MakeProfile("opponent"),
+                MakeProfile("datee"),
                 llm,
                 new StubDice(10),
                 new StubTrapRegistry(),

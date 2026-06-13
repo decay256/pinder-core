@@ -47,7 +47,7 @@ namespace Pinder.Core.Tests
             int rizzFailures = 0,
             DialogueOption[] options = null,
             StatBlock playerStats = null,
-            StatBlock opponentStats = null,
+            StatBlock dateeStats = null,
             int levelBonus = 0)
         {
             return new ShadowHintContext
@@ -62,7 +62,7 @@ namespace Pinder.Core.Tests
                 RizzCumulativeFailureCount = rizzFailures,
                 CurrentOptions = options ?? new DialogueOption[0],
                 PlayerStats = playerStats ?? MakeStats(),
-                OpponentStats = opponentStats ?? MakeStats(),
+                DateeStats = dateeStats ?? MakeStats(),
                 PlayerLevelBonus = levelBonus
             };
         }
@@ -256,12 +256,12 @@ namespace Pinder.Core.Tests
         public void HighDC_ShowsDreadReduction()
         {
             // Create stats where the option's need is ≥16
-            // Player has +0 for Honesty, opponent has high defence
+            // Player has +0 for Honesty, datee has high defence
             var playerStats = MakeStats(charm: 0, rizz: 0, honesty: 0, chaos: 0, wit: 0, sa: 0);
-            var opponentStats = MakeStats(charm: 0, rizz: 0, honesty: 0, chaos: 0, wit: 0, sa: 0);
-            // DC = 16 + opponent defending stat. For Honesty, defence is SA.
+            var dateeStats = MakeStats(charm: 0, rizz: 0, honesty: 0, chaos: 0, wit: 0, sa: 0);
+            // DC = 16 + datee defending stat. For Honesty, defence is SA.
             // DC = 16 + 0 = 16, need = 16 - (0 + 0) = 16
-            var ctx = MakeContext(playerStats: playerStats, opponentStats: opponentStats, levelBonus: 0);
+            var ctx = MakeContext(playerStats: playerStats, dateeStats: dateeStats, levelBonus: 0);
             var option = MakeOption(StatType.Honesty);
 
             var hints = ShadowHintComputer.ComputeShadowHints(option, ctx);
@@ -274,8 +274,8 @@ namespace Pinder.Core.Tests
         {
             // Player has high stats, easy roll
             var playerStats = MakeStats(charm: 5, rizz: 5, honesty: 5, chaos: 5, wit: 5, sa: 5);
-            var opponentStats = MakeStats(charm: 0, rizz: 0, honesty: 0, chaos: 0, wit: 0, sa: 0);
-            var ctx = MakeContext(playerStats: playerStats, opponentStats: opponentStats, levelBonus: 2);
+            var dateeStats = MakeStats(charm: 0, rizz: 0, honesty: 0, chaos: 0, wit: 0, sa: 0);
+            var ctx = MakeContext(playerStats: playerStats, dateeStats: dateeStats, levelBonus: 2);
             var option = MakeOption(StatType.Charm);
 
             var hints = ShadowHintComputer.ComputeShadowHints(option, ctx);
@@ -308,7 +308,7 @@ namespace Pinder.Core.Tests
             var highestPctHistory = new List<bool> { true, true };
             // Create options where Charm is the highest-% option
             var playerStats = MakeStats(charm: 5, rizz: 0, honesty: 0, chaos: 0, wit: 0, sa: 0);
-            var opponentStats = MakeStats(charm: 0, rizz: 0, honesty: 0, chaos: 0, wit: 0, sa: 0);
+            var dateeStats = MakeStats(charm: 0, rizz: 0, honesty: 0, chaos: 0, wit: 0, sa: 0);
             var options = new[]
             {
                 MakeOption(StatType.Charm),
@@ -318,7 +318,7 @@ namespace Pinder.Core.Tests
             var ctx = MakeContext(
                 highestPctHistory: highestPctHistory,
                 playerStats: playerStats,
-                opponentStats: opponentStats,
+                dateeStats: dateeStats,
                 options: options);
 
             var hints = ShadowHintComputer.ComputeShadowHints(options[0], ctx);
@@ -331,7 +331,7 @@ namespace Pinder.Core.Tests
         {
             var highestPctHistory = new List<bool> { true, false };
             var playerStats = MakeStats(charm: 5, rizz: 0, honesty: 0, chaos: 0, wit: 0, sa: 0);
-            var opponentStats = MakeStats(charm: 0, rizz: 0, honesty: 0, chaos: 0, wit: 0, sa: 0);
+            var dateeStats = MakeStats(charm: 0, rizz: 0, honesty: 0, chaos: 0, wit: 0, sa: 0);
             var options = new[]
             {
                 MakeOption(StatType.Charm),
@@ -340,7 +340,7 @@ namespace Pinder.Core.Tests
             var ctx = MakeContext(
                 highestPctHistory: highestPctHistory,
                 playerStats: playerStats,
-                opponentStats: opponentStats,
+                dateeStats: dateeStats,
                 options: options);
 
             var hints = ShadowHintComputer.ComputeShadowHints(options[0], ctx);

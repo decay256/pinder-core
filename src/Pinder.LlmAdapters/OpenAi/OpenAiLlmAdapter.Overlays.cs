@@ -21,7 +21,7 @@ namespace Pinder.LlmAdapters.OpenAi
         // false fallback to the un-overlaid message.
 
         /// <inheritdoc />
-        public async Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null, CancellationToken ct = default)
+        public async Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, CancellationToken ct = default)
         {
             if (string.IsNullOrWhiteSpace(message) || string.IsNullOrWhiteSpace(instruction))
                 return message;
@@ -31,8 +31,8 @@ namespace Pinder.LlmAdapters.OpenAi
                 "Apply the overlay instruction to rewrite the message with the requested tonal shift. " +
                 "Return ONLY the rewritten message text. No commentary, no refusals, no preamble.";
 
-            if (!string.IsNullOrWhiteSpace(opponentContext))
-                systemPrompt += $"\n\nThe message being sent is directed at this character:\n{opponentContext}";
+            if (!string.IsNullOrWhiteSpace(dateeContext))
+                systemPrompt += $"\n\nThe message being sent is directed at this character:\n{dateeContext}";
 
             string userContent = !string.IsNullOrWhiteSpace(archetypeDirective)
                 ? $"{archetypeDirective}\n\nOVERLAY INSTRUCTION:\n{instruction}\n\nORIGINAL MESSAGE:\n{message}\n\nApply the overlay (preserving the archetype voice above) and return the modified message."
@@ -63,7 +63,7 @@ namespace Pinder.LlmAdapters.OpenAi
         }
 
         /// <inheritdoc />
-        public async Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null, CancellationToken ct = default)
+        public async Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, CancellationToken ct = default)
         {
             if (string.IsNullOrWhiteSpace(message) || string.IsNullOrWhiteSpace(trapInstruction))
                 return message;
@@ -74,8 +74,8 @@ namespace Pinder.LlmAdapters.OpenAi
                 "Apply the trap instruction to rewrite the message so the trap's signature taint is visible. " +
                 "Return ONLY the rewritten message text. No commentary, no refusals, no preamble.";
 
-            if (!string.IsNullOrWhiteSpace(opponentContext))
-                systemPrompt += $"\n\nThe message being sent is directed at this character:\n{opponentContext}";
+            if (!string.IsNullOrWhiteSpace(dateeContext))
+                systemPrompt += $"\n\nThe message being sent is directed at this character:\n{dateeContext}";
 
             string userContent = !string.IsNullOrWhiteSpace(archetypeDirective)
                 ? $"{archetypeDirective}\n\nTRAP INSTRUCTION ({trapName}):\n{trapInstruction}\n\nORIGINAL MESSAGE:\n{message}\n\nApply the trap taint (preserving the archetype voice above) and return the modified message."

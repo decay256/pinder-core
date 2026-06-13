@@ -24,17 +24,17 @@ the end of every sprint or epic before declaring done.
 ## When a new `GameDefinition` section is added
 
 - [ ] **Role-affiliation decision** — decide at the moment of addition whether
-  the section belongs to `BuildPlayer`, `BuildOpponent`, or `Build()` (shared).
+  the section belongs to `BuildPlayer`, `BuildDatee`, or `Build()` (shared).
   Wire it exclusively to one path. Document the decision in a code comment if
   it is "shared" (the default assumption is role-specific).
   See `ARCHITECTURE.md §5 → Role-affiliation rule`.
-- [ ] **ARCHITECTURE.md §5** — update the `BuildPlayer` / `BuildOpponent` /
+- [ ] **ARCHITECTURE.md §5** — update the `BuildPlayer` / `BuildDatee` /
   `Build()` split table if the section materially changes prompt structure.
 - [ ] **Regression test** — add a prompt-content test pinning that the new
   section appears in the correct builder output and is absent from the other.
   Reference: `Issue867_DeliveryTokenAuditSpecTests` as the pattern.
 - [ ] **Parity audit** — check the symmetric prompt surface. If the new rule
-  applies to player delivery, does opponent delivery need it too (or vice
+  applies to player delivery, does datee delivery need it too (or vice
   versa)? See `§PROMPT-ENFORCEMENT-PARITY`.
 
 ---

@@ -333,7 +333,7 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public void NullOpponentStats_Throws()
+        public void NullDateeStats_Throws()
         {
             Assert.Throws<ArgumentNullException>(() =>
                 PlayerResponseDelayEvaluator.Evaluate(

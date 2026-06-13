@@ -13,7 +13,7 @@ namespace Pinder.Core.Tests
 {
     /// <summary>
     /// Issue #333: regression tests for the turn-0 scene-setting entries
-    /// (player bio, opponent bio, LLM-generated outfit description) seeded
+    /// (player bio, datee bio, LLM-generated outfit description) seeded
     /// onto <see cref="GameSession.ConversationHistory"/> via
     /// <see cref="GameSession.SeedSceneEntries"/>.
     /// </summary>
@@ -27,14 +27,14 @@ namespace Pinder.Core.Tests
 
             session.SeedSceneEntries(
                 "Player bio text.",
-                "Opponent bio text.",
+                "Datee bio text.",
                 "Both wear something quietly out of fashion.");
 
             var history = session.ConversationHistory;
             Assert.Equal(3, history.Count);
             Assert.All(history, e => Assert.True(Senders.IsScene(e.Sender)));
             Assert.Equal("Player bio text.",                                history[0].Text);
-            Assert.Equal("Opponent bio text.",                              history[1].Text);
+            Assert.Equal("Datee bio text.",                              history[1].Text);
             Assert.Equal("Both wear something quietly out of fashion.",    history[2].Text);
         }
 
@@ -71,7 +71,7 @@ namespace Pinder.Core.Tests
         public async Task Scene_entries_are_excluded_from_LLM_context_history()
         {
             var session = MakeSession(out var llm);
-            session.SeedSceneEntries("Player bio.", "Opponent bio.", "Outfit prose.");
+            session.SeedSceneEntries("Player bio.", "Datee bio.", "Outfit prose.");
 
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0);
@@ -145,7 +145,7 @@ namespace Pinder.Core.Tests
         private sealed class CapturingLlm : ILlmAdapter
         {
             public DeliveryContext? CapturedDeliveryContext { get; private set; }
-            public OpponentContext? CapturedOpponentContext { get; private set; }
+            public DateeContext? CapturedDateeContext { get; private set; }
 
             public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult(new[]
@@ -162,19 +162,19 @@ namespace Pinder.Core.Tests
                 return Task.FromResult(context.ChosenOption.IntendedText);
             }
 
-            public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context, System.Threading.CancellationToken ct = default)
+            public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
             {
-                CapturedOpponentContext = context;
-                return Task.FromResult(new OpponentResponse("Reply"));
+                CapturedDateeContext = context;
+                return Task.FromResult(new DateeResponse("Reply"));
             }
 
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult<string?>(null);
-            public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
+            public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
                 => Task.FromResult(message);
             public Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
                 => Task.FromResult(message);
-            public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => Task.FromResult(message);
+            public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => Task.FromResult(message);
         }
     }
 }

@@ -29,9 +29,9 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task Safe_LowDc_Returns_1x_BaseXp()
         {
-            // Player stat 10, opponent stat 0 → DC = 13, need = 3 → Safe (≤5)
+            // Player stat 10, datee stat 0 → DC = 13, need = 3 → Safe (≤5)
             // Base XP = 5 (low DC), 5 * 1.0 = 5
-            var session = MakeSession(diceRoll: 15, opponentStatValue: 0, playerStatValue: 10);
+            var session = MakeSession(diceRoll: 15, dateeStatValue: 0, playerStatValue: 10);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -45,9 +45,9 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task Safe_MidDc_Returns_1x_BaseXp()
         {
-            // Player stat 10, opponent stat 1 → DC = 14, need = 4 → Safe (≤5)
+            // Player stat 10, datee stat 1 → DC = 14, need = 4 → Safe (≤5)
             // Base XP = 10 (mid DC), 10 * 1.0 = 10
-            var session = MakeSession(diceRoll: 18, opponentStatValue: 1, playerStatValue: 10);
+            var session = MakeSession(diceRoll: 18, dateeStatValue: 1, playerStatValue: 10);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -63,9 +63,9 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task Medium_LowDc_Returns_1_5x_BaseXp()
         {
-            // Player stat 6, opponent stat 0 → DC = 16, need = 10 → Medium (8–11)
+            // Player stat 6, datee stat 0 → DC = 16, need = 10 → Medium (8–11)
             // Base XP = 5, 5 * 1.5 = 7.5 → rounds to 8
-            var session = MakeSession(diceRoll: 15, opponentStatValue: 0, playerStatValue: 6);
+            var session = MakeSession(diceRoll: 15, dateeStatValue: 0, playerStatValue: 6);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -79,9 +79,9 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task Medium_MidDc_Returns_1_5x_BaseXp_Exact()
         {
-            // Player stat 6, opponent stat 1 → DC = 14, need = 8 → Medium (6–10)
+            // Player stat 6, datee stat 1 → DC = 14, need = 8 → Medium (6–10)
             // Base XP = 10, 10 * 1.5 = 15.0 (exact)
-            var session = MakeSession(diceRoll: 18, opponentStatValue: 1, playerStatValue: 6);
+            var session = MakeSession(diceRoll: 18, dateeStatValue: 1, playerStatValue: 6);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -97,9 +97,9 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task Hard_MidDc_Returns_2x_BaseXp()
         {
-            // Player stat 3, opponent stat 1 → DC = 14, need = 11 → Hard (11–15)
+            // Player stat 3, datee stat 1 → DC = 14, need = 11 → Hard (11–15)
             // Base XP = 10, 10 * 2.0 = 20
-            var session = MakeSession(diceRoll: 18, opponentStatValue: 1, playerStatValue: 3);
+            var session = MakeSession(diceRoll: 18, dateeStatValue: 1, playerStatValue: 3);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -113,9 +113,9 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task Hard_HighDc_Returns_2x_BaseXp()
         {
-            // Player stat 3, opponent stat 1 → DC = 17, need = 14 → Hard (12–15)
+            // Player stat 3, datee stat 1 → DC = 17, need = 14 → Hard (12–15)
             // Base XP = 10 (DC≤20), 10 * 2.0 = 20
-            var session = MakeSession(diceRoll: 14, opponentStatValue: 1, playerStatValue: 3);
+            var session = MakeSession(diceRoll: 14, dateeStatValue: 1, playerStatValue: 3);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -131,9 +131,9 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task Bold_HighDc_Returns_3x_BaseXp()
         {
-            // Player stat 3, opponent stat 6 → DC = 22, need = 19 → Bold (16–19)
+            // Player stat 3, datee stat 6 → DC = 22, need = 19 → Bold (16–19)
             // Base XP = 15 (DC>20), 15 * 3.0 = 45
-            var session = MakeSession(diceRoll: 19, opponentStatValue: 6, playerStatValue: 3);
+            var session = MakeSession(diceRoll: 19, dateeStatValue: 6, playerStatValue: 3);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -147,9 +147,9 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task Bold_LowDc_Returns_3x_BaseXp()
         {
-            // Player stat -3 (synthetic), opponent stat 0 → DC = 16, need = 19 → Bold (16–19)
+            // Player stat -3 (synthetic), datee stat 0 → DC = 16, need = 19 → Bold (16–19)
             // Base XP = 5 (DC≤16), 5 * 3.0 = 15
-            var session = MakeSession(diceRoll: 19, opponentStatValue: 0, playerStatValue: -3);
+            var session = MakeSession(diceRoll: 19, dateeStatValue: 0, playerStatValue: -3);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -165,7 +165,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task Nat20_NoMultiplier_Flat25()
         {
-            var session = MakeSession(diceRoll: 20, opponentStatValue: 0, playerStatValue: 3);
+            var session = MakeSession(diceRoll: 20, dateeStatValue: 0, playerStatValue: 3);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -178,7 +178,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task Nat1_NoMultiplier_Flat10()
         {
-            var session = MakeSession(diceRoll: 1, opponentStatValue: 0, playerStatValue: 3);
+            var session = MakeSession(diceRoll: 1, dateeStatValue: 0, playerStatValue: 3);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -192,7 +192,7 @@ namespace Pinder.Core.Tests
         public async Task Failure_NoMultiplier_Flat2()
         {
             // Roll 5 with low stat → failure
-            var session = MakeSession(diceRoll: 5, opponentStatValue: 0, playerStatValue: 3);
+            var session = MakeSession(diceRoll: 5, dateeStatValue: 0, playerStatValue: 3);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -208,8 +208,8 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task Medium_LowDc_RoundsUp_From_7_5_To_8()
         {
-            // 5 * 1.5 = 7.5 → should round to 8. Player stat 6, opponent stat 0 → DC=16, need=10 → Medium
-            var session = MakeSession(diceRoll: 15, opponentStatValue: 0, playerStatValue: 6);
+            // 5 * 1.5 = 7.5 → should round to 8. Player stat 6, datee stat 0 → DC=16, need=10 → Medium
+            var session = MakeSession(diceRoll: 15, dateeStatValue: 0, playerStatValue: 6);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -224,7 +224,7 @@ namespace Pinder.Core.Tests
         public async Task Hard_MidDc_ExactMultiplication_NoRounding()
         {
             // 10 * 2.0 = 20.0 exactly
-            var session = MakeSession(diceRoll: 18, opponentStatValue: 1, playerStatValue: 3);
+            var session = MakeSession(diceRoll: 18, dateeStatValue: 1, playerStatValue: 3);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -239,8 +239,8 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task XpLedger_Records_MultipliedAmount()
         {
-            // Medium, base 5, multiplied to 8. Player stat 6, opponent stat 0 → DC=16, need=10 → Medium
-            var session = MakeSession(diceRoll: 15, opponentStatValue: 0, playerStatValue: 6);
+            // Medium, base 5, multiplied to 8. Player stat 6, datee stat 0 → DC=16, need=10 → Medium
+            var session = MakeSession(diceRoll: 15, dateeStatValue: 0, playerStatValue: 6);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -255,8 +255,8 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task XpLedger_Bold_Records_3xAmount()
         {
-            // Bold, base 15 (DC>20), multiplied to 45. Player stat 3, opponent stat 6 → DC=22, need=19 → Bold
-            var session = MakeSession(diceRoll: 19, opponentStatValue: 6, playerStatValue: 3);
+            // Bold, base 15 (DC>20), multiplied to 45. Player stat 3, datee stat 6 → DC=22, need=19 → Bold
+            var session = MakeSession(diceRoll: 19, dateeStatValue: 6, playerStatValue: 3);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -274,7 +274,7 @@ namespace Pinder.Core.Tests
         public async Task XpEarned_Matches_Ledger_ForAllTiers()
         {
             // Test Hard tier (2x)
-            var session = MakeSession(diceRoll: 18, opponentStatValue: 1, playerStatValue: 3);
+            var session = MakeSession(diceRoll: 18, dateeStatValue: 1, playerStatValue: 3);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -287,22 +287,22 @@ namespace Pinder.Core.Tests
 
         private static GameSession MakeSession(
             int diceRoll,
-            int opponentStatValue,
+            int dateeStatValue,
             int playerStatValue = 3,
             GameSessionConfig? config = null)
         {
             var playerStats = MakeStatBlock(allStats: playerStatValue);
             var player = MakeProfile("player", playerStats);
 
-            var opponentStats = MakeStatBlock(allStats: opponentStatValue);
-            var opponent = MakeProfile("opponent", opponentStats);
+            var dateeStats = MakeStatBlock(allStats: dateeStatValue);
+            var datee = MakeProfile("datee", dateeStats);
 
             // Clock is required; provide default zero-modifier clock if caller didn't supply config.
             config = config ?? new GameSessionConfig(clock: TestHelpers.MakeClock());
 
             return new GameSession(
                 player,
-                opponent,
+                datee,
                 new NullLlmAdapter(),
                 new ConstantDice(diceRoll),
                 new NullTrapRegistry(),

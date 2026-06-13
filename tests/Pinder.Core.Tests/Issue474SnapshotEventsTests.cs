@@ -223,7 +223,7 @@ namespace Pinder.Core.Tests
             // tooling can rely on it.
             var roll = new RollResult(20, null, 20, StatType.Charm, 2, 0, 13, FailureTier.Success);
             var result = new TurnResult(
-                roll: roll, deliveredMessage: "msg", opponentMessage: "...",
+                roll: roll, deliveredMessage: "msg", dateeMessage: "...",
                 narrativeBeat: null, interestDelta: 1,
                 stateAfter: new GameStateSnapshot(
                     10, InterestState.Interested, 0, Array.Empty<string>(), 1),
@@ -251,7 +251,7 @@ namespace Pinder.Core.Tests
                 comboHistory: new List<(StatType Stat, bool Succeeded)>(),
                 activeTell: null,
                 perTurnTextDiffs: null,
-                opponentHistory: null,
+                dateeHistory: null,
                 playerSender: "P1",
                 i18nCatalog: null);
 
@@ -278,7 +278,7 @@ namespace Pinder.Core.Tests
             var catalog = LoadCatalog();
             var roll = new RollResult(20, null, 20, StatType.Charm, 2, 0, 13, FailureTier.Success);
             var result = new TurnResult(
-                roll: roll, deliveredMessage: "msg", opponentMessage: "...",
+                roll: roll, deliveredMessage: "msg", dateeMessage: "...",
                 narrativeBeat: null, interestDelta: 1,
                 stateAfter: new GameStateSnapshot(
                     10, InterestState.Interested, 0, Array.Empty<string>(), 7),
@@ -301,7 +301,7 @@ namespace Pinder.Core.Tests
                 comboHistory: new List<(StatType Stat, bool Succeeded)>(),
                 activeTell: null,
                 perTurnTextDiffs: null,
-                opponentHistory: null,
+                dateeHistory: null,
                 playerSender: "P1",
                 i18nCatalog: catalog);
 
@@ -329,7 +329,7 @@ namespace Pinder.Core.Tests
                 comboHistory: new List<(StatType Stat, bool Succeeded)>(),
                 activeTell: null,
                 perTurnTextDiffs: null,
-                opponentHistory: null,
+                dateeHistory: null,
                 playerSender: "P1",
                 i18nCatalog: catalog);
             Assert.Equal(snap.Events[0].EventInterpretation, snap2.Events[0].EventInterpretation);
@@ -349,7 +349,7 @@ namespace Pinder.Core.Tests
             var catalog = LoadCatalog();
             var roll = new RollResult(20, null, 20, StatType.Charm, 2, 0, 13, FailureTier.Success);
             var result = new TurnResult(
-                roll: roll, deliveredMessage: "msg", opponentMessage: "...",
+                roll: roll, deliveredMessage: "msg", dateeMessage: "...",
                 narrativeBeat: null, interestDelta: 1,
                 stateAfter: new GameStateSnapshot(
                     10, InterestState.Interested, 0, Array.Empty<string>(), 4),
@@ -373,7 +373,7 @@ namespace Pinder.Core.Tests
                 comboHistory: new List<(StatType Stat, bool Succeeded)>(),
                 activeTell: null,
                 perTurnTextDiffs: null,
-                opponentHistory: null,
+                dateeHistory: null,
                 playerSender: "P1",
                 i18nCatalog: catalog);
 
@@ -439,7 +439,7 @@ namespace Pinder.Core.Tests
             return new TurnResult(
                 roll: roll ?? MakeSuccessRoll(),
                 deliveredMessage: "msg",
-                opponentMessage: "...",
+                dateeMessage: "...",
                 narrativeBeat: null,
                 interestDelta: 1,
                 stateAfter: new GameStateSnapshot(

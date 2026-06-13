@@ -53,7 +53,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         [Theory]
         [InlineData(nameof(AnthropicOptions.DialogueOptionsTemperature))]
         [InlineData(nameof(AnthropicOptions.DeliveryTemperature))]
-        [InlineData(nameof(AnthropicOptions.OpponentResponseTemperature))]
+        [InlineData(nameof(AnthropicOptions.DateeResponseTemperature))]
         [InlineData(nameof(AnthropicOptions.InterestChangeBeatTemperature))]
         public void AnthropicOptions_PerMethodTemperatures_DefaultToNull(string propertyName)
         {
@@ -77,7 +77,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
                 Temperature = 0.3,
                 DialogueOptionsTemperature = 1.0,
                 DeliveryTemperature = 0.5,
-                OpponentResponseTemperature = 0.8,
+                DateeResponseTemperature = 0.8,
                 InterestChangeBeatTemperature = 0.6
             };
 
@@ -87,7 +87,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             Assert.Equal(0.3, opts.Temperature);
             Assert.Equal(1.0, opts.DialogueOptionsTemperature);
             Assert.Equal(0.5, opts.DeliveryTemperature);
-            Assert.Equal(0.8, opts.OpponentResponseTemperature);
+            Assert.Equal(0.8, opts.DateeResponseTemperature);
             Assert.Equal(0.6, opts.InterestChangeBeatTemperature);
         }
 

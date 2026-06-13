@@ -117,7 +117,7 @@ namespace Pinder.Core.Tests
             var session = BuildSession(
                 dice: Dice(4, 1, 50), // ghost check=4 (no ghost), attack Nat1 → big fail
                 playerStats: MakeStats(charm: 0),
-                opponentStats: MakeStats(sa: 5),
+                dateeStats: MakeStats(sa: 5),
                 shadows: shadows,
                 startingInterest: 2);
 
@@ -191,13 +191,13 @@ namespace Pinder.Core.Tests
         private static GameSession BuildSession(
             TestDice? dice = null,
             StatBlock? playerStats = null,
-            StatBlock? opponentStats = null,
+            StatBlock? dateeStats = null,
             SessionShadowTracker? shadows = null,
             DialogueOption[]? options = null,
             int? startingInterest = null)
         {
             playerStats ??= MakeStats();
-            opponentStats ??= MakeStats();
+            dateeStats ??= MakeStats();
             ILlmAdapter llm = options != null
                 ? (ILlmAdapter)new StubLlmAdapter(options)
                 : new NullLlmAdapter();
@@ -210,7 +210,7 @@ namespace Pinder.Core.Tests
 
             return new GameSession(
                 MakeProfile("player", playerStats),
-                MakeProfile("opponent", opponentStats),
+                MakeProfile("datee", dateeStats),
                 llm,
                 wrappedDice,
                 new NullTrapRegistry(),
@@ -230,7 +230,7 @@ namespace Pinder.Core.Tests
 
             var session = new GameSession(
                 MakeProfile("player", playerStats),
-                MakeProfile("opponent", MakeStats()),
+                MakeProfile("datee", MakeStats()),
                 new NullLlmAdapter(),
                 wrappedDice,
                 new NullTrapRegistry(),

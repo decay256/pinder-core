@@ -3,7 +3,7 @@ using System;
 namespace Pinder.Core.Conversation
 {
     /// <summary>
-    /// Single entry in a stateful opponent conversation history (#788).
+    /// Single entry in a stateful datee conversation history (#788).
     /// Plain value type carried as <c>IReadOnlyList&lt;ConversationMessage&gt;</c>
     /// across the stateless <see cref="Pinder.Core.Interfaces.IStatefulLlmAdapter"/>
     /// boundary so the engine, not the adapter, owns the conversation state.

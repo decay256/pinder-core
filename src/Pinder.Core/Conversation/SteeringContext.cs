@@ -12,8 +12,8 @@ namespace Pinder.Core.Conversation
         /// <summary>The player character's system prompt (for voice consistency).</summary>
         public string PlayerPrompt { get; }
 
-        /// <summary>The opponent character's display name.</summary>
-        public string OpponentName { get; }
+        /// <summary>The datee character's display name.</summary>
+        public string DateeName { get; }
 
         /// <summary>The player character's display name.</summary>
         public string PlayerName { get; }
@@ -26,13 +26,13 @@ namespace Pinder.Core.Conversation
 
         public SteeringContext(
             string playerPrompt,
-            string opponentName,
+            string dateeName,
             string playerName,
             string deliveredMessage,
             IReadOnlyList<(string Sender, string Text)> conversationHistory)
         {
             PlayerPrompt = playerPrompt ?? "";
-            OpponentName = opponentName ?? "";
+            DateeName = dateeName ?? "";
             PlayerName = playerName ?? "";
             DeliveredMessage = deliveredMessage ?? "";
             ConversationHistory = conversationHistory ?? (IReadOnlyList<(string Sender, string Text)>)new List<(string, string)>();

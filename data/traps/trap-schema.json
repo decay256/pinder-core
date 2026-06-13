@@ -28,13 +28,13 @@
       },
       "effect": {
         "type": "string",
-        "enum": ["disadvantage", "stat_penalty", "opponent_dc_increase"],
+        "enum": ["disadvantage", "stat_penalty", "datee_dc_increase"],
         "description": "The mechanical effect type applied while the trap is active."
       },
       "effect_value": {
         "type": "integer",
         "minimum": 0,
-        "description": "Magnitude of the effect. 0 for disadvantage (boolean effect), positive for stat_penalty/opponent_dc_increase."
+        "description": "Magnitude of the effect. 0 for disadvantage (boolean effect), positive for stat_penalty/datee_dc_increase."
       },
       "duration_turns": {
         "type": "integer",

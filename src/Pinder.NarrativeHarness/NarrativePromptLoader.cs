@@ -41,7 +41,7 @@ namespace Pinder.Tools.NarrativeHarness
                 throw new FileNotFoundException(
                     $"Could not find {RelativePath} on the harness locator paths " +
                     $"(searched from baseDir '{baseDir}', honoring PINDER_DATA_PATH). " +
-                    "The editable narrative prompt is required to seed the opponent's " +
+                    "The editable narrative prompt is required to seed the datee's " +
                     "== CONVERSATION ARC == slot.");
             }
 

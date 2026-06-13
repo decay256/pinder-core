@@ -35,10 +35,10 @@ namespace Pinder.LlmAdapters.Tests
         private static DialogueContext MakeDialogueContext(
             int currentTurn = 3,
             string playerName = "Velvet",
-            string opponentName = "Sable",
+            string dateeName = "Sable",
             int currentInterest = 14,
             IReadOnlyList<(string Sender, string Text)>? conversationHistory = null,
-            string opponentLastMessage = "hey",
+            string dateeLastMessage = "hey",
             Dictionary<ShadowStatType, int>? shadowThresholds = null,
             List<CallbackOpportunity>? callbackOpportunities = null,
             int horninessLevel = 0,
@@ -49,7 +49,7 @@ namespace Pinder.LlmAdapters.Tests
         {
             return new DialogueContext(
                 playerPrompt: "velvet system prompt",
-                opponentPrompt: "sable system prompt",
+                dateePrompt: "sable system prompt",
                 conversationHistory: conversationHistory ?? new List<(string, string)>
                 {
                     ("Velvet", "hey there"),
@@ -57,7 +57,7 @@ namespace Pinder.LlmAdapters.Tests
                     ("Velvet", "how's your night going"),
                     ("Sable", "so good lol")
                 },
-                opponentLastMessage: opponentLastMessage,
+                dateeLastMessage: dateeLastMessage,
                 activeTraps: activeTraps ?? Array.Empty<string>(),
                 currentInterest: currentInterest,
                 shadowThresholds: shadowThresholds,
@@ -66,7 +66,7 @@ namespace Pinder.LlmAdapters.Tests
                 requiresRizzOption: requiresRizzOption,
                 activeTrapInstructions: activeTrapInstructions,
                 playerName: playerName,
-                opponentName: opponentName,
+                dateeName: dateeName,
                 currentTurn: currentTurn,
                 playerTextingStyle: playerTextingStyle);
         }
@@ -76,19 +76,19 @@ namespace Pinder.LlmAdapters.Tests
             FailureTier outcome = FailureTier.None,
             int beatDcBy = 5,
             string playerName = "Velvet",
-            string opponentName = "Sable",
+            string dateeName = "Sable",
             Dictionary<ShadowStatType, int>? shadowThresholds = null,
             string[]? activeTrapInstructions = null)
         {
             return new DeliveryContext(
                 playerPrompt: "velvet system prompt",
-                opponentPrompt: "sable system prompt",
+                dateePrompt: "sable system prompt",
                 conversationHistory: new List<(string, string)>
                 {
                     ("Velvet", "hey there"),
                     ("Sable", "omg hi!!")
                 },
-                opponentLastMessage: "omg hi!!",
+                dateeLastMessage: "omg hi!!",
                 chosenOption: chosenOption ?? new DialogueOption(StatType.Wit, "you remind me of a song I can't quite place"),
                 outcome: outcome,
                 beatDcBy: beatDcBy,
@@ -96,29 +96,29 @@ namespace Pinder.LlmAdapters.Tests
                 shadowThresholds: shadowThresholds,
                 activeTrapInstructions: activeTrapInstructions,
                 playerName: playerName,
-                opponentName: opponentName);
+                dateeName: dateeName);
         }
 
-        private static OpponentContext MakeOpponentContext(
+        private static DateeContext MakeDateeContext(
             int interestBefore = 12,
             int interestAfter = 14,
             string playerDeliveredMessage = "you remind me of a song I can't quite place",
             double responseDelayMinutes = 2.5,
             string playerName = "Velvet",
-            string opponentName = "Sable",
+            string dateeName = "Sable",
             Dictionary<ShadowStatType, int>? shadowThresholds = null,
             string[]? activeTrapInstructions = null,
             FailureTier deliveryTier = FailureTier.None)
         {
-            return new OpponentContext(
+            return new DateeContext(
                 playerPrompt: "velvet system prompt",
-                opponentPrompt: "sable system prompt",
+                dateePrompt: "sable system prompt",
                 conversationHistory: new List<(string, string)>
                 {
                     ("Velvet", "hey there"),
                     ("Sable", "omg hi!!")
                 },
-                opponentLastMessage: "omg hi!!",
+                dateeLastMessage: "omg hi!!",
                 activeTraps: Array.Empty<string>(),
                 currentInterest: interestAfter,
                 playerDeliveredMessage: playerDeliveredMessage,
@@ -128,7 +128,7 @@ namespace Pinder.LlmAdapters.Tests
                 shadowThresholds: shadowThresholds,
                 activeTrapInstructions: activeTrapInstructions,
                 playerName: playerName,
-                opponentName: opponentName,
+                dateeName: dateeName,
                 deliveryTier: deliveryTier);
         }
 

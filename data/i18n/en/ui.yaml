@@ -5,7 +5,7 @@ locale: en
 strings:
   # ── TopNav (#329, migrated #439 Phase 4) ──────────────────────────
   topnav.open_player_sheet: "Open player sheet"
-  topnav.open_opponent_sheet: "Open opponent sheet"
+  topnav.open_datee_sheet: "Open datee sheet"
   topnav.aria_primary: "Primary"
   topnav.play: "Play"
   topnav.sessions: "Sessions"
@@ -32,9 +32,9 @@ strings:
   character_detail.anatomy_heading: "Anatomy"
   character_detail.items_heading: "Items"
 
-  # ── LastOpponentReplyPanel (#187, #337, migrated #439) ────────────
-  last_opponent_reply.replying_to_prefix: "Replying to"
-  last_opponent_reply.opponent_fallback: "Opponent"
+  # ── LastDateeReplyPanel (#187, #337, migrated #439) ────────────
+  last_datee_reply.replying_to_prefix: "Replying to"
+  last_datee_reply.datee_fallback: "Datee"
 
   # ── ConversationLog (#345) ───────────────────────────────────────
   conversation_log.empty: "No messages were exchanged."
@@ -42,13 +42,13 @@ strings:
   # ── PlayPage (#329, migrated #440 Phase 5) ────────────────────────
   play_page.loading: "Loading characters…"
   play_page.title: "Select Characters"
-  play_page.subtitle: "Pick your character and your opponent, then start the match."
+  play_page.subtitle: "Pick your character and your datee, then start the match."
   play_page.model_label: "Model"
   play_page.fast_gameplay_label: "fast ($$$)"
   play_page.start_game_button: "Start Game"
   play_page.starting_button: "Starting…"
   play_page.player_label: "Player:"
-  play_page.opponent_label: "Opponent:"
+  play_page.datee_label: "Datee:"
 
   # ── SessionsPage (migrated #440 Phase 5) ──────────────────────────
   sessions_page.loading: "Loading sessions…"

@@ -22,7 +22,7 @@ namespace Pinder.Core.Conversation
 
         private readonly RollResolutionStage _rollResolutionStage;
         private readonly DeliveryStage _deliveryStage;
-        private readonly OpponentResponseStage _opponentResponseStage;
+        private readonly DateeResponseStage _dateeResponseStage;
         private readonly int _maxDialogueOptions;
 
         public TurnOrchestrator(
@@ -32,7 +32,7 @@ namespace Pinder.Core.Conversation
             Random? statDrawRng,
             RollResolutionStage rollResolutionStage,
             DeliveryStage deliveryStage,
-            OpponentResponseStage opponentResponseStage,
+            DateeResponseStage dateeResponseStage,
             int maxDialogueOptions)
         {
             _llm = llm ?? throw new ArgumentNullException(nameof(llm));
@@ -42,14 +42,14 @@ namespace Pinder.Core.Conversation
 
             _rollResolutionStage = rollResolutionStage ?? throw new ArgumentNullException(nameof(rollResolutionStage));
             _deliveryStage = deliveryStage ?? throw new ArgumentNullException(nameof(deliveryStage));
-            _opponentResponseStage = opponentResponseStage ?? throw new ArgumentNullException(nameof(opponentResponseStage));
+            _dateeResponseStage = dateeResponseStage ?? throw new ArgumentNullException(nameof(dateeResponseStage));
             _maxDialogueOptions = maxDialogueOptions;
         }
 
         internal async Task<TurnStart> StartTurnAsync(
             GameSessionState state,
             CharacterProfile player,
-            CharacterProfile opponent,
+            CharacterProfile datee,
             CancellationToken ct)
         {
             ct.ThrowIfCancellationRequested();
@@ -141,12 +141,12 @@ namespace Pinder.Core.Conversation
 
             var context = new DialogueContext(
                 playerPrompt: player.AssembledSystemPrompt,
-                opponentPrompt: GameSessionHelpers
-                    .BuildOpponentVisibleProfile(opponent, state.OpponentOutfitDescription)
+                dateePrompt: GameSessionHelpers
+                    .BuildDateeVisibleProfile(datee, state.DateeOutfitDescription)
                     .Render(),
                 // #333: scene entries are excluded from the LLM context view.
                 conversationHistory: TurnOrchestratorHelpers.BuildHistoryForLlmContext(state),
-                opponentLastMessage: GameSessionHelpers.GetLastOpponentMessage(state.History, opponent.DisplayName),
+                dateeLastMessage: GameSessionHelpers.GetLastDateeMessage(state.History, datee.DisplayName),
                 activeTraps: activeTrapNames,
                 currentInterest: state.Interest.Current,
                 shadowThresholds: shadowThresholds,
@@ -201,23 +201,23 @@ namespace Pinder.Core.Conversation
 
             var snapshot = TurnOrchestratorHelpers.CreateSnapshot(state, _rules);
 
-            // #903 — build opponent defense snapshot (6 entries, one per StatType).
-            var defenseEntries = new System.Collections.Generic.Dictionary<Pinder.Core.Stats.StatType, OpponentDefenseEntry>();
+            // #903 — build datee defense snapshot (6 entries, one per StatType).
+            var defenseEntries = new System.Collections.Generic.Dictionary<Pinder.Core.Stats.StatType, DateeDefenseEntry>();
             foreach (Pinder.Core.Stats.StatType attackerStat in System.Enum.GetValues(typeof(Pinder.Core.Stats.StatType)))
             {
                 var defenderStat = Pinder.Core.Stats.StatBlock.DefenceTable[attackerStat];
-                int baseModifier = opponent.Stats.GetBase(defenderStat);
-                int effectiveModifier = opponent.Stats.GetEffective(defenderStat);
+                int baseModifier = datee.Stats.GetBase(defenderStat);
+                int effectiveModifier = datee.Stats.GetEffective(defenderStat);
 
-                // Include any active OpponentDCIncrease trap bonus for this attacker stat.
+                // Include any active DateeDCIncrease trap bonus for this attacker stat.
                 var activeTrap = state.Traps.GetActive(attackerStat);
-                if (activeTrap != null && activeTrap.Definition.Effect == Pinder.Core.Traps.TrapEffect.OpponentDCIncrease)
+                if (activeTrap != null && activeTrap.Definition.Effect == Pinder.Core.Traps.TrapEffect.DateeDCIncrease)
                     effectiveModifier += activeTrap.Definition.EffectValue;
 
-                defenseEntries[attackerStat] = new OpponentDefenseEntry(defenderStat, effectiveModifier, baseModifier);
+                defenseEntries[attackerStat] = new DateeDefenseEntry(defenderStat, effectiveModifier, baseModifier);
             }
-            var defenseSnapshot = new OpponentDefenseSnapshot(
-                new System.Collections.ObjectModel.ReadOnlyDictionary<Pinder.Core.Stats.StatType, OpponentDefenseEntry>(defenseEntries));
+            var defenseSnapshot = new DateeDefenseSnapshot(
+                new System.Collections.ObjectModel.ReadOnlyDictionary<Pinder.Core.Stats.StatType, DateeDefenseEntry>(defenseEntries));
 
             // #593: expose the active weakness window's DC reduction so the frontend
             // can render the magnitude on its FoldableHintBanner.

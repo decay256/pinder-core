@@ -12,14 +12,14 @@ namespace Pinder.Core.Conversation
         /// <summary>Assembled system prompt for the player character.</summary>
         public string PlayerPrompt { get; }
 
-        /// <summary>Assembled system prompt for the opponent character.</summary>
-        public string OpponentPrompt { get; }
+        /// <summary>Assembled system prompt for the datee character.</summary>
+        public string DateePrompt { get; }
 
         /// <summary>Conversation history as (sender, text) pairs in order.</summary>
         public IReadOnlyList<(string Sender, string Text)> ConversationHistory { get; }
 
-        /// <summary>The opponent's last message, or empty if first turn.</summary>
-        public string OpponentLastMessage { get; }
+        /// <summary>The datee's last message, or empty if first turn.</summary>
+        public string DateeLastMessage { get; }
 
         /// <summary>Names of currently active traps (for taint injection).</summary>
         public IReadOnlyList<string> ActiveTraps { get; }
@@ -45,8 +45,8 @@ namespace Pinder.Core.Conversation
         /// <summary>Display name of the player character. Default empty for backward compatibility.</summary>
         public string PlayerName { get; }
 
-        /// <summary>Display name of the opponent character. Default empty for backward compatibility.</summary>
-        public string OpponentName { get; }
+        /// <summary>Display name of the datee character. Default empty for backward compatibility.</summary>
+        public string DateeName { get; }
 
         /// <summary>Current turn number (1-based). Default 0 for backward compatibility.</summary>
         public int CurrentTurn { get; }
@@ -54,7 +54,7 @@ namespace Pinder.Core.Conversation
         /// <summary>The player's texting style fragment for voice reinforcement. Empty string if not available.</summary>
         public string PlayerTextingStyle { get; }
 
-        /// <summary>The opponent's active tell from their last response, if any. Used to craft specific options.</summary>
+        /// <summary>The datee's active tell from their last response, if any. Used to craft specific options.</summary>
         public Tell? ActiveTell { get; }
 
         /// <summary>The stats available for options this turn (randomly drawn). Null means all 6 stats available.</summary>
@@ -83,9 +83,9 @@ namespace Pinder.Core.Conversation
 
         public DialogueContext(
             string playerPrompt,
-            string opponentPrompt,
+            string dateePrompt,
             IReadOnlyList<(string Sender, string Text)> conversationHistory,
-            string opponentLastMessage,
+            string dateeLastMessage,
             IReadOnlyList<string> activeTraps,
             int currentInterest,
             Dictionary<ShadowStatType, int>? shadowThresholds = null,
@@ -94,7 +94,7 @@ namespace Pinder.Core.Conversation
             bool requiresRizzOption = false,
             string[]? activeTrapInstructions = null,
             string playerName = "",
-            string opponentName = "",
+            string dateeName = "",
             int currentTurn = 0,
             string playerTextingStyle = "",
             Tell? activeTell = null,
@@ -105,9 +105,9 @@ namespace Pinder.Core.Conversation
             int maxDialogueOptions = 3)
         {
             PlayerPrompt = playerPrompt ?? throw new System.ArgumentNullException(nameof(playerPrompt));
-            OpponentPrompt = opponentPrompt ?? throw new System.ArgumentNullException(nameof(opponentPrompt));
+            DateePrompt = dateePrompt ?? throw new System.ArgumentNullException(nameof(dateePrompt));
             ConversationHistory = conversationHistory ?? throw new System.ArgumentNullException(nameof(conversationHistory));
-            OpponentLastMessage = opponentLastMessage ?? throw new System.ArgumentNullException(nameof(opponentLastMessage));
+            DateeLastMessage = dateeLastMessage ?? throw new System.ArgumentNullException(nameof(dateeLastMessage));
             ActiveTraps = activeTraps ?? throw new System.ArgumentNullException(nameof(activeTraps));
             CurrentInterest = currentInterest;
             ShadowThresholds = shadowThresholds;
@@ -116,7 +116,7 @@ namespace Pinder.Core.Conversation
             RequiresRizzOption = requiresRizzOption;
             ActiveTrapInstructions = activeTrapInstructions;
             PlayerName = playerName ?? "";
-            OpponentName = opponentName ?? "";
+            DateeName = dateeName ?? "";
             CurrentTurn = currentTurn;
             PlayerTextingStyle = playerTextingStyle ?? "";
             ActiveTell = activeTell;

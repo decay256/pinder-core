@@ -42,18 +42,18 @@ namespace Pinder.Core.Tests
             return Task.FromResult(context.ChosenOption.IntendedText);
         }
 
-        public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context, System.Threading.CancellationToken ct = default)
+        public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
         {
-            return Task.FromResult(new OpponentResponse("..."));
+            return Task.FromResult(new DateeResponse("..."));
         }
 
         public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, System.Threading.CancellationToken ct = default)
         {
             return Task.FromResult<string?>(null);
         }
-        public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
+        public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
             public System.Threading.Tasks.Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
-            public System.Threading.Tasks.Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
+            public System.Threading.Tasks.Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
     }
 
     [Trait("Category", "Core")]
@@ -76,7 +76,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task TheSetup_WitThenCharm_ComboTriggeredAndBonusApplied()
         {
-            // Opponent allStats=0 → DC = 16. Roll 15: 15 + 2 + 0 = 17 >= 16 → success (beat by 1 → SuccessScale +1)
+            // Datee allStats=0 → DC = 16. Roll 15: 15 + 2 + 0 = 17 >= 16 → success (beat by 1 → SuccessScale +1)
             // need = 16-2=14 → Hard → RiskTierBonus +3. Turn 2 + combo +1 = total 5.
             // Each turn: d20 + d100(timing)
             var dice = new FixedDice(
@@ -114,7 +114,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task TheRecovery_FailThenSASuccess_ComboTriggered()
         {
-            // Opponent allStats=0 → DC=16.
+            // Datee allStats=0 → DC=16.
             // Turn 1: Roll 5 → fail (5 + 2 = 7 vs DC 16, miss by 9 = TropeTrap -2)
             // Turn 2: Roll 15 → success (SA, 15+2=17 vs DC 16, need=14 → Hard +3)
             var dice = new FixedDice(
@@ -152,7 +152,7 @@ namespace Pinder.Core.Tests
         public async Task TheTriple_ThreeDistinctStats_RollBonusNextTurn()
         {
             // Use stats that don't form 2-stat combos: Rizz, SelfAwareness, Chaos
-            // Opponent allStats=0 → DC=16. Roll 15: 15+2=17 >= 16 → success
+            // Datee allStats=0 → DC=16. Roll 15: 15+2=17 >= 16 → success
             var dice = new FixedDice(
                 5,  // Constructor: horniness roll (1d10)
                 15, 50,      // Turn 1: Rizz (d20 + d100 timing)
@@ -262,7 +262,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task TripleBonus_ConsumedByWait()
         {
-            // Opponent allStats=0 → DC=16. Turn 2 reaches VeryIntoIt → turn 3 uses advantage (2 d20s).
+            // Datee allStats=0 → DC=16. Turn 2 reaches VeryIntoIt → turn 3 uses advantage (2 d20s).
             var dice = new FixedDice(
                 5,  // Constructor: horniness roll (1d10)
                 15, 50,      // Turn 1

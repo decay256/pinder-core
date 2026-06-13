@@ -203,14 +203,14 @@ namespace Pinder.Core.Conversation
     {
         public IGameClock? Clock { get; }
         public SessionShadowTracker? PlayerShadows { get; }
-        public SessionShadowTracker? OpponentShadows { get; }
+        public SessionShadowTracker? DateeShadows { get; }
         public int? StartingInterest { get; }
         public string? PreviousOpener { get; }  // per #162 resolution
 
         public GameSessionConfig(
             IGameClock? clock = null,
             SessionShadowTracker? playerShadows = null,
-            SessionShadowTracker? opponentShadows = null,
+            SessionShadowTracker? dateeShadows = null,
             int? startingInterest = null,
             string? previousOpener = null);
     }
@@ -225,7 +225,7 @@ namespace Pinder.Core.Conversation
 // Existing constructor remains unchanged
 public GameSession(
     CharacterProfile player,
-    CharacterProfile opponent,
+    CharacterProfile datee,
     ILlmAdapter llm,
     IDiceRoller dice,
     ITrapRegistry trapRegistry);
@@ -233,7 +233,7 @@ public GameSession(
 // NEW overload — accepts optional config
 public GameSession(
     CharacterProfile player,
-    CharacterProfile opponent,
+    CharacterProfile datee,
     ILlmAdapter llm,
     IDiceRoller dice,
     ITrapRegistry trapRegistry,
@@ -385,22 +385,22 @@ Without externalBonus and dcAdjustment: Total 13 vs DC 15 → miss by 2 → Fail
 var config = new GameSessionConfig(
     clock: null,
     playerShadows: new SessionShadowTracker(playerStats),
-    opponentShadows: null,
+    dateeShadows: null,
     startingInterest: 8,
     previousOpener: null
 );
-var session = new GameSession(player, opponent, llm, dice, trapRegistry, config);
+var session = new GameSession(player, datee, llm, dice, trapRegistry, config);
 // → InterestMeter starts at 8 instead of default 10
 // → PlayerShadows tracker stored for shadow growth mechanics
 // → No clock injected (time mechanics disabled for this session)
-// → No opponent shadows (opponent shadow growth disabled)
+// → No datee shadows (datee shadow growth disabled)
 // → No previous opener
 ```
 
 **Example: All-null config (equivalent to no config)**
 ```csharp
-var session = new GameSession(player, opponent, llm, dice, trapRegistry, new GameSessionConfig());
-// Identical behavior to: new GameSession(player, opponent, llm, dice, trapRegistry)
+var session = new GameSession(player, datee, llm, dice, trapRegistry, new GameSessionConfig());
+// Identical behavior to: new GameSession(player, datee, llm, dice, trapRegistry)
 ```
 
 ---
@@ -496,11 +496,11 @@ var session = new GameSession(player, opponent, llm, dice, trapRegistry, new Gam
 ### AC6: GameSessionConfig accepted by GameSession constructor
 
 - `GameSessionConfig` is a new `sealed class` with five read-only properties, all nullable.
-- Properties: `Clock` (`IGameClock?`), `PlayerShadows` (`SessionShadowTracker?`), `OpponentShadows` (`SessionShadowTracker?`), `StartingInterest` (`int?`), `PreviousOpener` (`string?`).
+- Properties: `Clock` (`IGameClock?`), `PlayerShadows` (`SessionShadowTracker?`), `DateeShadows` (`SessionShadowTracker?`), `StartingInterest` (`int?`), `PreviousOpener` (`string?`).
 - `GameSession` gains a new constructor overload accepting `GameSessionConfig? config` as the last parameter.
 - When `config` is null or not provided, behavior is identical to the existing constructor.
 - When `config.StartingInterest` has a value, the `InterestMeter` is constructed with `new InterestMeter(config.StartingInterest.Value)`.
-- When `config.PlayerShadows`, `config.OpponentShadows`, `config.Clock`, or `config.PreviousOpener` are provided, they are stored as private fields for use by downstream Sprint 8 features.
+- When `config.PlayerShadows`, `config.DateeShadows`, `config.Clock`, or `config.PreviousOpener` are provided, they are stored as private fields for use by downstream Sprint 8 features.
 - The existing parameterless-config constructor continues to work unchanged.
 
 ### AC7: InterestMeter(int) overload works
@@ -618,7 +618,7 @@ var session = new GameSession(player, opponent, llm, dice, trapRegistry, new Gam
 | `SessionShadowTracker.ApplyGrowth` | `amount <= 0` | `ArgumentOutOfRangeException` | Parameter name: `"amount"` |
 | `IGameClock.AdvanceTo` | `target <= Now` | `ArgumentException` | Target must be in the future |
 | `IGameClock.ConsumeEnergy` | Insufficient energy | Returns `false` (no exception, no deduction) | N/A |
-| `GameSession` constructor (existing) | `null` for player, opponent, llm, dice, or trapRegistry | `ArgumentNullException` | Respective parameter name |
+| `GameSession` constructor (existing) | `null` for player, datee, llm, dice, or trapRegistry | `ArgumentNullException` | Respective parameter name |
 | `RollEngine` methods | Null attacker, attackerTraps, trapRegistry, or dice | `NullReferenceException` at usage point | Existing behavior — no explicit validation |
 
 ---

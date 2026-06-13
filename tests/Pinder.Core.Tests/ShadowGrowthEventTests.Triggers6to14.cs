@@ -48,7 +48,7 @@ namespace Pinder.Core.Tests
             var dice = new QueueDice(new[] { 2, 50 });
             var session = MakeSessionWithDice(dice,
                 playerStats: MakeStatBlock(charm: 0),
-                opponentStats: MakeStatBlock(sa: 0),
+                dateeStats: MakeStatBlock(sa: 0),
                 shadows: shadows,
                 startingInterest: 1);
 

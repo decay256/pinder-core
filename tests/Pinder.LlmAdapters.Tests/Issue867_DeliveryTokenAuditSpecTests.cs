@@ -4,9 +4,9 @@ using Xunit;
 namespace Pinder.LlmAdapters.Tests
 {
     /// <summary>
-    /// Spec-driven tests for Issue #867: audit + cut opponent-behavior sections from BuildPlayer.
-    /// Verifies OpponentFriction and OpponentCuriosity are stripped from player-side
-    /// system prompts while preserved in opponent-side prompts.
+    /// Spec-driven tests for Issue #867: audit + cut datee-behavior sections from BuildPlayer.
+    /// Verifies DateeFriction and DateeCuriosity are stripped from player-side
+    /// system prompts while preserved in datee-side prompts.
     /// ConversationArcProgression is shared conversation structure — kept in both.
     /// PlayerProbing is player-specific — kept in BuildPlayer.
     /// </summary>
@@ -19,34 +19,34 @@ namespace Pinder.LlmAdapters.Tests
                 "Vision text here.",
                 "World description text here.",
                 "Player role description here.",
-                "Opponent role description here.",
+                "Datee role description here.",
                 "Meta contract text here.\n\n== WRITING RULES ==\n\nWriting rules text here.\n\n" +
                 "== TEXTING PSYCHOLOGY ==\n\ntexting psych content\n\n" +
                 "== REVELATION OVER STATEMENT ==\n\nrevelation content",
-                opponentFriction: "opponent friction content",
-                opponentCuriosity: "opponent curiosity content",
+                dateeFriction: "datee friction content",
+                dateeCuriosity: "datee curiosity content",
                 conversationArcProgression: "conversation arc content",
                 playerProbing: "player probing content");
         }
 
-        #region BuildPlayer: opponent sections removed
+        #region BuildPlayer: datee sections removed
 
         [Fact]
-        public void BuildPlayer_ExcludesOpponentFriction()
+        public void BuildPlayer_ExcludesDateeFriction()
         {
             var def = FullFixture();
             var result = SessionSystemPromptBuilder.BuildPlayer("player prompt", def);
-            Assert.DoesNotContain("OPPONENT RESISTANCE", result);
-            Assert.DoesNotContain("opponent friction content", result);
+            Assert.DoesNotContain("DATEE RESISTANCE", result);
+            Assert.DoesNotContain("datee friction content", result);
         }
 
         [Fact]
-        public void BuildPlayer_ExcludesOpponentCuriosity()
+        public void BuildPlayer_ExcludesDateeCuriosity()
         {
             var def = FullFixture();
             var result = SessionSystemPromptBuilder.BuildPlayer("player prompt", def);
-            Assert.DoesNotContain("OPPONENT CURIOSITY", result);
-            Assert.DoesNotContain("opponent curiosity content", result);
+            Assert.DoesNotContain("DATEE CURIOSITY", result);
+            Assert.DoesNotContain("datee curiosity content", result);
         }
 
         [Fact]
@@ -93,68 +93,68 @@ namespace Pinder.LlmAdapters.Tests
 
         #endregion
 
-        #region BuildOpponent: opponent sections preserved
+        #region BuildDatee: datee sections preserved
 
         [Fact]
-        public void BuildOpponent_IncludesOpponentFriction()
+        public void BuildDatee_IncludesDateeFriction()
         {
             var def = FullFixture();
-            var result = SessionSystemPromptBuilder.BuildOpponent("opponent prompt", def);
-            Assert.Contains("OPPONENT RESISTANCE", result);
-            Assert.Contains("opponent friction content", result);
+            var result = SessionSystemPromptBuilder.BuildDatee("datee prompt", def);
+            Assert.Contains("DATEE RESISTANCE", result);
+            Assert.Contains("datee friction content", result);
         }
 
         [Fact]
-        public void BuildOpponent_IncludesOpponentCuriosity()
+        public void BuildDatee_IncludesDateeCuriosity()
         {
             var def = FullFixture();
-            var result = SessionSystemPromptBuilder.BuildOpponent("opponent prompt", def);
-            Assert.Contains("OPPONENT CURIOSITY", result);
-            Assert.Contains("opponent curiosity content", result);
+            var result = SessionSystemPromptBuilder.BuildDatee("datee prompt", def);
+            Assert.Contains("DATEE CURIOSITY", result);
+            Assert.Contains("datee curiosity content", result);
         }
 
         [Fact]
-        public void BuildOpponent_IncludesConversationArcProgression()
+        public void BuildDatee_IncludesConversationArcProgression()
         {
             var def = FullFixture();
-            var result = SessionSystemPromptBuilder.BuildOpponent("opponent prompt", def);
+            var result = SessionSystemPromptBuilder.BuildDatee("datee prompt", def);
             Assert.Contains("CONVERSATION ARC", result);
             Assert.Contains("conversation arc content", result);
         }
 
         [Fact]
-        public void BuildOpponent_ExcludesPlayerProbing()
+        public void BuildDatee_ExcludesPlayerProbing()
         {
             var def = FullFixture();
-            var result = SessionSystemPromptBuilder.BuildOpponent("opponent prompt", def);
+            var result = SessionSystemPromptBuilder.BuildDatee("datee prompt", def);
             Assert.DoesNotContain("PLAYER PROBING", result);
             Assert.DoesNotContain("player probing content", result);
         }
 
         #endregion
 
-        #region Build (legacy shared prompt) — opponent sections also removed
+        #region Build (legacy shared prompt) — datee sections also removed
 
         // Build() is the legacy joint method that retains ALL sections per
         // LESSONS_LEARNED PROMPT-BLOAT-FROM-CROSS-ROLE-SECTIONS. Only BuildPlayer
         // is trimmed (saves ~1,000 tokens per delivery call). Build() callers are
         // test-only paths that want the full prompt for parity checks.
         [Fact]
-        public void Build_IncludesOpponentFriction()
+        public void Build_IncludesDateeFriction()
         {
             var def = FullFixture();
             var result = SessionSystemPromptBuilder.Build("p", "o", def);
-            Assert.Contains("OPPONENT RESISTANCE", result);
-            Assert.Contains("opponent friction content", result);
+            Assert.Contains("DATEE RESISTANCE", result);
+            Assert.Contains("datee friction content", result);
         }
 
         [Fact]
-        public void Build_IncludesOpponentCuriosity()
+        public void Build_IncludesDateeCuriosity()
         {
             var def = FullFixture();
             var result = SessionSystemPromptBuilder.Build("p", "o", def);
-            Assert.Contains("OPPONENT CURIOSITY", result);
-            Assert.Contains("opponent curiosity content", result);
+            Assert.Contains("DATEE CURIOSITY", result);
+            Assert.Contains("datee curiosity content", result);
         }
 
         [Fact]
@@ -184,7 +184,7 @@ namespace Pinder.LlmAdapters.Tests
         {
             var def = FullFixture();
             var result = SessionSystemPromptBuilder.BuildPlayer("player prompt", def);
-            // With the three opponent sections removed, BuildPlayer should be
+            // With the three datee sections removed, BuildPlayer should be
             // measurably smaller. This is a coarse sanity check.
             // The three removed sections + headers total ~1,400 tokens (~5,600 chars).
             // Even with a minimal GameDefinition, we'd expect at least 5K chars.

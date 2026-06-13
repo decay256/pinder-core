@@ -24,11 +24,11 @@ namespace Pinder.Core.Tests
         public async Task HighestProbAtNonZeroIndex_3Turns_TriggersFixation()
         {
             // Player: Honesty=5, everything else low
-            // Opponent defaults: Chaos=0 (defends Honesty), others higher
+            // Datee defaults: Chaos=0 (defends Honesty), others higher
             // So Honesty has the best margin (attack 5 vs DC 13+0=13)
             // Other stats have worse margins
             var playerStats = MakeStats(charm: 0, rizz: 0, honesty: 5, chaos: 0, wit: 0, sa: 0);
-            var opponentStats = MakeStats(charm: 3, rizz: 3, honesty: 3, chaos: 0, wit: 3, sa: 3);
+            var dateeStats = MakeStats(charm: 3, rizz: 3, honesty: 3, chaos: 0, wit: 3, sa: 3);
             var shadows = new SessionShadowTracker(playerStats);
 
             // Honesty at index 1 (not index 0) — it's the highest-prob option
@@ -46,7 +46,7 @@ namespace Pinder.Core.Tests
                 dice: new TestDice(diceValues.ToArray()),
                 llm: new StubLlmAdapter(opts),
                 playerStats: playerStats,
-                opponentStats: opponentStats,
+                dateeStats: dateeStats,
                 shadows: shadows);
 
             for (int i = 0; i < 3; i++)
@@ -69,10 +69,10 @@ namespace Pinder.Core.Tests
         public async Task PickingLowerProbOption_3Turns_NoHighestPctFixation()
         {
             // Player: Honesty=5, Charm=0
-            // Opponent: Chaos=0 (defends Honesty), SA=3 (defends Charm)
+            // Datee: Chaos=0 (defends Honesty), SA=3 (defends Charm)
             // Honesty has best margin, Charm has worst
             var playerStats = MakeStats(charm: 0, rizz: 0, honesty: 5, chaos: 0, wit: 0, sa: 0);
-            var opponentStats = MakeStats(charm: 3, rizz: 3, honesty: 3, chaos: 0, wit: 3, sa: 3);
+            var dateeStats = MakeStats(charm: 3, rizz: 3, honesty: 3, chaos: 0, wit: 3, sa: 3);
             var shadows = new SessionShadowTracker(playerStats);
 
             // Use different stats each turn to avoid same-stat Fixation trigger
@@ -87,7 +87,7 @@ namespace Pinder.Core.Tests
                 dice: new TestDice(diceValues.ToArray()),
                 llm: new RotatingLlmAdapter(new[] { opts1, opts2, opts3 }),
                 playerStats: playerStats,
-                opponentStats: opponentStats,
+                dateeStats: dateeStats,
                 shadows: shadows);
 
             for (int i = 0; i < 3; i++)
@@ -109,10 +109,10 @@ namespace Pinder.Core.Tests
         public async Task TiedProbabilityOptions_AllCountAsHighest()
         {
             // Player: Charm=3, Wit=3 (same effective stat)
-            // Opponent: SA=2 (defends Charm), Rizz=2 (defends Wit)
+            // Datee: SA=2 (defends Charm), Rizz=2 (defends Wit)
             // Both have identical margin → tied for highest
             var playerStats = MakeStats(charm: 3, rizz: 0, honesty: 0, chaos: 0, wit: 3, sa: 0);
-            var opponentStats = MakeStats(charm: 0, rizz: 2, honesty: 0, chaos: 0, wit: 0, sa: 2);
+            var dateeStats = MakeStats(charm: 0, rizz: 2, honesty: 0, chaos: 0, wit: 0, sa: 2);
             var shadows = new SessionShadowTracker(playerStats);
 
             // Use different tied stats each turn to avoid same-stat trigger
@@ -127,7 +127,7 @@ namespace Pinder.Core.Tests
                 dice: new TestDice(diceValues.ToArray()),
                 llm: new RotatingLlmAdapter(new[] { opts1, opts2, opts3 }),
                 playerStats: playerStats,
-                opponentStats: opponentStats,
+                dateeStats: dateeStats,
                 shadows: shadows);
 
             // Pick alternating tied options: index 0, 1, 0
@@ -174,7 +174,7 @@ namespace Pinder.Core.Tests
             TestDice dice,
             ILlmAdapter llm,
             StatBlock playerStats,
-            StatBlock opponentStats,
+            StatBlock dateeStats,
             SessionShadowTracker shadows)
         {
             var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: shadows);
@@ -182,7 +182,7 @@ namespace Pinder.Core.Tests
             // Prepend a ghost-check dice value
             return new GameSession(
                 MakeProfile("player", playerStats),
-                MakeProfile("opponent", opponentStats),
+                MakeProfile("datee", dateeStats),
                 llm,
                 dice,
                 new NullTrapRegistry(),
@@ -209,13 +209,13 @@ namespace Pinder.Core.Tests
             }
             public Task<string> DeliverMessageAsync(DeliveryContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult(context.ChosenOption.IntendedText);
-            public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context, System.Threading.CancellationToken ct = default)
-                => Task.FromResult(new OpponentResponse("..."));
+            public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
+                => Task.FromResult(new DateeResponse("..."));
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult<string?>(null);
-            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
+            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
             public System.Threading.Tasks.Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
-            public System.Threading.Tasks.Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
+            public System.Threading.Tasks.Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
         }
     }
 }

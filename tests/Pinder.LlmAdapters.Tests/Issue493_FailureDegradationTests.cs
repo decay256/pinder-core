@@ -9,19 +9,19 @@ using Xunit;
 namespace Pinder.LlmAdapters.Tests
 {
     /// <summary>
-    /// Tests for Issue #493: failure degradation legibility in opponent response prompts.
-    /// Verifies that BuildOpponentPrompt injects per-tier failure context when DeliveryTier != None,
+    /// Tests for Issue #493: failure degradation legibility in datee response prompts.
+    /// Verifies that BuildDateePrompt injects per-tier failure context when DeliveryTier != None,
     /// and omits it on success.
     /// </summary>
     public class Issue493_FailureDegradationTests
     {
-        private static OpponentContext MakeContext(FailureTier tier)
+        private static DateeContext MakeContext(FailureTier tier)
         {
-            return new OpponentContext(
+            return new DateeContext(
                 playerPrompt: "player prompt",
-                opponentPrompt: "opponent prompt",
-                conversationHistory: new List<(string, string)> { ("Player", "hey"), ("Opponent", "hi") },
-                opponentLastMessage: "hi",
+                dateePrompt: "datee prompt",
+                conversationHistory: new List<(string, string)> { ("Player", "hey"), ("Datee", "hi") },
+                dateeLastMessage: "hi",
                 activeTraps: Array.Empty<string>(),
                 currentInterest: 12,
                 playerDeliveredMessage: "so uh yeah you seem cool",
@@ -29,7 +29,7 @@ namespace Pinder.LlmAdapters.Tests
                 interestAfter: 11,
                 responseDelayMinutes: 2.0,
                 playerName: "Player",
-                opponentName: "Opponent",
+                dateeName: "Datee",
                 currentTurn: 3,
                 deliveryTier: tier);
         }
@@ -38,7 +38,7 @@ namespace Pinder.LlmAdapters.Tests
         public void Success_NoFailureContext()
         {
             var context = MakeContext(FailureTier.None);
-            var prompt = SessionDocumentBuilder.BuildOpponentPrompt(context);
+            var prompt = SessionDocumentBuilder.BuildDateePrompt(context);
 
             Assert.Contains("PLAYER'S LAST MESSAGE", prompt);
             Assert.DoesNotContain("FAILURE CONTEXT", prompt);
@@ -49,7 +49,7 @@ namespace Pinder.LlmAdapters.Tests
         public void Fumble_InjectsFailureContextWithSlightCoolness()
         {
             var context = MakeContext(FailureTier.Fumble);
-            var prompt = SessionDocumentBuilder.BuildOpponentPrompt(context);
+            var prompt = SessionDocumentBuilder.BuildDateePrompt(context);
 
             Assert.Contains("delivered after a FUMBLE", prompt);
             Assert.Contains("FAILURE CONTEXT", prompt);
@@ -61,7 +61,7 @@ namespace Pinder.LlmAdapters.Tests
         public void Misfire_InjectsGuardedReaction()
         {
             var context = MakeContext(FailureTier.Misfire);
-            var prompt = SessionDocumentBuilder.BuildOpponentPrompt(context);
+            var prompt = SessionDocumentBuilder.BuildDateePrompt(context);
 
             Assert.Contains("delivered after a MISFIRE", prompt);
             Assert.Contains("FAILURE CONTEXT", prompt);
@@ -72,7 +72,7 @@ namespace Pinder.LlmAdapters.Tests
         public void TropeTrap_InjectsVisibleDiscomfort()
         {
             var context = MakeContext(FailureTier.TropeTrap);
-            var prompt = SessionDocumentBuilder.BuildOpponentPrompt(context);
+            var prompt = SessionDocumentBuilder.BuildDateePrompt(context);
 
             Assert.Contains("delivered after a TROPE_TRAP", prompt);
             Assert.Contains("FAILURE CONTEXT", prompt);
@@ -83,7 +83,7 @@ namespace Pinder.LlmAdapters.Tests
         public void Catastrophe_InjectsConfusion()
         {
             var context = MakeContext(FailureTier.Catastrophe);
-            var prompt = SessionDocumentBuilder.BuildOpponentPrompt(context);
+            var prompt = SessionDocumentBuilder.BuildDateePrompt(context);
 
             Assert.Contains("delivered after a CATASTROPHE", prompt);
             Assert.Contains("FAILURE CONTEXT", prompt);
@@ -94,7 +94,7 @@ namespace Pinder.LlmAdapters.Tests
         public void Legendary_InjectsMaximumReaction()
         {
             var context = MakeContext(FailureTier.Legendary);
-            var prompt = SessionDocumentBuilder.BuildOpponentPrompt(context);
+            var prompt = SessionDocumentBuilder.BuildDateePrompt(context);
 
             Assert.Contains("delivered after a LEGENDARY", prompt);
             Assert.Contains("FAILURE CONTEXT", prompt);
@@ -104,12 +104,12 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void DefaultDeliveryTier_IsNone()
         {
-            // Backward compatibility: OpponentContext without deliveryTier defaults to None
-            var context = new OpponentContext(
+            // Backward compatibility: DateeContext without deliveryTier defaults to None
+            var context = new DateeContext(
                 playerPrompt: "p",
-                opponentPrompt: "o",
+                dateePrompt: "o",
                 conversationHistory: new List<(string, string)> { ("P", "hey") },
-                opponentLastMessage: "hi",
+                dateeLastMessage: "hi",
                 activeTraps: Array.Empty<string>(),
                 currentInterest: 10,
                 playerDeliveredMessage: "hello",
@@ -121,9 +121,9 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Fact]
-        public void GetOpponentReactionGuidance_ReturnsEmptyForNone()
+        public void GetDateeReactionGuidance_ReturnsEmptyForNone()
         {
-            var result = SessionDocumentBuilder.GetOpponentReactionGuidance(FailureTier.None);
+            var result = SessionDocumentBuilder.GetDateeReactionGuidance(FailureTier.None);
             Assert.Equal(string.Empty, result);
         }
 
@@ -133,9 +133,9 @@ namespace Pinder.LlmAdapters.Tests
         [InlineData(FailureTier.TropeTrap)]
         [InlineData(FailureTier.Catastrophe)]
         [InlineData(FailureTier.Legendary)]
-        public void GetOpponentReactionGuidance_ReturnsNonEmptyForAllTiers(FailureTier tier)
+        public void GetDateeReactionGuidance_ReturnsNonEmptyForAllTiers(FailureTier tier)
         {
-            var result = SessionDocumentBuilder.GetOpponentReactionGuidance(tier);
+            var result = SessionDocumentBuilder.GetDateeReactionGuidance(tier);
             Assert.False(string.IsNullOrEmpty(result));
         }
     }

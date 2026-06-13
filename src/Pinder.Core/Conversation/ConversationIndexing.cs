@@ -11,10 +11,10 @@ namespace Pinder.Core.Conversation
     /// <remarks>
     /// <para>
     /// Pre-#333 the conversation log was strict alternating
-    /// <c>(player, opponent, player, opponent, ...)</c> pairs, so consumers
+    /// <c>(player, datee, player, datee, ...)</c> pairs, so consumers
     /// could derive the turn number with <c>(i / 2) + 1</c> and the role
     /// with <c>i % 2 == 0</c>. Once the engine started seeding
-    /// <c>[scene]</c> entries (player bio, opponent bio, outfit
+    /// <c>[scene]</c> entries (player bio, datee bio, outfit
     /// description) at indices 0..N before the first turn, that pair-math
     /// shifts by N and silently misattributes turn numbers / text-diffs.
     /// </para>
@@ -58,7 +58,7 @@ namespace Pinder.Core.Conversation
         /// <remarks>
         /// Turn 1 starts at the first non-scene entry. The first non-scene
         /// entry (the player's turn-1 message) and the second non-scene
-        /// entry (the opponent's turn-1 reply) both return <c>1</c>; the
+        /// entry (the datee's turn-1 reply) both return <c>1</c>; the
         /// third and fourth return <c>2</c>; and so on.
         /// </remarks>
         public static int TurnNumberAt(
@@ -78,7 +78,7 @@ namespace Pinder.Core.Conversation
 
         /// <summary>
         /// True when the entry at <paramref name="index"/> is the player
-        /// half of a (player, opponent) turn pair. False for opponent
+        /// half of a (player, datee) turn pair. False for datee
         /// entries and for <c>[scene]</c> entries.
         /// </summary>
         public static bool IsPlayerEntryAt(

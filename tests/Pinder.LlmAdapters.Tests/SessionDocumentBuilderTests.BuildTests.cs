@@ -19,7 +19,7 @@ namespace Pinder.LlmAdapters.Tests
         {
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
                 MakeDialogueContext(activeTraps: new[] { "Cringe", "Spiral" },
-                    currentInterest: 12, playerName: "GERALD", opponentName: "VELVET"));
+                    currentInterest: 12, playerName: "GERALD", dateeName: "VELVET"));
 
             Assert.Contains("Active traps: Cringe, Spiral", result);
         }
@@ -28,7 +28,7 @@ namespace Pinder.LlmAdapters.Tests
         public void BuildDialogueOptionsPrompt_NoTraps_NoTrapsMentioned()
         {
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
-                MakeDialogueContext(playerName: "GERALD", opponentName: "VELVET"));
+                MakeDialogueContext(playerName: "GERALD", dateeName: "VELVET"));
 
             // With no active traps, the output should not mention any trap names
             Assert.DoesNotContain("Active traps:", result);
@@ -38,7 +38,7 @@ namespace Pinder.LlmAdapters.Tests
         public void BuildDialogueOptionsPrompt_ContainsTaskInstruction()
         {
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
-                MakeDialogueContext(playerName: "GERALD", opponentName: "VELVET"));
+                MakeDialogueContext(playerName: "GERALD", dateeName: "VELVET"));
 
             Assert.Contains("[ENGINE — Turn", result);
             Assert.Contains("Generate exactly 3 dialogue options for GERALD", result);
@@ -51,7 +51,7 @@ namespace Pinder.LlmAdapters.Tests
 
             var result = SessionDocumentBuilder.BuildDeliveryPrompt(
                 MakeDeliveryContext(chosenOption: option, outcome: FailureTier.None, beatDcBy: 4,
-                    playerName: "GERALD", opponentName: "VELVET"));
+                    playerName: "GERALD", dateeName: "VELVET"));
 
             Assert.Contains("[ENGINE — DELIVERY]", result);
             Assert.Contains("Beat DC by 4", result);
@@ -67,7 +67,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildDeliveryPrompt(
                 MakeDeliveryContext(chosenOption: option, outcome: FailureTier.Misfire, beatDcBy: -4,
                     activeTrapInstructions: new[] { "You are aware of how you're coming across." },
-                    playerName: "GERALD", opponentName: "VELVET"));
+                    playerName: "GERALD", dateeName: "VELVET"));
 
             Assert.Contains("FAILED", result);
             Assert.Contains("missed DC by 4", result);
@@ -84,13 +84,13 @@ namespace Pinder.LlmAdapters.Tests
 
             var result = SessionDocumentBuilder.BuildDeliveryPrompt(
                 MakeDeliveryContext(chosenOption: option, outcome: FailureTier.Fumble, beatDcBy: -1,
-                    playerName: "GERALD", opponentName: "VELVET"));
+                    playerName: "GERALD", dateeName: "VELVET"));
 
             Assert.DoesNotContain("Active trap instructions:", result);
         }
 
         [Fact]
-        public void BuildOpponentPrompt_ContainsAllSections()
+        public void BuildDateePrompt_ContainsAllSections()
         {
             var history = new List<(string, string)>
             {
@@ -98,14 +98,14 @@ namespace Pinder.LlmAdapters.Tests
                 ("VELVET", "Hi")
             };
 
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(conversationHistory: history, playerDeliveredMessage: "How are you?",
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(conversationHistory: history, playerDeliveredMessage: "How are you?",
                     interestBefore: 10, interestAfter: 12, responseDelayMinutes: 3.5,
-                    playerName: "GERALD", opponentName: "VELVET"));
+                    playerName: "GERALD", dateeName: "VELVET"));
 
             Assert.Contains("PLAYER'S LAST MESSAGE", result);
             Assert.Contains("\"How are you?\"", result);
-            Assert.Contains("[ENGINE — OPPONENT]", result);
+            Assert.Contains("[ENGINE — DATEE]", result);
             Assert.Contains("Interest moved from 10 to 12 (+2)", result);
             Assert.Contains("Interest 12/25", result);
             Assert.Contains("RESPONSE TIMING", result);
@@ -116,38 +116,38 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Fact]
-        public void BuildOpponentPrompt_NegativeDelta_FormattedCorrectly()
+        public void BuildDateePrompt_NegativeDelta_FormattedCorrectly()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(playerDeliveredMessage: "Bye",
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(playerDeliveredMessage: "Bye",
                     interestBefore: 12, interestAfter: 9, responseDelayMinutes: 5.0));
 
             Assert.Contains("Interest moved from 12 to 9 (-3)", result);
         }
 
         [Fact]
-        public void BuildOpponentPrompt_SmallDelay_ShowsLessThanOneMinute()
+        public void BuildDateePrompt_SmallDelay_ShowsLessThanOneMinute()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(responseDelayMinutes: 0.5));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(responseDelayMinutes: 0.5));
 
             Assert.Contains("less than 1 minute", result);
         }
 
         [Fact]
-        public void BuildOpponentPrompt_InterestBehaviourBlock_HighInterest()
+        public void BuildDateePrompt_InterestBehaviourBlock_HighInterest()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(interestBefore: 10, interestAfter: 18));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(interestBefore: 10, interestAfter: 18));
 
             Assert.Contains("Interested but holding back", result);
         }
 
         [Fact]
-        public void BuildOpponentPrompt_InterestBehaviourBlock_LowInterest()
+        public void BuildDateePrompt_InterestBehaviourBlock_LowInterest()
         {
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(interestBefore: 5, interestAfter: 3));
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(interestBefore: 5, interestAfter: 3));
 
             Assert.Contains("Reconsidering", result);
         }
@@ -196,7 +196,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void BuildCachedSystemBlocks_ReturnsTwoBlocksWithEphemeralCache()
         {
-            var blocks = CacheBlockBuilder.BuildCachedSystemBlocks("player prompt", "opponent prompt");
+            var blocks = CacheBlockBuilder.BuildCachedSystemBlocks("player prompt", "datee prompt");
 
             Assert.Equal(2, blocks.Length);
             Assert.Equal("text", blocks[0].Type);
@@ -205,19 +205,19 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Equal("ephemeral", blocks[0].CacheControl!.Type);
 
             Assert.Equal("text", blocks[1].Type);
-            Assert.Equal("opponent prompt", blocks[1].Text);
+            Assert.Equal("datee prompt", blocks[1].Text);
             Assert.NotNull(blocks[1].CacheControl);
             Assert.Equal("ephemeral", blocks[1].CacheControl!.Type);
         }
 
         [Fact]
-        public void BuildOpponentOnlySystemBlocks_ReturnsOneBlockWithEphemeralCache()
+        public void BuildDateeOnlySystemBlocks_ReturnsOneBlockWithEphemeralCache()
         {
-            var blocks = CacheBlockBuilder.BuildOpponentOnlySystemBlocks("opponent prompt");
+            var blocks = CacheBlockBuilder.BuildDateeOnlySystemBlocks("datee prompt");
 
             Assert.Single(blocks);
             Assert.Equal("text", blocks[0].Type);
-            Assert.Equal("opponent prompt", blocks[0].Text);
+            Assert.Equal("datee prompt", blocks[0].Text);
             Assert.NotNull(blocks[0].CacheControl);
             Assert.Equal("ephemeral", blocks[0].CacheControl!.Type);
         }
@@ -236,21 +236,21 @@ namespace Pinder.LlmAdapters.Tests
         public void BuildCachedSystemBlocks_NullPlayerPrompt_Throws()
         {
             Assert.Throws<ArgumentNullException>(() =>
-                CacheBlockBuilder.BuildCachedSystemBlocks(null!, "opponent"));
+                CacheBlockBuilder.BuildCachedSystemBlocks(null!, "datee"));
         }
 
         [Fact]
-        public void BuildCachedSystemBlocks_NullOpponentPrompt_Throws()
+        public void BuildCachedSystemBlocks_NullDateePrompt_Throws()
         {
             Assert.Throws<ArgumentNullException>(() =>
                 CacheBlockBuilder.BuildCachedSystemBlocks("player", null!));
         }
 
         [Fact]
-        public void BuildOpponentOnlySystemBlocks_NullPrompt_Throws()
+        public void BuildDateeOnlySystemBlocks_NullPrompt_Throws()
         {
             Assert.Throws<ArgumentNullException>(() =>
-                CacheBlockBuilder.BuildOpponentOnlySystemBlocks(null!));
+                CacheBlockBuilder.BuildDateeOnlySystemBlocks(null!));
         }
 
         // ── Error conditions ──
@@ -270,14 +270,14 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Fact]
-        public void BuildOpponentPrompt_NullContext_Throws()
+        public void BuildDateePrompt_NullContext_Throws()
         {
             Assert.Throws<ArgumentNullException>(() =>
-                SessionDocumentBuilder.BuildOpponentPrompt((OpponentContext)null!));
+                SessionDocumentBuilder.BuildDateePrompt((DateeContext)null!));
         }
 
         [Fact]
-        public void BuildInterestChangeBeatPrompt_NullOpponentName_Throws()
+        public void BuildInterestChangeBeatPrompt_NullDateeName_Throws()
         {
             Assert.Throws<ArgumentNullException>(() =>
                 SessionDocumentBuilder.BuildInterestChangeBeatPrompt(
@@ -292,7 +292,7 @@ namespace Pinder.LlmAdapters.Tests
             Assert.False(string.IsNullOrEmpty(PromptTemplates.DialogueOptionsInstruction));
             Assert.False(string.IsNullOrEmpty(PromptTemplates.SuccessDeliveryInstruction));
             Assert.False(string.IsNullOrEmpty(PromptTemplates.FailureDeliveryInstruction));
-            Assert.False(string.IsNullOrEmpty(PromptTemplates.OpponentResponseInstruction));
+            Assert.False(string.IsNullOrEmpty(PromptTemplates.DateeResponseInstruction));
             Assert.False(string.IsNullOrEmpty(PromptTemplates.InterestBeatInstruction));
         }
 
@@ -317,12 +317,12 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Fact]
-        public void PromptTemplates_OpponentResponseInstruction_ContainsSignalsBlock()
+        public void PromptTemplates_DateeResponseInstruction_ContainsSignalsBlock()
         {
-            Assert.Contains("[SIGNALS]", PromptTemplates.OpponentResponseInstruction);
-            Assert.Contains("[RESPONSE]", PromptTemplates.OpponentResponseInstruction);
-            Assert.Contains("TELL:", PromptTemplates.OpponentResponseInstruction);
-            Assert.Contains("WEAKNESS:", PromptTemplates.OpponentResponseInstruction);
+            Assert.Contains("[SIGNALS]", PromptTemplates.DateeResponseInstruction);
+            Assert.Contains("[RESPONSE]", PromptTemplates.DateeResponseInstruction);
+            Assert.Contains("TELL:", PromptTemplates.DateeResponseInstruction);
+            Assert.Contains("WEAKNESS:", PromptTemplates.DateeResponseInstruction);
         }
 
         // ── Pivot directive tests (#696) ──
@@ -369,32 +369,32 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("Turn 4", result);
         }
 
-        // ── Issue #951 regression: scene entries must never leak as the opponent name ──
+        // ── Issue #951 regression: scene entries must never leak as the datee name ──
 
         [Fact]
-        public void BuildOpponentPrompt_SceneEntriesInHistory_AreFiltered()
+        public void BuildDateePrompt_SceneEntriesInHistory_AreFiltered()
         {
             // Arrange: history contains turn-0 scene entries followed by real conversation.
-            // Scene entries must not appear in the built prompt, and the opponent character
+            // Scene entries must not appear in the built prompt, and the datee character
             // name ("SABLE_XO") must be present instead of the literal word "scene".
             var historyWithScenes = new List<(string, string)>
             {
                 (Senders.Scene, "Player bio text."),
-                (Senders.Scene, "Opponent bio text."),
+                (Senders.Scene, "Datee bio text."),
                 (Senders.Scene, "Both wear something quietly out of fashion."),
                 ("GERALD_42", "Hey there, I noticed your bio."),
             };
 
-            var result = SessionDocumentBuilder.BuildOpponentPrompt(
-                MakeOpponentContext(
+            var result = SessionDocumentBuilder.BuildDateePrompt(
+                MakeDateeContext(
                     conversationHistory: historyWithScenes,
                     playerDeliveredMessage: "Hey there, I noticed your bio.",
                     playerName: "GERALD_42",
-                    opponentName: "SABLE_XO"));
+                    dateeName: "SABLE_XO"));
 
-            // Scene entries must not appear as [OPPONENT|[scene]] labels.
+            // Scene entries must not appear as [DATEE|[scene]] labels.
             Assert.DoesNotContain("[scene]", result);
-            // The opponent’s real name must be present (substituted into engine block).
+            // The datee’s real name must be present (substituted into engine block).
             Assert.Contains("SABLE_XO", result);
             // Standalone word “scene” must not appear as a whole word where it could
             // be mistaken for a character name. (Use whole-word check to avoid false
@@ -409,14 +409,14 @@ namespace Pinder.LlmAdapters.Tests
             var historyWithScenes = new List<(string, string)>
             {
                 (Senders.Scene, "Player bio text."),
-                (Senders.Scene, "Opponent bio text."),
+                (Senders.Scene, "Datee bio text."),
                 (Senders.Scene, "Both wear something out of fashion."),
                 ("GERALD_42", "Hey there!"),
                 ("SABLE_XO",  "Hi!"),
             };
 
             var result = SessionDocumentBuilder.BuildInterestChangeBeatPrompt(
-                opponentName: "SABLE_XO",
+                dateeName: "SABLE_XO",
                 interestBefore: 5,
                 interestAfter: 10,
                 newState: InterestState.Interested,
@@ -426,7 +426,7 @@ namespace Pinder.LlmAdapters.Tests
             // Scene entries must not appear in the RECENT CONVERSATION block.
             Assert.DoesNotContain("[scene]", result);
             Assert.DoesNotMatch(@"(?i)\bscene\b", result);
-            // Opponent name must be substituted correctly.
+            // Datee name must be substituted correctly.
             Assert.Contains("SABLE_XO", result);
         }
     }

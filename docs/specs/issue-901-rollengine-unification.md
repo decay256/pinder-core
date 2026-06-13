@@ -18,7 +18,7 @@ Four dice-check flows in `pinder-core` each re-implemented the same primitive
 
 ```
 OptionRoll  — main attacker roll
-Steering    — opponent steering
+Steering    — datee steering
 Horniness   — session-horniness overlay check
 Shadow      — paired-shadow check
 ShadowGrowth — reserved; ShadowGrowthEvaluator uses no standalone d20

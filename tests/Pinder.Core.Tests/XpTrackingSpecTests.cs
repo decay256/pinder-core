@@ -212,22 +212,22 @@ namespace Pinder.Core.Tests
 
         private static GameSession MakeSession(
             int diceRoll,
-            int opponentStatValue,
+            int dateeStatValue,
             GameSessionConfig? config = null,
             int playerStatValue = 3)
         {
             var playerStats = MakeStatBlock(allStats: playerStatValue);
             var player = MakeProfile("player", playerStats);
 
-            var opponentStats = MakeStatBlock(allStats: opponentStatValue);
-            var opponent = MakeProfile("opponent", opponentStats);
+            var dateeStats = MakeStatBlock(allStats: dateeStatValue);
+            var datee = MakeProfile("datee", dateeStats);
 
             // Clock is required; if caller did not supply a config, provide one with a zero-modifier clock.
             config = config ?? new GameSessionConfig(clock: TestHelpers.MakeClock());
 
             return new GameSession(
                 player,
-                opponent,
+                datee,
                 new NullLlmAdapter(),
                 new ConstantDice(diceRoll),
                 new NullTrapRegistry(),
@@ -236,21 +236,21 @@ namespace Pinder.Core.Tests
 
         private static GameSession MakeSessionWithDice(
             IDiceRoller dice,
-            int opponentStatValue,
+            int dateeStatValue,
             GameSessionConfig? config = null)
         {
             var playerStats = MakeStatBlock(allStats: 3);
             var player = MakeProfile("player", playerStats);
 
-            var opponentStats = MakeStatBlock(allStats: opponentStatValue);
-            var opponent = MakeProfile("opponent", opponentStats);
+            var dateeStats = MakeStatBlock(allStats: dateeStatValue);
+            var datee = MakeProfile("datee", dateeStats);
 
             // Clock is required; if caller did not supply a config, provide one with a zero-modifier clock.
             config = config ?? new GameSessionConfig(clock: TestHelpers.MakeClock());
 
             return new GameSession(
                 player,
-                opponent,
+                datee,
                 new NullLlmAdapter(),
                 dice,
                 new NullTrapRegistry(),

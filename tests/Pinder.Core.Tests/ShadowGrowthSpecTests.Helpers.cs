@@ -49,7 +49,7 @@ namespace Pinder.Core.Tests
         private static GameSession BuildSession(
             TestDice? dice = null,
             StatBlock? playerStats = null,
-            StatBlock? opponentStats = null,
+            StatBlock? dateeStats = null,
             SessionShadowTracker? shadows = null,
             DialogueOption[]? options = null,
             string? previousOpener = null,
@@ -59,7 +59,7 @@ namespace Pinder.Core.Tests
                 dice: dice ?? Dice(15, 50),
                 llm: options != null ? new StubLlmAdapter(options) : null,
                 playerStats: playerStats,
-                opponentStats: opponentStats,
+                dateeStats: dateeStats,
                 shadows: shadows,
                 previousOpener: previousOpener,
                 startingInterest: startingInterest);
@@ -69,13 +69,13 @@ namespace Pinder.Core.Tests
             TestDice dice,
             ILlmAdapter? llm = null,
             StatBlock? playerStats = null,
-            StatBlock? opponentStats = null,
+            StatBlock? dateeStats = null,
             SessionShadowTracker? shadows = null,
             string? previousOpener = null,
             int? startingInterest = null)
         {
             playerStats ??= Stats();
-            opponentStats ??= Stats();
+            dateeStats ??= Stats();
             llm ??= new NullLlmAdapter();
 
             var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: shadows,
@@ -86,7 +86,7 @@ namespace Pinder.Core.Tests
 
             return new GameSession(
                 MakeProfile("player", playerStats),
-                MakeProfile("opponent", opponentStats),
+                MakeProfile("datee", dateeStats),
                 llm,
                 wrappedDice,
                 new NullTrapRegistry(),
@@ -112,7 +112,7 @@ namespace Pinder.Core.Tests
                 => _values.Count > 0 ? _values.Dequeue() : 10;
         }
 
-        /// <summary>LLM adapter that returns a Tell on the opponent's response for a specific stat.</summary>
+        /// <summary>LLM adapter that returns a Tell on the datee's response for a specific stat.</summary>
         private sealed class TellLlmAdapter : ILlmAdapter
         {
             private readonly StatType _tellStat;
@@ -131,14 +131,14 @@ namespace Pinder.Core.Tests
             }
             public Task<string> DeliverMessageAsync(DeliveryContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult(context.ChosenOption.IntendedText);
-            public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context, System.Threading.CancellationToken ct = default)
-                => Task.FromResult(new OpponentResponse("...",
+            public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
+                => Task.FromResult(new DateeResponse("...",
                     detectedTell: new Tell(_tellStat, $"Tell on {_tellStat}")));
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult<string?>(null);
-            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
+            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
             public System.Threading.Tasks.Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
-            public System.Threading.Tasks.Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
+            public System.Threading.Tasks.Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
         }
 
         /// <summary>LLM adapter that rotates through different option sets per turn.</summary>
@@ -156,13 +156,13 @@ namespace Pinder.Core.Tests
             }
             public Task<string> DeliverMessageAsync(DeliveryContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult(context.ChosenOption.IntendedText);
-            public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context, System.Threading.CancellationToken ct = default)
-                => Task.FromResult(new OpponentResponse("..."));
+            public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
+                => Task.FromResult(new DateeResponse("..."));
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult<string?>(null);
-            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
+            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
             public System.Threading.Tasks.Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
-            public System.Threading.Tasks.Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
+            public System.Threading.Tasks.Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
         }
     }
 }

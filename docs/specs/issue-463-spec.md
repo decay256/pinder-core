@@ -106,7 +106,7 @@ public sealed class GameSessionConfig
     // Existing properties (unchanged)...
     public IGameClock? Clock { get; }
     public SessionShadowTracker? PlayerShadows { get; }
-    public SessionShadowTracker? OpponentShadows { get; }
+    public SessionShadowTracker? DateeShadows { get; }
     public int? StartingInterest { get; }
     public string? PreviousOpener { get; }
 
@@ -117,7 +117,7 @@ public sealed class GameSessionConfig
     public GameSessionConfig(
         IGameClock? clock = null,
         SessionShadowTracker? playerShadows = null,
-        SessionShadowTracker? opponentShadows = null,
+        SessionShadowTracker? dateeShadows = null,
         int? startingInterest = null,
         string? previousOpener = null,
         IRuleResolver? rules = null);  // NEW — appended, default null

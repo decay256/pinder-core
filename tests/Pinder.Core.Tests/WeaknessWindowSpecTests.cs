@@ -59,23 +59,23 @@ namespace Pinder.Core.Tests
         }
 
         // ================================================================
-        // AC2: OpponentResponse carries optional WeaknessWindow
+        // AC2: DateeResponse carries optional WeaknessWindow
         // ================================================================
 
-        // Mutation: would catch if OpponentResponse ignores WeaknessWindow parameter
+        // Mutation: would catch if DateeResponse ignores WeaknessWindow parameter
         [Fact]
-        public void AC2_OpponentResponse_CarriesWeaknessWindow()
+        public void AC2_DateeResponse_CarriesWeaknessWindow()
         {
             var window = new WeaknessWindow(StatType.Honesty, 2);
-            var response = new OpponentResponse("test msg", weaknessWindow: window);
+            var response = new DateeResponse("test msg", weaknessWindow: window);
             Assert.Same(window, response.WeaknessWindow);
         }
 
         // Mutation: would catch if WeaknessWindow defaults to non-null
         [Fact]
-        public void AC2_OpponentResponse_WeaknessWindowDefaultsToNull()
+        public void AC2_DateeResponse_WeaknessWindowDefaultsToNull()
         {
-            var response = new OpponentResponse("test msg");
+            var response = new DateeResponse("test msg");
             Assert.Null(response.WeaknessWindow);
         }
 
@@ -107,7 +107,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void AC5_RollEngine_DcAdjustment_ReducesDC()
         {
-            // Opponent Honesty = 2 → DC = 16 + 2 = 18. With dcAdjustment=5 → DC=13.
+            // Datee Honesty = 2 → DC = 16 + 2 = 18. With dcAdjustment=5 → DC=13.
             var attacker = TestHelpers.MakeStatBlock(2); // SA mod = 2
             var defender = TestHelpers.MakeStatBlock(2); // Honesty mod = 2
             var traps = new TrapState();
@@ -414,17 +414,17 @@ namespace Pinder.Core.Tests
             public Task<string> DeliverMessageAsync(DeliveryContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult(context.ChosenOption.IntendedText);
 
-            public Task<OpponentResponse> GetOpponentResponseAsync(OpponentContext context, System.Threading.CancellationToken ct = default)
+            public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
             {
                 var window = _weaknessWindows.Count > 0 ? _weaknessWindows.Dequeue() : null;
-                return Task.FromResult(new OpponentResponse("...", weaknessWindow: window));
+                return Task.FromResult(new DateeResponse("...", weaknessWindow: window));
             }
 
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult<string?>(null);
-            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
+            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
             public System.Threading.Tasks.Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
-            public System.Threading.Tasks.Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? opponentContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
+            public System.Threading.Tasks.Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
         }
     }
 }

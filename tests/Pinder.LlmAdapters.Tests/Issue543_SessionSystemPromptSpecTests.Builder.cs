@@ -41,12 +41,12 @@ namespace Pinder.LlmAdapters.Tests
             Assert.False(string.IsNullOrWhiteSpace(GameDefinition.PinderDefaults.PlayerRoleDescription));
         }
 
-        // What: AC3 — PinderDefaults.OpponentRoleDescription describes opponent role
-        // Mutation: would catch if opponent role was empty
+        // What: AC3 — PinderDefaults.DateeRoleDescription describes datee role
+        // Mutation: would catch if datee role was empty
         [Fact]
-        public void PinderDefaults_OpponentRoleDescriptionMentionsOpponent()
+        public void PinderDefaults_DateeRoleDescriptionMentionsDatee()
         {
-            Assert.Contains("opponent", GameDefinition.PinderDefaults.OpponentRoleDescription,
+            Assert.Contains("datee", GameDefinition.PinderDefaults.DateeRoleDescription,
                 StringComparison.OrdinalIgnoreCase);
         }
 
@@ -88,7 +88,7 @@ namespace Pinder.LlmAdapters.Tests
             Assert.NotNull(gd.Vision);
             Assert.NotNull(gd.WorldDescription);
             Assert.NotNull(gd.PlayerRoleDescription);
-            Assert.NotNull(gd.OpponentRoleDescription);
+            Assert.NotNull(gd.DateeRoleDescription);
             Assert.NotNull(gd.NarrativeDoctrine);
         }
 
@@ -101,32 +101,32 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void Build_ContainsAllFiveSectionHeaders()
         {
-            var result = SessionSystemPromptBuilder.Build("player text", "opponent text");
+            var result = SessionSystemPromptBuilder.Build("player text", "datee text");
             Assert.Contains("== GAME VISION ==", result);
             Assert.Contains("== WORLD RULES ==", result);
             Assert.Contains("== PLAYER CHARACTER ==", result);
-            Assert.Contains("== OPPONENT CHARACTER ==", result);
+            Assert.Contains("== DATEE CHARACTER ==", result);
             Assert.Contains("== NARRATIVE DOCTRINE ==", result);
         }
 
-        // What: AC4 — Sections are in correct order: Vision < World < Player < Opponent < Meta
+        // What: AC4 — Sections are in correct order: Vision < World < Player < Datee < Meta
         // Mutation: would catch if section order was swapped (e.g. player before world)
         [Fact]
         public void Build_SectionsInCorrectOrder()
         {
-            var result = SessionSystemPromptBuilder.Build("player text", "opponent text");
+            var result = SessionSystemPromptBuilder.Build("player text", "datee text");
             var visionIdx = result.IndexOf("== GAME VISION ==");
             var worldIdx = result.IndexOf("== WORLD RULES ==");
             var playerIdx = result.IndexOf("== PLAYER CHARACTER ==");
-            var opponentIdx = result.IndexOf("== OPPONENT CHARACTER ==");
+            var dateeIdx = result.IndexOf("== DATEE CHARACTER ==");
             var metaIdx = result.IndexOf("== NARRATIVE DOCTRINE ==");
 
             // Variable character sections come LAST: static game/doctrine material first,
-            // then PLAYER CHARACTER and OPPONENT CHARACTER at the tail.
+            // then PLAYER CHARACTER and DATEE CHARACTER at the tail.
             Assert.True(visionIdx < worldIdx, "GAME VISION must precede WORLD RULES");
             Assert.True(worldIdx < metaIdx, "WORLD RULES must precede NARRATIVE DOCTRINE");
             Assert.True(metaIdx < playerIdx, "NARRATIVE DOCTRINE must precede PLAYER CHARACTER");
-            Assert.True(playerIdx < opponentIdx, "PLAYER CHARACTER must precede OPPONENT CHARACTER");
+            Assert.True(playerIdx < dateeIdx, "PLAYER CHARACTER must precede DATEE CHARACTER");
         }
 
         // What: AC4 — GAME VISION section sourced from gameDef.Vision
@@ -136,7 +136,7 @@ namespace Pinder.LlmAdapters.Tests
         {
             var custom = new GameDefinition(
                 "G", "UNIQUE_VISION_XYZ", "W", "P", "O", "ND");
-            var result = SessionSystemPromptBuilder.Build("player", "opponent", custom);
+            var result = SessionSystemPromptBuilder.Build("player", "datee", custom);
 
             var visionIdx = result.IndexOf("== GAME VISION ==");
             var worldIdx = result.IndexOf("== WORLD RULES ==");
@@ -151,7 +151,7 @@ namespace Pinder.LlmAdapters.Tests
         {
             var custom = new GameDefinition(
                 "G", "V", "UNIQUE_WORLD_ABC", "P", "O", "ND");
-            var result = SessionSystemPromptBuilder.Build("player", "opponent", custom);
+            var result = SessionSystemPromptBuilder.Build("player", "datee", custom);
 
             var worldIdx = result.IndexOf("== WORLD RULES ==");
             var playerIdx = result.IndexOf("== PLAYER CHARACTER ==");
@@ -168,23 +168,23 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionSystemPromptBuilder.Build(playerText, "opp");
 
             var playerIdx = result.IndexOf("== PLAYER CHARACTER ==");
-            var opponentIdx = result.IndexOf("== OPPONENT CHARACTER ==");
-            var playerSection = result.Substring(playerIdx, opponentIdx - playerIdx);
+            var dateeIdx = result.IndexOf("== DATEE CHARACTER ==");
+            var playerSection = result.Substring(playerIdx, dateeIdx - playerIdx);
             Assert.Contains(playerText, playerSection);
         }
 
-        // What: AC4 — OPPONENT CHARACTER section contains opponentPrompt verbatim
-        // Mutation: would catch if opponentPrompt was modified or placed in player section
+        // What: AC4 — DATEE CHARACTER section contains dateePrompt verbatim
+        // Mutation: would catch if dateePrompt was modified or placed in player section
         [Fact]
-        public void Build_OpponentSectionContainsOpponentPromptVerbatim()
+        public void Build_DateeSectionContainsDateePromptVerbatim()
         {
-            var opponentText = "You are Sable. Fast-talking. Uses omg and emoji. Level 5.";
-            var result = SessionSystemPromptBuilder.Build("player", opponentText);
+            var dateeText = "You are Sable. Fast-talking. Uses omg and emoji. Level 5.";
+            var result = SessionSystemPromptBuilder.Build("player", dateeText);
 
-            // OPPONENT CHARACTER is now the final section; it runs to the end of the prompt.
-            var opponentIdx = result.IndexOf("== OPPONENT CHARACTER ==");
-            var opponentSection = result.Substring(opponentIdx);
-            Assert.Contains(opponentText, opponentSection);
+            // DATEE CHARACTER is now the final section; it runs to the end of the prompt.
+            var dateeIdx = result.IndexOf("== DATEE CHARACTER ==");
+            var dateeSection = result.Substring(dateeIdx);
+            Assert.Contains(dateeText, dateeSection);
         }
 
         // What: AC4 — NARRATIVE DOCTRINE section contains the merged doctrine body
@@ -213,15 +213,15 @@ namespace Pinder.LlmAdapters.Tests
         public void Build_WithKnownInputs_ContainsAllContent()
         {
             var playerPrompt = "You are Velvet. Lowercase-with-intent. Ironic. Level 7 Veteran.";
-            var opponentPrompt = "You are Sable. Fast-talking. Uses omg and emoji. Level 5 Journeyman.";
+            var dateePrompt = "You are Sable. Fast-talking. Uses omg and emoji. Level 5 Journeyman.";
             var gameDef = GameDefinition.PinderDefaults;
 
-            var result = SessionSystemPromptBuilder.Build(playerPrompt, opponentPrompt, gameDef);
+            var result = SessionSystemPromptBuilder.Build(playerPrompt, dateePrompt, gameDef);
 
             // Player prompt appears verbatim
             Assert.Contains(playerPrompt, result);
-            // Opponent prompt appears verbatim
-            Assert.Contains(opponentPrompt, result);
+            // Datee prompt appears verbatim
+            Assert.Contains(dateePrompt, result);
             // Game vision content present
             Assert.Contains("comedy dating RPG", result);
             // World description content present
@@ -241,7 +241,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void Build_NullGameDef_UsesPinderDefaults()
         {
-            var result = SessionSystemPromptBuilder.Build("player", "opponent", null);
+            var result = SessionSystemPromptBuilder.Build("player", "datee", null);
             // Should use PinderDefaults, which contains "Pinder" and "comedy dating RPG"
             Assert.Contains("comedy dating RPG", result);
             Assert.Contains("== GAME VISION ==", result);
@@ -252,7 +252,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void Build_OmittedGameDef_UsesPinderDefaults()
         {
-            var result = SessionSystemPromptBuilder.Build("player", "opponent");
+            var result = SessionSystemPromptBuilder.Build("player", "datee");
             Assert.Contains("comedy dating RPG", result);
         }
 
@@ -262,18 +262,18 @@ namespace Pinder.LlmAdapters.Tests
         public void Build_NullPlayerPrompt_ThrowsArgumentNullException()
         {
             var ex = Assert.Throws<ArgumentNullException>(() =>
-                SessionSystemPromptBuilder.Build(null!, "opponent"));
+                SessionSystemPromptBuilder.Build(null!, "datee"));
             Assert.Equal("playerPrompt", ex.ParamName);
         }
 
-        // What: Edge case — null opponentPrompt throws ArgumentNullException
-        // Mutation: would catch if null check on opponentPrompt was removed
+        // What: Edge case — null dateePrompt throws ArgumentNullException
+        // Mutation: would catch if null check on dateePrompt was removed
         [Fact]
-        public void Build_NullOpponentPrompt_ThrowsArgumentNullException()
+        public void Build_NullDateePrompt_ThrowsArgumentNullException()
         {
             var ex = Assert.Throws<ArgumentNullException>(() =>
                 SessionSystemPromptBuilder.Build("player", null!));
-            Assert.Equal("opponentPrompt", ex.ParamName);
+            Assert.Equal("dateePrompt", ex.ParamName);
         }
 
         // What: Edge case — empty string prompts produce valid output with section headers
@@ -285,7 +285,7 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("== GAME VISION ==", result);
             Assert.Contains("== WORLD RULES ==", result);
             Assert.Contains("== PLAYER CHARACTER ==", result);
-            Assert.Contains("== OPPONENT CHARACTER ==", result);
+            Assert.Contains("== DATEE CHARACTER ==", result);
             Assert.Contains("== NARRATIVE DOCTRINE ==", result);
         }
 
@@ -295,11 +295,11 @@ namespace Pinder.LlmAdapters.Tests
         public void Build_EmptyGameDefFields_ProducesAllSections()
         {
             var emptyDef = new GameDefinition("", "", "", "", "", "");
-            var result = SessionSystemPromptBuilder.Build("player", "opponent", emptyDef);
+            var result = SessionSystemPromptBuilder.Build("player", "datee", emptyDef);
             Assert.Contains("== GAME VISION ==", result);
             Assert.Contains("== NARRATIVE DOCTRINE ==", result);
             Assert.Contains("player", result);
-            Assert.Contains("opponent", result);
+            Assert.Contains("datee", result);
         }
 
         #endregion
@@ -312,10 +312,10 @@ namespace Pinder.LlmAdapters.Tests
         public void Build_LargePrompts_NotTruncated()
         {
             var largePlayer = new string('A', 10000);
-            var largeOpponent = new string('B', 10000);
-            var result = SessionSystemPromptBuilder.Build(largePlayer, largeOpponent);
+            var largeDatee = new string('B', 10000);
+            var result = SessionSystemPromptBuilder.Build(largePlayer, largeDatee);
             Assert.Contains(largePlayer, result);
-            Assert.Contains(largeOpponent, result);
+            Assert.Contains(largeDatee, result);
         }
 
         #endregion
@@ -332,7 +332,7 @@ name: Test
 vision: v
 world_description: w
 player_role_description: p
-opponent_role_description: o
+datee_role_description: o
 global_dc_bias: 0
 horniness_time_modifiers:
   morning: 3
@@ -356,31 +356,31 @@ horniness_time_modifiers:
 
         #endregion
 
-        #region Cross-cutting: Build does not mix player/opponent sections
+        #region Cross-cutting: Build does not mix player/datee sections
 
-        // What: Player prompt must not appear in opponent section and vice versa
-        // Mutation: would catch if playerPrompt and opponentPrompt params were swapped
+        // What: Player prompt must not appear in datee section and vice versa
+        // Mutation: would catch if playerPrompt and dateePrompt params were swapped
         [Fact]
-        public void Build_PlayerAndOpponentPromptsInCorrectSections()
+        public void Build_PlayerAndDateePromptsInCorrectSections()
         {
             var playerPrompt = "PLAYER_UNIQUE_MARKER_111";
-            var opponentPrompt = "OPPONENT_UNIQUE_MARKER_222";
-            var result = SessionSystemPromptBuilder.Build(playerPrompt, opponentPrompt);
+            var dateePrompt = "DATEE_UNIQUE_MARKER_222";
+            var result = SessionSystemPromptBuilder.Build(playerPrompt, dateePrompt);
 
             var playerIdx = result.IndexOf("== PLAYER CHARACTER ==");
-            var opponentIdx = result.IndexOf("== OPPONENT CHARACTER ==");
+            var dateeIdx = result.IndexOf("== DATEE CHARACTER ==");
 
-            // PLAYER CHARACTER and OPPONENT CHARACTER are the final two sections.
-            var playerSection = result.Substring(playerIdx, opponentIdx - playerIdx);
-            var opponentSection = result.Substring(opponentIdx);
+            // PLAYER CHARACTER and DATEE CHARACTER are the final two sections.
+            var playerSection = result.Substring(playerIdx, dateeIdx - playerIdx);
+            var dateeSection = result.Substring(dateeIdx);
 
-            // Player marker in player section, not in opponent section
+            // Player marker in player section, not in datee section
             Assert.Contains("PLAYER_UNIQUE_MARKER_111", playerSection);
-            Assert.DoesNotContain("PLAYER_UNIQUE_MARKER_111", opponentSection);
+            Assert.DoesNotContain("PLAYER_UNIQUE_MARKER_111", dateeSection);
 
-            // Opponent marker in opponent section, not in player section
-            Assert.Contains("OPPONENT_UNIQUE_MARKER_222", opponentSection);
-            Assert.DoesNotContain("OPPONENT_UNIQUE_MARKER_222", playerSection);
+            // Datee marker in datee section, not in player section
+            Assert.Contains("DATEE_UNIQUE_MARKER_222", dateeSection);
+            Assert.DoesNotContain("DATEE_UNIQUE_MARKER_222", playerSection);
         }
 
         #endregion
@@ -397,7 +397,7 @@ horniness_time_modifiers:
                 "CUSTOM_VISION_TEXT",
                 "CUSTOM_WORLD_TEXT",
                 "CUSTOM_PLAYER_ROLE",
-                "CUSTOM_OPPONENT_ROLE",
+                "CUSTOM_DATEE_ROLE",
                 "CUSTOM_META_CONTRACT CUSTOM_WRITING_RULES");
 
             var result = SessionSystemPromptBuilder.Build("p", "o", custom);

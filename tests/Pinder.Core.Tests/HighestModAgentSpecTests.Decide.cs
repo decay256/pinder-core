@@ -17,7 +17,7 @@ namespace Pinder.Core.Tests
         {
             var agent = new HighestModAgent();
             var turn = MakeTurn(Array.Empty<DialogueOption>());
-            var ctx = MakeContext(MakePlayerStats(), MakeOpponentStats());
+            var ctx = MakeContext(MakePlayerStats(), MakeDateeStats());
 
             await Assert.ThrowsAsync<InvalidOperationException>(
                 () => agent.DecideAsync(turn, ctx));
@@ -27,7 +27,7 @@ namespace Pinder.Core.Tests
         public async Task DecideAsync_NullTurn_ThrowsArgumentNullException()
         {
             var agent = new HighestModAgent();
-            var ctx = MakeContext(MakePlayerStats(), MakeOpponentStats());
+            var ctx = MakeContext(MakePlayerStats(), MakeDateeStats());
 
             await Assert.ThrowsAsync<ArgumentNullException>(
                 () => agent.DecideAsync(null!, ctx));
@@ -51,10 +51,10 @@ namespace Pinder.Core.Tests
         {
             var agent = new HighestModAgent();
             var player = MakePlayerStats(); // Charm +4
-            var opponent = MakeOpponentStats(); // SA defence DC = 16 + 2 = 18
+            var datee = MakeDateeStats(); // SA defence DC = 16 + 2 = 18
             var options = new[] { new DialogueOption(StatType.Charm, "charm line") };
             var turn = MakeTurn(options);
-            var ctx = MakeContext(player, opponent);
+            var ctx = MakeContext(player, datee);
 
             var decision = await agent.DecideAsync(turn, ctx);
 
@@ -69,7 +69,7 @@ namespace Pinder.Core.Tests
             var agent = new HighestModAgent();
             var options = new[] { new DialogueOption(StatType.Charm, "hi") };
             var turn = MakeTurn(options);
-            var ctx = MakeContext(MakePlayerStats(), MakeOpponentStats());
+            var ctx = MakeContext(MakePlayerStats(), MakeDateeStats());
 
             var decision = await agent.DecideAsync(turn, ctx);
 
@@ -87,7 +87,7 @@ namespace Pinder.Core.Tests
                 new DialogueOption(StatType.Honesty, "c"),
             };
             var turn = MakeTurn(options);
-            var ctx = MakeContext(MakePlayerStats(), MakeOpponentStats());
+            var ctx = MakeContext(MakePlayerStats(), MakeDateeStats());
 
             var decision = await agent.DecideAsync(turn, ctx);
 
@@ -105,7 +105,7 @@ namespace Pinder.Core.Tests
                 new DialogueOption(StatType.Rizz, "b"),
             };
             var turn = MakeTurn(options);
-            var ctx = MakeContext(MakePlayerStats(), MakeOpponentStats());
+            var ctx = MakeContext(MakePlayerStats(), MakeDateeStats());
 
             var decision = await agent.DecideAsync(turn, ctx);
 
@@ -126,7 +126,7 @@ namespace Pinder.Core.Tests
                 new DialogueOption(StatType.Honesty, "c", hasTellBonus: true),
             };
             var turn = MakeTurn(options);
-            var ctx = MakeContext(MakePlayerStats(), MakeOpponentStats());
+            var ctx = MakeContext(MakePlayerStats(), MakeDateeStats());
 
             var decision = await agent.DecideAsync(turn, ctx);
 
@@ -152,7 +152,7 @@ namespace Pinder.Core.Tests
                     { ShadowStatType.Denial, 0 }, { ShadowStatType.Fixation, 0 },
                     { ShadowStatType.Dread, 0 }, { ShadowStatType.Overthinking, 0 }
                 });
-            var opponent = new StatBlock(
+            var datee = new StatBlock(
                 new Dictionary<StatType, int>
                 {
                     { StatType.Charm, 2 }, { StatType.Rizz, 3 }, { StatType.Honesty, 1 },
@@ -173,7 +173,7 @@ namespace Pinder.Core.Tests
                 new DialogueOption(StatType.Chaos, "chaos line"),
             };
             var turn = MakeTurn(options, interest: 12, state: InterestState.Interested, momentum: 2, turn: 5);
-            var ctx = MakeContext(player, opponent, interest: 12, state: InterestState.Interested, momentum: 2);
+            var ctx = MakeContext(player, datee, interest: 12, state: InterestState.Interested, momentum: 2);
 
             var decision = await agent.DecideAsync(turn, ctx);
 
@@ -197,7 +197,7 @@ namespace Pinder.Core.Tests
                 new DialogueOption(StatType.Rizz, "rizz d"),
             };
             var turn = MakeTurn(options);
-            var ctx = MakeContext(MakePlayerStats(), MakeOpponentStats());
+            var ctx = MakeContext(MakePlayerStats(), MakeDateeStats());
 
             var decision = await agent.DecideAsync(turn, ctx);
 

@@ -1,14 +1,14 @@
-# Spec: Issue #50 — Tells (§15 Opponent Tell Detection and Hidden Roll Bonus)
+# Spec: Issue #50 — Tells (§15 Datee Tell Detection and Hidden Roll Bonus)
 
 ## Overview
 
-Tells are a hidden bonus mechanic from rules v3.4 §15. The opponent's messages contain subtle behavioural cues ("tells") that hint at which stat will work best on the next turn. When the LLM detects a tell in the opponent's response, it returns a `Tell` object indicating the stat. If the player then picks a dialogue option using that stat, they receive a hidden +2 bonus to their roll via the `externalBonus` parameter on `RollEngine.Resolve`. The bonus is invisible in the displayed success percentage but is revealed post-roll via `TurnResult.TellReadBonus` and `TurnResult.TellReadMessage`.
+Tells are a hidden bonus mechanic from rules v3.4 §15. The datee's messages contain subtle behavioural cues ("tells") that hint at which stat will work best on the next turn. When the LLM detects a tell in the datee's response, it returns a `Tell` object indicating the stat. If the player then picks a dialogue option using that stat, they receive a hidden +2 bonus to their roll via the `externalBonus` parameter on `RollEngine.Resolve`. The bonus is invisible in the displayed success percentage but is revealed post-roll via `TurnResult.TellReadBonus` and `TurnResult.TellReadMessage`.
 
 ---
 
 ## Tell Table (from §15)
 
-| Opponent Behaviour | Tell Stat (+2) |
+| Datee Behaviour | Tell Stat (+2) |
 |---|---|
 | Compliments you | Honesty |
 | Asks a personal question | Honesty or SelfAwareness |
@@ -21,7 +21,7 @@ Tells are a hidden bonus mechanic from rules v3.4 §15. The opponent's messages 
 | Changes subject | Chaos |
 | Goes silent a while | SelfAwareness |
 
-Note: Some behaviours map to two possible stats. The LLM chooses one per response. The engine only receives a single `Tell` per opponent response.
+Note: Some behaviours map to two possible stats. The LLM chooses one per response. The engine only receives a single `Tell` per datee response.
 
 ---
 
@@ -41,15 +41,15 @@ public sealed class Tell
 }
 ```
 
-### `OpponentResponse` (`src/Pinder.Core/Conversation/OpponentResponse.cs`)
+### `DateeResponse` (`src/Pinder.Core/Conversation/DateeResponse.cs`)
 
 ```csharp
-public sealed class OpponentResponse
+public sealed class DateeResponse
 {
     public string MessageText { get; }
     public Tell? DetectedTell { get; }
     public WeaknessWindow? WeaknessWindow { get; }
-    public OpponentResponse(string messageText, Tell? detectedTell = null, WeaknessWindow? weaknessWindow = null);
+    public DateeResponse(string messageText, Tell? detectedTell = null, WeaknessWindow? weaknessWindow = null);
     // Throws ArgumentNullException if messageText is null
 }
 ```
@@ -79,9 +79,9 @@ public string? TellReadMessage { get; }  // null or "📖 You read the moment. +
 
 These are constructor parameters with defaults of `0` and `null`.
 
-### `ILlmAdapter.GetOpponentResponseAsync`
+### `ILlmAdapter.GetDateeResponseAsync`
 
-Already returns `Task<OpponentResponse>` (not `Task<string>`).
+Already returns `Task<DateeResponse>` (not `Task<string>`).
 
 ### `RollResult` (`src/Pinder.Core/Rolls/RollResult.cs`)
 
@@ -124,7 +124,7 @@ And `RollResult` `IsSuccess` changes to: `IsNatTwenty || (!IsNatOne && FinalTota
 private Tell? _activeTell;  // null initially
 ```
 
-Stores the tell from the most recent opponent response. Consumed on the next `ResolveTurnAsync` call.
+Stores the tell from the most recent datee response. Consumed on the next `ResolveTurnAsync` call.
 
 ---
 
@@ -163,7 +163,7 @@ After the roll (regardless of match): set `_activeTell = null`. A tell is always
 var rollResult = RollEngine.Resolve(
     stat: chosenOption.Stat,
     attacker: _player.Stats,
-    defender: _opponent.Stats,
+    defender: _datee.Stats,
     attackerTraps: _traps,
     level: _player.Level,
     trapRegistry: _trapRegistry,
@@ -177,7 +177,7 @@ int tellBonus = (_activeTell != null && chosenOption.Stat == _activeTell.Stat) ?
 var rollResult = RollEngine.Resolve(
     stat: chosenOption.Stat,
     attacker: _player.Stats,
-    defender: _opponent.Stats,
+    defender: _datee.Stats,
     attackerTraps: _traps,
     level: _player.Level,
     trapRegistry: _trapRegistry,
@@ -212,17 +212,17 @@ This flag is purely informational — it lets the UI show a hint (e.g. 📖 icon
 
 ---
 
-### 4. Extract and Store Tell from Opponent Response
+### 4. Extract and Store Tell from Datee Response
 
-In `ResolveTurnAsync`, after calling `_llm.GetOpponentResponseAsync(opponentContext)`:
+In `ResolveTurnAsync`, after calling `_llm.GetDateeResponseAsync(dateeContext)`:
 
 ```csharp
-var opponentResponse = await _llm.GetOpponentResponseAsync(opponentContext).ConfigureAwait(false);
-string opponentMessage = opponentResponse.MessageText;
-_activeTell = opponentResponse.DetectedTell;  // NEW — store tell for next turn
+var dateeResponse = await _llm.GetDateeResponseAsync(dateeContext).ConfigureAwait(false);
+string dateeMessage = dateeResponse.MessageText;
+_activeTell = dateeResponse.DetectedTell;  // NEW — store tell for next turn
 ```
 
-This line must be added after the existing `opponentMessage` extraction (currently at line ~254 of GameSession.cs).
+This line must be added after the existing `dateeMessage` extraction (currently at line ~254 of GameSession.cs).
 
 ---
 
@@ -234,7 +234,7 @@ The existing `TurnResult` construction in `ResolveTurnAsync` must pass the tell 
 return new TurnResult(
     roll: rollResult,
     deliveredMessage: deliveredMessage,
-    opponentMessage: opponentMessage,
+    dateeMessage: dateeMessage,
     narrativeBeat: narrativeBeat,
     interestDelta: interestDelta,
     stateAfter: stateSnapshot,
@@ -316,11 +316,11 @@ TurnResult.TellReadBonus = 2
 TurnResult.TellReadMessage = "📖 You read the moment. +2 bonus."
 ```
 
-### Example 5: Tell Stored from Opponent Response
+### Example 5: Tell Stored from Datee Response
 ```
-ResolveTurnAsync completes, opponent responds:
-  OpponentResponse("Ha, that's actually funny", new Tell(StatType.Wit, "Makes a joke"), null)
-  → opponentMessage = "Ha, that's actually funny"
+ResolveTurnAsync completes, datee responds:
+  DateeResponse("Ha, that's actually funny", new Tell(StatType.Wit, "Makes a joke"), null)
+  → dateeMessage = "Ha, that's actually funny"
   → _activeTell = Tell(StatType.Wit, "Makes a joke")
   → Available for next turn's ResolveTurnAsync
 ```
@@ -329,11 +329,11 @@ ResolveTurnAsync completes, opponent responds:
 
 ## Acceptance Criteria
 
-### AC1: `GameSession` stores active tell from previous turn's `OpponentResponse.DetectedTell`
+### AC1: `GameSession` stores active tell from previous turn's `DateeResponse.DetectedTell`
 
-- After `_llm.GetOpponentResponseAsync()` in `ResolveTurnAsync`, `_activeTell` is set to `opponentResponse.DetectedTell`.
+- After `_llm.GetDateeResponseAsync()` in `ResolveTurnAsync`, `_activeTell` is set to `dateeResponse.DetectedTell`.
 - `_activeTell` persists across the `StartTurnAsync`/`ResolveTurnAsync` boundary.
-- On the first turn (before any opponent response), `_activeTell` is null.
+- On the first turn (before any datee response), `_activeTell` is null.
 
 ### AC2: On matching stat — +2 added via `externalBonus` on `RollEngine.Resolve`
 
@@ -385,13 +385,13 @@ Required test cases (see Edge Cases section for additional detail):
 | 2 | Tell active but player picks different stat | `tellBonus = 0`, tell consumed (set to null), `TellReadBonus = 0` |
 | 3 | Tell active and player picks matching stat | `tellBonus = 2`, tell consumed, `TellReadBonus = 2`, message set |
 | 4 | Tell persists across StartTurnAsync/ResolveTurnAsync boundary | `_activeTell` is not cleared by `StartTurnAsync` — only by `ResolveTurnAsync` |
-| 5 | Multiple tells in sequence (opponent sends tell every turn) | Each new `OpponentResponse.DetectedTell` overwrites `_activeTell`. Only the most recent tell is active. |
-| 6 | First turn (no prior opponent response) | `_activeTell` is null; no tell bonus possible. |
+| 5 | Multiple tells in sequence (datee sends tell every turn) | Each new `DateeResponse.DetectedTell` overwrites `_activeTell`. Only the most recent tell is active. |
+| 6 | First turn (no prior datee response) | `_activeTell` is null; no tell bonus possible. |
 | 7 | Nat 20 with tell bonus | `externalBonus: 2` is passed. Nat 20 is auto-success; the +2 increases `FinalTotal`, potentially yielding a higher `SuccessScale` tier. `TellReadBonus = 2`. |
 | 8 | Nat 1 with tell bonus | Nat 1 is auto-failure (Legendary tier). The `externalBonus: 2` is passed but Nat 1 auto-fail takes precedence. `TellReadBonus = 2` because the player correctly read the tell (picked the matching stat). The bonus was applied to the roll; the outcome was just too bad. |
 | 9 | Tell stat matches but roll still fails after +2 | `TellReadBonus = 2`, `TellReadMessage` set. The bonus was applied but wasn't enough. The tell was "read" correctly — the player picked the right stat. |
 | 10 | `DialogueOption.HasTellBonus` is true but player picks a different option | The non-selected option's `HasTellBonus` flag is irrelevant. Only the chosen option's stat is compared to `_activeTell`. |
-| 11 | Opponent response has no tell (`DetectedTell == null`) | `_activeTell` set to null. No bonus available next turn. |
+| 11 | Datee response has no tell (`DetectedTell == null`) | `_activeTell` set to null. No bonus available next turn. |
 | 12 | Game ends during the turn (DateSecured or Unmatched) | Tell is still consumed. `TellReadBonus` is still recorded on `TurnResult`. |
 
 ---
@@ -414,10 +414,10 @@ None of these are affected by tell logic.
 | Dependency | Type | Status | Notes |
 |-----------|------|--------|-------|
 | **#27 — GameSession** | Hard | ✅ Merged | Base GameSession exists |
-| **#63 — Tell/OpponentResponse types** | Hard | ✅ Merged | `Tell`, `OpponentResponse`, `DialogueOption.HasTellBonus`, `TurnResult.TellReadBonus/TellReadMessage` all exist |
+| **#63 — Tell/DateeResponse types** | Hard | ✅ Merged | `Tell`, `DateeResponse`, `DialogueOption.HasTellBonus`, `TurnResult.TellReadBonus/TellReadMessage` all exist |
 | **#130 — Wave 0: `RollEngine.Resolve(externalBonus)`** | Hard | ⚠️ Check status | `externalBonus` parameter on `RollEngine.Resolve` must exist. Currently `RollEngine.Resolve` does NOT have this parameter. `RollResult.ExternalBonus` and `FinalTotal` exist but are set post-hoc. |
-| `ILlmAdapter` | Interface | ✅ No change needed | Already returns `Task<OpponentResponse>` |
-| `NullLlmAdapter` | Test adapter | ✅ No change needed | Already returns `OpponentResponse` |
+| `ILlmAdapter` | Interface | ✅ No change needed | Already returns `Task<DateeResponse>` |
+| `NullLlmAdapter` | Test adapter | ✅ No change needed | Already returns `DateeResponse` |
 
 ### Critical Dependency: Wave 0 `externalBonus` on `RollEngine.Resolve`
 
@@ -434,7 +434,7 @@ The `RollResult` already has `ExternalBonus`, `FinalTotal`, and `AddExternalBonu
 
 | File | Change |
 |------|--------|
-| `src/Pinder.Core/Conversation/GameSession.cs` | Add `_activeTell` field; compute tell bonus in `ResolveTurnAsync`; flag options in `StartTurnAsync`; store tell from `OpponentResponse` |
+| `src/Pinder.Core/Conversation/GameSession.cs` | Add `_activeTell` field; compute tell bonus in `ResolveTurnAsync`; flag options in `StartTurnAsync`; store tell from `DateeResponse` |
 | `src/Pinder.Core/Rolls/RollEngine.cs` | Add `int externalBonus = 0` parameter to `Resolve` (if Wave 0 not yet merged) |
 | `src/Pinder.Core/Rolls/RollResult.cs` | Change `IsSuccess` to use `FinalTotal` (if Wave 0 not yet merged) |
 
@@ -443,11 +443,11 @@ The `RollResult` already has `ExternalBonus`, `FinalTotal`, and `AddExternalBonu
 | File | Reason |
 |------|--------|
 | `src/Pinder.Core/Conversation/Tell.cs` | Already exists with correct API |
-| `src/Pinder.Core/Conversation/OpponentResponse.cs` | Already exists with `DetectedTell` |
+| `src/Pinder.Core/Conversation/DateeResponse.cs` | Already exists with `DetectedTell` |
 | `src/Pinder.Core/Conversation/DialogueOption.cs` | Already has `HasTellBonus` |
 | `src/Pinder.Core/Conversation/TurnResult.cs` | Already has `TellReadBonus`, `TellReadMessage` |
-| `src/Pinder.Core/Interfaces/ILlmAdapter.cs` | Already returns `Task<OpponentResponse>` |
-| `src/Pinder.Core/Conversation/NullLlmAdapter.cs` | Already returns `OpponentResponse` |
+| `src/Pinder.Core/Interfaces/ILlmAdapter.cs` | Already returns `Task<DateeResponse>` |
+| `src/Pinder.Core/Conversation/NullLlmAdapter.cs` | Already returns `DateeResponse` |
 
 ---
 

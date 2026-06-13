@@ -10,7 +10,7 @@ namespace Pinder.Core.Rolls
     /// <summary>
     /// Core roll resolution engine. Stateless — all state is passed in.
     /// Formula: d20 + statMod + levelBonus >= DC
-    /// DC    = 16 + opponent defending stat's effective modifier
+    /// DC    = 16 + datee defending stat's effective modifier
     /// </summary>
     public static class RollEngine
     {
@@ -117,8 +117,8 @@ namespace Pinder.Core.Rolls
             // --- Compute DC ---
             int dc = defender.GetDefenceDC(stat) - dcAdjustment;
 
-            // Apply OpponentDCIncrease trap effect
-            if (activeTrap != null && activeTrap.Definition.Effect == TrapEffect.OpponentDCIncrease)
+            // Apply DateeDCIncrease trap effect
+            if (activeTrap != null && activeTrap.Definition.Effect == TrapEffect.DateeDCIncrease)
                 dc += activeTrap.Definition.EffectValue;
 
             // --- Determine failure tier ---
@@ -181,9 +181,9 @@ namespace Pinder.Core.Rolls
 
             int levelBonus = LevelTable.GetBonus(level);
 
-            // Apply OpponentDCIncrease trap effect
+            // Apply DateeDCIncrease trap effect
             int effectiveDc = fixedDc;
-            if (activeTrap != null && activeTrap.Definition.Effect == TrapEffect.OpponentDCIncrease)
+            if (activeTrap != null && activeTrap.Definition.Effect == TrapEffect.DateeDCIncrease)
                 effectiveDc += activeTrap.Definition.EffectValue;
 
             // --- Determine failure tier ---

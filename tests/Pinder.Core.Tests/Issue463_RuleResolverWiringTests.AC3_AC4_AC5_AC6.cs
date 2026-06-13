@@ -25,7 +25,7 @@ namespace Pinder.Core.Tests
 
             var dice = new FixedDice(1, 4);
             var session = new GameSession(
-                MakeProfile("Player"), MakeProfile("Opponent"),
+                MakeProfile("Player"), MakeProfile("Datee"),
                 new NullLlmAdapter(), dice, new NullTrapRegistry(), config);
 
             await session.StartTurnAsync();
@@ -45,7 +45,7 @@ namespace Pinder.Core.Tests
             // Dice: horniness=1, ghost roll=1 (triggers ghost at 25% chance when Bored)
             var dice = new FixedDice(1, 1);
             var session = new GameSession(
-                MakeProfile("Player"), MakeProfile("Opponent"),
+                MakeProfile("Player"), MakeProfile("Datee"),
                 new NullLlmAdapter(), dice, new NullTrapRegistry(), config);
 
             // If resolver's Bored state is used, ghost should trigger (dice roll=1 on d4)
@@ -72,7 +72,7 @@ namespace Pinder.Core.Tests
 
             var dice = new FixedDice(1);
             var session = new GameSession(
-                MakeProfile("Player"), MakeProfile("Opponent"),
+                MakeProfile("Player"), MakeProfile("Datee"),
                 new NullLlmAdapter(), dice, new NullTrapRegistry(), config);
 
             Assert.True(resolver.ShadowThresholdCalls.Count > 0,
@@ -95,7 +95,7 @@ namespace Pinder.Core.Tests
 
             var dice = new FixedDice(1, 4);
             var session = new GameSession(
-                MakeProfile("Player"), MakeProfile("Opponent"),
+                MakeProfile("Player"), MakeProfile("Datee"),
                 new NullLlmAdapter(), dice, new NullTrapRegistry(), config);
 
             var start = await session.StartTurnAsync();
@@ -125,7 +125,7 @@ namespace Pinder.Core.Tests
             );
 
             var session = new GameSession(
-                MakeProfile("Player", 5), MakeProfile("Opponent"),
+                MakeProfile("Player", 5), MakeProfile("Datee"),
                 new NullLlmAdapter(), dice, new NullTrapRegistry(), config);
 
             // Turn 1 — builds streak
@@ -148,14 +148,14 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task ResolveTurn_OnNonNat20Success_CallsResolverForXpMultiplier()
         {
-            // Use high stats (5) so a roll of 15 succeeds against the opponent's DC
+            // Use high stats (5) so a roll of 15 succeeds against the datee's DC
             var resolver = new StubRuleResolver { SuccessDeltaReturn = 2, XpMultiplierReturn = 5.0 };
             var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), rules: resolver, startingInterest: 10);
 
             // Roll 15 (not nat20) — with +5 stat bonus = 20 total, should succeed against most DCs
             var dice = new FixedDice(1, 15, 50, 50, 50, 50, 50, 50, 50, 50, 50);
             var session = new GameSession(
-                MakeProfile("Player", 5), MakeProfile("Opponent"),
+                MakeProfile("Player", 5), MakeProfile("Datee"),
                 new NullLlmAdapter(), dice, new NullTrapRegistry(), config);
 
             await session.StartTurnAsync();
@@ -177,7 +177,7 @@ namespace Pinder.Core.Tests
             // Roll 15 (not nat20) with high stat bonus so it succeeds
             var dice = new FixedDice(1, 15, 50, 50, 50, 50, 50, 50, 50, 50, 50);
             var session = new GameSession(
-                MakeProfile("Player", 5), MakeProfile("Opponent"),
+                MakeProfile("Player", 5), MakeProfile("Datee"),
                 new NullLlmAdapter(), dice, new NullTrapRegistry(), config);
 
             await session.StartTurnAsync();

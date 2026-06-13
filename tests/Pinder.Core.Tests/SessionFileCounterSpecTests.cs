@@ -56,7 +56,7 @@ namespace Pinder.Core.Tests
         {
             for (int i = 1; i <= 8; i++)
             {
-                File.WriteAllText(Path.Combine(_tempDir, $"session-{i:D3}-player-vs-opponent.md"), "");
+                File.WriteAllText(Path.Combine(_tempDir, $"session-{i:D3}-player-vs-datee.md"), "");
             }
 
             Assert.Equal(9, SessionFileCounter.GetNextSessionNumber(_tempDir));

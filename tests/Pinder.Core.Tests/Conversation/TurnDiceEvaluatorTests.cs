@@ -41,10 +41,10 @@ namespace Pinder.Core.Tests.Conversation
                 level: 1
             );
             
-            var opponent = new CharacterProfile(
+            var datee = new CharacterProfile(
                 stats: TestHelpers.MakeStatBlock(10),
-                assembledSystemPrompt: "Opponent",
-                displayName: "Opponent",
+                assembledSystemPrompt: "Datee",
+                displayName: "Datee",
                 timing: new TimingProfile(5, 0f, 0f, "neutral"),
                 level: 1
             );
@@ -59,7 +59,7 @@ namespace Pinder.Core.Tests.Conversation
                 optionIndex: 0,
                 chosenOption: chosenOption,
                 player: player,
-                opponent: opponent,
+                datee: datee,
                 dice: dice,
                 trapRegistry: trapRegistry,
                 consequenceCatalog: null,
@@ -97,10 +97,10 @@ namespace Pinder.Core.Tests.Conversation
                 level: 1
             );
             
-            var opponent = new CharacterProfile(
+            var datee = new CharacterProfile(
                 stats: TestHelpers.MakeStatBlock(10),
-                assembledSystemPrompt: "Opponent",
-                displayName: "Opponent",
+                assembledSystemPrompt: "Datee",
+                displayName: "Datee",
                 timing: new TimingProfile(5, 0f, 0f, "neutral"),
                 level: 1
             );
@@ -115,7 +115,7 @@ namespace Pinder.Core.Tests.Conversation
                 optionIndex: 0,
                 chosenOption: chosenOption,
                 player: player,
-                opponent: opponent,
+                datee: datee,
                 dice: dice,
                 trapRegistry: trapRegistry,
                 consequenceCatalog: null,

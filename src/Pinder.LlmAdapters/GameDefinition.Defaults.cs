@@ -38,7 +38,7 @@ it can override the character's will entirely.
 
 Conversations are the core gameplay loop. Each turn, the player picks
 from 4 dialogue options (each tied to a stat). A d20 is rolled against
-the opponent's defence DC. Success raises the Interest meter; failure
+the datee's defence DC. Success raises the Interest meter; failure
 drops it and risks activating traps.
 
 The Interest meter runs from 0 to 25. At 25 (Date Secured) you win.
@@ -52,17 +52,17 @@ fragments, and texting style.
 
 Horniness mechanics can force Rizz options onto the menu. When combo or
 callback opportunities exist, options should weave them in organically.",
-            opponentRoleDescription: @"The opponent is another player's character being puppeted by the LLM.
+            dateeRoleDescription: @"The datee is another player's character being puppeted by the LLM.
 Their personality prompt is the character bible — everything they say
 must be consistent with their assembled identity.
 
-Below Interest 25, the opponent is NOT won over. They are evaluating.
-Resistance is proportional to their current interest state. The opponent
+Below Interest 25, the datee is NOT won over. They are evaluating.
+Resistance is proportional to their current interest state. The datee
 reacts to mechanical events they can perceive through the conversation:
 failed messages land awkwardly, shadow taint shifts tone, and traps
-create conversational disruptions the opponent responds to naturally.
+create conversational disruptions the datee responds to naturally.
 
-The opponent has their own texting style that must remain distinct from
+The datee has their own texting style that must remain distinct from
 the player's at all times.",
             narrativeDoctrine: @"Characters believe they are real people in a real situation. They cannot
 see dice, DCs, stat modifiers, interest meters, shadow thresholds,
@@ -82,7 +82,7 @@ Maintain two distinct character voices throughout the entire conversation.
 
 All dialogue is texting register. Short, informal, platform-appropriate.
 Message length: typically 1-3 sentences for player options, 1-4 sentences
-for opponent responses. Brevity is a feature.
+for datee responses. Brevity is a feature.
 
 Emoji: use only when the character's texting style fragment calls for it.
 No asterisk actions (*walks over*). This is a text-based dating app.
@@ -100,7 +100,7 @@ app at 1 AM.",
                     "You may: rearrange for better flow, sharpen word choice, add ONE word or phrase that makes the existing sentiment more precise.\n" +
                     "You must not: add new sentences that introduce ideas not in the intended message, change the emotional register, or make the message say something the player didn't intend.",
                 critical: "Deliver at peak. The message arrives perfectly. Something resonates.",
-                exceptional: "This is the best version of this message that could exist. It arrives at exactly the right moment with exactly the right weight. The opponent feels it.",
+                exceptional: "This is the best version of this message that could exist. It arrives at exactly the right moment with exactly the right weight. The datee feels it.",
                 test: "The test: every idea in the delivered version should have a counterpart in the intended version. New additions should sharpen, not expand.",
                 registerInstruction: "Stay in character. Match the texting register from the character profile above. Do not change the character's capitalization style.",
                 mediumRule: "This is a text message on a phone screen, not a monologue. No internal stage directions, no narration of emotional state, no self-commentary mid-message."),
@@ -110,13 +110,13 @@ Not just a pleasant exchange — a story the player felt. The player should be
 leaning in when they pick turn 7's option, not clicking on autopilot.
 
 The three experiences we are building toward:
-- INVESTMENT: The player cares what the opponent thinks. Not just about winning —
+- INVESTMENT: The player cares what the datee thinks. Not just about winning —
   about this specific person's response to this specific thing they said.
 - TENSION: Something feels at stake. The player is not sure how the next message
   will land. They have been burned before. They are not comfortable.
 - PAYOFF: The win or loss lands with weight. DateSecured should feel earned.
   Unmatched should sting. Neither should feel like a probability calculation resolving.",
-                opponentWant: @"The opponent is not passive. They have something they want from this conversation.
+                dateeWant: @"The datee is not passive. They have something they want from this conversation.
 
 At Interest 10-14: They want to find out if there is anything real here, or if
 this is another performance. They are gathering evidence. Their questions are tests.
@@ -153,17 +153,17 @@ Target: 2-3 for normal exchanges. 4-5 only at maximum pressure points. Never abo
 A character who says 'I am nervous' is at 7. A character who sends a message that is
 slightly too eager is at 2. The eagerness IS the nervousness.
 
-For the opponent: at low interest, operate at 1-2 (near pure subtext). At high
+For the datee: at low interest, operate at 1-2 (near pure subtext). At high
 interest, move toward 3-4 — say slightly more real things, but never lose the
 withholding quality that makes them worth pursuing.",
-                failureCost: @"When the player's message fails (Misfire, Trope Trap, Nat 1), the opponent does not
+                failureCost: @"When the player's message fails (Misfire, Trope Trap, Nat 1), the datee does not
 reset to neutral. They noticed. Whatever leaked through in the corrupted message
 informs their emotional stance for the rest of the conversation.
 
 A Misfire revealing backstory is not erased by the next successful message. The
-opponent saw it. They are now watching for whether it comes back.
+datee saw it. They are now watching for whether it comes back.
 
-The opponent's response to a failure: reaction to what they saw, dilemma about
+The datee's response to a failure: reaction to what they saw, dilemma about
 what it means, decision about how to proceed. This is how failures create dramatic
 arcs rather than temporary interest dips.",
                 earningTheClose: @"DateSecured should feel like something dissolved, not a threshold crossed.
@@ -171,7 +171,7 @@ arcs rather than temporary interest dips.",
 A win that came too easily was not a win — it was a transaction. If the path had
 friction, reversal, near-loss, and genuine earned moments — the close lands.
 
-The opponent's final concession is not 'Interest hit 25.' It is the opponent
+The datee's final concession is not 'Interest hit 25.' It is the datee
 deciding this person earned it. The final message should reflect that something
 real happened, not just that the meter filled.")
         );
@@ -184,8 +184,8 @@ real happened, not just that the meter filled.")
 @"You are writing as {player_name} on Pinder — a satirical comedy dating app for sentient penises.
 The character just sent: ""{delivered_message}""
 
-Based specifically on what {opponent_name} has revealed in the conversation above, write ONE question to append to this message. The question must:
-1. Reference something specific the opponent actually said or revealed — not a generic question
+Based specifically on what {datee_name} has revealed in the conversation above, write ONE question to append to this message. The question must:
+1. Reference something specific the datee actually said or revealed — not a generic question
 2. Gently nudge toward meeting up or closing a date (this is a dating app; connection is the goal)
 3. Be slightly too specific or too eager in a charming, slightly unhinged way — we want comedy
 4. Sound natural as a continuation of the delivered message, not a separate topic

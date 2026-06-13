@@ -67,7 +67,7 @@ partial class Program
                 RizzCumulativeFailureCount = loopResult.RizzCumulativeFailureCount,
                 CurrentOptions = turnStart.Options,
                 PlayerStats = setup.SableStats,
-                OpponentStats = setup.BrickStats,
+                DateeStats = setup.BrickStats,
                 PlayerLevelBonus = setup.P1LevelBonus,
                 HonestyAvailable = Array.Exists(turnStart.Options, o => o.Stat == StatType.Honesty)
             };
@@ -139,7 +139,7 @@ partial class Program
             {
                 TrapEffect.Disadvantage        => $"disadvantage on {trap.Stat} rolls",
                 TrapEffect.StatPenalty         => $"-{trap.EffectValue} to {trap.Stat} rolls",
-                TrapEffect.OpponentDCIncrease  => $"opponent DC +{trap.EffectValue}",
+                TrapEffect.DateeDCIncrease  => $"datee DC +{trap.EffectValue}",
                 _                              => trap.Effect.ToString()
             };
             int dur = trap.DurationTurns;
@@ -197,7 +197,7 @@ partial class Program
         }
     }
 
-    private static void PrintMessagesInterestAndShadow(TurnResult result, GameSetupResult setup, DialogueOption chosen, ref string lastOpponentMsg, GameLoopResult loopResult)
+    private static void PrintMessagesInterestAndShadow(TurnResult result, GameSetupResult setup, DialogueOption chosen, ref string lastDateeMsg, GameLoopResult loopResult)
     {
         Console.WriteLine($"**📨 {setup.Player1} sends:**");
         if (result.TextDiffs == null || result.TextDiffs.Count == 0)
@@ -238,11 +238,11 @@ partial class Program
                     })
                     .ToList());
         }
-        lastOpponentMsg = result.OpponentMessage ?? "";
-        if (!string.IsNullOrEmpty(lastOpponentMsg))
-            loopResult.ConversationHistory.Add((setup.Player2, lastOpponentMsg));
+        lastDateeMsg = result.DateeMessage ?? "";
+        if (!string.IsNullOrEmpty(lastDateeMsg))
+            loopResult.ConversationHistory.Add((setup.Player2, lastDateeMsg));
         Console.WriteLine($"**📩 {setup.Player2} replies:**");
-        PrintQuoted(result.OpponentMessage);
+        PrintQuoted(result.DateeMessage);
         Console.WriteLine();
 
         int newInterest = result.StateAfter.Interest;

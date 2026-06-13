@@ -83,7 +83,7 @@ namespace Pinder.Tools.NarrativeHarness
             // ── Optional REAL pursuer character (#855) ────────────────────
             // When --pursuer-character is set, the pursuer is a real Pinder
             // character driven through the SAME production prompt path as the
-            // opponent (BuildOpponent). It takes precedence over both the
+            // datee (BuildDatee). It takes precedence over both the
             // scripted and the generic-LLM pursuer.
             LoadedCharacter? pursuerCharacter = null;
             if (opts.PursuerCharacterSlug != null)

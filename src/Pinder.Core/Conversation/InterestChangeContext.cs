@@ -6,8 +6,8 @@ namespace Pinder.Core.Conversation
     /// </summary>
     public sealed class InterestChangeContext
     {
-        /// <summary>The opponent character's name.</summary>
-        public string OpponentName { get; }
+        /// <summary>The datee character's name.</summary>
+        public string DateeName { get; }
 
         /// <summary>Interest value before the change.</summary>
         public int InterestBefore { get; }
@@ -19,10 +19,10 @@ namespace Pinder.Core.Conversation
         public InterestState NewState { get; }
 
         /// <summary>
-        /// The opponent's assembled system prompt, used to generate
-        /// interest change beats in the opponent's voice/character.
+        /// The datee's assembled system prompt, used to generate
+        /// interest change beats in the datee's voice/character.
         /// </summary>
-        public string? OpponentPrompt { get; }
+        public string? DateePrompt { get; }
 
         /// <summary>
         /// Recent conversation history — passed so the beat can reference specific details.
@@ -33,19 +33,19 @@ namespace Pinder.Core.Conversation
         public string? PlayerName { get; }
 
         public InterestChangeContext(
-            string opponentName,
+            string dateeName,
             int interestBefore,
             int interestAfter,
             InterestState newState,
-            string? opponentPrompt = null,
+            string? dateePrompt = null,
             System.Collections.Generic.IReadOnlyList<(string Sender, string Text)>? conversationHistory = null,
             string? playerName = null)
         {
-            OpponentName = opponentName ?? throw new System.ArgumentNullException(nameof(opponentName));
+            DateeName = dateeName ?? throw new System.ArgumentNullException(nameof(dateeName));
             InterestBefore = interestBefore;
             InterestAfter = interestAfter;
             NewState = newState;
-            OpponentPrompt = opponentPrompt;
+            DateePrompt = dateePrompt;
             ConversationHistory = conversationHistory;
             PlayerName = playerName;
         }
