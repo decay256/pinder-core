@@ -44,15 +44,17 @@ namespace Pinder.Core.Tests
         // ----- loader: entry count -------------------------------------------
 
         [Fact]
-        public void TemplatesYaml_LoadsAll37Entries()
+        public void TemplatesYaml_LoadsAll35Entries()
         {
             var catalog = PromptCatalog.LoadFromDirectory(PromptsRoot);
 
-            // Verify the templates.yaml entries are present (37 Phase 2
-            // entries + 1 Phase 1 stake entry = at least 38 names).
+            // #1126: two dead creative-delivery templates were removed
+            // (engine-delivery-block, failure-delivery-instruction), dropping
+            // templates.yaml from 37 to 35 Phase 2 entries. With the Phase 1
+            // stake entry that is at least 36 names.
             var names = catalog.Names.ToList();
-            Assert.True(names.Count >= 38,
-                $"expected >=38 prompt names (37 templates + stake), got {names.Count}");
+            Assert.True(names.Count >= 36,
+                $"expected >=36 prompt names (35 templates + stake), got {names.Count}");
 
             // Spot-check a few representative keys.
             Assert.Contains("dialogue-options-instruction", names);

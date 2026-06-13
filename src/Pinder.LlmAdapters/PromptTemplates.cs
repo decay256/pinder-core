@@ -137,7 +137,14 @@ namespace Pinder.LlmAdapters
 
         internal static string EngineOptionsBlock => GetCatalogString("engine-options-block");
 
-        internal static string EngineDeliveryBlock => GetCatalogString("engine-delivery-block");
+        // EngineDeliveryBlock (yaml key "engine-delivery-block") REMOVED, #1126.
+        // It was the [ENGINE — DELIVERY] block consumed only by the creative
+        // delivery-prompt builder (BuildDeliveryPrompt), which #1125/#1138
+        // deleted when delivery collapsed into the deterministic, non-LLM
+        // DeliveryOverlay. No live builder appended it, so the property and its
+        // yaml entry are both gone. (failure-delivery-instruction yaml key was
+        // likewise removed — its C# property FailureDeliveryInstruction was
+        // already deleted in #1138, leaving the yaml entry orphaned.)
 
         internal static string EngineDateeBlock => GetCatalogString("engine-datee-block");
     }
