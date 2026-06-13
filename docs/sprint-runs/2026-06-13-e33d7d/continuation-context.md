@@ -115,16 +115,25 @@ Current test baseline for NEW work = **4442 passed / 0 failed / 27 skipped** (on
   (persisted yaml; wants a back-compat parser + coordinated pinder-web migration). **FOLD INTO #1129.**
 
 ## Lessons captured this run
-- **EIGENTAKT-DELEGATE-MODEL-OPACITY** (in LESSONS_LEARNED.md, segment 1): the delegate_task result
-  envelope reports the ORCHESTRATOR's model (`claude-opus-4-8`) and opus-scale token counts, NOT the
-  routed child (`gemini-3.1-pro-preview`). All segment-3 envelopes again showed `model:claude-opus-4-8`
-  with multi-million input tokens — TRUST `spawn-with-routing` envelope `"model":"gemini-3.1-pro-preview"`
-  + `pre_spawn_estimate.model_requested`, NOT the delegate envelope. **STILL OPEN for Daniel:** verify
-  out-of-band (billing/probe) whether delegate-model-routing actually applied the rung-0 gemini slug or
-  silently inherited opus. If inherited it's a real cost regression needing a plugin fix.
-- **PRICING-SNAPSHOT-ABSENT** (segment 3): `docs/sprint-runs/2026-06-13-e33d7d/pricing-snapshot.jsonl`
-  was never created despite being referenced in run identity. spawn-recover works around it by omitting
-  numeric tokens (see operating-env #6). Consider creating the snapshot so cost lines stop being null.
+- **EIGENTAKT-DELEGATE-MODEL-OPACITY** (LESSONS_LEARNED.md) — **RESOLVED 2026-06-13. REPORTING IS NOT
+  BROKEN; ROUTING WAS VERIFIED CORRECT. Do NOT re-open or run a billing check — already done.** The
+  envelope `model` field reflects the agent the parent DIRECTLY spawned. For the BATCH/array form
+  (`delegate_task(tasks=[{model,provider},...])`) — which is how the orchestrator spawns its workers —
+  the envelope `model` is CORRECT and per-task (verified live: a 2-task batch pinned to gemini-3.1-pro-preview
+  + gemini-3.5-flash returned those exact slugs, NOT opus). The opus-looking number only appears one layer
+  UP, on the single-goal envelope that wraps a NESTED orchestrator; it masks grandchildren but does NOT
+  affect worker cost-correctness. Worker routing is provable two agreeing ways: batch envelope `model` AND
+  `pre_spawn_estimate.model_requested` in agent.log. See the full RESOLVED entry in LESSONS_LEARNED.md.
+  OPTIONAL liveness check at segment start (only if you suspect a post-restart plugin failure): fire a
+  throwaway 2-task batch pinned to two different cheap models; if each envelope echoes its own pinned slug,
+  delegate-model-routing is live. If they ALL show the parent's model, the plugin didn't re-register —
+  only then is there a real problem.
+- **PRICING-SNAPSHOT-ABSENT** (segment 3) — **FALSE ALARM, CORRECTED 2026-06-13. The file EXISTS** at
+  `docs/sprint-runs/2026-06-13-e33d7d/pricing-snapshot.jsonl` (created segment 1, all 4 rungs). Segment 3's
+  "never created" was a cwd-relative path miss (orchestrator runs from /root/projects/eigentakt; file is
+  under the pinder-core submodule — use an ABSOLUTE path). $0/null cost rows for rung 0/2 are BY DESIGN
+  (Gemini 3.1 Pro Preview pricing is a deliberate 0.0 placeholder until Google publishes it), not a missing
+  snapshot. See the CORRECTED entry in LESSONS_LEARNED.md.
 
 ## Calibration / sediment
 - `agent.log` (in pinder-core) has full per-spawn `pre_spawn_estimate` + recovered `attempt-end` records

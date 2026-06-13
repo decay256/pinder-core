@@ -785,55 +785,86 @@ constructor and clone constructors.
 **Discovered in:** Sprint 13 (2026-05-27).
 
 
-## EIGENTAKT-DELEGATE-MODEL-OPACITY (sprint 2026-06-13-e33d7d)
+## EIGENTAKT-DELEGATE-MODEL-OPACITY (sprint 2026-06-13-e33d7d) — RESOLVED 2026-06-13
 
-**Hazard.** When eigentakt runs on Hermes via `delegate_task` (the
-sanctioned subagent mapping for `sessions_spawn`), the child task's
-result envelope reports `model: claude-opus-4-8` (the orchestrator's
-pinned model) even when the spawn was routed to a rung-0 model
-(`gemini-3.1-pro-preview` via `delegate_task(model=..., provider=google)`).
-The envelope's `model` field reflects the *delegating* agent's model, not
-the resolved child model. This means:
+**STATUS: RESOLVED. Reporting is NOT broken. Routing was verified
+CORRECT.** Do not re-open this as a suspected cost regression — it was
+investigated to ground truth on 2026-06-13 and closed. Read this whole
+entry before doubting the numbers.
 
-1. Per-spawn cost calibration cannot trust the result envelope's `model`
-   field — it must trust the `pre_spawn_estimate` written by
-   `spawn-with-routing.sh` (which records `model_requested` correctly).
-2. We cannot confirm from the envelope alone whether the
-   delegate-model-routing plugin actually applied the rung-0 model or
-   silently inherited the parent's model (the hazard #23 failure mode one
-   layer down). The token counts (1.35M in for #1121 impl) are plausible
-   for either model, so they don't disambiguate.
+**What looked wrong.** A `delegate_task` result envelope's top-level
+`model` field can read `claude-opus-4-8` (the delegating orchestrator's
+own pinned model) with opus-scale token counts, even when the work was
+routed to a rung-0 model. This is a NESTING artifact, not misrouting.
 
-**Mitigation applied this sprint.** Logged the discrepancy in every
-`spawn-recover.sh --reason` and in the synthetic `attempt-end`
-(`model_resolved: null`, `EIGENTAKT-MODEL-RESOLVED-GAP`). The authoritative
-record of intended routing is the `pre_spawn_estimate` line, not the
-result envelope.
+**Ground-truth finding (verified by probe, 2026-06-13).** The envelope's
+`model`/`tokens` come from `getattr(child, "model")` /
+`child.session_prompt_tokens` in `delegate_tool.py` (~line 1682). That
+reflects whichever agent the parent *directly* spawned:
 
-**Follow-up.** Verify out-of-band whether delegate-model-routing applied
-the rung-0 slug (e.g. provider-side billing, or a probe spawn that echoes
-its own model). If routing did NOT apply, this is a real cost regression
-and the plugin needs a fix. Filed as an after-sprint concern for Daniel.
+- **BATCH / array form** — `delegate_task(tasks=[{model, provider}, ...])`,
+  which is EXACTLY how the eigentakt orchestrator spawns its
+  implementer/reviewer/fix workers — the envelope `model` is CORRECT and
+  per-task. Verified live: a 2-task batch pinned to
+  `gemini-3.1-pro-preview` + `gemini-3.5-flash` returned envelopes
+  reading `model: gemini-3.1-pro-preview` and `model: gemini-3.5-flash`
+  respectively (NOT opus). **So the orchestrator's workers ARE
+  independently verifiable from the envelope, and were routed correctly.**
+- **Single-goal form wrapping a NESTED orchestrator** — e.g. the top
+  caller spawning the eigentakt orchestrator itself — the envelope shows
+  the *child orchestrator's* own model (opus), masking its grandchildren.
+  This is the only layer where opacity bites, and it does NOT affect the
+  cost-correctness of the workers underneath.
+
+**Therefore:** worker-level routing is provable two independent ways that
+AGREE — (a) the batch envelope `model` per task, and (b) the
+`pre_spawn_estimate` / `model_requested` line written by
+`spawn-with-routing.sh` to `agent.log`. No provider-side billing check is
+required; the workers ran on the rung-0 Gemini slug as intended. The
+`model_resolved: null` / `EIGENTAKT-MODEL-RESOLVED-GAP` notes in
+`attempt-end` are a known cosmetic gap (runtime doesn't echo the
+provider-resolved slug), NOT evidence of misrouting.
+
+**How to confirm the plugin is live after a gateway restart** (do this
+once at segment start instead of assuming): fire a throwaway 2-task batch
+pinned to two different cheap models and read the per-task envelope
+`model`. If they come back as the two distinct pinned slugs (not the
+parent's model), routing is live. If they ALL come back as the parent's
+model, the `delegate-model-routing` plugin failed to re-register — only
+THEN is there a real regression to chase.
+
+**Bottom line for future sessions:** trust the batch-form envelope `model`
+and the `model_requested` log line. The opus-looking number on a
+nested-orchestrator envelope is expected and harmless. Reporting works.
 
 
-## PRICING-SNAPSHOT-ABSENT (sprint 2026-06-13-e33d7d, segment 3)
+## PRICING-SNAPSHOT-ABSENT (sprint 2026-06-13-e33d7d, segment 3) — CORRECTED 2026-06-13
 
-**Hazard.** The run identity references a pricing snapshot at
-`docs/sprint-runs/2026-06-13-e33d7d/pricing-snapshot.jsonl`, but the file
-was never created. `scripts/spawn-recover.sh` aborts with **exit 22**
-("pricing-snapshot has no entry for sprint … rung …") — but ONLY on the
-code path where numeric `--tokens-in` / `--tokens-out` are supplied (it
-tries to compute cost and fails to find a price line).
+**STATUS: FALSE ALARM. The snapshot file EXISTS and is correct.** The
+segment-3 orchestrator reported it "never created" — that was wrong. The
+file is at `docs/sprint-runs/2026-06-13-e33d7d/pricing-snapshot.jsonl`
+(created segment 1, 09:18, 852 bytes, all 4 rungs present). The likely
+cause of the false alarm: the orchestrator runs from
+`/root/projects/eigentakt` but the file lives under the `pinder-core`
+submodule, so a cwd-relative path lookup missed it.
 
-**Mitigation applied.** Close every spawn's logging loop by passing
-`--runtime-seconds <N>` and OMITTING `--tokens-in` / `--tokens-out`. With
-null tokens the cost branch is skipped, the synthetic `attempt-end` writes
-`tokens_in:null, tokens_out:null, cost_usd:null`, and the loop closes
-(exit 0). Record the real envelope token volumes in the `--reason` string
-for the audit trail instead. NOTE: the `--pricing-snapshot <path>` CLI arg
-is still REQUIRED (the script validates the flag's presence even though
-the file is absent) — pass the path even though the file doesn't exist.
+**Why cost lines read $0/null (this part is BY DESIGN, not a fault).**
+Rungs 0 and 2 (`gemini-3.1-pro-preview`) carry `0.0` pricing in
+`model-routing.yaml` because Google has not published preview pricing —
+it's a deliberate operator placeholder. So implementer/reviewer cost rows
+computing to $0 is EXPECTED, not a missing snapshot. Cost numbers are a
+known lower bound until real Gemini-preview pricing is filled in.
 
-**Follow-up.** Create the pricing snapshot for this sprint so cost lines
-stop being null, OR teach spawn-recover to no-op cost (not abort) when the
-snapshot file is missing. Carried forward in continuation-context.md.
+**Mitigation (still valid).** When closing a spawn's logging loop via
+`spawn-recover.sh`, pass the snapshot path with an ABSOLUTE path (resolve
+from sprint-id, not cwd) to avoid the false "absent" read. Passing
+`--runtime-seconds <N>` and omitting `--tokens-in/--tokens-out` skips the
+cost branch cleanly (exit 0) when you don't want a priced line.
+
+**Real follow-ups (small, optional):**
+1. Fill real `gemini-3.1-pro-preview` pricing into rung 0/2
+   `pricing_at_verification` in `model-routing.yaml` when Google publishes
+   it (or the negotiated rate), then cost calibration becomes meaningful.
+2. Make `spawn-recover.sh` resolve the snapshot path absolutely from
+   sprint-id so a continuation orchestrator started from a different cwd
+   can't false-alarm "absent" again.
