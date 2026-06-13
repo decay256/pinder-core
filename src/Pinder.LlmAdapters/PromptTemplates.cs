@@ -45,48 +45,15 @@ namespace Pinder.LlmAdapters
 
         public static string DialogueOptionsInstruction => GetCatalogString("dialogue-options-instruction");
 
-        // ── §3.3 — Success delivery instruction ─────────────────────────────
-
-        public static string SuccessDeliveryInstruction => BuildSuccessDeliveryInstruction(null);
-
-        public static string BuildSuccessDeliveryInstruction(DeliveryRules rules)
-        {
-            string clean = (rules != null && !string.IsNullOrEmpty(rules.Clean))
-                ? rules.Clean.TrimEnd() : GetCatalogString("default-clean");
-            string strong = (rules != null && !string.IsNullOrEmpty(rules.Strong))
-                ? rules.Strong.TrimEnd() : GetCatalogString("default-strong");
-            string critical = (rules != null && !string.IsNullOrEmpty(rules.Critical))
-                ? rules.Critical.TrimEnd() : GetCatalogString("default-critical");
-            string exceptional = (rules != null && !string.IsNullOrEmpty(rules.Exceptional))
-                ? rules.Exceptional.TrimEnd() : GetCatalogString("default-exceptional");
-            string test = (rules != null && !string.IsNullOrEmpty(rules.Test))
-                ? rules.Test.TrimEnd() : GetCatalogString("default-test");
-            string registerInstruction = (rules != null && !string.IsNullOrEmpty(rules.RegisterInstruction))
-                ? rules.RegisterInstruction.TrimEnd() : GetCatalogString("default-register-instruction");
-            string mediumRule = (rules != null && !string.IsNullOrEmpty(rules.MediumRule))
-                ? rules.MediumRule.TrimEnd() : GetCatalogString("default-medium-rule");
-
-            return "Write as {player_name}.\n" +
-                "The intended message is the player's plan. Your job is to make it land.\n" +
-                "You beat the DC by {beat_dc_by}.\n" +
-                "\n" +
-                "YOUR TIER: {tier_instruction}\n" +
-                "\n" +
-                "Other tiers for reference:\n" +
-                "- Clean success (margin 1-4): " + clean + "\n" +
-                "- Strong success (margin 5-9): " + strong + "\n" +
-                "- Critical success (margin 10-14): " + critical + "\n" +
-                "- Exceptional (margin 15+): " + exceptional + "\n" +
-                "- Critical success / Nat 20: legendary. One sentence can be more effective than a paragraph if it's exactly right.\n" +
-                "\n" +
-                test + "\n" +
-                "\n" +
-                "MEDIUM RULE: " + mediumRule + "\n" +
-                "\n" +
-                registerInstruction + " Don't explain the success.\n" +
-                "HARD RULE: Do not append a new sentence or em-dash continuation to the end of the message. Do not make the message longer. Do not split a single-paragraph message into multiple paragraphs. Rewrite — do not extend.\n" +
-                "Output only the message text.";
-        }
+        // ── §3.3 — Success delivery instruction (REMOVED, #1125/#1138) ───────
+        //
+        // SuccessDeliveryInstruction / BuildSuccessDeliveryInstruction were only
+        // ever consumed by SessionDocumentBuilder.BuildDeliveryPromptEx, the
+        // creative delivery-prompt formatter. #1125 collapsed delivery into a
+        // deterministic, non-LLM overlay/commit step (DeliveryOverlay), and
+        // #1138 removed the prompt builders, so this instruction is fully dead.
+        // DeliveryRules itself is retained — it is still parsed from the game
+        // definition and surfaced elsewhere.
 
         // ── §3.4 — Failure delivery instruction ─────────────────────────────
 
