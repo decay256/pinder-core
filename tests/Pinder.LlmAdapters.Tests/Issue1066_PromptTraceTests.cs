@@ -10,6 +10,7 @@ using Pinder.Core.TestCommon;
 
 namespace Pinder.LlmAdapters.Tests
 {
+    [Collection("PromptTraceSingleton")]
     public sealed class Issue1066_PromptTraceTests
     {
         [Fact]

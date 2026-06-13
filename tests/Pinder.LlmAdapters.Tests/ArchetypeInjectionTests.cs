@@ -10,6 +10,7 @@ namespace Pinder.LlmAdapters.Tests
     /// <summary>
     /// Tests that active archetype directives are injected into LLM prompts (#649).
     /// </summary>
+    [Collection("PromptTraceSingleton")]
     public class ArchetypeInjectionTests
     {
         private static DialogueContext MakeDialogueContext(string activeArchetypeDirective = null)

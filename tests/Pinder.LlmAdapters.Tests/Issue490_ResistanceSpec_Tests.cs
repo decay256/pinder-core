@@ -12,6 +12,7 @@ namespace Pinder.LlmAdapters.Tests
     /// Tests verify behavior described in docs/specs/issue-490-spec.md.
     /// Each test has a mutation comment explaining what code change would cause failure.
     /// </summary>
+    [Collection("PromptTraceSingleton")]
     public class Issue490_ResistanceSpec_Tests
     {
         /// <summary>

@@ -12,6 +12,7 @@ namespace Pinder.LlmAdapters.Tests
     /// Verifies that BuildDateePrompt includes the fundamental resistance rule
     /// and interest-appropriate resistance descriptors.
     /// </summary>
+    [Collection("PromptTraceSingleton")]
     public class Issue490_ResistanceDescriptorTests
     {
         private static DateeContext MakeDateeContext(int interestAfter, int interestBefore = -1)

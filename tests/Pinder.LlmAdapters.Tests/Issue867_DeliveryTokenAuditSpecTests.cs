@@ -12,6 +12,7 @@ namespace Pinder.LlmAdapters.Tests
     /// These tests pin the new shared-base contract and keep the original
     /// token-ceiling sanity check.
     /// </summary>
+    [Collection("PromptTraceSingleton")]
     public class Issue867_DeliveryTokenAuditSpecTests
     {
         private static GameDefinition FullFixture()

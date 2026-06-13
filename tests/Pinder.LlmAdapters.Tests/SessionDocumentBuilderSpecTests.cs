@@ -14,6 +14,7 @@ namespace Pinder.LlmAdapters.Tests
     /// Spec-based tests for SessionDocumentBuilder, PromptTemplates, and CacheBlockBuilder.
     /// Tests derived from docs/specs/issue-207-spec.md.
     /// </summary>
+    [Collection("PromptTraceSingleton")]
     public partial class SessionDocumentBuilderSpecTests
     {
         // ── Helpers ──

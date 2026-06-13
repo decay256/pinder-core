@@ -18,6 +18,7 @@ namespace Pinder.LlmAdapters.Tests
     ///   AC6: Unit tests verify injection format correctness
     ///   AC7: Build clean
     /// </summary>
+    [Collection("PromptTraceSingleton")]
     public partial class Issue544_EngineInjectionSpecTests
     {
         // ── Test Helpers ──

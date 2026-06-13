@@ -32,6 +32,7 @@ namespace Pinder.LlmAdapters.Tests
     /// cross-repo pinder-web follow-up filed against #1129; this repo owns the
     /// serialization/trace-key/fixture surface and asserts it here.
     /// </summary>
+    [Collection("PromptTraceSingleton")]
     public sealed class Issue1129_SchemaRenameGuardTests
     {
         // The complete set of live prompt_type trace keys the engine compiles

@@ -13,6 +13,7 @@ namespace Pinder.LlmAdapters.Tests
     /// the formula's boundary cases. One formula test verifies ComputeResponseCeiling at
     /// the boundary values and the regression scenario from session 707fca72.
     /// </summary>
+    [Collection("PromptTraceSingleton")]
     public class Issue866_DateeLengthCapTests
     {
         // ── Helpers ──

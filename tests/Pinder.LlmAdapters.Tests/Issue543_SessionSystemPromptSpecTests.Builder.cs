@@ -3,6 +3,7 @@ using Xunit;
 
 namespace Pinder.LlmAdapters.Tests
 {
+    [Collection("PromptTraceSingleton")]
     public partial class Issue543_SessionSystemPromptSpecTests
     {
         #region AC3: GameDefinition.PinderDefaults hardcoded fallback

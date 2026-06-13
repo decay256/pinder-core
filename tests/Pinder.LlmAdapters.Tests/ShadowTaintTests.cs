@@ -7,6 +7,7 @@ using Xunit;
 
 namespace Pinder.LlmAdapters.Tests
 {
+    [Collection("PromptTraceSingleton")]
     public class ShadowTaintTests
     {
         private static DialogueContext MakeDialogueContext(
