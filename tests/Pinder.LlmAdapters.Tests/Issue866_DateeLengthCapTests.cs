@@ -20,7 +20,7 @@ namespace Pinder.LlmAdapters.Tests
         private static DateeContext MakeDateeContext(string playerDeliveredMessage)
         {
             return new DateeContext(
-                playerPrompt: "player system prompt",
+                playerAvatarPrompt: "player system prompt",
                 dateePrompt: "datee system prompt",
                 conversationHistory: new List<(string, string)> { ("P", "hey"), ("O", "hi") },
                 dateeLastMessage: "hi",

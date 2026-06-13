@@ -95,7 +95,7 @@ namespace Pinder.Core.Tests.Conversation
 
         private static DateeContext MakeContext(string playerLabel) =>
             new DateeContext(
-                playerPrompt: "p",
+                playerAvatarPrompt: "p",
                 dateePrompt: "o",
                 conversationHistory: System.Array.Empty<(string, string)>(),
                 dateeLastMessage: string.Empty,

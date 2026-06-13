@@ -22,7 +22,7 @@ namespace Pinder.LlmAdapters.Tests
             int currentTurn = 1)
         {
             return new DialogueContext(
-                playerPrompt: "player prompt",
+                playerAvatarPrompt: "player prompt",
                 dateePrompt: "datee prompt",
                 conversationHistory: new List<(string, string)>(),
                 dateeLastMessage: "hey",
@@ -77,7 +77,7 @@ namespace Pinder.LlmAdapters.Tests
         public void DialogueContext_PlayerTextingStyle_DefaultsToEmpty()
         {
             var ctx = new DialogueContext(
-                playerPrompt: "p",
+                playerAvatarPrompt: "p",
                 dateePrompt: "o",
                 conversationHistory: new List<(string, string)>(),
                 dateeLastMessage: "",
@@ -127,7 +127,7 @@ namespace Pinder.LlmAdapters.Tests
         {
             // Default constructor — no playerTextingStyle param
             var ctx = new DialogueContext(
-                playerPrompt: "p",
+                playerAvatarPrompt: "p",
                 dateePrompt: "o",
                 conversationHistory: new List<(string, string)>(),
                 dateeLastMessage: "hi",

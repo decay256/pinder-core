@@ -61,7 +61,7 @@ namespace Pinder.Core.Conversation
             string dateeArchetypeDirective = datee.ActiveArchetype?.Directive;
 
             var dateeContext = new DateeContext(
-                playerPrompt: player.AssembledSystemPrompt,
+                playerAvatarPrompt: player.AssembledSystemPrompt,
                 dateePrompt: datee.AssembledSystemPrompt,
                 conversationHistory: TurnOrchestratorHelpers.BuildHistoryForLlmContext(state),
                 dateeLastMessage: GameSessionHelpers.GetLastDateeMessage(state.History, datee.DisplayName),

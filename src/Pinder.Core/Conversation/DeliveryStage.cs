@@ -119,7 +119,7 @@ namespace Pinder.Core.Conversation
             string playerArchetypeDirectiveForDelivery = player.ActiveArchetype?.Directive;
 
             var deliveryContext = new DeliveryContext(
-                playerPrompt: player.AssembledSystemPrompt,
+                playerAvatarPrompt: player.AssembledSystemPrompt,
                 dateePrompt: datee.AssembledSystemPrompt,
                 conversationHistory: TurnOrchestratorHelpers.BuildHistoryForLlmContext(state),
                 dateeLastMessage: GameSessionHelpers.GetLastDateeMessage(state.History, datee.DisplayName),

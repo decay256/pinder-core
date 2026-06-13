@@ -60,7 +60,7 @@ namespace Pinder.LlmAdapters.Tests
             PromptCatalogInitializer.Initialize();
 
             var context = new DialogueContext(
-                playerPrompt: "You are reuben.",
+                playerAvatarPrompt: "You are reuben.",
                 dateePrompt: "You are talking to velvet.",
                 conversationHistory: new List<(string Sender, string Text)> { ("Velvet", "Hello") },
                 dateeLastMessage: "Hello",

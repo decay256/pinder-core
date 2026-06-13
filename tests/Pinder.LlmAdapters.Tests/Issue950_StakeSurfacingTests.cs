@@ -31,7 +31,7 @@ namespace Pinder.LlmAdapters.Tests
             int turn = 2)
         {
             return new DialogueContext(
-                playerPrompt: "PSYCHOLOGICAL STAKE:\n" + string.Join("\n", stakeLines ?? MakeStakeLines()),
+                playerAvatarPrompt: "PSYCHOLOGICAL STAKE:\n" + string.Join("\n", stakeLines ?? MakeStakeLines()),
                 dateePrompt: "datee prompt",
                 conversationHistory: new List<(string, string)>
                 {

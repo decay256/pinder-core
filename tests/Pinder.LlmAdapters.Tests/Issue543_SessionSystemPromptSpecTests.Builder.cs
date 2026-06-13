@@ -159,8 +159,8 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("UNIQUE_WORLD_ABC", worldSection);
         }
 
-        // What: AC4 — PLAYER CHARACTER section contains playerPrompt verbatim
-        // Mutation: would catch if playerPrompt was modified, trimmed, or summarized
+        // What: AC4 — PLAYER CHARACTER section contains playerAvatarPrompt verbatim
+        // Mutation: would catch if playerAvatarPrompt was modified, trimmed, or summarized
         [Fact]
         public void Build_PlayerSectionContainsPlayerPromptVerbatim()
         {
@@ -212,14 +212,14 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void Build_WithKnownInputs_ContainsAllContent()
         {
-            var playerPrompt = "You are Velvet. Lowercase-with-intent. Ironic. Level 7 Veteran.";
+            var playerAvatarPrompt = "You are Velvet. Lowercase-with-intent. Ironic. Level 7 Veteran.";
             var dateePrompt = "You are Sable. Fast-talking. Uses omg and emoji. Level 5 Journeyman.";
             var gameDef = GameDefinition.PinderDefaults;
 
-            var result = SessionSystemPromptBuilder.Build(playerPrompt, dateePrompt, gameDef);
+            var result = SessionSystemPromptBuilder.Build(playerAvatarPrompt, dateePrompt, gameDef);
 
             // Player prompt appears verbatim
-            Assert.Contains(playerPrompt, result);
+            Assert.Contains(playerAvatarPrompt, result);
             // Datee prompt appears verbatim
             Assert.Contains(dateePrompt, result);
             // Game vision content present
@@ -256,14 +256,14 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("comedy dating RPG", result);
         }
 
-        // What: Edge case — null playerPrompt throws ArgumentNullException
-        // Mutation: would catch if null check on playerPrompt was removed
+        // What: Edge case — null playerAvatarPrompt throws ArgumentNullException
+        // Mutation: would catch if null check on playerAvatarPrompt was removed
         [Fact]
         public void Build_NullPlayerPrompt_ThrowsArgumentNullException()
         {
             var ex = Assert.Throws<ArgumentNullException>(() =>
                 SessionSystemPromptBuilder.Build(null!, "datee"));
-            Assert.Equal("playerPrompt", ex.ParamName);
+            Assert.Equal("playerAvatarPrompt", ex.ParamName);
         }
 
         // What: Edge case — null dateePrompt throws ArgumentNullException
@@ -359,13 +359,13 @@ horniness_time_modifiers:
         #region Cross-cutting: Build does not mix player/datee sections
 
         // What: Player prompt must not appear in datee section and vice versa
-        // Mutation: would catch if playerPrompt and dateePrompt params were swapped
+        // Mutation: would catch if playerAvatarPrompt and dateePrompt params were swapped
         [Fact]
         public void Build_PlayerAndDateePromptsInCorrectSections()
         {
-            var playerPrompt = "PLAYER_UNIQUE_MARKER_111";
+            var playerAvatarPrompt = "PLAYER_UNIQUE_MARKER_111";
             var dateePrompt = "DATEE_UNIQUE_MARKER_222";
-            var result = SessionSystemPromptBuilder.Build(playerPrompt, dateePrompt);
+            var result = SessionSystemPromptBuilder.Build(playerAvatarPrompt, dateePrompt);
 
             var playerIdx = result.IndexOf("== PLAYER CHARACTER ==");
             var dateeIdx = result.IndexOf("== DATEE CHARACTER ==");

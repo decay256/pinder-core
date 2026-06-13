@@ -27,7 +27,7 @@ namespace Pinder.LlmAdapters.Tests
             int beatDcBy = 0)
         {
             return new DeliveryContext(
-                playerPrompt: "player prompt",
+                playerAvatarPrompt: "player prompt",
                 dateePrompt: "datee prompt",
                 conversationHistory: new List<(string Sender, string Text)>(),
                 dateeLastMessage: "",

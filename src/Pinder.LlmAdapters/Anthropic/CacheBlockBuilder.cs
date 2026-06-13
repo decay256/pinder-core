@@ -14,12 +14,12 @@ namespace Pinder.LlmAdapters.Anthropic
         /// Builds system blocks with both character prompts cached.
         /// Used by dialogue options and delivery calls.
         /// </summary>
-        /// <param name="playerPrompt">The player's assembled §3.1 system prompt.</param>
+        /// <param name="playerAvatarPrompt">The player's assembled §3.1 system prompt.</param>
         /// <param name="dateePrompt">The datee's assembled §3.1 system prompt.</param>
         /// <returns>Two ContentBlocks, both with cache_control: ephemeral.</returns>
-        public static ContentBlock[] BuildCachedSystemBlocks(string playerPrompt, string dateePrompt)
+        public static ContentBlock[] BuildCachedSystemBlocks(string playerAvatarPrompt, string dateePrompt)
         {
-            if (playerPrompt == null) throw new ArgumentNullException(nameof(playerPrompt));
+            if (playerAvatarPrompt == null) throw new ArgumentNullException(nameof(playerAvatarPrompt));
             if (dateePrompt == null) throw new ArgumentNullException(nameof(dateePrompt));
 
             return new[]
@@ -27,7 +27,7 @@ namespace Pinder.LlmAdapters.Anthropic
                 new ContentBlock
                 {
                     Type = "text",
-                    Text = playerPrompt,
+                    Text = playerAvatarPrompt,
                     CacheControl = new CacheControl { Type = "ephemeral" }
                 },
                 new ContentBlock
@@ -40,21 +40,21 @@ namespace Pinder.LlmAdapters.Anthropic
         }
 
         /// <summary>
-        /// Builds system blocks with only the player prompt cached.
-        /// Used by delivery calls where only the player speaks.
+        /// Builds system blocks with only the player avatar prompt cached.
+        /// Used by delivery calls where only the player avatar speaks.
         /// </summary>
-        /// <param name="playerPrompt">The player's assembled §3.1 system prompt.</param>
+        /// <param name="playerAvatarPrompt">The player avatar's assembled §3.1 system prompt.</param>
         /// <returns>One ContentBlock with cache_control: ephemeral.</returns>
-        public static ContentBlock[] BuildPlayerOnlySystemBlocks(string playerPrompt)
+        public static ContentBlock[] BuildPlayerAvatarOnlySystemBlocks(string playerAvatarPrompt)
         {
-            if (playerPrompt == null) throw new ArgumentNullException(nameof(playerPrompt));
+            if (playerAvatarPrompt == null) throw new ArgumentNullException(nameof(playerAvatarPrompt));
 
             return new[]
             {
                 new ContentBlock
                 {
                     Type = "text",
-                    Text = playerPrompt,
+                    Text = playerAvatarPrompt,
                     CacheControl = new CacheControl { Type = "ephemeral" }
                 }
             };

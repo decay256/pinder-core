@@ -10,7 +10,7 @@ namespace Pinder.Core.Conversation
     public sealed class DateeContext
     {
         /// <summary>Assembled system prompt for the player character.</summary>
-        public string PlayerPrompt { get; }
+        public string PlayerAvatarPrompt { get; }
 
         /// <summary>Assembled system prompt for the datee character.</summary>
         public string DateePrompt { get; }
@@ -61,7 +61,7 @@ namespace Pinder.Core.Conversation
         public string ActiveArchetypeDirective { get; }
 
         public DateeContext(
-            string playerPrompt,
+            string playerAvatarPrompt,
             string dateePrompt,
             IReadOnlyList<(string Sender, string Text)> conversationHistory,
             string dateeLastMessage,
@@ -79,7 +79,7 @@ namespace Pinder.Core.Conversation
             FailureTier deliveryTier = FailureTier.Success,
             string activeArchetypeDirective = null)
         {
-            PlayerPrompt = playerPrompt ?? throw new System.ArgumentNullException(nameof(playerPrompt));
+            PlayerAvatarPrompt = playerAvatarPrompt ?? throw new System.ArgumentNullException(nameof(playerAvatarPrompt));
             DateePrompt = dateePrompt ?? throw new System.ArgumentNullException(nameof(dateePrompt));
             ConversationHistory = conversationHistory ?? throw new System.ArgumentNullException(nameof(conversationHistory));
             DateeLastMessage = dateeLastMessage ?? throw new System.ArgumentNullException(nameof(dateeLastMessage));

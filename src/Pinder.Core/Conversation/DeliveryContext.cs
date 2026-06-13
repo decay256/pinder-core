@@ -10,8 +10,8 @@ namespace Pinder.Core.Conversation
     /// </summary>
     public sealed class DeliveryContext
     {
-        /// <summary>Assembled system prompt for the player character.</summary>
-        public string PlayerPrompt { get; }
+        /// <summary>Assembled system prompt for the player avatar (the in-game character the human portrays).</summary>
+        public string PlayerAvatarPrompt { get; }
 
         /// <summary>Assembled system prompt for the datee character.</summary>
         public string DateePrompt { get; }
@@ -70,7 +70,7 @@ namespace Pinder.Core.Conversation
         public string ActiveArchetypeDirective { get; }
 
         public DeliveryContext(
-            string playerPrompt,
+            string playerAvatarPrompt,
             string dateePrompt,
             IReadOnlyList<(string Sender, string Text)> conversationHistory,
             string dateeLastMessage,
@@ -87,7 +87,7 @@ namespace Pinder.Core.Conversation
             string statFailureInstruction = null,
             string activeArchetypeDirective = null)
         {
-            PlayerPrompt = playerPrompt ?? throw new System.ArgumentNullException(nameof(playerPrompt));
+            PlayerAvatarPrompt = playerAvatarPrompt ?? throw new System.ArgumentNullException(nameof(playerAvatarPrompt));
             DateePrompt = dateePrompt ?? throw new System.ArgumentNullException(nameof(dateePrompt));
             ConversationHistory = conversationHistory ?? throw new System.ArgumentNullException(nameof(conversationHistory));
             DateeLastMessage = dateeLastMessage ?? throw new System.ArgumentNullException(nameof(dateeLastMessage));

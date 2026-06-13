@@ -31,7 +31,7 @@ namespace Pinder.LlmAdapters.Tests
         public void BuildDialogueOptionsPrompt_EmptyDateePrompt_OmitsDateeProfile()
         {
             var ctx = new DialogueContext(
-                playerPrompt: "player prompt",
+                playerAvatarPrompt: "player prompt",
                 dateePrompt: "",
                 conversationHistory: new List<(string, string)>(),
                 dateeLastMessage: "",

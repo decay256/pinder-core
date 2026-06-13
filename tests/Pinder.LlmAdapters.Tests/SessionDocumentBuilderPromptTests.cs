@@ -24,7 +24,7 @@ namespace Pinder.LlmAdapters.Tests
             Dictionary<ShadowStatType, int> shadowThresholds = null)
         {
             return new DialogueContext(
-                playerPrompt: "player prompt",
+                playerAvatarPrompt: "player prompt",
                 dateePrompt: "datee prompt",
                 conversationHistory: conversationHistory ?? Array.Empty<(string, string)>(),
                 dateeLastMessage: dateeLastMessage,

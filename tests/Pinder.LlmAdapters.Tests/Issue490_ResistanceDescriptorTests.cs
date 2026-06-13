@@ -18,7 +18,7 @@ namespace Pinder.LlmAdapters.Tests
         {
             if (interestBefore < 0) interestBefore = interestAfter;
             return new DateeContext(
-                playerPrompt: "player prompt",
+                playerAvatarPrompt: "player prompt",
                 dateePrompt: "datee prompt",
                 conversationHistory: new List<(string, string)> { ("P", "hey"), ("O", "hi") },
                 dateeLastMessage: "hi",

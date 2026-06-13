@@ -20,7 +20,7 @@ namespace Pinder.LlmAdapters.Tests
         private static DeliveryContext MakeSuccessDeliveryContext(int beatDcBy, string playerName = "Velvet")
         {
             return new DeliveryContext(
-                playerPrompt: "player prompt",
+                playerAvatarPrompt: "player prompt",
                 dateePrompt: "datee prompt",
                 conversationHistory: new List<(string, string)> { ("P", "hey"), ("O", "hi") },
                 dateeLastMessage: "hi",
@@ -205,7 +205,7 @@ namespace Pinder.LlmAdapters.Tests
         public void BuildDeliveryPrompt_FailurePath_DoesNotContainSuccessInstruction()
         {
             var ctx = new DeliveryContext(
-                playerPrompt: "player prompt",
+                playerAvatarPrompt: "player prompt",
                 dateePrompt: "datee prompt",
                 conversationHistory: new List<(string, string)> { ("P", "hey"), ("O", "hi") },
                 dateeLastMessage: "hi",
