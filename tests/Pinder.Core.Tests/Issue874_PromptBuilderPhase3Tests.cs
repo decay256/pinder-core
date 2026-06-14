@@ -12,18 +12,20 @@ using Xunit;
 namespace Pinder.Core.Tests
 {
     /// <summary>
-    /// Issue #874 Phase 3 + #875 Phase 5: <see cref="PromptBuilder"/>
+    /// Issue #874 Phase 3 + #875 Phase 5 (updated by #1154): <see cref="PromptBuilder"/>
     /// structural strings sourced exclusively from
     /// <c>data/prompts/structural.yaml</c>.
     ///
-    /// What this file pins (updated after Phase 5):
+    /// What this file pins (updated after #1154):
     /// - The loader parses <c>data/prompts/structural.yaml</c> into a
-    ///   <see cref="PromptCatalog"/> with 7 expected entries.
+    ///   <see cref="PromptCatalog"/> with the single collapsed
+    ///   <c>character_card_framing</c> entry (was 7 <c>structural-*</c> keys).
     /// - <see cref="PromptBuilder.StructuralFragmentLookup"/> MUST be wired
     ///   before calling <see cref="PromptBuilder.BuildSystemPrompt"/> —
     ///   a null or missing-key lookup throws <see cref="InvalidOperationException"/>.
     /// - When the lookup is wired, <see cref="PromptBuilder.BuildSystemPrompt"/>
-    ///   emits the yaml-sourced section headers into the assembled prompt.
+    ///   splits the collapsed framing back into the yaml-sourced section
+    ///   headers and emits them into the assembled prompt.
     /// </summary>
     [Trait("Category", "PromptCatalog")]
     [Collection("StaticWiring")]
@@ -69,49 +71,52 @@ namespace Pinder.Core.Tests
         // ----- loader: entry count -------------------------------------------
 
         [Fact]
-        public void StructuralYaml_LoadsAll7Entries()
+        public void StructuralYaml_LoadsCollapsedFramingEntry()
         {
             var catalog = LoadCatalog();
 
-            // The 7 structural entries must be present.
+            // #1154: the 7 structural-* keys collapsed into one field.
             var names = catalog.Names.ToList();
-            Assert.Contains("structural-lead-in", names);
-            Assert.Contains("structural-identity", names);
-            Assert.Contains("structural-personality", names);
-            Assert.Contains("structural-backstory", names);
-            Assert.Contains("structural-texting-style", names);
-            Assert.Contains("structural-active-archetype", names);
-            Assert.Contains("structural-active-trap-instructions", names);
+            Assert.Contains("character_card_framing", names);
+
+            // The old per-section keys are gone.
+            Assert.DoesNotContain("structural-lead-in", names);
+            Assert.DoesNotContain("structural-identity", names);
+            Assert.DoesNotContain("structural-personality", names);
+            Assert.DoesNotContain("structural-backstory", names);
+            Assert.DoesNotContain("structural-texting-style", names);
+            Assert.DoesNotContain("structural-active-archetype", names);
+            Assert.DoesNotContain("structural-active-trap-instructions", names);
         }
 
-        // ----- byte-identity contract: representative entry ------------------
+        // ----- byte-identity contract: collapsed framing carries the 7 labels --
 
         [Fact]
-        public void Yaml_StructuralIdentity_MatchesConst_ByteForByte()
+        public void Yaml_CharacterCardFraming_CarriesSevenLabelsInOrder()
         {
-            // #874 Phase 3 contract: this is a pure relocation. The yaml
-            // must produce the same text the legacy const does. If a
-            // future PR renames the section header, it MUST update both
-            // the yaml AND the const (or, post-Phase 5, just the yaml).
+            // #1154 contract: the collapsed field is the 7 section labels,
+            // one per line, in emission order. Splitting it back must
+            // recover the exact legacy label strings byte-for-byte.
             var catalog = LoadCatalog();
-            var entry = catalog.Get("structural-identity");
+            var entry = catalog.Get("character_card_framing");
 
-            string fromYaml = entry.SystemPrompt!;
-            const string fromConst = "IDENTITY";
+            var labels = entry.SystemPrompt!
+                .Replace("\r\n", "\n")
+                .TrimEnd('\n')
+                .Split('\n');
 
-            Assert.Equal(fromConst, fromYaml);
-        }
-
-        [Fact]
-        public void Yaml_StructuralLeadIn_MatchesConst_ByteForByte()
-        {
-            var catalog = LoadCatalog();
-            var entry = catalog.Get("structural-lead-in");
-
-            string fromYaml = entry.SystemPrompt!;
-            const string fromConst = "RULES";
-
-            Assert.Equal(fromConst, fromYaml);
+            Assert.Equal(
+                new[]
+                {
+                    "RULES",
+                    "IDENTITY",
+                    "PERSONALITY",
+                    "BACKSTORY",
+                    "TEXTING STYLE",
+                    "ACTIVE ARCHETYPE",
+                    "ACTIVE TRAP INSTRUCTIONS",
+                },
+                labels);
         }
 
         // ----- StructuralFragmentLookup: must be wired (Phase 5) ------------

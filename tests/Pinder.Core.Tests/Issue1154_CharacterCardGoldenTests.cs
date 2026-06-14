@@ -1,0 +1,142 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using Pinder.Core.Characters;
+using Pinder.Core.Conversation;
+using Pinder.Core.Prompts;
+using Pinder.Core.Stats;
+using Pinder.Core.Traps;
+using Xunit;
+
+namespace Pinder.Core.Tests
+{
+    /// <summary>
+    /// Issue #1154 — golden byte-identity oracle for the inner character-card
+    /// builder <see cref="PromptBuilder.BuildSystemPromptEx"/>.
+    ///
+    /// The #1154 refactor collapsed the 7 <c>structural-*</c> section-header
+    /// keys in <c>data/prompts/structural.yaml</c> into a single
+    /// <c>character_card_framing</c> field; the builder splits that one field
+    /// back into the 7 labels and emits them in the EXACT same byte positions
+    /// as before. This is a BEHAVIOR-PRESERVING change: the compiled character
+    /// card must stay byte-for-byte identical to what the old per-key builder
+    /// produced.
+    ///
+    /// The golden fixtures were captured from the UNMODIFIED pre-refactor code
+    /// and checked in verbatim. Both the trap-INACTIVE and trap-ACTIVE cases
+    /// are pinned (the trap block is gated on <c>activeTraps.AllActive</c>).
+    ///
+    /// NOTE (orchestrator decision): #1154's other half — reordering sections
+    /// so variable per-character data forms a trailing block — was DEFERRED
+    /// because it is byte-CHANGING and conflicts with this non-negotiable
+    /// byte-identity contract. Only the SSOT collapse landed here.
+    /// </summary>
+    [Trait("Category", "PromptCatalog")]
+    [Collection("StaticWiring")]
+    public class Issue1154_CharacterCardGoldenTests
+    {
+        private static string FixturesDir =>
+            Path.Combine(AppContext.BaseDirectory, "Fixtures", "Issue1154");
+
+        private static string ReadFixture(string name) =>
+            File.ReadAllText(Path.Combine(FixturesDir, name));
+
+        private static readonly Dictionary<StatType, int> BaseStats =
+            new Dictionary<StatType, int>
+            {
+                { StatType.Charm, 3 }, { StatType.Rizz, 2 },
+                { StatType.Honesty, 5 }, { StatType.Chaos, 1 },
+                { StatType.Wit, 4 }, { StatType.SelfAwareness, 0 },
+            };
+
+        private static readonly Dictionary<ShadowStatType, int> Shadow =
+            new Dictionary<ShadowStatType, int>
+            {
+                { ShadowStatType.Madness, 0 }, { ShadowStatType.Despair, 0 },
+                { ShadowStatType.Denial, 0 }, { ShadowStatType.Fixation, 0 },
+                { ShadowStatType.Dread, 0 }, { ShadowStatType.Overthinking, 0 },
+            };
+
+        private static FragmentCollection BuildDeterministicFragments()
+        {
+            return new FragmentCollection(
+                personalityFragments: new List<string> { "warm but guarded", "dry humour", "secretly competitive" },
+                backstoryFragments:   new List<string> { "grew up by the sea", "dropped out of art school", "adopted a three-legged cat" },
+                textingStyleFragments: new List<string>(),
+                rankedArchetypes:     new List<(string, int)> { ("The Peacock", 4) },
+                timing: new TimingProfile(5, 1.0f, 0.0f, "neutral"),
+                stats: new StatBlock(BaseStats, Shadow),
+                activeArchetype: new ActiveArchetype(
+                    "The Peacock",
+                    "Loud, expensive flex.\n*Sample lines:* \"check my watch\" \u00b7 \"weekend trip booked\"",
+                    4, 5),
+                textingStyleSources: new List<TextingStyleFragmentSource>
+                {
+                    new TextingStyleFragmentSource(
+                        "item", "hiking-boots",
+                        "SYNTAX:\n- emoji: never uses emoji at all\n- shorthand: \n- grammar: \n- structure: \n- length: \n- tics: \nTONE:",
+                        slotOrParameter: "shoes"),
+                });
+        }
+
+        // ── trap-INACTIVE: no ACTIVE TRAP block ───────────────────────────
+        [Fact]
+        public void BuildSystemPromptEx_TrapInactive_MatchesGoldenByteForByte()
+        {
+            var fragments = BuildDeterministicFragments();
+
+            var result = PromptBuilder.BuildSystemPromptEx(
+                "Velvet", "she/her", "just here for the vibes",
+                fragments, new TrapState(), characterIdSeed: "fixed-seed-1154");
+
+            Assert.Equal(ReadFixture("golden_inactive.txt"), result.Text);
+        }
+
+        // ── trap-ACTIVE: the gated ACTIVE TRAP INSTRUCTIONS block appears ──
+        [Fact]
+        public void BuildSystemPromptEx_TrapActive_MatchesGoldenByteForByte()
+        {
+            var fragments = BuildDeterministicFragments();
+
+            var trapState = new TrapState();
+            trapState.Activate(new TrapDefinition(
+                id: "cringe",
+                stat: StatType.Charm,
+                effect: TrapEffect.StatPenalty,
+                effectValue: 2,
+                durationTurns: 3,
+                llmInstruction: "You just said something deeply cringe. Overcompensate awkwardly for the next few messages.",
+                clearMethod: "land a genuine joke",
+                nat1Bonus: "double cringe",
+                displayName: "Cringe"));
+
+            var result = PromptBuilder.BuildSystemPromptEx(
+                "Velvet", "she/her", "just here for the vibes",
+                fragments, trapState, characterIdSeed: "fixed-seed-1154");
+
+            Assert.Equal(ReadFixture("golden_active.txt"), result.Text);
+        }
+
+        // ── provenance: every framing span is now sourced from the single
+        //    collapsed key (was the 7 structural-* keys) ────────────────────
+        [Fact]
+        public void BuildSystemPromptEx_FramingSpans_AttributeToCollapsedKey()
+        {
+            var fragments = BuildDeterministicFragments();
+
+            var trapState = new TrapState();
+            trapState.Activate(new TrapDefinition(
+                "cringe", StatType.Charm, TrapEffect.StatPenalty, 2, 3,
+                "trap instr", "clear", "nat1", "Cringe"));
+
+            var result = PromptBuilder.BuildSystemPromptEx(
+                "Velvet", "she/her", "bio", fragments, trapState,
+                characterIdSeed: "fixed-seed-1154");
+
+            // No span carries a legacy structural-* key anymore.
+            Assert.DoesNotContain(result.Spans, s => s.Key.StartsWith("structural-", StringComparison.Ordinal));
+            // The framing headers are now attributed to the collapsed key.
+            Assert.Contains(result.Spans, s => s.Key == PromptBuilder.CharacterCardFramingKey);
+        }
+    }
+}
