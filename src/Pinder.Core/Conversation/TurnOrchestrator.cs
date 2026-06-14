@@ -154,6 +154,14 @@ namespace Pinder.Core.Conversation
                 callbackOpportunities: state.Topics.Count > 0 ? new List<CallbackOpportunity>(state.Topics) : null,
                 horninessLevel: state.SessionHorniness,
                 requiresRizzOption: false,
+                // #1156: the options prompt must know who the player and datee
+                // are so HistoryFormatter can attribute speakers. Omitting these
+                // let them default to "" -> FallbackName turned "" into "Player",
+                // which never matched the real sender, so EVERY history line
+                // (including the player's own messages) was labeled [DATEE].
+                // Mirror DateeResponseStage which already passes these.
+                playerName: player.DisplayName,
+                dateeName: datee.DisplayName,
                 currentTurn: state.TurnNumber,
                 playerTextingStyle: player.TextingStyleFragment,
                 activeTell: state.ActiveTell,
