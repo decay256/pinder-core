@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Pinder.Core.Characters;
 using Pinder.Core.Data;
 using Pinder.Core.Interfaces;
@@ -37,8 +38,31 @@ namespace Pinder.Tools.NarrativeHarness
     /// </summary>
     public static class HarnessCharacterLoader
     {
+        // Defense-in-depth allowlist for admin-supplied character slugs
+        // (--character / --pursuer-character). Accept only a leading
+        // alphanumeric followed by alphanumerics/hyphen/underscore. This
+        // rejects path separators ('/', '\'), parent-dir traversal (".."),
+        // bare dots, leading separators/dots, drive roots, and whitespace,
+        // BEFORE any path is constructed from the slug.
+        private static readonly Regex SafeSlugPattern =
+            new Regex("^[A-Za-z0-9][A-Za-z0-9_-]*$", RegexOptions.Compiled);
+
+        private static void ValidateSlug(string slug)
+        {
+            if (string.IsNullOrWhiteSpace(slug) || !SafeSlugPattern.IsMatch(slug))
+                throw new ArgumentException(
+                    $"Invalid character slug: '{slug}'. Slugs must match ^[A-Za-z0-9][A-Za-z0-9_-]*$ "
+                    + "(no path separators, no '..', no absolute paths, no whitespace).",
+                    nameof(slug));
+        }
+
         public static LoadedCharacter Load(string slug)
         {
+            // Guard first: reject structurally-unsafe slugs before constructing
+            // any filesystem path. Valid-but-missing slugs still fall through to
+            // the FileNotFoundException path below.
+            ValidateSlug(slug);
+
             string baseDir = AppContext.BaseDirectory;
 
             // Production prompt assembly requires the unified PromptCatalog to be
