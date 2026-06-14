@@ -1,16 +1,17 @@
 schema_version: 1
 prompts:
-  structural-lead-in:
-    system_prompt: 'RULES'
-  structural-identity:
-    system_prompt: IDENTITY
-  structural-personality:
-    system_prompt: PERSONALITY
-  structural-backstory:
-    system_prompt: BACKSTORY
-  structural-texting-style:
-    system_prompt: TEXTING STYLE
-  structural-active-archetype:
-    system_prompt: ACTIVE ARCHETYPE
-  structural-active-trap-instructions:
-    system_prompt: ACTIVE TRAP INSTRUCTIONS
+  # Issue #1154: the 7 former structural-* header keys (RULES, IDENTITY,
+  # PERSONALITY, BACKSTORY, TEXTING STYLE, ACTIVE ARCHETYPE, ACTIVE TRAP
+  # INSTRUCTIONS) are collapsed into this single constant-framing field.
+  # PromptBuilder.BuildSystemPromptEx splits it back into the 7 labels by
+  # line, in order, and emits them in the exact same byte positions as
+  # before — the compiled character card stays byte-identical.
+  character_card_framing:
+    system_prompt: |-
+      RULES
+      IDENTITY
+      PERSONALITY
+      BACKSTORY
+      TEXTING STYLE
+      ACTIVE ARCHETYPE
+      ACTIVE TRAP INSTRUCTIONS

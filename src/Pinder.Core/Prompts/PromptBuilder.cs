@@ -29,12 +29,22 @@ namespace Pinder.Core.Prompts
     public static class PromptBuilder
     {
         /// <summary>
+        /// The single yaml key (since #1154) holding the collapsed
+        /// constant character-card framing. Its value is the 7 section
+        /// labels, one per line, in emission order:
+        /// RULES / IDENTITY / PERSONALITY / BACKSTORY / TEXTING STYLE /
+        /// ACTIVE ARCHETYPE / ACTIVE TRAP INSTRUCTIONS.
+        /// </summary>
+        public const string CharacterCardFramingKey = "character_card_framing";
+
+        /// <summary>
         /// Resolves structural prompt fragments from the yaml catalog.
-        /// Keys are kebab-case (e.g. <c>"structural-lead-in"</c>,
-        /// <c>"structural-identity"</c>). Set at startup (typically by
-        /// <c>PromptWiring.Wire()</c>). After Phase 5 of #871, null
-        /// or missing keys cause <see cref="BuildSystemPrompt"/> to throw
-        /// — there are no embedded const fallbacks.
+        /// Since #1154 the only key consulted is
+        /// <see cref="CharacterCardFramingKey"/> (<c>"character_card_framing"</c>).
+        /// Set at startup (typically by <c>PromptWiring.Wire()</c>). After
+        /// Phase 5 of #871, null or missing keys cause
+        /// <see cref="BuildSystemPrompt"/> to throw — there are no embedded
+        /// const fallbacks.
         /// </summary>
         public static Func<string, string?>? StructuralFragmentLookup { get; set; }
 
@@ -48,11 +58,6 @@ namespace Pinder.Core.Prompts
         /// delegate is not wired or the key is missing — after Phase 5
         /// there are no const fallbacks.
         /// </summary>
-        private static string GetHeader(string key)
-        {
-            return GetHeaderEx(key).Content;
-        }
-
         private static (string Content, string SourceFile) GetHeaderEx(string key)
         {
             var lookup = StructuralFragmentLookup
@@ -78,6 +83,62 @@ namespace Pinder.Core.Prompts
             }
 
             return (value, sourceFile);
+        }
+
+        /// <summary>
+        /// #1154: the 7 constant section labels recovered, in order, from
+        /// the single <see cref="CharacterCardFramingKey"/> field.
+        /// </summary>
+        private readonly struct CardFraming
+        {
+            public readonly string LeadIn;
+            public readonly string Identity;
+            public readonly string Personality;
+            public readonly string Backstory;
+            public readonly string TextingStyle;
+            public readonly string ActiveArchetype;
+            public readonly string ActiveTrapInstructions;
+            public readonly string SourceFile;
+
+            public CardFraming(string[] labels, string sourceFile)
+            {
+                LeadIn                 = labels[0];
+                Identity               = labels[1];
+                Personality            = labels[2];
+                Backstory              = labels[3];
+                TextingStyle           = labels[4];
+                ActiveArchetype        = labels[5];
+                ActiveTrapInstructions = labels[6];
+                SourceFile             = sourceFile;
+            }
+        }
+
+        /// <summary>
+        /// Load the collapsed framing field and split it back into the 7
+        /// section labels (one per line, in emission order). The split is
+        /// byte-preserving: each recovered label is emitted in the exact
+        /// same position as the legacy per-key headers.
+        /// </summary>
+        private static CardFraming GetCardFraming()
+        {
+            var framing = GetHeaderEx(CharacterCardFramingKey);
+            // Split on LF, tolerating CRLF, and drop a single trailing
+            // blank line if the yaml block scalar produced one.
+            var lines = framing.Content.Replace("\r\n", "\n").Split('\n');
+            int count = lines.Length;
+            while (count > 0 && lines[count - 1].Length == 0) count--;
+
+            if (count != 7)
+            {
+                throw new InvalidOperationException(
+                    $"prompt-catalog: '{CharacterCardFramingKey}' must declare exactly " +
+                    $"7 section labels (one per line); found {count}. " +
+                    $"Check data/prompts/structural.yaml.");
+            }
+
+            var labels = new string[7];
+            for (int i = 0; i < 7; i++) labels[i] = lines[i];
+            return new CardFraming(labels, framing.SourceFile);
         }
 
         /// <summary>
@@ -128,40 +189,41 @@ namespace Pinder.Core.Prompts
 
             var sb = new AnnotatedStringBuilder();
 
+            // #1154: the constant section framing now lives in ONE collapsed
+            // field (character_card_framing); split it back into the 7 labels
+            // and emit them in the EXACT same byte positions as before.
+            var framing = GetCardFraming();
+            string srcFile = framing.SourceFile;
+            const string srcKey = CharacterCardFramingKey;
+
             // Header — sourced from structural.yaml, no fallback.
-            var leadIn = GetHeaderEx("structural-lead-in");
-            sb.AppendLine(leadIn.Content.Replace("{name}", displayName), leadIn.SourceFile, "structural-lead-in");
+            sb.AppendLine(framing.LeadIn.Replace("{name}", displayName), srcFile, srcKey);
             sb.AppendLine();
 
             // IDENTITY
-            var identity = GetHeaderEx("structural-identity");
-            sb.AppendLine(identity.Content, identity.SourceFile, "structural-identity");
+            sb.AppendLine(framing.Identity, srcFile, srcKey);
             sb.AppendLine($"- Gender identity: {genderIdentity}");
             sb.AppendLine($"- Bio: {(string.IsNullOrWhiteSpace(bioOneLiner) ? "none" : bioOneLiner)}");
             sb.AppendLine();
 
             // PERSONALITY
-            var personality = GetHeaderEx("structural-personality");
-            sb.AppendLine(personality.Content, personality.SourceFile, "structural-personality");
+            sb.AppendLine(framing.Personality, srcFile, srcKey);
             AppendBulletList(sb, fragments.PersonalityFragments);
             sb.AppendLine();
 
             // BACKSTORY
-            var backstory = GetHeaderEx("structural-backstory");
-            sb.AppendLine(backstory.Content, backstory.SourceFile, "structural-backstory");
+            sb.AppendLine(framing.Backstory, srcFile, srcKey);
             AppendBulletList(sb, fragments.BackstoryFragments);
             sb.AppendLine();
 
             // TEXTING STYLE
-            var textingStyle = GetHeaderEx("structural-texting-style");
-            sb.AppendLine(textingStyle.Content, textingStyle.SourceFile, "structural-texting-style");
+            sb.AppendLine(framing.TextingStyle, srcFile, srcKey);
             AppendBulletList(sb, TextingStyleAggregator.AggregateAsList(
                 fragments.TextingStyleSources, characterIdSeed));
             sb.AppendLine();
 
             // ACTIVE ARCHETYPE
-            var activeArchetype = GetHeaderEx("structural-active-archetype");
-            sb.AppendLine(activeArchetype.Content, activeArchetype.SourceFile, "structural-active-archetype");
+            sb.AppendLine(framing.ActiveArchetype, srcFile, srcKey);
             if (fragments.ActiveArchetype != null)
             {
                 var aa = fragments.ActiveArchetype;
@@ -191,8 +253,7 @@ namespace Pinder.Core.Prompts
                 if (!hasActiveHeader)
                 {
                     sb.AppendLine();
-                    var activeTrapHeader = GetHeaderEx("structural-active-trap-instructions");
-                    sb.AppendLine(activeTrapHeader.Content, activeTrapHeader.SourceFile, "structural-active-trap-instructions");
+                    sb.AppendLine(framing.ActiveTrapInstructions, srcFile, srcKey);
                     hasActiveHeader = true;
                 }
                 sb.AppendLine(trap.Definition.LlmInstruction);
