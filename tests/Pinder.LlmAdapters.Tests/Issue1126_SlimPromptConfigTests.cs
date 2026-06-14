@@ -177,7 +177,6 @@ namespace Pinder.LlmAdapters.Tests
             // consumes these, so they must NOT have been swept up with the dead
             // creative-delivery templates.
             var def = GameDefinition.PinderDefaults;
-            Assert.NotNull(def.DeliveryRules);
             Assert.True(def.MaxDeliveryWords > 0);
 
             // The delivery-tier instruction strings (default-*) stay in the catalog.

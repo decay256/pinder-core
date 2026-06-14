@@ -31,4 +31,8 @@
     <ProjectReference Include="..\Pinder.Core.TestCommon\Pinder.Core.TestCommon.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="Fixtures\Issue1153\*.txt" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

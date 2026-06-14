@@ -58,41 +58,12 @@ namespace Pinder.LlmAdapters
                 throw new FormatException($"Missing required key: \"{newKey}\"");
             }
 
-            DeliveryRules deliveryRules = null;
-            if (parsed.TryGetValue("delivery_rules", out var drObj))
-            {
-                deliveryRules = CatalogParser.ParseDeliveryRules(drObj);
-            }
-
-            DramaticCraft dramaticCraft = null;
-            if (parsed.TryGetValue("dramatic_craft", out var dcObj))
-            {
-                dramaticCraft = CatalogParser.ParseDramaticCraft(dcObj);
-            }
-
             // Parse optional prose fields
             string GetOptional(string key)
             {
                 if (parsed.TryGetValue(key, out var v) && v != null)
                     return v.ToString();
                 return null;
-            }
-            
-            string GetOptionalWithFallback(string newKey, string oldKey)
-            {
-                if (parsed.TryGetValue(newKey, out var v) && v != null)
-                    return v.ToString();
-                if (parsed.TryGetValue(oldKey, out v) && v != null)
-                    return v.ToString();
-                return null;
-            }
-            
-            // conversation_arc is a dict with a "progression" key
-            string conversationArcProgression = null;
-            if (parsed.TryGetValue("conversation_arc", out var caObj) && caObj is Dictionary<object, object> caDict)
-            {
-                if (caDict.TryGetValue("progression", out var caV) && caV != null)
-                    conversationArcProgression = caV.ToString();
             }
 
             // Parse required horniness_time_modifiers
@@ -101,11 +72,9 @@ namespace Pinder.LlmAdapters
 
             // Validate core required keys first (throws FormatException)
             var name = GetRequired("name");
-            var vision = GetRequired("vision");
-            var worldDescription = GetRequired("world_description");
+            var gameMasterPrompt = GetRequired("game_master_prompt");
             var playerAvatarRoleDescription = GetRequiredWithFallback("player_avatar_role_description", "player_role_description");
             var dateeRoleDescription = GetRequired("datee_role_description");
-            var narrativeDoctrine = GetRequired("narrative_doctrine");
 
             // Parse required global_dc_bias
             if (!parsed.TryGetValue("global_dc_bias", out var gdcbObj) || gdcbObj == null)
@@ -115,17 +84,9 @@ namespace Pinder.LlmAdapters
 
             return new GameDefinition(
                 name: name,
-                vision: vision,
-                worldDescription: worldDescription,
+                gameMasterPrompt: gameMasterPrompt,
                 playerAvatarRoleDescription: playerAvatarRoleDescription,
                 dateeRoleDescription: dateeRoleDescription,
-                narrativeDoctrine: narrativeDoctrine,
-                deliveryRules: deliveryRules,
-                dramaticCraft: dramaticCraft,
-                dateeFriction: GetOptional("datee_friction"),
-                dateeCuriosity: GetOptional("datee_curiosity"),
-                conversationArcProgression: conversationArcProgression,
-                playerAvatarProbing: GetOptionalWithFallback("player_avatar_probing", "player_probing"),
                 improvementPrompt: GetOptional("improvement_prompt"),
                 steeringPrompt: GetOptional("steering_prompt"),
                 horninessTimeModifiers: horninessTimeModifiers,

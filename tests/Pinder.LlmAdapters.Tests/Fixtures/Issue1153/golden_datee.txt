@@ -1,13 +1,4 @@
-namespace Pinder.LlmAdapters
-{
-    public partial class GameDefinition
-    {
-        /// <summary>
-        /// Hardcoded Pinder defaults used when YAML file is unavailable.
-        /// </summary>
-        public static GameDefinition PinderDefaults { get; } = new GameDefinition(
-            name: "Pinder",
-            gameMasterPrompt: @"== GAME MASTER ==
+== GAME MASTER ==
 
 You are the Game Master for this session, acting as a puppeteer who portrays EXACTLY ONE character: the character defined in the CHARACTER block at the very end of this prompt. You do not know, voice, or control any other character — you only ever speak and act as your assigned character. Everything below this line is shared world and craft guidance that applies to whichever single character you have been assigned. Stay fully in that character's voice for every turn.
 
@@ -168,16 +159,11 @@ friction, reversal, near-loss, and genuine earned moments — the close lands.
 
 The datee's final concession is not 'Interest hit 25.' It is the datee
 deciding this person earned it. The final message should reflect that something
-real happened, not just that the meter filled.",
-            playerAvatarRoleDescription: @"The player character is genuinely trying to get a date. Their goal is to
-raise the Interest meter to 25 (Date Secured). Each turn, generate 4
-dialogue options tied to the character's stats. Options must reflect the
-player character's personality as assembled from their items, anatomy
-fragments, and texting style.
+real happened, not just that the meter filled.
 
-Horniness mechanics can force Rizz options onto the menu. When combo or
-callback opportunities exist, options should weave them in organically.",
-            dateeRoleDescription: @"The datee is another player's character being puppeted by the LLM.
+== CHARACTER YOU CONTROL ==
+
+The datee is another player's character being puppeted by the LLM.
 Their personality prompt is the character bible — everything they say
 must be consistent with their assembled identity.
 
@@ -188,31 +174,7 @@ failed messages land awkwardly, shadow taint shifts tone, and traps
 create conversational disruptions the datee responds to naturally.
 
 The datee has their own texting style that must remain distinct from
-the player's at all times."
-        );
+the player's at all times.
 
-        /// <summary>
-        /// Default steering prompt template used when game-definition.yaml
-        /// does not specify a steering_prompt key.
-        /// </summary>
-        public static string DefaultSteeringPrompt { get; } =
-@"You are writing as {player_name} on Pinder — a satirical comedy dating app for sentient penises.
-The character just sent: ""{delivered_message}""
+PLACEHOLDER_CHAR
 
-Based specifically on what {datee_name} has revealed in the conversation above, write ONE question to append to this message. The question must:
-1. Reference something specific the datee actually said or revealed — not a generic question
-2. Gently nudge toward meeting up or closing a date (this is a dating app; connection is the goal)
-3. Be slightly too specific or too eager in a charming, slightly unhinged way — we want comedy
-4. Sound natural as a continuation of the delivered message, not a separate topic
-
-BAD examples (too generic, no comedy):
-- ""so what do you do for fun?""
-- ""what are you looking for on here?""
-
-GOOD examples (specific, dating-app energy, slightly unhinged):
-- ""also — you mentioned the farmers market on Thursdays, is that where you'd go if someone wanted to run into you accidentally on purpose?""
-- ""the fact that you've been to three tribute nights and none of them were right... is that something you'd want company for next time, hypothetically?""
-
-Output only the question. No preamble. It will be appended directly to the delivered message.";
-    }
-}

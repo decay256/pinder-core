@@ -59,8 +59,10 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void Build_ContainsNarrativeDoctrineHeader()
         {
+            // #1153: the GM base is now a single field; the doctrine sub-header
+            // lives inside the assembled GameMasterPrompt prose.
             var result = SessionSystemPromptBuilder.BuildPlayerAvatar(PlayerAvatarPrompt);
-            Assert.Contains("== NARRATIVE DOCTRINE ==", result);
+            Assert.Contains("WRITING RULES", result);
         }
 
         [Fact]
@@ -78,11 +80,10 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void Build_HasSharedSections()
         {
+            // #1153: GM base collapsed into one field; GAME MASTER header and the
+            // character-spec header bracket the shared base.
             var result = SessionSystemPromptBuilder.BuildPlayerAvatar(PlayerAvatarPrompt);
             Assert.Contains("== GAME MASTER ==", result);
-            Assert.Contains("== GAME VISION ==", result);
-            Assert.Contains("== WORLD RULES ==", result);
-            Assert.Contains("== NARRATIVE DOCTRINE ==", result);
             Assert.Contains(SessionSystemPromptBuilder.CharacterSpecHeader, result);
         }
 
@@ -93,13 +94,10 @@ namespace Pinder.LlmAdapters.Tests
             // so the cacheable prefix stays stable (#1123 caching).
             var result = SessionSystemPromptBuilder.BuildPlayerAvatar(PlayerAvatarPrompt);
             var gmIdx = result.IndexOf("== GAME MASTER ==", StringComparison.Ordinal);
-            var visionIdx = result.IndexOf("== GAME VISION ==", StringComparison.Ordinal);
-            var doctrineIdx = result.IndexOf("== NARRATIVE DOCTRINE ==", StringComparison.Ordinal);
             var specIdx = result.IndexOf(SessionSystemPromptBuilder.CharacterSpecHeader, StringComparison.Ordinal);
 
-            Assert.True(gmIdx < visionIdx, "GAME MASTER framing should come first");
-            Assert.True(visionIdx < doctrineIdx, "GAME VISION should precede NARRATIVE DOCTRINE");
-            Assert.True(doctrineIdx < specIdx, "Static base should precede the character-spec block");
+            Assert.True(gmIdx >= 0, "GAME MASTER framing should be present");
+            Assert.True(gmIdx < specIdx, "Static base should precede the character-spec block");
             // The character spec is the final block — its prompt text appears after it.
             Assert.Contains(PlayerAvatarPrompt, result.Substring(specIdx));
         }
@@ -163,11 +161,9 @@ namespace Pinder.LlmAdapters.Tests
         {
             var custom = new GameDefinition(
                 "CustomGame",
-                "Custom vision text",
-                "Custom world desc",
+                "Custom vision text Custom world desc Custom meta contract Custom writing rules",
                 "Custom player role",
-                "Custom datee role",
-                "Custom meta contract Custom writing rules");
+                "Custom datee role");
 
             var result = SessionSystemPromptBuilder.BuildPlayerAvatar(PlayerAvatarPrompt, custom);
             Assert.Contains("Custom vision text", result);
@@ -203,14 +199,13 @@ namespace Pinder.LlmAdapters.Tests
         public void Build_MetaContractIncludesWritingRules()
         {
             var custom = new GameDefinition(
-                "G", "V", "W", "P", "O",
-                "MetaSection WritingSection");
+                "G", "MetaSection WritingSection", "P", "O");
 
             var result = SessionSystemPromptBuilder.BuildPlayerAvatar("p", custom);
-            var metaIdx = result.IndexOf("== NARRATIVE DOCTRINE ==", StringComparison.Ordinal);
-            var afterMeta = result.Substring(metaIdx);
-            Assert.Contains("MetaSection", afterMeta);
-            Assert.Contains("WritingSection", afterMeta);
+            var specIdx = result.IndexOf(SessionSystemPromptBuilder.CharacterSpecHeader, StringComparison.Ordinal);
+            var gmBase = result.Substring(0, specIdx);
+            Assert.Contains("MetaSection", gmBase);
+            Assert.Contains("WritingSection", gmBase);
         }
     }
 }

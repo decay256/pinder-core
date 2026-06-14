@@ -17,19 +17,21 @@ namespace Pinder.LlmAdapters.Tests
     {
         private static GameDefinition FullFixture()
         {
+            // #1153: the GM base is a single pre-assembled field. The conversation-
+            // dynamic sections and doctrine sub-sections are now part of that one
+            // GameMasterPrompt body.
             return new GameDefinition(
                 "TestGame",
-                "Vision text here.",
-                "World description text here.",
-                "Player role description here.",
-                "Datee role description here.",
+                "Vision text here.\n\nWorld description text here.\n\n" +
                 "Meta contract text here.\n\n== WRITING RULES ==\n\nWriting rules text here.\n\n" +
                 "== TEXTING PSYCHOLOGY ==\n\ntexting psych content\n\n" +
-                "== REVELATION OVER STATEMENT ==\n\nrevelation content",
-                dateeFriction: "datee friction content",
-                dateeCuriosity: "datee curiosity content",
-                conversationArcProgression: "conversation arc content",
-                playerAvatarProbing: "player probing content");
+                "== REVELATION OVER STATEMENT ==\n\nrevelation content\n\n" +
+                "== DATEE RESISTANCE ==\n\ndatee friction content\n\n" +
+                "== DATEE CURIOSITY ==\n\ndatee curiosity content\n\n" +
+                "== CONVERSATION ARC ==\n\nconversation arc content\n\n" +
+                "== PLAYER PROBING ==\n\nplayer probing content",
+                "Player role description here.",
+                "Datee role description here.");
         }
 
         #region Shared GM base is identical for both sessions (#1124)

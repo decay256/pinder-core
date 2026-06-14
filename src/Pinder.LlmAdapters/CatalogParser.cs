@@ -10,55 +10,6 @@ namespace Pinder.LlmAdapters
     public static class CatalogParser
     {
         /// <summary>
-        /// Parses a dictionary object into a <see cref="DeliveryRules"/> instance.
-        /// </summary>
-        public static DeliveryRules? ParseDeliveryRules(object? obj)
-        {
-            if (obj is Dictionary<object, object> dict)
-            {
-                string DrGet(string key)
-                {
-                    if (dict.TryGetValue(key, out var v) && v != null)
-                        return v.ToString();
-                    return "";
-                }
-                return new DeliveryRules(
-                    clean: DrGet("clean"),
-                    strong: DrGet("strong"),
-                    critical: DrGet("critical"),
-                    exceptional: DrGet("exceptional"),
-                    test: DrGet("test"),
-                    registerInstruction: DrGet("register_instruction"),
-                    mediumRule: DrGet("medium_rule"));
-            }
-            return null;
-        }
-
-        /// <summary>
-        /// Parses a dictionary object into a <see cref="DramaticCraft"/> instance.
-        /// </summary>
-        public static DramaticCraft? ParseDramaticCraft(object? obj)
-        {
-            if (obj is Dictionary<object, object> dict)
-            {
-                string DcGet(string key)
-                {
-                    if (dict.TryGetValue(key, out var v) && v != null)
-                        return v.ToString();
-                    return "";
-                }
-                return new DramaticCraft(
-                    goal: DcGet("goal"),
-                    dateeWant: DcGet("datee_want"),
-                    revelationBudget: DcGet("revelation_budget"),
-                    directnessDial: DcGet("directness_dial"),
-                    failureCost: DcGet("failure_cost"),
-                    earningTheClose: DcGet("earning_the_close"));
-            }
-            return null;
-        }
-
-        /// <summary>
         /// Parses a dictionary object into a <see cref="HorninessTimeModifiers"/> instance.
         /// </summary>
         public static HorninessTimeModifiers ParseHorninessTimeModifiers(object? obj)

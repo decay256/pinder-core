@@ -6,25 +6,27 @@ namespace Pinder.LlmAdapters.Tests
     /// <summary>
     /// Spec-driven tests for Issue #543: Build session system prompt.
     /// Tests verify behavior from docs/specs/issue-543-spec.md.
+    ///
+    /// #1153: the GM base collapsed into a single <c>game_master_prompt</c>
+    /// field, so the constructor/parser shape is (name, gameMasterPrompt,
+    /// playerAvatarRoleDescription, dateeRoleDescription, ...).
     /// </summary>
     public partial class Issue543_SessionSystemPromptSpecTests
     {
-        #region AC1: GameDefinition class with all fields
+        #region AC1: GameDefinition class with required fields
 
-        // What: AC1 — GameDefinition sealed class with read-only string properties
+        // What: AC1 — GameDefinition class with read-only string properties
         // Mutation: would catch if any property was omitted or mapped to wrong constructor param
         [Fact]
-        public void GameDefinition_Constructor_SetsAll7Properties()
+        public void GameDefinition_Constructor_SetsAllProperties()
         {
             var gd = new GameDefinition(
-                "MyGame", "Vision1", "World1", "Player1", "Datee1", "Doctrine1");
+                "MyGame", "GmPrompt1", "Player1", "Datee1");
 
             Assert.Equal("MyGame", gd.Name);
-            Assert.Equal("Vision1", gd.Vision);
-            Assert.Equal("World1", gd.WorldDescription);
+            Assert.Equal("GmPrompt1", gd.GameMasterPrompt);
             Assert.Equal("Player1", gd.PlayerAvatarRoleDescription);
             Assert.Equal("Datee1", gd.DateeRoleDescription);
-            Assert.Equal("Doctrine1", gd.NarrativeDoctrine);
         }
 
         // What: AC1 — constructor throws ArgumentNullException for null name
@@ -33,28 +35,18 @@ namespace Pinder.LlmAdapters.Tests
         public void GameDefinition_Constructor_NullName_ThrowsArgumentNullException()
         {
             var ex = Assert.Throws<ArgumentNullException>(() =>
-                new GameDefinition(null!, "V", "W", "P", "O", "ND"));
+                new GameDefinition(null!, "GM", "P", "O"));
             Assert.Equal("name", ex.ParamName);
         }
 
-        // What: AC1 — constructor throws ArgumentNullException for null vision
-        // Mutation: would catch if null check on vision was removed
+        // What: AC1 — constructor throws ArgumentNullException for null gameMasterPrompt
+        // Mutation: would catch if null check on gameMasterPrompt was removed
         [Fact]
-        public void GameDefinition_Constructor_NullVision_ThrowsArgumentNullException()
+        public void GameDefinition_Constructor_NullGameMasterPrompt_ThrowsArgumentNullException()
         {
             var ex = Assert.Throws<ArgumentNullException>(() =>
-                new GameDefinition("N", null!, "W", "P", "O", "ND"));
-            Assert.Equal("vision", ex.ParamName);
-        }
-
-        // What: AC1 — constructor throws ArgumentNullException for null worldDescription
-        // Mutation: would catch if null check on worldDescription was removed
-        [Fact]
-        public void GameDefinition_Constructor_NullWorldDescription_ThrowsArgumentNullException()
-        {
-            var ex = Assert.Throws<ArgumentNullException>(() =>
-                new GameDefinition("N", "V", null!, "P", "O", "ND"));
-            Assert.Equal("worldDescription", ex.ParamName);
+                new GameDefinition("N", null!, "P", "O"));
+            Assert.Equal("gameMasterPrompt", ex.ParamName);
         }
 
         // What: AC1 — constructor throws ArgumentNullException for null playerAvatarRoleDescription
@@ -63,7 +55,7 @@ namespace Pinder.LlmAdapters.Tests
         public void GameDefinition_Constructor_NullPlayerAvatarRoleDescription_ThrowsArgumentNullException()
         {
             var ex = Assert.Throws<ArgumentNullException>(() =>
-                new GameDefinition("N", "V", "W", null!, "O", "ND"));
+                new GameDefinition("N", "GM", null!, "O"));
             Assert.Equal("playerAvatarRoleDescription", ex.ParamName);
         }
 
@@ -73,18 +65,8 @@ namespace Pinder.LlmAdapters.Tests
         public void GameDefinition_Constructor_NullDateeRoleDescription_ThrowsArgumentNullException()
         {
             var ex = Assert.Throws<ArgumentNullException>(() =>
-                new GameDefinition("N", "V", "W", "P", null!, "ND"));
+                new GameDefinition("N", "GM", "P", null!));
             Assert.Equal("dateeRoleDescription", ex.ParamName);
-        }
-
-        // What: AC1 — constructor throws ArgumentNullException for null narrativeDoctrine
-        // Mutation: would catch if null check on narrativeDoctrine was removed
-        [Fact]
-        public void GameDefinition_Constructor_NullMetaContract_ThrowsArgumentNullException()
-        {
-            var ex = Assert.Throws<ArgumentNullException>(() =>
-                new GameDefinition("N", "V", "W", "P", "O", null!));
-            Assert.Equal("narrativeDoctrine", ex.ParamName);
         }
 
         // What: Edge case — empty strings are allowed (not null)
@@ -92,13 +74,11 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void GameDefinition_Constructor_AllowsEmptyStrings()
         {
-            var gd = new GameDefinition("", "", "", "", "", "");
+            var gd = new GameDefinition("", "", "", "");
             Assert.Equal("", gd.Name);
-            Assert.Equal("", gd.Vision);
-            Assert.Equal("", gd.WorldDescription);
+            Assert.Equal("", gd.GameMasterPrompt);
             Assert.Equal("", gd.PlayerAvatarRoleDescription);
             Assert.Equal("", gd.DateeRoleDescription);
-            Assert.Equal("", gd.NarrativeDoctrine);
         }
 
         #endregion
@@ -107,19 +87,14 @@ namespace Pinder.LlmAdapters.Tests
 
         private const string FullValidYaml = @"
 name: ""Pinder""
-vision: |
+game_master_prompt: |
   A comedy dating RPG where players are sentient penises
   swiping on a Tinder-like app called Pinder.
-world_description: |
-  The world of Pinder is absurdist. Characters are anatomical
-  beings navigating modern dating culture.
+  Never break character. Write in texting register.
 player_avatar_role_description: |
   You are the player's character.
 datee_role_description: |
   You are the datee.
-narrative_doctrine: |
-  Never break character.
-  Write in texting register.
 global_dc_bias: 0
 horniness_time_modifiers:
   morning: 3
@@ -128,21 +103,20 @@ horniness_time_modifiers:
   overnight: 5
 ";
 
-        // What: AC2 — LoadFrom parses valid YAML and maps all 7 keys correctly
-        // Mutation: would catch if any key mapping (e.g. world_description → WorldDescription) was wrong
+        // What: AC2 — LoadFrom parses valid YAML and maps the keys correctly
+        // Mutation: would catch if any key mapping was wrong
         [Fact]
         public void LoadFrom_ValidYaml_MapsAllKeysToProperties()
         {
             var gd = GameDefinition.LoadFrom(FullValidYaml);
 
             Assert.Equal("Pinder", gd.Name);
-            Assert.Contains("comedy dating RPG", gd.Vision);
-            Assert.Contains("sentient penises", gd.Vision);
-            Assert.Contains("absurdist", gd.WorldDescription);
+            Assert.Contains("comedy dating RPG", gd.GameMasterPrompt);
+            Assert.Contains("sentient penises", gd.GameMasterPrompt);
+            Assert.Contains("break character", gd.GameMasterPrompt);
+            Assert.Contains("texting register", gd.GameMasterPrompt);
             Assert.Contains("player's character", gd.PlayerAvatarRoleDescription);
             Assert.Contains("datee", gd.DateeRoleDescription);
-            Assert.Contains("break character", gd.NarrativeDoctrine);
-            Assert.Contains("texting register", gd.NarrativeDoctrine);
         }
 
         // What: AC2 — LoadFrom throws ArgumentNullException for null input
@@ -161,7 +135,6 @@ horniness_time_modifiers:
         {
             var ex = Assert.Throws<FormatException>(() =>
                 GameDefinition.LoadFrom("{{invalid yaml content"));
-            // Spec says message contains "YAML" or "parse"
             Assert.True(
                 ex.Message.Contains("YAML", StringComparison.OrdinalIgnoreCase) ||
                 ex.Message.Contains("parse", StringComparison.OrdinalIgnoreCase),
@@ -171,14 +144,12 @@ horniness_time_modifiers:
         // What: Error condition — missing required key throws FormatException naming the key
         // Mutation: would catch if missing key validation was skipped
         [Fact]
-        public void LoadFrom_MissingVisionKey_ThrowsFormatExceptionNamingKey()
+        public void LoadFrom_MissingGameMasterPromptKey_ThrowsFormatExceptionNamingKey()
         {
             var yaml = @"
 name: Test
-world_description: w
 player_avatar_role_description: p
 datee_role_description: o
-narrative_doctrine: nd
 global_dc_bias: 0
 horniness_time_modifiers:
   morning: 3
@@ -188,7 +159,7 @@ horniness_time_modifiers:
 ";
             var ex = Assert.Throws<FormatException>(() =>
                 GameDefinition.LoadFrom(yaml));
-            Assert.Contains("vision", ex.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("game_master_prompt", ex.Message, StringComparison.OrdinalIgnoreCase);
         }
 
         // What: Error condition — missing name key throws FormatException naming the key
@@ -197,11 +168,9 @@ horniness_time_modifiers:
         public void LoadFrom_MissingNameKey_ThrowsFormatExceptionNamingKey()
         {
             var yaml = @"
-vision: v
-world_description: w
+game_master_prompt: gm
 player_avatar_role_description: p
 datee_role_description: o
-narrative_doctrine: nd
 global_dc_bias: 0
 horniness_time_modifiers:
   morning: 3
@@ -221,11 +190,9 @@ horniness_time_modifiers:
         {
             var yaml = @"
 name: Test
-vision: ~
-world_description: wd
+game_master_prompt: ~
 player_avatar_role_description: p
 datee_role_description: o
-narrative_doctrine: nd
 global_dc_bias: 0
 horniness_time_modifiers:
   morning: 3
@@ -235,7 +202,7 @@ horniness_time_modifiers:
 ";
             var ex = Assert.Throws<FormatException>(() =>
                 GameDefinition.LoadFrom(yaml));
-            Assert.Contains("vision", ex.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("game_master_prompt", ex.Message, StringComparison.OrdinalIgnoreCase);
         }
 
         // What: Edge case — extra/unknown YAML keys are tolerated
@@ -245,11 +212,9 @@ horniness_time_modifiers:
         {
             var yaml = @"
 name: TestGame
-vision: v
-world_description: w
+game_master_prompt: gm
 player_avatar_role_description: p
 datee_role_description: o
-narrative_doctrine: nd
 global_dc_bias: 0
 horniness_time_modifiers:
   morning: 3
@@ -261,7 +226,7 @@ another_one: also ignored
 ";
             var gd = GameDefinition.LoadFrom(yaml);
             Assert.Equal("TestGame", gd.Name);
-            Assert.Equal("v", gd.Vision);
+            Assert.Equal("gm", gd.GameMasterPrompt);
         }
 
         // What: Edge case — YAML block scalar preserves newlines (no trimming)
@@ -271,13 +236,11 @@ another_one: also ignored
         {
             var yaml = @"
 name: Test
-vision: |
+game_master_prompt: |
   Line one.
   Line two.
-world_description: w
 player_avatar_role_description: p
 datee_role_description: o
-narrative_doctrine: nd
 global_dc_bias: 0
 horniness_time_modifiers:
   morning: 3
@@ -286,10 +249,10 @@ horniness_time_modifiers:
   overnight: 5
 ";
             var gd = GameDefinition.LoadFrom(yaml);
-            Assert.Contains("Line one.", gd.Vision);
-            Assert.Contains("Line two.", gd.Vision);
+            Assert.Contains("Line one.", gd.GameMasterPrompt);
+            Assert.Contains("Line two.", gd.GameMasterPrompt);
             // Block scalar | preserves newlines between lines
-            Assert.Contains("\n", gd.Vision);
+            Assert.Contains("\n", gd.GameMasterPrompt);
         }
 
         #endregion

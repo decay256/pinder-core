@@ -12,11 +12,9 @@ namespace Pinder.Core.Tests
     {
         private const string MinimalValidYaml = @"
 name: TestGame
-vision: v
-world_description: w
+game_master_prompt: gm
 player_avatar_role_description: p
 datee_role_description: o
-narrative_doctrine: nd
 global_dc_bias: 0
 horniness_time_modifiers:
   morning: 3
@@ -61,11 +59,9 @@ horniness_time_modifiers:
         {
             var yaml = @"
 name: TestGame
-vision: v
-world_description: w
+game_master_prompt: gm
 player_avatar_role_description: p
 datee_role_description: o
-narrative_doctrine: nd
 global_dc_bias: 0
 horniness_time_modifiers:
   morning: 10
@@ -87,11 +83,9 @@ horniness_time_modifiers:
         {
             var yaml = @"
 name: TestGame
-vision: v
-world_description: w
+game_master_prompt: gm
 player_avatar_role_description: p
 datee_role_description: o
-narrative_doctrine: nd
 global_dc_bias: 0
 ";
             var ex = Assert.Throws<InvalidOperationException>(
@@ -104,11 +98,9 @@ global_dc_bias: 0
         {
             var yaml = @"
 name: TestGame
-vision: v
-world_description: w
+game_master_prompt: gm
 player_avatar_role_description: p
 datee_role_description: o
-narrative_doctrine: nd
 global_dc_bias: 0
 ";
             var ex = Assert.Throws<InvalidOperationException>(
@@ -121,11 +113,9 @@ global_dc_bias: 0
         {
             var yaml = @"
 name: TestGame
-vision: v
-world_description: w
+game_master_prompt: gm
 player_avatar_role_description: p
 datee_role_description: o
-narrative_doctrine: nd
 global_dc_bias: 0
 horniness_time_modifiers: ~
 ";
@@ -140,11 +130,9 @@ horniness_time_modifiers: ~
         {
             var yaml = @"
 name: TestGame
-vision: v
-world_description: w
+game_master_prompt: gm
 player_avatar_role_description: p
 datee_role_description: o
-narrative_doctrine: nd
 global_dc_bias: 0
 horniness_time_modifiers:
   morning: -3
@@ -164,11 +152,9 @@ horniness_time_modifiers:
         {
             var yaml = @"
 name: TestGame
-vision: v
-world_description: w
+game_master_prompt: gm
 player_avatar_role_description: p
 datee_role_description: o
-narrative_doctrine: nd
 global_dc_bias: 0
 horniness_time_modifiers:
   morning: 0
