@@ -53,8 +53,8 @@ namespace Pinder.LlmAdapters
         // delivery-prompt formatter. #1125 collapsed delivery into a
         // deterministic, non-LLM overlay/commit step (DeliveryOverlay), and
         // #1138 removed the prompt builders, so these instructions are fully
-        // dead and have been removed. DeliveryRules itself is retained — it is
-        // still parsed from the game definition and surfaced elsewhere.
+        // dead and have been removed. #1153 then removed the last vestige —
+        // the dead DeliveryRules class + delivery_rules parse path — entirely.
 
         // ── §3.5 — Datee response instruction ────────────────────────────
 

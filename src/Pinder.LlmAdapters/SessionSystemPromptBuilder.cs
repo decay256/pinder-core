@@ -24,19 +24,6 @@ namespace Pinder.LlmAdapters
     public static class SessionSystemPromptBuilder
     {
         /// <summary>
-        /// Shared GM puppeteer framing. Static and identical for both sessions:
-        /// the GM is told it portrays exactly the one character defined at the
-        /// end of the prompt and knows/controls no other character.
-        /// </summary>
-        internal const string GmRoleFraming =
-            "You are the Game Master for this session, acting as a puppeteer who portrays " +
-            "EXACTLY ONE character: the character defined in the CHARACTER block at the very " +
-            "end of this prompt. You do not know, voice, or control any other character — " +
-            "you only ever speak and act as your assigned character. Everything below this line is " +
-            "shared world and craft guidance that applies to whichever single character you have " +
-            "been assigned. Stay fully in that character's voice for every turn.";
-
-        /// <summary>
         /// Header that marks the start of the per-session character-spec block.
         /// Everything BEFORE this marker is the shared, identical GM base.
         /// </summary>
@@ -91,59 +78,13 @@ namespace Pinder.LlmAdapters
         }
 
         /// <summary>
-        /// Appends the shared, session-invariant GM base. This block is produced
-        /// identically for BOTH sessions — the cacheable static prefix. Optional
-        /// sections are gated on non-empty content so an empty game definition
-        /// still yields an identical base across both sessions.
+        /// Appends the shared, session-invariant GM base (#1153). The entire GM
+        /// base is now a single pre-assembled field; it is emitted verbatim as
+        /// the cacheable static prefix produced identically for BOTH sessions.
         /// </summary>
         private static void AppendGmBase(AnnotatedStringBuilder sb, GameDefinition def)
         {
-            // --- Puppeteer framing (static; shared across both sessions) ---
-            sb.Append("== GAME MASTER ==\n\n");
-            sb.AppendLine(GmRoleFraming, "session-system-prompt-builder", "gm-role-framing");
-
-            // --- STATIC, session-invariant game definition sections ---
-            sb.Append("\n== GAME VISION ==\n\n");
-            sb.AppendLine(def.Vision.TrimEnd(), "game-definition.yaml", "vision");
-
-            sb.Append("\n== WORLD RULES ==\n\n");
-            sb.AppendLine(def.WorldDescription.TrimEnd(), "game-definition.yaml", "world_description");
-
-            sb.Append("\n== NARRATIVE DOCTRINE ==\n\n");
-            sb.AppendLine(def.NarrativeDoctrine.TrimEnd(), "game-definition.yaml", "narrative_doctrine");
-
-            if (def.DramaticCraft != null)
-            {
-                sb.Append("\n== DRAMATIC CRAFT ==\n\n");
-                sb.AppendLine(def.DramaticCraft.BuildSection().TrimEnd(), "game-definition.yaml", "dramatic_craft");
-            }
-
-            // Shared conversation-dynamic sections. Under the single-puppeteer
-            // model the GM needs the full dynamic regardless of which character
-            // it portrays, so these live in the shared base (not split per role).
-            if (!string.IsNullOrWhiteSpace(def.DateeFriction))
-            {
-                sb.Append("\n== DATEE RESISTANCE ==\n\n");
-                sb.AppendLine(def.DateeFriction.TrimEnd(), "game-definition.yaml", "datee_friction");
-            }
-
-            if (!string.IsNullOrWhiteSpace(def.DateeCuriosity))
-            {
-                sb.Append("\n== DATEE CURIOSITY ==\n\n");
-                sb.AppendLine(def.DateeCuriosity.TrimEnd(), "game-definition.yaml", "datee_curiosity");
-            }
-
-            if (!string.IsNullOrWhiteSpace(def.ConversationArcProgression))
-            {
-                sb.Append("\n== CONVERSATION ARC ==\n\n");
-                sb.AppendLine(def.ConversationArcProgression.TrimEnd(), "game-definition.yaml", "conversation_arc_progression");
-            }
-
-            if (!string.IsNullOrWhiteSpace(def.PlayerAvatarProbing))
-            {
-                sb.Append("\n== PLAYER PROBING ==\n\n");
-                sb.AppendLine(def.PlayerAvatarProbing.TrimEnd(), "game-definition.yaml", "player_avatar_probing");
-            }
+            sb.AppendLine(def.GameMasterPrompt.TrimEnd(), "game-definition.yaml", "game_master_prompt");
         }
 
         /// <summary>

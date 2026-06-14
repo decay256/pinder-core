@@ -17,11 +17,9 @@ namespace Pinder.Rules.Tests
         private static readonly string[] RequiredContentKeys = new[]
         {
             "name",
-            "vision",
-            "world_description",
+            "game_master_prompt",
             "player_avatar_role_description",
-            "datee_role_description",
-            "narrative_doctrine"
+            "datee_role_description"
         };
 
         /// <summary>All top-level keys expected in the current game-definition.yaml.</summary>
@@ -31,17 +29,9 @@ namespace Pinder.Rules.Tests
             "max_turns",
             "max_dialogue_options",
             "max_delivery_words",
-            "vision",
-            "world_description",
+            "game_master_prompt",
             "player_avatar_role_description",
             "datee_role_description",
-            "datee_friction",
-            "datee_curiosity",
-            "player_avatar_probing",
-            "narrative_doctrine",
-            "delivery_rules",
-            "conversation_arc",
-            "dramatic_craft",
             "improvement_prompt",
             "global_dc_bias",
             "horniness_time_modifiers",
@@ -163,11 +153,9 @@ namespace Pinder.Rules.Tests
 
         [Theory]
         [InlineData("name")]
-        [InlineData("vision")]
-        [InlineData("world_description")]
+        [InlineData("game_master_prompt")]
         [InlineData("player_avatar_role_description")]
         [InlineData("datee_role_description")]
-        [InlineData("narrative_doctrine")]
         public void YamlFile_ValueIsNonEmpty(string key)
         {
             var raw = ParseYamlRaw();
@@ -187,7 +175,7 @@ namespace Pinder.Rules.Tests
         public void YamlFile_VisionMentionsPinderSpecificConcepts()
         {
             var data = ParseYaml();
-            var vision = data["vision"];
+            var vision = data["game_master_prompt"];
             // Must reference the core premise
             Assert.Contains("sentient penis", vision, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("game master", vision, StringComparison.OrdinalIgnoreCase);
@@ -199,7 +187,7 @@ namespace Pinder.Rules.Tests
         public void YamlFile_WorldDescriptionMentionsStatPairs()
         {
             var data = ParseYaml();
-            var world = data["world_description"];
+            var world = data["game_master_prompt"];
             // Must reference the 6 stat pairs
             Assert.Contains("Charm", world);
             Assert.Contains("Madness", world);
@@ -219,7 +207,7 @@ namespace Pinder.Rules.Tests
         public void YamlFile_WorldDescriptionMentionsInterestMeter()
         {
             var data = ParseYaml();
-            var world = data["world_description"];
+            var world = data["game_master_prompt"];
             var playerRole = data["player_avatar_role_description"];
             var dateeRole = data["datee_role_description"];
             Assert.Contains("Interest", world, StringComparison.OrdinalIgnoreCase);
@@ -232,7 +220,7 @@ namespace Pinder.Rules.Tests
         public void YamlFile_MetaContractMentionsNeverBreakCharacter()
         {
             var data = ParseYaml();
-            var meta = data["narrative_doctrine"];
+            var meta = data["game_master_prompt"];
             Assert.Contains("Never break character", meta);
             Assert.Contains("ENGINE", meta);
         }
@@ -241,7 +229,7 @@ namespace Pinder.Rules.Tests
         public void YamlFile_WritingRulesMentionsTextingRegister()
         {
             var data = ParseYaml();
-            var rules = data["narrative_doctrine"];
+            var rules = data["game_master_prompt"];
             Assert.Contains("texting", rules, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("asterisk", rules, StringComparison.OrdinalIgnoreCase);
         }

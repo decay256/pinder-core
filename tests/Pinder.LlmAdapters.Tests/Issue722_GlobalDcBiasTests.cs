@@ -7,17 +7,13 @@ namespace Pinder.LlmAdapters.Tests
     {
         private const string BaseYaml = @"
 name: ""TestGame""
-vision: |
-  A test game vision.
-world_description: |
-  A test world description.
+game_master_prompt: |
+  A test game master prompt.
+  With writing rules text.
 player_avatar_role_description: |
   Player role.
 datee_role_description: |
   Datee role.
-narrative_doctrine: |
-  Meta contract text.
-  Writing rules text.
 horniness_time_modifiers:
   morning: 3
   afternoon: 0

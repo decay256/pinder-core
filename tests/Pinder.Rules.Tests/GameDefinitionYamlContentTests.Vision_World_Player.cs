@@ -12,7 +12,7 @@ namespace Pinder.Rules.Tests
         public void Vision_MentionsMultiplayerStructure()
         {
             var data = ParseYaml();
-            var vision = data["vision"];
+            var vision = data["game_master_prompt"];
             // Must mention that datees are other players' characters
             Assert.True(
                 vision.Contains("player", StringComparison.OrdinalIgnoreCase) &&
@@ -29,7 +29,7 @@ namespace Pinder.Rules.Tests
         public void Vision_MentionsEmotionalStakes()
         {
             var data = ParseYaml();
-            var vision = data["vision"];
+            var vision = data["game_master_prompt"];
             Assert.True(
                 vision.Contains("emotional", StringComparison.OrdinalIgnoreCase) ||
                 vision.Contains("tension", StringComparison.OrdinalIgnoreCase) ||
@@ -47,7 +47,7 @@ namespace Pinder.Rules.Tests
         public void Vision_MentionsRpgMechanics()
         {
             var data = ParseYaml();
-            var vision = data["vision"];
+            var vision = data["game_master_prompt"];
             Assert.True(
                 vision.Contains("dice", StringComparison.OrdinalIgnoreCase) ||
                 vision.Contains("d20", StringComparison.OrdinalIgnoreCase) ||
@@ -64,7 +64,7 @@ namespace Pinder.Rules.Tests
         public void WorldDescription_MentionsRollMechanics()
         {
             var data = ParseYaml();
-            var world = data["world_description"];
+            var world = data["game_master_prompt"];
             Assert.True(
                 world.Contains("d20", StringComparison.OrdinalIgnoreCase) ||
                 world.Contains("dice", StringComparison.OrdinalIgnoreCase) ||
@@ -77,7 +77,7 @@ namespace Pinder.Rules.Tests
         public void WorldDescription_MentionsShadowGrowth()
         {
             var data = ParseYaml();
-            var world = data["world_description"];
+            var world = data["game_master_prompt"];
             Assert.True(
                 world.Contains("shadow", StringComparison.OrdinalIgnoreCase) &&
                 (world.Contains("grow", StringComparison.OrdinalIgnoreCase) ||
@@ -91,7 +91,7 @@ namespace Pinder.Rules.Tests
         public void WorldDescription_MentionsInterestRange()
         {
             var data = ParseYaml();
-            var world = data["world_description"];
+            var world = data["game_master_prompt"];
             var player = data["player_avatar_role_description"];
             // Must mention 0 and 25 as the interest range boundaries
             Assert.Contains("0", world);
@@ -103,7 +103,7 @@ namespace Pinder.Rules.Tests
         public void WorldDescription_MentionsBoredGhostingRisk()
         {
             var data = ParseYaml();
-            var world = data["world_description"];
+            var world = data["game_master_prompt"];
             var datee = data["datee_role_description"];
             Assert.True(
                 world.Contains("Bored", StringComparison.Ordinal) ||

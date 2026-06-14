@@ -149,8 +149,8 @@ namespace Pinder.Rules.Tests
             var data = ParseYaml();
             // The YAML now contains many more keys than the original 7;
             // verify the core content sections are still present.
-            string[] required = { "name", "vision", "world_description", "player_avatar_role_description",
-                "datee_role_description", "narrative_doctrine" };
+            string[] required = { "name", "game_master_prompt", "player_avatar_role_description",
+                "datee_role_description" };
             foreach (var key in required)
             {
                 Assert.True(data.ContainsKey(key), $"Missing required content key: {key}");
