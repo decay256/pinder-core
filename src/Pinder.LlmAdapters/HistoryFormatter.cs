@@ -22,6 +22,27 @@ namespace Pinder.LlmAdapters
             if (sb == null) throw new ArgumentNullException(nameof(sb));
             if (history == null) throw new ArgumentNullException(nameof(history));
 
+            // #1156: this formatter attributes every non-scene entry to either
+            // the player avatar or the datee by comparing entry.Sender to
+            // playerName. If playerName is null/whitespace the comparison can
+            // NEVER match, so the player's own messages silently fall through to
+            // "DATEE". That silent mislabel — masked by SessionDocumentBuilder's
+            // FallbackName("" -> "Player") — is exactly what hid #1156. Fail
+            // loudly instead of producing a corrupt prompt: callers (the options
+            // and datee contexts) MUST pass player.DisplayName.
+            bool hasAttributableEntry = false;
+            foreach (var probe in history)
+            {
+                if (!Senders.IsScene(probe.Sender)) { hasAttributableEntry = true; break; }
+            }
+            if (hasAttributableEntry && string.IsNullOrWhiteSpace(playerName))
+            {
+                throw new InvalidOperationException(
+                    "HistoryFormatter.Format: playerName is empty — cannot attribute " +
+                    "conversation roles; the options/datee context must pass " +
+                    "player.DisplayName (see #1156).");
+            }
+
             sb.AppendLine("[CONVERSATION_START]");
 
             // #951: turn index must count only real conversational entries.
