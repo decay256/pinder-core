@@ -106,10 +106,12 @@ namespace Pinder.LlmAdapters
                 sb.AppendLine();
             }
 
-            // Turn 1 cold-opener guard
-            if (context.CurrentTurn == 1)
+            // Cold-opener guard: fires only on the genuine first turn (nobody has spoken yet).
+            // Keyed on empty history rather than a turn integer so it is robust to the
+            // 0-based, end-of-turn-incremented counter (issue #1155).
+            if (context.ConversationHistory.Count == 0)
             {
-                sb.AppendLine("COLD OPENER RULE: This is Turn 1. You have never spoken to this person before.");
+                sb.AppendLine("COLD OPENER RULE: This is the very first message. You have never spoken to this person before.");
                 sb.AppendLine("Since you are initiating the contact and sending the very first message, you MUST NOT say \"interesting that you mention\", \"since you said\", \"you mentioned\", or use any other phrasing that assumes the datee has already spoken or sent a message in this conversation. The datee has sent ZERO messages.");
                 sb.AppendLine("Your only knowledge of them is their dating profile: bio text AND visible appearance (items listed after 'Wearing:' in the profile above).");
                 sb.AppendLine("Do NOT reference anything you would only know from inside knowledge of the character — only what is visible on their public profile.");
