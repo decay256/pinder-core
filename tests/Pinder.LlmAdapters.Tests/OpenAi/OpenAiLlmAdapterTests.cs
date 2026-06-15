@@ -1,6 +1,7 @@
 using System;
 using System.Net;
 using System.Net.Http;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Pinder.Core.Conversation;
@@ -86,6 +87,27 @@ WEAKNESS: Honesty-2 (gets flustered when people are direct about attraction)";
             Assert.Equal("", result.MessageText);
             Assert.Null(result.DetectedTell);
             Assert.Null(result.WeaknessWindow);
+        }
+
+        // --- Issue #1164 regression coverage ---
+
+        [Fact, Trait("Category", "regression-test-required")]
+        public void ParseDialogueOptions_DuplicateStats_ReconcilesAgainstAvailableStats()
+        {
+            var input = @"OPTION_1 [STAT: Honesty] ""First honesty"" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
+OPTION_2 [STAT: Honesty] ""Second honesty"" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
+OPTION_3 [STAT: Charm] ""A charm"" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]";
+
+            var drawnStats = new[] { StatType.Honesty, StatType.Charm, StatType.Wit, StatType.Chaos };
+            var result = OpenAiLlmAdapter.ParseDialogueOptions(input, drawnStats);
+
+            Assert.Equal(4, result.Length);
+            var resultStats = result.Select(r => r.Stat).Distinct().ToList();
+            Assert.Equal(4, resultStats.Count);
+            Assert.Contains(StatType.Honesty, resultStats);
+            Assert.Contains(StatType.Charm, resultStats);
+            Assert.Contains(StatType.Wit, resultStats);
+            Assert.Contains(StatType.Chaos, resultStats);
         }
     }
 }
