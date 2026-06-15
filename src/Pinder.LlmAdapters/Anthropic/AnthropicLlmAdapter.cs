@@ -85,7 +85,7 @@ namespace Pinder.LlmAdapters.Anthropic
             var toolInput = response.GetToolInput();
             if (toolInput != null)
             {
-                var parsed = DialogueOptionParsers.ParseDialogueOptionsTool(toolInput);
+                var parsed = DialogueOptionParsers.ParseDialogueOptionsTool(toolInput, context.AvailableStats);
                 if (parsed != null) return parsed;
             }
 
@@ -96,7 +96,7 @@ namespace Pinder.LlmAdapters.Anthropic
                 : await AnthropicResponseImprover.ApplyImprovementAsync(
                     _client, _options, systemBlocks, userContent, optionsDraft,
                     _options.DialogueOptionsTemperature ?? DefaultDialogueOptionsTemperature, ct).ConfigureAwait(false);
-            return DialogueOptionParsers.ParseDialogueOptionsText(optionsText);
+            return DialogueOptionParsers.ParseDialogueOptionsText(optionsText, context.AvailableStats);
         }
 
         /// <inheritdoc />
@@ -386,8 +386,8 @@ namespace Pinder.LlmAdapters.Anthropic
         /// Parses structured LLM output into DialogueOption array.
         /// Delegates to DialogueOptionParsers.ParseDialogueOptionsText.
         /// </summary>
-        internal static DialogueOption[] ParseDialogueOptions(string? llmResponse)
-            => DialogueOptionParsers.ParseDialogueOptionsText(llmResponse);
+        internal static DialogueOption[] ParseDialogueOptions(string? llmResponse, StatType[]? availableStats = null)
+            => DialogueOptionParsers.ParseDialogueOptionsText(llmResponse, availableStats);
 
         /// <summary>
         /// Parses structured LLM output with optional [SIGNALS] blocks.

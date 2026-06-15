@@ -1,6 +1,7 @@
 using Newtonsoft.Json.Linq;
 using Pinder.Core.Stats;
 using Pinder.LlmAdapters.Anthropic;
+using System.Linq;
 using Xunit;
 
 namespace Pinder.LlmAdapters.Tests.Anthropic
@@ -166,6 +167,47 @@ OPTION_2 [STAT: Wit] ""That's a genuinely funny take, I'll give you that."" [CAL
             Assert.DoesNotContain(result, o => o.IntendedText == "the");
             // The real option is still parsed and surfaced.
             Assert.Contains(result, o => o.IntendedText == "That's a genuinely funny take, I'll give you that.");
+        }
+
+        // --- Issue #1164 regression coverage ---
+
+        [Fact, Trait("Category", "regression-test-required")]
+        public void ParseDialogueOptionsText_DuplicateStats_ReconcilesAgainstAvailableStats()
+        {
+            var input = @"OPTION_1 [STAT: Honesty] ""First honesty"" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
+OPTION_2 [STAT: Honesty] ""Second honesty"" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
+OPTION_3 [STAT: Charm] ""A charm"" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]";
+
+            var drawnStats = new[] { StatType.Honesty, StatType.Charm, StatType.Wit, StatType.Chaos };
+            var result = DialogueOptionParsers.ParseDialogueOptionsText(input, drawnStats);
+
+            Assert.Equal(4, result.Length);
+            var resultStats = result.Select(r => r.Stat).Distinct().ToList();
+            Assert.Equal(4, resultStats.Count);
+            Assert.Contains(StatType.Honesty, resultStats);
+            Assert.Contains(StatType.Charm, resultStats);
+            Assert.Contains(StatType.Wit, resultStats);
+            Assert.Contains(StatType.Chaos, resultStats);
+        }
+
+        [Fact]
+        public void ParseDialogueOptionsTool_DuplicateStats_ReconcilesAgainstAvailableStats()
+        {
+            var json = JObject.Parse(@"{
+                ""options"": [
+                    { ""stat"": ""Honesty"", ""text"": ""First honesty"" },
+                    { ""stat"": ""Honesty"", ""text"": ""Second honesty"" },
+                    { ""stat"": ""Charm"", ""text"": ""A charm"" }
+                ]
+            }");
+
+            var drawnStats = new[] { StatType.Honesty, StatType.Charm, StatType.Wit, StatType.Chaos };
+            var result = DialogueOptionParsers.ParseDialogueOptionsTool(json, drawnStats);
+
+            Assert.NotNull(result);
+            Assert.Equal(4, result!.Length);
+            var resultStats = result.Select(r => r.Stat).Distinct().ToList();
+            Assert.Equal(4, resultStats.Count);
         }
     }
 }
