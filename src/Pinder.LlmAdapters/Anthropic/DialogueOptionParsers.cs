@@ -67,7 +67,7 @@ namespace Pinder.LlmAdapters.Anthropic
         /// Parses structured LLM text output into DialogueOption array.
         /// Never throws — returns 4 options, padding with defaults if needed.
         /// </summary>
-        public static DialogueOption[] ParseDialogueOptionsText(string? llmResponse)
+        public static DialogueOption[] ParseDialogueOptionsText(string? llmResponse, StatType[]? availableStats = null)
         {
             var parsed = new List<DialogueOption>();
 
@@ -157,14 +157,14 @@ namespace Pinder.LlmAdapters.Anthropic
                 }
             }
 
-            return PadDialogueOptionsToFour(parsed);
+            return ReconcileAndPadDialogueOptions(parsed, availableStats);
         }
 
         /// <summary>
         /// Parses dialogue options from a tool_use JSON input.
         /// Returns null if the input is malformed (caller should fall back to text parsing).
         /// </summary>
-        public static DialogueOption[]? ParseDialogueOptionsTool(JObject toolInput)
+        public static DialogueOption[]? ParseDialogueOptionsTool(JObject toolInput, StatType[]? availableStats = null)
         {
             try
             {
@@ -229,7 +229,7 @@ namespace Pinder.LlmAdapters.Anthropic
                 }
 
                 if (parsed.Count == 0) return null;
-                return PadDialogueOptionsToFour(parsed);
+                return ReconcileAndPadDialogueOptions(parsed, availableStats);
             }
             catch
             {
@@ -237,35 +237,91 @@ namespace Pinder.LlmAdapters.Anthropic
             }
         }
 
-        public static DialogueOption[] PadDialogueOptionsToFour(List<DialogueOption> parsed)
+        public static DialogueOption[] ReconcileAndPadDialogueOptions(List<DialogueOption> parsed, StatType[]? availableStats = null)
         {
-            if (parsed.Count >= 4)
-            {
-                return parsed.GetRange(0, 4).ToArray();
-            }
-
+            var result = new List<DialogueOption>();
             var usedStats = new HashSet<StatType>();
-            foreach (var opt in parsed)
+            var remainingAllowed = availableStats != null ? new List<StatType>(availableStats) : new List<StatType>(DefaultPaddingStats);
+
+            var tempOptions = new DialogueOption[parsed.Count];
+            for (int i = 0; i < parsed.Count; i++)
             {
-                usedStats.Add(opt.Stat);
+                var opt = parsed[i];
+                if (remainingAllowed.Contains(opt.Stat))
+                {
+                    tempOptions[i] = opt;
+                    remainingAllowed.Remove(opt.Stat);
+                    usedStats.Add(opt.Stat);
+                }
             }
 
-            var result = new List<DialogueOption>(parsed);
-            foreach (var defaultStat in DefaultPaddingStats)
+            for (int i = 0; i < parsed.Count; i++)
             {
-                if (result.Count >= 4) break;
-                if (usedStats.Contains(defaultStat)) continue;
-                result.Add(new DialogueOption(defaultStat, "...",
-                    callbackTurnNumber: null, comboName: null,
-                    hasTellBonus: false, hasWeaknessWindow: false));
+                if (tempOptions[i] == null)
+                {
+                    var opt = parsed[i];
+                    StatType assignedStat;
+                    if (remainingAllowed.Count > 0)
+                    {
+                        assignedStat = remainingAllowed[0];
+                        remainingAllowed.RemoveAt(0);
+                    }
+                    else
+                    {
+                        assignedStat = StatType.Charm;
+                        foreach (StatType s in Enum.GetValues(typeof(StatType)))
+                        {
+                            if (!usedStats.Contains(s))
+                            {
+                                assignedStat = s;
+                                break;
+                            }
+                        }
+                    }
+                    usedStats.Add(assignedStat);
+                    
+                    tempOptions[i] = new DialogueOption(
+                        assignedStat,
+                        opt.IntendedText,
+                        opt.CallbackTurnNumber,
+                        opt.ComboName,
+                        opt.HasTellBonus,
+                        opt.HasWeaknessWindow
+                    );
+                }
             }
+
+            result.AddRange(tempOptions);
 
             while (result.Count < 4)
             {
-                // If we still need more, just pad with Charm (or any valid stat)
-                result.Add(new DialogueOption(StatType.Charm, "...",
+                StatType padStat;
+                if (remainingAllowed.Count > 0)
+                {
+                    padStat = remainingAllowed[0];
+                    remainingAllowed.RemoveAt(0);
+                }
+                else
+                {
+                    padStat = StatType.Charm;
+                    foreach (StatType s in Enum.GetValues(typeof(StatType)))
+                    {
+                        if (!usedStats.Contains(s))
+                        {
+                            padStat = s;
+                            break;
+                        }
+                    }
+                }
+                usedStats.Add(padStat);
+                result.Add(new DialogueOption(padStat, "...",
                     callbackTurnNumber: null, comboName: null,
                     hasTellBonus: false, hasWeaknessWindow: false));
+            }
+
+            if (result.Count > 4)
+            {
+                return result.GetRange(0, 4).ToArray();
             }
 
             return result.ToArray();

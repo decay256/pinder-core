@@ -54,7 +54,7 @@ namespace Pinder.LlmAdapters.OpenAi
             var requestJson = BuildRequestJson(systemPrompt, userContent, DefaultDialogueOptionsTemperature);
             var responseText = await _client.SendChatCompletionAsync(requestJson, ct).ConfigureAwait(false);
 
-            return ParseDialogueOptions(responseText);
+            return ParseDialogueOptions(responseText, context.AvailableStats);
         }
 
         /// <inheritdoc />
