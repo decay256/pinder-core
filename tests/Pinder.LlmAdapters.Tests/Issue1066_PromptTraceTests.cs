@@ -68,7 +68,7 @@ namespace Pinder.LlmAdapters.Tests
                 activeTraps: new List<string>(),
                 currentInterest: 10,
                 currentTurn: 3
-            );
+            , availableStats: new[] { Pinder.Core.Stats.StatType.Charm, Pinder.Core.Stats.StatType.Rizz, Pinder.Core.Stats.StatType.Honesty,  }, playerName: "P", dateeName: "O");
 
             InMemoryPromptTraceService.Instance.Clear();
             var prompt = SessionDocumentBuilder.BuildDialogueOptionsPrompt(context);

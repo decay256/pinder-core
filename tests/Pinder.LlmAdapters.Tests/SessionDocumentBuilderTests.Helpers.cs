@@ -21,7 +21,8 @@ namespace Pinder.LlmAdapters.Tests
             List<CallbackOpportunity> callbackOpportunities = null,
             string[] activeTrapInstructions = null,
             int horninessLevel = 0,
-            bool requiresRizzOption = false)
+            bool requiresRizzOption = false,
+            StatType[] availableStats = null)
         {
             return new DialogueContext(
                 playerAvatarPrompt: "player prompt",
@@ -37,7 +38,8 @@ namespace Pinder.LlmAdapters.Tests
                 activeTrapInstructions: activeTrapInstructions,
                 playerName: playerName,
                 dateeName: dateeName,
-                currentTurn: currentTurn);
+                currentTurn: currentTurn,
+                availableStats: availableStats ?? new[] { StatType.Charm, StatType.Rizz, StatType.Honesty });
         }
 
         // #1138: MakeDeliveryContext() removed — the delivery prompt builder it

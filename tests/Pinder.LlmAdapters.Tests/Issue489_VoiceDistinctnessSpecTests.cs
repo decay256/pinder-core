@@ -62,7 +62,7 @@ namespace Pinder.LlmAdapters.Tests
                 playerName: playerName,
                 dateeName: dateeName,
                 currentTurn: currentTurn,
-                playerTextingStyle: playerTextingStyle);
+                playerTextingStyle: playerTextingStyle, availableStats: new[] { Pinder.Core.Stats.StatType.Charm, Pinder.Core.Stats.StatType.Rizz, Pinder.Core.Stats.StatType.Honesty,  });
         }
 
         // ══════════════════════════════════════════════════════════════
@@ -128,7 +128,7 @@ namespace Pinder.LlmAdapters.Tests
                 conversationHistory: new List<(string, string)>(),
                 dateeLastMessage: "",
                 activeTraps: Array.Empty<string>(),
-                currentInterest: 10);
+                currentInterest: 10, availableStats: new[] { Pinder.Core.Stats.StatType.Charm, Pinder.Core.Stats.StatType.Rizz, Pinder.Core.Stats.StatType.Honesty,  }, playerName: "P", dateeName: "O");
 
             Assert.Equal(string.Empty, ctx.PlayerTextingStyle);
             Assert.NotNull(ctx.PlayerTextingStyle);
@@ -235,7 +235,7 @@ namespace Pinder.LlmAdapters.Tests
                 currentInterest: 10,
                 playerName: "Velvet",
                 dateeName: "Sable",
-                currentTurn: 1);
+                currentTurn: 1, availableStats: new[] { Pinder.Core.Stats.StatType.Charm, Pinder.Core.Stats.StatType.Rizz, Pinder.Core.Stats.StatType.Honesty,  });
 
             string result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(ctx);
 

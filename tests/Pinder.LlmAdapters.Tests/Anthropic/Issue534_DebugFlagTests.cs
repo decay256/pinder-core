@@ -90,7 +90,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             var history = new System.Collections.Generic.List<(string, string)>();
             return new DialogueContext(
                 "Player Prompt", "Datee Prompt", history, "Last message",
-                new System.Collections.Generic.List<string>(), 10);
+                new System.Collections.Generic.List<string>(), 10, availableStats: new[] { Pinder.Core.Stats.StatType.Charm, Pinder.Core.Stats.StatType.Rizz, Pinder.Core.Stats.StatType.Honesty,  }, playerName: "P", dateeName: "O");
         }
 
         // #1125: the delivery LLM surface was removed; the "second call" in the
@@ -107,7 +107,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
                 playerDeliveredMessage: "hello",
                 interestBefore: 10,
                 interestAfter: 11,
-                responseDelayMinutes: 1.0);
+                responseDelayMinutes: 1.0, playerName: "P", dateeName: "O");
         }
 
         [Fact]

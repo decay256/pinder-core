@@ -38,7 +38,7 @@ namespace Pinder.LlmAdapters.Tests
                 activeTrapInstructions: activeTrapInstructions,
                 playerName: playerName,
                 dateeName: dateeName,
-                currentTurn: currentTurn);
+                currentTurn: currentTurn, availableStats: new[] { Pinder.Core.Stats.StatType.Charm, Pinder.Core.Stats.StatType.Rizz, Pinder.Core.Stats.StatType.Honesty,  });
         }
 
         private static string BuildMinimal(

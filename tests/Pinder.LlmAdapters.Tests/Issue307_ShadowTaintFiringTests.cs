@@ -194,7 +194,7 @@ namespace Pinder.LlmAdapters.Tests
                 shadowThresholds: shadowThresholds,
                 playerName: "Player",
                 dateeName: "Datee",
-                currentTurn: 1);
+                currentTurn: 1, availableStats: new[] { Pinder.Core.Stats.StatType.Charm, Pinder.Core.Stats.StatType.Rizz, Pinder.Core.Stats.StatType.Honesty,  });
         }
 
         // #1138: MakeDeliveryContext() removed — BuildDeliveryPrompt no longer

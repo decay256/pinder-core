@@ -39,7 +39,7 @@ namespace Pinder.LlmAdapters.Tests
                 activeTraps: Array.Empty<string>(),
                 currentInterest: 10,
                 playerName: "P",
-                dateeName: "O");
+                dateeName: "O", availableStats: new[] { Pinder.Core.Stats.StatType.Charm, Pinder.Core.Stats.StatType.Rizz, Pinder.Core.Stats.StatType.Honesty,  });
 
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(ctx);
 

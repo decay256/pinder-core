@@ -25,7 +25,7 @@ namespace Pinder.LlmAdapters.Tests
                 playerName: "TestPlayer",
                 dateeName: "TestDatee",
                 currentTurn: 1,
-                activeArchetypeDirective: activeArchetypeDirective);
+                activeArchetypeDirective: activeArchetypeDirective, availableStats: new[] { Pinder.Core.Stats.StatType.Charm, Pinder.Core.Stats.StatType.Rizz, Pinder.Core.Stats.StatType.Honesty,  });
         }
 
         private static DateeContext MakeDateeContext(string activeArchetypeDirective = null)

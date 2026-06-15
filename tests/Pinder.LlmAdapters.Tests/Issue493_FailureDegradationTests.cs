@@ -114,7 +114,7 @@ namespace Pinder.LlmAdapters.Tests
                 playerDeliveredMessage: "hello",
                 interestBefore: 10,
                 interestAfter: 10,
-                responseDelayMinutes: 1.0);
+                responseDelayMinutes: 1.0, playerName: "P", dateeName: "O");
 
             Assert.Equal(FailureTier.None, context.DeliveryTier);
         }

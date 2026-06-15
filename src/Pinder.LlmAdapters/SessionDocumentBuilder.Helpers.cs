@@ -163,10 +163,5 @@ namespace Pinder.LlmAdapters
                 default: return string.Empty;
             }
         }
-
-        private static string FallbackName(string name, string fallback)
-        {
-            return string.IsNullOrEmpty(name) ? fallback : name;
-        }
     }
 }

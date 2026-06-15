@@ -68,7 +68,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             currentInterest: 10,
             playerName: "Thundercock",
             dateeName: "Velvet",
-            currentTurn: 1);
+            currentTurn: 1, availableStats: new[] { Pinder.Core.Stats.StatType.Charm, Pinder.Core.Stats.StatType.Rizz, Pinder.Core.Stats.StatType.Honesty,  });
 
         // #1138: MakeDeliveryContext()/DeliveryContext removed — the creative
         // delivery LLM call was collapsed into the deterministic DeliveryOverlay

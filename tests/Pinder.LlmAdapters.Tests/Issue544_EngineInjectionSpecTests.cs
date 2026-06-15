@@ -57,7 +57,7 @@ namespace Pinder.LlmAdapters.Tests
                 playerName: playerName,
                 dateeName: dateeName,
                 currentTurn: currentTurn,
-                playerTextingStyle: playerTextingStyle);
+                playerTextingStyle: playerTextingStyle, availableStats: new[] { Pinder.Core.Stats.StatType.Charm, Pinder.Core.Stats.StatType.Rizz, Pinder.Core.Stats.StatType.Honesty,  });
         }
 
         // #1138: MakeDeliveryContext() removed — the delivery prompt builder it

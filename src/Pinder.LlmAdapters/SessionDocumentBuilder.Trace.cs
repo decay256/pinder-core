@@ -22,9 +22,11 @@ namespace Pinder.LlmAdapters
         public static PromptTraceResult BuildDialogueOptionsPromptEx(DialogueContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
+            if (string.IsNullOrEmpty(context.PlayerName)) throw new ArgumentException("PlayerName cannot be null or empty.");
+            if (string.IsNullOrEmpty(context.DateeName)) throw new ArgumentException("DateeName cannot be null or empty.");
 
-            var playerName = FallbackName(context.PlayerName, "Player");
-            var dateeName = FallbackName(context.DateeName, "Datee");
+            var playerName = context.PlayerName;
+            var dateeName = context.DateeName;
 
             var sb = new AnnotatedStringBuilder();
 
@@ -171,28 +173,22 @@ namespace Pinder.LlmAdapters
                 .Replace("{player_name}", playerName)
                 .Replace("{game_state}", gameState.ToString().TrimEnd())
                 .Replace("{options_count}", optionsCountStr)
-                .Replace("{options_format_list}", optionsFormatListStr)
-                // Fallback for non-updated/legacy template yaml
-                .Replace("Generate 4 options", $"Generate {optionCount} options")
-                .Replace("OPTION_A: [message] OPTION_B: [message] etc.", optionsFormatListStr);
+                .Replace("{options_format_list}", optionsFormatListStr);
             sb.Append(engineBlock, GetTemplateSource("engine-options-block"), "engine-options-block");
 
             sb.AppendLine();
             sb.AppendLine();
 
             // Output format instructions
-            string availableStatsStr = context.AvailableStats != null && context.AvailableStats.Length > 0
-                ? string.Join(", ", Array.ConvertAll(context.AvailableStats, s => s.ToString().ToUpperInvariant()))
-                : "CHARM, RIZZ, HONESTY, CHAOS, WIT, SELF_AWARENESS";
+            if (context.AvailableStats == null || context.AvailableStats.Length == 0)
+                throw new InvalidOperationException("AvailableStats cannot be null or empty.");
+            string availableStatsStr = string.Join(", ", Array.ConvertAll(context.AvailableStats, s => s.ToString().ToUpperInvariant()));
+
             string dialogueOptionsInstruction = PromptTemplates.DialogueOptionsInstruction
                 .Replace("{player_name}", playerName)
                 .Replace("{available_stats}", availableStatsStr)
                 .Replace("{options_count}", optionsCountStr)
-                .Replace("{options_list}", optionsListStr)
-                // Fallback for non-updated/legacy template yaml
-                .Replace("Generate exactly 4 dialogue options", $"Generate exactly {optionCount} dialogue options")
-                .Replace("only OPTION_1, OPTION_2, OPTION_3, OPTION_4", "only " + optionsListStr)
-                .Replace("OPTION_4", $"OPTION_{optionCount}");
+                .Replace("{options_list}", optionsListStr);
             sb.Append(dialogueOptionsInstruction, GetTemplateSource("dialogue-options-instruction"), "dialogue-options-instruction");
 
             return new PromptTraceResult(sb.ToString(), sb.Spans);
@@ -212,9 +208,11 @@ namespace Pinder.LlmAdapters
         public static PromptTraceResult BuildDateePromptEx(DateeContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
+            if (string.IsNullOrEmpty(context.PlayerName)) throw new ArgumentException("PlayerName cannot be null or empty.");
+            if (string.IsNullOrEmpty(context.DateeName)) throw new ArgumentException("DateeName cannot be null or empty.");
 
-            var playerName = FallbackName(context.PlayerName, "Player");
-            var dateeName = FallbackName(context.DateeName, "Datee");
+            var playerName = context.PlayerName;
+            var dateeName = context.DateeName;
 
             var sb = new AnnotatedStringBuilder();
 

@@ -156,10 +156,10 @@ another: also ignored
         }
 
         [Fact]
-        public void LoadFrom_LegacyPlayerRoleKey_BackwardCompatibility_Regression1133()
+        public void LoadFrom_MissingNewKeyPlayerAvatarRoleDescription_ThrowsFormatException_Regression1165()
         {
-            // 1. Only old key
-            var yamlOld = @"
+            // 1. Old key alone should throw (fallback removed)
+            var yamlOldOnly = @"
 name: Test
 game_master_prompt: gm
 player_role_description: old_role
@@ -171,56 +171,24 @@ horniness_time_modifiers:
   evening: 2
   overnight: 5
 ";
-            var gdOld = GameDefinition.LoadFrom(yamlOld);
-            Assert.Equal("old_role", gdOld.PlayerAvatarRoleDescription);
-
-            // 2. Only new key
-            var yamlNew = @"
-name: Test
-game_master_prompt: gm
-player_avatar_role_description: new_role
-datee_role_description: o
-global_dc_bias: 0
-horniness_time_modifiers:
-  morning: 3
-  afternoon: 0
-  evening: 2
-  overnight: 5
-";
-            var gdNew = GameDefinition.LoadFrom(yamlNew);
-            Assert.Equal("new_role", gdNew.PlayerAvatarRoleDescription);
-
-            // 3. Both keys present - prefers new
-            var yamlBoth = @"
-name: Test
-game_master_prompt: gm
-player_role_description: old_role
-player_avatar_role_description: new_role
-datee_role_description: o
-global_dc_bias: 0
-horniness_time_modifiers:
-  morning: 3
-  afternoon: 0
-  evening: 2
-  overnight: 5
-";
-            var gdBoth = GameDefinition.LoadFrom(yamlBoth);
-            Assert.Equal("new_role", gdBoth.PlayerAvatarRoleDescription);
-
-            // 4. Missing player role key throws naming the new key
-            var yamlMissing = @"
-name: Test
-game_master_prompt: gm
-datee_role_description: o
-global_dc_bias: 0
-horniness_time_modifiers:
-  morning: 3
-  afternoon: 0
-  evening: 2
-  overnight: 5
-";
-            var ex = Assert.Throws<FormatException>(() => GameDefinition.LoadFrom(yamlMissing));
+            var ex = Assert.Throws<FormatException>(() => GameDefinition.LoadFrom(yamlOldOnly));
             Assert.Contains("player_avatar_role_description", ex.Message);
+
+            // 2. New key alone parses
+            var yamlNewOnly = @"
+name: Test
+game_master_prompt: gm
+player_avatar_role_description: new_role
+datee_role_description: o
+global_dc_bias: 0
+horniness_time_modifiers:
+  morning: 3
+  afternoon: 0
+  evening: 2
+  overnight: 5
+";
+            var gdNew = GameDefinition.LoadFrom(yamlNewOnly);
+            Assert.Equal("new_role", gdNew.PlayerAvatarRoleDescription);
         }
     }
 }

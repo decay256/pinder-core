@@ -22,7 +22,7 @@ namespace Pinder.LlmAdapters.Tests
                 activeTraps: new List<string>(),
                 currentInterest: 10,
                 activeTell: activeTell
-            );
+            , availableStats: new[] { Pinder.Core.Stats.StatType.Charm, Pinder.Core.Stats.StatType.Rizz, Pinder.Core.Stats.StatType.Honesty,  }, playerName: "P", dateeName: "O");
 
             // Act
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(context);
@@ -45,7 +45,7 @@ namespace Pinder.LlmAdapters.Tests
                 activeTraps: new List<string>(),
                 currentInterest: 10,
                 activeTell: null
-            );
+            , availableStats: new[] { Pinder.Core.Stats.StatType.Charm, Pinder.Core.Stats.StatType.Rizz, Pinder.Core.Stats.StatType.Honesty,  }, playerName: "P", dateeName: "O");
 
             // Act
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(context);

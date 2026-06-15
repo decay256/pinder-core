@@ -46,7 +46,7 @@ namespace Pinder.LlmAdapters.Tests
                 dateeName: "O",
                 currentTurn: turn,
                 stakeLines: stakeLines ?? MakeStakeLines(),
-                stakeLinesReferenced: stakeLinesReferenced);
+                stakeLinesReferenced: stakeLinesReferenced, availableStats: new[] { Pinder.Core.Stats.StatType.Charm, Pinder.Core.Stats.StatType.Rizz, Pinder.Core.Stats.StatType.Honesty,  });
         }
 
         // ── test 1: OPTION_C mandate appears in prompt (from templates.yaml) ──
