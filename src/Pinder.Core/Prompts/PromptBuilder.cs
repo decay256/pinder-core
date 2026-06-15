@@ -196,33 +196,40 @@ namespace Pinder.Core.Prompts
             string srcFile = framing.SourceFile;
             const string srcKey = CharacterCardFramingKey;
 
-            // Header — sourced from structural.yaml, no fallback.
-            sb.AppendLine(framing.LeadIn.Replace("{name}", displayName), srcFile, srcKey);
-            sb.AppendLine();
+            // --- CONSTANT PREFIX BLOCK ---
+            // Emitted without variable data to form a stable cacheable prefix.
+            sb.AppendLine(framing.LeadIn, srcFile, srcKey); // No Replace("{name}", displayName) in constant prefix
+            sb.AppendLine(framing.Identity, srcFile, srcKey);
+            sb.AppendLine(framing.Personality, srcFile, srcKey);
+            sb.AppendLine(framing.Backstory, srcFile, srcKey);
+            sb.AppendLine(framing.TextingStyle, srcFile, srcKey);
+            sb.AppendLine(framing.ActiveArchetype, srcFile, srcKey);
+            sb.AppendLine("EFFECTIVE STATS");
+            sb.AppendLine(framing.ActiveTrapInstructions, srcFile, srcKey);
 
-            // IDENTITY
+            // --- SEPARATOR ---
+            sb.AppendLine();
+            sb.AppendLine("=== CHARACTER DATA ===");
+
+            // --- VARIABLE BLOCK ---
             sb.AppendLine(framing.Identity, srcFile, srcKey);
             sb.AppendLine($"- Gender identity: {genderIdentity}");
             sb.AppendLine($"- Bio: {(string.IsNullOrWhiteSpace(bioOneLiner) ? "none" : bioOneLiner)}");
             sb.AppendLine();
 
-            // PERSONALITY
             sb.AppendLine(framing.Personality, srcFile, srcKey);
             AppendBulletList(sb, fragments.PersonalityFragments);
             sb.AppendLine();
 
-            // BACKSTORY
             sb.AppendLine(framing.Backstory, srcFile, srcKey);
             AppendBulletList(sb, fragments.BackstoryFragments);
             sb.AppendLine();
 
-            // TEXTING STYLE
             sb.AppendLine(framing.TextingStyle, srcFile, srcKey);
             AppendBulletList(sb, TextingStyleAggregator.AggregateAsList(
                 fragments.TextingStyleSources, characterIdSeed));
             sb.AppendLine();
 
-            // ACTIVE ARCHETYPE
             sb.AppendLine(framing.ActiveArchetype, srcFile, srcKey);
             if (fragments.ActiveArchetype != null)
             {
@@ -237,7 +244,6 @@ namespace Pinder.Core.Prompts
             }
             sb.AppendLine();
 
-            // EFFECTIVE STATS
             sb.AppendLine("EFFECTIVE STATS");
             sb.AppendLine($"- Charm: {fragments.Stats.GetEffective(StatType.Charm)}");
             sb.AppendLine($"- Rizz: {fragments.Stats.GetEffective(StatType.Rizz)}");

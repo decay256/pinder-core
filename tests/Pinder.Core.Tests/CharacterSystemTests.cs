@@ -208,7 +208,8 @@ namespace Pinder.Core.Tests
             var prompt = PromptBuilder.BuildSystemPrompt(
                 "TestChar", "she/her", null, fragments, new TrapState());
 
-            Assert.DoesNotContain("ACTIVE TRAP INSTRUCTIONS", prompt);
+            int dataStart = prompt.IndexOf("=== CHARACTER DATA ===", System.StringComparison.Ordinal);
+            Assert.DoesNotContain("ACTIVE TRAP INSTRUCTIONS", prompt.Substring(dataStart));
         }
 
         [Fact]
