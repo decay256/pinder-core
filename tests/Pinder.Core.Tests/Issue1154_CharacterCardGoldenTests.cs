@@ -117,6 +117,28 @@ namespace Pinder.Core.Tests
             Assert.Equal(ReadFixture("golden_active.txt"), result.Text);
         }
 
+        [Fact]
+        public void BuildSystemPromptEx_ConstantPrefix_IdenticalAcrossCharacters()
+        {
+            var f1 = BuildDeterministicFragments();
+            var t1 = new TrapState();
+            var r1 = PromptBuilder.BuildSystemPromptEx("Alice", "she/her", "bio 1", f1, t1, "seed1");
+            
+            var f2 = new FragmentCollection(
+                new List<string> { "different personality" }, new List<string>(), new List<string>(), 
+                new List<(string, int)>(), new TimingProfile(1, 1, 1, "f"), new StatBlock(BaseStats, Shadow), null, new List<TextingStyleFragmentSource>());
+            var t2 = new TrapState();
+            var r2 = PromptBuilder.BuildSystemPromptEx("Bob", "he/him", "bio 2", f2, t2, "seed2");
+
+            int split1 = r1.Text.IndexOf("=== CHARACTER DATA ===", StringComparison.Ordinal);
+            int split2 = r2.Text.IndexOf("=== CHARACTER DATA ===", StringComparison.Ordinal);
+            
+            string prefix1 = r1.Text.Substring(0, split1 + "=== CHARACTER DATA ===".Length);
+            string prefix2 = r2.Text.Substring(0, split2 + "=== CHARACTER DATA ===".Length);
+            
+            Assert.Equal(prefix1, prefix2);
+        }
+
         // ── provenance: every framing span is now sourced from the single
         //    collapsed key (was the 7 structural-* keys) ────────────────────
         [Fact]

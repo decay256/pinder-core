@@ -307,7 +307,9 @@ namespace Pinder.Core.Tests
 
         private static string ExtractSection(string prompt, string header, string nextHeader)
         {
-            int start = prompt.IndexOf(header, StringComparison.Ordinal);
+            int dataStart = prompt.IndexOf("=== CHARACTER DATA ===", StringComparison.Ordinal);
+            int searchFrom = dataStart >= 0 ? dataStart : 0;
+            int start = prompt.IndexOf(header, searchFrom, StringComparison.Ordinal);
             Assert.True(start >= 0, $"Section '{header}' not found in prompt.");
             int afterHeader = start + header.Length;
             int end = prompt.IndexOf(nextHeader, afterHeader, StringComparison.Ordinal);
