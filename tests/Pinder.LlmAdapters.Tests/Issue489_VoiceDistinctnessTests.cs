@@ -32,7 +32,7 @@ namespace Pinder.LlmAdapters.Tests
                 playerName: "Velvet",
                 dateeName: "Sable",
                 currentTurn: currentTurn,
-                playerTextingStyle: playerTextingStyle);
+                playerTextingStyle: playerTextingStyle, availableStats: new[] { Pinder.Core.Stats.StatType.Charm, Pinder.Core.Stats.StatType.Rizz, Pinder.Core.Stats.StatType.Honesty,  });
         }
 
         // ── CharacterProfile.TextingStyleFragment ──
@@ -83,7 +83,7 @@ namespace Pinder.LlmAdapters.Tests
                 conversationHistory: new List<(string, string)>(),
                 dateeLastMessage: "",
                 activeTraps: Array.Empty<string>(),
-                currentInterest: 10);
+                currentInterest: 10, availableStats: new[] { Pinder.Core.Stats.StatType.Charm, Pinder.Core.Stats.StatType.Rizz, Pinder.Core.Stats.StatType.Honesty,  }, playerName: "P", dateeName: "O");
 
             Assert.Equal(string.Empty, ctx.PlayerTextingStyle);
         }
@@ -136,7 +136,7 @@ namespace Pinder.LlmAdapters.Tests
                 currentInterest: 10,
                 playerName: "V",
                 dateeName: "S",
-                currentTurn: 1);
+                currentTurn: 1, availableStats: new[] { Pinder.Core.Stats.StatType.Charm, Pinder.Core.Stats.StatType.Rizz, Pinder.Core.Stats.StatType.Honesty,  });
             string result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(ctx);
 
             Assert.DoesNotContain("YOUR TEXTING STYLE", result);

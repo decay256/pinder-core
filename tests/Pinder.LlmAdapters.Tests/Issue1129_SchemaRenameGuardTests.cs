@@ -63,7 +63,7 @@ namespace Pinder.LlmAdapters.Tests
             dateeLastMessage: "Hello",
             activeTraps: new List<string>(),
             currentInterest: 10,
-            currentTurn: 3);
+            currentTurn: 3, availableStats: new[] { Pinder.Core.Stats.StatType.Charm, Pinder.Core.Stats.StatType.Rizz, Pinder.Core.Stats.StatType.Honesty,  }, playerName: "P", dateeName: "O");
 
         private static DateeContext MakeDateeContext() => new DateeContext(
             dateePrompt: "You are velvet.",

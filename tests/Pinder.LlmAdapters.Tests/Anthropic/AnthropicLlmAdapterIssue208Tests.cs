@@ -71,7 +71,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             currentInterest: 10,
             playerName: "Thundercock",
             dateeName: "Velvet",
-            currentTurn: 1);
+            currentTurn: 1, availableStats: new[] { Pinder.Core.Stats.StatType.Charm, Pinder.Core.Stats.StatType.Rizz, Pinder.Core.Stats.StatType.Honesty, Pinder.Core.Stats.StatType.Chaos, Pinder.Core.Stats.StatType.Wit, Pinder.Core.Stats.StatType.SelfAwareness });
 
         // #1138: MakeDeliveryContext()/DeliveryContext removed — delivery prompt
         // surface was collapsed into the deterministic DeliveryOverlay (#1125).

@@ -43,21 +43,6 @@ namespace Pinder.LlmAdapters
                 return value.ToString()!;
             }
 
-            string GetRequiredWithFallback(string newKey, string oldKey)
-            {
-                if (parsed.TryGetValue(newKey, out var val))
-                {
-                    if (val == null) throw new FormatException($"Key \"{newKey}\" has a null value.");
-                    return val.ToString()!;
-                }
-                if (parsed.TryGetValue(oldKey, out val))
-                {
-                    if (val == null) throw new FormatException($"Key \"{oldKey}\" has a null value.");
-                    return val.ToString()!;
-                }
-                throw new FormatException($"Missing required key: \"{newKey}\"");
-            }
-
             // Parse optional prose fields
             string GetOptional(string key)
             {
@@ -73,7 +58,7 @@ namespace Pinder.LlmAdapters
             // Validate core required keys first (throws FormatException)
             var name = GetRequired("name");
             var gameMasterPrompt = GetRequired("game_master_prompt");
-            var playerAvatarRoleDescription = GetRequiredWithFallback("player_avatar_role_description", "player_role_description");
+            var playerAvatarRoleDescription = GetRequired("player_avatar_role_description");
             var dateeRoleDescription = GetRequired("datee_role_description");
 
             // Parse required global_dc_bias

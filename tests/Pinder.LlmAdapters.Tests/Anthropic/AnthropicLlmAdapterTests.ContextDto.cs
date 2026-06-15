@@ -16,7 +16,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             var ctx = new DialogueContext(
                 "player", "datee",
                 new List<(string, string)>(), "last",
-                new string[0], 10);
+                new string[0], 10, availableStats: new[] { Pinder.Core.Stats.StatType.Charm, Pinder.Core.Stats.StatType.Rizz, Pinder.Core.Stats.StatType.Honesty,  });
 
             Assert.Equal("", ctx.PlayerName);
             Assert.Equal("", ctx.DateeName);
@@ -51,7 +51,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
                 new string[0], 10,
                 playerName: "Thundercock",
                 dateeName: "Velvet",
-                currentTurn: 3);
+                currentTurn: 3, availableStats: new[] { Pinder.Core.Stats.StatType.Charm, Pinder.Core.Stats.StatType.Rizz, Pinder.Core.Stats.StatType.Honesty,  });
 
             Assert.Equal("Thundercock", ctx.PlayerName);
             Assert.Equal("Velvet", ctx.DateeName);

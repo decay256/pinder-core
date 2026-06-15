@@ -96,7 +96,7 @@ OPTION_4
             currentInterest: 10,
             playerName: "Thundercock",
             dateeName: "Velvet",
-            currentTurn: 1);
+            currentTurn: 1, availableStats: new[] { Pinder.Core.Stats.StatType.Charm, Pinder.Core.Stats.StatType.Rizz, Pinder.Core.Stats.StatType.Honesty,  });
 
         // #1138: MakeDeliveryContext()/DeliveryContext removed — delivery prompt
         // surface was collapsed into the deterministic DeliveryOverlay (#1125).
@@ -238,7 +238,7 @@ OPTION_4
             var ctx = new DialogueContext(
                 "player", "datee",
                 new List<(string, string)>(),
-                "last", new string[0], 10);
+                "last", new string[0], 10, availableStats: new[] { Pinder.Core.Stats.StatType.Charm, Pinder.Core.Stats.StatType.Rizz, Pinder.Core.Stats.StatType.Honesty,  });
 
             Assert.Equal("", ctx.PlayerName);
             Assert.Equal("", ctx.DateeName);

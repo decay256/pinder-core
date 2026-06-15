@@ -46,7 +46,7 @@ namespace Pinder.LlmAdapters.Tests
                 currentInterest: 10,
                 playerName: playerName,
                 dateeName: dateeName,
-                currentTurn: 1);
+                currentTurn: 1, availableStats: new[] { Pinder.Core.Stats.StatType.Charm, Pinder.Core.Stats.StatType.Rizz, Pinder.Core.Stats.StatType.Honesty,  });
         }
 
         [Fact]
