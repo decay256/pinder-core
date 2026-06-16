@@ -82,6 +82,8 @@ namespace Pinder.Core.Conversation
         // Rule resolver for data-driven game constants (#463)
         private readonly IRuleResolver? _rules;
         private readonly int _globalDcBias;
+        private readonly int _shadowDcBias;
+        private readonly int _horninessDcBias;
 
         // Weakness window from datee's last response (#49)
         private WeaknessWindow? _activeWeakness { get => _state.ActiveWeakness; set => _state.ActiveWeakness = value; }
@@ -172,6 +174,8 @@ namespace Pinder.Core.Conversation
             _dateeShadows = config.DateeShadows;
             _rules = config.Rules;
             _globalDcBias = config.GlobalDcBias;
+            _shadowDcBias = config.ShadowDcBias;
+            _horninessDcBias = config.HorninessDcBias;
             var steeringRng = config.SteeringRng ?? new Random();
             _statDrawRng = config.StatDrawRng;
             _statDeliveryInstructions = config.StatDeliveryInstructions;
@@ -231,8 +235,8 @@ namespace Pinder.Core.Conversation
             _maxDialogueOptions = config.MaxDialogueOptions ?? 3;
             _maxDeliveryWords = config.MaxDeliveryWords ?? 80;
             _steeringEngine = new SteeringEngine(steeringRng);
-            _horninessEngine = new HorninessEngine(steeringRng, _consequenceCatalog);
-            _shadowCheckEngine = new ShadowCheckEngine(steeringRng, _consequenceCatalog);
+            _horninessEngine = new HorninessEngine(steeringRng, _consequenceCatalog, _horninessDcBias);
+            _shadowCheckEngine = new ShadowCheckEngine(steeringRng, _consequenceCatalog, _shadowDcBias);
 
             _turnOrchestrator = BuildTurnOrchestrator();
 

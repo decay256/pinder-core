@@ -113,7 +113,14 @@ namespace Pinder.Core.Conversation
                 dcAdjustment = state.ActiveWeakness.DcReduction;
             }
             if (_globalDcBias != 0)
-                dcAdjustment -= _globalDcBias;
+            {
+                // Positive bias lowers the effective DC (easier).
+                // Under ApplyDcBias semantics: ApplyDcBias(baseDc, bias) => baseDc - bias.
+                // In RollEngine.Resolve, the final DC is computed as defender.GetDefenceDC(stat) - dcAdjustment.
+                // Therefore, adding _globalDcBias to dcAdjustment is mathematically identical to routing through the shared helper:
+                // defenceDC - (dcAdjustment_without_bias + globalDcBias) == ApplyDcBias(defenceDC - dcAdjustment_without_bias, globalDcBias).
+                dcAdjustment += _globalDcBias;
+            }
 
             // Clear weakness window — consumed this turn regardless of match (#49)
             state.ActiveWeakness = null;

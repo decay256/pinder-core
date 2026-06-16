@@ -15,11 +15,13 @@ namespace Pinder.Core.Conversation
     {
         private readonly Random _rng;
         private readonly IConsequenceCatalog? _consequenceCatalog;
+        private readonly int _shadowDcBias;
 
-        public ShadowCheckEngine(Random rng, IConsequenceCatalog? consequenceCatalog = null)
+        public ShadowCheckEngine(Random rng, IConsequenceCatalog? consequenceCatalog = null, int shadowDcBias = 0)
         {
             _rng = rng ?? throw new ArgumentNullException(nameof(rng));
             _consequenceCatalog = consequenceCatalog;
+            _shadowDcBias = shadowDcBias;
         }
 
         /// <summary>
@@ -34,7 +36,7 @@ namespace Pinder.Core.Conversation
             if (shadowValue <= 0)
                 return ShadowCheckResult.NotPerformed;
 
-            int shadowDC = 20 - shadowValue;
+            int shadowDC = RollEngine.ApplyDcBias(20 - shadowValue, _shadowDcBias);
 
             // #901: route through single entry point.
             // Dice consumption: one Roll(20) — identical to old _steeringEngine.RollD20().

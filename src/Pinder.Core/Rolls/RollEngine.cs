@@ -15,6 +15,12 @@ namespace Pinder.Core.Rolls
     public static class RollEngine
     {
         /// <summary>
+        /// Applies a difficulty DC bias to a base DC.
+        /// Positive bias lowers the effective DC, making the check easier.
+        /// </summary>
+        public static int ApplyDcBias(int baseDc, int bias) => baseDc - bias;
+
+        /// <summary>
         /// Single entry point for all d20 checks.
         /// Rolls a d20 (with optional advantage/disadvantage), sums the modifier bag,
         /// computes total vs DC, and returns a canonical <see cref="RollCheckResult"/>.

@@ -37,6 +37,8 @@ namespace Pinder.Tools.NarrativeHarness
                 steeringPrompt: baseDef.SteeringPrompt,
                 horninessTimeModifiers: baseDef.HorninessTimeModifiers,
                 globalDcBias: baseDef.GlobalDcBias,
+                shadowDcBias: baseDef.ShadowDcBias,
+                horninessDcBias: baseDef.HorninessDcBias,
                 maxTurns: baseDef.MaxTurns,
                 maxDialogueOptions: baseDef.MaxDialogueOptions,
                 maxDeliveryWords: baseDef.MaxDeliveryWords);

@@ -32,8 +32,14 @@ namespace Pinder.LlmAdapters
         /// <summary>Steering question prompt template. Placeholders: {player_name}, {datee_name}, {delivered_message}.</summary>
         public string SteeringPrompt { get; }
 
-        /// <summary>Global DC bias applied to all rolls. 0 = standard difficulty. Positive = harder.</summary>
+        /// <summary>Global DC bias applied to all rolls. 0 = standard difficulty. Positive = easier.</summary>
         public int GlobalDcBias { get; }
+
+        /// <summary>DC bias applied to shadow checks. 0 = standard difficulty. Positive = easier.</summary>
+        public int ShadowDcBias { get; }
+
+        /// <summary>DC bias applied to horniness checks. 0 = standard difficulty. Positive = easier.</summary>
+        public int HorninessDcBias { get; }
 
         /// <summary>Maximum number of turns per session. Default 30 if not set in YAML.</summary>
         public int MaxTurns { get; }
@@ -56,6 +62,8 @@ namespace Pinder.LlmAdapters
             string steeringPrompt = null,
             HorninessTimeModifiers horninessTimeModifiers = null,
             int globalDcBias = 0,
+            int shadowDcBias = 0,
+            int horninessDcBias = 0,
             int maxTurns = 30,
             int maxDialogueOptions = 3,
             int maxDeliveryWords = 80)
@@ -68,6 +76,8 @@ namespace Pinder.LlmAdapters
             SteeringPrompt = steeringPrompt ?? "";
             HorninessTimeModifiers = horninessTimeModifiers;
             GlobalDcBias = globalDcBias;
+            ShadowDcBias = shadowDcBias;
+            HorninessDcBias = horninessDcBias;
             MaxTurns = maxTurns > 0 ? maxTurns : 30;
             MaxDialogueOptions = maxDialogueOptions > 0 ? maxDialogueOptions : 3;
             MaxDeliveryWords = maxDeliveryWords > 0 ? maxDeliveryWords : 80;
