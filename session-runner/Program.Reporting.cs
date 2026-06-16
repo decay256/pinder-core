@@ -62,12 +62,6 @@ partial class Program
         // ── token audit table ─────────────────────────────────────────────
         {
             var allStats = new List<CallSummaryStat>();
-#pragma warning disable CS0618
-            if (setup.Llm is AnthropicLlmAdapter anthropicLlm)
-            {
-                allStats.AddRange(anthropicLlm.GetCallStats());
-            }
-#pragma warning restore CS0618
             if (setup.Agent is LlmPlayerAgent llmAgent)
             {
                 allStats.AddRange(llmAgent.GetTokenStats());

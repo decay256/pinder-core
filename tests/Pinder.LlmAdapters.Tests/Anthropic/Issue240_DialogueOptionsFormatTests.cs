@@ -78,7 +78,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         public void AC2_WellFormed_4_options_returns_exactly_4()
         {
             var input = BuildWellFormed4Options();
-            var result = AnthropicLlmAdapter.ParseDialogueOptions(input);
+            var result = DialogueOptionParsers.ParseDialogueOptionsText(input);
             Assert.Equal(4, result.Length);
         }
 
@@ -87,7 +87,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         public void AC2_WellFormed_4_options_all_have_non_placeholder_IntendedText()
         {
             var input = BuildWellFormed4Options();
-            var result = AnthropicLlmAdapter.ParseDialogueOptions(input);
+            var result = DialogueOptionParsers.ParseDialogueOptionsText(input);
             foreach (var opt in result)
             {
                 Assert.NotEqual("...", opt.IntendedText);
@@ -100,7 +100,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         public void AC2_Stats_match_STAT_tags_in_input()
         {
             var input = BuildWellFormed4Options();
-            var result = AnthropicLlmAdapter.ParseDialogueOptions(input);
+            var result = DialogueOptionParsers.ParseDialogueOptionsText(input);
             Assert.Equal(StatType.Charm, result[0].Stat);
             Assert.Equal(StatType.Honesty, result[1].Stat);
             Assert.Equal(StatType.Chaos, result[2].Stat);
@@ -112,7 +112,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         public void AC2_Callback_turn_number_parsed_when_present()
         {
             var input = BuildWellFormed4Options();
-            var result = AnthropicLlmAdapter.ParseDialogueOptions(input);
+            var result = DialogueOptionParsers.ParseDialogueOptionsText(input);
             Assert.Equal(2, result[1].CallbackTurnNumber);
         }
 
@@ -121,7 +121,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         public void AC2_ComboName_parsed_when_present()
         {
             var input = BuildWellFormed4Options();
-            var result = AnthropicLlmAdapter.ParseDialogueOptions(input);
+            var result = DialogueOptionParsers.ParseDialogueOptionsText(input);
             Assert.Equal("The Reveal", result[1].ComboName);
         }
 
@@ -130,7 +130,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         public void AC2_HasTellBonus_parsed_when_yes()
         {
             var input = BuildWellFormed4Options();
-            var result = AnthropicLlmAdapter.ParseDialogueOptions(input);
+            var result = DialogueOptionParsers.ParseDialogueOptionsText(input);
             Assert.True(result[1].HasTellBonus);
         }
 
@@ -139,7 +139,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         public void AC2_None_metadata_parsed_as_null()
         {
             var input = BuildWellFormed4Options();
-            var result = AnthropicLlmAdapter.ParseDialogueOptions(input);
+            var result = DialogueOptionParsers.ParseDialogueOptionsText(input);
             Assert.Null(result[0].CallbackTurnNumber);
             Assert.Null(result[0].ComboName);
             Assert.False(result[0].HasTellBonus);
@@ -161,7 +161,7 @@ OPTION_2
 [STAT: WIT] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
 ""Is your bio a riddle? Because I'm intrigued.""";
 
-            var result = AnthropicLlmAdapter.ParseDialogueOptions(input);
+            var result = DialogueOptionParsers.ParseDialogueOptionsText(input);
             Assert.Equal(4, result.Length);
             // First two should be parsed, last two padded
             Assert.NotEqual("...", result[0].IntendedText);
@@ -192,7 +192,7 @@ OPTION_4
 [STAT: HONESTY] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
 ""I'm genuinely curious about you""";
 
-            var result = AnthropicLlmAdapter.ParseDialogueOptions(input);
+            var result = DialogueOptionParsers.ParseDialogueOptionsText(input);
             Assert.Equal(4, result.Length);
             foreach (var opt in result)
             {
@@ -224,7 +224,7 @@ OPTION_5
 [STAT: CHAOS] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
 ""Option five should be ignored""";
 
-            var result = AnthropicLlmAdapter.ParseDialogueOptions(input);
+            var result = DialogueOptionParsers.ParseDialogueOptionsText(input);
             Assert.Equal(4, result.Length);
         }
 
@@ -232,7 +232,7 @@ OPTION_5
         [Fact]
         public void EdgeCase_Null_response_returns_4_defaults_without_throwing()
         {
-            var result = AnthropicLlmAdapter.ParseDialogueOptions(null);
+            var result = DialogueOptionParsers.ParseDialogueOptionsText(null);
             Assert.Equal(4, result.Length);
             foreach (var opt in result)
             {
@@ -244,7 +244,7 @@ OPTION_5
         [Fact]
         public void EdgeCase_Whitespace_only_response_returns_4_defaults()
         {
-            var result = AnthropicLlmAdapter.ParseDialogueOptions("   \n\t  ");
+            var result = DialogueOptionParsers.ParseDialogueOptionsText("   \n\t  ");
             Assert.Equal(4, result.Length);
             foreach (var opt in result)
             {
@@ -272,7 +272,7 @@ OPTION_4
 [STAT: HONESTY] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
 ""Valid too""";
 
-            var result = AnthropicLlmAdapter.ParseDialogueOptions(input);
+            var result = DialogueOptionParsers.ParseDialogueOptionsText(input);
             Assert.Equal(4, result.Length);
             // The invalid-stat option should be skipped; 3 parsed + 1 padded
         }
@@ -288,7 +288,7 @@ OPTION_4
 3. **Wit** - ""so your bio says..."" Clever approach...
 4. **Chaos** - ""what if penguins..."" Wild card...";
 
-            var result = AnthropicLlmAdapter.ParseDialogueOptions(input);
+            var result = DialogueOptionParsers.ParseDialogueOptionsText(input);
             Assert.Equal(4, result.Length);
             foreach (var opt in result)
             {
@@ -325,7 +325,7 @@ OPTION_4
 [STAT: HONESTY] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
 ""Honest line""";
 
-            var result = AnthropicLlmAdapter.ParseDialogueOptions(input);
+            var result = DialogueOptionParsers.ParseDialogueOptionsText(input);
             Assert.Equal(4, result.Length);
             Assert.Equal(StatType.Rizz, result[0].Stat);
             Assert.Equal(StatType.SelfAwareness, result[1].Stat);
@@ -339,7 +339,7 @@ OPTION_4
         [Fact]
         public void AC4_Default_padding_stats_are_Charm_Honesty_Wit_Chaos()
         {
-            var result = AnthropicLlmAdapter.ParseDialogueOptions(null);
+            var result = DialogueOptionParsers.ParseDialogueOptionsText(null);
             Assert.Equal(StatType.Charm, result[0].Stat);
             Assert.Equal(StatType.Honesty, result[1].Stat);
             Assert.Equal(StatType.Wit, result[2].Stat);

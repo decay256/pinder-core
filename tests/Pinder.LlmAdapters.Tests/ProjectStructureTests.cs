@@ -179,5 +179,23 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         #endregion
+
+        #region Obsolete adapters guard
+
+        // What: #1172 Guard — Assert that obsolete adapter type names do not exist in the assembly.
+        [Fact]
+        public void ObsoleteAdapters_DoNotExistInAssembly()
+        {
+            var assembly = typeof(AnthropicOptions).Assembly;
+            
+            // Check full names
+            var anthropicLlmAdapterType = assembly.GetType("Pinder.LlmAdapters.Anthropic.AnthropicLlmAdapter");
+            var openAiLlmAdapterType = assembly.GetType("Pinder.LlmAdapters.OpenAi.OpenAiLlmAdapter");
+
+            Assert.Null(anthropicLlmAdapterType);
+            Assert.Null(openAiLlmAdapterType);
+        }
+
+        #endregion
     }
 }

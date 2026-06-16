@@ -144,21 +144,17 @@ namespace Pinder.Core.Tests.Conversation
         }
 
         // Static-shape lock: no public mutable instance field on PinderLlmAdapter
-        // (or its sibling adapters) should match the old datee-session names
+        // should match the old datee-session names
         // (_dateeHistory, _dateeSession, _dateeSystemPrompt). If a
         // regression re-introduces them, this catches it before runtime tests.
         [Fact]
         public void PinderLlmAdapter_HasNoDateeSessionFields()
         {
             var adapterType = typeof(Pinder.LlmAdapters.PinderLlmAdapter);
-#pragma warning disable CS0618
-            var anthropicType = typeof(Pinder.LlmAdapters.Anthropic.AnthropicLlmAdapter);
-            var openAiType = typeof(Pinder.LlmAdapters.OpenAi.OpenAiLlmAdapter);
-#pragma warning restore CS0618
 
             string[] forbidden = { "_dateeHistory", "_dateeSession", "_dateeSystemPrompt" };
 
-            foreach (var t in new[] { adapterType, anthropicType, openAiType })
+            foreach (var t in new[] { adapterType })
             {
                 foreach (var name in forbidden)
                 {
