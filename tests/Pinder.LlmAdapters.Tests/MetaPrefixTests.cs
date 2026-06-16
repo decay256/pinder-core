@@ -1,6 +1,5 @@
 using Pinder.Core.Stats;
 using Pinder.LlmAdapters.Anthropic;
-using Pinder.LlmAdapters.OpenAi;
 using Xunit;
 using Newtonsoft.Json.Linq;
 
@@ -22,15 +21,6 @@ namespace Pinder.LlmAdapters.Tests
             var result = DialogueOptionParsers.ParseDialogueOptionsText(rawInput);
             
             Assert.Equal(expected, result[0].IntendedText);
-        }
-
-        [Fact]
-        public void OpenAiLlmAdapter_StripsMetaPrefix_Correctly()
-        {
-            var input = @"OPTION_1 [STAT: Charm] ""CONTEXT: OpenAI message"" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]";
-            var result = OpenAiLlmAdapter.ParseDialogueOptions(input);
-            
-            Assert.Equal("OpenAI message", result[0].IntendedText);
         }
 
         [Fact]
