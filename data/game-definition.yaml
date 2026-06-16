@@ -230,50 +230,24 @@ game_master_prompt: |-
   relationship that ended over a spreadsheet, a job quit on a Tuesday and hidden for weeks).
   The PLAYER AVATAR probes the absurd detail with complete sincerity. The absurdity is never
   acknowledged — it's treated as the normal texture of a life, because to them it is.
-player_avatar_role_description: |
-  The PLAYER AVATAR genuinely wants the date; their goal is to raise Interest to 25 ("Date Secured"). The human PLAYER also earns XP, but the character doesn't know about XP — they
-  just want it to go well.
+player_avatar_role_description: |-
+  The PLAYER AVATAR genuinely wants to get laid; their goal is to raise Interest to 25 ("Date Secured"). The human PLAYER also earns XP in that case, but the character doesn't know about XP — they just want it to go well.
 
-  Each turn, generate up to max_dialogue_options options tied to the character's stats,
-  reflecting their personality as assembled from items, anatomy, and texting style. The
-  TEXTING STYLE fragment is the voice authority — every option must sound like THIS
-  character, not generic dating-app banter. Offer genuine stat variety so the PLAYER has
-  real tactical choices; don't cluster all options on the strongest stat.
-
-  Ambient Horniness (session-level: d10 + time-of-day modifier) can overlay any delivered
-  message with involuntary heat the character doesn't notice; it does not force stat choices.
-  Despair is Rizz's shadow, grown from cumulative Rizz failures (performed magnetism from
-  scarcity).
-
-  If a combo opportunity exists (last two stats set up a named combo), one option should
-  naturally complete it. If a callback opportunity exists (something said 2+ turns ago),
-  one option should weave it in. Keep it organic — clever, not visibly gaming a system.
+  If a combo opportunity exists (last two stats set up a named combo), one option should naturally complete it. If a callback opportunity exists (something said 2+ turns ago), one option should weave it in. Keep it organic — clever, not visibly gaming a system.
 datee_role_description: |
-  The DATEE is another PLAYER's character puppeted by the LLM; their personality prompt is
-  the character bible — everything they say stays consistent with their assembled identity
-  (stats, items, anatomy, texting style).
+  The DATEE is another PLAYER's character puppeted by the LLM; their personality prompt is the character bible — everything they say stays consistent with their BACKGROUND and PSYCHOLOGICAL STAKE.
 
-  Below Interest 25 they are NOT won over — they're evaluating, with resistance proportional
-  to their interest band:
-  - Bored (1-4): actively disengaged, short, looking for an excuse to stop replying
-  - Lukewarm (5-9): present but unconvinced, polite but guarded
-  - Interested (10-15): warming, curious, still holding back
-  - Very Into It (16-20): genuinely engaged, flirty/invested, but reserved — undecided
-  - Almost There (21-24): clearly into it, subtle resistance — one foot out as self-protection
-  - Date Secured (25): resistance dissolves genuinely (not abruptly) — earned warmth
-
-  The DATEE reacts to mechanical events they can perceive through the conversation: failed
-  messages land awkwardly (proportional to tier); shadow taint shifts the PLAYER's tone in
-  ways they notice but can't name; traps create disruptions they respond to naturally. Their
-  texting style stays distinct from the PLAYER's at all times — the two never sound alike.
+  The DATEE reacts to the whole CONVERSATION so far.
 improvement_prompt: |
-  Silently check whether what you just wrote has any of these problems:
-  - Topics looping without moving forward, or not about their actual lives
-  - No comedy, surprise, absurdity, or emotional punch — just competent filler
-  - Same structure as the last 2-3 messages (no pattern break)
-  - A reader watching would feel nothing
+  Check whether what you just wrote has any of these problems:
+  - Are topics looping?
+  - Are messages not about their BACKGROUND or PSYCHOLOGICAL STAKE?
+  - Is the conversation so far boring, or serious?
+  - Not enough drama?
+  - Has the DATEE used the same type of text structure already?
+  - Is NOT funny or comedic?
 
-  If any problem exists, rewrite now to fix it — more specific, more alive, more surprising.
+  If any problem exists, rewrite now to fix it.
   If none, output the content unchanged.
 
   CRITICAL OUTPUT RULE: output ONLY the final content. No evaluation, no numbered lists, no
