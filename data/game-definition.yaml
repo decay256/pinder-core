@@ -279,8 +279,8 @@ improvement_prompt: |
   CRITICAL OUTPUT RULE: output ONLY the final content. No evaluation, no numbered lists, no
   "here's what I changed." Just the content itself — a single message or set of options.
 global_dc_bias: 0  # Adjusts DC for all main rolls. 0 = standard. Positive = easier (lowers DC).
-shadow_dc_bias: 0  # Adjusts DC for the shadow check. 0 = standard. Positive = easier (lowers DC).
-horniness_dc_bias: 0  # Adjusts DC for the horniness check. 0 = standard. Positive = easier (lowers DC).
+shadow_dc_bias: 3  # Adjusts DC for the shadow check. 0 = standard. Positive = easier (lowers DC).
+horniness_dc_bias: 8  # Adjusts DC for the horniness check. 0 = standard. Positive = easier (lowers DC).
 
 horniness_time_modifiers:
   morning: 2      # 09:00-11:59
