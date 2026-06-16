@@ -38,12 +38,46 @@ horniness_time_modifiers:
         }
 
         [Fact]
-        public void LoadFrom_GlobalDcBias_PositiveValues_MakeGameHarder()
+        public void LoadFrom_GlobalDcBias_PositiveValues_LowerDc()
         {
             var yaml = BaseYaml + "global_dc_bias: 3\n";
             var gd = GameDefinition.LoadFrom(yaml);
             Assert.Equal(3, gd.GlobalDcBias);
-            Assert.True(gd.GlobalDcBias > 0, "Positive global_dc_bias should make the game harder");
+            Assert.True(gd.GlobalDcBias > 0, "Positive global_dc_bias should make the game easier (lowers DC)");
+        }
+
+        [Fact]
+        public void LoadFrom_ShadowAndHorninessDcBias_LoadsCorrectly()
+        {
+            var yaml = BaseYaml + "global_dc_bias: 0\nshadow_dc_bias: 4\nhorniness_dc_bias: -2\n";
+            var gd = GameDefinition.LoadFrom(yaml);
+            Assert.Equal(4, gd.ShadowDcBias);
+            Assert.Equal(-2, gd.HorninessDcBias);
+        }
+
+        [Fact]
+        public void LoadFrom_ShadowAndHorninessDcBias_Absent_DefaultsToZero()
+        {
+            var yaml = BaseYaml + "global_dc_bias: 0\n";
+            var gd = GameDefinition.LoadFrom(yaml);
+            Assert.Equal(0, gd.ShadowDcBias);
+            Assert.Equal(0, gd.HorninessDcBias);
+        }
+
+        [Fact]
+        public void LoadFrom_ShadowDcBias_NonInteger_ThrowsInvalidOperationException()
+        {
+            var yaml = BaseYaml + "global_dc_bias: 0\nshadow_dc_bias: abc\n";
+            var ex = Assert.Throws<InvalidOperationException>(() => GameDefinition.LoadFrom(yaml));
+            Assert.Contains("shadow_dc_bias must be an integer", ex.Message);
+        }
+
+        [Fact]
+        public void LoadFrom_HorninessDcBias_NonInteger_ThrowsInvalidOperationException()
+        {
+            var yaml = BaseYaml + "global_dc_bias: 0\nhorniness_dc_bias: xyz\n";
+            var ex = Assert.Throws<InvalidOperationException>(() => GameDefinition.LoadFrom(yaml));
+            Assert.Contains("horniness_dc_bias must be an integer", ex.Message);
         }
 
         [Fact]

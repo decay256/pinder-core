@@ -16,11 +16,13 @@ namespace Pinder.Core.Conversation
     {
         private readonly Random _rng;
         private readonly IConsequenceCatalog? _consequenceCatalog;
+        private readonly int _horninessDcBias;
 
-        public HorninessEngine(Random rng, IConsequenceCatalog? consequenceCatalog = null)
+        public HorninessEngine(Random rng, IConsequenceCatalog? consequenceCatalog = null, int horninessDcBias = 0)
         {
             _rng = rng ?? throw new ArgumentNullException(nameof(rng));
             _consequenceCatalog = consequenceCatalog;
+            _horninessDcBias = horninessDcBias;
         }
 
         /// <summary>
@@ -63,7 +65,7 @@ namespace Pinder.Core.Conversation
             if (sessionHorniness <= 0 || playerShadows == null)
                 return (HorninessCheckResult.NotPerformed, null);
 
-            int horninessDC = 20 - sessionHorniness;
+            int horninessDC = RollEngine.ApplyDcBias(20 - sessionHorniness, _horninessDcBias);
             // #901: route through single entry point — dice consumption is identical (one Roll(20))
             var check = RollEngine.ResolveCheck(
                 RollCheckKind.Horniness,

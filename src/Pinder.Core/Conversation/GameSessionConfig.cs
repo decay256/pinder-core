@@ -34,10 +34,22 @@ namespace Pinder.Core.Conversation
         public IRuleResolver? Rules { get; }
 
         /// <summary>
-        /// Global DC adjustment applied to every roll. Positive = harder (DC raised),
-        /// negative = easier (DC lowered). Does not affect Nat 1 / Nat 20 detection.
+        /// Global DC adjustment applied to every main option roll. Positive = easier (DC lowered),
+        /// negative = harder (DC raised). Does not affect Nat 1 / Nat 20 detection.
         /// </summary>
         public int GlobalDcBias { get; }
+
+        /// <summary>
+        /// Shadow DC adjustment applied to shadow checks. Positive = easier (DC lowered),
+        /// negative = harder (DC raised). Fully independent of global DC bias.
+        /// </summary>
+        public int ShadowDcBias { get; }
+
+        /// <summary>
+        /// Horniness DC adjustment applied to horniness checks. Positive = easier (DC lowered),
+        /// negative = harder (DC raised). Fully independent of global DC bias.
+        /// </summary>
+        public int HorninessDcBias { get; }
 
         /// <summary>
         /// Optional RNG for the steering roll. When null, a new System.Random is used.
@@ -106,6 +118,8 @@ namespace Pinder.Core.Conversation
             string? previousOpener = null,
             IRuleResolver? rules = null,
             int globalDcBias = 0,
+            int shadowDcBias = 0,
+            int horninessDcBias = 0,
             Random? steeringRng = null,
             object? statDeliveryInstructions = null,
             IDiceRoller? diceRoller = null,
@@ -122,6 +136,8 @@ namespace Pinder.Core.Conversation
             PreviousOpener = previousOpener;
             Rules = rules;
             GlobalDcBias = globalDcBias;
+            ShadowDcBias = shadowDcBias;
+            HorninessDcBias = horninessDcBias;
             SteeringRng = steeringRng;
             StatDeliveryInstructions = statDeliveryInstructions;
             DiceRoller = diceRoller;

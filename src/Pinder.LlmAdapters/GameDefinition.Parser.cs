@@ -67,6 +67,22 @@ namespace Pinder.LlmAdapters
             if (!int.TryParse(gdcbObj.ToString(), out int globalDcBias))
                 throw new InvalidOperationException("game-definition.yaml global_dc_bias must be an integer");
 
+            // Parse optional shadow_dc_bias
+            int shadowDcBias = 0;
+            if (parsed.TryGetValue("shadow_dc_bias", out var sObj) && sObj != null)
+            {
+                if (!int.TryParse(sObj.ToString(), out shadowDcBias))
+                    throw new InvalidOperationException("game-definition.yaml shadow_dc_bias must be an integer");
+            }
+
+            // Parse optional horniness_dc_bias
+            int horninessDcBias = 0;
+            if (parsed.TryGetValue("horniness_dc_bias", out var hObj) && hObj != null)
+            {
+                if (!int.TryParse(hObj.ToString(), out horninessDcBias))
+                    throw new InvalidOperationException("game-definition.yaml horniness_dc_bias must be an integer");
+            }
+
             return new GameDefinition(
                 name: name,
                 gameMasterPrompt: gameMasterPrompt,
@@ -76,6 +92,8 @@ namespace Pinder.LlmAdapters
                 steeringPrompt: GetOptional("steering_prompt"),
                 horninessTimeModifiers: horninessTimeModifiers,
                 globalDcBias: globalDcBias,
+                shadowDcBias: shadowDcBias,
+                horninessDcBias: horninessDcBias,
                 maxTurns: parsed.TryGetValue("max_turns", out var mtObj) && int.TryParse(mtObj?.ToString(), out int mt) ? mt : 30,
                 maxDialogueOptions: parsed.TryGetValue("max_dialogue_options", out var mdoObj) && int.TryParse(mdoObj?.ToString(), out int mdo) ? mdo : 3,
                 maxDeliveryWords: parsed.TryGetValue("max_delivery_words", out var mdwObj) && int.TryParse(mdwObj?.ToString(), out int mdw) ? mdw : 80

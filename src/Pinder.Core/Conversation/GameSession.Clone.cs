@@ -79,6 +79,8 @@ namespace Pinder.Core.Conversation
             _clock           = src._clock;
             _rules           = src._rules;
             _globalDcBias    = src._globalDcBias;
+            _shadowDcBias    = src._shadowDcBias;
+            _horninessDcBias = src._horninessDcBias;
             _statDeliveryInstructions = src._statDeliveryInstructions;
             _onTextLayerNoop = src._onTextLayerNoop;
             _consequenceCatalog = src._consequenceCatalog;
@@ -98,8 +100,8 @@ namespace Pinder.Core.Conversation
             // in the public ctor; preserve that shape on the clone.
             var clonedSteeringRng = RandomCloner.Clone(src._steeringEngine.SteeringRngForCloneOnly);
             _steeringEngine  = new SteeringEngine(clonedSteeringRng);
-            _horninessEngine = new HorninessEngine(clonedSteeringRng, _consequenceCatalog);
-            _shadowCheckEngine = new ShadowCheckEngine(clonedSteeringRng, _consequenceCatalog);
+            _horninessEngine = new HorninessEngine(clonedSteeringRng, _consequenceCatalog, _horninessDcBias);
+            _shadowCheckEngine = new ShadowCheckEngine(clonedSteeringRng, _consequenceCatalog, _shadowDcBias);
             _statDrawRng     = src._statDrawRng != null ? RandomCloner.Clone(src._statDrawRng) : null;
 
             _turnOrchestrator = BuildTurnOrchestrator();
@@ -226,8 +228,8 @@ namespace Pinder.Core.Conversation
             // RNGs (deep-clone to avoid sharing internal state with src).
             var clonedSteeringRng = RandomCloner.Clone(src._steeringEngine.SteeringRngForCloneOnly);
             _steeringEngine  = new SteeringEngine(clonedSteeringRng);
-            _horninessEngine = new HorninessEngine(clonedSteeringRng, _consequenceCatalog);
-            _shadowCheckEngine = new ShadowCheckEngine(clonedSteeringRng, _consequenceCatalog);
+            _horninessEngine = new HorninessEngine(clonedSteeringRng, _consequenceCatalog, _horninessDcBias);
+            _shadowCheckEngine = new ShadowCheckEngine(clonedSteeringRng, _consequenceCatalog, _shadowDcBias);
             _statDrawRng     = src._statDrawRng != null ? RandomCloner.Clone(src._statDrawRng) : null;
 
             _turnOrchestrator = BuildTurnOrchestrator();

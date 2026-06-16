@@ -263,12 +263,21 @@ partial class Program
         }
 
         int yamlDcBias = result.GameDef?.GlobalDcBias ?? 0;
+        int yamlShadowDcBias = result.GameDef?.ShadowDcBias ?? 0;
+        int yamlHorninessDcBias = result.GameDef?.HorninessDcBias ?? 0;
         int totalDcBias = difficultyBias + yamlDcBias;
         Pinder.LlmAdapters.ConsequenceCatalog? consequenceCatalog = null;
         if (result.SnapshotI18nCatalog != null)
             consequenceCatalog = new Pinder.LlmAdapters.ConsequenceCatalog(result.SnapshotI18nCatalog);
 
-        var config = new GameSessionConfig(clock: clock, playerShadows: result.SableShadows, globalDcBias: totalDcBias, statDeliveryInstructions: statDeliveryInstructions, consequenceCatalog: consequenceCatalog);
+        var config = new GameSessionConfig(
+            clock: clock,
+            playerShadows: result.SableShadows,
+            globalDcBias: totalDcBias,
+            shadowDcBias: yamlShadowDcBias,
+            horninessDcBias: yamlHorninessDcBias,
+            statDeliveryInstructions: statDeliveryInstructions,
+            consequenceCatalog: consequenceCatalog);
         int? diceSeed = null;
         { if (ParseArg(args, "--seed") is string s2 && int.TryParse(s2, out int s3)) diceSeed = s3; }
         result.Session = new GameSession(result.Sable, result.Brick, result.Llm, new SystemRandomDiceRoller(diceSeed), result.TrapRegistry, config);
