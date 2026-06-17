@@ -144,7 +144,7 @@ namespace Pinder.LlmAdapters
                 sb.AppendLine($"STAKE COVERAGE — {referencedCount} line(s) referenced this session, {untouchedIndices.Count} untouched.");
                 if (untouchedIndices.Count > 0)
                 {
-                    sb.AppendLine("Untouched stake lines (OPTION_C must reference one):");
+                    sb.AppendLine("Untouched stake lines (the final OPTION must reference one):");
                     foreach (int idx in untouchedIndices)
                     {
                         string preview = context.StakeLines[idx];
@@ -154,7 +154,7 @@ namespace Pinder.LlmAdapters
                 }
                 else
                 {
-                    sb.AppendLine("All stake lines referenced — OPTION_C may continue the most recent stake thread.");
+                    sb.AppendLine("All stake lines referenced — the final OPTION may continue the most recent stake thread.");
                 }
                 sb.AppendLine();
             }
@@ -165,7 +165,7 @@ namespace Pinder.LlmAdapters
 
             string optionsCountStr = optionCount.ToString();
             string optionsListStr = string.Join(", ", Enumerable.Range(1, optionCount).Select(i => $"OPTION_{i}"));
-            string optionsFormatListStr = string.Join(" ", Enumerable.Range(0, optionCount).Select(i => $"OPTION_{(char)('A' + i)}: [message]"));
+            string optionsFormatListStr = string.Join(" ", Enumerable.Range(0, optionCount).Select(i => $"OPTION_{i + 1}: [message]"));
 
             // [ENGINE — Turn N] injection block
             string engineBlock = PromptTemplates.EngineOptionsBlock

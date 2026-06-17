@@ -80,7 +80,7 @@ prompts:
       Before writing each option, verify: does this sound exactly like
       the texting style above? If not, rewrite it.
 
-      PSYCHOLOGICAL STAKE — mandatory: if a PSYCHOLOGICAL STAKE section is present in the character profile above, OPTION_C MUST quote or paraphrase one of the numbered stake lines verbatim or near-verbatim. If none of the stake lines fit this turn's emotional moment naturally, that is a signal the conversation needs to pivot — OPTION_C should bridge toward a stake-relevant topic. Options that only respond to the surface topic without touching the emotional through-line are incomplete.
+      PSYCHOLOGICAL STAKE — mandatory: if a PSYCHOLOGICAL STAKE section is present in the character profile above, the final OPTION (OPTION_3) MUST quote or paraphrase one of the numbered stake lines verbatim or near-verbatim. If none of the stake lines fit this turn's emotional moment naturally, that is a signal the conversation needs to pivot — the final OPTION (OPTION_3) should bridge toward a stake-relevant topic. Options that only respond to the surface topic without touching the emotional through-line are incomplete.
 
       BIOGRAPHICAL SPECIFICITY — critical: when the DATEE has revealed a concrete biographical detail (a job they left, a place they went, a relationship, a specific event or year), at least one option should follow up on that specific detail — not the emotional theme, the actual fact. 'You mentioned leaving database engineering — what were you doing the following week?' is stronger than 'you seem like someone who takes big risks.' The conversation only advances when both parties are actually curious about each other's lives.
 

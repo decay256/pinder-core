@@ -127,14 +127,14 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("Interest: 22/25", result);
         }
 
-        // Mutation: would catch if OPTION_A/B/C/D format instruction was missing
+        // Mutation: would catch if OPTION_1/2/3 format instruction was missing
         [Fact]
         public void AC1_OptionsInjection_HasOptionFormatInstruction()
         {
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
                 MakeDialogueContext());
-            Assert.Contains("OPTION_A", result);
-            Assert.Contains("OPTION_B", result);
+            Assert.Contains("OPTION_1", result);
+            Assert.Contains("OPTION_2", result);
         }
 
         // Mutation: would catch if horniness was not included when >= 6

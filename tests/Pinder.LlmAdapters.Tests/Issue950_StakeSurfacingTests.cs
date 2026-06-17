@@ -58,8 +58,8 @@ namespace Pinder.LlmAdapters.Tests
             var context = MakeContextWithStake();
             var prompt = SessionDocumentBuilder.BuildDialogueOptionsPrompt(context);
 
-            // The templates.yaml dialogue-options-instruction now mandates OPTION_C.
-            Assert.Contains("OPTION_C MUST", prompt);
+            // The templates.yaml dialogue-options-instruction now mandates OPTION_3.
+            Assert.Contains("the final OPTION (OPTION_3) MUST", prompt);
         }
 
         // ── test 2: stake-coverage block injected when StakeLines set ────

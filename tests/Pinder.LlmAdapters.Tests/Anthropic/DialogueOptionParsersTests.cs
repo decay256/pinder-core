@@ -11,7 +11,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         [Fact]
         public void ParseDialogueOptionsText_NullInput_ReturnsPaddedDefaults()
         {
-            var result = DialogueOptionParsers.ParseDialogueOptionsText(null);
+            var result = DialogueOptionParsers.ParseDialogueOptionsText(null, new[] { StatType.Charm, StatType.Honesty, StatType.Wit, StatType.Chaos });
             Assert.Equal(4, result.Length);
             // Defaults should use Charm, Honesty, Wit, Chaos
             Assert.Equal(StatType.Charm, result[0].Stat);
@@ -23,7 +23,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         [Fact]
         public void ParseDialogueOptionsText_EmptyInput_ReturnsPaddedDefaults()
         {
-            var result = DialogueOptionParsers.ParseDialogueOptionsText("");
+            var result = DialogueOptionParsers.ParseDialogueOptionsText("", new[] { StatType.Charm, StatType.Honesty, StatType.Wit, StatType.Chaos });
             Assert.Equal(4, result.Length);
         }
 
@@ -34,7 +34,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
 OPTION_2 [STAT: Wit] ""Did it hurt when you fell from heaven?"" [CALLBACK: 3] [COMBO: SmoothTalker] [TELL_BONUS: yes]
 OPTION_3 [STAT: Honesty] ""I just wanted to say hi."" [CALLBACK: turn_5] [COMBO: none] [TELL_BONUS: no]";
 
-            var result = DialogueOptionParsers.ParseDialogueOptionsText(input);
+            var result = DialogueOptionParsers.ParseDialogueOptionsText(input, new[] { StatType.Charm, StatType.Honesty, StatType.Wit, StatType.Chaos });
             Assert.Equal(4, result.Length);
 
             Assert.Equal(StatType.Charm, result[0].Stat);
@@ -57,7 +57,7 @@ OPTION_3 [STAT: Honesty] ""I just wanted to say hi."" [CALLBACK: turn_5] [COMBO:
         {
             var input = @"OPTION_1 [STAT: Charm] ""Hello!"" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]";
 
-            var result = DialogueOptionParsers.ParseDialogueOptionsText(input);
+            var result = DialogueOptionParsers.ParseDialogueOptionsText(input, new[] { StatType.Charm, StatType.Honesty, StatType.Wit, StatType.Chaos });
             Assert.Equal(4, result.Length);
             Assert.Equal(StatType.Charm, result[0].Stat);
             Assert.Equal("Hello!", result[0].IntendedText);
@@ -78,7 +78,7 @@ OPTION_3 [STAT: Honesty] ""I just wanted to say hi."" [CALLBACK: turn_5] [COMBO:
                 ]
             }");
 
-            var result = DialogueOptionParsers.ParseDialogueOptionsTool(json);
+            var result = DialogueOptionParsers.ParseDialogueOptionsTool(json, new[] { StatType.Charm, StatType.Honesty, StatType.Wit, StatType.Chaos });
             Assert.NotNull(result);
             Assert.Equal(4, result!.Length);
 
@@ -97,7 +97,7 @@ OPTION_3 [STAT: Honesty] ""I just wanted to say hi."" [CALLBACK: turn_5] [COMBO:
         public void ParseDialogueOptionsTool_EmptyOptions_ReturnsNull()
         {
             var json = JObject.Parse(@"{ ""options"": [] }");
-            var result = DialogueOptionParsers.ParseDialogueOptionsTool(json);
+            var result = DialogueOptionParsers.ParseDialogueOptionsTool(json, new[] { StatType.Charm, StatType.Honesty, StatType.Wit, StatType.Chaos });
             Assert.Null(result);
         }
 
@@ -105,7 +105,7 @@ OPTION_3 [STAT: Honesty] ""I just wanted to say hi."" [CALLBACK: turn_5] [COMBO:
         public void ParseDialogueOptionsTool_MalformedInput_ReturnsNull()
         {
             var json = JObject.Parse(@"{ ""garbage"": true }");
-            var result = DialogueOptionParsers.ParseDialogueOptionsTool(json);
+            var result = DialogueOptionParsers.ParseDialogueOptionsTool(json, new[] { StatType.Charm, StatType.Honesty, StatType.Wit, StatType.Chaos });
             Assert.Null(result);
         }
 
@@ -113,7 +113,7 @@ OPTION_3 [STAT: Honesty] ""I just wanted to say hi."" [CALLBACK: turn_5] [COMBO:
         public void ParseDialogueOptionsText_SelfAwareness_NormalizesCorrectly()
         {
             var input = @"OPTION_1 [STAT: SELF_AWARENESS] ""I know myself."" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]";
-            var result = DialogueOptionParsers.ParseDialogueOptionsText(input);
+            var result = DialogueOptionParsers.ParseDialogueOptionsText(input, new[] { StatType.SelfAwareness, StatType.Charm, StatType.Honesty, StatType.Wit });
             Assert.Equal(StatType.SelfAwareness, result[0].Stat);
         }
 
@@ -127,7 +127,7 @@ OPTION_3 [STAT: Honesty] ""I just wanted to say hi."" [CALLBACK: turn_5] [COMBO:
             // inner double-quote (observed fragments like "see you said it's").
             var input = @"OPTION_1 [STAT: Wit] ""Interesting that you said ""it's a lot"" earlier — care to unpack that?"" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]";
 
-            var result = DialogueOptionParsers.ParseDialogueOptionsText(input);
+            var result = DialogueOptionParsers.ParseDialogueOptionsText(input, new[] { StatType.Wit, StatType.Charm, StatType.Honesty, StatType.Wit });
 
             Assert.Equal(StatType.Wit, result[0].Stat);
             Assert.Equal(
@@ -142,7 +142,7 @@ OPTION_3 [STAT: Honesty] ""I just wanted to say hi."" [CALLBACK: turn_5] [COMBO:
 OPTION_2 [STAT: Honesty] ""You literally said ""I never text first"" two minutes ago."" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
 OPTION_3 [STAT: Wit] ""Bold of you to assume I read."" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]";
 
-            var result = DialogueOptionParsers.ParseDialogueOptionsText(input);
+            var result = DialogueOptionParsers.ParseDialogueOptionsText(input, new[] { StatType.Charm, StatType.Honesty, StatType.Wit, StatType.Chaos });
 
             Assert.Equal(4, result.Length);
             Assert.Equal("Hey there, looking good!", result[0].IntendedText);
@@ -160,7 +160,7 @@ OPTION_3 [STAT: Wit] ""Bold of you to assume I read."" [CALLBACK: none] [COMBO: 
             var input = @"OPTION_1 [STAT: Charm] ""the"" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
 OPTION_2 [STAT: Wit] ""That's a genuinely funny take, I'll give you that."" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]";
 
-            var result = DialogueOptionParsers.ParseDialogueOptionsText(input);
+            var result = DialogueOptionParsers.ParseDialogueOptionsText(input, new[] { StatType.Charm, StatType.Wit, StatType.Honesty, StatType.Chaos });
 
             Assert.Equal(4, result.Length);
             // The degenerate "the" fragment must not appear as any option's text.
