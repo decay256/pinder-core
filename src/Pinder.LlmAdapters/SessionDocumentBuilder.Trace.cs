@@ -62,7 +62,7 @@ namespace Pinder.LlmAdapters
 
             if (context.HorninessLevel >= 6)
             {
-                gameState.AppendLine($"Horniness: {context.HorninessLevel}/10 — Rizz options more prominent, slightly too forward.");
+                gameState.AppendLine($"Horniness: {context.HorninessLevel} — Rizz options more prominent, slightly too forward.");
             }
             if (context.RequiresRizzOption)
             {

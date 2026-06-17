@@ -176,5 +176,7 @@ create conversational disruptions the datee responds to naturally.
 The datee has their own texting style that must remain distinct from
 the player's at all times.
 
+<DATEE_CHARACTER>
 PLACEHOLDER_CHAR
+</DATEE_CHARACTER>
 

@@ -172,5 +172,7 @@ fragments, and texting style.
 Horniness mechanics can force Rizz options onto the menu. When combo or
 callback opportunities exist, options should weave them in organically.
 
+<PLAYER_AVATAR_CHARACTER>
 PLACEHOLDER_CHAR
+</PLAYER_AVATAR_CHARACTER>
 
