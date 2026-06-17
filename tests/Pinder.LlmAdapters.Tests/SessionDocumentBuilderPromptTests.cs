@@ -126,7 +126,8 @@ namespace Pinder.LlmAdapters.Tests
         {
             var result = BuildMinimal(horninessLevel: 7);
 
-            Assert.Contains("Horniness: 7/10", result);
+            Assert.Contains("Horniness: 7", result);
+            Assert.DoesNotContain("Horniness: 7/10", result);
         }
 
         [Fact]

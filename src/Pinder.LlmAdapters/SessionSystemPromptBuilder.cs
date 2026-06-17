@@ -48,7 +48,7 @@ namespace Pinder.LlmAdapters
             var sb = new AnnotatedStringBuilder();
             AppendGmBase(sb, def);
             AppendCharacterSpec(sb, def.PlayerAvatarRoleDescription, "player_avatar_role_description",
-                playerAvatarPrompt, "player-profile");
+                playerAvatarPrompt, "player-profile", "PLAYER_AVATAR_CHARACTER");
 
             return new PromptTraceResult(sb.ToString(), sb.Spans);
         }
@@ -72,7 +72,7 @@ namespace Pinder.LlmAdapters
             var sb = new AnnotatedStringBuilder();
             AppendGmBase(sb, def);
             AppendCharacterSpec(sb, def.DateeRoleDescription, "datee_role_description",
-                dateePrompt, "datee-profile");
+                dateePrompt, "datee-profile", "DATEE_CHARACTER");
 
             return new PromptTraceResult(sb.ToString(), sb.Spans);
         }
@@ -91,18 +91,24 @@ namespace Pinder.LlmAdapters
         /// Appends the per-session character-spec block — the ONLY difference
         /// between the two built prompts. Placed LAST to keep the shared base as
         /// the stable cacheable prefix.
+        /// The characterTag parameter wraps the character payload in the
+        /// SSOT injection-fence declared in game-definition.yaml §5:
+        ///   PLAYER_AVATAR_CHARACTER or DATEE_CHARACTER.
         /// </summary>
         private static void AppendCharacterSpec(
             AnnotatedStringBuilder sb,
             string roleDescription,
             string roleKey,
             string characterPrompt,
-            string profileKey)
+            string profileKey,
+            string characterTag)
         {
             sb.Append("\n" + CharacterSpecHeader + "\n\n");
             sb.AppendLine(roleDescription.TrimEnd(), "game-definition.yaml", roleKey);
             sb.Append("\n");
+            sb.Append($"<{characterTag}>\n");
             sb.AppendLine(characterPrompt.TrimEnd(), "character-profile", profileKey);
+            sb.Append($"</{characterTag}>\n");
             sb.Append("\n");
         }
     }

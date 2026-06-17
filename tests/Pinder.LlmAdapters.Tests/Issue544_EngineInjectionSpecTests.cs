@@ -143,7 +143,8 @@ namespace Pinder.LlmAdapters.Tests
         {
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
                 MakeDialogueContext(horninessLevel: 8));
-            Assert.Contains("Horniness: 8/10", result);
+            Assert.Contains("Horniness: 8", result);
+            Assert.DoesNotContain("Horniness: 8/10", result);
         }
 
         // Mutation: would catch if horniness was shown when below 6

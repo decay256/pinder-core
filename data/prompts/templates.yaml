@@ -90,16 +90,20 @@ prompts:
       - Since Turn 1 has empty conversation history, options generated for Turn 1 must never assume the DATEE has already spoken (never say 'you mentioned', 'since you said', 'interesting that you mention', etc.). You are initiating the contact.
   engine-datee-block:
     system_prompt: |-
+      <ENGINE_STATE>
       [ENGINE — DATEE]
       {datee_name} is at Interest {interest}/25. {interest_narrative}
       Write {datee_name}'s response.
+      </ENGINE_STATE>
   engine-options-block:
     system_prompt: |-
+      <ENGINE_STATE>
       [ENGINE — Turn {turn}]
       {player_name} is deciding what to send next.
       {game_state}
       Generate {options_count} options for what {player_name} might send, given the conversation above.
       Format: {options_format_list}
+      </ENGINE_STATE>
   interest-beat-above15:
     system_prompt: >-
       Generate a brief reaction — one sentence or a small gesture — showing {datee_name} becoming more invested. Subtle. Not a proclamation. A shift in energy.
