@@ -87,7 +87,8 @@ namespace Pinder.Core.Tests
 
             var result = PromptBuilder.BuildSystemPromptEx(
                 "Velvet", "she/her", "just here for the vibes",
-                fragments, new TrapState(), characterIdSeed: "fixed-seed-1154");
+                fragments, new TrapState(), characterIdSeed: "fixed-seed-1154",
+                archetypesEnabled: true);
 
             Assert.Equal(ReadFixture("golden_inactive.txt"), result.Text);
         }
@@ -112,7 +113,8 @@ namespace Pinder.Core.Tests
 
             var result = PromptBuilder.BuildSystemPromptEx(
                 "Velvet", "she/her", "just here for the vibes",
-                fragments, trapState, characterIdSeed: "fixed-seed-1154");
+                fragments, trapState, characterIdSeed: "fixed-seed-1154",
+                archetypesEnabled: true);
 
             Assert.Equal(ReadFixture("golden_active.txt"), result.Text);
         }

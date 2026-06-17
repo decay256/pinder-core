@@ -45,13 +45,14 @@ namespace Pinder.SessionSetup
         public static CharacterProfile Load(
             string jsonPath,
             IItemRepository itemRepo,
-            IAnatomyRepository anatomyRepo)
+            IAnatomyRepository anatomyRepo,
+            bool archetypesEnabled = false)
         {
             if (!File.Exists(jsonPath))
                 throw new FileNotFoundException($"Character definition file not found: {jsonPath}", jsonPath);
 
             string json = File.ReadAllText(jsonPath);
-            return Parse(json, itemRepo, anatomyRepo);
+            return Parse(json, itemRepo, anatomyRepo, archetypesEnabled);
         }
 
         /// <summary>
@@ -136,13 +137,14 @@ namespace Pinder.SessionSetup
         public static CharacterProfile Parse(
             string json,
             IItemRepository itemRepo,
-            IAnatomyRepository anatomyRepo)
+            IAnatomyRepository anatomyRepo,
+            bool archetypesEnabled = false)
         {
             if (itemRepo == null) throw new ArgumentNullException(nameof(itemRepo));
             if (anatomyRepo == null) throw new ArgumentNullException(nameof(anatomyRepo));
 
             CharacterDefinition def = ParseDefinition(json);
-            return Assemble(def, itemRepo, anatomyRepo);
+            return Assemble(def, itemRepo, anatomyRepo, archetypesEnabled);
         }
 
         /// <summary>
@@ -154,7 +156,8 @@ namespace Pinder.SessionSetup
         public static CharacterProfile Assemble(
             CharacterDefinition def,
             IItemRepository itemRepo,
-            IAnatomyRepository anatomyRepo)
+            IAnatomyRepository anatomyRepo,
+            bool archetypesEnabled = false)
         {
             if (def == null) throw new ArgumentNullException(nameof(def));
             if (itemRepo == null) throw new ArgumentNullException(nameof(itemRepo));
@@ -166,7 +169,8 @@ namespace Pinder.SessionSetup
                 def.Anatomy,
                 def.Allocation.Spent,
                 def.Allocation.Shadows,
-                def.Level);
+                def.Level,
+                archetypesEnabled: archetypesEnabled);
 
             // #836 placeholder aggregation: use the character UUID as the
             // stable seed so the system prompt and the runtime
@@ -177,7 +181,8 @@ namespace Pinder.SessionSetup
 
             string systemPrompt = PromptBuilder.BuildSystemPrompt(
                 def.Name, def.GenderIdentity, def.Bio, fragments, new TrapState(),
-                characterIdSeed: textingSeed);
+                characterIdSeed: textingSeed,
+                archetypesEnabled: archetypesEnabled);
 
             // #907: Use AggregateWithAudit so conflict drops are visible at
             // session-creation time. ConflictCatalog is loaded by PromptWiring.Wire();

@@ -103,7 +103,8 @@ namespace Pinder.Core.Tests
 
             var prompt = PromptBuilder.BuildSystemPrompt(
                 "TestChar", "she/her", "bio", fragments, new TrapState(),
-                characterIdSeed: "stable-seed");
+                characterIdSeed: "stable-seed",
+                archetypesEnabled: true);
 
             // Slice out the TEXTING STYLE section.
             string section = ExtractSection(prompt, "TEXTING STYLE", "ACTIVE ARCHETYPE");

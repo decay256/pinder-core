@@ -83,6 +83,14 @@ namespace Pinder.LlmAdapters
                     throw new InvalidOperationException("game-definition.yaml horniness_dc_bias must be an integer");
             }
 
+            // Parse optional archetypes_enabled
+            bool archetypesEnabled = false;
+            if (parsed.TryGetValue("archetypes_enabled", out var aeObj) && aeObj != null)
+            {
+                if (!bool.TryParse(aeObj.ToString(), out archetypesEnabled))
+                    throw new InvalidOperationException("game-definition.yaml archetypes_enabled must be a boolean");
+            }
+
             return new GameDefinition(
                 name: name,
                 gameMasterPrompt: gameMasterPrompt,
@@ -94,6 +102,7 @@ namespace Pinder.LlmAdapters
                 globalDcBias: globalDcBias,
                 shadowDcBias: shadowDcBias,
                 horninessDcBias: horninessDcBias,
+                archetypesEnabled: archetypesEnabled,
                 maxTurns: parsed.TryGetValue("max_turns", out var mtObj) && int.TryParse(mtObj?.ToString(), out int mt) ? mt : 30,
                 maxDialogueOptions: parsed.TryGetValue("max_dialogue_options", out var mdoObj) && int.TryParse(mdoObj?.ToString(), out int mdo) ? mdo : 3,
                 maxDeliveryWords: parsed.TryGetValue("max_delivery_words", out var mdwObj) && int.TryParse(mdwObj?.ToString(), out int mdw) ? mdw : 80

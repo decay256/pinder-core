@@ -6,6 +6,7 @@ name: "Pinder"
 max_turns: 30
 max_dialogue_options: 3
 max_delivery_words: 80
+archetypes_enabled: false  # When false (default), no archetype content is injected into any prompt surface.
 game_master_prompt: |
   ## 1. Role
 

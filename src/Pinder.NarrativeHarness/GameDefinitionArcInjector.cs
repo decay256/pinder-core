@@ -39,6 +39,7 @@ namespace Pinder.Tools.NarrativeHarness
                 globalDcBias: baseDef.GlobalDcBias,
                 shadowDcBias: baseDef.ShadowDcBias,
                 horninessDcBias: baseDef.HorninessDcBias,
+                archetypesEnabled: baseDef.ArchetypesEnabled,
                 maxTurns: baseDef.MaxTurns,
                 maxDialogueOptions: baseDef.MaxDialogueOptions,
                 maxDeliveryWords: baseDef.MaxDeliveryWords);

@@ -346,7 +346,7 @@ namespace Pinder.Core.Tests
             string path = Path.Combine(RepoRoot, "data", "characters", "gerald.json");
             string json = File.ReadAllText(path);
 
-            var profile = CharacterDefinitionLoader.Parse(json, itemRepo, anatomyRepo);
+            var profile = CharacterDefinitionLoader.Parse(json, itemRepo, anatomyRepo, archetypesEnabled: true);
 
             // Should contain assembled fragments, not be empty
             // Lead-in is now RULES token; character name no longer in character-level prompt (RULES migration).

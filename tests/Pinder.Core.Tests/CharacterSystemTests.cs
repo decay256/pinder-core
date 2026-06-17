@@ -182,7 +182,8 @@ namespace Pinder.Core.Tests
                 ZeroBaseStats, ZeroShadow);
 
             var prompt = PromptBuilder.BuildSystemPrompt(
-                "TestChar", "she/her", "A test bio.", fragments, new TrapState());
+                "TestChar", "she/her", "A test bio.", fragments, new TrapState(),
+                archetypesEnabled: true);
 
             Assert.Contains("PERSONALITY", prompt);
             Assert.Contains("BACKSTORY", prompt);
