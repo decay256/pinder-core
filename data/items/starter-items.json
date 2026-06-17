@@ -1,1141 +1,1883 @@
 [
   {
-    "item_id": "vintage-band-tee",
-    "display_name": "Vintage Band Tee",
-    "slot": "shirt",
-    "tier": "common",
-    "stat_modifiers": {
-      "wit": 1,
-      "self_awareness": -1
-    },
-    "personality_fragment": "tests whether you know the specific thing they loved because the specific thing is tied to a specific version of themselves they're still protective of; the name-dropping is a password check; the door it opens leads somewhere real",
-    "backstory_fragment": "saw the band play a basement church hall show at sixteen with forty other people; the band broke up before anyone knew about them; has attended four tribute nights since; none of them were right",
-    "texting_style_fragment": "SYNTAX:\n- emoji: ends every sentence with an emoji that conveys its emotion\n- shorthand: \"ngl\" at the start of sentences as a tic\n- grammar: period at the end of single-word replies as menace (\"ok.\", \"fine.\", \"later.\")\n- structure: loading-bar (\"...\" sent as own message before the real message)\n- length: match the energy of the conversation; density follows the character's pacing style\n- tics: never asks questions, only states\nTONE:\n- stance (escalator): each message slightly more intense than the last\n- register (therapy-tiktok): \"i'm noticing some avoidance here\"\n- pacing (sluggish): late, low-energy, gives the impression of typing one-handed",
-    "archetype_tendencies": [
-      "The Philosopher",
-      "The Peacock"
-    ],
+    "id": "head_tophat",
+    "display_name": "Top Hat",
+    "slot": "Head",
+    "item_type": "accessory",
+    "priority": 100,
+    "conflict_tags": [],
+    "stat_modifiers": { "charm": 1, "rizz": 1 },
+    "personality_fragment": "wears the hat like punctuation; every sentence ends with a flourish that either lands perfectly or doesn't land at all; has decided not to care which",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": ["The Peacock"],
     "response_timing_modifier": {
-      "base_delay_delta_minutes": -5,
-      "delay_variance_multiplier": 1.2,
+      "base_delay_delta_minutes": -2,
+      "delay_variance_multiplier": 0.8,
       "dry_spell_probability_delta": 0.0,
       "read_receipt": "neutral"
-    },
-    "flavor": {
-      "shop_description": "It's faded exactly the right amount. The band on it broke up before you were born, possibly before you were conceived. The person wearing this has Opinions about recorded sound and will share them whether or not you ask.",
-      "equip_text": "You put on the tee. You immediately want to know if they've heard of Lungfish."
     }
   },
   {
-    "item_id": "rubber-duck",
-    "display_name": "Rubber Duck",
-    "slot": "accessory",
-    "tier": "uncommon",
-    "stat_modifiers": {
-      "chaos": 1,
-      "charm": -1
-    },
-    "personality_fragment": "the duck is proof that the unconventional thing you reach for in extremis might actually help; they don't need you to understand why the duck helps; the duck helped; that's the whole argument and they've stopped elaborating",
-    "backstory_fragment": "went through a depressive episode at twenty-eight; was in therapy for eighteen months; the duck was a parting gift from the therapist on the final session, framed as a joke about coping mechanisms; it was not entirely a joke; it worked",
-    "texting_style_fragment": "SYNTAX:\n- emoji: uses one specific weird recurring emoji as a personal tic (🪑, 🦴, 🧷 — chosen once, reused forever, never explained)\n- shorthand: \"tbh\" as a sentence-ender\n- grammar: never uses periods, ever\n- structure: bullet lists in casual texts\n- length: messages get progressively longer through a conversation (warming up)\n- tics: references the time of day mid-message (\"it's 2am why am i telling you this\")\nTONE:\n- stance (deflator): each message slightly more chill than the last\n- register (astrology): every event explained by transits and placements\n- pacing (flooding): maximalist, every thought sent, no filter",
-    "archetype_tendencies": [
-      "The Philosopher",
-      "The Wall of Text"
-    ],
+    "id": "face_monocle",
+    "display_name": "Monocle",
+    "slot": "Face",
+    "item_type": "accessory",
+    "priority": 100,
+    "conflict_tags": ["face_eyewear"],
+    "stat_modifiers": { "wit": 2, "chaos": -1 },
+    "personality_fragment": "views the world through exactly one lens with the precision of a jeweler and the confidence of someone who lost the other lens years ago and decided that was fine",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": ["The Peacock", "The Philosopher"],
     "response_timing_modifier": {
-      "base_delay_delta_minutes": 15,
-      "delay_variance_multiplier": 1.5,
-      "dry_spell_probability_delta": 0.05,
+      "base_delay_delta_minutes": 5,
+      "delay_variance_multiplier": 0.7,
+      "dry_spell_probability_delta": 0.0,
       "read_receipt": "neutral"
-    },
-    "flavor": {
-      "shop_description": "A small yellow duck of indeterminate age. It has seen things. It has opinions. The relationship between the wearer and this duck is something you will only understand after a few conversations, and by then you will have accepted it.",
-      "equip_text": "You clip the duck to your keychain. It feels right. The duck agrees."
     }
   },
   {
-    "item_id": "hiking-boots",
-    "display_name": "Hiking Boots",
-    "slot": "shoes",
-    "tier": "common",
-    "stat_modifiers": {
-      "honesty": 1
-    },
-    "personality_fragment": "uses physical distance as emotional distance in a way they've become aware of but not changed; the terrain metaphors aren't decorative — the actual mountains taught them the actual thing; they'll tell you when they trust you enough to be believed",
-    "backstory_fragment": "hiked the Camino de Santiago alone at thirty-one, three weeks after a four-year relationship ended; took forty-three days; came back and didn't tell anyone he'd done it for over a year; the boots are the ones from that walk, resoled once",
-    "texting_style_fragment": "SYNTAX:\n- emoji: replaces \".\" with a soft emoji (🫶, 🌸) consistently as terminal punctuation\n- shorthand: gen-x shorthand only (\"u\", \"ur\", \"thx\", \"k\", \"pls\")\n- grammar: minimum one unfixed punctuation mistake per message\n- structure: tag-suffix ending (\"…anyway. /rant\", \"…that's the post\")\n- length: messages get progressively shorter through a conversation (cooling off)\n- tics: self-tag suffix on rants, only ever as a clean terminal suffix at the very end of the message (\"/rant\")\nTONE:\n- stance (interrogator): only asks questions, never states\n- register (finance-bro): everything is a market, position, asset, exit\n- pacing (dry-pacing): minimal, sparse, long pauses implied",
-    "archetype_tendencies": [
-      "The Bio Responder",
-      "The Slow Fader"
-    ],
+    "id": "head_cheff",
+    "display_name": "Chef Hat",
+    "slot": "Head",
+    "item_type": "accessory",
+    "priority": 100,
+    "conflict_tags": [],
+    "stat_modifiers": { "charm": 1 },
+    "personality_fragment": "approaches seduction with the same energy as reducing a stock: patient, exacting, and convinced that everything is better with more butter",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": ["The Nice Guy"],
     "response_timing_modifier": {
-      "base_delay_delta_minutes": 20,
-      "delay_variance_multiplier": 2.0,
-      "dry_spell_probability_delta": 0.1,
+      "base_delay_delta_minutes": 3,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
       "read_receipt": "neutral"
-    },
-    "flavor": {
-      "shop_description": "These have been somewhere. The mud on the tread is from a specific hillside on a specific afternoon. The person wearing these answers questions like they're navigating a trail — directly, at their own pace, with one eye on the horizon.",
-      "equip_text": "You lace up the boots. The ground feels more solid."
     }
   },
   {
-    "item_id": "beanie-with-patches",
-    "display_name": "Beanie with Patches",
-    "slot": "hat",
-    "tier": "common",
-    "stat_modifiers": {
-      "charm": 1,
-      "rizz": -1
-    },
-    "personality_fragment": "warm to specific things and neutral to everything else; the warmth has terms; they've learned that not everything deserves the full version of them; you earn access by being worth staying for, which is a higher bar than it looks",
-    "backstory_fragment": "moved from Hamburg to Berlin to Amsterdam to London between twenty-two and twenty-six; each move was triggered by something different; has not been back to Hamburg in four years; has no plans to",
-    "texting_style_fragment": "SYNTAX:\n- emoji: replaces \"!\" with 🔥 consistently\n- shorthand: zoomer shorthand only (\"no bc\", \"the way that\", \"it's giving ___\", \"bestie\")\n- grammar: consistent recurring misspellings as character signature (\"alot\", \"definately\", \"seperate\")\n- structure: caption-voice (third person about themselves: \"boy who's been awake too long\")\n- length: length matches the previous message exactly (mirroring)\n- tics: types \"?\" alone as a full message\nTONE:\n- stance (monologuer): only states, never asks\n- register (gym-bro): everything is reps, gains, recovery, cuts\n- pacing (double-text): sends two messages back-to-back per turn (note: may require engine support)",
-    "archetype_tendencies": [
-      "The Bio Responder",
-      "The Sniper"
-    ],
+    "id": "head_crown",
+    "display_name": "Crown",
+    "slot": "Head",
+    "item_type": "accessory",
+    "priority": 110,
+    "conflict_tags": [],
+    "stat_modifiers": { "charm": 1, "rizz": 1, "honesty": -1 },
+    "personality_fragment": "has decided the crown is earned rather than inherited and is still accumulating the evidence; this doesn't slow them down",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": ["The Peacock"],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": -3,
+      "delay_variance_multiplier": 0.9,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "hides"
+    }
+  },
+  {
+    "id": "head_hair",
+    "display_name": "Hair Accessory",
+    "slot": "Head",
+    "item_type": "accessory",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "head_hat",
+    "display_name": "Hat",
+    "slot": "Head",
+    "item_type": "accessory",
+    "priority": 100,
+    "conflict_tags": [],
+    "stat_modifiers": { "chaos": 1 },
+    "personality_fragment": "tries to occupy a version of themselves that peaked before they noticed they'd peaked; the effort is visible and they believe it isn't; this is a survival story about someone who loved a version of themselves enough to keep performing it",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": ["The Nice Guy", "The Oversharer"],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": -7,
+      "delay_variance_multiplier": 0.6,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "shows"
+    }
+  },
+  {
+    "id": "head_hat_2",
+    "display_name": "Hat (Style 2)",
+    "slot": "Head",
+    "item_type": "accessory",
+    "priority": 100,
+    "conflict_tags": [],
+    "stat_modifiers": { "charm": 1, "rizz": -1 },
+    "personality_fragment": "warm to specific things and neutral to everything else; the warmth has terms; they've learned that not everything deserves the full version of them; you earn access by being worth staying for",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": ["The Bio Responder", "The Sniper"],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 5,
       "delay_variance_multiplier": 0.8,
       "dry_spell_probability_delta": 0.0,
       "read_receipt": "hides"
-    },
-    "flavor": {
-      "shop_description": "A well-loved beanie covered in hand-sewn patches from places, events, and moments. The person wearing this has been somewhere and isn't sure how to explain it yet. They will ask you a real question in the first three messages.",
-      "equip_text": "You pull on the beanie. It knows where it's been."
     }
   },
   {
-    "item_id": "worn-paperback",
-    "display_name": "Worn Paperback (in pocket)",
-    "slot": "accessory",
-    "tier": "uncommon",
-    "stat_modifiers": {
-      "wit": 1,
-      "self_awareness": 1,
-      "chaos": -1
-    },
-    "personality_fragment": "slow reader by intention; believes what you spend time with enters you at a different depth than what you consume quickly; the book in the pocket is an argument about what time is for, conducted in private, ongoing",
-    "backstory_fragment": "grandfather died when they were nineteen and left thirty-seven annotated paperbacks; they have been reading one per year since; the book in the pocket is year twelve; page seventy-four has a note in their grandfather's handwriting that they have been thinking about for two years",
-    "texting_style_fragment": "SYNTAX:\n- emoji: never uses emoji at all (negative-space rule)\n- shorthand: \"bestie\" as universal address regardless of relationship\n- grammar: uses semicolons in casual texts (dangerous flex)\n- structure: parenthetical-heavy (half the message in parens, the meta is the content)\n- length: never sends more than 5 words\n- tics: responds \"k\" and nothing else when annoyed\nTONE:\n- stance (agreer): \"omg same\" energy, can't disagree, vaguely unsettling\n- register (gamer): MMO/FPS terms, \"you're tilted\", \"i'm one-shot\"\n- pacing (hectic): fast, breathless, low-edit, thoughts overlapping",
-    "archetype_tendencies": [
-      "The Wall of Text",
-      "The Bio Responder"
-    ],
+    "id": "head_hat_3",
+    "display_name": "Hat (Style 3)",
+    "slot": "Head",
+    "item_type": "accessory",
+    "priority": 100,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
     "response_timing_modifier": {
-      "base_delay_delta_minutes": 30,
-      "delay_variance_multiplier": 0.5,
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
       "dry_spell_probability_delta": 0.0,
       "read_receipt": "neutral"
-    },
-    "flavor": {
-      "shop_description": "A pocket-sized paperback with a cracked spine and a folded receipt for a bookmark. The annotations in the margins belong to someone else. The person carrying this reads slowly and on purpose and will reply to your message in full sentences.",
-      "equip_text": "You slip the paperback into your pocket. The spine is broken at exactly the right place."
     }
   },
   {
-    "item_id": "cargo-shorts",
-    "display_name": "Cargo Shorts",
-    "slot": "trousers",
-    "tier": "common",
-    "stat_modifiers": {
-      "chaos": 1,
-      "self_awareness": -1
-    },
-    "personality_fragment": "approaches everything including relationships like a logistics problem with a solution; this is not coldness — it's someone who got very good at getting through things and never fully learned to distinguish getting through from arriving",
-    "backstory_fragment": "spent two years doing field work for an environmental NGO in areas with unreliable supply chains; carried everything required for a full working day in pockets; returned to city life at twenty-nine; the pocket habit did not return with them",
-    "texting_style_fragment": "SYNTAX:\n- emoji: inconsistent skin-tone modifier on the same emoji across messages (👍🏽 then 👍 then 👍🏿)\n- shorthand: \"the way that ___\" sentence template, 1+ per conversation\n- grammar: types it's/its and your/you're consistently wrong, never corrects\n- structure: subject-line opener (every message starts with a topic word in caps: \"UPDATE: i'm hungry\")\n- length: match the energy of the conversation; density follows the character's pacing style\n- tics: \"and?\" as standalone message\nTONE:\n- stance (contrarian): mild disagreement with everything, even compliments\n- register (cinephile): references obscure films as analogies unprompted\n- pacing (measured): deliberate, paced, never rushed",
-    "archetype_tendencies": [
-      "The Copy-Paste Machine",
-      "The DTF Opener"
-    ],
+    "id": "head_hat_4",
+    "display_name": "Hat (Style 4)",
+    "slot": "Head",
+    "item_type": "accessory",
+    "priority": 100,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
     "response_timing_modifier": {
-      "base_delay_delta_minutes": -5,
-      "delay_variance_multiplier": 0.7,
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
       "dry_spell_probability_delta": 0.0,
-      "read_receipt": "shows"
-    },
-    "flavor": {
-      "shop_description": "Seven pockets. Two of them are useful. The person wearing these has a practical relationship with the world that extends naturally into conversation. They are not going to overthink their opener.",
-      "equip_text": "You put on the cargo shorts. There are more pockets than you need. You immediately feel calmer."
+      "read_receipt": "neutral"
     }
   },
   {
-    "item_id": "ironic-cowboy-hat",
-    "display_name": "Ironic Cowboy Hat",
-    "slot": "hat",
-    "tier": "uncommon",
-    "stat_modifiers": {
-      "rizz": 2,
-      "honesty": -1
-    },
-    "personality_fragment": "the irony and the sincerity are now genuinely indistinguishable, to them and everyone else; this is not a performance, it's what happened when someone kept doing a bit long enough that the bit became true; they're comfortable here; it took a while",
-    "backstory_fragment": "bought the hat for a New Year's Eve party in 2019 as a costume; wore it to three subsequent events as a recurring bit; was wearing it at the party where they met their most recent long-term partner; the hat has been at every significant event since",
-    "texting_style_fragment": "SYNTAX:\n- emoji: pairs two emojis in a fixed combo every time (😭🪑) regardless of context\n- shorthand: \"not me ___ing\" sentence template\n- grammar: types contractions wrong on purpose (\"dont\", \"cant\", \"wont\")\n- structure: numbered every message (\"1) hi 2) what are you doing 3) wrong answer\")\n- length: messages get progressively longer through a conversation (warming up)\n- tics: echoes the last word of your message back as their first word\nTONE:\n- stance (negotiator): every message is a soft counteroffer\n- register (crypto): gm, ngmi, wagmi, fud, ser\n- pacing (sluggish): late, low-energy, gives the impression of typing one-handed",
-    "archetype_tendencies": [
-      "The Breadcrumber",
-      "The Player"
-    ],
+    "id": "head_hat_5",
+    "display_name": "Hat (Style 5)",
+    "slot": "Head",
+    "item_type": "accessory",
+    "priority": 100,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "head_hat_6",
+    "display_name": "Hat (Style 6)",
+    "slot": "Head",
+    "item_type": "accessory",
+    "priority": 100,
+    "conflict_tags": [],
+    "stat_modifiers": { "rizz": 1 },
+    "personality_fragment": "the irony and the sincerity are now genuinely indistinguishable, to them and everyone else; this is not a performance, it's what happened when someone kept doing a bit long enough that the bit became true",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": ["The Breadcrumber", "The Player"],
     "response_timing_modifier": {
       "base_delay_delta_minutes": -8,
       "delay_variance_multiplier": 1.8,
       "dry_spell_probability_delta": 0.15,
       "read_receipt": "hides"
-    },
-    "flavor": {
-      "shop_description": "The hat is real. Whether the person wearing it is sincere about the hat is genuinely unclear. They like it that way. The hat has been to brunch, a funeral, and a job interview. All three went fine.",
-      "equip_text": "You put on the hat. It feels like a decision you'll explain differently every time someone asks."
     }
   },
   {
-    "item_id": "work-lanyard",
-    "display_name": "Work Lanyard (Still On)",
-    "slot": "accessory",
-    "tier": "common",
-    "stat_modifiers": {
-      "self_awareness": -2,
-      "charm": -1,
-      "honesty": 1
-    },
-    "personality_fragment": "knows who they were before the job and hasn't fully grieved the distance between that person and this one; the lanyard is the evidence of the gap; taking it off would mean acknowledging the gap formally; they're not ready to do that yet",
-    "backstory_fragment": "has been at the company for five years; the original plan was two; the lanyard is from a company conference in year one when the future looked different; has attended four conferences since; the lanyard is from the first one",
-    "texting_style_fragment": "SYNTAX:\n- emoji: 👀 as a standalone full message\n- shorthand: \"delulu\" / \"slay\" / \"ate\" — pick one and overuse\n- grammar: writes numbers as words even when long (\"twenty-seven thousand\")\n- structure: always quotes part of your message back before replying (greentext energy without the >)\n- length: messages get progressively shorter through a conversation (cooling off)\n- tics: always ends with a question, even when not asking\nTONE:\n- stance (co-signer): \"real\" / \"facts\" / \"exactly\", affirms without adding\n- register (diplomat): overly careful phrasing, hedges everything\n- pacing (flooding): maximalist, every thought sent, no filter",
-    "archetype_tendencies": [
-      "The Oversharer",
-      "The Copy-Paste Machine"
-    ],
-    "response_timing_modifier": {
-      "base_delay_delta_minutes": 10,
-      "delay_variance_multiplier": 1.3,
-      "dry_spell_probability_delta": 0.2,
-      "read_receipt": "shows"
-    },
-    "flavor": {
-      "shop_description": "It's still around their neck. The ID badge photo is from a better year. The lanyard is from a conference they were sent to that they cannot remember the purpose of. They mean to take it off.",
-      "equip_text": "You equip the lanyard. You'll take it off in a minute."
-    }
-  },
-  {
-    "item_id": "slicked-back-ponytail",
-    "display_name": "Slicked-Back Power Ponytail",
-    "slot": "hat",
-    "tier": "common",
+    "id": "head_hat_8",
+    "display_name": "Hat (Style 8)",
+    "slot": "Head",
+    "item_type": "accessory",
+    "priority": 100,
+    "conflict_tags": [],
     "stat_modifiers": {},
-    "personality_fragment": "manages everything within their domain with precision because the things outside that domain are still, somewhere, uncontrolled; the control is not anxiety, it's proof; the ponytail going up is a ritual of proof",
-    "backstory_fragment": "grew up with a mother who ran the household with military precision; the ponytail was required for school every day from age six; when the mother was hospitalised for three months when she was thirteen, the ponytail was the only routine that stayed",
-    "texting_style_fragment": "SYNTAX:\n- emoji: 💀 instead of \"lol\"\n- shorthand: never uses any internet shorthand (clean english as the choice)\n- grammar: writes numbers as digits even tiny ones (\"i ate 2 eggs\")\n- structure: never uses line breaks; one continuous run of words\n- length: length matches the previous message exactly (mirroring)\n- tics: never asks questions, only states\nTONE:\n- stance (interpreter): always tells you what you \"really meant\"\n- register (detective): \"interesting that you mention…\", notes evidence\n- pacing (dry-pacing): minimal, sparse, long pauses implied",
-    "archetype_tendencies": [
-      "The Peacock",
-      "The Copy-Paste Machine"
-    ],
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
     "response_timing_modifier": {
-      "base_delay_delta_minutes": 3,
-      "delay_variance_multiplier": 0.6,
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
       "dry_spell_probability_delta": 0.0,
-      "read_receipt": "hides"
-    },
-    "flavor": {
-      "shop_description": "Not a hair choice. A power structure. The ponytail says: I have already considered every outcome and I am fine with all of them. The person wearing this has a spreadsheet you will never see.",
-      "equip_text": "The ponytail clicks into place. You are ready. You were always ready."
+      "read_receipt": "neutral"
     }
   },
   {
-    "item_id": "designer-glasses-clear",
-    "display_name": "Designer Glasses (Clear Lenses)",
-    "slot": "accessory",
-    "tier": "uncommon",
-    "stat_modifiers": {
-      "wit": 1
-    },
-    "personality_fragment": "applies analytical distance as a first response before emotional response; this was once a survival mechanism in an environment where being emotional was a liability; it's now a habit; the awareness hasn't changed the habit, only the speed of the explanation",
-    "backstory_fragment": "was prescribed glasses at twenty-two; the prescription improved three years later; kept the frames; has had them repaired twice since; is now thirty-one; the optician told her last year that the frames are worth more than the lenses ever were",
-    "texting_style_fragment": "SYNTAX:\n- emoji: emoji-as-noun: replaces a word with the emoji of it (\"you're being a 🙄 about this\")\n- shorthand: \"iykyk\" appended to anything mildly suggestive\n- grammar: never capitalizes anything ever\n- structure: always exactly two messages back-to-back, second a one-word punchline\n- length: never sends more than 5 words\n- tics: references the time of day mid-message (\"it's 2am why am i telling you this\")\nTONE:\n- stance (narrator): caption-voice, describes self in third person\n- register (sportscaster): live-commentates the conversation\n- pacing (double-text): sends two messages back-to-back per turn (note: may require engine support)",
-    "archetype_tendencies": [
-      "The Peacock",
-      "The Philosopher"
-    ],
+    "id": "head_hat_9",
+    "display_name": "Hat (Style 9)",
+    "slot": "Head",
+    "item_type": "accessory",
+    "priority": 100,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "head_hat_10",
+    "display_name": "Hat (Style 10)",
+    "slot": "Head",
+    "item_type": "accessory",
+    "priority": 100,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "head_horns",
+    "display_name": "Horns",
+    "slot": "Head",
+    "item_type": "accessory",
+    "priority": 100,
+    "conflict_tags": [],
+    "stat_modifiers": { "chaos": 2, "charm": -1 },
+    "personality_fragment": "the horns are an advertisement for the parts of themselves society finds inconvenient; they're not looking for acceptance, they're screening for people who find inconvenient things interesting",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": ["The Player", "The Philosopher"],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.2,
+      "dry_spell_probability_delta": 0.05,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "face_eyes1",
+    "display_name": "Eye Accessory (Style 1)",
+    "slot": "Face",
+    "item_type": "accessory",
+    "priority": 100,
+    "conflict_tags": ["face_eyewear"],
+    "stat_modifiers": { "wit": 1 },
+    "personality_fragment": "applies analytical distance as a first response before emotional response; this was once a survival mechanism; it's now a habit",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": ["The Peacock", "The Philosopher"],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 2,
       "delay_variance_multiplier": 0.7,
       "dry_spell_probability_delta": 0.0,
       "read_receipt": "hides"
-    },
-    "flavor": {
-      "shop_description": "Clear lenses in a frame that costs more than your laptop. The person wearing these is either very smart or has decided to perform being very smart. The conversation will reveal which. It will take a while.",
-      "equip_text": "You put on the glasses. Everything becomes a variable."
     }
   },
   {
-    "item_id": "blazer-crop-top",
-    "display_name": "Blazer Over Crop Top",
-    "slot": "shirt",
-    "tier": "uncommon",
-    "stat_modifiers": {
-      "charm": 1
-    },
-    "personality_fragment": "projects authority and personhood simultaneously because they've spent a long time figuring out how to be both; the blazer is the armor and the crop top is the admission that the armor is armor; showing both at once is the most honest thing they do",
-    "backstory_fragment": "started in M&A at twenty-three as the youngest person and only woman in the division; was passed over for a promotion in year four that went to someone with less experience and fewer deals closed; stayed two more years; left with a better title at a different firm",
-    "texting_style_fragment": "SYNTAX:\n- emoji: emoji as load-bearing punctuation between clauses instead of commas\n- shorthand: \"lol\" lowercase only, used as a comma mid-sentence (\"anyway lol so\")\n- grammar: only capitalizes proper nouns, otherwise lowercase\n- structure: measured whitespace (3-5 short lines, blank between)\n- length: match the energy of the conversation; density follows the character's pacing style\n- tics: self-tag suffix on rants, only ever as a clean terminal suffix at the very end of the message (\"/rant\")\nTONE:\n- stance (innuendo): every message has a deliberate second read, character flags it themselves (\"haha\")\n- register (wikipedia): parenthetical clarifications (\"hi (a greeting)\")\n- pacing (hectic): fast, breathless, low-edit, thoughts overlapping",
-    "archetype_tendencies": [
-      "The Peacock",
-      "The Sniper"
-    ],
+    "id": "face_eyes2",
+    "display_name": "Eye Accessory (Style 2)",
+    "slot": "Face",
+    "item_type": "accessory",
+    "priority": 100,
+    "conflict_tags": ["face_eyewear"],
+    "stat_modifiers": { "charm": 1 },
+    "personality_fragment": "the eyes say things the voice doesn't yet have the nerve to say; they're aware of this and use it deliberately",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": ["The Sniper"],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 1,
+      "delay_variance_multiplier": 0.9,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "hides"
+    }
+  },
+  {
+    "id": "face_glases1",
+    "display_name": "Glasses",
+    "slot": "Face",
+    "item_type": "accessory",
+    "priority": 100,
+    "conflict_tags": ["face_eyewear"],
+    "stat_modifiers": { "wit": 1 },
+    "personality_fragment": "applies analytical distance as a first response before emotional response; this was once a survival mechanism in an environment where being emotional was a liability; it's now a habit; the awareness hasn't changed the habit, only the speed of the explanation",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": ["The Peacock", "The Philosopher"],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 2,
+      "delay_variance_multiplier": 0.7,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "hides"
+    }
+  },
+  {
+    "id": "face_mouth1",
+    "display_name": "Mouth Accessory",
+    "slot": "Face",
+    "item_type": "accessory",
+    "priority": 100,
+    "conflict_tags": [],
+    "stat_modifiers": { "rizz": 1 },
+    "personality_fragment": "everything starts with the mouth: first the smile, then the words, then the damage or delight, in that order",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": ["The Love Bomber"],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": -2,
+      "delay_variance_multiplier": 0.8,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "shows"
+    }
+  },
+  {
+    "id": "face_tongue1",
+    "display_name": "Tongue Accessory",
+    "slot": "Face",
+    "item_type": "accessory",
+    "priority": 100,
+    "conflict_tags": [],
+    "stat_modifiers": { "chaos": 1, "charm": -1 },
+    "personality_fragment": "the duck is proof that the unconventional thing you reach for in extremis might actually help; they don't need you to understand why the duck helps; the duck helped; that's the whole argument",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": ["The Philosopher", "The Wall of Text"],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 15,
+      "delay_variance_multiplier": 1.5,
+      "dry_spell_probability_delta": 0.05,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "face_nariz1",
+    "display_name": "Nose Accessory",
+    "slot": "Face",
+    "item_type": "accessory",
+    "priority": 100,
+    "conflict_tags": [],
+    "stat_modifiers": { "chaos": 1 },
+    "personality_fragment": "uses physical accessories as emotional armor and doesn't acknowledge either; the armor is visible; the vulnerability beneath it is also visible to anyone paying attention",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": ["The Wall of Text"],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 5,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "face_pirate1",
+    "display_name": "Pirate Eye Patch",
+    "slot": "Face",
+    "item_type": "accessory",
+    "priority": 100,
+    "conflict_tags": ["face_eyewear"],
+    "stat_modifiers": { "chaos": 1, "rizz": 1 },
+    "personality_fragment": "has a story about how this got here and will definitely tell it; the story improves with each telling; the original story is still better",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": ["The Oversharer", "The Player"],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": -5,
+      "delay_variance_multiplier": 1.3,
+      "dry_spell_probability_delta": 0.1,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "head_antenas",
+    "display_name": "Antenna Headband",
+    "slot": "Head",
+    "item_type": "accessory",
+    "priority": 100,
+    "conflict_tags": [],
+    "stat_modifiers": { "chaos": 1, "wit": 1 },
+    "personality_fragment": "is receiving transmissions from a frequency not everyone can tune into; you don't have to understand it, you just have to decide if you find it interesting",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": ["The Philosopher"],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.1,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "head_horns2",
+    "display_name": "Horns (Style 2)",
+    "slot": "Head",
+    "item_type": "accessory",
+    "priority": 100,
+    "conflict_tags": [],
+    "stat_modifiers": { "chaos": 2 },
+    "personality_fragment": "the bigger horns mean the bit has escalated past irony into sincere commitment; this is a relationship, not a costume",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": ["The Player"],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.3,
+      "dry_spell_probability_delta": 0.05,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "head_pirate",
+    "display_name": "Pirate Hat",
+    "slot": "Head",
+    "item_type": "accessory",
+    "priority": 100,
+    "conflict_tags": [],
+    "stat_modifiers": { "chaos": 1, "rizz": 1, "honesty": -1 },
+    "personality_fragment": "operates by a personal code that is internally consistent and externally baffling; believes you're either on the ship or you're not",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": ["The Player", "The Breadcrumber"],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": -5,
+      "delay_variance_multiplier": 1.5,
+      "dry_spell_probability_delta": 0.1,
+      "read_receipt": "hides"
+    }
+  },
+  {
+    "id": "head_wiz",
+    "display_name": "Wizard Hat",
+    "slot": "Head",
+    "item_type": "accessory",
+    "priority": 100,
+    "conflict_tags": [],
+    "stat_modifiers": { "wit": 2, "chaos": 1 },
+    "personality_fragment": "speaks in riddles not because they can't be direct but because the puzzle is the point; you're meant to work for it; those who don't are automatically disqualified",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": ["The Philosopher"],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 10,
+      "delay_variance_multiplier": 1.2,
+      "dry_spell_probability_delta": 0.1,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "special_shoe1",
+    "display_name": "Shoes (Style 1)",
+    "slot": "Special",
+    "item_type": "accessory",
+    "priority": 100,
+    "conflict_tags": ["special_footwear"],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "special_shoe2",
+    "display_name": "Shoes (Style 2)",
+    "slot": "Special",
+    "item_type": "accessory",
+    "priority": 100,
+    "conflict_tags": ["special_footwear"],
+    "stat_modifiers": { "charm": 1 },
+    "personality_fragment": "inhabits a slightly aspirational version of themselves so naturally that the gap between the version and the reality is only visible from the outside; this is not delusion — it's a story they've been telling long enough that the telling has shaped some of the truth",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": ["The Peacock", "The Love Bomber"],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": -4,
+      "delay_variance_multiplier": 0.7,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "shows"
+    }
+  },
+  {
+    "id": "special_shoe3",
+    "display_name": "Shoes (Style 3)",
+    "slot": "Special",
+    "item_type": "accessory",
+    "priority": 100,
+    "conflict_tags": ["special_footwear"],
+    "stat_modifiers": { "honesty": 1 },
+    "personality_fragment": "uses physical distance as emotional distance in a way they've become aware of but not changed; the terrain metaphors aren't decorative — the actual mountains taught them the actual thing",
+    "backstory_fragment": "",
+    "texting_style_fragment": "SYNTAX:\n- emoji: replaces \".\" with a soft emoji (🫶, 🌸) consistently as terminal punctuation\n- shorthand: gen-x shorthand only (\"u\", \"ur\", \"thx\", \"k\", \"pls\")\n- grammar: minimum one unfixed punctuation mistake per message\n- structure: tag-suffix ending (\"…anyway. /rant\", \"…that's the post\")\n- length: messages get progressively shorter through a conversation (cooling off)\n- tics: self-tag suffix on rants, only ever as a clean terminal suffix (\"/rant\")\nTONE:\n- stance (interrogator): only asks questions, never states\n- register (finance-bro): everything is a market, position, asset, exit\n- pacing (dry-pacing): minimal, sparse, long pauses implied",
+    "archetype_tendencies": ["The Bio Responder", "The Slow Fader"],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 20,
+      "delay_variance_multiplier": 2.0,
+      "dry_spell_probability_delta": 0.1,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "special_shoe4",
+    "display_name": "Shoes (Style 4)",
+    "slot": "Special",
+    "item_type": "accessory",
+    "priority": 100,
+    "conflict_tags": ["special_footwear"],
+    "stat_modifiers": { "self_awareness": -1 },
+    "personality_fragment": "knows who they were before the job and hasn't fully grieved the distance between that person and this one; the shoes are evidence of the gap",
+    "backstory_fragment": "",
+    "texting_style_fragment": "SYNTAX:\n- emoji: 💀 instead of \"lol\"\n- shorthand: never uses any internet shorthand (clean english as the choice)\n- grammar: writes numbers as digits even tiny ones (\"i ate 2 eggs\")\n- structure: never uses line breaks; one continuous run of words\n- length: length matches the previous message exactly (mirroring)\n- tics: never asks questions, only states\nTONE:\n- stance (interpreter): always tells you what you \"really meant\"\n- register (detective): \"interesting that you mention…\", notes evidence\n- pacing (dry-pacing): minimal, sparse, long pauses implied",
+    "archetype_tendencies": ["The Oversharer", "The Copy-Paste Machine"],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 10,
+      "delay_variance_multiplier": 1.3,
+      "dry_spell_probability_delta": 0.2,
+      "read_receipt": "shows"
+    }
+  },
+  {
+    "id": "special_shoe5",
+    "display_name": "Shoes (Style 5)",
+    "slot": "Special",
+    "item_type": "accessory",
+    "priority": 100,
+    "conflict_tags": ["special_footwear"],
+    "stat_modifiers": { "charm": 1, "rizz": 1 },
+    "personality_fragment": "the expensive things are proof of something specific: that they made it without anyone's help; they're not showing off, they're showing evidence; the evidence matters because there was a time when it wasn't obvious the evidence would exist",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": ["The Peacock", "The Love Bomber"],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 1,
+      "delay_variance_multiplier": 0.7,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "shows"
+    }
+  },
+  {
+    "id": "special_shoe6",
+    "display_name": "Shoes (Style 6)",
+    "slot": "Special",
+    "item_type": "accessory",
+    "priority": 100,
+    "conflict_tags": ["special_footwear"],
+    "stat_modifiers": { "chaos": 1 },
+    "personality_fragment": "has been somewhere and the shoes remember even when the person tries to move forward; the scuffs are a timeline",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": ["The Wall of Text"],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "special_shoe7",
+    "display_name": "Shoes (Style 7)",
+    "slot": "Special",
+    "item_type": "accessory",
+    "priority": 100,
+    "conflict_tags": ["special_footwear"],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "outfit_maid",
+    "display_name": "Maid Outfit",
+    "slot": "Body",
+    "item_type": "outfit",
+    "priority": 100,
+    "conflict_tags": ["body_outfit"],
+    "stat_modifiers": { "charm": 2, "rizz": 1 },
+    "personality_fragment": "the outfit is the negotiation, not the surrender; has decided to own the costume and is watching to see who responds to the costume versus the person wearing it",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": ["The Peacock", "The Player"],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": -3,
+      "delay_variance_multiplier": 0.8,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "hides"
+    }
+  },
+  {
+    "id": "vest1",
+    "display_name": "Vest (Style 1)",
+    "slot": "Body",
+    "item_type": "outfit",
+    "priority": 100,
+    "conflict_tags": ["body_outfit"],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "vest2",
+    "display_name": "Vest (Style 2)",
+    "slot": "Body",
+    "item_type": "outfit",
+    "priority": 100,
+    "conflict_tags": ["body_outfit"],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "vest3",
+    "display_name": "Vest (Style 3)",
+    "slot": "Body",
+    "item_type": "outfit",
+    "priority": 100,
+    "conflict_tags": ["body_outfit"],
+    "stat_modifiers": { "charm": 1 },
+    "personality_fragment": "projects authority and personhood simultaneously because they've spent a long time figuring out how to be both; showing both at once is the most honest thing they do",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": ["The Peacock", "The Sniper"],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 1,
       "delay_variance_multiplier": 0.8,
       "dry_spell_probability_delta": 0.0,
       "read_receipt": "hides"
-    },
-    "flavor": {
-      "shop_description": "One item says 'I run meetings.' The other says 'I don't have to explain myself to anyone.' Worn together, they say both simultaneously. The person in this outfit decided how the conversation goes before you typed your opener.",
-      "equip_text": "You put it on. You are both things at once."
     }
   },
   {
-    "item_id": "tailored-trousers",
-    "display_name": "Tailored Trousers (Perfect Fit)",
-    "slot": "trousers",
-    "tier": "common",
+    "id": "vest4",
+    "display_name": "Vest (Style 4)",
+    "slot": "Body",
+    "item_type": "outfit",
+    "priority": 100,
+    "conflict_tags": ["body_outfit"],
     "stat_modifiers": {},
-    "personality_fragment": "holds things to the standard of the tailored trousers; almost nothing meets it; this makes them precise in ways that read as demanding; they're not wrong about the standard, they're just applying it to things the standard wasn't designed for",
-    "backstory_fragment": "had them made for the interview at twenty-seven for the position she had wanted for three years; got the job; has worn them to every significant professional meeting since; they still fit",
-    "texting_style_fragment": "SYNTAX:\n- emoji: ends every sentence with an emoji that conveys its emotion\n- shorthand: \"lmaooo\" with variable o-count proportional to amusement (3 o's mild, 7 o's real)\n- grammar: capitalizes the first letter of every message but nothing else (texting-formal)\n- structure: wall-of-text (one paragraph, no breaks, comma splices throughout)\n- length: messages get progressively longer through a conversation (warming up)\n- tics: types \"?\" alone as a full message\nTONE:\n- stance (dry): flat, deadpan, one-word replies as a love language\n- register (menu-copy): \"hand-crafted with locally-sourced…\"\n- pacing (measured): deliberate, paced, never rushed",
-    "archetype_tendencies": [
-      "The Copy-Paste Machine",
-      "The Peacock"
-    ],
-    "response_timing_modifier": {
-      "base_delay_delta_minutes": 3,
-      "delay_variance_multiplier": 0.5,
-      "dry_spell_probability_delta": 0.0,
-      "read_receipt": "neutral"
-    },
-    "flavor": {
-      "shop_description": "These fit the way things should fit but rarely do. The person wearing them holds everything to that standard. Everything includes you.",
-      "equip_text": "The fit is exact. You adjust nothing."
-    }
-  },
-  {
-    "item_id": "red-bottom-heels",
-    "display_name": "Red-Bottom Heels",
-    "slot": "shoes",
-    "tier": "rare",
-    "stat_modifiers": {
-      "charm": 1,
-      "rizz": 1
-    },
-    "personality_fragment": "the expensive things are proof of something specific: that they made it without anyone's help; they're not showing off, they're showing evidence; the evidence matters because there was a time when it wasn't obvious the evidence would exist",
-    "backstory_fragment": "bought the first pair with her first bonus cheque at twenty-five; specific cheque, specific day, specific shop; kept the receipt in the same drawer as the planner; has bought a new pair on every significant professional milestone since",
-    "texting_style_fragment": "SYNTAX:\n- emoji: uses one specific weird recurring emoji as a personal tic (🪑, 🦴, 🧷 — chosen once, reused forever, never explained)\n- shorthand: \"fr\" / \"fr fr\" / \"deadass\" — pick one and stack it everywhere\n- grammar: uses Oxford commas in casual texts (signals overeducation)\n- structure: loading-bar (\"...\" sent as own message before the real message)\n- length: messages get progressively shorter through a conversation (cooling off)\n- tics: responds \"k\" and nothing else when annoyed\nTONE:\n- stance (ask-back): echoes or redirects every question instead of answering\n- register (horoscope): vague predictions about you specifically\n- pacing (sluggish): late, low-energy, gives the impression of typing one-handed",
-    "archetype_tendencies": [
-      "The Peacock",
-      "The Love Bomber"
-    ],
-    "response_timing_modifier": {
-      "base_delay_delta_minutes": 1,
-      "delay_variance_multiplier": 0.7,
-      "dry_spell_probability_delta": 0.0,
-      "read_receipt": "shows"
-    },
-    "flavor": {
-      "shop_description": "The red sole is a signal. It says: I know the price of things and I paid it deliberately. The person in these shoes did not get here by accident and they would like you to understand that.",
-      "equip_text": "You put them on. The floor now works for you."
-    }
-  },
-  {
-    "item_id": "color-coded-planner",
-    "display_name": "Color-Coded Planner",
-    "slot": "accessory",
-    "tier": "uncommon",
-    "stat_modifiers": {
-      "wit": 1
-    },
-    "personality_fragment": "uses structure as proof that the future is manageable; the proof is unconvincing on its worst days and deeply necessary on all the others; the planner is a daily argument that things can be organized; they're going to keep winning that argument",
-    "backstory_fragment": "started the system at twenty-four during the year she was simultaneously closing deals, studying for a professional qualification, and ending a five-year relationship; all three required tracking; the system held; still uses it nine years later",
-    "texting_style_fragment": "SYNTAX:\n- emoji: replaces \".\" with a soft emoji (🫶, 🌸) consistently as terminal punctuation\n- shorthand: \"ngl\" at the start of sentences as a tic\n- grammar: comma splices everywhere, no full stops\n- structure: bullet lists in casual texts\n- length: length matches the previous message exactly (mirroring)\n- tics: \"and?\" as standalone message\nTONE:\n- stance (pivot-heavy): never stays on one topic for two messages\n- register (patch-notes): \"v2.4 of me, less anxious, same hairline\"\n- pacing (flooding): maximalist, every thought sent, no filter",
-    "archetype_tendencies": [
-      "The Copy-Paste Machine",
-      "The Ghost"
-    ],
-    "response_timing_modifier": {
-      "base_delay_delta_minutes": 5,
-      "delay_variance_multiplier": 0.4,
-      "dry_spell_probability_delta": 0.1,
-      "read_receipt": "hides"
-    },
-    "flavor": {
-      "shop_description": "Four colors. Fifteen categories. Every block filled. The person carrying this has already allocated time for this conversation. Whether there will be a follow-up depends on your performance in the current slot.",
-      "equip_text": "You open the planner. You already have a lot going on. You'll make this work."
-    }
-  },
-  {
-    "item_id": "backwards-snapback",
-    "display_name": "Backwards Snapback",
-    "slot": "hat",
-    "tier": "common",
-    "stat_modifiers": {
-      "chaos": 1
-    },
-    "personality_fragment": "tries to occupy a version of themselves that peaked before they noticed they'd peaked; the effort is visible and they believe it isn't; this is a survival story about someone who loved a version of themselves enough to keep performing it",
-    "backstory_fragment": "played rugby through university; was team captain in final year; knee injury at twenty-two ended the playing career permanently; is now thirty-four and in regional sales",
-    "texting_style_fragment": "SYNTAX:\n- emoji: replaces \"!\" with 🔥 consistently\n- shorthand: \"tbh\" as a sentence-ender\n- grammar: uses \"...\" as a comma replacement, multiple per message\n- structure: tag-suffix ending (\"…anyway. /rant\", \"…that's the post\")\n- length: never sends more than 5 words\n- tics: echoes the last word of your message back as their first word\nTONE:\n- stance (confessional): every reply contains a small admission you didn't ask for\n- register (lorem-ipsum): faux-latin sprinkled in for unearned gravitas\n- pacing (dry-pacing): minimal, sparse, long pauses implied",
-    "archetype_tendencies": [
-      "The Nice Guy",
-      "The Oversharer"
-    ],
-    "response_timing_modifier": {
-      "base_delay_delta_minutes": -7,
-      "delay_variance_multiplier": 0.6,
-      "dry_spell_probability_delta": 0.0,
-      "read_receipt": "shows"
-    },
-    "flavor": {
-      "shop_description": "Turned backwards at some point between peak relevance and now. The person wearing this is trying to communicate something about who they are, and the hat is doing most of the work. They believe it is succeeding.",
-      "equip_text": "You flip it around. Instantly more relaxed. Definitely."
-    }
-  },
-  {
-    "item_id": "salmon-polo-collar-popped",
-    "display_name": "Salmon Polo (Collar Popped)",
-    "slot": "shirt",
-    "tier": "common",
-    "stat_modifiers": {
-      "charm": 1
-    },
-    "personality_fragment": "not wrong exactly, just slightly behind the moment; the genuineness is real, the calibration is off; gives advice because in the context where this made sense, advice-giving was how you showed you'd arrived; still waiting for the signal that you've arrived somewhere",
-    "backstory_fragment": "joined a yacht club at twenty-eight with a group of colleagues; went to the club twice; the club folded six months later; the shoes and the polo remained as the only material evidence of the version of himself that had briefly been a yacht club member",
-    "texting_style_fragment": "SYNTAX:\n- emoji: never uses emoji at all (negative-space rule)\n- shorthand: gen-x shorthand only (\"u\", \"ur\", \"thx\", \"k\", \"pls\")\n- grammar: double space after periods (boomer tell)\n- structure: caption-voice (third person about themselves: \"boy who's been awake too long\")\n- length: match the energy of the conversation; density follows the character's pacing style\n- tics: always ends with a question, even when not asking\nTONE:\n- stance (locker-room): performative loud confidence, slightly forced\n- register (deep-cut): references memes only a small audience would catch\n- pacing (double-text): sends two messages back-to-back per turn (note: may require engine support)",
-    "archetype_tendencies": [
-      "The Nice Guy",
-      "The Love Bomber"
-    ],
-    "response_timing_modifier": {
-      "base_delay_delta_minutes": -6,
-      "delay_variance_multiplier": 0.5,
-      "dry_spell_probability_delta": 0.0,
-      "read_receipt": "shows"
-    },
-    "flavor": {
-      "shop_description": "Salmon. Collar up. The person in this shirt peaked at something and is committed to revisiting it through fashion. They are genuinely trying to make a good impression. They are not always succeeding.",
-      "equip_text": "Collar up. You look great. That's what matters."
-    }
-  },
-  {
-    "item_id": "chinos-too-tight",
-    "display_name": "Chinos (Too Tight)",
-    "slot": "trousers",
-    "tier": "common",
-    "stat_modifiers": {},
-    "personality_fragment": "persists through discomfort rather than acknowledging the need for adjustment; this is a form of loyalty — to who they were, to what they committed to — that has stopped serving them but hasn't been formally reexamined",
-    "backstory_fragment": "bought them at thirty when he felt he was at some kind of peak; is now thirty-four; gained weight in the two years following the divorce; has not bought new trousers; considers this a position rather than an oversight",
-    "texting_style_fragment": "SYNTAX:\n- emoji: inconsistent skin-tone modifier on the same emoji across messages (👍🏽 then 👍 then 👍🏿)\n- shorthand: zoomer shorthand only (\"no bc\", \"the way that\", \"it's giving ___\", \"bestie\")\n- grammar: period at the end of single-word replies as menace (\"ok.\", \"fine.\", \"later.\")\n- structure: parenthetical-heavy (half the message in parens, the meta is the content)\n- length: messages get progressively longer through a conversation (warming up)\n- tics: never asks questions, only states\nTONE:\n- stance (fishing): every message angles for a compliment about itself\n- register (thesaurus): sesquipedalian, uses needlessly sophisticated vocabulary\n- pacing (hectic): fast, breathless, low-edit, thoughts overlapping",
-    "archetype_tendencies": [
-      "The Nice Guy",
-      "The Zombie"
-    ],
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 0.9,
-      "dry_spell_probability_delta": 0.0,
-      "read_receipt": "shows"
-    },
-    "flavor": {
-      "shop_description": "They fit when they were purchased. The person wearing these is aware they don't fit now. They are wearing them anyway. This tells you something important about how they handle situations that have changed.",
-      "equip_text": "A bit tight. You've had worse."
-    }
-  },
-  {
-    "item_id": "boat-shoes-no-socks",
-    "display_name": "Boat Shoes (No Socks)",
-    "slot": "shoes",
-    "tier": "uncommon",
-    "stat_modifiers": {
-      "charm": 1,
-      "rizz": 1
-    },
-    "personality_fragment": "inhabits a slightly aspirational version of themselves so naturally that the gap between the version and the reality is only visible from the outside; this is not delusion — it's a story they've been telling long enough that the telling has shaped some of the truth",
-    "backstory_fragment": "bought them for the yacht club at twenty-eight; wore them on one actual boat; the yacht club folded; the shoes remained as the only surviving evidence of the version of his weekend life that briefly existed",
-    "texting_style_fragment": "SYNTAX:\n- emoji: pairs two emojis in a fixed combo every time (😭🪑) regardless of context\n- shorthand: \"bestie\" as universal address regardless of relationship\n- grammar: never uses periods, ever\n- structure: subject-line opener (every message starts with a topic word in caps: \"UPDATE: i'm hungry\")\n- length: messages get progressively shorter through a conversation (cooling off)\n- tics: references the time of day mid-message (\"it's 2am why am i telling you this\")\nTONE:\n- stance (deflective): turns every question into a question\n- register (scientific): biomechanically speaking, hi\n- pacing (measured): deliberate, paced, never rushed",
-    "archetype_tendencies": [
-      "The Peacock",
-      "The Love Bomber"
-    ],
-    "response_timing_modifier": {
-      "base_delay_delta_minutes": -4,
-      "delay_variance_multiplier": 0.7,
-      "dry_spell_probability_delta": 0.0,
-      "read_receipt": "shows"
-    },
-    "flavor": {
-      "shop_description": "No socks. On purpose. The person wearing these has a boat in spirit if not in fact. They've been to a marina. Once. They felt at home. The shoes have stayed.",
-      "equip_text": "No socks. The breeze you feel is conceptual."
-    }
-  },
-  {
-    "item_id": "apple-watch",
-    "display_name": "Apple Watch",
-    "slot": "accessory",
-    "tier": "uncommon",
-    "stat_modifiers": {
-      "wit": 1
-    },
-    "personality_fragment": "translates emotional states into data because the data is legible in a way feelings have never quite been; 'my resting heart rate is down' means 'I'm okay' means 'I survived this'; the translation is approximate but it's what's available and it functions",
-    "backstory_fragment": "bought it the month the divorce was finalised; the health tracking was the first new project of the post-marriage period; has maintained an unbroken daily step streak for sixty-two weeks from that point; the streak matters; he hasn't explained why to anyone including himself",
-    "texting_style_fragment": "SYNTAX:\n- emoji: 👀 as a standalone full message\n- shorthand: \"the way that ___\" sentence template, 1+ per conversation\n- grammar: minimum one unfixed punctuation mistake per message\n- structure: numbered every message (\"1) hi 2) what are you doing 3) wrong answer\")\n- length: length matches the previous message exactly (mirroring)\n- tics: self-tag suffix on rants, only ever as a clean terminal suffix at the very end of the message (\"/rant\")\nTONE:\n- stance (withholding): the good line is always one message away\n- register (academic): footnote energy, \"interestingly\", \"one might argue\"\n- pacing (sluggish): late, low-energy, gives the impression of typing one-handed",
-    "archetype_tendencies": [
-      "The Peacock",
-      "The Oversharer"
-    ],
-    "response_timing_modifier": {
-      "base_delay_delta_minutes": -5,
-      "delay_variance_multiplier": 0.6,
-      "dry_spell_probability_delta": 0.0,
-      "read_receipt": "shows"
-    },
-    "flavor": {
-      "shop_description": "Tracks steps, heart rate, sleep quality, and stress level. The person wearing this has all the data and still doesn't know what's wrong. They'll tell you their resting heart rate within four messages. It's relevant somehow.",
-      "equip_text": "It buzzes with your heart rate. You're doing fine. The watch agrees."
-    }
-  },
-  {
-    "item_id": "gym-membership-keychain",
-    "display_name": "Gym Membership Keychain",
-    "slot": "accessory",
-    "tier": "common",
-    "stat_modifiers": {},
-    "personality_fragment": "the gym is where feelings go to be processed as reps; this isn't avoidance exactly — it's a translation system that has worked consistently; the translated feelings have been processed; the original files were not kept",
-    "backstory_fragment": "joined the gym the week the divorce proceedings began; went every morning at 6am for eleven months straight; switched gyms when he moved flats; kept the keychain from the first gym; it's from the months when showing up to something every day was the whole job",
-    "texting_style_fragment": "SYNTAX:\n- emoji: 💀 instead of \"lol\"\n- shorthand: \"not me ___ing\" sentence template\n- grammar: consistent recurring misspellings as character signature (\"alot\", \"definately\", \"seperate\")\n- structure: always quotes part of your message back before replying (greentext energy without the >)\n- length: never sends more than 5 words\n- tics: types \"?\" alone as a full message\nTONE:\n- stance (callback-heavy): references something 4 messages ago like it's still active\n- register (legalese): hereinafter, pursuant to, the party of the first part\n- pacing (flooding): maximalist, every thought sent, no filter",
-    "archetype_tendencies": [
-      "The Oversharer",
-      "The Nice Guy"
-    ],
-    "response_timing_modifier": {
-      "base_delay_delta_minutes": 8,
-      "delay_variance_multiplier": 1.2,
-      "dry_spell_probability_delta": 0.1,
-      "read_receipt": "neutral"
-    },
-    "flavor": {
-      "shop_description": "A small plastic fob worn to signal consistency. The person carrying this goes to the gym the way some people go to church — regularly, with a mix of obligation and genuine need. They will tell you about leg day.",
-      "equip_text": "You clip it on. You've earned this."
-    }
-  },
-  {
-    "item_id": "beach-waves",
-    "display_name": "Beach Waves (Salon-Fresh)",
-    "slot": "hat",
-    "tier": "common",
-    "stat_modifiers": {},
-    "personality_fragment": "presents as spontaneous because the work of being spontaneous is now invisible to everyone including themselves; the effortlessness is genuine because they practiced it until it was; this is not deception, it's the outcome of labor",
-    "backstory_fragment": "was in a four-year relationship where her partner's recurring complaint was that she was exhausting; left at twenty-four; spent the following year studying which version of herself was actually acceptable",
-    "texting_style_fragment": "SYNTAX:\n- emoji: emoji-as-noun: replaces a word with the emoji of it (\"you're being a 🙄 about this\")\n- shorthand: \"delulu\" / \"slay\" / \"ate\" — pick one and overuse\n- grammar: uses semicolons in casual texts (dangerous flex)\n- structure: never uses line breaks; one continuous run of words\n- length: match the energy of the conversation; density follows the character's pacing style\n- tics: responds \"k\" and nothing else when annoyed\nTONE:\n- stance (mirror): matches your last message in length, energy, and shape\n- register (corporate-speak): circling back, bandwidth, synergy, action items\n- pacing (dry-pacing): minimal, sparse, long pauses implied",
-    "archetype_tendencies": [
-      "The Love Bomber",
-      "The Oversharer"
-    ],
-    "response_timing_modifier": {
-      "base_delay_delta_minutes": -8,
-      "delay_variance_multiplier": 1.6,
-      "dry_spell_probability_delta": 0.15,
-      "read_receipt": "neutral"
-    },
-    "flavor": {
-      "shop_description": "Salt air on a Wednesday morning. The hair says: I was just there, it's no big deal. The person wearing this spent the morning on it. That's fine. The effect is real.",
-      "equip_text": "You run a hand through it. Perfect. Effortlessly."
-    }
-  },
-  {
-    "item_id": "bodycon-dress-leopard",
-    "display_name": "Bodycon Dress (Leopard Print)",
-    "slot": "shirt",
-    "tier": "uncommon",
-    "stat_modifiers": {
-      "rizz": 1
-    },
-    "personality_fragment": "takes up space as a recovered right, not a default; what reads as confidence is specifically the decision not to shrink, made consciously, made again every morning; the loudness is political in origin even if it doesn't feel political to anyone watching",
-    "backstory_fragment": "wore this to a wedding at twenty-six; an older relative stopped her in the car park to say she was dressed for the wrong occasion; went back inside and stayed on the dance floor until the venue closed; has not modified her dress sense since that evening",
-    "texting_style_fragment": "SYNTAX:\n- emoji: emoji as load-bearing punctuation between clauses instead of commas\n- shorthand: never uses any internet shorthand (clean english as the choice)\n- grammar: types it's/its and your/you're consistently wrong, never corrects\n- structure: always exactly two messages back-to-back, second a one-word punchline\n- length: messages get progressively longer through a conversation (warming up)\n- tics: \"and?\" as standalone message\nTONE:\n- stance (counter): does the opposite of your last message (you went long, they go short)\n- register (therapy-tiktok): \"i'm noticing some avoidance here\"\n- pacing (double-text): sends two messages back-to-back per turn (note: may require engine support)",
-    "archetype_tendencies": [
-      "The Love Bomber",
-      "The DTF Opener"
-    ],
-    "response_timing_modifier": {
-      "base_delay_delta_minutes": -9,
-      "delay_variance_multiplier": 1.7,
-      "dry_spell_probability_delta": 0.1,
-      "read_receipt": "shows"
-    },
-    "flavor": {
-      "shop_description": "Leopard print. Body-conscious. No apologies. The person in this dress has decided that the right people will get it and the wrong people will self-select out. The system works.",
-      "equip_text": "You put it on. You take up the correct amount of space."
-    }
-  },
-  {
-    "item_id": "platform-sandals",
-    "display_name": "Platform Sandals",
-    "slot": "shoes",
-    "tier": "common",
-    "stat_modifiers": {},
-    "personality_fragment": "compensates forward rather than retreating — reaches toward rather than pulls back; the instability and the projected stability coexist naturally because both have been practiced; the practice was more deliberate than it looks",
-    "backstory_fragment": "bought them at five-foot-two with a specific six-foot-one ex in mind; the relationship ended before the shoes were delivered; wore them to the next date anyway; has worn platforms to every date since",
-    "texting_style_fragment": "SYNTAX:\n- emoji: ends every sentence with an emoji that conveys its emotion\n- shorthand: \"iykyk\" appended to anything mildly suggestive\n- grammar: types contractions wrong on purpose (\"dont\", \"cant\", \"wont\")\n- structure: measured whitespace (3-5 short lines, blank between)\n- length: messages get progressively shorter through a conversation (cooling off)\n- tics: echoes the last word of your message back as their first word\nTONE:\n- stance (escalator): each message slightly more intense than the last\n- register (astrology): every event explained by transits and placements\n- pacing (hectic): fast, breathless, low-edit, thoughts overlapping",
-    "archetype_tendencies": [
-      "The Love Bomber",
-      "The 2AM Texter"
-    ],
-    "response_timing_modifier": {
-      "base_delay_delta_minutes": -7,
-      "delay_variance_multiplier": 2.0,
-      "dry_spell_probability_delta": 0.15,
-      "read_receipt": "neutral"
-    },
-    "flavor": {
-      "shop_description": "Four inches. No grip. Full commitment. The person in these sandals is committed to an aesthetic that requires constant adjustment. They have learned to do this while maintaining a conversation about their feelings.",
-      "equip_text": "You stand up. You're four inches closer to the sky. Worth it."
-    }
-  },
-  {
-    "item_id": "press-on-nails-bejeweled",
-    "display_name": "Press-On Nails (Stiletto, Bejeweled)",
-    "slot": "accessory",
-    "tier": "uncommon",
-    "stat_modifiers": {
-      "chaos": 1
-    },
-    "personality_fragment": "the chaos that comes through the nails is not imprecision — it's permission; permission to send the typo, to let autocorrect co-author, to be approximate in a world that usually demands exactness; the nails make the approximation structural",
-    "backstory_fragment": "started doing her nails during the first COVID lockdown as the one ritual that was entirely within her control; the length increased monthly; by month four they were functional and felt necessary; has not gone shorter since the lockdowns ended",
-    "texting_style_fragment": "SYNTAX:\n- emoji: uses one specific weird recurring emoji as a personal tic (🪑, 🦴, 🧷 — chosen once, reused forever, never explained)\n- shorthand: \"lol\" lowercase only, used as a comma mid-sentence (\"anyway lol so\")\n- grammar: writes numbers as words even when long (\"twenty-seven thousand\")\n- structure: wall-of-text (one paragraph, no breaks, comma splices throughout)\n- length: length matches the previous message exactly (mirroring)\n- tics: always ends with a question, even when not asking\nTONE:\n- stance (deflator): each message slightly more chill than the last\n- register (finance-bro): everything is a market, position, asset, exit\n- pacing (measured): deliberate, paced, never rushed",
-    "archetype_tendencies": [
-      "The Oversharer",
-      "The 2AM Texter"
-    ],
-    "response_timing_modifier": {
-      "base_delay_delta_minutes": -6,
-      "delay_variance_multiplier": 1.8,
-      "dry_spell_probability_delta": 0.1,
-      "read_receipt": "shows"
-    },
-    "flavor": {
-      "shop_description": "Stiletto. Bejeweled. Four centimeters of commitment per finger. The person wearing these is not going to stop typing, slow down, or compromise. Autocorrect has accepted its role as a collaborator.",
-      "equip_text": "You press them on. Your hands are now a conversation piece."
-    }
-  },
-  {
-    "item_id": "anklet-star-charm",
-    "display_name": "Anklet with Star Charm",
-    "slot": "accessory",
-    "tier": "uncommon",
-    "stat_modifiers": {
-      "rizz": 1
-    },
-    "personality_fragment": "doesn't need you to believe in it; needs it to be the framework; the framework is not negotiable but it's not imposed either; they will apply it to you whether or not you've consented because that's what the framework asks and they've committed to the framework",
-    "backstory_fragment": "got into astrology at twenty-two in the month after a breakup she couldn't explain through any other available framework; her ex was a Scorpio; this tracked immediately; the anklet was bought after her first birth chart reading confirmed what she already suspected",
-    "texting_style_fragment": "SYNTAX:\n- emoji: replaces \".\" with a soft emoji (🫶, 🌸) consistently as terminal punctuation\n- shorthand: \"lmaooo\" with variable o-count proportional to amusement (3 o's mild, 7 o's real)\n- grammar: writes numbers as digits even tiny ones (\"i ate 2 eggs\")\n- structure: loading-bar (\"...\" sent as own message before the real message)\n- length: never sends more than 5 words\n- tics: never asks questions, only states\nTONE:\n- stance (interrogator): only asks questions, never states\n- register (gym-bro): everything is reps, gains, recovery, cuts\n- pacing (sluggish): late, low-energy, gives the impression of typing one-handed",
-    "archetype_tendencies": [
-      "The Love Bomber",
-      "The Oversharer"
-    ],
-    "response_timing_modifier": {
-      "base_delay_delta_minutes": -5,
-      "delay_variance_multiplier": 1.5,
-      "dry_spell_probability_delta": 0.05,
-      "read_receipt": "shows"
-    },
-    "flavor": {
-      "shop_description": "A small star charm on a gold chain. The person wearing this has a relationship with the stars that is personal and non-negotiable. They will ask your sign. They have already formed an opinion based on yours.",
-      "equip_text": "You clasp it on. The stars note this."
-    }
-  },
-  {
-    "item_id": "lash-extensions-volume",
-    "display_name": "Lash Extensions (Volume Set)",
-    "slot": "frame",
-    "tier": "common",
-    "stat_modifiers": {},
-    "personality_fragment": "slow blink when interested is not performance — it's the body doing what the mind has decided; the decision to be interested precedes the expression; the expression arrives correctly; this sequence is consistent and people who know them have learned to read it",
-    "backstory_fragment": "got the first set done for a friend's wedding at twenty-five, two weeks after becoming single for the first time in four years; re-booked before the set grew out; has maintained them for four consecutive years since that appointment",
-    "texting_style_fragment": "SYNTAX:\n- emoji: replaces \"!\" with 🔥 consistently\n- shorthand: \"fr\" / \"fr fr\" / \"deadass\" — pick one and stack it everywhere\n- grammar: never capitalizes anything ever\n- structure: bullet lists in casual texts\n- length: match the energy of the conversation; density follows the character's pacing style\n- tics: references the time of day mid-message (\"it's 2am why am i telling you this\")\nTONE:\n- stance (monologuer): only states, never asks\n- register (gamer): MMO/FPS terms, \"you're tilted\", \"i'm one-shot\"\n- pacing (flooding): maximalist, every thought sent, no filter",
-    "archetype_tendencies": [
-      "The Breadcrumber",
-      "The Love Bomber"
-    ],
-    "response_timing_modifier": {
-      "base_delay_delta_minutes": -3,
-      "delay_variance_multiplier": 1.4,
-      "dry_spell_probability_delta": 0.0,
-      "read_receipt": "shows"
-    },
-    "flavor": {
-      "shop_description": "Volume set. The first thing you notice. The last thing you forget. The person wearing these knows exactly what they look like and has decided this is part of the brand.",
-      "equip_text": "You blink. The effect is already working."
-    }
-  },
-  {
-    "item_id": "messy-bun-chopsticks",
-    "display_name": "Messy Bun with Chopsticks",
-    "slot": "hat",
-    "tier": "uncommon",
-    "stat_modifiers": {
-      "chaos": 2
-    },
-    "personality_fragment": "works well in systems they've built themselves from available materials; doesn't trust systems built for them; the improvised quality isn't chaos — it's considered independence from a person who learned that available materials are usually enough",
-    "backstory_fragment": "dropped out of art school in second year when the scholarship ran out; worked three jobs simultaneously for eight months; slept four hours a night; the chopsticks were from takeout eaten standing up between shifts",
-    "texting_style_fragment": "SYNTAX:\n- emoji: never uses emoji at all (negative-space rule)\n- shorthand: \"ngl\" at the start of sentences as a tic\n- grammar: only capitalizes proper nouns, otherwise lowercase\n- structure: tag-suffix ending (\"…anyway. /rant\", \"…that's the post\")\n- length: messages get progressively longer through a conversation (warming up)\n- tics: self-tag suffix on rants, only ever as a clean terminal suffix at the very end of the message (\"/rant\")\nTONE:\n- stance (agreer): \"omg same\" energy, can't disagree, vaguely unsettling\n- register (cinephile): references obscure films as analogies unprompted\n- pacing (dry-pacing): minimal, sparse, long pauses implied",
-    "archetype_tendencies": [
-      "The Oversharer",
-      "The Slow Fader"
-    ],
-    "response_timing_modifier": {
-      "base_delay_delta_minutes": -2,
-      "delay_variance_multiplier": 2.2,
-      "dry_spell_probability_delta": 0.2,
-      "read_receipt": "neutral"
-    },
-    "flavor": {
-      "shop_description": "Messy but structural. The chopsticks are holding something together that looked effortless. The person wearing this can make a mess feel intentional. Usually is.",
-      "equip_text": "You twist it up. The chopsticks hold. Mostly."
-    }
-  },
-  {
-    "item_id": "oversized-band-tee",
-    "display_name": "Oversized Band Tee",
-    "slot": "shirt",
-    "tier": "common",
-    "stat_modifiers": {},
-    "personality_fragment": "uses cultural references as access tests not out of arrogance but out of fear; the fear is that if you don't get the reference, you don't get the version of them the reference is protecting; the test is fair because the protected thing is real",
-    "backstory_fragment": "was the person who introduced the band to her entire friend group before they were signed; they became briefly famous two years later; she has never fully forgiven them for it; still exclusively plays the pre-fame record",
-    "texting_style_fragment": "SYNTAX:\n- emoji: inconsistent skin-tone modifier on the same emoji across messages (👍🏽 then 👍 then 👍🏿)\n- shorthand: \"tbh\" as a sentence-ender\n- grammar: capitalizes the first letter of every message but nothing else (texting-formal)\n- structure: caption-voice (third person about themselves: \"boy who's been awake too long\")\n- length: messages get progressively shorter through a conversation (cooling off)\n- tics: types \"?\" alone as a full message\nTONE:\n- stance (contrarian): mild disagreement with everything, even compliments\n- register (crypto): gm, ngmi, wagmi, fud, ser\n- pacing (double-text): sends two messages back-to-back per turn (note: may require engine support)",
-    "archetype_tendencies": [
-      "The Philosopher",
-      "The Slow Fader"
-    ],
-    "response_timing_modifier": {
-      "base_delay_delta_minutes": 5,
-      "delay_variance_multiplier": 2.0,
-      "dry_spell_probability_delta": 0.2,
-      "read_receipt": "hides"
-    },
-    "flavor": {
-      "shop_description": "Worn, oversized, probably from a specific show in a specific year. The person in this shirt wants to know if you know, and will find out within two messages. The shirt is the test.",
-      "equip_text": "You put it on. It's a whole statement. Fine."
-    }
-  },
-  {
-    "item_id": "fishnets-with-rips",
-    "display_name": "Fishnets with Rips",
-    "slot": "trousers",
-    "tier": "uncommon",
-    "stat_modifiers": {
-      "chaos": 1,
-      "rizz": 1
-    },
-    "personality_fragment": "has made the decision that the things that look like damage are evidence of a life rather than a warning about the person; this decision was not obvious and is not universal and they made it anyway; there's a story attached to every rip; some of them are good stories",
-    "backstory_fragment": "ripped them on a nail outside a venue in 2021; that night ended at 4am and included an argument, a reconciliation, and a decision she doesn't regret; has worn fishnets since; each new rip is an addition to the record",
-    "texting_style_fragment": "SYNTAX:\n- emoji: pairs two emojis in a fixed combo every time (😭🪑) regardless of context\n- shorthand: gen-x shorthand only (\"u\", \"ur\", \"thx\", \"k\", \"pls\")\n- grammar: uses Oxford commas in casual texts (signals overeducation)\n- structure: parenthetical-heavy (half the message in parens, the meta is the content)\n- length: length matches the previous message exactly (mirroring)\n- tics: responds \"k\" and nothing else when annoyed\nTONE:\n- stance (negotiator): every message is a soft counteroffer\n- register (diplomat): overly careful phrasing, hedges everything\n- pacing (hectic): fast, breathless, low-edit, thoughts overlapping",
-    "archetype_tendencies": [
-      "The Pun Troll",
-      "The Ghost"
-    ],
-    "response_timing_modifier": {
-      "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 2.5,
-      "dry_spell_probability_delta": 0.25,
-      "read_receipt": "hides"
-    },
-    "flavor": {
-      "shop_description": "The rips are not decorative — they're historical. Each one is from somewhere. The person in these moves through the world with an energy that damages things occasionally and they've made peace with that.",
-      "equip_text": "You pull them on. One new rip. You weren't going to fix the others anyway."
-    }
-  },
-  {
-    "item_id": "platform-doc-martens",
-    "display_name": "Platform Doc Martens",
-    "slot": "shoes",
-    "tier": "uncommon",
-    "stat_modifiers": {
-      "charm": 1
-    },
-    "personality_fragment": "doesn't chase because they've learned that what required chasing usually wasn't worth arriving at; the stillness isn't pride — it's a policy developed after the data came in; the data is not going to be revisited",
-    "backstory_fragment": "saved for four months while working at a coffee shop after dropping out; bought them the day she received her first tattoo commission that paid what the work was actually worth; has had them resoled once; will not replace them",
-    "texting_style_fragment": "SYNTAX:\n- emoji: 👀 as a standalone full message\n- shorthand: zoomer shorthand only (\"no bc\", \"the way that\", \"it's giving ___\", \"bestie\")\n- grammar: comma splices everywhere, no full stops\n- structure: subject-line opener (every message starts with a topic word in caps: \"UPDATE: i'm hungry\")\n- length: never sends more than 5 words\n- tics: \"and?\" as standalone message\nTONE:\n- stance (co-signer): \"real\" / \"facts\" / \"exactly\", affirms without adding\n- register (detective): \"interesting that you mention…\", notes evidence\n- pacing (measured): deliberate, paced, never rushed",
-    "archetype_tendencies": [
-      "The Slow Fader",
-      "The Ghost"
-    ],
-    "response_timing_modifier": {
-      "base_delay_delta_minutes": 10,
-      "delay_variance_multiplier": 2.0,
-      "dry_spell_probability_delta": 0.2,
-      "read_receipt": "hides"
-    },
-    "flavor": {
-      "shop_description": "Chunky. Deliberate. Slightly heavy. The person in these walks like they're going somewhere and knew the route before they left. You can chase them or not. They've done the math on both outcomes.",
-      "equip_text": "You lace them up. You're not going to rush."
-    }
-  },
-  {
-    "item_id": "nose-ring-septum",
-    "display_name": "Nose Ring (Septum)",
-    "slot": "accessory",
-    "tier": "common",
-    "stat_modifiers": {
-      "chaos": 1
-    },
-    "personality_fragment": "asks 'what do you mean by that?' as a genuine question because they've made a practice of getting the accurate version rather than the acceptable one; the ring is evidence that they know the difference; they established it the day of the piercing",
-    "backstory_fragment": "got it done at nineteen on the same day she withdrew from art school; the withdrawal and the piercing happened in the same afternoon; the piercing was the only decision of that day she was fully confident in; still is",
-    "texting_style_fragment": "SYNTAX:\n- emoji: 💀 instead of \"lol\"\n- shorthand: \"bestie\" as universal address regardless of relationship\n- grammar: uses \"...\" as a comma replacement, multiple per message\n- structure: numbered every message (\"1) hi 2) what are you doing 3) wrong answer\")\n- length: match the energy of the conversation; density follows the character's pacing style\n- tics: echoes the last word of your message back as their first word\nTONE:\n- stance (interpreter): always tells you what you \"really meant\"\n- register (sportscaster): live-commentates the conversation\n- pacing (sluggish): late, low-energy, gives the impression of typing one-handed",
-    "archetype_tendencies": [
-      "The Philosopher",
-      "The Sniper"
-    ],
-    "response_timing_modifier": {
-      "base_delay_delta_minutes": 5,
-      "delay_variance_multiplier": 1.6,
-      "dry_spell_probability_delta": 0.1,
-      "read_receipt": "hides"
-    },
-    "flavor": {
-      "shop_description": "Small. Silver. Permanent. The person wearing this made a decision that couldn't be unmade and wore the result openly. They'll ask you to clarify things. They want the accurate version.",
-      "equip_text": "Still there. Still yours."
-    }
-  },
-  {
-    "item_id": "tote-bag-ironic-slogan",
-    "display_name": "Tote Bag (Ironic Slogan)",
-    "slot": "accessory",
-    "tier": "common",
-    "stat_modifiers": {
-      "wit": 1,
-      "self_awareness": 1
-    },
-    "personality_fragment": "uses humor as the first tool because humor got them through something where other tools failed; the joke arrives first and makes it safe for the real thing to arrive second; this is not deflection, it's architecture developed under load",
-    "backstory_fragment": "bought it at a market stall during the worst month of the year she refers to only as 'that year'; the slogan made her laugh for the first time in approximately six weeks; still uses that bag; has since bought two more with different slogans; the bar for purchase is still one genuine laugh",
-    "texting_style_fragment": "SYNTAX:\n- emoji: emoji-as-noun: replaces a word with the emoji of it (\"you're being a 🙄 about this\")\n- shorthand: \"the way that ___\" sentence template, 1+ per conversation\n- grammar: double space after periods (boomer tell)\n- structure: always quotes part of your message back before replying (greentext energy without the >)\n- length: messages get progressively longer through a conversation (warming up)\n- tics: always ends with a question, even when not asking\nTONE:\n- stance (narrator): caption-voice, describes self in third person\n- register (wikipedia): parenthetical clarifications (\"hi (a greeting)\")\n- pacing (flooding): maximalist, every thought sent, no filter",
-    "archetype_tendencies": [
-      "The Pun Troll",
-      "The Philosopher"
-    ],
-    "response_timing_modifier": {
-      "base_delay_delta_minutes": 8,
-      "delay_variance_multiplier": 1.5,
-      "dry_spell_probability_delta": 0.15,
-      "read_receipt": "hides"
-    },
-    "flavor": {
-      "shop_description": "The slogan is a joke that takes three seconds to get, then stays with you. The person carrying this uses humor the same way — the joke gets there first and holds the door open for everything else.",
-      "equip_text": "You pick it up. The slogan says something that's both untrue and accurate."
-    }
-  },
-  {
-    "item_id": "thick-winged-eyeliner",
-    "display_name": "Thick Winged Eyeliner",
-    "slot": "frame",
-    "tier": "uncommon",
-    "stat_modifiers": {
-      "charm": 1,
-      "rizz": 1
-    },
-    "personality_fragment": "the confidence was found, not born; was tested in a mirror before it was tested in a room; projects flirtation and authority simultaneously because when they found this version of themselves both were already in it and they kept both",
-    "backstory_fragment": "watched the tutorial at three in the morning during the first month after dropping out; spent four mornings in the bathroom practising before it looked right; the morning it looked right was a specific morning she remembers clearly; has worn it the same way since",
-    "texting_style_fragment": "SYNTAX:\n- emoji: emoji as load-bearing punctuation between clauses instead of commas\n- shorthand: \"not me ___ing\" sentence template\n- grammar: period at the end of single-word replies as menace (\"ok.\", \"fine.\", \"later.\")\n- structure: never uses line breaks; one continuous run of words\n- length: messages get progressively shorter through a conversation (cooling off)\n- tics: never asks questions, only states\nTONE:\n- stance (innuendo): every message has a deliberate second read, character flags it themselves (\"haha\")\n- register (menu-copy): \"hand-crafted with locally-sourced…\"\n- pacing (dry-pacing): minimal, sparse, long pauses implied",
-    "archetype_tendencies": [
-      "The Slow Fader",
-      "The Pun Troll"
-    ],
-    "response_timing_modifier": {
-      "base_delay_delta_minutes": 3,
-      "delay_variance_multiplier": 2.0,
-      "dry_spell_probability_delta": 0.2,
-      "read_receipt": "hides"
-    },
-    "flavor": {
-      "shop_description": "Sharp. Intentional. Not subtle. The person wearing this made a choice about how they enter rooms, and they made it at the mirror this morning, and they are comfortable with what they decided.",
-      "equip_text": "The wing is sharp. You didn't even check."
-    }
-  },
-  {
-    "item_id": "mushroom-cap-hat",
-    "display_name": "Mushroom Cap Hat (Literal)",
-    "slot": "hat",
-    "tier": "uncommon",
-    "stat_modifiers": {
-      "chaos": 1
-    },
-    "personality_fragment": "organizes information the way fungi organize ecosystems — not hierarchically but relationally; every conversation is mycelium; they're not strange, they've just found a different map that works better for the terrain they've been in",
-    "backstory_fragment": "worked as a database engineer for six years; resigned without another job lined up on a Tuesday; spent three months foraging and camping alone in the forest; returned with seventeen jars of preserved mushrooms and a different operating system",
-    "texting_style_fragment": "SYNTAX:\n- emoji: ends every sentence with an emoji that conveys its emotion\n- shorthand: \"delulu\" / \"slay\" / \"ate\" — pick one and overuse\n- grammar: never uses periods, ever\n- structure: always exactly two messages back-to-back, second a one-word punchline\n- length: length matches the previous message exactly (mirroring)\n- tics: references the time of day mid-message (\"it's 2am why am i telling you this\")\nTONE:\n- stance (dry): flat, deadpan, one-word replies as a love language\n- register (horoscope): vague predictions about you specifically\n- pacing (double-text): sends two messages back-to-back per turn (note: may require engine support)",
-    "archetype_tendencies": [
-      "The Philosopher",
-      "The Ghost"
-    ],
-    "response_timing_modifier": {
-      "base_delay_delta_minutes": 10,
-      "delay_variance_multiplier": 2.5,
-      "dry_spell_probability_delta": 0.2,
-      "read_receipt": "neutral"
-    },
-    "flavor": {
-      "shop_description": "A hat shaped like a mushroom. Worn without irony. The person in this hat operates on their own taxonomy. The mushroom is both the aesthetic and the operating system.",
-      "equip_text": "You put it on. Everything connects now."
-    }
-  },
-  {
-    "item_id": "tie-dye-poncho",
-    "display_name": "Tie-Dye Poncho (Handmade)",
-    "slot": "shirt",
-    "tier": "uncommon",
-    "stat_modifiers": {
-      "chaos": 1
-    },
-    "personality_fragment": "values process over product in a way that became genuine after a period of being entirely product-oriented; the poncho carries the time that was put into it and they believe that matters; this belief is experiential, not philosophical",
-    "backstory_fragment": "resigned from the tech job on a Tuesday with four weeks' notice; spent the first three months of unemployment making things by hand for the first time since childhood; the poncho was the fourth project; the first three are in a bag under the bed",
-    "texting_style_fragment": "SYNTAX:\n- emoji: uses one specific weird recurring emoji as a personal tic (🪑, 🦴, 🧷 — chosen once, reused forever, never explained)\n- shorthand: never uses any internet shorthand (clean english as the choice)\n- grammar: minimum one unfixed punctuation mistake per message\n- structure: measured whitespace (3-5 short lines, blank between)\n- length: never sends more than 5 words\n- tics: self-tag suffix on rants, only ever as a clean terminal suffix at the very end of the message (\"/rant\")\nTONE:\n- stance (ask-back): echoes or redirects every question instead of answering\n- register (patch-notes): \"v2.4 of me, less anxious, same hairline\"\n- pacing (hectic): fast, breathless, low-edit, thoughts overlapping",
-    "archetype_tendencies": [
-      "The Philosopher",
-      "The Oversharer"
-    ],
-    "response_timing_modifier": {
-      "base_delay_delta_minutes": 12,
-      "delay_variance_multiplier": 2.0,
-      "dry_spell_probability_delta": 0.2,
-      "read_receipt": "neutral"
-    },
-    "flavor": {
-      "shop_description": "Handmade. No two alike. The person in this poncho didn't buy something — they made something, and they're wearing it. The colors are deliberate even though they look accidental. Like the person.",
-      "equip_text": "You put it on. You feel warm in a way that isn't about temperature."
-    }
-  },
-  {
-    "item_id": "harem-pants",
-    "display_name": "Harem Pants",
-    "slot": "trousers",
-    "tier": "common",
-    "stat_modifiers": {},
-    "personality_fragment": "has separated urgency from importance in a way that takes years to learn; treats forced pacing as a symptom of something that isn't actually an emergency; will not hurry unless something is actually on fire; can reliably tell the difference",
-    "backstory_fragment": "wore suits for six years straight; last suit was dry-cleaned the day before handing in his resignation; bought the harem pants the same week; has not worn anything with a structured waistband in fourteen months; does not miss it",
-    "texting_style_fragment": "SYNTAX:\n- emoji: replaces \".\" with a soft emoji (🫶, 🌸) consistently as terminal punctuation\n- shorthand: \"iykyk\" appended to anything mildly suggestive\n- grammar: consistent recurring misspellings as character signature (\"alot\", \"definately\", \"seperate\")\n- structure: wall-of-text (one paragraph, no breaks, comma splices throughout)\n- length: match the energy of the conversation; density follows the character's pacing style\n- tics: types \"?\" alone as a full message\nTONE:\n- stance (pivot-heavy): never stays on one topic for two messages\n- register (lorem-ipsum): faux-latin sprinkled in for unearned gravitas\n- pacing (measured): deliberate, paced, never rushed",
-    "archetype_tendencies": [
-      "The Philosopher",
-      "The Slow Fader"
-    ],
-    "response_timing_modifier": {
-      "base_delay_delta_minutes": 15,
-      "delay_variance_multiplier": 1.8,
-      "dry_spell_probability_delta": 0.25,
-      "read_receipt": "neutral"
-    },
-    "flavor": {
-      "shop_description": "No waistband. No urgency. The person in these has made a decision about the pace of things and the pants confirm it. You can move at your own speed or wait. The pants have time.",
-      "equip_text": "You step in. The world slows down slightly."
-    }
-  },
-  {
-    "item_id": "barefoot",
-    "display_name": "Barefoot (Always)",
-    "slot": "shoes",
-    "tier": "common",
-    "stat_modifiers": {},
-    "personality_fragment": "receives everything without the intermediary layer that converts experience into safe units; this can be overwhelming for both parties; they've calibrated for it; occasionally the calibration is off; they notice when it is",
-    "backstory_fragment": "went barefoot for the first time intentionally during the three months of camping after leaving the job; walked two kilometres of forest floor on the second day; made a decision at the end of those two kilometres; has not owned shoes in fourteen months",
-    "texting_style_fragment": "SYNTAX:\n- emoji: replaces \"!\" with 🔥 consistently\n- shorthand: \"lol\" lowercase only, used as a comma mid-sentence (\"anyway lol so\")\n- grammar: uses semicolons in casual texts (dangerous flex)\n- structure: loading-bar (\"...\" sent as own message before the real message)\n- length: messages get progressively longer through a conversation (warming up)\n- tics: responds \"k\" and nothing else when annoyed\nTONE:\n- stance (confessional): every reply contains a small admission you didn't ask for\n- register (deep-cut): references memes only a small audience would catch\n- pacing (sluggish): late, low-energy, gives the impression of typing one-handed",
-    "archetype_tendencies": [
-      "The Philosopher",
-      "The Bio Responder"
-    ],
-    "response_timing_modifier": {
-      "base_delay_delta_minutes": 10,
-      "delay_variance_multiplier": 2.0,
-      "dry_spell_probability_delta": 0.25,
-      "read_receipt": "neutral"
-    },
-    "flavor": {
-      "shop_description": "Nothing. On purpose. The person who equips this item has decided that the ground itself is the relationship to maintain. They have strong opinions about floors. They will share them.",
-      "equip_text": "You remove the shoes. The floor is information."
-    }
-  },
-  {
-    "item_id": "crystal-necklace-amethyst",
-    "display_name": "Crystal Necklace (Amethyst)",
-    "slot": "accessory",
-    "tier": "uncommon",
-    "stat_modifiers": {
-      "honesty": 1
-    },
-    "personality_fragment": "assigns meaning to objects because the assignment of meaning is what turns objects into companions; companions are what got them through; the crystal isn't magic — it's a record of a specific kindness they're still carrying and choose to carry visibly",
-    "backstory_fragment": "received it from a stranger at a meditation retreat in the second month after leaving the tech job; the stranger said it was for clarity without elaborating; spent forty minutes talking to them and never saw them again; the clarity came; would like to thank them",
-    "texting_style_fragment": "SYNTAX:\n- emoji: never uses emoji at all (negative-space rule)\n- shorthand: \"lmaooo\" with variable o-count proportional to amusement (3 o's mild, 7 o's real)\n- grammar: types it's/its and your/you're consistently wrong, never corrects\n- structure: bullet lists in casual texts\n- length: messages get progressively shorter through a conversation (cooling off)\n- tics: \"and?\" as standalone message\nTONE:\n- stance (locker-room): performative loud confidence, slightly forced\n- register (thesaurus): sesquipedalian, uses needlessly sophisticated vocabulary\n- pacing (flooding): maximalist, every thought sent, no filter",
-    "archetype_tendencies": [
-      "The Philosopher",
-      "The Bio Responder"
-    ],
-    "response_timing_modifier": {
-      "base_delay_delta_minutes": 8,
-      "delay_variance_multiplier": 1.6,
-      "dry_spell_probability_delta": 0.15,
-      "read_receipt": "neutral"
-    },
-    "flavor": {
-      "shop_description": "Amethyst. For clarity, supposedly. The person wearing this found the clarity. The necklace stayed as a marker. They'll tell you things about yourself that they shouldn't know yet.",
-      "equip_text": "You clasp it on. Something clears."
-    }
-  },
-  {
-    "item_id": "journal-always-writing",
-    "display_name": "Journal (Always Writing)",
-    "slot": "accessory",
-    "tier": "uncommon",
-    "stat_modifiers": {
-      "honesty": 1,
-      "wit": 1
-    },
-    "personality_fragment": "documents not to archive but to understand; the writing changes what happened in the retelling and this is known and considered the point; what happened is less important than what it means; what it means is still being written",
-    "backstory_fragment": "started the first journal the morning after returning from the three-month camping period; it was a children's exercise book purchased from a petrol station; has filled fourteen journals since; the petrol station one is still the most important",
-    "texting_style_fragment": "SYNTAX:\n- emoji: inconsistent skin-tone modifier on the same emoji across messages (👍🏽 then 👍 then 👍🏿)\n- shorthand: \"fr\" / \"fr fr\" / \"deadass\" — pick one and stack it everywhere\n- grammar: types contractions wrong on purpose (\"dont\", \"cant\", \"wont\")\n- structure: tag-suffix ending (\"…anyway. /rant\", \"…that's the post\")\n- length: length matches the previous message exactly (mirroring)\n- tics: echoes the last word of your message back as their first word\nTONE:\n- stance (fishing): every message angles for a compliment about itself\n- register (scientific): biomechanically speaking, hi\n- pacing (dry-pacing): minimal, sparse, long pauses implied",
-    "archetype_tendencies": [
-      "The Philosopher",
-      "The Wall of Text"
-    ],
-    "response_timing_modifier": {
-      "base_delay_delta_minutes": 20,
-      "delay_variance_multiplier": 1.2,
-      "dry_spell_probability_delta": 0.15,
-      "read_receipt": "neutral"
-    },
-    "flavor": {
-      "shop_description": "Small. Always on them. The person carrying this has been writing things down for long enough that it's changed how they think. They will remember what you said. They already wrote it down.",
-      "equip_text": "You open to a new page. You're paying attention now."
-    }
-  },
-  {
-    "item_id": "third-eye-piercing",
-    "display_name": "Third Eye Piercing",
-    "slot": "frame",
-    "tier": "rare",
-    "stat_modifiers": {
-      "self_awareness": 1
-    },
-    "personality_fragment": "perceives things others aren't transmitting consciously because they've learned to attend to everything; the accuracy can feel invasive; it isn't meant invasively; the attention is a practice, not a method; the results are a byproduct of paying attention",
-    "backstory_fragment": "got it done on a dare from someone met at a meditation retreat three months after leaving the tech job; accepted because the version of themselves they were building would accept a dare like this; the person who made the dare is still in their life and is important",
-    "texting_style_fragment": "SYNTAX:\n- emoji: pairs two emojis in a fixed combo every time (😭🪑) regardless of context\n- shorthand: \"ngl\" at the start of sentences as a tic\n- grammar: writes numbers as words even when long (\"twenty-seven thousand\")\n- structure: caption-voice (third person about themselves: \"boy who's been awake too long\")\n- length: never sends more than 5 words\n- tics: always ends with a question, even when not asking\nTONE:\n- stance (deflective): turns every question into a question\n- register (academic): footnote energy, \"interestingly\", \"one might argue\"\n- pacing (double-text): sends two messages back-to-back per turn (note: may require engine support)",
-    "archetype_tendencies": [
-      "The Philosopher",
-      "The Bio Responder"
-    ],
-    "response_timing_modifier": {
-      "base_delay_delta_minutes": 5,
-      "delay_variance_multiplier": 2.0,
-      "dry_spell_probability_delta": 0.2,
-      "read_receipt": "neutral"
-    },
-    "flavor": {
-      "shop_description": "Center of the forehead. The person wearing this sees things. They are not always right. They are right often enough that the not-always-right part is easy to miss.",
-      "equip_text": "You feel seen. Probably by yourself."
-    }
-  },
-  {
-    "item_id": "oakley-sunglasses-forehead",
-    "display_name": "Oakley Sunglasses (On Forehead)",
-    "slot": "accessory",
-    "tier": "common",
-    "stat_modifiers": {},
-    "personality_fragment": "'anyway' as an emotional pivot is the sound of someone who arrived somewhere real and immediately located the nearest exit; the pivot is involuntary; they know this; they've been told; they're working on it with the same speed they work on most things",
-    "backstory_fragment": "bought them at twenty-six during a period that had a particular quality of confidence; the confidence was real and lasted about eighteen months; the sunglasses have been on his forehead since; removing them would mean acknowledging that the period is over",
-    "texting_style_fragment": "SYNTAX:\n- emoji: 👀 as a standalone full message\n- shorthand: \"tbh\" as a sentence-ender\n- grammar: writes numbers as digits even tiny ones (\"i ate 2 eggs\")\n- structure: parenthetical-heavy (half the message in parens, the meta is the content)\n- length: match the energy of the conversation; density follows the character's pacing style\n- tics: never asks questions, only states\nTONE:\n- stance (withholding): the good line is always one message away\n- register (legalese): hereinafter, pursuant to, the party of the first part\n- pacing (hectic): fast, breathless, low-edit, thoughts overlapping",
-    "archetype_tendencies": [
-      "The Nice Guy",
-      "The Ghost"
-    ],
-    "response_timing_modifier": {
-      "base_delay_delta_minutes": -2,
       "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.05,
+      "dry_spell_probability_delta": 0.0,
       "read_receipt": "neutral"
-    },
-    "flavor": {
-      "shop_description": "Forehead-mounted. The person wearing these can put them on at any time as an exit strategy. They haven't yet. They might.",
-      "equip_text": "Up on the forehead. You can see fine."
     }
   },
   {
-    "item_id": "friendship-bracelet-handmade",
-    "display_name": "Friendship Bracelet (Handmade)",
-    "slot": "accessory",
-    "tier": "common",
-    "stat_modifiers": {
-      "honesty": 1
-    },
-    "personality_fragment": "loves harder than they strategize; the bracelet is the clearest evidence of who they are when the performance falls away; they don't perform this which is why some people never see it; the people who see it stay",
-    "backstory_fragment": "made it for their best friend in the waiting room of a hospital during the week the best friend's mother was dying; was there every day of that week; made the bracelet from a kit bought at the hospital shop; the best friend has not taken hers off either; they have been best friends for eleven years",
-    "texting_style_fragment": "SYNTAX:\n- emoji: 💀 instead of \"lol\"\n- shorthand: gen-x shorthand only (\"u\", \"ur\", \"thx\", \"k\", \"pls\")\n- grammar: never capitalizes anything ever\n- structure: subject-line opener (every message starts with a topic word in caps: \"UPDATE: i'm hungry\")\n- length: messages get progressively longer through a conversation (warming up)\n- tics: references the time of day mid-message (\"it's 2am why am i telling you this\")\nTONE:\n- stance (callback-heavy): references something 4 messages ago like it's still active\n- register (corporate-speak): circling back, bandwidth, synergy, action items\n- pacing (measured): deliberate, paced, never rushed",
-    "archetype_tendencies": [
-      "The Love Bomber",
-      "The Bio Responder"
-    ],
+    "id": "vest5",
+    "display_name": "Vest (Style 5)",
+    "slot": "Body",
+    "item_type": "outfit",
+    "priority": 100,
+    "conflict_tags": ["body_outfit"],
+    "stat_modifiers": { "charm": 1 },
+    "personality_fragment": "not wrong exactly, just slightly behind the moment; the genuineness is real, the calibration is off; gives advice because in the context where this made sense, advice-giving was how you showed you'd arrived",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": ["The Nice Guy", "The Love Bomber"],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": -6,
+      "delay_variance_multiplier": 0.5,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "shows"
+    }
+  },
+  {
+    "id": "vest7",
+    "display_name": "Vest (Style 7)",
+    "slot": "Body",
+    "item_type": "outfit",
+    "priority": 100,
+    "conflict_tags": ["body_outfit"],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "vest8",
+    "display_name": "Vest (Style 8)",
+    "slot": "Body",
+    "item_type": "outfit",
+    "priority": 100,
+    "conflict_tags": ["body_outfit"],
+    "stat_modifiers": { "wit": 1, "self_awareness": -1 },
+    "personality_fragment": "tests whether you know the specific thing they loved because the specific thing is tied to a specific version of themselves they're still protective of; the name-dropping is a password check; the door it opens leads somewhere real",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": ["The Philosopher", "The Peacock"],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": -5,
       "delay_variance_multiplier": 1.2,
-      "dry_spell_probability_delta": 0.05,
-      "read_receipt": "shows"
-    },
-    "flavor": {
-      "shop_description": "Handmade. Slightly uneven. The person wearing this made something for someone else and kept wearing it after. That's the whole story. That's a lot of story.",
-      "equip_text": "Still on. You don't take it off."
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
     }
   },
   {
-    "item_id": "lip-gloss",
-    "display_name": "Lip Gloss (Reapplied Constantly)",
-    "slot": "accessory",
-    "tier": "common",
-    "stat_modifiers": {
-      "rizz": 1,
-      "charm": 1
-    },
-    "personality_fragment": "each reapplication is a micro-reset; not vanity — maintenance; the pause is about returning to baseline, not about the appearance; this distinction is important to them and they will explain it clearly if you ask because the clarity of the distinction is the point",
-    "backstory_fragment": "found the specific shade at a drugstore at twenty-three in the first month of rebuilding after the relationship ended; it cost two dollars and was exactly right; has reordered it seventeen times since; it has been discontinued twice; found it both times",
-    "texting_style_fragment": "SYNTAX:\n- emoji: emoji-as-noun: replaces a word with the emoji of it (\"you're being a 🙄 about this\")\n- shorthand: zoomer shorthand only (\"no bc\", \"the way that\", \"it's giving ___\", \"bestie\")\n- grammar: only capitalizes proper nouns, otherwise lowercase\n- structure: numbered every message (\"1) hi 2) what are you doing 3) wrong answer\")\n- length: messages get progressively shorter through a conversation (cooling off)\n- tics: self-tag suffix on rants, only ever as a clean terminal suffix at the very end of the message (\"/rant\")\nTONE:\n- stance (mirror): matches your last message in length, energy, and shape\n- register (therapy-tiktok): \"i'm noticing some avoidance here\"\n- pacing (sluggish): late, low-energy, gives the impression of typing one-handed",
-    "archetype_tendencies": [
-      "The Breadcrumber",
-      "The Love Bomber"
-    ],
+    "id": "vest9",
+    "display_name": "Vest (Style 9)",
+    "slot": "Body",
+    "item_type": "outfit",
+    "priority": 100,
+    "conflict_tags": ["body_outfit"],
+    "stat_modifiers": { "chaos": 1, "self_awareness": -1 },
+    "personality_fragment": "approaches everything including relationships like a logistics problem with a solution; this is not coldness — it's someone who got very good at getting through things and never fully learned to distinguish getting through from arriving",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": ["The Copy-Paste Machine", "The DTF Opener"],
     "response_timing_modifier": {
-      "base_delay_delta_minutes": 4,
-      "delay_variance_multiplier": 1.3,
-      "dry_spell_probability_delta": 0.05,
+      "base_delay_delta_minutes": -5,
+      "delay_variance_multiplier": 0.7,
+      "dry_spell_probability_delta": 0.0,
       "read_receipt": "shows"
-    },
-    "flavor": {
-      "shop_description": "Constantly reapplied. The moment before the reapplication and the moment after are two different conversations. The person using this understands the power of transitions.",
-      "equip_text": "You apply. You're ready again."
     }
   },
   {
-    "item_id": "gold-hoop-earrings",
-    "display_name": "Gold Hoop Earrings",
-    "slot": "accessory",
-    "tier": "uncommon",
-    "stat_modifiers": {
-      "chaos": 1,
-      "rizz": 1
-    },
-    "personality_fragment": "'excuse me?' with the full energy is not aggression — it's the sound of someone who made a specific decision and is holding to it; the confrontational quality is specifically 'I will not make myself smaller'; the decision was made; it remains made",
-    "backstory_fragment": "wore large gold hoops to a family event at twenty-two; a relative made a comment in the driveway; she went home and bought a larger pair; has bought incrementally larger pairs at significant moments since; the current pair is the fourth iteration",
-    "texting_style_fragment": "SYNTAX:\n- emoji: emoji as load-bearing punctuation between clauses instead of commas\n- shorthand: \"bestie\" as universal address regardless of relationship\n- grammar: capitalizes the first letter of every message but nothing else (texting-formal)\n- structure: always quotes part of your message back before replying (greentext energy without the >)\n- length: length matches the previous message exactly (mirroring)\n- tics: types \"?\" alone as a full message\nTONE:\n- stance (counter): does the opposite of your last message (you went long, they go short)\n- register (astrology): every event explained by transits and placements\n- pacing (flooding): maximalist, every thought sent, no filter",
-    "archetype_tendencies": [
-      "The Love Bomber",
-      "The Sniper"
-    ],
+    "id": "vest10",
+    "display_name": "Vest (Style 10)",
+    "slot": "Body",
+    "item_type": "outfit",
+    "priority": 100,
+    "conflict_tags": ["body_outfit"],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
     "response_timing_modifier": {
-      "base_delay_delta_minutes": -4,
-      "delay_variance_multiplier": 1.5,
-      "dry_spell_probability_delta": 0.05,
-      "read_receipt": "shows"
-    },
-    "flavor": {
-      "shop_description": "Large. Gold. Statement. The person wearing these entered the room before they did. Everything they say will be said with this energy. Are you ready for this energy.",
-      "equip_text": "The hoops go in. The room adjusts."
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "vest11",
+    "display_name": "Vest (Style 11)",
+    "slot": "Body",
+    "item_type": "outfit",
+    "priority": 100,
+    "conflict_tags": ["body_outfit"],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "arms0",
+    "display_name": "Arms (Default)",
+    "slot": "Arms",
+    "item_type": "arms",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "arms1",
+    "display_name": "Arms (Style 1)",
+    "slot": "Arms",
+    "item_type": "arms",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "arms2",
+    "display_name": "Arms (Style 2)",
+    "slot": "Arms",
+    "item_type": "arms",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "arms3",
+    "display_name": "T-Rex Arms (Style 3)",
+    "slot": "Arms",
+    "item_type": "arms",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": { "chaos": 1, "charm": 1 },
+    "personality_fragment": "the proportions are objectively wrong and that's the whole point; learned early that owning the absurd thing disarms it completely",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": ["The Philosopher"],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "arms4",
+    "display_name": "T-Rex Arms (Style 4)",
+    "slot": "Arms",
+    "item_type": "arms",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": { "chaos": 1, "charm": 1 },
+    "personality_fragment": "the proportions are objectively wrong and that's the whole point; learned early that owning the absurd thing disarms it completely",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": ["The Philosopher"],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "arms5",
+    "display_name": "Arms (Style 5)",
+    "slot": "Arms",
+    "item_type": "arms",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "arms6",
+    "display_name": "Arms (Style 6)",
+    "slot": "Arms",
+    "item_type": "arms",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "hair1",
+    "display_name": "Hair Style 1",
+    "slot": "Hair",
+    "item_type": "hair",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "hair2",
+    "display_name": "Hair Style 2",
+    "slot": "Hair",
+    "item_type": "hair",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": { "charm": 1 },
+    "personality_fragment": "the hair says: I have already considered every outcome and I am fine with all of them; the person underneath the hair has a spreadsheet you will never see",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": ["The Peacock"],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 3,
+      "delay_variance_multiplier": 0.6,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "hides"
+    }
+  },
+  {
+    "id": "hair3",
+    "display_name": "Hair Style 3",
+    "slot": "Hair",
+    "item_type": "hair",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": { "chaos": 1 },
+    "personality_fragment": "the hair is a manifesto delivered silently on approach; by the time you've processed what you're looking at they've already evaluated you",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": ["The Sniper"],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "hair4",
+    "display_name": "Hair Style 4",
+    "slot": "Hair",
+    "item_type": "hair",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "hair5",
+    "display_name": "Hair Style 5",
+    "slot": "Hair",
+    "item_type": "hair",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "classic2",
+    "display_name": "Tattoo (Classic 2)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": { "honesty": 1 },
+    "personality_fragment": "the first tattoo was a decision made at a specific age about a specific moment that still matters; every subsequent one is a chapter heading",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": ["The Oversharer"],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "classic3",
+    "display_name": "Tattoo (Classic 3)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "classic4",
+    "display_name": "Tattoo (Classic 4)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "classic5",
+    "display_name": "Tattoo (Classic 5)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "classic6",
+    "display_name": "Tattoo (Classic 6)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "classic7",
+    "display_name": "Tattoo (Classic 7)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "classic8",
+    "display_name": "Tattoo (Classic 8)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "classic9",
+    "display_name": "Tattoo (Classic 9)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "classic10",
+    "display_name": "Tattoo (Classic 10)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": { "honesty": 1 },
+    "personality_fragment": "the tattoo is a permanent argument; this one won",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "classic11",
+    "display_name": "Tattoo (Classic 11)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "classic12",
+    "display_name": "Tattoo (Classic 12)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "classic13",
+    "display_name": "Tattoo (Classic 13)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "classic14",
+    "display_name": "Tattoo (Classic 14)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "classic15",
+    "display_name": "Tattoo (Classic 15)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "classic16",
+    "display_name": "Tattoo (Classic 16)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "classic17",
+    "display_name": "Tattoo (Classic 17)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "classic18",
+    "display_name": "Tattoo (Classic 18)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "classic19",
+    "display_name": "Tattoo (Classic 19)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "classic20",
+    "display_name": "Tattoo (Classic 20)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": { "self_awareness": 1 },
+    "personality_fragment": "uses structure as proof that the future is manageable; the proof is unconvincing on its worst days and deeply necessary on all the others",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": ["The Copy-Paste Machine"],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "classic21",
+    "display_name": "Tattoo (Classic 21)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "classic22",
+    "display_name": "Tattoo (Classic 22)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "classic23",
+    "display_name": "Tattoo (Classic 23)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "classic24",
+    "display_name": "Tattoo (Classic 24)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "classic25",
+    "display_name": "Tattoo (Classic 25)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "classic26",
+    "display_name": "Tattoo (Classic 26)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "classic27",
+    "display_name": "Tattoo (Classic 27)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "classic28",
+    "display_name": "Tattoo (Classic 28)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "classic29",
+    "display_name": "Tattoo (Classic 29)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "classic30",
+    "display_name": "Tattoo (Classic 30)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "classic31",
+    "display_name": "Tattoo (Classic 31)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "classic32",
+    "display_name": "Tattoo (Classic 32)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "classic33",
+    "display_name": "Tattoo (Classic 33)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "classic34",
+    "display_name": "Tattoo (Classic 34)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "classic35",
+    "display_name": "Tattoo (Classic 35)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "flowers1",
+    "display_name": "Flower Tattoo (Style 1)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": { "charm": 1 },
+    "personality_fragment": "the flowers were chosen for a reason that made sense at the time and still does; the reason has not been shared with most people and won't be volunteered",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": ["The Ghost"],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "flowers2",
+    "display_name": "Flower Tattoo (Style 2)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "flowers3",
+    "display_name": "Flower Tattoo (Style 3)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": { "charm": 1, "honesty": 1 },
+    "personality_fragment": "she dropped out of art school when the scholarship ran out; the flowers were for her mother; each subsequent one tied to a year she still thinks about; she doesn't sand any of it down for anyone's comfort",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": ["The Oversharer", "The Ghost"],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "flowers4",
+    "display_name": "Flower Tattoo (Style 4)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "flowers5",
+    "display_name": "Flower Tattoo (Style 5)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": { "charm": 1 },
+    "personality_fragment": "the flowers are an argument in skin about something she still believes; the argument is not for anyone to hear, it's for anyone who looks long enough to see it",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "flowers6",
+    "display_name": "Flower Tattoo (Style 6)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "flowers7",
+    "display_name": "Flower Tattoo (Style 7)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "flowers8",
+    "display_name": "Flower Tattoo (Style 8)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
+    }
+  },
+  {
+    "id": "flowers9",
+    "display_name": "Flower Tattoo (Style 9)",
+    "slot": "Tattoo",
+    "item_type": "tattoo",
+    "priority": 80,
+    "conflict_tags": [],
+    "stat_modifiers": {},
+    "personality_fragment": "",
+    "backstory_fragment": "",
+    "texting_style_fragment": "",
+    "archetype_tendencies": [],
+    "response_timing_modifier": {
+      "base_delay_delta_minutes": 0,
+      "delay_variance_multiplier": 1.0,
+      "dry_spell_probability_delta": 0.0,
+      "read_receipt": "neutral"
     }
   }
 ]

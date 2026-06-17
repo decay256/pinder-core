@@ -57,12 +57,23 @@ namespace Pinder.Core.Prompts
         public static readonly IReadOnlyDictionary<string, string> SlotToSyntaxAxis =
             new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
+                // Legacy fictional slot names (pre-#1176, kept for backward compatibility)
                 { "shoes",     "emoji" },
                 { "hat",       "shorthand" },
                 { "shirt",     "grammar" },
                 { "trousers",  "structure" },
                 { "frame",     "length" },
                 { "accessory", "tics" },
+
+                // Issue #1176: Unity-verbatim slot names
+                { "Special",   "emoji" },     // Unity slot 4 = Special (shoes/footwear)
+                { "Head",      "shorthand" }, // Unity slot 0 = Head (hats/headwear)
+                { "Body",      "grammar" },   // Unity slot 2 = Body (outfits)
+                { "Hair",      "structure" }, // LookCatalog hair items
+                { "Arms",      "length" },    // LookCatalog arms items
+                { "Face",      "tics" },      // Unity slot 1 = Face (face accessories)
+                // Waist (slot 3) is currently empty in Unity; no axis mapping yet.
+                // Tattoo/Sticker items contribute to personality but not syntax axes.
             };
 
         // ------------------------------------------------------------------

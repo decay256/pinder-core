@@ -73,14 +73,17 @@ namespace Pinder.Core.Tests
         // exercised by the tests. The starter-items.json fixture has at
         // least one item per slot; the assembler maps slot from
         // ItemDefinition.Slot.
+        // Issue #1176: updated to use real Unity item ids / Unity slot names.
+        // Slot → syntax axis mapping (Unity slots): Special→emoji, Head→shorthand,
+        // Body→grammar, Hair→structure, Arms→length, Face→tics.
         private static readonly string[] OneItemPerSlot =
         {
-            "vintage-band-tee",         // shirt
-            "rubber-duck",              // accessory
-            "hiking-boots",             // shoes
-            "beanie-with-patches",      // hat
-            "worn-paperback",           // accessory? — will fall back to whichever slot
-            "cargo-shorts",             // trousers
+            "special_shoe3",   // Special slot → emoji axis (has SYNTAX block)
+            "head_hat",        // Head slot → shorthand axis
+            "vest8",           // Body slot → grammar axis (has personality fragment)
+            "hair1",           // Hair slot → structure axis
+            "arms0",           // Arms slot → length axis
+            "face_eyes1",      // Face slot → tics axis
         };
 
         // A small anatomy stack covering at least one tier per tone group
@@ -106,7 +109,8 @@ namespace Pinder.Core.Tests
         public void ParseSyntaxAxes_ExtractsAllSixAxes()
         {
             var repo = BuildItemRepo();
-            var item = repo.GetItem("vintage-band-tee");
+            // Issue #1176: use real Unity item id (special_shoe3 has a full SYNTAX/TONE block)
+            var item = repo.GetItem("special_shoe3");
             Assert.NotNull(item);
 
             var axes = TextingStyleAggregator.ParseSyntaxAxes(item!.TextingStyleFragment);
@@ -302,10 +306,10 @@ namespace Pinder.Core.Tests
             // starter pool guarantees this for the candidates we pick).
             var assembler = new CharacterAssembler(BuildItemRepo(), BuildAnatomyRepo());
 
-            // Find two items in slot "shoes" with different emoji axes.
+            // Find two items in slot "Special" (Unity footwear slot) with different emoji axes.
             var repo = BuildItemRepo();
             var allItems = repo.GetAll()
-                .Where(i => string.Equals(i.Slot, "shoes", StringComparison.OrdinalIgnoreCase))
+                .Where(i => string.Equals(i.Slot, "Special", StringComparison.OrdinalIgnoreCase))
                 .ToList();
             Assert.True(allItems.Count >= 2,
                 "Need at least 2 shoes items in starter-items.json to run this test.");
@@ -354,10 +358,11 @@ namespace Pinder.Core.Tests
             // aggregate (those slots' axes are filled by hat / shirt /
             // etc. items, or silenced if absent).
             var repo = BuildItemRepo();
-            var shoesItem = repo.GetAll()
-                .First(i => string.Equals(i.Slot, "shoes", StringComparison.OrdinalIgnoreCase));
+            // Issue #1176: use special_shoe3 which has a full SYNTAX/TONE block
+            var shoesItem = repo.GetItem("special_shoe3");
+            Assert.NotNull(shoesItem);
 
-            var shoesAxes = TextingStyleAggregator.ParseSyntaxAxes(shoesItem.TextingStyleFragment);
+            var shoesAxes = TextingStyleAggregator.ParseSyntaxAxes(shoesItem!.TextingStyleFragment);
             var nonEmojiLines = shoesAxes
                 .Where(kv => !string.Equals(kv.Key, "emoji", StringComparison.OrdinalIgnoreCase))
                 .Select(kv => kv.Value)
@@ -367,7 +372,7 @@ namespace Pinder.Core.Tests
             var assembler = new CharacterAssembler(BuildItemRepo(), BuildAnatomyRepo());
             // Equip ONLY the shoes item; no other items, no anatomy.
             var fragments = assembler.Assemble(
-                new[] { shoesItem.ItemId },
+                new[] { shoesItem!.ItemId },
                 new Dictionary<string, float>(),
                 ZeroBaseStats, ZeroShadow);
 
