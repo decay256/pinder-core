@@ -277,7 +277,8 @@ partial class Program
             shadowDcBias: yamlShadowDcBias,
             horninessDcBias: yamlHorninessDcBias,
             statDeliveryInstructions: statDeliveryInstructions,
-            consequenceCatalog: consequenceCatalog);
+            consequenceCatalog: consequenceCatalog,
+            archetypesEnabled: result.GameDef?.ArchetypesEnabled ?? false);
         int? diceSeed = null;
         { if (ParseArg(args, "--seed") is string s2 && int.TryParse(s2, out int s3)) diceSeed = s3; }
         result.Session = new GameSession(result.Sable, result.Brick, result.Llm, new SystemRandomDiceRoller(diceSeed), result.TrapRegistry, config);

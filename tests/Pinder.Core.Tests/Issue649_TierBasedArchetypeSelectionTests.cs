@@ -218,7 +218,8 @@ namespace Pinder.Core.Tests
                 new[] { "a", "b" },
                 new Dictionary<string, string>(),
                 ZeroStats, ZeroShadow,
-                characterLevel: 1);
+                characterLevel: 1,
+                archetypesEnabled: true);
 
             Assert.Equal("The Hey Opener", result.ActiveArchetype?.Name);
         }
@@ -237,7 +238,8 @@ namespace Pinder.Core.Tests
                 new[] { "a", "b" },
                 new Dictionary<string, string>(),
                 ZeroStats, ZeroShadow,
-                characterLevel: 5);
+                characterLevel: 5,
+                archetypesEnabled: true);
 
             Assert.Equal("The Sniper", result.ActiveArchetype?.Name);
         }
@@ -255,7 +257,8 @@ namespace Pinder.Core.Tests
                 new[] { "a", "b" },
                 new Dictionary<string, string>(),
                 ZeroStats, ZeroShadow,
-                characterLevel: 5);
+                characterLevel: 5,
+                archetypesEnabled: true);
 
             Assert.NotNull(result.ActiveArchetype);
             Assert.NotEmpty(result.ActiveArchetype!.Behavior);
@@ -276,7 +279,8 @@ namespace Pinder.Core.Tests
                 new[] { "a", "b" },
                 new Dictionary<string, string>(),
                 ZeroStats, ZeroShadow,
-                characterLevel: 1);
+                characterLevel: 1,
+                archetypesEnabled: true);
 
             // Fallback: highest count overall
             Assert.NotNull(result.ActiveArchetype);
@@ -296,7 +300,8 @@ namespace Pinder.Core.Tests
                 new[] { "a" },
                 new Dictionary<string, string>(),
                 ZeroStats, ZeroShadow,
-                characterLevel: 5); // T3 eligible at level 5
+                characterLevel: 5,
+                archetypesEnabled: true); // T3 eligible at level 5
 
             Assert.NotNull(result.ActiveArchetype);
             var directive = result.ActiveArchetype!.Directive;

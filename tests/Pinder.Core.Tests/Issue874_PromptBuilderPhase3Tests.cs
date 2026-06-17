@@ -150,7 +150,8 @@ namespace Pinder.Core.Tests
             try
             {
                 string prompt = PromptBuilder.BuildSystemPrompt(
-                    "TestChar", "they/them", null, EmptyFragments, new TrapState());
+                    "TestChar", "they/them", null, EmptyFragments, new TrapState(),
+                    archetypesEnabled: true);
 
                 // Headers from yaml must appear.
                 Assert.Contains("IDENTITY", prompt);

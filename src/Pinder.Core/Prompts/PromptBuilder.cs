@@ -166,9 +166,10 @@ namespace Pinder.Core.Prompts
             string? bioOneLiner,
             FragmentCollection fragments,
             TrapState activeTraps,
-            string? characterIdSeed = null)
+            string? characterIdSeed = null,
+            bool archetypesEnabled = false)
         {
-            return BuildSystemPromptEx(displayName, genderIdentity, bioOneLiner, fragments, activeTraps, characterIdSeed).Text;
+            return BuildSystemPromptEx(displayName, genderIdentity, bioOneLiner, fragments, activeTraps, characterIdSeed, archetypesEnabled).Text;
         }
 
         /// <summary>
@@ -180,7 +181,8 @@ namespace Pinder.Core.Prompts
             string? bioOneLiner,
             FragmentCollection fragments,
             TrapState activeTraps,
-            string? characterIdSeed = null)
+            string? characterIdSeed = null,
+            bool archetypesEnabled = false)
         {
             if (displayName  == null) throw new ArgumentNullException(nameof(displayName));
             if (genderIdentity == null) throw new ArgumentNullException(nameof(genderIdentity));
@@ -203,7 +205,10 @@ namespace Pinder.Core.Prompts
             sb.AppendLine(framing.Personality, srcFile, srcKey);
             sb.AppendLine(framing.Backstory, srcFile, srcKey);
             sb.AppendLine(framing.TextingStyle, srcFile, srcKey);
-            sb.AppendLine(framing.ActiveArchetype, srcFile, srcKey);
+            if (archetypesEnabled)
+            {
+                sb.AppendLine(framing.ActiveArchetype, srcFile, srcKey);
+            }
             sb.AppendLine("EFFECTIVE STATS");
             sb.AppendLine(framing.ActiveTrapInstructions, srcFile, srcKey);
 
@@ -230,19 +235,22 @@ namespace Pinder.Core.Prompts
                 fragments.TextingStyleSources, characterIdSeed));
             sb.AppendLine();
 
-            sb.AppendLine(framing.ActiveArchetype, srcFile, srcKey);
-            if (fragments.ActiveArchetype != null)
+            if (archetypesEnabled)
             {
-                var aa = fragments.ActiveArchetype;
-                sb.AppendLine($"- {aa.Name} ({aa.InterferenceLevel})");
-                if (!string.IsNullOrWhiteSpace(aa.Behavior))
-                    sb.AppendLine(aa.Behavior);
+                sb.AppendLine(framing.ActiveArchetype, srcFile, srcKey);
+                if (fragments.ActiveArchetype != null)
+                {
+                    var aa = fragments.ActiveArchetype;
+                    sb.AppendLine($"- {aa.Name} ({aa.InterferenceLevel})");
+                    if (!string.IsNullOrWhiteSpace(aa.Behavior))
+                        sb.AppendLine(aa.Behavior);
+                }
+                else
+                {
+                    sb.AppendLine("(none resolved)");
+                }
+                sb.AppendLine();
             }
-            else
-            {
-                sb.AppendLine("(none resolved)");
-            }
-            sb.AppendLine();
 
             sb.AppendLine("EFFECTIVE STATS");
             sb.AppendLine($"- Charm: {fragments.Stats.GetEffective(StatType.Charm)}");

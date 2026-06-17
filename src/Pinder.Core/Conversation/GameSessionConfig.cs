@@ -110,6 +110,9 @@ namespace Pinder.Core.Conversation
         /// <summary>Max delivery words configured in GameDefinition. Null means default 80.</summary>
         public int? MaxDeliveryWords { get; }
 
+        /// <summary>Whether archetype content is injected into prompt surfaces.</summary>
+        public bool ArchetypesEnabled { get; }
+
         public GameSessionConfig(
             IGameClock? clock = null,
             SessionShadowTracker? playerShadows = null,
@@ -127,7 +130,8 @@ namespace Pinder.Core.Conversation
             Action<TextLayerNoopEvent>? onTextLayerNoop = null,
             IConsequenceCatalog? consequenceCatalog = null,
             int? maxDialogueOptions = null,
-            int? maxDeliveryWords = null)
+            int? maxDeliveryWords = null,
+            bool archetypesEnabled = false)
         {
             Clock = clock;
             PlayerShadows = playerShadows;
@@ -146,6 +150,7 @@ namespace Pinder.Core.Conversation
             ConsequenceCatalog = consequenceCatalog;
             MaxDialogueOptions = maxDialogueOptions;
             MaxDeliveryWords = maxDeliveryWords;
+            ArchetypesEnabled = archetypesEnabled;
         }
     }
 }

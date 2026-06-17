@@ -45,7 +45,8 @@ namespace Pinder.Core.Tests
                 behavior: "Loud, expensive flex. Sample lines: \"check my watch\" \u00b7 \"weekend trip booked\"",
                 count: 4, totalCount: 5);
             string prompt = PromptBuilder.BuildSystemPrompt(
-                "TestChar", "she/her", "bio", fragments, new TrapState());
+                "TestChar", "she/her", "bio", fragments, new TrapState(),
+                archetypesEnabled: true);
 
             Assert.Contains("ACTIVE ARCHETYPE", prompt);
         }
@@ -60,7 +61,8 @@ namespace Pinder.Core.Tests
                 name: "The Peacock", behavior: "behavior", count: 4, totalCount: 5,
                 rankedNonActives: new[] { ("The Wall of Text", 2), ("The Hey Opener", 1) });
             string prompt = PromptBuilder.BuildSystemPrompt(
-                "TestChar", "she/her", "bio", fragments, new TrapState());
+                "TestChar", "she/her", "bio", fragments, new TrapState(),
+                archetypesEnabled: true);
 
             Assert.DoesNotContain("ARCHETYPES (tendency order", prompt);
             // The non-active archetypes must NOT appear in the prompt.
@@ -80,7 +82,8 @@ namespace Pinder.Core.Tests
                 count: 4, totalCount: 5);
 
             string prompt = PromptBuilder.BuildSystemPrompt(
-                "TestChar", "she/her", "bio", fragments, new TrapState());
+                "TestChar", "she/her", "bio", fragments, new TrapState(),
+                archetypesEnabled: true);
 
             // Name + interference level on a labelled bullet so a parser
             // can split them out cleanly.
@@ -98,7 +101,8 @@ namespace Pinder.Core.Tests
                 name: "The Peacock", behavior: "b", count: 2, totalCount: 4);
 
             string prompt = PromptBuilder.BuildSystemPrompt(
-                "TestChar", "she/her", null, fragments, new TrapState());
+                "TestChar", "she/her", null, fragments, new TrapState(),
+                archetypesEnabled: true);
 
             Assert.Contains("- The Peacock (clear)", prompt);
         }
@@ -111,7 +115,8 @@ namespace Pinder.Core.Tests
                 name: "The Peacock", behavior: "b", count: 1, totalCount: 5);
 
             string prompt = PromptBuilder.BuildSystemPrompt(
-                "TestChar", "she/her", null, fragments, new TrapState());
+                "TestChar", "she/her", null, fragments, new TrapState(),
+                archetypesEnabled: true);
 
             Assert.Contains("- The Peacock (slight)", prompt);
         }
@@ -132,7 +137,8 @@ namespace Pinder.Core.Tests
                 activeArchetype: null);
 
             string prompt = PromptBuilder.BuildSystemPrompt(
-                "TestChar", "she/her", null, fragments, new TrapState());
+                "TestChar", "she/her", null, fragments, new TrapState(),
+                archetypesEnabled: true);
 
             Assert.Contains("ACTIVE ARCHETYPE", prompt);
             Assert.Contains("(none resolved)", prompt);

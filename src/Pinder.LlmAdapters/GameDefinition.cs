@@ -41,6 +41,11 @@ namespace Pinder.LlmAdapters
         /// <summary>DC bias applied to horniness checks. 0 = standard difficulty. Positive = easier.</summary>
         public int HorninessDcBias { get; }
 
+        /// <summary>
+        /// When false (default), no archetype content is injected into any prompt surface.
+        /// </summary>
+        public bool ArchetypesEnabled { get; }
+
         /// <summary>Maximum number of turns per session. Default 30 if not set in YAML.</summary>
         public int MaxTurns { get; }
 
@@ -64,6 +69,7 @@ namespace Pinder.LlmAdapters
             int globalDcBias = 0,
             int shadowDcBias = 0,
             int horninessDcBias = 0,
+            bool archetypesEnabled = false,
             int maxTurns = 30,
             int maxDialogueOptions = 3,
             int maxDeliveryWords = 80)
@@ -78,6 +84,7 @@ namespace Pinder.LlmAdapters
             GlobalDcBias = globalDcBias;
             ShadowDcBias = shadowDcBias;
             HorninessDcBias = horninessDcBias;
+            ArchetypesEnabled = archetypesEnabled;
             MaxTurns = maxTurns > 0 ? maxTurns : 30;
             MaxDialogueOptions = maxDialogueOptions > 0 ? maxDialogueOptions : 3;
             MaxDeliveryWords = maxDeliveryWords > 0 ? maxDeliveryWords : 80;

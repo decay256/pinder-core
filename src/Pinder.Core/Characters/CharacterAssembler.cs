@@ -34,12 +34,14 @@ namespace Pinder.Core.Characters
         /// Character level used to filter archetypes by their eligible level range.
         /// When 0 (default), no level filtering is applied (backward-compatible).
         /// </param>
+        /// <param name="archetypesEnabled">Whether archetype selection/resolution is enabled.</param>
         public FragmentCollection Assemble(
             IEnumerable<string> equippedItemIds,
             IReadOnlyDictionary<string, string> anatomySelections,
             IReadOnlyDictionary<StatType, int> playerBaseStats,
             IReadOnlyDictionary<ShadowStatType, int> shadowStats,
-            int characterLevel = 0)
+            int characterLevel = 0,
+            bool archetypesEnabled = false)
         {
             // --- 1. Resolve items and anatomy tiers --------------------------------
 
@@ -195,7 +197,7 @@ namespace Pinder.Core.Characters
 
             // --- 7. Resolve active archetype ------------------------------------
 
-            ActiveArchetype activeArchetype = ResolveActiveArchetype(ranked, characterLevel);
+            ActiveArchetype activeArchetype = archetypesEnabled ? ResolveActiveArchetype(ranked, characterLevel) : null;
 
             // --- 8. Return FragmentCollection -------------------------------------
 
