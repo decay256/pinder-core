@@ -129,9 +129,9 @@ namespace Pinder.Core.Tests
             var itemRepo = LoadItemRepo();
             var anatomyRepo = LoadAnatomyRepo();
 
-            // v1 file with name field elided.
+            // v2 file with name field elided.
             string json = @"{
-                ""schema_version"": 1,
+                ""schema_version"": 2,
                 ""character_id"": ""550e8400-e29b-41d4-a716-446655440000"",
                 ""gender_identity"": ""they/them"",
                 ""bio"": ""test"",
@@ -154,7 +154,7 @@ namespace Pinder.Core.Tests
             var anatomyRepo = LoadAnatomyRepo();
 
             string json = @"{
-                ""schema_version"": 1,
+                ""schema_version"": 2,
                 ""character_id"": ""550e8400-e29b-41d4-a716-446655440000"",
                 ""name"": ""Test"",
                 ""bio"": ""test"",
@@ -177,7 +177,7 @@ namespace Pinder.Core.Tests
             var anatomyRepo = LoadAnatomyRepo();
 
             string json = @"{
-                ""schema_version"": 1,
+                ""schema_version"": 2,
                 ""character_id"": ""550e8400-e29b-41d4-a716-446655440000"",
                 ""name"": ""Test"",
                 ""gender_identity"": ""they/them"",
@@ -200,7 +200,7 @@ namespace Pinder.Core.Tests
             var anatomyRepo = LoadAnatomyRepo();
 
             string json = @"{
-                ""schema_version"": 1,
+                ""schema_version"": 2,
                 ""character_id"": ""550e8400-e29b-41d4-a716-446655440000"",
                 ""name"": ""Test"",
                 ""gender_identity"": ""they/them"",
@@ -223,7 +223,7 @@ namespace Pinder.Core.Tests
             var anatomyRepo = LoadAnatomyRepo();
 
             string json = @"{
-                ""schema_version"": 1,
+                ""schema_version"": 2,
                 ""character_id"": ""550e8400-e29b-41d4-a716-446655440000"",
                 ""name"": ""Test"",
                 ""gender_identity"": ""they/them"",
@@ -246,7 +246,7 @@ namespace Pinder.Core.Tests
             var anatomyRepo = LoadAnatomyRepo();
 
             string json = @"{
-                ""schema_version"": 1,
+                ""schema_version"": 2,
                 ""character_id"": ""550e8400-e29b-41d4-a716-446655440000"",
                 ""name"": ""Test"",
                 ""gender_identity"": ""they/them"",
@@ -270,7 +270,7 @@ namespace Pinder.Core.Tests
             var anatomyRepo = LoadAnatomyRepo();
 
             string json = @"{
-                ""schema_version"": 1,
+                ""schema_version"": 2,
                 ""character_id"": ""550e8400-e29b-41d4-a716-446655440000"",
                 ""name"": ""Test"",
                 ""gender_identity"": ""they/them"",

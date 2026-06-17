@@ -85,14 +85,14 @@ namespace Pinder.RemoteAssets.Tests
             // Query path doesn't invoke the parser, but Configuration
             // requires it to be non-null. Return a minimal stub.
             return new CharacterDefinition(
-                schemaVersion: 1,
+                schemaVersion: 2,
                 characterId: Guid.Parse(AssetIdA),
                 name: "Stub",
                 genderIdentity: "they/them",
                 bio: "stub",
                 level: 1,
                 items: Array.Empty<string>(),
-                anatomy: new Dictionary<string, string>(),
+                anatomy: new Dictionary<string, float>(),
                 allocation: new AllocationBlock(
                     new Dictionary<StatType, int>(),
                     0,

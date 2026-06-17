@@ -3,68 +3,69 @@ using System.Collections.Generic;
 namespace Pinder.Core.Characters
 {
     /// <summary>
-    /// One of the nine anatomy parameters (e.g. Length, Girth, Eye Style).
-    /// Contains all selectable tiers for that parameter.
+    /// One scalar anatomy parameter (e.g. <c>trunkLengthBase</c>, <c>trunkGirth</c>).
+    /// Contains an ordered list of <see cref="AnatomyBandDefinition"/> instances whose
+    /// [Lower, Upper) ranges tile the normalised [0..1] scale.
+    ///
+    /// As of issue #1175, this class replaces the old tier/ScaleType/NumericRange
+    /// model. All values arriving from Unity are normalised to [0..1] before
+    /// band resolution; the old categorical tier look-up (<c>GetTier</c>) is
+    /// replaced by <see cref="ResolveBand"/>.
+    ///
+    /// Fixed standard thresholds: [0.00, 0.05, 0.20, 0.50, 0.70, 0.95, 1.00]
+    /// → 6 bands per scalar parameter. <c>isCircumcised</c> uses 2 bands split
+    /// at 0.5; bipolar <c>trunkCurvature</c> uses the same 6 bands on its
+    /// normalised [0..1] value (midpoint band = neutral).
     /// </summary>
-    /// <remarks>
-    /// As of #551 (admin-content-editor sprint Phase 2a), parameters carry
-    /// a <see cref="ScaleType"/> distinguishing numeric scales (length, girth,
-    /// ball_size) from categorical ones (eye style, tattoos, …). Numeric
-    /// parameters expose a <see cref="NumericRange"/> with min/max/unit; their
-    /// tiers carry <see cref="AnatomyTierDefinition.NumericBreakpoint"/> values
-    /// indicating position on the scale. The default value of
-    /// <see cref="ScaleType"/> is <c>"categorical"</c> so files authored before
-    /// this change still parse with their original semantics.
-    /// </remarks>
     public sealed class AnatomyParameterDefinition
     {
-        /// <summary>String constant for the categorical scale type. Default.</summary>
-        public const string ScaleTypeCategorical = "categorical";
-
-        /// <summary>String constant for the numeric scale type.</summary>
-        public const string ScaleTypeNumeric     = "numeric";
-
+        /// <summary>Stable string id matching the Unity <c>CharacterData</c> field name.</summary>
         public string Id   { get; }
+
+        /// <summary>Human-readable display name (e.g. "Trunk Length Base").</summary>
         public string Name { get; }
-        public IReadOnlyList<AnatomyTierDefinition> Tiers { get; }
 
         /// <summary>
-        /// Either <see cref="ScaleTypeCategorical"/> or <see cref="ScaleTypeNumeric"/>.
-        /// Default is categorical; files without a <c>scale_type</c> field parse
-        /// as categorical.
+        /// Bands in ascending <see cref="AnatomyBandDefinition.Lower"/> order.
+        /// Use <see cref="ResolveBand"/> for value look-up.
         /// </summary>
-        public string ScaleType { get; }
-
-        /// <summary>
-        /// Min/max/unit for the scale. Non-null if and only if
-        /// <see cref="ScaleType"/> equals <see cref="ScaleTypeNumeric"/>.
-        /// </summary>
-        public NumericRangeSpec? NumericRange { get; }
-
-        private readonly Dictionary<string, AnatomyTierDefinition> _tierIndex;
+        public IReadOnlyList<AnatomyBandDefinition> Bands { get; }
 
         public AnatomyParameterDefinition(string id, string name,
-            IReadOnlyList<AnatomyTierDefinition> tiers,
-            string? scaleType = null,
-            NumericRangeSpec? numericRange = null)
+            IReadOnlyList<AnatomyBandDefinition> bands)
         {
-            Id           = id;
-            Name         = name;
-            Tiers        = tiers;
-            ScaleType    = scaleType ?? ScaleTypeCategorical;
-            NumericRange = numericRange;
-
-            _tierIndex = new Dictionary<string, AnatomyTierDefinition>(
-                System.StringComparer.OrdinalIgnoreCase);
-            foreach (var t in tiers)
-                _tierIndex[t.TierId] = t;
+            Id    = id;
+            Name  = name;
+            Bands = bands ?? new List<AnatomyBandDefinition>();
         }
 
-        /// <summary>Returns the tier with the given id, or null if not found.</summary>
-        public AnatomyTierDefinition? GetTier(string tierId)
+        /// <summary>
+        /// Resolves the band whose [Lower, Upper) interval contains
+        /// <paramref name="value"/>. The last band's upper bound is inclusive
+        /// of 1.0. Values below 0 are clamped to band 0; values above 1 are
+        /// clamped to the last band.
+        ///
+        /// Returns null if <see cref="Bands"/> is empty.
+        /// </summary>
+        public AnatomyBandDefinition? ResolveBand(float value)
         {
-            _tierIndex.TryGetValue(tierId, out var tier);
-            return tier;
+            if (Bands.Count == 0) return null;
+
+            for (int i = 0; i < Bands.Count; i++)
+            {
+                var band   = Bands[i];
+                bool isLast = (i == Bands.Count - 1);
+
+                // Last band: inclusive of upper (handles exactly 1.0).
+                if (isLast)
+                    return value <= band.Upper ? band : Bands[Bands.Count - 1];
+
+                if (value < band.Upper)
+                    return band;
+            }
+
+            // Fallback for values > 1.0 (clamp to last band).
+            return Bands[Bands.Count - 1];
         }
     }
 }

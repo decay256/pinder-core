@@ -29,7 +29,7 @@ namespace Pinder.SessionSetup
     /// </summary>
     public static class CharacterDefinitionLoader
     {
-        /// <summary>The schema version this loader understands.</summary>
+        /// <summary>The schema version this loader understands (v2 as of #1175).</summary>
         public const int SupportedSchemaVersion = CharacterDefinition.CurrentSchemaVersion;
 
         /// <summary>
@@ -250,7 +250,6 @@ namespace Pinder.SessionSetup
             }
             return version;
         }
-
         private static Guid ParseCharacterId(JsonElement root)
         {
             if (!root.TryGetProperty("character_id", out var prop) ||
@@ -303,7 +302,7 @@ namespace Pinder.SessionSetup
             return items;
         }
 
-        private static Dictionary<string, string> ParseAnatomySelections(JsonElement root)
+        private static Dictionary<string, float> ParseAnatomySelections(JsonElement root)
         {
             if (!root.TryGetProperty("anatomy", out var prop) ||
                 prop.ValueKind != JsonValueKind.Object)
@@ -311,11 +310,24 @@ namespace Pinder.SessionSetup
                 throw new FormatException("Character definition missing required field: anatomy");
             }
 
-            var anatomy = new Dictionary<string, string>();
+            var anatomy = new Dictionary<string, float>();
             foreach (var kv in prop.EnumerateObject())
             {
-                if (kv.Value.ValueKind == JsonValueKind.String)
-                    anatomy[kv.Name] = kv.Value.GetString()!;
+                // v2: float values
+                if (kv.Value.ValueKind == JsonValueKind.Number)
+                {
+                    anatomy[kv.Name] = kv.Value.GetSingle();
+                }
+                // Tolerate booleans (isCircumcised may appear as JSON bool)
+                else if (kv.Value.ValueKind == JsonValueKind.True)
+                {
+                    anatomy[kv.Name] = 1.0f;
+                }
+                else if (kv.Value.ValueKind == JsonValueKind.False)
+                {
+                    anatomy[kv.Name] = 0.0f;
+                }
+                // Silently skip any other token types (strings, null)
             }
             return anatomy;
         }

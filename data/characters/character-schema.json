@@ -20,8 +20,8 @@
   "properties": {
     "schema_version": {
       "type": "integer",
-      "description": "Schema version. v1 files MUST be exactly 1.",
-      "const": 1
+      "description": "Schema version. v2 files MUST be exactly 2 (issue #1175: anatomy is float [0..1], was v1 string tier ids).",
+      "const": 2
     },
     "character_id": {
       "type": "string",
@@ -55,8 +55,8 @@
     },
     "anatomy": {
       "type": "object",
-      "additionalProperties": { "type": "string", "minLength": 1 },
-      "description": "Anatomy selections: parameter id (e.g. \"length\") -> tier id (e.g. \"short\")."
+      "additionalProperties": { "type": "number", "minimum": 0, "maximum": 1 },
+      "description": "Anatomy scalars: parameter id (e.g. \"trunkLengthBase\") -> normalised float [0..1] value (issue #1175)."
     },
     "psychological_stake": {
       "type": "string",

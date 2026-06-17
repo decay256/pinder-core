@@ -249,9 +249,9 @@ conflicts:
                 MakeItemSource("trousers", "structure",
                     "wall-of-text (one paragraph, no breaks, comma splices throughout)"),
                 new TextingStyleFragmentSource(
-                    kind: "anatomy", source: "ball_size_tier",
+                    kind: "anatomy", source: "isCircumcised[0.00,0.50)",
                     fragment: MakeToneFragment("dry-low-edit", "dry-pacing"),
-                    slotOrParameter: "ball_size"),
+                    slotOrParameter: "isCircumcised"),
             };
             var result = TextingStyleAggregator.AggregateWithAudit(sources, "char-002", conflicts);
 

@@ -330,14 +330,14 @@ namespace Pinder.LlmAdapters.Tests
 
             // CharacterDefinition — minimal valid construction.
             var def = new CharacterDefinition(
-                schemaVersion: 1,
+                schemaVersion: 2,
                 characterId: Guid.NewGuid(),
                 name: name,
                 genderIdentity: "they/them",
                 bio: "A test character.",
                 level: 1,
                 items: new List<string>(),
-                anatomy: new Dictionary<string, string>(),
+                anatomy: new Dictionary<string, float>(),
                 allocation: new AllocationBlock(
                     spent: new Dictionary<StatType, int>(),
                     unspentPool: 0,
