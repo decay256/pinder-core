@@ -181,9 +181,9 @@ namespace Pinder.Core.Tests
             }
 
             Assert.True(sawAnyAnatomyPersonality);
-            // backstory fragments are optional in MVP bands — only assert if any exist
-            // Assert.True(sawAnyAnatomyBackstory); // optional check
-            _ = sawAnyAnatomyBackstory; // suppress unused warning
+            // #1184: load-bearing anatomy bands now carry backstory fragments.
+            Assert.True(sawAnyAnatomyBackstory,
+                "At least one resolved anatomy band should contribute a backstory fragment");
         }
 
         [Fact]
