@@ -65,11 +65,12 @@ namespace Pinder.LlmAdapters.Anthropic
 
         /// <summary>
         /// Parses structured LLM text output into DialogueOption array.
-        /// Never throws — returns 4 options, padding with defaults if needed.
+        /// Never throws — returns options padded with defaults if needed.
         /// </summary>
         public static DialogueOption[] ParseDialogueOptionsText(string? llmResponse, StatType[]? availableStats = null)
         {
             var parsed = new List<DialogueOption>();
+            int count = availableStats != null ? availableStats.Length : DefaultPaddingStats.Length;
 
             if (!string.IsNullOrWhiteSpace(llmResponse))
             {
@@ -81,7 +82,7 @@ namespace Pinder.LlmAdapters.Anthropic
                     foreach (var section in sections)
                     {
                         if (string.IsNullOrWhiteSpace(section)) continue;
-                        if (parsed.Count >= 4) break;
+                        if (parsed.Count >= count) break;
 
                         var statMatch = StatRegex.Match(section);
                         if (!statMatch.Success) continue;
@@ -172,10 +173,11 @@ namespace Pinder.LlmAdapters.Anthropic
                 if (optionsArray == null || optionsArray.Count == 0)
                     return null;
 
+                int count = availableStats != null ? availableStats.Length : DefaultPaddingStats.Length;
                 var parsed = new List<DialogueOption>();
                 foreach (var item in optionsArray)
                 {
-                    if (parsed.Count >= 4) break;
+                    if (parsed.Count >= count) break;
 
                     var statStr = StatNameNormalizer.NormalizeStatName(item.Value<string>("stat") ?? "");
                     StatType stat;
@@ -239,6 +241,7 @@ namespace Pinder.LlmAdapters.Anthropic
 
         public static DialogueOption[] ReconcileAndPadDialogueOptions(List<DialogueOption> parsed, StatType[]? availableStats = null)
         {
+            int count = availableStats != null ? availableStats.Length : DefaultPaddingStats.Length;
             var result = new List<DialogueOption>();
             var usedStats = new HashSet<StatType>();
             var remainingAllowed = availableStats != null ? new List<StatType>(availableStats) : new List<StatType>(DefaultPaddingStats);
@@ -293,7 +296,7 @@ namespace Pinder.LlmAdapters.Anthropic
 
             result.AddRange(tempOptions);
 
-            while (result.Count < 4)
+            while (result.Count < count)
             {
                 StatType padStat;
                 if (remainingAllowed.Count > 0)
@@ -319,9 +322,9 @@ namespace Pinder.LlmAdapters.Anthropic
                     hasTellBonus: false, hasWeaknessWindow: false));
             }
 
-            if (result.Count > 4)
+            if (result.Count > count)
             {
-                return result.GetRange(0, 4).ToArray();
+                return result.GetRange(0, count).ToArray();
             }
 
             return result.ToArray();

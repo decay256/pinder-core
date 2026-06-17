@@ -18,7 +18,7 @@ namespace Pinder.LlmAdapters.Tests
         {
             // We test via the Anthropic parser which is the primary implementation
             var rawInput = $@"OPTION_1 [STAT: Charm] ""{input}"" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]";
-            var result = DialogueOptionParsers.ParseDialogueOptionsText(rawInput);
+            var result = DialogueOptionParsers.ParseDialogueOptionsText(rawInput, new[] { StatType.Charm, StatType.Honesty, StatType.Wit, StatType.Chaos });
             
             Assert.Equal(expected, result[0].IntendedText);
         }
@@ -31,7 +31,7 @@ namespace Pinder.LlmAdapters.Tests
                     { ""stat"": ""Charm"", ""text"": ""CONTEXT: tool message"", ""callback"": ""none"", ""combo"": ""none"", ""tell_bonus"": false, ""weakness_window"": false }
                 ]
             }");
-            var result = DialogueOptionParsers.ParseDialogueOptionsTool(json);
+            var result = DialogueOptionParsers.ParseDialogueOptionsTool(json, new[] { StatType.Charm, StatType.Honesty, StatType.Wit, StatType.Chaos });
             
             Assert.Equal("tool message", result![0].IntendedText);
         }

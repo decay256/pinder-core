@@ -50,7 +50,7 @@ namespace Pinder.LlmAdapters.Tests
         public void OptionsPrompt_ContainsFormatInstruction()
         {
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(MakeDialogueContext());
-            Assert.Contains("Format: OPTION_A: [message] OPTION_B: [message] OPTION_C: [message]", result);
+            Assert.Contains("Format: OPTION_1: [message] OPTION_2: [message] OPTION_3: [message]", result);
         }
 
         [Theory]

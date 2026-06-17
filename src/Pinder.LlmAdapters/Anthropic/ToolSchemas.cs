@@ -11,55 +11,60 @@ namespace Pinder.LlmAdapters.Anthropic
     internal static class ToolSchemas
     {
         /// <summary>
-        /// Tool for GetDialogueOptionsAsync — returns 4 structured dialogue options.
+        /// Tool for GetDialogueOptionsAsync — returns structured dialogue options.
         /// Schema: {options: [{stat, text, callback, combo, tell_bonus, weakness_window}]}
         /// </summary>
-        public static readonly ToolDefinition DialogueOptions = new ToolDefinition
+        public static ToolDefinition GetDialogueOptions(int count)
         {
-            Name = "submit_dialogue_options",
-            Description = "Submit the generated dialogue options for the player.",
-            InputSchema = JObject.Parse(@"{
-                ""type"": ""object"",
-                ""properties"": {
-                    ""options"": {
-                        ""type"": ""array"",
-                        ""items"": {
-                            ""type"": ""object"",
-                            ""properties"": {
-                                ""stat"": {
-                                    ""type"": ""string"",
-                                    ""description"": ""The stat used for this option. Must be one of: Charm, Rizz, Honesty, Chaos, Wit, SelfAwareness""
-                                },
-                                ""text"": {
-                                    ""type"": ""string"",
-                                    ""description"": ""The dialogue text for this option.""
-                                },
-                                ""callback"": {
-                                    ""type"": [""string"", ""null""],
-                                    ""description"": ""Callback turn reference (e.g. '3' or 'turn_3') or null if none.""
-                                },
-                                ""combo"": {
-                                    ""type"": [""string"", ""null""],
-                                    ""description"": ""Combo name being completed, or null if none.""
-                                },
-                                ""tell_bonus"": {
-                                    ""type"": ""boolean"",
-                                    ""description"": ""Whether this option has a tell bonus.""
-                                },
-                                ""weakness_window"": {
-                                    ""type"": ""boolean"",
-                                    ""description"": ""Whether a weakness window is active for this option.""
-                                }
-                            },
-                            ""required"": [""stat"", ""text"", ""tell_bonus"", ""weakness_window""]
-                        },
-                        ""minItems"": 4,
-                        ""maxItems"": 4
-                    }
-                },
-                ""required"": [""options""]
-            }")
-        };
+            return new ToolDefinition
+            {
+                Name = "submit_dialogue_options",
+                Description = "Submit the generated dialogue options for the player.",
+                InputSchema = JObject.Parse($@"{{
+                    ""type"": ""object"",
+                    ""properties"": {{
+                        ""options"": {{
+                            ""type"": ""array"",
+                            ""items"": {{
+                                ""type"": ""object"",
+                                ""properties"": {{
+                                    ""stat"": {{
+                                        ""type"": ""string"",
+                                        ""description"": ""The stat used for this option. Must be one of: Charm, Rizz, Honesty, Chaos, Wit, SelfAwareness""
+                                    }},
+                                    ""text"": {{
+                                        ""type"": ""string"",
+                                        ""description"": ""The dialogue text for this option.""
+                                    }},
+                                    ""callback"": {{
+                                        ""type"": [""string"", ""null""],
+                                        ""description"": ""Callback turn reference (e.g. '3' or 'turn_3') or null if none.""
+                                    }},
+                                    ""combo"": {{
+                                        ""type"": [""string"", ""null""],
+                                        ""description"": ""Combo name being completed, or null if none.""
+                                    }},
+                                    ""tell_bonus"": {{
+                                        ""type"": ""boolean"",
+                                        ""description"": ""Whether this option has a tell bonus.""
+                                    }},
+                                    ""weakness_window"": {{
+                                        ""type"": ""boolean"",
+                                        ""description"": ""Whether a weakness window is active for this option.""
+                                    }}
+                                }},
+                                ""required"": [""stat"", ""text"", ""tell_bonus"", ""weakness_window""]
+                            }},
+                            ""minItems"": {count},
+                            ""maxItems"": {count}
+                        }}
+                    }},
+                    ""required"": [""options""]
+                }}")
+            };
+        }
+
+        public static readonly ToolDefinition DialogueOptions = GetDialogueOptions(4);
 
         // #1125 — the "submit_delivery" tool schema was removed along with the
         // collapsed delivery LLM call (DeliverMessageAsync is gone from the
