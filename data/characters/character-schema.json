@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://pinder.dk-eigenvektor.de/schemas/character-v1.json",
-  "title": "Pinder Character v1",
+  "$id": "https://pinder.dk-eigenvektor.de/schemas/character-v2.json",
+  "title": "Pinder Character v2",
   "description": "On-disk shape of a Pinder character file. Describes player-authored allocation only; bonuses from items/anatomy are recomputed at load time and never serialised here.",
   "type": "object",
   "additionalProperties": false,
