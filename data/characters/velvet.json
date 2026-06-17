@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "character_id": "699b1fea-92d9-4f1e-8a39-b502052ae865",
   "name": "Velvet_Void",
   "gender_identity": "she/her",
@@ -15,14 +15,31 @@
     "thick-winged-eyeliner"
   ],
   "anatomy": {
-    "length": "medium",
-    "girth": "slim",
-    "circumcision": "uncircumcised",
-    "vein_definition": "defined",
-    "skin_texture": "textured",
-    "ball_size": "average",
-    "tattoos": "several",
-    "eye_style": "intense"
+    "trunkLengthBase": 0.42,
+    "trunkLengthMid": 0.45,
+    "trunkLengthTip": 0.4,
+    "trunkGirth": 0.15,
+    "trunkCurvature": 0.5,
+    "glansScale": 0.45,
+    "glansWidth": 0.42,
+    "scrotumScale": 0.45,
+    "leftTesticleScale": 0.45,
+    "rightTesticleScale": 0.45,
+    "scrotumDrop": 0.5,
+    "prepucius": 0,
+    "arrugatis": 0,
+    "gravitatis": 0,
+    "venicus": 0.25,
+    "sad": 0.2,
+    "happy": 0.3,
+    "serius": 0.65,
+    "skinHue": 0.05,
+    "skinSat": 0.3,
+    "skinVal": 0.85,
+    "freckles": 0,
+    "blemishes": 0.45,
+    "veins": 0.25,
+    "isCircumcised": 0
   },
   "allocation": {
     "spent": {

@@ -98,7 +98,7 @@ namespace Pinder.Core.Tests
             // red-bottom-heels: Charm +1, Rizz +1
             var result = assembler.Assemble(
                 new[] { "blazer-crop-top", "red-bottom-heels" },
-                new Dictionary<string, string>(),
+                new Dictionary<string, float>(),
                 ZeroBaseStats, ZeroShadow);
 
             Assert.Equal(2, result.Stats.GetEffective(StatType.Charm));
@@ -111,10 +111,15 @@ namespace Pinder.Core.Tests
             var assembler = new CharacterAssembler(BuildItemRepo(), BuildAnatomyRepo());
 
             // blazer-crop-top: Charm +1
-            // anatomy: length=short → SA+1, Honesty+1
+            // anatomy: isCircumcised=0.0 → uncircumcised band → Honesty+1
+            //          scrotumScale=0.00 → band 0 (0.00-0.05) → Wit+1, SA+1
             var result = assembler.Assemble(
                 new[] { "blazer-crop-top" },
-                new Dictionary<string, string> { { "length", "short" } },
+                new Dictionary<string, float>
+                {
+                    { "isCircumcised", 0.0f },   // uncircumcised → Honesty+1
+                    { "scrotumScale",  0.02f },   // band 0 → Wit+1, SA+1
+                },
                 ZeroBaseStats, ZeroShadow);
 
             Assert.Equal(1, result.Stats.GetEffective(StatType.Charm));
@@ -129,7 +134,7 @@ namespace Pinder.Core.Tests
 
             var result = assembler.Assemble(
                 new[] { "blazer-crop-top", "color-coded-planner" },
-                new Dictionary<string, string> { { "length", "short" }, { "girth", "slim" } },
+                new Dictionary<string, float> { { "trunkLengthBase", 0.18f }, { "trunkGirth", 0.08f } },
                 ZeroBaseStats, ZeroShadow);
 
             Assert.NotEmpty(result.PersonalityFragments);
@@ -144,7 +149,7 @@ namespace Pinder.Core.Tests
 
             var result = assembler.Assemble(
                 new[] { "mushroom-cap-hat", "journal-always-writing" },
-                new Dictionary<string, string> { { "length", "short" } },
+                new Dictionary<string, float> { { "trunkLengthBase", 0.18f } },
                 ZeroBaseStats, ZeroShadow);
 
             Assert.NotEmpty(result.RankedArchetypes);
@@ -161,7 +166,7 @@ namespace Pinder.Core.Tests
 
             var result = assembler.Assemble(
                 new[] { "blazer-crop-top", "THIS_DOES_NOT_EXIST" },
-                new Dictionary<string, string>(),
+                new Dictionary<string, float>(),
                 ZeroBaseStats, ZeroShadow);
 
             // Should not throw; known item fragments still present
@@ -178,7 +183,7 @@ namespace Pinder.Core.Tests
             var assembler = new CharacterAssembler(BuildItemRepo(), BuildAnatomyRepo());
             var fragments = assembler.Assemble(
                 new[] { "blazer-crop-top" },
-                new Dictionary<string, string> { { "length", "short" } },
+                new Dictionary<string, float> { { "trunkLengthBase", 0.18f } },
                 ZeroBaseStats, ZeroShadow);
 
             var prompt = PromptBuilder.BuildSystemPrompt(
@@ -203,7 +208,7 @@ namespace Pinder.Core.Tests
             var assembler = new CharacterAssembler(BuildItemRepo(), BuildAnatomyRepo());
             var fragments = assembler.Assemble(
                 new[] { "blazer-crop-top" },
-                new Dictionary<string, string>(),
+                new Dictionary<string, float>(),
                 ZeroBaseStats, ZeroShadow);
 
             var prompt = PromptBuilder.BuildSystemPrompt(
@@ -219,7 +224,7 @@ namespace Pinder.Core.Tests
             var assembler = new CharacterAssembler(BuildItemRepo(), BuildAnatomyRepo());
             var fragments = assembler.Assemble(
                 new[] { "blazer-crop-top" },
-                new Dictionary<string, string>(),
+                new Dictionary<string, float>(),
                 ZeroBaseStats, ZeroShadow);
 
             var trapDef = new TrapDefinition(
@@ -244,7 +249,7 @@ namespace Pinder.Core.Tests
             var assembler = new CharacterAssembler(BuildItemRepo(), BuildAnatomyRepo());
             var fragments = assembler.Assemble(
                 new[] { "blazer-crop-top" },
-                new Dictionary<string, string>(),
+                new Dictionary<string, float>(),
                 ZeroBaseStats, ZeroShadow);
 
             var prompt = PromptBuilder.BuildSystemPrompt(

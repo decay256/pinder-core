@@ -216,7 +216,7 @@ namespace Pinder.Core.Tests
             var assembler = new CharacterAssembler(items, new NullAnatomyRepo());
             var result = assembler.Assemble(
                 new[] { "a", "b" },
-                new Dictionary<string, string>(),
+                new Dictionary<string, float>(),
                 ZeroStats, ZeroShadow,
                 characterLevel: 1,
                 archetypesEnabled: true);
@@ -236,7 +236,7 @@ namespace Pinder.Core.Tests
             var assembler = new CharacterAssembler(items, new NullAnatomyRepo());
             var result = assembler.Assemble(
                 new[] { "a", "b" },
-                new Dictionary<string, string>(),
+                new Dictionary<string, float>(),
                 ZeroStats, ZeroShadow,
                 characterLevel: 5,
                 archetypesEnabled: true);
@@ -255,7 +255,7 @@ namespace Pinder.Core.Tests
             var assembler = new CharacterAssembler(items, new NullAnatomyRepo());
             var result = assembler.Assemble(
                 new[] { "a", "b" },
-                new Dictionary<string, string>(),
+                new Dictionary<string, float>(),
                 ZeroStats, ZeroShadow,
                 characterLevel: 5,
                 archetypesEnabled: true);
@@ -277,7 +277,7 @@ namespace Pinder.Core.Tests
             var assembler = new CharacterAssembler(items, new NullAnatomyRepo());
             var result = assembler.Assemble(
                 new[] { "a", "b" },
-                new Dictionary<string, string>(),
+                new Dictionary<string, float>(),
                 ZeroStats, ZeroShadow,
                 characterLevel: 1,
                 archetypesEnabled: true);
@@ -298,7 +298,7 @@ namespace Pinder.Core.Tests
             var assembler = new CharacterAssembler(items, new NullAnatomyRepo());
             var result = assembler.Assemble(
                 new[] { "a" },
-                new Dictionary<string, string>(),
+                new Dictionary<string, float>(),
                 ZeroStats, ZeroShadow,
                 characterLevel: 5,
                 archetypesEnabled: true); // T3 eligible at level 5

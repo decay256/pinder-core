@@ -6,9 +6,9 @@ using Pinder.Core.Stats;
 namespace Pinder.Core.Characters
 {
     /// <summary>
-    /// Serialises a <see cref="CharacterDefinition"/> to canonical v1 JSON.
+    /// Serialises a <see cref="CharacterDefinition"/> to canonical v2 JSON.
     ///
-    /// Design contract (issue #815):
+    /// Design contract (issue #815, updated #1175):
     /// <list type="bullet">
     ///   <item>Pure: no I/O, no side effects, deterministic.</item>
     ///   <item>Stable property ordering matches the schema's documented order
@@ -17,7 +17,10 @@ namespace Pinder.Core.Characters
     ///         <c>anatomy</c>, <c>allocation</c>).</item>
     ///   <item>2-space indent, single trailing newline (LF), UTF-8 no BOM.</item>
     ///   <item>Round-trip stable: <c>Write(Parse(json)) == json</c> byte-equal
-    ///         for every v1 file produced by this writer.</item>
+    ///         for every v2 file produced by this writer.</item>
+    ///   <item>v2 change (#1175): <c>anatomy</c> values are JSON numbers (float
+    ///         [0..1]) rather than strings. Written with up to 6 decimal places,
+    ///         trailing zeros stripped.</item>
     /// </list>
     ///
     /// We hand-walk the POCO with <see cref="Utf8JsonWriter"/> rather than
@@ -120,11 +123,12 @@ namespace Pinder.Core.Characters
             // anatomy: emitted in the order it appears in the POCO's
             // dictionary, which preserves insertion order from parse time.
             // Starter files are hand-authored with a documented field order;
-            // the parser uses Dictionary<string,string> which on .NET preserves
+            // the parser uses Dictionary<string,float> which on .NET preserves
             // insertion order. Round-trip tests pin this contract.
+            // v2 (#1175): values are floats [0..1], written as JSON numbers.
             writer.WriteStartObject("anatomy");
             foreach (var kv in def.Anatomy)
-                writer.WriteString(kv.Key, kv.Value);
+                writer.WriteNumber(kv.Key, kv.Value);
             writer.WriteEndObject();
 
             writer.WriteStartObject("allocation");

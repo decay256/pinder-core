@@ -7,20 +7,30 @@ using Pinder.Core.Stats;
 namespace Pinder.Core.Data
 {
     /// <summary>
-    /// Parses anatomy-parameters.json and exposes parameters via IAnatomyRepository.
-    /// </summary>
-    /// <remarks>
-    /// As of #551 (admin-content-editor sprint Phase 2a), parameter records
-    /// may carry a <c>scale_type</c> field (<c>"numeric"</c> or <c>"categorical"</c>)
-    /// plus, for numeric parameters, a <c>numeric_range</c> object with
-    /// <c>min</c>/<c>max</c>/<c>unit</c> keys. Tiers within numeric parameters
-    /// may carry a <c>numeric_breakpoint</c> integer.
+    /// Parses the scalar-banded anatomy-parameters.json and exposes parameters
+    /// via <see cref="IAnatomyRepository"/>.
     ///
-    /// The loader is fully backwards-compatible: a parameter without a
-    /// <c>scale_type</c> field parses as categorical with no numeric range
-    /// and tiers with null <c>NumericBreakpoint</c>, matching the file
-    /// format that shipped before this change.
-    /// </remarks>
+    /// As of issue #1175, each parameter record has the shape:
+    /// <code>
+    /// {
+    ///   "id": "trunkLengthBase",
+    ///   "name": "Trunk Length Base",
+    ///   "bands": [
+    ///     {
+    ///       "lower": 0.00, "upper": 0.05,
+    ///       "personality_fragment": "...",   // optional
+    ///       "backstory_fragment": "...",     // optional
+    ///       "texting_style_fragment": "...", // optional
+    ///       "archetype_tendencies": [...],   // optional
+    ///       "response_timing_modifier": {...}, // optional
+    ///       "stat_modifiers": {...}          // optional
+    ///     },
+    ///     ...
+    ///   ]
+    /// }
+    /// </code>
+    /// All band fields except <c>lower</c> and <c>upper</c> are optional.
+    /// </summary>
     public sealed class JsonAnatomyRepository : IAnatomyRepository
     {
         private readonly Dictionary<string, AnatomyParameterDefinition> _params =
@@ -56,92 +66,47 @@ namespace Pinder.Core.Data
             string id   = obj.GetString("id");
             string name = obj.GetString("name");
 
-            // Default: categorical (matches files authored before #551).
-            string scaleType = obj.HasKey("scale_type")
-                ? obj.GetString("scale_type", AnatomyParameterDefinition.ScaleTypeCategorical)
-                : AnatomyParameterDefinition.ScaleTypeCategorical;
+            var bandsArr = obj.GetArray("bands");
+            var bands = new List<AnatomyBandDefinition>();
 
-            NumericRangeSpec? numericRange = null;
-            if (string.Equals(scaleType, AnatomyParameterDefinition.ScaleTypeNumeric,
-                              StringComparison.Ordinal))
+            if (bandsArr != null)
             {
-                var rangeObj = obj.GetObject("numeric_range");
-                if (rangeObj != null)
+                foreach (var elem in bandsArr.Items)
                 {
-                    numericRange = new NumericRangeSpec(
-                        rangeObj.GetInt("min"),
-                        rangeObj.GetInt("max"),
-                        rangeObj.GetString("unit"));
+                    if (!(elem is JsonObject bandObj)) continue;
+                    bands.Add(ParseBand(bandObj));
                 }
             }
 
-            var tiersArr = obj.GetArray("tiers");
-            var tiers    = new List<AnatomyTierDefinition>();
-
-            if (tiersArr != null)
-            {
-                bool isNumeric = string.Equals(
-                    scaleType,
-                    AnatomyParameterDefinition.ScaleTypeNumeric,
-                    StringComparison.Ordinal);
-                foreach (var elem in tiersArr.Items)
-                {
-                    if (!(elem is JsonObject tierObj)) continue;
-                    tiers.Add(ParseTier(id, tierObj, isNumeric));
-                }
-            }
-
-            return new AnatomyParameterDefinition(id, name, tiers, scaleType, numericRange);
+            return new AnatomyParameterDefinition(id, name, bands);
         }
 
-        private static AnatomyTierDefinition ParseTier(
-            string parameterId,
-            JsonObject obj,
-            bool parentIsNumeric)
+        private static AnatomyBandDefinition ParseBand(JsonObject obj)
         {
-            string tierId   = obj.GetString("id");
-            string tierName = obj.GetString("name");
+            float lower = obj.GetFloat("lower", 0f);
+            float upper = obj.GetFloat("upper", 1f);
 
-            // Numeric breakpoint: only meaningful when the parent parameter
-            // is numeric. We still parse the field if present so a malformed
-            // file (e.g. categorical param with stray breakpoints) round-trips
-            // safely without surfacing an exception; the value is just dropped
-            // for non-numeric parents.
-            int? numericBreakpoint = null;
-            if (parentIsNumeric && obj.HasKey("numeric_breakpoint"))
-            {
-                numericBreakpoint = obj.GetInt("numeric_breakpoint");
-            }
+            string? personality = obj.HasKey("personality_fragment")
+                ? NullIfEmpty(obj.GetString("personality_fragment"))
+                : null;
+            string? backstory = obj.HasKey("backstory_fragment")
+                ? NullIfEmpty(obj.GetString("backstory_fragment"))
+                : null;
+            string? texting = obj.HasKey("texting_style_fragment")
+                ? NullIfEmpty(obj.GetString("texting_style_fragment"))
+                : null;
 
-            // Skin Tone tiers: visual_description only, no modifiers/fragments.
-            bool isVisualOnly = obj.HasKey("visual_description") &&
-                                !obj.HasKey("personality_fragment");
-
-            if (isVisualOnly)
-            {
-                string visual = obj.GetString("visual_description");
-                return new AnatomyTierDefinition(
-                    parameterId, tierId, tierName,
-                    new Dictionary<StatType, int>(),
-                    null, null, null,
-                    Array.Empty<string>(),
-                    TimingModifier.Zero,
-                    visual,
-                    numericBreakpoint);
-            }
-
-            var statMods  = JsonItemRepository.ParseStatModifiers(obj.GetObject("stat_modifiers"));
-            string personality = obj.GetString("personality_fragment");
-            string backstory   = obj.GetString("backstory_fragment");
-            string texting     = obj.GetString("texting_style_fragment");
             string[] archetypes = JsonItemRepository.ParseStringArray(obj.GetArray("archetype_tendencies"));
-            var timing = JsonItemRepository.ParseTimingModifier(obj.GetObject("response_timing_modifier"));
+            TimingModifier timing = JsonItemRepository.ParseTimingModifier(obj.GetObject("response_timing_modifier"));
+            IReadOnlyDictionary<StatType, int> statMods = JsonItemRepository.ParseStatModifiers(obj.GetObject("stat_modifiers"));
 
-            return new AnatomyTierDefinition(
-                parameterId, tierId, tierName,
-                statMods, personality, backstory, texting, archetypes, timing,
-                visualDescription: null,
-                numericBreakpoint: numericBreakpoint);
+            return new AnatomyBandDefinition(
+                lower, upper,
+                personality, backstory, texting,
+                archetypes, timing, statMods);
         }
+
+        private static string? NullIfEmpty(string s)
+            => string.IsNullOrWhiteSpace(s) ? null : s;
     }
 }

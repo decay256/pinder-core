@@ -59,14 +59,14 @@ namespace Pinder.Core.Tests
                 shadows[s] = 0;
 
             return new CharacterDefinition(
-                schemaVersion: 1,
+                schemaVersion: 2,
                 characterId: Guid.Parse(idHex),
                 name: name,
                 genderIdentity: "they/them",
                 bio: "test bio",
                 level: level,
                 items: new List<string>(),
-                anatomy: new Dictionary<string, string>(),
+                anatomy: new Dictionary<string, float>(),
                 allocation: new AllocationBlock(spent, 0, shadows));
         }
 

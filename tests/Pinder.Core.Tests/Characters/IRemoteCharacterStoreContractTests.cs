@@ -28,14 +28,14 @@ namespace Pinder.Core.Tests.Characters
             foreach (ShadowStatType s in Enum.GetValues(typeof(ShadowStatType)))
                 shadows[s] = 0;
             return new CharacterDefinition(
-                schemaVersion: 1,
+                schemaVersion: 2,
                 characterId: Guid.Parse(idHex),
                 name: name,
                 genderIdentity: "they/them",
                 bio: "test bio",
                 level: 1,
                 items: Array.Empty<string>(),
-                anatomy: new Dictionary<string, string>(),
+                anatomy: new Dictionary<string, float>(),
                 allocation: new AllocationBlock(spent, 0, shadows));
         }
 

@@ -93,9 +93,9 @@ namespace Pinder.Core.Tests
             string schemaPath = Path.Combine(RepoRoot, "data", "characters", "character-schema.json");
             string filePath = Path.Combine(RepoRoot, "data", "characters", "gerald.json");
 
-            // Replace schema_version: 1 with schema_version: 99.
+            // Replace schema_version: 2 with schema_version: 99.
             string mutated = File.ReadAllText(filePath).Replace(
-                "\"schema_version\": 1,", "\"schema_version\": 99,");
+                "\"schema_version\": 2,", "\"schema_version\": 99,");
 
             using var schemaDoc = JsonDocument.Parse(File.ReadAllText(schemaPath));
             using var fileDoc = JsonDocument.Parse(mutated);
@@ -145,14 +145,14 @@ namespace Pinder.Core.Tests
 
             if (schema.TryGetProperty("minimum", out var min) && instance.ValueKind == JsonValueKind.Number)
             {
-                if (instance.GetInt32() < min.GetInt32())
-                    errors.Add($"{path}: value {instance.GetInt32()} below minimum {min.GetInt32()}");
+                if (instance.GetDouble() < min.GetDouble())
+                    errors.Add($"{path}: value {instance.GetDouble()} below minimum {min.GetDouble()}");
             }
 
             if (schema.TryGetProperty("maximum", out var max) && instance.ValueKind == JsonValueKind.Number)
             {
-                if (instance.GetInt32() > max.GetInt32())
-                    errors.Add($"{path}: value {instance.GetInt32()} above maximum {max.GetInt32()}");
+                if (instance.GetDouble() > max.GetDouble())
+                    errors.Add($"{path}: value {instance.GetDouble()} above maximum {max.GetDouble()}");
             }
 
             // object: required + properties + additionalProperties

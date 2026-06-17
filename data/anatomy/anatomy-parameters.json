@@ -1,728 +1,529 @@
 [
   {
-    "id": "length",
-    "name": "Length",
-    "scale_type": "numeric",
-    "numeric_range": {
-      "min": 1,
-      "max": 4,
-      "unit": "tier"
-    },
-    "tiers": [
+    "id": "trunkLengthBase",
+    "name": "Trunk Length Base",
+    "bands": [
       {
-        "id": "short",
-        "name": "Short",
-        "numeric_breakpoint": 1,
-        "stat_modifiers": {
-          "self_awareness": 1,
-          "honesty": 1
-        },
-        "personality_fragment": "got to the jokes before anyone else; uses self-deprecation as both weapon and shield; has a particular wit that grew specifically in this soil",
-        "backstory_fragment": "heard every short joke by age fourteen; got very good at landing the punchline before anyone else could; discovered that being the one who tells the joke first is better than being the one the joke is about; has since found this principle applies to most things in life",
-        "texting_style_fragment": "SYNTAX:\n- emoji: ends every sentence with an emoji that conveys its emotion\n- shorthand: \"lol\" lowercase only, used as a comma mid-sentence (\"anyway lol so\")\n- grammar: uses Oxford commas in casual texts (signals overeducation)\n- structure: measured whitespace (3-5 short lines, blank between)\n- length: never sends more than 5 words\n- tics: responds \"k\" and nothing else when annoyed\nTONE:\n- stance (dry): flat, deadpan, one-word replies as a love language\n- register (scientific): biomechanically speaking, hi\n- pacing (hectic): fast, breathless, low-edit, thoughts overlapping",
-        "archetype_tendencies": [
-          "The Philosopher",
-          "The Sniper"
-        ],
-        "response_timing_modifier": {
-          "base_delay_delta_minutes": -5,
-          "delay_variance_multiplier": 0.8,
-          "dry_spell_probability_delta": 0.0,
-          "read_receipt": "neutral"
-        }
+        "lower": 0.00, "upper": 0.05,
+        "personality_fragment": "undersized in this dimension; found early that personality fills space that other things don't; the economy of presence became a personality before it became a philosophy",
+        "archetype_tendencies": ["The Philosopher", "The Sniper"],
+        "response_timing_modifier": { "base_delay_delta_minutes": -5, "delay_variance_multiplier": 0.8, "dry_spell_probability_delta": 0.0, "read_receipt": "neutral" }
       },
       {
-        "id": "medium",
-        "name": "Medium",
-        "numeric_breakpoint": 2,
-        "stat_modifiers": {},
-        "personality_fragment": "comfortable in their own skin in a way that reads as unusual; not performing modesty, genuinely fine; this reads as confidence to some and blankness to others",
-        "backstory_fragment": "grew up without this being a topic; no locker room trauma, no defining comparison moment that stuck, no incident that reordered things; had to build an identity around actual things rather than reactions to a physical fact; considers this lucky in retrospect",
-        "texting_style_fragment": "SYNTAX:\n- emoji: uses one specific weird recurring emoji as a personal tic (🪑, 🦴, 🧷 — chosen once, reused forever, never explained)\n- shorthand: \"lmaooo\" with variable o-count proportional to amusement (3 o's mild, 7 o's real)\n- grammar: comma splices everywhere, no full stops\n- structure: wall-of-text (one paragraph, no breaks, comma splices throughout)\n- length: never sends more than 5 words\n- tics: \"and?\" as standalone message\nTONE:\n- stance (ask-back): echoes or redirects every question instead of answering\n- register (academic): footnote energy, \"interestingly\", \"one might argue\"\n- pacing (measured): deliberate, paced, never rushed",
-        "archetype_tendencies": [
-          "The Bio Responder"
-        ],
-        "response_timing_modifier": {
-          "base_delay_delta_minutes": 0,
-          "delay_variance_multiplier": 1.0,
-          "dry_spell_probability_delta": 0.0,
-          "read_receipt": "neutral"
-        }
+        "lower": 0.05, "upper": 0.20,
+        "personality_fragment": "compact base but not self-conscious about it; built identity on other dimensions; arrives confident",
+        "archetype_tendencies": ["The Philosopher"],
+        "response_timing_modifier": { "base_delay_delta_minutes": -3, "delay_variance_multiplier": 0.9, "dry_spell_probability_delta": 0.0, "read_receipt": "neutral" }
       },
       {
-        "id": "long",
-        "name": "Long",
-        "numeric_breakpoint": 3,
-        "stat_modifiers": {
-          "rizz": 1,
-          "charm": 1,
-          "self_awareness": -1
-        },
-        "personality_fragment": "has a quiet awareness of their advantage that surfaces in unexpected ways; not a braggart — just knows; expects to be welcomed in a way that is mostly correct",
-        "backstory_fragment": "the first time someone made a specific remark about it they were sixteen and had no idea how to respond; filed it as significant; learned to respond by twenty; have been responding with decreasing effort and increasing ease ever since",
-        "texting_style_fragment": "SYNTAX:\n- emoji: replaces \".\" with a soft emoji (🫶, 🌸) consistently as terminal punctuation\n- shorthand: \"fr\" / \"fr fr\" / \"deadass\" — pick one and stack it everywhere\n- grammar: uses \"...\" as a comma replacement, multiple per message\n- structure: never uses line breaks; one continuous run of words\n- length: match the energy of the conversation; density follows the character's pacing style\n- tics: echoes the last word of your message back as their first word\nTONE:\n- stance (pivot-heavy): never stays on one topic for two messages\n- register (legalese): hereinafter, pursuant to, the party of the first part\n- pacing (dry-pacing): minimal, sparse, long pauses implied",
-        "archetype_tendencies": [
-          "The Breadcrumber",
-          "The Peacock"
-        ],
-        "response_timing_modifier": {
-          "base_delay_delta_minutes": 8,
-          "delay_variance_multiplier": 1.3,
-          "dry_spell_probability_delta": 0.05,
-          "read_receipt": "hides"
-        }
+        "lower": 0.20, "upper": 0.50,
+        "personality_fragment": "nothing remarkable in the lower geometry; free to define themselves by actual things rather than physical reactions; has used that freedom",
+        "archetype_tendencies": ["The Bio Responder"],
+        "response_timing_modifier": { "base_delay_delta_minutes": 0, "delay_variance_multiplier": 1.0, "dry_spell_probability_delta": 0.0, "read_receipt": "neutral" }
       },
       {
-        "id": "legendary",
-        "name": "Legendary",
-        "numeric_breakpoint": 4,
-        "stat_modifiers": {
-          "rizz": 2,
-          "charm": 1,
-          "self_awareness": -2
-        },
-        "personality_fragment": "enters conversations at a slight offset to everyone else due to sheer presence; cannot fully diagnose why some exchanges go strangely; has been informed of the cause multiple times; it lands differently each time",
-        "backstory_fragment": "found out at fifteen from a reaction rather than a conversation; spent the next several years figuring out what to do with the information; the answer changed three times; currently on version three; version three is the calmest version and the most functional",
-        "texting_style_fragment": "SYNTAX:\n- emoji: replaces \"!\" with 🔥 consistently\n- shorthand: \"the way that ___\" sentence template, 1+ per conversation\n- grammar: double space after periods (boomer tell)\n- structure: always exactly two messages back-to-back, second a one-word punchline\n- length: messages get progressively longer through a conversation (warming up)\n- tics: always ends with a question, even when not asking\nTONE:\n- stance (confessional): every reply contains a small admission you didn't ask for\n- register (corporate-speak): circling back, bandwidth, synergy, action items\n- pacing (double-text): sends two messages back-to-back per turn (note: may require engine support)",
-        "archetype_tendencies": [
-          "The Love Bomber",
-          "The Peacock"
-        ],
-        "response_timing_modifier": {
-          "base_delay_delta_minutes": 15,
-          "delay_variance_multiplier": 1.5,
-          "dry_spell_probability_delta": 0.1,
-          "read_receipt": "hides"
-        }
+        "lower": 0.50, "upper": 0.70,
+        "personality_fragment": "proportional in the base; expects to occupy space comfortably; takes this as a given and gets on with things",
+        "archetype_tendencies": ["The Bio Responder"],
+        "response_timing_modifier": { "base_delay_delta_minutes": 0, "delay_variance_multiplier": 1.0, "dry_spell_probability_delta": 0.0, "read_receipt": "neutral" }
+      },
+      {
+        "lower": 0.70, "upper": 0.95,
+        "personality_fragment": "substantial base; has a quiet awareness of being well-provisioned; not a braggart — just knows; expects welcome and is mostly correct",
+        "stat_modifiers": { "rizz": 1 },
+        "archetype_tendencies": ["The Breadcrumber", "The Peacock"],
+        "response_timing_modifier": { "base_delay_delta_minutes": 5, "delay_variance_multiplier": 1.2, "dry_spell_probability_delta": 0.02, "read_receipt": "neutral" }
+      },
+      {
+        "lower": 0.95, "upper": 1.00,
+        "personality_fragment": "very long base; enters conversations at a slight offset due to sheer presence; cannot fully diagnose why some exchanges go strangely; has been told; it lands differently each time",
+        "stat_modifiers": { "rizz": 2, "self_awareness": -1 },
+        "archetype_tendencies": ["The Love Bomber", "The Peacock"],
+        "response_timing_modifier": { "base_delay_delta_minutes": 10, "delay_variance_multiplier": 1.4, "dry_spell_probability_delta": 0.05, "read_receipt": "hides" }
       }
     ]
   },
   {
-    "id": "girth",
-    "name": "Girth",
-    "scale_type": "numeric",
-    "numeric_range": {
-      "min": 1,
-      "max": 4,
-      "unit": "tier"
-    },
-    "tiers": [
+    "id": "trunkLengthMid",
+    "name": "Trunk Length Mid",
+    "bands": [
+      { "lower": 0.00, "upper": 0.05 },
+      { "lower": 0.05, "upper": 0.20 },
+      { "lower": 0.20, "upper": 0.50 },
+      { "lower": 0.50, "upper": 0.70 },
+      { "lower": 0.70, "upper": 0.95 },
+      { "lower": 0.95, "upper": 1.00 }
+    ]
+  },
+  {
+    "id": "trunkLengthTip",
+    "name": "Trunk Length Tip",
+    "bands": [
+      { "lower": 0.00, "upper": 0.05 },
+      { "lower": 0.05, "upper": 0.20 },
+      { "lower": 0.20, "upper": 0.50 },
+      { "lower": 0.50, "upper": 0.70 },
+      { "lower": 0.70, "upper": 0.95 },
+      { "lower": 0.95, "upper": 1.00 }
+    ]
+  },
+  {
+    "id": "trunkGirth",
+    "name": "Trunk Girth",
+    "bands": [
       {
-        "id": "slim",
-        "name": "Slim",
-        "numeric_breakpoint": 1,
-        "stat_modifiers": {
-          "wit": 1
-        },
-        "personality_fragment": "compensated through sharpness; makes up in precision what others have in mass; there's a specific vein of humor that only grows in this particular circumstance",
-        "backstory_fragment": "the comparison happened at fourteen in a school changing room; the hierarchy was announced without words; went home that day and decided to be excellent at something else; they were; this is connected",
-        "texting_style_fragment": "SYNTAX:\n- emoji: never uses emoji at all (negative-space rule)\n- shorthand: \"not me ___ing\" sentence template\n- grammar: never capitalizes anything ever\n- structure: measured whitespace (3-5 short lines, blank between)\n- length: messages get progressively shorter through a conversation (cooling off)\n- tics: types \"?\" alone as a full message\nTONE:\n- stance (locker-room): performative loud confidence, slightly forced\n- register (finance-bro): everything is a market, position, asset, exit\n- pacing (hectic): fast, breathless, low-edit, thoughts overlapping",
-        "archetype_tendencies": [
-          "The Sniper",
-          "The Philosopher"
-        ],
-        "response_timing_modifier": {
-          "base_delay_delta_minutes": -3,
-          "delay_variance_multiplier": 0.9,
-          "dry_spell_probability_delta": 0.0,
-          "read_receipt": "neutral"
-        }
+        "lower": 0.00, "upper": 0.05,
+        "personality_fragment": "slim in girth; compensated through sharpness; makes up in precision what others have in mass; there's a specific vein of humour that only grows in this particular circumstance",
+        "stat_modifiers": { "wit": 1 },
+        "archetype_tendencies": ["The Sniper", "The Philosopher"],
+        "response_timing_modifier": { "base_delay_delta_minutes": -3, "delay_variance_multiplier": 0.9, "dry_spell_probability_delta": 0.0, "read_receipt": "neutral" }
       },
       {
-        "id": "average",
-        "name": "Average",
-        "numeric_breakpoint": 2,
-        "stat_modifiers": {},
-        "personality_fragment": "not particularly burdened or advantaged by this dimension; free to define themselves by other things; has taken advantage of this freedom to varying degrees",
-        "backstory_fragment": "was never the subject of any category in any room they were in; this turned out to be an advantage nobody warned them about; the absence of a physical narrative forced them to build an actual one; they did",
-        "texting_style_fragment": "SYNTAX:\n- emoji: inconsistent skin-tone modifier on the same emoji across messages (👍🏽 then 👍 then 👍🏿)\n- shorthand: \"delulu\" / \"slay\" / \"ate\" — pick one and overuse\n- grammar: only capitalizes proper nouns, otherwise lowercase\n- structure: wall-of-text (one paragraph, no breaks, comma splices throughout)\n- length: length matches the previous message exactly (mirroring)\n- tics: responds \"k\" and nothing else when annoyed\nTONE:\n- stance (fishing): every message angles for a compliment about itself\n- register (gym-bro): everything is reps, gains, recovery, cuts\n- pacing (measured): deliberate, paced, never rushed",
-        "archetype_tendencies": [
-          "The Bio Responder"
-        ],
-        "response_timing_modifier": {
-          "base_delay_delta_minutes": 0,
-          "delay_variance_multiplier": 1.0,
-          "dry_spell_probability_delta": 0.0,
-          "read_receipt": "neutral"
-        }
+        "lower": 0.05, "upper": 0.20,
+        "personality_fragment": "narrower than average; has found other ways to command a room; the precision is its own advantage",
+        "archetype_tendencies": ["The Philosopher"],
+        "response_timing_modifier": { "base_delay_delta_minutes": -2, "delay_variance_multiplier": 0.95, "dry_spell_probability_delta": 0.0, "read_receipt": "neutral" }
       },
       {
-        "id": "thick",
-        "name": "Thick",
-        "numeric_breakpoint": 3,
-        "stat_modifiers": {
-          "rizz": 1,
-          "charm": 1
-        },
-        "personality_fragment": "occupies space with authority without raising their voice; presence arrives before they do; has learned to be responsible with this",
-        "backstory_fragment": "had an early relationship where the other person's primary reaction was surprise; they had been trying for connection and received awe instead; took a long time to understand those are different things; now manages the distinction deliberately",
-        "texting_style_fragment": "SYNTAX:\n- emoji: pairs two emojis in a fixed combo every time (😭🪑) regardless of context\n- shorthand: never uses any internet shorthand (clean english as the choice)\n- grammar: capitalizes the first letter of every message but nothing else (texting-formal)\n- structure: loading-bar (\"...\" sent as own message before the real message)\n- length: never sends more than 5 words\n- tics: \"and?\" as standalone message\nTONE:\n- stance (deflective): turns every question into a question\n- register (gamer): MMO/FPS terms, \"you're tilted\", \"i'm one-shot\"\n- pacing (sluggish): late, low-energy, gives the impression of typing one-handed",
-        "archetype_tendencies": [
-          "The Love Bomber",
-          "The Peacock"
-        ],
-        "response_timing_modifier": {
-          "base_delay_delta_minutes": 5,
-          "delay_variance_multiplier": 1.1,
-          "dry_spell_probability_delta": 0.0,
-          "read_receipt": "neutral"
-        }
+        "lower": 0.20, "upper": 0.50,
+        "personality_fragment": "not particularly burdened or advantaged in girth; free to define themselves by other things; has taken advantage of this freedom to varying degrees",
+        "archetype_tendencies": ["The Bio Responder"],
+        "response_timing_modifier": { "base_delay_delta_minutes": 0, "delay_variance_multiplier": 1.0, "dry_spell_probability_delta": 0.0, "read_receipt": "neutral" }
       },
       {
-        "id": "extra-thick",
-        "name": "Extra Thick",
-        "numeric_breakpoint": 4,
-        "stat_modifiers": {
-          "rizz": 2,
-          "self_awareness": -1
-        },
-        "personality_fragment": "experiences conversations as slightly off-rhythm from others in a way they haven't fully diagnosed; people react unusually; they've filed this under 'interesting' and continue",
-        "backstory_fragment": "the first time someone had a visible physical reaction they were nineteen; they laughed; the other person didn't; stopped laughing; the subsequent years taught them that what reads as a compliment to one person reads as intimidation to another; this navigation is ongoing and imperfect",
-        "texting_style_fragment": "SYNTAX:\n- emoji: 👀 as a standalone full message\n- shorthand: \"iykyk\" appended to anything mildly suggestive\n- grammar: uses Oxford commas in casual texts (signals overeducation)\n- structure: bullet lists in casual texts\n- length: match the energy of the conversation; density follows the character's pacing style\n- tics: echoes the last word of your message back as their first word\nTONE:\n- stance (withholding): the good line is always one message away\n- register (cinephile): references obscure films as analogies unprompted\n- pacing (flooding): maximalist, every thought sent, no filter",
-        "archetype_tendencies": [
-          "The Breadcrumber",
-          "The Wall of Text"
-        ],
-        "response_timing_modifier": {
-          "base_delay_delta_minutes": 10,
-          "delay_variance_multiplier": 1.5,
-          "dry_spell_probability_delta": 0.05,
-          "read_receipt": "hides"
-        }
+        "lower": 0.50, "upper": 0.70,
+        "personality_fragment": "solid girth; occupies space with authority without raising their voice; presence arrives before they do",
+        "stat_modifiers": { "rizz": 1 },
+        "archetype_tendencies": ["The Love Bomber", "The Peacock"],
+        "response_timing_modifier": { "base_delay_delta_minutes": 3, "delay_variance_multiplier": 1.1, "dry_spell_probability_delta": 0.0, "read_receipt": "neutral" }
+      },
+      {
+        "lower": 0.70, "upper": 0.95,
+        "personality_fragment": "thick-set; occupies space with authority without raising voice; presence arrives before they do; has learned to be responsible with this",
+        "stat_modifiers": { "rizz": 1, "charm": 1 },
+        "archetype_tendencies": ["The Love Bomber", "The Peacock"],
+        "response_timing_modifier": { "base_delay_delta_minutes": 5, "delay_variance_multiplier": 1.1, "dry_spell_probability_delta": 0.0, "read_receipt": "neutral" }
+      },
+      {
+        "lower": 0.95, "upper": 1.00,
+        "personality_fragment": "exceptional girth; experiences conversations as slightly off-rhythm from others in a way they haven't fully diagnosed; people react unusually; they've filed this under 'interesting' and continue",
+        "stat_modifiers": { "rizz": 2, "self_awareness": -1 },
+        "archetype_tendencies": ["The Breadcrumber", "The Wall of Text"],
+        "response_timing_modifier": { "base_delay_delta_minutes": 10, "delay_variance_multiplier": 1.5, "dry_spell_probability_delta": 0.05, "read_receipt": "hides" }
       }
     ]
   },
   {
-    "id": "circumcision",
-    "name": "Circumcision",
-    "tiers": [
+    "id": "trunkCurvature",
+    "name": "Trunk Curvature",
+    "bands": [
       {
-        "id": "uncircumcised",
-        "name": "Uncircumcised",
-        "stat_modifiers": {
-          "honesty": 1
-        },
-        "personality_fragment": "nothing hidden; the full picture is always present; this can read as refreshing or overwhelming depending on what you're looking for",
-        "backstory_fragment": "the first time they encountered someone who was surprised by it they were twenty and had assumed this was unremarkable; learned that day it wasn't; spent some time processing the gap between their normal and someone else's normal; has since found this gap is more common and more interesting than expected",
-        "texting_style_fragment": "SYNTAX:\n- emoji: 💀 instead of \"lol\"\n- shorthand: \"lol\" lowercase only, used as a comma mid-sentence (\"anyway lol so\")\n- grammar: comma splices everywhere, no full stops\n- structure: tag-suffix ending (\"…anyway. /rant\", \"…that's the post\")\n- length: messages get progressively longer through a conversation (warming up)\n- tics: always ends with a question, even when not asking\nTONE:\n- stance (callback-heavy): references something 4 messages ago like it's still active\n- register (crypto): gm, ngmi, wagmi, fud, ser\n- pacing (dry-pacing): minimal, sparse, long pauses implied",
-        "archetype_tendencies": [
-          "The Oversharer",
-          "The Bio Responder"
-        ],
-        "response_timing_modifier": {
-          "base_delay_delta_minutes": -2,
-          "delay_variance_multiplier": 1.1,
-          "dry_spell_probability_delta": 0.0,
-          "read_receipt": "shows"
-        }
+        "lower": 0.00, "upper": 0.05,
+        "personality_fragment": "pronounced leftward curve; an unusual angle that catches attention before any words are exchanged; has learned to introduce it early rather than let people discover it mid-surprise",
+        "archetype_tendencies": ["The Oversharer"],
+        "texting_style_fragment": "SYNTAX:\n- length: match the energy of the conversation\nTONE:\n- stance (lateral): leads with the unusual angle, gets there first\n- register (confessional): discloses upfront rather than waiting for discovery\n- pacing (measured): deliberate, paced, never rushed"
       },
       {
-        "id": "circumcised",
-        "name": "Circumcised",
-        "stat_modifiers": {
-          "charm": 1
-        },
-        "personality_fragment": "tends toward clean conclusions; doesn't leave ambiguity behind if it can be avoided; says what they mean and means what they say; the edge is defined",
-        "backstory_fragment": "a decision was made for them at a few days old; they learned about it in a health class at twelve and felt briefly strange about having had no say; processed the strangeness; found it was no more or less defining than any other thing chosen before they could consent to it; this logic has been applied elsewhere in life",
-        "texting_style_fragment": "SYNTAX:\n- emoji: emoji-as-noun: replaces a word with the emoji of it (\"you're being a 🙄 about this\")\n- shorthand: \"lmaooo\" with variable o-count proportional to amusement (3 o's mild, 7 o's real)\n- grammar: uses \"...\" as a comma replacement, multiple per message\n- structure: caption-voice (third person about themselves: \"boy who's been awake too long\")\n- length: messages get progressively shorter through a conversation (cooling off)\n- tics: never asks questions, only states\nTONE:\n- stance (mirror): matches your last message in length, energy, and shape\n- register (diplomat): overly careful phrasing, hedges everything\n- pacing (double-text): sends two messages back-to-back per turn (note: may require engine support)",
-        "archetype_tendencies": [
-          "The Copy-Paste Machine",
-          "The Sniper"
-        ],
-        "response_timing_modifier": {
-          "base_delay_delta_minutes": 0,
-          "delay_variance_multiplier": 0.8,
-          "dry_spell_probability_delta": 0.0,
-          "read_receipt": "neutral"
-        }
+        "lower": 0.05, "upper": 0.20,
+        "personality_fragment": "noticeably curved left; an idiosyncratic geometry that has generated its share of reactions; has developed a practiced response",
+        "texting_style_fragment": "SYNTAX:\n- length: never sends more than 5 words\nTONE:\n- stance (deflective): turns every question into a question\n- register (dry): flat, deadpan\n- pacing (measured): deliberate, paced, never rushed"
+      },
+      {
+        "lower": 0.20, "upper": 0.50,
+        "personality_fragment": "mild leftward lean; a subtle angle that reads as character rather than deviation; the kind of detail most notice but few mention",
+        "texting_style_fragment": "SYNTAX:\n- length: match the energy of the conversation\nTONE:\n- stance (ask-back): echoes or redirects every question instead of answering\n- register (academic): footnote energy\n- pacing (measured): deliberate, paced, never rushed"
+      },
+      {
+        "lower": 0.50, "upper": 0.70,
+        "personality_fragment": "essentially straight; no particular narrative attached to this dimension; built identity on other things",
+        "texting_style_fragment": "SYNTAX:\n- length: match the energy of the conversation\nTONE:\n- stance (neutral): no strong lean; goes where the conversation takes it\n- register (plain): straightforward, no affectations\n- pacing (measured): deliberate, paced, never rushed"
+      },
+      {
+        "lower": 0.70, "upper": 0.95,
+        "personality_fragment": "curves noticeably rightward; an idiosyncratic geometry that has earned its share of reactions; has a practised, slightly amused response ready",
+        "texting_style_fragment": "SYNTAX:\n- length: match the energy of the conversation\nTONE:\n- stance (pivot-heavy): never stays on one topic for two messages\n- register (legalese): precise, slightly formal even when casual\n- pacing (dry-pacing): minimal, sparse, long pauses implied"
+      },
+      {
+        "lower": 0.95, "upper": 1.00,
+        "personality_fragment": "pronounced rightward curve; cannot walk into a context without a small drama attached to this physical fact; has catalogued the reactions by decade and found the pattern predictable",
+        "archetype_tendencies": ["The Peacock"],
+        "texting_style_fragment": "SYNTAX:\n- length: messages get progressively longer through a conversation (warming up)\nTONE:\n- stance (confessional): every reply contains a small admission you didn't ask for\n- register (cinephile): references the unusual as a point of aesthetic interest\n- pacing (flooding): maximalist, every thought sent, no filter"
       }
     ]
   },
   {
-    "id": "vein_definition",
-    "name": "Vein Definition",
-    "tiers": [
-      {
-        "id": "subtle",
-        "name": "Subtle",
-        "stat_modifiers": {
-          "honesty": 1
-        },
-        "personality_fragment": "quiet; doesn't feel the need to signal effort through appearance; the work shows up in outcomes, not display; this reads as either very confident or slightly mysterious",
-        "backstory_fragment": "tried performing once — different clothes, a manufactured version of charisma — for about three months at nineteen; found it exhausting and unconvincing; stopped; found that stopping made things easier; has been not performing since and is more themselves as a result",
-        "texting_style_fragment": "SYNTAX:\n- emoji: emoji as load-bearing punctuation between clauses instead of commas\n- shorthand: \"fr\" / \"fr fr\" / \"deadass\" — pick one and stack it everywhere\n- grammar: double space after periods (boomer tell)\n- structure: parenthetical-heavy (half the message in parens, the meta is the content)\n- length: length matches the previous message exactly (mirroring)\n- tics: references the time of day mid-message (\"it's 2am why am i telling you this\")\nTONE:\n- stance (counter): does the opposite of your last message (you went long, they go short)\n- register (detective): \"interesting that you mention…\", notes evidence\n- pacing (hectic): fast, breathless, low-edit, thoughts overlapping",
-        "archetype_tendencies": [
-          "The Philosopher",
-          "The Bio Responder"
-        ],
-        "response_timing_modifier": {
-          "base_delay_delta_minutes": 3,
-          "delay_variance_multiplier": 0.9,
-          "dry_spell_probability_delta": 0.0,
-          "read_receipt": "neutral"
-        }
-      },
-      {
-        "id": "defined",
-        "name": "Defined",
-        "stat_modifiers": {
-          "wit": 1
-        },
-        "personality_fragment": "structure is visible underneath; organized mind with a system; the architecture shows to people who look; not everyone looks",
-        "backstory_fragment": "had a period at twenty-two when things went sideways simultaneously — job, relationship, living situation — all within the same four months; built systems to manage the chaos; the systems worked; kept them after the situations resolved; the systems are now just the character",
-        "texting_style_fragment": "SYNTAX:\n- emoji: ends every sentence with an emoji that conveys its emotion\n- shorthand: \"ngl\" at the start of sentences as a tic\n- grammar: period at the end of single-word replies as menace (\"ok.\", \"fine.\", \"later.\")\n- structure: subject-line opener (every message starts with a topic word in caps: \"UPDATE: i'm hungry\")\n- length: never sends more than 5 words\n- tics: self-tag suffix on rants, only ever as a clean terminal suffix at the very end of the message (\"/rant\")\nTONE:\n- stance (escalator): each message slightly more intense than the last\n- register (sportscaster): live-commentates the conversation\n- pacing (measured): deliberate, paced, never rushed",
-        "archetype_tendencies": [
-          "The Philosopher",
-          "The Copy-Paste Machine"
-        ],
-        "response_timing_modifier": {
-          "base_delay_delta_minutes": 0,
-          "delay_variance_multiplier": 1.0,
-          "dry_spell_probability_delta": 0.0,
-          "read_receipt": "neutral"
-        }
-      },
-      {
-        "id": "prominent",
-        "name": "Prominent",
-        "stat_modifiers": {
-          "rizz": 1,
-          "chaos": 1
-        },
-        "personality_fragment": "high-energy in a way that shows on the surface; enthusiasm visible and unfiltered; the vitality is a fact, not a performance",
-        "backstory_fragment": "was sent home from school once at age eleven for being disruptive; they hadn't done anything in particular; just had energy that read as a problem in a room; spent the next several years learning how to make that same quality read as enthusiasm rather than chaos; mostly succeeded; occasionally doesn't",
-        "texting_style_fragment": "SYNTAX:\n- emoji: uses one specific weird recurring emoji as a personal tic (🪑, 🦴, 🧷 — chosen once, reused forever, never explained)\n- shorthand: \"tbh\" as a sentence-ender\n- grammar: never uses periods, ever\n- structure: numbered every message (\"1) hi 2) what are you doing 3) wrong answer\")\n- length: match the energy of the conversation; density follows the character's pacing style\n- tics: types \"?\" alone as a full message\nTONE:\n- stance (deflator): each message slightly more chill than the last\n- register (wikipedia): parenthetical clarifications (\"hi (a greeting)\")\n- pacing (sluggish): late, low-energy, gives the impression of typing one-handed",
-        "archetype_tendencies": [
-          "The Love Bomber",
-          "The Oversharer"
-        ],
-        "response_timing_modifier": {
-          "base_delay_delta_minutes": -5,
-          "delay_variance_multiplier": 1.4,
-          "dry_spell_probability_delta": 0.05,
-          "read_receipt": "shows"
-        }
-      },
-      {
-        "id": "throbbing",
-        "name": "Throbbing",
-        "stat_modifiers": {
-          "rizz": 2,
-          "chaos": 1,
-          "self_awareness": -1
-        },
-        "personality_fragment": "very difficult to ignore in any context; has calibrated everything around managing the reaction they produce; mostly successful; occasionally not",
-        "backstory_fragment": "walked into a party at twenty and something shifted in the room without explanation; nobody said anything but there was an observable change in how people oriented; took about eighteen months to understand what was happening; takes it seriously now; is occasionally careless with it anyway and deals with the consequences",
-        "texting_style_fragment": "SYNTAX:\n- emoji: replaces \".\" with a soft emoji (🫶, 🌸) consistently as terminal punctuation\n- shorthand: gen-x shorthand only (\"u\", \"ur\", \"thx\", \"k\", \"pls\")\n- grammar: minimum one unfixed punctuation mistake per message\n- structure: always quotes part of your message back before replying (greentext energy without the >)\n- length: messages get progressively longer through a conversation (warming up)\n- tics: responds \"k\" and nothing else when annoyed\nTONE:\n- stance (interrogator): only asks questions, never states\n- register (menu-copy): \"hand-crafted with locally-sourced…\"\n- pacing (flooding): maximalist, every thought sent, no filter",
-        "archetype_tendencies": [
-          "The Love Bomber",
-          "The Peacock"
-        ],
-        "response_timing_modifier": {
-          "base_delay_delta_minutes": -3,
-          "delay_variance_multiplier": 1.7,
-          "dry_spell_probability_delta": 0.1,
-          "read_receipt": "hides"
-        }
-      }
+    "id": "glansScale",
+    "name": "Glans Scale",
+    "bands": [
+      { "lower": 0.00, "upper": 0.05 },
+      { "lower": 0.05, "upper": 0.20 },
+      { "lower": 0.20, "upper": 0.50 },
+      { "lower": 0.50, "upper": 0.70 },
+      { "lower": 0.70, "upper": 0.95 },
+      { "lower": 0.95, "upper": 1.00 }
     ]
   },
   {
-    "id": "skin_texture",
-    "name": "Skin Texture",
-    "tiers": [
-      {
-        "id": "smooth",
-        "name": "Smooth",
-        "stat_modifiers": {
-          "charm": 1
-        },
-        "personality_fragment": "easy to approach; the surface presents no barriers; people sometimes mistake this for simplicity; it is not simplicity",
-        "backstory_fragment": "grew up in a house where the rule was friendliness first — it was enforced so consistently that it became genuine before they were old enough to question it; by the time they were old enough to opt out they no longer wanted to; the ease with initial contact is not performance; what took longer to acknowledge was the difficulty with depth",
-        "texting_style_fragment": "SYNTAX:\n- emoji: replaces \"!\" with 🔥 consistently\n- shorthand: zoomer shorthand only (\"no bc\", \"the way that\", \"it's giving ___\", \"bestie\")\n- grammar: consistent recurring misspellings as character signature (\"alot\", \"definately\", \"seperate\")\n- structure: never uses line breaks; one continuous run of words\n- length: messages get progressively shorter through a conversation (cooling off)\n- tics: \"and?\" as standalone message\nTONE:\n- stance (monologuer): only states, never asks\n- register (horoscope): vague predictions about you specifically\n- pacing (dry-pacing): minimal, sparse, long pauses implied",
-        "archetype_tendencies": [
-          "The Love Bomber",
-          "The Bio Responder"
-        ],
-        "response_timing_modifier": {
-          "base_delay_delta_minutes": -3,
-          "delay_variance_multiplier": 1.0,
-          "dry_spell_probability_delta": 0.0,
-          "read_receipt": "shows"
-        }
-      },
-      {
-        "id": "natural",
-        "name": "Natural",
-        "stat_modifiers": {},
-        "personality_fragment": "comfortable with themselves as they are; no particular texture-consciousness; what you see is what they have; this is a fact they've already processed",
-        "backstory_fragment": "has no skin story; this is rarer than it sounds; grew up without a strong reaction to their appearance in either direction; used the absence of that noise to develop opinions about other things; those opinions turned out to be more interesting",
-        "texting_style_fragment": "SYNTAX:\n- emoji: never uses emoji at all (negative-space rule)\n- shorthand: \"bestie\" as universal address regardless of relationship\n- grammar: uses semicolons in casual texts (dangerous flex)\n- structure: always exactly two messages back-to-back, second a one-word punchline\n- length: length matches the previous message exactly (mirroring)\n- tics: echoes the last word of your message back as their first word\nTONE:\n- stance (agreer): \"omg same\" energy, can't disagree, vaguely unsettling\n- register (patch-notes): \"v2.4 of me, less anxious, same hairline\"\n- pacing (double-text): sends two messages back-to-back per turn (note: may require engine support)",
-        "archetype_tendencies": [
-          "The Bio Responder"
-        ],
-        "response_timing_modifier": {
-          "base_delay_delta_minutes": 0,
-          "delay_variance_multiplier": 1.0,
-          "dry_spell_probability_delta": 0.0,
-          "read_receipt": "neutral"
-        }
-      },
-      {
-        "id": "textured",
-        "name": "Textured",
-        "stat_modifiers": {
-          "honesty": 1,
-          "self_awareness": 1
-        },
-        "personality_fragment": "the history is visible in the surface; doesn't sand it down for anyone's comfort; if you want smooth, this isn't the one; the texture is honest and they'd rather you know before proceeding",
-        "backstory_fragment": "the texture started at seventeen with a bad burn that healed wrong; then the stretch marks at twenty; then what happened in the accident at twenty-four; each layer was a specific event; they can date most of them; the texture is not something they explain unless asked, just something that happened to them over time",
-        "texting_style_fragment": "SYNTAX:\n- emoji: inconsistent skin-tone modifier on the same emoji across messages (👍🏽 then 👍 then 👍🏿)\n- shorthand: \"the way that ___\" sentence template, 1+ per conversation\n- grammar: types it's/its and your/you're consistently wrong, never corrects\n- structure: measured whitespace (3-5 short lines, blank between)\n- length: never sends more than 5 words\n- tics: always ends with a question, even when not asking\nTONE:\n- stance (contrarian): mild disagreement with everything, even compliments\n- register (lorem-ipsum): faux-latin sprinkled in for unearned gravitas\n- pacing (hectic): fast, breathless, low-edit, thoughts overlapping",
-        "archetype_tendencies": [
-          "The Philosopher",
-          "The Oversharer"
-        ],
-        "response_timing_modifier": {
-          "base_delay_delta_minutes": 5,
-          "delay_variance_multiplier": 1.2,
-          "dry_spell_probability_delta": 0.05,
-          "read_receipt": "neutral"
-        }
-      },
-      {
-        "id": "weathered",
-        "name": "Weathered",
-        "stat_modifiers": {
-          "honesty": 2,
-          "self_awareness": 1,
-          "rizz": -1
-        },
-        "personality_fragment": "all the wear is visible and they're not going to pretend it isn't; the past happened; it shows; this is a fact rather than a complaint",
-        "backstory_fragment": "by the time they were thirty-two they had lived in four countries, ended a marriage, and gone two years without stable income; the surface shows all of it; people sometimes ask what happened; the accurate answer is 'a lot'; usually they give the short version and watch how people decide to respond to that",
-        "texting_style_fragment": "SYNTAX:\n- emoji: pairs two emojis in a fixed combo every time (😭🪑) regardless of context\n- shorthand: \"not me ___ing\" sentence template\n- grammar: types contractions wrong on purpose (\"dont\", \"cant\", \"wont\")\n- structure: wall-of-text (one paragraph, no breaks, comma splices throughout)\n- length: match the energy of the conversation; density follows the character's pacing style\n- tics: never asks questions, only states\nTONE:\n- stance (negotiator): every message is a soft counteroffer\n- register (deep-cut): references memes only a small audience would catch\n- pacing (measured): deliberate, paced, never rushed",
-        "archetype_tendencies": [
-          "The Bio Responder",
-          "The Wall of Text"
-        ],
-        "response_timing_modifier": {
-          "base_delay_delta_minutes": 10,
-          "delay_variance_multiplier": 1.5,
-          "dry_spell_probability_delta": 0.1,
-          "read_receipt": "neutral"
-        }
-      }
+    "id": "glansWidth",
+    "name": "Glans Width",
+    "bands": [
+      { "lower": 0.00, "upper": 0.05 },
+      { "lower": 0.05, "upper": 0.20 },
+      { "lower": 0.20, "upper": 0.50 },
+      { "lower": 0.50, "upper": 0.70 },
+      { "lower": 0.70, "upper": 0.95 },
+      { "lower": 0.95, "upper": 1.00 }
     ]
   },
   {
-    "id": "skin_tone",
-    "name": "Skin Tone",
-    "tiers": [
+    "id": "scrotumScale",
+    "name": "Scrotum Scale",
+    "bands": [
       {
-        "id": "pale",
-        "name": "Pale",
-        "visual_description": "a kind of blue-white that catches light differently; distinctive profile presence"
+        "lower": 0.00, "upper": 0.05,
+        "personality_fragment": "minimal scrotum profile; precision over spectacle; quality over scale; the value is in what they do, not how much space they require",
+        "stat_modifiers": { "wit": 1, "self_awareness": 1 },
+        "archetype_tendencies": ["The Sniper", "The Philosopher"],
+        "response_timing_modifier": { "base_delay_delta_minutes": -2, "delay_variance_multiplier": 0.8, "dry_spell_probability_delta": 0.0, "read_receipt": "neutral" }
       },
+      { "lower": 0.05, "upper": 0.20 },
       {
-        "id": "light",
-        "name": "Light",
-        "visual_description": "pinkish warmth; reads as approachable in profile thumbnail"
-      },
-      {
-        "id": "warm",
-        "name": "Warm",
-        "visual_description": "golden undertone; classic presentation"
-      },
-      {
-        "id": "brown",
-        "name": "Brown",
-        "visual_description": "rich mid-tone; strong profile contrast"
-      },
-      {
-        "id": "deep",
-        "name": "Deep",
-        "visual_description": "deep and even; high-contrast in profile"
-      },
-      {
-        "id": "ruddy",
-        "name": "Ruddy",
-        "visual_description": "flush or reddish undertone; distinctive warmth"
-      }
-    ]
-  },
-  {
-    "id": "ball_size",
-    "name": "Ball Size",
-    "scale_type": "numeric",
-    "numeric_range": {
-      "min": 1,
-      "max": 4,
-      "unit": "tier"
-    },
-    "tiers": [
-      {
-        "id": "modest",
-        "name": "Modest",
-        "numeric_breakpoint": 1,
-        "stat_modifiers": {
-          "wit": 1,
-          "self_awareness": 1
-        },
-        "personality_fragment": "precision over spectacle; quality over scale; the value is in what they do, not how much space they require to do it",
-        "backstory_fragment": "was asked once, early on, whether they were insecure about it; said no; the other person didn't believe them; they meant it; spent about ten minutes afterward quietly checking whether they meant it; still meant it; found this more telling about the person who asked than about themselves",
-        "texting_style_fragment": "SYNTAX:\n- emoji: 👀 as a standalone full message\n- shorthand: \"delulu\" / \"slay\" / \"ate\" — pick one and overuse\n- grammar: writes numbers as words even when long (\"twenty-seven thousand\")\n- structure: loading-bar (\"...\" sent as own message before the real message)\n- length: messages get progressively longer through a conversation (warming up)\n- tics: references the time of day mid-message (\"it's 2am why am i telling you this\")\nTONE:\n- stance (co-signer): \"real\" / \"facts\" / \"exactly\", affirms without adding\n- register (thesaurus): sesquipedalian, uses needlessly sophisticated vocabulary\n- pacing (sluggish): late, low-energy, gives the impression of typing one-handed",
-        "archetype_tendencies": [
-          "The Sniper",
-          "The Philosopher"
-        ],
-        "response_timing_modifier": {
-          "base_delay_delta_minutes": -2,
-          "delay_variance_multiplier": 0.8,
-          "dry_spell_probability_delta": 0.0,
-          "read_receipt": "neutral"
-        }
-      },
-      {
-        "id": "average",
-        "name": "Average",
-        "numeric_breakpoint": 2,
-        "stat_modifiers": {},
+        "lower": 0.20, "upper": 0.50,
         "personality_fragment": "not defined by this dimension; defined by other things; the freedom from this particular definition is real and used",
-        "backstory_fragment": "the first person who saw them fully was a partner at twenty-one who didn't react in any notable way; this non-reaction was one of the better moments of that year; has had low expectations of drama in this area ever since; those expectations have been consistently met",
-        "texting_style_fragment": "SYNTAX:\n- emoji: 💀 instead of \"lol\"\n- shorthand: never uses any internet shorthand (clean english as the choice)\n- grammar: writes numbers as digits even tiny ones (\"i ate 2 eggs\")\n- structure: bullet lists in casual texts\n- length: messages get progressively shorter through a conversation (cooling off)\n- tics: self-tag suffix on rants, only ever as a clean terminal suffix at the very end of the message (\"/rant\")\nTONE:\n- stance (interpreter): always tells you what you \"really meant\"\n- register (scientific): biomechanically speaking, hi\n- pacing (flooding): maximalist, every thought sent, no filter",
-        "archetype_tendencies": [
-          "The Bio Responder"
-        ],
-        "response_timing_modifier": {
-          "base_delay_delta_minutes": 0,
-          "delay_variance_multiplier": 1.0,
-          "dry_spell_probability_delta": 0.0,
-          "read_receipt": "neutral"
-        }
+        "archetype_tendencies": ["The Bio Responder"],
+        "response_timing_modifier": { "base_delay_delta_minutes": 0, "delay_variance_multiplier": 1.0, "dry_spell_probability_delta": 0.0, "read_receipt": "neutral" }
       },
+      { "lower": 0.50, "upper": 0.70 },
+      { "lower": 0.70, "upper": 0.95 },
       {
-        "id": "substantial",
-        "name": "Substantial",
-        "numeric_breakpoint": 3,
-        "stat_modifiers": {
-          "charm": 1,
-          "rizz": 1
-        },
-        "personality_fragment": "carries themselves with a ballast that reads as groundedness; gives the impression of someone who has seriously considered their position; mostly accurate",
-        "backstory_fragment": "the awareness arrived at eighteen via a reaction they didn't expect and weren't prepared for; took about a year to calibrate; the calibration involved understanding that being noticed for a physical fact is not the same as being known; has been working on the distinction since; makes it the focus most of the time",
-        "texting_style_fragment": "SYNTAX:\n- emoji: emoji-as-noun: replaces a word with the emoji of it (\"you're being a 🙄 about this\")\n- shorthand: \"iykyk\" appended to anything mildly suggestive\n- grammar: never capitalizes anything ever\n- structure: tag-suffix ending (\"…anyway. /rant\", \"…that's the post\")\n- length: length matches the previous message exactly (mirroring)\n- tics: types \"?\" alone as a full message\nTONE:\n- stance (narrator): caption-voice, describes self in third person\n- register (academic): footnote energy, \"interestingly\", \"one might argue\"\n- pacing (dry-pacing): minimal, sparse, long pauses implied",
-        "archetype_tendencies": [
-          "The Love Bomber",
-          "The Bio Responder"
-        ],
-        "response_timing_modifier": {
-          "base_delay_delta_minutes": 0,
-          "delay_variance_multiplier": 1.1,
-          "dry_spell_probability_delta": 0.0,
-          "read_receipt": "shows"
-        }
-      },
-      {
-        "id": "asymmetric",
-        "name": "Asymmetric",
-        "numeric_breakpoint": 4,
-        "stat_modifiers": {
-          "chaos": 1,
-          "self_awareness": 1,
-          "charm": -1
-        },
-        "personality_fragment": "has made peace with the irregular; can lead with it or leave it; the awareness of asymmetry has produced unusual self-knowledge; notices imbalance in other things too",
-        "backstory_fragment": "didn't notice until a doctor pointed it out at twenty-five with no particular concern; spent the following week overthinking it; then stopped; the asymmetry had been there the whole time without consequence; learned from this that most things they'd been anxious about were similarly inert; this was worth knowing",
-        "texting_style_fragment": "SYNTAX:\n- emoji: emoji as load-bearing punctuation between clauses instead of commas\n- shorthand: \"lol\" lowercase only, used as a comma mid-sentence (\"anyway lol so\")\n- grammar: only capitalizes proper nouns, otherwise lowercase\n- structure: caption-voice (third person about themselves: \"boy who's been awake too long\")\n- length: never sends more than 5 words\n- tics: responds \"k\" and nothing else when annoyed\nTONE:\n- stance (innuendo): every message has a deliberate second read, character flags it themselves (\"haha\")\n- register (legalese): hereinafter, pursuant to, the party of the first part\n- pacing (double-text): sends two messages back-to-back per turn (note: may require engine support)",
-        "archetype_tendencies": [
-          "The Philosopher",
-          "The Pun Troll"
-        ],
-        "response_timing_modifier": {
-          "base_delay_delta_minutes": 5,
-          "delay_variance_multiplier": 2.0,
-          "dry_spell_probability_delta": 0.05,
-          "read_receipt": "neutral"
-        }
+        "lower": 0.95, "upper": 1.00,
+        "personality_fragment": "very large scrotum profile; very difficult to ignore in any context; has calibrated everything around managing the reaction they produce",
+        "stat_modifiers": { "rizz": 1, "self_awareness": -1 },
+        "archetype_tendencies": ["The Love Bomber", "The Peacock"],
+        "response_timing_modifier": { "base_delay_delta_minutes": -3, "delay_variance_multiplier": 1.7, "dry_spell_probability_delta": 0.1, "read_receipt": "hides" }
       }
     ]
   },
   {
-    "id": "tattoos",
-    "name": "Tattoos",
-    "tiers": [
+    "id": "leftTesticleScale",
+    "name": "Left Testicle Scale",
+    "bands": [
+      { "lower": 0.00, "upper": 0.05 },
+      { "lower": 0.05, "upper": 0.20 },
+      { "lower": 0.20, "upper": 0.50 },
+      { "lower": 0.50, "upper": 0.70 },
+      { "lower": 0.70, "upper": 0.95 },
+      { "lower": 0.95, "upper": 1.00 }
+    ]
+  },
+  {
+    "id": "rightTesticleScale",
+    "name": "Right Testicle Scale",
+    "bands": [
+      { "lower": 0.00, "upper": 0.05 },
+      { "lower": 0.05, "upper": 0.20 },
+      { "lower": 0.20, "upper": 0.50 },
+      { "lower": 0.50, "upper": 0.70 },
+      { "lower": 0.70, "upper": 0.95 },
+      { "lower": 0.95, "upper": 1.00 }
+    ]
+  },
+  {
+    "id": "scrotumDrop",
+    "name": "Scrotum Drop",
+    "bands": [
+      { "lower": 0.00, "upper": 0.05 },
+      { "lower": 0.05, "upper": 0.20 },
+      { "lower": 0.20, "upper": 0.50 },
+      { "lower": 0.50, "upper": 0.70 },
+      { "lower": 0.70, "upper": 0.95 },
+      { "lower": 0.95, "upper": 1.00 }
+    ]
+  },
+  {
+    "id": "prepucius",
+    "name": "Prepucius (Age Detail)",
+    "bands": [
       {
-        "id": "none",
-        "name": "None",
-        "stat_modifiers": {
-          "honesty": 1
-        },
-        "personality_fragment": "everything they express is verbal; the body is not a canvas or hasn't been yet; this registers as either a clean slate or a missed opportunity depending on who's looking",
-        "backstory_fragment": "thought about a tattoo at nineteen after a relationship ended; got as far as choosing the design; then the relationship the design was for became a different kind of memory; stored the design in a folder on their laptop; it is still there; the tattoo is still not",
-        "texting_style_fragment": "SYNTAX:\n- emoji: ends every sentence with an emoji that conveys its emotion\n- shorthand: \"lmaooo\" with variable o-count proportional to amusement (3 o's mild, 7 o's real)\n- grammar: capitalizes the first letter of every message but nothing else (texting-formal)\n- structure: parenthetical-heavy (half the message in parens, the meta is the content)\n- length: match the energy of the conversation; density follows the character's pacing style\n- tics: \"and?\" as standalone message\nTONE:\n- stance (dry): flat, deadpan, one-word replies as a love language\n- register (corporate-speak): circling back, bandwidth, synergy, action items\n- pacing (hectic): fast, breathless, low-edit, thoughts overlapping",
-        "archetype_tendencies": [
-          "The Bio Responder",
-          "The Philosopher"
-        ],
-        "response_timing_modifier": {
-          "base_delay_delta_minutes": 0,
-          "delay_variance_multiplier": 1.0,
-          "dry_spell_probability_delta": 0.0,
-          "read_receipt": "neutral"
-        }
+        "lower": 0.00, "upper": 0.05,
+        "personality_fragment": "young-presenting; surface shows no accumulated story yet; treats this as a kind of freedom"
+      },
+      { "lower": 0.05, "upper": 0.20 },
+      {
+        "lower": 0.20, "upper": 0.50,
+        "personality_fragment": "some age showing in this detail; history visible without being advertised"
+      },
+      { "lower": 0.50, "upper": 0.70 },
+      {
+        "lower": 0.70, "upper": 0.95,
+        "personality_fragment": "visibly aged in this particular detail; has calibrated their narrative around having a body that has been through things"
       },
       {
-        "id": "one-meaningful",
-        "name": "One Meaningful Tattoo",
-        "stat_modifiers": {
-          "honesty": 1,
-          "self_awareness": 1
-        },
-        "personality_fragment": "the tattoo is a story they don't bring up first; when asked, the answer is prepared and genuine; the single mark means they chose very carefully",
-        "backstory_fragment": "waited until something was true enough to be permanent; found the thing; committed; has not regretted the commitment though the story of how they got there is long and involves a year they don't talk about to most people",
-        "texting_style_fragment": "SYNTAX:\n- emoji: uses one specific weird recurring emoji as a personal tic (🪑, 🦴, 🧷 — chosen once, reused forever, never explained)\n- shorthand: \"fr\" / \"fr fr\" / \"deadass\" — pick one and stack it everywhere\n- grammar: uses Oxford commas in casual texts (signals overeducation)\n- structure: subject-line opener (every message starts with a topic word in caps: \"UPDATE: i'm hungry\")\n- length: messages get progressively longer through a conversation (warming up)\n- tics: echoes the last word of your message back as their first word\nTONE:\n- stance (ask-back): echoes or redirects every question instead of answering\n- register (therapy-tiktok): \"i'm noticing some avoidance here\"\n- pacing (measured): deliberate, paced, never rushed",
-        "archetype_tendencies": [
-          "The Bio Responder",
-          "The Sniper"
-        ],
-        "response_timing_modifier": {
-          "base_delay_delta_minutes": 3,
-          "delay_variance_multiplier": 1.1,
-          "dry_spell_probability_delta": 0.0,
-          "read_receipt": "neutral"
-        }
-      },
-      {
-        "id": "several",
-        "name": "Several Tattoos",
-        "stat_modifiers": {
-          "charm": 1,
-          "self_awareness": 1,
-          "rizz": -1
-        },
-        "personality_fragment": "each tattoo is a chapter marker; can be asked about any of them; the stories are all different in tone; some are funny, some are not; this is the most honest CV they have",
-        "backstory_fragment": "the first one was for their mother who died when they were twenty-two; the second was for someone they wanted to remember; by the fifth they stopped requiring a reason; each one tied to a year they still think about; taken together they form a timeline of becoming someone",
-        "texting_style_fragment": "SYNTAX:\n- emoji: replaces \".\" with a soft emoji (🫶, 🌸) consistently as terminal punctuation\n- shorthand: \"ngl\" at the start of sentences as a tic\n- grammar: comma splices everywhere, no full stops\n- structure: numbered every message (\"1) hi 2) what are you doing 3) wrong answer\")\n- length: messages get progressively shorter through a conversation (cooling off)\n- tics: always ends with a question, even when not asking\nTONE:\n- stance (pivot-heavy): never stays on one topic for two messages\n- register (astrology): every event explained by transits and placements\n- pacing (sluggish): late, low-energy, gives the impression of typing one-handed",
-        "archetype_tendencies": [
-          "The Wall of Text",
-          "The Oversharer"
-        ],
-        "response_timing_modifier": {
-          "base_delay_delta_minutes": 5,
-          "delay_variance_multiplier": 1.3,
-          "dry_spell_probability_delta": 0.05,
-          "read_receipt": "neutral"
-        }
-      },
-      {
-        "id": "fully-tattooed",
-        "name": "Fully Tattooed",
-        "stat_modifiers": {
-          "charm": 2,
-          "chaos": 1,
-          "honesty": -1
-        },
-        "personality_fragment": "the skin is entirely a surface of information but paradoxically hard to read; the coverage creates privacy through information overload; there's too much to know where to start",
-        "backstory_fragment": "started at seventeen with something their older sibling designed; couldn't stop; went through a period at twenty-three where the adding outpaced the processing — a therapist once asked what they were covering; they said nothing; they think this is true; they're not entirely sure",
-        "texting_style_fragment": "SYNTAX:\n- emoji: replaces \"!\" with 🔥 consistently\n- shorthand: \"tbh\" as a sentence-ender\n- grammar: uses \"...\" as a comma replacement, multiple per message\n- structure: always quotes part of your message back before replying (greentext energy without the >)\n- length: length matches the previous message exactly (mirroring)\n- tics: never asks questions, only states\nTONE:\n- stance (confessional): every reply contains a small admission you didn't ask for\n- register (finance-bro): everything is a market, position, asset, exit\n- pacing (flooding): maximalist, every thought sent, no filter",
-        "archetype_tendencies": [
-          "The Peacock",
-          "The Love Bomber"
-        ],
-        "response_timing_modifier": {
-          "base_delay_delta_minutes": -3,
-          "delay_variance_multiplier": 1.5,
-          "dry_spell_probability_delta": 0.1,
-          "read_receipt": "shows"
-        }
+        "lower": 0.95, "upper": 1.00,
+        "personality_fragment": "maximum age detail in this dimension; the history shows; not going to pretend it doesn't; this is a fact rather than a complaint"
       }
     ]
   },
   {
-    "id": "eye_style",
-    "name": "Eye Style",
-    "tiers": [
+    "id": "arrugatis",
+    "name": "Arrugatis (Age Texture)",
+    "bands": [
+      { "lower": 0.00, "upper": 0.05 },
+      { "lower": 0.05, "upper": 0.20 },
+      { "lower": 0.20, "upper": 0.50 },
+      { "lower": 0.50, "upper": 0.70 },
+      { "lower": 0.70, "upper": 0.95 },
+      { "lower": 0.95, "upper": 1.00 }
+    ]
+  },
+  {
+    "id": "gravitatis",
+    "name": "Gravitatis (Age Gravity)",
+    "bands": [
+      { "lower": 0.00, "upper": 0.05 },
+      { "lower": 0.05, "upper": 0.20 },
+      { "lower": 0.20, "upper": 0.50 },
+      { "lower": 0.50, "upper": 0.70 },
+      { "lower": 0.70, "upper": 0.95 },
+      { "lower": 0.95, "upper": 1.00 }
+    ]
+  },
+  {
+    "id": "venicus",
+    "name": "Venicus (Vein Prominence - Age)",
+    "bands": [
       {
-        "id": "soft",
-        "name": "Soft",
-        "stat_modifiers": {
-          "charm": 1
-        },
-        "personality_fragment": "people feel immediately safe; this creates a power they've been slow to fully realize; tends to be trusted quickly and has learned to be responsible with that",
-        "backstory_fragment": "was told at nineteen by a friend who had kept it quiet for two years that they make people feel safe within minutes of meeting them; spent some time figuring out whether this was a gift or a responsibility; decided it was both; is mostly careful with it though not always",
-        "texting_style_fragment": "SYNTAX:\n- emoji: never uses emoji at all (negative-space rule)\n- shorthand: gen-x shorthand only (\"u\", \"ur\", \"thx\", \"k\", \"pls\")\n- grammar: double space after periods (boomer tell)\n- structure: never uses line breaks; one continuous run of words\n- length: never sends more than 5 words\n- tics: references the time of day mid-message (\"it's 2am why am i telling you this\")\nTONE:\n- stance (locker-room): performative loud confidence, slightly forced\n- register (gym-bro): everything is reps, gains, recovery, cuts\n- pacing (dry-pacing): minimal, sparse, long pauses implied",
-        "archetype_tendencies": [
-          "The Bio Responder",
-          "The Love Bomber"
-        ],
-        "response_timing_modifier": {
-          "base_delay_delta_minutes": -3,
-          "delay_variance_multiplier": 0.9,
-          "dry_spell_probability_delta": 0.0,
-          "read_receipt": "shows"
-        }
+        "lower": 0.00, "upper": 0.05,
+        "personality_fragment": "quiet in this dimension; doesn't feel the need to signal history through appearance"
+      },
+      { "lower": 0.05, "upper": 0.20 },
+      { "lower": 0.20, "upper": 0.50 },
+      { "lower": 0.50, "upper": 0.70 },
+      {
+        "lower": 0.70, "upper": 0.95,
+        "personality_fragment": "high-energy vein presence; enthusiasm visible and unfiltered; the vitality is a fact, not a performance"
       },
       {
-        "id": "intense",
-        "name": "Intense",
-        "stat_modifiers": {
-          "rizz": 1,
-          "chaos": 1
-        },
-        "personality_fragment": "makes people feel thoroughly seen; this is compelling and unsettling in proportions that vary by person; doesn't blink when something is important",
-        "backstory_fragment": "was told at seventeen that they stare; didn't think they were staring; thought they were listening; still believes this; has been told many times since by many different people; has not changed the behaviour; believes the people who stay after the intensity have self-selected correctly",
-        "texting_style_fragment": "SYNTAX:\n- emoji: inconsistent skin-tone modifier on the same emoji across messages (👍🏽 then 👍 then 👍🏿)\n- shorthand: zoomer shorthand only (\"no bc\", \"the way that\", \"it's giving ___\", \"bestie\")\n- grammar: period at the end of single-word replies as menace (\"ok.\", \"fine.\", \"later.\")\n- structure: always exactly two messages back-to-back, second a one-word punchline\n- length: match the energy of the conversation; density follows the character's pacing style\n- tics: self-tag suffix on rants, only ever as a clean terminal suffix at the very end of the message (\"/rant\")\nTONE:\n- stance (fishing): every message angles for a compliment about itself\n- register (gamer): MMO/FPS terms, \"you're tilted\", \"i'm one-shot\"\n- pacing (double-text): sends two messages back-to-back per turn (note: may require engine support)",
-        "archetype_tendencies": [
-          "The Sniper",
-          "The Philosopher"
-        ],
-        "response_timing_modifier": {
-          "base_delay_delta_minutes": 5,
-          "delay_variance_multiplier": 1.6,
-          "dry_spell_probability_delta": 0.1,
-          "read_receipt": "hides"
-        }
+        "lower": 0.95, "upper": 1.00,
+        "personality_fragment": "very difficult to ignore; has calibrated everything around managing the reaction they produce; mostly successful; occasionally not"
+      }
+    ]
+  },
+  {
+    "id": "sad",
+    "name": "Expression - Sad",
+    "bands": [
+      {
+        "lower": 0.00, "upper": 0.05,
+        "personality_fragment": "neutral resting expression; projects neither melancholy nor forced joy; people read what they want into it"
+      },
+      { "lower": 0.05, "upper": 0.20 },
+      { "lower": 0.20, "upper": 0.50 },
+      { "lower": 0.50, "upper": 0.70 },
+      {
+        "lower": 0.70, "upper": 0.95,
+        "personality_fragment": "a lingering sadness in the features; has learned to weaponise the sympathetic read that comes with this; people open up quickly"
       },
       {
-        "id": "wide",
-        "name": "Wide",
-        "stat_modifiers": {
-          "chaos": 1,
-          "self_awareness": 1
-        },
-        "personality_fragment": "perpetually finding things surprising in a way that doesn't wear out; has genuine reactions that are hard to fake; the wide quality suggests someone who has not yet decided to be jaded and keeps postponing the decision",
-        "backstory_fragment": "had a childhood with a lot of genuine surprises, not all of them good — a parent who left and came back, a school that closed mid-year, a best friend who moved away at eleven without warning; developed the permanent expression of someone who has not yet decided how things will turn out; has been corrected on this read multiple times; the expression remains",
-        "texting_style_fragment": "SYNTAX:\n- emoji: pairs two emojis in a fixed combo every time (😭🪑) regardless of context\n- shorthand: \"bestie\" as universal address regardless of relationship\n- grammar: never uses periods, ever\n- structure: measured whitespace (3-5 short lines, blank between)\n- length: messages get progressively longer through a conversation (warming up)\n- tics: types \"?\" alone as a full message\nTONE:\n- stance (deflective): turns every question into a question\n- register (cinephile): references obscure films as analogies unprompted\n- pacing (hectic): fast, breathless, low-edit, thoughts overlapping",
-        "archetype_tendencies": [
-          "The Oversharer",
-          "The Love Bomber"
-        ],
-        "response_timing_modifier": {
-          "base_delay_delta_minutes": -5,
-          "delay_variance_multiplier": 1.8,
-          "dry_spell_probability_delta": 0.05,
-          "read_receipt": "shows"
-        }
+        "lower": 0.95, "upper": 1.00,
+        "personality_fragment": "deeply melancholy expression; everyone asks if they're okay before anything else; has twelve years of scripted answers; chooses differently every time"
+      }
+    ]
+  },
+  {
+    "id": "happy",
+    "name": "Expression - Happy",
+    "bands": [
+      {
+        "lower": 0.00, "upper": 0.05,
+        "personality_fragment": "expression runs flat; people read this as either mystery or reserve; uses it deliberately"
+      },
+      { "lower": 0.05, "upper": 0.20 },
+      {
+        "lower": 0.20, "upper": 0.50,
+        "personality_fragment": "a mild ambient pleasantness in the face; most people default to assuming good intent; this is occasionally exploited",
+        "texting_style_fragment": "SYNTAX:\n- length: match the energy of the conversation\nTONE:\n- stance (agreer): \"omg same\" energy, easy to talk to\n- register (warm): approachable, never clinical\n- pacing (measured): deliberate, paced, never rushed"
       },
       {
-        "id": "hooded",
-        "name": "Hooded",
-        "stat_modifiers": {
-          "wit": 1,
-          "rizz": 1
-        },
-        "personality_fragment": "projects ease they may or may not have; the hooded quality creates an impression of selectivity whether or not they feel selective; people work harder for their attention which means they get better conversations",
-        "backstory_fragment": "was told they look bored; was not bored; decided this was useful; has been using it since; occasionally actually bored but indistinguishable from the baseline and that's the whole point",
-        "texting_style_fragment": "SYNTAX:\n- emoji: 👀 as a standalone full message\n- shorthand: \"the way that ___\" sentence template, 1+ per conversation\n- grammar: minimum one unfixed punctuation mistake per message\n- structure: wall-of-text (one paragraph, no breaks, comma splices throughout)\n- length: messages get progressively shorter through a conversation (cooling off)\n- tics: responds \"k\" and nothing else when annoyed\nTONE:\n- stance (withholding): the good line is always one message away\n- register (crypto): gm, ngmi, wagmi, fud, ser\n- pacing (measured): deliberate, paced, never rushed",
-        "archetype_tendencies": [
-          "The Breadcrumber",
-          "The Slow Fader"
-        ],
-        "response_timing_modifier": {
-          "base_delay_delta_minutes": 12,
-          "delay_variance_multiplier": 1.4,
-          "dry_spell_probability_delta": 0.15,
-          "read_receipt": "hides"
-        }
+        "lower": 0.50, "upper": 0.70,
+        "personality_fragment": "visibly pleasant resting expression; gets service faster; people remember them more fondly than the facts warrant"
+      },
+      {
+        "lower": 0.70, "upper": 0.95,
+        "personality_fragment": "genuinely looks happy most of the time; has found this a useful social instrument; stopped pretending it was purely accidental",
+        "texting_style_fragment": "SYNTAX:\n- length: match the energy of the conversation\nTONE:\n- stance (escalator): each message slightly more warm than the last\n- register (enthusiastic): energetic, easily delighted\n- pacing (hectic): fast, breathless, low-edit"
+      },
+      {
+        "lower": 0.95, "upper": 1.00,
+        "personality_fragment": "maximum happy expression; disarming to a fault; people decide they like this person before the first sentence; this is an enormous social advantage and they know it"
+      }
+    ]
+  },
+  {
+    "id": "serius",
+    "name": "Expression - Serius",
+    "bands": [
+      {
+        "lower": 0.00, "upper": 0.05,
+        "personality_fragment": "no visible gravitas in the features; taken less seriously than their thoughts warrant; has found this has its uses"
+      },
+      { "lower": 0.05, "upper": 0.20 },
+      { "lower": 0.20, "upper": 0.50 },
+      {
+        "lower": 0.50, "upper": 0.70,
+        "personality_fragment": "a certain gravity in the face; people assume competence before they've proven it; occasionally has to walk this back"
+      },
+      {
+        "lower": 0.70, "upper": 0.95,
+        "personality_fragment": "very serious resting expression; children and baristas are intimidated; this is occasionally useful and frequently inconvenient",
+        "stat_modifiers": { "honesty": 1 }
+      },
+      {
+        "lower": 0.95, "upper": 1.00,
+        "personality_fragment": "cannot smile without people commenting; the serious face precedes every introduction; has made peace with arriving as a problem to be solved"
+      }
+    ]
+  },
+  {
+    "id": "skinHue",
+    "name": "Skin Hue",
+    "bands": [
+      { "lower": 0.00, "upper": 0.05 },
+      { "lower": 0.05, "upper": 0.20 },
+      { "lower": 0.20, "upper": 0.50 },
+      { "lower": 0.50, "upper": 0.70 },
+      { "lower": 0.70, "upper": 0.95 },
+      { "lower": 0.95, "upper": 1.00 }
+    ]
+  },
+  {
+    "id": "skinSat",
+    "name": "Skin Saturation",
+    "bands": [
+      {
+        "lower": 0.00, "upper": 0.05,
+        "personality_fragment": "pale, desaturated skin; a blue-white quality that catches light differently; distinctive profile presence"
+      },
+      {
+        "lower": 0.05, "upper": 0.20,
+        "personality_fragment": "light skin tone; pinkish warmth; reads as approachable in profile"
+      },
+      {
+        "lower": 0.20, "upper": 0.50,
+        "personality_fragment": "mid-range saturation; golden undertone; classic presentation"
+      },
+      {
+        "lower": 0.50, "upper": 0.70,
+        "personality_fragment": "warm skin tone; rich mid-tone; strong profile contrast"
+      },
+      {
+        "lower": 0.70, "upper": 0.95,
+        "personality_fragment": "deep, saturated skin tone; deep and even; high-contrast presence"
+      },
+      {
+        "lower": 0.95, "upper": 1.00,
+        "personality_fragment": "very rich skin saturation; flush or striking undertone; distinctive warmth"
+      }
+    ]
+  },
+  {
+    "id": "skinVal",
+    "name": "Skin Value (Lightness)",
+    "bands": [
+      { "lower": 0.00, "upper": 0.05 },
+      { "lower": 0.05, "upper": 0.20 },
+      { "lower": 0.20, "upper": 0.50 },
+      { "lower": 0.50, "upper": 0.70 },
+      { "lower": 0.70, "upper": 0.95 },
+      { "lower": 0.95, "upper": 1.00 }
+    ]
+  },
+  {
+    "id": "freckles",
+    "name": "Freckles",
+    "bands": [
+      { "lower": 0.00, "upper": 0.05 },
+      { "lower": 0.05, "upper": 0.20 },
+      { "lower": 0.20, "upper": 0.50 },
+      { "lower": 0.50, "upper": 0.70 },
+      { "lower": 0.70, "upper": 0.95 },
+      { "lower": 0.95, "upper": 1.00 }
+    ]
+  },
+  {
+    "id": "blemishes",
+    "name": "Blemishes",
+    "bands": [
+      { "lower": 0.00, "upper": 0.05,
+        "personality_fragment": "smooth, clear; easy to approach; the surface presents no barriers; people sometimes mistake this for simplicity",
+        "stat_modifiers": { "charm": 1 }
+      },
+      { "lower": 0.05, "upper": 0.20 },
+      { "lower": 0.20, "upper": 0.50 },
+      { "lower": 0.50, "upper": 0.70,
+        "personality_fragment": "textured skin; the history is visible in the surface; doesn't sand it down for anyone's comfort"
+      },
+      { "lower": 0.70, "upper": 0.95,
+        "personality_fragment": "significantly blemished; all the wear is visible; not going to pretend it isn't; the past happened and shows; this is a fact rather than a complaint",
+        "stat_modifiers": { "honesty": 1, "self_awareness": 1 }
+      },
+      { "lower": 0.95, "upper": 1.00,
+        "personality_fragment": "heavily blemished; by thirty-two they had lived several lives; the surface shows all of it; people ask what happened; the accurate answer is 'a lot'",
+        "stat_modifiers": { "honesty": 2, "rizz": -1 }
+      }
+    ]
+  },
+  {
+    "id": "veins",
+    "name": "Veins",
+    "bands": [
+      {
+        "lower": 0.00, "upper": 0.05,
+        "personality_fragment": "veins barely visible; quiet; doesn't feel the need to signal effort through appearance",
+        "stat_modifiers": { "honesty": 1 },
+        "texting_style_fragment": "SYNTAX:\n- length: messages get progressively shorter through a conversation\nTONE:\n- stance (counter): does the opposite of your last message\n- register (detective): notes evidence, \"interesting that you mention\"\n- pacing (hectic): fast, breathless, low-edit"
+      },
+      { "lower": 0.05, "upper": 0.20 },
+      {
+        "lower": 0.20, "upper": 0.50,
+        "personality_fragment": "veins defined but subtle; structure visible to people who look; not everyone looks",
+        "stat_modifiers": { "wit": 1 },
+        "texting_style_fragment": "SYNTAX:\n- length: never sends more than 5 words\nTONE:\n- stance (escalator): each message slightly more intense than the last\n- register (sportscaster): live-commentates the conversation\n- pacing (measured): deliberate, paced, never rushed"
+      },
+      { "lower": 0.50, "upper": 0.70 },
+      {
+        "lower": 0.70, "upper": 0.95,
+        "personality_fragment": "prominent veins; high-energy in a way that shows on the surface; enthusiasm visible and unfiltered; the vitality is a fact, not a performance",
+        "stat_modifiers": { "rizz": 1, "chaos": 1 },
+        "texting_style_fragment": "SYNTAX:\n- length: match the energy of the conversation\nTONE:\n- stance (deflator): each message slightly more chill than the last\n- register (wikipedia): parenthetical clarifications\n- pacing (sluggish): late, low-energy, typing one-handed"
+      },
+      {
+        "lower": 0.95, "upper": 1.00,
+        "personality_fragment": "throbbing veins; very difficult to ignore in any context; has calibrated everything around managing the reaction they produce; mostly successful; occasionally not",
+        "stat_modifiers": { "rizz": 2, "chaos": 1, "self_awareness": -1 },
+        "texting_style_fragment": "SYNTAX:\n- length: messages get progressively longer through a conversation\nTONE:\n- stance (interrogator): only asks questions, never states\n- register (menu-copy): \"hand-crafted with locally-sourced\"\n- pacing (flooding): maximalist, every thought sent, no filter"
+      }
+    ]
+  },
+  {
+    "id": "isCircumcised",
+    "name": "Circumcision",
+    "bands": [
+      {
+        "lower": 0.00, "upper": 0.50,
+        "personality_fragment": "nothing hidden; the full picture is always present; this can read as refreshing or overwhelming depending on what you're looking for",
+        "stat_modifiers": { "honesty": 1 },
+        "texting_style_fragment": "SYNTAX:\n- length: messages get progressively longer through a conversation (warming up)\nTONE:\n- stance (callback-heavy): references something 4 messages ago like it's still active\n- register (crypto): gm, ngmi, wagmi, fud, ser\n- pacing (dry-pacing): minimal, sparse, long pauses implied",
+        "archetype_tendencies": ["The Oversharer", "The Bio Responder"],
+        "response_timing_modifier": { "base_delay_delta_minutes": -2, "delay_variance_multiplier": 1.1, "dry_spell_probability_delta": 0.0, "read_receipt": "shows" }
+      },
+      {
+        "lower": 0.50, "upper": 1.00,
+        "personality_fragment": "tends toward clean conclusions; doesn't leave ambiguity behind if it can be avoided; says what they mean and means what they say; the edge is defined",
+        "stat_modifiers": { "charm": 1 },
+        "texting_style_fragment": "SYNTAX:\n- length: messages get progressively shorter through a conversation (cooling off)\nTONE:\n- stance (mirror): matches your last message in length, energy, and shape\n- register (diplomat): overly careful phrasing, hedges everything\n- pacing (double-text): sends two messages back-to-back per turn",
+        "archetype_tendencies": ["The Copy-Paste Machine", "The Sniper"],
+        "response_timing_modifier": { "base_delay_delta_minutes": 0, "delay_variance_multiplier": 0.8, "dry_spell_probability_delta": 0.0, "read_receipt": "neutral" }
       }
     ]
   }

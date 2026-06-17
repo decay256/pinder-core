@@ -36,14 +36,14 @@ namespace Pinder.RemoteAssets.Tests
         private static CharacterDefinition StubDef()
         {
             return new CharacterDefinition(
-                schemaVersion: 1,
+                schemaVersion: 2,
                 characterId: Guid.Parse(AssetId),
                 name: "Stub",
                 genderIdentity: "they/them",
                 bio: "stub",
                 level: 1,
                 items: Array.Empty<string>(),
-                anatomy: new Dictionary<string, string>(),
+                anatomy: new Dictionary<string, float>(),
                 allocation: new AllocationBlock(
                     new Dictionary<StatType, int>(),
                     0,

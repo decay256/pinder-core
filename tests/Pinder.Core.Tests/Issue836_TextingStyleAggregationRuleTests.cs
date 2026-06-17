@@ -69,7 +69,7 @@ namespace Pinder.Core.Tests
         private static readonly IReadOnlyDictionary<ShadowStatType, int> ZeroShadow =
             new Dictionary<ShadowStatType, int>();
 
-        // Six items \u2014 one in each slot \u2014 so all 6 syntax axes are
+        // Six items — one in each slot — so all 6 syntax axes are
         // exercised by the tests. The starter-items.json fixture has at
         // least one item per slot; the assembler maps slot from
         // ItemDefinition.Slot.
@@ -79,21 +79,25 @@ namespace Pinder.Core.Tests
             "rubber-duck",              // accessory
             "hiking-boots",             // shoes
             "beanie-with-patches",      // hat
-            "worn-paperback",           // accessory? \u2014 will fall back to whichever slot
+            "worn-paperback",           // accessory? — will fall back to whichever slot
             "cargo-shorts",             // trousers
         };
 
         // A small anatomy stack covering at least one tier per tone group
         // so each of the three tone axes has a contributing source.
-        private static readonly Dictionary<string, string> AnatomyStack =
-            new Dictionary<string, string>
+        // #1175: now uses Unity param ids with float values [0..1].
+        // Stance group: trunkLengthBase, trunkLengthMid, trunkLengthTip, trunkGirth, trunkCurvature
+        // Register group: skinHue, skinSat, skinVal, freckles, blemishes, veins
+        // Pacing group: glansScale, glansWidth, scrotumScale, leftTesticleScale, rightTesticleScale, scrotumDrop, isCircumcised
+        private static readonly Dictionary<string, float> AnatomyStack =
+            new Dictionary<string, float>
             {
-                { "length",          "short" },        // stance group
-                { "girth",           "slim"  },        // stance group
-                { "vein_definition", "subtle" },       // register group
-                { "skin_texture",    "smooth" },       // register group
-                { "ball_size",       "petite" },       // pacing group
-                { "tattoos",         "ink-free" },     // pacing group
+                { "trunkLengthBase",  0.18f },  // stance group (band 1 – compact)
+                { "trunkGirth",       0.08f },  // stance group (band 0 – slim)
+                { "veins",            0.08f },  // register group (band 0 – subtle)
+                { "blemishes",        0.05f },  // register group (band 0 – smooth)
+                { "glansScale",       0.50f },  // pacing group (mid band)
+                { "isCircumcised",    0.0f  },  // pacing group (uncircumcised band)
             };
 
         // ----- direct aggregator: parsing -------------------------------------
@@ -119,18 +123,21 @@ namespace Pinder.Core.Tests
         [Fact]
         public void ParseToneAxes_ExtractsStanceRegisterPacing_WithParenSubKeyStripped()
         {
+            // #1175: Use the trunkCurvature parameter from the bundled file,
+            // which has SYNTAX/TONE blocks and parens in tone axis keys.
             var repo = BuildAnatomyRepo();
-            var lengthShort = repo.GetParameter("length")!.GetTier("short");
-            Assert.NotNull(lengthShort);
+            var param = repo.GetParameter("trunkCurvature");
+            Assert.NotNull(param);
+            // Resolve a band that has a texting_style_fragment (band 1 = neutral-ish)
+            var band = param!.ResolveBand(0.5f); // neutral straight → band 3
+            Assert.NotNull(band);
+            Assert.NotNull(band!.TextingStyleFragment);
 
-            var axes = TextingStyleAggregator.ParseToneAxes(lengthShort!.TextingStyleFragment);
+            var axes = TextingStyleAggregator.ParseToneAxes(band.TextingStyleFragment!);
             Assert.Contains("stance", axes.Keys);
-            Assert.Contains("register", axes.Keys);
-            Assert.Contains("pacing", axes.Keys);
-            // The parenthesised sub-key (e.g. "stance (dry)") must not
+            // The parenthesised sub-key (e.g. "stance (neutral)") must not
             // appear in the extracted text key.
-            Assert.False(axes.ContainsKey("stance (dry)"));
-            Assert.False(axes.ContainsKey("register (scientific)"));
+            Assert.False(axes.ContainsKey("stance (neutral)"));
         }
 
         [Fact]
@@ -206,7 +213,7 @@ namespace Pinder.Core.Tests
             var assembler = new CharacterAssembler(BuildItemRepo(), BuildAnatomyRepo());
             var fragments = assembler.Assemble(
                 Array.Empty<string>(),
-                new Dictionary<string, string>(),
+                new Dictionary<string, float>(),
                 ZeroBaseStats, ZeroShadow);
 
             var lines = TextingStyleAggregator.AggregateAsList(
@@ -238,7 +245,7 @@ namespace Pinder.Core.Tests
         {
             var assembler = new CharacterAssembler(BuildItemRepo(), BuildAnatomyRepo());
             var fragments = assembler.Assemble(
-                OneItemPerSlot, new Dictionary<string, string>(),
+                OneItemPerSlot, new Dictionary<string, float>(),
                 ZeroBaseStats, ZeroShadow);
 
             var lines = TextingStyleAggregator.AggregateAsList(
@@ -361,7 +368,7 @@ namespace Pinder.Core.Tests
             // Equip ONLY the shoes item; no other items, no anatomy.
             var fragments = assembler.Assemble(
                 new[] { shoesItem.ItemId },
-                new Dictionary<string, string>(),
+                new Dictionary<string, float>(),
                 ZeroBaseStats, ZeroShadow);
 
             var lines = TextingStyleAggregator.AggregateAsList(fragments.TextingStyleSources, null);

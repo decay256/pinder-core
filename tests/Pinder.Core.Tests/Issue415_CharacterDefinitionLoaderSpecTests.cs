@@ -64,7 +64,7 @@ namespace Pinder.Core.Tests
             string anatomyBlock = "{}",
             string? buildPointsInner = null,
             string? shadowsInner = null,
-            string? schemaVersion = "1",
+            string? schemaVersion = "2",
             string? characterId = "550e8400-e29b-41d4-a716-446655440000")
         {
             buildPointsInner ??= @"""charm"": 1, ""rizz"": 1, ""honesty"": 1, ""chaos"": 1, ""wit"": 1, ""self_awareness"": 1";

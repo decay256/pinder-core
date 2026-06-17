@@ -9,7 +9,16 @@ namespace Pinder.Core.Characters
 {
     /// <summary>
     /// Assembles a <see cref="FragmentCollection"/> from a character's equipped items,
-    /// anatomy selections, base stats, and shadow stats.
+    /// anatomy scalar values, base stats, and shadow stats.
+    ///
+    /// As of issue #1175, anatomy is expressed as a
+    /// <c>IReadOnlyDictionary&lt;string,float&gt;</c> (parameter id → normalised
+    /// [0..1] value). For each parameter the assembler calls
+    /// <see cref="AnatomyParameterDefinition.ResolveBand"/> to find the matching
+    /// band and then applies that band's fragment suite exactly as the old tier
+    /// system did. The #836 texting-style param-id handle is preserved:
+    /// anatomy contributions are still keyed by parameter id in the
+    /// <see cref="TextingStyleFragmentSource.SlotOrParameter"/> field.
     /// </summary>
     public sealed class CharacterAssembler
     {
@@ -27,7 +36,10 @@ namespace Pinder.Core.Characters
         /// Missing item IDs and anatomy parameters are silently skipped.
         /// </summary>
         /// <param name="equippedItemIds">Item IDs of all equipped items.</param>
-        /// <param name="anatomySelections">Map of parameterId → tierId (e.g. "length" → "short").</param>
+        /// <param name="anatomyValues">
+        /// Map of parameterId → normalised float value [0..1]
+        /// (e.g. "trunkLengthBase" → 0.42).
+        /// </param>
         /// <param name="playerBaseStats">Player-authored base stat values.</param>
         /// <param name="shadowStats">Current shadow stat values.</param>
         /// <param name="characterLevel">
@@ -37,13 +49,13 @@ namespace Pinder.Core.Characters
         /// <param name="archetypesEnabled">Whether archetype selection/resolution is enabled.</param>
         public FragmentCollection Assemble(
             IEnumerable<string> equippedItemIds,
-            IReadOnlyDictionary<string, string> anatomySelections,
+            IReadOnlyDictionary<string, float> anatomyValues,
             IReadOnlyDictionary<StatType, int> playerBaseStats,
             IReadOnlyDictionary<ShadowStatType, int> shadowStats,
             int characterLevel = 0,
             bool archetypesEnabled = false)
         {
-            // --- 1. Resolve items and anatomy tiers --------------------------------
+            // --- 1. Resolve items and anatomy bands --------------------------------
 
             var resolvedItems = new List<ItemDefinition>();
             foreach (var id in equippedItemIds)
@@ -52,13 +64,13 @@ namespace Pinder.Core.Characters
                 if (item != null) resolvedItems.Add(item);
             }
 
-            var resolvedTiers = new List<AnatomyTierDefinition>();
-            foreach (var kv in anatomySelections)
+            var resolvedBands = new List<(string ParamId, AnatomyBandDefinition Band)>();
+            foreach (var kv in anatomyValues)
             {
                 var param = _anatomy.GetParameter(kv.Key);
                 if (param == null) continue;
-                var tier = param.GetTier(kv.Value);
-                if (tier != null) resolvedTiers.Add(tier);
+                var band = param.ResolveBand(kv.Value);
+                if (band != null) resolvedBands.Add((kv.Key, band));
             }
 
             // --- 2. Sum stat modifiers on top of player base stats -----------------
@@ -74,8 +86,8 @@ namespace Pinder.Core.Characters
                 foreach (var kv in item.StatModifiers)
                     statSums[kv.Key] = statSums[kv.Key] + kv.Value;
 
-            foreach (var tier in resolvedTiers)
-                foreach (var kv in tier.StatModifiers)
+            foreach (var (_, band) in resolvedBands)
+                foreach (var kv in band.StatModifiers)
                     statSums[kv.Key] = statSums[kv.Key] + kv.Value;
 
             // --- 3. Build StatBlock ------------------------------------------------
@@ -111,8 +123,8 @@ namespace Pinder.Core.Characters
             foreach (var item in resolvedItems)
                 ApplyTiming(item.ResponseTimingModifier);
 
-            foreach (var tier in resolvedTiers)
-                ApplyTiming(tier.ResponseTimingModifier);
+            foreach (var (_, band) in resolvedBands)
+                ApplyTiming(band.ResponseTimingModifier);
 
             var timingProfile = new TimingProfile(
                 Math.Max(0, totalDelayDelta),
@@ -157,12 +169,17 @@ namespace Pinder.Core.Characters
                              "item", item.DisplayName, item.Slot);
 
             // #836: anatomy parameter id is the engine-side handle for
-            // the param (e.g. "length", "girth"); it's stable and
-            // grouped by the aggregator's tone-axis groups.
-            foreach (var tier in resolvedTiers)
-                AddFragments(tier.PersonalityFragment, tier.BackstoryFragment,
-                             tier.TextingStyleFragment, tier.ArchetypeTendencies,
-                             "anatomy", tier.TierName, tier.ParameterId);
+            // the param (e.g. "trunkLengthBase", "trunkGirth"); it's stable
+            // and grouped by the aggregator's tone-axis groups.
+            // #1175: band name is used as the source name for auditing.
+            foreach (var (paramId, band) in resolvedBands)
+            {
+                // Build a descriptive source name from the param + band bounds
+                string bandLabel = $"{paramId}[{band.Lower:F2},{band.Upper:F2})";
+                AddFragments(band.PersonalityFragment, band.BackstoryFragment,
+                             band.TextingStyleFragment, band.ArchetypeTendencies,
+                             "anatomy", bandLabel, paramId);
+            }
 
             // --- 6. Count and rank archetypes -------------------------------------
             // When characterLevel > 0, filter to archetypes whose level range

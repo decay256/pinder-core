@@ -136,7 +136,7 @@ namespace Pinder.Core.Tests
             var assembler = new CharacterAssembler(items, new NullAnatomyRepo());
             var result = assembler.Assemble(
                 new[] { "a", "b" },
-                new Dictionary<string, string>(),
+                new Dictionary<string, float>(),
                 ZeroStats, ZeroShadow,
                 characterLevel: 1);
 
@@ -155,7 +155,7 @@ namespace Pinder.Core.Tests
             var assembler = new CharacterAssembler(items, new NullAnatomyRepo());
             var result = assembler.Assemble(
                 new[] { "a", "b" },
-                new Dictionary<string, string>(),
+                new Dictionary<string, float>(),
                 ZeroStats, ZeroShadow,
                 characterLevel: 7);
 
@@ -177,7 +177,7 @@ namespace Pinder.Core.Tests
             var assembler = new CharacterAssembler(items, new NullAnatomyRepo());
             var result = assembler.Assemble(
                 new[] { "a", "b" },
-                new Dictionary<string, string>(),
+                new Dictionary<string, float>(),
                 ZeroStats, ZeroShadow,
                 characterLevel: 7);
 
@@ -196,7 +196,7 @@ namespace Pinder.Core.Tests
             var assembler = new CharacterAssembler(items, new NullAnatomyRepo());
             var result = assembler.Assemble(
                 new[] { "a", "b" },
-                new Dictionary<string, string>(),
+                new Dictionary<string, float>(),
                 ZeroStats, ZeroShadow);
 
             // No filtering → Sniper wins by count
@@ -215,7 +215,7 @@ namespace Pinder.Core.Tests
             var assembler = new CharacterAssembler(items, new NullAnatomyRepo());
             var result = assembler.Assemble(
                 new[] { "a", "b" },
-                new Dictionary<string, string>(),
+                new Dictionary<string, float>(),
                 ZeroStats, ZeroShadow,
                 characterLevel: 1);
 
@@ -238,7 +238,7 @@ namespace Pinder.Core.Tests
             var assembler = new CharacterAssembler(items, new NullAnatomyRepo());
             var result = assembler.Assemble(
                 new[] { "a", "b" },
-                new Dictionary<string, string>(),
+                new Dictionary<string, float>(),
                 ZeroStats, ZeroShadow,
                 characterLevel: 1);
 
@@ -258,7 +258,7 @@ namespace Pinder.Core.Tests
             var assembler = new CharacterAssembler(items, new NullAnatomyRepo());
             var result = assembler.Assemble(
                 new[] { "a", "b", "c" },
-                new Dictionary<string, string>(),
+                new Dictionary<string, float>(),
                 ZeroStats, ZeroShadow,
                 characterLevel: 5);
 

@@ -69,18 +69,26 @@ namespace Pinder.Core.Prompts
         // Anatomy parameter → tone axis groupings. The order of parameters
         // inside each group is load-bearing: it's the tie-breaker when
         // two distinct lines share the highest count. See the design doc
-        // for the rationale (size/shape → stance, surface → register,
-        // presentation → pacing).
+        // for the rationale.
+        //
+        // Updated for #1175: parameter ids now mirror Unity CharacterData
+        // field names. Old ids (length, girth, etc.) are replaced with the
+        // Unity scalar ids. The 3 tone groups remain (stance, register, pacing)
+        // but now cover the new ~24 Unity params.
         // ------------------------------------------------------------------
 
         internal static readonly IReadOnlyList<string> StanceGroup =
-            new[] { "length", "girth", "circumcision" };
+            new[] { "trunkLengthBase", "trunkLengthMid", "trunkLengthTip",
+                    "trunkGirth", "trunkCurvature" };
 
         internal static readonly IReadOnlyList<string> RegisterGroup =
-            new[] { "vein_definition", "skin_texture", "skin_tone" };
+            new[] { "skinHue", "skinSat", "skinVal",
+                    "freckles", "blemishes", "veins" };
 
         internal static readonly IReadOnlyList<string> PacingGroup =
-            new[] { "ball_size", "tattoos", "eye_style" };
+            new[] { "glansScale", "glansWidth",
+                    "scrotumScale", "leftTesticleScale", "rightTesticleScale", "scrotumDrop",
+                    "isCircumcised" };
 
         // Canonical output order. Aggregate() emits axes in this order;
         // missing axes are dropped, not preserved as gaps.

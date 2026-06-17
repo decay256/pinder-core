@@ -46,10 +46,10 @@ namespace Pinder.Core.Tests
         private static readonly string[] AllStarterSlugs =
             { "brick", "gerald", "reuben", "sable", "velvet", "zyx" };
 
-        // Reusable v1 fixture string (a minimally-valid file). Tests mutate
+        // Reusable v2 fixture string (a minimally-valid file). Tests mutate
         // copies of this to provoke negative cases.
         private const string ValidV1Json = @"{
-            ""schema_version"": 1,
+            ""schema_version"": 2,
             ""character_id"": ""550e8400-e29b-41d4-a716-446655440000"",
             ""name"": ""TestChar"",
             ""gender_identity"": ""they/them"",
@@ -114,7 +114,7 @@ namespace Pinder.Core.Tests
 
                 var def = CharacterDefinitionLoader.ParseDefinition(json);
 
-                Assert.Equal(1, def.SchemaVersion);
+                Assert.Equal(2, def.SchemaVersion);
                 Assert.NotEqual(Guid.Empty, def.CharacterId);
                 Assert.False(string.IsNullOrWhiteSpace(def.Name));
                 Assert.False(string.IsNullOrWhiteSpace(def.GenderIdentity));
@@ -166,7 +166,7 @@ namespace Pinder.Core.Tests
             var itemRepo = LoadItemRepo();
             var anatomyRepo = LoadAnatomyRepo();
 
-            string json = ValidV1Json.Replace("\"schema_version\": 1,", "");
+            string json = ValidV1Json.Replace("\"schema_version\": 2,", "");
 
             var ex = Assert.Throws<FormatException>(() =>
                 CharacterDefinitionLoader.Parse(json, itemRepo, anatomyRepo));
@@ -179,12 +179,12 @@ namespace Pinder.Core.Tests
             var itemRepo = LoadItemRepo();
             var anatomyRepo = LoadAnatomyRepo();
 
-            string json = ValidV1Json.Replace("\"schema_version\": 1,", "\"schema_version\": 2,");
+            string json = ValidV1Json.Replace("\"schema_version\": 2,", "\"schema_version\": 99,");
 
             var ex = Assert.Throws<FormatException>(() =>
                 CharacterDefinitionLoader.Parse(json, itemRepo, anatomyRepo));
             Assert.Contains("schema_version", ex.Message);
-            Assert.Contains("2", ex.Message);
+            Assert.Contains("99", ex.Message);
         }
 
         [Fact]
@@ -193,7 +193,7 @@ namespace Pinder.Core.Tests
             var itemRepo = LoadItemRepo();
             var anatomyRepo = LoadAnatomyRepo();
 
-            string json = ValidV1Json.Replace("\"schema_version\": 1,", "\"schema_version\": \"v1\",");
+            string json = ValidV1Json.Replace("\"schema_version\": 2,", "\"schema_version\": \"v2\",");
 
             var ex = Assert.Throws<FormatException>(() =>
                 CharacterDefinitionLoader.Parse(json, itemRepo, anatomyRepo));
@@ -235,9 +235,9 @@ namespace Pinder.Core.Tests
             var itemRepo = LoadItemRepo();
             var anatomyRepo = LoadAnatomyRepo();
 
-            // Construct a v1 file with allocation.shadows omitted entirely.
+            // Construct a v2 file with allocation.shadows omitted entirely.
             string json = @"{
-                ""schema_version"": 1,
+                ""schema_version"": 2,
                 ""character_id"": ""550e8400-e29b-41d4-a716-446655440000"",
                 ""name"": ""TestChar"",
                 ""gender_identity"": ""they/them"",
@@ -366,7 +366,7 @@ namespace Pinder.Core.Tests
             var anatomyRepo = LoadAnatomyRepo();
 
             string json = @"{
-                ""schema_version"": 1,
+                ""schema_version"": 2,
                 ""character_id"": ""550e8400-e29b-41d4-a716-446655440000"",
                 ""name"": ""Bare"",
                 ""gender_identity"": ""they/them"",

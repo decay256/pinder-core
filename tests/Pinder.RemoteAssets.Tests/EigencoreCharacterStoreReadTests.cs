@@ -69,14 +69,14 @@ namespace Pinder.RemoteAssets.Tests
         private static CharacterDefinition StubParse(byte[] _)
         {
             return new CharacterDefinition(
-                schemaVersion: 1,
+                schemaVersion: 2,
                 characterId: Guid.Parse(AssetId),
                 name: "Stub",
                 genderIdentity: "they/them",
                 bio: "stub",
                 level: 1,
                 items: Array.Empty<string>(),
-                anatomy: new Dictionary<string, string>(),
+                anatomy: new Dictionary<string, float>(),
                 allocation: new AllocationBlock(
                     new Dictionary<StatType, int>(),
                     0,
@@ -121,14 +121,14 @@ namespace Pinder.RemoteAssets.Tests
             {
                 sawPayload = bytes;
                 return new CharacterDefinition(
-                    schemaVersion: 1,
+                    schemaVersion: 2,
                     characterId: Guid.Parse(AssetId),
                     name: "Happy",
                     genderIdentity: "they/them",
                     bio: "happy",
                     level: 3,
                     items: Array.Empty<string>(),
-                    anatomy: new Dictionary<string, string>(),
+                    anatomy: new Dictionary<string, float>(),
                     allocation: new AllocationBlock(
                         new Dictionary<StatType, int>(),
                         0,
