@@ -142,7 +142,6 @@ namespace Pinder.Core.Conversation
         private readonly IConsequenceCatalog? _consequenceCatalog;
         private readonly int _maxDialogueOptions;
         private readonly int _maxDeliveryWords;
-        private readonly bool _archetypesEnabled;
 
         internal GameSessionState State => _state;
 
@@ -235,7 +234,6 @@ namespace Pinder.Core.Conversation
             _consequenceCatalog = config.ConsequenceCatalog;
             _maxDialogueOptions = config.MaxDialogueOptions ?? 3;
             _maxDeliveryWords = config.MaxDeliveryWords ?? 80;
-            _archetypesEnabled = config.ArchetypesEnabled;
             _steeringEngine = new SteeringEngine(steeringRng);
             _horninessEngine = new HorninessEngine(steeringRng, _consequenceCatalog, _horninessDcBias);
             _shadowCheckEngine = new ShadowCheckEngine(steeringRng, _consequenceCatalog, _shadowDcBias);

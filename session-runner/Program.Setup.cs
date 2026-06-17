@@ -82,6 +82,25 @@ partial class Program
             Path.Combine(AppContext.BaseDirectory, "data", "prompts"),
             Console.Error);
 
+        // Load game-definition.yaml if present. Hoisted above character
+        // loading (#1179) so result.GameDef.ArchetypesEnabled is known before
+        // characters are assembled — the assembler gates archetype injection on
+        // this flag. The load depends only on AppContext.BaseDirectory +
+        // DataFileLocator and has no dependency on character data.
+        string? gameDefPath = DataFileLocator.FindDataFile(AppContext.BaseDirectory, Path.Combine("data", "game-definition.yaml"));
+        result.GameDef = null;
+        if (gameDefPath != null)
+        {
+            try
+            {
+                result.GameDef = GameDefinition.LoadFrom(File.ReadAllText(gameDefPath));
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"[WARN] Failed to load game-definition.yaml: {ex.Message}");
+            }
+        }
+
         if (result.IsResimulation)
         {
             result.PlaytestDir = SessionFileCounter.ResolvePlaytestDirectory(AppContext.BaseDirectory);
@@ -106,8 +125,9 @@ partial class Program
 
             try
             {
-                result.Sable = LoadCharacter(playerDefArg, playerArg, ref itemRepo, ref anatomyRepo);
-                result.Brick = LoadCharacter(dateeDefArg, dateeArg, ref itemRepo, ref anatomyRepo);
+                bool archetypesEnabled = result.GameDef?.ArchetypesEnabled ?? false;
+                result.Sable = LoadCharacter(playerDefArg, playerArg, ref itemRepo, ref anatomyRepo, archetypesEnabled);
+                result.Brick = LoadCharacter(dateeDefArg, dateeArg, ref itemRepo, ref anatomyRepo, archetypesEnabled);
             }
             catch (FileNotFoundException ex)
             {
@@ -178,21 +198,6 @@ partial class Program
         PrintSetupDetails(result);
 
         // ── LLM + session setup ───────────────────────────────────────────
-        // Load game-definition.yaml if present
-        string? gameDefPath = DataFileLocator.FindDataFile(AppContext.BaseDirectory, Path.Combine("data", "game-definition.yaml"));
-        result.GameDef = null;
-        if (gameDefPath != null)
-        {
-            try
-            {
-                result.GameDef = GameDefinition.LoadFrom(File.ReadAllText(gameDefPath));
-            }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"[WARN] Failed to load game-definition.yaml: {ex.Message}");
-            }
-        }
-
         // Resolve maxTurns: CLI arg overrides YAML, YAML overrides default (30)
         result.MaxTurns = maxTurnsArg > 0 ? maxTurnsArg : (result.GameDef?.MaxTurns ?? 30);
 
