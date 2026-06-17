@@ -6,13 +6,71 @@ namespace Pinder.Core.Characters
     /// <summary>
     /// Immutable definition of a wearable item. Carries all six fragment types
     /// that feed the character-assembly pipeline.
+    ///
+    /// As of issue #1176, items are keyed by their Unity-verbatim id (the <c>id</c>
+    /// JSON field). The old fictional <c>tier</c> field has been REMOVED and
+    /// replaced by <c>ItemType</c>, <c>Priority</c>, and <c>ConflictTags</c>.
+    ///
+    /// AUTHORITY SPLIT:
+    ///   Unity  = SSOT for item existence, ids, slot enum, and attachment transforms
+    ///            (transforms = graphics, NOT carried here).
+    ///   Core   = SSOT for gameplay meaning (stat mods, fragments, priority,
+    ///            conflict_tags, item_type).
+    ///
+    /// SLOT VOCABULARY:
+    ///   Accessories / Outfits use Unity's slot enum strings verbatim:
+    ///     Head | Face | Body | Waist | Special
+    ///   LookCatalog items use their logical slot:
+    ///     Hair | Arms
+    ///   TatooCatalog items use their logical slot:
+    ///     Tattoo | Sticker
+    ///   (Sticker and Tattoo share the same id pool; the item_type field
+    ///    distinguishes them — same id can be a tattoo when in a tattoo slot
+    ///    and a sticker when in a sticker slot at the Unity equip layer. Core
+    ///    only stores tattoo-type entries; the sticker semantic is a Unity-side
+    ///    equip-context distinction and does not require separate core records.)
+    ///
+    /// CONFLICT / PRIORITY:
+    ///   When two resolved items share a conflict_tag, the higher-priority
+    ///   item wins. Tie-break: earlier in equip order wins. The lower-priority
+    ///   conflicting item's fragment suite (personality, backstory, texting,
+    ///   archetypes) is suppressed. Stat modifiers always apply regardless.
+    ///
+    /// SCHEMA VERSION: 2 (item_id → id; tier removed; item_type/priority/
+    ///   conflict_tags added).
     /// </summary>
     public sealed class ItemDefinition
     {
+        /// <summary>Unity-verbatim item id (e.g. "head_tophat", "vest1", "classic2").</summary>
         public string ItemId       { get; }
-        public string DisplayName   { get; }
-        public string Slot          { get; }
-        public string Tier          { get; }
+
+        /// <summary>Human-readable display name.</summary>
+        public string DisplayName  { get; }
+
+        /// <summary>
+        /// Slot string. For accessories/outfits: Unity enum verbatim (Head/Face/Body/Waist/Special).
+        /// For LookCatalog: Hair or Arms. For TatooCatalog: Tattoo or Sticker.
+        /// </summary>
+        public string Slot         { get; }
+
+        /// <summary>
+        /// Item type: one of accessory | outfit | hair | arms | tattoo | sticker.
+        /// Sticker and tattoo share the same id pool; item_type disambiguates usage.
+        /// </summary>
+        public string ItemType     { get; }
+
+        /// <summary>
+        /// Priority for conflict resolution. Higher value wins.
+        /// Default 100. Tie-break: earlier equip order wins.
+        /// </summary>
+        public int Priority        { get; }
+
+        /// <summary>
+        /// Tags used for conflict resolution. If two equipped items share a
+        /// conflict_tag, the lower-priority item's fragments are suppressed.
+        /// Stat modifiers are never suppressed.
+        /// </summary>
+        public string[] ConflictTags { get; }
 
         /// <summary>Flat bonuses/penalties to base stats.</summary>
         public IReadOnlyDictionary<StatType, int> StatModifiers { get; }
@@ -27,7 +85,9 @@ namespace Pinder.Core.Characters
             string itemId,
             string displayName,
             string slot,
-            string tier,
+            string itemType,
+            int priority,
+            string[] conflictTags,
             IReadOnlyDictionary<StatType, int> statModifiers,
             string personalityFragment,
             string backstoryFragment,
@@ -38,12 +98,14 @@ namespace Pinder.Core.Characters
             ItemId                  = itemId;
             DisplayName             = displayName ?? itemId;
             Slot                    = slot;
-            Tier                    = tier;
+            ItemType                = itemType ?? "accessory";
+            Priority                = priority;
+            ConflictTags            = conflictTags ?? System.Array.Empty<string>();
             StatModifiers           = statModifiers;
             PersonalityFragment     = personalityFragment;
             BackstoryFragment       = backstoryFragment;
             TextingStyleFragment    = textingStyleFragment;
-            ArchetypeTendencies     = archetypeTendencies;
+            ArchetypeTendencies     = archetypeTendencies ?? System.Array.Empty<string>();
             ResponseTimingModifier  = responseTimingModifier;
         }
     }

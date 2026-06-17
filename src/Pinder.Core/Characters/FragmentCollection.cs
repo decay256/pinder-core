@@ -48,6 +48,13 @@ namespace Pinder.Core.Characters
         /// </summary>
         public ActiveArchetype ActiveArchetype { get; }
 
+        /// <summary>
+        /// Issue #1176: item IDs that were equipped but had no core definition.
+        /// These resolved to zero modifiers (no stat mods, no fragments).
+        /// Surfaced here for admin authoring — never causes a hard failure.
+        /// </summary>
+        public IReadOnlyList<string> UnknownItemIds { get; }
+
         public FragmentCollection(
             IReadOnlyList<string> personalityFragments,
             IReadOnlyList<string> backstoryFragments,
@@ -56,7 +63,8 @@ namespace Pinder.Core.Characters
             TimingProfile timing,
             StatBlock stats,
             ActiveArchetype activeArchetype = null,
-            IReadOnlyList<TextingStyleFragmentSource> textingStyleSources = null)
+            IReadOnlyList<TextingStyleFragmentSource> textingStyleSources = null,
+            IReadOnlyList<string> unknownItemIds = null)
         {
             PersonalityFragments  = personalityFragments;
             BackstoryFragments    = backstoryFragments;
@@ -66,6 +74,7 @@ namespace Pinder.Core.Characters
             Stats                 = stats;
             ActiveArchetype       = activeArchetype;
             TextingStyleSources   = textingStyleSources ?? new List<TextingStyleFragmentSource>();
+            UnknownItemIds        = unknownItemIds      ?? new List<string>();
         }
     }
 

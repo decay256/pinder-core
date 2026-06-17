@@ -6,12 +6,12 @@
   "bio": "Just a normal guy who loves the gym, good food, and real connections.",
   "level": 5,
   "items": [
-    "backwards-snapback",
-    "salmon-polo-collar-popped",
-    "chinos-too-tight",
-    "boat-shoes-no-socks",
-    "apple-watch",
-    "gym-membership-keychain"
+    "head_hat",
+    "vest5",
+    "special_shoe1",
+    "face_eyes1",
+    "head_crown",
+    "classic10"
   ],
   "anatomy": {
     "trunkLengthBase": 0.75,
