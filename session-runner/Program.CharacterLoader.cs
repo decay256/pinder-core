@@ -14,13 +14,14 @@ partial class Program
         string? defPath,
         string? name,
         ref IItemRepository? itemRepo,
-        ref IAnatomyRepository? anatomyRepo)
+        ref IAnatomyRepository? anatomyRepo,
+        bool archetypesEnabled = false)
     {
         // Explicit --player-def / --datee-def takes priority.
         if (defPath != null)
         {
             EnsureReposLoaded(ref itemRepo, ref anatomyRepo);
-            return CharacterDefinitionLoader.Load(defPath, itemRepo!, anatomyRepo!);
+            return CharacterDefinitionLoader.Load(defPath, itemRepo!, anatomyRepo!, archetypesEnabled);
         }
 
         // --player / --datee name: resolve through DirectoryCharacterStore
@@ -49,7 +50,7 @@ partial class Program
             if (def == null)
                 throw new InvalidOperationException(
                     $"DirectoryCharacterStore at {charactersDir} did not surface character_id {id} from {charDefPath}");
-            return CharacterDefinitionLoader.Assemble(def, itemRepo!, anatomyRepo!);
+            return CharacterDefinitionLoader.Assemble(def, itemRepo!, anatomyRepo!, archetypesEnabled);
         }
 
         throw new InvalidOperationException("Neither definition path nor name provided");

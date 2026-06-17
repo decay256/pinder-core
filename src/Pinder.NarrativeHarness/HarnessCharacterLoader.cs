@@ -56,7 +56,7 @@ namespace Pinder.Tools.NarrativeHarness
                     nameof(slug));
         }
 
-        public static LoadedCharacter Load(string slug)
+        public static LoadedCharacter Load(string slug, bool archetypesEnabled = false)
         {
             // Guard first: reject structurally-unsafe slugs before constructing
             // any filesystem path. Valid-but-missing slugs still fall through to
@@ -97,7 +97,7 @@ namespace Pinder.Tools.NarrativeHarness
                 throw new InvalidOperationException(
                     $"DirectoryCharacterStore at {charactersDir} did not surface character_id {id}.");
 
-            CharacterProfile profile = CharacterDefinitionLoader.Assemble(def, itemRepo, anatomyRepo);
+            CharacterProfile profile = CharacterDefinitionLoader.Assemble(def, itemRepo, anatomyRepo, archetypesEnabled);
             return new LoadedCharacter(profile, def);
         }
 
