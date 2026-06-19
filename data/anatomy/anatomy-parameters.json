@@ -4,48 +4,106 @@
     "name": "Trunk Length Base",
     "bands": [
       {
-        "lower": 0.00, "upper": 0.05,
-        "personality_fragment": "undersized in this dimension; found early that personality fills space that other things don't; the economy of presence became a personality before it became a philosophy",
-        "backstory_fragment": "at fourteen got cropped out of a group photo without anyone meaning anything by it; decided that afternoon to become unforgettable in the ways a lens can't measure",
-        "archetype_tendencies": ["The Philosopher", "The Sniper"],
-        "response_timing_modifier": { "base_delay_delta_minutes": -5, "delay_variance_multiplier": 0.8, "dry_spell_probability_delta": 0.0, "read_receipt": "neutral" }
+        "lower": 0.0,
+        "upper": 0.05,
+        "personality_fragment": "apologize for the lack of base length before introducing your name, then frantically pivot to discussing your vast emotional intelligence before they can leave",
+        "backstory_fragment": "once got cropped out of a family portrait due to poor framing, and spent the next six years trying to find a camera that would validate your existence",
+        "texting_style_fragment": "TONE:\n- stance (timid): start every conversation by asking if you are being too loud",
+        "archetype_tendencies": [
+          "The Philosopher",
+          "The Sniper"
+        ],
+        "response_timing_modifier": {
+          "base_delay_delta_minutes": -5,
+          "delay_variance_multiplier": 0.8,
+          "dry_spell_probability_delta": 0.0,
+          "read_receipt": "neutral"
+        }
       },
       {
-        "lower": 0.05, "upper": 0.20,
-        "personality_fragment": "compact base but not self-conscious about it; built identity on other dimensions; arrives confident",
-        "backstory_fragment": "the changing-room comparisons of school never landed as a verdict; an older cousin had already taught them the loudest room rarely belongs to the largest body",
-        "archetype_tendencies": ["The Philosopher"],
-        "response_timing_modifier": { "base_delay_delta_minutes": -3, "delay_variance_multiplier": 0.9, "dry_spell_probability_delta": 0.0, "read_receipt": "neutral" }
+        "lower": 0.05,
+        "upper": 0.2,
+        "personality_fragment": "explain that your compact base is a design feature, not a limitation, then ask if they prefer efficiency over sheer volume",
+        "backstory_fragment": "once spent an entire summer trying to convince a lifeguard that your compact base was actually an optical illusion caused by the water",
+        "archetype_tendencies": [
+          "The Philosopher"
+        ],
+        "response_timing_modifier": {
+          "base_delay_delta_minutes": -3,
+          "delay_variance_multiplier": 0.9,
+          "dry_spell_probability_delta": 0.0,
+          "read_receipt": "neutral"
+        }
       },
       {
-        "lower": 0.20, "upper": 0.50,
-        "personality_fragment": "nothing remarkable in the lower geometry; free to define themselves by actual things rather than physical reactions; has used that freedom",
-        "backstory_fragment": "no single afternoon ever turned this dimension into a story; grew up in a household that measured people by other yardsticks and carried the indifference outward",
-        "archetype_tendencies": ["The Bio Responder"],
-        "response_timing_modifier": { "base_delay_delta_minutes": 0, "delay_variance_multiplier": 1.0, "dry_spell_probability_delta": 0.0, "read_receipt": "neutral" }
+        "lower": 0.2,
+        "upper": 0.5,
+        "personality_fragment": "treat your average base length as a mark of supreme sophistication, and challenge anyone who suggests a standard distribution is boring",
+        "backstory_fragment": "",
+        "archetype_tendencies": [
+          "The Bio Responder"
+        ],
+        "response_timing_modifier": {
+          "base_delay_delta_minutes": 0,
+          "delay_variance_multiplier": 1.0,
+          "dry_spell_probability_delta": 0.0,
+          "read_receipt": "neutral"
+        }
       },
       {
-        "lower": 0.50, "upper": 0.70,
-        "personality_fragment": "proportional in the base; expects to occupy space comfortably; takes this as a given and gets on with things",
-        "backstory_fragment": "a coach once called them well-built in passing and they pocketed it without fuss; the comfort settled in that young and never had to be argued for again",
-        "archetype_tendencies": ["The Bio Responder"],
-        "response_timing_modifier": { "base_delay_delta_minutes": 0, "delay_variance_multiplier": 1.0, "dry_spell_probability_delta": 0.0, "read_receipt": "neutral" }
+        "lower": 0.5,
+        "upper": 0.7,
+        "personality_fragment": "nod sagely whenever someone mentions proportions, and declare your base length to be the gold standard of civil engineering",
+        "backstory_fragment": "",
+        "archetype_tendencies": [
+          "The Bio Responder"
+        ],
+        "response_timing_modifier": {
+          "base_delay_delta_minutes": 0,
+          "delay_variance_multiplier": 1.0,
+          "dry_spell_probability_delta": 0.0,
+          "read_receipt": "neutral"
+        }
       },
       {
-        "lower": 0.70, "upper": 0.95,
-        "personality_fragment": "substantial base; has a quiet awareness of being well-provisioned; not a braggart — just knows; expects welcome and is mostly correct",
-        "backstory_fragment": "a locker-room remark at seventeen first named them well-provisioned; learned that same year to wear the fact lightly so it wouldn't curdle into something uglier",
-        "stat_modifiers": { "rizz": 1 },
-        "archetype_tendencies": ["The Breadcrumber", "The Peacock"],
-        "response_timing_modifier": { "base_delay_delta_minutes": 5, "delay_variance_multiplier": 1.2, "dry_spell_probability_delta": 0.02, "read_receipt": "neutral" }
+        "lower": 0.7,
+        "upper": 0.95,
+        "personality_fragment": "mention your solid base length with the breezy confidence of a landlord discussing real estate, and assume they are already impressed",
+        "backstory_fragment": "",
+        "stat_modifiers": {
+          "rizz": 1
+        },
+        "archetype_tendencies": [
+          "The Breadcrumber",
+          "The Peacock"
+        ],
+        "response_timing_modifier": {
+          "base_delay_delta_minutes": 5,
+          "delay_variance_multiplier": 1.2,
+          "dry_spell_probability_delta": 0.02,
+          "read_receipt": "neutral"
+        }
       },
       {
-        "lower": 0.95, "upper": 1.00,
-        "personality_fragment": "very long base; enters conversations at a slight offset due to sheer presence; cannot fully diagnose why some exchanges go strangely; has been told; it lands differently each time",
-        "backstory_fragment": "an early encounter went quiet and then nervous, and that was the night they understood the scale entered the room before they could; have been managing the entrance ever since",
-        "stat_modifiers": { "rizz": 2, "self_awareness": -1 },
-        "archetype_tendencies": ["The Love Bomber", "The Peacock"],
-        "response_timing_modifier": { "base_delay_delta_minutes": 10, "delay_variance_multiplier": 1.4, "dry_spell_probability_delta": 0.05, "read_receipt": "hides" }
+        "lower": 0.95,
+        "upper": 1.0,
+        "personality_fragment": "arrive in the chat like a physical block of limestone that everyone must walk around, and never apologize for the sheer, unyielding logistics of your presence",
+        "backstory_fragment": "realized that having a massive base means entering every room as an engineering puzzle rather than a conversational partner",
+        "stat_modifiers": {
+          "rizz": 2,
+          "self_awareness": -1
+        },
+        "texting_style_fragment": "TONE:\n- stance (unyielding): write declarative sentences without punctuation, and assume the date is already won",
+        "archetype_tendencies": [
+          "The Love Bomber",
+          "The Peacock"
+        ],
+        "response_timing_modifier": {
+          "base_delay_delta_minutes": 10,
+          "delay_variance_multiplier": 1.4,
+          "dry_spell_probability_delta": 0.05,
+          "read_receipt": "hides"
+        }
       }
     ]
   },
@@ -142,50 +200,113 @@
     "name": "Trunk Girth",
     "bands": [
       {
-        "lower": 0.00, "upper": 0.05,
-        "personality_fragment": "slim in girth; compensated through sharpness; makes up in precision what others have in mass; there's a specific vein of humour that only grows in this particular circumstance",
-        "backstory_fragment": "got the sharpness the hard way at school, trading bulk they didn't have for a tongue quick enough to end the joke before it reached them",
-        "stat_modifiers": { "wit": 1 },
-        "archetype_tendencies": ["The Sniper", "The Philosopher"],
-        "response_timing_modifier": { "base_delay_delta_minutes": -3, "delay_variance_multiplier": 0.9, "dry_spell_probability_delta": 0.0, "read_receipt": "neutral" }
+        "lower": 0.0,
+        "upper": 0.05,
+        "personality_fragment": "deliver your replies with the speed and precision of an acupuncture needle, and make sure every word is sharp enough to draw blood",
+        "backstory_fragment": "learned early to trade physical volume for a verbal edge sharp enough to end any debate before it can start",
+        "stat_modifiers": {
+          "wit": 1
+        },
+        "texting_style_fragment": "TONE:\n- stance (needling): use short, piercing sentences, and point out tiny logical flaws in their bio",
+        "archetype_tendencies": [
+          "The Sniper",
+          "The Philosopher"
+        ],
+        "response_timing_modifier": {
+          "base_delay_delta_minutes": -3,
+          "delay_variance_multiplier": 0.9,
+          "dry_spell_probability_delta": 0.0,
+          "read_receipt": "neutral"
+        }
       },
       {
-        "lower": 0.05, "upper": 0.20,
-        "personality_fragment": "narrower than average; has found other ways to command a room; the precision is its own advantage",
-        "backstory_fragment": "an early partner once reached for a comparison and thought better of it; the unsaid word taught them to command attention before the body ever entered the conversation",
-        "archetype_tendencies": ["The Philosopher"],
-        "response_timing_modifier": { "base_delay_delta_minutes": -2, "delay_variance_multiplier": 0.95, "dry_spell_probability_delta": 0.0, "read_receipt": "neutral" }
+        "lower": 0.05,
+        "upper": 0.2,
+        "personality_fragment": "explain that narrowness is simply aerodynamic, and pivot immediately to a complicated theory about conversational drag coefficients",
+        "backstory_fragment": "filed a formal complaint with a ruler manufacturer at age fifteen because they refused to list 'streamlined' as a valid unit of thickness",
+        "archetype_tendencies": [
+          "The Philosopher"
+        ],
+        "response_timing_modifier": {
+          "base_delay_delta_minutes": -2,
+          "delay_variance_multiplier": 0.95,
+          "dry_spell_probability_delta": 0.0,
+          "read_receipt": "neutral"
+        }
       },
       {
-        "lower": 0.20, "upper": 0.50,
-        "personality_fragment": "not particularly burdened or advantaged in girth; free to define themselves by other things; has taken advantage of this freedom to varying degrees",
-        "backstory_fragment": "this dimension never came up at any of the ages where it might have stung; spent that spared attention on getting good at things that lasted",
-        "archetype_tendencies": ["The Bio Responder"],
-        "response_timing_modifier": { "base_delay_delta_minutes": 0, "delay_variance_multiplier": 1.0, "dry_spell_probability_delta": 0.0, "read_receipt": "neutral" }
+        "lower": 0.2,
+        "upper": 0.5,
+        "personality_fragment": "describe your girth as 'ergonomic' rather than average, and decline to discuss any measurements that cannot be represented in a spreadsheet",
+        "backstory_fragment": "",
+        "archetype_tendencies": [
+          "The Bio Responder"
+        ],
+        "response_timing_modifier": {
+          "base_delay_delta_minutes": 0,
+          "delay_variance_multiplier": 1.0,
+          "dry_spell_probability_delta": 0.0,
+          "read_receipt": "neutral"
+        }
       },
       {
-        "lower": 0.50, "upper": 0.70,
-        "personality_fragment": "solid girth; occupies space with authority without raising their voice; presence arrives before they do",
-        "backstory_fragment": "noticed in their early twenties that people gave them the wider berth and the benefit of the doubt; decided to earn the deference rather than just collect it",
-        "stat_modifiers": { "rizz": 1 },
-        "archetype_tendencies": ["The Love Bomber", "The Peacock"],
-        "response_timing_modifier": { "base_delay_delta_minutes": 3, "delay_variance_multiplier": 1.1, "dry_spell_probability_delta": 0.0, "read_receipt": "neutral" }
+        "lower": 0.5,
+        "upper": 0.7,
+        "personality_fragment": "speak with a warm, rumbling confidence that makes people want to agree with you, and never raise your voice to make a point",
+        "backstory_fragment": "",
+        "stat_modifiers": {
+          "charm": 1
+        },
+        "archetype_tendencies": [
+          "The Love Bomber",
+          "The Peacock"
+        ],
+        "response_timing_modifier": {
+          "base_delay_delta_minutes": 3,
+          "delay_variance_multiplier": 1.1,
+          "dry_spell_probability_delta": 0.0,
+          "read_receipt": "neutral"
+        }
       },
       {
-        "lower": 0.70, "upper": 0.95,
-        "personality_fragment": "thick-set; occupies space with authority without raising voice; presence arrives before they do; has learned to be responsible with this",
-        "backstory_fragment": "a moment of carelessness in their twenties made someone flinch, and the flinch rearranged how they moved through every room after; the gentleness was a lesson, not a temperament",
-        "stat_modifiers": { "rizz": 1, "charm": 1 },
-        "archetype_tendencies": ["The Love Bomber", "The Peacock"],
-        "response_timing_modifier": { "base_delay_delta_minutes": 5, "delay_variance_multiplier": 1.1, "dry_spell_probability_delta": 0.0, "read_receipt": "neutral" }
+        "lower": 0.7,
+        "upper": 0.95,
+        "personality_fragment": "blanket the chat with a cozy, unhurried warmth that borders on smothering, and assume everyone is safe under your conversational umbrella",
+        "backstory_fragment": "",
+        "stat_modifiers": {
+          "charm": 1
+        },
+        "archetype_tendencies": [
+          "The Love Bomber",
+          "The Peacock"
+        ],
+        "response_timing_modifier": {
+          "base_delay_delta_minutes": 5,
+          "delay_variance_multiplier": 1.1,
+          "dry_spell_probability_delta": 0.0,
+          "read_receipt": "neutral"
+        }
       },
       {
-        "lower": 0.95, "upper": 1.00,
-        "personality_fragment": "exceptional girth; experiences conversations as slightly off-rhythm from others in a way they haven't fully diagnosed; people react unusually; they've filed this under 'interesting' and continue",
-        "backstory_fragment": "the first time it visibly unsettled someone they cared about, they were nineteen and learned that exceptional in this dimension means arriving as a logistics problem before a person",
-        "stat_modifiers": { "rizz": 2, "self_awareness": -1 },
-        "archetype_tendencies": ["The Breadcrumber", "The Wall of Text"],
-        "response_timing_modifier": { "base_delay_delta_minutes": 10, "delay_variance_multiplier": 1.5, "dry_spell_probability_delta": 0.05, "read_receipt": "hides" }
+        "lower": 0.95,
+        "upper": 1.0,
+        "personality_fragment": "treat your own girth as an undeniable meteorological event, and invite them to shelter from the storm of your massive presence",
+        "backstory_fragment": "once visibly startled a date just by entering the room, and have been managing the weather patterns of your scale ever since",
+        "stat_modifiers": {
+          "charm": 2,
+          "self_awareness": -1
+        },
+        "texting_style_fragment": "TONE:\n- stance (looming): make statements without asking questions, and behave as if you already own the chat",
+        "archetype_tendencies": [
+          "The Breadcrumber",
+          "The Wall of Text"
+        ],
+        "response_timing_modifier": {
+          "base_delay_delta_minutes": 10,
+          "delay_variance_multiplier": 1.5,
+          "dry_spell_probability_delta": 0.05,
+          "read_receipt": "hides"
+        }
       }
     ]
   },
@@ -194,42 +315,62 @@
     "name": "Trunk Curvature",
     "bands": [
       {
-        "lower": 0.00, "upper": 0.05,
-        "personality_fragment": "pronounced leftward curve; an unusual angle that catches attention before any words are exchanged; has learned to introduce it early rather than let people discover it mid-surprise",
-        "backstory_fragment": "got blindsided once by someone's mid-moment double-take and never again; that single startled face is why they now name the angle up front, on their own terms",
-        "archetype_tendencies": ["The Oversharer"],
-        "texting_style_fragment": "SYNTAX:\n- length: match the energy of the conversation\nTONE:\n- stance (lateral): leads with the unusual angle, gets there first\n- register (confessional): discloses upfront rather than waiting for discovery\n- pacing (measured): deliberate, paced, never rushed"
+        "lower": 0.0,
+        "upper": 0.05,
+        "personality_fragment": "explain your dramatic leftward curve as an aesthetic choice, and claim that straight lines are for people who lack imagination",
+        "backstory_fragment": "got blindsided once by a mid-moment double-take, and resolved that day to name the angle up front on your own terms",
+        "stat_modifiers": {
+          "rizz": 1
+        },
+        "texting_style_fragment": "TONE:\n- stance (oblique): approach every topic from a bizarre lateral angle, and never answer a question directly",
+        "archetype_tendencies": [
+          "The Oversharer"
+        ]
       },
       {
-        "lower": 0.05, "upper": 0.20,
-        "personality_fragment": "noticeably curved left; an idiosyncratic geometry that has generated its share of reactions; has developed a practiced response",
-        "backstory_fragment": "fielded enough raised eyebrows through their twenties to write the same wry line a hundred times; the practiced response is scar tissue from the first few that weren't",
-        "texting_style_fragment": "SYNTAX:\n- length: never sends more than 5 words\nTONE:\n- stance (deflective): turns every question into a question\n- register (dry): flat, deadpan\n- pacing (measured): deliberate, paced, never rushed"
+        "lower": 0.05,
+        "upper": 0.2,
+        "personality_fragment": "warn them that your worldview leans slightly to the left, and demand to know if they can handle a perspective with some real curvature",
+        "backstory_fragment": "",
+        "texting_style_fragment": "",
+        "archetype_tendencies": []
       },
       {
-        "lower": 0.20, "upper": 0.50,
-        "personality_fragment": "mild leftward lean; a subtle angle that reads as character rather than deviation; the kind of detail most notice but few mention",
-        "backstory_fragment": "a partner once described the slight lean as characterful rather than wrong; kept that adjective like a coin and stopped bracing for the other word",
-        "texting_style_fragment": "SYNTAX:\n- length: match the energy of the conversation\nTONE:\n- stance (ask-back): echoes or redirects every question instead of answering\n- register (academic): footnote energy\n- pacing (measured): deliberate, paced, never rushed"
+        "lower": 0.2,
+        "upper": 0.5,
+        "personality_fragment": "deflect any comments about your slight leftward lean by calling it a subtle artistic inflection, and refuse to straighten it out",
+        "backstory_fragment": "",
+        "texting_style_fragment": "",
+        "archetype_tendencies": []
       },
       {
-        "lower": 0.50, "upper": 0.70,
-        "personality_fragment": "essentially straight; no particular narrative attached to this dimension; built identity on other things",
-        "backstory_fragment": "this dimension never gave them an anecdote, awkward or otherwise; grew up free to be defined by the things they chose instead of the ones they were dealt",
-        "texting_style_fragment": "SYNTAX:\n- length: match the energy of the conversation\nTONE:\n- stance (neutral): no strong lean; goes where the conversation takes it\n- register (plain): straightforward, no affectations\n- pacing (measured): deliberate, paced, never rushed"
+        "lower": 0.5,
+        "upper": 0.7,
+        "personality_fragment": "present yourself as an essentially straight shooter who refuses to play games, and deliver your messages with flat, unadorned honesty",
+        "backstory_fragment": "",
+        "texting_style_fragment": "TONE:\n- stance (neutral): no strong lean; goes where the conversation takes it",
+        "archetype_tendencies": []
       },
       {
-        "lower": 0.70, "upper": 0.95,
-        "personality_fragment": "curves noticeably rightward; an idiosyncratic geometry that has earned its share of reactions; has a practised, slightly amused response ready",
-        "backstory_fragment": "early on a partner laughed in surprise and then, seeing their face, laughed warmer; learned that night to get ahead of the reaction with the joke already loaded",
-        "texting_style_fragment": "SYNTAX:\n- length: match the energy of the conversation\nTONE:\n- stance (pivot-heavy): never stays on one topic for two messages\n- register (legalese): precise, slightly formal even when casual\n- pacing (dry-pacing): minimal, sparse, long pauses implied"
+        "lower": 0.7,
+        "upper": 0.95,
+        "personality_fragment": "boast that your rightward curve is actually a navigational guide, and suggest that all the best routes have a little bend in them",
+        "backstory_fragment": "",
+        "texting_style_fragment": "",
+        "archetype_tendencies": []
       },
       {
-        "lower": 0.95, "upper": 1.00,
-        "personality_fragment": "pronounced rightward curve; cannot walk into a context without a small drama attached to this physical fact; has catalogued the reactions by decade and found the pattern predictable",
-        "backstory_fragment": "kept a private ledger of reactions since their teens and noticed the script never really changed; the cataloguing started as defence and curdled into a kind of weary anthropology",
-        "archetype_tendencies": ["The Peacock"],
-        "texting_style_fragment": "SYNTAX:\n- length: messages get progressively longer through a conversation (warming up)\nTONE:\n- stance (confessional): every reply contains a small admission you didn't ask for\n- register (cinephile): references the unusual as a point of aesthetic interest\n- pacing (flooding): maximalist, every thought sent, no filter"
+        "lower": 0.95,
+        "upper": 1.0,
+        "personality_fragment": "declare that your intense rightward curve has its own gravitational pull, and dare them to enter your idiosyncratic orbit",
+        "backstory_fragment": "kept a private ledger of surprised gasps since your teens, and concluded that standard physics is an absolute bore",
+        "stat_modifiers": {
+          "rizz": 1
+        },
+        "texting_style_fragment": "TONE:\n- stance (hooked): pull the conversation back to your favorite topics with absolute, unbending force",
+        "archetype_tendencies": [
+          "The Peacock"
+        ]
       }
     ]
   },
@@ -658,29 +799,38 @@
     "name": "Expression - Sad",
     "bands": [
       {
-        "lower": 0.00, "upper": 0.05,
+        "lower": 0.0,
+        "upper": 0.05,
         "personality_fragment": "neutral resting expression; projects neither melancholy nor forced joy; people read what they want into it",
         "backstory_fragment": "learned young that a blank face was a kind of privacy nobody could argue with; the neutrality was a door they got to decide who walked through"
       },
       {
-        "lower": 0.05, "upper": 0.20,
-        "backstory_fragment": "carried only the faintest downward set and nobody ever asked after it; grew up without the burden of strangers appointing themselves to their mood"
+        "lower": 0.05,
+        "upper": 0.2,
+        "backstory_fragment": "carried only the faintest downward set and nobody ever asked after it; grew up without the burden of strangers appointing themselves to their mood",
+        "personality_fragment": "sigh quietly at the start of your message, then immediately claim you are having the most exciting day of your life"
       },
       {
-        "lower": 0.20, "upper": 0.50,
-        "backstory_fragment": "a mild seriousness around the eyes drew the occasional are-you-alright they didn't need; learned early to wave it off before it became a conversation"
+        "lower": 0.2,
+        "upper": 0.5,
+        "backstory_fragment": "a mild seriousness around the eyes drew the occasional are-you-alright they didn't need; learned early to wave it off before it became a conversation",
+        "personality_fragment": "admit that you feel a tiny, inexplicable pang of melancholy, and ask if they have a silly joke that can cure your existential sigh"
       },
       {
-        "lower": 0.50, "upper": 0.70,
-        "backstory_fragment": "by their mid-twenties enough people had read sadness into the face that they stopped correcting it; let the assumption stand because it spared them the smaller talk"
+        "lower": 0.5,
+        "upper": 0.7,
+        "backstory_fragment": "by their mid-twenties enough people had read sadness into the face that they stopped correcting it; let the assumption stand because it spared them the smaller talk",
+        "personality_fragment": "gaze wistfully out of an imaginary window while texting, and describe the rain-streaked glass in unnecessary, dramatic detail"
       },
       {
-        "lower": 0.70, "upper": 0.95,
+        "lower": 0.7,
+        "upper": 0.95,
         "personality_fragment": "a lingering sadness in the features; has learned to weaponise the sympathetic read that comes with this; people open up quickly",
         "backstory_fragment": "noticed in their twenties that strangers confessed to the sad-looking face faster than to anyone else; the discovery felt like finding a key that fit too many locks"
       },
       {
-        "lower": 0.95, "upper": 1.00,
+        "lower": 0.95,
+        "upper": 1.0,
         "personality_fragment": "deeply melancholy expression; everyone asks if they're okay before anything else; has twelve years of scripted answers; chooses differently every time",
         "backstory_fragment": "the okay-question started in childhood and never stopped, so somewhere around twenty they began collecting answers the way other people collect grievances"
       }
@@ -691,33 +841,40 @@
     "name": "Expression - Happy",
     "bands": [
       {
-        "lower": 0.00, "upper": 0.05,
+        "lower": 0.0,
+        "upper": 0.05,
         "personality_fragment": "expression runs flat; people read this as either mystery or reserve; uses it deliberately",
         "backstory_fragment": "as a teenager got accused of sulking when they were perfectly content; gave up explaining and started letting the flatness do whatever work people assigned it"
       },
       {
-        "lower": 0.05, "upper": 0.20,
-        "backstory_fragment": "the small, rare smile made people work a little for it, and they noticed early that scarcity raised the value of every one they spent"
+        "lower": 0.05,
+        "upper": 0.2,
+        "backstory_fragment": "the small, rare smile made people work a little for it, and they noticed early that scarcity raised the value of every one they spent",
+        "personality_fragment": "give a small, reserved smile through the screen, and warn them that your happiness is a premium resource that must be earned"
       },
       {
-        "lower": 0.20, "upper": 0.50,
+        "lower": 0.2,
+        "upper": 0.5,
         "personality_fragment": "a mild ambient pleasantness in the face; most people default to assuming good intent; this is occasionally exploited",
         "backstory_fragment": "got waved through a few doors in their youth on nothing but a pleasant face and clocked exactly what was happening; the ambient goodwill became a tool they chose when to pick up",
         "texting_style_fragment": "SYNTAX:\n- length: match the energy of the conversation\nTONE:\n- stance (agreer): \"omg same\" energy, easy to talk to\n- register (warm): approachable, never clinical\n- pacing (measured): deliberate, paced, never rushed"
       },
       {
-        "lower": 0.50, "upper": 0.70,
+        "lower": 0.5,
+        "upper": 0.7,
         "personality_fragment": "visibly pleasant resting expression; gets service faster; people remember them more fondly than the facts warrant",
         "backstory_fragment": "realised in their twenties that people remembered them more kindly than events strictly justified; decided not to correct the record and quietly banked the goodwill"
       },
       {
-        "lower": 0.70, "upper": 0.95,
+        "lower": 0.7,
+        "upper": 0.95,
         "personality_fragment": "genuinely looks happy most of the time; has found this a useful social instrument; stopped pretending it was purely accidental",
         "backstory_fragment": "spent years insisting the easy happiness was just luck until a friend called the bluff; admitted then they'd been playing the instrument on purpose for a long while",
         "texting_style_fragment": "SYNTAX:\n- length: match the energy of the conversation\nTONE:\n- stance (escalator): each message slightly more warm than the last\n- register (enthusiastic): energetic, easily delighted\n- pacing (hectic): fast, breathless, low-edit"
       },
       {
-        "lower": 0.95, "upper": 1.00,
+        "lower": 0.95,
+        "upper": 1.0,
         "personality_fragment": "maximum happy expression; disarming to a fault; people decide they like this person before the first sentence; this is an enormous social advantage and they know it",
         "backstory_fragment": "won a room over before saying a word so many times in their youth that they began to wonder whether anyone had ever actually met them; the advantage came with that particular loneliness attached"
       }
@@ -728,31 +885,41 @@
     "name": "Expression - Serius",
     "bands": [
       {
-        "lower": 0.00, "upper": 0.05,
+        "lower": 0.0,
+        "upper": 0.05,
         "personality_fragment": "no visible gravitas in the features; taken less seriously than their thoughts warrant; has found this has its uses",
         "backstory_fragment": "got underestimated through school and learned to like the cover it gave; the boyish face became an ambush they could spring whenever the room relaxed"
       },
       {
-        "lower": 0.05, "upper": 0.20,
-        "backstory_fragment": "the light, easy face meant people let their guard down around them young; spent years quietly learning more in those unguarded moments than anyone meant to teach"
+        "lower": 0.05,
+        "upper": 0.2,
+        "backstory_fragment": "the light, easy face meant people let their guard down around them young; spent years quietly learning more in those unguarded moments than anyone meant to teach",
+        "personality_fragment": "maintain a light, easy conversational tone, and check if they are capable of holding a serious discussion about the quality of fast food"
       },
       {
-        "lower": 0.20, "upper": 0.50,
-        "backstory_fragment": "a middling seriousness that never told anyone in advance how to treat them; grew up having to earn each first impression on the merits, and got good at it"
+        "lower": 0.2,
+        "upper": 0.5,
+        "backstory_fragment": "a middling seriousness that never told anyone in advance how to treat them; grew up having to earn each first impression on the merits, and got good at it",
+        "personality_fragment": "interject with a perfectly dry, neutral statement about weather patterns, and ask if they appreciate a partner with real geographic knowledge"
       },
       {
-        "lower": 0.50, "upper": 0.70,
+        "lower": 0.5,
+        "upper": 0.7,
         "personality_fragment": "a certain gravity in the face; people assume competence before they've proven it; occasionally has to walk this back",
         "backstory_fragment": "handed responsibilities in their twenties they hadn't earned yet, purely on the strength of looking like they had; spent the next few years racing to deserve the face"
       },
       {
-        "lower": 0.70, "upper": 0.95,
+        "lower": 0.7,
+        "upper": 0.95,
         "personality_fragment": "very serious resting expression; children and baristas are intimidated; this is occasionally useful and frequently inconvenient",
         "backstory_fragment": "made a small child wary once just by looking down at them, and the moment stuck; have softened the voice ever since to apologise for a face they can't change",
-        "stat_modifiers": { "honesty": 1 }
+        "stat_modifiers": {
+          "honesty": 1
+        }
       },
       {
-        "lower": 0.95, "upper": 1.00,
+        "lower": 0.95,
+        "upper": 1.0,
         "personality_fragment": "cannot smile without people commenting; the serious face precedes every introduction; has made peace with arriving as a problem to be solved",
         "backstory_fragment": "heard cheer-up so relentlessly through their youth that the phrase stopped meaning anything; somewhere along the way they quit defending the face and let it walk in first"
       }
@@ -762,12 +929,54 @@
     "id": "skinHue",
     "name": "Skin Hue",
     "bands": [
-      { "lower": 0.00, "upper": 0.05 },
-      { "lower": 0.05, "upper": 0.20 },
-      { "lower": 0.20, "upper": 0.50 },
-      { "lower": 0.50, "upper": 0.70 },
-      { "lower": 0.70, "upper": 0.95 },
-      { "lower": 0.95, "upper": 1.00 }
+      {
+        "lower": 0.0,
+        "upper": 0.05,
+        "personality_fragment": "warn them that your skin tone shifts unpredictably when you are startled, and treat every minor notification as a sudden emergency",
+        "backstory_fragment": "",
+        "texting_style_fragment": "TONE:\n- register (erratic): switch between overly formal grammar and pure slang without warning",
+        "archetype_tendencies": []
+      },
+      {
+        "lower": 0.05,
+        "upper": 0.2,
+        "personality_fragment": "describe your complexion as a rare, delicate wildflower, and demand that they handle your messages with extreme environmental care",
+        "backstory_fragment": "",
+        "texting_style_fragment": "",
+        "archetype_tendencies": []
+      },
+      {
+        "lower": 0.2,
+        "upper": 0.5,
+        "personality_fragment": "claim that your perfectly neutral skin tone is the only true canvas for high fashion, and refuse to chat with anyone wearing uncoordinated accessories",
+        "backstory_fragment": "",
+        "texting_style_fragment": "",
+        "archetype_tendencies": []
+      },
+      {
+        "lower": 0.5,
+        "upper": 0.7,
+        "personality_fragment": "boast about your deep, sun-kissed undertones as if you personally invented solar radiation, and ask if they need SPF just to read your texts",
+        "backstory_fragment": "",
+        "texting_style_fragment": "",
+        "archetype_tendencies": []
+      },
+      {
+        "lower": 0.7,
+        "upper": 0.95,
+        "personality_fragment": "insist that your vibrant skin tone makes you a natural main character, and refuse to reply to any message that doesn't include a compliment about your glow",
+        "backstory_fragment": "",
+        "texting_style_fragment": "",
+        "archetype_tendencies": []
+      },
+      {
+        "lower": 0.95,
+        "upper": 1.0,
+        "personality_fragment": "howl that your intense skin tone is a biological warning sign to predators, and challenge them to prove they are brave enough to date you",
+        "backstory_fragment": "",
+        "texting_style_fragment": "TONE:\n- register (warning): end your messages with sudden, high-intensity punctuation, and demand immediate reassurance",
+        "archetype_tendencies": []
+      }
     ]
   },
   {
@@ -775,28 +984,58 @@
     "name": "Skin Saturation",
     "bands": [
       {
-        "lower": 0.00, "upper": 0.05,
-        "personality_fragment": "pale, desaturated skin; a blue-white quality that catches light differently; distinctive profile presence"
+        "lower": 0.0,
+        "upper": 0.05,
+        "personality_fragment": "speak in a soft, ghostly whisper as if you are fading from the physical plane, and ask if they can still see you through the screen",
+        "texting_style_fragment": "TONE:\n- register (faded): use lowercase and spaced-out punctuation, as if each letter costs you precious energy",
+        "backstory_fragment": "",
+        "archetype_tendencies": []
       },
       {
-        "lower": 0.05, "upper": 0.20,
-        "personality_fragment": "light skin tone; pinkish warmth; reads as approachable in profile"
+        "lower": 0.05,
+        "upper": 0.2,
+        "personality_fragment": "keep your replies mild and pastel, and apologize immediately if your presence feels too intense or demanding",
+        "backstory_fragment": "",
+        "texting_style_fragment": "",
+        "archetype_tendencies": []
       },
       {
-        "lower": 0.20, "upper": 0.50,
-        "personality_fragment": "mid-range saturation; golden undertone; classic presentation"
+        "lower": 0.2,
+        "upper": 0.5,
+        "personality_fragment": "describe your color as 'perfectly balanced beige' and defend it with the boring intensity of a paint catalogue",
+        "backstory_fragment": "",
+        "texting_style_fragment": "",
+        "archetype_tendencies": []
       },
       {
-        "lower": 0.50, "upper": 0.70,
-        "personality_fragment": "warm skin tone; rich mid-tone; strong profile contrast"
+        "lower": 0.5,
+        "upper": 0.7,
+        "personality_fragment": "gloat about your rich, warm color like a toasted marshmallow, and demand that they appreciate your oven-ready glow",
+        "backstory_fragment": "",
+        "texting_style_fragment": "",
+        "archetype_tendencies": []
       },
       {
-        "lower": 0.70, "upper": 0.95,
-        "personality_fragment": "deep, saturated skin tone; deep and even; high-contrast presence"
+        "lower": 0.7,
+        "upper": 0.95,
+        "personality_fragment": "scream your feelings into the chat in high-definition, and refuse to apologize for having a personality with the saturation turned all the way up",
+        "stat_modifiers": {
+          "chaos": 1
+        },
+        "backstory_fragment": "",
+        "texting_style_fragment": "",
+        "archetype_tendencies": []
       },
       {
-        "lower": 0.95, "upper": 1.00,
-        "personality_fragment": "very rich skin saturation; flush or striking undertone; distinctive warmth"
+        "lower": 0.95,
+        "upper": 1.0,
+        "personality_fragment": "type like you have eleven tabs of feelings open at once; escalate the emotional stakes of small things immediately",
+        "stat_modifiers": {
+          "chaos": 2
+        },
+        "texting_style_fragment": "TONE:\n- register (unhinged): punctuate with intensity, not grammar; CAPS for feelings, not for nouns",
+        "backstory_fragment": "",
+        "archetype_tendencies": []
       }
     ]
   },
@@ -804,46 +1043,154 @@
     "id": "skinVal",
     "name": "Skin Value (Lightness)",
     "bands": [
-      { "lower": 0.00, "upper": 0.05 },
-      { "lower": 0.05, "upper": 0.20 },
-      { "lower": 0.20, "upper": 0.50 },
-      { "lower": 0.50, "upper": 0.70 },
-      { "lower": 0.70, "upper": 0.95 },
-      { "lower": 0.95, "upper": 1.00 }
+      {
+        "lower": 0.0,
+        "upper": 0.05,
+        "personality_fragment": "insist that you exist in a state of absolute, gothic darkness, and refuse to discuss anything that doesn't involve heavy shadows or existential dread",
+        "backstory_fragment": "",
+        "texting_style_fragment": "TONE:\n- register (shadowy): wrap your statements in cryptic, moody phrasing, and never use bright emojis",
+        "archetype_tendencies": []
+      },
+      {
+        "lower": 0.05,
+        "upper": 0.2,
+        "personality_fragment": "declare that your deep, dark complexion is a rich velvet tapestry, and ask if they are worthy of touching such premium fabric",
+        "backstory_fragment": "",
+        "texting_style_fragment": "",
+        "archetype_tendencies": []
+      },
+      {
+        "lower": 0.2,
+        "upper": 0.5,
+        "personality_fragment": "state that your classic, mid-tone value is the gold standard of visibility, and decline to chat in low-light environments",
+        "backstory_fragment": "",
+        "texting_style_fragment": "",
+        "archetype_tendencies": []
+      },
+      {
+        "lower": 0.5,
+        "upper": 0.7,
+        "personality_fragment": "brag that your bright skin tone is a natural source of illumination, and offer to act as a nightlight for their dark, lonely soul",
+        "backstory_fragment": "",
+        "texting_style_fragment": "",
+        "archetype_tendencies": []
+      },
+      {
+        "lower": 0.7,
+        "upper": 0.95,
+        "personality_fragment": "boast that your high-value complexion is so radiant it blinds onlookers, and suggest they wear sunglasses while typing their replies",
+        "backstory_fragment": "",
+        "texting_style_fragment": "",
+        "archetype_tendencies": []
+      },
+      {
+        "lower": 0.95,
+        "upper": 1.0,
+        "personality_fragment": "screech that you are a beacon of blinding, luminescent light, and demand that they worship your solar intensity or leave the chat",
+        "backstory_fragment": "",
+        "texting_style_fragment": "TONE:\n- register (beacon): write with high-intensity exclamation points, and assume you are the center of the universe",
+        "archetype_tendencies": []
+      }
     ]
   },
   {
     "id": "freckles",
     "name": "Freckles",
     "bands": [
-      { "lower": 0.00, "upper": 0.05 },
-      { "lower": 0.05, "upper": 0.20 },
-      { "lower": 0.20, "upper": 0.50 },
-      { "lower": 0.50, "upper": 0.70 },
-      { "lower": 0.70, "upper": 0.95 },
-      { "lower": 0.95, "upper": 1.00 }
+      {
+        "lower": 0.0,
+        "upper": 0.05,
+        "personality_fragment": "boast that your completely smooth, freckle-free skin is a pristine marble monument, and refuse to let anyone clutter your thoughts with messy details",
+        "backstory_fragment": "",
+        "texting_style_fragment": "TONE:\n- register (pristine): use perfect, clinical spacing and no abbreviations, as if typing on an expensive typewriter",
+        "archetype_tendencies": []
+      },
+      {
+        "lower": 0.05,
+        "upper": 0.2,
+        "personality_fragment": "point out your single, lonely freckle as if it is a rare astrological event, and demand that they treat it with appropriate cosmic respect",
+        "backstory_fragment": "",
+        "texting_style_fragment": "",
+        "archetype_tendencies": []
+      },
+      {
+        "lower": 0.2,
+        "upper": 0.5,
+        "personality_fragment": "describe your light dusting of freckles as a tasteful decoration, and warn them not to confuse your skin with a connect-the-dots puzzle",
+        "backstory_fragment": "",
+        "texting_style_fragment": "",
+        "archetype_tendencies": []
+      },
+      {
+        "lower": 0.5,
+        "upper": 0.7,
+        "personality_fragment": "gloat that your face is a beautiful, starry constellation, and offer to read their astrological fortune based on your facial geometry",
+        "backstory_fragment": "",
+        "texting_style_fragment": "",
+        "archetype_tendencies": []
+      },
+      {
+        "lower": 0.7,
+        "upper": 0.95,
+        "personality_fragment": "brag that you have more freckles than the sky has stars, and challenge them to try counting them all without losing their mind",
+        "backstory_fragment": "",
+        "texting_style_fragment": "",
+        "archetype_tendencies": []
+      },
+      {
+        "lower": 0.95,
+        "upper": 1.0,
+        "personality_fragment": "rant that you are eighty percent freckles by volume and refuse to accept any dating-app matches who cannot appreciate a heavily speckled masterpiece",
+        "backstory_fragment": "",
+        "texting_style_fragment": "TONE:\n- register (speckled): scatter random, chaotic punctuation through your sentences to mimic your skin pattern",
+        "archetype_tendencies": []
+      }
     ]
   },
   {
     "id": "blemishes",
     "name": "Blemishes",
     "bands": [
-      { "lower": 0.00, "upper": 0.05,
+      {
+        "lower": 0.0,
+        "upper": 0.05,
         "personality_fragment": "smooth, clear; easy to approach; the surface presents no barriers; people sometimes mistake this for simplicity",
-        "stat_modifiers": { "charm": 1 }
+        "stat_modifiers": {
+          "charm": 1
+        }
       },
-      { "lower": 0.05, "upper": 0.20 },
-      { "lower": 0.20, "upper": 0.50 },
-      { "lower": 0.50, "upper": 0.70,
+      {
+        "lower": 0.05,
+        "upper": 0.2,
+        "personality_fragment": "disclose your one tiny blemish as if it is a major structural defect, and ask if they can look past your ruined perfection"
+      },
+      {
+        "lower": 0.2,
+        "upper": 0.5,
+        "personality_fragment": "describe your few blemishes as character marks that prove you have survived the harsh realities of the outside world, and demand some sympathy"
+      },
+      {
+        "lower": 0.5,
+        "upper": 0.7,
         "personality_fragment": "textured skin; the history is visible in the surface; doesn't sand it down for anyone's comfort"
       },
-      { "lower": 0.70, "upper": 0.95,
+      {
+        "lower": 0.7,
+        "upper": 0.95,
         "personality_fragment": "significantly blemished; all the wear is visible; not going to pretend it isn't; the past happened and shows; this is a fact rather than a complaint",
-        "stat_modifiers": { "honesty": 1, "self_awareness": 1 }
+        "stat_modifiers": {
+          "honesty": 1,
+          "self_awareness": 1
+        }
       },
-      { "lower": 0.95, "upper": 1.00,
+      {
+        "lower": 0.95,
+        "upper": 1.0,
         "personality_fragment": "heavily blemished; by thirty-two they had lived several lives; the surface shows all of it; people ask what happened; the accurate answer is 'a lot'",
-        "stat_modifiers": { "honesty": 2, "rizz": -1 }
+        "stat_modifiers": {
+          "honesty": 2,
+          "rizz": -1
+        }
       }
     ]
   },
@@ -852,29 +1199,52 @@
     "name": "Veins",
     "bands": [
       {
-        "lower": 0.00, "upper": 0.05,
+        "lower": 0.0,
+        "upper": 0.05,
         "personality_fragment": "veins barely visible; quiet; doesn't feel the need to signal effort through appearance",
-        "stat_modifiers": { "honesty": 1 },
+        "stat_modifiers": {
+          "honesty": 1
+        },
         "texting_style_fragment": "SYNTAX:\n- length: messages get progressively shorter through a conversation\nTONE:\n- stance (counter): does the opposite of your last message\n- register (detective): notes evidence, \"interesting that you mention\"\n- pacing (hectic): fast, breathless, low-edit"
       },
-      { "lower": 0.05, "upper": 0.20 },
       {
-        "lower": 0.20, "upper": 0.50,
+        "lower": 0.05,
+        "upper": 0.2,
+        "personality_fragment": "whisper that your veins are barely visible beneath the surface, and ask if they can hear the faint, polite typing of your heart"
+      },
+      {
+        "lower": 0.2,
+        "upper": 0.5,
         "personality_fragment": "veins defined but subtle; structure visible to people who look; not everyone looks",
-        "stat_modifiers": { "wit": 1 },
+        "stat_modifiers": {
+          "wit": 1
+        },
         "texting_style_fragment": "SYNTAX:\n- length: never sends more than 5 words\nTONE:\n- stance (escalator): each message slightly more intense than the last\n- register (sportscaster): live-commentates the conversation\n- pacing (measured): deliberate, paced, never rushed"
       },
-      { "lower": 0.50, "upper": 0.70 },
       {
-        "lower": 0.70, "upper": 0.95,
+        "lower": 0.5,
+        "upper": 0.7,
+        "personality_fragment": "boast about the elegant, branching networks of your veins, and claim they form a perfect map of a highly sophisticated emotional transit system"
+      },
+      {
+        "lower": 0.7,
+        "upper": 0.95,
         "personality_fragment": "prominent veins; high-energy in a way that shows on the surface; enthusiasm visible and unfiltered; the vitality is a fact, not a performance",
-        "stat_modifiers": { "rizz": 1, "chaos": 1 },
+        "stat_modifiers": {
+          "rizz": 1,
+          "chaos": 1
+        },
         "texting_style_fragment": "SYNTAX:\n- length: match the energy of the conversation\nTONE:\n- stance (deflator): each message slightly more chill than the last\n- register (wikipedia): parenthetical clarifications\n- pacing (sluggish): late, low-energy, typing one-handed"
       },
       {
-        "lower": 0.95, "upper": 1.00,
+        "lower": 0.95,
+        "upper": 1.0,
         "personality_fragment": "throbbing veins; very difficult to ignore in any context; has calibrated everything around managing the reaction they produce; mostly successful; occasionally not",
-        "stat_modifiers": { "rizz": 2, "chaos": 1, "self_awareness": -1 },
+        "stat_modifiers": {
+          "rizz": 2,
+          "chaos": 1,
+          "self_awareness": -1
+        },
         "texting_style_fragment": "SYNTAX:\n- length: messages get progressively longer through a conversation\nTONE:\n- stance (interrogator): only asks questions, never states\n- register (menu-copy): \"hand-crafted with locally-sourced\"\n- pacing (flooding): maximalist, every thought sent, no filter"
       }
     ]
