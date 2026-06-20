@@ -107,7 +107,7 @@ For `ResolveFromComponents`: build a `RollCheckResult` from the same intermediat
 
 ### Step 4 — `HorninessEngine.CheckAsync` routes through `RollEngine.ResolveCheck`
 
-- Replace its bespoke d20 roll with `RollEngine.ResolveCheck(RollCheckKind.Horniness, _steeringDice, Array.Empty<NamedModifier>(), dc: 20 - sessionHorniness)`.
+- Replace its bespoke d20 roll with `RollEngine.ResolveCheck(RollCheckKind.Horniness, _steeringDice, Array.Empty<NamedModifier>(), dc: RollEngine.ApplyDcBias(sessionHorniness, _horninessDcBias))`.
 - Delete `HorninessEngine.DetermineHorninessTier` (lines ~90+).
 - `HorninessCheckResult` gains `Check: RollCheckResult`. Existing fields stay populated from `check.*`.
 - All `HorninessEngineTests` must pass unchanged.

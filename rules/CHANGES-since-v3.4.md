@@ -65,7 +65,7 @@ This document catalogues every rule change made to the Pinder game engine since 
 Horniness is no longer a growing shadow stat. It was replaced by Despair as RIZZ's paired shadow.
 
 - **Session Horniness** = d10 + time-of-day modifier (from `GameClock.GetHorninessModifier()`). Commit `da32a5d`, `50d83c4`, `4f928e4`.
-- **Per-turn check:** d20 vs DC (20 − sessionHorniness). On miss, an overlay instruction is applied to the delivered message.
+- **Per-turn check:** d20 vs `RollEngine.ApplyDcBias(sessionHorniness, horniness_dc_bias)` (base DC = sessionHorniness; higher horniness is more dangerous). On miss, an overlay instruction is applied to the delivered message.
 - **Tiers:** Fumble / Misfire / TropeTrap / Catastrophe (from `horniness_overlay` in `delivery-instructions.yaml`). Commit `beda823`.
 - **Session header** shows 🌶️ Session Horniness roll.
 - **Per-turn check result** shown in turn log.

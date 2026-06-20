@@ -166,7 +166,8 @@ namespace Pinder.Core.Tests
             var rng = new Random(99);
             var engine = new ShadowCheckEngine(rng, null);
             var result = engine.Check(ShadowStatType.Dread, 1);
-            // dc=19, roll low → miss; consequence should be null without catalog
+            // shadowValue=1 → DC=1 under the negative-meter curve; if the roll misses,
+            // consequence should be null without catalog.
             if (result.CheckPerformed && result.IsMiss)
                 Assert.Null(result.Consequence);
         }

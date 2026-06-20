@@ -248,7 +248,7 @@
 ### Horniness
 - Session horniness roll (d10 + time-of-day modifier) ✓
 - Time-of-day bands (morning +3, afternoon +0, evening +2, overnight +5) ✓
-- Per-turn check (d20 vs DC 20 − sessionHorniness) ✓
+- Per-turn check (d20 vs `RollEngine.ApplyDcBias(sessionHorniness, horniness_dc_bias)`, base DC = sessionHorniness) ✓
 - Overlay tier determination (fumble/misfire/trope_trap/catastrophe) ✓
 - LLM overlay application ✓
 
