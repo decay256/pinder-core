@@ -65,7 +65,7 @@ namespace Pinder.Core.Conversation
             if (sessionHorniness <= 0 || playerShadows == null)
                 return (HorninessCheckResult.NotPerformed, null);
 
-            int horninessDC = RollEngine.ApplyDcBias(20 - sessionHorniness, _horninessDcBias);
+            int horninessDC = RollEngine.ApplyDcBias(sessionHorniness, _horninessDcBias);
             // #901: route through single entry point — dice consumption is identical (one Roll(20))
             var check = RollEngine.ResolveCheck(
                 RollCheckKind.Horniness,

@@ -90,14 +90,14 @@ namespace Pinder.Core.Tests
             var shadowEngine = new ShadowCheckEngine(rng, consequenceCatalog, shadowDcBias: 4);
             var horninessEngine = new HorninessEngine(rng, consequenceCatalog, horninessDcBias: 7);
             
-            // Check Shadow DC: shadow base DC is 20 - value. At shadowValue = 8, base DC is 12. Bias +4 -> DC = 8.
+            // Check Shadow DC: At shadowValue = 8, base DC is 8. Bias +4 -> DC = 4.
             var shadowResult = shadowEngine.Check(ShadowStatType.Madness, 8);
-            Assert.Equal(8, shadowResult.DC);
+            Assert.Equal(4, shadowResult.DC);
 
-            // Check Horniness DC: base DC is 20 - value. At value = 12, base DC is 8. Bias +7 -> DC = 1.
+            // Check Horniness DC: At value = 12, base DC is 12. Bias +7 -> DC = 5.
             var playerShadows = new SessionShadowTracker(TestHelpers.MakeStatBlock());
             var (horninessResult, _) = horninessEngine.PeekAsync(12, playerShadows, null);
-            Assert.Equal(1, horninessResult.DC);
+            Assert.Equal(5, horninessResult.DC);
 
             // Check Main Roll (RollResolutionStage / GameSession with globalDcBias)
             // If globalDcBias is 3, base DC for a defender with stat 2 is 16 + 2 = 18. Bias +3 -> effective DC = 15.
@@ -133,15 +133,15 @@ namespace Pinder.Core.Tests
             var rng = new Random(42);
             var playerShadows = new SessionShadowTracker(TestHelpers.MakeStatBlock());
 
-            // SHADOW: base DC = 20 - 5 = 15. Positive bias = 5 -> DC = 10 (easier).
+            // SHADOW: At shadowValue = 5, base DC is 5. Positive bias = 5 -> DC = 0 (easier).
             var shadowEngineWithBias = new ShadowCheckEngine(rng, shadowDcBias: 5);
             var shadowResultWithBias = shadowEngineWithBias.Check(ShadowStatType.Madness, 5);
-            Assert.Equal(10, shadowResultWithBias.DC);
+            Assert.Equal(0, shadowResultWithBias.DC);
 
-            // HORNINESS: base DC = 20 - 5 = 15. Positive bias = 5 -> DC = 10 (easier).
+            // HORNINESS: At value = 5, base DC is 5. Positive bias = 5 -> DC = 0 (easier).
             var horninessEngineWithBias = new HorninessEngine(rng, horninessDcBias: 5);
             var (horninessResultWithBias, _) = horninessEngineWithBias.PeekAsync(5, playerShadows, null);
-            Assert.Equal(10, horninessResultWithBias.DC);
+            Assert.Equal(0, horninessResultWithBias.DC);
 
             // MAIN ROLL: base DC = 18. Positive globalDcBias = 5 -> DC = 13 (easier).
             var player = MakeProfile("Player", 2, 0);

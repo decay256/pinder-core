@@ -82,7 +82,7 @@ namespace Pinder.Core.Tests
             var instructions = LoadDeliveryInstructions();
             var session = MakeSession(
                 startingInterest: 14,
-                sessionHorniness: 5,
+                sessionHorniness: 15,
                 steeringSeed: OverlayFiredSeed,
                 instructions: instructions,
                 mainRoll: 18); // Use 18 to ensure a success and positive interest delta
@@ -92,7 +92,7 @@ namespace Pinder.Core.Tests
 
             // Overlay should have fired
             Assert.True(result.HorninessCheck.OverlayApplied,
-                "Expected horniness overlay to fire with seed=1, sessionHorniness=5");
+                "Expected horniness overlay to fire with seed=1, sessionHorniness=15");
 
             // Penalty should be non-zero (since interestDelta should be > 0)
             Assert.NotEqual(0, result.HorninessInterestPenalty);
@@ -231,7 +231,7 @@ namespace Pinder.Core.Tests
             var instructions = LoadDeliveryInstructions();
             var session = MakeSession(
                 startingInterest: 14,
-                sessionHorniness: 5,
+                sessionHorniness: 15,
                 steeringSeed: OverlayNotFiredSeed,
                 instructions: instructions);
 
@@ -240,7 +240,7 @@ namespace Pinder.Core.Tests
 
             // Overlay should NOT have fired
             Assert.False(result.HorninessCheck.OverlayApplied,
-                "Expected horniness overlay NOT to fire with seed=0, sessionHorniness=5");
+                "Expected horniness overlay NOT to fire with seed=0, sessionHorniness=15");
 
             // No penalty
             Assert.Equal(0, result.HorninessInterestPenalty);
@@ -256,7 +256,7 @@ namespace Pinder.Core.Tests
             var instructions = LoadDeliveryInstructions();
             var session = MakeSession(
                 startingInterest: 14,
-                sessionHorniness: 5, // DC=15; OverlayFiredSeed=1 produces miss
+                sessionHorniness: 15, // DC=15; OverlayFiredSeed=1 produces miss
                 steeringSeed: OverlayFiredSeed,
                 instructions: instructions,
                 mainRoll: 18); // Ensure positive interest delta
@@ -287,7 +287,7 @@ namespace Pinder.Core.Tests
             var instructions = LoadDeliveryInstructions();
             var session = MakeSession(
                 startingInterest: 14,
-                sessionHorniness: 5,
+                sessionHorniness: 15,
                 steeringSeed: OverlayFiredSeed,
                 instructions: instructions,
                 mainRoll: 10); // Low roll ensures negative interest delta

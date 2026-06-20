@@ -61,16 +61,16 @@ namespace Pinder.Core.Tests
 
             // Horniness check should have been performed
             Assert.NotNull(result.HorninessCheck);
-            Assert.True(result.HorninessCheck.DC == 20 - 5); // DC = 20 - sessionHorniness
+            Assert.True(result.HorninessCheck.DC == 5); // DC = sessionHorniness
         }
 
         /// <summary>
-        /// DC = 20 - sessionHorniness.
+        /// DC = sessionHorniness.
         /// </summary>
         [Fact]
-        public async Task HorninessDC_Equals20MinusSessionHorniness()
+        public async Task HorninessDC_EqualsSessionHorniness()
         {
-            var dice = new FixedDice(8); // horniness = 8, DC = 12
+            var dice = new FixedDice(8); // horniness = 8, DC = 8
             var shadows = new SessionShadowTracker(TestHelpers.MakeStatBlock());
             var steeringRng = new Random(42);
             var config = new GameSessionConfig(
@@ -89,7 +89,7 @@ namespace Pinder.Core.Tests
             var turn = await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
-            Assert.Equal(12, result.HorninessCheck.DC);
+            Assert.Equal(8, result.HorninessCheck.DC);
         }
 
         /// <summary>

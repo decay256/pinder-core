@@ -35,10 +35,10 @@ namespace Pinder.LlmAdapters
         /// <summary>Global DC bias applied to all rolls. 0 = standard difficulty. Positive = easier.</summary>
         public int GlobalDcBias { get; }
 
-        /// <summary>DC bias applied to shadow checks. 0 = standard difficulty. Positive = easier.</summary>
+        /// <summary>DC bias applied to shadow checks. 0 = standard difficulty. Positive = easier/safer (lower trigger chance), negative = harder/more dangerous.</summary>
         public int ShadowDcBias { get; }
 
-        /// <summary>DC bias applied to horniness checks. 0 = standard difficulty. Positive = easier.</summary>
+        /// <summary>DC bias applied to horniness checks. 0 = standard difficulty. Positive = easier/safer (lower trigger chance), negative = harder/more dangerous.</summary>
         public int HorninessDcBias { get; }
 
         /// <summary>

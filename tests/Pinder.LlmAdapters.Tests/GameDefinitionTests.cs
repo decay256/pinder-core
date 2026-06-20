@@ -152,7 +152,7 @@ another: also ignored
             var content = System.IO.File.ReadAllText(yamlPath);
             var gd = GameDefinition.LoadFrom(content);
             Assert.Equal("Pinder", gd.Name);
-            Assert.Contains("RPG similar to D&D", gd.GameMasterPrompt);
+            Assert.Contains("dating RPG", gd.GameMasterPrompt);
         }
 
         [Fact]
