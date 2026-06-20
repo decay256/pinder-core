@@ -76,27 +76,6 @@ namespace Pinder.Core.Conversation
                 TurnProgressStage.SteeringCompleted,
                 steeringResult.SteeringSucceeded ? steeringResult.SteeringQuestion : null));
 
-            // #1125 — the picked option now carries the FULL sendable line
-            // (avatar GM emits final candidate lines; no second "delivery" LLM
-            // call expands a gist). Steering, when it fires, appends its
-            // question to that full line; this stays the pre-overlay "picked
-            // line".
-            string pickedLine = originalIntendedText;
-            if (steeringResult.SteeringSucceeded && steeringResult.SteeringQuestion != null)
-            {
-                pickedLine = originalIntendedText.Length == 0
-                    ? steeringResult.SteeringQuestion
-                    : originalIntendedText.TrimEnd() + " " + steeringResult.SteeringQuestion;
-
-                if (pickedLine != originalIntendedText
-                    && !string.IsNullOrEmpty(originalIntendedText)
-                    && originalIntendedText != "...")
-                {
-                    var steeringSpans = WordDiff.Compute(originalIntendedText, pickedLine);
-                    textDiffs.Add(new TextDiff("Steering", steeringSpans, originalIntendedText, pickedLine));
-                }
-            }
-
             string playerArchetypeDirectiveForDelivery = player.ActiveArchetype?.Directive;
             // #1125: the stat-specific failure instruction and trap/beatDcBy
             // inputs that previously fed the creative delivery PROMPT are gone —
@@ -116,7 +95,7 @@ namespace Pinder.Core.Conversation
             // and this commit overlay are ephemeral; only the committed line is
             // persisted (by TurnOrchestrator), preserving the clean-history rule.
             progress?.Report(new TurnProgressEvent(TurnProgressStage.DeliveryStarted));
-            string deliveredMessage = DeliveryOverlay.Apply(pickedLine, rollResult.Tier, rollResult.MissMargin);
+            string deliveredMessage = DeliveryOverlay.Apply(originalIntendedText, rollResult.Tier, rollResult.MissMargin);
             progress?.Report(new TurnProgressEvent(TurnProgressStage.DeliveryCompleted, deliveredMessage));
 
             // #902 / SANITIZATION-INVARIANTS-MUST-RUN-AFTER-EACH-STAGE: meta-prefix
@@ -125,17 +104,34 @@ namespace Pinder.Core.Conversation
             // before downstream overlays. Emits a TextDiff layer when it fires.
             deliveredMessage = TextSanitizer.Sanitize(deliveredMessage, MetaPrefixStripper.LayerName, textDiffs);
 
-            // Tier modifier diff: the deterministic degrade vs the picked line.
-            if (deliveredMessage != pickedLine
-                && !string.IsNullOrEmpty(pickedLine)
-                && pickedLine != "...")
+            // Tier modifier diff: the deterministic degrade vs the original pre-steering base.
+            if (deliveredMessage != originalIntendedText
+                && !string.IsNullOrEmpty(originalIntendedText)
+                && originalIntendedText != "...")
             {
                 string layerLabel = rollResult.IsNatTwenty ? "Nat 20" :
                                     rollResult.IsNatOne    ? "Nat 1"  :
                                     rollResult.Tier == Rolls.FailureTier.Success ? "Strong success" :
                                     rollResult.Tier.ToString();
-                var tierSpans = WordDiff.Compute(pickedLine, deliveredMessage);
-                textDiffs.Add(new TextDiff(layerLabel, tierSpans, pickedLine, deliveredMessage));
+                var tierSpans = WordDiff.Compute(originalIntendedText, deliveredMessage);
+                textDiffs.Add(new TextDiff(layerLabel, tierSpans, originalIntendedText, deliveredMessage));
+            }
+
+            // Steering, when it fires, appends its question to the degraded and sanitized delivery base as its own later layer
+            if (steeringResult.SteeringSucceeded && steeringResult.SteeringQuestion != null)
+            {
+                string beforeSteering = deliveredMessage;
+                deliveredMessage = beforeSteering.Length == 0
+                    ? steeringResult.SteeringQuestion
+                    : beforeSteering.TrimEnd() + " " + steeringResult.SteeringQuestion;
+
+                if (deliveredMessage != beforeSteering
+                    && !string.IsNullOrEmpty(beforeSteering)
+                    && beforeSteering != "...")
+                {
+                    var steeringSpans = WordDiff.Compute(beforeSteering, deliveredMessage);
+                    textDiffs.Add(new TextDiff("Steering", steeringSpans, beforeSteering, deliveredMessage));
+                }
             }
 
             // ---- Speculative Overlay Dispatcher ----

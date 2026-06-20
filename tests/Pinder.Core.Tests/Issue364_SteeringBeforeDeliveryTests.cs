@@ -105,10 +105,8 @@ namespace Pinder.Core.Tests
 
         /// <summary>
         /// AC: On a Nat-1/Catastrophe-tier failure with a successful steering
-        /// roll, the deterministic overlay degrades the WHOLE combined
-        /// intended+steering line — the committed text is the overlay output of
-        /// "picked + question", proving the question was folded in before
-        /// degradation (no lucid question survives intact).
+        /// roll, the deterministic overlay degrades only the pre-steering base,
+        /// and then appends the clean steering question.
         /// </summary>
         [Fact]
         public async Task Catastrophe_with_steering_success_degrades_combined_text()
@@ -131,19 +129,20 @@ namespace Pinder.Core.Tests
             Assert.NotNull(result.Steering.SteeringQuestion);
             Assert.False(result.Roll.IsSuccess);
 
-            // The committed line is the deterministic overlay of the COMBINED line.
-            string combined = PickedOption + " " + result.Steering.SteeringQuestion;
-            string expected = DeliveryOverlay.Apply(combined, result.Roll.Tier, result.Roll.MissMargin);
+            // The committed line is the deterministic overlay of PickedOption, with the clean steering question appended.
+            string degradedBase = DeliveryOverlay.Apply(PickedOption, result.Roll.Tier, result.Roll.MissMargin);
+            string expected = degradedBase.TrimEnd() + " " + result.Steering.SteeringQuestion;
             Assert.Equal(expected, result.DeliveredMessage);
 
-            // And it actually degraded (differs from the clean combined line).
-            Assert.NotEqual(combined, result.DeliveredMessage);
+            // And it actually degraded (differs from the clean PickedOption plus question).
+            string combinedClean = PickedOption + " " + result.Steering.SteeringQuestion;
+            Assert.NotEqual(combinedClean, result.DeliveredMessage);
         }
 
         /// <summary>
-        /// AC: textDiffs are emitted in order Steering FIRST, tier modifier
-        /// SECOND. The Steering diff goes picked → picked+question; the tier diff
-        /// goes picked+question → committed (overlay output).
+        /// AC: textDiffs are emitted in order tier modifier FIRST, Steering SECOND.
+        /// The tier diff goes picked → degraded base; the Steering diff goes
+        /// degraded base → degraded base + question.
         /// </summary>
         [Fact]
         public async Task TextDiffs_ordering_steering_first_then_tier_modifier()
@@ -178,17 +177,17 @@ namespace Pinder.Core.Tests
 
             Assert.True(steeringIdx >= 0, "Steering diff layer must be present");
             Assert.True(tierIdx >= 0, "Tier-modifier diff layer must be present");
-            Assert.True(steeringIdx < tierIdx, $"Steering diff (idx {steeringIdx}) must appear before tier diff (idx {tierIdx})");
+            Assert.True(tierIdx < steeringIdx, $"Tier diff (idx {tierIdx}) must appear before steering diff (idx {steeringIdx})");
 
-            // Steering diff goes picked → picked+question
-            Assert.Equal(PickedOption, diffs[steeringIdx].Before);
-            Assert.Contains(result.Steering.SteeringQuestion!, diffs[steeringIdx].After);
-
-            // Tier diff goes picked+question → committed (deterministic overlay output)
-            Assert.Equal(diffs[steeringIdx].After, diffs[tierIdx].Before);
+            // Tier diff goes picked → degraded base
+            Assert.Equal(PickedOption, diffs[tierIdx].Before);
             Assert.Equal(
-                DeliveryOverlay.Apply(diffs[steeringIdx].After, result.Roll.Tier, result.Roll.MissMargin),
+                DeliveryOverlay.Apply(PickedOption, result.Roll.Tier, result.Roll.MissMargin),
                 diffs[tierIdx].After);
+
+            // Steering diff goes degraded base → degraded base + question
+            Assert.Equal(diffs[tierIdx].After, diffs[steeringIdx].Before);
+            Assert.Contains(result.Steering.SteeringQuestion!, diffs[steeringIdx].After);
         }
 
         /// <summary>
