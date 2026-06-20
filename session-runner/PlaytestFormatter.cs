@@ -153,7 +153,7 @@ namespace Pinder.SessionRunner
                 case "The Escalation": return "You played Chaos last turn, then Rizz this turn — the sequence earns +1 bonus interest.";
                 case "The Disarm": return "You played Wit last turn, then Honesty this turn — the sequence earns +1 bonus interest.";
                 case "The Recovery": return "You failed a roll last turn, then played SA this turn — the sequence earns +2 bonus interest.";
-                case "The Triple": return "You played 3 different stats in 3 consecutive turns — your next roll gains +1 bonus.";
+                case "The Triple": return "You played 3 different stats in 3 consecutive turns — your next roll gains +2 bonus.";
                 default: return "Unknown combo sequence.";
             }
         }
@@ -175,7 +175,7 @@ namespace Pinder.SessionRunner
             switch (comboName)
             {
                 case "The Recovery": return "+2 Interest if success";
-                case "The Triple": return "+1 to ALL rolls next turn";
+                case "The Triple": return "+2 to ALL rolls next turn";
                 default: return "+1 Interest if success";
             }
         }

@@ -93,14 +93,14 @@ namespace Pinder.Core.Conversation
 
             // Compute tell bonus (#50)
             bool hasTellOption = state.ActiveTell != null && chosenOption.Stat == state.ActiveTell.Stat;
-            int tellBonus = hasTellOption ? 2 : 0;
+            int tellBonus = hasTellOption ? 4 : 0;
 
             // Compute external bonus: tell + callback + Triple combo + momentum (#46, #47, #50, #268)
             int externalBonus = tellBonus + callbackBonus + state.PendingMomentumBonus;
             int tripleBonusApplied = 0;
             if (state.ComboTracker.HasTripleBonus)
             {
-                tripleBonusApplied = 1;
+                tripleBonusApplied = 2;
                 externalBonus += tripleBonusApplied;
                 state.ComboTracker.ConsumeTripleBonus(); // Consume after applying (#46 edge case 7)
             }

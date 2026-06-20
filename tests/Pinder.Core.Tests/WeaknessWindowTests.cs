@@ -107,7 +107,7 @@ namespace Pinder.Core.Tests
         public async Task T2_CorrectStatDcReduced()
         {
             // Datee has allStats=2, so Honesty mod = 2 → DC = 16+2 = 18
-            // With weakness window DcReduction=2 → DC should be 16
+            // With weakness window DcReduction=2 → effective DC reduction is 4 → DC should be 14
 
             var llm = new WeaknessTestLlm();
             // Turn 0: Charm option, datee returns window(Honesty, 2)
@@ -118,7 +118,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueWeaknessWindow(null);
 
             // Turn 0: roll 15, timing roll
-            // Turn 1: roll 14 (SA mod=2, level bonus=0, total=16). Normal DC=18 → fail. With dcAdj=2 → DC=16 → success.
+            // Turn 1: roll 14 (SA mod=2, level bonus=0, total=16). Normal DC=18 → fail. With dcAdj=4 → DC=14 → success.
             var dice = new FixedDice(5, 15, 5, 14, 5, 15, 5, 15, 5);
             var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
@@ -130,9 +130,9 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
-            // Roll=14, stat mod=2, DC should be 16 (18-2)
-            Assert.Equal(16, result.Roll.DC);
-            Assert.True(result.Roll.IsSuccess); // 14+2=16 >= 16
+            // Roll=14, stat mod=2, DC should be 14 (18-4)
+            Assert.Equal(14, result.Roll.DC);
+            Assert.True(result.Roll.IsSuccess); // 14+2=16 >= 14
         }
 
         // ================================================================
@@ -217,7 +217,7 @@ namespace Pinder.Core.Tests
 
             Assert.NotNull(result.DetectedWindow);
             Assert.Equal(StatType.Wit, result.DetectedWindow!.DefendingStat);
-            Assert.Equal(2, result.DetectedWindow.DcReduction);
+            Assert.Equal(4, result.DetectedWindow.DcReduction);
         }
 
         [Fact]

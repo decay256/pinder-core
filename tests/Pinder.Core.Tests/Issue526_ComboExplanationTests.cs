@@ -18,7 +18,7 @@ namespace Pinder.Core.Tests
         [InlineData("The Escalation", "You played Chaos last turn, then Rizz this turn \u2014 the sequence earns +1 bonus interest.")]
         [InlineData("The Disarm", "You played Wit last turn, then Honesty this turn \u2014 the sequence earns +1 bonus interest.")]
         [InlineData("The Recovery", "You failed a roll last turn, then played SA this turn \u2014 the sequence earns +2 bonus interest.")]
-        [InlineData("The Triple", "You played 3 different stats in 3 consecutive turns \u2014 your next roll gains +1 bonus.")]
+        [InlineData("The Triple", "You played 3 different stats in 3 consecutive turns \u2014 your next roll gains +2 bonus.")]
         public void GetComboSequenceDescription_KnownCombos_ReturnsExpectedString(string comboName, string expected)
         {
             var result = PlaytestFormatter.GetComboSequenceDescription(comboName);
@@ -41,7 +41,7 @@ namespace Pinder.Core.Tests
         // Mutation: Would catch if summary strings are altered
         [Theory]
         [InlineData("The Recovery", "+2 Interest if success")]
-        [InlineData("The Triple", "+1 to ALL rolls next turn")]
+        [InlineData("The Triple", "+2 to ALL rolls next turn")]
         [InlineData("The Setup", "+1 Interest if success")]
         [InlineData("UnknownCombo", "+1 Interest if success")]
         [InlineData(null, "+1 Interest if success")]

@@ -20,8 +20,8 @@ namespace Pinder.Core.Tests
     public class TellBonusSpecTests
     {
         // ================================================================
-        // Edge Case 3 (explicit): Tell active + matching stat → TellReadBonus=2
-        // Mutation: Fails if tell bonus is not exactly 2, or if tell comparison
+        // Edge Case 3 (explicit): Tell active + matching stat → TellReadBonus=4
+        // Mutation: Fails if tell bonus is not exactly 4, or if tell comparison
         //           uses != instead of == for stat matching
         // ================================================================
 
@@ -43,10 +43,10 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
-            // Mutation: would catch if bonus was 1 or 3 instead of 2
-            Assert.Equal(2, result.TellReadBonus);
-            Assert.Equal("📖 You read the moment. +2 bonus.", result.TellReadMessage);
-            Assert.Equal(2, result.Roll.ExternalBonus);
+            // Mutation: would catch if bonus was 1 or 3 instead of 4
+            Assert.Equal(4, result.TellReadBonus);
+            Assert.Equal("📖 You read the moment. +4 bonus.", result.TellReadMessage);
+            Assert.Equal(4, result.Roll.ExternalBonus);
         }
 
         // ================================================================
@@ -112,7 +112,7 @@ namespace Pinder.Core.Tests
 
             // Mutation: catches if FinalTotal doesn't include ExternalBonus
             Assert.Equal(result.Roll.Total + result.Roll.ExternalBonus, result.Roll.FinalTotal);
-            Assert.Equal(2, result.Roll.ExternalBonus);
+            Assert.Equal(4, result.Roll.ExternalBonus);
         }
 
         // ================================================================
@@ -197,7 +197,7 @@ namespace Pinder.Core.Tests
             var result = await session.ResolveTurnAsync(0);
 
             // Mutation: catches wrong emoji, missing period, different wording
-            Assert.Equal("📖 You read the moment. +2 bonus.", result.TellReadMessage);
+            Assert.Equal("📖 You read the moment. +4 bonus.", result.TellReadMessage);
             Assert.Contains("📖", result.TellReadMessage);
             Assert.EndsWith(".", result.TellReadMessage);
         }
@@ -270,7 +270,7 @@ namespace Pinder.Core.Tests
 
             var result = await session.ResolveTurnAsync(0);
             // Mutation: catches if any particular stat is excluded from tell matching
-            Assert.Equal(2, result.TellReadBonus);
+            Assert.Equal(4, result.TellReadBonus);
         }
 
         // ================================================================

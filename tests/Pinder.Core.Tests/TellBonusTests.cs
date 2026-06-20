@@ -74,9 +74,9 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
-            // ExternalBonus should be 2
-            Assert.Equal(2, result.Roll.ExternalBonus);
-            Assert.Equal(result.Roll.Total + 2, result.Roll.FinalTotal);
+            // ExternalBonus should be 4
+            Assert.Equal(4, result.Roll.ExternalBonus);
+            Assert.Equal(result.Roll.Total + 4, result.Roll.FinalTotal);
         }
 
         // ================================================================
@@ -101,8 +101,8 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
-            Assert.Equal(2, result.TellReadBonus);
-            Assert.Equal("📖 You read the moment. +2 bonus.", result.TellReadMessage);
+            Assert.Equal(4, result.TellReadBonus);
+            Assert.Equal("📖 You read the moment. +4 bonus.", result.TellReadMessage);
         }
 
         [Fact]

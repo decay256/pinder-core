@@ -26,7 +26,7 @@ namespace Pinder.Core.Conversation
         /// <summary>Current turn number (0-based before first turn).</summary>
         public int TurnNumber { get; }
 
-        /// <summary>True if The Triple bonus is active for the current turn (+1 to all rolls).</summary>
+        /// <summary>True if The Triple bonus is active for the current turn (+2 to all rolls).</summary>
         public bool TripleBonusActive { get; }
 
         /// <summary>

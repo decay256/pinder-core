@@ -219,7 +219,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.SelfAwareness, "Insight"));
             llm.EnqueueWeaknessWindow(null);
 
-            // Turn 0: roll 15, Turn 1: roll 14 (14+2=16, DC=18-2=16 → success)
+            // Turn 0: roll 15, Turn 1: roll 14 (14+2=16, DC=18-4=14 → success)
             var dice = new FixedDice(5, 15, 5, 14, 5, 15, 5);
             var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
@@ -229,8 +229,8 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
-            // Verify the DC in the roll result is 16 (18 - 2)
-            Assert.Equal(16, result.Roll.DC);
+            // Verify the DC in the roll result is 14 (18 - 4)
+            Assert.Equal(14, result.Roll.DC);
             Assert.True(result.Roll.IsSuccess);
         }
 

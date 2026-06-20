@@ -142,7 +142,7 @@ namespace Pinder.Core.Tests
         }
 
         /// <summary>
-        /// Tests The Triple combo: 3 distinct stats → +1 roll bonus next turn via externalBonus.
+        /// Tests The Triple combo: 3 distinct stats → +2 roll bonus next turn via externalBonus.
         /// </summary>
         [Fact]
         public async Task TheTriple_ThreeDistinctStats_RollBonusNextTurn()
@@ -154,7 +154,7 @@ namespace Pinder.Core.Tests
                 15, 50,      // Turn 1: Rizz (d20 + d100 timing)
                 15, 50,      // Turn 2: SA
                 15, 15, 50,  // Turn 3: Chaos → Triple triggers (VeryIntoIt advantage after turn 2)
-                15, 15, 50,  // Turn 4: advantage, +1 triple + 2 momentum = 3 external
+                15, 15, 50,  // Turn 4: advantage, +2 triple + 2 momentum = 4 external
                 15, 50       // Extra safety margin
             );
 
@@ -180,13 +180,13 @@ namespace Pinder.Core.Tests
             Assert.Equal(0, r3.TripleBonusApplied); // #693: bonus not yet consumed on triggering turn
             Assert.True(r3.StateAfter.TripleBonusActive);
 
-            // Turn 4: should have +1 external bonus from triple + +2 from momentum (streak=3 at start, #268)
+            // Turn 4: should have +2 external bonus from triple + +2 from momentum (streak=3 at start, #268)
             var start4 = await session.StartTurnAsync();
             Assert.True(start4.State.TripleBonusActive);
             var r4 = await session.ResolveTurnAsync(0);
-            // Roll: 15+2+0=17 base, +1 triple + 2 momentum = 3 external
-            Assert.Equal(3, r4.Roll.ExternalBonus);
-            Assert.Equal(1, r4.TripleBonusApplied); // #693: Triple bonus surfaced in TurnResult
+            // Roll: 15+2+0=17 base, +2 triple + 2 momentum = 4 external
+            Assert.Equal(4, r4.Roll.ExternalBonus);
+            Assert.Equal(2, r4.TripleBonusApplied); // #693: Triple bonus surfaced in TurnResult
             Assert.False(r4.StateAfter.TripleBonusActive); // consumed
         }
 

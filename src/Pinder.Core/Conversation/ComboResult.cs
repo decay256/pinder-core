@@ -15,7 +15,7 @@ namespace Pinder.Core.Conversation
         public int InterestBonus { get; }
 
         /// <summary>
-        /// True only for The Triple — signals that next turn gets +1 roll bonus.
+        /// True only for The Triple — signals that next turn gets +2 roll bonus.
         /// </summary>
         public bool IsTriple { get; }
 
