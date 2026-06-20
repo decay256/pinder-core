@@ -19,10 +19,10 @@ namespace Pinder.Core.Tests
     [Trait("Category", "Core")]
     public class Issue743_HorninessInterestPenaltyTests
     {
-        // Seed 1: steering roll=5 (fails), horniness roll=3 (misses DC=15 for sessionHorniness=5).
+        // Seed 1: steering roll=5 (fails), horniness roll=3 (misses DC=15 for sessionHorniness=15).
         private const int OverlayFiredSeed = 1;
 
-        // Seed 0: steering roll=15 (high), horniness roll=17 (passes DC=15 for sessionHorniness=5).
+        // Seed 0: steering roll=15 (high), horniness roll=17 (passes DC=15 for sessionHorniness=15).
         private const int OverlayNotFiredSeed = 0;
 
         private static StatDeliveryInstructions LoadDeliveryInstructions()
@@ -115,7 +115,7 @@ namespace Pinder.Core.Tests
             // We want an odd delta so we can test the floor behavior.
             // Using mainRoll=19 will yield a success with some positive delta. We'll verify
             // that floor(delta/2) is applied correctly.
-            // sessionHorniness=5 → DC=15; OverlayFiredSeed=1 produces a miss on the horniness check
+            // sessionHorniness=5 → DC=5; OverlayFiredSeed=1 produces a miss on the horniness check
             var dice = new FixedDice(5, 19, 50);
             var shadows = new SessionShadowTracker(TestHelpers.MakeStatBlock());
             var rng = new Random(OverlayFiredSeed);

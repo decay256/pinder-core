@@ -20,7 +20,7 @@ namespace Pinder.Core.Conversation
         /// <summary>The d20 roll value (1–20).</summary>
         public int Roll { get; }
 
-        /// <summary>The DC the roll had to meet or exceed (20 − shadowValue).</summary>
+        /// <summary>The DC the roll had to meet or exceed (shadowValue, with bias applied).</summary>
         public int DC { get; }
 
         /// <summary>True if the roll missed the DC, meaning corruption may fire.</summary>

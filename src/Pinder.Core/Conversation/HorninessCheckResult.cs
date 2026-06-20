@@ -17,7 +17,7 @@ namespace Pinder.Core.Conversation
         /// <summary>The total (Roll + Modifier).</summary>
         public int Total { get; }
 
-        /// <summary>The DC (20 - sessionHorniness).</summary>
+        /// <summary>The DC (sessionHorniness, with bias applied).</summary>
         public int DC { get; }
 
         /// <summary>True if the check was a miss (total &lt; DC), meaning corruption fires.</summary>

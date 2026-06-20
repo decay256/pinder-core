@@ -101,7 +101,7 @@ namespace Pinder.Core.Tests
             // Player: Honesty 5 (so a roll passes easily), Denial shadow 10
             // (paired with Honesty — moderate shadow).  Datee: weak.
             //
-            // shadow check DC = 20 - 10 = 10 → miss when shadow d20 < 10.
+            // shadow check DC = 10 → miss when shadow d20 < 10.
             // We force shadow d20 = 1 → missMargin = 9 → TropeTrap tier.
             // Honesty success on a Nat 20 → positive pre-shadow delta.
             var playerStats = MakeStats(allStats: 5,
@@ -109,11 +109,11 @@ namespace Pinder.Core.Tests
             var player = MakeProfile("PlayerH", playerStats);
             var datee = MakeProfile("OppH", MakeStats(allStats: 0));
 
-            // Game dice: horniness session value = 5 (DC=15), main d20 = 20
+            // Game dice: horniness session value = 5 (DC=5), main d20 = 20
             // (Nat 20 success), timing = 50.
             var dice = new FixedDice(5, 20, 50);
 
-            // SteeringRng feeds: steering d20, horniness d20 (force MISS: < 15),
+            // SteeringRng feeds: steering d20, horniness d20 (force MISS: < 5),
             // shadow d20 (force MISS: < 10).
             var steeringRng = new FixedRandom(1, 1, 1);
 
@@ -215,7 +215,7 @@ namespace Pinder.Core.Tests
 
             // Dice: horniness=5, d20=20 (Nat 20 success), timing=50
             var dice = new FixedDice(5, 20, 50);
-            // Steering RNG: steering=1 (fail), horniness=1 (DC=15, miss).
+            // Steering RNG: steering=1 (fail), horniness=1 (DC=5, miss).
             // No shadow roll (shadow value is 0).
             var steeringRng = new FixedRandom(1, 1);
 
@@ -269,7 +269,7 @@ namespace Pinder.Core.Tests
 
             // Dice: horniness=5, d20=1 (Nat 1 — guaranteed failure), timing=50
             var dice = new FixedDice(5, 1, 50);
-            // Steering RNG: steering=1, horniness=1 (DC=15, miss),
+            // Steering RNG: steering=1, horniness=1 (DC=5, miss),
             // shadow=1 (DC=10, miss → TropeTrap).
             var steeringRng = new FixedRandom(1, 1, 1);
 

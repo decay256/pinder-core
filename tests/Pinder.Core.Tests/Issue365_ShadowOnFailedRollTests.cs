@@ -79,11 +79,7 @@ namespace Pinder.Core.Tests
         {
             var instructions = LoadYaml();
 
-            // Player has Despair shadow at 19 (very high) so shadow DC = 20-19 = 1.
-            // Steering RNG is also used for the shadow d20. To force a shadow
-            // MISS we'd need a roll < 1 — impossible with d20. So instead set
-            // shadow to a moderate value and force the steering RNG to a low
-            // roll: shadow=10 → DC = 20-10 = 10. Steering RNG sequence:
+            // Player has Despair shadow at 10 → DC = 10. Steering RNG sequence:
             //   1st call = steering d20 (we want failure, roll 1)
             //   2nd call = shadow d20 (we want miss → roll < DC, so roll 1)
             // missMargin = 9 → tier ≈ Trope_trap (per HorninessEngine)
