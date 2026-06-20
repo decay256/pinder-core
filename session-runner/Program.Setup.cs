@@ -298,7 +298,7 @@ partial class Program
         // Display session horniness in header (#709, #750)
         {
             int sh = result.Session.SessionHorniness;
-            int horninessDC = 20 - sh;
+            int horninessDC = RollEngine.ApplyDcBias(sh, yamlHorninessDcBias);
             int hRoll = result.Session.HorninessRoll;
             int hMod = result.Session.HorninessTimeModifier;
             string timeBand = clock.GetTimeOfDay().ToString().ToLower();

@@ -36,7 +36,7 @@ namespace Pinder.Core.Conversation
             if (shadowValue <= 0)
                 return ShadowCheckResult.NotPerformed;
 
-            int shadowDC = RollEngine.ApplyDcBias(20 - shadowValue, _shadowDcBias);
+            int shadowDC = RollEngine.ApplyDcBias(shadowValue, _shadowDcBias);
 
             // #901: route through single entry point.
             // Dice consumption: one Roll(20) — identical to old _steeringEngine.RollD20().

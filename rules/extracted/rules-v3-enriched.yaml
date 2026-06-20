@@ -1632,14 +1632,14 @@
   type: mechanic
   description: >
     Session Horniness = d10 + time-of-day modifier (from GameClock, configured in game-definition.yaml).
-    Per-turn check: d20 vs DC (20 - sessionHorniness) — lower session horniness = harder check.
+    Per-turn check: d20 vs DC = RollEngine.ApplyDcBias(sessionHorniness, horniness_dc_bias) — base DC is sessionHorniness (higher session horniness = harder check).
     On miss: overlay applied to delivered message using horniness_overlay tiers from delivery-instructions.yaml.
     Tiers: Fumble (miss 1-2), Misfire (miss 3-5), TropeTrap (miss 6-9), Catastrophe (miss 10+).
     Character has no awareness the overlay occurred.
     NOT a shadow stat — ambient environmental effect.
   condition:
     trigger: every turn (after delivery)
-    check: d20 vs DC (20 - sessionHorniness)
+    check: d20 vs DC = RollEngine.ApplyDcBias(sessionHorniness, horniness_dc_bias)
   outcome:
     on_miss: horniness overlay applied to delivered message
     on_pass: no overlay
@@ -1855,7 +1855,7 @@
     text: >-
       When a player picks an option using a stat with a paired shadow value > 0,
       a shadow check roll fires automatically after the main roll resolves.
-      The check uses d20 vs DC = (20 - shadowValue). Higher shadow = lower DC = higher failure rate.
+      The check uses d20 vs DC = RollEngine.ApplyDcBias(shadowValue, shadow_dc_bias) (base DC is shadowValue). Higher shadow = higher DC = higher failure rate.
 
       If the shadow check fails AND the main roll succeeded:
       - The success is overridden — interest delta is replaced with the failure delta for that tier
@@ -1871,7 +1871,7 @@
       (Fumble: miss 1-2, Misfire: miss 3-5, TropeTrap: miss 6-9, Catastrophe: miss 10+)
       but are labeled "Shadow (Name) Misfire" etc. and do not activate traps.
   description: >-
-    Shadow check: d20 vs DC=(20-shadowValue). Failure overrides success and corrupts the message.
+    Shadow check: d20 vs DC = RollEngine.ApplyDcBias(shadowValue, shadow_dc_bias) (base DC is shadowValue). Failure overrides success and corrupts the message.
 - id: §9.shadow-thresholds
   section: §9
   title: Shadow Thresholds

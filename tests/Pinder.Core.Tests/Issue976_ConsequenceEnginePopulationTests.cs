@@ -166,7 +166,8 @@ namespace Pinder.Core.Tests
             var rng = new Random(99);
             var engine = new ShadowCheckEngine(rng, null);
             var result = engine.Check(ShadowStatType.Dread, 1);
-            // dc=19, roll low → miss; consequence should be null without catalog
+            // shadowValue=1 → DC=1 under the negative-meter curve; if the roll misses,
+            // consequence should be null without catalog.
             if (result.CheckPerformed && result.IsMiss)
                 Assert.Null(result.Consequence);
         }
@@ -176,10 +177,10 @@ namespace Pinder.Core.Tests
         {
             var cat = new FakeConsequenceCatalog();
             cat.Add("consequence.shadow.miss.dread", "Dread tightens.");
-            // Seed RNG so roll=1 → miss on dc=15
+            // Seed RNG so roll=1 → miss on dc=5
             var rng = new Random(17);
             var engine = new ShadowCheckEngine(rng, cat);
-            var result = engine.Check(ShadowStatType.Dread, 5); // dc=15
+            var result = engine.Check(ShadowStatType.Dread, 5); // dc=5
             Assert.True(result.CheckPerformed);
             if (result.IsMiss)
             {

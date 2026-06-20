@@ -19,10 +19,10 @@ namespace Pinder.Core.Tests
     [Trait("Category", "Core")]
     public class Issue743_HorninessInterestPenaltyTests
     {
-        // Seed 1: steering roll=5 (fails), horniness roll=3 (misses DC=15 for sessionHorniness=5).
+        // Seed 1: steering roll=5 (fails), horniness roll=3 (misses DC=15 for sessionHorniness=15).
         private const int OverlayFiredSeed = 1;
 
-        // Seed 0: steering roll=15 (high), horniness roll=17 (passes DC=15 for sessionHorniness=5).
+        // Seed 0: steering roll=15 (high), horniness roll=17 (passes DC=15 for sessionHorniness=15).
         private const int OverlayNotFiredSeed = 0;
 
         private static StatDeliveryInstructions LoadDeliveryInstructions()
@@ -82,7 +82,7 @@ namespace Pinder.Core.Tests
             var instructions = LoadDeliveryInstructions();
             var session = MakeSession(
                 startingInterest: 14,
-                sessionHorniness: 5,
+                sessionHorniness: 15,
                 steeringSeed: OverlayFiredSeed,
                 instructions: instructions,
                 mainRoll: 18); // Use 18 to ensure a success and positive interest delta
@@ -92,7 +92,7 @@ namespace Pinder.Core.Tests
 
             // Overlay should have fired
             Assert.True(result.HorninessCheck.OverlayApplied,
-                "Expected horniness overlay to fire with seed=1, sessionHorniness=5");
+                "Expected horniness overlay to fire with seed=1, sessionHorniness=15");
 
             // Penalty should be non-zero (since interestDelta should be > 0)
             Assert.NotEqual(0, result.HorninessInterestPenalty);
@@ -115,7 +115,7 @@ namespace Pinder.Core.Tests
             // We want an odd delta so we can test the floor behavior.
             // Using mainRoll=19 will yield a success with some positive delta. We'll verify
             // that floor(delta/2) is applied correctly.
-            // sessionHorniness=5 → DC=15; OverlayFiredSeed=1 produces a miss on the horniness check
+            // sessionHorniness=5 → DC=5; OverlayFiredSeed=1 produces a miss on the horniness check
             var dice = new FixedDice(5, 19, 50);
             var shadows = new SessionShadowTracker(TestHelpers.MakeStatBlock());
             var rng = new Random(OverlayFiredSeed);
@@ -231,7 +231,7 @@ namespace Pinder.Core.Tests
             var instructions = LoadDeliveryInstructions();
             var session = MakeSession(
                 startingInterest: 14,
-                sessionHorniness: 5,
+                sessionHorniness: 15,
                 steeringSeed: OverlayNotFiredSeed,
                 instructions: instructions);
 
@@ -240,7 +240,7 @@ namespace Pinder.Core.Tests
 
             // Overlay should NOT have fired
             Assert.False(result.HorninessCheck.OverlayApplied,
-                "Expected horniness overlay NOT to fire with seed=0, sessionHorniness=5");
+                "Expected horniness overlay NOT to fire with seed=0, sessionHorniness=15");
 
             // No penalty
             Assert.Equal(0, result.HorninessInterestPenalty);
@@ -256,7 +256,7 @@ namespace Pinder.Core.Tests
             var instructions = LoadDeliveryInstructions();
             var session = MakeSession(
                 startingInterest: 14,
-                sessionHorniness: 5, // DC=15; OverlayFiredSeed=1 produces miss
+                sessionHorniness: 15, // DC=15; OverlayFiredSeed=1 produces miss
                 steeringSeed: OverlayFiredSeed,
                 instructions: instructions,
                 mainRoll: 18); // Ensure positive interest delta
@@ -287,7 +287,7 @@ namespace Pinder.Core.Tests
             var instructions = LoadDeliveryInstructions();
             var session = MakeSession(
                 startingInterest: 14,
-                sessionHorniness: 5,
+                sessionHorniness: 15,
                 steeringSeed: OverlayFiredSeed,
                 instructions: instructions,
                 mainRoll: 10); // Low roll ensures negative interest delta

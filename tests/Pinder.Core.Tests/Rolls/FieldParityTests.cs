@@ -119,7 +119,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void HorninessCheckResult_Miss_CheckFieldsMatchBespoke()
         {
-            // sessionHorniness = 5 → DC = 15. Roll 8 → miss by 7 → TropeTrap.
+            // sessionHorniness = 15 → DC = 15. Roll 8 → miss by 7 → TropeTrap.
             var engine = new HorninessEngine(new Random(42));
             // We need a fixed roll of 8. Seed the Random to get a specific first roll.
             // Use a brute-force search for a seed that yields roll 8 as first Next(1,21).
@@ -132,7 +132,7 @@ namespace Pinder.Core.Tests
             Assert.NotNull(rng);
             var eng = new HorninessEngine(rng!);
             var shadows = new SessionShadowTracker(MakeStats());
-            var (result, _) = eng.PeekAsync(5, shadows, null);
+            var (result, _) = eng.PeekAsync(15, shadows, null);
 
             Assert.Equal(8, result.Roll);
             Assert.NotNull(result.Check);

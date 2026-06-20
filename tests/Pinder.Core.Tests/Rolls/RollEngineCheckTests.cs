@@ -83,7 +83,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void Horniness_EmptyModifierBag_ModifierSumIsZero()
         {
-            // Roll 5 vs DC 15 (sessionHorniness = 5 → DC = 20-5 = 15): miss by 10 → Catastrophe
+            // Roll 5 vs supplied horniness DC 15: miss by 10 → Catastrophe
             var check = RollEngine.ResolveCheck(RollCheckKind.Horniness, new FixedDice(5),
                 new NamedModifier[0], dc: 15);
 
