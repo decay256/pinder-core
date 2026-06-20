@@ -215,5 +215,59 @@ namespace Pinder.Core.Tests
             Assert.Empty(result.DefenderGroup);
             Assert.Equal(0, result.DcBase);
         }
+
+        /// <summary>
+        /// Issue #1201: steering question must not contaminate roll/tier text diffs.
+        /// </summary>
+        [Fact]
+        public async Task SteeringQuestion_DoesNotContaminate_TierTextDiff()
+        {
+            // Player stats: Charm=5, Wit=5, SA=5 → steering mod = 5
+            var playerStats = MakeStatBlockWithValues(charm: 5, wit: 5, sa: 5);
+            // Datee stats: SA=0, Rizz=0, Honesty=0 → steering DC = 16
+            var dateeStats = MakeStatBlockWithValues(sa: 0, rizz: 0, honesty: 0);
+
+            var player = new CharacterProfile(
+                playerStats, "You are Player.", "Player",
+                new TimingProfile(5, 0.0f, 0.0f, "neutral"), 1);
+            var datee = new CharacterProfile(
+                dateeStats, "You are Datee.", "Datee",
+                new TimingProfile(5, 0.0f, 0.0f, "neutral"), 1);
+
+            // Dice: main d20 is 1 to force Nat 1 failure and trigger degradation
+            var dice = new FixedDice(
+                1,     // horniness roll
+                1,     // main d20 roll (Nat 1 / failure)
+                50     // response delay d100
+            );
+
+            // Steering uses separate RNG: Next(1,21) returns 20 → steering succeeds
+            var steeringRng = new FixedRandom(20);
+
+            var llm = new NullLlmAdapter();
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), steeringRng: steeringRng);
+            var session = new GameSession(player, datee, llm, dice, new NullTrapRegistry(), config);
+
+            var turnStart = await session.StartTurnAsync();
+            var result = await session.ResolveTurnAsync(0);
+
+            Assert.True(result.Steering.SteeringSucceeded);
+            Assert.False(result.Roll.IsSuccess);
+            Assert.NotNull(result.Steering.SteeringQuestion);
+
+            string steeringQuestion = result.Steering.SteeringQuestion!;
+            Assert.Contains(steeringQuestion, result.DeliveredMessage);
+
+            // Find the Steering and tier-modifier layers
+            var tierDiff = result.TextDiffs.Single(d => d.LayerName == "Nat 1" || d.LayerName == "Catastrophe");
+            var steeringDiff = result.TextDiffs.Single(d => d.LayerName == "Steering");
+
+            // The tier diff Before (and After) must NOT contain the SteeringQuestion
+            Assert.DoesNotContain(steeringQuestion, tierDiff.Before);
+            Assert.DoesNotContain(steeringQuestion, tierDiff.After);
+
+            // The Steering diff After must contain the SteeringQuestion
+            Assert.Contains(steeringQuestion, steeringDiff.After);
+        }
     }
 }
