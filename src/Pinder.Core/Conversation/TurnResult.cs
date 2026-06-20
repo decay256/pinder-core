@@ -95,7 +95,7 @@ namespace Pinder.Core.Conversation
         public ShadowCheckResult ShadowCheck { get; }
 
         /// <summary>
-        /// Roll bonus applied from a previous Triple combo (+1). 0 if no Triple bonus was consumed this turn.
+        /// Roll bonus applied from a previous Triple combo (+2). 0 if no Triple bonus was consumed this turn.
         /// </summary>
         public int TripleBonusApplied { get; }
 

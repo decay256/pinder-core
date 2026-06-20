@@ -25,7 +25,7 @@ namespace Pinder.Core.Conversation
         /// <summary>
         /// True if The Triple was completed on a previous turn and the bonus
         /// has not yet been consumed. GameSession reads this before calling
-        /// RollEngine.Resolve to pass +1 externalBonus.
+        /// RollEngine.Resolve to pass +2 externalBonus.
         /// </summary>
         public bool HasTripleBonus => _pendingTripleBonus;
 

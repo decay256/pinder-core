@@ -77,7 +77,7 @@ namespace Pinder.Core.Tests.Conversation
             var turn2Start = await session.StartTurnAsync();
 
             Assert.NotNull(turn2Start.WeaknessDcReduction);
-            Assert.Equal(expectedDcReduction, turn2Start.WeaknessDcReduction!.Value);
+            Assert.Equal(expectedDcReduction * 2, turn2Start.WeaknessDcReduction!.Value);
         }
 
         // ── AC3: Window consumed after resolve → next turn has null ──────────
@@ -94,9 +94,9 @@ namespace Pinder.Core.Tests.Conversation
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0);
 
-            // Turn 2 start: window is active.
+            // Turn 2 start: window is active (effective value is doubled).
             var turn2Start = await session.StartTurnAsync();
-            Assert.Equal(dcReduction, turn2Start.WeaknessDcReduction);
+            Assert.Equal(dcReduction * 2, turn2Start.WeaknessDcReduction);
 
             // Turn 2 resolve: window is consumed (cleared by ResolveTurnAsync regardless of match).
             await session.ResolveTurnAsync(0);
@@ -123,7 +123,7 @@ namespace Pinder.Core.Tests.Conversation
             string json = JsonSerializer.Serialize(turn2Start);
 
             Assert.Contains("\"weakness_dc_reduction\"", json);
-            Assert.Contains($":{dcReduction}", json);
+            Assert.Contains($":{dcReduction * 2}", json);
         }
 
         [Fact]

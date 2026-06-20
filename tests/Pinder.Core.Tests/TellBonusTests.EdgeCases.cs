@@ -87,7 +87,7 @@ namespace Pinder.Core.Tests
             // Turn 1: tell active → bonus
             await session.StartTurnAsync();
             var result1 = await session.ResolveTurnAsync(0);
-            Assert.Equal(2, result1.TellReadBonus);
+            Assert.Equal(4, result1.TellReadBonus);
 
             // Turn 2: tell consumed → no bonus
             var start2 = await session.StartTurnAsync();
@@ -172,8 +172,8 @@ namespace Pinder.Core.Tests
             var result = await session.ResolveTurnAsync(0);
 
             Assert.True(result.Roll.IsNatTwenty);
-            Assert.Equal(2, result.TellReadBonus);
-            Assert.Equal("📖 You read the moment. +2 bonus.", result.TellReadMessage);
+            Assert.Equal(4, result.TellReadBonus);
+            Assert.Equal("📖 You read the moment. +4 bonus.", result.TellReadMessage);
         }
 
         // ================================================================
@@ -201,8 +201,8 @@ namespace Pinder.Core.Tests
 
             Assert.True(result.Roll.IsNatOne);
             Assert.False(result.Roll.IsSuccess); // Nat 1 is auto-fail
-            Assert.Equal(2, result.TellReadBonus);
-            Assert.Equal("📖 You read the moment. +2 bonus.", result.TellReadMessage);
+            Assert.Equal(4, result.TellReadBonus);
+            Assert.Equal("📖 You read the moment. +4 bonus.", result.TellReadMessage);
         }
 
         // ================================================================
@@ -212,8 +212,8 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task EdgeCase9_TellMatchedButRollStillFails_BonusRecorded()
         {
-            // Player has allStats=2, datee allStats=2, so DC = 16 + 2 = 15
-            // d20=10, mod=2, total=12, externalBonus=2, finalTotal=14 < 15 → still fails
+            // Player has allStats=2, datee allStats=2, so DC = 16 + 2 = 18
+            // d20=10, mod=2, total=12, externalBonus=4, finalTotal=16 < 18 → still fails
             var llm = new TellTestLlm();
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Setup"));
             llm.EnqueueTell(new Tell(StatType.Wit, "Makes joke"));
@@ -230,9 +230,9 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
-            Assert.False(result.Roll.IsSuccess); // 10+2+2=14 < 15
-            Assert.Equal(2, result.TellReadBonus);
-            Assert.Equal("📖 You read the moment. +2 bonus.", result.TellReadMessage);
+            Assert.False(result.Roll.IsSuccess); // 10+2+4=16 < 18
+            Assert.Equal(4, result.TellReadBonus);
+            Assert.Equal("📖 You read the moment. +4 bonus.", result.TellReadMessage);
         }
 
         // ================================================================
@@ -242,15 +242,15 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task TellBonusTurnsMissIntoHit()
         {
-            // DC = 16 + 2 = 18. d20=14 + mod=2 = total 16, externalBonus=2 → FinalTotal=18 = success
+            // DC = 16 + 2 = 18. d20=12 + mod=2 = total 14, externalBonus=4 → FinalTotal=18 = success
             var llm = new TellTestLlm();
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Setup"));
             llm.EnqueueTell(new Tell(StatType.Wit, "Makes joke"));
             llm.EnqueueOptions(new DialogueOption(StatType.Wit, "Funny"));
             llm.EnqueueTell(null);
 
-            // Turn 0: d20=15, timing=5. Turn 1: d20=14, timing=5
-            var dice = new FixedDice(5, 15, 5, 14, 5);
+            // Turn 0: d20=15, timing=5. Turn 1: d20=12, timing=5
+            var dice = new FixedDice(5, 15, 5, 12, 5);
             var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             await session.StartTurnAsync();
@@ -259,10 +259,10 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
-            // Without bonus: 14+2=16 < 18 → fail
-            // With bonus: 14+2+2=18 >= 18 → success
+            // Without bonus: 12+2=14 < 18 → fail
+            // With bonus: 12+2+4=18 >= 18 → success
             Assert.True(result.Roll.IsSuccess);
-            Assert.Equal(2, result.TellReadBonus);
+            Assert.Equal(4, result.TellReadBonus);
         }
 
         // ================================================================

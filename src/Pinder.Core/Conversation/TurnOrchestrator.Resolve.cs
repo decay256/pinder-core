@@ -90,7 +90,9 @@ namespace Pinder.Core.Conversation
             var dateeResponse = dateeStageResult.DateeResponse;
             string dateeMessage = dateeStageResult.DateeMessage;
 
-            state.ActiveWeakness = dateeResponse.WeaknessWindow;
+            state.ActiveWeakness = dateeResponse.WeaknessWindow != null 
+                ? new WeaknessWindow(dateeResponse.WeaknessWindow.DefendingStat, dateeResponse.WeaknessWindow.DcReduction * 2) 
+                : null;
             state.ActiveTell = dateeResponse.DetectedTell;
 
             state.History.Add((datee.DisplayName, dateeMessage));
@@ -124,13 +126,15 @@ namespace Pinder.Core.Conversation
                 comboTriggered: rollStage.ComboTriggered,
                 callbackBonusApplied: rollStage.CallbackBonus,
                 tellReadBonus: rollStage.TellBonus,
-                tellReadMessage: rollStage.TellBonus > 0 ? "📖 You read the moment. +2 bonus." : null,
+                tellReadMessage: rollStage.TellBonus > 0 ? $"📖 You read the moment. +{rollStage.TellBonus} bonus." : null,
                 xpEarned: rollStage.TurnXpEarned,
                 baseInterestDelta: rollStage.BaseInterestDelta,
                 riskBonusDelta: rollStage.RiskBonusDelta,
                 riskTier: rollStage.RollResult.RiskTier,
                 comboBonusDelta: rollStage.ComboBonusDelta,
-                detectedWindow: dateeResponse.WeaknessWindow,
+                detectedWindow: dateeResponse.WeaknessWindow != null 
+                    ? new WeaknessWindow(dateeResponse.WeaknessWindow.DefendingStat, dateeResponse.WeaknessWindow.DcReduction * 2) 
+                    : null,
                 steering: deliveryStage.SteeringResult,
                 horninessCheck: deliveryStage.HorninessCheckResult,
                 tripleBonusApplied: rollStage.TripleBonusApplied,

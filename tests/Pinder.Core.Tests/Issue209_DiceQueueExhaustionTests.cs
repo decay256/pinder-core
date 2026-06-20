@@ -135,8 +135,8 @@ namespace Pinder.Core.Tests
             Assert.True(start4.State.TripleBonusActive, "TripleBonusActive should be visible at start of turn 4");
 
             var r4 = await session.ResolveTurnAsync(0);
-            // ExternalBonus = triple(+1) + momentum(+2 from streak=3 at start, #268)
-            Assert.Equal(3, r4.Roll.ExternalBonus);
+            // ExternalBonus = triple(+2) + momentum(+2 from streak=3 at start, #268)
+            Assert.Equal(4, r4.Roll.ExternalBonus);
             Assert.False(r4.StateAfter.TripleBonusActive, "TripleBonusActive should be consumed after turn 4");
         }
 
@@ -236,10 +236,10 @@ namespace Pinder.Core.Tests
             Assert.Contains("no more values", ex.Message);
         }
 
-        // What: AC1 — ExternalBonus includes +1 from Triple bonus (not 0 or 2)
-        // Mutation: would catch if Triple bonus applied +2 instead of +1
+        // What: AC1 — ExternalBonus includes +2 from Triple bonus (not 0 or 1)
+        // Mutation: would catch if Triple bonus applied +3 instead of +2
         [Fact]
-        public async Task TripleBonus_AppliesExactlyPlusOne_AsExternalBonus()
+        public async Task TripleBonus_AppliesExactlyPlusTwo_AsExternalBonus()
         {
             var dice = new FixedDice(
                 5,  // Constructor: horniness roll (1d10)
@@ -266,8 +266,8 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
             var r4 = await session.ResolveTurnAsync(0);
 
-            // ExternalBonus = triple(+1) + momentum(+2 from streak=3 at start, #268) = 3
-            Assert.Equal(3, r4.Roll.ExternalBonus);
+            // ExternalBonus = triple(+2) + momentum(+2 from streak=3 at start, #268) = 4
+            Assert.Equal(4, r4.Roll.ExternalBonus);
         }
 
         // What: Edge case — Turns before VeryIntoIt consume exactly 2 dice each (no advantage)
