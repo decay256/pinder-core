@@ -8,7 +8,9 @@
   "items": [
     "face_nariz1",
     "head_wiz",
-    "flowers1"
+    "flowers1",
+    "hair1",
+    "arms0"
   ],
   "anatomy": {
     "trunkLengthBase": 0.18,

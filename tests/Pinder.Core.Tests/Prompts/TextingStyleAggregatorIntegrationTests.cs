@@ -165,42 +165,11 @@ namespace Pinder.Core.Tests.Prompts
                 result.Drops[0].DroppedValue, StringComparison.Ordinal);
         }
 
-        // ------------------------------------------------------------------
         // Test 3: Production path — CharacterDefinitionLoader.Load for Zyx.
         //
-        // This is the key regression test the reviewer requested:
-        //   "exercises the production path (CharacterDefinitionLoader.LoadCharacter
-        //    → aggregation produces a profile that should have conflicts dropped)
-        //    and asserts the conflict matrix actually fired."
-        //
-        // BEFORE the fix: the callsite passed TextingStyleConflicts.Empty via
-        //   the 2-arg Aggregate overload → both conflicting values appeared in
-        //   the profile → this assertion would FAIL.
-        //
-        // AFTER the fix: CharacterDefinitionLoader.Load uses AggregateWithAudit
-        //   with ConflictCatalog (loaded by CoreTestWiring / PromptWiring.Wire).
-        //   Conflict fires → "never sends more than 5 words" is dropped →
-        //   this assertion PASSES.
-        //
-        // Zyx items that trigger the conflict:
-        //   harem-pants     (slot=trousers → structure axis):
-        //       structure: wall-of-text (one paragraph, no breaks, comma splices throughout)
-        //   third-eye-piercing (slot=frame → length axis):
-        //       length: never sends more than 5 words
-        // These are listed as mutually exclusive in texting-style-conflicts.yaml.
-        // ------------------------------------------------------------------
-
-        // ------------------------------------------------------------------
-        // Test 3: Production path — CharacterDefinitionLoader.Load for Zyx.
-        //
-        // Issue #1176: Zyx now uses real Unity item ids (head_wiz, outfit_maid,
-        // head_horns, face_nariz1, head_antenas, flowers1). None of these items
-        // carry SYNTAX/TONE blocks so the old fragment-based conflict test
-        // cannot be reproduced via the production Zyx load. The conflict logic
-        // is verified by Tests 1 and 2 (which use ZyxConflictSources() directly).
-        //
-        // This test now verifies the production path loads without error and
-        // surfaces unknown items correctly (old fictional ids gone).
+        // Restored #907 end-to-end production guard: conflicting structure axis
+        // kept, lower-priority 5-word length cap dropped on a real Zyx load with
+        // real Unity items hair1/arms0.
         // ------------------------------------------------------------------
 
         [Fact]
@@ -222,12 +191,10 @@ namespace Pinder.Core.Tests.Prompts
             // Assert: profile assembles correctly; Zyx's real Unity items are known
             Assert.NotNull(profile);
             Assert.False(string.IsNullOrWhiteSpace(profile.AssembledSystemPrompt));
-
-            // No unknown item ids (all real Unity ids should be in core)
-            // Note: TextingStyleFragment may be empty/minimal since Zyx's items
-            // don't carry SYNTAX blocks yet — that's expected; fragments are authored
-            // progressively. The conflict test itself is in Tests 1 and 2.
             Assert.NotNull(profile.TextingStyleFragment);
+
+            Assert.Contains("wall-of-text", profile.TextingStyleFragment, StringComparison.Ordinal);
+            Assert.DoesNotContain("never sends more than 5 words", profile.TextingStyleFragment, StringComparison.Ordinal);
         }
 
         // ------------------------------------------------------------------
