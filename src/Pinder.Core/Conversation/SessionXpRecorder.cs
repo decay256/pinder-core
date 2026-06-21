@@ -29,21 +29,31 @@ namespace Pinder.Core.Conversation
         {
             if (rollResult.IsNatTwenty)
             {
-                _xpLedger.Record("Nat20", 25);
+                int award = _rules?.GetFlatXpAward("Nat20") ?? 25;
+                _xpLedger.Record("Nat20", award);
             }
             else if (rollResult.IsNatOne)
             {
-                _xpLedger.Record("Nat1", 10);
+                int award = _rules?.GetFlatXpAward("Nat1") ?? 10;
+                _xpLedger.Record("Nat1", award);
             }
             else if (rollResult.IsSuccess)
             {
                 int baseXp;
-                if (rollResult.DC <= 16)
-                    baseXp = 5;
-                else if (rollResult.DC <= 20)
-                    baseXp = 10;
+                int? configBaseXp = _rules?.GetSuccessBaseXp(rollResult.DC);
+                if (configBaseXp.HasValue)
+                {
+                    baseXp = configBaseXp.Value;
+                }
                 else
-                    baseXp = 15;
+                {
+                    if (rollResult.DC <= 16)
+                        baseXp = 5;
+                    else if (rollResult.DC <= 20)
+                        baseXp = 10;
+                    else
+                        baseXp = 15;
+                }
 
                 int xp = ApplyRiskTierMultiplier(baseXp, rollResult.RiskTier);
 
@@ -54,7 +64,8 @@ namespace Pinder.Core.Conversation
             }
             else
             {
-                _xpLedger.Record("Failure", 2);
+                int award = _rules?.GetFlatXpAward("Failure") ?? 2;
+                _xpLedger.Record("Failure", award);
             }
         }
 
@@ -78,6 +89,8 @@ namespace Pinder.Core.Conversation
                 multiplier = 2.0;
             else if (riskTier == RiskTier.Medium)
                 multiplier = 1.5;
+            else if (riskTier == RiskTier.Reckless)
+                multiplier = 10.0;
             else
                 multiplier = 1.0;
 
@@ -86,14 +99,15 @@ namespace Pinder.Core.Conversation
 
         /// <summary>
         /// Records end-of-game XP based on the game outcome.
-        /// DateSecured → 50, Unmatched/Ghosted → 5.
+        /// Uses terminal outcome multipliers.
         /// </summary>
         public void RecordEndOfGameXp(GameOutcome outcome)
         {
-            if (outcome == GameOutcome.DateSecured)
-                _xpLedger.Record("DateSecured", 50);
-            else if (outcome == GameOutcome.Unmatched || outcome == GameOutcome.Ghosted)
-                _xpLedger.Record("ConversationComplete", 5);
+            double multiplier = _rules?.GetTerminalOutcomeMultiplier(outcome) ?? (outcome == GameOutcome.DateSecured ? 3.0 : 1.0);
+            int collected = _xpLedger.TotalXp;
+            int delta = (int)Math.Round(collected * multiplier) - collected;
+            if (delta > 0)
+                _xpLedger.Record($"OutcomeBonus_{outcome}", delta);
         }
     }
 }

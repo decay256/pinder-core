@@ -248,7 +248,10 @@ namespace Pinder.Core.Tests.Conversation
             public int? GetMomentumBonus(int streak) => null;
             public InterestState? GetInterestState(int interest) => null;
             public int? GetShadowThresholdLevel(int shadowValue) => null;
-            public double? GetRiskTierXpMultiplier(Pinder.Core.Rolls.RiskTier riskTier) => null;
+            public double? GetRiskTierXpMultiplier(RiskTier riskTier) => null;
+            public double? GetTerminalOutcomeMultiplier(GameOutcome outcome) => null;
+            public int? GetSuccessBaseXp(int dc) => null;
+            public int? GetFlatXpAward(string awardType) => null;
         }
     }
 }

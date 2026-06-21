@@ -255,6 +255,7 @@ namespace Pinder.Rules
                 case RiskTier.Medium: targetId = "§2.risk-tier.medium"; break;
                 case RiskTier.Hard: targetId = "§2.risk-tier.hard"; break;
                 case RiskTier.Bold: targetId = "§2.risk-tier.bold"; break;
+                case RiskTier.Reckless: targetId = "§2.risk-tier.reckless"; break;
                 default: return null;
             }
 
@@ -262,6 +263,41 @@ namespace Pinder.Rules
             if (rule?.Outcome != null)
                 return GetOutcomeDouble(rule.Outcome, "xp_multiplier");
 
+            return null;
+        }
+
+        public double? GetTerminalOutcomeMultiplier(GameOutcome outcome)
+        {
+            string id = outcome switch
+            {
+                GameOutcome.DateSecured => "§10.xp.terminal.date-secured",
+                GameOutcome.Unmatched => "§10.xp.terminal.unmatched",
+                GameOutcome.Ghosted => "§10.xp.terminal.ghosted",
+                _ => null
+            };
+
+            if (id == null) return null;
+
+            var rule = FindById(id);
+            if (rule?.Outcome != null)
+                return GetOutcomeDouble(rule.Outcome, "multiplier");
+
+            return null;
+        }
+
+        public int? GetSuccessBaseXp(int dc)
+        {
+            var rule = FindById($"§10.xp.success.dc-{dc}");
+            if (rule?.Outcome != null)
+                return GetOutcomeInt(rule.Outcome, "base_xp");
+            return null;
+        }
+
+        public int? GetFlatXpAward(string awardType)
+        {
+            var rule = FindById($"§10.xp.flat.{awardType.ToLowerInvariant()}");
+            if (rule?.Outcome != null)
+                return GetOutcomeInt(rule.Outcome, "xp");
             return null;
         }
 

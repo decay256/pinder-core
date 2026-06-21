@@ -93,25 +93,33 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public void SessionXpRecorder_EndOfGame_DateSecured_Records50Xp()
+        public void SessionXpRecorder_EndOfGame_DateSecured_Multiplies3x()
         {
             var ledger = new XpLedger();
             var recorder = new SessionXpRecorder(ledger, rules: null);
+
+            // Add some base XP to multiply
+            ledger.Record("Base", 10);
 
             recorder.RecordEndOfGameXp(GameOutcome.DateSecured);
 
-            Assert.Equal(50, ledger.TotalXp);
+            Assert.Equal(30, ledger.TotalXp);
+            Assert.Contains(ledger.Events, e => e.Source == "OutcomeBonus_DateSecured" && e.Amount == 20);
         }
 
         [Fact]
-        public void SessionXpRecorder_EndOfGame_Unmatched_Records5Xp()
+        public void SessionXpRecorder_EndOfGame_Unmatched_Multiplies1x()
         {
             var ledger = new XpLedger();
             var recorder = new SessionXpRecorder(ledger, rules: null);
 
+            // Add some base XP to multiply
+            ledger.Record("Base", 10);
+
             recorder.RecordEndOfGameXp(GameOutcome.Unmatched);
 
-            Assert.Equal(5, ledger.TotalXp);
+            Assert.Equal(10, ledger.TotalXp);
+            Assert.DoesNotContain(ledger.Events, e => e.Source.StartsWith("OutcomeBonus_"));
         }
 
         [Theory]
