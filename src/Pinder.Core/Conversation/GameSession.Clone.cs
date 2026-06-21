@@ -31,7 +31,8 @@ namespace Pinder.Core.Conversation
         ///     <see cref="_llm"/>, <see cref="_dice"/>,
         ///     <see cref="_trapRegistry"/>, <see cref="_clock"/>,
         ///     <see cref="_rules"/>, <see cref="_statDeliveryInstructions"/>,
-        ///     <see cref="_onTextLayerNoop"/>. The active fast-gameplay
+        ///     <see cref="_onTextLayerNoop"/>, <see cref="_onShadowFilterTrace"/>,
+        ///     <see cref="_onRuleResolution"/>. The active fast-gameplay
         ///     scheduler (#425) is expected to inject branch-specific
         ///     <see cref="Pinder.Core.Rolls.PerOptionDicePool"/> via
         ///     <see cref="InjectNextDicePool"/>; <see cref="_dice"/> itself
@@ -83,6 +84,8 @@ namespace Pinder.Core.Conversation
             _horninessDcBias = src._horninessDcBias;
             _statDeliveryInstructions = src._statDeliveryInstructions;
             _onTextLayerNoop = src._onTextLayerNoop;
+            _onShadowFilterTrace = src._onShadowFilterTrace;
+            _onRuleResolution = src._onRuleResolution;
             _consequenceCatalog = src._consequenceCatalog;
             _maxDialogueOptions = src._maxDialogueOptions;
             _maxDeliveryWords = src._maxDeliveryWords;

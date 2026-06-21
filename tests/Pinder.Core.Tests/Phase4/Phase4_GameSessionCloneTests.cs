@@ -243,6 +243,8 @@ namespace Pinder.Core.Tests.Phase4
                 "_globalDcBias",            // value-type, primitive int
                 "_statDeliveryInstructions",// opaque immutable bag
                 "_onTextLayerNoop",         // delegate (stateless callback)
+                "_onShadowFilterTrace",     // delegate (stateless callback)
+                "_onRuleResolution",        // delegate (stateless callback)
             };
 
             var missing = new List<string>();

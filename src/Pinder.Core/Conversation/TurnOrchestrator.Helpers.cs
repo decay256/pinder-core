@@ -10,62 +10,87 @@ namespace Pinder.Core.Conversation
 {
     internal static class TurnOrchestratorHelpers
     {
-        internal static int GetMomentumBonus(int streak, IRuleResolver? rules)
+        internal static int GetMomentumBonus(int streak, IRuleResolver? rules, Action<RuleResolutionTraceEvent>? onRuleResolution = null)
         {
             if (rules != null)
             {
                 var resolved = rules.GetMomentumBonus(streak);
                 if (resolved.HasValue)
+                {
+                    onRuleResolution?.Invoke(new RuleResolutionTraceEvent("momentum_bonus", "resolver", resolverConfigured: true, numericValue: resolved.Value, stateValue: null));
                     return resolved.Value;
+                }
             }
-            if (streak >= 5) return 3;
-            if (streak >= 3) return 2;
-            return 0;
+            int fallback = 0;
+            if (streak >= 5) fallback = 3;
+            else if (streak >= 3) fallback = 2;
+            onRuleResolution?.Invoke(new RuleResolutionTraceEvent("momentum_bonus", "hardcoded_fallback", resolverConfigured: rules != null, numericValue: fallback, stateValue: null));
+            return fallback;
         }
 
-        internal static int ResolveFailureInterestDelta(RollResult rollResult, IRuleResolver? rules)
+        internal static int ResolveFailureInterestDelta(RollResult rollResult, IRuleResolver? rules, Action<RuleResolutionTraceEvent>? onRuleResolution = null)
         {
             if (rules != null)
             {
                 var resolved = rules.GetFailureInterestDelta(rollResult.MissMargin, rollResult.UsedDieRoll);
                 if (resolved.HasValue)
+                {
+                    onRuleResolution?.Invoke(new RuleResolutionTraceEvent("failure_interest_delta", "resolver", resolverConfigured: true, numericValue: resolved.Value, stateValue: null));
                     return resolved.Value;
+                }
             }
-            return FailureScale.GetInterestDelta(rollResult);
+            int fallback = FailureScale.GetInterestDelta(rollResult);
+            onRuleResolution?.Invoke(new RuleResolutionTraceEvent("failure_interest_delta", "hardcoded_fallback", resolverConfigured: rules != null, numericValue: fallback, stateValue: null));
+            return fallback;
         }
 
-        internal static int ResolveSuccessInterestDelta(RollResult rollResult, IRuleResolver? rules)
+        internal static int ResolveSuccessInterestDelta(RollResult rollResult, IRuleResolver? rules, Action<RuleResolutionTraceEvent>? onRuleResolution = null)
         {
             if (rules != null)
             {
                 int beatMargin = rollResult.FinalTotal - rollResult.DC;
                 var resolved = rules.GetSuccessInterestDelta(beatMargin, rollResult.UsedDieRoll);
                 if (resolved.HasValue)
+                {
+                    onRuleResolution?.Invoke(new RuleResolutionTraceEvent("success_interest_delta", "resolver", resolverConfigured: true, numericValue: resolved.Value, stateValue: null));
                     return resolved.Value;
+                }
             }
-            return SuccessScale.GetInterestDelta(rollResult);
+            int fallback = SuccessScale.GetInterestDelta(rollResult);
+            onRuleResolution?.Invoke(new RuleResolutionTraceEvent("success_interest_delta", "hardcoded_fallback", resolverConfigured: rules != null, numericValue: fallback, stateValue: null));
+            return fallback;
         }
 
-        internal static InterestState ResolveInterestState(GameSessionState state, IRuleResolver? rules)
+        internal static InterestState ResolveInterestState(GameSessionState state, IRuleResolver? rules, Action<RuleResolutionTraceEvent>? onRuleResolution = null)
         {
             if (rules != null)
             {
                 var resolved = rules.GetInterestState(state.Interest.Current);
                 if (resolved.HasValue)
+                {
+                    onRuleResolution?.Invoke(new RuleResolutionTraceEvent("interest_state", "resolver", resolverConfigured: true, numericValue: null, stateValue: resolved.Value.ToString()));
                     return resolved.Value;
+                }
             }
-            return state.Interest.GetState();
+            InterestState fallback = state.Interest.GetState();
+            onRuleResolution?.Invoke(new RuleResolutionTraceEvent("interest_state", "hardcoded_fallback", resolverConfigured: rules != null, numericValue: null, stateValue: fallback.ToString()));
+            return fallback;
         }
 
-        internal static int ResolveThresholdLevel(int shadowValue, IRuleResolver? rules)
+        internal static int ResolveThresholdLevel(int shadowValue, IRuleResolver? rules, Action<RuleResolutionTraceEvent>? onRuleResolution = null)
         {
             if (rules != null)
             {
                 var resolved = rules.GetShadowThresholdLevel(shadowValue);
                 if (resolved.HasValue)
+                {
+                    onRuleResolution?.Invoke(new RuleResolutionTraceEvent("shadow_threshold_level", "resolver", resolverConfigured: true, numericValue: resolved.Value, stateValue: null));
                     return resolved.Value;
+                }
             }
-            return ShadowThresholdEvaluator.GetThresholdLevel(shadowValue);
+            int fallback = ShadowThresholdEvaluator.GetThresholdLevel(shadowValue);
+            onRuleResolution?.Invoke(new RuleResolutionTraceEvent("shadow_threshold_level", "hardcoded_fallback", resolverConfigured: rules != null, numericValue: fallback, stateValue: null));
+            return fallback;
         }
 
         internal static GameStateSnapshot CreateSnapshot(GameSessionState state, IRuleResolver? rules)

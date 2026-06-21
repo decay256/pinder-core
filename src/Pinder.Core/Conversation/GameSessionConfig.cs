@@ -104,6 +104,12 @@ namespace Pinder.Core.Conversation
         public Action<ShadowFilterTraceEvent>? OnShadowFilterTrace { get; }
 
         /// <summary>
+        /// Optional callback fired when a rule resolution occurs (#1219).
+        /// When null, no callback is fired.
+        /// </summary>
+        public Action<RuleResolutionTraceEvent>? OnRuleResolution { get; }
+
+        /// <summary>
         /// Consequence catalogue for engine-side population of
         /// Consequence fields on roll/shadow/horniness result DTOs (#976).
         /// When null, engines leave <c>Consequence</c> null.
@@ -138,7 +144,8 @@ namespace Pinder.Core.Conversation
             IConsequenceCatalog? consequenceCatalog = null,
             int? maxDialogueOptions = null,
             int? maxDeliveryWords = null,
-            bool archetypesEnabled = false)
+            bool archetypesEnabled = false,
+            Action<RuleResolutionTraceEvent>? onRuleResolution = null)
         {
             Clock = clock;
             PlayerShadows = playerShadows;
@@ -155,6 +162,7 @@ namespace Pinder.Core.Conversation
             StatDrawRng = statDrawRng;
             OnTextLayerNoop = onTextLayerNoop;
             OnShadowFilterTrace = onShadowFilterTrace;
+            OnRuleResolution = onRuleResolution;
             ConsequenceCatalog = consequenceCatalog;
             MaxDialogueOptions = maxDialogueOptions;
             MaxDeliveryWords = maxDeliveryWords;
