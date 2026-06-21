@@ -301,6 +301,38 @@ namespace Pinder.Rules
             return null;
         }
 
+        public int? GetXpThresholdForLevel(int level)
+        {
+            var rule = FindById($"§10.progression.level.{level}");
+            if (rule?.Outcome != null)
+                return GetOutcomeInt(rule.Outcome, "xp_threshold");
+            return null;
+        }
+
+        public int? GetLevelRollBonus(int level)
+        {
+            var rule = FindById($"§10.progression.level.{level}");
+            if (rule?.Outcome != null)
+                return GetOutcomeInt(rule.Outcome, "roll_bonus");
+            return null;
+        }
+
+        public int? GetBuildPointsForLevel(int level)
+        {
+            var rule = FindById($"§10.progression.level.{level}");
+            if (rule?.Outcome != null)
+                return GetOutcomeInt(rule.Outcome, "build_points");
+            return null;
+        }
+
+        public int? GetItemSlotsForLevel(int level)
+        {
+            var rule = FindById($"§10.progression.level.{level}");
+            if (rule?.Outcome != null)
+                return GetOutcomeInt(rule.Outcome, "item_slots");
+            return null;
+        }
+
         // --- Helpers ---
 
         private RuleEntry? FindById(string id)

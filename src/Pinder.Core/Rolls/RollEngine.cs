@@ -89,7 +89,8 @@ namespace Pinder.Core.Rolls
             bool hasAdvantage     = false,
             bool hasDisadvantage  = false,
             int externalBonus     = 0,
-            int dcAdjustment      = 0)
+            int dcAdjustment      = 0,
+            IRuleResolver? rules  = null)
         {
             // --- Determine advantage/disadvantage from active traps ---
             var activeTrap = attackerTraps.GetActive(stat);
@@ -118,7 +119,7 @@ namespace Pinder.Core.Rolls
             if (activeTrap != null && activeTrap.Definition.Effect == TrapEffect.StatPenalty)
                 statMod -= activeTrap.Definition.EffectValue;
 
-            int levelBonus = LevelTable.GetBonus(level);
+            int levelBonus = LevelTable.GetBonus(level, rules);
 
             // --- Compute DC ---
             int dc = defender.GetDefenceDC(stat) - dcAdjustment;
@@ -156,7 +157,8 @@ namespace Pinder.Core.Rolls
             IDiceRoller dice,
             bool hasAdvantage     = false,
             bool hasDisadvantage  = false,
-            int externalBonus     = 0)
+            int externalBonus     = 0,
+            IRuleResolver? rules  = null)
         {
             // --- Determine advantage/disadvantage from active traps ---
             var activeTrap = attackerTraps.GetActive(stat);
@@ -185,7 +187,7 @@ namespace Pinder.Core.Rolls
             if (activeTrap != null && activeTrap.Definition.Effect == TrapEffect.StatPenalty)
                 statMod -= activeTrap.Definition.EffectValue;
 
-            int levelBonus = LevelTable.GetBonus(level);
+            int levelBonus = LevelTable.GetBonus(level, rules);
 
             // Apply DateeDCIncrease trap effect
             int effectiveDc = fixedDc;

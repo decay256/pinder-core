@@ -198,9 +198,10 @@ namespace Pinder.Core.Conversation
             DialogueOption chosen,
             DialogueOption[] options,
             CharacterProfile player,
-            CharacterProfile datee)
+            CharacterProfile datee,
+            Pinder.Core.Interfaces.IRuleResolver? rules = null)
         {
-            int levelBonus = LevelTable.GetBonus(player.Level);
+            int levelBonus = LevelTable.GetBonus(player.Level, rules);
 
             int chosenMargin = player.Stats.GetEffective(chosen.Stat) + levelBonus
                                - datee.Stats.GetDefenceDC(chosen.Stat);

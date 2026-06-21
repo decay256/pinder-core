@@ -252,6 +252,10 @@ namespace Pinder.Core.Tests.Conversation
             public double? GetTerminalOutcomeMultiplier(GameOutcome outcome) => null;
             public int? GetSuccessBaseXp(int dc) => null;
             public int? GetFlatXpAward(string awardType) => null;
+            public int? GetXpThresholdForLevel(int level) => null;
+            public int? GetLevelRollBonus(int level) => null;
+            public int? GetBuildPointsForLevel(int level) => null;
+            public int? GetItemSlotsForLevel(int level) => null;
         }
     }
 }
