@@ -100,6 +100,8 @@ namespace Pinder.Core.Tests
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, CancellationToken ct = default)
                 => Task.FromResult<string?>(null);
 
+        public Task<string> GetSuccessImprovementAsync(SuccessImprovementContext context, CancellationToken ct = default) => Task.FromResult(context.DeliveredMessage);
+
             public Task<string> GetSteeringQuestionAsync(SteeringContext context, CancellationToken ct = default)
                 => Task.FromResult("so... when are we actually doing this?");
 

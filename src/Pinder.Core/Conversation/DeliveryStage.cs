@@ -117,6 +117,60 @@ namespace Pinder.Core.Conversation
                 textDiffs.Add(new TextDiff(layerLabel, tierSpans, originalIntendedText, deliveredMessage));
             }
 
+            // Success Improvement (Strong/Legendary)
+            bool isSuccess = rollResult.IsSuccess;
+            bool isNat20 = rollResult.IsNatTwenty;
+            if (isSuccess && !isNat20 && !string.IsNullOrWhiteSpace(deliveredMessage) && deliveredMessage.Trim() != "..." && _llm is IStatefulLlmAdapter statefulAdapter)
+            {
+                int beatDcBy = Math.Max(0, rollResult.FinalTotal - rollResult.DC);
+                string tierKey = beatDcBy >= 15 ? "exceptional" :
+                                 beatDcBy >= 10 ? "critical" :
+                                 beatDcBy >= 5  ? "strong" : "clean";
+
+                if (beatDcBy >= 5) // strong, critical, exceptional
+                {
+                    string beforeImprovement = deliveredMessage;
+                    string improved = null;
+                    try
+                    {
+                        var context = new SuccessImprovementContext(
+                            player.AssembledSystemPrompt,
+                            datee.DisplayName,
+                            player.DisplayName,
+                            beforeImprovement,
+                            chosenOption.Stat,
+                            tierKey,
+                            TurnOrchestratorHelpers.BuildHistoryForLlmContext(state));
+                        
+                        improved = await statefulAdapter.GetSuccessImprovementAsync(context, ct).ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException) when (ct.IsCancellationRequested)
+                    {
+                        throw;
+                    }
+                    catch
+                    {
+                        // Ignore and fallback
+                    }
+
+                    if (improved != null)
+                    {
+                        improved = improved.Trim();
+                        if (!string.IsNullOrWhiteSpace(improved) && improved != "...")
+                        {
+                            deliveredMessage = improved;
+                        }
+                    }
+
+                    if (deliveredMessage != beforeImprovement)
+                    {
+                        string layerName = tierKey == "exceptional" ? "Legendary success" : "Strong success";
+                        var spans = WordDiff.Compute(beforeImprovement, deliveredMessage);
+                        textDiffs.Add(new TextDiff(layerName, spans, beforeImprovement, deliveredMessage));
+                    }
+                }
+            }
+
             // Steering, when it fires, appends its question to the degraded and sanitized delivery base as its own later layer
             if (steeringResult.SteeringSucceeded && steeringResult.SteeringQuestion != null)
             {

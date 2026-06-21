@@ -49,6 +49,8 @@ namespace Pinder.Core.Tests.Conversation
                 => Task.FromResult(new DateeResponse(string.Empty));
             public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, CancellationToken ct = default)
                 => Task.FromResult<string?>(null);
+        public Task<string> GetSuccessImprovementAsync(SuccessImprovementContext context, CancellationToken ct = default) => Task.FromResult(context.DeliveredMessage);
+
             public Task<string> GetSteeringQuestionAsync(SteeringContext context, CancellationToken ct = default)
                 => Task.FromResult(string.Empty);
             public Task<string> ApplyHorninessOverlayAsync(string m, string i, string? oc = null, string? ad = null, CancellationToken ct = default) => Task.FromResult(m);

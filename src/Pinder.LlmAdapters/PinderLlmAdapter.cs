@@ -341,6 +341,53 @@ namespace Pinder.LlmAdapters
         }
 
         /// <inheritdoc />
+        public async Task<string> GetSuccessImprovementAsync(SuccessImprovementContext context, CancellationToken ct = default)
+        {
+            if (context == null) throw new ArgumentNullException(nameof(context));
+
+            string template = null;
+            if (_options.StatDeliveryInstructions != null)
+            {
+                template = _options.StatDeliveryInstructions.Get(context.Stat, context.TierKey);
+            }
+
+            if (string.IsNullOrWhiteSpace(template))
+            {
+                return context.DeliveredMessage;
+            }
+
+            string prompt = template
+                .Replace("{player_name}", context.PlayerName)
+                .Replace("{datee_name}", context.DateeName)
+                .Replace("{delivered_message}", context.DeliveredMessage);
+
+            var sb = new StringBuilder();
+            sb.AppendLine("CONVERSATION SO FAR:");
+            foreach (var (sender, text) in context.ConversationHistory)
+            {
+                sb.AppendLine($"{sender}: {text}");
+            }
+            sb.AppendLine();
+            sb.AppendLine(prompt);
+
+            string systemPrompt = SessionSystemPromptBuilder.BuildPlayerAvatar(context.PlayerAvatarPrompt, _options.GameDefinition);
+
+            var responseText = await _transport.SendAsync(systemPrompt, sb.ToString(), 0.8, _options.MaxTokens, phase: LlmPhase.Delivery, ct: ct)
+                .ConfigureAwait(false);
+
+            var improved = (responseText ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(improved) || string.Equals(improved, "...", StringComparison.OrdinalIgnoreCase))
+            {
+                return context.DeliveredMessage;
+            }
+
+            if (improved.Length >= 2 && improved[0] == '"' && improved[improved.Length - 1] == '"')
+                improved = improved.Substring(1, improved.Length - 2).Trim();
+
+            return improved;
+        }
+
+        /// <inheritdoc />
         public async Task<string> GetSteeringQuestionAsync(SteeringContext context, CancellationToken ct = default)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));

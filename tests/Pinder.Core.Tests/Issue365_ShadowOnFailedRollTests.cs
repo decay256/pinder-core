@@ -273,6 +273,8 @@ namespace Pinder.Core.Tests
                 return Task.FromResult(message);
             }
 
+        public Task<string> GetSuccessImprovementAsync(SuccessImprovementContext context, CancellationToken ct = default) => Task.FromResult(context.DeliveredMessage);
+
             public Task<string> GetSteeringQuestionAsync(SteeringContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult("steering question");
         }
