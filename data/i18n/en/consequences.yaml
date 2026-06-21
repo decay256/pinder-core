@@ -38,10 +38,10 @@ strings:
   consequence.shadow.miss.overthinking: "Your Overthinking shadow took over — the message reads as second-guessing on display."
 
   # ── horniness ─────────────────────────────────────────────────────────────
-  consequence.horniness.miss.fumble: "Horniness checked out — the message lost its edge."
-  consequence.horniness.miss.misfire: "Horniness misfired — the message reads slightly more thirsty than intended."
-  consequence.horniness.miss.tropetrap: "Horniness walked into a trope trap — the flirt pattern backfired."
-  consequence.horniness.miss.catastrophe: "Horniness misfired catastrophically — the message reads thirsty in a cringey way."
+  consequence.horniness.miss.fumble: "Horniness miss — appended a horny follow-up question."
+  consequence.horniness.miss.misfire: "Horniness miss — appended a thirsty follow-up question."
+  consequence.horniness.miss.tropetrap: "Horniness miss — appended an overly flirty follow-up question."
+  consequence.horniness.miss.catastrophe: "Horniness miss — appended a desperately horny follow-up question."
 
   # ── steering ─────────────────────────────────────────────────────────────
   consequence.steering.miss: "Steering missed — the pivot didn't land and the message stays on the rejected topic."

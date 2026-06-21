@@ -108,8 +108,8 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task HorninessMiss_AppendsOneQuestion_DoesNotRewritePrefix()
         {
-            // mainRoll = 15 (clean success, low margin so SuccessImprovement doesn't trigger)
-            var session = MakeSession(sessionHorniness: 10, steeringRng: new AlwaysMinRandom(), mainRoll: 15);
+            // mainRoll = 16 (clean success, low margin so SuccessImprovement doesn't trigger)
+            var session = MakeSession(sessionHorniness: 10, steeringRng: new AlwaysMinRandom(), mainRoll: 16);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -156,7 +156,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task HorninessSuccess_NoQuestionAppended()
         {
-            var session = MakeSession(sessionHorniness: 10, steeringRng: new AlwaysMaxRandom(), mainRoll: 15);
+            var session = MakeSession(sessionHorniness: 10, steeringRng: new AlwaysMaxRandom(), mainRoll: 16);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -170,11 +170,11 @@ namespace Pinder.Core.Tests
         public async Task Steering_StillWorks_Independently()
         {
             // steeringRng returns max -> steering succeeds. 
-            var session = MakeSession(sessionHorniness: 10, steeringRng: new AlwaysMaxRandom(), mainRoll: 15);
+            var session = MakeSession(sessionHorniness: 10, steeringRng: new AlwaysMaxRandom(), mainRoll: 16);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
-            Assert.True(result.Steering.IsSuccess, "Steering should succeed");
+            Assert.True(result.Steering.SteeringSucceeded, "Steering should succeed");
             Assert.Contains(AppendedSteering, result.DeliveredMessage);
             
             var diff = Assert.Single(result.TextDiffs, d => d.LayerName == "Steering");

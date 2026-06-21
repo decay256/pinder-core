@@ -18,7 +18,7 @@ strings:
   turn_result.outcome_summary: "Turn {turn} · {riskTier} · d20[{used}] {total}/{dc}"
 
   turn_result.horniness_check_heading: "Horniness check"
-  turn_result.horniness_check_explainer: "Per-turn d20 vs DC {dc}: a miss may trigger a horniness overlay on the delivered message."
+  turn_result.horniness_check_explainer: "Per-turn d20 vs DC {dc}: a miss appends a horny follow-up question (no interest penalty)."
 
   turn_result.shadow_check_heading: "Shadow check"
   turn_result.shadow_check_explainer: "Per-turn d20 vs DC {dc}: a miss taints the delivered message via a shadow overlay and caps a successful action's interest gain at +1 (it does NOT fail the turn)."
@@ -36,7 +36,7 @@ strings:
   turn_result.interest_breakdown.risk_bonus: "Risk bonus: {value}"
   turn_result.interest_breakdown.combo_bonus: "Combo bonus: {value}"
   turn_result.interest_breakdown.shadow_misfire: "Shadow: {original} → capped to +1"
-  turn_result.interest_breakdown.horniness_penalty: "Horniness: floor({original} / 2) = {value}"
+  turn_result.interest_breakdown.horniness_penalty: "Horniness: no interest penalty"
   turn_result.interest_breakdown.delay_penalty: "Delay penalty: {value}"
   turn_result.interest_breakdown.total: "= {value} (now {now})"
 

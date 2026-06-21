@@ -189,14 +189,14 @@ namespace Pinder.Core.Tests
 
         /// <summary>
         /// Case 2 (the headline worked example): shadow trap on a success FOLLOWED by
-        /// horniness halving. Base positive delta (Nat 20 → ≥ 4) is first truncated by
-        /// the shadow trap to 1, then horniness (floor, delta &gt; 0) halves it:
-        /// floor(1 / 2) = 0. Net final interest delta == 0 — BUT the turn is STILL NOT
-        /// a failure: the roll verdict stays SUCCESS and the momentum streak still
-        /// increments. (horninessDie = 5 → SessionHorniness = 5 → overlay fires.)
+        /// horniness check. Base positive delta (Nat 20 → ≥ 4) is first truncated by
+        /// the shadow trap to 1, then horniness appends a question (#1209, no penalty).
+        /// Net final interest delta == 1. The turn is STILL NOT a failure: the roll
+        /// verdict stays SUCCESS and the momentum streak still increments.
+        /// (horninessDie = 5 → SessionHorniness = 5 → check misses.)
         /// </summary>
         [Fact]
-        public async Task ShadowTrap_ThenHorniness_NetsZero_ButStillSuccess_MomentumIncrements()
+        public async Task ShadowTrap_ThenHorniness_NetsOne_StillSuccess_MomentumIncrements()
         {
             var (session, llm) = MakeSession(horninessDie: 5);
 
@@ -206,15 +206,15 @@ namespace Pinder.Core.Tests
             var result = await session.ResolveTurnAsync(rizzIdx);
             int momentumAfter = session.CreateSnapshot().MomentumStreak;
 
-            // Shadow trap fired AND horniness overlay fired (it is what drives the halving).
+            // Shadow trap fired AND horniness check missed.
             Assert.True(result.Roll.IsSuccess);
             Assert.True(result.ShadowCheck.OverlayApplied);
-            Assert.True(result.HorninessCheck.OverlayApplied);
+            Assert.True(result.HorninessCheck.IsMiss);
 
-            // #1095 worked example: shadow → 1, then horniness floor(1/2) = 0.
-            Assert.Equal(0, result.InterestDelta);
+            // shadow → 1, horniness no penalty.
+            Assert.Equal(1, result.InterestDelta);
 
-            // Still a success: verdict NOT demoted to Miss despite the net-zero delta.
+            // Still a success: verdict NOT demoted to Miss.
             Assert.Equal(RollVerdict.Success, result.Roll.Check.FinalVerdict);
             Assert.Equal(FailureTier.Success, result.Roll.Check.FinalTier);
 
@@ -222,7 +222,7 @@ namespace Pinder.Core.Tests
             Assert.True(result.BaseInterestDelta >= 1,
                 $"base success delta should be positive; got {result.BaseInterestDelta}");
 
-            // Momentum streak still increments through the net-zero shadow+horniness turn.
+            // Momentum streak still increments.
             Assert.Equal(momentumBefore + 1, momentumAfter);
         }
 
@@ -276,7 +276,8 @@ namespace Pinder.Core.Tests
 
         public Task<string> GetSuccessImprovementAsync(SuccessImprovementContext context, CancellationToken ct = default) => Task.FromResult(context.DeliveredMessage);
 
-            public Task<string> GetSteeringQuestionAsync(SteeringContext context, System.Threading.CancellationToken ct = default)
+            public Task<string> GetHorninessQuestionAsync(HorninessQuestionContext context, CancellationToken ct = default) => Task.FromResult("question?");
+        public Task<string> GetSteeringQuestionAsync(SteeringContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult("steering question");
         }
 

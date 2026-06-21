@@ -429,7 +429,43 @@ namespace Pinder.LlmAdapters
             return question;
         }
 
-        // ── Private helpers ────────────────────────────────────────────────
+        public async Task<string> GetHorninessQuestionAsync(HorninessQuestionContext context, CancellationToken ct = default)
+        {
+            if (context == null) throw new ArgumentNullException(nameof(context));
+
+            string template = _options.GameDefinition?.HorninessPrompt;
+            if (string.IsNullOrWhiteSpace(template))
+                template = GameDefinition.DefaultHorninessPrompt;
+
+            string prompt = template
+                .Replace("{player_name}", context.PlayerName)
+                .Replace("{datee_name}", context.DateeName)
+                .Replace("{delivered_message}", context.DeliveredMessage);
+
+            var sb = new StringBuilder();
+            sb.AppendLine("CONVERSATION SO FAR:");
+            foreach (var (sender, text) in context.ConversationHistory)
+            {
+                sb.AppendLine($"{sender}: {text}");
+            }
+            sb.AppendLine();
+            sb.AppendLine(prompt);
+
+            string systemPrompt = SessionSystemPromptBuilder.BuildPlayerAvatar(context.PlayerAvatarPrompt, _options.GameDefinition);
+
+            var responseText = await _transport.SendAsync(systemPrompt, sb.ToString(), 0.9, _options.MaxTokens, phase: LlmPhase.HorninessOverlay, ct: ct)
+                .ConfigureAwait(false);
+
+            var question = (responseText ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(question))
+                return "so... your place or mine?";
+
+            if (question.Length >= 2 && question[0] == '"' && question[question.Length - 1] == '"')
+                question = question.Substring(1, question.Length - 2).Trim();
+
+            return question;
+        }
+
 
         /// <summary>
         /// Sends a stateful datee request by flattening the supplied history

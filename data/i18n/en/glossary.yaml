@@ -50,7 +50,7 @@ strings:
   glossary.combo.fallback_reward: "+1 Interest if success"
 
   # ── Shadow trap (#1095) ───────────────────────────────────────────
-  glossary.shadow.trap: "A shadow trap is a successful message tainted by a missed shadow check. It is NOT a failed turn: the roll still counts as a success and momentum keeps building, but the message lands a little off — the DATEE reacts neutrally or with mild coolness — and the interest gain is capped at +1 (horniness may halve that to 0)."
+  glossary.shadow.trap: "A shadow trap is a successful message tainted by a missed shadow check. It is NOT a failed turn: the roll still counts as a success and momentum keeps building, but the message lands a little off — the DATEE reacts neutrally or with mild coolness — and the interest gain is capped at +1."
 
   # ── Shadow reason explanations (#186 / mirrors PlaytestFormatter) ─
   # Brief plain-English explanation paired with each shadow-growth

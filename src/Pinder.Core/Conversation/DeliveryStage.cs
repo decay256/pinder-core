@@ -318,54 +318,29 @@ namespace Pinder.Core.Conversation
             int horninessInterestPenalty = 0;
             int horninessInterestBefore = 0;
 
-            // #899: Horniness TEXT OVERLAY
-            if (horninessOverlayInstruction != null)
+            // #1209: Horniness append
+            if (horninessCheckResult.IsMiss && _llm is IStatefulLlmAdapter horninessStateful && !string.IsNullOrWhiteSpace(deliveredMessage) && deliveredMessage.Trim() != "...")
             {
-                string beforeHorniness = deliveredMessage;
-                string dateeCtx = TurnOrchestratorHelpers.BuildDateeContext(datee);
-
-                // AC-B2: Add remaining budget hint to Horniness overlay instruction if tight.
-                int currentWords = deliveredMessage.Split(new[] { ' ', '\r', '\n', '\t' }, StringSplitOptions.RemoveEmptyEntries).Length;
-                int remainingBudget = Math.Max(0, _maxDeliveryWords - currentWords);
-                string finalInstruction = horninessOverlayInstruction;
-                if (remainingBudget < 25)
-                {
-                    finalInstruction += $"\nLength constraint: Keep it extremely brief (max {remainingBudget} words). Do not append long sentences.";
-                }
-
                 progress?.Report(new TurnProgressEvent(TurnProgressStage.HorninessOverlayStarted));
-                string rawHorninessOutput = await _llm.ApplyHorninessOverlayAsync(deliveredMessage, finalInstruction, dateeCtx, playerArchetypeDirectiveForDelivery, ct).ConfigureAwait(false);
-                progress?.Report(new TurnProgressEvent(TurnProgressStage.HorninessOverlayCompleted, rawHorninessOutput));
-
-                string sanitizedHorninessOutput = MetaPrefixStripper.Strip(rawHorninessOutput);
-                if (sanitizedHorninessOutput != rawHorninessOutput)
+                string beforeHorniness = deliveredMessage;
+                string question = null;
+                try
                 {
-                    var stripSpans = WordDiff.Compute(rawHorninessOutput, sanitizedHorninessOutput);
-                    textDiffs.Add(new TextDiff(
-                        MetaPrefixStripper.LayerName, stripSpans,
-                        rawHorninessOutput, sanitizedHorninessOutput));
+                    question = await horninessStateful.GetHorninessQuestionAsync(new HorninessQuestionContext(player.AssembledSystemPrompt, datee.DisplayName, player.DisplayName, beforeHorniness, TurnOrchestratorHelpers.BuildHistoryForLlmContext(state)), ct).ConfigureAwait(false);
                 }
-
-                deliveredMessage = sanitizedHorninessOutput;
-
-                if (deliveredMessage != beforeHorniness)
+                catch (OperationCanceledException) when (ct.IsCancellationRequested) { throw; }
+                catch { question = null; }
+                
+                if (!string.IsNullOrWhiteSpace(question))
                 {
-                    var horninessSpans = WordDiff.Compute(beforeHorniness, deliveredMessage);
-                    textDiffs.Add(new TextDiff("Horniness", horninessSpans, beforeHorniness, deliveredMessage));
+                    deliveredMessage = beforeHorniness.Length == 0 ? question : beforeHorniness.TrimEnd() + " " + question;
+                    if (deliveredMessage != beforeHorniness)
+                    {
+                        var sp = WordDiff.Compute(beforeHorniness, deliveredMessage);
+                        textDiffs.Add(new TextDiff("Horniness", sp, beforeHorniness, deliveredMessage));
+                    }
                 }
-                else
-                {
-                    TurnOrchestratorHelpers.EmitTextLayerNoop(_onTextLayerNoop, state.TurnNumber, "Horniness", beforeHorniness, deliveredMessage);
-                }
-            }
-
-            if (horninessCheckResult.OverlayApplied && interestDelta > 0)
-            {
-                horninessInterestBefore = state.Interest.Current + shadowCorrection;
-                int halvedDelta = (int)Math.Floor(interestDelta / 2.0);
-                int penalty = halvedDelta - interestDelta;
-                horninessInterestPenalty = penalty;
-                interestDelta += penalty;
+                progress?.Report(new TurnProgressEvent(TurnProgressStage.HorninessOverlayCompleted, deliveredMessage));
             }
 
             // Issue #339: same-turn callback-phrase strip
