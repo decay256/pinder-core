@@ -78,5 +78,10 @@ namespace Pinder.LlmAdapters
         /// Receives structured metadata about the violation.
         /// </summary>
         public System.Action<LlmContractViolation>? OnLlmContractViolation { get; set; }
+
+        /// <summary>
+        /// Optional callback invoked when an overlay or steering rewrite degraded, failed, or was skipped.
+        /// </summary>
+        public System.Action<OverlayDegradedEvent>? OnOverlayDegraded { get; set; }
     }
 }
