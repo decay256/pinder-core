@@ -263,7 +263,16 @@ namespace Pinder.LlmAdapters
 
                 var trimmed = responseText?.Trim();
                 if (string.IsNullOrWhiteSpace(trimmed))
+                {
+                    _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                        overlayType: "interest_beat",
+                        provider: "primary",
+                        model: null,
+                        reason: "empty_output",
+                        outcome: OverlayOutcome.Degraded
+                    ));
                     return null;
+                }
 
                 // Strip surrounding quotes if present
                 if (trimmed.Length >= 2 && trimmed[0] == '"' && trimmed[trimmed.Length - 1] == '"')
@@ -277,8 +286,16 @@ namespace Pinder.LlmAdapters
                 // generic LLM-failure fallback (#794).
                 throw;
             }
-            catch
+            catch (Exception ex)
             {
+                _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                    overlayType: "interest_beat",
+                    provider: "primary",
+                    model: null,
+                    reason: "error",
+                    outcome: OverlayOutcome.Degraded,
+                    errorCode: ex.GetType().Name
+                ));
                 return null;
             }
         }
@@ -287,13 +304,25 @@ namespace Pinder.LlmAdapters
         public async Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, CancellationToken ct = default)
         {
             if (string.IsNullOrWhiteSpace(message) || string.IsNullOrWhiteSpace(instruction))
+            {
+                if (string.IsNullOrWhiteSpace(instruction))
+                {
+                    _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                        overlayType: "horniness_overlay",
+                        provider: "primary",
+                        model: null,
+                        reason: "skipped_no_instruction",
+                        outcome: OverlayOutcome.Skipped
+                    ));
+                }
                 return message;
+            }
 
             // Route to Groq if configured
             if (!string.IsNullOrWhiteSpace(_options.OverlayGroqModel) && !string.IsNullOrWhiteSpace(_options.OverlayGroqApiKey))
             {
                 return await GroqOverlayApplier.ApplyHorninessOverlayAsync(
-                    _options.OverlayGroqApiKey, _options.OverlayGroqModel, message, instruction, dateeContext, archetypeDirective, ct)
+                    _options.OverlayGroqApiKey, _options.OverlayGroqModel, message, instruction, dateeContext, archetypeDirective, ct, _options.OnOverlayDegraded)
                     .ConfigureAwait(false);
             }
 
@@ -319,7 +348,17 @@ namespace Pinder.LlmAdapters
                 var result = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.HorninessOverlay, ct: ct)
                     .ConfigureAwait(false);
 
-                if (string.IsNullOrWhiteSpace(result)) return message;
+                if (string.IsNullOrWhiteSpace(result))
+                {
+                    _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                        overlayType: "horniness_overlay",
+                        provider: "primary",
+                        model: null,
+                        reason: "empty_output",
+                        outcome: OverlayOutcome.Degraded
+                    ));
+                    return message;
+                }
                 // #831: thinking-block stripping moved to
                 // ThinkingStrippingLlmTransport (transport decorator).
                 // The transport already strips, so we only trim here.
@@ -332,7 +371,16 @@ namespace Pinder.LlmAdapters
                     trimmed.StartsWith("I cannot", StringComparison.OrdinalIgnoreCase) ||
                     trimmed.IndexOf("inappropriate", StringComparison.OrdinalIgnoreCase) >= 0 ||
                     trimmed.IndexOf("I'd be happy to help", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                        overlayType: "horniness_overlay",
+                        provider: "primary",
+                        model: null,
+                        reason: "refusal",
+                        outcome: OverlayOutcome.Degraded
+                    ));
                     return message;
+                }
 
                 return trimmed;
             }
@@ -340,8 +388,16 @@ namespace Pinder.LlmAdapters
             {
                 throw; // #794: cancellation must propagate.
             }
-            catch
+            catch (Exception ex)
             {
+                _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                    overlayType: "horniness_overlay",
+                    provider: "primary",
+                    model: null,
+                    reason: "error",
+                    outcome: OverlayOutcome.Degraded,
+                    errorCode: ex.GetType().Name
+                ));
                 return message;
             }
         }
@@ -350,13 +406,26 @@ namespace Pinder.LlmAdapters
         public async Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, CancellationToken ct = default)
         {
             if (string.IsNullOrWhiteSpace(message) || string.IsNullOrWhiteSpace(trapInstruction))
+            {
+                if (string.IsNullOrWhiteSpace(trapInstruction))
+                {
+                    _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                        overlayType: "trap_overlay",
+                        provider: "primary",
+                        model: null,
+                        reason: "skipped_no_instruction",
+                        outcome: OverlayOutcome.Skipped,
+                        trapName: trapName
+                    ));
+                }
                 return message;
+            }
 
             // Route to Groq when configured — same path as horniness/shadow overlays.
             if (!string.IsNullOrWhiteSpace(_options.OverlayGroqModel) && !string.IsNullOrWhiteSpace(_options.OverlayGroqApiKey))
             {
                 return await GroqOverlayApplier.ApplyTrapOverlayAsync(
-                    _options.OverlayGroqApiKey, _options.OverlayGroqModel, message, trapInstruction, trapName, dateeContext, archetypeDirective, ct)
+                    _options.OverlayGroqApiKey, _options.OverlayGroqModel, message, trapInstruction, trapName, dateeContext, archetypeDirective, ct, _options.OnOverlayDegraded)
                     .ConfigureAwait(false);
             }
 
@@ -381,7 +450,18 @@ namespace Pinder.LlmAdapters
                 var result = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.TrapOverlay, ct: ct)
                     .ConfigureAwait(false);
 
-                if (string.IsNullOrWhiteSpace(result)) return message;
+                if (string.IsNullOrWhiteSpace(result))
+                {
+                    _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                        overlayType: "trap_overlay",
+                        provider: "primary",
+                        model: null,
+                        reason: "empty_output",
+                        outcome: OverlayOutcome.Degraded,
+                        trapName: trapName
+                    ));
+                    return message;
+                }
                 // #831: thinking-block stripping moved to
                 // ThinkingStrippingLlmTransport (transport decorator).
                 string trimmed = result.Trim();
@@ -391,7 +471,17 @@ namespace Pinder.LlmAdapters
                     trimmed.StartsWith("I cannot", StringComparison.OrdinalIgnoreCase) ||
                     trimmed.IndexOf("inappropriate", StringComparison.OrdinalIgnoreCase) >= 0 ||
                     trimmed.IndexOf("I'd be happy to help", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                        overlayType: "trap_overlay",
+                        provider: "primary",
+                        model: null,
+                        reason: "refusal",
+                        outcome: OverlayOutcome.Degraded,
+                        trapName: trapName
+                    ));
                     return message;
+                }
 
                 return trimmed;
             }
@@ -399,8 +489,17 @@ namespace Pinder.LlmAdapters
             {
                 throw; // #794: cancellation must propagate.
             }
-            catch
+            catch (Exception ex)
             {
+                _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                    overlayType: "trap_overlay",
+                    provider: "primary",
+                    model: null,
+                    reason: "error",
+                    outcome: OverlayOutcome.Degraded,
+                    errorCode: ex.GetType().Name,
+                    trapName: trapName
+                ));
                 return message;
             }
         }
@@ -409,7 +508,19 @@ namespace Pinder.LlmAdapters
         public async Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow, string? archetypeDirective = null, CancellationToken ct = default)
         {
             if (string.IsNullOrWhiteSpace(message) || string.IsNullOrWhiteSpace(instruction))
+            {
+                if (string.IsNullOrWhiteSpace(instruction))
+                {
+                    _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                        overlayType: "shadow_corruption",
+                        provider: "primary",
+                        model: null,
+                        reason: "skipped_no_instruction",
+                        outcome: OverlayOutcome.Skipped
+                    ));
+                }
                 return message;
+            }
 
             string systemPrompt = "You are editing a text message for Pinder, a satirical comedy dating app. " +
                 "Apply the shadow corruption instruction to rewrite the delivered message. " +
@@ -429,7 +540,17 @@ namespace Pinder.LlmAdapters
                 var result = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.ShadowCorruption, ct: ct)
                     .ConfigureAwait(false);
 
-                if (string.IsNullOrWhiteSpace(result)) return message;
+                if (string.IsNullOrWhiteSpace(result))
+                {
+                    _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                        overlayType: "shadow_corruption",
+                        provider: "primary",
+                        model: null,
+                        reason: "empty_output",
+                        outcome: OverlayOutcome.Degraded
+                    ));
+                    return message;
+                }
                 // #831: thinking-block stripping moved to
                 // ThinkingStrippingLlmTransport (transport decorator).
                 string trimmed = result.Trim();
@@ -439,7 +560,16 @@ namespace Pinder.LlmAdapters
                     trimmed.StartsWith("I cannot", StringComparison.OrdinalIgnoreCase) ||
                     trimmed.IndexOf("inappropriate", StringComparison.OrdinalIgnoreCase) >= 0 ||
                     trimmed.IndexOf("I'd be happy to help", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                        overlayType: "shadow_corruption",
+                        provider: "primary",
+                        model: null,
+                        reason: "refusal",
+                        outcome: OverlayOutcome.Degraded
+                    ));
                     return message;
+                }
 
                 return trimmed;
             }
@@ -447,8 +577,16 @@ namespace Pinder.LlmAdapters
             {
                 throw; // #794: cancellation must propagate.
             }
-            catch
+            catch (Exception ex)
             {
+                _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                    overlayType: "shadow_corruption",
+                    provider: "primary",
+                    model: null,
+                    reason: "error",
+                    outcome: OverlayOutcome.Degraded,
+                    errorCode: ex.GetType().Name
+                ));
                 return message;
             }
         }
@@ -468,6 +606,13 @@ namespace Pinder.LlmAdapters
 
             if (string.IsNullOrWhiteSpace(template))
             {
+                _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                    overlayType: "success_improvement",
+                    provider: "primary",
+                    model: null,
+                    reason: "skipped_no_template",
+                    outcome: OverlayOutcome.Skipped
+                ));
                 return context.DeliveredMessage;
             }
 
@@ -493,6 +638,13 @@ namespace Pinder.LlmAdapters
             var improved = (responseText ?? string.Empty).Trim();
             if (string.IsNullOrWhiteSpace(improved) || string.Equals(improved, "...", StringComparison.OrdinalIgnoreCase))
             {
+                _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                    overlayType: "success_improvement",
+                    provider: "primary",
+                    model: null,
+                    reason: "empty_output",
+                    outcome: OverlayOutcome.Degraded
+                ));
                 return context.DeliveredMessage;
             }
 
@@ -538,7 +690,16 @@ namespace Pinder.LlmAdapters
             // trim here.
             var question = (responseText ?? string.Empty).Trim();
             if (string.IsNullOrWhiteSpace(question))
-                return "so... when are we doing this?";
+            {
+                _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                    overlayType: "steering",
+                    provider: "primary",
+                    model: null,
+                    reason: "empty_output",
+                    outcome: OverlayOutcome.Degraded
+                ));
+                return string.Empty;
+            }
 
             if (question.Length >= 2 && question[0] == '"' && question[question.Length - 1] == '"')
                 question = question.Substring(1, question.Length - 2).Trim();

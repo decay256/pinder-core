@@ -93,6 +93,10 @@ namespace Pinder.Core.Conversation
                 try
                 {
                     steeringQuestion = await stateful.GetSteeringQuestionAsync(steeringContext, ct).ConfigureAwait(false);
+                    if (string.IsNullOrWhiteSpace(steeringQuestion))
+                    {
+                        success = false;
+                    }
                 }
                 catch (OperationCanceledException) when (ct.IsCancellationRequested)
                 {
