@@ -51,5 +51,23 @@ namespace Pinder.Core.Interfaces
         /// Returns null if no matching rule found.
         /// </summary>
         double? GetRiskTierXpMultiplier(RiskTier riskTier);
+
+        /// <summary>
+        /// §10 terminal outcome → XP multiplier.
+        /// Returns null if no matching rule found.
+        /// </summary>
+        double? GetTerminalOutcomeMultiplier(GameOutcome outcome);
+
+        /// <summary>
+        /// Success base XP based on DC.
+        /// Returns null if no matching rule found.
+        /// </summary>
+        int? GetSuccessBaseXp(int dc);
+
+        /// <summary>
+        /// Flat XP award based on string type (e.g. Nat20, Nat1, Failure).
+        /// Returns null if no matching rule found.
+        /// </summary>
+        int? GetFlatXpAward(string awardType);
     }
 }

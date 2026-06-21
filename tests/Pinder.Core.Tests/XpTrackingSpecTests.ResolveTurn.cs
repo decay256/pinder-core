@@ -127,7 +127,7 @@ namespace Pinder.Core.Tests
         // What: AC-4 — Date secured awards exactly 50 XP with label "DateSecured" (spec §2, §5.5)
         // Mutation: Fails if DateSecured amount is not 50 or label is wrong
         [Fact]
-        public async Task ResolveTurn_DateSecured_Awards50XpEndOfGame()
+        public async Task ResolveTurn_DateSecured_Multiplies3xEndOfGame()
         {
             // Start at 24 interest, success pushes to 25+ → DateSecured
             var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 24);
@@ -138,17 +138,18 @@ namespace Pinder.Core.Tests
             Assert.True(result.IsGameOver);
             Assert.Equal(GameOutcome.DateSecured, result.Outcome);
 
-            var dateEvent = session.XpLedger.Events.Single(e => e.Source == "DateSecured");
-            Assert.Equal(50, dateEvent.Amount);
+            var dateEvent = session.XpLedger.Events.Single(e => e.Source == "OutcomeBonus_DateSecured");
+            // Roll XP is 10 (5 base * 2x Hard), 3x multiplier means delta is 20
+            Assert.Equal(20, dateEvent.Amount);
 
             // TurnResult includes both roll XP and date XP
-            Assert.True(result.XpEarned >= 58); // 8 (DC low * 1.5x Medium) + 50
+            Assert.True(result.XpEarned >= 30);
         }
 
-        // What: AC-2 — Conversation complete (Unmatched) awards 5 XP (spec §2, §5.5)
+        // What: AC-2 — Conversation complete (Unmatched) awards 1x XP multiplier
         // Mutation: Fails if Unmatched doesn't record ConversationComplete event
         [Fact]
-        public async Task ResolveTurn_Unmatched_Awards5XpConversationComplete()
+        public async Task ResolveTurn_Unmatched_Multiplies1xEndOfGame()
         {
             // Start at 1 interest, failure drops to 0 → Unmatched
             var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 1);
@@ -159,8 +160,8 @@ namespace Pinder.Core.Tests
             Assert.True(result.IsGameOver);
             Assert.Equal(GameOutcome.Unmatched, result.Outcome);
 
-            var endEvent = session.XpLedger.Events.Single(e => e.Source == "ConversationComplete");
-            Assert.Equal(5, endEvent.Amount);
+            Assert.DoesNotContain(session.XpLedger.Events, e => e.Source.StartsWith("OutcomeBonus_"));
+            Assert.DoesNotContain(session.XpLedger.Events, e => e.Source == "ConversationComplete");
         }
 
         // What: Edge case — Wait action awards 0 XP (spec §10, Wait not in XP sources)
@@ -347,13 +348,13 @@ namespace Pinder.Core.Tests
             Assert.True(result.IsGameOver);
             Assert.Equal(GameOutcome.DateSecured, result.Outcome);
 
-            // Roll XP (8 for DC low * 1.5x Medium) + DateSecured (50) = at least 58
-            Assert.True(result.XpEarned >= 58);
+            // Roll XP (10 for DC 16 * 2x Hard) * 3x DateSecured multiplier = 30 total
+            Assert.True(result.XpEarned >= 30);
             Assert.Equal(result.XpEarned, session.TotalXpEarned);
         }
 
         // What: Spec §8 ex 8 — Failure + conversation complete on same turn
-        // Mutation: Fails if end-of-game XP replaces rather than adds to roll XP
+        // Mutation: Fails if one of the XP sources is dropped on a terminal failure
         [Fact]
         public async Task ResolveTurn_FailurePlusUnmatched_BothXpRecorded()
         {
@@ -365,9 +366,10 @@ namespace Pinder.Core.Tests
             Assert.True(result.IsGameOver);
             Assert.Equal(GameOutcome.Unmatched, result.Outcome);
 
-            // Should have both failure (2) and conversation complete (5)
-            Assert.True(session.XpLedger.Events.Count >= 2);
-            Assert.True(result.XpEarned >= 7); // 2 + 5
+            // Should have failure (2), 1x multiplier means no bonus event
+            Assert.Contains(session.XpLedger.Events, e => e.Source == "Failure");
+            Assert.DoesNotContain(session.XpLedger.Events, e => e.Source.StartsWith("OutcomeBonus_"));
+            Assert.True(result.XpEarned >= 2);
         }
 
         // What: Edge case — Game ends on first turn with both types of XP (spec §10 edge case)
@@ -382,7 +384,7 @@ namespace Pinder.Core.Tests
 
             Assert.True(result.IsGameOver);
             Assert.True(session.XpLedger.Events.Count >= 2);
-            Assert.True(session.XpLedger.Events.Any(e => e.Source == "DateSecured"));
+            Assert.True(session.XpLedger.Events.Any(e => e.Source == "OutcomeBonus_DateSecured"));
         }
 
         // ====================== Session-Level Ledger Tests ======================

@@ -73,6 +73,10 @@ namespace Pinder.Core.Tests
                 XpMultiplierCalls.Add(riskTier);
                 return XpMultiplierReturn;
             }
+
+            public double? GetTerminalOutcomeMultiplier(GameOutcome outcome) => null;
+            public int? GetSuccessBaseXp(int dc) => null;
+            public int? GetFlatXpAward(string awardType) => null;
         }
 
         private static CharacterProfile MakeProfile(string name, int allStats = 2)

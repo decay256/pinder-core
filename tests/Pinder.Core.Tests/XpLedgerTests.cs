@@ -228,7 +228,7 @@ namespace Pinder.Core.Tests
 
         // AC-4: Date secured grants 50 XP on final turn
         [Fact]
-        public async Task ResolveTurnAsync_DateSecured_Awards50XpPlusRollXp()
+        public async Task ResolveTurnAsync_DateSecured_Multiplies3xPlusRollXp()
         {
             // Start at interest 24 (AlmostThere), roll success → +1 or more → 25 → DateSecured
             var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 24);
@@ -239,20 +239,20 @@ namespace Pinder.Core.Tests
             Assert.True(result.IsGameOver);
             Assert.Equal(GameOutcome.DateSecured, result.Outcome);
 
-            // Should have roll XP + DateSecured 50
-            var dateEvent = session.XpLedger.Events.FirstOrDefault(e => e.Source == "DateSecured");
+            // Roll XP is 10 (5 base * 2x Hard), 3x multiplier means delta is 20
+            var dateEvent = session.XpLedger.Events.FirstOrDefault(e => e.Source == "OutcomeBonus_DateSecured");
             Assert.NotNull(dateEvent);
-            Assert.Equal(50, dateEvent!.Amount);
+            Assert.Equal(20, dateEvent!.Amount);
 
-            // TurnResult.XpEarned includes both roll XP and date XP
-            Assert.True(result.XpEarned >= 58); // at minimum: 8 (DC low * 1.5x Medium) + 50 (date)
+            // TurnResult.XpEarned includes both roll XP and bonus
+            Assert.Equal(30, result.XpEarned);
         }
 
-        // AC-2: Conversation complete (Unmatched) → 5 XP
+        // AC-2: Conversation complete (Unmatched) → 1x XP multiplier
         [Fact]
-        public async Task ResolveTurnAsync_Unmatched_Awards5XpConversationComplete()
+        public async Task ResolveTurnAsync_Unmatched_Multiplies1xConversationComplete()
         {
-            // Start at interest 1, large failure → push to 0 → Unmatched
+            // Start at interest 1, failure drops to 0 → Unmatched
             var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 1);
             var session = MakeSession(diceRoll: 2, dateeStatValue: 0, config: config);
             await session.StartTurnAsync();
@@ -261,9 +261,8 @@ namespace Pinder.Core.Tests
             Assert.True(result.IsGameOver);
             Assert.Equal(GameOutcome.Unmatched, result.Outcome);
 
-            var endEvent = session.XpLedger.Events.FirstOrDefault(e => e.Source == "ConversationComplete");
-            Assert.NotNull(endEvent);
-            Assert.Equal(5, endEvent!.Amount);
+            Assert.DoesNotContain(session.XpLedger.Events, e => e.Source.StartsWith("OutcomeBonus_"));
+            Assert.DoesNotContain(session.XpLedger.Events, e => e.Source == "ConversationComplete");
         }
 
         // AC-6: DC boundary test — DC exactly 13, Medium risk → 5*1.5=8 XP

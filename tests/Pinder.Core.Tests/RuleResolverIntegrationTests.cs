@@ -67,6 +67,10 @@ namespace Pinder.Core.Tests
             XpMultiplierCalls++;
             return XpMultiplier;
         }
+
+        public double? GetTerminalOutcomeMultiplier(GameOutcome outcome) => null;
+        public int? GetSuccessBaseXp(int dc) => null;
+        public int? GetFlatXpAward(string awardType) => null;
     }
 
     [Trait("Category", "Rules")]
