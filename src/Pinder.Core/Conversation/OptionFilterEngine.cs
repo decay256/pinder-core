@@ -15,7 +15,7 @@ namespace Pinder.Core.Conversation
     {
         /// <summary>
         /// Draws N random stats from the pool, applying shadow-based exclusions.
-        /// Denial T3 (≥12): removes HONESTY from pool.
+        /// Denial T3 (≥18): removes HONESTY from pool.
         ///
         /// <para>
         /// <paramref name="rng"/> is used to shuffle the eligible pool. When null a
@@ -29,16 +29,27 @@ namespace Pinder.Core.Conversation
             StatType[] pool,
             int count,
             Dictionary<ShadowStatType, int>? shadowThresholds,
-            Random? rng = null)
+            Random? rng = null,
+            Action<ShadowFilterTraceEvent>? onTrace = null)
         {
             var eligible = new List<StatType>(pool);
 
-            // Denial T3 (≥12): remove HONESTY from pool
+            // Denial T3 (≥18): remove HONESTY from pool
             if (shadowThresholds != null
                 && shadowThresholds.TryGetValue(ShadowStatType.Denial, out int denVal)
-                && denVal >= 12)
+                && ShadowThresholdEvaluator.GetThresholdLevel(denVal) == 3)
             {
-                eligible.Remove(StatType.Honesty);
+                if (eligible.Contains(StatType.Honesty))
+                {
+                    eligible.Remove(StatType.Honesty);
+                    onTrace?.Invoke(new ShadowFilterTraceEvent(
+                        ShadowStatType.Denial,
+                        denVal,
+                        3,
+                        new[] { StatType.Honesty },
+                        "pre_llm_stat_draw"
+                    ));
+                }
             }
 
             // Shuffle using the provided RNG (or a fresh non-deterministic one if none
@@ -70,7 +81,8 @@ namespace Pinder.Core.Conversation
             DialogueOption[] options,
             Dictionary<ShadowStatType, int> shadowThresholds,
             StatType? lastStatUsed,
-            IDiceRoller dice)
+            IDiceRoller dice,
+            Action<ShadowFilterTraceEvent>? onTrace = null)
         {
             // Fixation T3: force all options to use the same stat as last turn
             if (shadowThresholds.TryGetValue(ShadowStatType.Fixation, out int fixRaw)
@@ -88,15 +100,26 @@ namespace Pinder.Core.Conversation
 
             // Denial T3: remove Honesty options
             if (shadowThresholds.TryGetValue(ShadowStatType.Denial, out int denRaw)
-                && denRaw >= 18)
+                && ShadowThresholdEvaluator.GetThresholdLevel(denRaw) == 3)
             {
+                var originalLength = options.Length;
                 var filtered = options.Where(o => o.Stat != StatType.Honesty).ToArray();
-                if (filtered.Length == 0)
+                if (filtered.Length < originalLength)
                 {
-                    var chaos = options.FirstOrDefault(o => o.Stat == StatType.Chaos);
-                    filtered = new[] { chaos ?? options[0] };
+                    if (filtered.Length == 0)
+                    {
+                        var chaos = options.FirstOrDefault(o => o.Stat == StatType.Chaos);
+                        filtered = new[] { chaos ?? options[0] };
+                    }
+                    options = filtered;
+                    onTrace?.Invoke(new ShadowFilterTraceEvent(
+                        ShadowStatType.Denial,
+                        denRaw,
+                        3,
+                        new[] { StatType.Honesty },
+                        "post_llm_filter"
+                    ));
                 }
-                options = filtered;
             }
 
             // Madness T3: replace one random option with unhinged replacement marker

@@ -155,7 +155,7 @@ namespace Pinder.Core.Tests
             var pool = new[] { StatType.Charm, StatType.Rizz, StatType.Honesty, StatType.Chaos, StatType.Wit, StatType.SelfAwareness };
             var thresholds = new Dictionary<ShadowStatType, int>
             {
-                { ShadowStatType.Denial, 12 }
+                { ShadowStatType.Denial, 18 }
             };
 
             // Draw all 5 remaining stats

@@ -98,6 +98,12 @@ namespace Pinder.Core.Conversation
         public Action<TextLayerNoopEvent>? OnTextLayerNoop { get; }
 
         /// <summary>
+        /// Optional callback fired when shadow filtering changes the option/stat pool (#1218).
+        /// When null, no callback is fired.
+        /// </summary>
+        public Action<ShadowFilterTraceEvent>? OnShadowFilterTrace { get; }
+
+        /// <summary>
         /// Consequence catalogue for engine-side population of
         /// Consequence fields on roll/shadow/horniness result DTOs (#976).
         /// When null, engines leave <c>Consequence</c> null.
@@ -128,6 +134,7 @@ namespace Pinder.Core.Conversation
             IDiceRoller? diceRoller = null,
             Random? statDrawRng = null,
             Action<TextLayerNoopEvent>? onTextLayerNoop = null,
+            Action<ShadowFilterTraceEvent>? onShadowFilterTrace = null,
             IConsequenceCatalog? consequenceCatalog = null,
             int? maxDialogueOptions = null,
             int? maxDeliveryWords = null,
@@ -147,6 +154,7 @@ namespace Pinder.Core.Conversation
             DiceRoller = diceRoller;
             StatDrawRng = statDrawRng;
             OnTextLayerNoop = onTextLayerNoop;
+            OnShadowFilterTrace = onShadowFilterTrace;
             ConsequenceCatalog = consequenceCatalog;
             MaxDialogueOptions = maxDialogueOptions;
             MaxDeliveryWords = maxDeliveryWords;

@@ -102,6 +102,55 @@ namespace Pinder.Core.Tests
             Assert.DoesNotContain(StatType.Honesty, llm.CapturedContext.AvailableStats);
         }
 
+        [Fact]
+        public void DrawRandomStats_DenialAt18_EmitsTrace()
+        {
+            var pool = new[] { StatType.Charm, StatType.Rizz, StatType.Honesty, StatType.Chaos, StatType.Wit, StatType.SelfAwareness };
+            var thresholds = new Dictionary<ShadowStatType, int>
+            {
+                { ShadowStatType.Denial, 18 }
+            };
+
+            ShadowFilterTraceEvent? captured = null;
+            Action<ShadowFilterTraceEvent> onTrace = ev => captured = ev;
+
+            var drawn = OptionFilterEngine.DrawRandomStats(pool, pool.Length, thresholds, new Random(12345), onTrace);
+
+            Assert.NotNull(captured);
+            Assert.Equal(ShadowStatType.Denial, captured!.ShadowStat);
+            Assert.Equal(18, captured.RawValue);
+            Assert.Equal(3, captured.ComputedTier);
+            Assert.Contains(StatType.Honesty, captured.RemovedStats);
+            Assert.Equal("pre_llm_stat_draw", captured.SourcePath);
+        }
+
+        [Fact]
+        public void ApplyT3Filters_DenialAt18_EmitsTrace()
+        {
+            var options = new[]
+            {
+                new DialogueOption(StatType.Charm, "Hi"),
+                new DialogueOption(StatType.Honesty, "Truth"),
+                new DialogueOption(StatType.Wit, "Joke")
+            };
+            var thresholds = new Dictionary<ShadowStatType, int>
+            {
+                { ShadowStatType.Denial, 18 }
+            };
+
+            ShadowFilterTraceEvent? captured = null;
+            Action<ShadowFilterTraceEvent> onTrace = ev => captured = ev;
+
+            var filtered = OptionFilterEngine.ApplyT3Filters(options, thresholds, lastStatUsed: null, dice: new QueueDice(new[] { 1 }), onTrace);
+
+            Assert.NotNull(captured);
+            Assert.Equal(ShadowStatType.Denial, captured!.ShadowStat);
+            Assert.Equal(18, captured.RawValue);
+            Assert.Equal(3, captured.ComputedTier);
+            Assert.Contains(StatType.Honesty, captured.RemovedStats);
+            Assert.Equal("post_llm_filter", captured.SourcePath);
+        }
+
         // ---- Test Helpers ----
 
         private static SessionShadowTracker MakeShadowTracker(int denial)
@@ -149,7 +198,10 @@ namespace Pinder.Core.Tests
             SessionShadowTracker? shadows,
             ILlmAdapter llm)
         {
-            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: shadows);
+            var config = new GameSessionConfig(
+                clock: TestHelpers.MakeClock(),
+                playerShadows: shadows,
+                maxDialogueOptions: 6);
 
             var allDice = new int[diceValues.Length + 1];
             allDice[0] = 5;
