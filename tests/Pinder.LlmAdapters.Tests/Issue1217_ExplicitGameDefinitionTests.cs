@@ -88,7 +88,7 @@ namespace Pinder.LlmAdapters.Tests
         public async Task Production_GetDialogueOptions_DoesNotThrow_WhenGameDefinitionIsProvided()
         {
             // Arrange
-            var transport = new FixedResponseTransport("OPTION_1\n[STAT: CHARM] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]\n\"Hi\"");
+            var transport = new FixedResponseTransport("OPTION_1\n[STAT: CHARM] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]\n\"Hello\"");
             var options = new PinderLlmAdapterOptions { GameDefinition = GameDefinition.PinderDefaults };
             var adapter = new PinderLlmAdapter(transport, options);
 

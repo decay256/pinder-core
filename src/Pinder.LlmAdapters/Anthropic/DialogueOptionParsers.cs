@@ -66,6 +66,10 @@ namespace Pinder.LlmAdapters.Anthropic
         /// <summary>
         /// Parses structured LLM text output into DialogueOption array.
         /// Never throws — returns options padded with defaults if needed.
+        /// <para>
+        /// NOTE: This lenient parser is best-effort and diagnostics-only.
+        /// Gameplay production uses the strict path (ParseDialogueOptionsStrict).
+        /// </para>
         /// </summary>
         public static DialogueOption[] ParseDialogueOptionsText(string? llmResponse, StatType[]? availableStats = null)
         {
@@ -164,6 +168,10 @@ namespace Pinder.LlmAdapters.Anthropic
         /// <summary>
         /// Parses dialogue options from a tool_use JSON input.
         /// Returns null if the input is malformed (caller should fall back to text parsing).
+        /// <para>
+        /// NOTE: This lenient parser is best-effort and diagnostics-only.
+        /// Gameplay production uses the strict path (ParseDialogueOptionsStrict).
+        /// </para>
         /// </summary>
         public static DialogueOption[]? ParseDialogueOptionsTool(JObject toolInput, StatType[]? availableStats = null)
         {
@@ -237,6 +245,153 @@ namespace Pinder.LlmAdapters.Anthropic
             {
                 return null; // Malformed — fall back to text parsing
             }
+        }
+
+        /// <summary>
+        /// Strictly parses and validates LLM response text for dialogue options.
+        /// Throws detailed error codes if output is empty, has an invalid stat, is missing required option counts, or has no valid options.
+        /// </summary>
+        public static DialogueOption[] ParseDialogueOptionsStrict(
+            string? llmResponse,
+            StatType[]? availableStats,
+            int maxDialogueOptions,
+            out string? errorCode,
+            out string? errorMessage,
+            out int parsedCount,
+            out int expectedCount)
+        {
+            errorCode = null;
+            errorMessage = null;
+            parsedCount = 0;
+            expectedCount = availableStats != null ? Math.Min(availableStats.Length, maxDialogueOptions) : maxDialogueOptions;
+
+            if (string.IsNullOrWhiteSpace(llmResponse))
+            {
+                errorCode = "empty_output";
+                errorMessage = "LLM dialogue_options output is empty or whitespace.";
+                return Array.Empty<DialogueOption>();
+            }
+
+            var parsed = new List<DialogueOption>();
+            var sections = OptionHeaderRegex.Split(llmResponse);
+
+            // sections[0] contains anything before OPTION_1 (the preamble / thinking block).
+            // sections[1..] contain the actual options.
+            for (int i = 1; i < sections.Length; i++)
+            {
+                var section = sections[i];
+                if (string.IsNullOrWhiteSpace(section)) continue;
+
+                // Check for stat tag
+                var statMatch = StatRegex.Match(section);
+                if (!statMatch.Success)
+                {
+                    // If we have an OPTION_N block but no STAT tag, it's not a valid complete option
+                    continue;
+                }
+
+                var statStr = StatNameNormalizer.NormalizeStatName(statMatch.Groups[1].Value.Trim());
+                StatType stat;
+                try
+                {
+                    stat = (StatType)Enum.Parse(typeof(StatType), statStr, true);
+                }
+                catch (ArgumentException)
+                {
+                    errorCode = "invalid_stat";
+                    errorMessage = "LLM dialogue_options option names an invalid or unknown stat.";
+                    return Array.Empty<DialogueOption>();
+                }
+
+                // Check for quoted text
+                var textMatch = QuotedTextRegex.Match(section);
+                if (!textMatch.Success) continue;
+
+                var text = MetaPrefixStripper.Strip(textMatch.Groups[1].Value.Trim());
+                if (string.IsNullOrEmpty(text) || text.Length < MinPlayableOptionLength) continue;
+
+                // Parse optional metadata
+                int? callbackTurn = null;
+                var callbackMatch = CallbackRegex.Match(section);
+                if (callbackMatch.Success)
+                {
+                    var cbVal = callbackMatch.Groups[1].Value.Trim();
+                    if (!string.Equals(cbVal, "none", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (int.TryParse(cbVal, out int turnNum))
+                        {
+                            callbackTurn = turnNum;
+                        }
+                        else if (cbVal.StartsWith("turn_", StringComparison.OrdinalIgnoreCase) &&
+                                 int.TryParse(cbVal.Substring(5), out int turnNum2))
+                        {
+                            callbackTurn = turnNum2;
+                        }
+                    }
+                }
+
+                string? comboName = null;
+                var comboMatch = ComboRegex.Match(section);
+                if (comboMatch.Success)
+                {
+                    var comboVal = comboMatch.Groups[1].Value.Trim();
+                    if (!string.Equals(comboVal, "none", StringComparison.OrdinalIgnoreCase))
+                    {
+                        comboName = comboVal;
+                    }
+                }
+
+                bool hasTellBonus = false;
+                var tellMatch = TellBonusRegex.Match(section);
+                if (tellMatch.Success)
+                {
+                    hasTellBonus = string.Equals(
+                        tellMatch.Groups[1].Value.Trim(), "yes", StringComparison.OrdinalIgnoreCase);
+                }
+
+                parsed.Add(new DialogueOption(
+                    stat, text, callbackTurn, comboName, hasTellBonus, hasWeaknessWindow: false));
+            }
+
+            var validOptions = new List<DialogueOption>();
+            var usedStats = new HashSet<StatType>();
+            var allowedStats = availableStats != null ? new HashSet<StatType>(availableStats) : null;
+
+            foreach (var opt in parsed)
+            {
+                if (allowedStats != null && !allowedStats.Contains(opt.Stat))
+                {
+                    continue;
+                }
+                if (usedStats.Contains(opt.Stat))
+                {
+                    continue;
+                }
+                usedStats.Add(opt.Stat);
+                validOptions.Add(opt);
+            }
+
+            parsedCount = validOptions.Count;
+
+            if (validOptions.Count == 0)
+            {
+                errorCode = "no_valid_options";
+                errorMessage = "LLM dialogue_options response contains no valid options (malformed).";
+                return Array.Empty<DialogueOption>();
+            }
+
+            if (validOptions.Count < expectedCount)
+            {
+                errorCode = "partial_options";
+                errorMessage = $"LLM dialogue_options response has partial options: fewer valid options ({validOptions.Count}) than required ({expectedCount}).";
+                return Array.Empty<DialogueOption>();
+            }
+
+            if (validOptions.Count > expectedCount)
+            {
+                return validOptions.GetRange(0, expectedCount).ToArray();
+            }
+            return validOptions.ToArray();
         }
 
         public static DialogueOption[] ReconcileAndPadDialogueOptions(List<DialogueOption> parsed, StatType[]? availableStats = null)

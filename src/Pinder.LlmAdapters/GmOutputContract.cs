@@ -93,6 +93,10 @@ namespace Pinder.LlmAdapters
         /// Parses canonical GM output text into a <see cref="GmTurnOutput"/>.
         /// Never throws — malformed input degrades to a message-only result with
         /// null signals. The message is everything before <c>[SIGNALS]</c>.
+        /// <para>
+        /// NOTE: This parser is lenient and best-effort for backwards compatibility.
+        /// Production gameplay uses strict validation (ValidateSignalsStrict).
+        /// </para>
         /// </summary>
         public static GmTurnOutput Parse(string? raw)
         {
@@ -166,5 +170,91 @@ namespace Pinder.LlmAdapters
             // the SELF_AWARENESS token the model emits and the normalizer accepts.
             return stat == StatType.SelfAwareness ? "SELF_AWARENESS" : stat.ToString();
         }
+
+        /// <summary>
+        /// Strictly validates the optional [SIGNALS] block of datee output if present.
+        /// </summary>
+        public static DateeSignalsValidationResult ValidateSignalsStrict(string? raw, out string? errorDetail)
+        {
+            errorDetail = null;
+            if (string.IsNullOrEmpty(raw))
+            {
+                return DateeSignalsValidationResult.NoSignalsBlock;
+            }
+
+            int signalsIdx = raw!.IndexOf(SignalsMarker, StringComparison.OrdinalIgnoreCase);
+            if (signalsIdx < 0)
+            {
+                return DateeSignalsValidationResult.NoSignalsBlock;
+            }
+
+            string block = raw.Substring(signalsIdx + SignalsMarker.Length).Trim();
+
+            // Check if block contains TELL: or WEAKNESS: at all
+            bool hasTellIndicator = block.IndexOf("TELL:", StringComparison.OrdinalIgnoreCase) >= 0;
+            bool hasWeaknessIndicator = block.IndexOf("WEAKNESS:", StringComparison.OrdinalIgnoreCase) >= 0;
+
+            if (!hasTellIndicator && !hasWeaknessIndicator)
+            {
+                errorDetail = "malformed_signals";
+                return DateeSignalsValidationResult.MalformedSignals;
+            }
+
+            var lines = block.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var line in lines)
+            {
+                var trimmedLine = line.Trim();
+                if (string.IsNullOrEmpty(trimmedLine)) continue;
+
+                if (trimmedLine.IndexOf("TELL:", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    var match = TellSignalRegex.Match(trimmedLine);
+                    if (!match.Success)
+                    {
+                        errorDetail = "malformed_signals";
+                        return DateeSignalsValidationResult.MalformedSignals;
+                    }
+
+                    if (!TryParseStat(match.Groups[1].Value, out _))
+                    {
+                        errorDetail = "tell_invalid_stat";
+                        return DateeSignalsValidationResult.MalformedSignals;
+                    }
+                }
+                else if (trimmedLine.IndexOf("WEAKNESS:", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    var match = WeaknessSignalRegex.Match(trimmedLine);
+                    if (!match.Success)
+                    {
+                        errorDetail = "malformed_signals";
+                        return DateeSignalsValidationResult.MalformedSignals;
+                    }
+
+                    if (!TryParseStat(match.Groups[1].Value, out _))
+                    {
+                        errorDetail = "weakness_invalid_stat";
+                        return DateeSignalsValidationResult.MalformedSignals;
+                    }
+
+                    if (!int.TryParse(match.Groups[2].Value.Trim(), out int reduction) || reduction <= 0)
+                    {
+                        errorDetail = "weakness_missing_dc";
+                        return DateeSignalsValidationResult.MalformedSignals;
+                    }
+                }
+            }
+
+            return DateeSignalsValidationResult.ValidSignals;
+        }
+    }
+
+    /// <summary>
+    /// Result of strict signals block validation.
+    /// </summary>
+    public enum DateeSignalsValidationResult
+    {
+        NoSignalsBlock,
+        ValidSignals,
+        MalformedSignals
     }
 }

@@ -113,6 +113,46 @@ namespace Pinder.Core.Tests.Phase0
                 response = DefaultResponse;
             }
 
+            if (string.Equals(ph, LlmPhase.DialogueOptions, StringComparison.Ordinal) && response != null && response.Contains("OPTION_"))
+            {
+                var statsInPrompt = new List<string>();
+                string combinedPrompt = (userMessage ?? "") + "\n" + (systemPrompt ?? "");
+                
+                string marker = "Be tagged with one of the available stats for this turn:";
+                int markerIdx = combinedPrompt.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
+                if (markerIdx >= 0)
+                {
+                    string statsLine = combinedPrompt.Substring(markerIdx + marker.Length);
+                    int endLineIdx = statsLine.IndexOf('\n');
+                    if (endLineIdx >= 0)
+                    {
+                        statsLine = statsLine.Substring(0, endLineIdx);
+                    }
+                    foreach (Pinder.Core.Stats.StatType s in Enum.GetValues(typeof(Pinder.Core.Stats.StatType)))
+                    {
+                        string sName = s == Pinder.Core.Stats.StatType.SelfAwareness ? "SELF_AWARENESS" : s.ToString();
+                        if (statsLine.IndexOf(sName, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                            (s == Pinder.Core.Stats.StatType.SelfAwareness && statsLine.IndexOf("SELFAWARENESS", StringComparison.OrdinalIgnoreCase) >= 0))
+                        {
+                            statsInPrompt.Add(sName);
+                        }
+                    }
+                }
+
+                if (statsInPrompt.Count >= 3)
+                {
+                    int idx = 0;
+                    response = System.Text.RegularExpressions.Regex.Replace(response, @"\[STAT:\s*\w+\]", m =>
+                    {
+                        if (idx < statsInPrompt.Count)
+                        {
+                            return $"[STAT: {statsInPrompt[idx++].ToUpperInvariant()}]";
+                        }
+                        return m.Value;
+                    }, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                }
+            }
+
             var ex = new LlmExchange(
                 Phase: ph,
                 SystemPrompt: systemPrompt ?? "",
