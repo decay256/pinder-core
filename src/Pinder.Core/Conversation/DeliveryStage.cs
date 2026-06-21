@@ -117,17 +117,18 @@ namespace Pinder.Core.Conversation
                 textDiffs.Add(new TextDiff(layerLabel, tierSpans, originalIntendedText, deliveredMessage));
             }
 
-            // Success Improvement (Strong/Legendary)
+            // Success Improvement (Strong/Legendary/Nat20)
             bool isSuccess = rollResult.IsSuccess;
             bool isNat20 = rollResult.IsNatTwenty;
-            if (isSuccess && !isNat20 && !string.IsNullOrWhiteSpace(deliveredMessage) && deliveredMessage.Trim() != "..." && _llm is IStatefulLlmAdapter statefulAdapter)
+            if (isSuccess && !string.IsNullOrWhiteSpace(deliveredMessage) && deliveredMessage.Trim() != "..." && _llm is IStatefulLlmAdapter statefulAdapter)
             {
                 int beatDcBy = Math.Max(0, rollResult.FinalTotal - rollResult.DC);
-                string tierKey = beatDcBy >= 15 ? "exceptional" :
+                string tierKey = isNat20 ? "nat20" :
+                                 beatDcBy >= 15 ? "exceptional" :
                                  beatDcBy >= 10 ? "critical" :
                                  beatDcBy >= 5  ? "strong" : "clean";
 
-                if (beatDcBy >= 5) // strong, critical, exceptional
+                if (isNat20 || beatDcBy >= 5) // nat20, strong, critical, exceptional
                 {
                     string beforeImprovement = deliveredMessage;
                     string improved = null;
@@ -164,7 +165,7 @@ namespace Pinder.Core.Conversation
 
                     if (deliveredMessage != beforeImprovement)
                     {
-                        string layerName = tierKey == "exceptional" ? "Legendary success" : "Strong success";
+                        string layerName = isNat20 ? "Nat 20" : (tierKey == "exceptional" ? "Legendary success" : "Strong success");
                         var spans = WordDiff.Compute(beforeImprovement, deliveredMessage);
                         textDiffs.Add(new TextDiff(layerName, spans, beforeImprovement, deliveredMessage));
                     }
