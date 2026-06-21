@@ -163,11 +163,15 @@ OPTION_2
 
             var result = DialogueOptionParsers.ParseDialogueOptionsText(input, new[] { StatType.Charm, StatType.Wit, StatType.Honesty, StatType.Chaos });
             Assert.Equal(4, result.Length);
-            // First two should be parsed, last two padded
+            // First two should be parsed, last two padded (pads are now fallback lines, never '...')
             Assert.NotEqual("...", result[0].IntendedText);
             Assert.NotEqual("...", result[1].IntendedText);
-            Assert.Equal("...", result[2].IntendedText);
-            Assert.Equal("...", result[3].IntendedText);
+            Assert.NotEqual("...", result[2].IntendedText);
+            Assert.False(string.IsNullOrWhiteSpace(result[2].IntendedText));
+            Assert.True(result[2].IntendedText.Length >= 4);
+            Assert.NotEqual("...", result[3].IntendedText);
+            Assert.False(string.IsNullOrWhiteSpace(result[3].IntendedText));
+            Assert.True(result[3].IntendedText.Length >= 4);
         }
 
         // Mutation: Would catch if preamble text before OPTION_1 broke the parser
@@ -236,7 +240,9 @@ OPTION_5
             Assert.Equal(4, result.Length);
             foreach (var opt in result)
             {
-                Assert.Equal("...", opt.IntendedText);
+                Assert.NotEqual("...", opt.IntendedText);
+                Assert.False(string.IsNullOrWhiteSpace(opt.IntendedText));
+                Assert.True(opt.IntendedText.Length >= 4);
             }
         }
 
@@ -248,7 +254,9 @@ OPTION_5
             Assert.Equal(4, result.Length);
             foreach (var opt in result)
             {
-                Assert.Equal("...", opt.IntendedText);
+                Assert.NotEqual("...", opt.IntendedText);
+                Assert.False(string.IsNullOrWhiteSpace(opt.IntendedText));
+                Assert.True(opt.IntendedText.Length >= 4);
             }
         }
 
@@ -292,7 +300,9 @@ OPTION_4
             Assert.Equal(4, result.Length);
             foreach (var opt in result)
             {
-                Assert.Equal("...", opt.IntendedText);
+                Assert.NotEqual("...", opt.IntendedText);
+                Assert.False(string.IsNullOrWhiteSpace(opt.IntendedText));
+                Assert.True(opt.IntendedText.Length >= 4);
             }
         }
 
