@@ -72,5 +72,11 @@ namespace Pinder.LlmAdapters
         /// (a Trace warning is still emitted regardless).
         /// </summary>
         public System.Action<string>? OnStakeSkipWarning { get; set; }
+
+        /// <summary>
+        /// Optional callback invoked when an LLM contract violation is detected.
+        /// Receives structured metadata about the violation.
+        /// </summary>
+        public System.Action<LlmContractViolation>? OnLlmContractViolation { get; set; }
     }
 }

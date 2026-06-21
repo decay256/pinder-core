@@ -63,6 +63,10 @@ namespace Pinder.LlmAdapters.Anthropic
         /// <summary>
         /// Parses structured LLM text output with optional [SIGNALS] blocks.
         /// Never throws — returns DateeResponse with null signals on parse failure.
+        /// <para>
+        /// NOTE: This lenient parser is best-effort and diagnostics-only.
+        /// Gameplay production uses strict validation logic.
+        /// </para>
         /// </summary>
         public static DateeResponse ParseDateeResponseText(string? llmResponse)
         {
@@ -137,6 +141,10 @@ namespace Pinder.LlmAdapters.Anthropic
         /// <summary>
         /// Parses datee response from a tool_use JSON input.
         /// Returns null if the input is malformed (caller should fall back to text parsing).
+        /// <para>
+        /// NOTE: This lenient parser is best-effort and diagnostics-only.
+        /// Gameplay production uses strict validation logic.
+        /// </para>
         /// </summary>
         public static DateeResponse? ParseDateeResponseTool(JObject toolInput)
         {

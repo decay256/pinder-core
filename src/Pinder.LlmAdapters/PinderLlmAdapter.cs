@@ -52,13 +52,52 @@ namespace Pinder.LlmAdapters
             var responseText = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.DialogueOptions, ct: ct)
                 .ConfigureAwait(false);
 
-            var parsedOptions = DialogueOptionParsers.ParseDialogueOptionsText(responseText, context.AvailableStats);
-            int maxOptions = gameDef.MaxDialogueOptions;
-            if (parsedOptions.Length > maxOptions)
+            string? errorCode;
+            string? errorMessage;
+            int parsedCount;
+            int expectedCount;
+
+            var parsedOptions = DialogueOptionParsers.ParseDialogueOptionsStrict(
+                responseText,
+                context.AvailableStats,
+                gameDef.MaxDialogueOptions,
+                out errorCode,
+                out errorMessage,
+                out parsedCount,
+                out expectedCount);
+
+            if (errorCode != null)
             {
-                var capped = new DialogueOption[maxOptions];
-                System.Array.Copy(parsedOptions, capped, maxOptions);
-                parsedOptions = capped;
+                var violation = new LlmContractViolation(
+                    phase: "dialogue_options",
+                    reason: errorCode,
+                    provider: null,
+                    model: null,
+                    parserName: "StrictDialogueOptionsParser",
+                    expectedOptionCount: expectedCount,
+                    parsedOptionCount: parsedCount,
+                    optionCount: parsedCount,
+                    signalCount: null,
+                    sessionId: null,
+                    turnId: context.CurrentTurn
+                );
+
+                _options.OnLlmContractViolation?.Invoke(violation);
+
+                throw new LlmContractException(
+                    phase: "dialogue_options",
+                    reason: errorCode,
+                    message: errorMessage!,
+                    provider: null,
+                    model: null,
+                    parserName: "StrictDialogueOptionsParser",
+                    expectedOptionCount: expectedCount,
+                    parsedOptionCount: parsedCount,
+                    optionCount: parsedCount,
+                    signalCount: null,
+                    sessionId: null,
+                    turnId: context.CurrentTurn
+                );
             }
 
             // #950: warn when the option generator skips all stake content.
@@ -111,6 +150,75 @@ namespace Pinder.LlmAdapters
                 // wire ordering.
                 responseText = await SendStatefulDateeAsync(systemPrompt, userContent, history, temperature, cancellationToken)
                     .ConfigureAwait(false);
+            }
+
+            if (string.IsNullOrWhiteSpace(responseText))
+            {
+                var violation = new LlmContractViolation(
+                    phase: "datee_response",
+                    reason: "empty_output",
+                    provider: null,
+                    model: null,
+                    parserName: "StrictDateeResponseParser",
+                    expectedOptionCount: null,
+                    parsedOptionCount: null,
+                    optionCount: null,
+                    signalCount: 0,
+                    sessionId: null,
+                    turnId: context.CurrentTurn
+                );
+
+                _options.OnLlmContractViolation?.Invoke(violation);
+
+                throw new LlmContractException(
+                    phase: "datee_response",
+                    reason: "empty_output",
+                    message: "LLM datee_response output is empty or whitespace.",
+                    provider: null,
+                    model: null,
+                    parserName: "StrictDateeResponseParser",
+                    expectedOptionCount: null,
+                    parsedOptionCount: null,
+                    optionCount: null,
+                    signalCount: 0,
+                    sessionId: null,
+                    turnId: context.CurrentTurn
+                );
+            }
+
+            var validationResult = GmOutputContract.ValidateSignalsStrict(responseText, out string? errorDetail);
+            if (validationResult == DateeSignalsValidationResult.MalformedSignals)
+            {
+                var violation = new LlmContractViolation(
+                    phase: "datee_response",
+                    reason: "malformed_signals",
+                    provider: null,
+                    model: null,
+                    parserName: "StrictDateeResponseParser",
+                    expectedOptionCount: null,
+                    parsedOptionCount: null,
+                    optionCount: null,
+                    signalCount: null,
+                    sessionId: null,
+                    turnId: context.CurrentTurn
+                );
+
+                _options.OnLlmContractViolation?.Invoke(violation);
+
+                throw new LlmContractException(
+                    phase: "datee_response",
+                    reason: "malformed_signals",
+                    message: $"LLM datee_response has malformed signals block: {errorDetail}",
+                    provider: null,
+                    model: null,
+                    parserName: "StrictDateeResponseParser",
+                    expectedOptionCount: null,
+                    parsedOptionCount: null,
+                    optionCount: null,
+                    signalCount: null,
+                    sessionId: null,
+                    turnId: context.CurrentTurn
+                );
             }
 
             var parsed = DateeResponseParsers.ParseDateeResponseText(responseText);
