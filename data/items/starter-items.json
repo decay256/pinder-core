@@ -845,7 +845,7 @@
     "stat_modifiers": { "honesty": 1, "self_awareness": 1 },
     "personality_fragment": "mention your hands at least once in every three messages; describe them as either too cold, too clean, or moving without your permission.",
     "backstory_fragment": "",
-    "texting_style_fragment": "SYNTAX:\n- length: write moderately long, anxious sentences that trail off with a single comma",
+    "texting_style_fragment": "SYNTAX:\n- length: never sends more than 5 words",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
@@ -978,7 +978,7 @@
     "stat_modifiers": { "charm": 2, "self_awareness": -1 },
     "personality_fragment": "maintain an impossibly slick, confident attitude, but let it slip by asking your match if they think your hair is secretly trying to escape your scalp.",
     "backstory_fragment": "",
-    "texting_style_fragment": "SYNTAX:\n- structure: write every message as a single, perfectly symmetrical block of text with centered line breaks",
+    "texting_style_fragment": "SYNTAX:\n- structure: wall-of-text (one paragraph, no breaks, comma splices throughout)",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
