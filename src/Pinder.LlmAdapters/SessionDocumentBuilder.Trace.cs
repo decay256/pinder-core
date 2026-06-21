@@ -19,6 +19,12 @@ namespace Pinder.LlmAdapters
         /// <summary>
         /// Builds the user-message content for GetDialogueOptionsAsync and returns the trace data.
         /// </summary>
+        /// <remarks>
+        /// <para><strong>#1208 immutable-first contract: DOCUMENTED EXCEPTION</strong></para>
+        /// <para>This builder CANNOT be safely reordered to immutable-first. Its engine blocks interpolate volatile state,
+        /// and trailing static instructions contain positional back-references. Changing this order breaks rendered semantics.
+        /// See docs/prompt-cache-ordering.md and pinning tests for details.</para>
+        /// </remarks>
         public static PromptTraceResult BuildDialogueOptionsPromptEx(DialogueContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
@@ -205,6 +211,12 @@ namespace Pinder.LlmAdapters
         /// <summary>
         /// Builds the user-message content for GetDateeResponseAsync and returns the trace data.
         /// </summary>
+        /// <remarks>
+        /// <para><strong>#1208 immutable-first contract: DOCUMENTED EXCEPTION</strong></para>
+        /// <para>This builder CANNOT be safely reordered to immutable-first. Its engine blocks interpolate volatile state,
+        /// and trailing static instructions contain positional back-references. Changing this order breaks rendered semantics.
+        /// See docs/prompt-cache-ordering.md and pinning tests for details.</para>
+        /// </remarks>
         public static PromptTraceResult BuildDateePromptEx(DateeContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
