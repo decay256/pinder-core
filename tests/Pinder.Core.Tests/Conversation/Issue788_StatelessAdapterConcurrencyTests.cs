@@ -51,7 +51,8 @@ namespace Pinder.Core.Tests.Conversation
                 => Task.FromResult<string?>(null);
         public Task<string> GetSuccessImprovementAsync(SuccessImprovementContext context, CancellationToken ct = default) => Task.FromResult(context.DeliveredMessage);
 
-            public Task<string> GetSteeringQuestionAsync(SteeringContext context, CancellationToken ct = default)
+            public Task<string> GetHorninessQuestionAsync(HorninessQuestionContext context, CancellationToken ct = default) => Task.FromResult("question?");
+        public Task<string> GetSteeringQuestionAsync(SteeringContext context, CancellationToken ct = default)
                 => Task.FromResult(string.Empty);
             public Task<string> ApplyHorninessOverlayAsync(string m, string i, string? oc = null, string? ad = null, CancellationToken ct = default) => Task.FromResult(m);
             public Task<string> ApplyShadowCorruptionAsync(string m, string i, ShadowStatType s, string? ad = null, CancellationToken ct = default) => Task.FromResult(m);

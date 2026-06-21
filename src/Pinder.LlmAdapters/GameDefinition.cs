@@ -32,6 +32,8 @@ namespace Pinder.LlmAdapters
         /// <summary>Steering question prompt template. Placeholders: {player_name}, {datee_name}, {delivered_message}.</summary>
         public string SteeringPrompt { get; }
 
+        public string HorninessPrompt { get; }
+
         /// <summary>Global DC bias applied to all rolls. 0 = standard difficulty. Positive = easier.</summary>
         public int GlobalDcBias { get; }
 
@@ -65,6 +67,7 @@ namespace Pinder.LlmAdapters
             string dateeRoleDescription,
             string improvementPrompt = null,
             string steeringPrompt = null,
+            string horninessPrompt = null,
             HorninessTimeModifiers horninessTimeModifiers = null,
             int globalDcBias = 0,
             int shadowDcBias = 0,
@@ -80,6 +83,7 @@ namespace Pinder.LlmAdapters
             DateeRoleDescription = dateeRoleDescription ?? throw new ArgumentNullException(nameof(dateeRoleDescription));
             ImprovementPrompt = improvementPrompt ?? "";
             SteeringPrompt = steeringPrompt ?? "";
+            HorninessPrompt = horninessPrompt ?? "";
             HorninessTimeModifiers = horninessTimeModifiers;
             GlobalDcBias = globalDcBias;
             ShadowDcBias = shadowDcBias;

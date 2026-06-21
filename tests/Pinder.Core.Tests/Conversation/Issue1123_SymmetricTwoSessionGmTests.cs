@@ -124,7 +124,8 @@ namespace Pinder.Core.Tests.Conversation
                 => Task.FromResult<string?>(null);
         public Task<string> GetSuccessImprovementAsync(SuccessImprovementContext context, CancellationToken ct = default) => Task.FromResult(context.DeliveredMessage);
 
-            public Task<string> GetSteeringQuestionAsync(SteeringContext context, CancellationToken ct = default)
+            public Task<string> GetHorninessQuestionAsync(HorninessQuestionContext context, CancellationToken ct = default) => Task.FromResult("question?");
+        public Task<string> GetSteeringQuestionAsync(SteeringContext context, CancellationToken ct = default)
                 => Task.FromResult(string.Empty);
             public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, CancellationToken ct = default) => Task.FromResult(message);
             public Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow, string? archetypeDirective = null, CancellationToken ct = default) => Task.FromResult(message);

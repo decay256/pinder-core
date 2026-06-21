@@ -98,6 +98,7 @@ namespace Pinder.LlmAdapters
                 dateeRoleDescription: dateeRoleDescription,
                 improvementPrompt: GetOptional("improvement_prompt"),
                 steeringPrompt: GetOptional("steering_prompt"),
+                horninessPrompt: GetOptional("horniness_prompt"),
                 horninessTimeModifiers: horninessTimeModifiers,
                 globalDcBias: globalDcBias,
                 shadowDcBias: shadowDcBias,

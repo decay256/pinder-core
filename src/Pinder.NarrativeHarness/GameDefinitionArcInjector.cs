@@ -35,6 +35,7 @@ namespace Pinder.Tools.NarrativeHarness
                 dateeRoleDescription: baseDef.DateeRoleDescription,
                 improvementPrompt: baseDef.ImprovementPrompt,
                 steeringPrompt: baseDef.SteeringPrompt,
+                horninessPrompt: baseDef.HorninessPrompt,
                 horninessTimeModifiers: baseDef.HorninessTimeModifiers,
                 globalDcBias: baseDef.GlobalDcBias,
                 shadowDcBias: baseDef.ShadowDcBias,

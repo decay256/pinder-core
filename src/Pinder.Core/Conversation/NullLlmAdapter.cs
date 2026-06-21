@@ -75,6 +75,12 @@ namespace Pinder.Core.Conversation
             return Task.FromResult("so... when are we actually doing this?");
         }
 
+        public Task<string> GetHorninessQuestionAsync(HorninessQuestionContext context, CancellationToken ct = default)
+        {
+            ct.ThrowIfCancellationRequested();
+            return Task.FromResult("so... your place or mine?");
+        }
+
         public Task<string> GetSuccessImprovementAsync(SuccessImprovementContext context, CancellationToken ct = default)
         {
             ct.ThrowIfCancellationRequested();

@@ -94,7 +94,7 @@ namespace Pinder.Core.Tests
         // incrementing.
         // -----------------------------------------------------------------
         [Fact]
-        public async Task HonestySuccess_HorninessMiss_DenialShadowTrap_CapsToOneThenHorninessToZero_StaysSuccess()
+        public async Task HonestySuccess_HorninessMiss_DenialShadowTrap_CapsToOneThenHorninessAppends_StaysSuccess()
         {
             var instructions = LoadYaml();
 
@@ -145,9 +145,9 @@ namespace Pinder.Core.Tests
             Assert.True(result.ShadowCheck.OverlayApplied,
                 "Shadow corruption overlay must apply on Honesty/Denial TropeTrap");
 
-            // #1095: shadow trap truncates the positive delta to 1, then horniness
-            // halves (floor) → floor(1/2) = 0. Net final delta == 0.
-            Assert.Equal(0, result.InterestDelta);
+            // #1209: shadow trap truncates the positive delta to 1, horniness has no penalty.
+            // Net final delta == 1.
+            Assert.Equal(1, result.InterestDelta);
 
             // #1095: the turn is STILL a success — the FINAL verdict is NOT a miss.
             Assert.Equal(Pinder.Core.Rolls.RollVerdict.Success, result.Roll.Check.FinalVerdict);
@@ -181,19 +181,12 @@ namespace Pinder.Core.Tests
         [Fact]
         public void Section15_PenaltyArithmetic_OnPositivePostDemoteDelta()
         {
-            // §15 rule: penalty = floor(delta/2) - delta when delta > 0.
-            // For a hypothetical post-demote positive delta of d, the penalty
-            // applied by GameSession is exactly halvedDelta - d where
-            // halvedDelta = floor(d/2). This is the property the audit log
-            // invariant relies on.
+            // §15 rule removed in #1209: penalty is always 0.
             for (int d = 1; d <= 8; d++)
             {
-                int halved = (int)System.Math.Floor(d / 2.0);
-                int penalty = halved - d;
-                // Penalty is in [floor(d/2)-d, 0].  Equivalently in [-ceil(d/2), 0].
-                Assert.InRange(penalty, halved - d, 0);
-                // Net-of-penalty delta must equal the halved delta.
-                Assert.Equal(halved, d + penalty);
+                int penalty = 0;
+                Assert.Equal(0, penalty);
+                Assert.Equal(d, d + penalty);
             }
         }
 
@@ -240,14 +233,9 @@ namespace Pinder.Core.Tests
             Assert.False(result.ShadowCheck.CheckPerformed,
                 "Shadow check must not be performed when shadow value is 0");
 
-            // Natural delta is positive. §15 halves it.
-            // result.HorninessInterestPenalty is the penalty applied
-            // (floor(delta/2) - delta_pre_penalty), so the post-§15
-            // interestDelta = delta_pre_penalty + penalty.
-            int preDelta = result.InterestDelta - result.HorninessInterestPenalty;
-            int expectedPenalty = (int)System.Math.Floor(preDelta / 2.0) - preDelta;
+            int preDelta = result.InterestDelta;
             Assert.True(preDelta > 0, $"pre-§15 delta must be positive; got {preDelta}");
-            Assert.Equal(expectedPenalty, result.HorninessInterestPenalty);
+            Assert.Equal(0, result.HorninessInterestPenalty);
 
             // Invariant: before + final delta == after.
             Assert.Equal(interestBefore + result.InterestDelta, interestAfter);
@@ -364,7 +352,8 @@ namespace Pinder.Core.Tests
 
         public Task<string> GetSuccessImprovementAsync(SuccessImprovementContext context, CancellationToken ct = default) => Task.FromResult(context.DeliveredMessage);
 
-            public Task<string> GetSteeringQuestionAsync(SteeringContext context, System.Threading.CancellationToken ct = default)
+            public Task<string> GetHorninessQuestionAsync(HorninessQuestionContext context, CancellationToken ct = default) => Task.FromResult("question?");
+        public Task<string> GetSteeringQuestionAsync(SteeringContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult("steering question");
         }
 

@@ -66,6 +66,19 @@ namespace Pinder.Core.Interfaces
         Task<string> GetSteeringQuestionAsync(SteeringContext context, CancellationToken ct = default);
 
         /// <summary>
+        /// Generate a horny question to append to the player's delivered message.
+        /// Called after a horniness miss roll. The question should reference
+        /// specifics from the conversation and add a flirty/horny tone.
+        /// </summary>
+        /// <param name="context">The context for horniness question generation.</param>
+        /// <param name="ct">
+        /// Cancellation token forwarded from <see cref="GameSession.ResolveTurnAsync(int, System.IProgress{TurnProgressEvent}?, CancellationToken)"/>
+        /// (#794). Implementations MUST pass this through to the underlying
+        /// transport so a mid-turn cancel halts the in-flight HTTP call.
+        /// </param>
+        Task<string> GetHorninessQuestionAsync(HorninessQuestionContext context, CancellationToken ct = default);
+
+        /// <summary>
         /// Generate an improved message after a strong or legendary success roll.
         /// Replaces the delivered message entirely.
         /// </summary>
