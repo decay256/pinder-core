@@ -117,6 +117,9 @@ namespace Pinder.Core.Conversation
         // #1218: optional callback invoked when shadow filtering changes the option/stat pool.
         private readonly Action<ShadowFilterTraceEvent>? _onShadowFilterTrace;
 
+        // #1219: optional callback invoked when a rule resolution occurs.
+        private readonly Action<RuleResolutionTraceEvent>? _onRuleResolution;
+
         // Stored between StartTurnAsync and ResolveTurnAsync
         private DialogueOption[]? _currentOptions { get => _state.CurrentOptions; set => _state.CurrentOptions = value; }
         private bool _currentHasAdvantage { get => _state.CurrentHasAdvantage; set => _state.CurrentHasAdvantage = value; }
@@ -184,6 +187,7 @@ namespace Pinder.Core.Conversation
             _statDeliveryInstructions = config.StatDeliveryInstructions;
             _onTextLayerNoop = config.OnTextLayerNoop;
             _onShadowFilterTrace = config.OnShadowFilterTrace;
+            _onRuleResolution = config.OnRuleResolution;
 
             // Determine starting interest: explicit config > Dread T3 > default
             if (config.StartingInterest.HasValue)
@@ -259,7 +263,8 @@ namespace Pinder.Core.Conversation
                 _rules,
                 _shadowGrowthEvaluator,
                 _xpRecorder,
-                _globalDcBias);
+                _globalDcBias,
+                _onRuleResolution);
 
             var deliveryStage = new DeliveryStage(
                 _llm,
@@ -282,7 +287,8 @@ namespace Pinder.Core.Conversation
                 deliveryStage,
                 dateeResponseStage,
                 _maxDialogueOptions,
-                _onShadowFilterTrace);
+                _onShadowFilterTrace,
+                _onRuleResolution);
         }
     }
 }

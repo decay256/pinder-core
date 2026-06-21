@@ -108,5 +108,40 @@ namespace Pinder.Core.Tests
             var actual = TurnOrchestratorHelpers.GetMomentumBonus(streak, fakeResolver);
             Assert.Equal(resolverValue, actual);
         }
+
+        [Fact]
+        public void Test5_ResolverHit_TracesExpectedEvent()
+        {
+            var fakeResolver = new FakeRuleResolver { MomentumBonus = 42 };
+            RuleResolutionTraceEvent? trace = null;
+            Action<RuleResolutionTraceEvent> callback = ev => trace = ev;
+
+            var result = TurnOrchestratorHelpers.GetMomentumBonus(5, fakeResolver, callback);
+
+            Assert.Equal(42, result);
+            Assert.NotNull(trace);
+            Assert.Equal("momentum_bonus", trace.RuleKey);
+            Assert.Equal("resolver", trace.Source);
+            Assert.True(trace.ResolverConfigured);
+            Assert.Equal(42, trace.NumericValue);
+            Assert.Null(trace.StateValue);
+        }
+
+        [Fact]
+        public void Test6_ResolverMiss_TracesExpectedEvent()
+        {
+            RuleResolutionTraceEvent? trace = null;
+            Action<RuleResolutionTraceEvent> callback = ev => trace = ev;
+
+            var result = TurnOrchestratorHelpers.GetMomentumBonus(5, null, callback);
+
+            Assert.Equal(3, result);
+            Assert.NotNull(trace);
+            Assert.Equal("momentum_bonus", trace.RuleKey);
+            Assert.Equal("hardcoded_fallback", trace.Source);
+            Assert.False(trace.ResolverConfigured);
+            Assert.Equal(3, trace.NumericValue);
+            Assert.Null(trace.StateValue);
+        }
     }
 }

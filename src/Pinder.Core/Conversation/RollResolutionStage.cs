@@ -42,6 +42,7 @@ namespace Pinder.Core.Conversation
         private readonly ShadowGrowthEvaluator? _shadowGrowthEvaluator;
         private readonly SessionXpRecorder _xpRecorder;
         private readonly int _globalDcBias;
+        private readonly Action<RuleResolutionTraceEvent>? _onRuleResolution;
 
         public RollResolutionStage(
             IDiceRoller dice,
@@ -49,7 +50,8 @@ namespace Pinder.Core.Conversation
             IRuleResolver? rules,
             ShadowGrowthEvaluator? shadowGrowthEvaluator,
             SessionXpRecorder xpRecorder,
-            int globalDcBias)
+            int globalDcBias,
+            Action<RuleResolutionTraceEvent>? onRuleResolution = null)
         {
             _dice = dice ?? throw new ArgumentNullException(nameof(dice));
             _trapRegistry = trapRegistry ?? throw new ArgumentNullException(nameof(trapRegistry));
@@ -57,6 +59,7 @@ namespace Pinder.Core.Conversation
             _shadowGrowthEvaluator = shadowGrowthEvaluator;
             _xpRecorder = xpRecorder ?? throw new ArgumentNullException(nameof(xpRecorder));
             _globalDcBias = globalDcBias;
+            _onRuleResolution = onRuleResolution;
         }
 
         public RollStageResult Execute(
@@ -157,12 +160,12 @@ namespace Pinder.Core.Conversation
             int riskBonusDelta = 0;
             if (rollResult.IsSuccess)
             {
-                baseInterestDelta = TurnOrchestratorHelpers.ResolveSuccessInterestDelta(rollResult, _rules);
+                baseInterestDelta = TurnOrchestratorHelpers.ResolveSuccessInterestDelta(rollResult, _rules, _onRuleResolution);
                 riskBonusDelta = RiskTierBonus.GetInterestBonus(rollResult);
             }
             else
             {
-                baseInterestDelta = TurnOrchestratorHelpers.ResolveFailureInterestDelta(rollResult, _rules);
+                baseInterestDelta = TurnOrchestratorHelpers.ResolveFailureInterestDelta(rollResult, _rules, _onRuleResolution);
             }
             int interestDelta = baseInterestDelta + riskBonusDelta;
 
@@ -214,13 +217,13 @@ namespace Pinder.Core.Conversation
 
             // 4. Record interest before applying delta
             int interestBefore = state.Interest.Current;
-            InterestState stateBefore = TurnOrchestratorHelpers.ResolveInterestState(state, _rules);
+            InterestState stateBefore = TurnOrchestratorHelpers.ResolveInterestState(state, _rules, _onRuleResolution);
 
             // 5. Apply interest delta
             state.Interest.Apply(interestDelta);
 
             int interestAfter = state.Interest.Current;
-            InterestState stateAfter = TurnOrchestratorHelpers.ResolveInterestState(state, _rules);
+            InterestState stateAfter = TurnOrchestratorHelpers.ResolveInterestState(state, _rules, _onRuleResolution);
 
             // ---- Shadow growth evaluation (#44) ----
             _shadowGrowthEvaluator?.EvaluatePerTurn(

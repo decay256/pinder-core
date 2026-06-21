@@ -25,6 +25,7 @@ namespace Pinder.Core.Conversation
         private readonly DateeResponseStage _dateeResponseStage;
         private readonly int _maxDialogueOptions;
         private readonly Action<ShadowFilterTraceEvent>? _onShadowFilterTrace;
+        private readonly Action<RuleResolutionTraceEvent>? _onRuleResolution;
 
         public TurnOrchestrator(
             ILlmAdapter llm,
@@ -35,7 +36,8 @@ namespace Pinder.Core.Conversation
             DeliveryStage deliveryStage,
             DateeResponseStage dateeResponseStage,
             int maxDialogueOptions,
-            Action<ShadowFilterTraceEvent>? onShadowFilterTrace = null)
+            Action<ShadowFilterTraceEvent>? onShadowFilterTrace = null,
+            Action<RuleResolutionTraceEvent>? onRuleResolution = null)
         {
             _llm = llm ?? throw new ArgumentNullException(nameof(llm));
             _dice = dice ?? throw new ArgumentNullException(nameof(dice));
@@ -47,6 +49,7 @@ namespace Pinder.Core.Conversation
             _dateeResponseStage = dateeResponseStage ?? throw new ArgumentNullException(nameof(dateeResponseStage));
             _maxDialogueOptions = maxDialogueOptions;
             _onShadowFilterTrace = onShadowFilterTrace;
+            _onRuleResolution = onRuleResolution;
         }
 
         internal async Task<TurnStart> StartTurnAsync(
@@ -78,7 +81,7 @@ namespace Pinder.Core.Conversation
             }
 
             // Ghost trigger: if Bored state, 25% chance per turn
-            if (TurnOrchestratorHelpers.ResolveInterestState(state, _rules) == InterestState.Bored)
+            if (TurnOrchestratorHelpers.ResolveInterestState(state, _rules, _onRuleResolution) == InterestState.Bored)
             {
                 int ghostRoll = _dice.Roll(4);
                 if (ghostRoll == 1)
@@ -122,7 +125,7 @@ namespace Pinder.Core.Conversation
                 {
                     int effectiveVal = state.PlayerShadows.GetEffectiveShadow(shadow);
                     shadowThresholds[shadow] = effectiveVal;
-                    int tier = TurnOrchestratorHelpers.ResolveThresholdLevel(effectiveVal, _rules);
+                    int tier = TurnOrchestratorHelpers.ResolveThresholdLevel(effectiveVal, _rules, _onRuleResolution);
                     // T2+ disadvantage for paired stats is removed: shadow check IS the disadvantage (#755)
                     _ = tier; // suppress unused warning
                 }
@@ -204,7 +207,7 @@ namespace Pinder.Core.Conversation
             state.CurrentOptions = options;
 
             // Compute pending momentum bonus for the upcoming roll (#268)
-            state.PendingMomentumBonus = TurnOrchestratorHelpers.GetMomentumBonus(state.MomentumStreak, _rules);
+            state.PendingMomentumBonus = TurnOrchestratorHelpers.GetMomentumBonus(state.MomentumStreak, _rules, _onRuleResolution);
 
             state.CurrentDicePools = new Pinder.Core.Rolls.PerOptionDicePool[options.Length];
             for (int i = 0; i < options.Length; i++)
