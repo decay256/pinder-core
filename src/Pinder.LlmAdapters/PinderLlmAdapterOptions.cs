@@ -8,7 +8,8 @@ namespace Pinder.LlmAdapters
     {
         /// <summary>
         /// Game definition containing vision, world rules, prompts, steering prompt, etc.
-        /// When null, GameDefinition.PinderDefaults is used.
+        /// Production REQUIRES this to be set explicitly. A null value will cause the production adapter
+        /// to throw an InvalidOperationException at call time (no silent PinderDefaults fallbacks in production).
         /// </summary>
         public GameDefinition? GameDefinition { get; set; }
 

@@ -3,7 +3,7 @@ namespace Pinder.LlmAdapters
     public partial class GameDefinition
     {
         /// <summary>
-        /// Hardcoded Pinder defaults used when YAML file is unavailable.
+        /// Hardcoded Pinder defaults used when YAML file is unavailable. TEST/DEV-only fallback; not for production.
         /// </summary>
         public static GameDefinition PinderDefaults { get; } = new GameDefinition(
             name: "Pinder",
@@ -27,7 +27,7 @@ feelings (that their shadow stats are slowly corrupting).
 The mechanical identity is a d20 RPG: six positive stats paired with
 six shadow stats that grow on their own and penalize their paired stat.
 Shadows represent the psychological cost of prolonged app use — Madness,
-Horniness, Denial, Fixation, Dread, Overthinking. You level up to fight
+Despair, Denial, Fixation, Dread, Overthinking. You level up to fight
 the darkness, but the darkness levels up too.
 
 == WORLD RULES ==
@@ -37,7 +37,7 @@ has been dressed up, given a personality through equipped items and
 anatomy choices, and uploaded by their player.
 
 Every character has 6 positive stats and 6 shadow stats that form
-paired opposites: Charm/Madness, Rizz/Horniness, Honesty/Denial,
+paired opposites: Charm/Madness, Rizz/Despair, Honesty/Denial,
 Chaos/Fixation, Wit/Dread, Self-Awareness/Overthinking.
 
 Shadows start at 0 and grow from in-conversation events. Every 3 points
