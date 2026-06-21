@@ -20,6 +20,8 @@ namespace Pinder.LlmAdapters
     /// the VARIABLE character-spec block LAST. This keeps the stable cacheable
     /// prefix (GM base + game definition) ahead of the per-character delta and
     /// the volatile running transcript, so #1123's prompt caching still pays off.
+    /// 
+    /// #1208: This builder implements the COMPLIANT immutable-first ordering pattern (see docs/prompt-cache-ordering.md).
     /// </summary>
     public static class SessionSystemPromptBuilder
     {
