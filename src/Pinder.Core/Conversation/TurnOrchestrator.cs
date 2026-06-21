@@ -24,6 +24,7 @@ namespace Pinder.Core.Conversation
         private readonly DeliveryStage _deliveryStage;
         private readonly DateeResponseStage _dateeResponseStage;
         private readonly int _maxDialogueOptions;
+        private readonly Action<ShadowFilterTraceEvent>? _onShadowFilterTrace;
 
         public TurnOrchestrator(
             ILlmAdapter llm,
@@ -33,7 +34,8 @@ namespace Pinder.Core.Conversation
             RollResolutionStage rollResolutionStage,
             DeliveryStage deliveryStage,
             DateeResponseStage dateeResponseStage,
-            int maxDialogueOptions)
+            int maxDialogueOptions,
+            Action<ShadowFilterTraceEvent>? onShadowFilterTrace = null)
         {
             _llm = llm ?? throw new ArgumentNullException(nameof(llm));
             _dice = dice ?? throw new ArgumentNullException(nameof(dice));
@@ -44,6 +46,7 @@ namespace Pinder.Core.Conversation
             _deliveryStage = deliveryStage ?? throw new ArgumentNullException(nameof(deliveryStage));
             _dateeResponseStage = dateeResponseStage ?? throw new ArgumentNullException(nameof(dateeResponseStage));
             _maxDialogueOptions = maxDialogueOptions;
+            _onShadowFilterTrace = onShadowFilterTrace;
         }
 
         internal async Task<TurnStart> StartTurnAsync(
@@ -137,7 +140,7 @@ namespace Pinder.Core.Conversation
 
             // Draw N random stats for this turn's options
             var allStats = new[] { StatType.Charm, StatType.Rizz, StatType.Honesty, StatType.Chaos, StatType.Wit, StatType.SelfAwareness };
-            var availableStats = OptionFilterEngine.DrawRandomStats(allStats, _maxDialogueOptions, shadowThresholds, _statDrawRng);
+            var availableStats = OptionFilterEngine.DrawRandomStats(allStats, _maxDialogueOptions, shadowThresholds, _statDrawRng, _onShadowFilterTrace);
 
             var context = new DialogueContext(
                 playerAvatarPrompt: player.AssembledSystemPrompt,
@@ -195,7 +198,7 @@ namespace Pinder.Core.Conversation
             // T3 option filtering (#45)
             if (state.PlayerShadows != null && shadowThresholds != null)
             {
-                options = OptionFilterEngine.ApplyT3Filters(options, shadowThresholds, state.LastStatUsed, _dice);
+                options = OptionFilterEngine.ApplyT3Filters(options, shadowThresholds, state.LastStatUsed, _dice, _onShadowFilterTrace);
             }
 
             state.CurrentOptions = options;
