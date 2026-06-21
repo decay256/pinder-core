@@ -28,7 +28,8 @@ namespace Pinder.Core.Conversation
             IConsequenceCatalog? consequenceCatalog,
             int externalBonus,
             int dcAdjustment,
-            bool resolveHasDisadvantage)
+            bool resolveHasDisadvantage,
+            IRuleResolver? rules = null)
         {
             // 1. Roll dice
             var chosenPool = state.InjectedNextPool != null
@@ -51,7 +52,8 @@ namespace Pinder.Core.Conversation
                 hasAdvantage: state.CurrentHasAdvantage,
                 hasDisadvantage: resolveHasDisadvantage,
                 externalBonus: externalBonus,
-                dcAdjustment: dcAdjustment);
+                dcAdjustment: dcAdjustment,
+                rules: rules);
 
             // #976: populate Consequence on the main option roll from i18n catalogue.
             if (consequenceCatalog != null && rollResult.Check != null)

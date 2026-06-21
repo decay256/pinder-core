@@ -1,3 +1,5 @@
+using Pinder.Core.Interfaces;
+
 namespace Pinder.Core.Progression
 {
     /// <summary>
@@ -82,14 +84,16 @@ namespace Pinder.Core.Progression
         public const int BaseStatCap = 6;
 
         /// <summary>Resolve 1-based level from raw XP.</summary>
-        public static int GetLevel(int xp)
+        public static int GetLevel(int xp, IRuleResolver? rules = null)
         {
             int level = 1;
             for (int i = XpThresholds.Length - 1; i >= 0; i--)
             {
-                if (xp >= XpThresholds[i])
+                int l = i + 1;
+                int threshold = rules?.GetXpThresholdForLevel(l) ?? XpThresholds[i];
+                if (xp >= threshold)
                 {
-                    level = i + 1;
+                    level = l;
                     break;
                 }
             }
@@ -97,22 +101,28 @@ namespace Pinder.Core.Progression
         }
 
         /// <summary>Roll bonus for a given level (1-based).</summary>
-        public static int GetBonus(int level)
+        public static int GetBonus(int level, IRuleResolver? rules = null)
         {
+            var o = rules?.GetLevelRollBonus(level);
+            if (o.HasValue) return o.Value;
             int idx = System.Math.Max(0, System.Math.Min(level - 1, LevelBonuses.Length - 1));
             return LevelBonuses[idx];
         }
 
         /// <summary>Build points granted upon reaching a given level (1-based). 0 for L1 (creation budget).</summary>
-        public static int GetBuildPointsForLevel(int level)
+        public static int GetBuildPointsForLevel(int level, IRuleResolver? rules = null)
         {
+            var o = rules?.GetBuildPointsForLevel(level);
+            if (o.HasValue) return o.Value;
             int idx = System.Math.Max(0, System.Math.Min(level - 1, BuildPointsGranted.Length - 1));
             return BuildPointsGranted[idx];
         }
 
         /// <summary>Maximum item slots at a given level (1-based).</summary>
-        public static int GetItemSlots(int level)
+        public static int GetItemSlots(int level, IRuleResolver? rules = null)
         {
+            var o = rules?.GetItemSlotsForLevel(level);
+            if (o.HasValue) return o.Value;
             int idx = System.Math.Max(0, System.Math.Min(level - 1, ItemSlots.Length - 1));
             return ItemSlots[idx];
         }

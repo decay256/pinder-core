@@ -69,5 +69,25 @@ namespace Pinder.Core.Interfaces
         /// Returns null if no matching rule found.
         /// </summary>
         int? GetFlatXpAward(string awardType);
+
+        /// <summary>
+        /// XP required to REACH this 1-based level
+        /// </summary>
+        int? GetXpThresholdForLevel(int level);
+
+        /// <summary>
+        /// flat d20 bonus at this 1-based level
+        /// </summary>
+        int? GetLevelRollBonus(int level);
+
+        /// <summary>
+        /// build points granted on reaching this level
+        /// </summary>
+        int? GetBuildPointsForLevel(int level);
+
+        /// <summary>
+        /// max item slots at this level
+        /// </summary>
+        int? GetItemSlotsForLevel(int level);
     }
 }

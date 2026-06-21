@@ -149,7 +149,8 @@ namespace Pinder.Core.Conversation
                 null, // consequenceCatalog is not needed inside EvaluateRolls
                 externalBonus,
                 dcAdjustment,
-                resolveHasDisadvantage);
+                resolveHasDisadvantage,
+                _rules);
 
             // 2. Compute interest delta from roll outcome
             int baseInterestDelta;
@@ -225,7 +226,7 @@ namespace Pinder.Core.Conversation
             _shadowGrowthEvaluator?.EvaluatePerTurn(
                 chosenOption, optionIndex, rollResult, interestAfter, comboTriggered, hasTellOption,
                 state.CurrentOptions,
-                (chosen, opts) => GameSessionHelpers.IsHighestProbabilityOption(chosen, opts, player, datee));
+                (chosen, opts) => GameSessionHelpers.IsHighestProbabilityOption(chosen, opts, player, datee, _rules));
 
             // Shadow reduction: Winning despite Overthinking disadvantage → Overthinking −1
             if (rollResult.IsSuccess
