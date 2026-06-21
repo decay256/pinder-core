@@ -75,6 +75,7 @@ namespace Pinder.Core.Tests.Phase0
         {
             return new PinderLlmAdapter(transport, new PinderLlmAdapterOptions
             {
+                GameDefinition = GameDefinition.PinderDefaults,
                 MaxTokens = 256,
                 Temperature = 0.9,
             });

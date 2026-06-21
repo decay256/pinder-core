@@ -114,6 +114,7 @@ namespace Pinder.LlmAdapters.Tests
             var transport = new FixedResponseTransport(fakeResponse);
             var options = new PinderLlmAdapterOptions
             {
+                GameDefinition = GameDefinition.PinderDefaults,
                 OnStakeSkipWarning = w => capturedWarning = w,
             };
             var adapter = new PinderLlmAdapter(transport, options);
@@ -146,6 +147,7 @@ namespace Pinder.LlmAdapters.Tests
             var transport = new FixedResponseTransport(fakeResponse);
             var options = new PinderLlmAdapterOptions
             {
+                GameDefinition = GameDefinition.PinderDefaults,
                 OnStakeSkipWarning = w => capturedWarning = w,
             };
             var adapter = new PinderLlmAdapter(transport, options);

@@ -3,7 +3,7 @@ namespace Pinder.LlmAdapters
     public partial class GameDefinition
     {
         /// <summary>
-        /// Hardcoded Pinder defaults used when YAML file is unavailable.
+        /// Hardcoded Pinder defaults used when YAML file is unavailable. TEST/DEV-only fallback; not for production.
         /// </summary>
         public static GameDefinition PinderDefaults { get; } = new GameDefinition(
             name: "Pinder",
@@ -37,7 +37,7 @@ has been dressed up, given a personality through equipped items and
 anatomy choices, and uploaded by their player.
 
 Every character has 6 positive stats and 6 shadow stats that form
-paired opposites: Charm/Madness, Rizz/Horniness, Honesty/Denial,
+paired opposites: Charm/Madness, Rizz/Despair, Honesty/Denial,
 Chaos/Fixation, Wit/Dread, Self-Awareness/Overthinking.
 
 Shadows start at 0 and grow from in-conversation events. Every 3 points

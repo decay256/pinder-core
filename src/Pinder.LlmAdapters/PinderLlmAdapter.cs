@@ -44,15 +44,16 @@ namespace Pinder.LlmAdapters
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
+            var gameDef = RequireGameDefinition();
             var userContent = SessionDocumentBuilder.BuildDialogueOptionsPrompt(context);
-            var systemPrompt = SessionSystemPromptBuilder.BuildPlayerAvatar(context.PlayerAvatarPrompt, _options.GameDefinition);
+            var systemPrompt = SessionSystemPromptBuilder.BuildPlayerAvatar(context.PlayerAvatarPrompt, gameDef);
             double temperature = _options.DialogueOptionsTemperature ?? DefaultDialogueOptionsTemperature;
 
             var responseText = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.DialogueOptions, ct: ct)
                 .ConfigureAwait(false);
 
             var parsedOptions = DialogueOptionParsers.ParseDialogueOptionsText(responseText, context.AvailableStats);
-            int maxOptions = _options.GameDefinition?.MaxDialogueOptions ?? 99;
+            int maxOptions = gameDef.MaxDialogueOptions;
             if (parsedOptions.Length > maxOptions)
             {
                 var capped = new DialogueOption[maxOptions];
@@ -74,6 +75,7 @@ namespace Pinder.LlmAdapters
         /// <inheritdoc />
         public async Task<DateeResponse> GetDateeResponseAsync(DateeContext context, CancellationToken ct = default)
         {
+            RequireGameDefinition();
             // #788: stateless single-turn fallback path. Stateful callers route
             // through the IStatefulLlmAdapter overload that takes a history.
             var result = await GetDateeResponseAsync(context, System.Array.Empty<ConversationMessage>(), ct).ConfigureAwait(false);
@@ -89,8 +91,9 @@ namespace Pinder.LlmAdapters
             if (context == null) throw new ArgumentNullException(nameof(context));
             if (history == null) throw new ArgumentNullException(nameof(history));
 
+            var gameDef = RequireGameDefinition();
             var userContent = SessionDocumentBuilder.BuildDateePrompt(context);
-            var systemPrompt = SessionSystemPromptBuilder.BuildDatee(context.DateePrompt, _options.GameDefinition);
+            var systemPrompt = SessionSystemPromptBuilder.BuildDatee(context.DateePrompt, gameDef);
             double temperature = _options.DateeResponseTemperature ?? DefaultDateeResponseTemperature;
 
             string responseText;
@@ -127,6 +130,8 @@ namespace Pinder.LlmAdapters
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
+            var gameDef = RequireGameDefinition();
+
             // Build user content with history context
             var userContent = SessionDocumentBuilder.BuildInterestChangeBeatPrompt(
                 context.DateeName,
@@ -138,8 +143,8 @@ namespace Pinder.LlmAdapters
 
             // Use datee system prompt if provided, otherwise skip system prompt
             string systemPrompt = string.IsNullOrWhiteSpace(context.DateePrompt)
-                ? SessionSystemPromptBuilder.BuildDatee("", _options.GameDefinition)
-                : SessionSystemPromptBuilder.BuildDatee(context.DateePrompt, _options.GameDefinition);
+                ? SessionSystemPromptBuilder.BuildDatee("", gameDef)
+                : SessionSystemPromptBuilder.BuildDatee(context.DateePrompt, gameDef);
 
             double temperature = _options.Temperature;
 
@@ -345,6 +350,8 @@ namespace Pinder.LlmAdapters
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
+            var gameDef = RequireGameDefinition();
+
             string template = null;
             if (_options.StatDeliveryInstructions != null)
             {
@@ -370,7 +377,7 @@ namespace Pinder.LlmAdapters
             sb.AppendLine();
             sb.AppendLine(prompt);
 
-            string systemPrompt = SessionSystemPromptBuilder.BuildPlayerAvatar(context.PlayerAvatarPrompt, _options.GameDefinition);
+            string systemPrompt = SessionSystemPromptBuilder.BuildPlayerAvatar(context.PlayerAvatarPrompt, gameDef);
 
             var responseText = await _transport.SendAsync(systemPrompt, sb.ToString(), 0.8, _options.MaxTokens, phase: LlmPhase.Delivery, ct: ct)
                 .ConfigureAwait(false);
@@ -392,7 +399,9 @@ namespace Pinder.LlmAdapters
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
-            string template = _options.GameDefinition?.SteeringPrompt;
+            var gameDef = RequireGameDefinition();
+
+            string template = gameDef.SteeringPrompt;
             if (string.IsNullOrWhiteSpace(template))
                 template = GameDefinition.DefaultSteeringPrompt;
 
@@ -410,7 +419,7 @@ namespace Pinder.LlmAdapters
             sb.AppendLine();
             sb.AppendLine(prompt);
 
-            string systemPrompt = SessionSystemPromptBuilder.BuildPlayerAvatar(context.PlayerAvatarPrompt, _options.GameDefinition);
+            string systemPrompt = SessionSystemPromptBuilder.BuildPlayerAvatar(context.PlayerAvatarPrompt, gameDef);
 
             var responseText = await _transport.SendAsync(systemPrompt, sb.ToString(), 0.9, _options.MaxTokens, phase: LlmPhase.Steering, ct: ct)
                 .ConfigureAwait(false);
@@ -433,7 +442,9 @@ namespace Pinder.LlmAdapters
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
-            string template = _options.GameDefinition?.HorninessPrompt;
+            var gameDef = RequireGameDefinition();
+
+            string template = gameDef.HorninessPrompt;
             if (string.IsNullOrWhiteSpace(template))
                 template = GameDefinition.DefaultHorninessPrompt;
 
@@ -451,7 +462,7 @@ namespace Pinder.LlmAdapters
             sb.AppendLine();
             sb.AppendLine(prompt);
 
-            string systemPrompt = SessionSystemPromptBuilder.BuildPlayerAvatar(context.PlayerAvatarPrompt, _options.GameDefinition);
+            string systemPrompt = SessionSystemPromptBuilder.BuildPlayerAvatar(context.PlayerAvatarPrompt, gameDef);
 
             var responseText = await _transport.SendAsync(systemPrompt, sb.ToString(), 0.9, _options.MaxTokens, phase: LlmPhase.HorninessOverlay, ct: ct)
                 .ConfigureAwait(false);
@@ -571,6 +582,15 @@ namespace Pinder.LlmAdapters
                 System.Diagnostics.Trace.TraceWarning(warning);
                 _options.OnStakeSkipWarning?.Invoke(warning);
             }
+        }
+
+        private GameDefinition RequireGameDefinition([System.Runtime.CompilerServices.CallerMemberName] string methodName = "")
+        {
+            if (_options.GameDefinition == null)
+            {
+                throw new InvalidOperationException($"Production path '{methodName}' is missing GameDefinition. GameDefinition is required at the production adapter boundary to avoid silent fallbacks.");
+            }
+            return _options.GameDefinition;
         }
 
         public void Dispose()
