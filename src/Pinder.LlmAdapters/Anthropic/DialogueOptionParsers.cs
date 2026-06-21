@@ -317,7 +317,7 @@ namespace Pinder.LlmAdapters.Anthropic
                     }
                 }
                 usedStats.Add(padStat);
-                result.Add(new DialogueOption(padStat, "...",
+                result.Add(new DialogueOption(padStat, "Tell me more about you.",
                     callbackTurnNumber: null, comboName: null,
                     hasTellBonus: false, hasWeaknessWindow: false));
             }

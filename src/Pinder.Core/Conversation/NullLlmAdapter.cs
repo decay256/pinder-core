@@ -75,6 +75,12 @@ namespace Pinder.Core.Conversation
             return Task.FromResult("so... when are we actually doing this?");
         }
 
+        public Task<string> GetSuccessImprovementAsync(SuccessImprovementContext context, CancellationToken ct = default)
+        {
+            ct.ThrowIfCancellationRequested();
+            return Task.FromResult(context.DeliveredMessage);
+        }
+
         /// <summary>
         /// Returns the message unchanged (no LLM overlay in test mode).
         /// </summary>

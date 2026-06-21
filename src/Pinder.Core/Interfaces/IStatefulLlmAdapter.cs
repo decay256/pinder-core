@@ -64,5 +64,17 @@ namespace Pinder.Core.Interfaces
         /// transport so a mid-turn cancel halts the in-flight HTTP call.
         /// </param>
         Task<string> GetSteeringQuestionAsync(SteeringContext context, CancellationToken ct = default);
+
+        /// <summary>
+        /// Generate an improved message after a strong or legendary success roll.
+        /// Replaces the delivered message entirely.
+        /// </summary>
+        /// <param name="context">The context for improvement.</param>
+        /// <param name="ct">
+        /// Cancellation token forwarded from <see cref="GameSession.ResolveTurnAsync(int, System.IProgress{TurnProgressEvent}?, CancellationToken)"/>
+        /// (#794). Implementations MUST pass this through to the underlying
+        /// transport so a mid-turn cancel halts the in-flight HTTP call.
+        /// </param>
+        Task<string> GetSuccessImprovementAsync(SuccessImprovementContext context, CancellationToken ct = default);
     }
 }

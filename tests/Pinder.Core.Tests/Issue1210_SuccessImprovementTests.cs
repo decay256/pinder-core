@@ -91,9 +91,9 @@ namespace Pinder.Core.Tests
         public async Task StrongSuccess_ImprovesDeliveredMessage_AndEmitsTextDiffLayer()
         {
             // Strong margin 5..14. 
-            // If datee has 0 stats, DC is 13+0=13. Player has 5 stats. Mod = 5. d20 = 15. Total = 20.
-            // Margin = 20 - 13 = 7. Not a Nat20 (15).
-            var dice = new FixedDice(5, 15, 50);
+            // If datee has 0 stats, DC is 16+0=16. Player has 5 stats. Mod = 5. d20 = 16. Total = 21.
+            // Margin = 21 - 16 = 5. Not a Nat20 (16).
+            var dice = new FixedDice(5, 16, 50);
             var llm = new DeliveryAdapterWithSuccessImprovement(PickedLine);
             var session = NewSession(llm, dice, playerStats: 5, dateeStats: 0);
 
@@ -109,8 +109,8 @@ namespace Pinder.Core.Tests
         public async Task ExceptionalSuccess_ImprovesDeliveredMessage_AndEmitsTextDiffLayer()
         {
             // Exceptional margin >= 15.
-            // If datee has 0 stats, DC is 13+0=13. Player has 20 stats. Mod = 20. d20 = 19. Total = 39.
-            // Margin = 39 - 13 = 26. Not a Nat20 (19).
+            // If datee has 0 stats, DC is 16+0=16. Player has 20 stats. Mod = 20. d20 = 19. Total = 39.
+            // Margin = 39 - 16 = 23. Not a Nat20 (19).
             var dice = new FixedDice(5, 19, 50);
             var llm = new DeliveryAdapterWithSuccessImprovement(PickedLine);
             var session = NewSession(llm, dice, playerStats: 20, dateeStats: 0);
@@ -127,9 +127,9 @@ namespace Pinder.Core.Tests
         public async Task CleanSuccess_DoesNotImproveMessage_AndStaysVerbatim()
         {
             // Clean margin < 5.
-            // If datee has 0 stats, DC is 13. Player has 2 stats. Mod = 2. d20 = 11. Total = 13.
-            // Margin = 13 - 13 = 0.
-            var dice = new FixedDice(5, 11, 50);
+            // If datee has 0 stats, DC is 16. Player has 2 stats. Mod = 2. d20 = 14. Total = 16.
+            // Margin = 16 - 16 = 0.
+            var dice = new FixedDice(5, 14, 50);
             var llm = new DeliveryAdapterWithSuccessImprovement(PickedLine);
             var session = NewSession(llm, dice, playerStats: 2, dateeStats: 0);
 
