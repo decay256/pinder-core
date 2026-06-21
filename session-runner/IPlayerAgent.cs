@@ -10,6 +10,16 @@ namespace Pinder.SessionRunner
     public interface IPlayerAgent
     {
         /// <summary>
+        /// How this agent's scores/decisions are derived.
+        /// </summary>
+        ScoringMode ScoringMode { get; }
+
+        /// <summary>
+        /// Honest label describing the source of the mechanics and logic.
+        /// </summary>
+        string MechanicsSource { get; }
+
+        /// <summary>
         /// Given a TurnStart (options + game state snapshot) and additional agent context,
         /// returns a decision: which option to pick, why, and score breakdowns for all options.
         /// </summary>

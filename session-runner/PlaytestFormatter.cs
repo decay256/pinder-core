@@ -18,8 +18,14 @@ namespace Pinder.SessionRunner
         /// </summary>
         /// <param name="decision">The PlayerDecision returned by the agent.</param>
         /// <param name="agentTypeName">The simple class name of the agent (e.g. "ScoringPlayerAgent").</param>
+        /// <param name="scoringMode">The optional ScoringMode. If null, inferred from agentTypeName.</param>
+        /// <param name="mechanicsSource">The optional mechanics source string. If null, inferred from agentTypeName.</param>
         /// <returns>A multi-line string containing the formatted reasoning block.</returns>
-        public static string FormatReasoningBlock(PlayerDecision? decision, string agentTypeName)
+        public static string FormatReasoningBlock(
+            PlayerDecision? decision,
+            string agentTypeName,
+            ScoringMode? scoringMode = null,
+            string? mechanicsSource = null)
         {
             if (decision == null)
             {
@@ -27,6 +33,23 @@ namespace Pinder.SessionRunner
             }
 
             var sb = new StringBuilder();
+
+            ScoringMode realMode;
+            string realSource;
+            if (scoringMode.HasValue && mechanicsSource != null)
+            {
+                realMode = scoringMode.Value;
+                realSource = mechanicsSource;
+            }
+            else
+            {
+                var inferred = InferScoringModeAndSourceFromTypeName(agentTypeName);
+                realMode = scoringMode ?? inferred.Item1;
+                realSource = mechanicsSource ?? inferred.Item2;
+            }
+
+            sb.AppendLine($"> scoring_mode={realMode.ToString().ToLowerInvariant()} (mechanics_source={realSource})");
+
             string reasoning = decision.Reasoning;
             if (string.IsNullOrEmpty(reasoning))
             {
@@ -42,6 +65,28 @@ namespace Pinder.SessionRunner
             }
 
             return sb.ToString();
+        }
+
+        private static (ScoringMode, string) InferScoringModeAndSourceFromTypeName(string agentTypeName)
+        {
+            if (string.Equals(agentTypeName, "ScoringPlayerAgent", StringComparison.OrdinalIgnoreCase))
+            {
+                return (ScoringMode.Heuristic, "heuristic:ScoringPlayerAgent expected-value (duplicates engine rules — NOT engine-derived)");
+            }
+            if (string.Equals(agentTypeName, "HighestModAgent", StringComparison.OrdinalIgnoreCase))
+            {
+                return (ScoringMode.Heuristic, "heuristic:HighestModAgent highest-effective-modifier baseline");
+            }
+            if (string.Equals(agentTypeName, "LlmPlayerAgent", StringComparison.OrdinalIgnoreCase))
+            {
+                return (ScoringMode.Llm, "llm+heuristic:LlmPlayerAgent wraps ScoringPlayerAgent heuristic and makes strategic LLM choices");
+            }
+            if (string.Equals(agentTypeName, "HumanPlayerAgent", StringComparison.OrdinalIgnoreCase))
+            {
+                return (ScoringMode.Human, "human:interactive");
+            }
+            // default fallback if none match
+            return (ScoringMode.Heuristic, "heuristic");
         }
 
         /// <summary>
