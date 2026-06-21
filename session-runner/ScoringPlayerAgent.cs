@@ -15,6 +15,9 @@ namespace Pinder.SessionRunner
     {
         public string LastExplanation { get; private set; } = "";
 
+        public ScoringMode ScoringMode => ScoringMode.Heuristic;
+        public string MechanicsSource => "heuristic:ScoringPlayerAgent expected-value (duplicates engine rules — NOT engine-derived)";
+
         // Trap activation cost added to TropeTrap/Catastrophe/Legendary failure tiers
         // Represents ~1.5 turns of reduced effectiveness from activated trap
         private const float TrapActivationCost = 1.5f;

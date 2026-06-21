@@ -12,6 +12,9 @@ namespace Pinder.SessionRunner
     {
         public string LastExplanation { get; private set; } = "";
 
+        public ScoringMode ScoringMode => ScoringMode.Human;
+        public string MechanicsSource => "human:interactive";
+
         public Task<PlayerDecision> DecideAsync(TurnStart turn, PlayerAgentContext context)
         {
             var options = turn.Options;

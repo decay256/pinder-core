@@ -14,6 +14,9 @@ namespace Pinder.SessionRunner
     {
         public string LastExplanation { get; private set; } = "";
 
+        public ScoringMode ScoringMode => ScoringMode.Heuristic;
+        public string MechanicsSource => "heuristic:HighestModAgent highest-effective-modifier baseline";
+
         public Task<PlayerDecision> DecideAsync(TurnStart turn, PlayerAgentContext context)
         {
             if (turn == null) throw new ArgumentNullException(nameof(turn));

@@ -137,7 +137,7 @@ partial class Program
             var chosen = turnStart.Options[pick];
             Console.WriteLine($"**► Player picks: {letters[pick]} ({StatLabel(chosen.Stat)})**");
             Console.WriteLine();
-            Console.WriteLine(PlaytestFormatter.FormatReasoningBlock(decision, setup.Agent.GetType().Name));
+            Console.WriteLine(PlaytestFormatter.FormatReasoningBlock(decision, setup.Agent.GetType().Name, setup.Agent.ScoringMode, setup.Agent.MechanicsSource));
             Console.WriteLine(PlaytestFormatter.FormatScoreTable(decision, turnStart.Options));
             Console.WriteLine();
 

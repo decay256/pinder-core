@@ -96,6 +96,9 @@ namespace Pinder.SessionRunner
         /// </summary>
         public string LastExplanation { get; private set; } = "";
 
+        public ScoringMode ScoringMode => ScoringMode.Llm;
+        public string MechanicsSource => "llm+heuristic:LlmPlayerAgent wraps ScoringPlayerAgent heuristic and makes strategic LLM choices";
+
         /// <summary>Returns per-call token stats for each llm-player-pick call made.</summary>
         public IReadOnlyList<CallSummaryStat> GetTokenStats() => _tokenStats.AsReadOnly();
 
