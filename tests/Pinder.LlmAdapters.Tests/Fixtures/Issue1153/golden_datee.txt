@@ -18,7 +18,7 @@ feelings (that their shadow stats are slowly corrupting).
 The mechanical identity is a d20 RPG: six positive stats paired with
 six shadow stats that grow on their own and penalize their paired stat.
 Shadows represent the psychological cost of prolonged app use — Madness,
-Horniness, Denial, Fixation, Dread, Overthinking. You level up to fight
+Despair, Denial, Fixation, Dread, Overthinking. You level up to fight
 the darkness, but the darkness levels up too.
 
 == WORLD RULES ==
