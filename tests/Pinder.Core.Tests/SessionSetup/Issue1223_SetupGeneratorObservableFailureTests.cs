@@ -68,13 +68,128 @@ namespace Pinder.Core.Tests.SessionSetup
             Assert.Equal("hello stake", stakeResult);
         }
 
-        // ── 5. BEHAVIORAL RED (SKIPPED) ─────────────────────────────────────────────
-        // We chose to SKIP test #5 (wiring the currently-nonexistent degradation callback via reflection
-        // and asserting it fires on transport failure) because attempting to dynamically invoke or cast 
-        // to a callback whose delegate signature and types (including SetupGenerationResult) are 
-        // completely missing at compile time would be extremely brittle and complex (requiring Reflection.Emit
-        // or DynamicMethod stubbing), which is prone to false positives/negatives. 
-        // We rely on tests #1 and #2 as our solid RED gates to enforce the contract.
+        // ── 5. BEHAVIORAL TESTS (IMPLEMENTED & GREEN) ─────────────────────────────
+        [Fact]
+        public async Task DegradationCallback_FiresOnTransportFailure_ForAllGenerators()
+        {
+            var throwingTransport = new ThrowingLlmTransport();
+
+            // 1. Stake Generator
+            SetupGenerationResult? stakeResult = null;
+            var stakeGen = new LlmStakeGenerator(throwingTransport, new LlmStakeGenerator.Options
+            {
+                OnDegraded = r => stakeResult = r
+            });
+            await stakeGen.GenerateAsync("Alice", "system prompt");
+            Assert.NotNull(stakeResult);
+            Assert.True(stakeResult.Degraded);
+            Assert.Equal("transport_error", stakeResult.ErrorCode);
+            Assert.Equal("stake", stakeResult.GeneratorName);
+
+            // 2. Background Generator
+            SetupGenerationResult? backgroundResult = null;
+            var backgroundGen = new LlmBackgroundGenerator(throwingTransport, new LlmBackgroundGenerator.Options
+            {
+                OnDegraded = r => backgroundResult = r
+            });
+            await backgroundGen.GenerateAsync("Alice", "system prompt");
+            Assert.NotNull(backgroundResult);
+            Assert.True(backgroundResult.Degraded);
+            Assert.Equal("transport_error", backgroundResult.ErrorCode);
+            Assert.Equal("background", backgroundResult.GeneratorName);
+
+            // 3. Outfit Describer
+            SetupGenerationResult? outfitResult = null;
+            var outfitGen = new LlmOutfitDescriber(throwingTransport, new LlmOutfitDescriber.Options
+            {
+                OnDegraded = r => outfitResult = r
+            });
+            await outfitGen.GenerateAsync("Alice", new List<string>(), "Bob", new List<string>());
+            Assert.NotNull(outfitResult);
+            Assert.True(outfitResult.Degraded);
+            Assert.Equal("transport_error", outfitResult.ErrorCode);
+            Assert.Equal("outfit", outfitResult.GeneratorName);
+
+            // 4. Dramatic Arc Generator
+            SetupGenerationResult? arcResult = null;
+            var arcGen = new LlmDramaticArcGenerator(throwingTransport, new LlmDramaticArcGenerator.Options
+            {
+                OnDegraded = r => arcResult = r
+            });
+            await arcGen.GenerateAsync("Alice", "stake", "bio", "Bob", "stake", "bio");
+            Assert.NotNull(arcResult);
+            Assert.True(arcResult.Degraded);
+            Assert.Equal("transport_error", arcResult.ErrorCode);
+            Assert.Equal("dramatic_arc", arcResult.GeneratorName);
+        }
+
+        [Fact]
+        public async Task DegradationCallback_FiresOnEmptyOutput_ForAllGenerators()
+        {
+            var emptyTransport = new FakeLlmTransport("   ");
+
+            // 1. Stake Generator
+            SetupGenerationResult? stakeResult = null;
+            var stakeGen = new LlmStakeGenerator(emptyTransport, new LlmStakeGenerator.Options
+            {
+                OnDegraded = r => stakeResult = r
+            });
+            await stakeGen.GenerateAsync("Alice", "system prompt");
+            Assert.NotNull(stakeResult);
+            Assert.True(stakeResult.Degraded);
+            Assert.Equal("empty_output", stakeResult.ErrorCode);
+            Assert.Equal("stake", stakeResult.GeneratorName);
+
+            // 2. Background Generator
+            SetupGenerationResult? backgroundResult = null;
+            var backgroundGen = new LlmBackgroundGenerator(emptyTransport, new LlmBackgroundGenerator.Options
+            {
+                OnDegraded = r => backgroundResult = r
+            });
+            await backgroundGen.GenerateAsync("Alice", "system prompt");
+            Assert.NotNull(backgroundResult);
+            Assert.True(backgroundResult.Degraded);
+            Assert.Equal("empty_output", backgroundResult.ErrorCode);
+            Assert.Equal("background", backgroundResult.GeneratorName);
+
+            // 3. Outfit Describer
+            SetupGenerationResult? outfitResult = null;
+            var outfitGen = new LlmOutfitDescriber(emptyTransport, new LlmOutfitDescriber.Options
+            {
+                OnDegraded = r => outfitResult = r
+            });
+            await outfitGen.GenerateAsync("Alice", new List<string>(), "Bob", new List<string>());
+            Assert.NotNull(outfitResult);
+            Assert.True(outfitResult.Degraded);
+            Assert.Equal("empty_output", outfitResult.ErrorCode);
+            Assert.Equal("outfit", outfitResult.GeneratorName);
+
+            // 4. Dramatic Arc Generator
+            SetupGenerationResult? arcResult = null;
+            var arcGen = new LlmDramaticArcGenerator(emptyTransport, new LlmDramaticArcGenerator.Options
+            {
+                OnDegraded = r => arcResult = r
+            });
+            await arcGen.GenerateAsync("Alice", "stake", "bio", "Bob", "stake", "bio");
+            Assert.NotNull(arcResult);
+            Assert.True(arcResult.Degraded);
+            Assert.Equal("empty_output", arcResult.ErrorCode);
+            Assert.Equal("dramatic_arc", arcResult.GeneratorName);
+        }
+
+        [Fact]
+        public async Task HappyPath_DoesNotFireOnDegraded()
+        {
+            var happyTransport = new FakeLlmTransport("actual content");
+
+            SetupGenerationResult? stakeResult = null;
+            var stakeGen = new LlmStakeGenerator(happyTransport, new LlmStakeGenerator.Options
+            {
+                OnDegraded = r => stakeResult = r
+            });
+            await stakeGen.GenerateAsync("Alice", "system prompt");
+            Assert.Null(stakeResult);
+        }
 
         // ── Helpers ───────────────────────────────────────────────────────────────
 

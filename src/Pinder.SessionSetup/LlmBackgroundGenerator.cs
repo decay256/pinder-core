@@ -78,6 +78,11 @@ namespace Pinder.SessionSetup
             }
         }
 
+        /// <summary>
+        /// Generates the narrative background story asynchronously.
+        /// This generation is OPTIONAL/degradable; if a transport failure or empty output occurs,
+        /// it will trigger the <see cref="Options.OnDegraded"/> callback and return <see cref="string.Empty"/>.
+        /// </summary>
         public async Task<string> GenerateAsync(
             string characterName,
             string assembledSystemPrompt,
@@ -91,10 +96,21 @@ namespace Pinder.SessionSetup
                 string response = await _transport
                     .SendAsync(SystemPrompt, userMessage, _options.Temperature, _options.MaxTokens, phase: LlmPhase.BackgroundStory)
                     .ConfigureAwait(false);
-                return (response ?? string.Empty).Trim();
+                string trimmed = (response ?? string.Empty).Trim();
+                if (string.IsNullOrEmpty(trimmed))
+                {
+                    _options.OnDegraded?.Invoke(SetupGenerationResult.DegradedFailure("background", "empty_output"));
+                }
+                return trimmed;
+            }
+            catch (OperationCanceledException)
+            {
+                // Do not fire OnDegraded on cancellation; preserve existing behavior of returning empty string.
+                return string.Empty;
             }
             catch
             {
+                _options.OnDegraded?.Invoke(SetupGenerationResult.DegradedFailure("background", "transport_error"));
                 // Mirror stake generator: transport failure → empty string.
                 return string.Empty;
             }
@@ -152,6 +168,11 @@ CHARACTER PROFILE:
             /// prose; allows ~250-300 tokens with a small safety margin).
             /// </summary>
             public int MaxTokens { get; set; } = 350;
+
+            /// <summary>
+            /// Opt-in callback triggered when generation is degraded (e.g. transport failure or empty output).
+            /// </summary>
+            public Action<SetupGenerationResult>? OnDegraded { get; set; }
         }
     }
 }

@@ -114,6 +114,12 @@ namespace Pinder.SessionSetup
             }
         }
 
+        /// <summary>
+        /// Generates the stake psychological fragments asynchronously.
+        /// This generation is OPTIONAL/degradable; if a transport failure or empty output occurs,
+        /// it will trigger the <see cref="Options.OnDegraded"/> callback and return <see cref="string.Empty"/>,
+        /// whereas the streaming <see cref="StreamStakeAsync"/> is required and will throw.
+        /// </summary>
         public async Task<string> GenerateAsync(
             string characterName,
             string assembledSystemPrompt,
@@ -127,10 +133,21 @@ namespace Pinder.SessionSetup
                 string response = await _transport
                     .SendAsync(SystemPrompt, userMessage, _options.Temperature, _options.MaxTokens, phase: LlmPhase.PsychologicalStake)
                     .ConfigureAwait(false);
-                return (response ?? string.Empty).Trim();
+                string trimmed = (response ?? string.Empty).Trim();
+                if (string.IsNullOrEmpty(trimmed))
+                {
+                    _options.OnDegraded?.Invoke(SetupGenerationResult.DegradedFailure("stake", "empty_output"));
+                }
+                return trimmed;
+            }
+            catch (OperationCanceledException)
+            {
+                // Do not fire OnDegraded on cancellation; preserve existing behavior of returning empty string.
+                return string.Empty;
             }
             catch
             {
+                _options.OnDegraded?.Invoke(SetupGenerationResult.DegradedFailure("stake", "transport_error"));
                 // Parity with legacy helper: transport failure → empty string.
                 return string.Empty;
             }
@@ -292,6 +309,11 @@ CHARACTER PROFILE:
             /// per character, so 300 leaves a small safety margin).
             /// </summary>
             public int MaxTokens { get; set; } = 300;
+
+            /// <summary>
+            /// Opt-in callback triggered when generation is degraded (e.g. transport failure or empty output).
+            /// </summary>
+            public Action<SetupGenerationResult>? OnDegraded { get; set; }
         }
     }
 }
