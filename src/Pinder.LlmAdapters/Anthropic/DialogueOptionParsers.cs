@@ -299,7 +299,7 @@ namespace Pinder.LlmAdapters.Anthropic
                 catch (ArgumentException)
                 {
                     errorCode = "invalid_stat";
-                    errorMessage = $"LLM dialogue_options option names an invalid or unknown stat '{statStr}'.";
+                    errorMessage = "LLM dialogue_options option names an invalid or unknown stat.";
                     return Array.Empty<DialogueOption>();
                 }
 
@@ -353,24 +353,45 @@ namespace Pinder.LlmAdapters.Anthropic
                     stat, text, callbackTurn, comboName, hasTellBonus, hasWeaknessWindow: false));
             }
 
-            parsedCount = parsed.Count;
+            var validOptions = new List<DialogueOption>();
+            var usedStats = new HashSet<StatType>();
+            var allowedStats = availableStats != null ? new HashSet<StatType>(availableStats) : null;
 
-            if (parsed.Count == 0)
+            foreach (var opt in parsed)
+            {
+                if (allowedStats != null && !allowedStats.Contains(opt.Stat))
+                {
+                    continue;
+                }
+                if (usedStats.Contains(opt.Stat))
+                {
+                    continue;
+                }
+                usedStats.Add(opt.Stat);
+                validOptions.Add(opt);
+            }
+
+            parsedCount = validOptions.Count;
+
+            if (validOptions.Count == 0)
             {
                 errorCode = "no_valid_options";
                 errorMessage = "LLM dialogue_options response contains no valid options (malformed).";
                 return Array.Empty<DialogueOption>();
             }
 
-            if (parsed.Count < expectedCount)
+            if (validOptions.Count < expectedCount)
             {
                 errorCode = "partial_options";
-                errorMessage = $"LLM dialogue_options response has fewer valid options ({parsed.Count}) than required ({expectedCount}).";
+                errorMessage = $"LLM dialogue_options response has partial options: fewer valid options ({validOptions.Count}) than required ({expectedCount}).";
                 return Array.Empty<DialogueOption>();
             }
 
-            // Standardize/reconcile the options to map them perfectly to expected availableStats (no padding because count >= expectedCount).
-            return ReconcileAndPadDialogueOptions(parsed, availableStats);
+            if (validOptions.Count > expectedCount)
+            {
+                return validOptions.GetRange(0, expectedCount).ToArray();
+            }
+            return validOptions.ToArray();
         }
 
         public static DialogueOption[] ReconcileAndPadDialogueOptions(List<DialogueOption> parsed, StatType[]? availableStats = null)

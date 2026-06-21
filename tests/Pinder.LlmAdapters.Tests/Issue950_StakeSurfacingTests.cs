@@ -103,7 +103,7 @@ namespace Pinder.LlmAdapters.Tests
             const string fakeResponse =
                 "OPTION_1\n[STAT: CHARM] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]\n" +
                 "\"So what are you up to this weekend?\"\n\n" +
-                "OPTION_2\n[STAT: WIT] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]\n" +
+                "OPTION_2\n[STAT: RIZZ] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]\n" +
                 "\"You seem like someone who enjoys long walks.\"\n\n" +
                 "OPTION_3\n[STAT: HONESTY] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]\n" +
                 "\"Honestly I have no idea what I'm doing here.\"\n\n" +
@@ -136,7 +136,7 @@ namespace Pinder.LlmAdapters.Tests
             const string fakeResponse =
                 "OPTION_1\n[STAT: CHARM] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]\n" +
                 "\"So what are you up to this weekend?\"\n\n" +
-                "OPTION_2\n[STAT: WIT] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]\n" +
+                "OPTION_2\n[STAT: RIZZ] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]\n" +
                 "\"You seem like someone who enjoys long walks.\"\n\n" +
                 "OPTION_3\n[STAT: HONESTY] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]\n" +
                 "\"I deleted my thesis on purpose, actually. Watched it go.\"\n\n" +

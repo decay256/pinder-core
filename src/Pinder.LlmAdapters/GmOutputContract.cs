@@ -196,7 +196,7 @@ namespace Pinder.LlmAdapters
 
             if (!hasTellIndicator && !hasWeaknessIndicator)
             {
-                errorDetail = "The [SIGNALS] block is present but contains neither a TELL nor a WEAKNESS signal.";
+                errorDetail = "malformed_signals";
                 return DateeSignalsValidationResult.MalformedSignals;
             }
 
@@ -211,13 +211,13 @@ namespace Pinder.LlmAdapters
                     var match = TellSignalRegex.Match(trimmedLine);
                     if (!match.Success)
                     {
-                        errorDetail = $"Malformed TELL line format: '{trimmedLine}'. Expected format 'TELL: <Stat> (<description>)'.";
+                        errorDetail = "malformed_signals";
                         return DateeSignalsValidationResult.MalformedSignals;
                     }
 
                     if (!TryParseStat(match.Groups[1].Value, out _))
                     {
-                        errorDetail = $"Invalid stat '{match.Groups[1].Value}' in TELL signal: '{trimmedLine}'.";
+                        errorDetail = "tell_invalid_stat";
                         return DateeSignalsValidationResult.MalformedSignals;
                     }
                 }
@@ -226,19 +226,19 @@ namespace Pinder.LlmAdapters
                     var match = WeaknessSignalRegex.Match(trimmedLine);
                     if (!match.Success)
                     {
-                        errorDetail = $"Malformed WEAKNESS line format: '{trimmedLine}'. Expected format 'WEAKNESS: <Stat> -<n> (<description>)'.";
+                        errorDetail = "malformed_signals";
                         return DateeSignalsValidationResult.MalformedSignals;
                     }
 
                     if (!TryParseStat(match.Groups[1].Value, out _))
                     {
-                        errorDetail = $"Invalid stat '{match.Groups[1].Value}' in WEAKNESS signal: '{trimmedLine}'.";
+                        errorDetail = "weakness_invalid_stat";
                         return DateeSignalsValidationResult.MalformedSignals;
                     }
 
                     if (!int.TryParse(match.Groups[2].Value.Trim(), out int reduction) || reduction <= 0)
                     {
-                        errorDetail = $"Invalid DC reduction '{match.Groups[2].Value}' in WEAKNESS signal: '{trimmedLine}'. Must be a positive integer.";
+                        errorDetail = "weakness_missing_dc";
                         return DateeSignalsValidationResult.MalformedSignals;
                     }
                 }
