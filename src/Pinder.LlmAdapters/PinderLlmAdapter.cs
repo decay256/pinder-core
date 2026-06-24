@@ -622,6 +622,14 @@ namespace Pinder.LlmAdapters
                 .Replace("{delivered_message}", context.DeliveredMessage);
 
             var sb = new StringBuilder();
+            sb.AppendLine("<ENGINE_STATE>");
+            sb.AppendLine("[ENGINE — CALL PURPOSE: SUCCESS_IMPROVEMENT]");
+            sb.AppendLine($"Delivery outcome / tier: {(context.TierKey ?? "").ToUpperInvariant()}");
+            sb.AppendLine($"Selected stat: {context.Stat}");
+            sb.AppendLine($"Current delivered PLAYER AVATAR message: \"{context.DeliveredMessage}\"");
+            sb.AppendLine("Output requirement: return ONE rewritten PLAYER AVATAR message only — sharper wording, same voice. No analysis, no OPTIONS, no engine commentary, no ENGINE_STATE echo.");
+            sb.AppendLine("</ENGINE_STATE>");
+            sb.AppendLine();
             sb.AppendLine("CONVERSATION SO FAR:");
             foreach (var (sender, text) in context.ConversationHistory)
             {
@@ -643,6 +651,18 @@ namespace Pinder.LlmAdapters
                     provider: "primary",
                     model: null,
                     reason: "empty_output",
+                    outcome: OverlayOutcome.Degraded
+                ));
+                return context.DeliveredMessage;
+            }
+
+            if (Pinder.Core.Conversation.SuccessImprovementValidator.IsRejected(improved))
+            {
+                _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                    overlayType: "success_improvement",
+                    provider: "primary",
+                    model: null,
+                    reason: "meta_control_output",
                     outcome: OverlayOutcome.Degraded
                 ));
                 return context.DeliveredMessage;
