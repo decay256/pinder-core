@@ -157,7 +157,16 @@ namespace Pinder.Core.Conversation
                     if (improved != null)
                     {
                         improved = improved.Trim();
-                        if (!string.IsNullOrWhiteSpace(improved) && improved != "...")
+                        if (SuccessImprovementValidator.IsRejected(improved))
+                        {
+                            TurnOrchestratorHelpers.EmitTextLayerNoop(
+                                _onTextLayerNoop,
+                                state.TurnNumber,
+                                "Success improvement",
+                                beforeImprovement,
+                                beforeImprovement);
+                        }
+                        else if (!string.IsNullOrWhiteSpace(improved) && improved != "...")
                         {
                             deliveredMessage = improved;
                         }
