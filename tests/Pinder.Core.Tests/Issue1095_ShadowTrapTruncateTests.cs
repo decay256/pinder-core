@@ -191,12 +191,13 @@ namespace Pinder.Core.Tests
         /// Case 2 (the headline worked example): shadow trap on a success FOLLOWED by
         /// horniness check. Base positive delta (Nat 20 → ≥ 4) is first truncated by
         /// the shadow trap to 1, then horniness appends a question (#1209, no penalty).
-        /// Net final interest delta == 1. The turn is STILL NOT a failure: the roll
+        /// Net final interest delta == 0 (shadow truncates to 1, horniness halves 1 to 0).
+        /// The turn is STILL NOT a failure: the roll
         /// verdict stays SUCCESS and the momentum streak still increments.
         /// (horninessDie = 5 → SessionHorniness = 5 → check misses.)
         /// </summary>
         [Fact]
-        public async Task ShadowTrap_ThenHorniness_NetsOne_StillSuccess_MomentumIncrements()
+        public async Task ShadowTrap_ThenHorniness_NetsZero_StillSuccess_MomentumIncrements()
         {
             var (session, llm) = MakeSession(horninessDie: 5);
 
@@ -211,8 +212,8 @@ namespace Pinder.Core.Tests
             Assert.True(result.ShadowCheck.OverlayApplied);
             Assert.True(result.HorninessCheck.IsMiss);
 
-            // shadow → 1, horniness no penalty.
-            Assert.Equal(1, result.InterestDelta);
+            // shadow → 1, horniness halves 1 → 0.
+            Assert.Equal(0, result.InterestDelta);
 
             // Still a success: verdict NOT demoted to Miss.
             Assert.Equal(RollVerdict.Success, result.Roll.Check.FinalVerdict);

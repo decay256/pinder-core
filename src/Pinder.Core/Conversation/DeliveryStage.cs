@@ -352,6 +352,15 @@ namespace Pinder.Core.Conversation
                 progress?.Report(new TurnProgressEvent(TurnProgressStage.HorninessOverlayCompleted, deliveredMessage));
             }
 
+            if (horninessCheckResult.OverlayApplied && interestDelta > 0)
+            {
+                horninessInterestBefore = state.Interest.Current + shadowCorrection;
+                int halvedDelta = (int)Math.Floor(interestDelta / 2.0);
+                int penalty = halvedDelta - interestDelta;
+                horninessInterestPenalty = penalty;
+                interestDelta += penalty;
+            }
+
             // Issue #339: same-turn callback-phrase strip
             deliveredMessage = TextSanitizer.Sanitize(deliveredMessage, CallbackStripper.LayerName, textDiffs);
 

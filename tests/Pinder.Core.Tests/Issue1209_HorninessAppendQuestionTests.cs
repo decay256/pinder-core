@@ -10,6 +10,8 @@ using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
 using Pinder.Core.Text;
 using Pinder.Core.Traps;
+using System.IO;
+using Pinder.LlmAdapters;
 using Xunit;
 
 namespace Pinder.Core.Tests
@@ -88,6 +90,21 @@ namespace Pinder.Core.Tests
             public override int Next() => int.MaxValue;
         }
 
+        private static StatDeliveryInstructions LoadDeliveryInstructions()
+        {
+            string dir = Directory.GetCurrentDirectory();
+            for (int i = 0; i < 10; i++)
+            {
+                string candidate = Path.Combine(dir, "data", "delivery-instructions.yaml");
+                if (File.Exists(candidate))
+                    return StatDeliveryInstructions.LoadFrom(File.ReadAllText(candidate));
+                dir = Path.GetDirectoryName(dir)!;
+                if (dir == null) break;
+            }
+            string fallback = Path.Combine("/root/.openclaw/workspace/pinder-core", "data", "delivery-instructions.yaml");
+            return StatDeliveryInstructions.LoadFrom(File.ReadAllText(fallback));
+        }
+
         private static GameSession MakeSession(int sessionHorniness, Random steeringRng, int mainRoll)
         {
             // Dice: index0 = horniness d10 (determines sessionHorniness via clock mod 0), then main d20, then d100.
@@ -98,6 +115,7 @@ namespace Pinder.Core.Tests
                 clock: clock,
                 playerShadows: shadows,
                 steeringRng: steeringRng,
+                statDeliveryInstructions: LoadDeliveryInstructions(),
                 startingInterest: 10); // positive interest
 
             return new GameSession(
@@ -127,7 +145,7 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public async Task HorninessMiss_NoInterestPenalty()
+        public async Task HorninessMiss_HalvesInterestPenalty()
         {
             // We want positive interest delta. mainRoll = 18 ensures success.
             var sessionMiss = MakeSession(sessionHorniness: 10, steeringRng: new AlwaysMinRandom(), mainRoll: 18);
@@ -135,12 +153,13 @@ namespace Pinder.Core.Tests
             var resultMiss = await sessionMiss.ResolveTurnAsync(0);
 
             Assert.True(resultMiss.HorninessCheck.IsMiss);
-            Assert.Equal(0, resultMiss.HorninessInterestPenalty);
+            int pre = resultMiss.InterestDelta - resultMiss.HorninessInterestPenalty;
+            Assert.True(pre > 0, "Expected a positive pre-penalty interest delta");
+            Assert.Equal((int)Math.Floor(pre / 2.0) - pre, resultMiss.HorninessInterestPenalty);
 
-            // No horniness breakdown item
-            Assert.DoesNotContain(resultMiss.InterestBreakdown, b => 
-                b.Source.Contains("horniness", StringComparison.OrdinalIgnoreCase) ||
-                b.Label.Contains("horniness", StringComparison.OrdinalIgnoreCase));
+            // Horniness breakdown item should exist and match penalty
+            var horninessItem = Assert.Single(resultMiss.InterestBreakdown, b => b.Source.Contains("horniness", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(resultMiss.HorninessInterestPenalty, horninessItem.Delta);
 
             // Compare to control (success horniness)
             var sessionSuccess = MakeSession(sessionHorniness: 10, steeringRng: new AlwaysMaxRandom(), mainRoll: 18);
@@ -149,8 +168,8 @@ namespace Pinder.Core.Tests
 
             Assert.False(resultSuccess.HorninessCheck.IsMiss);
             
-            // Both turns should have exact same interest delta (horniness no longer halves it)
-            Assert.Equal(resultSuccess.InterestDelta, resultMiss.InterestDelta);
+            // Both turns start with the same base positive delta, but Miss gets halved
+            Assert.True(resultMiss.InterestDelta < resultSuccess.InterestDelta);
         }
 
         [Fact]
