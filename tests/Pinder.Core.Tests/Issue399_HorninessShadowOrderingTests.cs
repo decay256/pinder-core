@@ -145,9 +145,10 @@ namespace Pinder.Core.Tests
             Assert.True(result.ShadowCheck.OverlayApplied,
                 "Shadow corruption overlay must apply on Honesty/Denial TropeTrap");
 
-            // #1209: shadow trap truncates the positive delta to 1, horniness has no penalty.
-            // Net final delta == 1.
-            Assert.Equal(1, result.InterestDelta);
+            // #1209: shadow trap truncates the positive delta to 1.
+            // #1247: horniness halves the post-shadow delta (floor(1/2) = 0).
+            // Net final delta == 0.
+            Assert.Equal(0, result.InterestDelta);
 
             // #1095: the turn is STILL a success — the FINAL verdict is NOT a miss.
             Assert.Equal(Pinder.Core.Rolls.RollVerdict.Success, result.Roll.Check.FinalVerdict);
@@ -233,9 +234,10 @@ namespace Pinder.Core.Tests
             Assert.False(result.ShadowCheck.CheckPerformed,
                 "Shadow check must not be performed when shadow value is 0");
 
-            int preDelta = result.InterestDelta;
+            int preDelta = result.InterestDelta - result.HorninessInterestPenalty;
             Assert.True(preDelta > 0, $"pre-§15 delta must be positive; got {preDelta}");
-            Assert.Equal(0, result.HorninessInterestPenalty);
+            int expectedPenalty = (int)Math.Floor(preDelta / 2.0) - preDelta;
+            Assert.Equal(expectedPenalty, result.HorninessInterestPenalty);
 
             // Invariant: before + final delta == after.
             Assert.Equal(interestBefore + result.InterestDelta, interestAfter);

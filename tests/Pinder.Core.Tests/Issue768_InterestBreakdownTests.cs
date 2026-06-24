@@ -156,22 +156,22 @@ namespace Pinder.Core.Tests
         }
 
         /// <summary>
-        /// Horniness penalty removed.
-        /// Sum invariant: 2 + 1 + 0 == 3.
+        /// Horniness penalty applied.
+        /// Sum invariant: 2 + 1 - 2 == 1.
         /// </summary>
         [Fact]
         public void Breakdown_WithHorninessTropeTrap_SumEqualsInterestDelta()
         {
             var result = MakeTurnResult(
-                interestDelta: 3,
+                interestDelta: 1,
                 baseInterestDelta: 2,
                 riskBonusDelta: 1,
-                horninessInterestPenalty: 0);
+                horninessInterestPenalty: -2);
 
-            Assert.Equal(3, result.InterestDelta);
-            Assert.Equal(3, result.InterestBreakdown.Sum(x => x.Delta));
-            Assert.Equal(2, result.InterestBreakdown.Count);
-            Assert.DoesNotContain(result.InterestBreakdown, x => x.Source == "horniness_trope_trap");
+            Assert.Equal(1, result.InterestDelta);
+            Assert.Equal(1, result.InterestBreakdown.Sum(x => x.Delta));
+            Assert.Equal(3, result.InterestBreakdown.Count);
+            Assert.Contains(result.InterestBreakdown, x => x.Source == "horniness_trope_trap");
         }
 
         /// <summary>
@@ -405,21 +405,22 @@ namespace Pinder.Core.Tests
         }
 
         /// <summary>
-        /// Variant: horniness TropeTrap fires on a success turn. No penalty.
-        /// Sum invariant: 2 + 0 == 2.
+        /// Variant: horniness TropeTrap fires on a success turn. Penalty applies.
+        /// Sum invariant: 2 - 1 == 1.
         /// </summary>
         [Fact]
-        public void LiveCase_HorninessOnPositiveInterest_NoPenalty_SumInvariantHolds()
+        public void LiveCase_HorninessOnPositiveInterest_HalvesInterest_SumInvariantHolds()
         {
             var result = MakeTurnResult(
-                interestDelta: 2,
-                baseInterestDelta: 2,                horninessInterestPenalty: 0);
+                interestDelta: 1,
+                baseInterestDelta: 2,
+                horninessInterestPenalty: -1);
 
-            Assert.Equal(2, result.InterestDelta);
-            Assert.Equal(2, result.InterestBreakdown.Sum(x => x.Delta));
-            Assert.Equal(1, result.InterestBreakdown.Count);
+            Assert.Equal(1, result.InterestDelta);
+            Assert.Equal(1, result.InterestBreakdown.Sum(x => x.Delta));
+            Assert.Equal(2, result.InterestBreakdown.Count);
             Assert.Contains(result.InterestBreakdown, x => x.Source == "base_roll" && x.Delta == 2);
-            Assert.DoesNotContain(result.InterestBreakdown, x => x.Source == "horniness_trope_trap");
+            Assert.Contains(result.InterestBreakdown, x => x.Source == "horniness_trope_trap" && x.Delta == -1);
         }
     }
 }

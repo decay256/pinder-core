@@ -15,6 +15,7 @@ namespace Pinder.Core.Tests
     /// <summary>
     /// Tests for issue #743: Horniness overlay fires → interest halved (floor).
     /// Rule §15.horniness-interest-penalty.
+    /// Halving was removed by #1209 but restored by #1247.
     /// </summary>
     [Trait("Category", "Core")]
     public class Issue743_HorninessInterestPenaltyTests
@@ -74,10 +75,10 @@ namespace Pinder.Core.Tests
         }
 
         /// <summary>
-        /// Horniness overlay fires + positive interest → no penalty (issue #1209).
+        /// Horniness overlay fires + positive interest → halving restored (#1247).
         /// </summary>
         [Fact]
-        public async Task Overlay_Fires_PositiveInterest_NoPenalty()
+        public async Task Overlay_Fires_PositiveInterest_HalvesInterest()
         {
             var instructions = LoadDeliveryInstructions();
             var session = MakeSession(
@@ -94,17 +95,20 @@ namespace Pinder.Core.Tests
             Assert.True(result.HorninessCheck.OverlayApplied,
                 "Expected horniness overlay to fire with seed=1, sessionHorniness=15");
 
-            // Penalty should be zero (removed in #1209)
-            Assert.Equal(0, result.HorninessInterestPenalty);
+            int pre = result.InterestDelta - result.HorninessInterestPenalty;
+            Assert.True(pre > 0, "Expected a positive pre-penalty interest delta");
 
-            Assert.True(result.InterestDelta > 0, "Expected a positive interest delta");
+            int expectedPenalty = (int)Math.Floor(pre / 2.0) - pre;
+            Assert.True(result.HorninessInterestPenalty < 0, "Expected a negative penalty");
+            Assert.Equal(expectedPenalty, result.HorninessInterestPenalty);
+            Assert.Equal((int)Math.Floor(pre / 2.0), result.InterestDelta);
         }
 
         /// <summary>
-        /// Horniness overlay fires + odd interest (15) → no penalty.
+        /// Horniness overlay fires + odd interest (15) → applies floor halving.
         /// </summary>
         [Fact]
-        public async Task Overlay_Fires_OddInterest15_NoPenalty()
+        public async Task Overlay_Fires_OddInterest_FloorHalving()
         {
             var instructions = LoadDeliveryInstructions();
             // We want an odd delta so we can test the floor behavior.
@@ -131,8 +135,16 @@ namespace Pinder.Core.Tests
             Assert.True(result.HorninessCheck.OverlayApplied,
                 "Expected horniness overlay to fire");
 
-            Assert.True(result.InterestDelta > 0, "Test requires positive delta");
-            Assert.Equal(0, result.HorninessInterestPenalty);
+            int pre = result.InterestDelta - result.HorninessInterestPenalty;
+            Assert.True(pre > 0, "Test requires positive delta");
+            
+            int expectedPenalty = (int)Math.Floor(pre / 2.0) - pre;
+            Assert.Equal(expectedPenalty, result.HorninessInterestPenalty);
+            
+            if (pre % 2 != 0)
+            {
+                Assert.Equal((int)Math.Floor(pre / 2.0), result.InterestDelta);
+            }
         }
 
         /// <summary>
@@ -233,10 +245,10 @@ namespace Pinder.Core.Tests
         }
 
         /// <summary>
-        /// InterestDelta on TurnResult is unmodified by horniness overlay.
+        /// InterestDelta on TurnResult includes penalty from horniness overlay.
         /// </summary>
         [Fact]
-        public async Task Overlay_Fires_InterestDeltaExcludesPenalty()
+        public async Task Overlay_Fires_InterestDeltaIncludesPenalty()
         {
             var instructions = LoadDeliveryInstructions();
             var session = MakeSession(
@@ -252,7 +264,9 @@ namespace Pinder.Core.Tests
             Assert.True(result.HorninessCheck.OverlayApplied,
                 "Expected overlay to fire");
 
-            Assert.Equal(0, result.HorninessInterestPenalty);
+            Assert.True(result.HorninessInterestPenalty < 0, "Expected penalty to be negative");
+            int pre = result.InterestDelta - result.HorninessInterestPenalty;
+            Assert.True(pre > result.InterestDelta, "Expected pre-penalty delta to be greater than InterestDelta");
         }
 
         /// <summary>
