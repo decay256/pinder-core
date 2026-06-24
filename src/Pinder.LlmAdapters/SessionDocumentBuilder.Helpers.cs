@@ -9,6 +9,8 @@ namespace Pinder.LlmAdapters
 {
     public static partial class SessionDocumentBuilder
     {
+        public const int HorninessWarmthThreshold = 18;
+
         /// <summary>
         /// Computes the datee response length ceiling from the player's message length.
         /// Formula: ceiling = min(600, max(playerLen × 2, 80)).
@@ -161,6 +163,20 @@ namespace Pinder.LlmAdapters
                 case FailureTier.Catastrophe: return PromptTemplates.DateeReactionCatastrophe;
                 case FailureTier.Legendary: return PromptTemplates.DateeReactionLegendary;
                 default: return string.Empty;
+            }
+        }
+
+        internal static string GetHorninessReactionGuidance(int interest, bool overlayApplied, Pinder.Core.Rolls.FailureTier tier)
+        {
+            if (!overlayApplied) return string.Empty;
+
+            if (interest < HorninessWarmthThreshold)
+            {
+                return $"Current interest: {interest}/25. {PromptTemplates.DateeHorninessReactionBelowThreshold}";
+            }
+            else
+            {
+                return $"Current interest: {interest}/25. {PromptTemplates.DateeHorninessReactionHighInterest}";
             }
         }
     }

@@ -252,6 +252,17 @@ namespace Pinder.LlmAdapters
 
             sb.AppendLine();
 
+            if (context.HorninessOverlayApplied)
+            {
+                string horninessGuidance = GetHorninessReactionGuidance(context.InterestAfter, context.HorninessOverlayApplied, context.HorninessTier);
+                string templateKey = context.InterestAfter < HorninessWarmthThreshold 
+                    ? "datee-horniness-reaction-below-threshold" 
+                    : "datee-horniness-reaction-high-interest";
+                sb.AppendLine("HORNINESS REACTION GUIDANCE");
+                sb.AppendLine(horninessGuidance, GetTemplateSource(templateKey), "datee-horniness-reaction");
+                sb.AppendLine();
+            }
+
             // [ENGINE — DATEE] injection block with interest narrative
             string interestNarrative = PromptTemplates.GetInterestNarrative(context.InterestAfter);
             string dateeBlock = PromptTemplates.EngineDateeBlock

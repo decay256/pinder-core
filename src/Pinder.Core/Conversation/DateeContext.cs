@@ -68,6 +68,12 @@ namespace Pinder.Core.Conversation
         /// <summary>Active archetype directive for the datee character, or null if none.</summary>
         public string ActiveArchetypeDirective { get; }
 
+        /// <summary>True when the horniness overlay made the player's delivered message overtly horny/eager this turn.</summary>
+        public bool HorninessOverlayApplied { get; }
+
+        /// <summary>Miss tier of the horniness overlay this turn; only meaningful when HorninessOverlayApplied is true.</summary>
+        public FailureTier HorninessTier { get; }
+
         public DateeContext(
             string dateePrompt,
             IReadOnlyList<(string Sender, string Text)> conversationHistory,
@@ -85,7 +91,9 @@ namespace Pinder.Core.Conversation
             int currentTurn = 0,
             FailureTier deliveryTier = FailureTier.Success,
             string activeArchetypeDirective = null,
-            PublicProfileCard? playerAvatarCard = null)
+            PublicProfileCard? playerAvatarCard = null,
+            bool horninessOverlayApplied = false,
+            FailureTier horninessTier = FailureTier.Success)
         {
             PlayerAvatarCard = playerAvatarCard ?? PublicProfileCard.Empty;
             DateePrompt = dateePrompt ?? throw new System.ArgumentNullException(nameof(dateePrompt));
@@ -104,6 +112,8 @@ namespace Pinder.Core.Conversation
             CurrentTurn = currentTurn;
             DeliveryTier = deliveryTier;
             ActiveArchetypeDirective = activeArchetypeDirective;
+            HorninessOverlayApplied = horninessOverlayApplied;
+            HorninessTier = horninessTier;
         }
     }
 }

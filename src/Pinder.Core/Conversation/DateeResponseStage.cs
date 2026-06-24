@@ -80,7 +80,9 @@ namespace Pinder.Core.Conversation
                 // #1123 strict bleed isolation: the datee session sees ONLY the
                 // avatar's public dating-app card, never the avatar's full
                 // private system prompt.
-                playerAvatarCard: GameSessionHelpers.BuildPublicProfileCard(player));
+                playerAvatarCard: GameSessionHelpers.BuildPublicProfileCard(player),
+                horninessOverlayApplied: deliveryStage.HorninessCheckResult.OverlayApplied,
+                horninessTier: deliveryStage.HorninessCheckResult.Tier);
 
             progress?.Report(new TurnProgressEvent(TurnProgressStage.DateeResponseStarted));
 

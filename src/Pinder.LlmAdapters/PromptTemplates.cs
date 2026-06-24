@@ -104,6 +104,10 @@ namespace Pinder.LlmAdapters
 
         internal static string DateeReactionLegendary => GetCatalogString("datee-reaction-legendary");
 
+        internal static string DateeHorninessReactionBelowThreshold => GetCatalogString("datee-horniness-reaction-below-threshold");
+
+        internal static string DateeHorninessReactionHighInterest => GetCatalogString("datee-horniness-reaction-high-interest");
+
         // ── Interest narrative bands ────────────────────────────────────────
 
         internal static string InterestNarrative_1_4 => GetCatalogString("interest-narrative-1-4");
