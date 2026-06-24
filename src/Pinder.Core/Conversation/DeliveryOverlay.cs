@@ -75,13 +75,12 @@ namespace Pinder.Core.Conversation
                     return TrimTail(pickedLine, keepFraction: margin >= 8 ? 0.6 : 0.75);
 
                 case FailureTier.Catastrophe:
-                    // Missed by 10+: spectacular disaster — only a blurted
-                    // fragment survives, and it comes out far too loud.
-                    return Blurt(pickedLine, keepFraction: 0.4);
+                    // Missed by 10+: spectacular disaster — over-hedged, stumbling full line.
+                    return Flail(pickedLine);
 
                 case FailureTier.Legendary:
-                    // Nat 1: maximum humiliation — a tiny, shouted fragment.
-                    return Blurt(pickedLine, keepWords: 3);
+                    // Nat 1: maximum humiliation — extremely flustered nervous opener, full body trailing off.
+                    return Panic(pickedLine);
 
                 default:
                     return pickedLine;
@@ -127,33 +126,16 @@ namespace Pinder.Core.Conversation
             return kept + "...";
         }
 
-        /// <summary>
-        /// Blurt: keep only a short leading fragment and shout it. Either a
-        /// fraction of words or an absolute word cap (whichever is supplied).
-        /// </summary>
-        private static string Blurt(string line, double keepFraction = 0.0, int keepWords = 0)
+        /// <summary>Over-hedged, stumbling version of the full line.</summary>
+        private static string Flail(string line)
         {
-            var words = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-            if (words.Length == 0)
-                return line.ToUpperInvariant();
+            return "well, i mean, " + Stumble(Hesitate(line));
+        }
 
-            int keep;
-            if (keepWords > 0)
-                keep = Math.Min(keepWords, words.Length);
-            else
-            {
-                keep = (int)Math.Floor(words.Length * keepFraction);
-                if (keep < 1) keep = 1;
-            }
-
-            var sb = new StringBuilder();
-            for (int i = 0; i < keep; i++)
-            {
-                if (i > 0) sb.Append(' ');
-                sb.Append(words[i]);
-            }
-            string kept = sb.ToString().TrimEnd('.', '!', '?', '…', ',');
-            return kept.ToUpperInvariant() + "—";
+        /// <summary>Extremely flustered nervous opener with a stumble.</summary>
+        private static string Panic(string line)
+        {
+            return "oh god, um, " + Stumble(Hesitate(line));
         }
 
         private static string LowerFirst(string s)
