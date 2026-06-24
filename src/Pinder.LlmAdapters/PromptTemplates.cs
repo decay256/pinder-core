@@ -108,6 +108,14 @@ namespace Pinder.LlmAdapters
 
         internal static string DateeHorninessReactionHighInterest => GetCatalogString("datee-horniness-reaction-high-interest");
 
+        internal static string DateeHorninessTierIntensityFumble => GetCatalogString("datee-horniness-tier-intensity-fumble");
+
+        internal static string DateeHorninessTierIntensityMisfire => GetCatalogString("datee-horniness-tier-intensity-misfire");
+
+        internal static string DateeHorninessTierIntensityTropeTrap => GetCatalogString("datee-horniness-tier-intensity-trope-trap");
+
+        internal static string DateeHorninessTierIntensityCatastrophe => GetCatalogString("datee-horniness-tier-intensity-catastrophe");
+
         // ── Interest narrative bands ────────────────────────────────────────
 
         internal static string InterestNarrative_1_4 => GetCatalogString("interest-narrative-1-4");

@@ -166,18 +166,33 @@ namespace Pinder.LlmAdapters
             }
         }
 
+        private static string GetHorninessTierIntensity(Pinder.Core.Rolls.FailureTier tier)
+        {
+            switch (tier)
+            {
+                case FailureTier.Fumble: return PromptTemplates.DateeHorninessTierIntensityFumble;
+                case FailureTier.Misfire: return PromptTemplates.DateeHorninessTierIntensityMisfire;
+                case FailureTier.TropeTrap: return PromptTemplates.DateeHorninessTierIntensityTropeTrap;
+                case FailureTier.Catastrophe:
+                case FailureTier.Legendary:
+                    return PromptTemplates.DateeHorninessTierIntensityCatastrophe;
+                default:
+                    return string.Empty;
+            }
+        }
+
         internal static string GetHorninessReactionGuidance(int interest, bool overlayApplied, Pinder.Core.Rolls.FailureTier tier)
         {
             if (!overlayApplied) return string.Empty;
 
-            if (interest < HorninessWarmthThreshold)
-            {
-                return $"Current interest: {interest}/25. {PromptTemplates.DateeHorninessReactionBelowThreshold}";
-            }
-            else
-            {
-                return $"Current interest: {interest}/25. {PromptTemplates.DateeHorninessReactionHighInterest}";
-            }
+            string band = interest < HorninessWarmthThreshold
+                ? PromptTemplates.DateeHorninessReactionBelowThreshold
+                : PromptTemplates.DateeHorninessReactionHighInterest;
+            string tierIntensity = GetHorninessTierIntensity(tier);
+            string composed = $"Current interest: {interest}/25. {band}";
+            if (!string.IsNullOrWhiteSpace(tierIntensity))
+                composed += " " + tierIntensity;
+            return composed;
         }
     }
 }
