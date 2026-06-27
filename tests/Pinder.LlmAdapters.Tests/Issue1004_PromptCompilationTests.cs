@@ -284,10 +284,7 @@ STAKES:
             string actual = SessionSystemPromptBuilder.CompilePrompt(template, input);
 
             // Assert
-            string expectedNormalized = ExpectedGoldenCompiled.Replace("\r\n", "\n").Trim();
-            string actualNormalized = actual.Replace("\r\n", "\n").Trim();
-
-            Assert.Equal(expectedNormalized, actualNormalized);
+            Assert.Equal(ExpectedGoldenCompiled, actual);
         }
     }
 }
