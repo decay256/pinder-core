@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
 using Pinder.Core.Text;
 
 namespace Pinder.LlmAdapters
@@ -25,6 +28,87 @@ namespace Pinder.LlmAdapters
     /// </summary>
     public static class SessionSystemPromptBuilder
     {
+        public const int RequiredBackstoryFactCount = 20;
+        public const int RequiredPsychologicalStakeCount = 15;
+
+        public const string CharacterProfileToken = "{character_profile}";
+        public const string BackstoryFactsToken = "{backstory_facts}";
+        public const string PsychologicalStakesToken = "{psychological_stakes}";
+
+        public static string CompilePrompt(string template, PromptCompilationInput input)
+        {
+            if (template == null)
+            {
+                throw new ArgumentNullException(nameof(template));
+            }
+            if (input == null)
+            {
+                throw new ArgumentNullException(nameof(input));
+            }
+
+            // Validate character profile
+            if (string.IsNullOrWhiteSpace(input.CharacterProfile))
+            {
+                throw new PromptCompilationException("Character profile (anatomy) cannot be empty or whitespace.");
+            }
+
+            // Validate backstory facts
+            if (input.BackstoryFacts == null)
+            {
+                throw new PromptCompilationException("Backstory facts cannot be null.");
+            }
+            if (input.BackstoryFacts.Count != RequiredBackstoryFactCount)
+            {
+                throw new PromptCompilationException($"Backstory facts count expected {RequiredBackstoryFactCount}, actual count {input.BackstoryFacts.Count}.");
+            }
+            foreach (var fact in input.BackstoryFacts)
+            {
+                if (string.IsNullOrWhiteSpace(fact))
+                {
+                    throw new PromptCompilationException("Backstory fact cannot be null or whitespace.");
+                }
+            }
+
+            // Validate psychological stakes
+            if (input.PsychologicalStakes == null)
+            {
+                throw new PromptCompilationException("Psychological stakes cannot be null.");
+            }
+            if (input.PsychologicalStakes.Count != RequiredPsychologicalStakeCount)
+            {
+                throw new PromptCompilationException($"Psychological stakes count expected {RequiredPsychologicalStakeCount}, actual count {input.PsychologicalStakes.Count}.");
+            }
+            foreach (var stake in input.PsychologicalStakes)
+            {
+                if (string.IsNullOrWhiteSpace(stake))
+                {
+                    throw new PromptCompilationException("Psychological stake cannot be null or whitespace.");
+                }
+            }
+
+            // Single-pass replacement over template
+            return Regex.Replace(template, @"\{[A-Za-z0-9_]+\}", match =>
+            {
+                string token = match.Value;
+                if (token == CharacterProfileToken)
+                {
+                    return input.CharacterProfile;
+                }
+                else if (token == BackstoryFactsToken)
+                {
+                    return string.Join("\n", input.BackstoryFacts.Select((f, i) => (i + 1) + ". " + f));
+                }
+                else if (token == PsychologicalStakesToken)
+                {
+                    return string.Join("\n", input.PsychologicalStakes.Select((s, i) => (i + 1) + ". " + s));
+                }
+                else
+                {
+                    throw new PromptCompilationException("unknown token '" + token + "'");
+                }
+            });
+        }
+
         /// <summary>
         /// Header that marks the start of the per-session character-spec block.
         /// Everything BEFORE this marker is the shared, identical GM base.
