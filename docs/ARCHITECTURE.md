@@ -39,9 +39,9 @@ API. `Pinder.RemoteAssets` is NOT used by the engine or the CLI harness directly
 
 ### Pinder.Core
 
-The domain kernel. Domain model, game loop, interfaces.
+The domain kernel. Zero external dependencies — no NuGet packages, no I/O.
 
-| Depends on | Microsoft.Bcl.AsyncInterfaces, System.Text.Json |
+| Depends on | Nothing |
 |---|---|
 | **Purpose** | Game loop, stat model, roll engine, interest meter, shadow tracking, traps, XP, combos |
 | **Key files** | `Conversation/GameSession.cs` — the game session host |
@@ -49,7 +49,7 @@ The domain kernel. Domain model, game loop, interfaces.
 | | `Conversation/RollResolutionStage.cs` — stateless pipeline stage for d20 roll evaluation |
 | | `Conversation/DeliveryStage.cs` — stateless pipeline stage for choice delivery and overlays |
 | | `Conversation/DateeResponseStage.cs` — stateless pipeline stage for datee reaction and tells |
-| | `Interfaces/` — ILlmAdapter, IStatefulLlmAdapter, IGameClock, ITrapRegistry, IDiceRoller, IRuleResolver  (historical) |
+| | `Interfaces/` — ILlmAdapter, IStatefulLlmAdapter, IGameClock, ITrapRegistry, IDiceRoller, IRuleResolver |
 | | `Rolls/RollEngine.cs` — d20 resolution logic |
 | | `Stats/StatBlock.cs` — stat model + shadow pairing table |
 | | `Conversation/GameClock.cs` — simulated clock with energy + horniness modifiers |
@@ -61,12 +61,10 @@ The domain kernel. Domain model, game loop, interfaces.
 
 Prompt construction and LLM API integration. Depends on Pinder.Core and Pinder.Rules.
 
-**Note on LLM Architecture**: `GameSession` now handles engine-owned history and history-passing directly to `PinderLlmAdapter` via `ILlmTransport`, replacing the historical stateful adapter shape.
-
 | Depends on | Pinder.Core, Pinder.Rules, Newtonsoft.Json, YamlDotNet |
 |---|---|
 | **Purpose** | Build prompts from game state, call LLM APIs, parse responses |
-| **Key files** | `PinderLlmAdapter.cs` — unified provider-agnostic LLM adapter implementing `ILlmAdapter` and `IStatefulLlmAdapter`, delegating wire I/O to low-level transports  (historical) |
+| **Key files** | `PinderLlmAdapter.cs` — unified provider-agnostic LLM adapter implementing `ILlmAdapter` and `IStatefulLlmAdapter`, delegating wire I/O to low-level transports |
 | | `Anthropic/AnthropicTransport.cs` / `AnthropicStreamingTransport.cs` — direct Anthropic wire transports with prompt-caching (system & context history) |
 | | `OpenAi/OpenAiTransport.cs` / `OpenAiStreamingTransport.cs` — OpenAI-compatible wire transports (Groq, Together, OpenRouter, Ollama) |
 | | `SessionDocumentBuilder.cs` — static prompt builder for all call types |
@@ -122,7 +120,7 @@ from the per-turn game loop so that the web tier (`Pinder.GameApi`) can run
 it eagerly in the background after session create, while the CLI harness
 skips it or runs a lighter version.
 
-| Depends on | System.Text.Json, Pinder.Core, Pinder.LlmAdapters |
+| Depends on | Pinder.Core, Pinder.LlmAdapters (via ILlmTransport) |
 |---|---|
 | **Purpose** | Matchup preview + stake copy at session boot time |
 | **Key files** | `IMatchupAnalyzer.cs` / `LlmMatchupAnalyzer.cs` — matchup narrative |
@@ -169,7 +167,7 @@ A single turn flows through two phases: `StartTurnAsync` (generate options) and 
 
 8. **Delivery (Commit Step)** — The chosen option's full line is committed. On a success, it is sent verbatim. On a failure, it is degraded deterministically via `DeliveryOverlay.Apply` based on the failure tier. There is **no creative delivery LLM call** — option generation and this commit overlay are ephemeral, preserving the clean-history rule.
 
-9. **Steering roll** — Separate RNG. DC = 16 + average(datee SA, Rizz, Honesty). On success, calls `IStatefulLlmAdapter.GetSteeringQuestionAsync()` → appends a date-nudge question. (historical)
+9. **Steering roll** — Separate RNG. DC = 16 + average(datee SA, Rizz, Honesty). On success, calls `IStatefulLlmAdapter.GetSteeringQuestionAsync()` → appends a date-nudge question.
 
 10. **Horniness check (roll only)** — Separate RNG. Effective DC = `RollEngine.ApplyDcBias(sessionHorniness, horniness_dc_bias)`: base DC is the session horniness value, so higher horniness is more dangerous; positive bias lowers DC/safens, negative bias raises DC/dangers. On miss, records the overlay instruction via `HorninessEngine.PeekAsync()` but defers the text rewrite until after shadow corruption (#899).
 
@@ -177,7 +175,7 @@ A single turn flows through two phases: `StartTurnAsync` (generate options) and 
 
 10b. **Horniness text overlay** — Applies the pre-fetched horniness overlay instruction (step 10) via `ILlmAdapter.ApplyHorninessOverlayAsync()`. Runs AFTER shadow corruption so horniness has final say over the delivered text (#899). If no overlay instruction, skipped.
 
-10c. **Horniness §15 interest-delta halving** — When the horniness overlay fired and the post-shadow interest delta is strictly positive, the delta is halved (floor). This step is delayed to operate on the post-shadow (truncated) delta (#743/#399). Worked shadow-trap interaction (#1095): a success with base delta = e.g. 4 → shadow trap truncates to **1** → horniness halves `floor(1/2) = 0`. Net interest delta is **0**, but the turn is **STILL NOT a failure** — the verdict stays SUCCESS and the momentum increments. The player is not punished with failure for being too smooth while horny, they just spin their tires.
+10c. **Horniness §15 interest-delta halving** — When the horniness overlay fired and the post-shadow interest delta is strictly positive, the delta is halved (floor). This is deferred to operate on the post-shadow (truncated) delta (#743/#399). Worked shadow-trap interaction (#1095): a success with base delta = e.g. 4 → shadow trap truncates to **1** → horniness halves `floor(1/2) = 0`. Net interest delta is **0**, but the turn is **STILL NOT a failure** — the verdict stays SUCCESS and the momentum streak still increments.
 
 11. **Shadow growth** — `EvaluatePerTurnShadowGrowth()` evaluates 15+ triggers: Nat 1 → paired shadow +1, same stat 3× → Fixation +1, Charm 3× → Madness +1, RIZZ failures → Despair, etc. Also evaluates reductions (combo success → Madness −1, Honesty success at high interest → Denial −1).
 
@@ -195,7 +193,7 @@ are:
 | Interface | Owner | Purpose |
 |---|---|---|
 | `ILlmTransport` | Pinder.Core | HTTP wire adapter for an LLM provider — the lowest-level swap point |
-| `ILlmAdapter` / `IStatefulLlmAdapter` | Pinder.LlmAdapters | Turn-time prompt assembly + parsing  (historical) |
+| `ILlmAdapter` / `IStatefulLlmAdapter` | Pinder.LlmAdapters | Turn-time prompt assembly + parsing |
 | `ITrapRegistry` | Pinder.Core | Supplies trap definitions by stat |
 | `IDiceRoller` | Pinder.Core | Deterministic roll injection for tests |
 | `IRuleResolver` | Pinder.Rules | YAML-driven constant lookup |
@@ -227,9 +225,9 @@ Core abstraction for all LLM interactions. Stateless per-call.
 | `ApplyShadowCorruptionAsync(message, instruction, ...)` | Rewrite message with shadow corruption |
 | `ApplyTrapOverlayAsync(message, ...)` | Rewrite message with trap taint |
 
-**Implementations:** `AnthropicLlmAdapter`, `OpenAiLlmAdapter` (both in Pinder.LlmAdapters) (historical)
+**Implementations:** `AnthropicLlmAdapter`, `OpenAiLlmAdapter` (both in Pinder.LlmAdapters)
 
-### IStatefulLlmAdapter : ILlmAdapter (historical)
+### IStatefulLlmAdapter : ILlmAdapter
 
 Extends ILlmAdapter with persistent datee session for memory continuity across turns. Options and delivery remain stateless to prevent voice bleed between player/datee roles.
 
@@ -238,7 +236,7 @@ Extends ILlmAdapter with persistent datee session for memory continuity across t
 | `StartDateeSession(systemPrompt)` | Initialize persistent datee conversation |
 | `GetSteeringQuestionAsync(SteeringContext)` | Generate steering question after successful roll |
 
-**Implementations:** `AnthropicLlmAdapter`, `OpenAiLlmAdapter` (historical)
+**Implementations:** `AnthropicLlmAdapter`, `OpenAiLlmAdapter`
 
 ### IPlayerAgent
 
@@ -331,13 +329,13 @@ Failures are tiered by **miss margin** and natural roll. Delivery instructions
 are tier-specific — a `Fumble` corrupts differently from a `Catastrophe`.
 
 | Failure tier   | Trigger                                |
-| Tier           | Condition                              |
 |----------------|----------------------------------------|
-| `Fumble`       | <=2                                    |
-| `Misfire`      | <=5                                    |
-| `TropeTrap`    | <=9 (or active trap hit)               |
-| `Catastrophe`  | >=10                                   |
-| `Legendary`    | Natural 1 on d20                       |
+| `None`         | Success                                |
+| `Fumble`       | Miss by 1–2                            |
+| `Misfire`      | Miss by 3–5                            |
+| `TropeTrap`    | Miss by 6–10 (or active trap hit)      |
+| `Catastrophe`  | Miss by 11+                            |
+| `Legendary`    | Nat 1 on a desperate/legendary attempt |
 
 See `Pinder.Core/Rolls/FailureScale.cs` for the mapping used by
 `GetFailureInterestDelta`.
@@ -477,7 +475,7 @@ Configured via `GameDefinition.ImprovementPrompt`. Appended after initial genera
 
 ### 5. Steering Question (`GetSteeringQuestionAsync`) — conditional
 
-Called only on successful steering roll via `IStatefulLlmAdapter`. Receives player/datee names, delivered message, conversation history. Returns a single question to append. (historical)
+Called only on successful steering roll via `IStatefulLlmAdapter`. Receives player/datee names, delivered message, conversation history. Returns a single question to append.
 
 ### 6. Horniness Overlay (`ApplyHorninessOverlayAsync`) — conditional
 

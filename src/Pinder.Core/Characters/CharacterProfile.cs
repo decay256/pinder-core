@@ -98,6 +98,7 @@ namespace Pinder.Core.Characters
         public IReadOnlyDictionary<string, BackstoryFact>? Backstory { get; }
         public IReadOnlyList<string>? StakeLines { get; }
         public IReadOnlyDictionary<string, string>? PsychiatricDiagnosis { get; }
+        public IReadOnlyList<string>? BackstoryFragments { get; }
 
         /// <summary>Appends additional text to the assembled system prompt.</summary>
         public void AppendToSystemPrompt(string text)
@@ -137,7 +138,8 @@ namespace Pinder.Core.Characters
             IReadOnlyList<string> textingStyleLines = null,
             IReadOnlyDictionary<string, BackstoryFact>? backstory = null,
             IReadOnlyList<string>? stakeLines = null,
-            IReadOnlyDictionary<string, string>? psychiatricDiagnosis = null)
+            IReadOnlyDictionary<string, string>? psychiatricDiagnosis = null,
+            IReadOnlyList<string>? backstoryFragments = null)
         {
             Stats = stats ?? throw new ArgumentNullException(nameof(stats));
             AssembledSystemPrompt = assembledSystemPrompt ?? throw new ArgumentNullException(nameof(assembledSystemPrompt));
@@ -159,6 +161,7 @@ namespace Pinder.Core.Characters
             Backstory = backstory;
             StakeLines = stakeLines;
             PsychiatricDiagnosis = psychiatricDiagnosis;
+            BackstoryFragments = backstoryFragments;
         }
     }
 }

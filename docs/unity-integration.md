@@ -175,10 +175,10 @@ ScriptableObjects rather than JSON):
 
 | Assembly | Target | Required NuGet | Purpose |
 |---|---|---|---|
-| `Pinder.Core.dll` | netstandard2.0 | `Microsoft.Bcl.AsyncInterfaces`, `System.Text.Json` | Game logic kernel + JSON repositories (`Pinder.Core.Data`) |
+| `Pinder.Core.dll` | netstandard2.0 | `Microsoft.Bcl.AsyncInterfaces` | Game logic kernel + JSON repositories (`Pinder.Core.Data`) |
 | `Pinder.Rules.dll` | netstandard2.0 | `YamlDotNet` | Data-driven mechanics |
 | `Pinder.LlmAdapters.dll` | netstandard2.0 | `Newtonsoft.Json`, `YamlDotNet` | Prompt assembly + (optional) HTTP transports |
-| `Pinder.SessionSetup.dll` | netstandard2.0 | `System.Text.Json`, `Pinder.Core`, `Pinder.LlmAdapters` | High-level character JSON loader (`CharacterDefinitionLoader`) |
+| `Pinder.SessionSetup.dll` | netstandard2.0 | `System.Text.Json` | High-level character JSON loader (`CharacterDefinitionLoader`) |
 
 `pinder-web` is **not** part of the Unity integration — that's the
 React/FastAPI presentation tier for the browser game. Skip it.
@@ -462,17 +462,16 @@ public class PinderRunner : MonoBehaviour
         CharacterProfile datee = CharacterDefinitionLoader.Load(dateePath, items, anatomy);
 
         // 4. Construct the session. `GameSessionConfig` is required — the
-        //    engine refuses silent defaults. Passing a clock is mandatory.
-        //    See GameSessionConfig.cs for every knob (DC bias,
+        //    engine refuses silent defaults. The zero-arg call is fine for
+        //    bring-up; see GameSessionConfig.cs for every knob (DC bias,
         //    clock, shadow trackers, RNG, etc.).
-        var config       = new GameSessionConfig { Clock = new GameClock(DateTime.UtcNow) };
+        var config       = new GameSessionConfig();
         IDiceRoller dice = new SystemRandomDiceRoller(seed: null);  // null = nondeterministic
         _session = new GameSession(player, datee, llm, dice, traps, config);
     }
 
     public async Task PickOption(int optionIndex, IProgress<TurnProgressEvent>? progress = null)
     {
-        await _session.StartTurnAsync();
         TurnResult result = await _session.ResolveTurnAsync(optionIndex, progress);
         // result.DeliveredMessage ← the player's outgoing message after roll degradation
         // result.DateeMessage  ← datee reply
@@ -494,8 +493,8 @@ early text. A complete event taxonomy is at the top of
 
 > **`Pinder.SessionSetup`** is a fourth assembly alongside the three
 > in §0's table. Add it to your Unity project the same way — source
-> import or DLL — if you take path (a). It depends on `Pinder.Core`,
-> `Pinder.LlmAdapters`, and `System.Text.Json`. If you take path (b) (ScriptableObject characters), you can
+> import or DLL — if you take path (a). It depends on `Pinder.Core`
+> only. If you take path (b) (ScriptableObject characters), you can
 > skip it.
 
 ---
@@ -503,15 +502,15 @@ early text. A complete event taxonomy is at the top of
 ## 2. Snapshot / restore / replay
 
 The engine supports save / load via `GameStateSnapshot`. Call
-`session.CreateSnapshot()` to serialise; pass the snapshot to
-`GameSession.RestoreState(...)` to resume:
+`session.Snapshot()` to serialise; pass the snapshot to
+`GameSession.Restore(...)` to resume:
 
 ```csharp
-GameStateSnapshot snap = _session.CreateSnapshot();
+GameStateSnapshot snap = _session.Snapshot();
 var json = JsonConvert.SerializeObject(snap);
 PlayerPrefs.SetString("pinder.session", json);
 // ...later...
-var restored = GameSession.RestoreState(JsonConvert.DeserializeObject<GameStateSnapshot>(json),
+var restored = GameSession.Restore(JsonConvert.DeserializeObject<GameStateSnapshot>(json),
                                    player, datee, llm, dice, trapRegistry);
 ```
 
@@ -683,7 +682,7 @@ parameter only defines `short / medium / long / legendary`.
 2. **Map the unknown value** at load time. Write a
    migration step in your character loader:
 
-```csharp
+   ```csharp
    private static CharacterJson Migrate(CharacterJson c)
    {
        foreach (var kv in c.Anatomy.ToList())
@@ -693,7 +692,7 @@ parameter only defines `short / medium / long / legendary`.
        }
        return c;
    }
-```
+   ```
 3. **Reject the character** at load time with a clear error. Use this
    for content-team workflow — surfaces missing mistakes during
    character authoring rather than at runtime.

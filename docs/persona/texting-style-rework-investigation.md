@@ -1,5 +1,3 @@
-> **Archived:** This document is historical.
-
 # Texting-Style Schema — Investigation Before Rework
 
 Investigation conducted before reworking the per-item `texting_style_fragment`
