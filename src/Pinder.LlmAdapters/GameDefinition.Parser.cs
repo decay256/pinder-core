@@ -117,6 +117,21 @@ namespace Pinder.LlmAdapters
                 }
             }
 
+            int hungerForIntimacy = 0;
+            if (parsed.TryGetValue("hunger_for_intimacy", out var hfiObj) && hfiObj != null)
+            {
+                if (!int.TryParse(hfiObj.ToString(), out int hfi))
+                    throw new InvalidOperationException("game-definition.yaml hunger_for_intimacy must be an integer");
+                hungerForIntimacy = hfi;
+            }
+            int terrorOfRejection = 0;
+            if (parsed.TryGetValue("terror_of_rejection", out var torObj) && torObj != null)
+            {
+                if (!int.TryParse(torObj.ToString(), out int tor))
+                    throw new InvalidOperationException("game-definition.yaml terror_of_rejection must be an integer");
+                terrorOfRejection = tor;
+            }
+
             return new GameDefinition(
                 name: name,
                 gameMasterPrompt: gameMasterPrompt,
@@ -133,7 +148,9 @@ namespace Pinder.LlmAdapters
                 maxTurns: parsed.TryGetValue("max_turns", out var mtObj) && int.TryParse(mtObj?.ToString(), out int mt) ? mt : 30,
                 maxDialogueOptions: parsed.TryGetValue("max_dialogue_options", out var mdoObj) && int.TryParse(mdoObj?.ToString(), out int mdo) ? mdo : 3,
                 maxDeliveryWords: parsed.TryGetValue("max_delivery_words", out var mdwObj) && int.TryParse(mdwObj?.ToString(), out int mdw) ? mdw : 80,
-                activeTrapInterestPenalty: activeTrapInterestPenalty
+                activeTrapInterestPenalty: activeTrapInterestPenalty,
+                hungerForIntimacy: hungerForIntimacy,
+                terrorOfRejection: terrorOfRejection
             );
         }
     }
