@@ -157,7 +157,8 @@ namespace Pinder.Core.Tests
 
             // The picked line is the full option text (no steering/overlay fired).
             // The expected committed line is the deterministic overlay output.
-            string expected = DeliveryOverlay.Apply(PickedLine, FailureTier.Catastrophe, missMargin: 10);
+            string expected = DeliveryOverlay.Apply(PickedLine, FailureTier.Catastrophe, 10, StatType.Charm);
+            expected = MarkdownSanitizer.Strip(expected);
 
             Assert.False(result.Roll.IsSuccess);
             Assert.Equal(FailureTier.Catastrophe, result.Roll.Tier);

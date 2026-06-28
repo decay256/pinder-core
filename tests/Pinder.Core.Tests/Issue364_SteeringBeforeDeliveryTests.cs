@@ -7,6 +7,7 @@ using Pinder.Core.Conversation;
 using Pinder.Core.Interfaces;
 using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
+using Pinder.Core.Text;
 using Pinder.Core.Traps;
 using Xunit;
 
@@ -130,8 +131,9 @@ namespace Pinder.Core.Tests
             Assert.False(result.Roll.IsSuccess);
 
             // The committed line is the deterministic overlay of PickedOption, with the clean steering question appended.
-            string degradedBase = DeliveryOverlay.Apply(PickedOption, result.Roll.Tier, result.Roll.MissMargin);
+            string degradedBase = DeliveryOverlay.Apply(PickedOption, result.Roll.Tier, result.Roll.MissMargin, StatType.Charm);
             string expected = degradedBase.TrimEnd() + " " + result.Steering.SteeringQuestion;
+            expected = MarkdownSanitizer.Strip(expected);
             Assert.Equal(expected, result.DeliveredMessage);
 
             // And it actually degraded (differs from the clean PickedOption plus question).
@@ -182,7 +184,7 @@ namespace Pinder.Core.Tests
             // Tier diff goes picked → degraded base
             Assert.Equal(PickedOption, diffs[tierIdx].Before);
             Assert.Equal(
-                DeliveryOverlay.Apply(PickedOption, result.Roll.Tier, result.Roll.MissMargin),
+                DeliveryOverlay.Apply(PickedOption, result.Roll.Tier, result.Roll.MissMargin, StatType.Charm),
                 diffs[tierIdx].After);
 
             // Steering diff goes degraded base → degraded base + question
@@ -218,7 +220,8 @@ namespace Pinder.Core.Tests
             // No steering question was folded in: the committed line is the PLAIN
             // picked option run through the deterministic overlay for whatever
             // tier the roll produced (no steering text anywhere).
-            string expected = DeliveryOverlay.Apply(PickedOption, result.Roll.Tier, result.Roll.MissMargin);
+            string expected = DeliveryOverlay.Apply(PickedOption, result.Roll.Tier, result.Roll.MissMargin, StatType.Charm);
+            expected = MarkdownSanitizer.Strip(expected);
             Assert.Equal(expected, result.DeliveredMessage);
 
             if (result.TextDiffs != null)
