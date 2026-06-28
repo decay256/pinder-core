@@ -49,7 +49,7 @@ The domain kernel. Zero external dependencies — no NuGet packages, no I/O.
 | | `Conversation/RollResolutionStage.cs` — stateless pipeline stage for d20 roll evaluation |
 | | `Conversation/DeliveryStage.cs` — stateless pipeline stage for choice delivery and overlays |
 | | `Conversation/DateeResponseStage.cs` — stateless pipeline stage for datee reaction and tells |
-| | `Interfaces/` — ILlmAdapter, IStatefulLlmAdapter, IGameClock, ITrapRegistry, IDiceRoller, IRuleResolver |
+| | `Interfaces/` — ILlmAdapter, IStatefulLlmAdapter, IGameClock, ITrapRegistry, IDiceRoller, IRuleResolver  (historical) |
 | | `Rolls/RollEngine.cs` — d20 resolution logic |
 | | `Stats/StatBlock.cs` — stat model + shadow pairing table |
 | | `Conversation/GameClock.cs` — simulated clock with energy + horniness modifiers |
@@ -61,10 +61,12 @@ The domain kernel. Zero external dependencies — no NuGet packages, no I/O.
 
 Prompt construction and LLM API integration. Depends on Pinder.Core and Pinder.Rules.
 
+**Note on LLM Architecture**: `GameSession` now handles engine-owned history and history-passing directly to `PinderLlmAdapter` via `ILlmTransport`, replacing the historical stateful adapter shape.
+
 | Depends on | Pinder.Core, Pinder.Rules, Newtonsoft.Json, YamlDotNet |
 |---|---|
 | **Purpose** | Build prompts from game state, call LLM APIs, parse responses |
-| **Key files** | `PinderLlmAdapter.cs` — unified provider-agnostic LLM adapter implementing `ILlmAdapter` and `IStatefulLlmAdapter`, delegating wire I/O to low-level transports |
+| **Key files** | `PinderLlmAdapter.cs` — unified provider-agnostic LLM adapter implementing `ILlmAdapter` and `IStatefulLlmAdapter`, delegating wire I/O to low-level transports  (historical) |
 | | `Anthropic/AnthropicTransport.cs` / `AnthropicStreamingTransport.cs` — direct Anthropic wire transports with prompt-caching (system & context history) |
 | | `OpenAi/OpenAiTransport.cs` / `OpenAiStreamingTransport.cs` — OpenAI-compatible wire transports (Groq, Together, OpenRouter, Ollama) |
 | | `SessionDocumentBuilder.cs` — static prompt builder for all call types |
@@ -167,7 +169,7 @@ A single turn flows through two phases: `StartTurnAsync` (generate options) and 
 
 8. **Delivery (Commit Step)** — The chosen option's full line is committed. On a success, it is sent verbatim. On a failure, it is degraded deterministically via `DeliveryOverlay.Apply` based on the failure tier. There is **no creative delivery LLM call** — option generation and this commit overlay are ephemeral, preserving the clean-history rule.
 
-9. **Steering roll** — Separate RNG. DC = 16 + average(datee SA, Rizz, Honesty). On success, calls `IStatefulLlmAdapter.GetSteeringQuestionAsync()` → appends a date-nudge question.
+9. **Steering roll** — Separate RNG. DC = 16 + average(datee SA, Rizz, Honesty). On success, calls `IStatefulLlmAdapter.GetSteeringQuestionAsync()` → appends a date-nudge question. (historical)
 
 10. **Horniness check (roll only)** — Separate RNG. Effective DC = `RollEngine.ApplyDcBias(sessionHorniness, horniness_dc_bias)`: base DC is the session horniness value, so higher horniness is more dangerous; positive bias lowers DC/safens, negative bias raises DC/dangers. On miss, records the overlay instruction via `HorninessEngine.PeekAsync()` but defers the text rewrite until after shadow corruption (#899).
 
@@ -193,7 +195,7 @@ are:
 | Interface | Owner | Purpose |
 |---|---|---|
 | `ILlmTransport` | Pinder.Core | HTTP wire adapter for an LLM provider — the lowest-level swap point |
-| `ILlmAdapter` / `IStatefulLlmAdapter` | Pinder.LlmAdapters | Turn-time prompt assembly + parsing |
+| `ILlmAdapter` / `IStatefulLlmAdapter` | Pinder.LlmAdapters | Turn-time prompt assembly + parsing  (historical) |
 | `ITrapRegistry` | Pinder.Core | Supplies trap definitions by stat |
 | `IDiceRoller` | Pinder.Core | Deterministic roll injection for tests |
 | `IRuleResolver` | Pinder.Rules | YAML-driven constant lookup |
@@ -225,9 +227,9 @@ Core abstraction for all LLM interactions. Stateless per-call.
 | `ApplyShadowCorruptionAsync(message, instruction, ...)` | Rewrite message with shadow corruption |
 | `ApplyTrapOverlayAsync(message, ...)` | Rewrite message with trap taint |
 
-**Implementations:** `AnthropicLlmAdapter`, `OpenAiLlmAdapter` (both in Pinder.LlmAdapters)
+**Implementations:** `AnthropicLlmAdapter`, `OpenAiLlmAdapter` (both in Pinder.LlmAdapters) (historical)
 
-### IStatefulLlmAdapter : ILlmAdapter
+### IStatefulLlmAdapter : ILlmAdapter (historical)
 
 Extends ILlmAdapter with persistent datee session for memory continuity across turns. Options and delivery remain stateless to prevent voice bleed between player/datee roles.
 
@@ -236,7 +238,7 @@ Extends ILlmAdapter with persistent datee session for memory continuity across t
 | `StartDateeSession(systemPrompt)` | Initialize persistent datee conversation |
 | `GetSteeringQuestionAsync(SteeringContext)` | Generate steering question after successful roll |
 
-**Implementations:** `AnthropicLlmAdapter`, `OpenAiLlmAdapter`
+**Implementations:** `AnthropicLlmAdapter`, `OpenAiLlmAdapter` (historical)
 
 ### IPlayerAgent
 
@@ -475,7 +477,7 @@ Configured via `GameDefinition.ImprovementPrompt`. Appended after initial genera
 
 ### 5. Steering Question (`GetSteeringQuestionAsync`) — conditional
 
-Called only on successful steering roll via `IStatefulLlmAdapter`. Receives player/datee names, delivered message, conversation history. Returns a single question to append.
+Called only on successful steering roll via `IStatefulLlmAdapter`. Receives player/datee names, delivered message, conversation history. Returns a single question to append. (historical)
 
 ### 6. Horniness Overlay (`ApplyHorninessOverlayAsync`) — conditional
 
