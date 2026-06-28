@@ -55,6 +55,9 @@ namespace Pinder.Core.Conversation
         /// </summary>
         public IReadOnlyList<ConversationMessage> AvatarHistory { get; }
 
+        [JsonPropertyName("shadow_values")]
+        public IReadOnlyDictionary<string, int> ShadowValues { get; }
+
         public GameStateSnapshot(
             int interest,
             InterestState state,
@@ -65,7 +68,8 @@ namespace Pinder.Core.Conversation
             TrapDetail[] activeTrapDetails = null,
             IReadOnlyList<ConversationMessage> dateeHistory = null,
             double ghostProbabilityPerTurn = 0.0,
-            IReadOnlyList<ConversationMessage> avatarHistory = null)
+            IReadOnlyList<ConversationMessage> avatarHistory = null,
+            IReadOnlyDictionary<string, int> shadowValues = null)
         {
             Interest = interest;
             State = state;
@@ -77,6 +81,7 @@ namespace Pinder.Core.Conversation
             DateeHistory = dateeHistory ?? System.Array.Empty<ConversationMessage>();
             AvatarHistory = avatarHistory ?? System.Array.Empty<ConversationMessage>();
             GhostProbabilityPerTurn = ghostProbabilityPerTurn;
+            ShadowValues = shadowValues ?? new Dictionary<string, int>();
         }
     }
 }
