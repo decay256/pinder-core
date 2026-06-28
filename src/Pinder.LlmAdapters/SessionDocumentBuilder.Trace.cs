@@ -165,6 +165,17 @@ namespace Pinder.LlmAdapters
                 sb.AppendLine();
             }
 
+            if (context.ResolvedTarget != null)
+            {
+                var target = context.ResolvedTarget.Value;
+                sb.AppendLine($"TRANSITION DIRECTIVE: {playerName} should deliver {target.Registry} #{target.Index} (\"{target.StemText}\") via OPTION_C as {target.TransitionStyle}.");
+                if (!string.IsNullOrEmpty(context.CognitiveSubtext))
+                {
+                    sb.AppendLine($"COGNITIVE SUBTEXT: {context.CognitiveSubtext}");
+                }
+                sb.AppendLine();
+            }
+
             int optionCount = context.AvailableStats != null
                 ? context.AvailableStats.Length
                 : context.MaxDialogueOptions;
@@ -316,6 +327,17 @@ namespace Pinder.LlmAdapters
             }
 
             sb.AppendLine();
+
+            if (context.ResolvedTarget != null)
+            {
+                var target = context.ResolvedTarget.Value;
+                sb.AppendLine($"TRANSITION DIRECTIVE: React to {target.Registry} #{target.Index} (\"{target.StemText}\") using {target.TransitionStyle}.");
+                if (!string.IsNullOrEmpty(context.CognitiveSubtext))
+                {
+                    sb.AppendLine($"COGNITIVE SUBTEXT: {context.CognitiveSubtext}");
+                }
+                sb.AppendLine();
+            }
 
             string resistanceBlock = GetResistanceBlock(context.InterestAfter);
 

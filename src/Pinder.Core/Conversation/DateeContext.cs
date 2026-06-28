@@ -71,8 +71,20 @@ namespace Pinder.Core.Conversation
         /// <summary>True when the horniness overlay made the player's delivered message overtly horny/eager this turn.</summary>
         public bool HorninessOverlayApplied { get; }
 
-        /// <summary>Miss tier of the horniness overlay this turn; only meaningful when HorninessOverlayApplied is true.</summary>
+        /// <summary>
+        /// Miss tier of the horniness overlay this turn; only meaningful when HorninessOverlayApplied is true.
+        /// </summary>
         public FailureTier HorninessTier { get; }
+
+        /// <summary>
+        /// Resolved revelation target for injecting into the LLM prompt.
+        /// </summary>
+        public ResolvedRevelationTarget? ResolvedTarget { get; }
+
+        /// <summary>
+        /// Therapeutic cognitive subtext for injecting into the LLM prompt.
+        /// </summary>
+        public string? CognitiveSubtext { get; }
 
         public DateeContext(
             string dateePrompt,
@@ -93,7 +105,9 @@ namespace Pinder.Core.Conversation
             string activeArchetypeDirective = null,
             PublicProfileCard? playerAvatarCard = null,
             bool horninessOverlayApplied = false,
-            FailureTier horninessTier = FailureTier.Success)
+            FailureTier horninessTier = FailureTier.Success,
+            ResolvedRevelationTarget? resolvedTarget = null,
+            string? cognitiveSubtext = null)
         {
             PlayerAvatarCard = playerAvatarCard ?? PublicProfileCard.Empty;
             DateePrompt = dateePrompt ?? throw new System.ArgumentNullException(nameof(dateePrompt));
@@ -114,6 +128,8 @@ namespace Pinder.Core.Conversation
             ActiveArchetypeDirective = activeArchetypeDirective;
             HorninessOverlayApplied = horninessOverlayApplied;
             HorninessTier = horninessTier;
+            ResolvedTarget = resolvedTarget;
+            CognitiveSubtext = cognitiveSubtext;
         }
     }
 }

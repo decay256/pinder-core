@@ -81,6 +81,16 @@ namespace Pinder.Core.Conversation
         /// </summary>
         public System.Collections.Generic.IReadOnlyCollection<int>? StakeLinesReferenced { get; }
 
+        /// <summary>
+        /// Resolved revelation target for injecting into the LLM prompt.
+        /// </summary>
+        public ResolvedRevelationTarget? ResolvedTarget { get; }
+
+        /// <summary>
+        /// Therapeutic cognitive subtext for injecting into the LLM prompt.
+        /// </summary>
+        public string? CognitiveSubtext { get; }
+
         public DialogueContext(
             string playerAvatarPrompt,
             string dateePrompt,
@@ -102,7 +112,9 @@ namespace Pinder.Core.Conversation
             string activeArchetypeDirective = null,
             string[]? stakeLines = null,
             System.Collections.Generic.IReadOnlyCollection<int>? stakeLinesReferenced = null,
-            int maxDialogueOptions = 3)
+            int maxDialogueOptions = 3,
+            ResolvedRevelationTarget? resolvedTarget = null,
+            string? cognitiveSubtext = null)
         {
             PlayerAvatarPrompt = playerAvatarPrompt ?? throw new System.ArgumentNullException(nameof(playerAvatarPrompt));
             DateePrompt = dateePrompt ?? throw new System.ArgumentNullException(nameof(dateePrompt));
@@ -125,6 +137,8 @@ namespace Pinder.Core.Conversation
             StakeLines = stakeLines;
             StakeLinesReferenced = stakeLinesReferenced;
             MaxDialogueOptions = maxDialogueOptions;
+            ResolvedTarget = resolvedTarget;
+            CognitiveSubtext = cognitiveSubtext;
         }
     }
 }
