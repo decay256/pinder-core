@@ -86,10 +86,7 @@ See [`docs/specs/character-asset-vocabulary.md`](../specs/character-asset-vocabu
 - **No streaming response handling.** The current contract caps payloads at 256 KiB; full body reads are fine at that scale.
 - **No HEAD support.** `ExistsAsync` and `GetMetadataAsync` issue a full `GET` (v1 wire has no HEAD endpoint).
 
-## Follow-Up Tickets Opened During the Sprint
 
-- **#859 — HTTPS-scheme enforcement.** `Configuration` currently accepts any `Uri` for `BaseUrl`, including `http://`. Defence-in-depth: add a constructor guard that throws if the scheme is not `https` in non-test contexts, or at minimum emit a warning.
-- **#860 — Response-size cap.** The current read/query paths do an unbounded `ReadAsByteArrayAsync`. Defence-in-depth: cap the response body read at a configurable limit to prevent a misbehaving server from causing an OOM.
 
 ## Source of Truth
 

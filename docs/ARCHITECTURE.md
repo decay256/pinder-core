@@ -39,9 +39,9 @@ API. `Pinder.RemoteAssets` is NOT used by the engine or the CLI harness directly
 
 ### Pinder.Core
 
-The domain kernel. Zero external dependencies — no NuGet packages, no I/O.
+The domain kernel. Domain model, game loop, interfaces.
 
-| Depends on | Nothing |
+| Depends on | Microsoft.Bcl.AsyncInterfaces, System.Text.Json |
 |---|---|
 | **Purpose** | Game loop, stat model, roll engine, interest meter, shadow tracking, traps, XP, combos |
 | **Key files** | `Conversation/GameSession.cs` — the game session host |
@@ -122,7 +122,7 @@ from the per-turn game loop so that the web tier (`Pinder.GameApi`) can run
 it eagerly in the background after session create, while the CLI harness
 skips it or runs a lighter version.
 
-| Depends on | Pinder.Core, Pinder.LlmAdapters (via ILlmTransport) |
+| Depends on | System.Text.Json, Pinder.Core, Pinder.LlmAdapters |
 |---|---|
 | **Purpose** | Matchup preview + stake copy at session boot time |
 | **Key files** | `IMatchupAnalyzer.cs` / `LlmMatchupAnalyzer.cs` — matchup narrative |

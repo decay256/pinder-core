@@ -1,7 +1,9 @@
 # Texting-Style Aggregation Rule (v1)
 
+Note: This relies on item schema v2.
+
 This is the canonical rule for aggregating a character's equipped items
-and anatomy parameters into the **9-axis texting-style block** that ends
+and scalars into the **9-axis texting-style block** that ends
 up in the LLM system prompt and in `CharacterProfile.TextingStyleFragment`.
 
 It replaces the random-pick-2 placeholder shipped during the
@@ -25,7 +27,7 @@ sources on the character. Two distinct sources never write to the same
 axis.
 
 The output is fully deterministic for a given (character_id, equipped
-items, anatomy tiers). Two runs against the same configuration produce
+items, scalar levels). Two runs against the same configuration produce
 the same 9-line aggregate, byte-exact. Players never see this aggregate
 directly — they discover it indirectly through the LLM's behaviour.
 
@@ -37,12 +39,12 @@ Each of the 6 item slots owns exactly one syntax subcategory:
 
 | slot       | syntax axis |
 |------------|-------------|
-| `shoes`    | `emoji`     |
-| `hat`      | `shorthand` |
-| `shirt`    | `grammar`   |
-| `trousers` | `structure` |
-| `frame`    | `length`    |
-| `accessory`| `tics`      |
+| `Special`    | `emoji`     |
+| `Head`      | `shorthand` |
+| `Body`    | `grammar`   |
+| `Hair` | `structure` |
+| `Arms`    | `length`    |
+| `Face`| `tics`      |
 
 If a slot is empty (no item equipped), the axis is **silenced** for that
 character — not back-filled from elsewhere. The block emits 9 axis
@@ -67,9 +69,9 @@ TONE:
 ```
 
 The aggregator reads the slot's owned axis from its item — so if the
-item in the `shoes` slot has `- emoji: ends every sentence with an emoji
+item in the `Special` slot has `- emoji: ends every sentence with an emoji
 that conveys its emotion`, that's the line written to the final
-fragment's `emoji` axis. Items in the `shoes` slot do NOT contribute to
+fragment's `emoji` axis. Items in the `Special` slot do NOT contribute to
 any other axis: only the slot's owned axis is read.
 
 This is the design rule that makes the system **discoverable by
@@ -78,21 +80,21 @@ cannot fight back across the boundary.
 
 ---
 
-## Anatomy parameters lock tone (3:1 group-vote mapping)
+## Scalars lock tone (3:1 group-vote mapping)
 
-The 9 anatomy parameters are partitioned into 3 groups of 3. Each
+The 9 scalars are partitioned into 3 groups of 3. Each
 group decides one tone axis:
 
-| anatomy params                                       | tone axis  |
+| scalars params                                       | tone axis  |
 |------------------------------------------------------|------------|
 | `length`, `girth`, `circumcision`                    | `stance`   |
 | `vein_definition`, `skin_texture`, `skin_tone`       | `register` |
 | `ball_size`, `tattoos`, `eye_style`                  | `pacing`   |
 
 For each group, the aggregator extracts the tone-axis line from each
-selected tier in the group. The decision rule is:
+selected level in the group. The decision rule is:
 
-1. **Drop empty contributions.** If a tier has no `texting_style_fragment`
+1. **Drop empty contributions.** If a level has no `texting_style_fragment`
    or its TONE block doesn't carry the axis, that source contributes
    nothing.
 2. **Majority wins.** Group the remaining lines by their text. The
@@ -105,7 +107,7 @@ selected tier in the group. The decision rule is:
 If the entire group contributes nothing, the tone axis is silenced for
 that character — the final fragment list emits 8 lines instead of 9.
 
-Anatomy is **never** read for syntax. The full grouping is fixed and
+Scalars are **never** read for syntax. The full grouping is fixed and
 documented here; designers can verify and operators can predict.
 
 ---
@@ -116,12 +118,12 @@ The aggregator returns a list of strings, one per filled axis, in the
 canonical order:
 
 ```
-emoji: <line from shoes.SYNTAX.emoji>
-shorthand: <line from hat.SYNTAX.shorthand>
-grammar: <line from shirt.SYNTAX.grammar>
-structure: <line from trousers.SYNTAX.structure>
-length: <line from frame.SYNTAX.length>
-tics: <line from accessory.SYNTAX.tics>
+emoji: <line from Special.SYNTAX.emoji>
+shorthand: <line from Head.SYNTAX.shorthand>
+grammar: <line from Body.SYNTAX.grammar>
+structure: <line from Hair.SYNTAX.structure>
+length: <line from Arms.SYNTAX.length>
+tics: <line from Face.SYNTAX.tics>
 stance: <majority winner from {length, girth, circumcision}.TONE.stance>
 register: <majority winner from {vein_definition, skin_texture, skin_tone}.TONE.register>
 pacing: <majority winner from {ball_size, tattoos, eye_style}.TONE.pacing>
@@ -133,7 +135,7 @@ Axes whose source is empty are dropped, not emitted as
 remaining axis as its own bullet line in the system prompt's TEXTING
 STYLE section.
 
-When the character has no items and no anatomy contributions, the
+When the character has no items and no scalar contributions, the
 output is an empty list — the section header may still be emitted but
 carries no rules.
 
@@ -142,9 +144,9 @@ carries no rules.
 ## Why this rule
 
 1. **9 axes. Always.** No more, no less. 6 items × 1 axis per slot, 3
-   anatomy groups × 1 axis per group. No risk of soup.
+   scalar groups × 1 axis per group. No risk of soup.
 2. **Discoverable through gameplay.**
-   - Layer 1: "swapping clothes never changes my stance" → anatomy
+   - Layer 1: "swapping clothes never changes my stance" → scalars
      decides tone. The player figures this out across multiple equipment
      swaps.
    - Layer 2: "swapping shoes changes my emoji rule" → items decide
@@ -153,15 +155,15 @@ carries no rules.
      consistently changes the same axis.
 3. **Not directly controllable.** Players never see the prompt, can't
    say "give me dry stance". The path from intent → result goes through
-   anatomy + items, which are physical decisions, not text knobs.
-4. **Surfaces both items and anatomy.** Anatomy is back in the wire —
-   the previous placeholder silenced anatomy entirely, which broke the
-   discoverability layer. Now anatomy is the only path to tone.
+   scalars + items, which are physical decisions, not text knobs.
+4. **Surfaces both items and scalars.** Scalars are back in the wire —
+   the previous placeholder silenced scalars entirely, which broke the
+   discoverability layer. Now scalars are the only path to tone.
 5. **Deterministic.** Per-character; per-configuration. No re-roll mid
    conversation. Build-craft is preserved: the player's choices stick.
 6. **Auditable.** Every axis has exactly one source. A reviewer reading
    the assembled prompt can trace each line back to a specific slot or
-   anatomy parameter without RNG.
+   scalar without RNG.
 
 ---
 
@@ -169,14 +171,14 @@ carries no rules.
 
 - **Random-pick-2 is gone.** No more seeded RNG over the item fragment
   list. No more "this character got the boring two".
-- **Anatomy is back.** The placeholder dropped anatomy entirely; the
+- **Scalars are back.** The placeholder dropped scalars entirely; the
   v1 rule reintroduces it as the sole tone author.
 - **9 axes always.** The placeholder produced "2 messy fragments";
   the v1 rule produces up to 9 single-axis lines.
 - **`TextingStyleFragmentSource.SlotOrParameter` is new.** The
   per-source breakdown now carries the slot ("shoes", "hat", …) or
-  anatomy parameter id ("length", "girth", …) so the aggregator can
-  do the slot→axis lookup without re-deriving it from item / anatomy
+  scalar id ("length", "girth", …) so the aggregator can
+  do the slot→axis lookup without re-deriving it from item / scalars
   definitions. This field is a strict superset; existing consumers
   keep their `Kind` / `Source` / `Fragment` reads.
 
@@ -193,11 +195,11 @@ deterministically authored from the new rule.
   language, earned through gameplay (mirror item, NPC reactions,
   achievement-style cards). Tracked separately, not in v1.
 - **Rule revision after playtest.** If a tone axis turns out to be
-  dominated by one anatomy parameter that's nearly always the same
-  tier, revisit the group composition or switch to weighted voting.
+  dominated by one scalar that's nearly always the same
+  level, revisit the group composition or switch to weighted voting.
   No revision before playtest data is in.
 - **Slot↔axis remap.** The slot→syntax assignment above is a design
-  call. Future versions may swap mappings (e.g. accessory→length to
+  call. Future versions may swap mappings (e.g. Face→length to
   match items that authentically dictate verbosity). Each swap is a
   new revision of THIS DOCUMENT, not an undocumented engine change.
 
@@ -212,7 +214,7 @@ values before emitting the final list. The matrix is encoded in
 
 ### Why conflicts arise
 
-Each axis is picked independently (slot → syntax axis; anatomy group → tone
+Each axis is picked independently (slot → syntax axis; scalars group → tone
 axis). There is no constraint across axes during the pick phase. Some
 combinations are semantically contradictory even though each individual pick
 is valid:
