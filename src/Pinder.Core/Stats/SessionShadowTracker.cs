@@ -178,6 +178,16 @@ namespace Pinder.Core.Stats
         }
 
         /// <summary>
+        /// Resets all accumulated shadow growth (deltas and events), restoring effective shadows to base.
+        /// </summary>
+        public void ResetShadows()
+        {
+            _deltas.Clear();
+            _growthEvents.Clear();
+            _growthEffects.Clear();
+        }
+
+        /// <summary>
         /// Returns all growth event description strings accumulated since last drain, then clears the internal log.
         /// Returns an empty list if no growth events have occurred since the last drain (or since construction).
         /// Added per #161 resolution — this is the canonical drain method, replacing the dropped CharacterState concept.
