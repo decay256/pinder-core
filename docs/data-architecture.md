@@ -47,7 +47,7 @@ data/
   game-definition.yaml         — singleton LLM creative brief (non-extensible structure)
   delivery-instructions.yaml   — per-stat × per-outcome rewrite prompts + horniness + shadow corruption
   characters/
-    <slug>.json                — one file per character (items, anatomy, build_points, shadows)
+    <slug>.json                — one file per character (items, anatomy, allocation blocks)
   items/
     starter-items.json         — item pool (extensible by appending entries)
   anatomy/
@@ -64,8 +64,8 @@ data/
 | File | Loader | What it controls |
 |---|---|---|
 | `game-definition.yaml` | `GameDefinition.LoadFrom` (singleton) | `vision`, `world_description`, `texting_psychology`, `player_role_description`, `max_turns`, `max_dialogue_options`, time-of-day horniness bands. Becomes the top of every system prompt. |
-| `delivery-instructions.yaml` | `StatDeliveryInstructions.LoadFrom` (singleton) | Two top-level sections: `delivery_instructions.{stat}.{outcome}` (per-stat × 11 outcomes from `clean` to `nat1`, plus `horniness_overlay` per tier) and `shadow_corruption.{shadow}.{tier}` (corruption text for Madness, Despair, Dread, Denial, Fixation, Overthinking). This is the prompt library for *how a delivered message gets rewritten* based on roll outcome and shadow state. |
-| `characters/<slug>.json` | `Pinder.SessionSetup.CharacterDefinitionLoader` | Per-character: `name`, `gender_identity`, `bio`, `level`, `items[]` (item ids), `anatomy{}` (parameterId → tierId), `build_points{}`, `shadows{}`. |
+| `delivery_instructions.yaml` | `StatDeliveryInstructions.LoadFrom` (singleton) | Two top-level sections: `delivery_instructions.{stat}.{outcome}` (per-stat × 11 outcomes from `clean` to `nat1`, plus `horniness_overlay` per tier) and `shadow_corruption.{shadow}.{tier}` (corruption text for Madness, Despair, Dread, Denial, Fixation, Overthinking). This is the prompt library for *how a delivered message gets rewritten* based on roll outcome and shadow state. |
+| `characters/<slug>.json` | `Pinder.SessionSetup.CharacterDefinitionLoader` | Per-character: `name`, `gender_identity`, `bio`, `level`, `items[]` (item ids), `anatomy{}` (parameterId → `[0..1]` scalar value), `allocation.spent{}`, `allocation.total`, `allocation.shadows{}`. |
 | `items/starter-items.json` | `JsonItemRepository` | Item pool. Each item carries `stat_modifiers`, `personality_fragment`, `backstory_fragment`, `texting_style_fragment`, `archetype_tendencies`, `response_timing_modifier`, plus UI flavor (`flavor.shop_description`, `display_name`, `slot`, `tier`). |
 | `anatomy/anatomy-parameters.json` | `JsonAnatomyRepository` | Anatomy parameters × tiers. Each tier carries the same fragment/modifier shape as items. The number and names of parameters are fully data-driven — see "Anatomy parameter extensibility" below. |
 | `traps/traps.json` | `JsonTrapRepository` (`ITrapRegistry`) | Trap definitions (one per stat). Fields: `stat`, `effect`, `effect_value`, `duration_turns`, `llm_instruction` (the trap overlay prompt used on persistence turns), `clear_method`, `nat1_bonus`. |
@@ -81,7 +81,7 @@ All character / item / anatomy fields above are concatenated by `CharacterAssemb
 | A character's items / stats / level | `data/characters/<slug>.json` | top-level fields |
 | Add a new item | `data/items/starter-items.json` | append entry |
 | Item personality / texting style | `data/items/starter-items.json` | item's `personality_fragment` / `texting_style_fragment` |
-| What an anatomy tier feels like | `data/anatomy/anatomy-parameters.json` | tier's fragments + `stat_modifiers` |
+| What an anatomy band feels like | `data/anatomy/anatomy-parameters.json` | band's fragments + `stat_modifiers` |
 | Add an anatomy parameter or tier | `data/anatomy/anatomy-parameters.json` | append parameter or tier (no code change — see below) |
 | What a trap's corruption *feels like* | `data/traps/traps.json` | trap's `llm_instruction` |
 | Trap stat / duration / effect | `data/traps/traps.json` | other trap fields |
@@ -130,15 +130,15 @@ Characters reference parameters by string id in their `anatomy` block:
 
 ```json
 "anatomy": {
-  "length": "medium",
-  "girth": "slim",
+  "trunkLengthBase": 0.5,
+  "trunkGirth": 0.75,
   ...
 }
 ```
 
-`CharacterAssembler.Assemble` takes an `IReadOnlyDictionary<string, string>` of `parameterId → tierId`. Unknown parameter ids are silently skipped — the engine does not require any specific parameter to exist. Removing a parameter from the JSON simply means no character can reference it; existing characters that still reference the removed id silently lose those fragments and modifiers (no error).
+`CharacterAssembler.Assemble` takes an `IReadOnlyDictionary<string, float>` of `parameterId → [0..1]` normalized value. Unknown parameter ids are silently skipped — the engine does not require any specific parameter to exist. Removing a parameter from the JSON simply means no character can reference it; existing characters that still reference the removed id silently lose those fragments and modifiers (no error).
 
-#### Adding a parameter
+#### Adding a parameter (Historical Tier Example)
 
 1. Append a new object to `data/anatomy/anatomy-parameters.json`:
    ```json
@@ -180,7 +180,7 @@ Characters reference parameters by string id in their `anatomy` block:
 Very little. The only places anatomy is referenced by *type* in C# are:
 
 - `JsonAnatomyRepository` — schema-aware loader.
-- `CharacterAssembler` — calls `repo.GetParameter(id).GetTier(tierId)` for each `(parameterId, tierId)` pair on the character.
+- `CharacterAssembler` — calls `repo.GetParameter(id).ResolveBand(value)` for each `(parameter id, scalar value)` pair on the character.
 - `Pinder.GameApi` (the web tier) — may have UI-side schemas describing pickers; if you change parameter shape, audit the web tier.
 
 The **stats** (Charm, Rizz, Honesty, Chaos, Wit, Self-Awareness) and **shadows** (Madness, Despair, Denial, Fixation, Dread, Overthinking) are enums (`StatType`, `ShadowStatType`) and are not data-driven. Anatomy parameters refer to those stats by string in `stat_modifiers`, parsed against the enum at load time.

@@ -555,10 +555,10 @@ violate them:
 |---|---|
 | Six positive stats: Charm, Rizz, Honesty, Chaos, Wit, SelfAwareness. | `StatType` enum drives DC computation, success scaling, shadow pairing. Adding/removing requires editing the enum and recompiling. |
 | Six paired shadow stats: Madness/Despair/Denial/Fixation/Dread/Overthinking. | Same enum. Shadow growth, hint computation, threshold evaluator all key off these. |
-| Anatomy is a flat list of **named parameters**, each with a list of **named tiers**. | The engine indexes by `parameterId` + `tierId` strings. The number / names of parameters is data, not code. |
-| Each anatomy tier exposes the six fragment fields (`stat_modifiers`, `personality_fragment`, `backstory_fragment`, `texting_style_fragment`, `archetype_tendencies`, `response_timing_modifier`). | `CharacterAssembler` reads these and combines into the LLM prompt. Missing fields are tolerated (treated as empty); spurious fields are ignored. |
+| Anatomy is a flat list of **named parameters**, each with a list of **normalized scalar bands**. | The engine uses float values mapped onto `[0..1]` scalar bands. The number / names of parameters is data, not code. |
+| Each anatomy band exposes the six fragment fields (`stat_modifiers`, `personality_fragment`, `backstory_fragment`, `texting_style_fragment`, `archetype_tendencies`, `response_timing_modifier`). | `CharacterAssembler` reads these and combines into the LLM prompt. Missing fields are tolerated (treated as empty); spurious fields are ignored. |
 | Items are a flat list keyed by `id`, with the same six fragment fields. | Same reason. |
-| Character JSON has `name`, `level`, `items[]`, `anatomy{}`, `build_points{}`, `shadows{}`. | Drives `CharacterAssembler.Assemble`. |
+| Character JSON has `name`, `level`, `items[]`, `anatomy{}`, `allocation.spent{}`, `allocation.total`, `allocation.shadows{}`. | Drives `CharacterAssembler.Assemble`. |
 
 Anything above the line: **safe to vary at the data layer**, no code
 change.
@@ -574,7 +574,7 @@ E.g. your Unity project has 12 anatomy parameters instead of 9, or
 adds a new parameter "Voice Pitch", or drops "Skin Texture".
 
 **Do this:** ship your own `anatomy-parameters.json` (or your own
-`IAnatomyRepository`). The engine reads parameter ids and tier ids as
+`IAnatomyRepository`). The engine reads parameter ids and scalar bounds;
 strings; the shipped 9 parameters are not hardcoded anywhere except
 in `data/anatomy/anatomy-parameters.json` and the character JSON
 files that reference them.
@@ -584,20 +584,20 @@ Step-by-step:
 1. **Define the parameters** in JSON (or in your ScriptableObject
    pipeline) using the exact shape in
    `data/anatomy/anatomy-parameters.json`. Each parameter has an
-   `id`, `name`, and `tiers[]`.
-2. **Define the tiers**. Each tier has `id`, `name`, `stat_modifiers`,
+   `id`, `name`, and `bands[]`.
+2. **Define the bands**. Each band has `id`, `lower` bound, `upper` bound, `stat_modifiers`,
    the four fragments, `archetype_tendencies`, and
-   `response_timing_modifier`. Cosmetic-only tiers (no fragments,
+   `response_timing_modifier`. Cosmetic-only bands (no fragments,
    only a `visual_description`) are allowed — see "Skin Tone" in the
    shipped data for the pattern.
 3. **Update your character JSON** so every character's `anatomy{}`
-   block references your new parameter ids and tier ids.
+   block references your new parameter ids and a normalized scalar value.
 4. **Validate**: run a session against `NullLlmAdapter` and confirm
    `CharacterAssembler.Assemble` succeeds for every character. Any
-   missing parameter / tier id will throw; the error message names
+   missing parameter id will throw; the error message names
    the missing key.
 
-> **Rule:** anatomy parameter ids and tier ids are looked up
+> **Rule:** anatomy parameter ids are looked up
 > case-insensitively (`StringComparer.OrdinalIgnoreCase`). Item ids
 > are looked up case-sensitively (`StringComparer.Ordinal`).
 > Lower-case kebab-case is the convention that works for both.
@@ -614,12 +614,12 @@ d20 + statModifier + levelBonus + externalBonus >= DC
 DC = 16 + datee's defending stat modifier
 ```
 
-`statModifier` is the raw value from `build_points` (no ability-score
+`statModifier` is the raw value from `allocation.spent` (no ability-score
 table). `levelBonus` is `level - 1`. Both come from data, not code.
 
 | You want | Where to change |
 |---|---|
-| Different base modifier table (e.g. D&D-style `(score-10)/2`) | Override `Pinder.Core.Stats.StatBlock`'s modifier accessor in your own subclass, or pre-compute and store the modifier directly in `build_points`. |
+| Different base modifier table (e.g. D&D-style `(score-10)/2`) | Override `Pinder.Core.Stats.StatBlock`'s modifier accessor in your own subclass, or pre-compute and store the modifier directly in `allocation.spent`. |
 | Different level scaling | `Pinder.Core.Conversation.GameSession` reads `_player.Level` directly. Change the level bonus by writing your own `GameSession` wrapper, or scale the value at `CharacterAssembler` time. |
 | Different DC base (e.g. `15 +` instead of `16 +`) | `_globalDcBias` constructor parameter on `GameSession`. Pass `bias = -1` to lower the base by one. Range bias only — no separate per-stat overrides. |
 | Different stat range (0–5, 0–10, etc.) | Stats are integers; the engine doesn't enforce a range. Cap them at character-creation time in your Unity UI. |
@@ -686,19 +686,12 @@ parameter only defines `short / medium / long / legendary`.
 
 **Do one of these:**
 
-1. **Add the missing tier** to your anatomy parameter definition.
-   Easiest path; preserves existing characters. New tier needs the
-   six fragment fields filled in (or null for cosmetic-only).
-2. **Map the unknown value to a known tier** at load time. Write a
+1. **Add the missing band** to your anatomy parameter definition.
+   Easiest path; preserves existing characters.
+2. **Map the unknown value** at load time. Write a
    migration step in your character loader:
 
    ```csharp
-   private static readonly Dictionary<(string param, string tier), string> Migrations = new()
-   {
-       { ("length", "extra-long"), "legendary" },
-       { ("eye_style", "piercing"), "soft"     },
-   };
-
    private static CharacterJson Migrate(CharacterJson c)
    {
        foreach (var kv in c.Anatomy.ToList())
@@ -710,11 +703,11 @@ parameter only defines `short / medium / long / legendary`.
    }
    ```
 3. **Reject the character** at load time with a clear error. Use this
-   for content-team workflow — surfaces missing-tier mistakes during
+   for content-team workflow — surfaces missing mistakes during
    character authoring rather than at runtime.
 
 `CharacterAssembler.Assemble` throws if it can't resolve a parameter
-or tier id. Catch the exception, log the missing id, decide your
+id. Catch the exception, log the missing id, decide your
 policy.
 
 ### 3.6 You have items / anatomy that the engine recognises but you don't want to use
@@ -763,16 +756,16 @@ Adding/removing traps is data-only; the engine reads them through
 
 Archetypes live in `Pinder.Core.Characters.ArchetypeCatalog` (engine
 code) and are referenced by name from the `archetype_tendencies`
-arrays on every anatomy tier and item. There is no separate
+arrays on every anatomy band and item. There is no separate
 archetype data file in `data/` — archetypes are a fixed roster the
-engine ships with, and tiers/items vote for which one becomes a
+engine ships with, and bands/items vote for which one becomes a
 character's active archetype.
 
 If you want a different roster:
 
 1. Edit `ArchetypeCatalog.cs` to add / rename / remove archetypes.
    This is a code change in pinder-core, not a data change.
-2. Update every anatomy tier (`data/anatomy/anatomy-parameters.json`)
+2. Update every anatomy band (`data/anatomy/anatomy-parameters.json`)
    and every item (`data/items/*.json`) so its
    `archetype_tendencies` array references only archetypes that
    exist in your modified catalog. Stale references silently
@@ -808,7 +801,7 @@ Three tiers, in the order you should add them:
    `NullLlmAdapter` + your repositories + a known character pair, run
    `ResolveTurnAsync` for 5 turns, assert no exceptions and that
    `_session.TurnNumber == 5`. This catches missing items, missing
-   tiers, malformed JSON.
+   bands, malformed JSON.
 2. **Adapter parity** (run during LLM-adapter changes). Replay a
    pinned conversation through your adapter and compare the LLM
    prompts to a fixture file. Any drift means your adapter is

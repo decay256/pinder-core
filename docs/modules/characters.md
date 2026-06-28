@@ -14,7 +14,7 @@ The `Pinder.Core.Characters` namespace handles character assembly — combining 
 | `src/Pinder.Core/Characters/FragmentCollection.cs` | Collection of personality/backstory/texting-style fragments and ranked archetypes |
 | `src/Pinder.Core/Characters/ItemDefinition.cs` | Item data: slot, rarity, stat mods, personality fragments, archetype tendencies, timing modifier |
 | `src/Pinder.Core/Characters/AnatomyParameterDefinition.cs` | Anatomy parameter definition (e.g. "length") |
-| `src/Pinder.Core/Characters/AnatomyTierDefinition.cs` | Anatomy tier within a parameter (contributes fragments and archetype tendencies) |
+| `src/Pinder.Core/Characters/AnatomyBandDefinition.cs` | Anatomy band within a parameter (contributes fragments and archetype tendencies) |
 | `src/Pinder.Core/Characters/TimingModifier.cs` | Timing/pacing modifier from items |
 | `src/Pinder.Core/Conversation/EmotionStemSelector.cs` | Resolves target emotion stems based on conversation phase, spent indices, and derives posture manner via HFI/TOR quadrant mapping. |
 | `tests/Pinder.Core.Tests/ArchetypeLevelFilterTests.cs` | Tests for archetype catalog lookups, eligibility checks, and level-filtered assembly |
@@ -51,7 +51,7 @@ public static class ArchetypeCatalog
 ```csharp
 public FragmentCollection Assemble(
     IEnumerable<string> equippedItemIds,
-    IReadOnlyDictionary<string, string> anatomySelections,
+    IReadOnlyDictionary<string, float> anatomySelections,
     IReadOnlyDictionary<StatType, int> playerBaseStats,
     IReadOnlyDictionary<ShadowStatType, int> shadowStats,
     int characterLevel = 0);  // 0 = no level filtering (backward-compatible)
