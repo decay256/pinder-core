@@ -1,13 +1,13 @@
 # Shadow Stats
 
 ## Overview
-The shadow stats system tracks five hidden "dark side" stats (`ShadowStatType`) that accumulate during gameplay and influence dialogue prompts, mechanical effects, and player options. `GameSession` stores **raw** shadow values (not tier indices) in the context dictionaries passed to `SessionDocumentBuilder`, which uses threshold comparisons on those raw values to inject shadow taint blocks into LLM prompts. Note that **Horniness** is tracked separately as a distinct session mechanic, entirely separate from the shadow system.
+The shadow stats system tracks six hidden "dark side" stats (`ShadowStatType`) that accumulate during gameplay and influence dialogue prompts, mechanical effects, and player options. `GameSession` stores **raw** shadow values (not tier indices) in the context dictionaries passed to `SessionDocumentBuilder`, which uses threshold comparisons on those raw values to inject shadow taint blocks into LLM prompts. Note that **Horniness** is tracked separately as a distinct session mechanic, entirely separate from the shadow system.
 
 ## Key Components
 
 | File / Class | Description |
 |---|---|
-| `src/Pinder.Core/Stats/ShadowStatType.cs` | Enum: `Dread`, `Denial`, `Fixation`, `Madness`, `Overthinking`. |
+| `src/Pinder.Core/Stats/ShadowStatType.cs` | Enum: `Dread`, `Denial`, `Fixation`, `Madness`, `Overthinking`, `Despair`. |
 | `src/Pinder.Core/Stats/SessionShadowTracker.cs` | Tracks per-session shadow stat values; constructed from a `StatBlock`. |
 | `src/Pinder.Core/Stats/StatBlock.cs` | Holds both primary stats and shadow stats as dictionaries. |
 | `src/Pinder.Core/Conversation/GameSession.cs` | Populates `ShadowThresholds` on `DialogueContext`, `DeliveryContext`, and `DateeContext` with **raw** shadow values (not tiers). |
@@ -26,7 +26,7 @@ The shadow stats system tracks five hidden "dark side" stats (`ShadowStatType`) 
 
 ### ShadowStatType (enum)
 ```csharp
-public enum ShadowStatType { Dread, Denial, Fixation, Madness, Overthinking }
+public enum ShadowStatType { Dread, Denial, Fixation, Madness, Overthinking, Despair }
 ```
 
 ### Context Dictionaries

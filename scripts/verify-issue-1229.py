@@ -36,6 +36,11 @@ def main():
         errors.append("Stale reference: 'Horniness' is mentioned as a shadow stat.")
     if "separate session mechanic" not in shadow_text.lower() and "horniness" not in shadow_text.lower():
         errors.append("Acceptance criteria failed: Shadow docs must explain horniness separately as a session mechanic.")
+        
+    if "Despair" not in shadow_text and "Despair" not in re.findall(r'ShadowStatType \{[^}]+\}', shadow_text)[0]:
+        errors.append("Acceptance criteria failed: Shadow docs must list Despair as a shadow stat.")
+    if "six hidden" not in shadow_text.lower():
+        errors.append("Acceptance criteria failed: Shadow docs must state there are six shadow stats in total.")
 
     # 2. Pre-current risk tiers or failure bounds
     stale_risk_pattern = r'(?i)\b(Low|High|Extreme)\b\s*risk'
@@ -69,8 +74,18 @@ def main():
     if 'DC ≤ 13' in contents['xp-progression'] or 'DC 14–17' in contents['xp-progression'] or 'DC ≥ 18' in contents['xp-progression']:
         errors.append("Stale reference: Old XP DC buckets (<=13, 14-17, >=18) found in xp-progression.md")
 
+    xp_text = contents['xp-progression']
+    if not re.search(r'Reckless\s*\|\s*10\.0[xX×]?', xp_text):
+        errors.append("Acceptance criteria failed: xp-progression.md must list 10.0x for Reckless.")
+
     # 4. Trap docs omitting current fields or containing old semantics
     traps_text = contents['traps']
+    data_text = contents['data']
+    
+    if 'display_name' not in data_text or 'summary' not in data_text:
+        errors.append("Acceptance criteria failed: data.md missing current display fields (display_name, summary).")
+    if '| 3 |' not in data_text:
+        errors.append("Acceptance criteria failed: data.md missing duration_turns = 3.")
     
     if 'display_name' not in traps_text or 'summary' not in traps_text:
         errors.append("Acceptance criteria failed: Trap docs missing current display fields (display_name, summary).")

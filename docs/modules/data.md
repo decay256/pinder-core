@@ -62,14 +62,14 @@ public sealed class TrapDefinition
 
 ### Canonical Traps
 
-| id | stat | effect | effect_value | duration_turns |
-|----|------|--------|-------------|----------------|
-| `cringe` | `charm` | `disadvantage` | 0 | 1 |
-| `creep` | `rizz` | `stat_penalty` | 2 | 2 |
-| `overshare` | `honesty` | `datee_dc_increase` | 2 | 1 |
-| `unhinged` | `chaos` | `disadvantage` | 0 | 1 |
-| `pretentious` | `wit` | `datee_dc_increase` | 3 | 1 |
-| `spiral` | `self_awareness` | `disadvantage` | 0 | 2 |
+| id | display_name | summary | stat | effect | effect_value | duration_turns |
+|----|--------------|---------|------|--------|-------------|----------------|
+| `cringe` | Cringe | You're aware of how you're coming across, which is making it worse. | `charm` | `disadvantage` | 0 | 3 |
+| `creep` | Creep | An accidental 'agenda' quality is leaking into your messages. | `rizz` | `stat_penalty` | 2 | 3 |
+| `overshare` | Overshare | Personal details keep leaking into your replies. | `honesty` | `datee_dc_increase` | 2 | 3 |
+| `unhinged` | Unhinged | Your messages keep accelerating beyond where you meant to land. | `chaos` | `disadvantage` | 0 | 3 |
+| `pretentious` | Pretentious | You can't stop over-explaining things nobody asked you to clarify. | `wit` | `datee_dc_increase` | 3 | 3 |
+| `spiral` | Spiral | You keep narrating the conversation while you're inside it. | `self_awareness` | `disadvantage` | 0 | 3 |
 
 ## Architecture Notes
 

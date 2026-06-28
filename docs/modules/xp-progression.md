@@ -76,7 +76,7 @@ private static int ApplyRiskTierMultiplier(int baseXp, RiskTier riskTier);
 | Medium | 1.5× |
 | Hard | 2.0× |
 | Bold | 3.0× |
-| Reckless | 4.0× |
+| Reckless | 10.0× |
 
 Rounding: `(int)Math.Round(baseXp * multiplier)` — midpoint rounds to nearest even (banker's rounding), so 7.5 → 8.
 
