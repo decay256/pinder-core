@@ -33,6 +33,19 @@ namespace Pinder.Core.Conversation
                 throw new ArgumentOutOfRangeException(nameof(optionIndex),
                     $"Option index {optionIndex} is out of range. Valid range: 0–{state.CurrentOptions.Length - 1}.");
 
+            if (optionIndex == 2 && state.CurrentResolvedTarget.HasValue)
+            {
+                var target = state.CurrentResolvedTarget.Value;
+                if (target.Registry == "BACKSTORY")
+                {
+                    state.SpentBackstoryIndices.Add(target.Index);
+                }
+                else if (target.Registry == "STAKE")
+                {
+                    state.SpentStakeIndices.Add(target.Index);
+                }
+            }
+
             // Execute Roll Stage
             var rollStage = _rollResolutionStage.Execute(
                 state,

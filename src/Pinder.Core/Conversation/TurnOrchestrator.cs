@@ -138,6 +138,34 @@ namespace Pinder.Core.Conversation
             var activeTrapNames = GameSessionHelpers.GetActiveTrapNames(state.Traps);
             var activeTrapInstructions = GameSessionHelpers.GetActiveTrapInstructions(state.Traps);
 
+            // EmotionStemSelector resolution
+            var conversationState = new ConversationState
+            {
+                TurnCount = state.TurnNumber,
+                InterestScore = state.Interest.Current,
+                PreviousPhase = state.PreviousPhase,
+                ActiveTraps = activeTrapNames,
+                SpentBackstoryIndices = state.SpentBackstoryIndices,
+                SpentStakeIndices = state.SpentStakeIndices,
+                PlayerStats = new ParticipantStats { BaseHFI = player.Stats.GetBase(StatType.Charm), BaseTOR = player.Stats.GetBase(StatType.Rizz) },
+                DateeStats = new ParticipantStats { BaseHFI = datee.Stats.GetBase(StatType.Charm), BaseTOR = datee.Stats.GetBase(StatType.Rizz) },
+                PreviousResolvedIndex = state.PreviousResolvedIndex
+            };
+
+            var selector = new EmotionStemSelector(42 + state.TurnNumber);
+            var resolvedTarget = selector.Resolve(conversationState);
+
+            state.PreviousPhase = resolvedTarget.Registry;
+            state.PreviousResolvedIndex = resolvedTarget.Index;
+            state.CurrentResolvedTarget = resolvedTarget;
+
+            string cognitiveSubtext = "FEAR OF INTIMACY + DEFENSIVE SARCASM";
+            if (datee.PsychiatricDiagnosis != null && datee.PsychiatricDiagnosis.TryGetValue("derived_feeling", out var feeling) && datee.PsychiatricDiagnosis.TryGetValue("defense_reaction", out var defense))
+            {
+                cognitiveSubtext = feeling.ToUpper() + " + " + defense.ToUpper();
+            }
+            state.CurrentCognitiveSubtext = cognitiveSubtext;
+
             // Build dialogue context — pass callback topics (#47) and shadow thresholds (#45)
             string playerArchetypeDirective = player.ActiveArchetype?.Directive;
 
@@ -175,7 +203,9 @@ namespace Pinder.Core.Conversation
                 activeArchetypeDirective: playerArchetypeDirective,
                 stakeLines: null,
                 stakeLinesReferenced: null,
-                maxDialogueOptions: _maxDialogueOptions);
+                maxDialogueOptions: _maxDialogueOptions,
+                resolvedTarget: resolvedTarget,
+                cognitiveSubtext: cognitiveSubtext);
 
             // Get dialogue options from LLM
             var rawOptions = await _llm.GetDialogueOptionsAsync(context, ct).ConfigureAwait(false);

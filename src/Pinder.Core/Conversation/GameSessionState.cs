@@ -23,6 +23,12 @@ namespace Pinder.Core.Conversation
         // cached just like the datee session — the engine owns this list and
         // threads it through the stateful avatar adapter overload on each turn.
         public List<ConversationMessage> AvatarHistory { get; internal set; } = new List<ConversationMessage>();
+        public HashSet<int> SpentBackstoryIndices { get; } = new HashSet<int>();
+        public HashSet<int> SpentStakeIndices { get; } = new HashSet<int>();
+        public string? PreviousPhase { get; set; }
+        public int PreviousResolvedIndex { get; set; }
+        public ResolvedRevelationTarget? CurrentResolvedTarget { get; set; }
+        public string? CurrentCognitiveSubtext { get; set; }
         public SessionShadowTracker? PlayerShadows { get; internal set; }
         public SessionShadowTracker? DateeShadows { get; internal set; }
         public ComboTracker ComboTracker { get; internal set; } = new ComboTracker();
@@ -63,6 +69,12 @@ namespace Pinder.Core.Conversation
             clone.DateeOutfitDescription = DateeOutfitDescription;
             clone.DateeHistory = new List<ConversationMessage>(DateeHistory);
             clone.AvatarHistory = new List<ConversationMessage>(AvatarHistory);
+            foreach (var idx in SpentBackstoryIndices) clone.SpentBackstoryIndices.Add(idx);
+            foreach (var idx in SpentStakeIndices) clone.SpentStakeIndices.Add(idx);
+            clone.PreviousPhase = PreviousPhase;
+            clone.PreviousResolvedIndex = PreviousResolvedIndex;
+            clone.CurrentResolvedTarget = CurrentResolvedTarget;
+            clone.CurrentCognitiveSubtext = CurrentCognitiveSubtext;
             clone.PlayerShadows = PlayerShadows?.Clone();
             clone.DateeShadows = DateeShadows?.Clone();
             clone.ComboTracker = ComboTracker.Clone();
@@ -109,6 +121,15 @@ namespace Pinder.Core.Conversation
             History.Clear(); History.AddRange(src.History);
             DateeHistory.Clear(); DateeHistory.AddRange(src.DateeHistory);
             AvatarHistory.Clear(); AvatarHistory.AddRange(src.AvatarHistory);
+
+            SpentBackstoryIndices.Clear();
+            foreach (var idx in src.SpentBackstoryIndices) SpentBackstoryIndices.Add(idx);
+            SpentStakeIndices.Clear();
+            foreach (var idx in src.SpentStakeIndices) SpentStakeIndices.Add(idx);
+            PreviousPhase = src.PreviousPhase;
+            PreviousResolvedIndex = src.PreviousResolvedIndex;
+            CurrentResolvedTarget = src.CurrentResolvedTarget;
+            CurrentCognitiveSubtext = src.CurrentCognitiveSubtext;
             ComboTracker = src.ComboTracker.Clone();
             Topics.Clear(); Topics.AddRange(src.Topics);
             XpLedger = src.XpLedger.Clone();

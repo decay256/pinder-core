@@ -82,7 +82,9 @@ namespace Pinder.Core.Conversation
                 // private system prompt.
                 playerAvatarCard: GameSessionHelpers.BuildPublicProfileCard(player),
                 horninessOverlayApplied: deliveryStage.HorninessCheckResult.OverlayApplied,
-                horninessTier: deliveryStage.HorninessCheckResult.Tier);
+                horninessTier: deliveryStage.HorninessCheckResult.Tier,
+                resolvedTarget: state.CurrentResolvedTarget,
+                cognitiveSubtext: state.CurrentCognitiveSubtext);
 
             progress?.Report(new TurnProgressEvent(TurnProgressStage.DateeResponseStarted));
 
@@ -116,6 +118,19 @@ namespace Pinder.Core.Conversation
 
             string dateeMessage = dateeResponse.MessageText;
             progress?.Report(new TurnProgressEvent(TurnProgressStage.DateeResponseCompleted, dateeMessage));
+
+            if (state.CurrentResolvedTarget.HasValue)
+            {
+                var target = state.CurrentResolvedTarget.Value;
+                if (target.Registry == "BACKSTORY")
+                {
+                    state.SpentBackstoryIndices.Add(target.Index);
+                }
+                else if (target.Registry == "STAKE")
+                {
+                    state.SpentStakeIndices.Add(target.Index);
+                }
+            }
 
             return new DateeResponseStageResult(dateeResponse, responseDelayMinutes, dateeMessage);
         }
