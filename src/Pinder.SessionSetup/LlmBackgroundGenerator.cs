@@ -94,7 +94,7 @@ namespace Pinder.SessionSetup
             try
             {
                 string response = await _transport
-                    .SendAsync(SystemPrompt, userMessage, _options.Temperature, _options.MaxTokens, phase: LlmPhase.BackgroundStory)
+                    .SendAsync(SystemPrompt, userMessage, _options.Temperature, _options.MaxTokens, phase: LlmPhase.Synthesis)
                     .ConfigureAwait(false);
                 string trimmed = (response ?? string.Empty).Trim();
                 if (string.IsNullOrEmpty(trimmed))

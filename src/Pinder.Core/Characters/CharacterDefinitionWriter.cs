@@ -142,11 +142,10 @@ namespace Pinder.Core.Characters
             if (!string.IsNullOrWhiteSpace(def.PsychologicalStake))
                 writer.WriteString("psychological_stake", def.PsychologicalStake);
 
-            // Issue #1259: write the backstory categories if present.
-            if (def.BackstoryCategories != null)
+            if (def.Backstory != null)
             {
                 writer.WriteStartObject("backstory_categories");
-                foreach (var kv in def.BackstoryCategories)
+                foreach (var kv in def.Backstory)
                 {
                     writer.WriteStartObject(kv.Key);
                     writer.WriteString("bio_lie", kv.Value.BioLie);
@@ -155,9 +154,21 @@ namespace Pinder.Core.Characters
                 }
                 writer.WriteEndObject();
             }
-            else if (!string.IsNullOrWhiteSpace(def.BackgroundStory))
+
+            if (def.StakeLines != null)
             {
-                writer.WriteString("background_story", def.BackgroundStory);
+                writer.WriteStartArray("stake_lines");
+                foreach (var s in def.StakeLines)
+                    writer.WriteStringValue(s);
+                writer.WriteEndArray();
+            }
+
+            if (def.PsychiatricDiagnosis != null)
+            {
+                writer.WriteStartObject("psychiatric_diagnosis");
+                foreach (var kv in def.PsychiatricDiagnosis)
+                    writer.WriteString(kv.Key, kv.Value);
+                writer.WriteEndObject();
             }
 
             writer.WriteEndObject();

@@ -103,22 +103,35 @@ namespace Pinder.SessionSetup
                         psychologicalStake = raw.Trim();
                 }
 
-                // Issue #820: optional narrative background story.
-                string? backgroundStory = null;
-                if (root.TryGetProperty("background_story", out var storyProp) &&
-                    storyProp.ValueKind == JsonValueKind.String)
-                {
-                    string raw = storyProp.GetString() ?? string.Empty;
-                    if (!string.IsNullOrWhiteSpace(raw))
-                        backgroundStory = raw.Trim();
-                }
-
-                // Issue #1259: backstory categories
-                IReadOnlyDictionary<string, BackstoryFact>? backstoryCategories = null;
+                IReadOnlyDictionary<string, BackstoryFact>? backstory = null;
                 if (root.TryGetProperty("backstory_categories", out var catsProp) &&
                     catsProp.ValueKind == JsonValueKind.Object)
                 {
-                    backstoryCategories = ParseBackstoryCategories(catsProp);
+                    backstory = ParseBackstoryCategories(catsProp);
+                }
+
+                IReadOnlyList<string>? stakeLines = null;
+                if (root.TryGetProperty("stake_lines", out var stakesProp) &&
+                    stakesProp.ValueKind == JsonValueKind.Array)
+                {
+                    var list = new List<string>();
+                    foreach(var e in stakesProp.EnumerateArray())
+                        if(e.ValueKind == JsonValueKind.String)
+                            list.Add(e.GetString()!);
+                    stakeLines = list;
+                }
+
+                IReadOnlyDictionary<string, string>? psychiatricDiagnosis = null;
+                if (root.TryGetProperty("psychiatric_diagnosis", out var diagProp) &&
+                    diagProp.ValueKind == JsonValueKind.Object)
+                {
+                    var dict = new Dictionary<string, string>();
+                    foreach(var kv in diagProp.EnumerateObject())
+                    {
+                        if(kv.Value.ValueKind == JsonValueKind.String)
+                            dict[kv.Name] = kv.Value.GetString()!;
+                    }
+                    psychiatricDiagnosis = dict;
                 }
 
                 return new CharacterDefinition(
@@ -132,8 +145,9 @@ namespace Pinder.SessionSetup
                     anatomy,
                     allocation,
                     psychologicalStake,
-                    backgroundStory,
-                    backstoryCategories);
+                    backstory,
+                    stakeLines,
+                    psychiatricDiagnosis);
             }
         }
 
@@ -230,7 +244,9 @@ namespace Pinder.SessionSetup
                 // the admin-facing character sheet can show the full
                 // composed template without re-running the aggregator.
                 textingStyleLines: aggregationResult.Lines,
-                backstoryCategories: def.BackstoryCategories);
+                backstory: def.Backstory,
+                stakeLines: def.StakeLines,
+                psychiatricDiagnosis: def.PsychiatricDiagnosis);
 
             // Issue #779: propagate the permanent stake from the definition
             // to the profile so setup can read it without an LLM call.

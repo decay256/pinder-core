@@ -5,7 +5,7 @@ using Pinder.Core.Stats;
 namespace Pinder.Core.Characters
 {
     /// <summary>
-    /// Strongly-typed representation of an on-disk v2 character file
+    /// Strongly-typed representation of an on-disk v1 character file
     /// (<c>data/characters/*.json</c>).
     ///
     /// This is the wire-shape of the file system: parsed from JSON, used by
@@ -24,18 +24,13 @@ namespace Pinder.Core.Characters
     /// allocation (<see cref="Allocation"/>). Bonuses from items / anatomy are
     /// computed every load by <see cref="CharacterAssembler"/> and are NOT
     /// stored on disk.
-    ///
-    /// Schema v2 change (issue #1175): <see cref="Anatomy"/> is now a
-    /// <c>IReadOnlyDictionary&lt;string,float&gt;</c> mapping each Unity
-    /// <c>CharacterData</c> field id to its normalised [0..1] value.
-    /// The old discrete tier strings are gone.
     /// </summary>
     public sealed class CharacterDefinition
     {
-        /// <summary>The integer schema version. v2 files MUST have this set to 2.</summary>
+        /// <summary>The integer schema version. v1 files MUST have this set to 1.</summary>
         public const int CurrentSchemaVersion = 2;
 
-        /// <summary>v2. Reader rejects missing or unknown values.</summary>
+        /// <summary>v1. Reader rejects missing or unknown values.</summary>
         public int SchemaVersion { get; }
 
         /// <summary>UUIDv4 identity. Stable across renames; filename slug is presentation only.</summary>
@@ -57,16 +52,8 @@ namespace Pinder.Core.Characters
         public IReadOnlyList<string> Items { get; }
 
         /// <summary>
-        /// Anatomy parameter values. Map of Unity <c>CharacterData</c> field id
-        /// (e.g. "trunkLengthBase") to its normalised [0..1] float value.
-        ///
-        /// Normalisation rules (issue #1175):
-        ///   - Unity float 0–100 → divide by 100 → [0..1]
-        ///   - trunkCurvature (bipolar −100..100) → (x + 100) / 200 → [0..1]
-        ///   - skinColor (Unity Color RGB) → HSV → skinHue/skinSat/skinVal (3 scalars)
-        ///   - isCircumcised (bool) → 0.0 (false) / 1.0 (true)
-        ///
-        /// Resolved against <c>IAnatomyRepository</c> by <see cref="CharacterAssembler"/>.
+        /// Anatomy selections. Map of parameter id (e.g. "length") to tier id
+        /// (e.g. "short"). Resolved against <c>IAnatomyRepository</c>.
         /// </summary>
         public IReadOnlyDictionary<string, float> Anatomy { get; }
 
@@ -80,17 +67,14 @@ namespace Pinder.Core.Characters
         /// </summary>
         public string? PsychologicalStake { get; }
 
-        /// <summary>
-        /// Issue #820: cohesive narrative background story generated at
-        /// character-creation time from assembled background fragments.
-        /// 3-5 sentence prose. Null when absent (legacy files not yet regenerated).
-        /// </summary>
-        public string? BackgroundStory { get; }
+        public IReadOnlyDictionary<string, BackstoryFact>? Backstory { get; }
 
-        /// <summary>
-        /// Issue #1259: The 20-category detailed backstory array mapping out their history and lies.
-        /// </summary>
-        public IReadOnlyDictionary<string, BackstoryFact>? BackstoryCategories { get; }
+        public string? BackgroundStory => Backstory != null 
+            ? string.Join(" ", System.Linq.Enumerable.Select(Backstory.Values, v => v.TragicReality)) 
+            : null;
+
+        public IReadOnlyList<string>? StakeLines { get; }
+        public IReadOnlyDictionary<string, string>? PsychiatricDiagnosis { get; }
 
         public CharacterDefinition(
             int schemaVersion,
@@ -103,21 +87,23 @@ namespace Pinder.Core.Characters
             IReadOnlyDictionary<string, float> anatomy,
             AllocationBlock allocation,
             string? psychologicalStake = null,
-            string? backgroundStory = null,
-            IReadOnlyDictionary<string, BackstoryFact>? backstoryCategories = null)
+            IReadOnlyDictionary<string, BackstoryFact>? backstory = null,
+            IReadOnlyList<string>? stakeLines = null,
+            IReadOnlyDictionary<string, string>? psychiatricDiagnosis = null)
         {
-            SchemaVersion  = schemaVersion;
-            CharacterId    = characterId;
-            Name           = name           ?? throw new ArgumentNullException(nameof(name));
+            SchemaVersion = schemaVersion;
+            CharacterId = characterId;
+            Name = name ?? throw new ArgumentNullException(nameof(name));
             GenderIdentity = genderIdentity ?? throw new ArgumentNullException(nameof(genderIdentity));
-            Bio            = bio            ?? string.Empty;
-            Level          = level;
-            Items          = items          ?? throw new ArgumentNullException(nameof(items));
-            Anatomy        = anatomy        ?? throw new ArgumentNullException(nameof(anatomy));
-            Allocation     = allocation     ?? throw new ArgumentNullException(nameof(allocation));
+            Bio = bio ?? throw new ArgumentNullException(nameof(bio));
+            Level = level;
+            Items = items ?? throw new ArgumentNullException(nameof(items));
+            Anatomy = anatomy ?? throw new ArgumentNullException(nameof(anatomy));
+            Allocation = allocation ?? throw new ArgumentNullException(nameof(allocation));
             PsychologicalStake = psychologicalStake;
-            BackgroundStory    = backgroundStory;
-            BackstoryCategories = backstoryCategories;
+            Backstory = backstory;
+            StakeLines = stakeLines;
+            PsychiatricDiagnosis = psychiatricDiagnosis;
         }
     }
 
@@ -131,7 +117,7 @@ namespace Pinder.Core.Characters
         /// <summary>Build points spent on each positive stat.</summary>
         public IReadOnlyDictionary<StatType, int> Spent { get; }
 
-        /// <summary>Unspent build-point pool. v2 starter files all set this to 0.</summary>
+        /// <summary>Unspent build-point pool. v1 starter files all set this to 0.</summary>
         public int UnspentPool { get; }
 
         /// <summary>Allocated shadow values.</summary>
@@ -142,9 +128,9 @@ namespace Pinder.Core.Characters
             int unspentPool,
             IReadOnlyDictionary<ShadowStatType, int> shadows)
         {
-            Spent       = spent   ?? throw new ArgumentNullException(nameof(spent));
+            Spent = spent ?? throw new ArgumentNullException(nameof(spent));
             UnspentPool = unspentPool;
-            Shadows     = shadows ?? throw new ArgumentNullException(nameof(shadows));
+            Shadows = shadows ?? throw new ArgumentNullException(nameof(shadows));
         }
     }
 }

@@ -139,7 +139,7 @@ namespace Pinder.LlmAdapters
             if (history.Count == 0)
             {
                 // No prior turns — single-shot.
-                responseText = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.DateeResponse, ct: cancellationToken)
+                responseText = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.OpponentResponse, ct: cancellationToken)
                     .ConfigureAwait(false);
             }
             else
@@ -783,7 +783,7 @@ namespace Pinder.LlmAdapters
         {
             return SendStatefulAsync(
                 systemPrompt, currentUserContent, priorHistory, temperature,
-                LlmPhase.DateeResponse, ct);
+                LlmPhase.OpponentResponse, ct);
         }
 
         /// <summary>
