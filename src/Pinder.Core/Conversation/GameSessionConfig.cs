@@ -125,6 +125,9 @@ namespace Pinder.Core.Conversation
         /// <summary>Whether archetype content is injected into prompt surfaces.</summary>
         public bool ArchetypesEnabled { get; }
 
+        /// <summary>Multiplier applied to positive interest gains when a trap is active.</summary>
+        public double ActiveTrapInterestPenalty { get; }
+
         public GameSessionConfig(
             IGameClock? clock = null,
             SessionShadowTracker? playerShadows = null,
@@ -145,7 +148,8 @@ namespace Pinder.Core.Conversation
             int? maxDialogueOptions = null,
             int? maxDeliveryWords = null,
             bool archetypesEnabled = false,
-            Action<RuleResolutionTraceEvent>? onRuleResolution = null)
+            Action<RuleResolutionTraceEvent>? onRuleResolution = null,
+            double activeTrapInterestPenalty = -0.25)
         {
             Clock = clock;
             PlayerShadows = playerShadows;
@@ -167,6 +171,7 @@ namespace Pinder.Core.Conversation
             MaxDialogueOptions = maxDialogueOptions;
             MaxDeliveryWords = maxDeliveryWords;
             ArchetypesEnabled = archetypesEnabled;
+            ActiveTrapInterestPenalty = activeTrapInterestPenalty;
         }
     }
 }

@@ -189,6 +189,8 @@ create conversational disruptions the datee responds to naturally.
 
 The datee has their own texting style that must remain distinct from
 the player's at all times."
+            // no extra comma was there, we add it above and add parameter
+            , activeTrapInterestPenalty: -0.25
         );
 
         /// <summary>

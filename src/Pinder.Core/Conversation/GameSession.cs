@@ -120,6 +120,8 @@ namespace Pinder.Core.Conversation
         // #1219: optional callback invoked when a rule resolution occurs.
         private readonly Action<RuleResolutionTraceEvent>? _onRuleResolution;
 
+        private readonly double _activeTrapInterestPenalty;
+
         // Stored between StartTurnAsync and ResolveTurnAsync
         private DialogueOption[]? _currentOptions { get => _state.CurrentOptions; set => _state.CurrentOptions = value; }
         private bool _currentHasAdvantage { get => _state.CurrentHasAdvantage; set => _state.CurrentHasAdvantage = value; }
@@ -188,6 +190,7 @@ namespace Pinder.Core.Conversation
             _onTextLayerNoop = config.OnTextLayerNoop;
             _onShadowFilterTrace = config.OnShadowFilterTrace;
             _onRuleResolution = config.OnRuleResolution;
+            _activeTrapInterestPenalty = config.ActiveTrapInterestPenalty;
 
             // Determine starting interest: explicit config > Dread T3 > default
             if (config.StartingInterest.HasValue)
@@ -264,6 +267,7 @@ namespace Pinder.Core.Conversation
                 _shadowGrowthEvaluator,
                 _xpRecorder,
                 _globalDcBias,
+                _activeTrapInterestPenalty,
                 _onRuleResolution);
 
             var deliveryStage = new DeliveryStage(

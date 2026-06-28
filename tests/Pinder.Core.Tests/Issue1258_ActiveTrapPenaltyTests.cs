@@ -63,6 +63,12 @@ name: TestGame
 game_master_prompt: gm
 player_avatar_role_description: p
 datee_role_description: o
+global_dc_bias: 0
+horniness_time_modifiers:
+  morning: 0
+  afternoon: 0
+  evening: 0
+  overnight: 0
 active_trap_interest_penalty: -25%
 ";
             var gd = GameDefinition.LoadFrom(yaml);
@@ -77,6 +83,12 @@ name: TestGame
 game_master_prompt: gm
 player_avatar_role_description: p
 datee_role_description: o
+global_dc_bias: 0
+horniness_time_modifiers:
+  morning: 0
+  afternoon: 0
+  evening: 0
+  overnight: 0
 active_trap_interest_penalty: -0.25
 ";
             var gd = GameDefinition.LoadFrom(yaml);
@@ -91,6 +103,12 @@ name: TestGame
 game_master_prompt: gm
 player_avatar_role_description: p
 datee_role_description: o
+global_dc_bias: 0
+horniness_time_modifiers:
+  morning: 0
+  afternoon: 0
+  evening: 0
+  overnight: 0
 ";
             var gd = GameDefinition.LoadFrom(yaml);
             // Engine defaults absent value to 0 or -0.25

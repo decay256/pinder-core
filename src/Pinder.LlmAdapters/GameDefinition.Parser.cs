@@ -91,6 +91,32 @@ namespace Pinder.LlmAdapters
                     throw new InvalidOperationException("game-definition.yaml archetypes_enabled must be a boolean");
             }
 
+            // Parse optional active_trap_interest_penalty
+            double activeTrapInterestPenalty = -0.25;
+            if (parsed.TryGetValue("active_trap_interest_penalty", out var atipObj) && atipObj != null)
+            {
+                var valStr = atipObj.ToString().Trim();
+                if (valStr.EndsWith("%"))
+                {
+                    if (double.TryParse(valStr.Substring(0, valStr.Length - 1), out double percentVal))
+                    {
+                        activeTrapInterestPenalty = percentVal / 100.0;
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException("game-definition.yaml active_trap_interest_penalty has invalid percentage format");
+                    }
+                }
+                else if (double.TryParse(valStr, out double floatVal))
+                {
+                    activeTrapInterestPenalty = floatVal;
+                }
+                else
+                {
+                    throw new InvalidOperationException("game-definition.yaml active_trap_interest_penalty must be a number or percentage");
+                }
+            }
+
             return new GameDefinition(
                 name: name,
                 gameMasterPrompt: gameMasterPrompt,
@@ -106,7 +132,8 @@ namespace Pinder.LlmAdapters
                 archetypesEnabled: archetypesEnabled,
                 maxTurns: parsed.TryGetValue("max_turns", out var mtObj) && int.TryParse(mtObj?.ToString(), out int mt) ? mt : 30,
                 maxDialogueOptions: parsed.TryGetValue("max_dialogue_options", out var mdoObj) && int.TryParse(mdoObj?.ToString(), out int mdo) ? mdo : 3,
-                maxDeliveryWords: parsed.TryGetValue("max_delivery_words", out var mdwObj) && int.TryParse(mdwObj?.ToString(), out int mdw) ? mdw : 80
+                maxDeliveryWords: parsed.TryGetValue("max_delivery_words", out var mdwObj) && int.TryParse(mdwObj?.ToString(), out int mdw) ? mdw : 80,
+                activeTrapInterestPenalty: activeTrapInterestPenalty
             );
         }
     }

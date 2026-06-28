@@ -42,6 +42,7 @@ namespace Pinder.Core.Conversation
         private readonly ShadowGrowthEvaluator? _shadowGrowthEvaluator;
         private readonly SessionXpRecorder _xpRecorder;
         private readonly int _globalDcBias;
+        private readonly double _activeTrapInterestPenalty;
         private readonly Action<RuleResolutionTraceEvent>? _onRuleResolution;
 
         public RollResolutionStage(
@@ -51,6 +52,7 @@ namespace Pinder.Core.Conversation
             ShadowGrowthEvaluator? shadowGrowthEvaluator,
             SessionXpRecorder xpRecorder,
             int globalDcBias,
+            double activeTrapInterestPenalty = 0.0,
             Action<RuleResolutionTraceEvent>? onRuleResolution = null)
         {
             _dice = dice ?? throw new ArgumentNullException(nameof(dice));
@@ -59,6 +61,7 @@ namespace Pinder.Core.Conversation
             _shadowGrowthEvaluator = shadowGrowthEvaluator;
             _xpRecorder = xpRecorder ?? throw new ArgumentNullException(nameof(xpRecorder));
             _globalDcBias = globalDcBias;
+            _activeTrapInterestPenalty = activeTrapInterestPenalty;
             _onRuleResolution = onRuleResolution;
         }
 
@@ -210,6 +213,12 @@ namespace Pinder.Core.Conversation
                 comboBonusDelta = combo.InterestBonus;
                 interestDelta += comboBonusDelta;
                 comboTriggered = combo.Name;
+            }
+
+            // Apply active trap penalty (#1258)
+            if (state.Traps.HasActive && interestDelta > 0)
+            {
+                interestDelta = (int)Math.Round(interestDelta * (1.0 + _activeTrapInterestPenalty), MidpointRounding.AwayFromZero);
             }
 
             // 3d. Record roll XP (#48)

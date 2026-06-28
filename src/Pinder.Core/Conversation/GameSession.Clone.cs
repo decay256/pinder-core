@@ -89,6 +89,7 @@ namespace Pinder.Core.Conversation
             _consequenceCatalog = src._consequenceCatalog;
             _maxDialogueOptions = src._maxDialogueOptions;
             _maxDeliveryWords = src._maxDeliveryWords;
+            _activeTrapInterestPenalty = src._activeTrapInterestPenalty;
 
             // ── Mutable engine state — deep copies (Category A) ──
             _state           = src._state.Clone();

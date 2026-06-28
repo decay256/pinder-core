@@ -60,6 +60,9 @@ namespace Pinder.LlmAdapters
         /// <summary>Time-of-day horniness modifiers loaded from game-definition.yaml.</summary>
         public HorninessTimeModifiers HorninessTimeModifiers { get; }
 
+        /// <summary>Interest penalty multiplier when a trap is active.</summary>
+        public double ActiveTrapInterestPenalty { get; }
+
         public GameDefinition(
             string name,
             string gameMasterPrompt,
@@ -75,7 +78,8 @@ namespace Pinder.LlmAdapters
             bool archetypesEnabled = false,
             int maxTurns = 30,
             int maxDialogueOptions = 3,
-            int maxDeliveryWords = 80)
+            int maxDeliveryWords = 80,
+            double activeTrapInterestPenalty = -0.25)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             GameMasterPrompt = gameMasterPrompt ?? throw new ArgumentNullException(nameof(gameMasterPrompt));
@@ -92,6 +96,7 @@ namespace Pinder.LlmAdapters
             MaxTurns = maxTurns > 0 ? maxTurns : 30;
             MaxDialogueOptions = maxDialogueOptions > 0 ? maxDialogueOptions : 3;
             MaxDeliveryWords = maxDeliveryWords > 0 ? maxDeliveryWords : 80;
+            ActiveTrapInterestPenalty = activeTrapInterestPenalty;
         }
     }
 }
