@@ -1,6 +1,7 @@
 # Unity ↔ Core Sync Architecture
 
-**Status:** SHIPPED — covers pinder-core#1175 (anatomy) + pinder-core#1176 (items). Engine half of pinder-web#949.
+**Status:** SHIPPED in core — covers pinder-core#1175 (anatomy) + pinder-core#1176 (items). Engine half of pinder-web#949.
+> **Note:** The Unity runtime (`p-game` @ `c0d45c5`) is currently pinned/pending and not fully compatible with current core main without updating its vendored DLL/data/bridge. The pipeline below describes the target state where `CharacterData` feeds `CharacterDefinitionLoader` / `CharacterAssembler` once the bridge is updated.
 
 ---
 
@@ -34,7 +35,7 @@ CharacterDefinitionLoader ──────────────────
 
 1. Player opens the Unity client (`Diego_Quarantine/p-game`).
 2. Player sculpts avatar using the body sliders (trunk, glans, scrotum, age, expression, skin channels) — these drive `CharacterData.cs` float fields.
-3. Player equips items (accessories, outfits, hair, arms, tattoos, stickers) — these are stored as ids in `CharacterData.equipedAccessories[]`, `CharacterData.hairStyleIndex`, `CharacterData.tattooId`, `CharacterData.stickerIds[]`.
+3. Player equips items (accessories, outfits, hair, arms, tattoos, stickers) — these are stored as ids in the CharacterData struct.
 
 ### Step 2: EigenCore Store
 
@@ -45,7 +46,7 @@ After character creation (or any update):
 3. The `items[]` array in the payload contains raw Unity ids (e.g. `["head_tophat", "vest1", "classic2"]`) verbatim.
 4. The `anatomy{}` block contains the normalised float values produced by `CharacterDataNormalizer.Normalize(CharacterDataDto)`.
 
-> **Bridge note:** The current `CharacterProfileBridge` in Unity live code calculates stats from `personalityTags` and accessory count — this is the old pipeline. The bridge should be updated to route equipped item ids and normalized anatomy through the core DLL. If the bridge lives in Unity, it is a Unity-side JIRA follow-up; the core DLL ships the normalizer and assembler so Unity can call them directly.
+> **Bridge note:** The current `CharacterProfileBridge` in Unity live code calculates stats from `personalityTags` and accessory count — this is the old pipeline. The bridge should be updated to route equipped item ids and normalized anatomy through the core DLL. If the bridge lives in Unity, it is a Unity-side follow-up (see GitHub issue); the core DLL ships the normalizer and assembler so Unity can call them directly.
 
 ### Step 3: EigenCore Retrieve
 
@@ -146,8 +147,8 @@ How a pinder-web admin authoring item gameplay modifiers reaches production:
 
 ```
 pinder-web admin editor
-  → HTTP PUT /api/admin/items/{id}
-  → pinder-web backend commits changes to pinder-core/main (via PR or direct push to staging-edits)
+  → HTTP POST /api/admin/content/items (or /anatomy)
+  → pinder-web backend commits changes to pinder-core/main (via commit+push-to-main flow)
   → pinder-core/main updated
   → pinder-web staging deploy: git submodule update → rebuild game-api-staging Docker image
   → game-api-staging container picks up new starter-items.json
@@ -167,7 +168,7 @@ Before pinder-core, Unity's `PromptLookupTable` (a scriptable object / data asse
 | Unity `personalityTags` → character style | Core item/anatomy modifiers → assembled prompt |
 | Static text per character archetype | Dynamic, item + anatomy + archetype driven assembly |
 
-Unity JIRA follow-up: remove the `PromptLookupTable` asset from `p-game` once the DLL-based pipeline is fully live.
+Unity follow-up: remove the `PromptLookupTable` asset from `p-game` once the DLL-based pipeline is fully live.
 
 ---
 

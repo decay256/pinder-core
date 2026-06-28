@@ -1,6 +1,7 @@
 # Unity ↔ Core Item & Anatomy Contract
 
-**Status:** SHIPPED — issue #1176 (items) + issue #1175 (anatomy). Both cover the wire contract between Unity (`Diego_Quarantine/p-game`) and pinder-core.
+**Status:** SHIPPED in core — issue #1176 (items) + issue #1175 (anatomy). Both cover the wire contract between Unity (`Diego_Quarantine/p-game`) and pinder-core.
+> **Note:** The Unity runtime (`p-game` @ `c0d45c5`) is currently pinned/pending and not fully compatible with current core main without updating its vendored DLL/data/bridge. Current Unity `starter-items.json` still uses old fields like `tier` which are omitted in the v2 schema described below.
 
 ---
 
@@ -219,7 +220,7 @@ All parameters mirror Unity's `CharacterData.cs` field names verbatim:
 | Expression | `sad`, `happy`, `serius` |
 | Skin | `skinHue`, `skinSat`, `skinVal`, `freckles`, `blemishes`, `veins`, `isCircumcised` |
 
-Grooming fields (`hasHair`, `hairLength`, `hairStyleIndex`, `hairColor`) are **cosmetic-only** and excluded from anatomy parameters.
+Grooming fields (`hasHair`, `hairLength`, `hair`, `hairColor`) are **cosmetic-only** and excluded from anatomy parameters.
 
 ### 9.2 Normalisation Rules
 
@@ -281,14 +282,12 @@ Each band may carry any or all of: `personality_fragment`, `backstory_fragment`,
 
 `outfit_maid`, `vest1`, `vest2`, `vest3`, `vest4`, `vest5`, `vest7`, `vest8`, `vest9`, `vest10`, `vest11`
 
-> **Note:** `vest6` is ABSENT in Unity — do NOT create a `vest6` entry. See Unity JIRA follow-up.
+> **Note:** `vest6` is ABSENT in Unity — do NOT create a `vest6` entry. See Unity follow-up.
 
-### LookCatalog (7 hair + 7 arms = 14 items)
-
-Hair: `hair1`, `hair2`, `hair3`, `hair4`, `hair5`
-Arms: `arms0`, `arms1`, `arms2`, `arms3`, `arms4`, `arms5`, `arms6`
-
-> **Note:** `arms3` and `arms4` are duplicate 'T Rex' ids in Unity — both present in core. Unity JIRA follow-up filed.
+### LookCatalog
+ 
+ Hair: `hair1`, `hair2`, `hair3`, `hair4`, `hair5`
+ Arms: `arms0`, `arms1`, `arms2`, `arms3`, `arms4`, `arms5`, `arms6`
 
 ### TatooCatalog (34 classic + 9 flowers = 43 items)
 
@@ -307,14 +306,14 @@ The following Unity fields/concepts are **excluded from pinder-core** and must n
 | Unity `personalityTags` | Placeholder data (`elegant,fancy`/`submissive,cosplay`) — superseded by core |
 | Unity `PromptLookupTable` | Superseded by pinder-core gameplay modifiers |
 | `occupiedSlots` field on outfits | Dead field in Unity — not used by core |
-| Grooming fields (`hasHair`, `hairLength`, `hairStyleIndex`, `hairColor`) | Cosmetic-only |
+| Grooming fields (`hasHair`, `hairLength`, `hair`, `hairColor`) | Cosmetic-only |
 
 ---
 
-## 12. Unity JIRA Follow-ups (file AFTER core/web/docs done)
+## 12. Unity Follow-ups (file AFTER core/web/docs done)
 
 - **Placeholder `personalityTags`:** Replace Unity placeholder tags with actual descriptors once pinder-core modifiers are shipped.
-- **Duplicate `arms3`/`arms4` ids:** Both map to 'T Rex' — Unity should deduplicate to a single id. Core carries both in the interim.
+- **`arms3`/`arms4` ids:** Both map to 'T Rex' — Unity should resolve to a single id. Core carries both in the interim.
 - **Retire `PromptLookupTable`:** Remove the legacy table from Unity once pinder-core DLL is live.
 - **Empty `Waist` / `Body` slots:** No items currently use `Waist` (slot 3) or non-outfit `Body` items. Confirm intent.
 - **Dead `occupiedSlots` field on outfits:** Can be removed from Unity's `AccessoryData` struct.

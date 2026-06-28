@@ -62,7 +62,7 @@ returns zero hits in `src/`).
 |---|---|---|
 | `OpponentContext` | `DateeContext` | class — [`src/Pinder.Core/Conversation/DateeContext.cs`](../src/Pinder.Core/Conversation/DateeContext.cs) |
 | `OpponentResponse` | `DateeResponse` | class — `src/Pinder.Core/Conversation/DateeResponse.cs` |
-| `GetOpponentResponseAsync` | `GetDateeResponseAsync` | `ILlmAdapter` method |
+| `GetOpponentResponseAsync` | `GetDateeResponseAsync` | `ILlmAdapter` method (Note: Unity's `PlaceholderLlmAdapter` uses `DeliverMessageAsync` / `GetOpponentResponseAsync` and must be updated) |
 | `OpponentPrompt` | `DateePrompt` | property on `DateeContext` / `DialogueContext` |
 | `OpponentName` | `DateeName` | property on `DateeContext` / `DialogueContext` |
 | `OpponentLastMessage` | `DateeLastMessage` | property on `DateeContext` |
@@ -909,10 +909,7 @@ pinned by `ApiRequestContract.ApiVersionFieldName`):
 - The field is **mandatory.** A request that omits it deserializes to
   `null` and is rejected by the handshake — a missing version is a
   mismatch, not a silent default.
-- **Sending `apiVersion` is a Unity-side change owned by Martin.** The
-  Unity client must add the field to its request envelope. (Unity lives
-  in GitLab `Diego_Quarantine/p-game`, read-only from this repo; this
-  doc only describes the required change.)
+- **Sending `apiVersion` is a Unity-side change owned by Martin.** Currently, pinder-web acts as a browser proxy and injects `apiVersion` for proxied calls. Any future direct-Unity GameApi contract must add the field to its request envelope.
 
 ### 8.3 The mismatch error shape
 
