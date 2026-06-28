@@ -1,7 +1,7 @@
 # Rule Engine
 
 ## Overview
-`Pinder.Rules` is a data-driven rule engine that loads enriched YAML rule definitions and evaluates their conditions against an immutable game-state snapshot. It provides a parallel, YAML-sourced path for game-balance values (failure tiers, interest states) enabling iteration without recompilation. `GameSession` supports optional `IRuleResolver` injection which acts as a fallback path for rule lookups.
+`Pinder.Rules` is a data-driven rule engine that loads enriched YAML rule definitions and evaluates their conditions against an immutable game-state snapshot. It provides a parallel, YAML-sourced path for game-balance values (failure tiers, interest states) currently hardcoded in `FailureScale` and `InterestMeter`, enabling iteration without recompilation. Direct `GameSession` wiring is deferred; equivalence is proven via tests.
 
 ## Key Components
 
@@ -152,7 +152,7 @@ public interface IEffectHandler
 ## Architecture Notes
 
 - **Dependency direction**: `Pinder.Rules → Pinder.Core` (one-way). `Pinder.Core` has no reference to `Pinder.Rules`.
-- **GameSession integration**: `GameSession` uses optional `IRuleResolver` injection. The host (e.g. session-runner) can wrap `GameSession` calls with rule-engine lookups.
+- **No GameSession changes**: Direct wiring is deferred to preserve `Pinder.Core`'s zero-dependency invariant. The host (e.g. session-runner) can wrap `GameSession` calls with rule-engine lookups in a future sprint.
 - **Shadow values as strings**: `GameState.ShadowValues` uses `string` keys (not `ShadowStatType`) to avoid tight coupling. The caller maps enum → string when constructing the snapshot.
 - **Evaluation philosophy**: Loading is strict (throws `FormatException` on bad YAML); evaluation is lenient (bad data in a condition/outcome key returns false or is skipped, never crashes).
 - **YAML deserialization**: Uses `YamlDotNet` `DeserializerBuilder` with `UnderscoredNamingConvention`. Raw YAML is deserialized as `List<Dictionary<object, object>>` then normalized to `Dictionary<string, object>` recursively.

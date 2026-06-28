@@ -7,7 +7,7 @@ This document covers `GameSession` features beyond the primary module doc [`game
 
 | File / Class | Description |
 |---|---|
-| `src/Pinder.Core/Conversation/GameSession.cs` | Contains all shadow reduction logic within existing methods (`ResolveTurnAsync`, `EvaluatePerTurnShadowGrowth`, `EvaluateEndOfGameShadowGrowth`, `RecoverAsync`). | (Historical)
+| `src/Pinder.Core/Conversation/GameSession.cs` | Contains all shadow reduction logic within existing methods (`ResolveTurnAsync`, `EvaluatePerTurnShadowGrowth`, `EvaluateEndOfGameShadowGrowth`, `RecoverAsync`). |
 | `src/Pinder.Core/Stats/SessionShadowTracker.cs` | Provides `ApplyOffset(ShadowStatType, int, string)` — the method used for all reductions (accepts negative deltas, unlike `ApplyGrowth`). |
 | `tests/Pinder.Core.Tests/ShadowReductionTests.cs` | Core positive/negative tests for each of the 4 new reduction events. |
 | `tests/Pinder.Core.Tests/ShadowReductionSpecTests.cs` | Spec-driven tests — boundary values, edge cases (negative deltas, null shadows, stacking), and coexistence with other shadow events. |
@@ -49,14 +49,14 @@ public int GetDelta(ShadowStatType shadow);
 |---|---------|--------|-------|----------|---------------|
 | 1 | `outcome == GameOutcome.DateSecured` | Dread | −1 | `EvaluateEndOfGameShadowGrowth()` | `"Date secured"` |
 | 2 | Honesty success at interest ≥ 15 | Denial | −1 | `EvaluatePerTurnShadowGrowth()` (trigger 6 block) | `"Honesty success at high interest"` |
-| 3 | Successful `RecoverAsync()` | Madness | −1 | `RecoverAsync()` success branch | `"Recovered from trope trap"` | (Historical)
+| 3 | Successful `RecoverAsync()` | Madness | −1 | `RecoverAsync()` success branch | `"Recovered from trope trap"` |
 | 4 | Success despite Overthinking disadvantage | Overthinking | −1 | `ResolveTurnAsync()` after roll | `"Succeeded despite Overthinking disadvantage"` |
 | 5 | 4+ different stats used | Fixation | −1 | `EvaluateEndOfGameShadowGrowth()` (trigger 13) | *(pre-existing, not changed)* |
 
 ### Implementation Details
 
 - **All reductions use `ApplyOffset()`**, not `ApplyGrowth()`. `ApplyGrowth` throws `ArgumentOutOfRangeException` on negative amounts.
-- **Null-safety**: All reduction code checks `_playerShadows != null` (or uses `?.` operator for `RecoverAsync`). (Historical)
+- **Null-safety**: All reduction code checks `_playerShadows != null` (or uses `?.` operator for `RecoverAsync`).
 - **Negative deltas are valid**: A shadow delta can go below 0 (e.g., Dread at 0 → −1 after DateSecured).
 - **No per-session cap**: Reductions stack across turns (e.g., Denial −1 fires on every qualifying Honesty success).
 - **Overthinking reduction (AC-4)** has an extra guard: checks `StatBlock.ShadowPairs[chosenOption.Stat] == ShadowStatType.Overthinking` in addition to `_shadowDisadvantagedStats.Contains(chosenOption.Stat)`. This ensures only Overthinking-specific disadvantage triggers the reduction.
