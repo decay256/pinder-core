@@ -1,13 +1,13 @@
 # Shadow Stats
 
 ## Overview
-The shadow stats system tracks six hidden "dark side" stats (`ShadowStatType`) that accumulate during gameplay and influence dialogue prompts, mechanical effects, and player options. `GameSession` stores **raw** shadow values (not tier indices) in the context dictionaries passed to `SessionDocumentBuilder`, which uses threshold comparisons on those raw values to inject shadow taint blocks into LLM prompts.
+The shadow stats system tracks five hidden "dark side" stats (`ShadowStatType`) that accumulate during gameplay and influence dialogue prompts, mechanical effects, and player options. `GameSession` stores **raw** shadow values (not tier indices) in the context dictionaries passed to `SessionDocumentBuilder`, which uses threshold comparisons on those raw values to inject shadow taint blocks into LLM prompts. Note that **Horniness** is tracked separately as a distinct session mechanic, entirely separate from the shadow system.
 
 ## Key Components
 
 | File / Class | Description |
 |---|---|
-| `src/Pinder.Core/Stats/ShadowStatType.cs` | Enum: `Dread`, `Denial`, `Fixation`, `Madness`, `Overthinking`, `Horniness`. |
+| `src/Pinder.Core/Stats/ShadowStatType.cs` | Enum: `Dread`, `Denial`, `Fixation`, `Madness`, `Overthinking`. |
 | `src/Pinder.Core/Stats/SessionShadowTracker.cs` | Tracks per-session shadow stat values; constructed from a `StatBlock`. |
 | `src/Pinder.Core/Stats/StatBlock.cs` | Holds both primary stats and shadow stats as dictionaries. |
 | `src/Pinder.Core/Conversation/GameSession.cs` | Populates `ShadowThresholds` on `DialogueContext`, `DeliveryContext`, and `DateeContext` with **raw** shadow values (not tiers). |
@@ -15,7 +15,7 @@ The shadow stats system tracks six hidden "dark side" stats (`ShadowStatType`) t
 | `src/Pinder.Core/Conversation/DialogueContext.cs` | Carries `ShadowThresholds` (`Dictionary<ShadowStatType, int>?`) to prompt builders. |
 | `src/Pinder.Core/Conversation/DeliveryContext.cs` | Carries `ShadowThresholds` for delivery prompt generation. |
 | `src/Pinder.Core/Conversation/DateeContext.cs` | Carries `ShadowThresholds` for datee prompt generation. |
-| `src/Pinder.LlmAdapters/SessionDocumentBuilder.cs` | `BuildShadowTaintBlock` — emits a `SHADOW STATE` section in prompts when raw shadow values exceed thresholds (e.g., most stats > 5, Horniness > 6). |
+| `src/Pinder.LlmAdapters/SessionDocumentBuilder.cs` | `BuildShadowTaintBlock` — emits a `SHADOW STATE` section in prompts when raw shadow values exceed thresholds (e.g., most stats > 5). |
 | `tests/Pinder.Core.Tests/Issue307_ShadowTaintRawValueTests.cs` | Tests that `GameSession` passes raw shadow values (not tiers 0-3) in context dictionaries. |
 | `tests/Pinder.LlmAdapters.Tests/Issue307_ShadowTaintFiringTests.cs` | Tests that `SessionDocumentBuilder` fires shadow taint blocks at correct raw-value thresholds. |
 | `tests/Pinder.Core.Tests/MadnessT3UnhingedSpecTests.cs` | Tests for Madness T3 (≥18) unhinged option replacement — covers threshold boundary, stat/text preservation, single/empty options, Fixation T3 interaction. |
@@ -26,7 +26,7 @@ The shadow stats system tracks six hidden "dark side" stats (`ShadowStatType`) t
 
 ### ShadowStatType (enum)
 ```csharp
-public enum ShadowStatType { Dread, Denial, Fixation, Madness, Overthinking, Horniness }
+public enum ShadowStatType { Dread, Denial, Fixation, Madness, Overthinking }
 ```
 
 ### Context Dictionaries
@@ -39,7 +39,6 @@ public Dictionary<ShadowStatType, int>? ShadowThresholds { get; }
 
 ### SessionDocumentBuilder Taint Thresholds
 - Most shadow stats: taint fires when raw value **> 5**.
-- `Horniness`: taint fires when raw value **> 6**.
 - When fired, a `SHADOW STATE` section is injected into dialogue, delivery, and datee prompts.
 
 ### Mechanical Effects (T3)

@@ -3,6 +3,8 @@
 ## Overview
 The session runner orchestrates simulated playtest sessions between two `CharacterProfile` instances via `GameSession`. It handles turn execution, output formatting (interest bars, trap status, shadow events), and session summary generation including outcome and shadow delta tables.
 
+Note on failure tiers: Failure tier logic follows TropeTrap <=9 and Catastrophe >=10.
+
 ## Key Components
 
 - **`session-runner/Program.cs`** — Entry point. Parses CLI arguments (`--player`, `--datee`, `--max-turns`, `--agent`), loads character profiles via `CharacterDefinitionLoader` (through `DirectoryCharacterStore`), configures `GameSession` with `GameSessionConfig`, runs the turn loop, and prints per-turn status and session summary markdown. Calls `PlaytestFormatter` to render pick reasoning and score tables. Resolves session number once at startup via `SessionFileCounter.ResolvePlaytestDirectory()` + `GetNextSessionNumber()`, then reuses that number for both the header and `WritePlaytestLog`. — #840: prompt-file fallback removed; `--player <name>` resolves exclusively through `data/characters/{slug}.json`.

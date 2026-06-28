@@ -24,6 +24,8 @@ The traps module defines trap mechanics for Pinder conversations. Each stat has 
 public sealed class TrapDefinition
 {
     public string Id { get; }
+    public string DisplayName { get; }
+    public string Summary { get; }
     public StatType Stat { get; }
     public TrapEffect Effect { get; }
     public int EffectValue { get; }
@@ -71,12 +73,14 @@ Each trap object in the top-level array:
 ```json
 {
   "id": "cringe",
+  "display_name": "Cringe",
+  "summary": "You're aware of how you're coming across, which is making it worse.",
   "stat": "charm",
   "effect": "disadvantage",
   "effect_value": 0,
-  "duration_turns": 1,
+  "duration_turns": 3,
   "llm_instruction": "...",
-  "clear_method": "SA vs DC 12",
+  "clear_method": "Pick any Self-Awareness option (selection disarms; SA fail triggers Spiral)",
   "nat1_bonus": ""
 }
 ```
@@ -87,7 +91,7 @@ Each trap object in the top-level array:
 - **Flat schema**: `traps.json` uses flat top-level fields (`stat`, `effect`, `effect_value`, etc.). A previous nested schema (with `triggered_by_stat`, `mechanical_effect`, `prompt_taint` sub-objects) caused parser crashes — issue #306 fixed this by migrating to the flat schema the parser expects.
 - **One trap per stat**: The 6 traps map 1:1 to `StatType` values. `JsonTrapRepository` stores them in a `Dictionary<StatType, TrapDefinition>`; duplicate stats are last-write-wins.
 - **LLM taint**: Each trap carries an `llm_instruction` that gets injected into LLM prompts for ALL messages while the trap is active, not just the trapped stat's messages.
-- **Clear method**: All traps currently use "SA vs DC 12" (Self-Awareness check vs DC 12) as the early clear mechanism.
+- **Clear method**: All traps currently use "Pick any Self-Awareness option (selection disarms; SA fail triggers Spiral)" as the early clear mechanism.
 - **Custom traps**: The overloaded constructor accepts additional JSON strings for extensibility.
 
 ## Change Log

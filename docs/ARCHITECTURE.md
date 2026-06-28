@@ -177,7 +177,7 @@ A single turn flows through two phases: `StartTurnAsync` (generate options) and 
 
 10b. **Horniness text overlay** — Applies the pre-fetched horniness overlay instruction (step 10) via `ILlmAdapter.ApplyHorninessOverlayAsync()`. Runs AFTER shadow corruption so horniness has final say over the delivered text (#899). If no overlay instruction, skipped.
 
-10c. **Horniness §15 interest-delta halving** — When the horniness overlay fired and the post-shadow interest delta is strictly positive, the delta is halved (floor). This is deferred to operate on the post-shadow (truncated) delta (#743/#399). Worked shadow-trap interaction (#1095): a success with base delta = e.g. 4 → shadow trap truncates to **1** → horniness halves `floor(1/2) = 0`. Net interest delta is **0**, but the turn is **STILL NOT a failure** — the verdict stays SUCCESS and the momentum streak still increments.
+10c. **Horniness §15 interest-delta halving** — When the horniness overlay fired and the post-shadow interest delta is strictly positive, the delta is halved (floor). This step is delayed to operate on the post-shadow (truncated) delta (#743/#399). Worked shadow-trap interaction (#1095): a success with base delta = e.g. 4 → shadow trap truncates to **1** → horniness halves `floor(1/2) = 0`. Net interest delta is **0**, but the turn is **STILL NOT a failure** — the verdict stays SUCCESS and the momentum increments. The player is not punished with failure for being too smooth while horny, they just spin their tires.
 
 11. **Shadow growth** — `EvaluatePerTurnShadowGrowth()` evaluates 15+ triggers: Nat 1 → paired shadow +1, same stat 3× → Fixation +1, Charm 3× → Madness +1, RIZZ failures → Despair, etc. Also evaluates reductions (combo success → Madness −1, Honesty success at high interest → Denial −1).
 
@@ -331,13 +331,13 @@ Failures are tiered by **miss margin** and natural roll. Delivery instructions
 are tier-specific — a `Fumble` corrupts differently from a `Catastrophe`.
 
 | Failure tier   | Trigger                                |
+| Tier           | Condition                              |
 |----------------|----------------------------------------|
-| `None`         | Success                                |
-| `Fumble`       | Miss by 1–2                            |
-| `Misfire`      | Miss by 3–5                            |
-| `TropeTrap`    | Miss by 6–10 (or active trap hit)      |
-| `Catastrophe`  | Miss by 11+                            |
-| `Legendary`    | Nat 1 on a desperate/legendary attempt |
+| `Fumble`       | <=2                                    |
+| `Misfire`      | <=5                                    |
+| `TropeTrap`    | <=9 (or active trap hit)               |
+| `Catastrophe`  | >=10                                   |
+| `Legendary`    | Natural 1 on d20                       |
 
 See `Pinder.Core/Rolls/FailureScale.cs` for the mapping used by
 `GetFailureInterestDelta`.

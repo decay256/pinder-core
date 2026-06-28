@@ -59,9 +59,9 @@ public static class LevelTable
 |---|---|
 | Nat 20 | 25 (flat, no multiplier) |
 | Nat 1 | 10 (flat, no multiplier) |
-| Success (DC ≤ 13) | 5 × risk-tier multiplier |
-| Success (DC 14–17) | 10 × risk-tier multiplier |
-| Success (DC ≥ 18) | 15 × risk-tier multiplier |
+| Success (DC <=16) | 5 × risk-tier multiplier |
+| Success (DC <=20) | 10 × risk-tier multiplier |
+| Success (DC >20) | 15 × risk-tier multiplier |
 | Failure (non-Nat1) | 2 (flat, no multiplier) |
 
 ### Risk-Tier XP Multiplier (`GameSession.ApplyRiskTierMultiplier`)
@@ -76,6 +76,7 @@ private static int ApplyRiskTierMultiplier(int baseXp, RiskTier riskTier);
 | Medium | 1.5× |
 | Hard | 2.0× |
 | Bold | 3.0× |
+| Reckless | 4.0× |
 
 Rounding: `(int)Math.Round(baseXp * multiplier)` — midpoint rounds to nearest even (banker's rounding), so 7.5 → 8.
 
