@@ -209,7 +209,8 @@ namespace Pinder.Core.Conversation
                 _turnNumber,
                 _comboTracker.HasTripleBonus,
                 _dateeHistory,
-                _avatarHistory);
+                _avatarHistory,
+                _playerShadows);
         }
     }
 }

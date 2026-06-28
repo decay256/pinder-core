@@ -146,7 +146,8 @@ namespace Pinder.Core.Conversation
             int turnNumber,
             bool tripleBonusActive,
             System.Collections.Generic.IReadOnlyList<ConversationMessage> dateeHistory = null,
-            System.Collections.Generic.IReadOnlyList<ConversationMessage> avatarHistory = null)
+            System.Collections.Generic.IReadOnlyList<ConversationMessage> avatarHistory = null,
+            SessionShadowTracker? playerShadows = null)
         {
             var trapNames = traps.AllActive
                 .Select(t => t.Definition.Id)
@@ -177,6 +178,15 @@ namespace Pinder.Core.Conversation
             // can display ghost-risk indicators without knowing the interest thresholds.
             double ghostProbabilityPerTurn = state == InterestState.Bored ? 0.25 : 0.0;
 
+            var shadowValues = new Dictionary<string, int>();
+            if (playerShadows != null)
+            {
+                foreach (ShadowStatType shadow in System.Enum.GetValues(typeof(ShadowStatType)))
+                {
+                    shadowValues[shadow.ToString()] = playerShadows.GetEffectiveShadow(shadow);
+                }
+            }
+
             return new GameStateSnapshot(
                 interest: interest.Current,
                 state: state,
@@ -187,7 +197,8 @@ namespace Pinder.Core.Conversation
                 activeTrapDetails: trapDetails,
                 dateeHistory: historySnapshot,
                 ghostProbabilityPerTurn: ghostProbabilityPerTurn,
-                avatarHistory: avatarHistorySnapshot);
+                avatarHistory: avatarHistorySnapshot,
+                shadowValues: shadowValues);
         }
 
         /// <summary>
