@@ -135,6 +135,11 @@ namespace Pinder.Core.Conversation
         /// </summary>
         public string? TrapClearedDisplayName { get; }
 
+        public ResolvedRevelationTarget? ResolvedTarget { get; }
+        public string? CognitiveSubtext { get; }
+        public int HungerForIntimacy { get; }
+        public int TerrorOfRejection { get; }
+
         public TurnResult(
             RollResult roll,
             string deliveredMessage,
@@ -167,7 +172,11 @@ namespace Pinder.Core.Conversation
             int delayPenalty = 0,
             int activeTrapInterestPenalty = 0,
             int activeTrapInterestBefore = 0,
-            int activeTrapInterestPenaltyPercent = 0)
+            int activeTrapInterestPenaltyPercent = 0,
+            ResolvedRevelationTarget? resolvedTarget = null,
+            string? cognitiveSubtext = null,
+            int hungerForIntimacy = 0,
+            int terrorOfRejection = 0)
         {
             Roll = roll ?? throw new ArgumentNullException(nameof(roll));
             DeliveredMessage = deliveredMessage ?? throw new ArgumentNullException(nameof(deliveredMessage));
@@ -200,6 +209,10 @@ namespace Pinder.Core.Conversation
             ActiveTrapInterestPenalty = activeTrapInterestPenalty;
             ActiveTrapInterestBefore = activeTrapInterestBefore;
             ActiveTrapInterestPenaltyPercent = activeTrapInterestPenaltyPercent;
+            ResolvedTarget = resolvedTarget;
+            CognitiveSubtext = cognitiveSubtext;
+            HungerForIntimacy = hungerForIntimacy;
+            TerrorOfRejection = terrorOfRejection;
             InterestBreakdown = BuildBreakdown(
                 baseInterestDelta, riskBonusDelta, comboBonusDelta,
                 shadowInterestDelta, horninessInterestPenalty, delayPenalty, activeTrapInterestPenalty);

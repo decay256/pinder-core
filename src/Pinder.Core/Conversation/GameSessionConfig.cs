@@ -128,6 +128,12 @@ namespace Pinder.Core.Conversation
         /// <summary>Multiplier applied to positive interest gains when a trap is active.</summary>
         public double ActiveTrapInterestPenalty { get; }
 
+        /// <summary>Optional override for Hunger For Intimacy.</summary>
+        public int HungerForIntimacy { get; }
+
+        /// <summary>Optional override for Terror Of Rejection.</summary>
+        public int TerrorOfRejection { get; }
+
         public GameSessionConfig(
             IGameClock? clock = null,
             SessionShadowTracker? playerShadows = null,
@@ -149,7 +155,9 @@ namespace Pinder.Core.Conversation
             int? maxDeliveryWords = null,
             bool archetypesEnabled = false,
             Action<RuleResolutionTraceEvent>? onRuleResolution = null,
-            double activeTrapInterestPenalty = -0.25)
+            double activeTrapInterestPenalty = -0.25,
+            int hungerForIntimacy = 0,
+            int terrorOfRejection = 0)
         {
             Clock = clock;
             PlayerShadows = playerShadows;
@@ -172,6 +180,8 @@ namespace Pinder.Core.Conversation
             MaxDeliveryWords = maxDeliveryWords;
             ArchetypesEnabled = archetypesEnabled;
             ActiveTrapInterestPenalty = activeTrapInterestPenalty;
+            HungerForIntimacy = hungerForIntimacy;
+            TerrorOfRejection = terrorOfRejection;
         }
     }
 }

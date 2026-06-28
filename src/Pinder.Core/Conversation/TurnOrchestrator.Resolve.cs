@@ -160,7 +160,11 @@ namespace Pinder.Core.Conversation
                 delayPenalty: 0,
                 activeTrapInterestPenalty: rollStage.ActiveTrapInterestPenalty,
                 activeTrapInterestBefore: rollStage.ActiveTrapInterestBefore,
-                activeTrapInterestPenaltyPercent: rollStage.ActiveTrapInterestPenaltyPercent);
+                activeTrapInterestPenaltyPercent: rollStage.ActiveTrapInterestPenaltyPercent,
+                resolvedTarget: state.CurrentResolvedTarget,
+                cognitiveSubtext: state.CurrentCognitiveSubtext,
+                hungerForIntimacy: _hungerForIntimacy != 0 ? _hungerForIntimacy : player.Stats.GetBase(StatType.Charm),
+                terrorOfRejection: _terrorOfRejection != 0 ? _terrorOfRejection : player.Stats.GetBase(StatType.Rizz));
         }
     }
 }

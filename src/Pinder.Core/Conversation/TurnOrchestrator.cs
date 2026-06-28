@@ -27,6 +27,9 @@ namespace Pinder.Core.Conversation
         private readonly Action<ShadowFilterTraceEvent>? _onShadowFilterTrace;
         private readonly Action<RuleResolutionTraceEvent>? _onRuleResolution;
 
+        private readonly int _hungerForIntimacy;
+        private readonly int _terrorOfRejection;
+
         public TurnOrchestrator(
             ILlmAdapter llm,
             IDiceRoller dice,
@@ -37,7 +40,9 @@ namespace Pinder.Core.Conversation
             DateeResponseStage dateeResponseStage,
             int maxDialogueOptions,
             Action<ShadowFilterTraceEvent>? onShadowFilterTrace = null,
-            Action<RuleResolutionTraceEvent>? onRuleResolution = null)
+            Action<RuleResolutionTraceEvent>? onRuleResolution = null,
+            int hungerForIntimacy = 0,
+            int terrorOfRejection = 0)
         {
             _llm = llm ?? throw new ArgumentNullException(nameof(llm));
             _dice = dice ?? throw new ArgumentNullException(nameof(dice));
@@ -50,6 +55,8 @@ namespace Pinder.Core.Conversation
             _maxDialogueOptions = maxDialogueOptions;
             _onShadowFilterTrace = onShadowFilterTrace;
             _onRuleResolution = onRuleResolution;
+            _hungerForIntimacy = hungerForIntimacy;
+            _terrorOfRejection = terrorOfRejection;
         }
 
         internal async Task<TurnStart> StartTurnAsync(
@@ -147,8 +154,14 @@ namespace Pinder.Core.Conversation
                 ActiveTraps = activeTrapNames,
                 SpentBackstoryIndices = state.SpentBackstoryIndices,
                 SpentStakeIndices = state.SpentStakeIndices,
-                PlayerStats = new ParticipantStats { BaseHFI = player.Stats.GetBase(StatType.Charm), BaseTOR = player.Stats.GetBase(StatType.Rizz) },
-                DateeStats = new ParticipantStats { BaseHFI = datee.Stats.GetBase(StatType.Charm), BaseTOR = datee.Stats.GetBase(StatType.Rizz) },
+                PlayerStats = new ParticipantStats { 
+                    BaseHFI = _hungerForIntimacy != 0 ? _hungerForIntimacy : player.Stats.GetBase(StatType.Charm), 
+                    BaseTOR = _terrorOfRejection != 0 ? _terrorOfRejection : player.Stats.GetBase(StatType.Rizz) 
+                },
+                DateeStats = new ParticipantStats { 
+                    BaseHFI = _hungerForIntimacy != 0 ? _hungerForIntimacy : datee.Stats.GetBase(StatType.Charm), 
+                    BaseTOR = _terrorOfRejection != 0 ? _terrorOfRejection : datee.Stats.GetBase(StatType.Rizz) 
+                },
                 PreviousResolvedIndex = state.PreviousResolvedIndex
             };
 

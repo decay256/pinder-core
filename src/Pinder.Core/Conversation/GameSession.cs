@@ -150,6 +150,8 @@ namespace Pinder.Core.Conversation
         private readonly IConsequenceCatalog? _consequenceCatalog;
         private readonly int _maxDialogueOptions;
         private readonly int _maxDeliveryWords;
+        private readonly int _hungerForIntimacy;
+        private readonly int _terrorOfRejection;
 
         internal GameSessionState State => _state;
 
@@ -191,6 +193,8 @@ namespace Pinder.Core.Conversation
             _onShadowFilterTrace = config.OnShadowFilterTrace;
             _onRuleResolution = config.OnRuleResolution;
             _activeTrapInterestPenalty = config.ActiveTrapInterestPenalty;
+            _hungerForIntimacy = config.HungerForIntimacy;
+            _terrorOfRejection = config.TerrorOfRejection;
 
             // Determine starting interest: explicit config > Dread T3 > default
             if (config.StartingInterest.HasValue)
@@ -292,7 +296,9 @@ namespace Pinder.Core.Conversation
                 dateeResponseStage,
                 _maxDialogueOptions,
                 _onShadowFilterTrace,
-                _onRuleResolution);
+                _onRuleResolution,
+                _hungerForIntimacy,
+                _terrorOfRejection);
         }
     }
 }
