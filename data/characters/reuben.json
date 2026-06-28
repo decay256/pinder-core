@@ -3,7 +3,6 @@
   "character_id": "f179a327-8aa5-443d-aa56-0e764f6ea3ce",
   "name": "Reuben_404",
   "gender_identity": "he/him",
-  "bio": "accidentally deleted my thesis. starting fresh. no notes. please clap.",
   "level": 7,
   "items": [
     "head_tophat",
@@ -60,5 +59,86 @@
     }
   },
   "psychological_stake": "- The most humiliating thing that happened to me this week was when my advisor Dr. Halberstam said \"are you okay\" in a tone that made me realise I was clearly not okay.\n- The thing about my body I'm convinced everyone notices but actually no one does is how my left ball hangs noticeably lower since I had mumps in 2003.\n- My last sexual accident was when I cried during oral with Mei in the grad-student housing on Forest Ave last October and called her \"mom\" mid-apology.\n- The kink I've never said out loud to anyone is being graded — like, literally given a letter grade — by a stern woman in glasses after sex.\n- The substance I leaned on harder than I should have last month was 4mg lorazepam I bought from a guy named Cody at the philosophy department, and I used it to get through my defence draft.\n- The most embarrassing impulse purchase on my last bank statement is a 4 \"emotional support\" weighted dinosaur plush from Etsy named Greg.\n- If you opened my browser history at 3am last Tuesday you'd find \"can you actually die from being embarrassed\" and seventeen tabs of competitor PhD candidates' LinkedIns.\n- The last lie I told on a dating profile was saying my thesis is \"almost done\" — it has been almost done since fall 2022.\n- The most undignified thing my body did in public recently was projectile-vomiting in the Whole Foods cereal aisle after my fourth Celsius on an empty stomach.\n- The thing I do alone in my apartment that I'd be humiliated to be filmed doing is reading my old undergrad acceptance letter aloud to my cat Aristotle while crying.\n- The single object in my bedroom I could not explain to a stranger is a Ziploc bag of dried umbilical cord my mom gave me \"for luck\" before I moved out.\n- The last time I cried was on the M14D bus across 14th Street on Monday because a stranger smiled at me kindly.\n- My last named ex was Priya Bhattacharya and it ended in 2023 because I correctly identified her cat's breed but could not remember her sister's name.\n- The lowest professional moment of the last year was when I accidentally CC'd my entire cohort on a panic email titled \"i am genuinely cooked\".\n- The thing I genuinely believe will happen to me in the next two years that everyone else would call delusional is being offered tenure at Yale on the strength of a single viral paragraph.",
-  "background_story": "Between twenty-two and twenty-six he moved from Hamburg to Berlin to Amsterdam to London, each relocation triggered by something different, and he hasn't been back to Hamburg in four years with no plans to return. At sixteen he saw a band play a basement church hall show to forty people; they broke up before anyone knew about them, and the four tribute nights he's attended since were none of them right. He spent two years doing field work for an environmental NGO in areas with unreliable supply chains, carrying everything required for a full working day in his pockets, before returning to city life at twenty-nine without the pocket habit; at twenty-eight he went through a depressive episode and spent eighteen months in therapy, walking away from the final session with a duck his therapist gave him as a joke about coping mechanisms that worked anyway. At thirty-one, three weeks after a four-year relationship ended, he hiked the Camino de Santiago alone over forty-three days and didn't tell anyone he'd done it for over a year, and the boots from that walk have been resoled once. He's been at the company for five years against an original plan of two."
+  "backstory_categories": {
+    "age_and_demographics": {
+      "bio_lie": "accidentally deleted my thesis. starting fresh. no notes. please clap.",
+      "tragic_reality": "Between twenty-two and twenty-six he moved from Hamburg to Berlin to Amsterdam to London, each relocation triggered by something different, and he hasn't been back to Hamburg in four years with no plans to return. At sixteen he saw a band play a basement church hall show to forty people; they broke up before anyone knew about them, and the four tribute nights he's attended since were none of them right. He spent two years doing field work for an environmental NGO in areas with unreliable supply chains, carrying everything required for a full working day in his pockets, before returning to city life at twenty-nine without the pocket habit; at twenty-eight he went through a depressive episode and spent eighteen months in therapy, walking away from the final session with a duck his therapist gave him as a joke about coping mechanisms that worked anyway. At thirty-one, three weeks after a four-year relationship ended, he hiked the Camino de Santiago alone over forty-three days and didn't tell anyone he'd done it for over a year, and the boots from that walk have been resoled once. He's been at the company for five years against an original plan of two."
+    },
+    "birthplace_and_origin": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "childhood_milieu": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "parental_dynamics": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "early_education_scars": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "higher_education": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "formative_intimacies": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "career_debut": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "current_profession": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "financial_hygiene": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "domestic_milieu": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "social_circle": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "recent_ex": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "career_low": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "delusional_plan": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "hyperfixations": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "ideological_posture": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "digital_footprint": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "physical_dysmorphia": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "dependencies": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    }
+  }
 }

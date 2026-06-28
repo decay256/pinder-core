@@ -184,10 +184,31 @@ namespace Pinder.Core.Tests
 
                 foreach (var member in instance.EnumerateObject())
                 {
+                    bool matchedPattern = false;
+                    JsonElement? patternSchema = null;
+
+                    if (schema.TryGetProperty("patternProperties", out var patProps))
+                    {
+                        foreach (var pp in patProps.EnumerateObject())
+                        {
+                            var rx = new System.Text.RegularExpressions.Regex(pp.Name);
+                            if (rx.IsMatch(member.Name))
+                            {
+                                matchedPattern = true;
+                                patternSchema = pp.Value;
+                                break;
+                            }
+                        }
+                    }
+
                     if (declaredProps.Contains(member.Name))
                     {
                         var subSchema = schema.GetProperty("properties").GetProperty(member.Name);
                         Validate(subSchema, member.Value, $"{path}.{member.Name}", errors);
+                    }
+                    else if (matchedPattern && patternSchema.HasValue)
+                    {
+                        Validate(patternSchema.Value, member.Value, $"{path}.{member.Name}", errors);
                     }
                     else if (!additionalAllowed)
                     {

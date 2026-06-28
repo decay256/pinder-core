@@ -10,7 +10,6 @@
     "character_id",
     "name",
     "gender_identity",
-    "bio",
     "level",
     "items",
     "anatomy",
@@ -38,10 +37,6 @@
       "minLength": 1,
       "description": "Free-form gender identity string (e.g. \"he/him\", \"they/them\")."
     },
-    "bio": {
-      "type": "string",
-      "description": "Short bio shown to opposing player."
-    },
     "level": {
       "type": "integer",
       "minimum": 1,
@@ -62,9 +57,43 @@
       "type": "string",
       "description": "Issue #779: permanent psychological stake generated at character-creation time. Markdown bullet list of the character's core emotional motivations and vulnerabilities as injected into their LLM system prompt. Optional — absent on legacy files until regenerated."
     },
-    "background_story": {
-      "type": "string",
-      "description": "Issue #820: permanent narrative background story generated at character-creation time via LlmBackgroundGenerator. Optional — absent on legacy files until backfilled/regenerated. Same hygiene as psychological_stake: omitted from required so legacy files without it remain valid."
+    "backstory_categories": {
+      "type": "object",
+      "description": "Issue #1259: The 20-category detailed backstory array mapping out their history and lies.",
+      "additionalProperties": false,
+      "required": [
+        "age_and_demographics",
+        "birthplace_and_origin",
+        "childhood_milieu",
+        "parental_dynamics",
+        "early_education_scars",
+        "higher_education",
+        "formative_intimacies",
+        "career_debut",
+        "current_profession",
+        "financial_hygiene",
+        "domestic_milieu",
+        "social_circle",
+        "recent_ex",
+        "career_low",
+        "delusional_plan",
+        "hyperfixations",
+        "ideological_posture",
+        "digital_footprint",
+        "physical_dysmorphia",
+        "dependencies"
+      ],
+      "patternProperties": {
+        "^[a-z_]+$": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["bio_lie", "tragic_reality"],
+          "properties": {
+            "bio_lie": { "type": "string" },
+            "tragic_reality": { "type": "string" }
+          }
+        }
+      }
     },
     "allocation": {
       "type": "object",

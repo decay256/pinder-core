@@ -159,20 +159,20 @@ namespace Pinder.Core.Tests
             int posId       = written.IndexOf("\"character_id\"", StringComparison.Ordinal);
             int posName     = written.IndexOf("\"name\"", StringComparison.Ordinal);
             int posGender   = written.IndexOf("\"gender_identity\"", StringComparison.Ordinal);
-            int posBio      = written.IndexOf("\"bio\"", StringComparison.Ordinal);
             int posLevel    = written.IndexOf("\"level\"", StringComparison.Ordinal);
             int posItems    = written.IndexOf("\"items\"", StringComparison.Ordinal);
             int posAnatomy  = written.IndexOf("\"anatomy\"", StringComparison.Ordinal);
             int posAlloc    = written.IndexOf("\"allocation\"", StringComparison.Ordinal);
+            int posCats     = written.IndexOf("\"backstory_categories\"", StringComparison.Ordinal);
 
             Assert.True(posSchema  < posId,      "schema_version before character_id");
             Assert.True(posId      < posName,    "character_id before name");
             Assert.True(posName    < posGender,  "name before gender_identity");
-            Assert.True(posGender  < posBio,     "gender_identity before bio");
-            Assert.True(posBio     < posLevel,   "bio before level");
+            Assert.True(posGender  < posLevel,   "gender_identity before level");
             Assert.True(posLevel   < posItems,   "level before items");
             Assert.True(posItems   < posAnatomy, "items before anatomy");
             Assert.True(posAnatomy < posAlloc,   "anatomy before allocation");
+            Assert.True(posAlloc   < posCats,    "allocation before backstory_categories");
         }
 
         [Fact]

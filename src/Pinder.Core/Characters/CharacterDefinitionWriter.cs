@@ -112,7 +112,6 @@ namespace Pinder.Core.Characters
             writer.WriteString("character_id", def.CharacterId.ToString("D"));
             writer.WriteString("name", def.Name);
             writer.WriteString("gender_identity", def.GenderIdentity);
-            writer.WriteString("bio", def.Bio);
             writer.WriteNumber("level", def.Level);
 
             writer.WriteStartArray("items");
@@ -143,10 +142,23 @@ namespace Pinder.Core.Characters
             if (!string.IsNullOrWhiteSpace(def.PsychologicalStake))
                 writer.WriteString("psychological_stake", def.PsychologicalStake);
 
-            // Issue #820: write the narrative background story if present.
-            // Omitted when absent, same hygiene as stake.
-            if (!string.IsNullOrWhiteSpace(def.BackgroundStory))
+            // Issue #1259: write the backstory categories if present.
+            if (def.BackstoryCategories != null)
+            {
+                writer.WriteStartObject("backstory_categories");
+                foreach (var kv in def.BackstoryCategories)
+                {
+                    writer.WriteStartObject(kv.Key);
+                    writer.WriteString("bio_lie", kv.Value.BioLie);
+                    writer.WriteString("tragic_reality", kv.Value.TragicReality);
+                    writer.WriteEndObject();
+                }
+                writer.WriteEndObject();
+            }
+            else if (!string.IsNullOrWhiteSpace(def.BackgroundStory))
+            {
                 writer.WriteString("background_story", def.BackgroundStory);
+            }
 
             writer.WriteEndObject();
         }

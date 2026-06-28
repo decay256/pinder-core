@@ -3,7 +3,6 @@
   "character_id": "59aa20f2-46d6-4adc-89c1-6ea17f815020",
   "name": "Gerald_42",
   "gender_identity": "he/him",
-  "bio": "here for a good time, not a long time. gym twice a day, pasta on Sundays, and absolutely no drama. swipe right if you're also normal. please.",
   "level": 5,
   "items": [
     "head_hat",
@@ -60,5 +59,86 @@
     }
   },
   "psychological_stake": "- The most humiliating thing that happened to me this week was when the front-desk girl at LA Fitness in Sherman Oaks called me \"sir\" three times and I'm thirty-four.\n- The thing about my body I'm convinced everyone notices but actually no one does is the one vein on my right side that I think looks \"intense\" in mirror selfies.\n- My last sexual accident was when I lost my erection with Bethany from Hinge in March 2024 because I was thinking about my macros.\n- The kink I've never said out loud to anyone is wanting a girl to call me her \"good boy\" in the exact tone my mom used about my report cards.\n- The substance I leaned on harder than I should have last month was pre-workout from GNC, and I used it to get through eleven 5am leg days while pretending I felt great.\n- The most embarrassing impulse purchase on my last bank statement is a 12 \"sigma male\" coaching call with a guy named Brandt who has 4,000 Instagram followers.\n- If you opened my browser history at 3am last Tuesday you'd find \"is sweet potato a carb or a vegetable\" searched fourteen times across two browsers.\n- The last lie I told on a dating profile was saying I \"love to travel\" — I have been to Cancun once in 2019 for my cousin Devin's bachelor party.\n- The most undignified thing my body did in public recently was a full-volume gym fart at the Equinox in Century City under the squat rack on a Saturday.\n- The thing I do alone in my apartment that I'd be humiliated to be filmed doing is flexing in the bathroom mirror for forty-five minutes while listening to Joe Rogan.\n- The single object in my bedroom I could not explain to a stranger is a vacuum-sealed bag of my dead golden retriever Buddy's fur from 2018.\n- The last time I cried was in my Tacoma in the In-N-Out drive-through on Sepulveda after I ordered a Double-Double on a cut week.\n- My last named ex was Hannah Pellegrini and it ended because she said I \"talked about creatine more than her\" — which was technically false, but only just.\n- The lowest professional moment of the last year was when my own brother Devin asked me at Thanksgiving what exactly I \"do\" for sales at the dealership.\n- The thing I genuinely believe will happen to me in the next two years that everyone else would call delusional is getting scouted by a producer at the Burbank Whole Foods and becoming the next Channing Tatum.",
-  "background_story": "He played rugby through university and captained the team in his final year, until a knee injury at twenty-two permanently ended his playing career, leaving him at thirty-four working in regional sales. At twenty-eight he joined a yacht club with colleagues, went twice before it folded six months later, and kept the polo and the boat shoes he'd bought as the only surviving evidence of that brief weekend version of himself. The divorce became the organizing event of his recent years: he joined a gym the week proceedings began and went every morning at 6am for eleven months, bought a fitness tracker the month it was finalized, and has maintained an unbroken daily step streak for sixty-two weeks without explaining to anyone, including himself, why it matters. He has gained weight in the two years since and has not bought new trousers, a choice he considers a position rather than an oversight. As for the physical dimension, a decision made for him at a few days old, which he learned about in a health class at twelve, left no strong narrative either way; he treated the absence as freedom, built an actual self in place of a physical one, and once stored a tattoo design in a laptop folder named 'maybe' that has not been opened in four years."
+  "backstory_categories": {
+    "age_and_demographics": {
+      "bio_lie": "here for a good time, not a long time. gym twice a day, pasta on Sundays, and absolutely no drama. swipe right if you're also normal. please.",
+      "tragic_reality": "He played rugby through university and captained the team in his final year, until a knee injury at twenty-two permanently ended his playing career, leaving him at thirty-four working in regional sales. At twenty-eight he joined a yacht club with colleagues, went twice before it folded six months later, and kept the polo and the boat shoes he'd bought as the only surviving evidence of that brief weekend version of himself. The divorce became the organizing event of his recent years: he joined a gym the week proceedings began and went every morning at 6am for eleven months, bought a fitness tracker the month it was finalized, and has maintained an unbroken daily step streak for sixty-two weeks without explaining to anyone, including himself, why it matters. He has gained weight in the two years since and has not bought new trousers, a choice he considers a position rather than an oversight. As for the physical dimension, a decision made for him at a few days old, which he learned about in a health class at twelve, left no strong narrative either way; he treated the absence as freedom, built an actual self in place of a physical one, and once stored a tattoo design in a laptop folder named 'maybe' that has not been opened in four years."
+    },
+    "birthplace_and_origin": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "childhood_milieu": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "parental_dynamics": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "early_education_scars": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "higher_education": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "formative_intimacies": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "career_debut": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "current_profession": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "financial_hygiene": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "domestic_milieu": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "social_circle": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "recent_ex": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "career_low": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "delusional_plan": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "hyperfixations": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "ideological_posture": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "digital_footprint": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "physical_dysmorphia": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "dependencies": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    }
+  }
 }
