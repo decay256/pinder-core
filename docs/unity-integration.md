@@ -175,10 +175,10 @@ ScriptableObjects rather than JSON):
 
 | Assembly | Target | Required NuGet | Purpose |
 |---|---|---|---|
-| `Pinder.Core.dll` | netstandard2.0 | `Microsoft.Bcl.AsyncInterfaces` | Game logic kernel + JSON repositories (`Pinder.Core.Data`) |
+| `Pinder.Core.dll` | netstandard2.0 | `Microsoft.Bcl.AsyncInterfaces`, `System.Text.Json` | Game logic kernel + JSON repositories (`Pinder.Core.Data`) |
 | `Pinder.Rules.dll` | netstandard2.0 | `YamlDotNet` | Data-driven mechanics |
 | `Pinder.LlmAdapters.dll` | netstandard2.0 | `Newtonsoft.Json`, `YamlDotNet` | Prompt assembly + (optional) HTTP transports |
-| `Pinder.SessionSetup.dll` | netstandard2.0 | `System.Text.Json` | High-level character JSON loader (`CharacterDefinitionLoader`) |
+| `Pinder.SessionSetup.dll` | netstandard2.0 | `System.Text.Json`, `Pinder.Core`, `Pinder.LlmAdapters` | High-level character JSON loader (`CharacterDefinitionLoader`) |
 
 `pinder-web` is **not** part of the Unity integration — that's the
 React/FastAPI presentation tier for the browser game. Skip it.
@@ -494,8 +494,8 @@ early text. A complete event taxonomy is at the top of
 
 > **`Pinder.SessionSetup`** is a fourth assembly alongside the three
 > in §0's table. Add it to your Unity project the same way — source
-> import or DLL — if you take path (a). It depends on `Pinder.Core`
-> only. If you take path (b) (ScriptableObject characters), you can
+> import or DLL — if you take path (a). It depends on `Pinder.Core`,
+> `Pinder.LlmAdapters`, and `System.Text.Json`. If you take path (b) (ScriptableObject characters), you can
 > skip it.
 
 ---

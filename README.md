@@ -2,13 +2,13 @@
 
 Pure C# RPG engine for [Pinder](https://github.com/decay256/pinder) — the comedy dating RPG.
 
-Targets **netstandard2.0** / **C# 8.0**. Zero external dependencies in the core library.
+Targets **netstandard2.0** / **C# 8.0**. Depends on **Microsoft.Bcl.AsyncInterfaces** and **System.Text.Json**.
 
 ## Assemblies
 
 | Project | Target | Dependencies | Purpose |
 |---|---|---|---|
-| `Pinder.Core` | netstandard2.0 | None | Domain model, game loop, roll engine, stats, traps, XP, combos |
+| `Pinder.Core` | netstandard2.0 | Microsoft.Bcl.AsyncInterfaces, System.Text.Json | Domain model, game loop, roll engine, stats, traps, XP, combos |
 | `Pinder.Rules` | netstandard2.0 | Core, YamlDotNet | Data-driven rule resolution from YAML |
 | `Pinder.LlmAdapters` | netstandard2.0 | Core, Rules, Newtonsoft.Json | LLM prompt assembly + API integration (Anthropic, OpenAI) |
 | `session-runner` | net8.0 | Core, LlmAdapters | CLI harness for automated playtesting |
@@ -70,7 +70,7 @@ Run `dotnet test --filter "Category=Rules"` after any change to YAML rule files 
 ## Project Structure
 
 ```
-src/Pinder.Core/           # Domain kernel (zero deps)
+src/Pinder.Core/           # Domain kernel
 src/Pinder.LlmAdapters/   # LLM integration
 src/Pinder.Rules/          # YAML rule engine
 session-runner/            # CLI playtesting harness

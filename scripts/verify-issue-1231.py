@@ -71,15 +71,25 @@ def main():
         content = files_content.get(f, "")
         if not content: continue
         
-        if re.search(r'Pinder\.Core.*?(zero|no)\s+(external\s+)?dependencies', content, re.IGNORECASE):
+        if re.search(r'zero\s+(external\s+)?dependencies', content, re.IGNORECASE):
             errors.append(f"{f}: Found false claim that Pinder.Core has zero dependencies.")
+            
+        if re.search(r'zero\s+deps', content, re.IGNORECASE):
+            errors.append(f"{f}: Found false claim that Pinder.Core has zero deps.")
+            
+        if re.search(r'\|\s*`?Pinder\.Core(?:\.dll)?`?\s*\|\s*[^|]+\|\s*(None|`?Microsoft\.Bcl\.AsyncInterfaces`?)\s*\|', content, re.IGNORECASE):
+            errors.append(f"{f}: Found table row indicating Pinder.Core has no dependencies or only AsyncInterfaces.")
             
         if re.search(r'Pinder\.Core.*?without\s+System\.Text\.Json', content, re.IGNORECASE) or \
            re.search(r'no\s+System\.Text\.Json', content, re.IGNORECASE):
             errors.append(f"{f}: Found false claim that Pinder.Core doesnt use System.Text.Json.")
             
-        if re.search(r'Pinder\.SessionSetup\s+depends\s+(only|solely)\s+on\s+Pinder\.Core', content, re.IGNORECASE):
+        if re.search(r'depends\s+on\s+`?Pinder\.Core`?(?:\s|>\s)*only', content, re.IGNORECASE) or \
+           re.search(r'Pinder\.SessionSetup\s+depends\s+(only|solely)\s+on\s+Pinder\.Core', content, re.IGNORECASE):
             errors.append(f"{f}: Found false claim that Pinder.SessionSetup depends ONLY on Pinder.Core.")
+            
+        if re.search(r'\|\s*`?Pinder\.SessionSetup(?:\.dll)?`?\s*\|\s*[^|]+\|\s*`?System\.Text\.Json`?\s*\|', content, re.IGNORECASE):
+            errors.append(f"{f}: Found table row indicating Pinder.SessionSetup depends only on System.Text.Json.")
 
         if f == "docs/ARCHITECTURE.md":
             if "System.Text.Json" not in content:
