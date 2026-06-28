@@ -19,8 +19,8 @@ namespace Pinder.Core.Characters
 
         /// <summary>
         /// The base system prompt before psychological stake was appended.
-        /// Used when building datee context for the player agent — the player
-        /// should not see the datee's generated stake as prior knowledge.
+        /// Used when building opponent context for the player agent — the player
+        /// should not see the opponent's generated stake as prior knowledge.
         /// </summary>
         public string BaseSystemPrompt { get; private set; }
 
@@ -40,7 +40,7 @@ namespace Pinder.Core.Characters
         /// Issue #562: self-reported gender identity (e.g. "she/her",
         /// "they/them"). Sourced from the <c>gender_identity</c> field in
         /// the character JSON. Surfaced in the
-        /// <see cref="DateeVisibleProfile"/> as a Tinder-card-equivalent
+        /// <see cref="OpponentVisibleProfile"/> as a Tinder-card-equivalent
         /// field. Empty when not set on the character file.
         /// </summary>
         public string GenderIdentity { get; }
@@ -95,10 +95,9 @@ namespace Pinder.Core.Characters
         /// </summary>
         public IReadOnlyList<string> EquippedItemDisplayNames { get; }
 
-        /// <summary>
-        /// Issue #1259: The 20-category detailed backstory array mapping out their history and lies.
-        /// </summary>
-        public IReadOnlyDictionary<string, BackstoryFact>? BackstoryCategories { get; }
+        public IReadOnlyDictionary<string, BackstoryFact>? Backstory { get; }
+        public IReadOnlyList<string>? StakeLines { get; }
+        public IReadOnlyDictionary<string, string>? PsychiatricDiagnosis { get; }
 
         /// <summary>Appends additional text to the assembled system prompt.</summary>
         public void AppendToSystemPrompt(string text)
@@ -116,7 +115,7 @@ namespace Pinder.Core.Characters
         /// <summary>
         /// Freezes BaseSystemPrompt to the current AssembledSystemPrompt value.
         /// Call this immediately before appending the psychological stake so the
-        /// base prompt remains clean for datee profile injection.
+        /// base prompt remains clean for opponent profile injection.
         /// </summary>
         public void FreezeBasePrompt()
         {
@@ -136,7 +135,9 @@ namespace Pinder.Core.Characters
             IReadOnlyList<TextingStyleFragmentSource> textingStyleSources = null,
             string genderIdentity = "",
             IReadOnlyList<string> textingStyleLines = null,
-            IReadOnlyDictionary<string, BackstoryFact>? backstoryCategories = null)
+            IReadOnlyDictionary<string, BackstoryFact>? backstory = null,
+            IReadOnlyList<string>? stakeLines = null,
+            IReadOnlyDictionary<string, string>? psychiatricDiagnosis = null)
         {
             Stats = stats ?? throw new ArgumentNullException(nameof(stats));
             AssembledSystemPrompt = assembledSystemPrompt ?? throw new ArgumentNullException(nameof(assembledSystemPrompt));
@@ -155,7 +156,9 @@ namespace Pinder.Core.Characters
             // #781: final aggregated texting-style lines. Defaults to empty
             // list so existing callers (test fixtures) don't need to pass it.
             TextingStyleLines = textingStyleLines ?? new System.Collections.Generic.List<string>();
-            BackstoryCategories = backstoryCategories;
+            Backstory = backstory;
+            StakeLines = stakeLines;
+            PsychiatricDiagnosis = psychiatricDiagnosis;
         }
     }
 }

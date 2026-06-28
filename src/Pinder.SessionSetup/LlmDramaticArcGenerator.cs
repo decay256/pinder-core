@@ -12,7 +12,7 @@ namespace Pinder.SessionSetup
     /// Issue #821.
     /// </summary>
     /// <remarks>
-    /// Uses the canonical <see cref="LlmPhase.DramaticArc"/> phase
+    /// Uses the canonical <see cref="LlmPhase.Synthesis"/> phase
     /// label so snapshot recording and audit decorators tag the exchange
     /// without re-deriving the phase from prompt text.
     /// </remarks>
@@ -63,7 +63,7 @@ namespace Pinder.SessionSetup
             try
             {
                 string response = await _transport
-                    .SendAsync(SystemPrompt, userMessage, _options.Temperature, _options.MaxTokens, phase: LlmPhase.DramaticArc)
+                    .SendAsync(SystemPrompt, userMessage, _options.Temperature, _options.MaxTokens, phase: LlmPhase.Synthesis)
                     .ConfigureAwait(false);
                 string trimmed = (response ?? string.Empty).Trim();
                 if (string.IsNullOrEmpty(trimmed))

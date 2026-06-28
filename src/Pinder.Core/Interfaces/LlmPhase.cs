@@ -17,27 +17,19 @@ namespace Pinder.Core.Interfaces
         /// <summary>Player dialogue-options generation.</summary>
         public const string DialogueOptions = "dialogue_options";
 
-        /// <summary>
-        /// RETIRED — no longer emitted (#1125/#1129). The standalone "delivery"
-        /// creative LLM call was collapsed into the deterministic
-        /// <see cref="Pinder.Core.Conversation.DeliveryOverlay"/> commit step:
-        /// the avatar GM now returns full, sendable candidate lines, so there is
-        /// no second "delivery" LLM call to label. This constant is RETAINED (not
-        /// renamed/removed) only so historical audit/cost rows that reference the
-        /// <c>"delivery"</c> phase string still render with a typed label —
-        /// mirroring the #827 MatchupAnalysis/MatchupSummary precedent below.
-        /// Phase strings are a public decorator contract; do not re-purpose this
-        /// value for a new LLM phase.
-        /// </summary>
+        /// <summary>Player message delivery (final transformation of the chosen option).</summary>
         public const string Delivery = "delivery";
 
         /// <summary>Steering question for the player.</summary>
         public const string Steering = "steering";
 
-        /// <summary>Datee reply to the delivered player message.</summary>
-        public const string DateeResponse = "datee_response";
+        /// <summary>Opponent reply to the delivered player message.</summary>
+        public const string OpponentResponse = "opponent_response";
 
-        /// <summary>Optional narrative beat emitted when datee interest changes.</summary>
+        /// <summary>Alias for backward compatibility with tests.</summary>
+        public const string DateeResponse = OpponentResponse;
+
+        /// <summary>Optional narrative beat emitted when opponent interest changes.</summary>
         public const string InterestChangeBeat = "interest_change_beat";
 
         /// <summary>Horniness overlay rewrite of a delivered message.</summary>
@@ -80,21 +72,8 @@ namespace Pinder.Core.Interfaces
         /// </summary>
         public const string OutfitDescription = "outfit_description";
 
-        /// <summary>
-        /// Session-setup dramatic-arc generation (issue #821).
-        /// One LLM call per session that produces a 3-5 sentence
-        /// narrative arc (setup, escalation, turning point, resolution)
-        /// appended to the datee system prompt as soft guardrails.
-        /// </summary>
-        public const string DramaticArc = "dramatic_arc";
-
-        /// <summary>
-        /// Session-setup background-story generation (issue #820).
-        /// One LLM call per character at creation time that weaves
-        /// assembled background fragments into a 3-5 sentence cohesive
-        /// narrative stored on-disk and surfaced on the Character Sheet.
-        /// </summary>
-        public const string BackgroundStory = "background_story";
+        /// <summary>Character synthesis pipeline.</summary>
+        public const string Synthesis = "synthesis";
 
         /// <summary>Phase could not be determined (decorators may use this when no phase was supplied).</summary>
         public const string Unknown = "unknown";

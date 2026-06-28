@@ -1,0 +1,175 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
+using System.IO;
+using Xunit;
+using Pinder.Core.Characters;
+using Pinder.Core.Interfaces;
+using Pinder.Core.Stats;
+using Pinder.Core.Conversation;
+using Pinder.LlmAdapters;
+using Pinder.SessionSetup;
+
+namespace Pinder.Core.Tests
+{
+    public class Issue1253_SequentialSynthesisTests
+    {
+        private class FakeBackstoryGenerator : IBackstoryGenerator
+        {
+            public bool WasCalled { get; private set; }
+            public Task<Dictionary<string, BackstoryFact>> GenerateAsync(string characterName, string genderIdentity, string bio, IReadOnlyList<string> looksAndAssetFragments, CancellationToken cancellationToken = default)
+            {
+                WasCalled = true;
+                var dict = new Dictionary<string, BackstoryFact>
+                {
+                    { "fact1", new BackstoryFact("Family", "Parents divorced", "High") }
+                };
+                return Task.FromResult(dict);
+            }
+        }
+
+        private class FakeStakeGenerator : ISequentialStakeGenerator
+        {
+            public bool WasCalled { get; private set; }
+            public Dictionary<string, BackstoryFact>? PassedBackstory { get; private set; }
+            public Task<List<string>> GenerateAsync(string characterName, string genderIdentity, string bio, Dictionary<string, BackstoryFact> backstory, CancellationToken cancellationToken = default)
+            {
+                WasCalled = true;
+                PassedBackstory = backstory;
+                return Task.FromResult(new List<string> { "Afraid of commitment" });
+            }
+        }
+
+        private class FakeDiagnosisGenerator : ITherapistDiagnosisGenerator
+        {
+            public bool WasCalled { get; private set; }
+            public Dictionary<string, BackstoryFact>? PassedBackstory { get; private set; }
+            public List<string>? PassedStakes { get; private set; }
+            public Task<Dictionary<string, string>> GenerateAsync(string characterName, string genderIdentity, string bio, Dictionary<string, BackstoryFact> backstory, List<string> stakeLines, CancellationToken cancellationToken = default)
+            {
+                WasCalled = true;
+                PassedBackstory = backstory;
+                PassedStakes = stakeLines;
+                var dict = new Dictionary<string, string>
+                {
+                    { "derived_feeling", "anxiety" },
+                    { "defense_reaction", "deflection" }
+                };
+                return Task.FromResult(dict);
+            }
+        }
+
+        private class FakeLlmTransport : ILlmTransport
+        {
+            public string? LastSystemPrompt { get; private set; }
+            public string? LastUserMessage { get; private set; }
+            public string ResponseToReturn { get; set; } = "{}";
+
+            public Task<string> SendAsync(string systemPrompt, string userMessage, double temperature = 0.9, int maxTokens = 1024, string? phase = null, CancellationToken ct = default)
+            {
+                LastSystemPrompt = systemPrompt;
+                LastUserMessage = userMessage;
+                return Task.FromResult(ResponseToReturn);
+            }
+        }
+
+        [Fact]
+        public async Task Pipeline_ExecutesStagesInOrder_PassingOutputsToNext()
+        {
+            var backstoryGen = new FakeBackstoryGenerator();
+            var stakeGen = new FakeStakeGenerator();
+            var diagnosisGen = new FakeDiagnosisGenerator();
+            var pipeline = new SequentialSynthesisPipeline(backstoryGen, stakeGen, diagnosisGen);
+
+            var result = await pipeline.SynthesizeAsync("TestChar", "they/them", "bio", new List<string>());
+
+            Assert.True(backstoryGen.WasCalled);
+            Assert.True(stakeGen.WasCalled);
+            Assert.True(diagnosisGen.WasCalled);
+            Assert.NotNull(stakeGen.PassedBackstory);
+            Assert.True(stakeGen.PassedBackstory.ContainsKey("fact1"));
+            Assert.NotNull(diagnosisGen.PassedBackstory);
+            Assert.NotNull(diagnosisGen.PassedStakes);
+            Assert.Contains("Afraid of commitment", diagnosisGen.PassedStakes);
+        }
+
+        [Fact]
+        public async Task TherapistDiagnosisGenerator_BuildsCorrectPromptAndParsesJson()
+        {
+            var testDir = Path.Combine(Directory.GetCurrentDirectory(), "TestData_Prompts_" + Guid.NewGuid());
+            Directory.CreateDirectory(testDir);
+            File.WriteAllText(Path.Combine(testDir, "diagnosis.yaml"), "schema_version: 1\nprompts:\n  diagnosis:\n    system_prompt: \"SYSTEM PROMPT\"\n    user_template: \"USER {backstory} - {stakes}\"");
+
+            var transport = new FakeLlmTransport();
+            transport.ResponseToReturn = @"{ ""derived_feeling"": ""abandonment issues"", ""defense_reaction"": ""humor"" }";
+            
+            var catalog = PromptCatalog.LoadFromDirectory(testDir);
+            var generator = new LlmTherapistDiagnosisGenerator(transport, catalog);
+
+            var backstory = new Dictionary<string, BackstoryFact>
+            {
+                { "b1", new BackstoryFact("Subj", "Det", "Sig") }
+            };
+            var stakes = new List<string> { "Stake 1" };
+
+            var result = await generator.GenerateAsync("Char", "he/him", "bio", backstory, stakes);
+
+            Assert.Equal("SYSTEM PROMPT", transport.LastSystemPrompt);
+            Assert.Contains("Det", transport.LastUserMessage);
+            Assert.Contains("Stake 1", transport.LastUserMessage);
+            
+            Assert.Equal("abandonment issues", result["derived_feeling"]);
+            Assert.Equal("humor", result["defense_reaction"]);
+            
+            Directory.Delete(testDir, true);
+        }
+        
+        [Fact]
+        public void CharacterDefinitionAndProfile_RetainSynthesisFields()
+        {
+            var backstory = new Dictionary<string, BackstoryFact> { { "f1", new BackstoryFact("S", "D", "S") } };
+            var stakes = new List<string> { "Stake line" };
+            var diag = new Dictionary<string, string> { { "derived_feeling", "angst" } };
+
+            var def = new CharacterDefinition(
+                schemaVersion: 1,
+                characterId: Guid.NewGuid(),
+                name: "Test",
+                genderIdentity: "none",
+                bio: "bio",
+                level: 1,
+                items: new List<string>(),
+                anatomy: new Dictionary<string, float>(),
+                allocation: new AllocationBlock(new Dictionary<StatType, int>(), 0, new Dictionary<ShadowStatType, int>()),
+                psychologicalStake: null,
+                backstory: backstory,
+                stakeLines: stakes,
+                psychiatricDiagnosis: diag
+            );
+
+            Assert.NotNull(def.Backstory);
+            Assert.True(def.Backstory.ContainsKey("f1"));
+            Assert.Contains("Stake line", def.StakeLines);
+            Assert.Equal("angst", def.PsychiatricDiagnosis["derived_feeling"]);
+
+            var profile = new CharacterProfile(
+                stats: new StatBlock(new Dictionary<StatType, int>(), new Dictionary<ShadowStatType, int>()),
+                assembledSystemPrompt: "prompt",
+                displayName: "Test",
+                timing: new TimingProfile(1, 1f, 1f, "neutral"),
+                level: 1,
+                backstory: backstory,
+                stakeLines: stakes,
+                psychiatricDiagnosis: diag
+            );
+
+            Assert.NotNull(profile.Backstory);
+            Assert.True(profile.Backstory.ContainsKey("f1"));
+            Assert.Contains("Stake line", profile.StakeLines);
+            Assert.Equal("angst", profile.PsychiatricDiagnosis["derived_feeling"]);
+        }
+    }
+}

@@ -343,7 +343,7 @@ namespace Pinder.LlmAdapters.Tests
                     unspentPool: 0,
                     shadows: new Dictionary<ShadowStatType, int>()),
                 psychologicalStake: "Surface fear: [1] I want connection. [2] I push people away.",
-                backgroundStory: "Grew up near the sea.");
+                backstory: new Dictionary<string, BackstoryFact> { { "childhood", new BackstoryFact("Lie", "Grew up near the sea.") } });
 
             return new LoadedCharacter(profile, def);
         }

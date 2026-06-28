@@ -1,0 +1,5 @@
+schema_version: 1
+prompts:
+  diagnosis:
+    system_prompt: "You are a clinical therapist diagnosing a patient based on their backstory and emotional stakes. Respond in JSON with 'derived_feeling' and 'defense_reaction'."
+    user_template: "Backstory: {backstory}\nStakes: {stakes}"
