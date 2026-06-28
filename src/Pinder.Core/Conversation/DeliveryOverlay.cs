@@ -1,6 +1,7 @@
 using System;
 using System.Text;
 using Pinder.Core.Rolls;
+using Pinder.Core.Stats;
 
 namespace Pinder.Core.Conversation
 {
@@ -48,7 +49,7 @@ namespace Pinder.Core.Conversation
         /// (i.e. <c>DC - total</c> on a failure). On success this is ignored.
         /// Negative inputs are clamped to 0.
         /// </param>
-        public static string Apply(string pickedLine, FailureTier tier, int missMargin)
+        public static string Apply(string pickedLine, FailureTier tier, int missMargin, StatType stat = StatType.Rizz)
         {
             if (string.IsNullOrEmpty(pickedLine))
                 return pickedLine ?? string.Empty;
