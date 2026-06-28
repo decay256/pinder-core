@@ -110,6 +110,10 @@ namespace Pinder.Core.Conversation
         /// </summary>
         public int HorninessInterestBefore { get; }
 
+        public int ActiveTrapInterestPenalty { get; }
+        public int ActiveTrapInterestBefore { get; }
+        public int ActiveTrapInterestPenaltyPercent { get; }
+
         /// <summary>Word-level diffs for each text transform layer that changed the message.</summary>
         public IReadOnlyList<TextDiff> TextDiffs { get; }
 
@@ -160,7 +164,10 @@ namespace Pinder.Core.Conversation
             ShadowCheckResult shadowCheck = null,
             string? trapClearedDisplayName = null,
             int shadowInterestDelta = 0,
-            int delayPenalty = 0)
+            int delayPenalty = 0,
+            int activeTrapInterestPenalty = 0,
+            int activeTrapInterestBefore = 0,
+            int activeTrapInterestPenaltyPercent = 0)
         {
             Roll = roll ?? throw new ArgumentNullException(nameof(roll));
             DeliveredMessage = deliveredMessage ?? throw new ArgumentNullException(nameof(deliveredMessage));
@@ -190,9 +197,12 @@ namespace Pinder.Core.Conversation
             ShadowCheck = shadowCheck ?? ShadowCheckResult.NotPerformed;
             TrapClearedDisplayName = trapClearedDisplayName;
             ShadowInterestDelta = shadowInterestDelta;
+            ActiveTrapInterestPenalty = activeTrapInterestPenalty;
+            ActiveTrapInterestBefore = activeTrapInterestBefore;
+            ActiveTrapInterestPenaltyPercent = activeTrapInterestPenaltyPercent;
             InterestBreakdown = BuildBreakdown(
                 baseInterestDelta, riskBonusDelta, comboBonusDelta,
-                shadowInterestDelta, horninessInterestPenalty, delayPenalty);
+                shadowInterestDelta, horninessInterestPenalty, delayPenalty, activeTrapInterestPenalty);
         }
 
         private static IReadOnlyList<InterestBreakdownItem> BuildBreakdown(
@@ -201,9 +211,10 @@ namespace Pinder.Core.Conversation
             int comboBonus,
             int shadowDelta,
             int horninesspenalty,
-            int delayPenalty)
+            int delayPenalty,
+            int activeTrapPenalty)
         {
-            var items = new List<InterestBreakdownItem>(6);
+            var items = new List<InterestBreakdownItem>(7);
             if (baseDelta != 0)
                 items.Add(new InterestBreakdownItem("base_roll", "Base roll", baseDelta));
             if (riskBonus != 0)
@@ -216,6 +227,8 @@ namespace Pinder.Core.Conversation
                 items.Add(new InterestBreakdownItem("horniness_trope_trap", "Horniness trope-trap", horninesspenalty));
             if (delayPenalty != 0)
                 items.Add(new InterestBreakdownItem("delay_penalty", "Delay penalty", delayPenalty));
+            if (activeTrapPenalty != 0)
+                items.Add(new InterestBreakdownItem("active_trap_penalty", "Active trap penalty", activeTrapPenalty));
             return items.AsReadOnly();
         }
     }

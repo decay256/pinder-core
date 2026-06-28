@@ -84,6 +84,16 @@ namespace Pinder.SessionSetup
                 string name = GetRequiredString(root, "name");
                 string genderIdentity = GetRequiredString(root, "gender_identity");
                 string bio = GetOptionalString(root, "bio") ?? string.Empty;
+                if (string.IsNullOrWhiteSpace(bio) && root.TryGetProperty("backstory_categories", out var cats) && cats.ValueKind == JsonValueKind.Object)
+                {
+                    if (cats.TryGetProperty("age_and_demographics", out var ageCat) && ageCat.ValueKind == JsonValueKind.Object)
+                    {
+                        if (ageCat.TryGetProperty("bio_lie", out var lieProp) && lieProp.ValueKind == JsonValueKind.String)
+                        {
+                            bio = lieProp.GetString() ?? string.Empty;
+                        }
+                    }
+                }
                 int level = GetRequiredInt(root, "level");
 
                 if (level < 1 || level > 11)

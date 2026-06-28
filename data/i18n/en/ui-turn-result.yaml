@@ -38,6 +38,7 @@ strings:
   turn_result.interest_breakdown.shadow_misfire: "Shadow: {original} → capped to +1"
   turn_result.interest_breakdown.horniness_penalty: "Horniness: no interest penalty"
   turn_result.interest_breakdown.delay_penalty: "Delay penalty: {value}"
+  turn_result.interest_breakdown.active_trap_penalty: "Active trap penalty (-{percent}%): {original} → {value}"
   turn_result.interest_breakdown.total: "= {value} (now {now})"
 
   turn_result.annotation_triple: "⚡ Combo: The Triple — +{bonus} to this roll"

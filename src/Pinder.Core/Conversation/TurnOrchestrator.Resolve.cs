@@ -157,7 +157,10 @@ namespace Pinder.Core.Conversation
                 shadowCheck: deliveryStage.ShadowCheckResult,
                 trapClearedDisplayName: rollStage.TrapClearedDisplayName,
                 shadowInterestDelta: deliveryStage.ShadowCorrection,
-                delayPenalty: 0);
+                delayPenalty: 0,
+                activeTrapInterestPenalty: rollStage.ActiveTrapInterestPenalty,
+                activeTrapInterestBefore: rollStage.ActiveTrapInterestBefore,
+                activeTrapInterestPenaltyPercent: rollStage.ActiveTrapInterestPenaltyPercent);
         }
     }
 }

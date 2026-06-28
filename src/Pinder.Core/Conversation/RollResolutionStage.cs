@@ -32,6 +32,9 @@ namespace Pinder.Core.Conversation
         public GameOutcome? Outcome { get; set; }
         public int TurnXpEarned { get; set; }
         public IReadOnlyList<string> ShadowGrowthEvents { get; set; }
+        public int ActiveTrapInterestBefore { get; set; }
+        public int ActiveTrapInterestPenalty { get; set; }
+        public int ActiveTrapInterestPenaltyPercent { get; set; }
     }
 
     internal class RollResolutionStage
@@ -216,9 +219,16 @@ namespace Pinder.Core.Conversation
             }
 
             // Apply active trap penalty (#1258)
-            if (state.Traps.HasActive && interestDelta > 0)
+            int activeTrapInterestBefore = 0;
+            int activeTrapInterestPenalty = 0;
+            int activeTrapInterestPenaltyPercent = 0;
+            if (state.Traps.HasActive && interestDelta > 0 && _activeTrapInterestPenalty != 0)
             {
-                interestDelta = (int)Math.Round(interestDelta * (1.0 + _activeTrapInterestPenalty), MidpointRounding.AwayFromZero);
+                activeTrapInterestBefore = interestDelta;
+                activeTrapInterestPenaltyPercent = (int)Math.Round(Math.Abs(_activeTrapInterestPenalty) * 100);
+                int penalizedDelta = (int)Math.Round(interestDelta * (1.0 + _activeTrapInterestPenalty), MidpointRounding.AwayFromZero);
+                activeTrapInterestPenalty = penalizedDelta - interestDelta;
+                interestDelta = penalizedDelta;
             }
 
             // 3d. Record roll XP (#48)
@@ -318,7 +328,10 @@ namespace Pinder.Core.Conversation
                 IsGameOver = isGameOver,
                 Outcome = outcome,
                 TurnXpEarned = turnXpEarned,
-                ShadowGrowthEvents = shadowGrowthEvents
+                ShadowGrowthEvents = shadowGrowthEvents,
+                ActiveTrapInterestBefore = activeTrapInterestBefore,
+                ActiveTrapInterestPenalty = activeTrapInterestPenalty,
+                ActiveTrapInterestPenaltyPercent = activeTrapInterestPenaltyPercent
             };
         }
     }
