@@ -462,16 +462,17 @@ public class PinderRunner : MonoBehaviour
         CharacterProfile datee = CharacterDefinitionLoader.Load(dateePath, items, anatomy);
 
         // 4. Construct the session. `GameSessionConfig` is required — the
-        //    engine refuses silent defaults. The zero-arg call is fine for
-        //    bring-up; see GameSessionConfig.cs for every knob (DC bias,
+        //    engine refuses silent defaults. Passing a clock is mandatory.
+        //    See GameSessionConfig.cs for every knob (DC bias,
         //    clock, shadow trackers, RNG, etc.).
-        var config       = new GameSessionConfig();
+        var config       = new GameSessionConfig { Clock = new GameClock(DateTime.UtcNow) };
         IDiceRoller dice = new SystemRandomDiceRoller(seed: null);  // null = nondeterministic
         _session = new GameSession(player, datee, llm, dice, traps, config);
     }
 
     public async Task PickOption(int optionIndex, IProgress<TurnProgressEvent>? progress = null)
     {
+        await _session.StartTurnAsync();
         TurnResult result = await _session.ResolveTurnAsync(optionIndex, progress);
         // result.DeliveredMessage ← the player's outgoing message after roll degradation
         // result.DateeMessage  ← datee reply
@@ -502,15 +503,15 @@ early text. A complete event taxonomy is at the top of
 ## 2. Snapshot / restore / replay
 
 The engine supports save / load via `GameStateSnapshot`. Call
-`session.Snapshot()` to serialise; pass the snapshot to
-`GameSession.Restore(...)` to resume:
+`session.CreateSnapshot()` to serialise; pass the snapshot to
+`GameSession.RestoreState(...)` to resume:
 
 ```csharp
-GameStateSnapshot snap = _session.Snapshot();
+GameStateSnapshot snap = _session.CreateSnapshot();
 var json = JsonConvert.SerializeObject(snap);
 PlayerPrefs.SetString("pinder.session", json);
 // ...later...
-var restored = GameSession.Restore(JsonConvert.DeserializeObject<GameStateSnapshot>(json),
+var restored = GameSession.RestoreState(JsonConvert.DeserializeObject<GameStateSnapshot>(json),
                                    player, datee, llm, dice, trapRegistry);
 ```
 
@@ -682,7 +683,7 @@ parameter only defines `short / medium / long / legendary`.
 2. **Map the unknown value** at load time. Write a
    migration step in your character loader:
 
-   ```csharp
+```csharp
    private static CharacterJson Migrate(CharacterJson c)
    {
        foreach (var kv in c.Anatomy.ToList())
@@ -692,7 +693,7 @@ parameter only defines `short / medium / long / legendary`.
        }
        return c;
    }
-   ```
+```
 3. **Reject the character** at load time with a clear error. Use this
    for content-team workflow — surfaces missing mistakes during
    character authoring rather than at runtime.
