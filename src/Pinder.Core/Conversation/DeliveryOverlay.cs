@@ -77,11 +77,11 @@ namespace Pinder.Core.Conversation
 
                 case FailureTier.Catastrophe:
                     // Missed by 10+: spectacular disaster — over-hedged, stumbling full line.
-                    return Flail(pickedLine);
+                    return GetStatTaintPrefix(stat) + Flail(pickedLine);
 
                 case FailureTier.Legendary:
                     // Nat 1: maximum humiliation — extremely flustered nervous opener, full body trailing off.
-                    return Panic(pickedLine);
+                    return GetStatTaintPrefix(stat) + Panic(pickedLine);
 
                 default:
                     return pickedLine;
@@ -144,6 +144,26 @@ namespace Pinder.Core.Conversation
             if (string.IsNullOrEmpty(s)) return s;
             if (!char.IsUpper(s[0])) return s;
             return char.ToLowerInvariant(s[0]) + s.Substring(1);
+        }
+
+        private static string GetStatTaintPrefix(StatType stat)
+        {
+            switch (stat)
+            {
+                case StatType.Rizz:
+                    return "*I'm ruining this...* ";
+                case StatType.SelfAwareness:
+                case StatType.Wit:
+                    return "(I know how this sounds...) ";
+                case StatType.Charm:
+                    return "*It has to be perfect...* ";
+                case StatType.Chaos:
+                    return "*Let it burn...* ";
+                case StatType.Honesty:
+                    return "*I'm filled with dread...* ";
+                default:
+                    return "";
+            }
         }
     }
 }

@@ -95,7 +95,7 @@ namespace Pinder.Core.Conversation
             // and this commit overlay are ephemeral; only the committed line is
             // persisted (by TurnOrchestrator), preserving the clean-history rule.
             progress?.Report(new TurnProgressEvent(TurnProgressStage.DeliveryStarted));
-            string deliveredMessage = DeliveryOverlay.Apply(originalIntendedText, rollResult.Tier, rollResult.MissMargin);
+            string deliveredMessage = DeliveryOverlay.Apply(originalIntendedText, rollResult.Tier, rollResult.MissMargin, chosenOption.Stat);
             progress?.Report(new TurnProgressEvent(TurnProgressStage.DeliveryCompleted, deliveredMessage));
 
             // #902 / SANITIZATION-INVARIANTS-MUST-RUN-AFTER-EACH-STAGE: meta-prefix
