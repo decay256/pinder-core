@@ -16,6 +16,7 @@ The `Pinder.Core.Characters` namespace handles character assembly — combining 
 | `src/Pinder.Core/Characters/AnatomyParameterDefinition.cs` | Anatomy parameter definition (e.g. "length") |
 | `src/Pinder.Core/Characters/AnatomyTierDefinition.cs` | Anatomy tier within a parameter (contributes fragments and archetype tendencies) |
 | `src/Pinder.Core/Characters/TimingModifier.cs` | Timing/pacing modifier from items |
+| `src/Pinder.Core/Conversation/EmotionStemSelector.cs` | Resolves target emotion stems based on conversation phase, spent indices, and derives posture manner via HFI/TOR quadrant mapping. |
 | `tests/Pinder.Core.Tests/ArchetypeLevelFilterTests.cs` | Tests for archetype catalog lookups, eligibility checks, and level-filtered assembly |
 
 ## API / Public Interface
@@ -56,12 +57,24 @@ public FragmentCollection Assemble(
     int characterLevel = 0);  // 0 = no level filtering (backward-compatible)
 ```
 
+### EmotionStemSelector
+
+```csharp
+public class EmotionStemSelector
+{
+    public EmotionStemSelector(int rngSeed);
+    public ResolvedRevelationTarget Resolve(ConversationState state);
+}
+```
+*Maps conversation state (TurnCount, InterestScore) to a Macro Phase with hysteresis buffer, selects an untouched string index based on weighted phase affinity, and computes a resolved manner using an HFI/TOR symmetrical quadrant mapping (`CURATED_BUFFER`, `DEFENSIVE_EVASION`, `INTIMATE_BREAKTHROUGH`, or `TRAUMATIC_LEAKAGE`), overridden if traps are present.*
+
 ## Architecture Notes
 
 - **Archetype level filtering**: When `characterLevel > 0`, `CharacterAssembler.Assemble` filters the counted archetypes through `ArchetypeCatalog.IsEligibleAtLevel` before ranking. If filtering eliminates all archetypes, it falls back to the unfiltered list so the character always has archetype data.
 - **Unknown archetypes**: Archetypes not present in the catalog are never filtered out — they are always considered eligible. This ensures forward compatibility with custom/new archetypes.
 - **Catalog data**: The 20 archetypes and their level ranges are hardcoded in `ArchetypeCatalog`, sourced from `rules/extracted/archetypes-enriched.yaml §3`. Level ranges span from 1–3 (e.g. "The Hey Opener") up to 1–10 (e.g. "The Ghost") and 5–11 (e.g. "The Sniper").
 - **Backward compatibility**: The `characterLevel` parameter defaults to `0`, preserving existing behavior for callers that don't pass a level.
+- **Emotion Stem Manner Quadrant**: HFI/TOR stats are clamped 0-20. Average is mapped via midpoint 10: Q1 (HFI < 10, TOR < 10) -> `CURATED_BUFFER`, Q2 (HFI < 10, TOR >= 10) -> `DEFENSIVE_EVASION`, Q3 (HFI >= 10, TOR >= 10) -> `INTIMATE_BREAKTHROUGH`, Q4 (HFI >= 10, TOR < 10) -> `TRAUMATIC_LEAKAGE`. Traps forcibly override this to `DEFENSIVE_EVASION`.
 
 ## Change Log
 | Date | Issue | Summary |

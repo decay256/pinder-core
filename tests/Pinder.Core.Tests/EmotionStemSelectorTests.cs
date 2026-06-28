@@ -1,57 +1,10 @@
 using System;
 using System.Collections.Generic;
 using Xunit;
+using Pinder.Core.Conversation;
 
 namespace Pinder.Core.Tests
 {
-    // --- STUBS FOR CONTRACT ---
-
-    public struct ResolvedRevelationTarget 
-    {
-        public string Registry; // "BACKSTORY" or "STAKE"
-        public int Index;
-        public string Field;    // "BIO_LIE" / "TRAGIC_REALITY" / "STAKE_LINE"
-        public string Manner;   // "CURATED" / "PRE_EMPTIVE" / "SINCERE" / "LEAKING"
-        public string StemText;
-        public string TransitionStyle;
-    }
-
-    public class EmotionStemSelector
-    {
-        public EmotionStemSelector(int rngSeed) 
-        {
-            throw new NotImplementedException();
-        }
-
-        public ResolvedRevelationTarget Resolve(ConversationState state)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class ConversationState
-    {
-        public int TurnCount { get; set; }
-        public int InterestScore { get; set; }
-        public string PreviousPhase { get; set; }
-        public List<string> ActiveTraps { get; set; } = new List<string>();
-        public HashSet<int> SpentBackstoryIndices { get; set; } = new HashSet<int>();
-        public HashSet<int> SpentStakeIndices { get; set; } = new HashSet<int>();
-        public Stats PlayerStats { get; set; } = new Stats();
-        public Stats DateeStats { get; set; } = new Stats();
-        public int PreviousResolvedIndex { get; set; }
-    }
-
-    public class Stats 
-    {
-        public int BaseHFI { get; set; }
-        public int BaseTOR { get; set; }
-        public int WinStreak { get; set; }
-        public int LossStreak { get; set; }
-    }
-
-    // --- TESTS ---
-
     [Trait("Category", "Core")]
     public class EmotionStemSelectorTests
     {
@@ -82,8 +35,8 @@ namespace Pinder.Core.Tests
             var selector = new EmotionStemSelector(42);
             var state = new ConversationState
             {
-                PlayerStats = new Stats { BaseHFI = 25, BaseTOR = -5 }, // Needs clamping to [0..20]
-                DateeStats = new Stats { BaseHFI = 15, BaseTOR = 15 }
+                PlayerStats = new ParticipantStats { BaseHFI = 25, BaseTOR = -5 }, // Needs clamping to [0..20]
+                DateeStats = new ParticipantStats { BaseHFI = 15, BaseTOR = 15 }
             };
 
             // Act
@@ -103,7 +56,7 @@ namespace Pinder.Core.Tests
             var selector = new EmotionStemSelector(42);
             var state = new ConversationState
             {
-                PlayerStats = new Stats { BaseHFI = 20, BaseTOR = 20 }, // Would normally be a SINCERE / Q3 manner
+                PlayerStats = new ParticipantStats { BaseHFI = 20, BaseTOR = 20 }, // Would normally be a SINCERE / Q3 manner
                 ActiveTraps = new List<string> { "DEFENSIVE_TRAP" } // Should override manner
             };
 
