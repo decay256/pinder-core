@@ -95,6 +95,11 @@ namespace Pinder.Core.Characters
         /// </summary>
         public IReadOnlyList<string> EquippedItemDisplayNames { get; }
 
+        /// <summary>
+        /// Issue #1259: The 20-category detailed backstory array mapping out their history and lies.
+        /// </summary>
+        public IReadOnlyDictionary<string, BackstoryFact>? BackstoryCategories { get; }
+
         /// <summary>Appends additional text to the assembled system prompt.</summary>
         public void AppendToSystemPrompt(string text)
         {
@@ -130,7 +135,8 @@ namespace Pinder.Core.Characters
             IReadOnlyList<string> equippedItemDisplayNames = null,
             IReadOnlyList<TextingStyleFragmentSource> textingStyleSources = null,
             string genderIdentity = "",
-            IReadOnlyList<string> textingStyleLines = null)
+            IReadOnlyList<string> textingStyleLines = null,
+            IReadOnlyDictionary<string, BackstoryFact>? backstoryCategories = null)
         {
             Stats = stats ?? throw new ArgumentNullException(nameof(stats));
             AssembledSystemPrompt = assembledSystemPrompt ?? throw new ArgumentNullException(nameof(assembledSystemPrompt));
@@ -149,6 +155,7 @@ namespace Pinder.Core.Characters
             // #781: final aggregated texting-style lines. Defaults to empty
             // list so existing callers (test fixtures) don't need to pass it.
             TextingStyleLines = textingStyleLines ?? new System.Collections.Generic.List<string>();
+            BackstoryCategories = backstoryCategories;
         }
     }
 }

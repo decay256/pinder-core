@@ -3,7 +3,6 @@
   "character_id": "e6a72ae2-d73a-4b44-a474-63b21e8084ec",
   "name": "Zyx_444",
   "gender_identity": "they/them",
-  "bio": "resigned from capitalism in 2022. currently between frameworks. can feel the earth's frequency and own one jar of preserved mushrooms per emotional event. ask me about Pemberton.",
   "level": 1,
   "items": [
     "face_nariz1",
@@ -59,5 +58,86 @@
     }
   },
   "psychological_stake": "- The most humiliating thing that happened to me this week was when a barista at Communion in Oakland asked if my pronouns were \"real or, like, for the bit\".\n- The thing about my body I'm convinced everyone notices but actually no one does is a single curly hair on my left shaft I have named \"the witness\".\n- My last sexual accident was when I lost my erection mid-ritual with a partner named River in Topanga in 2024 because I heard a coyote and thought it was \"a sign\".\n- The kink I've never said out loud to anyone is being firmly told what is real and what is not by someone with a clipboard and a kind voice.\n- The substance I leaned on harder than I should have last month was microdosed psilocybin every weekday for nineteen days, and I used it to \"work on my novel\" which is one paragraph.\n- The most embarrassing impulse purchase on my last bank statement is a ,200 \"ancestral resonance bowl\" from an Etsy seller who has since deleted their account.\n- If you opened my browser history at 3am last Tuesday you'd find \"am i dissociating or just hungry\" and the public benefits portal for Alameda County.\n- The last lie I told on a dating profile was claiming I'm \"between projects\" — I have been between projects since I quit my UX job at Stripe in 2022.\n- The most undignified thing my body did in public recently was loudly wet-burping at a silent meditation retreat in Marin during the third hour of noble silence.\n- The thing I do alone in my apartment that I'd be humiliated to be filmed doing is having full out-loud conversations with the mushroom in a jar on my windowsill named Pemberton.\n- The single object in my bedroom I could not explain to a stranger is a laminated index card that just says \"FRIDAY = NO\" with no further context.\n- The last time I cried was at the Berkeley Bowl produce section last Wednesday because someone had moved the kabocha squash.\n- My last named ex was Frances Mott-Akiyama and it ended because they said I \"used spirituality as a load-bearing wall\" and I could not refute it.\n- The lowest professional moment of the last year was when my own roommate Saoirse offered me $500 to \"just get a normal job\".\n- The thing I genuinely believe will happen to me in the next two years that everyone else would call delusional is being identified by a future generation as a minor mystic of the Bay Area.",
-  "background_story": "After six years working as a database engineer and wearing suits every day, they resigned on a Tuesday with four weeks' notice, dry-cleaning their last suit the day before handing it in and buying harem pants the same week; they have not worn a structured waistband in fourteen months and do not miss it. They spent the first three months of unemployment camping and foraging alone in the forest, going barefoot intentionally for the first time and walking two kilometres of forest floor on the second day before making a decision that ended their ownership of shoes, returning with seventeen jars of preserved mushrooms and a different operating system. During those months they attended a meditation retreat where a stranger gave them a crystal for clarity without elaborating after forty minutes of conversation, and where someone dared them into something the version of themselves they were building would accept; that person is still in their life. The morning after returning from the camping period they started their first journal in a children's exercise book bought from a petrol station and have filled fourteen since, though the petrol station one remains the most important. Earlier in life a wordless hierarchy announced in a school changing room at fourteen led them"
+  "backstory_categories": {
+    "age_and_demographics": {
+      "bio_lie": "resigned from capitalism in 2022. currently between frameworks. can feel the earth's frequency and own one jar of preserved mushrooms per emotional event. ask me about Pemberton.",
+      "tragic_reality": "After six years working as a database engineer and wearing suits every day, they resigned on a Tuesday with four weeks' notice, dry-cleaning their last suit the day before handing it in and buying harem pants the same week; they have not worn a structured waistband in fourteen months and do not miss it. They spent the first three months of unemployment camping and foraging alone in the forest, going barefoot intentionally for the first time and walking two kilometres of forest floor on the second day before making a decision that ended their ownership of shoes, returning with seventeen jars of preserved mushrooms and a different operating system. During those months they attended a meditation retreat where a stranger gave them a crystal for clarity without elaborating after forty minutes of conversation, and where someone dared them into something the version of themselves they were building would accept; that person is still in their life. The morning after returning from the camping period they started their first journal in a children's exercise book bought from a petrol station and have filled fourteen since, though the petrol station one remains the most important. Earlier in life a wordless hierarchy announced in a school changing room at fourteen led them"
+    },
+    "birthplace_and_origin": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "childhood_milieu": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "parental_dynamics": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "early_education_scars": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "higher_education": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "formative_intimacies": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "career_debut": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "current_profession": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "financial_hygiene": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "domestic_milieu": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "social_circle": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "recent_ex": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "career_low": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "delusional_plan": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "hyperfixations": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "ideological_posture": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "digital_footprint": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "physical_dysmorphia": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    },
+    "dependencies": {
+      "bio_lie": "Not specified",
+      "tragic_reality": "Not specified"
+    }
+  }
 }

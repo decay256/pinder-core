@@ -87,6 +87,11 @@ namespace Pinder.Core.Characters
         /// </summary>
         public string? BackgroundStory { get; }
 
+        /// <summary>
+        /// Issue #1259: The 20-category detailed backstory array mapping out their history and lies.
+        /// </summary>
+        public IReadOnlyDictionary<string, BackstoryFact>? BackstoryCategories { get; }
+
         public CharacterDefinition(
             int schemaVersion,
             Guid characterId,
@@ -98,19 +103,21 @@ namespace Pinder.Core.Characters
             IReadOnlyDictionary<string, float> anatomy,
             AllocationBlock allocation,
             string? psychologicalStake = null,
-            string? backgroundStory = null)
+            string? backgroundStory = null,
+            IReadOnlyDictionary<string, BackstoryFact>? backstoryCategories = null)
         {
             SchemaVersion  = schemaVersion;
             CharacterId    = characterId;
             Name           = name           ?? throw new ArgumentNullException(nameof(name));
             GenderIdentity = genderIdentity ?? throw new ArgumentNullException(nameof(genderIdentity));
-            Bio            = bio            ?? throw new ArgumentNullException(nameof(bio));
+            Bio            = bio            ?? string.Empty;
             Level          = level;
             Items          = items          ?? throw new ArgumentNullException(nameof(items));
             Anatomy        = anatomy        ?? throw new ArgumentNullException(nameof(anatomy));
             Allocation     = allocation     ?? throw new ArgumentNullException(nameof(allocation));
             PsychologicalStake = psychologicalStake;
             BackgroundStory    = backgroundStory;
+            BackstoryCategories = backstoryCategories;
         }
     }
 

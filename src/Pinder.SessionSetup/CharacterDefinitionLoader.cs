@@ -83,7 +83,7 @@ namespace Pinder.SessionSetup
 
                 string name = GetRequiredString(root, "name");
                 string genderIdentity = GetRequiredString(root, "gender_identity");
-                string bio = GetRequiredString(root, "bio");
+                string bio = GetOptionalString(root, "bio") ?? string.Empty;
                 int level = GetRequiredInt(root, "level");
 
                 if (level < 1 || level > 11)
@@ -113,6 +113,14 @@ namespace Pinder.SessionSetup
                         backgroundStory = raw.Trim();
                 }
 
+                // Issue #1259: backstory categories
+                IReadOnlyDictionary<string, BackstoryFact>? backstoryCategories = null;
+                if (root.TryGetProperty("backstory_categories", out var catsProp) &&
+                    catsProp.ValueKind == JsonValueKind.Object)
+                {
+                    backstoryCategories = ParseBackstoryCategories(catsProp);
+                }
+
                 return new CharacterDefinition(
                     schemaVersion,
                     characterId,
@@ -124,7 +132,8 @@ namespace Pinder.SessionSetup
                     anatomy,
                     allocation,
                     psychologicalStake,
-                    backgroundStory);
+                    backgroundStory,
+                    backstoryCategories);
             }
         }
 
@@ -218,9 +227,10 @@ namespace Pinder.SessionSetup
                 // and only used for the assembled system prompt.
                 genderIdentity: def.GenderIdentity,
                 // #781: expose the final aggregated texting-style lines
-                // so the admin-facing character sheet can show the full
+                // the admin-facing character sheet can show the full
                 // composed template without re-running the aggregator.
-                textingStyleLines: aggregationResult.Lines);
+                textingStyleLines: aggregationResult.Lines,
+                backstoryCategories: def.BackstoryCategories);
 
             // Issue #779: propagate the permanent stake from the definition
             // to the profile so setup can read it without an LLM call.
@@ -267,10 +277,17 @@ namespace Pinder.SessionSetup
 
         private static string GetRequiredString(JsonElement root, string fieldName)
         {
+            string? val = GetOptionalString(root, fieldName);
+            if (val == null) throw new FormatException($"Character definition missing required field: {fieldName}");
+            return val;
+        }
+
+        private static string? GetOptionalString(JsonElement root, string fieldName)
+        {
             if (!root.TryGetProperty(fieldName, out var prop) ||
                 prop.ValueKind != JsonValueKind.String)
             {
-                throw new FormatException($"Character definition missing required field: {fieldName}");
+                return null;
             }
             return prop.GetString()!;
         }
@@ -425,6 +442,31 @@ namespace Pinder.SessionSetup
                 case "overthinking":  result = ShadowStatType.Overthinking;  return true;
                 default:              result = default;                       return false;
             }
+        }
+
+        private static Dictionary<string, BackstoryFact> ParseBackstoryCategories(JsonElement root)
+        {
+            var categories = new Dictionary<string, BackstoryFact>();
+            foreach (var kv in root.EnumerateObject())
+            {
+                if (kv.Value.ValueKind != JsonValueKind.Object) continue;
+                
+                var fact = new BackstoryFact();
+                
+                // Handle both snake_case and PascalCase
+                if (kv.Value.TryGetProperty("bio_lie", out var bioLieProp) && bioLieProp.ValueKind == JsonValueKind.String)
+                    fact.BioLie = bioLieProp.GetString() ?? string.Empty;
+                else if (kv.Value.TryGetProperty("BioLie", out var bioLiePropPascal) && bioLiePropPascal.ValueKind == JsonValueKind.String)
+                    fact.BioLie = bioLiePropPascal.GetString() ?? string.Empty;
+
+                if (kv.Value.TryGetProperty("tragic_reality", out var trProp) && trProp.ValueKind == JsonValueKind.String)
+                    fact.TragicReality = trProp.GetString() ?? string.Empty;
+                else if (kv.Value.TryGetProperty("TragicReality", out var trPropPascal) && trPropPascal.ValueKind == JsonValueKind.String)
+                    fact.TragicReality = trPropPascal.GetString() ?? string.Empty;
+
+                categories[kv.Name] = fact;
+            }
+            return categories;
         }
     }
 }

@@ -187,9 +187,8 @@ namespace Pinder.Core.Tests
                 ""allocation"": { ""spent"": { ""charm"": 1, ""rizz"": 1, ""honesty"": 1, ""chaos"": 1, ""wit"": 1, ""self_awareness"": 1 }, ""unspent_pool"": 0, ""shadows"": { ""madness"": 0, ""despair"": 0, ""denial"": 0, ""fixation"": 0, ""dread"": 0, ""overthinking"": 0 } }
             }";
 
-            var ex = Assert.Throws<FormatException>(() =>
-                CharacterDefinitionLoader.Parse(json, itemRepo, anatomyRepo));
-            Assert.Contains("bio", ex.Message, StringComparison.OrdinalIgnoreCase);
+            var def = CharacterDefinitionLoader.Parse(json, itemRepo, anatomyRepo);
+            Assert.Equal(string.Empty, def.Bio);
         }
 
         // Fails if: Missing "level" field not detected
