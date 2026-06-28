@@ -109,15 +109,13 @@ Accumulates user/assistant messages for stateful multi-turn conversations with t
 Data carrier for game-level creative direction. Parsed from YAML or provided via hardcoded defaults. All properties are non-null strings set at construction.
 
 - **`Name`** (`string`) — Game name (e.g. "Pinder").
-- **`Vision`** (`string`) — Creative brief: what the game is, tone, goal.
-- **`WorldDescription`** (`string`) — World setting description.
-- **`PlayerRoleDescription`** (`string`) — Player character role description.
+- **`GameMasterPrompt`** (`string`) — The complete, pre-assembled Game Master base system prompt.
+- **`PlayerAvatarRoleDescription`** (`string`) — Player character role description.
 - **`DateeRoleDescription`** (`string`) — Datee character role description.
-- **`MetaContract`** (`string`) — Immersion rules: never break character, [ENGINE] blocks as stage directions.
-- **`WritingRules`** (`string`) — Writing style rules: texting register, brevity, character voice fidelity.
-- **`GameDefinition(string name, string vision, string worldDescription, string playerRoleDescription, string dateeRoleDescription, string metaContract, string writingRules)`** — Constructor. Throws `ArgumentNullException` if any argument is null. Empty strings are allowed.
-- **`LoadFrom(string yamlContent)`** (`static`) — Parses a YAML string into a `GameDefinition`. Maps keys: `name`, `vision`, `world_description`, `player_role_description`, `datee_role_description`, `meta_contract`, `writing_rules`. Extra YAML keys are ignored. Throws `ArgumentNullException` if `yamlContent` is null. Throws `FormatException` if YAML is unparseable, a required key is missing, or a key has a null value. Block scalar newlines are preserved as-is from the YAML parser (no trimming). Uses `YamlDotNet 16.3.0` with `UnderscoredNamingConvention`.
-- **`PinderDefaults`** (`static GameDefinition`) — Hardcoded fallback with all 7 fields populated with Pinder-specific creative direction: comedy dating RPG, sentient penises, absurdist world, d20 mechanics, shadow stats, texting register, immersion rules. Usable in production playtests.
+- **`GlobalDcBias`** (`int`) — Global DC bias applied to all rolls.
+- **`GameDefinition(...)`** — Constructor. Throws `ArgumentNullException` if required arguments are null.
+- **`LoadFrom(string yamlContent)`** (`static`) — Parses a YAML string into a `GameDefinition`. Maps keys: `name`, `game_master_prompt`, `player_avatar_role_description`, `datee_role_description`, `global_dc_bias`. Extra YAML keys are ignored. Throws `ArgumentNullException` if `yamlContent` is null. Throws `FormatException` if YAML is unparseable, a required key is missing, or a key has a null value.
+- **`PinderDefaults`** (`static GameDefinition`) — Hardcoded fallback with core fields populated with Pinder-specific creative direction. Usable in production playtests.
 
 ### `SessionSystemPromptBuilder` (public static class)
 
@@ -131,11 +129,9 @@ public static string Build(
 ```
 
 - Returns a single string with 5 sections delimited by `== SECTION NAME ==` headers:
-  1. **== GAME VISION ==** — from `gameDef.Vision`
-  2. **== WORLD RULES ==** — from `gameDef.WorldDescription`
+  1. **== GAME MASTER PROMPT ==** — from `gameDef.GameMasterPrompt`
   3. **== PLAYER CHARACTER ==** — `playerPrompt` verbatim
   4. **== DATEE CHARACTER ==** — `dateePrompt` verbatim
-  5. **== META CONTRACT ==** — `gameDef.MetaContract` + `gameDef.WritingRules` concatenated
 - Each section body is trimmed of trailing whitespace via `TrimEnd()`.
 - When `gameDef` is `null`, `GameDefinition.PinderDefaults` is used.
 - Throws `ArgumentNullException` if `playerPrompt` or `dateePrompt` is null. Empty strings are allowed.

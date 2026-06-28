@@ -72,20 +72,11 @@ returns zero hits in `src/`).
 | `PlayerPrompt` | `PlayerAvatarPrompt` | property on `DialogueContext` |
 | `BuildPlayer` (system prompt) | `BuildPlayerAvatar` / `BuildPlayerAvatarEx` | `SessionSystemPromptBuilder` methods |
 | `BuildPlayerOnlySystemBlocks` | `BuildPlayerAvatarOnlySystemBlocks` | `CacheBlockBuilder` method |
-| `player_role_description` | `player_avatar_role_description` | `data/game-definition.yaml` key (renamed in #1133) |
-| `player_probing` | `player_avatar_probing` | `data/game-definition.yaml` key |
-| `PlayerRoleDescription` | `PlayerAvatarRoleDescription` | `GameDefinition` property |
+| `historical_player_role_description` | `player_avatar_role_description` | `data/game-definition.yaml` key (renamed in #1133) |
+| `historical_player_probing` | `player_avatar_probing` | `data/game-definition.yaml` key |
+| `HistoricalPlayerRoleDescription` | `PlayerAvatarRoleDescription` | `GameDefinition` property |
 | *(none — new in #1123)* | `DateeContext.PlayerAvatarCard` | the avatar's PUBLIC dating-app card (`PublicProfileCard`) handed to the datee session for bleed isolation |
 
-> **Backward-compat note (#1133).** The YAML parser still accepts the
-> legacy `player_role_description` key as a fallback for
-> `player_avatar_role_description`
-> ([`GameDefinition.Parser.cs`](../src/Pinder.LlmAdapters/GameDefinition.Parser.cs),
-> `GetRequiredWithFallback`). New content should use the new key; the
-> fallback exists only so unmigrated data files don't hard-fail. There
-> is no compatibility shim for the C# identifiers — those are renamed
-> outright.
->
 > **No `DateeCard`.** There is deliberately no `DateeCard` type. The
 > datee never receives a card *for the player* beyond the public
 > `PublicProfileCard` (carried as `DateeContext.PlayerAvatarCard`); the
