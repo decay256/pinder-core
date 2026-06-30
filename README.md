@@ -39,6 +39,15 @@ DC = 16 + datee's defending stat modifier
 | 10+ | +3 |
 | Nat 20 | +4 |
 
+## Versioning
+
+The C# project version is centralized in `Directory.Build.props` at the root of the repository. All `.csproj` files automatically inherit this version.
+
+To increment the version:
+1. Open `Directory.Build.props`.
+2. Update the `<Version>` tag (e.g., from `0.1.0` to `0.1.1`).
+3. Build the solution to apply the new version to all assemblies.
+
 ## Running Tests
 
 ```bash
