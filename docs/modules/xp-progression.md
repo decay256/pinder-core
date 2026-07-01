@@ -10,7 +10,7 @@ The `Pinder.Core.Progression` namespace and related XP logic in `GameSession` ha
 | `src/Pinder.Core/Progression/XpLedger.cs` | Append-only event log accumulating XP events with source labels and amounts. Supports `DrainTurnEvents()` for per-turn consumption. |
 | `src/Pinder.Core/Progression/LevelTable.cs` | Static lookup table mapping XP → level, level → roll bonus, build points, item slots, and failure pool tier. Matches rules §10. |
 | `src/Pinder.Core/Conversation/GameSession.cs` | Contains `RecordXp()` (per-turn XP awards) and `ApplyRiskTierMultiplier()` (risk-tier XP scaling). Owns the `XpLedger` instance. |
-| `src/Pinder.Core/Conversation/TurnResult.cs` | Exposes `XpEarned` — the total XP awarded for a single turn. |
+| `src/Pinder.Core/Conversation/TurnResult.cs` | Exposes `XpEarned` — the total XP awarded for a single turn, and `XpBreakdown` — the itemized list of XP events for the turn. |
 | `tests/Pinder.Core.Tests/XpRiskTierMultiplierSpecTests.cs` | Tests for risk-tier XP multiplier (issue #314): all four tiers, Nat20/Nat1/failure flat values, rounding, ledger consistency. |
 
 ## API / Public Interface
@@ -109,9 +109,11 @@ Rounding: `(int)Math.Round(baseXp * multiplier)` — midpoint rounds to nearest 
 - **The multiplier is computed in `GameSession`** (private static method `ApplyRiskTierMultiplier`), not in the `Progression` namespace. The multiplied value is what gets recorded in the ledger.
 - **DC buckets determine base XP**: low (≤13) = 5, mid (14–17) = 10, high (≥18) = 15. Risk tier determines the multiplier independently of DC.
 - **`TurnResult.XpEarned`** equals the sum of all ledger events recorded during that turn, ensuring consistency between the return value and the ledger.
+- **`TurnResult.XpBreakdown`** exposes the itemized `IReadOnlyList<XpLedger.XpEvent>` of XP events earned during the turn.
 
 ## Change Log
 
 | Date | Issue | Summary |
 |------|-------|---------|
 | 2026-04-03 | #314 | Initial creation — documented XP risk-tier multiplier (Safe=1×, Medium=1.5×, Hard=2×, Bold=3×) applied to successful rolls. Multiplier uses `Math.Round`. Flat XP for Nat20 (25), Nat1 (10), failure (2). Added `XpRiskTierMultiplierSpecTests.cs` (344 lines, 14 tests). |
+| 2026-07-01 | #1281 | Added `XpBreakdown` property to `TurnResult` to expose itemized XP events. |
