@@ -522,11 +522,17 @@ namespace Pinder.LlmAdapters
                 return message;
             }
 
-            string systemPrompt = "You are editing a text message for Pinder, a satirical comedy dating app. " +
-                "Apply the shadow corruption instruction to rewrite the delivered message. " +
-                "The message has already been through its normal delivery transformation. " +
-                "Now the character's shadow stat is corrupting it further. " +
-                "Return ONLY the corrupted message text. No commentary, no preamble, no refusals.";
+            if (!string.IsNullOrWhiteSpace(_options.OverlayGroqModel) && !string.IsNullOrWhiteSpace(_options.OverlayGroqApiKey))
+            {
+                return await GroqOverlayApplier.ApplyShadowCorruptionAsync(_options.OverlayGroqApiKey, _options.OverlayGroqModel, message, instruction, shadow, archetypeDirective, ct, _options.OnOverlayDegraded).ConfigureAwait(false);
+            }
+
+            string systemPrompt = "You are editing dialogue for Pinder, a comedy RPG where sentient penises date each other on a fictional app. " +
+                $"The character's {shadow} shadow corruption is flaring up, turning them into an absolute lunatic! " +
+                "Rewrite the message to make it EXTREMELY unhinged, distinct, and hilariously comedic, " +
+                "dramatically applying the requested shadow corruption instruction while staying in the character's voice. " +
+                "Be wildly creative, ridiculous, and funny, but return ONLY the rewritten message text. " +
+                "No commentary, no meta-text, no preamble, and no refusals. Absolute silence except for the unhinged rewrite.";
 
             // Inject the speaker's active archetype directive (#372) so the
             // shadow-corrupted rewrite still sounds like the character.
