@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Pinder.Core.Rolls;
 using Pinder.Core.Text;
+using Pinder.Core.Progression;
 
 namespace Pinder.Core.Conversation
 {
@@ -128,6 +129,11 @@ namespace Pinder.Core.Conversation
         public IReadOnlyList<InterestBreakdownItem> InterestBreakdown { get; }
 
         /// <summary>
+        /// Itemized per-source XP breakdown for this turn.
+        /// </summary>
+        public IReadOnlyList<XpLedger.XpEvent> XpBreakdown { get; }
+
+        /// <summary>
         /// Display name of the trap that was disarmed at the start of this turn
         /// by the player selecting a Self-Awareness option (issue #371). Null when
         /// no SA-disarm fired (no trap was active, or chosen option was not SA).
@@ -176,7 +182,8 @@ namespace Pinder.Core.Conversation
             ResolvedRevelationTarget? resolvedTarget = null,
             string? cognitiveSubtext = null,
             int hungerForIntimacy = 0,
-            int terrorOfRejection = 0)
+            int terrorOfRejection = 0,
+            IReadOnlyList<XpLedger.XpEvent>? xpBreakdown = null)
         {
             Roll = roll ?? throw new ArgumentNullException(nameof(roll));
             DeliveredMessage = deliveredMessage ?? throw new ArgumentNullException(nameof(deliveredMessage));
@@ -213,6 +220,7 @@ namespace Pinder.Core.Conversation
             CognitiveSubtext = cognitiveSubtext;
             HungerForIntimacy = hungerForIntimacy;
             TerrorOfRejection = terrorOfRejection;
+            XpBreakdown = xpBreakdown ?? Array.Empty<XpLedger.XpEvent>();
             InterestBreakdown = BuildBreakdown(
                 baseInterestDelta, riskBonusDelta, comboBonusDelta,
                 shadowInterestDelta, horninessInterestPenalty, delayPenalty, activeTrapInterestPenalty);

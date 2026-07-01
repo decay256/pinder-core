@@ -141,6 +141,7 @@ namespace Pinder.Core.Conversation
                 tellReadBonus: rollStage.TellBonus,
                 tellReadMessage: rollStage.TellBonus > 0 ? $"📖 You read the moment. +{rollStage.TellBonus} bonus." : null,
                 xpEarned: rollStage.TurnXpEarned,
+                xpBreakdown: rollStage.TurnXpEvents,
                 baseInterestDelta: rollStage.BaseInterestDelta,
                 riskBonusDelta: rollStage.RiskBonusDelta,
                 riskTier: rollStage.RollResult.RiskTier,

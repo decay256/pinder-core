@@ -31,6 +31,7 @@ namespace Pinder.Core.Conversation
         public bool IsGameOver { get; set; }
         public GameOutcome? Outcome { get; set; }
         public int TurnXpEarned { get; set; }
+        public IReadOnlyList<XpLedger.XpEvent> TurnXpEvents { get; set; }
         public IReadOnlyList<string> ShadowGrowthEvents { get; set; }
         public int ActiveTrapInterestBefore { get; set; }
         public int ActiveTrapInterestPenalty { get; set; }
@@ -328,6 +329,7 @@ namespace Pinder.Core.Conversation
                 IsGameOver = isGameOver,
                 Outcome = outcome,
                 TurnXpEarned = turnXpEarned,
+                TurnXpEvents = turnXpEvents,
                 ShadowGrowthEvents = shadowGrowthEvents,
                 ActiveTrapInterestBefore = activeTrapInterestBefore,
                 ActiveTrapInterestPenalty = activeTrapInterestPenalty,
