@@ -88,3 +88,11 @@ Phase 5. Tests pin this byte-equality so a Phase-N PR that
 accidentally tunes a string in the yaml without touching the const —
 or vice versa — fails loudly. After Phase 5 the const is gone and
 the test is rewritten to lock the yaml render alone.
+
+## Groq Overlay Routing for Shadow Corruptions
+
+Shadow corruptions now support routing to the Groq overlay applier. This behavior is gated on the presence of both `OverlayGroqModel` and `OverlayGroqApiKey` in the LLM adapter options (mirroring the routing logic for horniness and trap overlays).
+
+If both parameters are provided, shadow corruptions bypass the primary LLM transport entirely and run through `GroqOverlayApplier.ApplyShadowCorruptionAsync` using a highly unhinged and comedic system rewrite prompt that includes the target shadow stat name.
+
+If either parameter is missing, the adapter falls back to the primary LLM transport, using the same unhinged rewrite system prompt.

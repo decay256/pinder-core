@@ -264,5 +264,122 @@ namespace Pinder.LlmAdapters.Groq
                 return message;
             }
         }
+
+        public static async Task<string> ApplyShadowCorruptionAsync(
+            string groqApiKey,
+            string model,
+            string message,
+            string instruction,
+            Pinder.Core.Stats.ShadowStatType shadow,
+            string? archetypeDirective,
+            System.Threading.CancellationToken ct,
+            Action<OverlayDegradedEvent>? onDegraded)
+        {
+            if (string.IsNullOrWhiteSpace(message) || string.IsNullOrWhiteSpace(instruction))
+            {
+                if (string.IsNullOrWhiteSpace(instruction))
+                {
+                    onDegraded?.Invoke(new OverlayDegradedEvent(
+                        overlayType: "shadow_corruption",
+                        provider: "groq",
+                        model: model,
+                        reason: "skipped_no_instruction",
+                        outcome: OverlayOutcome.Skipped
+                    ));
+                }
+                return message;
+            }
+
+            string systemPrompt = "You are editing dialogue for Pinder, a comedy RPG where sentient penises date each other on a fictional app. " +
+                $"The character's {shadow} shadow corruption is flaring up, turning them into an absolute lunatic! " +
+                "Rewrite the message to make it EXTREMELY unhinged, distinct, and hilariously comedic, " +
+                "dramatically applying the requested shadow corruption instruction while staying in the character's voice. " +
+                "Be wildly creative, ridiculous, and funny, but return ONLY the rewritten message text. " +
+                "No commentary, no meta-text, no preamble, and no refusals. Absolute silence except for the unhinged rewrite.";
+
+            string userContent = !string.IsNullOrWhiteSpace(archetypeDirective)
+                ? $"{archetypeDirective}\n\nSHADOW CORRUPTION ({shadow}) INSTRUCTION:\n{instruction}\n\nORIGINAL MESSAGE:\n{message}\n\nApply the corruption (preserving the archetype voice above, but making it hilariously unhinged/comedic) and return the modified message."
+                : $"SHADOW CORRUPTION ({shadow}) INSTRUCTION:\n{instruction}\n\nORIGINAL MESSAGE:\n{message}\n\nApply the corruption (making it hilariously unhinged/comedic) and return the modified message.";
+
+            var payload = new
+            {
+                model = model,
+                max_tokens = 400,
+                messages = new[]
+                {
+                    new { role = "system", content = systemPrompt },
+                    new { role = "user", content = userContent }
+                }
+            };
+
+            var request = new HttpRequestMessage(HttpMethod.Post, "https://api.groq.com/openai/v1/chat/completions");
+            request.Headers.Add("Authorization", $"Bearer {groqApiKey}");
+            request.Content = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json");
+
+            try
+            {
+                var response = await _http.SendAsync(request, ct).ConfigureAwait(false);
+                var body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                if (!response.IsSuccessStatusCode)
+                {
+                    onDegraded?.Invoke(new OverlayDegradedEvent(
+                        overlayType: "shadow_corruption",
+                        provider: "groq",
+                        model: model,
+                        reason: "http_error",
+                        outcome: OverlayOutcome.Degraded,
+                        errorCode: ((int)response.StatusCode).ToString()
+                    ));
+                    return message;
+                }
+
+                var json = JObject.Parse(body);
+                var text = json["choices"]?[0]?["message"]?["content"]?.Value<string>()?.Trim();
+
+                if (string.IsNullOrWhiteSpace(text))
+                {
+                    onDegraded?.Invoke(new OverlayDegradedEvent(
+                        overlayType: "shadow_corruption",
+                        provider: "groq",
+                        model: model,
+                        reason: "empty_output",
+                        outcome: OverlayOutcome.Degraded
+                    ));
+                    return message;
+                }
+
+                if (text!.StartsWith("I can't", StringComparison.OrdinalIgnoreCase) ||
+                    text.StartsWith("I cannot", StringComparison.OrdinalIgnoreCase) ||
+                    text.IndexOf("inappropriate", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    onDegraded?.Invoke(new OverlayDegradedEvent(
+                        overlayType: "shadow_corruption",
+                        provider: "groq",
+                        model: model,
+                        reason: "refusal",
+                        outcome: OverlayOutcome.Degraded
+                    ));
+                    return message;
+                }
+
+                return text;
+            }
+            catch (OperationCanceledException) when (ct.IsCancellationRequested)
+            {
+                throw; // #794: cancellation must propagate.
+            }
+            catch (Exception ex)
+            {
+                onDegraded?.Invoke(new OverlayDegradedEvent(
+                    overlayType: "shadow_corruption",
+                    provider: "groq",
+                    model: model,
+                    reason: "error",
+                    outcome: OverlayOutcome.Degraded,
+                    errorCode: ex.GetType().Name
+                ));
+                return message;
+            }
+        }
     }
 }
