@@ -44,6 +44,11 @@ namespace Pinder.Core.Prompts
     /// character UUID, but the rule itself no longer consults RNG —
     /// the seed is unused in v1. It may return as a tie-breaker in a
     /// future revision.
+    ///
+    /// Determinism guarantee: Aggregation output is a pure function of the
+    /// input sources and conflict catalog. It is entirely independent of the
+    /// seedKey and is stable byte-for-byte across repeated calls and across
+    /// different sessions or process lifetimes.
     /// </summary>
     public static partial class TextingStyleAggregator
     {
@@ -137,6 +142,10 @@ namespace Pinder.Core.Prompts
         /// Aggregate the texting-style sources into the joined string that
         /// gets injected into the LLM system prompt / runtime player
         /// style. Implements the #836 v1 rule with #907 conflict resolution.
+        ///
+        /// Determinism Guarantee: The aggregation output is a pure function of the
+        /// input sources and conflict catalog, is completely independent of the
+        /// seedKey, and is stable byte-for-byte across repeated calls and across sessions.
         ///
         /// Uses <see cref="ConflictCatalog"/> when set (assigned by
         /// <c>PromptWiring.Wire()</c>), otherwise falls back to
@@ -255,7 +264,13 @@ namespace Pinder.Core.Prompts
             var pickedPairs = new List<(string axis, string value)>();
 
             // Syntax axes — read from the slot's item, if equipped.
-            foreach (var kv in SlotToSyntaxAxis)
+            // Order slot-to-axis mappings canonically/deterministically to ensure stable evaluation sequence across different environments and sessions.
+            var canonicalAxisList = CanonicalAxisOrder.ToList();
+            var orderedSlotToSyntaxAxis = SlotToSyntaxAxis
+                .OrderBy(kv => canonicalAxisList.IndexOf(kv.Value))
+                .ThenBy(kv => kv.Key, StringComparer.Ordinal);
+
+            foreach (var kv in orderedSlotToSyntaxAxis)
             {
                 string slot = kv.Key;
                 string axis = kv.Value;

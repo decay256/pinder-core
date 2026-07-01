@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Pinder.Core.Characters;
 using Pinder.Core.Data;
 using Pinder.Core.Interfaces;
@@ -230,5 +231,145 @@ namespace Pinder.Core.Tests.Prompts
                 TextingStyleAggregator.ConflictCatalog = saved;
             }
         }
+
+        #region AC_Deterministic_TextingStyle_Tests
+
+        [Fact]
+        public void RepeatedAggregation_IsByteForByteIdenticalAndStable()
+        {
+            var conflicts = LoadRealConflictCatalog();
+            var sources = ZyxConflictSources();
+
+            var firstResult = TextingStyleAggregator.AggregateWithAudit(sources, "zyx-test", conflicts);
+            Assert.NotNull(firstResult);
+
+            for (int i = 0; i < 4; i++)
+            {
+                var currentResult = TextingStyleAggregator.AggregateWithAudit(sources, "zyx-test", conflicts);
+                Assert.NotNull(currentResult);
+
+                // Assert result.Lines sequence is byte-for-byte identical
+                Assert.Equal(firstResult.Lines.Count, currentResult.Lines.Count);
+                Assert.True(firstResult.Lines.SequenceEqual(currentResult.Lines, StringComparer.Ordinal));
+
+                // Assert result.Drops count/content identical across runs
+                Assert.Equal(firstResult.Drops.Count, currentResult.Drops.Count);
+                for (int j = 0; j < firstResult.Drops.Count; j++)
+                {
+                    var expectedDrop = firstResult.Drops[j];
+                    var actualDrop = currentResult.Drops[j];
+                    Assert.Equal(expectedDrop.Axis, actualDrop.Axis);
+                    Assert.Equal(expectedDrop.DroppedValue, actualDrop.DroppedValue);
+                }
+            }
+        }
+
+        [Fact]
+        public void SeedIndependence_DoesNotAffectAggregationResult()
+        {
+            var conflicts = LoadRealConflictCatalog();
+            var sources = ZyxConflictSources();
+
+            var seeds = new List<string?>
+            {
+                null,
+                "",
+                "some-fixed-seed",
+                Guid.NewGuid().ToString(),
+                Guid.NewGuid().ToString(),
+                Guid.NewGuid().ToString()
+            };
+
+            var firstResult = TextingStyleAggregator.AggregateWithAudit(sources, null, conflicts);
+            var firstAggregate = TextingStyleAggregator.Aggregate(sources, null, conflicts);
+
+            foreach (var seed in seeds)
+            {
+                var result = TextingStyleAggregator.AggregateWithAudit(sources, seed, conflicts);
+                var aggregate = TextingStyleAggregator.Aggregate(sources, seed, conflicts);
+
+                // Assert result.Lines sequence is identical
+                Assert.True(firstResult.Lines.SequenceEqual(result.Lines, StringComparer.Ordinal));
+
+                // Assert aggregated string is identical
+                Assert.Equal(firstAggregate, aggregate);
+            }
+        }
+
+        [Fact]
+        public void ProductionPath_RepeatedLoad_IsIdenticalAndStable()
+        {
+            var itemRepo = LoadItemRepo();
+            var anatomyRepo = LoadAnatomyRepo();
+            string zyxPath = Path.Combine(RepoRoot, "data", "characters", "zyx.json");
+
+            string? firstFragment = null;
+            IReadOnlyList<string>? firstLines = null;
+
+            for (int i = 0; i < 3; i++)
+            {
+                var profile = CharacterDefinitionLoader.Load(zyxPath, itemRepo, anatomyRepo);
+                Assert.NotNull(profile);
+
+                if (firstFragment == null)
+                {
+                    firstFragment = profile.TextingStyleFragment;
+                    firstLines = profile.TextingStyleLines;
+                    Assert.NotNull(firstFragment);
+                    Assert.NotNull(firstLines);
+                }
+                else
+                {
+                    Assert.Equal(firstFragment, profile.TextingStyleFragment);
+                    Assert.True(firstLines.SequenceEqual(profile.TextingStyleLines, StringComparer.Ordinal));
+                }
+            }
+        }
+
+        [Fact]
+        public void ListVsStringConsistency_AcrossRepeats_IsIdentical()
+        {
+            var conflicts = LoadRealConflictCatalog();
+            var sources = ZyxConflictSources();
+            string seedKey = "zyx-test";
+
+            IReadOnlyList<string>? firstList = null;
+
+            for (int i = 0; i < 5; i++)
+            {
+                var currentList = TextingStyleAggregator.AggregateAsList(sources, seedKey, conflicts);
+                var currentString = TextingStyleAggregator.Aggregate(sources, seedKey, conflicts);
+
+                Assert.NotNull(currentList);
+                Assert.NotNull(currentString);
+
+                // Assert that the string form equals the joined list form
+                string expectedString = currentList.Count == 0
+                    ? string.Empty
+                    : string.Join(" | ", currentList);
+
+                Assert.Equal(expectedString, currentString);
+
+                if (firstList == null)
+                {
+                    firstList = currentList;
+                }
+                else
+                {
+                    Assert.True(firstList.SequenceEqual(currentList, StringComparer.Ordinal));
+                }
+            }
+
+            // Also assert consistency when the list is empty, verifying that string form == string.Empty
+            var emptySources = Array.Empty<TextingStyleFragmentSource>();
+            var emptyList = TextingStyleAggregator.AggregateAsList(emptySources, seedKey, conflicts);
+            var emptyString = TextingStyleAggregator.Aggregate(emptySources, seedKey, conflicts);
+
+            Assert.NotNull(emptyList);
+            Assert.Empty(emptyList);
+            Assert.Equal(string.Empty, emptyString);
+        }
+
+        #endregion
     }
 }
