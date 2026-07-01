@@ -338,7 +338,17 @@ namespace Pinder.Core.Tests.Prompts
             for (int i = 0; i < 5; i++)
             {
                 var currentList = TextingStyleAggregator.AggregateAsList(sources, seedKey, conflicts);
+                var currentString = TextingStyleAggregator.Aggregate(sources, seedKey, conflicts);
+
                 Assert.NotNull(currentList);
+                Assert.NotNull(currentString);
+
+                // Assert that the string form equals the joined list form
+                string expectedString = currentList.Count == 0
+                    ? string.Empty
+                    : string.Join(" | ", currentList);
+
+                Assert.Equal(expectedString, currentString);
 
                 if (firstList == null)
                 {
@@ -349,6 +359,15 @@ namespace Pinder.Core.Tests.Prompts
                     Assert.True(firstList.SequenceEqual(currentList, StringComparer.Ordinal));
                 }
             }
+
+            // Also assert consistency when the list is empty, verifying that string form == string.Empty
+            var emptySources = Array.Empty<TextingStyleFragmentSource>();
+            var emptyList = TextingStyleAggregator.AggregateAsList(emptySources, seedKey, conflicts);
+            var emptyString = TextingStyleAggregator.Aggregate(emptySources, seedKey, conflicts);
+
+            Assert.NotNull(emptyList);
+            Assert.Empty(emptyList);
+            Assert.Equal(string.Empty, emptyString);
         }
 
         #endregion
