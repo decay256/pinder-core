@@ -83,8 +83,8 @@ Rounding: `(int)Math.Round(baseXp * multiplier)` — midpoint rounds to nearest 
 
 | Outcome | XP |
 |---|---|
-| DateSecured | 50 |
-| Unmatched / Ghosted | 5 |
+| DateSecured | 3.0x |
+| Unmatched / Ghosted | 1.0x |
 
 ### Level Thresholds
 
