@@ -642,6 +642,7 @@ delivery_instructions:
       would that be flattering or actionable?"
 
 shadow_corruption:
+  # Design boundary: Madness prompt rolls must strictly preserve texting distance and never invent physical/same-room knowledge of the datee.
   madness:
     description: >-
       MADNESS is cosmic horror on a dating app. The app has been open too long.
@@ -650,6 +651,7 @@ shadow_corruption:
       Do not describe madness. Let it leak into the existing message. Use
       specific details from this conversation to make the contamination feel
       like it was always there.
+      CRITICAL: Never describe or imply impossible physical-world knowledge of the datee — not what they are wearing, what they are doing in their private room, their physical habits, or their immediate surroundings — nothing that would require being in the same room as them. This is a texting app; you have never met. Keep every uncanny observation abstract, environmental in a general sense, or focused on the sender's own setting and mind, preserving the distance of the texting medium.
     fumble: >-
       SHADOW TAINT: MADNESS (Fumble — one wrong detail).
       Take the message. Add one sentence or phrase at the end that doesn't
@@ -660,6 +662,7 @@ shadow_corruption:
       atmosphere?" → delivered "...or are you mostly there for the atmosphere?
       The honey smells different there." — the extra sentence. The honey.
       What honey.
+      CRITICAL: Never describe or imply impossible physical-world knowledge of the datee — not what they are wearing, what they are doing in their private room, their physical habits, or their immediate surroundings — nothing that would require being in the same room as them. This is a texting app; you have never met. Keep every uncanny observation abstract, environmental in a general sense, or focused on the sender's own setting and mind, preserving the distance of the texting medium.
     misfire: >-
       SHADOW TAINT: MADNESS (Misfire — the message has sprouted something).
       Take the message. Insert a clause mid-message that sounds like it
@@ -669,6 +672,7 @@ shadow_corruption:
       e.g.: inserted "I went once and I think the man at the bread stall was
       watching me the whole time but every time I looked up he was looking at
       someone else." — the contamination has a face now.
+      CRITICAL: Never describe or imply impossible physical-world knowledge of the datee — not what they are wearing, what they are doing in their private room, their physical habits, or their immediate surroundings — nothing that would require being in the same room as them. This is a texting app; you have never met. Keep every uncanny observation abstract, environmental in a general sense, or focused on the sender's own setting and mind, preserving the distance of the texting medium.
     trope_trap: >-
       SHADOW TAINT: MADNESS (TropeTrap — the message starts fine then something
       happens). Take the message. Keep the opening as intended. Then, mid-way,
@@ -679,6 +683,7 @@ shadow_corruption:
       e.g.: "...I timed it once. Seventeen minutes of walking before I found
       a wall. I think about that sometimes." — the cosmic horror is in the
       specificity.
+      CRITICAL: Never describe or imply impossible physical-world knowledge of the datee — not what they are wearing, what they are doing in their private room, their physical habits, or their immediate surroundings — nothing that would require being in the same room as them. This is a texting app; you have never met. Keep every uncanny observation abstract, environmental in a general sense, or focused on the sender's own setting and mind, preserving the distance of the texting medium.
     catastrophe: >-
       SHADOW TAINT: MADNESS (Catastrophe — the void has typed for them).
       Rewrite the entire message as if it has been authored by something that
@@ -691,6 +696,7 @@ shadow_corruption:
       e.g.: "...The cars in the parking lot are all facing the same direction.
       I notice this now. I notice this at all parking lots now. You have very
       good posture in your photos."
+      CRITICAL: Never describe or imply impossible physical-world knowledge of the datee — not what they are wearing, what they are doing in their private room, their physical habits, or their immediate surroundings — nothing that would require being in the same room as them. This is a texting app; you have never met. Keep every uncanny observation abstract, environmental in a general sense, or focused on the sender's own setting and mind, preserving the distance of the texting medium.
 
   despair:
     description: >-
