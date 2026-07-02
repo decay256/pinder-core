@@ -7,7 +7,6 @@ using Pinder.Core.Conversation;
 using Pinder.Core.Interfaces;
 using Pinder.Core.Stats;
 using Pinder.LlmAdapters.Anthropic;
-using Pinder.LlmAdapters.Groq;
 
 namespace Pinder.LlmAdapters
 {

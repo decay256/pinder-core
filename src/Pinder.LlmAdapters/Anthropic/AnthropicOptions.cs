@@ -23,12 +23,6 @@ namespace Pinder.LlmAdapters.Anthropic
 
         public string? DebugDirectory { get; set; }
 
-        /// <summary>Reserved slot 1 for backward compatibility after symbol cleanup.</summary>
-        public string? ReservedSlot1 { get; set; }
-
-        /// <summary>Reserved slot 2 for backward compatibility after symbol cleanup.</summary>
-        public string? ReservedSlot2 { get; set; }
-
         /// <summary>
         /// Per-stat, per-tier delivery instructions loaded from delivery-instructions.yaml.
         /// When set, overrides the hardcoded tier instructions in SessionDocumentBuilder.
