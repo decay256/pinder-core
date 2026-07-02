@@ -91,14 +91,14 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             Assert.Equal(0.6, opts.InterestChangeBeatTemperature);
         }
 
-        // What: AC3 — Exactly 13 public instance properties exist
+        // What: AC3 — Exactly 11 public instance properties exist
         // Mutation: would catch if a property was missing or extra ones were added
         [Fact]
-        public void AnthropicOptions_Has_Exactly13_PublicProperties()
+        public void AnthropicOptions_Has_Exactly11_PublicProperties()
         {
             var props = typeof(AnthropicOptions).GetProperties(
                 System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
-            Assert.Equal(13, props.Length);
+            Assert.Equal(11, props.Length);
         }
 
         #endregion

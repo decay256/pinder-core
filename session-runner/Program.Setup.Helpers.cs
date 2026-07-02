@@ -131,23 +131,16 @@ partial class Program
         }
         else
         {
-            string? groqApiKey = !string.IsNullOrWhiteSpace(result.OverlayModel)
-                ? Environment.GetEnvironmentVariable("GROQ_API_KEY")
-                : null;
             if (!string.IsNullOrWhiteSpace(result.OverlayModel))
             {
-                Console.Error.WriteLine($"Overlay model: {result.OverlayModel} (Groq)");
-                if (string.IsNullOrWhiteSpace(groqApiKey))
-                    Console.Error.WriteLine("[WARN] GROQ_API_KEY not set — overlay calls will fall back to primary transport");
-                adapterOptions.OverlayGroqModel = result.OverlayModel;
-                adapterOptions.OverlayGroqApiKey = groqApiKey;
+                Console.Error.WriteLine($"[WARN] Overlay model '{result.OverlayModel}' requested but overlay routing via option fields was removed (#1293); overlay calls will use the primary transport. Wire a dedicated overlay ILlmTransport to route overlays.");
             }
             string anthropicModel = "claude-sonnet-4-20250514";
             var transport = new AnthropicTransport(result.ApiKey, anthropicModel);
             result.Llm = new PinderLlmAdapter(transport, adapterOptions);
             engineLabel = string.IsNullOrWhiteSpace(result.OverlayModel)
                 ? $"PinderLlmAdapter + AnthropicTransport → {anthropicModel}"
-                : $"PinderLlmAdapter + AnthropicTransport → {anthropicModel} (overlay: {result.OverlayModel} via Groq)";
+                : $"PinderLlmAdapter + AnthropicTransport → {anthropicModel} (overlay: unrouted)";
         }
     }
 
