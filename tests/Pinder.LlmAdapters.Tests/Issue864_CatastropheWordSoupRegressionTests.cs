@@ -33,7 +33,7 @@ namespace Pinder.LlmAdapters.Tests
         public async Task ApplyHorninessOverlay_EmptyInstruction_ReturnsOriginalWithoutLlmCall()
         {
             // #864 note:
-            // The original word-count skip-guard lived in the now-deleted AnthropicOverlayApplier;
+            // The original word-count skip-guard lived in the now-deleted vendor-specific overlay applier class;
             // PinderLlmAdapter has no word-count guard (and #1293 must not modify the restricted PinderLlmAdapter.cs),
             // so this preserves the regression's intent — the overlay returns the original text with ZERO LLM calls
             // for input it must not rewrite — via the adapter's real empty-input skip-guard.
