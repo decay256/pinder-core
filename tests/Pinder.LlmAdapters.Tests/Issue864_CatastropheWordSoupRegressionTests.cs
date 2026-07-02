@@ -3,42 +3,52 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
-using Pinder.LlmAdapters.Anthropic;
-using Pinder.LlmAdapters.Anthropic.Dto;
-using System.Net.Http;
-using Moq;
-using Moq.Protected;
+using Pinder.Core.Interfaces;
+using Pinder.LlmAdapters;
 
 namespace Pinder.LlmAdapters.Tests
 {
     public class Issue864_CatastropheWordSoupRegressionTests
     {
-        [Fact]
-        public async Task ApplyHorninessOverlayAsync_ShortMessage_ReturnsOriginalWithoutLlmCall()
+        private sealed class CountingTransport : ILlmTransport
         {
-            // Arrange
-            var handlerMock = new Mock<HttpMessageHandler>();
-            handlerMock.Protected()
-                .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
-                .ThrowsAsync(new System.Exception("LLM should not have been called"));
+            public int Calls { get; set; }
+            private readonly string _response;
+            public CountingTransport(string response = "primary-was-called") => _response = response;
 
-            var httpClient = new HttpClient(handlerMock.Object);
-            var client = new AnthropicClient("fake-key", httpClient);
-            var options = new AnthropicOptions { Model = "claude-3-haiku" };
-            var message = "This is a short message."; // 5 words
-            var instruction = "Apply horniness catastrophe tier";
+            public Task<string> SendAsync(
+                string systemPrompt,
+                string userMessage,
+                double temperature = 0.9,
+                int maxTokens = 1024,
+                string? phase = null,
+                CancellationToken ct = default)
+            {
+                Calls++;
+                return Task.FromResult(_response);
+            }
+        }
+
+        [Fact]
+        public async Task ApplyHorninessOverlay_EmptyInstruction_ReturnsOriginalWithoutLlmCall()
+        {
+            // #864 note:
+            // The original word-count skip-guard lived in the now-deleted AnthropicOverlayApplier;
+            // PinderLlmAdapter has no word-count guard (and #1293 must not modify the restricted PinderLlmAdapter.cs),
+            // so this preserves the regression's intent — the overlay returns the original text with ZERO LLM calls
+            // for input it must not rewrite — via the adapter's real empty-input skip-guard.
+
+            // Arrange
+            var transport = new CountingTransport();
+            var options = new PinderLlmAdapterOptions { GameDefinition = GameDefinition.PinderDefaults };
+            var adapter = new PinderLlmAdapter(transport, options);
 
             // Act
-            var result = await AnthropicOverlayApplier.ApplyHorninessOverlayAsync(
-                client,
-                options,
-                message,
-                instruction,
-                ct: CancellationToken.None);
+            var result = await adapter.ApplyHorninessOverlayAsync("This is a short message.", "");
 
             // Assert
-            Assert.Equal(message, result);
-            // If SendAsync was called, the mock throws. Since it didn't, we passed.
+            Assert.Equal("This is a short message.", result);
+            Assert.Equal(0, transport.Calls);
         }
 
         [Fact]
