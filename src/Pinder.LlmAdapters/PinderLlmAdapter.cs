@@ -26,15 +26,26 @@ namespace Pinder.LlmAdapters
         private const double DefaultDateeResponseTemperature = 0.85;
 
         private readonly ILlmTransport _transport;
+        private readonly ILlmTransport _overlayTransport;
         private readonly PinderLlmAdapterOptions _options;
 
         // #788: datee conversation state lives on GameSession, not here.
         // The adapter is pure-stateless and safe for concurrent reuse across sessions.
 
-        public PinderLlmAdapter(ILlmTransport transport, PinderLlmAdapterOptions options)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PinderLlmAdapter"/> class.
+        /// </summary>
+        /// <param name="transport">The primary LLM transport.</param>
+        /// <param name="options">The adapter configuration options.</param>
+        /// <param name="overlayTransport">The optional secondary transport for overlay rewriting.</param>
+        /// <remarks>
+        /// When null, overlay calls (ApplyHorninessOverlayAsync/ApplyTrapOverlayAsync/ApplyShadowCorruptionAsync) use the same transport as primary game-turn calls. Pass a distinct transport (built the same way as the primary transport, via whatever factory the host application uses to resolve provider-qualified model specs) to route overlay rewrites to a different/cheaper model. Overlay routing must never be selected by vendor-specific fields on PinderLlmAdapterOptions — the transport instance is the only routing mechanism.
+        /// </remarks>
+        public PinderLlmAdapter(ILlmTransport transport, PinderLlmAdapterOptions options, ILlmTransport? overlayTransport = null)
         {
             _transport = transport ?? throw new ArgumentNullException(nameof(transport));
             _options = options ?? throw new ArgumentNullException(nameof(options));
+            _overlayTransport = overlayTransport ?? transport;
         }
 
         // ── ILlmAdapter ────────────────────────────────────────────────────
@@ -318,14 +329,6 @@ namespace Pinder.LlmAdapters
                 return message;
             }
 
-            // Route to Groq if configured
-            if (!string.IsNullOrWhiteSpace(_options.OverlayGroqModel) && !string.IsNullOrWhiteSpace(_options.OverlayGroqApiKey))
-            {
-                return await GroqOverlayApplier.ApplyHorninessOverlayAsync(
-                    _options.OverlayGroqApiKey, _options.OverlayGroqModel, message, instruction, dateeContext, archetypeDirective, ct, _options.OnOverlayDegraded)
-                    .ConfigureAwait(false);
-            }
-
             // Use primary transport
             string systemPrompt = "You are editing dialogue for Pinder, a comedy RPG where sentient penises date each other on a fictional app. " +
                 "The humour is absurdist and satirical — characters are oblivious to double-entendre, not explicit. " +
@@ -345,7 +348,7 @@ namespace Pinder.LlmAdapters
             try
             {
                 double temperature = _options.DeliveryTemperature ?? 0.7;
-                var result = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.HorninessOverlay, ct: ct)
+                var result = await _overlayTransport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.HorninessOverlay, ct: ct)
                     .ConfigureAwait(false);
 
                 if (string.IsNullOrWhiteSpace(result))
@@ -421,14 +424,6 @@ namespace Pinder.LlmAdapters
                 return message;
             }
 
-            // Route to Groq when configured — same path as horniness/shadow overlays.
-            if (!string.IsNullOrWhiteSpace(_options.OverlayGroqModel) && !string.IsNullOrWhiteSpace(_options.OverlayGroqApiKey))
-            {
-                return await GroqOverlayApplier.ApplyTrapOverlayAsync(
-                    _options.OverlayGroqApiKey, _options.OverlayGroqModel, message, trapInstruction, trapName, dateeContext, archetypeDirective, ct, _options.OnOverlayDegraded)
-                    .ConfigureAwait(false);
-            }
-
             string systemPrompt = "You are editing dialogue for Pinder, a comedy RPG where sentient penises date each other on a fictional app. " +
                 "The humour is absurdist and satirical — characters are oblivious to double-entendre, not explicit. " +
                 "A trap is currently corrupting the character's voice. " +
@@ -447,7 +442,7 @@ namespace Pinder.LlmAdapters
             try
             {
                 double temperature = _options.DeliveryTemperature ?? 0.7;
-                var result = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.TrapOverlay, ct: ct)
+                var result = await _overlayTransport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.TrapOverlay, ct: ct)
                     .ConfigureAwait(false);
 
                 if (string.IsNullOrWhiteSpace(result))
@@ -522,11 +517,6 @@ namespace Pinder.LlmAdapters
                 return message;
             }
 
-            if (!string.IsNullOrWhiteSpace(_options.OverlayGroqModel) && !string.IsNullOrWhiteSpace(_options.OverlayGroqApiKey))
-            {
-                return await GroqOverlayApplier.ApplyShadowCorruptionAsync(_options.OverlayGroqApiKey, _options.OverlayGroqModel, message, instruction, shadow, archetypeDirective, ct, _options.OnOverlayDegraded).ConfigureAwait(false);
-            }
-
             string systemPrompt = "You are editing dialogue for Pinder, a comedy RPG where sentient penises date each other on a fictional app. " +
                 $"The character's {shadow} shadow corruption is flaring up, turning them into an absolute lunatic! " +
                 "Rewrite the message to make it EXTREMELY unhinged, distinct, and hilariously comedic, " +
@@ -543,7 +533,7 @@ namespace Pinder.LlmAdapters
             try
             {
                 double temperature = _options.DeliveryTemperature ?? 0.7;
-                var result = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.ShadowCorruption, ct: ct)
+                var result = await _overlayTransport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.ShadowCorruption, ct: ct)
                     .ConfigureAwait(false);
 
                 if (string.IsNullOrWhiteSpace(result))
