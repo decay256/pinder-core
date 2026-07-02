@@ -89,6 +89,6 @@ accidentally tunes a string in the yaml without touching the const —
 or vice versa — fails loudly. After Phase 5 the const is gone and
 the test is rewritten to lock the yaml render alone.
 
-## Groq Overlay Routing for Shadow Corruptions
+## Overlay Transport Routing
 
 Overlay calls (horniness/trap/shadow-corruption) use a second, optional ILlmTransport passed to PinderLlmAdapter's constructor. When omitted, overlays use the same transport as primary game-turn calls. There is no vendor-specific overlay routing inside the adapter — the host application controls which model/vendor handles overlays purely by which transport instance it constructs and passes in. (GameApi wiring for this is tracked in a separate follow-up ticket.)
