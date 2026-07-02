@@ -53,18 +53,6 @@ namespace Pinder.LlmAdapters
         public double? DateeResponseTemperature { get; set; }
 
         /// <summary>
-        /// Optional Groq API key for routing horniness overlay calls to Groq.
-        /// When null, overlay calls use the primary transport.
-        /// </summary>
-        public string? OverlayGroqApiKey { get; set; }
-
-        /// <summary>
-        /// Optional Groq model name for horniness overlay routing.
-        /// When null, overlay calls use the primary transport.
-        /// </summary>
-        public string? OverlayGroqModel { get; set; }
-
-        /// <summary>
         /// #950: optional callback invoked when the option generator returns N options with
         /// zero references to the active stake content. Receives a diagnostic string of the
         /// form "option_generator_skipped_stake turn={N} stake_lines={M} stake_hits=0".
