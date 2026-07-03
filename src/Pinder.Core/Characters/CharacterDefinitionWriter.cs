@@ -112,6 +112,7 @@ namespace Pinder.Core.Characters
             writer.WriteString("character_id", def.CharacterId.ToString("D"));
             writer.WriteString("name", def.Name);
             writer.WriteString("gender_identity", def.GenderIdentity);
+            writer.WriteString("bio", def.Bio);
             writer.WriteNumber("level", def.Level);
 
             writer.WriteStartArray("items");

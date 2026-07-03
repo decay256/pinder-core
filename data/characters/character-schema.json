@@ -10,6 +10,7 @@
     "character_id",
     "name",
     "gender_identity",
+    "bio",
     "level",
     "items",
     "anatomy",
@@ -36,6 +37,11 @@
       "type": "string",
       "minLength": 1,
       "description": "Free-form gender identity string (e.g. \"he/him\", \"they/them\")."
+    },
+    "bio": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Short biography / Tinder profile bio shown to opposing player."
     },
     "level": {
       "type": "integer",
