@@ -22,10 +22,6 @@ namespace Pinder.Core.Characters
     ///
     /// As of issue #1176:
     /// - Item ids are Unity-verbatim (e.g. "head_tophat", "vest1", "classic2").
-    /// - Conflict/priority resolution: when two equipped items share a
-    ///   conflict_tag, the higher-priority item wins; ties go to the earlier
-    ///   equip order. The lower-priority conflicting item's fragments are
-    ///   suppressed (its stat modifiers still apply).
     /// - Unknown item ids (no core definition) → zero modifiers, id collected
     ///   in <see cref="FragmentCollection.UnknownItemIds"/> for admin authoring.
     ///   Player flow never hard-fails.
@@ -66,7 +62,7 @@ namespace Pinder.Core.Characters
             int characterLevel = 0,
             bool archetypesEnabled = false)
         {
-            // --- 1. Resolve items, track unknowns, and run conflict/priority resolution ---
+            // --- 1. Resolve items, track unknowns ---
 
             var unknownIds    = new List<string>();
             var resolvedItems = new List<ItemDefinition>();
@@ -95,7 +91,7 @@ namespace Pinder.Core.Characters
             }
 
             // --- 2. Sum stat modifiers on top of player base stats -----------------
-            // Stat modifiers apply to ALL resolved items (including conflict-losers).
+            // Stat modifiers apply to ALL resolved items.
 
             var statSums = new Dictionary<StatType, int>();
             foreach (StatType st in Enum.GetValues(typeof(StatType)))
