@@ -1,13 +1,28 @@
 using System;
+using System.Collections.Generic;
+using Pinder.Core.Conversation;
+using Pinder.Core.Interfaces;
+using Pinder.Core.Rolls;
 
 namespace Pinder.LlmAdapters
 {
+    public class ConfigurationException : Exception
+    {
+        public ConfigurationException(string message) : base(message) { }
+        public ConfigurationException(string message, Exception innerException) : base(message, innerException) { }
+    }
+
     /// <summary>
     /// Data carrier for game-level creative direction.
     /// Parsed from YAML or provided via hardcoded defaults.
     /// </summary>
-    public partial class GameDefinition
+    public partial class GameDefinition : IRuleResolver
     {
+        static GameDefinition()
+        {
+            Pinder.Core.Interfaces.DefaultRuleResolver.Instance = PinderDefaults;
+        }
+
         /// <summary>Game name (e.g. "Pinder").</summary>
         public string Name { get; }
 
@@ -67,6 +82,17 @@ namespace Pinder.LlmAdapters
 
         public int TerrorOfRejection { get; }
 
+        // The 9 new properties
+        public IReadOnlyDictionary<string, int> XpFlatAwards { get; }
+        public IReadOnlyDictionary<string, int> XpSuccessBase { get; }
+        public IReadOnlyDictionary<string, double> XpRiskMultipliers { get; }
+        public IReadOnlyDictionary<string, double> XpTerminalMultipliers { get; }
+        public IReadOnlyDictionary<string, int> ProgressionXpThresholds { get; }
+        public IReadOnlyDictionary<string, int> ProgressionBuildPoints { get; }
+        public IReadOnlyDictionary<string, int> ProgressionLevelBonuses { get; }
+        public IReadOnlyDictionary<string, int> ProgressionItemSlots { get; }
+        public IReadOnlyDictionary<string, int> ProgressionFailurePoolTiers { get; }
+
         public GameDefinition(
             string name,
             string gameMasterPrompt,
@@ -85,7 +111,16 @@ namespace Pinder.LlmAdapters
             int maxDeliveryWords = 80,
             double activeTrapInterestPenalty = -0.25,
             int hungerForIntimacy = 0,
-            int terrorOfRejection = 0)
+            int terrorOfRejection = 0,
+            IReadOnlyDictionary<string, int>? xpFlatAwards = null,
+            IReadOnlyDictionary<string, int>? xpSuccessBase = null,
+            IReadOnlyDictionary<string, double>? xpRiskMultipliers = null,
+            IReadOnlyDictionary<string, double>? xpTerminalMultipliers = null,
+            IReadOnlyDictionary<string, int>? progressionXpThresholds = null,
+            IReadOnlyDictionary<string, int>? progressionBuildPoints = null,
+            IReadOnlyDictionary<string, int>? progressionLevelBonuses = null,
+            IReadOnlyDictionary<string, int>? progressionItemSlots = null,
+            IReadOnlyDictionary<string, int>? progressionFailurePoolTiers = null)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             GameMasterPrompt = gameMasterPrompt ?? throw new ArgumentNullException(nameof(gameMasterPrompt));
@@ -105,6 +140,151 @@ namespace Pinder.LlmAdapters
             ActiveTrapInterestPenalty = activeTrapInterestPenalty;
             HungerForIntimacy = hungerForIntimacy;
             TerrorOfRejection = terrorOfRejection;
+
+            XpFlatAwards = xpFlatAwards ?? new Dictionary<string, int>();
+            XpSuccessBase = xpSuccessBase ?? new Dictionary<string, int>();
+            XpRiskMultipliers = xpRiskMultipliers ?? new Dictionary<string, double>();
+            XpTerminalMultipliers = xpTerminalMultipliers ?? new Dictionary<string, double>();
+            ProgressionXpThresholds = progressionXpThresholds ?? new Dictionary<string, int>();
+            ProgressionBuildPoints = progressionBuildPoints ?? new Dictionary<string, int>();
+            ProgressionLevelBonuses = progressionLevelBonuses ?? new Dictionary<string, int>();
+            ProgressionItemSlots = progressionItemSlots ?? new Dictionary<string, int>();
+            ProgressionFailurePoolTiers = progressionFailurePoolTiers ?? new Dictionary<string, int>();
+        }
+
+        // IRuleResolver Implementation
+        public int? GetFailureInterestDelta(int missMargin, int naturalRoll) => null;
+        public int? GetSuccessInterestDelta(int beatMargin, int naturalRoll) => null;
+        public InterestState? GetInterestState(int interest) => null;
+        public int? GetShadowThresholdLevel(int shadowValue) => null;
+        public int? GetMomentumBonus(int streak) => null;
+
+        public double? GetRiskTierXpMultiplier(RiskTier riskTier)
+        {
+            if (XpRiskMultipliers == null)
+                throw new ConfigurationException("Risk multipliers configuration is missing.");
+
+            string key = riskTier switch
+            {
+                RiskTier.Safe => "safe",
+                RiskTier.Medium => "medium",
+                RiskTier.Hard => "hard",
+                RiskTier.Bold => "bold",
+                RiskTier.Reckless => "reckless",
+                _ => throw new ArgumentOutOfRangeException(nameof(riskTier))
+            };
+
+            if (XpRiskMultipliers.TryGetValue(key, out double val)) return val;
+            throw new KeyNotFoundException($"Missing risk multiplier for tier {riskTier}");
+        }
+
+        public double? GetTerminalOutcomeMultiplier(GameOutcome outcome)
+        {
+            if (XpTerminalMultipliers == null)
+                throw new ConfigurationException("Terminal multipliers configuration is missing.");
+
+            string key = outcome switch
+            {
+                GameOutcome.DateSecured => "date_secured",
+                GameOutcome.Unmatched => "unmatched",
+                GameOutcome.Ghosted => "ghosted",
+                _ => throw new ArgumentOutOfRangeException(nameof(outcome))
+            };
+
+            if (XpTerminalMultipliers.TryGetValue(key, out double val)) return val;
+            throw new KeyNotFoundException($"Missing terminal multiplier for outcome {outcome}");
+        }
+
+        public int? GetSuccessBaseXp(int dc)
+        {
+            if (XpSuccessBase == null)
+                throw new ConfigurationException("Success base XP configuration is missing.");
+
+            if (!XpSuccessBase.TryGetValue("dc_low_max", out int dcLowMax))
+                throw new KeyNotFoundException("Missing dc_low_max in xp_success_base config.");
+            if (!XpSuccessBase.TryGetValue("dc_low_xp", out int dcLowXp))
+                throw new KeyNotFoundException("Missing dc_low_xp in xp_success_base config.");
+            if (!XpSuccessBase.TryGetValue("dc_mid_max", out int dcMidMax))
+                throw new KeyNotFoundException("Missing dc_mid_max in xp_success_base config.");
+            if (!XpSuccessBase.TryGetValue("dc_mid_xp", out int dcMidXp))
+                throw new KeyNotFoundException("Missing dc_mid_xp in xp_success_base config.");
+            if (!XpSuccessBase.TryGetValue("dc_high_xp", out int dcHighXp))
+                throw new KeyNotFoundException("Missing dc_high_xp in xp_success_base config.");
+
+            if (dc <= dcLowMax) return dcLowXp;
+            if (dc <= dcMidMax) return dcMidXp;
+            return dcHighXp;
+        }
+
+        public int? GetFlatXpAward(string awardType)
+        {
+            if (XpFlatAwards == null)
+                throw new ConfigurationException("Flat awards configuration is missing.");
+
+            string key = awardType.ToLowerInvariant();
+            if (!XpFlatAwards.TryGetValue(key, out int value))
+                throw new KeyNotFoundException($"Missing flat award config for '{awardType}'.");
+
+            return value;
+        }
+
+        public int? GetXpThresholdForLevel(int level)
+        {
+            if (ProgressionXpThresholds == null)
+                throw new ConfigurationException("Progression XP thresholds configuration is missing.");
+
+            string key = level.ToString();
+            if (!ProgressionXpThresholds.TryGetValue(key, out int value))
+                throw new KeyNotFoundException($"Missing progression XP threshold for level {level}.");
+
+            return value;
+        }
+
+        public int? GetLevelRollBonus(int level)
+        {
+            if (ProgressionLevelBonuses == null)
+                throw new ConfigurationException("Progression level bonuses configuration is missing.");
+
+            string key = level.ToString();
+            if (!ProgressionLevelBonuses.TryGetValue(key, out int value))
+                throw new KeyNotFoundException($"Missing progression level bonus for level {level}.");
+
+            return value;
+        }
+
+        public int? GetBuildPointsForLevel(int level)
+        {
+            if (ProgressionBuildPoints == null)
+                throw new ConfigurationException("Progression build points configuration is missing.");
+
+            string key = level.ToString();
+            if (!ProgressionBuildPoints.TryGetValue(key, out int value))
+                throw new KeyNotFoundException($"Missing progression build points for level {level}.");
+
+            return value;
+        }
+
+        public int? GetItemSlotsForLevel(int level)
+        {
+            if (ProgressionItemSlots == null)
+                throw new ConfigurationException("Progression item slots configuration is missing.");
+
+            string key = level.ToString();
+            if (!ProgressionItemSlots.TryGetValue(key, out int value))
+                throw new KeyNotFoundException($"Missing progression item slots for level {level}.");
+
+            return value;
+        }
+
+        public int? GetFailurePoolTierMinLevel(string tierName)
+        {
+            if (ProgressionFailurePoolTiers == null)
+                throw new ConfigurationException("Progression failure pool tiers configuration is missing.");
+
+            if (!ProgressionFailurePoolTiers.TryGetValue(tierName, out int value))
+                throw new KeyNotFoundException($"Missing failure pool tier min level config for '{tierName}'.");
+
+            return value;
         }
     }
 }

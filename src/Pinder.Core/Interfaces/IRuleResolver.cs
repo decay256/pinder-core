@@ -89,5 +89,57 @@ namespace Pinder.Core.Interfaces
         /// max item slots at this level
         /// </summary>
         int? GetItemSlotsForLevel(int level);
+
+        /// <summary>
+        /// failure pool tier minimum level based on tier name (e.g. intermediate_min, advanced_min, legendary_min)
+        /// </summary>
+        int? GetFailurePoolTierMinLevel(string tierName);
+    }
+
+    /// <summary>
+    /// Global provider for the default rules resolver.
+    /// </summary>
+    public static class DefaultRuleResolver
+    {
+        private static IRuleResolver? _instance;
+
+        public static IRuleResolver? Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    try
+                    {
+                        var assemblies = System.AppDomain.CurrentDomain.GetAssemblies();
+                        foreach (var asm in assemblies)
+                        {
+                            var t = asm.GetType("Pinder.LlmAdapters.GameDefinition");
+                            if (t != null)
+                            {
+                                var prop = t.GetProperty("PinderDefaults", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                                if (prop != null)
+                                {
+                                    _instance = prop.GetValue(null) as IRuleResolver;
+                                    if (_instance != null)
+                                    {
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        // Fallback gracefully
+                    }
+                }
+                return _instance;
+            }
+            set
+            {
+                _instance = value;
+            }
+        }
     }
 }

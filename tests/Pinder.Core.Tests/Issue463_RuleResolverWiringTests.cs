@@ -81,6 +81,7 @@ namespace Pinder.Core.Tests
             public int? GetLevelRollBonus(int level) => null;
             public int? GetBuildPointsForLevel(int level) => null;
             public int? GetItemSlotsForLevel(int level) => null;
+            public int? GetFailurePoolTierMinLevel(string tierName) => null;
         }
 
         private static CharacterProfile MakeProfile(string name, int allStats = 2)
