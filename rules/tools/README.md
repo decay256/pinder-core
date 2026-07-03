@@ -1,36 +1,21 @@
-# Rules Pipeline Tools
+# Check Version Bump
 
-Single CLI entry point: `python3 rules/tools/rules_pipeline.py <command>`
+This tool verifies if changes made to gameplay-affecting files (such as engine/rules code, schemas, and templates) are accompanied by a strictly greater SemVer version bump in `Directory.Build.props` compared to `origin/main`.
 
-## Commands
+It is intended for use in pre-commit hooks or CI/CD pipelines to ensure that gameplay-affecting changes are properly versioned.
 
-| Command | Description |
-|---------|-------------|
-| `extract` | Extract structured YAML from design Markdown |
-| `enrich` | Run enrichment pass (add condition/outcome fields) |
-| `yaml-to-md` | Generate Markdown from enriched YAML |
-| `md-to-yaml` | Parse Markdown back to YAML |
-| `check` | Round-trip verification (YAML→MD→YAML), report diff count |
-| `check-diff` | Round-trip + LLM classification (FORMATTING_ONLY / CONTENT_LOSS) |
-| `game-def` | Generate game-definition.md from YAML |
-| `test` | Run all pipeline tests via pytest |
+## Usage
+
+To run the verification script manually, execute:
+
+```bash
+python rules/tools/check_version_bump.py
+```
 
 ## Running Tests
 
+To run the unit and integration tests for this tool, execute:
+
 ```bash
-# Python tests only
-python3 rules/tools/rules_pipeline.py test
-
-# C# integration tests (shells out to Python pipeline)
-dotnet test --filter "Category=Rules"
-
-# All tests (Core + Rules)
-dotnet test tests/Pinder.Core.Tests/Pinder.Core.Tests.csproj
+uv run pytest rules/tools/test_check_version_bump.py
 ```
-
-## Test Categories
-
-- **Core** — C# unit tests, always run
-- **Rules** — Pipeline integration tests, run when rules files change. Requires `python3` + `pyyaml`. The `check-diff` test calls the Anthropic API when `ANTHROPIC_API_KEY` is set; skips gracefully without it.
-
-Internal modules are prefixed with `_` (e.g. `_extract.py`) — import via `rules_pipeline.py`, don't call directly.
