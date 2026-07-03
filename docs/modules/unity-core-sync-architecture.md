@@ -75,12 +75,8 @@ CharacterDefinitionLoader.Load(path, itemRepo, anatomyRepo)
 For each id in `equippedItemIds`:
 
 1. `IItemRepository.GetItem(id)` looks up the Unity id in `starter-items.json`.
-2. **Known id:** `ItemDefinition` with core-authored modifiers (stat_modifiers, fragments, priority, conflict_tags) is returned and queued.
+2. **Known id:** `ItemDefinition` with core-authored modifiers (stat_modifiers, fragments) is returned and queued.
 3. **Unknown id:** id has no core definition → zero modifiers, id collected in `FragmentCollection.UnknownItemIds` for admin authoring. Player flow continues normally.
-
-After resolving, **conflict/priority resolution** runs:
-- Items sharing a `conflict_tag` compete. Higher-priority item wins; tie → earlier equip order wins.
-- Loser's fragments are suppressed; loser's stat_modifiers still apply.
 
 ### Step 6: Anatomy Resolution (CharacterAssembler)
 
@@ -112,9 +108,8 @@ Unity (p-game, GitLab)
 
 pinder-core (GitHub decay256/pinder-core)
   SSOT for:
-    - Item gameplay meaning (stat_modifiers, fragments, priority, conflict_tags, item_type)
+    - Item gameplay meaning (stat_modifiers, fragments, item_type)
     - Anatomy band gameplay fragments
-    - Conflict/priority resolution logic
     - Stat accumulation + shadow stats
     - Texting-style aggregation rules (SlotToSyntaxAxis, tone groups)
     - Archetype selection
@@ -200,7 +195,7 @@ All values are clamped to [0..1] after normalisation.
 | Class | Location | Responsibility |
 |-------|----------|----------------|
 | `CharacterAssembler` | `src/Pinder.Core/Characters/CharacterAssembler.cs` | Full assembly pipeline: items + anatomy → FragmentCollection |
-| `ItemDefinition` | `src/Pinder.Core/Characters/ItemDefinition.cs` | Single item; carries gameplay modifiers + conflict/priority |
+| `ItemDefinition` | `src/Pinder.Core/Characters/ItemDefinition.cs` | Single item; carries gameplay modifiers |
 | `JsonItemRepository` | `src/Pinder.Core/Data/JsonItemRepository.cs` | Parses `starter-items.json`; GetItem(id) |
 | `JsonAnatomyRepository` | `src/Pinder.Core/Data/JsonAnatomyRepository.cs` | Parses `anatomy-parameters.json`; GetParameter(id) |
 | `AnatomyParameterDefinition` | `src/Pinder.Core/Characters/AnatomyParameterDefinition.cs` | Scalar param + 6 bands; ResolveBand(value) |
@@ -231,7 +226,7 @@ When a Unity id has no core definition at assembly time:
 | Issue | Change |
 |-------|--------|
 | pinder-core#1175 | Anatomy: scalar-band rebuild (24 Unity params, 6 bands, normalized [0..1]) |
-| pinder-core#1176 | Items: real Unity ids, new schema (item_type/priority/conflict_tags), conflict/priority resolution, unknown-id safety |
+| pinder-core#1176 | Items: real Unity ids, new schema (item_type), unknown-id safety |
 | pinder-web#949 | Items: admin editor + backend write path for item gameplay modifiers |
 | pinder-web#947 | Anatomy: admin editor + backend write path for anatomy band fragments |
 | pinder-core#836 | Texting style: slot→axis aggregation rule |

@@ -186,8 +186,7 @@ namespace Pinder.Core.Tests
             public void Add(string id, params string[] archetypes)
             {
                 _items[id] = new ItemDefinition(
-                    id, id, "head", "accessory", 100,
-                    System.Array.Empty<string>(),
+                    id, id, "head", "accessory",
                     new Dictionary<StatType, int>(),
                     "personality", "backstory", "texting",
                     archetypes,
