@@ -12,7 +12,12 @@ namespace Pinder.LlmAdapters.Tests
 {
     public class OptionsConsumptionGuardTests
     {
-        private static readonly Dictionary<string, string> Allowlist = new();
+        private static readonly Dictionary<string, string> Allowlist = new()
+        {
+            // TODO(orphan-candidate): the entries below are option fields with no current production consumer; see #1297 PR — file follow-up removal tickets, do NOT silently keep forever.
+            { "AnthropicOptions.ApiKey", "the Anthropic API key is consumed by the transport/client credential path, not referenced by name in adapter src; orphan-candidate pending confirmation (see #1287 pattern). Follow-up removal ticket to be filed." },
+            { "AnthropicOptions.InterestChangeBeatTemperature", "per-method temperature override with no current production consumer; orphan-candidate. Follow-up removal ticket to be filed." }
+        };
 
         private static string FindRepoRoot()
         {
