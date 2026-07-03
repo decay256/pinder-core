@@ -10,11 +10,9 @@ namespace Pinder.Core.Data
     /// Parses starter-items.json (or any JSON conforming to the item schema v2)
     /// and exposes items via IItemRepository.
     ///
-    /// Schema v2 (issue #1176):
+    /// Schema v3 (issue #1299):
     ///   - "id" key (was "item_id" in v1; both accepted for migration)
     ///   - "item_type" replaces "tier"
-    ///   - "priority" (int, default 100)
-    ///   - "conflict_tags" (string array, default [])
     ///   All fragment/modifier fields identical to v1.
     /// </summary>
     public sealed class JsonItemRepository : IItemRepository
@@ -64,11 +62,6 @@ namespace Pinder.Core.Data
             if (string.IsNullOrEmpty(itemType))
                 itemType = "accessory";
 
-            // priority: default 100
-            int priority = obj.HasKey("priority") ? obj.GetInt("priority") : 100;
-
-            string[] conflictTags = ParseStringArray(obj.GetArray("conflict_tags"));
-
             var statMods = ParseStatModifiers(obj.GetObject("stat_modifiers"));
 
             string personality  = obj.GetString("personality_fragment");
@@ -78,7 +71,7 @@ namespace Pinder.Core.Data
             var timing          = ParseTimingModifier(obj.GetObject("response_timing_modifier"));
 
             return new ItemDefinition(
-                itemId, displayName, slot, itemType, priority, conflictTags,
+                itemId, displayName, slot, itemType,
                 statMods, personality, backstory, texting, archetypes, timing);
         }
 

@@ -22,10 +22,6 @@ namespace Pinder.Core.Characters
     ///
     /// As of issue #1176:
     /// - Item ids are Unity-verbatim (e.g. "head_tophat", "vest1", "classic2").
-    /// - Conflict/priority resolution: when two equipped items share a
-    ///   conflict_tag, the higher-priority item wins; ties go to the earlier
-    ///   equip order. The lower-priority conflicting item's fragments are
-    ///   suppressed (its stat modifiers still apply).
     /// - Unknown item ids (no core definition) → zero modifiers, id collected
     ///   in <see cref="FragmentCollection.UnknownItemIds"/> for admin authoring.
     ///   Player flow never hard-fails.
@@ -66,7 +62,7 @@ namespace Pinder.Core.Characters
             int characterLevel = 0,
             bool archetypesEnabled = false)
         {
-            // --- 1. Resolve items, track unknowns, and run conflict/priority resolution ---
+            // --- 1. Resolve items, track unknowns ---
 
             var unknownIds    = new List<string>();
             var resolvedItems = new List<ItemDefinition>();
@@ -85,56 +81,6 @@ namespace Pinder.Core.Characters
                 }
             }
 
-            // --- 1b. Conflict/priority resolution ---
-            // Items share a conflict_tag → the lower-priority item's FRAGMENTS
-            // (personality/backstory/texting/archetypes) are suppressed.
-            // Tie-break: earlier equip order (lower index) wins.
-            // Stat modifiers are NEVER suppressed regardless of conflicts.
-            //
-            // Algorithm: for each conflict_tag, track the winning item.
-            // Then mark items whose ANY conflict_tag is already "owned" by a winner.
-
-            // Build a map: conflict_tag → winning item index
-            var conflictTagWinner = new Dictionary<string, int>(StringComparer.Ordinal);
-
-            for (int i = 0; i < resolvedItems.Count; i++)
-            {
-                var item = resolvedItems[i];
-                foreach (var tag in item.ConflictTags)
-                {
-                    if (!conflictTagWinner.ContainsKey(tag))
-                    {
-                        // First item claiming this tag wins
-                        conflictTagWinner[tag] = i;
-                    }
-                    else
-                    {
-                        int existingIdx = conflictTagWinner[tag];
-                        var existingItem = resolvedItems[existingIdx];
-                        // Higher priority wins; tie → earlier index (current winner) already wins
-                        if (item.Priority > existingItem.Priority)
-                        {
-                            conflictTagWinner[tag] = i;
-                        }
-                    }
-                }
-            }
-
-            // Determine which item indices have their fragments suppressed
-            var suppressedFragments = new HashSet<int>();
-            for (int i = 0; i < resolvedItems.Count; i++)
-            {
-                var item = resolvedItems[i];
-                foreach (var tag in item.ConflictTags)
-                {
-                    if (conflictTagWinner.TryGetValue(tag, out int winnerIdx) && winnerIdx != i)
-                    {
-                        suppressedFragments.Add(i);
-                        break;
-                    }
-                }
-            }
-
             var resolvedBands = new List<(string ParamId, AnatomyBandDefinition Band)>();
             foreach (var kv in anatomyValues)
             {
@@ -145,7 +91,7 @@ namespace Pinder.Core.Characters
             }
 
             // --- 2. Sum stat modifiers on top of player base stats -----------------
-            // Stat modifiers apply to ALL resolved items (including conflict-losers).
+            // Stat modifiers apply to ALL resolved items.
 
             var statSums = new Dictionary<StatType, int>();
             foreach (StatType st in Enum.GetValues(typeof(StatType)))
@@ -205,7 +151,6 @@ namespace Pinder.Core.Characters
                 finalReceipt);
 
             // --- 5. Concat fragments -----------------------------------------------
-            // Items whose fragments are conflict-suppressed are skipped here.
             // Stat modifiers (above) were already applied to all items.
 
             var personality  = new List<string>();
@@ -239,7 +184,6 @@ namespace Pinder.Core.Characters
             // slot → syntax-axis lookup without re-resolving the item.
             for (int i = 0; i < resolvedItems.Count; i++)
             {
-                if (suppressedFragments.Contains(i)) continue; // conflict loser
                 var item = resolvedItems[i];
                 AddFragments(item.PersonalityFragment, item.BackstoryFragment,
                              item.TextingStyleFragment, item.ArchetypeTendencies,

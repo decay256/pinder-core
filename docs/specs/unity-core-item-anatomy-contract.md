@@ -15,13 +15,13 @@
 | `streamerMode` / `isStreamerSafe` | ✅ (geometry swap only) | ❌ excluded |
 | Unity `personalityTags` | ✅ (placeholder only; all `elegant,fancy` / `submissive,cosplay`) | ❌ IGNORED |
 | Unity `PromptLookupTable` | legacy | ❌ SUPERSEDED by core |
-| Item gameplay meaning (stat mods, fragments, priority, conflict_tags, item_type) | — | ✅ |
+| Item gameplay meaning (stat mods, fragments, item_type) | — | ✅ |
 | Anatomy parameter existence / range / normalisation | ✅ | — |
 | Anatomy band gameplay fragments | — | ✅ |
 
 ---
 
-## 2. Item Schema (pinder-core v2, issue #1176)
+## 2. Item Schema (pinder-core v3, issue #1299)
 
 `data/items/starter-items.json` — JSON array of item objects.
 
@@ -31,8 +31,6 @@
   "display_name": "Top Hat",
   "slot": "Head",
   "item_type": "accessory",
-  "priority": 100,
-  "conflict_tags": [],
   "stat_modifiers": { "charm": 1, "rizz": 1 },
   "personality_fragment": "...",
   "backstory_fragment": "...",
@@ -55,14 +53,12 @@
 | `display_name` | string | optional | Fallback = `id` |
 | `slot` | string | ✅ | See §3 Slot Vocabulary |
 | `item_type` | string | ✅ | See §4 Item Types |
-| `priority` | int | optional | Default 100. Higher = wins conflict. |
-| `conflict_tags` | string[] | optional | See §5 Conflict Resolution |
 | `stat_modifiers` | object | optional | Keys: `charm` `rizz` `honesty` `chaos` `wit` `self_awareness` |
 | `personality_fragment` | string | optional | Appended to PERSONALITY section |
 | `backstory_fragment` | string | optional | Appended to BACKSTORY section |
-| `texting_style_fragment` | string | optional | SYNTAX/TONE block (see §6) |
+| `texting_style_fragment` | string | optional | SYNTAX/TONE block (see §5) |
 | `archetype_tendencies` | string[] | optional | Votes toward archetype ranking |
-| `response_timing_modifier` | object | optional | See §7 |
+| `response_timing_modifier` | object | optional | See §6 |
 
 **Excluded fields (not in pinder-core):** `scale`, `offset`, `rotation`, `opacity`, `tiling`, `personalityTags`, `isStreamerSafe`, `streamerMode`, `occupiedSlots`.
 
@@ -141,21 +137,7 @@ Legacy slot names (`shoes`, `hat`, `shirt`, `trousers`, `frame`, `accessory`) ar
 
 ---
 
-## 5. Conflict / Priority Resolution
-
-When two equipped items share a `conflict_tag`, the higher-priority item wins.
-
-**Tie-break rule:** Earlier equip order wins (lower index in the `items` array wins when priorities are equal).
-
-**Fragment suppression:** The lower-priority conflicting item's `personality_fragment`, `backstory_fragment`, `texting_style_fragment`, and `archetype_tendencies` are **dropped**. Stat modifiers (`stat_modifiers`) always apply regardless of conflict outcome.
-
-**Implementation:** `CharacterAssembler.Assemble()` — see `src/Pinder.Core/Characters/CharacterAssembler.cs`.
-
-**Example:** `face_glases1` and `face_monocle` both have `conflict_tags: ["face_eyewear"]`. Equipping both → the one listed first in `items` wins (both have priority 100); the other's fragments are suppressed.
-
----
-
-## 6. Texting-Style Fragment Format
+## 5. Texting-Style Fragment Format
 
 For items that contribute a syntax axis, the `texting_style_fragment` uses the SYNTAX/TONE block format:
 
@@ -177,7 +159,7 @@ The aggregator (`TextingStyleAggregator`) reads only the axis owned by the item'
 
 ---
 
-## 7. Response Timing Modifier
+## 6. Response Timing Modifier
 
 ```json
 "response_timing_modifier": {
@@ -197,7 +179,7 @@ The aggregator (`TextingStyleAggregator`) reads only the axis owned by the item'
 
 ---
 
-## 8. Unknown-ID Safety
+## 7. Unknown-ID Safety
 
 An equipped Unity item id with no core definition resolves to **zero modifiers** (no stat mods, no fragments). The id is collected in `FragmentCollection.UnknownItemIds` for admin authoring. The player flow never hard-fails.
 
@@ -205,9 +187,9 @@ See: `CharacterAssembler` resolvedItems loop; `FragmentCollection.UnknownItemIds
 
 ---
 
-## 9. Anatomy Contract (issue #1175)
+## 8. Anatomy Contract (issue #1175)
 
-### 9.1 Parameter Set (~24 scalars)
+### 8.1 Parameter Set (~24 scalars)
 
 All parameters mirror Unity's `CharacterData.cs` field names verbatim:
 
@@ -222,7 +204,7 @@ All parameters mirror Unity's `CharacterData.cs` field names verbatim:
 
 Grooming fields (`hasHair`, `hairLength`, `hair`, `hairColor`) are **cosmetic-only** and excluded from anatomy parameters.
 
-### 9.2 Normalisation Rules
+### 8.2 Normalisation Rules
 
 | Source type | Rule |
 |-------------|------|
@@ -233,7 +215,7 @@ Grooming fields (`hasHair`, `hairLength`, `hair`, `hairColor`) are **cosmetic-on
 
 Normalisation is implemented in `CharacterDataNormalizer.Normalize(CharacterDataDto)`.
 
-### 9.3 Band System (6-band scalar)
+### 8.3 Band System (6-band scalar)
 
 Fixed standard thresholds: `[0.00, 0.05, 0.20, 0.50, 0.70, 0.95, 1.00]` → 6 bands.
 
@@ -252,7 +234,7 @@ Fixed standard thresholds: `[0.00, 0.05, 0.20, 0.50, 0.70, 0.95, 1.00]` → 6 ba
 
 Each band may carry any or all of: `personality_fragment`, `backstory_fragment`, `texting_style_fragment`, `archetype_tendencies`, `response_timing_modifier`, `stat_modifiers`. All fields optional; an empty band contributes nothing.
 
-### 9.4 Anatomy JSON Schema
+### 8.4 Anatomy JSON Schema
 
 `data/anatomy/anatomy-parameters.json`:
 
@@ -272,7 +254,7 @@ Each band may carry any or all of: `personality_fragment`, `backstory_fragment`,
 
 ---
 
-## 10. Real Unity Inventory (verified p-game tip c0d45c5)
+## 9. Real Unity Inventory (verified p-game tip c0d45c5)
 
 ### MainAccessoryCatalog — Accessories (33 items)
 
@@ -295,7 +277,7 @@ Each band may carry any or all of: `personality_fragment`, `backstory_fragment`,
 
 ---
 
-## 11. Explicit Exclusions
+## 10. Explicit Exclusions
 
 The following Unity fields/concepts are **excluded from pinder-core** and must never appear in the item schema or assembly pipeline:
 
@@ -310,7 +292,7 @@ The following Unity fields/concepts are **excluded from pinder-core** and must n
 
 ---
 
-## 12. Unity Follow-ups (file AFTER core/web/docs done)
+## 11. Unity Follow-ups (file AFTER core/web/docs done)
 
 - **Placeholder `personalityTags`:** Replace Unity placeholder tags with actual descriptors once pinder-core modifiers are shipped.
 - **`arms3`/`arms4` ids:** Both map to 'T Rex' — Unity should resolve to a single id. Core carries both in the interim.

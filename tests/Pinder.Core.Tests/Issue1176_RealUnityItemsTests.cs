@@ -11,15 +11,13 @@ using Xunit;
 namespace Pinder.Core.Tests
 {
     /// <summary>
-    /// Issue #1176: Real Unity item ids, conflict/priority resolution, unknown-id safety.
+    /// Issue #1176: Real Unity item ids, unknown-id safety.
     ///
     /// Tests:
     ///   1. Real Unity fixture items resolve and produce core-authored modifiers.
-    ///   2. Conflict/priority: two items sharing a conflict_tag → only higher-priority
-    ///      item's fragments appear.
-    ///   3. Unknown-id: equipped id absent from core → zero modifiers + id surfaced
+    ///   2. Unknown-id: equipped id absent from core → zero modifiers + id surfaced
     ///      in UnknownItemIds; player flow does not throw.
-    ///   4. Sticker/tattoo id pool: same id works as both item_type=tattoo and =sticker
+    ///   3. Sticker/tattoo id pool: same id works as both item_type=tattoo and =sticker
     ///      (distinguished by item_type in the JSON — no separate sticker entries needed).
     /// </summary>
     [Trait("Category", "Characters")]
@@ -197,173 +195,7 @@ namespace Pinder.Core.Tests
             Assert.Empty(result.UnknownItemIds);
         }
 
-        // ─── 2. Conflict/priority resolution ────────────────────────────────────
-
-        [Fact]
-        public void ConflictResolution_TwoItemsSameConflictTag_HigherPriorityFragmentAppears()
-        {
-            // Create two items sharing conflict_tag "test_conflict"
-            // Item A: priority 200, personality "A wins"
-            // Item B: priority 100, personality "B loses"
-            // Expect: only "A wins" appears; "B loses" is suppressed.
-
-            var itemA = new ItemDefinition(
-                "item_a", "Item A", "Head", "accessory", 200,
-                new[] { "test_conflict" },
-                new Dictionary<StatType, int>(),
-                "A wins",
-                "", "", new string[0],
-                TimingModifier.Zero);
-
-            var itemB = new ItemDefinition(
-                "item_b", "Item B", "Head", "accessory", 100,
-                new[] { "test_conflict" },
-                new Dictionary<StatType, int>(),
-                "B loses",
-                "", "", new string[0],
-                TimingModifier.Zero);
-
-            var fakeRepo = new InlineItemRepo(itemA, itemB);
-            var anatomy  = new NullAnatomyRepo();
-            var assembler = new CharacterAssembler(fakeRepo, anatomy);
-
-            var result = assembler.Assemble(
-                new[] { "item_a", "item_b" },
-                new Dictionary<string, float>(),
-                ZeroBaseStats,
-                ZeroShadow);
-
-            Assert.Contains("A wins", result.PersonalityFragments);
-            Assert.DoesNotContain("B loses", result.PersonalityFragments);
-        }
-
-        [Fact]
-        public void ConflictResolution_LowerPriorityEquippedFirst_HigherPriorityStillWins()
-        {
-            // Item with higher priority equipped SECOND — should still win
-            var itemLow = new ItemDefinition(
-                "item_low", "Low", "Head", "accessory", 50,
-                new[] { "face_conflict" },
-                new Dictionary<StatType, int>(),
-                "low priority",
-                "", "", new string[0],
-                TimingModifier.Zero);
-
-            var itemHigh = new ItemDefinition(
-                "item_high", "High", "Head", "accessory", 150,
-                new[] { "face_conflict" },
-                new Dictionary<StatType, int>(),
-                "high priority",
-                "", "", new string[0],
-                TimingModifier.Zero);
-
-            var fakeRepo = new InlineItemRepo(itemLow, itemHigh);
-            var assembler = new CharacterAssembler(fakeRepo, new NullAnatomyRepo());
-
-            // itemLow is equipped first, itemHigh second
-            var result = assembler.Assemble(
-                new[] { "item_low", "item_high" },
-                new Dictionary<string, float>(),
-                ZeroBaseStats,
-                ZeroShadow);
-
-            Assert.Contains("high priority", result.PersonalityFragments);
-            Assert.DoesNotContain("low priority", result.PersonalityFragments);
-        }
-
-        [Fact]
-        public void ConflictResolution_SamePriority_EarlierEquipOrderWins()
-        {
-            // Tie on priority: earlier equip order wins
-            var item1 = new ItemDefinition(
-                "item_first", "First", "Head", "accessory", 100,
-                new[] { "tie_tag" },
-                new Dictionary<StatType, int>(),
-                "first equipped",
-                "", "", new string[0],
-                TimingModifier.Zero);
-
-            var item2 = new ItemDefinition(
-                "item_second", "Second", "Head", "accessory", 100,
-                new[] { "tie_tag" },
-                new Dictionary<StatType, int>(),
-                "second equipped",
-                "", "", new string[0],
-                TimingModifier.Zero);
-
-            var fakeRepo = new InlineItemRepo(item1, item2);
-            var assembler = new CharacterAssembler(fakeRepo, new NullAnatomyRepo());
-
-            var result = assembler.Assemble(
-                new[] { "item_first", "item_second" },
-                new Dictionary<string, float>(),
-                ZeroBaseStats,
-                ZeroShadow);
-
-            Assert.Contains("first equipped", result.PersonalityFragments);
-            Assert.DoesNotContain("second equipped", result.PersonalityFragments);
-        }
-
-        [Fact]
-        public void ConflictResolution_StatModifiersAlwaysApply_EvenFromLoser()
-        {
-            // The conflict loser's stat modifiers must still be applied
-            var winner = new ItemDefinition(
-                "winner", "Winner", "Head", "accessory", 200,
-                new[] { "stat_conflict" },
-                new Dictionary<StatType, int> { { StatType.Charm, 5 } },
-                "winner fragment",
-                "", "", new string[0],
-                TimingModifier.Zero);
-
-            var loser = new ItemDefinition(
-                "loser", "Loser", "Head", "accessory", 100,
-                new[] { "stat_conflict" },
-                new Dictionary<StatType, int> { { StatType.Wit, 3 } },
-                "loser fragment",
-                "", "", new string[0],
-                TimingModifier.Zero);
-
-            var fakeRepo = new InlineItemRepo(winner, loser);
-            var assembler = new CharacterAssembler(fakeRepo, new NullAnatomyRepo());
-
-            var result = assembler.Assemble(
-                new[] { "winner", "loser" },
-                new Dictionary<string, float>(),
-                ZeroBaseStats,
-                ZeroShadow);
-
-            // Fragments: only winner's appear
-            Assert.Contains("winner fragment", result.PersonalityFragments);
-            Assert.DoesNotContain("loser fragment", result.PersonalityFragments);
-
-            // But BOTH stat modifiers apply
-            Assert.Equal(5, result.Stats.GetEffective(StatType.Charm));
-            Assert.Equal(3, result.Stats.GetEffective(StatType.Wit));
-        }
-
-        [Fact]
-        public void ConflictResolution_RealItems_face_eyewear_ConflictTag_Works()
-        {
-            // face_glases1 and face_monocle both have conflict_tag "face_eyewear"
-            // face_monocle priority 100 vs face_glases1 priority 100 → tie → earlier wins
-            var repo     = LoadItemRepo();
-            var anatomy  = LoadAnatomyRepo();
-            var assembler = new CharacterAssembler(repo, anatomy);
-
-            var result = assembler.Assemble(
-                new[] { "face_glases1", "face_monocle" },
-                new Dictionary<string, float>(),
-                ZeroBaseStats,
-                ZeroShadow);
-
-            // Only one "face_eyewear" fragment should appear (both have personality frags)
-            // face_glases1 is equipped first, so its fragment wins
-            int personalityCount = result.PersonalityFragments.Count;
-            Assert.Equal(1, personalityCount);
-        }
-
-        // ─── 3. Unknown-id safety ────────────────────────────────────────────────
+        // ─── 2. Unknown-id safety ────────────────────────────────────────────────
 
         [Fact]
         public void UnknownId_ZeroModifiers_IdSurfacedInSignal_NoException()
@@ -497,33 +329,5 @@ namespace Pinder.Core.Tests
             Assert.Null(repo.GetItem("vest6"));
         }
 
-        // ─── Stub types ─────────────────────────────────────────────────────────
-
-        private sealed class InlineItemRepo : IItemRepository
-        {
-            private readonly Dictionary<string, ItemDefinition> _map;
-
-            public InlineItemRepo(params ItemDefinition[] items)
-            {
-                _map = new Dictionary<string, ItemDefinition>(StringComparer.Ordinal);
-                foreach (var item in items)
-                    _map[item.ItemId] = item;
-            }
-
-            public ItemDefinition? GetItem(string itemId)
-            {
-                _map.TryGetValue(itemId, out var v);
-                return v;
-            }
-
-            public IEnumerable<ItemDefinition> GetAll() => _map.Values;
-        }
-
-        private sealed class NullAnatomyRepo : IAnatomyRepository
-        {
-            public AnatomyParameterDefinition? GetParameter(string id) => null;
-            public IEnumerable<AnatomyParameterDefinition> GetAll()
-                => Enumerable.Empty<AnatomyParameterDefinition>();
-        }
     }
 }
