@@ -39,6 +39,8 @@ API. `Pinder.RemoteAssets` is NOT used by the engine or the CLI harness directly
 
 ## 2. Assembly Map
 
+These assembly-map invariants — Pinder.Core kernel purity (zero non-BCL dependencies) and a single production ILlmAdapter implementation (PinderLlmAdapter), with vendor transports under vendor namespaces — are enforced by ArchitectureRuleTests.
+
 ### Pinder.Core
 
 The domain kernel. Zero external dependencies — no NuGet packages, no I/O.
