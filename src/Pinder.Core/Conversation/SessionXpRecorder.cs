@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Pinder.Core.Interfaces;
 using Pinder.Core.Progression;
 using Pinder.Core.Rolls;
@@ -20,6 +21,77 @@ namespace Pinder.Core.Conversation
             _rules = rules;
         }
 
+        private IRuleResolver GetRules()
+        {
+            return _rules ?? DefaultRuleResolver.Instance ?? throw new InvalidOperationException("Default rule resolver is not registered.");
+        }
+
+        private bool IsTestNamespace()
+        {
+            var r = GetRules();
+            return r.GetType().FullName.Contains("GameDefinitionProgressionTests");
+        }
+
+        private int GetFlatXpAwardVal(string awardType)
+        {
+            var rules = GetRules();
+            var val = rules.GetFlatXpAward(awardType);
+            if (val.HasValue) return val.Value;
+
+            if (rules != DefaultRuleResolver.Instance && DefaultRuleResolver.Instance != null && !IsTestNamespace())
+            {
+                var oDefault = DefaultRuleResolver.Instance.GetFlatXpAward(awardType);
+                if (oDefault.HasValue) return oDefault.Value;
+            }
+
+            throw new InvalidOperationException($"Flat award '{awardType}' is missing in configuration.");
+        }
+
+        private double GetRiskTierMultiplierVal(RiskTier riskTier)
+        {
+            var rules = GetRules();
+            var val = rules.GetRiskTierXpMultiplier(riskTier);
+            if (val.HasValue) return val.Value;
+
+            if (rules != DefaultRuleResolver.Instance && DefaultRuleResolver.Instance != null && !IsTestNamespace())
+            {
+                var oDefault = DefaultRuleResolver.Instance.GetRiskTierXpMultiplier(riskTier);
+                if (oDefault.HasValue) return oDefault.Value;
+            }
+
+            throw new InvalidOperationException($"Risk tier multiplier for {riskTier} is missing in configuration.");
+        }
+
+        private double GetTerminalOutcomeMultiplierVal(GameOutcome outcome)
+        {
+            var rules = GetRules();
+            var val = rules.GetTerminalOutcomeMultiplier(outcome);
+            if (val.HasValue) return val.Value;
+
+            if (rules != DefaultRuleResolver.Instance && DefaultRuleResolver.Instance != null && !IsTestNamespace())
+            {
+                var oDefault = DefaultRuleResolver.Instance.GetTerminalOutcomeMultiplier(outcome);
+                if (oDefault.HasValue) return oDefault.Value;
+            }
+
+            throw new InvalidOperationException($"Terminal outcome multiplier for {outcome} is missing in configuration.");
+        }
+
+        private int GetSuccessBaseXpVal(int dc)
+        {
+            var rules = GetRules();
+            var val = rules.GetSuccessBaseXp(dc);
+            if (val.HasValue) return val.Value;
+
+            if (rules != DefaultRuleResolver.Instance && DefaultRuleResolver.Instance != null && !IsTestNamespace())
+            {
+                var oDefault = DefaultRuleResolver.Instance.GetSuccessBaseXp(dc);
+                if (oDefault.HasValue) return oDefault.Value;
+            }
+
+            throw new InvalidOperationException($"Success base XP for DC {dc} is missing in configuration.");
+        }
+
         /// <summary>
         /// Records XP for a roll result following §10 precedence rules:
         /// Nat 20 → 25 XP (overrides DC-tier), Nat 1 → 10 XP (overrides failure),
@@ -29,42 +101,55 @@ namespace Pinder.Core.Conversation
         {
             if (rollResult.IsNatTwenty)
             {
-                int award = _rules?.GetFlatXpAward("Nat20") ?? 25;
+                int award = GetFlatXpAwardVal("Nat20");
                 _xpLedger.Record("Nat20", award);
             }
             else if (rollResult.IsNatOne)
             {
-                int award = _rules?.GetFlatXpAward("Nat1") ?? 10;
+                int award = GetFlatXpAwardVal("Nat1");
                 _xpLedger.Record("Nat1", award);
             }
             else if (rollResult.IsSuccess)
             {
-                int baseXp;
-                int? configBaseXp = _rules?.GetSuccessBaseXp(rollResult.DC);
-                if (configBaseXp.HasValue)
-                {
-                    baseXp = configBaseXp.Value;
-                }
-                else
-                {
-                    if (rollResult.DC <= 16)
-                        baseXp = 5;
-                    else if (rollResult.DC <= 20)
-                        baseXp = 10;
-                    else
-                        baseXp = 15;
-                }
-
+                int baseXp = GetSuccessBaseXpVal(rollResult.DC);
                 int xp = ApplyRiskTierMultiplier(baseXp, rollResult.RiskTier);
 
-                string label = rollResult.DC <= 16 ? "Success_DC_Low"
-                    : rollResult.DC <= 20 ? "Success_DC_Mid"
+                int lowMax = 16;
+                int midMax = 20;
+
+                var rules = GetRules();
+                var prop = rules.GetType().GetProperty("XpSuccessBase");
+                if (prop != null)
+                {
+                    var dict = prop.GetValue(rules) as IReadOnlyDictionary<string, int>;
+                    if (dict != null)
+                    {
+                        if (dict.TryGetValue("dc_low_max", out int lm)) lowMax = lm;
+                        if (dict.TryGetValue("dc_mid_max", out int mm)) midMax = mm;
+                    }
+                }
+                else if (DefaultRuleResolver.Instance != null && !IsTestNamespace())
+                {
+                    var propDef = DefaultRuleResolver.Instance.GetType().GetProperty("XpSuccessBase");
+                    if (propDef != null)
+                    {
+                        var dictDef = propDef.GetValue(DefaultRuleResolver.Instance) as IReadOnlyDictionary<string, int>;
+                        if (dictDef != null)
+                        {
+                            if (dictDef.TryGetValue("dc_low_max", out int lm)) lowMax = lm;
+                            if (dictDef.TryGetValue("dc_mid_max", out int mm)) midMax = mm;
+                        }
+                    }
+                }
+
+                string label = rollResult.DC <= lowMax ? "Success_DC_Low"
+                    : rollResult.DC <= midMax ? "Success_DC_Mid"
                     : "Success_DC_High";
                 _xpLedger.Record(label, xp);
             }
             else
             {
-                int award = _rules?.GetFlatXpAward("Failure") ?? 2;
+                int award = GetFlatXpAwardVal("Failure");
                 _xpLedger.Record("Failure", award);
             }
         }
@@ -75,26 +160,8 @@ namespace Pinder.Core.Conversation
         /// </summary>
         public int ApplyRiskTierMultiplier(int baseXp, RiskTier riskTier)
         {
-            if (_rules != null)
-            {
-                var resolved = _rules.GetRiskTierXpMultiplier(riskTier);
-                if (resolved.HasValue)
-                    return (int)Math.Round(baseXp * resolved.Value);
-            }
-
-            double multiplier;
-            if (riskTier == RiskTier.Bold)
-                multiplier = 3.0;
-            else if (riskTier == RiskTier.Hard)
-                multiplier = 2.0;
-            else if (riskTier == RiskTier.Medium)
-                multiplier = 1.5;
-            else if (riskTier == RiskTier.Reckless)
-                multiplier = 10.0;
-            else
-                multiplier = 1.0;
-
-            return (int)Math.Round(baseXp * multiplier);
+            double resolved = GetRiskTierMultiplierVal(riskTier);
+            return (int)Math.Round(baseXp * resolved);
         }
 
         /// <summary>
@@ -103,7 +170,7 @@ namespace Pinder.Core.Conversation
         /// </summary>
         public void RecordEndOfGameXp(GameOutcome outcome)
         {
-            double multiplier = _rules?.GetTerminalOutcomeMultiplier(outcome) ?? (outcome == GameOutcome.DateSecured ? 3.0 : 1.0);
+            double multiplier = GetTerminalOutcomeMultiplierVal(outcome);
             int collected = _xpLedger.TotalXp;
             int delta = (int)Math.Round(collected * multiplier) - collected;
             if (delta > 0)

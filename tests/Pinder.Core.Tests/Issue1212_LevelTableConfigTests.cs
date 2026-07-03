@@ -183,6 +183,8 @@ namespace Pinder.Core.Tests
             {
                 return 42;
             }
+
+            public int? GetFailurePoolTierMinLevel(string tierName) => null;
         }
     }
 }

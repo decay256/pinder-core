@@ -333,6 +333,11 @@ namespace Pinder.Rules
             return null;
         }
 
+        public int? GetFailurePoolTierMinLevel(string tierName)
+        {
+            return null;
+        }
+
         // --- Helpers ---
 
         private RuleEntry? FindById(string id)

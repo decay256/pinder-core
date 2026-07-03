@@ -40,6 +40,7 @@ namespace Pinder.Core.Tests
             public int? GetLevelRollBonus(int level) => LevelRollBonusValue;
             public int? GetBuildPointsForLevel(int level) => BuildPointsForLevelValue;
             public int? GetItemSlotsForLevel(int level) => ItemSlotsForLevelValue;
+            public int? GetFailurePoolTierMinLevel(string tierName) => null;
         }
 
         [Fact]

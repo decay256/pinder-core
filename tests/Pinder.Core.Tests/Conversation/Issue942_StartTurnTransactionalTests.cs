@@ -256,6 +256,7 @@ namespace Pinder.Core.Tests.Conversation
             public int? GetLevelRollBonus(int level) => null;
             public int? GetBuildPointsForLevel(int level) => null;
             public int? GetItemSlotsForLevel(int level) => null;
+            public int? GetFailurePoolTierMinLevel(string tierName) => null;
         }
     }
 }

@@ -85,20 +85,20 @@ namespace Pinder.Rules.Tests
             foreach (var item in levels)
             {
                 // 1. Assert XP threshold maps to the correct level in LevelTable
-                Assert.Equal(item.level, LevelTable.GetLevel(item.xp));
+                Assert.Equal(item.level, LevelTable.GetLevel(item.xp, Pinder.LlmAdapters.GameDefinition.PinderDefaults));
                 if (item.xp > 0)
                 {
-                    Assert.Equal(item.level - 1, LevelTable.GetLevel(item.xp - 1));
+                    Assert.Equal(item.level - 1, LevelTable.GetLevel(item.xp - 1, Pinder.LlmAdapters.GameDefinition.PinderDefaults));
                 }
 
                 // 2. Assert roll bonus matches
-                Assert.Equal(item.rollBonus, LevelTable.GetBonus(item.level));
+                Assert.Equal(item.rollBonus, LevelTable.GetBonus(item.level, Pinder.LlmAdapters.GameDefinition.PinderDefaults));
 
                 // 3. Assert build points matches
-                Assert.Equal(item.buildPoints, LevelTable.GetBuildPointsForLevel(item.level));
+                Assert.Equal(item.buildPoints, LevelTable.GetBuildPointsForLevel(item.level, Pinder.LlmAdapters.GameDefinition.PinderDefaults));
 
                 // 4. Assert item slots matches
-                Assert.Equal(item.itemSlots, LevelTable.GetItemSlots(item.level));
+                Assert.Equal(item.itemSlots, LevelTable.GetItemSlots(item.level, Pinder.LlmAdapters.GameDefinition.PinderDefaults));
             }
         }
 
@@ -160,7 +160,7 @@ namespace Pinder.Rules.Tests
                 if (Enum.TryParse(tierName, out RiskTier riskTier))
                 {
                     var ledger = new XpLedger();
-                    var recorder = Activator.CreateInstance(recorderType, ledger, null);
+                    var recorder = Activator.CreateInstance(recorderType, ledger, Pinder.LlmAdapters.GameDefinition.PinderDefaults);
                     var applyMethod = recorderType.GetMethod("ApplyRiskTierMultiplier", new Type[] { typeof(int), typeof(RiskTier) });
                     Assert.NotNull(applyMethod);
 
@@ -246,7 +246,7 @@ namespace Pinder.Rules.Tests
                     var ledger = new XpLedger();
                     ledger.Record("BaseXP", 100);
 
-                    var recorder = Activator.CreateInstance(recorderType, ledger, null);
+                    var recorder = Activator.CreateInstance(recorderType, ledger, Pinder.LlmAdapters.GameDefinition.PinderDefaults);
                     var recordEndMethod = recorderType.GetMethod("RecordEndOfGameXp", new Type[] { typeof(GameOutcome) });
                     Assert.NotNull(recordEndMethod);
 
