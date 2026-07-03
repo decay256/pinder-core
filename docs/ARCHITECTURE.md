@@ -1,5 +1,7 @@
 # Architecture
 
+File references in this doc are enforced by DocsArchitectureReferenceIntegrityTests.
+
 Developer guide to the Pinder codebase — systems, subsystems, interfaces, and constraints.
 
 ---
@@ -73,8 +75,6 @@ Prompt construction and LLM API integration. Depends on Pinder.Core and Pinder.R
 | | `GameDefinition.cs` — game-level creative direction loaded from YAML |
 | | `PromptTemplates.cs` — template strings for ENGINE injection blocks |
 | | `RollContextBuilder.cs` — YAML-sourced roll flavor text |
-| | `Anthropic/AnthropicLlmAdapter.cs` — deprecated Claude adapter |
-| | `OpenAi/OpenAiLlmAdapter.cs` — deprecated OpenAI adapter |
 
 ### Pinder.Core.TestCommon
 
@@ -115,21 +115,15 @@ Data-driven rule resolution. Loads YAML rule definitions and evaluates condition
 
 ### Pinder.SessionSetup
 
-Pre-session setup: narrative matchup analysis + stake generation. Isolated
-from the per-turn game loop so that the web tier (`Pinder.GameApi`) can run
-it eagerly in the background after session create, while the CLI harness
-skips it or runs a lighter version.
+Pre-session setup: stake generation. Isolated from the per-turn game loop so that the web tier (`Pinder.GameApi`) can run it eagerly in the background after session create.
 
 | Depends on | Pinder.Core, Pinder.LlmAdapters (via ILlmTransport) |
 |---|---|
-| **Purpose** | Matchup preview + stake copy at session boot time |
-| **Key files** | `IMatchupAnalyzer.cs` / `LlmMatchupAnalyzer.cs` — matchup narrative |
-| | `IStakeGenerator.cs` / `LlmStakeGenerator.cs` — player + datee stake strings |
+| **Purpose** | Pre-session stake generation at session boot time |
+| **Key files** | `IStakeGenerator.cs` / `LlmStakeGenerator.cs` — player + datee stake strings |
 | | `CharacterDefinitionLoader.cs` — shared character JSON loader |
 
-Ported into this library in #756 (`569b9f9`). Previously inlined in
-`session-runner/MatchupAnalyzer.cs`; still referenced there via the new
-interface for CLI use.
+Pre-session stake generation was ported into this library in #756 (`569b9f9`).
 
 ### session-runner
 
@@ -143,7 +137,6 @@ CLI executable that wires everything together and runs a full game session.
 | | `ScoringPlayerAgent.cs` — heuristic-based option scorer (default) |
 | | `LlmPlayerAgent.cs` — LLM-powered decision agent |
 | | `HumanPlayerAgent.cs` — interactive stdin agent |
-| | `MatchupAnalyzer.cs` — pre-session matchup analysis |
 
 ## 3. Core Game Loop
 
@@ -197,7 +190,6 @@ are:
 | `ITrapRegistry` | Pinder.Core | Supplies trap definitions by stat |
 | `IDiceRoller` | Pinder.Core | Deterministic roll injection for tests |
 | `IRuleResolver` | Pinder.Rules | YAML-driven constant lookup |
-| `IMatchupAnalyzer` | Pinder.SessionSetup | Pre-session matchup narrative |
 | `IStakeGenerator` | Pinder.SessionSetup | Pre-session stake generation |
 | `IPlayerAgent` | session-runner | Sim-agent decision-making |
 
@@ -225,7 +217,7 @@ Core abstraction for all LLM interactions. Stateless per-call.
 | `ApplyShadowCorruptionAsync(message, instruction, ...)` | Rewrite message with shadow corruption |
 | `ApplyTrapOverlayAsync(message, ...)` | Rewrite message with trap taint |
 
-**Implementations:** `AnthropicLlmAdapter`, `OpenAiLlmAdapter` (both in Pinder.LlmAdapters)
+**Implementations:** `PinderLlmAdapter` (in Pinder.LlmAdapters)
 
 ### IStatefulLlmAdapter : ILlmAdapter
 
@@ -236,7 +228,7 @@ Extends ILlmAdapter with persistent datee session for memory continuity across t
 | `StartDateeSession(systemPrompt)` | Initialize persistent datee conversation |
 | `GetSteeringQuestionAsync(SteeringContext)` | Generate steering question after successful roll |
 
-**Implementations:** `AnthropicLlmAdapter`, `OpenAiLlmAdapter`
+**Implementations:** `PinderLlmAdapter` (in Pinder.LlmAdapters)
 
 ### IPlayerAgent
 
