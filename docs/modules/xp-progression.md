@@ -36,7 +36,7 @@ public sealed class XpLedger
 
 ### LevelTable
 
-**Config-Editable Progression:** The level table (XP thresholds, roll bonuses, build points, and item slots) is config-editable via the rules layer (`IRuleResolver`). The `LevelTable` methods accept an optional `IRuleResolver? rules` parameter. If a YAML rule is defined under `§10.progression.level.N` (e.g. `xp_threshold`, `roll_bonus`, `build_points`, `item_slots`), it overrides the code defaults. If no rule is found, or `rules` is null, it falls back to the hardcoded C# arrays.
+**Single Source of Truth Configuration:** All XP thresholds, level roll bonuses, build point awards, item slots, and failure pool tiers are defined inside `game-definition.yaml` (the Single Source of Truth). Hardcoded static C# default arrays and `??` cascades have been completely removed. If any required progression or XP configuration keys are missing in the configuration file, the game engine will fail fast and loud on startup/loading by throwing an exception.
 
 ```csharp
 public static class LevelTable
@@ -117,3 +117,4 @@ Rounding: `(int)Math.Round(baseXp * multiplier)` — midpoint rounds to nearest 
 |------|-------|---------|
 | 2026-04-03 | #314 | Initial creation — documented XP risk-tier multiplier (Safe=1×, Medium=1.5×, Hard=2×, Bold=3×) applied to successful rolls. Multiplier uses `Math.Round`. Flat XP for Nat20 (25), Nat1 (10), failure (2). Added `XpRiskTierMultiplierSpecTests.cs` (344 lines, 14 tests). |
 | 2026-07-01 | #1281 | Added `XpBreakdown` property to `TurnResult` to expose itemized XP events. |
+| 2026-07-03 | #1283 | Migrated all XP and progression thresholds to game-definition.yaml. Removed hardcoded C# arrays and cascades. Added strict failure-fast loading validations. |
