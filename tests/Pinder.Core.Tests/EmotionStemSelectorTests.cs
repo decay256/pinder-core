@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 using Pinder.Core.Conversation;
 
@@ -112,6 +113,234 @@ namespace Pinder.Core.Tests
             Assert.Equal(resultA.Registry, resultB.Registry);
             Assert.Equal(resultA.Index, resultB.Index);
             Assert.Equal(resultA.Manner, resultB.Manner);
+        }
+
+        // =====================================================================
+        // NEW TESTS FOR ISSUE #1279
+        // =====================================================================
+
+        [Fact]
+        public void Resolve_MacroPhase1_ReturnsBackstoryRegistry()
+        {
+            // Arrange
+            var selector = new EmotionStemSelector(42);
+            var state = new ConversationState
+            {
+                TurnCount = 2,
+                InterestScore = 20,
+                PreviousPhase = null
+            };
+
+            // Act
+            var result = selector.Resolve(state);
+
+            // Assert
+            Assert.Equal("BACKSTORY", result.Registry);
+        }
+
+        [Fact]
+        public void Resolve_MacroPhase2_ReturnsBackstoryRegistry()
+        {
+            // Arrange
+            var selector = new EmotionStemSelector(42);
+            var state = new ConversationState
+            {
+                TurnCount = 6,
+                InterestScore = 20,
+                PreviousPhase = null
+            };
+
+            // Act
+            var result = selector.Resolve(state);
+
+            // Assert
+            Assert.Equal("BACKSTORY", result.Registry); // Fails on current code (currently returns STAKE)
+        }
+
+        [Fact]
+        public void Resolve_MacroPhase3_ReturnsStakeRegistry()
+        {
+            // Arrange
+            var selector = new EmotionStemSelector(42);
+            var state = new ConversationState
+            {
+                TurnCount = 10,
+                InterestScore = 20,
+                PreviousPhase = null
+            };
+
+            // Act
+            var result = selector.Resolve(state);
+
+            // Assert
+            Assert.Equal("STAKE", result.Registry);
+        }
+
+        [Fact]
+        public void Resolve_MacroPhase1_ReturnsBioLieField()
+        {
+            // Arrange
+            var selector = new EmotionStemSelector(42);
+            var state = new ConversationState
+            {
+                TurnCount = 2,
+                InterestScore = 20,
+                PreviousPhase = null
+            };
+
+            // Act
+            var result = selector.Resolve(state);
+
+            // Assert
+            Assert.Equal("BIO_LIE", result.Field);
+        }
+
+        [Fact]
+        public void Resolve_MacroPhase2_ReturnsTragicRealityField()
+        {
+            // Arrange
+            var selector = new EmotionStemSelector(42);
+            var state = new ConversationState
+            {
+                TurnCount = 6,
+                InterestScore = 20,
+                PreviousPhase = null
+            };
+
+            // Act
+            var result = selector.Resolve(state);
+
+            // Assert
+            Assert.Equal("TRAGIC_REALITY", result.Field); // Fails on current code (currently returns STAKE_LINE)
+        }
+
+        [Fact]
+        public void Resolve_MacroPhase3_ReturnsStakeLineField()
+        {
+            // Arrange
+            var selector = new EmotionStemSelector(42);
+            var state = new ConversationState
+            {
+                TurnCount = 10,
+                InterestScore = 20,
+                PreviousPhase = null
+            };
+
+            // Act
+            var result = selector.Resolve(state);
+
+            // Assert
+            Assert.Equal("STAKE_LINE", result.Field);
+        }
+
+        [Fact]
+        public void Resolve_Backstory_BoundsCheck_ExcludesIndex20AndAbove()
+        {
+            // Arrange
+            var selector = new EmotionStemSelector(42);
+            var state = new ConversationState
+            {
+                TurnCount = 2, // MacroPhase1 -> BACKSTORY
+                InterestScore = 20,
+                SpentBackstoryIndices = new HashSet<int>(Enumerable.Range(0, 20)), // 0 to 19 spent
+                PreviousResolvedIndex = 77
+            };
+
+            // Act
+            var result = selector.Resolve(state);
+
+            // Assert
+            // Since all valid indices (0 to 19) are spent, and index 20+ is not allowed,
+            // it must fallback to PreviousResolvedIndex.
+            Assert.Equal(77, result.Index); // Fails on current code (returns 20)
+        }
+
+        [Fact]
+        public void Resolve_Stake_BoundsCheck_ExcludesIndex15AndAbove()
+        {
+            // Arrange
+            var selector = new EmotionStemSelector(42);
+            var state = new ConversationState
+            {
+                TurnCount = 10, // MacroPhase3 -> STAKE
+                InterestScore = 20,
+                SpentStakeIndices = new HashSet<int>(Enumerable.Range(0, 15)), // 0 to 14 spent
+                PreviousResolvedIndex = 55
+            };
+
+            // Act
+            var result = selector.Resolve(state);
+
+            // Assert
+            // Since all valid indices (0 to 14) are spent, and index 15+ is not allowed,
+            // it must fallback to PreviousResolvedIndex.
+            Assert.Equal(55, result.Index); // Fails on current code (returns 15 or above)
+        }
+
+        [Fact]
+        public void Resolve_SpentExhaustionFallback_MacroPhase1_NoExceptionAndReturnsPreviousResolvedIndex()
+        {
+            // Arrange
+            var selector = new EmotionStemSelector(42);
+            var state = new ConversationState
+            {
+                TurnCount = 2,
+                InterestScore = 20,
+                SpentBackstoryIndices = new HashSet<int>(Enumerable.Range(0, 20)), // 0 to 19 spent
+                PreviousResolvedIndex = 11
+            };
+
+            // Act & Assert
+            var exception = Record.Exception(() => {
+                var result = selector.Resolve(state);
+                Assert.Equal(11, result.Index);
+            });
+
+            Assert.Null(exception);
+        }
+
+        [Fact]
+        public void Resolve_SpentExhaustionFallback_MacroPhase2_NoExceptionAndReturnsPreviousResolvedIndex()
+        {
+            // Arrange
+            var selector = new EmotionStemSelector(42);
+            var state = new ConversationState
+            {
+                TurnCount = 6,
+                InterestScore = 20,
+                SpentBackstoryIndices = new HashSet<int>(Enumerable.Range(0, 20)), // 0 to 19 spent
+                PreviousResolvedIndex = 12
+            };
+
+            // Act & Assert
+            var exception = Record.Exception(() => {
+                var result = selector.Resolve(state);
+                Assert.Equal(12, result.Index);
+            });
+
+            Assert.Null(exception);
+        }
+
+        [Fact]
+        public void Resolve_SpentExhaustionFallback_MacroPhase3_NoExceptionAndReturnsPreviousResolvedIndex()
+        {
+            // Arrange
+            var selector = new EmotionStemSelector(42);
+            var state = new ConversationState
+            {
+                TurnCount = 10,
+                InterestScore = 20,
+                SpentStakeIndices = new HashSet<int>(Enumerable.Range(0, 15)), // 0 to 14 spent
+                PreviousResolvedIndex = 13
+            };
+
+            // Act & Assert
+            var exception = Record.Exception(() => {
+                var result = selector.Resolve(state);
+                Assert.Equal(13, result.Index);
+            });
+
+            Assert.Null(exception);
         }
     }
 }
