@@ -76,6 +76,12 @@ Prompt construction and LLM API integration. Depends on Pinder.Core and Pinder.R
 | | `PromptTemplates.cs` — template strings for ENGINE injection blocks |
 | | `RollContextBuilder.cs` — YAML-sourced roll flavor text |
 
+#### Guard tests
+
+Options classes (`PinderLlmAdapterOptions` and `AnthropicOptions`) are consumption-guarded by `OptionsConsumptionGuardTests`. This test ensures that every public instance option property is textually consumed in production code under `src/` to prevent dead-code or orphan configurations.
+
+If an options property is intentionally not referenced by name in `src/` but must be retained as a legitimate exception, it can be added to the test's `Allowlist` dictionary using the key format `"ClassName.PropertyName"` mapped to a clear justification string. However, prefer wiring the property in production or removing the field entirely over adding it to the allowlist.
+
 ### Pinder.Core.TestCommon
 
 Shared testing library. Consolidates stubs and mock setups to deduplicate unit test boilerplate.
