@@ -47,6 +47,8 @@ namespace Pinder.Core.Conversation
     /// <summary>
     /// Selects an emotion stem and determines the appropriate posture manner 
     /// based on conversation state, HFI/TOR statistics, and active traps.
+    /// Manages the 20 Backstory Fields, 15 Psychological Stakes, and Crack and Slip philosophy
+    /// where character cracking/slipping controls are bounded strictly.
     /// </summary>
     public class EmotionStemSelector
     {
@@ -81,13 +83,15 @@ namespace Pinder.Core.Conversation
                 }
             }
 
-            string registry = currentPhase == "MacroPhase1" ? "BACKSTORY" : "STAKE";
+            string registry = (currentPhase == "MacroPhase3") ? "STAKE" : "BACKSTORY";
 
             // 2. Filter Registry and apply Affinity Scorer
             var availableIndices = new List<int>();
             var spentIndices = registry == "BACKSTORY" ? state.SpentBackstoryIndices : state.SpentStakeIndices;
             
-            for (int i = 0; i <= 20; i++)
+            // Bounds limit based on registry (20 Backstory Fields, 15 Psychological Stakes, Crack and Slip philosophy)
+            int maxLimit = (registry == "BACKSTORY") ? 20 : 15;
+            for (int i = 0; i < maxLimit; i++)
             {
                 if (!spentIndices.Contains(i))
                 {
@@ -132,6 +136,11 @@ namespace Pinder.Core.Conversation
                         break;
                     }
                 }
+
+                if (selectedIndex < 0 || selectedIndex >= maxLimit)
+                {
+                    selectedIndex = Math.Max(0, Math.Min(maxLimit - 1, selectedIndex));
+                }
             }
 
             // 3. Symmetrical Quadrant (HFI/TOR)
@@ -175,7 +184,8 @@ namespace Pinder.Core.Conversation
                 Registry = registry,
                 Index = selectedIndex,
                 Manner = manner,
-                Field = registry == "BACKSTORY" ? "BIO_LIE" : "STAKE_LINE",
+                Field = (currentPhase == "MacroPhase1") ? "BIO_LIE" :
+                        (currentPhase == "MacroPhase2") ? "TRAGIC_REALITY" : "STAKE_LINE",
                 StemText = "Resolved stem text",
                 TransitionStyle = "Smooth"
             };
