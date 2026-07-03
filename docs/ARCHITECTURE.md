@@ -1,7 +1,5 @@
 # Architecture
 
-File references in this doc are enforced by DocsArchitectureReferenceIntegrityTests.
-
 Developer guide to the Pinder codebase — systems, subsystems, interfaces, and constraints.
 
 ---
@@ -39,8 +37,6 @@ API. `Pinder.RemoteAssets` is NOT used by the engine or the CLI harness directly
 
 ## 2. Assembly Map
 
-These assembly-map invariants — Pinder.Core kernel purity (zero non-BCL dependencies) and a single production ILlmAdapter implementation (PinderLlmAdapter), with vendor transports under vendor namespaces — are enforced by ArchitectureRuleTests.
-
 ### Pinder.Core
 
 The domain kernel. Zero external dependencies — no NuGet packages, no I/O.
@@ -77,12 +73,8 @@ Prompt construction and LLM API integration. Depends on Pinder.Core and Pinder.R
 | | `GameDefinition.cs` — game-level creative direction loaded from YAML |
 | | `PromptTemplates.cs` — template strings for ENGINE injection blocks |
 | | `RollContextBuilder.cs` — YAML-sourced roll flavor text |
-
-#### Guard tests
-
-Options classes (`PinderLlmAdapterOptions` and `AnthropicOptions`) are consumption-guarded by `OptionsConsumptionGuardTests`. This test ensures that every public instance option property is textually consumed in production code under `src/` to prevent dead-code or orphan configurations.
-
-If an options property is intentionally not referenced by name in `src/` but must be retained as a legitimate exception, it can be added to the test's `Allowlist` dictionary using the key format `"ClassName.PropertyName"` mapped to a clear justification string. However, prefer wiring the property in production or removing the field entirely over adding it to the allowlist.
+| | `Anthropic/AnthropicLlmAdapter.cs` — deprecated Claude adapter |
+| | `OpenAi/OpenAiLlmAdapter.cs` — deprecated OpenAI adapter |
 
 ### Pinder.Core.TestCommon
 
@@ -123,15 +115,21 @@ Data-driven rule resolution. Loads YAML rule definitions and evaluates condition
 
 ### Pinder.SessionSetup
 
-Pre-session setup: stake generation. Isolated from the per-turn game loop so that the web tier (`Pinder.GameApi`) can run it eagerly in the background after session create.
+Pre-session setup: narrative matchup analysis + stake generation. Isolated
+from the per-turn game loop so that the web tier (`Pinder.GameApi`) can run
+it eagerly in the background after session create, while the CLI harness
+skips it or runs a lighter version.
 
 | Depends on | Pinder.Core, Pinder.LlmAdapters (via ILlmTransport) |
 |---|---|
-| **Purpose** | Pre-session stake generation at session boot time |
-| **Key files** | `IStakeGenerator.cs` / `LlmStakeGenerator.cs` — player + datee stake strings |
+| **Purpose** | Matchup preview + stake copy at session boot time |
+| **Key files** | `IMatchupAnalyzer.cs` / `LlmMatchupAnalyzer.cs` — matchup narrative |
+| | `IStakeGenerator.cs` / `LlmStakeGenerator.cs` — player + datee stake strings |
 | | `CharacterDefinitionLoader.cs` — shared character JSON loader |
 
-Pre-session stake generation was ported into this library in #756 (`569b9f9`).
+Ported into this library in #756 (`569b9f9`). Previously inlined in
+`session-runner/MatchupAnalyzer.cs`; still referenced there via the new
+interface for CLI use.
 
 ### session-runner
 
@@ -145,6 +143,7 @@ CLI executable that wires everything together and runs a full game session.
 | | `ScoringPlayerAgent.cs` — heuristic-based option scorer (default) |
 | | `LlmPlayerAgent.cs` — LLM-powered decision agent |
 | | `HumanPlayerAgent.cs` — interactive stdin agent |
+| | `MatchupAnalyzer.cs` — pre-session matchup analysis |
 
 ## 3. Core Game Loop
 
@@ -198,6 +197,7 @@ are:
 | `ITrapRegistry` | Pinder.Core | Supplies trap definitions by stat |
 | `IDiceRoller` | Pinder.Core | Deterministic roll injection for tests |
 | `IRuleResolver` | Pinder.Rules | YAML-driven constant lookup |
+| `IMatchupAnalyzer` | Pinder.SessionSetup | Pre-session matchup narrative |
 | `IStakeGenerator` | Pinder.SessionSetup | Pre-session stake generation |
 | `IPlayerAgent` | session-runner | Sim-agent decision-making |
 
@@ -225,7 +225,7 @@ Core abstraction for all LLM interactions. Stateless per-call.
 | `ApplyShadowCorruptionAsync(message, instruction, ...)` | Rewrite message with shadow corruption |
 | `ApplyTrapOverlayAsync(message, ...)` | Rewrite message with trap taint |
 
-**Implementations:** `PinderLlmAdapter` (in Pinder.LlmAdapters)
+**Implementations:** `AnthropicLlmAdapter`, `OpenAiLlmAdapter` (both in Pinder.LlmAdapters)
 
 ### IStatefulLlmAdapter : ILlmAdapter
 
@@ -236,7 +236,7 @@ Extends ILlmAdapter with persistent datee session for memory continuity across t
 | `StartDateeSession(systemPrompt)` | Initialize persistent datee conversation |
 | `GetSteeringQuestionAsync(SteeringContext)` | Generate steering question after successful roll |
 
-**Implementations:** `PinderLlmAdapter` (in Pinder.LlmAdapters)
+**Implementations:** `AnthropicLlmAdapter`, `OpenAiLlmAdapter`
 
 ### IPlayerAgent
 
