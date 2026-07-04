@@ -370,6 +370,56 @@ namespace Pinder.Core.Tests.Prompts
             Assert.Equal(string.Empty, emptyString);
         }
 
+        [Fact]
+        public void AggregateWithAudit_ReturnsPreservedAttributedLines_Issue1067()
+        {
+            var conflicts = LoadRealConflictCatalog();
+            var sources = ZyxConflictSources();
+
+            // Act
+            var result = TextingStyleAggregator.AggregateWithAudit(sources, "zyx-test", conflicts);
+
+            // Assert: Verify that the new AttributedLines property exists on AggregationResult
+            var property = result.GetType().GetProperty("AttributedLines");
+            Assert.NotNull(property); // This will fail because the property does not exist yet
+
+            var attributedLinesValue = property.GetValue(result);
+            Assert.NotNull(attributedLinesValue);
+
+            var attributedLinesList = attributedLinesValue as System.Collections.IEnumerable;
+            Assert.NotNull(attributedLinesList);
+
+            int count = 0;
+            foreach (var line in attributedLinesList)
+            {
+                count++;
+                var type = line.GetType();
+                Assert.Equal("AttributedTextingStyleLine", type.Name);
+
+                var axisProp = type.GetProperty("Axis");
+                var valueProp = type.GetProperty("Value");
+                var sourceNameProp = type.GetProperty("SourceName");
+                var sourceKindProp = type.GetProperty("SourceKind");
+
+                Assert.NotNull(axisProp);
+                Assert.NotNull(valueProp);
+                Assert.NotNull(sourceNameProp);
+                Assert.NotNull(sourceKindProp);
+
+                var axis = axisProp.GetValue(line) as string;
+                var value = valueProp.GetValue(line) as string;
+                var sourceName = sourceNameProp.GetValue(line) as string;
+                var sourceKind = sourceKindProp.GetValue(line) as string;
+
+                Assert.False(string.IsNullOrWhiteSpace(axis));
+                Assert.False(string.IsNullOrWhiteSpace(value));
+                Assert.False(string.IsNullOrWhiteSpace(sourceName));
+                Assert.False(string.IsNullOrWhiteSpace(sourceKind));
+            }
+
+            Assert.True(count > 0, "Should have returned at least one attributed line");
+        }
+
         #endregion
     }
 }

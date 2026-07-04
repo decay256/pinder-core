@@ -65,6 +65,12 @@ namespace Pinder.Core.Characters
         public IReadOnlyList<string> TextingStyleLines { get; }
 
         /// <summary>
+        /// Issue #1067: final aggregated texting-style axis lines with source attribution as computed by
+        /// <c>TextingStyleAggregator.AggregateWithAudit</c>.
+        /// </summary>
+        public IReadOnlyList<Prompts.TextingStyleAggregator.AttributedTextingStyleLine> AttributedTextingStyleLines { get; }
+
+        /// <summary>
         /// Issue #404: per-source breakdown of the texting-style fragments
         /// that were joined into <see cref="TextingStyleFragment"/>. Each
         /// entry pairs <c>(kind, source, fragment)</c>: kind is
@@ -139,7 +145,8 @@ namespace Pinder.Core.Characters
             IReadOnlyDictionary<string, BackstoryFact>? backstory = null,
             IReadOnlyList<string>? stakeLines = null,
             IReadOnlyDictionary<string, string>? psychiatricDiagnosis = null,
-            IReadOnlyList<string>? backstoryFragments = null)
+            IReadOnlyList<string>? backstoryFragments = null,
+            IReadOnlyList<Prompts.TextingStyleAggregator.AttributedTextingStyleLine> attributedTextingStyleLines = null)
         {
             Stats = stats ?? throw new ArgumentNullException(nameof(stats));
             AssembledSystemPrompt = assembledSystemPrompt ?? throw new ArgumentNullException(nameof(assembledSystemPrompt));
@@ -162,6 +169,7 @@ namespace Pinder.Core.Characters
             StakeLines = stakeLines;
             PsychiatricDiagnosis = psychiatricDiagnosis;
             BackstoryFragments = backstoryFragments;
+            AttributedTextingStyleLines = attributedTextingStyleLines ?? new System.Collections.Generic.List<Prompts.TextingStyleAggregator.AttributedTextingStyleLine>();
         }
     }
 }

@@ -52,21 +52,40 @@ namespace Pinder.Core.Prompts
                 $"reason=\"{Reason}\"";
         }
 
+        public sealed class AttributedTextingStyleLine
+        {
+            public string Axis { get; }
+            public string Value { get; }
+            public string SourceName { get; }
+            public string SourceKind { get; }
+
+            public AttributedTextingStyleLine(string axis, string value, string sourceName, string sourceKind)
+            {
+                Axis = axis;
+                Value = value;
+                SourceName = sourceName;
+                SourceKind = sourceKind;
+            }
+        }
+
         /// <summary>
         /// Result of conflict-aware aggregation: the resolved axis lines
         /// plus the audit log of dropped fragments.
         /// </summary>
         public sealed class AggregationResult
         {
-            public IReadOnlyList<string>           Lines   { get; }
-            public IReadOnlyList<ConflictDropEntry> Drops  { get; }
+            public IReadOnlyList<string>                     Lines           { get; }
+            public IReadOnlyList<ConflictDropEntry>           Drops           { get; }
+            public IReadOnlyList<AttributedTextingStyleLine> AttributedLines { get; }
 
             public AggregationResult(
-                IReadOnlyList<string>           lines,
-                IReadOnlyList<ConflictDropEntry> drops)
+                IReadOnlyList<string>                     lines,
+                IReadOnlyList<ConflictDropEntry>           drops,
+                IReadOnlyList<AttributedTextingStyleLine> attributedLines = null)
             {
-                Lines = lines;
-                Drops = drops;
+                Lines           = lines;
+                Drops           = drops;
+                AttributedLines = attributedLines ?? Array.Empty<AttributedTextingStyleLine>();
             }
         }
     }

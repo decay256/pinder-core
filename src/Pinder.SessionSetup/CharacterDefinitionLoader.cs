@@ -257,7 +257,8 @@ namespace Pinder.SessionSetup
                 backstory: def.Backstory,
                 stakeLines: def.StakeLines,
                 psychiatricDiagnosis: def.PsychiatricDiagnosis,
-                backstoryFragments: fragments.BackstoryFragments);
+                backstoryFragments: fragments.BackstoryFragments,
+                attributedTextingStyleLines: aggregationResult.AttributedLines);
 
             // Issue #779: propagate the permanent stake from the definition
             // to the profile so setup can read it without an LLM call.

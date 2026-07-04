@@ -223,14 +223,14 @@ namespace Pinder.Core.Prompts
             _ = seedKey;
 
             if (sources == null || sources.Count == 0)
-                return new AggregationResult(Array.Empty<string>(), Array.Empty<ConflictDropEntry>());
+                return new AggregationResult(Array.Empty<string>(), Array.Empty<ConflictDropEntry>(), Array.Empty<AttributedTextingStyleLine>());
 
             // Index syntax inputs by slot, tone inputs by parameter id.
             // Multiple sources for the same slot would be a content bug
             // (two items in one slot is not supposed to happen); first
             // wins so the assembler's ordering decides.
-            var bySlot = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            var anatomyByParam = new List<(string ParamId, string Fragment)>();
+            var bySlot = new Dictionary<string, TextingStyleFragmentSource>(StringComparer.OrdinalIgnoreCase);
+            var anatomyByParam = new Dictionary<string, TextingStyleFragmentSource>(StringComparer.OrdinalIgnoreCase);
 
             foreach (var src in sources)
             {
@@ -241,11 +241,12 @@ namespace Pinder.Core.Prompts
                 if (string.Equals(src.Kind, "item", StringComparison.Ordinal))
                 {
                     if (!bySlot.ContainsKey(src.SlotOrParameter))
-                        bySlot[src.SlotOrParameter] = src.Fragment;
+                        bySlot[src.SlotOrParameter] = src;
                 }
                 else if (string.Equals(src.Kind, "anatomy", StringComparison.Ordinal))
                 {
-                    anatomyByParam.Add((src.SlotOrParameter, src.Fragment));
+                    if (!anatomyByParam.ContainsKey(src.SlotOrParameter))
+                        anatomyByParam[src.SlotOrParameter] = src;
                 }
             }
 
@@ -253,15 +254,15 @@ namespace Pinder.Core.Prompts
             // group-vote step doesn't re-parse on every lookup.
             var toneByParam = new Dictionary<string, IReadOnlyDictionary<string, string>>(
                 StringComparer.OrdinalIgnoreCase);
-            foreach (var (paramId, frag) in anatomyByParam)
+            foreach (var kvp in anatomyByParam)
             {
-                toneByParam[paramId] = ParseToneAxes(frag);
+                toneByParam[kvp.Key] = ParseToneAxes(kvp.Value.Fragment);
             }
 
             // Resolve axis-by-axis in canonical order. Missing axes drop.
             // Collect as (axis, value) pairs first so we can run conflict
             // resolution across all picked values before emitting strings.
-            var pickedPairs = new List<(string axis, string value)>();
+            var pickedPairs = new List<AttributedTextingStyleLine>();
 
             // Syntax axes — read from the slot's item, if equipped.
             // Order slot-to-axis mappings canonically/deterministically to ensure stable evaluation sequence across different environments and sessions.
@@ -274,22 +275,34 @@ namespace Pinder.Core.Prompts
             {
                 string slot = kv.Key;
                 string axis = kv.Value;
-                if (!bySlot.TryGetValue(slot, out var fragment)) continue;
-                var syntax = ParseSyntaxAxes(fragment);
+                if (!bySlot.TryGetValue(slot, out var src)) continue;
+                var syntax = ParseSyntaxAxes(src.Fragment);
                 if (syntax.TryGetValue(axis, out var line) && !string.IsNullOrWhiteSpace(line))
                 {
-                    pickedPairs.Add((axis, line));
+                    pickedPairs.Add(new AttributedTextingStyleLine(axis, line, src.Source, src.Kind));
                 }
             }
 
             // Tone axes — majority vote per group.
-            string? stanceLine   = MajorityVote("stance",   StanceGroup,   toneByParam);
-            string? registerLine = MajorityVote("register", RegisterGroup, toneByParam);
-            string? pacingLine   = MajorityVote("pacing",   PacingGroup,   toneByParam);
+            var stanceResult   = MajorityVote("stance",   StanceGroup,   toneByParam);
+            var registerResult = MajorityVote("register", RegisterGroup, toneByParam);
+            var pacingResult   = MajorityVote("pacing",   PacingGroup,   toneByParam);
 
-            if (stanceLine   != null) pickedPairs.Add(AxisValuePairOf(stanceLine));
-            if (registerLine != null) pickedPairs.Add(AxisValuePairOf(registerLine));
-            if (pacingLine   != null) pickedPairs.Add(AxisValuePairOf(pacingLine));
+            if (stanceResult != null && anatomyByParam.TryGetValue(stanceResult.ParamId, out var stanceSrc))
+            {
+                var pair = AxisValuePairOf(stanceResult.WinnerLine);
+                pickedPairs.Add(new AttributedTextingStyleLine(pair.axis, pair.value, stanceSrc.Source, stanceSrc.Kind));
+            }
+            if (registerResult != null && anatomyByParam.TryGetValue(registerResult.ParamId, out var registerSrc))
+            {
+                var pair = AxisValuePairOf(registerResult.WinnerLine);
+                pickedPairs.Add(new AttributedTextingStyleLine(pair.axis, pair.value, registerSrc.Source, registerSrc.Kind));
+            }
+            if (pacingResult != null && anatomyByParam.TryGetValue(pacingResult.ParamId, out var pacingSrc))
+            {
+                var pair = AxisValuePairOf(pacingResult.WinnerLine);
+                pickedPairs.Add(new AttributedTextingStyleLine(pair.axis, pair.value, pacingSrc.Source, pacingSrc.Kind));
+            }
 
             // ------------------------------------------------------------------
             // #907: Conflict resolution.
@@ -298,17 +311,17 @@ namespace Pinder.Core.Prompts
             // (the one that conflicts with an already-kept earlier value).
             // The resolver is O(n²) over the picked set — fine for n ≤ 9.
             // ------------------------------------------------------------------
-            var kept  = new List<(string axis, string value)>(pickedPairs.Count);
+            var kept  = new List<AttributedTextingStyleLine>(pickedPairs.Count);
             var drops = new List<ConflictDropEntry>();
 
             foreach (var candidate in pickedPairs)
             {
                 string? conflictReason = null;
-                (string axis, string value) conflictKept = default;
+                AttributedTextingStyleLine? conflictKept = null;
 
                 foreach (var alreadyKept in kept)
                 {
-                    var reason = conflicts.GetReason(alreadyKept, candidate);
+                    var reason = conflicts.GetReason((alreadyKept.Axis, alreadyKept.Value), (candidate.Axis, candidate.Value));
                     if (reason != null)
                     {
                         conflictReason = reason;
@@ -321,10 +334,10 @@ namespace Pinder.Core.Prompts
                 {
                     drops.Add(new ConflictDropEntry(
                         characterId:  seedKey,
-                        axis:         candidate.axis,
-                        droppedValue: candidate.value,
-                        conflictAxis: conflictKept.axis,
-                        keptValue:    conflictKept.value,
+                        axis:         candidate.Axis,
+                        droppedValue: candidate.Value,
+                        conflictAxis: conflictKept.Axis,
+                        keptValue:    conflictKept.Value,
                         reason:       conflictReason));
                     // Do NOT add to kept — this axis is silenced for this character.
                 }
@@ -335,13 +348,15 @@ namespace Pinder.Core.Prompts
             }
 
             // Re-order to match the canonical sequence.
-            var canonicalList = CanonicalAxisOrder.ToList();
-            var result = kept
-                .Select(p => $"{p.axis}: {p.value}")
-                .OrderBy(line => canonicalList.IndexOf(AxisOf(line)))
+            var orderedKept = kept
+                .OrderBy(line => canonicalAxisList.IndexOf(line.Axis))
                 .ToList();
 
-            return new AggregationResult(result, drops);
+            var result = orderedKept
+                .Select(p => $"{p.Axis}: {p.Value}")
+                .ToList();
+
+            return new AggregationResult(result, drops, orderedKept);
         }
     }
 }
