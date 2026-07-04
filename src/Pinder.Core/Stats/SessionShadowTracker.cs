@@ -17,7 +17,7 @@ namespace Pinder.Core.Stats
     /// </summary>
     public sealed class SessionShadowTracker
     {
-        private readonly StatBlock _baseStats;
+        private StatBlock _baseStats;
         private readonly Dictionary<ShadowStatType, int> _deltas;
         private readonly List<string> _growthEvents;
         private readonly List<ShadowGrowthEffect> _growthEffects;
@@ -33,6 +33,14 @@ namespace Pinder.Core.Stats
             _deltas = new Dictionary<ShadowStatType, int>();
             _growthEvents = new List<string>();
             _growthEffects = new List<ShadowGrowthEffect>();
+        }
+
+        /// <summary>
+        /// Allows updating the base stats block dynamically (e.g., after level-up allocations).
+        /// </summary>
+        public void UpdateBaseStats(StatBlock newBase)
+        {
+            _baseStats = newBase ?? throw new ArgumentNullException(nameof(newBase));
         }
 
         /// <summary>

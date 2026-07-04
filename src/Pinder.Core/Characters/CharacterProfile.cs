@@ -12,7 +12,7 @@ namespace Pinder.Core.Characters
     public sealed class CharacterProfile
     {
         /// <summary>The character's stat block for roll resolution.</summary>
-        public StatBlock Stats { get; }
+        public StatBlock Stats { get; private set; }
 
         /// <summary>The fully assembled system prompt for LLM interactions.</summary>
         public string AssembledSystemPrompt { get; private set; }
@@ -111,6 +111,12 @@ namespace Pinder.Core.Characters
         {
             if (!string.IsNullOrEmpty(text))
                 AssembledSystemPrompt += text;
+        }
+
+        /// <summary>Allows updating the player's stat block dynamically (e.g., after level-up allocations).</summary>
+        public void UpdateStats(StatBlock stats)
+        {
+            Stats = stats ?? throw new ArgumentNullException(nameof(stats));
         }
 
         /// <summary>Overwrites the assembled system prompt with a new value.</summary>
