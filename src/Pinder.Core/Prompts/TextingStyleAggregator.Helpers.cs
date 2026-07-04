@@ -102,7 +102,19 @@ namespace Pinder.Core.Prompts
         // Tone aggregation — majority vote across an anatomy group.
         // ------------------------------------------------------------------
 
-        private static string? MajorityVote(
+        internal sealed class ToneVoteResult
+        {
+            public string WinnerLine { get; }
+            public string ParamId { get; }
+
+            public ToneVoteResult(string winnerLine, string paramId)
+            {
+                WinnerLine = winnerLine;
+                ParamId = paramId;
+            }
+        }
+
+        private static ToneVoteResult? MajorityVote(
             string axisName,
             IReadOnlyList<string> groupParams,
             IReadOnlyDictionary<string, IReadOnlyDictionary<string, string>> toneByParam)
@@ -113,6 +125,7 @@ namespace Pinder.Core.Prompts
             // earlier in groupParams wins.
             var counts = new Dictionary<string, int>(StringComparer.Ordinal);
             var firstRank = new Dictionary<string, int>(StringComparer.Ordinal);
+            var firstParamId = new Dictionary<string, string>(StringComparer.Ordinal);
 
             for (int rank = 0; rank < groupParams.Count; rank++)
             {
@@ -124,7 +137,10 @@ namespace Pinder.Core.Prompts
                 counts.TryGetValue(line, out int c);
                 counts[line] = c + 1;
                 if (!firstRank.ContainsKey(line))
+                {
                     firstRank[line] = rank;
+                    firstParamId[line] = paramId;
+                }
             }
 
             if (counts.Count == 0) return null;
@@ -136,7 +152,7 @@ namespace Pinder.Core.Prompts
                 .First()
                 .Key;
 
-            return $"{axisName}: {winner}";
+            return new ToneVoteResult($"{axisName}: {winner}", firstParamId[winner]);
         }
 
         // ------------------------------------------------------------------
