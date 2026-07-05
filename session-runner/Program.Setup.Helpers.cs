@@ -135,7 +135,9 @@ partial class Program
             {
                 Console.Error.WriteLine($"[WARN] Overlay model '{result.OverlayModel}' requested but overlay routing via option fields was removed (#1293); overlay calls will use the primary transport. Wire a dedicated overlay ILlmTransport to route overlays.");
             }
-            string anthropicModel = "claude-sonnet-4-20250514";
+            string anthropicModel = string.IsNullOrWhiteSpace(result.ModelSpec)
+                ? "claude-sonnet-4-20250514"
+                : result.ModelSpec;
             var transport = new AnthropicTransport(result.ApiKey, anthropicModel);
             result.Llm = new PinderLlmAdapter(transport, adapterOptions);
             engineLabel = string.IsNullOrWhiteSpace(result.OverlayModel)

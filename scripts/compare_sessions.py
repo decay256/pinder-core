@@ -9,7 +9,8 @@ FILES = {
 }
 
 def parse_turns(path):
-    text = open(path).read()
+    with open(path, "r", encoding="utf-8") as f:
+        text = f.read()
     split = re.compile(r'## ═══ TURN (\d+) ═══')
     parts = split.split(text)
     turns = []
@@ -165,7 +166,8 @@ for (a, b) in PAIRS:
         lines.append(f"| **Interest** | {ia}/25 ({da}) | {ib}/25 ({db}) |")
         lines.append("")
 
-    open(fname, 'w').write('\n'.join(lines))
+    with open(fname, 'w', encoding="utf-8") as f:
+        f.write('\n'.join(lines))
     print(f"Written: {fname}")
 
 # Verify first few turns have no empty cells

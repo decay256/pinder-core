@@ -119,15 +119,16 @@ namespace Pinder.SessionSetup
             }
             catch (OperationCanceledException)
             {
-                // Do not fire OnDegraded on cancellation; preserve existing behavior of returning empty string.
-                return string.Empty;
+                throw;
             }
-            catch
+            catch (Exception ex)
             {
-                _options.OnDegraded?.Invoke(SetupGenerationResult.DegradedFailure("dramatic_arc", "transport_error"));
-                // Parity with IStakeGenerator and IOutfitDescriber: transport failure → empty string.
-                // The caller decides what to do (skip arc, or fail setup).
-                return string.Empty;
+                if (_options.OnDegraded != null)
+                {
+                    _options.OnDegraded.Invoke(SetupGenerationResult.DegradedFailure("dramatic_arc", "transport_error"));
+                    return string.Empty;
+                }
+                throw;
             }
         }
 

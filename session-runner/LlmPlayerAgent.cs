@@ -21,65 +21,6 @@ namespace Pinder.SessionRunner
     /// </summary>
     public sealed class LlmPlayerAgent : IPlayerAgent, IDisposable
     {
-        private const string DefaultSystemPrompt =
-            "You are playing as {playerName} in Pinder, a comedy dating RPG. " +
-            "You are a strategic player agent. Your PRIMARY goal is to WIN — raise interest to 25. " +
-            "Your SECONDARY goal is strategic shadow management — prevent shadows from hitting dangerous thresholds. " +
-            "You make calculated decisions, not random ones.{personalityBlock}";
-
-        private const string DefaultUserTemplate =
-            "You are {playerName} talking to {dateeName}. Choose a dialogue option.\n" +
-            "\n" +
-            "{recentHistoryBlock}" +
-            "## Current State\n" +
-            "- Interest: {currentInterest}/25 ({interestState}){modifierNote}\n" +
-            "- Momentum: {momentumStreak} consecutive wins{momentumNote}\n" +
-            "- Active traps: {activeTraps}\n" +
-            "- Turn: {turnNumber}\n" +
-            "\n" +
-            "## Shadow Status\n" +
-            "{shadowStatusBlock}\n" +
-            "## Your Options\n" +
-            "{optionsBlock}\n" +
-            "## Rules Reminder\n" +
-            "- Roll d20 + stat modifier + bonuses vs DC. Meet or beat DC = success.\n" +
-            "- Success tiers: {successRules}.\n" +
-            "- Failure tiers: {failureRules}.\n" +
-            "- Risk tier bonus on success: Hard → +1 interest, Bold → +2 interest.\n" +
-            "- Momentum: {momentumRules}\n" +
-            "- 🔗 = callback bonus: hidden +1/+2/+3 added to roll.\n" +
-            "- 📖 = tell bonus: hidden +2 added to roll.\n" +
-            "- ⭐ = combo: +1 interest on success.\n" +
-            "- 🔓 = weakness window: DC is already reduced by 2-3.\n" +
-            "\n" +
-            "## Shadow Threshold Rules\n" +
-            "- T1 (≥{t1}): shadow taints delivery of paired stat.\n" +
-            "- T2 (≥{t2}): -2 penalty to paired stat rolls.\n" +
-            "- T3 (≥{t3}): shadow may override your choices for paired stat.\n" +
-            "\n" +
-            "## How to Reduce Shadows\n" +
-            "- Madness: −1 on any combo success | −1 on Tell option selected | −1 on Nat 20 CHAOS\n" +
-            "- Despair: −1 when SA or HONESTY succeeds at interest >18\n" +
-            "- Denial: −1 when HONESTY succeeds at interest ≥15\n" +
-            "- Fixation: −1 when 4+ different stats used in session | −1 on CHAOS combo\n" +
-            "- Dread: −1 when date secured | −1 on any Nat 20\n" +
-            "- Overthinking: −1 when any roll succeeds at interest ≥20\n" +
-            "\n" +
-            "## What Grows Shadows (avoid when near threshold)\n" +
-            "- Madness: every TropeTrap failure +1 | CHARM used 3x in session +1\n" +
-            "- Despair: Nat 1 on RIZZ +2 | RIZZ TropeTrap +1 | every 3rd cumulative RIZZ failure +1\n" +
-            "- Denial: skipping available HONESTY option +1 | date secured without HONESTY success +1\n" +
-            "- Fixation: same stat 3 turns in a row +1 | always picking highest-% 3 turns +1\n" +
-            "- Dread: Nat 1 on WIT +1 | catastrophic WIT fail +1 | interest hits 0 +2 | Ghosted +1\n" +
-            "- Overthinking: Nat 1 on SA +1 | SA used 3+ times in session +1\n" +
-            "\n" +
-            "## Your Strategy\n" +
-            "PRIMARY GOAL: Win the date. Raise interest to 25.\n" +
-            "SECONDARY: Manage shadows strategically. Trade a losing roll for shadow reduction when it prevents a dangerous threshold.\n" +
-            "NARRATIVE GAMBLE: When EV difference between options is < 5 percentage points, you may pick the riskier/more interesting option.\n" +
-            "Always explain your reasoning in 1-2 sentences.\n" +
-            "\n" +
-            "Use the submit_choice tool to make your pick. choice is 0-indexed (A=0, B=1, C=2, D=3).";
 
         /// <summary>
         /// Tool definition for structured output via Anthropic tool_use.
@@ -170,29 +111,21 @@ namespace Pinder.SessionRunner
 
         private static (string SystemPrompt, string UserTemplate) LoadTemplates()
         {
-            try
-            {
-                string? repoRoot = DataFileLocator.FindRepoRoot(AppContext.BaseDirectory);
-                string promptsDir = repoRoot != null 
-                    ? Path.Combine(repoRoot, "data", "prompts")
-                    : Path.Combine(AppContext.BaseDirectory, "data", "prompts");
+            string? repoRoot = DataFileLocator.FindRepoRoot(AppContext.BaseDirectory);
+            string promptsDir = repoRoot != null 
+                ? Path.Combine(repoRoot, "data", "prompts")
+                : Path.Combine(AppContext.BaseDirectory, "data", "prompts");
 
-                if (Directory.Exists(promptsDir))
-                {
-                    var catalog = PromptCatalog.LoadFromDirectory(promptsDir);
-                    var entry = catalog.TryGet("sim_agent");
-                    if (entry != null)
-                    {
-                        return (entry.SystemPrompt ?? "", entry.UserTemplate ?? "");
-                    }
-                }
-            }
-            catch
+            if (!Directory.Exists(promptsDir))
             {
-                // Fallback gracefully
+                throw new DirectoryNotFoundException($"Required prompt directory was not found: {promptsDir}");
             }
 
-            return (DefaultSystemPrompt, DefaultUserTemplate);
+            var catalog = PromptCatalog.LoadFromDirectory(promptsDir);
+            var entry = catalog.TryGet("sim_agent")
+                ?? throw new KeyNotFoundException("Prompt catalog does not contain required template 'sim_agent'.");
+
+            return (entry.SystemPrompt ?? "", entry.UserTemplate ?? "");
         }
 
         private static (int T1, int T2, int T3) ResolveShadowThresholds(IRuleResolver? resolver)

@@ -168,6 +168,9 @@ namespace Pinder.Core.Tests
 
                 Assert.Throws<InvalidOperationException>(() =>
                     new LlmBackgroundGenerator(new StubLlmTransport()));
+
+                Assert.Throws<InvalidOperationException>(() =>
+                    new LlmBackstoryGenerator(new StubLlmTransport()));
             }
             finally
             {
@@ -191,6 +194,9 @@ namespace Pinder.Core.Tests
 
                 Assert.Throws<InvalidOperationException>(() =>
                     new LlmBackgroundGenerator(new StubLlmTransport(), null, emptyCatalog));
+
+                Assert.Throws<InvalidOperationException>(() =>
+                    new LlmBackstoryGenerator(new StubLlmTransport(), null, emptyCatalog));
             }
             finally
             {

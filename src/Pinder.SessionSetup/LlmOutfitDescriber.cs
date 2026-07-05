@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Pinder.Core.Interfaces;
+using Pinder.LlmAdapters;
 
 namespace Pinder.SessionSetup
 {
@@ -30,11 +31,13 @@ namespace Pinder.SessionSetup
 
         private readonly ILlmTransport _transport;
         private readonly Options _options;
+        private readonly PromptCatalog? _catalog;
 
-        public LlmOutfitDescriber(ILlmTransport transport, Options? options = null)
+        public LlmOutfitDescriber(ILlmTransport transport, Options? options = null, PromptCatalog? catalog = null)
         {
             _transport = transport ?? throw new ArgumentNullException(nameof(transport));
             _options = options ?? new Options();
+            _catalog = catalog;
         }
 
         /// <summary>
@@ -56,12 +59,53 @@ namespace Pinder.SessionSetup
             if (playerItems == null) throw new ArgumentNullException(nameof(playerItems));
             if (dateeItems == null) throw new ArgumentNullException(nameof(dateeItems));
 
-            string userMessage = BuildUserMessage(playerName, playerItems, dateeName, dateeItems);
+            string systemPrompt = SystemPrompt;
+            string userMessage;
+
+            var entry = _catalog?.TryGet("outfit");
+            if (entry != null)
+            {
+                if (entry.SystemPrompt != null) systemPrompt = entry.SystemPrompt;
+            }
+
+            var playerItemsSb = new StringBuilder();
+            if (playerItems.Count == 0) playerItemsSb.AppendLine("- (no items recorded)");
+            else
+                foreach (var i in playerItems)
+                    playerItemsSb.AppendLine($"- {i}");
+
+            var dateeItemsSb = new StringBuilder();
+            if (dateeItems.Count == 0) dateeItemsSb.AppendLine("- (no items recorded)");
+            else
+                foreach (var i in dateeItems)
+                    dateeItemsSb.AppendLine($"- {i}");
+
+            var values = new Dictionary<string, string>
+            {
+                { "playerName", playerName },
+                { "playerItems", playerItemsSb.ToString().TrimEnd() },
+                { "dateeName", dateeName },
+                { "dateeItems", dateeItemsSb.ToString().TrimEnd() }
+            };
+
+            if (entry != null && entry.SystemPrompt != null)
+            {
+                systemPrompt = PromptCatalog.Substitute(systemPrompt, values);
+            }
+
+            if (entry != null && entry.UserTemplate != null)
+            {
+                userMessage = PromptCatalog.Substitute(entry.UserTemplate, values);
+            }
+            else
+            {
+                userMessage = BuildUserMessage(playerName, playerItems, dateeName, dateeItems);
+            }
 
             try
             {
                 string response = await _transport
-                    .SendAsync(SystemPrompt, userMessage, _options.Temperature, _options.MaxTokens, phase: LlmPhase.OutfitDescription)
+                    .SendAsync(systemPrompt, userMessage, _options.Temperature, _options.MaxTokens, phase: LlmPhase.OutfitDescription)
                     .ConfigureAwait(false);
                 string trimmed = (response ?? string.Empty).Trim();
                 if (string.IsNullOrEmpty(trimmed))
@@ -72,15 +116,16 @@ namespace Pinder.SessionSetup
             }
             catch (OperationCanceledException)
             {
-                // Do not fire OnDegraded on cancellation; preserve existing behavior of returning empty string.
-                return string.Empty;
+                throw;
             }
-            catch
+            catch (Exception ex)
             {
-                _options.OnDegraded?.Invoke(SetupGenerationResult.DegradedFailure("outfit", "transport_error"));
-                // Parity with IStakeGenerator: transport failure → empty string.
-                // The caller decides what to do (skip scene entry, or fail setup).
-                return string.Empty;
+                if (_options.OnDegraded != null)
+                {
+                    _options.OnDegraded.Invoke(SetupGenerationResult.DegradedFailure("outfit", "transport_error"));
+                    return string.Empty;
+                }
+                throw;
             }
         }
 

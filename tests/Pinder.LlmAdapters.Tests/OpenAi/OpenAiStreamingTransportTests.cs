@@ -13,19 +13,29 @@ using Xunit;
 
 namespace Pinder.LlmAdapters.Tests.OpenAi
 {
-    public partial class OpenAiStreamingTransportTests
+    public partial class OpenAiStreamingTransportTests : IDisposable
     {
+        private readonly List<HttpClient> _httpClients = new();
+
         // ==================================================================
         // Helpers
         // ==================================================================
 
-        private static OpenAiStreamingTransport NewTransport(string sseBody, HttpStatusCode status = HttpStatusCode.OK)
+        private OpenAiStreamingTransport NewTransport(string sseBody, HttpStatusCode status = HttpStatusCode.OK)
         {
             var handler = new CannedSseHandler(sseBody, statusCode: status);
             var http = new HttpClient(handler);
-            // Caller owns http via transport.Dispose -> we DO NOT pass ownership flag,
-            // but the test transports are short-lived and disposed in test scope.
+            _httpClients.Add(http);
             return new OpenAiStreamingTransport("sk-test", "https://example.test", "test-model", http);
+        }
+
+        public void Dispose()
+        {
+            foreach (var client in _httpClients)
+            {
+                try { client.Dispose(); } catch { /* best effort */ }
+            }
+            _httpClients.Clear();
         }
 
         private static async Task<List<string>> CollectAsync(IAsyncEnumerable<string> source)

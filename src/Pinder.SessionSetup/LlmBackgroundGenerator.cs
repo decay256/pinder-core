@@ -104,11 +104,14 @@ namespace Pinder.SessionSetup
                 // Do not fire OnDegraded on cancellation; preserve existing behavior of returning empty string.
                 return string.Empty;
             }
-            catch
+            catch (Exception ex)
             {
-                _options.OnDegraded?.Invoke(SetupGenerationResult.DegradedFailure("background", "transport_error"));
-                // Mirror stake generator: transport failure → empty string.
-                return string.Empty;
+                if (_options.OnDegraded != null)
+                {
+                    _options.OnDegraded.Invoke(SetupGenerationResult.DegradedFailure("background", "transport_error"));
+                    return string.Empty;
+                }
+                throw;
             }
         }
 

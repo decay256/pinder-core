@@ -19,30 +19,30 @@ namespace Pinder.SessionSetup
 
         private readonly ILlmTransport _transport;
         private readonly Options _options;
-        private readonly PromptCatalog? _catalog;
+        private readonly PromptCatalog _catalog;
 
-        private const string DefaultSystemPrompt = 
-            "You are a backstory generator for a character. " +
-            "You must generate exactly 20 categories of backstory facts. " +
-            "Here are the 20 exact category keys you must use: " +
-            "age_and_demographics, birthplace_and_origin, childhood_milieu, parental_dynamics, early_education_scars, " +
-            "higher_education, formative_intimacies, career_debut, current_profession, financial_hygiene, " +
-            "domestic_milieu, social_circle, recent_ex, career_low, delusional_plan, " +
-            "hyperfixations, ideological_posture, digital_footprint, physical_dysmorphia, dependencies. " +
-            "For each category, provide a 'BioLie' and a 'TragicReality'. " +
-            "Return ONLY valid JSON where keys are the 20 category names and values are objects containing 'BioLie' and 'TragicReality' strings.";
+        public LlmBackstoryGenerator(ILlmTransport transport, Options? options = null)
+            : this(transport, options, catalog: null)
+        {
+        }
 
-        private const string DefaultUserTemplate = 
-            "Character: {characterName}\n" +
-            "Gender: {genderIdentity}\n" +
-            "Bio: {bio}\n" +
-            "Fragments:\n{fragments}";
-
-        public LlmBackstoryGenerator(ILlmTransport transport, Options? options = null, PromptCatalog? catalog = null)
+        public LlmBackstoryGenerator(
+            ILlmTransport transport,
+            Options? options,
+            PromptCatalog? catalog)
         {
             _transport = transport ?? throw new ArgumentNullException(nameof(transport));
             _options = options ?? new Options();
-            _catalog = catalog;
+            _catalog = catalog ?? PromptTemplates.Catalog
+                ?? throw new InvalidOperationException("PromptTemplates.Catalog is not wired. Call PromptWiring.Wire() at startup.");
+
+            // Enforce that the catalog contains the required key
+            var entry = _catalog.TryGet("backstory")
+                ?? throw new InvalidOperationException("prompt-catalog: missing required key 'backstory'.");
+            if (string.IsNullOrWhiteSpace(entry.SystemPrompt))
+                throw new InvalidOperationException("prompt-catalog: key 'backstory' has no system_prompt. Check the yaml file.");
+            if (string.IsNullOrWhiteSpace(entry.UserTemplate))
+                throw new InvalidOperationException("prompt-catalog: key 'backstory' has no user_template. Check the yaml file.");
         }
 
         public async Task<Dictionary<string, BackstoryFact>> GenerateAsync(
@@ -52,15 +52,13 @@ namespace Pinder.SessionSetup
             IReadOnlyList<string> backstoryFragments,
             CancellationToken cancellationToken = default)
         {
-            string systemPrompt = DefaultSystemPrompt;
-            string userTemplate = DefaultUserTemplate;
+            var entry = _catalog.TryGet("backstory")
+                ?? throw new InvalidOperationException("prompt-catalog: missing required key 'backstory'.");
 
-            var entry = _catalog?.TryGet("backstory");
-            if (entry != null)
-            {
-                if (entry.SystemPrompt != null) systemPrompt = entry.SystemPrompt;
-                if (entry.UserTemplate != null) userTemplate = entry.UserTemplate;
-            }
+            string systemPromptTemplate = entry.SystemPrompt
+                ?? throw new InvalidOperationException("prompt-catalog: key 'backstory' has no system_prompt.");
+            string userTemplate = entry.UserTemplate
+                ?? throw new InvalidOperationException("prompt-catalog: key 'backstory' has no user_template.");
 
             string fragments = string.Join("\n", backstoryFragments);
 
@@ -72,14 +70,9 @@ namespace Pinder.SessionSetup
                 { "fragments", fragments }
             };
 
-            // Using PromptCatalog.Substitute if possible, else manual fallback for default template
-            string userMessage = _catalog != null && entry != null 
-                ? PromptCatalog.Substitute(userTemplate, values)
-                : userTemplate
-                    .Replace("{characterName}", characterName)
-                    .Replace("{genderIdentity}", genderIdentity)
-                    .Replace("{bio}", bio)
-                    .Replace("{fragments}", fragments);
+            // Use PromptCatalog.Substitute for both system prompt (in case of variables) and user message
+            string systemPrompt = PromptCatalog.Substitute(systemPromptTemplate, values);
+            string userMessage = PromptCatalog.Substitute(userTemplate, values);
 
             var responseJson = await _transport.SendAsync(
                 systemPrompt,

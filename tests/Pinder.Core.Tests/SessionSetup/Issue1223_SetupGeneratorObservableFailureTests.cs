@@ -38,23 +38,30 @@ namespace Pinder.Core.Tests.SessionSetup
             Assert.NotNull(resultType);
         }
 
-        // ── 3. PARITY GUARD — FAILURE STILL RETURNS EMPTY (must PASS now) ───────────
+        // ── 3. PARITY GUARD — FAILURE RETENTION AND BUBBLING (must PASS now) ───────────
         [Fact]
-        public async Task ParityGuard_FailureStillReturnsEmpty_StakeAndDramaticArc()
+        public async Task ParityGuard_FailureStillReturnsEmpty_Stake_ButDramaticArcAndOutfitBubble()
         {
             var throwingTransport = new ThrowingLlmTransport();
 
-            // Test LlmStakeGenerator
+            // Test LlmStakeGenerator (now bubbles up)
             var stakeGen = new LlmStakeGenerator(throwingTransport);
-            string stakeResult = await stakeGen.GenerateAsync("Alice", "some system prompt");
-            Assert.Equal(string.Empty, stakeResult);
+            await Assert.ThrowsAsync<LlmTransportException>(() => stakeGen.GenerateAsync("Alice", "some system prompt"));
 
-            // Test LlmDramaticArcGenerator
+            // Test LlmBackgroundGenerator (now bubbles up)
+            var bgGen = new LlmBackgroundGenerator(throwingTransport);
+            await Assert.ThrowsAsync<LlmTransportException>(() => bgGen.GenerateAsync("Alice", "some system prompt"));
+
+            // Test LlmDramaticArcGenerator (throws)
             var arcGen = new LlmDramaticArcGenerator(throwingTransport);
-            string arcResult = await arcGen.GenerateAsync(
+            await Assert.ThrowsAsync<LlmTransportException>(() => arcGen.GenerateAsync(
                 "Player", "PlayerStake", "PlayerBio",
-                "Datee", "DateeStake", "DateeBio");
-            Assert.Equal(string.Empty, arcResult);
+                "Datee", "DateeStake", "DateeBio"));
+
+            // Test LlmOutfitDescriber (throws)
+            var outfitGen = new LlmOutfitDescriber(throwingTransport);
+            await Assert.ThrowsAsync<LlmTransportException>(() => outfitGen.GenerateAsync(
+                "Player", new List<string>(), "Datee", new List<string>()));
         }
 
         // ── 4. PARITY GUARD — SUCCESS RETURNS TRIMMED TEXT (must PASS now) ──────────

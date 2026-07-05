@@ -10,14 +10,17 @@ import json, urllib.request, urllib.error
 
 ANTHROPIC_KEY = ''
 try:
-    env = open('/root/.openclaw/.env').read()
+    with open('/root/.openclaw/.env', 'r', encoding='utf-8') as f:
+        env = f.read()
     if 'ANTHROPIC_API_KEY=' in env:
         ANTHROPIC_KEY = env.split('ANTHROPIC_API_KEY=')[1].split('\n')[0].strip().strip('"')
 except: pass
-GROQ_KEY = open('/tmp/groq_key.txt').read().strip()
+with open('/tmp/groq_key.txt', 'r', encoding='utf-8') as f:
+    GROQ_KEY = f.read().strip()
 
 def extract_delivery_system():
-    lines = open('/root/.openclaw/agents-extra/pinder/design/playtests/session-076-debug.md').readlines()
+    with open('/root/.openclaw/agents-extra/pinder/design/playtests/session-076-debug.md', 'r', encoding='utf-8') as f:
+        lines = f.readlines()
     in_block, start_line, result = False, None, []
     for i, line in enumerate(lines):
         if '### DELIVERY REQUEST' in line: start_line = i
@@ -28,7 +31,8 @@ def extract_delivery_system():
     return ''.join(result)
 
 def extract_catastrophe():
-    text = open('/root/.openclaw/workspace/pinder-core/data/delivery-instructions.yaml').read()
+    with open('/root/.openclaw/workspace/pinder-core/data/delivery-instructions.yaml', 'r', encoding='utf-8') as f:
+        text = f.read()
     start = text.find('horniness_overlay:')
     section = text[start:]
     cat_start = section.find('\n    catastrophe:')
