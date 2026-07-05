@@ -10,7 +10,7 @@ strings:
   game_screen.momentum_label: "Momentum"
   game_screen.momentum_streak: "×{streak} streak"
   game_screen.momentum_cold: "Cold"
-  game_screen.triple_bonus_active: "✨ Triple bonus active (+1 to next roll)"
+  game_screen.triple_bonus_active: "✨ Triple bonus active (+2 to next roll)"
   game_screen.interest_state_label: "Interest state"
   game_screen.active_trap_label: "Active Trap"
   game_screen.loading_turn: "Loading turn…"

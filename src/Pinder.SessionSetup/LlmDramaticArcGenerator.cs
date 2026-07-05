@@ -97,6 +97,10 @@ namespace Pinder.SessionSetup
                 { "dateeBio", dBio }
             };
 
+            if (_catalog != null && entry != null && entry.SystemPrompt != null)
+            {
+                systemPrompt = PromptCatalog.Substitute(systemPrompt, values);
+            }
             string userMessage = _catalog != null && entry != null
                 ? PromptCatalog.Substitute(userTemplate, values)
                 : BuildUserMessage(playerName, pStake, pBio, dateeName, dStake, dBio);

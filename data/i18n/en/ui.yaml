@@ -49,6 +49,13 @@ strings:
   play_page.starting_button: "Starting…"
   play_page.player_label: "Player:"
   play_page.datee_label: "Datee:"
+  play_page.generate_button: "Generate Random Character"
+  play_page.generating_button: "Generating…"
+  play_page.generate_success: "Created “{name}” (level {level})."
+  play_page.generate_failed: "Generation failed ({status}): {error}"
+  play_page.generate_failed_network: "Generation failed: network or unexpected error."
+  play_page.failed_to_load_characters: "Failed to load characters."
+  play_page.failed_to_create_session: "Failed to create session."
 
   # ── SessionsPage (migrated #440 Phase 5) ──────────────────────────
   sessions_page.loading: "Loading sessions…"

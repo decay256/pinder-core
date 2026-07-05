@@ -194,10 +194,19 @@ namespace Pinder.Core.Tests
         [Fact]
         public void OldMechanics_HorninessGte6_ForcedRizzDraw_Removed()
         {
-            // This is a structural test — the code no longer references _sessionHorniness >= 6
-            // in DrawRandomStats. Verified by code inspection and removal of the condition.
-            // The test passes if compilation succeeds (the condition was removed).
-            Assert.True(true);
+            // Verified that DrawRandomStats does not force or guarantee Rizz under any conditions.
+            // When horniness was >= 6, the old system used to force a Rizz draw. Now, if the pool
+            // does not contain Rizz, DrawRandomStats should respect that and return only what was requested.
+            var poolWithoutRizz = new[] { StatType.Charm, StatType.Honesty, StatType.Wit };
+            var thresholds = new Dictionary<ShadowStatType, int>();
+            var rng = new Random(42);
+
+            var drawn = OptionFilterEngine.DrawRandomStats(poolWithoutRizz, 3, thresholds, rng);
+
+            Assert.DoesNotContain(StatType.Rizz, drawn);
+            Assert.Contains(StatType.Charm, drawn);
+            Assert.Contains(StatType.Honesty, drawn);
+            Assert.Contains(StatType.Wit, drawn);
         }
 
         // ======================== Helpers ========================
