@@ -376,14 +376,14 @@ namespace Pinder.LlmAdapters.Anthropic
             if (validOptions.Count == 0)
             {
                 errorCode = "no_valid_options";
-                errorMessage = "LLM dialogue_options response contains no valid options (malformed).";
+                errorMessage = $"LLM dialogue_options response contains no valid options (malformed). Raw Response: {llmResponse}";
                 return Array.Empty<DialogueOption>();
             }
 
             if (validOptions.Count < expectedCount)
             {
                 errorCode = "partial_options";
-                errorMessage = $"LLM dialogue_options response has partial options: fewer valid options ({validOptions.Count}) than required ({expectedCount}).";
+                errorMessage = $"LLM dialogue_options response has partial options: fewer valid options ({validOptions.Count}) than required ({expectedCount}). Raw Response: {llmResponse}";
                 return Array.Empty<DialogueOption>();
             }
 

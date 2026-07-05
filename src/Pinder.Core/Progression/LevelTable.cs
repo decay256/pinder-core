@@ -20,9 +20,9 @@ namespace Pinder.Core.Progression
         /// <summary>Absolute maximum for any base stat (before gear).</summary>
         public const int BaseStatCap = 6;
 
-        private static bool IsTestNamespace(IRuleResolver rules)
+        private static bool IsTestResolver(IRuleResolver rules)
         {
-            return rules.GetType().FullName.Contains("GameDefinitionProgressionTests");
+            return rules.GetType().Assembly.GetName().Name.Contains("Tests");
         }
 
         /// <summary>Resolve 1-based level from raw XP.</summary>
@@ -30,59 +30,61 @@ namespace Pinder.Core.Progression
         {
             rules = rules ?? DefaultRuleResolver.Instance ?? throw new InvalidOperationException("Default rule resolver is not registered.");
 
-            if (rules.GetType().Name == "GameDefinition")
-            {
-                var prop = rules.GetType().GetProperty("ProgressionXpThresholds");
-                if (prop != null)
-                {
-                    var dict = prop.GetValue(rules) as IReadOnlyDictionary<string, int>;
-                    if (dict != null)
-                    {
-                        int maxLevel = dict.Count;
-                        int level = 1;
-                        for (int l = maxLevel; l >= 1; l--)
-                        {
-                            if (dict.TryGetValue(l.ToString(), out int thresh))
-                            {
-                                if (xp >= thresh)
-                                {
-                                    level = l;
-                                    break;
-                                }
-                            }
-                            else
-                            {
-                                throw new KeyNotFoundException($"Missing progression XP threshold for level {l}.");
-                            }
-                        }
-                        return level;
-                    }
-                }
-            }
-
-            // Fallback for custom mock/test resolvers
-            int levelFallback = 1;
+            int level = 1;
+            int currentCheck = 1;
             bool foundAny = false;
-            for (int l = 11; l >= 1; l--)
+
+            while (true)
             {
-                var threshold = rules.GetXpThresholdForLevel(l);
-                if (threshold.HasValue)
+                try
                 {
-                    foundAny = true;
+                    int? threshold = rules.GetXpThresholdForLevel(currentCheck);
+                    if (threshold.HasValue)
+                    {
+                        foundAny = true;
+                    }
+                    else
+                    {
+                        if (currentCheck == 1)
+                        {
+                            threshold = 0;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+
                     if (xp >= threshold.Value)
                     {
-                        levelFallback = l;
+                        level = currentCheck;
+                    }
+                    currentCheck++;
+                }
+                catch (KeyNotFoundException)
+                {
+                    if (currentCheck == 1)
+                    {
+                        int? threshold = 0;
+                        if (xp >= threshold.Value)
+                        {
+                            level = currentCheck;
+                        }
+                        currentCheck++;
+                    }
+                    else
+                    {
                         break;
                     }
                 }
             }
 
-            if (!foundAny && DefaultRuleResolver.Instance != null && DefaultRuleResolver.Instance != rules && !IsTestNamespace(rules))
+            if (!foundAny && DefaultRuleResolver.Instance != null && DefaultRuleResolver.Instance != rules && !IsTestResolver(rules))
             {
                 return GetLevel(xp, DefaultRuleResolver.Instance);
             }
 
-            return levelFallback;
+            return level;
         }
 
         /// <summary>Roll bonus for a given level (1-based).</summary>
@@ -93,7 +95,7 @@ namespace Pinder.Core.Progression
             var o = rules.GetLevelRollBonus(level);
             if (o.HasValue) return o.Value;
 
-            if (rules != DefaultRuleResolver.Instance && DefaultRuleResolver.Instance != null && !IsTestNamespace(rules))
+            if (rules != DefaultRuleResolver.Instance && DefaultRuleResolver.Instance != null && !IsTestResolver(rules))
             {
                 var oDefault = DefaultRuleResolver.Instance.GetLevelRollBonus(level);
                 if (oDefault.HasValue) return oDefault.Value;
@@ -110,7 +112,7 @@ namespace Pinder.Core.Progression
             var o = rules.GetBuildPointsForLevel(level);
             if (o.HasValue) return o.Value;
 
-            if (rules != DefaultRuleResolver.Instance && DefaultRuleResolver.Instance != null && !IsTestNamespace(rules))
+            if (rules != DefaultRuleResolver.Instance && DefaultRuleResolver.Instance != null && !IsTestResolver(rules))
             {
                 var oDefault = DefaultRuleResolver.Instance.GetBuildPointsForLevel(level);
                 if (oDefault.HasValue) return oDefault.Value;
@@ -127,7 +129,7 @@ namespace Pinder.Core.Progression
             var o = rules.GetItemSlotsForLevel(level);
             if (o.HasValue) return o.Value;
 
-            if (rules != DefaultRuleResolver.Instance && DefaultRuleResolver.Instance != null && !IsTestNamespace(rules))
+            if (rules != DefaultRuleResolver.Instance && DefaultRuleResolver.Instance != null && !IsTestResolver(rules))
             {
                 var oDefault = DefaultRuleResolver.Instance.GetItemSlotsForLevel(level);
                 if (oDefault.HasValue) return oDefault.Value;
@@ -141,44 +143,13 @@ namespace Pinder.Core.Progression
         {
             rules = rules ?? DefaultRuleResolver.Instance ?? throw new InvalidOperationException("Default rule resolver is not registered.");
 
-            int? intermediateMin = null;
-            int? advancedMin = null;
-            int? legendaryMin = null;
-
-            if (rules.GetType().Name == "GameDefinition")
-            {
-                var prop = rules.GetType().GetProperty("ProgressionFailurePoolTiers");
-                if (prop != null)
-                {
-                    var dict = prop.GetValue(rules) as IReadOnlyDictionary<string, int>;
-                    if (dict != null)
-                    {
-                        if (dict.TryGetValue("intermediate_min", out int iVal)) intermediateMin = iVal;
-                        if (dict.TryGetValue("advanced_min", out int aVal)) advancedMin = aVal;
-                        if (dict.TryGetValue("legendary_min", out int lVal)) legendaryMin = lVal;
-                    }
-                }
-            }
-            else
-            {
-                var method = rules.GetType().GetMethod("GetFailurePoolTierMinLevel");
-                if (method != null)
-                {
-                    intermediateMin = method.Invoke(rules, new object[] { "intermediate_min" }) as int?;
-                    advancedMin = method.Invoke(rules, new object[] { "advanced_min" }) as int?;
-                    legendaryMin = method.Invoke(rules, new object[] { "legendary_min" }) as int?;
-                }
-                else
-                {
-                    intermediateMin = rules.GetFailurePoolTierMinLevel("intermediate_min");
-                    advancedMin = rules.GetFailurePoolTierMinLevel("advanced_min");
-                    legendaryMin = rules.GetFailurePoolTierMinLevel("legendary_min");
-                }
-            }
+            int? intermediateMin = rules.GetFailurePoolTierMinLevel("intermediate_min");
+            int? advancedMin = rules.GetFailurePoolTierMinLevel("advanced_min");
+            int? legendaryMin = rules.GetFailurePoolTierMinLevel("legendary_min");
 
             // Fallback to default resolver if values are null
             if ((!intermediateMin.HasValue || !advancedMin.HasValue || !legendaryMin.HasValue) 
-                && DefaultRuleResolver.Instance != null && DefaultRuleResolver.Instance != rules && !IsTestNamespace(rules))
+                && DefaultRuleResolver.Instance != null && DefaultRuleResolver.Instance != rules && !IsTestResolver(rules))
             {
                 return GetFailurePoolTier(level, DefaultRuleResolver.Instance);
             }
