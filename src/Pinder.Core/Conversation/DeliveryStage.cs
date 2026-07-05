@@ -95,7 +95,40 @@ namespace Pinder.Core.Conversation
             // and this commit overlay are ephemeral; only the committed line is
             // persisted (by TurnOrchestrator), preserving the clean-history rule.
             progress?.Report(new TurnProgressEvent(TurnProgressStage.DeliveryStarted));
-            string deliveredMessage = DeliveryOverlay.Apply(originalIntendedText, rollResult.Tier, rollResult.MissMargin, chosenOption.Stat);
+            string? deliveredMessage = null;
+
+            if (!rollResult.IsSuccess)
+            {
+                string? failureInstruction = HorninessEngine.GetStatFailureInstruction(_statDeliveryInstructions, chosenOption.Stat, rollResult.Tier);
+                if (!string.IsNullOrWhiteSpace(failureInstruction) && _llm != null)
+                {
+                    try
+                    {
+                        deliveredMessage = await _llm.ApplyFailureCorruptionAsync(
+                            originalIntendedText,
+                            failureInstruction,
+                            chosenOption.Stat,
+                            rollResult.Tier,
+                            playerArchetypeDirectiveForDelivery,
+                            ct).ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException) when (ct.IsCancellationRequested)
+                    {
+                        throw;
+                    }
+                    catch (Exception)
+                    {
+                        // Fall back to deterministic DeliveryOverlay
+                        deliveredMessage = null;
+                    }
+                }
+            }
+
+            if (deliveredMessage == null || deliveredMessage == originalIntendedText)
+            {
+                deliveredMessage = DeliveryOverlay.Apply(originalIntendedText, rollResult.Tier, rollResult.MissMargin, chosenOption.Stat);
+            }
+
             progress?.Report(new TurnProgressEvent(TurnProgressStage.DeliveryCompleted, deliveredMessage));
 
             // #902 / SANITIZATION-INVARIANTS-MUST-RUN-AFTER-EACH-STAGE: meta-prefix
