@@ -83,7 +83,35 @@ public interface IStatefulLlmAdapter : ILlmAdapter
 - Extends `ILlmAdapter` — implementors must also satisfy the four `ILlmAdapter` methods.
 - `StartConversation` initializes an internal conversation session. Calling again replaces the previous session (no error).
 - `HasActiveConversation` returns `false` before `StartConversation`, `true` after.
-- Lives in `Pinder.Core` (zero NuGet dependencies — pure interface). Implemented by `AnthropicLlmAdapter`; not implemented by `NullLlmAdapter`.
+- Lives in `Pinder.Core` (zero NuGet dependencies — pure interface). Implemented by `AnthropicLlmAdapter` (and modern `PinderLlmAdapter`); not implemented by `NullLlmAdapter`.
+
+### `ILlmAdapter.ApplyFailureCorruptionAsync` (Pinder.Core.Interfaces)
+
+```csharp
+Task<string> ApplyFailureCorruptionAsync(
+    string message,
+    string instruction,
+    StatType stat,
+    FailureTier tier,
+    string? archetypeDirective = null,
+    CancellationToken ct = default);
+```
+
+Applies a config-driven failure corruption instruction prompt to a message when a player rolls a failure (Fumble, Misfire, TropeTrap, Catastrophe, Legendary).
+
+- **Arguments:**
+  - `message`: The original intended message text.
+  - `instruction`: The stat-specific failure instruction prompt retrieved from config (via `HorninessEngine.GetStatFailureInstruction(...)`).
+  - `stat`: The stat type on which the check failed (e.g. `RIZZ`, `WIT`, etc.).
+  - `tier`: The severity level of the failure (from `FailureTier.Fumble` to `FailureTier.Legendary`).
+  - `archetypeDirective`: Optional archetype directive to preserve character voice traits during the rewrite.
+  - `ct`: A cancellation token that must be propagated cleanly.
+- **Implementations:**
+  - **`PinderLlmAdapter`**: Constructs a system prompt establishing the comedy RPG setting and character voice, formats the user message with the failure instruction and archetype directive (if present), and calls the underlying transport layer.
+  - **`NullLlmAdapter`**: A no-op fallback implementation that returns the original message text unmodified, which in turn causes the delivery stage to fall back immediately to static deterministic degradation.
+- **Robust Fallback Mechanics:**
+  - If the adapter invocation throws an exception (excluding `OperationCanceledException` under cancellation), returns an empty or unmodified string, or detects LLM refusal (e.g., matching phrases like `"I can't"`, `"I cannot"`, `"inappropriate"`, or `"I'd be happy to help"`), it fires an `OnOverlayDegraded` event to capture the degradation state.
+  - In `DeliveryStage.ExecuteAsync`, if the asynchronous operation does not produce a valid mutated message, it falls back gracefully to the deterministic static overlay rendering via `DeliveryOverlay.Apply(...)`.
 
 ### `ConversationSession` (public sealed class)
 
@@ -167,6 +195,7 @@ The prompt includes an explicit "ONLY" constraint with 10 behavior-to-stat mappi
 - **Stateful conversation mode:** `AnthropicLlmAdapter` supports an optional stateful mode activated by `StartConversation(systemPrompt)`. When active (`HasActiveConversation == true`), all four `ILlmAdapter` methods follow a shared pattern: (1) build user content via `SessionDocumentBuilder` (same as stateless), (2) append user message to `ConversationSession`, (3) build request via `_session.BuildRequest()` (includes system blocks + ALL accumulated messages), (4) send via `_client.SendMessagesAsync()`, (5) append raw assistant response to session, (6) parse and return. System blocks come from the `ConversationSession` (set at construction), not from `CacheBlockBuilder`. When no session is active, all methods execute the original stateless code path with no conditional logic overhead. The Anthropic Messages API is stateless (full history must be sent each call), so `ConversationSession` accumulates messages client-side. Messages grow unbounded within a session (acceptable for ~20-turn games within Anthropic's 200k token window). `ConversationSession` does not enforce user/assistant alternation — the caller is responsible. The class is not thread-safe; it is designed for sequential use within one `GameSession`.
 - **Session system prompt assembly:** `SessionSystemPromptBuilder.Build` produces a structured 5-section system prompt combining game-level creative direction (`GameDefinition`) with per-character profile prompts. This replaces the placeholder concatenation (player + `\n\n---\n\n` + datee) used in the initial `GameSession` wiring (#542). The output is passed to `IStatefulLlmAdapter.StartConversation()` to initialize a stateful conversation session. `GameDefinition` can be loaded from a YAML file via `LoadFrom()` or use `PinderDefaults` as a hardcoded fallback. The YAML parsing uses `YamlDotNet 16.3.0` (same version as `Pinder.Rules`), added only to `Pinder.LlmAdapters.csproj` — `Pinder.Core` remains dependency-free.
 - **Debug payload logging:** `AnthropicOptions` exposes an optional `DebugDirectory`. When set, `AnthropicLlmAdapter` writes exactly what is sent to and received from the Anthropic API to disk (`turn-XX-callType-request.json` and `-response.json`). It also accumulates token and cache performance metrics via thread-safe tracking, outputting a rolling `session-summary.json` file. This allows inspection of raw LLM interaction and prompt caching behavior without modifying game logic.
+- **Config-driven failure corruption overlays:** When standard option rolls fail, instead of immediately applying the deterministic static `DeliveryOverlay.Apply` rules, the system queries the config for stat-specific failure instructions. If found, it routes them to `ILlmAdapter.ApplyFailureCorruptionAsync` for a highly creative and context-aware failure rewrite, preserving the player's archetype voice. It guarantees robustness by falling back to the static deterministic overlay whenever the LLM fails, cancels, gets empty output, or issues standard refusals.
 - **Provider abstraction:** The Anthropic-specific code is isolated in its own subdirectory. The adapter pattern allows swapping LLM providers without changing prompt templates or game logic.
 
 ## Change Log
@@ -187,3 +216,4 @@ The prompt includes an explicit "ONLY" constraint with 10 behavior-to-stat mappi
 | 2026-04-06 | #530 | Scaled delivery quality infinitely with roll margin. Added `Critical (10-14)` and `Exceptional (15+)` tiers to `SuccessDeliveryInstruction`. Injected exact `{beat_dc_by}` margin and Nat 20 status into the prompt via `SessionDocumentBuilder.BuildDeliveryPrompt()` to instruct the LLM on exactly how well the player rolled. |
 | 2026-04-06 | #534 | Added `--debug` flag support to `session-runner` via `AnthropicOptions.DebugDirectory`. `AnthropicLlmAdapter` now intercepts and writes `turn-{turn:D2}-{callType}-request.json` and `response.json` for every API call, plus a `session-summary.json` tracking cumulative input/output and cache tokens. Validated thread-safe stat tracking with 100-thread concurrent test. |
 | 2026-04-07 | #647 | Active tell options — `DialogueContext` gains `ActiveTell` property. `GameSession.StartTurnAsync` passes `_activeTell` into context. `SessionDocumentBuilder.BuildDialogueOptionsPrompt` injects a `TELL DETECTED` directive if an active tell exists, forcing the LLM to craft one option that exploits the revealed vulnerability. |
+| 2026-07-05 | #1311 | Restored config-driven LLM failure corruption prompts by implementing `ApplyFailureCorruptionAsync` on `ILlmAdapter`/`PinderLlmAdapter` and wiring it into `DeliveryStage.ExecuteAsync` with robust fallback to `DeliveryOverlay.Apply` and exception handling properties. |
