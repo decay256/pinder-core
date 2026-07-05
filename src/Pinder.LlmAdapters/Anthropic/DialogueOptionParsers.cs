@@ -17,8 +17,8 @@ namespace Pinder.LlmAdapters.Anthropic
     {
         // Regex patterns for parsing LLM responses
         private static readonly Regex OptionHeaderRegex = new Regex(
-            @"OPTION_\d+",
-            RegexOptions.Compiled);
+            @"OPTION[_\s]\d+",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         private static readonly Regex StatRegex = new Regex(
             @"\[STAT:\s*(\w+)\]",
