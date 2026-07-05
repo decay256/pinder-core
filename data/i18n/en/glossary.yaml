@@ -23,7 +23,7 @@ strings:
   glossary.combo.sequences.the_escalation: "You played Chaos last turn, then Rizz this turn — the sequence earns +1 bonus interest."
   glossary.combo.sequences.the_disarm: "You played Wit last turn, then Honesty this turn — the sequence earns +1 bonus interest."
   glossary.combo.sequences.the_recovery: "You failed a roll last turn, then played Self-Awareness this turn — the sequence earns +2 bonus interest."
-  glossary.combo.sequences.the_triple: "You played 3 different stats in 3 consecutive turns — your next roll gains +1 bonus."
+  glossary.combo.sequences.the_triple: "You played 3 different stats in 3 consecutive turns — your next roll gains +2 bonus."
 
   # ── Combo rewards (short reward summary) ──────────────────────────
   glossary.combo.rewards.the_setup: "+1 Interest if success"
@@ -33,7 +33,7 @@ strings:
   glossary.combo.rewards.the_escalation: "+1 Interest if success"
   glossary.combo.rewards.the_disarm: "+1 Interest if success"
   glossary.combo.rewards.the_recovery: "+2 Interest if success"
-  glossary.combo.rewards.the_triple: "+1 to ALL rolls next turn"
+  glossary.combo.rewards.the_triple: "+2 to ALL rolls next turn"
 
   # ── Combo breakdowns (one-line stat-pair summary) ─────────────────
   glossary.combo.breakdown.the_setup: "Wit→Charm sequence"

@@ -63,8 +63,7 @@ preserved.
 The pinder-web frontend renders the stake field directly with
 `whitespace-pre-wrap` into a plain `<p>` element. Markdown markers are not
 parsed — they appear verbatim to the user (literal asterisks, hashes, etc.).
-See `pinder-web/docs/modules/session-setup.md` for the full rendering
-context.
+See the historical `pinder-web/docs/modules/session-setup.md` for context.
 
 ### Defense in depth
 
@@ -147,14 +146,12 @@ sequence emitted on `GET /sessions/{id}/setup-status/stream`:
 - `LlmTransportException` mid-stream → `error` (with the matching stable
   code: `stake_llm_failed` for either stake stage)
 
-See `pinder-web/docs/modules/session-setup.md §7` for the full event
-schema and reconnect semantics. The engine library is intentionally
+The engine library is intentionally
 unaware of SSE — these overloads stay a clean `IAsyncEnumerable<string>`
 contract that any consumer (web tier, CLI, tests) can drive.
 
 ## Reference
 
-- pinder-web doc: [`docs/modules/session-setup.md`](https://github.com/decay256/pinder-web/blob/main/docs/modules/session-setup.md)
 - Tracking issue: [pinder-web#138](https://github.com/decay256/pinder-web/issues/138)
 - Markdown contract issue: [pinder-web#136](https://github.com/decay256/pinder-web/issues/136)
 - Streaming protocol issues: [pinder-web#148](https://github.com/decay256/pinder-web/issues/148) (epic), #151–#156

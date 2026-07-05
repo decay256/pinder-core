@@ -14,3 +14,4 @@ __pycache__/
 
 # eigentakt orchestration artifacts (per-worktree, regenerated)
 .eigentakt-bin/
+.worktrees/
