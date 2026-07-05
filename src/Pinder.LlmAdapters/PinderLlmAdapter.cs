@@ -499,6 +499,13 @@ namespace Pinder.LlmAdapters
         }
 
         /// <inheritdoc />
+        public Task<string> ApplyFailureCorruptionAsync(string message, string instruction, StatType stat, Pinder.Core.Rolls.FailureTier tier, string? archetypeDirective = null, CancellationToken ct = default)
+        {
+            ct.ThrowIfCancellationRequested();
+            return Task.FromResult(message);
+        }
+
+        /// <inheritdoc />
         public async Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow, string? archetypeDirective = null, CancellationToken ct = default)
         {
             if (string.IsNullOrWhiteSpace(message) || string.IsNullOrWhiteSpace(instruction))

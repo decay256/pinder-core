@@ -69,6 +69,9 @@ namespace Pinder.Core.TestCommon
         public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, CancellationToken ct = default)
             => Task.FromResult(message);
 
+        public Task<string> ApplyFailureCorruptionAsync(string message, string instruction, StatType stat, Pinder.Core.Rolls.FailureTier tier, string? archetypeDirective = null, CancellationToken ct = default)
+            => Task.FromResult(message);
+
         public static StatBlock MakeStatBlock(int allStats = 2, int allShadow = 0)
         {
             var stats = new Dictionary<StatType, int>

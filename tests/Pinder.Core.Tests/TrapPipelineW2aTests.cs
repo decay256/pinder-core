@@ -88,7 +88,12 @@ namespace Pinder.Core.Tests
                 // Mark the message so a Trap (X) text-diff is emitted.
                 return Task.FromResult($"[Trap:{trapName}] {message}");
             }
+        
+        public Task<string> ApplyFailureCorruptionAsync(string message, string instruction, Pinder.Core.Stats.StatType stat, Pinder.Core.Rolls.FailureTier tier, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
+        {
+            return Task.FromResult(message);
         }
+}
 
         /// <summary>
         /// Trap registry that exposes one trap per stat. Stat → trap-name map matches

@@ -357,7 +357,12 @@ namespace Pinder.Core.Tests
             public Task<string> GetHorninessQuestionAsync(HorninessQuestionContext context, CancellationToken ct = default) => Task.FromResult("question?");
         public Task<string> GetSteeringQuestionAsync(SteeringContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult("steering question");
+        
+        public Task<string> ApplyFailureCorruptionAsync(string message, string instruction, Pinder.Core.Stats.StatType stat, Pinder.Core.Rolls.FailureTier tier, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
+        {
+            return Task.FromResult(message);
         }
+}
 
         private sealed class FixedRandom : System.Random
         {

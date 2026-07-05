@@ -1,6 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Pinder.Core.Conversation;
+using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
 
 namespace Pinder.Core.Interfaces
@@ -83,5 +84,12 @@ namespace Pinder.Core.Interfaces
         /// the trap-overlay rewrite still sounds like the character (#372 + #371 union).
         /// </param>
         Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, CancellationToken ct = default);
+
+        /// <summary>
+        /// Apply a stat-specific failure corruption instruction to a delivered message.
+        /// Called when a standard option roll fails and a config prompt is available.
+        /// Returns the corrupted message text.
+        /// </summary>
+        Task<string> ApplyFailureCorruptionAsync(string message, string instruction, StatType stat, Pinder.Core.Rolls.FailureTier tier, string? archetypeDirective = null, CancellationToken ct = default);
     }
 }
