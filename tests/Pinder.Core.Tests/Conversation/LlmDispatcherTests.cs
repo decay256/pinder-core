@@ -37,7 +37,12 @@ namespace Pinder.Core.Tests.Conversation
                 TrapCalls++;
                 return Task.FromResult(TrapResponse == "ECHO" ? message : TrapResponse);
             }
+        
+        public Task<string> ApplyFailureCorruptionAsync(string message, string instruction, Pinder.Core.Stats.StatType stat, Pinder.Core.Rolls.FailureTier tier, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
+        {
+            return Task.FromResult(message);
         }
+}
 
         [Fact]
         public async Task Dispatcher_ReturnsOriginalMessage_WhenNoOverlaysEnabled()

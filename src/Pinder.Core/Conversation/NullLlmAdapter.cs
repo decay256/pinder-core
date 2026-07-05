@@ -115,5 +115,12 @@ namespace Pinder.Core.Conversation
             ct.ThrowIfCancellationRequested();
             return Task.FromResult(message);
         }
+
+        /// <inheritdoc />
+        public Task<string> ApplyFailureCorruptionAsync(string message, string instruction, StatType stat, FailureTier tier, string? archetypeDirective = null, CancellationToken ct = default)
+        {
+            ct.ThrowIfCancellationRequested();
+            return Task.FromResult(message);
+        }
     }
 }

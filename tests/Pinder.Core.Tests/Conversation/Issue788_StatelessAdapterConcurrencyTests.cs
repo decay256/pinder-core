@@ -92,7 +92,12 @@ namespace Pinder.Core.Tests.Conversation
                     Interlocked.Decrement(ref _inFlight);
                 }
             }
+        
+        public Task<string> ApplyFailureCorruptionAsync(string message, string instruction, Pinder.Core.Stats.StatType stat, Pinder.Core.Rolls.FailureTier tier, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
+        {
+            return Task.FromResult(message);
         }
+}
 
         private static DateeContext MakeContext(string playerLabel) =>
             new DateeContext(

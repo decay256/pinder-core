@@ -57,7 +57,12 @@ namespace Pinder.Core.Tests
             {
                 return Task.FromResult(message);
             }
+        
+        public Task<string> ApplyFailureCorruptionAsync(string message, string instruction, Pinder.Core.Stats.StatType stat, Pinder.Core.Rolls.FailureTier tier, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
+        {
+            return Task.FromResult(message);
         }
+}
 
         // 1. RollEngine.ApplyDcBias
         [Fact]

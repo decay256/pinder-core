@@ -499,6 +499,90 @@ namespace Pinder.LlmAdapters
         }
 
         /// <inheritdoc />
+        public async Task<string> ApplyFailureCorruptionAsync(string message, string instruction, StatType stat, Pinder.Core.Rolls.FailureTier tier, string? archetypeDirective = null, CancellationToken ct = default)
+        {
+            if (string.IsNullOrWhiteSpace(message) || string.IsNullOrWhiteSpace(instruction))
+            {
+                if (string.IsNullOrWhiteSpace(instruction))
+                {
+                    _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                        overlayType: "failure_corruption",
+                        provider: "primary",
+                        model: null,
+                        reason: "skipped_no_instruction",
+                        outcome: OverlayOutcome.Skipped
+                    ));
+                }
+                return message;
+            }
+
+            string systemPrompt = "You are editing dialogue for Pinder, a comedy RPG where sentient penises date each other on a fictional app. " +
+                $"The character completely failed a {stat} check (failure tier: {tier}), causing their message to be corrupted or botched! " +
+                "Rewrite the message to dramatically apply the failure instruction while staying in the character's voice. " +
+                "Be wildly creative, ridiculous, and funny, but return ONLY the rewritten message text. " +
+                "No commentary, no meta-text, no preamble, and no refusals. Absolute silence except for the rewritten message.";
+
+            string userContent = !string.IsNullOrWhiteSpace(archetypeDirective)
+                ? $"{archetypeDirective}\n\nFAILURE CORRUPTION INSTRUCTION ({stat}, {tier}):\n{instruction}\n\nORIGINAL MESSAGE:\n{message}\n\nApply the failure corruption (preserving the archetype voice above) and return the modified message."
+                : $"FAILURE CORRUPTION INSTRUCTION ({stat}, {tier}):\n{instruction}\n\nORIGINAL MESSAGE:\n{message}\n\nApply the failure corruption and return the modified message.";
+
+            try
+            {
+                double temperature = _options.DeliveryTemperature ?? DefaultDeliveryTemperature;
+                var result = await _overlayTransport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.Delivery, ct: ct)
+                    .ConfigureAwait(false);
+
+                if (string.IsNullOrWhiteSpace(result))
+                {
+                    _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                        overlayType: "failure_corruption",
+                        provider: "primary",
+                        model: null,
+                        reason: "empty_output",
+                        outcome: OverlayOutcome.Degraded
+                    ));
+                    return message;
+                }
+
+                string trimmed = result.Trim();
+
+                // Detect refusal — fall back to original message silently
+                if (trimmed.StartsWith("I can't", StringComparison.OrdinalIgnoreCase) ||
+                    trimmed.StartsWith("I cannot", StringComparison.OrdinalIgnoreCase) ||
+                    trimmed.IndexOf("inappropriate", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    trimmed.IndexOf("I'd be happy to help", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                        overlayType: "failure_corruption",
+                        provider: "primary",
+                        model: null,
+                        reason: "refusal",
+                        outcome: OverlayOutcome.Degraded
+                    ));
+                    return message;
+                }
+
+                return trimmed;
+            }
+            catch (OperationCanceledException) when (ct.IsCancellationRequested)
+            {
+                throw; // #794: cancellation must propagate.
+            }
+            catch (Exception ex)
+            {
+                _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                    overlayType: "failure_corruption",
+                    provider: "primary",
+                    model: null,
+                    reason: "error",
+                    outcome: OverlayOutcome.Degraded,
+                    errorCode: ex.GetType().Name
+                ));
+                return message;
+            }
+        }
+
+        /// <inheritdoc />
         public async Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow, string? archetypeDirective = null, CancellationToken ct = default)
         {
             if (string.IsNullOrWhiteSpace(message) || string.IsNullOrWhiteSpace(instruction))

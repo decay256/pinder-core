@@ -70,7 +70,12 @@ namespace Pinder.Core.Tests
             {
                 return Task.FromResult(context.DeliveredMessage + $" [IMPROVED:{context.TierKey}]");
             }
+        
+        public Task<string> ApplyFailureCorruptionAsync(string message, string instruction, Pinder.Core.Stats.StatType stat, Pinder.Core.Rolls.FailureTier tier, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
+        {
+            return Task.FromResult(message);
         }
+}
 
         private static GameSession NewSession(ILlmAdapter llm, IDiceRoller dice, int playerStats = 2, int dateeStats = 2)
             => new GameSession(
