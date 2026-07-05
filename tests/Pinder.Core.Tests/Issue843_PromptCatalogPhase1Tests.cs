@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using Pinder.LlmAdapters;
 using Pinder.SessionSetup;
+using Pinder.Core.Tests.SessionSetup;
 using Xunit;
 
 namespace Pinder.Core.Tests
@@ -152,61 +153,49 @@ namespace Pinder.Core.Tests
             Assert.Equal(template, out_);
         }
 
-        // ----- byte-identity contract: stake.yaml vs DefaultSystemPrompt -----
+        // ----- Phase 5 contract: missing catalog throws descriptive initialization error -----
 
         [Fact]
-        public void StakeYaml_SystemPrompt_MatchesConstFallback_ByteForByte()
+        public void Generators_WithoutCatalog_ThrowsInvalidOperationException()
         {
-            // #843 Phase 1 contract: this is a pure relocation. The yaml
-            // must produce the same system_prompt the legacy const does.
-            // If a future PR tunes the prompt content, it MUST update
-            // both the yaml AND the const (or, post-Phase-5, just the
-            // yaml after the const is deleted).
-            var catalog = PromptCatalog.LoadFromDirectory(PromptsRoot);
-            var stake = catalog.Get("stake");
+            // Ensure any null/unwired PromptTemplates.Catalog throws
+            var previous = PromptTemplates.Catalog;
+            PromptTemplates.Catalog = null;
+            try
+            {
+                Assert.Throws<InvalidOperationException>(() =>
+                    new LlmStakeGenerator(new StubLlmTransport()));
 
-            string fromYaml = NormalizeWhitespace(stake.SystemPrompt!);
-            string fromConst = NormalizeWhitespace(LlmStakeGenerator.DefaultSystemPrompt);
-
-            Assert.Equal(fromConst, fromYaml);
+                Assert.Throws<InvalidOperationException>(() =>
+                    new LlmBackgroundGenerator(new StubLlmTransport()));
+            }
+            finally
+            {
+                PromptTemplates.Catalog = previous;
+            }
         }
 
         [Fact]
-        public void StakeYaml_UserTemplate_RendersIdenticallyToConstFallback()
+        public void Generators_WithIncompleteCatalog_ThrowsInvalidOperationException()
         {
-            var catalog = PromptCatalog.LoadFromDirectory(PromptsRoot);
-            const string sampleProfile = "<<TEST PROFILE>>";
+            // Ensure if catalog is present but missing stake/background entries, it throws
+            var dir = Directory.CreateTempSubdirectory("incomplete-catalog-test-").FullName;
+            try
+            {
+                File.WriteAllText(Path.Combine(dir, "empty.yaml"),
+                    "schema_version: 1\nprompts: {}\n");
+                var emptyCatalog = PromptCatalog.LoadFromDirectory(dir);
 
-            // Catalog-driven render.
-            string fromCatalog = LlmStakeGenerator.BuildUserMessage(
-                sampleProfile, catalog);
+                Assert.Throws<InvalidOperationException>(() =>
+                    new LlmStakeGenerator(new StubLlmTransport(), null, null, emptyCatalog));
 
-            // Const-fallback render (catalog=null).
-            string fromConst = LlmStakeGenerator.BuildUserMessage(
-                sampleProfile, catalog: null);
-
-            // Whitespace-normalised equality \u2014 yaml's block-scalar
-            // trimming may add or strip a trailing newline; the
-            // semantically-meaningful content must match.
-            Assert.Equal(NormalizeWhitespace(fromConst), NormalizeWhitespace(fromCatalog));
-
-            // Both renders must contain the substituted profile.
-            Assert.Contains(sampleProfile, fromCatalog);
-            Assert.Contains(sampleProfile, fromConst);
-        }
-
-        [Fact]
-        public void StakeGenerator_WithoutCatalog_UsesConstDefaults()
-        {
-            // Belt-and-braces: the catalog argument is optional. The
-            // legacy 3-arg constructor and the new 4-arg constructor
-            // must both yield identical output when the catalog is
-            // null / unsupplied.
-            const string sampleProfile = "<<NULL CATALOG>>";
-            string a = LlmStakeGenerator.BuildUserMessage(sampleProfile, catalog: null);
-            string b = LlmStakeGenerator.BuildUserMessage(sampleProfile, catalog: null);
-            Assert.Equal(a, b);
-            Assert.Contains(sampleProfile, a);
+                Assert.Throws<InvalidOperationException>(() =>
+                    new LlmBackgroundGenerator(new StubLlmTransport(), null, emptyCatalog));
+            }
+            finally
+            {
+                Directory.Delete(dir, recursive: true);
+            }
         }
 
         // ----- helper -------------------------------------------------------

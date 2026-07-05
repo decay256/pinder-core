@@ -1,14 +1,33 @@
-using Xunit;
-using Pinder.SessionSetup;
-using Pinder.LlmAdapters;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Reflection;
+using Pinder.LlmAdapters;
+using Pinder.SessionSetup;
+using Xunit;
 
 namespace Pinder.Core.Tests
 {
     public class Issue868_StakePromptTests
     {
+        private static string FindRepoSubdir(string subdir)
+        {
+            var dir = AppDomain.CurrentDomain.BaseDirectory;
+            for (int i = 0; i < 10; i++)
+            {
+                var candidate = Path.Combine(dir, subdir);
+                if (Directory.Exists(candidate)) return candidate;
+                var parent = Path.GetDirectoryName(dir);
+                if (parent == null || parent == dir) break;
+                dir = parent;
+            }
+            throw new DirectoryNotFoundException(
+                $"Could not locate {subdir} in any ancestor of the test binary.");
+        }
+
+        private static string PromptsRoot
+            => FindRepoSubdir(Path.Combine("data", "prompts"));
+
         [Fact]
         public void Stake_UserTemplate_ContainsAll15Stems()
         {
@@ -30,7 +49,8 @@ namespace Pinder.Core.Tests
                 "15. The thing I genuinely believe will happen to me in the next two years that everyone else would call delusional is…"
             };
 
-            string userMessage = LlmStakeGenerator.BuildUserMessageFromConstFallback("TEST PROFILE");
+            var catalog = PromptCatalog.LoadFromDirectory(PromptsRoot);
+            string userMessage = LlmStakeGenerator.BuildUserMessage("TEST PROFILE", catalog);
             
             foreach (var stem in expectedStems)
             {
@@ -43,13 +63,11 @@ namespace Pinder.Core.Tests
         {
             string sentinel = "sentence-completion engine for a comedy hookup-app simulator";
             
-            var field = typeof(LlmStakeGenerator).GetField("DefaultSystemPrompt", 
-                BindingFlags.NonPublic | BindingFlags.Static);
+            var catalog = PromptCatalog.LoadFromDirectory(PromptsRoot);
+            var entry = catalog.TryGet("stake");
             
-            var value = field?.GetValue(null) as string;
-            
-            Assert.NotNull(value);
-            Assert.Contains(sentinel, value!);
+            Assert.NotNull(entry);
+            Assert.Contains(sentinel, entry!.SystemPrompt);
         }
     }
 }

@@ -43,30 +43,10 @@ namespace Pinder.SessionSetup
     /// </remarks>
     public sealed class LlmStakeGenerator : IStakeGenerator
     {
-        // #843 Phase 1: SystemPrompt + UserTemplate fall back to these
-        // const defaults when no PromptCatalog is supplied. Phase 5 of
-        // the migration removes these fallbacks once every call-site
-        // has been wired with the catalog and the CI grep gate is in
-        // place. Strings here MUST stay byte-identical to the
-        // corresponding entries in <c>data/prompts/stake.yaml</c>;
-        // <see cref="Pinder.Core.Tests.Issue843_PromptCatalogPhase1Tests"/>
-        // pins that invariant.
-        internal const string DefaultSystemPrompt =
-            "You are a sentence-completion engine for a comedy hookup-app simulator where the protagonists are sentient penises. " +
-            "Read the character profile and produce exactly 15 lines — one for each numbered stem below — written in the character's first-person voice. " +
-            "Each line completes the stem with one specific, concrete, slightly absurd, embodied answer that the character believes completely and would never realise is funny. " +
-            "Output a markdown bullet list. One bullet per stem-completion. Each line starts with `- ` (dash + space). Include the stem prefix in the bullet body. ~10-15 words per bullet. No nested bullets. No numbering. No headings. " +
-            "The character treats absurd things as completely real. Specific over generic. Embodied over emotional-meta. Undignified is a feature. " +
-            "BIOGRAPHICAL ANCHOR REQUIREMENT: every completed stem MUST contain at least one of the following — " +
-            "(a) a proper name (e.g. 'Margot', not 'an ex'), " +
-            "(b) a specific year or date (e.g. '2019', not 'a few years ago'), " +
-            "(c) a concrete named place or event (e.g. 'the Pret A Manger on Euston Road', not 'a coffee shop'). " +
-            "Avoid abstract emotional themes ('fear of abandonment', 'feeling lost'); use concrete biography ('the night Margot left in 2019, I binged 14 episodes of Planet Earth alone').";
-
         private readonly ILlmTransport _transport;
         private readonly IStreamingLlmTransport? _streamingTransport;
         private readonly Options _options;
-        private readonly PromptCatalog? _catalog;
+        private readonly PromptCatalog _catalog;
 
         public LlmStakeGenerator(ILlmTransport transport, Options? options = null)
             : this(transport, streamingTransport: null, options, catalog: null)
@@ -85,7 +65,7 @@ namespace Pinder.SessionSetup
         /// Issue #843: catalog-aware constructor. When
         /// <paramref name="catalog"/> is non-null and contains a
         /// <c>"stake"</c> entry, system + user templates are read from
-        /// it; otherwise the embedded const defaults are used.
+        /// it.
         /// </summary>
         public LlmStakeGenerator(
             ILlmTransport transport,
@@ -96,21 +76,29 @@ namespace Pinder.SessionSetup
             _transport = transport ?? throw new ArgumentNullException(nameof(transport));
             _streamingTransport = streamingTransport;
             _options = options ?? new Options();
-            _catalog = catalog;
+            _catalog = catalog ?? PromptTemplates.Catalog
+                ?? throw new InvalidOperationException("PromptTemplates.Catalog is not wired. Call PromptWiring.Wire() at startup.");
+
+            // Enforce that the catalog contains the required key
+            var entry = _catalog.TryGet("stake")
+                ?? throw new InvalidOperationException("prompt-catalog: missing required key 'stake'. The yaml file is incomplete or missing.");
+            if (string.IsNullOrWhiteSpace(entry.SystemPrompt))
+                throw new InvalidOperationException("prompt-catalog: key 'stake' has no system_prompt. Check the yaml file.");
+            if (string.IsNullOrWhiteSpace(entry.UserTemplate))
+                throw new InvalidOperationException("prompt-catalog: key 'stake' has no user_template. Check the yaml file.");
         }
 
         /// <summary>
-        /// Effective system prompt for the stake call — the catalog
-        /// entry if one is registered, otherwise the const default.
+        /// Effective system prompt for the stake call — the catalog entry.
         /// </summary>
         private string SystemPrompt
         {
             get
             {
-                var entry = _catalog?.TryGet("stake");
+                var entry = _catalog.TryGet("stake");
                 if (entry != null && !string.IsNullOrWhiteSpace(entry.SystemPrompt))
                     return entry.SystemPrompt!;
-                return DefaultSystemPrompt;
+                throw new InvalidOperationException("prompt-catalog: key 'stake' has no system_prompt. Check the yaml file.");
             }
         }
 
@@ -243,58 +231,19 @@ namespace Pinder.SessionSetup
             string assembledSystemPrompt,
             PromptCatalog? catalog)
         {
-            // #843 Phase 1: prefer the catalog template; fall back to the
-            // embedded const if the catalog is absent or doesn't carry a
-            // stake entry. Phase 5 deletes the const fallback.
-            var entry = catalog?.TryGet("stake");
-            if (entry != null && !string.IsNullOrWhiteSpace(entry.UserTemplate))
-            {
-                return PromptCatalog.Substitute(
-                    entry.UserTemplate!,
-                    new Dictionary<string, string>(StringComparer.Ordinal)
-                    {
-                        { "character_profile", assembledSystemPrompt },
-                    });
-            }
-            return BuildUserMessageFromConstFallback(assembledSystemPrompt);
-        }
+            var resolvedCatalog = catalog ?? PromptTemplates.Catalog
+                ?? throw new InvalidOperationException("PromptTemplates.Catalog is not wired. Call PromptWiring.Wire() at startup.");
+            var entry = resolvedCatalog.TryGet("stake")
+                ?? throw new InvalidOperationException("prompt-catalog: missing required key 'stake'. The yaml file is incomplete or missing.");
+            if (string.IsNullOrWhiteSpace(entry.UserTemplate))
+                throw new InvalidOperationException("prompt-catalog: key 'stake' has no user_template. Check the yaml file.");
 
-        /// <summary>
-        /// Pre-#843 user-message body. Kept as a private fallback during
-        /// the migration; removed in Phase 5 alongside the
-        /// <see cref="DefaultSystemPrompt"/> const.
-        /// </summary>
-        internal static string BuildUserMessageFromConstFallback(string assembledSystemPrompt)
-        {
-            // #834: pass the full assembled system prompt — never silently truncate LLM input.
-            // Stake generation is once-per-character-per-session and the result is cached into the
-            // assembled system prompt prefix, so cost impact of full-profile input is one-time, not
-            // per-turn. See LESSONS_LEARNED LLM-INPUT-SILENT-TRUNCATION-IS-ALWAYS-A-BUG.
-            //
-            // #868: replaced abstract 5-7 fragments with 15-stem first-person sentence completion.
-            string promptSlice = assembledSystemPrompt;
-
-            return
-                $@"Read this character profile and complete each of the 15 stems below in the character's first-person voice. One line per stem, in order, ~10-15 words each. Specific, concrete, embodied. The character is real, their feelings are genuine, their answers are ridiculous. They never know they're funny.
-
-1. The most humiliating thing that happened to me this week was when…
-2. The thing about my body I'm convinced everyone notices but actually no one does is…
-3. My last sexual accident or mishap was when I…
-4. The kink I've never said out loud to anyone is…
-5. The substance I leaned on harder than I should have last month was … and I used it to …
-6. The most embarrassing impulse purchase on my last bank statement is…
-7. If you opened my browser history at 3am last Tuesday you'd find…
-8. The last lie I told on a dating profile or in a chat was…
-9. The most undignified thing my body did in public recently was…
-10. The thing I do alone in my apartment that I'd be humiliated to be filmed doing is…
-11. The single object in my bedroom I could not explain to a stranger is…
-12. The last time I cried and where it happened was…
-13. My last named ex was [name] and the specific reason it ended was…
-14. The lowest professional moment of the last year was when I…
-15. The thing I genuinely believe will happen to me in the next two years that everyone else would call delusional is…
-
-CHARACTER PROFILE:
-{promptSlice}";
+            return PromptCatalog.Substitute(
+                entry.UserTemplate!,
+                new Dictionary<string, string>(StringComparer.Ordinal)
+                {
+                    { "character_profile", assembledSystemPrompt },
+                });
         }
 
         /// <summary>Tunable knobs for <see cref="LlmStakeGenerator"/>.</summary>

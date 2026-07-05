@@ -94,10 +94,10 @@ namespace Pinder.Core.Tests
         {
             var assembler = new CharacterAssembler(BuildItemRepo(), BuildAnatomyRepo());
 
-            // blazer-crop-top: Charm +1
-            // red-bottom-heels: Charm +1, Rizz +1
+            // head_cheff: Charm +1
+            // head_tophat: Charm +1, Rizz +1
             var result = assembler.Assemble(
-                new[] { "blazer-crop-top", "red-bottom-heels" },
+                new[] { "head_cheff", "head_tophat" },
                 new Dictionary<string, float>(),
                 ZeroBaseStats, ZeroShadow);
 
@@ -110,11 +110,11 @@ namespace Pinder.Core.Tests
         {
             var assembler = new CharacterAssembler(BuildItemRepo(), BuildAnatomyRepo());
 
-            // blazer-crop-top: Charm +1
+            // head_cheff: Charm +1
             // anatomy: isCircumcised=0.0 → uncircumcised band → Honesty+1
             //          scrotumScale=0.00 → band 0 (0.00-0.05) → Wit+1, SA+1
             var result = assembler.Assemble(
-                new[] { "blazer-crop-top" },
+                new[] { "head_cheff" },
                 new Dictionary<string, float>
                 {
                     { "isCircumcised", 0.0f },   // uncircumcised → Honesty+1
@@ -133,7 +133,7 @@ namespace Pinder.Core.Tests
             var assembler = new CharacterAssembler(BuildItemRepo(), BuildAnatomyRepo());
 
             var result = assembler.Assemble(
-                new[] { "blazer-crop-top", "color-coded-planner" },
+                new[] { "head_cheff", "head_tophat" },
                 new Dictionary<string, float> { { "trunkLengthBase", 0.18f }, { "trunkGirth", 0.08f } },
                 ZeroBaseStats, ZeroShadow);
 
@@ -165,7 +165,7 @@ namespace Pinder.Core.Tests
             var assembler = new CharacterAssembler(BuildItemRepo(), BuildAnatomyRepo());
 
             var result = assembler.Assemble(
-                new[] { "blazer-crop-top", "THIS_DOES_NOT_EXIST" },
+                new[] { "head_cheff", "THIS_DOES_NOT_EXIST" },
                 new Dictionary<string, float>(),
                 ZeroBaseStats, ZeroShadow);
 
@@ -182,7 +182,7 @@ namespace Pinder.Core.Tests
         {
             var assembler = new CharacterAssembler(BuildItemRepo(), BuildAnatomyRepo());
             var fragments = assembler.Assemble(
-                new[] { "blazer-crop-top" },
+                new[] { "head_cheff" },
                 new Dictionary<string, float> { { "trunkLengthBase", 0.18f } },
                 ZeroBaseStats, ZeroShadow);
 
@@ -207,7 +207,7 @@ namespace Pinder.Core.Tests
         {
             var assembler = new CharacterAssembler(BuildItemRepo(), BuildAnatomyRepo());
             var fragments = assembler.Assemble(
-                new[] { "blazer-crop-top" },
+                new[] { "head_cheff" },
                 new Dictionary<string, float>(),
                 ZeroBaseStats, ZeroShadow);
 
@@ -223,7 +223,7 @@ namespace Pinder.Core.Tests
         {
             var assembler = new CharacterAssembler(BuildItemRepo(), BuildAnatomyRepo());
             var fragments = assembler.Assemble(
-                new[] { "blazer-crop-top" },
+                new[] { "head_cheff" },
                 new Dictionary<string, float>(),
                 ZeroBaseStats, ZeroShadow);
 
@@ -248,7 +248,7 @@ namespace Pinder.Core.Tests
         {
             var assembler = new CharacterAssembler(BuildItemRepo(), BuildAnatomyRepo());
             var fragments = assembler.Assemble(
-                new[] { "blazer-crop-top" },
+                new[] { "head_cheff" },
                 new Dictionary<string, float>(),
                 ZeroBaseStats, ZeroShadow);
 

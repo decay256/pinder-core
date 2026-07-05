@@ -1,0 +1,14 @@
+{
+  "type": "object",
+  "properties": {
+    "choice": {
+      "type": "integer",
+      "description": "0-based index of the chosen option (0=A, 1=B, 2=C, 3=D)"
+    },
+    "explanation": {
+      "type": "string",
+      "description": "1-2 sentence strategic explanation for this pick. Reference shadow levels, success %, combos, or momentum as relevant."
+    }
+  },
+  "required": ["choice", "explanation"]
+}

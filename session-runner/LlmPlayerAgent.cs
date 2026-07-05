@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Pinder.Core.Conversation;
 using Pinder.Core.Stats;
+using Pinder.Core.Interfaces;
+using Pinder.LlmAdapters;
 using Pinder.LlmAdapters.Anthropic;
 using Pinder.LlmAdapters.Anthropic.Dto;
 
@@ -18,11 +21,41 @@ namespace Pinder.SessionRunner
     /// </summary>
     public sealed class LlmPlayerAgent : IPlayerAgent, IDisposable
     {
-        private const string ShadowRulesReminder =
+        private const string DefaultSystemPrompt =
+            "You are playing as {playerName} in Pinder, a comedy dating RPG. " +
+            "You are a strategic player agent. Your PRIMARY goal is to WIN — raise interest to 25. " +
+            "Your SECONDARY goal is strategic shadow management — prevent shadows from hitting dangerous thresholds. " +
+            "You make calculated decisions, not random ones.{personalityBlock}";
+
+        private const string DefaultUserTemplate =
+            "You are {playerName} talking to {dateeName}. Choose a dialogue option.\n" +
+            "\n" +
+            "{recentHistoryBlock}" +
+            "## Current State\n" +
+            "- Interest: {currentInterest}/25 ({interestState}){modifierNote}\n" +
+            "- Momentum: {momentumStreak} consecutive wins{momentumNote}\n" +
+            "- Active traps: {activeTraps}\n" +
+            "- Turn: {turnNumber}\n" +
+            "\n" +
+            "## Shadow Status\n" +
+            "{shadowStatusBlock}\n" +
+            "## Your Options\n" +
+            "{optionsBlock}\n" +
+            "## Rules Reminder\n" +
+            "- Roll d20 + stat modifier + bonuses vs DC. Meet or beat DC = success.\n" +
+            "- Success tiers: {successRules}.\n" +
+            "- Failure tiers: {failureRules}.\n" +
+            "- Risk tier bonus on success: Hard → +1 interest, Bold → +2 interest.\n" +
+            "- Momentum: {momentumRules}\n" +
+            "- 🔗 = callback bonus: hidden +1/+2/+3 added to roll.\n" +
+            "- 📖 = tell bonus: hidden +2 added to roll.\n" +
+            "- ⭐ = combo: +1 interest on success.\n" +
+            "- 🔓 = weakness window: DC is already reduced by 2-3.\n" +
+            "\n" +
             "## Shadow Threshold Rules\n" +
-            "- T1 (≥6): shadow taints delivery of paired stat.\n" +
-            "- T2 (≥12): -2 penalty to paired stat rolls.\n" +
-            "- T3 (≥18): shadow may override your choices for paired stat.\n" +
+            "- T1 (≥{t1}): shadow taints delivery of paired stat.\n" +
+            "- T2 (≥{t2}): -2 penalty to paired stat rolls.\n" +
+            "- T3 (≥{t3}): shadow may override your choices for paired stat.\n" +
             "\n" +
             "## How to Reduce Shadows\n" +
             "- Madness: −1 on any combo success | −1 on Tell option selected | −1 on Nat 20 CHAOS\n" +
@@ -38,49 +71,25 @@ namespace Pinder.SessionRunner
             "- Denial: skipping available HONESTY option +1 | date secured without HONESTY success +1\n" +
             "- Fixation: same stat 3 turns in a row +1 | always picking highest-% 3 turns +1\n" +
             "- Dread: Nat 1 on WIT +1 | catastrophic WIT fail +1 | interest hits 0 +2 | Ghosted +1\n" +
-            "- Overthinking: Nat 1 on SA +1 | SA used 3+ times in session +1\n";
-
-        private const string RulesReminder =
-            "## Rules Reminder\n" +
-            "- Roll d20 + stat modifier + bonuses vs DC. Meet or beat DC = success.\n" +
-            "- Success tiers: beat by 1-4 → +1 interest, 5-9 → +2, 10+ → +3. Nat 20 → +4.\n" +
-            "- Failure tiers: miss by 1-2 → Fumble (−1), 3-5 → Misfire (−1), 6-9 → Trope Trap (−2 + trap), " +
-            "10+ → Catastrophe (−3 + trap). Nat 1 → Legendary Fail (−4).\n" +
-            "- Risk tier bonus on success: Hard → +1 interest, Bold → +2 interest.\n" +
-            "- Momentum: 3+ wins → +2 to next roll. 5+ wins → +3.\n" +
-            "- 🔗 = callback bonus: hidden +1/+2/+3 added to roll.\n" +
-            "- 📖 = tell bonus: hidden +2 added to roll.\n" +
-            "- ⭐ = combo: +1 interest on success.\n" +
-            "- 🔓 = weakness window: DC is already reduced by 2-3.\n";
-
-        private const string StrategyReminder =
+            "- Overthinking: Nat 1 on SA +1 | SA used 3+ times in session +1\n" +
+            "\n" +
             "## Your Strategy\n" +
             "PRIMARY GOAL: Win the date. Raise interest to 25.\n" +
             "SECONDARY: Manage shadows strategically. Trade a losing roll for shadow reduction when it prevents a dangerous threshold.\n" +
             "NARRATIVE GAMBLE: When EV difference between options is < 5 percentage points, you may pick the riskier/more interesting option.\n" +
-            "Always explain your reasoning in 1-2 sentences.\n";
+            "Always explain your reasoning in 1-2 sentences.\n" +
+            "\n" +
+            "Use the submit_choice tool to make your pick. choice is 0-indexed (A=0, B=1, C=2, D=3).";
 
         /// <summary>
         /// Tool definition for structured output via Anthropic tool_use.
+        /// Loads the JSON schema from a static resource file rather than inlining a parsed JSON string.
         /// </summary>
         private static readonly ToolDefinition SubmitChoiceTool = new ToolDefinition
         {
             Name = "submit_choice",
             Description = "Submit your choice of dialogue option with a strategic explanation.",
-            InputSchema = JObject.Parse(@"{
-                ""type"": ""object"",
-                ""properties"": {
-                    ""choice"": {
-                        ""type"": ""integer"",
-                        ""description"": ""0-based index of the chosen option (0=A, 1=B, 2=C, 3=D)""
-                    },
-                    ""explanation"": {
-                        ""type"": ""string"",
-                        ""description"": ""1-2 sentence strategic explanation for this pick. Reference shadow levels, success %, combos, or momentum as relevant.""
-                    }
-                },
-                ""required"": [""choice"", ""explanation""]
-            }")
+            InputSchema = LoadToolSchema()
         };
 
         private readonly AnthropicClient _client;
@@ -88,6 +97,7 @@ namespace Pinder.SessionRunner
         private readonly string _model;
         private readonly string _playerName;
         private readonly string _dateeName;
+        private readonly IRuleResolver? _ruleResolver;
         private bool _disposed;
         private readonly List<CallSummaryStat> _tokenStats = new List<CallSummaryStat>();
 
@@ -109,12 +119,14 @@ namespace Pinder.SessionRunner
         /// <param name="fallback">Deterministic scoring agent used on LLM failure.</param>
         /// <param name="playerName">Player character display name (optional, for prompt immersion).</param>
         /// <param name="dateeName">Datee character display name (optional, for prompt immersion).</param>
+        /// <param name="ruleResolver">Dynamic rule resolver (optional, falls back to DefaultRuleResolver.Instance).</param>
         /// <exception cref="ArgumentNullException">If options or fallback is null.</exception>
         public LlmPlayerAgent(
             AnthropicOptions options,
             ScoringPlayerAgent fallback,
             string playerName = "the player",
-            string dateeName = "the datee")
+            string dateeName = "the datee",
+            IRuleResolver? ruleResolver = null)
         {
             if (options == null) throw new ArgumentNullException(nameof(options));
             _fallback = fallback ?? throw new ArgumentNullException(nameof(fallback));
@@ -122,6 +134,161 @@ namespace Pinder.SessionRunner
             _dateeName = dateeName ?? "the datee";
             _model = options.Model;
             _client = new AnthropicClient(options.ApiKey);
+            _ruleResolver = ruleResolver ?? DefaultRuleResolver.Instance;
+        }
+
+        private static JObject LoadToolSchema()
+        {
+            try
+            {
+                string? path = DataFileLocator.FindDataFile(AppContext.BaseDirectory, Path.Combine("data", "schemas", "submit_choice_tool.json"));
+                if (path != null && File.Exists(path))
+                {
+                    return JObject.Parse(File.ReadAllText(path));
+                }
+            }
+            catch
+            {
+                // Fallback gracefully
+            }
+
+            return JObject.Parse(@"{
+                ""type"": ""object"",
+                ""properties"": {
+                    ""choice"": {
+                        ""type"": ""integer"",
+                        ""description"": ""0-based index of the chosen option (0=A, 1=B, 2=C, 3=D)""
+                    },
+                    ""explanation"": {
+                        ""type"": ""string"",
+                        ""description"": ""1-2 sentence strategic explanation for this pick. Reference shadow levels, success %, combos, or momentum as relevant.""
+                    }
+                },
+                ""required"": [""choice"", ""explanation""]
+            }");
+        }
+
+        private static (string SystemPrompt, string UserTemplate) LoadTemplates()
+        {
+            try
+            {
+                string? repoRoot = DataFileLocator.FindRepoRoot(AppContext.BaseDirectory);
+                string promptsDir = repoRoot != null 
+                    ? Path.Combine(repoRoot, "data", "prompts")
+                    : Path.Combine(AppContext.BaseDirectory, "data", "prompts");
+
+                if (Directory.Exists(promptsDir))
+                {
+                    var catalog = PromptCatalog.LoadFromDirectory(promptsDir);
+                    var entry = catalog.TryGet("sim_agent");
+                    if (entry != null)
+                    {
+                        return (entry.SystemPrompt ?? "", entry.UserTemplate ?? "");
+                    }
+                }
+            }
+            catch
+            {
+                // Fallback gracefully
+            }
+
+            return (DefaultSystemPrompt, DefaultUserTemplate);
+        }
+
+        private static (int T1, int T2, int T3) ResolveShadowThresholds(IRuleResolver? resolver)
+        {
+            int t1 = 6;
+            int t2 = 12;
+            int t3 = 18;
+
+            if (resolver == null) return (t1, t2, t3);
+
+            bool foundT1 = false;
+            bool foundT2 = false;
+            bool foundT3 = false;
+
+            for (int v = 1; v <= 25; v++)
+            {
+                int? lvl = resolver.GetShadowThresholdLevel(v);
+                if (lvl == 1 && !foundT1)
+                {
+                    t1 = v;
+                    foundT1 = true;
+                }
+                else if (lvl == 2 && !foundT2)
+                {
+                    t2 = v;
+                    foundT2 = true;
+                }
+                else if (lvl == 3 && !foundT3)
+                {
+                    t3 = v;
+                    foundT3 = true;
+                }
+            }
+
+            return (t1, t2, t3);
+        }
+
+        private static string ResolveSuccessRules(IRuleResolver? resolver)
+        {
+            if (resolver == null) return "beat by 1-4 → +1 interest, 5-9 → +2, 10+ → +3. Nat 20 → +4";
+
+            int? tier1 = resolver.GetSuccessInterestDelta(1, 10);
+            int? tier2 = resolver.GetSuccessInterestDelta(5, 10);
+            int? tier3 = resolver.GetSuccessInterestDelta(10, 10);
+            int? nat20 = resolver.GetSuccessInterestDelta(1, 20);
+
+            string t1Str = tier1.HasValue ? $"+{tier1}" : "+1";
+            string t2Str = tier2.HasValue ? $"+{tier2}" : "+2";
+            string t3Str = tier3.HasValue ? $"+{tier3}" : "+3";
+            string natStr = nat20.HasValue ? $"+{nat20}" : "+4";
+
+            return $"beat by 1-4 → {t1Str} interest, 5-9 → {t2Str}, 10+ → {t3Str}. Nat 20 → {natStr}";
+        }
+
+        private static string ResolveFailureRules(IRuleResolver? resolver)
+        {
+            if (resolver == null) return "miss by 1-2 → Fumble (−1), 3-5 → Misfire (−1), 6-9 → Trope Trap (−2 + trap), 10+ → Catastrophe (−3 + trap). Nat 1 → Legendary Fail (−4)";
+
+            int? fumble = resolver.GetFailureInterestDelta(1, 10);
+            int? misfire = resolver.GetFailureInterestDelta(3, 10);
+            int? trap = resolver.GetFailureInterestDelta(6, 10);
+            int? catastrophe = resolver.GetFailureInterestDelta(10, 10);
+            int? legendary = resolver.GetFailureInterestDelta(1, 1);
+
+            string fStr = fumble.HasValue ? $"{fumble}" : "−1";
+            string mStr = misfire.HasValue ? $"{misfire}" : "−1";
+            string tStr = trap.HasValue ? $"{trap}" : "−2";
+            string cStr = catastrophe.HasValue ? $"{catastrophe}" : "−3";
+            string lStr = legendary.HasValue ? $"{legendary}" : "−4";
+
+            return $"miss by 1-2 → Fumble ({fStr}), 3-5 → Misfire ({mStr}), 6-9 → Trope Trap ({tStr} + trap), 10+ → Catastrophe ({cStr} + trap). Nat 1 → Legendary Fail ({lStr})";
+        }
+
+        private static string ResolveMomentumRules(IRuleResolver? resolver)
+        {
+            if (resolver == null) return "3+ wins → +2 to next roll. 5+ wins → +3.";
+
+            var activeRules = new List<string>();
+            for (int streak = 1; streak <= 10; streak++)
+            {
+                int? bonus = resolver.GetMomentumBonus(streak);
+                if (bonus.HasValue && bonus.Value > 0)
+                {
+                    int? prevBonus = streak > 1 ? resolver.GetMomentumBonus(streak - 1) : null;
+                    if (prevBonus != bonus.Value)
+                    {
+                        activeRules.Add($"{streak}+ wins → +{bonus.Value} to next roll");
+                    }
+                }
+            }
+
+            if (activeRules.Count > 0)
+            {
+                return string.Join(". ", activeRules) + ".";
+            }
+            return "3+ wins → +2 to next roll. 5+ wins → +3.";
         }
 
         /// <summary>
@@ -213,33 +380,11 @@ namespace Pinder.SessionRunner
             }
         }
 
-        /// <summary>
-        /// Builds the system message with strategic framing and character personality.
-        /// </summary>
         private string BuildSystemMessage(PlayerAgentContext context)
         {
-            string name = !string.IsNullOrEmpty(context.PlayerName) ? context.PlayerName : _playerName;
-
-            var sb = new System.Text.StringBuilder(512);
-            sb.Append($"You are playing as {name} in Pinder, a comedy dating RPG. ");
-            sb.Append("You are a strategic player agent. Your PRIMARY goal is to WIN — raise interest to 25. ");
-            sb.Append("Your SECONDARY goal is strategic shadow management — prevent shadows from hitting dangerous thresholds. ");
-            sb.Append("You make calculated decisions, not random ones.");
-
-            if (!string.IsNullOrEmpty(context.PlayerSystemPrompt))
-            {
-                // #834: pass the full assembled player system prompt. The previous 500-char
-                // "keep prompt lean" cap silently truncated the character's personality block,
-                // dropping anatomy/aesthetic/backstory fragments past the 500-char mark. Sim
-                // strategic reasoning is fine with the full character bible — this is a sim-tool,
-                // not a per-turn budget hotspot. See LESSONS_LEARNED
-                // LLM-INPUT-SILENT-TRUNCATION-IS-ALWAYS-A-BUG.
-                sb.AppendLine();
-                sb.AppendLine();
-                sb.Append($"Character personality (for voice, not strategy):\n{context.PlayerSystemPrompt}");
-            }
-
-            return sb.ToString();
+            var (systemTemplate, _) = LoadTemplates();
+            var dict = BuildSubstitutionDict(null, context, null);
+            return PromptCatalog.Substitute(systemTemplate, dict);
         }
 
         /// <summary>
@@ -247,44 +392,48 @@ namespace Pinder.SessionRunner
         /// </summary>
         internal string BuildPrompt(TurnStart turn, PlayerAgentContext context, OptionScore[] scores = null)
         {
-            var sb = new System.Text.StringBuilder(2048);
+            var (_, userTemplate) = LoadTemplates();
+            var dict = BuildSubstitutionDict(turn, context, scores);
+            return PromptCatalog.Substitute(userTemplate, dict);
+        }
 
-            string playerLabel = !string.IsNullOrEmpty(context.PlayerName) ? context.PlayerName : _playerName;
-            string dateeLabel = !string.IsNullOrEmpty(context.DateeName) ? context.DateeName : _dateeName;
+        private Dictionary<string, string> BuildSubstitutionDict(TurnStart? turn, PlayerAgentContext context, OptionScore[]? scores)
+        {
+            var (t1, t2, t3) = ResolveShadowThresholds(_ruleResolver);
+            string successRules = ResolveSuccessRules(_ruleResolver);
+            string failureRules = ResolveFailureRules(_ruleResolver);
+            string momentumRules = ResolveMomentumRules(_ruleResolver);
 
-            sb.AppendLine($"You are {playerLabel} talking to {dateeLabel}. Choose a dialogue option.");
-            sb.AppendLine();
+            string playerNameValue = !string.IsNullOrEmpty(context.PlayerName) ? context.PlayerName : _playerName;
+            string dateeNameValue = !string.IsNullOrEmpty(context.DateeName) ? context.DateeName : _dateeName;
 
-            // Recent conversation context
+            string modifierNoteValue = GetModifierNote(context.InterestState);
+            string momentumNoteValue = GetMomentumNote(context.MomentumStreak);
+            string activeTrapsValue = context.ActiveTrapNames.Length > 0
+                ? string.Join(", ", context.ActiveTrapNames)
+                : "none";
+
+            string personalityBlockValue = "";
+            if (!string.IsNullOrEmpty(context.PlayerSystemPrompt))
+            {
+                personalityBlockValue = "\n\nCharacter personality (for voice, not strategy):\n" + context.PlayerSystemPrompt;
+            }
+
+            var recentHistorySb = new System.Text.StringBuilder();
             if (context.RecentHistory != null && context.RecentHistory.Count > 0)
             {
-                sb.AppendLine("## Recent Conversation");
+                recentHistorySb.AppendLine("## Recent Conversation");
                 int start = Math.Max(0, context.RecentHistory.Count - 6);
                 for (int i = start; i < context.RecentHistory.Count; i++)
                 {
                     var entry = context.RecentHistory[i];
-                    sb.AppendLine($"{entry.Sender}: \"{entry.Text}\"");
+                    recentHistorySb.AppendLine($"{entry.Sender}: \"{entry.Text}\"");
                 }
-                sb.AppendLine();
+                recentHistorySb.AppendLine();
             }
+            string recentHistoryBlockValue = recentHistorySb.ToString();
 
-            // Current state
-            sb.AppendLine("## Current State");
-            string modifierNote = GetModifierNote(context.InterestState);
-            sb.AppendLine($"- Interest: {context.CurrentInterest}/25 ({context.InterestState}){modifierNote}");
-
-            string momentumNote = GetMomentumNote(context.MomentumStreak);
-            sb.AppendLine($"- Momentum: {context.MomentumStreak} consecutive wins{momentumNote}");
-
-            string trapList = context.ActiveTrapNames.Length > 0
-                ? string.Join(", ", context.ActiveTrapNames)
-                : "none";
-            sb.AppendLine($"- Active traps: {trapList}");
-            sb.AppendLine($"- Turn: {context.TurnNumber}");
-            sb.AppendLine();
-
-            // Shadow state with threshold warnings
-            sb.AppendLine("## Shadow Status");
+            var shadowStatusSb = new System.Text.StringBuilder();
             if (context.ShadowValues != null)
             {
                 foreach (ShadowStatType s in (ShadowStatType[])Enum.GetValues(typeof(ShadowStatType)))
@@ -292,81 +441,112 @@ namespace Pinder.SessionRunner
                     if (context.ShadowValues.TryGetValue(s, out int value))
                     {
                         string warning = "";
-                        if (value >= 18) warning = " ⚠️ T3 CRITICAL — may override choices!";
-                        else if (value >= 12) warning = " ⚠️ T2 — -2 penalty to paired stat rolls";
-                        else if (value >= 6) warning = " ⚠️ T1 — taints delivery";
+                        if (value >= t3) warning = $" ⚠️ T3 CRITICAL — may override choices!";
+                        else if (value >= t2) warning = $" ⚠️ T2 — -2 penalty to paired stat rolls";
+                        else if (value >= t1) warning = $" ⚠️ T1 — taints delivery";
                         else if (value >= 4) warning = " (approaching T1)";
-                        sb.AppendLine($"- {s}: {value}/18{warning}");
+                        shadowStatusSb.AppendLine($"- {s}: {value}/18{warning}");
                     }
                 }
             }
             else
             {
-                sb.AppendLine("- Shadow tracking unavailable");
+                shadowStatusSb.AppendLine("- Shadow tracking unavailable");
             }
-            sb.AppendLine();
+            string shadowStatusBlockValue = shadowStatusSb.ToString();
 
-            // Options with shadow hints
-            sb.AppendLine("## Your Options");
-            char letter = 'A';
-            for (int i = 0; i < turn.Options.Length; i++)
+            string optionsBlockValue = "";
+            if (turn != null)
             {
-                DialogueOption opt = turn.Options[i];
-                int modifier = context.PlayerStats.GetEffective(opt.Stat);
-                int dc = context.DateeStats.GetDefenceDC(opt.Stat);
-                int need = dc - modifier;
-                int pct = Math.Max(0, Math.Min(100, (21 - need) * 5));
-                string riskTier = GetRiskTier(need);
-                string icons = FormatBonusIcons(opt);
+                var optionsSb = new System.Text.StringBuilder();
+                char letter = 'A';
+                for (int i = 0; i < turn.Options.Length; i++)
+                {
+                    DialogueOption opt = turn.Options[i];
+                    int modifier = context.PlayerStats.GetEffective(opt.Stat);
+                    int dc = context.DateeStats.GetDefenceDC(opt.Stat);
+                    
+                    int momentumBonus;
+                    if (_ruleResolver != null)
+                    {
+                        momentumBonus = _ruleResolver.GetMomentumBonus(context.MomentumStreak) ?? (context.MomentumStreak >= 5 ? 3 : (context.MomentumStreak >= 3 ? 2 : 0));
+                    }
+                    else
+                    {
+                        momentumBonus = context.MomentumStreak >= 5 ? 3 : (context.MomentumStreak >= 3 ? 2 : 0);
+                    }
+                    
+                    int tellBonus = opt.HasTellBonus ? 2 : 0;
+                    
+                    int callbackBonus = opt.CallbackTurnNumber.HasValue
+                        ? CallbackBonus.Compute(context.TurnNumber, opt.CallbackTurnNumber.Value)
+                        : 0;
+                        
+                    int totalMod = modifier + context.PlayerLevelBonus + momentumBonus + tellBonus + callbackBonus;
+                    int need = dc - totalMod;
+                    int pct = Math.Max(0, Math.Min(100, (21 - need) * 5));
+                    string riskTier = GetRiskTier(need);
+                    string icons = FormatBonusIcons(opt);
 
-                sb.AppendLine($"{letter}) [{opt.Stat.ToString().ToUpperInvariant()} +{modifier}] DC {dc} | Need {need}+ on d20 | {pct}% success | {riskTier}{icons}");
-                sb.AppendLine($"   Text: \"{opt.IntendedText}\"");
+                    optionsSb.AppendLine($"{letter}) [{opt.Stat.ToString().ToUpperInvariant()} +{modifier}] DC {dc} | Need {need}+ on d20 | {pct}% success | {riskTier}{icons}");
+                    optionsSb.AppendLine($"   Text: \"{opt.IntendedText}\"");
 
-                // Shadow impact hints
-                string shadowImpact = GetShadowImpact(opt.Stat, context);
-                if (!string.IsNullOrEmpty(shadowImpact))
-                    sb.AppendLine($"   Shadow: {shadowImpact}");
+                    string shadowImpact = GetShadowImpact(opt.Stat, context, t1, t2, t3);
+                    if (!string.IsNullOrEmpty(shadowImpact))
+                        optionsSb.AppendLine($"   Shadow: {shadowImpact}");
 
-                // Include EV from scoring agent if available
-                if (scores != null && i < scores.Length)
-                    sb.AppendLine($"   EV: {scores[i].ExpectedInterestGain:F2}");
+                    if (scores != null && i < scores.Length)
+                        optionsSb.AppendLine($"   EV: {scores[i].ExpectedInterestGain:F2}");
 
-                letter = (char)(letter + 1);
+                    letter = (char)(letter + 1);
+                }
+                optionsBlockValue = optionsSb.ToString();
             }
-            sb.AppendLine();
 
-            // Rules
-            sb.AppendLine(RulesReminder);
-            sb.AppendLine(ShadowRulesReminder);
-            sb.AppendLine(StrategyReminder);
-
-            sb.AppendLine("Use the submit_choice tool to make your pick. choice is 0-indexed (A=0, B=1, C=2, D=3).");
-
-            return sb.ToString();
+            return new Dictionary<string, string>
+            {
+                { "playerName", playerNameValue },
+                { "dateeName", dateeNameValue },
+                { "personalityBlock", personalityBlockValue },
+                { "recentHistoryBlock", recentHistoryBlockValue },
+                { "currentInterest", context.CurrentInterest.ToString() },
+                { "interestState", context.InterestState.ToString() },
+                { "modifierNote", modifierNoteValue },
+                { "momentumStreak", context.MomentumStreak.ToString() },
+                { "momentumNote", momentumNoteValue },
+                { "activeTraps", activeTrapsValue },
+                { "turnNumber", context.TurnNumber.ToString() },
+                { "shadowStatusBlock", shadowStatusBlockValue },
+                { "optionsBlock", optionsBlockValue },
+                { "successRules", successRules },
+                { "failureRules", failureRules },
+                { "momentumRules", momentumRules },
+                { "t1", t1.ToString() },
+                { "t2", t2.ToString() },
+                { "t3", t3.ToString() }
+            };
         }
 
         /// <summary>
         /// Returns a shadow impact description for the given stat choice.
         /// </summary>
-        private static string GetShadowImpact(StatType stat, PlayerAgentContext context)
+        private static string GetShadowImpact(StatType stat, PlayerAgentContext context, int t1, int t2, int t3)
         {
             if (context.ShadowValues == null) return "";
 
             var parts = new List<string>();
 
-            // Shadow growth: using a stat can grow its paired shadow
             ShadowStatType paired = GetPairedShadow(stat);
             if (context.ShadowValues.TryGetValue(paired, out int currentVal))
             {
-                if (currentVal >= 4 && currentVal < 6)
-                    parts.Add($"RISK: {paired} at {currentVal}, using {stat} may push to T1 (≥6)");
-                else if (currentVal >= 10 && currentVal < 12)
-                    parts.Add($"RISK: {paired} at {currentVal}, may push to T2 (≥12)");
-                else if (currentVal >= 16 && currentVal < 18)
-                    parts.Add($"DANGER: {paired} at {currentVal}, may push to T3 (≥18)!");
+                if (currentVal >= t3 - 2 && currentVal < t3)
+                    parts.Add($"DANGER: {paired} at {currentVal}, may push to T3 (≥{t3})!");
+                else if (currentVal >= t2 - 2 && currentVal < t2)
+                    parts.Add($"RISK: {paired} at {currentVal}, may push to T2 (≥{t2})");
+                else if (currentVal >= t1 - 2 && currentVal < t1)
+                    parts.Add($"RISK: {paired} at {currentVal}, using {stat} may push to T1 (≥{t1})");
             }
 
-            // Honesty reduces Denial
             if (stat == StatType.Honesty)
             {
                 if (context.ShadowValues.TryGetValue(ShadowStatType.Denial, out int denial) && denial > 0)
@@ -403,6 +583,7 @@ namespace Pinder.SessionRunner
             int? pickIndex = ParsePick(responseText, turn.Options.Length);
             if (pickIndex == null)
             {
+                // Fallback to scoring agent
                 return MakeFallbackDecision(scoringDecision, "Could not parse PICK from response");
             }
 

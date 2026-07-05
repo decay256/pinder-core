@@ -27,20 +27,9 @@ namespace Pinder.SessionSetup
     /// </remarks>
     public sealed class LlmBackgroundGenerator : IBackgroundGenerator
     {
-        // Fallback constants when no PromptCatalog is supplied.
-        // These must stay byte-identical to data/prompts/background.yaml
-        // until the catalog is wired everywhere.
-        internal const string DefaultSystemPrompt =
-            "You are a narrative synthesis engine for a comedy hookup-app simulator where the protagonists are sentient penises. " +
-            "Read the character profile below and weave the character's background fragments into a single cohesive narrative paragraph (3-5 sentences). " +
-            "Write in third person past tense. Make it read like a brief character biography: straightforward, specific, and grounded in the details given. " +
-            "Do not add new facts, embellishments, or emotional commentary not present in the source material. " +
-            "Output plain prose only — no markdown formatting, no bullet points, no section headers, no bold/italics. " +
-            "Keep the absurd-yet-matter-of-fact tone: the character's world is ridiculous but they take it completely seriously.";
-
         private readonly ILlmTransport _transport;
         private readonly Options _options;
-        private readonly PromptCatalog? _catalog;
+        private readonly PromptCatalog _catalog;
 
         public LlmBackgroundGenerator(ILlmTransport transport, Options? options = null)
             : this(transport, options, catalog: null)
@@ -50,8 +39,7 @@ namespace Pinder.SessionSetup
         /// <summary>
         /// Catalog-aware constructor. When <paramref name="catalog"/> is
         /// non-null and contains a <c>"background"</c> entry, system + user
-        /// templates are read from it; otherwise the embedded const defaults
-        /// are used.
+        /// templates are read from it.
         /// </summary>
         public LlmBackgroundGenerator(
             ILlmTransport transport,
@@ -60,21 +48,29 @@ namespace Pinder.SessionSetup
         {
             _transport = transport ?? throw new ArgumentNullException(nameof(transport));
             _options = options ?? new Options();
-            _catalog = catalog;
+            _catalog = catalog ?? PromptTemplates.Catalog
+                ?? throw new InvalidOperationException("PromptTemplates.Catalog is not wired. Call PromptWiring.Wire() at startup.");
+
+            // Enforce that the catalog contains the required key
+            var entry = _catalog.TryGet("background")
+                ?? throw new InvalidOperationException("prompt-catalog: missing required key 'background'. The yaml file is incomplete or missing.");
+            if (string.IsNullOrWhiteSpace(entry.SystemPrompt))
+                throw new InvalidOperationException("prompt-catalog: key 'background' has no system_prompt. Check the yaml file.");
+            if (string.IsNullOrWhiteSpace(entry.UserTemplate))
+                throw new InvalidOperationException("prompt-catalog: key 'background' has no user_template. Check the yaml file.");
         }
 
         /// <summary>
-        /// Effective system prompt for the background call — the catalog
-        /// entry if one is registered, otherwise the const default.
+        /// Effective system prompt for the background call — the catalog entry.
         /// </summary>
         private string SystemPrompt
         {
             get
             {
-                var entry = _catalog?.TryGet("background");
+                var entry = _catalog.TryGet("background");
                 if (entry != null && !string.IsNullOrWhiteSpace(entry.SystemPrompt))
                     return entry.SystemPrompt!;
-                return DefaultSystemPrompt;
+                throw new InvalidOperationException("prompt-catalog: key 'background' has no system_prompt. Check the yaml file.");
             }
         }
 
@@ -130,31 +126,19 @@ namespace Pinder.SessionSetup
             string assembledSystemPrompt,
             PromptCatalog? catalog)
         {
-            // Prefer the catalog template; fall back to const if absent.
-            var entry = catalog?.TryGet("background");
-            if (entry != null && !string.IsNullOrWhiteSpace(entry.UserTemplate))
-            {
-                return PromptCatalog.Substitute(
-                    entry.UserTemplate!,
-                    new Dictionary<string, string>(StringComparer.Ordinal)
-                    {
-                        { "character_profile", assembledSystemPrompt },
-                    });
-            }
-            return BuildUserMessageFromConstFallback(assembledSystemPrompt);
-        }
+            var resolvedCatalog = catalog ?? PromptTemplates.Catalog
+                ?? throw new InvalidOperationException("PromptTemplates.Catalog is not wired. Call PromptWiring.Wire() at startup.");
+            var entry = resolvedCatalog.TryGet("background")
+                ?? throw new InvalidOperationException("prompt-catalog: missing required key 'background'. The yaml file is incomplete or missing.");
+            if (string.IsNullOrWhiteSpace(entry.UserTemplate))
+                throw new InvalidOperationException("prompt-catalog: key 'background' has no user_template. Check the yaml file.");
 
-        /// <summary>
-        /// Fallback user-message body when catalog is absent.
-        /// </summary>
-        internal static string BuildUserMessageFromConstFallback(string assembledSystemPrompt)
-        {
-            return
-                $@"Read this character profile and synthesize the background fragments into a single narrative paragraph (3-5 sentences, third person past tense).
-Use only the facts given. No embellishments. Plain prose only.
-
-CHARACTER PROFILE:
-{assembledSystemPrompt}";
+            return PromptCatalog.Substitute(
+                entry.UserTemplate!,
+                new Dictionary<string, string>(StringComparer.Ordinal)
+                {
+                    { "character_profile", assembledSystemPrompt },
+                });
         }
 
         /// <summary>Tunable knobs for <see cref="LlmBackgroundGenerator"/>.</summary>
