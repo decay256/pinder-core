@@ -30,5 +30,11 @@ namespace Pinder.RemoteAssets.Exceptions
         {
             Errors = errors ?? Array.Empty<string>();
         }
+
+        public override string ToString()
+        {
+            var errorsStr = Errors != null ? string.Join(", ", Errors) : "none";
+            return $"[RemoteAssetValidationFailureDetails] Errors: [{errorsStr}]\n{base.ToString()}";
+        }
     }
 }

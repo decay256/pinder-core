@@ -58,6 +58,11 @@ namespace Pinder.SessionSetup
                 throw new InvalidOperationException("prompt-catalog: key 'background' has no system_prompt. Check the yaml file.");
             if (string.IsNullOrWhiteSpace(entry.UserTemplate))
                 throw new InvalidOperationException("prompt-catalog: key 'background' has no user_template. Check the yaml file.");
+
+            if (!entry.Temperature.HasValue)
+                throw new InvalidOperationException("prompt-catalog: key 'background' has no temperature. Check the yaml file.");
+            if (!entry.MaxTokens.HasValue)
+                throw new InvalidOperationException("prompt-catalog: key 'background' has no max_tokens. Check the yaml file.");
         }
 
         /// <summary>
@@ -89,8 +94,16 @@ namespace Pinder.SessionSetup
 
             try
             {
+                var entry = _catalog.Get("background");
+                double temp = _options.Temperature != GeneratorDefaultConfigs.Background.Temperature
+                    ? _options.Temperature
+                    : entry.Temperature!.Value;
+                int maxTok = _options.MaxTokens != GeneratorDefaultConfigs.Background.MaxTokens
+                    ? _options.MaxTokens
+                    : entry.MaxTokens!.Value;
+
                 string response = await _transport
-                    .SendAsync(SystemPrompt, userMessage, _options.Temperature, _options.MaxTokens, phase: LlmPhase.Synthesis)
+                    .SendAsync(SystemPrompt, userMessage, temp, maxTok, phase: LlmPhase.Synthesis)
                     .ConfigureAwait(false);
                 string trimmed = (response ?? string.Empty).Trim();
                 if (string.IsNullOrEmpty(trimmed))
@@ -148,13 +161,13 @@ namespace Pinder.SessionSetup
         public sealed class Options
         {
             /// <summary>Temperature. Default 0.8 (slightly lower than stake for more coherent prose).</summary>
-            public double Temperature { get; set; } = 0.8;
+            public double Temperature { get; set; } = GeneratorDefaultConfigs.Background.Temperature;
 
             /// <summary>
             /// Max output tokens. Default 350 (3-5 sentences of narrative
             /// prose; allows ~250-300 tokens with a small safety margin).
             /// </summary>
-            public int MaxTokens { get; set; } = 350;
+            public int MaxTokens { get; set; } = GeneratorDefaultConfigs.Background.MaxTokens;
 
             /// <summary>
             /// Opt-in callback triggered when generation is degraded (e.g. transport failure or empty output).

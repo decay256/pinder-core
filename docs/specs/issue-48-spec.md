@@ -122,9 +122,9 @@ To ensure consistency across all XP recording sites, these exact string labels m
 
 | Label | When Used |
 |-------|-----------|
-| `"Success_DC_Low"` | Successful check, DC ≤ 13 |
-| `"Success_DC_Mid"` | Successful check, DC 14–17 |
-| `"Success_DC_High"` | Successful check, DC ≥ 18 |
+| `"Success_DC_Low"` | Successful check, DC ≤ 16 |
+| `"Success_DC_Mid"` | Successful check, DC 17–20 |
+| `"Success_DC_High"` | Successful check, DC ≥ 21 |
 | `"Failure"` | Normal failed check (not nat-1) |
 | `"Nat20"` | Natural 20 rolled |
 | `"Nat1"` | Natural 1 rolled |
@@ -173,9 +173,9 @@ else
 
 | Condition | Label | Amount |
 |-----------|-------|--------|
-| DC ≤ 13 | `"Success_DC_Low"` | 5 |
-| DC 14–17 | `"Success_DC_Mid"` | 10 |
-| DC ≥ 18 | `"Success_DC_High"` | 15 |
+| DC ≤ 16 | `"Success_DC_Low"` | 5 |
+| DC 17–20 | `"Success_DC_Mid"` | 10 |
+| DC ≥ 21 | `"Success_DC_High"` | 15 |
 
 ### 5.4 XP Recording in `RecoverAsync` (from #43)
 

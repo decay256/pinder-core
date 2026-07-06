@@ -59,9 +59,9 @@ public static class LevelTable
 |---|---|
 | Nat 20 | 25 (flat, no multiplier) |
 | Nat 1 | 10 (flat, no multiplier) |
-| Success (DC ≤ 13) | 5 × risk-tier multiplier |
-| Success (DC 14–17) | 10 × risk-tier multiplier |
-| Success (DC ≥ 18) | 15 × risk-tier multiplier |
+| Success (DC ≤ 16) | 5 × risk-tier multiplier |
+| Success (DC 17–20) | 10 × risk-tier multiplier |
+| Success (DC ≥ 21) | 15 × risk-tier multiplier |
 | Failure (non-Nat1) | 2 (flat, no multiplier) |
 
 ### Risk-Tier XP Multiplier (`GameSession.ApplyRiskTierMultiplier`)
@@ -76,6 +76,7 @@ private static int ApplyRiskTierMultiplier(int baseXp, RiskTier riskTier);
 | Medium | 1.5× |
 | Hard | 2.0× |
 | Bold | 3.0× |
+| Reckless | 10.0× |
 
 Rounding: `(int)Math.Round(baseXp * multiplier)` — midpoint rounds to nearest even (banker's rounding), so 7.5 → 8.
 
@@ -107,7 +108,7 @@ Rounding: `(int)Math.Round(baseXp * multiplier)` — midpoint rounds to nearest 
 - **XpLedger is append-only**: events cannot be removed. `TotalXp` is a running sum. `DrainTurnEvents()` returns new events since last drain without modifying the ledger.
 - **Risk-tier multiplier is applied only to normal successes**: Nat20, Nat1, and non-Nat1 failures use flat XP values with no multiplier.
 - **The multiplier is computed in `GameSession`** (private static method `ApplyRiskTierMultiplier`), not in the `Progression` namespace. The multiplied value is what gets recorded in the ledger.
-- **DC buckets determine base XP**: low (≤13) = 5, mid (14–17) = 10, high (≥18) = 15. Risk tier determines the multiplier independently of DC.
+- **DC buckets determine base XP**: low (≤16) = 5, mid (17–20) = 10, high (≥21) = 15. Risk tier determines the multiplier independently of DC.
 - **`TurnResult.XpEarned`** equals the sum of all ledger events recorded during that turn, ensuring consistency between the return value and the ledger.
 - **`TurnResult.XpBreakdown`** exposes the itemized `IReadOnlyList<XpLedger.XpEvent>` of XP events earned during the turn.
 
@@ -118,3 +119,4 @@ Rounding: `(int)Math.Round(baseXp * multiplier)` — midpoint rounds to nearest 
 | 2026-04-03 | #314 | Initial creation — documented XP risk-tier multiplier (Safe=1×, Medium=1.5×, Hard=2×, Bold=3×) applied to successful rolls. Multiplier uses `Math.Round`. Flat XP for Nat20 (25), Nat1 (10), failure (2). Added `XpRiskTierMultiplierSpecTests.cs` (344 lines, 14 tests). |
 | 2026-07-01 | #1281 | Added `XpBreakdown` property to `TurnResult` to expose itemized XP events. |
 | 2026-07-03 | #1283 | Migrated all XP and progression thresholds to game-definition.yaml. Removed hardcoded C# arrays and cascades. Added strict failure-fast loading validations. |
+| 2026-07-06 | Audit | Appended the Reckless risk tier (10.0× multiplier) and ensured Levels 9-11 and attributes in Level Thresholds are documented in alignment with game-definition.yaml. |

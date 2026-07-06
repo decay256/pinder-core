@@ -79,4 +79,5 @@ public class EmotionStemSelector
 ## Change Log
 | Date | Issue | Summary |
 |------|-------|---------|
+| 2026-07-04 | #1310 | Documented/added texting style attribution by introducing `AttributedTextingStyleLine` and property `AttributedTextingStyleLines` on `CharacterProfile`, preserving origin tracing. |
 | 2026-04-05 | #540 | Initial creation — added `ArchetypeDefinition`, `ArchetypeCatalog` (20 archetypes with level ranges), and level-range filtering in `CharacterAssembler.Assemble` so dominant archetype respects character's level tier |

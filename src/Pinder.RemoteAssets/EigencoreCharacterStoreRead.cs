@@ -103,62 +103,18 @@ namespace Pinder.RemoteAssets
                             return ParseQueryResponse(body);
                         }
 
-                        if (status == 401)
-                        {
-                            string body401 = await SafeReadBodyAsync(resp).ConfigureAwait(false);
-                            throw new RemoteAssetAuthException(
-                                "Eigencore returned 401 for GET assets query.",
-                                responseBody: body401);
-                        }
-
-                        if (status == 422)
-                        {
-                            string body422 = await SafeReadBodyAsync(resp).ConfigureAwait(false);
-                            (string? errorCode, IReadOnlyList<string> errors) = ParseValidationBody(body422);
-                            if (string.Equals(errorCode, "invalid_cursor", StringComparison.Ordinal))
-                            {
-                                throw new RemoteAssetInvalidCursorException(
-                                    "Eigencore returned 422 invalid_cursor for GET assets query.",
-                                    responseBody: body422);
-                            }
-                            throw new RemoteAssetValidationException(
-                                "Eigencore returned 422 for GET assets query.",
-                                errors: errors,
-                                responseBody: body422);
-                        }
-
                         if (status == 429)
                         {
-                            TimeSpan delay = ParseRetryAfter(resp) ?? _config.DefaultRetryAfter;
-                            string body429 = await SafeReadBodyAsync(resp).ConfigureAwait(false);
-                            if (retried)
-                            {
-                                throw new RemoteAssetRateLimitException(
-                                    "Eigencore returned 429 for GET assets query after one retry.",
-                                    retryAfter: delay,
-                                    responseBody: body429);
-                            }
-                            retried = true;
-                            resp.Dispose();
-                            if (delay > TimeSpan.Zero)
-                                await Task.Delay(delay, ct).ConfigureAwait(false);
+                            retried = await EigencoreResponseHandler.Handle429RetryAsync(
+                                resp,
+                                retried,
+                                "Eigencore returned 429 for GET assets query after one retry.",
+                                _config.DefaultRetryAfter,
+                                ct).ConfigureAwait(false);
                             continue;
                         }
 
-                        if (status >= 500 && status <= 599)
-                        {
-                            string body5xx = await SafeReadBodyAsync(resp).ConfigureAwait(false);
-                            throw new RemoteAssetServerException(
-                                $"Eigencore returned {status} for GET assets query.",
-                                statusCode: status,
-                                responseBody: body5xx);
-                        }
-
-                        string bodyOther = await SafeReadBodyAsync(resp).ConfigureAwait(false);
-                        throw new RemoteAssetServerException(
-                            $"Eigencore returned unexpected status {status} for GET assets query.",
-                            statusCode: status,
-                            responseBody: bodyOther);
+                        await EigencoreResponseHandler.HandleFailureResponseAsync(resp, "GET assets query", ct).ConfigureAwait(false);
                     }
                     finally
                     {
@@ -223,46 +179,18 @@ namespace Pinder.RemoteAssets
                             return (Array.Empty<byte>(), null!, false);
                         }
 
-                        if (status == 401)
-                        {
-                            string body401 = await SafeReadBodyAsync(resp).ConfigureAwait(false);
-                            throw new RemoteAssetAuthException(
-                                $"Eigencore returned 401 for GET assets/{characterId}.",
-                                responseBody: body401);
-                        }
-
                         if (status == 429)
                         {
-                            TimeSpan delay = ParseRetryAfter(resp) ?? _config.DefaultRetryAfter;
-                            string body429 = await SafeReadBodyAsync(resp).ConfigureAwait(false);
-                            if (retried)
-                            {
-                                throw new RemoteAssetRateLimitException(
-                                    $"Eigencore returned 429 for GET assets/{characterId} after one retry.",
-                                    retryAfter: delay,
-                                    responseBody: body429);
-                            }
-                            retried = true;
-                            resp.Dispose();
-                            if (delay > TimeSpan.Zero)
-                                await Task.Delay(delay, ct).ConfigureAwait(false);
+                            retried = await EigencoreResponseHandler.Handle429RetryAsync(
+                                resp,
+                                retried,
+                                $"Eigencore returned 429 for GET assets/{characterId} after one retry.",
+                                _config.DefaultRetryAfter,
+                                ct).ConfigureAwait(false);
                             continue;
                         }
 
-                        if (status >= 500 && status <= 599)
-                        {
-                            string body5xx = await SafeReadBodyAsync(resp).ConfigureAwait(false);
-                            throw new RemoteAssetServerException(
-                                $"Eigencore returned {status} for GET assets/{characterId}.",
-                                statusCode: status,
-                                responseBody: body5xx);
-                        }
-
-                        string bodyOther = await SafeReadBodyAsync(resp).ConfigureAwait(false);
-                        throw new RemoteAssetServerException(
-                            $"Eigencore returned unexpected status {status} for GET assets/{characterId}.",
-                            statusCode: status,
-                            responseBody: bodyOther);
+                        await EigencoreResponseHandler.HandleFailureResponseAsync(resp, $"GET assets/{characterId}", ct).ConfigureAwait(false);
                     }
                     finally
                     {

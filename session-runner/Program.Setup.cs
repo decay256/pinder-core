@@ -314,7 +314,7 @@ partial class Program
             var agentOptions = new AnthropicOptions
             {
                 ApiKey = result.ApiKey,
-                Model = Environment.GetEnvironmentVariable("PLAYER_AGENT_MODEL") ?? "claude-sonnet-4-20250514"
+                Model = Environment.GetEnvironmentVariable("PLAYER_AGENT_MODEL") ?? AnthropicModelIds.DefaultModel
             };
             result.Agent = new LlmPlayerAgent(agentOptions, new ScoringPlayerAgent(),
                 playerName: result.Sable.DisplayName, dateeName: result.Brick.DisplayName);

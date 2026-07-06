@@ -19,6 +19,7 @@ namespace Pinder.LlmAdapters
         public string? SessionId { get; }
         public int? TurnId { get; }
         public string? TrapName { get; }
+        public Exception? Exception { get; }
 
         public OverlayDegradedEvent(
             string overlayType,
@@ -29,7 +30,8 @@ namespace Pinder.LlmAdapters
             string? errorCode = null,
             string? sessionId = null,
             int? turnId = null,
-            string? trapName = null)
+            string? trapName = null,
+            Exception? exception = null)
         {
             OverlayType = overlayType;
             Provider = provider;
@@ -40,6 +42,7 @@ namespace Pinder.LlmAdapters
             SessionId = sessionId;
             TurnId = turnId;
             TrapName = trapName;
+            Exception = exception;
         }
     }
 }

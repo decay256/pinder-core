@@ -47,11 +47,20 @@ namespace Pinder.SessionSetup
                 cancellationToken);
 
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            try {
+            try
+            {
                 var list = JsonSerializer.Deserialize<List<string>>(llmResponse, options);
-                return list ?? new List<string>();
-            } catch {
-                return new List<string>();
+                if (list == null)
+                {
+                    throw new System.Text.Json.JsonException("Deserialized stakes list was null.");
+                }
+                return list;
+            }
+            catch (System.Text.Json.JsonException ex)
+            {
+                // Fail-loud by propagating the failure with structural context
+                throw new System.InvalidOperationException(
+                    $"Failed to parse stakes JSON from LLM response. Raw response was: '{llmResponse}'", ex);
             }
         }
     }

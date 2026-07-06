@@ -194,5 +194,38 @@ TELL: SELF_AWARENESS (knows her flaws)";
             Assert.DoesNotContain("/rant", result!.MessageText);
             Assert.Equal("...that's the post", result.MessageText);
         }
+
+        [Fact]
+        public void ParseDateeResponseTool_InvalidStatOrWeakness_LogsAndGracefullyHandles()
+        {
+            var json = JObject.Parse(@"{
+                ""message"": ""Hello there!"",
+                ""tell"": { ""stat"": ""InvalidStatName"", ""description"": ""some tell"" },
+                ""weakness"": { ""defending_stat"": ""AnotherInvalidStat"", ""dc_reduction"": 5 }
+            }");
+
+            using (var sw = new System.IO.StringWriter())
+            {
+                var originalError = System.Console.Error;
+                System.Console.SetError(sw);
+                try
+                {
+                    var result = DateeResponseParsers.ParseDateeResponseTool(json);
+                    
+                    Assert.NotNull(result);
+                    Assert.Equal("Hello there!", result!.MessageText);
+                    Assert.Null(result.DetectedTell);
+                    Assert.Null(result.WeaknessWindow);
+
+                    var consoleOutput = sw.ToString();
+                    Assert.Contains("[DateeResponseParsers] Failed to parse Tell stat 'InvalidStatName'", consoleOutput);
+                    Assert.Contains("[DateeResponseParsers] Failed to parse Weakness Window (stat='AnotherInvalidStat')", consoleOutput);
+                }
+                finally
+                {
+                    System.Console.SetError(originalError);
+                }
+            }
+        }
     }
 }

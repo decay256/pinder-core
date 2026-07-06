@@ -274,7 +274,7 @@ namespace Pinder.LlmAdapters
                 var trimmed = responseText?.Trim();
                 if (string.IsNullOrWhiteSpace(trimmed))
                 {
-                    _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                    RaiseOverlayDegraded(new OverlayDegradedEvent(
                         overlayType: "interest_beat",
                         provider: "primary",
                         model: null,
@@ -298,13 +298,14 @@ namespace Pinder.LlmAdapters
             }
             catch (Exception ex)
             {
-                _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                RaiseOverlayDegraded(new OverlayDegradedEvent(
                     overlayType: "interest_beat",
                     provider: "primary",
                     model: null,
                     reason: "error",
                     outcome: OverlayOutcome.Degraded,
-                    errorCode: ex.GetType().Name
+                    errorCode: ex.GetType().Name,
+                    exception: ex
                 ));
                 return null;
             }
@@ -317,7 +318,7 @@ namespace Pinder.LlmAdapters
             {
                 if (string.IsNullOrWhiteSpace(instruction))
                 {
-                    _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                    RaiseOverlayDegraded(new OverlayDegradedEvent(
                         overlayType: "horniness_overlay",
                         provider: "primary",
                         model: null,
@@ -346,13 +347,13 @@ namespace Pinder.LlmAdapters
 
             try
             {
-                double temperature = _options.DeliveryTemperature ?? 0.7;
+                double temperature = _options.DeliveryTemperature ?? DefaultDeliveryTemperature;
                 var result = await _overlayTransport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.HorninessOverlay, ct: ct)
                     .ConfigureAwait(false);
 
                 if (string.IsNullOrWhiteSpace(result))
                 {
-                    _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                    RaiseOverlayDegraded(new OverlayDegradedEvent(
                         overlayType: "horniness_overlay",
                         provider: "primary",
                         model: null,
@@ -374,7 +375,7 @@ namespace Pinder.LlmAdapters
                     trimmed.IndexOf("inappropriate", StringComparison.OrdinalIgnoreCase) >= 0 ||
                     trimmed.IndexOf("I'd be happy to help", StringComparison.OrdinalIgnoreCase) >= 0)
                 {
-                    _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                    RaiseOverlayDegraded(new OverlayDegradedEvent(
                         overlayType: "horniness_overlay",
                         provider: "primary",
                         model: null,
@@ -392,13 +393,14 @@ namespace Pinder.LlmAdapters
             }
             catch (Exception ex)
             {
-                _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                RaiseOverlayDegraded(new OverlayDegradedEvent(
                     overlayType: "horniness_overlay",
                     provider: "primary",
                     model: null,
                     reason: "error",
                     outcome: OverlayOutcome.Degraded,
-                    errorCode: ex.GetType().Name
+                    errorCode: ex.GetType().Name,
+                    exception: ex
                 ));
                 return message;
             }
@@ -411,7 +413,7 @@ namespace Pinder.LlmAdapters
             {
                 if (string.IsNullOrWhiteSpace(trapInstruction))
                 {
-                    _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                    RaiseOverlayDegraded(new OverlayDegradedEvent(
                         overlayType: "trap_overlay",
                         provider: "primary",
                         model: null,
@@ -440,13 +442,13 @@ namespace Pinder.LlmAdapters
 
             try
             {
-                double temperature = _options.DeliveryTemperature ?? 0.7;
+                double temperature = _options.DeliveryTemperature ?? DefaultDeliveryTemperature;
                 var result = await _overlayTransport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.TrapOverlay, ct: ct)
                     .ConfigureAwait(false);
 
                 if (string.IsNullOrWhiteSpace(result))
                 {
-                    _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                    RaiseOverlayDegraded(new OverlayDegradedEvent(
                         overlayType: "trap_overlay",
                         provider: "primary",
                         model: null,
@@ -466,7 +468,7 @@ namespace Pinder.LlmAdapters
                     trimmed.IndexOf("inappropriate", StringComparison.OrdinalIgnoreCase) >= 0 ||
                     trimmed.IndexOf("I'd be happy to help", StringComparison.OrdinalIgnoreCase) >= 0)
                 {
-                    _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                    RaiseOverlayDegraded(new OverlayDegradedEvent(
                         overlayType: "trap_overlay",
                         provider: "primary",
                         model: null,
@@ -485,14 +487,15 @@ namespace Pinder.LlmAdapters
             }
             catch (Exception ex)
             {
-                _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                RaiseOverlayDegraded(new OverlayDegradedEvent(
                     overlayType: "trap_overlay",
                     provider: "primary",
                     model: null,
                     reason: "error",
                     outcome: OverlayOutcome.Degraded,
                     errorCode: ex.GetType().Name,
-                    trapName: trapName
+                    trapName: trapName,
+                    exception: ex
                 ));
                 return message;
             }
@@ -505,7 +508,7 @@ namespace Pinder.LlmAdapters
             {
                 if (string.IsNullOrWhiteSpace(instruction))
                 {
-                    _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                    RaiseOverlayDegraded(new OverlayDegradedEvent(
                         overlayType: "failure_corruption",
                         provider: "primary",
                         model: null,
@@ -534,7 +537,7 @@ namespace Pinder.LlmAdapters
 
                 if (string.IsNullOrWhiteSpace(result))
                 {
-                    _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                    RaiseOverlayDegraded(new OverlayDegradedEvent(
                         overlayType: "failure_corruption",
                         provider: "primary",
                         model: null,
@@ -552,7 +555,7 @@ namespace Pinder.LlmAdapters
                     trimmed.IndexOf("inappropriate", StringComparison.OrdinalIgnoreCase) >= 0 ||
                     trimmed.IndexOf("I'd be happy to help", StringComparison.OrdinalIgnoreCase) >= 0)
                 {
-                    _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                    RaiseOverlayDegraded(new OverlayDegradedEvent(
                         overlayType: "failure_corruption",
                         provider: "primary",
                         model: null,
@@ -570,13 +573,14 @@ namespace Pinder.LlmAdapters
             }
             catch (Exception ex)
             {
-                _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                RaiseOverlayDegraded(new OverlayDegradedEvent(
                     overlayType: "failure_corruption",
                     provider: "primary",
                     model: null,
                     reason: "error",
                     outcome: OverlayOutcome.Degraded,
-                    errorCode: ex.GetType().Name
+                    errorCode: ex.GetType().Name,
+                    exception: ex
                 ));
                 return message;
             }
@@ -589,7 +593,7 @@ namespace Pinder.LlmAdapters
             {
                 if (string.IsNullOrWhiteSpace(instruction))
                 {
-                    _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                    RaiseOverlayDegraded(new OverlayDegradedEvent(
                         overlayType: "shadow_corruption",
                         provider: "primary",
                         model: null,
@@ -615,13 +619,13 @@ namespace Pinder.LlmAdapters
 
             try
             {
-                double temperature = _options.DeliveryTemperature ?? 0.7;
+                double temperature = _options.DeliveryTemperature ?? DefaultDeliveryTemperature;
                 var result = await _overlayTransport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.ShadowCorruption, ct: ct)
                     .ConfigureAwait(false);
 
                 if (string.IsNullOrWhiteSpace(result))
                 {
-                    _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                    RaiseOverlayDegraded(new OverlayDegradedEvent(
                         overlayType: "shadow_corruption",
                         provider: "primary",
                         model: null,
@@ -640,7 +644,7 @@ namespace Pinder.LlmAdapters
                     trimmed.IndexOf("inappropriate", StringComparison.OrdinalIgnoreCase) >= 0 ||
                     trimmed.IndexOf("I'd be happy to help", StringComparison.OrdinalIgnoreCase) >= 0)
                 {
-                    _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                    RaiseOverlayDegraded(new OverlayDegradedEvent(
                         overlayType: "shadow_corruption",
                         provider: "primary",
                         model: null,
@@ -658,13 +662,14 @@ namespace Pinder.LlmAdapters
             }
             catch (Exception ex)
             {
-                _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                RaiseOverlayDegraded(new OverlayDegradedEvent(
                     overlayType: "shadow_corruption",
                     provider: "primary",
                     model: null,
                     reason: "error",
                     outcome: OverlayOutcome.Degraded,
-                    errorCode: ex.GetType().Name
+                    errorCode: ex.GetType().Name,
+                    exception: ex
                 ));
                 return message;
             }
@@ -685,7 +690,7 @@ namespace Pinder.LlmAdapters
 
             if (string.IsNullOrWhiteSpace(template))
             {
-                _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                RaiseOverlayDegraded(new OverlayDegradedEvent(
                     overlayType: "success_improvement",
                     provider: "primary",
                     model: null,
@@ -725,7 +730,7 @@ namespace Pinder.LlmAdapters
             var improved = (responseText ?? string.Empty).Trim();
             if (string.IsNullOrWhiteSpace(improved) || string.Equals(improved, "...", StringComparison.OrdinalIgnoreCase))
             {
-                _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                RaiseOverlayDegraded(new OverlayDegradedEvent(
                     overlayType: "success_improvement",
                     provider: "primary",
                     model: null,
@@ -737,7 +742,7 @@ namespace Pinder.LlmAdapters
 
             if (Pinder.Core.Conversation.SuccessImprovementValidator.IsRejected(improved))
             {
-                _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                RaiseOverlayDegraded(new OverlayDegradedEvent(
                     overlayType: "success_improvement",
                     provider: "primary",
                     model: null,
@@ -790,7 +795,7 @@ namespace Pinder.LlmAdapters
             var question = (responseText ?? string.Empty).Trim();
             if (string.IsNullOrWhiteSpace(question))
             {
-                _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                RaiseOverlayDegraded(new OverlayDegradedEvent(
                     overlayType: "steering",
                     provider: "primary",
                     model: null,
@@ -950,6 +955,12 @@ namespace Pinder.LlmAdapters
                 System.Diagnostics.Trace.TraceWarning(warning);
                 _options.OnStakeSkipWarning?.Invoke(warning);
             }
+        }
+
+        private void RaiseOverlayDegraded(OverlayDegradedEvent evt)
+        {
+            var handler = _options.OnOverlayDegraded ?? PinderLlmAdapterOptions.DefaultOnOverlayDegraded;
+            handler?.Invoke(evt);
         }
 
         private GameDefinition RequireGameDefinition([System.Runtime.CompilerServices.CallerMemberName] string methodName = "")

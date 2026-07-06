@@ -33,3 +33,5 @@ strings:
   game_screen.open_help_aria: "Open help"
   game_screen.scroll_to_newest_aria: "Scroll to newest message"
   game_screen.scroll_to_newest_button: "↓ new"
+  game_screen.reconnecting: "Reconnecting… (Attempt {attempts})"
+  game_screen.prompt_debug_button: "Prompt Debug"

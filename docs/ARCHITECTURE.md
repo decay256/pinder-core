@@ -313,11 +313,11 @@ post-roll margin. This keeps "risk" a property of the choice, not of luck.
 
 | Risk tier     | When                                       |
 |---------------|--------------------------------------------|
-| `Safe`        | Needed ≤ 5 on d20                          |
-| `Moderate`    | Needed 6–10                                |
-| `Risky`       | Needed 11–15                               |
-| `Desperate`   | Needed 16–19                               |
-| `Legendary`   | Needed 20 (only a nat 20 succeeds)         |
+| `Safe`        | Needed 1–7                                 |
+| `Medium`      | Needed 8–11                                |
+| `Hard`        | Needed 12–15                               |
+| `Bold`        | Needed 16–19                               |
+| `Reckless`    | Needed 20+ (only a nat 20 succeeds)        |
 
 Success interest delta is `baseDelta(beatMargin) + riskTierBonus` with the
 bonus scaling with risk. See `Pinder.Core/Rolls/RollEngine.cs` and

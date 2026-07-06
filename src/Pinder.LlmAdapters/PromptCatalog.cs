@@ -230,6 +230,8 @@ namespace Pinder.LlmAdapters
 
                 string? systemPrompt = TryParseString(body, "system_prompt");
                 string? userTemplate = TryParseString(body, "user_template");
+                double? temperature = TryParseDouble(body, "temperature");
+                int? maxTokens = TryParseIntOptional(body, "max_tokens");
 
                 if (systemPrompt == null && userTemplate == null)
                 {
@@ -256,7 +258,9 @@ namespace Pinder.LlmAdapters
                 entries[name] = new PromptEntry(
                     systemPrompt: systemPrompt,
                     userTemplate: userTemplate,
-                    sourceFile: normalizedPath);
+                    sourceFile: normalizedPath,
+                    temperature: temperature,
+                    maxTokens: maxTokens);
             }
         }
 
@@ -286,6 +290,32 @@ namespace Pinder.LlmAdapters
             return null;
         }
 
+        private static double? TryParseDouble(YamlMappingNode node, string key)
+        {
+            if (node.Children.TryGetValue(new YamlScalarNode(key), out var v)
+                && v is YamlScalarNode scalar)
+            {
+                if (double.TryParse(scalar.Value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var d))
+                {
+                    return d;
+                }
+            }
+            return null;
+        }
+
+        private static int? TryParseIntOptional(YamlMappingNode node, string key)
+        {
+            if (node.Children.TryGetValue(new YamlScalarNode(key), out var v)
+                && v is YamlScalarNode scalar)
+            {
+                if (int.TryParse(scalar.Value, out var i))
+                {
+                    return i;
+                }
+            }
+            return null;
+        }
+
         private static bool TryGetMapping(YamlMappingNode parent, string key, out YamlMappingNode? mapping)
         {
             if (parent.Children.TryGetValue(new YamlScalarNode(key), out var v) && v is YamlMappingNode m)
@@ -308,12 +338,16 @@ namespace Pinder.LlmAdapters
         public string? SystemPrompt { get; }
         public string? UserTemplate { get; }
         public string? SourceFile { get; }
+        public double? Temperature { get; }
+        public int? MaxTokens { get; }
 
-        public PromptEntry(string? systemPrompt, string? userTemplate, string? sourceFile = null)
+        public PromptEntry(string? systemPrompt, string? userTemplate, string? sourceFile = null, double? temperature = null, int? maxTokens = null)
         {
             SystemPrompt = systemPrompt;
             UserTemplate = userTemplate;
             SourceFile = sourceFile;
+            Temperature = temperature;
+            MaxTokens = maxTokens;
         }
     }
 }

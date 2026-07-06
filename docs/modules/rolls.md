@@ -12,7 +12,7 @@ The `Pinder.Core.Rolls` namespace implements dice-rolling mechanics, failure/suc
 | `src/Pinder.Core/Rolls/SuccessScale.cs` | Maps successful rolls to positive interest deltas. |
 | `src/Pinder.Core/Rolls/RollEngine.cs` | Core dice-rolling logic — resolves rolls against DC, applies modifiers. |
 | `src/Pinder.Core/Rolls/RollResult.cs` | Value object holding the outcome of a single roll (total, DC, tier, success flag, etc.). |
-| `src/Pinder.Core/Rolls/RiskTier.cs` | Enum for risk tiers (e.g., Safe, Bold, Risky). |
+| `src/Pinder.Core/Rolls/RiskTier.cs` | Enum for risk tiers: Safe, Medium, Hard, Bold, Reckless. |
 | `src/Pinder.Core/Rolls/RiskTierBonus.cs` | Maps risk tiers to bonus modifiers. |
 | `src/Pinder.Core/Rolls/SystemRandom.cs` | Default `IDice` implementation wrapping `System.Random`. |
 | `tests/Pinder.Core.Tests/RulesSpec/RulesSpecTests.cs` | 54 xUnit tests (37 passing, 17 skipped) auto-generated from `rules-v3-enriched.yaml`, verifying `FailureScale`, `SuccessScale`, `RiskTier`, `RiskTierBonus`, `InterestMeter`, `ShadowThresholdEvaluator`, and `LevelTable` against authoritative rules. |

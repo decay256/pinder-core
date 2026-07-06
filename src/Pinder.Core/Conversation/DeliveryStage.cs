@@ -116,8 +116,15 @@ namespace Pinder.Core.Conversation
                     {
                         throw;
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
+                        if (!IsRetryableException(ex))
+                        {
+                            throw;
+                        }
+
+                        System.Console.Error.WriteLine($"[WARNING] Primary LLM failure corruption failed with transient error: {ex.Message}");
+
                         // Fall back to deterministic DeliveryOverlay
                         deliveredMessage = null;
                     }
@@ -182,8 +189,15 @@ namespace Pinder.Core.Conversation
                     {
                         throw;
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        if (!IsRetryableException(ex))
+                        {
+                            throw;
+                        }
+
+                        System.Console.Error.WriteLine($"[WARNING] Success improvement failed with transient error: {ex.Message}");
+
                         // Ignore and fallback
                     }
 
@@ -412,6 +426,43 @@ namespace Pinder.Core.Conversation
                 FinalInterestDelta = interestDelta,
                 ShadowCorrection = shadowCorrection
             };
+        }
+
+        private static bool IsRetryableException(Exception ex)
+        {
+            if (ex is OperationCanceledException)
+            {
+                return false;
+            }
+            if (ex is TimeoutException)
+            {
+                return true;
+            }
+            if (ex is System.Net.Http.HttpRequestException)
+            {
+                return true;
+            }
+            if (ex is LlmTransportException transportEx)
+            {
+                return transportEx.FailureKind == LlmFailureKind.RateLimited ||
+                       transportEx.FailureKind == LlmFailureKind.Network;
+            }
+
+            string msg = ex.Message ?? "";
+            if (msg.IndexOf("429", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                msg.IndexOf("503", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                msg.IndexOf("rate limit", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                msg.IndexOf("thrott", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                msg.IndexOf("timeout", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                msg.IndexOf("service unavailable", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                msg.IndexOf("temporary", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                msg.IndexOf("transient", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                msg.IndexOf("LLM failure", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return true;
+            }
+
+            return false;
         }
 
     }

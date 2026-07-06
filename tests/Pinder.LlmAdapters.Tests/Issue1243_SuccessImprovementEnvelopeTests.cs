@@ -42,6 +42,11 @@ namespace Pinder.LlmAdapters.Tests
 delivery_instructions:
   charm:
     strong: ""rewrite the intended message so it lands harder: {delivered_message}""
+  horniness_overlay:
+    fumble: ""mock horniness""
+shadow_corruption:
+  madness:
+    fumble: ""mock madness""
 ";
             var instructions = StatDeliveryInstructions.LoadFrom(yamlContent);
 

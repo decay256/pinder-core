@@ -11,7 +11,7 @@ namespace Pinder.Core.Conversation
     /// A no-op LLM adapter that returns hardcoded placeholder responses.
     /// Used for unit testing and standalone runs without an actual LLM provider.
     /// </summary>
-    public sealed class NullLlmAdapter : ILlmAdapter, IStatefulLlmAdapter
+    public class NullLlmAdapter : ILlmAdapter, IStatefulLlmAdapter
     {
         /// <summary>
         /// Returns 4 generic dialogue options, one per stat family
@@ -33,14 +33,14 @@ namespace Pinder.Core.Conversation
         /// <summary>
         /// Returns a minimal placeholder DateeResponse with "..." text and no signals.
         /// </summary>
-        public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, CancellationToken ct = default)
+        public virtual Task<DateeResponse> GetDateeResponseAsync(DateeContext context, CancellationToken ct = default)
         {
             ct.ThrowIfCancellationRequested();
             return Task.FromResult(new DateeResponse("..."));
         }
 
         /// <inheritdoc />
-        public Task<StatefulDateeResult> GetDateeResponseAsync(
+        public virtual Task<StatefulDateeResult> GetDateeResponseAsync(
             DateeContext context,
             IReadOnlyList<ConversationMessage> history,
             CancellationToken cancellationToken = default)
@@ -69,7 +69,7 @@ namespace Pinder.Core.Conversation
         /// <summary>
         /// Returns a placeholder steering question.
         /// </summary>
-        public Task<string> GetSteeringQuestionAsync(SteeringContext context, CancellationToken ct = default)
+        public virtual Task<string> GetSteeringQuestionAsync(SteeringContext context, CancellationToken ct = default)
         {
             ct.ThrowIfCancellationRequested();
             return Task.FromResult("so... when are we actually doing this?");

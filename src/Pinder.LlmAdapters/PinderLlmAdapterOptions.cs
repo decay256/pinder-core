@@ -71,5 +71,10 @@ namespace Pinder.LlmAdapters
         /// Optional callback invoked when an overlay or steering rewrite degraded, failed, or was skipped.
         /// </summary>
         public System.Action<OverlayDegradedEvent>? OnOverlayDegraded { get; set; }
+
+        /// <summary>
+        /// A default callback used when OnOverlayDegraded is null.
+        /// </summary>
+        public static System.Action<OverlayDegradedEvent>? DefaultOnOverlayDegraded { get; set; }
     }
 }

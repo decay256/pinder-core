@@ -317,8 +317,11 @@ namespace Pinder.Core.Tests
 
             var session = new GameSession(player, datee, llm, dice, new NullTrapRegistry(), config);
 
-            // Wait should not throw
+            int initialTurn = session.State.TurnNumber;
             session.Wait();
+
+            Assert.Equal(initialTurn + 1, session.State.TurnNumber);
+            Assert.False(session.IsEnded);
         }
 
         // ---- Helpers ----

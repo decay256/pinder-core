@@ -56,5 +56,10 @@ namespace Pinder.Core.Interfaces
         {
             FailureKind = failureKind;
         }
+
+        public override string ToString()
+        {
+            return $"[TransportFailureDetails] FailureKind: {FailureKind}\n{base.ToString()}";
+        }
     }
 }
