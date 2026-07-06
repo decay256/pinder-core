@@ -209,5 +209,19 @@ OPTION_3 [STAT: Charm] ""A charm"" [CALLBACK: none] [COMBO: none] [TELL_BONUS: n
             var resultStats = result.Select(r => r.Stat).Distinct().ToList();
             Assert.Equal(4, resultStats.Count);
         }
+
+        [Fact]
+        public void ParseDialogueOptionsText_MultilineOptionText_ParsesCorrectly()
+        {
+            var input = @"OPTION_1 [STAT: Charm] ""Line 1
+Line 2
+Line 3"" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
+OPTION_2 [STAT: Wit] ""Option 2 text"" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]";
+
+            var result = DialogueOptionParsers.ParseDialogueOptionsText(input, new[] { StatType.Charm, StatType.Wit });
+            Assert.Equal(2, result.Length);
+            Assert.Equal(StatType.Charm, result[0].Stat);
+            Assert.Equal("Line 1\nLine 2\nLine 3", result[0].IntendedText.Replace("\r", "")); // normalize newlines for cross-platform
+        }
     }
 }

@@ -47,7 +47,7 @@ namespace Pinder.LlmAdapters.Anthropic
         // the line reconstructs the complete text, inner quotes included.
         private static readonly Regex QuotedTextRegex = new Regex(
             @"""(.+)""",
-            RegexOptions.Compiled);
+            RegexOptions.Compiled | RegexOptions.Singleline);
 
         // Minimum length (after meta-prefix stripping/trim) for a parsed option
         // to be treated as a playable dialogue line. Degenerate stubs such as
