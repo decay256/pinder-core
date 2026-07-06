@@ -40,3 +40,6 @@ strings:
   character_sheet.unspent_skill_points_count: "{count} unspent skill points"
   character_sheet.points_available: "Points available: {count}"
   character_sheet.stat_allocated: "{label}: {base} (+{allocated} from level up)"
+  character_sheet.max_level: "Max Level"
+  character_sheet.xp_remaining: "{xp} XP remaining"
+  character_sheet.cash_label: "Cash:"

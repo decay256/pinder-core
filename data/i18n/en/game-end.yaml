@@ -18,3 +18,9 @@ strings:
   game_end.final_shadow_growth_heading: "⚫ Final Shadow Growth"
   game_end.play_again_button: "↺ Play Again"
   game_end.view_log_button: "📋 View Full Log"
+
+  # XP Progression Panel strings
+  game_end.loading_xp: "Loading XP progression..."
+  game_end.xp_progression: "XP Progression"
+  game_end.level_label: "Level {level}"
+  game_end.level_up_toast: "✨ LEVEL UP! +1 Skill Point Granted ✨"
