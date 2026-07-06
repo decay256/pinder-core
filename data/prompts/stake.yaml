@@ -16,8 +16,6 @@ schema_version: 1
 
 prompts:
   stake:
-    temperature: 0.9
-    max_tokens: 300
     system_prompt: >-
       You are a sentence-completion engine for a comedy hookup-app simulator where the protagonists are sentient penises.
       Read the character profile and produce exactly 15 lines — one for each numbered stem below — written in the character's first-person voice.
