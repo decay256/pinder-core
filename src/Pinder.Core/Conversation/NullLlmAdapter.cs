@@ -11,13 +11,13 @@ namespace Pinder.Core.Conversation
     /// A no-op LLM adapter that returns hardcoded placeholder responses.
     /// Used for unit testing and standalone runs without an actual LLM provider.
     /// </summary>
-    public sealed class NullLlmAdapter : ILlmAdapter, IStatefulLlmAdapter
+    public class NullLlmAdapter : ILlmAdapter, IStatefulLlmAdapter
     {
         /// <summary>
         /// Returns 4 generic dialogue options, one per stat family
         /// (Charm, Honesty, Wit, Chaos).
         /// </summary>
-        public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, CancellationToken ct = default)
+        public virtual Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, CancellationToken ct = default)
         {
             ct.ThrowIfCancellationRequested();
             var options = new[]
@@ -31,16 +31,16 @@ namespace Pinder.Core.Conversation
         }
 
         /// <summary>
-        /// Returns a minimal placeholder DateeResponse with "..." text and no signals.
+        /// Returns a placeholder DateeResponse with "..." text and no signals.
         /// </summary>
-        public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, CancellationToken ct = default)
+        public virtual Task<DateeResponse> GetDateeResponseAsync(DateeContext context, CancellationToken ct = default)
         {
             ct.ThrowIfCancellationRequested();
             return Task.FromResult(new DateeResponse("..."));
         }
 
         /// <inheritdoc />
-        public Task<StatefulDateeResult> GetDateeResponseAsync(
+        public virtual Task<StatefulDateeResult> GetDateeResponseAsync(
             DateeContext context,
             IReadOnlyList<ConversationMessage> history,
             CancellationToken cancellationToken = default)
@@ -60,7 +60,7 @@ namespace Pinder.Core.Conversation
         /// <summary>
         /// Always returns null (no narrative beat).
         /// </summary>
-        public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, CancellationToken ct = default)
+        public virtual Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, CancellationToken ct = default)
         {
             ct.ThrowIfCancellationRequested();
             return Task.FromResult<string?>(null);
@@ -69,19 +69,19 @@ namespace Pinder.Core.Conversation
         /// <summary>
         /// Returns a placeholder steering question.
         /// </summary>
-        public Task<string> GetSteeringQuestionAsync(SteeringContext context, CancellationToken ct = default)
+        public virtual Task<string> GetSteeringQuestionAsync(SteeringContext context, CancellationToken ct = default)
         {
             ct.ThrowIfCancellationRequested();
             return Task.FromResult("so... when are we actually doing this?");
         }
 
-        public Task<string> GetHorninessQuestionAsync(HorninessQuestionContext context, CancellationToken ct = default)
+        public virtual Task<string> GetHorninessQuestionAsync(HorninessQuestionContext context, CancellationToken ct = default)
         {
             ct.ThrowIfCancellationRequested();
             return Task.FromResult("so... your place or mine?");
         }
 
-        public Task<string> GetSuccessImprovementAsync(SuccessImprovementContext context, CancellationToken ct = default)
+        public virtual Task<string> GetSuccessImprovementAsync(SuccessImprovementContext context, CancellationToken ct = default)
         {
             ct.ThrowIfCancellationRequested();
             return Task.FromResult(context.DeliveredMessage);
@@ -90,7 +90,7 @@ namespace Pinder.Core.Conversation
         /// <summary>
         /// Returns the message unchanged (no LLM overlay in test mode).
         /// </summary>
-        public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, CancellationToken ct = default)
+        public virtual Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, CancellationToken ct = default)
         {
             ct.ThrowIfCancellationRequested();
             return Task.FromResult(message);
@@ -99,7 +99,7 @@ namespace Pinder.Core.Conversation
         /// <summary>
         /// Returns the message unchanged (no shadow corruption in test mode).
         /// </summary>
-        public Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow, string? archetypeDirective = null, CancellationToken ct = default)
+        public virtual Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow, string? archetypeDirective = null, CancellationToken ct = default)
         {
             ct.ThrowIfCancellationRequested();
             return Task.FromResult(message);
@@ -110,14 +110,14 @@ namespace Pinder.Core.Conversation
         /// Used by the deterministic test harness so engine flow can be exercised
         /// without an actual LLM round-trip.
         /// </summary>
-        public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, CancellationToken ct = default)
+        public virtual Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, CancellationToken ct = default)
         {
             ct.ThrowIfCancellationRequested();
             return Task.FromResult(message);
         }
 
         /// <inheritdoc />
-        public Task<string> ApplyFailureCorruptionAsync(string message, string instruction, StatType stat, FailureTier tier, string? archetypeDirective = null, CancellationToken ct = default)
+        public virtual Task<string> ApplyFailureCorruptionAsync(string message, string instruction, StatType stat, FailureTier tier, string? archetypeDirective = null, CancellationToken ct = default)
         {
             ct.ThrowIfCancellationRequested();
             return Task.FromResult(message);
