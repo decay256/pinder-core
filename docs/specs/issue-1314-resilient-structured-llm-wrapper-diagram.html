@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pinder System Architecture & Control Flow Diagram</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: #020617;
+      min-height: 100vh;
+      padding: 2rem;
+      color: white;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      margin-bottom: 2rem;
+    }
+    
+    .header-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .pulse-dot {
+      width: 12px;
+      height: 12px;
+      background: #34d399;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+    }
+    
+    .subtitle {
+      color: #94a3b8;
+      font-size: 0.875rem;
+      margin-left: 1.75rem;
+    }
+    
+    .diagram-container {
+      background: rgba(15, 23, 42, 0.5);
+      border-radius: 1rem;
+      border: 1px solid #1e293b;
+      padding: 1.5rem;
+      overflow-x: auto;
+    }
+    
+    svg {
+      width: 100%;
+      min-width: 1100px;
+      display: block;
+    }
+    
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    
+    .card {
+      background: rgba(15, 23, 42, 0.5);
+      border-radius: 0.75rem;
+      border: 1px solid #1e293b;
+      padding: 1.25rem;
+    }
+    
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+    
+    .card-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    
+    .card-dot.cyan { background: #22d3ee; }
+    .card-dot.emerald { background: #34d399; }
+    .card-dot.violet { background: #a78bfa; }
+    .card-dot.amber { background: #fbbf24; }
+    .card-dot.rose { background: #fb7185; }
+    
+    .card h3 {
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+    
+    .card ul {
+      list-style: none;
+      color: #94a3b8;
+      font-size: 0.75rem;
+    }
+    
+    .card li {
+      margin-bottom: 0.5rem;
+      line-height: 1.4;
+    }
+    
+    .footer {
+      text-align: center;
+      margin-top: 1.5rem;
+      color: #475569;
+      font-size: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-row">
+        <div class="pulse-dot"></div>
+        <h1>Pinder Architecture & Control Flow</h1>
+      </div>
+      <p class="subtitle">Speculative Fast-Path vs Synchronous Slow-Path & Proposed Resilience Wrap (Issue #1314)</p>
+    </div>
+
+    <!-- Main Diagram -->
+    <div class="diagram-container">
+      <svg viewBox="0 0 1150 820">
+        <!-- Definitions -->
+        <defs>
+          <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#64748b" />
+          </marker>
+          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.5"/>
+          </pattern>
+        </defs>
+
+        <!-- Background Grid -->
+        <rect width="100%" height="100%" fill="url(#grid)" />
+
+        <!-- Host Box (Tailscale Private Network) -->
+        <rect x="50" y="30" width="1050" height="760" rx="12" fill="rgba(251, 191, 36, 0.02)" stroke="#fbbf24" stroke-width="1" stroke-dasharray="8,4"/>
+        <text x="65" y="48" fill="#fbbf24" font-size="10" font-weight="600">PRODUCTION HOST BOX: app-server-fra1-01 (tail678fd2.ts.net)</text>
+
+        <!-- =================================================================
+             FRONTEND LAYER (Cyan)
+             ================================================================= -->
+        <!-- React Frontend Container -->
+        <rect x="80" y="160" width="180" height="150" rx="8" fill="rgba(8, 51, 68, 0.3)" stroke="#22d3ee" stroke-width="1.5"/>
+        <text x="170" y="185" fill="white" font-size="12" font-weight="700" text-anchor="middle">pinder-frontend</text>
+        <text x="170" y="202" fill="#22d3ee" font-size="9" text-anchor="middle">React SPA (Vite) / Caddy</text>
+        
+        <!-- UI Components Inside Frontend -->
+        <rect x="95" y="215" width="150" height="35" rx="4" fill="#0f172a" stroke="#22d3ee" stroke-width="1"/>
+        <text x="170" y="236" fill="white" font-size="9" font-weight="600" text-anchor="middle">ChatInterface.tsx</text>
+        
+        <rect x="95" y="260" width="150" height="35" rx="4" fill="#0f172a" stroke="#22d3ee" stroke-width="1"/>
+        <text x="170" y="281" fill="white" font-size="9" font-weight="600" text-anchor="middle">useGameSessionState.ts</text>
+
+        <!-- =================================================================
+             BACKEND API / SERVICE LAYER (Emerald)
+             ================================================================= -->
+        <!-- FastAPI Backend (Proxy & Admin Panel) -->
+        <rect x="340" y="60" width="200" height="70" rx="6" fill="rgba(6, 78, 59, 0.3)" stroke="#34d399" stroke-width="1.5"/>
+        <text x="440" y="85" fill="white" font-size="11" font-weight="700" text-anchor="middle">pinder-backend</text>
+        <text x="440" y="102" fill="#34d399" font-size="9" text-anchor="middle">FastAPI App (Python 3.12)</text>
+        <text x="440" y="117" fill="#94a3b8" font-size="8" text-anchor="middle">Admin Panel Content Write-back</text>
+
+        <!-- C# GameApi Service Container (Primary Gameplay Controller) -->
+        <rect x="320" y="160" width="310" height="420" rx="8" fill="rgba(6, 78, 59, 0.2)" stroke="#34d399" stroke-width="2"/>
+        <text x="475" y="185" fill="white" font-size="12" font-weight="700" text-anchor="middle">Pinder.GameApi (.NET 8.0)</text>
+        <text x="475" y="202" fill="#34d399" font-size="9" text-anchor="middle">Primary C# Game Server Instance</text>
+
+        <!-- Components inside GameApi -->
+        <!-- SessionsController -->
+        <rect x="340" y="225" width="270" height="45" rx="4" fill="#0f172a" stroke="#34d399" stroke-width="1"/>
+        <text x="475" y="243" fill="white" font-size="10" font-weight="600" text-anchor="middle">SessionsController.cs</text>
+        <text x="475" y="258" fill="#94a3b8" font-size="8" text-anchor="middle">GET /turn, GET /turn/stream (Acquires streamSlot)</text>
+
+        <!-- ActiveSession (In-Memory Session Manager) -->
+        <rect x="340" y="295" width="270" height="115" rx="4" fill="#0f172a" stroke="#34d399" stroke-width="1"/>
+        <text x="475" y="315" fill="white" font-size="10" font-weight="600" text-anchor="middle">ActiveSession.Turn.cs</text>
+        <text x="475" y="330" fill="#94a3b8" font-size="8" text-anchor="middle">Manages turn Lock semaphore & active cached state</text>
+        
+        <!-- ActiveSession Sub-elements -->
+        <rect x="355" y="342" width="240" height="25" rx="2" fill="rgba(30, 41, 59, 0.5)" stroke="#fbbf24" stroke-width="1"/>
+        <text x="475" y="358" fill="white" font-size="8" font-weight="600" text-anchor="middle">StartNextPrefetch() [Thread.Run]</text>
+
+        <rect x="355" y="372" width="240" height="25" rx="2" fill="rgba(30, 41, 59, 0.5)" stroke="#22d3ee" stroke-width="1"/>
+        <text x="475" y="388" fill="white" font-size="8" font-weight="600" text-anchor="middle">TryAdoptSpeculativeBranchAsync()</text>
+
+        <!-- Proposed Resilient Wrapper Group (Issue #1314) -->
+        <rect x="330" y="425" width="290" height="140" rx="6" fill="rgba(136, 19, 55, 0.1)" stroke="#fb7185" stroke-width="1.5" stroke-dasharray="4,4"/>
+        <text x="340" y="440" fill="#fb7185" font-size="8" font-weight="700">RESILIENCE WRAPPER (Issue #1314)</text>
+
+        <!-- PinderLlmAdapter (Stateless Adapter) -->
+        <rect x="340" y="450" width="270" height="100" rx="4" fill="#0f172a" stroke="#fb7185" stroke-width="1.5"/>
+        <text x="475" y="470" fill="white" font-size="10" font-weight="600" text-anchor="middle">PinderLlmAdapter.cs</text>
+        <text x="475" y="485" fill="#94a3b8" font-size="8" text-anchor="middle">Stateless Wrapper around ILlmTransport calls</text>
+        
+        <!-- Retry Loop Visual -->
+        <rect x="355" y="497" width="240" height="43" rx="2" fill="rgba(136, 19, 55, 0.3)" stroke="#fb7185" stroke-width="1"/>
+        <text x="475" y="513" fill="#fb7185" font-size="8" font-weight="700" text-anchor="middle">3x Stateless Retry Wrapper Loop</text>
+        <text x="475" y="528" fill="#94a3b8" font-size="7.5" text-anchor="middle">Catches LlmContractException, backs off, retries</text>
+
+
+        <!-- =================================================================
+             PINDER ENGINE MODULE (Violet) - Consumed as a git submodule
+             ================================================================= -->
+        <!-- pinder-core Submodule -->
+        <rect x="680" y="160" width="200" height="420" rx="8" fill="rgba(76, 29, 149, 0.1)" stroke="#a78bfa" stroke-width="1.5"/>
+        <text x="780" y="185" fill="white" font-size="12" font-weight="700" text-anchor="middle">pinder-core</text>
+        <text x="780" y="202" fill="#a78bfa" font-size="9" text-anchor="middle">Git Submodule (C# Engine)</text>
+
+        <!-- Inside pinder-core -->
+        <rect x="700" y="225" width="160" height="50" rx="4" fill="#0f172a" stroke="#a78bfa" stroke-width="1"/>
+        <text x="780" y="245" fill="white" font-size="10" font-weight="600" text-anchor="middle">GameSession.cs</text>
+        <text x="780" y="260" fill="#94a3b8" font-size="8" text-anchor="middle">Core session logic &amp; state</text>
+
+        <rect x="700" y="295" width="160" height="50" rx="4" fill="#0f172a" stroke="#a78bfa" stroke-width="1"/>
+        <text x="780" y="315" fill="white" font-size="10" font-weight="600" text-anchor="middle">TurnOrchestrator.cs</text>
+        <text x="780" y="330" fill="#94a3b8" font-size="8" text-anchor="middle">Runs engine math</text>
+
+        <rect x="700" y="365" width="160" height="50" rx="4" fill="#0f172a" stroke="#a78bfa" stroke-width="1"/>
+        <text x="780" y="385" fill="white" font-size="10" font-weight="600" text-anchor="middle">Strict Parsers</text>
+        <text x="780" y="400" fill="#94a3b8" font-size="8" text-anchor="middle">DialogueOptionParsers.cs</text>
+
+        <rect x="700" y="450" width="160" height="100" rx="4" fill="#0f172a" stroke="#a78bfa" stroke-width="1"/>
+        <text x="780" y="472" fill="white" font-size="10" font-weight="600" text-anchor="middle">ILlmTransport</text>
+        <text x="780" y="488" fill="#94a3b8" font-size="8" text-anchor="middle">Transport Abstraction</text>
+        <text x="780" y="508" fill="#fb7185" font-size="7.5" text-anchor="middle">• ThinkingStrippingDecorator</text>
+        <text x="780" y="524" fill="#fb7185" font-size="7.5" text-anchor="middle">• PunctuationNormalizer</text>
+
+
+        <!-- =================================================================
+             DATABASE LAYER (Purple)
+             ================================================================= -->
+        <!-- PostgreSQL Staging Database -->
+        <rect x="680" y="60" width="200" height="70" rx="6" fill="rgba(76, 29, 149, 0.3)" stroke="#a78bfa" stroke-width="1.5"/>
+        <text x="780" y="85" fill="white" font-size="11" font-weight="700" text-anchor="middle">Staging DB (PostgreSQL)</text>
+        <text x="780" y="102" fill="#a78bfa" font-size="9" text-anchor="middle">eigencore-db / pinder_staging</text>
+        <text x="780" y="117" fill="#94a3b8" font-size="8" text-anchor="middle">game_sessions / turn_records tables</text>
+
+
+        <!-- =================================================================
+             EXTERNAL LLM API LAYER (Amber)
+             ================================================================= -->
+        <!-- External LLM Provider API -->
+        <rect x="940" y="295" width="150" height="190" rx="8" fill="rgba(120, 53, 15, 0.2)" stroke="#fbbf24" stroke-width="1.5"/>
+        <text x="1015" y="325" fill="white" font-size="12" font-weight="700" text-anchor="middle">LLM Provider API</text>
+        <text x="1015" y="342" fill="#fbbf24" font-size="9" text-anchor="middle">External Interface</text>
+        
+        <rect x="955" y="365" width="120" height="40" rx="4" fill="#0f172a" stroke="#fbbf24" stroke-width="1"/>
+        <text x="1015" y="388" fill="white" font-size="9" font-weight="600" text-anchor="middle">Gemini 3.5 Flash</text>
+
+        <rect x="955" y="420" width="120" height="40" rx="4" fill="#0f172a" stroke="#fbbf24" stroke-width="1"/>
+        <text x="1015" y="443" fill="white" font-size="9" font-weight="600" text-anchor="middle">Claude 4.5/4.6</text>
+
+
+        <!-- =================================================================
+             CONTROL FLOW ARROWS & ROUTING (CURVED PATHS & LINES)
+             ================================================================= -->
+
+        <!-- 1. Frontend user click option -> API Controller (Cyan Line) -->
+        <path d="M 260 235 L 300 235 Q 315 235 315 240 L 315 245 Q 315 250 330 250 L 338 250" fill="none" stroke="#22d3ee" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <text x="290" y="222" fill="#22d3ee" font-size="8" text-anchor="middle">1. POST /turn</text>
+
+        <!-- 2. Controller -> ActiveSession Resolve (Cyan Line) -->
+        <line x1="475" y1="270" x2="475" y2="290" stroke="#22d3ee" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <text x="480" y="283" fill="#94a3b8" font-size="8">2. Lock Turn</text>
+
+        <!-- 3. SLOW PATH (Sync Resolution Route - Red/Solid Line) -->
+        <!-- ActiveSession -> PinderLlmAdapter -->
+        <path d="M 400 410 L 400 445" fill="none" stroke="#fb7185" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <text x="340" y="430" fill="#fb7185" font-size="8" font-weight="600">3a. SLOW PATH</text>
+
+        <!-- PinderLlmAdapter -> GameSession -> TurnOrchestrator -->
+        <path d="M 610 475 L 640 475 Q 660 475 660 380 Q 660 320 690 320" fill="none" stroke="#fb7185" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <text x="640" y="492" fill="#fb7185" font-size="7.5" text-anchor="middle">3b. StartTurnAsync()</text>
+
+        <!-- TurnOrchestrator -> LlmTransport (SendAsync) -->
+        <path d="M 780 345 L 780 445" fill="none" stroke="#fb7185" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <text x="785" y="440" fill="#94a3b8" font-size="7.5">3c. SendAsync()</text>
+
+        <!-- LlmTransport -> LLM API (Send Payload) -->
+        <line x1="860" y1="500" x2="915" y2="500" stroke="#ff4757" stroke-width="1.5" stroke-dasharray="3,3"/>
+        <path d="M 915 500 L 915 450" fill="none" stroke="#ff4757" stroke-width="1.5" stroke-dasharray="3,3" marker-end="url(#arrowhead)"/>
+        <text x="890" y="515" fill="#ff4757" font-size="8">3d. 10-30s API Block</text>
+
+        <!-- LLM Response -> Transport -> Strict Parsers -->
+        <path d="M 940 445 L 900 445 Q 880 445 880 390 L 865 390" fill="none" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <text x="900" y="436" fill="#94a3b8" font-size="7.5" text-anchor="middle">Return Text</text>
+
+        <!-- Parser parsing evaluation -->
+        <path d="M 700 390 L 615 460" fill="none" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <text x="660" y="415" fill="#94a3b8" font-size="8" text-anchor="middle">3e. Parse / Validate</text>
+
+        <!-- Error feedback loop inside proposed resilience wrap -->
+        <path d="M 340 513 L 305 513 Q 295 513 295 530 L 295 545 Q 295 560 315 560 Q 330 560 338 535" fill="none" stroke="#fb7185" stroke-width="1.2" stroke-dasharray="2,2" marker-end="url(#arrowhead)"/>
+        <text x="250" y="534" fill="#fb7185" font-size="7.5">If Parse Fails: Retry up to 3x (Stateless)</text>
+
+
+        <!-- 4. FAST PATH (Speculative Fast-Path Route - Blue/Dashed Line) -->
+        <!-- Background Task Pre-spawning (Fast path active) -->
+        <path d="M 610 358 L 650 358 Q 665 358 665 250 L 690 250" fill="none" stroke="#34d399" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrowhead)"/>
+        <text x="645" y="348" fill="#34d399" font-size="8" text-anchor="middle">4a. Background Prefetch</text>
+
+        <!-- Speculative Adoption (Adopts immediately from RAM clone) -->
+        <path d="M 230 278 L 290 278 Q 305 278 305 385 L 350 385" fill="none" stroke="#22d3ee" stroke-width="1.5" stroke-dasharray="5,2" marker-end="url(#arrowhead)"/>
+        <text x="280" y="293" fill="#22d3ee" font-size="8">4b. Speculative Adoption (Instant &lt;100ms)</text>
+
+
+        <!-- 5. DB Persistence (Violet Line) -->
+        <path d="M 610 240 L 655 240 Q 665 240 665 95 L 678 95" fill="none" stroke="#a78bfa" stroke-width="1.2" marker-end="url(#arrowhead)"/>
+        <text x="655" y="145" fill="#a78bfa" font-size="8" text-anchor="middle" transform="rotate(-90 655 145)">5. Write Session &amp; Turns</text>
+
+
+        <!-- =================================================================
+             LEGEND (Clean and Separated)
+             ================================================================= -->
+        <rect x="70" y="630" width="1010" height="130" rx="8" fill="rgba(15, 23, 42, 0.7)" stroke="#1e293b" stroke-width="1"/>
+        <text x="85" y="650" fill="white" font-size="10" font-weight="700">Legend &amp; Flow Semantics</text>
+        
+        <!-- Component Types -->
+        <rect x="85" y="665" width="16" height="10" rx="2" fill="rgba(8, 51, 68, 0.4)" stroke="#22d3ee" stroke-width="1"/>
+        <text x="108" y="674" fill="#94a3b8" font-size="8">Frontend component (React)</text>
+        
+        <rect x="85" y="682" width="16" height="10" rx="2" fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1"/>
+        <text x="108" y="691" fill="#94a3b8" font-size="8">Backend component (C# / Python API)</text>
+
+        <rect x="85" y="699" width="16" height="10" rx="2" fill="rgba(76, 29, 149, 0.4)" stroke="#a78bfa" stroke-width="1"/>
+        <text x="108" y="708" fill="#94a3b8" font-size="8">pinder-core engine submodule</text>
+
+        <rect x="85" y="716" width="16" height="10" rx="2" fill="rgba(120, 53, 15, 0.2)" stroke="#fbbf24" stroke-width="1"/>
+        <text x="108" y="725" fill="#94a3b8" font-size="8">External model API providers</text>
+
+        <!-- Flow lines -->
+        <line x1="430" y1="670" x2="455" y2="670" stroke="#fb7185" stroke-width="1.5"/>
+        <text x="465" y="674" fill="#94a3b8" font-size="8">Slow Path execution (Real-time sync LLM block)</text>
+
+        <line x1="430" y1="687" x2="455" y2="687" stroke="#22d3ee" stroke-width="1.5" stroke-dasharray="5,2"/>
+        <text x="465" y="691" fill="#94a3b8" font-size="8">Fast Path execution (Adopts background speculative prefetch)</text>
+
+        <line x1="430" y1="704" x2="455" y2="704" stroke="#fb7185" stroke-width="1.2" stroke-dasharray="2,2"/>
+        <text x="465" y="708" fill="#94a3b8" font-size="8">Proposed stateless error recovery retry flow (Issue #1314)</text>
+
+        <!-- Special Highlights -->
+        <rect x="800" y="665" width="16" height="10" rx="2" fill="rgba(136, 19, 55, 0.3)" stroke="#fb7185" stroke-width="1"/>
+        <text x="825" y="674" fill="#94a3b8" font-size="8">Resilience Wrapper boundaries</text>
+
+        <rect x="800" y="682" width="16" height="10" rx="2" fill="rgba(251, 191, 36, 0.02)" stroke="#fbbf24" stroke-width="1" stroke-dasharray="4,2"/>
+        <text x="825" y="691" fill="#94a3b8" font-size="8">AWS Staging host boundaries</text>
+        
+        <text x="85" y="745" fill="#e2e8f0" font-size="8.5" font-weight="600">CRITICAL PATH VULNERABILITY FIXED BY #1314: If LLM output fails syntax rules, the wrapper intercepts the parsing exception, stashes the failure as telemetry, and transparently retries, leaving game history unpolluted.</text>
+      </svg>
+    </div>
+
+    <!-- Info Cards explaining the details -->
+    <div class="cards">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot cyan"></div>
+          <h3>1. Why the Slow Path Wedges</h3>
+        </div>
+        <ul>
+          <li>• **Synchronous LLM Block:** On the slow path, turn resolution runs in real time, locking the session's stream-slot for 10-30s during the API call.</li>
+          <li>• **Reconnection Rejections (HTTP 429):** Any transient client network drop triggers a reconnect that gets rejected with a 429 because the background lock is still held.</li>
+          <li>• **Hardcoded Rejection (HTTP 400):** The frontend hard-maps all stream errors to 400 Bad Requests, aborts immediately, and drops the game options panel, wedging the player interface.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot emerald"></div>
+          <h3>2. Why Fast-Gameplay Succeeds</h3>
+        </div>
+        <ul>
+          <li>• **Speculative Pre-generation:** While the player is reading, the backend uses parallel execution branches to pre-generate the next turn's outcomes.</li>
+          <li>• **Instant Adoption (&lt;100ms):** When the player clicks an option, the pre-generated outcome is instantly adopted, removing any active LLM blocking times.</li>
+          <li>• **Connection Immunity:** Because the resolve resolves instantly, there is virtually zero time window for network timeouts or browser connection drops.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot rose"></div>
+          <h3>3. The New Resilience Wrapper (Issue #1314)</h3>
+        </div>
+        <ul>
+          <li>• **Stateless Interception:** Wraps `PinderLlmAdapter.cs` calls in a 3x retry loop. Intermediate formatting failures (e.g. chain-of-thought bleed) are captured safely in memory.</li>
+          <li>• **Unpolluted History:** If attempts 1 or 2 fail, the invalid output is discarded. Only successful, fully-validated outputs are written to the database history or session state.</li>
+          <li>• **Exponential Backoff:** Configurable `MaxContractViolationRetries` and `ContractViolationBackoffMs` parameters ensure graceful delays between attempts, keeping active play unblocked.</li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="footer">
+      Pinder Core Engineering Team • Built on Monday, July 06, 2026
+    </p>
+  </div>
+</body>
+</html>
