@@ -171,5 +171,57 @@ namespace Pinder.Core.Tests
             Assert.Contains("Stake line", profile.StakeLines);
             Assert.Equal("angst", profile.PsychiatricDiagnosis["derived_feeling"]);
         }
+
+        [Fact]
+        public async Task TherapistDiagnosisGenerator_WithMalformedJson_ReturnsEmptyDictionary()
+        {
+            var testDir = Path.Combine(Directory.GetCurrentDirectory(), "TestData_Prompts_" + Guid.NewGuid());
+            Directory.CreateDirectory(testDir);
+            File.WriteAllText(Path.Combine(testDir, "diagnosis.yaml"), "schema_version: 1\nprompts:\n  diagnosis:\n    system_prompt: \"SYSTEM PROMPT\"\n    user_template: \"USER {backstory} - {stakes}\"");
+
+            var transport = new FakeLlmTransport();
+            transport.ResponseToReturn = "Malformed JSON string that will fail to deserialize";
+            
+            var catalog = PromptCatalog.LoadFromDirectory(testDir);
+            var generator = new LlmTherapistDiagnosisGenerator(transport, catalog);
+
+            var backstory = new Dictionary<string, BackstoryFact>();
+            var stakes = new List<string>();
+
+            // Act & Assert (Should not throw, but return empty dictionary)
+            var result = await generator.GenerateAsync("Char", "he/him", "bio", backstory, stakes);
+
+            Assert.NotNull(result);
+            Assert.Empty(result);
+            
+            Directory.Delete(testDir, true);
+        }
+
+        [Fact]
+        public async Task TherapistDiagnosisGenerator_WithValidJsonButWhitespaceKeysOrValues_TrimsAndFiltersThem()
+        {
+            var testDir = Path.Combine(Directory.GetCurrentDirectory(), "TestData_Prompts_" + Guid.NewGuid());
+            Directory.CreateDirectory(testDir);
+            File.WriteAllText(Path.Combine(testDir, "diagnosis.yaml"), "schema_version: 1\nprompts:\n  diagnosis:\n    system_prompt: \"SYSTEM PROMPT\"\n    user_template: \"USER {backstory} - {stakes}\"");
+
+            var transport = new FakeLlmTransport();
+            transport.ResponseToReturn = @"{ ""valid_key"": ""  some value with whitespace  "", "" "": ""value with empty key"", ""empty_value"": ""   "" }";
+            
+            var catalog = PromptCatalog.LoadFromDirectory(testDir);
+            var generator = new LlmTherapistDiagnosisGenerator(transport, catalog);
+
+            var backstory = new Dictionary<string, BackstoryFact>();
+            var stakes = new List<string>();
+
+            // Act
+            var result = await generator.GenerateAsync("Char", "he/him", "bio", backstory, stakes);
+
+            // Assert
+            Assert.Single(result);
+            Assert.True(result.ContainsKey("valid_key"));
+            Assert.Equal("some value with whitespace", result["valid_key"]);
+            
+            Directory.Delete(testDir, true);
+        }
     }
 }

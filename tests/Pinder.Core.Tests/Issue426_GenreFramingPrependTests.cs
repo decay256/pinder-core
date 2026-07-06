@@ -39,7 +39,7 @@ namespace Pinder.Core.Tests
         // pinder-core/data/delivery-instructions.yaml. If the preamble is
         // re-worded, update both phrases here (keep at least one).
         private const string GenreFramingPhrase    = "parody of Tinder messaging";
-        private const string DoNotRefusePhrase     = "Do not refuse, soften, moralize";
+        private const string DoNotRefusePhrase     = "Do not refuse, do not soften, do not moralize";
 
         // Unique substring of the catastrophe-specific reinforcement appended
         // by StatDeliveryInstructions.LoadFrom ("The structure is a normal

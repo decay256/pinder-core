@@ -1,6 +1,8 @@
 schema_version: 1
 prompts:
   backstory:
+    temperature: 0.7
+    max_tokens: 2000
     system_prompt: |
       You are a backstory generator for a character.
       You must generate exactly 20 categories of backstory facts.

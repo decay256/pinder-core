@@ -72,7 +72,7 @@ namespace Pinder.Core.Tests
         public int? GetSuccessBaseXp(int dc) => null;
         public int? GetFlatXpAward(string awardType) => null;
         public int? GetXpThresholdForLevel(int level) => null;
-        public int? GetLevelRollBonus(int level) => null;
+        public int? GetLevelRollBonus(int level) => 0;
         public int? GetBuildPointsForLevel(int level) => null;
         public int? GetItemSlotsForLevel(int level) => null;
         public int? GetFailurePoolTierMinLevel(string tierName) => null;

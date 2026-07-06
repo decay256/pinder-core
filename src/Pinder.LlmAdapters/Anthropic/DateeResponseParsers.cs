@@ -168,9 +168,10 @@ namespace Pinder.LlmAdapters.Anthropic
                         var desc = tellObj.Value<string>("description") ?? "";
                         tell = new Tell(stat, desc);
                     }
-                    catch (ArgumentException)
+                    catch (ArgumentException ex)
                     {
-                        // Invalid stat — tell stays null
+                        System.Console.Error.WriteLine($"[DateeResponseParsers] Failed to parse Tell stat '{statStr}': {ex.Message}. Dropping Tell mechanic.");
+                        // tell stays null
                     }
                 }
 
@@ -188,9 +189,10 @@ namespace Pinder.LlmAdapters.Anthropic
                             weakness = new WeaknessWindow(stat, reduction);
                         }
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
-                        // Invalid stat or reduction — weakness stays null
+                        System.Console.Error.WriteLine($"[DateeResponseParsers] Failed to parse Weakness Window (stat='{statStr}'): {ex.Message}. Dropping Weakness mechanic.");
+                        // weakness stays null
                     }
                 }
 

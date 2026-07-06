@@ -124,6 +124,58 @@ namespace Pinder.Core.Tests
             Assert.Equal(expectedDeterministic, result.DeliveredMessage);
         }
 
+        [Fact]
+        public async Task ApplyFailureCorruption_ThrowsException_WhenLlmThrowsNonRetryableException()
+        {
+            // 1. Setup GameSession with a mock LLM adapter configured to throw a non-retryable exception
+            var llm = new MockLlmAdapter1311 { ExceptionToThrow = new InvalidOperationException("Non-retryable validation error") };
+            
+            var dice = new FixedDice(1, 1, 50);
+            var statInstructions = new MockStatDeliveryInstructions("REWRITE WITH DISASTER STYLE");
+            var config = new GameSessionConfig(
+                clock: TestHelpers.MakeClock(),
+                statDeliveryInstructions: statInstructions
+            );
+
+            var player = MakeProfile("Sable");
+            var datee = MakeProfile("Brick");
+
+            var session = new GameSession(player, datee, llm, dice, new NullTrapRegistry(), config);
+
+            await session.StartTurnAsync();
+
+            // 2. Resolve turn should propagate the non-retryable exception out of the session
+            await Assert.ThrowsAsync<InvalidOperationException>(() => session.ResolveTurnAsync(0));
+        }
+
+        [Fact]
+        public async Task ApplyFailureCorruption_FallsBackToDeliveryOverlay_WhenLlmThrowsRetryableException()
+        {
+            // 1. Setup GameSession with a mock LLM adapter configured to throw a retryable exception
+            var llm = new MockLlmAdapter1311 { ExceptionToThrow = new LlmTransportException("Rate limit exceeded!", LlmFailureKind.RateLimited) };
+            
+            var dice = new FixedDice(1, 1, 50);
+            var statInstructions = new MockStatDeliveryInstructions("REWRITE WITH DISASTER STYLE");
+            var config = new GameSessionConfig(
+                clock: TestHelpers.MakeClock(),
+                statDeliveryInstructions: statInstructions
+            );
+
+            var player = MakeProfile("Sable");
+            var datee = MakeProfile("Brick");
+
+            var session = new GameSession(player, datee, llm, dice, new NullTrapRegistry(), config);
+
+            await session.StartTurnAsync();
+            var result = await session.ResolveTurnAsync(0);
+
+            // 2. Verify that it fell back to deterministic overlay instead of throwing
+            Assert.False(result.Roll.IsSuccess);
+            string expectedDeterministic = DeliveryOverlay.Apply("Test Option", result.Roll.Tier, result.Roll.MissMargin, StatType.Charm);
+            expectedDeterministic = Pinder.Core.Text.MarkdownSanitizer.Strip(expectedDeterministic);
+            Assert.Equal(expectedDeterministic, result.DeliveredMessage);
+        }
+
         // ======================== Helpers & Mocks ========================
 
         private static CharacterProfile MakeProfile(string name, int allStats = 2, ActiveArchetype? activeArchetype = null)
@@ -164,6 +216,7 @@ namespace Pinder.Core.Tests
             
             public string ReturnValue { get; set; } = "Corrupted by LLM!";
             public bool ShouldThrow { get; set; }
+            public Exception? ExceptionToThrow { get; set; }
 
             public Task<string> ApplyFailureCorruptionAsync(
                 string message, 
@@ -179,6 +232,11 @@ namespace Pinder.Core.Tests
                 CapturedStat = stat;
                 CapturedTier = tier;
                 CapturedArchetypeDirective = archetypeDirective;
+
+                if (ExceptionToThrow != null)
+                {
+                    throw ExceptionToThrow;
+                }
 
                 if (ShouldThrow)
                 {

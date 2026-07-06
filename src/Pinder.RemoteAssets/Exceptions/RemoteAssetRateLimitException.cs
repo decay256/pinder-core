@@ -23,5 +23,10 @@ namespace Pinder.RemoteAssets.Exceptions
         {
             RetryAfter = retryAfter;
         }
+
+        public override string ToString()
+        {
+            return $"[RemoteAssetRateLimitFailureDetails] RetryAfter: {RetryAfter}\n{base.ToString()}";
+        }
     }
 }

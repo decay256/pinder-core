@@ -13,8 +13,8 @@ namespace Pinder.SessionSetup
     {
         public sealed class Options
         {
-            public double Temperature { get; set; } = 0.7;
-            public int MaxTokens { get; set; } = 2000;
+            public double Temperature { get; set; } = GeneratorDefaultConfigs.Backstory.Temperature;
+            public int MaxTokens { get; set; } = GeneratorDefaultConfigs.Backstory.MaxTokens;
         }
 
         private readonly ILlmTransport _transport;
@@ -36,13 +36,18 @@ namespace Pinder.SessionSetup
             _catalog = catalog ?? PromptTemplates.Catalog
                 ?? throw new InvalidOperationException("PromptTemplates.Catalog is not wired. Call PromptWiring.Wire() at startup.");
 
-            // Enforce that the catalog contains the required key
+            // Enforce that the catalog contains the required key and parameters
             var entry = _catalog.TryGet("backstory")
                 ?? throw new InvalidOperationException("prompt-catalog: missing required key 'backstory'.");
             if (string.IsNullOrWhiteSpace(entry.SystemPrompt))
                 throw new InvalidOperationException("prompt-catalog: key 'backstory' has no system_prompt. Check the yaml file.");
             if (string.IsNullOrWhiteSpace(entry.UserTemplate))
                 throw new InvalidOperationException("prompt-catalog: key 'backstory' has no user_template. Check the yaml file.");
+
+            if (!entry.Temperature.HasValue)
+                throw new InvalidOperationException("prompt-catalog: key 'backstory' has no temperature. Check the yaml file.");
+            if (!entry.MaxTokens.HasValue)
+                throw new InvalidOperationException("prompt-catalog: key 'backstory' has no max_tokens. Check the yaml file.");
         }
 
         public async Task<Dictionary<string, BackstoryFact>> GenerateAsync(
@@ -74,11 +79,18 @@ namespace Pinder.SessionSetup
             string systemPrompt = PromptCatalog.Substitute(systemPromptTemplate, values);
             string userMessage = PromptCatalog.Substitute(userTemplate, values);
 
+            double temp = _options.Temperature != GeneratorDefaultConfigs.Backstory.Temperature
+                ? _options.Temperature
+                : entry.Temperature!.Value;
+            int maxTok = _options.MaxTokens != GeneratorDefaultConfigs.Backstory.MaxTokens
+                ? _options.MaxTokens
+                : entry.MaxTokens!.Value;
+
             var responseJson = await _transport.SendAsync(
                 systemPrompt,
                 userMessage,
-                _options.Temperature,
-                _options.MaxTokens,
+                temp,
+                maxTok,
                 "backstory",
                 cancellationToken);
 

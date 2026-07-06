@@ -53,6 +53,8 @@ namespace Pinder.Core.Tests.SessionSetup
                 File.WriteAllText(Path.Combine(catalogDir, "outfit.yaml"), @"schema_version: 1
 prompts:
   outfit:
+    temperature: 0.8
+    max_tokens: 250
     system_prompt: 'CUSTOM SYSTEM PROMPT {playerName}'
     user_template: 'CUSTOM USER {playerName} wears {playerItems} datee {dateeName} wears {dateeItems}'
 ");

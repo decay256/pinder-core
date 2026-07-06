@@ -136,7 +136,7 @@ namespace Pinder.Core.Tests
     [Trait("Category", "Core")]
     public class XpTrackingGameSessionTests
     {
-        // AC-2: Normal success DC ≤ 13, Medium risk → 5*1.5=8 XP (Success_DC_Low)
+        // AC-2: Normal success DC ≤ 16, Medium risk → 5*1.5=8 XP (Success_DC_Low)
         [Fact]
         public async Task ResolveTurnAsync_SuccessDcLow_Awards5Xp()
         {
@@ -151,11 +151,11 @@ namespace Pinder.Core.Tests
             Assert.Equal(10, session.TotalXpEarned);
         }
 
-        // AC-2: Normal success DC 14-17, Hard risk → 10*2=20 XP (Success_DC_Mid)
+        // AC-2: Normal success DC 17-20, Hard risk → 10*2=20 XP (Success_DC_Mid)
         [Fact]
         public async Task ResolveTurnAsync_SuccessDcMid_Awards10Xp()
         {
-            // Datee has +1 → DC = 14, need=14-3=11 → Hard (2x), base 10 → 20
+            // Datee has +1 → DC = 17, need=17-3=14 → Hard (2x), base 10 → 20
             var session = MakeSession(diceRoll: 18, dateeStatValue: 1);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
@@ -165,7 +165,7 @@ namespace Pinder.Core.Tests
             Assert.Equal(20, result.XpEarned); // 10 * 2.0 = 20
         }
 
-        // AC-2: Normal success DC ≥ 18, Hard risk → 15*2=30 XP (Success_DC_High)
+        // AC-2: Normal success DC ≥ 21, Hard risk → 15*2=30 XP (Success_DC_High)
         [Fact]
         public async Task ResolveTurnAsync_SuccessDcHigh_Awards15Xp()
         {
@@ -176,7 +176,7 @@ namespace Pinder.Core.Tests
 
             Assert.True(result.Roll.IsSuccess);
             Assert.False(result.Roll.IsNatTwenty);
-            Assert.True(result.Roll.DC >= 18);
+            Assert.True(result.Roll.DC >= 21);
             Assert.Equal(45, result.XpEarned); // 15 * 3.0 = 45
         }
 

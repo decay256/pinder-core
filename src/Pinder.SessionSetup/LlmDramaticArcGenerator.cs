@@ -20,36 +20,29 @@ namespace Pinder.SessionSetup
     /// </remarks>
     public sealed class LlmDramaticArcGenerator : IDramaticArcGenerator
     {
-        private const string DefaultSystemPrompt =
-            "You are a dramaturge for a comedy dating-RPG. Given two characters (their names, " +
-            "psychological stakes, and bios), sketch a light dramatic arc for their conversation " +
-            "as soft direction — setup, escalation, a turning point, and a possible resolution — " +
-            "in 3-5 sentences of plain prose. This is flavour and direction, NOT a script: the " +
-            "actual conversation is driven by a simulation and the characters' own choices, so " +
-            "never dictate specific lines or outcomes, and never contradict where the interaction " +
-            "actually goes. Plain prose only: no markdown, no headings, no lists, no bold/italics.";
-
-        private const string DefaultUserTemplate =
-            "Player: {playerName}\n" +
-            "Psychological stake: {playerStake}\n" +
-            "Bio: {playerBio}\n\n" +
-            "Datee: {dateeName}\n" +
-            "Psychological stake: {dateeStake}\n" +
-            "Bio: {dateeBio}\n\n" +
-            "Sketch a light dramatic arc for their conversation in 3-5 sentences of plain prose: " +
-            "setup, escalation, a turning point, and a possible resolution. Remember: this is " +
-            "soft direction only — the actual conversation will unfold based on the simulation " +
-            "and the characters' choices, so do not prescribe specific dialogue or fixed outcomes.";
-
         private readonly ILlmTransport _transport;
         private readonly Options _options;
-        private readonly PromptCatalog? _catalog;
+        private readonly PromptCatalog _catalog;
 
         public LlmDramaticArcGenerator(ILlmTransport transport, Options? options = null, PromptCatalog? catalog = null)
         {
             _transport = transport ?? throw new ArgumentNullException(nameof(transport));
             _options = options ?? new Options();
-            _catalog = catalog;
+            _catalog = catalog ?? PromptTemplates.Catalog
+                ?? throw new InvalidOperationException("PromptTemplates.Catalog is not wired. Call PromptWiring.Wire() at startup.");
+
+            // Enforce that the catalog contains the required key and parameters
+            var entry = _catalog.TryGet("dramatic_arc")
+                ?? throw new InvalidOperationException("prompt-catalog: missing required key 'dramatic_arc'.");
+            if (string.IsNullOrWhiteSpace(entry.SystemPrompt))
+                throw new InvalidOperationException("prompt-catalog: key 'dramatic_arc' has no system_prompt. Check the yaml file.");
+            if (string.IsNullOrWhiteSpace(entry.UserTemplate))
+                throw new InvalidOperationException("prompt-catalog: key 'dramatic_arc' has no user_template. Check the yaml file.");
+
+            if (!entry.Temperature.HasValue)
+                throw new InvalidOperationException("prompt-catalog: key 'dramatic_arc' has no temperature. Check the yaml file.");
+            if (!entry.MaxTokens.HasValue)
+                throw new InvalidOperationException("prompt-catalog: key 'dramatic_arc' has no max_tokens. Check the yaml file.");
         }
 
         /// <summary>
@@ -72,15 +65,9 @@ namespace Pinder.SessionSetup
                 throw new ArgumentException("dateeName must not be null or whitespace.", nameof(dateeName));
             // Stakes and bios are allowed to be empty/whitespace (character might not have them yet)
 
-            string systemPrompt = DefaultSystemPrompt;
-            string userTemplate = DefaultUserTemplate;
-
-            var entry = _catalog?.TryGet("dramatic_arc");
-            if (entry != null)
-            {
-                if (entry.SystemPrompt != null) systemPrompt = entry.SystemPrompt;
-                if (entry.UserTemplate != null) userTemplate = entry.UserTemplate;
-            }
+            var entry = _catalog.Get("dramatic_arc");
+            string systemPrompt = entry.SystemPrompt!;
+            string userTemplate = entry.UserTemplate!;
 
             string pStake = string.IsNullOrWhiteSpace(playerStake) ? "(none)" : playerStake;
             string pBio = string.IsNullOrWhiteSpace(playerBio) ? "(none)" : playerBio;
@@ -97,18 +84,20 @@ namespace Pinder.SessionSetup
                 { "dateeBio", dBio }
             };
 
-            if (_catalog != null && entry != null && entry.SystemPrompt != null)
-            {
-                systemPrompt = PromptCatalog.Substitute(systemPrompt, values);
-            }
-            string userMessage = _catalog != null && entry != null
-                ? PromptCatalog.Substitute(userTemplate, values)
-                : BuildUserMessage(playerName, pStake, pBio, dateeName, dStake, dBio);
+            systemPrompt = PromptCatalog.Substitute(systemPrompt, values);
+            string userMessage = PromptCatalog.Substitute(userTemplate, values);
 
             try
             {
+                double temp = _options.Temperature != GeneratorDefaultConfigs.DramaticArc.Temperature
+                    ? _options.Temperature
+                    : entry.Temperature!.Value;
+                int maxTok = _options.MaxTokens != GeneratorDefaultConfigs.DramaticArc.MaxTokens
+                    ? _options.MaxTokens
+                    : entry.MaxTokens!.Value;
+
                 string response = await _transport
-                    .SendAsync(systemPrompt, userMessage, _options.Temperature, _options.MaxTokens, phase: LlmPhase.Synthesis, ct: cancellationToken)
+                    .SendAsync(systemPrompt, userMessage, temp, maxTok, phase: LlmPhase.Synthesis, ct: cancellationToken)
                     .ConfigureAwait(false);
                 string trimmed = (response ?? string.Empty).Trim();
                 if (string.IsNullOrEmpty(trimmed))
@@ -132,35 +121,14 @@ namespace Pinder.SessionSetup
             }
         }
 
-        private static string BuildUserMessage(
-            string playerName, string playerStake, string playerBio,
-            string dateeName, string dateeStake, string dateeBio)
-        {
-            var sb = new StringBuilder();
-            sb.AppendLine($"Player: {playerName}");
-            sb.AppendLine($"Psychological stake: {(string.IsNullOrWhiteSpace(playerStake) ? "(none)" : playerStake)}");
-            sb.AppendLine($"Bio: {(string.IsNullOrWhiteSpace(playerBio) ? "(none)" : playerBio)}");
-            sb.AppendLine();
-            sb.AppendLine($"Datee: {dateeName}");
-            sb.AppendLine($"Psychological stake: {(string.IsNullOrWhiteSpace(dateeStake) ? "(none)" : dateeStake)}");
-            sb.AppendLine($"Bio: {(string.IsNullOrWhiteSpace(dateeBio) ? "(none)" : dateeBio)}");
-            sb.AppendLine();
-            sb.AppendLine(
-                "Sketch a light dramatic arc for their conversation in 3-5 sentences of plain prose: " +
-                "setup, escalation, a turning point, and a possible resolution. Remember: this is " +
-                "soft direction only — the actual conversation will unfold based on the simulation " +
-                "and the characters' choices, so do not prescribe specific dialogue or fixed outcomes.");
-            return sb.ToString();
-        }
-
         /// <summary>Tunable knobs for <see cref="LlmDramaticArcGenerator"/>.</summary>
         public sealed class Options
         {
             /// <summary>Temperature. Default 0.85 — creative but grounded.</summary>
-            public double Temperature { get; set; } = 0.85;
+            public double Temperature { get; set; } = GeneratorDefaultConfigs.DramaticArc.Temperature;
 
-            /// <summary>Max output tokens. Default 300 (paragraph-sized).</summary>
-            public int MaxTokens { get; set; } = 300;
+            /// <summary>Max tokens for dramatic arc generation.</summary>
+            public int MaxTokens { get; set; } = GeneratorDefaultConfigs.DramaticArc.MaxTokens;
 
             /// <summary>
             /// Opt-in callback triggered when generation is degraded (e.g. transport failure or empty output).

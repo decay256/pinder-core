@@ -276,3 +276,44 @@ orderings.
 
 This ensures that even if the conflict resolver misses a case, the engine's
 length floor takes priority over a style-rule hard cap.
+
+---
+
+## Rule Attribution (v1.2 — issue #1310)
+
+As of #1310, the aggregation result retains origin-tracing for every active texting style line. This prevents texting style rules from being treated as anonymous blocks, allowing the engine and the UI to attribute each rule to its source item or anatomy parameter.
+
+### Data Structures
+
+A new type represents an attributed rule line:
+
+```csharp
+public sealed class AttributedTextingStyleLine
+{
+    public string Axis { get; }         // e.g., "emoji", "pacing"
+    public string Value { get; }        // e.g., "ends every sentence with a heart emoji"
+    public string SourceName { get; }   // e.g., "special_shoe6", "trunkCurvature"
+    public string SourceKind { get; }   // "item" or "anatomy"
+
+    public AttributedTextingStyleLine(string axis, string value, string sourceName, string sourceKind);
+}
+```
+
+The `AggregationResult` returned by `TextingStyleAggregator.Aggregate` has been updated to expose:
+
+```csharp
+public sealed class AggregationResult
+{
+    public IReadOnlyList<string> Lines { get; }
+    public IReadOnlyList<ConflictDropEntry> Drops { get; }
+    public IReadOnlyList<AttributedTextingStyleLine> AttributedLines { get; }
+}
+```
+
+### Flow and Integration
+
+1. **Resolution & Attribution:** During aggregation, when a syntax axis is selected from an item or a tone axis is majority-voted from an anatomy parameter group, the aggregator packages the rule along with its `SourceName` and `SourceKind`.
+2. **Conflict Resolution Preservation:** If a rule is dropped during conflict resolution, its corresponding `AttributedTextingStyleLine` is also removed from the final `AttributedLines` list, keeping the list of active lines in perfect sync with `Lines`.
+3. **Propagation:**
+   - The `CharacterProfile` exposes `IReadOnlyList<AttributedTextingStyleLine> AttributedTextingStyleLines` (populated at assembly time).
+   - `CharacterDefinitionLoader` extracts `aggregationResult.AttributedLines` and passes it to the `CharacterProfile` constructor.

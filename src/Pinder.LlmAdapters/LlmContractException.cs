@@ -89,5 +89,18 @@ namespace Pinder.LlmAdapters
             SessionId = sessionId;
             TurnId = turnId;
         }
+
+        public override string ToString()
+        {
+            var baseString = base.ToString();
+            var details = $"[ContractViolationDetails] Phase: {Phase}, Reason: {Reason}, Provider: {Provider ?? "none"}, " +
+                          $"Model: {Model ?? "none"}, Parser: {ParserName ?? "none"}, " +
+                          $"ExpectedOptions: {ExpectedOptionCount?.ToString() ?? "none"}, " +
+                          $"ParsedOptions: {ParsedOptionCount?.ToString() ?? "none"}, " +
+                          $"Options: {OptionCount?.ToString() ?? "none"}, " +
+                          $"Signals: {SignalCount?.ToString() ?? "none"}, " +
+                          $"SessionId: {SessionId ?? "none"}, TurnId: {TurnId?.ToString() ?? "none"}";
+            return $"{details}\n{baseString}";
+        }
     }
 }

@@ -55,11 +55,6 @@ namespace Pinder.Core.Rolls
         /// </summary>
         public int FinalTotal => Total + ExternalBonus;
 
-        /// <summary>Apply an external bonus (callback, tell, combo, momentum). Additive.
-        /// DEPRECATED: Use the externalBonus parameter on RollEngine.Resolve() or ResolveFixedDC() instead.</summary>
-        [System.Obsolete("Use the externalBonus parameter on RollEngine.Resolve() or ResolveFixedDC() instead.")]
-        public void AddExternalBonus(int bonus) { ExternalBonus += bonus; }
-
         /// <summary>DC that had to be beaten.</summary>
         public int DC { get; }
 

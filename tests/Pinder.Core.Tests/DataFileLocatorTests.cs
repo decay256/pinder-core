@@ -47,7 +47,7 @@ namespace Pinder.Core.Tests
         {
             // Root directory has no data+src pair
             string? root = DataFileLocator.FindRepoRoot("/");
-            // May or may not find it depending on system; at minimum shouldn't throw
+            Assert.Null(root);
         }
 
         [Fact]

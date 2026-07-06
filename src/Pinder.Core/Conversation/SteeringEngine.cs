@@ -105,9 +105,10 @@ namespace Pinder.Core.Conversation
                     // generic LLM transport failure.
                     throw;
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // LLM failure should not break the game
+                    // Log the failure to ensure operational awareness while preserving game continuity
+                    System.Console.Error.WriteLine($"[SteeringEngine] GetSteeringQuestionAsync threw an exception: {ex}");
                     steeringQuestion = null;
                     success = false;
                 }

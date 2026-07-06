@@ -214,7 +214,9 @@ namespace Pinder.Core.Tests
             var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             session.AddTopic(new CallbackOpportunity("pizza", 0));
-            // No exception means success
+            
+            Assert.Single(session.State.Topics);
+            Assert.Contains(session.State.Topics, t => t.TopicKey == "pizza");
         }
     }
 }

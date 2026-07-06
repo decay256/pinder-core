@@ -46,9 +46,30 @@ namespace Pinder.SessionSetup
                 cancellationToken);
 
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            var dict = JsonSerializer.Deserialize<Dictionary<string, string>>(llmResponse, options);
-            
-            return dict ?? new Dictionary<string, string>();
+            try
+            {
+                var dict = JsonSerializer.Deserialize<Dictionary<string, string>>(llmResponse, options);
+                if (dict == null || dict.Count == 0)
+                {
+                    return new Dictionary<string, string>();
+                }
+
+                // Validate that keys and values are meaningful and non-empty
+                var validatedDict = new Dictionary<string, string>();
+                foreach (var kvp in dict)
+                {
+                    if (!string.IsNullOrWhiteSpace(kvp.Key) && !string.IsNullOrWhiteSpace(kvp.Value))
+                    {
+                        validatedDict[kvp.Key] = kvp.Value.Trim();
+                    }
+                }
+                return validatedDict;
+            }
+            catch (JsonException)
+            {
+                // Suppress exception or log internally, returning a safe default dictionary
+                return new Dictionary<string, string>();
+            }
         }
     }
 }

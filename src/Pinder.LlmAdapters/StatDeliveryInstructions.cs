@@ -140,7 +140,7 @@ namespace Pinder.LlmAdapters
         public static StatDeliveryInstructions LoadFrom(string yamlContent)
         {
             if (string.IsNullOrWhiteSpace(yamlContent))
-                return new StatDeliveryInstructions(null);
+                throw new ConfigurationException("Delivery instructions YAML content is empty.");
 
             try
             {
@@ -150,60 +150,71 @@ namespace Pinder.LlmAdapters
 
                 var root = deserializer.Deserialize<Dictionary<string, object>>(yamlContent);
                 if (root == null)
-                    return new StatDeliveryInstructions(null);
+                    throw new ConfigurationException("Failed to deserialize delivery instructions root mapping.");
+
+                if (!root.TryGetValue("delivery_instructions", out var diObj) || !(diObj is Dictionary<object, object> statMap) || statMap.Count == 0)
+                    throw new ConfigurationException("Missing or invalid required configuration section: 'delivery_instructions'.");
+
+                if (!root.TryGetValue("shadow_corruption", out var scObj) || !(scObj is Dictionary<object, object> shadowMap) || shadowMap.Count == 0)
+                    throw new ConfigurationException("Missing or invalid required configuration section: 'shadow_corruption'.");
+
+                bool hasHorninessOverlay = false;
+                if (root.TryGetValue("horniness_overlay", out var hoObjDirect) && hoObjDirect is Dictionary<object, object> hoMapDirect && hoMapDirect.Count > 0)
+                {
+                    hasHorninessOverlay = true;
+                }
+                else if (statMap.TryGetValue("horniness_overlay", out var hoObjNested) && hoObjNested is Dictionary<object, object> hoMapNested && hoMapNested.Count > 0)
+                {
+                    hasHorninessOverlay = true;
+                }
+
+                if (!hasHorninessOverlay)
+                    throw new ConfigurationException("Missing or invalid required configuration section: 'horniness_overlay'.");
 
                 var result = new Dictionary<string, Dictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
 
                 // Parse delivery_instructions (flat stat → tier → text)
-                if (root.TryGetValue("delivery_instructions", out var diObj) &&
-                    diObj is Dictionary<object, object> statMap)
+                foreach (var statEntry in statMap)
                 {
-                    foreach (var statEntry in statMap)
+                    string statKey = statEntry.Key?.ToString() ?? "";
+                    var tierDict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+                    if (statEntry.Value is Dictionary<object, object> tierMap)
                     {
-                        string statKey = statEntry.Key?.ToString() ?? "";
-                        var tierDict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-
-                        if (statEntry.Value is Dictionary<object, object> tierMap)
+                        foreach (var tierEntry in tierMap)
                         {
-                            foreach (var tierEntry in tierMap)
-                            {
-                                string tierKey = tierEntry.Key?.ToString() ?? "";
-                                string text = tierEntry.Value?.ToString() ?? "";
-                                if (!string.IsNullOrWhiteSpace(tierKey))
-                                    tierDict[tierKey] = text;
-                            }
+                            string tierKey = tierEntry.Key?.ToString() ?? "";
+                            string text = tierEntry.Value?.ToString() ?? "";
+                            if (!string.IsNullOrWhiteSpace(tierKey))
+                                tierDict[tierKey] = text;
                         }
-
-                        if (!string.IsNullOrWhiteSpace(statKey))
-                            result[statKey] = tierDict;
                     }
+
+                    if (!string.IsNullOrWhiteSpace(statKey))
+                        result[statKey] = tierDict;
                 }
 
                 // Parse shadow_corruption (nested: shadowName → tier → text)
                 // Stored as composite keys "shadow_corruption.{shadowName}" for lookup.
-                if (root.TryGetValue("shadow_corruption", out var scObj) &&
-                    scObj is Dictionary<object, object> shadowMap)
+                foreach (var shadowEntry in shadowMap)
                 {
-                    foreach (var shadowEntry in shadowMap)
+                    string shadowName = shadowEntry.Key?.ToString() ?? "";
+                    if (string.IsNullOrWhiteSpace(shadowName)) continue;
+
+                    var tierDict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+                    if (shadowEntry.Value is Dictionary<object, object> tierMap)
                     {
-                        string shadowName = shadowEntry.Key?.ToString() ?? "";
-                        if (string.IsNullOrWhiteSpace(shadowName)) continue;
-
-                        var tierDict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-
-                        if (shadowEntry.Value is Dictionary<object, object> tierMap)
+                        foreach (var tierEntry in tierMap)
                         {
-                            foreach (var tierEntry in tierMap)
-                            {
-                                string tierKey = tierEntry.Key?.ToString() ?? "";
-                                string text = tierEntry.Value?.ToString() ?? "";
-                                if (!string.IsNullOrWhiteSpace(tierKey) && tierKey != "description")
-                                    tierDict[tierKey] = text;
-                            }
+                            string tierKey = tierEntry.Key?.ToString() ?? "";
+                            string text = tierEntry.Value?.ToString() ?? "";
+                            if (!string.IsNullOrWhiteSpace(tierKey) && tierKey != "description")
+                                tierDict[tierKey] = text;
                         }
-
-                        result["shadow_corruption." + shadowName] = tierDict;
                     }
+
+                    result["shadow_corruption." + shadowName] = tierDict;
                 }
 
                 // Post-process horniness_overlay: prepend shared _genre_framing preamble to each
@@ -242,9 +253,13 @@ namespace Pinder.LlmAdapters
 
                 return new StatDeliveryInstructions(result);
             }
-            catch
+            catch (ConfigurationException)
             {
-                return new StatDeliveryInstructions(null);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new ConfigurationException($"Malformed delivery instructions YAML file layout: {ex.Message}", ex);
             }
         }
     }

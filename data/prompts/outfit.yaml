@@ -1,6 +1,8 @@
 schema_version: 1
 prompts:
   outfit:
+    temperature: 0.8
+    max_tokens: 250
     system_prompt: |
       You are setting the visual scene for a comedy dating-RPG conversation. Given the items both characters are wearing, write a single brief paragraph describing what each is wearing and the visual / aesthetic vibe of the encounter. Keep it grounded and concrete. Respond in plain prose only. Do NOT use markdown formatting of any kind: no headings, no bold or italics, no bullet or numbered lists, no blockquotes, no inline or fenced code. Two to four sentences total — not a list, not a fashion review.
     user_template: |

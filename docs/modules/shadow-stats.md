@@ -7,7 +7,7 @@ The shadow stats system tracks six hidden "dark side" stats (`ShadowStatType`) t
 
 | File / Class | Description |
 |---|---|
-| `src/Pinder.Core/Stats/ShadowStatType.cs` | Enum: `Dread`, `Denial`, `Fixation`, `Madness`, `Overthinking`, `Horniness`. |
+| `src/Pinder.Core/Stats/StatType.cs` | Enum: `Madness`, `Despair`, `Denial`, `Fixation`, `Dread`, `Overthinking`. |
 | `src/Pinder.Core/Stats/SessionShadowTracker.cs` | Tracks per-session shadow stat values; constructed from a `StatBlock`. |
 | `src/Pinder.Core/Stats/StatBlock.cs` | Holds both primary stats and shadow stats as dictionaries. |
 | `src/Pinder.Core/Conversation/GameSession.cs` | Populates `ShadowThresholds` on `DialogueContext`, `DeliveryContext`, and `DateeContext` with **raw** shadow values (not tiers). |
@@ -15,7 +15,7 @@ The shadow stats system tracks six hidden "dark side" stats (`ShadowStatType`) t
 | `src/Pinder.Core/Conversation/DialogueContext.cs` | Carries `ShadowThresholds` (`Dictionary<ShadowStatType, int>?`) to prompt builders. |
 | `src/Pinder.Core/Conversation/DeliveryContext.cs` | Carries `ShadowThresholds` for delivery prompt generation. |
 | `src/Pinder.Core/Conversation/DateeContext.cs` | Carries `ShadowThresholds` for datee prompt generation. |
-| `src/Pinder.LlmAdapters/SessionDocumentBuilder.cs` | `BuildShadowTaintBlock` — emits a `SHADOW STATE` section in prompts when raw shadow values exceed thresholds (e.g., most stats > 5, Horniness > 6). |
+| `src/Pinder.LlmAdapters/SessionDocumentBuilder.cs` | `BuildShadowTaintBlock` — emits a `SHADOW STATE` section in prompts when raw shadow values exceed thresholds (e.g., most stats > 5, Despair > 6). |
 | `tests/Pinder.Core.Tests/Issue307_ShadowTaintRawValueTests.cs` | Tests that `GameSession` passes raw shadow values (not tiers 0-3) in context dictionaries. |
 | `tests/Pinder.LlmAdapters.Tests/Issue307_ShadowTaintFiringTests.cs` | Tests that `SessionDocumentBuilder` fires shadow taint blocks at correct raw-value thresholds. |
 | `tests/Pinder.Core.Tests/MadnessT3UnhingedSpecTests.cs` | Tests for Madness T3 (≥18) unhinged option replacement — covers threshold boundary, stat/text preservation, single/empty options, Fixation T3 interaction. |
@@ -26,7 +26,7 @@ The shadow stats system tracks six hidden "dark side" stats (`ShadowStatType`) t
 
 ### ShadowStatType (enum)
 ```csharp
-public enum ShadowStatType { Dread, Denial, Fixation, Madness, Overthinking, Horniness }
+public enum ShadowStatType { Madness, Despair, Denial, Fixation, Dread, Overthinking }
 ```
 
 ### Context Dictionaries
@@ -39,7 +39,7 @@ public Dictionary<ShadowStatType, int>? ShadowThresholds { get; }
 
 ### SessionDocumentBuilder Taint Thresholds
 - Most shadow stats: taint fires when raw value **> 5**.
-- `Horniness`: taint fires when raw value **> 6**.
+- `Despair`: taint fires when raw value **> 6**.
 - When fired, a `SHADOW STATE` section is injected into dialogue, delivery, and datee prompts.
 
 ### Mechanical Effects (T3)
@@ -57,6 +57,7 @@ Computes success probability margins (`statMod + levelBonus - defenceDC`) for ea
 - Shadow stats are orthogonal to primary stats (`StatType`). They affect prompt generation (taint blocks) and have discrete mechanical effects at tier boundaries (e.g., Denial T3 removes Honesty options, Overthinking T2+ applies SA disadvantage on Read/Recover).
 - `SessionShadowTracker` is optional — when absent, all `ShadowThresholds` are `null` and no taint processing occurs.
 - **Separate player/datee trackers**: `GameSessionConfig` accepts both `playerShadows` and `dateeShadows`. `DeliveryContext` receives the **player's** shadow thresholds; `DateeContext` receives the **datee's** shadow thresholds. When only one tracker is configured, the other context's `ShadowThresholds` is `null`. All-zero shadow values still produce a non-null dictionary (not treated as absent).
+- **Horniness as a separate engine overlay**: Horniness is not a standard shadow stat and is not included in the `ShadowStatType` enum. Instead, it is implemented as a completely separate mechanics engine and overlay system, operating independently of the standard shadow stat tracking framework.
 
 ## Change Log
 | Date | Issue | Summary |

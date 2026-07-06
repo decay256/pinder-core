@@ -111,9 +111,11 @@ namespace Pinder.Core.Tests
         {
             var session = MakeSession(diceValue: 10, saModifier: 0);
 
-            // Should not throw — just a sanity check
+            int xpBefore = session.TotalXpEarned;
             session.Wait();
-            // The spec says Wait earns 0 XP. Covered by the void return type.
+
+            Assert.Equal(xpBefore, session.TotalXpEarned);
+            Assert.Equal(0, session.TotalXpEarned);
         }
 
         // What: AC1 — Wait increments turn number

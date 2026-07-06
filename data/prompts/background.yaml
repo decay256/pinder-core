@@ -14,6 +14,8 @@ schema_version: 1
 
 prompts:
   background:
+    temperature: 0.8
+    max_tokens: 350
     system_prompt: >-
       You are a narrative synthesis engine for a comedy hookup-app simulator where the protagonists are sentient penises.
       Read the character profile below and weave the character's background fragments into a single cohesive narrative paragraph (3-5 sentences).

@@ -86,6 +86,11 @@ namespace Pinder.SessionSetup
                 throw new InvalidOperationException("prompt-catalog: key 'stake' has no system_prompt. Check the yaml file.");
             if (string.IsNullOrWhiteSpace(entry.UserTemplate))
                 throw new InvalidOperationException("prompt-catalog: key 'stake' has no user_template. Check the yaml file.");
+
+            if (!entry.Temperature.HasValue)
+                throw new InvalidOperationException("prompt-catalog: key 'stake' has no temperature. Check the yaml file.");
+            if (!entry.MaxTokens.HasValue)
+                throw new InvalidOperationException("prompt-catalog: key 'stake' has no max_tokens. Check the yaml file.");
         }
 
         /// <summary>
@@ -118,8 +123,16 @@ namespace Pinder.SessionSetup
 
             try
             {
+                var entry = _catalog.Get("stake");
+                double temp = _options.Temperature != GeneratorDefaultConfigs.Stake.Temperature
+                    ? _options.Temperature
+                    : entry.Temperature!.Value;
+                int maxTok = _options.MaxTokens != GeneratorDefaultConfigs.Stake.MaxTokens
+                    ? _options.MaxTokens
+                    : entry.MaxTokens!.Value;
+
                 string response = await _transport
-                    .SendAsync(SystemPrompt, userMessage, _options.Temperature, _options.MaxTokens, phase: LlmPhase.PsychologicalStake)
+                    .SendAsync(SystemPrompt, userMessage, temp, maxTok, phase: LlmPhase.PsychologicalStake)
                     .ConfigureAwait(false);
                 string trimmed = (response ?? string.Empty).Trim();
                 if (string.IsNullOrEmpty(trimmed))
@@ -162,12 +175,20 @@ namespace Pinder.SessionSetup
 
             string userMessage = BuildUserMessage(assembledSystemPrompt, _catalog);
 
+            var entry = _catalog.Get("stake");
+            double temp = _options.Temperature != GeneratorDefaultConfigs.Stake.Temperature
+                ? _options.Temperature
+                : entry.Temperature!.Value;
+            int maxTok = _options.MaxTokens != GeneratorDefaultConfigs.Stake.MaxTokens
+                ? _options.MaxTokens
+                : entry.MaxTokens!.Value;
+
             IAsyncEnumerator<string> enumerator;
             try
             {
                 enumerator = _streamingTransport.SendStreamAsync(
                         SystemPrompt, userMessage,
-                        _options.Temperature, _options.MaxTokens,
+                        temp, maxTok,
                         cancellationToken,
                         phase: LlmPhase.PsychologicalStake)
                     .GetAsyncEnumerator(cancellationToken);
@@ -238,8 +259,6 @@ namespace Pinder.SessionSetup
                 ?? throw new InvalidOperationException("PromptTemplates.Catalog is not wired. Call PromptWiring.Wire() at startup.");
             var entry = resolvedCatalog.TryGet("stake")
                 ?? throw new InvalidOperationException("prompt-catalog: missing required key 'stake'. The yaml file is incomplete or missing.");
-            if (string.IsNullOrWhiteSpace(entry.UserTemplate))
-                throw new InvalidOperationException("prompt-catalog: key 'stake' has no user_template. Check the yaml file.");
 
             return PromptCatalog.Substitute(
                 entry.UserTemplate!,
@@ -253,14 +272,14 @@ namespace Pinder.SessionSetup
         public sealed class Options
         {
             /// <summary>Temperature. Default 0.9 (matches the legacy helper).</summary>
-            public double Temperature { get; set; } = 0.9;
+            public double Temperature { get; set; } = GeneratorDefaultConfigs.Stake.Temperature;
 
             /// <summary>
             /// Max output tokens. Default 300 (#826: hard ceiling for the
             /// 5-7 single-line-fragment shape; target output is ~250 tokens
             /// per character, so 300 leaves a small safety margin).
             /// </summary>
-            public int MaxTokens { get; set; } = 300;
+            public int MaxTokens { get; set; } = GeneratorDefaultConfigs.Stake.MaxTokens;
 
             /// <summary>
             /// Opt-in callback triggered when generation is degraded (e.g. transport failure or empty output).

@@ -329,14 +329,14 @@ namespace Pinder.LlmAdapters
             catch (Exception ex)
             {
                 RaiseOverlayDegraded(new OverlayDegradedEvent(
-                     overlayType: "interest_beat",
-                     provider: "primary",
-                     model: null,
-                     reason: "error",
-                     outcome: OverlayOutcome.Degraded,
-                     errorCode: ex.GetType().Name,
-                     exception: ex
-                 ));
+                    overlayType: "interest_beat",
+                    provider: "primary",
+                    model: null,
+                    reason: "error",
+                    outcome: OverlayOutcome.Degraded,
+                    errorCode: ex.GetType().Name,
+                    exception: ex
+                ));
                 return null;
             }
         }
@@ -377,7 +377,7 @@ namespace Pinder.LlmAdapters
 
             try
             {
-                double temperature = _options.DeliveryTemperature ?? 0.7;
+                double temperature = _options.DeliveryTemperature ?? DefaultDeliveryTemperature;
                 var result = await _overlayTransport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.HorninessOverlay, ct: ct)
                     .ConfigureAwait(false);
 
@@ -424,14 +424,14 @@ namespace Pinder.LlmAdapters
             catch (Exception ex)
             {
                 RaiseOverlayDegraded(new OverlayDegradedEvent(
-                     overlayType: "horniness_overlay",
-                     provider: "primary",
-                     model: null,
-                     reason: "error",
-                     outcome: OverlayOutcome.Degraded,
-                     errorCode: ex.GetType().Name,
-                     exception: ex
-                 ));
+                    overlayType: "horniness_overlay",
+                    provider: "primary",
+                    model: null,
+                    reason: "error",
+                    outcome: OverlayOutcome.Degraded,
+                    errorCode: ex.GetType().Name,
+                    exception: ex
+                ));
                 return message;
             }
         }
@@ -472,7 +472,7 @@ namespace Pinder.LlmAdapters
 
             try
             {
-                double temperature = _options.DeliveryTemperature ?? 0.7;
+                double temperature = _options.DeliveryTemperature ?? DefaultDeliveryTemperature;
                 var result = await _overlayTransport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.TrapOverlay, ct: ct)
                     .ConfigureAwait(false);
 
@@ -518,15 +518,15 @@ namespace Pinder.LlmAdapters
             catch (Exception ex)
             {
                 RaiseOverlayDegraded(new OverlayDegradedEvent(
-                     overlayType: "trap_overlay",
-                     provider: "primary",
-                     model: null,
-                     reason: "error",
-                     outcome: OverlayOutcome.Degraded,
-                     errorCode: ex.GetType().Name,
-                     trapName: trapName,
-                     exception: ex
-                 ));
+                    overlayType: "trap_overlay",
+                    provider: "primary",
+                    model: null,
+                    reason: "error",
+                    outcome: OverlayOutcome.Degraded,
+                    errorCode: ex.GetType().Name,
+                    trapName: trapName,
+                    exception: ex
+                ));
                 return message;
             }
         }
@@ -604,14 +604,14 @@ namespace Pinder.LlmAdapters
             catch (Exception ex)
             {
                 RaiseOverlayDegraded(new OverlayDegradedEvent(
-                     overlayType: "failure_corruption",
-                     provider: "primary",
-                     model: null,
-                     reason: "error",
-                     outcome: OverlayOutcome.Degraded,
-                     errorCode: ex.GetType().Name,
-                     exception: ex
-                 ));
+                    overlayType: "failure_corruption",
+                    provider: "primary",
+                    model: null,
+                    reason: "error",
+                    outcome: OverlayOutcome.Degraded,
+                    errorCode: ex.GetType().Name,
+                    exception: ex
+                ));
                 return message;
             }
         }
@@ -649,7 +649,7 @@ namespace Pinder.LlmAdapters
 
             try
             {
-                double temperature = _options.DeliveryTemperature ?? 0.7;
+                double temperature = _options.DeliveryTemperature ?? DefaultDeliveryTemperature;
                 var result = await _overlayTransport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.ShadowCorruption, ct: ct)
                     .ConfigureAwait(false);
 
@@ -693,14 +693,14 @@ namespace Pinder.LlmAdapters
             catch (Exception ex)
             {
                 RaiseOverlayDegraded(new OverlayDegradedEvent(
-                     overlayType: "shadow_corruption",
-                     provider: "primary",
-                     model: null,
-                     reason: "error",
-                     outcome: OverlayOutcome.Degraded,
-                     errorCode: ex.GetType().Name,
-                     exception: ex
-                 ));
+                    overlayType: "shadow_corruption",
+                    provider: "primary",
+                    model: null,
+                    reason: "error",
+                    outcome: OverlayOutcome.Degraded,
+                    errorCode: ex.GetType().Name,
+                    exception: ex
+                ));
                 return message;
             }
         }
@@ -989,8 +989,8 @@ namespace Pinder.LlmAdapters
 
         private void RaiseOverlayDegraded(OverlayDegradedEvent evt)
         {
-           var handler = _options.OnOverlayDegraded ?? PinderLlmAdapterOptions.DefaultOnOverlayDegraded;
-           handler?.Invoke(evt);
+            var handler = _options.OnOverlayDegraded ?? PinderLlmAdapterOptions.DefaultOnOverlayDegraded;
+            handler?.Invoke(evt);
         }
 
         private GameDefinition RequireGameDefinition([System.Runtime.CompilerServices.CallerMemberName] string methodName = "")

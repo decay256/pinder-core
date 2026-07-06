@@ -89,78 +89,18 @@ namespace Pinder.RemoteAssets
                             return ParsePublishResponse(body);
                         }
 
-                        if (status == 401)
-                        {
-                            string body401 = await EigencoreCharacterStoreRead.SafeReadBodyAsync(resp).ConfigureAwait(false);
-                            throw new RemoteAssetAuthException(
-                                "Eigencore returned 401 for POST assets.",
-                                responseBody: body401);
-                        }
-
-                        if (status == 403)
-                        {
-                            string body403 = await EigencoreCharacterStoreRead.SafeReadBodyAsync(resp).ConfigureAwait(false);
-                            throw BuildForbiddenException(body403, "POST assets");
-                        }
-
-                        if (status == 422)
-                        {
-                            string body422 = await EigencoreCharacterStoreRead.SafeReadBodyAsync(resp).ConfigureAwait(false);
-                            (string? errorCode, IReadOnlyList<string> errors) = EigencoreCharacterStoreRead.ParseValidationBody(body422);
-                            if (string.Equals(errorCode, "metadata_too_large", StringComparison.Ordinal))
-                            {
-                                throw new RemoteAssetTooLargeException(
-                                    "Eigencore returned 422 metadata_too_large for POST assets.",
-                                    subject: "metadata",
-                                    responseBody: body422);
-                            }
-                            if (string.Equals(errorCode, "payload_too_large", StringComparison.Ordinal))
-                            {
-                                throw new RemoteAssetTooLargeException(
-                                    "Eigencore returned 422 payload_too_large for POST assets.",
-                                    subject: "payload",
-                                    responseBody: body422);
-                            }
-                            // invalid_multipart and all other 422 codes
-                            // surface as a generic validation exception.
-                            throw new RemoteAssetValidationException(
-                                $"Eigencore returned 422 for POST assets (code={errorCode ?? "<none>"}).",
-                                errors: errors,
-                                responseBody: body422);
-                        }
-
                         if (status == 429)
                         {
-                            TimeSpan delay = EigencoreCharacterStoreRead.ParseRetryAfter(resp) ?? _config.DefaultRetryAfter;
-                            string body429 = await EigencoreCharacterStoreRead.SafeReadBodyAsync(resp).ConfigureAwait(false);
-                            if (retried)
-                            {
-                                throw new RemoteAssetRateLimitException(
-                                    "Eigencore returned 429 for POST assets after one retry.",
-                                    retryAfter: delay,
-                                    responseBody: body429);
-                            }
-                            retried = true;
-                            resp.Dispose();
-                            if (delay > TimeSpan.Zero)
-                                await Task.Delay(delay, ct).ConfigureAwait(false);
+                            retried = await EigencoreResponseHandler.Handle429RetryAsync(
+                                resp,
+                                retried,
+                                "Eigencore returned 429 for POST assets after one retry.",
+                                _config.DefaultRetryAfter,
+                                ct).ConfigureAwait(false);
                             continue;
                         }
 
-                        if (status >= 500 && status <= 599)
-                        {
-                            string body5xx = await EigencoreCharacterStoreRead.SafeReadBodyAsync(resp).ConfigureAwait(false);
-                            throw new RemoteAssetServerException(
-                                $"Eigencore returned {status} for POST assets.",
-                                statusCode: status,
-                                responseBody: body5xx);
-                        }
-
-                        string bodyOther = await EigencoreCharacterStoreRead.SafeReadBodyAsync(resp).ConfigureAwait(false);
-                        throw new RemoteAssetServerException(
-                            $"Eigencore returned unexpected status {status} for POST assets.",
-                            statusCode: status,
-                            responseBody: bodyOther);
+                        await EigencoreResponseHandler.HandleFailureResponseAsync(resp, "POST assets", ct).ConfigureAwait(false);
                     }
                     finally
                     {
@@ -223,64 +163,18 @@ namespace Pinder.RemoteAssets
                             return false;
                         }
 
-                        if (status == 401)
-                        {
-                            string body401 = await EigencoreCharacterStoreRead.SafeReadBodyAsync(resp).ConfigureAwait(false);
-                            throw new RemoteAssetAuthException(
-                                $"Eigencore returned 401 for DELETE assets/{characterId}.",
-                                responseBody: body401);
-                        }
-
-                        if (status == 403)
-                        {
-                            string body403 = await EigencoreCharacterStoreRead.SafeReadBodyAsync(resp).ConfigureAwait(false);
-                            throw new RemoteAssetForbiddenException(
-                                $"Eigencore returned 403 for DELETE assets/{characterId} (caller is not the asset owner).",
-                                responseBody: body403);
-                        }
-
-                        if (status == 422)
-                        {
-                            string body422 = await EigencoreCharacterStoreRead.SafeReadBodyAsync(resp).ConfigureAwait(false);
-                            (_, IReadOnlyList<string> errors) = EigencoreCharacterStoreRead.ParseValidationBody(body422);
-                            throw new RemoteAssetValidationException(
-                                $"Eigencore returned 422 for DELETE assets/{characterId}.",
-                                errors: errors,
-                                responseBody: body422);
-                        }
-
                         if (status == 429)
                         {
-                            TimeSpan delay = EigencoreCharacterStoreRead.ParseRetryAfter(resp) ?? _config.DefaultRetryAfter;
-                            string body429 = await EigencoreCharacterStoreRead.SafeReadBodyAsync(resp).ConfigureAwait(false);
-                            if (retried)
-                            {
-                                throw new RemoteAssetRateLimitException(
-                                    $"Eigencore returned 429 for DELETE assets/{characterId} after one retry.",
-                                    retryAfter: delay,
-                                    responseBody: body429);
-                            }
-                            retried = true;
-                            resp.Dispose();
-                            if (delay > TimeSpan.Zero)
-                                await Task.Delay(delay, ct).ConfigureAwait(false);
+                            retried = await EigencoreResponseHandler.Handle429RetryAsync(
+                                resp,
+                                retried,
+                                $"Eigencore returned 429 for DELETE assets/{characterId} after one retry.",
+                                _config.DefaultRetryAfter,
+                                ct).ConfigureAwait(false);
                             continue;
                         }
 
-                        if (status >= 500 && status <= 599)
-                        {
-                            string body5xx = await EigencoreCharacterStoreRead.SafeReadBodyAsync(resp).ConfigureAwait(false);
-                            throw new RemoteAssetServerException(
-                                $"Eigencore returned {status} for DELETE assets/{characterId}.",
-                                statusCode: status,
-                                responseBody: body5xx);
-                        }
-
-                        string bodyOther = await EigencoreCharacterStoreRead.SafeReadBodyAsync(resp).ConfigureAwait(false);
-                        throw new RemoteAssetServerException(
-                            $"Eigencore returned unexpected status {status} for DELETE assets/{characterId}.",
-                            statusCode: status,
-                            responseBody: bodyOther);
+                        await EigencoreResponseHandler.HandleFailureResponseAsync(resp, $"DELETE assets/{characterId}", ct).ConfigureAwait(false);
                     }
                     finally
                     {
@@ -323,71 +217,7 @@ namespace Pinder.RemoteAssets
             return CharacterAssetMetadataParser.ParseBytes(body);
         }
 
-        private static RemoteAssetForbiddenException BuildForbiddenException(string body403, string opLabel)
-        {
-            string? offendingPrefix = ExtractForbiddenPrefix(body403);
-            string msg = offendingPrefix != null
-                ? $"Eigencore returned 403 permission_denied for {opLabel}: reserved tag prefix '{offendingPrefix}' is not allowed for this caller."
-                : $"Eigencore returned 403 permission_denied for {opLabel}.";
-            return new RemoteAssetForbiddenException(msg, responseBody: body403);
-        }
 
-        private static string? ExtractForbiddenPrefix(string body)
-        {
-            if (string.IsNullOrWhiteSpace(body)) return null;
-            try
-            {
-                using (var doc = JsonDocument.Parse(body))
-                {
-                    var root = doc.RootElement;
-                    if (root.ValueKind != JsonValueKind.Object) return null;
-
-                    if (root.TryGetProperty("prefix", out var pEl)
-                        && pEl.ValueKind == JsonValueKind.String)
-                    {
-                        var p = pEl.GetString();
-                        if (!string.IsNullOrEmpty(p)) return p;
-                    }
-
-                    if (root.TryGetProperty("tag", out var tEl)
-                        && tEl.ValueKind == JsonValueKind.String)
-                    {
-                        var tag = tEl.GetString();
-                        if (!string.IsNullOrEmpty(tag))
-                        {
-                            int dash = tag!.IndexOf('-');
-                            if (dash > 0)
-                                return tag.Substring(0, dash + 1);
-                            return tag;
-                        }
-                    }
-
-                    foreach (var key in new[] { "detail", "message", "error" })
-                    {
-                        if (root.TryGetProperty(key, out var mEl)
-                            && mEl.ValueKind == JsonValueKind.String)
-                        {
-                            var s = mEl.GetString() ?? string.Empty;
-                            foreach (var candidate in new[] { "auto-", "official-" })
-                            {
-                                if (s.IndexOf(candidate, StringComparison.OrdinalIgnoreCase) >= 0)
-                                    return candidate;
-                            }
-                        }
-                    }
-                }
-            }
-            catch (JsonException)
-            {
-            }
-
-            foreach (var candidate in new[] { "auto-", "official-" })
-            {
-                if (body.IndexOf(candidate, StringComparison.OrdinalIgnoreCase) >= 0)
-                    return candidate;
-            }
-            return null;
-        }
 
         private async Task AttachAuthAsync(HttpRequestMessage req, CancellationToken ct)
         {

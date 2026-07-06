@@ -26,5 +26,10 @@ namespace Pinder.RemoteAssets.Exceptions
         {
             Subject = subject ?? string.Empty;
         }
+
+        public override string ToString()
+        {
+            return $"[RemoteAssetTooLargeFailureDetails] Subject: {Subject}\n{base.ToString()}";
+        }
     }
 }

@@ -25,9 +25,11 @@ public sealed class TrapDefinition
 {
     public string Id { get; }
     public StatType Stat { get; }
+    public string DisplayName { get; }
+    public string Summary { get; }
     public TrapEffect Effect { get; }
     public int EffectValue { get; }
-    public int DurationTurns { get; }
+    public int DurationTurns { get; } // Defaults to 3 in JSON repository if omitted.
     public string LlmInstruction { get; }
     public string ClearMethod { get; }
     public string Nat1Bonus { get; }
@@ -72,9 +74,11 @@ Each trap object in the top-level array:
 {
   "id": "cringe",
   "stat": "charm",
+  "display_name": "Cringe",
+  "summary": "Your awkward attempts at charm leave everyone uncomfortable.",
   "effect": "disadvantage",
   "effect_value": 0,
-  "duration_turns": 1,
+  "duration_turns": 3,
   "llm_instruction": "...",
   "clear_method": "SA vs DC 12",
   "nat1_bonus": ""

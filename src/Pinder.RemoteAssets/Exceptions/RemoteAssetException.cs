@@ -32,5 +32,15 @@ namespace Pinder.RemoteAssets.Exceptions
             StatusCode = statusCode;
             ResponseBody = responseBody ?? string.Empty;
         }
+
+        public override string ToString()
+        {
+            var errorString = $"[RemoteAssetFailureDetails] StatusCode: {StatusCode}";
+            if (!string.IsNullOrEmpty(ResponseBody))
+            {
+                errorString += $", ResponseBody: {ResponseBody}";
+            }
+            return $"{errorString}\n{base.ToString()}";
+        }
     }
 }
