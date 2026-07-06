@@ -59,66 +59,89 @@ namespace Pinder.LlmAdapters
             var systemPrompt = SessionSystemPromptBuilder.BuildPlayerAvatar(context.PlayerAvatarPrompt, gameDef);
             double temperature = _options.DialogueOptionsTemperature ?? DefaultDialogueOptionsTemperature;
 
-            var responseText = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.DialogueOptions, ct: ct)
-                .ConfigureAwait(false);
+            int attempt = 0;
+            int maxRetries = Math.Max(1, _options.MaxContractViolationRetries);
 
-            string? errorCode;
-            string? errorMessage;
-            int parsedCount;
-            int expectedCount;
-
-            var parsedOptions = DialogueOptionParsers.ParseDialogueOptionsStrict(
-                responseText,
-                context.AvailableStats,
-                gameDef.MaxDialogueOptions,
-                out errorCode,
-                out errorMessage,
-                out parsedCount,
-                out expectedCount);
-
-            if (errorCode != null)
+            while (true)
             {
-                var violation = new LlmContractViolation(
-                    phase: "dialogue_options",
-                    reason: errorCode,
-                    provider: null,
-                    model: null,
-                    parserName: "StrictDialogueOptionsParser",
-                    expectedOptionCount: expectedCount,
-                    parsedOptionCount: parsedCount,
-                    optionCount: parsedCount,
-                    signalCount: null,
-                    sessionId: null,
-                    turnId: context.CurrentTurn
-                );
+                attempt++;
+                try
+                {
+                    var responseText = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.DialogueOptions, ct: ct)
+                        .ConfigureAwait(false);
 
-                _options.OnLlmContractViolation?.Invoke(violation);
+                    string? errorCode;
+                    string? errorMessage;
+                    int parsedCount;
+                    int expectedCount;
 
-                throw new LlmContractException(
-                    phase: "dialogue_options",
-                    reason: errorCode,
-                    message: errorMessage!,
-                    provider: null,
-                    model: null,
-                    parserName: "StrictDialogueOptionsParser",
-                    expectedOptionCount: expectedCount,
-                    parsedOptionCount: parsedCount,
-                    optionCount: parsedCount,
-                    signalCount: null,
-                    sessionId: null,
-                    turnId: context.CurrentTurn
-                );
+                    var parsedOptions = DialogueOptionParsers.ParseDialogueOptionsStrict(
+                        responseText,
+                        context.AvailableStats,
+                        gameDef.MaxDialogueOptions,
+                        out errorCode,
+                        out errorMessage,
+                        out parsedCount,
+                        out expectedCount);
+
+                    if (errorCode != null)
+                    {
+                        throw new LlmContractException(
+                            phase: "dialogue_options",
+                            reason: errorCode,
+                            message: errorMessage!,
+                            provider: null,
+                            model: null,
+                            parserName: "StrictDialogueOptionsParser",
+                            expectedOptionCount: expectedCount,
+                            parsedOptionCount: parsedCount,
+                            optionCount: parsedCount,
+                            signalCount: null,
+                            sessionId: null,
+                            turnId: context.CurrentTurn
+                        );
+                    }
+
+                    // #950: warn when the option generator skips all stake content.
+                    // Lightweight check: split stake lines on sentence/clause boundaries,
+                    // discard fragments shorter than 8 chars, look for any fragment in any option.
+                    if (context.StakeLines != null && context.StakeLines.Length > 0 && parsedOptions.Length > 0)
+                    {
+                        WarnIfStakeSkipped(context, parsedOptions);
+                    }
+
+                    return parsedOptions;
+                }
+                catch (LlmContractException ex)
+                {
+                    var violation = new LlmContractViolation(
+                        phase: ex.Phase,
+                        reason: ex.Reason,
+                        provider: ex.Provider,
+                        model: ex.Model,
+                        parserName: ex.ParserName,
+                        expectedOptionCount: ex.ExpectedOptionCount,
+                        parsedOptionCount: ex.ParsedOptionCount,
+                        optionCount: ex.OptionCount,
+                        signalCount: ex.SignalCount,
+                        sessionId: ex.SessionId,
+                        turnId: ex.TurnId
+                    );
+
+                    _options.OnLlmContractViolation?.Invoke(violation);
+
+                    if (attempt >= maxRetries)
+                    {
+                        throw;
+                    }
+
+                    int delayMs = (int)(_options.ContractViolationBackoffMs * Math.Pow(2, attempt - 1));
+                    if (delayMs > 0)
+                    {
+                        await Task.Delay(delayMs, ct).ConfigureAwait(false);
+                    }
+                }
             }
-
-            // #950: warn when the option generator skips all stake content.
-            // Lightweight check: split stake lines on sentence/clause boundaries,
-            // discard fragments shorter than 8 chars, look for any fragment in any option.
-            if (context.StakeLines != null && context.StakeLines.Length > 0 && parsedOptions.Length > 0)
-            {
-                WarnIfStakeSkipped(context, parsedOptions);
-            }
-
-            return parsedOptions;
         }
 
         /// <inheritdoc />
@@ -145,102 +168,109 @@ namespace Pinder.LlmAdapters
             var systemPrompt = SessionSystemPromptBuilder.BuildDatee(context.DateePrompt, gameDef);
             double temperature = _options.DateeResponseTemperature ?? DefaultDateeResponseTemperature;
 
-            string responseText;
-            if (history.Count == 0)
+            int attempt = 0;
+            int maxRetries = Math.Max(1, _options.MaxContractViolationRetries);
+
+            while (true)
             {
-                // No prior turns — single-shot.
-                responseText = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.OpponentResponse, ct: cancellationToken)
-                    .ConfigureAwait(false);
+                attempt++;
+                try
+                {
+                    string responseText;
+                    if (history.Count == 0)
+                    {
+                        // No prior turns — single-shot.
+                        responseText = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.OpponentResponse, ct: cancellationToken)
+                            .ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        // Multi-turn: flatten the supplied history into the user content
+                        // (the transport contract is single-turn). The current turn's
+                        // user content is appended last, mirroring Anthropic/OpenAI
+                        // wire ordering.
+                        responseText = await SendStatefulDateeAsync(systemPrompt, userContent, history, temperature, cancellationToken)
+                            .ConfigureAwait(false);
+                    }
+
+                    if (string.IsNullOrWhiteSpace(responseText))
+                    {
+                        throw new LlmContractException(
+                            phase: "datee_response",
+                            reason: "empty_output",
+                            message: "LLM datee_response output is empty or whitespace.",
+                            provider: null,
+                            model: null,
+                            parserName: "StrictDateeResponseParser",
+                            expectedOptionCount: null,
+                            parsedOptionCount: null,
+                            optionCount: null,
+                            signalCount: 0,
+                            sessionId: null,
+                            turnId: context.CurrentTurn
+                        );
+                    }
+
+                    var validationResult = GmOutputContract.ValidateSignalsStrict(responseText, out string? errorDetail);
+                    if (validationResult == DateeSignalsValidationResult.MalformedSignals)
+                    {
+                        throw new LlmContractException(
+                            phase: "datee_response",
+                            reason: "malformed_signals",
+                            message: $"LLM datee_response has malformed signals block: {errorDetail}",
+                            provider: null,
+                            model: null,
+                            parserName: "StrictDateeResponseParser",
+                            expectedOptionCount: null,
+                            parsedOptionCount: null,
+                            optionCount: null,
+                            signalCount: null,
+                            sessionId: null,
+                            turnId: context.CurrentTurn
+                        );
+                    }
+
+                    var parsed = DateeResponseParsers.ParseDateeResponseText(responseText);
+
+                    // Hand the engine the two new history entries to append: the user
+                    // prompt we just sent and the assistant response we got back.
+                    var newEntries = new ConversationMessage[]
+                    {
+                        ConversationMessage.User(userContent),
+                        ConversationMessage.Assistant(responseText ?? string.Empty),
+                    };
+                    return new StatefulDateeResult(parsed, newEntries);
+                }
+                catch (LlmContractException ex)
+                {
+                    var violation = new LlmContractViolation(
+                        phase: ex.Phase,
+                        reason: ex.Reason,
+                        provider: ex.Provider,
+                        model: ex.Model,
+                        parserName: ex.ParserName,
+                        expectedOptionCount: ex.ExpectedOptionCount,
+                        parsedOptionCount: ex.ParsedOptionCount,
+                        optionCount: ex.OptionCount,
+                        signalCount: ex.SignalCount,
+                        sessionId: ex.SessionId,
+                        turnId: ex.TurnId
+                    );
+
+                    _options.OnLlmContractViolation?.Invoke(violation);
+
+                    if (attempt >= maxRetries)
+                    {
+                        throw;
+                    }
+
+                    int delayMs = (int)(_options.ContractViolationBackoffMs * Math.Pow(2, attempt - 1));
+                    if (delayMs > 0)
+                    {
+                        await Task.Delay(delayMs, cancellationToken).ConfigureAwait(false);
+                    }
+                }
             }
-            else
-            {
-                // Multi-turn: flatten the supplied history into the user content
-                // (the transport contract is single-turn). The current turn's
-                // user content is appended last, mirroring Anthropic/OpenAI
-                // wire ordering.
-                responseText = await SendStatefulDateeAsync(systemPrompt, userContent, history, temperature, cancellationToken)
-                    .ConfigureAwait(false);
-            }
-
-            if (string.IsNullOrWhiteSpace(responseText))
-            {
-                var violation = new LlmContractViolation(
-                    phase: "datee_response",
-                    reason: "empty_output",
-                    provider: null,
-                    model: null,
-                    parserName: "StrictDateeResponseParser",
-                    expectedOptionCount: null,
-                    parsedOptionCount: null,
-                    optionCount: null,
-                    signalCount: 0,
-                    sessionId: null,
-                    turnId: context.CurrentTurn
-                );
-
-                _options.OnLlmContractViolation?.Invoke(violation);
-
-                throw new LlmContractException(
-                    phase: "datee_response",
-                    reason: "empty_output",
-                    message: "LLM datee_response output is empty or whitespace.",
-                    provider: null,
-                    model: null,
-                    parserName: "StrictDateeResponseParser",
-                    expectedOptionCount: null,
-                    parsedOptionCount: null,
-                    optionCount: null,
-                    signalCount: 0,
-                    sessionId: null,
-                    turnId: context.CurrentTurn
-                );
-            }
-
-            var validationResult = GmOutputContract.ValidateSignalsStrict(responseText, out string? errorDetail);
-            if (validationResult == DateeSignalsValidationResult.MalformedSignals)
-            {
-                var violation = new LlmContractViolation(
-                    phase: "datee_response",
-                    reason: "malformed_signals",
-                    provider: null,
-                    model: null,
-                    parserName: "StrictDateeResponseParser",
-                    expectedOptionCount: null,
-                    parsedOptionCount: null,
-                    optionCount: null,
-                    signalCount: null,
-                    sessionId: null,
-                    turnId: context.CurrentTurn
-                );
-
-                _options.OnLlmContractViolation?.Invoke(violation);
-
-                throw new LlmContractException(
-                    phase: "datee_response",
-                    reason: "malformed_signals",
-                    message: $"LLM datee_response has malformed signals block: {errorDetail}",
-                    provider: null,
-                    model: null,
-                    parserName: "StrictDateeResponseParser",
-                    expectedOptionCount: null,
-                    parsedOptionCount: null,
-                    optionCount: null,
-                    signalCount: null,
-                    sessionId: null,
-                    turnId: context.CurrentTurn
-                );
-            }
-
-            var parsed = DateeResponseParsers.ParseDateeResponseText(responseText);
-
-            // Hand the engine the two new history entries to append: the user
-            // prompt we just sent and the assistant response we got back.
-            var newEntries = new ConversationMessage[]
-            {
-                ConversationMessage.User(userContent),
-                ConversationMessage.Assistant(responseText ?? string.Empty),
-            };
-            return new StatefulDateeResult(parsed, newEntries);
         }
 
         /// <inheritdoc />
@@ -274,7 +304,7 @@ namespace Pinder.LlmAdapters
                 var trimmed = responseText?.Trim();
                 if (string.IsNullOrWhiteSpace(trimmed))
                 {
-                    _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                    RaiseOverlayDegraded(new OverlayDegradedEvent(
                         overlayType: "interest_beat",
                         provider: "primary",
                         model: null,
@@ -298,14 +328,15 @@ namespace Pinder.LlmAdapters
             }
             catch (Exception ex)
             {
-                _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
-                    overlayType: "interest_beat",
-                    provider: "primary",
-                    model: null,
-                    reason: "error",
-                    outcome: OverlayOutcome.Degraded,
-                    errorCode: ex.GetType().Name
-                ));
+                RaiseOverlayDegraded(new OverlayDegradedEvent(
+                     overlayType: "interest_beat",
+                     provider: "primary",
+                     model: null,
+                     reason: "error",
+                     outcome: OverlayOutcome.Degraded,
+                     errorCode: ex.GetType().Name,
+                     exception: ex
+                 ));
                 return null;
             }
         }
@@ -317,7 +348,7 @@ namespace Pinder.LlmAdapters
             {
                 if (string.IsNullOrWhiteSpace(instruction))
                 {
-                    _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                    RaiseOverlayDegraded(new OverlayDegradedEvent(
                         overlayType: "horniness_overlay",
                         provider: "primary",
                         model: null,
@@ -352,7 +383,7 @@ namespace Pinder.LlmAdapters
 
                 if (string.IsNullOrWhiteSpace(result))
                 {
-                    _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                    RaiseOverlayDegraded(new OverlayDegradedEvent(
                         overlayType: "horniness_overlay",
                         provider: "primary",
                         model: null,
@@ -374,7 +405,7 @@ namespace Pinder.LlmAdapters
                     trimmed.IndexOf("inappropriate", StringComparison.OrdinalIgnoreCase) >= 0 ||
                     trimmed.IndexOf("I'd be happy to help", StringComparison.OrdinalIgnoreCase) >= 0)
                 {
-                    _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                    RaiseOverlayDegraded(new OverlayDegradedEvent(
                         overlayType: "horniness_overlay",
                         provider: "primary",
                         model: null,
@@ -392,14 +423,15 @@ namespace Pinder.LlmAdapters
             }
             catch (Exception ex)
             {
-                _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
-                    overlayType: "horniness_overlay",
-                    provider: "primary",
-                    model: null,
-                    reason: "error",
-                    outcome: OverlayOutcome.Degraded,
-                    errorCode: ex.GetType().Name
-                ));
+                RaiseOverlayDegraded(new OverlayDegradedEvent(
+                     overlayType: "horniness_overlay",
+                     provider: "primary",
+                     model: null,
+                     reason: "error",
+                     outcome: OverlayOutcome.Degraded,
+                     errorCode: ex.GetType().Name,
+                     exception: ex
+                 ));
                 return message;
             }
         }
@@ -411,7 +443,7 @@ namespace Pinder.LlmAdapters
             {
                 if (string.IsNullOrWhiteSpace(trapInstruction))
                 {
-                    _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                    RaiseOverlayDegraded(new OverlayDegradedEvent(
                         overlayType: "trap_overlay",
                         provider: "primary",
                         model: null,
@@ -446,7 +478,7 @@ namespace Pinder.LlmAdapters
 
                 if (string.IsNullOrWhiteSpace(result))
                 {
-                    _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                    RaiseOverlayDegraded(new OverlayDegradedEvent(
                         overlayType: "trap_overlay",
                         provider: "primary",
                         model: null,
@@ -466,7 +498,7 @@ namespace Pinder.LlmAdapters
                     trimmed.IndexOf("inappropriate", StringComparison.OrdinalIgnoreCase) >= 0 ||
                     trimmed.IndexOf("I'd be happy to help", StringComparison.OrdinalIgnoreCase) >= 0)
                 {
-                    _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                    RaiseOverlayDegraded(new OverlayDegradedEvent(
                         overlayType: "trap_overlay",
                         provider: "primary",
                         model: null,
@@ -485,15 +517,16 @@ namespace Pinder.LlmAdapters
             }
             catch (Exception ex)
             {
-                _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
-                    overlayType: "trap_overlay",
-                    provider: "primary",
-                    model: null,
-                    reason: "error",
-                    outcome: OverlayOutcome.Degraded,
-                    errorCode: ex.GetType().Name,
-                    trapName: trapName
-                ));
+                RaiseOverlayDegraded(new OverlayDegradedEvent(
+                     overlayType: "trap_overlay",
+                     provider: "primary",
+                     model: null,
+                     reason: "error",
+                     outcome: OverlayOutcome.Degraded,
+                     errorCode: ex.GetType().Name,
+                     trapName: trapName,
+                     exception: ex
+                 ));
                 return message;
             }
         }
@@ -505,7 +538,7 @@ namespace Pinder.LlmAdapters
             {
                 if (string.IsNullOrWhiteSpace(instruction))
                 {
-                    _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                    RaiseOverlayDegraded(new OverlayDegradedEvent(
                         overlayType: "failure_corruption",
                         provider: "primary",
                         model: null,
@@ -534,7 +567,7 @@ namespace Pinder.LlmAdapters
 
                 if (string.IsNullOrWhiteSpace(result))
                 {
-                    _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                    RaiseOverlayDegraded(new OverlayDegradedEvent(
                         overlayType: "failure_corruption",
                         provider: "primary",
                         model: null,
@@ -552,7 +585,7 @@ namespace Pinder.LlmAdapters
                     trimmed.IndexOf("inappropriate", StringComparison.OrdinalIgnoreCase) >= 0 ||
                     trimmed.IndexOf("I'd be happy to help", StringComparison.OrdinalIgnoreCase) >= 0)
                 {
-                    _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                    RaiseOverlayDegraded(new OverlayDegradedEvent(
                         overlayType: "failure_corruption",
                         provider: "primary",
                         model: null,
@@ -570,14 +603,15 @@ namespace Pinder.LlmAdapters
             }
             catch (Exception ex)
             {
-                _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
-                    overlayType: "failure_corruption",
-                    provider: "primary",
-                    model: null,
-                    reason: "error",
-                    outcome: OverlayOutcome.Degraded,
-                    errorCode: ex.GetType().Name
-                ));
+                RaiseOverlayDegraded(new OverlayDegradedEvent(
+                     overlayType: "failure_corruption",
+                     provider: "primary",
+                     model: null,
+                     reason: "error",
+                     outcome: OverlayOutcome.Degraded,
+                     errorCode: ex.GetType().Name,
+                     exception: ex
+                 ));
                 return message;
             }
         }
@@ -589,7 +623,7 @@ namespace Pinder.LlmAdapters
             {
                 if (string.IsNullOrWhiteSpace(instruction))
                 {
-                    _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                    RaiseOverlayDegraded(new OverlayDegradedEvent(
                         overlayType: "shadow_corruption",
                         provider: "primary",
                         model: null,
@@ -621,7 +655,7 @@ namespace Pinder.LlmAdapters
 
                 if (string.IsNullOrWhiteSpace(result))
                 {
-                    _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                    RaiseOverlayDegraded(new OverlayDegradedEvent(
                         overlayType: "shadow_corruption",
                         provider: "primary",
                         model: null,
@@ -640,7 +674,7 @@ namespace Pinder.LlmAdapters
                     trimmed.IndexOf("inappropriate", StringComparison.OrdinalIgnoreCase) >= 0 ||
                     trimmed.IndexOf("I'd be happy to help", StringComparison.OrdinalIgnoreCase) >= 0)
                 {
-                    _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                    RaiseOverlayDegraded(new OverlayDegradedEvent(
                         overlayType: "shadow_corruption",
                         provider: "primary",
                         model: null,
@@ -658,14 +692,15 @@ namespace Pinder.LlmAdapters
             }
             catch (Exception ex)
             {
-                _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
-                    overlayType: "shadow_corruption",
-                    provider: "primary",
-                    model: null,
-                    reason: "error",
-                    outcome: OverlayOutcome.Degraded,
-                    errorCode: ex.GetType().Name
-                ));
+                RaiseOverlayDegraded(new OverlayDegradedEvent(
+                     overlayType: "shadow_corruption",
+                     provider: "primary",
+                     model: null,
+                     reason: "error",
+                     outcome: OverlayOutcome.Degraded,
+                     errorCode: ex.GetType().Name,
+                     exception: ex
+                 ));
                 return message;
             }
         }
@@ -685,7 +720,7 @@ namespace Pinder.LlmAdapters
 
             if (string.IsNullOrWhiteSpace(template))
             {
-                _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                RaiseOverlayDegraded(new OverlayDegradedEvent(
                     overlayType: "success_improvement",
                     provider: "primary",
                     model: null,
@@ -725,7 +760,7 @@ namespace Pinder.LlmAdapters
             var improved = (responseText ?? string.Empty).Trim();
             if (string.IsNullOrWhiteSpace(improved) || string.Equals(improved, "...", StringComparison.OrdinalIgnoreCase))
             {
-                _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                RaiseOverlayDegraded(new OverlayDegradedEvent(
                     overlayType: "success_improvement",
                     provider: "primary",
                     model: null,
@@ -737,7 +772,7 @@ namespace Pinder.LlmAdapters
 
             if (Pinder.Core.Conversation.SuccessImprovementValidator.IsRejected(improved))
             {
-                _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                RaiseOverlayDegraded(new OverlayDegradedEvent(
                     overlayType: "success_improvement",
                     provider: "primary",
                     model: null,
@@ -790,7 +825,7 @@ namespace Pinder.LlmAdapters
             var question = (responseText ?? string.Empty).Trim();
             if (string.IsNullOrWhiteSpace(question))
             {
-                _options.OnOverlayDegraded?.Invoke(new OverlayDegradedEvent(
+                RaiseOverlayDegraded(new OverlayDegradedEvent(
                     overlayType: "steering",
                     provider: "primary",
                     model: null,
@@ -950,6 +985,12 @@ namespace Pinder.LlmAdapters
                 System.Diagnostics.Trace.TraceWarning(warning);
                 _options.OnStakeSkipWarning?.Invoke(warning);
             }
+        }
+
+        private void RaiseOverlayDegraded(OverlayDegradedEvent evt)
+        {
+           var handler = _options.OnOverlayDegraded ?? PinderLlmAdapterOptions.DefaultOnOverlayDegraded;
+           handler?.Invoke(evt);
         }
 
         private GameDefinition RequireGameDefinition([System.Runtime.CompilerServices.CallerMemberName] string methodName = "")

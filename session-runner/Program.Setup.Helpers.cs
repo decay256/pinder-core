@@ -136,7 +136,7 @@ partial class Program
                 Console.Error.WriteLine($"[WARN] Overlay model '{result.OverlayModel}' requested but overlay routing via option fields was removed (#1293); overlay calls will use the primary transport. Wire a dedicated overlay ILlmTransport to route overlays.");
             }
             string anthropicModel = string.IsNullOrWhiteSpace(result.ModelSpec)
-                ? "claude-sonnet-4-20250514"
+                ? AnthropicModelIds.DefaultModel
                 : result.ModelSpec;
             var transport = new AnthropicTransport(result.ApiKey, anthropicModel);
             result.Llm = new PinderLlmAdapter(transport, adapterOptions);
@@ -150,7 +150,7 @@ partial class Program
     {
         if (!result.IsResimulation)
         {
-            string setupModel = Environment.GetEnvironmentVariable("PLAYER_AGENT_MODEL") ?? "claude-sonnet-4-20250514";
+            string setupModel = Environment.GetEnvironmentVariable("PLAYER_AGENT_MODEL") ?? AnthropicModelIds.DefaultModel;
             using var setupRawTransport = new Pinder.LlmAdapters.Anthropic.AnthropicTransport(result.ApiKey, setupModel);
             var setupTransport = new Pinder.LlmAdapters.ThinkingStrippingLlmTransport(setupRawTransport);
 

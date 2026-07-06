@@ -68,8 +68,25 @@ namespace Pinder.LlmAdapters
         public System.Action<LlmContractViolation>? OnLlmContractViolation { get; set; }
 
         /// <summary>
+        /// Gets or sets the maximum number of times to retry an LLM call if a contract/parsing violation occurs.
+        /// Default is 3. Set to 1 to disable retries.
+        /// </summary>
+        public int MaxContractViolationRetries { get; set; } = 3;
+
+        /// <summary>
+        /// Gets or sets the base millisecond delay to wait before retrying on a contract violation.
+        /// Uses exponential backoff. Default is 100ms.
+        /// </summary>
+        public int ContractViolationBackoffMs { get; set; } = 100;
+
+        /// <summary>
         /// Optional callback invoked when an overlay or steering rewrite degraded, failed, or was skipped.
         /// </summary>
         public System.Action<OverlayDegradedEvent>? OnOverlayDegraded { get; set; }
+
+        /// <summary>
+        /// A default callback used when OnOverlayDegraded is null.
+        /// </summary>
+        public static System.Action<OverlayDegradedEvent>? DefaultOnOverlayDegraded { get; set; }
     }
 }
