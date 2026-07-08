@@ -15,8 +15,6 @@ The session runner orchestrates simulated playtest sessions between two `Charact
 - **`tests/Pinder.Core.Tests/Issue415_CharacterDefinitionLoaderSpecTests.cs`** — Spec-driven tests for `CharacterDefinitionLoader` and `DataFileLocator`: assembly pipeline (AC2–AC4), all 5 character definitions load successfully (AC5), `DataFileLocator` resolves character files (AC6), data file presence, edge cases (missing shadows, empty items/anatomy, special chars in name, unknown item IDs), error conditions (file not found, malformed JSON, missing required fields, level range, unknown stat/shadow types), shadow parsing, `DataFileLocator` walk-up and repo root discovery, integration tests for full pipeline across characters.
 - **`tests/Pinder.Core.Tests/Issue840_SingleLoaderPipelineTests.cs`** — Microbenchmark + structural tests for #840: enumerates the starter character store, asserts `CharacterDefinitionLoader.Assemble` p50/p99 over 1000 iterations stays under the documented threshold, and pins the structural rule that `session-runner/Program.cs` no longer references the legacy `CharacterLoader` symbol or the `design/examples/*-prompt.md` fallback path.
 - **`tests/Pinder.Core.Tests/Issue527_SessionRunnerBioFormatTests.cs`** — Tests for character bio output formatting in session runner, verifying bio row is removed from table and bios are printed as bold italic paragraphs (issue #527).
-- **`session-runner/MatchupAnalyzer.cs`** — Static utility that generates a pre-game LLM-backed character analysis using `AnthropicClient`. Analyzes player and datee stats vs DC table to provide a brief strategic summary of best lanes and shadow risks. Outputs results under `## Matchup Analysis` header.
-- **`tests/Pinder.Core.Tests/Issue528_MatchupAnalyzerTests.cs`** — Tests for `MatchupAnalyzer`: verifies spec signature, prompt generation, edge cases (missing bio, mirror matches), error handling (graceful fallback on API failure), and `Program.cs` integration.
 - **`tests/Pinder.Core.Tests/Issue529_EmojiRiskColorsTests.cs`** — Tests for emoji risk color restoration in `session-runner/Program.cs`: verifies `RiskLabel` helper returns correct emoji and text (`🟢 Safe`, `🟡 Medium`, `🟠 Hard`, `🔴 Bold`), handles negative and extreme values, preserves accessibility text, and verifies the inline ternary was replaced with the helper call.
 - **`tests/Pinder.Core.Tests/Issue486_SessionRunnerDiffTests.cs`** — Tests for the inline markdown diff logic `FormatDeliveredAdditions` and `WrapAdditions` in `Program.cs`.
 - **`tests/Pinder.Core.Tests/Issue486_SpecDiffTests.cs`** — Tests for the clear separation block formatting `FormatMessageDiff` in `PlaytestFormatter.cs`.
@@ -165,26 +163,6 @@ public static string FormatScoreTable(PlayerDecision? decision, DialogueOption[]
 /// Returns a formatted diff separating intended and delivered texts.
 /// If the text is identical or intended is empty/"...", returns just delivered.
 public static string FormatMessageDiff(string? intended, string? delivered);
-```
-
-### MatchupAnalyzer (static class)
-
-Generates a pre-game LLM-backed character analysis based on stats and matchup.
-Called at the beginning of a playtest session to provide strategic context.
-
-```csharp
-public static class MatchupAnalyzer
-{
-    /// Analyzes the player and datee stats, shadow traits, and bios alongside the DC table.
-    /// Uses Anthropic API with zero-shot prompting to provide a brief strategic summary,
-    /// best lanes, shadow risks, and a matchup prediction.
-    /// Caches the output in `.matchup-cache/` locally (hashed by character stats) to save API calls.
-    /// Returns a graceful fallback string on API or network failure.
-    public static async Task<string?> AnalyzeMatchupAsync(
-        AnthropicOptions options,
-        CharacterProfile player,
-        CharacterProfile datee);
-}
 ```
 
 ### OutcomeProjector (internal static class)
@@ -392,3 +370,4 @@ LlmPlayerAgent(
 | 2026-04-06 | #529 | Restored visual `🟢🟡🟠🔴` emoji prefixes for dialogue option risk tiers in `Program.cs` by reusing the `RiskLabel` helper method. Added `Issue529_EmojiRiskColorsTests.cs` to verify emoji rendering, text fallbacks, and boundary conditions. |
 | 2026-04-06 | #486 | Updated session runner to display both intended and delivered messages when the LLM modifies text based on roll outcomes (strong success/fail/Nat 1/Nat 20). Diverges slightly from the spec: implemented both `PlaytestFormatter.FormatMessageDiff` for clear block separation as well as an inline text diff algorithm in `Program.cs` (`FormatDeliveredAdditions`, `WrapAdditions`) to apply strikethrough/italics to transformed parts of the delivered text. Added tests in `Issue486_SessionRunnerDiffTests.cs` and `Issue486_SpecDiffTests.cs`. |
 | 2026-04-07 | #632 | Fixed roll result display logic in `Program.cs` to correctly show 'Beat by N' for successful rolls and 'Miss by N' for failures, instead of 'Miss: -N'. Also added special margin text handling for Natural 1 overrides. |
+| 2026-05-09 | #827 | Setup-trim phase 1 removed the pre-turn matchup analyzer and summarizer stages. `MatchupAnalyzer` and its tests were deleted; historical audit/cost rows may still refer to the old matchup phase strings, but the session runner no longer exposes a current matchup-analysis component. |
