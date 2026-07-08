@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Pinder.Core.Conversation;
 using Pinder.Core.Stats;
 using Pinder.Core.Traps;
@@ -30,7 +31,7 @@ namespace Pinder.Core.Tests
 
         // Mutation: Fails if GameSession with config doesn't apply StartingInterest properly
         [Fact]
-        public void GameSession_Config_StartingInterest_Zero_CreatesUnmatchedSession()
+        public async Task GameSession_Config_StartingInterest_Zero_CreatesUnmatchedSession()
         {
             var session = new GameSession(
                 MakeProfile("player"),
@@ -40,15 +41,19 @@ namespace Pinder.Core.Tests
                 new NullTrapRegistry(),
                 new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 0));
 
-            // Interest=0 should be Unmatched state.
-            // StartTurnAsync should handle this (likely end condition).
-            // We just verify construction doesn't throw.
-            Assert.NotNull(session);
+            var snapshot = session.CreateSnapshot();
+            Assert.Equal(0, snapshot.Interest);
+            Assert.Equal(InterestState.Unmatched, snapshot.State);
+            Assert.Equal(0, snapshot.TurnNumber);
+            Assert.Empty(snapshot.ActiveTrapNames);
+
+            var ended = await Assert.ThrowsAsync<GameEndedException>(() => session.StartTurnAsync());
+            Assert.Equal(GameOutcome.Unmatched, ended.Outcome);
         }
 
         // Mutation: Fails if negative StartingInterest crashes instead of clamping
         [Fact]
-        public void GameSession_Config_NegativeStartingInterest_DoesNotThrow()
+        public void GameSession_Config_NegativeStartingInterest_ClampsToUnmatched()
         {
             // Negative should be clamped by InterestMeter(int) to 0
             var session = new GameSession(
@@ -58,7 +63,12 @@ namespace Pinder.Core.Tests
                 new FixedDice(10),
                 new NullTrapRegistry(),
                 new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: -10));
-            Assert.NotNull(session);
+
+            var snapshot = session.CreateSnapshot();
+            Assert.Equal(0, snapshot.Interest);
+            Assert.Equal(InterestState.Unmatched, snapshot.State);
+            Assert.Equal(0, snapshot.TurnNumber);
+            Assert.Empty(snapshot.ActiveTrapNames);
         }
 
         // Mutation: Fails if config with all properties set doesn't pass clock through
