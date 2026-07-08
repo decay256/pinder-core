@@ -80,6 +80,121 @@ namespace Pinder.Core.Tests
         }
 }
 
+        private sealed class ThrowingHorninessAdapter : ILlmAdapter, IStatefulLlmAdapter
+        {
+            private readonly Exception _toThrow;
+
+            public ThrowingHorninessAdapter(Exception toThrow)
+            {
+                _toThrow = toThrow;
+            }
+
+            public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, CancellationToken ct = default)
+                => Task.FromResult(new[] { new DialogueOption(StatType.Charm, PickedLine) });
+
+            public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, CancellationToken ct = default)
+                => Task.FromResult(new DateeResponse("ok, go on..."));
+
+            public Task<StatefulDateeResult> GetDateeResponseAsync(
+                DateeContext context, IReadOnlyList<ConversationMessage> history, CancellationToken cancellationToken = default)
+            {
+                var resp = new DateeResponse("ok, go on...");
+                var entries = new[] { ConversationMessage.User(string.Empty), ConversationMessage.Assistant("ok, go on...") };
+                return Task.FromResult(new StatefulDateeResult(resp, entries));
+            }
+
+            public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, CancellationToken ct = default)
+                => Task.FromResult<string?>(null);
+
+            public Task<string> GetSuccessImprovementAsync(SuccessImprovementContext context, CancellationToken ct = default)
+                => Task.FromResult(context.DeliveredMessage);
+
+            public Task<string> GetSteeringQuestionAsync(SteeringContext context, CancellationToken ct = default)
+                => Task.FromResult(AppendedSteering);
+
+            // THE HOOK UNDER TEST — throws instead of returning a question.
+            public Task<string> GetHorninessQuestionAsync(HorninessQuestionContext context, CancellationToken ct = default)
+                => throw _toThrow;
+
+            public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, CancellationToken ct = default)
+                => Task.FromResult(message);
+
+            public Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow, string? archetypeDirective = null, CancellationToken ct = default)
+                => Task.FromResult(message);
+
+            public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, CancellationToken ct = default)
+                => Task.FromResult(message);
+
+            public Task<string> ApplyFailureCorruptionAsync(string message, string instruction, Pinder.Core.Stats.StatType stat, Pinder.Core.Rolls.FailureTier tier, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
+                => Task.FromResult(message);
+        }
+
+        private static GameSession MakeSessionWithAdapter(
+            int sessionHorniness, Random steeringRng, int mainRoll, ILlmAdapter adapter,
+            Action<OperationalDiagnosticEvent>? onDiagnostic = null)
+        {
+            var dice = new FixedDice(sessionHorniness, mainRoll, 50);
+            var shadows = new SessionShadowTracker(TestHelpers.MakeStatBlock());
+            var clock = TestHelpers.MakeClock();
+            var config = new GameSessionConfig(
+                clock: clock,
+                playerShadows: shadows,
+                steeringRng: steeringRng,
+                statDeliveryInstructions: LoadDeliveryInstructions(),
+                startingInterest: 10,
+                onDiagnostic: onDiagnostic);
+
+            return new GameSession(
+                MakeProfile("Player"), MakeProfile("Datee"),
+                adapter, dice, new NullTrapRegistry(), config);
+        }
+
+        [Fact]
+        public async Task HorninessMiss_QuestionThrowsNonCancellation_EmitsDiagnosticAndFallsBackToNull()
+        {
+            var diagnostics = new List<OperationalDiagnosticEvent>();
+            var adapter = new ThrowingHorninessAdapter(new InvalidOperationException("adapter contract drift"));
+            var session = MakeSessionWithAdapter(
+                sessionHorniness: 10, steeringRng: new AlwaysMinRandom(), mainRoll: 16, adapter: adapter,
+                onDiagnostic: diagnostics.Add);
+
+            await session.StartTurnAsync();
+            var result = await session.ResolveTurnAsync(0);
+
+            // Miss logic still fires, but the question generation blew up.
+            Assert.True(result.HorninessCheck.IsMiss);
+
+            // Fallback preserved: no question appended, no Horniness TextDiff layer.
+            Assert.DoesNotContain("Horniness", result.TextDiffs.Select(d => d.LayerName));
+            Assert.Equal(PickedLine, result.DeliveredMessage.TrimEnd());
+
+            // But the failure is now observable via the diagnostic callback.
+            var diag = Assert.Single(diagnostics, d => d.EventName == "HorninessQuestionFailure");
+            Assert.Equal("DeliveryStage", diag.Source);
+            Assert.Equal(OperationalDiagnosticSeverity.Warning, diag.Severity);
+            Assert.IsType<InvalidOperationException>(diag.Exception);
+            Assert.Contains("adapter contract drift", diag.Message);
+        }
+
+        [Fact]
+        public async Task HorninessMiss_QuestionThrowsCancellation_PropagatesAndEmitsNoDiagnostic()
+        {
+            var diagnostics = new List<OperationalDiagnosticEvent>();
+            using var cts = new CancellationTokenSource();
+            cts.Cancel();
+            var adapter = new ThrowingHorninessAdapter(new OperationCanceledException(cts.Token));
+            var session = MakeSessionWithAdapter(
+                sessionHorniness: 10, steeringRng: new AlwaysMinRandom(), mainRoll: 16, adapter: adapter,
+                onDiagnostic: diagnostics.Add);
+
+            await session.StartTurnAsync();
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(
+                () => session.ResolveTurnAsync(0, progress: null, ct: cts.Token));
+
+            // Cancellation must propagate untouched — no diagnostic swallowing/logging of cancellation.
+            Assert.Empty(diagnostics);
+        }
+
         // Shared RNGs for predictable checks
         private sealed class AlwaysMinRandom : Random
         {

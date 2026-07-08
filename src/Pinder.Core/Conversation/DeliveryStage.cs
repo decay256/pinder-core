@@ -402,7 +402,20 @@ namespace Pinder.Core.Conversation
                     question = await horninessStateful.GetHorninessQuestionAsync(new HorninessQuestionContext(player.AssembledSystemPrompt, datee.DisplayName, player.DisplayName, beforeHorniness, TurnOrchestratorHelpers.BuildHistoryForLlmContext(state)), ct).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException) when (ct.IsCancellationRequested) { throw; }
-                catch { question = null; }
+                catch (Exception ex)
+                {
+                    OperationalDiagnostics.Emit(
+                        _onDiagnostic,
+                        new OperationalDiagnosticEvent(
+                            "DeliveryStage",
+                            "HorninessQuestionFailure",
+                            OperationalDiagnosticSeverity.Warning,
+                            $"Horniness question generation failed on turn {state.TurnNumber}: {ex.Message}",
+                            ex));
+
+                    // Preserve existing gameplay fallback: continue the turn without an appended question.
+                    question = null;
+                }
                 
                 if (!string.IsNullOrWhiteSpace(question))
                 {
