@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading;
@@ -49,8 +50,21 @@ namespace Pinder.SessionSetup
             try
             {
                 var dict = JsonSerializer.Deserialize<Dictionary<string, string>>(llmResponse, options);
-                if (dict == null || dict.Count == 0)
+                if (dict == null)
                 {
+                    // The LLM returned the JSON literal `null` (or something that
+                    // deserializes to it) rather than an object. That is not the
+                    // same as a legitimate "no notable psychiatric traits" answer
+                    // (which the model expresses as `{}`), so treat it as a
+                    // malformed/contract-violating response and fail loud.
+                    throw new JsonException("Deserialized diagnosis was null.");
+                }
+
+                if (dict.Count == 0)
+                {
+                    // A valid, empty JSON object is a legitimate answer: the
+                    // character genuinely has no notable psychiatric diagnosis.
+                    // This is success, not failure.
                     return new Dictionary<string, string>();
                 }
 
@@ -65,10 +79,18 @@ namespace Pinder.SessionSetup
                 }
                 return validatedDict;
             }
-            catch (JsonException)
+            catch (JsonException ex)
             {
-                // Suppress exception or log internally, returning a safe default dictionary
-                return new Dictionary<string, string>();
+                // Fail-loud by propagating the failure with structural context,
+                // mirroring LlmSequentialStakeGenerator: a malformed/unparseable
+                // diagnosis response is a genuine generation failure, not a
+                // valid empty diagnosis, and must not be silently swallowed.
+                throw new InvalidOperationException(
+                    LlmDiagnosticFormatter.GeneratedTextFailure(
+                        "Failed to parse diagnosis JSON from LLM response.",
+                        LlmPhase.Synthesis,
+                        llmResponse),
+                    ex);
             }
         }
     }

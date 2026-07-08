@@ -173,7 +173,7 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public async Task TherapistDiagnosisGenerator_WithMalformedJson_ReturnsEmptyDictionary()
+        public async Task TherapistDiagnosisGenerator_WithMalformedJson_ThrowsInsteadOfReturningEmptyDictionary()
         {
             var testDir = Path.Combine(Directory.GetCurrentDirectory(), "TestData_Prompts_" + Guid.NewGuid());
             Directory.CreateDirectory(testDir);
@@ -181,19 +181,50 @@ namespace Pinder.Core.Tests
 
             var transport = new FakeLlmTransport();
             transport.ResponseToReturn = "Malformed JSON string that will fail to deserialize";
-            
+
             var catalog = PromptCatalog.LoadFromDirectory(testDir);
             var generator = new LlmTherapistDiagnosisGenerator(transport, catalog);
 
             var backstory = new Dictionary<string, BackstoryFact>();
             var stakes = new List<string>();
 
-            // Act & Assert (Should not throw, but return empty dictionary)
+            // A malformed/unparseable diagnosis response is bad model output,
+            // not a valid empty diagnosis. It must fail loud (so the caller —
+            // the synthesis pipeline / regeneration flow — can record a real
+            // failure) instead of silently returning an empty dictionary that
+            // looks like a legitimate "no diagnosis" answer.
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+                () => generator.GenerateAsync("Char", "he/him", "bio", backstory, stakes));
+
+            Assert.IsType<JsonException>(ex.InnerException);
+
+            Directory.Delete(testDir, true);
+        }
+
+        [Fact]
+        public async Task TherapistDiagnosisGenerator_WithValidEmptyJsonObject_ReturnsEmptyDictionaryWithoutThrowing()
+        {
+            var testDir = Path.Combine(Directory.GetCurrentDirectory(), "TestData_Prompts_" + Guid.NewGuid());
+            Directory.CreateDirectory(testDir);
+            File.WriteAllText(Path.Combine(testDir, "diagnosis.yaml"), "schema_version: 1\nprompts:\n  diagnosis:\n    system_prompt: \"SYSTEM PROMPT\"\n    user_template: \"USER {backstory} - {stakes}\"");
+
+            var transport = new FakeLlmTransport();
+            // A well-formed, empty JSON object is the LLM's legitimate way of
+            // saying "this character has no notable psychiatric diagnosis" —
+            // that is success, not a parse failure, and must not throw.
+            transport.ResponseToReturn = "{}";
+
+            var catalog = PromptCatalog.LoadFromDirectory(testDir);
+            var generator = new LlmTherapistDiagnosisGenerator(transport, catalog);
+
+            var backstory = new Dictionary<string, BackstoryFact>();
+            var stakes = new List<string>();
+
             var result = await generator.GenerateAsync("Char", "he/him", "bio", backstory, stakes);
 
             Assert.NotNull(result);
             Assert.Empty(result);
-            
+
             Directory.Delete(testDir, true);
         }
 
