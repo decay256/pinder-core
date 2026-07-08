@@ -272,28 +272,5 @@ GOOD examples (specific, dating-app energy, slightly unhinged):
 
 Output only the question. No preamble. It will be appended directly to the delivered message.";
 
-        /// <summary>
-        /// Default horniness prompt template used when game-definition.yaml
-        /// does not specify a horniness_prompt key.
-        /// </summary>
-        public static string DefaultHorninessPrompt { get; } =
-@"You are writing as {player_name} on Pinder — a satirical comedy dating app for sentient penises.
-The character just sent: ""{delivered_message}""
-
-Based specifically on what {datee_name} has revealed in the conversation above, write ONLY ONE short flirty/horny follow-up QUESTION to append to this message. The question must:
-1. Reference something specific the datee actually said or revealed — not a generic line
-2. Be overtly flirty, thirsty, or slightly desperate in a comedic way
-3. Sound natural as a continuation of the delivered message, not a separate topic
-4. Output ONLY the question. No preamble, no rewrite.
-
-BAD examples:
-- ""so what do you do for fun?""
-- ""you looking for a hookup?""
-
-GOOD examples:
-- ""also, and this is completely unrelated... how strong are your hands?""
-- ""wait, if you're so good at organizing things, do you want to organize me against a wall?""
-
-Output ONLY the question. No preamble. It will be appended directly to the delivered message.";
     }
 }

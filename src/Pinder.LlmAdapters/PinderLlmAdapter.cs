@@ -827,9 +827,10 @@ namespace Pinder.LlmAdapters
 
             var gameDef = RequireGameDefinition();
 
-            string template = gameDef.HorninessPrompt;
-            if (string.IsNullOrWhiteSpace(template))
-                template = GameDefinition.DefaultHorninessPrompt;
+            string template = RequireConfiguredPrompt(
+                gameDef.HorninessPrompt,
+                "horniness_prompt",
+                nameof(GetHorninessQuestionAsync));
 
             string prompt = template
                 .Replace("{player_name}", context.PlayerName)
@@ -852,7 +853,16 @@ namespace Pinder.LlmAdapters
 
             var question = (responseText ?? string.Empty).Trim();
             if (string.IsNullOrWhiteSpace(question))
-                return "so... your place or mine?";
+            {
+                RaiseOverlayDegraded(new OverlayDegradedEvent(
+                    overlayType: "horniness_question",
+                    provider: "primary",
+                    model: null,
+                    reason: "empty_output",
+                    outcome: OverlayOutcome.Degraded
+                ));
+                throw new InvalidOperationException("LLM horniness_question output is empty or whitespace.");
+            }
 
             if (question.Length >= 2 && question[0] == '"' && question[question.Length - 1] == '"')
                 question = question.Substring(1, question.Length - 2).Trim();
@@ -1033,6 +1043,18 @@ namespace Pinder.LlmAdapters
                 throw new InvalidOperationException($"Production path '{methodName}' is missing GameDefinition. GameDefinition is required at the production adapter boundary to avoid silent fallbacks.");
             }
             return _options.GameDefinition;
+        }
+
+        private static string RequireConfiguredPrompt(string value, string key, string methodName)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                throw new InvalidOperationException(
+                    $"Production path '{methodName}' is missing configured GameDefinition.{key}. " +
+                    $"Load data/game-definition.yaml with a non-empty '{key}' value.");
+            }
+
+            return value;
         }
 
         public void Dispose()
