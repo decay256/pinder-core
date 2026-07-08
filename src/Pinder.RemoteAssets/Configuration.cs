@@ -29,6 +29,12 @@ namespace Pinder.RemoteAssets
     /// the store falls back to
     /// <c>Pinder.Core.Characters.CharacterDefinitionWriter.Write</c>
     /// (UTF-8 encoded). Tests can inject a stub that returns canned bytes.
+    ///
+    /// A <c>null</c> or zero-length return value is treated as a failed
+    /// serialization and throws <c>RemoteAssetValidationException</c>
+    /// BEFORE any HTTP request is sent — the store never silently
+    /// substitutes an empty payload (fail-fast; see
+    /// <c>SyncHelper.SerializePayload</c>).
     /// </summary>
     public delegate byte[] CharacterPayloadSerializer(CharacterDefinition def);
 

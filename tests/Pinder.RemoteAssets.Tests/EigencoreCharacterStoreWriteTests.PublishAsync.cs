@@ -118,6 +118,54 @@ namespace Pinder.RemoteAssets.Tests
         }
 
         [Fact]
+        public async Task PublishAsync_Null_Serializer_Payload_Throws_Before_Any_Http_Call()
+        {
+            // A custom PayloadSerializer that returns null must not be
+            // silently coerced to an empty payload — that would publish
+            // a zero-byte character asset that looks like a success.
+            var (store, handler) = Make(payloadSerializer: _ => null!);
+
+            var ex = await Assert.ThrowsAsync<RemoteAssetValidationException>(() =>
+                store.PublishAsync(StubDef(), MakeMetadata()));
+
+            Assert.Equal(422, ex.StatusCode);
+            Assert.Empty(handler.Requests);
+        }
+
+        [Fact]
+        public async Task PublishAsync_Empty_Serializer_Payload_Throws_Before_Any_Http_Call()
+        {
+            // Same guard, but for a serializer that returns a non-null,
+            // zero-length array instead of null.
+            var (store, handler) = Make(payloadSerializer: _ => Array.Empty<byte>());
+
+            var ex = await Assert.ThrowsAsync<RemoteAssetValidationException>(() =>
+                store.PublishAsync(StubDef(), MakeMetadata()));
+
+            Assert.Equal(422, ex.StatusCode);
+            Assert.Empty(handler.Requests);
+        }
+
+        [Fact]
+        public async Task PublishAsync_Valid_Nonempty_Serializer_Payload_Proceeds_Normally()
+        {
+            // Control case: a well-behaved custom serializer is
+            // unaffected by the null/empty guard and the request
+            // proceeds as normal.
+            byte[] customPayload = Encoding.UTF8.GetBytes("{\"custom\":\"payload\"}");
+            var (store, handler) = Make(payloadSerializer: _ => customPayload);
+            handler.Enqueue(_ => OkPublish());
+
+            CharacterAssetMetadata returned = await store.PublishAsync(StubDef(), MakeMetadata());
+
+            Assert.Equal(AssetId, returned.CharacterId);
+            Assert.Single(handler.Requests);
+
+            var parts = ReadMultipartParts(handler);
+            Assert.Equal(customPayload, parts["payload"].body);
+        }
+
+        [Fact]
         public async Task PublishAsync_Overwrite_Returns_200_Is_Success()
         {
             // Second publish of same asset_id: eigencore returns 200

@@ -189,7 +189,18 @@ namespace Pinder.RemoteAssets
         private byte[] SerializePayload(CharacterDefinition def)
         {
             if (_config.PayloadSerializer != null)
-                return _config.PayloadSerializer(def) ?? Array.Empty<byte>();
+            {
+                byte[]? result = _config.PayloadSerializer(def);
+                if (result == null || result.Length == 0)
+                {
+                    throw new RemoteAssetValidationException(
+                        "Custom PayloadSerializer returned a null or zero-length payload. " +
+                        "Refusing to publish an empty character asset. " +
+                        "No HTTP request was sent (pre-validation).",
+                        errors: new[] { "payload: serializer returned null or empty bytes" });
+                }
+                return result;
+            }
             string json = CharacterDefinitionWriter.Write(def);
             return new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetBytes(json);
         }
