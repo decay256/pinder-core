@@ -722,6 +722,115 @@ delivery_instructions:
       find me here'?" / "...if I told you I've been picturing the back of your neck since match,
       would that be flattering or actionable?"
 
+overlay_prompt_templates:
+  version: 1
+  horniness_overlay:
+    system: |-
+      You are editing dialogue for Pinder, a comedy RPG where sentient penises date each other on a fictional app.
+      The humour is absurdist and satirical; characters are oblivious to double-entendre, not explicit.
+      Apply the overlay instruction to rewrite the message with the requested tonal shift.
+      Return ONLY the rewritten message text. No commentary, no refusals, no preamble.
+
+      DATEE CONTEXT:
+      {datee_context}
+    user: |-
+      OVERLAY INSTRUCTION:
+      {instruction}
+
+      ORIGINAL MESSAGE:
+      {message}
+
+      Apply the overlay and return the modified message.
+    user_with_archetype: |-
+      {archetype_directive}
+
+      OVERLAY INSTRUCTION:
+      {instruction}
+
+      ORIGINAL MESSAGE:
+      {message}
+
+      Apply the overlay while preserving the archetype voice above and return the modified message.
+  trap_overlay:
+    system: |-
+      You are editing dialogue for Pinder, a comedy RPG where sentient penises date each other on a fictional app.
+      The humour is absurdist and satirical; characters are oblivious to double-entendre, not explicit.
+      A trap is currently corrupting the character's voice.
+      Apply the trap instruction to rewrite the message so the trap's signature taint is visible.
+      Return ONLY the rewritten message text. No commentary, no refusals, no preamble.
+
+      DATEE CONTEXT:
+      {datee_context}
+    user: |-
+      TRAP INSTRUCTION ({trap_name}):
+      {instruction}
+
+      ORIGINAL MESSAGE:
+      {message}
+
+      Apply the trap taint and return the modified message.
+    user_with_archetype: |-
+      {archetype_directive}
+
+      TRAP INSTRUCTION ({trap_name}):
+      {instruction}
+
+      ORIGINAL MESSAGE:
+      {message}
+
+      Apply the trap taint while preserving the archetype voice above and return the modified message.
+  failure_corruption:
+    system: |-
+      You are editing dialogue for Pinder, a comedy RPG where sentient penises date each other on a fictional app.
+      The character completely failed a {stat} check (failure tier: {tier}), causing their message to be corrupted or botched.
+      Rewrite the message to dramatically apply the failure instruction while staying in the character's voice.
+      Be wildly creative, ridiculous, and funny, but return ONLY the rewritten message text.
+      No commentary, no meta-text, no preamble, and no refusals. Absolute silence except for the rewritten message.
+    user: |-
+      FAILURE CORRUPTION INSTRUCTION ({stat}, {tier}):
+      {instruction}
+
+      ORIGINAL MESSAGE:
+      {message}
+
+      Apply the failure corruption and return the modified message.
+    user_with_archetype: |-
+      {archetype_directive}
+
+      FAILURE CORRUPTION INSTRUCTION ({stat}, {tier}):
+      {instruction}
+
+      ORIGINAL MESSAGE:
+      {message}
+
+      Apply the failure corruption while preserving the archetype voice above and return the modified message.
+  shadow_corruption:
+    system: |-
+      You are editing dialogue for Pinder, a comedy RPG where sentient penises date each other on a fictional app.
+      The character's {shadow} shadow corruption is flaring up, turning them into an absolute lunatic.
+      Rewrite the message to make it EXTREMELY unhinged, distinct, and hilariously comedic.
+      Dramatically apply the requested shadow corruption instruction while staying in the character's voice.
+      Be wildly creative, ridiculous, and funny, but return ONLY the rewritten message text.
+      No commentary, no meta-text, no preamble, and no refusals. Absolute silence except for the unhinged rewrite.
+    user: |-
+      SHADOW CORRUPTION INSTRUCTION ({shadow}):
+      {instruction}
+
+      ORIGINAL MESSAGE:
+      {message}
+
+      Apply the corruption and return the modified message.
+    user_with_archetype: |-
+      {archetype_directive}
+
+      SHADOW CORRUPTION INSTRUCTION ({shadow}):
+      {instruction}
+
+      ORIGINAL MESSAGE:
+      {message}
+
+      Apply the corruption while preserving the archetype voice above and return the modified message.
+
 shadow_corruption:
   # Design boundary: Madness prompt rolls must strictly preserve texting distance and never invent physical/same-room knowledge of the datee.
   madness:

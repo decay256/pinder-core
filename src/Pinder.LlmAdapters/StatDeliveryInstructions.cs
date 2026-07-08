@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Pinder.Core.Interfaces;
 using Pinder.Core.Stats;
 using YamlDotNet.Serialization;
@@ -17,11 +18,20 @@ namespace Pinder.LlmAdapters
     /// </summary>
     public sealed class StatDeliveryInstructions : IStatDeliveryInstructionProvider
     {
-        private readonly Dictionary<string, Dictionary<string, string>> _instructions;
+        private const string OverlayPromptTemplatesSection = "overlay_prompt_templates";
+        private static readonly object DefaultLoadLock = new object();
+        private static bool defaultLoadAttempted;
+        private static StatDeliveryInstructions? defaultInstructions;
 
-        private StatDeliveryInstructions(Dictionary<string, Dictionary<string, string>> instructions)
+        private readonly Dictionary<string, Dictionary<string, string>> _instructions;
+        private readonly Dictionary<string, OverlayPromptTemplate> _overlayPromptTemplates;
+
+        private StatDeliveryInstructions(
+            Dictionary<string, Dictionary<string, string>> instructions,
+            Dictionary<string, OverlayPromptTemplate>? overlayPromptTemplates = null)
         {
             _instructions = instructions ?? new Dictionary<string, Dictionary<string, string>>();
+            _overlayPromptTemplates = overlayPromptTemplates ?? new Dictionary<string, OverlayPromptTemplate>(StringComparer.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -109,6 +119,17 @@ namespace Pinder.LlmAdapters
             return null;
         }
 
+        internal OverlayPromptTemplate? GetOverlayPromptTemplate(string overlayType)
+        {
+            if (string.IsNullOrWhiteSpace(overlayType))
+                return null;
+
+            if (_overlayPromptTemplates.TryGetValue(overlayType, out var template))
+                return template;
+
+            return null;
+        }
+
         private static string ShadowKey(Pinder.Core.Stats.ShadowStatType shadow)
         {
             switch (shadow)
@@ -176,6 +197,7 @@ namespace Pinder.LlmAdapters
                     throw new ConfigurationException("Missing or invalid required configuration section: 'horniness_overlay'.");
 
                 var result = new Dictionary<string, Dictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
+                var overlayPromptTemplates = ParseOverlayPromptTemplates(root);
 
                 // Parse delivery_instructions (flat stat → tier → text)
                 foreach (var statEntry in statMap)
@@ -255,7 +277,7 @@ namespace Pinder.LlmAdapters
                     }
                 }
 
-                return new StatDeliveryInstructions(result);
+                return new StatDeliveryInstructions(result, overlayPromptTemplates);
             }
             catch (ConfigurationException)
             {
@@ -266,5 +288,100 @@ namespace Pinder.LlmAdapters
                 throw new ConfigurationException($"Malformed delivery instructions YAML file layout: {ex.Message}", ex);
             }
         }
+
+        internal static StatDeliveryInstructions? TryLoadDefault()
+        {
+            lock (DefaultLoadLock)
+            {
+                if (defaultLoadAttempted)
+                    return defaultInstructions;
+
+                defaultLoadAttempted = true;
+
+                string? path = FindDefaultDeliveryInstructionsPath(AppContext.BaseDirectory)
+                    ?? FindDefaultDeliveryInstructionsPath(Directory.GetCurrentDirectory());
+                if (path == null)
+                    return null;
+
+                defaultInstructions = LoadFrom(File.ReadAllText(path));
+                return defaultInstructions;
+            }
+        }
+
+        private static string? FindDefaultDeliveryInstructionsPath(string startDirectory)
+        {
+            if (string.IsNullOrWhiteSpace(startDirectory))
+                return null;
+
+            var dir = new DirectoryInfo(startDirectory);
+            for (int i = 0; i < 12 && dir != null; i++)
+            {
+                string candidate = Path.Combine(dir.FullName, "data", "delivery-instructions.yaml");
+                if (File.Exists(candidate))
+                    return candidate;
+
+                dir = dir.Parent;
+            }
+
+            return null;
+        }
+
+        private static Dictionary<string, OverlayPromptTemplate> ParseOverlayPromptTemplates(Dictionary<string, object> root)
+        {
+            var templates = new Dictionary<string, OverlayPromptTemplate>(StringComparer.OrdinalIgnoreCase);
+
+            if (!root.TryGetValue(OverlayPromptTemplatesSection, out var templatesObj) ||
+                !(templatesObj is Dictionary<object, object> templateMap))
+            {
+                return templates;
+            }
+
+            foreach (var entry in templateMap)
+            {
+                string overlayType = entry.Key?.ToString() ?? "";
+                if (string.IsNullOrWhiteSpace(overlayType) || overlayType == "version")
+                    continue;
+
+                if (!(entry.Value is Dictionary<object, object> fields))
+                    continue;
+
+                string system = GetTemplateField(fields, "system");
+                string user = GetTemplateField(fields, "user");
+                string userWithArchetype = GetTemplateField(fields, "user_with_archetype");
+
+                if (string.IsNullOrWhiteSpace(system) || string.IsNullOrWhiteSpace(user))
+                    throw new ConfigurationException($"Overlay prompt template '{overlayType}' must define non-empty 'system' and 'user' fields.");
+
+                templates[overlayType] = new OverlayPromptTemplate(
+                    system,
+                    user,
+                    string.IsNullOrWhiteSpace(userWithArchetype) ? null : userWithArchetype);
+            }
+
+            return templates;
+        }
+
+        private static string GetTemplateField(Dictionary<object, object> fields, string key)
+        {
+            return fields.TryGetValue(key, out var value)
+                ? value?.ToString() ?? ""
+                : "";
+        }
+    }
+
+    internal sealed class OverlayPromptTemplate
+    {
+        public OverlayPromptTemplate(string system, string user, string? userWithArchetype)
+        {
+            System = system ?? throw new ArgumentNullException(nameof(system));
+            User = user ?? throw new ArgumentNullException(nameof(user));
+            UserWithArchetype = userWithArchetype;
+        }
+
+        public string System { get; }
+
+        public string User { get; }
+
+        public string? UserWithArchetype { get; }
     }
 }

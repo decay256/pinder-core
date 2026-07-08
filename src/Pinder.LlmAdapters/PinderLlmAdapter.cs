@@ -23,6 +23,10 @@ namespace Pinder.LlmAdapters
         private const double DefaultDialogueOptionsTemperature = 0.9;
         private const double DefaultDeliveryTemperature = 0.7;
         private const double DefaultDateeResponseTemperature = 0.85;
+        private const string HorninessOverlayPrompt = "horniness_overlay";
+        private const string TrapOverlayPrompt = "trap_overlay";
+        private const string FailureCorruptionPrompt = "failure_corruption";
+        private const string ShadowCorruptionPrompt = "shadow_corruption";
 
         private readonly ILlmTransport _transport;
         private readonly ILlmTransport _overlayTransport;
@@ -359,26 +363,17 @@ namespace Pinder.LlmAdapters
                 return message;
             }
 
-            // Use primary transport
-            string systemPrompt = "You are editing dialogue for Pinder, a comedy RPG where sentient penises date each other on a fictional app. " +
-                "The humour is absurdist and satirical — characters are oblivious to double-entendre, not explicit. " +
-                "Apply the overlay instruction to rewrite the message with the requested tonal shift. " +
-                "Return ONLY the rewritten message text. No commentary, no refusals, no preamble.";
-
-            if (!string.IsNullOrWhiteSpace(dateeContext))
-                systemPrompt += $"\n\nThe message being sent is directed at this character:\n{dateeContext}";
-
-            // Inject the speaker's active archetype directive (#372) so the
-            // overlay rewrite stays in the character's voice instead of
-            // collapsing to a generic horny rewrite.
-            string userContent = !string.IsNullOrWhiteSpace(archetypeDirective)
-                ? $"{archetypeDirective}\n\nOVERLAY INSTRUCTION:\n{instruction}\n\nORIGINAL MESSAGE:\n{message}\n\nApply the overlay (preserving the archetype voice above) and return the modified message."
-                : $"OVERLAY INSTRUCTION:\n{instruction}\n\nORIGINAL MESSAGE:\n{message}\n\nApply the overlay and return the modified message.";
+            var prompt = BuildOverlayPrompt(
+                HorninessOverlayPrompt,
+                message,
+                instruction,
+                dateeContext: dateeContext,
+                archetypeDirective: archetypeDirective);
 
             try
             {
                 double temperature = _options.DeliveryTemperature ?? DefaultDeliveryTemperature;
-                var result = await _overlayTransport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.HorninessOverlay, ct: ct)
+                var result = await _overlayTransport.SendAsync(prompt.SystemPrompt, prompt.UserContent, temperature, _options.MaxTokens, phase: LlmPhase.HorninessOverlay, ct: ct)
                     .ConfigureAwait(false);
 
                 if (string.IsNullOrWhiteSpace(result))
@@ -455,25 +450,18 @@ namespace Pinder.LlmAdapters
                 return message;
             }
 
-            string systemPrompt = "You are editing dialogue for Pinder, a comedy RPG where sentient penises date each other on a fictional app. " +
-                "The humour is absurdist and satirical — characters are oblivious to double-entendre, not explicit. " +
-                "A trap is currently corrupting the character's voice. " +
-                "Apply the trap instruction to rewrite the message so the trap's signature taint is visible. " +
-                "Return ONLY the rewritten message text. No commentary, no refusals, no preamble.";
-
-            if (!string.IsNullOrWhiteSpace(dateeContext))
-                systemPrompt += $"\n\nThe message being sent is directed at this character:\n{dateeContext}";
-
-            // Inject the speaker's active archetype directive (#372 + #371 union) so the
-            // trap-overlay rewrite still sounds like the character.
-            string userContent = !string.IsNullOrWhiteSpace(archetypeDirective)
-                ? $"{archetypeDirective}\n\nTRAP INSTRUCTION ({trapName}):\n{trapInstruction}\n\nORIGINAL MESSAGE:\n{message}\n\nApply the trap taint (preserving the archetype voice above) and return the modified message."
-                : $"TRAP INSTRUCTION ({trapName}):\n{trapInstruction}\n\nORIGINAL MESSAGE:\n{message}\n\nApply the trap taint and return the modified message.";
+            var prompt = BuildOverlayPrompt(
+                TrapOverlayPrompt,
+                message,
+                trapInstruction,
+                trapName: trapName,
+                dateeContext: dateeContext,
+                archetypeDirective: archetypeDirective);
 
             try
             {
                 double temperature = _options.DeliveryTemperature ?? DefaultDeliveryTemperature;
-                var result = await _overlayTransport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.TrapOverlay, ct: ct)
+                var result = await _overlayTransport.SendAsync(prompt.SystemPrompt, prompt.UserContent, temperature, _options.MaxTokens, phase: LlmPhase.TrapOverlay, ct: ct)
                     .ConfigureAwait(false);
 
                 if (string.IsNullOrWhiteSpace(result))
@@ -549,20 +537,18 @@ namespace Pinder.LlmAdapters
                 return message;
             }
 
-            string systemPrompt = "You are editing dialogue for Pinder, a comedy RPG where sentient penises date each other on a fictional app. " +
-                $"The character completely failed a {stat} check (failure tier: {tier}), causing their message to be corrupted or botched! " +
-                "Rewrite the message to dramatically apply the failure instruction while staying in the character's voice. " +
-                "Be wildly creative, ridiculous, and funny, but return ONLY the rewritten message text. " +
-                "No commentary, no meta-text, no preamble, and no refusals. Absolute silence except for the rewritten message.";
-
-            string userContent = !string.IsNullOrWhiteSpace(archetypeDirective)
-                ? $"{archetypeDirective}\n\nFAILURE CORRUPTION INSTRUCTION ({stat}, {tier}):\n{instruction}\n\nORIGINAL MESSAGE:\n{message}\n\nApply the failure corruption (preserving the archetype voice above) and return the modified message."
-                : $"FAILURE CORRUPTION INSTRUCTION ({stat}, {tier}):\n{instruction}\n\nORIGINAL MESSAGE:\n{message}\n\nApply the failure corruption and return the modified message.";
+            var prompt = BuildOverlayPrompt(
+                FailureCorruptionPrompt,
+                message,
+                instruction,
+                stat: stat.ToString(),
+                tier: tier.ToString(),
+                archetypeDirective: archetypeDirective);
 
             try
             {
                 double temperature = _options.DeliveryTemperature ?? DefaultDeliveryTemperature;
-                var result = await _overlayTransport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.Delivery, ct: ct)
+                var result = await _overlayTransport.SendAsync(prompt.SystemPrompt, prompt.UserContent, temperature, _options.MaxTokens, phase: LlmPhase.Delivery, ct: ct)
                     .ConfigureAwait(false);
 
                 if (string.IsNullOrWhiteSpace(result))
@@ -634,23 +620,17 @@ namespace Pinder.LlmAdapters
                 return message;
             }
 
-            string systemPrompt = "You are editing dialogue for Pinder, a comedy RPG where sentient penises date each other on a fictional app. " +
-                $"The character's {shadow} shadow corruption is flaring up, turning them into an absolute lunatic! " +
-                "Rewrite the message to make it EXTREMELY unhinged, distinct, and hilariously comedic, " +
-                "dramatically applying the requested shadow corruption instruction while staying in the character's voice. " +
-                "Be wildly creative, ridiculous, and funny, but return ONLY the rewritten message text. " +
-                "No commentary, no meta-text, no preamble, and no refusals. Absolute silence except for the unhinged rewrite.";
-
-            // Inject the speaker's active archetype directive (#372) so the
-            // shadow-corrupted rewrite still sounds like the character.
-            string userContent = !string.IsNullOrWhiteSpace(archetypeDirective)
-                ? $"{archetypeDirective}\n\nSHADOW CORRUPTION INSTRUCTION ({shadow}):\n{instruction}\n\nORIGINAL MESSAGE:\n{message}\n\nApply the corruption (preserving the archetype voice above) and return the modified message."
-                : $"SHADOW CORRUPTION INSTRUCTION ({shadow}):\n{instruction}\n\nORIGINAL MESSAGE:\n{message}\n\nApply the corruption and return the modified message.";
+            var prompt = BuildOverlayPrompt(
+                ShadowCorruptionPrompt,
+                message,
+                instruction,
+                shadow: shadow.ToString(),
+                archetypeDirective: archetypeDirective);
 
             try
             {
                 double temperature = _options.DeliveryTemperature ?? DefaultDeliveryTemperature;
-                var result = await _overlayTransport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.ShadowCorruption, ct: ct)
+                var result = await _overlayTransport.SendAsync(prompt.SystemPrompt, prompt.UserContent, temperature, _options.MaxTokens, phase: LlmPhase.ShadowCorruption, ct: ct)
                     .ConfigureAwait(false);
 
                 if (string.IsNullOrWhiteSpace(result))
@@ -993,6 +973,54 @@ namespace Pinder.LlmAdapters
             handler?.Invoke(evt);
         }
 
+        private RenderedOverlayPrompt BuildOverlayPrompt(
+            string overlayType,
+            string message,
+            string instruction,
+            string? stat = null,
+            string? tier = null,
+            string? trapName = null,
+            string? shadow = null,
+            string? dateeContext = null,
+            string? archetypeDirective = null)
+        {
+            var instructions = _options.StatDeliveryInstructions ?? StatDeliveryInstructions.TryLoadDefault();
+            var template = instructions?.GetOverlayPromptTemplate(overlayType);
+            if (template == null)
+                return new RenderedOverlayPrompt(string.Empty, instruction + "\n\n" + message);
+
+            var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["instruction"] = instruction,
+                ["message"] = message,
+                ["stat"] = stat ?? string.Empty,
+                ["tier"] = tier ?? string.Empty,
+                ["trap_name"] = trapName ?? string.Empty,
+                ["shadow"] = shadow ?? string.Empty,
+                ["datee_context"] = dateeContext?.Trim() ?? string.Empty,
+                ["archetype_directive"] = archetypeDirective?.Trim() ?? string.Empty,
+            };
+
+            string userTemplate = !string.IsNullOrWhiteSpace(archetypeDirective) && template.UserWithArchetype != null
+                ? template.UserWithArchetype
+                : template.User;
+
+            return new RenderedOverlayPrompt(
+                RenderOverlayTemplate(template.System, values),
+                RenderOverlayTemplate(userTemplate, values));
+        }
+
+        private static string RenderOverlayTemplate(string template, IReadOnlyDictionary<string, string> values)
+        {
+            string rendered = template;
+            foreach (var pair in values)
+            {
+                rendered = rendered.Replace("{" + pair.Key + "}", pair.Value);
+            }
+
+            return rendered.Trim();
+        }
+
         private Action<OperationalDiagnosticEvent>? GetDiagnosticSink()
         {
             return _options.OnDiagnostic ?? PinderLlmAdapterOptions.DefaultOnDiagnostic;
@@ -1011,6 +1039,19 @@ namespace Pinder.LlmAdapters
         {
             if (_transport is IDisposable disposable)
                 disposable.Dispose();
+        }
+
+        private sealed class RenderedOverlayPrompt
+        {
+            public RenderedOverlayPrompt(string systemPrompt, string userContent)
+            {
+                SystemPrompt = systemPrompt;
+                UserContent = userContent;
+            }
+
+            public string SystemPrompt { get; }
+
+            public string UserContent { get; }
         }
     }
 }
