@@ -54,9 +54,15 @@ namespace Pinder.Core.Conversation
             Task<string>? trapTask = null;
             Task<string>? shadowTask = null;
 
+            // #6 (Task.Run audit): both overlay calls are already async I/O
+            // (LLM transport calls). Invoking these local functions directly
+            // starts each call immediately — back-to-back, before either is
+            // awaited — which is exactly what's needed for them to run
+            // concurrently via Task.WhenAll below. Task.Run added nothing
+            // but an unnecessary ThreadPool hop for I/O-bound work.
             if (runTrap)
             {
-                trapTask = Task.Run(async () =>
+                async Task<string> RunTrapAsync()
                 {
                     progress?.Report(new TurnProgressEvent(TurnProgressStage.TrapOverlayStarted));
                     string rawTrapOutput = await llm.ApplyTrapOverlayAsync(
@@ -64,19 +70,21 @@ namespace Pinder.Core.Conversation
                         .ConfigureAwait(false);
                     progress?.Report(new TurnProgressEvent(TurnProgressStage.TrapOverlayCompleted, rawTrapOutput));
                     return rawTrapOutput;
-                }, ct);
+                }
+                trapTask = RunTrapAsync();
             }
 
             if (runShadow)
             {
-                shadowTask = Task.Run(async () =>
+                async Task<string> RunShadowAsync()
                 {
                     progress?.Report(new TurnProgressEvent(TurnProgressStage.ShadowCorruptionStarted));
                     string rawShadowOutput = await llm.ApplyShadowCorruptionAsync(
                         deliveredMessage, corruptionInstruction, shadowType, playerArchetypeDirectiveForDelivery, ct).ConfigureAwait(false);
                     progress?.Report(new TurnProgressEvent(TurnProgressStage.ShadowCorruptionCompleted, rawShadowOutput));
                     return rawShadowOutput;
-                }, ct);
+                }
+                shadowTask = RunShadowAsync();
             }
 
             // #1041 (Tier C): When both Trap and Shadow are requested, check whether

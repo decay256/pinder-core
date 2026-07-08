@@ -124,6 +124,64 @@ namespace Pinder.Core.Tests.Conversation
             Assert.Equal(1, llm.ShadowCalls);
         }
 
+        /// <summary>
+        /// Regression guard for the #6 Task.Run-removal fix: DispatchSpeculativeCallsAsync
+        /// used to wrap the Trap and Shadow overlay calls in separate
+        /// <c>Task.Run</c>s so they'd race in parallel via Task.WhenAll. They
+        /// are now invoked directly (no thread-pool hop), which only
+        /// preserves the "both in flight together" behaviour if both calls
+        /// are *started* before either is awaited. This adapter gates both
+        /// calls on a shared latch that only opens once BOTH have been
+        /// entered, proving the dispatcher still fires them concurrently
+        /// rather than sequentially.
+        /// </summary>
+        private sealed class GatedLlmAdapter : ILlmAdapter
+        {
+            private readonly TaskCompletionSource<bool> _trapEntered = new(TaskCreationOptions.RunContinuationsAsynchronously);
+            private readonly TaskCompletionSource<bool> _shadowEntered = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+            public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, CancellationToken ct = default) => throw new NotImplementedException();
+            public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, CancellationToken ct = default) => throw new NotImplementedException();
+            public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, CancellationToken ct = default) => throw new NotImplementedException();
+            public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, CancellationToken ct = default) => throw new NotImplementedException();
+            public Task<string> ApplyFailureCorruptionAsync(string message, string instruction, StatType stat, Pinder.Core.Rolls.FailureTier tier, string? archetypeDirective = null, CancellationToken ct = default) => Task.FromResult(message);
+
+            public async Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, CancellationToken ct = default)
+            {
+                _trapEntered.TrySetResult(true);
+                await _shadowEntered.Task; // deadlocks (and the test times out) if shadow was never started
+                return "Trap Output";
+            }
+
+            public async Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow, string? archetypeDirective = null, CancellationToken ct = default)
+            {
+                _shadowEntered.TrySetResult(true);
+                await _trapEntered.Task; // deadlocks (and the test times out) if trap was never started
+                return "Shadow Output";
+            }
+        }
+
+        [Fact]
+        public async Task Dispatcher_StartsTrapAndShadow_ConcurrentlyNotSequentially()
+        {
+            var llm = new GatedLlmAdapter();
+            var textDiffs = new List<TextDiff>();
+
+            var dispatchTask = LlmDispatcher.DispatchSpeculativeCallsAsync(
+                llm,
+                "Original",
+                runTrap: true, "trap-instruction", "trap-name", "datee-context",
+                runShadow: true, "shadow-instruction", ShadowStatType.Dread,
+                "", textDiffs, null, 1, null, CancellationToken.None);
+
+            var completed = await Task.WhenAny(dispatchTask, Task.Delay(TimeSpan.FromSeconds(5)));
+
+            Assert.Same(dispatchTask, completed);
+            var result = await dispatchTask;
+            Assert.Equal("Shadow Output", result.FinalMessage);
+            Assert.True(result.ShadowOverlayApplied);
+        }
+
         [Fact]
         public async Task Dispatcher_ReRunsShadow_IfTrapChangedMessage()
         {
