@@ -168,7 +168,18 @@ namespace Pinder.Core.Tests
             Assert.Equal(RiskTier.Reckless, r.RiskTier);
             Assert.Equal(10, RiskTierBonus.GetInterestBonus(r));
         }
-
+        [Theory]
+        [InlineData(RiskTier.Safe, 1)]
+        [InlineData(RiskTier.Medium, 2)]
+        [InlineData(RiskTier.Hard, 3)]
+        [InlineData(RiskTier.Bold, 5)]
+        [InlineData(RiskTier.Reckless, 10)]
+        public void RiskTierBonus_ByTier_ReturnsSuccessPreviewBonus(
+            RiskTier tier,
+            int expected)
+        {
+            Assert.Equal(expected, RiskTierBonus.GetInterestBonus(tier));
+        }
         // Failures → always 0 regardless of tier
         [Theory]
         [InlineData(5, 3, 0, 1)]   // Safe, nat-1 = failure

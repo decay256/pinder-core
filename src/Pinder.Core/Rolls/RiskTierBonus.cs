@@ -30,7 +30,16 @@ namespace Pinder.Core.Rolls
             if (!result.IsSuccess)
                 return 0;
 
-            switch (result.RiskTier)
+            return GetInterestBonus(result.RiskTier);
+        }
+
+        /// <summary>
+        /// Returns the bonus Interest delta for a successful roll at the given risk tier.
+        /// Use this for pre-roll previews where no <see cref="RollResult"/> exists yet.
+        /// </summary>
+        public static int GetInterestBonus(RiskTier riskTier)
+        {
+            switch (riskTier)
             {
                 case RiskTier.Safe:      return 1;
                 case RiskTier.Medium:    return 2;
