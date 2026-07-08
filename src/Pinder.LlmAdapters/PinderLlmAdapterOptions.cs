@@ -1,5 +1,7 @@
 namespace Pinder.LlmAdapters
 {
+    using Pinder.Core.Conversation;
+
     /// <summary>
     /// Configuration for PinderLlmAdapter. Provider-agnostic — the transport
     /// (AnthropicTransport, OpenAiTransport, etc.) handles API-specific settings.
@@ -85,8 +87,20 @@ namespace Pinder.LlmAdapters
         public System.Action<OverlayDegradedEvent>? OnOverlayDegraded { get; set; }
 
         /// <summary>
+        /// Optional host-controlled sink for adapter diagnostics. When null,
+        /// diagnostics are no-op unless <see cref="DefaultOnDiagnostic"/> is
+        /// configured by the host process.
+        /// </summary>
+        public System.Action<OperationalDiagnosticEvent>? OnDiagnostic { get; set; }
+
+        /// <summary>
         /// A default callback used when OnOverlayDegraded is null.
         /// </summary>
         public static System.Action<OverlayDegradedEvent>? DefaultOnOverlayDegraded { get; set; }
+
+        /// <summary>
+        /// A default callback used when OnDiagnostic is null.
+        /// </summary>
+        public static System.Action<OperationalDiagnosticEvent>? DefaultOnDiagnostic { get; set; }
     }
 }

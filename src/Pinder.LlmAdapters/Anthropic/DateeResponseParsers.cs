@@ -68,7 +68,9 @@ namespace Pinder.LlmAdapters.Anthropic
         /// Gameplay production uses strict validation logic.
         /// </para>
         /// </summary>
-        public static DateeResponse ParseDateeResponseText(string? llmResponse)
+        public static DateeResponse ParseDateeResponseText(
+            string? llmResponse,
+            Action<OperationalDiagnosticEvent>? onDiagnostic = null)
         {
             if (string.IsNullOrWhiteSpace(llmResponse))
             {
@@ -146,7 +148,9 @@ namespace Pinder.LlmAdapters.Anthropic
         /// Gameplay production uses strict validation logic.
         /// </para>
         /// </summary>
-        public static DateeResponse? ParseDateeResponseTool(JObject toolInput)
+        public static DateeResponse? ParseDateeResponseTool(
+            JObject toolInput,
+            Action<OperationalDiagnosticEvent>? onDiagnostic = null)
         {
             try
             {
@@ -170,7 +174,14 @@ namespace Pinder.LlmAdapters.Anthropic
                     }
                     catch (ArgumentException ex)
                     {
-                        System.Console.Error.WriteLine($"[DateeResponseParsers] Failed to parse Tell stat '{statStr}': {ex.Message}. Dropping Tell mechanic.");
+                        OperationalDiagnostics.Emit(
+                            onDiagnostic,
+                            new OperationalDiagnosticEvent(
+                                "DateeResponseParsers",
+                                "TellStatParseFailure",
+                                OperationalDiagnosticSeverity.Warning,
+                                $"Failed to parse Tell stat '{statStr}': {ex.Message}. Dropping Tell mechanic.",
+                                ex));
                         // tell stays null
                     }
                 }
@@ -191,7 +202,14 @@ namespace Pinder.LlmAdapters.Anthropic
                     }
                     catch (Exception ex)
                     {
-                        System.Console.Error.WriteLine($"[DateeResponseParsers] Failed to parse Weakness Window (stat='{statStr}'): {ex.Message}. Dropping Weakness mechanic.");
+                        OperationalDiagnostics.Emit(
+                            onDiagnostic,
+                            new OperationalDiagnosticEvent(
+                                "DateeResponseParsers",
+                                "WeaknessWindowStatParseFailure",
+                                OperationalDiagnosticSeverity.Warning,
+                                $"Failed to parse Weakness Window (stat='{statStr}'): {ex.Message}. Dropping Weakness mechanic.",
+                                ex));
                         // weakness stays null
                     }
                 }

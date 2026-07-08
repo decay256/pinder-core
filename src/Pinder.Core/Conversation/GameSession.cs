@@ -120,6 +120,9 @@ namespace Pinder.Core.Conversation
         // #1219: optional callback invoked when a rule resolution occurs.
         private readonly Action<RuleResolutionTraceEvent>? _onRuleResolution;
 
+        // Optional host-controlled diagnostic callback. Null means no-op.
+        private readonly Action<OperationalDiagnosticEvent>? _onDiagnostic;
+
         private readonly double _activeTrapInterestPenalty;
 
         // Stored between StartTurnAsync and ResolveTurnAsync
@@ -192,6 +195,7 @@ namespace Pinder.Core.Conversation
             _onTextLayerNoop = config.OnTextLayerNoop;
             _onShadowFilterTrace = config.OnShadowFilterTrace;
             _onRuleResolution = config.OnRuleResolution;
+            _onDiagnostic = config.OnDiagnostic;
             _activeTrapInterestPenalty = config.ActiveTrapInterestPenalty;
             _hungerForIntimacy = config.HungerForIntimacy;
             _terrorOfRejection = config.TerrorOfRejection;
@@ -249,7 +253,7 @@ namespace Pinder.Core.Conversation
             _consequenceCatalog = config.ConsequenceCatalog;
             _maxDialogueOptions = config.MaxDialogueOptions ?? 3;
             _maxDeliveryWords = config.MaxDeliveryWords ?? 80;
-            _steeringEngine = new SteeringEngine(steeringRng);
+            _steeringEngine = new SteeringEngine(steeringRng, _onDiagnostic);
             _horninessEngine = new HorninessEngine(steeringRng, _consequenceCatalog, _horninessDcBias);
             _shadowCheckEngine = new ShadowCheckEngine(steeringRng, _consequenceCatalog, _shadowDcBias);
 
@@ -282,6 +286,7 @@ namespace Pinder.Core.Conversation
                 _shadowCheckEngine,
                 _statDeliveryInstructions,
                 _onTextLayerNoop,
+                _onDiagnostic,
                 _maxDeliveryWords);
 
             var dateeResponseStage = new DateeResponseStage(_llm);

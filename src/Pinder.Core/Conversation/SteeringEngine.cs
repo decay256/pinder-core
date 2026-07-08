@@ -17,10 +17,12 @@ namespace Pinder.Core.Conversation
     internal sealed class SteeringEngine
     {
         private readonly Random _steeringRng;
+        private readonly Action<OperationalDiagnosticEvent>? _onDiagnostic;
 
-        public SteeringEngine(Random steeringRng)
+        public SteeringEngine(Random steeringRng, Action<OperationalDiagnosticEvent>? onDiagnostic = null)
         {
             _steeringRng = steeringRng ?? throw new ArgumentNullException(nameof(steeringRng));
+            _onDiagnostic = onDiagnostic;
         }
 
         /// <summary>
@@ -107,8 +109,14 @@ namespace Pinder.Core.Conversation
                 }
                 catch (Exception ex)
                 {
-                    // Log the failure to ensure operational awareness while preserving game continuity
-                    System.Console.Error.WriteLine($"[SteeringEngine] GetSteeringQuestionAsync threw an exception: {ex}");
+                    OperationalDiagnostics.Emit(
+                        _onDiagnostic,
+                        new OperationalDiagnosticEvent(
+                            "SteeringEngine",
+                            "SteeringQuestionFailure",
+                            OperationalDiagnosticSeverity.Warning,
+                            $"GetSteeringQuestionAsync threw an exception: {ex.Message}",
+                            ex));
                     steeringQuestion = null;
                     success = false;
                 }

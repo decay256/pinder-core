@@ -110,6 +110,14 @@ namespace Pinder.Core.Conversation
         public Action<RuleResolutionTraceEvent>? OnRuleResolution { get; }
 
         /// <summary>
+        /// Optional callback fired for operational diagnostics such as transient
+        /// LLM failures that the engine can recover from. When null, no
+        /// callback is fired. Hosts can bridge this to ILogger, Unity logs,
+        /// structured telemetry, or test-controlled capture.
+        /// </summary>
+        public Action<OperationalDiagnosticEvent>? OnDiagnostic { get; }
+
+        /// <summary>
         /// Consequence catalogue for engine-side population of
         /// Consequence fields on roll/shadow/horniness result DTOs (#976).
         /// When null, engines leave <c>Consequence</c> null.
@@ -157,7 +165,8 @@ namespace Pinder.Core.Conversation
             Action<RuleResolutionTraceEvent>? onRuleResolution = null,
             double activeTrapInterestPenalty = -0.25,
             int hungerForIntimacy = 0,
-            int terrorOfRejection = 0)
+            int terrorOfRejection = 0,
+            Action<OperationalDiagnosticEvent>? onDiagnostic = null)
         {
             Clock = clock;
             PlayerShadows = playerShadows;
@@ -175,6 +184,7 @@ namespace Pinder.Core.Conversation
             OnTextLayerNoop = onTextLayerNoop;
             OnShadowFilterTrace = onShadowFilterTrace;
             OnRuleResolution = onRuleResolution;
+            OnDiagnostic = onDiagnostic;
             ConsequenceCatalog = consequenceCatalog;
             MaxDialogueOptions = maxDialogueOptions;
             MaxDeliveryWords = maxDeliveryWords;

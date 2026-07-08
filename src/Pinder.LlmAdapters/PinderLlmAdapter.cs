@@ -230,7 +230,7 @@ namespace Pinder.LlmAdapters
                         );
                     }
 
-                    var parsed = DateeResponseParsers.ParseDateeResponseText(responseText);
+                    var parsed = DateeResponseParsers.ParseDateeResponseText(responseText, GetDiagnosticSink());
 
                     // Hand the engine the two new history entries to append: the user
                     // prompt we just sent and the assistant response we got back.
@@ -991,6 +991,11 @@ namespace Pinder.LlmAdapters
         {
             var handler = _options.OnOverlayDegraded ?? PinderLlmAdapterOptions.DefaultOnOverlayDegraded;
             handler?.Invoke(evt);
+        }
+
+        private Action<OperationalDiagnosticEvent>? GetDiagnosticSink()
+        {
+            return _options.OnDiagnostic ?? PinderLlmAdapterOptions.DefaultOnDiagnostic;
         }
 
         private GameDefinition RequireGameDefinition([System.Runtime.CompilerServices.CallerMemberName] string methodName = "")

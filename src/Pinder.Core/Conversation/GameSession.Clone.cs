@@ -32,7 +32,8 @@ namespace Pinder.Core.Conversation
         ///     <see cref="_trapRegistry"/>, <see cref="_clock"/>,
         ///     <see cref="_rules"/>, <see cref="_statDeliveryInstructions"/>,
         ///     <see cref="_onTextLayerNoop"/>, <see cref="_onShadowFilterTrace"/>,
-        ///     <see cref="_onRuleResolution"/>. The active fast-gameplay
+        ///     <see cref="_onRuleResolution"/>, <see cref="_onDiagnostic"/>.
+        ///     The active fast-gameplay
         ///     scheduler (#425) is expected to inject branch-specific
         ///     <see cref="Pinder.Core.Rolls.PerOptionDicePool"/> via
         ///     <see cref="InjectNextDicePool"/>; <see cref="_dice"/> itself
@@ -86,6 +87,7 @@ namespace Pinder.Core.Conversation
             _onTextLayerNoop = src._onTextLayerNoop;
             _onShadowFilterTrace = src._onShadowFilterTrace;
             _onRuleResolution = src._onRuleResolution;
+            _onDiagnostic = src._onDiagnostic;
             _consequenceCatalog = src._consequenceCatalog;
             _maxDialogueOptions = src._maxDialogueOptions;
             _maxDeliveryWords = src._maxDeliveryWords;
@@ -103,7 +105,7 @@ namespace Pinder.Core.Conversation
             // Steering RNG is shared between SteeringEngine and HorninessEngine
             // in the public ctor; preserve that shape on the clone.
             var clonedSteeringRng = RandomCloner.Clone(src._steeringEngine.SteeringRngForCloneOnly);
-            _steeringEngine  = new SteeringEngine(clonedSteeringRng);
+            _steeringEngine  = new SteeringEngine(clonedSteeringRng, _onDiagnostic);
             _horninessEngine = new HorninessEngine(clonedSteeringRng, _consequenceCatalog, _horninessDcBias);
             _shadowCheckEngine = new ShadowCheckEngine(clonedSteeringRng, _consequenceCatalog, _shadowDcBias);
             _statDrawRng     = src._statDrawRng != null ? RandomCloner.Clone(src._statDrawRng) : null;
@@ -231,7 +233,7 @@ namespace Pinder.Core.Conversation
 
             // RNGs (deep-clone to avoid sharing internal state with src).
             var clonedSteeringRng = RandomCloner.Clone(src._steeringEngine.SteeringRngForCloneOnly);
-            _steeringEngine  = new SteeringEngine(clonedSteeringRng);
+            _steeringEngine  = new SteeringEngine(clonedSteeringRng, _onDiagnostic);
             _horninessEngine = new HorninessEngine(clonedSteeringRng, _consequenceCatalog, _horninessDcBias);
             _shadowCheckEngine = new ShadowCheckEngine(clonedSteeringRng, _consequenceCatalog, _shadowDcBias);
             _statDrawRng     = src._statDrawRng != null ? RandomCloner.Clone(src._statDrawRng) : null;

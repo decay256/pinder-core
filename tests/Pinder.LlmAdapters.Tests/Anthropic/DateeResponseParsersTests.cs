@@ -1,4 +1,5 @@
 using Newtonsoft.Json.Linq;
+using Pinder.Core.Conversation;
 using Pinder.Core.Stats;
 using Pinder.LlmAdapters.Anthropic;
 using Xunit;
@@ -196,7 +197,7 @@ TELL: SELF_AWARENESS (knows her flaws)";
         }
 
         [Fact]
-        public void ParseDateeResponseTool_InvalidStatOrWeakness_LogsAndGracefullyHandles()
+        public void ParseDateeResponseTool_InvalidStatOrWeakness_ReportsDiagnosticsAndGracefullyHandles()
         {
             var json = JObject.Parse(@"{
                 ""message"": ""Hello there!"",
@@ -204,28 +205,30 @@ TELL: SELF_AWARENESS (knows her flaws)";
                 ""weakness"": { ""defending_stat"": ""AnotherInvalidStat"", ""dc_reduction"": 5 }
             }");
 
-            using (var sw = new System.IO.StringWriter())
-            {
-                var originalError = System.Console.Error;
-                System.Console.SetError(sw);
-                try
-                {
-                    var result = DateeResponseParsers.ParseDateeResponseTool(json);
-                    
-                    Assert.NotNull(result);
-                    Assert.Equal("Hello there!", result!.MessageText);
-                    Assert.Null(result.DetectedTell);
-                    Assert.Null(result.WeaknessWindow);
+            var diagnostics = new System.Collections.Generic.List<OperationalDiagnosticEvent>();
+            var result = DateeResponseParsers.ParseDateeResponseTool(json, diagnostics.Add);
 
-                    var consoleOutput = sw.ToString();
-                    Assert.Contains("[DateeResponseParsers] Failed to parse Tell stat 'InvalidStatName'", consoleOutput);
-                    Assert.Contains("[DateeResponseParsers] Failed to parse Weakness Window (stat='AnotherInvalidStat')", consoleOutput);
-                }
-                finally
+            Assert.NotNull(result);
+            Assert.Equal("Hello there!", result!.MessageText);
+            Assert.Null(result.DetectedTell);
+            Assert.Null(result.WeaknessWindow);
+
+            Assert.Collection(
+                diagnostics,
+                tell =>
                 {
-                    System.Console.SetError(originalError);
-                }
-            }
+                    Assert.Equal("DateeResponseParsers", tell.Source);
+                    Assert.Equal("TellStatParseFailure", tell.EventName);
+                    Assert.Contains("InvalidStatName", tell.Message);
+                    Assert.Equal(OperationalDiagnosticSeverity.Warning, tell.Severity);
+                },
+                weakness =>
+                {
+                    Assert.Equal("DateeResponseParsers", weakness.Source);
+                    Assert.Equal("WeaknessWindowStatParseFailure", weakness.EventName);
+                    Assert.Contains("AnotherInvalidStat", weakness.Message);
+                    Assert.Equal(OperationalDiagnosticSeverity.Warning, weakness.Severity);
+                });
         }
     }
 }

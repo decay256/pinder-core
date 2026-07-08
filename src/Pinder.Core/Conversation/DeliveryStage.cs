@@ -33,6 +33,7 @@ namespace Pinder.Core.Conversation
         private readonly ShadowCheckEngine _shadowCheckEngine;
         private readonly object? _statDeliveryInstructions;
         private readonly Action<TextLayerNoopEvent>? _onTextLayerNoop;
+        private readonly Action<OperationalDiagnosticEvent>? _onDiagnostic;
         private readonly int _maxDeliveryWords;
 
         public DeliveryStage(
@@ -43,6 +44,7 @@ namespace Pinder.Core.Conversation
             ShadowCheckEngine shadowCheckEngine,
             object? statDeliveryInstructions,
             Action<TextLayerNoopEvent>? onTextLayerNoop,
+            Action<OperationalDiagnosticEvent>? onDiagnostic,
             int maxDeliveryWords)
         {
             _llm = llm ?? throw new ArgumentNullException(nameof(llm));
@@ -52,6 +54,7 @@ namespace Pinder.Core.Conversation
             _shadowCheckEngine = shadowCheckEngine ?? throw new ArgumentNullException(nameof(shadowCheckEngine));
             _statDeliveryInstructions = statDeliveryInstructions;
             _onTextLayerNoop = onTextLayerNoop;
+            _onDiagnostic = onDiagnostic;
             _maxDeliveryWords = maxDeliveryWords;
         }
 
@@ -123,7 +126,14 @@ namespace Pinder.Core.Conversation
                             throw;
                         }
 
-                        System.Console.Error.WriteLine($"[WARNING] Primary LLM failure corruption failed with transient error: {ex.Message}");
+                        OperationalDiagnostics.Emit(
+                            _onDiagnostic,
+                            new OperationalDiagnosticEvent(
+                                "DeliveryStage",
+                                "FailureCorruptionTransientFailure",
+                                OperationalDiagnosticSeverity.Warning,
+                                $"Primary LLM failure corruption failed with transient error: {ex.Message}",
+                                ex));
 
                         // Fall back to deterministic DeliveryOverlay
                         deliveredMessage = null;
@@ -196,7 +206,14 @@ namespace Pinder.Core.Conversation
                             throw;
                         }
 
-                        System.Console.Error.WriteLine($"[WARNING] Success improvement failed with transient error: {ex.Message}");
+                        OperationalDiagnostics.Emit(
+                            _onDiagnostic,
+                            new OperationalDiagnosticEvent(
+                                "DeliveryStage",
+                                "SuccessImprovementTransientFailure",
+                                OperationalDiagnosticSeverity.Warning,
+                                $"Success improvement failed with transient error: {ex.Message}",
+                                ex));
 
                         // Ignore and fallback
                     }

@@ -279,7 +279,7 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public async Task SteeringRoll_ExceptionCaught_AndLoggedToConsoleError()
+        public async Task SteeringRoll_ExceptionCaught_AndReportedToDiagnostics()
         {
             // Player stats: Charm=5, Wit=5, SA=5 → steering mod = 5
             var playerStats = MakeStatBlockWithValues(charm: 5, wit: 5, sa: 5);
@@ -297,30 +297,25 @@ namespace Pinder.Core.Tests
             var steeringRng = new FixedRandom(20); // steering succeeds
 
             var llm = new ThrowingLlmAdapter();
-            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), steeringRng: steeringRng);
+            var diagnostics = new List<OperationalDiagnosticEvent>();
+            var config = new GameSessionConfig(
+                clock: TestHelpers.MakeClock(),
+                steeringRng: steeringRng,
+                onDiagnostic: diagnostics.Add);
             var session = new GameSession(player, datee, llm, dice, new NullTrapRegistry(), config);
 
-            var originalError = Console.Error;
-            using (var sw = new System.IO.StringWriter())
-            {
-                Console.SetError(sw);
-                try
-                {
-                    var turnStart = await session.StartTurnAsync();
-                    var result = await session.ResolveTurnAsync(0);
+            var turnStart = await session.StartTurnAsync();
+            var result = await session.ResolveTurnAsync(0);
 
-                    Assert.False(result.Steering.SteeringSucceeded);
-                    Assert.Null(result.Steering.SteeringQuestion);
+            Assert.False(result.Steering.SteeringSucceeded);
+            Assert.Null(result.Steering.SteeringQuestion);
 
-                    var consoleOutput = sw.ToString();
-                    Assert.Contains("[SteeringEngine] GetSteeringQuestionAsync threw an exception:", consoleOutput);
-                    Assert.Contains("API Gateway Outage 503", consoleOutput);
-                }
-                finally
-                {
-                    Console.SetError(originalError);
-                }
-            }
+            var diagnostic = Assert.Single(diagnostics);
+            Assert.Equal("SteeringEngine", diagnostic.Source);
+            Assert.Equal("SteeringQuestionFailure", diagnostic.EventName);
+            Assert.Equal(OperationalDiagnosticSeverity.Warning, diagnostic.Severity);
+            Assert.Contains("API Gateway Outage 503", diagnostic.Message);
+            Assert.IsType<InvalidOperationException>(diagnostic.Exception);
         }
     }
 }
