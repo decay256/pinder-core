@@ -16,6 +16,62 @@ namespace Pinder.LlmAdapters
             return PromptTemplates.Catalog?.TryGet(key)?.SourceFile ?? "data/prompts/templates.yaml";
         }
 
+        private static string RenderTemplate(string template, IReadOnlyDictionary<string, string> values)
+        {
+            return PromptCatalog.Substitute(template, values);
+        }
+
+        private static bool AppendShadowTaintBlock(
+            AnnotatedStringBuilder sb,
+            Dictionary<ShadowStatType, int>? thresholds,
+            string headingKey,
+            string heading)
+        {
+            if (thresholds == null || thresholds.Count == 0) return false;
+
+            var keys = GetActiveShadowTaintKeys(thresholds).ToList();
+            if (keys.Count == 0) return false;
+
+            sb.AppendLine(heading, GetTemplateSource(headingKey), headingKey);
+            foreach (var key in keys)
+            {
+                sb.AppendLine(GetShadowTaintTemplate(key), GetTemplateSource(key), key);
+            }
+
+            return true;
+        }
+
+        private static IEnumerable<string> GetActiveShadowTaintKeys(Dictionary<ShadowStatType, int> thresholds)
+        {
+            if (thresholds.TryGetValue(ShadowStatType.Madness, out int madness) && madness > 5)
+                yield return "shadow-taint-madness";
+            if (thresholds.TryGetValue(ShadowStatType.Despair, out int despair) && despair > 6)
+                yield return "shadow-taint-despair";
+            if (thresholds.TryGetValue(ShadowStatType.Denial, out int denial) && denial > 5)
+                yield return "shadow-taint-denial";
+            if (thresholds.TryGetValue(ShadowStatType.Fixation, out int fixation) && fixation > 5)
+                yield return "shadow-taint-fixation";
+            if (thresholds.TryGetValue(ShadowStatType.Dread, out int dread) && dread > 5)
+                yield return "shadow-taint-dread";
+            if (thresholds.TryGetValue(ShadowStatType.Overthinking, out int overthinking) && overthinking > 5)
+                yield return "shadow-taint-overthinking";
+        }
+
+        private static string GetShadowTaintTemplate(string key)
+        {
+            switch (key)
+            {
+                case "shadow-taint-madness": return PromptTemplates.ShadowTaintMadness;
+                case "shadow-taint-despair": return PromptTemplates.ShadowTaintDespair;
+                case "shadow-taint-denial": return PromptTemplates.ShadowTaintDenial;
+                case "shadow-taint-fixation": return PromptTemplates.ShadowTaintFixation;
+                case "shadow-taint-dread": return PromptTemplates.ShadowTaintDread;
+                case "shadow-taint-overthinking": return PromptTemplates.ShadowTaintOverthinking;
+                default:
+                    throw new InvalidOperationException($"Unknown shadow taint prompt key '{key}'.");
+            }
+        }
+
         /// <summary>
         /// Builds the user-message content for GetDialogueOptionsAsync and returns the trace data.
         /// </summary>
@@ -75,12 +131,6 @@ namespace Pinder.LlmAdapters
                 gameState.AppendLine("\U0001f525 REQUIRED: Include at least one Rizz option.");
             }
 
-            string shadowTaint = BuildShadowTaintBlock(context.ShadowThresholds);
-            if (!string.IsNullOrEmpty(shadowTaint))
-            {
-                gameState.AppendLine($"Shadow state: {shadowTaint}");
-            }
-
             if (context.CallbackOpportunities != null && context.CallbackOpportunities.Count > 0)
             {
                 gameState.AppendLine("Callback opportunities:");
@@ -114,17 +164,17 @@ namespace Pinder.LlmAdapters
                 sb.AppendLine();
             }
 
+            if (AppendShadowTaintBlock(sb, context.ShadowThresholds, "shadow-state-heading", PromptTemplates.ShadowStateHeading))
+            {
+                sb.AppendLine();
+            }
+
             // Cold-opener guard: fires only on the genuine first turn (nobody has spoken yet).
             // Keyed on empty history rather than a turn integer so it is robust to the
             // 0-based, end-of-turn-incremented counter (issue #1155).
             if (context.ConversationHistory.Count == 0)
             {
-                sb.AppendLine("COLD OPENER RULE: This is the very first message. You have never spoken to this person before.");
-                sb.AppendLine("Since you are initiating the contact and sending the very first message, you MUST NOT say \"interesting that you mention\", \"since you said\", \"you mentioned\", or use any other phrasing that assumes the datee has already spoken or sent a message in this conversation. The datee has sent ZERO messages.");
-                sb.AppendLine("Your only knowledge of them is their dating profile: bio text AND visible appearance (items listed after 'Wearing:' in the profile above).");
-                sb.AppendLine("Do NOT reference anything you would only know from inside knowledge of the character — only what is visible on their public profile.");
-                sb.AppendLine("A strong opener can react to their bio, their look, or both. Something specific beats something generic.");
-                sb.AppendLine("Examples: their outfit, a specific item they're wearing, the energy their style projects, something the bio implies about them.");
+                sb.AppendLine(PromptTemplates.ColdOpenerRule, GetTemplateSource("cold-opener-rule"), "cold-opener-rule");
                 sb.AppendLine();
             }
 
@@ -147,10 +197,20 @@ namespace Pinder.LlmAdapters
                 }
 
                 int referencedCount = context.StakeLines.Length - untouchedIndices.Count;
-                sb.AppendLine($"STAKE COVERAGE — {referencedCount} line(s) referenced this session, {untouchedIndices.Count} untouched.");
+                string stakeCoverageSummary = RenderTemplate(
+                    PromptTemplates.StakeCoverageSummary,
+                    new Dictionary<string, string>
+                    {
+                        { "referenced_count", referencedCount.ToString() },
+                        { "untouched_count", untouchedIndices.Count.ToString() },
+                    });
+                sb.AppendLine(stakeCoverageSummary, GetTemplateSource("stake-coverage-summary"), "stake-coverage-summary");
                 if (untouchedIndices.Count > 0)
                 {
-                    sb.AppendLine("Untouched stake lines (the final OPTION must reference one):");
+                    sb.AppendLine(
+                        PromptTemplates.StakeCoverageUntouchedDirective,
+                        GetTemplateSource("stake-coverage-untouched-directive"),
+                        "stake-coverage-untouched-directive");
                     foreach (int idx in untouchedIndices)
                     {
                         string preview = context.StakeLines[idx];
@@ -160,7 +220,10 @@ namespace Pinder.LlmAdapters
                 }
                 else
                 {
-                    sb.AppendLine("All stake lines referenced — the final OPTION may continue the most recent stake thread.");
+                    sb.AppendLine(
+                        PromptTemplates.StakeCoverageAllReferencedDirective,
+                        GetTemplateSource("stake-coverage-all-referenced-directive"),
+                        "stake-coverage-all-referenced-directive");
                 }
                 sb.AppendLine();
             }
@@ -168,10 +231,26 @@ namespace Pinder.LlmAdapters
             if (context.ResolvedTarget != null)
             {
                 var target = context.ResolvedTarget.Value;
-                sb.AppendLine($"TRANSITION DIRECTIVE: {playerName} should deliver {target.Registry} #{target.Index} (\"{target.StemText}\") via OPTION_C as {target.TransitionStyle}.");
+                string transitionDirective = RenderTemplate(
+                    PromptTemplates.PlayerTransitionDirective,
+                    new Dictionary<string, string>
+                    {
+                        { "player_name", playerName },
+                        { "registry", target.Registry ?? string.Empty },
+                        { "index", target.Index.ToString() },
+                        { "stem_text", target.StemText ?? string.Empty },
+                        { "transition_style", target.TransitionStyle ?? string.Empty },
+                    });
+                sb.AppendLine(transitionDirective, GetTemplateSource("player-transition-directive"), "player-transition-directive");
                 if (!string.IsNullOrEmpty(context.CognitiveSubtext))
                 {
-                    sb.AppendLine($"COGNITIVE SUBTEXT: {context.CognitiveSubtext}");
+                    string cognitiveSubtextDirective = RenderTemplate(
+                        PromptTemplates.CognitiveSubtextDirective,
+                        new Dictionary<string, string>
+                        {
+                            { "cognitive_subtext", context.CognitiveSubtext ?? string.Empty },
+                        });
+                    sb.AppendLine(cognitiveSubtextDirective, GetTemplateSource("cognitive-subtext-directive"), "cognitive-subtext-directive");
                 }
                 sb.AppendLine();
             }
@@ -291,14 +370,20 @@ namespace Pinder.LlmAdapters
 
             // Response timing
             sb.AppendLine();
-            sb.AppendLine("RESPONSE TIMING");
+            sb.AppendLine(PromptTemplates.ResponseTimingHeader, GetTemplateSource("response-timing-header"), "response-timing-header");
             if (context.ResponseDelayMinutes < 1.0)
             {
-                sb.AppendLine("Your reply arrives in less than 1 minute.");
+                sb.AppendLine(PromptTemplates.ResponseTimingSubMinute, GetTemplateSource("response-timing-sub-minute"), "response-timing-sub-minute");
             }
             else
             {
-                sb.AppendLine($"Your reply arrives in approximately {context.ResponseDelayMinutes:F1} minutes.");
+                string responseTiming = RenderTemplate(
+                    PromptTemplates.ResponseTimingApproximate,
+                    new Dictionary<string, string>
+                    {
+                        { "delay_minutes", context.ResponseDelayMinutes.ToString("F1") },
+                    });
+                sb.AppendLine(responseTiming, GetTemplateSource("response-timing-approximate"), "response-timing-approximate");
             }
 
             if (context.ActiveTrapInstructions != null && context.ActiveTrapInstructions.Length > 0)
@@ -311,12 +396,9 @@ namespace Pinder.LlmAdapters
                 }
             }
 
-            string dateeTaint = BuildShadowTaintBlock(context.ShadowThresholds);
-            if (!string.IsNullOrEmpty(dateeTaint))
+            if (AppendShadowTaintBlock(sb, context.ShadowThresholds, "datee-shadow-state-heading", PromptTemplates.DateeShadowStateHeading))
             {
                 sb.AppendLine();
-                sb.AppendLine("SHADOW STATE (corrupting forces on your communication)");
-                sb.AppendLine(dateeTaint);
             }
 
             // Inject active archetype directive for datee
@@ -331,10 +413,25 @@ namespace Pinder.LlmAdapters
             if (context.ResolvedTarget != null)
             {
                 var target = context.ResolvedTarget.Value;
-                sb.AppendLine($"TRANSITION DIRECTIVE: React to {target.Registry} #{target.Index} (\"{target.StemText}\") using {target.TransitionStyle}.");
+                string transitionDirective = RenderTemplate(
+                    PromptTemplates.DateeTransitionDirective,
+                    new Dictionary<string, string>
+                    {
+                        { "registry", target.Registry ?? string.Empty },
+                        { "index", target.Index.ToString() },
+                        { "stem_text", target.StemText ?? string.Empty },
+                        { "transition_style", target.TransitionStyle ?? string.Empty },
+                    });
+                sb.AppendLine(transitionDirective, GetTemplateSource("datee-transition-directive"), "datee-transition-directive");
                 if (!string.IsNullOrEmpty(context.CognitiveSubtext))
                 {
-                    sb.AppendLine($"COGNITIVE SUBTEXT: {context.CognitiveSubtext}");
+                    string cognitiveSubtextDirective = RenderTemplate(
+                        PromptTemplates.CognitiveSubtextDirective,
+                        new Dictionary<string, string>
+                        {
+                            { "cognitive_subtext", context.CognitiveSubtext ?? string.Empty },
+                        });
+                    sb.AppendLine(cognitiveSubtextDirective, GetTemplateSource("cognitive-subtext-directive"), "cognitive-subtext-directive");
                 }
                 sb.AppendLine();
             }

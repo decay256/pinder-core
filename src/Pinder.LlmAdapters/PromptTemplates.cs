@@ -78,6 +78,44 @@ namespace Pinder.LlmAdapters
 
         internal static string PivotDirective => GetCatalogString("pivot-directive");
 
+        // Live gameplay generation directives
+
+        internal static string ColdOpenerRule => GetCatalogString("cold-opener-rule");
+
+        internal static string StakeCoverageSummary => GetCatalogString("stake-coverage-summary");
+
+        internal static string StakeCoverageUntouchedDirective => GetCatalogString("stake-coverage-untouched-directive");
+
+        internal static string StakeCoverageAllReferencedDirective => GetCatalogString("stake-coverage-all-referenced-directive");
+
+        internal static string PlayerTransitionDirective => GetCatalogString("player-transition-directive");
+
+        internal static string DateeTransitionDirective => GetCatalogString("datee-transition-directive");
+
+        internal static string CognitiveSubtextDirective => GetCatalogString("cognitive-subtext-directive");
+
+        internal static string ResponseTimingHeader => GetCatalogString("response-timing-header");
+
+        internal static string ResponseTimingSubMinute => GetCatalogString("response-timing-sub-minute");
+
+        internal static string ResponseTimingApproximate => GetCatalogString("response-timing-approximate");
+
+        internal static string ShadowStateHeading => GetCatalogString("shadow-state-heading");
+
+        internal static string DateeShadowStateHeading => GetCatalogString("datee-shadow-state-heading");
+
+        internal static string ShadowTaintMadness => GetCatalogString("shadow-taint-madness");
+
+        internal static string ShadowTaintDespair => GetCatalogString("shadow-taint-despair");
+
+        internal static string ShadowTaintDenial => GetCatalogString("shadow-taint-denial");
+
+        internal static string ShadowTaintFixation => GetCatalogString("shadow-taint-fixation");
+
+        internal static string ShadowTaintDread => GetCatalogString("shadow-taint-dread");
+
+        internal static string ShadowTaintOverthinking => GetCatalogString("shadow-taint-overthinking");
+
         // ── Resistance descriptors ──────────────────────────────────────────
 
         internal static string ResistanceActiveDisengagement => GetCatalogString("resistance-active-disengagement");

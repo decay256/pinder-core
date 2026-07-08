@@ -4,6 +4,7 @@ using System.Linq;
 using Xunit;
 using Pinder.Core.Conversation;
 using Pinder.Core.Rolls;
+using Pinder.Core.Stats;
 using Pinder.Core.Text;
 using Pinder.LlmAdapters;
 using Pinder.Core.TestCommon;
@@ -83,6 +84,89 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains(trace.Spans, s => s.Key == "pivot-directive");
             Assert.Contains(trace.Spans, s => s.Key == "engine-options-block");
             Assert.Contains(trace.Spans, s => s.Key == "dialogue-options-instruction");
+        }
+
+        [Fact]
+        public void Test_SessionDocumentBuilder_GameplayDirectivesUseCatalogSpans()
+        {
+            PromptCatalogInitializer.Initialize();
+
+            var target = new ResolvedRevelationTarget
+            {
+                Registry = "STAKE",
+                Index = 7,
+                Field = "STAKE_LINE",
+                Manner = "ACCIDENTAL_SLIP",
+                StemText = "the song I still cannot hear",
+                TransitionStyle = "ACCIDENTAL_SLIP",
+            };
+
+            var dialogueContext = new DialogueContext(
+                playerAvatarPrompt: "player prompt",
+                dateePrompt: "datee prompt",
+                conversationHistory: new List<(string Sender, string Text)>(),
+                dateeLastMessage: "",
+                activeTraps: Array.Empty<string>(),
+                currentInterest: 10,
+                shadowThresholds: new Dictionary<ShadowStatType, int>
+                {
+                    { ShadowStatType.Fixation, 8 },
+                },
+                playerName: "P",
+                dateeName: "O",
+                currentTurn: 3,
+                availableStats: new[] { StatType.Charm, StatType.Rizz, StatType.Honesty },
+                stakeLines: new[] { "1. The song I still cannot hear without leaving the room" },
+                resolvedTarget: target,
+                cognitiveSubtext: "fear of being too visible");
+
+            var dialogueTrace = SessionDocumentBuilder.BuildDialogueOptionsPromptEx(dialogueContext);
+
+            AssertCatalogSpan(dialogueTrace, "cold-opener-rule");
+            AssertCatalogSpan(dialogueTrace, "shadow-state-heading");
+            AssertCatalogSpan(dialogueTrace, "shadow-taint-fixation");
+            AssertCatalogSpan(dialogueTrace, "stake-coverage-summary");
+            AssertCatalogSpan(dialogueTrace, "stake-coverage-untouched-directive");
+            AssertCatalogSpan(dialogueTrace, "player-transition-directive");
+            AssertCatalogSpan(dialogueTrace, "cognitive-subtext-directive");
+
+            var dateeContext = new DateeContext(
+                dateePrompt: "datee prompt",
+                conversationHistory: new List<(string Sender, string Text)>
+                {
+                    ("P", "hey"),
+                },
+                dateeLastMessage: "",
+                activeTraps: Array.Empty<string>(),
+                currentInterest: 10,
+                playerDeliveredMessage: "hey",
+                interestBefore: 8,
+                interestAfter: 10,
+                responseDelayMinutes: 2.5,
+                shadowThresholds: new Dictionary<ShadowStatType, int>
+                {
+                    { ShadowStatType.Fixation, 8 },
+                },
+                playerName: "P",
+                dateeName: "O",
+                resolvedTarget: target,
+                cognitiveSubtext: "fear of being too visible");
+
+            var dateeTrace = SessionDocumentBuilder.BuildDateePromptEx(dateeContext);
+
+            AssertCatalogSpan(dateeTrace, "response-timing-header");
+            AssertCatalogSpan(dateeTrace, "response-timing-approximate");
+            AssertCatalogSpan(dateeTrace, "datee-shadow-state-heading");
+            AssertCatalogSpan(dateeTrace, "shadow-taint-fixation");
+            AssertCatalogSpan(dateeTrace, "datee-transition-directive");
+            AssertCatalogSpan(dateeTrace, "cognitive-subtext-directive");
+        }
+
+        private static void AssertCatalogSpan(PromptTraceResult trace, string key)
+        {
+            Assert.Contains(
+                trace.Spans,
+                s => s.Key == key && s.SourceFile == "data/prompts/templates.yaml");
         }
     }
 }

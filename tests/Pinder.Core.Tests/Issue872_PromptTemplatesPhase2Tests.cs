@@ -44,23 +44,27 @@ namespace Pinder.Core.Tests
         // ----- loader: entry count -------------------------------------------
 
         [Fact]
-        public void TemplatesYaml_LoadsAll35Entries()
+        public void TemplatesYaml_LoadsAll53Entries()
         {
             var catalog = PromptCatalog.LoadFromDirectory(PromptsRoot);
 
             // #1126: two dead creative-delivery templates were removed
             // (engine-delivery-block, failure-delivery-instruction), dropping
             // templates.yaml from 37 to 35 Phase 2 entries. With the Phase 1
-            // stake entry that is at least 36 names.
+            // stake entry that was at least 36 names. Finding 3 later moved
+            // 18 live gameplay-generation directives into templates.yaml.
             var names = catalog.Names.ToList();
-            Assert.True(names.Count >= 36,
-                $"expected >=36 prompt names (35 templates + stake), got {names.Count}");
+            Assert.True(names.Count >= 54,
+                $"expected >=54 prompt names (53 templates + stake), got {names.Count}");
 
             // Spot-check a few representative keys.
             Assert.Contains("dialogue-options-instruction", names);
             Assert.Contains("default-clean", names);
             Assert.Contains("interest-narrative-25", names);
             Assert.Contains("engine-options-block", names);
+            Assert.Contains("cold-opener-rule", names);
+            Assert.Contains("player-transition-directive", names);
+            Assert.Contains("response-timing-header", names);
         }
     }
 }

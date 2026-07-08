@@ -256,6 +256,65 @@ prompts:
       TOPIC PIVOT RULE (Turn 3+): If the conversation has stayed on the same topic since the opener, one option (Option C) MUST bridge to a different dimension of the character. The bridge should feel natural, not abrupt — use the current topic as a stepping stone.
       Examples: from 'mushrooms' to asking about the character's relationship to risk, from 'travel' to asking what home means to them, from 'work stress' to what they do when they need to feel alive.
       The pivot option should still be tagged with an appropriate stat and follow all other rules. It opens a new conversational thread without abandoning the rapport built so far.
+  cold-opener-rule:
+    system_prompt: |-
+      COLD OPENER RULE: This is the very first message. You have never spoken to this person before.
+      Since you are initiating the contact and sending the very first message, you MUST NOT say "interesting that you mention", "since you said", "you mentioned", or use any other phrasing that assumes the datee has already spoken or sent a message in this conversation. The datee has sent ZERO messages.
+      Your only knowledge of them is their dating profile: bio text AND visible appearance (items listed after 'Wearing:' in the profile above).
+      Do NOT reference anything you would only know from inside knowledge of the character - only what is visible on their public profile.
+      A strong opener can react to their bio, their look, or both. Something specific beats something generic.
+      Examples: their outfit, a specific item they're wearing, the energy their style projects, something the bio implies about them.
+  stake-coverage-summary:
+    system_prompt: >-
+      STAKE COVERAGE - {referenced_count} line(s) referenced this session, {untouched_count} untouched.
+  stake-coverage-untouched-directive:
+    system_prompt: >-
+      Untouched stake lines (the final OPTION must reference one):
+  stake-coverage-all-referenced-directive:
+    system_prompt: >-
+      All stake lines referenced - the final OPTION may continue the most recent stake thread.
+  player-transition-directive:
+    system_prompt: >-
+      TRANSITION DIRECTIVE: {player_name} should deliver {registry} #{index} ("{stem_text}") via OPTION_C as {transition_style}.
+  datee-transition-directive:
+    system_prompt: >-
+      TRANSITION DIRECTIVE: React to {registry} #{index} ("{stem_text}") using {transition_style}.
+  cognitive-subtext-directive:
+    system_prompt: >-
+      COGNITIVE SUBTEXT: {cognitive_subtext}
+  response-timing-header:
+    system_prompt: >-
+      RESPONSE TIMING
+  response-timing-sub-minute:
+    system_prompt: >-
+      Your reply arrives in less than 1 minute.
+  response-timing-approximate:
+    system_prompt: >-
+      Your reply arrives in approximately {delay_minutes} minutes.
+  shadow-state-heading:
+    system_prompt: >-
+      SHADOW STATE
+  datee-shadow-state-heading:
+    system_prompt: >-
+      SHADOW STATE (corrupting forces on your communication)
+  shadow-taint-madness:
+    system_prompt: >-
+      Your Madness is elevated. Your charm has an uncanny quality - warmth that somehow feels slightly off. Smooth words that land wrong. People can't identify why they feel uneasy. You don't notice.
+  shadow-taint-despair:
+    system_prompt: >-
+      Your Despair is elevated. You want to be desired and it shows. Neediness leaks through even confident-sounding Rizz options. You are performing magnetism rather than feeling it.
+  shadow-taint-denial:
+    system_prompt: >-
+      Your Denial is elevated. Your honest options sound rehearsed. You tell truths that are technically true but curated. Emotional availability is performed rather than felt.
+  shadow-taint-fixation:
+    system_prompt: >-
+      Your Fixation is elevated. Chaos options feel forced - spontaneity that sounds calculated. You're trying to seem unpredictable. It shows.
+  shadow-taint-dread:
+    system_prompt: >-
+      Your Dread is elevated. Even successful Wit options have melancholy undertones. Jokes land but leave a slightly hollow aftertaste. You're funny because it's easier than being vulnerable.
+  shadow-taint-overthinking:
+    system_prompt: >-
+      Your Overthinking is elevated. Self-Awareness options are too clinical. You explain your feelings rather than expressing them. You know this. You're doing it anyway.
   resistance-active-disengagement:
     system_prompt: >-
       Active disengagement — short replies, testing, near-silence. You are barely here.

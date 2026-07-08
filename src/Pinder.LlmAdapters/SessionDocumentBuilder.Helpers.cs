@@ -79,17 +79,17 @@ namespace Pinder.LlmAdapters
             if (thresholds == null || thresholds.Count == 0) return string.Empty;
             var sb = new StringBuilder();
             if (thresholds.TryGetValue(ShadowStatType.Madness, out int madness) && madness > 5)
-                sb.AppendLine("Your Madness is elevated. Your charm has an uncanny quality — warmth that somehow feels slightly off. Smooth words that land wrong. People can't identify why they feel uneasy. You don't notice.");
+                sb.AppendLine(PromptTemplates.ShadowTaintMadness);
             if (thresholds.TryGetValue(ShadowStatType.Despair, out int despair) && despair > 6)
-                sb.AppendLine("Your Despair is elevated. You want to be desired and it shows. Neediness leaks through even confident-sounding Rizz options. You are performing magnetism rather than feeling it.");
+                sb.AppendLine(PromptTemplates.ShadowTaintDespair);
             if (thresholds.TryGetValue(ShadowStatType.Denial, out int denial) && denial > 5)
-                sb.AppendLine("Your Denial is elevated. Your honest options sound rehearsed. You tell truths that are technically true but curated. Emotional availability is performed rather than felt.");
+                sb.AppendLine(PromptTemplates.ShadowTaintDenial);
             if (thresholds.TryGetValue(ShadowStatType.Fixation, out int fixation) && fixation > 5)
-                sb.AppendLine("Your Fixation is elevated. Chaos options feel forced — spontaneity that sounds calculated. You're trying to seem unpredictable. It shows.");
+                sb.AppendLine(PromptTemplates.ShadowTaintFixation);
             if (thresholds.TryGetValue(ShadowStatType.Dread, out int dread) && dread > 5)
-                sb.AppendLine("Your Dread is elevated. Even successful Wit options have melancholy undertones. Jokes land but leave a slightly hollow aftertaste. You're funny because it's easier than being vulnerable.");
+                sb.AppendLine(PromptTemplates.ShadowTaintDread);
             if (thresholds.TryGetValue(ShadowStatType.Overthinking, out int overthinking) && overthinking > 5)
-                sb.AppendLine("Your Overthinking is elevated. Self-Awareness options are too clinical. You explain your feelings rather than expressing them. You know this. You're doing it anyway.");
+                sb.AppendLine(PromptTemplates.ShadowTaintOverthinking);
             return sb.ToString().Trim();
         }
 
