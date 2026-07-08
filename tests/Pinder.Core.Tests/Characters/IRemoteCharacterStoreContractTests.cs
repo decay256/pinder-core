@@ -60,16 +60,17 @@ namespace Pinder.Core.Tests.Characters
             // Drop-in compatibility: a caller that already takes an
             // ICharacterStore must compile when handed an
             // IRemoteCharacterStore. Issue #817 treats this as a contract.
-            IRemoteCharacterStore remote = new InMemoryRemoteCharacterStore();
+            using IRemoteCharacterStore remote = new InMemoryRemoteCharacterStore();
             ICharacterStore baseShape = remote;
             Assert.NotNull(baseShape);
             Assert.True(typeof(ICharacterStore).IsAssignableFrom(typeof(IRemoteCharacterStore)));
+            Assert.True(typeof(IDisposable).IsAssignableFrom(typeof(IRemoteCharacterStore)));
         }
 
         [Fact]
         public async Task PublishAsync_ThenLoadAsync_RoundTripsTheDefinition()
         {
-            var store = new InMemoryRemoteCharacterStore();
+            using var store = new InMemoryRemoteCharacterStore();
             var def = NewDef("11111111-1111-4111-8111-111111111111", name: "Round_Trip");
 
             var stamped = await store.PublishAsync(def, NewMeta("11111111-1111-4111-8111-111111111111"));
@@ -84,7 +85,7 @@ namespace Pinder.Core.Tests.Characters
         [Fact]
         public async Task PublishAsync_StampsCreatedAtAndUpdatedAt_ServerSide()
         {
-            var store = new InMemoryRemoteCharacterStore();
+            using var store = new InMemoryRemoteCharacterStore();
             var def = NewDef("11111111-1111-4111-8111-111111111111");
 
             // Client supplies MinValue; server replaces.
@@ -101,7 +102,7 @@ namespace Pinder.Core.Tests.Characters
         [Fact]
         public async Task PublishAsync_PreservesTagsAndVisibilityFromClient()
         {
-            var store = new InMemoryRemoteCharacterStore();
+            using var store = new InMemoryRemoteCharacterStore();
             var def = NewDef("11111111-1111-4111-8111-111111111111");
             var meta = NewMeta(
                 "11111111-1111-4111-8111-111111111111",
@@ -120,7 +121,7 @@ namespace Pinder.Core.Tests.Characters
             // The server uses its authenticated identity; the client cannot
             // claim arbitrary owner ids. Verified by stamping the OwnerId
             // via SimulatedServiceOwnerId in the fake.
-            var store = new InMemoryRemoteCharacterStore { SimulatedServiceOwnerId = "service:authoritative" };
+            using var store = new InMemoryRemoteCharacterStore { SimulatedServiceOwnerId = "service:authoritative" };
             var def = NewDef("11111111-1111-4111-8111-111111111111");
             var meta = NewMeta("11111111-1111-4111-8111-111111111111", ownerId: "client:lying");
 
@@ -132,7 +133,7 @@ namespace Pinder.Core.Tests.Characters
         [Fact]
         public async Task QueryAsync_FiltersByTags_AllMustMatch()
         {
-            var store = new InMemoryRemoteCharacterStore();
+            using var store = new InMemoryRemoteCharacterStore();
             await store.PublishAsync(
                 NewDef("11111111-1111-4111-8111-111111111111", "A"),
                 NewMeta("11111111-1111-4111-8111-111111111111", tags: new[] { "official-pack" }));
@@ -163,7 +164,7 @@ namespace Pinder.Core.Tests.Characters
         [Fact]
         public async Task QueryAsync_FiltersByIsPublic()
         {
-            var store = new InMemoryRemoteCharacterStore();
+            using var store = new InMemoryRemoteCharacterStore();
             await store.PublishAsync(
                 NewDef("11111111-1111-4111-8111-111111111111"),
                 NewMeta("11111111-1111-4111-8111-111111111111", isPublic: true));
@@ -186,7 +187,7 @@ namespace Pinder.Core.Tests.Characters
         [Fact]
         public async Task QueryAsync_PaginationViaCursor_DrainsAllResults()
         {
-            var store = new InMemoryRemoteCharacterStore();
+            using var store = new InMemoryRemoteCharacterStore();
             for (int i = 0; i < 7; i++)
             {
                 string id = $"{i:x8}-aaaa-4aaa-8aaa-000000000000";
@@ -210,7 +211,7 @@ namespace Pinder.Core.Tests.Characters
         [Fact]
         public async Task GetMetadataAsync_ReturnsNullForUnknownId()
         {
-            var store = new InMemoryRemoteCharacterStore();
+            using var store = new InMemoryRemoteCharacterStore();
             var got = await store.GetMetadataAsync("00000000-0000-4000-8000-000000000000");
             Assert.Null(got);
         }
@@ -218,7 +219,7 @@ namespace Pinder.Core.Tests.Characters
         [Fact]
         public async Task GetMetadataAsync_AfterPublish_ReturnsStampedMetadata()
         {
-            var store = new InMemoryRemoteCharacterStore();
+            using var store = new InMemoryRemoteCharacterStore();
             var def = NewDef("11111111-1111-4111-8111-111111111111");
             var stamped = await store.PublishAsync(def, NewMeta("11111111-1111-4111-8111-111111111111"));
 

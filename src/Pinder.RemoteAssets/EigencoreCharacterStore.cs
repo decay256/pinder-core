@@ -27,6 +27,10 @@ namespace Pinder.RemoteAssets
     /// <see cref="ListIdsAsync"/> remains <see cref="NotSupportedException"/>:
     /// the v1 wire contract has no list-all endpoint; discovery happens
     /// via <see cref="QueryAsync"/>.
+    ///
+    /// Owns its internal <see cref="HttpClient"/> and disposes it from
+    /// <see cref="Dispose"/>. The injected <see cref="HttpMessageHandler"/>
+    /// remains caller-owned; see <see cref="Configuration.HttpMessageHandler"/>.
     /// </summary>
     public sealed class EigencoreCharacterStore : IRemoteCharacterStore
     {
@@ -34,6 +38,7 @@ namespace Pinder.RemoteAssets
         private readonly HttpClient _http;
         private readonly EigencoreCharacterStoreRead _readStore;
         private readonly SyncHelper _syncHelper;
+        private bool _disposed;
 
         public EigencoreCharacterStore(Configuration config)
         {
@@ -64,31 +69,68 @@ namespace Pinder.RemoteAssets
             _syncHelper = new SyncHelper(_config, _http);
         }
 
-        public Task<CharacterDefinition?> LoadAsync(string characterId, CancellationToken ct = default) =>
-            _readStore.LoadAsync(characterId, ct);
+        public Task<CharacterDefinition?> LoadAsync(string characterId, CancellationToken ct = default)
+        {
+            ThrowIfDisposed();
+            return _readStore.LoadAsync(characterId, ct);
+        }
 
-        public Task<CharacterAssetMetadata?> GetMetadataAsync(string characterId, CancellationToken ct = default) =>
-            _readStore.GetMetadataAsync(characterId, ct);
+        public Task<CharacterAssetMetadata?> GetMetadataAsync(string characterId, CancellationToken ct = default)
+        {
+            ThrowIfDisposed();
+            return _readStore.GetMetadataAsync(characterId, ct);
+        }
 
-        public Task<bool> ExistsAsync(string characterId, CancellationToken ct = default) =>
-            _readStore.ExistsAsync(characterId, ct);
+        public Task<bool> ExistsAsync(string characterId, CancellationToken ct = default)
+        {
+            ThrowIfDisposed();
+            return _readStore.ExistsAsync(characterId, ct);
+        }
 
-        public Task<IReadOnlyList<string>> ListIdsAsync(CancellationToken ct = default) =>
-            _readStore.ListIdsAsync(ct);
+        public Task<IReadOnlyList<string>> ListIdsAsync(CancellationToken ct = default)
+        {
+            ThrowIfDisposed();
+            return _readStore.ListIdsAsync(ct);
+        }
 
-        public Task<CharacterAssetPage> QueryAsync(CharacterAssetQuery query, CancellationToken ct = default) =>
-            _readStore.QueryAsync(query, ct);
+        public Task<CharacterAssetPage> QueryAsync(CharacterAssetQuery query, CancellationToken ct = default)
+        {
+            ThrowIfDisposed();
+            return _readStore.QueryAsync(query, ct);
+        }
 
         public Task<CharacterAssetMetadata> PublishAsync(
             CharacterDefinition def,
             CharacterAssetMetadata metadata,
-            CancellationToken ct = default) =>
-            _syncHelper.PublishAsync(def, metadata, ct);
+            CancellationToken ct = default)
+        {
+            ThrowIfDisposed();
+            return _syncHelper.PublishAsync(def, metadata, ct);
+        }
 
-        public Task SaveAsync(CharacterDefinition def, CancellationToken ct = default) =>
-            _syncHelper.SaveAsync(def, ct);
+        public Task SaveAsync(CharacterDefinition def, CancellationToken ct = default)
+        {
+            ThrowIfDisposed();
+            return _syncHelper.SaveAsync(def, ct);
+        }
 
-        public Task<bool> DeleteAsync(string characterId, CancellationToken ct = default) =>
-            _syncHelper.DeleteAsync(characterId, ct);
+        public Task<bool> DeleteAsync(string characterId, CancellationToken ct = default)
+        {
+            ThrowIfDisposed();
+            return _syncHelper.DeleteAsync(characterId, ct);
+        }
+
+        public void Dispose()
+        {
+            if (_disposed) return;
+            _http.Dispose();
+            _disposed = true;
+        }
+
+        private void ThrowIfDisposed()
+        {
+            if (_disposed)
+                throw new ObjectDisposedException(nameof(EigencoreCharacterStore));
+        }
     }
 }

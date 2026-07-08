@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,8 +18,11 @@ namespace Pinder.Core.Characters
     /// <see cref="ICharacterStore"/> can be handed an
     /// <see cref="IRemoteCharacterStore"/> and continues to work; the
     /// remote-specific methods are additive.
+    ///
+    /// Because remote stores may own network clients, callers that construct
+    /// or otherwise own an implementation must dispose it when finished.
     /// </summary>
-    public interface IRemoteCharacterStore : ICharacterStore
+    public interface IRemoteCharacterStore : ICharacterStore, IDisposable
     {
         /// <summary>
         /// Returns one page of metadata matching the given query. Metadata

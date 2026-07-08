@@ -180,6 +180,10 @@ namespace Pinder.Core.Tests.Characters
             }
         }
 
+        public void Dispose()
+        {
+        }
+
         // --- helpers --------------------------------------------------------
 
         private CharacterAssetMetadata StampServerSide(
