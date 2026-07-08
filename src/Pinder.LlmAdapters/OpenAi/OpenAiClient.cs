@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
@@ -51,9 +52,19 @@ namespace Pinder.LlmAdapters.OpenAi
         /// <param name="requestJson">Serialized JSON request body.</param>
         /// <param name="ct">Cancellation token.</param>
         /// <returns>The text content of choices[0].message.content.</returns>
-        public async Task<string> SendChatCompletionAsync(string requestJson, CancellationToken ct = default)
+        public async Task<string> SendChatCompletionAsync(
+            string requestJson,
+            CancellationToken ct = default,
+            LlmCallTelemetryOptions? telemetry = null,
+            string provider = "openai-compatible",
+            string? phase = "chat_completion")
         {
-            var (text, _) = await SendChatCompletionWithUsageAsync(requestJson, ct).ConfigureAwait(false);
+            var (text, _) = await SendChatCompletionWithUsageAsync(
+                requestJson,
+                ct,
+                telemetry,
+                provider,
+                phase).ConfigureAwait(false);
             return text;
         }
 
@@ -63,12 +74,29 @@ namespace Pinder.LlmAdapters.OpenAi
         /// <param name="requestJson">Serialized JSON request body.</param>
         /// <param name="ct">Cancellation token.</param>
         /// <returns>A tuple containing the text content of choices[0].message.content and the raw parsed response.</returns>
-        public async Task<(string text, JObject rawJson)> SendChatCompletionWithUsageAsync(string requestJson, CancellationToken ct = default)
+        public async Task<(string text, JObject rawJson)> SendChatCompletionWithUsageAsync(
+            string requestJson,
+            CancellationToken ct = default,
+            LlmCallTelemetryOptions? telemetry = null,
+            string provider = "openai-compatible",
+            string? phase = "chat_completion")
         {
             if (requestJson == null) throw new ArgumentNullException(nameof(requestJson));
 
             string url = _baseUrl + "/v1/chat/completions";
             string? model = TryExtractModel(requestJson);
+            var duration = Stopwatch.StartNew();
+            var attempt = 1;
+            LlmCallTelemetry.Emit(
+                telemetry,
+                LlmCallTelemetryEventNames.Started,
+                provider,
+                model,
+                phase,
+                statusCode: null,
+                attempt: attempt,
+                retryAfter: null,
+                duration: duration.Elapsed);
             int retries429 = 0;
             int retries5xx = 0;
 
@@ -78,7 +106,26 @@ namespace Pinder.LlmAdapters.OpenAi
 
                 using (var content = new StringContent(requestJson, Encoding.UTF8, "application/json"))
                 {
-                    var response = await _httpClient.PostAsync(url, content, ct).ConfigureAwait(false);
+                    HttpResponseMessage response;
+                    try
+                    {
+                        response = await _httpClient.PostAsync(url, content, ct).ConfigureAwait(false);
+                    }
+                    catch (Exception ex) when (!(ex is OperationCanceledException))
+                    {
+                        LlmCallTelemetry.Emit(
+                            telemetry,
+                            LlmCallTelemetryEventNames.Failed,
+                            provider,
+                            model,
+                            phase,
+                            statusCode: null,
+                            attempt: attempt,
+                            retryAfter: null,
+                            duration: duration.Elapsed,
+                            exceptionType: ex.GetType().Name);
+                        throw;
+                    }
                     int statusCode = (int)response.StatusCode;
 
                     if (response.IsSuccessStatusCode)
@@ -88,24 +135,37 @@ namespace Pinder.LlmAdapters.OpenAi
                         {
                             var json = JObject.Parse(body);
                             string text = ExtractAssistantText(json);
+                            LlmCallTelemetry.Emit(
+                                telemetry,
+                                LlmCallTelemetryEventNames.Completed,
+                                provider,
+                                model,
+                                phase,
+                                statusCode,
+                                attempt,
+                                retryAfter: null,
+                                duration: duration.Elapsed);
                             return (text, json);
                         }
-                        catch (InvalidOperationException)
+                        catch (InvalidOperationException ex)
                         {
                             // ExtractAssistantText raises a typed error for malformed shapes;
                             // re-throw without wrapping to preserve the message.
+                            EmitFailedTelemetry(telemetry, provider, model, phase, statusCode, attempt, duration, ex);
                             throw;
                         }
                         catch (Exception)
                         {
-                            throw new InvalidOperationException(
+                            var wrapped = new InvalidOperationException(
                                 LlmDiagnosticFormatter.ProviderFailure(
-                                    "openai-compatible",
+                                    provider,
                                     "OpenAI-compatible API returned a malformed response.",
                                     statusCode: statusCode,
                                     model: model,
-                                    phase: "chat_completion",
+                                    phase: phase,
                                     body: body));
+                            EmitFailedTelemetry(telemetry, provider, model, phase, statusCode, attempt, duration, wrapped);
+                            throw wrapped;
                         }
                     }
 
@@ -114,15 +174,21 @@ namespace Pinder.LlmAdapters.OpenAi
                     if (statusCode == 429)
                     {
                         if (retries429 >= MaxRetries429)
-                            throw new HttpRequestException(LlmDiagnosticFormatter.ProviderFailure(
-                                "openai-compatible",
+                        {
+                            var ex = new HttpRequestException(LlmDiagnosticFormatter.ProviderFailure(
+                                provider,
                                 $"OpenAI-compatible API rate limited after {MaxRetries429} retries.",
                                 statusCode: statusCode,
                                 model: model,
-                                phase: "chat_completion",
+                                phase: phase,
                                 body: errorBody));
+                            EmitFailedTelemetry(telemetry, provider, model, phase, statusCode, attempt, duration, ex);
+                            throw ex;
+                        }
                         retries429++;
                         var delay = GetRetryAfterDelay(response);
+                        EmitRetryTelemetry(telemetry, provider, model, phase, statusCode, attempt, delay, duration);
+                        attempt++;
                         await Task.Delay(delay, ct).ConfigureAwait(false);
                         continue;
                     }
@@ -130,25 +196,34 @@ namespace Pinder.LlmAdapters.OpenAi
                     if (statusCode >= 500 && statusCode < 600)
                     {
                         if (retries5xx >= MaxRetries5xx)
-                            throw new HttpRequestException(LlmDiagnosticFormatter.ProviderFailure(
-                                "openai-compatible",
+                        {
+                            var ex = new HttpRequestException(LlmDiagnosticFormatter.ProviderFailure(
+                                provider,
                                 $"OpenAI-compatible API server error after {MaxRetries5xx} retries.",
                                 statusCode: statusCode,
                                 model: model,
-                                phase: "chat_completion",
+                                phase: phase,
                                 body: errorBody));
+                            EmitFailedTelemetry(telemetry, provider, model, phase, statusCode, attempt, duration, ex);
+                            throw ex;
+                        }
                         retries5xx++;
-                        await Task.Delay(TimeSpan.FromSeconds(1), ct).ConfigureAwait(false);
+                        var delay = TimeSpan.FromSeconds(1);
+                        EmitRetryTelemetry(telemetry, provider, model, phase, statusCode, attempt, delay, duration);
+                        attempt++;
+                        await Task.Delay(delay, ct).ConfigureAwait(false);
                         continue;
                     }
 
-                    throw new HttpRequestException(LlmDiagnosticFormatter.ProviderFailure(
-                        "openai-compatible",
+                    var nonRetryable = new HttpRequestException(LlmDiagnosticFormatter.ProviderFailure(
+                        provider,
                         "OpenAI-compatible API request failed.",
                         statusCode: statusCode,
                         model: model,
-                        phase: "chat_completion",
+                        phase: phase,
                         body: errorBody));
+                    EmitFailedTelemetry(telemetry, provider, model, phase, statusCode, attempt, duration, nonRetryable);
+                    throw nonRetryable;
                 }
             }
         }
@@ -255,6 +330,51 @@ namespace Pinder.LlmAdapters.OpenAi
             {
                 return null;
             }
+        }
+
+        private static void EmitRetryTelemetry(
+            LlmCallTelemetryOptions? telemetry,
+            string provider,
+            string? model,
+            string? phase,
+            int statusCode,
+            int attempt,
+            TimeSpan delay,
+            Stopwatch duration)
+        {
+            LlmCallTelemetry.Emit(
+                telemetry,
+                LlmCallTelemetryEventNames.Retry,
+                provider,
+                model,
+                phase,
+                statusCode,
+                attempt,
+                delay,
+                duration.Elapsed);
+        }
+
+        private static void EmitFailedTelemetry(
+            LlmCallTelemetryOptions? telemetry,
+            string provider,
+            string? model,
+            string? phase,
+            int statusCode,
+            int attempt,
+            Stopwatch duration,
+            Exception exception)
+        {
+            LlmCallTelemetry.Emit(
+                telemetry,
+                LlmCallTelemetryEventNames.Failed,
+                provider,
+                model,
+                phase,
+                statusCode,
+                attempt,
+                retryAfter: null,
+                duration: duration.Elapsed,
+                exceptionType: exception.GetType().Name);
         }
     }
 }

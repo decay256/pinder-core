@@ -15,31 +15,39 @@ namespace Pinder.LlmAdapters.Anthropic
     {
         private readonly AnthropicClient _client;
         private readonly string _model;
+        private readonly LlmCallTelemetryOptions? _telemetry;
         private bool _disposed;
 
         /// <summary>Creates transport with internally-owned AnthropicClient.</summary>
-        public AnthropicTransport(string apiKey, string model = AnthropicModelIds.DefaultModel)
+        public AnthropicTransport(
+            string apiKey,
+            string model = AnthropicModelIds.DefaultModel,
+            LlmCallTelemetryOptions? telemetry = null)
         {
             if (string.IsNullOrWhiteSpace(apiKey))
                 throw new ArgumentException("API key must not be null, empty, or whitespace.", nameof(apiKey));
             _model = AnthropicModelIds.ToApiId(model ?? throw new ArgumentNullException(nameof(model)));
+            _telemetry = telemetry;
             _client = new AnthropicClient(apiKey);
         }
 
         /// <summary>Creates transport with externally-provided HttpClient (for testing).</summary>
-        public AnthropicTransport(string apiKey, string model, System.Net.Http.HttpClient httpClient)
+        public AnthropicTransport(
+            string apiKey,
+            string model,
+            System.Net.Http.HttpClient httpClient,
+            LlmCallTelemetryOptions? telemetry = null)
         {
             if (string.IsNullOrWhiteSpace(apiKey))
                 throw new ArgumentException("API key must not be null, empty, or whitespace.", nameof(apiKey));
             _model = AnthropicModelIds.ToApiId(model ?? throw new ArgumentNullException(nameof(model)));
+            _telemetry = telemetry;
             _client = new AnthropicClient(apiKey, httpClient);
         }
 
         /// <inheritdoc />
         public async Task<string> SendAsync(string systemPrompt, string userMessage, double temperature = 0.9, int maxTokens = 1024, string? phase = null, CancellationToken ct = default)
         {
-            // phase is metadata for decorators; the underlying provider has no use for it.
-            _ = phase;
             if (systemPrompt == null) throw new ArgumentNullException(nameof(systemPrompt));
             if (userMessage == null) throw new ArgumentNullException(nameof(userMessage));
 
@@ -58,7 +66,13 @@ namespace Pinder.LlmAdapters.Anthropic
 
             // #794: forward the engine-level cancellation token to the underlying
             // HTTP call so a mid-turn Cancel() halts the in-flight request.
-            var response = await _client.SendMessagesAsync(request, ct).ConfigureAwait(false);
+            var response = await _client.SendMessagesAsync(
+                request,
+                ct,
+                _telemetry,
+                provider: "anthropic",
+                model: _model,
+                phase: phase).ConfigureAwait(false);
             return response.GetText() ?? "";
         }
 

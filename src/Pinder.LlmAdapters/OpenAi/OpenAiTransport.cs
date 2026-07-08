@@ -18,34 +18,46 @@ namespace Pinder.LlmAdapters.OpenAi
         private readonly OpenAiClient _client;
         private readonly string _model;
         private readonly bool _useAnthropicCacheControl;
+        private readonly LlmCallTelemetryOptions? _telemetry;
         private readonly OpenAiUsageCollector _usageCollector = new OpenAiUsageCollector();
         private bool _disposed;
 
         /// <summary>Creates transport with internally-owned OpenAiClient.</summary>
-        public OpenAiTransport(string apiKey, string baseUrl, string model, bool useAnthropicCacheControl = true)
+        public OpenAiTransport(
+            string apiKey,
+            string baseUrl,
+            string model,
+            bool useAnthropicCacheControl = true,
+            LlmCallTelemetryOptions? telemetry = null)
         {
             if (string.IsNullOrWhiteSpace(apiKey))
                 throw new ArgumentException("API key must not be null, empty, or whitespace.", nameof(apiKey));
             _model = model ?? throw new ArgumentNullException(nameof(model));
             _client = new OpenAiClient(apiKey, baseUrl);
             _useAnthropicCacheControl = useAnthropicCacheControl;
+            _telemetry = telemetry;
         }
 
         /// <summary>Creates transport with externally-provided HttpClient (for testing).</summary>
-        public OpenAiTransport(string apiKey, string baseUrl, string model, System.Net.Http.HttpClient httpClient, bool useAnthropicCacheControl = true)
+        public OpenAiTransport(
+            string apiKey,
+            string baseUrl,
+            string model,
+            System.Net.Http.HttpClient httpClient,
+            bool useAnthropicCacheControl = true,
+            LlmCallTelemetryOptions? telemetry = null)
         {
             if (string.IsNullOrWhiteSpace(apiKey))
                 throw new ArgumentException("API key must not be null, empty, or whitespace.", nameof(apiKey));
             _model = model ?? throw new ArgumentNullException(nameof(model));
             _client = new OpenAiClient(apiKey, baseUrl, httpClient);
             _useAnthropicCacheControl = useAnthropicCacheControl;
+            _telemetry = telemetry;
         }
 
         /// <inheritdoc />
         public async Task<string> SendAsync(string systemPrompt, string userMessage, double temperature = 0.9, int maxTokens = 1024, string? phase = null, CancellationToken ct = default)
         {
-            // phase is metadata for decorators; the underlying provider has no use for it.
-            _ = phase;
             if (systemPrompt == null) throw new ArgumentNullException(nameof(systemPrompt));
             if (userMessage == null) throw new ArgumentNullException(nameof(userMessage));
 
@@ -71,7 +83,12 @@ namespace Pinder.LlmAdapters.OpenAi
             string requestJson = JsonConvert.SerializeObject(request);
             // #794: forward the engine-level cancellation token to the underlying
             // HTTP call so a mid-turn Cancel() halts the in-flight request.
-            var (text, rawJson) = await _client.SendChatCompletionWithUsageAsync(requestJson, ct).ConfigureAwait(false);
+            var (text, rawJson) = await _client.SendChatCompletionWithUsageAsync(
+                requestJson,
+                ct,
+                _telemetry,
+                provider: "openai-compatible",
+                phase: phase).ConfigureAwait(false);
             _usageCollector.Collect(rawJson);
             return text;
         }
