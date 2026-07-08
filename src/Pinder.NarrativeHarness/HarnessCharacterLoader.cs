@@ -1,7 +1,10 @@
 using System;
 using System.IO;
+using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using Pinder.Core.Characters;
 using Pinder.Core.Data;
 using Pinder.Core.Interfaces;
@@ -56,7 +59,32 @@ namespace Pinder.Tools.NarrativeHarness
                     nameof(slug));
         }
 
+        /// <summary>
+        /// Synchronous entry point used by CLI-only callers (e.g.
+        /// tools/NarrativeHarness/Program.cs) where blocking on disk I/O during
+        /// process startup is acceptable. Delegates to <see cref="LoadAsync"/> so
+        /// there is exactly one implementation of the load path; request-driven
+        /// callers (the admin narrative-harness HTTP endpoint) MUST use
+        /// <see cref="LoadAsync"/> directly instead of calling this method, so
+        /// they never block an ASP.NET request thread on disk I/O.
+        /// </summary>
         public static LoadedCharacter Load(string slug, bool archetypesEnabled = false)
+        {
+            return LoadAsync(slug, archetypesEnabled).GetAwaiter().GetResult();
+        }
+
+        /// <summary>
+        /// Async counterpart of <see cref="Load"/>. Same production load path
+        /// (DataFileLocator -&gt; DirectoryCharacterStore -&gt;
+        /// CharacterDefinitionLoader.Assemble) but with genuinely asynchronous
+        /// file reads (<see cref="ReadAllTextAsync"/>) and an awaited
+        /// <see cref="DirectoryCharacterStore.LoadAsync"/> call instead of
+        /// <c>.GetAwaiter().GetResult()</c>. Intended for request-driven
+        /// callers that must not block a thread on disk I/O while setting up
+        /// an admin harness run.
+        /// </summary>
+        public static async Task<LoadedCharacter> LoadAsync(
+            string slug, bool archetypesEnabled = false, CancellationToken cancellationToken = default)
         {
             // Guard first: reject structurally-unsafe slugs before constructing
             // any filesystem path. Valid-but-missing slugs still fall through to
@@ -86,13 +114,15 @@ namespace Pinder.Tools.NarrativeHarness
             if (anatomyPath == null)
                 throw new FileNotFoundException("Could not find data/anatomy/anatomy-parameters.json.");
 
-            IItemRepository itemRepo = new JsonItemRepository(File.ReadAllText(itemsPath));
-            IAnatomyRepository anatomyRepo = new JsonAnatomyRepository(File.ReadAllText(anatomyPath));
+            IItemRepository itemRepo = new JsonItemRepository(
+                await ReadAllTextAsync(itemsPath, cancellationToken).ConfigureAwait(false));
+            IAnatomyRepository anatomyRepo = new JsonAnatomyRepository(
+                await ReadAllTextAsync(anatomyPath, cancellationToken).ConfigureAwait(false));
 
             string charactersDir = Path.GetDirectoryName(charDefPath)!;
             var store = new DirectoryCharacterStore(charactersDir);
-            string id = ReadCharacterId(charDefPath);
-            CharacterDefinition? def = store.LoadAsync(id).GetAwaiter().GetResult();
+            string id = await ReadCharacterIdAsync(charDefPath, cancellationToken).ConfigureAwait(false);
+            CharacterDefinition? def = await store.LoadAsync(id, cancellationToken).ConfigureAwait(false);
             if (def == null)
                 throw new InvalidOperationException(
                     $"DirectoryCharacterStore at {charactersDir} did not surface character_id {id}.");
@@ -101,25 +131,62 @@ namespace Pinder.Tools.NarrativeHarness
             return new LoadedCharacter(profile, def);
         }
 
-        private static string ReadCharacterId(string path)
+        private static async Task<string> ReadCharacterIdAsync(string path, CancellationToken cancellationToken)
         {
-            using var stream = File.OpenRead(path);
-            using var doc = JsonDocument.Parse(stream);
+            string json = await ReadAllTextAsync(path, cancellationToken).ConfigureAwait(false);
+            using var doc = JsonDocument.Parse(json);
             if (!doc.RootElement.TryGetProperty("character_id", out var idProp)
                 || idProp.ValueKind != JsonValueKind.String)
                 throw new FormatException($"{path} is missing required field: character_id");
             return idProp.GetString()!;
         }
 
-        /// <summary>Locate and load data/game-definition.yaml as the base GameDefinition.</summary>
+        /// <summary>
+        /// Genuinely asynchronous file read (async <see cref="FileStream"/> +
+        /// <see cref="StreamReader"/>), mirroring
+        /// <c>DirectoryCharacterStore</c>'s raw I/O helper. This project
+        /// targets netstandard2.0, which has no <c>File.ReadAllTextAsync</c>,
+        /// so this hand-rolled helper is what makes <see cref="LoadAsync"/>
+        /// and <see cref="LoadBaseGameDefinitionAsync"/> non-blocking rather
+        /// than a synchronous read wrapped in <c>Task.FromResult</c>.
+        /// </summary>
+        private static async Task<string> ReadAllTextAsync(string path, CancellationToken cancellationToken)
+        {
+            const int bufferSize = 4096;
+            using var stream = new FileStream(
+                path, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize, useAsync: true);
+            // Matches File.ReadAllText's behaviour: auto-detect BOM, default to UTF-8.
+            using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
+            string text = await reader.ReadToEndAsync().ConfigureAwait(false);
+            cancellationToken.ThrowIfCancellationRequested();
+            return text;
+        }
+
+        /// <summary>
+        /// Locate and load data/game-definition.yaml as the base GameDefinition.
+        /// Synchronous entry point for CLI-only callers; delegates to
+        /// <see cref="LoadBaseGameDefinitionAsync"/>.
+        /// </summary>
         public static Pinder.LlmAdapters.GameDefinition LoadBaseGameDefinition()
+        {
+            return LoadBaseGameDefinitionAsync().GetAwaiter().GetResult();
+        }
+
+        /// <summary>
+        /// Async counterpart of <see cref="LoadBaseGameDefinition"/> using
+        /// <see cref="ReadAllTextAsync"/> instead of a synchronous read.
+        /// Intended for request-driven callers.
+        /// </summary>
+        public static async Task<Pinder.LlmAdapters.GameDefinition> LoadBaseGameDefinitionAsync(
+            CancellationToken cancellationToken = default)
         {
             string baseDir = AppContext.BaseDirectory;
             string? gameDefPath = HarnessDataLocator.FindDataFile(
                 baseDir, Path.Combine("data", "game-definition.yaml"));
             if (gameDefPath == null)
                 throw new FileNotFoundException("Could not find data/game-definition.yaml.");
-            return Pinder.LlmAdapters.GameDefinition.LoadFrom(File.ReadAllText(gameDefPath));
+            string yaml = await ReadAllTextAsync(gameDefPath, cancellationToken).ConfigureAwait(false);
+            return Pinder.LlmAdapters.GameDefinition.LoadFrom(yaml);
         }
     }
 }
