@@ -70,6 +70,15 @@ namespace Pinder.Core.Tests
             }
         }";
 
+        private static string WithAdditionalRootProperty(string propertyJson)
+        {
+            string trimmed = ValidV1Json.TrimEnd();
+            return trimmed.Substring(0, trimmed.Length - 1) +
+                "," + Environment.NewLine +
+                propertyJson + Environment.NewLine +
+                "}";
+        }
+
         [Fact]
         public void Load_GeraldDefinition_ProducesValidProfile()
         {
@@ -316,6 +325,73 @@ namespace Pinder.Core.Tests
             var ex = Assert.Throws<FormatException>(() =>
                 CharacterDefinitionLoader.Parse(json, itemRepo, anatomyRepo));
             Assert.Contains("Unknown shadow stat type", ex.Message);
+        }
+
+        [Fact]
+        public void ParseDefinition_MalformedItemsElement_ThrowsFormatExceptionWithPath()
+        {
+            string json = ValidV1Json.Replace(
+                "\"items\": [],",
+                "\"items\": [\"head_hat\", 42],");
+
+            var ex = Assert.Throws<FormatException>(() =>
+                CharacterDefinitionLoader.ParseDefinition(json));
+
+            Assert.Contains("items[1]", ex.Message);
+            Assert.Contains("string", ex.Message, StringComparison.OrdinalIgnoreCase);
+        }
+
+        [Fact]
+        public void ParseDefinition_MalformedAnatomyValue_ThrowsFormatExceptionWithPath()
+        {
+            string json = ValidV1Json.Replace(
+                "\"anatomy\": {},",
+                "\"anatomy\": { \"trunkLengthBase\": \"0.5\" },");
+
+            var ex = Assert.Throws<FormatException>(() =>
+                CharacterDefinitionLoader.ParseDefinition(json));
+
+            Assert.Contains("anatomy.trunkLengthBase", ex.Message);
+            Assert.Contains("number", ex.Message, StringComparison.OrdinalIgnoreCase);
+        }
+
+        [Fact]
+        public void ParseDefinition_MalformedBackstoryCategory_ThrowsFormatExceptionWithPath()
+        {
+            string json = WithAdditionalRootProperty(
+                @"""backstory_categories"": { ""origin"": { ""bio_lie"": { ""text"": ""lie"" }, ""tragic_reality"": ""truth"" } }");
+
+            var ex = Assert.Throws<FormatException>(() =>
+                CharacterDefinitionLoader.ParseDefinition(json));
+
+            Assert.Contains("backstory_categories.origin.bio_lie", ex.Message);
+            Assert.Contains("string", ex.Message, StringComparison.OrdinalIgnoreCase);
+        }
+
+        [Fact]
+        public void ParseDefinition_MalformedStakeLinesElement_ThrowsFormatExceptionWithPath()
+        {
+            string json = WithAdditionalRootProperty(
+                @"""stake_lines"": [""valid stake"", { ""text"": ""not a string"" }]");
+
+            var ex = Assert.Throws<FormatException>(() =>
+                CharacterDefinitionLoader.ParseDefinition(json));
+
+            Assert.Contains("stake_lines[1]", ex.Message);
+            Assert.Contains("string", ex.Message, StringComparison.OrdinalIgnoreCase);
+        }
+
+        [Fact]
+        public void ParseDefinition_MalformedPsychiatricDiagnosisValue_ThrowsFormatExceptionWithPath()
+        {
+            string json = WithAdditionalRootProperty(
+                @"""psychiatric_diagnosis"": { ""derived_feeling"": ""angst"", ""defense_reaction"": [""freeze""] }");
+
+            var ex = Assert.Throws<FormatException>(() =>
+                CharacterDefinitionLoader.ParseDefinition(json));
+
+            Assert.Contains("psychiatric_diagnosis.defense_reaction", ex.Message);
+            Assert.Contains("string", ex.Message, StringComparison.OrdinalIgnoreCase);
         }
 
         [Fact]

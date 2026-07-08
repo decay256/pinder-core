@@ -105,44 +105,20 @@ namespace Pinder.SessionSetup
 
                 // Issue #779: optional permanent psychological stake.
                 string? psychologicalStake = null;
-                if (root.TryGetProperty("psychological_stake", out var stakeProp) &&
-                    stakeProp.ValueKind == JsonValueKind.String)
+                if (root.TryGetProperty("psychological_stake", out var stakeProp))
                 {
+                    if (stakeProp.ValueKind != JsonValueKind.String)
+                        throw new FormatException($"Character definition field psychological_stake must be a string, got {DescribeValueKind(stakeProp)}.");
                     string raw = stakeProp.GetString() ?? string.Empty;
                     if (!string.IsNullOrWhiteSpace(raw))
                         psychologicalStake = raw.Trim();
                 }
 
-                IReadOnlyDictionary<string, BackstoryFact>? backstory = null;
-                if (root.TryGetProperty("backstory_categories", out var catsProp) &&
-                    catsProp.ValueKind == JsonValueKind.Object)
-                {
-                    backstory = ParseBackstoryCategories(catsProp);
-                }
+                IReadOnlyDictionary<string, BackstoryFact>? backstory = ParseOptionalBackstoryCategories(root);
 
-                IReadOnlyList<string>? stakeLines = null;
-                if (root.TryGetProperty("stake_lines", out var stakesProp) &&
-                    stakesProp.ValueKind == JsonValueKind.Array)
-                {
-                    var list = new List<string>();
-                    foreach(var e in stakesProp.EnumerateArray())
-                        if(e.ValueKind == JsonValueKind.String)
-                            list.Add(e.GetString()!);
-                    stakeLines = list;
-                }
+                IReadOnlyList<string>? stakeLines = ParseOptionalStakeLines(root);
 
-                IReadOnlyDictionary<string, string>? psychiatricDiagnosis = null;
-                if (root.TryGetProperty("psychiatric_diagnosis", out var diagProp) &&
-                    diagProp.ValueKind == JsonValueKind.Object)
-                {
-                    var dict = new Dictionary<string, string>();
-                    foreach(var kv in diagProp.EnumerateObject())
-                    {
-                        if(kv.Value.ValueKind == JsonValueKind.String)
-                            dict[kv.Name] = kv.Value.GetString()!;
-                    }
-                    psychiatricDiagnosis = dict;
-                }
+                IReadOnlyDictionary<string, string>? psychiatricDiagnosis = ParseOptionalPsychiatricDiagnosis(root);
 
                 return new CharacterDefinition(
                     schemaVersion,
@@ -312,11 +288,12 @@ namespace Pinder.SessionSetup
 
         private static string? GetOptionalString(JsonElement root, string fieldName)
         {
-            if (!root.TryGetProperty(fieldName, out var prop) ||
-                prop.ValueKind != JsonValueKind.String)
+            if (!root.TryGetProperty(fieldName, out var prop))
             {
                 return null;
             }
+            if (prop.ValueKind != JsonValueKind.String)
+                throw new FormatException($"Character definition field {fieldName} must be a string, got {DescribeValueKind(prop)}.");
             return prop.GetString()!;
         }
 
@@ -327,7 +304,9 @@ namespace Pinder.SessionSetup
             {
                 throw new FormatException($"Character definition missing required field: {fieldName}");
             }
-            return prop.GetInt32();
+            if (!prop.TryGetInt32(out int value))
+                throw new FormatException($"Character definition field {fieldName} must be an integer.");
+            return value;
         }
 
         private static List<string> ParseItemIds(JsonElement root)
@@ -339,10 +318,16 @@ namespace Pinder.SessionSetup
             }
 
             var items = new List<string>();
+            int index = 0;
             foreach (var element in prop.EnumerateArray())
             {
-                if (element.ValueKind == JsonValueKind.String)
-                    items.Add(element.GetString()!);
+                if (element.ValueKind != JsonValueKind.String)
+                    throw new FormatException($"Character definition field items[{index}] must be a string, got {DescribeValueKind(element)}.");
+                string value = element.GetString()!;
+                if (string.IsNullOrWhiteSpace(value))
+                    throw new FormatException($"Character definition field items[{index}] must be a non-empty string.");
+                items.Add(value);
+                index++;
             }
             return items;
         }
@@ -372,7 +357,10 @@ namespace Pinder.SessionSetup
                 {
                     anatomy[kv.Name] = 0.0f;
                 }
-                // Silently skip any other token types (strings, null)
+                else
+                {
+                    throw new FormatException($"Character definition field anatomy.{kv.Name} must be a number or boolean, got {DescribeValueKind(kv.Value)}.");
+                }
             }
             return anatomy;
         }
@@ -412,9 +400,9 @@ namespace Pinder.SessionSetup
             {
                 if (!TryParseStatType(kv.Name, out var statType))
                     throw new FormatException($"Unknown stat type: {kv.Name}");
-                if (kv.Value.ValueKind != JsonValueKind.Number)
-                    throw new FormatException($"Build point value for {kv.Name} must be a number");
-                spent[statType] = kv.Value.GetInt32();
+                if (kv.Value.ValueKind != JsonValueKind.Number || !kv.Value.TryGetInt32(out int value))
+                    throw new FormatException($"Build point value for allocation.spent.{kv.Name} must be an integer.");
+                spent[statType] = value;
             }
             return spent;
         }
@@ -436,9 +424,9 @@ namespace Pinder.SessionSetup
             {
                 if (!TryParseShadowStatType(kv.Name, out var shadowType))
                     throw new FormatException($"Unknown shadow stat type: {kv.Name}");
-                if (kv.Value.ValueKind != JsonValueKind.Number)
-                    throw new FormatException($"Shadow value for {kv.Name} must be a number");
-                shadows[shadowType] = kv.Value.GetInt32();
+                if (kv.Value.ValueKind != JsonValueKind.Number || !kv.Value.TryGetInt32(out int value))
+                    throw new FormatException($"Shadow value for allocation.shadows.{kv.Name} must be an integer.");
+                shadows[shadowType] = value;
             }
             return shadows;
         }
@@ -472,29 +460,91 @@ namespace Pinder.SessionSetup
             }
         }
 
+        private static IReadOnlyDictionary<string, BackstoryFact>? ParseOptionalBackstoryCategories(JsonElement root)
+        {
+            if (!root.TryGetProperty("backstory_categories", out var prop))
+                return null;
+            if (prop.ValueKind != JsonValueKind.Object)
+                throw new FormatException($"Character definition field backstory_categories must be an object, got {DescribeValueKind(prop)}.");
+            return ParseBackstoryCategories(prop);
+        }
+
+        private static IReadOnlyList<string>? ParseOptionalStakeLines(JsonElement root)
+        {
+            if (!root.TryGetProperty("stake_lines", out var prop))
+                return null;
+            if (prop.ValueKind != JsonValueKind.Array)
+                throw new FormatException($"Character definition field stake_lines must be an array, got {DescribeValueKind(prop)}.");
+
+            var list = new List<string>();
+            int index = 0;
+            foreach (var element in prop.EnumerateArray())
+            {
+                if (element.ValueKind != JsonValueKind.String)
+                    throw new FormatException($"Character definition field stake_lines[{index}] must be a string, got {DescribeValueKind(element)}.");
+                list.Add(element.GetString()!);
+                index++;
+            }
+            return list;
+        }
+
+        private static IReadOnlyDictionary<string, string>? ParseOptionalPsychiatricDiagnosis(JsonElement root)
+        {
+            if (!root.TryGetProperty("psychiatric_diagnosis", out var prop))
+                return null;
+            if (prop.ValueKind != JsonValueKind.Object)
+                throw new FormatException($"Character definition field psychiatric_diagnosis must be an object, got {DescribeValueKind(prop)}.");
+
+            var dict = new Dictionary<string, string>();
+            foreach (var kv in prop.EnumerateObject())
+            {
+                if (kv.Value.ValueKind != JsonValueKind.String)
+                    throw new FormatException($"Character definition field psychiatric_diagnosis.{kv.Name} must be a string, got {DescribeValueKind(kv.Value)}.");
+                dict[kv.Name] = kv.Value.GetString()!;
+            }
+            return dict;
+        }
+
         private static Dictionary<string, BackstoryFact> ParseBackstoryCategories(JsonElement root)
         {
             var categories = new Dictionary<string, BackstoryFact>();
             foreach (var kv in root.EnumerateObject())
             {
-                if (kv.Value.ValueKind != JsonValueKind.Object) continue;
-                
-                var fact = new BackstoryFact();
-                
-                // Handle both snake_case and PascalCase
-                if (kv.Value.TryGetProperty("bio_lie", out var bioLieProp) && bioLieProp.ValueKind == JsonValueKind.String)
-                    fact.BioLie = bioLieProp.GetString() ?? string.Empty;
-                else if (kv.Value.TryGetProperty("BioLie", out var bioLiePropPascal) && bioLiePropPascal.ValueKind == JsonValueKind.String)
-                    fact.BioLie = bioLiePropPascal.GetString() ?? string.Empty;
+                string categoryPath = $"backstory_categories.{kv.Name}";
+                if (kv.Value.ValueKind != JsonValueKind.Object)
+                    throw new FormatException($"Character definition field {categoryPath} must be an object, got {DescribeValueKind(kv.Value)}.");
 
-                if (kv.Value.TryGetProperty("tragic_reality", out var trProp) && trProp.ValueKind == JsonValueKind.String)
-                    fact.TragicReality = trProp.GetString() ?? string.Empty;
-                else if (kv.Value.TryGetProperty("TragicReality", out var trPropPascal) && trPropPascal.ValueKind == JsonValueKind.String)
-                    fact.TragicReality = trPropPascal.GetString() ?? string.Empty;
-
-                categories[kv.Name] = fact;
+                string bioLie = GetRequiredBackstoryString(kv.Value, categoryPath, "bio_lie", "BioLie");
+                string tragicReality = GetRequiredBackstoryString(kv.Value, categoryPath, "tragic_reality", "TragicReality");
+                categories[kv.Name] = new BackstoryFact(bioLie, tragicReality);
             }
             return categories;
+        }
+
+        private static string GetRequiredBackstoryString(
+            JsonElement category,
+            string categoryPath,
+            string snakeName,
+            string pascalName)
+        {
+            if (category.TryGetProperty(snakeName, out var snakeProp))
+            {
+                if (snakeProp.ValueKind != JsonValueKind.String)
+                    throw new FormatException($"Character definition field {categoryPath}.{snakeName} must be a string, got {DescribeValueKind(snakeProp)}.");
+                return snakeProp.GetString() ?? string.Empty;
+            }
+            if (category.TryGetProperty(pascalName, out var pascalProp))
+            {
+                if (pascalProp.ValueKind != JsonValueKind.String)
+                    throw new FormatException($"Character definition field {categoryPath}.{pascalName} must be a string, got {DescribeValueKind(pascalProp)}.");
+                return pascalProp.GetString() ?? string.Empty;
+            }
+            throw new FormatException($"Character definition missing required field: {categoryPath}.{snakeName}");
+        }
+
+        private static string DescribeValueKind(JsonElement element)
+        {
+            return element.ValueKind.ToString().ToLowerInvariant();
         }
     }
 }
