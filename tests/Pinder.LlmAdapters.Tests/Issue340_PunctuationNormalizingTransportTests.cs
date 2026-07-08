@@ -75,9 +75,35 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Equal(new[] { "hello; ", "world; ok" }, got);
         }
 
+        [Fact]
+        public void Dispose_disposes_same_inner_transport_once()
+        {
+            var inner = new RecordingTransport("ignored");
+            var sut = new PunctuationNormalizingTransport(inner, inner);
+
+            sut.Dispose();
+            sut.Dispose();
+
+            Assert.Equal(1, inner.DisposeCount);
+        }
+
+        [Fact]
+        public void Dispose_disposes_separate_inner_transports_once()
+        {
+            var inner = new RecordingTransport("ignored");
+            var streaming = new DisposableStreamingTransport();
+            var sut = new PunctuationNormalizingTransport(inner, streaming);
+
+            sut.Dispose();
+            sut.Dispose();
+
+            Assert.Equal(1, inner.DisposeCount);
+            Assert.Equal(1, streaming.DisposeCount);
+        }
+
         // ── Test transport ───────────────────────────────────────────────
 
-        private sealed class RecordingTransport : ILlmTransport, IStreamingLlmTransport
+        private sealed class RecordingTransport : ILlmTransport, IStreamingLlmTransport, System.IDisposable
         {
             private readonly string _response;
             private readonly string[]? _fragments;
@@ -85,6 +111,7 @@ namespace Pinder.LlmAdapters.Tests
             public string? LastSystem { get; private set; }
             public string? LastUser { get; private set; }
             public string? LastPhase { get; private set; }
+            public int DisposeCount { get; private set; }
 
             public RecordingTransport(string response, string[]? streamingFragments = null)
             {
@@ -117,6 +144,32 @@ namespace Pinder.LlmAdapters.Tests
                 foreach (var f in _fragments) yield return f;
             }
 #pragma warning restore CS1998
+
+            public void Dispose()
+            {
+                DisposeCount++;
+            }
+        }
+
+        private sealed class DisposableStreamingTransport : IStreamingLlmTransport, System.IDisposable
+        {
+            public int DisposeCount { get; private set; }
+
+#pragma warning disable CS1998 // async without await - yield-based async iterator
+            public async IAsyncEnumerable<string> SendStreamAsync(
+                string systemPrompt, string userMessage,
+                double temperature = 0.9, int maxTokens = 1024,
+                [EnumeratorCancellation] CancellationToken cancellationToken = default,
+                string? phase = null)
+            {
+                yield break;
+            }
+#pragma warning restore CS1998
+
+            public void Dispose()
+            {
+                DisposeCount++;
+            }
         }
     }
 }

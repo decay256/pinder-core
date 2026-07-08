@@ -45,7 +45,7 @@ namespace Pinder.LlmAdapters
     /// buffering — to avoid changing streaming latency characteristics.
     /// </para>
     /// </remarks>
-    public sealed class PunctuationNormalizingTransport : ILlmTransport, IStreamingLlmTransport
+    public sealed class PunctuationNormalizingTransport : ILlmTransport, IStreamingLlmTransport, System.IDisposable
     {
         // U+2014 = em-dash, U+2009 = thin-space.
         private const char EmDash    = '\u2014';
@@ -53,6 +53,7 @@ namespace Pinder.LlmAdapters
 
         private readonly ILlmTransport _inner;
         private readonly IStreamingLlmTransport? _innerStreaming;
+        private int _disposed;
 
         public PunctuationNormalizingTransport(ILlmTransport inner)
             : this(inner, innerStreaming: null) { }
@@ -75,6 +76,21 @@ namespace Pinder.LlmAdapters
         /// constructed without one. Same purpose as <see cref="Inner"/>.
         /// </summary>
         public IStreamingLlmTransport? InnerStreaming => _innerStreaming;
+
+        public void Dispose()
+        {
+            if (System.Threading.Interlocked.Exchange(ref _disposed, 1) != 0)
+                return;
+
+            if (_inner is System.IDisposable innerDisposable)
+                innerDisposable.Dispose();
+
+            if (_innerStreaming is System.IDisposable streamingDisposable
+                && !ReferenceEquals(_inner, _innerStreaming))
+            {
+                streamingDisposable.Dispose();
+            }
+        }
 
         public async Task<string> SendAsync(
             string systemPrompt, string userMessage,

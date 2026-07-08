@@ -68,7 +68,7 @@ namespace Pinder.LlmAdapters
     /// fragment whose content rules out a leading tag.
     /// </para>
     /// </remarks>
-    public sealed class ThinkingStrippingLlmTransport : ILlmTransport, IStreamingLlmTransport
+    public sealed class ThinkingStrippingLlmTransport : ILlmTransport, IStreamingLlmTransport, System.IDisposable
     {
         /// <summary>
         /// Maximum characters to buffer in the streaming code path while
@@ -83,6 +83,7 @@ namespace Pinder.LlmAdapters
 
         private readonly ILlmTransport _inner;
         private readonly IStreamingLlmTransport? _innerStreaming;
+        private int _disposed;
 
         public ThinkingStrippingLlmTransport(ILlmTransport inner)
             : this(inner, innerStreaming: null) { }
@@ -106,6 +107,21 @@ namespace Pinder.LlmAdapters
         /// was constructed without one.
         /// </summary>
         public IStreamingLlmTransport? InnerStreaming => _innerStreaming;
+
+        public void Dispose()
+        {
+            if (System.Threading.Interlocked.Exchange(ref _disposed, 1) != 0)
+                return;
+
+            if (_inner is System.IDisposable innerDisposable)
+                innerDisposable.Dispose();
+
+            if (_innerStreaming is System.IDisposable streamingDisposable
+                && !ReferenceEquals(_inner, _innerStreaming))
+            {
+                streamingDisposable.Dispose();
+            }
+        }
 
         public async Task<string> SendAsync(
             string systemPrompt, string userMessage,
