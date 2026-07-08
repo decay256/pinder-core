@@ -28,6 +28,12 @@ strings:
 
   # ── CharacterCard / CharacterDetailCard (migrated #439) ───────────
   character_card.level_label: "Level {level}"
+  character_card.open_sheet_aria: "Open character sheet for {name}"
+  character_card.role_player: "Your pick"
+  character_card.role_opponent: "Opponent's pick"
+  character_card.view_sheet_cta: "View Character Sheet"
+  character_card.pick_cta: "Pick"
+  character_card.deselect_cta: "Deselect"
   character_detail.shadows_heading: "Shadows"
   character_detail.anatomy_heading: "Anatomy"
   character_detail.items_heading: "Items"
