@@ -60,7 +60,11 @@ namespace Pinder.SessionSetup
             {
                 // Fail-loud by propagating the failure with structural context
                 throw new System.InvalidOperationException(
-                    $"Failed to parse stakes JSON from LLM response. Raw response was: '{llmResponse}'", ex);
+                    LlmDiagnosticFormatter.GeneratedTextFailure(
+                        "Failed to parse stakes JSON from LLM response.",
+                        LlmPhase.Synthesis,
+                        llmResponse),
+                    ex);
             }
         }
     }

@@ -283,7 +283,9 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         {
             var ex = new AnthropicApiException(418, "{\"error\":\"teapot\"}");
             Assert.Equal(418, ex.StatusCode);
-            Assert.Equal("{\"error\":\"teapot\"}", ex.ResponseBody);
+            Assert.Equal("{\"error\":\"teapot\"}", ex.RawResponseBody);
+            Assert.DoesNotContain("teapot", ex.ResponseBody);
+            Assert.DoesNotContain("teapot", ex.Message);
         }
 
         // Mutation: would catch if AnthropicApiException with null body crashes
@@ -293,16 +295,20 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             var ex = new AnthropicApiException(500, null);
             Assert.Equal(500, ex.StatusCode);
             Assert.Null(ex.ResponseBody);
+            Assert.Null(ex.RawResponseBody);
         }
 
-        // Mutation: would catch if AnthropicApiException message constructor is broken
+        // Mutation: would catch if AnthropicApiException safe-context constructor is broken
         [Fact]
         public void Edge_AnthropicApiException_WithMessage()
         {
-            var ex = new AnthropicApiException(400, "body", "custom message");
+            var rawBody = "secret-provider-text";
+            var ex = new AnthropicApiException(400, rawBody, "custom message");
             Assert.Equal(400, ex.StatusCode);
-            Assert.Equal("body", ex.ResponseBody);
-            Assert.Equal("custom message", ex.Message);
+            Assert.Equal(rawBody, ex.RawResponseBody);
+            Assert.DoesNotContain(rawBody, ex.ResponseBody);
+            Assert.Contains("custom message", ex.Message);
+            Assert.DoesNotContain(rawBody, ex.Message);
         }
 
         // Mutation: would catch if 200 with null deserialization result doesn't throw

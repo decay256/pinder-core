@@ -105,6 +105,11 @@ prompts:
                     generator.GenerateAsync("CharName", "gender", "bio", backstory));
                 
                 Assert.Contains("Failed to parse stakes JSON from LLM response", ex.Message);
+                Assert.DoesNotContain("Malformed / non-JSON LLM response", ex.Message);
+                Assert.DoesNotContain("Malformed / non-JSON LLM response", ex.ToString());
+                Assert.Contains("phase=synthesis", ex.Message);
+                Assert.Contains("output_length=", ex.Message);
+                Assert.Contains("output_sha256=", ex.Message);
             }
             finally
             {

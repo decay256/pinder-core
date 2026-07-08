@@ -36,8 +36,12 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             });
 
             Assert.Equal(new[] { "partial" }, fragments);
-            Assert.Contains("overloaded_error", ex.Message);
-            Assert.Contains("Overloaded", ex.Message);
+            Assert.DoesNotContain("overloaded_error", ex.Message);
+            Assert.DoesNotContain("Overloaded", ex.Message);
+            Assert.DoesNotContain("Overloaded", ex.ToString());
+            Assert.Contains("provider=anthropic-streaming", ex.Message);
+            Assert.Contains("error_length=", ex.Message);
+            Assert.Contains("error_sha256=", ex.Message);
         }
 
         // ─── Cancellation ─────────────────────────────────────────────────

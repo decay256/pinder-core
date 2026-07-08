@@ -114,14 +114,19 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             Assert.IsAssignableFrom<Exception>(ex);
         }
 
-        // What: AC4 — Message format matches spec exactly
-        // Mutation: would catch if message format was "Error {code}" instead of "Anthropic API error {code}: {body}"
+        // What: AC4 — Message exposes safe diagnostic context
+        // Mutation: would catch if message includes the raw provider body
         [Fact]
-        public void AnthropicApiException_MessageFormat_MatchesSpec()
+        public void AnthropicApiException_Message_UsesSafeDiagnostics()
         {
             var body = "{\"error\":{\"type\":\"rate_limit_error\"}}";
             var ex = new AnthropicApiException(429, body);
-            Assert.Equal($"Anthropic API error 429: {body}", ex.Message);
+            Assert.Contains("provider=anthropic", ex.Message);
+            Assert.Contains("status=429", ex.Message);
+            Assert.Contains("body_length=", ex.Message);
+            Assert.Contains("body_sha256=", ex.Message);
+            Assert.DoesNotContain("rate_limit_error", ex.Message);
+            Assert.DoesNotContain("rate_limit_error", ex.ToString());
         }
 
         // What: AC4 — StatusCode is exposed as read-only
@@ -133,14 +138,16 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             Assert.Equal(529, ex.StatusCode);
         }
 
-        // What: AC4 — ResponseBody is exposed as read-only
-        // Mutation: would catch if ResponseBody returned wrong string
+        // What: AC4 — raw response body is preserved only internally
+        // Mutation: would catch if public exception surfaces expose raw provider text
         [Fact]
-        public void AnthropicApiException_ResponseBody_IsPreserved()
+        public void AnthropicApiException_RawResponseBody_IsInternalOnly()
         {
             var body = "server error details";
             var ex = new AnthropicApiException(500, body);
-            Assert.Equal(body, ex.ResponseBody);
+            Assert.Equal(body, ex.RawResponseBody);
+            Assert.DoesNotContain(body, ex.ResponseBody);
+            Assert.DoesNotContain(body, ex.Message);
         }
 
         // What: Error condition — empty responseBody is accepted
@@ -150,7 +157,9 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         {
             var ex = new AnthropicApiException(500, "");
             Assert.Equal("", ex.ResponseBody);
-            Assert.Equal("Anthropic API error 500: ", ex.Message);
+            Assert.Equal("", ex.RawResponseBody);
+            Assert.Contains("status=500", ex.Message);
+            Assert.Contains("body_length=0", ex.Message);
         }
 
         // What: Error condition — various HTTP status codes work
@@ -166,8 +175,10 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         {
             var ex = new AnthropicApiException(code, body);
             Assert.Equal(code, ex.StatusCode);
-            Assert.Equal(body, ex.ResponseBody);
-            Assert.Equal($"Anthropic API error {code}: {body}", ex.Message);
+            Assert.Equal(body, ex.RawResponseBody);
+            Assert.DoesNotContain(body, ex.ResponseBody);
+            Assert.DoesNotContain(body, ex.Message);
+            Assert.Contains($"status={code}", ex.Message);
         }
 
         // What: AC4 — Exception can be caught as Exception

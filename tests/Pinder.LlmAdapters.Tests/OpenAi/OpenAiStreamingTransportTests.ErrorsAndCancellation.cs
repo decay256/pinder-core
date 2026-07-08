@@ -32,7 +32,12 @@ namespace Pinder.LlmAdapters.Tests.OpenAi
                 await foreach (var _ in transport.SendStreamAsync("sys", "user")) { }
             });
             Assert.Contains("401", ex.Message);
-            Assert.Contains("unauthorized", ex.Message);
+            Assert.DoesNotContain("unauthorized", ex.Message);
+            Assert.DoesNotContain("unauthorized", ex.ToString());
+            Assert.Contains("provider=openai-compatible-streaming", ex.Message);
+            Assert.Contains("model=test-model", ex.Message);
+            Assert.Contains("body_length=", ex.Message);
+            Assert.Contains("body_sha256=", ex.Message);
         }
 
         [Fact]
@@ -53,7 +58,10 @@ namespace Pinder.LlmAdapters.Tests.OpenAi
                     collected.Add(f);
             });
             Assert.Equal(new[] { "partial" }, collected);
-            Assert.Contains("upstream blew up", ex.Message);
+            Assert.DoesNotContain("upstream blew up", ex.Message);
+            Assert.DoesNotContain("upstream blew up", ex.ToString());
+            Assert.Contains("error_length=", ex.Message);
+            Assert.Contains("error_sha256=", ex.Message);
         }
 
         [Fact]
@@ -65,10 +73,14 @@ namespace Pinder.LlmAdapters.Tests.OpenAi
                 "data: [DONE]\n\n";
             using var transport = NewTransport(sse);
 
-            await Assert.ThrowsAsync<LlmTransportException>(async () =>
+            var ex = await Assert.ThrowsAsync<LlmTransportException>(async () =>
             {
                 await foreach (var _ in transport.SendStreamAsync("sys", "user")) { }
             });
+            Assert.DoesNotContain("{not valid json", ex.Message);
+            Assert.DoesNotContain("{not valid json", ex.ToString());
+            Assert.Contains("chunk_length=", ex.Message);
+            Assert.Contains("chunk_sha256=", ex.Message);
         }
 
         // ------------------------------------------------------------------

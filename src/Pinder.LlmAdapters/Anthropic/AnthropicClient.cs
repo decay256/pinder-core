@@ -94,19 +94,17 @@ namespace Pinder.LlmAdapters.Anthropic
                         }
                         catch (JsonException)
                         {
-                            var truncated = responseBody?.Length > 200 ? responseBody.Substring(0, 200) : responseBody;
                             throw new AnthropicApiException(
                                 statusCode,
                                 responseBody,
-                                $"Anthropic API returned {statusCode} but response body is malformed JSON: {truncated}") { };
+                                "Anthropic API returned a malformed JSON response.");
                         }
                         if (result == null)
                         {
-                            var truncated = responseBody?.Length > 200 ? responseBody.Substring(0, 200) : responseBody;
                             throw new AnthropicApiException(
                                 statusCode,
                                 responseBody,
-                                $"Anthropic API returned {statusCode} but response body deserialized to null: {truncated}");
+                                "Anthropic API response deserialized to null.");
                         }
                         return result;
                     }

@@ -55,9 +55,9 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             }
         }
 
-        // Mutation: would catch if 429 response body is not captured in exception
+        // Mutation: would catch if 429 response body is not captured internally in exception
         [Fact]
-        public async Task AC3_429_ExhaustedRetries_IncludesLastResponseBody()
+        public async Task AC3_429_ExhaustedRetries_KeepsLastResponseBodyInternalOnly()
         {
             var handler = new SequenceHandler(
                 _ => Make429("0"),
@@ -71,7 +71,10 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
                 var ex = await Assert.ThrowsAsync<AnthropicApiException>(
                     () => client.SendMessagesAsync(MakeRequest()));
                 Assert.Equal(429, ex.StatusCode);
-                Assert.Contains("final_429", ex.ResponseBody);
+                Assert.Contains("final_429", ex.RawResponseBody);
+                Assert.DoesNotContain("final_429", ex.ResponseBody);
+                Assert.DoesNotContain("final_429", ex.Message);
+                Assert.DoesNotContain("final_429", ex.ToString());
             }
         }
 
@@ -204,7 +207,9 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
                 var ex = await Assert.ThrowsAsync<AnthropicApiException>(
                     () => client.SendMessagesAsync(MakeRequest()));
                 Assert.Equal(400, ex.StatusCode);
-                Assert.Contains("invalid_request", ex.ResponseBody);
+                Assert.Contains("invalid_request", ex.RawResponseBody);
+                Assert.DoesNotContain("invalid_request", ex.ResponseBody);
+                Assert.DoesNotContain("invalid_request", ex.Message);
                 Assert.Equal(1, handler.CallCount);
             }
         }

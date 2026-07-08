@@ -79,10 +79,10 @@ namespace Pinder.LlmAdapters.Anthropic
     ///   ignored. The stream terminates when the underlying response stream
     ///   ends; no sentinel is required (Anthropic does not send <c>[DONE]</c>).</item>
     ///   <item>An open-time non-2xx HTTP response throws
-    ///   <see cref="LlmTransportException"/> with the status code and a
-    ///   truncated body excerpt (≤1KB).</item>
+    ///   <see cref="LlmTransportException"/> with status code and safe body
+    ///   length/hash diagnostics.</item>
     ///   <item>A mid-stream <c>event: error</c> frame throws
-    ///   <see cref="LlmTransportException"/> with the provider error message.</item>
+    ///   <see cref="LlmTransportException"/> with safe error-frame diagnostics.</item>
     ///   <item>Mid-stream network/IO failures are wrapped in
     ///   <see cref="LlmTransportException"/> preserving the inner exception.</item>
     ///   <item>The supplied <see cref="CancellationToken"/> is propagated to
@@ -95,7 +95,6 @@ namespace Pinder.LlmAdapters.Anthropic
     {
         private const string ApiUrl = "https://api.anthropic.com/v1/messages";
         private const string AnthropicVersion = "2023-06-01";
-        private const int MaxBodyExcerptBytes = 1024;
 
         private readonly HttpClient _httpClient;
         private readonly bool _ownsHttpClient;
@@ -150,8 +149,6 @@ namespace Pinder.LlmAdapters.Anthropic
             CancellationToken cancellationToken = default,
             string? phase = null)
         {
-            // phase is metadata for decorators; the underlying provider has no use for it.
-            _ = phase;
             if (systemPrompt == null) throw new ArgumentNullException(nameof(systemPrompt));
             if (userMessage == null) throw new ArgumentNullException(nameof(userMessage));
 
@@ -167,11 +164,12 @@ namespace Pinder.LlmAdapters.Anthropic
             var request = AnthropicRequestBuilders.BuildMessagesRequest(
                 _model, maxTokens, systemBlocks, userMessage, temperature);
 
-            return StreamCoreAsync(request, cancellationToken);
+            return StreamCoreAsync(request, phase, cancellationToken);
         }
 
         private async IAsyncEnumerable<string> StreamCoreAsync(
             MessagesRequest request,
+            string? phase,
             [EnumeratorCancellation] CancellationToken cancellationToken)
         {
             // Inject "stream":true into the serialized payload. We don't have
@@ -218,10 +216,6 @@ namespace Pinder.LlmAdapters.Anthropic
                     {
                         body = "";
                     }
-                    var excerpt = body.Length > MaxBodyExcerptBytes
-                        ? body.Substring(0, MaxBodyExcerptBytes) + "…[truncated]"
-                        : body;
-
                     LlmFailureKind failureKind = LlmFailureKind.Unknown;
                     string errorType = null;
                     try
@@ -253,23 +247,43 @@ namespace Pinder.LlmAdapters.Anthropic
                     string message;
                     if (failureKind == LlmFailureKind.ModelNotFound)
                     {
-                        message = $"Anthropic streaming request failed: HTTP {(int)response.StatusCode} {response.StatusCode} (not_found_error). " +
-                                  $"Offending model ID: '{_model}'. Operator hint: Ensure that the model ID is typed correctly and is active on your Anthropic account/plan. " +
-                                  $"Body: {excerpt}";
+                        message = LlmDiagnosticFormatter.ProviderFailure(
+                            "anthropic-streaming",
+                            "Anthropic streaming request failed (not_found_error). Operator hint: Ensure that the model ID is typed correctly and is active on your Anthropic account/plan.",
+                            statusCode: (int)response.StatusCode,
+                            model: _model,
+                            phase: phase,
+                            body: body);
                     }
                     else if (failureKind == LlmFailureKind.Unauthorized)
                     {
-                        message = $"Anthropic streaming request failed: HTTP {(int)response.StatusCode} {response.StatusCode} (authentication_error). " +
-                                  $"Operator hint: Check your API key. Body: {excerpt}";
+                        message = LlmDiagnosticFormatter.ProviderFailure(
+                            "anthropic-streaming",
+                            "Anthropic streaming request failed (authentication_error). Operator hint: Check your API key.",
+                            statusCode: (int)response.StatusCode,
+                            model: _model,
+                            phase: phase,
+                            body: body);
                     }
                     else if (failureKind == LlmFailureKind.RateLimited)
                     {
-                        message = $"Anthropic streaming request failed: HTTP {(int)response.StatusCode} {response.StatusCode} (rate_limit_error). " +
-                                  $"Operator hint: Requests have been throttled. Body: {excerpt}";
+                        message = LlmDiagnosticFormatter.ProviderFailure(
+                            "anthropic-streaming",
+                            "Anthropic streaming request failed (rate_limit_error). Operator hint: Retry after the provider rate limit resets.",
+                            statusCode: (int)response.StatusCode,
+                            model: _model,
+                            phase: phase,
+                            body: body);
                     }
                     else
                     {
-                        message = $"Anthropic streaming request failed: HTTP {(int)response.StatusCode} {response.StatusCode}. Body: {excerpt}";
+                        message = LlmDiagnosticFormatter.ProviderFailure(
+                            "anthropic-streaming",
+                            "Anthropic streaming request failed.",
+                            statusCode: (int)response.StatusCode,
+                            model: _model,
+                            phase: phase,
+                            body: body);
                     }
 
                     throw new LlmTransportException(message, failureKind);
@@ -368,7 +382,7 @@ namespace Pinder.LlmAdapters.Anthropic
                             var emitFinal = TryHandleDataFrame(dataBuffer.ToString(), usage, out var frag, out var errMsg);
                             dataBuffer.Clear();
                             if (errMsg != null)
-                                throw new LlmTransportException("Anthropic streaming error: " + errMsg);
+                                throw new LlmTransportException(errMsg);
                             if (emitFinal && frag != null)
                                 yield return frag;
                         }
@@ -383,7 +397,7 @@ namespace Pinder.LlmAdapters.Anthropic
                             var emit = TryHandleDataFrame(dataBuffer.ToString(), usage, out var frag, out var errMsg);
                             dataBuffer.Clear();
                             if (errMsg != null)
-                                throw new LlmTransportException("Anthropic streaming error: " + errMsg);
+                                throw new LlmTransportException(errMsg);
                             if (emit && frag != null)
                                 yield return frag;
                         }
@@ -485,11 +499,14 @@ namespace Pinder.LlmAdapters.Anthropic
                 case "error":
                 {
                     var err = obj["error"] as JObject;
-                    var msg = (string?)err?["message"] ?? "unknown error";
-                    var errType = (string?)err?["type"];
-                    errorMessage = string.IsNullOrEmpty(errType)
-                        ? msg
-                        : $"{errType}: {msg}";
+                    var errorBody = err == null
+                        ? obj.ToString(Formatting.None)
+                        : err.ToString(Formatting.None);
+                    errorMessage = LlmDiagnosticFormatter.ProviderFailure(
+                        "anthropic-streaming",
+                        "Anthropic streaming endpoint returned an error frame.",
+                        body: errorBody,
+                        bodyLabel: "error");
                     return false;
                 }
                 default:

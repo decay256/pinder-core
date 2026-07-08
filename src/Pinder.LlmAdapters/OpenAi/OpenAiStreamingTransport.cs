@@ -99,8 +99,6 @@ namespace Pinder.LlmAdapters.OpenAi
             CancellationToken cancellationToken = default,
             string? phase = null)
         {
-            // phase is metadata for decorators; the underlying provider has no use for it.
-            _ = phase;
             if (systemPrompt == null) throw new ArgumentNullException(nameof(systemPrompt));
             if (userMessage == null) throw new ArgumentNullException(nameof(userMessage));
 
@@ -124,11 +122,12 @@ namespace Pinder.LlmAdapters.OpenAi
                 }
             };
             string requestJson = JsonConvert.SerializeObject(request);
-            return StreamCore(requestJson, cancellationToken);
+            return StreamCore(requestJson, phase, cancellationToken);
         }
 
         private async IAsyncEnumerable<string> StreamCore(
             string requestJson,
+            string? phase,
             [EnumeratorCancellation] CancellationToken cancellationToken)
         {
             string url = _baseUrl + "/v1/chat/completions";
@@ -169,9 +168,14 @@ namespace Pinder.LlmAdapters.OpenAi
                         {
                             errorBody = "<unavailable>";
                         }
-                        var truncated = errorBody.Length > 500 ? errorBody.Substring(0, 500) : errorBody;
                         throw new LlmTransportException(
-                            $"OpenAI-compatible streaming endpoint returned HTTP {(int)response.StatusCode}: {truncated}");
+                            LlmDiagnosticFormatter.ProviderFailure(
+                                "openai-compatible-streaming",
+                                "OpenAI-compatible streaming endpoint returned an HTTP error.",
+                                statusCode: (int)response.StatusCode,
+                                model: _model,
+                                phase: phase,
+                                body: errorBody));
                     }
 
                     // Honour pre-cancellation deterministically before we touch the
@@ -332,9 +336,13 @@ namespace Pinder.LlmAdapters.OpenAi
             }
             catch (Exception ex)
             {
-                var truncated = data.Length > 200 ? data.Substring(0, 200) : data;
                 throw new LlmTransportException(
-                    $"Malformed SSE chunk from OpenAI-compatible streaming endpoint: {truncated}", ex);
+                    LlmDiagnosticFormatter.ProviderFailure(
+                        "openai-compatible-streaming",
+                        "Malformed SSE chunk from OpenAI-compatible streaming endpoint.",
+                        body: data,
+                        bodyLabel: "chunk"),
+                    ex);
             }
 
             // Mid-stream provider error frame (some OpenAI-compat providers emit this).
@@ -346,8 +354,11 @@ namespace Pinder.LlmAdapters.OpenAi
                     message = errorToken["message"]?.ToString();
                 if (string.IsNullOrEmpty(message))
                     message = errorToken.ToString(Formatting.None);
-                throw new LlmTransportException(
-                    "OpenAI-compatible streaming endpoint returned error frame: " + message);
+                throw new LlmTransportException(LlmDiagnosticFormatter.ProviderFailure(
+                    "openai-compatible-streaming",
+                    "OpenAI-compatible streaming endpoint returned an error frame.",
+                    body: message,
+                    bodyLabel: "error"));
             }
 
             var delta = obj["choices"]?[0]?["delta"];

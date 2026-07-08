@@ -13,22 +13,30 @@ namespace Pinder.LlmAdapters.Anthropic
         public int StatusCode { get; }
 
         /// <summary>
-        /// The raw response body returned by the Anthropic API (may be null if no body was returned).
+        /// Redacted diagnostic excerpt of the response body (may be null if no body was returned).
         /// </summary>
         public string? ResponseBody { get; }
 
+        internal string? RawResponseBody { get; }
+
         public AnthropicApiException(int statusCode, string? responseBody)
-            : base($"Anthropic API error {statusCode}: {responseBody}")
+            : this(
+                statusCode,
+                responseBody,
+                "Anthropic API request failed.")
         {
-            StatusCode = statusCode;
-            ResponseBody = responseBody;
         }
 
-        public AnthropicApiException(int statusCode, string? responseBody, string message)
-            : base(message)
+        public AnthropicApiException(int statusCode, string? responseBody, string failure)
+            : base(LlmDiagnosticFormatter.ProviderFailure(
+                "anthropic",
+                failure,
+                statusCode: statusCode,
+                body: responseBody))
         {
             StatusCode = statusCode;
-            ResponseBody = responseBody;
+            RawResponseBody = responseBody;
+            ResponseBody = LlmDiagnosticFormatter.RedactedBodyExcerptOrEmpty(responseBody);
         }
     }
 }

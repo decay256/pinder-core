@@ -29,9 +29,13 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             // Assert
             Assert.Equal(LlmFailureKind.ModelNotFound, ex.FailureKind);
             Assert.Contains("not_found_error", ex.Message);
-            Assert.Contains("Offending model ID", ex.Message);
+            Assert.DoesNotContain("The model does not exist", ex.Message);
+            Assert.DoesNotContain("The model does not exist", ex.ToString());
+            Assert.Contains("provider=anthropic-streaming", ex.Message);
             Assert.Contains(TestModel, ex.Message);
             Assert.Contains("Operator hint", ex.Message);
+            Assert.Contains("body_length=", ex.Message);
+            Assert.Contains("body_sha256=", ex.Message);
         }
 
         [Fact]
@@ -53,7 +57,11 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             // Assert
             Assert.Equal(LlmFailureKind.Unauthorized, ex.FailureKind);
             Assert.Contains("authentication_error", ex.Message);
+            Assert.DoesNotContain("invalid x-api-key", ex.Message);
+            Assert.DoesNotContain("invalid x-api-key", ex.ToString());
             Assert.Contains("Operator hint", ex.Message);
+            Assert.Contains("body_length=", ex.Message);
+            Assert.Contains("body_sha256=", ex.Message);
         }
 
         [Fact]
@@ -75,7 +83,11 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             // Assert
             Assert.Equal(LlmFailureKind.RateLimited, ex.FailureKind);
             Assert.Contains("rate_limit_error", ex.Message);
+            Assert.DoesNotContain("throttled", ex.Message);
+            Assert.DoesNotContain("throttled", ex.ToString());
             Assert.Contains("Operator hint", ex.Message);
+            Assert.Contains("body_length=", ex.Message);
+            Assert.Contains("body_sha256=", ex.Message);
         }
 
         [Fact]

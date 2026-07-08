@@ -165,7 +165,9 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
                     () => client.SendMessagesAsync(MakeTestRequest()));
 
                 Assert.Equal(400, ex.StatusCode);
-                Assert.Contains("bad request", ex.ResponseBody);
+                Assert.Equal("{\"error\":\"bad request\"}", ex.RawResponseBody);
+                Assert.DoesNotContain("bad request", ex.ResponseBody);
+                Assert.DoesNotContain("bad request", ex.Message);
                 Assert.Equal(1, handler.CallCount); // no retry
             }
         }
@@ -316,7 +318,9 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
 
                 Assert.Equal(200, ex.StatusCode);
                 Assert.Contains("malformed JSON", ex.Message);
-                Assert.Equal("not valid json", ex.ResponseBody);
+                Assert.Equal("not valid json", ex.RawResponseBody);
+                Assert.DoesNotContain("not valid json", ex.Message);
+                Assert.DoesNotContain("not valid json", ex.ResponseBody);
                 Assert.Equal(1, handler.CallCount); // no retry on deserialization failure
             }
         }

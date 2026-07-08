@@ -162,7 +162,10 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             });
 
             Assert.Contains("401", ex.Message);
-            Assert.Contains("invalid x-api-key", ex.Message);
+            Assert.DoesNotContain("invalid x-api-key", ex.Message);
+            Assert.Contains("provider=anthropic-streaming", ex.Message);
+            Assert.Contains("body_length=", ex.Message);
+            Assert.Contains("body_sha256=", ex.Message);
         }
 
         [Fact]
@@ -178,11 +181,14 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             });
 
             Assert.Contains("500", ex.Message);
-            Assert.Contains("boom", ex.Message);
+            Assert.DoesNotContain("boom", ex.Message);
+            Assert.Contains("provider=anthropic-streaming", ex.Message);
+            Assert.Contains("body_length=", ex.Message);
+            Assert.Contains("body_sha256=", ex.Message);
         }
 
         [Fact]
-        public async Task SendStreamAsync_Http400_BodyTruncatedTo1KB()
+        public async Task SendStreamAsync_Http400_UsesSafeBodyDiagnostics()
         {
             var bigBody = new string('x', 4096);
             var handler = new FixedHandler(HttpStatusCode.BadRequest, bigBody);
@@ -194,8 +200,9 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
                 await foreach (var _ in transport.SendStreamAsync("s", "u")) { }
             });
 
-            Assert.Contains("truncated", ex.Message);
-            Assert.True(ex.Message.Length < 4096, "message should not contain the full 4KB body");
+            Assert.DoesNotContain(bigBody, ex.Message);
+            Assert.Contains("body_length=4096", ex.Message);
+            Assert.Contains("body_sha256=", ex.Message);
         }
     }
 }

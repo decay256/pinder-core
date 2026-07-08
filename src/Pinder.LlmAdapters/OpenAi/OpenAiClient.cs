@@ -68,6 +68,7 @@ namespace Pinder.LlmAdapters.OpenAi
             if (requestJson == null) throw new ArgumentNullException(nameof(requestJson));
 
             string url = _baseUrl + "/v1/chat/completions";
+            string? model = TryExtractModel(requestJson);
             int retries429 = 0;
             int retries5xx = 0;
 
@@ -97,9 +98,14 @@ namespace Pinder.LlmAdapters.OpenAi
                         }
                         catch (Exception)
                         {
-                            var truncated = body.Length > 200 ? body.Substring(0, 200) : body;
                             throw new InvalidOperationException(
-                                $"OpenAI-compatible API returned {statusCode} but response is malformed: {truncated}");
+                                LlmDiagnosticFormatter.ProviderFailure(
+                                    "openai-compatible",
+                                    "OpenAI-compatible API returned a malformed response.",
+                                    statusCode: statusCode,
+                                    model: model,
+                                    phase: "chat_completion",
+                                    body: body));
                         }
                     }
 
@@ -108,7 +114,13 @@ namespace Pinder.LlmAdapters.OpenAi
                     if (statusCode == 429)
                     {
                         if (retries429 >= MaxRetries429)
-                            throw new HttpRequestException($"OpenAI-compatible API rate limited after {MaxRetries429} retries. Status: {statusCode}. Body: {errorBody}");
+                            throw new HttpRequestException(LlmDiagnosticFormatter.ProviderFailure(
+                                "openai-compatible",
+                                $"OpenAI-compatible API rate limited after {MaxRetries429} retries.",
+                                statusCode: statusCode,
+                                model: model,
+                                phase: "chat_completion",
+                                body: errorBody));
                         retries429++;
                         var delay = GetRetryAfterDelay(response);
                         await Task.Delay(delay, ct).ConfigureAwait(false);
@@ -118,13 +130,25 @@ namespace Pinder.LlmAdapters.OpenAi
                     if (statusCode >= 500 && statusCode < 600)
                     {
                         if (retries5xx >= MaxRetries5xx)
-                            throw new HttpRequestException($"OpenAI-compatible API server error after {MaxRetries5xx} retries. Status: {statusCode}. Body: {errorBody}");
+                            throw new HttpRequestException(LlmDiagnosticFormatter.ProviderFailure(
+                                "openai-compatible",
+                                $"OpenAI-compatible API server error after {MaxRetries5xx} retries.",
+                                statusCode: statusCode,
+                                model: model,
+                                phase: "chat_completion",
+                                body: errorBody));
                         retries5xx++;
                         await Task.Delay(TimeSpan.FromSeconds(1), ct).ConfigureAwait(false);
                         continue;
                     }
 
-                    throw new HttpRequestException($"OpenAI-compatible API error. Status: {statusCode}. Body: {errorBody}");
+                    throw new HttpRequestException(LlmDiagnosticFormatter.ProviderFailure(
+                        "openai-compatible",
+                        "OpenAI-compatible API request failed.",
+                        statusCode: statusCode,
+                        model: model,
+                        phase: "chat_completion",
+                        body: errorBody));
                 }
             }
         }
@@ -218,6 +242,19 @@ namespace Pinder.LlmAdapters.OpenAi
                 }
             }
             return TimeSpan.FromSeconds(DefaultRetryAfterSeconds);
+        }
+
+        private static string? TryExtractModel(string requestJson)
+        {
+            try
+            {
+                var json = JObject.Parse(requestJson);
+                return json["model"]?.Value<string>();
+            }
+            catch
+            {
+                return null;
+            }
         }
     }
 }
