@@ -244,60 +244,6 @@ namespace Pinder.Core.Tests.RulesSpec
 """
 
 _FOOTER = """\
-        // =====================================================================
-        // §7/§11 — Qualitative / LLM rules (17 skipped tests)
-        // =====================================================================
-
-        [Fact(Skip = "Qualitative/LLM rule — not unit-testable")]
-        public void Rule_S7_ShadowTaint_Dread_T1() { }
-
-        [Fact(Skip = "Qualitative/LLM rule — not unit-testable")]
-        public void Rule_S7_ShadowTaint_Dread_T2() { }
-
-        [Fact(Skip = "Qualitative/LLM rule — not unit-testable")]
-        public void Rule_S7_ShadowTaint_Dread_T3() { }
-
-        [Fact(Skip = "Qualitative/LLM rule — not unit-testable")]
-        public void Rule_S7_ShadowTaint_Fixation_T1() { }
-
-        [Fact(Skip = "Qualitative/LLM rule — not unit-testable")]
-        public void Rule_S7_ShadowTaint_Fixation_T2() { }
-
-        [Fact(Skip = "Qualitative/LLM rule — not unit-testable")]
-        public void Rule_S7_ShadowTaint_Fixation_T3() { }
-
-        [Fact(Skip = "Qualitative/LLM rule — not unit-testable")]
-        public void Rule_S7_ShadowTaint_Denial_T1() { }
-
-        [Fact(Skip = "Qualitative/LLM rule — not unit-testable")]
-        public void Rule_S7_ShadowTaint_Denial_T2() { }
-
-        [Fact(Skip = "Qualitative/LLM rule — not unit-testable")]
-        public void Rule_S7_ShadowTaint_Denial_T3() { }
-
-        [Fact(Skip = "Qualitative/LLM rule — not unit-testable")]
-        public void Rule_S7_ShadowTaint_Madness_T1() { }
-
-        [Fact(Skip = "Qualitative/LLM rule — not unit-testable")]
-        public void Rule_S7_ShadowTaint_Madness_T2() { }
-
-        [Fact(Skip = "Qualitative/LLM rule — not unit-testable")]
-        public void Rule_S7_ShadowTaint_Madness_T3() { }
-
-        [Fact(Skip = "Qualitative/LLM rule — not unit-testable")]
-        public void Rule_S5_Failure_Fumble_Narrative() { }
-
-        [Fact(Skip = "Qualitative/LLM rule — not unit-testable")]
-        public void Rule_S5_Failure_Catastrophe_Narrative() { }
-
-        [Fact(Skip = "Qualitative/LLM rule — not unit-testable")]
-        public void Rule_S5_Failure_Legendary_Narrative() { }
-
-        [Fact(Skip = "Qualitative/LLM rule — not unit-testable")]
-        public void Rule_S6_Ghost_Trigger_Narrative() { }
-
-        [Fact(Skip = "Qualitative/LLM rule — not unit-testable")]
-        public void Rule_S11_LLM_Prompt_Taint_Injection() { }
     }
 }
 """

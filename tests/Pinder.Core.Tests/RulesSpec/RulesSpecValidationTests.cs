@@ -64,9 +64,9 @@ namespace Pinder.Core.Tests.RulesSpec
         // AC-1 verification: file structure conformance
         // =====================================================================
 
-        // Mutation: would catch if RulesSpecTests.cs has fewer than 54 [Fact] attributes
+        // Mutation: would catch if generated executable guardrails are dropped
         [Fact]
-        public void AC1_RulesSpecTests_File_Has_54_Facts()
+        public void AC1_RulesSpecTests_File_Has_37_Executable_Facts()
         {
             var path = System.IO.Path.Combine(
                 System.AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..",
@@ -83,7 +83,7 @@ namespace Pinder.Core.Tests.RulesSpec
             Assert.True(System.IO.File.Exists(path), $"RulesSpecTests.cs not found at expected location");
             var content = System.IO.File.ReadAllText(path);
             int factCount = System.Text.RegularExpressions.Regex.Matches(content, @"\[Fact").Count;
-            Assert.Equal(54, factCount);
+            Assert.Equal(37, factCount);
         }
 
         // Mutation: would catch if source attribution header is missing
@@ -106,9 +106,9 @@ namespace Pinder.Core.Tests.RulesSpec
             Assert.Contains("rules/tools/generate_tests.py", content);
         }
 
-        // Mutation: would catch if skipped tests use wrong skip message
+        // Mutation: would catch if qualitative placeholders are reintroduced as skipped facts
         [Fact]
-        public void AC2_Skipped_Tests_Have_Descriptive_Skip_Message()
+        public void AC2_RulesSpecTests_Has_No_Skipped_Facts()
         {
             var path = System.IO.Path.Combine(
                 System.AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..",
@@ -123,7 +123,7 @@ namespace Pinder.Core.Tests.RulesSpec
             Assert.True(System.IO.File.Exists(path));
             var content = System.IO.File.ReadAllText(path);
             var skipMatches = System.Text.RegularExpressions.Regex.Matches(content, @"\[Fact\(Skip\s*=");
-            Assert.Equal(17, skipMatches.Count);
+            Assert.Empty(skipMatches);
         }
 
         // =====================================================================
