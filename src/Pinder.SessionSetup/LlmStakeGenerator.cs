@@ -76,21 +76,10 @@ namespace Pinder.SessionSetup
             _transport = transport ?? throw new ArgumentNullException(nameof(transport));
             _streamingTransport = streamingTransport;
             _options = options ?? new Options();
-            _catalog = catalog ?? PromptTemplates.Catalog
-                ?? throw new InvalidOperationException("PromptTemplates.Catalog is not wired. Call PromptWiring.Wire() at startup.");
-
-            // Enforce that the catalog contains the required key
-            var entry = _catalog.TryGet("stake")
-                ?? throw new InvalidOperationException("prompt-catalog: missing required key 'stake'. The yaml file is incomplete or missing.");
-            if (string.IsNullOrWhiteSpace(entry.SystemPrompt))
-                throw new InvalidOperationException("prompt-catalog: key 'stake' has no system_prompt. Check the yaml file.");
-            if (string.IsNullOrWhiteSpace(entry.UserTemplate))
-                throw new InvalidOperationException("prompt-catalog: key 'stake' has no user_template. Check the yaml file.");
-
-            if (!entry.Temperature.HasValue)
-                throw new InvalidOperationException("prompt-catalog: key 'stake' has no temperature. Check the yaml file.");
-            if (!entry.MaxTokens.HasValue)
-                throw new InvalidOperationException("prompt-catalog: key 'stake' has no max_tokens. Check the yaml file.");
+            _catalog = PromptCatalog.ResolveCatalogOrThrow(catalog);
+            _catalog.RequireCompleteEntry(
+                "stake",
+                "prompt-catalog: missing required key 'stake'. The yaml file is incomplete or missing.");
         }
 
         /// <summary>

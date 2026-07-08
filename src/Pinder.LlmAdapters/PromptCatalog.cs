@@ -86,6 +86,41 @@ namespace Pinder.LlmAdapters
         }
 
         /// <summary>
+        /// Resolve an explicitly supplied catalog or the globally wired prompt
+        /// catalog, throwing the standard startup wiring error when neither
+        /// exists.
+        /// </summary>
+        public static PromptCatalog ResolveCatalogOrThrow(PromptCatalog? catalog)
+        {
+            return catalog ?? PromptTemplates.Catalog
+                ?? throw new InvalidOperationException(
+                    "PromptTemplates.Catalog is not wired. Call PromptWiring.Wire() at startup.");
+        }
+
+        /// <summary>
+        /// Look up a prompt entry and require the fields needed by setup LLM
+        /// generators.
+        /// </summary>
+        public PromptEntry RequireCompleteEntry(string key, string missingKeyMessage)
+        {
+            if (key is null) throw new ArgumentNullException(nameof(key));
+            if (missingKeyMessage is null) throw new ArgumentNullException(nameof(missingKeyMessage));
+
+            var entry = TryGet(key)
+                ?? throw new InvalidOperationException(missingKeyMessage);
+            if (string.IsNullOrWhiteSpace(entry.SystemPrompt))
+                throw new InvalidOperationException($"prompt-catalog: key '{key}' has no system_prompt. Check the yaml file.");
+            if (string.IsNullOrWhiteSpace(entry.UserTemplate))
+                throw new InvalidOperationException($"prompt-catalog: key '{key}' has no user_template. Check the yaml file.");
+            if (!entry.Temperature.HasValue)
+                throw new InvalidOperationException($"prompt-catalog: key '{key}' has no temperature. Check the yaml file.");
+            if (!entry.MaxTokens.HasValue)
+                throw new InvalidOperationException($"prompt-catalog: key '{key}' has no max_tokens. Check the yaml file.");
+
+            return entry;
+        }
+
+        /// <summary>
         /// Names of every prompt the catalog loaded. Useful for
         /// diagnostics and tests asserting the migration's completeness.
         /// </summary>
