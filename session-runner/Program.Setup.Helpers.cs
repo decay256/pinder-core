@@ -89,7 +89,8 @@ partial class Program
 
     private static void ConfigureLlmAdapterAndEngine(GameSetupResult result, string[] args, ref string engineLabel, out StatDeliveryInstructions? statDeliveryInstructions)
     {
-        result.ModelSpec = ParseArg(args, "--model") ?? "";
+        result.ModelSpec = ParseGameModelArg(args);
+        result.SetupModelSpec = ParseSetupModelArg(args, result.ModelSpec);
         result.OverlayModel = ParseArg(args, "--overlay-model");
 
         // Load delivery-instructions.yaml if present
@@ -116,16 +117,9 @@ partial class Program
             Temperature = 0.9,
         };
 
-        if (result.ModelSpec.StartsWith("groq/") || result.ModelSpec.StartsWith("together/") ||
-            result.ModelSpec.StartsWith("openrouter/") || result.ModelSpec.StartsWith("ollama/"))
+        if (IsOpenAiCompatibleModelSpec(result.ModelSpec))
         {
-            string[] providerParts = result.ModelSpec.Split(new[] { '/' }, 2);
-            string provider = providerParts[0];
-            string model = providerParts.Length > 1 ? providerParts[1] : result.ModelSpec;
-            string baseUrl = GetProviderBaseUrl(provider);
-            string envKey = provider.ToUpperInvariant() + "_API_KEY";
-            string openAiKey = Environment.GetEnvironmentVariable(envKey) ?? result.ApiKey;
-            var transport = new OpenAiTransport(openAiKey, baseUrl, model);
+            var transport = CreateOpenAiCompatibleTransport(result.ModelSpec, result.ApiKey!, out string provider, out string model);
             result.Llm = new PinderLlmAdapter(transport, adapterOptions);
             engineLabel = $"PinderLlmAdapter + OpenAiTransport ({provider}) → {model}";
         }
@@ -135,9 +129,7 @@ partial class Program
             {
                 Console.Error.WriteLine($"[WARN] Overlay model '{result.OverlayModel}' requested but overlay routing via option fields was removed (#1293); overlay calls will use the primary transport. Wire a dedicated overlay ILlmTransport to route overlays.");
             }
-            string anthropicModel = string.IsNullOrWhiteSpace(result.ModelSpec)
-                ? AnthropicModelIds.DefaultModel
-                : result.ModelSpec;
+            string anthropicModel = result.ModelSpec;
             var transport = new AnthropicTransport(result.ApiKey, anthropicModel);
             result.Llm = new PinderLlmAdapter(transport, adapterOptions);
             engineLabel = string.IsNullOrWhiteSpace(result.OverlayModel)
@@ -150,8 +142,20 @@ partial class Program
     {
         if (!result.IsResimulation)
         {
-            string setupModel = Environment.GetEnvironmentVariable("PLAYER_AGENT_MODEL") ?? AnthropicModelIds.DefaultModel;
-            using var setupRawTransport = new Pinder.LlmAdapters.Anthropic.AnthropicTransport(result.ApiKey, setupModel);
+            IDisposable? setupRawDisposable = null;
+            ILlmTransport setupRawTransport;
+            if (IsOpenAiCompatibleModelSpec(result.SetupModelSpec))
+            {
+                setupRawTransport = CreateOpenAiCompatibleTransport(result.SetupModelSpec, result.ApiKey!, out _, out _);
+                setupRawDisposable = (IDisposable)setupRawTransport;
+            }
+            else
+            {
+                var anthropicTransport = new Pinder.LlmAdapters.Anthropic.AnthropicTransport(result.ApiKey, result.SetupModelSpec);
+                setupRawTransport = anthropicTransport;
+                setupRawDisposable = anthropicTransport;
+            }
+            using var disposeSetupTransport = setupRawDisposable;
             var setupTransport = new Pinder.LlmAdapters.ThinkingStrippingLlmTransport(setupRawTransport);
 
             // ── Psychological Stakes ──────────────────────────────────
@@ -192,5 +196,24 @@ partial class Program
             result.Sable.FreezeBasePrompt();
             result.Brick.FreezeBasePrompt();
         }
+    }
+
+    private static bool IsOpenAiCompatibleModelSpec(string modelSpec)
+    {
+        return modelSpec.StartsWith("groq/", StringComparison.OrdinalIgnoreCase)
+            || modelSpec.StartsWith("together/", StringComparison.OrdinalIgnoreCase)
+            || modelSpec.StartsWith("openrouter/", StringComparison.OrdinalIgnoreCase)
+            || modelSpec.StartsWith("ollama/", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static OpenAiTransport CreateOpenAiCompatibleTransport(string modelSpec, string apiKey, out string provider, out string model)
+    {
+        string[] providerParts = modelSpec.Split(new[] { '/' }, 2);
+        provider = providerParts[0];
+        model = providerParts.Length > 1 ? providerParts[1] : modelSpec;
+        string baseUrl = GetProviderBaseUrl(provider);
+        string envKey = provider.ToUpperInvariant() + "_API_KEY";
+        string openAiKey = Environment.GetEnvironmentVariable(envKey) ?? apiKey;
+        return new OpenAiTransport(openAiKey, baseUrl, model);
     }
 }

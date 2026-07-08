@@ -5,7 +5,7 @@ The session runner orchestrates simulated playtest sessions between two `Charact
 
 ## Key Components
 
-- **`session-runner/Program.cs`** — Entry point. Parses CLI arguments (`--player`, `--datee`, `--max-turns`, `--agent`), loads character profiles via `CharacterDefinitionLoader` (through `DirectoryCharacterStore`), configures `GameSession` with `GameSessionConfig`, runs the turn loop, and prints per-turn status and session summary markdown. Calls `PlaytestFormatter` to render pick reasoning and score tables. Resolves session number once at startup via `SessionFileCounter.ResolvePlaytestDirectory()` + `GetNextSessionNumber()`, then reuses that number for both the header and `WritePlaytestLog`. — #840: prompt-file fallback removed; `--player <name>` resolves exclusively through `data/characters/{slug}.json`.
+- **`session-runner/Program.cs`** — Entry point. Parses CLI arguments (`--player`, `--datee`, `--turns`, `--agent`, `--model`, `--setup-model`, `--player-agent-model`), loads character profiles via `CharacterDefinitionLoader` (through `DirectoryCharacterStore`), configures `GameSession` with `GameSessionConfig`, runs the turn loop, and prints per-turn status and session summary markdown. Calls `PlaytestFormatter` to render pick reasoning and score tables. Resolves session number once at startup via `SessionFileCounter.ResolvePlaytestDirectory()` + `GetNextSessionNumber()`, then reuses that number for both the header and `WritePlaytestLog`. — #840: prompt-file fallback removed; `--player <name>` resolves exclusively through `data/characters/{slug}.json`.
 - **`src/Pinder.SessionSetup/CharacterDefinitionLoader.cs`** — Static utility that loads character definition JSON files and runs them through the full `CharacterAssembler` + `PromptBuilder` pipeline to produce `CharacterProfile` instances. Exposes `Load(path, itemRepo, anatomyRepo)` for file-based loading and internal `Parse(json, itemRepo, anatomyRepo)` for direct JSON string parsing (used in tests). Lives in `Pinder.SessionSetup`, not in `session-runner/` (the prior doc claim was incorrect).
 - **`src/Pinder.SessionSetup/DirectoryCharacterStore.cs`** — `ICharacterStore` implementation backed by a directory of `{slug}.json` v1 files. `LoadAsync(id)` resolves by `character_id`; `ListIdsAsync()` enumerates available ids. The single point of entry for slug-driven character resolution in session-runner and Pinder.GameApi.
 - **`session-runner/DataFileLocator.cs`** — Static utility that resolves paths to data files by walking up from a base directory. Checks `PINDER_DATA_PATH` env var first, then walks parent directories. Also provides `FindRepoRoot()` to locate the repo root (directory containing both `data/` and `src/`).
@@ -40,20 +40,30 @@ The session runner is a console application (`Program.cs`), not a library.
 ### CLI Interface
 
 ```
-Usage: dotnet run --project session-runner -- --player <name> --datee <name> [--max-turns <n>] [--agent <scoring|llm>]
-       dotnet run --project session-runner -- --player-def <path> --datee-def <path> [--max-turns <n>] [--agent <scoring|llm>]
+Usage: dotnet run --project session-runner -- --player <name> --datee <name> [--turns <n>] [--agent <score|llm|human>]
+       dotnet run --project session-runner -- --player-def <path> --datee-def <path> [--turns <n>] [--agent <score|llm|human>]
 
   --player <name>        Player character name (resolves data/characters/{name}.json via DirectoryCharacterStore)
   --datee <name>      Datee character name (same resolution as --player)
   --player-def <path>    Player character definition JSON file (uses CharacterDefinitionLoader.Load)
   --datee-def <path>  Datee character definition JSON file (uses CharacterDefinitionLoader.Load)
-  --max-turns <n>        Maximum turns (default: 20)
-  --agent <type>         Player agent: scoring or llm (default: scoring)
+  --turns <n>            Maximum turns (default: game-definition.yaml max_turns, otherwise 30)
+  --agent <type>         Player agent: score, llm, or human (default: score)
+  --model <spec>         Game-turn LLM target (default: claude-sonnet-4-20250514)
+  --setup-model <spec>   Setup generator target (default: same as --model; env: SESSION_SETUP_MODEL)
+  --player-agent-model <spec>
+                         LLM player decision target (default: claude-sonnet-4-20250514; env: PLAYER_AGENT_MODEL)
 ```
 
 `--player`/`--datee` and `--player-def`/`--datee-def` can be mixed freely. The `--player <name>` shorthand resolves `data/characters/{name}.json` via `DataFileLocator` and runs it through `CharacterDefinitionLoader.Assemble()`. As of #840 there is no prompt-file fallback: a missing `data/characters/{name}.json` raises a `FileNotFoundException` with the list of available slugs in the message. Running with no args or invalid args prints usage and exits with code 1.
 
-The `--agent` argument replaces the previous `PLAYER_AGENT` environment variable for agent selection.
+The `--agent` argument is the preferred agent selector. If omitted, the runner still accepts `PLAYER_AGENT` as a compatibility fallback before defaulting to `score`.
+
+Model knobs are intentionally separate:
+
+- `--model` selects the game-turn adapter used by `PinderLlmAdapter`. It accepts Anthropic model IDs such as `claude-sonnet-4-20250514` plus OpenAI-compatible provider specs such as `groq/<model>`, `together/<model>`, `openrouter/<model>`, and `ollama/<model>`.
+- `--setup-model` selects the setup generators that produce psychological stakes before turn 1. If omitted, it reuses the resolved `--model`; `SESSION_SETUP_MODEL` can override it without changing game turns.
+- `--player-agent-model` selects the Anthropic model used only when `--agent llm` asks the simulated player to choose an option. If omitted, it uses `PLAYER_AGENT_MODEL`, then `claude-sonnet-4-20250514`.
 
 ### CharacterDefinitionLoader (static class)
 
@@ -287,7 +297,7 @@ When all optional fields are at defaults, scoring behavior is identical to pre-#
 - **Shadow growth triggers** (e.g., Nat 1 → Madness, 3 consecutive same-stat picks → Fixation) are handled inside `GameSession`; the session runner only reads and displays results.
 - **Character loading (dual path)**: Characters can be loaded two ways: (1) **CharacterDefinitionLoader** reads JSON definition files and runs the full `CharacterAssembler` + `PromptBuilder` pipeline — this is the preferred path that exercises real item/anatomy data. (2) **CharacterLoader** reads pre-assembled prompt markdown files — retained as a fallback. CLI args `--player-def`/`--datee-def` use the definition loader directly; `--player`/`--datee` shorthand tries `data/characters/{name}.json` via `DataFileLocator` first, falling back to `CharacterLoader` if not found.
 - **Data file resolution**: `DataFileLocator` walks up from the working directory to find `data/items/starter-items.json` and `data/anatomy/anatomy-parameters.json`. Also checks the `PINDER_DATA_PATH` env var. If data files cannot be resolved, the runner warns and falls back to prompt file loading.
-- **CLI-driven configuration**: The session runner uses positional CLI arguments instead of environment variables for character selection and agent type. The `--max-turns` default is 20 (previously hardcoded as 15).
+- **CLI-driven configuration**: The session runner uses CLI arguments for character selection, agent type, turn count, and model routing. Environment variables remain as compatibility or secret-bearing fallbacks: `PLAYER_AGENT`, `SESSION_SETUP_MODEL`, `PLAYER_AGENT_MODEL`, and provider API keys.
 - **Playtest directory resolution** uses a 3-tier strategy: (1) `PINDER_PLAYTESTS_PATH` env var override, (2) walk up from `AppContext.BaseDirectory` looking for `design/playtests/`, (3) hardcoded fallback. This replaced a previously hardcoded absolute path in `Program.cs` that caused `GetNextSessionNumber` to scan the wrong directory when the working directory didn't match expectations.
 
 ## Player Agents
@@ -342,7 +352,7 @@ LlmPlayerAgent(
 5. **Rules Reminder** — success/failure tiers, risk bonus, momentum, bonus icons
 6. **Task** — character-fit reasoning instruction with `PICK: [A/B/C/D]` format
 
-**Agent selection:** controlled via `--agent` CLI argument (`scoring` or `llm`, default `scoring`). The `PLAYER_AGENT` env var is no longer used. LLM model configurable via `PLAYER_AGENT_MODEL` env var.
+**Agent selection:** controlled via `--agent` CLI argument (`score`, `llm`, or `human`, default `score`; `PLAYER_AGENT` remains a compatibility fallback). Game-turn model selection is controlled by `--model` (default `claude-sonnet-4-20250514`). Setup generator model selection is controlled by `--setup-model` or `SESSION_SETUP_MODEL` and otherwise follows `--model`. LLM player decisions are controlled by `--player-agent-model` or `PLAYER_AGENT_MODEL` and otherwise use `claude-sonnet-4-20250514`.
 
 ### Supporting Types
 - **`PlayerDecision`** — result type: `OptionIndex`, `Reasoning` (string), `Scores` (OptionScore[])

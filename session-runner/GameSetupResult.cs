@@ -44,6 +44,8 @@ public class GameSetupResult
     public int MaxTurns { get; set; }
     public string? DebugFile { get; set; }
     public string ModelSpec { get; set; }
+    public string SetupModelSpec { get; set; }
+    public string PlayerAgentModelSpec { get; set; }
     public string? OverlayModel { get; set; }
     public IStatefulLlmAdapter Llm { get; set; }
     public ITrapRegistry TrapRegistry { get; set; }

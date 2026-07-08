@@ -1,8 +1,12 @@
 using System;
 using System.Linq;
+using Pinder.LlmAdapters.Anthropic;
 
 partial class Program
 {
+    internal const string SessionSetupModelEnvVar = "SESSION_SETUP_MODEL";
+    internal const string PlayerAgentModelEnvVar = "PLAYER_AGENT_MODEL";
+
     internal static string ExtractSystemPrompt(string md)
     {
         int start = md.IndexOf("```\n", StringComparison.Ordinal) + 4;
@@ -26,6 +30,25 @@ partial class Program
         return Environment.GetEnvironmentVariable("PLAYER_AGENT") ?? "score";
     }
 
+    internal static string ParseGameModelArg(string[] args)
+    {
+        return ParseArg(args, "--model") ?? AnthropicModelIds.DefaultModel;
+    }
+
+    internal static string ParseSetupModelArg(string[] args, string gameModel)
+    {
+        return ParseArg(args, "--setup-model")
+            ?? Environment.GetEnvironmentVariable(SessionSetupModelEnvVar)
+            ?? gameModel;
+    }
+
+    internal static string ParsePlayerAgentModelArg(string[] args)
+    {
+        return ParseArg(args, "--player-agent-model")
+            ?? Environment.GetEnvironmentVariable(PlayerAgentModelEnvVar)
+            ?? AnthropicModelIds.DefaultModel;
+    }
+
     internal static string? ParseArg(string[] args, string flag)
     {
         int idx = Array.IndexOf(args, flag);
@@ -44,7 +67,9 @@ partial class Program
         Console.Error.WriteLine("Options:");
         Console.Error.WriteLine("  --turns <N>        Override maximum session turns (default: 30)");
         Console.Error.WriteLine("  --agent <type>      Select decision agent: score, llm, human (default: score)");
-        Console.Error.WriteLine("  --model <spec>      LLM adapter target (e.g. groq/llama3-8b, ollama/mistral, defaults to Claude 3.5 Sonnet)");
+        Console.Error.WriteLine($"  --model <spec>      Game-turn LLM target (default: {AnthropicModelIds.DefaultModel})");
+        Console.Error.WriteLine($"  --setup-model <m>   Setup generator model (default: same as --model; env: {SessionSetupModelEnvVar})");
+        Console.Error.WriteLine($"  --player-agent-model <m> LLM player decision model (default: {AnthropicModelIds.DefaultModel}; env: {PlayerAgentModelEnvVar})");
         Console.Error.WriteLine("  --overlay-model <m> Run an overlay/refinement model on top of primary adapter output (via Groq)");
         Console.Error.WriteLine("  --difficulty <pct> Reduce check success probability by N% (e.g. --difficulty 15 = 15% harder)");
         Console.Error.WriteLine("  --seed <int>       Seed value for deterministic dice checks");
