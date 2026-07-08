@@ -190,7 +190,7 @@ namespace Pinder.Core.Tests
             );
         }
 
-        private class MockStatDeliveryInstructions
+        private class MockStatDeliveryInstructions : IStatDeliveryInstructionProvider
         {
             private readonly string? _instruction;
 
@@ -203,6 +203,10 @@ namespace Pinder.Core.Tests
             {
                 return _instruction;
             }
+
+            public string? GetHorninessOverlayInstruction(FailureTier tier) => null;
+
+            public string? GetShadowCorruptionInstruction(ShadowStatType shadow, FailureTier tier) => null;
         }
 
         private class MockLlmAdapter1311 : ILlmAdapter

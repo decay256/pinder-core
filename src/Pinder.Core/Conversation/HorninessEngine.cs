@@ -34,7 +34,7 @@ namespace Pinder.Core.Conversation
             SessionShadowTracker? playerShadows,
             string deliveredMessage,
             ILlmAdapter llm,
-            object? statDeliveryInstructions,
+            IStatDeliveryInstructionProvider? statDeliveryInstructions,
             Func<string, Task> applyOverlay,
             CancellationToken ct = default)
         {
@@ -58,7 +58,7 @@ namespace Pinder.Core.Conversation
         public (HorninessCheckResult Result, string? OverlayInstruction) PeekAsync(
             int sessionHorniness,
             SessionShadowTracker? playerShadows,
-            object? statDeliveryInstructions,
+            IStatDeliveryInstructionProvider? statDeliveryInstructions,
             CancellationToken ct = default)
         {
             ct.ThrowIfCancellationRequested();
@@ -107,54 +107,35 @@ namespace Pinder.Core.Conversation
 
         /// <summary>
         /// Retrieves the horniness overlay instruction from the stat delivery instructions.
-        /// Uses reflection to call GetHorninessOverlayInstruction on the injected object
-        /// (which is StatDeliveryInstructions from the LlmAdapters layer).
+        /// Calls <see cref="IStatDeliveryInstructionProvider.GetHorninessOverlayInstruction"/>
+        /// directly (#709 audit fix — previously used reflection against an untyped object?).
         /// Returns null if instructions are not available.
         /// </summary>
-        internal static string? GetHorninessOverlayInstruction(object? statDeliveryInstructions, FailureTier tier)
+        internal static string? GetHorninessOverlayInstruction(IStatDeliveryInstructionProvider? statDeliveryInstructions, FailureTier tier)
         {
-            if (statDeliveryInstructions == null)
-                return null;
-
-            var method = statDeliveryInstructions.GetType().GetMethod("GetHorninessOverlayInstruction");
-            if (method == null)
-                return null;
-
-            return method.Invoke(statDeliveryInstructions, new object[] { tier }) as string;
+            return statDeliveryInstructions?.GetHorninessOverlayInstruction(tier);
         }
 
         /// <summary>
         /// Retrieves the stat-specific failure instruction from the stat delivery instructions.
-        /// Uses reflection to avoid a direct dependency on Pinder.LlmAdapters from Pinder.Core.
+        /// Calls <see cref="IStatDeliveryInstructionProvider.GetStatFailureInstruction"/>
+        /// directly (#709 audit fix — previously used reflection against an untyped object?).
         /// Returns null if instructions are not available.
         /// </summary>
-        internal static string? GetStatFailureInstruction(object? statDeliveryInstructions, StatType stat, FailureTier tier)
+        internal static string? GetStatFailureInstruction(IStatDeliveryInstructionProvider? statDeliveryInstructions, StatType stat, FailureTier tier)
         {
-            if (statDeliveryInstructions == null)
-                return null;
-
-            var method = statDeliveryInstructions.GetType().GetMethod("GetStatFailureInstruction");
-            if (method == null)
-                return null;
-
-            return method.Invoke(statDeliveryInstructions, new object[] { stat, tier }) as string;
+            return statDeliveryInstructions?.GetStatFailureInstruction(stat, tier);
         }
 
         /// <summary>
         /// Retrieves the shadow corruption instruction from the stat delivery instructions.
-        /// Uses reflection to avoid a direct dependency on Pinder.LlmAdapters from Pinder.Core.
+        /// Calls <see cref="IStatDeliveryInstructionProvider.GetShadowCorruptionInstruction"/>
+        /// directly (#709 audit fix — previously used reflection against an untyped object?).
         /// Returns null if instructions are not available.
         /// </summary>
-        internal static string? GetShadowCorruptionInstruction(object? statDeliveryInstructions, ShadowStatType shadow, FailureTier tier)
+        internal static string? GetShadowCorruptionInstruction(IStatDeliveryInstructionProvider? statDeliveryInstructions, ShadowStatType shadow, FailureTier tier)
         {
-            if (statDeliveryInstructions == null)
-                return null;
-
-            var method = statDeliveryInstructions.GetType().GetMethod("GetShadowCorruptionInstruction");
-            if (method == null)
-                return null;
-
-            return method.Invoke(statDeliveryInstructions, new object[] { shadow, tier }) as string;
+            return statDeliveryInstructions?.GetShadowCorruptionInstruction(shadow, tier);
         }
     }
 }

@@ -31,7 +31,7 @@ namespace Pinder.Core.Conversation
         private readonly SteeringEngine _steeringEngine;
         private readonly HorninessEngine _horninessEngine;
         private readonly ShadowCheckEngine _shadowCheckEngine;
-        private readonly object? _statDeliveryInstructions;
+        private readonly IStatDeliveryInstructionProvider? _statDeliveryInstructions;
         private readonly Action<TextLayerNoopEvent>? _onTextLayerNoop;
         private readonly Action<OperationalDiagnosticEvent>? _onDiagnostic;
         private readonly int _maxDeliveryWords;
@@ -42,7 +42,7 @@ namespace Pinder.Core.Conversation
             SteeringEngine steeringEngine,
             HorninessEngine horninessEngine,
             ShadowCheckEngine shadowCheckEngine,
-            object? statDeliveryInstructions,
+            IStatDeliveryInstructionProvider? statDeliveryInstructions,
             Action<TextLayerNoopEvent>? onTextLayerNoop,
             Action<OperationalDiagnosticEvent>? onDiagnostic,
             int maxDeliveryWords)

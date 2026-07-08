@@ -61,8 +61,12 @@ namespace Pinder.Core.Conversation
         /// Optional delivery instructions for horniness overlay tier lookups.
         /// When null, horniness overlay is skipped (no silent fallback — caller
         /// should supply instructions if horniness mechanic is desired).
+        /// Typed as <see cref="IStatDeliveryInstructionProvider"/> (implemented by
+        /// the adapter-layer StatDeliveryInstructions class) rather than
+        /// <c>object?</c>, so the engine calls these members at compile time
+        /// instead of via reflection (#709 audit fix).
         /// </summary>
-        public object? StatDeliveryInstructions { get; }
+        public IStatDeliveryInstructionProvider? StatDeliveryInstructions { get; }
 
         /// <summary>
         /// Optional dice roller override. When non-null, GameSession uses this instead of
@@ -153,7 +157,7 @@ namespace Pinder.Core.Conversation
             int shadowDcBias = 0,
             int horninessDcBias = 0,
             Random? steeringRng = null,
-            object? statDeliveryInstructions = null,
+            IStatDeliveryInstructionProvider? statDeliveryInstructions = null,
             IDiceRoller? diceRoller = null,
             Random? statDrawRng = null,
             Action<TextLayerNoopEvent>? onTextLayerNoop = null,

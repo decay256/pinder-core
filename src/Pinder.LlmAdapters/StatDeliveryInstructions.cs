@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Pinder.Core.Interfaces;
 using Pinder.Core.Stats;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -10,8 +11,11 @@ namespace Pinder.LlmAdapters
     /// Per-stat, per-tier delivery instructions loaded from delivery-instructions.yaml.
     /// Provides specific LLM prompts for each stat × outcome combination.
     /// Falls back to null when a key is missing — callers should use hardcoded defaults.
+    /// Implements <see cref="IStatDeliveryInstructionProvider"/> so Pinder.Core can call
+    /// these members directly (as the compile-time interface type) instead of via
+    /// reflection against an untyped <c>object?</c>.
     /// </summary>
-    public sealed class StatDeliveryInstructions
+    public sealed class StatDeliveryInstructions : IStatDeliveryInstructionProvider
     {
         private readonly Dictionary<string, Dictionary<string, string>> _instructions;
 
@@ -24,7 +28,7 @@ namespace Pinder.LlmAdapters
         /// Returns the instruction for a given stat and tier key, or null if not found.
         /// Tier keys: clean | strong | critical | exceptional | nat20 | fumble | misfire | trope_trap | catastrophe | nat1
         /// </summary>
-        public string Get(StatType stat, string tierKey)
+        public string? Get(StatType stat, string tierKey)
         {
             string statKey = StatKey(stat);
             if (_instructions.TryGetValue(statKey, out var tiers) &&
@@ -66,7 +70,7 @@ namespace Pinder.LlmAdapters
         /// Returns the stat-specific failure instruction for the given stat and failure tier, or null if not found.
         /// Convenience wrapper around Get() + FailureTierKey().
         /// </summary>
-        public string GetStatFailureInstruction(Pinder.Core.Stats.StatType stat, Pinder.Core.Rolls.FailureTier tier)
+        public string? GetStatFailureInstruction(Pinder.Core.Stats.StatType stat, Pinder.Core.Rolls.FailureTier tier)
         {
             string tierKey = FailureTierKey(tier);
             return Get(stat, tierKey);
@@ -76,7 +80,7 @@ namespace Pinder.LlmAdapters
         /// Returns the horniness overlay instruction for the given failure tier, or null if not found.
         /// The horniness_overlay section in YAML has tiers: fumble, misfire, trope_trap, catastrophe.
         /// </summary>
-        public string GetHorninessOverlayInstruction(Pinder.Core.Rolls.FailureTier tier)
+        public string? GetHorninessOverlayInstruction(Pinder.Core.Rolls.FailureTier tier)
         {
             string tierKey = FailureTierKey(tier);
             if (_instructions.TryGetValue("horniness_overlay", out var tiers) &&
@@ -91,7 +95,7 @@ namespace Pinder.LlmAdapters
         /// The shadow_corruption section in YAML has subsections per shadow, each with tiers:
         /// fumble, misfire, trope_trap, catastrophe.
         /// </summary>
-        public string GetShadowCorruptionInstruction(Pinder.Core.Stats.ShadowStatType shadow, Pinder.Core.Rolls.FailureTier tier)
+        public string? GetShadowCorruptionInstruction(Pinder.Core.Stats.ShadowStatType shadow, Pinder.Core.Rolls.FailureTier tier)
         {
             string shadowKey = ShadowKey(shadow);
             string tierKey = FailureTierKey(tier);

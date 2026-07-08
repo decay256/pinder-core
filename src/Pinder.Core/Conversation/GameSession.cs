@@ -105,7 +105,7 @@ namespace Pinder.Core.Conversation
         private Dictionary<ShadowStatType, int>? _currentShadowThresholds { get => _state.CurrentShadowThresholds; set => _state.CurrentShadowThresholds = value; }
 
         // Stat delivery instructions for horniness overlay tier lookups (#709)
-        private readonly object? _statDeliveryInstructions;
+        private readonly IStatDeliveryInstructionProvider? _statDeliveryInstructions;
 
         // #314: optional callback invoked when a text-transform layer (Horniness /
         // Shadow / Trap overlay) ran an LLM call but produced byte-identical
