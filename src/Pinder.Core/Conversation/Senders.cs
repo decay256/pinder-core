@@ -28,6 +28,8 @@ namespace Pinder.Core.Conversation
         /// </summary>
         public const string Scene = "[scene]";
 
+        private const string SceneDisplayPrefix = Scene + ":";
+
         /// <summary>
         /// True when <paramref name="sender"/> is a synthetic
         /// scene-setting tag rather than a character speaking.
@@ -35,6 +37,18 @@ namespace Pinder.Core.Conversation
         public static bool IsScene(string? sender)
         {
             return sender != null && sender.StartsWith(Scene);
+        }
+
+        /// <summary>
+        /// Removes the synthetic scene display prefix from sender labels.
+        /// </summary>
+        public static string StripScenePrefix(string? sender)
+        {
+            if (sender is null) return string.Empty;
+
+            return sender.StartsWith(SceneDisplayPrefix)
+                ? sender.Substring(SceneDisplayPrefix.Length)
+                : sender;
         }
     }
 }
