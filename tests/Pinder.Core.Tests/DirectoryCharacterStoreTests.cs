@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Pinder.Core.Characters;
 using Pinder.Core.Stats;
@@ -340,6 +342,190 @@ namespace Pinder.Core.Tests
 
             Assert.Equal(6, ids.Count);
             Assert.All(ids, id => Assert.True(Guid.TryParseExact(id, "D", out _)));
+        }
+
+        // --- genuine-async regression coverage ------------------------------
+        //
+        // These tests use the internal DirectoryCharacterStore.TestIoDelayHook
+        // seam (exposed via InternalsVisibleTo) to inject an artificial delay
+        // into the store's disk read/write path. That proves the async
+        // methods are not `Task.FromResult`/sync-I/O facades: the calling
+        // thread must be released immediately (not blocked for the delay
+        // duration) and the returned Task must not be synchronously
+        // completed at the moment the method returns.
+
+        [Fact]
+        public async Task SaveAsync_DoesNotBlockCallingThread_WhenDiskWriteIsSlow()
+        {
+            var store = new DirectoryCharacterStore(_tmpDir);
+            var def = NewDefinition();
+
+            DirectoryCharacterStore.TestIoDelayHook = ct => Task.Delay(200, ct);
+            try
+            {
+                var sw = Stopwatch.StartNew();
+                Task saveTask = store.SaveAsync(def);
+                sw.Stop();
+
+                Assert.True(
+                    sw.ElapsedMilliseconds < 100,
+                    $"SaveAsync blocked the calling thread for {sw.ElapsedMilliseconds}ms " +
+                    "instead of returning control immediately.");
+                Assert.False(
+                    saveTask.IsCompleted,
+                    "SaveAsync's Task completed synchronously despite a 200ms injected I/O delay.");
+
+                await saveTask;
+            }
+            finally
+            {
+                DirectoryCharacterStore.TestIoDelayHook = null;
+            }
+        }
+
+        [Fact]
+        public async Task LoadAsync_DoesNotBlockCallingThread_WhenDiskReadIsSlow()
+        {
+            var store = new DirectoryCharacterStore(_tmpDir);
+            var def = NewDefinition();
+            await store.SaveAsync(def);
+
+            DirectoryCharacterStore.TestIoDelayHook = ct => Task.Delay(200, ct);
+            try
+            {
+                var sw = Stopwatch.StartNew();
+                Task<CharacterDefinition?> loadTask = store.LoadAsync(def.CharacterId.ToString("D"));
+                sw.Stop();
+
+                Assert.True(
+                    sw.ElapsedMilliseconds < 100,
+                    $"LoadAsync blocked the calling thread for {sw.ElapsedMilliseconds}ms " +
+                    "instead of returning control immediately.");
+                Assert.False(
+                    loadTask.IsCompleted,
+                    "LoadAsync's Task completed synchronously despite a 200ms injected I/O delay.");
+
+                var loaded = await loadTask;
+                Assert.NotNull(loaded);
+            }
+            finally
+            {
+                DirectoryCharacterStore.TestIoDelayHook = null;
+            }
+        }
+
+        [Fact]
+        public async Task ListIdsAsync_DoesNotBlockCallingThread_WhenIndexScanIsSlow()
+        {
+            // Save with one store, then read with a fresh instance so the
+            // index is cold and the per-file scan path actually executes.
+            var writer = new DirectoryCharacterStore(_tmpDir);
+            await writer.SaveAsync(NewDefinition());
+            var reader = new DirectoryCharacterStore(_tmpDir);
+
+            DirectoryCharacterStore.TestIoDelayHook = ct => Task.Delay(200, ct);
+            try
+            {
+                var sw = Stopwatch.StartNew();
+                Task<IReadOnlyList<string>> listTask = reader.ListIdsAsync();
+                sw.Stop();
+
+                Assert.True(
+                    sw.ElapsedMilliseconds < 100,
+                    $"ListIdsAsync blocked the calling thread for {sw.ElapsedMilliseconds}ms " +
+                    "instead of returning control immediately.");
+                Assert.False(
+                    listTask.IsCompleted,
+                    "ListIdsAsync's Task completed synchronously despite a 200ms injected I/O delay.");
+
+                var ids = await listTask;
+                Assert.Single(ids);
+            }
+            finally
+            {
+                DirectoryCharacterStore.TestIoDelayHook = null;
+            }
+        }
+
+        [Fact]
+        public async Task SaveAsync_HonoursCancellation_DuringSlowDiskWrite()
+        {
+            var store = new DirectoryCharacterStore(_tmpDir);
+            var def = NewDefinition();
+
+            DirectoryCharacterStore.TestIoDelayHook = ct => Task.Delay(2000, ct);
+            try
+            {
+                using var cts = new CancellationTokenSource();
+                cts.CancelAfter(20);
+
+                await Assert.ThrowsAsync<TaskCanceledException>(() => store.SaveAsync(def, cts.Token));
+            }
+            finally
+            {
+                DirectoryCharacterStore.TestIoDelayHook = null;
+            }
+        }
+
+        [Fact]
+        public async Task LoadAsync_HonoursCancellation_DuringSlowDiskRead()
+        {
+            var store = new DirectoryCharacterStore(_tmpDir);
+            var def = NewDefinition();
+            await store.SaveAsync(def);
+
+            DirectoryCharacterStore.TestIoDelayHook = ct => Task.Delay(2000, ct);
+            try
+            {
+                using var cts = new CancellationTokenSource();
+                cts.CancelAfter(20);
+
+                await Assert.ThrowsAsync<TaskCanceledException>(
+                    () => store.LoadAsync(def.CharacterId.ToString("D"), cts.Token));
+            }
+            finally
+            {
+                DirectoryCharacterStore.TestIoDelayHook = null;
+            }
+        }
+
+        [Fact]
+        public async Task Cancellation_ListIdsAsync_Throws()
+        {
+            var store = new DirectoryCharacterStore(_tmpDir);
+            using var cts = new CancellationTokenSource();
+            cts.Cancel();
+            await Assert.ThrowsAsync<OperationCanceledException>(() => store.ListIdsAsync(cts.Token));
+        }
+
+        [Fact]
+        public async Task Cancellation_LoadAsync_Throws()
+        {
+            var store = new DirectoryCharacterStore(_tmpDir);
+            using var cts = new CancellationTokenSource();
+            cts.Cancel();
+            await Assert.ThrowsAsync<OperationCanceledException>(
+                () => store.LoadAsync("00000000-0000-4000-8000-000000000000", cts.Token));
+        }
+
+        [Fact]
+        public async Task Cancellation_DeleteAsync_Throws()
+        {
+            var store = new DirectoryCharacterStore(_tmpDir);
+            using var cts = new CancellationTokenSource();
+            cts.Cancel();
+            await Assert.ThrowsAsync<OperationCanceledException>(
+                () => store.DeleteAsync("00000000-0000-4000-8000-000000000000", cts.Token));
+        }
+
+        [Fact]
+        public async Task Cancellation_ExistsAsync_Throws()
+        {
+            var store = new DirectoryCharacterStore(_tmpDir);
+            using var cts = new CancellationTokenSource();
+            cts.Cancel();
+            await Assert.ThrowsAsync<OperationCanceledException>(
+                () => store.ExistsAsync("00000000-0000-4000-8000-000000000000", cts.Token));
         }
     }
 }
