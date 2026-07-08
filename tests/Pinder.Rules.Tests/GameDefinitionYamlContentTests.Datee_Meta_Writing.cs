@@ -7,21 +7,20 @@ namespace Pinder.Rules.Tests
     {
         // ===== AC2 / AC4: Datee role description content requirements =====
 
-        // Mutation: would catch if datee role omits resistance below Interest 25
-        [Fact(Skip="yaml changed")]
-        public void DateeRole_MentionsResistanceBelowTwentyFive()
+        // Mutation: would catch if the prompt stops treating Interest 25 as engine-owned
+        [Fact]
+        public void DateeRole_InterestTwentyFiveRequiresEngineTerminalState()
         {
             var data = ParseYaml();
-            var datee = data["datee_role_description"];
+            var prompt = data["game_master_prompt"];
             Assert.True(
-                datee.Contains("resist", StringComparison.OrdinalIgnoreCase) ||
-                datee.Contains("not won over", StringComparison.OrdinalIgnoreCase) ||
-                datee.Contains("holdback", StringComparison.OrdinalIgnoreCase),
-                "Datee role must establish resistance below Interest 25");
+                prompt.Contains("INTEREST `25` alone does not authorise", StringComparison.Ordinal) &&
+                prompt.Contains("DATE_SECURED", StringComparison.Ordinal),
+                "Prompt must keep Interest 25 subordinate to the engine terminal state");
         }
 
         // Mutation: would catch if datee role omits that it's another player's character
-        [Fact(Skip="yaml changed")]
+        [Fact]
         public void DateeRole_MentionsOtherPlayerCharacter()
         {
             var data = ParseYaml();
@@ -36,11 +35,11 @@ namespace Pinder.Rules.Tests
         }
 
         // Mutation: would catch if datee role omits failure tier reaction guidance
-        [Fact(Skip="yaml changed")]
+        [Fact]
         public void DateeRole_MentionsFailureReactions()
         {
             var data = ParseYaml();
-            var datee = data["datee_role_description"];
+            var datee = data["datee_role_description"] + "\n" + data["game_master_prompt"];
             Assert.True(
                 datee.Contains("fail", StringComparison.OrdinalIgnoreCase) ||
                 datee.Contains("tier", StringComparison.OrdinalIgnoreCase),
@@ -48,22 +47,24 @@ namespace Pinder.Rules.Tests
         }
 
         // Mutation: would catch if datee role omits Date Secured at 25
-        [Fact(Skip="yaml changed")]
+        [Fact]
         public void DateeRole_MentionsDateSecured()
         {
             var data = ParseYaml();
-            var datee = data["datee_role_description"];
+            var datee = data["datee_role_description"] + "\n" +
+                data["player_avatar_role_description"] + "\n" +
+                data["game_master_prompt"];
             Assert.True(
                 datee.Contains("Date Secured", StringComparison.Ordinal) ||
                 (datee.Contains("25", StringComparison.Ordinal) &&
-                 datee.Contains("resist", StringComparison.OrdinalIgnoreCase)),
+                 datee.Contains("DATE_SECURED", StringComparison.Ordinal)),
                 "Datee role must mention Date Secured / resistance dissolving at 25");
         }
 
         // ===== AC2 / AC4: Meta contract content requirements =====
 
         // Mutation: would catch if meta contract omits "never reference game mechanics"
-        [Fact(Skip="yaml changed")]
+        [Fact]
         public void MetaContract_ForbidsReferencingGameMechanics()
         {
             var data = ParseYaml();
@@ -78,7 +79,7 @@ namespace Pinder.Rules.Tests
         }
 
         // Mutation: would catch if meta contract omits "never add content player didn't choose"
-        [Fact(Skip="yaml changed")]
+        [Fact]
         public void MetaContract_ForbidsAddingContent()
         {
             var data = ParseYaml();
@@ -94,7 +95,7 @@ namespace Pinder.Rules.Tests
         }
 
         // Mutation: would catch if meta contract omits "never resolve date early"
-        [Fact(Skip="yaml changed")]
+        [Fact]
         public void MetaContract_ForbidsEarlyDateResolution()
         {
             var data = ParseYaml();
@@ -109,7 +110,7 @@ namespace Pinder.Rules.Tests
         }
 
         // Mutation: would catch if meta contract omits two distinct voices rule
-        [Fact(Skip="yaml changed")]
+        [Fact]
         public void MetaContract_RequiresDistinctVoices()
         {
             var data = ParseYaml();
@@ -122,7 +123,7 @@ namespace Pinder.Rules.Tests
         }
 
         // Mutation: would catch if meta contract omits ENGINE block rule
-        [Fact(Skip="yaml changed")]
+        [Fact]
         public void MetaContract_MentionsEngineBlocks()
         {
             var data = ParseYaml();
@@ -133,7 +134,7 @@ namespace Pinder.Rules.Tests
         // ===== AC2 / AC4: Writing rules content requirements =====
 
         // Mutation: would catch if writing rules omit message length guidance
-        [Fact(Skip="yaml changed")]
+        [Fact]
         public void WritingRules_MentionsMessageLength()
         {
             var data = ParseYaml();
@@ -146,7 +147,7 @@ namespace Pinder.Rules.Tests
         }
 
         // Mutation: would catch if writing rules omit emoji usage convention
-        [Fact(Skip="yaml changed")]
+        [Fact]
         public void WritingRules_MentionsEmojiUsage()
         {
             var data = ParseYaml();
@@ -157,7 +158,7 @@ namespace Pinder.Rules.Tests
         }
 
         // Mutation: would catch if writing rules omit no-asterisk-actions rule
-        [Fact(Skip="yaml changed")]
+        [Fact]
         public void WritingRules_ForbidsAsteriskActions()
         {
             var data = ParseYaml();
@@ -166,7 +167,7 @@ namespace Pinder.Rules.Tests
         }
 
         // Mutation: would catch if writing rules omit comedy-through-voice principle
-        [Fact(Skip="yaml changed")]
+        [Fact]
         public void WritingRules_MentionsComedyThroughVoice()
         {
             var data = ParseYaml();
@@ -178,7 +179,7 @@ namespace Pinder.Rules.Tests
         }
 
         // Mutation: would catch if writing rules omit "strong rolls sharpen, don't add"
-        [Fact(Skip="yaml changed")]
+        [Fact]
         public void WritingRules_MentionsStrongRollSharpening()
         {
             var data = ParseYaml();
@@ -191,7 +192,7 @@ namespace Pinder.Rules.Tests
         }
 
         // Mutation: would catch if writing rules omit failure corruption
-        [Fact(Skip="yaml changed")]
+        [Fact]
         public void WritingRules_MentionsFailureCorruption()
         {
             var data = ParseYaml();
@@ -208,7 +209,7 @@ namespace Pinder.Rules.Tests
         // ===== AC3: YAML is parseable — multi-line values preserved =====
 
         // Mutation: would catch if block scalars are broken (single-line instead of multi-line)
-        [Fact(Skip="yaml changed")]
+        [Fact]
         public void YamlFile_MultiLineValuesContainNewlines()
         {
             var data = ParseYaml();
@@ -223,7 +224,7 @@ namespace Pinder.Rules.Tests
         // ===== Edge case: no emoji characters in YAML file itself (spec says words only) =====
 
         // Mutation: would catch if YAML file uses emoji instead of describing them
-        [Fact(Skip="yaml changed")]
+        [Fact]
         public void YamlFile_ContainsNoEmojiCharacters()
         {
             var content = LoadYamlContent();

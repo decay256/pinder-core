@@ -39,6 +39,8 @@ namespace Pinder.Rules.Tests
             if (node is string s) return s;
             if (node is int i) return i;
             if (node is long l) return l;
+            if (node is double d) return d;
+            if (node is bool b) return b;
             if (node is Dictionary<object, object> dict)
             {
                 var result = new Dictionary<string, object?>();
@@ -71,6 +73,18 @@ namespace Pinder.Rules.Tests
                 {
                     result[kvp.Key] = i.ToString();
                 }
+                else if (kvp.Value is long l)
+                {
+                    result[kvp.Key] = l.ToString();
+                }
+                else if (kvp.Value is double d)
+                {
+                    result[kvp.Key] = d.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                }
+                else if (kvp.Value is bool b)
+                {
+                    result[kvp.Key] = b.ToString();
+                }
                 else if (kvp.Value is Dictionary<string, object?> dict)
                 {
                     var sb = new StringBuilder();
@@ -86,10 +100,15 @@ namespace Pinder.Rules.Tests
             return result;
         }
 
+        private static bool IsSupportedYamlScalar(object? value)
+        {
+            return value is string || value is int || value is long || value is double || value is bool;
+        }
+
         // ===== AC1: File location and format =====
 
         // Mutation: would catch if file contained tab characters causing YAML parse issues
-        [Fact(Skip="yaml changed")]
+        [Fact]
         public void YamlFile_ContainsNoTabs()
         {
             var content = LoadYamlContent();
@@ -97,7 +116,7 @@ namespace Pinder.Rules.Tests
         }
 
         // Mutation: would catch if file had BOM marker (spec requires UTF-8 without BOM)
-        [Fact(Skip="yaml changed")]
+        [Fact]
         public void YamlFile_HasNoBom()
         {
             var dir = AppDomain.CurrentDomain.BaseDirectory;
@@ -115,8 +134,8 @@ namespace Pinder.Rules.Tests
         }
 
         // Mutation: would catch if any content value is something other than string, int, or nested string/int dict
-        [Fact(Skip="yaml changed")]
-        public void YamlFile_AllContentValuesAreStringIntOrNestedDict()
+        [Fact]
+        public void YamlFile_AllContentValuesAreSupportedScalarsOrNestedDict()
         {
             var content = LoadYamlContent();
             var deserializer = new DeserializerBuilder()
@@ -132,18 +151,18 @@ namespace Pinder.Rules.Tests
                 {
                     foreach (var dkv in dict.Values)
                     {
-                        if (dkv != null && dkv is not string && dkv is not int && dkv is not long)
-                            Assert.Fail($"Nested value in '{kvp.Key}' is not a string or integer: {dkv.GetType()}");
+                        if (dkv != null && !IsSupportedYamlScalar(dkv))
+                            Assert.Fail($"Nested value in '{kvp.Key}' is not a supported scalar: {dkv.GetType()}");
                     }
                 }
-                else if (kvp.Value is not string && kvp.Value is not int && kvp.Value is not long)
+                else if (!IsSupportedYamlScalar(kvp.Value))
                 {
-                    Assert.Fail($"Value for '{kvp.Key}' is not a string or integer: {kvp.Value?.GetType()}");
+                    Assert.Fail($"Value for '{kvp.Key}' is not a supported scalar: {kvp.Value?.GetType()}");
                 }
             }
         }
 
-        [Fact(Skip="yaml changed")]
+        [Fact]
         public void YamlFile_HasRequiredContentKeys()
         {
             var data = ParseYaml();

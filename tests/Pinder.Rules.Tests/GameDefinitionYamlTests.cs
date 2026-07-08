@@ -38,7 +38,17 @@ namespace Pinder.Rules.Tests
             "steering_prompt",
             "archetypes_enabled",
             "shadow_dc_bias",
-            "horniness_dc_bias"
+            "horniness_dc_bias",
+            "active_trap_interest_penalty",
+            "xp_flat_awards",
+            "xp_success_base",
+            "xp_risk_multipliers",
+            "xp_terminal_multipliers",
+            "progression_xp_thresholds",
+            "progression_build_points",
+            "progression_level_bonuses",
+            "progression_item_slots",
+            "progression_failure_pool_tiers"
         };
 
         private static string LoadYamlContent()
@@ -66,6 +76,8 @@ namespace Pinder.Rules.Tests
             if (node is string s) return s;
             if (node is int i) return i;
             if (node is long l) return l;
+            if (node is double d) return d;
+            if (node is bool b) return b;
             if (node is Dictionary<object, object> dict)
             {
                 var result = new Dictionary<string, object?>();
@@ -109,6 +121,18 @@ namespace Pinder.Rules.Tests
                 {
                     result[kvp.Key] = i.ToString();
                 }
+                else if (kvp.Value is long l)
+                {
+                    result[kvp.Key] = l.ToString();
+                }
+                else if (kvp.Value is double d)
+                {
+                    result[kvp.Key] = d.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                }
+                else if (kvp.Value is bool b)
+                {
+                    result[kvp.Key] = b.ToString();
+                }
                 else if (kvp.Value is Dictionary<string, object?> dict)
                 {
                     var sb = new System.Text.StringBuilder();
@@ -124,7 +148,7 @@ namespace Pinder.Rules.Tests
             return result;
         }
 
-        [Fact(Skip="yaml changed")]
+        [Fact]
         public void YamlFile_IsValidYaml()
         {
             // Should not throw
@@ -132,7 +156,18 @@ namespace Pinder.Rules.Tests
             Assert.NotNull(data);
         }
 
-        [Fact(Skip="yaml changed")]
+        [Fact]
+        public void YamlFile_LoadsThroughProductionParser()
+        {
+            var definition = Pinder.LlmAdapters.GameDefinition.LoadFrom(LoadYamlContent());
+
+            Assert.Equal("Pinder", definition.Name);
+            Assert.Equal(30, definition.MaxTurns);
+            Assert.Equal(3, definition.MaxDialogueOptions);
+            Assert.Equal(80, definition.MaxDeliveryWords);
+        }
+
+        [Fact]
         public void YamlFile_ContainsAllRequiredKeys()
         {
             var raw = ParseYamlRaw();
@@ -142,7 +177,7 @@ namespace Pinder.Rules.Tests
             }
         }
 
-        [Fact(Skip="yaml changed")]
+        [Fact]
         public void YamlFile_HasNoExtraKeys()
         {
             var raw = ParseYamlRaw();
@@ -167,14 +202,14 @@ namespace Pinder.Rules.Tests
                 $"Value for '{key}' is not a non-empty string (type: {raw[key]?.GetType().Name ?? "null"})");
         }
 
-        [Fact(Skip="yaml changed")]
+        [Fact]
         public void YamlFile_NameIsPinder()
         {
             var data = ParseYaml();
             Assert.Equal("Pinder", data["name"]);
         }
 
-        [Fact(Skip="yaml changed")]
+        [Fact]
         public void YamlFile_VisionMentionsPinderSpecificConcepts()
         {
             var data = ParseYaml();
@@ -186,7 +221,7 @@ namespace Pinder.Rules.Tests
             Assert.Contains("dialogue", vision, StringComparison.OrdinalIgnoreCase);
         }
 
-        [Fact(Skip="yaml changed")]
+        [Fact]
         public void YamlFile_WorldDescriptionMentionsStatPairs()
         {
             var data = ParseYaml();
@@ -206,29 +241,31 @@ namespace Pinder.Rules.Tests
             Assert.Contains("Overthinking", world);
         }
 
-        [Fact(Skip="yaml changed")]
+        [Fact]
         public void YamlFile_WorldDescriptionMentionsInterestMeter()
         {
             var data = ParseYaml();
             var world = data["game_master_prompt"];
             var playerRole = data["player_avatar_role_description"];
-            var dateeRole = data["datee_role_description"];
             Assert.Contains("Interest", world, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("25", playerRole);
-            Assert.Contains("Bored", dateeRole);
+            Assert.Contains("UNMATCHED", world);
             Assert.Contains("Date Secured", playerRole);
         }
 
-        [Fact(Skip="yaml changed")]
+        [Fact]
         public void YamlFile_MetaContractMentionsNeverBreakCharacter()
         {
             var data = ParseYaml();
             var meta = data["game_master_prompt"];
-            Assert.Contains("Never break character", meta);
+            Assert.True(
+                meta.Contains("Never break character", StringComparison.OrdinalIgnoreCase) ||
+                meta.Contains("break the fourth wall", StringComparison.OrdinalIgnoreCase),
+                "Meta contract must forbid out-of-character output");
             Assert.Contains("ENGINE", meta);
         }
 
-        [Fact(Skip="yaml changed")]
+        [Fact]
         public void YamlFile_WritingRulesMentionsTextingRegister()
         {
             var data = ParseYaml();
@@ -237,7 +274,7 @@ namespace Pinder.Rules.Tests
             Assert.Contains("asterisk", rules, StringComparison.OrdinalIgnoreCase);
         }
 
-        [Fact(Skip="yaml changed")]
+        [Fact]
         public void YamlFile_ContentSectionsHaveSubstantiveLength()
         {
             var data = ParseYaml();
