@@ -126,6 +126,16 @@ namespace Pinder.RemoteAssets.Tests
             };
         }
 
+        private static HttpResponseMessage TooManyRequests(string body = "rate", string retryAfter = "0")
+        {
+            var response = new HttpResponseMessage(HttpStatusCode.TooManyRequests)
+            {
+                Content = new StringContent(body),
+            };
+            response.Headers.TryAddWithoutValidation("Retry-After", retryAfter);
+            return response;
+        }
+
         /// <summary>
         /// Decode the multipart parts of a captured request using the
         /// FakeHttpMessageHandler's pre-disposal body snapshot. Returns
@@ -304,6 +314,44 @@ namespace Pinder.RemoteAssets.Tests
 
             var ex = await Assert.ThrowsAsync<RemoteAssetAuthException>(() => store.DeleteAsync(AssetId));
             Assert.Equal(401, ex.StatusCode);
+        }
+
+        [Fact]
+        public async Task DeleteAsync_429_Then_204_Retries_And_Succeeds()
+        {
+            var (store, handler) = Make();
+            handler.Enqueue(_ => TooManyRequests());
+            handler.Enqueue(_ => new HttpResponseMessage(HttpStatusCode.NoContent));
+
+            bool deleted = await store.DeleteAsync(AssetId);
+
+            Assert.True(deleted);
+            Assert.Equal(2, handler.Requests.Count);
+            Assert.All(handler.Requests, req =>
+            {
+                Assert.Equal(HttpMethod.Delete, req.Method);
+                Assert.Equal($"https://eigencore.test/api/v1/assets/{AssetId}", req.RequestUri!.AbsoluteUri);
+            });
+        }
+
+        [Fact]
+        public async Task DeleteAsync_429_Then_429_Throws_RemoteAssetRateLimitException()
+        {
+            var (store, handler) = Make();
+            handler.Enqueue(_ => TooManyRequests());
+            handler.Enqueue(_ => TooManyRequests("rate-2", "2"));
+
+            var ex = await Assert.ThrowsAsync<RemoteAssetRateLimitException>(() => store.DeleteAsync(AssetId));
+
+            Assert.Equal(429, ex.StatusCode);
+            Assert.Equal(TimeSpan.FromSeconds(2), ex.RetryAfter);
+            Assert.Equal("rate-2", ex.ResponseBody);
+            Assert.Equal(2, handler.Requests.Count);
+            Assert.All(handler.Requests, req =>
+            {
+                Assert.Equal(HttpMethod.Delete, req.Method);
+                Assert.Equal($"https://eigencore.test/api/v1/assets/{AssetId}", req.RequestUri!.AbsoluteUri);
+            });
         }
 
         // -- SaveAsync tests ---------------------------------------------

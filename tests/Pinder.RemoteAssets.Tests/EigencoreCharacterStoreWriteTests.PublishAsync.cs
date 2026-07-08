@@ -134,6 +134,66 @@ namespace Pinder.RemoteAssets.Tests
         }
 
         [Fact]
+        public async Task PublishAsync_429_Then_201_Rebuilds_Multipart_And_Succeeds()
+        {
+            var (store, handler) = Make();
+            handler.Enqueue(_ => TooManyRequests());
+            handler.Enqueue(_ => OkPublish());
+
+            CharacterAssetMetadata returned = await store.PublishAsync(StubDef(), MakeMetadata());
+
+            Assert.Equal(AssetId, returned.CharacterId);
+            Assert.Equal(2, handler.Requests.Count);
+            Assert.All(handler.Requests, req =>
+            {
+                Assert.Equal(HttpMethod.Post, req.Method);
+                Assert.Equal("https://eigencore.test/api/v1/assets", req.RequestUri!.AbsoluteUri);
+            });
+
+            var firstParts = ReadMultipartParts(handler, requestIndex: 0);
+            var retryParts = ReadMultipartParts(handler, requestIndex: 1);
+
+            Assert.Equal(2, retryParts.Count);
+            Assert.True(retryParts.ContainsKey("metadata"), "retried request missing 'metadata' part");
+            Assert.True(retryParts.ContainsKey("payload"), "retried request missing 'payload' part");
+            Assert.StartsWith("application/json", retryParts["metadata"].contentType, StringComparison.OrdinalIgnoreCase);
+            Assert.StartsWith("application/octet-stream", retryParts["payload"].contentType, StringComparison.OrdinalIgnoreCase);
+            Assert.Equal(firstParts["metadata"].body, retryParts["metadata"].body);
+            Assert.Equal(firstParts["payload"].body, retryParts["payload"].body);
+
+            string retryMetadataJson = Encoding.UTF8.GetString(retryParts["metadata"].body);
+            string retryPayloadJson = Encoding.UTF8.GetString(retryParts["payload"].body);
+            Assert.Contains("\"asset_id\"", retryMetadataJson);
+            Assert.DoesNotContain("\"character_id\"", retryMetadataJson);
+            Assert.Contains(AssetId, retryMetadataJson);
+            Assert.Contains("\"schema_version\"", retryPayloadJson);
+            Assert.Contains("\"character_id\"", retryPayloadJson);
+            Assert.Contains(AssetId, retryPayloadJson);
+        }
+
+        [Fact]
+        public async Task PublishAsync_429_Then_429_Throws_RemoteAssetRateLimitException()
+        {
+            var (store, handler) = Make();
+            handler.Enqueue(_ => TooManyRequests());
+            handler.Enqueue(_ => TooManyRequests("rate-2", "2"));
+
+            var ex = await Assert.ThrowsAsync<RemoteAssetRateLimitException>(() =>
+                store.PublishAsync(StubDef(), MakeMetadata()));
+
+            Assert.Equal(429, ex.StatusCode);
+            Assert.Equal(TimeSpan.FromSeconds(2), ex.RetryAfter);
+            Assert.Equal("rate-2", ex.ResponseBody);
+            Assert.Equal(2, handler.Requests.Count);
+            Assert.All(handler.Requests, req =>
+            {
+                Assert.Equal(HttpMethod.Post, req.Method);
+                Assert.Equal("https://eigencore.test/api/v1/assets", req.RequestUri!.AbsoluteUri);
+            });
+            ReadMultipartParts(handler, requestIndex: 1);
+        }
+
+        [Fact]
         public async Task PublishAsync_Reserved_Prefix_auto_Returns_403_Throws_Forbidden_With_Prefix()
         {
             var (store, handler) = Make();
