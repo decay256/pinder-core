@@ -11,6 +11,10 @@ from pathlib import Path
 def snake_to_title(s):
     return s.replace('_', ' ').title()
 
+def append_scalar(lines, label, value):
+    if value is not None:
+        lines.append(f'- **{label}:** {value}')
+
 def render_section(key, value, level=2):
     heading = '#' * level
     title = snake_to_title(key)
@@ -28,7 +32,7 @@ def main():
     yaml_path = root / 'data' / 'game-definition.yaml'
     out_path = root / 'design' / 'game-definition.md'
 
-    with open(yaml_path) as f:
+    with open(yaml_path, encoding='utf-8') as f:
         data = yaml.safe_load(f)
 
     lines = [
@@ -39,13 +43,48 @@ def main():
         '',
     ]
 
-    # Define section order and display names
+    scalar_fields = [
+        ('max_turns', 'Max Turns'),
+        ('max_dialogue_options', 'Max Dialogue Options'),
+        ('max_delivery_words', 'Max Delivery Words'),
+        ('archetypes_enabled', 'Archetypes Enabled'),
+        ('global_dc_bias', 'Global DC Bias'),
+        ('shadow_dc_bias', 'Shadow DC Bias'),
+        ('horniness_dc_bias', 'Horniness DC Bias'),
+        ('active_trap_interest_penalty', 'Active Trap Interest Penalty'),
+    ]
+
+    scalar_lines = []
+    for key, label in scalar_fields:
+        append_scalar(scalar_lines, label, data.get(key))
+    if scalar_lines:
+        lines.append('## Configuration')
+        lines.append('')
+        lines.extend(scalar_lines)
+        lines.append('')
+
+    # Define section order and display names.
+    # Keep current YAML keys first; legacy keys remain so older data can still render.
     section_order = [
+        ('game_master_prompt', 'Game Master Prompt'),
+        ('player_avatar_role_description', 'Player Avatar Role'),
+        ('datee_role_description', 'Datee Role'),
+        ('improvement_prompt', 'Improvement Prompt'),
+        ('steering_prompt', 'Steering Prompt'),
+        ('horniness_time_modifiers', 'Horniness Time Modifiers'),
+        ('xp_flat_awards', 'XP Flat Awards'),
+        ('xp_success_base', 'XP Success Base'),
+        ('xp_risk_multipliers', 'XP Risk Multipliers'),
+        ('xp_terminal_multipliers', 'XP Terminal Multipliers'),
+        ('progression_xp_thresholds', 'Progression XP Thresholds'),
+        ('progression_build_points', 'Progression Build Points'),
+        ('progression_level_bonuses', 'Progression Level Bonuses'),
+        ('progression_item_slots', 'Progression Item Slots'),
+        ('progression_failure_pool_tiers', 'Progression Failure Pool Tiers'),
         ('vision', 'Vision'),
         ('world_description', 'World Description'),
         ('texting_psychology', 'Texting Psychology'),
         ('player_role_description', 'Player Role'),
-        ('datee_role_description', 'Datee Role'),
         ('datee_friction', 'Datee: Friction'),
         ('datee_curiosity', 'Datee: Curiosity'),
         ('meta_contract', 'Meta Contract'),
@@ -54,7 +93,6 @@ def main():
         ('delivery_rules', 'Delivery Rules'),
         ('conversation_arc', 'Conversation Arc'),
         ('dramatic_craft', 'Dramatic Craft'),
-        ('horniness_time_modifiers', 'Horniness Time Modifiers'),
     ]
 
     for key, title in section_order:
@@ -75,7 +113,7 @@ def main():
                 lines.append('')
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text('\n'.join(lines) + '\n')
+    out_path.write_text('\n'.join(lines) + '\n', encoding='utf-8')
     print(f'Generated: {out_path}')
 
 if __name__ == '__main__':
