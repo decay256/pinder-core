@@ -1,28 +1,36 @@
 namespace Pinder.Core.Rolls
 {
     /// <summary>
-    /// Maps (FailureTier, RollCheckKind) → player-facing label.
-    /// Decouples display from enum identity: TropeTrap activates a trap ONLY on option rolls;
-    /// on other check kinds it's just "miss margin 6-9" and should not imply a trap fired.
-    /// Wire DTOs, YAML keys, and the FailureTier enum itself are unchanged — only the
-    /// human-readable string changes per kind.
+    /// Maps a failure tier and roll kind to the i18n display-name key.
     /// </summary>
     public static class FailureTierDisplay
     {
         /// <summary>
-        /// Returns the player-facing label for a <see cref="FailureTier"/> in the context of a
+        /// Returns the display-name key for a <see cref="FailureTier"/> in the context of a
         /// specific <see cref="RollCheckKind"/>.
-        /// <para>
-        /// <c>TropeTrap</c> is labelled <c>"TropeTrap"</c> on <c>OptionRoll</c> (the trap fires)
-        /// and <c>"Severe"</c> on all other check kinds (no trap; scale-consistent label only).
-        /// All other tiers pass through <c>tier.ToString()</c> regardless of kind.
-        /// </para>
         /// </summary>
-        public static string Label(FailureTier tier, RollCheckKind kind)
+        public static string DisplayNameKey(FailureTier tier, RollCheckKind kind)
         {
             if (tier == FailureTier.TropeTrap && kind != RollCheckKind.OptionRoll)
-                return "Severe";
-            return tier.ToString();
+                return "display_names.failure_tier.severe";
+
+            switch (tier)
+            {
+                case FailureTier.Success:
+                    return "display_names.failure_tier.none";
+                case FailureTier.Fumble:
+                    return "display_names.failure_tier.fumble";
+                case FailureTier.Misfire:
+                    return "display_names.failure_tier.misfire";
+                case FailureTier.TropeTrap:
+                    return "display_names.failure_tier.trope_trap";
+                case FailureTier.Catastrophe:
+                    return "display_names.failure_tier.catastrophe";
+                case FailureTier.Legendary:
+                    return "display_names.failure_tier.legendary";
+                default:
+                    return "display_names.failure_tier.fallback";
+            }
         }
     }
 }

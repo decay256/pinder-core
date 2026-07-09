@@ -108,6 +108,7 @@ strings:
   display_names.failure_tier.fumble: "Fumble"
   display_names.failure_tier.misfire: "Misfire"
   display_names.failure_tier.trope_trap: "Trope Trap"
+  display_names.failure_tier.severe: "Severe"
   display_names.failure_tier.catastrophe: "Catastrophe"
   display_names.failure_tier.legendary: "Legendary"
   display_names.failure_tier.fallback: "Failure"

@@ -6,16 +6,20 @@ namespace Pinder.Core.Tests
     public class FailureTierDisplayTests
     {
         [Fact]
-        public void TropeTrap_OnOptionRoll_LabelIsTropeTrap()
-            => Assert.Equal("TropeTrap", FailureTierDisplay.Label(FailureTier.TropeTrap, RollCheckKind.OptionRoll));
+        public void TropeTrap_OnOptionRoll_UsesTropeTrapDisplayKey()
+            => Assert.Equal(
+                "display_names.failure_tier.trope_trap",
+                FailureTierDisplay.DisplayNameKey(FailureTier.TropeTrap, RollCheckKind.OptionRoll));
 
         [Theory]
         [InlineData(RollCheckKind.Horniness)]
         [InlineData(RollCheckKind.Shadow)]
         [InlineData(RollCheckKind.ShadowGrowth)]
         [InlineData(RollCheckKind.Steering)]
-        public void TropeTrap_OnNonOptionKinds_LabelIsSevere(RollCheckKind kind)
-            => Assert.Equal("Severe", FailureTierDisplay.Label(FailureTier.TropeTrap, kind));
+        public void TropeTrap_OnNonOptionKinds_UsesSevereDisplayKey(RollCheckKind kind)
+            => Assert.Equal(
+                "display_names.failure_tier.severe",
+                FailureTierDisplay.DisplayNameKey(FailureTier.TropeTrap, kind));
 
         [Theory]
         [InlineData(FailureTier.Success)]
@@ -23,11 +27,11 @@ namespace Pinder.Core.Tests
         [InlineData(FailureTier.Misfire)]
         [InlineData(FailureTier.Catastrophe)]
         [InlineData(FailureTier.Legendary)]
-        public void NonTropeTrapTiers_LabelPassesThrough(FailureTier tier)
+        public void NonTropeTrapTiers_UseSameDisplayKeyRegardlessOfKind(FailureTier tier)
         {
-            Assert.Equal(tier.ToString(), FailureTierDisplay.Label(tier, RollCheckKind.OptionRoll));
-            Assert.Equal(tier.ToString(), FailureTierDisplay.Label(tier, RollCheckKind.Horniness));
-            Assert.Equal(tier.ToString(), FailureTierDisplay.Label(tier, RollCheckKind.Shadow));
+            var expected = FailureTierDisplay.DisplayNameKey(tier, RollCheckKind.OptionRoll);
+            Assert.Equal(expected, FailureTierDisplay.DisplayNameKey(tier, RollCheckKind.Horniness));
+            Assert.Equal(expected, FailureTierDisplay.DisplayNameKey(tier, RollCheckKind.Shadow));
         }
 
         [Fact]
