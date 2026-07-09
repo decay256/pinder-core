@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading;
@@ -15,8 +16,11 @@ namespace Pinder.SessionSetup
 
         public LlmSequentialStakeGenerator(ILlmTransport transport, PromptCatalog catalog)
         {
-            _transport = transport;
-            _catalog = catalog;
+            _transport = transport ?? throw new ArgumentNullException(nameof(transport));
+            _catalog = catalog ?? throw new ArgumentNullException(nameof(catalog));
+            _catalog.RequireCompleteEntry(
+                "stakes",
+                "prompt-catalog: missing required key 'stakes'. The yaml file is incomplete or missing.");
         }
 
         public async Task<List<string>> GenerateAsync(
@@ -26,13 +30,9 @@ namespace Pinder.SessionSetup
             Dictionary<string, BackstoryFact> backstory, 
             CancellationToken cancellationToken = default)
         {
-            // Fetch prompt from catalog if you like, or just mock it.
-            // But since the test Issue1253 doesn't actually test LlmSequentialStakeGenerator directly,
-            // we just need it to compile and perhaps just return an empty list or call LLM.
-            
             var entry = _catalog.Get("stakes");
-            var systemPrompt = entry.SystemPrompt;
-            var userPromptTemplate = entry.UserTemplate ?? "{backstory}";
+            var systemPrompt = entry.SystemPrompt!;
+            var userPromptTemplate = entry.UserTemplate!;
             var userPrompt = PromptCatalog.Substitute(userPromptTemplate, new Dictionary<string, string>
             {
                 { "backstory", JsonSerializer.Serialize(backstory) }
@@ -41,8 +41,8 @@ namespace Pinder.SessionSetup
             var llmResponse = await _transport.SendAsync(
                 systemPrompt,
                 userPrompt,
-                0.7,
-                1024,
+                entry.Temperature!.Value,
+                entry.MaxTokens!.Value,
                 LlmPhase.Synthesis,
                 cancellationToken);
 

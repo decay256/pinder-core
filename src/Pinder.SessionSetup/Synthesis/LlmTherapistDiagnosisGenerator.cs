@@ -16,8 +16,11 @@ namespace Pinder.SessionSetup
 
         public LlmTherapistDiagnosisGenerator(ILlmTransport transport, PromptCatalog catalog)
         {
-            _transport = transport;
-            _catalog = catalog;
+            _transport = transport ?? throw new ArgumentNullException(nameof(transport));
+            _catalog = catalog ?? throw new ArgumentNullException(nameof(catalog));
+            _catalog.RequireCompleteEntry(
+                "diagnosis",
+                "prompt-catalog: missing required key 'diagnosis'. The yaml file is incomplete or missing.");
         }
 
         public async Task<Dictionary<string, string>> GenerateAsync(
@@ -29,9 +32,9 @@ namespace Pinder.SessionSetup
             CancellationToken cancellationToken = default)
         {
             var entry = _catalog.Get("diagnosis");
-            var systemPrompt = entry.SystemPrompt;
-            
-            var userPromptTemplate = entry.UserTemplate ?? "{backstory}\n{stakes}";
+            var systemPrompt = entry.SystemPrompt!;
+
+            var userPromptTemplate = entry.UserTemplate!;
             var userPrompt = PromptCatalog.Substitute(userPromptTemplate, new Dictionary<string, string>
             {
                 { "backstory", JsonSerializer.Serialize(backstory) },
@@ -41,8 +44,8 @@ namespace Pinder.SessionSetup
             var llmResponse = await _transport.SendAsync(
                 systemPrompt,
                 userPrompt,
-                0.7,
-                1024,
+                entry.Temperature!.Value,
+                entry.MaxTokens!.Value,
                 LlmPhase.Synthesis,
                 cancellationToken);
 

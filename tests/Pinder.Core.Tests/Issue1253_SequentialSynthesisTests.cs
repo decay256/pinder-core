@@ -66,12 +66,20 @@ namespace Pinder.Core.Tests
         {
             public string? LastSystemPrompt { get; private set; }
             public string? LastUserMessage { get; private set; }
+            public double? LastTemperature { get; private set; }
+            public int? LastMaxTokens { get; private set; }
+            public string? LastPhase { get; private set; }
+            public int CallCount { get; private set; }
             public string ResponseToReturn { get; set; } = "{}";
 
             public Task<string> SendAsync(string systemPrompt, string userMessage, double temperature = 0.9, int maxTokens = 1024, string? phase = null, CancellationToken ct = default)
             {
+                CallCount++;
                 LastSystemPrompt = systemPrompt;
                 LastUserMessage = userMessage;
+                LastTemperature = temperature;
+                LastMaxTokens = maxTokens;
+                LastPhase = phase;
                 return Task.FromResult(ResponseToReturn);
             }
         }
@@ -101,7 +109,7 @@ namespace Pinder.Core.Tests
         {
             var testDir = Path.Combine(Directory.GetCurrentDirectory(), "TestData_Prompts_" + Guid.NewGuid());
             Directory.CreateDirectory(testDir);
-            File.WriteAllText(Path.Combine(testDir, "diagnosis.yaml"), "schema_version: 1\nprompts:\n  diagnosis:\n    system_prompt: \"SYSTEM PROMPT\"\n    user_template: \"USER {backstory} - {stakes}\"");
+            File.WriteAllText(Path.Combine(testDir, "diagnosis.yaml"), "schema_version: 1\nprompts:\n  diagnosis:\n    temperature: 0.62\n    max_tokens: 888\n    system_prompt: \"SYSTEM PROMPT\"\n    user_template: \"USER {backstory} - {stakes}\"");
 
             var transport = new FakeLlmTransport();
             transport.ResponseToReturn = @"{ ""derived_feeling"": ""abandonment issues"", ""defense_reaction"": ""humor"" }";
@@ -120,11 +128,39 @@ namespace Pinder.Core.Tests
             Assert.Equal("SYSTEM PROMPT", transport.LastSystemPrompt);
             Assert.Contains("Det", transport.LastUserMessage);
             Assert.Contains("Stake 1", transport.LastUserMessage);
+            Assert.Equal(0.62, transport.LastTemperature);
+            Assert.Equal(888, transport.LastMaxTokens);
+            Assert.Equal(LlmPhase.Synthesis, transport.LastPhase);
+            Assert.Equal(1, transport.CallCount);
             
             Assert.Equal("abandonment issues", result["derived_feeling"]);
             Assert.Equal("humor", result["defense_reaction"]);
             
             Directory.Delete(testDir, true);
+        }
+
+        [Fact]
+        public void TherapistDiagnosisGenerator_WithMissingUserTemplate_ThrowsBeforeLlmCall()
+        {
+            var testDir = Path.Combine(Directory.GetCurrentDirectory(), "TestData_Prompts_" + Guid.NewGuid());
+            Directory.CreateDirectory(testDir);
+            try
+            {
+                File.WriteAllText(Path.Combine(testDir, "diagnosis.yaml"), "schema_version: 1\nprompts:\n  diagnosis:\n    temperature: 0.7\n    max_tokens: 1024\n    system_prompt: \"SYSTEM PROMPT\"");
+
+                var catalog = PromptCatalog.LoadFromDirectory(testDir);
+                var transport = new FakeLlmTransport();
+
+                var ex = Assert.Throws<InvalidOperationException>(
+                    () => new LlmTherapistDiagnosisGenerator(transport, catalog));
+
+                Assert.Contains("no user_template", ex.Message);
+                Assert.Equal(0, transport.CallCount);
+            }
+            finally
+            {
+                Directory.Delete(testDir, true);
+            }
         }
         
         [Fact]
@@ -177,7 +213,7 @@ namespace Pinder.Core.Tests
         {
             var testDir = Path.Combine(Directory.GetCurrentDirectory(), "TestData_Prompts_" + Guid.NewGuid());
             Directory.CreateDirectory(testDir);
-            File.WriteAllText(Path.Combine(testDir, "diagnosis.yaml"), "schema_version: 1\nprompts:\n  diagnosis:\n    system_prompt: \"SYSTEM PROMPT\"\n    user_template: \"USER {backstory} - {stakes}\"");
+            File.WriteAllText(Path.Combine(testDir, "diagnosis.yaml"), "schema_version: 1\nprompts:\n  diagnosis:\n    temperature: 0.7\n    max_tokens: 1024\n    system_prompt: \"SYSTEM PROMPT\"\n    user_template: \"USER {backstory} - {stakes}\"");
 
             var transport = new FakeLlmTransport();
             transport.ResponseToReturn = "Malformed JSON string that will fail to deserialize";
@@ -206,7 +242,7 @@ namespace Pinder.Core.Tests
         {
             var testDir = Path.Combine(Directory.GetCurrentDirectory(), "TestData_Prompts_" + Guid.NewGuid());
             Directory.CreateDirectory(testDir);
-            File.WriteAllText(Path.Combine(testDir, "diagnosis.yaml"), "schema_version: 1\nprompts:\n  diagnosis:\n    system_prompt: \"SYSTEM PROMPT\"\n    user_template: \"USER {backstory} - {stakes}\"");
+            File.WriteAllText(Path.Combine(testDir, "diagnosis.yaml"), "schema_version: 1\nprompts:\n  diagnosis:\n    temperature: 0.7\n    max_tokens: 1024\n    system_prompt: \"SYSTEM PROMPT\"\n    user_template: \"USER {backstory} - {stakes}\"");
 
             var transport = new FakeLlmTransport();
             // A well-formed, empty JSON object is the LLM's legitimate way of
@@ -233,7 +269,7 @@ namespace Pinder.Core.Tests
         {
             var testDir = Path.Combine(Directory.GetCurrentDirectory(), "TestData_Prompts_" + Guid.NewGuid());
             Directory.CreateDirectory(testDir);
-            File.WriteAllText(Path.Combine(testDir, "diagnosis.yaml"), "schema_version: 1\nprompts:\n  diagnosis:\n    system_prompt: \"SYSTEM PROMPT\"\n    user_template: \"USER {backstory} - {stakes}\"");
+            File.WriteAllText(Path.Combine(testDir, "diagnosis.yaml"), "schema_version: 1\nprompts:\n  diagnosis:\n    temperature: 0.7\n    max_tokens: 1024\n    system_prompt: \"SYSTEM PROMPT\"\n    user_template: \"USER {backstory} - {stakes}\"");
 
             var transport = new FakeLlmTransport();
             transport.ResponseToReturn = @"{ ""valid_key"": ""  some value with whitespace  "", "" "": ""value with empty key"", ""empty_value"": ""   "" }";
