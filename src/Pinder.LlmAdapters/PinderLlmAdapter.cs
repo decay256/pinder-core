@@ -20,9 +20,6 @@ namespace Pinder.LlmAdapters
     /// </summary>
     public sealed class PinderLlmAdapter : IStatefulLlmAdapter, IDisposable
     {
-        private const double DefaultDialogueOptionsTemperature = 0.9;
-        private const double DefaultDeliveryTemperature = 0.7;
-        private const double DefaultDateeResponseTemperature = 0.85;
         private const string HorninessOverlayPrompt = "horniness_overlay";
         private const string TrapOverlayPrompt = "trap_overlay";
         private const string FailureCorruptionPrompt = "failure_corruption";
@@ -61,7 +58,7 @@ namespace Pinder.LlmAdapters
             var gameDef = RequireGameDefinition();
             var userContent = SessionDocumentBuilder.BuildDialogueOptionsPrompt(context);
             var systemPrompt = SessionSystemPromptBuilder.BuildPlayerAvatar(context.PlayerAvatarPrompt, gameDef);
-            double temperature = _options.DialogueOptionsTemperature ?? DefaultDialogueOptionsTemperature;
+            double temperature = _options.DialogueOptionsTemperature ?? LlmPhaseTemperatures.DialogueOptions;
 
             int attempt = 0;
             int maxRetries = Math.Max(1, _options.MaxContractViolationRetries);
@@ -170,7 +167,7 @@ namespace Pinder.LlmAdapters
             var gameDef = RequireGameDefinition();
             var userContent = SessionDocumentBuilder.BuildDateePrompt(context);
             var systemPrompt = SessionSystemPromptBuilder.BuildDatee(context.DateePrompt, gameDef);
-            double temperature = _options.DateeResponseTemperature ?? DefaultDateeResponseTemperature;
+            double temperature = _options.DateeResponseTemperature ?? LlmPhaseTemperatures.DateeResponse;
 
             int attempt = 0;
             int maxRetries = Math.Max(1, _options.MaxContractViolationRetries);
@@ -372,7 +369,7 @@ namespace Pinder.LlmAdapters
 
             try
             {
-                double temperature = _options.DeliveryTemperature ?? DefaultDeliveryTemperature;
+                double temperature = _options.DeliveryTemperature ?? LlmPhaseTemperatures.OverlayRewrite;
                 var result = await _overlayTransport.SendAsync(prompt.SystemPrompt, prompt.UserContent, temperature, _options.MaxTokens, phase: LlmPhase.HorninessOverlay, ct: ct)
                     .ConfigureAwait(false);
 
@@ -460,7 +457,7 @@ namespace Pinder.LlmAdapters
 
             try
             {
-                double temperature = _options.DeliveryTemperature ?? DefaultDeliveryTemperature;
+                double temperature = _options.DeliveryTemperature ?? LlmPhaseTemperatures.OverlayRewrite;
                 var result = await _overlayTransport.SendAsync(prompt.SystemPrompt, prompt.UserContent, temperature, _options.MaxTokens, phase: LlmPhase.TrapOverlay, ct: ct)
                     .ConfigureAwait(false);
 
@@ -547,7 +544,7 @@ namespace Pinder.LlmAdapters
 
             try
             {
-                double temperature = _options.DeliveryTemperature ?? DefaultDeliveryTemperature;
+                double temperature = _options.DeliveryTemperature ?? LlmPhaseTemperatures.OverlayRewrite;
                 var result = await _overlayTransport.SendAsync(prompt.SystemPrompt, prompt.UserContent, temperature, _options.MaxTokens, phase: LlmPhase.Delivery, ct: ct)
                     .ConfigureAwait(false);
 
@@ -629,7 +626,7 @@ namespace Pinder.LlmAdapters
 
             try
             {
-                double temperature = _options.DeliveryTemperature ?? DefaultDeliveryTemperature;
+                double temperature = _options.DeliveryTemperature ?? LlmPhaseTemperatures.OverlayRewrite;
                 var result = await _overlayTransport.SendAsync(prompt.SystemPrompt, prompt.UserContent, temperature, _options.MaxTokens, phase: LlmPhase.ShadowCorruption, ct: ct)
                     .ConfigureAwait(false);
 

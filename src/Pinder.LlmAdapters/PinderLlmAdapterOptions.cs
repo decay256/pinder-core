@@ -27,7 +27,7 @@ namespace Pinder.LlmAdapters
         public string? DebugDirectory { get; set; }
 
         /// <summary>Default sampling temperature for all calls (overridable per method).</summary>
-        public double Temperature { get; set; } = 0.9;
+        public double Temperature { get; set; } = LlmPhaseTemperatures.Default;
 
         /// <summary>Maximum tokens for all calls.</summary>
         public int MaxTokens { get; set; } = 1024;

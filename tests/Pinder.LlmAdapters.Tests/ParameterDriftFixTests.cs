@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Pinder.Core.Conversation;
@@ -45,7 +46,7 @@ namespace Pinder.LlmAdapters.Tests
             await adapter.ApplyHorninessOverlayAsync("hello", "make it horny");
 
             // Assert
-            Assert.Equal(0.7, transport.LastTemperature);
+            Assert.Equal(LlmPhaseTemperatures.OverlayRewrite, transport.LastTemperature);
         }
 
         [Fact]
@@ -83,7 +84,7 @@ namespace Pinder.LlmAdapters.Tests
             await adapter.ApplyTrapOverlayAsync("hello", "trap them", "clown-trap");
 
             // Assert
-            Assert.Equal(0.7, transport.LastTemperature);
+            Assert.Equal(LlmPhaseTemperatures.OverlayRewrite, transport.LastTemperature);
         }
 
         [Fact]
@@ -121,7 +122,7 @@ namespace Pinder.LlmAdapters.Tests
             await adapter.ApplyShadowCorruptionAsync("hello", "corrupt them", ShadowStatType.Fixation);
 
             // Assert
-            Assert.Equal(0.7, transport.LastTemperature);
+            Assert.Equal(LlmPhaseTemperatures.OverlayRewrite, transport.LastTemperature);
         }
 
         [Fact]
@@ -141,6 +142,44 @@ namespace Pinder.LlmAdapters.Tests
 
             // Assert
             Assert.Equal(0.5, transport.LastTemperature);
+        }
+
+        [Fact]
+        public void PinderLlmAdapterOptions_DefaultsToCanonicalLlmPhaseTemperature()
+        {
+            var options = new PinderLlmAdapterOptions();
+
+            Assert.Equal(LlmPhaseTemperatures.Default, options.Temperature);
+        }
+
+        [Fact]
+        public void PinderLlmAdapter_SourceUsesCanonicalTemperatureRegistry()
+        {
+            string source = File.ReadAllText(FindRepoFile("src", "Pinder.LlmAdapters", "PinderLlmAdapter.cs"));
+
+            Assert.DoesNotContain("DefaultDialogueOptionsTemperature", source);
+            Assert.DoesNotContain("DefaultDeliveryTemperature", source);
+            Assert.DoesNotContain("DefaultDateeResponseTemperature", source);
+            Assert.Contains("LlmPhaseTemperatures.DialogueOptions", source);
+            Assert.Contains("LlmPhaseTemperatures.OverlayRewrite", source);
+            Assert.Contains("LlmPhaseTemperatures.DateeResponse", source);
+        }
+
+        private static string FindRepoFile(params string[] segments)
+        {
+            var dir = new DirectoryInfo(AppContext.BaseDirectory);
+            while (dir != null)
+            {
+                string candidate = Path.Combine(dir.FullName, Path.Combine(segments));
+                if (File.Exists(candidate))
+                {
+                    return candidate;
+                }
+
+                dir = dir.Parent;
+            }
+
+            throw new FileNotFoundException("Could not find repo file.", Path.Combine(segments));
         }
     }
 }
