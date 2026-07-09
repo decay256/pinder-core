@@ -180,6 +180,17 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Null(parsed.Weakness);
         }
 
+        [Theory]
+        [InlineData("[SIGNALS]\nTELL: Charm (she twirls her hair when nervous)")]
+        [InlineData("[RESPONSE]\n[SIGNALS]\nWEAKNESS: Wit -2 (distracted by the joke)")]
+        public void ValidateSignalsStrict_SignalsWithoutResponseText_IsMalformed(string raw)
+        {
+            var result = GmOutputContract.ValidateSignalsStrict(raw, out var errorDetail);
+
+            Assert.Equal(DateeSignalsValidationResult.MalformedSignals, result);
+            Assert.Equal("missing_response_text", errorDetail);
+        }
+
         // ── Emit guards ──────────────────────────────────────────────────────
 
         [Fact]

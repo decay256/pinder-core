@@ -212,6 +212,34 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Fact]
+        public async Task Test7b_DateeResponse_SignalsWithoutResponseText_ThrowsContractException()
+        {
+            var context = MakeDateeContext();
+            var transport = new FixedResponseTransport(
+                "[SIGNALS]\n" +
+                "TELL: Charm (she twirls her hair when nervous)"
+            );
+            LlmContractViolation? violation = null;
+            var options = new PinderLlmAdapterOptions
+            {
+                GameDefinition = GameDefinition.PinderDefaults,
+                MaxContractViolationRetries = 1,
+                OnLlmContractViolation = v => violation = v,
+            };
+            var adapter = new PinderLlmAdapter(transport, options);
+
+            var ex = await Assert.ThrowsAsync<LlmContractException>(async () => await adapter.GetDateeResponseAsync(context));
+
+            Assert.Equal("datee_response", ex.Phase);
+            Assert.Equal("malformed_signals", ex.Reason);
+            Assert.Contains("missing_response_text", ex.Message);
+            Assert.NotNull(violation);
+            Assert.Equal("datee_response", violation!.Phase);
+            Assert.Equal("malformed_signals", violation.Reason);
+            Assert.Equal("StrictDateeResponseParser", violation.ParserName);
+        }
+
+        [Fact]
         public async Task Test8_DateeResponse_OptionalAbsentSignals_Succeeds()
         {
             var context = MakeDateeContext();

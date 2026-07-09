@@ -188,6 +188,12 @@ namespace Pinder.LlmAdapters
                 return DateeSignalsValidationResult.NoSignalsBlock;
             }
 
+            if (!HasResponseTextBeforeSignals(raw, signalsIdx))
+            {
+                errorDetail = "missing_response_text";
+                return DateeSignalsValidationResult.MalformedSignals;
+            }
+
             string block = raw.Substring(signalsIdx + SignalsMarker.Length).Trim();
 
             // Check if block contains TELL: or WEAKNESS: at all
@@ -245,6 +251,18 @@ namespace Pinder.LlmAdapters
             }
 
             return DateeSignalsValidationResult.ValidSignals;
+        }
+
+        private static bool HasResponseTextBeforeSignals(string raw, int signalsIdx)
+        {
+            string message = raw.Substring(0, signalsIdx).Trim();
+            const string ResponseMarker = "[RESPONSE]";
+            if (message.StartsWith(ResponseMarker, StringComparison.OrdinalIgnoreCase))
+            {
+                message = message.Substring(ResponseMarker.Length).Trim();
+            }
+
+            return !string.IsNullOrWhiteSpace(message);
         }
     }
 
