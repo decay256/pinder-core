@@ -14,44 +14,9 @@ namespace Pinder.Core.Tests
     {
         // ============ Helpers ============
 
-        private static SessionShadowTracker MakeShadowTracker(
-            int dread = 0, int denial = 0, int fixation = 0,
-            int madness = 0, int overthinking = 0, int horniness = 0)
-        {
-            var stats = new StatBlock(
-                new Dictionary<StatType, int>
-                {
-                    { StatType.Charm, 2 }, { StatType.Rizz, 2 }, { StatType.Honesty, 2 },
-                    { StatType.Chaos, 2 }, { StatType.Wit, 2 }, { StatType.SelfAwareness, 2 }
-                },
-                new Dictionary<ShadowStatType, int>
-                {
-                    { ShadowStatType.Dread, dread }, { ShadowStatType.Denial, denial },
-                    { ShadowStatType.Fixation, fixation }, { ShadowStatType.Madness, madness },
-                    { ShadowStatType.Overthinking, overthinking }, { ShadowStatType.Despair, horniness }
-                });
-            return new SessionShadowTracker(stats);
-        }
-
-        private static StatBlock MakeStatBlock(int allStats = 2, int allShadow = 0)
-        {
-            var stats = new Dictionary<StatType, int>
-            {
-                { StatType.Charm, allStats }, { StatType.Rizz, allStats }, { StatType.Honesty, allStats },
-                { StatType.Chaos, allStats }, { StatType.Wit, allStats }, { StatType.SelfAwareness, allStats }
-            };
-            var shadow = new Dictionary<ShadowStatType, int>
-            {
-                { ShadowStatType.Madness, allShadow }, { ShadowStatType.Despair, allShadow },
-                { ShadowStatType.Denial, allShadow }, { ShadowStatType.Fixation, allShadow },
-                { ShadowStatType.Dread, allShadow }, { ShadowStatType.Overthinking, allShadow }
-            };
-            return new StatBlock(stats, shadow);
-        }
-
         private static CharacterProfile MakeProfile(string name, StatBlock? stats = null)
         {
-            stats = stats ?? MakeStatBlock();
+            stats = stats ?? TestHelpers.MakeStatBlock();
             var timing = new TimingProfile(5, 1.0f, 0.0f, "neutral");
             return new CharacterProfile(stats, "system prompt", name, timing, 1);
         }

@@ -73,26 +73,6 @@ namespace Pinder.Core.TestCommon
             => Task.FromResult(message);
 
         public static StatBlock MakeStatBlock(int allStats = 2, int allShadow = 0)
-        {
-            var stats = new Dictionary<StatType, int>
-            {
-                { StatType.Charm, allStats },
-                { StatType.Rizz, allStats },
-                { StatType.Honesty, allStats },
-                { StatType.Chaos, allStats },
-                { StatType.Wit, allStats },
-                { StatType.SelfAwareness, allStats }
-            };
-            var shadow = new Dictionary<ShadowStatType, int>
-            {
-                { ShadowStatType.Madness, allShadow },
-                { ShadowStatType.Despair, allShadow },
-                { ShadowStatType.Denial, allShadow },
-                { ShadowStatType.Fixation, allShadow },
-                { ShadowStatType.Dread, allShadow },
-                { ShadowStatType.Overthinking, allShadow }
-            };
-            return new StatBlock(stats, shadow);
-        }
+            => TestHelpers.MakeStatBlock(allStats, allShadow);
     }
 }

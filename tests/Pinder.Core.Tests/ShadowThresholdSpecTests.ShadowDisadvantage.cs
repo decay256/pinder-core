@@ -25,7 +25,7 @@ namespace Pinder.Core.Tests
         {
             // What: Denial ≥12 → shadow check fires (not roll disadvantage) per #755
             // Dice: 18 → single roll used (no disadvantage)
-            var shadows = MakeShadowTracker(denial: 12);
+            var shadows = TestHelpers.MakeShadowTracker(denial: 12);
             var session = MakeSession(
                 diceValues: new[] { 18, 50 },
                 shadows: shadows,
@@ -41,7 +41,7 @@ namespace Pinder.Core.Tests
         public async Task AC2_DreadT2_WitNoLongerHasDisadvantage()
         {
             // What: Dread ≥12 → shadow check fires (not roll disadvantage) per #755
-            var shadows = MakeShadowTracker(dread: 14);
+            var shadows = TestHelpers.MakeShadowTracker(dread: 14);
             var session = MakeSession(
                 diceValues: new[] { 19, 50 },
                 shadows: shadows,
@@ -57,7 +57,7 @@ namespace Pinder.Core.Tests
         public async Task AC2_MadnessT2_CharmNoLongerHasDisadvantage()
         {
             // What: Madness ≥12 → shadow check fires (not roll disadvantage) per #755
-            var shadows = MakeShadowTracker(madness: 15);
+            var shadows = TestHelpers.MakeShadowTracker(madness: 15);
             var session = MakeSession(
                 diceValues: new[] { 17, 50 },
                 shadows: shadows,
@@ -73,7 +73,7 @@ namespace Pinder.Core.Tests
         public async Task AC2_FixationT2_ChaosNoLongerHasDisadvantage()
         {
             // What: Fixation ≥12 → shadow check fires (not roll disadvantage) per #755
-            var shadows = MakeShadowTracker(fixation: 13);
+            var shadows = TestHelpers.MakeShadowTracker(fixation: 13);
             var session = MakeSession(
                 diceValues: new[] { 16, 50 },
                 shadows: shadows,
@@ -89,7 +89,7 @@ namespace Pinder.Core.Tests
         public async Task AC2_OverthinkingT2_SANoLongerHasDisadvantage()
         {
             // What: Overthinking ≥12 → shadow check fires (not roll disadvantage) per #755
-            var shadows = MakeShadowTracker(overthinking: 12);
+            var shadows = TestHelpers.MakeShadowTracker(overthinking: 12);
             var session = MakeSession(
                 diceValues: new[] { 20, 50 },
                 shadows: shadows,
@@ -105,7 +105,7 @@ namespace Pinder.Core.Tests
         public async Task AC2_DespairT2_RizzNoLongerHasDisadvantage()
         {
             // What: Despair ≥12 → shadow check fires (not roll disadvantage) per #755
-            var shadows = MakeShadowTracker(horniness: 14);
+            var shadows = TestHelpers.MakeShadowTracker(horniness: 14);
             var session = MakeSession(
                 diceValues: new[] { 18, 50 },
                 shadows: shadows,
@@ -122,7 +122,7 @@ namespace Pinder.Core.Tests
         public async Task AC2_T1_NoDisadvantage()
         {
             // What: Denial=11 is T1 → NO disadvantage on Honesty
-            var shadows = MakeShadowTracker(denial: 11);
+            var shadows = TestHelpers.MakeShadowTracker(denial: 11);
             var session = MakeSession(
                 diceValues: new[] { 15, 50 },
                 shadows: shadows,
@@ -140,7 +140,7 @@ namespace Pinder.Core.Tests
         public async Task AC2_UnpairedStat_NoDisadvantage()
         {
             // What: Denial T2 penalizes Honesty, NOT Charm (spec §3.2 pairing table)
-            var shadows = MakeShadowTracker(denial: 12);
+            var shadows = TestHelpers.MakeShadowTracker(denial: 12);
             var session = MakeSession(
                 diceValues: new[] { 15, 50 },
                 shadows: shadows,

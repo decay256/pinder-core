@@ -23,7 +23,7 @@ namespace Pinder.Core.Tests
         public async Task AC3_DenialT3_RemovesHonestyOptions()
         {
             // What: Denial ≥18 → Honesty options removed post-LLM (spec §3.4)
-            var shadows = MakeShadowTracker(denial: 18);
+            var shadows = TestHelpers.MakeShadowTracker(denial: 18);
             var session = MakeSession(
                 diceValues: new[] { 15, 50 },
                 shadows: shadows,
@@ -45,7 +45,7 @@ namespace Pinder.Core.Tests
         public async Task AC3_DenialT2_DoesNotRemoveHonestyOptions()
         {
             // What: Denial=17 (T2) should NOT remove Honesty options, only disadvantage
-            var shadows = MakeShadowTracker(denial: 17);
+            var shadows = TestHelpers.MakeShadowTracker(denial: 17);
             var session = MakeSession(
                 diceValues: new[] { 15, 50 },
                 shadows: shadows,
@@ -68,7 +68,7 @@ namespace Pinder.Core.Tests
         public async Task AC3_DenialT3_AllHonesty_FallsBackToChaos()
         {
             // What: All Honesty options + Denial T3 → keep Chaos fallback (spec §6.2)
-            var shadows = MakeShadowTracker(denial: 19);
+            var shadows = TestHelpers.MakeShadowTracker(denial: 19);
             var session = MakeSession(
                 diceValues: new[] { 15, 50 },
                 shadows: shadows,
@@ -91,7 +91,7 @@ namespace Pinder.Core.Tests
         public async Task AC3_DenialT3_AllHonestyNoChaos_KeepsFirst()
         {
             // What: All Honesty, no Chaos available → keep first option as fallback (spec §6.2)
-            var shadows = MakeShadowTracker(denial: 20);
+            var shadows = TestHelpers.MakeShadowTracker(denial: 20);
             var session = MakeSession(
                 diceValues: new[] { 15, 50 },
                 shadows: shadows,
@@ -116,7 +116,7 @@ namespace Pinder.Core.Tests
         public async Task AC4_FixationT3_ForcesLastUsedStat()
         {
             // What: Fixation ≥18 → all options forced to same stat as last turn (spec §3.4)
-            var shadows = MakeShadowTracker(fixation: 18);
+            var shadows = TestHelpers.MakeShadowTracker(fixation: 18);
             // Turn 1 dice: d20=15, delay=50; Turn 2 dice: d20=15, delay=50
             var session = MakeSession(
                 diceValues: new[] { 15, 50, 15, 50 },
@@ -143,7 +143,7 @@ namespace Pinder.Core.Tests
         public async Task AC4_FixationT3_FirstTurn_NoForce()
         {
             // What: First turn, no previous stat → options returned as-is (spec §6.3)
-            var shadows = MakeShadowTracker(fixation: 20);
+            var shadows = TestHelpers.MakeShadowTracker(fixation: 20);
             var session = MakeSession(
                 diceValues: new[] { 15, 50 },
                 shadows: shadows,
@@ -167,7 +167,7 @@ namespace Pinder.Core.Tests
         public async Task AC4_FixationT2_DoesNotForceStat()
         {
             // What: Fixation=17 (T2) should NOT force stat, only T3 does
-            var shadows = MakeShadowTracker(fixation: 17);
+            var shadows = TestHelpers.MakeShadowTracker(fixation: 17);
             var session = MakeSession(
                 diceValues: new[] { 15, 50, 15, 50 },
                 shadows: shadows,
@@ -197,7 +197,7 @@ namespace Pinder.Core.Tests
         {
             // What: StartTurnAsync populates DialogueContext.ShadowThresholds (spec §2.3)
             Dictionary<ShadowStatType, int>? captured = null;
-            var shadows = MakeShadowTracker(dread: 14, denial: 6, fixation: 0);
+            var shadows = TestHelpers.MakeShadowTracker(dread: 14, denial: 6, fixation: 0);
 
             var llm = new CapturingLlmAdapter(ctx => { captured = ctx.ShadowThresholds; });
             var session = MakeSessionWithLlm(diceValues: new[] { 15, 50 }, shadows: shadows, llm: llm);
@@ -217,7 +217,7 @@ namespace Pinder.Core.Tests
         {
             // What: All 6 shadow stats must be present in the threshold dictionary
             Dictionary<ShadowStatType, int>? captured = null;
-            var shadows = MakeShadowTracker();
+            var shadows = TestHelpers.MakeShadowTracker();
 
             var llm = new CapturingLlmAdapter(ctx => { captured = ctx.ShadowThresholds; });
             var session = MakeSessionWithLlm(diceValues: new[] { 15, 50 }, shadows: shadows, llm: llm);
@@ -309,7 +309,7 @@ namespace Pinder.Core.Tests
         public async Task Edge_MultipleT2_NoLongerCausesDisadvantage()
         {
             // What: Dread T2 + Denial T2 → shadow checks fire but NO roll disadvantage per #755
-            var shadows = MakeShadowTracker(dread: 12, denial: 12);
+            var shadows = TestHelpers.MakeShadowTracker(dread: 12, denial: 12);
 
             // Test Honesty: single roll (no disadvantage)
             var session = MakeSession(
@@ -332,7 +332,7 @@ namespace Pinder.Core.Tests
         {
             // What: VeryIntoIt (advantage) + Denial T2 → only advantage applies (T2 no longer causes disadvantage per #755)
             // With advantage, rolls twice and takes higher.
-            var shadows = MakeShadowTracker(denial: 14);
+            var shadows = TestHelpers.MakeShadowTracker(denial: 14);
             var session = MakeSession(
                 diceValues: new[] { 8, 14, 50 },
                 shadows: shadows,
@@ -356,7 +356,7 @@ namespace Pinder.Core.Tests
         {
             // What: Dread=14(T2), Denial=6(T1), Fixation=18(T3) → correct tiers (spec Example 8)
             Dictionary<ShadowStatType, int>? captured = null;
-            var shadows = MakeShadowTracker(dread: 14, denial: 6, fixation: 18);
+            var shadows = TestHelpers.MakeShadowTracker(dread: 14, denial: 6, fixation: 18);
             var llm = new CapturingLlmAdapter(ctx => { captured = ctx.ShadowThresholds; });
             var session = MakeSessionWithLlm(diceValues: new[] { 15, 50 }, shadows: shadows, llm: llm);
 

@@ -46,5 +46,34 @@ namespace Pinder.Core.TestCommon
             };
             return new StatBlock(stats, shadow);
         }
+
+        public static SessionShadowTracker MakeShadowTracker(
+            int dread = 0,
+            int denial = 0,
+            int fixation = 0,
+            int madness = 0,
+            int overthinking = 0,
+            int horniness = 0)
+        {
+            var stats = new Dictionary<StatType, int>
+            {
+                { StatType.Charm, 2 },
+                { StatType.Rizz, 2 },
+                { StatType.Honesty, 2 },
+                { StatType.Chaos, 2 },
+                { StatType.Wit, 2 },
+                { StatType.SelfAwareness, 2 }
+            };
+            var shadow = new Dictionary<ShadowStatType, int>
+            {
+                { ShadowStatType.Dread, dread },
+                { ShadowStatType.Denial, denial },
+                { ShadowStatType.Fixation, fixation },
+                { ShadowStatType.Madness, madness },
+                { ShadowStatType.Overthinking, overthinking },
+                { ShadowStatType.Despair, horniness }
+            };
+            return new SessionShadowTracker(new StatBlock(stats, shadow));
+        }
     }
 }

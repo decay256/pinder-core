@@ -58,7 +58,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task AC2_MadnessExactly18_MarksExactlyOneOption()
         {
-            var shadows = MakeShadowTracker(madness: 18);
+            var shadows = TestHelpers.MakeShadowTracker(madness: 18);
             var options = new[]
             {
                 new DialogueOption(StatType.Charm, "Hey"),
@@ -81,7 +81,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task AC2_MadnessFarAbove18_StillMarksExactlyOne()
         {
-            var shadows = MakeShadowTracker(madness: 30);
+            var shadows = TestHelpers.MakeShadowTracker(madness: 30);
             var options = new[]
             {
                 new DialogueOption(StatType.Charm, "A"),
@@ -105,7 +105,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task AC2_UnhingedOptionPreservesOriginalStat()
         {
-            var shadows = MakeShadowTracker(madness: 20);
+            var shadows = TestHelpers.MakeShadowTracker(madness: 20);
             var options = new[]
             {
                 new DialogueOption(StatType.Charm, "Hey babe")
@@ -127,7 +127,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task AC2_UnhingedOptionPreservesIntendedText()
         {
-            var shadows = MakeShadowTracker(madness: 19);
+            var shadows = TestHelpers.MakeShadowTracker(madness: 19);
             var options = new[]
             {
                 new DialogueOption(StatType.Wit, "Witty remark"),
@@ -150,7 +150,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task AC2_OnlyOneOptionMarkedNotAll()
         {
-            var shadows = MakeShadowTracker(madness: 22);
+            var shadows = TestHelpers.MakeShadowTracker(madness: 22);
             var options = new[]
             {
                 new DialogueOption(StatType.Charm, "A"),
@@ -180,7 +180,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task AC3_MadnessT2_NoOptionsMarked()
         {
-            var shadows = MakeShadowTracker(madness: 12);
+            var shadows = TestHelpers.MakeShadowTracker(madness: 12);
             var options = new[]
             {
                 new DialogueOption(StatType.Charm, "Hey"),
@@ -201,7 +201,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task AC3_Madness17_JustBelowThreshold_NoOptions()
         {
-            var shadows = MakeShadowTracker(madness: 17);
+            var shadows = TestHelpers.MakeShadowTracker(madness: 17);
             var options = new[]
             {
                 new DialogueOption(StatType.Charm, "Hey"),
@@ -222,7 +222,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task AC3_MadnessZero_NoOptionsMarked()
         {
-            var shadows = MakeShadowTracker(madness: 0);
+            var shadows = TestHelpers.MakeShadowTracker(madness: 0);
             var options = new[]
             {
                 new DialogueOption(StatType.Charm, "Hey"),
@@ -267,7 +267,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task AC5_SingleOption_MadnessT3_ThatOptionMarked()
         {
-            var shadows = MakeShadowTracker(madness: 18);
+            var shadows = TestHelpers.MakeShadowTracker(madness: 18);
             var options = new[]
             {
                 new DialogueOption(StatType.Chaos, "Only option")
@@ -288,7 +288,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task EdgeCase_EmptyOptions_MadnessT3_NoCrash()
         {
-            var shadows = MakeShadowTracker(madness: 20);
+            var shadows = TestHelpers.MakeShadowTracker(madness: 20);
             var options = Array.Empty<DialogueOption>();
 
             var session = MakeSession(
@@ -318,7 +318,7 @@ namespace Pinder.Core.Tests
         public async Task EdgeCase_FixationT3_PlusMadnessT3_BothApply()
         {
             // Fixation T3 forces all options to last stat; Madness T3 then marks one unhinged
-            var shadows = MakeShadowTracker(fixation: 18, madness: 18);
+            var shadows = TestHelpers.MakeShadowTracker(fixation: 18, madness: 18);
             var options = new[]
             {
                 new DialogueOption(StatType.Charm, "A"),
@@ -339,47 +339,12 @@ namespace Pinder.Core.Tests
         }
 
         // =====================================================================
-        // Helpers (duplicated from ShadowThresholdGameSessionTests pattern)
+        // Helpers
         // =====================================================================
-
-        private static SessionShadowTracker MakeShadowTracker(
-            int dread = 0, int denial = 0, int fixation = 0,
-            int madness = 0, int overthinking = 0, int horniness = 0)
-        {
-            var stats = new StatBlock(
-                new Dictionary<StatType, int>
-                {
-                    { StatType.Charm, 2 }, { StatType.Rizz, 2 }, { StatType.Honesty, 2 },
-                    { StatType.Chaos, 2 }, { StatType.Wit, 2 }, { StatType.SelfAwareness, 2 }
-                },
-                new Dictionary<ShadowStatType, int>
-                {
-                    { ShadowStatType.Dread, dread }, { ShadowStatType.Denial, denial },
-                    { ShadowStatType.Fixation, fixation }, { ShadowStatType.Madness, madness },
-                    { ShadowStatType.Overthinking, overthinking }, { ShadowStatType.Despair, horniness }
-                });
-            return new SessionShadowTracker(stats);
-        }
-
-        private static StatBlock MakeStatBlock(int allStats = 2, int allShadow = 0)
-        {
-            var stats = new Dictionary<StatType, int>
-            {
-                { StatType.Charm, allStats }, { StatType.Rizz, allStats }, { StatType.Honesty, allStats },
-                { StatType.Chaos, allStats }, { StatType.Wit, allStats }, { StatType.SelfAwareness, allStats }
-            };
-            var shadow = new Dictionary<ShadowStatType, int>
-            {
-                { ShadowStatType.Madness, allShadow }, { ShadowStatType.Despair, allShadow },
-                { ShadowStatType.Denial, allShadow }, { ShadowStatType.Fixation, allShadow },
-                { ShadowStatType.Dread, allShadow }, { ShadowStatType.Overthinking, allShadow }
-            };
-            return new StatBlock(stats, shadow);
-        }
 
         private static CharacterProfile MakeProfile(string name, StatBlock? stats = null)
         {
-            stats = stats ?? MakeStatBlock();
+            stats = stats ?? TestHelpers.MakeStatBlock();
             var timing = new TimingProfile(5, 1.0f, 0.0f, "neutral");
             return new CharacterProfile(stats, "system prompt", name, timing, 1);
         }

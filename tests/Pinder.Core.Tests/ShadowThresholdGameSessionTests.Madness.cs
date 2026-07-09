@@ -16,7 +16,7 @@ namespace Pinder.Core.Tests
         public async Task MultipleT2_NoLongerBothStatsGetDisadvantage()
         {
             // #755: T2 shadow fires shadow check, not roll disadvantage
-            var shadows = MakeShadowTracker(dread: 12, denial: 12);
+            var shadows = TestHelpers.MakeShadowTracker(dread: 12, denial: 12);
 
             // Single d20 roll (no disadvantage)
             var session = MakeSession(
@@ -35,7 +35,7 @@ namespace Pinder.Core.Tests
         public async Task AdvantageAndShadowDisadvantage_Cancel()
         {
             // #755: T2 no longer causes disadvantage, so advantage from VeryIntoIt applies cleanly.
-            var shadows = MakeShadowTracker(denial: 14);
+            var shadows = TestHelpers.MakeShadowTracker(denial: 14);
             var session = MakeSession(
                 diceValues: new[] { 8, 14, 50 },
                 shadows: shadows,
@@ -56,7 +56,7 @@ namespace Pinder.Core.Tests
         {
             // Madness=8 is T1 (tier=1). Context should get raw value 8, not tier 1.
             Dictionary<ShadowStatType, int>? capturedThresholds = null;
-            var shadows = MakeShadowTracker(madness: 8);
+            var shadows = TestHelpers.MakeShadowTracker(madness: 8);
 
             var llm = new CapturingLlmAdapter(ctx =>
             {
@@ -80,7 +80,7 @@ namespace Pinder.Core.Tests
         {
             // Madness=3 is T0. Context should get raw value 3.
             Dictionary<ShadowStatType, int>? capturedThresholds = null;
-            var shadows = MakeShadowTracker(madness: 3);
+            var shadows = TestHelpers.MakeShadowTracker(madness: 3);
 
             var llm = new CapturingLlmAdapter(ctx =>
             {
@@ -102,7 +102,7 @@ namespace Pinder.Core.Tests
         public async Task FixationT3_StillTriggersAt18RawValue()
         {
             // Fixation=18 (T3) should still force all options to last stat used
-            var shadows = MakeShadowTracker(fixation: 18);
+            var shadows = TestHelpers.MakeShadowTracker(fixation: 18);
             var options = new[]
             {
                 new DialogueOption(StatType.Charm, "Hey"),
@@ -128,7 +128,7 @@ namespace Pinder.Core.Tests
         public async Task DenialT3_StillTriggersAt18RawValue()
         {
             // Denial=18 (T3) should still remove Honesty options
-            var shadows = MakeShadowTracker(denial: 18);
+            var shadows = TestHelpers.MakeShadowTracker(denial: 18);
             var options = new[]
             {
                 new DialogueOption(StatType.Charm, "Hey"),
@@ -153,7 +153,7 @@ namespace Pinder.Core.Tests
         public async Task MadnessT3_MarksExactlyOneOptionAsUnhinged()
         {
             // Madness=18 (T3) → exactly one option IsUnhingedReplacement = true
-            var shadows = MakeShadowTracker(madness: 18);
+            var shadows = TestHelpers.MakeShadowTracker(madness: 18);
             var options = new[]
             {
                 new DialogueOption(StatType.Charm, "Hey"),
@@ -177,7 +177,7 @@ namespace Pinder.Core.Tests
         public async Task MadnessT2_NoOptionsMarkedUnhinged()
         {
             // Madness=12 (T2) → no options should be unhinged
-            var shadows = MakeShadowTracker(madness: 12);
+            var shadows = TestHelpers.MakeShadowTracker(madness: 12);
             var options = new[]
             {
                 new DialogueOption(StatType.Charm, "Hey"),
@@ -199,7 +199,7 @@ namespace Pinder.Core.Tests
         public async Task MadnessT3_PreservesOriginalStatAndText()
         {
             // The unhinged option should keep its original stat and text
-            var shadows = MakeShadowTracker(madness: 20);
+            var shadows = TestHelpers.MakeShadowTracker(madness: 20);
             var options = new[]
             {
                 new DialogueOption(StatType.Charm, "Hey babe"),
@@ -224,7 +224,7 @@ namespace Pinder.Core.Tests
         {
             // Both Madness T3 and Despair T3 active (session Horniness converts to Rizz)
             // but should preserve the IsUnhingedReplacement flag.
-            var shadows = MakeShadowTracker(madness: 18);
+            var shadows = TestHelpers.MakeShadowTracker(madness: 18);
             var options = new[]
             {
                 new DialogueOption(StatType.Charm, "Hey"),
@@ -248,7 +248,7 @@ namespace Pinder.Core.Tests
         public async Task MadnessBelow18_NoUnhingedOptions()
         {
             // Madness=17 (just below T3 threshold) → no unhinged
-            var shadows = MakeShadowTracker(madness: 17);
+            var shadows = TestHelpers.MakeShadowTracker(madness: 17);
             var options = new[]
             {
                 new DialogueOption(StatType.Charm, "Hey"),

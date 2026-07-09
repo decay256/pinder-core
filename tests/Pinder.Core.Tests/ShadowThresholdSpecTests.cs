@@ -116,7 +116,7 @@ namespace Pinder.Core.Tests
         public async Task AC5_DreadT3_StartsAt8Interest()
         {
             // What: Dread shadow ≥18 → InterestMeter(8) at construction (spec §3.3)
-            var shadows = MakeShadowTracker(dread: 18);
+            var shadows = TestHelpers.MakeShadowTracker(dread: 18);
             var session = MakeSession(diceValues: new[] { 15, 50 }, shadows: shadows);
 
             var turn = await session.StartTurnAsync();
@@ -128,7 +128,7 @@ namespace Pinder.Core.Tests
         public async Task AC5_DreadAt17_StartsAt10Interest()
         {
             // What: Dread=17 is T2, NOT T3 — interest stays 10
-            var shadows = MakeShadowTracker(dread: 17);
+            var shadows = TestHelpers.MakeShadowTracker(dread: 17);
             var session = MakeSession(diceValues: new[] { 15, 50 }, shadows: shadows);
 
             var turn = await session.StartTurnAsync();
@@ -140,7 +140,7 @@ namespace Pinder.Core.Tests
         public async Task AC5_DreadT2_StartsAt10Interest()
         {
             // What: Dread=12 (T2) should NOT affect starting interest
-            var shadows = MakeShadowTracker(dread: 12);
+            var shadows = TestHelpers.MakeShadowTracker(dread: 12);
             var session = MakeSession(diceValues: new[] { 15, 50 }, shadows: shadows);
 
             var turn = await session.StartTurnAsync();
@@ -152,7 +152,7 @@ namespace Pinder.Core.Tests
         public async Task AC5_ExplicitStartingInterest_OverridesDreadT3()
         {
             // What: If config has explicit StartingInterest, that takes priority over Dread T3
-            var shadows = MakeShadowTracker(dread: 20);
+            var shadows = TestHelpers.MakeShadowTracker(dread: 20);
             var session = MakeSession(diceValues: new[] { 15, 50 }, shadows: shadows, startingInterest: 5);
 
             var turn = await session.StartTurnAsync();
@@ -164,7 +164,7 @@ namespace Pinder.Core.Tests
         public async Task AC5_DreadAt25_StartsAt8Interest()
         {
             // What: Any Dread ≥18 should trigger T3, not just exactly 18
-            var shadows = MakeShadowTracker(dread: 25);
+            var shadows = TestHelpers.MakeShadowTracker(dread: 25);
             var session = MakeSession(diceValues: new[] { 15, 50 }, shadows: shadows);
 
             var turn = await session.StartTurnAsync();
@@ -172,47 +172,12 @@ namespace Pinder.Core.Tests
         }
 
         // =====================================================================
-        // Helpers (test-only utilities, not copied from implementation)
+        // Helpers
         // =====================================================================
-
-        private static SessionShadowTracker MakeShadowTracker(
-            int dread = 0, int denial = 0, int fixation = 0,
-            int madness = 0, int overthinking = 0, int horniness = 0)
-        {
-            var stats = new StatBlock(
-                new Dictionary<StatType, int>
-                {
-                    { StatType.Charm, 2 }, { StatType.Rizz, 2 }, { StatType.Honesty, 2 },
-                    { StatType.Chaos, 2 }, { StatType.Wit, 2 }, { StatType.SelfAwareness, 2 }
-                },
-                new Dictionary<ShadowStatType, int>
-                {
-                    { ShadowStatType.Dread, dread }, { ShadowStatType.Denial, denial },
-                    { ShadowStatType.Fixation, fixation }, { ShadowStatType.Madness, madness },
-                    { ShadowStatType.Overthinking, overthinking }, { ShadowStatType.Despair, horniness }
-                });
-            return new SessionShadowTracker(stats);
-        }
-
-        private static StatBlock MakeStatBlock()
-        {
-            return new StatBlock(
-                new Dictionary<StatType, int>
-                {
-                    { StatType.Charm, 2 }, { StatType.Rizz, 2 }, { StatType.Honesty, 2 },
-                    { StatType.Chaos, 2 }, { StatType.Wit, 2 }, { StatType.SelfAwareness, 2 }
-                },
-                new Dictionary<ShadowStatType, int>
-                {
-                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Despair, 0 },
-                    { ShadowStatType.Denial, 0 }, { ShadowStatType.Fixation, 0 },
-                    { ShadowStatType.Dread, 0 }, { ShadowStatType.Overthinking, 0 }
-                });
-        }
 
         private static CharacterProfile MakeProfile(string name)
         {
-            var stats = MakeStatBlock();
+            var stats = TestHelpers.MakeStatBlock();
             var timing = new TimingProfile(5, 1.0f, 0.0f, "neutral");
             return new CharacterProfile(stats, "system prompt", name, timing, 1);
         }

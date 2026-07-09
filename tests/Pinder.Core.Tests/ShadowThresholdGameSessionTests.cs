@@ -26,7 +26,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task DreadT3_StartsAt8Interest()
         {
-            var shadows = MakeShadowTracker(dread: 18);
+            var shadows = TestHelpers.MakeShadowTracker(dread: 18);
             var session = MakeSession(
                 diceValues: new[] { 15, 50 },
                 shadows: shadows);
@@ -39,7 +39,7 @@ namespace Pinder.Core.Tests
         public async Task DreadT2_StartsAt10Interest()
         {
             // Dread at 12 (T2) should NOT change starting interest
-            var shadows = MakeShadowTracker(dread: 12);
+            var shadows = TestHelpers.MakeShadowTracker(dread: 12);
             var session = MakeSession(
                 diceValues: new[] { 15, 50 },
                 shadows: shadows);
@@ -52,7 +52,7 @@ namespace Pinder.Core.Tests
         public async Task ExplicitStartingInterest_OverridesDreadT3()
         {
             // If config has explicit StartingInterest, that takes priority
-            var shadows = MakeShadowTracker(dread: 20);
+            var shadows = TestHelpers.MakeShadowTracker(dread: 20);
             var session = MakeSession(
                 diceValues: new[] { 15, 50 },
                 shadows: shadows,
@@ -69,7 +69,7 @@ namespace Pinder.Core.Tests
         public async Task DenialT2_HonestyNoLongerRollsWithDisadvantage()
         {
             // Denial at 12 → shadow check fires, but NO roll disadvantage per #755
-            var shadows = MakeShadowTracker(denial: 12);
+            var shadows = TestHelpers.MakeShadowTracker(denial: 12);
             // Single d20 roll (no disadvantage)
             var session = MakeSession(
                 diceValues: new[] { 18, 50 },
@@ -86,7 +86,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task DreadT2_WitNoLongerRollsWithDisadvantage()
         {
-            var shadows = MakeShadowTracker(dread: 14);
+            var shadows = TestHelpers.MakeShadowTracker(dread: 14);
             // Single d20 roll per #755
             var session = MakeSession(
                 diceValues: new[] { 19, 50 },
@@ -102,7 +102,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task MadnessT2_CharmNoLongerRollsWithDisadvantage()
         {
-            var shadows = MakeShadowTracker(madness: 15);
+            var shadows = TestHelpers.MakeShadowTracker(madness: 15);
             // Single d20 roll per #755
             var session = MakeSession(
                 diceValues: new[] { 17, 50 },
@@ -119,7 +119,7 @@ namespace Pinder.Core.Tests
         public async Task NoShadowDisadvantage_WhenBelowT2()
         {
             // Denial at 11 (T1) should NOT cause disadvantage
-            var shadows = MakeShadowTracker(denial: 11);
+            var shadows = TestHelpers.MakeShadowTracker(denial: 11);
             // Only one d20 roll needed (no disadvantage = single roll)
             var session = MakeSession(
                 diceValues: new[] { 15, 50 },
@@ -137,7 +137,7 @@ namespace Pinder.Core.Tests
         public async Task UnpairedStat_NoDisadvantage_WhenOtherShadowAtT2()
         {
             // Denial at 12 affects Honesty, NOT Charm
-            var shadows = MakeShadowTracker(denial: 12);
+            var shadows = TestHelpers.MakeShadowTracker(denial: 12);
             var session = MakeSession(
                 diceValues: new[] { 15, 50 },
                 shadows: shadows,
@@ -155,7 +155,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task DenialT3_RemovesHonestyOptions()
         {
-            var shadows = MakeShadowTracker(denial: 18);
+            var shadows = TestHelpers.MakeShadowTracker(denial: 18);
             var session = MakeSession(
                 diceValues: new[] { 15, 50 },
                 shadows: shadows,
@@ -178,7 +178,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task DenialT3_AllHonesty_FallbackToChaos()
         {
-            var shadows = MakeShadowTracker(denial: 19);
+            var shadows = TestHelpers.MakeShadowTracker(denial: 19);
             var session = MakeSession(
                 diceValues: new[] { 15, 50 },
                 shadows: shadows,
@@ -199,7 +199,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task DenialT3_AllHonestyNoChaos_KeepsFirst()
         {
-            var shadows = MakeShadowTracker(denial: 20);
+            var shadows = TestHelpers.MakeShadowTracker(denial: 20);
             var session = MakeSession(
                 diceValues: new[] { 15, 50 },
                 shadows: shadows,
@@ -222,7 +222,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task FixationT3_ForcesSameStatAsLastTurn()
         {
-            var shadows = MakeShadowTracker(fixation: 18);
+            var shadows = TestHelpers.MakeShadowTracker(fixation: 18);
             // Turn 1: pick Charm (index 0). Turn 2: all options forced to Charm.
             // Dice: turn1 d20=15, delay=50, turn2 d20=15, delay=50
             var session = MakeSession(
@@ -247,7 +247,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task FixationT3_FirstTurn_NoForce()
         {
-            var shadows = MakeShadowTracker(fixation: 20);
+            var shadows = TestHelpers.MakeShadowTracker(fixation: 20);
             var session = MakeSession(
                 diceValues: new[] { 15, 50 },
                 shadows: shadows,
@@ -272,7 +272,7 @@ namespace Pinder.Core.Tests
         public async Task ShadowThresholds_PopulatedInDialogueContext()
         {
             Dictionary<ShadowStatType, int>? capturedThresholds = null;
-            var shadows = MakeShadowTracker(dread: 14, denial: 6, fixation: 0);
+            var shadows = TestHelpers.MakeShadowTracker(dread: 14, denial: 6, fixation: 0);
 
             var llm = new CapturingLlmAdapter(ctx =>
             {

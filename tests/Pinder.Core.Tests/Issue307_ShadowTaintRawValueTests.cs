@@ -27,7 +27,7 @@ namespace Pinder.Core.Tests
         public async Task Madness8_ContextReceivesRawValue8_NotTier1()
         {
             Dictionary<ShadowStatType, int>? captured = null;
-            var shadows = MakeShadowTracker(madness: 8);
+            var shadows = TestHelpers.MakeShadowTracker(madness: 8);
             var llm = new CapturingLlmAdapter(ctx => captured = ctx.ShadowThresholds);
 
             var session = MakeSessionWithLlm(new[] { 15, 50 }, shadows, llm);
@@ -46,7 +46,7 @@ namespace Pinder.Core.Tests
         public async Task Madness3_ContextReceivesRawValue3()
         {
             Dictionary<ShadowStatType, int>? captured = null;
-            var shadows = MakeShadowTracker(madness: 3);
+            var shadows = TestHelpers.MakeShadowTracker(madness: 3);
             var llm = new CapturingLlmAdapter(ctx => captured = ctx.ShadowThresholds);
 
             var session = MakeSessionWithLlm(new[] { 15, 50 }, shadows, llm);
@@ -63,7 +63,7 @@ namespace Pinder.Core.Tests
         public async Task AllShadowStats_PassRawValues()
         {
             Dictionary<ShadowStatType, int>? captured = null;
-            var shadows = MakeShadowTracker(
+            var shadows = TestHelpers.MakeShadowTracker(
                 dread: 14, denial: 7, fixation: 3,
                 madness: 10, overthinking: 5, horniness: 12);
             var llm = new CapturingLlmAdapter(ctx => captured = ctx.ShadowThresholds);
@@ -87,7 +87,7 @@ namespace Pinder.Core.Tests
         public async Task ZeroShadow_StillPassedInContext()
         {
             Dictionary<ShadowStatType, int>? captured = null;
-            var shadows = MakeShadowTracker(madness: 0);
+            var shadows = TestHelpers.MakeShadowTracker(madness: 0);
             var llm = new CapturingLlmAdapter(ctx => captured = ctx.ShadowThresholds);
 
             var session = MakeSessionWithLlm(new[] { 15, 50 }, shadows, llm);
@@ -104,7 +104,7 @@ namespace Pinder.Core.Tests
         public async Task T3Shadow_PassesRawValue_NotCappedAt3()
         {
             Dictionary<ShadowStatType, int>? captured = null;
-            var shadows = MakeShadowTracker(dread: 22);
+            var shadows = TestHelpers.MakeShadowTracker(dread: 22);
             var llm = new CapturingLlmAdapter(ctx => captured = ctx.ShadowThresholds);
 
             var session = MakeSessionWithLlm(new[] { 15, 50 }, shadows, llm);
@@ -121,7 +121,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task DenialT3_StillRemovesHonestyOptions_WithRawValues()
         {
-            var shadows = MakeShadowTracker(denial: 18);
+            var shadows = TestHelpers.MakeShadowTracker(denial: 18);
             var options = new[]
             {
                 new DialogueOption(StatType.Charm, "Hey"),
@@ -139,7 +139,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task Denial17_DoesNotRemoveHonestyOptions()
         {
-            var shadows = MakeShadowTracker(denial: 17);
+            var shadows = TestHelpers.MakeShadowTracker(denial: 17);
             var options = new[]
             {
                 new DialogueOption(StatType.Charm, "Hey"),
@@ -176,45 +176,10 @@ namespace Pinder.Core.Tests
 
         // ============ Helpers ============
 
-        private static SessionShadowTracker MakeShadowTracker(
-            int dread = 0, int denial = 0, int fixation = 0,
-            int madness = 0, int overthinking = 0, int horniness = 0)
-        {
-            var stats = new StatBlock(
-                new Dictionary<StatType, int>
-                {
-                    { StatType.Charm, 2 }, { StatType.Rizz, 2 }, { StatType.Honesty, 2 },
-                    { StatType.Chaos, 2 }, { StatType.Wit, 2 }, { StatType.SelfAwareness, 2 }
-                },
-                new Dictionary<ShadowStatType, int>
-                {
-                    { ShadowStatType.Dread, dread }, { ShadowStatType.Denial, denial },
-                    { ShadowStatType.Fixation, fixation }, { ShadowStatType.Madness, madness },
-                    { ShadowStatType.Overthinking, overthinking }, { ShadowStatType.Despair, horniness }
-                });
-            return new SessionShadowTracker(stats);
-        }
-
-        private static StatBlock MakeStatBlock()
-        {
-            return new StatBlock(
-                new Dictionary<StatType, int>
-                {
-                    { StatType.Charm, 2 }, { StatType.Rizz, 2 }, { StatType.Honesty, 2 },
-                    { StatType.Chaos, 2 }, { StatType.Wit, 2 }, { StatType.SelfAwareness, 2 }
-                },
-                new Dictionary<ShadowStatType, int>
-                {
-                    { ShadowStatType.Madness, 0 }, { ShadowStatType.Despair, 0 },
-                    { ShadowStatType.Denial, 0 }, { ShadowStatType.Fixation, 0 },
-                    { ShadowStatType.Dread, 0 }, { ShadowStatType.Overthinking, 0 }
-                });
-        }
-
         private static CharacterProfile MakeProfile(string name)
         {
             var timing = new TimingProfile(5, 1.0f, 0.0f, "neutral");
-            return new CharacterProfile(MakeStatBlock(), "system prompt", name, timing, 1);
+            return new CharacterProfile(TestHelpers.MakeStatBlock(), "system prompt", name, timing, 1);
         }
 
         private static GameSession MakeSession(
