@@ -1,0 +1,45 @@
+{
+  "name": "submit_dialogue_options",
+  "description": "Submit the generated dialogue options for the player.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "options": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "stat": {
+              "type": "string",
+              "description": "The stat used for this option. Must be one of: Charm, Rizz, Honesty, Chaos, Wit, SelfAwareness"
+            },
+            "text": {
+              "type": "string",
+              "description": "The dialogue text for this option."
+            },
+            "callback": {
+              "type": ["string", "null"],
+              "description": "Callback turn reference (e.g. '3' or 'turn_3') or null if none."
+            },
+            "combo": {
+              "type": ["string", "null"],
+              "description": "Combo name being completed, or null if none."
+            },
+            "tell_bonus": {
+              "type": "boolean",
+              "description": "Whether this option has a tell bonus."
+            },
+            "weakness_window": {
+              "type": "boolean",
+              "description": "Whether a weakness window is active for this option."
+            }
+          },
+          "required": ["stat", "text", "tell_bonus", "weakness_window"]
+        },
+        "minItems": 4,
+        "maxItems": 4
+      }
+    },
+    "required": ["options"]
+  }
+}

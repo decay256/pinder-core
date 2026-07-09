@@ -1,0 +1,14 @@
+{
+  "name": "submit_improvement",
+  "description": "Submit the improved content.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "improved": {
+        "type": "string",
+        "description": "The improved content text. If no changes are needed, return the original content unchanged."
+      }
+    },
+    "required": ["improved"]
+  }
+}

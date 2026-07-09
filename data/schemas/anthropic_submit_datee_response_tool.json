@@ -1,0 +1,44 @@
+{
+  "name": "submit_datee_response",
+  "description": "Submit the datee's response message and any detected gameplay signals.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "message": {
+        "type": "string",
+        "description": "The datee's message text."
+      },
+      "tell": {
+        "type": ["object", "null"],
+        "description": "A detected tell signal, or null if none.",
+        "properties": {
+          "stat": {
+            "type": "string",
+            "description": "The stat the tell relates to (e.g. Charm, Rizz, Wit)."
+          },
+          "description": {
+            "type": "string",
+            "description": "Brief description of the tell behaviour."
+          }
+        },
+        "required": ["stat", "description"]
+      },
+      "weakness": {
+        "type": ["object", "null"],
+        "description": "A weakness window signal, or null if none.",
+        "properties": {
+          "defending_stat": {
+            "type": "string",
+            "description": "The defending stat whose DC is reduced."
+          },
+          "dc_reduction": {
+            "type": "integer",
+            "description": "How much the DC is reduced by (positive integer)."
+          }
+        },
+        "required": ["defending_stat", "dc_reduction"]
+      }
+    },
+    "required": ["message"]
+  }
+}
