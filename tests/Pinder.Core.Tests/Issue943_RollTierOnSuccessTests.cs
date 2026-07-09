@@ -1,81 +1,91 @@
-using Xunit;
-using Pinder.Core.Rolls;
+using System.Collections.Generic;
 using System.Text.Json;
+using Pinder.Core.Rolls;
+using Pinder.Core.Stats;
+using Pinder.Core.Traps;
+using Xunit;
 
 namespace Pinder.Core.Tests
 {
+    [Trait("Category", "Core")]
     public class Issue943_RollTierOnSuccessTests
     {
         [Fact]
-        public void SuccessfulRoll_HasSuccessTier()
+        public void ResolveFixedDC_SuccessfulRoll_HasSuccessTierOnResultAndCheck()
         {
-            // Arrange
-            int dc = 10;
-            int roll = 15; // Success
-            
-            // Act
-            // We can't easily instantiate RollResult without RollEngine or mocking dependencies, 
-            // so we use a simple mock-like constructor call if possible, 
-            // but the real test is verifying the logic in RollResult constructor.
-            
-            // Using the public constructor of RollResult:
-            // RollResult(dieRoll, secondDieRoll, usedDieRoll, stat, statModifier, levelBonus, dc, tier, activatedTrap, externalBonus, check, defendingStat)
-            
-            var check = new RollCheckResult(
-                RollCheckKind.OptionRoll, 15, null, 15, 
-                new System.Collections.Generic.List<Pinder.Core.Rolls.NamedModifier>(), 0, 15, dc, true, false, false, 
-                FailureTier.Success, 0);
+            var result = ResolveFixedDc(roll: 15, dc: 10);
 
-            var result = new RollResult(
-                15, null, 15, Pinder.Core.Stats.StatType.Charm, 0, 0, dc, 
-                FailureTier.Success, null, 0, check, Pinder.Core.Stats.StatType.Charm);
-
-            // Assert
             Assert.True(result.IsSuccess);
             Assert.Equal(FailureTier.Success, result.Tier);
+            Assert.Equal(FailureTier.Success, result.Check.Tier);
+            Assert.Equal(0, result.MissMargin);
+            Assert.Equal(0, result.Check.MissMargin);
         }
 
-        [Fact]
-        public void FailedRoll_HasCorrectFailureTier()
+        [Theory]
+        [InlineData(9, 10, FailureTier.Fumble, 1)]
+        [InlineData(5, 10, FailureTier.Misfire, 5)]
+        [InlineData(1, 10, FailureTier.Legendary, 9)]
+        public void ResolveFixedDC_FailedRoll_UsesRollEngineTierLogic(
+            int roll,
+            int dc,
+            FailureTier expectedTier,
+            int expectedMissMargin)
         {
-            // Arrange
-            int dc = 10;
-            int roll = 5; // Miss by 5 -> Misfire
-            
-            var check = new RollCheckResult(
-                RollCheckKind.OptionRoll, 5, null, 5, 
-                new System.Collections.Generic.List<Pinder.Core.Rolls.NamedModifier>(), 0, 5, dc, false, false, false, 
-                FailureTier.Misfire, 5);
+            var result = ResolveFixedDc(roll, dc);
 
-            var result = new RollResult(
-                5, null, 5, Pinder.Core.Stats.StatType.Charm, 0, 0, dc, 
-                FailureTier.Misfire, null, 0, check, Pinder.Core.Stats.StatType.Charm);
-
-            // Assert
             Assert.False(result.IsSuccess);
-            Assert.Equal(FailureTier.Misfire, result.Tier);
+            Assert.Equal(expectedTier, result.Tier);
+            Assert.Equal(expectedMissMargin, result.MissMargin);
+            Assert.Equal(FailureTierLadder.FromMissMargin(expectedMissMargin), result.Check.Tier);
+            Assert.Equal(expectedMissMargin, result.Check.MissMargin);
         }
 
         [Fact]
-        public void Serialization_SuccessfulRoll_EmitsTier()
+        public void Serialization_EngineResolvedSuccessfulRoll_EmitsJsonTier()
         {
-            // Arrange
-            var check = new RollCheckResult(
-                RollCheckKind.OptionRoll, 15, null, 15, 
-                new System.Collections.Generic.List<Pinder.Core.Rolls.NamedModifier>(), 0, 15, 10, true, false, false, 
-                FailureTier.Success, 0);
+            var result = ResolveFixedDc(roll: 15, dc: 10);
 
-            var result = new RollResult(
-                15, null, 15, Pinder.Core.Stats.StatType.Charm, 0, 0, 10, 
-                FailureTier.Success, null, 0, check, Pinder.Core.Stats.StatType.Charm);
-
-            // Act
             string json = JsonSerializer.Serialize(result);
 
-            // Assert
-            // RollResult doesn't have [JsonPropertyName("tier")] on the property, but it's a public property.
-            // In the DTOs (pinder-web), it's explicitly "tier". Here we just check the property is serialized.
-            Assert.Contains("\"Tier\":0", json); // FailureTier.Success is 0
+            using var document = JsonDocument.Parse(json);
+            string? tier = document.RootElement.GetProperty("tier").GetString();
+            Assert.Equal(nameof(FailureTier.Success), tier);
+        }
+
+        private static RollResult ResolveFixedDc(int roll, int dc)
+        {
+            return RollEngine.ResolveFixedDC(
+                StatType.Charm,
+                MakeStats(),
+                dc,
+                new TrapState(),
+                1,
+                new NullTrapRegistry(),
+                new FixedDice(roll));
+        }
+
+        private static StatBlock MakeStats()
+        {
+            var baseStats = new Dictionary<StatType, int>
+            {
+                { StatType.Charm, 0 },
+                { StatType.Rizz, 0 },
+                { StatType.Honesty, 0 },
+                { StatType.Chaos, 0 },
+                { StatType.Wit, 0 },
+                { StatType.SelfAwareness, 0 },
+            };
+            var shadowStats = new Dictionary<ShadowStatType, int>
+            {
+                { ShadowStatType.Madness, 0 },
+                { ShadowStatType.Despair, 0 },
+                { ShadowStatType.Denial, 0 },
+                { ShadowStatType.Fixation, 0 },
+                { ShadowStatType.Dread, 0 },
+                { ShadowStatType.Overthinking, 0 },
+            };
+            return new StatBlock(baseStats, shadowStats);
         }
     }
 }
