@@ -338,7 +338,8 @@ namespace Pinder.Core.Conversation
                 state.TurnNumber,
                 progress,
                 ct,
-                state.SpeculativeWasteTracker).ConfigureAwait(false);
+                state.SpeculativeWasteTracker,
+                _onDiagnostic).ConfigureAwait(false);
 
             deliveredMessage = dispatchResult.FinalMessage;
             bool shadowOverlayApplied = dispatchResult.ShadowOverlayApplied;

@@ -23,6 +23,9 @@ namespace Pinder.Core.Conversation
         /// and adapts dispatch mode to avoid repeated wasted token consumption.
         /// Pass <c>null</c> to always use parallel speculative dispatch (legacy behaviour).
         /// </param>
+        /// <param name="onDiagnostic">
+        /// Optional host diagnostic sink for safe overlay dispatch telemetry.
+        /// </param>
         public static async Task<(string FinalMessage, bool ShadowOverlayApplied)> DispatchSpeculativeCallsAsync(
             ILlmAdapter llm,
             string deliveredMessage,
@@ -42,7 +45,8 @@ namespace Pinder.Core.Conversation
             int turnNumber,
             IProgress<TurnProgressEvent>? progress,
             CancellationToken ct,
-            SpeculativeWasteTracker? wasteTracker = null)
+            SpeculativeWasteTracker? wasteTracker = null,
+            Action<OperationalDiagnosticEvent>? onDiagnostic = null)
         {
             ct.ThrowIfCancellationRequested();
 
@@ -53,6 +57,17 @@ namespace Pinder.Core.Conversation
 
             Task<string>? trapTask = null;
             Task<string>? shadowTask = null;
+            bool useParallel = wasteTracker == null || wasteTracker.ShouldRunParallel;
+
+            if (runTrap && runShadow)
+            {
+                EmitSpeculativeDispatchDecision(
+                    onDiagnostic,
+                    turnNumber,
+                    useParallel,
+                    shadowType,
+                    wasteTracker);
+            }
 
             // #6 (Task.Run audit): both overlay calls are already async I/O
             // (LLM transport calls). Invoking these local functions directly
@@ -74,7 +89,7 @@ namespace Pinder.Core.Conversation
                 trapTask = RunTrapAsync();
             }
 
-            if (runShadow)
+            if (runShadow && (useParallel || !runTrap))
             {
                 async Task<string> RunShadowAsync()
                 {
@@ -93,8 +108,6 @@ namespace Pinder.Core.Conversation
             // shadow task entirely and re-run shadow on the trap result, eliminating
             // the wasted parallel call. If Trap does not fire, shadow's speculative
             // result is valid and we proceed as in parallel mode.
-            bool useParallel = (wasteTracker == null || wasteTracker.ShouldRunParallel);
-
             if (runTrap && runShadow && !useParallel)
             {
                 // Sequential mode: run Trap, check if it changed the message,
@@ -130,7 +143,7 @@ namespace Pinder.Core.Conversation
                 {
                     EmitTextLayerNoop(onTextLayerNoop, turnNumber, $"Shadow ({shadowType})", trapResult, sanitizedShadow);
                 }
-                wasteTracker.RecordNonWaste();
+                wasteTracker?.RecordNonWaste();
                 return (sanitizedShadow, shadowApplied);
             }
 
@@ -181,7 +194,16 @@ namespace Pinder.Core.Conversation
                 else
                 {
                     // Speculative shadow result is stale — record waste and re-run sequentially.
+                    int? counterBefore = wasteTracker?.DiagnosticCounter;
                     wasteTracker?.RecordWaste();
+                    int? counterAfter = wasteTracker?.DiagnosticCounter;
+                    EmitSpeculativeWastedRerun(
+                        onDiagnostic,
+                        turnNumber,
+                        shadowType,
+                        counterBefore,
+                        counterAfter,
+                        wasteTracker);
                     progress?.Report(new TurnProgressEvent(TurnProgressStage.ShadowCorruptionStarted));
                     string rawReRunShadowOutput = await llm.ApplyShadowCorruptionAsync(
                         trapResult, corruptionInstruction, shadowType, playerArchetypeDirectiveForDelivery, ct).ConfigureAwait(false);
@@ -241,6 +263,66 @@ namespace Pinder.Core.Conversation
             }
 
             return (deliveredMessage, false);
+        }
+
+        private static void EmitSpeculativeDispatchDecision(
+            Action<OperationalDiagnosticEvent>? onDiagnostic,
+            int turnNumber,
+            bool useParallel,
+            ShadowStatType shadowType,
+            SpeculativeWasteTracker? wasteTracker)
+        {
+            string mode = useParallel ? "parallel" : "sequential";
+            string message = "Speculative overlay dispatch decision: "
+                + $"mode={mode}; "
+                + $"turn={turnNumber}; "
+                + $"shadow={shadowType}; "
+                + $"tracker_present={(wasteTracker != null)}; "
+                + $"counter={FormatNullable(wasteTracker?.DiagnosticCounter)}; "
+                + $"waste_threshold={FormatNullable(wasteTracker?.WasteThreshold)}; "
+                + $"recovery_threshold={FormatNullable(wasteTracker?.RecoveryThreshold)}.";
+
+            OperationalDiagnostics.Emit(
+                onDiagnostic,
+                new OperationalDiagnosticEvent(
+                    "LlmDispatcher",
+                    "SpeculativeOverlayDispatchDecision",
+                    OperationalDiagnosticSeverity.Info,
+                    message));
+        }
+
+        private static void EmitSpeculativeWastedRerun(
+            Action<OperationalDiagnosticEvent>? onDiagnostic,
+            int turnNumber,
+            ShadowStatType shadowType,
+            int? counterBefore,
+            int? counterAfter,
+            SpeculativeWasteTracker? wasteTracker)
+        {
+            bool sequentialNow = wasteTracker != null && !wasteTracker.ShouldRunParallel;
+            string message = "Speculative shadow overlay result was discarded and shadow was re-run: "
+                + $"turn={turnNumber}; "
+                + $"shadow={shadowType}; "
+                + "trap_changed=true; "
+                + "rerun_shadow=true; "
+                + $"counter_before={FormatNullable(counterBefore)}; "
+                + $"counter_after={FormatNullable(counterAfter)}; "
+                + $"sequential_now={sequentialNow}; "
+                + $"waste_threshold={FormatNullable(wasteTracker?.WasteThreshold)}; "
+                + $"recovery_threshold={FormatNullable(wasteTracker?.RecoveryThreshold)}.";
+
+            OperationalDiagnostics.Emit(
+                onDiagnostic,
+                new OperationalDiagnosticEvent(
+                    "LlmDispatcher",
+                    "SpeculativeOverlayWastedRerun",
+                    OperationalDiagnosticSeverity.Info,
+                    message));
+        }
+
+        private static string FormatNullable(int? value)
+        {
+            return value.HasValue ? value.Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : "n/a";
         }
 
         private static void EmitTextLayerNoop(Action<TextLayerNoopEvent>? onTextLayerNoop, int turnNumber, string layer, string beforeText, string afterText)

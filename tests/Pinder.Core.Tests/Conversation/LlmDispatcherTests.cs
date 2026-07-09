@@ -205,5 +205,114 @@ namespace Pinder.Core.Tests.Conversation
             // Expected 2 shadow calls: 1 speculative, and 1 sequential fallback re-run because trap changed the message
             Assert.Equal(2, llm.ShadowCalls);
         }
+
+        [Fact]
+        public async Task Dispatcher_EmitsSafeDispatchDecisionTelemetry_WhenBothOverlaysRequested()
+        {
+            var llm = new MockLlmAdapter
+            {
+                TrapResponse = "ECHO",
+                ShadowResponse = "Shadow Output"
+            };
+            var textDiffs = new List<TextDiff>();
+            var diagnostics = new List<OperationalDiagnosticEvent>();
+            var tracker = new SpeculativeWasteTracker();
+
+            await LlmDispatcher.DispatchSpeculativeCallsAsync(
+                llm,
+                "Original",
+                runTrap: true, "trap-instruction", "trap-name", "datee-context",
+                runShadow: true, "shadow-instruction", ShadowStatType.Dread,
+                "archetype-directive", textDiffs, null, 7, null, CancellationToken.None,
+                tracker,
+                diagnostics.Add);
+
+            var evt = Assert.Single(diagnostics);
+            Assert.Equal("LlmDispatcher", evt.Source);
+            Assert.Equal("SpeculativeOverlayDispatchDecision", evt.EventName);
+            Assert.Equal(OperationalDiagnosticSeverity.Info, evt.Severity);
+            Assert.Contains("mode=parallel", evt.Message);
+            Assert.Contains("turn=7", evt.Message);
+            Assert.Contains("shadow=Dread", evt.Message);
+            Assert.Contains("tracker_present=True", evt.Message);
+            Assert.DoesNotContain("Original", evt.Message);
+            Assert.DoesNotContain("trap-instruction", evt.Message);
+            Assert.DoesNotContain("shadow-instruction", evt.Message);
+            Assert.DoesNotContain("datee-context", evt.Message);
+            Assert.DoesNotContain("Trap Output", evt.Message);
+            Assert.DoesNotContain("Shadow Output", evt.Message);
+        }
+
+        [Fact]
+        public async Task Dispatcher_EmitsSafeWastedRerunTelemetry_WhenSpeculativeShadowIsDiscarded()
+        {
+            var llm = new MockLlmAdapter
+            {
+                TrapResponse = "Trap Output",
+                ShadowResponse = "Shadow Output"
+            };
+            var textDiffs = new List<TextDiff>();
+            var diagnostics = new List<OperationalDiagnosticEvent>();
+            var tracker = new SpeculativeWasteTracker();
+
+            await LlmDispatcher.DispatchSpeculativeCallsAsync(
+                llm,
+                "Original",
+                runTrap: true, "trap-instruction", "trap-name", "datee-context",
+                runShadow: true, "shadow-instruction", ShadowStatType.Dread,
+                "archetype-directive", textDiffs, null, 8, null, CancellationToken.None,
+                tracker,
+                diagnostics.Add);
+
+            Assert.Equal(2, diagnostics.Count);
+            var evt = diagnostics[1];
+            Assert.Equal("LlmDispatcher", evt.Source);
+            Assert.Equal("SpeculativeOverlayWastedRerun", evt.EventName);
+            Assert.Equal(OperationalDiagnosticSeverity.Info, evt.Severity);
+            Assert.Contains("turn=8", evt.Message);
+            Assert.Contains("shadow=Dread", evt.Message);
+            Assert.Contains("trap_changed=true", evt.Message);
+            Assert.Contains("rerun_shadow=true", evt.Message);
+            Assert.Contains("counter_before=0", evt.Message);
+            Assert.Contains("counter_after=-1", evt.Message);
+            Assert.DoesNotContain("Original", evt.Message);
+            Assert.DoesNotContain("trap-instruction", evt.Message);
+            Assert.DoesNotContain("shadow-instruction", evt.Message);
+            Assert.DoesNotContain("datee-context", evt.Message);
+            Assert.DoesNotContain("Trap Output", evt.Message);
+            Assert.DoesNotContain("Shadow Output", evt.Message);
+        }
+
+        [Fact]
+        public async Task Dispatcher_SequentialMode_DoesNotLaunchSpeculativeShadowBeforeTrap()
+        {
+            var llm = new MockLlmAdapter
+            {
+                TrapResponse = "Trap Output",
+                ShadowResponse = "Shadow Output"
+            };
+            var textDiffs = new List<TextDiff>();
+            var diagnostics = new List<OperationalDiagnosticEvent>();
+            var tracker = new SpeculativeWasteTracker(wasteThreshold: 1);
+            tracker.RecordWaste();
+
+            var result = await LlmDispatcher.DispatchSpeculativeCallsAsync(
+                llm,
+                "Original",
+                runTrap: true, "trap-instruction", "trap-name", "datee-context",
+                runShadow: true, "shadow-instruction", ShadowStatType.Dread,
+                "", textDiffs, null, 9, null, CancellationToken.None,
+                tracker,
+                diagnostics.Add);
+
+            Assert.Equal("Shadow Output", result.FinalMessage);
+            Assert.True(result.ShadowOverlayApplied);
+            Assert.Equal(1, llm.TrapCalls);
+            Assert.Equal(1, llm.ShadowCalls);
+            var evt = Assert.Single(diagnostics);
+            Assert.Equal("SpeculativeOverlayDispatchDecision", evt.EventName);
+            Assert.Contains("mode=sequential", evt.Message);
+            Assert.DoesNotContain("SpeculativeOverlayWastedRerun", evt.Message);
+        }
     }
 }
