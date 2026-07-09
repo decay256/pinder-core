@@ -56,7 +56,8 @@ namespace Pinder.Core.Tests
             int sessionHorniness,
             int steeringSeed,
             StatDeliveryInstructions? instructions = null,
-            int mainRoll = 15)
+            int mainRoll = 15,
+            IRuleResolver? rules = null)
         {
             // Dice: first roll is sessionHorniness (d10), rest pad the turn
             var dice = new FixedDice(sessionHorniness, mainRoll, 50);
@@ -67,11 +68,30 @@ namespace Pinder.Core.Tests
                 playerShadows: shadows,
                 steeringRng: rng,
                 startingInterest: startingInterest,
-                statDeliveryInstructions: instructions);
+                statDeliveryInstructions: instructions,
+                rules: rules);
 
             return new GameSession(
                 MakeProfile("Player"), MakeProfile("Datee"),
                 new NullLlmAdapter(), dice, new NullTrapRegistry(), config);
+        }
+
+        private sealed class ZeroSuccessDeltaRules : IRuleResolver
+        {
+            public int? GetFailureInterestDelta(int missMargin, int naturalRoll) => 0;
+            public int? GetSuccessInterestDelta(int beatMargin, int naturalRoll) => 0;
+            public InterestState? GetInterestState(int interest) => null;
+            public int? GetShadowThresholdLevel(int shadowValue) => null;
+            public int? GetMomentumBonus(int streak) => null;
+            public double? GetRiskTierXpMultiplier(RiskTier riskTier) => null;
+            public double? GetTerminalOutcomeMultiplier(GameOutcome outcome) => null;
+            public int? GetSuccessBaseXp(int dc) => null;
+            public int? GetFlatXpAward(string awardType) => null;
+            public int? GetXpThresholdForLevel(int level) => null;
+            public int? GetLevelRollBonus(int level) => 0;
+            public int? GetBuildPointsForLevel(int level) => null;
+            public int? GetItemSlotsForLevel(int level) => null;
+            public int? GetFailurePoolTierMinLevel(string tierName) => null;
         }
 
         /// <summary>
@@ -148,61 +168,30 @@ namespace Pinder.Core.Tests
         }
 
         /// <summary>
-        /// Horniness overlay fires + interest = 0 → no penalty.
+        /// Horniness overlay fires + zero interest delta -> no penalty.
         /// </summary>
         [Fact]
-        public async Task Overlay_Fires_InterestZero_NoPenalty()
+        public async Task Overlay_Fires_ZeroInterestDelta_NoPenalty()
         {
             var instructions = LoadDeliveryInstructions();
-            // Start at interest 1 and force failure for main roll to reduce interest to 0 first,
-            // but that's complex. Instead, start at 0 directly — but interest=0 ends the game.
-            // Instead, use interest=1 with a fumble (delta -1) so interest hits 0 before penalty.
-            // Actually, we need to test the case where interest IS 0 at penalty time.
-            // The simplest: start at interest=1, force success (no negative delta), then overlay fires.
-            // After success delta interest may still be > 0.
-            // Better approach: use startingInterest=0 → game ends immediately.
-            // Let's test the conditional: start at 2 with a -2 delta to reach 0 before penalty.
-            // Actually, the GameSession applies interest delta first, THEN horniness penalty.
-            // So if interest reaches 0 from normal delta, game ends and horniness never fires.
-            // The guard in the code is: if (_interest.Current > 0) { apply penalty }
-            // So we need a scenario where the main delta leaves interest at 0 → no penalty fires.
-            // But that would end the game. The more meaningful test is: start at 0 before overlay.
-            // Since we can't have interest=0 mid-turn (game ends), we test via
-            // HorninessInterestPenalty == 0 when overlay fires but the code guards on Current > 0.
-            // The guard fires AFTER the main interest delta. If game ended (interest=0),
-            // the horniness check won't even run.
-            // Instead, just verify: if interest is already 0, no penalty is applied.
-            // We simulate this by checking the result fields: if HorninessInterestBefore = 0,
-            // penalty = 0.
-            //
-            // The cleanest: use a helper that directly tests the guard condition using
-            // a scenario where interest = 0 at penalty time. We can do this by starting
-            // at interest=1 and forcing a Catastrophe miss (-3 delta → 0) followed by
-            // horniness overlay firing. But interest=0 ends the game before overlay...
-            //
-            // Actually the penalty fires AFTER the interest delta but before game-over check
-            // in the code. Wait, let me re-check. In GameSession.cs the end-game check happens
-            // after interest.Apply(interestDelta), and then the horniness penalty fires:
-            //
-            //   _interest.Apply(interestDelta);
-            //   ...game-over check...
-            //   if (isGameOver) → _xpRecorder.RecordEndOfGameXp → break early
-            //   ...
-            //   Per-turn Horniness overlay check (later)
-            //   Horniness penalty (#743): if OverlayApplied && Current > 0
-            //
-            // So if the game ends from interest reaching 0, we return early before horniness.
-            // Therefore, the penalty-firing-when-interest=0 scenario can't happen in practice.
-            // This test just verifies the code guard by examining `HorninessInterestPenalty == 0`
-            // when `HorninessInterestBefore == 0`.
-            //
-            // The practical guard: if interest > 0 is already handled. We trust the code logic
-            // and verify via a unit test of the guard condition. We'll test the boundary by
-            // verifying that when overlay fires and before-interest is positive, penalty = floor(x/2).
-            // The "interest=0 no penalty" case is implicitly tested by the code guard.
-            // Let's just verify programmatically.
+            var session = MakeSession(
+                startingInterest: 14,
+                sessionHorniness: 15,
+                steeringSeed: OverlayFiredSeed,
+                instructions: instructions,
+                mainRoll: 1,
+                rules: new ZeroSuccessDeltaRules());
 
-            Assert.True(true, "Penalty guard (interest > 0) is enforced in GameSession.cs #743 conditional.");
+            var turn = await session.StartTurnAsync();
+            var result = await session.ResolveTurnAsync(0);
+
+            Assert.False(result.Roll.IsSuccess, "Test requires a failed main roll with zero configured failure delta.");
+            Assert.True(result.HorninessCheck.OverlayApplied,
+                "Expected horniness overlay to fire with seed=1, sessionHorniness=15");
+            Assert.Equal(0, result.BaseInterestDelta);
+            Assert.Equal(0, result.InterestDelta);
+            Assert.Equal(0, result.HorninessInterestPenalty);
+            Assert.Equal(0, result.HorninessInterestBefore);
         }
 
         /// <summary>
