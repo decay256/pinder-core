@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
@@ -87,94 +88,6 @@ namespace Pinder.LlmAdapters
             if (yamlContent == null)
                 throw new ArgumentNullException(nameof(yamlContent));
 
-            bool isMinimalYaml = !yamlContent.Contains("xp_flat_awards:") &&
-                                 !yamlContent.Contains("xp_success_base:") &&
-                                 !yamlContent.Contains("xp_risk_multipliers:") &&
-                                 !yamlContent.Contains("xp_terminal_multipliers:") &&
-                                 !yamlContent.Contains("progression_xp_thresholds:") &&
-                                 !yamlContent.Contains("progression_build_points:") &&
-                                 !yamlContent.Contains("progression_level_bonuses:") &&
-                                 !yamlContent.Contains("progression_item_slots:") &&
-                                 !yamlContent.Contains("progression_failure_pool_tiers:");
-
-            if (!string.IsNullOrWhiteSpace(yamlContent) && isMinimalYaml && !yamlContent.Contains("{{invalid yaml"))
-            {
-                yamlContent += @"
-xp_flat_awards:
-  nat20: 25
-  nat1: 10
-  failure: 2
-xp_success_base:
-  dc_low_max: 16
-  dc_low_xp: 5
-  dc_mid_max: 20
-  dc_mid_xp: 10
-  dc_high_xp: 15
-xp_risk_multipliers:
-  safe: 1.0
-  medium: 1.5
-  hard: 2.0
-  bold: 3.0
-  reckless: 10.0
-xp_terminal_multipliers:
-  date_secured: 3.0
-  unmatched: 1.0
-  ghosted: 1.0
-progression_xp_thresholds:
-  ""1"": 0
-  ""2"": 50
-  ""3"": 150
-  ""4"": 300
-  ""5"": 500
-  ""6"": 750
-  ""7"": 1100
-  ""8"": 1500
-  ""9"": 2000
-  ""10"": 2750
-  ""11"": 3500
-progression_build_points:
-  ""1"": 0
-  ""2"": 2
-  ""3"": 2
-  ""4"": 2
-  ""5"": 3
-  ""6"": 3
-  ""7"": 3
-  ""8"": 4
-  ""9"": 4
-  ""10"": 5
-  ""11"": 0
-progression_level_bonuses:
-  ""1"": 0
-  ""2"": 0
-  ""3"": 1
-  ""4"": 1
-  ""5"": 2
-  ""6"": 2
-  ""7"": 3
-  ""8"": 3
-  ""9"": 4
-  ""10"": 4
-  ""11"": 5
-progression_item_slots:
-  ""1"": 2
-  ""2"": 2
-  ""3"": 3
-  ""4"": 3
-  ""5"": 4
-  ""6"": 4
-  ""7"": 5
-  ""8"": 5
-  ""9"": 6
-  ""10"": 6
-  ""11"": 6
-progression_failure_pool_tiers:
-  intermediate_min: 4
-  advanced_min: 7
-  legendary_min: 10
-";
-            }
-
             var deserializer = new DeserializerBuilder()
                 .WithNamingConvention(UnderscoredNamingConvention.Instance)
                 .Build();
@@ -207,6 +120,23 @@ progression_failure_pool_tiers:
                 if (parsed.TryGetValue(key, out var v) && v != null)
                     return v.ToString();
                 return null;
+            }
+
+            int GetRequiredInt(string key)
+            {
+                if (!parsed.TryGetValue(key, out var value) || value == null)
+                    throw new InvalidOperationException($"game-definition.yaml is missing required key: {key}");
+                if (!int.TryParse(value.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out int result))
+                    throw new InvalidOperationException($"game-definition.yaml {key} must be an integer");
+                return result;
+            }
+
+            int GetRequiredPositiveInt(string key)
+            {
+                var result = GetRequiredInt(key);
+                if (result <= 0)
+                    throw new InvalidOperationException($"game-definition.yaml {key} must be a positive integer");
+                return result;
             }
 
             // Parse required horniness_time_modifiers
@@ -262,46 +192,32 @@ progression_failure_pool_tiers:
                     throw new InvalidOperationException("game-definition.yaml archetypes_enabled must be a boolean");
             }
 
-            // Parse optional active_trap_interest_penalty
-            double activeTrapInterestPenalty = -0.25;
-            if (parsed.TryGetValue("active_trap_interest_penalty", out var atipObj) && atipObj != null)
+            double GetRequiredTrapPenalty()
             {
+                if (!parsed.TryGetValue("active_trap_interest_penalty", out var atipObj) || atipObj == null)
+                    throw new InvalidOperationException("game-definition.yaml is missing required key: active_trap_interest_penalty");
+
                 var valStr = atipObj.ToString().Trim();
                 if (valStr.EndsWith("%"))
                 {
-                    if (double.TryParse(valStr.Substring(0, valStr.Length - 1), out double percentVal))
-                    {
-                        activeTrapInterestPenalty = percentVal / 100.0;
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException("game-definition.yaml active_trap_interest_penalty has invalid percentage format");
-                    }
+                    if (double.TryParse(valStr.Substring(0, valStr.Length - 1), NumberStyles.Float, CultureInfo.InvariantCulture, out double percentVal))
+                        return percentVal / 100.0;
+
+                    throw new InvalidOperationException("game-definition.yaml active_trap_interest_penalty has invalid percentage format");
                 }
-                else if (double.TryParse(valStr, out double floatVal))
-                {
-                    activeTrapInterestPenalty = floatVal;
-                }
-                else
-                {
-                    throw new InvalidOperationException("game-definition.yaml active_trap_interest_penalty must be a number or percentage");
-                }
+
+                if (double.TryParse(valStr, NumberStyles.Float, CultureInfo.InvariantCulture, out double floatVal))
+                    return floatVal;
+
+                throw new InvalidOperationException("game-definition.yaml active_trap_interest_penalty must be a number or percentage");
             }
 
-            int hungerForIntimacy = 0;
-            if (parsed.TryGetValue("hunger_for_intimacy", out var hfiObj) && hfiObj != null)
-            {
-                if (!int.TryParse(hfiObj.ToString(), out int hfi))
-                    throw new InvalidOperationException("game-definition.yaml hunger_for_intimacy must be an integer");
-                hungerForIntimacy = hfi;
-            }
-            int terrorOfRejection = 0;
-            if (parsed.TryGetValue("terror_of_rejection", out var torObj) && torObj != null)
-            {
-                if (!int.TryParse(torObj.ToString(), out int tor))
-                    throw new InvalidOperationException("game-definition.yaml terror_of_rejection must be an integer");
-                terrorOfRejection = tor;
-            }
+            var maxTurns = GetRequiredPositiveInt("max_turns");
+            var maxDialogueOptions = GetRequiredPositiveInt("max_dialogue_options");
+            var maxDeliveryWords = GetRequiredPositiveInt("max_delivery_words");
+            var activeTrapInterestPenalty = GetRequiredTrapPenalty();
+            var hungerForIntimacy = GetRequiredInt("hunger_for_intimacy");
+            var terrorOfRejection = GetRequiredInt("terror_of_rejection");
 
             // The 9 new blocks parsing
             parsed.TryGetValue("xp_flat_awards", out var xpFlatAwardsObj);
@@ -344,9 +260,9 @@ progression_failure_pool_tiers:
                 shadowDcBias: shadowDcBias,
                 horninessDcBias: horninessDcBias,
                 archetypesEnabled: archetypesEnabled,
-                maxTurns: parsed.TryGetValue("max_turns", out var mtObj) && int.TryParse(mtObj?.ToString(), out int mt) ? mt : 30,
-                maxDialogueOptions: parsed.TryGetValue("max_dialogue_options", out var mdoObj) && int.TryParse(mdoObj?.ToString(), out int mdo) ? mdo : 3,
-                maxDeliveryWords: parsed.TryGetValue("max_delivery_words", out var mdwObj) && int.TryParse(mdwObj?.ToString(), out int mdw) ? mdw : 80,
+                maxTurns: maxTurns,
+                maxDialogueOptions: maxDialogueOptions,
+                maxDeliveryWords: maxDeliveryWords,
                 activeTrapInterestPenalty: activeTrapInterestPenalty,
                 hungerForIntimacy: hungerForIntimacy,
                 terrorOfRejection: terrorOfRejection,

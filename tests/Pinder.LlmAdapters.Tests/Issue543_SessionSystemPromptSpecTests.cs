@@ -101,7 +101,7 @@ horniness_time_modifiers:
   afternoon: 0
   evening: 2
   overnight: 5
-";
+" + GameDefinitionYamlTestFixtures.RequiredParserBlocks;
 
         // What: AC2 — LoadFrom parses valid YAML and maps the keys correctly
         // Mutation: would catch if any key mapping was wrong
@@ -223,7 +223,7 @@ horniness_time_modifiers:
   overnight: 5
 extra_unknown_key: should be silently ignored
 another_one: also ignored
-";
+" + GameDefinitionYamlTestFixtures.RequiredParserBlocks;
             var gd = GameDefinition.LoadFrom(yaml);
             Assert.Equal("TestGame", gd.Name);
             Assert.Equal("gm", gd.GameMasterPrompt);
@@ -247,7 +247,7 @@ horniness_time_modifiers:
   afternoon: 0
   evening: 2
   overnight: 5
-";
+" + GameDefinitionYamlTestFixtures.RequiredParserBlocks;
             var gd = GameDefinition.LoadFrom(yaml);
             Assert.Contains("Line one.", gd.GameMasterPrompt);
             Assert.Contains("Line two.", gd.GameMasterPrompt);

@@ -18,6 +18,12 @@ game_master_prompt: ""GM Prompt""
 player_avatar_role_description: ""Player Description""
 datee_role_description: ""Datee Description""
 global_dc_bias: 0
+max_turns: 30
+max_dialogue_options: 3
+max_delivery_words: 80
+active_trap_interest_penalty: -0.25
+hunger_for_intimacy: 0
+terror_of_rejection: 0
 horniness_time_modifiers:
   morning: 3
   afternoon: 0
