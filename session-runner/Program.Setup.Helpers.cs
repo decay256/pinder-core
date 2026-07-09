@@ -98,15 +98,11 @@ partial class Program
         statDeliveryInstructions = null;
         if (deliveryInstructionsPath != null)
         {
-            try
-            {
-                statDeliveryInstructions = StatDeliveryInstructions.LoadFrom(File.ReadAllText(deliveryInstructionsPath));
-                Console.Error.WriteLine("Loaded delivery-instructions.yaml");
-            }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"[WARN] Failed to load delivery-instructions.yaml: {ex.Message}");
-            }
+            statDeliveryInstructions = LoadStatDeliveryInstructionsOrExit(deliveryInstructionsPath, result, Console.Error);
+            if (result.ShouldExit)
+                return;
+
+            Console.Error.WriteLine("Loaded delivery-instructions.yaml");
         }
 
         var adapterOptions = new PinderLlmAdapterOptions
@@ -136,6 +132,39 @@ partial class Program
                 ? $"PinderLlmAdapter + AnthropicTransport → {anthropicModel}"
                 : $"PinderLlmAdapter + AnthropicTransport → {anthropicModel} (overlay: unrouted)";
         }
+    }
+
+    internal static GameDefinition? LoadGameDefinitionOrExit(string path, GameSetupResult result, TextWriter diagnostics)
+    {
+        try
+        {
+            return GameDefinition.LoadFrom(File.ReadAllText(path));
+        }
+        catch (Exception ex)
+        {
+            MarkConfigLoadFailure(result, "game-definition.yaml", path, ex, diagnostics);
+            return null;
+        }
+    }
+
+    internal static StatDeliveryInstructions? LoadStatDeliveryInstructionsOrExit(string path, GameSetupResult result, TextWriter diagnostics)
+    {
+        try
+        {
+            return StatDeliveryInstructions.LoadFrom(File.ReadAllText(path));
+        }
+        catch (Exception ex)
+        {
+            MarkConfigLoadFailure(result, "delivery-instructions.yaml", path, ex, diagnostics);
+            return null;
+        }
+    }
+
+    private static void MarkConfigLoadFailure(GameSetupResult result, string configName, string path, Exception ex, TextWriter diagnostics)
+    {
+        result.ShouldExit = true;
+        result.ExitCode = 1;
+        diagnostics.WriteLine($"[ERROR] Failed to load {configName} at {path}: {ex.GetType().Name}: {ex.Message}");
     }
 
     private static async Task GenerateStakesAndFreeze(GameSetupResult result)

@@ -91,14 +91,9 @@ partial class Program
         result.GameDef = null;
         if (gameDefPath != null)
         {
-            try
-            {
-                result.GameDef = GameDefinition.LoadFrom(File.ReadAllText(gameDefPath));
-            }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"[WARN] Failed to load game-definition.yaml: {ex.Message}");
-            }
+            result.GameDef = LoadGameDefinitionOrExit(gameDefPath, result, Console.Error);
+            if (result.ShouldExit)
+                return result;
         }
 
         if (result.IsResimulation)
@@ -203,6 +198,8 @@ partial class Program
 
         StatDeliveryInstructions? statDeliveryInstructions;
         ConfigureLlmAdapterAndEngine(result, args, ref engineLabel, out statDeliveryInstructions);
+        if (result.ShouldExit)
+            return result;
 
         result.DebugFile = null;
         if (isDebug && result.PlaytestDir != null)
