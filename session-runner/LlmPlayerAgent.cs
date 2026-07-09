@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
+using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
@@ -26,12 +27,7 @@ namespace Pinder.SessionRunner
         /// Tool definition for structured output via Anthropic tool_use.
         /// Loads the JSON schema from a static resource file rather than inlining a parsed JSON string.
         /// </summary>
-        private static readonly ToolDefinition SubmitChoiceTool = new ToolDefinition
-        {
-            Name = "submit_choice",
-            Description = "Submit your choice of dialogue option with a strategic explanation.",
-            InputSchema = LoadToolSchema()
-        };
+        private static readonly ToolDefinition SubmitChoiceTool = LoadSubmitChoiceTool();
 
         private readonly AnthropicClient _client;
         private readonly ScoringPlayerAgent _fallback;
@@ -39,6 +35,7 @@ namespace Pinder.SessionRunner
         private readonly string _playerName;
         private readonly string _dateeName;
         private readonly IRuleResolver? _ruleResolver;
+        private readonly SimAgentPromptAssets _promptAssets;
         private bool _disposed;
         private readonly List<CallSummaryStat> _tokenStats = new List<CallSummaryStat>();
 
@@ -71,7 +68,8 @@ namespace Pinder.SessionRunner
             ScoringPlayerAgent fallback,
             string playerName = "the player",
             string dateeName = "the datee",
-            IRuleResolver? ruleResolver = null)
+            IRuleResolver? ruleResolver = null,
+            PromptCatalog? promptCatalog = null)
         {
             if (options == null) throw new ArgumentNullException(nameof(options));
             _fallback = fallback ?? throw new ArgumentNullException(nameof(fallback));
@@ -80,40 +78,51 @@ namespace Pinder.SessionRunner
             _model = options.Model;
             _client = new AnthropicClient(options.ApiKey);
             _ruleResolver = ruleResolver ?? DefaultRuleResolver.Instance;
+            _promptAssets = SimAgentPromptAssets.Load(promptCatalog ?? LoadPromptCatalog());
         }
 
-        private static JObject LoadToolSchema()
+        private static ToolDefinition LoadSubmitChoiceTool()
         {
+            string relativePath = Path.Combine("data", "schemas", "submit_choice_tool.json");
+            string? path = DataFileLocator.FindDataFile(AppContext.BaseDirectory, relativePath);
+            if (path == null || !File.Exists(path))
+            {
+                throw new FileNotFoundException($"Required player-agent tool schema asset was not found: {relativePath}");
+            }
+
+            JObject root;
             try
             {
-                string? path = DataFileLocator.FindDataFile(AppContext.BaseDirectory, Path.Combine("data", "schemas", "submit_choice_tool.json"));
-                if (path != null && File.Exists(path))
-                {
-                    return JObject.Parse(File.ReadAllText(path));
-                }
+                root = JObject.Parse(File.ReadAllText(path));
             }
-            catch
+            catch (Exception ex) when (ex is IOException || ex is Newtonsoft.Json.JsonException)
             {
-                // Fallback gracefully
+                throw new InvalidDataException($"Could not load player-agent tool schema asset '{path}'.", ex);
             }
 
-            return JObject.Parse(@"{
-                ""type"": ""object"",
-                ""properties"": {
-                    ""choice"": {
-                        ""type"": ""integer"",
-                        ""description"": ""0-based index of the chosen option (0=A, 1=B, 2=C, 3=D)""
-                    },
-                    ""explanation"": {
-                        ""type"": ""string"",
-                        ""description"": ""1-2 sentence strategic explanation for this pick. Reference shadow levels, success %, combos, or momentum as relevant.""
-                    }
-                },
-                ""required"": [""choice"", ""explanation""]
-            }");
+            var inputSchema = root["input_schema"] as JObject
+                ?? throw new InvalidDataException($"{path}: required object property 'input_schema' is missing.");
+
+            return new ToolDefinition
+            {
+                Name = RequiredToolString(root, "name", path),
+                Description = RequiredToolString(root, "description", path),
+                InputSchema = inputSchema
+            };
         }
 
-        private static (string SystemPrompt, string UserTemplate) LoadTemplates()
+        private static string RequiredToolString(JObject root, string propertyName, string path)
+        {
+            string? value = root.Value<string>(propertyName);
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                throw new InvalidDataException($"{path}: required string property '{propertyName}' is missing.");
+            }
+
+            return value!;
+        }
+
+        private static PromptCatalog LoadPromptCatalog()
         {
             string? repoRoot = DataFileLocator.FindRepoRoot(AppContext.BaseDirectory);
             string promptsDir = repoRoot != null 
@@ -125,11 +134,7 @@ namespace Pinder.SessionRunner
                 throw new DirectoryNotFoundException($"Required prompt directory was not found: {promptsDir}");
             }
 
-            var catalog = PromptCatalog.LoadFromDirectory(promptsDir);
-            var entry = catalog.TryGet("sim_agent")
-                ?? throw new KeyNotFoundException("Prompt catalog does not contain required template 'sim_agent'.");
-
-            return (entry.SystemPrompt ?? "", entry.UserTemplate ?? "");
+            return PromptCatalog.LoadFromDirectory(promptsDir);
         }
 
         private static (int T1, int T2, int T3) ResolveShadowThresholds(IRuleResolver? resolver)
@@ -167,32 +172,34 @@ namespace Pinder.SessionRunner
             return (t1, t2, t3);
         }
 
-        private static string ResolveSuccessRules(IRuleResolver? resolver)
+        private string ResolveSuccessRules(IRuleResolver? resolver)
         {
-            if (resolver == null) return "beat by 1-4 → +1 interest, 5-9 → +2, 10+ → +3. Nat 20 → +4";
-
-            int? tier1 = resolver.GetSuccessInterestDelta(1, 10);
-            int? tier2 = resolver.GetSuccessInterestDelta(5, 10);
-            int? tier3 = resolver.GetSuccessInterestDelta(10, 10);
-            int? nat20 = resolver.GetSuccessInterestDelta(1, 20);
+            int? tier1 = resolver?.GetSuccessInterestDelta(1, 10);
+            int? tier2 = resolver?.GetSuccessInterestDelta(5, 10);
+            int? tier3 = resolver?.GetSuccessInterestDelta(10, 10);
+            int? nat20 = resolver?.GetSuccessInterestDelta(1, 20);
 
             string t1Str = tier1.HasValue ? $"+{tier1}" : "+1";
             string t2Str = tier2.HasValue ? $"+{tier2}" : "+2";
             string t3Str = tier3.HasValue ? $"+{tier3}" : "+3";
             string natStr = nat20.HasValue ? $"+{nat20}" : "+4";
 
-            return $"beat by 1-4 → {t1Str} interest, 5-9 → {t2Str}, 10+ → {t3Str}. Nat 20 → {natStr}";
+            return _promptAssets.Render("sim_agent_success_rules", new Dictionary<string, string>
+            {
+                { "tier1", t1Str },
+                { "tier2", t2Str },
+                { "tier3", t3Str },
+                { "nat20", natStr }
+            });
         }
 
-        private static string ResolveFailureRules(IRuleResolver? resolver)
+        private string ResolveFailureRules(IRuleResolver? resolver)
         {
-            if (resolver == null) return "miss by 1-2 → Fumble (−1), 3-5 → Misfire (−1), 6-9 → Trope Trap (−2 + trap), 10+ → Catastrophe (−3 + trap). Nat 1 → Legendary Fail (−4)";
-
-            int? fumble = resolver.GetFailureInterestDelta(1, 10);
-            int? misfire = resolver.GetFailureInterestDelta(3, 10);
-            int? trap = resolver.GetFailureInterestDelta(6, 10);
-            int? catastrophe = resolver.GetFailureInterestDelta(10, 10);
-            int? legendary = resolver.GetFailureInterestDelta(1, 1);
+            int? fumble = resolver?.GetFailureInterestDelta(1, 10);
+            int? misfire = resolver?.GetFailureInterestDelta(3, 10);
+            int? trap = resolver?.GetFailureInterestDelta(6, 10);
+            int? catastrophe = resolver?.GetFailureInterestDelta(10, 10);
+            int? legendary = resolver?.GetFailureInterestDelta(1, 1);
 
             string fStr = fumble.HasValue ? $"{fumble}" : "−1";
             string mStr = misfire.HasValue ? $"{misfire}" : "−1";
@@ -200,23 +207,32 @@ namespace Pinder.SessionRunner
             string cStr = catastrophe.HasValue ? $"{catastrophe}" : "−3";
             string lStr = legendary.HasValue ? $"{legendary}" : "−4";
 
-            return $"miss by 1-2 → Fumble ({fStr}), 3-5 → Misfire ({mStr}), 6-9 → Trope Trap ({tStr} + trap), 10+ → Catastrophe ({cStr} + trap). Nat 1 → Legendary Fail ({lStr})";
+            return _promptAssets.Render("sim_agent_failure_rules", new Dictionary<string, string>
+            {
+                { "fumble", fStr },
+                { "misfire", mStr },
+                { "trap", tStr },
+                { "catastrophe", cStr },
+                { "legendary", lStr }
+            });
         }
 
-        private static string ResolveMomentumRules(IRuleResolver? resolver)
+        private string ResolveMomentumRules(IRuleResolver? resolver)
         {
-            if (resolver == null) return "3+ wins → +2 to next roll. 5+ wins → +3.";
-
             var activeRules = new List<string>();
             for (int streak = 1; streak <= 10; streak++)
             {
-                int? bonus = resolver.GetMomentumBonus(streak);
+                int? bonus = resolver?.GetMomentumBonus(streak);
                 if (bonus.HasValue && bonus.Value > 0)
                 {
-                    int? prevBonus = streak > 1 ? resolver.GetMomentumBonus(streak - 1) : null;
+                    int? prevBonus = streak > 1 ? resolver?.GetMomentumBonus(streak - 1) : null;
                     if (prevBonus != bonus.Value)
                     {
-                        activeRules.Add($"{streak}+ wins → +{bonus.Value} to next roll");
+                        activeRules.Add(_promptAssets.Render("sim_agent_momentum_rules_threshold", new Dictionary<string, string>
+                        {
+                            { "streak", streak.ToString() },
+                            { "bonus", bonus.Value.ToString() }
+                        }));
                     }
                 }
             }
@@ -225,7 +241,19 @@ namespace Pinder.SessionRunner
             {
                 return string.Join(". ", activeRules) + ".";
             }
-            return "3+ wins → +2 to next roll. 5+ wins → +3.";
+            return string.Join(". ", new[]
+            {
+                _promptAssets.Render("sim_agent_momentum_rules_threshold", new Dictionary<string, string>
+                {
+                    { "streak", "3" },
+                    { "bonus", "2" }
+                }),
+                _promptAssets.Render("sim_agent_momentum_rules_threshold", new Dictionary<string, string>
+                {
+                    { "streak", "5" },
+                    { "bonus", "3" }
+                })
+            }) + ".";
         }
 
         /// <summary>
@@ -257,7 +285,7 @@ namespace Pinder.SessionRunner
                     System = new[] { new ContentBlock { Type = "text", Text = systemMsg } },
                     Messages = new[] { new Message { Role = "user", Content = userMessage } },
                     Tools = new[] { SubmitChoiceTool },
-                    ToolChoice = new ToolChoiceOption { Type = "tool", Name = "submit_choice" }
+                    ToolChoice = new ToolChoiceOption { Type = "tool", Name = SubmitChoiceTool.Name }
                 };
 
                 var sendMessagesAsync = SendMessagesAsyncOverride;
@@ -328,9 +356,8 @@ namespace Pinder.SessionRunner
 
         private string BuildSystemMessage(PlayerAgentContext context)
         {
-            var (systemTemplate, _) = LoadTemplates();
             var dict = BuildSubstitutionDict(null, context, null);
-            return PromptCatalog.Substitute(systemTemplate, dict);
+            return PromptCatalog.Substitute(_promptAssets.SystemPrompt, dict);
         }
 
         /// <summary>
@@ -338,9 +365,8 @@ namespace Pinder.SessionRunner
         /// </summary>
         internal string BuildPrompt(TurnStart turn, PlayerAgentContext context, OptionScore[] scores = null)
         {
-            var (_, userTemplate) = LoadTemplates();
             var dict = BuildSubstitutionDict(turn, context, scores);
-            return PromptCatalog.Substitute(userTemplate, dict);
+            return PromptCatalog.Substitute(_promptAssets.UserTemplate, dict);
         }
 
         private Dictionary<string, string> BuildSubstitutionDict(TurnStart? turn, PlayerAgentContext context, OptionScore[]? scores)
@@ -357,27 +383,37 @@ namespace Pinder.SessionRunner
             string momentumNoteValue = GetMomentumNote(context.MomentumStreak);
             string activeTrapsValue = context.ActiveTrapNames.Length > 0
                 ? string.Join(", ", context.ActiveTrapNames)
-                : "none";
+                : _promptAssets.Render("sim_agent_active_traps_none");
 
             string personalityBlockValue = "";
             if (!string.IsNullOrEmpty(context.PlayerSystemPrompt))
             {
-                personalityBlockValue = "\n\nCharacter personality (for voice, not strategy):\n" + context.PlayerSystemPrompt;
+                personalityBlockValue = _promptAssets.Render("sim_agent_personality_block", new Dictionary<string, string>
+                {
+                    { "playerSystemPrompt", context.PlayerSystemPrompt }
+                });
             }
 
-            var recentHistorySb = new System.Text.StringBuilder();
+            var recentHistoryRows = new List<string>();
             if (context.RecentHistory != null && context.RecentHistory.Count > 0)
             {
-                recentHistorySb.AppendLine("## Recent Conversation");
                 int start = Math.Max(0, context.RecentHistory.Count - 6);
                 for (int i = start; i < context.RecentHistory.Count; i++)
                 {
                     var entry = context.RecentHistory[i];
-                    recentHistorySb.AppendLine($"{entry.Sender}: \"{entry.Text}\"");
+                    recentHistoryRows.Add(_promptAssets.Render("sim_agent_recent_history_row", new Dictionary<string, string>
+                    {
+                        { "sender", entry.Sender },
+                        { "text", entry.Text }
+                    }));
                 }
-                recentHistorySb.AppendLine();
             }
-            string recentHistoryBlockValue = recentHistorySb.ToString();
+            string recentHistoryBlockValue = recentHistoryRows.Count > 0
+                ? _promptAssets.Render("sim_agent_recent_history_block", new Dictionary<string, string>
+                {
+                    { "recentHistoryRows", string.Join(Environment.NewLine, recentHistoryRows) }
+                }) + Environment.NewLine + Environment.NewLine
+                : "";
 
             var shadowStatusSb = new System.Text.StringBuilder();
             if (context.ShadowValues != null)
@@ -387,17 +423,23 @@ namespace Pinder.SessionRunner
                     if (context.ShadowValues.TryGetValue(s, out int value))
                     {
                         string warning = "";
-                        if (value >= t3) warning = $" ⚠️ T3 CRITICAL — may override choices!";
-                        else if (value >= t2) warning = $" ⚠️ T2 — -2 penalty to paired stat rolls";
-                        else if (value >= t1) warning = $" ⚠️ T1 — taints delivery";
-                        else if (value >= 4) warning = " (approaching T1)";
-                        shadowStatusSb.AppendLine($"- {s}: {value}/18{warning}");
+                        if (value >= t3) warning = _promptAssets.Render("sim_agent_shadow_warning_t3");
+                        else if (value >= t2) warning = _promptAssets.Render("sim_agent_shadow_warning_t2");
+                        else if (value >= t1) warning = _promptAssets.Render("sim_agent_shadow_warning_t1");
+                        else if (value >= 4) warning = _promptAssets.Render("sim_agent_shadow_warning_approaching_t1");
+                        shadowStatusSb.AppendLine(_promptAssets.Render("sim_agent_shadow_status_row", new Dictionary<string, string>
+                        {
+                            { "shadow", s.ToString() },
+                            { "value", value.ToString(CultureInfo.InvariantCulture) },
+                            { "t3", t3.ToString(CultureInfo.InvariantCulture) },
+                            { "warning", warning }
+                        }));
                     }
                 }
             }
             else
             {
-                shadowStatusSb.AppendLine("- Shadow tracking unavailable");
+                shadowStatusSb.AppendLine(_promptAssets.Render("sim_agent_shadow_status_unavailable"));
             }
             string shadowStatusBlockValue = shadowStatusSb.ToString();
 
@@ -434,15 +476,38 @@ namespace Pinder.SessionRunner
                     string riskTier = GetRiskTier(need);
                     string icons = FormatBonusIcons(opt);
 
-                    optionsSb.AppendLine($"{letter}) [{opt.Stat.ToString().ToUpperInvariant()} +{modifier}] DC {dc} | Need {need}+ on d20 | {pct}% success | {riskTier}{icons}");
-                    optionsSb.AppendLine($"   Text: \"{opt.IntendedText}\"");
+                    optionsSb.AppendLine(_promptAssets.Render("sim_agent_option_summary_row", new Dictionary<string, string>
+                    {
+                        { "letter", letter.ToString() },
+                        { "statName", opt.Stat.ToString().ToUpperInvariant() },
+                        { "modifier", modifier.ToString(CultureInfo.InvariantCulture) },
+                        { "dc", dc.ToString(CultureInfo.InvariantCulture) },
+                        { "need", need.ToString(CultureInfo.InvariantCulture) },
+                        { "successPct", pct.ToString(CultureInfo.InvariantCulture) },
+                        { "riskTier", riskTier },
+                        { "icons", icons }
+                    }));
+                    optionsSb.AppendLine(_promptAssets.Render("sim_agent_option_text_row", new Dictionary<string, string>
+                    {
+                        { "intendedText", opt.IntendedText }
+                    }));
 
                     string shadowImpact = GetShadowImpact(opt.Stat, context, t1, t2, t3);
                     if (!string.IsNullOrEmpty(shadowImpact))
-                        optionsSb.AppendLine($"   Shadow: {shadowImpact}");
+                    {
+                        optionsSb.AppendLine(_promptAssets.Render("sim_agent_option_shadow_row", new Dictionary<string, string>
+                        {
+                            { "shadowImpact", shadowImpact }
+                        }));
+                    }
 
                     if (scores != null && i < scores.Length)
-                        optionsSb.AppendLine($"   EV: {scores[i].ExpectedInterestGain:F2}");
+                    {
+                        optionsSb.AppendLine(_promptAssets.Render("sim_agent_option_ev_row", new Dictionary<string, string>
+                        {
+                            { "expectedInterestGain", scores[i].ExpectedInterestGain.ToString("F2", CultureInfo.InvariantCulture) }
+                        }));
+                    }
 
                     letter = (char)(letter + 1);
                 }
@@ -476,7 +541,7 @@ namespace Pinder.SessionRunner
         /// <summary>
         /// Returns a shadow impact description for the given stat choice.
         /// </summary>
-        private static string GetShadowImpact(StatType stat, PlayerAgentContext context, int t1, int t2, int t3)
+        private string GetShadowImpact(StatType stat, PlayerAgentContext context, int t1, int t2, int t3)
         {
             if (context.ShadowValues == null) return "";
 
@@ -486,20 +551,41 @@ namespace Pinder.SessionRunner
             if (context.ShadowValues.TryGetValue(paired, out int currentVal))
             {
                 if (currentVal >= t3 - 2 && currentVal < t3)
-                    parts.Add($"DANGER: {paired} at {currentVal}, may push to T3 (≥{t3})!");
+                    parts.Add(_promptAssets.Render("sim_agent_shadow_impact_danger", new Dictionary<string, string>
+                    {
+                        { "pairedShadow", paired.ToString() },
+                        { "currentValue", currentVal.ToString(CultureInfo.InvariantCulture) },
+                        { "t3", t3.ToString(CultureInfo.InvariantCulture) }
+                    }));
                 else if (currentVal >= t2 - 2 && currentVal < t2)
-                    parts.Add($"RISK: {paired} at {currentVal}, may push to T2 (≥{t2})");
+                    parts.Add(_promptAssets.Render("sim_agent_shadow_impact_risk_t2", new Dictionary<string, string>
+                    {
+                        { "pairedShadow", paired.ToString() },
+                        { "currentValue", currentVal.ToString(CultureInfo.InvariantCulture) },
+                        { "t2", t2.ToString(CultureInfo.InvariantCulture) }
+                    }));
                 else if (currentVal >= t1 - 2 && currentVal < t1)
-                    parts.Add($"RISK: {paired} at {currentVal}, using {stat} may push to T1 (≥{t1})");
+                    parts.Add(_promptAssets.Render("sim_agent_shadow_impact_risk_t1", new Dictionary<string, string>
+                    {
+                        { "pairedShadow", paired.ToString() },
+                        { "currentValue", currentVal.ToString(CultureInfo.InvariantCulture) },
+                        { "statName", stat.ToString() },
+                        { "t1", t1.ToString(CultureInfo.InvariantCulture) }
+                    }));
             }
 
             if (stat == StatType.Honesty)
             {
                 if (context.ShadowValues.TryGetValue(ShadowStatType.Denial, out int denial) && denial > 0)
-                    parts.Add($"BENEFIT: Honesty can reduce Denial (currently {denial})");
+                    parts.Add(_promptAssets.Render("sim_agent_shadow_impact_honesty_benefit", new Dictionary<string, string>
+                    {
+                        { "denial", denial.ToString(CultureInfo.InvariantCulture) }
+                    }));
             }
 
-            return parts.Count > 0 ? string.Join(" | ", parts) : "";
+            return parts.Count > 0
+                ? string.Join(_promptAssets.Render("sim_agent_shadow_impact_separator"), parts)
+                : "";
         }
 
         private static ShadowStatType GetPairedShadow(StatType stat)
@@ -593,44 +679,145 @@ namespace Pinder.SessionRunner
             return new PlayerDecision(optionIndexOverride ?? scoringDecision.OptionIndex, reasoning, scoringDecision.Scores);
         }
 
-        private static string GetModifierNote(InterestState state)
+        private string GetModifierNote(InterestState state)
         {
             switch (state)
             {
                 case InterestState.VeryIntoIt:
                 case InterestState.AlmostThere:
-                    return " — grants advantage";
+                    return _promptAssets.Render("sim_agent_modifier_advantage");
                 case InterestState.Bored:
-                    return " — grants disadvantage";
+                    return _promptAssets.Render("sim_agent_modifier_disadvantage");
                 default:
                     return "";
             }
         }
 
-        private static string GetMomentumNote(int streak)
+        private string GetMomentumNote(int streak)
         {
-            if (streak >= 5) return " (+3 to next roll)";
-            if (streak >= 3) return " (+2 to next roll)";
+            if (streak >= 5) return _promptAssets.Render("sim_agent_momentum_note_plus3");
+            if (streak >= 3) return _promptAssets.Render("sim_agent_momentum_note_plus2");
             return "";
         }
 
-        private static string GetRiskTier(int need)
+        private string GetRiskTier(int need)
         {
-            if (need <= 5) return "Safe";
-            if (need <= 10) return "Medium";
-            if (need <= 15) return "Hard";
-            return "Bold";
+            if (need <= 5) return _promptAssets.Render("sim_agent_risk_tier_safe");
+            if (need <= 10) return _promptAssets.Render("sim_agent_risk_tier_medium");
+            if (need <= 15) return _promptAssets.Render("sim_agent_risk_tier_hard");
+            return _promptAssets.Render("sim_agent_risk_tier_bold");
         }
 
-        private static string FormatBonusIcons(DialogueOption opt)
+        private string FormatBonusIcons(DialogueOption opt)
         {
             var icons = new List<string>();
-            if (opt.CallbackTurnNumber != null) icons.Add("🔗");
-            if (opt.HasTellBonus) icons.Add("📖");
-            if (opt.ComboName != null) icons.Add($"⭐ combo: {opt.ComboName}");
-            if (opt.HasWeaknessWindow) icons.Add("🔓");
+            if (opt.CallbackTurnNumber != null) icons.Add(_promptAssets.Render("sim_agent_icon_callback"));
+            if (opt.HasTellBonus) icons.Add(_promptAssets.Render("sim_agent_icon_tell"));
+            if (opt.ComboName != null) icons.Add(_promptAssets.Render("sim_agent_icon_combo", new Dictionary<string, string>
+            {
+                { "comboName", opt.ComboName }
+            }));
+            if (opt.HasWeaknessWindow) icons.Add(_promptAssets.Render("sim_agent_icon_weakness"));
 
             return icons.Count > 0 ? " " + string.Join(" ", icons) : "";
+        }
+
+        private sealed class SimAgentPromptAssets
+        {
+            private static readonly string[] RequiredUserTemplateKeys =
+            {
+                "sim_agent_personality_block",
+                "sim_agent_recent_history_block",
+                "sim_agent_recent_history_row",
+                "sim_agent_modifier_disadvantage",
+                "sim_agent_modifier_advantage",
+                "sim_agent_momentum_note_plus2",
+                "sim_agent_momentum_note_plus3",
+                "sim_agent_shadow_status_row",
+                "sim_agent_shadow_status_unavailable",
+                "sim_agent_shadow_warning_t3",
+                "sim_agent_shadow_warning_t2",
+                "sim_agent_shadow_warning_t1",
+                "sim_agent_shadow_warning_approaching_t1",
+                "sim_agent_active_traps_none",
+                "sim_agent_option_summary_row",
+                "sim_agent_option_text_row",
+                "sim_agent_option_shadow_row",
+                "sim_agent_option_ev_row",
+                "sim_agent_shadow_impact_danger",
+                "sim_agent_shadow_impact_risk_t2",
+                "sim_agent_shadow_impact_risk_t1",
+                "sim_agent_shadow_impact_honesty_benefit",
+                "sim_agent_shadow_impact_separator",
+                "sim_agent_success_rules",
+                "sim_agent_failure_rules",
+                "sim_agent_momentum_rules_threshold",
+                "sim_agent_risk_tier_safe",
+                "sim_agent_risk_tier_medium",
+                "sim_agent_risk_tier_hard",
+                "sim_agent_risk_tier_bold",
+                "sim_agent_icon_callback",
+                "sim_agent_icon_tell",
+                "sim_agent_icon_combo",
+                "sim_agent_icon_weakness"
+            };
+
+            private readonly Dictionary<string, string> _userTemplates;
+
+            private SimAgentPromptAssets(string systemPrompt, string userTemplate, Dictionary<string, string> userTemplates)
+            {
+                SystemPrompt = systemPrompt;
+                UserTemplate = userTemplate;
+                _userTemplates = userTemplates;
+            }
+
+            public string SystemPrompt { get; }
+            public string UserTemplate { get; }
+
+            public static SimAgentPromptAssets Load(PromptCatalog catalog)
+            {
+                if (catalog == null) throw new ArgumentNullException(nameof(catalog));
+
+                var root = catalog.Get("sim_agent");
+                if (string.IsNullOrWhiteSpace(root.SystemPrompt))
+                {
+                    throw new InvalidOperationException("prompt-catalog: key 'sim_agent' has no system_prompt. Check data/prompts/sim_agent.yaml.");
+                }
+
+                if (string.IsNullOrWhiteSpace(root.UserTemplate))
+                {
+                    throw new InvalidOperationException("prompt-catalog: key 'sim_agent' has no user_template. Check data/prompts/sim_agent.yaml.");
+                }
+
+                var userTemplates = new Dictionary<string, string>(StringComparer.Ordinal);
+                foreach (string key in RequiredUserTemplateKeys)
+                {
+                    var entry = catalog.Get(key);
+                    if (string.IsNullOrWhiteSpace(entry.UserTemplate))
+                    {
+                        throw new InvalidOperationException($"prompt-catalog: key '{key}' has no user_template. Check data/prompts/sim_agent.yaml.");
+                    }
+
+                    userTemplates[key] = entry.UserTemplate!;
+                }
+
+                return new SimAgentPromptAssets(root.SystemPrompt!, root.UserTemplate!, userTemplates);
+            }
+
+            public string Render(string key)
+            {
+                return Render(key, new Dictionary<string, string>());
+            }
+
+            public string Render(string key, IReadOnlyDictionary<string, string> values)
+            {
+                if (!_userTemplates.TryGetValue(key, out string template))
+                {
+                    throw new KeyNotFoundException($"prompt-catalog: missing sim agent prompt fragment '{key}'");
+                }
+
+                return PromptCatalog.Substitute(template, values);
+            }
         }
     }
 }
