@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
 
 namespace Pinder.Core.Conversation
 {
@@ -31,31 +30,28 @@ namespace Pinder.Core.Conversation
 
         /// <summary>
         /// #905: Probability (0.0..1.0) that the datee will ghost on this turn.
-        /// Derived from interest state: 0.25 when Bored, 0.0 otherwise.
-        /// Exposed on the wire so the frontend can surface ghost-risk UI without
-        /// needing to know the interest-threshold thresholds itself.
+        /// Derived from interest state: 0.25 when Bored, 0.0 otherwise. Hosts can
+        /// surface this value without duplicating interest thresholds.
         /// </summary>
-        [JsonPropertyName("ghost_probability_per_turn")]
         public double GhostProbabilityPerTurn { get; }
 
         /// <summary>
-        /// #788: snapshot of the engine-owned datee LLM conversation
-        /// history at the time the snapshot was taken. Each entry's role is
-        /// <c>"user"</c> or <c>"assistant"</c>. Always non-null — empty list
-        /// when no datee calls have resolved yet.
+        /// #788: snapshot of the engine-owned datee LLM conversation history at
+        /// the time the snapshot was taken. Each entry's role is <c>"user"</c>
+        /// or <c>"assistant"</c>. Always non-null: empty list when no datee calls
+        /// have resolved yet.
         /// </summary>
         public IReadOnlyList<ConversationMessage> DateeHistory { get; }
 
         /// <summary>
         /// #1123: snapshot of the engine-owned avatar LLM conversation history
-        /// at the time the snapshot was taken — the symmetric sibling of
+        /// at the time the snapshot was taken: the symmetric sibling of
         /// <see cref="DateeHistory"/>. Each entry's role is <c>"user"</c> or
-        /// <c>"assistant"</c>. Always non-null — empty list when no avatar calls
+        /// <c>"assistant"</c>. Always non-null: empty list when no avatar calls
         /// have resolved yet.
         /// </summary>
         public IReadOnlyList<ConversationMessage> AvatarHistory { get; }
 
-        [JsonPropertyName("shadow_values")]
         public IReadOnlyDictionary<string, int> ShadowValues { get; }
 
         public GameStateSnapshot(

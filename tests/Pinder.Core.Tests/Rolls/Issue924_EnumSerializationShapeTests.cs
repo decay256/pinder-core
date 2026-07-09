@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
 using Xunit;
@@ -6,22 +5,14 @@ using Xunit;
 namespace Pinder.Core.Tests.Issue924
 {
     /// <summary>
-    /// Issue #924: direct <see cref="JsonSerializer.Serialize"/> of a
-    /// <see cref="RollResult"/> must emit a consistently snake_case + string-enum
-    /// shape across every enum property (no mixed int/string, no mixed casing).
-    ///
-    /// NOT a wire-DTO test — the production wire path goes through
-    /// <c>RollResultDto.From()</c> in pinder-web. This test pins the latent
-    /// direct-serialization shape so test/debug/refactor callers see a
-    /// predictable JSON.
+    /// Issue #924: <see cref="RollResult"/> must expose consistent enum values
+    /// for host-layer DTOs to project into their own wire shape.
     /// </summary>
     [Trait("Category", "Core")]
     public class Issue924_EnumSerializationShapeTests
     {
         private static RollResult MakeResult()
         {
-            // Hit-success path; tier ends up Success on success but we
-            // verify the property still serializes as a string.
             return new RollResult(
                 dieRoll: 14,
                 secondDieRoll: null,
@@ -38,8 +29,6 @@ namespace Pinder.Core.Tests.Issue924
 
         private static RollResult MakeMissResult()
         {
-            // Force a real failure tier so we pin the string form of a
-            // non-default FailureTier value.
             return new RollResult(
                 dieRoll: 2,
                 secondDieRoll: null,
@@ -55,87 +44,37 @@ namespace Pinder.Core.Tests.Issue924
         }
 
         [Fact]
-        public void Stat_serialises_as_snake_case_string_enum()
+        public void Result_preserves_attacking_stat()
         {
-            var json = JsonSerializer.Serialize(MakeResult());
-            using var doc = JsonDocument.Parse(json);
-            var root = doc.RootElement;
-
-            Assert.True(root.TryGetProperty("stat", out var stat),
-                "expected snake_case 'stat' property");
-            Assert.Equal(JsonValueKind.String, stat.ValueKind);
-            Assert.Equal("Wit", stat.GetString());
-            // The old PascalCase, int-valued shape must be gone.
-            Assert.False(root.TryGetProperty("Stat", out _),
-                "did not expect legacy PascalCase 'Stat' property");
+            Assert.Equal(StatType.Wit, MakeResult().Stat);
         }
 
         [Fact]
-        public void DefendingStat_serialises_as_snake_case_string_enum()
+        public void Result_preserves_defending_stat()
         {
-            var json = JsonSerializer.Serialize(MakeResult());
-            using var doc = JsonDocument.Parse(json);
-            var root = doc.RootElement;
-
-            Assert.True(root.TryGetProperty("defending_stat", out var ds));
-            Assert.Equal(JsonValueKind.String, ds.ValueKind);
-            Assert.Equal("Charm", ds.GetString());
+            Assert.Equal(StatType.Charm, MakeResult().DefendingStat);
         }
 
         [Fact]
-        public void Tier_serialises_as_snake_case_string_enum()
+        public void Result_preserves_failure_tier()
         {
-            var json = JsonSerializer.Serialize(MakeMissResult());
-            using var doc = JsonDocument.Parse(json);
-            var root = doc.RootElement;
-
-            Assert.True(root.TryGetProperty("tier", out var tier),
-                "expected snake_case 'tier' property");
-            Assert.Equal(JsonValueKind.String, tier.ValueKind);
-            Assert.Equal("Catastrophe", tier.GetString());
-            Assert.False(root.TryGetProperty("Tier", out _),
-                "did not expect legacy PascalCase 'Tier' property");
+            Assert.Equal(FailureTier.Catastrophe, MakeMissResult().Tier);
         }
 
         [Fact]
-        public void RiskTier_serialises_as_snake_case_string_enum()
+        public void Result_computes_risk_tier_from_need()
         {
-            var json = JsonSerializer.Serialize(MakeMissResult());
-            using var doc = JsonDocument.Parse(json);
-            var root = doc.RootElement;
-
-            Assert.True(root.TryGetProperty("risk_tier", out var rt),
-                "expected snake_case 'risk_tier' property");
-            Assert.Equal(JsonValueKind.String, rt.ValueKind);
-            // dc=25, statMod=0, levelBonus=0 → need=25 → Reckless.
-            Assert.Equal("Reckless", rt.GetString());
-            Assert.False(root.TryGetProperty("RiskTier", out _),
-                "did not expect legacy PascalCase 'RiskTier' property");
+            Assert.Equal(RiskTier.Reckless, MakeMissResult().RiskTier);
         }
 
         [Fact]
-        public void All_four_enum_props_share_one_consistent_shape()
+        public void ComputeRiskTier_thresholds_are_stable()
         {
-            // Pin field-by-field that every enum property on RollResult uses
-            // the same snake_case + string-enum convention. This is the
-            // regression guard against the #924 mixed-shape footgun.
-            var json = JsonSerializer.Serialize(MakeMissResult());
-            using var doc = JsonDocument.Parse(json);
-            var root = doc.RootElement;
-
-            foreach (var name in new[] { "stat", "defending_stat", "tier", "risk_tier" })
-            {
-                Assert.True(root.TryGetProperty(name, out var prop),
-                    $"missing snake_case property '{name}'");
-                Assert.Equal(JsonValueKind.String, prop.ValueKind);
-            }
-
-            // And the legacy PascalCase forms must all be absent.
-            foreach (var legacy in new[] { "Stat", "DefendingStat", "Tier", "RiskTier" })
-            {
-                Assert.False(root.TryGetProperty(legacy, out _),
-                    $"unexpected legacy PascalCase property '{legacy}'");
-            }
+            Assert.Equal(RiskTier.Safe, RollResult.ComputeRiskTier(dc: 7, statModifier: 0, levelBonus: 0));
+            Assert.Equal(RiskTier.Medium, RollResult.ComputeRiskTier(dc: 8, statModifier: 0, levelBonus: 0));
+            Assert.Equal(RiskTier.Hard, RollResult.ComputeRiskTier(dc: 12, statModifier: 0, levelBonus: 0));
+            Assert.Equal(RiskTier.Bold, RollResult.ComputeRiskTier(dc: 16, statModifier: 0, levelBonus: 0));
+            Assert.Equal(RiskTier.Reckless, RollResult.ComputeRiskTier(dc: 20, statModifier: 0, levelBonus: 0));
         }
     }
 }

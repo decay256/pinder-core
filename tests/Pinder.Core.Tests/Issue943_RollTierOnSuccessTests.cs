@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Text.Json;
 using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
 using Pinder.Core.Traps;
@@ -42,15 +41,12 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public void Serialization_EngineResolvedSuccessfulRoll_EmitsJsonTier()
+        public void EngineResolvedSuccessfulRoll_ExposesSuccessTierForHostDtos()
         {
             var result = ResolveFixedDc(roll: 15, dc: 10);
 
-            string json = JsonSerializer.Serialize(result);
-
-            using var document = JsonDocument.Parse(json);
-            string? tier = document.RootElement.GetProperty("tier").GetString();
-            Assert.Equal(nameof(FailureTier.Success), tier);
+            Assert.Equal(FailureTier.Success, result.Tier);
+            Assert.Equal(nameof(FailureTier.Success), result.Tier.ToString());
         }
 
         private static RollResult ResolveFixedDc(int roll, int dc)
