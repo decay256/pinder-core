@@ -32,6 +32,8 @@ namespace Pinder.Rules.Tests
             "game_master_prompt",
             "player_avatar_role_description",
             "datee_role_description",
+            "horniness_prompt",
+            "horniness_question_prompt",
             "improvement_prompt",
             "global_dc_bias",
             "horniness_time_modifiers",

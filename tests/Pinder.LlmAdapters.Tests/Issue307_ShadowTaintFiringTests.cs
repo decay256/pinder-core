@@ -31,7 +31,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
                 MakeDialogueContext(shadows));
 
-            Assert.Contains("Shadow state:", result);
+            Assert.Contains("SHADOW STATE", result);
             Assert.Contains("Madness", result);
         }
 
@@ -49,7 +49,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
                 MakeDialogueContext(shadows));
 
-            Assert.DoesNotContain("Shadow state:", result);
+            Assert.DoesNotContain("SHADOW STATE", result);
         }
 
         // ============== Edge: Boundary value Madness=5 → no taint (> 5 needed) ==============
@@ -66,7 +66,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
                 MakeDialogueContext(shadows));
 
-            Assert.DoesNotContain("Shadow state:", result);
+            Assert.DoesNotContain("SHADOW STATE", result);
         }
 
         // ============== Edge: Boundary value Madness=6 → taint fires (> 5) ==============
@@ -83,7 +83,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
                 MakeDialogueContext(shadows));
 
-            Assert.Contains("Shadow state:", result);
+            Assert.Contains("SHADOW STATE", result);
         }
 
         // ============== Edge: Despair has different threshold (> 6) ==============
@@ -100,7 +100,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
                 MakeDialogueContext(shadows));
 
-            Assert.DoesNotContain("Shadow state:", result);
+            Assert.DoesNotContain("SHADOW STATE", result);
         }
 
         // Mutation: would catch if Despair threshold is > 7 instead of > 6
@@ -115,7 +115,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
                 MakeDialogueContext(shadows));
 
-            Assert.Contains("Shadow state:", result);
+            Assert.Contains("SHADOW STATE", result);
             Assert.Contains("Despair", result);
         }
 

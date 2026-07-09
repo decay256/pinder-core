@@ -58,7 +58,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
                 MakeDialogueContext(shadowThresholds: shadows));
 
-            Assert.Contains("Shadow state:", result);
+            Assert.Contains("SHADOW STATE", result);
             Assert.Contains("Your Madness is elevated", result);
         }
 
@@ -120,7 +120,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
                 MakeDialogueContext(shadowThresholds: shadows));
 
-            Assert.Contains("Shadow state:", result);
+            Assert.Contains("SHADOW STATE", result);
             Assert.Contains("Your Despair is elevated", result);
         }
 
