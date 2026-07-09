@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Pinder.Core.Conversation;
 using Pinder.Core.Stats;
@@ -112,6 +113,78 @@ namespace Pinder.Core.Tests
 
             // Should return a valid index within range
             Assert.InRange(decision.OptionIndex, 0, turn.Options.Length - 1);
+        }
+
+        [Fact]
+        public async Task DecideAsync_NetworkFailure_PreservesPrivateDiagnosticWithoutLeakingReasoning()
+        {
+            var opts = new Pinder.LlmAdapters.Anthropic.AnthropicOptions
+            {
+                ApiKey = "test-key",
+                Model = "claude-test-model"
+            };
+            using var agent = new LlmPlayerAgent(opts, new ScoringPlayerAgent(), "Sable", "Brick");
+            var inner = new InvalidOperationException("socket reset on private upstream");
+            var failure = new HttpRequestException("https://private.example.invalid failed", inner);
+            agent.SendMessagesAsyncOverride = _ => throw failure;
+
+            var turn = MakeTurnStart();
+            var context = MakeContext();
+
+            var decision = await agent.DecideAsync(turn, context);
+
+            Assert.Contains("[LLM fallback: Network error]", decision.Reasoning);
+            Assert.DoesNotContain("private.example.invalid", decision.Reasoning);
+            Assert.DoesNotContain("socket reset", decision.Reasoning);
+
+            var diagnostic = Assert.IsType<LlmPlayerAgentFallbackDiagnostic>(agent.LastFallbackDiagnostic);
+            Assert.Same(failure, diagnostic.Exception);
+            Assert.Equal("Network error", diagnostic.PublicReason);
+            Assert.Equal("claude-test-model", diagnostic.Model);
+            Assert.Equal(turn.State.TurnNumber, diagnostic.TurnNumber);
+            Assert.Equal(context.TurnNumber, diagnostic.ContextTurnNumber);
+            Assert.Contains(typeof(HttpRequestException).FullName!, diagnostic.ExceptionType);
+            Assert.Contains("private.example.invalid", diagnostic.ExceptionMessage);
+            Assert.Contains("socket reset on private upstream", diagnostic.Cause);
+            Assert.Contains(nameof(HttpRequestException), diagnostic.StackTrace);
+            Assert.Equal("", agent.LastExplanation);
+        }
+
+        [Fact]
+        public async Task DecideAsync_InvalidToolChoice_RecordsFallbackDiagnosticWithModelAndTurn()
+        {
+            var opts = new Pinder.LlmAdapters.Anthropic.AnthropicOptions
+            {
+                ApiKey = "test-key",
+                Model = "claude-test-model"
+            };
+            using var agent = new LlmPlayerAgent(opts, new ScoringPlayerAgent(), "Sable", "Brick");
+            agent.SendMessagesAsyncOverride = _ => Task.FromResult(new Pinder.LlmAdapters.Anthropic.Dto.MessagesResponse
+            {
+                Content = new[]
+                {
+                    new Pinder.LlmAdapters.Anthropic.Dto.ResponseContent
+                    {
+                        Type = "tool_use",
+                        Input = Newtonsoft.Json.Linq.JObject.Parse(@"{""choice"":99,""explanation"":""bad pick""}")
+                    }
+                }
+            });
+
+            var turn = MakeTurnStart();
+            var context = MakeContext();
+
+            var decision = await agent.DecideAsync(turn, context);
+
+            Assert.Equal(0, decision.OptionIndex);
+            Assert.Contains("[LLM fallback: LLM response invalid, defaulting to option 0]", decision.Reasoning);
+
+            var diagnostic = Assert.IsType<LlmPlayerAgentFallbackDiagnostic>(agent.LastFallbackDiagnostic);
+            Assert.Null(diagnostic.Exception);
+            Assert.Equal("claude-test-model", diagnostic.Model);
+            Assert.Equal(turn.State.TurnNumber, diagnostic.TurnNumber);
+            Assert.Equal(context.TurnNumber, diagnostic.ContextTurnNumber);
+            Assert.Equal("", diagnostic.StackTrace);
         }
     }
 }

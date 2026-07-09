@@ -47,6 +47,10 @@ namespace Pinder.SessionRunner
         /// </summary>
         public string LastExplanation { get; private set; } = "";
 
+        internal LlmPlayerAgentFallbackDiagnostic? LastFallbackDiagnostic { get; private set; }
+
+        internal Func<MessagesRequest, Task<MessagesResponse>>? SendMessagesAsyncOverride { get; set; }
+
         public ScoringMode ScoringMode => ScoringMode.Llm;
         public string MechanicsSource => "llm+heuristic:LlmPlayerAgent wraps ScoringPlayerAgent heuristic and makes strategic LLM choices";
 
@@ -238,6 +242,7 @@ namespace Pinder.SessionRunner
 
             // Always compute scoring agent decision first — we need its Scores array
             var scoringDecision = await _fallback.DecideAsync(turn, context).ConfigureAwait(false);
+            LastFallbackDiagnostic = null;
 
             try
             {
@@ -255,7 +260,10 @@ namespace Pinder.SessionRunner
                     ToolChoice = new ToolChoiceOption { Type = "tool", Name = "submit_choice" }
                 };
 
-                var response = await _client.SendMessagesAsync(request).ConfigureAwait(false);
+                var sendMessagesAsync = SendMessagesAsyncOverride;
+                var response = sendMessagesAsync != null
+                    ? await sendMessagesAsync(request).ConfigureAwait(false)
+                    : await _client.SendMessagesAsync(request).ConfigureAwait(false);
 
                 // Record token usage for audit table
                 if (response.Usage != null)
@@ -277,7 +285,7 @@ namespace Pinder.SessionRunner
                 {
                     // Fallback: try parsing text response for PICK: pattern
                     string responseText = response.GetText();
-                    return HandleTextFallback(responseText, turn, scoringDecision);
+                    return HandleTextFallback(responseText, turn, context, scoringDecision);
                 }
 
                 int? choice = toolInput.Value<int?>("choice");
@@ -285,8 +293,13 @@ namespace Pinder.SessionRunner
 
                 if (choice == null || choice.Value < 0 || choice.Value >= turn.Options.Length)
                 {
-                    LastExplanation = "LLM response invalid, defaulting to option 0";
-                    return new PlayerDecision(0, LastExplanation, scoringDecision.Scores);
+                    return MakeFallbackDecision(
+                        scoringDecision,
+                        "LLM response invalid, defaulting to option 0",
+                        null,
+                        turn,
+                        context,
+                        0);
                 }
 
                 LastExplanation = !string.IsNullOrWhiteSpace(explanation)
@@ -297,19 +310,19 @@ namespace Pinder.SessionRunner
             }
             catch (AnthropicApiException ex)
             {
-                return MakeFallbackDecision(scoringDecision, $"Anthropic API error ({ex.StatusCode})");
+                return MakeFallbackDecision(scoringDecision, $"Anthropic API error ({ex.StatusCode})", ex, turn, context);
             }
             catch (HttpRequestException ex)
             {
-                return MakeFallbackDecision(scoringDecision, $"Network error: {ex.Message}");
+                return MakeFallbackDecision(scoringDecision, "Network error", ex, turn, context);
             }
-            catch (TaskCanceledException)
+            catch (TaskCanceledException ex)
             {
-                return MakeFallbackDecision(scoringDecision, "Request timed out");
+                return MakeFallbackDecision(scoringDecision, "Request timed out", ex, turn, context);
             }
             catch (Exception ex)
             {
-                return MakeFallbackDecision(scoringDecision, $"Unexpected error: {ex.Message}");
+                return MakeFallbackDecision(scoringDecision, "Unexpected player-agent error", ex, turn, context);
             }
         }
 
@@ -506,20 +519,25 @@ namespace Pinder.SessionRunner
         /// <summary>
         /// Fallback for when tool_use isn't returned — try parsing PICK: from text.
         /// </summary>
-        private PlayerDecision HandleTextFallback(string responseText, TurnStart turn, PlayerDecision scoringDecision)
+        private PlayerDecision HandleTextFallback(
+            string responseText,
+            TurnStart turn,
+            PlayerAgentContext context,
+            PlayerDecision scoringDecision)
         {
             if (string.IsNullOrWhiteSpace(responseText))
             {
-                return MakeFallbackDecision(scoringDecision, "Empty response from LLM");
+                return MakeFallbackDecision(scoringDecision, "Empty response from LLM", null, turn, context);
             }
 
             int? pickIndex = ParsePick(responseText, turn.Options.Length);
             if (pickIndex == null)
             {
                 // Fallback to scoring agent
-                return MakeFallbackDecision(scoringDecision, "Could not parse PICK from response");
+                return MakeFallbackDecision(scoringDecision, "Could not parse PICK from response", null, turn, context);
             }
 
+            LastFallbackDiagnostic = null;
             LastExplanation = responseText;
             return new PlayerDecision(pickIndex.Value, responseText, scoringDecision.Scores);
         }
@@ -553,11 +571,26 @@ namespace Pinder.SessionRunner
             }
         }
 
-        private PlayerDecision MakeFallbackDecision(PlayerDecision scoringDecision, string reason)
+        private PlayerDecision MakeFallbackDecision(
+            PlayerDecision scoringDecision,
+            string reason,
+            Exception? exception,
+            TurnStart turn,
+            PlayerAgentContext context,
+            int? optionIndexOverride = null)
         {
+            LastFallbackDiagnostic = new LlmPlayerAgentFallbackDiagnostic(
+                reason,
+                _model,
+                turn?.State?.TurnNumber,
+                context?.TurnNumber,
+                context?.PlayerName ?? _playerName,
+                context?.DateeName ?? _dateeName,
+                exception);
+
             string reasoning = $"[LLM fallback: {reason}] {scoringDecision.Reasoning}";
             LastExplanation = "";
-            return new PlayerDecision(scoringDecision.OptionIndex, reasoning, scoringDecision.Scores);
+            return new PlayerDecision(optionIndexOverride ?? scoringDecision.OptionIndex, reasoning, scoringDecision.Scores);
         }
 
         private static string GetModifierNote(InterestState state)
