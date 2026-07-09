@@ -5,6 +5,7 @@ using Pinder.Core.Characters;
 using Pinder.Core.Conversation;
 using Pinder.Core.Prompts;
 using Pinder.Core.Stats;
+using Pinder.Core.Text;
 using Pinder.Core.Traps;
 using Xunit;
 
@@ -68,7 +69,9 @@ namespace Pinder.Core.Tests
                 stats: new StatBlock(BaseStats, Shadow),
                 activeArchetype: new ActiveArchetype(
                     "The Peacock",
-                    "Loud, expensive flex.\n*Sample lines:* \"check my watch\" \u00b7 \"weekend trip booked\"",
+                    string.Join(Environment.NewLine,
+                        "Loud, expensive flex.",
+                        "*Sample lines:* \"check my watch\" \u00b7 \"weekend trip booked\""),
                     4, 5),
                 textingStyleSources: new List<TextingStyleFragmentSource>
                 {
@@ -158,9 +161,104 @@ namespace Pinder.Core.Tests
                 characterIdSeed: "fixed-seed-1154");
 
             // No span carries a legacy structural-* key anymore.
-            Assert.DoesNotContain(result.Spans, s => s.Key.StartsWith("structural-", StringComparison.Ordinal));
+            Assert.DoesNotContain(result.Spans, s =>
+                s.Key != null && s.Key.StartsWith("structural-", StringComparison.Ordinal));
             // The framing headers are now attributed to the collapsed key.
             Assert.Contains(result.Spans, s => s.Key == PromptBuilder.CharacterCardFramingKey);
+        }
+
+        [Fact]
+        public void BuildSystemPromptEx_DataFramingSpans_AttributePromptLabelsToCatalog()
+        {
+            var fragments = BuildDeterministicFragments();
+
+            var result = PromptBuilder.BuildSystemPromptEx(
+                "Velvet", "she/her", "just here for the vibes",
+                fragments, new TrapState(), characterIdSeed: "fixed-seed-1154",
+                archetypesEnabled: true);
+
+            AssertAllOccurrencesAttributed(result, "EFFECTIVE STATS", PromptBuilder.CharacterDataFramingKey);
+            AssertAllOccurrencesAttributed(result, "=== CHARACTER DATA ===", PromptBuilder.CharacterDataFramingKey);
+            AssertAllOccurrencesAttributed(result, "- Gender identity:", PromptBuilder.CharacterDataFramingKey);
+            AssertAllOccurrencesAttributed(result, "- Bio:", PromptBuilder.CharacterDataFramingKey);
+            AssertAllOccurrencesAttributed(result, "- Charm:", PromptBuilder.CharacterDataFramingKey);
+            AssertAllOccurrencesAttributed(result, "- Self-Awareness:", PromptBuilder.CharacterDataFramingKey);
+        }
+
+        [Fact]
+        public void BuildSystemPromptEx_MissingDataFraming_Throws()
+        {
+            var previousLookup = PromptBuilder.StructuralFragmentLookup;
+            var previousLookupEx = PromptBuilder.StructuralFragmentLookupEx;
+            try
+            {
+                PromptBuilder.StructuralFragmentLookup = key =>
+                    key == PromptBuilder.CharacterCardFramingKey
+                        ? "RULES\nIDENTITY\nPERSONALITY\nBACKSTORY\nTEXTING STYLE\nACTIVE ARCHETYPE\nACTIVE TRAP INSTRUCTIONS"
+                        : null;
+                PromptBuilder.StructuralFragmentLookupEx = null;
+
+                var ex = Assert.Throws<InvalidOperationException>(() =>
+                    PromptBuilder.BuildSystemPromptEx(
+                        "Velvet", "she/her", "bio",
+                        BuildDeterministicFragments(), new TrapState()));
+
+                Assert.Contains(PromptBuilder.CharacterDataFramingKey, ex.Message, StringComparison.Ordinal);
+            }
+            finally
+            {
+                PromptBuilder.StructuralFragmentLookup = previousLookup;
+                PromptBuilder.StructuralFragmentLookupEx = previousLookupEx;
+            }
+        }
+
+        [Fact]
+        public void BuildSystemPromptEx_MalformedDataFraming_Throws()
+        {
+            var previousLookup = PromptBuilder.StructuralFragmentLookup;
+            var previousLookupEx = PromptBuilder.StructuralFragmentLookupEx;
+            try
+            {
+                PromptBuilder.StructuralFragmentLookup = key =>
+                    key == PromptBuilder.CharacterCardFramingKey
+                        ? "RULES\nIDENTITY\nPERSONALITY\nBACKSTORY\nTEXTING STYLE\nACTIVE ARCHETYPE\nACTIVE TRAP INSTRUCTIONS"
+                        : "EFFECTIVE STATS\n=== CHARACTER DATA ===";
+                PromptBuilder.StructuralFragmentLookupEx = null;
+
+                var ex = Assert.Throws<InvalidOperationException>(() =>
+                    PromptBuilder.BuildSystemPromptEx(
+                        "Velvet", "she/her", "bio",
+                        BuildDeterministicFragments(), new TrapState()));
+
+                Assert.Contains("12 labels/templates", ex.Message, StringComparison.Ordinal);
+            }
+            finally
+            {
+                PromptBuilder.StructuralFragmentLookup = previousLookup;
+                PromptBuilder.StructuralFragmentLookupEx = previousLookupEx;
+            }
+        }
+
+        private static void AssertAllOccurrencesAttributed(
+            PromptTraceResult result,
+            string text,
+            string key)
+        {
+            int searchFrom = 0;
+            int matches = 0;
+            while (true)
+            {
+                int index = result.Text.IndexOf(text, searchFrom, StringComparison.Ordinal);
+                if (index < 0) break;
+                matches++;
+                Assert.Contains(result.Spans, span =>
+                    span.Key == key &&
+                    span.Start <= index &&
+                    span.End >= index + text.Length);
+                searchFrom = index + text.Length;
+            }
+
+            Assert.True(matches > 0, $"Expected prompt to contain '{text}'.");
         }
     }
 }

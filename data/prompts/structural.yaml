@@ -15,3 +15,21 @@ prompts:
       TEXTING STYLE
       ACTIVE ARCHETYPE
       ACTIVE TRAP INSTRUCTIONS
+
+  # Fixed labels and typed-value templates for PromptBuilder.BuildSystemPromptEx.
+  # The builder owns typed value substitution, while these catalog lines own the
+  # prompt-facing wording around character data and effective stats.
+  character_data_framing:
+    system_prompt: |-
+      EFFECTIVE STATS
+      === CHARACTER DATA ===
+      - Gender identity: {gender_identity}
+      - Bio: {bio_one_liner}
+      none
+      EFFECTIVE STATS
+      - Charm: {charm}
+      - Rizz: {rizz}
+      - Honesty: {honesty}
+      - Chaos: {chaos}
+      - Wit: {wit}
+      - Self-Awareness: {self_awareness}
