@@ -78,7 +78,7 @@ namespace Pinder.Core.Conversation
         public virtual Task<string> GetHorninessQuestionAsync(HorninessQuestionContext context, CancellationToken ct = default)
         {
             ct.ThrowIfCancellationRequested();
-            return Task.FromResult(string.Empty);
+            return Task.FromResult("what do you want to ask them next?");
         }
 
         public virtual Task<string> GetSuccessImprovementAsync(SuccessImprovementContext context, CancellationToken ct = default)
