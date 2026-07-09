@@ -33,14 +33,14 @@ horniness_time_modifiers:
         [Fact]
         public void LoadFrom_ArchetypesEnabled_Absent_DefaultsToFalse()
         {
-            var gd = GameDefinition.LoadFrom(BaseYaml);
+            var gd = GameDefinition.LoadFrom(BaseYaml + GameDefinitionYamlTestFixtures.RequiredParserBlocks);
             Assert.False(gd.ArchetypesEnabled);
         }
 
         [Fact]
         public void LoadFrom_ArchetypesEnabled_ExplicitTrue_LoadsCorrectly()
         {
-            var yaml = BaseYaml + "archetypes_enabled: true\n";
+            var yaml = BaseYaml + "archetypes_enabled: true\n" + GameDefinitionYamlTestFixtures.RequiredParserBlocks;
             var gd = GameDefinition.LoadFrom(yaml);
             Assert.True(gd.ArchetypesEnabled);
         }
@@ -48,7 +48,7 @@ horniness_time_modifiers:
         [Fact]
         public void LoadFrom_ArchetypesEnabled_ExplicitFalse_LoadsCorrectly()
         {
-            var yaml = BaseYaml + "archetypes_enabled: false\n";
+            var yaml = BaseYaml + "archetypes_enabled: false\n" + GameDefinitionYamlTestFixtures.RequiredParserBlocks;
             var gd = GameDefinition.LoadFrom(yaml);
             Assert.False(gd.ArchetypesEnabled);
         }

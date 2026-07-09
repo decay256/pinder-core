@@ -21,7 +21,7 @@ horniness_time_modifiers:
   afternoon: 0
   evening: 2
   overnight: 5
-";
+" + GameDefinitionYamlTestFixtures.RequiredParserBlocks;
 
         // ===== LoadFrom parses horniness_time_modifiers =====
 
@@ -68,7 +68,7 @@ horniness_time_modifiers:
   afternoon: 20
   evening: 30
   overnight: 40
-";
+" + GameDefinitionYamlTestFixtures.RequiredParserBlocks;
             var gd = GameDefinition.LoadFrom(yaml);
             Assert.Equal(10, gd.HorninessTimeModifiers.Morning);
             Assert.Equal(20, gd.HorninessTimeModifiers.Afternoon);
@@ -139,7 +139,7 @@ horniness_time_modifiers:
   afternoon: -1
   evening: -2
   overnight: -5
-";
+" + GameDefinitionYamlTestFixtures.RequiredParserBlocks;
             var gd = GameDefinition.LoadFrom(yaml);
             Assert.Equal(-3, gd.HorninessTimeModifiers.Morning);
             Assert.Equal(-5, gd.HorninessTimeModifiers.Overnight);
@@ -161,7 +161,7 @@ horniness_time_modifiers:
   afternoon: 0
   evening: 0
   overnight: 0
-";
+" + GameDefinitionYamlTestFixtures.RequiredParserBlocks;
             var gd = GameDefinition.LoadFrom(yaml);
             Assert.Equal(0, gd.HorninessTimeModifiers.Morning);
             Assert.Equal(0, gd.HorninessTimeModifiers.Afternoon);

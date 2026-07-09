@@ -70,7 +70,7 @@ horniness_time_modifiers:
   evening: 0
   overnight: 0
 active_trap_interest_penalty: -25%
-";
+" + GameDefinitionYamlTestFixtures.RequiredParserBlocksWithoutActiveTrapPenalty;
             var gd = GameDefinition.LoadFrom(yaml);
             Assert.Equal(-0.25, gd.ActiveTrapInterestPenalty);
         }
@@ -90,13 +90,13 @@ horniness_time_modifiers:
   evening: 0
   overnight: 0
 active_trap_interest_penalty: -0.25
-";
+" + GameDefinitionYamlTestFixtures.RequiredParserBlocksWithoutActiveTrapPenalty;
             var gd = GameDefinition.LoadFrom(yaml);
             Assert.Equal(-0.25, gd.ActiveTrapInterestPenalty);
         }
 
         [Fact]
-        public void LoadFrom_WithoutActiveTrapPenalty_ReturnsDefault()
+        public void LoadFrom_WithoutActiveTrapPenalty_ThrowsInvalidOperationException()
         {
             const string yaml = @"
 name: TestGame
@@ -110,9 +110,9 @@ horniness_time_modifiers:
   evening: 0
   overnight: 0
 ";
-            var gd = GameDefinition.LoadFrom(yaml);
-            // Engine defaults absent value to 0 or -0.25
-            Assert.True(gd.ActiveTrapInterestPenalty == 0.0 || gd.ActiveTrapInterestPenalty == -0.25);
+            var ex = Assert.Throws<InvalidOperationException>(() =>
+                GameDefinition.LoadFrom(yaml + GameDefinitionYamlTestFixtures.RequiredParserBlocksWithoutActiveTrapPenalty));
+            Assert.Contains("active_trap_interest_penalty", ex.Message);
         }
 
         // ===== Engine Integration Tests (RollResolutionStage) =====

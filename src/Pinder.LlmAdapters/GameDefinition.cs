@@ -63,13 +63,13 @@ namespace Pinder.LlmAdapters
         /// </summary>
         public bool ArchetypesEnabled { get; }
 
-        /// <summary>Maximum number of turns per session. Default 30 if not set in YAML.</summary>
+        /// <summary>Maximum number of turns per session.</summary>
         public int MaxTurns { get; }
 
-        /// <summary>Maximum number of dialogue options per turn. Default 3 if not set in YAML.</summary>
+        /// <summary>Maximum number of dialogue options per turn.</summary>
         public int MaxDialogueOptions { get; }
 
-        /// <summary>Maximum words allowed for a single delivered message. Default 80 if not set in YAML.</summary>
+        /// <summary>Maximum words allowed for a single delivered message.</summary>
         public int MaxDeliveryWords { get; }
 
         /// <summary>Time-of-day horniness modifiers loaded from game-definition.yaml.</summary>
