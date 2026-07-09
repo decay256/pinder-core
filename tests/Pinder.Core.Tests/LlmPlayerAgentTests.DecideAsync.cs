@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Pinder.LlmAdapters;
+using Pinder.LlmAdapters.Anthropic.Dto;
 using Pinder.Core.Conversation;
 using Pinder.Core.Stats;
 using Pinder.SessionRunner;
@@ -185,6 +188,70 @@ namespace Pinder.Core.Tests
             Assert.Equal(turn.State.TurnNumber, diagnostic.TurnNumber);
             Assert.Equal(context.TurnNumber, diagnostic.ContextTurnNumber);
             Assert.Equal("", diagnostic.StackTrace);
+        }
+
+        [Fact]
+        public async Task DecideAsync_RequestUsesSubmitChoiceToolDefinitionAsset()
+        {
+            var opts = new Pinder.LlmAdapters.Anthropic.AnthropicOptions
+            {
+                ApiKey = "test-key",
+                Model = "claude-test-model"
+            };
+            using var agent = new LlmPlayerAgent(opts, new ScoringPlayerAgent(), "Sable", "Brick");
+
+            MessagesRequest? capturedRequest = null;
+            agent.SendMessagesAsyncOverride = request =>
+            {
+                capturedRequest = request;
+                return Task.FromResult(new MessagesResponse
+                {
+                    Content = new[]
+                    {
+                        new ResponseContent
+                        {
+                            Type = "tool_use",
+                            Input = Newtonsoft.Json.Linq.JObject.Parse(@"{""choice"":0,""explanation"":""best pick""}")
+                        }
+                    }
+                });
+            };
+
+            await agent.DecideAsync(MakeTurnStart(), MakeContext());
+
+            Assert.NotNull(capturedRequest);
+            var tool = Assert.Single(capturedRequest!.Tools);
+            Assert.Equal("submit_choice", tool.Name);
+            Assert.Contains("strategic explanation", tool.Description);
+            Assert.NotNull(tool.InputSchema["properties"]?["choice"]);
+            Assert.NotNull(tool.InputSchema["properties"]?["explanation"]);
+            Assert.Equal("submit_choice", capturedRequest.ToolChoice.Name);
+        }
+
+        [Fact]
+        public void Constructor_MissingSimAgentPromptFragment_Throws()
+        {
+            string tempDir = Path.Combine(Path.GetTempPath(), "pinder-sim-agent-prompts-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempDir);
+            try
+            {
+                File.WriteAllText(Path.Combine(tempDir, "sim_agent.yaml"), @"schema_version: 1
+prompts:
+  sim_agent:
+    system_prompt: ""system {playerName}""
+    user_template: ""user {optionsBlock}""
+");
+                var catalog = PromptCatalog.LoadFromDirectory(tempDir);
+                var opts = new Pinder.LlmAdapters.Anthropic.AnthropicOptions { ApiKey = "test-key" };
+
+                var ex = Assert.Throws<KeyNotFoundException>(() =>
+                    new LlmPlayerAgent(opts, new ScoringPlayerAgent(), promptCatalog: catalog));
+                Assert.Contains("sim_agent_personality_block", ex.Message);
+            }
+            finally
+            {
+                Directory.Delete(tempDir, recursive: true);
+            }
         }
     }
 }

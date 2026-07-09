@@ -56,3 +56,112 @@ prompts:
       Always explain your reasoning in 1-2 sentences.
 
       Use the submit_choice tool to make your pick. choice is 0-indexed (A=0, B=1, C=2, D=3).
+
+  sim_agent_personality_block:
+    user_template: |-
+
+
+      Character personality (for voice, not strategy):
+      {playerSystemPrompt}
+
+  sim_agent_recent_history_block:
+    user_template: |-
+      ## Recent Conversation
+      {recentHistoryRows}
+
+  sim_agent_recent_history_row:
+    user_template: |-
+      {sender}: "{text}"
+
+  sim_agent_modifier_disadvantage:
+    user_template: " — grants disadvantage"
+
+  sim_agent_modifier_advantage:
+    user_template: " — grants advantage"
+
+  sim_agent_momentum_note_plus2:
+    user_template: " (+2 to next roll)"
+
+  sim_agent_momentum_note_plus3:
+    user_template: " (+3 to next roll)"
+
+  sim_agent_shadow_status_row:
+    user_template: "- {shadow}: {value}/{t3}{warning}"
+
+  sim_agent_shadow_status_unavailable:
+    user_template: "- Shadow tracking unavailable"
+
+  sim_agent_shadow_warning_t3:
+    user_template: " ⚠️ T3 CRITICAL — may override choices!"
+
+  sim_agent_shadow_warning_t2:
+    user_template: " ⚠️ T2 — -2 penalty to paired stat rolls"
+
+  sim_agent_shadow_warning_t1:
+    user_template: " ⚠️ T1 — taints delivery"
+
+  sim_agent_shadow_warning_approaching_t1:
+    user_template: " (approaching T1)"
+
+  sim_agent_active_traps_none:
+    user_template: "none"
+
+  sim_agent_option_summary_row:
+    user_template: "{letter}) [{statName} +{modifier}] DC {dc} | Need {need}+ on d20 | {successPct}% success | {riskTier}{icons}"
+
+  sim_agent_option_text_row:
+    user_template: "   Text: \"{intendedText}\""
+
+  sim_agent_option_shadow_row:
+    user_template: "   Shadow: {shadowImpact}"
+
+  sim_agent_option_ev_row:
+    user_template: "   EV: {expectedInterestGain}"
+
+  sim_agent_shadow_impact_danger:
+    user_template: "DANGER: {pairedShadow} at {currentValue}, may push to T3 (≥{t3})!"
+
+  sim_agent_shadow_impact_risk_t2:
+    user_template: "RISK: {pairedShadow} at {currentValue}, may push to T2 (≥{t2})"
+
+  sim_agent_shadow_impact_risk_t1:
+    user_template: "RISK: {pairedShadow} at {currentValue}, using {statName} may push to T1 (≥{t1})"
+
+  sim_agent_shadow_impact_honesty_benefit:
+    user_template: "BENEFIT: Honesty can reduce Denial (currently {denial})"
+
+  sim_agent_shadow_impact_separator:
+    user_template: " | "
+
+  sim_agent_success_rules:
+    user_template: "beat by 1-4 → {tier1} interest, 5-9 → {tier2}, 10+ → {tier3}. Nat 20 → {nat20}"
+
+  sim_agent_failure_rules:
+    user_template: "miss by 1-2 → Fumble ({fumble}), 3-5 → Misfire ({misfire}), 6-9 → Trope Trap ({trap} + trap), 10+ → Catastrophe ({catastrophe} + trap). Nat 1 → Legendary Fail ({legendary})"
+
+  sim_agent_momentum_rules_threshold:
+    user_template: "{streak}+ wins → +{bonus} to next roll"
+
+  sim_agent_risk_tier_safe:
+    user_template: "Safe"
+
+  sim_agent_risk_tier_medium:
+    user_template: "Medium"
+
+  sim_agent_risk_tier_hard:
+    user_template: "Hard"
+
+  sim_agent_risk_tier_bold:
+    user_template: "Bold"
+
+  sim_agent_icon_callback:
+    user_template: "🔗"
+
+  sim_agent_icon_tell:
+    user_template: "📖"
+
+  sim_agent_icon_combo:
+    user_template: "⭐ combo: {comboName}"
+
+  sim_agent_icon_weakness:
+    user_template: "🔓"
