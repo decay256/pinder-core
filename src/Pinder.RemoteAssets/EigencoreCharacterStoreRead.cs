@@ -7,6 +7,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Pinder.Core.Characters;
 using Pinder.RemoteAssets.Exceptions;
 
@@ -23,11 +24,16 @@ namespace Pinder.RemoteAssets
 
         private readonly Configuration _config;
         private readonly HttpClient _http;
+        private readonly ILogger<EigencoreCharacterStoreRead> _logger;
 
-        public EigencoreCharacterStoreRead(Configuration config, HttpClient http)
+        public EigencoreCharacterStoreRead(
+            Configuration config,
+            HttpClient http,
+            ILogger<EigencoreCharacterStoreRead> logger)
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
             _http = http ?? throw new ArgumentNullException(nameof(http));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         /// <summary>
@@ -36,14 +42,33 @@ namespace Pinder.RemoteAssets
         /// </summary>
         public async Task<CharacterDefinition?> LoadAsync(string characterId, CancellationToken ct = default)
         {
-            ValidateId(characterId);
+            var op = RemoteAssetOperationLog.Begin(_logger, "remote_asset.load", assetId: characterId);
+            try
+            {
+                ValidateId(characterId);
 
-            (byte[] payload, CharacterAssetMetadata _, bool found) = await FetchAsync(characterId, ct).ConfigureAwait(false);
-            if (!found) return null;
-            // Run the injected parser. Exceptions from the parser
-            // propagate to the caller verbatim (per ICharacterStore's
-            // FormatException contract).
-            return _config.PayloadParser(payload);
+                (byte[] payload, CharacterAssetMetadata meta, bool found) = await FetchAsync(characterId, ct).ConfigureAwait(false);
+                if (!found)
+                {
+                    op.Complete("not_found", statusCode: 404);
+                    return null;
+                }
+                // Run the injected parser. Exceptions from the parser
+                // propagate to the caller verbatim (per ICharacterStore's
+                // FormatException contract).
+                CharacterDefinition parsed = _config.PayloadParser(payload);
+                op.Complete(
+                    "success",
+                    assetKind: meta.AssetKind,
+                    statusCode: 200,
+                    payloadBytes: payload.Length);
+                return parsed;
+            }
+            catch (Exception ex)
+            {
+                op.Failure(ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -52,10 +77,25 @@ namespace Pinder.RemoteAssets
         /// </summary>
         public async Task<CharacterAssetMetadata?> GetMetadataAsync(string characterId, CancellationToken ct = default)
         {
-            ValidateId(characterId);
+            var op = RemoteAssetOperationLog.Begin(_logger, "remote_asset.get_metadata", assetId: characterId);
+            try
+            {
+                ValidateId(characterId);
 
-            (byte[] _, CharacterAssetMetadata meta, bool found) = await FetchAsync(characterId, ct).ConfigureAwait(false);
-            return found ? meta : null;
+                (byte[] _, CharacterAssetMetadata meta, bool found) = await FetchAsync(characterId, ct).ConfigureAwait(false);
+                if (!found)
+                {
+                    op.Complete("not_found", statusCode: 404);
+                    return null;
+                }
+                op.Complete("success", assetKind: meta.AssetKind, statusCode: 200);
+                return meta;
+            }
+            catch (Exception ex)
+            {
+                op.Failure(ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -64,10 +104,23 @@ namespace Pinder.RemoteAssets
         /// </summary>
         public async Task<bool> ExistsAsync(string characterId, CancellationToken ct = default)
         {
-            ValidateId(characterId);
+            var op = RemoteAssetOperationLog.Begin(_logger, "remote_asset.exists", assetId: characterId);
+            try
+            {
+                ValidateId(characterId);
 
-            (byte[] _, CharacterAssetMetadata __, bool found) = await FetchAsync(characterId, ct).ConfigureAwait(false);
-            return found;
+                (byte[] _, CharacterAssetMetadata meta, bool found) = await FetchAsync(characterId, ct).ConfigureAwait(false);
+                op.Complete(
+                    found ? "success" : "not_found",
+                    assetKind: found ? meta.AssetKind : null,
+                    statusCode: found ? 200 : 404);
+                return found;
+            }
+            catch (Exception ex)
+            {
+                op.Failure(ex);
+                throw;
+            }
         }
 
         public Task<IReadOnlyList<string>> ListIdsAsync(CancellationToken ct = default) =>
@@ -83,44 +136,62 @@ namespace Pinder.RemoteAssets
         {
             if (query == null) throw new ArgumentNullException(nameof(query));
 
+            var op = RemoteAssetOperationLog.Begin(
+                _logger,
+                "remote_asset.query",
+                assetKind: query.AssetKind);
             bool retried = false;
 
-            while (true)
+            try
             {
-                using (var req = new HttpRequestMessage(HttpMethod.Get, BuildQueryUri(query)))
+                while (true)
                 {
-                    await AttachAuthAsync(req, ct).ConfigureAwait(false);
-
-                    HttpResponseMessage resp = await _http.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, ct)
-                        .ConfigureAwait(false);
-                    try
+                    using (var req = new HttpRequestMessage(HttpMethod.Get, BuildQueryUri(query)))
                     {
-                        int status = (int)resp.StatusCode;
+                        await AttachAuthAsync(req, ct).ConfigureAwait(false);
 
-                        if (status == 200)
+                        HttpResponseMessage resp = await _http.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, ct)
+                            .ConfigureAwait(false);
+                        try
                         {
-                            byte[] body = await resp.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
-                            return ParseQueryResponse(body);
-                        }
+                            int status = (int)resp.StatusCode;
 
-                        if (status == 429)
+                            if (status == 200)
+                            {
+                                byte[] body = await resp.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+                                CharacterAssetPage page = ParseQueryResponse(body);
+                                op.Complete(
+                                    "success",
+                                    itemCount: page.Items.Count,
+                                    hasNextCursor: !string.IsNullOrEmpty(page.NextCursor),
+                                    statusCode: status);
+                                return page;
+                            }
+
+                            if (status == 429)
+                            {
+                                retried = await EigencoreResponseHandler.Handle429RetryAsync(
+                                    resp,
+                                    retried,
+                                    "Eigencore returned 429 for GET assets query after one retry.",
+                                    _config.DefaultRetryAfter,
+                                    ct).ConfigureAwait(false);
+                                continue;
+                            }
+
+                            await EigencoreResponseHandler.HandleFailureResponseAsync(resp, "GET assets query", ct).ConfigureAwait(false);
+                        }
+                        finally
                         {
-                            retried = await EigencoreResponseHandler.Handle429RetryAsync(
-                                resp,
-                                retried,
-                                "Eigencore returned 429 for GET assets query after one retry.",
-                                _config.DefaultRetryAfter,
-                                ct).ConfigureAwait(false);
-                            continue;
+                            resp.Dispose();
                         }
-
-                        await EigencoreResponseHandler.HandleFailureResponseAsync(resp, "GET assets query", ct).ConfigureAwait(false);
-                    }
-                    finally
-                    {
-                        resp.Dispose();
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                op.Failure(ex);
+                throw;
             }
         }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Pinder.Core.Characters;
 
 namespace Pinder.RemoteAssets
@@ -65,8 +66,14 @@ namespace Pinder.RemoteAssets
             // headroom without permitting unbounded responses).
             _http.MaxResponseContentBufferSize = Math.Max(_config.PayloadSizeCapBytes, 1024 * 1024) * 4;
 
-            _readStore = new EigencoreCharacterStoreRead(_config, _http);
-            _syncHelper = new SyncHelper(_config, _http);
+            _readStore = new EigencoreCharacterStoreRead(
+                _config,
+                _http,
+                _config.LoggerFactory.CreateLogger<EigencoreCharacterStoreRead>());
+            _syncHelper = new SyncHelper(
+                _config,
+                _http,
+                _config.LoggerFactory.CreateLogger<SyncHelper>());
         }
 
         public Task<CharacterDefinition?> LoadAsync(string characterId, CancellationToken ct = default)

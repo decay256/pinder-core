@@ -2,6 +2,7 @@ using System;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 using Pinder.RemoteAssets;
 
@@ -11,7 +12,7 @@ namespace Pinder.RemoteAssets.Tests
     {
         private readonly HttpMessageHandler _handler = new FakeHttpMessageHandler();
         private readonly Func<CancellationToken, Task<string>> _auth = _ => Task.FromResult("token");
-        private readonly CharacterPayloadParser _parser = _ => null;
+        private readonly CharacterPayloadParser _parser = _ => null!;
 
         [Fact]
         public void Configuration_HttpsBaseUrl_Succeeds()
@@ -19,6 +20,7 @@ namespace Pinder.RemoteAssets.Tests
             var uri = new Uri("https://example.com");
             var config = new Configuration(uri, _handler, _auth, _parser);
             Assert.Equal(uri, config.BaseUrl);
+            Assert.Same(NullLoggerFactory.Instance, config.LoggerFactory);
         }
 
         [Fact]

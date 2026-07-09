@@ -2,6 +2,8 @@ using System;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Pinder.Core.Characters;
 
 namespace Pinder.RemoteAssets
@@ -139,6 +141,13 @@ namespace Pinder.RemoteAssets
         /// </summary>
         public CharacterPayloadSerializer? PayloadSerializer { get; }
 
+        /// <summary>
+        /// Logger factory used for internal structured logs around outbound
+        /// remote-asset read/write boundaries. Defaults to a null factory so
+        /// existing non-hosted consumers do not need to carry a logging stack.
+        /// </summary>
+        public ILoggerFactory LoggerFactory { get; }
+
         /// <param name="allowInsecureBaseUrl">
         /// Defaults to <c>false</c>. When <c>true</c>, permits <c>http://</c>
         /// URIs in <see cref="BaseUrl"/> instead of enforcing the HTTPS
@@ -155,7 +164,8 @@ namespace Pinder.RemoteAssets
             int? metadataSizeCapBytes = null,
             int? payloadSizeCapBytes = null,
             CharacterPayloadSerializer? payloadSerializer = null,
-            bool allowInsecureBaseUrl = false)
+            bool allowInsecureBaseUrl = false,
+            ILoggerFactory? loggerFactory = null)
         {
             if (baseUrl == null) throw new ArgumentNullException(nameof(baseUrl));
             if (!baseUrl.IsAbsoluteUri)
@@ -171,6 +181,7 @@ namespace Pinder.RemoteAssets
             MetadataSizeCapBytes = metadataSizeCapBytes ?? 4 * 1024;       // 4 KiB
             PayloadSizeCapBytes = payloadSizeCapBytes ?? 256 * 1024;       // 256 KiB
             PayloadSerializer = payloadSerializer;
+            LoggerFactory = loggerFactory ?? NullLoggerFactory.Instance;
             if (RequestTimeout <= TimeSpan.Zero)
                 throw new ArgumentOutOfRangeException(nameof(requestTimeout), "RequestTimeout must be positive.");
             if (DefaultRetryAfter < TimeSpan.Zero)
