@@ -91,6 +91,9 @@ namespace Pinder.Core.Data
         {
             int pos = 0;
             var result = ParseValue(json, ref pos);
+            SkipWhitespace(json, ref pos);
+            if (pos != json.Length)
+                throw new FormatException($"Unexpected character '{json[pos]}' at position {pos}.");
             return result;
         }
 
@@ -111,12 +114,20 @@ namespace Pinder.Core.Data
             if (c == '{') return ParseObject(s, ref pos);
             if (c == '[') return ParseArray(s, ref pos);
             if (c == '"') return new JsonString(ParseString(s, ref pos));
-            if (c == 't') { pos += 4; return new JsonBool(true);  }
-            if (c == 'f') { pos += 5; return new JsonBool(false); }
-            if (c == 'n') { pos += 4; return JsonNull.Instance;   }
+            if (c == 't') { ConsumeLiteral(s, ref pos, "true"); return new JsonBool(true);  }
+            if (c == 'f') { ConsumeLiteral(s, ref pos, "false"); return new JsonBool(false); }
+            if (c == 'n') { ConsumeLiteral(s, ref pos, "null"); return JsonNull.Instance;   }
             if (c == '-' || char.IsDigit(c)) return ParseNumber(s, ref pos);
 
             throw new FormatException($"Unexpected character '{c}' at position {pos}.");
+        }
+
+        private static void ConsumeLiteral(string s, ref int pos, string literal)
+        {
+            if (pos + literal.Length > s.Length ||
+                string.CompareOrdinal(s, pos, literal, 0, literal.Length) != 0)
+                throw new FormatException($"Invalid literal at position {pos}.");
+            pos += literal.Length;
         }
 
         private static JsonObject ParseObject(string s, ref int pos)
@@ -143,7 +154,7 @@ namespace Pinder.Core.Data
                 if (s[pos] == ',') { pos++; continue; }
                 throw new FormatException($"Expected ',' or '}}' at position {pos}.");
             }
-            return obj;
+            throw new FormatException("Unexpected end of JSON object.");
         }
 
         private static JsonArray ParseArray(string s, ref int pos)
@@ -164,7 +175,7 @@ namespace Pinder.Core.Data
                 if (s[pos] == ',') { pos++; continue; }
                 throw new FormatException($"Expected ',' or ']' at position {pos}.");
             }
-            return arr;
+            throw new FormatException("Unexpected end of JSON array.");
         }
 
         private static string ParseString(string s, ref int pos)
@@ -204,8 +215,7 @@ namespace Pinder.Core.Data
                             sb.Append((char)code);
                             break;
                         default:
-                            sb.Append(esc);
-                            break;
+                            throw new FormatException($"Invalid escape '\\{esc}' at position {pos - 1}.");
                     }
                 }
                 else
