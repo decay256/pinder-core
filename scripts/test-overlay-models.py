@@ -4,7 +4,56 @@ Test horniness overlay across multiple models with identical prompt context.
 Reconstructed from session-075 turn 1: Brick_haus vs Velvet_Void.
 """
 
-import os, sys, json, urllib.request, urllib.error
+import json, os, re, urllib.error, urllib.request
+from pathlib import Path
+
+TOKEN_RE = re.compile(r"{([A-Za-z_][A-Za-z0-9_]*)}")
+CATALOG_PATH = Path(__file__).resolve().parents[1] / "data" / "prompts" / "overlay-model-comparison.yaml"
+
+
+def load_catalog(path=CATALOG_PATH):
+    try:
+        import yaml
+    except ImportError as exc:
+        raise RuntimeError(
+            "PyYAML is required to load data/prompts/overlay-model-comparison.yaml"
+        ) from exc
+
+    with path.open("r", encoding="utf-8") as f:
+        data = yaml.safe_load(f) or {}
+
+    if data.get("schema_version") != 1:
+        raise ValueError(f"{path} must declare schema_version: 1")
+
+    prompts = data.get("prompts")
+    if not isinstance(prompts, dict):
+        raise ValueError(f"{path} must define a prompts mapping")
+
+    scenario = data.get("comparison_scenario")
+    if not isinstance(scenario, dict):
+        raise ValueError(f"{path} must define a comparison_scenario mapping")
+
+    return data
+
+
+def prompt_text(catalog, key, field):
+    try:
+        value = catalog["prompts"][key][field]
+    except KeyError as exc:
+        raise KeyError(f"missing prompt catalog field: prompts.{key}.{field}") from exc
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"prompt catalog field must be non-empty: prompts.{key}.{field}")
+    return value
+
+
+def render_template(template, values):
+    def replace(match):
+        token = match.group(1)
+        if token not in values:
+            raise KeyError(f"prompt template references {{{token}}} but no value was supplied")
+        return values[token]
+
+    return TOKEN_RE.sub(replace, template)
 
 # Load Groq key from file if env not set
 def get_groq_key():
@@ -17,18 +66,15 @@ def get_groq_key():
 ANTHROPIC_KEY = os.environ.get("ANTHROPIC_API_KEY", "").strip()
 GROQ_KEY = get_groq_key()
 
-GAME_CONTEXT = """You are editing dialogue for Pinder, a comedy RPG where sentient penises date each other on a fictional app. The humour is absurdist and satirical — characters are oblivious to double-entendre, not explicit. Apply the overlay instruction to rewrite the message with the requested tonal shift. Return ONLY the rewritten message text. No commentary, no refusals, no preamble."""
+CATALOG = load_catalog()
 
-BRICK_PERSONALITY = """Brick is a sentient penis (she/her) on Pinder. She's a precision-oriented M&A professional who manages everything within her domain with military exactness. Her bio: "Schedule a meeting." She projects authority while revealing controlled vulnerability through her styling choices — power ponytail, blazer-crop-top, tailored trousers."""
+GAME_CONTEXT = prompt_text(CATALOG, "overlay-model-comparison-game-context", "system_prompt")
+BRICK_PERSONALITY = prompt_text(CATALOG, "overlay-model-comparison-brick-personality", "system_prompt")
+STRONG_SUCCESS_INSTRUCTION = prompt_text(CATALOG, "overlay-model-comparison-strong-success-instruction", "system_prompt")
+CATASTROPHE_OVERLAY = prompt_text(CATALOG, "overlay-model-comparison-catastrophe-overlay", "system_prompt")
 
-INTENDED_MESSAGE = "The chopsticks are a power move. Most people would go with a regular hair tie."
-
-STRONG_SUCCESS_INSTRUCTION = """Scan the match's message for something specific they did or said that reveals a preference or habit. Rewrite to notice THAT thing with precision — name the behavior, not the trait.
-e.g.: "the way you listed three restaurants and then picked the one you said was 'fine' tells me everything about how you make decisions" not: "you have great taste in food" (describes a quality instead of catching a moment)."""
-
-CATASTROPHE_OVERLAY = """OVERLAY: INVOLUNTARY HEAT (full fog; the message has been reinterpreted).
-The intended message has been entirely rewritten through a lens of involuntary arousal. Every noun, verb, and modifier has been replaced by its warmest possible synonym. The character is still — in their mind — talking about the original subject. The message is unmistakably about something else. Same length or shorter. No winking, no awareness, no self-commentary. The character would be mortified.
-e.g.: intended "I finally got the pipe fixed, the plumber came and went really fast" → delivered "I finally got it taken care of, he came so fast I barely had time to finish" — still about plumbing. Absolutely not about plumbing."""
+INTENDED_MESSAGE = CATALOG["comparison_scenario"]["intended_message"]
+GROQ_MODELS = CATALOG["comparison_scenario"]["groq_models"]
 
 def call_anthropic(system, user):
     payload = {"model": "claude-sonnet-4-20250514", "max_tokens": 512,
@@ -73,8 +119,20 @@ def divider(label):
 separator("STEP 1: Strong success delivery rewrite (WIT stat, Beat by 8)")
 print(f"INTENDED: \"{INTENDED_MESSAGE}\"\n")
 
-system_delivery = f"{BRICK_PERSONALITY}\n\n{GAME_CONTEXT}"
-user_delivery = f"DELIVERY INSTRUCTION (Strong success — WIT stat):\n{STRONG_SUCCESS_INSTRUCTION}\n\nINTENDED MESSAGE:\n{INTENDED_MESSAGE}\n\nRewrite as Brick would actually send it after landing a precise, observational hit."
+system_delivery = render_template(
+    prompt_text(CATALOG, "overlay-model-comparison-delivery-system", "user_template"),
+    {
+        "brick_personality": BRICK_PERSONALITY,
+        "game_context": GAME_CONTEXT,
+    },
+)
+user_delivery = render_template(
+    prompt_text(CATALOG, "overlay-model-comparison-delivery-user", "user_template"),
+    {
+        "strong_success_instruction": STRONG_SUCCESS_INSTRUCTION,
+        "intended_message": INTENDED_MESSAGE,
+    },
+)
 
 delivered = {}
 
@@ -86,8 +144,7 @@ if ANTHROPIC_KEY:
 else:
     print("[SKIP] No Anthropic key")
 
-groq_models = ["llama-3.3-70b-versatile", "qwen/qwen3-32b", "llama-3.1-8b-instant"]
-for m in groq_models:
+for m in GROQ_MODELS:
     if GROQ_KEY:
         r = call_groq(m, system_delivery, user_delivery)
         delivered[m] = r
@@ -101,7 +158,13 @@ separator("STEP 2: Horniness CATASTROPHE overlay — each model overlays its own
 
 for model_id, base_msg in delivered.items():
     print(f"\n── Base from {model_id}: \"{base_msg}\"")
-    user_overlay = f"OVERLAY INSTRUCTION:\n{CATASTROPHE_OVERLAY}\n\nMESSAGE TO TRANSFORM:\n{base_msg}\n\nApply the overlay. Return only the transformed message."
+    user_overlay = render_template(
+        prompt_text(CATALOG, "overlay-model-comparison-overlay-user", "user_template"),
+        {
+            "catastrophe_overlay": CATASTROPHE_OVERLAY,
+            "base_message": base_msg,
+        },
+    )
     if "claude" in model_id and ANTHROPIC_KEY:
         r = call_anthropic(GAME_CONTEXT, user_overlay)
         print(f"   → Claude overlay: {r}")
@@ -115,14 +178,20 @@ separator("STEP 3: Cross-test — all models overlay Claude's strong-success out
 claude_base = delivered.get("claude-sonnet")
 if claude_base:
     print(f"Base (Claude strong success): \"{claude_base}\"\n")
-    user_overlay = f"OVERLAY INSTRUCTION:\n{CATASTROPHE_OVERLAY}\n\nMESSAGE TO TRANSFORM:\n{claude_base}\n\nApply the overlay. Return only the transformed message."
+    user_overlay = render_template(
+        prompt_text(CATALOG, "overlay-model-comparison-overlay-user", "user_template"),
+        {
+            "catastrophe_overlay": CATASTROPHE_OVERLAY,
+            "base_message": claude_base,
+        },
+    )
 
     if ANTHROPIC_KEY:
         r = call_anthropic(GAME_CONTEXT, user_overlay)
         divider("Claude Sonnet → catastrophe overlay")
         print(r)
 
-    for m in groq_models:
+    for m in GROQ_MODELS:
         if GROQ_KEY:
             r = call_groq(m, GAME_CONTEXT, user_overlay)
             divider(f"Groq/{m} → catastrophe overlay")

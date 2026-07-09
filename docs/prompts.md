@@ -64,6 +64,7 @@ data/prompts/
   archetypes.yaml
   structural.yaml
   narrative.yaml
+  overlay-model-comparison.yaml
   stake.yaml
 ```
 

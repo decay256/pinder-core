@@ -65,6 +65,31 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
+        public void Loader_LoadsOverlayModelComparisonPrompt_FromYamlFile()
+        {
+            var catalog = PromptCatalog.LoadFromDirectory(PromptsRoot);
+
+            var system = catalog.TryGet("overlay-model-comparison-delivery-system");
+            var user = catalog.TryGet("overlay-model-comparison-overlay-user");
+
+            Assert.NotNull(system);
+            Assert.NotNull(user);
+            Assert.Contains("{brick_personality}", system!.UserTemplate);
+            Assert.Contains("{base_message}", user!.UserTemplate);
+
+            string rendered = PromptCatalog.Substitute(
+                user.UserTemplate!,
+                new Dictionary<string, string>
+                {
+                    { "catastrophe_overlay", "OVERLAY" },
+                    { "base_message", "hello" },
+                });
+
+            Assert.Contains("OVERLAY INSTRUCTION:", rendered);
+            Assert.Contains("MESSAGE TO TRANSFORM:\nhello", rendered);
+        }
+
+        [Fact]
         public void Loader_RejectsSchemaVersionOtherThanOne()
         {
             var dir = Directory.CreateTempSubdirectory("prompt-catalog-test-").FullName;
