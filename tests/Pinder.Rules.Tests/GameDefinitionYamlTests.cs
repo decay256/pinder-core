@@ -42,6 +42,8 @@ namespace Pinder.Rules.Tests
             "shadow_dc_bias",
             "horniness_dc_bias",
             "active_trap_interest_penalty",
+            "hunger_for_intimacy",
+            "terror_of_rejection",
             "xp_flat_awards",
             "xp_success_base",
             "xp_risk_multipliers",
