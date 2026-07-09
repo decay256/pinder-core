@@ -31,7 +31,7 @@ namespace Pinder.LlmAdapters.Tests
                     { ""stat"": ""Charm"", ""text"": ""CONTEXT: tool message"", ""callback"": ""none"", ""combo"": ""none"", ""tell_bonus"": false, ""weakness_window"": false }
                 ]
             }");
-            var result = DialogueOptionParsers.ParseDialogueOptionsTool(json, new[] { StatType.Charm, StatType.Honesty, StatType.Wit, StatType.Chaos });
+            var result = DialogueOptionParsers.ParseDialogueOptionsTool(json, new[] { StatType.Charm });
             
             Assert.Equal("tool message", result![0].IntendedText);
         }

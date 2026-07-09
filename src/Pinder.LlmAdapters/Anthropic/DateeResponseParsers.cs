@@ -148,71 +148,89 @@ namespace Pinder.LlmAdapters.Anthropic
         /// Gameplay production uses strict validation logic.
         /// </para>
         /// </summary>
-        public static DateeResponse? ParseDateeResponseTool(
+        internal static DateeResponse? ParseDateeResponseTool(
             JObject toolInput,
             Action<OperationalDiagnosticEvent>? onDiagnostic = null)
         {
             try
             {
-                var message = toolInput.Value<string>("message");
-                if (string.IsNullOrWhiteSpace(message))
+                if (!TryReadRequiredString(toolInput, "message", out var message))
                     return null;
 
                 // Strip persona self-tag tics ("/end", "/rant") that must never persist to chat history.
                 message = StripPersonaSelfTags(message);
 
+                var valid = true;
                 Tell? tell = null;
-                var tellObj = toolInput["tell"] as JObject;
-                if (tellObj != null)
+                if (toolInput.TryGetValue("tell", out var tellToken) && tellToken.Type != JTokenType.Null)
                 {
-                    var statStr = StatNameNormalizer.NormalizeStatName(tellObj.Value<string>("stat") ?? "");
-                    try
+                    if (tellToken is JObject tellObj &&
+                        TryReadRequiredString(tellObj, "stat", out var rawStat) &&
+                        TryReadRequiredString(tellObj, "description", out var desc))
                     {
-                        var stat = (StatType)Enum.Parse(typeof(StatType), statStr, true);
-                        var desc = tellObj.Value<string>("description") ?? "";
-                        tell = new Tell(stat, desc);
-                    }
-                    catch (ArgumentException ex)
-                    {
-                        OperationalDiagnostics.Emit(
-                            onDiagnostic,
-                            new OperationalDiagnosticEvent(
-                                "DateeResponseParsers",
+                        var statStr = StatNameNormalizer.NormalizeStatName(rawStat);
+                        try
+                        {
+                            var stat = (StatType)Enum.Parse(typeof(StatType), statStr, true);
+                            tell = new Tell(stat, desc);
+                        }
+                        catch (ArgumentException ex)
+                        {
+                            valid = false;
+                            EmitInvalidToolDiagnostic(
+                                onDiagnostic,
                                 "TellStatParseFailure",
-                                OperationalDiagnosticSeverity.Warning,
-                                $"Failed to parse Tell stat '{statStr}': {ex.Message}. Dropping Tell mechanic.",
-                                ex));
-                        // tell stays null
+                                $"Failed to parse Tell stat '{statStr}': {ex.Message}.",
+                                ex);
+                        }
+                    }
+                    else
+                    {
+                        valid = false;
+                        EmitInvalidToolDiagnostic(
+                            onDiagnostic,
+                            "TellSchemaValidationFailure",
+                            "Tell signal is missing required stat or description.",
+                            null);
                     }
                 }
 
                 WeaknessWindow? weakness = null;
-                var weakObj = toolInput["weakness"] as JObject;
-                if (weakObj != null)
+                if (toolInput.TryGetValue("weakness", out var weakToken) && weakToken.Type != JTokenType.Null)
                 {
-                    var statStr = StatNameNormalizer.NormalizeStatName(weakObj.Value<string>("defending_stat") ?? "");
-                    try
+                    if (weakToken is JObject weakObj &&
+                        TryReadRequiredString(weakObj, "defending_stat", out var rawStat) &&
+                        TryReadRequiredPositiveInt(weakObj, "dc_reduction", out var reduction))
                     {
-                        var stat = (StatType)Enum.Parse(typeof(StatType), statStr, true);
-                        var reduction = weakObj.Value<int?>("dc_reduction") ?? 0;
-                        if (reduction > 0)
+                        var statStr = StatNameNormalizer.NormalizeStatName(rawStat);
+                        try
                         {
+                            var stat = (StatType)Enum.Parse(typeof(StatType), statStr, true);
                             weakness = new WeaknessWindow(stat, reduction);
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        OperationalDiagnostics.Emit(
-                            onDiagnostic,
-                            new OperationalDiagnosticEvent(
-                                "DateeResponseParsers",
+                        catch (Exception ex)
+                        {
+                            valid = false;
+                            EmitInvalidToolDiagnostic(
+                                onDiagnostic,
                                 "WeaknessWindowStatParseFailure",
-                                OperationalDiagnosticSeverity.Warning,
-                                $"Failed to parse Weakness Window (stat='{statStr}'): {ex.Message}. Dropping Weakness mechanic.",
-                                ex));
-                        // weakness stays null
+                                $"Failed to parse Weakness Window stat '{statStr}': {ex.Message}.",
+                                ex);
+                        }
+                    }
+                    else
+                    {
+                        valid = false;
+                        EmitInvalidToolDiagnostic(
+                            onDiagnostic,
+                            "WeaknessWindowSchemaValidationFailure",
+                            "Weakness signal is missing required defending_stat or positive dc_reduction.",
+                            null);
                     }
                 }
+
+                if (!valid)
+                    return null;
 
                 return new DateeResponse(message, tell, weakness);
             }
@@ -220,6 +238,42 @@ namespace Pinder.LlmAdapters.Anthropic
             {
                 return null; // Malformed — fall back to text parsing
             }
+        }
+
+        private static bool TryReadRequiredString(JObject obj, string propertyName, out string value)
+        {
+            value = string.Empty;
+            if (!obj.TryGetValue(propertyName, out var token) || token.Type != JTokenType.String)
+                return false;
+
+            value = token.Value<string>()?.Trim() ?? string.Empty;
+            return !string.IsNullOrWhiteSpace(value);
+        }
+
+        private static bool TryReadRequiredPositiveInt(JObject obj, string propertyName, out int value)
+        {
+            value = 0;
+            if (!obj.TryGetValue(propertyName, out var token) || token.Type != JTokenType.Integer)
+                return false;
+
+            value = token.Value<int>();
+            return value > 0;
+        }
+
+        private static void EmitInvalidToolDiagnostic(
+            Action<OperationalDiagnosticEvent>? onDiagnostic,
+            string eventName,
+            string message,
+            Exception? exception)
+        {
+            OperationalDiagnostics.Emit(
+                onDiagnostic,
+                new OperationalDiagnosticEvent(
+                    "DateeResponseParsers",
+                    eventName,
+                    OperationalDiagnosticSeverity.Warning,
+                    message,
+                    exception));
         }
     }
 }

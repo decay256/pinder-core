@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using Newtonsoft.Json.Linq;
 using Pinder.LlmAdapters.Anthropic;
 using Xunit;
@@ -23,6 +24,9 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             Assert.Equal(
                 assetProps!["text"]!["description"]!.Value<string>(),
                 toolProps!["text"]!["description"]!.Value<string>());
+            var required = tool.InputSchema["properties"]!["options"]!["items"]!["required"]!.Values<string>().ToArray();
+            Assert.Contains("callback", required);
+            Assert.Contains("combo", required);
             Assert.Equal(3, tool.InputSchema["properties"]!["options"]!["minItems"]!.Value<int>());
             Assert.Equal(3, tool.InputSchema["properties"]!["options"]!["maxItems"]!.Value<int>());
         }
@@ -37,6 +41,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             Assert.Equal(
                 asset["input_schema"]!["properties"]!["tell"]!["description"]!.Value<string>(),
                 ToolSchemas.DateeResponse.InputSchema["properties"]!["tell"]!["description"]!.Value<string>());
+            Assert.Equal(1, ToolSchemas.DateeResponse.InputSchema["properties"]!["weakness"]!["properties"]!["dc_reduction"]!["minimum"]!.Value<int>());
         }
 
         [Fact]

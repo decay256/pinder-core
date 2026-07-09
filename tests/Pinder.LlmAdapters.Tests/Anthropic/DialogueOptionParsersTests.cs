@@ -74,7 +74,8 @@ OPTION_3 [STAT: Honesty] ""I just wanted to say hi."" [CALLBACK: turn_5] [COMBO:
                 ""options"": [
                     { ""stat"": ""Charm"", ""text"": ""Hey!"", ""callback"": ""none"", ""combo"": ""none"", ""tell_bonus"": false, ""weakness_window"": false },
                     { ""stat"": ""Wit"", ""text"": ""Nice one."", ""callback"": ""3"", ""combo"": ""Joker"", ""tell_bonus"": true, ""weakness_window"": true },
-                    { ""stat"": ""Honesty"", ""text"": ""Truth."", ""callback"": ""null"", ""combo"": ""null"", ""tell_bonus"": false, ""weakness_window"": false }
+                    { ""stat"": ""Honesty"", ""text"": ""Truth."", ""callback"": ""null"", ""combo"": ""null"", ""tell_bonus"": false, ""weakness_window"": false },
+                    { ""stat"": ""Chaos"", ""text"": ""Chaos."", ""callback"": null, ""combo"": null, ""tell_bonus"": false, ""weakness_window"": false }
                 ]
             }");
 
@@ -106,6 +107,31 @@ OPTION_3 [STAT: Honesty] ""I just wanted to say hi."" [CALLBACK: turn_5] [COMBO:
         {
             var json = JObject.Parse(@"{ ""garbage"": true }");
             var result = DialogueOptionParsers.ParseDialogueOptionsTool(json, new[] { StatType.Charm, StatType.Honesty, StatType.Wit, StatType.Chaos });
+            Assert.Null(result);
+        }
+
+        [Theory]
+        [InlineData("stat")]
+        [InlineData("text")]
+        [InlineData("callback")]
+        [InlineData("combo")]
+        [InlineData("tell_bonus")]
+        [InlineData("weakness_window")]
+        public void ParseDialogueOptionsTool_MissingRequiredOptionField_ReturnsNull(string missingField)
+        {
+            var option = JObject.Parse(@"{
+                ""stat"": ""Charm"",
+                ""text"": ""Hey!"",
+                ""callback"": ""none"",
+                ""combo"": ""none"",
+                ""tell_bonus"": false,
+                ""weakness_window"": false
+            }");
+            option.Remove(missingField);
+            var json = new JObject { ["options"] = new JArray(option) };
+
+            var result = DialogueOptionParsers.ParseDialogueOptionsTool(json, new[] { StatType.Charm });
+
             Assert.Null(result);
         }
 
@@ -191,23 +217,21 @@ OPTION_3 [STAT: Charm] ""A charm"" [CALLBACK: none] [COMBO: none] [TELL_BONUS: n
         }
 
         [Fact]
-        public void ParseDialogueOptionsTool_DuplicateStats_ReconcilesAgainstAvailableStats()
+        public void ParseDialogueOptionsTool_DuplicateStats_ReturnsNull()
         {
             var json = JObject.Parse(@"{
                 ""options"": [
-                    { ""stat"": ""Honesty"", ""text"": ""First honesty"" },
-                    { ""stat"": ""Honesty"", ""text"": ""Second honesty"" },
-                    { ""stat"": ""Charm"", ""text"": ""A charm"" }
+                    { ""stat"": ""Honesty"", ""text"": ""First honesty"", ""callback"": ""none"", ""combo"": ""none"", ""tell_bonus"": false, ""weakness_window"": false },
+                    { ""stat"": ""Honesty"", ""text"": ""Second honesty"", ""callback"": ""none"", ""combo"": ""none"", ""tell_bonus"": false, ""weakness_window"": false },
+                    { ""stat"": ""Charm"", ""text"": ""A charm"", ""callback"": ""none"", ""combo"": ""none"", ""tell_bonus"": false, ""weakness_window"": false },
+                    { ""stat"": ""Chaos"", ""text"": ""A chaos"", ""callback"": ""none"", ""combo"": ""none"", ""tell_bonus"": false, ""weakness_window"": false }
                 ]
             }");
 
             var drawnStats = new[] { StatType.Honesty, StatType.Charm, StatType.Wit, StatType.Chaos };
             var result = DialogueOptionParsers.ParseDialogueOptionsTool(json, drawnStats);
 
-            Assert.NotNull(result);
-            Assert.Equal(4, result!.Length);
-            var resultStats = result.Select(r => r.Stat).Distinct().ToList();
-            Assert.Equal(4, resultStats.Count);
+            Assert.Null(result);
         }
 
         [Fact]

@@ -33,6 +33,7 @@
           },
           "dc_reduction": {
             "type": "integer",
+            "minimum": 1,
             "description": "How much the DC is reduced by (positive integer)."
           }
         },

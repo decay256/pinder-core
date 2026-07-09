@@ -56,7 +56,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             var drawnStats = allStats.Take(n).ToArray();
 
             var optionsArray = new JArray();
-            for (int i = 0; i < n + 2; i++)
+            for (int i = 0; i < n; i++)
             {
                 optionsArray.Add(new JObject
                 {

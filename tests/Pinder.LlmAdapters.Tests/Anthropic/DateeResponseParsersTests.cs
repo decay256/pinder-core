@@ -197,7 +197,7 @@ TELL: SELF_AWARENESS (knows her flaws)";
         }
 
         [Fact]
-        public void ParseDateeResponseTool_InvalidStatOrWeakness_ReportsDiagnosticsAndGracefullyHandles()
+        public void ParseDateeResponseTool_InvalidStatOrWeakness_ReportsDiagnosticsAndReturnsNull()
         {
             var json = JObject.Parse(@"{
                 ""message"": ""Hello there!"",
@@ -208,10 +208,7 @@ TELL: SELF_AWARENESS (knows her flaws)";
             var diagnostics = new System.Collections.Generic.List<OperationalDiagnosticEvent>();
             var result = DateeResponseParsers.ParseDateeResponseTool(json, diagnostics.Add);
 
-            Assert.NotNull(result);
-            Assert.Equal("Hello there!", result!.MessageText);
-            Assert.Null(result.DetectedTell);
-            Assert.Null(result.WeaknessWindow);
+            Assert.Null(result);
 
             Assert.Collection(
                 diagnostics,
@@ -229,6 +226,55 @@ TELL: SELF_AWARENESS (knows her flaws)";
                     Assert.Contains("AnotherInvalidStat", weakness.Message);
                     Assert.Equal(OperationalDiagnosticSeverity.Warning, weakness.Severity);
                 });
+        }
+
+        [Theory]
+        [InlineData("stat")]
+        [InlineData("description")]
+        public void ParseDateeResponseTool_TellMissingRequiredField_ReturnsNull(string missingField)
+        {
+            var tell = JObject.Parse(@"{ ""stat"": ""Charm"", ""description"": ""avoiding eye contact"" }");
+            tell.Remove(missingField);
+            var json = new JObject
+            {
+                ["message"] = "Hello there!",
+                ["tell"] = tell
+            };
+
+            var result = DateeResponseParsers.ParseDateeResponseTool(json);
+
+            Assert.Null(result);
+        }
+
+        [Theory]
+        [InlineData("defending_stat")]
+        [InlineData("dc_reduction")]
+        public void ParseDateeResponseTool_WeaknessMissingRequiredField_ReturnsNull(string missingField)
+        {
+            var weakness = JObject.Parse(@"{ ""defending_stat"": ""Chaos"", ""dc_reduction"": 3 }");
+            weakness.Remove(missingField);
+            var json = new JObject
+            {
+                ["message"] = "Hello there!",
+                ["weakness"] = weakness
+            };
+
+            var result = DateeResponseParsers.ParseDateeResponseTool(json);
+
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public void ParseDateeResponseTool_WeaknessZeroReduction_ReturnsNull()
+        {
+            var json = JObject.Parse(@"{
+                ""message"": ""Hello there!"",
+                ""weakness"": { ""defending_stat"": ""Chaos"", ""dc_reduction"": 0 }
+            }");
+
+            var result = DateeResponseParsers.ParseDateeResponseTool(json);
+
+            Assert.Null(result);
         }
     }
 }

@@ -34,7 +34,7 @@
               "description": "Whether a weakness window is active for this option."
             }
           },
-          "required": ["stat", "text", "tell_bonus", "weakness_window"]
+          "required": ["stat", "text", "callback", "combo", "tell_bonus", "weakness_window"]
         },
         "minItems": 4,
         "maxItems": 4

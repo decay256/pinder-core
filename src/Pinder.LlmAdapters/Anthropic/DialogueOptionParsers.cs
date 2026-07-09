@@ -173,7 +173,7 @@ namespace Pinder.LlmAdapters.Anthropic
         /// Gameplay production uses the strict path (ParseDialogueOptionsStrict).
         /// </para>
         /// </summary>
-        public static DialogueOption[]? ParseDialogueOptionsTool(JObject toolInput, StatType[]? availableStats = null)
+        internal static DialogueOption[]? ParseDialogueOptionsTool(JObject toolInput, StatType[]? availableStats = null)
         {
             try
             {
@@ -181,13 +181,22 @@ namespace Pinder.LlmAdapters.Anthropic
                 if (optionsArray == null || optionsArray.Count == 0)
                     return null;
 
-                int count = availableStats != null ? availableStats.Length : DefaultPaddingStats.Length;
+                int? expectedCount = availableStats != null ? availableStats.Length : (int?)null;
+                if (expectedCount.HasValue && optionsArray.Count != expectedCount.Value)
+                    return null;
+
+                var allowedStats = availableStats != null ? new HashSet<StatType>(availableStats) : null;
+                var usedStats = new HashSet<StatType>();
                 var parsed = new List<DialogueOption>();
                 foreach (var item in optionsArray)
                 {
-                    if (parsed.Count >= count) break;
+                    if (!(item is JObject optionObj))
+                        return null;
 
-                    var statStr = StatNameNormalizer.NormalizeStatName(item.Value<string>("stat") ?? "");
+                    if (!TryReadRequiredString(optionObj, "stat", out var rawStat))
+                        return null;
+
+                    var statStr = StatNameNormalizer.NormalizeStatName(rawStat);
                     StatType stat;
                     try
                     {
@@ -195,56 +204,122 @@ namespace Pinder.LlmAdapters.Anthropic
                     }
                     catch (ArgumentException)
                     {
-                        continue; // Invalid stat — skip
+                        return null;
                     }
 
-                    var text = item.Value<string>("text");
-                    if (string.IsNullOrWhiteSpace(text)) continue;
+                    if ((allowedStats != null && !allowedStats.Contains(stat)) || !usedStats.Add(stat))
+                        return null;
+
+                    if (!TryReadRequiredString(optionObj, "text", out var text))
+                        return null;
 
                     text = MetaPrefixStripper.Strip(text.Trim());
+                    if (text.Length < MinPlayableOptionLength)
+                        return null;
 
-                    // Parse callback
-                    int? callbackTurn = null;
-                    var callbackVal = item.Value<string>("callback");
-                    if (!string.IsNullOrEmpty(callbackVal) &&
-                        !string.Equals(callbackVal, "none", StringComparison.OrdinalIgnoreCase) &&
-                        !string.Equals(callbackVal, "null", StringComparison.OrdinalIgnoreCase))
+                    if (!TryParseRequiredCallback(optionObj, out var callbackTurn))
+                        return null;
+
+                    if (!TryParseRequiredCombo(optionObj, out var comboName))
+                        return null;
+
+                    if (!TryReadRequiredBool(optionObj, "tell_bonus", out var tellBonus) ||
+                        !TryReadRequiredBool(optionObj, "weakness_window", out var weaknessWindow))
                     {
-                        if (int.TryParse(callbackVal, out int turnNum))
-                        {
-                            callbackTurn = turnNum;
-                        }
-                        else if (callbackVal.StartsWith("turn_", StringComparison.OrdinalIgnoreCase) &&
-                                 int.TryParse(callbackVal.Substring(5), out int turnNum2))
-                        {
-                            callbackTurn = turnNum2;
-                        }
+                        return null;
                     }
-
-                    // Parse combo
-                    string? comboName = null;
-                    var comboVal = item.Value<string>("combo");
-                    if (!string.IsNullOrEmpty(comboVal) &&
-                        !string.Equals(comboVal, "none", StringComparison.OrdinalIgnoreCase) &&
-                        !string.Equals(comboVal, "null", StringComparison.OrdinalIgnoreCase))
-                    {
-                        comboName = comboVal;
-                    }
-
-                    var tellBonus = item.Value<bool?>("tell_bonus") ?? false;
-                    var weaknessWindow = item.Value<bool?>("weakness_window") ?? false;
 
                     parsed.Add(new DialogueOption(
                         stat, text, callbackTurn, comboName, tellBonus, weaknessWindow));
                 }
 
                 if (parsed.Count == 0) return null;
-                return ReconcileAndPadDialogueOptions(parsed, availableStats);
+                return parsed.ToArray();
             }
             catch
             {
-                return null; // Malformed — fall back to text parsing
+                return null; // Malformed - fall back to text parsing
             }
+        }
+
+        private static bool TryReadRequiredString(JObject obj, string propertyName, out string value)
+        {
+            value = string.Empty;
+            if (!obj.TryGetValue(propertyName, out var token) || token.Type != JTokenType.String)
+                return false;
+
+            value = token.Value<string>()?.Trim() ?? string.Empty;
+            return !string.IsNullOrWhiteSpace(value);
+        }
+
+        private static bool TryReadRequiredBool(JObject obj, string propertyName, out bool value)
+        {
+            value = false;
+            if (!obj.TryGetValue(propertyName, out var token) || token.Type != JTokenType.Boolean)
+                return false;
+
+            value = token.Value<bool>();
+            return true;
+        }
+
+        private static bool TryParseRequiredCallback(JObject obj, out int? callbackTurn)
+        {
+            callbackTurn = null;
+            if (!obj.TryGetValue("callback", out var token))
+                return false;
+
+            if (token.Type == JTokenType.Null)
+                return true;
+
+            if (token.Type != JTokenType.String)
+                return false;
+
+            var callbackVal = token.Value<string>()?.Trim();
+            if (string.IsNullOrEmpty(callbackVal) ||
+                string.Equals(callbackVal, "none", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(callbackVal, "null", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            if (int.TryParse(callbackVal, out int turnNum))
+            {
+                callbackTurn = turnNum;
+                return true;
+            }
+
+            if (callbackVal.StartsWith("turn_", StringComparison.OrdinalIgnoreCase) &&
+                int.TryParse(callbackVal.Substring(5), out int turnNum2))
+            {
+                callbackTurn = turnNum2;
+                return true;
+            }
+
+            return false;
+        }
+
+        private static bool TryParseRequiredCombo(JObject obj, out string? comboName)
+        {
+            comboName = null;
+            if (!obj.TryGetValue("combo", out var token))
+                return false;
+
+            if (token.Type == JTokenType.Null)
+                return true;
+
+            if (token.Type != JTokenType.String)
+                return false;
+
+            var comboVal = token.Value<string>()?.Trim();
+            if (string.IsNullOrEmpty(comboVal) ||
+                string.Equals(comboVal, "none", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(comboVal, "null", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            comboName = comboVal;
+            return true;
         }
 
         /// <summary>
