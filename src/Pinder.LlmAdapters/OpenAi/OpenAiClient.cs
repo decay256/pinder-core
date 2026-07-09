@@ -126,104 +126,107 @@ namespace Pinder.LlmAdapters.OpenAi
                             exceptionType: ex.GetType().Name);
                         throw;
                     }
-                    int statusCode = (int)response.StatusCode;
-
-                    if (response.IsSuccessStatusCode)
+                    using (response)
                     {
-                        var body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                        try
+                        int statusCode = (int)response.StatusCode;
+
+                        if (response.IsSuccessStatusCode)
                         {
-                            var json = JObject.Parse(body);
-                            string text = ExtractAssistantText(json);
-                            LlmCallTelemetry.Emit(
-                                telemetry,
-                                LlmCallTelemetryEventNames.Completed,
-                                provider,
-                                model,
-                                phase,
-                                statusCode,
-                                attempt,
-                                retryAfter: null,
-                                duration: duration.Elapsed);
-                            return (text, json);
-                        }
-                        catch (InvalidOperationException ex)
-                        {
-                            // ExtractAssistantText raises a typed error for malformed shapes;
-                            // re-throw without wrapping to preserve the message.
-                            EmitFailedTelemetry(telemetry, provider, model, phase, statusCode, attempt, duration, ex);
-                            throw;
-                        }
-                        catch (Exception)
-                        {
-                            var wrapped = new InvalidOperationException(
-                                LlmDiagnosticFormatter.ProviderFailure(
+                            var body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            try
+                            {
+                                var json = JObject.Parse(body);
+                                string text = ExtractAssistantText(json);
+                                LlmCallTelemetry.Emit(
+                                    telemetry,
+                                    LlmCallTelemetryEventNames.Completed,
                                     provider,
-                                    "OpenAI-compatible API returned a malformed response.",
+                                    model,
+                                    phase,
+                                    statusCode,
+                                    attempt,
+                                    retryAfter: null,
+                                    duration: duration.Elapsed);
+                                return (text, json);
+                            }
+                            catch (InvalidOperationException ex)
+                            {
+                                // ExtractAssistantText raises a typed error for malformed shapes;
+                                // re-throw without wrapping to preserve the message.
+                                EmitFailedTelemetry(telemetry, provider, model, phase, statusCode, attempt, duration, ex);
+                                throw;
+                            }
+                            catch (Exception)
+                            {
+                                var wrapped = new InvalidOperationException(
+                                    LlmDiagnosticFormatter.ProviderFailure(
+                                        provider,
+                                        "OpenAI-compatible API returned a malformed response.",
+                                        statusCode: statusCode,
+                                        model: model,
+                                        phase: phase,
+                                        body: body));
+                                EmitFailedTelemetry(telemetry, provider, model, phase, statusCode, attempt, duration, wrapped);
+                                throw wrapped;
+                            }
+                        }
+
+                        var errorBody = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+                        if (statusCode == 429)
+                        {
+                            if (retries429 >= MaxRetries429)
+                            {
+                                var ex = new HttpRequestException(LlmDiagnosticFormatter.ProviderFailure(
+                                    provider,
+                                    $"OpenAI-compatible API rate limited after {MaxRetries429} retries.",
                                     statusCode: statusCode,
                                     model: model,
                                     phase: phase,
-                                    body: body));
-                            EmitFailedTelemetry(telemetry, provider, model, phase, statusCode, attempt, duration, wrapped);
-                            throw wrapped;
+                                    body: errorBody));
+                                EmitFailedTelemetry(telemetry, provider, model, phase, statusCode, attempt, duration, ex);
+                                throw ex;
+                            }
+                            retries429++;
+                            var delay = GetRetryAfterDelay(response);
+                            EmitRetryTelemetry(telemetry, provider, model, phase, statusCode, attempt, delay, duration);
+                            attempt++;
+                            await Task.Delay(delay, ct).ConfigureAwait(false);
+                            continue;
                         }
-                    }
 
-                    var errorBody = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-
-                    if (statusCode == 429)
-                    {
-                        if (retries429 >= MaxRetries429)
+                        if (statusCode >= 500 && statusCode < 600)
                         {
-                            var ex = new HttpRequestException(LlmDiagnosticFormatter.ProviderFailure(
-                                provider,
-                                $"OpenAI-compatible API rate limited after {MaxRetries429} retries.",
-                                statusCode: statusCode,
-                                model: model,
-                                phase: phase,
-                                body: errorBody));
-                            EmitFailedTelemetry(telemetry, provider, model, phase, statusCode, attempt, duration, ex);
-                            throw ex;
+                            if (retries5xx >= MaxRetries5xx)
+                            {
+                                var ex = new HttpRequestException(LlmDiagnosticFormatter.ProviderFailure(
+                                    provider,
+                                    $"OpenAI-compatible API server error after {MaxRetries5xx} retries.",
+                                    statusCode: statusCode,
+                                    model: model,
+                                    phase: phase,
+                                    body: errorBody));
+                                EmitFailedTelemetry(telemetry, provider, model, phase, statusCode, attempt, duration, ex);
+                                throw ex;
+                            }
+                            retries5xx++;
+                            var delay = TimeSpan.FromSeconds(1);
+                            EmitRetryTelemetry(telemetry, provider, model, phase, statusCode, attempt, delay, duration);
+                            attempt++;
+                            await Task.Delay(delay, ct).ConfigureAwait(false);
+                            continue;
                         }
-                        retries429++;
-                        var delay = GetRetryAfterDelay(response);
-                        EmitRetryTelemetry(telemetry, provider, model, phase, statusCode, attempt, delay, duration);
-                        attempt++;
-                        await Task.Delay(delay, ct).ConfigureAwait(false);
-                        continue;
-                    }
 
-                    if (statusCode >= 500 && statusCode < 600)
-                    {
-                        if (retries5xx >= MaxRetries5xx)
-                        {
-                            var ex = new HttpRequestException(LlmDiagnosticFormatter.ProviderFailure(
-                                provider,
-                                $"OpenAI-compatible API server error after {MaxRetries5xx} retries.",
-                                statusCode: statusCode,
-                                model: model,
-                                phase: phase,
-                                body: errorBody));
-                            EmitFailedTelemetry(telemetry, provider, model, phase, statusCode, attempt, duration, ex);
-                            throw ex;
-                        }
-                        retries5xx++;
-                        var delay = TimeSpan.FromSeconds(1);
-                        EmitRetryTelemetry(telemetry, provider, model, phase, statusCode, attempt, delay, duration);
-                        attempt++;
-                        await Task.Delay(delay, ct).ConfigureAwait(false);
-                        continue;
+                        var nonRetryable = new HttpRequestException(LlmDiagnosticFormatter.ProviderFailure(
+                            provider,
+                            "OpenAI-compatible API request failed.",
+                            statusCode: statusCode,
+                            model: model,
+                            phase: phase,
+                            body: errorBody));
+                        EmitFailedTelemetry(telemetry, provider, model, phase, statusCode, attempt, duration, nonRetryable);
+                        throw nonRetryable;
                     }
-
-                    var nonRetryable = new HttpRequestException(LlmDiagnosticFormatter.ProviderFailure(
-                        provider,
-                        "OpenAI-compatible API request failed.",
-                        statusCode: statusCode,
-                        model: model,
-                        phase: phase,
-                        body: errorBody));
-                    EmitFailedTelemetry(telemetry, provider, model, phase, statusCode, attempt, duration, nonRetryable);
-                    throw nonRetryable;
                 }
             }
         }

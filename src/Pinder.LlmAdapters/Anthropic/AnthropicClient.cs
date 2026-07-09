@@ -119,123 +119,126 @@ namespace Pinder.LlmAdapters.Anthropic
                             exceptionType: ex.GetType().Name);
                         throw;
                     }
-                    var statusCode = (int)response.StatusCode;
-
-                    if (response.IsSuccessStatusCode)
+                    using (response)
                     {
-                        var responseBody = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                        MessagesResponse? result;
-                        try
+                        var statusCode = (int)response.StatusCode;
+
+                        if (response.IsSuccessStatusCode)
                         {
-                            result = JsonConvert.DeserializeObject<MessagesResponse>(responseBody);
-                        }
-                        catch (JsonException ex)
-                        {
+                            var responseBody = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            MessagesResponse? result;
+                            try
+                            {
+                                result = JsonConvert.DeserializeObject<MessagesResponse>(responseBody);
+                            }
+                            catch (JsonException ex)
+                            {
+                                LlmCallTelemetry.Emit(
+                                    telemetry,
+                                    LlmCallTelemetryEventNames.Failed,
+                                    provider,
+                                    model,
+                                    phase,
+                                    statusCode,
+                                    attempt,
+                                    retryAfter: null,
+                                    duration: duration.Elapsed,
+                                    exceptionType: ex.GetType().Name);
+                                throw new AnthropicApiException(
+                                    statusCode,
+                                    responseBody,
+                                    "Anthropic API returned a malformed JSON response.");
+                            }
+                            if (result == null)
+                            {
+                                LlmCallTelemetry.Emit(
+                                    telemetry,
+                                    LlmCallTelemetryEventNames.Failed,
+                                    provider,
+                                    model,
+                                    phase,
+                                    statusCode,
+                                    attempt,
+                                    retryAfter: null,
+                                    duration: duration.Elapsed,
+                                    exceptionType: nameof(AnthropicApiException));
+                                throw new AnthropicApiException(
+                                    statusCode,
+                                    responseBody,
+                                    "Anthropic API response deserialized to null.");
+                            }
                             LlmCallTelemetry.Emit(
                                 telemetry,
-                                LlmCallTelemetryEventNames.Failed,
+                                LlmCallTelemetryEventNames.Completed,
                                 provider,
                                 model,
                                 phase,
                                 statusCode,
                                 attempt,
                                 retryAfter: null,
-                                duration: duration.Elapsed,
-                                exceptionType: ex.GetType().Name);
-                            throw new AnthropicApiException(
-                                statusCode,
-                                responseBody,
-                                "Anthropic API returned a malformed JSON response.");
+                                duration: duration.Elapsed);
+                            return result;
                         }
-                        if (result == null)
+
+                        var errorBody = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+                        // 429: rate-limited — retry with Retry-After
+                        if (statusCode == 429)
                         {
-                            LlmCallTelemetry.Emit(
-                                telemetry,
-                                LlmCallTelemetryEventNames.Failed,
-                                provider,
-                                model,
-                                phase,
-                                statusCode,
-                                attempt,
-                                retryAfter: null,
-                                duration: duration.Elapsed,
-                                exceptionType: nameof(AnthropicApiException));
-                            throw new AnthropicApiException(
-                                statusCode,
-                                responseBody,
-                                "Anthropic API response deserialized to null.");
+                            if (retries429 >= MaxRetries429)
+                            {
+                                var ex = new AnthropicApiException(statusCode, errorBody);
+                                EmitFailedTelemetry(telemetry, provider, model, phase, statusCode, attempt, duration, ex);
+                                throw ex;
+                            }
+                            retries429++;
+                            var delay = GetRetryAfterDelay(response);
+                            EmitRetryTelemetry(telemetry, provider, model, phase, statusCode, attempt, delay, duration);
+                            attempt++;
+                            await Task.Delay(delay, ct).ConfigureAwait(false);
+                            continue;
                         }
-                        LlmCallTelemetry.Emit(
-                            telemetry,
-                            LlmCallTelemetryEventNames.Completed,
-                            provider,
-                            model,
-                            phase,
-                            statusCode,
-                            attempt,
-                            retryAfter: null,
-                            duration: duration.Elapsed);
-                        return result;
-                    }
 
-                    var errorBody = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-
-                    // 429: rate-limited — retry with Retry-After
-                    if (statusCode == 429)
-                    {
-                        if (retries429 >= MaxRetries429)
+                        // 529: overloaded — exponential backoff
+                        if (statusCode == 529)
                         {
-                            var ex = new AnthropicApiException(statusCode, errorBody);
-                            EmitFailedTelemetry(telemetry, provider, model, phase, statusCode, attempt, duration, ex);
-                            throw ex;
+                            if (retries529 >= MaxRetries529)
+                            {
+                                var ex = new AnthropicApiException(statusCode, errorBody);
+                                EmitFailedTelemetry(telemetry, provider, model, phase, statusCode, attempt, duration, ex);
+                                throw ex;
+                            }
+                            retries529++;
+                            var delaySeconds = 1 << (retries529 - 1); // 1s, 2s, 4s
+                            var delay = TimeSpan.FromSeconds(delaySeconds);
+                            EmitRetryTelemetry(telemetry, provider, model, phase, statusCode, attempt, delay, duration);
+                            attempt++;
+                            await Task.Delay(delay, ct).ConfigureAwait(false);
+                            continue;
                         }
-                        retries429++;
-                        var delay = GetRetryAfterDelay(response);
-                        EmitRetryTelemetry(telemetry, provider, model, phase, statusCode, attempt, delay, duration);
-                        attempt++;
-                        await Task.Delay(delay, ct).ConfigureAwait(false);
-                        continue;
-                    }
 
-                    // 529: overloaded — exponential backoff
-                    if (statusCode == 529)
-                    {
-                        if (retries529 >= MaxRetries529)
+                        // Other 5xx: retry once with 1s delay
+                        if (statusCode >= 500 && statusCode < 600)
                         {
-                            var ex = new AnthropicApiException(statusCode, errorBody);
-                            EmitFailedTelemetry(telemetry, provider, model, phase, statusCode, attempt, duration, ex);
-                            throw ex;
+                            if (retries5xx >= MaxRetries5xx)
+                            {
+                                var ex = new AnthropicApiException(statusCode, errorBody);
+                                EmitFailedTelemetry(telemetry, provider, model, phase, statusCode, attempt, duration, ex);
+                                throw ex;
+                            }
+                            retries5xx++;
+                            var delay = TimeSpan.FromSeconds(1);
+                            EmitRetryTelemetry(telemetry, provider, model, phase, statusCode, attempt, delay, duration);
+                            attempt++;
+                            await Task.Delay(delay, ct).ConfigureAwait(false);
+                            continue;
                         }
-                        retries529++;
-                        var delaySeconds = 1 << (retries529 - 1); // 1s, 2s, 4s
-                        var delay = TimeSpan.FromSeconds(delaySeconds);
-                        EmitRetryTelemetry(telemetry, provider, model, phase, statusCode, attempt, delay, duration);
-                        attempt++;
-                        await Task.Delay(delay, ct).ConfigureAwait(false);
-                        continue;
-                    }
 
-                    // Other 5xx: retry once with 1s delay
-                    if (statusCode >= 500 && statusCode < 600)
-                    {
-                        if (retries5xx >= MaxRetries5xx)
-                        {
-                            var ex = new AnthropicApiException(statusCode, errorBody);
-                            EmitFailedTelemetry(telemetry, provider, model, phase, statusCode, attempt, duration, ex);
-                            throw ex;
-                        }
-                        retries5xx++;
-                        var delay = TimeSpan.FromSeconds(1);
-                        EmitRetryTelemetry(telemetry, provider, model, phase, statusCode, attempt, delay, duration);
-                        attempt++;
-                        await Task.Delay(delay, ct).ConfigureAwait(false);
-                        continue;
+                        // 4xx (not 429): throw immediately
+                        var nonRetryable = new AnthropicApiException(statusCode, errorBody);
+                        EmitFailedTelemetry(telemetry, provider, model, phase, statusCode, attempt, duration, nonRetryable);
+                        throw nonRetryable;
                     }
-
-                    // 4xx (not 429): throw immediately
-                    var nonRetryable = new AnthropicApiException(statusCode, errorBody);
-                    EmitFailedTelemetry(telemetry, provider, model, phase, statusCode, attempt, duration, nonRetryable);
-                    throw nonRetryable;
                 }
             }
         }
