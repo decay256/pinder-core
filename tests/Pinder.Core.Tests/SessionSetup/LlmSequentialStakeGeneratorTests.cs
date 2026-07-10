@@ -101,7 +101,7 @@ prompts:
                 Assert.Contains("Divorce", transport.LastUserMessage);
                 Assert.Equal(0.61, transport.LastTemperature);
                 Assert.Equal(777, transport.LastMaxTokens);
-                Assert.Equal(LlmPhase.Synthesis, transport.LastPhase);
+                Assert.Equal(LlmPhase.PsychologicalStake, transport.LastPhase);
                 Assert.Equal(1, transport.CallCount);
             }
             finally

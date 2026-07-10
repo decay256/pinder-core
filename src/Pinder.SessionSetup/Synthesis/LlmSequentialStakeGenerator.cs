@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
 using System.Text;
 using System.Threading;
@@ -32,25 +31,19 @@ namespace Pinder.SessionSetup
             Dictionary<string, BackstoryFact> backstory, 
             CancellationToken cancellationToken = default)
         {
-            var entry = _catalog.Get("stake");
-            var systemPrompt = entry.SystemPrompt!;
-            var userPromptTemplate = entry.UserTemplate!;
-            var userPrompt = PromptCatalog.Substitute(userPromptTemplate, new Dictionary<string, string>
-            {
-                { "character_profile", BuildBackstoryOnlyProfile(backstory) }
-            });
-
-            var llmResponse = await _transport.SendAsync(
-                systemPrompt,
-                userPrompt,
-                entry.Temperature!.Value,
-                entry.MaxTokens!.Value,
-                LlmPhase.Synthesis,
-                cancellationToken);
+            var stakeGenerator = new LlmStakeGenerator(
+                _transport,
+                streamingTransport: null,
+                options: null,
+                catalog: _catalog);
+            var llmResponse = await stakeGenerator.GenerateAsync(
+                characterName,
+                BuildBackstoryOnlyProfile(backstory),
+                cancellationToken).ConfigureAwait(false);
 
             try
             {
-                var list = ParseCanonicalStakeBullets(llmResponse);
+                var list = LlmStakeGenerator.ParseCanonicalStakeBullets(llmResponse);
                 if (list.Count != 15)
                 {
                     throw new FormatException(
@@ -76,36 +69,6 @@ namespace Pinder.SessionSetup
             sb.AppendLine("BACKSTORY JSON:");
             sb.Append(JsonSerializer.Serialize(backstory));
             return sb.ToString();
-        }
-
-        internal static List<string> ParseCanonicalStakeBullets(string llmResponse)
-        {
-            if (string.IsNullOrWhiteSpace(llmResponse))
-                throw new FormatException("Stake response was empty.");
-
-            var lines = llmResponse
-                .Split(new[] { "\r\n", "\n" }, StringSplitOptions.None)
-                .Select(line => line.Trim())
-                .Where(line => line.Length > 0)
-                .ToList();
-
-            if (lines.Count == 0)
-                throw new FormatException("Stake response contained no non-empty lines.");
-
-            var result = new List<string>(capacity: lines.Count);
-            foreach (var line in lines)
-            {
-                if (!line.StartsWith("- ", StringComparison.Ordinal))
-                    throw new FormatException("Canonical stake response must contain only '- ' markdown bullet lines.");
-
-                var body = line.Substring(2).Trim();
-                if (body.Length == 0)
-                    throw new FormatException("Canonical stake response contained an empty bullet.");
-
-                result.Add(body);
-            }
-
-            return result;
         }
     }
 }
