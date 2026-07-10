@@ -2,10 +2,10 @@ schema_version: 1
 
 # Manual overlay model comparison harness prompts.
 #
-# These prompts are consumed by scripts/test-overlay-models.py. They live in the
-# shared prompt catalog directory so outbound LLM instructions can be reviewed
-# and edited alongside production prompt surfaces instead of being embedded in
-# Python source.
+# These prompts are consumed by scripts/manual-overlay-model-comparison.py.
+# They live in the shared prompt catalog directory so outbound LLM instructions
+# can be reviewed and edited alongside production prompt surfaces instead of
+# being embedded in Python source.
 
 comparison_scenario:
   intended_message: >-
