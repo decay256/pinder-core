@@ -263,12 +263,12 @@ namespace Pinder.Core.Tests
         public void Constructor_ParsesAllStatTypes()
         {
             var json = @"[
-                { ""id"": ""t1"", ""stat"": ""charm"", ""effect"": ""disadvantage"", ""llm_instruction"": ""i1"" },
-                { ""id"": ""t2"", ""stat"": ""rizz"", ""effect"": ""disadvantage"", ""llm_instruction"": ""i2"" },
-                { ""id"": ""t3"", ""stat"": ""honesty"", ""effect"": ""disadvantage"", ""llm_instruction"": ""i3"" },
-                { ""id"": ""t4"", ""stat"": ""chaos"", ""effect"": ""disadvantage"", ""llm_instruction"": ""i4"" },
-                { ""id"": ""t5"", ""stat"": ""wit"", ""effect"": ""disadvantage"", ""llm_instruction"": ""i5"" },
-                { ""id"": ""t6"", ""stat"": ""self_awareness"", ""effect"": ""disadvantage"", ""llm_instruction"": ""i6"" }
+                { ""id"": ""t1"", ""stat"": ""charm"", ""effect"": ""disadvantage"", ""effect_value"": 0, ""duration_turns"": 1, ""llm_instruction"": ""i1"" },
+                { ""id"": ""t2"", ""stat"": ""rizz"", ""effect"": ""disadvantage"", ""effect_value"": 0, ""duration_turns"": 1, ""llm_instruction"": ""i2"" },
+                { ""id"": ""t3"", ""stat"": ""honesty"", ""effect"": ""disadvantage"", ""effect_value"": 0, ""duration_turns"": 1, ""llm_instruction"": ""i3"" },
+                { ""id"": ""t4"", ""stat"": ""chaos"", ""effect"": ""disadvantage"", ""effect_value"": 0, ""duration_turns"": 1, ""llm_instruction"": ""i4"" },
+                { ""id"": ""t5"", ""stat"": ""wit"", ""effect"": ""disadvantage"", ""effect_value"": 0, ""duration_turns"": 1, ""llm_instruction"": ""i5"" },
+                { ""id"": ""t6"", ""stat"": ""self_awareness"", ""effect"": ""disadvantage"", ""effect_value"": 0, ""duration_turns"": 1, ""llm_instruction"": ""i6"" }
             ]";
 
             var repo = new JsonTrapRepository(json);
