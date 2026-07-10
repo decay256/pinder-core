@@ -39,7 +39,7 @@ namespace Pinder.Core.Tests
 
             if (offending.Count > 0)
             {
-                Assert.Fail($"Pinder.Core must remain a zero-dependency domain kernel. Offending assemblies: {string.Join(", ", offending)}");
+                Assert.Fail($"Pinder.Core must remain a domain kernel with only framework/BCL-support dependencies. Offending assemblies: {string.Join(", ", offending)}");
             }
         }
 
