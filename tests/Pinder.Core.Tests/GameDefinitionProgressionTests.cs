@@ -461,6 +461,10 @@ progression_failure_pool_tiers:
 
             public int? GetFailurePoolTierMinLevel(string tierName) =>
                 FailurePoolTierMinLevels.TryGetValue(tierName, out var v) ? v : null;
+
+            // These tests assert "no silent fallback": a missing config value must throw,
+            // not quietly resolve to a hardcoded default. Explicitly opt out of fallback.
+            public bool AllowDefaultFallback => false;
         }
     }
 }

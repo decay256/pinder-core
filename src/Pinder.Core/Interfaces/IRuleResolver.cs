@@ -94,6 +94,19 @@ namespace Pinder.Core.Interfaces
         /// failure pool tier minimum level based on tier name (e.g. intermediate_min, advanced_min, legendary_min)
         /// </summary>
         int? GetFailurePoolTierMinLevel(string tierName);
+
+        /// <summary>
+        /// Explicit policy: whether callers (e.g. <see cref="Pinder.Core.Progression.LevelTable"/> and
+        /// SessionXpRecorder) are allowed to fall back to <see cref="DefaultRuleResolver.Instance"/> when
+        /// this resolver returns null for a given lookup.
+        /// Real, data-driven resolvers should return true — this matches the rest of the codebase's
+        /// "partial config falls back to defaults" behavior. Test doubles that specifically assert
+        /// "no silent fallback" (i.e. missing config must throw rather than quietly resolve to a
+        /// hardcoded default) should return false.
+        /// This is an explicit, caller-visible capability flag — it must never be inferred by sniffing
+        /// the resolver's runtime type name or declaring assembly name.
+        /// </summary>
+        bool AllowDefaultFallback { get; }
     }
 
     /// <summary>

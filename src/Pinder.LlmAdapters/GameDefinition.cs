@@ -291,5 +291,11 @@ namespace Pinder.LlmAdapters
 
             return value;
         }
+
+        /// <summary>
+        /// Data-driven production resolver: allow callers to fall back to
+        /// <see cref="DefaultRuleResolver"/> when a rule is missing from this game definition.
+        /// </summary>
+        public bool AllowDefaultFallback => true;
     }
 }

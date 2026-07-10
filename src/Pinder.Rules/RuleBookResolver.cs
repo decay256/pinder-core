@@ -338,6 +338,12 @@ namespace Pinder.Rules
             return null;
         }
 
+        /// <summary>
+        /// Data-driven production resolver: allow callers to fall back to
+        /// <see cref="DefaultRuleResolver"/> when a rule is not present in the loaded RuleBook(s).
+        /// </summary>
+        public bool AllowDefaultFallback => true;
+
         // --- Helpers ---
 
         private RuleEntry? FindById(string id)

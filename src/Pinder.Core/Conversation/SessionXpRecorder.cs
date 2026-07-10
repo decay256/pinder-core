@@ -26,19 +26,13 @@ namespace Pinder.Core.Conversation
             return _rules ?? DefaultRuleResolver.Instance ?? throw new InvalidOperationException("Default rule resolver is not registered.");
         }
 
-        private bool IsTestNamespace()
-        {
-            var r = GetRules();
-            return r.GetType().FullName.Contains("GameDefinitionProgressionTests");
-        }
-
         private int GetFlatXpAwardVal(string awardType)
         {
             var rules = GetRules();
             var val = rules.GetFlatXpAward(awardType);
             if (val.HasValue) return val.Value;
 
-            if (rules != DefaultRuleResolver.Instance && DefaultRuleResolver.Instance != null && !IsTestNamespace())
+            if (rules != DefaultRuleResolver.Instance && DefaultRuleResolver.Instance != null && rules.AllowDefaultFallback)
             {
                 var oDefault = DefaultRuleResolver.Instance.GetFlatXpAward(awardType);
                 if (oDefault.HasValue) return oDefault.Value;
@@ -53,7 +47,7 @@ namespace Pinder.Core.Conversation
             var val = rules.GetRiskTierXpMultiplier(riskTier);
             if (val.HasValue) return val.Value;
 
-            if (rules != DefaultRuleResolver.Instance && DefaultRuleResolver.Instance != null && !IsTestNamespace())
+            if (rules != DefaultRuleResolver.Instance && DefaultRuleResolver.Instance != null && rules.AllowDefaultFallback)
             {
                 var oDefault = DefaultRuleResolver.Instance.GetRiskTierXpMultiplier(riskTier);
                 if (oDefault.HasValue) return oDefault.Value;
@@ -68,7 +62,7 @@ namespace Pinder.Core.Conversation
             var val = rules.GetTerminalOutcomeMultiplier(outcome);
             if (val.HasValue) return val.Value;
 
-            if (rules != DefaultRuleResolver.Instance && DefaultRuleResolver.Instance != null && !IsTestNamespace())
+            if (rules != DefaultRuleResolver.Instance && DefaultRuleResolver.Instance != null && rules.AllowDefaultFallback)
             {
                 var oDefault = DefaultRuleResolver.Instance.GetTerminalOutcomeMultiplier(outcome);
                 if (oDefault.HasValue) return oDefault.Value;
@@ -83,7 +77,7 @@ namespace Pinder.Core.Conversation
             var val = rules.GetSuccessBaseXp(dc);
             if (val.HasValue) return val.Value;
 
-            if (rules != DefaultRuleResolver.Instance && DefaultRuleResolver.Instance != null && !IsTestNamespace())
+            if (rules != DefaultRuleResolver.Instance && DefaultRuleResolver.Instance != null && rules.AllowDefaultFallback)
             {
                 var oDefault = DefaultRuleResolver.Instance.GetSuccessBaseXp(dc);
                 if (oDefault.HasValue) return oDefault.Value;
@@ -128,7 +122,7 @@ namespace Pinder.Core.Conversation
                         if (dict.TryGetValue("dc_mid_max", out int mm)) midMax = mm;
                     }
                 }
-                else if (DefaultRuleResolver.Instance != null && !IsTestNamespace())
+                else if (DefaultRuleResolver.Instance != null && rules.AllowDefaultFallback)
                 {
                     var propDef = DefaultRuleResolver.Instance.GetType().GetProperty("XpSuccessBase");
                     if (propDef != null)

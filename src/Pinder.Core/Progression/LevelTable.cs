@@ -20,11 +20,6 @@ namespace Pinder.Core.Progression
         /// <summary>Absolute maximum for any base stat (before gear).</summary>
         public const int BaseStatCap = 6;
 
-        private static bool IsTestResolver(IRuleResolver rules)
-        {
-            return rules.GetType().Assembly.GetName().Name.Contains("Tests");
-        }
-
         /// <summary>Resolve 1-based level from raw XP.</summary>
         public static int GetLevel(int xp, IRuleResolver? rules = null)
         {
@@ -79,7 +74,7 @@ namespace Pinder.Core.Progression
                 }
             }
 
-            if (!foundAny && DefaultRuleResolver.Instance != null && DefaultRuleResolver.Instance != rules && !IsTestResolver(rules))
+            if (!foundAny && DefaultRuleResolver.Instance != null && DefaultRuleResolver.Instance != rules && rules.AllowDefaultFallback)
             {
                 return GetLevel(xp, DefaultRuleResolver.Instance);
             }
@@ -95,7 +90,7 @@ namespace Pinder.Core.Progression
             var o = rules.GetLevelRollBonus(level);
             if (o.HasValue) return o.Value;
 
-            if (rules != DefaultRuleResolver.Instance && DefaultRuleResolver.Instance != null && !IsTestResolver(rules))
+            if (rules != DefaultRuleResolver.Instance && DefaultRuleResolver.Instance != null && rules.AllowDefaultFallback)
             {
                 var oDefault = DefaultRuleResolver.Instance.GetLevelRollBonus(level);
                 if (oDefault.HasValue) return oDefault.Value;
@@ -112,7 +107,7 @@ namespace Pinder.Core.Progression
             var o = rules.GetBuildPointsForLevel(level);
             if (o.HasValue) return o.Value;
 
-            if (rules != DefaultRuleResolver.Instance && DefaultRuleResolver.Instance != null && !IsTestResolver(rules))
+            if (rules != DefaultRuleResolver.Instance && DefaultRuleResolver.Instance != null && rules.AllowDefaultFallback)
             {
                 var oDefault = DefaultRuleResolver.Instance.GetBuildPointsForLevel(level);
                 if (oDefault.HasValue) return oDefault.Value;
@@ -129,7 +124,7 @@ namespace Pinder.Core.Progression
             var o = rules.GetItemSlotsForLevel(level);
             if (o.HasValue) return o.Value;
 
-            if (rules != DefaultRuleResolver.Instance && DefaultRuleResolver.Instance != null && !IsTestResolver(rules))
+            if (rules != DefaultRuleResolver.Instance && DefaultRuleResolver.Instance != null && rules.AllowDefaultFallback)
             {
                 var oDefault = DefaultRuleResolver.Instance.GetItemSlotsForLevel(level);
                 if (oDefault.HasValue) return oDefault.Value;
@@ -149,7 +144,7 @@ namespace Pinder.Core.Progression
 
             // Fallback to default resolver if values are null
             if ((!intermediateMin.HasValue || !advancedMin.HasValue || !legendaryMin.HasValue) 
-                && DefaultRuleResolver.Instance != null && DefaultRuleResolver.Instance != rules && !IsTestResolver(rules))
+                && DefaultRuleResolver.Instance != null && DefaultRuleResolver.Instance != rules && rules.AllowDefaultFallback)
             {
                 return GetFailurePoolTier(level, DefaultRuleResolver.Instance);
             }

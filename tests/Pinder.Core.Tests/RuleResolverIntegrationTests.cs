@@ -76,6 +76,9 @@ namespace Pinder.Core.Tests
         public int? GetBuildPointsForLevel(int level) => null;
         public int? GetItemSlotsForLevel(int level) => null;
         public int? GetFailurePoolTierMinLevel(string tierName) => null;
+
+        // Behaves like a production resolver: unresolved rules fall back to defaults.
+        public bool AllowDefaultFallback => true;
     }
 
     [Trait("Category", "Rules")]

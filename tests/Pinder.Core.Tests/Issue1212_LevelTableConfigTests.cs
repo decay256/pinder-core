@@ -185,6 +185,9 @@ namespace Pinder.Core.Tests
             }
 
             public int? GetFailurePoolTierMinLevel(string tierName) => null;
+
+            // Behaves like a production resolver: unresolved rules fall back to defaults.
+            public bool AllowDefaultFallback => true;
         }
     }
 }
