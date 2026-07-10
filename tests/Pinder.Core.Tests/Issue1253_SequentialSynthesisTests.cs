@@ -75,6 +75,7 @@ namespace Pinder.Core.Tests
             public string? LastPhase { get; private set; }
             public int CallCount { get; private set; }
             public string ResponseToReturn { get; set; } = "{}";
+            public Queue<string>? ResponsesToReturn { get; set; }
 
             public Task<string> SendAsync(string systemPrompt, string userMessage, double temperature = 0.9, int maxTokens = 1024, string? phase = null, CancellationToken ct = default)
             {
@@ -84,6 +85,8 @@ namespace Pinder.Core.Tests
                 LastTemperature = temperature;
                 LastMaxTokens = maxTokens;
                 LastPhase = phase;
+                if (ResponsesToReturn != null && ResponsesToReturn.Count > 0)
+                    return Task.FromResult(ResponsesToReturn.Dequeue());
                 return Task.FromResult(ResponseToReturn);
             }
         }
@@ -144,6 +147,78 @@ namespace Pinder.Core.Tests
             Assert.Equal("humor", result["defense_reaction"]);
             
             Directory.Delete(testDir, true);
+        }
+
+        [Fact]
+        public async Task TherapistDiagnosisGenerator_ExtractsJsonObjectFromMarkdownWrappedResponse()
+        {
+            var testDir = Path.Combine(Directory.GetCurrentDirectory(), "TestData_Prompts_" + Guid.NewGuid());
+            Directory.CreateDirectory(testDir);
+            File.WriteAllText(Path.Combine(testDir, "diagnosis.yaml"), "schema_version: 1\nprompts:\n  diagnosis:\n    temperature: 0.62\n    max_tokens: 888\n    system_prompt: \"SYSTEM PROMPT\"\n    user_template: \"USER {backstory} - {stakes}\"");
+
+            var transport = new FakeLlmTransport
+            {
+                ResponseToReturn = "Here is the object:\n```json\n{ \"derived_feeling\": \"being left behind\", \"defense_reaction\": \"performative detachment\" }\n```"
+            };
+
+            var catalog = PromptCatalog.LoadFromDirectory(testDir);
+            var generator = new LlmTherapistDiagnosisGenerator(transport, catalog);
+
+            try
+            {
+                var result = await generator.GenerateAsync(
+                    "Char",
+                    "he/him",
+                    "bio",
+                    new Dictionary<string, BackstoryFact>(),
+                    new List<string>());
+
+                Assert.Equal("being left behind", result["derived_feeling"]);
+                Assert.Equal("performative detachment", result["defense_reaction"]);
+                Assert.Equal(1, transport.CallCount);
+            }
+            finally
+            {
+                Directory.Delete(testDir, true);
+            }
+        }
+
+        [Fact]
+        public async Task TherapistDiagnosisGenerator_RetriesMalformedResponseUntilJsonObject()
+        {
+            var testDir = Path.Combine(Directory.GetCurrentDirectory(), "TestData_Prompts_" + Guid.NewGuid());
+            Directory.CreateDirectory(testDir);
+            File.WriteAllText(Path.Combine(testDir, "diagnosis.yaml"), "schema_version: 1\nprompts:\n  diagnosis:\n    temperature: 0.62\n    max_tokens: 888\n    system_prompt: \"SYSTEM PROMPT\"\n    user_template: \"USER {backstory} - {stakes}\"");
+
+            var transport = new FakeLlmTransport
+            {
+                ResponsesToReturn = new Queue<string>(new[]
+                {
+                    "I would diagnose this as anxious clowning.",
+                    @"{ ""derived_feeling"": ""social exposure"", ""defense_reaction"": ""preemptive irony"" }"
+                })
+            };
+
+            var catalog = PromptCatalog.LoadFromDirectory(testDir);
+            var generator = new LlmTherapistDiagnosisGenerator(transport, catalog);
+
+            try
+            {
+                var result = await generator.GenerateAsync(
+                    "Char",
+                    "he/him",
+                    "bio",
+                    new Dictionary<string, BackstoryFact>(),
+                    new List<string>());
+
+                Assert.Equal("social exposure", result["derived_feeling"]);
+                Assert.Equal("preemptive irony", result["defense_reaction"]);
+                Assert.Equal(2, transport.CallCount);
+            }
+            finally
+            {
+                Directory.Delete(testDir, true);
+            }
         }
 
         [Fact]
@@ -240,6 +315,7 @@ namespace Pinder.Core.Tests
                 () => generator.GenerateAsync("Char", "he/him", "bio", backstory, stakes));
 
             Assert.IsType<JsonException>(ex.InnerException);
+            Assert.Equal(3, transport.CallCount);
 
             Directory.Delete(testDir, true);
         }
