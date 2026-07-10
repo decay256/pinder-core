@@ -105,20 +105,28 @@ namespace Pinder.LlmAdapters
             if (parsed == null)
                 throw new FormatException("YAML content did not parse to a dictionary.");
 
+            string yamlLineEnding = yamlContent.Contains("\r\n") ? "\r\n" : "\n";
+            string NormalizeScalarLineEndings(string value)
+            {
+                var normalized = value.Replace("\r\n", "\n").Replace("\r", "\n");
+                return yamlLineEnding == "\r\n"
+                    ? normalized.Replace("\n", "\r\n")
+                    : normalized;
+            }
+
             string GetRequired(string key)
             {
                 if (!parsed.TryGetValue(key, out var value))
                     throw new FormatException($"Missing required key: \"{key}\"");
                 if (value == null)
                     throw new FormatException($"Key \"{key}\" has a null value.");
-                return value.ToString()!;
+                return NormalizeScalarLineEndings(value.ToString()!);
             }
 
-            // Parse optional prose fields
             string GetOptional(string key)
             {
                 if (parsed.TryGetValue(key, out var v) && v != null)
-                    return v.ToString();
+                    return NormalizeScalarLineEndings(v.ToString());
                 return null;
             }
 
@@ -139,7 +147,14 @@ namespace Pinder.LlmAdapters
                 return result;
             }
 
-            // Parse required horniness_time_modifiers
+            string GetRequiredFromDictionary(Dictionary<string, object> dictionary, string parentKey, string key)
+            {
+                if (!dictionary.TryGetValue(key, out var value) || value == null)
+                    throw new InvalidOperationException($"game-definition.yaml {parentKey} is missing required sub-key: {key}");
+
+                return NormalizeScalarLineEndings(value.ToString()!);
+            }
+
             parsed.TryGetValue("horniness_time_modifiers", out var htmObj);
             var htmCoerced = CoerceDictionary(htmObj, "horniness_time_modifiers");
             int ParseHtmInt(string key)
@@ -156,19 +171,16 @@ namespace Pinder.LlmAdapters
                 evening: ParseHtmInt("evening"),
                 overnight: ParseHtmInt("overnight"));
 
-            // Validate core required keys first (throws FormatException)
             var name = GetRequired("name");
             var gameMasterPrompt = GetRequired("game_master_prompt");
             var playerAvatarRoleDescription = GetRequired("player_avatar_role_description");
             var dateeRoleDescription = GetRequired("datee_role_description");
 
-            // Parse required global_dc_bias
             if (!parsed.TryGetValue("global_dc_bias", out var gdcbObj) || gdcbObj == null)
                 throw new InvalidOperationException("game-definition.yaml is missing required key: global_dc_bias");
             if (!int.TryParse(gdcbObj.ToString(), out int globalDcBias))
                 throw new InvalidOperationException("game-definition.yaml global_dc_bias must be an integer");
 
-            // Parse optional shadow_dc_bias
             int shadowDcBias = 0;
             if (parsed.TryGetValue("shadow_dc_bias", out var sObj) && sObj != null)
             {
@@ -176,7 +188,6 @@ namespace Pinder.LlmAdapters
                     throw new InvalidOperationException("game-definition.yaml shadow_dc_bias must be an integer");
             }
 
-            // Parse optional horniness_dc_bias
             int horninessDcBias = 0;
             if (parsed.TryGetValue("horniness_dc_bias", out var hObj) && hObj != null)
             {
@@ -184,7 +195,6 @@ namespace Pinder.LlmAdapters
                     throw new InvalidOperationException("game-definition.yaml horniness_dc_bias must be an integer");
             }
 
-            // Parse optional archetypes_enabled
             bool archetypesEnabled = false;
             if (parsed.TryGetValue("archetypes_enabled", out var aeObj) && aeObj != null)
             {
@@ -219,7 +229,6 @@ namespace Pinder.LlmAdapters
             var hungerForIntimacy = GetRequiredInt("hunger_for_intimacy");
             var terrorOfRejection = GetRequiredInt("terror_of_rejection");
 
-            // The 9 new blocks parsing
             parsed.TryGetValue("xp_flat_awards", out var xpFlatAwardsObj);
             var xpFlatAwards = ParseIntDictionary(xpFlatAwardsObj, "xp_flat_awards", new[] { "nat20", "nat1", "failure" });
 
@@ -246,6 +255,13 @@ namespace Pinder.LlmAdapters
 
             parsed.TryGetValue("progression_failure_pool_tiers", out var progressionFailurePoolTiersObj);
             var progressionFailurePoolTiers = ParseIntDictionary(progressionFailurePoolTiersObj, "progression_failure_pool_tiers", new[] { "intermediate_min", "advanced_min", "legendary_min" });
+
+            parsed.TryGetValue("character_prompt_structure", out var characterPromptStructureObj);
+            var characterPromptStructureDict = CoerceDictionary(characterPromptStructureObj, "character_prompt_structure");
+            var characterPromptStructure = new CharacterPromptStructure(
+                characterSpecHeader: GetRequiredFromDictionary(characterPromptStructureDict, "character_prompt_structure", "character_spec_header"),
+                playerAvatarCharacterTag: GetRequiredFromDictionary(characterPromptStructureDict, "character_prompt_structure", "player_avatar_character_tag"),
+                dateeCharacterTag: GetRequiredFromDictionary(characterPromptStructureDict, "character_prompt_structure", "datee_character_tag"));
 
             return new GameDefinition(
                 name: name,
@@ -274,7 +290,8 @@ namespace Pinder.LlmAdapters
                 progressionBuildPoints: progressionBuildPoints,
                 progressionLevelBonuses: progressionLevelBonuses,
                 progressionItemSlots: progressionItemSlots,
-                progressionFailurePoolTiers: progressionFailurePoolTiers
+                progressionFailurePoolTiers: progressionFailurePoolTiers,
+                characterPromptStructure: characterPromptStructure
             );
         }
     }

@@ -43,7 +43,20 @@ namespace Pinder.Tools.NarrativeHarness
                 archetypesEnabled: baseDef.ArchetypesEnabled,
                 maxTurns: baseDef.MaxTurns,
                 maxDialogueOptions: baseDef.MaxDialogueOptions,
-                maxDeliveryWords: baseDef.MaxDeliveryWords);
+                maxDeliveryWords: baseDef.MaxDeliveryWords,
+                activeTrapInterestPenalty: baseDef.ActiveTrapInterestPenalty,
+                hungerForIntimacy: baseDef.HungerForIntimacy,
+                terrorOfRejection: baseDef.TerrorOfRejection,
+                xpFlatAwards: baseDef.XpFlatAwards,
+                xpSuccessBase: baseDef.XpSuccessBase,
+                xpRiskMultipliers: baseDef.XpRiskMultipliers,
+                xpTerminalMultipliers: baseDef.XpTerminalMultipliers,
+                progressionXpThresholds: baseDef.ProgressionXpThresholds,
+                progressionBuildPoints: baseDef.ProgressionBuildPoints,
+                progressionLevelBonuses: baseDef.ProgressionLevelBonuses,
+                progressionItemSlots: baseDef.ProgressionItemSlots,
+                progressionFailurePoolTiers: baseDef.ProgressionFailurePoolTiers,
+                characterPromptStructure: baseDef.CharacterPromptStructure);
         }
     }
 }

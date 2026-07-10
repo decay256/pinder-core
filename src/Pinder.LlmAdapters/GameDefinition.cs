@@ -41,6 +41,9 @@ namespace Pinder.LlmAdapters
         /// <summary>Datee character role description.</summary>
         public string DateeRoleDescription { get; }
 
+        /// <summary>Prompt header and character-data fence names used by the session system prompt builder.</summary>
+        public CharacterPromptStructure CharacterPromptStructure { get; }
+
         /// <summary>Two-stage improvement prompt — appended after initial generation to trigger self-critique and rewrite.</summary>
         public string ImprovementPrompt { get; }
 
@@ -120,12 +123,14 @@ namespace Pinder.LlmAdapters
             IReadOnlyDictionary<string, int>? progressionBuildPoints = null,
             IReadOnlyDictionary<string, int>? progressionLevelBonuses = null,
             IReadOnlyDictionary<string, int>? progressionItemSlots = null,
-            IReadOnlyDictionary<string, int>? progressionFailurePoolTiers = null)
+            IReadOnlyDictionary<string, int>? progressionFailurePoolTiers = null,
+            CharacterPromptStructure? characterPromptStructure = null)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             GameMasterPrompt = gameMasterPrompt ?? throw new ArgumentNullException(nameof(gameMasterPrompt));
             PlayerAvatarRoleDescription = playerAvatarRoleDescription ?? throw new ArgumentNullException(nameof(playerAvatarRoleDescription));
             DateeRoleDescription = dateeRoleDescription ?? throw new ArgumentNullException(nameof(dateeRoleDescription));
+            CharacterPromptStructure = characterPromptStructure ?? CharacterPromptStructure.PinderDefaults;
             ImprovementPrompt = improvementPrompt ?? "";
             SteeringPrompt = steeringPrompt ?? "";
             HorninessPrompt = horninessPrompt ?? "";

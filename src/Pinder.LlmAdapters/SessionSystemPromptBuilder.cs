@@ -12,8 +12,8 @@ namespace Pinder.LlmAdapters
     /// #1124: BOTH sessions (player-avatar and datee) share ONE canonical GM
     /// system-prompt template. The GM is a puppeteer that portrays exactly ONE
     /// character; the per-session character spec (role description + the
-    /// assembled character profile) is injected as the FINAL block under
-    /// "== CHARACTER YOU CONTROL ==". The static GM base — puppeteer framing,
+    /// assembled character profile) is injected as the FINAL configured
+    /// character-spec block. The static GM base — puppeteer framing,
     /// game vision, world rules, narrative doctrine, dramatic craft, and the
     /// shared conversation-dynamic sections — is byte-for-byte identical across
     /// both sessions, so the ONLY difference between the two built prompts is
@@ -34,6 +34,9 @@ namespace Pinder.LlmAdapters
         public const string CharacterProfileToken = "{character_profile}";
         public const string BackstoryFactsToken = "{backstory_facts}";
         public const string PsychologicalStakesToken = "{psychological_stakes}";
+
+        public static string CharacterSpecHeader =>
+            GameDefinition.PinderDefaults.CharacterPromptStructure.CharacterSpecHeader;
 
         public static string CompilePrompt(string template, PromptCompilationInput input)
         {
@@ -96,11 +99,11 @@ namespace Pinder.LlmAdapters
                 }
                 else if (token == BackstoryFactsToken)
                 {
-                    return string.Join("\n", input.BackstoryFacts.Select((f, i) => (i + 1) + ". " + f));
+                    return string.Join(Environment.NewLine, input.BackstoryFacts.Select((f, i) => (i + 1) + ". " + f));
                 }
                 else if (token == PsychologicalStakesToken)
                 {
-                    return string.Join("\n", input.PsychologicalStakes.Select((s, i) => (i + 1) + ". " + s));
+                    return string.Join(Environment.NewLine, input.PsychologicalStakes.Select((s, i) => (i + 1) + ". " + s));
                 }
                 else
                 {
@@ -108,12 +111,6 @@ namespace Pinder.LlmAdapters
                 }
             });
         }
-
-        /// <summary>
-        /// Header that marks the start of the per-session character-spec block.
-        /// Everything BEFORE this marker is the shared, identical GM base.
-        /// </summary>
-        public const string CharacterSpecHeader = "== CHARACTER YOU CONTROL ==";
 
         /// <summary>
         /// Build the GM system prompt for the player-avatar session.
@@ -134,7 +131,7 @@ namespace Pinder.LlmAdapters
             var sb = new AnnotatedStringBuilder();
             AppendGmBase(sb, def);
             AppendCharacterSpec(sb, def.PlayerAvatarRoleDescription, "player_avatar_role_description",
-                playerAvatarPrompt, "player-profile", "PLAYER_AVATAR_CHARACTER");
+                playerAvatarPrompt, "player-profile", def.CharacterPromptStructure, CharacterPromptRole.PlayerAvatar);
 
             return new PromptTraceResult(sb.ToString(), sb.Spans);
         }
@@ -158,7 +155,7 @@ namespace Pinder.LlmAdapters
             var sb = new AnnotatedStringBuilder();
             AppendGmBase(sb, def);
             AppendCharacterSpec(sb, def.DateeRoleDescription, "datee_role_description",
-                dateePrompt, "datee-profile", "DATEE_CHARACTER");
+                dateePrompt, "datee-profile", def.CharacterPromptStructure, CharacterPromptRole.Datee);
 
             return new PromptTraceResult(sb.ToString(), sb.Spans);
         }
@@ -177,9 +174,8 @@ namespace Pinder.LlmAdapters
         /// Appends the per-session character-spec block — the ONLY difference
         /// between the two built prompts. Placed LAST to keep the shared base as
         /// the stable cacheable prefix.
-        /// The characterTag parameter wraps the character payload in the
-        /// SSOT injection-fence declared in game-definition.yaml §5:
-        ///   PLAYER_AVATAR_CHARACTER or DATEE_CHARACTER.
+        /// The prompt structure wraps the character payload in the injection
+        /// fence declared in game-definition.yaml.
         /// </summary>
         private static void AppendCharacterSpec(
             AnnotatedStringBuilder sb,
@@ -187,15 +183,20 @@ namespace Pinder.LlmAdapters
             string roleKey,
             string characterPrompt,
             string profileKey,
-            string characterTag)
+            CharacterPromptStructure promptStructure,
+            CharacterPromptRole promptRole)
         {
-            sb.Append("\n" + CharacterSpecHeader + "\n\n");
+            var characterTag = promptStructure.GetCharacterTag(promptRole);
+
+            sb.AppendLine();
+            sb.AppendLine(promptStructure.CharacterSpecHeader);
+            sb.AppendLine();
             sb.AppendLine(roleDescription.TrimEnd(), "game-definition.yaml", roleKey);
-            sb.Append("\n");
-            sb.Append($"<{characterTag}>\n");
+            sb.AppendLine();
+            sb.AppendLine($"<{characterTag}>");
             sb.AppendLine(characterPrompt.TrimEnd(), "character-profile", profileKey);
-            sb.Append($"</{characterTag}>\n");
-            sb.Append("\n");
+            sb.AppendLine($"</{characterTag}>");
+            sb.AppendLine();
         }
     }
 }
