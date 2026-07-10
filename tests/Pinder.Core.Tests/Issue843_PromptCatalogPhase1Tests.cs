@@ -69,12 +69,19 @@ namespace Pinder.Core.Tests
         {
             var catalog = PromptCatalog.LoadFromDirectory(PromptsRoot);
 
+            var backstory = catalog.RequireCompleteEntry(
+                "backstory",
+                "prompt-catalog: missing required key 'backstory'.");
             var diagnosis = catalog.RequireCompleteEntry(
                 "diagnosis",
                 "prompt-catalog: missing required key 'diagnosis'.");
             var stake = catalog.RequireCompleteEntry(
                 "stake",
                 "prompt-catalog: missing required key 'stake'.");
+
+            Assert.Contains("Return ONLY valid JSON", backstory.SystemPrompt);
+            Assert.Equal(0.7, backstory.Temperature);
+            Assert.True(backstory.MaxTokens >= 4096);
 
             Assert.Contains("{backstory}", diagnosis.UserTemplate);
             Assert.Contains("{stakes}", diagnosis.UserTemplate);

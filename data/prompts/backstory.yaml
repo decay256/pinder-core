@@ -2,7 +2,7 @@ schema_version: 1
 prompts:
   backstory:
     temperature: 0.7
-    max_tokens: 2000
+    max_tokens: 4096
     system_prompt: |
       You are a backstory generator for a character.
       You must generate exactly 20 categories of backstory facts.
@@ -28,6 +28,7 @@ prompts:
       - physical_dysmorphia
       - dependencies
       For each category, provide a 'BioLie' and a 'TragicReality'.
+      Keep each string concise enough that the entire response completes comfortably.
       Return ONLY valid JSON where keys are the 20 category names and values are objects containing 'BioLie' and 'TragicReality' strings.
     user_template: |
       Character: {characterName}

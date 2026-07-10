@@ -15,7 +15,7 @@ namespace Pinder.SessionSetup
         public static class Backstory
         {
             public const double Temperature = 0.7;
-            public const int MaxTokens = 2000;
+            public const int MaxTokens = 4096;
         }
 
         public static class Stake
