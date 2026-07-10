@@ -44,11 +44,12 @@ namespace Pinder.Core.Conversation
         ///     reference-type fields (interest meter, trap state, combo
         ///     tracker, XP ledger, shadow trackers, shadow-growth
         ///     evaluator, conversation history lists, topic list, etc.).</item>
-        ///   <item><b>Deep-copied via reflection:</b>
-        ///     <see cref="System.Random"/> RNGs (steering / stat-draw) via
-        ///     <see cref="RandomCloner"/>. The cloned RNGs produce the same
-        ///     next-sequence as the parent at clone-time but never share
-        ///     internal seed state.</item>
+        ///   <item><b>Deep-copied (owned RNG state, no reflection):</b>
+        ///     <see cref="Pinder.Core.Rolls.CloneableRandom"/> RNGs (steering /
+        ///     stat-draw) via <see cref="Pinder.Core.Rolls.CloneableRandom.Clone"/> —
+        ///     a plain field copy of the generator's own state. The cloned RNGs
+        ///     produce the same next-sequence as the parent at clone-time but
+        ///     never share internal seed state.</item>
         /// </list>
         ///
         /// <para>
@@ -104,11 +105,19 @@ namespace Pinder.Core.Conversation
             // ── RNG state — deep-cloned for independent forks (§2.3) ──
             // Steering RNG is shared between SteeringEngine and HorninessEngine
             // in the public ctor; preserve that shape on the clone.
-            var clonedSteeringRng = RandomCloner.Clone(src._steeringEngine.SteeringRngForCloneOnly);
+            //
+            // #790/#425 follow-up (audit 2026-07-10): cloning is now a plain field copy
+            // on CloneableRandom (Pinder.Core.Rolls) — no reflection into System.Random
+            // internals. RequireCloneable fails fast if the configured RNG isn't a
+            // CloneableRandom (see its doc comment for why that's intentional).
+            var clonedSteeringRng = CloneableRandom.RequireCloneable(
+                src._steeringEngine.SteeringRngForCloneOnly, nameof(GameSessionConfig.SteeringRng));
             _steeringEngine  = new SteeringEngine(clonedSteeringRng, _onDiagnostic);
             _horninessEngine = new HorninessEngine(clonedSteeringRng, _consequenceCatalog, _horninessDcBias);
             _shadowCheckEngine = new ShadowCheckEngine(clonedSteeringRng, _consequenceCatalog, _shadowDcBias);
-            _statDrawRng     = src._statDrawRng != null ? RandomCloner.Clone(src._statDrawRng) : null;
+            _statDrawRng     = src._statDrawRng != null
+                ? CloneableRandom.RequireCloneable(src._statDrawRng, nameof(GameSessionConfig.StatDrawRng))
+                : null;
 
             _turnOrchestrator = BuildTurnOrchestrator();
         }
@@ -231,12 +240,16 @@ namespace Pinder.Core.Conversation
                 : null;
             _xpRecorder      = new SessionXpRecorder(_state.XpLedger, _rules);
 
-            // RNGs (deep-clone to avoid sharing internal state with src).
-            var clonedSteeringRng = RandomCloner.Clone(src._steeringEngine.SteeringRngForCloneOnly);
+            // RNGs (deep-clone to avoid sharing internal state with src). See the clone
+            // constructor above for why this no longer reflects into System.Random.
+            var clonedSteeringRng = CloneableRandom.RequireCloneable(
+                src._steeringEngine.SteeringRngForCloneOnly, nameof(GameSessionConfig.SteeringRng));
             _steeringEngine  = new SteeringEngine(clonedSteeringRng, _onDiagnostic);
             _horninessEngine = new HorninessEngine(clonedSteeringRng, _consequenceCatalog, _horninessDcBias);
             _shadowCheckEngine = new ShadowCheckEngine(clonedSteeringRng, _consequenceCatalog, _shadowDcBias);
-            _statDrawRng     = src._statDrawRng != null ? RandomCloner.Clone(src._statDrawRng) : null;
+            _statDrawRng     = src._statDrawRng != null
+                ? CloneableRandom.RequireCloneable(src._statDrawRng, nameof(GameSessionConfig.StatDrawRng))
+                : null;
 
             _turnOrchestrator = BuildTurnOrchestrator();
         }

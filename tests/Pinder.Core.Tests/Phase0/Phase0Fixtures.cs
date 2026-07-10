@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Pinder.Core.Characters;
 using Pinder.Core.Conversation;
 using Pinder.Core.Interfaces;
+using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
 using Pinder.Core.Traps;
 using Pinder.LlmAdapters;
@@ -38,13 +39,20 @@ namespace Pinder.Core.Tests.Phase0
         /// a turn is deterministic. Steering covers <c>SteeringEngine</c> /
         /// <c>HorninessEngine</c> rolls; stat-draw covers
         /// <c>OptionFilterEngine.DrawRandomStats</c> shuffling (per #130).
+        ///
+        /// <para>
+        /// Uses <see cref="CloneableRandom"/> (not a plain <see cref="Random"/>) because
+        /// fixtures built here back the Phase 4 (#790) <c>GameSession.Clone</c> /
+        /// <c>AdoptStateFrom</c> tests, which require the configured RNGs to be
+        /// explicitly cloneable — see <see cref="CloneableRandom.RequireCloneable"/>.
+        /// </para>
         /// </summary>
         public static GameSessionConfig MakeConfig(int steeringSeed = 42, int statDrawSeed = 4242)
         {
             return new GameSessionConfig(
                 clock: TestHelpers.MakeClock(),
-                steeringRng: new Random(steeringSeed),
-                statDrawRng: new Random(statDrawSeed));
+                steeringRng: new CloneableRandom(steeringSeed),
+                statDrawRng: new CloneableRandom(statDrawSeed));
         }
 
         /// <summary>

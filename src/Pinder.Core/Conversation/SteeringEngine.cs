@@ -28,10 +28,10 @@ namespace Pinder.Core.Conversation
         /// <summary>
         /// #790 (Phase 4): expose the underlying steering RNG instance ONLY
         /// to <see cref="GameSession.Clone"/> so it can be deep-cloned via
-        /// <see cref="RandomCloner"/>. The same RNG is shared with
-        /// <see cref="HorninessEngine"/> by construction in
-        /// <see cref="GameSession"/>'s public constructor; the clone path
-        /// preserves that sharing shape on the new session.
+        /// <see cref="Pinder.Core.Rolls.CloneableRandom.RequireCloneable"/>.
+        /// The same RNG is shared with <see cref="HorninessEngine"/> by
+        /// construction in <see cref="GameSession"/>'s public constructor;
+        /// the clone path preserves that sharing shape on the new session.
         ///
         /// <para>
         /// Internal accessor; not part of the public API contract. Do not

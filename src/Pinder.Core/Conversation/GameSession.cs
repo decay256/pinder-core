@@ -189,7 +189,12 @@ namespace Pinder.Core.Conversation
             _globalDcBias = config.GlobalDcBias;
             _shadowDcBias = config.ShadowDcBias;
             _horninessDcBias = config.HorninessDcBias;
-            var steeringRng = config.SteeringRng ?? new Random();
+            // #790/#425 follow-up (audit 2026-07-10): default to a CloneableRandom (not a
+            // plain System.Random) so the fast-gameplay scheduler's session forking
+            // (GameSession.Clone / AdoptStateFrom) works without reflecting into
+            // System.Random's private internals. Callers that inject an explicit
+            // steeringRng and never clone the session may still pass any Random.
+            var steeringRng = config.SteeringRng ?? new CloneableRandom();
             _statDrawRng = config.StatDrawRng;
             _statDeliveryInstructions = config.StatDeliveryInstructions;
             _onTextLayerNoop = config.OnTextLayerNoop;
