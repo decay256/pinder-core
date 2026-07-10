@@ -262,7 +262,7 @@ namespace Pinder.RemoteAssets
             multipart.Add(metaPart, "metadata");
 
             var payloadPart = new ByteArrayContent(payloadBytes);
-            payloadPart.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+            payloadPart.Headers.ContentType = new MediaTypeHeaderValue("application/json");
             multipart.Add(payloadPart, "payload");
 
             return multipart;

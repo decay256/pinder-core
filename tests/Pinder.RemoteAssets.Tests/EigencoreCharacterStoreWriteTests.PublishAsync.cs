@@ -57,6 +57,7 @@ namespace Pinder.RemoteAssets.Tests
 
             // metadata Content-Type = application/json.
             Assert.StartsWith("application/json", parts["metadata"].contentType, StringComparison.OrdinalIgnoreCase);
+            Assert.StartsWith("application/json", parts["payload"].contentType, StringComparison.OrdinalIgnoreCase);
         }
 
         [Fact]
@@ -205,7 +206,7 @@ namespace Pinder.RemoteAssets.Tests
             Assert.True(retryParts.ContainsKey("metadata"), "retried request missing 'metadata' part");
             Assert.True(retryParts.ContainsKey("payload"), "retried request missing 'payload' part");
             Assert.StartsWith("application/json", retryParts["metadata"].contentType, StringComparison.OrdinalIgnoreCase);
-            Assert.StartsWith("application/octet-stream", retryParts["payload"].contentType, StringComparison.OrdinalIgnoreCase);
+            Assert.StartsWith("application/json", retryParts["payload"].contentType, StringComparison.OrdinalIgnoreCase);
             Assert.Equal(firstParts["metadata"].body, retryParts["metadata"].body);
             Assert.Equal(firstParts["payload"].body, retryParts["payload"].body);
 
