@@ -81,40 +81,21 @@ namespace Pinder.SessionSetup
             ValidateInputs(characterName, assembledSystemPrompt);
             string userMessage = BuildUserMessage(assembledSystemPrompt, _catalog);
 
-            try
-            {
-                var entry = _catalog.Get("background");
-                double temp = _options.Temperature != GeneratorDefaultConfigs.Background.Temperature
-                    ? _options.Temperature
-                    : entry.Temperature!.Value;
-                int maxTok = _options.MaxTokens != GeneratorDefaultConfigs.Background.MaxTokens
-                    ? _options.MaxTokens
-                    : entry.MaxTokens!.Value;
-
-                string response = await _transport
-                    .SendAsync(SystemPrompt, userMessage, temp, maxTok, phase: LlmPhase.Synthesis)
-                    .ConfigureAwait(false);
-                string trimmed = (response ?? string.Empty).Trim();
-                if (string.IsNullOrEmpty(trimmed))
-                {
-                    _options.OnDegraded?.Invoke(SetupGenerationResult.DegradedFailure("background", "empty_output"));
-                }
-                return trimmed;
-            }
-            catch (OperationCanceledException)
-            {
-                // Do not fire OnDegraded on cancellation; preserve existing behavior of returning empty string.
-                return string.Empty;
-            }
-            catch (Exception ex)
-            {
-                if (_options.OnDegraded != null)
-                {
-                    _options.OnDegraded.Invoke(SetupGenerationResult.DegradedFailure("background", "transport_error"));
-                    return string.Empty;
-                }
-                throw;
-            }
+            var entry = _catalog.Get("background");
+            return await LlmOptionalTextGeneration.RunAsync(
+                    "background",
+                    _transport,
+                    SystemPrompt,
+                    userMessage,
+                    entry,
+                    LlmPhase.Synthesis,
+                    _options.Temperature,
+                    GeneratorDefaultConfigs.Background.Temperature,
+                    _options.MaxTokens,
+                    GeneratorDefaultConfigs.Background.MaxTokens,
+                    _options.OnDegraded,
+                    LlmOptionalTextGeneration.CancellationBehavior.ReturnEmpty)
+                .ConfigureAwait(false);
         }
 
         // ── shared helpers ───────────────────────────────────────────────

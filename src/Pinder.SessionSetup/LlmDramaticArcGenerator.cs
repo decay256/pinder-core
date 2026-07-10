@@ -76,38 +76,22 @@ namespace Pinder.SessionSetup
             systemPrompt = PromptCatalog.Substitute(systemPrompt, values);
             string userMessage = PromptCatalog.Substitute(userTemplate, values);
 
-            try
-            {
-                double temp = _options.Temperature != GeneratorDefaultConfigs.DramaticArc.Temperature
-                    ? _options.Temperature
-                    : entry.Temperature!.Value;
-                int maxTok = _options.MaxTokens != GeneratorDefaultConfigs.DramaticArc.MaxTokens
-                    ? _options.MaxTokens
-                    : entry.MaxTokens!.Value;
-
-                string response = await _transport
-                    .SendAsync(systemPrompt, userMessage, temp, maxTok, phase: LlmPhase.Synthesis, ct: cancellationToken)
-                    .ConfigureAwait(false);
-                string trimmed = (response ?? string.Empty).Trim();
-                if (string.IsNullOrEmpty(trimmed))
-                {
-                    _options.OnDegraded?.Invoke(SetupGenerationResult.DegradedFailure("dramatic_arc", "empty_output"));
-                }
-                return trimmed;
-            }
-            catch (OperationCanceledException)
-            {
-                throw;
-            }
-            catch (Exception ex)
-            {
-                if (_options.OnDegraded != null)
-                {
-                    _options.OnDegraded.Invoke(SetupGenerationResult.DegradedFailure("dramatic_arc", "transport_error"));
-                    return string.Empty;
-                }
-                throw;
-            }
+            return await LlmOptionalTextGeneration.RunAsync(
+                    "dramatic_arc",
+                    _transport,
+                    systemPrompt,
+                    userMessage,
+                    entry,
+                    LlmPhase.Synthesis,
+                    _options.Temperature,
+                    GeneratorDefaultConfigs.DramaticArc.Temperature,
+                    _options.MaxTokens,
+                    GeneratorDefaultConfigs.DramaticArc.MaxTokens,
+                    _options.OnDegraded,
+                    LlmOptionalTextGeneration.CancellationBehavior.Throw,
+                    cancellationToken,
+                    passCancellationTokenToTransport: true)
+                .ConfigureAwait(false);
         }
 
         /// <summary>Tunable knobs for <see cref="LlmDramaticArcGenerator"/>.</summary>

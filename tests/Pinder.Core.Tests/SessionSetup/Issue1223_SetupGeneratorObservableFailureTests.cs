@@ -185,6 +185,48 @@ namespace Pinder.Core.Tests.SessionSetup
         }
 
         [Fact]
+        public async Task CancellationBehavior_IsPreserved_ForOptionalGenerators()
+        {
+            var cancelingTransport = new CancelingLlmTransport();
+
+            SetupGenerationResult? stakeResult = null;
+            var stakeGen = new LlmStakeGenerator(cancelingTransport, new LlmStakeGenerator.Options
+            {
+                OnDegraded = r => stakeResult = r
+            });
+            string stakeText = await stakeGen.GenerateAsync("Alice", "system prompt");
+            Assert.Equal(string.Empty, stakeText);
+            Assert.Null(stakeResult);
+
+            SetupGenerationResult? backgroundResult = null;
+            var backgroundGen = new LlmBackgroundGenerator(cancelingTransport, new LlmBackgroundGenerator.Options
+            {
+                OnDegraded = r => backgroundResult = r
+            });
+            string backgroundText = await backgroundGen.GenerateAsync("Alice", "system prompt");
+            Assert.Equal(string.Empty, backgroundText);
+            Assert.Null(backgroundResult);
+
+            SetupGenerationResult? outfitResult = null;
+            var outfitGen = new LlmOutfitDescriber(cancelingTransport, new LlmOutfitDescriber.Options
+            {
+                OnDegraded = r => outfitResult = r
+            });
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+                outfitGen.GenerateAsync("Alice", new List<string>(), "Bob", new List<string>()));
+            Assert.Null(outfitResult);
+
+            SetupGenerationResult? arcResult = null;
+            var arcGen = new LlmDramaticArcGenerator(cancelingTransport, new LlmDramaticArcGenerator.Options
+            {
+                OnDegraded = r => arcResult = r
+            });
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+                arcGen.GenerateAsync("Alice", "stake", "bio", "Bob", "stake", "bio"));
+            Assert.Null(arcResult);
+        }
+
+        [Fact]
         public async Task HappyPath_DoesNotFireOnDegraded()
         {
             var happyTransport = new FakeLlmTransport("actual content");
@@ -259,6 +301,20 @@ namespace Pinder.Core.Tests.SessionSetup
             CancellationToken ct = default)
         {
             return Task.FromResult(_response);
+        }
+    }
+
+    internal sealed class CancelingLlmTransport : ILlmTransport
+    {
+        public Task<string> SendAsync(
+            string systemPrompt,
+            string userMessage,
+            double temperature = 0.9,
+            int maxTokens = 1024,
+            string? phase = null,
+            CancellationToken ct = default)
+        {
+            throw new OperationCanceledException("simulated cancellation");
         }
     }
 }
