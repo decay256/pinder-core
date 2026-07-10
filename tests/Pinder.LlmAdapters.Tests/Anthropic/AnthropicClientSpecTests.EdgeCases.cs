@@ -21,7 +21,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         public async Task Edge_NullRequest_ThrowsArgumentNullException()
         {
             var handler = new SequenceHandler(_ => MakeSuccess());
-            var httpClient = new HttpClient(handler);
+            using var httpClient = new HttpClient(handler);
             using (var client = new AnthropicClient(TestApiKey, httpClient))
             {
                 await Assert.ThrowsAsync<ArgumentNullException>(
@@ -46,11 +46,11 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
                 },
                 _ => MakeSuccess("recovered from date retry-after")
             );
-            var httpClient = new HttpClient(handler);
+            using var httpClient = new HttpClient(handler);
             using (var client = new AnthropicClient(TestApiKey, httpClient))
             {
                 // Use a long timeout — if default is 5s, we need to wait
-                var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
                 var response = await client.SendMessagesAsync(MakeRequest(), cts.Token);
                 Assert.Equal("recovered from date retry-after", response.GetText());
                 Assert.Equal(2, handler.CallCount);
@@ -70,7 +70,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
                 },
                 _ => MakeSuccess("immediate retry")
             );
-            var httpClient = new HttpClient(handler);
+            using var httpClient = new HttpClient(handler);
             using (var client = new AnthropicClient(TestApiKey, httpClient))
             {
                 var sw = System.Diagnostics.Stopwatch.StartNew();
@@ -91,10 +91,10 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
                 _ => MakeError(429), // No Retry-After header
                 _ => MakeSuccess("recovered no header")
             );
-            var httpClient = new HttpClient(handler);
+            using var httpClient = new HttpClient(handler);
             using (var client = new AnthropicClient(TestApiKey, httpClient))
             {
-                var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
                 var response = await client.SendMessagesAsync(MakeRequest(), cts.Token);
                 Assert.Equal("recovered no header", response.GetText());
                 Assert.Equal(2, handler.CallCount);
@@ -111,7 +111,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
                     Content = new StringContent("", System.Text.Encoding.UTF8, "application/json")
                 }
             );
-            var httpClient = new HttpClient(handler);
+            using var httpClient = new HttpClient(handler);
             using (var client = new AnthropicClient(TestApiKey, httpClient))
             {
                 var ex = await Assert.ThrowsAsync<AnthropicApiException>(
@@ -128,7 +128,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         public void Edge_Dispose_MultipleCalls_NoException()
         {
             var handler = new SequenceHandler(_ => MakeSuccess());
-            var httpClient = new HttpClient(handler);
+            using var httpClient = new HttpClient(handler);
             var client = new AnthropicClient(TestApiKey, httpClient);
             client.Dispose();
             client.Dispose();
@@ -140,7 +140,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         public async Task Edge_Dispose_ExternalHttpClient_StillUsable()
         {
             var handler = new SequenceHandler(_ => MakeSuccess(), _ => MakeSuccess());
-            var httpClient = new HttpClient(handler);
+            using var httpClient = new HttpClient(handler);
 
             var client1 = new AnthropicClient(TestApiKey, httpClient);
             client1.Dispose();
@@ -159,10 +159,10 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         public async Task Edge_Cancellation_BeforeFirstCall()
         {
             var handler = new SequenceHandler(_ => MakeSuccess());
-            var httpClient = new HttpClient(handler);
+            using var httpClient = new HttpClient(handler);
             using (var client = new AnthropicClient(TestApiKey, httpClient))
             {
-                var cts = new CancellationTokenSource();
+                using var cts = new CancellationTokenSource();
                 cts.Cancel();
                 await Assert.ThrowsAnyAsync<OperationCanceledException>(
                     () => client.SendMessagesAsync(MakeRequest(), cts.Token));
@@ -179,7 +179,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
                 Assert.Equal("https://api.anthropic.com/v1/messages", req.RequestUri!.ToString());
                 return MakeSuccess();
             });
-            var httpClient = new HttpClient(handler);
+            using var httpClient = new HttpClient(handler);
             using (var client = new AnthropicClient(TestApiKey, httpClient))
             {
                 await client.SendMessagesAsync(MakeRequest());
@@ -198,7 +198,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
                 Assert.Equal("application/json", contentType);
                 return MakeSuccess();
             });
-            var httpClient = new HttpClient(handler);
+            using var httpClient = new HttpClient(handler);
             using (var client = new AnthropicClient(TestApiKey, httpClient))
             {
                 await client.SendMessagesAsync(MakeRequest());
@@ -225,7 +225,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
                 {
                     Content = new StringContent(responseJson, System.Text.Encoding.UTF8, "application/json")
                 });
-            var httpClient = new HttpClient(handler);
+            using var httpClient = new HttpClient(handler);
             using (var client = new AnthropicClient(TestApiKey, httpClient))
             {
                 var response = await client.SendMessagesAsync(MakeRequest());
@@ -247,7 +247,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
                 capturedBody = req.Content!.ReadAsStringAsync().Result;
                 return MakeSuccess();
             });
-            var httpClient = new HttpClient(handler);
+            using var httpClient = new HttpClient(handler);
             using (var client = new AnthropicClient(TestApiKey, httpClient))
             {
                 var request = new MessagesRequest
@@ -320,7 +320,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
                 {
                     Content = new StringContent("null", System.Text.Encoding.UTF8, "application/json")
                 });
-            var httpClient = new HttpClient(handler);
+            using var httpClient = new HttpClient(handler);
             using (var client = new AnthropicClient(TestApiKey, httpClient))
             {
                 // Should throw AnthropicApiException on null deserialization
@@ -339,7 +339,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
                 Assert.Equal(HttpMethod.Post, req.Method);
                 return MakeSuccess();
             });
-            var httpClient = new HttpClient(handler);
+            using var httpClient = new HttpClient(handler);
             using (var client = new AnthropicClient(TestApiKey, httpClient))
             {
                 await client.SendMessagesAsync(MakeRequest());
@@ -351,7 +351,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         public void Edge_ImplementsIDisposable()
         {
             var handler = new SequenceHandler(_ => MakeSuccess());
-            var httpClient = new HttpClient(handler);
+            using var httpClient = new HttpClient(handler);
             IDisposable disposable = new AnthropicClient(TestApiKey, httpClient);
             disposable.Dispose(); // Should not throw
         }

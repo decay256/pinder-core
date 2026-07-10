@@ -178,7 +178,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         public void AC1_HeadersSetCorrectly_ApiKey()
         {
             var handler = new SequenceHandler(_ => MakeSuccess());
-            var httpClient = new HttpClient(handler);
+            using var httpClient = new HttpClient(handler);
             using (var client = new AnthropicClient(TestApiKey, httpClient))
             {
                 var values = httpClient.DefaultRequestHeaders.GetValues("x-api-key").ToList();
@@ -192,7 +192,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         public void AC1_HeadersSetCorrectly_AnthropicVersion()
         {
             var handler = new SequenceHandler(_ => MakeSuccess());
-            var httpClient = new HttpClient(handler);
+            using var httpClient = new HttpClient(handler);
             using (var client = new AnthropicClient(TestApiKey, httpClient))
             {
                 var values = httpClient.DefaultRequestHeaders.GetValues("anthropic-version").ToList();
@@ -208,7 +208,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         public void AC2_NoBetaHeader_OnConstruction()
         {
             var handler = new SequenceHandler(_ => MakeSuccess());
-            var httpClient = new HttpClient(handler);
+            using var httpClient = new HttpClient(handler);
             using (var client = new AnthropicClient(TestApiKey, httpClient))
             {
                 Assert.False(httpClient.DefaultRequestHeaders.Contains("anthropic-beta"),
@@ -227,7 +227,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
                     "Request must not include anthropic-beta header");
                 return MakeSuccess();
             });
-            var httpClient = new HttpClient(handler);
+            using var httpClient = new HttpClient(handler);
             using (var client = new AnthropicClient(TestApiKey, httpClient))
             {
                 await client.SendMessagesAsync(MakeRequest());

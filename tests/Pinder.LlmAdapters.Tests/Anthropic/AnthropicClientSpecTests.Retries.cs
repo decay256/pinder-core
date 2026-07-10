@@ -24,7 +24,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
                 _ => Make429("0"),
                 _ => MakeSuccess("recovered")
             );
-            var httpClient = new HttpClient(handler);
+            using var httpClient = new HttpClient(handler);
             using (var client = new AnthropicClient(TestApiKey, httpClient))
             {
                 var response = await client.SendMessagesAsync(MakeRequest());
@@ -44,7 +44,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
                 _ => { callCount++; return Make429("0"); },
                 _ => { callCount++; return Make429("0"); }
             );
-            var httpClient = new HttpClient(handler);
+            using var httpClient = new HttpClient(handler);
             using (var client = new AnthropicClient(TestApiKey, httpClient))
             {
                 var ex = await Assert.ThrowsAsync<AnthropicApiException>(
@@ -65,7 +65,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
                 _ => Make429("0"),
                 _ => { var r = MakeError(429, "{\"error\":\"final_429\"}"); r.Headers.TryAddWithoutValidation("Retry-After", "0"); return r; }
             );
-            var httpClient = new HttpClient(handler);
+            using var httpClient = new HttpClient(handler);
             using (var client = new AnthropicClient(TestApiKey, httpClient))
             {
                 var ex = await Assert.ThrowsAsync<AnthropicApiException>(
@@ -88,7 +88,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
                 _ => Make429("0"),
                 _ => MakeSuccess("third retry success")
             );
-            var httpClient = new HttpClient(handler);
+            using var httpClient = new HttpClient(handler);
             using (var client = new AnthropicClient(TestApiKey, httpClient))
             {
                 var response = await client.SendMessagesAsync(MakeRequest());
@@ -109,7 +109,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
                 _ => MakeError(529, "{\"error\":\"overloaded\"}"),
                 _ => MakeError(529, "{\"error\":\"overloaded\"}")
             );
-            var httpClient = new HttpClient(handler);
+            using var httpClient = new HttpClient(handler);
             using (var client = new AnthropicClient(TestApiKey, httpClient))
             {
                 var ex = await Assert.ThrowsAsync<AnthropicApiException>(
@@ -128,7 +128,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
                 _ => MakeError(529),
                 _ => MakeSuccess("529 recovered")
             );
-            var httpClient = new HttpClient(handler);
+            using var httpClient = new HttpClient(handler);
             using (var client = new AnthropicClient(TestApiKey, httpClient))
             {
                 var response = await client.SendMessagesAsync(MakeRequest());
@@ -147,7 +147,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
                 _ => MakeError(500, "{\"error\":\"first\"}"),
                 _ => MakeError(500, "{\"error\":\"second\"}")
             );
-            var httpClient = new HttpClient(handler);
+            using var httpClient = new HttpClient(handler);
             using (var client = new AnthropicClient(TestApiKey, httpClient))
             {
                 var ex = await Assert.ThrowsAsync<AnthropicApiException>(
@@ -165,7 +165,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
                 _ => MakeError(502),
                 _ => MakeSuccess("502 recovered")
             );
-            var httpClient = new HttpClient(handler);
+            using var httpClient = new HttpClient(handler);
             using (var client = new AnthropicClient(TestApiKey, httpClient))
             {
                 var response = await client.SendMessagesAsync(MakeRequest());
@@ -182,7 +182,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
                 _ => MakeError(503),
                 _ => MakeError(503)
             );
-            var httpClient = new HttpClient(handler);
+            using var httpClient = new HttpClient(handler);
             using (var client = new AnthropicClient(TestApiKey, httpClient))
             {
                 var ex = await Assert.ThrowsAsync<AnthropicApiException>(
@@ -201,7 +201,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             var handler = new SequenceHandler(
                 _ => MakeError(400, "{\"error\":\"invalid_request\"}")
             );
-            var httpClient = new HttpClient(handler);
+            using var httpClient = new HttpClient(handler);
             using (var client = new AnthropicClient(TestApiKey, httpClient))
             {
                 var ex = await Assert.ThrowsAsync<AnthropicApiException>(
@@ -219,7 +219,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         public async Task AC6_403_NoRetry()
         {
             var handler = new SequenceHandler(_ => MakeError(403, "{\"error\":\"forbidden\"}"));
-            var httpClient = new HttpClient(handler);
+            using var httpClient = new HttpClient(handler);
             using (var client = new AnthropicClient(TestApiKey, httpClient))
             {
                 var ex = await Assert.ThrowsAsync<AnthropicApiException>(
@@ -234,7 +234,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         public async Task AC6_404_NoRetry()
         {
             var handler = new SequenceHandler(_ => MakeError(404));
-            var httpClient = new HttpClient(handler);
+            using var httpClient = new HttpClient(handler);
             using (var client = new AnthropicClient(TestApiKey, httpClient))
             {
                 var ex = await Assert.ThrowsAsync<AnthropicApiException>(
@@ -249,7 +249,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         public async Task AC6_422_NoRetry()
         {
             var handler = new SequenceHandler(_ => MakeError(422));
-            var httpClient = new HttpClient(handler);
+            using var httpClient = new HttpClient(handler);
             using (var client = new AnthropicClient(TestApiKey, httpClient))
             {
                 var ex = await Assert.ThrowsAsync<AnthropicApiException>(
