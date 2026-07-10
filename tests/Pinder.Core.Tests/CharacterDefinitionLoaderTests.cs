@@ -14,22 +14,7 @@ namespace Pinder.Core.Tests
     [Collection("StaticWiring")]
     public class CharacterDefinitionLoaderTests
     {
-        // Locate data files relative to repo root
-        private static string RepoRoot
-        {
-            get
-            {
-                string? dir = AppContext.BaseDirectory;
-                while (dir != null)
-                {
-                    if (Directory.Exists(Path.Combine(dir, "data")) &&
-                        Directory.Exists(Path.Combine(dir, "src")))
-                        return dir;
-                    dir = Directory.GetParent(dir)?.FullName;
-                }
-                throw new InvalidOperationException("Cannot find repo root from " + AppContext.BaseDirectory);
-            }
-        }
+        private static string RepoRoot => TestRepoLocator.RepoRoot;
 
         private static IItemRepository LoadItemRepo()
         {
