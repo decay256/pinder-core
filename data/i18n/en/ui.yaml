@@ -34,6 +34,8 @@ strings:
   character_card.view_sheet_cta: "View Character Sheet"
   character_card.pick_cta: "Pick"
   character_card.deselect_cta: "Deselect"
+  character_card.play_as_cta: "Play as"
+  character_card.play_against_cta: "Against"
   character_detail.shadows_heading: "Shadows"
   character_detail.anatomy_heading: "Anatomy"
   character_detail.items_heading: "Items"

@@ -34,23 +34,27 @@ namespace Pinder.Core.Tests
         private class FakeStakeGenerator : ISequentialStakeGenerator
         {
             public bool WasCalled { get; private set; }
+            public string? PassedBio { get; private set; }
             public Dictionary<string, BackstoryFact>? PassedBackstory { get; private set; }
             public Task<List<string>> GenerateAsync(string characterName, string genderIdentity, string bio, Dictionary<string, BackstoryFact> backstory, CancellationToken cancellationToken = default)
             {
                 WasCalled = true;
+                PassedBio = bio;
                 PassedBackstory = backstory;
-                return Task.FromResult(new List<string> { "Afraid of commitment" });
+                return Task.FromResult(Enumerable.Range(1, 15).Select(i => $"Stake {i}").ToList());
             }
         }
 
         private class FakeDiagnosisGenerator : ITherapistDiagnosisGenerator
         {
             public bool WasCalled { get; private set; }
+            public string? PassedBio { get; private set; }
             public Dictionary<string, BackstoryFact>? PassedBackstory { get; private set; }
             public List<string>? PassedStakes { get; private set; }
             public Task<Dictionary<string, string>> GenerateAsync(string characterName, string genderIdentity, string bio, Dictionary<string, BackstoryFact> backstory, List<string> stakeLines, CancellationToken cancellationToken = default)
             {
                 WasCalled = true;
+                PassedBio = bio;
                 PassedBackstory = backstory;
                 PassedStakes = stakeLines;
                 var dict = new Dictionary<string, string>
@@ -101,7 +105,10 @@ namespace Pinder.Core.Tests
             Assert.True(stakeGen.PassedBackstory.ContainsKey("fact1"));
             Assert.NotNull(diagnosisGen.PassedBackstory);
             Assert.NotNull(diagnosisGen.PassedStakes);
-            Assert.Contains("Afraid of commitment", diagnosisGen.PassedStakes);
+            Assert.Equal(15, diagnosisGen.PassedStakes.Count);
+            Assert.Contains("Stake 1", diagnosisGen.PassedStakes);
+            Assert.Equal(string.Empty, stakeGen.PassedBio);
+            Assert.Equal(string.Empty, diagnosisGen.PassedBio);
         }
 
         [Fact]

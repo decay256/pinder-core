@@ -72,18 +72,18 @@ namespace Pinder.Core.Tests
             var diagnosis = catalog.RequireCompleteEntry(
                 "diagnosis",
                 "prompt-catalog: missing required key 'diagnosis'.");
-            var stakes = catalog.RequireCompleteEntry(
-                "stakes",
-                "prompt-catalog: missing required key 'stakes'.");
+            var stake = catalog.RequireCompleteEntry(
+                "stake",
+                "prompt-catalog: missing required key 'stake'.");
 
             Assert.Contains("{backstory}", diagnosis.UserTemplate);
             Assert.Contains("{stakes}", diagnosis.UserTemplate);
             Assert.Equal(0.7, diagnosis.Temperature);
             Assert.Equal(1024, diagnosis.MaxTokens);
 
-            Assert.Contains("{backstory}", stakes.UserTemplate);
-            Assert.Equal(0.7, stakes.Temperature);
-            Assert.Equal(1024, stakes.MaxTokens);
+            Assert.Contains("{character_profile}", stake.UserTemplate);
+            Assert.Equal(0.9, stake.Temperature);
+            Assert.Equal(300, stake.MaxTokens);
         }
 
         [Fact]

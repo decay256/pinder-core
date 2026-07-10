@@ -33,7 +33,7 @@ namespace Pinder.RemoteAssets
 
         /// <summary>
         /// <c>POST {baseUrl}/assets</c> as <c>multipart/form-data</c> with
-        /// exactly two parts named <c>metadata</c> and <c>payload</c>.
+        /// exactly two file-backed parts named <c>metadata</c> and <c>payload</c>.
         /// </summary>
         public async Task<CharacterAssetMetadata> PublishAsync(
             CharacterDefinition def,
@@ -259,11 +259,11 @@ namespace Pinder.RemoteAssets
 
             var metaPart = new ByteArrayContent(metaBytes);
             metaPart.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-            multipart.Add(metaPart, "metadata");
+            multipart.Add(metaPart, "metadata", "metadata.json");
 
             var payloadPart = new ByteArrayContent(payloadBytes);
-            payloadPart.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
-            multipart.Add(payloadPart, "payload");
+            payloadPart.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            multipart.Add(payloadPart, "payload", "payload.json");
 
             return multipart;
         }

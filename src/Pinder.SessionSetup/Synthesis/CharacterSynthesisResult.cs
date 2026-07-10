@@ -8,5 +8,6 @@ namespace Pinder.SessionSetup
         public Dictionary<string, BackstoryFact> Backstory { get; set; } = new Dictionary<string, BackstoryFact>();
         public List<string> StakeLines { get; set; } = new List<string>();
         public Dictionary<string, string> PsychiatricDiagnosis { get; set; } = new Dictionary<string, string>();
+        public string Bio { get; set; } = string.Empty;
     }
 }

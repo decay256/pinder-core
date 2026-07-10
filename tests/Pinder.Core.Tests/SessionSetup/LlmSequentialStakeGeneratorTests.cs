@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -70,11 +71,11 @@ prompts:
         }
 
         [Fact]
-        public async Task GenerateAsync_WithValidJson_ParsesSuccessfully()
+        public async Task GenerateAsync_WithCanonicalBullets_ParsesSuccessfully()
         {
             // Arrange
-            var transport = new FakeLlmTransport { ResponseToReturn = "[\"Afraid of commitment\", \"Deep trust issues\"]" };
-            var (catalog, tempDir) = CreateTemporaryCatalog("stakes", "SYSTEM_INSTRUCTION", "USER_TEMPLATE {backstory}", 0.61, 777);
+            var transport = new FakeLlmTransport { ResponseToReturn = BuildStakeBullets() };
+            var (catalog, tempDir) = CreateTemporaryCatalog("stake", "SYSTEM_INSTRUCTION", "USER_TEMPLATE {character_profile}", 0.61, 777);
 
             try
             {
@@ -89,17 +90,18 @@ prompts:
                 var result = await generator.GenerateAsync("CharName", "gender", "bio", backstory);
 
                 // Assert
-                Assert.Equal(2, result.Count);
-                Assert.Contains("Afraid of commitment", result);
-                Assert.Contains("Deep trust issues", result);
+                Assert.Equal(15, result.Count);
+                Assert.Contains("Stake 1", result);
+                Assert.Contains("Stake 15", result);
 
                 Assert.Equal("SYSTEM_INSTRUCTION", transport.LastSystemPrompt);
                 Assert.NotNull(transport.LastUserMessage);
                 Assert.Contains("USER_TEMPLATE", transport.LastUserMessage);
+                Assert.Contains("BACKSTORY JSON", transport.LastUserMessage);
                 Assert.Contains("Divorce", transport.LastUserMessage);
                 Assert.Equal(0.61, transport.LastTemperature);
                 Assert.Equal(777, transport.LastMaxTokens);
-                Assert.Equal(LlmPhase.Synthesis, transport.LastPhase);
+                Assert.Equal(LlmPhase.PsychologicalStake, transport.LastPhase);
                 Assert.Equal(1, transport.CallCount);
             }
             finally
@@ -109,11 +111,11 @@ prompts:
         }
 
         [Fact]
-        public async Task GenerateAsync_WithMalformedJson_ThrowsInvalidOperationException()
+        public async Task GenerateAsync_WithNonBulletText_ThrowsInvalidOperationException()
         {
             // Arrange
-            var transport = new FakeLlmTransport { ResponseToReturn = "Malformed / non-JSON LLM response" };
-            var (catalog, tempDir) = CreateTemporaryCatalog("stakes", "SYSTEM_INSTRUCTION", "USER_TEMPLATE {backstory}");
+            var transport = new FakeLlmTransport { ResponseToReturn = "Malformed non-bullet LLM response" };
+            var (catalog, tempDir) = CreateTemporaryCatalog("stake", "SYSTEM_INSTRUCTION", "USER_TEMPLATE {character_profile}");
 
             try
             {
@@ -125,9 +127,9 @@ prompts:
                 var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => 
                     generator.GenerateAsync("CharName", "gender", "bio", backstory));
                 
-                Assert.Contains("Failed to parse stakes JSON from LLM response", ex.Message);
-                Assert.DoesNotContain("Malformed / non-JSON LLM response", ex.Message);
-                Assert.DoesNotContain("Malformed / non-JSON LLM response", ex.ToString());
+                Assert.Contains("Failed to parse canonical 15-item stake bullet list from LLM response", ex.Message);
+                Assert.DoesNotContain("Malformed non-bullet LLM response", ex.Message);
+                Assert.DoesNotContain("Malformed non-bullet LLM response", ex.ToString());
                 Assert.Contains("phase=synthesis", ex.Message);
                 Assert.Contains("output_length=", ex.Message);
                 Assert.Contains("output_sha256=", ex.Message);
@@ -143,7 +145,7 @@ prompts:
         {
             // Arrange
             var transport = new FakeLlmTransport { ResponseToReturn = "   " };
-            var (catalog, tempDir) = CreateTemporaryCatalog("stakes", "SYSTEM_INSTRUCTION", "USER_TEMPLATE {backstory}");
+            var (catalog, tempDir) = CreateTemporaryCatalog("stake", "SYSTEM_INSTRUCTION", "USER_TEMPLATE {character_profile}");
 
             try
             {
@@ -155,7 +157,7 @@ prompts:
                 var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => 
                     generator.GenerateAsync("CharName", "gender", "bio", backstory));
                 
-                Assert.Contains("Failed to parse stakes JSON from LLM response", ex.Message);
+                Assert.Contains("Failed to parse canonical 15-item stake bullet list from LLM response", ex.Message);
             }
             finally
             {
@@ -172,7 +174,7 @@ prompts:
             {
                 File.WriteAllText(Path.Combine(tempDir, "temp_prompts.yaml"), @"schema_version: 1
 prompts:
-  stakes:
+  stake:
     temperature: 0.7
     max_tokens: 1024
     system_prompt: ""SYSTEM_INSTRUCTION""");
@@ -191,5 +193,8 @@ prompts:
                 CleanupCatalog(tempDir);
             }
         }
+
+        private static string BuildStakeBullets()
+            => string.Join("\n", Enumerable.Range(1, 15).Select(i => $"- Stake {i}"));
     }
 }

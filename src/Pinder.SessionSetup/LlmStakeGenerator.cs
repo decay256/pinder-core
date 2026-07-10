@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -236,6 +237,36 @@ namespace Pinder.SessionSetup
                 {
                     { "character_profile", assembledSystemPrompt },
                 });
+        }
+
+        internal static List<string> ParseCanonicalStakeBullets(string llmResponse)
+        {
+            if (string.IsNullOrWhiteSpace(llmResponse))
+                throw new FormatException("Stake response was empty.");
+
+            var lines = llmResponse
+                .Split(new[] { "\r\n", "\n" }, StringSplitOptions.None)
+                .Select(line => line.Trim())
+                .Where(line => line.Length > 0)
+                .ToList();
+
+            if (lines.Count == 0)
+                throw new FormatException("Stake response contained no non-empty lines.");
+
+            var result = new List<string>(capacity: lines.Count);
+            foreach (var line in lines)
+            {
+                if (!line.StartsWith("- ", StringComparison.Ordinal))
+                    throw new FormatException("Canonical stake response must contain only '- ' markdown bullet lines.");
+
+                var body = line.Substring(2).Trim();
+                if (body.Length == 0)
+                    throw new FormatException("Canonical stake response contained an empty bullet.");
+
+                result.Add(body);
+            }
+
+            return result;
         }
 
         /// <summary>Tunable knobs for <see cref="LlmStakeGenerator"/>.</summary>

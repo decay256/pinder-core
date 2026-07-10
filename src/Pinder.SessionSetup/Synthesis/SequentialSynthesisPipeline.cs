@@ -10,15 +10,18 @@ namespace Pinder.SessionSetup
         private readonly IBackstoryGenerator _backstoryGenerator;
         private readonly ISequentialStakeGenerator _stakeGenerator;
         private readonly ITherapistDiagnosisGenerator _diagnosisGenerator;
+        private readonly IBioGenerator? _bioGenerator;
 
         public SequentialSynthesisPipeline(
             IBackstoryGenerator backstoryGenerator,
             ISequentialStakeGenerator stakeGenerator,
-            ITherapistDiagnosisGenerator diagnosisGenerator)
+            ITherapistDiagnosisGenerator diagnosisGenerator,
+            IBioGenerator? bioGenerator = null)
         {
             _backstoryGenerator = backstoryGenerator;
             _stakeGenerator = stakeGenerator;
             _diagnosisGenerator = diagnosisGenerator;
+            _bioGenerator = bioGenerator;
         }
 
         public async Task<CharacterSynthesisResult> SynthesizeAsync(
@@ -34,7 +37,7 @@ namespace Pinder.SessionSetup
 
             // Stage 2: Generate Stakes
             var stakes = await _stakeGenerator.GenerateAsync(
-                characterName, genderIdentity, bio, backstory, cancellationToken);
+                characterName, genderIdentity, string.Empty, backstory, cancellationToken);
 
             // Stage 3: Generate Therapist Diagnosis
             // NOTE: A genuinely empty-but-valid diagnosis (character has no
@@ -49,13 +52,24 @@ namespace Pinder.SessionSetup
             // recorded as a genuine failure rather than a completed
             // regeneration with silently-missing diagnosis data.
             var diagnosis = await _diagnosisGenerator.GenerateAsync(
-                characterName, genderIdentity, bio, backstory, stakes, cancellationToken);
+                characterName, genderIdentity, string.Empty, backstory, stakes, cancellationToken);
+
+            var generatedBio = _bioGenerator is null
+                ? string.Empty
+                : await _bioGenerator.GenerateAsync(
+                    characterName,
+                    genderIdentity,
+                    backstory,
+                    stakes,
+                    diagnosis,
+                    cancellationToken);
 
             return new CharacterSynthesisResult
             {
                 Backstory = backstory,
                 StakeLines = stakes,
-                PsychiatricDiagnosis = diagnosis
+                PsychiatricDiagnosis = diagnosis,
+                Bio = generatedBio
             };
         }
     }

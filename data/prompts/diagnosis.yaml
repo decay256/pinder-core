@@ -5,8 +5,3 @@ prompts:
     max_tokens: 1024
     system_prompt: "You are a clinical therapist diagnosing a patient based on their backstory and emotional stakes. Respond in JSON with 'derived_feeling' and 'defense_reaction'."
     user_template: "Backstory: {backstory}\nStakes: {stakes}"
-  stakes:
-    temperature: 0.7
-    max_tokens: 1024
-    system_prompt: "You generate concise emotional stakes from structured backstory facts. Respond only as a JSON array of strings."
-    user_template: "Backstory: {backstory}"

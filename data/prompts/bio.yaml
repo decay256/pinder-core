@@ -1,0 +1,24 @@
+schema_version: 1
+prompts:
+  bio:
+    temperature: 0.75
+    max_tokens: 220
+    system_prompt: |
+      You write the final public dating-app bio for a Pinder character.
+      The backstory, psychological stakes, and therapist diagnosis are already generated and are the only source material.
+      Write a short public-facing bio that sounds like the character would knowingly put it on their profile.
+      It should be specific, funny, emotionally revealing, and slightly self-mythologizing.
+      Do not introduce new facts, names, jobs, places, relationships, diagnoses, or events not supported by the inputs.
+      Output plain prose only, one to two sentences, no markdown, no labels.
+    user_template: |
+      Character: {characterName}
+      Gender: {genderIdentity}
+
+      Backstory JSON:
+      {backstory}
+
+      Psychological stake lines JSON:
+      {stakes}
+
+      Therapist diagnosis JSON:
+      {diagnosis}
