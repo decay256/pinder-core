@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """
-Test horniness overlay across multiple models with identical prompt context.
+Manual horniness overlay comparison across live models with identical prompt context.
 Reconstructed from session-075 turn 1: Brick_haus vs Velvet_Void.
+
+This is a manual eval harness, not an automated test. It prints candidate model
+outputs for human review and intentionally has no pass/fail oracle.
 """
 
 import json, os, re, urllib.error, urllib.request
@@ -55,7 +58,7 @@ def render_template(template, values):
 
     return TOKEN_RE.sub(replace, template)
 
-# Load Groq key from file if env not set
+# Load Groq key from file if env not set.
 def get_groq_key():
     k = os.environ.get("GROQ_API_KEY", "").strip()
     if k: return k
@@ -172,8 +175,8 @@ for model_id, base_msg in delivered.items():
         r = call_groq(model_id, GAME_CONTEXT, user_overlay)
         print(f"   → {model_id} overlay: {r}")
 
-# ── Step 3: Cross-test — all overlay models on Claude's delivery ──────────────
-separator("STEP 3: Cross-test — all models overlay Claude's strong-success output")
+# Step 3: Cross-comparison - all overlay models on Claude's delivery.
+separator("STEP 3: Cross-comparison - all models overlay Claude's strong-success output")
 
 claude_base = delivered.get("claude-sonnet")
 if claude_base:

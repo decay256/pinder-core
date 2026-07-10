@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """
-Overlay model test v3.
+Manual overlay model debug harness v3.
 Section A: Delivery with CORRECT intended message (chopsticks, WIT Strong success Beat+8).
 Section B: Overlay with short system + datee context.
 Delivery prompt extracted from debug for structure, but user message constructed for chopsticks.
+
+This script calls live LLM APIs and prints output for human review. It is not an
+automated test and has no pass/fail oracle.
 """
 
 import json, urllib.request, urllib.error
