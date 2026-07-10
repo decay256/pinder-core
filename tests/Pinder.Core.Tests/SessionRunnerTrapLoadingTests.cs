@@ -11,7 +11,10 @@ namespace Pinder.Core.Tests
 {
     /// <summary>
     /// Tests that validate the session runner's trap loading via TrapRegistryLoader.
-    /// Issue #353: NullTrapRegistry disables all traps in the session runner.
+    /// Issue #353 established real trap loading. Trap data is a core gameplay
+    /// contract: missing/corrupt traps.json now fails setup (throws) instead of
+    /// silently falling back to NullTrapRegistry. NullTrapRegistry is only used
+    /// deliberately, via the explicit --disable-traps flag (see Resolve tests).
     /// </summary>
     [Trait("Category", "SessionRunner")]
     public sealed class SessionRunnerTrapLoadingTests : IDisposable
@@ -90,22 +93,21 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public void Load_WithMissingFile_FallsBackToNullRegistry()
+        public void Load_WithMissingFile_ThrowsInsteadOfFallingBack()
         {
             // Arrange: point env var to nonexistent path
             Environment.SetEnvironmentVariable(TrapRegistryLoader.EnvVarName, "/nonexistent/traps.json");
-            var warnings = new StringWriter();
+            var infoWriter = new StringWriter();
 
-            // Act
-            ITrapRegistry registry = TrapRegistryLoader.Load("/also-nonexistent", warnings);
-
-            // Assert: graceful fallback — returns null for all stats
-            Assert.Null(registry.GetTrap(StatType.Charm));
-            Assert.Contains("[WARN]", warnings.ToString());
+            // Act + Assert: trap data is a core gameplay contract — missing
+            // data must fail setup, not silently disable the mechanic.
+            var ex = Assert.Throws<FileNotFoundException>(
+                () => TrapRegistryLoader.Load("/also-nonexistent", infoWriter));
+            Assert.Contains("traps.json", ex.Message);
         }
 
         [Fact]
-        public void Load_WithCorruptJson_FallsBackToNullRegistry()
+        public void Load_WithCorruptJson_ThrowsInsteadOfFallingBack()
         {
             // Arrange: write corrupt JSON to temp file
             string tempFile = Path.GetTempFileName();
@@ -113,19 +115,53 @@ namespace Pinder.Core.Tests
             {
                 File.WriteAllText(tempFile, "{ this is not valid json [[[");
                 Environment.SetEnvironmentVariable(TrapRegistryLoader.EnvVarName, tempFile);
-                var warnings = new StringWriter();
+                var infoWriter = new StringWriter();
 
-                // Act
-                ITrapRegistry registry = TrapRegistryLoader.Load("/nonexistent", warnings);
-
-                // Assert
-                Assert.Null(registry.GetTrap(StatType.Rizz));
-                Assert.Contains("[WARN]", warnings.ToString());
+                // Act + Assert
+                var ex = Assert.Throws<InvalidDataException>(
+                    () => TrapRegistryLoader.Load("/nonexistent", infoWriter));
+                Assert.Contains(tempFile, ex.Message);
             }
             finally
             {
                 File.Delete(tempFile);
             }
+        }
+
+        [Fact]
+        public void Resolve_WithDisableTrapsFlag_ReturnsNullRegistryWithoutTouchingTrapsJson()
+        {
+            // Arrange: point env var at a path that would throw if the loader
+            // ever tried to read it — proves --disable-traps short-circuits
+            // before any traps.json access is attempted.
+            Environment.SetEnvironmentVariable(TrapRegistryLoader.EnvVarName, "/nonexistent/traps.json");
+            var infoWriter = new StringWriter();
+
+            // Act: this mirrors Program.Setup.cs's handling of the explicit
+            // --disable-traps CLI flag.
+            ITrapRegistry registry = TrapRegistryLoader.Resolve(disableTraps: true, "/also-nonexistent", infoWriter);
+
+            // Assert: deliberate no-traps mode — null lookups, clearly logged
+            // as intentional (not a silent failure fallback).
+            Assert.IsType<NullTrapRegistry>(registry);
+            Assert.Null(registry.GetTrap(StatType.Charm));
+            Assert.Contains("[INFO] Traps disabled via --disable-traps", infoWriter.ToString());
+        }
+
+        [Fact]
+        public void Resolve_WithoutDisableTrapsFlag_LoadsRealRegistry()
+        {
+            // Arrange
+            string trapsPath = FindTrapsJson();
+            Environment.SetEnvironmentVariable(TrapRegistryLoader.EnvVarName, trapsPath);
+            var infoWriter = new StringWriter();
+
+            // Act
+            ITrapRegistry registry = TrapRegistryLoader.Resolve(disableTraps: false, "/nonexistent", infoWriter);
+
+            // Assert: real trap data loaded, not the null fallback
+            Assert.IsType<JsonTrapRepository>(registry);
+            Assert.NotNull(registry.GetTrap(StatType.Rizz));
         }
 
         [Fact]

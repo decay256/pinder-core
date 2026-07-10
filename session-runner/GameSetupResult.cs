@@ -49,6 +49,7 @@ public class GameSetupResult
     public string? OverlayModel { get; set; }
     public IStatefulLlmAdapter Llm { get; set; }
     public ITrapRegistry TrapRegistry { get; set; }
+    public bool TrapsDisabled { get; set; }
     public I18nCatalog? SnapshotI18nCatalog { get; set; }
     public SessionShadowTracker SableShadows { get; set; }
     public GameClock Clock { get; set; }

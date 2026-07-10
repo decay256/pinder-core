@@ -37,6 +37,7 @@ partial class Program
         int maxTurnsArg = ParseMaxTurns(args, defaultValue: -1); // -1 = not specified
         string agentType = ParseAgentArg(args);
         bool isDebug = args.Contains("--debug");
+        bool disableTraps = args.Contains("--disable-traps");
 
         // ── Resimulation flags ────────────────────────────────────────────
         result.ResimulateSlug = ParseArg(args, "--resimulate");
@@ -209,8 +210,28 @@ partial class Program
 
         Console.WriteLine($"**Engine:** `pinder-core GameSession` + `{engineLabel}`");
 
-        // Load real trap definitions — fallback to NullTrapRegistry if file missing/corrupt
-        result.TrapRegistry = TrapRegistryLoader.Load(AppContext.BaseDirectory, Console.Error);
+        // Load real trap definitions. Trap data is a core gameplay contract:
+        // a missing or corrupt traps.json fails setup rather than silently
+        // running with all trap mechanics disabled. The only sanctioned
+        // no-traps mode is the explicit --disable-traps flag, which is
+        // called out clearly in the session header below.
+        result.TrapsDisabled = disableTraps;
+        if (disableTraps)
+        {
+            Console.WriteLine("**Traps:** DISABLED (--disable-traps — deliberate no-traps mode)");
+        }
+        try
+        {
+            result.TrapRegistry = TrapRegistryLoader.Resolve(disableTraps, AppContext.BaseDirectory, Console.Error);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"[ERROR] Failed to load traps.json: {ex.GetType().Name}: {ex.Message}");
+            Console.Error.WriteLine("[ERROR] Pass --disable-traps to intentionally run without trap data.");
+            result.ShouldExit = true;
+            result.ExitCode = 1;
+            return result;
+        }
 
         // Issue #474: load the i18n catalog so per-turn snapshots can
         // embed deterministic interpretation strings on each event.

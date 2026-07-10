@@ -74,6 +74,7 @@ partial class Program
         Console.Error.WriteLine("  --difficulty <pct> Reduce check success probability by N% (e.g. --difficulty 15 = 15% harder)");
         Console.Error.WriteLine("  --seed <int>       Seed value for deterministic dice checks");
         Console.Error.WriteLine("  --debug            Write an accompanying session-XXX-debug.md log containing full raw API transcripts");
+        Console.Error.WriteLine("  --disable-traps    Deliberately run without trap data (skips traps.json load; session header notes this explicitly)");
         Console.Error.WriteLine();
         string available = ListAvailableCharacters();
         Console.Error.WriteLine($"Available characters: {available}");
