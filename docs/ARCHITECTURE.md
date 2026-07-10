@@ -39,13 +39,13 @@ API. `Pinder.RemoteAssets` is NOT used by the engine or the CLI harness directly
 
 ## 2. Assembly Map
 
-These assembly-map invariants — Pinder.Core kernel purity (zero non-BCL dependencies) and a single production ILlmAdapter implementation (PinderLlmAdapter), with vendor transports under vendor namespaces — are enforced by ArchitectureRuleTests.
+These assembly-map invariants — Pinder.Core kernel purity (only framework/BCL-support dependencies, no service/web/provider dependencies) and a single production ILlmAdapter implementation (PinderLlmAdapter), with vendor transports under vendor namespaces — are enforced by ArchitectureRuleTests.
 
 ### Pinder.Core
 
-The domain kernel. Zero external dependencies — no NuGet packages, no I/O.
+The domain kernel. It targets netstandard2.0 and may use narrowly scoped Microsoft BCL-support NuGet packages that are already listed in `Pinder.Core.csproj` (`Microsoft.Bcl.AsyncInterfaces` and `System.Text.Json`). It must not take service, web, provider, rules-engine, or gameplay-framework dependencies, and it must not perform I/O.
 
-| Depends on | Nothing |
+| Depends on | Microsoft.Bcl.AsyncInterfaces, System.Text.Json |
 |---|---|
 | **Purpose** | Game loop, stat model, roll engine, interest meter, shadow tracking, traps, XP, combos |
 | **Key files** | `Conversation/GameSession.cs` — the game session host |
