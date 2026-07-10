@@ -276,9 +276,8 @@ namespace Pinder.SessionSetup
             public double Temperature { get; set; } = GeneratorDefaultConfigs.Stake.Temperature;
 
             /// <summary>
-            /// Max output tokens. Default 300 (#826: hard ceiling for the
-            /// 5-7 single-line-fragment shape; target output is ~250 tokens
-            /// per character, so 300 leaves a small safety margin).
+            /// Max output tokens. Default 1200 to leave room for the
+            /// canonical 15-stem bullet contract.
             /// </summary>
             public int MaxTokens { get; set; } = GeneratorDefaultConfigs.Stake.MaxTokens;
 

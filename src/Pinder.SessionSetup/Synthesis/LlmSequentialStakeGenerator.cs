@@ -12,6 +12,8 @@ namespace Pinder.SessionSetup
 {
     public class LlmSequentialStakeGenerator : ISequentialStakeGenerator
     {
+        private const int MaxAttempts = 3;
+
         private readonly ILlmTransport _transport;
         private readonly PromptCatalog _catalog;
 
@@ -31,25 +33,43 @@ namespace Pinder.SessionSetup
             Dictionary<string, BackstoryFact> backstory, 
             CancellationToken cancellationToken = default)
         {
-            var stakeGenerator = new LlmStakeGenerator(
-                _transport,
-                streamingTransport: null,
-                options: null,
-                catalog: _catalog);
-            var llmResponse = await stakeGenerator.GenerateAsync(
-                characterName,
-                BuildBackstoryOnlyProfile(backstory),
-                cancellationToken).ConfigureAwait(false);
+            string llmResponse = string.Empty;
+            FormatException? lastParseFailure = null;
+            var profile = BuildBackstoryOnlyProfile(backstory);
+            for (int attempt = 1; attempt <= MaxAttempts; attempt++)
+            {
+                var stakeGenerator = new LlmStakeGenerator(
+                    _transport,
+                    streamingTransport: null,
+                    options: null,
+                    catalog: _catalog);
+                llmResponse = await stakeGenerator.GenerateAsync(
+                    characterName,
+                    profile,
+                    cancellationToken).ConfigureAwait(false);
 
+                try
+                {
+                    var list = LlmStakeGenerator.ParseCanonicalStakeBullets(llmResponse);
+                    if (list.Count != 15)
+                    {
+                        throw new FormatException(
+                            $"Expected exactly 15 psychological stake items, got {list.Count}.");
+                    }
+                    return list;
+                }
+                catch (FormatException ex)
+                {
+                    lastParseFailure = ex;
+                    if (attempt == MaxAttempts)
+                        break;
+                }
+            }
+
+            lastParseFailure ??= new FormatException("Stake generation did not return a parseable 15-item list.");
             try
             {
-                var list = LlmStakeGenerator.ParseCanonicalStakeBullets(llmResponse);
-                if (list.Count != 15)
-                {
-                    throw new FormatException(
-                        $"Expected exactly 15 psychological stake items, got {list.Count}.");
-                }
-                return list;
+                throw lastParseFailure;
             }
             catch (FormatException ex)
             {

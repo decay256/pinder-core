@@ -25,6 +25,7 @@ namespace Pinder.Core.Tests.SessionSetup
             public string? LastPhase { get; private set; }
             public int CallCount { get; private set; }
             public string ResponseToReturn { get; set; } = "[]";
+            public Queue<string>? ResponsesToReturn { get; set; }
 
             public Task<string> SendAsync(string systemPrompt, string userMessage, double temperature = 0.9, int maxTokens = 1024, string? phase = null, CancellationToken ct = default)
             {
@@ -34,6 +35,8 @@ namespace Pinder.Core.Tests.SessionSetup
                 LastTemperature = temperature;
                 LastMaxTokens = maxTokens;
                 LastPhase = phase;
+                if (ResponsesToReturn != null && ResponsesToReturn.Count > 0)
+                    return Task.FromResult(ResponsesToReturn.Dequeue());
                 return Task.FromResult(ResponseToReturn);
             }
         }
@@ -133,6 +136,39 @@ prompts:
                 Assert.Contains("phase=synthesis", ex.Message);
                 Assert.Contains("output_length=", ex.Message);
                 Assert.Contains("output_sha256=", ex.Message);
+                Assert.Equal(3, transport.CallCount);
+            }
+            finally
+            {
+                CleanupCatalog(tempDir);
+            }
+        }
+
+        [Fact]
+        public async Task GenerateAsync_WithInitialShortStake_RetriesUntilCanonicalFifteen()
+        {
+            var transport = new FakeLlmTransport
+            {
+                ResponsesToReturn = new Queue<string>(new[]
+                {
+                    "- Stake 1\n- Stake 2\n- Stake 3\n- Stake 4\n- Stake 5\n- Stake 6\n- Stake 7\n- Stake 8",
+                    BuildStakeBullets(),
+                })
+            };
+            var (catalog, tempDir) = CreateTemporaryCatalog("stake", "SYSTEM_INSTRUCTION", "USER_TEMPLATE {character_profile}");
+
+            try
+            {
+                var generator = new LlmSequentialStakeGenerator(transport, catalog);
+                var backstory = new Dictionary<string, BackstoryFact>
+                {
+                    { "f1", new BackstoryFact("Family", "Divorce", "High") }
+                };
+
+                var result = await generator.GenerateAsync("CharName", "gender", "bio", backstory);
+
+                Assert.Equal(15, result.Count);
+                Assert.Equal(2, transport.CallCount);
             }
             finally
             {

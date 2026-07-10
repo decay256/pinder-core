@@ -90,7 +90,7 @@ namespace Pinder.Core.Tests
 
             Assert.Contains("{character_profile}", stake.UserTemplate);
             Assert.Equal(0.9, stake.Temperature);
-            Assert.Equal(300, stake.MaxTokens);
+            Assert.Equal(1200, stake.MaxTokens);
         }
 
         [Fact]

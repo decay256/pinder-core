@@ -21,7 +21,7 @@ namespace Pinder.SessionSetup
         public static class Stake
         {
             public const double Temperature = 0.9;
-            public const int MaxTokens = 300;
+            public const int MaxTokens = 1200;
         }
 
         public static class Background
