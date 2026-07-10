@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -53,6 +54,16 @@ namespace Pinder.SessionSetup
                 if (list == null)
                 {
                     throw new System.Text.Json.JsonException("Deserialized stakes list was null.");
+                }
+                list = list
+                    .Select(line => line?.Trim())
+                    .Where(line => !string.IsNullOrWhiteSpace(line))
+                    .Cast<string>()
+                    .ToList();
+                if (list.Count != 15)
+                {
+                    throw new System.Text.Json.JsonException(
+                        $"Expected exactly 15 psychological stake items, got {list.Count}.");
                 }
                 return list;
             }
