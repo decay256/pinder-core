@@ -110,40 +110,21 @@ namespace Pinder.SessionSetup
             ValidateInputs(characterName, assembledSystemPrompt);
             string userMessage = BuildUserMessage(assembledSystemPrompt, _catalog);
 
-            try
-            {
-                var entry = _catalog.Get("stake");
-                double temp = _options.Temperature != GeneratorDefaultConfigs.Stake.Temperature
-                    ? _options.Temperature
-                    : entry.Temperature!.Value;
-                int maxTok = _options.MaxTokens != GeneratorDefaultConfigs.Stake.MaxTokens
-                    ? _options.MaxTokens
-                    : entry.MaxTokens!.Value;
-
-                string response = await _transport
-                    .SendAsync(SystemPrompt, userMessage, temp, maxTok, phase: LlmPhase.PsychologicalStake)
-                    .ConfigureAwait(false);
-                string trimmed = (response ?? string.Empty).Trim();
-                if (string.IsNullOrEmpty(trimmed))
-                {
-                    _options.OnDegraded?.Invoke(SetupGenerationResult.DegradedFailure("stake", "empty_output"));
-                }
-                return trimmed;
-            }
-            catch (OperationCanceledException)
-            {
-                // Do not fire OnDegraded on cancellation; preserve existing behavior of returning empty string.
-                return string.Empty;
-            }
-            catch (Exception ex)
-            {
-                if (_options.OnDegraded != null)
-                {
-                    _options.OnDegraded.Invoke(SetupGenerationResult.DegradedFailure("stake", "transport_error"));
-                    return string.Empty;
-                }
-                throw;
-            }
+            var entry = _catalog.Get("stake");
+            return await LlmOptionalTextGeneration.RunAsync(
+                    "stake",
+                    _transport,
+                    SystemPrompt,
+                    userMessage,
+                    entry,
+                    LlmPhase.PsychologicalStake,
+                    _options.Temperature,
+                    GeneratorDefaultConfigs.Stake.Temperature,
+                    _options.MaxTokens,
+                    GeneratorDefaultConfigs.Stake.MaxTokens,
+                    _options.OnDegraded,
+                    LlmOptionalTextGeneration.CancellationBehavior.ReturnEmpty)
+                .ConfigureAwait(false);
         }
 
         /// <inheritdoc />

@@ -80,38 +80,20 @@ namespace Pinder.SessionSetup
             systemPrompt = PromptCatalog.Substitute(systemPrompt, values);
             string userMessage = PromptCatalog.Substitute(userTemplate, values);
 
-            try
-            {
-                double temp = _options.Temperature != GeneratorDefaultConfigs.Outfit.Temperature
-                    ? _options.Temperature
-                    : entry.Temperature!.Value;
-                int maxTok = _options.MaxTokens != GeneratorDefaultConfigs.Outfit.MaxTokens
-                    ? _options.MaxTokens
-                    : entry.MaxTokens!.Value;
-
-                string response = await _transport
-                    .SendAsync(systemPrompt, userMessage, temp, maxTok, phase: LlmPhase.OutfitDescription)
-                    .ConfigureAwait(false);
-                string trimmed = (response ?? string.Empty).Trim();
-                if (string.IsNullOrEmpty(trimmed))
-                {
-                    _options.OnDegraded?.Invoke(SetupGenerationResult.DegradedFailure("outfit", "empty_output"));
-                }
-                return trimmed;
-            }
-            catch (OperationCanceledException)
-            {
-                throw;
-            }
-            catch (Exception ex)
-            {
-                if (_options.OnDegraded != null)
-                {
-                    _options.OnDegraded.Invoke(SetupGenerationResult.DegradedFailure("outfit", "transport_error"));
-                    return string.Empty;
-                }
-                throw;
-            }
+            return await LlmOptionalTextGeneration.RunAsync(
+                    "outfit",
+                    _transport,
+                    systemPrompt,
+                    userMessage,
+                    entry,
+                    LlmPhase.OutfitDescription,
+                    _options.Temperature,
+                    GeneratorDefaultConfigs.Outfit.Temperature,
+                    _options.MaxTokens,
+                    GeneratorDefaultConfigs.Outfit.MaxTokens,
+                    _options.OnDegraded,
+                    LlmOptionalTextGeneration.CancellationBehavior.Throw)
+                .ConfigureAwait(false);
         }
 
         /// <summary>Tunable knobs for <see cref="LlmOutfitDescriber"/>.</summary>
