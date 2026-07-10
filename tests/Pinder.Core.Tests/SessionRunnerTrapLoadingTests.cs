@@ -143,7 +143,11 @@ namespace Pinder.Core.Tests
 
             // Assert: deliberate no-traps mode — null lookups, clearly logged
             // as intentional (not a silent failure fallback).
-            Assert.IsType<NullTrapRegistry>(registry);
+            // Fully qualified: this test file's namespace (Pinder.Core.Tests)
+            // also contains an unrelated test-local NullTrapRegistry
+            // (GameSessionTests.cs) that would otherwise shadow the real
+            // Pinder.Core.Traps.NullTrapRegistry via `using`.
+            Assert.IsType<Pinder.Core.Traps.NullTrapRegistry>(registry);
             Assert.Null(registry.GetTrap(StatType.Charm));
             Assert.Contains("[INFO] Traps disabled via --disable-traps", infoWriter.ToString());
         }
