@@ -17,21 +17,7 @@ namespace Pinder.Core.Tests
     [Trait("Category", "Characters")]
     public class CharacterDefinitionWriterTests
     {
-        private static string RepoRoot
-        {
-            get
-            {
-                string? dir = AppContext.BaseDirectory;
-                while (dir != null)
-                {
-                    if (Directory.Exists(Path.Combine(dir, "data")) &&
-                        Directory.Exists(Path.Combine(dir, "src")))
-                        return dir;
-                    dir = Directory.GetParent(dir)?.FullName;
-                }
-                throw new InvalidOperationException("Cannot find repo root from " + AppContext.BaseDirectory);
-            }
-        }
+        private static string RepoRoot => TestRepoLocator.RepoRoot;
 
         public static IEnumerable<object[]> StarterFiles =>
             new[] { "brick", "gerald", "reuben", "sable", "velvet", "zyx" }

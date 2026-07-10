@@ -11,6 +11,7 @@
     <ProjectReference Include="..\..\src\Pinder.LlmAdapters\Pinder.LlmAdapters.csproj" />
     <ProjectReference Include="..\..\src\Pinder.SessionSetup\Pinder.SessionSetup.csproj" />
     <ProjectReference Include="..\..\src\Pinder.Rules\Pinder.Rules.csproj" />
+    <ProjectReference Include="..\..\session-runner\session-runner.csproj" />
   </ItemGroup>
 
 </Project>
