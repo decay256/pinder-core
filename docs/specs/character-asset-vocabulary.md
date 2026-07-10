@@ -135,7 +135,7 @@ The asset endpoints live under `/api/v1/assets` on the reference backend. The wr
 POST /assets
 Content-Type: multipart/form-data; boundary=...
 
-  Part 1: name="metadata", Content-Type=application/json
+  Part 1: name="metadata", filename="metadata.json", Content-Type=application/json
     {
       "asset_kind": "character/v1",
       "asset_id": "59aa20f2-46d6-4adc-89c1-6ea17f815020",
@@ -143,11 +143,11 @@ Content-Type: multipart/form-data; boundary=...
       "tags": ["starter", "official-pack"]
     }
 
-  Part 2: name="payload", Content-Type=application/json
+  Part 2: name="payload", filename="payload.json", Content-Type=application/json
     <raw v1 CharacterDefinition JSON, byte-equal to the on-disk file>
 ```
 
-Server fills in `owner_id`, `created_at`, `updated_at`, `payload_size` and returns the full metadata.
+Both parts are sent with a `filename` parameter so multipart parsers expose them as file parts rather than plain form values. Server fills in `owner_id`, `created_at`, `updated_at`, `payload_size` and returns the full metadata.
 
 **Size caps.** The metadata part has a hard cap of **4 KiB** (`MAX_ASSET_METADATA_JSON_SIZE` on the reference backend; not env-overridable). The payload part has a default cap of **256 KiB** (`max_asset_payload_size`, env-overridable per backend deployment). Violations surface as HTTP 422 with `code=metadata_too_large` or `code=payload_too_large` respectively, so the wrapper can distinguish them from generic validation errors and surface a useful error to the caller without re-parsing.
 

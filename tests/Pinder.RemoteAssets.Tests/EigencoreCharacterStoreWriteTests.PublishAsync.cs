@@ -58,6 +58,11 @@ namespace Pinder.RemoteAssets.Tests
             // metadata Content-Type = application/json.
             Assert.StartsWith("application/json", parts["metadata"].contentType, StringComparison.OrdinalIgnoreCase);
             Assert.StartsWith("application/json", parts["payload"].contentType, StringComparison.OrdinalIgnoreCase);
+
+            // Eigencore's Starlette parser requires the payload to arrive as
+            // an UploadFile, which is selected by the presence of filename=.
+            Assert.Equal("metadata.json", parts["metadata"].filename);
+            Assert.Equal("payload.json", parts["payload"].filename);
         }
 
         [Fact]
@@ -207,6 +212,8 @@ namespace Pinder.RemoteAssets.Tests
             Assert.True(retryParts.ContainsKey("payload"), "retried request missing 'payload' part");
             Assert.StartsWith("application/json", retryParts["metadata"].contentType, StringComparison.OrdinalIgnoreCase);
             Assert.StartsWith("application/json", retryParts["payload"].contentType, StringComparison.OrdinalIgnoreCase);
+            Assert.Equal("metadata.json", retryParts["metadata"].filename);
+            Assert.Equal("payload.json", retryParts["payload"].filename);
             Assert.Equal(firstParts["metadata"].body, retryParts["metadata"].body);
             Assert.Equal(firstParts["payload"].body, retryParts["payload"].body);
 

@@ -141,7 +141,7 @@ namespace Pinder.RemoteAssets.Tests
         /// FakeHttpMessageHandler's pre-disposal body snapshot. Returns
         /// parts indexed by form-data name.
         /// </summary>
-        private static Dictionary<string, (string contentType, byte[] body)> ReadMultipartParts(
+        private static Dictionary<string, (string contentType, string? filename, byte[] body)> ReadMultipartParts(
             FakeHttpMessageHandler handler, int requestIndex = 0)
         {
             string? ctHeader = handler.RequestContentTypes[requestIndex];
@@ -166,7 +166,7 @@ namespace Pinder.RemoteAssets.Tests
             return ParseMultipart(bodyBytes!, boundary!);
         }
 
-        private static Dictionary<string, (string contentType, byte[] body)> ParseMultipart(byte[] body, string boundary)
+        private static Dictionary<string, (string contentType, string? filename, byte[] body)> ParseMultipart(byte[] body, string boundary)
         {
             // Hand-rolled minimal RFC 7578 reader. Sufficient for the
             // shapes HttpClient emits in these tests; not a hardened
@@ -187,7 +187,7 @@ namespace Pinder.RemoteAssets.Tests
             // between is a part block.
             var raw = text.Split(new[] { delim }, StringSplitOptions.None);
 
-            var result = new Dictionary<string, (string contentType, byte[] body)>();
+            var result = new Dictionary<string, (string contentType, string? filename, byte[] body)>();
             // Skip first (preamble) and last (epilogue / close).
             for (int i = 1; i < raw.Length - 1; i++)
             {
@@ -206,6 +206,7 @@ namespace Pinder.RemoteAssets.Tests
                 string partBody = chunk.Substring(headerEnd + 4);
 
                 string? name = null;
+                string? filename = null;
                 string ct = "";
                 foreach (var line in headerBlock.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries))
                 {
@@ -231,6 +232,23 @@ namespace Pinder.RemoteAssets.Tests
                                 if (nEnd > nStart) name = line.Substring(nStart, nEnd - nStart);
                             }
                         }
+                        int fIdx = line.IndexOf("filename=", StringComparison.OrdinalIgnoreCase);
+                        if (fIdx >= 0)
+                        {
+                            int fStart = fIdx + 9;
+                            if (fStart < line.Length && line[fStart] == '"')
+                            {
+                                fStart++;
+                                int fEnd = line.IndexOf('"', fStart);
+                                if (fEnd > fStart) filename = line.Substring(fStart, fEnd - fStart);
+                            }
+                            else
+                            {
+                                int fEnd = line.IndexOfAny(new[] { ';', ' ', '\t' }, fStart);
+                                if (fEnd < 0) fEnd = line.Length;
+                                if (fEnd > fStart) filename = line.Substring(fStart, fEnd - fStart);
+                            }
+                        }
                     }
                     else if (line.StartsWith("Content-Type:", StringComparison.OrdinalIgnoreCase))
                     {
@@ -238,7 +256,7 @@ namespace Pinder.RemoteAssets.Tests
                     }
                 }
                 if (name != null)
-                    result[name] = (ct, Encoding.UTF8.GetBytes(partBody));
+                    result[name] = (ct, filename, Encoding.UTF8.GetBytes(partBody));
             }
             return result;
         }
