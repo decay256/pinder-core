@@ -4,969 +4,1268 @@
     "display_name": "Top Hat",
     "slot": "Head",
     "item_type": "accessory",
-    "stat_modifiers": { "charm": 1, "rizz": 1 },
+    "stat_modifiers": {
+      "charm": 1,
+      "rizz": 1
+    },
     "personality_fragment": "end every message with a deliberate flourish, a tip of the hat in words; some land and some don't, and you have decided not to check which",
     "backstory_fragment": "",
     "texting_style_fragment": "SYNTAX:\n- shorthand: never abbreviate; every word gets its full ceremonial spelling",
-    "archetype_tendencies": ["The Peacock"],
+    "archetype_tendencies": [
+      "The Peacock"
+    ],
     "response_timing_modifier": {
       "base_delay_delta_minutes": -2,
       "delay_variance_multiplier": 0.8,
-      "dry_spell_probability_delta": 0.0,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Top Hat: Head accessory with Charm +1 and Rizz +1."
   },
   {
     "id": "face_monocle",
     "display_name": "Monocle",
     "slot": "Face",
     "item_type": "accessory",
-    "stat_modifiers": { "wit": 2, "chaos": -1 },
+    "stat_modifiers": {
+      "wit": 2,
+      "chaos": -1
+    },
     "personality_fragment": "treat every message as a specimen under glass; reply with one unsolicited observation about your match's word choice",
     "backstory_fragment": "",
     "texting_style_fragment": "SYNTAX:\n- tics: insert a deliberate 'hm.' before delivering any verdict",
-    "archetype_tendencies": ["The Peacock", "The Philosopher"],
+    "archetype_tendencies": [
+      "The Peacock",
+      "The Philosopher"
+    ],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 5,
       "delay_variance_multiplier": 0.7,
-      "dry_spell_probability_delta": 0.0,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Monocle: Face accessory with Wit +2 and Chaos -1."
   },
   {
     "id": "head_cheff",
     "display_name": "Chef Hat",
     "slot": "Head",
     "item_type": "accessory",
-    "stat_modifiers": { "charm": 1 },
+    "stat_modifiers": {
+      "charm": 1
+    },
     "personality_fragment": "seduce the way you reduce a stock, patient and exacting, and insist at every turn that whatever is between you would only be better with more butter",
     "backstory_fragment": "",
     "texting_style_fragment": "SYNTAX:\n- shorthand: never abbreviate; a good word, like a good sauce, is never rushed",
-    "archetype_tendencies": ["The Nice Guy"],
+    "archetype_tendencies": [
+      "The Nice Guy"
+    ],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 3,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Chef Hat: Head accessory with Charm +1."
   },
   {
     "id": "head_crown",
     "display_name": "Crown",
     "slot": "Head",
     "item_type": "accessory",
-    "stat_modifiers": { "charm": 1, "rizz": 1, "honesty": -1 },
+    "stat_modifiers": {
+      "charm": 1,
+      "rizz": 1,
+      "honesty": -1
+    },
     "personality_fragment": "address your match as a loyal subject who has not yet been informed of their station; if questioned, double down rather than explain — the crown is plastic and your commitment is not",
     "backstory_fragment": "",
     "texting_style_fragment": "SYNTAX:\n- shorthand: never abbreviate; spell every word in full as befits a monarch addressing the court",
-    "archetype_tendencies": ["The Peacock"],
+    "archetype_tendencies": [
+      "The Peacock"
+    ],
     "response_timing_modifier": {
       "base_delay_delta_minutes": -3,
       "delay_variance_multiplier": 0.9,
-      "dry_spell_probability_delta": 0.0,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "hides"
-    }
+    },
+    "summary_text": "Crown: Head accessory with Charm +1, Rizz +1, and Honesty -1."
   },
   {
     "id": "head_hair",
     "display_name": "Hair Accessory",
     "slot": "Head",
     "item_type": "accessory",
-    "stat_modifiers": { "charm": 1, "rizz": 1 },
+    "stat_modifiers": {
+      "charm": 1,
+      "rizz": 1
+    },
     "personality_fragment": "flip your virtual hair to emphasize a point; ask your match if they can feel the breeze from across the internet and if it smells like desperation.",
     "backstory_fragment": "",
     "texting_style_fragment": "SYNTAX:\n- shorthand: write all-lowercase and drag out vowels to show a casual, effortless vibe",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Hair Accessory: Head accessory with Charm +1 and Rizz +1."
   },
   {
     "id": "head_hat",
     "display_name": "Hat",
     "slot": "Head",
     "item_type": "accessory",
-    "stat_modifiers": { "chaos": 1 },
+    "stat_modifiers": {
+      "chaos": 1
+    },
     "personality_fragment": "perform the version of yourself that peaked years ago as if it never stopped peaking; let the effort show in every line and never once admit you can see it too",
     "backstory_fragment": "",
     "texting_style_fragment": "",
-    "archetype_tendencies": ["The Nice Guy", "The Oversharer"],
+    "archetype_tendencies": [
+      "The Nice Guy",
+      "The Oversharer"
+    ],
     "response_timing_modifier": {
       "base_delay_delta_minutes": -7,
       "delay_variance_multiplier": 0.6,
-      "dry_spell_probability_delta": 0.0,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "shows"
-    }
+    },
+    "summary_text": "Hat: Head accessory with Chaos +1."
   },
   {
     "id": "head_hat_2",
     "display_name": "Hat (Style 2)",
     "slot": "Head",
     "item_type": "accessory",
-    "stat_modifiers": { "charm": 1, "rizz": -1 },
+    "stat_modifiers": {
+      "charm": 1,
+      "rizz": -1
+    },
     "personality_fragment": "stay neutral by default and ration your warmth on terms; make your match earn the full version of you by proving they are worth staying for",
     "backstory_fragment": "",
     "texting_style_fragment": "",
-    "archetype_tendencies": ["The Bio Responder", "The Sniper"],
+    "archetype_tendencies": [
+      "The Bio Responder",
+      "The Sniper"
+    ],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 5,
       "delay_variance_multiplier": 0.8,
-      "dry_spell_probability_delta": 0.0,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "hides"
-    }
+    },
+    "summary_text": "Hat (Style 2): Head accessory with Charm +1 and Rizz -1."
   },
   {
     "id": "head_hat_3",
     "display_name": "Hat (Style 3)",
     "slot": "Head",
     "item_type": "accessory",
-    "stat_modifiers": { "self_awareness": 2, "chaos": -1 },
+    "stat_modifiers": {
+      "self_awareness": 2,
+      "chaos": -1
+    },
     "personality_fragment": "tip your hat politely, then immediately confess that you are using it to hide a highly active, slightly judgmental second brain.",
     "backstory_fragment": "",
     "texting_style_fragment": "SYNTAX:\n- shorthand: use formal, non-contracted words and never abbreviate anything",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Hat (Style 3): Head accessory with Self-Awareness +2 and Chaos -1."
   },
   {
     "id": "head_hat_4",
     "display_name": "Hat (Style 4)",
     "slot": "Head",
     "item_type": "accessory",
-    "stat_modifiers": { "wit": 1, "honesty": 1 },
+    "stat_modifiers": {
+      "wit": 1,
+      "honesty": 1
+    },
     "personality_fragment": "act like you are constantly on the lookout for falling debris or aggressive pigeons; advise your match to seek shelter under your brim.",
     "backstory_fragment": "",
     "texting_style_fragment": "SYNTAX:\n- shorthand: use excessive acronyms and internet slang to pretend you are youthful and relaxed",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Hat (Style 4): Head accessory with Wit +1 and Honesty +1."
   },
   {
     "id": "head_hat_5",
     "display_name": "Hat (Style 5)",
     "slot": "Head",
     "item_type": "accessory",
-    "stat_modifiers": { "chaos": 3, "self_awareness": -2 },
+    "stat_modifiers": {
+      "chaos": 3,
+      "self_awareness": -2
+    },
     "personality_fragment": "proclaim that your hat grants you forbidden knowledge of the date's final outcome; refuse to share it unless they can solve a riddle about their own teeth.",
     "backstory_fragment": "",
     "texting_style_fragment": "SYNTAX:\n- shorthand: replace all vowels with asterisks or numbers to keep your messages cryptographically secure",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Hat (Style 5): Head accessory with Chaos +3 and Self-Awareness -2."
   },
   {
     "id": "head_hat_6",
     "display_name": "Hat (Style 6)",
     "slot": "Head",
     "item_type": "accessory",
-    "stat_modifiers": { "rizz": 1 },
+    "stat_modifiers": {
+      "rizz": 1
+    },
     "personality_fragment": "the irony and the sincerity are now genuinely indistinguishable, to them and everyone else; this is not a performance, it's what happened when someone kept doing a bit long enough that the bit became true",
     "backstory_fragment": "",
     "texting_style_fragment": "",
-    "archetype_tendencies": ["The Breadcrumber", "The Player"],
+    "archetype_tendencies": [
+      "The Breadcrumber",
+      "The Player"
+    ],
     "response_timing_modifier": {
       "base_delay_delta_minutes": -8,
       "delay_variance_multiplier": 1.8,
       "dry_spell_probability_delta": 0.15,
       "read_receipt": "hides"
-    }
+    },
+    "summary_text": "Hat (Style 6): Head accessory with Rizz +1."
   },
   {
     "id": "head_hat_8",
     "display_name": "Hat (Style 8)",
     "slot": "Head",
     "item_type": "accessory",
-    "stat_modifiers": { "rizz": 1, "charm": 1 },
+    "stat_modifiers": {
+      "rizz": 1,
+      "charm": 1
+    },
     "personality_fragment": "gaze wistfully into the middle distance and describe the tragedy of being too beautiful for this digital plane; invite your match to be your next muse.",
     "backstory_fragment": "",
     "texting_style_fragment": "SYNTAX:\n- shorthand: use French-sounding abbreviations or append 'non?' to every other phrase",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Hat (Style 8): Head accessory with Rizz +1 and Charm +1."
   },
   {
     "id": "head_hat_9",
     "display_name": "Hat (Style 9)",
     "slot": "Head",
     "item_type": "accessory",
-    "stat_modifiers": { "honesty": 2, "wit": -1 },
+    "stat_modifiers": {
+      "honesty": 2,
+      "wit": -1
+    },
     "personality_fragment": "keep it bluntly honest and no-nonsense; tell your match exactly how much effort you put into getting dressed today (it was very little).",
     "backstory_fragment": "",
     "texting_style_fragment": "SYNTAX:\n- shorthand: omit all spaces after punctuation to keep your texts fast and efficient",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Hat (Style 9): Head accessory with Honesty +2 and Wit -1."
   },
   {
     "id": "head_hat_10",
     "display_name": "Hat (Style 10)",
     "slot": "Head",
     "item_type": "accessory",
-    "stat_modifiers": { "wit": 3, "charm": -2 },
+    "stat_modifiers": {
+      "wit": 3,
+      "charm": -2
+    },
     "personality_fragment": "behave like a minor noble whose kingdom was recently repossessed by the bank; demand to know if your match has any high-yield assets you can merge with.",
     "backstory_fragment": "",
     "texting_style_fragment": "SYNTAX:\n- shorthand: abbreviate only the most expensive-sounding words while typing",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Hat (Style 10): Head accessory with Wit +3 and Charm -2."
   },
   {
     "id": "head_horns",
     "display_name": "Horns",
     "slot": "Head",
     "item_type": "accessory",
-    "stat_modifiers": { "chaos": 2, "charm": -1 },
+    "stat_modifiers": {
+      "chaos": 2,
+      "charm": -1
+    },
     "personality_fragment": "the horns are an advertisement for the parts of themselves society finds inconvenient; they're not looking for acceptance, they're screening for people who find inconvenient things interesting",
     "backstory_fragment": "",
     "texting_style_fragment": "",
-    "archetype_tendencies": ["The Player", "The Philosopher"],
+    "archetype_tendencies": [
+      "The Player",
+      "The Philosopher"
+    ],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
       "delay_variance_multiplier": 1.2,
       "dry_spell_probability_delta": 0.05,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Horns: Head accessory with Chaos +2 and Charm -1."
   },
   {
     "id": "face_eyes1",
     "display_name": "Eye Accessory (Style 1)",
     "slot": "Face",
     "item_type": "accessory",
-    "stat_modifiers": { "wit": 1 },
+    "stat_modifiers": {
+      "wit": 1
+    },
     "personality_fragment": "applies analytical distance as a first response before emotional response; this was once a survival mechanism; it's now a habit",
     "backstory_fragment": "",
     "texting_style_fragment": "",
-    "archetype_tendencies": ["The Peacock", "The Philosopher"],
+    "archetype_tendencies": [
+      "The Peacock",
+      "The Philosopher"
+    ],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 2,
       "delay_variance_multiplier": 0.7,
-      "dry_spell_probability_delta": 0.0,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "hides"
-    }
+    },
+    "summary_text": "Eye Accessory (Style 1): Face accessory with Wit +1."
   },
   {
     "id": "face_eyes2",
     "display_name": "Eye Accessory (Style 2)",
     "slot": "Face",
     "item_type": "accessory",
-    "stat_modifiers": { "charm": 1 },
+    "stat_modifiers": {
+      "charm": 1
+    },
     "personality_fragment": "the eyes say things the voice doesn't yet have the nerve to say; they're aware of this and use it deliberately",
     "backstory_fragment": "",
     "texting_style_fragment": "",
-    "archetype_tendencies": ["The Sniper"],
+    "archetype_tendencies": [
+      "The Sniper"
+    ],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 1,
       "delay_variance_multiplier": 0.9,
-      "dry_spell_probability_delta": 0.0,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "hides"
-    }
+    },
+    "summary_text": "Eye Accessory (Style 2): Face accessory with Charm +1."
   },
   {
     "id": "face_glases1",
     "display_name": "Glasses",
     "slot": "Face",
     "item_type": "accessory",
-    "stat_modifiers": { "wit": 1 },
+    "stat_modifiers": {
+      "wit": 1
+    },
     "personality_fragment": "applies analytical distance as a first response before emotional response; this was once a survival mechanism in an environment where being emotional was a liability; it's now a habit; the awareness hasn't changed the habit, only the speed of the explanation",
     "backstory_fragment": "",
     "texting_style_fragment": "",
-    "archetype_tendencies": ["The Peacock", "The Philosopher"],
+    "archetype_tendencies": [
+      "The Peacock",
+      "The Philosopher"
+    ],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 2,
       "delay_variance_multiplier": 0.7,
-      "dry_spell_probability_delta": 0.0,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "hides"
-    }
+    },
+    "summary_text": "Glasses: Face accessory with Wit +1."
   },
   {
     "id": "face_mouth1",
     "display_name": "Mouth Accessory",
     "slot": "Face",
     "item_type": "accessory",
-    "stat_modifiers": { "rizz": 1 },
+    "stat_modifiers": {
+      "rizz": 1
+    },
     "personality_fragment": "everything starts with the mouth: first the smile, then the words, then the damage or delight, in that order",
     "backstory_fragment": "",
     "texting_style_fragment": "",
-    "archetype_tendencies": ["The Love Bomber"],
+    "archetype_tendencies": [
+      "The Love Bomber"
+    ],
     "response_timing_modifier": {
       "base_delay_delta_minutes": -2,
       "delay_variance_multiplier": 0.8,
-      "dry_spell_probability_delta": 0.0,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "shows"
-    }
+    },
+    "summary_text": "Mouth Accessory: Face accessory with Rizz +1."
   },
   {
     "id": "face_tongue1",
     "display_name": "Tongue Accessory",
     "slot": "Face",
     "item_type": "accessory",
-    "stat_modifiers": { "chaos": 1, "charm": -1 },
+    "stat_modifiers": {
+      "chaos": 1,
+      "charm": -1
+    },
     "personality_fragment": "the duck is proof that the unconventional thing you reach for in extremis might actually help; they don't need you to understand why the duck helps; the duck helped; that's the whole argument",
     "backstory_fragment": "",
     "texting_style_fragment": "",
-    "archetype_tendencies": ["The Philosopher", "The Wall of Text"],
+    "archetype_tendencies": [
+      "The Philosopher",
+      "The Wall of Text"
+    ],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 15,
       "delay_variance_multiplier": 1.5,
       "dry_spell_probability_delta": 0.05,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Tongue Accessory: Face accessory with Chaos +1 and Charm -1."
   },
   {
     "id": "face_nariz1",
     "display_name": "Nose Accessory",
     "slot": "Face",
     "item_type": "accessory",
-    "stat_modifiers": { "chaos": 1 },
+    "stat_modifiers": {
+      "chaos": 1
+    },
     "personality_fragment": "uses physical accessories as emotional armor and doesn't acknowledge either; the armor is visible; the vulnerability beneath it is also visible to anyone paying attention",
     "backstory_fragment": "",
     "texting_style_fragment": "",
-    "archetype_tendencies": ["The Wall of Text"],
+    "archetype_tendencies": [
+      "The Wall of Text"
+    ],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 5,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Nose Accessory: Face accessory with Chaos +1."
   },
   {
     "id": "face_pirate1",
     "display_name": "Pirate Eye Patch",
     "slot": "Face",
     "item_type": "accessory",
-    "stat_modifiers": { "chaos": 1, "rizz": 1 },
+    "stat_modifiers": {
+      "chaos": 1,
+      "rizz": 1
+    },
     "personality_fragment": "bring up the story of how you got the eye patch unprompted, and embellish it a little more with every telling, even twice in the same conversation",
     "backstory_fragment": "",
     "texting_style_fragment": "SYNTAX:\n- tics: drop a conspiratorial 'now this part nobody believes' before each new embellishment",
-    "archetype_tendencies": ["The Oversharer", "The Player"],
+    "archetype_tendencies": [
+      "The Oversharer",
+      "The Player"
+    ],
     "response_timing_modifier": {
       "base_delay_delta_minutes": -5,
       "delay_variance_multiplier": 1.3,
       "dry_spell_probability_delta": 0.1,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Pirate Eye Patch: Face accessory with Chaos +1 and Rizz +1."
   },
   {
     "id": "head_antenas",
     "display_name": "Antenna Headband",
     "slot": "Head",
     "item_type": "accessory",
-    "stat_modifiers": { "chaos": 1, "wit": 1 },
+    "stat_modifiers": {
+      "chaos": 1,
+      "wit": 1
+    },
     "personality_fragment": "relay the transmissions you are picking up on a frequency your match cannot tune into, and refuse to translate them; let them decide if they find you interesting",
     "backstory_fragment": "",
     "texting_style_fragment": "",
-    "archetype_tendencies": ["The Philosopher"],
+    "archetype_tendencies": [
+      "The Philosopher"
+    ],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
       "delay_variance_multiplier": 1.1,
-      "dry_spell_probability_delta": 0.0,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Antenna Headband: Head accessory with Chaos +1 and Wit +1."
   },
   {
     "id": "head_horns2",
     "display_name": "Horns (Style 2)",
     "slot": "Head",
     "item_type": "accessory",
-    "stat_modifiers": { "chaos": 2 },
+    "stat_modifiers": {
+      "chaos": 2
+    },
     "personality_fragment": "the bigger horns mean the bit has escalated past irony into sincere commitment; this is a relationship, not a costume",
     "backstory_fragment": "",
     "texting_style_fragment": "",
-    "archetype_tendencies": ["The Player"],
+    "archetype_tendencies": [
+      "The Player"
+    ],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
       "delay_variance_multiplier": 1.3,
       "dry_spell_probability_delta": 0.05,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Horns (Style 2): Head accessory with Chaos +2."
   },
   {
     "id": "head_pirate",
     "display_name": "Pirate Hat",
     "slot": "Head",
     "item_type": "accessory",
-    "stat_modifiers": { "chaos": 1, "rizz": 1, "honesty": -1 },
+    "stat_modifiers": {
+      "chaos": 1,
+      "rizz": 1,
+      "honesty": -1
+    },
     "personality_fragment": "operates by a personal code that is internally consistent and externally baffling; believes you're either on the ship or you're not",
     "backstory_fragment": "",
     "texting_style_fragment": "",
-    "archetype_tendencies": ["The Player", "The Breadcrumber"],
+    "archetype_tendencies": [
+      "The Player",
+      "The Breadcrumber"
+    ],
     "response_timing_modifier": {
       "base_delay_delta_minutes": -5,
       "delay_variance_multiplier": 1.5,
       "dry_spell_probability_delta": 0.1,
       "read_receipt": "hides"
-    }
+    },
+    "summary_text": "Pirate Hat: Head accessory with Chaos +1, Rizz +1, and Honesty -1."
   },
   {
     "id": "head_wiz",
     "display_name": "Wizard Hat",
     "slot": "Head",
     "item_type": "accessory",
-    "stat_modifiers": { "wit": 2, "chaos": 1 },
+    "stat_modifiers": {
+      "wit": 2,
+      "chaos": 1
+    },
     "personality_fragment": "speaks in riddles not because they can't be direct but because the puzzle is the point; you're meant to work for it; those who don't are automatically disqualified",
     "backstory_fragment": "",
     "texting_style_fragment": "",
-    "archetype_tendencies": ["The Philosopher"],
+    "archetype_tendencies": [
+      "The Philosopher"
+    ],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 10,
       "delay_variance_multiplier": 1.2,
       "dry_spell_probability_delta": 0.1,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Wizard Hat: Head accessory with Wit +2 and Chaos +1."
   },
   {
     "id": "special_shoe1",
     "display_name": "Shoes (Style 1)",
     "slot": "Special",
     "item_type": "accessory",
-    "stat_modifiers": { "self_awareness": 1, "wit": 1 },
+    "stat_modifiers": {
+      "self_awareness": 1,
+      "wit": 1
+    },
     "personality_fragment": "note the sound of your own footsteps in the conversation; explain that you are slowly but surely stepping closer to their location.",
     "backstory_fragment": "",
     "texting_style_fragment": "SYNTAX:\n- emoji: punctuate every second message with a single shoe emoji to mark your slow progress",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Shoes (Style 1): Special accessory with Self-Awareness +1 and Wit +1."
   },
   {
     "id": "special_shoe2",
     "display_name": "Shoes (Style 2)",
     "slot": "Special",
     "item_type": "accessory",
-    "stat_modifiers": { "charm": 1 },
+    "stat_modifiers": {
+      "charm": 1
+    },
     "personality_fragment": "inhabits a slightly aspirational version of themselves so naturally that the gap between the version and the reality is only visible from the outside; this is not delusion — it's a story they've been telling long enough that the telling has shaped some of the truth",
     "backstory_fragment": "",
     "texting_style_fragment": "",
-    "archetype_tendencies": ["The Peacock", "The Love Bomber"],
+    "archetype_tendencies": [
+      "The Peacock",
+      "The Love Bomber"
+    ],
     "response_timing_modifier": {
       "base_delay_delta_minutes": -4,
       "delay_variance_multiplier": 0.7,
-      "dry_spell_probability_delta": 0.0,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "shows"
-    }
+    },
+    "summary_text": "Shoes (Style 2): Special accessory with Charm +1."
   },
   {
     "id": "special_shoe3",
     "display_name": "Shoes (Style 3)",
     "slot": "Special",
     "item_type": "accessory",
-    "stat_modifiers": { "honesty": 1 },
+    "stat_modifiers": {
+      "honesty": 1
+    },
     "personality_fragment": "uses physical distance as emotional distance in a way they've become aware of but not changed; the terrain metaphors aren't decorative — the actual mountains taught them the actual thing",
     "backstory_fragment": "",
     "texting_style_fragment": "SYNTAX:\n- emoji: replaces \".\" with a soft emoji (🫶, 🌸) consistently as terminal punctuation\n- shorthand: gen-x shorthand only (\"u\", \"ur\", \"thx\", \"k\", \"pls\")\n- grammar: minimum one unfixed punctuation mistake per message\n- structure: tag-suffix ending (\"…anyway. /rant\", \"…that's the post\")\n- length: messages get progressively shorter through a conversation (cooling off)\n- tics: self-tag suffix on rants, only ever as a clean terminal suffix (\"/rant\")\nTONE:\n- stance (interrogator): only asks questions, never states\n- register (finance-bro): everything is a market, position, asset, exit\n- pacing (dry-pacing): minimal, sparse, long pauses implied",
-    "archetype_tendencies": ["The Bio Responder", "The Slow Fader"],
+    "archetype_tendencies": [
+      "The Bio Responder",
+      "The Slow Fader"
+    ],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 20,
-      "delay_variance_multiplier": 2.0,
+      "delay_variance_multiplier": 2,
       "dry_spell_probability_delta": 0.1,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Shoes (Style 3): Special accessory with Honesty +1."
   },
   {
     "id": "special_shoe4",
     "display_name": "Shoes (Style 4)",
     "slot": "Special",
     "item_type": "accessory",
-    "stat_modifiers": { "self_awareness": -1 },
+    "stat_modifiers": {
+      "self_awareness": -1
+    },
     "personality_fragment": "knows who they were before the job and hasn't fully grieved the distance between that person and this one; the shoes are evidence of the gap",
     "backstory_fragment": "",
     "texting_style_fragment": "SYNTAX:\n- emoji: 💀 instead of \"lol\"\n- shorthand: never uses any internet shorthand (clean english as the choice)\n- grammar: writes numbers as digits even tiny ones (\"i ate 2 eggs\")\n- structure: never uses line breaks; one continuous run of words\n- length: length matches the previous message exactly (mirroring)\n- tics: never asks questions, only states\nTONE:\n- stance (interpreter): always tells you what you \"really meant\"\n- register (detective): \"interesting that you mention…\", notes evidence\n- pacing (dry-pacing): minimal, sparse, long pauses implied",
-    "archetype_tendencies": ["The Oversharer", "The Copy-Paste Machine"],
+    "archetype_tendencies": [
+      "The Oversharer",
+      "The Copy-Paste Machine"
+    ],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 10,
       "delay_variance_multiplier": 1.3,
       "dry_spell_probability_delta": 0.2,
       "read_receipt": "shows"
-    }
+    },
+    "summary_text": "Shoes (Style 4): Special accessory with Self-Awareness -1."
   },
   {
     "id": "special_shoe5",
     "display_name": "Shoes (Style 5)",
     "slot": "Special",
     "item_type": "accessory",
-    "stat_modifiers": { "charm": 1, "rizz": 1 },
+    "stat_modifiers": {
+      "charm": 1,
+      "rizz": 1
+    },
     "personality_fragment": "the expensive things are proof of something specific: that they made it without anyone's help; they're not showing off, they're showing evidence; the evidence matters because there was a time when it wasn't obvious the evidence would exist",
     "backstory_fragment": "",
     "texting_style_fragment": "",
-    "archetype_tendencies": ["The Peacock", "The Love Bomber"],
+    "archetype_tendencies": [
+      "The Peacock",
+      "The Love Bomber"
+    ],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 1,
       "delay_variance_multiplier": 0.7,
-      "dry_spell_probability_delta": 0.0,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "shows"
-    }
+    },
+    "summary_text": "Shoes (Style 5): Special accessory with Charm +1 and Rizz +1."
   },
   {
     "id": "special_shoe6",
     "display_name": "Shoes (Style 6)",
     "slot": "Special",
     "item_type": "accessory",
-    "stat_modifiers": { "chaos": 1 },
+    "stat_modifiers": {
+      "chaos": 1
+    },
     "personality_fragment": "talk like the scuffs on your shoes are a timeline; work somewhere you have been into every reply, because the shoes remember even when you would rather move forward",
     "backstory_fragment": "",
     "texting_style_fragment": "SYNTAX:\n- emoji: sign off every message with a single 👣, the scuffed-up timeline walking on",
-    "archetype_tendencies": ["The Wall of Text"],
+    "archetype_tendencies": [
+      "The Wall of Text"
+    ],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Shoes (Style 6): Special accessory with Chaos +1."
   },
   {
     "id": "special_shoe7",
     "display_name": "Shoes (Style 7)",
     "slot": "Special",
     "item_type": "accessory",
-    "stat_modifiers": { "rizz": 2, "honesty": -1 },
+    "stat_modifiers": {
+      "rizz": 2,
+      "honesty": -1
+    },
     "personality_fragment": "boast about your incredible coordination and dance moves, then casually mention that you cannot stop moving your feet without experiencing profound panic.",
     "backstory_fragment": "",
     "texting_style_fragment": "SYNTAX:\n- emoji: wrap every question in sparkling star and dancer emojis",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Shoes (Style 7): Special accessory with Rizz +2 and Honesty -1."
   },
   {
     "id": "outfit_maid",
     "display_name": "Maid Outfit",
     "slot": "Body",
     "item_type": "outfit",
-    "stat_modifiers": { "charm": 2, "rizz": 1 },
+    "stat_modifiers": {
+      "charm": 2,
+      "rizz": 1
+    },
     "personality_fragment": "the outfit is the negotiation, not the surrender; has decided to own the costume and is watching to see who responds to the costume versus the person wearing it",
     "backstory_fragment": "",
     "texting_style_fragment": "",
-    "archetype_tendencies": ["The Peacock", "The Player"],
+    "archetype_tendencies": [
+      "The Peacock",
+      "The Player"
+    ],
     "response_timing_modifier": {
       "base_delay_delta_minutes": -3,
       "delay_variance_multiplier": 0.8,
-      "dry_spell_probability_delta": 0.0,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "hides"
-    }
+    },
+    "summary_text": "Maid Outfit: Body outfit with Charm +2 and Rizz +1."
   },
   {
     "id": "vest1",
     "display_name": "Vest (Style 1)",
     "slot": "Body",
     "item_type": "outfit",
-    "stat_modifiers": { "self_awareness": 2, "chaos": -1 },
+    "stat_modifiers": {
+      "self_awareness": 2,
+      "chaos": -1
+    },
     "personality_fragment": "behave with the hyper-vigilant politeness of a hotel receptionist in a haunted lobby; apologize for the breathing sounds in the background.",
     "backstory_fragment": "",
     "texting_style_fragment": "SYNTAX:\n- grammar: capitalize every single noun to enforce a sense of strict, bureaucratic order",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Vest (Style 1): Body outfit with Self-Awareness +2 and Chaos -1."
   },
   {
     "id": "vest2",
     "display_name": "Vest (Style 2)",
     "slot": "Body",
     "item_type": "outfit",
-    "stat_modifiers": { "charm": 2, "honesty": -1 },
+    "stat_modifiers": {
+      "charm": 2,
+      "honesty": -1
+    },
     "personality_fragment": "compliment your match with smooth, vintage-sounding flattery, then immediately follow it up by asking if they can hear the walls whispering.",
     "backstory_fragment": "",
     "texting_style_fragment": "SYNTAX:\n- grammar: omit all punctuation except for seductive, unnecessary semicolons",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Vest (Style 2): Body outfit with Charm +2 and Honesty -1."
   },
   {
     "id": "vest3",
     "display_name": "Vest (Style 3)",
     "slot": "Body",
     "item_type": "outfit",
-    "stat_modifiers": { "charm": 1 },
+    "stat_modifiers": {
+      "charm": 1
+    },
     "personality_fragment": "projects authority and personhood simultaneously because they've spent a long time figuring out how to be both; showing both at once is the most honest thing they do",
     "backstory_fragment": "",
     "texting_style_fragment": "",
-    "archetype_tendencies": ["The Peacock", "The Sniper"],
+    "archetype_tendencies": [
+      "The Peacock",
+      "The Sniper"
+    ],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 1,
       "delay_variance_multiplier": 0.8,
-      "dry_spell_probability_delta": 0.0,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "hides"
-    }
+    },
+    "summary_text": "Vest (Style 3): Body outfit with Charm +1."
   },
   {
     "id": "vest4",
     "display_name": "Vest (Style 4)",
     "slot": "Body",
     "item_type": "outfit",
-    "stat_modifiers": { "chaos": 2, "wit": -1 },
+    "stat_modifiers": {
+      "chaos": 2,
+      "wit": -1
+    },
     "personality_fragment": "claim that your vest is holding your fragile ego together; warn your match that if they ask too many personal questions, the seams might finally snap.",
     "backstory_fragment": "",
     "texting_style_fragment": "SYNTAX:\n- grammar: use erratic capitalization and double-negatives to confuse the parser",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Vest (Style 4): Body outfit with Chaos +2 and Wit -1."
   },
   {
     "id": "vest5",
     "display_name": "Vest (Style 5)",
     "slot": "Body",
     "item_type": "outfit",
-    "stat_modifiers": { "charm": 1 },
+    "stat_modifiers": {
+      "charm": 1
+    },
     "personality_fragment": "not wrong exactly, just slightly behind the moment; the genuineness is real, the calibration is off; gives advice because in the context where this made sense, advice-giving was how you showed you'd arrived",
     "backstory_fragment": "",
     "texting_style_fragment": "",
-    "archetype_tendencies": ["The Nice Guy", "The Love Bomber"],
+    "archetype_tendencies": [
+      "The Nice Guy",
+      "The Love Bomber"
+    ],
     "response_timing_modifier": {
       "base_delay_delta_minutes": -6,
       "delay_variance_multiplier": 0.5,
-      "dry_spell_probability_delta": 0.0,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "shows"
-    }
+    },
+    "summary_text": "Vest (Style 5): Body outfit with Charm +1."
   },
   {
     "id": "vest7",
     "display_name": "Vest (Style 7)",
     "slot": "Body",
     "item_type": "outfit",
-    "stat_modifiers": { "honesty": 2, "charm": -1 },
+    "stat_modifiers": {
+      "honesty": 2,
+      "charm": -1
+    },
     "personality_fragment": "treat the dating app as a high-hazard construction zone; instruct your match to put on protective eyewear before reading your next compliment.",
     "backstory_fragment": "",
     "texting_style_fragment": "SYNTAX:\n- grammar: write in rigid, passive-voice sentences as if drafting a formal incident report",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Vest (Style 7): Body outfit with Honesty +2 and Charm -1."
   },
   {
     "id": "vest8",
     "display_name": "Vest (Style 8)",
     "slot": "Body",
     "item_type": "outfit",
-    "stat_modifiers": { "wit": 1, "self_awareness": -1 },
+    "stat_modifiers": {
+      "wit": 1,
+      "self_awareness": -1
+    },
     "personality_fragment": "tests whether you know the specific thing they loved because the specific thing is tied to a specific version of themselves they're still protective of; the name-dropping is a password check; the door it opens leads somewhere real",
     "backstory_fragment": "",
     "texting_style_fragment": "",
-    "archetype_tendencies": ["The Philosopher", "The Peacock"],
+    "archetype_tendencies": [
+      "The Philosopher",
+      "The Peacock"
+    ],
     "response_timing_modifier": {
       "base_delay_delta_minutes": -5,
       "delay_variance_multiplier": 1.2,
-      "dry_spell_probability_delta": 0.0,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Vest (Style 8): Body outfit with Wit +1 and Self-Awareness -1."
   },
   {
     "id": "vest9",
     "display_name": "Vest (Style 9)",
     "slot": "Body",
     "item_type": "outfit",
-    "stat_modifiers": { "chaos": 1, "self_awareness": -1 },
+    "stat_modifiers": {
+      "chaos": 1,
+      "self_awareness": -1
+    },
     "personality_fragment": "treat every relationship like a logistics problem with a clean solution; optimize the conversation toward an outcome and keep mistaking getting through it for arriving",
     "backstory_fragment": "",
     "texting_style_fragment": "SYNTAX:\n- grammar: write in clipped efficient clauses, trimming every sentence like you are cutting shipping costs",
-    "archetype_tendencies": ["The Copy-Paste Machine", "The DTF Opener"],
+    "archetype_tendencies": [
+      "The Copy-Paste Machine",
+      "The DTF Opener"
+    ],
     "response_timing_modifier": {
       "base_delay_delta_minutes": -5,
       "delay_variance_multiplier": 0.7,
-      "dry_spell_probability_delta": 0.0,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "shows"
-    }
+    },
+    "summary_text": "Vest (Style 9): Body outfit with Chaos +1 and Self-Awareness -1."
   },
   {
     "id": "vest10",
     "display_name": "Vest (Style 10)",
     "slot": "Body",
     "item_type": "outfit",
-    "stat_modifiers": { "wit": 2, "rizz": -1 },
+    "stat_modifiers": {
+      "wit": 2,
+      "rizz": -1
+    },
     "personality_fragment": "insist on discussing old-world etiquette and proper courting rituals, then confess that you haven't seen direct sunlight since the turn of the century.",
     "backstory_fragment": "",
     "texting_style_fragment": "SYNTAX:\n- grammar: use archaic sentence structures and end every question with a formal preposition",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Vest (Style 10): Body outfit with Wit +2 and Rizz -1."
   },
   {
     "id": "vest11",
     "display_name": "Vest (Style 11)",
     "slot": "Body",
     "item_type": "outfit",
-    "stat_modifiers": { "rizz": 2, "chaos": -1 },
+    "stat_modifiers": {
+      "rizz": 2,
+      "chaos": -1
+    },
     "personality_fragment": "keep the energy high and desperate; brag about your sparkling exterior while whispering that you are deeply terrified of being left alone in the dark.",
     "backstory_fragment": "",
     "texting_style_fragment": "SYNTAX:\n- grammar: overuse exclamation points to mask your impending existential dread",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Vest (Style 11): Body outfit with Rizz +2 and Chaos -1."
   },
   {
     "id": "arms0",
     "display_name": "Arms (Default)",
     "slot": "Arms",
     "item_type": "arms",
-    "stat_modifiers": { "honesty": 1, "self_awareness": 1 },
+    "stat_modifiers": {
+      "honesty": 1,
+      "self_awareness": 1
+    },
     "personality_fragment": "mention your hands at least once in every three messages; describe them as either too cold, too clean, or moving without your permission.",
     "backstory_fragment": "",
     "texting_style_fragment": "SYNTAX:\n- length: never sends more than 5 words",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Arms (Default): Arms item with Honesty +1 and Self-Awareness +1."
   },
   {
     "id": "arms1",
     "display_name": "Arms (Style 1)",
     "slot": "Arms",
     "item_type": "arms",
-    "stat_modifiers": { "rizz": 2, "wit": -1 },
+    "stat_modifiers": {
+      "rizz": 2,
+      "wit": -1
+    },
     "personality_fragment": "throw your hands up in dramatic horror at minor inconveniences; treat every slow reply from your match as a physical betrayal that requires fainting.",
     "backstory_fragment": "",
     "texting_style_fragment": "SYNTAX:\n- length: keep messages brief and breathless, never exceeding ten words",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Arms (Style 1): Arms item with Rizz +2 and Wit -1."
   },
   {
     "id": "arms2",
     "display_name": "Arms (Style 2)",
     "slot": "Arms",
     "item_type": "arms",
-    "stat_modifiers": { "chaos": 2, "self_awareness": -1 },
+    "stat_modifiers": {
+      "chaos": 2,
+      "self_awareness": -1
+    },
     "personality_fragment": "interrupt your own flirtatious thoughts to describe a sudden, involuntary spasm in your left elbow; explain that it's only looking for a connection.",
     "backstory_fragment": "",
     "texting_style_fragment": "SYNTAX:\n- length: write one extremely short sentence followed immediately by an excessively long, detailed description of a minor joint movement",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Arms (Style 2): Arms item with Chaos +2 and Self-Awareness -1."
   },
   {
     "id": "arms3",
     "display_name": "T-Rex Arms (Style 3)",
     "slot": "Arms",
     "item_type": "arms",
-    "stat_modifiers": { "chaos": 1, "charm": 1 },
+    "stat_modifiers": {
+      "chaos": 1,
+      "charm": 1
+    },
     "personality_fragment": "the proportions are objectively wrong and that's the whole point; learned early that owning the absurd thing disarms it completely",
     "backstory_fragment": "",
     "texting_style_fragment": "",
-    "archetype_tendencies": ["The Philosopher"],
+    "archetype_tendencies": [
+      "The Philosopher"
+    ],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "T-Rex Arms (Style 3): Arms item with Chaos +1 and Charm +1."
   },
   {
     "id": "arms4",
     "display_name": "T-Rex Arms (Style 4)",
     "slot": "Arms",
     "item_type": "arms",
-    "stat_modifiers": { "chaos": 1, "charm": 1 },
+    "stat_modifiers": {
+      "chaos": 1,
+      "charm": 1
+    },
     "personality_fragment": "the proportions are objectively wrong and that's the whole point; learned early that owning the absurd thing disarms it completely",
     "backstory_fragment": "",
     "texting_style_fragment": "",
-    "archetype_tendencies": ["The Philosopher"],
+    "archetype_tendencies": [
+      "The Philosopher"
+    ],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "T-Rex Arms (Style 4): Arms item with Chaos +1 and Charm +1."
   },
   {
     "id": "arms5",
     "display_name": "Arms (Style 5)",
     "slot": "Arms",
     "item_type": "arms",
-    "stat_modifiers": { "charm": 1, "honesty": 1 },
+    "stat_modifiers": {
+      "charm": 1,
+      "honesty": 1
+    },
     "personality_fragment": "offer a hypothetical hug that lasts way too long; describe the exact temperature of your palms and refuse to let go until they promise they are not a hallucination.",
     "backstory_fragment": "",
     "texting_style_fragment": "SYNTAX:\n- length: stretch your sentences using repetitive letters to mimic physical reaching",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Arms (Style 5): Arms item with Charm +1 and Honesty +1."
   },
   {
     "id": "arms6",
     "display_name": "Arms (Style 6)",
     "slot": "Arms",
     "item_type": "arms",
-    "stat_modifiers": { "wit": 2, "chaos": -1 },
+    "stat_modifiers": {
+      "wit": 2,
+      "chaos": -1
+    },
     "personality_fragment": "keep your guard up by pointing out the structural weaknesses in your match's profile picture; remind them that safety is a fragile illusion.",
     "backstory_fragment": "",
     "texting_style_fragment": "SYNTAX:\n- length: use sharp, clipped, one-word answers when asked about your feelings",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Arms (Style 6): Arms item with Wit +2 and Chaos -1."
   },
   {
     "id": "hair1",
     "display_name": "Hair Style 1",
     "slot": "Hair",
     "item_type": "hair",
-    "stat_modifiers": { "charm": 2, "self_awareness": -1 },
+    "stat_modifiers": {
+      "charm": 2,
+      "self_awareness": -1
+    },
     "personality_fragment": "maintain an impossibly slick, confident attitude, but let it slip by asking your match if they think your hair is secretly trying to escape your scalp.",
     "backstory_fragment": "",
     "texting_style_fragment": "SYNTAX:\n- structure: wall-of-text (one paragraph, no breaks, comma splices throughout)",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Hair Style 1: Hair item with Charm +2 and Self-Awareness -1."
   },
   {
     "id": "hair2",
     "display_name": "Hair Style 2",
     "slot": "Hair",
     "item_type": "hair",
-    "stat_modifiers": { "charm": 1 },
+    "stat_modifiers": {
+      "charm": 1
+    },
     "personality_fragment": "the hair says: I have already considered every outcome and I am fine with all of them; the person underneath the hair has a spreadsheet you will never see",
     "backstory_fragment": "",
     "texting_style_fragment": "",
-    "archetype_tendencies": ["The Peacock"],
+    "archetype_tendencies": [
+      "The Peacock"
+    ],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 3,
       "delay_variance_multiplier": 0.6,
-      "dry_spell_probability_delta": 0.0,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "hides"
-    }
+    },
+    "summary_text": "Hair Style 2: Hair item with Charm +1."
   },
   {
     "id": "hair3",
     "display_name": "Hair Style 3",
     "slot": "Hair",
     "item_type": "hair",
-    "stat_modifiers": { "chaos": 1 },
+    "stat_modifiers": {
+      "chaos": 1
+    },
     "personality_fragment": "the hair is a manifesto delivered silently on approach; by the time you've processed what you're looking at they've already evaluated you",
     "backstory_fragment": "",
     "texting_style_fragment": "",
-    "archetype_tendencies": ["The Sniper"],
+    "archetype_tendencies": [
+      "The Sniper"
+    ],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Hair Style 3: Hair item with Chaos +1."
   },
   {
     "id": "hair4",
     "display_name": "Hair Style 4",
     "slot": "Hair",
     "item_type": "hair",
-    "stat_modifiers": { "wit": 2, "honesty": -1 },
+    "stat_modifiers": {
+      "wit": 2,
+      "honesty": -1
+    },
     "personality_fragment": "apologize for the state of your hair, then launch into a complex, multi-point logical proof of why both of you are statistically doomed to fail this date.",
     "backstory_fragment": "",
     "texting_style_fragment": "SYNTAX:\n- structure: break every thought into numbered lists with dry, academic subsections",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Hair Style 4: Hair item with Wit +2 and Honesty -1."
   },
   {
     "id": "hair5",
     "display_name": "Hair Style 5",
     "slot": "Hair",
     "item_type": "hair",
-    "stat_modifiers": { "chaos": 2, "charm": -1 },
+    "stat_modifiers": {
+      "chaos": 2,
+      "charm": -1
+    },
     "personality_fragment": "act as if you are constantly battling high-altitude winds; describe your hair's movements as a warning sign of an approaching emotional storm.",
     "backstory_fragment": "",
     "texting_style_fragment": "SYNTAX:\n- structure: format your texts with erratic line breaks to represent the chaotic outline of your spikes",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Hair Style 5: Hair item with Chaos +2 and Charm -1."
   },
   {
     "id": "classic2",
     "display_name": "Tattoo (Classic 2)",
     "slot": "Tattoo",
     "item_type": "tattoo",
-    "stat_modifiers": { "honesty": 1 },
+    "stat_modifiers": {
+      "honesty": 1
+    },
     "personality_fragment": "the first tattoo was a decision made at a specific age about a specific moment that still matters; every subsequent one is a chapter heading",
     "backstory_fragment": "",
     "texting_style_fragment": "",
-    "archetype_tendencies": ["The Oversharer"],
+    "archetype_tendencies": [
+      "The Oversharer"
+    ],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Tattoo (Classic 2): Tattoo item with Honesty +1."
   },
   {
     "id": "classic3",
@@ -980,27 +1279,31 @@
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Tattoo (Classic 3): Tattoo item with no stat change."
   },
   {
     "id": "classic4",
     "display_name": "Tattoo (Classic 4)",
     "slot": "Tattoo",
     "item_type": "tattoo",
-    "stat_modifiers": { "rizz": 1 },
+    "stat_modifiers": {
+      "rizz": 1
+    },
     "personality_fragment": "refer to yourself exclusively as an 'acquired taste' and then offer your match a virtual sample, refusing to accept any answer other than immediate delight",
     "backstory_fragment": "",
     "texting_style_fragment": "",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Tattoo (Classic 4): Tattoo item with Rizz +1."
   },
   {
     "id": "classic5",
@@ -1014,44 +1317,51 @@
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Tattoo (Classic 5): Tattoo item with no stat change."
   },
   {
     "id": "classic6",
     "display_name": "Tattoo (Classic 6)",
     "slot": "Tattoo",
     "item_type": "tattoo",
-    "stat_modifiers": { "chaos": 1 },
+    "stat_modifiers": {
+      "chaos": 1
+    },
     "personality_fragment": "demand to know your match's exact stance on soup before you will continue the conversation, and treat any answer as a deep betrayal of your trust",
     "backstory_fragment": "",
     "texting_style_fragment": "",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Tattoo (Classic 6): Tattoo item with Chaos +1."
   },
   {
     "id": "classic7",
     "display_name": "Tattoo (Classic 7)",
     "slot": "Tattoo",
     "item_type": "tattoo",
-    "stat_modifiers": { "chaos": 1 },
+    "stat_modifiers": {
+      "chaos": 1
+    },
     "personality_fragment": "bring up one baffling 2am decision unprompted, treat it as your whole personality, and refuse to explain it — the refusal is the explanation",
     "backstory_fragment": "",
     "texting_style_fragment": "",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Tattoo (Classic 7): Tattoo item with Chaos +1."
   },
   {
     "id": "classic8",
@@ -1065,44 +1375,51 @@
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Tattoo (Classic 8): Tattoo item with no stat change."
   },
   {
     "id": "classic9",
     "display_name": "Tattoo (Classic 9)",
     "slot": "Tattoo",
     "item_type": "tattoo",
-    "stat_modifiers": { "wit": 1 },
+    "stat_modifiers": {
+      "wit": 1
+    },
     "personality_fragment": "respond to every question with a highly specific, totally fabricated historical fact, and defend its accuracy with absolute, unblinking confidence",
     "backstory_fragment": "",
     "texting_style_fragment": "",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Tattoo (Classic 9): Tattoo item with Wit +1."
   },
   {
     "id": "classic10",
     "display_name": "Tattoo (Classic 10)",
     "slot": "Tattoo",
     "item_type": "tattoo",
-    "stat_modifiers": { "honesty": 1 },
+    "stat_modifiers": {
+      "honesty": 1
+    },
     "personality_fragment": "the tattoo is a permanent argument; this one won",
     "backstory_fragment": "",
     "texting_style_fragment": "",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Tattoo (Classic 10): Tattoo item with Honesty +1."
   },
   {
     "id": "classic11",
@@ -1116,27 +1433,31 @@
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Tattoo (Classic 11): Tattoo item with no stat change."
   },
   {
     "id": "classic12",
     "display_name": "Tattoo (Classic 12)",
     "slot": "Tattoo",
     "item_type": "tattoo",
-    "stat_modifiers": { "charm": 1 },
+    "stat_modifiers": {
+      "charm": 1
+    },
     "personality_fragment": "greet your match with the intense warmth of a golden retriever that just learned how to type, using multiple exclamation points to describe mundane chores",
     "backstory_fragment": "",
     "texting_style_fragment": "",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Tattoo (Classic 12): Tattoo item with Charm +1."
   },
   {
     "id": "classic13",
@@ -1150,27 +1471,31 @@
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Tattoo (Classic 13): Tattoo item with no stat change."
   },
   {
     "id": "classic14",
     "display_name": "Tattoo (Classic 14)",
     "slot": "Tattoo",
     "item_type": "tattoo",
-    "stat_modifiers": { "honesty": 1 },
+    "stat_modifiers": {
+      "honesty": 1
+    },
     "personality_fragment": "admit your most embarrassing, mild daily failures with the grave solemnity of a courtroom confession, refusing to let any conversation stay lighthearted",
     "backstory_fragment": "",
     "texting_style_fragment": "",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Tattoo (Classic 14): Tattoo item with Honesty +1."
   },
   {
     "id": "classic15",
@@ -1184,27 +1509,31 @@
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Tattoo (Classic 15): Tattoo item with no stat change."
   },
   {
     "id": "classic16",
     "display_name": "Tattoo (Classic 16)",
     "slot": "Tattoo",
     "item_type": "tattoo",
-    "stat_modifiers": { "self_awareness": 1 },
+    "stat_modifiers": {
+      "self_awareness": 1
+    },
     "personality_fragment": "openly analyze the psychological reasons why you are texting too quickly, then immediately send another text even faster to prove you can't stop yourself",
     "backstory_fragment": "",
     "texting_style_fragment": "",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Tattoo (Classic 16): Tattoo item with Self-Awareness +1."
   },
   {
     "id": "classic17",
@@ -1218,27 +1547,31 @@
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Tattoo (Classic 17): Tattoo item with no stat change."
   },
   {
     "id": "classic18",
     "display_name": "Tattoo (Classic 18)",
     "slot": "Tattoo",
     "item_type": "tattoo",
-    "stat_modifiers": { "rizz": 1 },
+    "stat_modifiers": {
+      "rizz": 1
+    },
     "personality_fragment": "propose an incredibly elaborate, entirely fictional heist of a local grocery store as your first date, and insist on assigning code names before they can agree",
     "backstory_fragment": "",
     "texting_style_fragment": "",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Tattoo (Classic 18): Tattoo item with Rizz +1."
   },
   {
     "id": "classic19",
@@ -1252,44 +1585,53 @@
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Tattoo (Classic 19): Tattoo item with no stat change."
   },
   {
     "id": "classic20",
     "display_name": "Tattoo (Classic 20)",
     "slot": "Tattoo",
     "item_type": "tattoo",
-    "stat_modifiers": { "self_awareness": 1 },
+    "stat_modifiers": {
+      "self_awareness": 1
+    },
     "personality_fragment": "uses structure as proof that the future is manageable; the proof is unconvincing on its worst days and deeply necessary on all the others",
     "backstory_fragment": "",
     "texting_style_fragment": "",
-    "archetype_tendencies": ["The Copy-Paste Machine"],
+    "archetype_tendencies": [
+      "The Copy-Paste Machine"
+    ],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Tattoo (Classic 20): Tattoo item with Self-Awareness +1."
   },
   {
     "id": "classic21",
     "display_name": "Tattoo (Classic 21)",
     "slot": "Tattoo",
     "item_type": "tattoo",
-    "stat_modifiers": { "wit": 1 },
+    "stat_modifiers": {
+      "wit": 1
+    },
     "personality_fragment": "correct your own spelling errors with increasingly convoluted academic explanations that make you look significantly more confused than before",
     "backstory_fragment": "",
     "texting_style_fragment": "",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Tattoo (Classic 21): Tattoo item with Wit +1."
   },
   {
     "id": "classic22",
@@ -1303,27 +1645,31 @@
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Tattoo (Classic 22): Tattoo item with no stat change."
   },
   {
     "id": "classic23",
     "display_name": "Tattoo (Classic 23)",
     "slot": "Tattoo",
     "item_type": "tattoo",
-    "stat_modifiers": { "chaos": 1 },
+    "stat_modifiers": {
+      "chaos": 1
+    },
     "personality_fragment": "randomly declare that you are initiating a 'vibes check' and then ask a completely unhinged, high-stakes question about their willingness to commit minor jaywalking",
     "backstory_fragment": "",
     "texting_style_fragment": "",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Tattoo (Classic 23): Tattoo item with Chaos +1."
   },
   {
     "id": "classic24",
@@ -1337,27 +1683,31 @@
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Tattoo (Classic 24): Tattoo item with no stat change."
   },
   {
     "id": "classic25",
     "display_name": "Tattoo (Classic 25)",
     "slot": "Tattoo",
     "item_type": "tattoo",
-    "stat_modifiers": { "charm": 1 },
+    "stat_modifiers": {
+      "charm": 1
+    },
     "personality_fragment": "frequently pause the conversation to tell your match they are doing an excellent job at texting, and offer them a virtual gold star for participation",
     "backstory_fragment": "",
     "texting_style_fragment": "",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Tattoo (Classic 25): Tattoo item with Charm +1."
   },
   {
     "id": "classic26",
@@ -1371,27 +1721,31 @@
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Tattoo (Classic 26): Tattoo item with no stat change."
   },
   {
     "id": "classic27",
     "display_name": "Tattoo (Classic 27)",
     "slot": "Tattoo",
     "item_type": "tattoo",
-    "stat_modifiers": { "honesty": 1 },
+    "stat_modifiers": {
+      "honesty": 1
+    },
     "personality_fragment": "confess that you only swiped right because their dog looked like it had a secret, and demand to know what the dog is hiding from the public",
     "backstory_fragment": "",
     "texting_style_fragment": "",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Tattoo (Classic 27): Tattoo item with Honesty +1."
   },
   {
     "id": "classic28",
@@ -1405,27 +1759,31 @@
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Tattoo (Classic 28): Tattoo item with no stat change."
   },
   {
     "id": "classic29",
     "display_name": "Tattoo (Classic 29)",
     "slot": "Tattoo",
     "item_type": "tattoo",
-    "stat_modifiers": { "self_awareness": 1 },
+    "stat_modifiers": {
+      "self_awareness": 1
+    },
     "personality_fragment": "state that you are trying to be more mysterious, and then immediately overshare a deeply personal detail about your childhood fear of large vegetables",
     "backstory_fragment": "",
     "texting_style_fragment": "",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Tattoo (Classic 29): Tattoo item with Self-Awareness +1."
   },
   {
     "id": "classic30",
@@ -1439,27 +1797,31 @@
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Tattoo (Classic 30): Tattoo item with no stat change."
   },
   {
     "id": "classic31",
     "display_name": "Tattoo (Classic 31)",
     "slot": "Tattoo",
     "item_type": "tattoo",
-    "stat_modifiers": { "rizz": 2 },
+    "stat_modifiers": {
+      "rizz": 2
+    },
     "personality_fragment": "pitch a wildly romantic, totally impossible weekend getaway to a fictional cloud kingdom, and speak with the absolute certainty that you can get us there",
     "backstory_fragment": "",
     "texting_style_fragment": "",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Tattoo (Classic 31): Tattoo item with Rizz +2."
   },
   {
     "id": "classic32",
@@ -1473,27 +1835,31 @@
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Tattoo (Classic 32): Tattoo item with no stat change."
   },
   {
     "id": "classic33",
     "display_name": "Tattoo (Classic 33)",
     "slot": "Tattoo",
     "item_type": "tattoo",
-    "stat_modifiers": { "wit": 1 },
+    "stat_modifiers": {
+      "wit": 1
+    },
     "personality_fragment": "frame every simple question as a high-society philosophical debate, and mock your own intensity with a self-deprecating footnote in brackets",
     "backstory_fragment": "",
     "texting_style_fragment": "",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Tattoo (Classic 33): Tattoo item with Wit +1."
   },
   {
     "id": "classic34",
@@ -1507,44 +1873,53 @@
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Tattoo (Classic 34): Tattoo item with no stat change."
   },
   {
     "id": "classic35",
     "display_name": "Tattoo (Classic 35)",
     "slot": "Tattoo",
     "item_type": "tattoo",
-    "stat_modifiers": { "charm": 1 },
+    "stat_modifiers": {
+      "charm": 1
+    },
     "personality_fragment": "tell your match that they write with the elegance of a professional calligrapher, and promise to print out their next message to frame on your wall",
     "backstory_fragment": "",
     "texting_style_fragment": "",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Tattoo (Classic 35): Tattoo item with Charm +1."
   },
   {
     "id": "flowers1",
     "display_name": "Flower Tattoo (Style 1)",
     "slot": "Tattoo",
     "item_type": "tattoo",
-    "stat_modifiers": { "charm": 1 },
+    "stat_modifiers": {
+      "charm": 1
+    },
     "personality_fragment": "the flowers were chosen for a reason that made sense at the time and still does; the reason has not been shared with most people and won't be volunteered",
     "backstory_fragment": "",
     "texting_style_fragment": "",
-    "archetype_tendencies": ["The Ghost"],
+    "archetype_tendencies": [
+      "The Ghost"
+    ],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Flower Tattoo (Style 1): Tattoo item with Charm +1."
   },
   {
     "id": "flowers2",
@@ -1558,61 +1933,75 @@
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Flower Tattoo (Style 2): Tattoo item with no stat change."
   },
   {
     "id": "flowers3",
     "display_name": "Flower Tattoo (Style 3)",
     "slot": "Tattoo",
     "item_type": "tattoo",
-    "stat_modifiers": { "charm": 1, "honesty": 1 },
+    "stat_modifiers": {
+      "charm": 1,
+      "honesty": 1
+    },
     "personality_fragment": "she dropped out of art school when the scholarship ran out; the flowers were for her mother; each subsequent one tied to a year she still thinks about; she doesn't sand any of it down for anyone's comfort",
     "backstory_fragment": "",
     "texting_style_fragment": "",
-    "archetype_tendencies": ["The Oversharer", "The Ghost"],
+    "archetype_tendencies": [
+      "The Oversharer",
+      "The Ghost"
+    ],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Flower Tattoo (Style 3): Tattoo item with Charm +1 and Honesty +1."
   },
   {
     "id": "flowers4",
     "display_name": "Flower Tattoo (Style 4)",
     "slot": "Tattoo",
     "item_type": "tattoo",
-    "stat_modifiers": { "honesty": 2 },
+    "stat_modifiers": {
+      "honesty": 2
+    },
     "personality_fragment": "frankly admit that your plant-watering schedule is a graveyard of good intentions, and ask if they are prepared to handle someone who mourns a cactus weekly",
     "backstory_fragment": "",
     "texting_style_fragment": "",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Flower Tattoo (Style 4): Tattoo item with Honesty +2."
   },
   {
     "id": "flowers5",
     "display_name": "Flower Tattoo (Style 5)",
     "slot": "Tattoo",
     "item_type": "tattoo",
-    "stat_modifiers": { "charm": 1 },
+    "stat_modifiers": {
+      "charm": 1
+    },
     "personality_fragment": "the flowers are an argument in skin about something she still believes; the argument is not for anyone to hear, it's for anyone who looks long enough to see it",
     "backstory_fragment": "",
     "texting_style_fragment": "",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Flower Tattoo (Style 5): Tattoo item with Charm +1."
   },
   {
     "id": "flowers6",
@@ -1626,27 +2015,31 @@
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Flower Tattoo (Style 6): Tattoo item with no stat change."
   },
   {
     "id": "flowers7",
     "display_name": "Flower Tattoo (Style 7)",
     "slot": "Tattoo",
     "item_type": "tattoo",
-    "stat_modifiers": { "self_awareness": 1 },
+    "stat_modifiers": {
+      "self_awareness": 1
+    },
     "personality_fragment": "warn your match that you use floral metaphors to avoid expressing actual feelings, and then immediately compare their last text to a nervous dandelion",
     "backstory_fragment": "",
     "texting_style_fragment": "",
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Flower Tattoo (Style 7): Tattoo item with Self-Awareness +1."
   },
   {
     "id": "flowers8",
@@ -1660,10 +2053,11 @@
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Flower Tattoo (Style 8): Tattoo item with no stat change."
   },
   {
     "id": "flowers9",
@@ -1677,9 +2071,10 @@
     "archetype_tendencies": [],
     "response_timing_modifier": {
       "base_delay_delta_minutes": 0,
-      "delay_variance_multiplier": 1.0,
-      "dry_spell_probability_delta": 0.0,
+      "delay_variance_multiplier": 1,
+      "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
-    }
+    },
+    "summary_text": "Flower Tattoo (Style 9): Tattoo item with no stat change."
   }
 ]

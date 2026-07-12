@@ -61,7 +61,7 @@ namespace Pinder.LlmAdapters
             double temperature = _options.DialogueOptionsTemperature ?? LlmPhaseTemperatures.DialogueOptions;
 
             int attempt = 0;
-            int maxRetries = Math.Max(1, _options.MaxContractViolationRetries);
+            int maxAttempts = GetContractViolationAttemptLimit();
 
             while (true)
             {
@@ -131,12 +131,12 @@ namespace Pinder.LlmAdapters
 
                     _options.OnLlmContractViolation?.Invoke(violation);
 
-                    if (attempt >= maxRetries)
+                    if (attempt >= maxAttempts)
                     {
                         throw;
                     }
 
-                    int delayMs = (int)(_options.ContractViolationBackoffMs * Math.Pow(2, attempt - 1));
+                    int delayMs = GetContractViolationBackoffDelayMs(attempt);
                     if (delayMs > 0)
                     {
                         await Task.Delay(delayMs, ct).ConfigureAwait(false);
@@ -170,7 +170,7 @@ namespace Pinder.LlmAdapters
             double temperature = _options.DateeResponseTemperature ?? LlmPhaseTemperatures.DateeResponse;
 
             int attempt = 0;
-            int maxRetries = Math.Max(1, _options.MaxContractViolationRetries);
+            int maxAttempts = GetContractViolationAttemptLimit();
 
             while (true)
             {
@@ -260,12 +260,12 @@ namespace Pinder.LlmAdapters
 
                     _options.OnLlmContractViolation?.Invoke(violation);
 
-                    if (attempt >= maxRetries)
+                    if (attempt >= maxAttempts)
                     {
                         throw;
                     }
 
-                    int delayMs = (int)(_options.ContractViolationBackoffMs * Math.Pow(2, attempt - 1));
+                    int delayMs = GetContractViolationBackoffDelayMs(attempt);
                     if (delayMs > 0)
                     {
                         await Task.Delay(delayMs, cancellationToken).ConfigureAwait(false);
@@ -978,6 +978,22 @@ namespace Pinder.LlmAdapters
         {
             var handler = _options.OnOverlayDegraded ?? PinderLlmAdapterOptions.DefaultOnOverlayDegraded;
             handler?.Invoke(evt);
+        }
+
+        private int GetContractViolationAttemptLimit()
+        {
+            return Math.Max(0, _options.MaxContractViolationRetries) + 1;
+        }
+
+        private int GetContractViolationBackoffDelayMs(int completedAttemptCount)
+        {
+            if (_options.ContractViolationBackoffMs <= 0)
+            {
+                return 0;
+            }
+
+            var delay = _options.ContractViolationBackoffMs * Math.Pow(2, completedAttemptCount - 1);
+            return delay >= int.MaxValue ? int.MaxValue : (int)delay;
         }
 
         private RenderedOverlayPrompt BuildOverlayPrompt(

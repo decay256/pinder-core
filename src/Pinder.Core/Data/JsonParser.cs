@@ -54,6 +54,15 @@ namespace Pinder.Core.Data
             return defaultValue;
         }
 
+        public string GetRequiredString(string key, string context)
+        {
+            if (!Properties.TryGetValue(key, out var v) || !(v is JsonString s))
+                throw new FormatException($"Missing required string field '{key}' in {context}.");
+            if (string.IsNullOrWhiteSpace(s.Value))
+                throw new FormatException($"Required string field '{key}' in {context} must not be blank.");
+            return s.Value;
+        }
+
         public int GetInt(string key, int defaultValue = 0)
         {
             if (Properties.TryGetValue(key, out var v) && v is JsonNumber n)

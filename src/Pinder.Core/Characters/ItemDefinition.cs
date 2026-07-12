@@ -39,6 +39,9 @@ namespace Pinder.Core.Characters
         /// <summary>Human-readable display name.</summary>
         public string DisplayName  { get; }
 
+        /// <summary>User-visible one-line summary for inventory/profile display.</summary>
+        public string SummaryText  { get; }
+
         /// <summary>
         /// Slot string. For accessories/outfits: Unity enum verbatim (Head/Face/Body/Waist/Special).
         /// For LookCatalog: Hair or Arms. For TatooCatalog: Tattoo or Sticker.
@@ -70,10 +73,12 @@ namespace Pinder.Core.Characters
             string backstoryFragment,
             string textingStyleFragment,
             string[] archetypeTendencies,
-            TimingModifier responseTimingModifier)
+            TimingModifier responseTimingModifier,
+            string summaryText = "")
         {
             ItemId                  = itemId;
             DisplayName             = displayName ?? itemId;
+            SummaryText             = summaryText ?? string.Empty;
             Slot                    = slot;
             ItemType                = itemType ?? "accessory";
             StatModifiers           = statModifiers;

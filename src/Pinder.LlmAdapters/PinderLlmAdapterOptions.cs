@@ -70,8 +70,9 @@ namespace Pinder.LlmAdapters
         public System.Action<LlmContractViolation>? OnLlmContractViolation { get; set; }
 
         /// <summary>
-        /// Gets or sets the maximum number of times to retry an LLM call if a contract/parsing violation occurs.
-        /// Default is 3. Set to 1 to disable retries.
+        /// Gets or sets the maximum number of stateless retries after the initial
+        /// LLM call when a contract/parsing violation occurs.
+        /// Default is 3. Set to 0 to disable retries.
         /// </summary>
         public int MaxContractViolationRetries { get; set; } = 3;
 

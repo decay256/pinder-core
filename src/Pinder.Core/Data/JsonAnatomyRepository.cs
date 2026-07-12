@@ -18,6 +18,7 @@ namespace Pinder.Core.Data
     ///   "bands": [
     ///     {
     ///       "lower": 0.00, "upper": 0.05,
+    ///       "summary_text": "...",        // required display-only summary
     ///       "personality_fragment": "...",   // optional
     ///       "backstory_fragment": "...",     // optional
     ///       "texting_style_fragment": "...", // optional
@@ -29,7 +30,8 @@ namespace Pinder.Core.Data
     ///   ]
     /// }
     /// </code>
-    /// All band fields except <c>lower</c> and <c>upper</c> are optional.
+    /// All band fields except <c>lower</c>, <c>upper</c>, and
+    /// <c>summary_text</c> are optional.
     /// </summary>
     public sealed class JsonAnatomyRepository : IAnatomyRepository
     {
@@ -85,6 +87,9 @@ namespace Pinder.Core.Data
         {
             float lower = obj.GetFloat("lower", 0f);
             float upper = obj.GetFloat("upper", 1f);
+            string summaryText = obj.GetRequiredString(
+                "summary_text",
+                $"anatomy band {lower:0.###}-{upper:0.###}");
 
             string? personality = obj.HasKey("personality_fragment")
                 ? NullIfEmpty(obj.GetString("personality_fragment"))
@@ -103,7 +108,8 @@ namespace Pinder.Core.Data
             return new AnatomyBandDefinition(
                 lower, upper,
                 personality, backstory, texting,
-                archetypes, timing, statMods);
+                archetypes, timing, statMods,
+                summaryText);
         }
 
         private static string? NullIfEmpty(string s)

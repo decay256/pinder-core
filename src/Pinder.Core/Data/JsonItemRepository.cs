@@ -55,6 +55,7 @@ namespace Pinder.Core.Data
                 itemId = obj.GetString("item_id");
 
             string displayName = obj.GetString("display_name");
+            string summaryText = obj.GetRequiredString("summary_text", $"item '{itemId}'");
             string slot        = obj.GetString("slot");
 
             // item_type replaces tier; fall back to "accessory" if absent
@@ -72,7 +73,8 @@ namespace Pinder.Core.Data
 
             return new ItemDefinition(
                 itemId, displayName, slot, itemType,
-                statMods, personality, backstory, texting, archetypes, timing);
+                statMods, personality, backstory, texting, archetypes, timing,
+                summaryText);
         }
 
         internal static IReadOnlyDictionary<StatType, int> ParseStatModifiers(JsonObject? obj)

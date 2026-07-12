@@ -38,6 +38,9 @@ namespace Pinder.Core.Characters
         /// <summary>Null when this band has no texting-style contribution.</summary>
         public string? TextingStyleFragment  { get; }
 
+        /// <summary>User-visible one-line summary for displaying the resolved anatomy range.</summary>
+        public string SummaryText { get; }
+
         /// <summary>Archetype tendency strings. Empty array when not set.</summary>
         public string[] ArchetypeTendencies  { get; }
 
@@ -57,13 +60,15 @@ namespace Pinder.Core.Characters
             string? textingStyleFragment,
             string[] archetypeTendencies,
             TimingModifier responseTimingModifier,
-            IReadOnlyDictionary<StatType, int> statModifiers)
+            IReadOnlyDictionary<StatType, int> statModifiers,
+            string summaryText = "")
         {
             Lower                   = lower;
             Upper                   = upper;
             PersonalityFragment     = personalityFragment;
             BackstoryFragment       = backstoryFragment;
             TextingStyleFragment    = textingStyleFragment;
+            SummaryText             = summaryText ?? string.Empty;
             ArchetypeTendencies     = archetypeTendencies     ?? Array.Empty<string>();
             ResponseTimingModifier  = responseTimingModifier  ?? TimingModifier.Zero;
             StatModifiers           = statModifiers           ?? new Dictionary<StatType, int>();
