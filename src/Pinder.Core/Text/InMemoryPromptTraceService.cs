@@ -140,6 +140,27 @@ namespace Pinder.Core.Text
         }
 
         /// <inheritdoc />
+        public void RecordModelResponse(string response)
+        {
+            var scope = _scope.Value;
+            if (scope is null) return;
+            lock (_lock)
+            {
+                var pending = _sequence
+                    .Where(r => string.Equals(r.RunId, scope.RunId, StringComparison.Ordinal)
+                        && r.ModelResponse is null)
+                    .ToArray();
+                if (pending.Length == 0) return;
+                var now = DateTime.UtcNow;
+                foreach (var run in pending)
+                {
+                    run.ModelResponse = response ?? string.Empty;
+                    run.ResponseTimestamp = now;
+                }
+            }
+        }
+
+        /// <inheritdoc />
         public PromptTraceResult? GetLastTrace(string promptType)
         {
             if (string.IsNullOrEmpty(promptType)) return null;

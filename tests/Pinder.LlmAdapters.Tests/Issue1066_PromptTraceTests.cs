@@ -68,6 +68,7 @@ namespace Pinder.LlmAdapters.Tests
             {
                 service.RecordTrace("dialogue-options", new PromptTraceResult("alpha", spans));
                 service.RecordTrace("datee", new PromptTraceResult("alpha datee", spans));
+                service.RecordModelResponse("raw assistant response");
             }
 
             using (service.BeginSessionScope("session-b", "openai/test-model", "live_turn"))
@@ -87,6 +88,8 @@ namespace Pinder.LlmAdapters.Tests
             Assert.All(sessionA, r => Assert.Equal("anthropic/test-model", r.ProviderModel));
             Assert.All(sessionA, r => Assert.Equal(3, r.TurnNumber));
             Assert.All(sessionA, r => Assert.Equal(2, r.BranchOption));
+            Assert.All(sessionA, r => Assert.Equal("raw assistant response", r.ModelResponse));
+            Assert.All(sessionA, r => Assert.NotNull(r.ResponseTimestamp));
             Assert.Equal("alpha", service.GetLastTrace("dialogue-options", "session-a")!.Text);
             Assert.Equal("beta", service.GetLastTrace("dialogue-options", "session-b")!.Text);
 
