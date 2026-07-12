@@ -69,7 +69,7 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("Interest moved from 10 to 12 (+2)", result);
             Assert.Contains("Interest 12/25", result);
             Assert.DoesNotContain("RESPONSE TIMING", result);
-            Assert.Contains("3.5 minutes", result);
+            Assert.DoesNotContain("3.5 minutes", result);
             Assert.Contains("Engaged but not sold", result);
             Assert.Contains("[RESPONSE]", result);
             Assert.Contains("[SIGNALS]", result);

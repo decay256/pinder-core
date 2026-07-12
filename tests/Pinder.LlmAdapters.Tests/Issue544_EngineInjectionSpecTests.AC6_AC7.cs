@@ -52,17 +52,17 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("from 10 to 14", result);
         }
 
-        // Mutation: would catch if response timing was removed from datee prompt
+        // Obsolete timing metadata must not influence model output.
         [Fact]
-        public void AC6_DateePrompt_IncludesResponseTiming()
+        public void AC6_DateePrompt_OmitsResponseTiming()
         {
             var result = SessionDocumentBuilder.BuildDateePrompt(
                 MakeDateeContext(responseDelayMinutes: 5.0));
             Assert.DoesNotContain("RESPONSE TIMING", result);
-            Assert.Contains("5.0 minutes", result);
+            Assert.DoesNotContain("5.0 minutes", result);
         }
 
-        // Mutation: would catch if sub-minute delay didn't indicate rapid response
+        // Sub-minute timing is engine state, not model-facing guidance.
         [Fact]
         public void AC6_DateePrompt_SubMinuteDelay_IndicatesRapidResponse()
         {
