@@ -166,7 +166,10 @@ namespace Pinder.Core.Conversation
             };
 
             var selector = new EmotionStemSelector(42 + state.TurnNumber);
-            var resolvedTarget = selector.Resolve(conversationState);
+            var resolvedTarget = EmotionStemSelector.Hydrate(
+                selector.Resolve(conversationState),
+                player.Backstory,
+                player.StakeLines);
 
             state.PreviousPhase = resolvedTarget.Registry;
             state.PreviousResolvedIndex = resolvedTarget.Index;

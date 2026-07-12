@@ -3,12 +3,42 @@ using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 using Pinder.Core.Conversation;
+using Pinder.Core.Characters;
 
 namespace Pinder.Core.Tests
 {
     [Trait("Category", "Core")]
     public class EmotionStemSelectorTests
     {
+        [Fact]
+        public void Hydrate_UsesCanonicalBackstoryFactInsteadOfPlaceholderText()
+        {
+            var facts = BackstoryValidator.RequiredCategories.ToDictionary(
+                category => category,
+                category => new BackstoryFact($"lie for {category}", $"reality for {category}"));
+            var target = new ResolvedRevelationTarget
+            {
+                Registry = "BACKSTORY", Index = 0, Field = "BIO_LIE", Manner = "CURATED_BUFFER"
+            };
+
+            var result = EmotionStemSelector.Hydrate(target, facts, null);
+
+            Assert.Equal("lie for age_and_demographics", result.StemText);
+        }
+
+        [Fact]
+        public void Hydrate_UsesIndexedPsychologicalStake()
+        {
+            var target = new ResolvedRevelationTarget
+            {
+                Registry = "STAKE", Index = 1, Field = "STAKE_LINE", Manner = "INTIMATE_BREAKTHROUGH"
+            };
+
+            var result = EmotionStemSelector.Hydrate(target, null, new[] { "first", "actual stake" });
+
+            Assert.Equal("actual stake", result.StemText);
+        }
+
         [Fact]
         public void PhaseDerivation_AppliesHysteresisBuffer_PreventsThrashingOnBandBoundaries()
         {

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Pinder.Core.Characters;
 
 namespace Pinder.Core.Conversation
 {
@@ -186,9 +187,50 @@ namespace Pinder.Core.Conversation
                 Manner = manner,
                 Field = (currentPhase == "MacroPhase1") ? "BIO_LIE" :
                         (currentPhase == "MacroPhase2") ? "TRAGIC_REALITY" : "STAKE_LINE",
-                StemText = "Resolved stem text",
-                TransitionStyle = "Smooth"
+                StemText = string.Empty,
+                TransitionStyle = ResolveTransitionStyle(manner)
             };
         }
+
+        public static ResolvedRevelationTarget Hydrate(
+            ResolvedRevelationTarget target,
+            IReadOnlyDictionary<string, BackstoryFact>? backstory,
+            IReadOnlyList<string>? stakeLines)
+        {
+            if (target.Registry == "BACKSTORY")
+            {
+                if (target.Index < 0 || target.Index >= BackstoryValidator.RequiredCategories.Count)
+                    throw new InvalidOperationException($"Backstory target index {target.Index} is out of range.");
+
+                string category = BackstoryValidator.RequiredCategories[target.Index];
+                if (backstory == null || !backstory.TryGetValue(category, out var fact) || fact == null)
+                    throw new InvalidOperationException($"Backstory target '{category}' is missing from the player profile.");
+
+                target.StemText = target.Field == "BIO_LIE" ? fact.BioLie : fact.TragicReality;
+            }
+            else if (target.Registry == "STAKE")
+            {
+                if (stakeLines == null || target.Index < 0 || target.Index >= stakeLines.Count)
+                    throw new InvalidOperationException($"Stake target index {target.Index} is missing from the player profile.");
+                target.StemText = stakeLines[target.Index];
+            }
+            else
+            {
+                throw new InvalidOperationException($"Unknown revelation registry '{target.Registry}'.");
+            }
+
+            if (string.IsNullOrWhiteSpace(target.StemText))
+                throw new InvalidOperationException($"Resolved {target.Registry} target {target.Index} contains no text.");
+            return target;
+        }
+
+        private static string ResolveTransitionStyle(string manner) => manner switch
+        {
+            "CURATED_BUFFER" => "Keep the disclosure controlled and carefully buffered, revealing only enough to invite a response.",
+            "DEFENSIVE_EVASION" => "Approach the disclosure guardedly: acknowledge it, then deflect without making the transition feel abrupt.",
+            "INTIMATE_BREAKTHROUGH" => "Let the disclosure arrive as a sincere, unexpectedly intimate breakthrough.",
+            "TRAUMATIC_LEAKAGE" => "Let the disclosure slip out involuntarily, with emotion showing before the speaker can contain it.",
+            _ => "Move into the disclosure naturally and keep it emotionally consistent with the conversation."
+        };
     }
 }
