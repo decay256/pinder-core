@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text;
 using Pinder.Core.Characters;
 using Pinder.Core.Stats;
@@ -266,9 +267,10 @@ namespace Pinder.Core.Prompts
             TrapState activeTraps,
             string? characterIdSeed = null,
             bool archetypesEnabled = false,
-            string? consolidatedPersonality = null)
+            string? consolidatedPersonality = null,
+            IReadOnlyDictionary<string, BackstoryFact>? generatedBackstory = null)
         {
-            return BuildSystemPromptEx(displayName, genderIdentity, bioOneLiner, fragments, activeTraps, characterIdSeed, archetypesEnabled, consolidatedPersonality).Text;
+            return BuildSystemPromptEx(displayName, genderIdentity, bioOneLiner, fragments, activeTraps, characterIdSeed, archetypesEnabled, consolidatedPersonality, generatedBackstory).Text;
         }
 
         /// <summary>
@@ -282,7 +284,8 @@ namespace Pinder.Core.Prompts
             TrapState activeTraps,
             string? characterIdSeed = null,
             bool archetypesEnabled = false,
-            string? consolidatedPersonality = null)
+            string? consolidatedPersonality = null,
+            IReadOnlyDictionary<string, BackstoryFact>? generatedBackstory = null)
         {
             if (displayName  == null) throw new ArgumentNullException(nameof(displayName));
             if (genderIdentity == null) throw new ArgumentNullException(nameof(genderIdentity));
@@ -341,7 +344,21 @@ namespace Pinder.Core.Prompts
             sb.AppendLine();
 
             sb.AppendLine(framing.Backstory, srcFile, srcKey);
-            AppendBulletList(sb, fragments.BackstoryFragments);
+            if (generatedBackstory != null && generatedBackstory.Count > 0)
+            {
+                foreach (string category in BackstoryValidator.RequiredCategories)
+                {
+                    if (!generatedBackstory.TryGetValue(category, out var fact) || fact == null)
+                        continue;
+                    sb.AppendLine($"- {category}");
+                    sb.AppendLine($"  LIE: {fact.BioLie}");
+                    sb.AppendLine($"  REALITY: {fact.TragicReality}");
+                }
+            }
+            else
+            {
+                AppendBulletList(sb, fragments.BackstoryFragments);
+            }
             sb.AppendLine();
 
             sb.AppendLine(framing.TextingStyle, srcFile, srcKey);

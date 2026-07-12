@@ -196,7 +196,8 @@ namespace Pinder.SessionSetup
                 def.Name, def.GenderIdentity, def.Bio, fragments, new TrapState(),
                 characterIdSeed: textingSeed,
                 archetypesEnabled: archetypesEnabled,
-                consolidatedPersonality: def.ConsolidatedPersonality);
+                consolidatedPersonality: def.ConsolidatedPersonality,
+                generatedBackstory: def.Backstory);
 
             // #907: Use AggregateWithAudit so conflict drops are visible at
             // session-creation time. ConflictCatalog is loaded by PromptWiring.Wire();
