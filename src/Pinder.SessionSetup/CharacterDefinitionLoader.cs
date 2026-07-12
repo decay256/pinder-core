@@ -241,7 +241,8 @@ namespace Pinder.SessionSetup
                 backstoryFragments: fragments.BackstoryFragments,
                 attributedTextingStyleLines: aggregationResult.AttributedLines,
                 consolidatedPersonality: def.ConsolidatedPersonality,
-                consolidatedBackstory: def.ConsolidatedBackstory);
+                consolidatedBackstory: def.ConsolidatedBackstory,
+                personalityFragments: fragments.PersonalityFragments);
 
             // Issue #779: propagate the permanent stake from the definition
             // to the profile so setup can read it without an LLM call.

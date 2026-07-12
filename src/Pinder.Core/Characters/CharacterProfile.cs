@@ -105,6 +105,7 @@ namespace Pinder.Core.Characters
         public IReadOnlyList<string>? StakeLines { get; }
         public IReadOnlyDictionary<string, string>? PsychiatricDiagnosis { get; }
         public IReadOnlyList<string>? BackstoryFragments { get; }
+        public IReadOnlyList<string>? PersonalityFragments { get; }
         public string? ConsolidatedPersonality { get; }
         public string? ConsolidatedBackstory { get; }
 
@@ -156,7 +157,8 @@ namespace Pinder.Core.Characters
             IReadOnlyList<string>? backstoryFragments = null,
             IReadOnlyList<Prompts.TextingStyleAggregator.AttributedTextingStyleLine> attributedTextingStyleLines = null,
             string? consolidatedPersonality = null,
-            string? consolidatedBackstory = null)
+            string? consolidatedBackstory = null,
+            IReadOnlyList<string>? personalityFragments = null)
         {
             Stats = stats ?? throw new ArgumentNullException(nameof(stats));
             AssembledSystemPrompt = assembledSystemPrompt ?? throw new ArgumentNullException(nameof(assembledSystemPrompt));
@@ -179,6 +181,7 @@ namespace Pinder.Core.Characters
             StakeLines = stakeLines;
             PsychiatricDiagnosis = psychiatricDiagnosis;
             BackstoryFragments = backstoryFragments;
+            PersonalityFragments = personalityFragments;
             AttributedTextingStyleLines = attributedTextingStyleLines ?? new System.Collections.Generic.List<Prompts.TextingStyleAggregator.AttributedTextingStyleLine>();
             ConsolidatedPersonality = consolidatedPersonality;
             ConsolidatedBackstory = consolidatedBackstory;
