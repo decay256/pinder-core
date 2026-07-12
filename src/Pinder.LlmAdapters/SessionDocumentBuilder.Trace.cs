@@ -5,6 +5,7 @@ using System.Text;
 using Pinder.Core.Conversation;
 using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
+using Pinder.LlmAdapters.Anthropic;
 using Pinder.Core.Text;
 
 namespace Pinder.LlmAdapters
@@ -278,7 +279,7 @@ namespace Pinder.LlmAdapters
             // Output format instructions
             if (context.AvailableStats == null || context.AvailableStats.Length == 0)
                 throw new InvalidOperationException("AvailableStats cannot be null or empty.");
-            string availableStatsStr = string.Join(", ", Array.ConvertAll(context.AvailableStats, s => s.ToString().ToUpperInvariant()));
+            string availableStatsStr = string.Join(", ", Array.ConvertAll(context.AvailableStats, StatNameNormalizer.ToWireToken));
 
             string dialogueOptionsInstruction = PromptTemplates.DialogueOptionsInstruction
                 .Replace("{player_name}", playerName)

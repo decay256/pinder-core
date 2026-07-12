@@ -1,4 +1,5 @@
 using Pinder.LlmAdapters.Anthropic;
+using Pinder.Core.Stats;
 using Xunit;
 
 namespace Pinder.LlmAdapters.Tests.Anthropic
@@ -19,6 +20,14 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         {
             var result = StatNameNormalizer.NormalizeStatName(input);
             Assert.Equal(expected, result);
+        }
+
+        [Theory]
+        [InlineData(StatType.Charm, "CHARM")]
+        [InlineData(StatType.SelfAwareness, "SELF_AWARENESS")]
+        public void ToWireToken_UsesCanonicalLlmStatToken(StatType stat, string expected)
+        {
+            Assert.Equal(expected, StatNameNormalizer.ToWireToken(stat));
         }
     }
 }

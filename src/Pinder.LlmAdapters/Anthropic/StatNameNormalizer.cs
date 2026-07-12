@@ -18,5 +18,15 @@ namespace Pinder.LlmAdapters.Anthropic
             }
             return raw;
         }
+
+        /// <summary>
+        /// Formats enum stat names for the LLM-facing wire contract.
+        /// </summary>
+        public static string ToWireToken(Pinder.Core.Stats.StatType stat)
+        {
+            return stat == Pinder.Core.Stats.StatType.SelfAwareness
+                ? "SELF_AWARENESS"
+                : stat.ToString().ToUpperInvariant();
+        }
     }
 }

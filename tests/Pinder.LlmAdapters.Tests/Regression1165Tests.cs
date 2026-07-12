@@ -62,4 +62,17 @@ namespace Pinder.LlmAdapters.Tests
             Assert.DoesNotContain("Generate exactly 4 dialogue options", result.Text);
             Assert.DoesNotContain("Generate exactly 6 dialogue options", result.Text);
         }
+
+        [Fact]
+        public void DialogueOptionsInstruction_FormatsSelfAwarenessAsCanonicalWireToken()
+        {
+            var context = new DialogueContext(
+                "p", "d", new System.Collections.Generic.List<(string, string)>(), "last", new string[0], 10,
+                playerName: "P", dateeName: "O", currentTurn: 1, availableStats: new[] { StatType.Wit, StatType.SelfAwareness });
+
+            var result = SessionDocumentBuilder.BuildDialogueOptionsPromptEx(context);
+
+            Assert.Contains("WIT, SELF_AWARENESS", result.Text);
+            Assert.DoesNotContain("SELFAWARENESS", result.Text);
+        }
     }
