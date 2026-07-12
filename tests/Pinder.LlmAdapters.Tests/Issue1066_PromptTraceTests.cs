@@ -57,6 +57,44 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Fact]
+        public void Test_InMemoryPromptTraceService_ScopesTracesBySession()
+        {
+            var service = new InMemoryPromptTraceService();
+            service.Clear();
+
+            var spans = new List<AnnotatedSpan> { new AnnotatedSpan(0, 5, "file.yaml", "key") };
+
+            using (service.BeginSessionScope("session-a", "anthropic/test-model", "live_turn"))
+            {
+                service.RecordTrace("dialogue-options", new PromptTraceResult("alpha", spans));
+                service.RecordTrace("datee", new PromptTraceResult("alpha datee", spans));
+            }
+
+            using (service.BeginSessionScope("session-b", "openai/test-model", "live_turn"))
+            {
+                service.RecordTrace("dialogue-options", new PromptTraceResult("beta", spans));
+            }
+
+            var sessionA = service.GetSequence("session-a");
+            var sessionB = service.GetSequence("session-b");
+
+            Assert.Equal(2, sessionA.Count);
+            Assert.Single(sessionB);
+            Assert.All(sessionA, r => Assert.Equal("session-a", r.SessionId));
+            Assert.All(sessionA, r => Assert.Equal(sessionA[0].RunId, r.RunId));
+            Assert.All(sessionA, r => Assert.Equal("live_turn", r.RunKind));
+            Assert.All(sessionA, r => Assert.Equal("anthropic", r.Provider));
+            Assert.All(sessionA, r => Assert.Equal("anthropic/test-model", r.ProviderModel));
+            Assert.Equal("alpha", service.GetLastTrace("dialogue-options", "session-a")!.Text);
+            Assert.Equal("beta", service.GetLastTrace("dialogue-options", "session-b")!.Text);
+
+            service.ClearSession("session-a");
+
+            Assert.Empty(service.GetSequence("session-a"));
+            Assert.Single(service.GetSequence("session-b"));
+        }
+
+        [Fact]
         public void Test_SessionDocumentBuilder_DialogueOptionsPrompt_GeneratesTrace()
         {
             PromptCatalogInitializer.Initialize();
