@@ -81,13 +81,25 @@ namespace Pinder.Core.Characters
                 }
             }
 
-            var resolvedBands = new List<(string ParamId, AnatomyBandDefinition Band)>();
+            var resolvedBands = new List<(string ParamId, int BandIndex, AnatomyBandDefinition Band)>();
             foreach (var kv in anatomyValues)
             {
                 var param = _anatomy.GetParameter(kv.Key);
                 if (param == null) continue;
                 var band = param.ResolveBand(kv.Value);
-                if (band != null) resolvedBands.Add((kv.Key, band));
+                if (band != null)
+                {
+                    int bandIndex = 0;
+                    for (int i = 0; i < param.Bands.Count; i++)
+                    {
+                        if (ReferenceEquals(param.Bands[i], band))
+                        {
+                            bandIndex = i;
+                            break;
+                        }
+                    }
+                    resolvedBands.Add((kv.Key, bandIndex, band));
+                }
             }
 
             // --- 2. Sum stat modifiers on top of player base stats -----------------
@@ -104,7 +116,7 @@ namespace Pinder.Core.Characters
                 foreach (var kv in item.StatModifiers)
                     statSums[kv.Key] = statSums[kv.Key] + kv.Value;
 
-            foreach (var (_, band) in resolvedBands)
+            foreach (var (_, _, band) in resolvedBands)
                 foreach (var kv in band.StatModifiers)
                     statSums[kv.Key] = statSums[kv.Key] + kv.Value;
 
@@ -141,7 +153,7 @@ namespace Pinder.Core.Characters
             foreach (var item in resolvedItems)
                 ApplyTiming(item.ResponseTimingModifier);
 
-            foreach (var (_, band) in resolvedBands)
+            foreach (var (_, _, band) in resolvedBands)
                 ApplyTiming(band.ResponseTimingModifier);
 
             var timingProfile = new TimingProfile(
@@ -166,7 +178,9 @@ namespace Pinder.Core.Characters
             void AddFragments(
                 string? pf, string? bf, string? tf, string[] archetypes,
                 string textingKind, string textingSourceName,
-                string? slotOrParameter)
+                string? slotOrParameter,
+                string? sourceId,
+                int? bandIndex)
             {
                 if (!string.IsNullOrEmpty(pf)) personality.Add(pf!);
                 if (!string.IsNullOrEmpty(bf)) backstory.Add(bf!);
@@ -174,7 +188,7 @@ namespace Pinder.Core.Characters
                 {
                     texting.Add(tf!);
                     textingSources.Add(new TextingStyleFragmentSource(
-                        textingKind, textingSourceName, tf!, slotOrParameter));
+                        textingKind, textingSourceName, tf!, slotOrParameter, sourceId, bandIndex));
                 }
                 allArchetypes.AddRange(archetypes);
             }
@@ -187,20 +201,20 @@ namespace Pinder.Core.Characters
                 var item = resolvedItems[i];
                 AddFragments(item.PersonalityFragment, item.BackstoryFragment,
                              item.TextingStyleFragment, item.ArchetypeTendencies,
-                             "item", item.DisplayName, item.Slot);
+                             "item", item.DisplayName, item.Slot, item.ItemId, null);
             }
 
             // #836: anatomy parameter id is the engine-side handle for
             // the param (e.g. "trunkLengthBase", "trunkGirth"); it's stable
             // and grouped by the aggregator's tone-axis groups.
             // #1175: band name is used as the source name for auditing.
-            foreach (var (paramId, band) in resolvedBands)
+            foreach (var (paramId, bandIndex, band) in resolvedBands)
             {
                 // Build a descriptive source name from the param + band bounds
                 string bandLabel = $"{paramId}[{band.Lower:F2},{band.Upper:F2})";
                 AddFragments(band.PersonalityFragment, band.BackstoryFragment,
                              band.TextingStyleFragment, band.ArchetypeTendencies,
-                             "anatomy", bandLabel, paramId);
+                             "anatomy", bandLabel, paramId, paramId, bandIndex);
             }
 
             // --- 6. Count and rank archetypes -------------------------------------

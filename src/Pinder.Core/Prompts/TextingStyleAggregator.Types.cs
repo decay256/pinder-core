@@ -58,13 +58,31 @@ namespace Pinder.Core.Prompts
             public string Value { get; }
             public string SourceName { get; }
             public string SourceKind { get; }
+            public string SourceId { get; }
+            public string SlotOrParameter { get; }
+            public int? BandIndex { get; }
 
             public AttributedTextingStyleLine(string axis, string value, string sourceName, string sourceKind)
+                : this(axis, value, sourceName, sourceKind, sourceId: null, slotOrParameter: null, bandIndex: null)
+            {
+            }
+
+            public AttributedTextingStyleLine(
+                string axis,
+                string value,
+                string sourceName,
+                string sourceKind,
+                string sourceId,
+                string slotOrParameter,
+                int? bandIndex)
             {
                 Axis = axis;
                 Value = value;
                 SourceName = sourceName;
                 SourceKind = sourceKind;
+                SourceId = sourceId;
+                SlotOrParameter = slotOrParameter;
+                BandIndex = bandIndex;
             }
         }
 
