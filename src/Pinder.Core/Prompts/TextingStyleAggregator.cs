@@ -279,9 +279,7 @@ namespace Pinder.Core.Prompts
                 var syntax = ParseSyntaxAxes(src.Fragment);
                 if (syntax.TryGetValue(axis, out var line) && !string.IsNullOrWhiteSpace(line))
                 {
-                    pickedPairs.Add(new AttributedTextingStyleLine(
-                        axis, line, src.Source, src.Kind,
-                        src.SourceId, src.SlotOrParameter, src.BandIndex));
+                    pickedPairs.Add(new AttributedTextingStyleLine(axis, line, src.Source, src.Kind));
                 }
             }
 
@@ -293,23 +291,17 @@ namespace Pinder.Core.Prompts
             if (stanceResult != null && anatomyByParam.TryGetValue(stanceResult.ParamId, out var stanceSrc))
             {
                 var pair = AxisValuePairOf(stanceResult.WinnerLine);
-                pickedPairs.Add(new AttributedTextingStyleLine(
-                    pair.axis, pair.value, stanceSrc.Source, stanceSrc.Kind,
-                    stanceSrc.SourceId, stanceSrc.SlotOrParameter, stanceSrc.BandIndex));
+                pickedPairs.Add(new AttributedTextingStyleLine(pair.axis, pair.value, stanceSrc.Source, stanceSrc.Kind));
             }
             if (registerResult != null && anatomyByParam.TryGetValue(registerResult.ParamId, out var registerSrc))
             {
                 var pair = AxisValuePairOf(registerResult.WinnerLine);
-                pickedPairs.Add(new AttributedTextingStyleLine(
-                    pair.axis, pair.value, registerSrc.Source, registerSrc.Kind,
-                    registerSrc.SourceId, registerSrc.SlotOrParameter, registerSrc.BandIndex));
+                pickedPairs.Add(new AttributedTextingStyleLine(pair.axis, pair.value, registerSrc.Source, registerSrc.Kind));
             }
             if (pacingResult != null && anatomyByParam.TryGetValue(pacingResult.ParamId, out var pacingSrc))
             {
                 var pair = AxisValuePairOf(pacingResult.WinnerLine);
-                pickedPairs.Add(new AttributedTextingStyleLine(
-                    pair.axis, pair.value, pacingSrc.Source, pacingSrc.Kind,
-                    pacingSrc.SourceId, pacingSrc.SlotOrParameter, pacingSrc.BandIndex));
+                pickedPairs.Add(new AttributedTextingStyleLine(pair.axis, pair.value, pacingSrc.Source, pacingSrc.Kind));
             }
 
             // ------------------------------------------------------------------

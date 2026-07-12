@@ -117,10 +117,6 @@ namespace Pinder.Core.Characters
         /// </summary>
         public string SlotOrParameter { get; }
 
-        public string SourceId { get; }
-
-        public int? BandIndex { get; }
-
         public TextingStyleFragmentSource(string kind, string source, string fragment)
             : this(kind, source, fragment, slotOrParameter: null)
         {
@@ -131,24 +127,11 @@ namespace Pinder.Core.Characters
             string source,
             string fragment,
             string slotOrParameter)
-            : this(kind, source, fragment, slotOrParameter, sourceId: null, bandIndex: null)
-        {
-        }
-
-        public TextingStyleFragmentSource(
-            string kind,
-            string source,
-            string fragment,
-            string slotOrParameter,
-            string sourceId,
-            int? bandIndex)
         {
             Kind = kind;
             Source = source;
             Fragment = fragment;
             SlotOrParameter = slotOrParameter;
-            SourceId = sourceId;
-            BandIndex = bandIndex;
         }
     }
 }
