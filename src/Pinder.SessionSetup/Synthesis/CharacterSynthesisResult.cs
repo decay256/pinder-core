@@ -9,5 +9,7 @@ namespace Pinder.SessionSetup
         public List<string> StakeLines { get; set; } = new List<string>();
         public Dictionary<string, string> PsychiatricDiagnosis { get; set; } = new Dictionary<string, string>();
         public string Bio { get; set; } = string.Empty;
+        public string ConsolidatedPersonality { get; set; } = string.Empty;
+        public string ConsolidatedBackstory { get; set; } = string.Empty;
     }
 }

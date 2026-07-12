@@ -265,9 +265,10 @@ namespace Pinder.Core.Prompts
             FragmentCollection fragments,
             TrapState activeTraps,
             string? characterIdSeed = null,
-            bool archetypesEnabled = false)
+            bool archetypesEnabled = false,
+            string? consolidatedPersonality = null)
         {
-            return BuildSystemPromptEx(displayName, genderIdentity, bioOneLiner, fragments, activeTraps, characterIdSeed, archetypesEnabled).Text;
+            return BuildSystemPromptEx(displayName, genderIdentity, bioOneLiner, fragments, activeTraps, characterIdSeed, archetypesEnabled, consolidatedPersonality).Text;
         }
 
         /// <summary>
@@ -280,7 +281,8 @@ namespace Pinder.Core.Prompts
             FragmentCollection fragments,
             TrapState activeTraps,
             string? characterIdSeed = null,
-            bool archetypesEnabled = false)
+            bool archetypesEnabled = false,
+            string? consolidatedPersonality = null)
         {
             if (displayName  == null) throw new ArgumentNullException(nameof(displayName));
             if (genderIdentity == null) throw new ArgumentNullException(nameof(genderIdentity));
@@ -331,7 +333,11 @@ namespace Pinder.Core.Prompts
             sb.AppendLine();
 
             sb.AppendLine(framing.Personality, srcFile, srcKey);
-            AppendBulletList(sb, fragments.PersonalityFragments);
+            if (!string.IsNullOrWhiteSpace(consolidatedPersonality))
+            {
+                sb.Append("- ");
+                sb.AppendLine(consolidatedPersonality.Trim());
+            }
             sb.AppendLine();
 
             sb.AppendLine(framing.Backstory, srcFile, srcKey);

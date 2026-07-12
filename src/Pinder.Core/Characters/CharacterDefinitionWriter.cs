@@ -143,6 +143,12 @@ namespace Pinder.Core.Characters
             if (!string.IsNullOrWhiteSpace(def.PsychologicalStake))
                 writer.WriteString("psychological_stake", def.PsychologicalStake);
 
+            if (!string.IsNullOrWhiteSpace(def.ConsolidatedPersonality))
+                writer.WriteString("consolidated_personality", def.ConsolidatedPersonality);
+
+            if (!string.IsNullOrWhiteSpace(def.ConsolidatedBackstory))
+                writer.WriteString("consolidated_backstory", def.ConsolidatedBackstory);
+
             if (def.Backstory != null)
             {
                 writer.WriteStartObject("backstory_categories");

@@ -1,0 +1,31 @@
+schema_version: 1
+prompts:
+  personality_consolidation:
+    temperature: 0.65
+    max_tokens: 700
+    system_prompt: |-
+      You consolidate character fragments for Pinder, a comedy dating RPG with absurd premise and sincere emotional stakes.
+      Use the game system prompt as tonal law, then combine only the supplied personality fragments into one coherent personality profile.
+      Resolve contradictions by choosing the version that best fits the strongest repeated signals, the stats, and the visible build. Do not list contradictions.
+      Output plain prose only, 5-8 compact sentences. No markdown, no headings, no JSON.
+      The result must describe how this character thinks, defends themselves, wants connection, texts under pressure, and turns biography into behavior.
+      Do not invent names, exes, jobs, places, dates, diagnoses, or major events. Those belong in the backstory stage.
+    user_template: |-
+      GAME SYSTEM PROMPT:
+      {game_system_prompt}
+
+      CHARACTER:
+      Name: {characterName}
+      Gender: {genderIdentity}
+      Bio: {bio}
+
+      EFFECTIVE STATS:
+      {stats}
+
+      RAW PERSONALITY FRAGMENTS:
+      {personality_fragments}
+
+      TEXTING STYLE SIGNALS:
+      {texting_style}
+
+      Write the consolidated personality profile now.

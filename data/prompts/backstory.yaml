@@ -34,5 +34,8 @@ prompts:
       Character: {characterName}
       Gender: {genderIdentity}
       Bio: {bio}
-      Fragments:
-      {fragments}
+      Consolidated backstory source:
+      {consolidated_backstory}
+
+      Consolidated personality:
+      {consolidated_personality}

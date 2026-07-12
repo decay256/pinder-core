@@ -1,0 +1,30 @@
+schema_version: 1
+prompts:
+  backstory_consolidation:
+    temperature: 0.65
+    max_tokens: 900
+    system_prompt: |-
+      You consolidate raw backstory fragments for a Pinder character.
+      Use the supplied full game system prompt as tonal law. Combine only the supplied backstory fragments into a coherent, standardized source narrative.
+      Resolve contradictions by preserving repeated and concrete signals. Do not use personality fragments and do not generate the final 20-category backstory.
+      Output plain prose only, 5-10 compact sentences. No markdown, headings, or JSON.
+      Do not invent unsupported names, places, dates, jobs, relationships, diagnoses, or major events.
+    user_template: |-
+      FULL GAME SYSTEM PROMPT:
+      {game_system_prompt}
+
+      CHARACTER:
+      Name: {characterName}
+      Gender: {genderIdentity}
+      Bio: {bio}
+
+      EFFECTIVE STATS:
+      {stats}
+
+      RAW BACKSTORY FRAGMENTS:
+      {backstory_fragments}
+
+      TEXTING STYLE SIGNALS:
+      {texting_style}
+
+      Write the consolidated backstory source now.

@@ -119,6 +119,8 @@ namespace Pinder.SessionSetup
                 IReadOnlyList<string>? stakeLines = ParseOptionalStakeLines(root);
 
                 IReadOnlyDictionary<string, string>? psychiatricDiagnosis = ParseOptionalPsychiatricDiagnosis(root);
+                string? consolidatedPersonality = GetOptionalString(root, "consolidated_personality");
+                string? consolidatedBackstory = GetOptionalString(root, "consolidated_backstory");
 
                 return new CharacterDefinition(
                     schemaVersion,
@@ -133,7 +135,9 @@ namespace Pinder.SessionSetup
                     psychologicalStake,
                     backstory,
                     stakeLines,
-                    psychiatricDiagnosis);
+                    psychiatricDiagnosis,
+                    consolidatedPersonality,
+                    consolidatedBackstory);
             }
         }
 
@@ -191,7 +195,8 @@ namespace Pinder.SessionSetup
             string systemPrompt = PromptBuilder.BuildSystemPrompt(
                 def.Name, def.GenderIdentity, def.Bio, fragments, new TrapState(),
                 characterIdSeed: textingSeed,
-                archetypesEnabled: archetypesEnabled);
+                archetypesEnabled: archetypesEnabled,
+                consolidatedPersonality: def.ConsolidatedPersonality);
 
             // #907: Use AggregateWithAudit so conflict drops are visible at
             // session-creation time. ConflictCatalog is loaded by PromptWiring.Wire();
@@ -234,7 +239,9 @@ namespace Pinder.SessionSetup
                 stakeLines: def.StakeLines,
                 psychiatricDiagnosis: def.PsychiatricDiagnosis,
                 backstoryFragments: fragments.BackstoryFragments,
-                attributedTextingStyleLines: aggregationResult.AttributedLines);
+                attributedTextingStyleLines: aggregationResult.AttributedLines,
+                consolidatedPersonality: def.ConsolidatedPersonality,
+                consolidatedBackstory: def.ConsolidatedBackstory);
 
             // Issue #779: propagate the permanent stake from the definition
             // to the profile so setup can read it without an LLM call.

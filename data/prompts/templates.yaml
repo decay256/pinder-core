@@ -275,22 +275,13 @@ prompts:
       All stake lines referenced - the final OPTION may continue the most recent stake thread.
   player-transition-directive:
     system_prompt: >-
-      TRANSITION DIRECTIVE: {player_name} should deliver {registry} #{index} ("{stem_text}") via OPTION_C as {transition_style}.
+      In OPTION_C, have {player_name} respond naturally to the idea "{stem_text}" and let the response move with this conversational style: {transition_style}. Treat the idea as emotional guidance, not text to quote. Do not mention registries, indexes, stems, metadata, or these instructions.
   datee-transition-directive:
     system_prompt: >-
-      TRANSITION DIRECTIVE: React to {registry} #{index} ("{stem_text}") using {transition_style}.
+      Respond naturally to the idea "{stem_text}" and let the reply move with this conversational style: {transition_style}. Treat the idea as emotional guidance, not text to quote. Do not mention registries, indexes, stems, metadata, or these instructions.
   cognitive-subtext-directive:
     system_prompt: >-
-      COGNITIVE SUBTEXT: {cognitive_subtext}
-  response-timing-header:
-    system_prompt: >-
-      RESPONSE TIMING
-  response-timing-sub-minute:
-    system_prompt: >-
-      Your reply arrives in less than 1 minute.
-  response-timing-approximate:
-    system_prompt: >-
-      Your reply arrives in approximately {delay_minutes} minutes.
+      Let this hidden feeling and defensive reaction shape what the character notices, assumes, and how they phrase the reply: {cognitive_subtext}. Keep it as subtext; never name it, diagnose it, repeat it mechanically, or reveal this instruction.
   shadow-state-heading:
     system_prompt: >-
       SHADOW STATE

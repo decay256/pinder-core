@@ -32,10 +32,20 @@ namespace Pinder.SessionSetup
             string bio, 
             Dictionary<string, BackstoryFact> backstory, 
             CancellationToken cancellationToken = default)
+            => await GenerateFromBackstoryAndPersonalityAsync(characterName, genderIdentity, bio,
+                backstory, string.Empty, cancellationToken).ConfigureAwait(false);
+
+        public async Task<List<string>> GenerateFromBackstoryAndPersonalityAsync(
+            string characterName,
+            string genderIdentity,
+            string bio,
+            Dictionary<string, BackstoryFact> backstory,
+            string consolidatedPersonality,
+            CancellationToken cancellationToken = default)
         {
             string llmResponse = string.Empty;
             FormatException? lastParseFailure = null;
-            var profile = BuildBackstoryOnlyProfile(backstory);
+            var profile = BuildProfile(backstory, consolidatedPersonality);
             for (int attempt = 1; attempt <= MaxAttempts; attempt++)
             {
                 var stakeGenerator = new LlmStakeGenerator(
@@ -83,11 +93,14 @@ namespace Pinder.SessionSetup
             }
         }
 
-        private static string BuildBackstoryOnlyProfile(Dictionary<string, BackstoryFact> backstory)
+        private static string BuildProfile(Dictionary<string, BackstoryFact> backstory, string consolidatedPersonality)
         {
             var sb = new StringBuilder();
             sb.AppendLine("BACKSTORY JSON:");
             sb.Append(JsonSerializer.Serialize(backstory));
+            sb.AppendLine();
+            sb.AppendLine("CONSOLIDATED PERSONALITY:");
+            sb.Append(consolidatedPersonality);
             return sb.ToString();
         }
     }

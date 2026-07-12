@@ -57,6 +57,14 @@
       "type": "string",
       "description": "Issue #779: permanent psychological stake generated at character-creation time. Markdown bullet list of the character's core emotional motivations and vulnerabilities as injected into their LLM system prompt. Optional — absent on legacy files until regenerated."
     },
+    "consolidated_personality": {
+      "type": "string",
+      "description": "Standardized personality generated only from raw personality fragments and used by runtime prompts."
+    },
+    "consolidated_backstory": {
+      "type": "string",
+      "description": "Standardized backstory source generated only from raw backstory fragments before final backstory synthesis."
+    },
     "backstory_categories": {
       "type": "object",
       "description": "Issue #1259: The 20-category detailed backstory array mapping out their history and lies.",

@@ -75,6 +75,8 @@ namespace Pinder.Core.Characters
 
         public IReadOnlyList<string>? StakeLines { get; }
         public IReadOnlyDictionary<string, string>? PsychiatricDiagnosis { get; }
+        public string? ConsolidatedPersonality { get; }
+        public string? ConsolidatedBackstory { get; }
 
         public CharacterDefinition(
             int schemaVersion,
@@ -89,7 +91,9 @@ namespace Pinder.Core.Characters
             string? psychologicalStake = null,
             IReadOnlyDictionary<string, BackstoryFact>? backstory = null,
             IReadOnlyList<string>? stakeLines = null,
-            IReadOnlyDictionary<string, string>? psychiatricDiagnosis = null)
+            IReadOnlyDictionary<string, string>? psychiatricDiagnosis = null,
+            string? consolidatedPersonality = null,
+            string? consolidatedBackstory = null)
         {
             SchemaVersion = schemaVersion;
             CharacterId = characterId;
@@ -104,6 +108,8 @@ namespace Pinder.Core.Characters
             Backstory = backstory;
             StakeLines = stakeLines;
             PsychiatricDiagnosis = psychiatricDiagnosis;
+            ConsolidatedPersonality = consolidatedPersonality;
+            ConsolidatedBackstory = consolidatedBackstory;
         }
     }
 

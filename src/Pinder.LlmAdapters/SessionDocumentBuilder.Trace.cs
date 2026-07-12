@@ -369,24 +369,6 @@ namespace Pinder.LlmAdapters
             string deltaStr = delta >= 0 ? $"+{delta}" : delta.ToString();
             sb.AppendLine($"Interest moved from {context.InterestBefore} to {context.InterestAfter} ({deltaStr}).");
 
-            // Response timing
-            sb.AppendLine();
-            sb.AppendLine(PromptTemplates.ResponseTimingHeader, GetTemplateSource("response-timing-header"), "response-timing-header");
-            if (context.ResponseDelayMinutes < 1.0)
-            {
-                sb.AppendLine(PromptTemplates.ResponseTimingSubMinute, GetTemplateSource("response-timing-sub-minute"), "response-timing-sub-minute");
-            }
-            else
-            {
-                string responseTiming = RenderTemplate(
-                    PromptTemplates.ResponseTimingApproximate,
-                    new Dictionary<string, string>
-                    {
-                        { "delay_minutes", context.ResponseDelayMinutes.ToString("F1") },
-                    });
-                sb.AppendLine(responseTiming, GetTemplateSource("response-timing-approximate"), "response-timing-approximate");
-            }
-
             if (context.ActiveTrapInstructions != null && context.ActiveTrapInstructions.Length > 0)
             {
                 sb.AppendLine();

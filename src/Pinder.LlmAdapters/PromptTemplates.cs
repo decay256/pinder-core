@@ -94,12 +94,6 @@ namespace Pinder.LlmAdapters
 
         internal static string CognitiveSubtextDirective => GetCatalogString("cognitive-subtext-directive");
 
-        internal static string ResponseTimingHeader => GetCatalogString("response-timing-header");
-
-        internal static string ResponseTimingSubMinute => GetCatalogString("response-timing-sub-minute");
-
-        internal static string ResponseTimingApproximate => GetCatalogString("response-timing-approximate");
-
         internal static string ShadowStateHeading => GetCatalogString("shadow-state-heading");
 
         internal static string DateeShadowStateHeading => GetCatalogString("datee-shadow-state-heading");

@@ -45,6 +45,16 @@ namespace Pinder.SessionSetup
             string bio,
             IReadOnlyList<string> backstoryFragments,
             CancellationToken cancellationToken = default)
+            => await GenerateFromConsolidatedAsync(characterName, genderIdentity, bio,
+                string.Join("\n", backstoryFragments), string.Empty, cancellationToken).ConfigureAwait(false);
+
+        public async Task<Dictionary<string, BackstoryFact>> GenerateFromConsolidatedAsync(
+            string characterName,
+            string genderIdentity,
+            string bio,
+            string consolidatedBackstory,
+            string consolidatedPersonality,
+            CancellationToken cancellationToken = default)
         {
             var entry = _catalog.TryGet("backstory")
                 ?? throw new InvalidOperationException("prompt-catalog: missing required key 'backstory'.");
@@ -54,14 +64,13 @@ namespace Pinder.SessionSetup
             string userTemplate = entry.UserTemplate
                 ?? throw new InvalidOperationException("prompt-catalog: key 'backstory' has no user_template.");
 
-            string fragments = string.Join("\n", backstoryFragments);
-
             var values = new Dictionary<string, string>
             {
                 { "characterName", characterName },
                 { "genderIdentity", genderIdentity },
                 { "bio", bio },
-                { "fragments", fragments }
+                { "consolidated_backstory", consolidatedBackstory },
+                { "consolidated_personality", consolidatedPersonality }
             };
 
             // Use PromptCatalog.Substitute for both system prompt (in case of variables) and user message
