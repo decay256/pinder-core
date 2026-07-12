@@ -40,13 +40,17 @@ namespace Pinder.Core.Text
                 string? sessionId,
                 string runKind,
                 string? provider,
-                string? providerModel)
+                string? providerModel,
+                int? turnNumber,
+                int? branchOption)
             {
                 RunId = runId;
                 SessionId = sessionId;
                 RunKind = runKind;
                 Provider = provider;
                 ProviderModel = providerModel;
+                TurnNumber = turnNumber;
+                BranchOption = branchOption;
             }
 
             public string RunId { get; }
@@ -54,6 +58,8 @@ namespace Pinder.Core.Text
             public string RunKind { get; }
             public string? Provider { get; }
             public string? ProviderModel { get; }
+            public int? TurnNumber { get; }
+            public int? BranchOption { get; }
         }
 
         private sealed class ScopeHandle : IDisposable
@@ -82,7 +88,9 @@ namespace Pinder.Core.Text
         public IDisposable BeginSessionScope(
             string? sessionId,
             string? providerModel = null,
-            string runKind = "live_turn")
+            string runKind = "live_turn",
+            int? turnNumber = null,
+            int? branchOption = null)
         {
             var previous = _scope.Value;
             var provider = ProviderFromModelSpec(providerModel);
@@ -91,7 +99,9 @@ namespace Pinder.Core.Text
                 string.IsNullOrWhiteSpace(sessionId) ? null : sessionId,
                 string.IsNullOrWhiteSpace(runKind) ? "live_turn" : runKind,
                 provider,
-                string.IsNullOrWhiteSpace(providerModel) ? null : providerModel);
+                string.IsNullOrWhiteSpace(providerModel) ? null : providerModel,
+                turnNumber,
+                branchOption);
             return new ScopeHandle(this, previous);
         }
 
@@ -119,7 +129,9 @@ namespace Pinder.Core.Text
                     nonNullTrace,
                     now,
                     scope?.Provider,
-                    scope?.ProviderModel));
+                    scope?.ProviderModel,
+                    scope?.TurnNumber,
+                    scope?.BranchOption));
                 if (HasText(sessionId))
                 {
                     PruneSessionLocked(sessionId!, now);

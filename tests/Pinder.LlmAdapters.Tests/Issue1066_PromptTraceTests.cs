@@ -64,7 +64,7 @@ namespace Pinder.LlmAdapters.Tests
 
             var spans = new List<AnnotatedSpan> { new AnnotatedSpan(0, 5, "file.yaml", "key") };
 
-            using (service.BeginSessionScope("session-a", "anthropic/test-model", "live_turn"))
+            using (service.BeginSessionScope("session-a", "anthropic/test-model", "speculation", 3, 2))
             {
                 service.RecordTrace("dialogue-options", new PromptTraceResult("alpha", spans));
                 service.RecordTrace("datee", new PromptTraceResult("alpha datee", spans));
@@ -82,9 +82,11 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Single(sessionB);
             Assert.All(sessionA, r => Assert.Equal("session-a", r.SessionId));
             Assert.All(sessionA, r => Assert.Equal(sessionA[0].RunId, r.RunId));
-            Assert.All(sessionA, r => Assert.Equal("live_turn", r.RunKind));
+            Assert.All(sessionA, r => Assert.Equal("speculation", r.RunKind));
             Assert.All(sessionA, r => Assert.Equal("anthropic", r.Provider));
             Assert.All(sessionA, r => Assert.Equal("anthropic/test-model", r.ProviderModel));
+            Assert.All(sessionA, r => Assert.Equal(3, r.TurnNumber));
+            Assert.All(sessionA, r => Assert.Equal(2, r.BranchOption));
             Assert.Equal("alpha", service.GetLastTrace("dialogue-options", "session-a")!.Text);
             Assert.Equal("beta", service.GetLastTrace("dialogue-options", "session-b")!.Text);
 

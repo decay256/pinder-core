@@ -13,7 +13,9 @@ namespace Pinder.Core.Text
             PromptTraceResult trace,
             DateTime timestamp,
             string? provider,
-            string? providerModel)
+            string? providerModel,
+            int? turnNumber,
+            int? branchOption)
         {
             RunId = runId;
             SessionId = sessionId;
@@ -23,6 +25,8 @@ namespace Pinder.Core.Text
             Timestamp = timestamp;
             Provider = provider;
             ProviderModel = providerModel;
+            TurnNumber = turnNumber;
+            BranchOption = branchOption;
         }
 
         public string RunId { get; }
@@ -33,6 +37,8 @@ namespace Pinder.Core.Text
         public DateTime Timestamp { get; }
         public string? Provider { get; }
         public string? ProviderModel { get; }
+        public int? TurnNumber { get; }
+        public int? BranchOption { get; }
     }
 
     /// <summary>
