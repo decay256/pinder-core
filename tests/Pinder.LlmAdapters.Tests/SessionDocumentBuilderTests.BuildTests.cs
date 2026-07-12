@@ -68,7 +68,7 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("[ENGINE — DATEE]", result);
             Assert.Contains("Interest moved from 10 to 12 (+2)", result);
             Assert.Contains("Interest 12/25", result);
-            Assert.Contains("RESPONSE TIMING", result);
+            Assert.DoesNotContain("RESPONSE TIMING", result);
             Assert.Contains("3.5 minutes", result);
             Assert.Contains("Engaged but not sold", result);
             Assert.Contains("[RESPONSE]", result);
@@ -91,7 +91,7 @@ namespace Pinder.LlmAdapters.Tests
             var result = SessionDocumentBuilder.BuildDateePrompt(
                 MakeDateeContext(responseDelayMinutes: 0.5));
 
-            Assert.Contains("less than 1 minute", result);
+            Assert.DoesNotContain("less than 1 minute", result);
         }
 
         [Fact]

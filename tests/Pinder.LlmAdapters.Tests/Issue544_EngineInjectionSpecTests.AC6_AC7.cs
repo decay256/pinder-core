@@ -58,7 +58,7 @@ namespace Pinder.LlmAdapters.Tests
         {
             var result = SessionDocumentBuilder.BuildDateePrompt(
                 MakeDateeContext(responseDelayMinutes: 5.0));
-            Assert.Contains("RESPONSE TIMING", result);
+            Assert.DoesNotContain("RESPONSE TIMING", result);
             Assert.Contains("5.0 minutes", result);
         }
 
@@ -68,7 +68,7 @@ namespace Pinder.LlmAdapters.Tests
         {
             var result = SessionDocumentBuilder.BuildDateePrompt(
                 MakeDateeContext(responseDelayMinutes: 0.5));
-            Assert.Contains("less than 1 minute", result);
+            Assert.DoesNotContain("less than 1 minute", result);
         }
 
         // Mutation: would catch if shadow taint was not included when thresholds present

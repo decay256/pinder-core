@@ -44,21 +44,22 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Fact]
-        public void BuildDateePrompt_NormalDelay_ShowsApproximateMinutes()
+        public void BuildDateePrompt_NormalDelay_DoesNotExposeTimingToModel()
         {
             var result = SessionDocumentBuilder.BuildDateePrompt(
                 MakeDateeContext(responseDelayMinutes: 5.5));
 
-            Assert.Contains("approximately 5.5 minutes", result);
+            Assert.DoesNotContain("approximately 5.5 minutes", result);
+            Assert.DoesNotContain("RESPONSE TIMING", result);
         }
 
         [Fact]
-        public void BuildDateePrompt_SubMinuteDelay_ShowsLessThanOneMinute()
+        public void BuildDateePrompt_SubMinuteDelay_DoesNotExposeTimingToModel()
         {
             var result = SessionDocumentBuilder.BuildDateePrompt(
                 MakeDateeContext(responseDelayMinutes: 0.3));
 
-            Assert.Contains("less than 1 minute", result);
+            Assert.DoesNotContain("less than 1 minute", result);
         }
 
         [Fact]

@@ -77,11 +77,13 @@ namespace Pinder.LlmAdapters.Tests
             // - names the target by index, field, literal string
             // - steers exactly one option (OPTION_C) for player
             // - therapeutic cognitive subtext (DERIVED FEELING + DEFENSE REACTION)
-            Assert.Contains("STAKE #13", trace.Text);
+            Assert.DoesNotContain("STAKE #13", trace.Text);
             Assert.Contains("laminated Camino map", trace.Text);
             Assert.Contains("ACCIDENTAL_SLIP", trace.Text);
             Assert.Contains("FEAR OF INTIMACY + DEFENSIVE SARCASM", trace.Text);
             Assert.Contains("OPTION_C", trace.Text);
+            Assert.Contains("Treat the idea as emotional guidance", trace.Text);
+            Assert.Contains("Keep it as subtext", trace.Text);
         }
 
         [Fact]
@@ -90,10 +92,12 @@ namespace Pinder.LlmAdapters.Tests
             var context = MakeDateeContextWithTarget();
             var trace = SessionDocumentBuilder.BuildDateePromptEx(context);
 
-            Assert.Contains("STAKE #13", trace.Text);
+            Assert.DoesNotContain("STAKE #13", trace.Text);
             Assert.Contains("laminated Camino map", trace.Text);
             Assert.Contains("ACCIDENTAL_SLIP", trace.Text);
             Assert.Contains("FEAR OF INTIMACY + DEFENSIVE SARCASM", trace.Text);
+            Assert.Contains("Treat the idea as emotional guidance", trace.Text);
+            Assert.Contains("Keep it as subtext", trace.Text);
         }
     }
 }
