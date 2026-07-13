@@ -40,7 +40,9 @@ namespace Pinder.Core.Tests
             Path.Combine(AppContext.BaseDirectory, "Fixtures", "Issue1154");
 
         private static string ReadFixture(string name) =>
-            File.ReadAllText(Path.Combine(FixturesDir, name));
+            File.ReadAllText(Path.Combine(FixturesDir, name))
+                .Replace("\r\n", "\n")
+                .Replace("\n", Environment.NewLine);
 
         private static readonly Dictionary<StatType, int> BaseStats =
             new Dictionary<StatType, int>
@@ -123,25 +125,15 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public void BuildSystemPromptEx_ConstantPrefix_IdenticalAcrossCharacters()
+        public void BuildSystemPromptEx_DoesNotEmitLegacyHeaderOnlyPrefix()
         {
-            var f1 = BuildDeterministicFragments();
-            var t1 = new TrapState();
-            var r1 = PromptBuilder.BuildSystemPromptEx("Alice", "she/her", "bio 1", f1, t1, "seed1");
-            
-            var f2 = new FragmentCollection(
-                new List<string> { "different personality" }, new List<string>(), new List<string>(), 
-                new List<(string, int)>(), new TimingProfile(1, 1, 1, "f"), new StatBlock(BaseStats, Shadow), null, new List<TextingStyleFragmentSource>());
-            var t2 = new TrapState();
-            var r2 = PromptBuilder.BuildSystemPromptEx("Bob", "he/him", "bio 2", f2, t2, "seed2");
+            var result = PromptBuilder.BuildSystemPromptEx(
+                "Alice", "she/her", "bio",
+                BuildDeterministicFragments(), new TrapState(), "seed1",
+                archetypesEnabled: true);
 
-            int split1 = r1.Text.IndexOf("=== CHARACTER DATA ===", StringComparison.Ordinal);
-            int split2 = r2.Text.IndexOf("=== CHARACTER DATA ===", StringComparison.Ordinal);
-            
-            string prefix1 = r1.Text.Substring(0, split1 + "=== CHARACTER DATA ===".Length);
-            string prefix2 = r2.Text.Substring(0, split2 + "=== CHARACTER DATA ===".Length);
-            
-            Assert.Equal(prefix1, prefix2);
+            Assert.StartsWith("=== CHARACTER DATA ===", result.Text);
+            Assert.DoesNotContain("RULES\nIDENTITY", result.Text, StringComparison.Ordinal);
         }
 
         // ── provenance: every framing span is now sourced from the single

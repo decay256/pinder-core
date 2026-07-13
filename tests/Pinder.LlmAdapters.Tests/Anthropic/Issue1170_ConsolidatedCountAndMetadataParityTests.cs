@@ -63,9 +63,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
                     ["stat"] = drawnStats[i % n].ToString(),
                     ["text"] = $"Tool text option {i}",
                     ["callback"] = "none",
-                    ["combo"] = "none",
-                    ["tell_bonus"] = false,
-                    ["weakness_window"] = false
+                    ["combo"] = "none"
                 });
             }
             var toolInput = new JObject { ["options"] = optionsArray };
@@ -132,7 +130,7 @@ OPTION_3 [STAT: Wit] ""Witty message"" [CALLBACK: none] [COMBO: none] [TELL_BONU
         // ═══════════════════════════════════════════════════════════════
 
         [Fact]
-        public void MetadataTags_And_ToolSchemaFields_AreIdentical()
+        public void ToolSchema_ExcludesEngineDerivedGameplayMetadata()
         {
             // Get regex tags via reflection from DialogueOptionParsers
             var parserType = typeof(DialogueOptionParsers);
@@ -165,16 +163,17 @@ OPTION_3 [STAT: Wit] ""Witty message"" [CALLBACK: none] [COMBO: none] [TELL_BONU
 
             var schemaFields = optionsProps.Properties()
                 .Select(p => p.Name)
-                .Where(name => name != "text" && name != "weakness_window")
+                .Where(name => name != "text")
                 .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
             Assert.Contains("stat", schemaFields);
             Assert.Contains("callback", schemaFields);
             Assert.Contains("combo", schemaFields);
-            Assert.Contains("tell_bonus", schemaFields);
-            Assert.Equal(4, schemaFields.Count);
+            Assert.DoesNotContain("tell_bonus", schemaFields);
+            Assert.DoesNotContain("weakness_window", schemaFields);
+            Assert.Equal(3, schemaFields.Count);
 
-            Assert.True(textTags.SetEquals(schemaFields), "Metadata fields must be 100% synchronized between regex parser and tool schema.");
+            Assert.True(schemaFields.SetEquals(new[] { "stat", "callback", "combo" }), "Structured tool schema must only ask for model-authored fields; gameplay metadata remains engine-derived.");
         }
 
         // ═══════════════════════════════════════════════════════════════

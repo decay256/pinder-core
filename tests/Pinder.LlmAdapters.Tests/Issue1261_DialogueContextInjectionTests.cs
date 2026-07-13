@@ -73,17 +73,15 @@ namespace Pinder.LlmAdapters.Tests
             var context = MakeDialogueContextWithTarget();
             var trace = SessionDocumentBuilder.BuildDialogueOptionsPromptEx(context);
 
-            // Verify injection format inside [ENGINE] block (per issue #1261)
-            // - names the target by index, field, literal string
-            // - steers exactly one option (OPTION_C) for player
-            // - therapeutic cognitive subtext (DERIVED FEELING + DEFENSE REACTION)
-            Assert.DoesNotContain("STAKE #13", trace.Text);
-            Assert.Contains("laminated Camino map", trace.Text);
-            Assert.Contains("ACCIDENTAL_SLIP", trace.Text);
-            Assert.Contains("FEAR OF INTIMACY + DEFENSIVE SARCASM", trace.Text);
-            Assert.Contains("OPTION_C", trace.Text);
-            Assert.Contains("Treat the idea as emotional guidance", trace.Text);
-            Assert.Contains("Keep it as subtext", trace.Text);
+            string engine = ExtractEngineState(trace.Text);
+
+            Assert.Contains("Transition target: laminated Camino map", engine);
+            Assert.Contains("Apply this specifically to the final option", engine);
+            Assert.Contains("Transition style for the final option: ACCIDENTAL_SLIP", engine);
+            Assert.Contains("Cognitive subtext: FEAR OF INTIMACY + DEFENSIVE SARCASM", engine);
+            Assert.DoesNotContain("STAKE", engine);
+            Assert.DoesNotContain("#13", engine);
+            Assert.DoesNotContain("STAKE_LINE", engine);
         }
 
         [Fact]
@@ -92,12 +90,34 @@ namespace Pinder.LlmAdapters.Tests
             var context = MakeDateeContextWithTarget();
             var trace = SessionDocumentBuilder.BuildDateePromptEx(context);
 
-            Assert.DoesNotContain("STAKE #13", trace.Text);
-            Assert.Contains("laminated Camino map", trace.Text);
-            Assert.Contains("ACCIDENTAL_SLIP", trace.Text);
-            Assert.Contains("FEAR OF INTIMACY + DEFENSIVE SARCASM", trace.Text);
-            Assert.Contains("Treat the idea as emotional guidance", trace.Text);
-            Assert.Contains("Keep it as subtext", trace.Text);
+            string engine = ExtractEngineState(trace.Text);
+
+            Assert.Contains("Transition target: laminated Camino map", engine);
+            Assert.Contains("Apply this specifically to the datee response", engine);
+            Assert.Contains("Transition style for the datee response: ACCIDENTAL_SLIP", engine);
+            Assert.Contains("Cognitive subtext: FEAR OF INTIMACY + DEFENSIVE SARCASM", engine);
+            Assert.DoesNotContain("STAKE", engine);
+            Assert.DoesNotContain("#13", engine);
+            Assert.DoesNotContain("STAKE_LINE", engine);
+            Assert.DoesNotContain(trace.Spans, span => span.Key == "datee-transition-directive");
+            Assert.DoesNotContain(trace.Spans, span => span.Key == "cognitive-subtext-directive");
+            AssertCatalogSpan(trace, "engine-state-transition-target-line");
+            AssertCatalogSpan(trace, "engine-state-transition-style-line");
+            AssertCatalogSpan(trace, "engine-state-cognitive-subtext-line");
+        }
+
+        private static string ExtractEngineState(string prompt)
+        {
+            int start = prompt.IndexOf("<ENGINE_STATE>", StringComparison.Ordinal);
+            int end = prompt.IndexOf("</ENGINE_STATE>", start, StringComparison.Ordinal);
+            return prompt.Substring(start, end - start);
+        }
+
+        private static void AssertCatalogSpan(Pinder.Core.Text.PromptTraceResult trace, string key)
+        {
+            Assert.Contains(
+                trace.Spans,
+                span => span.Key == key && span.SourceFile == "data/prompts/templates.yaml");
         }
     }
 }

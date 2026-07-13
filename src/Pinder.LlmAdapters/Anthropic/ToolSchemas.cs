@@ -19,7 +19,7 @@ namespace Pinder.LlmAdapters.Anthropic
 
         /// <summary>
         /// Tool for GetDialogueOptionsAsync.
-        /// Schema: {options: [{stat, text, callback, combo, tell_bonus, weakness_window}]}
+        /// Schema: {options: [{stat, text, callback, combo}]}
         /// </summary>
         public static ToolDefinition GetDialogueOptions(int count)
         {

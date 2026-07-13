@@ -223,14 +223,8 @@ namespace Pinder.LlmAdapters.Anthropic
                     if (!TryParseRequiredCombo(optionObj, out var comboName))
                         return null;
 
-                    if (!TryReadRequiredBool(optionObj, "tell_bonus", out var tellBonus) ||
-                        !TryReadRequiredBool(optionObj, "weakness_window", out var weaknessWindow))
-                    {
-                        return null;
-                    }
-
                     parsed.Add(new DialogueOption(
-                        stat, text, callbackTurn, comboName, tellBonus, weaknessWindow));
+                        stat, text, callbackTurn, comboName));
                 }
 
                 if (parsed.Count == 0) return null;
@@ -250,16 +244,6 @@ namespace Pinder.LlmAdapters.Anthropic
 
             value = token.Value<string>()?.Trim() ?? string.Empty;
             return !string.IsNullOrWhiteSpace(value);
-        }
-
-        private static bool TryReadRequiredBool(JObject obj, string propertyName, out bool value)
-        {
-            value = false;
-            if (!obj.TryGetValue(propertyName, out var token) || token.Type != JTokenType.Boolean)
-                return false;
-
-            value = token.Value<bool>();
-            return true;
         }
 
         private static bool TryParseRequiredCallback(JObject obj, out int? callbackTurn)

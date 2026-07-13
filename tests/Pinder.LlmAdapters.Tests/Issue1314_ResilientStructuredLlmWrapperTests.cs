@@ -393,6 +393,16 @@ TELL: Charm (She liked your charm)";
             Assert.Equal(transport.UserMessages[0], transport.UserMessages[1]);
             Assert.Equal(transport.UserMessages[0], transport.UserMessages[2]);
             Assert.Equal(transport.UserMessages[0], transport.UserMessages[3]);
+
+            var trace = Pinder.Core.Text.InMemoryPromptTraceService.Instance
+                .GetLastTrace(LlmPhase.OpponentResponse);
+            Assert.NotNull(trace);
+            Assert.Contains(trace!.Spans, span =>
+                span.SourceFile == "data/prompts/templates.yaml" &&
+                span.Key == "stateful-previous-context-heading");
+            Assert.Contains(trace.Spans, span =>
+                span.SourceFile == "data/prompts/templates.yaml" &&
+                span.Key == "stateful-current-turn-heading");
         }
     }
 }

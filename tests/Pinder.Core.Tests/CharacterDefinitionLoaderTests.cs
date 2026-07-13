@@ -410,14 +410,30 @@ namespace Pinder.Core.Tests
             var profile = CharacterDefinitionLoader.Parse(json, itemRepo, anatomyRepo, archetypesEnabled: true);
 
             // Should contain assembled fragments, not be empty
-            // Lead-in is now RULES token; character name no longer in character-level prompt (RULES migration).
-            Assert.Contains("RULES", profile.AssembledSystemPrompt);
+            Assert.StartsWith("=== CHARACTER DATA ===", profile.AssembledSystemPrompt);
+            Assert.DoesNotContain("RULES\nIDENTITY", profile.AssembledSystemPrompt);
             Assert.Contains("he/him", profile.AssembledSystemPrompt);
             Assert.Contains("BACKSTORY", profile.AssembledSystemPrompt);
             Assert.Contains("TEXTING STYLE", profile.AssembledSystemPrompt);
             // #832: ARCHETYPES (tendency-order ranked list) replaced by
             // ACTIVE ARCHETYPE (the level-eligible top-ranked archetype).
             Assert.Contains("ACTIVE ARCHETYPE", profile.AssembledSystemPrompt);
+        }
+
+        [Fact]
+        public void Parse_SystemPrompt_IncludesGeneratedPsychiatricDiagnosis()
+        {
+            var itemRepo = LoadItemRepo();
+            var anatomyRepo = LoadAnatomyRepo();
+            string json = WithAdditionalRootProperty(
+                @"""psychiatric_diagnosis"": { ""derived_feeling"": ""terror of being ordinary"", ""defense_reaction"": ""turns sincere moments into bits"" }");
+
+            var profile = CharacterDefinitionLoader.Parse(json, itemRepo, anatomyRepo);
+
+            Assert.Contains("THERAPIST DIAGNOSIS", profile.AssembledSystemPrompt);
+            Assert.Contains("- Defense reaction: turns sincere moments into bits", profile.AssembledSystemPrompt);
+            Assert.Contains("- Derived feeling: terror of being ordinary", profile.AssembledSystemPrompt);
+            Assert.DoesNotContain("derived_feeling", profile.AssembledSystemPrompt);
         }
 
         [Fact]

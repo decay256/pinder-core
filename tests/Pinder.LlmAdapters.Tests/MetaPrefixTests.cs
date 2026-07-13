@@ -28,7 +28,7 @@ namespace Pinder.LlmAdapters.Tests
         {
             var json = JObject.Parse(@"{
                 ""options"": [
-                    { ""stat"": ""Charm"", ""text"": ""CONTEXT: tool message"", ""callback"": ""none"", ""combo"": ""none"", ""tell_bonus"": false, ""weakness_window"": false }
+                    { ""stat"": ""Charm"", ""text"": ""CONTEXT: tool message"", ""callback"": ""none"", ""combo"": ""none"" }
                 ]
             }");
             var result = DialogueOptionParsers.ParseDialogueOptionsTool(json, new[] { StatType.Charm });

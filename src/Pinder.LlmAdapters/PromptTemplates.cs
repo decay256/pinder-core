@@ -94,6 +94,26 @@ namespace Pinder.LlmAdapters
 
         internal static string CognitiveSubtextDirective => GetCatalogString("cognitive-subtext-directive");
 
+        internal static string StatefulPreviousContextHeading => GetCatalogString("stateful-previous-context-heading");
+
+        internal static string StatefulCurrentTurnHeading => GetCatalogString("stateful-current-turn-heading");
+
+        internal static string EngineStateHfiLine => GetCatalogString("engine-state-hfi-line");
+
+        internal static string EngineStateTorLine => GetCatalogString("engine-state-tor-line");
+
+        internal static string EngineStateCognitiveSubtextLine => GetCatalogString("engine-state-cognitive-subtext-line");
+
+        internal static string EngineStateTransitionTargetLine => GetCatalogString("engine-state-transition-target-line");
+
+        internal static string EngineStateTransitionStyleLine => GetCatalogString("engine-state-transition-style-line");
+
+        internal static string ConversationHistoryHeading => GetCatalogString("conversation-history-heading");
+
+        internal static string ConversationHistoryEmpty => GetCatalogString("conversation-history-empty");
+
+        internal static string DialogueOptionsStructuredJsonInstruction => GetCatalogString("dialogue-options-structured-json-instruction");
+
         internal static string ShadowStateHeading => GetCatalogString("shadow-state-heading");
 
         internal static string DateeShadowStateHeading => GetCatalogString("datee-shadow-state-heading");

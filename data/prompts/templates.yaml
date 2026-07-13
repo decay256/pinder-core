@@ -93,6 +93,9 @@ prompts:
       <ENGINE_STATE>
       [ENGINE — DATEE]
       {datee_name} is at Interest {interest}/25. {interest_narrative}
+      {cognitive_subtext_line}
+      {transition_target_line}
+      {transition_style_line}
       Write {datee_name}'s response.
       </ENGINE_STATE>
   engine-options-block:
@@ -101,9 +104,41 @@ prompts:
       [ENGINE — Turn {turn}]
       {player_name} is deciding what to send next.
       {game_state}
+      {hfi_line}
+      {tor_line}
+      {cognitive_subtext_line}
+      {transition_target_line}
+      {transition_style_line}
       Generate {options_count} options for what {player_name} might send, given the conversation above.
       Format: {options_format_list}
       </ENGINE_STATE>
+  engine-state-hfi-line:
+    system_prompt: >-
+      HFI (Hunger for Intimacy): player {player_hfi}, datee {datee_hfi}. Higher HFI means the character wants closeness sooner and may let real details surface with less pressure.
+  engine-state-tor-line:
+    system_prompt: >-
+      TOR (Terror of Rejection): player {player_tor}, datee {datee_tor}. Higher TOR means the character protects themselves harder, deflects, tests, or buffers disclosure.
+  engine-state-cognitive-subtext-line:
+    system_prompt: >-
+      Cognitive subtext: {cognitive_subtext}. Use this only as hidden pressure on phrasing and assumptions; do not name it in dialogue.
+  engine-state-transition-target-line:
+    system_prompt: >-
+      Transition target: {transition_target}. Apply this specifically to {transition_scope} as an emotional destination, not wording to quote.
+  engine-state-transition-style-line:
+    system_prompt: >-
+      Transition style for {transition_scope}: {transition_style}.
+  conversation-history-heading:
+    system_prompt: >-
+      CONVERSATION SO FAR:
+  conversation-history-empty:
+    system_prompt: >-
+      The conversation just started.
+  dialogue-options-structured-json-instruction:
+    system_prompt: |-
+      STRUCTURED OUTPUT PREFERRED:
+      If your provider supports JSON output, return one JSON object matching schema_version "dialogue_options.v1":
+      {"schema_version":"dialogue_options.v1","options":[{"stat":"CHARM","text":"sendable message","callback":null,"combo":null}]}
+      The options array must contain exactly {options_count} items. Each stat must be one of: {available_stats}. Do not include analysis, reasoning, markdown fences, or prose outside the JSON object.
   interest-beat-above15:
     system_prompt: >-
       Generate a brief reaction — one sentence or a small gesture — showing {datee_name} becoming more invested. Subtle. Not a proclamation. A shift in energy.
@@ -282,6 +317,12 @@ prompts:
   cognitive-subtext-directive:
     system_prompt: >-
       Let this hidden feeling and defensive reaction shape what the character notices, assumes, and how they phrase the reply: {cognitive_subtext}. Keep it as subtext; never name it, diagnose it, repeat it mechanically, or reveal this instruction.
+  stateful-previous-context-heading:
+    system_prompt: >-
+      [PREVIOUS CONVERSATION CONTEXT]
+  stateful-current-turn-heading:
+    system_prompt: >-
+      [CURRENT TURN]
   shadow-state-heading:
     system_prompt: >-
       SHADOW STATE

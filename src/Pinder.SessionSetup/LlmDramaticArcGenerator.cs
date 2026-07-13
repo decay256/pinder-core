@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Pinder.Core.Interfaces;
+using Pinder.Core.Text;
 using Pinder.LlmAdapters;
 
 namespace Pinder.SessionSetup
@@ -14,7 +15,7 @@ namespace Pinder.SessionSetup
     /// Issue #821.
     /// </summary>
     /// <remarks>
-    /// Uses the canonical <see cref="LlmPhase.Synthesis"/> phase
+    /// Uses the canonical <see cref="LlmPhase.DramaticArc"/> phase
     /// label so snapshot recording and audit decorators tag the exchange
     /// without re-deriving the phase from prompt text.
     /// </remarks>
@@ -36,8 +37,8 @@ namespace Pinder.SessionSetup
 
         /// <summary>
         /// Generates a light dramatic arc asynchronously.
-        /// This generation is OPTIONAL/degradable; if a transport failure or empty output occurs,
-        /// it will trigger the <see cref="Options.OnDegraded"/> callback and return <see cref="string.Empty"/>.
+        /// Incomplete outputs are retried and fail explicitly after the retry budget.
+        /// Recoverable transport failures preserve the generator's existing degradation callback behavior.
         /// </summary>
         public async Task<string> GenerateAsync(
             string playerName,
@@ -76,23 +77,118 @@ namespace Pinder.SessionSetup
             systemPrompt = PromptCatalog.Substitute(systemPrompt, values);
             string userMessage = PromptCatalog.Substitute(userTemplate, values);
 
-            return await LlmOptionalTextGeneration.RunAsync(
-                    "dramatic_arc",
-                    _transport,
-                    systemPrompt,
-                    userMessage,
-                    entry,
-                    LlmPhase.Synthesis,
-                    _options.Temperature,
-                    GeneratorDefaultConfigs.DramaticArc.Temperature,
-                    _options.MaxTokens,
-                    GeneratorDefaultConfigs.DramaticArc.MaxTokens,
-                    _options.OnDegraded,
-                    LlmOptionalTextGeneration.CancellationBehavior.Throw,
-                    cancellationToken,
-                    passCancellationTokenToTransport: true)
-                .ConfigureAwait(false);
+            double temperature = _options.Temperature != GeneratorDefaultConfigs.DramaticArc.Temperature
+                ? _options.Temperature
+                : entry.Temperature!.Value;
+            int maxTokens = _options.MaxTokens != GeneratorDefaultConfigs.DramaticArc.MaxTokens
+                ? _options.MaxTokens
+                : entry.MaxTokens!.Value;
+
+            string lastFailureCode = "invalid_output";
+            for (int attempt = 1; attempt <= _options.MaxValidationAttempts; attempt++)
+            {
+                string sourceFile = entry.SourceFile ?? "data/prompts/dramatic_arc.yaml";
+                InMemoryPromptTraceService.Instance.RecordTrace(
+                    "dramatic-arc-system",
+                    new PromptTraceResult(
+                        systemPrompt,
+                        new[] { new AnnotatedSpan(0, systemPrompt.Length, sourceFile, "dramatic_arc.system_prompt") }));
+                InMemoryPromptTraceService.Instance.RecordTrace(
+                    "dramatic-arc-user",
+                    new PromptTraceResult(
+                        userMessage,
+                        new[] { new AnnotatedSpan(0, userMessage.Length, sourceFile, "dramatic_arc.user_template") }));
+
+                string response;
+                try
+                {
+                    response = await _transport
+                        .SendAsync(
+                            systemPrompt,
+                            userMessage,
+                            temperature,
+                            maxTokens,
+                            phase: LlmPhase.DramaticArc,
+                            ct: cancellationToken)
+                        .ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+                catch (LlmTransportException)
+                {
+                    if (_options.OnDegraded != null)
+                    {
+                        _options.OnDegraded.Invoke(
+                            SetupGenerationResult.DegradedFailure("dramatic_arc", "transport_error"));
+                        return string.Empty;
+                    }
+
+                    throw;
+                }
+
+                string trimmed = (response ?? string.Empty).Trim();
+                if (string.IsNullOrEmpty(trimmed))
+                {
+                    lastFailureCode = "empty_output";
+                    continue;
+                }
+
+                if (IsCompleteDramaticArc(trimmed))
+                {
+                    return trimmed;
+                }
+
+                lastFailureCode = "invalid_output";
+            }
+
+            _options.OnDegraded?.Invoke(
+                SetupGenerationResult.DegradedFailure("dramatic_arc", lastFailureCode));
+            throw new InvalidOperationException(
+                $"dramatic_arc output failed validation after {_options.MaxValidationAttempts} attempts: " +
+                "expected 3-5 complete sentences of plain prose.");
         }
+
+        private static bool IsCompleteDramaticArc(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+                return false;
+
+            int sentences = 0;
+            bool inTerminatorRun = false;
+            bool lastSignificantWasTerminator = false;
+
+            foreach (char ch in text)
+            {
+                if (char.IsWhiteSpace(ch))
+                    continue;
+
+                bool isTerminator = ch == '.' || ch == '!' || ch == '?';
+                if (isTerminator)
+                {
+                    if (!inTerminatorRun)
+                        sentences++;
+                    inTerminatorRun = true;
+                    lastSignificantWasTerminator = true;
+                }
+                else if (lastSignificantWasTerminator && IsClosingDelimiter(ch))
+                {
+                    continue;
+                }
+                else
+                {
+                    inTerminatorRun = false;
+                    lastSignificantWasTerminator = false;
+                }
+            }
+
+            return lastSignificantWasTerminator && sentences >= 3 && sentences <= 5;
+        }
+
+        private static bool IsClosingDelimiter(char ch) =>
+            ch == '\'' || ch == '"' || ch == ')' || ch == ']' || ch == '}' ||
+            ch == '\u2019' || ch == '\u201D' || ch == '\u00BB';
 
         /// <summary>Tunable knobs for <see cref="LlmDramaticArcGenerator"/>.</summary>
         public sealed class Options
@@ -103,8 +199,11 @@ namespace Pinder.SessionSetup
             /// <summary>Max tokens for dramatic arc generation.</summary>
             public int MaxTokens { get; set; } = GeneratorDefaultConfigs.DramaticArc.MaxTokens;
 
+            /// <summary>Total attempts for incomplete dramatic-arc output before failing.</summary>
+            public int MaxValidationAttempts { get; set; } = 3;
+
             /// <summary>
-            /// Opt-in callback triggered when generation is degraded (e.g. transport failure or empty output).
+            /// Opt-in callback triggered when generation is degraded (e.g. recoverable transport failure or empty output).
             /// </summary>
             public Action<SetupGenerationResult>? OnDegraded { get; set; }
         }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Pinder.Core.Conversation;
 using Pinder.Core.Interfaces;
 using Pinder.Core.Stats;
+using Pinder.Core.Text;
 using Pinder.LlmAdapters.Anthropic;
 
 namespace Pinder.LlmAdapters
@@ -68,39 +69,75 @@ namespace Pinder.LlmAdapters
                 attempt++;
                 try
                 {
-                    var responseText = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.DialogueOptions, ct: ct)
-                        .ConfigureAwait(false);
-
-                    string? errorCode;
-                    string? errorMessage;
-                    int parsedCount;
-                    int expectedCount;
-
-                    var parsedOptions = DialogueOptionParsers.ParseDialogueOptionsStrict(
-                        responseText,
-                        context.AvailableStats,
-                        gameDef.MaxDialogueOptions,
-                        out errorCode,
-                        out errorMessage,
-                        out parsedCount,
-                        out expectedCount);
-
-                    if (errorCode != null)
+                    DialogueOption[] parsedOptions;
+                    if (_transport is IStructuredLlmTransport structuredTransport)
                     {
-                        throw new LlmContractException(
-                            phase: "dialogue_options",
-                            reason: errorCode,
-                            message: errorMessage!,
-                            provider: null,
-                            model: null,
-                            parserName: "StrictDialogueOptionsParser",
-                            expectedOptionCount: expectedCount,
-                            parsedOptionCount: parsedCount,
-                            optionCount: parsedCount,
-                            signalCount: null,
-                            sessionId: null,
-                            turnId: context.CurrentTurn
-                        );
+                        var request = DialogueOptionsStructuredContract.CreateRequest(
+                            systemPrompt,
+                            userContent,
+                            temperature,
+                            _options.MaxTokens,
+                            context,
+                            GetExpectedDialogueOptionCount(context, gameDef));
+                        var structuredResponse = await structuredTransport
+                            .SendStructuredAsync(request, ct)
+                            .ConfigureAwait(false);
+                        try
+                        {
+                            if (structuredResponse.UsedNativeStructuredOutput)
+                            {
+                                parsedOptions = DialogueOptionsStructuredContract.ParseStrict(
+                                    structuredResponse.JsonText,
+                                    context.AvailableStats,
+                                    gameDef.MaxDialogueOptions,
+                                    out string? errorCode,
+                                    out string? errorMessage,
+                                    out int parsedCount,
+                                    out int expectedCount);
+
+                                if (errorCode != null)
+                                {
+                                    throw CreateDialogueOptionsContractException(
+                                        errorCode,
+                                        errorMessage!,
+                                        "StructuredDialogueOptionsParser",
+                                        expectedCount,
+                                        parsedCount,
+                                        context.CurrentTurn,
+                                        structuredResponse.Provider,
+                                        structuredResponse.Model);
+                                }
+                            }
+                            else
+                            {
+                                parsedOptions = ParseDialogueOptionsFromTextOrJson(
+                                    structuredResponse.JsonText,
+                                    context,
+                                    gameDef);
+                            }
+
+                            structuredResponse.ReportValidation("accepted");
+                        }
+                        catch (LlmContractException ex)
+                        {
+                            structuredResponse.ReportValidation("rejected", ex.Reason);
+                            throw;
+                        }
+                        catch (Exception ex)
+                        {
+                            structuredResponse.ReportValidation("rejected", ex.GetType().Name);
+                            throw;
+                        }
+                    }
+                    else
+                    {
+                        var responseText = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.DialogueOptions, ct: ct)
+                            .ConfigureAwait(false);
+
+                        parsedOptions = ParseDialogueOptionsFromTextOrJson(
+                            responseText,
+                            context,
+                            gameDef);
                     }
 
                     // #950: warn when the option generator skips all stake content.
@@ -721,11 +758,7 @@ namespace Pinder.LlmAdapters
             sb.AppendLine("Output requirement: return ONE rewritten PLAYER AVATAR message only — sharper wording, same voice. No analysis, no OPTIONS, no engine commentary, no ENGINE_STATE echo.");
             sb.AppendLine("</ENGINE_STATE>");
             sb.AppendLine();
-            sb.AppendLine("CONVERSATION SO FAR:");
-            foreach (var (sender, text) in context.ConversationHistory)
-            {
-                sb.AppendLine($"{sender}: {text}");
-            }
+            AppendConfiguredConversationHistory(sb, context.ConversationHistory);
             sb.AppendLine();
             sb.AppendLine(prompt);
 
@@ -782,11 +815,7 @@ namespace Pinder.LlmAdapters
                 .Replace("{delivered_message}", context.DeliveredMessage);
 
             var sb = new StringBuilder();
-            sb.AppendLine("CONVERSATION SO FAR:");
-            foreach (var (sender, text) in context.ConversationHistory)
-            {
-                sb.AppendLine($"{sender}: {text}");
-            }
+            AppendConfiguredConversationHistory(sb, context.ConversationHistory);
             sb.AppendLine();
             sb.AppendLine(prompt);
 
@@ -835,11 +864,7 @@ namespace Pinder.LlmAdapters
                 .Replace("{delivered_message}", context.DeliveredMessage);
 
             var sb = new StringBuilder();
-            sb.AppendLine("CONVERSATION SO FAR:");
-            foreach (var (sender, text) in context.ConversationHistory)
-            {
-                sb.AppendLine($"{sender}: {text}");
-            }
+            AppendConfiguredConversationHistory(sb, context.ConversationHistory);
             sb.AppendLine();
             sb.AppendLine(prompt);
 
@@ -903,9 +928,18 @@ namespace Pinder.LlmAdapters
             string phase,
             CancellationToken ct = default)
         {
+            var catalog = PromptTemplates.Catalog
+                ?? throw new InvalidOperationException(
+                    "PromptTemplates.Catalog is not wired. Call PromptWiring.Wire() at startup.");
+            var previousHeadingEntry = catalog.Get("stateful-previous-context-heading");
+            var currentTurnHeadingEntry = catalog.Get("stateful-current-turn-heading");
+
             // Multi-turn: prefix prior exchanges into the user message for context.
-            var contextBuilder = new StringBuilder();
-            contextBuilder.AppendLine("[PREVIOUS CONVERSATION CONTEXT]");
+            var contextBuilder = new AnnotatedStringBuilder();
+            contextBuilder.AppendLine(
+                PromptTemplates.StatefulPreviousContextHeading,
+                previousHeadingEntry.SourceFile,
+                "stateful-previous-context-heading");
             for (int i = 0; i < priorHistory.Count; i++)
             {
                 var msg = priorHistory[i];
@@ -914,16 +948,138 @@ namespace Pinder.LlmAdapters
                 contextBuilder.AppendLine($"[{displayRole}] {msg.Content}");
             }
             contextBuilder.AppendLine();
-            contextBuilder.AppendLine("[CURRENT TURN]");
+            contextBuilder.AppendLine(
+                PromptTemplates.StatefulCurrentTurnHeading,
+                currentTurnHeadingEntry.SourceFile,
+                "stateful-current-turn-heading");
             contextBuilder.Append(currentUserContent);
+
+            var userTrace = new PromptTraceResult(contextBuilder.ToString(), contextBuilder.Spans);
+            InMemoryPromptTraceService.Instance.RecordTrace(phase, userTrace);
 
             return _transport.SendAsync(
                 systemPrompt,
-                contextBuilder.ToString(),
+                userTrace.Text,
                 temperature,
                 _options.MaxTokens,
                 phase: phase,
                 ct: ct);
+        }
+
+        private static int GetExpectedDialogueOptionCount(DialogueContext context, GameDefinition gameDef)
+        {
+            return context.AvailableStats != null
+                ? Math.Min(context.AvailableStats.Length, gameDef.MaxDialogueOptions)
+                : gameDef.MaxDialogueOptions;
+        }
+
+        private static void AppendConfiguredConversationHistory(
+            StringBuilder sb,
+            IReadOnlyList<(string Sender, string Text)> history)
+        {
+            sb.AppendLine(PromptTemplates.ConversationHistoryHeading);
+            if (history == null || history.Count == 0)
+            {
+                sb.AppendLine(PromptTemplates.ConversationHistoryEmpty);
+                return;
+            }
+
+            foreach (var (sender, text) in history)
+            {
+                sb.AppendLine($"{sender}: {text}");
+            }
+        }
+
+        private static DialogueOption[] ParseDialogueOptionsFromTextOrJson(
+            string responseText,
+            DialogueContext context,
+            GameDefinition gameDef)
+        {
+            if (LooksLikeJsonObject(responseText))
+            {
+                var structuredOptions = DialogueOptionsStructuredContract.ParseStrict(
+                    responseText,
+                    context.AvailableStats,
+                    gameDef.MaxDialogueOptions,
+                    out string? jsonErrorCode,
+                    out string? jsonErrorMessage,
+                    out int jsonParsedCount,
+                    out int jsonExpectedCount);
+
+                if (jsonErrorCode == null)
+                {
+                    return structuredOptions;
+                }
+
+                throw CreateDialogueOptionsContractException(
+                    jsonErrorCode,
+                    jsonErrorMessage!,
+                    "StructuredDialogueOptionsParser",
+                    jsonExpectedCount,
+                    jsonParsedCount,
+                    context.CurrentTurn,
+                    provider: null,
+                    model: null);
+            }
+
+            var parsedOptions = DialogueOptionParsers.ParseDialogueOptionsStrict(
+                responseText,
+                context.AvailableStats,
+                gameDef.MaxDialogueOptions,
+                out string? errorCode,
+                out string? errorMessage,
+                out int parsedCount,
+                out int expectedCount);
+
+            if (errorCode != null)
+            {
+                throw CreateDialogueOptionsContractException(
+                    errorCode,
+                    errorMessage!,
+                    "StrictDialogueOptionsParser",
+                    expectedCount,
+                    parsedCount,
+                    context.CurrentTurn,
+                    provider: null,
+                    model: null);
+            }
+
+            return parsedOptions;
+        }
+
+        private static bool LooksLikeJsonObject(string? responseText)
+        {
+            if (string.IsNullOrWhiteSpace(responseText))
+            {
+                return false;
+            }
+
+            return responseText.TrimStart().StartsWith("{", StringComparison.Ordinal);
+        }
+
+        private static LlmContractException CreateDialogueOptionsContractException(
+            string errorCode,
+            string errorMessage,
+            string parserName,
+            int expectedCount,
+            int parsedCount,
+            int turnId,
+            string? provider,
+            string? model)
+        {
+            return new LlmContractException(
+                phase: "dialogue_options",
+                reason: errorCode,
+                message: errorMessage,
+                provider: provider,
+                model: model,
+                parserName: parserName,
+                expectedOptionCount: expectedCount,
+                parsedOptionCount: parsedCount,
+                optionCount: parsedCount,
+                signalCount: null,
+                sessionId: null,
+                turnId: turnId);
         }
 
         /// <summary>

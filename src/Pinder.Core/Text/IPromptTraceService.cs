@@ -39,6 +39,7 @@ namespace Pinder.Core.Text
         public string? ProviderModel { get; }
         public int? TurnNumber { get; }
         public int? BranchOption { get; }
+        public string? CallId { get; internal set; }
         public string? ModelResponse { get; internal set; }
         public DateTime? ResponseTimestamp { get; internal set; }
     }
@@ -54,7 +55,7 @@ namespace Pinder.Core.Text
         void RecordTrace(string promptType, PromptTraceResult trace);
 
         /// <summary>Attaches the completed raw model response to the pending traces in the current call scope.</summary>
-        void RecordModelResponse(string response);
+        void RecordModelResponse(string response, string? callId = null);
 
         /// <summary>
         /// Retrieves the last recorded trace for a given prompt type.

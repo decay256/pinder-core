@@ -68,7 +68,7 @@ namespace Pinder.LlmAdapters
     /// fragment whose content rules out a leading tag.
     /// </para>
     /// </remarks>
-    public sealed class ThinkingStrippingLlmTransport : ILlmTransport, IStreamingLlmTransport, System.IDisposable
+    public sealed class ThinkingStrippingLlmTransport : ILlmTransport, IStreamingLlmTransport, IStructuredLlmTransport, System.IDisposable
     {
         /// <summary>
         /// Maximum characters to buffer in the streaming code path while
@@ -132,6 +132,24 @@ namespace Pinder.LlmAdapters
                 .SendAsync(systemPrompt, userMessage, temperature, maxTokens, phase, ct)
                 .ConfigureAwait(false);
             return InlineThinkingStripper.Strip(raw);
+        }
+
+        public async Task<StructuredLlmResponse> SendStructuredAsync(
+            StructuredLlmRequest request,
+            CancellationToken ct = default)
+        {
+            if (_inner is IStructuredLlmTransport structuredInner)
+            {
+                var response = await structuredInner.SendStructuredAsync(request, ct).ConfigureAwait(false);
+                return response.WithJsonText(InlineThinkingStripper.Strip(response.JsonText));
+            }
+
+            string raw = await _inner
+                .SendAsync(request.SystemPrompt, request.UserMessage, request.Temperature, request.MaxTokens, request.Phase, ct)
+                .ConfigureAwait(false);
+            return new StructuredLlmResponse(
+                InlineThinkingStripper.Strip(raw),
+                usedNativeStructuredOutput: false);
         }
 
         public async IAsyncEnumerable<string> SendStreamAsync(

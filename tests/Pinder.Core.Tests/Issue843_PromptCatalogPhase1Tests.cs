@@ -78,6 +78,9 @@ namespace Pinder.Core.Tests
             var stake = catalog.RequireCompleteEntry(
                 "stake",
                 "prompt-catalog: missing required key 'stake'.");
+            var dramaticArc = catalog.RequireCompleteEntry(
+                "dramatic_arc",
+                "prompt-catalog: missing required key 'dramatic_arc'.");
 
             Assert.Contains("Return ONLY valid JSON", backstory.SystemPrompt);
             Assert.Equal(0.7, backstory.Temperature);
@@ -91,6 +94,11 @@ namespace Pinder.Core.Tests
             Assert.Contains("{character_profile}", stake.UserTemplate);
             Assert.Equal(0.9, stake.Temperature);
             Assert.Equal(1200, stake.MaxTokens);
+
+            Assert.Contains("{playerName}", dramaticArc.UserTemplate);
+            Assert.Equal(0.85, dramaticArc.Temperature);
+            Assert.Equal(1000, dramaticArc.MaxTokens);
+            Assert.Equal(GeneratorDefaultConfigs.DramaticArc.MaxTokens, dramaticArc.MaxTokens);
         }
 
         [Fact]

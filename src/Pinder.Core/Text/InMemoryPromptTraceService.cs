@@ -140,7 +140,7 @@ namespace Pinder.Core.Text
         }
 
         /// <inheritdoc />
-        public void RecordModelResponse(string response)
+        public void RecordModelResponse(string response, string? callId = null)
         {
             var scope = _scope.Value;
             if (scope is null) return;
@@ -154,6 +154,7 @@ namespace Pinder.Core.Text
                 var now = DateTime.UtcNow;
                 foreach (var run in pending)
                 {
+                    run.CallId = string.IsNullOrWhiteSpace(callId) ? null : callId;
                     run.ModelResponse = response ?? string.Empty;
                     run.ResponseTimestamp = now;
                 }

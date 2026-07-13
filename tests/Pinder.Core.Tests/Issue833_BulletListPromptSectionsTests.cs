@@ -98,6 +98,32 @@ namespace Pinder.Core.Tests
             Assert.Contains("- had a moment", section);
         }
 
+        [Fact]
+        public void PsychiatricDiagnosis_RendersReadableDistinctSection()
+        {
+            var fragments = BuildFragments(backstory: new[] { "backstory fragment" });
+            var diagnosis = new Dictionary<string, string>
+            {
+                { "defense_reaction", "turns every sincere moment into a bit" },
+                { "derived_feeling", "terror of being ordinary" },
+            };
+
+            string prompt = PromptBuilder.BuildSystemPrompt(
+                "TestChar",
+                "she/her",
+                "bio",
+                fragments,
+                new TrapState(),
+                generatedPsychiatricDiagnosis: diagnosis);
+            string section = ExtractSection(prompt, "THERAPIST DIAGNOSIS", "TEXTING STYLE");
+
+            Assert.Contains("- Defense reaction: turns every sincere moment into a bit", section);
+            Assert.Contains("- Derived feeling: terror of being ordinary", section);
+            Assert.DoesNotContain("defense_reaction", section);
+            Assert.DoesNotContain("{", section);
+            Assert.DoesNotContain("}", section);
+        }
+
         // TEXTING STYLE ──────────────────────────────────────────────────
 
         [Fact]

@@ -72,10 +72,10 @@ OPTION_3 [STAT: Honesty] ""I just wanted to say hi."" [CALLBACK: turn_5] [COMBO:
         {
             var json = JObject.Parse(@"{
                 ""options"": [
-                    { ""stat"": ""Charm"", ""text"": ""Hey!"", ""callback"": ""none"", ""combo"": ""none"", ""tell_bonus"": false, ""weakness_window"": false },
-                    { ""stat"": ""Wit"", ""text"": ""Nice one."", ""callback"": ""3"", ""combo"": ""Joker"", ""tell_bonus"": true, ""weakness_window"": true },
-                    { ""stat"": ""Honesty"", ""text"": ""Truth."", ""callback"": ""null"", ""combo"": ""null"", ""tell_bonus"": false, ""weakness_window"": false },
-                    { ""stat"": ""Chaos"", ""text"": ""Chaos."", ""callback"": null, ""combo"": null, ""tell_bonus"": false, ""weakness_window"": false }
+                    { ""stat"": ""Charm"", ""text"": ""Hey!"", ""callback"": ""none"", ""combo"": ""none"" },
+                    { ""stat"": ""Wit"", ""text"": ""Nice one."", ""callback"": ""3"", ""combo"": ""Joker"" },
+                    { ""stat"": ""Honesty"", ""text"": ""Truth."", ""callback"": ""null"", ""combo"": ""null"" },
+                    { ""stat"": ""Chaos"", ""text"": ""Chaos."", ""callback"": null, ""combo"": null }
                 ]
             }");
 
@@ -90,8 +90,8 @@ OPTION_3 [STAT: Honesty] ""I just wanted to say hi."" [CALLBACK: turn_5] [COMBO:
             Assert.Equal(StatType.Wit, result[1].Stat);
             Assert.Equal(3, result[1].CallbackTurnNumber);
             Assert.Equal("Joker", result[1].ComboName);
-            Assert.True(result[1].HasTellBonus);
-            Assert.True(result[1].HasWeaknessWindow);
+            Assert.False(result[1].HasTellBonus);
+            Assert.False(result[1].HasWeaknessWindow);
         }
 
         [Fact]
@@ -115,17 +115,13 @@ OPTION_3 [STAT: Honesty] ""I just wanted to say hi."" [CALLBACK: turn_5] [COMBO:
         [InlineData("text")]
         [InlineData("callback")]
         [InlineData("combo")]
-        [InlineData("tell_bonus")]
-        [InlineData("weakness_window")]
         public void ParseDialogueOptionsTool_MissingRequiredOptionField_ReturnsNull(string missingField)
         {
             var option = JObject.Parse(@"{
                 ""stat"": ""Charm"",
                 ""text"": ""Hey!"",
                 ""callback"": ""none"",
-                ""combo"": ""none"",
-                ""tell_bonus"": false,
-                ""weakness_window"": false
+                ""combo"": ""none""
             }");
             option.Remove(missingField);
             var json = new JObject { ["options"] = new JArray(option) };
@@ -221,10 +217,10 @@ OPTION_3 [STAT: Charm] ""A charm"" [CALLBACK: none] [COMBO: none] [TELL_BONUS: n
         {
             var json = JObject.Parse(@"{
                 ""options"": [
-                    { ""stat"": ""Honesty"", ""text"": ""First honesty"", ""callback"": ""none"", ""combo"": ""none"", ""tell_bonus"": false, ""weakness_window"": false },
-                    { ""stat"": ""Honesty"", ""text"": ""Second honesty"", ""callback"": ""none"", ""combo"": ""none"", ""tell_bonus"": false, ""weakness_window"": false },
-                    { ""stat"": ""Charm"", ""text"": ""A charm"", ""callback"": ""none"", ""combo"": ""none"", ""tell_bonus"": false, ""weakness_window"": false },
-                    { ""stat"": ""Chaos"", ""text"": ""A chaos"", ""callback"": ""none"", ""combo"": ""none"", ""tell_bonus"": false, ""weakness_window"": false }
+                    { ""stat"": ""Honesty"", ""text"": ""First honesty"", ""callback"": ""none"", ""combo"": ""none"" },
+                    { ""stat"": ""Honesty"", ""text"": ""Second honesty"", ""callback"": ""none"", ""combo"": ""none"" },
+                    { ""stat"": ""Charm"", ""text"": ""A charm"", ""callback"": ""none"", ""combo"": ""none"" },
+                    { ""stat"": ""Chaos"", ""text"": ""A chaos"", ""callback"": ""none"", ""combo"": ""none"" }
                 ]
             }");
 

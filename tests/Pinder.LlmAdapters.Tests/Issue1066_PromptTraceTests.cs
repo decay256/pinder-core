@@ -68,7 +68,7 @@ namespace Pinder.LlmAdapters.Tests
             {
                 service.RecordTrace("dialogue-options", new PromptTraceResult("alpha", spans));
                 service.RecordTrace("datee", new PromptTraceResult("alpha datee", spans));
-                service.RecordModelResponse("raw assistant response");
+                service.RecordModelResponse("raw assistant response", "llmcall_first");
             }
 
             using (service.BeginSessionScope("session-b", "openai/test-model", "live_turn"))
@@ -89,6 +89,7 @@ namespace Pinder.LlmAdapters.Tests
             Assert.All(sessionA, r => Assert.Equal(3, r.TurnNumber));
             Assert.All(sessionA, r => Assert.Equal(2, r.BranchOption));
             Assert.All(sessionA, r => Assert.Equal("raw assistant response", r.ModelResponse));
+            Assert.All(sessionA, r => Assert.Equal("llmcall_first", r.CallId));
             Assert.All(sessionA, r => Assert.NotNull(r.ResponseTimestamp));
             Assert.Equal("alpha", service.GetLastTrace("dialogue-options", "session-a")!.Text);
             Assert.Equal("beta", service.GetLastTrace("dialogue-options", "session-b")!.Text);
@@ -97,6 +98,27 @@ namespace Pinder.LlmAdapters.Tests
 
             Assert.Empty(service.GetSequence("session-a"));
             Assert.Single(service.GetSequence("session-b"));
+        }
+
+        [Fact]
+        public void Test_InMemoryPromptTraceService_BindsIdenticalRetryPromptsToDistinctCallIds()
+        {
+            var service = new InMemoryPromptTraceService();
+            var spans = new List<AnnotatedSpan> { new AnnotatedSpan(0, 5, "file.yaml", "key") };
+
+            using (service.BeginSessionScope("session-a", runKind: "setup"))
+            {
+                service.RecordTrace("dramatic-arc-user", new PromptTraceResult("same prompt", spans));
+                service.RecordModelResponse("incomplete", "llmcall_attempt_1");
+                service.RecordTrace("dramatic-arc-user", new PromptTraceResult("same prompt", spans));
+                service.RecordModelResponse("complete", "llmcall_attempt_2");
+            }
+
+            var runs = service.GetSequence("session-a");
+            Assert.Collection(
+                runs,
+                first => Assert.Equal("llmcall_attempt_1", first.CallId),
+                second => Assert.Equal("llmcall_attempt_2", second.CallId));
         }
 
         [Fact]
@@ -170,8 +192,9 @@ namespace Pinder.LlmAdapters.Tests
             AssertCatalogSpan(dialogueTrace, "shadow-taint-fixation");
             AssertCatalogSpan(dialogueTrace, "stake-coverage-summary");
             AssertCatalogSpan(dialogueTrace, "stake-coverage-untouched-directive");
-            AssertCatalogSpan(dialogueTrace, "player-transition-directive");
-            AssertCatalogSpan(dialogueTrace, "cognitive-subtext-directive");
+            AssertCatalogSpan(dialogueTrace, "engine-state-transition-target-line");
+            AssertCatalogSpan(dialogueTrace, "engine-state-transition-style-line");
+            AssertCatalogSpan(dialogueTrace, "engine-state-cognitive-subtext-line");
 
             var dateeContext = new DateeContext(
                 dateePrompt: "datee prompt",
@@ -201,8 +224,9 @@ namespace Pinder.LlmAdapters.Tests
             AssertCatalogSpan(dateeTrace, "response-timing-approximate");
             AssertCatalogSpan(dateeTrace, "datee-shadow-state-heading");
             AssertCatalogSpan(dateeTrace, "shadow-taint-fixation");
-            AssertCatalogSpan(dateeTrace, "datee-transition-directive");
-            AssertCatalogSpan(dateeTrace, "cognitive-subtext-directive");
+            AssertCatalogSpan(dateeTrace, "engine-state-transition-target-line");
+            AssertCatalogSpan(dateeTrace, "engine-state-transition-style-line");
+            AssertCatalogSpan(dateeTrace, "engine-state-cognitive-subtext-line");
         }
 
         private static void AssertCatalogSpan(PromptTraceResult trace, string key)

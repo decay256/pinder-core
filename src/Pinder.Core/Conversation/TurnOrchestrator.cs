@@ -145,41 +145,49 @@ namespace Pinder.Core.Conversation
             var activeTrapNames = GameSessionHelpers.GetActiveTrapNames(state.Traps);
             var activeTrapInstructions = GameSessionHelpers.GetActiveTrapInstructions(state.Traps);
 
-            // EmotionStemSelector resolution
-            var conversationState = new ConversationState
+            int playerHfi = _hungerForIntimacy != 0 ? _hungerForIntimacy : player.Stats.GetBase(StatType.Charm);
+            int playerTor = _terrorOfRejection != 0 ? _terrorOfRejection : player.Stats.GetBase(StatType.Rizz);
+            int dateeHfi = _hungerForIntimacy != 0 ? _hungerForIntimacy : datee.Stats.GetBase(StatType.Charm);
+            int dateeTor = _terrorOfRejection != 0 ? _terrorOfRejection : datee.Stats.GetBase(StatType.Rizz);
+
+            ResolvedRevelationTarget? resolvedTarget = null;
+            var llmHistory = TurnOrchestratorHelpers.BuildHistoryForLlmContext(state);
+            if (llmHistory.Count > 0)
             {
-                TurnCount = state.TurnNumber,
-                InterestScore = state.Interest.Current,
-                PreviousPhase = state.PreviousPhase,
-                ActiveTraps = activeTrapNames,
-                SpentBackstoryIndices = state.SpentBackstoryIndices,
-                SpentStakeIndices = state.SpentStakeIndices,
-                PlayerStats = new ParticipantStats { 
-                    BaseHFI = _hungerForIntimacy != 0 ? _hungerForIntimacy : player.Stats.GetBase(StatType.Charm), 
-                    BaseTOR = _terrorOfRejection != 0 ? _terrorOfRejection : player.Stats.GetBase(StatType.Rizz) 
-                },
-                DateeStats = new ParticipantStats { 
-                    BaseHFI = _hungerForIntimacy != 0 ? _hungerForIntimacy : datee.Stats.GetBase(StatType.Charm), 
-                    BaseTOR = _terrorOfRejection != 0 ? _terrorOfRejection : datee.Stats.GetBase(StatType.Rizz) 
-                },
-                PreviousResolvedIndex = state.PreviousResolvedIndex
-            };
+                // EmotionStemSelector resolution
+                var conversationState = new ConversationState
+                {
+                    TurnCount = state.TurnNumber,
+                    InterestScore = state.Interest.Current,
+                    PreviousPhase = state.PreviousPhase,
+                    ActiveTraps = activeTrapNames,
+                    SpentBackstoryIndices = state.SpentBackstoryIndices,
+                    SpentStakeIndices = state.SpentStakeIndices,
+                    PlayerStats = new ParticipantStats
+                    {
+                        BaseHFI = playerHfi,
+                        BaseTOR = playerTor
+                    },
+                    DateeStats = new ParticipantStats
+                    {
+                        BaseHFI = dateeHfi,
+                        BaseTOR = dateeTor
+                    },
+                    PreviousResolvedIndex = state.PreviousResolvedIndex
+                };
 
-            var selector = new EmotionStemSelector(42 + state.TurnNumber);
-            var resolvedTarget = EmotionStemSelector.Hydrate(
-                selector.Resolve(conversationState),
-                player.Backstory,
-                player.StakeLines);
+                var selector = new EmotionStemSelector(42 + state.TurnNumber);
+                resolvedTarget = EmotionStemSelector.Hydrate(
+                    selector.Resolve(conversationState),
+                    player.Backstory,
+                    player.StakeLines);
 
-            state.PreviousPhase = resolvedTarget.Registry;
-            state.PreviousResolvedIndex = resolvedTarget.Index;
+                state.PreviousPhase = resolvedTarget.Value.Registry;
+                state.PreviousResolvedIndex = resolvedTarget.Value.Index;
+            }
             state.CurrentResolvedTarget = resolvedTarget;
 
-            string cognitiveSubtext = "FEAR OF INTIMACY + DEFENSIVE SARCASM";
-            if (datee.PsychiatricDiagnosis != null && datee.PsychiatricDiagnosis.TryGetValue("derived_feeling", out var feeling) && datee.PsychiatricDiagnosis.TryGetValue("defense_reaction", out var defense))
-            {
-                cognitiveSubtext = feeling.ToUpper() + " + " + defense.ToUpper();
-            }
+            string cognitiveSubtext = BuildCognitiveSubtext(datee, state.TurnNumber);
             state.CurrentCognitiveSubtext = cognitiveSubtext;
 
             // Build dialogue context — pass callback topics (#47) and shadow thresholds (#45)
@@ -195,7 +203,7 @@ namespace Pinder.Core.Conversation
                     .BuildDateeVisibleProfile(datee, state.DateeOutfitDescription)
                     .Render(),
                 // #333: scene entries are excluded from the LLM context view.
-                conversationHistory: TurnOrchestratorHelpers.BuildHistoryForLlmContext(state),
+                conversationHistory: llmHistory,
                 dateeLastMessage: GameSessionHelpers.GetLastDateeMessage(state.History, datee.DisplayName),
                 activeTraps: activeTrapNames,
                 currentInterest: state.Interest.Current,
@@ -221,7 +229,11 @@ namespace Pinder.Core.Conversation
                 stakeLinesReferenced: null,
                 maxDialogueOptions: _maxDialogueOptions,
                 resolvedTarget: resolvedTarget,
-                cognitiveSubtext: cognitiveSubtext);
+                cognitiveSubtext: cognitiveSubtext,
+                playerHungerForIntimacy: playerHfi,
+                playerTerrorOfRejection: playerTor,
+                dateeHungerForIntimacy: dateeHfi,
+                dateeTerrorOfRejection: dateeTor);
 
             // Get dialogue options from LLM
             var rawOptions = await _llm.GetDialogueOptionsAsync(context, ct).ConfigureAwait(false);
@@ -284,6 +296,28 @@ namespace Pinder.Core.Conversation
             int? weaknessDcReduction = state.ActiveWeakness?.DcReduction;
 
             return new TurnStart(options, snapshot, state.CurrentDicePools, defenseSnapshot, weaknessDcReduction);
+        }
+
+        private static string BuildCognitiveSubtext(CharacterProfile datee, int turnNumber)
+        {
+            if (datee.PsychiatricDiagnosis == null)
+            {
+                throw new CognitiveSubtextException("derived_feeling", datee.DisplayName, turnNumber);
+            }
+
+            if (!datee.PsychiatricDiagnosis.TryGetValue("derived_feeling", out var feeling) ||
+                string.IsNullOrWhiteSpace(feeling))
+            {
+                throw new CognitiveSubtextException("derived_feeling", datee.DisplayName, turnNumber);
+            }
+
+            if (!datee.PsychiatricDiagnosis.TryGetValue("defense_reaction", out var defense) ||
+                string.IsNullOrWhiteSpace(defense))
+            {
+                throw new CognitiveSubtextException("defense_reaction", datee.DisplayName, turnNumber);
+            }
+
+            return feeling.ToUpperInvariant() + " + " + defense.ToUpperInvariant();
         }
     }
 }

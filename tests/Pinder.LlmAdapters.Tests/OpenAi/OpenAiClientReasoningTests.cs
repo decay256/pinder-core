@@ -120,10 +120,11 @@ namespace Pinder.LlmAdapters.Tests.OpenAi
         }
 
         [Fact]
-        public void ExtractAssistantText_ReturnsEmpty_WhenNoChoices()
+        public void ExtractAssistantText_ThrowsProviderResponseException_WhenNoChoices()
         {
             var json = JObject.Parse(@"{ ""choices"": [] }");
-            Assert.Equal("", OpenAiClient.ExtractAssistantText(json));
+            var ex = Assert.Throws<OpenAiProviderResponseException>(() => OpenAiClient.ExtractAssistantText(json));
+            Assert.Equal("empty_choices", ex.ShapeError);
         }
 
         [Fact]

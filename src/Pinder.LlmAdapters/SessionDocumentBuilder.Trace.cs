@@ -22,6 +22,47 @@ namespace Pinder.LlmAdapters
             return PromptCatalog.Substitute(template, values);
         }
 
+        private static void AppendAnnotatedTemplate(
+            AnnotatedStringBuilder sb,
+            string template,
+            string templateKey,
+            IReadOnlyDictionary<string, (string Value, string SourceFile, string Key)> values)
+        {
+            int position = 0;
+            while (position < template.Length)
+            {
+                string? nextPlaceholder = null;
+                int nextIndex = template.Length;
+                foreach (string placeholder in values.Keys)
+                {
+                    int candidate = template.IndexOf(placeholder, position, StringComparison.Ordinal);
+                    if (candidate >= 0 && candidate < nextIndex)
+                    {
+                        nextPlaceholder = placeholder;
+                        nextIndex = candidate;
+                    }
+                }
+
+                if (nextPlaceholder == null)
+                {
+                    sb.Append(template.Substring(position), GetTemplateSource(templateKey), templateKey);
+                    break;
+                }
+
+                if (nextIndex > position)
+                {
+                    sb.Append(
+                        template.Substring(position, nextIndex - position),
+                        GetTemplateSource(templateKey),
+                        templateKey);
+                }
+
+                var replacement = values[nextPlaceholder];
+                sb.Append(replacement.Value, replacement.SourceFile, replacement.Key);
+                position = nextIndex + nextPlaceholder.Length;
+            }
+        }
+
         private static bool AppendShadowTaintBlock(
             AnnotatedStringBuilder sb,
             Dictionary<ShadowStatType, int>? thresholds,
@@ -229,33 +270,6 @@ namespace Pinder.LlmAdapters
                 sb.AppendLine();
             }
 
-            if (context.ResolvedTarget != null)
-            {
-                var target = context.ResolvedTarget.Value;
-                string transitionDirective = RenderTemplate(
-                    PromptTemplates.PlayerTransitionDirective,
-                    new Dictionary<string, string>
-                    {
-                        { "player_name", playerName },
-                        { "registry", target.Registry ?? string.Empty },
-                        { "index", target.Index.ToString() },
-                        { "stem_text", target.StemText ?? string.Empty },
-                        { "transition_style", target.TransitionStyle ?? string.Empty },
-                    });
-                sb.AppendLine(transitionDirective, GetTemplateSource("player-transition-directive"), "player-transition-directive");
-                if (!string.IsNullOrEmpty(context.CognitiveSubtext))
-                {
-                    string cognitiveSubtextDirective = RenderTemplate(
-                        PromptTemplates.CognitiveSubtextDirective,
-                        new Dictionary<string, string>
-                        {
-                            { "cognitive_subtext", context.CognitiveSubtext ?? string.Empty },
-                        });
-                    sb.AppendLine(cognitiveSubtextDirective, GetTemplateSource("cognitive-subtext-directive"), "cognitive-subtext-directive");
-                }
-                sb.AppendLine();
-            }
-
             int optionCount = context.AvailableStats != null
                 ? context.AvailableStats.Length
                 : context.MaxDialogueOptions;
@@ -263,15 +277,81 @@ namespace Pinder.LlmAdapters
             string optionsCountStr = optionCount.ToString();
             string optionsListStr = string.Join(", ", Enumerable.Range(1, optionCount).Select(i => $"OPTION_{i}"));
             string optionsFormatListStr = string.Join(" ", Enumerable.Range(0, optionCount).Select(i => $"OPTION_{i + 1}: [message]"));
+            string hfiLine = string.Empty;
+            if (context.PlayerHungerForIntimacy.HasValue && context.DateeHungerForIntimacy.HasValue)
+            {
+                hfiLine = RenderTemplate(
+                    PromptTemplates.EngineStateHfiLine,
+                    new Dictionary<string, string>
+                    {
+                        { "player_hfi", context.PlayerHungerForIntimacy.Value.ToString() },
+                        { "datee_hfi", context.DateeHungerForIntimacy.Value.ToString() },
+                    });
+            }
+
+            string torLine = string.Empty;
+            if (context.PlayerTerrorOfRejection.HasValue && context.DateeTerrorOfRejection.HasValue)
+            {
+                torLine = RenderTemplate(
+                    PromptTemplates.EngineStateTorLine,
+                    new Dictionary<string, string>
+                    {
+                        { "player_tor", context.PlayerTerrorOfRejection.Value.ToString() },
+                        { "datee_tor", context.DateeTerrorOfRejection.Value.ToString() },
+                    });
+            }
+
+            string cognitiveSubtextLine = string.Empty;
+            if (!string.IsNullOrWhiteSpace(context.CognitiveSubtext))
+            {
+                cognitiveSubtextLine = RenderTemplate(
+                    PromptTemplates.EngineStateCognitiveSubtextLine,
+                    new Dictionary<string, string>
+                    {
+                        { "cognitive_subtext", context.CognitiveSubtext ?? string.Empty },
+                    });
+            }
+
+            string transitionTargetLine = string.Empty;
+            string transitionStyleLine = string.Empty;
+            if (context.ResolvedTarget != null)
+            {
+                var target = context.ResolvedTarget.Value;
+                transitionTargetLine = RenderTemplate(
+                    PromptTemplates.EngineStateTransitionTargetLine,
+                    new Dictionary<string, string>
+                    {
+                        { "transition_target", target.StemText ?? string.Empty },
+                        { "transition_scope", "the final option" },
+                    });
+                transitionStyleLine = RenderTemplate(
+                    PromptTemplates.EngineStateTransitionStyleLine,
+                    new Dictionary<string, string>
+                    {
+                        { "transition_style", target.TransitionStyle ?? string.Empty },
+                        { "transition_scope", "the final option" },
+                    });
+            }
 
             // [ENGINE — Turn N] injection block
-            string engineBlock = PromptTemplates.EngineOptionsBlock
-                .Replace("{turn}", context.CurrentTurn.ToString())
-                .Replace("{player_name}", playerName)
-                .Replace("{game_state}", gameState.ToString().TrimEnd())
-                .Replace("{options_count}", optionsCountStr)
-                .Replace("{options_format_list}", optionsFormatListStr);
-            sb.Append(engineBlock, GetTemplateSource("engine-options-block"), "engine-options-block");
+            string engineOptionsSource = GetTemplateSource("engine-options-block");
+            AppendAnnotatedTemplate(
+                sb,
+                PromptTemplates.EngineOptionsBlock,
+                "engine-options-block",
+                new Dictionary<string, (string Value, string SourceFile, string Key)>
+                {
+                    { "{turn}", (context.CurrentTurn.ToString(), engineOptionsSource, "engine-options-block") },
+                    { "{player_name}", (playerName, engineOptionsSource, "engine-options-block") },
+                    { "{game_state}", (gameState.ToString().TrimEnd(), engineOptionsSource, "engine-options-block") },
+                    { "{hfi_line}", (hfiLine, GetTemplateSource("engine-state-hfi-line"), "engine-state-hfi-line") },
+                    { "{tor_line}", (torLine, GetTemplateSource("engine-state-tor-line"), "engine-state-tor-line") },
+                    { "{cognitive_subtext_line}", (cognitiveSubtextLine, GetTemplateSource("engine-state-cognitive-subtext-line"), "engine-state-cognitive-subtext-line") },
+                    { "{transition_target_line}", (transitionTargetLine, GetTemplateSource("engine-state-transition-target-line"), "engine-state-transition-target-line") },
+                    { "{transition_style_line}", (transitionStyleLine, GetTemplateSource("engine-state-transition-style-line"), "engine-state-transition-style-line") },
+                    { "{options_count}", (optionsCountStr, engineOptionsSource, "engine-options-block") },
+                    { "{options_format_list}", (optionsFormatListStr, engineOptionsSource, "engine-options-block") },
+                });
 
             sb.AppendLine();
             sb.AppendLine();
@@ -287,6 +367,12 @@ namespace Pinder.LlmAdapters
                 .Replace("{options_count}", optionsCountStr)
                 .Replace("{options_list}", optionsListStr);
             sb.Append(dialogueOptionsInstruction, GetTemplateSource("dialogue-options-instruction"), "dialogue-options-instruction");
+            sb.AppendLine();
+            sb.AppendLine();
+            string structuredJsonInstruction = PromptTemplates.DialogueOptionsStructuredJsonInstruction
+                .Replace("{available_stats}", availableStatsStr)
+                .Replace("{options_count}", optionsCountStr);
+            sb.Append(structuredJsonInstruction, GetTemplateSource("dialogue-options-structured-json-instruction"), "dialogue-options-structured-json-instruction");
 
             return new PromptTraceResult(sb.ToString(), sb.Spans);
         }
@@ -355,12 +441,54 @@ namespace Pinder.LlmAdapters
             }
 
             // [ENGINE — DATEE] injection block with interest narrative
+            string dateeCognitiveSubtextLine = string.Empty;
+            if (!string.IsNullOrWhiteSpace(context.CognitiveSubtext))
+            {
+                dateeCognitiveSubtextLine = RenderTemplate(
+                    PromptTemplates.EngineStateCognitiveSubtextLine,
+                    new Dictionary<string, string>
+                    {
+                        { "cognitive_subtext", context.CognitiveSubtext ?? string.Empty },
+                    });
+            }
+
+            string dateeTransitionTargetLine = string.Empty;
+            string dateeTransitionStyleLine = string.Empty;
+            if (context.ResolvedTarget != null)
+            {
+                var target = context.ResolvedTarget.Value;
+                dateeTransitionTargetLine = RenderTemplate(
+                    PromptTemplates.EngineStateTransitionTargetLine,
+                    new Dictionary<string, string>
+                    {
+                        { "transition_target", target.StemText ?? string.Empty },
+                        { "transition_scope", "the datee response" },
+                    });
+                dateeTransitionStyleLine = RenderTemplate(
+                    PromptTemplates.EngineStateTransitionStyleLine,
+                    new Dictionary<string, string>
+                    {
+                        { "transition_style", target.TransitionStyle ?? string.Empty },
+                        { "transition_scope", "the datee response" },
+                    });
+            }
+
             string interestNarrative = PromptTemplates.GetInterestNarrative(context.InterestAfter);
-            string dateeBlock = PromptTemplates.EngineDateeBlock
-                .Replace("{datee_name}", dateeName)
-                .Replace("{interest}", context.InterestAfter.ToString())
-                .Replace("{interest_narrative}", interestNarrative);
-            sb.AppendLine(dateeBlock, GetTemplateSource("engine-datee-block"), "engine-datee-block");
+            string engineDateeSource = GetTemplateSource("engine-datee-block");
+            AppendAnnotatedTemplate(
+                sb,
+                PromptTemplates.EngineDateeBlock,
+                "engine-datee-block",
+                new Dictionary<string, (string Value, string SourceFile, string Key)>
+                {
+                    { "{datee_name}", (dateeName, engineDateeSource, "engine-datee-block") },
+                    { "{interest}", (context.InterestAfter.ToString(), engineDateeSource, "engine-datee-block") },
+                    { "{interest_narrative}", (interestNarrative, engineDateeSource, "engine-datee-block") },
+                    { "{cognitive_subtext_line}", (dateeCognitiveSubtextLine, GetTemplateSource("engine-state-cognitive-subtext-line"), "engine-state-cognitive-subtext-line") },
+                    { "{transition_target_line}", (dateeTransitionTargetLine, GetTemplateSource("engine-state-transition-target-line"), "engine-state-transition-target-line") },
+                    { "{transition_style_line}", (dateeTransitionStyleLine, GetTemplateSource("engine-state-transition-style-line"), "engine-state-transition-style-line") },
+                });
+            sb.AppendLine();
 
             sb.AppendLine();
 
@@ -392,32 +520,6 @@ namespace Pinder.LlmAdapters
             }
 
             sb.AppendLine();
-
-            if (context.ResolvedTarget != null)
-            {
-                var target = context.ResolvedTarget.Value;
-                string transitionDirective = RenderTemplate(
-                    PromptTemplates.DateeTransitionDirective,
-                    new Dictionary<string, string>
-                    {
-                        { "registry", target.Registry ?? string.Empty },
-                        { "index", target.Index.ToString() },
-                        { "stem_text", target.StemText ?? string.Empty },
-                        { "transition_style", target.TransitionStyle ?? string.Empty },
-                    });
-                sb.AppendLine(transitionDirective, GetTemplateSource("datee-transition-directive"), "datee-transition-directive");
-                if (!string.IsNullOrEmpty(context.CognitiveSubtext))
-                {
-                    string cognitiveSubtextDirective = RenderTemplate(
-                        PromptTemplates.CognitiveSubtextDirective,
-                        new Dictionary<string, string>
-                        {
-                            { "cognitive_subtext", context.CognitiveSubtext ?? string.Empty },
-                        });
-                    sb.AppendLine(cognitiveSubtextDirective, GetTemplateSource("cognitive-subtext-directive"), "cognitive-subtext-directive");
-                }
-                sb.AppendLine();
-            }
 
             string resistanceBlock = GetResistanceBlock(context.InterestAfter);
 

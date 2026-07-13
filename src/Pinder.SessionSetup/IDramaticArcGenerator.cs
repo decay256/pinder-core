@@ -29,9 +29,8 @@ namespace Pinder.SessionSetup
     {
         /// <summary>
         /// Generate a brief dramatic-arc paragraph (3-5 sentences) for the
-        /// session. Returns an empty string on any transport failure — never
-        /// throws on LLM errors. The caller must therefore tolerate an empty
-        /// string and decide whether to continue without the arc.
+        /// session. Incomplete model output is retried and then fails
+        /// explicitly; callers should not treat a partial arc as valid setup.
         /// </summary>
         /// <param name="playerName">Player display name.</param>
         /// <param name="playerStake">Player's psychological stake (plain text).</param>

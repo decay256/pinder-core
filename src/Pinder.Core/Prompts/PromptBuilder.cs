@@ -268,9 +268,10 @@ namespace Pinder.Core.Prompts
             string? characterIdSeed = null,
             bool archetypesEnabled = false,
             string? consolidatedPersonality = null,
-            IReadOnlyDictionary<string, BackstoryFact>? generatedBackstory = null)
+            IReadOnlyDictionary<string, BackstoryFact>? generatedBackstory = null,
+            IReadOnlyDictionary<string, string>? generatedPsychiatricDiagnosis = null)
         {
-            return BuildSystemPromptEx(displayName, genderIdentity, bioOneLiner, fragments, activeTraps, characterIdSeed, archetypesEnabled, consolidatedPersonality, generatedBackstory).Text;
+            return BuildSystemPromptEx(displayName, genderIdentity, bioOneLiner, fragments, activeTraps, characterIdSeed, archetypesEnabled, consolidatedPersonality, generatedBackstory, generatedPsychiatricDiagnosis).Text;
         }
 
         /// <summary>
@@ -285,7 +286,8 @@ namespace Pinder.Core.Prompts
             string? characterIdSeed = null,
             bool archetypesEnabled = false,
             string? consolidatedPersonality = null,
-            IReadOnlyDictionary<string, BackstoryFact>? generatedBackstory = null)
+            IReadOnlyDictionary<string, BackstoryFact>? generatedBackstory = null,
+            IReadOnlyDictionary<string, string>? generatedPsychiatricDiagnosis = null)
         {
             if (displayName  == null) throw new ArgumentNullException(nameof(displayName));
             if (genderIdentity == null) throw new ArgumentNullException(nameof(genderIdentity));
@@ -304,22 +306,6 @@ namespace Pinder.Core.Prompts
             string dataSrcFile = dataFraming.SourceFile;
             const string dataSrcKey = CharacterDataFramingKey;
 
-            // --- CONSTANT PREFIX BLOCK ---
-            // Emitted without variable data to form a stable cacheable prefix.
-            sb.AppendLine(framing.LeadIn, srcFile, srcKey); // No Replace("{name}", displayName) in constant prefix
-            sb.AppendLine(framing.Identity, srcFile, srcKey);
-            sb.AppendLine(framing.Personality, srcFile, srcKey);
-            sb.AppendLine(framing.Backstory, srcFile, srcKey);
-            sb.AppendLine(framing.TextingStyle, srcFile, srcKey);
-            if (archetypesEnabled)
-            {
-                sb.AppendLine(framing.ActiveArchetype, srcFile, srcKey);
-            }
-            sb.AppendLine(dataFraming.PrefixStatsHeader, dataSrcFile, dataSrcKey);
-            sb.AppendLine(framing.ActiveTrapInstructions, srcFile, srcKey);
-
-            // --- SEPARATOR ---
-            sb.AppendLine();
             sb.AppendLine(dataFraming.CharacterDataHeader, dataSrcFile, dataSrcKey);
 
             // --- VARIABLE BLOCK ---
@@ -339,7 +325,11 @@ namespace Pinder.Core.Prompts
             if (!string.IsNullOrWhiteSpace(consolidatedPersonality))
             {
                 sb.Append("- ");
-                sb.AppendLine(consolidatedPersonality.Trim());
+                sb.AppendLine(consolidatedPersonality!.Trim());
+            }
+            else
+            {
+                AppendBulletList(sb, fragments.PersonalityFragments);
             }
             sb.AppendLine();
 
@@ -360,6 +350,8 @@ namespace Pinder.Core.Prompts
                 AppendBulletList(sb, fragments.BackstoryFragments);
             }
             sb.AppendLine();
+
+            AppendPsychiatricDiagnosis(sb, generatedPsychiatricDiagnosis);
 
             sb.AppendLine(framing.TextingStyle, srcFile, srcKey);
             AppendBulletList(sb, TextingStyleAggregator.AggregateAsList(
@@ -435,6 +427,67 @@ namespace Pinder.Core.Prompts
                 sb.Append("- ");
                 sb.AppendLine(fragment);
             }
+        }
+
+        private static void AppendPsychiatricDiagnosis(
+            AnnotatedStringBuilder sb,
+            IReadOnlyDictionary<string, string>? diagnosis)
+        {
+            if (diagnosis == null || diagnosis.Count == 0)
+                return;
+
+            var keys = new List<string>(diagnosis.Keys);
+            keys.Sort(StringComparer.Ordinal);
+
+            bool emittedHeader = false;
+            foreach (string key in keys)
+            {
+                if (string.IsNullOrWhiteSpace(key))
+                    continue;
+                if (!diagnosis.TryGetValue(key, out var rawValue) || string.IsNullOrWhiteSpace(rawValue))
+                    continue;
+
+                if (!emittedHeader)
+                {
+                    sb.AppendLine("THERAPIST DIAGNOSIS");
+                    emittedHeader = true;
+                }
+
+                sb.Append("- ");
+                sb.Append(FormatDiagnosisKey(key));
+                sb.Append(": ");
+                sb.AppendLine(rawValue.Trim());
+            }
+
+            if (emittedHeader)
+                sb.AppendLine();
+        }
+
+        private static string FormatDiagnosisKey(string key)
+        {
+            var sb = new StringBuilder(key.Length);
+            bool capitalizeNext = true;
+            foreach (char ch in key.Trim())
+            {
+                if (ch == '_' || ch == '-')
+                {
+                    sb.Append(' ');
+                    capitalizeNext = false;
+                    continue;
+                }
+
+                if (capitalizeNext && char.IsLetter(ch))
+                {
+                    sb.Append(char.ToUpperInvariant(ch));
+                    capitalizeNext = false;
+                }
+                else
+                {
+                    sb.Append(ch);
+                    capitalizeNext = false;
+                }
+            }
+            return sb.ToString();
         }
     }
 }

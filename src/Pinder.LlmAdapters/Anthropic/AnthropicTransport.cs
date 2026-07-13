@@ -1,6 +1,8 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 using Pinder.Core.Interfaces;
 using Pinder.LlmAdapters.Anthropic.Dto;
 
@@ -11,7 +13,7 @@ namespace Pinder.LlmAdapters.Anthropic
     /// Thin wrapper — no game logic. Converts (systemPrompt, userMessage) into
     /// an Anthropic MessagesRequest and returns the response text.
     /// </summary>
-    public sealed class AnthropicTransport : ILlmTransport, IDisposable
+    public sealed class AnthropicTransport : ILlmTransport, IStructuredLlmTransport, IDisposable
     {
         private readonly AnthropicClient _client;
         private readonly string _model;
@@ -74,6 +76,67 @@ namespace Pinder.LlmAdapters.Anthropic
                 model: _model,
                 phase: phase).ConfigureAwait(false);
             return response.GetText() ?? "";
+        }
+
+        public async Task<StructuredLlmResponse> SendStructuredAsync(
+            StructuredLlmRequest request,
+            CancellationToken ct = default)
+        {
+            if (request == null) throw new ArgumentNullException(nameof(request));
+
+            var systemBlocks = new[]
+            {
+                new ContentBlock
+                {
+                    Type = "text",
+                    Text = request.SystemPrompt,
+                    CacheControl = new CacheControl { Type = "ephemeral" }
+                }
+            };
+
+            var messagesRequest = AnthropicRequestBuilders.BuildMessagesRequest(
+                _model,
+                request.MaxTokens,
+                systemBlocks,
+                request.UserMessage,
+                request.Temperature);
+
+            messagesRequest.Tools = new[]
+            {
+                new ToolDefinition
+                {
+                    Name = request.SchemaName,
+                    Description = $"Return {request.SchemaVersion} JSON for {request.Phase}.",
+                    InputSchema = JObject.Parse(request.JsonSchema)
+                }
+            };
+            messagesRequest.ToolChoice = new ToolChoiceOption
+            {
+                Type = "tool",
+                Name = request.SchemaName
+            };
+            string providerRequestJson = JsonConvert.SerializeObject(messagesRequest);
+
+            var response = await _client.SendMessagesAsync(
+                messagesRequest,
+                ct,
+                _telemetry,
+                provider: "anthropic",
+                model: _model,
+                phase: request.Phase).ConfigureAwait(false);
+
+            var toolInput = response.GetToolInput();
+            string jsonText = toolInput != null
+                ? toolInput.ToString(Newtonsoft.Json.Formatting.None)
+                : response.GetText() ?? string.Empty;
+
+            return new StructuredLlmResponse(
+                jsonText,
+                provider: "anthropic",
+                model: _model,
+                usedNativeStructuredOutput: toolInput != null,
+                providerRequestJson: providerRequestJson,
+                validationMode: toolInput != null ? "anthropic_tool" : "local_validation");
         }
 
         public void Dispose()

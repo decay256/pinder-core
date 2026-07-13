@@ -13,7 +13,7 @@ namespace Pinder.LlmAdapters.Anthropic
     /// Public so the game-api-side usage-capturing transport
     /// (<c>UsageCapturingAnthropicTransport</c>, #1115 follow-up) can build a
     /// request identical to <see cref="AnthropicTransport"/> without
-    /// re-implementing the <c>[PREVIOUS CONVERSATION CONTEXT]</c> message
+    /// re-implementing the catalog-configured stateful-context message
     /// splitting in <see cref="BuildMessages"/>.
     /// </remarks>
     public static class AnthropicRequestBuilders
@@ -87,7 +87,9 @@ namespace Pinder.LlmAdapters.Anthropic
         {
             if (userMessage == null) throw new ArgumentNullException(nameof(userMessage));
 
-            if (!userMessage.StartsWith("[PREVIOUS CONVERSATION CONTEXT]"))
+            string previousContextHeading = PromptTemplates.StatefulPreviousContextHeading;
+            string currentTurnHeading = PromptTemplates.StatefulCurrentTurnHeading;
+            if (!userMessage.StartsWith(previousContextHeading, StringComparison.Ordinal))
             {
                 return new[]
                 {
@@ -108,7 +110,7 @@ namespace Pinder.LlmAdapters.Anthropic
                 {
                     currentTurnContent.AppendLine(line);
                 }
-                else if (line.Equals("[CURRENT TURN]", StringComparison.OrdinalIgnoreCase))
+                else if (line.Equals(currentTurnHeading, StringComparison.OrdinalIgnoreCase))
                 {
                     parsingCurrentTurn = true;
                 }

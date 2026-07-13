@@ -24,17 +24,9 @@
             "combo": {
               "type": ["string", "null"],
               "description": "Combo name being completed, or null if none."
-            },
-            "tell_bonus": {
-              "type": "boolean",
-              "description": "Whether this option has a tell bonus."
-            },
-            "weakness_window": {
-              "type": "boolean",
-              "description": "Whether a weakness window is active for this option."
             }
           },
-          "required": ["stat", "text", "callback", "combo", "tell_bonus", "weakness_window"]
+          "required": ["stat", "text", "callback", "combo"]
         },
         "minItems": 4,
         "maxItems": 4

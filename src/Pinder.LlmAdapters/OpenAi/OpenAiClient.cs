@@ -149,10 +149,23 @@ namespace Pinder.LlmAdapters.OpenAi
                                     duration: duration.Elapsed);
                                 return (text, json);
                             }
+                            catch (OpenAiProviderResponseException ex)
+                            {
+                                var wrapped = new OpenAiProviderResponseException(
+                                    LlmDiagnosticFormatter.ProviderFailure(
+                                        provider,
+                                        ex.Message,
+                                        statusCode: statusCode,
+                                        model: model,
+                                        phase: phase,
+                                        body: body),
+                                    ex.ShapeError,
+                                    ex);
+                                EmitFailedTelemetry(telemetry, provider, model, phase, statusCode, attempt, duration, wrapped);
+                                throw wrapped;
+                            }
                             catch (InvalidOperationException ex)
                             {
-                                // ExtractAssistantText raises a typed error for malformed shapes;
-                                // re-throw without wrapping to preserve the message.
                                 EmitFailedTelemetry(telemetry, provider, model, phase, statusCode, attempt, duration, ex);
                                 throw;
                             }
@@ -253,13 +266,7 @@ namespace Pinder.LlmAdapters.OpenAi
         {
             if (json == null) throw new ArgumentNullException(nameof(json));
 
-            // Note: JArray's int indexer throws on empty arrays (it does not support
-            // null-conditional chain semantics for out-of-range indices). Guard
-            // explicitly so a no-choices payload returns the empty string.
-            var choices = json["choices"] as JArray;
-            if (choices == null || choices.Count == 0) return "";
-            var message = choices[0]?["message"];
-            if (message == null || message.Type != JTokenType.Object) return "";
+            var message = GetAssistantMessageOrThrow(json);
 
             // 1) message.content
             var content = message["content"]?.Value<string?>();
@@ -293,6 +300,39 @@ namespace Pinder.LlmAdapters.OpenAi
             }
 
             return "";
+        }
+
+        internal static string ExtractAssistantContentOnly(JObject json)
+        {
+            if (json == null) throw new ArgumentNullException(nameof(json));
+
+            var message = GetAssistantMessageOrThrow(json);
+            return message["content"]?.Value<string?>() ?? string.Empty;
+        }
+
+        private static JObject GetAssistantMessageOrThrow(JObject json)
+        {
+            var choices = json["choices"] as JArray;
+            if (choices == null)
+                throw new OpenAiProviderResponseException(
+                    "OpenAI-compatible provider response is missing required array property 'choices'.",
+                    "missing_choices");
+            if (choices.Count == 0)
+                throw new OpenAiProviderResponseException(
+                    "OpenAI-compatible provider response has empty 'choices' array.",
+                    "empty_choices");
+
+            var message = choices[0]?["message"];
+            if (message == null)
+                throw new OpenAiProviderResponseException(
+                    "OpenAI-compatible provider response is missing required object property 'choices[0].message'.",
+                    "missing_message");
+            if (message.Type != JTokenType.Object)
+                throw new OpenAiProviderResponseException(
+                    "OpenAI-compatible provider response property 'choices[0].message' must be an object.",
+                    "invalid_message");
+
+            return (JObject)message;
         }
 
         public void Dispose()
@@ -379,5 +419,22 @@ namespace Pinder.LlmAdapters.OpenAi
                 duration: duration.Elapsed,
                 exceptionType: exception.GetType().Name);
         }
+    }
+
+    public sealed class OpenAiProviderResponseException : InvalidOperationException
+    {
+        public OpenAiProviderResponseException(string message, string shapeError)
+            : base(message)
+        {
+            ShapeError = shapeError ?? string.Empty;
+        }
+
+        public OpenAiProviderResponseException(string message, string shapeError, Exception innerException)
+            : base(message, innerException)
+        {
+            ShapeError = shapeError ?? string.Empty;
+        }
+
+        public string ShapeError { get; }
     }
 }

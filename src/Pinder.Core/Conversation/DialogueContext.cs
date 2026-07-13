@@ -91,6 +91,11 @@ namespace Pinder.Core.Conversation
         /// </summary>
         public string? CognitiveSubtext { get; }
 
+        public int? PlayerHungerForIntimacy { get; }
+        public int? PlayerTerrorOfRejection { get; }
+        public int? DateeHungerForIntimacy { get; }
+        public int? DateeTerrorOfRejection { get; }
+
         public DialogueContext(
             string playerAvatarPrompt,
             string dateePrompt,
@@ -114,7 +119,11 @@ namespace Pinder.Core.Conversation
             System.Collections.Generic.IReadOnlyCollection<int>? stakeLinesReferenced = null,
             int maxDialogueOptions = 3,
             ResolvedRevelationTarget? resolvedTarget = null,
-            string? cognitiveSubtext = null)
+            string? cognitiveSubtext = null,
+            int? playerHungerForIntimacy = null,
+            int? playerTerrorOfRejection = null,
+            int? dateeHungerForIntimacy = null,
+            int? dateeTerrorOfRejection = null)
         {
             PlayerAvatarPrompt = playerAvatarPrompt ?? throw new System.ArgumentNullException(nameof(playerAvatarPrompt));
             DateePrompt = dateePrompt ?? throw new System.ArgumentNullException(nameof(dateePrompt));
@@ -139,6 +148,10 @@ namespace Pinder.Core.Conversation
             MaxDialogueOptions = maxDialogueOptions;
             ResolvedTarget = resolvedTarget;
             CognitiveSubtext = cognitiveSubtext;
+            PlayerHungerForIntimacy = playerHungerForIntimacy;
+            PlayerTerrorOfRejection = playerTerrorOfRejection;
+            DateeHungerForIntimacy = dateeHungerForIntimacy;
+            DateeTerrorOfRejection = dateeTerrorOfRejection;
         }
     }
 }

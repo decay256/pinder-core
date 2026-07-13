@@ -9,7 +9,7 @@ namespace Pinder.SessionSetup
         public static class DramaticArc
         {
             public const double Temperature = 0.85;
-            public const int MaxTokens = 300;
+            public const int MaxTokens = 1000;
         }
 
         public static class Backstory

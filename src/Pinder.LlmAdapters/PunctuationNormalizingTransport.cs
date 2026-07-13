@@ -45,7 +45,7 @@ namespace Pinder.LlmAdapters
     /// buffering — to avoid changing streaming latency characteristics.
     /// </para>
     /// </remarks>
-    public sealed class PunctuationNormalizingTransport : ILlmTransport, IStreamingLlmTransport, System.IDisposable
+    public sealed class PunctuationNormalizingTransport : ILlmTransport, IStreamingLlmTransport, IStructuredLlmTransport, System.IDisposable
     {
         // U+2014 = em-dash, U+2009 = thin-space.
         private const char EmDash    = '\u2014';
@@ -101,6 +101,24 @@ namespace Pinder.LlmAdapters
                 .SendAsync(systemPrompt, userMessage, temperature, maxTokens, phase, ct)
                 .ConfigureAwait(false);
             return Normalize(raw);
+        }
+
+        public async Task<StructuredLlmResponse> SendStructuredAsync(
+            StructuredLlmRequest request,
+            CancellationToken ct = default)
+        {
+            if (_inner is IStructuredLlmTransport structuredInner)
+            {
+                var response = await structuredInner.SendStructuredAsync(request, ct).ConfigureAwait(false);
+                return response.WithJsonText(Normalize(response.JsonText));
+            }
+
+            string raw = await _inner
+                .SendAsync(request.SystemPrompt, request.UserMessage, request.Temperature, request.MaxTokens, request.Phase, ct)
+                .ConfigureAwait(false);
+            return new StructuredLlmResponse(
+                Normalize(raw),
+                usedNativeStructuredOutput: false);
         }
 
         public async IAsyncEnumerable<string> SendStreamAsync(

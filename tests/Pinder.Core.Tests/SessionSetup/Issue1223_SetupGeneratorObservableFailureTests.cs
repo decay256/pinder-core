@@ -40,7 +40,7 @@ namespace Pinder.Core.Tests.SessionSetup
 
         // ── 3. PARITY GUARD — FAILURE RETENTION AND BUBBLING (must PASS now) ───────────
         [Fact]
-        public async Task ParityGuard_FailureStillReturnsEmpty_Stake_ButDramaticArcAndOutfitBubble()
+        public async Task ParityGuard_FailureBubblesWithoutDegradationCallback_ForAllSetupGenerators()
         {
             var throwingTransport = new ThrowingLlmTransport();
 
@@ -177,7 +177,8 @@ namespace Pinder.Core.Tests.SessionSetup
             {
                 OnDegraded = r => arcResult = r
             });
-            await arcGen.GenerateAsync("Alice", "stake", "bio", "Bob", "stake", "bio");
+            await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                arcGen.GenerateAsync("Alice", "stake", "bio", "Bob", "stake", "bio"));
             Assert.NotNull(arcResult);
             Assert.True(arcResult.Degraded);
             Assert.Equal("empty_output", arcResult.ErrorCode);
