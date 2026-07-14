@@ -28,24 +28,26 @@ namespace Pinder.Core.Interfaces
     public interface IStatefulLlmAdapter : ILlmAdapter
     {
         /// <summary>
-        /// Generate the datee's next response, given the prior conversation
-        /// history accumulated by the engine. Stateless: implementations MUST NOT
-        /// retain any datee-session field across calls.
+        /// Generate the datee's next response. The complete prompt transcript is
+        /// supplied by <paramref name="context"/>; <paramref name="history"/> is
+        /// engine-owned semantic dialogue retained for snapshots and diagnostics.
+        /// Stateless: implementations MUST NOT retain any datee-session field
+        /// across calls.
         /// </summary>
         /// <param name="context">Datee context for the current turn (system prompt, etc.).</param>
         /// <param name="history">
-        /// Prior datee conversation, in chronological order. Each entry's
+        /// Prior semantic datee conversation, in chronological order. Each entry's
         /// <see cref="ConversationMessage.Role"/> is one of <c>"user"</c> or
-        /// <c>"assistant"</c>. The current-turn user prompt is NOT included —
-        /// the implementation derives it from <paramref name="context"/> and
-        /// appends it after the supplied history.
+        /// <c>"assistant"</c>. User entries contain delivered player dialogue,
+        /// never generated prompt documents. Implementations must not prepend this
+        /// history when <paramref name="context"/> already contains the transcript.
         /// </param>
         /// <param name="cancellationToken">Cooperative cancellation (#794 alignment).</param>
         /// <returns>
         /// A <see cref="StatefulDateeResult"/> bundling the parsed response with
         /// the new history entries the engine should append to its datee
-        /// history (typically one user-role entry followed by one assistant-role
-        /// entry). The engine appends them verbatim and passes the grown list
+        /// history (typically the delivered player dialogue followed by the datee
+        /// response). The engine appends them verbatim and passes the grown list
         /// in on the next call.
         /// </returns>
         Task<StatefulDateeResult> GetDateeResponseAsync(

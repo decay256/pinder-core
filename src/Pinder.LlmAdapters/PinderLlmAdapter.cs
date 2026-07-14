@@ -226,22 +226,20 @@ namespace Pinder.LlmAdapters
                 attempt++;
                 try
                 {
-                    string responseText;
-                    if (history.Count == 0)
-                    {
-                        // No prior turns — single-shot.
-                        responseText = await SendWithDiagnosticsAsync(_transport, systemPrompt, userContent, temperature, _options.MaxTokens, LlmPhase.OpponentResponse, context.CurrentTurn, cancellationToken)
-                            .ConfigureAwait(false);
-                    }
-                    else
-                    {
-                        // Multi-turn: flatten the supplied history into the user content
-                        // (the transport contract is single-turn). The current turn's
-                        // user content is appended last, mirroring Anthropic/OpenAI
-                        // wire ordering.
-                        responseText = await SendStatefulDateeAsync(systemPrompt, userContent, history, temperature, cancellationToken)
-                            .ConfigureAwait(false);
-                    }
+                    // DateeContext.ConversationHistory is the authoritative transcript
+                    // and BuildDateePrompt renders it into userContent. Prefixing the
+                    // separate engine-owned DateeHistory here would include each prior
+                    // full prompt again and cause nested, quadratic prompt growth.
+                    string responseText = await SendWithDiagnosticsAsync(
+                            _transport,
+                            systemPrompt,
+                            userContent,
+                            temperature,
+                            _options.MaxTokens,
+                            LlmPhase.OpponentResponse,
+                            context.CurrentTurn,
+                            cancellationToken)
+                        .ConfigureAwait(false);
 
                     if (string.IsNullOrWhiteSpace(responseText))
                     {
@@ -282,11 +280,11 @@ namespace Pinder.LlmAdapters
 
                     var parsed = DateeResponseParsers.ParseDateeResponseText(responseText, GetDiagnosticSink());
 
-                    // Hand the engine the two new history entries to append: the user
-                    // prompt we just sent and the assistant response we got back.
+                    // Keep dialogue history semantic: never persist the generated
+                    // prompt document as though it were a player message.
                     var newEntries = new ConversationMessage[]
                     {
-                        ConversationMessage.User(userContent),
+                        ConversationMessage.User(context.PlayerDeliveredMessage),
                         ConversationMessage.Assistant(responseText ?? string.Empty),
                     };
                     return new StatefulDateeResult(parsed, newEntries);
@@ -925,81 +923,6 @@ namespace Pinder.LlmAdapters
             return question;
         }
 
-
-        /// <summary>
-        /// Sends a stateful datee request by flattening the supplied history
-        /// into the user message. The transport contract is single-turn
-        /// (system + user), so prior exchanges are prefixed into the user payload
-        /// before the current turn's content. Pure function of its inputs — no
-        /// adapter-side state is read or written.
-        /// </summary>
-        private Task<string> SendStatefulDateeAsync(
-            string systemPrompt,
-            string currentUserContent,
-            IReadOnlyList<ConversationMessage> priorHistory,
-            double temperature,
-            CancellationToken ct = default)
-        {
-            return SendStatefulAsync(
-                systemPrompt, currentUserContent, priorHistory, temperature,
-                LlmPhase.OpponentResponse, ct);
-        }
-
-        /// <summary>
-        /// #1123: the single shared compile path for BOTH the datee and avatar
-        /// sessions. Each session = GM system prompt + character spec (the
-        /// cacheable prefix passed in <paramref name="systemPrompt"/>) + the
-        /// running labelled transcript as the volatile suffix. The ONLY
-        /// difference between the two sessions is the injected character spec;
-        /// the history-flattening, ordering, and cache breakpoints are identical.
-        /// </summary>
-        private Task<string> SendStatefulAsync(
-            string systemPrompt,
-            string currentUserContent,
-            IReadOnlyList<ConversationMessage> priorHistory,
-            double temperature,
-            string phase,
-            CancellationToken ct = default)
-        {
-            var catalog = PromptTemplates.Catalog
-                ?? throw new InvalidOperationException(
-                    "PromptTemplates.Catalog is not wired. Call PromptWiring.Wire() at startup.");
-            var previousHeadingEntry = catalog.Get("stateful-previous-context-heading");
-            var currentTurnHeadingEntry = catalog.Get("stateful-current-turn-heading");
-
-            // Multi-turn: prefix prior exchanges into the user message for context.
-            var contextBuilder = new AnnotatedStringBuilder();
-            contextBuilder.AppendLine(
-                PromptTemplates.StatefulPreviousContextHeading,
-                previousHeadingEntry.SourceFile,
-                "stateful-previous-context-heading");
-            for (int i = 0; i < priorHistory.Count; i++)
-            {
-                var msg = priorHistory[i];
-                string displayRole = string.Equals(msg.Role, ConversationMessage.AssistantRole, StringComparison.OrdinalIgnoreCase)
-                    ? "DATEE" : "PLAYER";
-                contextBuilder.AppendLine($"[{displayRole}] {msg.Content}");
-            }
-            contextBuilder.AppendLine();
-            contextBuilder.AppendLine(
-                PromptTemplates.StatefulCurrentTurnHeading,
-                currentTurnHeadingEntry.SourceFile,
-                "stateful-current-turn-heading");
-            contextBuilder.Append(currentUserContent);
-
-            var userTrace = new PromptTraceResult(contextBuilder.ToString(), contextBuilder.Spans);
-            InMemoryPromptTraceService.Instance.RecordTrace(phase, userTrace);
-
-            return SendWithDiagnosticsAsync(
-                _transport,
-                systemPrompt,
-                userTrace.Text,
-                temperature,
-                _options.MaxTokens,
-                phase,
-                null,
-                ct);
-        }
 
         private static int GetExpectedDialogueOptionCount(DialogueContext context, GameDefinition gameDef)
         {

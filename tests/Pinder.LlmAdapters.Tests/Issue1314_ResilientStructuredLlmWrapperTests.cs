@@ -387,22 +387,84 @@ TELL: Charm (She liked your charm)";
             Assert.Equal(3, violationCount);
             Assert.Equal(2, history.Count);
             Assert.Equal(2, result.NewHistoryEntries.Count);
-            Assert.Contains("[PREVIOUS CONVERSATION CONTEXT]", transport.UserMessages[0]);
-            Assert.Contains("old user line", transport.UserMessages[0]);
-            Assert.Contains("old assistant line", transport.UserMessages[0]);
+            Assert.Equal("new delivered line", result.NewHistoryEntries[0].Content);
+            Assert.DoesNotContain("[PREVIOUS CONVERSATION CONTEXT]", transport.UserMessages[0]);
+            Assert.DoesNotContain("old user line", transport.UserMessages[0]);
+            Assert.DoesNotContain("old assistant line", transport.UserMessages[0]);
             Assert.Equal(transport.UserMessages[0], transport.UserMessages[1]);
             Assert.Equal(transport.UserMessages[0], transport.UserMessages[2]);
             Assert.Equal(transport.UserMessages[0], transport.UserMessages[3]);
+        }
 
-            var trace = Pinder.Core.Text.InMemoryPromptTraceService.Instance
-                .GetLastTrace(LlmPhase.OpponentResponse);
-            Assert.NotNull(trace);
-            Assert.Contains(trace!.Spans, span =>
-                span.SourceFile == "data/prompts/templates.yaml" &&
-                span.Key == "stateful-previous-context-heading");
-            Assert.Contains(trace.Spans, span =>
-                span.SourceFile == "data/prompts/templates.yaml" &&
-                span.Key == "stateful-current-turn-heading");
+        [Fact]
+        public async Task GetDateeResponseAsync_ConsecutiveTurns_DoNotNestPriorPromptDocuments()
+        {
+            const string response = "Datee reply\n[SIGNALS]\nTELL: Charm (She liked that)";
+            var transport = new FailureSimulatingTransport(0, response, response);
+            var adapter = new PinderLlmAdapter(transport, new PinderLlmAdapterOptions
+            {
+                GameDefinition = GameDefinition.PinderDefaults,
+            });
+            var statefulHistory = new List<ConversationMessage>();
+
+            var firstContext = CreateDateeContext(
+                Array.Empty<(string Sender, string Text)>(),
+                "first delivered line",
+                currentTurn: 1);
+            var firstResult = await adapter.GetDateeResponseAsync(firstContext, statefulHistory);
+            statefulHistory.AddRange(firstResult.NewHistoryEntries);
+
+            var secondContext = CreateDateeContext(
+                new[]
+                {
+                    ("Pursuer", "first delivered line"),
+                    ("TestChar", "Datee reply"),
+                },
+                "second delivered line",
+                currentTurn: 2);
+            await adapter.GetDateeResponseAsync(secondContext, statefulHistory);
+
+            string secondPrompt = transport.UserMessages[1];
+            Assert.Equal(1, CountOccurrences(secondPrompt, "[CURRENT_TURN]"));
+            Assert.Equal(1, CountOccurrences(secondPrompt, "<ENGINE_STATE>"));
+            Assert.Equal(1, CountOccurrences(secondPrompt, "</ENGINE_STATE>"));
+            Assert.DoesNotContain("[PREVIOUS CONVERSATION CONTEXT]", secondPrompt);
+            Assert.Contains("first delivered line", secondPrompt);
+            Assert.Contains("Datee reply", secondPrompt);
+            Assert.Contains("second delivered line", secondPrompt);
+            Assert.DoesNotContain(transport.UserMessages[0], secondPrompt);
+        }
+
+        private static DateeContext CreateDateeContext(
+            IReadOnlyList<(string Sender, string Text)> conversationHistory,
+            string deliveredMessage,
+            int currentTurn)
+        {
+            return new DateeContext(
+                dateePrompt: "",
+                conversationHistory: conversationHistory,
+                dateeLastMessage: "",
+                activeTraps: Array.Empty<string>(),
+                currentInterest: 50,
+                playerDeliveredMessage: deliveredMessage,
+                interestBefore: 50,
+                interestAfter: 50,
+                responseDelayMinutes: 0,
+                playerName: "Pursuer",
+                dateeName: "TestChar",
+                currentTurn: currentTurn);
+        }
+
+        private static int CountOccurrences(string text, string value)
+        {
+            int count = 0;
+            int index = 0;
+            while ((index = text.IndexOf(value, index, StringComparison.Ordinal)) >= 0)
+            {
+                count++;
+                index += value.Length;
+            }
+            return count;
         }
     }
 }

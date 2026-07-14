@@ -24,7 +24,7 @@ namespace Pinder.Core.Conversation
 
         /// <summary>
         /// New entries the engine should append to its datee history.
-        /// Typically one user-role entry (the prompt this turn) followed by
+        /// Typically one user-role entry (the delivered player dialogue) followed by
         /// one assistant-role entry (the response). May be empty when the
         /// call short-circuited (e.g. the parsed response failed validation
         /// and the adapter chose not to record the turn).
