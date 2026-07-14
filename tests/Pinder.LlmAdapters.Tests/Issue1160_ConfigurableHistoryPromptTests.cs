@@ -107,8 +107,8 @@ namespace Pinder.LlmAdapters.Tests
                         gameMasterPrompt: "gm",
                         playerAvatarRoleDescription: "player role",
                         dateeRoleDescription: "datee role",
-                        steeringPrompt: "write one steering question about {delivered_message}",
-                        horninessPrompt: "write one horny followup for {delivered_message}",
+                        steeringPrompt: "CONVERSATION SO FAR:\n{conversation_history}\nwrite one steering question about {delivered_message}",
+                        horninessPrompt: "CONVERSATION SO FAR:\n{conversation_history}\nwrite one horny followup for {delivered_message}",
                         maxDialogueOptions: 3,
                         maxTurns: 30,
                         maxDeliveryWords: 80),
@@ -122,6 +122,11 @@ delivery_instructions:
 shadow_corruption:
   madness:
     fumble: ""mock madness""
+success_improvement_prompt_template: |-
+  CONVERSATION SO FAR:
+  {conversation_history}
+  Rewrite {delivered_message} for {stat} at {tier}/{tier_upper}.
+  {instruction}
 ")
                         : null
                 });

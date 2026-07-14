@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Pinder.Core.Characters;
+using Pinder.Core.Conversation;
 using Pinder.Core.Interfaces;
 using Pinder.LlmAdapters;
 
@@ -13,11 +14,16 @@ namespace Pinder.SessionSetup
     {
         private readonly ILlmTransport _transport;
         private readonly PromptCatalog _catalog;
+        private readonly Action<OperationalDiagnosticEvent>? _onDiagnostic;
 
-        public LlmBioGenerator(ILlmTransport transport, PromptCatalog catalog)
+        public LlmBioGenerator(
+            ILlmTransport transport,
+            PromptCatalog catalog,
+            Action<OperationalDiagnosticEvent>? onDiagnostic = null)
         {
             _transport = transport ?? throw new ArgumentNullException(nameof(transport));
             _catalog = catalog ?? throw new ArgumentNullException(nameof(catalog));
+            _onDiagnostic = onDiagnostic;
             _catalog.RequireCompleteEntry(
                 "bio",
                 "prompt-catalog: missing required key 'bio'. The yaml file is incomplete or missing.");
@@ -41,12 +47,15 @@ namespace Pinder.SessionSetup
                 { "diagnosis", JsonSerializer.Serialize(diagnosis) }
             });
 
-            var llmResponse = await _transport.SendAsync(
+            var llmResponse = await LlmOptionalTextGeneration.SendRequiredAsync(
+                "bio",
+                _transport,
                 entry.SystemPrompt!,
                 userPrompt,
                 entry.Temperature!.Value,
                 entry.MaxTokens!.Value,
                 LlmPhase.Synthesis,
+                _onDiagnostic,
                 cancellationToken);
 
             var bio = ExtractBio(llmResponse);

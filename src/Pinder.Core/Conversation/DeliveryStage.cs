@@ -69,7 +69,25 @@ namespace Pinder.Core.Conversation
             CancellationToken ct)
         {
             var textDiffs = new List<TextDiff>();
+            string deliveryCallId = OperationalDiagnostics.CreateCallId();
+            OperationalDiagnostics.Emit(
+                _onDiagnostic,
+                new OperationalDiagnosticEvent(
+                    "DeliveryStage",
+                    "DeliveryStarted",
+                    OperationalDiagnosticSeverity.Info,
+                    "Delivery operation started.",
+                    operationKind: OperationalDiagnosticOperationKind.Delivery,
+                    phaseCode: OperationalDiagnosticPhaseCode.Start,
+                    lifecycle: OperationalDiagnosticLifecycle.Start,
+                    callId: deliveryCallId,
+                    correlationHints: new Dictionary<string, string>
+                    {
+                        ["turn"] = state.TurnNumber.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    }));
 
+            try
+            {
             // 10b. Steering roll
             string originalIntendedText = chosenOption.IntendedText ?? "";
             progress?.Report(new TurnProgressEvent(TurnProgressStage.SteeringStarted));
@@ -445,6 +463,23 @@ namespace Pinder.Core.Conversation
             // #1041 (Tier C): markdown-stripping pass for surfaces that expect plain prose.
             deliveredMessage = TextSanitizer.Sanitize(deliveredMessage, MarkdownSanitizer.LayerName, textDiffs);
 
+            OperationalDiagnostics.Emit(
+                _onDiagnostic,
+                new OperationalDiagnosticEvent(
+                    "DeliveryStage",
+                    "DeliverySucceeded",
+                    OperationalDiagnosticSeverity.Info,
+                    "Delivery operation succeeded.",
+                    operationKind: OperationalDiagnosticOperationKind.Delivery,
+                    phaseCode: OperationalDiagnosticPhaseCode.Completed,
+                    lifecycle: OperationalDiagnosticLifecycle.Terminal,
+                    outcome: OperationalDiagnosticOutcome.Succeeded,
+                    callId: deliveryCallId,
+                    correlationHints: new Dictionary<string, string>
+                    {
+                        ["turn"] = state.TurnNumber.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    }));
+
             return new DeliveryStageResult
             {
                 DeliveredMessage = deliveredMessage,
@@ -457,6 +492,51 @@ namespace Pinder.Core.Conversation
                 FinalInterestDelta = interestDelta,
                 ShadowCorrection = shadowCorrection
             };
+            }
+            catch (OperationCanceledException ex)
+            {
+                OperationalDiagnostics.Emit(
+                    _onDiagnostic,
+                    new OperationalDiagnosticEvent(
+                        "DeliveryStage",
+                        "DeliveryCancelled",
+                        OperationalDiagnosticSeverity.Warning,
+                        "Delivery operation was cancelled.",
+                        ex,
+                        OperationalDiagnosticOperationKind.Delivery,
+                        OperationalDiagnosticPhaseCode.Completed,
+                        OperationalDiagnosticLifecycle.Terminal,
+                        OperationalDiagnosticOutcome.Cancelled,
+                        OperationalDiagnosticFailureClassification.Cancelled,
+                        callId: deliveryCallId,
+                        correlationHints: new Dictionary<string, string>
+                        {
+                            ["turn"] = state.TurnNumber.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                        }));
+                throw;
+            }
+            catch (Exception ex)
+            {
+                OperationalDiagnostics.Emit(
+                    _onDiagnostic,
+                    new OperationalDiagnosticEvent(
+                        "DeliveryStage",
+                        "DeliveryFailed",
+                        OperationalDiagnosticSeverity.Error,
+                        "Delivery operation failed.",
+                        ex,
+                        OperationalDiagnosticOperationKind.Delivery,
+                        OperationalDiagnosticPhaseCode.Completed,
+                        OperationalDiagnosticLifecycle.Terminal,
+                        OperationalDiagnosticOutcome.Failed,
+                        OperationalDiagnostics.ClassifyException(ex),
+                        callId: deliveryCallId,
+                        correlationHints: new Dictionary<string, string>
+                        {
+                            ["turn"] = state.TurnNumber.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                        }));
+                throw;
+            }
         }
 
         private static bool IsRetryableException(Exception ex)

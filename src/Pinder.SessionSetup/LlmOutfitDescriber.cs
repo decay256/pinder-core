@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Pinder.Core.Conversation;
 using Pinder.Core.Interfaces;
 using Pinder.LlmAdapters;
 
@@ -92,6 +93,7 @@ namespace Pinder.SessionSetup
                     _options.MaxTokens,
                     GeneratorDefaultConfigs.Outfit.MaxTokens,
                     _options.OnDegraded,
+                    _options.OnDiagnostic,
                     LlmOptionalTextGeneration.CancellationBehavior.Throw)
                 .ConfigureAwait(false);
         }
@@ -109,6 +111,11 @@ namespace Pinder.SessionSetup
             /// Opt-in callback triggered when generation is degraded (e.g. transport failure or empty output).
             /// </summary>
             public Action<SetupGenerationResult>? OnDegraded { get; set; }
+
+            /// <summary>
+            /// Opt-in operational diagnostic sink. Null keeps diagnostics disabled.
+            /// </summary>
+            public Action<OperationalDiagnosticEvent>? OnDiagnostic { get; set; }
         }
     }
 }

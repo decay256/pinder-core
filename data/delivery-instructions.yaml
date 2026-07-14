@@ -831,6 +831,21 @@ overlay_prompt_templates:
 
       Apply the corruption while preserving the archetype voice above and return the modified message.
 
+success_improvement_prompt_template: |-
+  <ENGINE_STATE>
+  [ENGINE - CALL PURPOSE: SUCCESS_IMPROVEMENT]
+  Delivery outcome / tier: {tier_upper}
+  Selected stat: {stat}
+  Current delivered PLAYER AVATAR message: "{delivered_message}"
+  Output requirement: return ONE rewritten PLAYER AVATAR message only - sharper wording, same voice. No analysis, no OPTIONS, no engine commentary, no ENGINE_STATE echo.
+  </ENGINE_STATE>
+
+  CONVERSATION SO FAR:
+  {conversation_history}
+
+  SUCCESS IMPROVEMENT INSTRUCTION ({stat}, {tier}):
+  {instruction}
+
 shadow_corruption:
   # Design boundary: Madness prompt rolls must strictly preserve texting distance and never invent physical/same-room knowledge of the datee.
   madness:

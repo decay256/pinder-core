@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Pinder.Core.Conversation;
 using Pinder.Core.Interfaces;
 using Pinder.LlmAdapters;
 
@@ -11,11 +12,16 @@ namespace Pinder.SessionSetup
     {
         private readonly ILlmTransport _transport;
         private readonly PromptCatalog _catalog;
+        private readonly Action<OperationalDiagnosticEvent>? _onDiagnostic;
 
-        public LlmBackstoryConsolidator(ILlmTransport transport, PromptCatalog catalog)
+        public LlmBackstoryConsolidator(
+            ILlmTransport transport,
+            PromptCatalog catalog,
+            Action<OperationalDiagnosticEvent>? onDiagnostic = null)
         {
             _transport = transport ?? throw new ArgumentNullException(nameof(transport));
             _catalog = catalog ?? throw new ArgumentNullException(nameof(catalog));
+            _onDiagnostic = onDiagnostic;
             _catalog.RequireCompleteEntry("backstory_consolidation", "prompt-catalog: missing required key 'backstory_consolidation'.");
         }
 
@@ -34,8 +40,16 @@ namespace Pinder.SessionSetup
                 { "texting_style", FormatList(textingStyleSignals) },
                 { "stats", stats }
             });
-            var result = (await _transport.SendAsync(entry.SystemPrompt!, userPrompt,
-                entry.Temperature!.Value, entry.MaxTokens!.Value, LlmPhase.Synthesis, cancellationToken)
+            var result = (await LlmOptionalTextGeneration.SendRequiredAsync(
+                "backstory_consolidation",
+                _transport,
+                entry.SystemPrompt!,
+                userPrompt,
+                entry.Temperature!.Value,
+                entry.MaxTokens!.Value,
+                LlmPhase.Synthesis,
+                _onDiagnostic,
+                cancellationToken)
                 .ConfigureAwait(false)).Trim();
             if (string.IsNullOrWhiteSpace(result))
                 throw new InvalidOperationException("Backstory consolidation returned empty output.");

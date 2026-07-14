@@ -19,16 +19,19 @@ namespace Pinder.LlmAdapters.Tests
             var adapter = CreateAdapter(
                 transport,
                 horninessPrompt:
-                    "CONFIG HORNINESS for {player_name} to {datee_name}: \"{delivered_message}\"");
+                    "HISTORY:\n{conversation_history}\nCONFIG HORNINESS for {player_name} to {datee_name}: \"{delivered_message}\"");
 
             var result = await adapter.GetHorninessQuestionAsync(Context());
 
             Assert.Equal("how strong are your hands?", result);
             var call = Assert.Single(transport.Calls);
+            Assert.Contains("Datee: I restore antique chairs.", call.UserMessage);
             Assert.Contains("CONFIG HORNINESS for Player to Datee: \"nice jacket\"", call.UserMessage);
+            Assert.DoesNotContain("CONVERSATION SO FAR:", call.UserMessage);
             Assert.DoesNotContain("{player_name}", call.UserMessage);
             Assert.DoesNotContain("{datee_name}", call.UserMessage);
             Assert.DoesNotContain("{delivered_message}", call.UserMessage);
+            Assert.DoesNotContain("{conversation_history}", call.UserMessage);
         }
 
         [Fact]
@@ -51,7 +54,7 @@ namespace Pinder.LlmAdapters.Tests
             var events = new List<OverlayDegradedEvent>();
             var adapter = CreateAdapter(
                 new CapturingTransport("   "),
-                horninessPrompt: "configured prompt",
+                horninessPrompt: "configured prompt {conversation_history}",
                 onOverlayDegraded: events.Add);
 
             var ex = await Assert.ThrowsAsync<InvalidOperationException>(
@@ -65,6 +68,91 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Fact]
+        public async Task GetHorninessQuestion_MissingConversationHistoryPlaceholder_ThrowsBeforeTransportCall()
+        {
+            var transport = new CapturingTransport("unused");
+            var adapter = CreateAdapter(
+                transport,
+                horninessPrompt: "configured prompt without history");
+
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+                () => adapter.GetHorninessQuestionAsync(Context()));
+
+            Assert.Contains("horniness_prompt", ex.Message);
+            Assert.Contains("{conversation_history}", ex.Message);
+            Assert.Empty(transport.Calls);
+        }
+
+        [Fact]
+        public async Task GetSteeringQuestion_UsesConfiguredTemplateWithConversationHistory()
+        {
+            var transport = new CapturingTransport("want to test that chair sometime?");
+            var adapter = CreateAdapter(
+                transport,
+                steeringPrompt:
+                    "STEERING HISTORY:\n{conversation_history}\nCONFIG STEER for {player_name} to {datee_name}: \"{delivered_message}\"",
+                horninessPrompt: "unused {conversation_history}");
+
+            var result = await adapter.GetSteeringQuestionAsync(new SteeringContext(
+                playerAvatarPrompt: "player profile",
+                dateeName: "Datee",
+                playerName: "Player",
+                deliveredMessage: "nice jacket",
+                conversationHistory: new[] { ("Datee", "I restore antique chairs.") }));
+
+            Assert.Equal("want to test that chair sometime?", result);
+            var call = Assert.Single(transport.Calls);
+            Assert.Contains("STEERING HISTORY:", call.UserMessage);
+            Assert.Contains("Datee: I restore antique chairs.", call.UserMessage);
+            Assert.Contains("CONFIG STEER for Player to Datee: \"nice jacket\"", call.UserMessage);
+            Assert.DoesNotContain("CONVERSATION SO FAR:", call.UserMessage);
+        }
+
+        [Fact]
+        public async Task GetSteeringQuestion_MissingConfiguredPrompt_ThrowsBeforeTransportCall()
+        {
+            var transport = new CapturingTransport("unused");
+            var adapter = CreateAdapter(
+                transport,
+                steeringPrompt: string.Empty,
+                horninessPrompt: "unused {conversation_history}");
+
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+                () => adapter.GetSteeringQuestionAsync(new SteeringContext(
+                    playerAvatarPrompt: "player profile",
+                    dateeName: "Datee",
+                    playerName: "Player",
+                    deliveredMessage: "nice jacket",
+                    conversationHistory: new[] { ("Datee", "I restore antique chairs.") })));
+
+            Assert.Contains("steering_prompt", ex.Message);
+            Assert.Contains("data/game-definition.yaml", ex.Message);
+            Assert.Empty(transport.Calls);
+        }
+
+        [Fact]
+        public async Task GetSteeringQuestion_MissingConversationHistoryPlaceholder_ThrowsBeforeTransportCall()
+        {
+            var transport = new CapturingTransport("unused");
+            var adapter = CreateAdapter(
+                transport,
+                steeringPrompt: "configured steering without history",
+                horninessPrompt: "unused {conversation_history}");
+
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+                () => adapter.GetSteeringQuestionAsync(new SteeringContext(
+                    playerAvatarPrompt: "player profile",
+                    dateeName: "Datee",
+                    playerName: "Player",
+                    deliveredMessage: "nice jacket",
+                    conversationHistory: new[] { ("Datee", "I restore antique chairs.") })));
+
+            Assert.Contains("steering_prompt", ex.Message);
+            Assert.Contains("{conversation_history}", ex.Message);
+            Assert.Empty(transport.Calls);
+        }
+
+        [Fact]
         public void SourceDoesNotContainHorninessQuestionFallback()
         {
             string adapterSource = File.ReadAllText(FindRepoFile("src", "Pinder.LlmAdapters", "PinderLlmAdapter.cs"));
@@ -73,6 +161,8 @@ namespace Pinder.LlmAdapters.Tests
 
             Assert.DoesNotContain("DefaultHorninessPrompt", adapterSource);
             Assert.DoesNotContain("DefaultHorninessPrompt", defaultsSource);
+            Assert.DoesNotContain("DefaultSteeringPrompt", adapterSource);
+            Assert.DoesNotContain("DefaultSteeringPrompt", defaultsSource);
             Assert.DoesNotContain("your place or mine", adapterSource);
             Assert.DoesNotContain("your place or mine", nullAdapterSource);
         }
@@ -90,6 +180,7 @@ namespace Pinder.LlmAdapters.Tests
         private static PinderLlmAdapter CreateAdapter(
             ILlmTransport transport,
             string horninessPrompt,
+            string steeringPrompt = "configured steering {conversation_history}",
             Action<OverlayDegradedEvent>? onOverlayDegraded = null)
         {
             return new PinderLlmAdapter(
@@ -101,6 +192,7 @@ namespace Pinder.LlmAdapters.Tests
                         gameMasterPrompt: "game master",
                         playerAvatarRoleDescription: "player",
                         dateeRoleDescription: "datee",
+                        steeringPrompt: steeringPrompt,
                         horninessPrompt: horninessPrompt),
                     OnOverlayDegraded = onOverlayDegraded,
                 });

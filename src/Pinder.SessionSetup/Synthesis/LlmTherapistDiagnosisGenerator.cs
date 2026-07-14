@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Pinder.Core.Characters;
+using Pinder.Core.Conversation;
 using Pinder.Core.Interfaces;
 using Pinder.LlmAdapters;
 
@@ -15,11 +16,16 @@ namespace Pinder.SessionSetup
 
         private readonly ILlmTransport _transport;
         private readonly PromptCatalog _catalog;
+        private readonly Action<OperationalDiagnosticEvent>? _onDiagnostic;
 
-        public LlmTherapistDiagnosisGenerator(ILlmTransport transport, PromptCatalog catalog)
+        public LlmTherapistDiagnosisGenerator(
+            ILlmTransport transport,
+            PromptCatalog catalog,
+            Action<OperationalDiagnosticEvent>? onDiagnostic = null)
         {
             _transport = transport ?? throw new ArgumentNullException(nameof(transport));
             _catalog = catalog ?? throw new ArgumentNullException(nameof(catalog));
+            _onDiagnostic = onDiagnostic;
             _catalog.RequireCompleteEntry(
                 "diagnosis",
                 "prompt-catalog: missing required key 'diagnosis'. The yaml file is incomplete or missing.");
@@ -47,12 +53,15 @@ namespace Pinder.SessionSetup
             Exception? lastParseFailure = null;
             for (int attempt = 1; attempt <= MaxAttempts; attempt++)
             {
-                llmResponse = await _transport.SendAsync(
+                llmResponse = await LlmOptionalTextGeneration.SendRequiredAsync(
+                    "diagnosis",
+                    _transport,
                     systemPrompt,
                     userPrompt,
                     entry.Temperature!.Value,
                     entry.MaxTokens!.Value,
                     LlmPhase.Synthesis,
+                    _onDiagnostic,
                     cancellationToken).ConfigureAwait(false);
 
                 try

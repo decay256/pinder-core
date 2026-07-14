@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Pinder.Core.Conversation;
 using Pinder.Core.Interfaces;
 using Pinder.SessionSetup;
 using Xunit;
@@ -241,6 +242,166 @@ namespace Pinder.Core.Tests.SessionSetup
             Assert.Null(stakeResult);
         }
 
+        [Fact]
+        public async Task Diagnostics_EmitStartThenOneTerminal_WhenConfigured()
+        {
+            var diagnostics = new List<OperationalDiagnosticEvent>();
+            var happyTransport = new FakeLlmTransport("actual content");
+            var stakeGen = new LlmStakeGenerator(happyTransport, new LlmStakeGenerator.Options
+            {
+                OnDiagnostic = diagnostics.Add
+            });
+
+            await stakeGen.GenerateAsync("Alice", "system prompt");
+
+            Assert.Equal(2, diagnostics.Count);
+            Assert.Equal(OperationalDiagnosticLifecycle.Start, diagnostics[0].Lifecycle);
+            Assert.Equal(OperationalDiagnosticOperationKind.SetupSynthesis, diagnostics[0].OperationKind);
+            Assert.Equal("stake", diagnostics[0].CorrelationHints["generator"]);
+            Assert.Equal(OperationalDiagnosticLifecycle.Terminal, diagnostics[1].Lifecycle);
+            Assert.Equal(OperationalDiagnosticOutcome.Succeeded, diagnostics[1].Outcome);
+            Assert.Equal(diagnostics[0].CallId, diagnostics[1].CallId);
+            Assert.Single(diagnostics.FindAll(d => d.Lifecycle == OperationalDiagnosticLifecycle.Terminal));
+        }
+
+        [Fact]
+        public async Task Diagnostics_DisabledSink_DoesNotChangeSetupBehavior()
+        {
+            var happyTransport = new FakeLlmTransport("actual content");
+            var stakeGen = new LlmStakeGenerator(happyTransport, new LlmStakeGenerator.Options
+            {
+                OnDiagnostic = null
+            });
+
+            string result = await stakeGen.GenerateAsync("Alice", "system prompt");
+
+            Assert.Equal("actual content", result);
+        }
+
+        [Fact]
+        public async Task Diagnostics_OptionalAndRequiredSuccessUseSameLifecycleContract()
+        {
+            var optionalDiagnostics = new List<OperationalDiagnosticEvent>();
+            var requiredDiagnostics = new List<OperationalDiagnosticEvent>();
+            var stakeGen = new LlmStakeGenerator(
+                new FakeLlmTransport("actual content"),
+                new LlmStakeGenerator.Options
+                {
+                    OnDiagnostic = optionalDiagnostics.Add
+                });
+            var backstoryGen = new LlmBackstoryGenerator(
+                new FakeLlmTransport("{\"family\":{\"BioLie\":\"lie\",\"TragicReality\":\"truth\"}}"),
+                new LlmBackstoryGenerator.Options
+                {
+                    OnDiagnostic = requiredDiagnostics.Add
+                });
+
+            await stakeGen.GenerateAsync("Alice", "system prompt");
+            await backstoryGen.GenerateFromConsolidatedAsync(
+                "Bob",
+                "nonbinary",
+                "bio",
+                "consolidated backstory",
+                "consolidated personality");
+
+            AssertSetupLifecycle(
+                optionalDiagnostics,
+                "stake",
+                LlmPhase.PsychologicalStake,
+                "SetupSynthesisSucceeded",
+                OperationalDiagnosticSeverity.Info,
+                OperationalDiagnosticOutcome.Succeeded,
+                OperationalDiagnosticFailureClassification.None);
+            AssertSetupLifecycle(
+                requiredDiagnostics,
+                "backstory",
+                "backstory",
+                "SetupSynthesisSucceeded",
+                OperationalDiagnosticSeverity.Info,
+                OperationalDiagnosticOutcome.Succeeded,
+                OperationalDiagnosticFailureClassification.None);
+        }
+
+        [Fact]
+        public async Task Diagnostics_RequiredFailureAndCancellationUseSharedLifecycleContract()
+        {
+            var failureDiagnostics = new List<OperationalDiagnosticEvent>();
+            var cancellationDiagnostics = new List<OperationalDiagnosticEvent>();
+            var failingBackstoryGen = new LlmBackstoryGenerator(
+                new ThrowingLlmTransport(),
+                new LlmBackstoryGenerator.Options
+                {
+                    OnDiagnostic = failureDiagnostics.Add
+                });
+            var cancellingBackstoryGen = new LlmBackstoryGenerator(
+                new CancelingLlmTransport(),
+                new LlmBackstoryGenerator.Options
+                {
+                    OnDiagnostic = cancellationDiagnostics.Add
+                });
+
+            await Assert.ThrowsAsync<LlmTransportException>(() =>
+                failingBackstoryGen.GenerateFromConsolidatedAsync(
+                    "Bob",
+                    "nonbinary",
+                    "bio",
+                    "consolidated backstory",
+                    "consolidated personality"));
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+                cancellingBackstoryGen.GenerateFromConsolidatedAsync(
+                    "Bob",
+                    "nonbinary",
+                    "bio",
+                    "consolidated backstory",
+                    "consolidated personality"));
+
+            AssertSetupLifecycle(
+                failureDiagnostics,
+                "backstory",
+                "backstory",
+                "SetupSynthesisFailed",
+                OperationalDiagnosticSeverity.Error,
+                OperationalDiagnosticOutcome.Failed,
+                OperationalDiagnosticFailureClassification.Permanent);
+            AssertSetupLifecycle(
+                cancellationDiagnostics,
+                "backstory",
+                "backstory",
+                "SetupSynthesisCancelled",
+                OperationalDiagnosticSeverity.Warning,
+                OperationalDiagnosticOutcome.Cancelled,
+                OperationalDiagnosticFailureClassification.Cancelled);
+        }
+
+        [Fact]
+        public async Task Diagnostics_OptionalEmptyOutputRemainsDistinctDegradedTerminal()
+        {
+            var diagnostics = new List<OperationalDiagnosticEvent>();
+            SetupGenerationResult? stakeResult = null;
+            var stakeGen = new LlmStakeGenerator(
+                new FakeLlmTransport("   "),
+                new LlmStakeGenerator.Options
+                {
+                    OnDegraded = result => stakeResult = result,
+                    OnDiagnostic = diagnostics.Add
+                });
+
+            string result = await stakeGen.GenerateAsync("Alice", "system prompt");
+
+            Assert.Equal(string.Empty, result);
+            Assert.NotNull(stakeResult);
+            Assert.Equal("empty_output", stakeResult.ErrorCode);
+            AssertSetupLifecycle(
+                diagnostics,
+                "stake",
+                LlmPhase.PsychologicalStake,
+                "SetupSynthesisDegraded",
+                OperationalDiagnosticSeverity.Warning,
+                OperationalDiagnosticOutcome.Degraded,
+                OperationalDiagnosticFailureClassification.Degraded);
+            Assert.Equal("empty_output", diagnostics[1].CorrelationHints["reason"]);
+        }
+
         // ── Helpers ───────────────────────────────────────────────────────────────
 
         private void AssertOptionsExposesCallback(Type optionsType)
@@ -267,6 +428,39 @@ namespace Pinder.Core.Tests.SessionSetup
             }
 
             Assert.True(targetProp != null, $"Expected a public settable delegate-typed property with name containing Degrad/Outcome/Result on type {optionsType.FullName}, but none was found.");
+        }
+
+        private static void AssertSetupLifecycle(
+            IReadOnlyList<OperationalDiagnosticEvent> diagnostics,
+            string generator,
+            string phase,
+            string terminalEventName,
+            OperationalDiagnosticSeverity terminalSeverity,
+            OperationalDiagnosticOutcome terminalOutcome,
+            OperationalDiagnosticFailureClassification terminalFailureClassification)
+        {
+            Assert.Equal(2, diagnostics.Count);
+            Assert.Equal("LlmOptionalTextGeneration", diagnostics[0].Source);
+            Assert.Equal("SetupSynthesisStarted", diagnostics[0].EventName);
+            Assert.Equal(OperationalDiagnosticSeverity.Info, diagnostics[0].Severity);
+            Assert.Equal("Setup synthesis LLM operation started.", diagnostics[0].Message);
+            Assert.Equal(OperationalDiagnosticOperationKind.SetupSynthesis, diagnostics[0].OperationKind);
+            Assert.Equal(phase, diagnostics[0].PhaseCode);
+            Assert.Equal(OperationalDiagnosticLifecycle.Start, diagnostics[0].Lifecycle);
+            Assert.Equal(generator, diagnostics[0].CorrelationHints["generator"]);
+
+            Assert.Equal("LlmOptionalTextGeneration", diagnostics[1].Source);
+            Assert.Equal(terminalEventName, diagnostics[1].EventName);
+            Assert.Equal(terminalSeverity, diagnostics[1].Severity);
+            Assert.Equal(OperationalDiagnosticOperationKind.SetupSynthesis, diagnostics[1].OperationKind);
+            Assert.Equal(phase, diagnostics[1].PhaseCode);
+            Assert.Equal(OperationalDiagnosticLifecycle.Terminal, diagnostics[1].Lifecycle);
+            Assert.Equal(terminalOutcome, diagnostics[1].Outcome);
+            Assert.Equal(terminalFailureClassification, diagnostics[1].FailureClassification);
+            Assert.Equal(generator, diagnostics[1].CorrelationHints["generator"]);
+            Assert.Equal(diagnostics[0].CallId, diagnostics[1].CallId);
+            Assert.Single(diagnostics, diagnostic =>
+                diagnostic.Lifecycle == OperationalDiagnosticLifecycle.Terminal);
         }
     }
 

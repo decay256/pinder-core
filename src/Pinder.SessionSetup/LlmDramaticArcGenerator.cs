@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Pinder.Core.Conversation;
 using Pinder.Core.Interfaces;
 using Pinder.Core.Text;
 using Pinder.LlmAdapters;
@@ -102,14 +103,22 @@ namespace Pinder.SessionSetup
                 string response;
                 try
                 {
-                    response = await _transport
-                        .SendAsync(
+                    response = await LlmOptionalTextGeneration.RunAsync(
+                            "dramatic_arc",
+                            _transport,
                             systemPrompt,
                             userMessage,
+                            entry,
+                            LlmPhase.DramaticArc,
                             temperature,
+                            GeneratorDefaultConfigs.DramaticArc.Temperature,
                             maxTokens,
-                            phase: LlmPhase.DramaticArc,
-                            ct: cancellationToken)
+                            GeneratorDefaultConfigs.DramaticArc.MaxTokens,
+                            onDegraded: null,
+                            _options.OnDiagnostic,
+                            LlmOptionalTextGeneration.CancellationBehavior.Throw,
+                            cancellationToken,
+                            passCancellationTokenToTransport: true)
                         .ConfigureAwait(false);
                 }
                 catch (OperationCanceledException)
@@ -206,6 +215,11 @@ namespace Pinder.SessionSetup
             /// Opt-in callback triggered when generation is degraded (e.g. recoverable transport failure or empty output).
             /// </summary>
             public Action<SetupGenerationResult>? OnDegraded { get; set; }
+
+            /// <summary>
+            /// Opt-in operational diagnostic sink. Null keeps diagnostics disabled.
+            /// </summary>
+            public Action<OperationalDiagnosticEvent>? OnDiagnostic { get; set; }
         }
     }
 }

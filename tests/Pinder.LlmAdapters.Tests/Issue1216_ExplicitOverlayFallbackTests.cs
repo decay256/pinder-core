@@ -29,9 +29,9 @@ namespace Pinder.LlmAdapters.Tests
                 => Task.FromResult(_response);
         }
 
-        // 1. STEERING HARDCODED FALLBACK REMOVED (RED)
+        // 1. STEERING HARDCODED FALLBACK REMOVED
         [Fact]
-        public async Task GetSteeringQuestionAsync_WhenTransportReturnsEmpty_DoesNotReturnHardcodedFallback()
+        public async Task GetSteeringQuestionAsync_WhenConfiguredPromptMissing_ThrowsBeforeTransportCall()
         {
             // Arrange
             var transport = new FixedResponseTransport("");
@@ -45,12 +45,11 @@ namespace Pinder.LlmAdapters.Tests
                 conversationHistory: new List<(string, string)> { ("O", "Hi") }
             );
 
-            // Act
-            var result = await adapter.GetSteeringQuestionAsync(context);
+            // Act / Assert
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+                () => adapter.GetSteeringQuestionAsync(context));
 
-            // Assert
-            Assert.NotEqual("so... when are we doing this?", result);
-            Assert.True(string.IsNullOrWhiteSpace(result));
+            Assert.Contains("steering_prompt", ex.Message);
         }
 
         // 2. OVERLAY-DEGRADATION CALLBACK EXISTS (RED via reflection)

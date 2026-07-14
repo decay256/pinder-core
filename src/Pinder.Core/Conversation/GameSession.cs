@@ -294,7 +294,7 @@ namespace Pinder.Core.Conversation
                 _onDiagnostic,
                 _maxDeliveryWords);
 
-            var dateeResponseStage = new DateeResponseStage(_llm);
+            var dateeResponseStage = new DateeResponseStage(_llm, _onDiagnostic);
 
             return new TurnOrchestrator(
                 _llm,
@@ -307,6 +307,7 @@ namespace Pinder.Core.Conversation
                 _maxDialogueOptions,
                 _onShadowFilterTrace,
                 _onRuleResolution,
+                _onDiagnostic,
                 _hungerForIntimacy,
                 _terrorOfRejection);
         }

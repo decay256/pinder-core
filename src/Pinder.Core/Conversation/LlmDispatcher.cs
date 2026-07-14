@@ -189,6 +189,11 @@ namespace Pinder.Core.Conversation
                     }
 
                     wasteTracker?.RecordNonWaste();
+                    EmitSpeculativeBranchAdopted(
+                        onDiagnostic,
+                        turnNumber,
+                        shadowType,
+                        wasteTracker);
                     return (shadowResult, applied);
                 }
                 else
@@ -288,7 +293,37 @@ namespace Pinder.Core.Conversation
                     "LlmDispatcher",
                     "SpeculativeOverlayDispatchDecision",
                     OperationalDiagnosticSeverity.Info,
-                    message));
+                    message,
+                    operationKind: OperationalDiagnosticOperationKind.SpeculativeBranch,
+                    phaseCode: LlmPhase.ShadowCorruption,
+                    lifecycle: OperationalDiagnosticLifecycle.Phase,
+                    branchId: BuildBranchId(turnNumber, shadowType),
+                    branchStatus: OperationalDiagnosticBranchStatus.Started));
+        }
+
+        private static void EmitSpeculativeBranchAdopted(
+            Action<OperationalDiagnosticEvent>? onDiagnostic,
+            int turnNumber,
+            ShadowStatType shadowType,
+            SpeculativeWasteTracker? wasteTracker)
+        {
+            string message = "Speculative shadow overlay result was adopted: "
+                + $"turn={turnNumber}; "
+                + $"shadow={shadowType}; "
+                + $"counter={FormatNullable(wasteTracker?.DiagnosticCounter)}.";
+
+            OperationalDiagnostics.Emit(
+                onDiagnostic,
+                new OperationalDiagnosticEvent(
+                    "LlmDispatcher",
+                    "SpeculativeOverlayAdopted",
+                    OperationalDiagnosticSeverity.Info,
+                    message,
+                    operationKind: OperationalDiagnosticOperationKind.SpeculativeBranch,
+                    phaseCode: LlmPhase.ShadowCorruption,
+                    lifecycle: OperationalDiagnosticLifecycle.Phase,
+                    branchId: BuildBranchId(turnNumber, shadowType),
+                    branchStatus: OperationalDiagnosticBranchStatus.Adopted));
         }
 
         private static void EmitSpeculativeWastedRerun(
@@ -317,7 +352,18 @@ namespace Pinder.Core.Conversation
                     "LlmDispatcher",
                     "SpeculativeOverlayWastedRerun",
                     OperationalDiagnosticSeverity.Info,
-                    message));
+                    message,
+                    operationKind: OperationalDiagnosticOperationKind.SpeculativeBranch,
+                    phaseCode: LlmPhase.ShadowCorruption,
+                    lifecycle: OperationalDiagnosticLifecycle.Phase,
+                    branchId: BuildBranchId(turnNumber, shadowType),
+                    branchStatus: OperationalDiagnosticBranchStatus.Discarded));
+        }
+
+        private static string BuildBranchId(int turnNumber, ShadowStatType shadowType)
+        {
+            return "shadow:" + turnNumber.ToString(System.Globalization.CultureInfo.InvariantCulture)
+                + ":" + shadowType.ToString();
         }
 
         private static string FormatNullable(int? value)

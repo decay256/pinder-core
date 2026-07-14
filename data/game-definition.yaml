@@ -601,6 +601,9 @@ horniness_time_modifiers:
   overnight: 3    # 00:00-08:59
 
 steering_prompt: |
+  CONVERSATION SO FAR:
+  {conversation_history}
+
   You are writing as {player_name} on Pinder — a satirical comedy dating app for sentient penises.
   The character just sent: "{delivered_message}"
 
@@ -621,6 +624,9 @@ steering_prompt: |
   Output only the question. No preamble. It will be appended directly to the delivered message.
 
 horniness_prompt: |
+  CONVERSATION SO FAR:
+  {conversation_history}
+
   You are writing as {player_name} on Pinder â€” a satirical comedy dating app for sentient penises.
   The character just sent: "{delivered_message}"
 

@@ -27,10 +27,14 @@ namespace Pinder.Core.Conversation
     internal class DateeResponseStage
     {
         private readonly ILlmAdapter _llm;
+        private readonly Action<OperationalDiagnosticEvent>? _onDiagnostic;
 
-        public DateeResponseStage(ILlmAdapter llm)
+        public DateeResponseStage(
+            ILlmAdapter llm,
+            Action<OperationalDiagnosticEvent>? onDiagnostic = null)
         {
             _llm = llm ?? throw new ArgumentNullException(nameof(llm));
+            _onDiagnostic = onDiagnostic;
         }
 
         public async Task<DateeResponseStageResult> ExecuteAsync(
@@ -88,32 +92,113 @@ namespace Pinder.Core.Conversation
 
             progress?.Report(new TurnProgressEvent(TurnProgressStage.DateeResponseStarted));
 
-            DateeResponse dateeResponse;
-            if (_llm is Pinder.Core.Interfaces.IStatefulLlmAdapter statefulLlm)
-            {
-                var statefulResult = await statefulLlm.GetDateeResponseAsync(
-                    dateeContext,
-                    state.DateeHistory,
-                    ct).ConfigureAwait(false);
-                if (statefulResult == null)
-                    throw new InvalidOperationException("LLM adapter returned null stateful datee result");
-                dateeResponse = statefulResult.Response;
-                if (dateeResponse == null)
-                    throw new InvalidOperationException("LLM adapter returned null datee response");
-                if (statefulResult.NewHistoryEntries != null)
-                {
-                    foreach (var entry in statefulResult.NewHistoryEntries)
+            string callId = OperationalDiagnostics.CreateCallId();
+            OperationalDiagnostics.Emit(
+                _onDiagnostic,
+                new OperationalDiagnosticEvent(
+                    "DateeResponseStage",
+                    "DateeResponseStarted",
+                    OperationalDiagnosticSeverity.Info,
+                    "Datee response operation started.",
+                    operationKind: OperationalDiagnosticOperationKind.DateeResponse,
+                    phaseCode: LlmPhase.OpponentResponse,
+                    lifecycle: OperationalDiagnosticLifecycle.Start,
+                    callId: callId,
+                    correlationHints: new Dictionary<string, string>
                     {
-                        if (entry != null)
-                            state.DateeHistory.Add(entry);
+                        ["turn"] = state.TurnNumber.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    }));
+
+            DateeResponse dateeResponse;
+            try
+            {
+                if (_llm is Pinder.Core.Interfaces.IStatefulLlmAdapter statefulLlm)
+                {
+                    var statefulResult = await statefulLlm.GetDateeResponseAsync(
+                        dateeContext,
+                        state.DateeHistory,
+                        ct).ConfigureAwait(false);
+                    if (statefulResult == null)
+                        throw new InvalidOperationException("LLM adapter returned null stateful datee result");
+                    dateeResponse = statefulResult.Response;
+                    if (dateeResponse == null)
+                        throw new InvalidOperationException("LLM adapter returned null datee response");
+                    if (statefulResult.NewHistoryEntries != null)
+                    {
+                        foreach (var entry in statefulResult.NewHistoryEntries)
+                        {
+                            if (entry != null)
+                                state.DateeHistory.Add(entry);
+                        }
                     }
                 }
+                else
+                {
+                    dateeResponse = await _llm.GetDateeResponseAsync(dateeContext, ct).ConfigureAwait(false);
+                    if (dateeResponse == null)
+                        throw new InvalidOperationException("LLM adapter returned null datee response");
+                }
+
+                OperationalDiagnostics.Emit(
+                    _onDiagnostic,
+                    new OperationalDiagnosticEvent(
+                        "DateeResponseStage",
+                        "DateeResponseSucceeded",
+                        OperationalDiagnosticSeverity.Info,
+                        "Datee response operation succeeded.",
+                        operationKind: OperationalDiagnosticOperationKind.DateeResponse,
+                        phaseCode: LlmPhase.OpponentResponse,
+                        lifecycle: OperationalDiagnosticLifecycle.Terminal,
+                        outcome: OperationalDiagnosticOutcome.Succeeded,
+                        callId: callId,
+                        correlationHints: new Dictionary<string, string>
+                        {
+                            ["turn"] = state.TurnNumber.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                        }));
             }
-            else
+            catch (OperationCanceledException ex)
             {
-                dateeResponse = await _llm.GetDateeResponseAsync(dateeContext, ct).ConfigureAwait(false);
-                if (dateeResponse == null)
-                    throw new InvalidOperationException("LLM adapter returned null datee response");
+                OperationalDiagnostics.Emit(
+                    _onDiagnostic,
+                    new OperationalDiagnosticEvent(
+                        "DateeResponseStage",
+                        "DateeResponseCancelled",
+                        OperationalDiagnosticSeverity.Warning,
+                        "Datee response operation was cancelled.",
+                        ex,
+                        OperationalDiagnosticOperationKind.DateeResponse,
+                        LlmPhase.OpponentResponse,
+                        OperationalDiagnosticLifecycle.Terminal,
+                        OperationalDiagnosticOutcome.Cancelled,
+                        OperationalDiagnosticFailureClassification.Cancelled,
+                        callId: callId,
+                        correlationHints: new Dictionary<string, string>
+                        {
+                            ["turn"] = state.TurnNumber.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                        }));
+                throw;
+            }
+            catch (Exception ex)
+            {
+                OperationalDiagnostics.Emit(
+                    _onDiagnostic,
+                    new OperationalDiagnosticEvent(
+                        "DateeResponseStage",
+                        "DateeResponseFailed",
+                        OperationalDiagnosticSeverity.Error,
+                        "Datee response operation failed.",
+                        ex,
+                        OperationalDiagnosticOperationKind.DateeResponse,
+                        LlmPhase.OpponentResponse,
+                        OperationalDiagnosticLifecycle.Terminal,
+                        OperationalDiagnosticOutcome.Failed,
+                        OperationalDiagnostics.ClassifyException(ex),
+                        callId: callId,
+                        correlationHints: new Dictionary<string, string>
+                        {
+                            ["turn"] = state.TurnNumber.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                        }));
+                throw;
             }
 
             string dateeMessage = dateeResponse.MessageText;

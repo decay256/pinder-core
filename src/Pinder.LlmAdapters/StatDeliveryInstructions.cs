@@ -19,19 +19,25 @@ namespace Pinder.LlmAdapters
     public sealed class StatDeliveryInstructions : IStatDeliveryInstructionProvider
     {
         private const string OverlayPromptTemplatesSection = "overlay_prompt_templates";
+        private const string SuccessImprovementPromptTemplateKey = "success_improvement_prompt_template";
         private static readonly object DefaultLoadLock = new object();
         private static bool defaultLoadAttempted;
         private static StatDeliveryInstructions? defaultInstructions;
 
         private readonly Dictionary<string, Dictionary<string, string>> _instructions;
         private readonly Dictionary<string, OverlayPromptTemplate> _overlayPromptTemplates;
+        private readonly string? _successImprovementPromptTemplate;
 
         private StatDeliveryInstructions(
             Dictionary<string, Dictionary<string, string>> instructions,
-            Dictionary<string, OverlayPromptTemplate>? overlayPromptTemplates = null)
+            Dictionary<string, OverlayPromptTemplate>? overlayPromptTemplates = null,
+            string? successImprovementPromptTemplate = null)
         {
             _instructions = instructions ?? new Dictionary<string, Dictionary<string, string>>();
             _overlayPromptTemplates = overlayPromptTemplates ?? new Dictionary<string, OverlayPromptTemplate>(StringComparer.OrdinalIgnoreCase);
+            _successImprovementPromptTemplate = string.IsNullOrWhiteSpace(successImprovementPromptTemplate)
+                ? null
+                : successImprovementPromptTemplate;
         }
 
         /// <summary>
@@ -130,6 +136,11 @@ namespace Pinder.LlmAdapters
             return null;
         }
 
+        internal string? GetSuccessImprovementPromptTemplate()
+        {
+            return _successImprovementPromptTemplate;
+        }
+
         private static string ShadowKey(Pinder.Core.Stats.ShadowStatType shadow)
         {
             switch (shadow)
@@ -198,6 +209,7 @@ namespace Pinder.LlmAdapters
 
                 var result = new Dictionary<string, Dictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
                 var overlayPromptTemplates = ParseOverlayPromptTemplates(root);
+                var successImprovementPromptTemplate = ParseSuccessImprovementPromptTemplate(root);
 
                 // Parse delivery_instructions (flat stat → tier → text)
                 foreach (var statEntry in statMap)
@@ -277,7 +289,7 @@ namespace Pinder.LlmAdapters
                     }
                 }
 
-                return new StatDeliveryInstructions(result, overlayPromptTemplates);
+                return new StatDeliveryInstructions(result, overlayPromptTemplates, successImprovementPromptTemplate);
             }
             catch (ConfigurationException)
             {
@@ -359,6 +371,15 @@ namespace Pinder.LlmAdapters
             }
 
             return templates;
+        }
+
+        private static string? ParseSuccessImprovementPromptTemplate(Dictionary<string, object> root)
+        {
+            if (!root.TryGetValue(SuccessImprovementPromptTemplateKey, out var templateObj))
+                return null;
+
+            string template = templateObj?.ToString() ?? "";
+            return string.IsNullOrWhiteSpace(template) ? null : template;
         }
 
         private static string GetTemplateField(Dictionary<object, object> fields, string key)

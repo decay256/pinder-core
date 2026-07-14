@@ -108,6 +108,26 @@ namespace Pinder.LlmAdapters.Tests
             Assert.DoesNotContain("absolute lunatic", source);
         }
 
+        [Fact]
+        public async Task PinderLlmAdapter_MissingOverlayPromptTemplate_ThrowsBeforeTransportCall()
+        {
+            var transport = new CapturingTransport("unused");
+            var adapter = new PinderLlmAdapter(
+                transport,
+                new PinderLlmAdapterOptions
+                {
+                    GameDefinition = GameDefinition.PinderDefaults,
+                    StatDeliveryInstructions = StatDeliveryInstructions.LoadFrom(MissingHorninessTemplateYaml),
+                });
+
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+                () => adapter.ApplyHorninessOverlayAsync("original", "instruction"));
+
+            Assert.Contains("horniness_overlay", ex.Message);
+            Assert.Contains("overlay_prompt_templates", ex.Message);
+            Assert.Empty(transport.Calls);
+        }
+
         private static PinderLlmAdapter CreateAdapter(ILlmTransport transport)
         {
             return new PinderLlmAdapter(
@@ -173,6 +193,22 @@ overlay_prompt_templates:
     system: ""SYS shadow {shadow}""
     user: ""USER shadow {shadow} {instruction} {message}""
     user_with_archetype: ""ARCH shadow {shadow} {archetype_directive} {instruction} {message}""
+";
+
+        private const string MissingHorninessTemplateYaml = @"
+delivery_instructions:
+  charm:
+    strong: ""stat instruction""
+  horniness_overlay:
+    fumble: ""horniness instruction""
+shadow_corruption:
+  madness:
+    fumble: ""shadow instruction""
+overlay_prompt_templates:
+  version: 1
+  trap_overlay:
+    system: ""SYS trap {datee_context}""
+    user: ""USER trap {trap_name} {instruction} {message}""
 ";
     }
 }

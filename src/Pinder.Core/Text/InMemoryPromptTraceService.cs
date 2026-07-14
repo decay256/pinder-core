@@ -142,6 +142,11 @@ namespace Pinder.Core.Text
         /// <inheritdoc />
         public void RecordModelResponse(string response, string? callId = null)
         {
+            RecordModelResponseCore(response, string.IsNullOrWhiteSpace(callId) ? null : callId);
+        }
+
+        private void RecordModelResponseCore(string response, string? callId)
+        {
             var scope = _scope.Value;
             if (scope is null) return;
             lock (_lock)

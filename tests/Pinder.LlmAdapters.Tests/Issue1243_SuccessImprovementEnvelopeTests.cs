@@ -47,6 +47,14 @@ delivery_instructions:
 shadow_corruption:
   madness:
     fumble: ""mock madness""
+success_improvement_prompt_template: |-
+  CONFIGURED SUCCESS {tier_upper} {stat}
+  TIER KEY: {tier}
+  HISTORY:
+  {conversation_history}
+  DELIVERED: {delivered_message}
+  INSTRUCTION:
+  {instruction}
 ";
             var instructions = StatDeliveryInstructions.LoadFrom(yamlContent);
 
@@ -89,11 +97,25 @@ shadow_corruption:
 
             var promptText = transport.UserMessage + transport.SystemPrompt;
 
-            Assert.Contains("SUCCESS_IMPROVEMENT", promptText, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("STRONG", promptText, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("Charm", promptText, StringComparison.OrdinalIgnoreCase);
-            // Must contain a strict format constraint for the player avatar message
-            Assert.Matches("(?i)(ONE|single|only).*PLAYER AVATAR message", promptText);
+            Assert.Contains("CONFIGURED SUCCESS STRONG Charm", promptText);
+            Assert.Contains("Datee: Tell me about yourself.", promptText);
+            Assert.Contains("rewrite the intended message so it lands harder: I like to code.", promptText);
+        }
+
+        [Fact]
+        public async Task B1b_EnvelopeContent_ComesFromConfiguredTemplate()
+        {
+            var adapter = CreateAdapter("Some response.", out var transport, out _);
+            var context = CreateContext();
+
+            await adapter.GetSuccessImprovementAsync(context);
+
+            Assert.Contains("CONFIGURED SUCCESS STRONG Charm", transport.UserMessage);
+            Assert.DoesNotContain("<ENGINE_STATE>", transport.UserMessage);
+            Assert.DoesNotContain("CALL PURPOSE: SUCCESS_IMPROVEMENT", transport.UserMessage);
+            Assert.DoesNotContain("CONVERSATION SO FAR:", transport.UserMessage);
         }
 
         [Fact]

@@ -227,10 +227,13 @@ namespace Pinder.Core.Tests.Conversation
                 tracker,
                 diagnostics.Add);
 
-            var evt = Assert.Single(diagnostics);
+            Assert.Equal(2, diagnostics.Count);
+            var evt = diagnostics[0];
             Assert.Equal("LlmDispatcher", evt.Source);
             Assert.Equal("SpeculativeOverlayDispatchDecision", evt.EventName);
             Assert.Equal(OperationalDiagnosticSeverity.Info, evt.Severity);
+            Assert.Equal(OperationalDiagnosticOperationKind.SpeculativeBranch, evt.OperationKind);
+            Assert.Equal(OperationalDiagnosticBranchStatus.Started, evt.BranchStatus);
             Assert.Contains("mode=parallel", evt.Message);
             Assert.Contains("turn=7", evt.Message);
             Assert.Contains("shadow=Dread", evt.Message);
@@ -241,6 +244,11 @@ namespace Pinder.Core.Tests.Conversation
             Assert.DoesNotContain("datee-context", evt.Message);
             Assert.DoesNotContain("Trap Output", evt.Message);
             Assert.DoesNotContain("Shadow Output", evt.Message);
+
+            var adopted = diagnostics[1];
+            Assert.Equal("SpeculativeOverlayAdopted", adopted.EventName);
+            Assert.Equal(OperationalDiagnosticBranchStatus.Adopted, adopted.BranchStatus);
+            Assert.Equal(evt.BranchId, adopted.BranchId);
         }
 
         [Fact]
@@ -313,6 +321,43 @@ namespace Pinder.Core.Tests.Conversation
             Assert.Equal("SpeculativeOverlayDispatchDecision", evt.EventName);
             Assert.Contains("mode=sequential", evt.Message);
             Assert.DoesNotContain("SpeculativeOverlayWastedRerun", evt.Message);
+        }
+
+        [Fact]
+        public async Task Dispatcher_ConcurrentTurns_KeepSpeculativeBranchIdsIsolated()
+        {
+            var diagnostics = new List<OperationalDiagnosticEvent>();
+            var textDiffsA = new List<TextDiff>();
+            var textDiffsB = new List<TextDiff>();
+
+            await Task.WhenAll(
+                LlmDispatcher.DispatchSpeculativeCallsAsync(
+                    new MockLlmAdapter { TrapResponse = "ECHO", ShadowResponse = "Shadow A" },
+                    "Original A",
+                    runTrap: true, "trap-instruction-a", "trap-a", "datee-context-a",
+                    runShadow: true, "shadow-instruction-a", ShadowStatType.Dread,
+                    "", textDiffsA, null, 21, null, CancellationToken.None,
+                    new SpeculativeWasteTracker(),
+                    diagnostics.Add),
+                LlmDispatcher.DispatchSpeculativeCallsAsync(
+                    new MockLlmAdapter { TrapResponse = "ECHO", ShadowResponse = "Shadow B" },
+                    "Original B",
+                    runTrap: true, "trap-instruction-b", "trap-b", "datee-context-b",
+                    runShadow: true, "shadow-instruction-b", ShadowStatType.Despair,
+                    "", textDiffsB, null, 22, null, CancellationToken.None,
+                    new SpeculativeWasteTracker(),
+                    diagnostics.Add));
+
+            Assert.Contains(diagnostics, d =>
+                d.BranchId == "shadow:21:Dread"
+                && d.BranchStatus == OperationalDiagnosticBranchStatus.Adopted);
+            Assert.Contains(diagnostics, d =>
+                d.BranchId == "shadow:22:Despair"
+                && d.BranchStatus == OperationalDiagnosticBranchStatus.Adopted);
+            Assert.DoesNotContain(diagnostics, d => d.Message.Contains("Original A"));
+            Assert.DoesNotContain(diagnostics, d => d.Message.Contains("Original B"));
+            Assert.DoesNotContain(diagnostics, d => d.Message.Contains("trap-instruction"));
+            Assert.DoesNotContain(diagnostics, d => d.Message.Contains("shadow-instruction"));
         }
     }
 }

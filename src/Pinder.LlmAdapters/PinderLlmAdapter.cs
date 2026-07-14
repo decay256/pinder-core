@@ -79,8 +79,12 @@ namespace Pinder.LlmAdapters
                             _options.MaxTokens,
                             context,
                             GetExpectedDialogueOptionCount(context, gameDef));
-                        var structuredResponse = await structuredTransport
-                            .SendStructuredAsync(request, ct)
+                        var structuredResponse = await SendStructuredWithDiagnosticsAsync(
+                                structuredTransport,
+                                request,
+                                LlmPhase.DialogueOptions,
+                                context.CurrentTurn,
+                                ct)
                             .ConfigureAwait(false);
                         try
                         {
@@ -131,7 +135,15 @@ namespace Pinder.LlmAdapters
                     }
                     else
                     {
-                        var responseText = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.DialogueOptions, ct: ct)
+                        var responseText = await SendWithDiagnosticsAsync(
+                                _transport,
+                                systemPrompt,
+                                userContent,
+                                temperature,
+                                _options.MaxTokens,
+                                LlmPhase.DialogueOptions,
+                                context.CurrentTurn,
+                                ct)
                             .ConfigureAwait(false);
 
                         parsedOptions = ParseDialogueOptionsFromTextOrJson(
@@ -218,7 +230,7 @@ namespace Pinder.LlmAdapters
                     if (history.Count == 0)
                     {
                         // No prior turns — single-shot.
-                        responseText = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.OpponentResponse, ct: cancellationToken)
+                        responseText = await SendWithDiagnosticsAsync(_transport, systemPrompt, userContent, temperature, _options.MaxTokens, LlmPhase.OpponentResponse, context.CurrentTurn, cancellationToken)
                             .ConfigureAwait(false);
                     }
                     else
@@ -336,7 +348,7 @@ namespace Pinder.LlmAdapters
 
             try
             {
-                var responseText = await _transport.SendAsync(systemPrompt, userContent, temperature, _options.MaxTokens, phase: LlmPhase.InterestChangeBeat, ct: ct)
+                var responseText = await SendWithDiagnosticsAsync(_transport, systemPrompt, userContent, temperature, _options.MaxTokens, LlmPhase.InterestChangeBeat, null, ct)
                     .ConfigureAwait(false);
 
                 var trimmed = responseText?.Trim();
@@ -407,7 +419,7 @@ namespace Pinder.LlmAdapters
             try
             {
                 double temperature = _options.DeliveryTemperature ?? LlmPhaseTemperatures.OverlayRewrite;
-                var result = await _overlayTransport.SendAsync(prompt.SystemPrompt, prompt.UserContent, temperature, _options.MaxTokens, phase: LlmPhase.HorninessOverlay, ct: ct)
+                var result = await SendWithDiagnosticsAsync(_overlayTransport, prompt.SystemPrompt, prompt.UserContent, temperature, _options.MaxTokens, LlmPhase.HorninessOverlay, null, ct)
                     .ConfigureAwait(false);
 
                 if (string.IsNullOrWhiteSpace(result))
@@ -495,7 +507,7 @@ namespace Pinder.LlmAdapters
             try
             {
                 double temperature = _options.DeliveryTemperature ?? LlmPhaseTemperatures.OverlayRewrite;
-                var result = await _overlayTransport.SendAsync(prompt.SystemPrompt, prompt.UserContent, temperature, _options.MaxTokens, phase: LlmPhase.TrapOverlay, ct: ct)
+                var result = await SendWithDiagnosticsAsync(_overlayTransport, prompt.SystemPrompt, prompt.UserContent, temperature, _options.MaxTokens, LlmPhase.TrapOverlay, null, ct)
                     .ConfigureAwait(false);
 
                 if (string.IsNullOrWhiteSpace(result))
@@ -582,7 +594,7 @@ namespace Pinder.LlmAdapters
             try
             {
                 double temperature = _options.DeliveryTemperature ?? LlmPhaseTemperatures.OverlayRewrite;
-                var result = await _overlayTransport.SendAsync(prompt.SystemPrompt, prompt.UserContent, temperature, _options.MaxTokens, phase: LlmPhase.Delivery, ct: ct)
+                var result = await SendWithDiagnosticsAsync(_overlayTransport, prompt.SystemPrompt, prompt.UserContent, temperature, _options.MaxTokens, LlmPhase.Delivery, null, ct)
                     .ConfigureAwait(false);
 
                 if (string.IsNullOrWhiteSpace(result))
@@ -664,7 +676,7 @@ namespace Pinder.LlmAdapters
             try
             {
                 double temperature = _options.DeliveryTemperature ?? LlmPhaseTemperatures.OverlayRewrite;
-                var result = await _overlayTransport.SendAsync(prompt.SystemPrompt, prompt.UserContent, temperature, _options.MaxTokens, phase: LlmPhase.ShadowCorruption, ct: ct)
+                var result = await SendWithDiagnosticsAsync(_overlayTransport, prompt.SystemPrompt, prompt.UserContent, temperature, _options.MaxTokens, LlmPhase.ShadowCorruption, null, ct)
                     .ConfigureAwait(false);
 
                 if (string.IsNullOrWhiteSpace(result))
@@ -726,11 +738,8 @@ namespace Pinder.LlmAdapters
 
             var gameDef = RequireGameDefinition();
 
-            string template = null;
-            if (_options.StatDeliveryInstructions != null)
-            {
-                template = _options.StatDeliveryInstructions.Get(context.Stat, context.TierKey);
-            }
+            var instructions = _options.StatDeliveryInstructions ?? StatDeliveryInstructions.TryLoadDefault();
+            string template = instructions?.Get(context.Stat, context.TierKey);
 
             if (string.IsNullOrWhiteSpace(template))
             {
@@ -744,27 +753,44 @@ namespace Pinder.LlmAdapters
                 return context.DeliveredMessage;
             }
 
-            string prompt = template
-                .Replace("{player_name}", context.PlayerName)
-                .Replace("{datee_name}", context.DateeName)
-                .Replace("{delivered_message}", context.DeliveredMessage);
+            string instruction = PromptCatalog.Substitute(
+                template,
+                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ["player_name"] = context.PlayerName,
+                    ["datee_name"] = context.DateeName,
+                    ["delivered_message"] = context.DeliveredMessage,
+                });
 
-            var sb = new StringBuilder();
-            sb.AppendLine("<ENGINE_STATE>");
-            sb.AppendLine("[ENGINE — CALL PURPOSE: SUCCESS_IMPROVEMENT]");
-            sb.AppendLine($"Delivery outcome / tier: {(context.TierKey ?? "").ToUpperInvariant()}");
-            sb.AppendLine($"Selected stat: {context.Stat}");
-            sb.AppendLine($"Current delivered PLAYER AVATAR message: \"{context.DeliveredMessage}\"");
-            sb.AppendLine("Output requirement: return ONE rewritten PLAYER AVATAR message only — sharper wording, same voice. No analysis, no OPTIONS, no engine commentary, no ENGINE_STATE echo.");
-            sb.AppendLine("</ENGINE_STATE>");
-            sb.AppendLine();
-            AppendConfiguredConversationHistory(sb, context.ConversationHistory);
-            sb.AppendLine();
-            sb.AppendLine(prompt);
+            string envelope = RequireConfiguredPrompt(
+                instructions?.GetSuccessImprovementPromptTemplate() ?? "",
+                "success_improvement_prompt_template",
+                nameof(GetSuccessImprovementAsync));
+
+            string userContent = RenderRequiredTemplate(
+                envelope,
+                "success_improvement_prompt_template",
+                nameof(GetSuccessImprovementAsync),
+                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ["player_name"] = context.PlayerName,
+                    ["datee_name"] = context.DateeName,
+                    ["delivered_message"] = context.DeliveredMessage,
+                    ["tier"] = context.TierKey ?? string.Empty,
+                    ["tier_upper"] = (context.TierKey ?? string.Empty).ToUpperInvariant(),
+                    ["stat"] = context.Stat.ToString(),
+                    ["conversation_history"] = FormatConversationHistory(context.ConversationHistory),
+                    ["instruction"] = instruction,
+                },
+                "tier",
+                "stat",
+                "delivered_message",
+                "conversation_history",
+                "instruction");
 
             string systemPrompt = SessionSystemPromptBuilder.BuildPlayerAvatar(context.PlayerAvatarPrompt, gameDef);
 
-            var responseText = await _transport.SendAsync(systemPrompt, sb.ToString(), 0.8, _options.MaxTokens, phase: LlmPhase.Delivery, ct: ct)
+            var responseText = await SendWithDiagnosticsAsync(_transport, systemPrompt, userContent, 0.8, _options.MaxTokens, LlmPhase.Delivery, null, ct)
                 .ConfigureAwait(false);
 
             var improved = (responseText ?? string.Empty).Trim();
@@ -805,23 +831,27 @@ namespace Pinder.LlmAdapters
 
             var gameDef = RequireGameDefinition();
 
-            string template = gameDef.SteeringPrompt;
-            if (string.IsNullOrWhiteSpace(template))
-                template = GameDefinition.DefaultSteeringPrompt;
+            string template = RequireConfiguredPrompt(
+                gameDef.SteeringPrompt,
+                "steering_prompt",
+                nameof(GetSteeringQuestionAsync));
 
-            string prompt = template
-                .Replace("{player_name}", context.PlayerName)
-                .Replace("{datee_name}", context.DateeName)
-                .Replace("{delivered_message}", context.DeliveredMessage);
-
-            var sb = new StringBuilder();
-            AppendConfiguredConversationHistory(sb, context.ConversationHistory);
-            sb.AppendLine();
-            sb.AppendLine(prompt);
+            string prompt = RenderRequiredTemplate(
+                template,
+                "steering_prompt",
+                nameof(GetSteeringQuestionAsync),
+                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ["player_name"] = context.PlayerName,
+                    ["datee_name"] = context.DateeName,
+                    ["delivered_message"] = context.DeliveredMessage,
+                    ["conversation_history"] = FormatConversationHistory(context.ConversationHistory),
+                },
+                "conversation_history");
 
             string systemPrompt = SessionSystemPromptBuilder.BuildPlayerAvatar(context.PlayerAvatarPrompt, gameDef);
 
-            var responseText = await _transport.SendAsync(systemPrompt, sb.ToString(), 0.9, _options.MaxTokens, phase: LlmPhase.Steering, ct: ct)
+            var responseText = await SendWithDiagnosticsAsync(_transport, systemPrompt, prompt, 0.9, _options.MaxTokens, LlmPhase.Steering, null, ct)
                 .ConfigureAwait(false);
 
             // #831: thinking-block stripping moved to
@@ -858,19 +888,22 @@ namespace Pinder.LlmAdapters
                 "horniness_prompt",
                 nameof(GetHorninessQuestionAsync));
 
-            string prompt = template
-                .Replace("{player_name}", context.PlayerName)
-                .Replace("{datee_name}", context.DateeName)
-                .Replace("{delivered_message}", context.DeliveredMessage);
-
-            var sb = new StringBuilder();
-            AppendConfiguredConversationHistory(sb, context.ConversationHistory);
-            sb.AppendLine();
-            sb.AppendLine(prompt);
+            string prompt = RenderRequiredTemplate(
+                template,
+                "horniness_prompt",
+                nameof(GetHorninessQuestionAsync),
+                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ["player_name"] = context.PlayerName,
+                    ["datee_name"] = context.DateeName,
+                    ["delivered_message"] = context.DeliveredMessage,
+                    ["conversation_history"] = FormatConversationHistory(context.ConversationHistory),
+                },
+                "conversation_history");
 
             string systemPrompt = SessionSystemPromptBuilder.BuildPlayerAvatar(context.PlayerAvatarPrompt, gameDef);
 
-            var responseText = await _transport.SendAsync(systemPrompt, sb.ToString(), 0.9, _options.MaxTokens, phase: LlmPhase.HorninessOverlay, ct: ct)
+            var responseText = await SendWithDiagnosticsAsync(_transport, systemPrompt, prompt, 0.9, _options.MaxTokens, LlmPhase.HorninessOverlay, null, ct)
                 .ConfigureAwait(false);
 
             var question = (responseText ?? string.Empty).Trim();
@@ -957,13 +990,15 @@ namespace Pinder.LlmAdapters
             var userTrace = new PromptTraceResult(contextBuilder.ToString(), contextBuilder.Spans);
             InMemoryPromptTraceService.Instance.RecordTrace(phase, userTrace);
 
-            return _transport.SendAsync(
+            return SendWithDiagnosticsAsync(
+                _transport,
                 systemPrompt,
                 userTrace.Text,
                 temperature,
                 _options.MaxTokens,
-                phase: phase,
-                ct: ct);
+                phase,
+                null,
+                ct);
         }
 
         private static int GetExpectedDialogueOptionCount(DialogueContext context, GameDefinition gameDef)
@@ -1166,7 +1201,11 @@ namespace Pinder.LlmAdapters
             var instructions = _options.StatDeliveryInstructions ?? StatDeliveryInstructions.TryLoadDefault();
             var template = instructions?.GetOverlayPromptTemplate(overlayType);
             if (template == null)
-                return new RenderedOverlayPrompt(string.Empty, instruction + "\n\n" + message);
+            {
+                throw new InvalidOperationException(
+                    $"Production overlay '{overlayType}' is missing a configured overlay prompt template. " +
+                    $"Load data/delivery-instructions.yaml with overlay_prompt_templates.{overlayType} before calling the LLM adapter.");
+            }
 
             var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
@@ -1200,9 +1239,252 @@ namespace Pinder.LlmAdapters
             return rendered.Trim();
         }
 
+        private static string RenderRequiredTemplate(
+            string template,
+            string key,
+            string methodName,
+            IReadOnlyDictionary<string, string> values,
+            params string[] requiredTokens)
+        {
+            foreach (var token in requiredTokens)
+            {
+                if (template.IndexOf("{" + token + "}", StringComparison.Ordinal) < 0)
+                {
+                    throw new InvalidOperationException(
+                        $"Production path '{methodName}' has configured template '{key}' without required placeholder '{{{token}}}'.");
+                }
+            }
+
+            return PromptCatalog.Substitute(template, values).Trim();
+        }
+
+        private static string FormatConversationHistory(IEnumerable<(string Sender, string Text)> history)
+        {
+            var sb = new StringBuilder();
+            bool hasEntries = false;
+            foreach (var (sender, text) in history)
+            {
+                hasEntries = true;
+                sb.AppendLine($"{sender}: {text}");
+            }
+
+            return hasEntries
+                ? sb.ToString().TrimEnd()
+                : PromptTemplates.ConversationHistoryEmpty;
+        }
+
         private Action<OperationalDiagnosticEvent>? GetDiagnosticSink()
         {
             return _options.OnDiagnostic ?? PinderLlmAdapterOptions.DefaultOnDiagnostic;
+        }
+
+        private async Task<StructuredLlmResponse> SendStructuredWithDiagnosticsAsync(
+            IStructuredLlmTransport transport,
+            StructuredLlmRequest request,
+            string phase,
+            int? turnId,
+            CancellationToken ct)
+        {
+            var sink = GetDiagnosticSink();
+            string callId = OperationalDiagnostics.CreateCallId();
+            var hints = new Dictionary<string, string> { ["phase"] = phase };
+            if (turnId.HasValue)
+            {
+                hints["turn"] = turnId.Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            }
+
+            OperationalDiagnostics.Emit(
+                sink,
+                new OperationalDiagnosticEvent(
+                    "PinderLlmAdapter",
+                    "LlmTransportStarted",
+                    OperationalDiagnosticSeverity.Info,
+                    "Structured LLM transport operation started.",
+                    operationKind: MapOperationKind(phase),
+                    phaseCode: phase,
+                    lifecycle: OperationalDiagnosticLifecycle.Start,
+                    callId: callId,
+                    correlationHints: hints));
+
+            try
+            {
+                var result = await transport.SendStructuredAsync(request, ct).ConfigureAwait(false);
+                OperationalDiagnostics.Emit(
+                    sink,
+                    new OperationalDiagnosticEvent(
+                        "PinderLlmAdapter",
+                        "LlmTransportSucceeded",
+                        OperationalDiagnosticSeverity.Info,
+                        "Structured LLM transport operation succeeded.",
+                        operationKind: MapOperationKind(phase),
+                        phaseCode: phase,
+                        lifecycle: OperationalDiagnosticLifecycle.Terminal,
+                        outcome: OperationalDiagnosticOutcome.Succeeded,
+                        callId: callId,
+                        correlationHints: hints));
+                return result;
+            }
+            catch (OperationCanceledException ex)
+            {
+                OperationalDiagnostics.Emit(
+                    sink,
+                    new OperationalDiagnosticEvent(
+                        "PinderLlmAdapter",
+                        "LlmTransportCancelled",
+                        OperationalDiagnosticSeverity.Warning,
+                        "Structured LLM transport operation was cancelled.",
+                        ex,
+                        MapOperationKind(phase),
+                        phase,
+                        OperationalDiagnosticLifecycle.Terminal,
+                        OperationalDiagnosticOutcome.Cancelled,
+                        OperationalDiagnosticFailureClassification.Cancelled,
+                        callId: callId,
+                        correlationHints: hints));
+                throw;
+            }
+            catch (Exception ex)
+            {
+                OperationalDiagnostics.Emit(
+                    sink,
+                    new OperationalDiagnosticEvent(
+                        "PinderLlmAdapter",
+                        "LlmTransportFailed",
+                        OperationalDiagnosticSeverity.Error,
+                        "Structured LLM transport operation failed.",
+                        ex,
+                        MapOperationKind(phase),
+                        phase,
+                        OperationalDiagnosticLifecycle.Terminal,
+                        OperationalDiagnosticOutcome.Failed,
+                        OperationalDiagnostics.ClassifyException(ex),
+                        callId: callId,
+                        correlationHints: hints));
+                throw;
+            }
+        }
+
+        private async Task<string> SendWithDiagnosticsAsync(
+            ILlmTransport transport,
+            string systemPrompt,
+            string userContent,
+            double temperature,
+            int maxTokens,
+            string phase,
+            int? turnId,
+            CancellationToken ct)
+        {
+            var sink = GetDiagnosticSink();
+            string callId = OperationalDiagnostics.CreateCallId();
+            var hints = new Dictionary<string, string>
+            {
+                ["phase"] = phase,
+            };
+            if (turnId.HasValue)
+            {
+                hints["turn"] = turnId.Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            }
+
+            OperationalDiagnostics.Emit(
+                sink,
+                new OperationalDiagnosticEvent(
+                    "PinderLlmAdapter",
+                    "LlmTransportStarted",
+                    OperationalDiagnosticSeverity.Info,
+                    "LLM transport operation started.",
+                    operationKind: MapOperationKind(phase),
+                    phaseCode: phase,
+                    lifecycle: OperationalDiagnosticLifecycle.Start,
+                    callId: callId,
+                    correlationHints: hints));
+
+            try
+            {
+                string result = await transport
+                    .SendAsync(systemPrompt, userContent, temperature, maxTokens, phase: phase, ct: ct)
+                    .ConfigureAwait(false);
+
+                OperationalDiagnostics.Emit(
+                    sink,
+                    new OperationalDiagnosticEvent(
+                        "PinderLlmAdapter",
+                        "LlmTransportSucceeded",
+                        OperationalDiagnosticSeverity.Info,
+                        "LLM transport operation succeeded.",
+                        operationKind: MapOperationKind(phase),
+                        phaseCode: phase,
+                        lifecycle: OperationalDiagnosticLifecycle.Terminal,
+                        outcome: OperationalDiagnosticOutcome.Succeeded,
+                        callId: callId,
+                        correlationHints: hints));
+
+                return result;
+            }
+            catch (OperationCanceledException ex)
+            {
+                OperationalDiagnostics.Emit(
+                    sink,
+                    new OperationalDiagnosticEvent(
+                        "PinderLlmAdapter",
+                        "LlmTransportCancelled",
+                        OperationalDiagnosticSeverity.Warning,
+                        "LLM transport operation was cancelled.",
+                        ex,
+                        MapOperationKind(phase),
+                        phase,
+                        OperationalDiagnosticLifecycle.Terminal,
+                        OperationalDiagnosticOutcome.Cancelled,
+                        OperationalDiagnosticFailureClassification.Cancelled,
+                        callId: callId,
+                        correlationHints: hints));
+                throw;
+            }
+            catch (Exception ex)
+            {
+                OperationalDiagnostics.Emit(
+                    sink,
+                    new OperationalDiagnosticEvent(
+                        "PinderLlmAdapter",
+                        "LlmTransportFailed",
+                        OperationalDiagnosticSeverity.Error,
+                        "LLM transport operation failed.",
+                        ex,
+                        MapOperationKind(phase),
+                        phase,
+                        OperationalDiagnosticLifecycle.Terminal,
+                        OperationalDiagnosticOutcome.Failed,
+                        OperationalDiagnostics.ClassifyException(ex),
+                        callId: callId,
+                        correlationHints: hints));
+                throw;
+            }
+        }
+
+        private static string MapOperationKind(string phase)
+        {
+            if (string.Equals(phase, LlmPhase.DialogueOptions, StringComparison.Ordinal))
+            {
+                return OperationalDiagnosticOperationKind.DialogueOptions;
+            }
+
+            if (string.Equals(phase, LlmPhase.OpponentResponse, StringComparison.Ordinal))
+            {
+                return OperationalDiagnosticOperationKind.DateeResponse;
+            }
+
+            if (string.Equals(phase, LlmPhase.Delivery, StringComparison.Ordinal))
+            {
+                return OperationalDiagnosticOperationKind.Delivery;
+            }
+
+            if (string.Equals(phase, LlmPhase.HorninessOverlay, StringComparison.Ordinal)
+                || string.Equals(phase, LlmPhase.ShadowCorruption, StringComparison.Ordinal)
+                || string.Equals(phase, LlmPhase.TrapOverlay, StringComparison.Ordinal))
+            {
+                return OperationalDiagnosticOperationKind.Overlay;
+            }
+
+            return phase ?? LlmPhase.Unknown;
         }
 
         private GameDefinition RequireGameDefinition([System.Runtime.CompilerServices.CallerMemberName] string methodName = "")

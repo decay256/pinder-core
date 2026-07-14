@@ -32,12 +32,12 @@ namespace Pinder.Core.Tests.Conversation
         }
 
         // Pure stateless LLM adapter (implements ILlmAdapter but NOT IStatefulLlmAdapter)
-        private sealed class PureStatelessMockLlm : ILlmAdapter
+        private class PureStatelessMockLlm : ILlmAdapter
         {
             private readonly string _response;
             public PureStatelessMockLlm(string response) => _response = response;
 
-            public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, CancellationToken ct = default)
+            public virtual Task<DateeResponse> GetDateeResponseAsync(DateeContext context, CancellationToken ct = default)
             {
                 return Task.FromResult(new DateeResponse(_response));
             }
@@ -51,6 +51,18 @@ namespace Pinder.Core.Tests.Conversation
             public Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow, string? archetypeDirective = null, CancellationToken ct = default) => Task.FromResult(message);
             public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, CancellationToken ct = default) => Task.FromResult(message);
             public Task<string> ApplyFailureCorruptionAsync(string message, string instruction, StatType stat, FailureTier tier, string? archetypeDirective = null, CancellationToken ct = default) => Task.FromResult(message);
+        }
+
+        private sealed class CancelingLlm : PureStatelessMockLlm
+        {
+            public CancelingLlm() : base("unused")
+            {
+            }
+
+            public override Task<DateeResponse> GetDateeResponseAsync(DateeContext context, CancellationToken ct = default)
+            {
+                throw new OperationCanceledException("cancelled");
+            }
         }
 
         // Fake LLM adapter for stateful responses (inherits from NullLlmAdapter to prevent interface drift)
@@ -140,6 +152,63 @@ namespace Pinder.Core.Tests.Conversation
         }
 
         [Fact]
+        public async Task ExecuteAsync_DiagnosticsEmitStartThenOneTerminal()
+        {
+            var diagnostics = new List<OperationalDiagnosticEvent>();
+            var stage = new DateeResponseStage(
+                new PureStatelessMockLlm("Datee Reply text"),
+                diagnostics.Add);
+            var state = new GameSessionState { Interest = new InterestMeter(10) };
+
+            await stage.ExecuteAsync(
+                state,
+                MakeRollStageResult(),
+                new DeliveryStageResult
+                {
+                    DeliveredMessage = "Hello!",
+                    HorninessCheckResult = HorninessCheckResult.NotPerformed
+                },
+                MakeProfile("Player"),
+                MakeProfile("Datee"),
+                null,
+                CancellationToken.None);
+
+            Assert.Equal(2, diagnostics.Count);
+            Assert.Equal(OperationalDiagnosticLifecycle.Start, diagnostics[0].Lifecycle);
+            Assert.Equal(OperationalDiagnosticOperationKind.DateeResponse, diagnostics[0].OperationKind);
+            Assert.Equal(OperationalDiagnosticLifecycle.Terminal, diagnostics[1].Lifecycle);
+            Assert.Equal(OperationalDiagnosticOutcome.Succeeded, diagnostics[1].Outcome);
+            Assert.Equal(diagnostics[0].CallId, diagnostics[1].CallId);
+            Assert.Single(diagnostics.FindAll(d => d.Lifecycle == OperationalDiagnosticLifecycle.Terminal));
+        }
+
+        [Fact]
+        public async Task ExecuteAsync_CancellationDiagnosticIsCancelledAndTerminal()
+        {
+            var diagnostics = new List<OperationalDiagnosticEvent>();
+            var stage = new DateeResponseStage(new CancelingLlm(), diagnostics.Add);
+            var state = new GameSessionState { Interest = new InterestMeter(10) };
+
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+                stage.ExecuteAsync(
+                    state,
+                    MakeRollStageResult(),
+                    new DeliveryStageResult
+                    {
+                        DeliveredMessage = "Hello!",
+                        HorninessCheckResult = HorninessCheckResult.NotPerformed
+                    },
+                    MakeProfile("Player"),
+                    MakeProfile("Datee"),
+                    null,
+                    CancellationToken.None));
+
+            var terminal = Assert.Single(diagnostics.FindAll(d => d.Lifecycle == OperationalDiagnosticLifecycle.Terminal));
+            Assert.Equal(OperationalDiagnosticOutcome.Cancelled, terminal.Outcome);
+            Assert.Equal(OperationalDiagnosticFailureClassification.Cancelled, terminal.FailureClassification);
+        }
+
+        [Fact]
         public async Task ExecuteAsync_StatefulAdapter_PushesNewHistoryEntries()
         {
             // Arrange
@@ -193,6 +262,25 @@ namespace Pinder.Core.Tests.Conversation
             Assert.Equal(2, state.DateeHistory.Count);
             Assert.Equal("User stateful", state.DateeHistory[0].Content);
             Assert.Equal("Assistant stateful", state.DateeHistory[1].Content);
+        }
+
+        private static RollStageResult MakeRollStageResult()
+        {
+            return new RollStageResult
+            {
+                ResolveDice = new SimpleDiceRoller(50),
+                InterestBefore = 10,
+                InterestAfter = 12,
+                RollResult = new RollResult(
+                    dieRoll: 10,
+                    secondDieRoll: null,
+                    usedDieRoll: 10,
+                    stat: StatType.Charm,
+                    statModifier: 0,
+                    levelBonus: 0,
+                    dc: 10,
+                    tier: FailureTier.Success)
+            };
         }
 
         [Fact]

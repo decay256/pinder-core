@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Pinder.Core.Characters;
+using Pinder.Core.Conversation;
 using Pinder.Core.Interfaces;
 using Pinder.LlmAdapters;
 
@@ -15,6 +16,7 @@ namespace Pinder.SessionSetup
         {
             public double Temperature { get; set; } = GeneratorDefaultConfigs.Backstory.Temperature;
             public int MaxTokens { get; set; } = GeneratorDefaultConfigs.Backstory.MaxTokens;
+            public Action<OperationalDiagnosticEvent>? OnDiagnostic { get; set; }
         }
 
         private readonly ILlmTransport _transport;
@@ -84,12 +86,15 @@ namespace Pinder.SessionSetup
                 ? _options.MaxTokens
                 : entry.MaxTokens!.Value;
 
-            var responseJson = await _transport.SendAsync(
+            var responseJson = await LlmOptionalTextGeneration.SendRequiredAsync(
+                "backstory",
+                _transport,
                 systemPrompt,
                 userMessage,
                 temp,
                 maxTok,
                 "backstory",
+                _options.OnDiagnostic,
                 cancellationToken);
 
             var result = new Dictionary<string, BackstoryFact>(StringComparer.OrdinalIgnoreCase);

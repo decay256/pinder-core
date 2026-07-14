@@ -26,6 +26,7 @@ namespace Pinder.Core.Conversation
         private readonly int _maxDialogueOptions;
         private readonly Action<ShadowFilterTraceEvent>? _onShadowFilterTrace;
         private readonly Action<RuleResolutionTraceEvent>? _onRuleResolution;
+        private readonly Action<OperationalDiagnosticEvent>? _onDiagnostic;
 
         private readonly int _hungerForIntimacy;
         private readonly int _terrorOfRejection;
@@ -41,6 +42,7 @@ namespace Pinder.Core.Conversation
             int maxDialogueOptions,
             Action<ShadowFilterTraceEvent>? onShadowFilterTrace = null,
             Action<RuleResolutionTraceEvent>? onRuleResolution = null,
+            Action<OperationalDiagnosticEvent>? onDiagnostic = null,
             int hungerForIntimacy = 0,
             int terrorOfRejection = 0)
         {
@@ -55,6 +57,7 @@ namespace Pinder.Core.Conversation
             _maxDialogueOptions = maxDialogueOptions;
             _onShadowFilterTrace = onShadowFilterTrace;
             _onRuleResolution = onRuleResolution;
+            _onDiagnostic = onDiagnostic;
             _hungerForIntimacy = hungerForIntimacy;
             _terrorOfRejection = terrorOfRejection;
         }
@@ -236,7 +239,88 @@ namespace Pinder.Core.Conversation
                 dateeTerrorOfRejection: dateeTor);
 
             // Get dialogue options from LLM
-            var rawOptions = await _llm.GetDialogueOptionsAsync(context, ct).ConfigureAwait(false);
+            string dialogueCallId = OperationalDiagnostics.CreateCallId();
+            OperationalDiagnostics.Emit(
+                _onDiagnostic,
+                new OperationalDiagnosticEvent(
+                    "TurnOrchestrator",
+                    "DialogueOptionsStarted",
+                    OperationalDiagnosticSeverity.Info,
+                    "Dialogue options operation started.",
+                    operationKind: OperationalDiagnosticOperationKind.DialogueOptions,
+                    phaseCode: LlmPhase.DialogueOptions,
+                    lifecycle: OperationalDiagnosticLifecycle.Start,
+                    callId: dialogueCallId,
+                    correlationHints: new Dictionary<string, string>
+                    {
+                        ["turn"] = state.TurnNumber.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    }));
+
+            DialogueOption[] rawOptions;
+            try
+            {
+                rawOptions = await _llm.GetDialogueOptionsAsync(context, ct).ConfigureAwait(false);
+                OperationalDiagnostics.Emit(
+                    _onDiagnostic,
+                    new OperationalDiagnosticEvent(
+                        "TurnOrchestrator",
+                        "DialogueOptionsSucceeded",
+                        OperationalDiagnosticSeverity.Info,
+                        "Dialogue options operation succeeded.",
+                        operationKind: OperationalDiagnosticOperationKind.DialogueOptions,
+                        phaseCode: LlmPhase.DialogueOptions,
+                        lifecycle: OperationalDiagnosticLifecycle.Terminal,
+                        outcome: OperationalDiagnosticOutcome.Succeeded,
+                        callId: dialogueCallId,
+                        correlationHints: new Dictionary<string, string>
+                        {
+                            ["turn"] = state.TurnNumber.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                        }));
+            }
+            catch (OperationCanceledException ex)
+            {
+                OperationalDiagnostics.Emit(
+                    _onDiagnostic,
+                    new OperationalDiagnosticEvent(
+                        "TurnOrchestrator",
+                        "DialogueOptionsCancelled",
+                        OperationalDiagnosticSeverity.Warning,
+                        "Dialogue options operation was cancelled.",
+                        ex,
+                        OperationalDiagnosticOperationKind.DialogueOptions,
+                        LlmPhase.DialogueOptions,
+                        OperationalDiagnosticLifecycle.Terminal,
+                        OperationalDiagnosticOutcome.Cancelled,
+                        OperationalDiagnosticFailureClassification.Cancelled,
+                        callId: dialogueCallId,
+                        correlationHints: new Dictionary<string, string>
+                        {
+                            ["turn"] = state.TurnNumber.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                        }));
+                throw;
+            }
+            catch (Exception ex)
+            {
+                OperationalDiagnostics.Emit(
+                    _onDiagnostic,
+                    new OperationalDiagnosticEvent(
+                        "TurnOrchestrator",
+                        "DialogueOptionsFailed",
+                        OperationalDiagnosticSeverity.Error,
+                        "Dialogue options operation failed.",
+                        ex,
+                        OperationalDiagnosticOperationKind.DialogueOptions,
+                        LlmPhase.DialogueOptions,
+                        OperationalDiagnosticLifecycle.Terminal,
+                        OperationalDiagnosticOutcome.Failed,
+                        OperationalDiagnostics.ClassifyException(ex),
+                        callId: dialogueCallId,
+                        correlationHints: new Dictionary<string, string>
+                        {
+                            ["turn"] = state.TurnNumber.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                        }));
+                throw;
+            }
 
             // Peek combos for each option (#46), enrich with weakness window (#49) and tell bonus (#50)
             var options = new DialogueOption[rawOptions.Length];

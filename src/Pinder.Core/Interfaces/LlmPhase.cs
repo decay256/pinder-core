@@ -55,6 +55,9 @@ namespace Pinder.Core.Interfaces
         /// <summary>Session-setup psychological-stake generation.</summary>
         public const string PsychologicalStake = "psychological_stake";
 
+        /// <summary>Session-setup dramatic-arc generation.</summary>
+        public const string DramaticArc = "dramatic_arc";
+
         /// <summary>
         /// Same-turn callback-phrase strip pass (issue #339). No LLM call —
         /// purely a regex post-process that runs alongside the other text
@@ -74,9 +77,6 @@ namespace Pinder.Core.Interfaces
 
         /// <summary>Character synthesis pipeline.</summary>
         public const string Synthesis = "synthesis";
-
-        /// <summary>Session-setup dramatic arc generation.</summary>
-        public const string DramaticArc = "dramatic_arc";
 
         /// <summary>Phase could not be determined (decorators may use this when no phase was supplied).</summary>
         public const string Unknown = "unknown";

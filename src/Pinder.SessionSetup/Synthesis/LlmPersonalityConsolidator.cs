@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Pinder.Core.Conversation;
 using Pinder.Core.Interfaces;
 using Pinder.LlmAdapters;
 
@@ -11,11 +12,16 @@ namespace Pinder.SessionSetup
     {
         private readonly ILlmTransport _transport;
         private readonly PromptCatalog _catalog;
+        private readonly Action<OperationalDiagnosticEvent>? _onDiagnostic;
 
-        public LlmPersonalityConsolidator(ILlmTransport transport, PromptCatalog catalog)
+        public LlmPersonalityConsolidator(
+            ILlmTransport transport,
+            PromptCatalog catalog,
+            Action<OperationalDiagnosticEvent>? onDiagnostic = null)
         {
             _transport = transport ?? throw new ArgumentNullException(nameof(transport));
             _catalog = catalog ?? throw new ArgumentNullException(nameof(catalog));
+            _onDiagnostic = onDiagnostic;
             _catalog.RequireCompleteEntry(
                 "personality_consolidation",
                 "prompt-catalog: missing required key 'personality_consolidation'.");
@@ -43,12 +49,15 @@ namespace Pinder.SessionSetup
                 { "stats", stats ?? string.Empty },
             });
 
-            string result = await _transport.SendAsync(
+            string result = await LlmOptionalTextGeneration.SendRequiredAsync(
+                "personality_consolidation",
+                _transport,
                 entry.SystemPrompt!,
                 userPrompt,
                 entry.Temperature!.Value,
                 entry.MaxTokens!.Value,
                 LlmPhase.Synthesis,
+                _onDiagnostic,
                 cancellationToken).ConfigureAwait(false);
 
             result = result.Trim();
