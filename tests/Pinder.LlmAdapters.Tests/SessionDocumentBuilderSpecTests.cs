@@ -145,7 +145,7 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("[STAT:", t);
             Assert.Contains("[CALLBACK:", t);
             Assert.Contains("[COMBO:", t);
-            Assert.Contains("[TELL_BONUS:", t);
+            Assert.DoesNotContain("TELL_BONUS", t, StringComparison.OrdinalIgnoreCase);
         }
 
         // #1138: PromptTemplates_SuccessDelivery_* / _FailureDelivery_* removed —

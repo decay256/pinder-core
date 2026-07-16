@@ -32,8 +32,8 @@ namespace Pinder.LlmAdapters.Anthropic
             @"\[COMBO:\s*([^\]]+)\]",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private static readonly Regex TellBonusRegex = new Regex(
-            @"\[TELL_BONUS:\s*(\w+)\]",
+        private static readonly Regex UnsupportedTellBonusTag = new Regex(
+            @"\[TELL_BONUS:\s*[^\]]*\]",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Captures the FULL intended text of an option (issue #1117).
@@ -42,7 +42,7 @@ namespace Pinder.LlmAdapters.Anthropic
         // (e.g. the model writes:  said "it's a lot")  got truncated to a
         // leading fragment. Because each per-option section (split out by the
         // OPTION_N header) only ever contains this single quoted block followed
-        // by bracketed [CALLBACK]/[COMBO]/[TELL_BONUS] metadata tags — none of
+        // by bracketed [CALLBACK]/[COMBO] metadata tags — none of
         // which contain double-quotes — a greedy capture to the LAST quote on
         // the line reconstructs the complete text, inner quotes included.
         private static readonly Regex QuotedTextRegex = new Regex(
@@ -73,6 +73,9 @@ namespace Pinder.LlmAdapters.Anthropic
         /// </summary>
         public static DialogueOption[] ParseDialogueOptionsText(string? llmResponse, StatType[]? availableStats = null)
         {
+            if (!string.IsNullOrWhiteSpace(llmResponse) && UnsupportedTellBonusTag.IsMatch(llmResponse))
+                return Array.Empty<DialogueOption>();
+
             var parsed = new List<DialogueOption>();
             int count = availableStats != null ? availableStats.Length : DefaultPaddingStats.Length;
 
@@ -144,16 +147,8 @@ namespace Pinder.LlmAdapters.Anthropic
                             }
                         }
 
-                        bool hasTellBonus = false;
-                        var tellMatch = TellBonusRegex.Match(section);
-                        if (tellMatch.Success)
-                        {
-                            hasTellBonus = string.Equals(
-                                tellMatch.Groups[1].Value.Trim(), "yes", StringComparison.OrdinalIgnoreCase);
-                        }
-
                         parsed.Add(new DialogueOption(
-                            stat, text, callbackTurn, comboName, hasTellBonus, hasWeaknessWindow: false));
+                            stat, text, callbackTurn, comboName));
                     }
                 }
                 catch
@@ -192,6 +187,15 @@ namespace Pinder.LlmAdapters.Anthropic
                 {
                     if (!(item is JObject optionObj))
                         return null;
+
+                    foreach (var property in optionObj.Properties())
+                    {
+                        if (property.Name != "stat"
+                            && property.Name != "text"
+                            && property.Name != "callback"
+                            && property.Name != "combo")
+                            return null;
+                    }
 
                     if (!TryReadRequiredString(optionObj, "stat", out var rawStat))
                         return null;
@@ -331,6 +335,13 @@ namespace Pinder.LlmAdapters.Anthropic
                 return Array.Empty<DialogueOption>();
             }
 
+            if (UnsupportedTellBonusTag.IsMatch(llmResponse))
+            {
+                errorCode = "unexpected_metadata";
+                errorMessage = "LLM dialogue_options output contains unsupported TELL_BONUS metadata.";
+                return Array.Empty<DialogueOption>();
+            }
+
             var parsed = new List<DialogueOption>();
             var sections = OptionHeaderRegex.Split(llmResponse);
 
@@ -400,16 +411,8 @@ namespace Pinder.LlmAdapters.Anthropic
                     }
                 }
 
-                bool hasTellBonus = false;
-                var tellMatch = TellBonusRegex.Match(section);
-                if (tellMatch.Success)
-                {
-                    hasTellBonus = string.Equals(
-                        tellMatch.Groups[1].Value.Trim(), "yes", StringComparison.OrdinalIgnoreCase);
-                }
-
                 parsed.Add(new DialogueOption(
-                    stat, text, callbackTurn, comboName, hasTellBonus, hasWeaknessWindow: false));
+                    stat, text, callbackTurn, comboName));
             }
 
             var validOptions = new List<DialogueOption>();

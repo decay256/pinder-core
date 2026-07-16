@@ -118,7 +118,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public async Task TextTransport_LegacyOptionFormat_RemainsCompatible()
         {
-            string legacy = "OPTION_1\n[STAT: CHARM] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]\n\"hey, that jacket is doing dangerous work\"\n\nOPTION_2\n[STAT: HONESTY] [CALLBACK: none] [COMBO: none] [TELL_BONUS: yes]\n\"I should admit your bio got me curious\"";
+            string legacy = "OPTION_1\n[STAT: CHARM] [CALLBACK: none] [COMBO: none]\n\"hey, that jacket is doing dangerous work\"\n\nOPTION_2\n[STAT: HONESTY] [CALLBACK: none] [COMBO: none]\n\"I should admit your bio got me curious\"";
             var transport = new TextTransport(legacy);
             var adapter = CreateAdapter(transport);
 

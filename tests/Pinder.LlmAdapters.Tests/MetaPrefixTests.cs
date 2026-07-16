@@ -17,7 +17,7 @@ namespace Pinder.LlmAdapters.Tests
         public void DialogueOptionParsers_StripsMetaPrefix_Correctly(string input, string expected)
         {
             // We test via the Anthropic parser which is the primary implementation
-            var rawInput = $@"OPTION_1 [STAT: Charm] ""{input}"" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]";
+            var rawInput = $@"OPTION_1 [STAT: Charm] ""{input}"" [CALLBACK: none] [COMBO: none]";
             var result = DialogueOptionParsers.ParseDialogueOptionsText(rawInput, new[] { StatType.Charm, StatType.Honesty, StatType.Wit, StatType.Chaos });
             
             Assert.Equal(expected, result[0].IntendedText);

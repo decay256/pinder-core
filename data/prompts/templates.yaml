@@ -50,18 +50,18 @@ prompts:
       7. Take the DATEE's profile into account — their personality, archetypes, and texting style should inform what would land or fail
 
       For each option include metadata:
-      [STAT: X] [CALLBACK: turn_N or none] [COMBO: name or none] [TELL_BONUS: yes/no]
+      [STAT: X] [CALLBACK: turn_N or none] [COMBO: name or none]
 
       Keep options concise. One to three sentences. Match the DATEE's register.
 
       Output EXACTLY this format for each option (no deviations):
 
       OPTION_1
-      [STAT: CHARM] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
+      [STAT: CHARM] [CALLBACK: none] [COMBO: none]
       "The exact text the character would send"
 
       OPTION_2
-      [STAT: HONESTY] [CALLBACK: turn_2] [COMBO: The Reveal] [TELL_BONUS: yes]
+      [STAT: HONESTY] [CALLBACK: turn_2] [COMBO: The Reveal]
       "The exact text the character would send"
 
       (only {options_list})

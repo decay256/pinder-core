@@ -30,9 +30,9 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         [Fact]
         public void ParseDialogueOptionsText_ValidInput_ParsesCorrectly()
         {
-            var input = @"OPTION_1 [STAT: Charm] ""Hey there, looking good!"" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
-OPTION_2 [STAT: Wit] ""Did it hurt when you fell from heaven?"" [CALLBACK: 3] [COMBO: SmoothTalker] [TELL_BONUS: yes]
-OPTION_3 [STAT: Honesty] ""I just wanted to say hi."" [CALLBACK: turn_5] [COMBO: none] [TELL_BONUS: no]";
+            var input = @"OPTION_1 [STAT: Charm] ""Hey there, looking good!"" [CALLBACK: none] [COMBO: none]
+OPTION_2 [STAT: Wit] ""Did it hurt when you fell from heaven?"" [CALLBACK: 3] [COMBO: SmoothTalker]
+OPTION_3 [STAT: Honesty] ""I just wanted to say hi."" [CALLBACK: turn_5] [COMBO: none]";
 
             var result = DialogueOptionParsers.ParseDialogueOptionsText(input, new[] { StatType.Charm, StatType.Honesty, StatType.Wit, StatType.Chaos });
             Assert.Equal(4, result.Length);
@@ -46,7 +46,7 @@ OPTION_3 [STAT: Honesty] ""I just wanted to say hi."" [CALLBACK: turn_5] [COMBO:
             Assert.Equal(StatType.Wit, result[1].Stat);
             Assert.Equal(3, result[1].CallbackTurnNumber);
             Assert.Equal("SmoothTalker", result[1].ComboName);
-            Assert.True(result[1].HasTellBonus);
+            Assert.False(result[1].HasTellBonus);
 
             Assert.Equal(StatType.Honesty, result[2].Stat);
             Assert.Equal(5, result[2].CallbackTurnNumber);
@@ -55,7 +55,7 @@ OPTION_3 [STAT: Honesty] ""I just wanted to say hi."" [CALLBACK: turn_5] [COMBO:
         [Fact]
         public void ParseDialogueOptionsText_PartialInput_PadsToFour()
         {
-            var input = @"OPTION_1 [STAT: Charm] ""Hello!"" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]";
+            var input = @"OPTION_1 [STAT: Charm] ""Hello!"" [CALLBACK: none] [COMBO: none]";
 
             var result = DialogueOptionParsers.ParseDialogueOptionsText(input, new[] { StatType.Charm, StatType.Honesty, StatType.Wit, StatType.Chaos });
             Assert.Equal(4, result.Length);
@@ -103,6 +103,20 @@ OPTION_3 [STAT: Honesty] ""I just wanted to say hi."" [CALLBACK: turn_5] [COMBO:
         }
 
         [Fact]
+        public void ParseDialogueOptionsTool_TellBonusProperty_ReturnsNull()
+        {
+            var json = JObject.Parse(@"{
+                ""options"": [
+                    { ""stat"": ""Charm"", ""text"": ""Hey!"", ""callback"": null, ""combo"": null, ""tell_bonus"": true }
+                ]
+            }");
+
+            var result = DialogueOptionParsers.ParseDialogueOptionsTool(json, new[] { StatType.Charm });
+
+            Assert.Null(result);
+        }
+
+        [Fact]
         public void ParseDialogueOptionsTool_MalformedInput_ReturnsNull()
         {
             var json = JObject.Parse(@"{ ""garbage"": true }");
@@ -134,7 +148,7 @@ OPTION_3 [STAT: Honesty] ""I just wanted to say hi."" [CALLBACK: turn_5] [COMBO:
         [Fact]
         public void ParseDialogueOptionsText_SelfAwareness_NormalizesCorrectly()
         {
-            var input = @"OPTION_1 [STAT: SELF_AWARENESS] ""I know myself."" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]";
+            var input = @"OPTION_1 [STAT: SELF_AWARENESS] ""I know myself."" [CALLBACK: none] [COMBO: none]";
             var result = DialogueOptionParsers.ParseDialogueOptionsText(input, new[] { StatType.SelfAwareness, StatType.Charm, StatType.Honesty, StatType.Wit });
             Assert.Equal(StatType.SelfAwareness, result[0].Stat);
         }
@@ -147,7 +161,7 @@ OPTION_3 [STAT: Honesty] ""I just wanted to say hi."" [CALLBACK: turn_5] [COMBO:
             // The model quotes the datee back inside the option's intended text.
             // Previously the leading-fragment regex truncated this at the first
             // inner double-quote (observed fragments like "see you said it's").
-            var input = @"OPTION_1 [STAT: Wit] ""Interesting that you said ""it's a lot"" earlier — care to unpack that?"" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]";
+            var input = @"OPTION_1 [STAT: Wit] ""Interesting that you said ""it's a lot"" earlier — care to unpack that?"" [CALLBACK: none] [COMBO: none]";
 
             var result = DialogueOptionParsers.ParseDialogueOptionsText(input, new[] { StatType.Wit, StatType.Charm, StatType.Honesty, StatType.Wit });
 
@@ -160,9 +174,9 @@ OPTION_3 [STAT: Honesty] ""I just wanted to say hi."" [CALLBACK: turn_5] [COMBO:
         [Fact]
         public void ParseDialogueOptionsText_MultipleOptions_OneWithInnerQuotes_AllParseFully()
         {
-            var input = @"OPTION_1 [STAT: Charm] ""Hey there, looking good!"" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
-OPTION_2 [STAT: Honesty] ""You literally said ""I never text first"" two minutes ago."" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
-OPTION_3 [STAT: Wit] ""Bold of you to assume I read."" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]";
+            var input = @"OPTION_1 [STAT: Charm] ""Hey there, looking good!"" [CALLBACK: none] [COMBO: none]
+OPTION_2 [STAT: Honesty] ""You literally said ""I never text first"" two minutes ago."" [CALLBACK: none] [COMBO: none]
+OPTION_3 [STAT: Wit] ""Bold of you to assume I read."" [CALLBACK: none] [COMBO: none]";
 
             var result = DialogueOptionParsers.ParseDialogueOptionsText(input, new[] { StatType.Charm, StatType.Honesty, StatType.Wit, StatType.Chaos });
 
@@ -179,8 +193,8 @@ OPTION_3 [STAT: Wit] ""Bold of you to assume I read."" [CALLBACK: none] [COMBO: 
         {
             // A truncated tiny stub ("the") must NOT be surfaced as a playable
             // option — it is dropped and the slot is backfilled by padding.
-            var input = @"OPTION_1 [STAT: Charm] ""the"" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
-OPTION_2 [STAT: Wit] ""That's a genuinely funny take, I'll give you that."" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]";
+            var input = @"OPTION_1 [STAT: Charm] ""the"" [CALLBACK: none] [COMBO: none]
+OPTION_2 [STAT: Wit] ""That's a genuinely funny take, I'll give you that."" [CALLBACK: none] [COMBO: none]";
 
             var result = DialogueOptionParsers.ParseDialogueOptionsText(input, new[] { StatType.Charm, StatType.Wit, StatType.Honesty, StatType.Chaos });
 
@@ -196,9 +210,9 @@ OPTION_2 [STAT: Wit] ""That's a genuinely funny take, I'll give you that."" [CAL
         [Fact, Trait("Category", "regression-test-required")]
         public void ParseDialogueOptionsText_DuplicateStats_ReconcilesAgainstAvailableStats()
         {
-            var input = @"OPTION_1 [STAT: Honesty] ""First honesty"" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
-OPTION_2 [STAT: Honesty] ""Second honesty"" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
-OPTION_3 [STAT: Charm] ""A charm"" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]";
+            var input = @"OPTION_1 [STAT: Honesty] ""First honesty"" [CALLBACK: none] [COMBO: none]
+OPTION_2 [STAT: Honesty] ""Second honesty"" [CALLBACK: none] [COMBO: none]
+OPTION_3 [STAT: Charm] ""A charm"" [CALLBACK: none] [COMBO: none]";
 
             var drawnStats = new[] { StatType.Honesty, StatType.Charm, StatType.Wit, StatType.Chaos };
             var result = DialogueOptionParsers.ParseDialogueOptionsText(input, drawnStats);
@@ -235,8 +249,8 @@ OPTION_3 [STAT: Charm] ""A charm"" [CALLBACK: none] [COMBO: none] [TELL_BONUS: n
         {
             var input = @"OPTION_1 [STAT: Charm] ""Line 1
 Line 2
-Line 3"" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
-OPTION_2 [STAT: Wit] ""Option 2 text"" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]";
+Line 3"" [CALLBACK: none] [COMBO: none]
+OPTION_2 [STAT: Wit] ""Option 2 text"" [CALLBACK: none] [COMBO: none]";
 
             var result = DialogueOptionParsers.ParseDialogueOptionsText(input, new[] { StatType.Charm, StatType.Wit });
             Assert.Equal(2, result.Length);
