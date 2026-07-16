@@ -78,7 +78,7 @@
       "rizz": 1,
       "honesty": -1
     },
-    "personality_fragment": "address your match as a loyal subject who has not yet been informed of their station; if questioned, double down rather than explain — the crown is plastic and your commitment is not",
+    "personality_fragment": "address your match as a loyal subject who has not yet been informed of their station; if questioned, double down rather than explain \u2014 the crown is plastic and your commitment is not",
     "backstory_fragment": "",
     "texting_style_fragment": "SYNTAX:\n- shorthand: never abbreviate; spell every word in full as befits a monarch addressing the court",
     "archetype_tendencies": [
@@ -615,7 +615,7 @@
     "stat_modifiers": {
       "charm": 1
     },
-    "personality_fragment": "inhabits a slightly aspirational version of themselves so naturally that the gap between the version and the reality is only visible from the outside; this is not delusion — it's a story they've been telling long enough that the telling has shaped some of the truth",
+    "personality_fragment": "inhabits a slightly aspirational version of themselves so naturally that the gap between the version and the reality is only visible from the outside; this is not delusion \u2014 it's a story they've been telling long enough that the telling has shaped some of the truth",
     "backstory_fragment": "",
     "texting_style_fragment": "",
     "archetype_tendencies": [
@@ -638,9 +638,9 @@
     "stat_modifiers": {
       "honesty": 1
     },
-    "personality_fragment": "uses physical distance as emotional distance in a way they've become aware of but not changed; the terrain metaphors aren't decorative — the actual mountains taught them the actual thing",
+    "personality_fragment": "uses physical distance as emotional distance in a way they've become aware of but not changed; the terrain metaphors aren't decorative \u2014 the actual mountains taught them the actual thing",
     "backstory_fragment": "",
-    "texting_style_fragment": "SYNTAX:\n- emoji: replaces \".\" with a soft emoji (🫶, 🌸) consistently as terminal punctuation\n- shorthand: gen-x shorthand only (\"u\", \"ur\", \"thx\", \"k\", \"pls\")\n- grammar: minimum one unfixed punctuation mistake per message\n- structure: tag-suffix ending (\"…anyway. /rant\", \"…that's the post\")\n- length: messages get progressively shorter through a conversation (cooling off)\n- tics: self-tag suffix on rants, only ever as a clean terminal suffix (\"/rant\")\nTONE:\n- stance (interrogator): only asks questions, never states\n- register (finance-bro): everything is a market, position, asset, exit\n- pacing (dry-pacing): minimal, sparse, long pauses implied",
+    "texting_style_fragment": "SYNTAX:\n- emoji: replaces \".\" with a soft emoji (\ud83e\udef6, \ud83c\udf38) consistently as terminal punctuation\n- shorthand: gen-x shorthand only (\"u\", \"ur\", \"thx\", \"k\", \"pls\")\n- grammar: minimum one unfixed punctuation mistake per message\n- structure: tag-suffix ending (\"\u2026anyway. /rant\", \"\u2026that's the post\")\n- length: messages get progressively shorter through a conversation (cooling off)\n- tics: self-tag suffix on rants, only ever as a clean terminal suffix (\"/rant\")\nTONE:\n- stance (interrogator): only asks questions, never states\n- register (finance-bro): everything is a market, position, asset, exit\n- pacing (dry-pacing): minimal, sparse, long pauses implied",
     "archetype_tendencies": [
       "The Bio Responder",
       "The Slow Fader"
@@ -663,7 +663,7 @@
     },
     "personality_fragment": "knows who they were before the job and hasn't fully grieved the distance between that person and this one; the shoes are evidence of the gap",
     "backstory_fragment": "",
-    "texting_style_fragment": "SYNTAX:\n- emoji: 💀 instead of \"lol\"\n- shorthand: never uses any internet shorthand (clean english as the choice)\n- grammar: writes numbers as digits even tiny ones (\"i ate 2 eggs\")\n- structure: never uses line breaks; one continuous run of words\n- length: length matches the previous message exactly (mirroring)\n- tics: never asks questions, only states\nTONE:\n- stance (interpreter): always tells you what you \"really meant\"\n- register (detective): \"interesting that you mention…\", notes evidence\n- pacing (dry-pacing): minimal, sparse, long pauses implied",
+    "texting_style_fragment": "SYNTAX:\n- emoji: \ud83d\udc80 instead of \"lol\"\n- shorthand: never uses any internet shorthand (clean english as the choice)\n- grammar: writes numbers as digits even tiny ones (\"i ate 2 eggs\")\n- structure: never uses line breaks; one continuous run of words\n- length: length matches the previous message exactly (mirroring)\n- tics: never asks questions, only states\nTONE:\n- stance (interpreter): always tells you what you \"really meant\"\n- register (detective): \"interesting that you mention\u2026\", notes evidence\n- pacing (dry-pacing): minimal, sparse, long pauses implied",
     "archetype_tendencies": [
       "The Oversharer",
       "The Copy-Paste Machine"
@@ -710,7 +710,7 @@
     },
     "personality_fragment": "talk like the scuffs on your shoes are a timeline; work somewhere you have been into every reply, because the shoes remember even when you would rather move forward",
     "backstory_fragment": "",
-    "texting_style_fragment": "SYNTAX:\n- emoji: sign off every message with a single 👣, the scuffed-up timeline walking on",
+    "texting_style_fragment": "SYNTAX:\n- emoji: sign off every message with a single \ud83d\udc63, the scuffed-up timeline walking on",
     "archetype_tendencies": [
       "The Wall of Text"
     ],
@@ -1169,7 +1169,7 @@
     },
     "personality_fragment": "the hair says: I have already considered every outcome and I am fine with all of them; the person underneath the hair has a spreadsheet you will never see",
     "backstory_fragment": "",
-    "texting_style_fragment": "",
+    "texting_style_fragment": "Never write more than exactly one sentence.",
     "archetype_tendencies": [
       "The Peacock"
     ],
@@ -1351,7 +1351,7 @@
     "stat_modifiers": {
       "chaos": 1
     },
-    "personality_fragment": "bring up one baffling 2am decision unprompted, treat it as your whole personality, and refuse to explain it — the refusal is the explanation",
+    "personality_fragment": "bring up one baffling 2am decision unprompted, treat it as your whole personality, and refuse to explain it \u2014 the refusal is the explanation",
     "backstory_fragment": "",
     "texting_style_fragment": "",
     "archetype_tendencies": [],
