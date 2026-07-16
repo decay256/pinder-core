@@ -220,8 +220,8 @@ namespace Pinder.LlmAdapters.Tests
 
             var dateeTrace = SessionDocumentBuilder.BuildDateePromptEx(dateeContext);
 
-            AssertCatalogSpan(dateeTrace, "response-timing-header");
-            AssertCatalogSpan(dateeTrace, "response-timing-approximate");
+            Assert.DoesNotContain(dateeTrace.Spans, s => s.Key == "response-timing-header");
+            Assert.DoesNotContain(dateeTrace.Spans, s => s.Key == "response-timing-approximate");
             AssertCatalogSpan(dateeTrace, "datee-shadow-state-heading");
             AssertCatalogSpan(dateeTrace, "shadow-taint-fixation");
             AssertCatalogSpan(dateeTrace, "engine-state-transition-target-line");
