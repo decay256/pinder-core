@@ -101,12 +101,18 @@ progression_failure_pool_tiers:
   intermediate_min: 4
   advanced_min: 7
   legendary_min: 10
+character_prompt_structure:
+  character_spec_header: ""== CHARACTER YOU CONTROL ==""
+  player_avatar_character_tag: ""PLAYER_AVATAR_CHARACTER""
+  datee_character_tag: ""DATEE_CHARACTER""
 ";
 
         [Fact]
         public void LoadFrom_WithValidProgressionYaml_ParsesAllBlocksSuccessfully()
         {
             var gd = GameDefinition.LoadFrom(ValidYamlWithProgression);
+
+            Assert.False(gd.AllowDefaultFallback);
 
             // 1. xp_flat_awards
             Assert.NotNull(gd.XpFlatAwards);
@@ -214,7 +220,12 @@ progression_failure_pool_tiers:
         [InlineData("xp_success_base", "dc_low_max")]
         [InlineData("xp_risk_multipliers", "safe")]
         [InlineData("xp_terminal_multipliers", "date_secured")]
+        [InlineData("progression_xp_thresholds", "1")]
         [InlineData("progression_xp_thresholds", "11")]
+        [InlineData("progression_build_points", "7")]
+        [InlineData("progression_level_bonuses", "7")]
+        [InlineData("progression_item_slots", "7")]
+        [InlineData("progression_failure_pool_tiers", "intermediate_min")]
         [InlineData("progression_failure_pool_tiers", "legendary_min")]
         public void LoadFrom_MissingSubKey_ThrowsException(string parentKey, string subKey)
         {
@@ -381,6 +392,7 @@ progression_failure_pool_tiers:
         {
             var resolver = new FakeRuleResolver();
 
+            resolver.XpThresholds[1] = 0;
             resolver.XpThresholds[2] = 60;
             resolver.XpThresholds[3] = 180;
             resolver.XpThresholds[4] = 400;
@@ -415,6 +427,26 @@ progression_failure_pool_tiers:
             resolver.LevelBonuses[3] = null;
 
             Assert.ThrowsAny<Exception>(() => LevelTable.GetBonus(3, resolver));
+        }
+
+        [Fact]
+        public void LevelTable_MissingProductionXpThresholds_ThrowsInsteadOfUsingDefaultResolver()
+        {
+            var resolver = new FakeRuleResolver();
+
+            var ex = Assert.Throws<InvalidOperationException>(() => LevelTable.GetLevel(50, resolver));
+
+            Assert.Contains("progression XP threshold", ex.Message, StringComparison.OrdinalIgnoreCase);
+        }
+
+        [Fact]
+        public void LevelTable_MissingProductionFailurePoolTiers_ThrowsInsteadOfHardcodedTierDefaults()
+        {
+            var resolver = new FakeRuleResolver();
+
+            var ex = Assert.Throws<InvalidOperationException>(() => LevelTable.GetFailurePoolTier(10, resolver));
+
+            Assert.Contains("failure pool tiers", ex.Message, StringComparison.OrdinalIgnoreCase);
         }
 
         private class FakeRuleResolver : IRuleResolver

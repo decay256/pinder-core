@@ -1,6 +1,7 @@
 using System.IO;
 using Xunit;
 using Pinder.Core.Conversation;
+using Pinder.Core.Progression;
 using Pinder.Core.Rolls;
 using Pinder.Rules;
 
@@ -316,12 +317,24 @@ namespace Pinder.Rules.Tests
             var emptyYaml = "- id: empty\n  section: test\n  title: test\n  type: test\n  description: test\n";
             var resolver = RuleBookResolver.FromYaml(emptyYaml);
 
+            Assert.False(resolver.AllowDefaultFallback);
             Assert.Null(resolver.GetFailureInterestDelta(5, 10));
             Assert.Null(resolver.GetSuccessInterestDelta(5, 15));
             Assert.Null(resolver.GetInterestState(10));
             Assert.Null(resolver.GetShadowThresholdLevel(12));
             Assert.Null(resolver.GetMomentumBonus(3));
             Assert.Null(resolver.GetRiskTierXpMultiplier(RiskTier.Hard));
+        }
+
+        [Fact]
+        public void EmptyRuleBook_LevelTableThrowsInsteadOfUsingDefaultThresholds()
+        {
+            var emptyYaml = "- id: empty\n  section: test\n  title: test\n  type: test\n  description: test\n";
+            var resolver = RuleBookResolver.FromYaml(emptyYaml);
+
+            var ex = Assert.Throws<System.InvalidOperationException>(() => LevelTable.GetLevel(50, resolver));
+
+            Assert.Contains("progression XP threshold", ex.Message, System.StringComparison.OrdinalIgnoreCase);
         }
 
         // =====================================================================

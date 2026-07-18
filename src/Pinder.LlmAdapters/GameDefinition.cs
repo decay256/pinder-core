@@ -293,9 +293,9 @@ namespace Pinder.LlmAdapters
         }
 
         /// <summary>
-        /// Data-driven production resolver: allow callers to fall back to
-        /// <see cref="DefaultRuleResolver"/> when a rule is missing from this game definition.
+        /// Parsed game-definition data is authoritative. Missing rule values must
+        /// fail the load or lookup instead of falling back to embedded defaults.
         /// </summary>
-        public bool AllowDefaultFallback => true;
+        public bool AllowDefaultFallback => false;
     }
 }

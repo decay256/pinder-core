@@ -30,6 +30,7 @@ namespace Pinder.Rules.Tests
             "max_dialogue_options",
             "max_delivery_words",
             "game_master_prompt",
+            "character_prompt_structure",
             "player_avatar_role_description",
             "datee_role_description",
             "horniness_prompt",

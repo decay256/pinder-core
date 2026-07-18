@@ -80,6 +80,10 @@ progression_failure_pool_tiers:
   intermediate_min: 4
   advanced_min: 7
   legendary_min: 10
+character_prompt_structure:
+  character_spec_header: ""== CHARACTER YOU CONTROL ==""
+  player_avatar_character_tag: ""PLAYER_AVATAR_CHARACTER""
+  datee_character_tag: ""DATEE_CHARACTER""
 ";
 
         public const string RequiredParserBlocks = @"

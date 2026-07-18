@@ -42,6 +42,9 @@ namespace Pinder.Core.Progression
                     {
                         if (currentCheck == 1)
                         {
+                            if (!rules.AllowDefaultFallback)
+                                throw new InvalidOperationException("Missing progression XP threshold for level 1.");
+
                             threshold = 0;
                         }
                         else
@@ -60,6 +63,9 @@ namespace Pinder.Core.Progression
                 {
                     if (currentCheck == 1)
                     {
+                        if (!rules.AllowDefaultFallback)
+                            throw new InvalidOperationException("Missing progression XP threshold for level 1.");
+
                         int? threshold = 0;
                         if (xp >= threshold.Value)
                         {
@@ -78,6 +84,9 @@ namespace Pinder.Core.Progression
             {
                 return GetLevel(xp, DefaultRuleResolver.Instance);
             }
+
+            if (!foundAny)
+                throw new InvalidOperationException("Progression XP thresholds are missing in configuration.");
 
             return level;
         }
@@ -149,9 +158,12 @@ namespace Pinder.Core.Progression
                 return GetFailurePoolTier(level, DefaultRuleResolver.Instance);
             }
 
-            int iMin = intermediateMin ?? 4;
-            int aMin = advancedMin ?? 7;
-            int lMin = legendaryMin ?? 10;
+            if (!intermediateMin.HasValue || !advancedMin.HasValue || !legendaryMin.HasValue)
+                throw new InvalidOperationException("Progression failure pool tiers are missing required minimum levels.");
+
+            int iMin = intermediateMin.Value;
+            int aMin = advancedMin.Value;
+            int lMin = legendaryMin.Value;
 
             if (level >= lMin) return FailurePoolTier.Legendary;
             if (level >= aMin)  return FailurePoolTier.Advanced;

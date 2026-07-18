@@ -339,10 +339,10 @@ namespace Pinder.Rules
         }
 
         /// <summary>
-        /// Data-driven production resolver: allow callers to fall back to
-        /// <see cref="DefaultRuleResolver"/> when a rule is not present in the loaded RuleBook(s).
+        /// Loaded rulebooks are authoritative. Missing rule values must be reported
+        /// by callers instead of falling back to embedded defaults.
         /// </summary>
-        public bool AllowDefaultFallback => true;
+        public bool AllowDefaultFallback => false;
 
         // --- Helpers ---
 

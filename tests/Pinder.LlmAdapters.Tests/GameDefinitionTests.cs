@@ -58,6 +58,7 @@ horniness_time_modifiers:
         {
             var gd = GameDefinition.LoadFrom(ValidYaml);
             Assert.Equal("TestGame", gd.Name);
+            Assert.False(gd.AllowDefaultFallback);
             Assert.Contains("test game master prompt", gd.GameMasterPrompt);
             Assert.Contains("multiple lines of guidance", gd.GameMasterPrompt);
             Assert.Contains("Player role", gd.PlayerAvatarRoleDescription);
@@ -196,6 +197,7 @@ horniness_time_modifiers:
         {
             var gd = GameDefinition.PinderDefaults;
             Assert.Equal("Pinder", gd.Name);
+            Assert.False(gd.AllowDefaultFallback);
             Assert.Contains("== GAME MASTER ==", gd.GameMasterPrompt);
             Assert.Contains("comedy dating RPG", gd.GameMasterPrompt);
             Assert.Contains("player character", gd.PlayerAvatarRoleDescription, StringComparison.OrdinalIgnoreCase);
