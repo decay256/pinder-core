@@ -88,7 +88,7 @@ partial class Program
         // characters are assembled — the assembler gates archetype injection on
         // this flag. The load depends only on AppContext.BaseDirectory +
         // DataFileLocator and has no dependency on character data.
-        string? gameDefPath = DataFileLocator.FindDataFile(AppContext.BaseDirectory, Path.Combine("data", "game-definition.yaml"));
+        string? gameDefPath = Pinder.Core.Data.DataFileLocator.FindDataFile(AppContext.BaseDirectory, Path.Combine("data", "game-definition.yaml"));
         result.GameDef = null;
         if (gameDefPath != null)
         {
@@ -239,7 +239,7 @@ partial class Program
         result.SnapshotI18nCatalog = null;
         try
         {
-            string? repoRoot = DataFileLocator.FindRepoRoot(AppContext.BaseDirectory);
+            string? repoRoot = Pinder.Core.Data.DataFileLocator.FindRepoRoot(AppContext.BaseDirectory);
             if (repoRoot != null)
             {
                 string i18nDir = Path.Combine(repoRoot, "data", "i18n");

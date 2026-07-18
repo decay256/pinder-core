@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using Pinder.SessionRunner;
+using Pinder.Core.Data;
 
 namespace Pinder.Core.TestCommon
 {
