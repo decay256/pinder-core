@@ -101,13 +101,13 @@ namespace Pinder.LlmAdapters.Tests
         {
             // Transport returns four options with no stake content whatsoever.
             const string fakeResponse =
-                "OPTION_1\n[STAT: CHARM] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]\n" +
+                "OPTION_1\n[STAT: CHARM] [CALLBACK: none] [COMBO: none]\n" +
                 "\"So what are you up to this weekend?\"\n\n" +
-                "OPTION_2\n[STAT: RIZZ] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]\n" +
+                "OPTION_2\n[STAT: RIZZ] [CALLBACK: none] [COMBO: none]\n" +
                 "\"You seem like someone who enjoys long walks.\"\n\n" +
-                "OPTION_3\n[STAT: HONESTY] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]\n" +
+                "OPTION_3\n[STAT: HONESTY] [CALLBACK: none] [COMBO: none]\n" +
                 "\"Honestly I have no idea what I'm doing here.\"\n\n" +
-                "OPTION_4\n[STAT: CHAOS] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]\n" +
+                "OPTION_4\n[STAT: CHAOS] [CALLBACK: none] [COMBO: none]\n" +
                 "\"Bold of you to assume I have plans.\"";
 
             string? capturedWarning = null;
@@ -134,13 +134,13 @@ namespace Pinder.LlmAdapters.Tests
         {
             // OPTION_3 mentions "Margot" — a fragment from the stake lines.
             const string fakeResponse =
-                "OPTION_1\n[STAT: CHARM] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]\n" +
+                "OPTION_1\n[STAT: CHARM] [CALLBACK: none] [COMBO: none]\n" +
                 "\"So what are you up to this weekend?\"\n\n" +
-                "OPTION_2\n[STAT: RIZZ] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]\n" +
+                "OPTION_2\n[STAT: RIZZ] [CALLBACK: none] [COMBO: none]\n" +
                 "\"You seem like someone who enjoys long walks.\"\n\n" +
-                "OPTION_3\n[STAT: HONESTY] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]\n" +
+                "OPTION_3\n[STAT: HONESTY] [CALLBACK: none] [COMBO: none]\n" +
                 "\"I deleted my thesis on purpose, actually. Watched it go.\"\n\n" +
-                "OPTION_4\n[STAT: CHAOS] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]\n" +
+                "OPTION_4\n[STAT: CHAOS] [CALLBACK: none] [COMBO: none]\n" +
                 "\"Bold of you to assume I have plans.\"";
 
             string? capturedWarning = null;

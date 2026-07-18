@@ -258,7 +258,7 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("[STAT: X]", PromptTemplates.DialogueOptionsInstruction);
             Assert.Contains("[CALLBACK:", PromptTemplates.DialogueOptionsInstruction);
             Assert.Contains("[COMBO:", PromptTemplates.DialogueOptionsInstruction);
-            Assert.Contains("[TELL_BONUS:", PromptTemplates.DialogueOptionsInstruction);
+            Assert.DoesNotContain("TELL_BONUS", PromptTemplates.DialogueOptionsInstruction, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("exactly {options_count}", PromptTemplates.DialogueOptionsInstruction);
         }
 

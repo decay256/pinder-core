@@ -32,14 +32,14 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             Assert.Contains("[STAT:", instruction);
         }
 
-        // Mutation: Would catch if CALLBACK/COMBO/TELL_BONUS tags were missing
+        // Engine-derived metadata must not be requested from the model.
         [Fact]
-        public void AC1_Instruction_contains_CALLBACK_COMBO_TELL_BONUS_tags()
+        public void AC1_Instruction_contains_only_model_authored_metadata_tags()
         {
             var instruction = PromptTemplates.DialogueOptionsInstruction;
             Assert.Contains("[CALLBACK:", instruction);
             Assert.Contains("[COMBO:", instruction);
-            Assert.Contains("[TELL_BONUS:", instruction);
+            Assert.DoesNotContain("TELL_BONUS", instruction, StringComparison.OrdinalIgnoreCase);
         }
 
         // Mutation: Would catch if the format block replaced the original instructional text
@@ -125,13 +125,28 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             Assert.Equal("The Reveal", result[1].ComboName);
         }
 
-        // Mutation: Would catch if HasTellBonus was always false
         [Fact]
-        public void AC2_HasTellBonus_parsed_when_yes()
+        public void AC2_TellBonus_metadata_is_rejected_by_lenient_and_strict_parsers()
         {
-            var input = BuildWellFormed4Options();
-            var result = DialogueOptionParsers.ParseDialogueOptionsText(input, new[] { StatType.Charm, StatType.Honesty, StatType.Chaos, StatType.Wit });
-            Assert.True(result[1].HasTellBonus);
+            var stats = new[] { StatType.Charm, StatType.Honesty, StatType.Chaos, StatType.Wit };
+            var input = BuildWellFormed4Options().Replace(
+                "[COMBO: The Reveal]",
+                "[COMBO: The Reveal] [TELL_BONUS: yes]",
+                StringComparison.Ordinal);
+
+            var lenient = DialogueOptionParsers.ParseDialogueOptionsText(input, stats);
+            var strict = DialogueOptionParsers.ParseDialogueOptionsStrict(
+                input,
+                stats,
+                stats.Length,
+                out var errorCode,
+                out _,
+                out _,
+                out _);
+
+            Assert.Empty(lenient);
+            Assert.Empty(strict);
+            Assert.Equal("unexpected_metadata", errorCode);
         }
 
         // Mutation: Would catch if "none" callback was parsed as non-null
@@ -154,11 +169,11 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         public void EdgeCase_Partial_options_padded_to_4()
         {
             var input = @"OPTION_1
-[STAT: CHARM] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
+[STAT: CHARM] [CALLBACK: none] [COMBO: none]
 ""Hey there, nice profile!""
 
 OPTION_2
-[STAT: WIT] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
+[STAT: WIT] [CALLBACK: none] [COMBO: none]
 ""Is your bio a riddle? Because I'm intrigued.""";
 
             var result = DialogueOptionParsers.ParseDialogueOptionsText(input, new[] { StatType.Charm, StatType.Wit, StatType.Honesty, StatType.Chaos });
@@ -181,19 +196,19 @@ OPTION_2
             var input = @"Here are your options for this turn:
 
 OPTION_1
-[STAT: CHARM] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
+[STAT: CHARM] [CALLBACK: none] [COMBO: none]
 ""Hey, nice to meet you!""
 
 OPTION_2
-[STAT: RIZZ] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
+[STAT: RIZZ] [CALLBACK: none] [COMBO: none]
 ""You look incredible tonight""
 
 OPTION_3
-[STAT: WIT] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
+[STAT: WIT] [CALLBACK: none] [COMBO: none]
 ""So what's your deal?""
 
 OPTION_4
-[STAT: HONESTY] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
+[STAT: HONESTY] [CALLBACK: none] [COMBO: none]
 ""I'm genuinely curious about you""";
 
             var result = DialogueOptionParsers.ParseDialogueOptionsText(input, new[] { StatType.Charm, StatType.Rizz, StatType.Wit, StatType.Honesty });
@@ -209,23 +224,23 @@ OPTION_4
         public void EdgeCase_More_than_4_options_truncated_to_4()
         {
             var input = @"OPTION_1
-[STAT: CHARM] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
+[STAT: CHARM] [CALLBACK: none] [COMBO: none]
 ""Option one""
 
 OPTION_2
-[STAT: RIZZ] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
+[STAT: RIZZ] [CALLBACK: none] [COMBO: none]
 ""Option two""
 
 OPTION_3
-[STAT: WIT] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
+[STAT: WIT] [CALLBACK: none] [COMBO: none]
 ""Option three""
 
 OPTION_4
-[STAT: HONESTY] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
+[STAT: HONESTY] [CALLBACK: none] [COMBO: none]
 ""Option four""
 
 OPTION_5
-[STAT: CHAOS] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
+[STAT: CHAOS] [CALLBACK: none] [COMBO: none]
 ""Option five should be ignored""";
 
             var result = DialogueOptionParsers.ParseDialogueOptionsText(input, new[] { StatType.Charm, StatType.Rizz, StatType.Wit, StatType.Honesty });
@@ -265,19 +280,19 @@ OPTION_5
         public void EdgeCase_Invalid_stat_name_skips_option_and_pads()
         {
             var input = @"OPTION_1
-[STAT: INVALID_STAT] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
+[STAT: INVALID_STAT] [CALLBACK: none] [COMBO: none]
 ""This option has an invalid stat""
 
 OPTION_2
-[STAT: CHARM] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
+[STAT: CHARM] [CALLBACK: none] [COMBO: none]
 ""This one is valid""
 
 OPTION_3
-[STAT: WIT] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
+[STAT: WIT] [CALLBACK: none] [COMBO: none]
 ""Also valid""
 
 OPTION_4
-[STAT: HONESTY] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
+[STAT: HONESTY] [CALLBACK: none] [COMBO: none]
 ""Valid too""";
 
             var result = DialogueOptionParsers.ParseDialogueOptionsText(input, new[] { StatType.Charm, StatType.Wit, StatType.Honesty, StatType.Chaos });
@@ -320,19 +335,19 @@ OPTION_4
         public void AC2_RIZZ_stat_parses_correctly()
         {
             var input = @"OPTION_1
-[STAT: RIZZ] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
+[STAT: RIZZ] [CALLBACK: none] [COMBO: none]
 ""Smooth operator line""
 
 OPTION_2
-[STAT: SELF_AWARENESS] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
+[STAT: SELF_AWARENESS] [CALLBACK: none] [COMBO: none]
 ""Introspective line""
 
 OPTION_3
-[STAT: CHARM] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
+[STAT: CHARM] [CALLBACK: none] [COMBO: none]
 ""Charming line""
 
 OPTION_4
-[STAT: HONESTY] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
+[STAT: HONESTY] [CALLBACK: none] [COMBO: none]
 ""Honest line""";
 
             var result = DialogueOptionParsers.ParseDialogueOptionsText(input, new[] { StatType.Rizz, StatType.SelfAwareness, StatType.Charm, StatType.Honesty });
@@ -363,19 +378,19 @@ OPTION_4
         private static string BuildWellFormed4Options()
         {
             return @"OPTION_1
-[STAT: CHARM] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
+[STAT: CHARM] [CALLBACK: none] [COMBO: none]
 ""hey so I noticed you're into marine biology… is that a career thing or a documentary thing""
 
 OPTION_2
-[STAT: HONESTY] [CALLBACK: turn_2] [COMBO: The Reveal] [TELL_BONUS: yes]
+[STAT: HONESTY] [CALLBACK: turn_2] [COMBO: The Reveal]
 ""okay real talk I looked at your profile for way too long and I have questions about the penguin photo""
 
 OPTION_3
-[STAT: CHAOS] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
+[STAT: CHAOS] [CALLBACK: none] [COMBO: none]
 ""what if penguins had tinder. like what would their bios say. I need your thoughts on this""
 
 OPTION_4
-[STAT: WIT] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
+[STAT: WIT] [CALLBACK: none] [COMBO: none]
 ""your bio says looking for someone who gets it which is either deeply profound or deeply vague""";
         }
     }

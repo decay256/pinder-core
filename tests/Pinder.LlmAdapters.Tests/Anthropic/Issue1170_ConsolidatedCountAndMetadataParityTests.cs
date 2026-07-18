@@ -28,7 +28,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
 
             // Feed an LLM response containing fewer, equal, and more option headers than N to test padding/cap
             var llmResponse = string.Join("\n", Enumerable.Range(1, n + 2).Select(i => 
-                $"OPTION_{i} [STAT: {drawnStats[i % n]}] \"Text option {i}\" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]"));
+                $"OPTION_{i} [STAT: {drawnStats[i % n]}] \"Text option {i}\" [CALLBACK: none] [COMBO: none]"));
 
             var result = DialogueOptionParsers.ParseDialogueOptionsText(llmResponse, drawnStats);
 
@@ -92,9 +92,9 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             var drawnStats = new[] { StatType.Charm, StatType.Honesty, StatType.Wit };
             var n = drawnStats.Length;
 
-            var input = @"OPTION_1 [STAT: Charm] ""Charming message"" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
-OPTION_2 [STAT: Honesty] ""Honest message"" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]
-OPTION_3 [STAT: Wit] ""Witty message"" [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]";
+            var input = @"OPTION_1 [STAT: Charm] ""Charming message"" [CALLBACK: none] [COMBO: none]
+OPTION_2 [STAT: Honesty] ""Honest message"" [CALLBACK: none] [COMBO: none]
+OPTION_3 [STAT: Wit] ""Witty message"" [CALLBACK: none] [COMBO: none]";
 
             var result = DialogueOptionParsers.ParseDialogueOptionsText(input, drawnStats);
 
@@ -153,8 +153,8 @@ OPTION_3 [STAT: Wit] ""Witty message"" [CALLBACK: none] [COMBO: none] [TELL_BONU
             Assert.Contains("STAT", textTags);
             Assert.Contains("CALLBACK", textTags);
             Assert.Contains("COMBO", textTags);
-            Assert.Contains("TELL_BONUS", textTags);
-            Assert.Equal(4, textTags.Count);
+            Assert.DoesNotContain("TELL_BONUS", textTags);
+            Assert.Equal(3, textTags.Count);
 
             // Get schema fields from ToolSchemas
             var toolSchema = ToolSchemas.GetDialogueOptions(4);

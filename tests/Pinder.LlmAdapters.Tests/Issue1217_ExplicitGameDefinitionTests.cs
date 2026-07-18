@@ -19,7 +19,7 @@ namespace Pinder.LlmAdapters.Tests
         public async Task Production_GetDialogueOptions_ThrowsInvalidOperationException_WhenGameDefinitionIsNull()
         {
             // Arrange
-            var transport = new FixedResponseTransport("OPTION_1\n[STAT: CHARM] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]\n\"Hi\"");
+            var transport = new FixedResponseTransport("OPTION_1\n[STAT: CHARM] [CALLBACK: none] [COMBO: none]\n\"Hi\"");
             var options = new PinderLlmAdapterOptions { GameDefinition = null };
             var adapter = new PinderLlmAdapter(transport, options);
 
@@ -88,7 +88,7 @@ namespace Pinder.LlmAdapters.Tests
         public async Task Production_GetDialogueOptions_DoesNotThrow_WhenGameDefinitionIsProvided()
         {
             // Arrange
-            var transport = new FixedResponseTransport("OPTION_1\n[STAT: CHARM] [CALLBACK: none] [COMBO: none] [TELL_BONUS: no]\n\"Hello\"");
+            var transport = new FixedResponseTransport("OPTION_1\n[STAT: CHARM] [CALLBACK: none] [COMBO: none]\n\"Hello\"");
             var options = new PinderLlmAdapterOptions { GameDefinition = GameDefinition.PinderDefaults };
             var adapter = new PinderLlmAdapter(transport, options);
 
