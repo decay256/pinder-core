@@ -10,6 +10,17 @@ namespace Pinder.Core.Conversation
     public static class PlayerResponseDelayEvaluator
     {
         private const string DefaultTestPrompt = "Datee noticed the long gap between replies";
+        private const double ImmediateReplyUpperMinutes = 1.0;
+        private const double ShortReplyUpperMinutes = 15.0;
+        private const double InterestedReplyUpperMinutes = 60.0;
+        private const double OneToSixHoursUpperMinutes = 360.0;
+        private const double TwentyFourHoursUpperMinutes = 1440.0;
+
+        private const int NoDelayPenalty = 0;
+        private const int InterestedReplyPenalty = -1;
+        private const int OneToSixHoursPenalty = -2;
+        private const int SixToTwentyFourHoursPenalty = -3;
+        private const int TwentyFourHoursPlusPenalty = -5;
 
         /// <summary>
         /// Evaluates the interest penalty for the player taking <paramref name="delay"/>
@@ -66,30 +77,31 @@ namespace Pinder.Core.Conversation
         {
             double totalMinutes = delay.TotalMinutes;
 
-            if (totalMinutes < 1.0)
-                return 0;
-            if (totalMinutes < 15.0)
-                return 0;
-            if (totalMinutes < 60.0)
+            if (totalMinutes < ImmediateReplyUpperMinutes)
+                return NoDelayPenalty;
+            if (totalMinutes < ShortReplyUpperMinutes)
+                return NoDelayPenalty;
+            if (totalMinutes < InterestedReplyUpperMinutes)
             {
                 // 15-60 min bucket: only applies if interest >= 16
                 if (currentInterest == InterestState.VeryIntoIt ||
                     currentInterest == InterestState.AlmostThere ||
                     currentInterest == InterestState.DateSecured)
-                    return -1;
-                return 0;
+                    return InterestedReplyPenalty;
+                return NoDelayPenalty;
             }
-            if (totalMinutes < 360.0) // < 6 hours
-                return -2;
-            if (totalMinutes < 1440.0) // < 24 hours
-                return -3;
-            return -5; // 24+ hours
+            if (totalMinutes < OneToSixHoursUpperMinutes)
+                return OneToSixHoursPenalty;
+            if (totalMinutes < TwentyFourHoursUpperMinutes)
+                return SixToTwentyFourHoursPenalty;
+            return TwentyFourHoursPlusPenalty;
         }
 
         private static bool IsOneToSixHourBucket(TimeSpan delay)
         {
             double totalMinutes = delay.TotalMinutes;
-            return totalMinutes >= 60.0 && totalMinutes < 360.0;
+            return totalMinutes >= InterestedReplyUpperMinutes &&
+                   totalMinutes < OneToSixHoursUpperMinutes;
         }
     }
 }
