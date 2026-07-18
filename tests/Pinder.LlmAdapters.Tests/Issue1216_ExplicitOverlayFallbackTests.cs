@@ -6,6 +6,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Pinder.Core.Conversation;
 using Pinder.Core.Interfaces;
+using Pinder.Core.Rolls;
+using Pinder.Core.Stats;
 using Pinder.LlmAdapters;
 using Xunit;
 
@@ -121,6 +123,87 @@ namespace Pinder.LlmAdapters.Tests
 
             // Assert
             Assert.Equal("orig msg", result);
+        }
+
+        [Theory]
+        [InlineData("horniness", "horniness_overlay", null)]
+        [InlineData("trap", "trap_overlay", "baited-snare")]
+        [InlineData("failure", "failure_corruption", null)]
+        [InlineData("shadow", "shadow_corruption", null)]
+        public async Task OverlayRewriteMethods_WhenTransportReturnsEmpty_DegradeWithExpectedMetadata(
+            string overlayKind,
+            string expectedOverlayType,
+            string? expectedTrapName)
+        {
+            // Arrange
+            var degradedEvents = new List<OverlayDegradedEvent>();
+            var transport = new FixedResponseTransport("   ");
+            var options = new PinderLlmAdapterOptions
+            {
+                GameDefinition = GameDefinition.PinderDefaults,
+                OnOverlayDegraded = evt => degradedEvents.Add(evt)
+            };
+            var adapter = new PinderLlmAdapter(transport, options);
+
+            // Act
+            var result = await InvokeOverlayAsync(adapter, overlayKind);
+
+            // Assert
+            Assert.Equal("orig msg", result);
+            var degradedEvent = Assert.Single(degradedEvents);
+            Assert.Equal(expectedOverlayType, degradedEvent.OverlayType);
+            Assert.Equal("empty_output", degradedEvent.Reason);
+            Assert.Equal(OverlayOutcome.Degraded, degradedEvent.Outcome);
+            Assert.Equal(expectedTrapName, degradedEvent.TrapName);
+        }
+
+        [Theory]
+        [InlineData("horniness", "horniness_overlay", null)]
+        [InlineData("trap", "trap_overlay", "baited-snare")]
+        [InlineData("failure", "failure_corruption", null)]
+        [InlineData("shadow", "shadow_corruption", null)]
+        public async Task OverlayRewriteMethods_WhenTransportReturnsRefusal_DegradeWithExpectedMetadata(
+            string overlayKind,
+            string expectedOverlayType,
+            string? expectedTrapName)
+        {
+            // Arrange
+            var degradedEvents = new List<OverlayDegradedEvent>();
+            var transport = new FixedResponseTransport("I'd be happy to help with something else.");
+            var options = new PinderLlmAdapterOptions
+            {
+                GameDefinition = GameDefinition.PinderDefaults,
+                OnOverlayDegraded = evt => degradedEvents.Add(evt)
+            };
+            var adapter = new PinderLlmAdapter(transport, options);
+
+            // Act
+            var result = await InvokeOverlayAsync(adapter, overlayKind);
+
+            // Assert
+            Assert.Equal("orig msg", result);
+            var degradedEvent = Assert.Single(degradedEvents);
+            Assert.Equal(expectedOverlayType, degradedEvent.OverlayType);
+            Assert.Equal("refusal", degradedEvent.Reason);
+            Assert.Equal(OverlayOutcome.Degraded, degradedEvent.Outcome);
+            Assert.Equal(expectedTrapName, degradedEvent.TrapName);
+        }
+
+        private static Task<string> InvokeOverlayAsync(PinderLlmAdapter adapter, string overlayKind)
+        {
+            switch (overlayKind)
+            {
+                case "horniness":
+                    return adapter.ApplyHorninessOverlayAsync("orig msg", "make it horny");
+                case "trap":
+                    return adapter.ApplyTrapOverlayAsync("orig msg", "apply trap", "baited-snare");
+                case "failure":
+                    return adapter.ApplyFailureCorruptionAsync("orig msg", "corrupt failure", StatType.Charm, FailureTier.Fumble);
+                case "shadow":
+                    return adapter.ApplyShadowCorruptionAsync("orig msg", "corrupt shadow", ShadowStatType.Madness);
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(overlayKind), overlayKind, "Unknown overlay kind.");
+            }
         }
     }
 }

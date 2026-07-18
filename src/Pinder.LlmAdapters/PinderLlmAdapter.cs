@@ -25,6 +25,15 @@ namespace Pinder.LlmAdapters
         private const string TrapOverlayPrompt = "trap_overlay";
         private const string FailureCorruptionPrompt = "failure_corruption";
         private const string ShadowCorruptionPrompt = "shadow_corruption";
+        private const string OverlayProviderPrimary = "primary";
+        private const string OverlayReasonSkippedNoInstruction = "skipped_no_instruction";
+        private const string OverlayReasonEmptyOutput = "empty_output";
+        private const string OverlayReasonRefusal = "refusal";
+        private const string OverlayReasonError = "error";
+        private const string RefusalPrefixCant = "I can't";
+        private const string RefusalPrefixCannot = "I cannot";
+        private const string RefusalPhraseInappropriate = "inappropriate";
+        private const string RefusalPhraseHappyToHelp = "I'd be happy to help";
 
         private readonly ILlmTransport _transport;
         private readonly ILlmTransport _overlayTransport;
@@ -400,10 +409,10 @@ namespace Pinder.LlmAdapters
                 if (string.IsNullOrWhiteSpace(instruction))
                 {
                     RaiseOverlayDegraded(new OverlayDegradedEvent(
-                        overlayType: "horniness_overlay",
-                        provider: "primary",
+                        overlayType: HorninessOverlayPrompt,
+                        provider: OverlayProviderPrimary,
                         model: null,
-                        reason: "skipped_no_instruction",
+                        reason: OverlayReasonSkippedNoInstruction,
                         outcome: OverlayOutcome.Skipped
                     ));
                 }
@@ -423,41 +432,11 @@ namespace Pinder.LlmAdapters
                 var result = await SendWithDiagnosticsAsync(_overlayTransport, prompt.SystemPrompt, prompt.UserContent, temperature, _options.MaxTokens, LlmPhase.HorninessOverlay, null, ct)
                     .ConfigureAwait(false);
 
-                if (string.IsNullOrWhiteSpace(result))
-                {
-                    RaiseOverlayDegraded(new OverlayDegradedEvent(
-                        overlayType: "horniness_overlay",
-                        provider: "primary",
-                        model: null,
-                        reason: "empty_output",
-                        outcome: OverlayOutcome.Degraded
-                    ));
+                var normalized = NormalizeOverlayRewriteResult(result, HorninessOverlayPrompt);
+                if (normalized.Degraded)
                     return message;
-                }
-                // #831: thinking-block stripping moved to
-                // ThinkingStrippingLlmTransport (transport decorator).
-                // The transport already strips, so we only trim here.
-                // Refusal detection sees the cleaned text the same way it
-                // did when the strip ran at this call site.
-                string trimmed = result.Trim();
 
-                // Detect refusal — fall back to original message silently
-                if (trimmed.StartsWith("I can't", StringComparison.OrdinalIgnoreCase) ||
-                    trimmed.StartsWith("I cannot", StringComparison.OrdinalIgnoreCase) ||
-                    trimmed.IndexOf("inappropriate", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    trimmed.IndexOf("I'd be happy to help", StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    RaiseOverlayDegraded(new OverlayDegradedEvent(
-                        overlayType: "horniness_overlay",
-                        provider: "primary",
-                        model: null,
-                        reason: "refusal",
-                        outcome: OverlayOutcome.Degraded
-                    ));
-                    return message;
-                }
-
-                return trimmed;
+                return normalized.RewrittenText!;
             }
             catch (OperationCanceledException) when (ct.IsCancellationRequested)
             {
@@ -466,10 +445,10 @@ namespace Pinder.LlmAdapters
             catch (Exception ex)
             {
                 RaiseOverlayDegraded(new OverlayDegradedEvent(
-                    overlayType: "horniness_overlay",
-                    provider: "primary",
+                    overlayType: HorninessOverlayPrompt,
+                    provider: OverlayProviderPrimary,
                     model: null,
-                    reason: "error",
+                    reason: OverlayReasonError,
                     outcome: OverlayOutcome.Degraded,
                     errorCode: ex.GetType().Name,
                     exception: ex
@@ -486,10 +465,10 @@ namespace Pinder.LlmAdapters
                 if (string.IsNullOrWhiteSpace(trapInstruction))
                 {
                     RaiseOverlayDegraded(new OverlayDegradedEvent(
-                        overlayType: "trap_overlay",
-                        provider: "primary",
+                        overlayType: TrapOverlayPrompt,
+                        provider: OverlayProviderPrimary,
                         model: null,
-                        reason: "skipped_no_instruction",
+                        reason: OverlayReasonSkippedNoInstruction,
                         outcome: OverlayOutcome.Skipped,
                         trapName: trapName
                     ));
@@ -511,40 +490,11 @@ namespace Pinder.LlmAdapters
                 var result = await SendWithDiagnosticsAsync(_overlayTransport, prompt.SystemPrompt, prompt.UserContent, temperature, _options.MaxTokens, LlmPhase.TrapOverlay, null, ct)
                     .ConfigureAwait(false);
 
-                if (string.IsNullOrWhiteSpace(result))
-                {
-                    RaiseOverlayDegraded(new OverlayDegradedEvent(
-                        overlayType: "trap_overlay",
-                        provider: "primary",
-                        model: null,
-                        reason: "empty_output",
-                        outcome: OverlayOutcome.Degraded,
-                        trapName: trapName
-                    ));
+                var normalized = NormalizeOverlayRewriteResult(result, TrapOverlayPrompt, trapName);
+                if (normalized.Degraded)
                     return message;
-                }
-                // #831: thinking-block stripping moved to
-                // ThinkingStrippingLlmTransport (transport decorator).
-                string trimmed = result.Trim();
 
-                // Detect refusal — fall back to original message silently.
-                if (trimmed.StartsWith("I can't", StringComparison.OrdinalIgnoreCase) ||
-                    trimmed.StartsWith("I cannot", StringComparison.OrdinalIgnoreCase) ||
-                    trimmed.IndexOf("inappropriate", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    trimmed.IndexOf("I'd be happy to help", StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    RaiseOverlayDegraded(new OverlayDegradedEvent(
-                        overlayType: "trap_overlay",
-                        provider: "primary",
-                        model: null,
-                        reason: "refusal",
-                        outcome: OverlayOutcome.Degraded,
-                        trapName: trapName
-                    ));
-                    return message;
-                }
-
-                return trimmed;
+                return normalized.RewrittenText!;
             }
             catch (OperationCanceledException) when (ct.IsCancellationRequested)
             {
@@ -553,10 +503,10 @@ namespace Pinder.LlmAdapters
             catch (Exception ex)
             {
                 RaiseOverlayDegraded(new OverlayDegradedEvent(
-                    overlayType: "trap_overlay",
-                    provider: "primary",
+                    overlayType: TrapOverlayPrompt,
+                    provider: OverlayProviderPrimary,
                     model: null,
-                    reason: "error",
+                    reason: OverlayReasonError,
                     outcome: OverlayOutcome.Degraded,
                     errorCode: ex.GetType().Name,
                     trapName: trapName,
@@ -574,10 +524,10 @@ namespace Pinder.LlmAdapters
                 if (string.IsNullOrWhiteSpace(instruction))
                 {
                     RaiseOverlayDegraded(new OverlayDegradedEvent(
-                        overlayType: "failure_corruption",
-                        provider: "primary",
+                        overlayType: FailureCorruptionPrompt,
+                        provider: OverlayProviderPrimary,
                         model: null,
-                        reason: "skipped_no_instruction",
+                        reason: OverlayReasonSkippedNoInstruction,
                         outcome: OverlayOutcome.Skipped
                     ));
                 }
@@ -598,37 +548,11 @@ namespace Pinder.LlmAdapters
                 var result = await SendWithDiagnosticsAsync(_overlayTransport, prompt.SystemPrompt, prompt.UserContent, temperature, _options.MaxTokens, LlmPhase.Delivery, null, ct)
                     .ConfigureAwait(false);
 
-                if (string.IsNullOrWhiteSpace(result))
-                {
-                    RaiseOverlayDegraded(new OverlayDegradedEvent(
-                        overlayType: "failure_corruption",
-                        provider: "primary",
-                        model: null,
-                        reason: "empty_output",
-                        outcome: OverlayOutcome.Degraded
-                    ));
+                var normalized = NormalizeOverlayRewriteResult(result, FailureCorruptionPrompt);
+                if (normalized.Degraded)
                     return message;
-                }
 
-                string trimmed = result.Trim();
-
-                // Detect refusal — fall back to original message silently
-                if (trimmed.StartsWith("I can't", StringComparison.OrdinalIgnoreCase) ||
-                    trimmed.StartsWith("I cannot", StringComparison.OrdinalIgnoreCase) ||
-                    trimmed.IndexOf("inappropriate", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    trimmed.IndexOf("I'd be happy to help", StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    RaiseOverlayDegraded(new OverlayDegradedEvent(
-                        overlayType: "failure_corruption",
-                        provider: "primary",
-                        model: null,
-                        reason: "refusal",
-                        outcome: OverlayOutcome.Degraded
-                    ));
-                    return message;
-                }
-
-                return trimmed;
+                return normalized.RewrittenText!;
             }
             catch (OperationCanceledException) when (ct.IsCancellationRequested)
             {
@@ -637,10 +561,10 @@ namespace Pinder.LlmAdapters
             catch (Exception ex)
             {
                 RaiseOverlayDegraded(new OverlayDegradedEvent(
-                    overlayType: "failure_corruption",
-                    provider: "primary",
+                    overlayType: FailureCorruptionPrompt,
+                    provider: OverlayProviderPrimary,
                     model: null,
-                    reason: "error",
+                    reason: OverlayReasonError,
                     outcome: OverlayOutcome.Degraded,
                     errorCode: ex.GetType().Name,
                     exception: ex
@@ -657,10 +581,10 @@ namespace Pinder.LlmAdapters
                 if (string.IsNullOrWhiteSpace(instruction))
                 {
                     RaiseOverlayDegraded(new OverlayDegradedEvent(
-                        overlayType: "shadow_corruption",
-                        provider: "primary",
+                        overlayType: ShadowCorruptionPrompt,
+                        provider: OverlayProviderPrimary,
                         model: null,
-                        reason: "skipped_no_instruction",
+                        reason: OverlayReasonSkippedNoInstruction,
                         outcome: OverlayOutcome.Skipped
                     ));
                 }
@@ -680,38 +604,11 @@ namespace Pinder.LlmAdapters
                 var result = await SendWithDiagnosticsAsync(_overlayTransport, prompt.SystemPrompt, prompt.UserContent, temperature, _options.MaxTokens, LlmPhase.ShadowCorruption, null, ct)
                     .ConfigureAwait(false);
 
-                if (string.IsNullOrWhiteSpace(result))
-                {
-                    RaiseOverlayDegraded(new OverlayDegradedEvent(
-                        overlayType: "shadow_corruption",
-                        provider: "primary",
-                        model: null,
-                        reason: "empty_output",
-                        outcome: OverlayOutcome.Degraded
-                    ));
+                var normalized = NormalizeOverlayRewriteResult(result, ShadowCorruptionPrompt);
+                if (normalized.Degraded)
                     return message;
-                }
-                // #831: thinking-block stripping moved to
-                // ThinkingStrippingLlmTransport (transport decorator).
-                string trimmed = result.Trim();
 
-                // Detect refusal — fall back to original message silently
-                if (trimmed.StartsWith("I can't", StringComparison.OrdinalIgnoreCase) ||
-                    trimmed.StartsWith("I cannot", StringComparison.OrdinalIgnoreCase) ||
-                    trimmed.IndexOf("inappropriate", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    trimmed.IndexOf("I'd be happy to help", StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    RaiseOverlayDegraded(new OverlayDegradedEvent(
-                        overlayType: "shadow_corruption",
-                        provider: "primary",
-                        model: null,
-                        reason: "refusal",
-                        outcome: OverlayOutcome.Degraded
-                    ));
-                    return message;
-                }
-
-                return trimmed;
+                return normalized.RewrittenText!;
             }
             catch (OperationCanceledException) when (ct.IsCancellationRequested)
             {
@@ -720,10 +617,10 @@ namespace Pinder.LlmAdapters
             catch (Exception ex)
             {
                 RaiseOverlayDegraded(new OverlayDegradedEvent(
-                    overlayType: "shadow_corruption",
-                    provider: "primary",
+                    overlayType: ShadowCorruptionPrompt,
+                    provider: OverlayProviderPrimary,
                     model: null,
-                    reason: "error",
+                    reason: OverlayReasonError,
                     outcome: OverlayOutcome.Degraded,
                     errorCode: ex.GetType().Name,
                     exception: ex
@@ -1091,6 +988,49 @@ namespace Pinder.LlmAdapters
             }
         }
 
+        private OverlayRewriteResult NormalizeOverlayRewriteResult(string? result, string overlayType, string? trapName = null)
+        {
+            if (string.IsNullOrWhiteSpace(result))
+            {
+                RaiseOverlayDegraded(CreateOverlayRewriteDegradedEvent(overlayType, OverlayReasonEmptyOutput, trapName));
+                return OverlayRewriteResult.DegradedResult();
+            }
+
+            // #831: thinking-block stripping moved to ThinkingStrippingLlmTransport
+            // (transport decorator). Refusal detection sees the already-cleaned text.
+            string trimmed = result!.Trim();
+            if (IsOverlayRefusal(trimmed))
+            {
+                RaiseOverlayDegraded(CreateOverlayRewriteDegradedEvent(overlayType, OverlayReasonRefusal, trapName));
+                return OverlayRewriteResult.DegradedResult();
+            }
+
+            return OverlayRewriteResult.Success(trimmed);
+        }
+
+        private static bool IsOverlayRefusal(string trimmed)
+        {
+            return trimmed.StartsWith(RefusalPrefixCant, StringComparison.OrdinalIgnoreCase) ||
+                trimmed.StartsWith(RefusalPrefixCannot, StringComparison.OrdinalIgnoreCase) ||
+                trimmed.IndexOf(RefusalPhraseInappropriate, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                trimmed.IndexOf(RefusalPhraseHappyToHelp, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        private static OverlayDegradedEvent CreateOverlayRewriteDegradedEvent(
+            string overlayType,
+            string reason,
+            string? trapName = null)
+        {
+            return new OverlayDegradedEvent(
+                overlayType: overlayType,
+                provider: OverlayProviderPrimary,
+                model: null,
+                reason: reason,
+                outcome: OverlayOutcome.Degraded,
+                trapName: trapName
+            );
+        }
+
         private void RaiseOverlayDegraded(OverlayDegradedEvent evt)
         {
             var handler = _options.OnOverlayDegraded ?? PinderLlmAdapterOptions.DefaultOnOverlayDegraded;
@@ -1451,6 +1391,29 @@ namespace Pinder.LlmAdapters
             public string SystemPrompt { get; }
 
             public string UserContent { get; }
+        }
+
+        private sealed class OverlayRewriteResult
+        {
+            private OverlayRewriteResult(bool degraded, string? rewrittenText)
+            {
+                Degraded = degraded;
+                RewrittenText = rewrittenText;
+            }
+
+            public bool Degraded { get; }
+
+            public string? RewrittenText { get; }
+
+            public static OverlayRewriteResult DegradedResult()
+            {
+                return new OverlayRewriteResult(true, null);
+            }
+
+            public static OverlayRewriteResult Success(string rewrittenText)
+            {
+                return new OverlayRewriteResult(false, rewrittenText);
+            }
         }
     }
 }
