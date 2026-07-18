@@ -201,6 +201,10 @@ are:
 | `IStakeGenerator` | Pinder.SessionSetup | Pre-session stake generation |
 | `IPlayerAgent` | session-runner | Sim-agent decision-making |
 
+Failure/success prompt pools are not a live extension point. Roll consequence
+copy is resolved through `IConsequenceCatalog` and delivered-message wording is
+handled by `StatDeliveryInstructions` plus the `DeliveryOverlay` commit step.
+
 ### ILlmTransport
 
 Low-level HTTP transport abstraction. Sits underneath `ILlmAdapter`. Tests
