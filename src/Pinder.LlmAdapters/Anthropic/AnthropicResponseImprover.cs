@@ -18,10 +18,14 @@ namespace Pinder.LlmAdapters.Anthropic
         public static async Task<string> ApplyImprovementAsync(
             AnthropicClient client,
             AnthropicOptions options,
+            string model,
+            int maxTokens,
             ContentBlock[] systemBlocks,
             string originalUserContent,
             string draft,
             double temperature,
+            LlmCallTelemetryOptions? telemetry = null,
+            string? phase = null,
             CancellationToken ct = default)
         {
             var improvementPrompt = options.GameDefinition?.ImprovementPrompt;
@@ -29,22 +33,27 @@ namespace Pinder.LlmAdapters.Anthropic
 
             try
             {
-                var improveRequest = new MessagesRequest
+                var improveRequest = AnthropicRequestBuilders.BuildMessagesRequest(
+                    model,
+                    maxTokens,
+                    systemBlocks,
+                    originalUserContent,
+                    temperature);
+                improveRequest.Messages = new[]
                 {
-                    Model = options.Model,
-                    MaxTokens = options.MaxTokens,
-                    Temperature = temperature,
-                    System = systemBlocks,
-                    Messages = new[]
-                    {
-                        new Message { Role = "user", Content = originalUserContent },
-                        new Message { Role = "assistant", Content = draft },
-                        new Message { Role = "user", Content = improvementPrompt }
-                    }
+                    new Message { Role = "user", Content = originalUserContent },
+                    new Message { Role = "assistant", Content = draft },
+                    new Message { Role = "user", Content = improvementPrompt }
                 };
                 AnthropicRequestBuilders.AttachTool(improveRequest, ToolSchemas.Improvement);
 
-                var improveResponse = await client.SendMessagesAsync(improveRequest, ct).ConfigureAwait(false);
+                var improveResponse = await client.SendMessagesAsync(
+                    improveRequest,
+                    ct,
+                    telemetry,
+                    provider: "anthropic",
+                    model: model,
+                    phase: phase).ConfigureAwait(false);
 
                 // Try structured tool_use first
                 var toolInput = improveResponse.GetToolInput();

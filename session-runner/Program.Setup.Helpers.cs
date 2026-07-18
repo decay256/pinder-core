@@ -126,7 +126,15 @@ partial class Program
                 Console.Error.WriteLine($"[WARN] Overlay model '{result.OverlayModel}' requested but overlay routing via option fields was removed (#1293); overlay calls will use the primary transport. Wire a dedicated overlay ILlmTransport to route overlays.");
             }
             string anthropicModel = result.ModelSpec;
-            var transport = new AnthropicTransport(result.ApiKey, anthropicModel);
+            var transport = new AnthropicTransport(new AnthropicOptions
+            {
+                ApiKey = result.ApiKey!,
+                Model = anthropicModel,
+                GameDefinition = result.GameDef,
+                MaxTokens = adapterOptions.MaxTokens,
+                Temperature = adapterOptions.Temperature,
+                StatDeliveryInstructions = statDeliveryInstructions
+            });
             result.Llm = new PinderLlmAdapter(transport, adapterOptions);
             engineLabel = string.IsNullOrWhiteSpace(result.OverlayModel)
                 ? $"PinderLlmAdapter + AnthropicTransport → {anthropicModel}"

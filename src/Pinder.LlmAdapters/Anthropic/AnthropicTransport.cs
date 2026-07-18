@@ -17,6 +17,7 @@ namespace Pinder.LlmAdapters.Anthropic
     {
         private readonly AnthropicClient _client;
         private readonly string _model;
+        private readonly AnthropicOptions? _options;
         private readonly LlmCallTelemetryOptions? _telemetry;
         private bool _disposed;
 
@@ -33,6 +34,20 @@ namespace Pinder.LlmAdapters.Anthropic
             _client = new AnthropicClient(apiKey);
         }
 
+        /// <summary>Creates transport from AnthropicOptions with internally-owned AnthropicClient.</summary>
+        public AnthropicTransport(
+            AnthropicOptions options,
+            LlmCallTelemetryOptions? telemetry = null)
+        {
+            if (options == null) throw new ArgumentNullException(nameof(options));
+            if (string.IsNullOrWhiteSpace(options.ApiKey))
+                throw new ArgumentException("API key must not be null, empty, or whitespace.", nameof(options));
+            _model = AnthropicModelIds.ToApiId(options.Model);
+            _options = options;
+            _telemetry = telemetry;
+            _client = new AnthropicClient(options.ApiKey);
+        }
+
         /// <summary>Creates transport with externally-provided HttpClient (for testing).</summary>
         public AnthropicTransport(
             string apiKey,
@@ -45,6 +60,21 @@ namespace Pinder.LlmAdapters.Anthropic
             _model = AnthropicModelIds.ToApiId(model ?? throw new ArgumentNullException(nameof(model)));
             _telemetry = telemetry;
             _client = new AnthropicClient(apiKey, httpClient);
+        }
+
+        /// <summary>Creates transport from AnthropicOptions with externally-provided HttpClient (for testing).</summary>
+        public AnthropicTransport(
+            AnthropicOptions options,
+            System.Net.Http.HttpClient httpClient,
+            LlmCallTelemetryOptions? telemetry = null)
+        {
+            if (options == null) throw new ArgumentNullException(nameof(options));
+            if (string.IsNullOrWhiteSpace(options.ApiKey))
+                throw new ArgumentException("API key must not be null, empty, or whitespace.", nameof(options));
+            _model = AnthropicModelIds.ToApiId(options.Model);
+            _options = options;
+            _telemetry = telemetry;
+            _client = new AnthropicClient(options.ApiKey, httpClient);
         }
 
         /// <inheritdoc />
@@ -75,7 +105,24 @@ namespace Pinder.LlmAdapters.Anthropic
                 provider: "anthropic",
                 model: _model,
                 phase: phase).ConfigureAwait(false);
-            return response.GetText() ?? "";
+            var draft = response.GetText() ?? "";
+            if (_options == null)
+            {
+                return draft;
+            }
+
+            return await AnthropicResponseImprover.ApplyImprovementAsync(
+                _client,
+                _options,
+                _model,
+                maxTokens,
+                systemBlocks,
+                userMessage,
+                draft,
+                temperature,
+                _telemetry,
+                phase,
+                ct).ConfigureAwait(false);
         }
 
         public async Task<StructuredLlmResponse> SendStructuredAsync(

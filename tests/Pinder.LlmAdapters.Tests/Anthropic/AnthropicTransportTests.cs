@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 using Pinder.LlmAdapters.Anthropic;
 using Xunit;
 
@@ -39,6 +41,35 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             }
         }
 
+        private sealed class SequenceCapturingHandler : HttpMessageHandler
+        {
+            private readonly Queue<string> _responses;
+
+            public SequenceCapturingHandler(params string[] responseJson)
+            {
+                _responses = new Queue<string>(responseJson);
+            }
+
+            public List<string> RequestBodies { get; } = new List<string>();
+
+            protected override async Task<HttpResponseMessage> SendAsync(
+                HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
+            {
+                RequestBodies.Add(request.Content == null
+                    ? ""
+                    : await request.Content.ReadAsStringAsync().ConfigureAwait(false));
+
+                string responseJson = _responses.Count == 0
+                    ? "{\"id\":\"msg_empty\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[]}"
+                    : _responses.Dequeue();
+
+                return new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(responseJson, Encoding.UTF8, "application/json")
+                };
+            }
+        }
+
         [Fact]
         public async Task SendAsync_SystemBlocks_HaveCacheControlEphemeral()
         {
@@ -54,6 +85,72 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             Assert.Contains("\"cache_control\"", handler.LastRequestBody);
             Assert.Contains("\"type\":\"ephemeral\"", handler.LastRequestBody);
             Assert.Contains("sysprompt-value", handler.LastRequestBody);
+        }
+
+        [Fact]
+        public async Task SendAsync_WithConfiguredImprovementPrompt_PerformsToolBackedImprovementPass()
+        {
+            string draftResponse = "{\"id\":\"msg_01\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"draft line\"}]}";
+            string improvementResponse = "{\"id\":\"msg_02\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"tool_use\",\"id\":\"toolu_01\",\"name\":\"submit_improvement\",\"input\":{\"improved\":\"improved line\"}}]}";
+            var handler = new SequenceCapturingHandler(draftResponse, improvementResponse);
+            using var http = new HttpClient(handler);
+            using var transport = new AnthropicTransport(new AnthropicOptions
+            {
+                ApiKey = TestApiKey,
+                Model = TestModel,
+                GameDefinition = CreateGameDefinition("Improve the draft and return the final text.")
+            }, http);
+
+            var responseText = await transport.SendAsync(
+                "sysprompt-value",
+                "usermsg-value",
+                temperature: 0.42,
+                maxTokens: 321);
+
+            Assert.Equal("improved line", responseText);
+            Assert.Equal(2, handler.RequestBodies.Count);
+
+            var improveRequest = JObject.Parse(handler.RequestBodies[1]);
+            Assert.Equal(TestModel, improveRequest.Value<string>("model"));
+            Assert.Equal(321, improveRequest.Value<int>("max_tokens"));
+            Assert.Equal(0.42, improveRequest.Value<double>("temperature"));
+            Assert.Equal("submit_improvement", improveRequest["tools"]![0]!.Value<string>("name"));
+            Assert.Equal("any", improveRequest["tool_choice"]!.Value<string>("type"));
+            Assert.Equal("user", improveRequest["messages"]![0]!.Value<string>("role"));
+            Assert.Equal("usermsg-value", improveRequest["messages"]![0]!["content"]!.Value<string>());
+            Assert.Equal("assistant", improveRequest["messages"]![1]!.Value<string>("role"));
+            Assert.Equal("draft line", improveRequest["messages"]![1]!["content"]!.Value<string>());
+            Assert.Equal("Improve the draft and return the final text.", improveRequest["messages"]![2]!["content"]!.Value<string>());
+        }
+
+        [Fact]
+        public async Task SendAsync_WithOptionsButNoImprovementPrompt_SendsOnlyDraftRequest()
+        {
+            string draftResponse = "{\"id\":\"msg_01\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"draft line\"}]}";
+            var handler = new SequenceCapturingHandler(draftResponse);
+            using var http = new HttpClient(handler);
+            using var transport = new AnthropicTransport(new AnthropicOptions
+            {
+                ApiKey = TestApiKey,
+                Model = TestModel,
+                GameDefinition = CreateGameDefinition("")
+            }, http);
+
+            var responseText = await transport.SendAsync("sysprompt-value", "usermsg-value");
+
+            Assert.Equal("draft line", responseText);
+            Assert.Single(handler.RequestBodies);
+            Assert.DoesNotContain("\"tools\"", handler.RequestBodies[0]);
+        }
+
+        private static GameDefinition CreateGameDefinition(string improvementPrompt)
+        {
+            return new GameDefinition(
+                name: "Pinder",
+                gameMasterPrompt: "gm prompt",
+                playerAvatarRoleDescription: "player avatar",
+                dateeRoleDescription: "datee",
+                improvementPrompt: improvementPrompt);
         }
     }
 }
