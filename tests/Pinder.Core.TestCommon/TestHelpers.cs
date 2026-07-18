@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Pinder.Core.Interfaces;
+using Pinder.Core.Characters;
 using Pinder.Core.Stats;
 
 namespace Pinder.Core.TestCommon
@@ -45,6 +46,37 @@ namespace Pinder.Core.TestCommon
                 { ShadowStatType.Overthinking, allShadow }
             };
             return new StatBlock(stats, shadow);
+        }
+
+        public static IReadOnlyDictionary<string, string> MakePsychiatricDiagnosis()
+            => new Dictionary<string, string>
+            {
+                { "derived_feeling", "fear of being overlooked" },
+                { "defense_reaction", "tests sincerity before trusting it" }
+            };
+
+        public static IReadOnlyDictionary<string, BackstoryFact> MakeBackstory()
+        {
+            var facts = new Dictionary<string, BackstoryFact>();
+            foreach (var category in BackstoryValidator.RequiredCategories)
+            {
+                facts[category] = new BackstoryFact(
+                    bioLie: $"lie for {category}",
+                    tragicReality: $"truth for {category}");
+            }
+
+            return facts;
+        }
+
+        public static IReadOnlyList<string> MakeStakeLines()
+        {
+            var stakes = new List<string>();
+            for (var i = 1; i <= 15; i++)
+            {
+                stakes.Add($"stake line {i}");
+            }
+
+            return stakes;
         }
 
         public static SessionShadowTracker MakeShadowTracker(

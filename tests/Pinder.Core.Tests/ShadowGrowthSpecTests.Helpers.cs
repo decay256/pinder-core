@@ -42,7 +42,15 @@ namespace Pinder.Core.Tests
         }
 
         private static CharacterProfile MakeProfile(string name, StatBlock stats)
-            => new CharacterProfile(stats, "system prompt", name, new TimingProfile(5, 1.0f, 0.0f, "neutral"), 1);
+            => new CharacterProfile(
+                stats,
+                "system prompt",
+                name,
+                new TimingProfile(5, 1.0f, 0.0f, "neutral"),
+                1,
+                backstory: TestHelpers.MakeBackstory(),
+                stakeLines: TestHelpers.MakeStakeLines(),
+                psychiatricDiagnosis: TestHelpers.MakePsychiatricDiagnosis());
 
         private static TestDice Dice(params int[] values) => new TestDice(values);
 
@@ -113,62 +121,34 @@ namespace Pinder.Core.Tests
         }
 
         /// <summary>LLM adapter that returns a Tell on the datee's response for a specific stat.</summary>
-        private sealed class TellLlmAdapter : ILlmAdapter
+        private sealed class TellLlmAdapter : StubLlmAdapter
         {
             private readonly StatType _tellStat;
-            public TellLlmAdapter(StatType tellStat) => _tellStat = tellStat;
-
-            public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, System.Threading.CancellationToken ct = default)
-            {
-                var options = new[]
-                {
+            public TellLlmAdapter(StatType tellStat)
+                : base(
                     new DialogueOption(StatType.Charm, "Hey, you come here often?"),
                     new DialogueOption(StatType.Honesty, "I have to be real with you..."),
                     new DialogueOption(StatType.Wit, "Did you know that penguins propose with pebbles?"),
-                    new DialogueOption(StatType.Chaos, "I once ate a whole pizza in a bouncy castle.")
-                };
-                return Task.FromResult(options);
+                    new DialogueOption(StatType.Chaos, "I once ate a whole pizza in a bouncy castle."))
+            {
+                _tellStat = tellStat;
             }
-            public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
+
+            public override Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
                 => Task.FromResult(new DateeResponse("...",
                     detectedTell: new Tell(_tellStat, $"Tell on {_tellStat}")));
-            public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, System.Threading.CancellationToken ct = default)
-                => Task.FromResult<string?>(null);
-            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
-            public System.Threading.Tasks.Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
-            public System.Threading.Tasks.Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
-        
-        public System.Threading.Tasks.Task<string> ApplyFailureCorruptionAsync(string message, string instruction, Pinder.Core.Stats.StatType stat, Pinder.Core.Rolls.FailureTier tier, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
-        {
-            return System.Threading.Tasks.Task.FromResult(message);
         }
-}
 
         /// <summary>LLM adapter that rotates through different option sets per turn.</summary>
-        private sealed class RotatingLlmAdapter : ILlmAdapter
+        private sealed class RotatingLlmAdapter : StubLlmAdapter
         {
-            private readonly DialogueOption[][] _optionSets;
-            private int _call;
-            public RotatingLlmAdapter(DialogueOption[][] optionSets) => _optionSets = optionSets;
-
-            public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, System.Threading.CancellationToken ct = default)
+            public RotatingLlmAdapter(DialogueOption[][] optionSets)
             {
-                var idx = _call < _optionSets.Length ? _call : _optionSets.Length - 1;
-                _call++;
-                return Task.FromResult(_optionSets[idx]);
+                foreach (var options in optionSets)
+                {
+                    EnqueueOptions(options);
+                }
             }
-            public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
-                => Task.FromResult(new DateeResponse("..."));
-            public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, System.Threading.CancellationToken ct = default)
-                => Task.FromResult<string?>(null);
-            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
-            public System.Threading.Tasks.Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
-            public System.Threading.Tasks.Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
-        
-        public System.Threading.Tasks.Task<string> ApplyFailureCorruptionAsync(string message, string instruction, Pinder.Core.Stats.StatType stat, Pinder.Core.Rolls.FailureTier tier, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
-        {
-            return System.Threading.Tasks.Task.FromResult(message);
         }
-}
     }
 }

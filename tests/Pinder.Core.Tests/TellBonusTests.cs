@@ -6,6 +6,7 @@ using Pinder.Core.Conversation;
 using Pinder.Core.Interfaces;
 using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
+using Pinder.Core.TestCommon;
 using Pinder.Core.Traps;
 using Xunit;
 
@@ -168,51 +169,21 @@ namespace Pinder.Core.Tests
                 assembledSystemPrompt: $"You are {name}.",
                 displayName: name,
                 timing: new TimingProfile(5, 0.0f, 0.0f, "neutral"),
-                level: 1);
+                level: 1,
+                backstory: TestHelpers.MakeBackstory(),
+                stakeLines: TestHelpers.MakeStakeLines(),
+                psychiatricDiagnosis: TestHelpers.MakePsychiatricDiagnosis());
         }
 
         /// <summary>
         /// LLM adapter that supports enqueuing tells per turn.
         /// </summary>
-        private sealed class TellTestLlm : ILlmAdapter
+        private sealed class TellTestLlm : StubLlmAdapter
         {
-            private readonly Queue<DialogueOption[]> _optionSets = new Queue<DialogueOption[]>();
-            private readonly Queue<Tell?> _tells = new Queue<Tell?>();
-
-            public void EnqueueOptions(params DialogueOption[] options)
-            {
-                _optionSets.Enqueue(options);
-            }
-
             public void EnqueueTell(Tell? tell)
             {
-                _tells.Enqueue(tell);
+                EnqueueDateeResponse(new DateeResponse("...", detectedTell: tell));
             }
-
-            public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, System.Threading.CancellationToken ct = default)
-            {
-                if (_optionSets.Count > 0)
-                    return Task.FromResult(_optionSets.Dequeue());
-                return Task.FromResult(new[] { new DialogueOption(StatType.Charm, "Default") });
-            }
-
-
-            public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
-            {
-                var tell = _tells.Count > 0 ? _tells.Dequeue() : null;
-                return Task.FromResult(new DateeResponse("...", detectedTell: tell));
-            }
-
-            public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, System.Threading.CancellationToken ct = default)
-                => Task.FromResult<string?>(null);
-            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
-            public System.Threading.Tasks.Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
-            public System.Threading.Tasks.Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
-        
-        public System.Threading.Tasks.Task<string> ApplyFailureCorruptionAsync(string message, string instruction, Pinder.Core.Stats.StatType stat, Pinder.Core.Rolls.FailureTier tier, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
-        {
-            return System.Threading.Tasks.Task.FromResult(message);
         }
-}
     }
 }

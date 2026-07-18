@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,7 +14,15 @@ namespace Pinder.Core.TestCommon
     public class StubLlmAdapter : ILlmAdapter
     {
         private readonly Queue<DialogueOption[]> _optionSets = new Queue<DialogueOption[]>();
+        private readonly Queue<DateeResponse> _dateeResponses = new Queue<DateeResponse>();
+        private readonly List<DialogueContext> _dialogueContexts = new List<DialogueContext>();
+        private readonly List<DateeContext> _dateeContexts = new List<DateeContext>();
         private DialogueOption[]? _lastOptions;
+
+        public IReadOnlyList<DialogueContext> DialogueContexts => _dialogueContexts;
+        public IReadOnlyList<DateeContext> DateeContexts => _dateeContexts;
+        public Action<DialogueContext>? OnGetDialogueOptions { get; set; }
+        public Action<DateeContext>? OnGetDateeResponse { get; set; }
 
         public StubLlmAdapter()
         {
@@ -32,8 +41,16 @@ namespace Pinder.Core.TestCommon
             _optionSets.Enqueue(options);
         }
 
-        public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, CancellationToken ct = default)
+        public void EnqueueDateeResponse(DateeResponse response)
         {
+            _dateeResponses.Enqueue(response);
+        }
+
+        public virtual Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, CancellationToken ct = default)
+        {
+            _dialogueContexts.Add(context);
+            OnGetDialogueOptions?.Invoke(context);
+
             if (_optionSets.Count > 0)
             {
                 _lastOptions = _optionSets.Dequeue();
@@ -54,22 +71,29 @@ namespace Pinder.Core.TestCommon
         // implement. (Keystone for #1136: both downstream test projects compile
         // against this contract.)
 
-        public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, CancellationToken ct = default)
-            => Task.FromResult(new DateeResponse("..."));
+        public virtual Task<DateeResponse> GetDateeResponseAsync(DateeContext context, CancellationToken ct = default)
+        {
+            _dateeContexts.Add(context);
+            OnGetDateeResponse?.Invoke(context);
 
-        public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, CancellationToken ct = default)
+            return Task.FromResult(_dateeResponses.Count > 0
+                ? _dateeResponses.Dequeue()
+                : new DateeResponse("..."));
+        }
+
+        public virtual Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, CancellationToken ct = default)
             => Task.FromResult<string?>(null);
 
-        public Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, CancellationToken ct = default)
+        public virtual Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, CancellationToken ct = default)
             => Task.FromResult(message);
 
-        public Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow, string? archetypeDirective = null, CancellationToken ct = default)
+        public virtual Task<string> ApplyShadowCorruptionAsync(string message, string instruction, ShadowStatType shadow, string? archetypeDirective = null, CancellationToken ct = default)
             => Task.FromResult(message);
 
-        public Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, CancellationToken ct = default)
+        public virtual Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, CancellationToken ct = default)
             => Task.FromResult(message);
 
-        public Task<string> ApplyFailureCorruptionAsync(string message, string instruction, StatType stat, Pinder.Core.Rolls.FailureTier tier, string? archetypeDirective = null, CancellationToken ct = default)
+        public virtual Task<string> ApplyFailureCorruptionAsync(string message, string instruction, StatType stat, Pinder.Core.Rolls.FailureTier tier, string? archetypeDirective = null, CancellationToken ct = default)
             => Task.FromResult(message);
 
         public static StatBlock MakeStatBlock(int allStats = 2, int allShadow = 0)

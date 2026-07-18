@@ -6,6 +6,7 @@ using Pinder.Core.Conversation;
 using Pinder.Core.Interfaces;
 using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
+using Pinder.Core.TestCommon;
 using Pinder.Core.Traps;
 using Xunit;
 
@@ -28,7 +29,7 @@ namespace Pinder.Core.Tests
         {
             Dictionary<ShadowStatType, int>? captured = null;
             var shadows = TestHelpers.MakeShadowTracker(madness: 8);
-            var llm = new CapturingLlmAdapter(ctx => captured = ctx.ShadowThresholds);
+            var llm = CaptureDialogueContext(ctx => captured = ctx.ShadowThresholds);
 
             var session = MakeSessionWithLlm(new[] { 15, 50 }, shadows, llm);
             await session.StartTurnAsync();
@@ -47,7 +48,7 @@ namespace Pinder.Core.Tests
         {
             Dictionary<ShadowStatType, int>? captured = null;
             var shadows = TestHelpers.MakeShadowTracker(madness: 3);
-            var llm = new CapturingLlmAdapter(ctx => captured = ctx.ShadowThresholds);
+            var llm = CaptureDialogueContext(ctx => captured = ctx.ShadowThresholds);
 
             var session = MakeSessionWithLlm(new[] { 15, 50 }, shadows, llm);
             await session.StartTurnAsync();
@@ -66,7 +67,7 @@ namespace Pinder.Core.Tests
             var shadows = TestHelpers.MakeShadowTracker(
                 dread: 14, denial: 7, fixation: 3,
                 madness: 10, overthinking: 5, horniness: 12);
-            var llm = new CapturingLlmAdapter(ctx => captured = ctx.ShadowThresholds);
+            var llm = CaptureDialogueContext(ctx => captured = ctx.ShadowThresholds);
 
             var session = MakeSessionWithLlm(new[] { 15, 50 }, shadows, llm);
             await session.StartTurnAsync();
@@ -88,7 +89,7 @@ namespace Pinder.Core.Tests
         {
             Dictionary<ShadowStatType, int>? captured = null;
             var shadows = TestHelpers.MakeShadowTracker(madness: 0);
-            var llm = new CapturingLlmAdapter(ctx => captured = ctx.ShadowThresholds);
+            var llm = CaptureDialogueContext(ctx => captured = ctx.ShadowThresholds);
 
             var session = MakeSessionWithLlm(new[] { 15, 50 }, shadows, llm);
             await session.StartTurnAsync();
@@ -105,7 +106,7 @@ namespace Pinder.Core.Tests
         {
             Dictionary<ShadowStatType, int>? captured = null;
             var shadows = TestHelpers.MakeShadowTracker(dread: 22);
-            var llm = new CapturingLlmAdapter(ctx => captured = ctx.ShadowThresholds);
+            var llm = CaptureDialogueContext(ctx => captured = ctx.ShadowThresholds);
 
             var session = MakeSessionWithLlm(new[] { 15, 50 }, shadows, llm);
             await session.StartTurnAsync();
@@ -161,7 +162,7 @@ namespace Pinder.Core.Tests
         {
             Dictionary<ShadowStatType, int>? captured = null;
             bool called = false;
-            var llm = new CapturingLlmAdapter(ctx =>
+            var llm = CaptureDialogueContext(ctx =>
             {
                 captured = ctx.ShadowThresholds;
                 called = true;
@@ -179,7 +180,15 @@ namespace Pinder.Core.Tests
         private static CharacterProfile MakeProfile(string name)
         {
             var timing = new TimingProfile(5, 1.0f, 0.0f, "neutral");
-            return new CharacterProfile(TestHelpers.MakeStatBlock(), "system prompt", name, timing, 1);
+            return new CharacterProfile(
+                TestHelpers.MakeStatBlock(),
+                "system prompt",
+                name,
+                timing,
+                1,
+                backstory: TestHelpers.MakeBackstory(),
+                stakeLines: TestHelpers.MakeStakeLines(),
+                psychiatricDiagnosis: TestHelpers.MakePsychiatricDiagnosis());
         }
 
         private static GameSession MakeSession(
@@ -189,7 +198,7 @@ namespace Pinder.Core.Tests
         {
             var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: shadows);
             ILlmAdapter llm = llmOptions != null
-                ? new CustomOptionsLlmAdapter(llmOptions)
+                ? new StubLlmAdapter(llmOptions)
                 : (ILlmAdapter)new NullLlmAdapter();
 
             var allDice = new int[diceValues.Length + 1];
@@ -231,51 +240,14 @@ namespace Pinder.Core.Tests
             public int Roll(int sides) => _values.Count > 0 ? _values.Dequeue() : 10;
         }
 
-        private sealed class CustomOptionsLlmAdapter : ILlmAdapter
+        private static StubLlmAdapter CaptureDialogueContext(Action<DialogueContext> onGetOptions)
         {
-            private readonly DialogueOption[] _options;
-            public CustomOptionsLlmAdapter(DialogueOption[] options) => _options = options;
-            public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, System.Threading.CancellationToken ct = default)
-                => Task.FromResult(_options);
-            public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
-                => Task.FromResult(new DateeResponse("..."));
-            public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, System.Threading.CancellationToken ct = default)
-                => Task.FromResult<string?>(null);
-            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
-            public System.Threading.Tasks.Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
-            public System.Threading.Tasks.Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
-        
-        public System.Threading.Tasks.Task<string> ApplyFailureCorruptionAsync(string message, string instruction, Pinder.Core.Stats.StatType stat, Pinder.Core.Rolls.FailureTier tier, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
-        {
-            return System.Threading.Tasks.Task.FromResult(message);
-        }
-}
-
-                private sealed class CapturingLlmAdapter : ILlmAdapter
-        {
-            private readonly Action<DialogueContext> _onGetOptions;
-            public CapturingLlmAdapter(Action<DialogueContext> onGetOptions) => _onGetOptions = onGetOptions;
-            public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, System.Threading.CancellationToken ct = default)
+            return new StubLlmAdapter(
+                new DialogueOption(StatType.Charm, "Hey"),
+                new DialogueOption(StatType.Wit, "Clever"))
             {
-                _onGetOptions(context);
-                return Task.FromResult(new[]
-                {
-                    new DialogueOption(StatType.Charm, "Hey"),
-                    new DialogueOption(StatType.Wit, "Clever")
-                });
-            }
-            public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
-                => Task.FromResult(new DateeResponse("..."));
-            public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, System.Threading.CancellationToken ct = default)
-                => Task.FromResult<string?>(null);
-            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
-            public System.Threading.Tasks.Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
-            public System.Threading.Tasks.Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
-        
-        public System.Threading.Tasks.Task<string> ApplyFailureCorruptionAsync(string message, string instruction, Pinder.Core.Stats.StatType stat, Pinder.Core.Rolls.FailureTier tier, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
-        {
-            return System.Threading.Tasks.Task.FromResult(message);
+                OnGetDialogueOptions = onGetOptions
+            };
         }
-}
     }
 }

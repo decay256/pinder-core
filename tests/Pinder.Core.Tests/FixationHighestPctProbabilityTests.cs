@@ -4,6 +4,7 @@ using Pinder.Core.Conversation;
 using Pinder.Core.Interfaces;
 using Pinder.Core.Characters;
 using Pinder.Core.Stats;
+using Pinder.Core.TestCommon;
 using Pinder.Core.Traps;
 
 namespace Pinder.Core.Tests
@@ -85,7 +86,7 @@ namespace Pinder.Core.Tests
 
             var session = BuildSession(
                 dice: new TestDice(diceValues.ToArray()),
-                llm: new RotatingLlmAdapter(new[] { opts1, opts2, opts3 }),
+                llm: ScriptOptions(opts1, opts2, opts3),
                 playerStats: playerStats,
                 dateeStats: dateeStats,
                 shadows: shadows);
@@ -125,7 +126,7 @@ namespace Pinder.Core.Tests
 
             var session = BuildSession(
                 dice: new TestDice(diceValues.ToArray()),
-                llm: new RotatingLlmAdapter(new[] { opts1, opts2, opts3 }),
+                llm: ScriptOptions(opts1, opts2, opts3),
                 playerStats: playerStats,
                 dateeStats: dateeStats,
                 shadows: shadows);
@@ -168,7 +169,26 @@ namespace Pinder.Core.Tests
         }
 
         private static CharacterProfile MakeProfile(string name, StatBlock stats)
-            => new CharacterProfile(stats, "system prompt", name, new TimingProfile(5, 1.0f, 0.0f, "neutral"), 1);
+            => new CharacterProfile(
+                stats,
+                "system prompt",
+                name,
+                new TimingProfile(5, 1.0f, 0.0f, "neutral"),
+                1,
+                backstory: TestHelpers.MakeBackstory(),
+                stakeLines: TestHelpers.MakeStakeLines(),
+                psychiatricDiagnosis: TestHelpers.MakePsychiatricDiagnosis());
+
+        private static StubLlmAdapter ScriptOptions(params DialogueOption[][] optionSets)
+        {
+            var llm = new StubLlmAdapter();
+            foreach (var options in optionSets)
+            {
+                llm.EnqueueOptions(options);
+            }
+
+            return llm;
+        }
 
         private static GameSession BuildSession(
             TestDice dice,
@@ -196,29 +216,5 @@ namespace Pinder.Core.Tests
             public int Roll(int sides) => _values.Count > 0 ? _values.Dequeue() : 10;
         }
 
-                private sealed class RotatingLlmAdapter : ILlmAdapter
-        {
-            private readonly DialogueOption[][] _optionSets;
-            private int _call;
-            public RotatingLlmAdapter(DialogueOption[][] optionSets) => _optionSets = optionSets;
-            public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, System.Threading.CancellationToken ct = default)
-            {
-                var idx = _call < _optionSets.Length ? _call : _optionSets.Length - 1;
-                _call++;
-                return Task.FromResult(_optionSets[idx]);
-            }
-            public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
-                => Task.FromResult(new DateeResponse("..."));
-            public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, System.Threading.CancellationToken ct = default)
-                => Task.FromResult<string?>(null);
-            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
-            public System.Threading.Tasks.Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
-            public System.Threading.Tasks.Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
-        
-        public System.Threading.Tasks.Task<string> ApplyFailureCorruptionAsync(string message, string instruction, Pinder.Core.Stats.StatType stat, Pinder.Core.Rolls.FailureTier tier, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
-        {
-            return System.Threading.Tasks.Task.FromResult(message);
-        }
-}
     }
 }

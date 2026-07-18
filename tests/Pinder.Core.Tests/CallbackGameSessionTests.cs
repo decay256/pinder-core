@@ -6,6 +6,7 @@ using Pinder.Core.Conversation;
 using Pinder.Core.Interfaces;
 using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
+using Pinder.Core.TestCommon;
 using Pinder.Core.Traps;
 using Xunit;
 
@@ -26,45 +27,13 @@ namespace Pinder.Core.Tests
                 assembledSystemPrompt: $"You are {name}.",
                 displayName: name,
                 timing: new TimingProfile(5, 0.0f, 0.0f, "neutral"),
-                level: 1);
+                level: 1,
+                backstory: TestHelpers.MakeBackstory(),
+                stakeLines: TestHelpers.MakeStakeLines(),
+                psychiatricDiagnosis: TestHelpers.MakePsychiatricDiagnosis());
         }
 
-        /// <summary>
-        /// LLM adapter that returns options with configurable CallbackTurnNumber.
-        /// </summary>
-        private sealed class CallbackTestLlmAdapter : ILlmAdapter
-        {
-            private readonly Queue<DialogueOption[]> _optionSets = new Queue<DialogueOption[]>();
-
-            public void EnqueueOptions(params DialogueOption[] options)
-            {
-                _optionSets.Enqueue(options);
-            }
-
-            public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, System.Threading.CancellationToken ct = default)
-            {
-                if (_optionSets.Count > 0)
-                    return Task.FromResult(_optionSets.Dequeue());
-                return Task.FromResult(new[] { new DialogueOption(StatType.Charm, "Default") });
-            }
-
-
-            public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
-                => Task.FromResult(new DateeResponse("..."));
-
-            public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, System.Threading.CancellationToken ct = default)
-                => Task.FromResult<string?>(null);
-            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
-            public System.Threading.Tasks.Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
-            public System.Threading.Tasks.Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
-        
-        public System.Threading.Tasks.Task<string> ApplyFailureCorruptionAsync(string message, string instruction, Pinder.Core.Stats.StatType stat, Pinder.Core.Rolls.FailureTier tier, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
-        {
-            return System.Threading.Tasks.Task.FromResult(message);
-        }
-}
-
-                [Fact]
+        [Fact]
         public async Task ResolveTurn_WithCallbackOption_AppliesCallbackBonus()
         {
             // Setup: roll = 13, stat mod = 2, level bonus = 0 → total = 15
@@ -83,7 +52,7 @@ namespace Pinder.Core.Tests
                 50, 50, 50, 50
             );
 
-            var llm = new CallbackTestLlmAdapter();
+            var llm = new StubLlmAdapter();
             // Turn 0: no callback
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Hello there"));
             // Turn 1: no callback
@@ -127,7 +96,7 @@ namespace Pinder.Core.Tests
                 50, 50, 50, 50
             );
 
-            var llm = new CallbackTestLlmAdapter();
+            var llm = new StubLlmAdapter();
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Opener"));
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Middle"));
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Callback!", callbackTurnNumber: 0));
@@ -152,7 +121,7 @@ namespace Pinder.Core.Tests
         public async Task ResolveTurn_NoCallbackOption_ZeroBonus()
         {
             var dice = new FixedDice(5, 15, 50);
-            var llm = new CallbackTestLlmAdapter();
+            var llm = new StubLlmAdapter();
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Just chatting"));
 
             var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
@@ -176,7 +145,7 @@ namespace Pinder.Core.Tests
                 50, 50, 50, 50, 50, 50, 50, 50  // extra buffer for any additional rolls
             );
 
-            var llm = new CallbackTestLlmAdapter();
+            var llm = new StubLlmAdapter();
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "T0"));
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "T1"));
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "T2"));
@@ -200,7 +169,7 @@ namespace Pinder.Core.Tests
         public void AddTopic_NullThrows()
         {
             var dice = new FixedDice(5, 15);
-            var llm = new CallbackTestLlmAdapter();
+            var llm = new StubLlmAdapter();
             var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             Assert.Throws<ArgumentNullException>(() => session.AddTopic(null!));
@@ -210,7 +179,7 @@ namespace Pinder.Core.Tests
         public void AddTopic_ValidTopic_DoesNotThrow()
         {
             var dice = new FixedDice(5, 15);
-            var llm = new CallbackTestLlmAdapter();
+            var llm = new StubLlmAdapter();
             var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             session.AddTopic(new CallbackOpportunity("pizza", 0));

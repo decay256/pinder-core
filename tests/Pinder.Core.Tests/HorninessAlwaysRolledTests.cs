@@ -5,6 +5,7 @@ using Pinder.Core.Characters;
 using Pinder.Core.Conversation;
 using Pinder.Core.Interfaces;
 using Pinder.Core.Stats;
+using Pinder.Core.TestCommon;
 using Xunit;
 
 namespace Pinder.Core.Tests
@@ -20,7 +21,15 @@ namespace Pinder.Core.Tests
         {
             var stats = TestHelpers.MakeStatBlock();
             var timing = new TimingProfile(5, 0.0f, 0.0f, "neutral");
-            return new CharacterProfile(stats, $"You are {name}.", name, timing, 1);
+            return new CharacterProfile(
+                stats,
+                $"You are {name}.",
+                name,
+                timing,
+                1,
+                backstory: TestHelpers.MakeBackstory(),
+                stakeLines: TestHelpers.MakeStakeLines(),
+                psychiatricDiagnosis: TestHelpers.MakePsychiatricDiagnosis());
         }
 
         /// <summary>
@@ -32,7 +41,7 @@ namespace Pinder.Core.Tests
         {
             // Dice: 7 = horniness roll, 15 = d20 for turn, 50 = d100 timing
             var dice = new FixedDice(7, 15, 50);
-            var capturingLlm = new CapturingLlmAdapter();
+            var capturingLlm = NewCapturingLlmAdapter();
 
             var session = new GameSession(
                 MakeProfile("P"), MakeProfile("O"),
@@ -41,8 +50,8 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
 
             // Verify horniness was passed to the LLM as 7 (not 0)
-            Assert.Single(capturingLlm.Contexts);
-            Assert.Equal(7, capturingLlm.Contexts[0].HorninessLevel);
+            Assert.Single(capturingLlm.DialogueContexts);
+            Assert.Equal(7, capturingLlm.DialogueContexts[0].HorninessLevel);
         }
 
         /// <summary>
@@ -55,7 +64,7 @@ namespace Pinder.Core.Tests
         {
             // Dice: 8 = horniness roll, 15 = d20, 50 = timing
             var dice = new FixedDice(8, 15, 50);
-            var capturingLlm = new CapturingLlmAdapter();
+            var capturingLlm = NewCapturingLlmAdapter();
 
             var session = new GameSession(
                 MakeProfile("P"), MakeProfile("O"),
@@ -64,7 +73,7 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
 
             // Without clock, modifier is 0 -> horniness = dice roll = 8
-            Assert.Equal(8, capturingLlm.Contexts[0].HorninessLevel);
+            Assert.Equal(8, capturingLlm.DialogueContexts[0].HorninessLevel);
         }
 
         /// <summary>
@@ -75,7 +84,7 @@ namespace Pinder.Core.Tests
         public async Task WithClock_TimeOfDayModifierApplied()
         {
             var dice = new FixedDice(7, 15, 50);
-            var capturingLlm = new CapturingLlmAdapter();
+            var capturingLlm = NewCapturingLlmAdapter();
             var clock = new TestClock(horninessModifier: 3);
             var config = new GameSessionConfig(clock: clock);
 
@@ -86,7 +95,7 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
 
             // 7 + 3 = 10
-            Assert.Equal(10, capturingLlm.Contexts[0].HorninessLevel);
+            Assert.Equal(10, capturingLlm.DialogueContexts[0].HorninessLevel);
         }
 
         /// <summary>
@@ -97,7 +106,7 @@ namespace Pinder.Core.Tests
         {
             // Dice: 1 (horniness roll), modifier -5 -> 1 + (-5) = -4 -> clamped to 0
             var dice = new FixedDice(1, 15, 50);
-            var capturingLlm = new CapturingLlmAdapter();
+            var capturingLlm = NewCapturingLlmAdapter();
             var clock = new TestClock(horninessModifier: -5);
             var config = new GameSessionConfig(clock: clock);
 
@@ -107,7 +116,7 @@ namespace Pinder.Core.Tests
 
             await session.StartTurnAsync();
 
-            Assert.Equal(0, capturingLlm.Contexts[0].HorninessLevel);
+            Assert.Equal(0, capturingLlm.DialogueContexts[0].HorninessLevel);
         }
 
         /// <summary>
@@ -119,7 +128,7 @@ namespace Pinder.Core.Tests
         {
             // 3 = horniness roll at construction, 16 = d20 for turn, 50 = timing
             var dice = new FixedDice(3, 16, 50);
-            var capturingLlm = new CapturingLlmAdapter();
+            var capturingLlm = NewCapturingLlmAdapter();
 
             var session = new GameSession(
                 MakeProfile("P"), MakeProfile("O"),
@@ -128,49 +137,21 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
 
             // Horniness = 3 (no clock, no modifier)
-            Assert.Equal(3, capturingLlm.Contexts[0].HorninessLevel);
+            Assert.Equal(3, capturingLlm.DialogueContexts[0].HorninessLevel);
 
             // The d20=16 should have been consumed by ResolveTurnAsync
             var result = await session.ResolveTurnAsync(0);
             Assert.True(result.Roll.IsSuccess); // 16+2=18 >= DC 18
         }
 
-        /// <summary>
-        /// Capturing LLM adapter that records DialogueContexts.
-        /// </summary>
-        private sealed class CapturingLlmAdapter : ILlmAdapter
-        {
-            public List<DialogueContext> Contexts { get; } = new List<DialogueContext>();
+        private static StubLlmAdapter NewCapturingLlmAdapter()
+            => new StubLlmAdapter(
+                new DialogueOption(StatType.Charm, "Hey"),
+                new DialogueOption(StatType.Honesty, "Look"),
+                new DialogueOption(StatType.Wit, "Joke"),
+                new DialogueOption(StatType.Chaos, "Wild"));
 
-            public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, System.Threading.CancellationToken ct = default)
-            {
-                Contexts.Add(context);
-                return Task.FromResult(new[]
-                {
-                    new DialogueOption(StatType.Charm, "Hey"),
-                    new DialogueOption(StatType.Honesty, "Look"),
-                    new DialogueOption(StatType.Wit, "Joke"),
-                    new DialogueOption(StatType.Chaos, "Wild")
-                });
-            }
-
-
-            public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
-                => Task.FromResult(new DateeResponse("..."));
-
-            public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, System.Threading.CancellationToken ct = default)
-                => Task.FromResult<string?>(null);
-            public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
-            public System.Threading.Tasks.Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
-            public System.Threading.Tasks.Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
-        
-        public System.Threading.Tasks.Task<string> ApplyFailureCorruptionAsync(string message, string instruction, Pinder.Core.Stats.StatType stat, Pinder.Core.Rolls.FailureTier tier, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
-        {
-            return System.Threading.Tasks.Task.FromResult(message);
-        }
-}
-
-                private sealed class TestClock : IGameClock
+        private sealed class TestClock : IGameClock
         {
             private readonly int _horninessModifier;
 
