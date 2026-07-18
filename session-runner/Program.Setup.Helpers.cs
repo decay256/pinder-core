@@ -94,7 +94,7 @@ partial class Program
         result.OverlayModel = ParseArg(args, "--overlay-model");
 
         // Load delivery-instructions.yaml if present
-        string? deliveryInstructionsPath = Pinder.Core.Data.DataFileLocator.FindDataFile(AppContext.BaseDirectory, Path.Combine("data", "delivery-instructions.yaml"));
+        string? deliveryInstructionsPath = Pinder.SessionSetup.DataFileLocator.FindDataFile(AppContext.BaseDirectory, Path.Combine("data", "delivery-instructions.yaml"));
         statDeliveryInstructions = null;
         if (deliveryInstructionsPath != null)
         {

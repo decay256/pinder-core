@@ -6,7 +6,7 @@ namespace Pinder.Rules
 {
     /// <summary>
     /// Reads outcome dictionaries and dispatches effects to an IEffectHandler.
-    /// Unknown keys are silently ignored.
+    /// Unknown keys and malformed values are rejected before any effects are applied.
     /// </summary>
     public static class OutcomeDispatcher
     {
@@ -22,6 +22,8 @@ namespace Pinder.Rules
             if (outcome == null || handler == null)
                 return;
 
+            Validate(outcome);
+
             foreach (var kvp in outcome)
             {
                 var key = kvp.Key.ToLowerInvariant();
@@ -30,7 +32,7 @@ namespace Pinder.Rules
                 switch (key)
                 {
                     case "interest_delta":
-                        handler.ApplyInterestDelta(ToInt(value));
+                        handler.ApplyInterestDelta(ToInt(value, key));
                         break;
 
                     case "trap":
@@ -43,7 +45,7 @@ namespace Pinder.Rules
                         break;
 
                     case "roll_bonus":
-                        handler.SetRollModifier("+" + ToInt(value).ToString(CultureInfo.InvariantCulture));
+                        handler.SetRollModifier("+" + ToInt(value, key).ToString(CultureInfo.InvariantCulture));
                         break;
 
                     case "effect":
@@ -55,7 +57,7 @@ namespace Pinder.Rules
                         break;
 
                     case "xp_multiplier":
-                        handler.SetXpMultiplier(ToDouble(value));
+                        handler.SetXpMultiplier(ToDouble(value, key));
                         break;
 
                     case "shadow_effect":
@@ -63,12 +65,74 @@ namespace Pinder.Rules
                         break;
 
                     case "starting_interest":
-                        handler.ApplyInterestDelta(ToInt(value));
+                        handler.ApplyInterestDelta(ToInt(value, key));
                         break;
 
-                    // Unknown outcome keys are silently ignored.
-                    default:
+                    case "tier":
+                    case "state":
+                    case "xp":
+                    case "multiplier":
+                    case "base_xp":
+                    case "xp_threshold":
+                    case "build_points":
+                    case "level_bonus":
+                    case "item_slots":
+                    case "min_level":
                         break;
+
+                    default:
+                        throw new FormatException($"Unknown rule outcome key '{kvp.Key}'.");
+                }
+            }
+        }
+
+        private static void Validate(Dictionary<string, object> outcome)
+        {
+            foreach (var kvp in outcome)
+            {
+                var key = kvp.Key.ToLowerInvariant();
+                var value = kvp.Value;
+
+                switch (key)
+                {
+                    case "interest_delta":
+                    case "roll_bonus":
+                    case "starting_interest":
+                        _ = ToInt(value, key);
+                        break;
+
+                    case "trap":
+                        _ = ToBool(value);
+                        break;
+
+                    case "trap_name":
+                    case "effect":
+                    case "risk_tier":
+                    case "tier":
+                    case "state":
+                        break;
+
+                    case "xp_multiplier":
+                        _ = ToDouble(value, key);
+                        break;
+
+                    case "shadow_effect":
+                        ValidateShadowEffect(value);
+                        break;
+
+                    case "xp":
+                    case "multiplier":
+                    case "base_xp":
+                    case "xp_threshold":
+                    case "build_points":
+                    case "level_bonus":
+                    case "item_slots":
+                    case "min_level":
+                        _ = ToDouble(value, key);
+                        break;
+
+                    default:
+                        throw new FormatException($"Unknown rule outcome key '{kvp.Key}'.");
                 }
             }
         }
@@ -78,33 +142,46 @@ namespace Pinder.Rules
             if (value is Dictionary<string, object> dict)
             {
                 var shadow = dict.ContainsKey("shadow") ? dict["shadow"]?.ToString() ?? "" : "";
-                var delta = dict.ContainsKey("delta") ? ToInt(dict["delta"]) : 0;
+                var delta = dict.ContainsKey("delta") ? ToInt(dict["delta"], "shadow_effect.delta") : 0;
                 handler.ApplyShadowGrowth(shadow, delta, "rule engine");
             }
         }
 
-        private static int ToInt(object? value)
+        private static void ValidateShadowEffect(object? value)
         {
-            if (value == null) return 0;
+            if (!(value is Dictionary<string, object> dict))
+                throw new FormatException("Rule outcome shadow_effect must be an object.");
+            if (!dict.ContainsKey("shadow"))
+                throw new FormatException("Rule outcome shadow_effect missing required key 'shadow'.");
+            if (!dict.ContainsKey("delta"))
+                throw new FormatException("Rule outcome shadow_effect missing required key 'delta'.");
+            _ = ToInt(dict["delta"], "shadow_effect.delta");
+        }
+
+        private static int ToInt(object? value, string context)
+        {
+            if (value == null)
+                throw new FormatException($"Rule outcome {context} must be numeric, got null.");
             if (value is int i) return i;
             if (value is long l) return (int)l;
             if (value is double d) return (int)d;
             if (value is float f) return (int)f;
             if (value is string s && int.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed))
                 return parsed;
-            return 0;
+            throw new FormatException($"Rule outcome {context} must be numeric, got '{value}'.");
         }
 
-        private static double ToDouble(object? value)
+        private static double ToDouble(object? value, string context)
         {
-            if (value == null) return 0.0;
+            if (value == null)
+                throw new FormatException($"Rule outcome {context} must be numeric, got null.");
             if (value is double d) return d;
             if (value is int i) return i;
             if (value is long l) return l;
             if (value is float f) return f;
             if (value is string s && double.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed))
                 return parsed;
-            return 0.0;
+            throw new FormatException($"Rule outcome {context} must be numeric, got '{value}'.");
         }
 
         private static bool ToBool(object? value)

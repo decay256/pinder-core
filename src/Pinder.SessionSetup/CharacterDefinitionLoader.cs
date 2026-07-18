@@ -445,15 +445,11 @@ namespace Pinder.SessionSetup
         private static Dictionary<ShadowStatType, int> ParseShadowsBlock(JsonElement alloc)
         {
             var shadows = new Dictionary<ShadowStatType, int>();
-            // Default all to 0
-            foreach (ShadowStatType sst in Enum.GetValues(typeof(ShadowStatType)))
-                shadows[sst] = 0;
 
-            if (!alloc.TryGetProperty("shadows", out var prop) ||
-                prop.ValueKind != JsonValueKind.Object)
-            {
-                return shadows;
-            }
+            if (!alloc.TryGetProperty("shadows", out var prop))
+                throw new FormatException("Character definition missing required field: allocation.shadows");
+            if (prop.ValueKind != JsonValueKind.Object)
+                throw new FormatException($"Character definition field allocation.shadows must be an object, got {DescribeValueKind(prop)}.");
 
             foreach (var kv in prop.EnumerateObject())
             {
@@ -463,7 +459,29 @@ namespace Pinder.SessionSetup
                     throw new FormatException($"Shadow value for allocation.shadows.{kv.Name} must be an integer.");
                 shadows[shadowType] = value;
             }
+            foreach (ShadowStatType shadowType in Enum.GetValues(typeof(ShadowStatType)))
+            {
+                if (!shadows.ContainsKey(shadowType))
+                {
+                    string key = ShadowStatTypeToJsonKey(shadowType);
+                    throw new FormatException($"Character definition missing required field: allocation.shadows.{key}");
+                }
+            }
             return shadows;
+        }
+
+        private static string ShadowStatTypeToJsonKey(ShadowStatType shadow)
+        {
+            switch (shadow)
+            {
+                case ShadowStatType.Madness: return "madness";
+                case ShadowStatType.Despair: return "despair";
+                case ShadowStatType.Denial: return "denial";
+                case ShadowStatType.Fixation: return "fixation";
+                case ShadowStatType.Dread: return "dread";
+                case ShadowStatType.Overthinking: return "overthinking";
+                default: return shadow.ToString().ToLowerInvariant();
+            }
         }
 
         private static bool TryParseStatType(string key, out StatType result)

@@ -287,7 +287,7 @@ namespace Pinder.Rules.Tests
         }
 
         [Fact]
-        public void UnknownKey_IsIgnored_ReturnsTrue()
+        public void UnknownKey_ThrowsFormatException()
         {
             var cond = new Dictionary<string, object>
             {
@@ -295,7 +295,34 @@ namespace Pinder.Rules.Tests
                 ["natural_roll"] = 5
             };
             var state = new GameState(naturalRoll: 5);
-            Assert.True(ConditionEvaluator.Evaluate(cond, state));
+            var ex = Assert.Throws<System.FormatException>(() => ConditionEvaluator.Evaluate(cond, state));
+            Assert.Contains("unknown_key", ex.Message);
+        }
+
+        [Fact]
+        public void MalformedNumericScalar_ThrowsFormatException()
+        {
+            var cond = new Dictionary<string, object>
+            {
+                ["natural_roll"] = "oops"
+            };
+            var state = new GameState(naturalRoll: 5);
+            var ex = Assert.Throws<System.FormatException>(() => ConditionEvaluator.Evaluate(cond, state));
+            Assert.Contains("natural_roll", ex.Message);
+            Assert.Contains("oops", ex.Message);
+        }
+
+        [Fact]
+        public void MalformedRangeElement_ThrowsFormatException()
+        {
+            var cond = new Dictionary<string, object>
+            {
+                ["miss_range"] = new List<object> { "oops", 5 }
+            };
+            var state = new GameState(missMargin: 3);
+            var ex = Assert.Throws<System.FormatException>(() => ConditionEvaluator.Evaluate(cond, state));
+            Assert.Contains("range lower bound", ex.Message);
+            Assert.Contains("oops", ex.Message);
         }
     }
 }

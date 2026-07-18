@@ -122,7 +122,7 @@ namespace Pinder.Rules
         /// Evaluate whether ALL conditions in the dictionary match the game state.
         /// Returns false if condition is null or empty.
         /// All keys must match (AND logic).
-        /// Unknown keys are ignored (treated as matching).
+        /// Unknown keys throw FormatException.
         /// </summary>
         public static bool Evaluate(Dictionary<string, object>? condition, GameState state);
     }
@@ -447,11 +447,11 @@ This AC from the issue is **deferred**. The architecture decision explicitly pre
 | `RuleBook.LoadFrom("key: value")` | Throws `FormatException` — YAML is valid but root is a mapping, not a sequence |
 | `ConditionEvaluator.Evaluate(condition, null)` | Throws `ArgumentNullException` |
 | `OutcomeDispatcher.Dispatch(outcome, state, null)` | Throws `ArgumentNullException` |
-| Range value is not a 2-element list | Condition key evaluates to `false` (does not throw) — defensive parsing |
-| Outcome value is wrong type (e.g. `interest_delta: "abc"`) | Key is silently skipped (does not throw) — defensive parsing |
+| Range value is not a 2-element list | `FormatException` for malformed lists; non-list ranges evaluate `false` |
+| Outcome value is wrong type (e.g. `interest_delta: "abc"`) | `FormatException` before any outcome effects are applied |
 | `shadow_threshold` with missing `shadow` or `value` key | Condition key evaluates to `false` — defensive parsing |
 
-The general error philosophy is: loading is strict (throw on malformed YAML), but evaluation is lenient (bad data in a single condition/outcome key does not crash the engine — it returns false or skips the key).
+The general error philosophy is: malformed authored rule data fails fast. Loading is strict, and evaluation rejects unknown keys or wrong-type numeric values instead of returning plausible gameplay.
 
 ---
 

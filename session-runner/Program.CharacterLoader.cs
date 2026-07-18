@@ -32,7 +32,7 @@ partial class Program
         // silent reach-for-stale-text-files.
         if (name != null)
         {
-            string? charDefPath = Pinder.Core.Data.DataFileLocator.FindDataFile(
+            string? charDefPath = Pinder.SessionSetup.DataFileLocator.FindDataFile(
                 AppContext.BaseDirectory,
                 Path.Combine("data", "characters", $"{name.ToLowerInvariant()}.json"));
 
@@ -61,7 +61,7 @@ partial class Program
 
     internal static string ListAvailableCharacters()
     {
-        string? charactersDir = Pinder.Core.Data.DataFileLocator.FindDataFile(
+        string? charactersDir = Pinder.SessionSetup.DataFileLocator.FindDataFile(
             AppContext.BaseDirectory, Path.Combine("data", "characters"));
         if (charactersDir == null || !Directory.Exists(charactersDir))
             return "(no characters directory found)";
@@ -97,15 +97,15 @@ partial class Program
 
         string baseDir = AppContext.BaseDirectory;
 
-        string? itemsPath = Pinder.Core.Data.DataFileLocator.FindDataFile(baseDir, Path.Combine("data", "items", "starter-items.json"));
+        string? itemsPath = Pinder.SessionSetup.DataFileLocator.FindDataFile(baseDir, Path.Combine("data", "items", "starter-items.json"));
         if (itemsPath == null)
             throw new FileNotFoundException("Could not find data/items/starter-items.json — ensure data files are present in the repo");
 
-        string? anatomyPath = Pinder.Core.Data.DataFileLocator.FindDataFile(baseDir, Path.Combine("data", "anatomy", "anatomy-parameters.json"));
+        string? anatomyPath = Pinder.SessionSetup.DataFileLocator.FindDataFile(baseDir, Path.Combine("data", "anatomy", "anatomy-parameters.json"));
         if (anatomyPath == null)
             throw new FileNotFoundException("Could not find data/anatomy/anatomy-parameters.json — ensure data files are present in the repo");
 
-        string? timingPath = Pinder.Core.Data.DataFileLocator.FindDataFile(baseDir, Path.Combine("data", "timing", "response-profiles.json"));
+        string? timingPath = Pinder.SessionSetup.DataFileLocator.FindDataFile(baseDir, Path.Combine("data", "timing", "response-profiles.json"));
         if (timingPath == null)
             throw new FileNotFoundException("Could not find data/timing/response-profiles.json - ensure data files are present in the repo");
 

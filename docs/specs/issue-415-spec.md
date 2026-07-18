@@ -269,11 +269,11 @@ Five new files (one per starter character), conforming to the schema above. Valu
 
 ## Edge Cases
 
-1. **Missing item IDs** — `CharacterAssembler.Assemble()` silently skips item IDs not found in the repository. The loader should NOT throw on missing items; the assembler handles this gracefully.
+1. **Missing item IDs** — `CharacterAssembler.Assemble()` treats item IDs not found in the repository as catalog drift and throws.
 
-2. **Missing anatomy parameters/tiers** — Similarly silently skipped by `CharacterAssembler.Assemble()`. The loader should NOT throw.
+2. **Missing anatomy parameters/tiers** — Missing anatomy parameters are catalog drift and throw during assembly.
 
-3. **Missing `shadows` field in JSON** — Default all shadow stats to 0. This is a valid character with no shadow growth.
+3. **Missing `shadows` field in JSON** — Invalid for schema v2. `allocation.shadows` must be present, object-shaped, and include all supported shadow stats.
 
 4. **Empty `items` array** — Valid. Character has no equipped items. Stats come from `build_points` only.
 

@@ -346,7 +346,9 @@ namespace Pinder.Core.Tests
             sb.Append(string.Join(",", anatomy.Select(kv =>
                 $"\"{kv.Key}\":{kv.Value.ToString("G", System.Globalization.CultureInfo.InvariantCulture)}")));
             sb.Append("},");
-            sb.Append("\"allocation\":{\"spent\":{},\"unspent_pool\":0,\"shadows\":{}}");
+            sb.Append("\"allocation\":{\"spent\":{},\"unspent_pool\":0,\"shadows\":{");
+            sb.Append("\"madness\":0,\"despair\":0,\"denial\":0,\"fixation\":0,\"dread\":0,\"overthinking\":0");
+            sb.Append("}}");
             sb.Append('}');
             return sb.ToString();
         }

@@ -59,24 +59,12 @@ namespace Pinder.Core.Progression
                     }
                     currentCheck++;
                 }
-                catch (KeyNotFoundException)
+                catch (KeyNotFoundException ex)
                 {
-                    if (currentCheck == 1)
-                    {
-                        if (!rules.AllowDefaultFallback)
-                            throw new InvalidOperationException("Missing progression XP threshold for level 1.");
-
-                        int? threshold = 0;
-                        if (xp >= threshold.Value)
-                        {
-                            level = currentCheck;
-                        }
-                        currentCheck++;
-                    }
-                    else
-                    {
-                        break;
-                    }
+                    throw new InvalidOperationException(
+                        $"Progression resolver '{rules.GetType().FullName}' failed while reading XP threshold for level {currentCheck}. " +
+                        "Return null only for an intentional end of the level table.",
+                        ex);
                 }
             }
 

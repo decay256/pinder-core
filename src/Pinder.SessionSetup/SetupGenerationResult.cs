@@ -35,7 +35,7 @@ namespace Pinder.SessionSetup
         public string? Source { get; }
 
         /// <summary>
-        /// The name of the generator / phase that produced this result (e.g. 'stake', 'background', 'outfit', 'dramatic_arc').
+        /// The name of the generator / phase that produced this result (e.g. 'stake', 'outfit', 'dramatic_arc').
         /// </summary>
         public string GeneratorName { get; }
 

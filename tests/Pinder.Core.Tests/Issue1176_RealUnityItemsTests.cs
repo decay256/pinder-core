@@ -198,7 +198,7 @@ namespace Pinder.Core.Tests
         // ─── 2. Unknown-id safety ────────────────────────────────────────────────
 
         [Fact]
-        public void UnknownId_ZeroModifiers_IdSurfacedInSignal_NoException()
+        public void UnknownId_ThrowsFormatException()
         {
             var repo     = LoadItemRepo();
             var anatomy  = LoadAnatomyRepo();
@@ -207,65 +207,61 @@ namespace Pinder.Core.Tests
             // "totally_fictional_item_xyz" is NOT in core
             var equippedIds = new[] { "totally_fictional_item_xyz" };
 
-            // Must NOT throw
-            var result = assembler.Assemble(
-                equippedIds,
-                new Dictionary<string, float>(),
-                ZeroBaseStats,
-                ZeroShadow);
-
-            // Zero stat modifiers (base stats only)
-            foreach (StatType st in Enum.GetValues(typeof(StatType)))
-                Assert.Equal(0, result.Stats.GetEffective(st));
-
-            // No fragments contributed
-            Assert.Empty(result.PersonalityFragments);
-
-            // Unknown id surfaced in signal
-            Assert.Contains("totally_fictional_item_xyz", result.UnknownItemIds);
+            var ex = Assert.Throws<FormatException>(() =>
+                assembler.Assemble(
+                    equippedIds,
+                    new Dictionary<string, float>(),
+                    ZeroBaseStats,
+                    ZeroShadow));
+            Assert.Contains("totally_fictional_item_xyz", ex.Message);
         }
 
         [Fact]
-        public void UnknownId_MixedWithKnown_KnownModifiersApply_UnknownSurfaced()
+        public void UnknownId_MixedWithKnown_ThrowsBeforePartialAssembly()
         {
             var repo     = LoadItemRepo();
             var anatomy  = LoadAnatomyRepo();
             var assembler = new CharacterAssembler(repo, anatomy);
 
-            // head_tophat is known (charm+1, rizz+1), "ghost_item" is not
-            var result = assembler.Assemble(
-                new[] { "head_tophat", "ghost_item" },
-                new Dictionary<string, float>(),
-                ZeroBaseStats,
-                ZeroShadow);
-
-            // Known item's charm modifier applies
-            Assert.True(result.Stats.GetEffective(StatType.Charm) >= 1);
-
-            // Unknown id is surfaced
-            Assert.Contains("ghost_item", result.UnknownItemIds);
-
-            // Known item's personality fragment appears
-            Assert.NotEmpty(result.PersonalityFragments);
+            var ex = Assert.Throws<FormatException>(() =>
+                assembler.Assemble(
+                    new[] { "head_tophat", "ghost_item" },
+                    new Dictionary<string, float>(),
+                    ZeroBaseStats,
+                    ZeroShadow));
+            Assert.Contains("ghost_item", ex.Message);
         }
 
         [Fact]
-        public void UnknownId_MultipleUnknown_AllSurfaced()
+        public void UnknownId_MultipleUnknown_ThrowsFirstUnknown()
         {
             var repo     = LoadItemRepo();
             var anatomy  = LoadAnatomyRepo();
             var assembler = new CharacterAssembler(repo, anatomy);
 
-            var result = assembler.Assemble(
-                new[] { "ghost1", "ghost2", "ghost3", "head_tophat" },
-                new Dictionary<string, float>(),
-                ZeroBaseStats,
-                ZeroShadow);
+            var ex = Assert.Throws<FormatException>(() =>
+                assembler.Assemble(
+                    new[] { "ghost1", "ghost2", "ghost3", "head_tophat" },
+                    new Dictionary<string, float>(),
+                    ZeroBaseStats,
+                    ZeroShadow));
+            Assert.Contains("ghost1", ex.Message);
+        }
 
-            Assert.Contains("ghost1", result.UnknownItemIds);
-            Assert.Contains("ghost2", result.UnknownItemIds);
-            Assert.Contains("ghost3", result.UnknownItemIds);
-            Assert.DoesNotContain("head_tophat", result.UnknownItemIds);
+        [Fact]
+        public void UnknownAnatomyParameter_ThrowsFormatException()
+        {
+            var repo = LoadItemRepo();
+            var anatomy = LoadAnatomyRepo();
+            var assembler = new CharacterAssembler(repo, anatomy);
+
+            var ex = Assert.Throws<FormatException>(() =>
+                assembler.Assemble(
+                    Array.Empty<string>(),
+                    new Dictionary<string, float> { ["missingAnatomyParam"] = 0.5f },
+                    ZeroBaseStats,
+                    ZeroShadow));
+            Assert.Contains("missingAnatomyParam", ex.Message);
         }
 
         // ─── 4. Sticker/Tattoo id pool ──────────────────────────────────────────

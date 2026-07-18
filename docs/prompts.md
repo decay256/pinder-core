@@ -59,7 +59,6 @@ next `pinder-game-api` (or session-runner) start.
 
 ```
 data/prompts/
-  background.yaml
   templates.yaml
   archetypes.yaml
   structural.yaml

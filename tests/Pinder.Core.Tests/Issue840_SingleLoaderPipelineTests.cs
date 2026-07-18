@@ -47,46 +47,11 @@ namespace Pinder.Core.Tests
 
         // ----- repo helpers ---------------------------------------------------
 
-        /// <summary>
-        /// Walk up from the test binary looking for <c>data/&lt;path&gt;</c>.
-        /// Same convention as #836's tests; no global-root fallbacks
-        /// (LEGACY-DATA-FALLBACK-PATH-IS-A-TRAP).
-        /// </summary>
-        private static string LoadJson(string relativePath)
-        {
-            var dir = AppDomain.CurrentDomain.BaseDirectory;
-            for (int i = 0; i < 10; i++)
-            {
-                var candidate = Path.Combine(dir, "data", relativePath);
-                if (File.Exists(candidate)) return File.ReadAllText(candidate);
-                var parent = Path.GetDirectoryName(dir);
-                if (parent == null || parent == dir) break;
-                dir = parent;
-            }
-            throw new FileNotFoundException(
-                $"Could not locate data/{relativePath} in any ancestor of the test binary.");
-        }
-
-        private static string FindRepoSubdir(string subdir)
-        {
-            var dir = AppDomain.CurrentDomain.BaseDirectory;
-            for (int i = 0; i < 10; i++)
-            {
-                var candidate = Path.Combine(dir, subdir);
-                if (Directory.Exists(candidate)) return candidate;
-                var parent = Path.GetDirectoryName(dir);
-                if (parent == null || parent == dir) break;
-                dir = parent;
-            }
-            throw new DirectoryNotFoundException(
-                $"Could not locate {subdir} in any ancestor of the test binary.");
-        }
-
         private static IItemRepository BuildItemRepo()
-            => new JsonItemRepository(LoadJson("items/starter-items.json"));
+            => new JsonItemRepository(TestRepoLocator.ReadDataFile("items/starter-items.json"));
 
         private static IAnatomyRepository BuildAnatomyRepo()
-            => new JsonAnatomyRepository(LoadJson("anatomy/anatomy-parameters.json"));
+            => new JsonAnatomyRepository(TestRepoLocator.ReadDataFile("anatomy/anatomy-parameters.json"));
 
         // ----- structural assertions: legacy paths are gone -------------------
 
@@ -95,7 +60,7 @@ namespace Pinder.Core.Tests
         {
             // The session-runner directory should NO LONGER contain
             // CharacterLoader.cs.
-            string sessionRunnerDir = FindRepoSubdir("session-runner");
+            string sessionRunnerDir = TestRepoLocator.FindRepoSubdir("session-runner");
             string legacy = Path.Combine(sessionRunnerDir, "CharacterLoader.cs");
             Assert.False(File.Exists(legacy),
                 $"Expected {legacy} to be deleted (#840); it still exists.");
@@ -107,7 +72,7 @@ namespace Pinder.Core.Tests
             // The 5 stale prompt-md files should be gone. The design/examples
             // directory itself may also be gone (git rm of all its tracked
             // contents leaves the dir untracked / empty); either is fine.
-            string repoDir = FindRepoSubdir("design");
+            string repoDir = TestRepoLocator.FindRepoSubdir("design");
             string examplesDir = Path.Combine(repoDir, "examples");
             string[] stale =
             {
@@ -125,7 +90,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void ProgramCs_DoesNotReferenceLegacyCharacterLoader()
         {
-            string sessionRunnerDir = FindRepoSubdir("session-runner");
+            string sessionRunnerDir = TestRepoLocator.FindRepoSubdir("session-runner");
             string programCs = Path.Combine(sessionRunnerDir, "Program.cs");
             Assert.True(File.Exists(programCs),
                 $"session-runner/Program.cs not found at {programCs}");
@@ -151,7 +116,7 @@ namespace Pinder.Core.Tests
         public void LegacyTestFiles_AreDeleted()
         {
             // The two legacy test files are gone.
-            string testsDir = FindRepoSubdir(Path.Combine("tests", "Pinder.Core.Tests"));
+            string testsDir = TestRepoLocator.FindRepoSubdir(Path.Combine("tests", "Pinder.Core.Tests"));
             string a = Path.Combine(testsDir, "CharacterLoaderTests.cs");
             string b = Path.Combine(testsDir, "CharacterLoaderSpecTests.cs");
             Assert.False(File.Exists(a),
@@ -213,7 +178,7 @@ namespace Pinder.Core.Tests
             var itemRepo = BuildItemRepo();
             var anatomyRepo = BuildAnatomyRepo();
 
-            string charactersDir = FindRepoSubdir(Path.Combine("data", "characters"));
+            string charactersDir = TestRepoLocator.FindRepoSubdir(Path.Combine("data", "characters"));
             var store = new DirectoryCharacterStore(charactersDir);
             var ids = await store.ListIdsAsync();
             Assert.NotEmpty(ids);
@@ -283,7 +248,7 @@ namespace Pinder.Core.Tests
             var itemRepo = BuildItemRepo();
             var anatomyRepo = BuildAnatomyRepo();
 
-            string charactersDir = FindRepoSubdir(Path.Combine("data", "characters"));
+            string charactersDir = TestRepoLocator.FindRepoSubdir(Path.Combine("data", "characters"));
             var store = new DirectoryCharacterStore(charactersDir);
             var ids = await store.ListIdsAsync();
             Assert.NotEmpty(ids);

@@ -131,7 +131,13 @@ namespace Pinder.Core.Tests
         private static CharacterProfile MakeProfile(string name, StatBlock stats)
         {
             var timing = new TimingProfile(5, 1.0f, 0.0f, "neutral");
-            return new CharacterProfile(stats, "system prompt", name, timing, 1);
+            return new CharacterProfile(
+                stats,
+                "system prompt",
+                name,
+                timing,
+                1,
+                psychiatricDiagnosis: TestHelpers.MakePsychiatricDiagnosis());
         }
 
         private sealed class ConstantDice : IDiceRoller

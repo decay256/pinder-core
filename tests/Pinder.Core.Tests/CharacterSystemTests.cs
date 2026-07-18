@@ -21,54 +21,15 @@ namespace Pinder.Core.Tests
         // Helpers
         // -----------------------------------------------------------------------
 
-        private static string LoadJson(string relativePath)
-        {
-            // Try explicit known roots first (cross-user paths on this host)
-            var knownRoots = new[]
-            {
-                "/root/.openclaw",
-                "/home/openclaw/.openclaw",
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".openclaw")
-            };
-            
-            var pathsToTry = new List<string> { relativePath };
-            if (relativePath.StartsWith("agents-extra/pinder/"))
-            {
-                pathsToTry.Add(relativePath.Substring("agents-extra/pinder/".Length));
-            }
-
-            foreach (var path in pathsToTry)
-            {
-                foreach (var root in knownRoots)
-                {
-                    var candidate = Path.Combine(root, path);
-                    if (File.Exists(candidate)) return File.ReadAllText(candidate);
-                }
-
-                // Walk up from test output directory
-                var dir = AppDomain.CurrentDomain.BaseDirectory;
-                for (int i = 0; i < 10; i++)
-                {
-                    var candidate = Path.Combine(dir, path);
-                    if (File.Exists(candidate)) return File.ReadAllText(candidate);
-                    var parent = Path.GetDirectoryName(dir);
-                    if (parent == null || parent == dir) break;
-                    dir = parent;
-                }
-            }
-
-            throw new FileNotFoundException($"Could not locate {relativePath} (searched known roots and walked up from {AppDomain.CurrentDomain.BaseDirectory})");
-        }
-
         private static IItemRepository BuildItemRepo()
         {
-            var json = LoadJson("agents-extra/pinder/data/items/starter-items.json");
+            var json = TestRepoLocator.ReadDataFile("items/starter-items.json");
             return new JsonItemRepository(json);
         }
 
         private static IAnatomyRepository BuildAnatomyRepo()
         {
-            var json = LoadJson("agents-extra/pinder/data/anatomy/anatomy-parameters.json");
+            var json = TestRepoLocator.ReadDataFile("anatomy/anatomy-parameters.json");
             return new JsonAnatomyRepository(json);
         }
 
@@ -148,7 +109,7 @@ namespace Pinder.Core.Tests
             var assembler = new CharacterAssembler(BuildItemRepo(), BuildAnatomyRepo());
 
             var result = assembler.Assemble(
-                new[] { "mushroom-cap-hat", "journal-always-writing" },
+                new[] { "head_tophat", "face_monocle" },
                 new Dictionary<string, float> { { "trunkLengthBase", 0.18f } },
                 ZeroBaseStats, ZeroShadow);
 
@@ -160,17 +121,17 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public void Assemble_UnknownItemSkipped()
+        public void Assemble_UnknownItem_ThrowsFormatException()
         {
             var assembler = new CharacterAssembler(BuildItemRepo(), BuildAnatomyRepo());
 
-            var result = assembler.Assemble(
-                new[] { "head_cheff", "THIS_DOES_NOT_EXIST" },
-                new Dictionary<string, float>(),
-                ZeroBaseStats, ZeroShadow);
+            var ex = Assert.Throws<FormatException>(() =>
+                assembler.Assemble(
+                    new[] { "head_cheff", "THIS_DOES_NOT_EXIST" },
+                    new Dictionary<string, float>(),
+                    ZeroBaseStats, ZeroShadow));
 
-            // Should not throw; known item fragments still present
-            Assert.Single(result.PersonalityFragments);
+            Assert.Contains("THIS_DOES_NOT_EXIST", ex.Message);
         }
 
         // -----------------------------------------------------------------------

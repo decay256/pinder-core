@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using Pinder.Core.Data;
+using Pinder.SessionSetup;
 
 namespace Pinder.Core.TestCommon
 {
@@ -28,5 +28,13 @@ namespace Pinder.Core.TestCommon
 
         public static string FindRepoSubdir(params string[] pathSegments)
             => FindRepoSubdir(Path.Combine(pathSegments));
+
+        public static string ReadDataFile(string relativePath)
+        {
+            var path = Path.Combine(RepoRoot, "data", relativePath);
+            if (!File.Exists(path))
+                throw new FileNotFoundException($"Could not locate data/{relativePath}.", path);
+            return File.ReadAllText(path);
+        }
     }
 }

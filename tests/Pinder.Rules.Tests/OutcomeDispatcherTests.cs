@@ -106,15 +106,33 @@ namespace Pinder.Rules.Tests
         }
 
         [Fact]
-        public void UnknownKeys_AreSilentlyIgnored()
+        public void UnknownKeys_ThrowBeforeApplyingAnyEffects()
         {
             var outcome = new Dictionary<string, object>
             {
                 ["unknown_key"] = "whatever",
                 ["interest_delta"] = -1
             };
-            OutcomeDispatcher.Dispatch(outcome, _state, _handler);
-            Assert.Equal(new[] { -1 }, _handler.InterestDeltas);
+            var ex = Assert.Throws<System.FormatException>(() =>
+                OutcomeDispatcher.Dispatch(outcome, _state, _handler));
+            Assert.Contains("unknown_key", ex.Message);
+            Assert.Empty(_handler.InterestDeltas);
+        }
+
+        [Fact]
+        public void MalformedNumericValue_ThrowsBeforeApplyingAnyEffects()
+        {
+            var outcome = new Dictionary<string, object>
+            {
+                ["interest_delta"] = -1,
+                ["roll_bonus"] = "high"
+            };
+            var ex = Assert.Throws<System.FormatException>(() =>
+                OutcomeDispatcher.Dispatch(outcome, _state, _handler));
+            Assert.Contains("roll_bonus", ex.Message);
+            Assert.Contains("high", ex.Message);
+            Assert.Empty(_handler.InterestDeltas);
+            Assert.Empty(_handler.RollModifiers);
         }
 
         [Fact]

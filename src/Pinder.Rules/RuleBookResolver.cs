@@ -416,7 +416,7 @@ namespace Pinder.Rules
         {
             if (outcome.TryGetValue(key, out var val))
             {
-                return ToInt(val);
+                return ToInt(val, $"outcome.{key}");
             }
             return null;
         }
@@ -425,7 +425,7 @@ namespace Pinder.Rules
         {
             if (outcome.TryGetValue(key, out var val))
             {
-                return ToDouble(val);
+                return ToDouble(val, $"outcome.{key}");
             }
             return null;
         }
@@ -443,33 +443,35 @@ namespace Pinder.Rules
         {
             if (condition.TryGetValue(key, out var val))
             {
-                return ToInt(val) ?? 0;
+                return ToInt(val, $"condition.{key}");
             }
-            return 0;
+            throw new FormatException($"Rule condition missing required key '{key}'.");
         }
 
-        private static int? ToInt(object? value)
+        private static int ToInt(object? value, string context)
         {
-            if (value == null) return null;
+            if (value == null)
+                throw new FormatException($"Rule {context} must be numeric, got null.");
             if (value is int i) return i;
             if (value is long l) return (int)l;
             if (value is double d) return (int)d;
             if (value is float f) return (int)f;
             if (value is string s && int.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed))
                 return parsed;
-            return null;
+            throw new FormatException($"Rule {context} must be numeric, got '{value}'.");
         }
 
-        private static double? ToDouble(object? value)
+        private static double ToDouble(object? value, string context)
         {
-            if (value == null) return null;
+            if (value == null)
+                throw new FormatException($"Rule {context} must be numeric, got null.");
             if (value is double d) return d;
             if (value is float f) return f;
             if (value is int i) return i;
             if (value is long l) return l;
             if (value is string s && double.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed))
                 return parsed;
-            return null;
+            throw new FormatException($"Rule {context} must be numeric, got '{value}'.");
         }
 
         /// <summary>

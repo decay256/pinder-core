@@ -5,6 +5,7 @@ using System.Reflection;
 using Xunit;
 using Pinder.Core.Conversation;
 using Pinder.Core.Interfaces;
+using Pinder.Core.Progression;
 using Pinder.LlmAdapters;
 
 namespace Pinder.Core.Tests
@@ -40,6 +41,34 @@ namespace Pinder.Core.Tests
             if (offending.Count > 0)
             {
                 Assert.Fail($"Pinder.Core must remain a domain kernel with only framework/BCL-support dependencies. Offending assemblies: {string.Join(", ", offending)}");
+            }
+        }
+
+        [Fact]
+        public void CoreAssembly_DoesNotExposeRuntimeDataFileLocator()
+        {
+            var assembly = typeof(GameSession).Assembly;
+            Assert.Null(assembly.GetType("Pinder.Core.Data.DataFileLocator"));
+        }
+
+        [Fact]
+        public void DefaultRuleResolver_UsesCoreOwnedDefaultWithoutAdapterReflection()
+        {
+            var previous = DefaultRuleResolver.Instance;
+            try
+            {
+                DefaultRuleResolver.Instance = null;
+
+                var resolver = DefaultRuleResolver.Instance;
+
+                Assert.NotNull(resolver);
+                Assert.Equal(typeof(GameSession).Assembly, resolver!.GetType().Assembly);
+                Assert.DoesNotContain("Pinder.LlmAdapters", resolver.GetType().FullName ?? string.Empty);
+                Assert.Equal(2, LevelTable.GetLevel(50));
+            }
+            finally
+            {
+                DefaultRuleResolver.Instance = previous;
             }
         }
 

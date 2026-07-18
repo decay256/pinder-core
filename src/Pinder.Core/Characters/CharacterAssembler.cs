@@ -39,8 +39,7 @@ namespace Pinder.Core.Characters
 
         /// <summary>
         /// Run the full assembly pipeline.
-        /// Unknown item IDs resolve to zero modifiers; unknown anatomy parameters
-        /// are silently skipped.
+        /// Unknown item IDs or anatomy parameters throw <see cref="FormatException"/>.
         /// </summary>
         /// <param name="equippedItemIds">Item IDs of all equipped items.</param>
         /// <param name="anatomyValues">
@@ -77,8 +76,7 @@ namespace Pinder.Core.Characters
                 }
                 else
                 {
-                    // Unknown id: record for admin surfacing; zero modifiers applied.
-                    unknownIds.Add(id);
+                    throw new FormatException($"Character assembly references unknown item id '{id}'.");
                 }
             }
 
@@ -86,7 +84,8 @@ namespace Pinder.Core.Characters
             foreach (var kv in anatomyValues)
             {
                 var param = _anatomy.GetParameter(kv.Key);
-                if (param == null) continue;
+                if (param == null)
+                    throw new FormatException($"Character assembly references unknown anatomy parameter '{kv.Key}'.");
                 var band = param.ResolveBand(kv.Value);
                 if (band != null)
                 {

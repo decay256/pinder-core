@@ -53,9 +53,9 @@ namespace Pinder.Rules.Tests
             Assert.Empty(book.All);
         }
 
-        // Mutation: would catch if duplicate IDs are not handled (first wins instead of last wins)
+        // Duplicate IDs are malformed rule configuration and must fail at load time.
         [Fact]
-        public void RuleBook_DuplicateIds_LastEntryWinsInGetById()
+        public void RuleBook_DuplicateIds_ThrowsFormatException()
         {
             var yaml = @"
 - id: dup.rule
@@ -69,13 +69,8 @@ namespace Pinder.Rules.Tests
   type: test
   description: Second entry
 ";
-            var book = RuleBook.LoadFrom(yaml);
-            // All should contain both entries
-            Assert.Equal(2, book.All.Count);
-            // GetById returns the last one per spec
-            var entry = book.GetById("dup.rule");
-            Assert.NotNull(entry);
-            Assert.Equal("Second", entry!.Title);
+            var ex = Assert.Throws<FormatException>(() => RuleBook.LoadFrom(yaml));
+            Assert.Contains("Duplicate rule id", ex.Message);
         }
 
         // Mutation: would catch if All doesn't preserve YAML document order

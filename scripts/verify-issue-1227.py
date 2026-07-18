@@ -96,7 +96,7 @@ def main():
         errors.append("docs/prompts.md does not describe fail-fast wiring.")
 
     # Acceptance Criteria 3: Lists the current catalog files
-    expected_catalog_files = ['background.yaml', 'templates.yaml', 'archetypes.yaml', 'structural.yaml', 'narrative.yaml', 'stake.yaml']
+    expected_catalog_files = ['templates.yaml', 'archetypes.yaml', 'structural.yaml', 'narrative.yaml', 'stake.yaml']
     for cat_file in expected_catalog_files:
         if cat_file not in prompts_content:
             errors.append(f"docs/prompts.md is missing the current catalog file: '{cat_file}'.")

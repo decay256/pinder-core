@@ -100,12 +100,12 @@ public static class ConditionEvaluator
 | `miss_minimum` | `MissMargin >= value` |
 
 - Null/empty condition → `false`.
-- Unknown keys are ignored (treated as matching).
+- Unknown keys throw `FormatException`.
 - All keys must match (AND logic).
 - Handles YamlDotNet `long` boxing via `Convert` helpers.
-- Malformed range (not 2-element list) → `false` for that key.
+- Malformed range values throw `FormatException`; non-list ranges evaluate `false`.
 
-> **Note:** `shadow_threshold` is specified in the spec but **not implemented** in the current `ConditionEvaluator`. The switch statement has no `shadow_threshold` case; unknown keys fall through as matching.
+> **Note:** `shadow_threshold` is specified in the historical spec but is **not implemented** in the current `ConditionEvaluator`. A `shadow_threshold` condition now fails fast as an unknown key.
 
 ### OutcomeDispatcher
 ```csharp
@@ -132,9 +132,10 @@ public static class OutcomeDispatcher
 | `shadow_effect` | `ApplyShadowGrowth(shadow, delta, "rule engine")` |
 | `starting_interest` | `ApplyInterestDelta(value)` |
 
+- Recognized metadata keys with no direct `IEffectHandler` call: `tier`, `state`, `xp`, `multiplier`, `base_xp`, `xp_threshold`, `build_points`, `level_bonus`, `item_slots`, `min_level`.
 - Null outcome or null handler → no-op (no `ArgumentNullException`).
-- Unknown keys silently ignored.
-- Wrong-type values handled defensively via `ToInt`/`ToDouble` helpers.
+- Unknown keys throw `FormatException`.
+- Wrong-type numeric values throw before any effects are applied.
 
 ### IEffectHandler
 ```csharp
@@ -154,14 +155,14 @@ public interface IEffectHandler
 - **Dependency direction**: `Pinder.Rules → Pinder.Core` (one-way). `Pinder.Core` has no reference to `Pinder.Rules`.
 - **No GameSession changes**: Direct wiring is deferred to preserve `Pinder.Core`'s zero-dependency invariant. The host (e.g. session-runner) can wrap `GameSession` calls with rule-engine lookups in a future sprint.
 - **Shadow values as strings**: `GameState.ShadowValues` uses `string` keys (not `ShadowStatType`) to avoid tight coupling. The caller maps enum → string when constructing the snapshot.
-- **Evaluation philosophy**: Loading is strict (throws `FormatException` on bad YAML); evaluation is lenient (bad data in a condition/outcome key returns false or is skipped, never crashes).
+- **Evaluation philosophy**: Loading and evaluation are strict for malformed rule data. Unknown keys and malformed numeric values throw rather than producing plausible gameplay.
 - **YAML deserialization**: Uses `YamlDotNet` `DeserializerBuilder` with `UnderscoredNamingConvention`. Raw YAML is deserialized as `List<Dictionary<object, object>>` then normalized to `Dictionary<string, object>` recursively.
 
 ### Spec divergences in implementation
 - `RuleBook.LoadFrom(null)` throws `FormatException` (spec says `ArgumentNullException`).
 - `ConditionEvaluator.Evaluate(cond, null)` throws `NullReferenceException` (spec says `ArgumentNullException`).
 - `OutcomeDispatcher.Dispatch(outcome, state, null)` silently returns (spec says `ArgumentNullException`).
-- `shadow_threshold` condition key is not implemented; falls through as unknown (always matching).
+- `shadow_threshold` condition key is not implemented; it throws as an unknown key.
 - `starting_interest` outcome key is implemented (dispatches as `ApplyInterestDelta`) but not listed in spec's outcome table.
 
 ## Change Log

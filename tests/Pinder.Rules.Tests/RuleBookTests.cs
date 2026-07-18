@@ -125,6 +125,20 @@ namespace Pinder.Rules.Tests
         }
 
         [Fact]
+        public void LoadFrom_DuplicateRuleIds_ThrowsFormatException()
+        {
+            var yaml = @"
+- id: duplicate.rule
+  type: first
+- id: DUPLICATE.RULE
+  type: second
+";
+            var ex = Assert.Throws<System.FormatException>(() => RuleBook.LoadFrom(yaml));
+            Assert.Contains("Duplicate rule id 'DUPLICATE.RULE'", ex.Message);
+            Assert.Contains("entries 1 and 2", ex.Message);
+        }
+
+        [Fact]
         public void LoadFrom_EntryWithNoCondition_HasNullCondition()
         {
             var yaml = @"

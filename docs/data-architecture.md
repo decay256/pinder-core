@@ -136,7 +136,7 @@ Characters reference parameters by string id in their `anatomy` block:
 }
 ```
 
-`CharacterAssembler.Assemble` takes an `IReadOnlyDictionary<string, float>` of `parameterId → [0..1]` normalized value. Unknown parameter ids are silently skipped — the engine does not require any specific parameter to exist. Removing a parameter from the JSON simply means no character can reference it; existing characters that still reference the removed id silently lose those fragments and modifiers (no error).
+`CharacterAssembler.Assemble` takes an `IReadOnlyDictionary<string, float>` of `parameterId → [0..1]` normalized value. Unknown parameter ids are treated as catalog drift and throw during assembly, because silently losing fragments or modifiers changes gameplay and prompt inputs.
 
 #### Adding a parameter (Historical Tier Example)
 

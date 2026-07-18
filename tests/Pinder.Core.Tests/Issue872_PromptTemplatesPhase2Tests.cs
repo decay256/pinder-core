@@ -27,7 +27,7 @@ namespace Pinder.Core.Tests
         // ----- loader: entry count -------------------------------------------
 
         [Fact]
-        public void TemplatesYaml_LoadsAll53Entries()
+        public void TemplatesYaml_LoadsCurrentEntries()
         {
             var catalog = PromptCatalog.LoadFromDirectory(PromptsRoot);
 
@@ -47,7 +47,8 @@ namespace Pinder.Core.Tests
             Assert.Contains("engine-options-block", names);
             Assert.Contains("cold-opener-rule", names);
             Assert.Contains("player-transition-directive", names);
-            Assert.Contains("response-timing-header", names);
+            Assert.Contains("resistance-skeptical-interest", names);
+            Assert.Contains("sim_agent_icon_weakness", names);
         }
     }
 }

@@ -22,11 +22,22 @@ namespace Pinder.Rules
             _byId = new Dictionary<string, RuleEntry>(StringComparer.OrdinalIgnoreCase);
             _byType = new Dictionary<string, List<RuleEntry>>(StringComparer.OrdinalIgnoreCase);
 
-            foreach (var entry in entries)
+            for (int i = 0; i < entries.Count; i++)
             {
+                var entry = entries[i];
                 if (!string.IsNullOrEmpty(entry.Id))
                 {
-                    _byId[entry.Id] = entry;
+                    if (_byId.TryGetValue(entry.Id, out _))
+                    {
+                        int firstPosition = entries.Take(i)
+                            .Select((candidate, index) => new { candidate, index })
+                            .First(x => string.Equals(x.candidate.Id, entry.Id, StringComparison.OrdinalIgnoreCase))
+                            .index + 1;
+                        throw new FormatException(
+                            $"Duplicate rule id '{entry.Id}' at entries {firstPosition} and {i + 1}.");
+                    }
+
+                    _byId.Add(entry.Id, entry);
                 }
 
                 if (!string.IsNullOrEmpty(entry.Type))

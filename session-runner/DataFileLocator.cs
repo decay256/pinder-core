@@ -1,4 +1,4 @@
-using SharedDataFileLocator = Pinder.Core.Data.DataFileLocator;
+using SharedDataFileLocator = Pinder.SessionSetup.DataFileLocator;
 
 namespace Pinder.SessionRunner
 {

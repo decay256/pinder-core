@@ -1,10 +1,12 @@
 using System;
 using System.IO;
 
-namespace Pinder.Core.Data
+namespace Pinder.SessionSetup
 {
     /// <summary>
     /// Resolves Pinder data files across runtime and repository layouts.
+    /// Host and setup layers own this filesystem/environment probing; the core
+    /// domain kernel receives parsed data and value objects.
     /// </summary>
     public static class DataFileLocator
     {
@@ -17,13 +19,6 @@ namespace Pinder.Core.Data
         /// Finds a data file by checking <see cref="EnvVarName"/> first, then
         /// walking up from <paramref name="baseDir"/>.
         /// </summary>
-        /// <param name="baseDir">Starting directory for the search.</param>
-        /// <param name="relativePath">
-        /// Relative path to the data file. The path is tried verbatim and with
-        /// the first path segment case-flipped so runtime <c>Data/</c> and
-        /// repository <c>data/</c> layouts both resolve.
-        /// </param>
-        /// <returns>Absolute path to the file, or null if not found.</returns>
         public static string? FindDataFile(string baseDir, string relativePath)
         {
             string? envPath = Environment.GetEnvironmentVariable(EnvVarName);
@@ -51,8 +46,6 @@ namespace Pinder.Core.Data
         /// Finds the repo root by walking up from <paramref name="baseDir"/>,
         /// looking for a directory that contains both "data" and "src".
         /// </summary>
-        /// <param name="baseDir">Starting directory for the search.</param>
-        /// <returns>Absolute path to the repo root, or null if not found.</returns>
         public static string? FindRepoRoot(string baseDir)
         {
             string? dir = baseDir;

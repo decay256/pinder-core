@@ -85,16 +85,16 @@ namespace Pinder.Rules.Tests
             Assert.True(ConditionEvaluator.Evaluate(cond, state));
         }
 
-        // Mutation: would catch if malformed range (not 2 elements) crashes instead of returning false
+        // Mutation: would catch if malformed range (not 2 elements) is treated as a valid miss boundary.
         [Fact]
-        public void ConditionEvaluator_Range_MalformedSingleElement_ReturnsFalse()
+        public void ConditionEvaluator_Range_MalformedSingleElement_Throws()
         {
             var cond = new Dictionary<string, object>
             {
                 ["miss_range"] = new List<object> { 1 }
             };
             var state = new GameState(missMargin: 1);
-            Assert.False(ConditionEvaluator.Evaluate(cond, state));
+            Assert.Throws<FormatException>(() => ConditionEvaluator.Evaluate(cond, state));
         }
 
         // Mutation: would catch if open-ended range with large hi value doesn't work
@@ -211,14 +211,14 @@ namespace Pinder.Rules.Tests
         // ConditionEvaluator — unknown keys only (AC6)
         // ============================================================
 
-        // Mutation: would catch if only-unknown-keys returns false.
-        // Per spec: "Unknown keys are ignored (treated as matching)" and dict is non-empty
+        // Unknown keys are malformed rule configuration and must fail fast.
         [Fact]
-        public void ConditionEvaluator_OnlyUnknownKeys_ReturnsTrue()
+        public void ConditionEvaluator_OnlyUnknownKeys_Throws()
         {
             var cond = new Dictionary<string, object> { ["future_mechanic"] = 42 };
             var state = new GameState();
-            Assert.True(ConditionEvaluator.Evaluate(cond, state));
+            var ex = Assert.Throws<FormatException>(() => ConditionEvaluator.Evaluate(cond, state));
+            Assert.Contains("future_mechanic", ex.Message);
         }
 
         // ============================================================

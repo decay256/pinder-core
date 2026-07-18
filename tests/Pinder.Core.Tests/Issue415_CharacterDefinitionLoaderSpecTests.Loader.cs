@@ -19,21 +19,26 @@ namespace Pinder.Core.Tests
 
         // Fails if: Missing shadows doesn't default to zero
         [Fact]
-        public void EdgeCase_MissingShadows_DefaultsToZero()
+        public void EdgeCase_MissingShadows_ThrowsFormatException()
         {
             var itemRepo = LoadItemRepo();
             var anatomyRepo = LoadAnatomyRepo();
 
-            string json = BuildMinimalJson(); // no shadows field
+            string json = @"{
+                ""schema_version"": 2,
+                ""character_id"": ""550e8400-e29b-41d4-a716-446655440000"",
+                ""name"": ""TestChar"",
+                ""gender_identity"": ""they/them"",
+                ""bio"": ""test"",
+                ""level"": 1,
+                ""items"": [],
+                ""anatomy"": {},
+                ""allocation"": { ""spent"": { ""charm"": 1, ""rizz"": 1, ""honesty"": 1, ""chaos"": 1, ""wit"": 1, ""self_awareness"": 1 }, ""unspent_pool"": 0 }
+            }";
 
-            var profile = CharacterDefinitionLoader.Parse(json, itemRepo, anatomyRepo);
-
-            Assert.Equal(0, profile.Stats.GetShadow(ShadowStatType.Madness));
-            Assert.Equal(0, profile.Stats.GetShadow(ShadowStatType.Despair));
-            Assert.Equal(0, profile.Stats.GetShadow(ShadowStatType.Denial));
-            Assert.Equal(0, profile.Stats.GetShadow(ShadowStatType.Fixation));
-            Assert.Equal(0, profile.Stats.GetShadow(ShadowStatType.Dread));
-            Assert.Equal(0, profile.Stats.GetShadow(ShadowStatType.Overthinking));
+            var ex = Assert.Throws<FormatException>(() =>
+                CharacterDefinitionLoader.Parse(json, itemRepo, anatomyRepo));
+            Assert.Contains("allocation.shadows", ex.Message);
         }
 
         // Fails if: Empty items array causes an exception instead of graceful handling
@@ -80,9 +85,9 @@ namespace Pinder.Core.Tests
             Assert.Equal("Xx_D3str0y3r_xX", profile.DisplayName);
         }
 
-        // Fails if: Missing item IDs crash instead of being silently skipped
+        // Fails if: Missing item IDs silently remove item mechanics.
         [Fact]
-        public void EdgeCase_MissingItemIds_SilentlySkipped()
+        public void EdgeCase_MissingItemIds_ThrowFormatException()
         {
             var itemRepo = LoadItemRepo();
             var anatomyRepo = LoadAnatomyRepo();
@@ -90,9 +95,9 @@ namespace Pinder.Core.Tests
             string json = BuildMinimalJson(
                 itemsArray: @"[""nonexistent-item-id-1"", ""nonexistent-item-id-2""]");
 
-            // Should not throw — assembler silently skips unknown items
-            var profile = CharacterDefinitionLoader.Parse(json, itemRepo, anatomyRepo);
-            Assert.NotNull(profile);
+            var ex = Assert.Throws<FormatException>(() =>
+                CharacterDefinitionLoader.Parse(json, itemRepo, anatomyRepo));
+            Assert.Contains("nonexistent-item-id-1", ex.Message);
         }
 
         // =====================================================================

@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using Pinder.Core.Data;
+using Pinder.SessionSetup;
 using Xunit;
 
 namespace Pinder.Core.Tests

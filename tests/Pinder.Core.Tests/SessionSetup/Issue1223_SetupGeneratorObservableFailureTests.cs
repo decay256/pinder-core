@@ -49,10 +49,6 @@ namespace Pinder.Core.Tests.SessionSetup
             var stakeGen = new LlmStakeGenerator(throwingTransport);
             await Assert.ThrowsAsync<LlmTransportException>(() => stakeGen.GenerateAsync("Alice", "some system prompt"));
 
-            // Test LlmBackgroundGenerator (now bubbles up)
-            var bgGen = new LlmBackgroundGenerator(throwingTransport);
-            await Assert.ThrowsAsync<LlmTransportException>(() => bgGen.GenerateAsync("Alice", "some system prompt"));
-
             // Test LlmDramaticArcGenerator (throws)
             var arcGen = new LlmDramaticArcGenerator(throwingTransport);
             await Assert.ThrowsAsync<LlmTransportException>(() => arcGen.GenerateAsync(
@@ -94,19 +90,7 @@ namespace Pinder.Core.Tests.SessionSetup
             Assert.Equal("transport_error", stakeResult.ErrorCode);
             Assert.Equal("stake", stakeResult.GeneratorName);
 
-            // 2. Background Generator
-            SetupGenerationResult? backgroundResult = null;
-            var backgroundGen = new LlmBackgroundGenerator(throwingTransport, new LlmBackgroundGenerator.Options
-            {
-                OnDegraded = r => backgroundResult = r
-            });
-            await backgroundGen.GenerateAsync("Alice", "system prompt");
-            Assert.NotNull(backgroundResult);
-            Assert.True(backgroundResult.Degraded);
-            Assert.Equal("transport_error", backgroundResult.ErrorCode);
-            Assert.Equal("background", backgroundResult.GeneratorName);
-
-            // 3. Outfit Describer
+            // 2. Outfit Describer
             SetupGenerationResult? outfitResult = null;
             var outfitGen = new LlmOutfitDescriber(throwingTransport, new LlmOutfitDescriber.Options
             {
@@ -118,7 +102,7 @@ namespace Pinder.Core.Tests.SessionSetup
             Assert.Equal("transport_error", outfitResult.ErrorCode);
             Assert.Equal("outfit", outfitResult.GeneratorName);
 
-            // 4. Dramatic Arc Generator
+            // 3. Dramatic Arc Generator
             SetupGenerationResult? arcResult = null;
             var arcGen = new LlmDramaticArcGenerator(throwingTransport, new LlmDramaticArcGenerator.Options
             {
@@ -148,19 +132,7 @@ namespace Pinder.Core.Tests.SessionSetup
             Assert.Equal("empty_output", stakeResult.ErrorCode);
             Assert.Equal("stake", stakeResult.GeneratorName);
 
-            // 2. Background Generator
-            SetupGenerationResult? backgroundResult = null;
-            var backgroundGen = new LlmBackgroundGenerator(emptyTransport, new LlmBackgroundGenerator.Options
-            {
-                OnDegraded = r => backgroundResult = r
-            });
-            await backgroundGen.GenerateAsync("Alice", "system prompt");
-            Assert.NotNull(backgroundResult);
-            Assert.True(backgroundResult.Degraded);
-            Assert.Equal("empty_output", backgroundResult.ErrorCode);
-            Assert.Equal("background", backgroundResult.GeneratorName);
-
-            // 3. Outfit Describer
+            // 2. Outfit Describer
             SetupGenerationResult? outfitResult = null;
             var outfitGen = new LlmOutfitDescriber(emptyTransport, new LlmOutfitDescriber.Options
             {
@@ -172,7 +144,7 @@ namespace Pinder.Core.Tests.SessionSetup
             Assert.Equal("empty_output", outfitResult.ErrorCode);
             Assert.Equal("outfit", outfitResult.GeneratorName);
 
-            // 4. Dramatic Arc Generator
+            // 3. Dramatic Arc Generator
             SetupGenerationResult? arcResult = null;
             var arcGen = new LlmDramaticArcGenerator(emptyTransport, new LlmDramaticArcGenerator.Options
             {
@@ -199,15 +171,6 @@ namespace Pinder.Core.Tests.SessionSetup
             string stakeText = await stakeGen.GenerateAsync("Alice", "system prompt");
             Assert.Equal(string.Empty, stakeText);
             Assert.Null(stakeResult);
-
-            SetupGenerationResult? backgroundResult = null;
-            var backgroundGen = new LlmBackgroundGenerator(cancelingTransport, new LlmBackgroundGenerator.Options
-            {
-                OnDegraded = r => backgroundResult = r
-            });
-            string backgroundText = await backgroundGen.GenerateAsync("Alice", "system prompt");
-            Assert.Equal(string.Empty, backgroundText);
-            Assert.Null(backgroundResult);
 
             SetupGenerationResult? outfitResult = null;
             var outfitGen = new LlmOutfitDescriber(cancelingTransport, new LlmOutfitDescriber.Options

@@ -127,5 +127,16 @@ namespace Pinder.Rules.Tests
             // Should NOT be in roll modifiers
             Assert.Empty(handler.RollModifiers);
         }
+
+        [Fact]
+        public void OutcomeDispatcher_UnknownOutcomeKey_Throws()
+        {
+            var handler = new TestEffectHandler();
+            var outcome = new Dictionary<string, object> { ["interest_dleta"] = -2 };
+            var ex = Assert.Throws<FormatException>(() =>
+                OutcomeDispatcher.Dispatch(outcome, new GameState(), handler));
+            Assert.Contains("interest_dleta", ex.Message);
+            Assert.Empty(handler.InterestDeltas);
+        }
     }
 }

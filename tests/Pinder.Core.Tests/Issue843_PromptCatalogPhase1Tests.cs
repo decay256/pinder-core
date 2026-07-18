@@ -213,9 +213,6 @@ namespace Pinder.Core.Tests
                     new LlmStakeGenerator(new StubLlmTransport()));
 
                 Assert.Throws<InvalidOperationException>(() =>
-                    new LlmBackgroundGenerator(new StubLlmTransport()));
-
-                Assert.Throws<InvalidOperationException>(() =>
                     new LlmBackstoryGenerator(new StubLlmTransport()));
             }
             finally
@@ -227,7 +224,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void Generators_WithIncompleteCatalog_ThrowsInvalidOperationException()
         {
-            // Ensure if catalog is present but missing stake/background entries, it throws
+            // Ensure if catalog is present but missing required setup entries, it throws.
             var dir = Directory.CreateTempSubdirectory("incomplete-catalog-test-").FullName;
             try
             {
@@ -237,9 +234,6 @@ namespace Pinder.Core.Tests
 
                 Assert.Throws<InvalidOperationException>(() =>
                     new LlmStakeGenerator(new StubLlmTransport(), null, null, emptyCatalog));
-
-                Assert.Throws<InvalidOperationException>(() =>
-                    new LlmBackgroundGenerator(new StubLlmTransport(), null, emptyCatalog));
 
                 Assert.Throws<InvalidOperationException>(() =>
                     new LlmBackstoryGenerator(new StubLlmTransport(), null, emptyCatalog));

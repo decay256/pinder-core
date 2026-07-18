@@ -258,7 +258,11 @@ namespace Pinder.LlmAdapters
 
             string key = level.ToString();
             if (!ProgressionXpThresholds.TryGetValue(key, out int value))
+            {
+                if (IsPastConfiguredProgressionLevel(ProgressionXpThresholds, level))
+                    return null;
                 throw new KeyNotFoundException($"Missing progression XP threshold for level {level}.");
+            }
 
             return value;
         }
@@ -315,5 +319,16 @@ namespace Pinder.LlmAdapters
         /// fail the load or lookup instead of falling back to embedded defaults.
         /// </summary>
         public bool AllowDefaultFallback => false;
+
+        private static bool IsPastConfiguredProgressionLevel(IReadOnlyDictionary<string, int> table, int level)
+        {
+            int maxLevel = 0;
+            foreach (var key in table.Keys)
+            {
+                if (int.TryParse(key, out int parsed) && parsed > maxLevel)
+                    maxLevel = parsed;
+            }
+            return maxLevel > 0 && level > maxLevel;
+        }
     }
 }

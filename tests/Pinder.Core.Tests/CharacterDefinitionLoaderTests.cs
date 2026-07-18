@@ -70,6 +70,14 @@ namespace Pinder.Core.Tests
                 "}";
         }
 
+        private static string ReplaceOrThrow(string source, string oldValue, string newValue)
+        {
+            string updated = source.Replace(oldValue, newValue);
+            if (updated == source)
+                throw new InvalidOperationException("Character definition test fixture mutation did not match the expected JSON fragment.");
+            return updated;
+        }
+
         [Fact]
         public void Load_GeraldDefinition_ProducesValidProfile()
         {
@@ -231,7 +239,7 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public void Parse_MissingShadows_DefaultsToZero()
+        public void Parse_MissingShadows_ThrowsFormatException()
         {
             var itemRepo = LoadItemRepo();
             var anatomyRepo = LoadAnatomyRepo();
@@ -255,12 +263,40 @@ namespace Pinder.Core.Tests
                 }
             }";
 
-            var profile = CharacterDefinitionLoader.Parse(json, itemRepo, anatomyRepo);
+            var ex = Assert.Throws<FormatException>(() =>
+                CharacterDefinitionLoader.Parse(json, itemRepo, anatomyRepo));
+            Assert.Contains("allocation.shadows", ex.Message);
+        }
 
-            Assert.Equal("TestChar", profile.DisplayName);
-            Assert.Equal(1, profile.Level);
-            Assert.Equal(0, profile.Stats.GetShadow(ShadowStatType.Madness));
-            Assert.Equal(0, profile.Stats.GetShadow(ShadowStatType.Despair));
+        [Fact]
+        public void Parse_NullShadows_ThrowsFormatException()
+        {
+            var itemRepo = LoadItemRepo();
+            var anatomyRepo = LoadAnatomyRepo();
+            string json = ReplaceOrThrow(
+                ValidV1Json,
+                @"""shadows"": {",
+                @"""shadows"": null, ""ignored_shadows"": {");
+
+            var ex = Assert.Throws<FormatException>(() =>
+                CharacterDefinitionLoader.Parse(json, itemRepo, anatomyRepo));
+            Assert.Contains("allocation.shadows", ex.Message);
+            Assert.Contains("object", ex.Message, StringComparison.OrdinalIgnoreCase);
+        }
+
+        [Fact]
+        public void Parse_PartialShadows_ThrowsFormatException()
+        {
+            var itemRepo = LoadItemRepo();
+            var anatomyRepo = LoadAnatomyRepo();
+            string json = ReplaceOrThrow(
+                ValidV1Json,
+                @"""denial"": 0,",
+                "");
+
+            var ex = Assert.Throws<FormatException>(() =>
+                CharacterDefinitionLoader.Parse(json, itemRepo, anatomyRepo));
+            Assert.Contains("allocation.shadows.denial", ex.Message);
         }
 
         [Fact]
@@ -295,9 +331,10 @@ namespace Pinder.Core.Tests
             var itemRepo = LoadItemRepo();
             var anatomyRepo = LoadAnatomyRepo();
 
-            string json = ValidV1Json.Replace(
-                "\"self_awareness\": 1\n                },",
-                "\"self_awareness\": 1, \"invalid_stat\": 1\n                },");
+            string json = ReplaceOrThrow(
+                ValidV1Json,
+                @"""self_awareness"": 1",
+                @"""self_awareness"": 1, ""invalid_stat"": 1");
 
             var ex = Assert.Throws<FormatException>(() =>
                 CharacterDefinitionLoader.Parse(json, itemRepo, anatomyRepo));
@@ -310,9 +347,10 @@ namespace Pinder.Core.Tests
             var itemRepo = LoadItemRepo();
             var anatomyRepo = LoadAnatomyRepo();
 
-            string json = ValidV1Json.Replace(
-                "\"overthinking\": 0\n                }\n            }",
-                "\"overthinking\": 0, \"invalid_shadow\": 5\n                }\n            }");
+            string json = ReplaceOrThrow(
+                ValidV1Json,
+                @"""overthinking"": 0",
+                @"""overthinking"": 0, ""invalid_shadow"": 5");
 
             var ex = Assert.Throws<FormatException>(() =>
                 CharacterDefinitionLoader.Parse(json, itemRepo, anatomyRepo));
