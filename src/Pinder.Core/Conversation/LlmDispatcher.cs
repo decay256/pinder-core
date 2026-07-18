@@ -122,7 +122,7 @@ namespace Pinder.Core.Conversation
                 }
                 else
                 {
-                    EmitTextLayerNoop(onTextLayerNoop, turnNumber, $"Trap ({trapDisplayName})", deliveredMessage, trapResult);
+                    TextLayerNoopDiagnostics.Emit(onTextLayerNoop, turnNumber, $"Trap ({trapDisplayName})", deliveredMessage, trapResult);
                 }
 
                 // Shadow always runs on the (possibly trap-modified) message — no waste.
@@ -141,7 +141,7 @@ namespace Pinder.Core.Conversation
                 }
                 else
                 {
-                    EmitTextLayerNoop(onTextLayerNoop, turnNumber, $"Shadow ({shadowType})", trapResult, sanitizedShadow);
+                    TextLayerNoopDiagnostics.Emit(onTextLayerNoop, turnNumber, $"Shadow ({shadowType})", trapResult, sanitizedShadow);
                 }
                 wasteTracker?.RecordNonWaste();
                 return (sanitizedShadow, shadowApplied);
@@ -165,7 +165,7 @@ namespace Pinder.Core.Conversation
                 }
                 else
                 {
-                    EmitTextLayerNoop(onTextLayerNoop, turnNumber, $"Trap ({trapDisplayName})", deliveredMessage, trapResult);
+                    TextLayerNoopDiagnostics.Emit(onTextLayerNoop, turnNumber, $"Trap ({trapDisplayName})", deliveredMessage, trapResult);
                 }
 
                 // 2. Process Shadow Output
@@ -185,7 +185,7 @@ namespace Pinder.Core.Conversation
                     }
                     else
                     {
-                        EmitTextLayerNoop(onTextLayerNoop, turnNumber, $"Shadow ({shadowType})", trapResult, shadowResult);
+                        TextLayerNoopDiagnostics.Emit(onTextLayerNoop, turnNumber, $"Shadow ({shadowType})", trapResult, shadowResult);
                     }
 
                     wasteTracker?.RecordNonWaste();
@@ -224,7 +224,7 @@ namespace Pinder.Core.Conversation
                     }
                     else
                     {
-                        EmitTextLayerNoop(onTextLayerNoop, turnNumber, $"Shadow ({shadowType})", trapResult, finalShadowResult);
+                        TextLayerNoopDiagnostics.Emit(onTextLayerNoop, turnNumber, $"Shadow ({shadowType})", trapResult, finalShadowResult);
                     }
 
                     return (finalShadowResult, applied);
@@ -243,7 +243,7 @@ namespace Pinder.Core.Conversation
                 }
                 else
                 {
-                    EmitTextLayerNoop(onTextLayerNoop, turnNumber, $"Trap ({trapDisplayName})", deliveredMessage, trapResult);
+                    TextLayerNoopDiagnostics.Emit(onTextLayerNoop, turnNumber, $"Trap ({trapDisplayName})", deliveredMessage, trapResult);
                 }
 
                 return (trapResult, false);
@@ -261,7 +261,7 @@ namespace Pinder.Core.Conversation
                 }
                 else
                 {
-                    EmitTextLayerNoop(onTextLayerNoop, turnNumber, $"Shadow ({shadowType})", deliveredMessage, shadowResult);
+                    TextLayerNoopDiagnostics.Emit(onTextLayerNoop, turnNumber, $"Shadow ({shadowType})", deliveredMessage, shadowResult);
                 }
 
                 return (shadowResult, applied);
@@ -371,34 +371,5 @@ namespace Pinder.Core.Conversation
             return value.HasValue ? value.Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : "n/a";
         }
 
-        private static void EmitTextLayerNoop(Action<TextLayerNoopEvent>? onTextLayerNoop, int turnNumber, string layer, string beforeText, string afterText)
-        {
-            if (onTextLayerNoop == null) return;
-            try
-            {
-                string beforeHash = ComputeStableHash(beforeText);
-                string afterHash = ComputeStableHash(afterText);
-                onTextLayerNoop(new TextLayerNoopEvent(turnNumber, layer, beforeHash, afterHash));
-            }
-            catch
-            {
-                // Diagnostic-only path — swallow
-            }
-        }
-
-        private static string ComputeStableHash(string? text)
-        {
-            if (text == null) return "";
-            using (var sha = System.Security.Cryptography.SHA256.Create())
-            {
-                byte[] bytes = sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(text));
-                var sb = new System.Text.StringBuilder(16);
-                for (int i = 0; i < Math.Min(8, bytes.Length); i++)
-                {
-                    sb.Append(bytes[i].ToString("x2"));
-                }
-                return sb.ToString();
-            }
-        }
     }
 }

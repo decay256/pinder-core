@@ -241,7 +241,7 @@ namespace Pinder.Core.Conversation
                         improved = improved.Trim();
                         if (SuccessImprovementValidator.IsRejected(improved))
                         {
-                            TurnOrchestratorHelpers.EmitTextLayerNoop(
+                            TextLayerNoopDiagnostics.Emit(
                                 _onTextLayerNoop,
                                 state.TurnNumber,
                                 "Success improvement",
