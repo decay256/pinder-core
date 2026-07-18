@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using Pinder.Core.Conversation;
 using Pinder.Core.Stats;
 using Pinder.LlmAdapters;
@@ -178,6 +181,40 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Equal("just a normal line with no signals", parsed.Message);
             Assert.Null(parsed.Tell);
             Assert.Null(parsed.Weakness);
+        }
+
+        [Fact]
+        public void ParseValidatedSignals_WhenValidatedSignalParserFails_ThrowsContractExceptionAndDiagnostic()
+        {
+            var raw = "Nice try, but you'll have to do better than that.\n" +
+                      "[SIGNALS]\n" +
+                      "TELL: Charm (she twirls her hair when nervous)";
+            var validation = GmOutputContract.ValidateSignalsStrict(raw, out var errorDetail);
+            Assert.Equal(DateeSignalsValidationResult.ValidSignals, validation);
+            Assert.Null(errorDetail);
+
+            var diagnostics = new List<OperationalDiagnosticEvent>();
+            var ex = Assert.Throws<LlmContractException>(() =>
+                GmOutputContract.ParseValidatedSignals(
+                    raw,
+                    diagnostics.Add,
+                    block => throw new RegexMatchTimeoutException(block, "TELL", TimeSpan.FromMilliseconds(1)),
+                    block => throw new InvalidOperationException("weakness matcher should not run")));
+
+            Assert.Equal("gm_output", ex.Phase);
+            Assert.Equal("signals_parse_failure", ex.Reason);
+            Assert.Equal("GmOutputContract", ex.ParserName);
+            Assert.Equal(1, ex.SignalCount);
+
+            var diagnostic = Assert.Single(diagnostics);
+            Assert.Equal("GmOutputContract", diagnostic.Source);
+            Assert.Equal("ValidatedSignalsParseFailed", diagnostic.EventName);
+            Assert.Equal(OperationalDiagnosticSeverity.Error, diagnostic.Severity);
+            Assert.IsType<RegexMatchTimeoutException>(diagnostic.Exception);
+            Assert.True(diagnostic.CorrelationHints.TryGetValue("has_signals_marker", out var hasSignalsMarker));
+            Assert.Equal("True", hasSignalsMarker);
+            Assert.True(diagnostic.CorrelationHints.TryGetValue("exception_type", out var exceptionType));
+            Assert.Equal(nameof(RegexMatchTimeoutException), exceptionType);
         }
 
         [Theory]

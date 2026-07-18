@@ -70,7 +70,8 @@ namespace Pinder.LlmAdapters.Anthropic
         /// </summary>
         public static DateeResponse ParseDateeResponseText(
             string? llmResponse,
-            Action<OperationalDiagnosticEvent>? onDiagnostic = null)
+            Action<OperationalDiagnosticEvent>? onDiagnostic = null,
+            bool requireValidatedSignals = false)
         {
             if (string.IsNullOrWhiteSpace(llmResponse))
             {
@@ -127,13 +128,24 @@ namespace Pinder.LlmAdapters.Anthropic
 
                 // #1124: parse the optional [SIGNALS] block via the single
                 // canonical contract shared by both GM sessions.
-                var signals = GmOutputContract.Parse(response);
+                var signals = requireValidatedSignals
+                    ? GmOutputContract.ParseValidatedSignals(response, onDiagnostic)
+                    : GmOutputContract.Parse(response);
                 tell = signals.Tell;
                 weakness = signals.Weakness;
             }
-            catch
+            catch (LlmContractException)
+            {
+                throw;
+            }
+            catch (Exception ex)
             {
                 // Any unexpected error — return empty response
+                EmitInvalidToolDiagnostic(
+                    onDiagnostic,
+                    "TextParseFailure",
+                    "Failed to parse datee response text; falling back to message-only output.",
+                    ex);
                 return new DateeResponse(response.Trim(), null, null);
             }
 

@@ -40,6 +40,14 @@ namespace Pinder.LlmAdapters
         /// <summary>Marker that opens the optional structured signals block.</summary>
         public const string SignalsMarker = "[SIGNALS]";
 
+        private const string ResponseMarker = "[RESPONSE]";
+        private const string TellSignalPrefix = "TELL:";
+        private const string WeaknessSignalPrefix = "WEAKNESS:";
+        private const string ParserName = "GmOutputContract";
+        private const string ParseFailureReason = "signals_parse_failure";
+        private const string ParseFailureEventName = "ValidatedSignalsParseFailed";
+        private const string GmOutputPhase = "gm_output";
+
         private static readonly Regex TellSignalRegex = new Regex(
             @"TELL:\s*(\w+)\s*\(([^)]+)\)",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -100,6 +108,54 @@ namespace Pinder.LlmAdapters
         /// </summary>
         public static GmTurnOutput Parse(string? raw)
         {
+            return ParseCore(
+                raw,
+                validatedSignalsBlock: false,
+                onDiagnostic: null,
+                tellSignalMatcher: MatchTellSignal,
+                weaknessSignalMatcher: MatchWeaknessSignal);
+        }
+
+        /// <summary>
+        /// Parses GM output after strict validation has accepted its [SIGNALS] block.
+        /// If the validated signal block cannot be parsed, throws a contract exception
+        /// instead of silently dropping gameplay-relevant signals.
+        /// </summary>
+        internal static GmTurnOutput ParseValidatedSignals(
+            string? raw,
+            Action<OperationalDiagnosticEvent>? onDiagnostic = null)
+        {
+            return ParseValidatedSignals(
+                raw,
+                onDiagnostic,
+                MatchTellSignal,
+                MatchWeaknessSignal);
+        }
+
+        internal static GmTurnOutput ParseValidatedSignals(
+            string? raw,
+            Action<OperationalDiagnosticEvent>? onDiagnostic,
+            Func<string, Match> tellSignalMatcher,
+            Func<string, Match> weaknessSignalMatcher)
+        {
+            if (tellSignalMatcher == null) throw new ArgumentNullException(nameof(tellSignalMatcher));
+            if (weaknessSignalMatcher == null) throw new ArgumentNullException(nameof(weaknessSignalMatcher));
+
+            return ParseCore(
+                raw,
+                validatedSignalsBlock: true,
+                onDiagnostic: onDiagnostic,
+                tellSignalMatcher: tellSignalMatcher,
+                weaknessSignalMatcher: weaknessSignalMatcher);
+        }
+
+        private static GmTurnOutput ParseCore(
+            string? raw,
+            bool validatedSignalsBlock,
+            Action<OperationalDiagnosticEvent>? onDiagnostic,
+            Func<string, Match> tellSignalMatcher,
+            Func<string, Match> weaknessSignalMatcher)
+        {
             if (string.IsNullOrEmpty(raw))
                 return new GmTurnOutput(string.Empty);
 
@@ -118,7 +174,7 @@ namespace Pinder.LlmAdapters
                 {
                     string block = raw.Substring(signalsIdx);
 
-                    var tellMatch = TellSignalRegex.Match(block);
+                    var tellMatch = tellSignalMatcher(block);
                     if (tellMatch.Success)
                     {
                         if (TryParseStat(tellMatch.Groups[1].Value, out var stat))
@@ -127,7 +183,7 @@ namespace Pinder.LlmAdapters
                         }
                     }
 
-                    var weakMatch = WeaknessSignalRegex.Match(block);
+                    var weakMatch = weaknessSignalMatcher(block);
                     if (weakMatch.Success)
                     {
                         if (TryParseStat(weakMatch.Groups[1].Value, out var stat) &&
@@ -140,13 +196,86 @@ namespace Pinder.LlmAdapters
                     }
                 }
             }
-            catch
+            catch (Exception ex) when (validatedSignalsBlock)
             {
-                // Defensive: any unexpected failure collapses to message-only.
+                throw CreateValidatedSignalsParseException(raw!, ex, onDiagnostic);
+            }
+            catch (RegexMatchTimeoutException)
+            {
+                return new GmTurnOutput(raw!.Trim());
+            }
+            catch (ArgumentException)
+            {
+                return new GmTurnOutput(raw!.Trim());
+            }
+            catch (OverflowException)
+            {
                 return new GmTurnOutput(raw!.Trim());
             }
 
             return new GmTurnOutput(message, tell, weakness, weaknessDescription);
+        }
+
+        private static Match MatchTellSignal(string block)
+        {
+            return TellSignalRegex.Match(block);
+        }
+
+        private static Match MatchWeaknessSignal(string block)
+        {
+            return WeaknessSignalRegex.Match(block);
+        }
+
+        private static LlmContractException CreateValidatedSignalsParseException(
+            string raw,
+            Exception exception,
+            Action<OperationalDiagnosticEvent>? onDiagnostic)
+        {
+            bool hasSignalsMarker = HasSignalsMarker(raw);
+            int signalCount = CountSignalIndicators(raw);
+            var hints = new Dictionary<string, string>
+            {
+                ["has_signals_marker"] = hasSignalsMarker.ToString(),
+                ["exception_type"] = exception.GetType().Name,
+                ["signal_count"] = signalCount.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            };
+
+            OperationalDiagnostics.Emit(
+                onDiagnostic,
+                new OperationalDiagnosticEvent(
+                    ParserName,
+                    ParseFailureEventName,
+                    OperationalDiagnosticSeverity.Error,
+                    "Validated GM output signals block failed to parse.",
+                    exception,
+                    OperationalDiagnosticOperationKind.DateeResponse,
+                    OperationalDiagnosticPhaseCode.Parse,
+                    OperationalDiagnosticLifecycle.Terminal,
+                    OperationalDiagnosticOutcome.Failed,
+                    OperationalDiagnostics.ClassifyException(exception),
+                    correlationHints: hints));
+
+            return new LlmContractException(
+                phase: GmOutputPhase,
+                reason: ParseFailureReason,
+                message: "Validated GM output signals block failed to parse; refusing to drop gameplay signals silently.",
+                provider: null,
+                model: null,
+                parserName: ParserName,
+                signalCount: signalCount);
+        }
+
+        private static bool HasSignalsMarker(string raw)
+        {
+            return raw.IndexOf(SignalsMarker, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        private static int CountSignalIndicators(string raw)
+        {
+            int count = 0;
+            if (raw.IndexOf(TellSignalPrefix, StringComparison.OrdinalIgnoreCase) >= 0) count++;
+            if (raw.IndexOf(WeaknessSignalPrefix, StringComparison.OrdinalIgnoreCase) >= 0) count++;
+            return count;
         }
 
         private static bool TryParseStat(string raw, out StatType stat)
@@ -158,6 +287,11 @@ namespace Pinder.LlmAdapters
                 return true;
             }
             catch (ArgumentException)
+            {
+                stat = default;
+                return false;
+            }
+            catch (OverflowException)
             {
                 stat = default;
                 return false;
@@ -197,8 +331,8 @@ namespace Pinder.LlmAdapters
             string block = raw.Substring(signalsIdx + SignalsMarker.Length).Trim();
 
             // Check if block contains TELL: or WEAKNESS: at all
-            bool hasTellIndicator = block.IndexOf("TELL:", StringComparison.OrdinalIgnoreCase) >= 0;
-            bool hasWeaknessIndicator = block.IndexOf("WEAKNESS:", StringComparison.OrdinalIgnoreCase) >= 0;
+            bool hasTellIndicator = block.IndexOf(TellSignalPrefix, StringComparison.OrdinalIgnoreCase) >= 0;
+            bool hasWeaknessIndicator = block.IndexOf(WeaknessSignalPrefix, StringComparison.OrdinalIgnoreCase) >= 0;
 
             if (!hasTellIndicator && !hasWeaknessIndicator)
             {
@@ -212,7 +346,7 @@ namespace Pinder.LlmAdapters
                 var trimmedLine = line.Trim();
                 if (string.IsNullOrEmpty(trimmedLine)) continue;
 
-                if (trimmedLine.IndexOf("TELL:", StringComparison.OrdinalIgnoreCase) >= 0)
+                if (trimmedLine.IndexOf(TellSignalPrefix, StringComparison.OrdinalIgnoreCase) >= 0)
                 {
                     var match = TellSignalRegex.Match(trimmedLine);
                     if (!match.Success)
@@ -227,7 +361,7 @@ namespace Pinder.LlmAdapters
                         return DateeSignalsValidationResult.MalformedSignals;
                     }
                 }
-                else if (trimmedLine.IndexOf("WEAKNESS:", StringComparison.OrdinalIgnoreCase) >= 0)
+                else if (trimmedLine.IndexOf(WeaknessSignalPrefix, StringComparison.OrdinalIgnoreCase) >= 0)
                 {
                     var match = WeaknessSignalRegex.Match(trimmedLine);
                     if (!match.Success)
@@ -256,7 +390,6 @@ namespace Pinder.LlmAdapters
         private static bool HasResponseTextBeforeSignals(string raw, int signalsIdx)
         {
             string message = raw.Substring(0, signalsIdx).Trim();
-            const string ResponseMarker = "[RESPONSE]";
             if (message.StartsWith(ResponseMarker, StringComparison.OrdinalIgnoreCase))
             {
                 message = message.Substring(ResponseMarker.Length).Trim();

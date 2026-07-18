@@ -278,7 +278,10 @@ namespace Pinder.LlmAdapters
                         );
                     }
 
-                    var parsed = DateeResponseParsers.ParseDateeResponseText(responseText, GetDiagnosticSink());
+                    var parsed = DateeResponseParsers.ParseDateeResponseText(
+                        responseText,
+                        GetDiagnosticSink(),
+                        requireValidatedSignals: validationResult == DateeSignalsValidationResult.ValidSignals);
 
                     // Keep dialogue history semantic: never persist the generated
                     // prompt document as though it were a player message.
