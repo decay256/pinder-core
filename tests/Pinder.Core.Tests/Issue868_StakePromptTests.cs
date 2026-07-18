@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
+using Pinder.Core.TestCommon;
 using Pinder.LlmAdapters;
 using Pinder.SessionSetup;
 using Xunit;
@@ -10,23 +10,8 @@ namespace Pinder.Core.Tests
 {
     public class Issue868_StakePromptTests
     {
-        private static string FindRepoSubdir(string subdir)
-        {
-            var dir = AppDomain.CurrentDomain.BaseDirectory;
-            for (int i = 0; i < 10; i++)
-            {
-                var candidate = Path.Combine(dir, subdir);
-                if (Directory.Exists(candidate)) return candidate;
-                var parent = Path.GetDirectoryName(dir);
-                if (parent == null || parent == dir) break;
-                dir = parent;
-            }
-            throw new DirectoryNotFoundException(
-                $"Could not locate {subdir} in any ancestor of the test binary.");
-        }
-
         private static string PromptsRoot
-            => FindRepoSubdir(Path.Combine("data", "prompts"));
+            => TestRepoLocator.FindRepoSubdir("data", "prompts");
 
         [Fact]
         public void Stake_UserTemplate_ContainsAll15Stems()
