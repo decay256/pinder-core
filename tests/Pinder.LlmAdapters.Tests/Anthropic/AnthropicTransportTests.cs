@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using Pinder.Core.Interfaces;
 using Pinder.LlmAdapters.Anthropic;
 using Xunit;
 
@@ -141,6 +142,32 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             Assert.Equal("draft line", responseText);
             Assert.Single(handler.RequestBodies);
             Assert.DoesNotContain("\"tools\"", handler.RequestBodies[0]);
+        }
+
+        [Theory]
+        [InlineData(LlmPhase.Delivery)]
+        [InlineData(LlmPhase.HorninessOverlay)]
+        [InlineData(LlmPhase.ShadowCorruption)]
+        [InlineData(LlmPhase.TrapOverlay)]
+        public async Task SendAsync_RewritePhase_DoesNotRunGenericImprovement(string phase)
+        {
+            string draftResponse = "{\"id\":\"msg_01\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"rewritten line\"}]}";
+            var handler = new SequenceCapturingHandler(draftResponse);
+            using var http = new HttpClient(handler);
+            using var transport = new AnthropicTransport(new AnthropicOptions
+            {
+                ApiKey = TestApiKey,
+                Model = TestModel,
+                GameDefinition = CreateGameDefinition("Improve the draft.")
+            }, http);
+
+            var responseText = await transport.SendAsync(
+                "sysprompt-value",
+                "usermsg-value",
+                phase: phase);
+
+            Assert.Equal("rewritten line", responseText);
+            Assert.Single(handler.RequestBodies);
         }
 
         private static GameDefinition CreateGameDefinition(string improvementPrompt)

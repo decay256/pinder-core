@@ -288,10 +288,31 @@ namespace Pinder.Rules
 
         public int? GetSuccessBaseXp(int dc)
         {
-            var rule = FindById($"§10.xp.success.dc-{dc}");
-            if (rule?.Outcome != null)
-                return GetOutcomeInt(rule.Outcome, "base_xp");
-            return null;
+            const string prefix = "\u00A710.xp.success.dc-";
+            RuleEntry? selected = null;
+            int selectedCutoff = int.MaxValue;
+
+            foreach (var book in _books)
+            {
+                foreach (var entry in book.All)
+                {
+                    if (entry.Outcome == null || !entry.Outcome.ContainsKey("base_xp"))
+                        continue;
+
+                    if (!entry.Id.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    if (int.TryParse(entry.Id.Substring(prefix.Length), NumberStyles.Integer, CultureInfo.InvariantCulture, out int cutoff)
+                        && cutoff >= dc
+                        && cutoff < selectedCutoff)
+                    {
+                        selected = entry;
+                        selectedCutoff = cutoff;
+                    }
+                }
+            }
+
+            return selected?.Outcome == null ? null : GetOutcomeInt(selected.Outcome, "base_xp");
         }
 
         public SuccessDcLabelThresholds? GetSuccessDcLabelThresholds()
@@ -365,7 +386,11 @@ namespace Pinder.Rules
 
         public int? GetFailurePoolTierMinLevel(string tierName)
         {
-            return null;
+            if (string.IsNullOrWhiteSpace(tierName))
+                return null;
+
+            var rule = FindById($"§10.progression.failure-pool.{tierName.ToLowerInvariant()}");
+            return rule?.Outcome == null ? null : GetOutcomeInt(rule.Outcome, "min_level");
         }
 
         /// <summary>

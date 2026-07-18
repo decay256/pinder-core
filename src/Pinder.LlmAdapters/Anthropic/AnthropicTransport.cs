@@ -106,7 +106,7 @@ namespace Pinder.LlmAdapters.Anthropic
                 model: _model,
                 phase: phase).ConfigureAwait(false);
             var draft = response.GetText() ?? "";
-            if (_options == null)
+            if (_options == null || !ShouldApplyImprovement(phase))
             {
                 return draft;
             }
@@ -123,6 +123,13 @@ namespace Pinder.LlmAdapters.Anthropic
                 _telemetry,
                 phase,
                 ct).ConfigureAwait(false);
+        }
+
+        private static bool ShouldApplyImprovement(string? phase)
+        {
+            return phase == null
+                || string.Equals(phase, LlmPhase.DialogueOptions, StringComparison.Ordinal)
+                || string.Equals(phase, LlmPhase.OpponentResponse, StringComparison.Ordinal);
         }
 
         public async Task<StructuredLlmResponse> SendStructuredAsync(

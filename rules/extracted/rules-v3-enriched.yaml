@@ -3537,3 +3537,15 @@
     build_points: 0
     roll_bonus: 5
     item_slots: 6
+- id: "\xA710.progression.failure-pool.intermediate_min"
+  title: Intermediate Failure Pool Tier
+  outcome:
+    min_level: 4
+- id: "\xA710.progression.failure-pool.advanced_min"
+  title: Advanced Failure Pool Tier
+  outcome:
+    min_level: 7
+- id: "\xA710.progression.failure-pool.legendary_min"
+  title: Legendary Failure Pool Tier
+  outcome:
+    min_level: 10

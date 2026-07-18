@@ -319,6 +319,42 @@ namespace Pinder.Rules.Tests
             Assert.Equal(20, thresholds.Value.MidMax);
         }
 
+        [Theory]
+        [InlineData(13, 5)]
+        [InlineData(16, 5)]
+        [InlineData(17, 10)]
+        [InlineData(20, 10)]
+        [InlineData(21, 15)]
+        public void GetSuccessBaseXp_UsesConfiguredUpperBoundRanges(int dc, int expectedXp)
+        {
+            var resolver = CreateResolver();
+
+            Assert.Equal(expectedXp, resolver.GetSuccessBaseXp(dc));
+        }
+
+        [Theory]
+        [InlineData("intermediate_min", 4)]
+        [InlineData("advanced_min", 7)]
+        [InlineData("legendary_min", 10)]
+        public void GetFailurePoolTierMinLevel_ReturnsConfiguredLevel(string tierName, int expectedLevel)
+        {
+            var resolver = CreateResolver();
+
+            Assert.Equal(expectedLevel, resolver.GetFailurePoolTierMinLevel(tierName));
+        }
+
+        [Theory]
+        [InlineData(3, FailurePoolTier.Basic)]
+        [InlineData(4, FailurePoolTier.Intermediate)]
+        [InlineData(7, FailurePoolTier.Advanced)]
+        [InlineData(10, FailurePoolTier.Legendary)]
+        public void LevelTable_UsesPopulatedRuleBookFailurePoolTiers(int level, FailurePoolTier expectedTier)
+        {
+            var resolver = CreateResolver();
+
+            Assert.Equal(expectedTier, LevelTable.GetFailurePoolTier(level, resolver));
+        }
+
         // =====================================================================
         // Fallback: empty RuleBook returns null
         // =====================================================================
@@ -337,6 +373,8 @@ namespace Pinder.Rules.Tests
             Assert.Null(resolver.GetMomentumBonus(3));
             Assert.Null(resolver.GetRiskTierXpMultiplier(RiskTier.Hard));
             Assert.Null(resolver.GetSuccessDcLabelThresholds());
+            Assert.Null(resolver.GetSuccessBaseXp(13));
+            Assert.Null(resolver.GetFailurePoolTierMinLevel("intermediate_min"));
         }
 
         [Fact]
