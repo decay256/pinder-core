@@ -39,24 +39,35 @@ internal static class SessionFileCounter
     /// deleting the .lock file after writing the real session file.
     /// Returns the claimed session number.
     /// </summary>
-    public static int ClaimNextSessionNumber(string directory)
+    public static int ClaimNextSessionNumber(string directory, Action<SessionLockWarning>? warningSink = null)
+        => ClaimNextSessionNumber(directory, warningSink, PhysicalSessionLockFileSystem.Instance);
+
+    internal static int ClaimNextSessionNumber(
+        string directory,
+        Action<SessionLockWarning>? warningSink,
+        ISessionLockFileSystem fileSystem)
     {
         // Clean up stale .lock files that have no corresponding .md file
         // (left by crashed processes). Never deletes .md files.
-        foreach (var lockFile in Directory.GetFiles(directory, "session-*.lock"))
+        foreach (var lockFile in fileSystem.GetLockFiles(directory))
         {
             string mdPath = lockFile.Replace(".lock", ".md");
             // Only remove lock if the corresponding session file doesn't exist
             // and the lock is older than 60 seconds (not actively being written)
-            if (!File.Exists(mdPath))
+            if (!fileSystem.FileExists(mdPath))
             {
                 try
                 {
-                    var lockAge = DateTime.UtcNow - File.GetCreationTimeUtc(lockFile);
+                    var lockAge = DateTime.UtcNow - fileSystem.GetCreationTimeUtc(lockFile);
                     if (lockAge.TotalSeconds > 60)
-                        File.Delete(lockFile);
+                        fileSystem.DeleteFile(lockFile);
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    EmitWarning(
+                        warningSink,
+                        new SessionLockWarning(SessionLockWarningOperation.CleanStaleLock, lockFile, ex));
+                }
             }
         }
 
@@ -67,7 +78,7 @@ internal static class SessionFileCounter
             try
             {
                 // FileMode.CreateNew fails atomically if the file already exists
-                using var fs = new FileStream(lockPath, FileMode.CreateNew, FileAccess.Write, FileShare.None);
+                using var fs = fileSystem.CreateNewLock(lockPath);
                 return candidate;
             }
             catch (IOException)
@@ -79,10 +90,37 @@ internal static class SessionFileCounter
     }
 
     /// <summary>Removes the .lock placeholder after the real session file is written.</summary>
-    public static void ReleaseLock(string directory, int sessionNumber)
+    public static void ReleaseLock(string directory, int sessionNumber, Action<SessionLockWarning>? warningSink = null)
+        => ReleaseLock(directory, sessionNumber, warningSink, PhysicalSessionLockFileSystem.Instance);
+
+    internal static void ReleaseLock(
+        string directory,
+        int sessionNumber,
+        Action<SessionLockWarning>? warningSink,
+        ISessionLockFileSystem fileSystem)
     {
         string lockPath = Path.Combine(directory, $"session-{sessionNumber:D3}.lock");
-        try { File.Delete(lockPath); } catch { }
+        try
+        {
+            fileSystem.DeleteFile(lockPath);
+        }
+        catch (Exception ex)
+        {
+            EmitWarning(
+                warningSink,
+                new SessionLockWarning(SessionLockWarningOperation.ReleaseLock, lockPath, ex));
+        }
+    }
+
+    private static void EmitWarning(Action<SessionLockWarning>? warningSink, SessionLockWarning warning)
+    {
+        if (warningSink != null)
+        {
+            warningSink(warning);
+            return;
+        }
+
+        Console.Error.WriteLine(warning);
     }
 
     /// <summary>
@@ -124,4 +162,64 @@ internal static class SessionFileCounter
 
         return null;
     }
+}
+
+internal enum SessionLockWarningOperation
+{
+    CleanStaleLock,
+    ReleaseLock
+}
+
+internal sealed class SessionLockWarning
+{
+    public SessionLockWarning(
+        SessionLockWarningOperation operation,
+        string lockPath,
+        Exception exception)
+    {
+        Operation = operation;
+        LockPath = lockPath;
+        Failure = exception;
+    }
+
+    public SessionLockWarningOperation Operation { get; }
+    public string LockPath { get; }
+    public Exception Failure { get; }
+    public Type ExceptionType => Failure.GetType();
+
+    public override string ToString()
+        => $"Warning: session lock {Operation} failed for '{LockPath}' ({ExceptionType.Name}: {Failure.Message})";
+}
+
+internal interface ISessionLockFileSystem
+{
+    string[] GetLockFiles(string directory);
+    bool FileExists(string path);
+    DateTime GetCreationTimeUtc(string path);
+    void DeleteFile(string path);
+    IDisposable CreateNewLock(string path);
+}
+
+internal sealed class PhysicalSessionLockFileSystem : ISessionLockFileSystem
+{
+    public static readonly PhysicalSessionLockFileSystem Instance = new PhysicalSessionLockFileSystem();
+
+    private PhysicalSessionLockFileSystem()
+    {
+    }
+
+    public string[] GetLockFiles(string directory)
+        => Directory.GetFiles(directory, "session-*.lock");
+
+    public bool FileExists(string path)
+        => File.Exists(path);
+
+    public DateTime GetCreationTimeUtc(string path)
+        => File.GetCreationTimeUtc(path);
+
+    public void DeleteFile(string path)
+        => File.Delete(path);
+
+    public IDisposable CreateNewLock(string path)
+        => new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None);
 }

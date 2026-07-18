@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Xunit;
 
@@ -258,6 +259,59 @@ namespace Pinder.Core.Tests
             }
         }
 
+        [Fact]
+        public void ClaimNextSessionNumber_StaleLockDeleteFailure_WarnsAndKeepsRetrying()
+        {
+            var dir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(dir);
+            try
+            {
+                var lockPath = Path.Combine(dir, "session-001.lock");
+                var fileSystem = SimulatedLockFileSystem.WithStaleLockDeleteFailure(lockPath);
+                var warnings = new List<SessionLockWarning>();
+
+                var ex = Assert.Throws<InvalidOperationException>(() =>
+                    SessionFileCounter.ClaimNextSessionNumber(dir, warnings.Add, fileSystem));
+
+                Assert.Contains("100 attempts", ex.Message);
+                var warning = Assert.Single(warnings);
+                Assert.Equal(SessionLockWarningOperation.CleanStaleLock, warning.Operation);
+                Assert.Equal(lockPath, warning.LockPath);
+                Assert.Equal(typeof(UnauthorizedAccessException), warning.ExceptionType);
+                Assert.Equal(1, fileSystem.DeleteAttempts);
+                Assert.Equal(100, fileSystem.CreateNewLockAttempts);
+            }
+            finally
+            {
+                Directory.Delete(dir, true);
+            }
+        }
+
+        [Fact]
+        public void ReleaseLock_DeleteFailure_WarnsWithLockPathAndExceptionType()
+        {
+            var dir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(dir);
+            try
+            {
+                var lockPath = Path.Combine(dir, "session-042.lock");
+                var fileSystem = SimulatedLockFileSystem.WithReleaseDeleteFailure();
+                var warnings = new List<SessionLockWarning>();
+
+                SessionFileCounter.ReleaseLock(dir, 42, warnings.Add, fileSystem);
+
+                var warning = Assert.Single(warnings);
+                Assert.Equal(SessionLockWarningOperation.ReleaseLock, warning.Operation);
+                Assert.Equal(lockPath, warning.LockPath);
+                Assert.Equal(typeof(IOException), warning.ExceptionType);
+                Assert.Equal(1, fileSystem.DeleteAttempts);
+            }
+            finally
+            {
+                Directory.Delete(dir, true);
+            }
+        }
+
         // ResolvePlaytestDirectory: env var takes priority
         [Fact]
         public void ResolvePlaytestDirectory_EnvVarOverride()
@@ -318,6 +372,77 @@ namespace Pinder.Core.Tests
             {
                 Environment.SetEnvironmentVariable(SessionFileCounter.EnvVarName, null);
                 Directory.Delete(dir, true);
+            }
+        }
+
+        private sealed class SimulatedLockFileSystem : ISessionLockFileSystem
+        {
+            private readonly string[] _lockFiles;
+            private readonly Exception _deleteException;
+            private readonly bool _createNewLockFails;
+
+            private SimulatedLockFileSystem(
+                string[] lockFiles,
+                Exception deleteException,
+                bool createNewLockFails)
+            {
+                _lockFiles = lockFiles;
+                _deleteException = deleteException;
+                _createNewLockFails = createNewLockFails;
+            }
+
+            public int DeleteAttempts { get; private set; }
+            public int CreateNewLockAttempts { get; private set; }
+
+            public static SimulatedLockFileSystem WithStaleLockDeleteFailure(string lockPath)
+                => new(
+                    new[] { lockPath },
+                    new UnauthorizedAccessException("simulated stale lock delete failure"),
+                    createNewLockFails: true);
+
+            public static SimulatedLockFileSystem WithReleaseDeleteFailure()
+                => new(
+                    Array.Empty<string>(),
+                    new IOException("simulated release delete failure"),
+                    createNewLockFails: false);
+
+            public string[] GetLockFiles(string directory)
+                => _lockFiles;
+
+            public bool FileExists(string path)
+                => false;
+
+            public DateTime GetCreationTimeUtc(string path)
+                => DateTime.UtcNow - TimeSpan.FromMinutes(5);
+
+            public void DeleteFile(string path)
+            {
+                DeleteAttempts++;
+                throw _deleteException;
+            }
+
+            public IDisposable CreateNewLock(string path)
+            {
+                CreateNewLockAttempts++;
+                if (_createNewLockFails)
+                {
+                    throw new IOException("simulated active lock contention");
+                }
+
+                return EmptyDisposable.Instance;
+            }
+        }
+
+        private sealed class EmptyDisposable : IDisposable
+        {
+            public static readonly EmptyDisposable Instance = new();
+
+            private EmptyDisposable()
+            {
+            }
+
+            public void Dispose()
+            {
             }
         }
     }
