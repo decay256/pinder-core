@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Pinder.LlmAdapters.OpenAi;
 using Xunit;
 
@@ -49,6 +50,7 @@ namespace Pinder.LlmAdapters.Tests.OpenAi
             Assert.Contains("model=unsafe-model", ex.Message);
             Assert.Contains("body_length=", ex.Message);
             Assert.Contains("body_sha256=", ex.Message);
+            Assert.IsType<JsonReaderException>(ex.InnerException);
         }
 
         private sealed class SingleResponseHandler : HttpMessageHandler

@@ -169,7 +169,7 @@ namespace Pinder.LlmAdapters.OpenAi
                                 EmitFailedTelemetry(telemetry, provider, model, phase, statusCode, attempt, duration, ex);
                                 throw;
                             }
-                            catch (Exception)
+                            catch (Exception ex)
                             {
                                 var wrapped = new InvalidOperationException(
                                     LlmDiagnosticFormatter.ProviderFailure(
@@ -178,7 +178,8 @@ namespace Pinder.LlmAdapters.OpenAi
                                         statusCode: statusCode,
                                         model: model,
                                         phase: phase,
-                                        body: body));
+                                        body: body),
+                                    ex);
                                 EmitFailedTelemetry(telemetry, provider, model, phase, statusCode, attempt, duration, wrapped);
                                 throw wrapped;
                             }
