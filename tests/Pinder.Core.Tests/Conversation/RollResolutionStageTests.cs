@@ -296,6 +296,34 @@ namespace Pinder.Core.Tests.Conversation
             Assert.Equal(baseDc - 4, result.RollResult.DC);
         }
 
+        [Theory]
+        [InlineData(1, true, false, FailureTier.Legendary, false)]
+        [InlineData(20, false, true, FailureTier.Success, true)]
+        public void Execute_WithGlobalDcBias_PreservesNatRollSemantics(
+            int dieRoll,
+            bool expectedNatOne,
+            bool expectedNatTwenty,
+            FailureTier expectedTier,
+            bool expectedSuccess)
+        {
+            // Arrange
+            var state = new GameSessionState();
+            state.CurrentOptions = new[] { new DialogueOption(StatType.Charm, "Charm Option") };
+
+            var dice = new FixedDice(dieRoll, 50);
+            var stage = BuildRollResolutionStage(dice, globalDcBias: 99);
+
+            // Act
+            var result = stage.Execute(state, 0, BuildProfile("Player"), BuildProfile("Datee"));
+
+            // Assert
+            Assert.Equal(dieRoll, result.RollResult.UsedDieRoll);
+            Assert.Equal(expectedNatOne, result.RollResult.IsNatOne);
+            Assert.Equal(expectedNatTwenty, result.RollResult.IsNatTwenty);
+            Assert.Equal(expectedTier, result.RollResult.Tier);
+            Assert.Equal(expectedSuccess, result.RollResult.IsSuccess);
+        }
+
         [Fact]
         public void Execute_WithShadowDisadvantage_ForcesDisadvantage()
         {

@@ -281,7 +281,7 @@ Dice abstraction for deterministic testing.
 |---|---|
 | `Roll(int sides)` | Return 1..sides |
 
-**Implementations:** `SystemRandomDiceRoller` (production), `BiasedDiceRoller` (testing — queued values)
+**Implementations:** `SystemRandomDiceRoller` (production randomness), `PlaybackDiceRoller` (queued values)
 
 ### IRuleResolver
 
@@ -519,7 +519,7 @@ Called on failed horniness check. Receives the delivered message + tier-specific
 
 ### Testing
 - **0 test failures before any merge**
-- Deterministic testing via `BiasedDiceRoller` (queued dice values) and `FixedGameClock`
+- Deterministic testing via queued `IDiceRoller` implementations and `FixedGameClock`
 - `InternalsVisibleTo` is set for all test assemblies
 
 ## 8. Rules Pipeline
