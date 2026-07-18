@@ -31,6 +31,7 @@ namespace Pinder.SessionSetup
     {
         /// <summary>The schema version this loader understands (v2 as of #1175).</summary>
         public const int SupportedSchemaVersion = CharacterDefinition.CurrentSchemaVersion;
+        public const string DefaultTimingProfileId = "average-responder";
 
         /// <summary>
         /// Load a character definition from a JSON file and assemble it into
@@ -46,13 +47,14 @@ namespace Pinder.SessionSetup
             string jsonPath,
             IItemRepository itemRepo,
             IAnatomyRepository anatomyRepo,
-            bool archetypesEnabled = false)
+            bool archetypesEnabled = false,
+            ITimingRepository? timingRepo = null)
         {
             if (!File.Exists(jsonPath))
                 throw new FileNotFoundException($"Character definition file not found: {jsonPath}", jsonPath);
 
             string json = File.ReadAllText(jsonPath);
-            return Parse(json, itemRepo, anatomyRepo, archetypesEnabled);
+            return Parse(json, itemRepo, anatomyRepo, archetypesEnabled, timingRepo);
         }
 
         /// <summary>
@@ -99,6 +101,10 @@ namespace Pinder.SessionSetup
                 if (level < 1 || level > 11)
                     throw new FormatException($"Character level must be between 1 and 11, got: {level}");
 
+                string? timingProfileId = GetOptionalString(root, "timing_profile_id");
+                if (timingProfileId != null && string.IsNullOrWhiteSpace(timingProfileId))
+                    throw new FormatException("Character definition field timing_profile_id must be a non-empty string when present.");
+
                 var items = ParseItemIds(root);
                 var anatomy = ParseAnatomySelections(root);
                 var allocation = ParseAllocation(root);
@@ -137,7 +143,8 @@ namespace Pinder.SessionSetup
                     stakeLines,
                     psychiatricDiagnosis,
                     consolidatedPersonality,
-                    consolidatedBackstory);
+                    consolidatedBackstory,
+                    timingProfileId);
             }
         }
 
@@ -151,13 +158,14 @@ namespace Pinder.SessionSetup
             string json,
             IItemRepository itemRepo,
             IAnatomyRepository anatomyRepo,
-            bool archetypesEnabled = false)
+            bool archetypesEnabled = false,
+            ITimingRepository? timingRepo = null)
         {
             if (itemRepo == null) throw new ArgumentNullException(nameof(itemRepo));
             if (anatomyRepo == null) throw new ArgumentNullException(nameof(anatomyRepo));
 
             CharacterDefinition def = ParseDefinition(json);
-            return Assemble(def, itemRepo, anatomyRepo, archetypesEnabled);
+            return Assemble(def, itemRepo, anatomyRepo, archetypesEnabled, timingRepo);
         }
 
         /// <summary>
@@ -170,20 +178,23 @@ namespace Pinder.SessionSetup
             CharacterDefinition def,
             IItemRepository itemRepo,
             IAnatomyRepository anatomyRepo,
-            bool archetypesEnabled = false)
+            bool archetypesEnabled = false,
+            ITimingRepository? timingRepo = null)
         {
             if (def == null) throw new ArgumentNullException(nameof(def));
             if (itemRepo == null) throw new ArgumentNullException(nameof(itemRepo));
             if (anatomyRepo == null) throw new ArgumentNullException(nameof(anatomyRepo));
 
             var assembler = new CharacterAssembler(itemRepo, anatomyRepo);
+            TimingProfile? baseTimingProfile = ResolveBaseTimingProfile(def, timingRepo);
             var fragments = assembler.Assemble(
                 def.Items,
                 def.Anatomy,
                 def.Allocation.Spent,
                 def.Allocation.Shadows,
                 def.Level,
-                archetypesEnabled: archetypesEnabled);
+                archetypesEnabled: archetypesEnabled,
+                baseTimingProfile: baseTimingProfile);
 
             // #836 placeholder aggregation: use the character UUID as the
             // stable seed so the system prompt and the runtime
@@ -250,6 +261,20 @@ namespace Pinder.SessionSetup
             // to the profile so setup can read it without an LLM call.
             profile.PsychologicalStake = def.PsychologicalStake;
 
+            return profile;
+        }
+
+        private static TimingProfile? ResolveBaseTimingProfile(CharacterDefinition def, ITimingRepository? timingRepo)
+        {
+            if (timingRepo == null)
+                return null;
+
+            string profileId = string.IsNullOrWhiteSpace(def.TimingProfileId)
+                ? DefaultTimingProfileId
+                : def.TimingProfileId!;
+            var profile = timingRepo.GetProfile(profileId);
+            if (profile == null)
+                throw new FormatException($"Character definition timing_profile_id '{profileId}' was not found in timing profiles.");
             return profile;
         }
 

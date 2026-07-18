@@ -43,6 +43,11 @@
       "maximum": 11,
       "description": "Character level used for archetype eligibility and starter-points budget."
     },
+    "timing_profile_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional base response timing profile id resolved against data/timing/response-profiles.json. Missing values use average-responder when a timing repository is supplied."
+    },
     "items": {
       "type": "array",
       "items": { "type": "string", "minLength": 1 },

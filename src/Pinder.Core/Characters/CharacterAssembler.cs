@@ -60,7 +60,8 @@ namespace Pinder.Core.Characters
             IReadOnlyDictionary<StatType, int> playerBaseStats,
             IReadOnlyDictionary<ShadowStatType, int> shadowStats,
             int characterLevel = 0,
-            bool archetypesEnabled = false)
+            bool archetypesEnabled = false,
+            TimingProfile? baseTimingProfile = null)
         {
             // --- 1. Resolve items, track unknowns ---
 
@@ -132,14 +133,14 @@ namespace Pinder.Core.Characters
             var statBlock = new StatBlock(statSums, shadowDict);
 
             // --- 4. Sum timing modifiers -------------------------------------------
-            // Base: delay=0, variance=1.0f, drySpell=0f, readReceipt="neutral"
+            // Base comes from the selected response timing profile when supplied.
             // delayDelta is additive; varianceMult is multiplicative;
             // drySpellDelta is additive; last non-neutral readReceipt wins.
 
-            int   totalDelayDelta = 0;
-            float totalVariance   = 1.0f;
-            float totalDrySpell   = 0f;
-            string finalReceipt   = "neutral";
+            int totalDelayDelta = baseTimingProfile?.BaseDelayMinutes ?? 0;
+            float totalVariance = baseTimingProfile?.VarianceMultiplier ?? 1.0f;
+            float totalDrySpell = baseTimingProfile?.DrySpellProbability ?? 0f;
+            string finalReceipt = baseTimingProfile?.ReadReceipt ?? "neutral";
 
             void ApplyTiming(TimingModifier tm)
             {

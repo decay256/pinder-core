@@ -114,10 +114,17 @@ namespace Pinder.Tools.NarrativeHarness
             if (anatomyPath == null)
                 throw new FileNotFoundException("Could not find data/anatomy/anatomy-parameters.json.");
 
+            string? timingPath = HarnessDataLocator.FindDataFile(
+                baseDir, Path.Combine("data", "timing", "response-profiles.json"));
+            if (timingPath == null)
+                throw new FileNotFoundException("Could not find data/timing/response-profiles.json.");
+
             IItemRepository itemRepo = new JsonItemRepository(
                 await ReadAllTextAsync(itemsPath, cancellationToken).ConfigureAwait(false));
             IAnatomyRepository anatomyRepo = new JsonAnatomyRepository(
                 await ReadAllTextAsync(anatomyPath, cancellationToken).ConfigureAwait(false));
+            ITimingRepository timingRepo = new JsonTimingRepository(
+                await ReadAllTextAsync(timingPath, cancellationToken).ConfigureAwait(false));
 
             string charactersDir = Path.GetDirectoryName(charDefPath)!;
             var store = new DirectoryCharacterStore(charactersDir);
@@ -127,7 +134,8 @@ namespace Pinder.Tools.NarrativeHarness
                 throw new InvalidOperationException(
                     $"DirectoryCharacterStore at {charactersDir} did not surface character_id {id}.");
 
-            CharacterProfile profile = CharacterDefinitionLoader.Assemble(def, itemRepo, anatomyRepo, archetypesEnabled);
+            CharacterProfile profile = CharacterDefinitionLoader.Assemble(
+                def, itemRepo, anatomyRepo, archetypesEnabled, timingRepo);
             return new LoadedCharacter(profile, def);
         }
 

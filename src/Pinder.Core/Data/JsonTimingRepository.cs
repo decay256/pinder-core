@@ -1,13 +1,14 @@
 using System;
 using System.Collections.Generic;
 using Pinder.Core.Conversation;
+using Pinder.Core.Interfaces;
 
 namespace Pinder.Core.Data
 {
     /// <summary>
     /// Loads timing profiles from a JSON string. Follows the same pattern as JsonItemRepository.
     /// </summary>
-    public sealed class JsonTimingRepository
+    public sealed class JsonTimingRepository : ITimingRepository
     {
         private readonly Dictionary<string, TimingProfile> _profiles =
             new Dictionary<string, TimingProfile>(StringComparer.Ordinal);

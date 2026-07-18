@@ -48,6 +48,9 @@ namespace Pinder.Core.Characters
         /// <summary>Character level, 1..11.</summary>
         public int Level { get; }
 
+        /// <summary>Optional base response timing profile id from <c>data/timing/response-profiles.json</c>.</summary>
+        public string? TimingProfileId { get; }
+
         /// <summary>Equipped item ids (resolved against <c>IItemRepository</c>).</summary>
         public IReadOnlyList<string> Items { get; }
 
@@ -93,7 +96,8 @@ namespace Pinder.Core.Characters
             IReadOnlyList<string>? stakeLines = null,
             IReadOnlyDictionary<string, string>? psychiatricDiagnosis = null,
             string? consolidatedPersonality = null,
-            string? consolidatedBackstory = null)
+            string? consolidatedBackstory = null,
+            string? timingProfileId = null)
         {
             SchemaVersion = schemaVersion;
             CharacterId = characterId;
@@ -101,6 +105,7 @@ namespace Pinder.Core.Characters
             GenderIdentity = genderIdentity ?? throw new ArgumentNullException(nameof(genderIdentity));
             Bio = bio ?? throw new ArgumentNullException(nameof(bio));
             Level = level;
+            TimingProfileId = string.IsNullOrWhiteSpace(timingProfileId) ? null : timingProfileId;
             Items = items ?? throw new ArgumentNullException(nameof(items));
             Anatomy = anatomy ?? throw new ArgumentNullException(nameof(anatomy));
             Allocation = allocation ?? throw new ArgumentNullException(nameof(allocation));

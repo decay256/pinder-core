@@ -146,6 +146,7 @@ namespace Pinder.Core.Tests
             int posName     = written.IndexOf("\"name\"", StringComparison.Ordinal);
             int posGender   = written.IndexOf("\"gender_identity\"", StringComparison.Ordinal);
             int posLevel    = written.IndexOf("\"level\"", StringComparison.Ordinal);
+            int posTiming   = written.IndexOf("\"timing_profile_id\"", StringComparison.Ordinal);
             int posItems    = written.IndexOf("\"items\"", StringComparison.Ordinal);
             int posAnatomy  = written.IndexOf("\"anatomy\"", StringComparison.Ordinal);
             int posAlloc    = written.IndexOf("\"allocation\"", StringComparison.Ordinal);
@@ -155,7 +156,8 @@ namespace Pinder.Core.Tests
             Assert.True(posId      < posName,    "character_id before name");
             Assert.True(posName    < posGender,  "name before gender_identity");
             Assert.True(posGender  < posLevel,   "gender_identity before level");
-            Assert.True(posLevel   < posItems,   "level before items");
+            Assert.True(posLevel   < posTiming,  "level before timing_profile_id");
+            Assert.True(posTiming  < posItems,   "timing_profile_id before items");
             Assert.True(posItems   < posAnatomy, "items before anatomy");
             Assert.True(posAnatomy < posAlloc,   "anatomy before allocation");
             Assert.True(posAlloc   < posCats,    "allocation before backstory_categories");

@@ -15,13 +15,15 @@ partial class Program
         string? name,
         ref IItemRepository? itemRepo,
         ref IAnatomyRepository? anatomyRepo,
+        ref ITimingRepository? timingRepo,
         bool archetypesEnabled = false)
     {
         // Explicit --player-def / --datee-def takes priority.
         if (defPath != null)
         {
-            EnsureReposLoaded(ref itemRepo, ref anatomyRepo);
-            return CharacterDefinitionLoader.Load(defPath, itemRepo!, anatomyRepo!, archetypesEnabled);
+            EnsureReposLoaded(ref itemRepo, ref anatomyRepo, ref timingRepo);
+            return CharacterDefinitionLoader.Load(
+                defPath, itemRepo!, anatomyRepo!, archetypesEnabled, timingRepo);
         }
 
         // --player / --datee name: resolve through DirectoryCharacterStore
@@ -42,7 +44,7 @@ partial class Program
                     $"Available characters: {available}");
             }
 
-            EnsureReposLoaded(ref itemRepo, ref anatomyRepo);
+            EnsureReposLoaded(ref itemRepo, ref anatomyRepo, ref timingRepo);
             string charactersDir = Path.GetDirectoryName(charDefPath)!;
             var store = new DirectoryCharacterStore(charactersDir);
             string id = ReadCharacterIdFromFile(charDefPath);
@@ -50,7 +52,8 @@ partial class Program
             if (def == null)
                 throw new InvalidOperationException(
                     $"DirectoryCharacterStore at {charactersDir} did not surface character_id {id} from {charDefPath}");
-            return CharacterDefinitionLoader.Assemble(def, itemRepo!, anatomyRepo!, archetypesEnabled);
+            return CharacterDefinitionLoader.Assemble(
+                def, itemRepo!, anatomyRepo!, archetypesEnabled, timingRepo);
         }
 
         throw new InvalidOperationException("Neither definition path nor name provided");
@@ -84,9 +87,12 @@ partial class Program
         return idProp.GetString()!;
     }
 
-    internal static void EnsureReposLoaded(ref IItemRepository? itemRepo, ref IAnatomyRepository? anatomyRepo)
+    internal static void EnsureReposLoaded(
+        ref IItemRepository? itemRepo,
+        ref IAnatomyRepository? anatomyRepo,
+        ref ITimingRepository? timingRepo)
     {
-        if (itemRepo != null && anatomyRepo != null)
+        if (itemRepo != null && anatomyRepo != null && timingRepo != null)
             return;
 
         string baseDir = AppContext.BaseDirectory;
@@ -99,7 +105,12 @@ partial class Program
         if (anatomyPath == null)
             throw new FileNotFoundException("Could not find data/anatomy/anatomy-parameters.json — ensure data files are present in the repo");
 
+        string? timingPath = DataFileLocator.FindDataFile(baseDir, Path.Combine("data", "timing", "response-profiles.json"));
+        if (timingPath == null)
+            throw new FileNotFoundException("Could not find data/timing/response-profiles.json - ensure data files are present in the repo");
+
         itemRepo = new JsonItemRepository(File.ReadAllText(itemsPath));
         anatomyRepo = new JsonAnatomyRepository(File.ReadAllText(anatomyPath));
+        timingRepo = new JsonTimingRepository(File.ReadAllText(timingPath));
     }
 }

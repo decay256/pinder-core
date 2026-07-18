@@ -28,6 +28,12 @@ namespace Pinder.Core.Tests
             return new JsonAnatomyRepository(json);
         }
 
+        private static ITimingRepository LoadTimingRepo()
+        {
+            string json = File.ReadAllText(Path.Combine(RepoRoot, "data", "timing", "response-profiles.json"));
+            return new JsonTimingRepository(json);
+        }
+
         private static readonly string[] AllStarterSlugs =
             { "brick", "gerald", "reuben", "sable", "velvet", "zyx" };
 
@@ -114,6 +120,7 @@ namespace Pinder.Core.Tests
                 Assert.False(string.IsNullOrWhiteSpace(def.GenderIdentity));
                 Assert.NotNull(def.Bio);
                 Assert.True(def.Level >= 1 && def.Level <= 11);
+                Assert.False(string.IsNullOrWhiteSpace(def.TimingProfileId));
                 Assert.NotNull(def.Items);
                 Assert.NotNull(def.Anatomy);
                 Assert.NotNull(def.Allocation);
@@ -587,6 +594,86 @@ namespace Pinder.Core.Tests
                     string.IsNullOrWhiteSpace(profile.PsychologicalStake),
                     $"{slug}: CharacterProfile.PsychologicalStake must be populated from the on-disk JSON (Issue #779)");
             }
+        }
+
+        [Fact]
+        public void Load_WithRealTimingProfiles_AppliesSelectedBaseBeforeModifiers()
+        {
+            var itemRepo = LoadItemRepo();
+            var anatomyRepo = LoadAnatomyRepo();
+            var timingRepo = LoadTimingRepo();
+            string path = Path.Combine(RepoRoot, "data", "characters", "reuben.json");
+            string json = File.ReadAllText(path);
+            var def = CharacterDefinitionLoader.ParseDefinition(json);
+
+            Assert.Equal("eager-texter", def.TimingProfileId);
+            var baseTiming = timingRepo.GetProfile(def.TimingProfileId!);
+            Assert.NotNull(baseTiming);
+
+            var profile = CharacterDefinitionLoader.Parse(
+                json, itemRepo, anatomyRepo, timingRepo: timingRepo);
+            var expected = ComputeExpectedTiming(def, itemRepo, anatomyRepo, baseTiming!);
+
+            Assert.Equal(expected.Delay, profile.Timing.BaseDelayMinutes);
+            Assert.Equal((double)expected.Variance, (double)profile.Timing.VarianceMultiplier, 6);
+            Assert.Equal((double)expected.DrySpell, (double)profile.Timing.DrySpellProbability, 6);
+            Assert.Equal(expected.ReadReceipt, profile.Timing.ReadReceipt);
+        }
+
+        [Fact]
+        public void Parse_WithUnknownTimingProfileId_FailsFastWhenTimingRepositorySupplied()
+        {
+            var itemRepo = LoadItemRepo();
+            var anatomyRepo = LoadAnatomyRepo();
+            var timingRepo = LoadTimingRepo();
+            string json = WithAdditionalRootProperty(@"""timing_profile_id"": ""missing-profile""");
+
+            var ex = Assert.Throws<FormatException>(() =>
+                CharacterDefinitionLoader.Parse(json, itemRepo, anatomyRepo, timingRepo: timingRepo));
+
+            Assert.Contains("missing-profile", ex.Message);
+        }
+
+        private static (int Delay, float Variance, float DrySpell, string ReadReceipt) ComputeExpectedTiming(
+            CharacterDefinition def,
+            IItemRepository itemRepo,
+            IAnatomyRepository anatomyRepo,
+            Pinder.Core.Conversation.TimingProfile baseTiming)
+        {
+            int delay = baseTiming.BaseDelayMinutes;
+            float variance = baseTiming.VarianceMultiplier;
+            float drySpell = baseTiming.DrySpellProbability;
+            string readReceipt = baseTiming.ReadReceipt;
+
+            void Apply(TimingModifier modifier)
+            {
+                delay += modifier.BaseDelayDeltaMinutes;
+                variance *= modifier.DelayVarianceMultiplier;
+                drySpell += modifier.DrySpellProbabilityDelta;
+                if (modifier.ReadReceipt != "neutral")
+                    readReceipt = modifier.ReadReceipt;
+            }
+
+            foreach (var itemId in def.Items)
+            {
+                var item = itemRepo.GetItem(itemId);
+                if (item != null)
+                    Apply(item.ResponseTimingModifier);
+            }
+
+            foreach (var kv in def.Anatomy)
+            {
+                var parameter = anatomyRepo.GetParameter(kv.Key);
+                var band = parameter?.ResolveBand(kv.Value);
+                if (band != null)
+                    Apply(band.ResponseTimingModifier);
+            }
+
+            return (
+                Math.Max(0, delay),
+                variance,
+                Math.Min(1f, Math.Max(0f, drySpell)),
+                readReceipt);
         }
     }
 }

@@ -118,12 +118,13 @@ partial class Program
             // Preload assembler repos (lazy — only if needed)
             IItemRepository? itemRepo = null;
             IAnatomyRepository? anatomyRepo = null;
+            ITimingRepository? timingRepo = null;
 
             try
             {
                 bool archetypesEnabled = result.GameDef?.ArchetypesEnabled ?? false;
-                result.Sable = LoadCharacter(playerDefArg, playerArg, ref itemRepo, ref anatomyRepo, archetypesEnabled);
-                result.Brick = LoadCharacter(dateeDefArg, dateeArg, ref itemRepo, ref anatomyRepo, archetypesEnabled);
+                result.Sable = LoadCharacter(playerDefArg, playerArg, ref itemRepo, ref anatomyRepo, ref timingRepo, archetypesEnabled);
+                result.Brick = LoadCharacter(dateeDefArg, dateeArg, ref itemRepo, ref anatomyRepo, ref timingRepo, archetypesEnabled);
             }
             catch (FileNotFoundException ex)
             {

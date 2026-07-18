@@ -13,7 +13,8 @@ namespace Pinder.Core.Characters
     ///   <item>Pure: no I/O, no side effects, deterministic.</item>
     ///   <item>Stable property ordering matches the schema's documented order
     ///         (<c>schema_version</c>, <c>character_id</c>, <c>name</c>,
-    ///         <c>gender_identity</c>, <c>bio</c>, <c>level</c>, <c>items</c>,
+    ///         <c>gender_identity</c>, <c>bio</c>, <c>level</c>,
+    ///         <c>timing_profile_id</c>, <c>items</c>,
     ///         <c>anatomy</c>, <c>allocation</c>).</item>
     ///   <item>2-space indent, single trailing newline (LF), UTF-8 no BOM.</item>
     ///   <item>Round-trip stable: <c>Write(Parse(json)) == json</c> byte-equal
@@ -114,6 +115,8 @@ namespace Pinder.Core.Characters
             writer.WriteString("gender_identity", def.GenderIdentity);
             writer.WriteString("bio", def.Bio);
             writer.WriteNumber("level", def.Level);
+            if (!string.IsNullOrWhiteSpace(def.TimingProfileId))
+                writer.WriteString("timing_profile_id", def.TimingProfileId);
 
             writer.WriteStartArray("items");
             foreach (var item in def.Items)

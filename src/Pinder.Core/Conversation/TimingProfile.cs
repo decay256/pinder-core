@@ -5,7 +5,7 @@ namespace Pinder.Core.Conversation
 {
     /// <summary>
     /// Final assembled timing profile for a character.
-    /// Produced by summing all TimingModifiers from items and anatomy tiers.
+    /// Produced from the selected base response profile plus item and anatomy timing modifiers.
     /// </summary>
     public sealed class TimingProfile
     {
