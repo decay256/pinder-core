@@ -86,6 +86,21 @@ namespace Pinder.Core.Conversation
             throw new InvalidOperationException($"Success base XP for DC {dc} is missing in configuration.");
         }
 
+        private SuccessDcLabelThresholds GetSuccessDcLabelThresholdsVal()
+        {
+            var rules = GetRules();
+            var val = rules.GetSuccessDcLabelThresholds();
+            if (val.HasValue) return val.Value;
+
+            if (rules != DefaultRuleResolver.Instance && DefaultRuleResolver.Instance != null && rules.AllowDefaultFallback)
+            {
+                var oDefault = DefaultRuleResolver.Instance.GetSuccessDcLabelThresholds();
+                if (oDefault.HasValue) return oDefault.Value;
+            }
+
+            throw new InvalidOperationException("Success DC label thresholds are missing in configuration.");
+        }
+
         /// <summary>
         /// Records XP for a roll result following §10 precedence rules:
         /// Nat 20 → 25 XP (overrides DC-tier), Nat 1 → 10 XP (overrides failure),
@@ -107,37 +122,10 @@ namespace Pinder.Core.Conversation
             {
                 int baseXp = GetSuccessBaseXpVal(rollResult.DC);
                 int xp = ApplyRiskTierMultiplier(baseXp, rollResult.RiskTier);
+                var thresholds = GetSuccessDcLabelThresholdsVal();
 
-                int lowMax = 16;
-                int midMax = 20;
-
-                var rules = GetRules();
-                var prop = rules.GetType().GetProperty("XpSuccessBase");
-                if (prop != null)
-                {
-                    var dict = prop.GetValue(rules) as IReadOnlyDictionary<string, int>;
-                    if (dict != null)
-                    {
-                        if (dict.TryGetValue("dc_low_max", out int lm)) lowMax = lm;
-                        if (dict.TryGetValue("dc_mid_max", out int mm)) midMax = mm;
-                    }
-                }
-                else if (DefaultRuleResolver.Instance != null && rules.AllowDefaultFallback)
-                {
-                    var propDef = DefaultRuleResolver.Instance.GetType().GetProperty("XpSuccessBase");
-                    if (propDef != null)
-                    {
-                        var dictDef = propDef.GetValue(DefaultRuleResolver.Instance) as IReadOnlyDictionary<string, int>;
-                        if (dictDef != null)
-                        {
-                            if (dictDef.TryGetValue("dc_low_max", out int lm)) lowMax = lm;
-                            if (dictDef.TryGetValue("dc_mid_max", out int mm)) midMax = mm;
-                        }
-                    }
-                }
-
-                string label = rollResult.DC <= lowMax ? "Success_DC_Low"
-                    : rollResult.DC <= midMax ? "Success_DC_Mid"
+                string label = rollResult.DC <= thresholds.LowMax ? "Success_DC_Low"
+                    : rollResult.DC <= thresholds.MidMax ? "Success_DC_Mid"
                     : "Success_DC_High";
                 _xpLedger.Record(label, xp);
             }

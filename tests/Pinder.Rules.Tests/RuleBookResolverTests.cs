@@ -307,6 +307,18 @@ namespace Pinder.Rules.Tests
             Assert.Equal(3.0, resolver.GetRiskTierXpMultiplier(RiskTier.Bold));
         }
 
+        [Fact]
+        public void GetSuccessDcLabelThresholds_ReturnsConfiguredCutoffs()
+        {
+            var resolver = CreateResolver();
+
+            var thresholds = resolver.GetSuccessDcLabelThresholds();
+
+            Assert.NotNull(thresholds);
+            Assert.Equal(16, thresholds!.Value.LowMax);
+            Assert.Equal(20, thresholds.Value.MidMax);
+        }
+
         // =====================================================================
         // Fallback: empty RuleBook returns null
         // =====================================================================
@@ -324,6 +336,7 @@ namespace Pinder.Rules.Tests
             Assert.Null(resolver.GetShadowThresholdLevel(12));
             Assert.Null(resolver.GetMomentumBonus(3));
             Assert.Null(resolver.GetRiskTierXpMultiplier(RiskTier.Hard));
+            Assert.Null(resolver.GetSuccessDcLabelThresholds());
         }
 
         [Fact]

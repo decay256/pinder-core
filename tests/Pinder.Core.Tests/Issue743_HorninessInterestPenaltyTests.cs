@@ -86,6 +86,7 @@ namespace Pinder.Core.Tests
             public double? GetRiskTierXpMultiplier(RiskTier riskTier) => null;
             public double? GetTerminalOutcomeMultiplier(GameOutcome outcome) => null;
             public int? GetSuccessBaseXp(int dc) => null;
+            public Pinder.Core.Progression.SuccessDcLabelThresholds? GetSuccessDcLabelThresholds() => null;
             public int? GetFlatXpAward(string awardType) => null;
             public int? GetXpThresholdForLevel(int level) => null;
             public int? GetLevelRollBonus(int level) => 0;

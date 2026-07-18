@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Pinder.Core.Conversation;
 using Pinder.Core.Interfaces;
+using Pinder.Core.Progression;
 using Pinder.Core.Rolls;
 
 namespace Pinder.LlmAdapters
@@ -205,20 +206,37 @@ namespace Pinder.LlmAdapters
             if (XpSuccessBase == null)
                 throw new ConfigurationException("Success base XP configuration is missing.");
 
-            if (!XpSuccessBase.TryGetValue("dc_low_max", out int dcLowMax))
-                throw new KeyNotFoundException("Missing dc_low_max in xp_success_base config.");
             if (!XpSuccessBase.TryGetValue("dc_low_xp", out int dcLowXp))
                 throw new KeyNotFoundException("Missing dc_low_xp in xp_success_base config.");
-            if (!XpSuccessBase.TryGetValue("dc_mid_max", out int dcMidMax))
-                throw new KeyNotFoundException("Missing dc_mid_max in xp_success_base config.");
             if (!XpSuccessBase.TryGetValue("dc_mid_xp", out int dcMidXp))
                 throw new KeyNotFoundException("Missing dc_mid_xp in xp_success_base config.");
             if (!XpSuccessBase.TryGetValue("dc_high_xp", out int dcHighXp))
                 throw new KeyNotFoundException("Missing dc_high_xp in xp_success_base config.");
+            var thresholds = GetSuccessDcLabelThresholds().Value;
 
-            if (dc <= dcLowMax) return dcLowXp;
-            if (dc <= dcMidMax) return dcMidXp;
+            if (dc <= thresholds.LowMax) return dcLowXp;
+            if (dc <= thresholds.MidMax) return dcMidXp;
             return dcHighXp;
+        }
+
+        public SuccessDcLabelThresholds? GetSuccessDcLabelThresholds()
+        {
+            if (XpSuccessBase == null)
+                throw new ConfigurationException("Success base XP configuration is missing.");
+
+            if (!XpSuccessBase.TryGetValue("dc_low_max", out int dcLowMax))
+                throw new KeyNotFoundException("Missing dc_low_max in xp_success_base config.");
+            if (!XpSuccessBase.TryGetValue("dc_mid_max", out int dcMidMax))
+                throw new KeyNotFoundException("Missing dc_mid_max in xp_success_base config.");
+
+            try
+            {
+                return new SuccessDcLabelThresholds(dcLowMax, dcMidMax);
+            }
+            catch (ArgumentException ex)
+            {
+                throw new ConfigurationException("Invalid xp_success_base config: dc_low_max must be less than or equal to dc_mid_max.", ex);
+            }
         }
 
         public int? GetFlatXpAward(string awardType)

@@ -321,6 +321,7 @@ character_prompt_structure:
 
             // Setup resolver
             resolver.SuccessBase[12] = 8; // base XP for low DC
+            resolver.SuccessDcThresholds = new SuccessDcLabelThresholds(12, 18);
             resolver.RiskMultipliers[RiskTier.Hard] = 2.5;
 
             var recorder = new SessionXpRecorder(ledger, resolver);
@@ -334,6 +335,46 @@ character_prompt_structure:
 
             // Expected XP = 8 * 2.5 = 20 XP
             Assert.Equal(20, ledger.TotalXp);
+        }
+
+        [Fact]
+        public void SessionXpRecorder_LabelsSuccessXpUsingConfiguredDcThresholds()
+        {
+            var ledger = new XpLedger();
+            var resolver = new FakeRuleResolver
+            {
+                SuccessDcThresholds = new SuccessDcLabelThresholds(lowMax: 11, midMax: 13)
+            };
+            resolver.SuccessBase[11] = 5;
+            resolver.SuccessBase[12] = 10;
+            resolver.SuccessBase[14] = 15;
+            resolver.RiskMultipliers[RiskTier.Medium] = 1.0;
+            resolver.RiskMultipliers[RiskTier.Hard] = 1.0;
+
+            var recorder = new SessionXpRecorder(ledger, resolver);
+
+            recorder.RecordRollXp(new RollResult(11, null, 11, StatType.Charm, 0, 0, 11, FailureTier.Success));
+            recorder.RecordRollXp(new RollResult(12, null, 12, StatType.Charm, 0, 0, 12, FailureTier.Success));
+            recorder.RecordRollXp(new RollResult(14, null, 14, StatType.Charm, 0, 0, 14, FailureTier.Success));
+
+            Assert.Collection(
+                ledger.Events,
+                e => Assert.Equal("Success_DC_Low", e.Source),
+                e => Assert.Equal("Success_DC_Mid", e.Source),
+                e => Assert.Equal("Success_DC_High", e.Source));
+        }
+
+        [Fact]
+        public void GameDefinition_InvalidSuccessDcThresholdOrder_ThrowsFromTypedResolver()
+        {
+            var yaml = ValidYamlWithProgression
+                .Replace("dc_low_max: 16", "dc_low_max: 21");
+
+            var gd = GameDefinition.LoadFrom(yaml);
+
+            var ex = Assert.Throws<ConfigurationException>(() => gd.GetSuccessDcLabelThresholds());
+            Assert.Contains("dc_low_max", ex.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("dc_mid_max", ex.Message, StringComparison.OrdinalIgnoreCase);
         }
 
         [Fact]
@@ -453,6 +494,7 @@ character_prompt_structure:
         {
             public Dictionary<string, int?> FlatAwards { get; set; } = new();
             public Dictionary<int, int?> SuccessBase { get; set; } = new();
+            public SuccessDcLabelThresholds? SuccessDcThresholds { get; set; }
             public Dictionary<RiskTier, double?> RiskMultipliers { get; set; } = new();
             public Dictionary<GameOutcome, double?> TerminalMultipliers { get; set; } = new();
             public Dictionary<int, int?> XpThresholds { get; set; } = new();
@@ -475,6 +517,8 @@ character_prompt_structure:
 
             public int? GetSuccessBaseXp(int dc) => 
                 SuccessBase.TryGetValue(dc, out var v) ? v : null;
+
+            public SuccessDcLabelThresholds? GetSuccessDcLabelThresholds() => SuccessDcThresholds;
 
             public int? GetFlatXpAward(string awardType) => 
                 FlatAwards.TryGetValue(awardType, out var v) ? v : null;

@@ -1,4 +1,5 @@
 using Pinder.Core.Conversation;
+using Pinder.Core.Progression;
 using Pinder.Core.Rolls;
 
 namespace Pinder.Core.Interfaces
@@ -63,6 +64,12 @@ namespace Pinder.Core.Interfaces
         /// Returns null if no matching rule found.
         /// </summary>
         int? GetSuccessBaseXp(int dc);
+
+        /// <summary>
+        /// DC bucket thresholds used to label successful roll XP ledger entries.
+        /// Returns null if no matching rule found.
+        /// </summary>
+        SuccessDcLabelThresholds? GetSuccessDcLabelThresholds();
 
         /// <summary>
         /// Flat XP award based on string type (e.g. Nat20, Nat1, Failure).

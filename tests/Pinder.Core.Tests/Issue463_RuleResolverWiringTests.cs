@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Pinder.Core.Characters;
 using Pinder.Core.Conversation;
 using Pinder.Core.Interfaces;
+using Pinder.Core.Progression;
 using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
 using Pinder.Core.Traps;
@@ -76,6 +77,7 @@ namespace Pinder.Core.Tests
 
             public double? GetTerminalOutcomeMultiplier(GameOutcome outcome) => null;
             public int? GetSuccessBaseXp(int dc) => null;
+            public SuccessDcLabelThresholds? GetSuccessDcLabelThresholds() => null;
             public int? GetFlatXpAward(string awardType) => null;
             public int? GetXpThresholdForLevel(int level) => null;
             public int? GetLevelRollBonus(int level) => 0;

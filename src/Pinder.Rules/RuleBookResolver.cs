@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using Pinder.Core.Conversation;
 using Pinder.Core.Interfaces;
+using Pinder.Core.Progression;
 using Pinder.Core.Rolls;
 
 namespace Pinder.Rules
@@ -291,6 +292,35 @@ namespace Pinder.Rules
             if (rule?.Outcome != null)
                 return GetOutcomeInt(rule.Outcome, "base_xp");
             return null;
+        }
+
+        public SuccessDcLabelThresholds? GetSuccessDcLabelThresholds()
+        {
+            const string prefix = "\u00A710.xp.success.dc-";
+            var cutoffs = new SortedSet<int>();
+
+            foreach (var book in _books)
+            {
+                foreach (var entry in book.All)
+                {
+                    if (entry.Outcome == null || !entry.Outcome.ContainsKey("base_xp"))
+                        continue;
+
+                    if (!entry.Id.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    if (int.TryParse(entry.Id.Substring(prefix.Length), NumberStyles.Integer, CultureInfo.InvariantCulture, out int cutoff))
+                    {
+                        cutoffs.Add(cutoff);
+                    }
+                }
+            }
+
+            if (cutoffs.Count < 2)
+                return null;
+
+            var ordered = cutoffs.ToArray();
+            return new SuccessDcLabelThresholds(ordered[0], ordered[1]);
         }
 
         public int? GetFlatXpAward(string awardType)
