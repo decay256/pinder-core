@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using YamlDotNet.Core;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace Pinder.Core.Prompts
 {
@@ -118,17 +121,8 @@ namespace Pinder.Core.Prompts
         }
 
         // ------------------------------------------------------------------
-        // Factory — parse the YAML file content.
-        //
-        // The YAML format is predictable (see data/persona/texting-style-conflicts.yaml),
-        // so we use a hand-written parser rather than pulling in a YAML library
-        // dependency into netstandard2.0 Pinder.Core.
-        //
-        // Expected shape:
-        //   conflicts:
-        //     - axis_a: { axis: <name>, value: "<string>" }
-        //       axis_b: { axis: <name>, value: "<string>" }
-        //       reason: "<string>"
+        // Factory - parse the YAML file content with the solution-standard
+        // YamlDotNet stack used by rule and prompt content loaders.
         // ------------------------------------------------------------------
 
         /// <summary>
@@ -144,169 +138,83 @@ namespace Pinder.Core.Prompts
             if (string.IsNullOrWhiteSpace(yamlContent))
                 return Empty;
 
-            var lines = yamlContent
-                .Replace("\r\n", "\n")
-                .Split('\n');
-
             var entries = new List<ConflictEntry>();
-
-            // State machine: collect raw block per "- axis_a:" item boundary.
-            var block = new List<string>();
-
-            void FlushBlock()
+            ConflictCatalogDto? catalog;
+            try
             {
-                if (block.Count == 0) return;
-                var entry = ParseBlock(block);
-                if (entry != null) entries.Add(entry);
-                block.Clear();
+                var deserializer = new DeserializerBuilder()
+                    .WithNamingConvention(UnderscoredNamingConvention.Instance)
+                    .IgnoreUnmatchedProperties()
+                    .Build();
+                catalog = deserializer.Deserialize<ConflictCatalogDto>(yamlContent);
+            }
+            catch (YamlException ex)
+            {
+                throw new FormatException("Texting-style conflict YAML is malformed.", ex);
             }
 
-            bool inConflictsSection = false;
-
-            foreach (var rawLine in lines)
+            var loaded = catalog?.Conflicts ?? new List<ConflictEntryDto>();
+            for (int i = 0; i < loaded.Count; i++)
             {
-                var trimmed = rawLine.TrimEnd();
-
-                // Skip blank lines and full-line comments.
-                if (string.IsNullOrWhiteSpace(trimmed) || trimmed.TrimStart().StartsWith("#", StringComparison.Ordinal))
-                    continue;
-
-                if (trimmed.TrimStart() == "conflicts:")
-                {
-                    inConflictsSection = true;
-                    continue;
-                }
-
-                if (!inConflictsSection) continue;
-
-                // Each entry block starts with "  - axis_a:".
-                var stripped = trimmed.TrimStart();
-                if (stripped.StartsWith("- axis_a:", StringComparison.Ordinal))
-                {
-                    FlushBlock();
-                    block.Add(trimmed);
-                }
-                else if (block.Count > 0)
-                {
-                    block.Add(trimmed);
-                }
-            }
-            FlushBlock();
-
-            // Validate: all entries must have non-empty reasons.
-            for (int i = 0; i < entries.Count; i++)
-            {
-                if (string.IsNullOrWhiteSpace(entries[i].Reason))
+                var dto = loaded[i];
+                var axisA = ValidateAxisValue(dto.AxisA, i, "axis_a");
+                var axisB = ValidateAxisValue(dto.AxisB, i, "axis_b");
+                if (string.IsNullOrWhiteSpace(dto.Reason))
                     throw new FormatException(
                         $"Conflict entry #{i + 1} has an empty reason. " +
                         "All conflict matrix entries must include a reason string.");
+
+                entries.Add(new ConflictEntry(
+                    axisA.axis,
+                    axisA.value,
+                    axisB.axis,
+                    axisB.value,
+                    dto.Reason.Trim()));
             }
 
             return new TextingStyleConflicts(entries);
         }
 
-        // ------------------------------------------------------------------
-        // Block parser — extract (axisA, valueA, axisB, valueB, reason)
-        // from the multi-line block collected for one "- axis_a:" item.
-        // ------------------------------------------------------------------
-
-        private static ConflictEntry? ParseBlock(List<string> block)
+        private static (string axis, string value) ValidateAxisValue(
+            AxisValueDto? dto,
+            int entryIndex,
+            string fieldName)
         {
-            string? axisA  = null;
-            string? valueA = null;
-            string? axisB  = null;
-            string? valueB = null;
-            string? reason = null;
+            if (dto == null)
+                throw new FormatException($"Conflict entry #{entryIndex + 1} is missing {fieldName}.");
 
-            foreach (var rawLine in block)
-            {
-                var line = rawLine.TrimStart(' ', '-').Trim();
+            string axis = dto.Axis?.Trim() ?? string.Empty;
+            string value = dto.Value?.Trim() ?? string.Empty;
+            if (axis.Length == 0 || value.Length == 0)
+                throw new FormatException(
+                    $"Conflict entry #{entryIndex + 1} has an incomplete {fieldName}; both axis and value are required.");
 
-                if (line.StartsWith("axis_a:", StringComparison.OrdinalIgnoreCase))
-                {
-                    (axisA, valueA) = ParseInlineAxisValue(line.Substring("axis_a:".Length).Trim());
-                }
-                else if (line.StartsWith("axis_b:", StringComparison.OrdinalIgnoreCase))
-                {
-                    (axisB, valueB) = ParseInlineAxisValue(line.Substring("axis_b:".Length).Trim());
-                }
-                else if (line.StartsWith("reason:", StringComparison.OrdinalIgnoreCase))
-                {
-                    reason = UnquoteYamlString(line.Substring("reason:".Length).Trim());
-                }
-            }
-
-            if (axisA == null || valueA == null || axisB == null || valueB == null || reason == null)
-                return null;
-
-            return new ConflictEntry(axisA, valueA, axisB, valueB, reason);
-        }
-
-        /// <summary>
-        /// Parses the inline <c>{ axis: name, value: "..." }</c> flow-mapping.
-        /// </summary>
-        private static (string axis, string value) ParseInlineAxisValue(string inline)
-        {
-            // Strip surrounding braces: "{ axis: length, value: "..." }"
-            var content = inline.Trim('{', '}', ' ');
-
-            string axis  = string.Empty;
-            string value = string.Empty;
-
-            // We need to handle the fact that `value` can contain commas.
-            // Strategy: find "axis:" first (before the first comma), then
-            // "value:" as the remainder.
-            int axisIdx = content.IndexOf("axis:", StringComparison.OrdinalIgnoreCase);
-            int valueIdx = content.IndexOf("value:", StringComparison.OrdinalIgnoreCase);
-
-            if (axisIdx >= 0 && valueIdx >= 0)
-            {
-                if (axisIdx < valueIdx)
-                {
-                    // axis comes first: "axis: foo, value: bar"
-                    string axisSection  = content.Substring(axisIdx + 5, valueIdx - axisIdx - 5).Trim().TrimEnd(',').Trim();
-                    string valueSection = content.Substring(valueIdx + 6).Trim();
-                    axis  = UnquoteYamlString(axisSection);
-                    value = UnquoteYamlString(valueSection);
-                }
-                else
-                {
-                    // value comes first: "value: bar, axis: foo"
-                    string valueSection = content.Substring(valueIdx + 6, axisIdx - valueIdx - 6).Trim().TrimEnd(',').Trim();
-                    string axisSection  = content.Substring(axisIdx + 5).Trim();
-                    axis  = UnquoteYamlString(axisSection);
-                    value = UnquoteYamlString(valueSection);
-                }
-            }
+            if (!KnownAxes.Contains(axis))
+                throw new FormatException(
+                    $"Conflict entry #{entryIndex + 1} references unknown texting-style axis '{axis}'.");
 
             return (axis, value);
         }
 
-        /// <summary>
-        /// Strips surrounding YAML quotes (' or ") if present, and
-        /// un-escapes standard YAML escape sequences:
-        ///   - Single-quoted: '' -> ' (YAML 7.3.3)
-        ///   - Double-quoted: \" -> " and \\ -> \
-        /// </summary>
-        private static string UnquoteYamlString(string s)
+        private static readonly IReadOnlyCollection<string> KnownAxes =
+            new HashSet<string>(TextingStyleAggregator.CanonicalAxisOrder, StringComparer.OrdinalIgnoreCase);
+
+        private sealed class ConflictCatalogDto
         {
-            s = s.Trim();
-            if (s.Length >= 2)
-            {
-                if (s[0] == '\'' && s[s.Length - 1] == '\'')
-                {
-                    // Single-quoted: '' is the escape for ' (YAML 7.3.3)
-                    return s.Substring(1, s.Length - 2).Replace("''", "'");
-                }
-                if (s[0] == '"' && s[s.Length - 1] == '"')
-                {
-                    // Double-quoted: basic \" and \\ unescaping
-                    return s.Substring(1, s.Length - 2)
-                        .Replace("\\\"", "\"")
-                        .Replace("\\\\", "\\");
-                }
-            }
-            return s;
+            public List<ConflictEntryDto>? Conflicts { get; set; }
+        }
+
+        private sealed class ConflictEntryDto
+        {
+            public AxisValueDto? AxisA { get; set; }
+            public AxisValueDto? AxisB { get; set; }
+            public string? Reason { get; set; }
+        }
+
+        private sealed class AxisValueDto
+        {
+            public string? Axis { get; set; }
+            public string? Value { get; set; }
         }
     }
 }

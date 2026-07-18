@@ -139,65 +139,42 @@ namespace Pinder.Core.Conversation
                         throw new InvalidOperationException("LLM adapter returned null datee response");
                 }
 
-                OperationalDiagnostics.Emit(
+                OperationalDiagnostics.EmitSucceededTerminal(
                     _onDiagnostic,
-                    new OperationalDiagnosticEvent(
-                        "DateeResponseStage",
-                        "DateeResponseSucceeded",
-                        OperationalDiagnosticSeverity.Info,
-                        "Datee response operation succeeded.",
-                        operationKind: OperationalDiagnosticOperationKind.DateeResponse,
-                        phaseCode: LlmPhase.OpponentResponse,
-                        lifecycle: OperationalDiagnosticLifecycle.Terminal,
-                        outcome: OperationalDiagnosticOutcome.Succeeded,
-                        callId: callId,
-                        correlationHints: new Dictionary<string, string>
-                        {
-                            ["turn"] = state.TurnNumber.ToString(System.Globalization.CultureInfo.InvariantCulture),
-                        }));
+                    "DateeResponseStage",
+                    "DateeResponseSucceeded",
+                    "Datee response operation succeeded.",
+                    OperationalDiagnosticOperationKind.DateeResponse,
+                    LlmPhase.OpponentResponse,
+                    callId,
+                    state.TurnNumber);
             }
             catch (OperationCanceledException ex)
             {
-                OperationalDiagnostics.Emit(
+                OperationalDiagnostics.EmitCancelledTerminal(
                     _onDiagnostic,
-                    new OperationalDiagnosticEvent(
-                        "DateeResponseStage",
-                        "DateeResponseCancelled",
-                        OperationalDiagnosticSeverity.Warning,
-                        "Datee response operation was cancelled.",
-                        ex,
-                        OperationalDiagnosticOperationKind.DateeResponse,
-                        LlmPhase.OpponentResponse,
-                        OperationalDiagnosticLifecycle.Terminal,
-                        OperationalDiagnosticOutcome.Cancelled,
-                        OperationalDiagnosticFailureClassification.Cancelled,
-                        callId: callId,
-                        correlationHints: new Dictionary<string, string>
-                        {
-                            ["turn"] = state.TurnNumber.ToString(System.Globalization.CultureInfo.InvariantCulture),
-                        }));
+                    "DateeResponseStage",
+                    "DateeResponseCancelled",
+                    "Datee response operation was cancelled.",
+                    ex,
+                    OperationalDiagnosticOperationKind.DateeResponse,
+                    LlmPhase.OpponentResponse,
+                    callId,
+                    state.TurnNumber);
                 throw;
             }
             catch (Exception ex)
             {
-                OperationalDiagnostics.Emit(
+                OperationalDiagnostics.EmitFailedTerminal(
                     _onDiagnostic,
-                    new OperationalDiagnosticEvent(
-                        "DateeResponseStage",
-                        "DateeResponseFailed",
-                        OperationalDiagnosticSeverity.Error,
-                        "Datee response operation failed.",
-                        ex,
-                        OperationalDiagnosticOperationKind.DateeResponse,
-                        LlmPhase.OpponentResponse,
-                        OperationalDiagnosticLifecycle.Terminal,
-                        OperationalDiagnosticOutcome.Failed,
-                        OperationalDiagnostics.ClassifyException(ex),
-                        callId: callId,
-                        correlationHints: new Dictionary<string, string>
-                        {
-                            ["turn"] = state.TurnNumber.ToString(System.Globalization.CultureInfo.InvariantCulture),
-                        }));
+                    "DateeResponseStage",
+                    "DateeResponseFailed",
+                    "Datee response operation failed.",
+                    ex,
+                    OperationalDiagnosticOperationKind.DateeResponse,
+                    LlmPhase.OpponentResponse,
+                    callId,
+                    state.TurnNumber);
                 throw;
             }
 

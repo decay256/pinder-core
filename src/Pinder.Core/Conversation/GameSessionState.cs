@@ -203,33 +203,13 @@ namespace Pinder.Core.Conversation
             DateeHistory.Clear();
             if (data.DateeHistory != null)
             {
-                foreach (var (role, content) in data.DateeHistory)
-                {
-                    if (string.IsNullOrEmpty(role)) continue;
-                    try
-                    {
-                        DateeHistory.Add(new ConversationMessage(role, content ?? string.Empty));
-                    }
-                    catch (ArgumentException)
-                    {
-                    }
-                }
+                RestoreConversationHistory(DateeHistory, data.DateeHistory, "datee");
             }
 
             AvatarHistory.Clear();
             if (data.AvatarHistory != null)
             {
-                foreach (var (role, content) in data.AvatarHistory)
-                {
-                    if (string.IsNullOrEmpty(role)) continue;
-                    try
-                    {
-                        AvatarHistory.Add(new ConversationMessage(role, content ?? string.Empty));
-                    }
-                    catch (ArgumentException)
-                    {
-                    }
-                }
+                RestoreConversationHistory(AvatarHistory, data.AvatarHistory, "avatar");
             }
 
             TurnNumber = data.TurnNumber;
@@ -239,6 +219,35 @@ namespace Pinder.Core.Conversation
                 data.PendingTripleBonus);
 
             RizzCumulativeFailureCount = data.RizzCumulativeFailureCount;
+        }
+
+        private static void RestoreConversationHistory(
+            ICollection<ConversationMessage> target,
+            IEnumerable<(string Role, string Content)> entries,
+            string historyKind)
+        {
+            int index = 0;
+            foreach (var (role, content) in entries)
+            {
+                if (string.IsNullOrWhiteSpace(role))
+                {
+                    throw new InvalidOperationException(
+                        $"Malformed persisted {historyKind} conversation history at entry {index}: role is empty.");
+                }
+
+                try
+                {
+                    target.Add(new ConversationMessage(role, content ?? string.Empty));
+                }
+                catch (ArgumentException ex)
+                {
+                    throw new InvalidOperationException(
+                        $"Malformed persisted {historyKind} conversation history at entry {index}: role '{role}' is not supported.",
+                        ex);
+                }
+
+                index++;
+            }
         }
     }
 }

@@ -110,10 +110,12 @@ namespace Pinder.LlmAdapters.Tests
                 http,
                 telemetry: telemetry);
 
-            var ex = await Assert.ThrowsAsync<HttpRequestException>(() =>
+            var ex = await Assert.ThrowsAsync<LlmTransportException>(() =>
                 transport.SendAsync("system", "user", phase: LlmPhase.OpponentResponse));
 
             Assert.DoesNotContain("SECRET_PROVIDER_BODY_DO_NOT_LOG", ex.Message);
+            Assert.Equal(LlmFailureKind.Unknown, ex.FailureKind);
+            Assert.IsType<HttpRequestException>(ex.InnerException);
             Assert.Collection(
                 events,
                 started => AssertOpenAiEvent(

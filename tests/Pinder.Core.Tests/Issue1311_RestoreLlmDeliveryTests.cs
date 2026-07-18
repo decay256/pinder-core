@@ -61,7 +61,10 @@ namespace Pinder.Core.Tests
         public async Task ApplyFailureCorruption_FallsBackToDeliveryOverlay_WhenLlmThrows()
         {
             // 1. Setup GameSession with a mock LLM adapter configured to throw
-            var llm = new MockLlmAdapter1311 { ShouldThrow = true };
+            var llm = new MockLlmAdapter1311
+            {
+                ExceptionToThrow = new TimeoutException("LLM timeout")
+            };
             
             // Dice: 1 (horniness), 1 (Nat 1 d20), 50 (timing)
             var dice = new FixedDice(1, 1, 50);
@@ -176,6 +179,30 @@ namespace Pinder.Core.Tests
             Assert.Equal(expectedDeterministic, result.DeliveredMessage);
         }
 
+        [Fact]
+        public async Task ApplyFailureCorruption_PropagatesRawHttpFailureFromMisbehavingAdapter()
+        {
+            var llm = new MockLlmAdapter1311
+            {
+                ExceptionToThrow = new System.Net.Http.HttpRequestException("status 429 rate limit")
+            };
+            var dice = new FixedDice(1, 1, 50);
+            var config = new GameSessionConfig(
+                clock: TestHelpers.MakeClock(),
+                statDeliveryInstructions: new MockStatDeliveryInstructions("REWRITE WITH DISASTER STYLE"));
+            var session = new GameSession(
+                MakeProfile("Sable"),
+                MakeProfile("Brick"),
+                llm,
+                dice,
+                new NullTrapRegistry(),
+                config);
+
+            await session.StartTurnAsync();
+
+            await Assert.ThrowsAsync<System.Net.Http.HttpRequestException>(() => session.ResolveTurnAsync(0));
+        }
+
         // ======================== Helpers & Mocks ========================
 
         private static CharacterProfile MakeProfile(string name, int allStats = 2, ActiveArchetype? activeArchetype = null)
@@ -186,8 +213,20 @@ namespace Pinder.Core.Tests
                 displayName: name,
                 timing: new TimingProfile(5, 0.0f, 0.0f, "neutral"),
                 level: 1,
-                activeArchetype: activeArchetype
+                activeArchetype: activeArchetype,
+                psychiatricDiagnosis: ValidDiagnosis(),
+                backstory: TestHelpers.MakeBackstory(),
+                stakeLines: TestHelpers.MakeStakeLines()
             );
+        }
+
+        private static IReadOnlyDictionary<string, string> ValidDiagnosis()
+        {
+            return new Dictionary<string, string>
+            {
+                ["derived_feeling"] = "curious",
+                ["defense_reaction"] = "guarded",
+            };
         }
 
         private class MockStatDeliveryInstructions : IStatDeliveryInstructionProvider

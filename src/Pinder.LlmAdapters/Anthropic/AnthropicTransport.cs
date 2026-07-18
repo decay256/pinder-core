@@ -98,13 +98,7 @@ namespace Pinder.LlmAdapters.Anthropic
 
             // #794: forward the engine-level cancellation token to the underlying
             // HTTP call so a mid-turn Cancel() halts the in-flight request.
-            var response = await _client.SendMessagesAsync(
-                request,
-                ct,
-                _telemetry,
-                provider: "anthropic",
-                model: _model,
-                phase: phase).ConfigureAwait(false);
+            var response = await SendMessagesNormalizedAsync(request, ct, phase).ConfigureAwait(false);
             var draft = response.GetText() ?? "";
             if (_options == null || !ShouldApplyImprovement(phase))
             {
@@ -171,13 +165,7 @@ namespace Pinder.LlmAdapters.Anthropic
             };
             string providerRequestJson = JsonConvert.SerializeObject(messagesRequest);
 
-            var response = await _client.SendMessagesAsync(
-                messagesRequest,
-                ct,
-                _telemetry,
-                provider: "anthropic",
-                model: _model,
-                phase: request.Phase).ConfigureAwait(false);
+            var response = await SendMessagesNormalizedAsync(messagesRequest, ct, request.Phase).ConfigureAwait(false);
 
             var toolInput = response.GetToolInput();
             string jsonText = toolInput != null
@@ -199,6 +187,38 @@ namespace Pinder.LlmAdapters.Anthropic
             {
                 _client.Dispose();
                 _disposed = true;
+            }
+        }
+
+        private async Task<MessagesResponse> SendMessagesNormalizedAsync(
+            MessagesRequest request,
+            CancellationToken ct,
+            string? phase)
+        {
+            try
+            {
+                return await _client.SendMessagesAsync(
+                    request,
+                    ct,
+                    _telemetry,
+                    provider: "anthropic",
+                    model: _model,
+                    phase: phase).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (AnthropicApiException ex)
+            {
+                LlmFailureKind kind = ex.StatusCode == 429
+                    ? LlmFailureKind.RateLimited
+                    : ex.StatusCode >= 500 ? LlmFailureKind.Network : LlmFailureKind.Unknown;
+                throw new LlmTransportException(ex.Message, kind, ex);
+            }
+            catch (System.Net.Http.HttpRequestException ex)
+            {
+                throw new LlmTransportException(ex.Message, LlmFailureKind.Network, ex);
             }
         }
     }

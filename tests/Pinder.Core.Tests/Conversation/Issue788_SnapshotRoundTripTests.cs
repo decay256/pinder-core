@@ -26,7 +26,19 @@ namespace Pinder.Core.Tests.Conversation
                 assembledSystemPrompt: $"You are {name}.",
                 displayName: name,
                 timing: new TimingProfile(5, 0.0f, 0.0f, "neutral"),
-                level: 1);
+                level: 1,
+                psychiatricDiagnosis: ValidDiagnosis(),
+                backstory: TestHelpers.MakeBackstory(),
+                stakeLines: TestHelpers.MakeStakeLines());
+        }
+
+        private static IReadOnlyDictionary<string, string> ValidDiagnosis()
+        {
+            return new Dictionary<string, string>
+            {
+                ["derived_feeling"] = "curious",
+                ["defense_reaction"] = "guarded",
+            };
         }
 
         [Fact]
@@ -98,6 +110,43 @@ namespace Pinder.Core.Tests.Conversation
             var snap = session.CreateSnapshot();
             Assert.Equal(4, snap.DateeHistory.Count);
             Assert.Equal("first datee reply", snap.DateeHistory[1].Content);
+        }
+
+        [Theory]
+        [InlineData("moderator", "datee")]
+        [InlineData("", "datee")]
+        [InlineData("system", "avatar")]
+        public void RestoreState_WithMalformedPersistedHistoryRole_FailsFast(string role, string historyKind)
+        {
+            var session = new GameSession(
+                MakeProfile("P1"),
+                MakeProfile("P2"),
+                new NullLlmAdapter(),
+                new FixedDice(5),
+                new NullTrapRegistry(),
+                new GameSessionConfig(clock: TestHelpers.MakeClock()));
+
+            var resim = new ResimulateData
+            {
+                TargetInterest = session.CreateSnapshot().Interest,
+                TurnNumber = 2,
+            };
+
+            if (historyKind == "datee")
+            {
+                resim.DateeHistory = new List<(string, string)> { (role, "bad datee message") };
+            }
+            else
+            {
+                resim.AvatarHistory = new List<(string, string)> { (role, "bad avatar message") };
+            }
+
+            var ex = Assert.Throws<InvalidOperationException>(
+                () => session.RestoreState(resim, new NullTrapRegistry()));
+
+            Assert.Contains(historyKind, ex.Message);
+            Assert.Contains("entry 0", ex.Message);
+            Assert.Contains("role", ex.Message);
         }
 
         [Fact]

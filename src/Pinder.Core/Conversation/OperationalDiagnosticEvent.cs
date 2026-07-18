@@ -176,6 +176,117 @@ namespace Pinder.Core.Conversation
                 // Diagnostic callbacks must never alter gameplay/library control flow.
             }
         }
+
+        public static void EmitSucceededTerminal(
+            Action<OperationalDiagnosticEvent>? sink,
+            string source,
+            string eventName,
+            string message,
+            string operationKind,
+            string phaseCode,
+            string callId,
+            int turn)
+        {
+            EmitTerminal(
+                sink,
+                source,
+                eventName,
+                OperationalDiagnosticSeverity.Info,
+                message,
+                null,
+                operationKind,
+                phaseCode,
+                OperationalDiagnosticOutcome.Succeeded,
+                OperationalDiagnosticFailureClassification.None,
+                callId,
+                turn);
+        }
+
+        public static void EmitCancelledTerminal(
+            Action<OperationalDiagnosticEvent>? sink,
+            string source,
+            string eventName,
+            string message,
+            Exception exception,
+            string operationKind,
+            string phaseCode,
+            string callId,
+            int turn)
+        {
+            EmitTerminal(
+                sink,
+                source,
+                eventName,
+                OperationalDiagnosticSeverity.Warning,
+                message,
+                exception,
+                operationKind,
+                phaseCode,
+                OperationalDiagnosticOutcome.Cancelled,
+                OperationalDiagnosticFailureClassification.Cancelled,
+                callId,
+                turn);
+        }
+
+        public static void EmitFailedTerminal(
+            Action<OperationalDiagnosticEvent>? sink,
+            string source,
+            string eventName,
+            string message,
+            Exception exception,
+            string operationKind,
+            string phaseCode,
+            string callId,
+            int turn)
+        {
+            EmitTerminal(
+                sink,
+                source,
+                eventName,
+                OperationalDiagnosticSeverity.Error,
+                message,
+                exception,
+                operationKind,
+                phaseCode,
+                OperationalDiagnosticOutcome.Failed,
+                ClassifyException(exception),
+                callId,
+                turn);
+        }
+
+        private static void EmitTerminal(
+            Action<OperationalDiagnosticEvent>? sink,
+            string source,
+            string eventName,
+            OperationalDiagnosticSeverity severity,
+            string message,
+            Exception? exception,
+            string operationKind,
+            string phaseCode,
+            OperationalDiagnosticOutcome outcome,
+            OperationalDiagnosticFailureClassification failureClassification,
+            string callId,
+            int turn)
+        {
+            Emit(
+                sink,
+                new OperationalDiagnosticEvent(
+                    source,
+                    eventName,
+                    severity,
+                    message,
+                    exception,
+                    operationKind,
+                    phaseCode,
+                    OperationalDiagnosticLifecycle.Terminal,
+                    outcome,
+                    failureClassification,
+                    callId: callId,
+                    correlationHints: new Dictionary<string, string>
+                    {
+                        ["turn"] = turn.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    }));
+        }
     }
 
     internal sealed class EmptyCorrelationHints : IReadOnlyDictionary<string, string>

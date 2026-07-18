@@ -45,6 +45,70 @@ namespace Pinder.Core.Conversation
         public int PreviousResolvedIndex { get; set; }
     }
 
+    public sealed class EmotionStemSelectionRules
+    {
+        public const int DeterministicSeedSalt = 42;
+        public const string MacroPhase1 = "MacroPhase1";
+        public const string MacroPhase2 = "MacroPhase2";
+        public const string MacroPhase3 = "MacroPhase3";
+        public const string BackstoryRegistry = "BACKSTORY";
+        public const string StakeRegistry = "STAKE";
+        public const int BackstoryRegistrySize = 20;
+        public const int StakeRegistrySize = 15;
+
+        public static EmotionStemSelectionRules Default { get; } = new EmotionStemSelectionRules();
+
+        public int MacroPhase2TurnThreshold { get; }
+        public int MacroPhase2InterestThreshold { get; }
+        public int MacroPhase3TurnThreshold { get; }
+        public int MacroPhase3InterestThreshold { get; }
+        public int MacroPhase1To2HysteresisMinTurn { get; }
+        public int MacroPhase1To2HysteresisMaxTurn { get; }
+        public int MacroPhase1To2HysteresisMinInterest { get; }
+        public int MacroPhase1To2HysteresisMaxInterest { get; }
+        public int MacroPhase2FavoredBackstoryIndex { get; }
+        public int MacroPhase3FavoredStakeIndex { get; }
+        public double FavoredTargetWeight { get; }
+        public int StatMin { get; }
+        public int StatMax { get; }
+        public int StatMidpoint { get; }
+        public int ActiveTrapStatAdjustment { get; }
+
+        public EmotionStemSelectionRules(
+            int macroPhase2TurnThreshold = 4,
+            int macroPhase2InterestThreshold = 40,
+            int macroPhase3TurnThreshold = 8,
+            int macroPhase3InterestThreshold = 70,
+            int macroPhase1To2HysteresisMinTurn = 4,
+            int macroPhase1To2HysteresisMaxTurn = 5,
+            int macroPhase1To2HysteresisMinInterest = 40,
+            int macroPhase1To2HysteresisMaxInterest = 55,
+            int macroPhase2FavoredBackstoryIndex = 13,
+            int macroPhase3FavoredStakeIndex = 14,
+            double favoredTargetWeight = 5.0,
+            int statMin = 0,
+            int statMax = 20,
+            int statMidpoint = 10,
+            int activeTrapStatAdjustment = 5)
+        {
+            MacroPhase2TurnThreshold = macroPhase2TurnThreshold;
+            MacroPhase2InterestThreshold = macroPhase2InterestThreshold;
+            MacroPhase3TurnThreshold = macroPhase3TurnThreshold;
+            MacroPhase3InterestThreshold = macroPhase3InterestThreshold;
+            MacroPhase1To2HysteresisMinTurn = macroPhase1To2HysteresisMinTurn;
+            MacroPhase1To2HysteresisMaxTurn = macroPhase1To2HysteresisMaxTurn;
+            MacroPhase1To2HysteresisMinInterest = macroPhase1To2HysteresisMinInterest;
+            MacroPhase1To2HysteresisMaxInterest = macroPhase1To2HysteresisMaxInterest;
+            MacroPhase2FavoredBackstoryIndex = macroPhase2FavoredBackstoryIndex;
+            MacroPhase3FavoredStakeIndex = macroPhase3FavoredStakeIndex;
+            FavoredTargetWeight = favoredTargetWeight;
+            StatMin = statMin;
+            StatMax = statMax;
+            StatMidpoint = statMidpoint;
+            ActiveTrapStatAdjustment = activeTrapStatAdjustment;
+        }
+    }
+
     /// <summary>
     /// Selects an emotion stem and determines the appropriate posture manner 
     /// based on conversation state, HFI/TOR statistics, and active traps.
@@ -54,44 +118,59 @@ namespace Pinder.Core.Conversation
     public class EmotionStemSelector
     {
         private readonly Random _random;
+        private readonly EmotionStemSelectionRules _rules;
 
-        public EmotionStemSelector(int rngSeed) 
+        public EmotionStemSelector(int rngSeed, EmotionStemSelectionRules? rules = null)
         {
             _random = new Random(rngSeed);
+            _rules = rules ?? EmotionStemSelectionRules.Default;
         }
 
         public ResolvedRevelationTarget Resolve(ConversationState state)
         {
             // 1. Derive Phase
-            string currentPhase = "MacroPhase1";
-            if (state.TurnCount >= 8 || state.InterestScore >= 70)
+            string currentPhase = EmotionStemSelectionRules.MacroPhase1;
+            if (state.TurnCount >= _rules.MacroPhase3TurnThreshold ||
+                state.InterestScore >= _rules.MacroPhase3InterestThreshold)
             {
-                currentPhase = "MacroPhase3";
+                currentPhase = EmotionStemSelectionRules.MacroPhase3;
             }
-            else if (state.TurnCount >= 4 || state.InterestScore >= 40)
+            else if (state.TurnCount >= _rules.MacroPhase2TurnThreshold ||
+                state.InterestScore >= _rules.MacroPhase2InterestThreshold)
             {
-                currentPhase = "MacroPhase2";
+                currentPhase = EmotionStemSelectionRules.MacroPhase2;
             }
 
             // Apply Hysteresis
-            if (state.PreviousPhase == "MacroPhase1" && currentPhase == "MacroPhase2")
+            if (state.PreviousPhase == EmotionStemSelectionRules.MacroPhase1 &&
+                currentPhase == EmotionStemSelectionRules.MacroPhase2)
             {
-                bool inHysteresisTurn = state.TurnCount == 4 || state.TurnCount == 5;
-                bool inHysteresisInterest = state.InterestScore >= 40 && state.InterestScore <= 55;
+                bool inHysteresisTurn =
+                    state.TurnCount >= _rules.MacroPhase1To2HysteresisMinTurn &&
+                    state.TurnCount <= _rules.MacroPhase1To2HysteresisMaxTurn;
+                bool inHysteresisInterest =
+                    state.InterestScore >= _rules.MacroPhase1To2HysteresisMinInterest &&
+                    state.InterestScore <= _rules.MacroPhase1To2HysteresisMaxInterest;
                 if (inHysteresisTurn || inHysteresisInterest)
                 {
-                    currentPhase = "MacroPhase1";
+                    currentPhase = EmotionStemSelectionRules.MacroPhase1;
                 }
             }
 
-            string registry = (currentPhase == "MacroPhase3") ? "STAKE" : "BACKSTORY";
+            string registry = currentPhase == EmotionStemSelectionRules.MacroPhase3
+                ? EmotionStemSelectionRules.StakeRegistry
+                : EmotionStemSelectionRules.BackstoryRegistry;
 
             // 2. Filter Registry and apply Affinity Scorer
             var availableIndices = new List<int>();
-            var spentIndices = registry == "BACKSTORY" ? state.SpentBackstoryIndices : state.SpentStakeIndices;
+            var spentIndices = registry == EmotionStemSelectionRules.BackstoryRegistry
+                ? state.SpentBackstoryIndices
+                : state.SpentStakeIndices;
             
             // Bounds limit based on registry (20 Backstory Fields, 15 Psychological Stakes, Crack and Slip philosophy)
-            int maxLimit = (registry == "BACKSTORY") ? 20 : 15;
+            int maxLimit = registry == EmotionStemSelectionRules.BackstoryRegistry
+                ? EmotionStemSelectionRules.BackstoryRegistrySize
+                : EmotionStemSelectionRules.StakeRegistrySize;
             for (int i = 0; i < maxLimit; i++)
             {
                 if (!spentIndices.Contains(i))
@@ -113,13 +192,15 @@ namespace Pinder.Core.Conversation
                 foreach (var index in availableIndices)
                 {
                     double weight = 1.0;
-                    if (currentPhase == "MacroPhase2" && index == 13)
+                    if (currentPhase == EmotionStemSelectionRules.MacroPhase2 &&
+                        index == _rules.MacroPhase2FavoredBackstoryIndex)
                     {
-                        weight = 5.0;
+                        weight = _rules.FavoredTargetWeight;
                     }
-                    else if (currentPhase == "MacroPhase3" && index == 19)
+                    else if (currentPhase == EmotionStemSelectionRules.MacroPhase3 &&
+                        index == _rules.MacroPhase3FavoredStakeIndex)
                     {
-                        weight = 5.0;
+                        weight = _rules.FavoredTargetWeight;
                     }
                     weights[index] = weight;
                     totalWeight += weight;
@@ -145,31 +226,31 @@ namespace Pinder.Core.Conversation
             }
 
             // 3. Symmetrical Quadrant (HFI/TOR)
-            int playerHfi = Math.Max(0, Math.Min(20, state.PlayerStats?.BaseHFI ?? 0));
-            int playerTor = Math.Max(0, Math.Min(20, state.PlayerStats?.BaseTOR ?? 0));
-            int dateeHfi = Math.Max(0, Math.Min(20, state.DateeStats?.BaseHFI ?? 0));
-            int dateeTor = Math.Max(0, Math.Min(20, state.DateeStats?.BaseTOR ?? 0));
+            int playerHfi = ClampStat(state.PlayerStats?.BaseHFI ?? 0);
+            int playerTor = ClampStat(state.PlayerStats?.BaseTOR ?? 0);
+            int dateeHfi = ClampStat(state.DateeStats?.BaseHFI ?? 0);
+            int dateeTor = ClampStat(state.DateeStats?.BaseTOR ?? 0);
 
             int avgHfi = (playerHfi + dateeHfi) / 2;
             int avgTor = (playerTor + dateeTor) / 2;
 
             if (state.ActiveTraps != null && state.ActiveTraps.Count > 0)
             {
-                avgHfi = Math.Max(0, Math.Min(20, avgHfi - 5));
-                avgTor = Math.Max(0, Math.Min(20, avgTor + 5));
+                avgHfi = ClampStat(avgHfi - _rules.ActiveTrapStatAdjustment);
+                avgTor = ClampStat(avgTor + _rules.ActiveTrapStatAdjustment);
             }
 
-            // Midpoint is 10. Map to quadrant:
+            // Map HFI/TOR to quadrant:
             // Q1 (HFI < 10, TOR < 10) -> "CURATED_BUFFER"
             // Q2 (HFI < 10, TOR >= 10) -> "DEFENSIVE_EVASION"
             // Q3 (HFI >= 10, TOR >= 10) -> "INTIMATE_BREAKTHROUGH"
             // Q4 (HFI >= 10, TOR < 10) -> "TRAUMATIC_LEAKAGE"
             string manner;
-            if (avgHfi < 10 && avgTor < 10)
+            if (avgHfi < _rules.StatMidpoint && avgTor < _rules.StatMidpoint)
                 manner = "CURATED_BUFFER";
-            else if (avgHfi < 10 && avgTor >= 10)
+            else if (avgHfi < _rules.StatMidpoint && avgTor >= _rules.StatMidpoint)
                 manner = "DEFENSIVE_EVASION";
-            else if (avgHfi >= 10 && avgTor >= 10)
+            else if (avgHfi >= _rules.StatMidpoint && avgTor >= _rules.StatMidpoint)
                 manner = "INTIMATE_BREAKTHROUGH";
             else
                 manner = "TRAUMATIC_LEAKAGE";
@@ -185,11 +266,16 @@ namespace Pinder.Core.Conversation
                 Registry = registry,
                 Index = selectedIndex,
                 Manner = manner,
-                Field = (currentPhase == "MacroPhase1") ? "BIO_LIE" :
-                        (currentPhase == "MacroPhase2") ? "TRAGIC_REALITY" : "STAKE_LINE",
+                Field = (currentPhase == EmotionStemSelectionRules.MacroPhase1) ? "BIO_LIE" :
+                        (currentPhase == EmotionStemSelectionRules.MacroPhase2) ? "TRAGIC_REALITY" : "STAKE_LINE",
                 StemText = string.Empty,
                 TransitionStyle = ResolveTransitionStyle(manner)
             };
+        }
+
+        private int ClampStat(int value)
+        {
+            return Math.Max(_rules.StatMin, Math.Min(_rules.StatMax, value));
         }
 
         public static ResolvedRevelationTarget Hydrate(

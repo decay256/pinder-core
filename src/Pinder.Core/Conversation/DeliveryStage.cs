@@ -463,22 +463,15 @@ namespace Pinder.Core.Conversation
             // #1041 (Tier C): markdown-stripping pass for surfaces that expect plain prose.
             deliveredMessage = TextSanitizer.Sanitize(deliveredMessage, MarkdownSanitizer.LayerName, textDiffs);
 
-            OperationalDiagnostics.Emit(
+            OperationalDiagnostics.EmitSucceededTerminal(
                 _onDiagnostic,
-                new OperationalDiagnosticEvent(
-                    "DeliveryStage",
-                    "DeliverySucceeded",
-                    OperationalDiagnosticSeverity.Info,
-                    "Delivery operation succeeded.",
-                    operationKind: OperationalDiagnosticOperationKind.Delivery,
-                    phaseCode: OperationalDiagnosticPhaseCode.Completed,
-                    lifecycle: OperationalDiagnosticLifecycle.Terminal,
-                    outcome: OperationalDiagnosticOutcome.Succeeded,
-                    callId: deliveryCallId,
-                    correlationHints: new Dictionary<string, string>
-                    {
-                        ["turn"] = state.TurnNumber.ToString(System.Globalization.CultureInfo.InvariantCulture),
-                    }));
+                "DeliveryStage",
+                "DeliverySucceeded",
+                "Delivery operation succeeded.",
+                OperationalDiagnosticOperationKind.Delivery,
+                OperationalDiagnosticPhaseCode.Completed,
+                deliveryCallId,
+                state.TurnNumber);
 
             return new DeliveryStageResult
             {
@@ -495,46 +488,30 @@ namespace Pinder.Core.Conversation
             }
             catch (OperationCanceledException ex)
             {
-                OperationalDiagnostics.Emit(
+                OperationalDiagnostics.EmitCancelledTerminal(
                     _onDiagnostic,
-                    new OperationalDiagnosticEvent(
-                        "DeliveryStage",
-                        "DeliveryCancelled",
-                        OperationalDiagnosticSeverity.Warning,
-                        "Delivery operation was cancelled.",
-                        ex,
-                        OperationalDiagnosticOperationKind.Delivery,
-                        OperationalDiagnosticPhaseCode.Completed,
-                        OperationalDiagnosticLifecycle.Terminal,
-                        OperationalDiagnosticOutcome.Cancelled,
-                        OperationalDiagnosticFailureClassification.Cancelled,
-                        callId: deliveryCallId,
-                        correlationHints: new Dictionary<string, string>
-                        {
-                            ["turn"] = state.TurnNumber.ToString(System.Globalization.CultureInfo.InvariantCulture),
-                        }));
+                    "DeliveryStage",
+                    "DeliveryCancelled",
+                    "Delivery operation was cancelled.",
+                    ex,
+                    OperationalDiagnosticOperationKind.Delivery,
+                    OperationalDiagnosticPhaseCode.Completed,
+                    deliveryCallId,
+                    state.TurnNumber);
                 throw;
             }
             catch (Exception ex)
             {
-                OperationalDiagnostics.Emit(
+                OperationalDiagnostics.EmitFailedTerminal(
                     _onDiagnostic,
-                    new OperationalDiagnosticEvent(
-                        "DeliveryStage",
-                        "DeliveryFailed",
-                        OperationalDiagnosticSeverity.Error,
-                        "Delivery operation failed.",
-                        ex,
-                        OperationalDiagnosticOperationKind.Delivery,
-                        OperationalDiagnosticPhaseCode.Completed,
-                        OperationalDiagnosticLifecycle.Terminal,
-                        OperationalDiagnosticOutcome.Failed,
-                        OperationalDiagnostics.ClassifyException(ex),
-                        callId: deliveryCallId,
-                        correlationHints: new Dictionary<string, string>
-                        {
-                            ["turn"] = state.TurnNumber.ToString(System.Globalization.CultureInfo.InvariantCulture),
-                        }));
+                    "DeliveryStage",
+                    "DeliveryFailed",
+                    "Delivery operation failed.",
+                    ex,
+                    OperationalDiagnosticOperationKind.Delivery,
+                    OperationalDiagnosticPhaseCode.Completed,
+                    deliveryCallId,
+                    state.TurnNumber);
                 throw;
             }
         }
@@ -549,28 +526,10 @@ namespace Pinder.Core.Conversation
             {
                 return true;
             }
-            if (ex is System.Net.Http.HttpRequestException)
-            {
-                return true;
-            }
             if (ex is LlmTransportException transportEx)
             {
                 return transportEx.FailureKind == LlmFailureKind.RateLimited ||
                        transportEx.FailureKind == LlmFailureKind.Network;
-            }
-
-            string msg = ex.Message ?? "";
-            if (msg.IndexOf("429", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                msg.IndexOf("503", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                msg.IndexOf("rate limit", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                msg.IndexOf("thrott", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                msg.IndexOf("timeout", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                msg.IndexOf("service unavailable", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                msg.IndexOf("temporary", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                msg.IndexOf("transient", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                msg.IndexOf("LLM failure", StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                return true;
             }
 
             return false;

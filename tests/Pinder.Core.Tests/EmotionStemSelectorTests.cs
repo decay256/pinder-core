@@ -145,6 +145,25 @@ namespace Pinder.Core.Tests
             Assert.Equal(resultA.Manner, resultB.Manner);
         }
 
+        [Fact]
+        public void DefaultRules_RegistrySizesMatchAvailableBackstoryAndStakeData()
+        {
+            Assert.Equal(
+                EmotionStemSelectionRules.BackstoryRegistrySize,
+                BackstoryValidator.RequiredCategories.Count);
+            Assert.Equal(
+                EmotionStemSelectionRules.StakeRegistrySize,
+                TestHelpers.MakeStakeLines().Count);
+            Assert.InRange(
+                EmotionStemSelectionRules.Default.MacroPhase2FavoredBackstoryIndex,
+                0,
+                EmotionStemSelectionRules.BackstoryRegistrySize - 1);
+            Assert.InRange(
+                EmotionStemSelectionRules.Default.MacroPhase3FavoredStakeIndex,
+                0,
+                EmotionStemSelectionRules.StakeRegistrySize - 1);
+        }
+
         // =====================================================================
         // NEW TESTS FOR ISSUE #1279
         // =====================================================================

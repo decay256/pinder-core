@@ -71,6 +71,36 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             }
         }
 
+        private sealed class ErrorHandler : HttpMessageHandler
+        {
+            private readonly HttpStatusCode _statusCode;
+
+            public ErrorHandler(HttpStatusCode statusCode)
+            {
+                _statusCode = statusCode;
+            }
+
+            protected override Task<HttpResponseMessage> SendAsync(
+                HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
+            {
+                var response = new HttpResponseMessage(_statusCode)
+                {
+                    Content = new StringContent("{\"error\":\"transient\"}", Encoding.UTF8, "application/json")
+                };
+                response.Headers.TryAddWithoutValidation("Retry-After", "0");
+                return Task.FromResult(response);
+            }
+        }
+
+        private sealed class ThrowingHandler : HttpMessageHandler
+        {
+            protected override Task<HttpResponseMessage> SendAsync(
+                HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
+            {
+                throw new HttpRequestException("connection failed");
+            }
+        }
+
         [Fact]
         public async Task SendAsync_SystemBlocks_HaveCacheControlEphemeral()
         {
@@ -168,6 +198,34 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
 
             Assert.Equal("rewritten line", responseText);
             Assert.Single(handler.RequestBodies);
+        }
+
+        [Theory]
+        [InlineData(429, LlmFailureKind.RateLimited)]
+        [InlineData(503, LlmFailureKind.Network)]
+        public async Task SendAsync_HttpProviderFailure_ThrowsTypedTransportException(
+            int statusCode,
+            LlmFailureKind expectedKind)
+        {
+            using var http = new HttpClient(new ErrorHandler((HttpStatusCode)statusCode));
+            using var transport = new AnthropicTransport(TestApiKey, TestModel, http);
+
+            var ex = await Assert.ThrowsAsync<LlmTransportException>(
+                () => transport.SendAsync("sys", "user"));
+
+            Assert.Equal(expectedKind, ex.FailureKind);
+        }
+
+        [Fact]
+        public async Task SendAsync_NetworkFailure_ThrowsTypedTransportException()
+        {
+            using var http = new HttpClient(new ThrowingHandler());
+            using var transport = new AnthropicTransport(TestApiKey, TestModel, http);
+
+            var ex = await Assert.ThrowsAsync<LlmTransportException>(
+                () => transport.SendAsync("sys", "user"));
+
+            Assert.Equal(LlmFailureKind.Network, ex.FailureKind);
         }
 
         private static GameDefinition CreateGameDefinition(string improvementPrompt)

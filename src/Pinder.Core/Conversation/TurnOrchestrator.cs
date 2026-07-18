@@ -179,7 +179,8 @@ namespace Pinder.Core.Conversation
                     PreviousResolvedIndex = state.PreviousResolvedIndex
                 };
 
-                var selector = new EmotionStemSelector(42 + state.TurnNumber);
+                var selector = new EmotionStemSelector(
+                    EmotionStemSelectionRules.DeterministicSeedSalt + state.TurnNumber);
                 resolvedTarget = EmotionStemSelector.Hydrate(
                     selector.Resolve(conversationState),
                     player.Backstory,
@@ -260,65 +261,42 @@ namespace Pinder.Core.Conversation
             try
             {
                 rawOptions = await _llm.GetDialogueOptionsAsync(context, ct).ConfigureAwait(false);
-                OperationalDiagnostics.Emit(
+                OperationalDiagnostics.EmitSucceededTerminal(
                     _onDiagnostic,
-                    new OperationalDiagnosticEvent(
-                        "TurnOrchestrator",
-                        "DialogueOptionsSucceeded",
-                        OperationalDiagnosticSeverity.Info,
-                        "Dialogue options operation succeeded.",
-                        operationKind: OperationalDiagnosticOperationKind.DialogueOptions,
-                        phaseCode: LlmPhase.DialogueOptions,
-                        lifecycle: OperationalDiagnosticLifecycle.Terminal,
-                        outcome: OperationalDiagnosticOutcome.Succeeded,
-                        callId: dialogueCallId,
-                        correlationHints: new Dictionary<string, string>
-                        {
-                            ["turn"] = state.TurnNumber.ToString(System.Globalization.CultureInfo.InvariantCulture),
-                        }));
+                    "TurnOrchestrator",
+                    "DialogueOptionsSucceeded",
+                    "Dialogue options operation succeeded.",
+                    OperationalDiagnosticOperationKind.DialogueOptions,
+                    LlmPhase.DialogueOptions,
+                    dialogueCallId,
+                    state.TurnNumber);
             }
             catch (OperationCanceledException ex)
             {
-                OperationalDiagnostics.Emit(
+                OperationalDiagnostics.EmitCancelledTerminal(
                     _onDiagnostic,
-                    new OperationalDiagnosticEvent(
-                        "TurnOrchestrator",
-                        "DialogueOptionsCancelled",
-                        OperationalDiagnosticSeverity.Warning,
-                        "Dialogue options operation was cancelled.",
-                        ex,
-                        OperationalDiagnosticOperationKind.DialogueOptions,
-                        LlmPhase.DialogueOptions,
-                        OperationalDiagnosticLifecycle.Terminal,
-                        OperationalDiagnosticOutcome.Cancelled,
-                        OperationalDiagnosticFailureClassification.Cancelled,
-                        callId: dialogueCallId,
-                        correlationHints: new Dictionary<string, string>
-                        {
-                            ["turn"] = state.TurnNumber.ToString(System.Globalization.CultureInfo.InvariantCulture),
-                        }));
+                    "TurnOrchestrator",
+                    "DialogueOptionsCancelled",
+                    "Dialogue options operation was cancelled.",
+                    ex,
+                    OperationalDiagnosticOperationKind.DialogueOptions,
+                    LlmPhase.DialogueOptions,
+                    dialogueCallId,
+                    state.TurnNumber);
                 throw;
             }
             catch (Exception ex)
             {
-                OperationalDiagnostics.Emit(
+                OperationalDiagnostics.EmitFailedTerminal(
                     _onDiagnostic,
-                    new OperationalDiagnosticEvent(
-                        "TurnOrchestrator",
-                        "DialogueOptionsFailed",
-                        OperationalDiagnosticSeverity.Error,
-                        "Dialogue options operation failed.",
-                        ex,
-                        OperationalDiagnosticOperationKind.DialogueOptions,
-                        LlmPhase.DialogueOptions,
-                        OperationalDiagnosticLifecycle.Terminal,
-                        OperationalDiagnosticOutcome.Failed,
-                        OperationalDiagnostics.ClassifyException(ex),
-                        callId: dialogueCallId,
-                        correlationHints: new Dictionary<string, string>
-                        {
-                            ["turn"] = state.TurnNumber.ToString(System.Globalization.CultureInfo.InvariantCulture),
-                        }));
+                    "TurnOrchestrator",
+                    "DialogueOptionsFailed",
+                    "Dialogue options operation failed.",
+                    ex,
+                    OperationalDiagnosticOperationKind.DialogueOptions,
+                    LlmPhase.DialogueOptions,
+                    dialogueCallId,
+                    state.TurnNumber);
                 throw;
             }
 

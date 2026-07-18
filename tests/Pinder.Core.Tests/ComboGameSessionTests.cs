@@ -1,12 +1,10 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Pinder.Core.Characters;
 using Pinder.Core.Conversation;
-using Pinder.Core.Interfaces;
 using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
+using Pinder.Core.TestCommon;
 using Pinder.Core.Traps;
 using Xunit;
 
@@ -16,46 +14,9 @@ namespace Pinder.Core.Tests
     /// LLM adapter that returns options with specific stats, allowing combo testing.
     /// </summary>
     [Trait("Category", "Core")]
-    public sealed class ComboTestLlmAdapter : ILlmAdapter
+    public sealed class ComboTestLlmAdapter : StubLlmAdapter
     {
-        private readonly Queue<DialogueOption[]> _optionSets = new Queue<DialogueOption[]>();
-
-        public void EnqueueOptions(params DialogueOption[] options)
-        {
-            _optionSets.Enqueue(options);
-        }
-
-        public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, System.Threading.CancellationToken ct = default)
-        {
-            if (_optionSets.Count > 0)
-                return Task.FromResult(_optionSets.Dequeue());
-
-            // Default fallback
-            return Task.FromResult(new[]
-            {
-                new DialogueOption(StatType.Charm, "Default option")
-            });
-        }
-
-
-        public Task<DateeResponse> GetDateeResponseAsync(DateeContext context, System.Threading.CancellationToken ct = default)
-        {
-            return Task.FromResult(new DateeResponse("..."));
-        }
-
-        public Task<string?> GetInterestChangeBeatAsync(InterestChangeContext context, System.Threading.CancellationToken ct = default)
-        {
-            return Task.FromResult<string?>(null);
-        }
-        public System.Threading.Tasks.Task<string> ApplyHorninessOverlayAsync(string message, string instruction, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
-            public System.Threading.Tasks.Task<string> ApplyShadowCorruptionAsync(string message, string instruction, Pinder.Core.Stats.ShadowStatType shadow, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
-            public System.Threading.Tasks.Task<string> ApplyTrapOverlayAsync(string message, string trapInstruction, string trapName, string? dateeContext = null, string? archetypeDirective = null, System.Threading.CancellationToken ct = default) => System.Threading.Tasks.Task.FromResult(message);
-    
-        public System.Threading.Tasks.Task<string> ApplyFailureCorruptionAsync(string message, string instruction, Pinder.Core.Stats.StatType stat, Pinder.Core.Rolls.FailureTier tier, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
-        {
-            return System.Threading.Tasks.Task.FromResult(message);
-        }
-}
+    }
 
     [Trait("Category", "Core")]
     public class ComboGameSessionTests
@@ -67,7 +28,19 @@ namespace Pinder.Core.Tests
                 assembledSystemPrompt: $"You are {name}.",
                 displayName: name,
                 timing: new TimingProfile(5, 0.0f, 0.0f, "neutral"),
-                level: 1);
+                level: 1,
+                psychiatricDiagnosis: ValidDiagnosis(),
+                backstory: TestHelpers.MakeBackstory(),
+                stakeLines: TestHelpers.MakeStakeLines());
+        }
+
+        private static IReadOnlyDictionary<string, string> ValidDiagnosis()
+        {
+            return new Dictionary<string, string>
+            {
+                ["derived_feeling"] = "curious",
+                ["defense_reaction"] = "guarded",
+            };
         }
 
         /// <summary>

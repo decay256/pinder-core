@@ -197,6 +197,7 @@ namespace Pinder.LlmAdapters.OpenAi
                                     model: model,
                                     phase: phase,
                                     body: errorBody));
+                                ex.Data["StatusCode"] = statusCode;
                                 EmitFailedTelemetry(telemetry, provider, model, phase, statusCode, attempt, duration, ex);
                                 throw ex;
                             }
@@ -219,6 +220,7 @@ namespace Pinder.LlmAdapters.OpenAi
                                     model: model,
                                     phase: phase,
                                     body: errorBody));
+                                ex.Data["StatusCode"] = statusCode;
                                 EmitFailedTelemetry(telemetry, provider, model, phase, statusCode, attempt, duration, ex);
                                 throw ex;
                             }
@@ -237,6 +239,7 @@ namespace Pinder.LlmAdapters.OpenAi
                             model: model,
                             phase: phase,
                             body: errorBody));
+                        nonRetryable.Data["StatusCode"] = statusCode;
                         EmitFailedTelemetry(telemetry, provider, model, phase, statusCode, attempt, duration, nonRetryable);
                         throw nonRetryable;
                     }

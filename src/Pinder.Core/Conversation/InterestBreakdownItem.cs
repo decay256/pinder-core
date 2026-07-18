@@ -10,7 +10,7 @@ namespace Pinder.Core.Conversation
         /// <summary>
         /// Stable machine-readable key identifying the source of this delta.
         /// Defined values: base_roll, risk_tier, combo, shadow_misfire,
-        /// horniness_trope_trap, delay_penalty.
+        /// horniness_trope_trap, active_trap_penalty.
         /// </summary>
         public string Source { get; }
 

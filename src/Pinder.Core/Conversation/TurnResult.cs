@@ -124,7 +124,7 @@ namespace Pinder.Core.Conversation
         /// <see cref="InterestBreakdownItem.Delta"/> values equals
         /// <see cref="InterestDelta"/> (sum invariant).
         /// Sources: base_roll, risk_tier, combo, shadow_misfire,
-        /// horniness_trope_trap, delay_penalty.
+        /// horniness_trope_trap, active_trap_penalty.
         /// </summary>
         public IReadOnlyList<InterestBreakdownItem> InterestBreakdown { get; }
 
@@ -175,7 +175,6 @@ namespace Pinder.Core.Conversation
             ShadowCheckResult shadowCheck = null,
             string? trapClearedDisplayName = null,
             int shadowInterestDelta = 0,
-            int delayPenalty = 0,
             int activeTrapInterestPenalty = 0,
             int activeTrapInterestBefore = 0,
             int activeTrapInterestPenaltyPercent = 0,
@@ -223,7 +222,7 @@ namespace Pinder.Core.Conversation
             XpBreakdown = xpBreakdown ?? Array.Empty<XpLedger.XpEvent>();
             InterestBreakdown = BuildBreakdown(
                 baseInterestDelta, riskBonusDelta, comboBonusDelta,
-                shadowInterestDelta, horninessInterestPenalty, delayPenalty, activeTrapInterestPenalty);
+                shadowInterestDelta, horninessInterestPenalty, activeTrapInterestPenalty);
         }
 
         private static IReadOnlyList<InterestBreakdownItem> BuildBreakdown(
@@ -232,10 +231,9 @@ namespace Pinder.Core.Conversation
             int comboBonus,
             int shadowDelta,
             int horninesspenalty,
-            int delayPenalty,
             int activeTrapPenalty)
         {
-            var items = new List<InterestBreakdownItem>(7);
+            var items = new List<InterestBreakdownItem>(6);
             if (baseDelta != 0)
                 items.Add(new InterestBreakdownItem("base_roll", "Base roll", baseDelta));
             if (riskBonus != 0)
@@ -246,8 +244,6 @@ namespace Pinder.Core.Conversation
                 items.Add(new InterestBreakdownItem("shadow_misfire", "Shadow misfire correction", shadowDelta));
             if (horninesspenalty != 0)
                 items.Add(new InterestBreakdownItem("horniness_trope_trap", "Horniness trope-trap", horninesspenalty));
-            if (delayPenalty != 0)
-                items.Add(new InterestBreakdownItem("delay_penalty", "Delay penalty", delayPenalty));
             if (activeTrapPenalty != 0)
                 items.Add(new InterestBreakdownItem("active_trap_penalty", "Active trap penalty", activeTrapPenalty));
             return items.AsReadOnly();

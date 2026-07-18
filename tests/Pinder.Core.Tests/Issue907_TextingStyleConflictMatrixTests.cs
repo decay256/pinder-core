@@ -63,6 +63,41 @@ conflicts:
         }
 
         [Fact]
+        public void LoadFrom_StructuredYaml_AllowsFlowKeyReorderingQuotedColonsAndMultilineReasons()
+        {
+            const string yaml = @"
+conflicts:
+  - axis_a: { value: ""compact, but layered: two beats"", axis: length }
+    axis_b:
+      value: ""always ends with a question, even when not asking""
+      axis: tics
+    reason: >-
+      Compact values with colons and commas still parse through
+      the structured YAML loader.
+";
+            var c = TextingStyleConflicts.LoadFrom(yaml);
+
+            var entry = Assert.Single(c.Entries);
+            Assert.Equal("length", entry.AxisA);
+            Assert.Equal("compact, but layered: two beats", entry.ValueA);
+            Assert.Equal("tics", entry.AxisB);
+            Assert.Contains("structured YAML loader", entry.Reason);
+        }
+
+        [Fact]
+        public void LoadFrom_UnknownAxis_ThrowsFormatException()
+        {
+            const string yaml = @"
+conflicts:
+  - axis_a: { axis: unknown_axis, value: ""value"" }
+    axis_b: { axis: length, value: ""other"" }
+    reason: ""bad axis""
+";
+            var ex = Assert.Throws<FormatException>(() => TextingStyleConflicts.LoadFrom(yaml));
+            Assert.Contains("unknown_axis", ex.Message);
+        }
+
+        [Fact]
         public void LoadFrom_AllEntriesHaveNonEmptyReason()
         {
             var c = TextingStyleConflicts.LoadFrom(MinimalConflictsYaml);

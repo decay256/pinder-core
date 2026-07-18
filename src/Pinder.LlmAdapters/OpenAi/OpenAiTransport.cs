@@ -1,4 +1,5 @@
 using System;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -89,14 +90,25 @@ namespace Pinder.LlmAdapters.OpenAi
             string requestJson = JsonConvert.SerializeObject(request);
             // #794: forward the engine-level cancellation token to the underlying
             // HTTP call so a mid-turn Cancel() halts the in-flight request.
-            var (text, rawJson) = await _client.SendChatCompletionWithUsageAsync(
-                requestJson,
-                ct,
-                _telemetry,
-                provider: "openai-compatible",
-                phase: phase).ConfigureAwait(false);
-            _usageCollector.Collect(rawJson);
-            return text;
+            try
+            {
+                var (text, rawJson) = await _client.SendChatCompletionWithUsageAsync(
+                    requestJson,
+                    ct,
+                    _telemetry,
+                    provider: "openai-compatible",
+                    phase: phase).ConfigureAwait(false);
+                _usageCollector.Collect(rawJson);
+                return text;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (HttpRequestException ex)
+            {
+                throw NormalizeHttpFailure(ex);
+            }
         }
 
         public async Task<StructuredLlmResponse> SendStructuredAsync(
@@ -118,20 +130,31 @@ namespace Pinder.LlmAdapters.OpenAi
                     }
                 };
                 string fallbackRequestJson = JsonConvert.SerializeObject(fallbackRequest);
-                var (text, fallbackRawJson) = await _client.SendChatCompletionWithUsageAsync(
-                    fallbackRequestJson,
-                    ct,
-                    _telemetry,
-                    provider: "openai-compatible",
-                    phase: structuredRequest.Phase).ConfigureAwait(false);
-                _usageCollector.Collect(fallbackRawJson);
-                return new StructuredLlmResponse(
-                    text,
-                    provider: "openai-compatible",
-                    model: _model,
-                    usedNativeStructuredOutput: false,
-                    providerRequestJson: fallbackRequestJson,
-                    validationMode: "local_validation");
+                try
+                {
+                    var (text, fallbackRawJson) = await _client.SendChatCompletionWithUsageAsync(
+                        fallbackRequestJson,
+                        ct,
+                        _telemetry,
+                        provider: "openai-compatible",
+                        phase: structuredRequest.Phase).ConfigureAwait(false);
+                    _usageCollector.Collect(fallbackRawJson);
+                    return new StructuredLlmResponse(
+                        text,
+                        provider: "openai-compatible",
+                        model: _model,
+                        usedNativeStructuredOutput: false,
+                        providerRequestJson: fallbackRequestJson,
+                        validationMode: "local_validation");
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+                catch (HttpRequestException ex)
+                {
+                    throw NormalizeHttpFailure(ex);
+                }
             }
 
             var systemContent = OpenAiCacheControl.BuildSystemContent(
@@ -160,26 +183,50 @@ namespace Pinder.LlmAdapters.OpenAi
             };
 
             string requestJson = JsonConvert.SerializeObject(request);
-            var (_, rawJson) = await _client.SendChatCompletionWithUsageAsync(
-                requestJson,
-                ct,
-                _telemetry,
-                provider: "openai-compatible",
-                phase: structuredRequest.Phase).ConfigureAwait(false);
-            _usageCollector.Collect(rawJson);
+            try
+            {
+                var (_, rawJson) = await _client.SendChatCompletionWithUsageAsync(
+                    requestJson,
+                    ct,
+                    _telemetry,
+                    provider: "openai-compatible",
+                    phase: structuredRequest.Phase).ConfigureAwait(false);
+                _usageCollector.Collect(rawJson);
 
-            string jsonText = OpenAiClient.ExtractAssistantContentOnly(rawJson);
-            return new StructuredLlmResponse(
-                jsonText,
-                provider: "openai-compatible",
-                model: _model,
-                usedNativeStructuredOutput: true,
-                providerRequestJson: requestJson,
-                validationMode: "openai_json_schema");
+                string jsonText = OpenAiClient.ExtractAssistantContentOnly(rawJson);
+                return new StructuredLlmResponse(
+                    jsonText,
+                    provider: "openai-compatible",
+                    model: _model,
+                    usedNativeStructuredOutput: true,
+                    providerRequestJson: requestJson,
+                    validationMode: "openai_json_schema");
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (HttpRequestException ex)
+            {
+                throw NormalizeHttpFailure(ex);
+            }
         }
 
         /// <inheritdoc />
         public SessionTokenUsage GetSessionUsage() => _usageCollector.GetSessionUsage();
+
+        private static LlmTransportException NormalizeHttpFailure(HttpRequestException ex)
+        {
+            var kind = LlmFailureKind.Network;
+            if (ex.Data.Contains("StatusCode") && ex.Data["StatusCode"] is int statusCode)
+            {
+                kind = statusCode == 429
+                    ? LlmFailureKind.RateLimited
+                    : statusCode >= 500 ? LlmFailureKind.Network : LlmFailureKind.Unknown;
+            }
+
+            return new LlmTransportException(ex.Message, kind, ex);
+        }
 
         public void Dispose()
         {

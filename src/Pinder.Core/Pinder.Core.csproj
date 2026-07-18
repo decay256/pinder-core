@@ -21,6 +21,7 @@
   <ItemGroup>
     <!-- IAsyncEnumerable<T> + [EnumeratorCancellation] for netstandard2.0 -->
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />
+    <PackageReference Include="YamlDotNet" Version="16.3.0" />
     <!--
       System.Text.Json provides Utf8JsonWriter for CharacterDefinitionWriter
       (issue #815). Pinder.SessionSetup already takes the same dep at the

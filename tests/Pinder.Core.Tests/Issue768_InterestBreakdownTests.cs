@@ -55,7 +55,6 @@ namespace Pinder.Core.Tests
             int comboBonusDelta = 0,
             int shadowInterestDelta = 0,
             int horninessInterestPenalty = 0,
-            int delayPenalty = 0,
             RollResult? roll = null,
             GameStateSnapshot? stateAfter = null)
         {
@@ -72,8 +71,7 @@ namespace Pinder.Core.Tests
                 riskBonusDelta: riskBonusDelta,
                 comboBonusDelta: comboBonusDelta,
                 shadowInterestDelta: shadowInterestDelta,
-                horninessInterestPenalty: horninessInterestPenalty,
-                delayPenalty: delayPenalty);
+                horninessInterestPenalty: horninessInterestPenalty);
         }
 
         // ── Sum invariant tests ───────────────────────────────────────────────
@@ -212,14 +210,12 @@ namespace Pinder.Core.Tests
                 riskBonusDelta: 0,
                 comboBonusDelta: 0,
                 shadowInterestDelta: 0,
-                horninessInterestPenalty: 0,
-                delayPenalty: 0);
+                horninessInterestPenalty: 0);
 
             Assert.DoesNotContain(result.InterestBreakdown, x => x.Source == "risk_tier");
             Assert.DoesNotContain(result.InterestBreakdown, x => x.Source == "combo");
             Assert.DoesNotContain(result.InterestBreakdown, x => x.Source == "shadow_misfire");
             Assert.DoesNotContain(result.InterestBreakdown, x => x.Source == "horniness_trope_trap");
-            Assert.DoesNotContain(result.InterestBreakdown, x => x.Source == "delay_penalty");
         }
 
         /// <summary>
@@ -238,23 +234,6 @@ namespace Pinder.Core.Tests
         }
 
         // ── Delay penalty ─────────────────────────────────────────────────────
-
-        /// <summary>
-        /// Delay penalty source key present and included when non-zero.
-        /// (Defined but always 0 in the current ResolveTurnAsync interest path.)
-        /// </summary>
-        [Fact]
-        public void Breakdown_DelayPenalty_IncludedWhenNonZero()
-        {
-            var result = MakeTurnResult(
-                interestDelta: 0,
-                baseInterestDelta: 1,
-                delayPenalty: -1);
-
-            Assert.Equal(0, result.InterestBreakdown.Sum(x => x.Delta));
-            Assert.Contains(result.InterestBreakdown, x => x.Source == "delay_penalty" && x.Delta == -1);
-            Assert.Equal("Delay penalty", result.InterestBreakdown.First(x => x.Source == "delay_penalty").Label);
-        }
 
         // ── ShadowInterestDelta property ──────────────────────────────────────
 

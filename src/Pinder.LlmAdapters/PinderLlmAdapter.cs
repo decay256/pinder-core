@@ -361,24 +361,10 @@ namespace Pinder.LlmAdapters
                 var responseText = await SendWithDiagnosticsAsync(_transport, systemPrompt, userContent, temperature, _options.MaxTokens, LlmPhase.InterestChangeBeat, null, ct)
                     .ConfigureAwait(false);
 
-                var trimmed = responseText?.Trim();
-                if (string.IsNullOrWhiteSpace(trimmed))
-                {
-                    RaiseOverlayDegraded(new OverlayDegradedEvent(
-                        overlayType: "interest_beat",
-                        provider: "primary",
-                        model: null,
-                        reason: "empty_output",
-                        outcome: OverlayOutcome.Degraded
-                    ));
-                    return null;
-                }
-
-                // Strip surrounding quotes if present
-                if (trimmed.Length >= 2 && trimmed[0] == '"' && trimmed[trimmed.Length - 1] == '"')
-                    trimmed = trimmed.Substring(1, trimmed.Length - 2).Trim();
-
-                return trimmed;
+                return NormalizeSingleTextOutput(
+                    responseText,
+                    "interest_beat",
+                    rejectEllipsis: false);
             }
             catch (OperationCanceledException) when (ct.IsCancellationRequested)
             {
@@ -691,18 +677,12 @@ namespace Pinder.LlmAdapters
             var responseText = await SendWithDiagnosticsAsync(_transport, systemPrompt, userContent, 0.8, _options.MaxTokens, LlmPhase.Delivery, null, ct)
                 .ConfigureAwait(false);
 
-            var improved = (responseText ?? string.Empty).Trim();
-            if (string.IsNullOrWhiteSpace(improved) || string.Equals(improved, "...", StringComparison.OrdinalIgnoreCase))
-            {
-                RaiseOverlayDegraded(new OverlayDegradedEvent(
-                    overlayType: "success_improvement",
-                    provider: "primary",
-                    model: null,
-                    reason: "empty_output",
-                    outcome: OverlayOutcome.Degraded
-                ));
+            var improved = NormalizeSingleTextOutput(
+                responseText,
+                "success_improvement",
+                rejectEllipsis: true);
+            if (improved == null)
                 return context.DeliveredMessage;
-            }
 
             if (Pinder.Core.Conversation.SuccessImprovementValidator.IsRejected(improved))
             {
@@ -715,9 +695,6 @@ namespace Pinder.LlmAdapters
                 ));
                 return context.DeliveredMessage;
             }
-
-            if (improved.Length >= 2 && improved[0] == '"' && improved[improved.Length - 1] == '"')
-                improved = improved.Substring(1, improved.Length - 2).Trim();
 
             return improved;
         }
@@ -756,23 +733,10 @@ namespace Pinder.LlmAdapters
             // ThinkingStrippingLlmTransport (transport decorator). The
             // steering question now arrives already stripped, so we only
             // trim here.
-            var question = (responseText ?? string.Empty).Trim();
-            if (string.IsNullOrWhiteSpace(question))
-            {
-                RaiseOverlayDegraded(new OverlayDegradedEvent(
-                    overlayType: "steering",
-                    provider: "primary",
-                    model: null,
-                    reason: "empty_output",
-                    outcome: OverlayOutcome.Degraded
-                ));
-                return string.Empty;
-            }
-
-            if (question.Length >= 2 && question[0] == '"' && question[question.Length - 1] == '"')
-                question = question.Substring(1, question.Length - 2).Trim();
-
-            return question;
+            return NormalizeSingleTextOutput(
+                responseText,
+                "steering",
+                rejectEllipsis: false) ?? string.Empty;
         }
 
         public async Task<string> GetHorninessQuestionAsync(HorninessQuestionContext context, CancellationToken ct = default)
@@ -804,21 +768,12 @@ namespace Pinder.LlmAdapters
             var responseText = await SendWithDiagnosticsAsync(_transport, systemPrompt, prompt, 0.9, _options.MaxTokens, LlmPhase.HorninessOverlay, null, ct)
                 .ConfigureAwait(false);
 
-            var question = (responseText ?? string.Empty).Trim();
-            if (string.IsNullOrWhiteSpace(question))
-            {
-                RaiseOverlayDegraded(new OverlayDegradedEvent(
-                    overlayType: "horniness_question",
-                    provider: "primary",
-                    model: null,
-                    reason: "empty_output",
-                    outcome: OverlayOutcome.Degraded
-                ));
+            var question = NormalizeSingleTextOutput(
+                responseText,
+                "horniness_question",
+                rejectEllipsis: false);
+            if (question == null)
                 throw new InvalidOperationException("LLM horniness_question output is empty or whitespace.");
-            }
-
-            if (question.Length >= 2 && question[0] == '"' && question[question.Length - 1] == '"')
-                question = question.Substring(1, question.Length - 2).Trim();
 
             return question;
         }
@@ -1006,6 +961,32 @@ namespace Pinder.LlmAdapters
             }
 
             return OverlayRewriteResult.Success(trimmed);
+        }
+
+        private string? NormalizeSingleTextOutput(
+            string? result,
+            string overlayType,
+            bool rejectEllipsis,
+            bool stripQuotes = true)
+        {
+            string trimmed = (result ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(trimmed) ||
+                (rejectEllipsis && string.Equals(trimmed, "...", StringComparison.OrdinalIgnoreCase)))
+            {
+                RaiseOverlayDegraded(new OverlayDegradedEvent(
+                    overlayType: overlayType,
+                    provider: OverlayProviderPrimary,
+                    model: null,
+                    reason: OverlayReasonEmptyOutput,
+                    outcome: OverlayOutcome.Degraded
+                ));
+                return null;
+            }
+
+            if (stripQuotes && trimmed.Length >= 2 && trimmed[0] == '"' && trimmed[trimmed.Length - 1] == '"')
+                trimmed = trimmed.Substring(1, trimmed.Length - 2).Trim();
+
+            return trimmed;
         }
 
         private static bool IsOverlayRefusal(string trimmed)
