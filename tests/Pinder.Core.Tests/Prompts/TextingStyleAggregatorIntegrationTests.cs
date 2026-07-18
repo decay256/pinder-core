@@ -6,6 +6,7 @@ using Pinder.Core.Characters;
 using Pinder.Core.Data;
 using Pinder.Core.Interfaces;
 using Pinder.Core.Prompts;
+using Pinder.LlmAdapters;
 using Pinder.SessionSetup;
 using Xunit;
 
@@ -58,7 +59,7 @@ namespace Pinder.Core.Tests.Prompts
         {
             var yaml = File.ReadAllText(
                 Path.Combine(RepoRoot, "data", "persona", "texting-style-conflicts.yaml"));
-            return TextingStyleConflicts.LoadFrom(yaml);
+            return TextingStyleConflictYamlLoader.LoadFrom(yaml);
         }
 
         private static IItemRepository LoadItemRepo()

@@ -55,4 +55,5 @@ public sealed class FixedGameClock : IGameClock
 - `IGameClock`, `TimeOfDay` (from #139 Wave 0)
 
 ## Consumers
-- #51 (Horniness), #55 (PlayerResponseDelay), #56 (ConversationRegistry)
+- #51 (Horniness), #56 (ConversationRegistry)
+- #55 (PlayerResponseDelay) is retired and is not a current GameClock consumer.

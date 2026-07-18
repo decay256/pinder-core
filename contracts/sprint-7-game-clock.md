@@ -83,5 +83,5 @@ public sealed class FixedGameClock : IGameClock
 
 ## Consumers
 - #51 (Horniness-forced Rizz — uses `GetHorninessModifier()`)
-- #55 (PlayerResponseDelay — caller computes delay from clock, not the evaluator itself)
+- #55 is retired: GameClock is not consumed by a player-response-delay evaluator in the current API.
 - #56 (ConversationRegistry — `FastForward` advances clock, `ConsumeEnergy` pass-through)

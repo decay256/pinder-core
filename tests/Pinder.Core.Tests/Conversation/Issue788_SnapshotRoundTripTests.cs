@@ -288,5 +288,90 @@ namespace Pinder.Core.Tests.Conversation
             Assert.Equal("assistant", snap.AvatarHistory[3].Role);
             Assert.Equal("second avatar reply", snap.AvatarHistory[3].Content);
         }
+
+        [Fact]
+        public void RestoreState_WithMalformedPersistedRole_IsAtomic()
+        {
+            var session = new GameSession(
+                MakeProfile("P1"),
+                MakeProfile("P2"),
+                new NullLlmAdapter(),
+                new FixedDice(5),
+                new NullTrapRegistry(),
+                new GameSessionConfig(clock: TestHelpers.MakeClock()));
+
+            session.RestoreState(new ResimulateData
+            {
+                TargetInterest = 14,
+                TurnNumber = 3,
+                MomentumStreak = 2,
+                ConversationHistory = new List<(string, string)>
+                {
+                    ("P1", "kept player line"),
+                    ("P2", "kept datee line"),
+                },
+                DateeHistory = new List<(string, string)>
+                {
+                    ("user", "kept datee prompt"),
+                    ("assistant", "kept datee reply"),
+                },
+                AvatarHistory = new List<(string, string)>
+                {
+                    ("user", "kept avatar prompt"),
+                    ("assistant", "kept avatar reply"),
+                },
+                ComboHistory = new List<(string, bool)>(),
+                PendingTripleBonus = true,
+                RizzCumulativeFailureCount = 1,
+            }, new NullTrapRegistry());
+
+            var before = session.CreateSnapshot();
+            var conversationBefore = session.ConversationHistory
+                .Select(e => (e.Sender, e.Text))
+                .ToList();
+            var dateeBefore = session.DateeHistory
+                .Select(m => (m.Role, m.Content))
+                .ToList();
+            var avatarBefore = session.AvatarHistory
+                .Select(m => (m.Role, m.Content))
+                .ToList();
+
+            var badRestore = new ResimulateData
+            {
+                TargetInterest = 1,
+                TurnNumber = 99,
+                MomentumStreak = 99,
+                ConversationHistory = new List<(string, string)>
+                {
+                    ("P1", "replacement line"),
+                },
+                DateeHistory = new List<(string, string)>
+                {
+                    ("system", "unsupported role"),
+                },
+                AvatarHistory = new List<(string, string)>
+                {
+                    ("user", "replacement avatar prompt"),
+                },
+                ComboHistory = new List<(string, bool)>(),
+                PendingTripleBonus = false,
+                RizzCumulativeFailureCount = 99,
+            };
+
+            var ex = Assert.Throws<InvalidOperationException>(
+                () => session.RestoreState(badRestore, new NullTrapRegistry()));
+
+            Assert.Contains("datee", ex.Message);
+            Assert.Contains("role", ex.Message);
+
+            var after = session.CreateSnapshot();
+            Assert.Equal(before.Interest, after.Interest);
+            Assert.Equal(before.MomentumStreak, after.MomentumStreak);
+            Assert.Equal(before.TurnNumber, after.TurnNumber);
+            Assert.Equal(before.TripleBonusActive, after.TripleBonusActive);
+            Assert.Equal(conversationBefore, session.ConversationHistory.Select(e => (e.Sender, e.Text)).ToList());
+            Assert.Equal(dateeBefore, session.DateeHistory.Select(m => (m.Role, m.Content)).ToList());
+            Assert.Equal(avatarBefore, session.AvatarHistory.Select(m => (m.Role, m.Content)).ToList());
+        }
     }
 }

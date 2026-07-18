@@ -211,9 +211,13 @@ namespace Pinder.LlmAdapters.Anthropic
             }
             catch (AnthropicApiException ex)
             {
-                LlmFailureKind kind = ex.StatusCode == 429
-                    ? LlmFailureKind.RateLimited
-                    : ex.StatusCode >= 500 ? LlmFailureKind.Network : LlmFailureKind.Unknown;
+                LlmFailureKind kind = ex.StatusCode == 401
+                    ? LlmFailureKind.Unauthorized
+                    : ex.StatusCode == 404
+                        ? LlmFailureKind.ModelNotFound
+                        : ex.StatusCode == 429
+                            ? LlmFailureKind.RateLimited
+                            : ex.StatusCode >= 500 ? LlmFailureKind.Network : LlmFailureKind.Unknown;
                 throw new LlmTransportException(ex.Message, kind, ex);
             }
             catch (System.Net.Http.HttpRequestException ex)

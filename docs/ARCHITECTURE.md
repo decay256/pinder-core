@@ -289,7 +289,7 @@ Dice abstraction for deterministic testing.
 
 ### IRuleResolver
 
-Data-driven game constant resolution. When injected, GameSession calls it first and falls back to hardcoded values when it returns null.
+Data-driven game constant resolution. `Pinder.Core` defines the interface but owns no built-in rule table and fabricates no fallback values. Production composition roots load a resolver from real configuration and pass it explicitly (for example through `GameSessionConfig.Rules`) or register it at the host boundary via `DefaultRuleResolver.Instance`.
 
 | Method | Purpose |
 |---|---|
@@ -300,7 +300,7 @@ Data-driven game constant resolution. When injected, GameSession calls it first 
 | `GetMomentumBonus(streak)` | §15 streak → roll bonus |
 | `GetRiskTierXpMultiplier(riskTier)` | §15 risk → XP multiplier |
 
-**Implementation:** `RuleBookResolver` (in Pinder.Rules)
+**Implementations:** `GameDefinition` (loaded from `data/game-definition.yaml` in Pinder.LlmAdapters) and `RuleBookResolver` (in Pinder.Rules). Missing required production rule values fail instead of falling back to Core constants; only explicit partial test/dev resolvers may opt into a host-registered default resolver with `AllowDefaultFallback`.
 
 ## 4a. Roll Outcomes — Risk Tiers and Failure Tiers
 
@@ -441,7 +441,7 @@ for the full rationale.
 | `data/characters/*.json` | Character definitions (items, anatomy, stats) | `CharacterDefinitionLoader` | `displayName`, `stats`, `equippedItems`, `anatomy`, `textingStyle` |
 | `data/items/starter-items.json` | Item catalog (stat modifiers, fragments) | `JsonItemRepository` | `id`, `statModifiers`, `promptFragment` |
 | `data/anatomy/anatomy-parameters.json` | Anatomy options (stat modifiers, fragments) | `JsonAnatomyRepository` | `id`, `statModifiers`, `promptFragment` |
-| `data/timing/response-profiles.json` | Datee response delay curves | `CharacterProfile.Timing` | `baseDelay`, `interestMultiplier` |
+| `data/timing/response-profiles.json` | Datee/NPC response presentation timing only; not the retired player-delay penalty subsystem | `CharacterProfile.Timing` | `baseDelay`, `interestMultiplier` |
 
 ## 6. LLM Call Types
 
@@ -500,7 +500,7 @@ Called on failed horniness check. Receives the delivered message + tier-specific
 - No `?? default` patterns for required configuration
 - `GameClock` is required — constructor throws if null
 - `GameDefinition.LoadFrom()` throws on missing required keys
-- `IRuleResolver` returns null → caller uses hardcoded fallback (this is the one intentional fallback pattern)
+- `IRuleResolver` has no Core-owned hardcoded fallback; production resolvers must be complete, and missing required values fail. Partial test/dev resolvers can only fall back to an explicitly host-registered resolver when `AllowDefaultFallback` is true.
 
 ### Source of truth hierarchy
 1. **`GameSession.cs`** — the code is the canonical specification

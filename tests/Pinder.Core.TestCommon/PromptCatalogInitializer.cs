@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using Pinder.Core.Characters;
+using Pinder.Core.Interfaces;
 using Pinder.Core.Prompts;
 using Pinder.LlmAdapters;
 using Pinder.SessionSetup;
@@ -38,7 +39,14 @@ namespace Pinder.Core.TestCommon
                         if (File.Exists(conflictsPath))
                         {
                             TextingStyleAggregator.ConflictCatalog =
-                                TextingStyleConflicts.LoadFrom(File.ReadAllText(conflictsPath));
+                                TextingStyleConflictYamlLoader.LoadFrom(File.ReadAllText(conflictsPath));
+                        }
+
+                        var gameDefinitionPath = Path.Combine(dataRoot, "game-definition.yaml");
+                        if (File.Exists(gameDefinitionPath))
+                        {
+                            DefaultRuleResolver.Instance =
+                                GameDefinition.LoadFrom(File.ReadAllText(gameDefinitionPath));
                         }
                     }
                     return;

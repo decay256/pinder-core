@@ -220,9 +220,13 @@ namespace Pinder.LlmAdapters.OpenAi
             var kind = LlmFailureKind.Network;
             if (ex.Data.Contains("StatusCode") && ex.Data["StatusCode"] is int statusCode)
             {
-                kind = statusCode == 429
-                    ? LlmFailureKind.RateLimited
-                    : statusCode >= 500 ? LlmFailureKind.Network : LlmFailureKind.Unknown;
+                kind = statusCode == 401
+                    ? LlmFailureKind.Unauthorized
+                    : statusCode == 404
+                        ? LlmFailureKind.ModelNotFound
+                        : statusCode == 429
+                            ? LlmFailureKind.RateLimited
+                            : statusCode >= 500 ? LlmFailureKind.Network : LlmFailureKind.Unknown;
             }
 
             return new LlmTransportException(ex.Message, kind, ex);

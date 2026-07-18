@@ -173,16 +173,16 @@ namespace Pinder.Core.Conversation
             if (data == null) throw new ArgumentNullException(nameof(data));
             if (trapRegistry == null) throw new ArgumentNullException(nameof(trapRegistry));
 
-            int interestDelta = data.TargetInterest - Interest.Current;
-            if (interestDelta != 0)
-                Interest.Apply(interestDelta);
+            var restoredInterest = new InterestMeter(data.TargetInterest);
 
+            SessionShadowTracker? restoredPlayerShadows = PlayerShadows;
             if (PlayerShadows != null && data.ShadowValues != null)
-                PlayerShadows.RestoreFromSnapshot(data.ShadowValues);
+            {
+                restoredPlayerShadows = PlayerShadows.Clone();
+                restoredPlayerShadows.RestoreFromSnapshot(data.ShadowValues);
+            }
 
-            MomentumStreak = data.MomentumStreak;
-
-            Traps.ClearAll();
+            var restoredTraps = new TrapState();
             if (data.ActiveTraps != null)
             {
                 foreach (var (statName, turnsRemaining) in data.ActiveTraps)
@@ -191,41 +191,45 @@ namespace Pinder.Core.Conversation
                     {
                         var definition = trapRegistry.GetTrap(stat);
                         if (definition != null)
-                            Traps.Activate(definition, turnsRemaining);
+                            restoredTraps.Activate(definition, turnsRemaining);
                     }
                 }
             }
 
-            History.Clear();
-            if (data.ConversationHistory != null)
-                History.AddRange(data.ConversationHistory);
+            var restoredHistory = data.ConversationHistory != null
+                ? new List<(string Sender, string Text)>(data.ConversationHistory)
+                : new List<(string Sender, string Text)>();
 
-            DateeHistory.Clear();
-            if (data.DateeHistory != null)
-            {
-                RestoreConversationHistory(DateeHistory, data.DateeHistory, "datee");
-            }
+            var restoredDateeHistory = data.DateeHistory != null
+                ? BuildConversationHistory(data.DateeHistory, "datee")
+                : new List<ConversationMessage>();
 
-            AvatarHistory.Clear();
-            if (data.AvatarHistory != null)
-            {
-                RestoreConversationHistory(AvatarHistory, data.AvatarHistory, "avatar");
-            }
+            var restoredAvatarHistory = data.AvatarHistory != null
+                ? BuildConversationHistory(data.AvatarHistory, "avatar")
+                : new List<ConversationMessage>();
 
-            TurnNumber = data.TurnNumber;
-
-            ComboTracker.RestoreFromSnapshot(
+            var restoredComboTracker = new ComboTracker();
+            restoredComboTracker.RestoreFromSnapshot(
                 data.ComboHistory ?? new List<(string StatName, bool Succeeded)>(),
                 data.PendingTripleBonus);
 
+            Interest = restoredInterest;
+            PlayerShadows = restoredPlayerShadows;
+            MomentumStreak = data.MomentumStreak;
+            Traps = restoredTraps;
+            History = restoredHistory;
+            DateeHistory = restoredDateeHistory;
+            AvatarHistory = restoredAvatarHistory;
+            TurnNumber = data.TurnNumber;
+            ComboTracker = restoredComboTracker;
             RizzCumulativeFailureCount = data.RizzCumulativeFailureCount;
         }
 
-        private static void RestoreConversationHistory(
-            ICollection<ConversationMessage> target,
+        private static List<ConversationMessage> BuildConversationHistory(
             IEnumerable<(string Role, string Content)> entries,
             string historyKind)
         {
+            var restored = new List<ConversationMessage>();
             int index = 0;
             foreach (var (role, content) in entries)
             {
@@ -237,7 +241,7 @@ namespace Pinder.Core.Conversation
 
                 try
                 {
-                    target.Add(new ConversationMessage(role, content ?? string.Empty));
+                    restored.Add(new ConversationMessage(role, content ?? string.Empty));
                 }
                 catch (ArgumentException ex)
                 {
@@ -248,6 +252,8 @@ namespace Pinder.Core.Conversation
 
                 index++;
             }
+
+            return restored;
         }
     }
 }

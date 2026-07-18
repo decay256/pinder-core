@@ -22,9 +22,8 @@ namespace Pinder.Core.Characters
     ///
     /// As of issue #1176:
     /// - Item ids are Unity-verbatim (e.g. "head_tophat", "vest1", "classic2").
-    /// - Unknown item ids (no core definition) → zero modifiers, id collected
-    ///   in <see cref="FragmentCollection.UnknownItemIds"/> for admin authoring.
-    ///   Player flow never hard-fails.
+    /// - Unknown item ids and unknown anatomy parameter ids are invalid
+    ///   authoring data and throw <see cref="FormatException"/> immediately.
     /// </summary>
     public sealed class CharacterAssembler
     {

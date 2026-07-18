@@ -114,7 +114,7 @@ namespace Pinder.SessionSetup
                 if (File.Exists(conflictsPath))
                 {
                     TextingStyleAggregator.ConflictCatalog =
-                        TextingStyleConflicts.LoadFrom(File.ReadAllText(conflictsPath));
+                        TextingStyleConflictYamlLoader.LoadFrom(File.ReadAllText(conflictsPath));
                     errorSink?.WriteLine(
                         $"[INFO] PromptWiring: loaded {TextingStyleAggregator.ConflictCatalog.Entries.Count} " +
                         $"conflict entries from {conflictsPath}");

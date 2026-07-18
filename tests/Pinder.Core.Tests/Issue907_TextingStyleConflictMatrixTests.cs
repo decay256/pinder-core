@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using Pinder.Core.Characters;
 using Pinder.Core.Prompts;
+using Pinder.LlmAdapters;
 using Xunit;
 
 namespace Pinder.Core.Tests
@@ -30,7 +31,7 @@ namespace Pinder.Core.Tests
         {
             string path = FindDataFile("persona/texting-style-conflicts.yaml");
             string yaml = File.ReadAllText(path);
-            return TextingStyleConflicts.LoadFrom(yaml);
+            return TextingStyleConflictYamlLoader.LoadFrom(yaml);
         }
 
         private const string MinimalConflictsYaml = @"
@@ -58,7 +59,7 @@ conflicts:
         [Fact]
         public void LoadFrom_MinimalYaml_LoadsSixEntries()
         {
-            var c = TextingStyleConflicts.LoadFrom(MinimalConflictsYaml);
+            var c = TextingStyleConflictYamlLoader.LoadFrom(MinimalConflictsYaml);
             Assert.Equal(6, c.Entries.Count);
         }
 
@@ -75,7 +76,7 @@ conflicts:
       Compact values with colons and commas still parse through
       the structured YAML loader.
 ";
-            var c = TextingStyleConflicts.LoadFrom(yaml);
+            var c = TextingStyleConflictYamlLoader.LoadFrom(yaml);
 
             var entry = Assert.Single(c.Entries);
             Assert.Equal("length", entry.AxisA);
@@ -93,14 +94,14 @@ conflicts:
     axis_b: { axis: length, value: ""other"" }
     reason: ""bad axis""
 ";
-            var ex = Assert.Throws<FormatException>(() => TextingStyleConflicts.LoadFrom(yaml));
+            var ex = Assert.Throws<FormatException>(() => TextingStyleConflictYamlLoader.LoadFrom(yaml));
             Assert.Contains("unknown_axis", ex.Message);
         }
 
         [Fact]
         public void LoadFrom_AllEntriesHaveNonEmptyReason()
         {
-            var c = TextingStyleConflicts.LoadFrom(MinimalConflictsYaml);
+            var c = TextingStyleConflictYamlLoader.LoadFrom(MinimalConflictsYaml);
             foreach (var entry in c.Entries)
             {
                 Assert.False(string.IsNullOrWhiteSpace(entry.Reason),
@@ -111,7 +112,7 @@ conflicts:
         [Fact]
         public void AreConflicting_KnownPair_ReturnsTrue()
         {
-            var c = TextingStyleConflicts.LoadFrom(MinimalConflictsYaml);
+            var c = TextingStyleConflictYamlLoader.LoadFrom(MinimalConflictsYaml);
             Assert.True(c.AreConflicting(
                 ("length", "never sends more than 5 words"),
                 ("length", "minimum 80 words per message, no exceptions")));
@@ -120,7 +121,7 @@ conflicts:
         [Fact]
         public void AreConflicting_IsSymmetric()
         {
-            var c = TextingStyleConflicts.LoadFrom(MinimalConflictsYaml);
+            var c = TextingStyleConflictYamlLoader.LoadFrom(MinimalConflictsYaml);
             var a = ("tics", "never asks questions, only states");
             var b = ("tics", "always ends with a question, even when not asking");
             Assert.True(c.AreConflicting(a, b), "Forward should conflict.");
@@ -130,7 +131,7 @@ conflicts:
         [Fact]
         public void AreConflicting_UnknownPair_ReturnsFalse()
         {
-            var c = TextingStyleConflicts.LoadFrom(MinimalConflictsYaml);
+            var c = TextingStyleConflictYamlLoader.LoadFrom(MinimalConflictsYaml);
             Assert.False(c.AreConflicting(
                 ("emoji", "some emoji rule"),
                 ("shorthand", "some shorthand rule")));
@@ -139,7 +140,7 @@ conflicts:
         [Fact]
         public void AreConflicting_CaseInsensitiveAxisAndValue()
         {
-            var c = TextingStyleConflicts.LoadFrom(MinimalConflictsYaml);
+            var c = TextingStyleConflictYamlLoader.LoadFrom(MinimalConflictsYaml);
             Assert.True(c.AreConflicting(
                 ("LENGTH", "never sends more than 5 words"),
                 ("LENGTH", "minimum 80 words per message, no exceptions")));
@@ -151,7 +152,7 @@ conflicts:
         [Fact]
         public void GetReason_KnownPair_ReturnsNonEmptyReason()
         {
-            var c = TextingStyleConflicts.LoadFrom(MinimalConflictsYaml);
+            var c = TextingStyleConflictYamlLoader.LoadFrom(MinimalConflictsYaml);
             var reason = c.GetReason(
                 ("structure", "wall-of-text (one paragraph, no breaks, comma splices throughout)"),
                 ("length", "never sends more than 5 words"));
@@ -162,14 +163,14 @@ conflicts:
         [Fact]
         public void GetReason_UnknownPair_ReturnsNull()
         {
-            var c = TextingStyleConflicts.LoadFrom(MinimalConflictsYaml);
+            var c = TextingStyleConflictYamlLoader.LoadFrom(MinimalConflictsYaml);
             Assert.Null(c.GetReason(("emoji", "foo"), ("shorthand", "bar")));
         }
 
         [Fact]
         public void LoadFrom_EmptyString_ReturnsEmptyCatalog()
         {
-            var c = TextingStyleConflicts.LoadFrom("");
+            var c = TextingStyleConflictYamlLoader.LoadFrom("");
             Assert.Equal(0, c.Entries.Count);
         }
 
@@ -243,7 +244,7 @@ conflicts:
         [Fact]
         public void AggregateWithAudit_ConflictingStructureVsLength_DropsLaterPicked()
         {
-            var conflicts = TextingStyleConflicts.LoadFrom(MinimalConflictsYaml);
+            var conflicts = TextingStyleConflictYamlLoader.LoadFrom(MinimalConflictsYaml);
             var sources = new List<TextingStyleFragmentSource>
             {
                 MakeItemSource("trousers", "structure",
@@ -272,7 +273,7 @@ conflicts:
         [Fact]
         public void AggregateWithAudit_ConflictingStructureVsPacing_DropsPacing()
         {
-            var conflicts = TextingStyleConflicts.LoadFrom(MinimalConflictsYaml);
+            var conflicts = TextingStyleConflictYamlLoader.LoadFrom(MinimalConflictsYaml);
             string MakeToneFragment(string pacingKey, string pacingValue) =>
                 "SYNTAX:\n" +
                 "TONE:\n" +
@@ -303,7 +304,7 @@ conflicts:
         [Fact]
         public void AggregateWithAudit_NoConflicts_DropListIsEmpty()
         {
-            var conflicts = TextingStyleConflicts.LoadFrom(MinimalConflictsYaml);
+            var conflicts = TextingStyleConflictYamlLoader.LoadFrom(MinimalConflictsYaml);
             var sources = new List<TextingStyleFragmentSource>
             {
                 MakeItemSource("shoes", "emoji", "a safe emoji rule"),
@@ -334,7 +335,7 @@ conflicts:
         [Fact]
         public void AggregateWithAudit_AuditEntry_ContainsAllRequiredFields()
         {
-            var conflicts = TextingStyleConflicts.LoadFrom(MinimalConflictsYaml);
+            var conflicts = TextingStyleConflictYamlLoader.LoadFrom(MinimalConflictsYaml);
             var sources = new List<TextingStyleFragmentSource>
             {
                 MakeItemSource("trousers", "structure",
@@ -359,7 +360,7 @@ conflicts:
         [Fact]
         public void AggregateWithAudit_SameSeedKeyDifferentOutput_Unused()
         {
-            var conflicts = TextingStyleConflicts.LoadFrom(MinimalConflictsYaml);
+            var conflicts = TextingStyleConflictYamlLoader.LoadFrom(MinimalConflictsYaml);
             var sources = new List<TextingStyleFragmentSource>
             {
                 MakeItemSource("shoes", "emoji", "a safe emoji rule"),

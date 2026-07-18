@@ -2,7 +2,7 @@
 
 ## Overview
 
-`GameClock` is a simulated in-game clock that tracks time-of-day in the Pinder RPG engine. It provides horniness modifiers based on time-of-day, manages a daily energy budget, and supports deterministic time advancement. The clock is injectable via the `IGameClock` interface so that consumers (GameSession, ConversationRegistry, PlayerResponseDelayEvaluator) can be tested with a `FixedGameClock` stub.
+`GameClock` is a simulated in-game clock that tracks time-of-day in the Pinder RPG engine. It provides horniness modifiers based on time-of-day, manages a daily energy budget, and supports deterministic time advancement. The clock is injectable via the `IGameClock` interface so that current consumers such as `GameSession` and `ConversationRegistry` can be tested with a `FixedGameClock` stub. The old player-response-delay evaluator is retired and is not a current consumer.
 
 ---
 
@@ -310,7 +310,7 @@ No exceptions are thrown for normal operation. `ConsumeEnergy` returns `false` (
 | Issue | Component | How it uses IGameClock |
 |---|---|---|
 | #51 | GameSession (horniness logic) | `GetHorninessModifier()`, `GetTimeOfDay()` |
-| #55 | PlayerResponseDelayEvaluator | `Now` for elapsed-time calculation |
+| #55 | Retired PlayerResponseDelay subsystem | No current GameClock consumer; no player-delay penalty API |
 | #56 | ConversationRegistry | `Now`, `Advance()`, `AdvanceTo()`, `ConsumeEnergy()` |
 
 ### Test Infrastructure

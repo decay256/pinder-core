@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using Pinder.Core.Prompts;
+using Pinder.LlmAdapters;
 
 class Program
 {
@@ -32,7 +33,7 @@ class Program
         TextingStyleConflicts conflicts;
         try
         {
-            conflicts = TextingStyleConflicts.LoadFrom(File.ReadAllText(conflictsPath));
+            conflicts = TextingStyleConflictYamlLoader.LoadFrom(File.ReadAllText(conflictsPath));
         }
         catch (Exception ex)
         {

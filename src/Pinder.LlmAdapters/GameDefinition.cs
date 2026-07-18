@@ -19,11 +19,6 @@ namespace Pinder.LlmAdapters
     /// </summary>
     public partial class GameDefinition : IRuleResolver
     {
-        static GameDefinition()
-        {
-            Pinder.Core.Interfaces.DefaultRuleResolver.Instance = PinderDefaults;
-        }
-
         /// <summary>Game name (e.g. "Pinder").</summary>
         public string Name { get; }
 

@@ -29,7 +29,7 @@ namespace Pinder.Core.Conversation
         /// <summary>
         /// Optional rule resolver for data-driven game constants.
         /// When non-null, GameSession uses this for §5/§6/§7/§15 lookups.
-        /// When null or when a lookup returns null, hardcoded fallback is used.
+        /// When null, callers that need rules must register a resolver at the host boundary.
         /// </summary>
         public IRuleResolver? Rules { get; }
 

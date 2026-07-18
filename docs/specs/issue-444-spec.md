@@ -336,9 +336,11 @@ The implementer should use **Approach B** (separate entries) as the primary appr
       Taint behaviour: Try-hard energy overtakes the message
 ```
 
-### Example 4: Timing Delay (async-time)
+### Example 4: Retired Timing Delay Rules (historical only)
 
-**Before** (from delay penalty table):
+The old async-time player response delay penalty table is retired and absent from the current API. Do not enrich or emit current rule-engine YAML for player response delay penalties, `PlayerResponseDelayEvaluator`, or `DelayPenalty`; new timing mechanics require a new current contract.
+
+**Historical before** (from retired delay penalty table):
 ```yaml
 - id: §4.delay-penalties
   section: §4
@@ -355,7 +357,7 @@ The implementer should use **Approach B** (separate entries) as the primary appr
       Penalty: "-2"
 ```
 
-**After** (enriched — separate entries):
+**Historical after** (retired enriched form, not current output):
 ```yaml
 - id: §4.delay-penalty.under-1m
   section: §4

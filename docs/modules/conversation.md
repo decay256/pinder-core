@@ -1,7 +1,7 @@
 # Conversation
 
 ## Overview
-The Conversation module implements the core game loop for Pinder's dating-conversation mechanic. It manages turn flow (Speak, Read, Recover, Wait), interest tracking, dice rolls with advantage/disadvantage, traps, combos, timing, and game outcome resolution. The central class is `GameSession`, which orchestrates all player actions and NPC responses.
+The Conversation module implements the core game loop for Pinder's dating-conversation mechanic. It manages turn flow (Speak, Read, Recover, Wait), interest tracking, dice rolls with advantage/disadvantage, traps, combos, datee response context, and game outcome resolution. The central class is `GameSession`, which orchestrates all player actions and NPC responses.
 
 ## Key Components
 
@@ -17,21 +17,17 @@ The Conversation module implements the core game loop for Pinder's dating-conver
 | `RecoverResult.cs` | Data returned by `RecoverAsync()` — roll result, trap recovery |
 | `DialogueOption.cs` | A selectable dialogue choice for a Speak turn (includes `IsUnhinged` flag for Madness T3) |
 | `DialogueContext.cs` | Context passed to the LLM adapter for generating dialogue options |
-| `DeliveryContext.cs` | Context for evaluating delivery/timing of player responses |
 | `ComboTracker.cs` | Tracks consecutive successes for combo bonuses |
 | `ComboResult.cs` | Result of a combo evaluation |
 | `CallbackOpportunity.cs` | Represents a callback opportunity during conversation |
 | `CallbackBonus.cs` | Bonus granted from callbacks |
-| `DelayPenalty.cs` | Penalty applied for slow player responses |
 | `GameClock.cs` | Tracks in-game time progression |
 | `GameOutcome.cs` | Final outcome of a session (DateSecured, Ghosted, etc.) |
 | `GameEndedException.cs` | Exception thrown when actions are attempted after game end |
 | `DateeContext.cs` | NPC datee configuration and state |
 | `DateeResponse.cs` | NPC response data |
-| `DateeTimingCalculator.cs` | Calculates NPC response timing |
-| `PlayerResponseDelayEvaluator.cs` | Evaluates player response delay for penalty calculation |
 | `Tell.cs` | Represents a behavioral tell from the NPC |
-| `TimingProfile.cs` | Timing configuration for datee responses |
+| `TimingProfile.cs` | Datee/NPC response presentation timing configuration; not a player-delay penalty API |
 | `WeaknessWindow.cs` | Represents a window where the NPC is vulnerable |
 | `NullLlmAdapter.cs` | No-op LLM adapter for testing |
 | `GameStateSnapshot.cs` | Serializable snapshot of game state |
@@ -71,6 +67,10 @@ The Conversation module implements the core game loop for Pinder's dating-conver
 - **Madness T3 unhinged option (§7):** In `StartTurnAsync()`, after the Denial T3 block and before the Horniness T3 block, if Madness ≥18, one random option is replaced with a new `DialogueOption` that has `IsUnhingedReplacement = true`. The random index is selected via `_dice.Roll(options.Length) - 1`. The option's `Stat` and `IntendedText` are preserved so the roll is mechanically unchanged. Empty option lists are safely skipped. The Horniness T3 block (which runs after) preserves the `IsUnhingedReplacement` flag when reconstructing options as Rizz. `DialogueOption` is immutable, so the replacement creates a new instance copying all properties.
 - **Denial shadow growth on skipped Honesty (§7):** In `ResolveTurnAsync()`, after determining `chosenOption`, if `_playerShadows` is non-null, `chosenOption.Stat != StatType.Honesty`, and any option in `_currentOptions` has `Stat == StatType.Honesty`, then `_playerShadows.ApplyGrowth(ShadowStatType.Denial, 1, "Skipped Honesty option")` is called. This is a boolean check (exactly +1 per turn regardless of how many Honesty options exist). The growth event flows into `TurnResult.ShadowGrowthEvents` via the existing `DrainGrowthEvents()` call. When Honesty is absent from the lineup (e.g., removed by Denial T3 threshold or Horniness-forced Rizz), no Denial growth occurs.
 
+## Retired Timing API
+
+The old player-response-delay penalty subsystem is intentionally absent. There is no `PlayerResponseDelayEvaluator`, no `DelayPenalty`, and no current API that applies interest penalties based on the player's real-world reply latency. `TimingProfile` remains datee/NPC response presentation context only.
+
 ## Change Log
 | Date | Issue | Summary |
 |------|-------|---------|
@@ -81,4 +81,4 @@ The Conversation module implements the core game loop for Pinder's dating-conver
 | 2026-04-03 | #313 | Added `Lukewarm` (5–9) as a distinct `InterestState` per rules §6. Previously, Interested covered 5–15; now Lukewarm covers 5–9 and Interested covers 10–15. Lukewarm grants neither advantage nor disadvantage. `InterestState` enum now has 7 values. Tests in `Issue313_LukewarmInterestStateTests.cs`. |
 | 2026-04-03 | #352 | `InterestChangeContext` gains `DateePrompt` property (`string?`, default `null`) so interest change beats (§3.8) can be generated in the datee's character voice. `GameSession.ResolveTurnAsync` now passes `_datee.AssembledSystemPrompt` when constructing `InterestChangeContext`. Backward-compatible — null prompt falls back to generic beats. |
 | 2026-04-06 | #573 | Removed LLM API call for NarrativeBeat generation to maintain stateless generation. `GameSession` now sets `TurnResult.NarrativeBeat` to a simple UI string signal on interest state changes. Deleted `InterestChangeContext`. |
-| 2026-04-06 | #530 | Added `IsNat20` property to `DeliveryContext` and updated `GameSession` to pass `rollResult.IsNatTwenty` into the context, enabling the LLM adapter to distinguish Nat 20s from high-margin normal successes. |
+| 2026-04-06 | #530 | Historical delivery-context Nat 20 flag work is retired with the old delivery DTO API; current roll data is exposed through turn result objects. |

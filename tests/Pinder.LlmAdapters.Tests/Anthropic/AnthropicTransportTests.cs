@@ -201,6 +201,8 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         }
 
         [Theory]
+        [InlineData(401, LlmFailureKind.Unauthorized)]
+        [InlineData(404, LlmFailureKind.ModelNotFound)]
         [InlineData(429, LlmFailureKind.RateLimited)]
         [InlineData(503, LlmFailureKind.Network)]
         public async Task SendAsync_HttpProviderFailure_ThrowsTypedTransportException(

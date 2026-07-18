@@ -1,24 +1,21 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using YamlDotNet.Core;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
 
 namespace Pinder.Core.Prompts
 {
     /// <summary>
-    /// Loads and exposes the texting-style conflict matrix from
-    /// <c>data/persona/texting-style-conflicts.yaml</c>.
+    /// Exposes the validated texting-style conflict matrix loaded by an
+    /// outer assembly from <c>data/persona/texting-style-conflicts.yaml</c>.
     ///
     /// Each entry encodes an unordered pair of <c>(axis, value)</c> tuples
     /// that MUST NOT co-occur in the same aggregated style profile. The
     /// constraint is bidirectional — <see cref="AreConflicting"/> checks
     /// both orderings.
     ///
-    /// Usage: construct via <see cref="LoadFrom(string)"/>, then inject
-    /// into <see cref="TextingStyleAggregator"/>. For tests, a no-op
-    /// empty catalog is available via <see cref="Empty"/>.
+    /// Usage: construct via <see cref="FromEntries"/>, then inject into
+    /// <see cref="TextingStyleAggregator"/>. For tests, a no-op empty
+    /// catalog is available via <see cref="Empty"/>.
     ///
     /// See <c>docs/persona/texting-style-aggregation.md</c> and
     /// <see href="https://github.com/decay256/pinder-core/issues/907"/>.
@@ -39,11 +36,11 @@ namespace Pinder.Core.Prompts
                 string axisB, string valueB,
                 string reason)
             {
-                AxisA  = axisA;
-                ValueA = valueA;
-                AxisB  = axisB;
-                ValueB = valueB;
-                Reason = reason;
+                AxisA  = RequireAxis(axisA, nameof(axisA));
+                ValueA = RequireValue(valueA, nameof(valueA));
+                AxisB  = RequireAxis(axisB, nameof(axisB));
+                ValueB = RequireValue(valueB, nameof(valueB));
+                Reason = RequireValue(reason, nameof(reason));
             }
         }
 
@@ -120,71 +117,51 @@ namespace Pinder.Core.Prompts
                 && string.Equals(entryValue, queryValue, StringComparison.OrdinalIgnoreCase);
         }
 
-        // ------------------------------------------------------------------
-        // Factory - parse the YAML file content with the solution-standard
-        // YamlDotNet stack used by rule and prompt content loaders.
-        // ------------------------------------------------------------------
-
         /// <summary>
-        /// Parses <paramref name="yamlContent"/> and returns a loaded
-        /// <see cref="TextingStyleConflicts"/> catalog.
+        /// Creates a loaded <see cref="TextingStyleConflicts"/> catalog from
+        /// already-parsed conflict rows. Parsing formats such as YAML belong in
+        /// outer assemblies; Core owns the domain object and validation.
         /// </summary>
         /// <exception cref="FormatException">
         /// If any entry is malformed, has an empty reason, or references an
         /// unrecognised axis name.
         /// </exception>
-        public static TextingStyleConflicts LoadFrom(string yamlContent)
+        public static TextingStyleConflicts FromEntries(
+            IEnumerable<(string AxisA, string ValueA, string AxisB, string ValueB, string Reason)> entries)
         {
-            if (string.IsNullOrWhiteSpace(yamlContent))
-                return Empty;
+            if (entries == null) throw new ArgumentNullException(nameof(entries));
 
-            var entries = new List<ConflictEntry>();
-            ConflictCatalogDto? catalog;
-            try
+            var loaded = new List<ConflictEntry>();
+            int i = 0;
+            foreach (var row in entries)
             {
-                var deserializer = new DeserializerBuilder()
-                    .WithNamingConvention(UnderscoredNamingConvention.Instance)
-                    .IgnoreUnmatchedProperties()
-                    .Build();
-                catalog = deserializer.Deserialize<ConflictCatalogDto>(yamlContent);
-            }
-            catch (YamlException ex)
-            {
-                throw new FormatException("Texting-style conflict YAML is malformed.", ex);
-            }
-
-            var loaded = catalog?.Conflicts ?? new List<ConflictEntryDto>();
-            for (int i = 0; i < loaded.Count; i++)
-            {
-                var dto = loaded[i];
-                var axisA = ValidateAxisValue(dto.AxisA, i, "axis_a");
-                var axisB = ValidateAxisValue(dto.AxisB, i, "axis_b");
-                if (string.IsNullOrWhiteSpace(dto.Reason))
+                var axisA = ValidateAxisValue(row.AxisA, row.ValueA, i, "axis_a");
+                var axisB = ValidateAxisValue(row.AxisB, row.ValueB, i, "axis_b");
+                if (string.IsNullOrWhiteSpace(row.Reason))
                     throw new FormatException(
                         $"Conflict entry #{i + 1} has an empty reason. " +
                         "All conflict matrix entries must include a reason string.");
 
-                entries.Add(new ConflictEntry(
+                loaded.Add(new ConflictEntry(
                     axisA.axis,
                     axisA.value,
                     axisB.axis,
                     axisB.value,
-                    dto.Reason.Trim()));
+                    row.Reason.Trim()));
+                i++;
             }
 
-            return new TextingStyleConflicts(entries);
+            return loaded.Count == 0 ? Empty : new TextingStyleConflicts(loaded);
         }
 
         private static (string axis, string value) ValidateAxisValue(
-            AxisValueDto? dto,
+            string? rawAxis,
+            string? rawValue,
             int entryIndex,
             string fieldName)
         {
-            if (dto == null)
-                throw new FormatException($"Conflict entry #{entryIndex + 1} is missing {fieldName}.");
-
-            string axis = dto.Axis?.Trim() ?? string.Empty;
-            string value = dto.Value?.Trim() ?? string.Empty;
+            string axis = rawAxis?.Trim() ?? string.Empty;
+            string value = rawValue?.Trim() ?? string.Empty;
             if (axis.Length == 0 || value.Length == 0)
                 throw new FormatException(
                     $"Conflict entry #{entryIndex + 1} has an incomplete {fieldName}; both axis and value are required.");
@@ -196,25 +173,22 @@ namespace Pinder.Core.Prompts
             return (axis, value);
         }
 
+        private static string RequireAxis(string? axis, string parameterName)
+        {
+            string value = RequireValue(axis, parameterName);
+            if (!KnownAxes.Contains(value))
+                throw new ArgumentException($"Unknown texting-style axis '{value}'.", parameterName);
+            return value;
+        }
+
+        private static string RequireValue(string? value, string parameterName)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                throw new ArgumentException("Value must be non-empty.", parameterName);
+            return value.Trim();
+        }
+
         private static readonly IReadOnlyCollection<string> KnownAxes =
             new HashSet<string>(TextingStyleAggregator.CanonicalAxisOrder, StringComparer.OrdinalIgnoreCase);
-
-        private sealed class ConflictCatalogDto
-        {
-            public List<ConflictEntryDto>? Conflicts { get; set; }
-        }
-
-        private sealed class ConflictEntryDto
-        {
-            public AxisValueDto? AxisA { get; set; }
-            public AxisValueDto? AxisB { get; set; }
-            public string? Reason { get; set; }
-        }
-
-        private sealed class AxisValueDto
-        {
-            public string? Axis { get; set; }
-            public string? Value { get; set; }
-        }
     }
 }

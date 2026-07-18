@@ -17,7 +17,7 @@ namespace Pinder.LlmAdapters.Anthropic
         
         /// <summary>
         /// Game definition used for building system prompts.
-        /// If null, GameDefinition.PinderDefaults is used.
+        /// Production composition should provide the YAML-loaded definition explicitly.
         /// </summary>
         public GameDefinition? GameDefinition { get; set; }
 

@@ -5,7 +5,6 @@ using System.Reflection;
 using Xunit;
 using Pinder.Core.Conversation;
 using Pinder.Core.Interfaces;
-using Pinder.Core.Progression;
 using Pinder.LlmAdapters;
 
 namespace Pinder.Core.Tests
@@ -52,23 +51,15 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public void DefaultRuleResolver_UsesCoreOwnedDefaultWithoutAdapterReflection()
+        public void DefaultRuleResolver_HasNoCoreOwnedDefaultType()
         {
-            var previous = DefaultRuleResolver.Instance;
-            try
-            {
-                DefaultRuleResolver.Instance = null;
+            var coreAssembly = typeof(GameSession).Assembly;
+            Assert.Null(coreAssembly.GetType("Pinder.Core.Interfaces.CoreDefaultRuleResolver"));
 
-                var resolver = DefaultRuleResolver.Instance;
-
-                Assert.NotNull(resolver);
-                Assert.Equal(typeof(GameSession).Assembly, resolver!.GetType().Assembly);
-                Assert.DoesNotContain("Pinder.LlmAdapters", resolver.GetType().FullName ?? string.Empty);
-                Assert.Equal(2, LevelTable.GetLevel(50));
-            }
-            finally
+            var resolver = DefaultRuleResolver.Instance;
+            if (resolver != null)
             {
-                DefaultRuleResolver.Instance = previous;
+                Assert.NotEqual(coreAssembly, resolver.GetType().Assembly);
             }
         }
 

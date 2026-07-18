@@ -83,19 +83,26 @@ partial class Program
             Path.Combine(AppContext.BaseDirectory, "data", "prompts"),
             Console.Error);
 
-        // Load game-definition.yaml if present. Hoisted above character
+        // Load required game-definition.yaml. Hoisted above character
         // loading (#1179) so result.GameDef.ArchetypesEnabled is known before
         // characters are assembled — the assembler gates archetype injection on
         // this flag. The load depends only on AppContext.BaseDirectory +
         // DataFileLocator and has no dependency on character data.
         string? gameDefPath = Pinder.SessionSetup.DataFileLocator.FindDataFile(AppContext.BaseDirectory, Path.Combine("data", "game-definition.yaml"));
-        result.GameDef = null;
-        if (gameDefPath != null)
+        if (gameDefPath == null)
         {
-            result.GameDef = LoadGameDefinitionOrExit(gameDefPath, result, Console.Error);
-            if (result.ShouldExit)
-                return result;
+            Console.Error.WriteLine("[ERROR] Required data/game-definition.yaml was not found.");
+            result.ShouldExit = true;
+            result.ExitCode = 1;
+            return result;
         }
+
+        result.GameDef = LoadGameDefinitionOrExit(gameDefPath, result, Console.Error);
+        var gameDefinition = result.GameDef;
+        if (result.ShouldExit || gameDefinition == null)
+            return result;
+
+        DefaultRuleResolver.Instance = gameDefinition;
 
         if (result.IsResimulation)
         {
@@ -122,7 +129,7 @@ partial class Program
 
             try
             {
-                bool archetypesEnabled = result.GameDef?.ArchetypesEnabled ?? false;
+                bool archetypesEnabled = gameDefinition.ArchetypesEnabled;
                 result.Sable = LoadCharacter(playerDefArg, playerArg, ref itemRepo, ref anatomyRepo, ref timingRepo, archetypesEnabled);
                 result.Brick = LoadCharacter(dateeDefArg, dateeArg, ref itemRepo, ref anatomyRepo, ref timingRepo, archetypesEnabled);
             }
@@ -150,8 +157,8 @@ partial class Program
         result.Player2 = result.Brick.DisplayName;
         result.P1Level = result.Sable.Level;
         result.P2Level = result.Brick.Level;
-        result.P1LevelBonus = Pinder.Core.Progression.LevelTable.GetBonus(result.P1Level);
-        result.P2LevelBonus = Pinder.Core.Progression.LevelTable.GetBonus(result.P2Level);
+        result.P1LevelBonus = Pinder.Core.Progression.LevelTable.GetBonus(result.P1Level, gameDefinition);
+        result.P2LevelBonus = Pinder.Core.Progression.LevelTable.GetBonus(result.P2Level, gameDefinition);
         result.SableStats = result.Sable.Stats;
         result.BrickStats = result.Brick.Stats;
 
@@ -196,7 +203,7 @@ partial class Program
 
         // ── LLM + session setup ───────────────────────────────────────────
         // Resolve maxTurns: CLI arg overrides YAML, YAML overrides default (30)
-        result.MaxTurns = maxTurnsArg > 0 ? maxTurnsArg : (result.GameDef?.MaxTurns ?? 30);
+        result.MaxTurns = maxTurnsArg > 0 ? maxTurnsArg : gameDefinition.MaxTurns;
 
         StatDeliveryInstructions? statDeliveryInstructions;
         ConfigureLlmAdapterAndEngine(result, args, ref engineLabel, out statDeliveryInstructions);
@@ -261,18 +268,10 @@ partial class Program
         // Create real wall clock with time-of-day horniness modifiers from game definition
         var now = DateTimeOffset.Now;
         Pinder.Core.Conversation.GameClock clock;
-        if (result.GameDef != null)
-        {
-            var mods = result.GameDef.HorninessTimeModifiers;
-            var horninessModifiers = new Pinder.Core.Conversation.HorninessModifiers(
-                mods.Morning, mods.Afternoon, mods.Evening, mods.Overnight);
-            clock = new Pinder.Core.Conversation.GameClock(now, horninessModifiers);
-        }
-        else
-        {
-            var zeroModifiers = new Pinder.Core.Conversation.HorninessModifiers(0, 0, 0, 0);
-            clock = new Pinder.Core.Conversation.GameClock(now, zeroModifiers);
-        }
+        var mods = gameDefinition.HorninessTimeModifiers;
+        var horninessModifiers = new Pinder.Core.Conversation.HorninessModifiers(
+            mods.Morning, mods.Afternoon, mods.Evening, mods.Overnight);
+        clock = new Pinder.Core.Conversation.GameClock(now, horninessModifiers);
         result.Clock = clock;
 
         // Display time-of-day info in session header
@@ -286,9 +285,9 @@ partial class Program
             Console.WriteLine();
         }
 
-        int yamlDcBias = result.GameDef?.GlobalDcBias ?? 0;
-        int yamlShadowDcBias = result.GameDef?.ShadowDcBias ?? 0;
-        int yamlHorninessDcBias = result.GameDef?.HorninessDcBias ?? 0;
+        int yamlDcBias = gameDefinition.GlobalDcBias;
+        int yamlShadowDcBias = gameDefinition.ShadowDcBias;
+        int yamlHorninessDcBias = gameDefinition.HorninessDcBias;
         int totalDcBias = difficultyBias + yamlDcBias;
         Pinder.LlmAdapters.ConsequenceCatalog? consequenceCatalog = null;
         if (result.SnapshotI18nCatalog != null)
@@ -302,7 +301,8 @@ partial class Program
             horninessDcBias: yamlHorninessDcBias,
             statDeliveryInstructions: statDeliveryInstructions,
             consequenceCatalog: consequenceCatalog,
-            archetypesEnabled: result.GameDef?.ArchetypesEnabled ?? false);
+            archetypesEnabled: gameDefinition.ArchetypesEnabled,
+            rules: gameDefinition);
         int? diceSeed = null;
         { if (ParseArg(args, "--seed") is string s2 && int.TryParse(s2, out int s3)) diceSeed = s3; }
         result.Session = new GameSession(result.Sable, result.Brick, result.Llm, new SystemRandomDiceRoller(diceSeed), result.TrapRegistry, config);
@@ -338,7 +338,8 @@ partial class Program
                 Model = result.PlayerAgentModelSpec
             };
             result.Agent = new LlmPlayerAgent(agentOptions, new ScoringPlayerAgent(),
-                playerName: result.Sable.DisplayName, dateeName: result.Brick.DisplayName);
+                playerName: result.Sable.DisplayName, dateeName: result.Brick.DisplayName,
+                ruleResolver: gameDefinition);
         }
         else if (agentType.Equals("human", StringComparison.OrdinalIgnoreCase))
         {
@@ -385,7 +386,7 @@ partial class Program
             var initialSnap = BuildInitialSnapshot(
                 result.Sable, result.Brick, result.P1LevelBonus, result.P2LevelBonus,
                 result.Session, result.Interest, result.MaxTurns, result.ModelSpec,
-                result.GameDef?.GlobalDcBias ?? 0, result.GameDef?.MaxDialogueOptions ?? 3);
+                gameDefinition.GlobalDcBias, gameDefinition.MaxDialogueOptions);
             string initialSnapPath = Path.Combine(result.PlaytestDir, $"{result.SessionSlug}.initial.snap.json");
             File.WriteAllText(initialSnapPath, JsonSerializer.Serialize(initialSnap, new JsonSerializerOptions { WriteIndented = true }));
             Console.Error.WriteLine($"📸 Initial snapshot → {initialSnapPath}");
