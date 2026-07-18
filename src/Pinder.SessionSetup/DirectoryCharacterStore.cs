@@ -193,7 +193,7 @@ namespace Pinder.SessionSetup
         /// Rebuilds (if necessary) and returns the id index. Callers must
         /// already hold <see cref="_gate"/>. The directory listing itself
         /// is a cheap synchronous syscall with no async counterpart; the
-        /// per-file reads it drives (<see cref="TryReadCharacterIdAsync"/>)
+        /// per-file reads it drives (<see cref="ReadCharacterIdForIndexAsync"/>)
         /// are genuinely asynchronous.
         /// </summary>
         private async Task<Dictionary<string, string>> EnsureIndexLockedAsync(CancellationToken ct)
@@ -201,6 +201,7 @@ namespace Pinder.SessionSetup
             if (_idIndex != null) return _idIndex;
 
             var index = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            var errors = new List<CharacterIndexValidationError>();
             if (System.IO.Directory.Exists(_directory))
             {
                 foreach (var path in System.IO.Directory.EnumerateFiles(_directory, "*.json"))
@@ -213,20 +214,57 @@ namespace Pinder.SessionSetup
                     if (fileName.Equals("character-schema.json", StringComparison.OrdinalIgnoreCase))
                         continue;
 
-                    string? id = await TryReadCharacterIdAsync(path, ct).ConfigureAwait(false);
-                    if (id == null) continue;
+                    CharacterIndexIdRead idRead =
+                        await ReadCharacterIdForIndexAsync(path, ct).ConfigureAwait(false);
+                    if (idRead.Error != null)
+                    {
+                        errors.Add(idRead.Error);
+                        continue;
+                    }
 
-                    // Last-write-wins on collision. Two files claiming the
-                    // same character_id is a user error; we don't try to
-                    // pick a winner intelligently.
-                    index[id] = path;
+                    string id = idRead.CharacterId!;
+                    if (index.TryGetValue(id, out string? existingPath))
+                    {
+                        errors.Add(CharacterIndexValidationError.Duplicate(id, existingPath, path));
+                        continue;
+                    }
+
+                    index.Add(id, path);
                 }
             }
+
+            if (errors.Count > 0)
+                throw CreateIndexValidationException(errors);
+
             _idIndex = index;
             return index;
         }
 
-        private static async Task<string?> TryReadCharacterIdAsync(string path, CancellationToken ct)
+        private InvalidOperationException CreateIndexValidationException(
+            IReadOnlyList<CharacterIndexValidationError> errors)
+        {
+            var message = new StringBuilder();
+            message.Append("DirectoryCharacterStore could not build a valid character index for '");
+            message.Append(_directory);
+            message.Append("'. ");
+            message.Append(errors.Count);
+            message.Append(errors.Count == 1 ? " error was found: " : " errors were found: ");
+            message.Append(string.Join("; ", errors.Select(e => e.Message)));
+
+            var innerExceptions = errors
+                .Where(e => e.Exception != null)
+                .Select(e => e.Exception!)
+                .ToList();
+            Exception? inner = innerExceptions.Count == 0
+                ? null
+                : new AggregateException(innerExceptions);
+
+            return new InvalidOperationException(message.ToString(), inner);
+        }
+
+        private static async Task<CharacterIndexIdRead> ReadCharacterIdForIndexAsync(
+            string path,
+            CancellationToken ct)
         {
             try
             {
@@ -235,19 +273,121 @@ namespace Pinder.SessionSetup
                 using var stream = new FileStream(
                     path, FileMode.Open, FileAccess.Read, FileShare.Read, DefaultBufferSize, useAsync: true);
                 using var doc = await JsonDocument.ParseAsync(stream, cancellationToken: ct).ConfigureAwait(false);
-                if (doc.RootElement.ValueKind != JsonValueKind.Object) return null;
-                if (!doc.RootElement.TryGetProperty("character_id", out var idProp)) return null;
-                if (idProp.ValueKind != JsonValueKind.String) return null;
+                if (doc.RootElement.ValueKind != JsonValueKind.Object)
+                {
+                    return CharacterIndexIdRead.Failed(
+                        CharacterIndexValidationError.Malformed(path, "root JSON value must be an object."));
+                }
+
+                if (!doc.RootElement.TryGetProperty("character_id", out var idProp))
+                {
+                    return CharacterIndexIdRead.Failed(
+                        CharacterIndexValidationError.Malformed(path, "missing required property 'character_id'."));
+                }
+
+                if (idProp.ValueKind != JsonValueKind.String)
+                {
+                    return CharacterIndexIdRead.Failed(
+                        CharacterIndexValidationError.Malformed(path, "'character_id' must be a string."));
+                }
+
                 string raw = idProp.GetString()!;
-                return Guid.TryParseExact(raw, "D", out _) ? raw : null;
+                if (!Guid.TryParseExact(raw, "D", out _))
+                {
+                    return CharacterIndexIdRead.Failed(
+                        CharacterIndexValidationError.Malformed(
+                            path,
+                            "'character_id' must be a UUID in canonical D format."));
+                }
+
+                return CharacterIndexIdRead.Success(raw);
             }
-            catch (IOException)
+            catch (IOException ex)
             {
-                return null;
+                return CharacterIndexIdRead.Failed(CharacterIndexValidationError.Unreadable(path, ex));
             }
-            catch (JsonException)
+            catch (UnauthorizedAccessException ex)
             {
-                return null;
+                return CharacterIndexIdRead.Failed(CharacterIndexValidationError.AccessDenied(path, ex));
+            }
+            catch (JsonException ex)
+            {
+                return CharacterIndexIdRead.Failed(CharacterIndexValidationError.Malformed(
+                    path,
+                    "malformed JSON.",
+                    ex));
+            }
+        }
+
+        private sealed class CharacterIndexIdRead
+        {
+            private CharacterIndexIdRead(string? characterId, CharacterIndexValidationError? error)
+            {
+                CharacterId = characterId;
+                Error = error;
+            }
+
+            public string? CharacterId { get; }
+            public CharacterIndexValidationError? Error { get; }
+
+            public static CharacterIndexIdRead Success(string characterId)
+            {
+                return new CharacterIndexIdRead(characterId, null);
+            }
+
+            public static CharacterIndexIdRead Failed(CharacterIndexValidationError error)
+            {
+                return new CharacterIndexIdRead(null, error);
+            }
+        }
+
+        private sealed class CharacterIndexValidationError
+        {
+            private CharacterIndexValidationError(string message, Exception? exception = null)
+            {
+                Message = message;
+                Exception = exception;
+            }
+
+            public string Message { get; }
+            public Exception? Exception { get; }
+
+            public static CharacterIndexValidationError Malformed(
+                string path,
+                string reason,
+                Exception? exception = null)
+            {
+                return new CharacterIndexValidationError(
+                    $"Character file '{path}' is invalid and must be fixed: {reason}",
+                    exception);
+            }
+
+            public static CharacterIndexValidationError Unreadable(string path, IOException exception)
+            {
+                return new CharacterIndexValidationError(
+                    $"Character file '{path}' could not be read because of an I/O error; " +
+                    "retry after the filesystem issue is corrected.",
+                    exception);
+            }
+
+            public static CharacterIndexValidationError AccessDenied(
+                string path,
+                UnauthorizedAccessException exception)
+            {
+                return new CharacterIndexValidationError(
+                    $"Character file '{path}' could not be read because access was denied; " +
+                    "fix file permissions before rebuilding the index.",
+                    exception);
+            }
+
+            public static CharacterIndexValidationError Duplicate(
+                string characterId,
+                string firstPath,
+                string duplicatePath)
+            {
+                return new CharacterIndexValidationError(
+                    $"Duplicate character_id '{characterId}' appears in both '{firstPath}' " +
+                    $"and '{duplicatePath}'.");
             }
         }
 

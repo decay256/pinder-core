@@ -233,17 +233,67 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public async Task Index_IgnoresMalformedJsonFiles()
+        public async Task Index_MalformedJsonFiles_Throw()
         {
-            // A stray invalid file in the directory must not blow up the
-            // whole store.
             File.WriteAllText(Path.Combine(_tmpDir, "garbage.json"), "{ this is not json");
 
-            var def = NewDefinition();
-            await new DirectoryCharacterStore(_tmpDir).SaveAsync(def);
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+                () => new DirectoryCharacterStore(_tmpDir).ListIdsAsync());
 
-            var ids = await new DirectoryCharacterStore(_tmpDir).ListIdsAsync();
-            Assert.Single(ids);
+            Assert.Contains("garbage.json", ex.Message);
+            Assert.Contains("malformed JSON", ex.Message);
+        }
+
+        [Fact]
+        public async Task Index_MissingCharacterId_Throws()
+        {
+            File.WriteAllText(Path.Combine(_tmpDir, "missing-id.json"), "{}");
+
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+                () => new DirectoryCharacterStore(_tmpDir).ListIdsAsync());
+
+            Assert.Contains("missing-id.json", ex.Message);
+            Assert.Contains("missing required property 'character_id'", ex.Message);
+        }
+
+        [Fact]
+        public async Task Index_DuplicateCharacterId_Throws()
+        {
+            var a = NewDefinition(idHex: "11111111-1111-4111-8111-111111111111", name: "A");
+            var b = NewDefinition(idHex: "11111111-1111-4111-8111-111111111111", name: "B");
+            File.WriteAllText(Path.Combine(_tmpDir, "a.json"), CharacterDefinitionWriter.Write(a));
+            File.WriteAllText(Path.Combine(_tmpDir, "b.json"), CharacterDefinitionWriter.Write(b));
+
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+                () => new DirectoryCharacterStore(_tmpDir).ListIdsAsync());
+
+            Assert.Contains("Duplicate character_id", ex.Message);
+            Assert.Contains("a.json", ex.Message);
+            Assert.Contains("b.json", ex.Message);
+        }
+
+        [Fact]
+        public async Task Index_ReadIOException_Throws()
+        {
+            var def = NewDefinition();
+            File.WriteAllText(Path.Combine(_tmpDir, "unavailable.json"), CharacterDefinitionWriter.Write(def));
+
+            DirectoryCharacterStore.TestIoDelayHook =
+                _ => throw new IOException("simulated unavailable character file");
+            try
+            {
+                var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+                    () => new DirectoryCharacterStore(_tmpDir).ListIdsAsync());
+
+                Assert.Contains("unavailable.json", ex.Message);
+                Assert.Contains("I/O error", ex.Message);
+                var aggregate = Assert.IsType<AggregateException>(ex.InnerException);
+                Assert.IsType<IOException>(Assert.Single(aggregate.InnerExceptions));
+            }
+            finally
+            {
+                DirectoryCharacterStore.TestIoDelayHook = null;
+            }
         }
 
         [Fact]
