@@ -102,8 +102,6 @@ partial class Program
         if (result.ShouldExit || gameDefinition == null)
             return result;
 
-        DefaultRuleResolver.Instance = gameDefinition;
-
         if (result.IsResimulation)
         {
             result.PlaytestDir = SessionFileCounter.ResolvePlaytestDirectory(AppContext.BaseDirectory);

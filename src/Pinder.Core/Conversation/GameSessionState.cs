@@ -175,11 +175,12 @@ namespace Pinder.Core.Conversation
 
             var restoredInterest = new InterestMeter(data.TargetInterest);
 
-            SessionShadowTracker? restoredPlayerShadows = PlayerShadows;
+            Dictionary<string, int>? validatedShadowValues = null;
             if (PlayerShadows != null && data.ShadowValues != null)
             {
-                restoredPlayerShadows = PlayerShadows.Clone();
-                restoredPlayerShadows.RestoreFromSnapshot(data.ShadowValues);
+                validatedShadowValues = new Dictionary<string, int>(data.ShadowValues);
+                var shadowValidationTracker = PlayerShadows.Clone();
+                shadowValidationTracker.RestoreFromSnapshot(validatedShadowValues);
             }
 
             var restoredTraps = new TrapState();
@@ -213,8 +214,13 @@ namespace Pinder.Core.Conversation
                 data.ComboHistory ?? new List<(string StatName, bool Succeeded)>(),
                 data.PendingTripleBonus);
 
+            if (validatedShadowValues != null)
+            {
+                // Keep the tracker identity shared by the session pipeline and host.
+                PlayerShadows!.RestoreFromSnapshot(validatedShadowValues);
+            }
+
             Interest = restoredInterest;
-            PlayerShadows = restoredPlayerShadows;
             MomentumStreak = data.MomentumStreak;
             Traps = restoredTraps;
             History = restoredHistory;

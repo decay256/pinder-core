@@ -22,7 +22,7 @@ This issue is a dedicated QA pass across the entire Pinder.Core test suite (curr
 | `TrapTaintInjectionTests.cs` | 19 | JsonTrapRepository parsing, trap registration, error handling |
 | `TurnResultExpansionTests.cs` | 12 | TurnResult expanded fields (shadow, combo, XP, tell, weakness) |
 | `TurnResultExpansionSpecTests.cs` | 33 | TurnResult spec compliance, DialogueOption expanded fields |
-| `DateeTimingCalculatorTests.cs` | 29 | Datee reply delay calculation |
+| `DateeTimingCalculatorTests.cs` | 29 | Historical datee reply delay calculation (retired; subsystem absent from the current API) |
 | `DateeResponseTests.cs` | 17 | DateeResponse type, Tell, WeaknessWindow, CallbackOpportunity |
 | `JsonTimingRepositoryTests.cs` | 6 | TimingProfile JSON loading |
 
@@ -52,7 +52,7 @@ This issue is a dedicated QA pass across the entire Pinder.Core test suite (curr
 | `src/Pinder.Core/Conversation/GameSession.cs` | Session orchestrator: `StartTurnAsync()`, `ResolveTurnAsync()`, momentum, ghost trigger |
 | `src/Pinder.Core/Conversation/NullLlmAdapter.cs` | Test-only `ILlmAdapter` implementation |
 | `src/Pinder.Core/Conversation/TurnResult.cs` | Extended with shadow events, combo, XP, tell, weakness fields |
-| `src/Pinder.Core/Conversation/DateeTimingCalculator.cs` | Static `ComputeDelayMinutes()` |
+| `src/Pinder.Core/Conversation/DateeTimingCalculator.cs` | Historical static `ComputeDelayMinutes()` implementation; retired and absent from the current API |
 | `src/Pinder.Core/Interfaces/IRollDataProvider.cs` | `IDiceRoller`, `IFailurePool`, `ITrapRegistry` interfaces |
 | `src/Pinder.Core/Interfaces/ILlmAdapter.cs` | LLM adapter interface (4 async methods) |
 

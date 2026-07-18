@@ -61,7 +61,7 @@ namespace Pinder.SessionRunner
         /// <param name="fallback">Deterministic scoring agent used on LLM failure.</param>
         /// <param name="playerName">Player character display name (optional, for prompt immersion).</param>
         /// <param name="dateeName">Datee character display name (optional, for prompt immersion).</param>
-        /// <param name="ruleResolver">Dynamic rule resolver. When null, uses the host-registered DefaultRuleResolver.Instance.</param>
+        /// <param name="ruleResolver">Dynamic rule resolver supplied by the host composition root.</param>
         /// <exception cref="ArgumentNullException">If options or fallback is null.</exception>
         public LlmPlayerAgent(
             AnthropicOptions options,
@@ -77,7 +77,7 @@ namespace Pinder.SessionRunner
             _dateeName = dateeName ?? "the datee";
             _model = options.Model;
             _client = new AnthropicClient(options.ApiKey);
-            _ruleResolver = ruleResolver ?? DefaultRuleResolver.Instance;
+            _ruleResolver = ruleResolver;
             _promptAssets = SimAgentPromptAssets.Load(promptCatalog ?? LoadPromptCatalog());
         }
 

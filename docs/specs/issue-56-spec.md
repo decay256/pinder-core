@@ -449,7 +449,7 @@ This component depends on implementation from:
 - **#54** — `IGameClock` interface and `GameClock` implementation (provides `.Now`, `.AdvanceTo()`, `.ConsumeEnergy()`)
 - **#44** — Shadow growth mechanics (`SessionShadowTracker.ApplyGrowth()`)
 - **#130** — Wave 0 infrastructure (SessionShadowTracker creation)
-- **#53** — `DateeTimingCalculator` (computes delay values passed to `ScheduleDateeReply`)
+- **#53** — Historical `DateeTimingCalculator` dependency. That reply-delay subsystem is retired; `DateeTimingCalculator` and delay scheduling are absent from the current API.
 
 ---
 

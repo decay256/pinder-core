@@ -207,8 +207,10 @@ deterministically authored from the new rule.
 
 As of #907, the aggregator applies a **conflict matrix** to the picked axis
 values before emitting the final list. The matrix is encoded in
-`data/persona/texting-style-conflicts.yaml` and loaded by
-`TextingStyleConflicts`.
+`data/persona/texting-style-conflicts.yaml`. The outer-layer
+`TextingStyleConflictYamlLoader` performs structured YAML deserialization and
+passes parsed rows to the Core-owned `TextingStyleConflicts` domain model for
+validation and conflict resolution.
 
 ### Why conflicts arise
 

@@ -292,13 +292,14 @@ namespace Pinder.Core.Tests.Conversation
         [Fact]
         public void RestoreState_WithMalformedPersistedRole_IsAtomic()
         {
+            var tracker = new SessionShadowTracker(TestHelpers.MakeStatBlock());
             var session = new GameSession(
                 MakeProfile("P1"),
                 MakeProfile("P2"),
                 new NullLlmAdapter(),
                 new FixedDice(5),
                 new NullTrapRegistry(),
-                new GameSessionConfig(clock: TestHelpers.MakeClock()));
+                new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: tracker));
 
             session.RestoreState(new ResimulateData
             {
@@ -324,6 +325,7 @@ namespace Pinder.Core.Tests.Conversation
                 PendingTripleBonus = true,
                 RizzCumulativeFailureCount = 1,
             }, new NullTrapRegistry());
+            tracker.ApplyGrowth(ShadowStatType.Dread, 2, "state before restore");
 
             var before = session.CreateSnapshot();
             var conversationBefore = session.ConversationHistory
@@ -356,6 +358,10 @@ namespace Pinder.Core.Tests.Conversation
                 ComboHistory = new List<(string, bool)>(),
                 PendingTripleBonus = false,
                 RizzCumulativeFailureCount = 99,
+                ShadowValues = new Dictionary<string, int>
+                {
+                    [ShadowStatType.Dread.ToString()] = 19,
+                },
             };
 
             var ex = Assert.Throws<InvalidOperationException>(
@@ -369,6 +375,7 @@ namespace Pinder.Core.Tests.Conversation
             Assert.Equal(before.MomentumStreak, after.MomentumStreak);
             Assert.Equal(before.TurnNumber, after.TurnNumber);
             Assert.Equal(before.TripleBonusActive, after.TripleBonusActive);
+            Assert.Equal(2, tracker.GetEffectiveShadow(ShadowStatType.Dread));
             Assert.Equal(conversationBefore, session.ConversationHistory.Select(e => (e.Sender, e.Text)).ToList());
             Assert.Equal(dateeBefore, session.DateeHistory.Select(m => (m.Role, m.Content)).ToList());
             Assert.Equal(avatarBefore, session.AvatarHistory.Select(m => (m.Role, m.Content)).ToList());
