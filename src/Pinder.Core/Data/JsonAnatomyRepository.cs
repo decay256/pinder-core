@@ -114,11 +114,20 @@ namespace Pinder.Core.Data
 
             if (bandsArr != null)
             {
-                foreach (var elem in bandsArr.Items)
+                for (int bandIndex = 0; bandIndex < bandsArr.Items.Count; bandIndex++)
                 {
-                    if (!(elem is JsonObject bandObj)) continue;
-                    bands.Add(ParseBand(bandObj));
+                    var elem = bandsArr.Items[bandIndex];
+                    if (!(elem is JsonObject bandObj))
+                    {
+                        throw new FormatException(
+                            $"Invalid anatomy parameter '{id}' band at index {bandIndex}: " +
+                            "expected a JSON object.");
+                    }
+
+                    bands.Add(ParseBand(id, bandObj, bandIndex));
                 }
+
+                ValidateBandCoverage(id, bands);
             }
 
             return new AnatomyParameterDefinition(id, name, bands, metadata);
@@ -239,13 +248,19 @@ namespace Pinder.Core.Data
             return (int)rounded;
         }
 
-        private static AnatomyBandDefinition ParseBand(JsonObject obj)
+        private static AnatomyBandDefinition ParseBand(
+            string parameterId,
+            JsonObject obj,
+            int bandIndex)
         {
-            float lower = obj.GetFloat("lower", 0f);
-            float upper = obj.GetFloat("upper", 1f);
+            string context = $"anatomy parameter '{parameterId}' band {bandIndex}";
+            float lower = GetRequiredFiniteFloat(obj, "lower", context);
+            float upper = GetRequiredFiniteFloat(obj, "upper", context);
+            ValidateBandBounds(parameterId, bandIndex, lower, upper);
+
             string summaryText = obj.GetRequiredString(
                 "summary_text",
-                $"anatomy band {lower:0.###}-{upper:0.###}");
+                context);
 
             string? personality = obj.HasKey("personality_fragment")
                 ? NullIfEmpty(obj.GetString("personality_fragment"))
@@ -267,6 +282,81 @@ namespace Pinder.Core.Data
                 archetypes, timing, statMods,
                 summaryText);
         }
+
+        private static float GetRequiredFiniteFloat(
+            JsonObject obj,
+            string key,
+            string context)
+        {
+            if (!obj.Properties.TryGetValue(key, out var value) || !(value is JsonNumber number))
+                throw new FormatException(
+                    $"Missing required finite number field '{key}' in {context}.");
+
+            if (double.IsNaN(number.Value) || double.IsInfinity(number.Value))
+                throw new FormatException(
+                    $"Required finite number field '{key}' in {context} must be finite.");
+
+            float result = number.ToFloat();
+            if (float.IsNaN(result) || float.IsInfinity(result))
+                throw new FormatException(
+                    $"Required finite number field '{key}' in {context} must be finite.");
+
+            return result;
+        }
+
+        private static void ValidateBandBounds(
+            string parameterId,
+            int bandIndex,
+            float lower,
+            float upper)
+        {
+            if (lower < 0f || lower > 1f)
+                throw BandError(parameterId, bandIndex, "lower",
+                    "must be within [0, 1].");
+
+            if (upper < 0f || upper > 1f)
+                throw BandError(parameterId, bandIndex, "upper",
+                    "must be within [0, 1].");
+
+            if (lower >= upper)
+                throw BandError(parameterId, bandIndex, "upper",
+                    "must be greater than lower.");
+        }
+
+        private static void ValidateBandCoverage(
+            string parameterId,
+            IReadOnlyList<AnatomyBandDefinition> bands)
+        {
+            if (bands.Count == 0)
+                return;
+
+            if (!NearlyEqual(bands[0].Lower, 0f))
+                throw BandError(parameterId, 0, "lower",
+                    "must start at 0 to tile [0, 1].");
+
+            for (int i = 1; i < bands.Count; i++)
+            {
+                if (!NearlyEqual(bands[i].Lower, bands[i - 1].Upper))
+                    throw BandError(parameterId, i, "lower",
+                        $"must equal previous band upper ({bands[i - 1].Upper:0.###}) to tile [0, 1].");
+            }
+
+            int lastIndex = bands.Count - 1;
+            if (!NearlyEqual(bands[lastIndex].Upper, 1f))
+                throw BandError(parameterId, lastIndex, "upper",
+                    "must end at 1 to tile [0, 1].");
+        }
+
+        private static bool NearlyEqual(float left, float right)
+            => Math.Abs(left - right) <= 0.000001f;
+
+        private static FormatException BandError(
+            string parameterId,
+            int bandIndex,
+            string field,
+            string message)
+            => new FormatException(
+                $"Invalid anatomy parameter '{parameterId}' band {bandIndex} field '{field}': {message}");
 
         private static string? NullIfEmpty(string s)
             => string.IsNullOrWhiteSpace(s) ? null : s;

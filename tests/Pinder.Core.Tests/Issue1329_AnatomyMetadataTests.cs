@@ -143,6 +143,134 @@ namespace Pinder.Core.Tests
             Assert.Contains(expectedField, ex.Message);
         }
 
+        [Theory]
+        [InlineData("null")]
+        [InlineData("42")]
+        [InlineData(@"""not-an-object""")]
+        [InlineData("[]")]
+        public void Loader_RejectsNonObjectBandEntryWithParameterIdAndIndex(string invalidBand)
+        {
+            string json = "[" + ParameterJson(
+                "broken-band",
+                bandsJson: @"[
+    {
+      ""lower"": 0,
+      ""upper"": 0.5,
+      ""summary_text"": ""valid first band""
+    },
+    " + invalidBand + @"
+  ]") + "]";
+
+            var ex = Assert.Throws<FormatException>(() => new JsonAnatomyRepository(json));
+
+            Assert.Contains("broken-band", ex.Message);
+            Assert.Contains("band at index 1", ex.Message);
+            Assert.Contains("expected a JSON object", ex.Message);
+        }
+
+        [Theory]
+        [InlineData(@"{ ""upper"": 1, ""summary_text"": ""missing lower"" }", "lower")]
+        [InlineData(@"{ ""lower"": 0, ""summary_text"": ""missing upper"" }", "upper")]
+        [InlineData(@"{ ""lower"": ""zero"", ""upper"": 1, ""summary_text"": ""non-numeric lower"" }", "lower")]
+        [InlineData(@"{ ""lower"": 0, ""upper"": null, ""summary_text"": ""non-numeric upper"" }", "upper")]
+        public void Loader_RejectsMissingOrNonNumericBandBounds(string bandJson, string expectedField)
+        {
+            string json = "[" + ParameterJson("broken-bounds", bandsJson: "[" + bandJson + "]") + "]";
+
+            var ex = Assert.Throws<FormatException>(() => new JsonAnatomyRepository(json));
+
+            Assert.Contains("broken-bounds", ex.Message);
+            Assert.Contains("band 0", ex.Message);
+            Assert.Contains(expectedField, ex.Message);
+            Assert.Contains("finite number", ex.Message);
+        }
+
+        [Fact]
+        public void Loader_RejectsNonFiniteBandBound()
+        {
+            string json = "[" + ParameterJson(
+                "overflow-bound",
+                bandsJson: @"[
+    {
+      ""lower"": 0,
+      ""upper"": 1e100,
+      ""summary_text"": ""overflow upper""
+    }
+  ]") + "]";
+
+            var ex = Assert.Throws<FormatException>(() => new JsonAnatomyRepository(json));
+
+            Assert.Contains("overflow-bound", ex.Message);
+            Assert.Contains("band 0", ex.Message);
+            Assert.Contains("upper", ex.Message);
+            Assert.Contains("must be finite", ex.Message);
+        }
+
+        [Theory]
+        [InlineData(@"{ ""lower"": -0.01, ""upper"": 1, ""summary_text"": ""negative lower"" }", "lower", "within [0, 1]")]
+        [InlineData(@"{ ""lower"": 0, ""upper"": 1.01, ""summary_text"": ""large upper"" }", "upper", "within [0, 1]")]
+        [InlineData(@"{ ""lower"": 0.75, ""upper"": 0.5, ""summary_text"": ""inverted"" }", "upper", "greater than lower")]
+        public void Loader_RejectsInvalidBandBounds(
+            string bandJson,
+            string expectedField,
+            string expectedReason)
+        {
+            string json = "[" + ParameterJson("invalid-bounds", bandsJson: "[" + bandJson + "]") + "]";
+
+            var ex = Assert.Throws<FormatException>(() => new JsonAnatomyRepository(json));
+
+            Assert.Contains("invalid-bounds", ex.Message);
+            Assert.Contains("band 0", ex.Message);
+            Assert.Contains(expectedField, ex.Message);
+            Assert.Contains(expectedReason, ex.Message);
+        }
+
+        [Theory]
+        [InlineData(@"[
+    {
+      ""lower"": 0.1,
+      ""upper"": 1,
+      ""summary_text"": ""missing first slice""
+    }
+  ]", "band 0", "start at 0")]
+        [InlineData(@"[
+    {
+      ""lower"": 0,
+      ""upper"": 0.4,
+      ""summary_text"": ""first""
+    },
+    {
+      ""lower"": 0.6,
+      ""upper"": 1,
+      ""summary_text"": ""gap""
+    }
+  ]", "band 1", "previous band upper")]
+        [InlineData(@"[
+    {
+      ""lower"": 0,
+      ""upper"": 0.5,
+      ""summary_text"": ""first""
+    },
+    {
+      ""lower"": 0.5,
+      ""upper"": 0.9,
+      ""summary_text"": ""missing tail""
+    }
+  ]", "band 1", "end at 1")]
+        public void Loader_RejectsBandCoverageGaps(
+            string bandsJson,
+            string expectedBand,
+            string expectedReason)
+        {
+            string json = "[" + ParameterJson("coverage-gap", bandsJson: bandsJson) + "]";
+
+            var ex = Assert.Throws<FormatException>(() => new JsonAnatomyRepository(json));
+
+            Assert.Contains("coverage-gap", ex.Message);
+            Assert.Contains(expectedBand, ex.Message);
+            Assert.Contains(expectedReason, ex.Message);
+        }
+
         private static string ReplacementTarget(string replacement)
         {
             if (replacement.Contains("control_type", StringComparison.Ordinal))
@@ -161,7 +289,8 @@ namespace Pinder.Core.Tests
         private static string ParameterJson(
             string id,
             int displayOrder = 10,
-            string controlType = "slider")
+            string controlType = "slider",
+            string? bandsJson = null)
             => @"{
   ""id"": """ + id + @""",
   ""name"": """ + id + @" Parameter"",
@@ -176,13 +305,13 @@ namespace Pinder.Core.Tests
     ""normalized_step"": 0.01,
     ""display_order"": " + displayOrder + @"
   },
-  ""bands"": [
+  ""bands"": " + (bandsJson ?? @"[
     {
       ""lower"": 0,
       ""upper"": 1,
       ""summary_text"": """ + id + @" summary""
     }
-  ]
+  ]") + @"
 }";
 
         private static string LoadBundledAnatomyJson()
