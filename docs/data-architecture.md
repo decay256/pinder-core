@@ -51,7 +51,7 @@ data/
   items/
     starter-items.json         — item pool (extensible by appending entries)
   anatomy/
-    anatomy-parameters.json    — anatomy parameters × tiers (extensible by appending parameters and/or tiers)
+    anatomy-parameters.json    — anatomy parameters × scalar bands (extensible by appending parameters and/or bands)
   traps/
     traps.json                 — trap definitions (one per StatType)
     trap-schema.json           — JSON Schema for validation
@@ -67,7 +67,7 @@ data/
 | `delivery-instructions.yaml` | `StatDeliveryInstructions.LoadFrom` (singleton) | Two top-level sections: `delivery_instructions.{stat}.{outcome}` (per-stat × 11 outcomes from `clean` to `nat1`, plus `horniness_overlay` per tier) and `shadow_corruption.{shadow}.{tier}` (corruption text for Madness, Despair, Dread, Denial, Fixation, Overthinking). This is the prompt library for *how a delivered message gets rewritten* based on roll outcome and shadow state. |
 | `characters/<slug>.json` | `Pinder.SessionSetup.CharacterDefinitionLoader` | Per-character: `name`, `gender_identity`, `bio`, `level`, `items[]` (item ids), `anatomy{}` (parameterId → `[0..1]` scalar value), `allocation.spent{}`, `allocation.total`, `allocation.shadows{}`. |
 | `items/starter-items.json` | `JsonItemRepository` | Item pool. Each item carries `stat_modifiers`, `personality_fragment`, `backstory_fragment`, `texting_style_fragment`, `archetype_tendencies`, `response_timing_modifier`, plus UI flavor (`flavor.shop_description`, `display_name`, `slot`, `tier`). |
-| `anatomy/anatomy-parameters.json` | `JsonAnatomyRepository` | Anatomy parameters × tiers. Each tier carries the same fragment/modifier shape as items. The number and names of parameters are fully data-driven — see "Anatomy parameter extensibility" below. |
+| `anatomy/anatomy-parameters.json` | `JsonAnatomyRepository` | Anatomy parameters × scalar bands. Each parameter carries host-facing `metadata` (`group`, `section`, `label_key`, `control_type`, normalized min/max/default/step, `display_order`), and each band carries the same fragment/modifier shape as items. The number, names, grouping, labels, control types, and display order are fully data-driven — see "Anatomy parameter extensibility" below. |
 | `traps/traps.json` | `JsonTrapRepository` (`ITrapRegistry`) | Trap definitions (one per stat). Fields: `stat`, `effect`, `effect_value`, `duration_turns`, `llm_instruction` (the trap overlay prompt used on persistence turns), `clear_method`, `nat1_bonus`. |
 | `traps/trap-schema.json` | (validation only) | JSON Schema documenting trap structure. |
 | `timing/response-profiles.json` | response-timing layer | Base profiles for datee reply timing; combined with item/anatomy `response_timing_modifier` deltas. |
@@ -82,7 +82,7 @@ All character / item / anatomy fields above are concatenated by `CharacterAssemb
 | Add a new item | `data/items/starter-items.json` | append entry |
 | Item personality / texting style | `data/items/starter-items.json` | item's `personality_fragment` / `texting_style_fragment` |
 | What an anatomy band feels like | `data/anatomy/anatomy-parameters.json` | band's fragments + `stat_modifiers` |
-| Add an anatomy parameter or tier | `data/anatomy/anatomy-parameters.json` | append parameter or tier (no code change — see below) |
+| Add an anatomy parameter or band | `data/anatomy/anatomy-parameters.json` | append parameter metadata and bands (no code change — see below) |
 | What a trap's corruption *feels like* | `data/traps/traps.json` | trap's `llm_instruction` |
 | Trap stat / duration / effect | `data/traps/traps.json` | other trap fields |
 | Per-stat × per-outcome rewrite prompt | `data/delivery-instructions.yaml` | `delivery_instructions.<stat>.<outcome>` |
@@ -124,7 +124,9 @@ Follow these rules when introducing new content:
 
 ### 6. Anatomy parameter extensibility
 
-The number and names of anatomy parameters are **fully data-driven**. There is no enum, no hardcoded list, and no per-parameter C# class — `JsonAnatomyRepository` reads whatever parameters are present in `anatomy-parameters.json` and exposes them via `IAnatomyRepository.GetAll()` / `GetParameter(id)`.
+The number, names, UI grouping, labels, control types, and display order of anatomy parameters are **fully data-driven**. There is no enum, no hardcoded parameter list, and no per-parameter C# class; `JsonAnatomyRepository` reads whatever parameters are present in `anatomy-parameters.json` and exposes them via `IAnatomyRepository.GetAll()` / `GetParameter(id)`. Metadata is required for every JSON parameter, and `GetAll()` always returns parameters in `metadata.display_order`.
+
+Parameter metadata is host-facing and intentionally abstract. Keep Unity node, morph, material, shader, or asset names out of `pinder-core`; map those names in the host/import layer.
 
 Characters reference parameters by string id in their `anatomy` block:
 
@@ -138,17 +140,29 @@ Characters reference parameters by string id in their `anatomy` block:
 
 `CharacterAssembler.Assemble` takes an `IReadOnlyDictionary<string, float>` of `parameterId → [0..1]` normalized value. Unknown parameter ids are treated as catalog drift and throw during assembly, because silently losing fragments or modifiers changes gameplay and prompt inputs.
 
-#### Adding a parameter (Historical Tier Example)
+#### Adding a parameter
 
 1. Append a new object to `data/anatomy/anatomy-parameters.json`:
    ```json
    {
      "id": "voice_pitch",
      "name": "Voice Pitch",
-     "tiers": [
+     "metadata": {
+       "group": "voice",
+       "section": "tone",
+       "label_key": "anatomy.voice_pitch.label",
+       "control_type": "slider",
+       "normalized_min": 0,
+       "normalized_max": 1,
+       "normalized_default": 0.5,
+       "normalized_step": 0.01,
+       "display_order": 260
+     },
+     "bands": [
        {
-         "id": "low",
-         "name": "Low",
+         "lower": 0,
+         "upper": 0.5,
+         "summary_text": "Voice Pitch: lower range.",
          "stat_modifiers": { "charm": 1, "self_awareness": -1 },
          "personality_fragment": "...",
          "backstory_fragment": "...",
@@ -161,19 +175,18 @@ Characters reference parameters by string id in their `anatomy` block:
            "read_receipt": "neutral"
          }
        },
-       { "id": "high", ... },
-       { "id": "crackling", ... }
+       { "lower": 0.5, "upper": 1, "summary_text": "Voice Pitch: higher range." }
      ]
    }
    ```
-2. Optionally update characters that should pick a tier on this parameter (`data/characters/<slug>.json` → add `"voice_pitch": "low"` under `anatomy`).
-3. If the host (Unity, web) renders an anatomy picker, expose the new parameter in its UI — see [Unity Integration Guide](unity-integration.md) for the recommended pattern.
+2. Optionally update characters that should select a scalar on this parameter (`data/characters/<slug>.json` -> add `"voice_pitch": 0.25` under `anatomy`).
+3. If the host (Unity, web) renders an anatomy picker, expose the new parameter in its UI; see [Unity Integration Guide](unity-integration.md) for the recommended pattern.
 
-#### Adding or removing tiers on an existing parameter
+#### Adding or removing bands on an existing parameter
 
-1. Edit the parameter's `tiers[]` array in `anatomy-parameters.json`.
-2. Tiers must have unique `id` within the parameter.
-3. **Visual-only tiers** (e.g. `skin_tone`) are recognised when the tier object has `visual_description` and no `personality_fragment` — these contribute zero stat modifiers and zero fragments. Use this for purely cosmetic dimensions.
+1. Edit the parameter's `bands[]` array in `anatomy-parameters.json`.
+2. Bands must use valid normalized ranges. The repository resolves values by `[lower, upper)` and treats the final band's upper bound as inclusive.
+3. **Visual-only bands** are represented by bands with only `summary_text` and no gameplay fragments/modifiers; they contribute zero stat modifiers and zero fragments.
 
 #### What is hardcoded
 

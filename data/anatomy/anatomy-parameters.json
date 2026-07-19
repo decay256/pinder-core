@@ -2,6 +2,17 @@
   {
     "id": "trunkLengthBase",
     "name": "Trunk Length Base",
+    "metadata": {
+      "group": "trunk",
+      "section": "length",
+      "label_key": "anatomy.trunkLengthBase.label",
+      "control_type": "slider",
+      "normalized_min": 0,
+      "normalized_max": 1,
+      "normalized_default": 0.5,
+      "normalized_step": 0.01,
+      "display_order": 10
+    },
     "bands": [
       {
         "lower": 0,
@@ -116,6 +127,17 @@
   {
     "id": "trunkLengthMid",
     "name": "Trunk Length Mid",
+    "metadata": {
+      "group": "trunk",
+      "section": "length",
+      "label_key": "anatomy.trunkLengthMid.label",
+      "control_type": "slider",
+      "normalized_min": 0,
+      "normalized_max": 1,
+      "normalized_default": 0.5,
+      "normalized_step": 0.01,
+      "display_order": 20
+    },
     "bands": [
       {
         "lower": 0,
@@ -172,6 +194,17 @@
   {
     "id": "trunkLengthTip",
     "name": "Trunk Length Tip",
+    "metadata": {
+      "group": "trunk",
+      "section": "length",
+      "label_key": "anatomy.trunkLengthTip.label",
+      "control_type": "slider",
+      "normalized_min": 0,
+      "normalized_max": 1,
+      "normalized_default": 0.5,
+      "normalized_step": 0.01,
+      "display_order": 30
+    },
     "bands": [
       {
         "lower": 0,
@@ -228,6 +261,17 @@
   {
     "id": "trunkGirth",
     "name": "Trunk Girth",
+    "metadata": {
+      "group": "trunk",
+      "section": "shape",
+      "label_key": "anatomy.trunkGirth.label",
+      "control_type": "slider",
+      "normalized_min": 0,
+      "normalized_max": 1,
+      "normalized_default": 0.5,
+      "normalized_step": 0.01,
+      "display_order": 40
+    },
     "bands": [
       {
         "lower": 0,
@@ -349,6 +393,17 @@
   {
     "id": "trunkCurvature",
     "name": "Trunk Curvature",
+    "metadata": {
+      "group": "trunk",
+      "section": "shape",
+      "label_key": "anatomy.trunkCurvature.label",
+      "control_type": "slider",
+      "normalized_min": 0,
+      "normalized_max": 1,
+      "normalized_default": 0.5,
+      "normalized_step": 0.01,
+      "display_order": 50
+    },
     "bands": [
       {
         "lower": 0,
@@ -419,6 +474,17 @@
   {
     "id": "glansScale",
     "name": "Glans Scale",
+    "metadata": {
+      "group": "glans",
+      "section": "shape",
+      "label_key": "anatomy.glansScale.label",
+      "control_type": "slider",
+      "normalized_min": 0,
+      "normalized_max": 1,
+      "normalized_default": 0.5,
+      "normalized_step": 0.01,
+      "display_order": 60
+    },
     "bands": [
       {
         "lower": 0,
@@ -475,6 +541,17 @@
   {
     "id": "glansWidth",
     "name": "Glans Width",
+    "metadata": {
+      "group": "glans",
+      "section": "shape",
+      "label_key": "anatomy.glansWidth.label",
+      "control_type": "slider",
+      "normalized_min": 0,
+      "normalized_max": 1,
+      "normalized_default": 0.5,
+      "normalized_step": 0.01,
+      "display_order": 70
+    },
     "bands": [
       {
         "lower": 0,
@@ -531,6 +608,17 @@
   {
     "id": "scrotumScale",
     "name": "Scrotum Scale",
+    "metadata": {
+      "group": "scrotum",
+      "section": "shape",
+      "label_key": "anatomy.scrotumScale.label",
+      "control_type": "slider",
+      "normalized_min": 0,
+      "normalized_max": 1,
+      "normalized_default": 0.5,
+      "normalized_step": 0.01,
+      "display_order": 80
+    },
     "bands": [
       {
         "lower": 0,
@@ -613,6 +701,17 @@
   {
     "id": "leftTesticleScale",
     "name": "Left Testicle Scale",
+    "metadata": {
+      "group": "scrotum",
+      "section": "testicles",
+      "label_key": "anatomy.leftTesticleScale.label",
+      "control_type": "slider",
+      "normalized_min": 0,
+      "normalized_max": 1,
+      "normalized_default": 0.5,
+      "normalized_step": 0.01,
+      "display_order": 90
+    },
     "bands": [
       {
         "lower": 0,
@@ -677,6 +776,17 @@
   {
     "id": "rightTesticleScale",
     "name": "Right Testicle Scale",
+    "metadata": {
+      "group": "scrotum",
+      "section": "testicles",
+      "label_key": "anatomy.rightTesticleScale.label",
+      "control_type": "slider",
+      "normalized_min": 0,
+      "normalized_max": 1,
+      "normalized_default": 0.5,
+      "normalized_step": 0.01,
+      "display_order": 100
+    },
     "bands": [
       {
         "lower": 0,
@@ -741,6 +851,17 @@
   {
     "id": "scrotumDrop",
     "name": "Scrotum Drop",
+    "metadata": {
+      "group": "scrotum",
+      "section": "shape",
+      "label_key": "anatomy.scrotumDrop.label",
+      "control_type": "slider",
+      "normalized_min": 0,
+      "normalized_max": 1,
+      "normalized_default": 0.5,
+      "normalized_step": 0.01,
+      "display_order": 110
+    },
     "bands": [
       {
         "lower": 0,
@@ -797,6 +918,17 @@
   {
     "id": "prepucius",
     "name": "Prepucius (Age Detail)",
+    "metadata": {
+      "group": "surface",
+      "section": "age_detail",
+      "label_key": "anatomy.prepucius.label",
+      "control_type": "slider",
+      "normalized_min": 0,
+      "normalized_max": 1,
+      "normalized_default": 0.5,
+      "normalized_step": 0.01,
+      "display_order": 120
+    },
     "bands": [
       {
         "lower": 0,
@@ -841,6 +973,17 @@
   {
     "id": "arrugatis",
     "name": "Arrugatis (Age Texture)",
+    "metadata": {
+      "group": "surface",
+      "section": "age_detail",
+      "label_key": "anatomy.arrugatis.label",
+      "control_type": "slider",
+      "normalized_min": 0,
+      "normalized_max": 1,
+      "normalized_default": 0.5,
+      "normalized_step": 0.01,
+      "display_order": 130
+    },
     "bands": [
       {
         "lower": 0,
@@ -906,6 +1049,17 @@
   {
     "id": "gravitatis",
     "name": "Gravitatis (Age Gravity)",
+    "metadata": {
+      "group": "surface",
+      "section": "age_detail",
+      "label_key": "anatomy.gravitatis.label",
+      "control_type": "slider",
+      "normalized_min": 0,
+      "normalized_max": 1,
+      "normalized_default": 0.5,
+      "normalized_step": 0.01,
+      "display_order": 140
+    },
     "bands": [
       {
         "lower": 0,
@@ -971,6 +1125,17 @@
   {
     "id": "venicus",
     "name": "Venicus (Vein Prominence - Age)",
+    "metadata": {
+      "group": "surface",
+      "section": "vascularity",
+      "label_key": "anatomy.venicus.label",
+      "control_type": "slider",
+      "normalized_min": 0,
+      "normalized_max": 1,
+      "normalized_default": 0.5,
+      "normalized_step": 0.01,
+      "display_order": 150
+    },
     "bands": [
       {
         "lower": 0,
@@ -1016,6 +1181,17 @@
   {
     "id": "sad",
     "name": "Expression - Sad",
+    "metadata": {
+      "group": "expression",
+      "section": "pose",
+      "label_key": "anatomy.sad.label",
+      "control_type": "slider",
+      "normalized_min": 0,
+      "normalized_max": 1,
+      "normalized_default": 0,
+      "normalized_step": 0.01,
+      "display_order": 160
+    },
     "bands": [
       {
         "lower": 0,
@@ -1064,6 +1240,17 @@
   {
     "id": "happy",
     "name": "Expression - Happy",
+    "metadata": {
+      "group": "expression",
+      "section": "pose",
+      "label_key": "anatomy.happy.label",
+      "control_type": "slider",
+      "normalized_min": 0,
+      "normalized_max": 1,
+      "normalized_default": 0,
+      "normalized_step": 0.01,
+      "display_order": 170
+    },
     "bands": [
       {
         "lower": 0,
@@ -1114,6 +1301,17 @@
   {
     "id": "serius",
     "name": "Expression - Serius",
+    "metadata": {
+      "group": "expression",
+      "section": "pose",
+      "label_key": "anatomy.serius.label",
+      "control_type": "slider",
+      "normalized_min": 0,
+      "normalized_max": 1,
+      "normalized_default": 0,
+      "normalized_step": 0.01,
+      "display_order": 180
+    },
     "bands": [
       {
         "lower": 0,
@@ -1165,6 +1363,17 @@
   {
     "id": "skinHue",
     "name": "Skin Hue",
+    "metadata": {
+      "group": "skin",
+      "section": "color",
+      "label_key": "anatomy.skinHue.label",
+      "control_type": "slider",
+      "normalized_min": 0,
+      "normalized_max": 1,
+      "normalized_default": 0.5,
+      "normalized_step": 0.01,
+      "display_order": 190
+    },
     "bands": [
       {
         "lower": 0,
@@ -1225,6 +1434,17 @@
   {
     "id": "skinSat",
     "name": "Skin Saturation",
+    "metadata": {
+      "group": "skin",
+      "section": "color",
+      "label_key": "anatomy.skinSat.label",
+      "control_type": "slider",
+      "normalized_min": 0,
+      "normalized_max": 1,
+      "normalized_default": 0.5,
+      "normalized_step": 0.01,
+      "display_order": 200
+    },
     "bands": [
       {
         "lower": 0,
@@ -1291,6 +1511,17 @@
   {
     "id": "skinVal",
     "name": "Skin Value (Lightness)",
+    "metadata": {
+      "group": "skin",
+      "section": "color",
+      "label_key": "anatomy.skinVal.label",
+      "control_type": "slider",
+      "normalized_min": 0,
+      "normalized_max": 1,
+      "normalized_default": 0.5,
+      "normalized_step": 0.01,
+      "display_order": 210
+    },
     "bands": [
       {
         "lower": 0,
@@ -1351,6 +1582,17 @@
   {
     "id": "freckles",
     "name": "Freckles",
+    "metadata": {
+      "group": "skin",
+      "section": "details",
+      "label_key": "anatomy.freckles.label",
+      "control_type": "slider",
+      "normalized_min": 0,
+      "normalized_max": 1,
+      "normalized_default": 0,
+      "normalized_step": 0.01,
+      "display_order": 220
+    },
     "bands": [
       {
         "lower": 0,
@@ -1411,6 +1653,17 @@
   {
     "id": "blemishes",
     "name": "Blemishes",
+    "metadata": {
+      "group": "skin",
+      "section": "details",
+      "label_key": "anatomy.blemishes.label",
+      "control_type": "slider",
+      "normalized_min": 0,
+      "normalized_max": 1,
+      "normalized_default": 0,
+      "normalized_step": 0.01,
+      "display_order": 230
+    },
     "bands": [
       {
         "lower": 0,
@@ -1464,6 +1717,17 @@
   {
     "id": "veins",
     "name": "Veins",
+    "metadata": {
+      "group": "skin",
+      "section": "details",
+      "label_key": "anatomy.veins.label",
+      "control_type": "slider",
+      "normalized_min": 0,
+      "normalized_max": 1,
+      "normalized_default": 0,
+      "normalized_step": 0.01,
+      "display_order": 240
+    },
     "bands": [
       {
         "lower": 0,
@@ -1525,6 +1789,17 @@
   {
     "id": "isCircumcised",
     "name": "Circumcision",
+    "metadata": {
+      "group": "surface",
+      "section": "state",
+      "label_key": "anatomy.isCircumcised.label",
+      "control_type": "toggle",
+      "normalized_min": 0,
+      "normalized_max": 1,
+      "normalized_default": 0,
+      "normalized_step": 1,
+      "display_order": 250
+    },
     "bands": [
       {
         "lower": 0,

@@ -27,13 +27,21 @@ namespace Pinder.Core.Tests
   {
     ""id"": ""trunkLengthBase"",
     ""name"": ""Trunk Length Base"",
+    ""metadata"": {
+      ""group"": ""test"", ""section"": ""test"",
+      ""label_key"": ""anatomy.trunk_length_base.label"",
+      ""control_type"": ""slider"",
+      ""normalized_min"": 0, ""normalized_max"": 1,
+      ""normalized_default"": 0.5, ""normalized_step"": 0.01,
+      ""display_order"": 10
+    },
     ""bands"": [
-      { ""lower"": 0.00, ""upper"": 0.05 },
-      { ""lower"": 0.05, ""upper"": 0.20 },
-      { ""lower"": 0.20, ""upper"": 0.50 },
-      { ""lower"": 0.50, ""upper"": 0.70 },
-      { ""lower"": 0.70, ""upper"": 0.95 },
-      { ""lower"": 0.95, ""upper"": 1.00 }
+      { ""lower"": 0.00, ""upper"": 0.05, ""summary_text"": ""minimum"" },
+      { ""lower"": 0.05, ""upper"": 0.20, ""summary_text"": ""low"" },
+      { ""lower"": 0.20, ""upper"": 0.50, ""summary_text"": ""moderate"" },
+      { ""lower"": 0.50, ""upper"": 0.70, ""summary_text"": ""balanced"" },
+      { ""lower"": 0.70, ""upper"": 0.95, ""summary_text"": ""high"" },
+      { ""lower"": 0.95, ""upper"": 1.00, ""summary_text"": ""maximum"" }
     ]
   }
 ]";
@@ -54,7 +62,17 @@ namespace Pinder.Core.Tests
         [Fact]
         public void BandSchema_EmptyBands_ParsesOkay()
         {
-            const string json = @"[{ ""id"": ""test"", ""name"": ""Test"", ""bands"": [] }]";
+            const string json = @"[{
+  ""id"": ""test"", ""name"": ""Test"",
+  ""metadata"": {
+    ""group"": ""test"", ""section"": ""test"",
+    ""label_key"": ""anatomy.test.label"", ""control_type"": ""slider"",
+    ""normalized_min"": 0, ""normalized_max"": 1,
+    ""normalized_default"": 0.5, ""normalized_step"": 0.01,
+    ""display_order"": 10
+  },
+  ""bands"": []
+}]";
             var repo = new JsonAnatomyRepository(json);
             var p = repo.GetParameter("test");
             Assert.NotNull(p);
@@ -68,6 +86,13 @@ namespace Pinder.Core.Tests
 [{
   ""id"": ""trunkGirth"",
   ""name"": ""Trunk Girth"",
+  ""metadata"": {
+    ""group"": ""test"", ""section"": ""test"",
+    ""label_key"": ""anatomy.trunk_girth.label"", ""control_type"": ""slider"",
+    ""normalized_min"": 0, ""normalized_max"": 1,
+    ""normalized_default"": 0.5, ""normalized_step"": 0.01,
+    ""display_order"": 10
+  },
   ""bands"": [
     {
       ""lower"": 0.00, ""upper"": 0.20,
@@ -81,9 +106,10 @@ namespace Pinder.Core.Tests
         ""delay_variance_multiplier"": 0.9,
         ""dry_spell_probability_delta"": 0.0,
         ""read_receipt"": ""neutral""
-      }
+      },
+      ""summary_text"": ""slim band""
     },
-    { ""lower"": 0.20, ""upper"": 1.00 }
+    { ""lower"": 0.20, ""upper"": 1.00, ""summary_text"": ""wide band"" }
   ]
 }]";
             var repo = new JsonAnatomyRepository(json);
@@ -146,7 +172,17 @@ namespace Pinder.Core.Tests
         [Fact]
         public void ResolveBand_EmptyBands_ReturnsNull()
         {
-            const string json = @"[{ ""id"": ""test"", ""name"": ""Test"", ""bands"": [] }]";
+            const string json = @"[{
+  ""id"": ""test"", ""name"": ""Test"",
+  ""metadata"": {
+    ""group"": ""test"", ""section"": ""test"",
+    ""label_key"": ""anatomy.test.label"", ""control_type"": ""slider"",
+    ""normalized_min"": 0, ""normalized_max"": 1,
+    ""normalized_default"": 0.5, ""normalized_step"": 0.01,
+    ""display_order"": 10
+  },
+  ""bands"": []
+}]";
             var repo = new JsonAnatomyRepository(json);
             var p = repo.GetParameter("test")!;
             Assert.Null(p.ResolveBand(0.5f));
@@ -165,9 +201,16 @@ namespace Pinder.Core.Tests
 [{
   ""id"": ""isCircumcised"",
   ""name"": ""Circumcision"",
+  ""metadata"": {
+    ""group"": ""test"", ""section"": ""test"",
+    ""label_key"": ""anatomy.is_circumcised.label"", ""control_type"": ""toggle"",
+    ""normalized_min"": 0, ""normalized_max"": 1,
+    ""normalized_default"": 0, ""normalized_step"": 1,
+    ""display_order"": 10
+  },
   ""bands"": [
-    { ""lower"": 0.00, ""upper"": 0.50, ""personality_fragment"": ""uncircumcised"" },
-    { ""lower"": 0.50, ""upper"": 1.00, ""personality_fragment"": ""circumcised"" }
+    { ""lower"": 0.00, ""upper"": 0.50, ""summary_text"": ""uncircumcised"", ""personality_fragment"": ""uncircumcised"" },
+    { ""lower"": 0.50, ""upper"": 1.00, ""summary_text"": ""circumcised"", ""personality_fragment"": ""circumcised"" }
   ]
 }]";
             var repo = new JsonAnatomyRepository(json);

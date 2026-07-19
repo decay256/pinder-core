@@ -15,6 +15,14 @@ namespace Pinder.Core.Tests
     [Collection("StaticWiring")]
     public sealed class Issue1127_1128_SummaryTextDataTests
     {
+        private const string TestMetadataJson = @"{
+  ""group"": ""test"", ""section"": ""test"",
+  ""label_key"": ""anatomy.summary_param.label"", ""control_type"": ""slider"",
+  ""normalized_min"": 0, ""normalized_max"": 1,
+  ""normalized_default"": 0.5, ""normalized_step"": 0.01,
+  ""display_order"": 10
+}";
+
         private static string RepoRoot => TestRepoLocator.RepoRoot;
 
         private static string LoadJson(params string[] parts)
@@ -76,6 +84,7 @@ namespace Pinder.Core.Tests
   {
     ""id"": ""summaryParam"",
     ""name"": ""Summary Parameter"",
+    ""metadata"": " + TestMetadataJson + @",
     ""bands"": [
       {
         ""lower"": 0.0,
@@ -144,6 +153,7 @@ namespace Pinder.Core.Tests
   {
     ""id"": ""summaryParam"",
     ""name"": ""Summary Parameter"",
+    ""metadata"": " + TestMetadataJson + @",
     ""bands"": [
       {
         ""lower"": 0.0,
@@ -157,6 +167,7 @@ namespace Pinder.Core.Tests
   {
     ""id"": ""summaryParam"",
     ""name"": ""Summary Parameter"",
+    ""metadata"": " + TestMetadataJson + @",
     ""bands"": [
       {
         ""lower"": 0.0,
@@ -198,6 +209,7 @@ namespace Pinder.Core.Tests
   {
     ""id"": ""summaryParam"",
     ""name"": ""Summary Parameter"",
+    ""metadata"": " + TestMetadataJson + @",
     ""bands"": [
       {
         ""lower"": 0.0,

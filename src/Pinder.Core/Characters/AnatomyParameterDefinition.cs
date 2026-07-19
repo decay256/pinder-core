@@ -31,12 +31,17 @@ namespace Pinder.Core.Characters
         /// </summary>
         public IReadOnlyList<AnatomyBandDefinition> Bands { get; }
 
+        /// <summary>Data-driven metadata for host-side anatomy controls.</summary>
+        public AnatomyParameterMetadata? Metadata { get; }
+
         public AnatomyParameterDefinition(string id, string name,
-            IReadOnlyList<AnatomyBandDefinition> bands)
+            IReadOnlyList<AnatomyBandDefinition> bands,
+            AnatomyParameterMetadata? metadata = null)
         {
-            Id    = id;
-            Name  = name;
-            Bands = bands ?? new List<AnatomyBandDefinition>();
+            Id       = id;
+            Name     = name;
+            Bands    = bands ?? new List<AnatomyBandDefinition>();
+            Metadata = metadata;
         }
 
         /// <summary>

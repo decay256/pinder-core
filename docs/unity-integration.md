@@ -532,7 +532,7 @@ is to read stored turn payloads, not re-roll.
 ## 3. Adapting interfaces when your Unity content doesn't match
 
 This is the section to bookmark. The defaults shipped under `data/`
-(9 anatomy parameters, 6 stats, ~40 items, 6 character archetypes,
+(25 anatomy parameters, 6 stats, ~40 items, 6 character archetypes,
 specific trap set) are the **content the LLM was tuned against**.
 When your Unity project ships different content, follow the rules
 below — in order — to stay inside the engine's contract.
@@ -565,18 +565,15 @@ E.g. your Unity project has 12 anatomy parameters instead of 9, or
 adds a new parameter "Voice Pitch", or drops "Skin Texture".
 
 **Do this:** ship your own `anatomy-parameters.json` (or your own
-`IAnatomyRepository`). The engine reads parameter ids and scalar bounds;
-strings; the shipped 9 parameters are not hardcoded anywhere except
-in `data/anatomy/anatomy-parameters.json` and the character JSON
-files that reference them.
+`IAnatomyRepository`). The engine reads parameter ids, host-facing metadata, and scalar bounds from data; the shipped 25 parameters are not hardcoded anywhere except in `data/anatomy/anatomy-parameters.json` and the character JSON files that reference them.
 
 Step-by-step:
 
 1. **Define the parameters** in JSON (or in your ScriptableObject
    pipeline) using the exact shape in
    `data/anatomy/anatomy-parameters.json`. Each parameter has an
-   `id`, `name`, and `bands[]`.
-2. **Define the bands**. Each band has `id`, `lower` bound, `upper` bound, `stat_modifiers`,
+   `id`, `name`, required host-facing `metadata`, and `bands[]`. JSON loading fails when metadata is absent or invalid. Keep Unity node, morph, material, shader, and asset names in Unity/import code rather than in core metadata.
+2. **Define the bands**. Each band has `lower` bound, `upper` bound, `stat_modifiers`,
    the four fragments, `archetype_tendencies`, and
    `response_timing_modifier`. Cosmetic-only bands (no fragments,
    only a `visual_description`) are allowed — see "Skin Tone" in the
