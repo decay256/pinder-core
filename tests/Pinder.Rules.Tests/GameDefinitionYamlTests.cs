@@ -53,7 +53,8 @@ namespace Pinder.Rules.Tests
             "progression_build_points",
             "progression_level_bonuses",
             "progression_item_slots",
-            "progression_failure_pool_tiers"
+            "progression_failure_pool_tiers",
+            "progression_currency_per_xp"
         };
 
         private static string LoadYamlContent()

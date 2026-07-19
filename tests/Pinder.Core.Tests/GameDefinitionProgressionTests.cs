@@ -101,6 +101,7 @@ progression_failure_pool_tiers:
   intermediate_min: 4
   advanced_min: 7
   legendary_min: 10
+progression_currency_per_xp: 10
 character_prompt_structure:
   character_spec_header: ""== CHARACTER YOU CONTROL ==""
   player_avatar_character_tag: ""PLAYER_AVATAR_CHARACTER""
@@ -171,6 +172,7 @@ character_prompt_structure:
             Assert.Equal(4, gd.ProgressionFailurePoolTiers["intermediate_min"]);
             Assert.Equal(7, gd.ProgressionFailurePoolTiers["advanced_min"]);
             Assert.Equal(10, gd.ProgressionFailurePoolTiers["legendary_min"]);
+            Assert.Equal(10, gd.ProgressionCurrencyPerXp);
         }
 
         [Theory]
@@ -183,6 +185,7 @@ character_prompt_structure:
         [InlineData("progression_level_bonuses")]
         [InlineData("progression_item_slots")]
         [InlineData("progression_failure_pool_tiers")]
+        [InlineData("progression_currency_per_xp")]
         public void LoadFrom_MissingTopLevelKey_ThrowsException(string missingKey)
         {
             var lines = ValidYamlWithProgression.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
@@ -537,6 +540,8 @@ character_prompt_structure:
 
             public int? GetFailurePoolTierMinLevel(string tierName) =>
                 FailurePoolTierMinLevels.TryGetValue(tierName, out var v) ? v : null;
+
+            public int? GetProgressionCurrencyPerXp() => 10;
 
             // These tests assert "no silent fallback": a missing config value must throw,
             // not quietly resolve to a hardcoded default. Explicitly opt out of fallback.

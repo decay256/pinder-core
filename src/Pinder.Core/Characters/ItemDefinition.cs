@@ -54,6 +54,12 @@ namespace Pinder.Core.Characters
         /// </summary>
         public string ItemType     { get; }
 
+        /// <summary>Cash price in the shop. Starter items are always 0; locked items are positive.</summary>
+        public int ShopPrice { get; }
+
+        /// <summary>Whether a new player starts with this item unlocked.</summary>
+        public bool StarterUnlocked { get; }
+
         /// <summary>Flat bonuses/penalties to base stats.</summary>
         public IReadOnlyDictionary<StatType, int> StatModifiers { get; }
 
@@ -74,13 +80,23 @@ namespace Pinder.Core.Characters
             string textingStyleFragment,
             string[] archetypeTendencies,
             TimingModifier responseTimingModifier,
-            string summaryText = "")
+            string summaryText = "",
+            int shopPrice = 0,
+            bool starterUnlocked = true)
         {
             ItemId                  = itemId;
             DisplayName             = displayName ?? itemId;
             SummaryText             = summaryText ?? string.Empty;
             Slot                    = slot;
             ItemType                = itemType ?? "accessory";
+            if (shopPrice < 0)
+                throw new System.ArgumentOutOfRangeException(nameof(shopPrice), "Shop price must be non-negative.");
+            if (starterUnlocked && shopPrice != 0)
+                throw new System.ArgumentException("Starter-unlocked items must have shop_price 0.", nameof(shopPrice));
+            if (!starterUnlocked && shopPrice <= 0)
+                throw new System.ArgumentException("Locked items must have a positive shop_price.", nameof(shopPrice));
+            ShopPrice               = shopPrice;
+            StarterUnlocked         = starterUnlocked;
             StatModifiers           = statModifiers;
             PersonalityFragment     = personalityFragment;
             BackstoryFragment       = backstoryFragment;

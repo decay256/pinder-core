@@ -245,7 +245,8 @@ the player's at all times.",
                 { "intermediate_min", 4 },
                 { "advanced_min", 7 },
                 { "legendary_min", 10 }
-            }
+            },
+            progressionCurrencyPerXp: 10
         );
 
     }

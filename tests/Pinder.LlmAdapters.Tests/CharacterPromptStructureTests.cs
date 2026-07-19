@@ -94,6 +94,7 @@ progression_failure_pool_tiers:
   intermediate_min: 4
   advanced_min: 7
   legendary_min: 10
+progression_currency_per_xp: 10
 ";
 
         [Fact]

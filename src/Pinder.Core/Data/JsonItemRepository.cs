@@ -63,6 +63,15 @@ namespace Pinder.Core.Data
             if (string.IsNullOrEmpty(itemType))
                 itemType = "accessory";
 
+            int shopPrice = GetRequiredInt(obj, "shop_price", $"item '{itemId}'");
+            bool starterUnlocked = GetRequiredBool(obj, "starter_unlocked", $"item '{itemId}'");
+            if (shopPrice < 0)
+                throw new FormatException($"Field 'shop_price' in item '{itemId}' must be non-negative.");
+            if (starterUnlocked && shopPrice != 0)
+                throw new FormatException($"Starter item '{itemId}' must have shop_price 0.");
+            if (!starterUnlocked && shopPrice <= 0)
+                throw new FormatException($"Locked item '{itemId}' must have a positive shop_price.");
+
             var statMods = ParseStatModifiers(obj.GetObject("stat_modifiers"));
 
             string personality  = obj.GetString("personality_fragment");
@@ -74,7 +83,25 @@ namespace Pinder.Core.Data
             return new ItemDefinition(
                 itemId, displayName, slot, itemType,
                 statMods, personality, backstory, texting, archetypes, timing,
-                summaryText);
+                summaryText,
+                shopPrice,
+                starterUnlocked);
+        }
+
+        private static int GetRequiredInt(JsonObject obj, string key, string context)
+        {
+            if (!obj.Properties.TryGetValue(key, out var value) || !(value is JsonNumber number))
+                throw new FormatException($"Missing required numeric field '{key}' in {context}.");
+            if (number.Value % 1 != 0)
+                throw new FormatException($"Required numeric field '{key}' in {context} must be an integer.");
+            return number.ToInt();
+        }
+
+        private static bool GetRequiredBool(JsonObject obj, string key, string context)
+        {
+            if (!obj.Properties.TryGetValue(key, out var value) || !(value is JsonBool boolean))
+                throw new FormatException($"Missing required boolean field '{key}' in {context}.");
+            return boolean.Value;
         }
 
         internal static IReadOnlyDictionary<StatType, int> ParseStatModifiers(JsonObject? obj)

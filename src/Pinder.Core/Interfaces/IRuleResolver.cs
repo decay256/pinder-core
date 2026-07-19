@@ -101,6 +101,12 @@ namespace Pinder.Core.Interfaces
         int? GetFailurePoolTierMinLevel(string tierName);
 
         /// <summary>
+        /// Currency awarded per persisted XP at terminal settlement.
+        /// Returns null if no matching rule found.
+        /// </summary>
+        int? GetProgressionCurrencyPerXp();
+
+        /// <summary>
         /// Explicit policy: whether callers (e.g. <see cref="Pinder.Core.Progression.LevelTable"/> and
         /// SessionXpRecorder) are allowed to fall back to <see cref="DefaultRuleResolver.Instance"/> when
         /// this resolver returns null for a given lookup.

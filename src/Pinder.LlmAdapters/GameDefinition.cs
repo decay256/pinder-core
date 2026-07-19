@@ -91,6 +91,7 @@ namespace Pinder.LlmAdapters
         public IReadOnlyDictionary<string, int> ProgressionLevelBonuses { get; }
         public IReadOnlyDictionary<string, int> ProgressionItemSlots { get; }
         public IReadOnlyDictionary<string, int> ProgressionFailurePoolTiers { get; }
+        public int ProgressionCurrencyPerXp { get; }
 
         public GameDefinition(
             string name,
@@ -120,6 +121,7 @@ namespace Pinder.LlmAdapters
             IReadOnlyDictionary<string, int>? progressionLevelBonuses = null,
             IReadOnlyDictionary<string, int>? progressionItemSlots = null,
             IReadOnlyDictionary<string, int>? progressionFailurePoolTiers = null,
+            int progressionCurrencyPerXp = 10,
             CharacterPromptStructure? characterPromptStructure = null)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
@@ -151,6 +153,9 @@ namespace Pinder.LlmAdapters
             ProgressionLevelBonuses = progressionLevelBonuses ?? new Dictionary<string, int>();
             ProgressionItemSlots = progressionItemSlots ?? new Dictionary<string, int>();
             ProgressionFailurePoolTiers = progressionFailurePoolTiers ?? new Dictionary<string, int>();
+            if (progressionCurrencyPerXp < 0)
+                throw new ConfigurationException("progression_currency_per_xp must be non-negative.");
+            ProgressionCurrencyPerXp = progressionCurrencyPerXp;
         }
 
         // IRuleResolver Implementation
@@ -308,6 +313,8 @@ namespace Pinder.LlmAdapters
 
             return value;
         }
+
+        public int? GetProgressionCurrencyPerXp() => ProgressionCurrencyPerXp;
 
         /// <summary>
         /// Parsed game-definition data is authoritative. Missing rule values must

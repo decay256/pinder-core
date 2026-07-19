@@ -8,6 +8,7 @@ using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
 using Pinder.Core.Progression;
 using Pinder.Core.Traps;
+using Pinder.LlmAdapters;
 
 namespace Pinder.Core.Tests
 {
@@ -24,7 +25,7 @@ namespace Pinder.Core.Tests
         public void SessionXpRecorder_Nat20_Records25Xp()
         {
             var ledger = new XpLedger();
-            var recorder = new SessionXpRecorder(ledger, rules: null);
+            var recorder = new SessionXpRecorder(ledger, GameDefinition.PinderDefaults);
 
             var roll = MakeRollResult(isNat20: true, isSuccess: true, dc: 15, finalTotal: 20);
             recorder.RecordRollXp(roll);
@@ -36,7 +37,7 @@ namespace Pinder.Core.Tests
         public void SessionXpRecorder_Nat1_Records10Xp()
         {
             var ledger = new XpLedger();
-            var recorder = new SessionXpRecorder(ledger, rules: null);
+            var recorder = new SessionXpRecorder(ledger, GameDefinition.PinderDefaults);
 
             var roll = MakeRollResult(isNat1: true, isSuccess: false, dc: 15, finalTotal: 1);
             recorder.RecordRollXp(roll);
@@ -48,7 +49,7 @@ namespace Pinder.Core.Tests
         public void SessionXpRecorder_SuccessLowDc_Records5Xp()
         {
             var ledger = new XpLedger();
-            var recorder = new SessionXpRecorder(ledger, rules: null);
+            var recorder = new SessionXpRecorder(ledger, GameDefinition.PinderDefaults);
 
             var roll = MakeRollResult(isSuccess: true, dc: 14, finalTotal: 16);
             recorder.RecordRollXp(roll);
@@ -60,7 +61,7 @@ namespace Pinder.Core.Tests
         public void SessionXpRecorder_SuccessMidDc_Records10Xp()
         {
             var ledger = new XpLedger();
-            var recorder = new SessionXpRecorder(ledger, rules: null);
+            var recorder = new SessionXpRecorder(ledger, GameDefinition.PinderDefaults);
 
             var roll = MakeRollResult(isSuccess: true, dc: 18, finalTotal: 20);
             recorder.RecordRollXp(roll);
@@ -72,7 +73,7 @@ namespace Pinder.Core.Tests
         public void SessionXpRecorder_SuccessHighDc_Records15Xp()
         {
             var ledger = new XpLedger();
-            var recorder = new SessionXpRecorder(ledger, rules: null);
+            var recorder = new SessionXpRecorder(ledger, GameDefinition.PinderDefaults);
 
             var roll = MakeRollResult(isSuccess: true, dc: 22, finalTotal: 24);
             recorder.RecordRollXp(roll);
@@ -84,7 +85,7 @@ namespace Pinder.Core.Tests
         public void SessionXpRecorder_Failure_Records2Xp()
         {
             var ledger = new XpLedger();
-            var recorder = new SessionXpRecorder(ledger, rules: null);
+            var recorder = new SessionXpRecorder(ledger, GameDefinition.PinderDefaults);
 
             var roll = MakeRollResult(isSuccess: false, dc: 15, finalTotal: 10);
             recorder.RecordRollXp(roll);
@@ -96,7 +97,7 @@ namespace Pinder.Core.Tests
         public void SessionXpRecorder_EndOfGame_DateSecured_Multiplies3x()
         {
             var ledger = new XpLedger();
-            var recorder = new SessionXpRecorder(ledger, rules: null);
+            var recorder = new SessionXpRecorder(ledger, GameDefinition.PinderDefaults);
 
             // Add some base XP to multiply
             ledger.Record("Base", 10);
@@ -111,7 +112,7 @@ namespace Pinder.Core.Tests
         public void SessionXpRecorder_EndOfGame_Unmatched_Multiplies1x()
         {
             var ledger = new XpLedger();
-            var recorder = new SessionXpRecorder(ledger, rules: null);
+            var recorder = new SessionXpRecorder(ledger, GameDefinition.PinderDefaults);
 
             // Add some base XP to multiply
             ledger.Record("Base", 10);
@@ -130,7 +131,7 @@ namespace Pinder.Core.Tests
         public void SessionXpRecorder_RiskTierMultiplier_AppliesCorrectly(RiskTier tier, int baseXp, int expected)
         {
             var ledger = new XpLedger();
-            var recorder = new SessionXpRecorder(ledger, rules: null);
+            var recorder = new SessionXpRecorder(ledger, GameDefinition.PinderDefaults);
 
             int result = recorder.ApplyRiskTierMultiplier(baseXp, tier);
 

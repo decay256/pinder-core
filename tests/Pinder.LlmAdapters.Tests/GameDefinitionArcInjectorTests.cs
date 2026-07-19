@@ -43,6 +43,7 @@ namespace Pinder.LlmAdapters.Tests
                 "progressionLevelBonuses",
                 "progressionItemSlots",
                 "progressionFailurePoolTiers",
+                "progressionCurrencyPerXp",
                 "characterPromptStructure"
             };
 
@@ -166,6 +167,7 @@ namespace Pinder.LlmAdapters.Tests
                 {
                     ["severe"] = 60
                 },
+                progressionCurrencyPerXp: 70,
                 characterPromptStructure: new CharacterPromptStructure(
                     characterSpecHeader: "== SENTINEL CHARACTER ==",
                     playerAvatarCharacterTag: "SENTINEL_PLAYER",

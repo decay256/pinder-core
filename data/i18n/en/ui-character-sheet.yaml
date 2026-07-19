@@ -44,6 +44,7 @@ strings:
   character_sheet.spend_skill_points: "Spend Skill Points"
   character_sheet.permanent_warning: "Warning: Allocations are permanent. No respec/undo allowed."
   character_sheet.level_up_cancel: "Cancel"
+  character_sheet.level_up_failed: "Skill point spend failed."
   character_sheet.level_up_save: "Save Allocations"
   character_sheet.level_up_heading: "Level Up!"
   character_sheet.unspent_skill_points_count: "{count} unspent skill points"

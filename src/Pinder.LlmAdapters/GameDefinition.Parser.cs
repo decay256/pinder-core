@@ -256,6 +256,10 @@ namespace Pinder.LlmAdapters
             parsed.TryGetValue("progression_failure_pool_tiers", out var progressionFailurePoolTiersObj);
             var progressionFailurePoolTiers = ParseIntDictionary(progressionFailurePoolTiersObj, "progression_failure_pool_tiers", new[] { "intermediate_min", "advanced_min", "legendary_min" });
 
+            var progressionCurrencyPerXp = GetRequiredInt("progression_currency_per_xp");
+            if (progressionCurrencyPerXp < 0)
+                throw new InvalidOperationException("game-definition.yaml progression_currency_per_xp must be non-negative");
+
             parsed.TryGetValue("character_prompt_structure", out var characterPromptStructureObj);
             var characterPromptStructureDict = CoerceDictionary(characterPromptStructureObj, "character_prompt_structure");
             var characterPromptStructure = new CharacterPromptStructure(
@@ -291,6 +295,7 @@ namespace Pinder.LlmAdapters
                 progressionLevelBonuses: progressionLevelBonuses,
                 progressionItemSlots: progressionItemSlots,
                 progressionFailurePoolTiers: progressionFailurePoolTiers,
+                progressionCurrencyPerXp: progressionCurrencyPerXp,
                 characterPromptStructure: characterPromptStructure
             );
         }

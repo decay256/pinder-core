@@ -20,7 +20,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Top Hat: Head accessory with Charm +1 and Rizz +1."
+    "summary_text": "Top Hat: Head accessory with Charm +1 and Rizz +1.",
+    "shop_price": 0,
+    "starter_unlocked": true
   },
   {
     "id": "face_monocle",
@@ -44,7 +46,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Monocle: Face accessory with Wit +2 and Chaos -1."
+    "summary_text": "Monocle: Face accessory with Wit +2 and Chaos -1.",
+    "shop_price": 0,
+    "starter_unlocked": true
   },
   {
     "id": "head_cheff",
@@ -66,7 +70,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Chef Hat: Head accessory with Charm +1."
+    "summary_text": "Chef Hat: Head accessory with Charm +1.",
+    "shop_price": 160,
+    "starter_unlocked": false
   },
   {
     "id": "head_crown",
@@ -90,7 +96,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "hides"
     },
-    "summary_text": "Crown: Head accessory with Charm +1, Rizz +1, and Honesty -1."
+    "summary_text": "Crown: Head accessory with Charm +1, Rizz +1, and Honesty -1.",
+    "shop_price": 180,
+    "starter_unlocked": false
   },
   {
     "id": "head_hair",
@@ -111,7 +119,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Hair Accessory: Head accessory with Charm +1 and Rizz +1."
+    "summary_text": "Hair Accessory: Head accessory with Charm +1 and Rizz +1.",
+    "shop_price": 200,
+    "starter_unlocked": false
   },
   {
     "id": "head_hat",
@@ -134,7 +144,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "shows"
     },
-    "summary_text": "Hat: Head accessory with Chaos +1."
+    "summary_text": "Hat: Head accessory with Chaos +1.",
+    "shop_price": 220,
+    "starter_unlocked": false
   },
   {
     "id": "head_hat_2",
@@ -158,7 +170,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "hides"
     },
-    "summary_text": "Hat (Style 2): Head accessory with Charm +1 and Rizz -1."
+    "summary_text": "Hat (Style 2): Head accessory with Charm +1 and Rizz -1.",
+    "shop_price": 240,
+    "starter_unlocked": false
   },
   {
     "id": "head_hat_3",
@@ -179,7 +193,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Hat (Style 3): Head accessory with Self-Awareness +2 and Chaos -1."
+    "summary_text": "Hat (Style 3): Head accessory with Self-Awareness +2 and Chaos -1.",
+    "shop_price": 260,
+    "starter_unlocked": false
   },
   {
     "id": "head_hat_4",
@@ -200,7 +216,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Hat (Style 4): Head accessory with Wit +1 and Honesty +1."
+    "summary_text": "Hat (Style 4): Head accessory with Wit +1 and Honesty +1.",
+    "shop_price": 280,
+    "starter_unlocked": false
   },
   {
     "id": "head_hat_5",
@@ -221,7 +239,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Hat (Style 5): Head accessory with Chaos +3 and Self-Awareness -2."
+    "summary_text": "Hat (Style 5): Head accessory with Chaos +3 and Self-Awareness -2.",
+    "shop_price": 300,
+    "starter_unlocked": false
   },
   {
     "id": "head_hat_6",
@@ -244,7 +264,9 @@
       "dry_spell_probability_delta": 0.15,
       "read_receipt": "hides"
     },
-    "summary_text": "Hat (Style 6): Head accessory with Rizz +1."
+    "summary_text": "Hat (Style 6): Head accessory with Rizz +1.",
+    "shop_price": 320,
+    "starter_unlocked": false
   },
   {
     "id": "head_hat_8",
@@ -265,7 +287,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Hat (Style 8): Head accessory with Rizz +1 and Charm +1."
+    "summary_text": "Hat (Style 8): Head accessory with Rizz +1 and Charm +1.",
+    "shop_price": 340,
+    "starter_unlocked": false
   },
   {
     "id": "head_hat_9",
@@ -286,7 +310,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Hat (Style 9): Head accessory with Honesty +2 and Wit -1."
+    "summary_text": "Hat (Style 9): Head accessory with Honesty +2 and Wit -1.",
+    "shop_price": 360,
+    "starter_unlocked": false
   },
   {
     "id": "head_hat_10",
@@ -307,7 +333,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Hat (Style 10): Head accessory with Wit +3 and Charm -2."
+    "summary_text": "Hat (Style 10): Head accessory with Wit +3 and Charm -2.",
+    "shop_price": 380,
+    "starter_unlocked": false
   },
   {
     "id": "head_horns",
@@ -331,7 +359,9 @@
       "dry_spell_probability_delta": 0.05,
       "read_receipt": "neutral"
     },
-    "summary_text": "Horns: Head accessory with Chaos +2 and Charm -1."
+    "summary_text": "Horns: Head accessory with Chaos +2 and Charm -1.",
+    "shop_price": 400,
+    "starter_unlocked": false
   },
   {
     "id": "face_eyes1",
@@ -354,7 +384,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "hides"
     },
-    "summary_text": "Eye Accessory (Style 1): Face accessory with Wit +1."
+    "summary_text": "Eye Accessory (Style 1): Face accessory with Wit +1.",
+    "shop_price": 420,
+    "starter_unlocked": false
   },
   {
     "id": "face_eyes2",
@@ -376,7 +408,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "hides"
     },
-    "summary_text": "Eye Accessory (Style 2): Face accessory with Charm +1."
+    "summary_text": "Eye Accessory (Style 2): Face accessory with Charm +1.",
+    "shop_price": 440,
+    "starter_unlocked": false
   },
   {
     "id": "face_glases1",
@@ -399,7 +433,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "hides"
     },
-    "summary_text": "Glasses: Face accessory with Wit +1."
+    "summary_text": "Glasses: Face accessory with Wit +1.",
+    "shop_price": 460,
+    "starter_unlocked": false
   },
   {
     "id": "face_mouth1",
@@ -421,7 +457,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "shows"
     },
-    "summary_text": "Mouth Accessory: Face accessory with Rizz +1."
+    "summary_text": "Mouth Accessory: Face accessory with Rizz +1.",
+    "shop_price": 480,
+    "starter_unlocked": false
   },
   {
     "id": "face_tongue1",
@@ -445,7 +483,9 @@
       "dry_spell_probability_delta": 0.05,
       "read_receipt": "neutral"
     },
-    "summary_text": "Tongue Accessory: Face accessory with Chaos +1 and Charm -1."
+    "summary_text": "Tongue Accessory: Face accessory with Chaos +1 and Charm -1.",
+    "shop_price": 500,
+    "starter_unlocked": false
   },
   {
     "id": "face_nariz1",
@@ -467,7 +507,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Nose Accessory: Face accessory with Chaos +1."
+    "summary_text": "Nose Accessory: Face accessory with Chaos +1.",
+    "shop_price": 520,
+    "starter_unlocked": false
   },
   {
     "id": "face_pirate1",
@@ -491,7 +533,9 @@
       "dry_spell_probability_delta": 0.1,
       "read_receipt": "neutral"
     },
-    "summary_text": "Pirate Eye Patch: Face accessory with Chaos +1 and Rizz +1."
+    "summary_text": "Pirate Eye Patch: Face accessory with Chaos +1 and Rizz +1.",
+    "shop_price": 540,
+    "starter_unlocked": false
   },
   {
     "id": "head_antenas",
@@ -514,7 +558,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Antenna Headband: Head accessory with Chaos +1 and Wit +1."
+    "summary_text": "Antenna Headband: Head accessory with Chaos +1 and Wit +1.",
+    "shop_price": 560,
+    "starter_unlocked": false
   },
   {
     "id": "head_horns2",
@@ -536,7 +582,9 @@
       "dry_spell_probability_delta": 0.05,
       "read_receipt": "neutral"
     },
-    "summary_text": "Horns (Style 2): Head accessory with Chaos +2."
+    "summary_text": "Horns (Style 2): Head accessory with Chaos +2.",
+    "shop_price": 580,
+    "starter_unlocked": false
   },
   {
     "id": "head_pirate",
@@ -561,7 +609,9 @@
       "dry_spell_probability_delta": 0.1,
       "read_receipt": "hides"
     },
-    "summary_text": "Pirate Hat: Head accessory with Chaos +1, Rizz +1, and Honesty -1."
+    "summary_text": "Pirate Hat: Head accessory with Chaos +1, Rizz +1, and Honesty -1.",
+    "shop_price": 600,
+    "starter_unlocked": false
   },
   {
     "id": "head_wiz",
@@ -584,7 +634,9 @@
       "dry_spell_probability_delta": 0.1,
       "read_receipt": "neutral"
     },
-    "summary_text": "Wizard Hat: Head accessory with Wit +2 and Chaos +1."
+    "summary_text": "Wizard Hat: Head accessory with Wit +2 and Chaos +1.",
+    "shop_price": 620,
+    "starter_unlocked": false
   },
   {
     "id": "special_shoe1",
@@ -605,7 +657,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Shoes (Style 1): Special accessory with Self-Awareness +1 and Wit +1."
+    "summary_text": "Shoes (Style 1): Special accessory with Self-Awareness +1 and Wit +1.",
+    "shop_price": 0,
+    "starter_unlocked": true
   },
   {
     "id": "special_shoe2",
@@ -628,7 +682,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "shows"
     },
-    "summary_text": "Shoes (Style 2): Special accessory with Charm +1."
+    "summary_text": "Shoes (Style 2): Special accessory with Charm +1.",
+    "shop_price": 660,
+    "starter_unlocked": false
   },
   {
     "id": "special_shoe3",
@@ -651,7 +707,9 @@
       "dry_spell_probability_delta": 0.1,
       "read_receipt": "neutral"
     },
-    "summary_text": "Shoes (Style 3): Special accessory with Honesty +1."
+    "summary_text": "Shoes (Style 3): Special accessory with Honesty +1.",
+    "shop_price": 680,
+    "starter_unlocked": false
   },
   {
     "id": "special_shoe4",
@@ -674,7 +732,9 @@
       "dry_spell_probability_delta": 0.2,
       "read_receipt": "shows"
     },
-    "summary_text": "Shoes (Style 4): Special accessory with Self-Awareness -1."
+    "summary_text": "Shoes (Style 4): Special accessory with Self-Awareness -1.",
+    "shop_price": 700,
+    "starter_unlocked": false
   },
   {
     "id": "special_shoe5",
@@ -698,7 +758,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "shows"
     },
-    "summary_text": "Shoes (Style 5): Special accessory with Charm +1 and Rizz +1."
+    "summary_text": "Shoes (Style 5): Special accessory with Charm +1 and Rizz +1.",
+    "shop_price": 720,
+    "starter_unlocked": false
   },
   {
     "id": "special_shoe6",
@@ -720,7 +782,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Shoes (Style 6): Special accessory with Chaos +1."
+    "summary_text": "Shoes (Style 6): Special accessory with Chaos +1.",
+    "shop_price": 740,
+    "starter_unlocked": false
   },
   {
     "id": "special_shoe7",
@@ -741,7 +805,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Shoes (Style 7): Special accessory with Rizz +2 and Honesty -1."
+    "summary_text": "Shoes (Style 7): Special accessory with Rizz +2 and Honesty -1.",
+    "shop_price": 760,
+    "starter_unlocked": false
   },
   {
     "id": "outfit_maid",
@@ -765,7 +831,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "hides"
     },
-    "summary_text": "Maid Outfit: Body outfit with Charm +2 and Rizz +1."
+    "summary_text": "Maid Outfit: Body outfit with Charm +2 and Rizz +1.",
+    "shop_price": 0,
+    "starter_unlocked": true
   },
   {
     "id": "vest1",
@@ -786,7 +854,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Vest (Style 1): Body outfit with Self-Awareness +2 and Chaos -1."
+    "summary_text": "Vest (Style 1): Body outfit with Self-Awareness +2 and Chaos -1.",
+    "shop_price": 1620,
+    "starter_unlocked": false
   },
   {
     "id": "vest2",
@@ -807,7 +877,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Vest (Style 2): Body outfit with Charm +2 and Honesty -1."
+    "summary_text": "Vest (Style 2): Body outfit with Charm +2 and Honesty -1.",
+    "shop_price": 1660,
+    "starter_unlocked": false
   },
   {
     "id": "vest3",
@@ -830,7 +902,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "hides"
     },
-    "summary_text": "Vest (Style 3): Body outfit with Charm +1."
+    "summary_text": "Vest (Style 3): Body outfit with Charm +1.",
+    "shop_price": 1700,
+    "starter_unlocked": false
   },
   {
     "id": "vest4",
@@ -851,7 +925,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Vest (Style 4): Body outfit with Chaos +2 and Wit -1."
+    "summary_text": "Vest (Style 4): Body outfit with Chaos +2 and Wit -1.",
+    "shop_price": 1740,
+    "starter_unlocked": false
   },
   {
     "id": "vest5",
@@ -874,7 +950,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "shows"
     },
-    "summary_text": "Vest (Style 5): Body outfit with Charm +1."
+    "summary_text": "Vest (Style 5): Body outfit with Charm +1.",
+    "shop_price": 1780,
+    "starter_unlocked": false
   },
   {
     "id": "vest7",
@@ -895,7 +973,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Vest (Style 7): Body outfit with Honesty +2 and Charm -1."
+    "summary_text": "Vest (Style 7): Body outfit with Honesty +2 and Charm -1.",
+    "shop_price": 1820,
+    "starter_unlocked": false
   },
   {
     "id": "vest8",
@@ -919,7 +999,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Vest (Style 8): Body outfit with Wit +1 and Self-Awareness -1."
+    "summary_text": "Vest (Style 8): Body outfit with Wit +1 and Self-Awareness -1.",
+    "shop_price": 1860,
+    "starter_unlocked": false
   },
   {
     "id": "vest9",
@@ -943,7 +1025,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "shows"
     },
-    "summary_text": "Vest (Style 9): Body outfit with Chaos +1 and Self-Awareness -1."
+    "summary_text": "Vest (Style 9): Body outfit with Chaos +1 and Self-Awareness -1.",
+    "shop_price": 1900,
+    "starter_unlocked": false
   },
   {
     "id": "vest10",
@@ -964,7 +1048,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Vest (Style 10): Body outfit with Wit +2 and Rizz -1."
+    "summary_text": "Vest (Style 10): Body outfit with Wit +2 and Rizz -1.",
+    "shop_price": 1940,
+    "starter_unlocked": false
   },
   {
     "id": "vest11",
@@ -985,7 +1071,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Vest (Style 11): Body outfit with Rizz +2 and Chaos -1."
+    "summary_text": "Vest (Style 11): Body outfit with Rizz +2 and Chaos -1.",
+    "shop_price": 1980,
+    "starter_unlocked": false
   },
   {
     "id": "arms0",
@@ -1006,7 +1094,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Arms (Default): Arms item with Honesty +1 and Self-Awareness +1."
+    "summary_text": "Arms (Default): Arms item with Honesty +1 and Self-Awareness +1.",
+    "shop_price": 0,
+    "starter_unlocked": true
   },
   {
     "id": "arms1",
@@ -1027,7 +1117,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Arms (Style 1): Arms item with Rizz +2 and Wit -1."
+    "summary_text": "Arms (Style 1): Arms item with Rizz +2 and Wit -1.",
+    "shop_price": 1265,
+    "starter_unlocked": false
   },
   {
     "id": "arms2",
@@ -1048,7 +1140,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Arms (Style 2): Arms item with Chaos +2 and Self-Awareness -1."
+    "summary_text": "Arms (Style 2): Arms item with Chaos +2 and Self-Awareness -1.",
+    "shop_price": 1290,
+    "starter_unlocked": false
   },
   {
     "id": "arms3",
@@ -1071,7 +1165,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "T-Rex Arms (Style 3): Arms item with Chaos +1 and Charm +1."
+    "summary_text": "T-Rex Arms (Style 3): Arms item with Chaos +1 and Charm +1.",
+    "shop_price": 1315,
+    "starter_unlocked": false
   },
   {
     "id": "arms4",
@@ -1094,7 +1190,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "T-Rex Arms (Style 4): Arms item with Chaos +1 and Charm +1."
+    "summary_text": "T-Rex Arms (Style 4): Arms item with Chaos +1 and Charm +1.",
+    "shop_price": 1340,
+    "starter_unlocked": false
   },
   {
     "id": "arms5",
@@ -1115,7 +1213,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Arms (Style 5): Arms item with Charm +1 and Honesty +1."
+    "summary_text": "Arms (Style 5): Arms item with Charm +1 and Honesty +1.",
+    "shop_price": 1365,
+    "starter_unlocked": false
   },
   {
     "id": "arms6",
@@ -1136,7 +1236,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Arms (Style 6): Arms item with Wit +2 and Chaos -1."
+    "summary_text": "Arms (Style 6): Arms item with Wit +2 and Chaos -1.",
+    "shop_price": 1390,
+    "starter_unlocked": false
   },
   {
     "id": "hair1",
@@ -1157,7 +1259,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Hair Style 1: Hair item with Charm +2 and Self-Awareness -1."
+    "summary_text": "Hair Style 1: Hair item with Charm +2 and Self-Awareness -1.",
+    "shop_price": 0,
+    "starter_unlocked": true
   },
   {
     "id": "hair2",
@@ -1179,7 +1283,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "hides"
     },
-    "summary_text": "Hair Style 2: Hair item with Charm +1."
+    "summary_text": "Hair Style 2: Hair item with Charm +1.",
+    "shop_price": 1440,
+    "starter_unlocked": false
   },
   {
     "id": "hair3",
@@ -1201,7 +1307,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Hair Style 3: Hair item with Chaos +1."
+    "summary_text": "Hair Style 3: Hair item with Chaos +1.",
+    "shop_price": 1465,
+    "starter_unlocked": false
   },
   {
     "id": "hair4",
@@ -1222,7 +1330,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Hair Style 4: Hair item with Wit +2 and Honesty -1."
+    "summary_text": "Hair Style 4: Hair item with Wit +2 and Honesty -1.",
+    "shop_price": 1490,
+    "starter_unlocked": false
   },
   {
     "id": "hair5",
@@ -1243,7 +1353,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Hair Style 5: Hair item with Chaos +2 and Charm -1."
+    "summary_text": "Hair Style 5: Hair item with Chaos +2 and Charm -1.",
+    "shop_price": 1515,
+    "starter_unlocked": false
   },
   {
     "id": "classic2",
@@ -1265,7 +1377,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Tattoo (Classic 2): Tattoo item with Honesty +1."
+    "summary_text": "Tattoo (Classic 2): Tattoo item with Honesty +1.",
+    "shop_price": 0,
+    "starter_unlocked": true
   },
   {
     "id": "classic3",
@@ -1283,7 +1397,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Tattoo (Classic 3): Tattoo item with no stat change."
+    "summary_text": "Tattoo (Classic 3): Tattoo item with no stat change.",
+    "shop_price": 650,
+    "starter_unlocked": false
   },
   {
     "id": "classic4",
@@ -1303,7 +1419,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Tattoo (Classic 4): Tattoo item with Rizz +1."
+    "summary_text": "Tattoo (Classic 4): Tattoo item with Rizz +1.",
+    "shop_price": 660,
+    "starter_unlocked": false
   },
   {
     "id": "classic5",
@@ -1321,7 +1439,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Tattoo (Classic 5): Tattoo item with no stat change."
+    "summary_text": "Tattoo (Classic 5): Tattoo item with no stat change.",
+    "shop_price": 670,
+    "starter_unlocked": false
   },
   {
     "id": "classic6",
@@ -1341,7 +1461,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Tattoo (Classic 6): Tattoo item with Chaos +1."
+    "summary_text": "Tattoo (Classic 6): Tattoo item with Chaos +1.",
+    "shop_price": 680,
+    "starter_unlocked": false
   },
   {
     "id": "classic7",
@@ -1361,7 +1483,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Tattoo (Classic 7): Tattoo item with Chaos +1."
+    "summary_text": "Tattoo (Classic 7): Tattoo item with Chaos +1.",
+    "shop_price": 690,
+    "starter_unlocked": false
   },
   {
     "id": "classic8",
@@ -1379,7 +1503,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Tattoo (Classic 8): Tattoo item with no stat change."
+    "summary_text": "Tattoo (Classic 8): Tattoo item with no stat change.",
+    "shop_price": 700,
+    "starter_unlocked": false
   },
   {
     "id": "classic9",
@@ -1399,7 +1525,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Tattoo (Classic 9): Tattoo item with Wit +1."
+    "summary_text": "Tattoo (Classic 9): Tattoo item with Wit +1.",
+    "shop_price": 710,
+    "starter_unlocked": false
   },
   {
     "id": "classic10",
@@ -1419,7 +1547,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Tattoo (Classic 10): Tattoo item with Honesty +1."
+    "summary_text": "Tattoo (Classic 10): Tattoo item with Honesty +1.",
+    "shop_price": 720,
+    "starter_unlocked": false
   },
   {
     "id": "classic11",
@@ -1437,7 +1567,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Tattoo (Classic 11): Tattoo item with no stat change."
+    "summary_text": "Tattoo (Classic 11): Tattoo item with no stat change.",
+    "shop_price": 730,
+    "starter_unlocked": false
   },
   {
     "id": "classic12",
@@ -1457,7 +1589,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Tattoo (Classic 12): Tattoo item with Charm +1."
+    "summary_text": "Tattoo (Classic 12): Tattoo item with Charm +1.",
+    "shop_price": 740,
+    "starter_unlocked": false
   },
   {
     "id": "classic13",
@@ -1475,7 +1609,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Tattoo (Classic 13): Tattoo item with no stat change."
+    "summary_text": "Tattoo (Classic 13): Tattoo item with no stat change.",
+    "shop_price": 750,
+    "starter_unlocked": false
   },
   {
     "id": "classic14",
@@ -1495,7 +1631,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Tattoo (Classic 14): Tattoo item with Honesty +1."
+    "summary_text": "Tattoo (Classic 14): Tattoo item with Honesty +1.",
+    "shop_price": 760,
+    "starter_unlocked": false
   },
   {
     "id": "classic15",
@@ -1513,7 +1651,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Tattoo (Classic 15): Tattoo item with no stat change."
+    "summary_text": "Tattoo (Classic 15): Tattoo item with no stat change.",
+    "shop_price": 770,
+    "starter_unlocked": false
   },
   {
     "id": "classic16",
@@ -1533,7 +1673,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Tattoo (Classic 16): Tattoo item with Self-Awareness +1."
+    "summary_text": "Tattoo (Classic 16): Tattoo item with Self-Awareness +1.",
+    "shop_price": 780,
+    "starter_unlocked": false
   },
   {
     "id": "classic17",
@@ -1551,7 +1693,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Tattoo (Classic 17): Tattoo item with no stat change."
+    "summary_text": "Tattoo (Classic 17): Tattoo item with no stat change.",
+    "shop_price": 790,
+    "starter_unlocked": false
   },
   {
     "id": "classic18",
@@ -1571,7 +1715,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Tattoo (Classic 18): Tattoo item with Rizz +1."
+    "summary_text": "Tattoo (Classic 18): Tattoo item with Rizz +1.",
+    "shop_price": 800,
+    "starter_unlocked": false
   },
   {
     "id": "classic19",
@@ -1589,7 +1735,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Tattoo (Classic 19): Tattoo item with no stat change."
+    "summary_text": "Tattoo (Classic 19): Tattoo item with no stat change.",
+    "shop_price": 810,
+    "starter_unlocked": false
   },
   {
     "id": "classic20",
@@ -1611,7 +1759,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Tattoo (Classic 20): Tattoo item with Self-Awareness +1."
+    "summary_text": "Tattoo (Classic 20): Tattoo item with Self-Awareness +1.",
+    "shop_price": 820,
+    "starter_unlocked": false
   },
   {
     "id": "classic21",
@@ -1631,7 +1781,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Tattoo (Classic 21): Tattoo item with Wit +1."
+    "summary_text": "Tattoo (Classic 21): Tattoo item with Wit +1.",
+    "shop_price": 830,
+    "starter_unlocked": false
   },
   {
     "id": "classic22",
@@ -1649,7 +1801,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Tattoo (Classic 22): Tattoo item with no stat change."
+    "summary_text": "Tattoo (Classic 22): Tattoo item with no stat change.",
+    "shop_price": 840,
+    "starter_unlocked": false
   },
   {
     "id": "classic23",
@@ -1669,7 +1823,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Tattoo (Classic 23): Tattoo item with Chaos +1."
+    "summary_text": "Tattoo (Classic 23): Tattoo item with Chaos +1.",
+    "shop_price": 850,
+    "starter_unlocked": false
   },
   {
     "id": "classic24",
@@ -1687,7 +1843,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Tattoo (Classic 24): Tattoo item with no stat change."
+    "summary_text": "Tattoo (Classic 24): Tattoo item with no stat change.",
+    "shop_price": 860,
+    "starter_unlocked": false
   },
   {
     "id": "classic25",
@@ -1707,7 +1865,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Tattoo (Classic 25): Tattoo item with Charm +1."
+    "summary_text": "Tattoo (Classic 25): Tattoo item with Charm +1.",
+    "shop_price": 870,
+    "starter_unlocked": false
   },
   {
     "id": "classic26",
@@ -1725,7 +1885,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Tattoo (Classic 26): Tattoo item with no stat change."
+    "summary_text": "Tattoo (Classic 26): Tattoo item with no stat change.",
+    "shop_price": 880,
+    "starter_unlocked": false
   },
   {
     "id": "classic27",
@@ -1745,7 +1907,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Tattoo (Classic 27): Tattoo item with Honesty +1."
+    "summary_text": "Tattoo (Classic 27): Tattoo item with Honesty +1.",
+    "shop_price": 890,
+    "starter_unlocked": false
   },
   {
     "id": "classic28",
@@ -1763,7 +1927,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Tattoo (Classic 28): Tattoo item with no stat change."
+    "summary_text": "Tattoo (Classic 28): Tattoo item with no stat change.",
+    "shop_price": 900,
+    "starter_unlocked": false
   },
   {
     "id": "classic29",
@@ -1783,7 +1949,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Tattoo (Classic 29): Tattoo item with Self-Awareness +1."
+    "summary_text": "Tattoo (Classic 29): Tattoo item with Self-Awareness +1.",
+    "shop_price": 910,
+    "starter_unlocked": false
   },
   {
     "id": "classic30",
@@ -1801,7 +1969,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Tattoo (Classic 30): Tattoo item with no stat change."
+    "summary_text": "Tattoo (Classic 30): Tattoo item with no stat change.",
+    "shop_price": 920,
+    "starter_unlocked": false
   },
   {
     "id": "classic31",
@@ -1821,7 +1991,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Tattoo (Classic 31): Tattoo item with Rizz +2."
+    "summary_text": "Tattoo (Classic 31): Tattoo item with Rizz +2.",
+    "shop_price": 930,
+    "starter_unlocked": false
   },
   {
     "id": "classic32",
@@ -1839,7 +2011,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Tattoo (Classic 32): Tattoo item with no stat change."
+    "summary_text": "Tattoo (Classic 32): Tattoo item with no stat change.",
+    "shop_price": 940,
+    "starter_unlocked": false
   },
   {
     "id": "classic33",
@@ -1859,7 +2033,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Tattoo (Classic 33): Tattoo item with Wit +1."
+    "summary_text": "Tattoo (Classic 33): Tattoo item with Wit +1.",
+    "shop_price": 950,
+    "starter_unlocked": false
   },
   {
     "id": "classic34",
@@ -1877,7 +2053,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Tattoo (Classic 34): Tattoo item with no stat change."
+    "summary_text": "Tattoo (Classic 34): Tattoo item with no stat change.",
+    "shop_price": 960,
+    "starter_unlocked": false
   },
   {
     "id": "classic35",
@@ -1897,7 +2075,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Tattoo (Classic 35): Tattoo item with Charm +1."
+    "summary_text": "Tattoo (Classic 35): Tattoo item with Charm +1.",
+    "shop_price": 970,
+    "starter_unlocked": false
   },
   {
     "id": "flowers1",
@@ -1919,7 +2099,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Flower Tattoo (Style 1): Tattoo item with Charm +1."
+    "summary_text": "Flower Tattoo (Style 1): Tattoo item with Charm +1.",
+    "shop_price": 980,
+    "starter_unlocked": false
   },
   {
     "id": "flowers2",
@@ -1937,7 +2119,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Flower Tattoo (Style 2): Tattoo item with no stat change."
+    "summary_text": "Flower Tattoo (Style 2): Tattoo item with no stat change.",
+    "shop_price": 990,
+    "starter_unlocked": false
   },
   {
     "id": "flowers3",
@@ -1961,7 +2145,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Flower Tattoo (Style 3): Tattoo item with Charm +1 and Honesty +1."
+    "summary_text": "Flower Tattoo (Style 3): Tattoo item with Charm +1 and Honesty +1.",
+    "shop_price": 1000,
+    "starter_unlocked": false
   },
   {
     "id": "flowers4",
@@ -1981,7 +2167,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Flower Tattoo (Style 4): Tattoo item with Honesty +2."
+    "summary_text": "Flower Tattoo (Style 4): Tattoo item with Honesty +2.",
+    "shop_price": 1010,
+    "starter_unlocked": false
   },
   {
     "id": "flowers5",
@@ -2001,7 +2189,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Flower Tattoo (Style 5): Tattoo item with Charm +1."
+    "summary_text": "Flower Tattoo (Style 5): Tattoo item with Charm +1.",
+    "shop_price": 1020,
+    "starter_unlocked": false
   },
   {
     "id": "flowers6",
@@ -2019,7 +2209,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Flower Tattoo (Style 6): Tattoo item with no stat change."
+    "summary_text": "Flower Tattoo (Style 6): Tattoo item with no stat change.",
+    "shop_price": 1030,
+    "starter_unlocked": false
   },
   {
     "id": "flowers7",
@@ -2039,7 +2231,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Flower Tattoo (Style 7): Tattoo item with Self-Awareness +1."
+    "summary_text": "Flower Tattoo (Style 7): Tattoo item with Self-Awareness +1.",
+    "shop_price": 1040,
+    "starter_unlocked": false
   },
   {
     "id": "flowers8",
@@ -2057,7 +2251,9 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Flower Tattoo (Style 8): Tattoo item with no stat change."
+    "summary_text": "Flower Tattoo (Style 8): Tattoo item with no stat change.",
+    "shop_price": 1050,
+    "starter_unlocked": false
   },
   {
     "id": "flowers9",
@@ -2075,6 +2271,8 @@
       "dry_spell_probability_delta": 0,
       "read_receipt": "neutral"
     },
-    "summary_text": "Flower Tattoo (Style 9): Tattoo item with no stat change."
+    "summary_text": "Flower Tattoo (Style 9): Tattoo item with no stat change.",
+    "shop_price": 1060,
+    "starter_unlocked": false
   }
 ]

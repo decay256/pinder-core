@@ -393,6 +393,8 @@ namespace Pinder.Rules
             return rule?.Outcome == null ? null : GetOutcomeInt(rule.Outcome, "min_level");
         }
 
+        public int? GetProgressionCurrencyPerXp() => null;
+
         /// <summary>
         /// Loaded rulebooks are authoritative. Missing rule values must be reported
         /// by callers instead of falling back to embedded defaults.

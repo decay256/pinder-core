@@ -67,7 +67,9 @@ namespace Pinder.Core.Tests
     ""backstory_fragment"": """",
     ""texting_style_fragment"": """",
     ""archetype_tendencies"": [],
-    ""response_timing_modifier"": {}
+    ""response_timing_modifier"": {},
+    ""shop_price"": 0,
+    ""starter_unlocked"": true
   }
 ]";
             const string anatomyJson = @"[
@@ -108,7 +110,9 @@ namespace Pinder.Core.Tests
     ""backstory_fragment"": """",
     ""texting_style_fragment"": """",
     ""archetype_tendencies"": [],
-    ""response_timing_modifier"": {}
+    ""response_timing_modifier"": {},
+    ""shop_price"": 0,
+    ""starter_unlocked"": true
   }
 ]";
             const string blankSummaryJson = @"[
@@ -123,7 +127,9 @@ namespace Pinder.Core.Tests
     ""backstory_fragment"": """",
     ""texting_style_fragment"": """",
     ""archetype_tendencies"": [],
-    ""response_timing_modifier"": {}
+    ""response_timing_modifier"": {},
+    ""shop_price"": 0,
+    ""starter_unlocked"": true
   }
 ]";
 
@@ -183,7 +189,9 @@ namespace Pinder.Core.Tests
     ""backstory_fragment"": """",
     ""texting_style_fragment"": """",
     ""archetype_tendencies"": [],
-    ""response_timing_modifier"": {}
+    ""response_timing_modifier"": {},
+    ""shop_price"": 0,
+    ""starter_unlocked"": true
   }
 ]";
             const string anatomyJson = @"[

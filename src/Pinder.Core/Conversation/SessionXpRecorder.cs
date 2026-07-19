@@ -152,11 +152,14 @@ namespace Pinder.Core.Conversation
         /// </summary>
         public void RecordEndOfGameXp(GameOutcome outcome)
         {
-            double multiplier = GetTerminalOutcomeMultiplierVal(outcome);
-            int collected = _xpLedger.TotalXp;
-            int delta = (int)Math.Round(collected * multiplier) - collected;
-            if (delta > 0)
-                _xpLedger.Record($"OutcomeBonus_{outcome}", delta);
+            var sessionRules = _rules
+                ?? throw new InvalidOperationException(
+                    "Terminal progression settlement requires explicit session rules.");
+            var settlement = ProgressionSettlementCalculator.CalculateTerminalSettlement(
+                _xpLedger.TotalXp,
+                outcome,
+                sessionRules);
+            _xpLedger.RecordTerminalSettlement(settlement);
         }
     }
 }

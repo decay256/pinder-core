@@ -56,6 +56,7 @@ namespace Pinder.Tools.NarrativeHarness
                 progressionLevelBonuses: baseDef.ProgressionLevelBonuses,
                 progressionItemSlots: baseDef.ProgressionItemSlots,
                 progressionFailurePoolTiers: baseDef.ProgressionFailurePoolTiers,
+                progressionCurrencyPerXp: baseDef.ProgressionCurrencyPerXp,
                 characterPromptStructure: baseDef.CharacterPromptStructure);
         }
     }

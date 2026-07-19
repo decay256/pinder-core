@@ -43,6 +43,8 @@ namespace Pinder.Core.Tests
             public int? GetItemSlotsForLevel(int level) => ItemSlotsForLevelValue;
             public int? GetFailurePoolTierMinLevel(string tierName) => null;
 
+            public int? GetProgressionCurrencyPerXp() => 10;
+
             // Behaves like a production resolver: unresolved rules fall back to defaults.
             public bool AllowDefaultFallback => true;
         }

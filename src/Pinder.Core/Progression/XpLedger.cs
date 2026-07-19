@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Pinder.Core.Conversation;
 
 namespace Pinder.Core.Progression
 {
@@ -34,6 +35,10 @@ namespace Pinder.Core.Progression
 
         private readonly List<XpEvent> _events;
         private int _drainCursor;
+        private GameOutcome? _terminalSettlementOutcome;
+        private int? _terminalSettlementBaseXp;
+        private double? _terminalSettlementMultiplier;
+        private int? _terminalSettlementBonusXp;
 
         /// <summary>Creates an empty ledger with TotalXp == 0 and no events.</summary>
         public XpLedger()
@@ -48,6 +53,12 @@ namespace Pinder.Core.Progression
         /// <summary>All recorded XP events in chronological order.</summary>
         public IReadOnlyList<XpEvent> Events => _events;
 
+        /// <summary>Terminal outcome already settled into this ledger, if any.</summary>
+        public GameOutcome? TerminalSettlementOutcome => _terminalSettlementOutcome;
+
+        /// <summary>XP total before terminal outcome bonus was applied.</summary>
+        public int? TerminalSettlementBaseXp => _terminalSettlementBaseXp;
+
         /// <summary>
         /// Records an XP event with the given source label and amount.
         /// </summary>
@@ -60,6 +71,49 @@ namespace Pinder.Core.Progression
             var evt = new XpEvent(source, amount);
             _events.Add(evt);
             TotalXp += amount;
+        }
+
+        /// <summary>
+        /// Applies a terminal settlement exactly once. A second settlement for the
+        /// same outcome is a no-op; a different outcome is invalid.
+        /// </summary>
+        public ProgressionSettlement RecordTerminalSettlement(ProgressionSettlement settlement)
+        {
+            if (settlement == null) throw new ArgumentNullException(nameof(settlement));
+
+            if (_terminalSettlementOutcome.HasValue)
+            {
+                if (_terminalSettlementOutcome.Value != settlement.Outcome)
+                {
+                    throw new InvalidOperationException(
+                        $"XP ledger was already settled for {_terminalSettlementOutcome.Value}; cannot settle {settlement.Outcome}.");
+                }
+
+                return new ProgressionSettlement(
+                    settlement.Outcome,
+                    _terminalSettlementBaseXp!.Value,
+                    _terminalSettlementMultiplier!.Value,
+                    0,
+                    TotalXp,
+                    settlement.CurrencyPerXp,
+                    TotalXp * settlement.CurrencyPerXp);
+            }
+
+            if (settlement.BaseXp != TotalXp)
+            {
+                throw new InvalidOperationException(
+                    $"Terminal settlement base XP {settlement.BaseXp} does not match ledger total {TotalXp}.");
+            }
+
+            _terminalSettlementOutcome = settlement.Outcome;
+            _terminalSettlementBaseXp = settlement.BaseXp;
+            _terminalSettlementMultiplier = settlement.OutcomeMultiplier;
+            _terminalSettlementBonusXp = settlement.BonusXp;
+
+            if (settlement.BonusXp > 0)
+                Record($"OutcomeBonus_{settlement.Outcome}", settlement.BonusXp);
+
+            return settlement;
         }
 
         /// <summary>
@@ -95,6 +149,10 @@ namespace Pinder.Core.Progression
             copy._events.AddRange(_events); // XpEvent is immutable.
             copy.TotalXp = TotalXp;
             copy._drainCursor = _drainCursor;
+            copy._terminalSettlementOutcome = _terminalSettlementOutcome;
+            copy._terminalSettlementBaseXp = _terminalSettlementBaseXp;
+            copy._terminalSettlementMultiplier = _terminalSettlementMultiplier;
+            copy._terminalSettlementBonusXp = _terminalSettlementBonusXp;
             return copy;
         }
     }
