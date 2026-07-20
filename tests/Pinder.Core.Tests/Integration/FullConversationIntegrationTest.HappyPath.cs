@@ -39,8 +39,8 @@ namespace Pinder.Core.Tests.Integration
 
             var timing = new TimingProfile(baseDelay: 10, variance: 0.5f, drySpell: 0.0f, readReceipt: "neutral");
 
-            var gerald = new CharacterProfile(geraldStats, "Test system prompt", "Gerald", timing, level: 5);
-            var velvet = new CharacterProfile(velvetStats, "Test system prompt", "Velvet", timing, level: 7);
+            var gerald = TestHelpers.MakeCharacterProfile(geraldStats, "Test system prompt", "Gerald", timing, level: 5);
+            var velvet = TestHelpers.MakeCharacterProfile(velvetStats, "Test system prompt", "Velvet", timing, level: 7);
 
             var playerShadows = new SessionShadowTracker(geraldStats);
             var dateeShadows = new SessionShadowTracker(velvetStats);

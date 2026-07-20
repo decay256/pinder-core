@@ -110,7 +110,7 @@ namespace Pinder.Core.Tests.Conversation
 
         private static CharacterProfile CreateProfile(string name)
         {
-            return new CharacterProfile(
+            return TestHelpers.MakeCharacterProfile(
                 TestHelpers.MakeStatBlock(2),
                 $"You are {name}.",
                 name,

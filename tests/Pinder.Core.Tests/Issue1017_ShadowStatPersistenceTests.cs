@@ -20,7 +20,7 @@ namespace Pinder.Core.Tests
         {
             var stats = TestHelpers.MakeStatBlock();
             var timing = new TimingProfile(5, 1.0f, 0.0f, "neutral");
-            return new CharacterProfile(
+            return TestHelpers.MakeCharacterProfile(
                 stats,
                 "system prompt",
                 name,

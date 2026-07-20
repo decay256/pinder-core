@@ -14,10 +14,10 @@ namespace Pinder.Core.Tests
 {
     public partial class ShadowGrowthEventTests
     {
-        // ======================== No shadow tracker → empty events ========================
+        // ======================== Omitted tracker → default tracker events ========================
 
         [Fact]
-        public async Task NoShadowTracker_EmptyShadowEvents()
+        public async Task OmittedShadowTracker_RecordsGrowthEvents()
         {
             var dice = new QueueDice(new[] { 1, 50 }); // Nat 1, d100=50
             var session = MakeSessionWithDice(dice,
@@ -27,7 +27,9 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
-            Assert.Empty(result.ShadowGrowthEvents);
+            Assert.Contains(result.ShadowGrowthEvents, e => e.Contains("Madness"));
+            Assert.NotNull(session.State.PlayerShadows);
+            Assert.Equal(1, session.State.PlayerShadows!.GetDelta(ShadowStatType.Madness));
         }
 
         // ======================== Multiple triggers in one turn ========================

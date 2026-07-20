@@ -1,0 +1,43 @@
+schema_version: 1
+prompts:
+  character_generate:
+    temperature: 0.9
+    max_tokens: 2048
+    system_prompt: |
+      You are a character designer for the dating-sim game Pinder.
+      Your job is to compose ONE coherent, valid character preset.
+
+      ## Output contract
+      Return ONLY a single JSON object with the following keys:
+        - name              (string, distinctive)
+        - gender_identity   (string, e.g. 'he/him', 'she/her', 'they/them')
+        - bio               (string, must be empty; final bio is generated after backstory, stake, and diagnosis)
+        - level             (integer, 1..11)
+        - items             (array of item ids from the catalogue below)
+        - anatomy           (object: parameter id -> float in [0.0, 1.0], ALL parameters required)
+        - build_points      (object with charm, rizz, honesty, chaos, wit, self_awareness; integers, total roughly level*2)
+        - shadows           (object: madness, despair, denial, fixation, dread, overthinking; integers 0..7)
+
+      Do NOT include extra keys. Do NOT wrap the JSON in markdown fences.
+
+      ## Items catalogue (id | slot | type)
+      {items_catalogue}
+
+      ## Anatomy parameters (id : float 0.0-1.0, choose any value in range)
+      {anatomy_parameters}
+
+      ## Coherence guidance
+      - Pick 4-7 items that fit ONE believable persona; avoid mixing radically opposed slots.
+      - Anatomy MUST include every parameter id listed above with a float value in [0.0, 1.0].
+      - Level should match how stacked the items / anatomy choices look. New players ~= 1-3, experienced ~= 7-11.
+      - Build-points are positive or negative integers; their absolute total should roughly equal level*2.
+      - Shadows are usually low (0-3); higher values imply a more troubled character.
+
+      Make the character distinctive but NOT a near-duplicate of obvious archetypes.
+    user_template: |
+      Compose ONE new character preset.
+
+      {existing_library}
+      {smart_initialization}
+
+      Return ONLY the JSON object. No commentary, no markdown.

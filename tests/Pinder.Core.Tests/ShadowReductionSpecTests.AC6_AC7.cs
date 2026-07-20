@@ -15,31 +15,27 @@ namespace Pinder.Core.Tests
     public partial class ShadowReductionSpecTests
     {
         // =====================================================================
-        // AC-6: Build clean — null shadow tracker doesn't crash
+        // AC-6: Omitted tracker is synthesized and reductions remain safe
         // =====================================================================
 
-        // What: Edge case — No shadow tracker configured → reductions silently skip
-        // Mutation: Would catch if null check is missing before ApplyOffset calls
         [Fact]
-        public async Task NullShadowTracker_DateSecured_NoException()
+        public async Task OmittedShadowTracker_DateSecured_UsesDefaultTracker()
         {
             var session = BuildSession(
                 dice: Dice(20, 50),
                 playerStats: MakeStats(charm: 5),
-                shadows: null, // No shadow tracking
+                shadows: null,
                 startingInterest: 24);
 
             await session.StartTurnAsync();
-            // Should not throw NullReferenceException
             var result = await session.ResolveTurnAsync(0);
 
             Assert.Equal(GameOutcome.DateSecured, result.Outcome);
+            Assert.NotNull(session.State.PlayerShadows);
         }
 
-        // What: Edge case — No shadow tracker → Honesty success at high interest doesn't crash
-        // Mutation: Would catch if null check missing in EvaluatePerTurnShadowGrowth
         [Fact]
-        public async Task NullShadowTracker_HonestySuccessHighInterest_NoException()
+        public async Task OmittedShadowTracker_HonestySuccessUsesDefaultTracker()
         {
             var session = BuildSession(
                 dice: Dice(18, 50),
@@ -51,6 +47,7 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
             Assert.True(result.Roll.IsSuccess);
+            Assert.NotNull(session.State.PlayerShadows);
         }
 
         // =====================================================================

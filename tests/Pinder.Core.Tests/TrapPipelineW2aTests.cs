@@ -150,7 +150,7 @@ namespace Pinder.Core.Tests
 
         private static CharacterProfile MakeProfile(string name, int allStats = 2)
         {
-            return new CharacterProfile(
+            return TestHelpers.MakeCharacterProfile(
                 stats: MakeStatBlock(allStats),
                 assembledSystemPrompt: $"You are {name}.",
                 displayName: name,

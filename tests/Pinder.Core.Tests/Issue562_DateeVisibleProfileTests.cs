@@ -168,7 +168,7 @@ namespace Pinder.Core.Tests
                     { ShadowStatType.Dread, 0 }, { ShadowStatType.Overthinking, 0 },
                 });
 
-            return new CharacterProfile(
+            return TestHelpers.MakeCharacterProfile(
                 stats, "system prompt", name,
                 new TimingProfile(5, 1.0f, 0.0f, "neutral"), level: 1,
                 bio: bio,

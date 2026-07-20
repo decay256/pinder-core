@@ -317,10 +317,12 @@ namespace Pinder.LlmAdapters
         public int? GetProgressionCurrencyPerXp() => ProgressionCurrencyPerXp;
 
         /// <summary>
-        /// Parsed game-definition data is authoritative. Missing rule values must
-        /// fail the load or lookup instead of falling back to embedded defaults.
+        /// GameDefinition is authoritative for the progression values it exposes,
+        /// but intentionally does not own conversation rule tables such as
+        /// interest states and shadow thresholds. Those unresolved lookups retain
+        /// the engine defaults unless a complete RuleBookResolver is supplied.
         /// </summary>
-        public bool AllowDefaultFallback => false;
+        public bool AllowDefaultFallback => true;
 
         private static bool IsPastConfiguredProgressionLevel(IReadOnlyDictionary<string, int> table, int level)
         {

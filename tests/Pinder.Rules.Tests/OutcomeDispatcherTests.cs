@@ -40,6 +40,28 @@ namespace Pinder.Rules.Tests
             Assert.Empty(_handler.ActivatedTraps);
         }
 
+        [Theory]
+        [InlineData(null)]
+        [InlineData("yes")]
+        [InlineData("1")]
+        [InlineData(1)]
+        public void Trap_MalformedBoolean_ThrowsBeforeApplyingAnyEffects(object? value)
+        {
+            var outcome = new Dictionary<string, object>
+            {
+                ["interest_delta"] = -1,
+                ["trap"] = value!
+            };
+
+            var ex = Assert.Throws<System.FormatException>(() =>
+                OutcomeDispatcher.Dispatch(outcome, _state, _handler));
+
+            Assert.Contains("trap", ex.Message);
+            Assert.Contains("boolean", ex.Message);
+            Assert.Empty(_handler.InterestDeltas);
+            Assert.Empty(_handler.ActivatedTraps);
+        }
+
         [Fact]
         public void TrapName_ActivatesNamedTrap()
         {
@@ -146,6 +168,86 @@ namespace Pinder.Rules.Tests
             OutcomeDispatcher.Dispatch(outcome, _state, _handler);
             Assert.Equal(new[] { -3 }, _handler.InterestDeltas);
             Assert.Single(_handler.ActivatedTraps);
+        }
+
+        [Fact]
+        public void NumericCoercion_AcceptsIntegerAndFloatStringsAcrossOutcomes()
+        {
+            var outcome = new Dictionary<string, object>
+            {
+                ["interest_delta"] = "-2",
+                ["roll_bonus"] = "3",
+                ["xp_multiplier"] = "1.5"
+            };
+
+            OutcomeDispatcher.Dispatch(outcome, _state, _handler);
+
+            Assert.Equal(new[] { -2 }, _handler.InterestDeltas);
+            Assert.Equal(new[] { "+3" }, _handler.RollModifiers);
+            Assert.Equal(new[] { 1.5 }, _handler.XpMultipliers);
+        }
+
+        [Fact]
+        public void NumericCoercion_RejectsFractionalIntegerOutcomeBeforeApplyingAnyEffects()
+        {
+            var outcome = new Dictionary<string, object>
+            {
+                ["interest_delta"] = 1,
+                ["roll_bonus"] = 2.5
+            };
+
+            var ex = Assert.Throws<System.FormatException>(() =>
+                OutcomeDispatcher.Dispatch(outcome, _state, _handler));
+
+            Assert.Contains("roll_bonus", ex.Message);
+            Assert.Contains("whole number", ex.Message);
+            Assert.Empty(_handler.InterestDeltas);
+            Assert.Empty(_handler.RollModifiers);
+        }
+
+        [Fact]
+        public void NumericCoercion_RejectsIntegerOutcomeOverflowBeforeApplyingAnyEffects()
+        {
+            var outcome = new Dictionary<string, object>
+            {
+                ["interest_delta"] = 1,
+                ["roll_bonus"] = long.MaxValue
+            };
+
+            var ex = Assert.Throws<System.FormatException>(() =>
+                OutcomeDispatcher.Dispatch(outcome, _state, _handler));
+
+            Assert.Contains("roll_bonus", ex.Message);
+            Assert.Contains("Int32", ex.Message);
+            Assert.Empty(_handler.InterestDeltas);
+            Assert.Empty(_handler.RollModifiers);
+        }
+
+        [Theory]
+        [InlineData(double.NaN)]
+        [InlineData(double.PositiveInfinity)]
+        [InlineData(double.NegativeInfinity)]
+        [InlineData(float.NaN)]
+        [InlineData(float.PositiveInfinity)]
+        [InlineData(float.NegativeInfinity)]
+        [InlineData("NaN")]
+        [InlineData("Infinity")]
+        [InlineData("-Infinity")]
+        public void NumericCoercion_RejectsNonFiniteMultiplierBeforeApplyingAnyEffects(object value)
+        {
+            var outcome = new Dictionary<string, object>
+            {
+                ["interest_delta"] = 1,
+                ["xp_multiplier"] = value
+            };
+
+            var ex = Assert.Throws<System.FormatException>(() =>
+                OutcomeDispatcher.Dispatch(outcome, _state, _handler));
+
+            Assert.Contains("xp_multiplier", ex.Message);
+            Assert.Contains("finite", ex.Message);
+            Assert.Empty(_handler.InterestDeltas);
+            Assert.Empty(_handler.XpMultipliers);
         }
     }
 }

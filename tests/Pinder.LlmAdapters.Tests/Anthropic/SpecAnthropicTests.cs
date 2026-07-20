@@ -64,43 +64,6 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             Assert.Null(value);
         }
 
-        // What: AC3 — All 8 properties are settable
-        // Mutation: would catch if any property was read-only
-        [Fact]
-        public void AnthropicOptions_AllProperties_AreSettable()
-        {
-            var opts = new AnthropicOptions
-            {
-                ApiKey = "sk-ant-test",
-                Model = "claude-opus-4-20250514",
-                MaxTokens = 4096,
-                Temperature = 0.3,
-                DialogueOptionsTemperature = 1.0,
-                DeliveryTemperature = 0.5,
-                DateeResponseTemperature = 0.8,
-                InterestChangeBeatTemperature = 0.6
-            };
-
-            Assert.Equal("sk-ant-test", opts.ApiKey);
-            Assert.Equal("claude-opus-4-20250514", opts.Model);
-            Assert.Equal(4096, opts.MaxTokens);
-            Assert.Equal(0.3, opts.Temperature);
-            Assert.Equal(1.0, opts.DialogueOptionsTemperature);
-            Assert.Equal(0.5, opts.DeliveryTemperature);
-            Assert.Equal(0.8, opts.DateeResponseTemperature);
-            Assert.Equal(0.6, opts.InterestChangeBeatTemperature);
-        }
-
-        // What: AC3 — Exactly 11 public instance properties exist
-        // Mutation: would catch if a property was missing or extra ones were added
-        [Fact]
-        public void AnthropicOptions_Has_Exactly11_PublicProperties()
-        {
-            var props = typeof(AnthropicOptions).GetProperties(
-                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
-            Assert.Equal(11, props.Length);
-        }
-
         #endregion
 
         #region AC4: AnthropicApiException

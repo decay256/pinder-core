@@ -263,6 +263,36 @@ namespace Pinder.Rules.Tests
         }
 
         [Fact]
+        public void ConversationStart_ExplicitFalse_MatchesNonStart()
+        {
+            var cond = new Dictionary<string, object>
+            {
+                ["conversation_start"] = false
+            };
+            var state = new GameState(isConversationStart: false);
+            Assert.True(ConditionEvaluator.Evaluate(cond, state));
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("yes")]
+        [InlineData("1")]
+        [InlineData(0)]
+        public void ConversationStart_MalformedBoolean_ThrowsFormatException(object? value)
+        {
+            var cond = new Dictionary<string, object>
+            {
+                ["conversation_start"] = value!
+            };
+
+            var ex = Assert.Throws<System.FormatException>(() =>
+                ConditionEvaluator.Evaluate(cond, new GameState()));
+
+            Assert.Contains("conversation_start", ex.Message);
+            Assert.Contains("boolean", ex.Message);
+        }
+
+        [Fact]
         public void MultipleConditions_AllMatch_ReturnsTrue()
         {
             var cond = new Dictionary<string, object>
@@ -323,6 +353,48 @@ namespace Pinder.Rules.Tests
             var ex = Assert.Throws<System.FormatException>(() => ConditionEvaluator.Evaluate(cond, state));
             Assert.Contains("range lower bound", ex.Message);
             Assert.Contains("oops", ex.Message);
+        }
+
+        [Fact]
+        public void NumericCoercion_AcceptsIntegerStringsForScalarAndRangeConditions()
+        {
+            var cond = new Dictionary<string, object>
+            {
+                ["natural_roll"] = "20",
+                ["miss_range"] = new List<object> { "1", "3" }
+            };
+
+            Assert.True(ConditionEvaluator.Evaluate(cond, new GameState(naturalRoll: 20, missMargin: 2)));
+        }
+
+        [Fact]
+        public void NumericCoercion_RejectsFractionalScalarCondition()
+        {
+            var cond = new Dictionary<string, object>
+            {
+                ["natural_roll"] = 20.5
+            };
+
+            var ex = Assert.Throws<System.FormatException>(() =>
+                ConditionEvaluator.Evaluate(cond, new GameState(naturalRoll: 20)));
+
+            Assert.Contains("natural_roll", ex.Message);
+            Assert.Contains("whole number", ex.Message);
+        }
+
+        [Fact]
+        public void NumericCoercion_RejectsNonFiniteRangeCondition()
+        {
+            var cond = new Dictionary<string, object>
+            {
+                ["miss_range"] = new List<object> { 1, double.PositiveInfinity }
+            };
+
+            var ex = Assert.Throws<System.FormatException>(() =>
+                ConditionEvaluator.Evaluate(cond, new GameState(missMargin: 3)));
+
+            Assert.Contains("range upper bound", ex.Message);
+            Assert.Contains("finite", ex.Message);
         }
     }
 }

@@ -169,7 +169,7 @@ namespace Pinder.Core.Tests
         }
 
         private static CharacterProfile MakeProfile(string name, StatBlock stats)
-            => new CharacterProfile(
+            => TestHelpers.MakeCharacterProfile(
                 stats,
                 "system prompt",
                 name,

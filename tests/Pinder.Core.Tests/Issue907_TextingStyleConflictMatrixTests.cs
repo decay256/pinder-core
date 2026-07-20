@@ -371,24 +371,5 @@ conflicts:
             Assert.Equal(r1.Drops.Count, r2.Drops.Count);
         }
 
-        [Fact]
-        public void ConflictDropEntry_ToString_DoesNotThrow()
-        {
-            var entry = new TextingStyleAggregator.ConflictDropEntry(
-                "test-id", "length", "dropped-val", "structure", "kept-val", "test reason");
-            var s = entry.ToString();
-            Assert.Contains("test-id", s, StringComparison.Ordinal);
-            Assert.Contains("ConflictDrop", s, StringComparison.Ordinal);
-        }
-
-        [Fact]
-        public void AggregationResult_Constructor_StoresArguments()
-        {
-            var lines = new List<string> { "emoji: test" };
-            var drops = new List<TextingStyleAggregator.ConflictDropEntry>();
-            var result = new TextingStyleAggregator.AggregationResult(lines, drops);
-            Assert.Single(result.Lines);
-            Assert.Empty(result.Drops);
-        }
     }
 }

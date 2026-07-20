@@ -9,6 +9,7 @@ using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
 using Pinder.Core.Traps;
 using Pinder.Core.TestCommon;
+using Pinder.LlmAdapters;
 using Xunit;
 
 namespace Pinder.Core.Tests
@@ -183,8 +184,15 @@ namespace Pinder.Core.Tests
         }
 
         private static CharacterProfile MakeProfile(string name, StatBlock stats)
-            => new CharacterProfile(stats, "system prompt", name,
-                new TimingProfile(5, 1.0f, 0.0f, "neutral"), 1);
+            => TestHelpers.MakeCharacterProfile(
+                stats,
+                "system prompt",
+                name,
+                new TimingProfile(5, 1.0f, 0.0f, "neutral"),
+                1,
+                backstory: TestHelpers.MakeBackstory(),
+                stakeLines: TestHelpers.MakeStakeLines(),
+                psychiatricDiagnosis: TestHelpers.MakePsychiatricDiagnosis());
 
         private static TestDice Dice(params int[] values) => new TestDice(values);
 
@@ -202,8 +210,11 @@ namespace Pinder.Core.Tests
                 ? (ILlmAdapter)new StubLlmAdapter(options)
                 : new NullLlmAdapter();
 
-            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: shadows,
-                startingInterest: startingInterest);
+            var config = new GameSessionConfig(
+                clock: TestHelpers.MakeClock(),
+                playerShadows: shadows,
+                startingInterest: startingInterest,
+                rules: GameDefinition.PinderDefaults);
 
             // Prepend horniness roll (1d10) consumed by constructor
             var wrappedDice = new PrependedDice(5, dice ?? Dice(15, 50));
@@ -224,7 +235,10 @@ namespace Pinder.Core.Tests
             TrapDefinition? trapDef = null)
         {
             playerStats ??= MakeStats();
-            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: shadows);
+            var config = new GameSessionConfig(
+                clock: TestHelpers.MakeClock(),
+                playerShadows: shadows,
+                rules: GameDefinition.PinderDefaults);
 
             var wrappedDice = new PrependedDice(5, dice);
 

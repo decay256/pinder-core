@@ -71,7 +71,7 @@ namespace Pinder.Core.Tests
                     { ShadowStatType.Dread, 0 },   { ShadowStatType.Overthinking, 0 },
                 });
             var timing = new TimingProfile(500, 0.1f, 3000f, "neutral");
-            var profile = new CharacterProfile(
+            var profile = TestHelpers.MakeCharacterProfile(
                 stats,
                 "prompt",
                 "TestChar",

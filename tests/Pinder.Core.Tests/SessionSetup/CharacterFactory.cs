@@ -29,7 +29,7 @@ namespace Pinder.Core.Tests.SessionSetup
             };
             var stats = new StatBlock(baseStats, shadows);
             var timing = new TimingProfile(60, 0.2f, 1.0f, "always");
-            return new CharacterProfile(
+            return TestHelpers.MakeCharacterProfile(
                 stats,
                 assembledSystemPrompt: $"Assembled prompt for {displayName}.",
                 displayName: displayName,

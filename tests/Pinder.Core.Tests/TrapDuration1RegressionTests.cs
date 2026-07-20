@@ -42,7 +42,7 @@ namespace Pinder.Core.Tests
 
         private static CharacterProfile MakeProfile(string name)
         {
-            return new CharacterProfile(
+            return TestHelpers.MakeCharacterProfile(
                 stats: MakeStatBlock(),
                 assembledSystemPrompt: $"You are {name}.",
                 displayName: name,

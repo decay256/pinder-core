@@ -452,28 +452,12 @@ namespace Pinder.Rules
 
         private static int ToInt(object? value, string context)
         {
-            if (value == null)
-                throw new FormatException($"Rule {context} must be numeric, got null.");
-            if (value is int i) return i;
-            if (value is long l) return (int)l;
-            if (value is double d) return (int)d;
-            if (value is float f) return (int)f;
-            if (value is string s && int.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed))
-                return parsed;
-            throw new FormatException($"Rule {context} must be numeric, got '{value}'.");
+            return RuleValueCoercion.ToInt(value, "Rule", context);
         }
 
         private static double ToDouble(object? value, string context)
         {
-            if (value == null)
-                throw new FormatException($"Rule {context} must be numeric, got null.");
-            if (value is double d) return d;
-            if (value is float f) return f;
-            if (value is int i) return i;
-            if (value is long l) return l;
-            if (value is string s && double.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed))
-                return parsed;
-            throw new FormatException($"Rule {context} must be numeric, got '{value}'.");
+            return RuleValueCoercion.ToDouble(value, "Rule", context);
         }
 
         /// <summary>

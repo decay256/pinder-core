@@ -239,9 +239,8 @@ namespace Pinder.Core.Tests
             Assert.All(turn.Options, o => Assert.False(o.IsUnhingedReplacement));
         }
 
-        // Mutation: would catch if null shadow tracker causes crash or marks options
         [Fact]
-        public async Task AC3_NoShadowTracker_NoOptionsMarked()
+        public async Task AC3_OmittedShadowTracker_UsesLowPlayerMadness()
         {
             var options = new[]
             {
@@ -257,6 +256,8 @@ namespace Pinder.Core.Tests
             var turn = await session.StartTurnAsync();
 
             Assert.All(turn.Options, o => Assert.False(o.IsUnhingedReplacement));
+            Assert.NotNull(session.State.PlayerShadows);
+            Assert.Equal(0, session.State.PlayerShadows!.GetEffectiveShadow(ShadowStatType.Madness));
         }
 
         // =====================================================================
@@ -346,7 +347,15 @@ namespace Pinder.Core.Tests
         {
             stats = stats ?? TestHelpers.MakeStatBlock();
             var timing = new TimingProfile(5, 1.0f, 0.0f, "neutral");
-            return new CharacterProfile(stats, "system prompt", name, timing, 1);
+            return TestHelpers.MakeCharacterProfile(
+                stats,
+                "system prompt",
+                name,
+                timing,
+                1,
+                backstory: TestHelpers.MakeBackstory(),
+                stakeLines: TestHelpers.MakeStakeLines(),
+                psychiatricDiagnosis: TestHelpers.MakePsychiatricDiagnosis());
         }
 
         private static GameSession MakeSession(

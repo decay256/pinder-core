@@ -102,9 +102,9 @@ namespace Pinder.Core.Tests
             Assert.Equal(2, shadows.GetDelta(ShadowStatType.Denial));
         }
 
-        // Edge: No shadows tracker → no crash
+        // Edge: Omitted tracker is synthesized from player stats
         [Fact]
-        public async Task NoShadowTracker_NoCrash()
+        public async Task OmittedShadowTracker_TracksSkippedHonesty()
         {
             var options = new[]
             {
@@ -114,8 +114,10 @@ namespace Pinder.Core.Tests
             var session = BuildSession(dice: Dice(15, 50), shadows: null, options: options);
 
             await session.StartTurnAsync();
-            // Should not throw
             await session.ResolveTurnAsync(0);
+
+            Assert.NotNull(session.State.PlayerShadows);
+            Assert.Equal(1, session.State.PlayerShadows!.GetDelta(ShadowStatType.Denial));
         }
 
         // =====================================================================
@@ -145,12 +147,15 @@ namespace Pinder.Core.Tests
         }
 
         private static CharacterProfile MakeProfile(string name, StatBlock? stats = null)
-            => new CharacterProfile(
+            => TestHelpers.MakeCharacterProfile(
                 stats ?? MakeStats(),
                 "system prompt",
                 name,
                 new TimingProfile(5, 1.0f, 0.0f, "neutral"),
-                1);
+                1,
+                backstory: TestHelpers.MakeBackstory(),
+                stakeLines: TestHelpers.MakeStakeLines(),
+                psychiatricDiagnosis: TestHelpers.MakePsychiatricDiagnosis());
 
         private static TestDice Dice(params int[] values) => new TestDice(values);
 

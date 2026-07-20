@@ -64,7 +64,7 @@ namespace Pinder.Core.Tests
 
         private static CharacterProfile MakeProfile(string name, StatBlock stats)
         {
-            return new CharacterProfile(
+            return TestHelpers.MakeCharacterProfile(
                 stats, $"You are {name}.", name,
                 new TimingProfile(5, 0.0f, 0.0f, "neutral"), level: 1);
         }

@@ -100,12 +100,12 @@ public sealed class ConversationIndexingTests
         Assert.False(ConversationIndexing.IsPlayerEntryAt(history, 4));   // o2
     }
 
-    // ── 3 scene entries (full #333: bio + bio + outfit) ─────────────────
+    // ── 3 scene entries (legacy arbitrary scene-prefixed history) ───────
 
     [Fact]
     public void ThreeScene_TurnNumberAt_AllScenesReturnZero_PairMathRebasedOnFirstNonScene()
     {
-        // 3 scene + 3 turns of (player, opp).
+        // Legacy 3-scene histories still rebase pair math correctly.
         var history = new[]
         {
             Scene("player bio"),
@@ -155,13 +155,12 @@ public sealed class ConversationIndexingTests
         Assert.False(ConversationIndexing.IsPlayerEntryAt(history, 6));  // o2
     }
 
-    // ── 2 scene entries (test-override path: bio + bio, outfit skipped) ─
+    // ── 2 scene entries (current production path: bio + bio) ────────────
 
     [Fact]
-    public void TwoScene_MatchesProductionTestOverridePath()
+    public void TwoScene_MatchesProductionPath()
     {
-        // The PlaybackLlmTransport / test-override path skips the outfit
-        // describer, so a real test session has 2 scene entries up front.
+        // Session setup seeds exactly the player and datee bios up front.
         var history = new[]
         {
             Scene("player bio"),

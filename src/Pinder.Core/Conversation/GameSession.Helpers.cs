@@ -122,15 +122,15 @@ namespace Pinder.Core.Conversation
         }
 
         /// <summary>
-        /// Issue #333: append the three turn-0 scene-setting entries
-        /// (player bio, datee bio, LLM-generated outfit description) to
-        /// the conversation log BEFORE the first player turn. Sender for
-        /// each entry is <see cref="Senders.Scene"/>; the frontend renders
-        /// these distinctly from player/datee dialogue.
+        /// Issue #333: append the two turn-0 bio scene-setting entries
+        /// (player bio, datee bio) to the conversation log BEFORE the
+        /// first player turn. Sender for each entry is
+        /// <see cref="Senders.Scene"/>; the frontend renders these
+        /// distinctly from player/datee dialogue.
         /// </summary>
         /// <param name="playerBio">Player bio text. Empty entries are skipped.</param>
         /// <param name="dateeBio">Datee bio text. Empty entries are skipped.</param>
-        /// <param name="outfitDescription">LLM-generated outfit description. Empty entries are skipped.</param>
+        /// <param name="outfitDescription">Legacy compatibility parameter. Ignored; equipped-items fallback now provides outfit context.</param>
         /// <exception cref="InvalidOperationException">If any turn has already been resolved.</exception>
         public void SeedSceneEntries(string? playerBio, string? dateeBio, string? outfitDescription)
         {
@@ -143,17 +143,6 @@ namespace Pinder.Core.Conversation
                 _history.Add(($"{Senders.Scene}:{_player.DisplayName}", playerBio!.Trim()));
             if (!string.IsNullOrWhiteSpace(dateeBio))
                 _history.Add(($"{Senders.Scene}:{_datee.DisplayName}", dateeBio!.Trim()));
-            if (!string.IsNullOrWhiteSpace(outfitDescription))
-            {
-                string trimmed = outfitDescription!.Trim();
-                _history.Add((Senders.Scene, trimmed));
-                // #562: also retain on the session so
-                // BuildDateeVisibleProfile can surface it on every
-                // dialogue-options call. Scene-history entries are
-                // excluded from the LLM context view, so without this
-                // field the player-LLM never sees the outfit.
-                _dateeOutfitDescription = trimmed;
-            }
         }
 
         /// <summary>Session horniness value (d10 + clock modifier). Used for display.</summary>

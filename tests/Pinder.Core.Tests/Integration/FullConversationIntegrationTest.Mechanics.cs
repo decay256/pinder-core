@@ -33,8 +33,8 @@ namespace Pinder.Core.Tests.Integration
             var geraldStats = CreateGeraldStats();
             var velvetStats = CreateVelvetStats();
             var timing = new TimingProfile(baseDelay: 10, variance: 0.5f, drySpell: 0.0f, readReceipt: "neutral");
-            var gerald = new CharacterProfile(geraldStats, "Test", "Gerald", timing, level: 5);
-            var velvet = new CharacterProfile(velvetStats, "Test", "Velvet", timing, level: 7);
+            var gerald = TestHelpers.MakeCharacterProfile(geraldStats, "Test", "Gerald", timing, level: 5);
+            var velvet = TestHelpers.MakeCharacterProfile(velvetStats, "Test", "Velvet", timing, level: 7);
 
             // Start at 5 (Lukewarm) — successes add interest but won't reach VeryIntoIt.
             // Momentum is a roll bonus (#268), not interest delta — it appears in ExternalBonus.
@@ -120,8 +120,8 @@ namespace Pinder.Core.Tests.Integration
             var geraldStats = CreateGeraldStats();
             var velvetStats = CreateVelvetStats();
             var timing = new TimingProfile(baseDelay: 10, variance: 0.5f, drySpell: 0.0f, readReceipt: "neutral");
-            var gerald = new CharacterProfile(geraldStats, "Test", "Gerald", timing, level: 5);
-            var velvet = new CharacterProfile(velvetStats, "Test", "Velvet", timing, level: 7);
+            var gerald = TestHelpers.MakeCharacterProfile(geraldStats, "Test", "Gerald", timing, level: 5);
+            var velvet = TestHelpers.MakeCharacterProfile(velvetStats, "Test", "Velvet", timing, level: 7);
 
             // Start at interest=4 (Bored)
             var config = new GameSessionConfig(
@@ -156,8 +156,8 @@ namespace Pinder.Core.Tests.Integration
             var geraldStats = CreateGeraldStats();
             var velvetStats = CreateVelvetStats();
             var timing = new TimingProfile(baseDelay: 10, variance: 0.5f, drySpell: 0.0f, readReceipt: "neutral");
-            var gerald = new CharacterProfile(geraldStats, "Test", "Gerald", timing, level: 5);
-            var velvet = new CharacterProfile(velvetStats, "Test", "Velvet", timing, level: 7);
+            var gerald = TestHelpers.MakeCharacterProfile(geraldStats, "Test", "Gerald", timing, level: 5);
+            var velvet = TestHelpers.MakeCharacterProfile(velvetStats, "Test", "Velvet", timing, level: 7);
 
             // Start at interest=4 (Bored) — Bored grants disadvantage
             var config = new GameSessionConfig(
@@ -200,8 +200,8 @@ namespace Pinder.Core.Tests.Integration
             var geraldStats = CreateGeraldStats();
             var velvetStats = CreateVelvetStats();
             var timing = new TimingProfile(baseDelay: 10, variance: 0.5f, drySpell: 0.0f, readReceipt: "neutral");
-            var gerald = new CharacterProfile(geraldStats, "Test", "Gerald", timing, level: 5);
-            var velvet = new CharacterProfile(velvetStats, "Test", "Velvet", timing, level: 7);
+            var gerald = TestHelpers.MakeCharacterProfile(geraldStats, "Test", "Gerald", timing, level: 5);
+            var velvet = TestHelpers.MakeCharacterProfile(velvetStats, "Test", "Velvet", timing, level: 7);
 
             // Start at interest=1 (Bored, just above Unmatched)
             var config = new GameSessionConfig(
@@ -251,8 +251,8 @@ namespace Pinder.Core.Tests.Integration
                 var geraldStats = CreateGeraldStats();
                 var velvetStats = CreateVelvetStats();
                 var timing = new TimingProfile(baseDelay: 10, variance: 0.5f, drySpell: 0.0f, readReceipt: "neutral");
-                var gerald = new CharacterProfile(geraldStats, "Test", "Gerald", timing, level: 5);
-                var velvet = new CharacterProfile(velvetStats, "Test", "Velvet", timing, level: 7);
+                var gerald = TestHelpers.MakeCharacterProfile(geraldStats, "Test", "Gerald", timing, level: 5);
+                var velvet = TestHelpers.MakeCharacterProfile(velvetStats, "Test", "Velvet", timing, level: 7);
 
                 var config = new GameSessionConfig(
                     clock: TestHelpers.MakeClock(),
@@ -301,8 +301,8 @@ namespace Pinder.Core.Tests.Integration
             var geraldStats = CreateGeraldStats();
             var velvetStats = CreateVelvetStats();
             var timing = new TimingProfile(baseDelay: 10, variance: 0.5f, drySpell: 0.0f, readReceipt: "neutral");
-            var gerald = new CharacterProfile(geraldStats, "Test", "Gerald", timing, level: 5);
-            var velvet = new CharacterProfile(velvetStats, "Test", "Velvet", timing, level: 7);
+            var gerald = TestHelpers.MakeCharacterProfile(geraldStats, "Test", "Gerald", timing, level: 5);
+            var velvet = TestHelpers.MakeCharacterProfile(velvetStats, "Test", "Velvet", timing, level: 7);
 
             // Start at interest=1 (Bored). Ghost check d4=1 → Ghosted immediately.
             var config = new GameSessionConfig(
@@ -347,8 +347,8 @@ namespace Pinder.Core.Tests.Integration
             var geraldStats = CreateGeraldStats();
             var velvetStats = CreateVelvetStats();
             var timing = new TimingProfile(baseDelay: 10, variance: 0.5f, drySpell: 0.0f, readReceipt: "neutral");
-            var gerald = new CharacterProfile(geraldStats, "Test", "Gerald", timing, level: 5);
-            var velvet = new CharacterProfile(velvetStats, "Test", "Velvet", timing, level: 7);
+            var gerald = TestHelpers.MakeCharacterProfile(geraldStats, "Test", "Gerald", timing, level: 5);
+            var velvet = TestHelpers.MakeCharacterProfile(velvetStats, "Test", "Velvet", timing, level: 7);
 
             var config = new GameSessionConfig(
                 clock: TestHelpers.MakeClock(),

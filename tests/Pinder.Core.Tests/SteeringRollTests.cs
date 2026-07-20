@@ -90,10 +90,10 @@ namespace Pinder.Core.Tests
             // Datee stats: SA=0, Rizz=0, Honesty=0 → steering DC = 16
             var dateeStats = MakeStatBlockWithValues(sa: 0, rizz: 0, honesty: 0);
 
-            var player = new CharacterProfile(
+            var player = TestHelpers.MakeCharacterProfile(
                 playerStats, "You are Player.", "Player",
                 new TimingProfile(5, 0.0f, 0.0f, "neutral"), 1);
-            var datee = new CharacterProfile(
+            var datee = TestHelpers.MakeCharacterProfile(
                 dateeStats, "You are Datee.", "Datee",
                 new TimingProfile(5, 0.0f, 0.0f, "neutral"), 1);
 
@@ -135,10 +135,10 @@ namespace Pinder.Core.Tests
             // Datee stats: SA=3, Rizz=3, Honesty=3 → steering DC = 16 + 3 = 19
             var dateeStats = MakeStatBlockWithValues(sa: 3, rizz: 3, honesty: 3);
 
-            var player = new CharacterProfile(
+            var player = TestHelpers.MakeCharacterProfile(
                 playerStats, "You are Player.", "Player",
                 new TimingProfile(5, 0.0f, 0.0f, "neutral"), 1);
-            var datee = new CharacterProfile(
+            var datee = TestHelpers.MakeCharacterProfile(
                 dateeStats, "You are Datee.", "Datee",
                 new TimingProfile(5, 0.0f, 0.0f, "neutral"), 1);
 
@@ -180,10 +180,10 @@ namespace Pinder.Core.Tests
             // Datee stats: SA=0, Rizz=0, Honesty=0 → steering DC = 16
             var dateeStats = MakeStatBlockWithValues(sa: 0, rizz: 0, honesty: 0);
 
-            var player = new CharacterProfile(
+            var player = TestHelpers.MakeCharacterProfile(
                 playerStats, "You are Player.", "Player",
                 new TimingProfile(5, 0.0f, 0.0f, "neutral"), 1);
-            var datee = new CharacterProfile(
+            var datee = TestHelpers.MakeCharacterProfile(
                 dateeStats, "You are Datee.", "Datee",
                 new TimingProfile(5, 0.0f, 0.0f, "neutral"), 1);
 
@@ -227,10 +227,10 @@ namespace Pinder.Core.Tests
             // Datee stats: SA=0, Rizz=0, Honesty=0 → steering DC = 16
             var dateeStats = MakeStatBlockWithValues(sa: 0, rizz: 0, honesty: 0);
 
-            var player = new CharacterProfile(
+            var player = TestHelpers.MakeCharacterProfile(
                 playerStats, "You are Player.", "Player",
                 new TimingProfile(5, 0.0f, 0.0f, "neutral"), 1);
-            var datee = new CharacterProfile(
+            var datee = TestHelpers.MakeCharacterProfile(
                 dateeStats, "You are Datee.", "Datee",
                 new TimingProfile(5, 0.0f, 0.0f, "neutral"), 1);
 
@@ -286,10 +286,10 @@ namespace Pinder.Core.Tests
             // Datee stats: SA=0, Rizz=0, Honesty=0 → steering DC = 16
             var dateeStats = MakeStatBlockWithValues(sa: 0, rizz: 0, honesty: 0);
 
-            var player = new CharacterProfile(
+            var player = TestHelpers.MakeCharacterProfile(
                 playerStats, "You are Player.", "Player",
                 new TimingProfile(5, 0.0f, 0.0f, "neutral"), 1);
-            var datee = new CharacterProfile(
+            var datee = TestHelpers.MakeCharacterProfile(
                 dateeStats, "You are Datee.", "Datee",
                 new TimingProfile(5, 0.0f, 0.0f, "neutral"), 1);
 

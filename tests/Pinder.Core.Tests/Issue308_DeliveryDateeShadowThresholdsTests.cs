@@ -113,7 +113,7 @@ namespace Pinder.Core.Tests
         private static CharacterProfile MakeProfile(string name)
         {
             var timing = new TimingProfile(5, 1.0f, 0.0f, "neutral");
-            return new CharacterProfile(TestHelpers.MakeStatBlock(), "system prompt", name, timing, 1);
+            return TestHelpers.MakeCharacterProfile(TestHelpers.MakeStatBlock(), "system prompt", name, timing, 1);
         }
 
         private static GameSession MakeSession(

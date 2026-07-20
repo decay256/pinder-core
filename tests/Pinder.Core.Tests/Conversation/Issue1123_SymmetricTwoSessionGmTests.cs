@@ -45,7 +45,7 @@ namespace Pinder.Core.Tests.Conversation
         private const string DateePrivateStake = "DATEE_PRIVATE_STAKE_9c2b";
 
         private static CharacterProfile MakeAvatarProfile() =>
-            new CharacterProfile(
+            TestHelpers.MakeCharacterProfile(
                 stats: TestHelpers.MakeStatBlock(2),
                 assembledSystemPrompt: $"You are Avery. {AvatarPrivateStake} You secretly want to impress.",
                 displayName: "Avery",
@@ -55,7 +55,7 @@ namespace Pinder.Core.Tests.Conversation
                 genderIdentity: "they/them");
 
         private static CharacterProfile MakeDateeProfile() =>
-            new CharacterProfile(
+            TestHelpers.MakeCharacterProfile(
                 stats: TestHelpers.MakeStatBlock(2),
                 assembledSystemPrompt: $"You are Dakota. {DateePrivateStake} You secretly are unsure.",
                 displayName: "Dakota",

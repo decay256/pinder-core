@@ -38,6 +38,7 @@ namespace Pinder.LlmAdapters
         private readonly ILlmTransport _transport;
         private readonly ILlmTransport _overlayTransport;
         private readonly PinderLlmAdapterOptions _options;
+        private readonly PinderLlmAdapterTemperatureSource _temperatures;
 
         // #788: datee conversation state lives on GameSession, not here.
         // The adapter is pure-stateless and safe for concurrent reuse across sessions.
@@ -56,6 +57,7 @@ namespace Pinder.LlmAdapters
             _transport = transport ?? throw new ArgumentNullException(nameof(transport));
             _options = options ?? throw new ArgumentNullException(nameof(options));
             _overlayTransport = overlayTransport ?? transport;
+            _temperatures = new PinderLlmAdapterTemperatureSource(_options);
         }
 
         // ── ILlmAdapter ────────────────────────────────────────────────────
@@ -68,7 +70,7 @@ namespace Pinder.LlmAdapters
             var gameDef = RequireGameDefinition();
             var userContent = SessionDocumentBuilder.BuildDialogueOptionsPrompt(context);
             var systemPrompt = SessionSystemPromptBuilder.BuildPlayerAvatar(context.PlayerAvatarPrompt, gameDef);
-            double temperature = _options.DialogueOptionsTemperature ?? LlmPhaseTemperatures.DialogueOptions;
+            double temperature = _temperatures.For(PinderLlmAdapterPhase.DialogueOptions);
 
             int attempt = 0;
             int maxAttempts = GetContractViolationAttemptLimit();
@@ -225,7 +227,7 @@ namespace Pinder.LlmAdapters
             var gameDef = RequireGameDefinition();
             var userContent = SessionDocumentBuilder.BuildDateePrompt(context);
             var systemPrompt = SessionSystemPromptBuilder.BuildDatee(context.DateePrompt, gameDef);
-            double temperature = _options.DateeResponseTemperature ?? LlmPhaseTemperatures.DateeResponse;
+            double temperature = _temperatures.For(PinderLlmAdapterPhase.DateeResponse);
 
             int attempt = 0;
             int maxAttempts = GetContractViolationAttemptLimit();
@@ -354,7 +356,7 @@ namespace Pinder.LlmAdapters
                 ? SessionSystemPromptBuilder.BuildDatee("", gameDef)
                 : SessionSystemPromptBuilder.BuildDatee(context.DateePrompt, gameDef);
 
-            double temperature = _options.Temperature;
+            double temperature = _temperatures.For(PinderLlmAdapterPhase.InterestChangeBeat);
 
             try
             {
@@ -414,7 +416,7 @@ namespace Pinder.LlmAdapters
 
             try
             {
-                double temperature = _options.DeliveryTemperature ?? LlmPhaseTemperatures.OverlayRewrite;
+                double temperature = _temperatures.For(PinderLlmAdapterPhase.OverlayRewrite);
                 var result = await SendWithDiagnosticsAsync(_overlayTransport, prompt.SystemPrompt, prompt.UserContent, temperature, _options.MaxTokens, LlmPhase.HorninessOverlay, null, ct)
                     .ConfigureAwait(false);
 
@@ -472,7 +474,7 @@ namespace Pinder.LlmAdapters
 
             try
             {
-                double temperature = _options.DeliveryTemperature ?? LlmPhaseTemperatures.OverlayRewrite;
+                double temperature = _temperatures.For(PinderLlmAdapterPhase.OverlayRewrite);
                 var result = await SendWithDiagnosticsAsync(_overlayTransport, prompt.SystemPrompt, prompt.UserContent, temperature, _options.MaxTokens, LlmPhase.TrapOverlay, null, ct)
                     .ConfigureAwait(false);
 
@@ -530,7 +532,7 @@ namespace Pinder.LlmAdapters
 
             try
             {
-                double temperature = _options.DeliveryTemperature ?? LlmPhaseTemperatures.OverlayRewrite;
+                double temperature = _temperatures.For(PinderLlmAdapterPhase.OverlayRewrite);
                 var result = await SendWithDiagnosticsAsync(_overlayTransport, prompt.SystemPrompt, prompt.UserContent, temperature, _options.MaxTokens, LlmPhase.Delivery, null, ct)
                     .ConfigureAwait(false);
 
@@ -586,7 +588,7 @@ namespace Pinder.LlmAdapters
 
             try
             {
-                double temperature = _options.DeliveryTemperature ?? LlmPhaseTemperatures.OverlayRewrite;
+                double temperature = _temperatures.For(PinderLlmAdapterPhase.OverlayRewrite);
                 var result = await SendWithDiagnosticsAsync(_overlayTransport, prompt.SystemPrompt, prompt.UserContent, temperature, _options.MaxTokens, LlmPhase.ShadowCorruption, null, ct)
                     .ConfigureAwait(false);
 
@@ -674,7 +676,7 @@ namespace Pinder.LlmAdapters
 
             string systemPrompt = SessionSystemPromptBuilder.BuildPlayerAvatar(context.PlayerAvatarPrompt, gameDef);
 
-            var responseText = await SendWithDiagnosticsAsync(_transport, systemPrompt, userContent, 0.8, _options.MaxTokens, LlmPhase.Delivery, null, ct)
+            var responseText = await SendWithDiagnosticsAsync(_transport, systemPrompt, userContent, _temperatures.For(PinderLlmAdapterPhase.SuccessImprovement), _options.MaxTokens, LlmPhase.Delivery, null, ct)
                 .ConfigureAwait(false);
 
             var improved = NormalizeSingleTextOutput(
@@ -726,7 +728,7 @@ namespace Pinder.LlmAdapters
 
             string systemPrompt = SessionSystemPromptBuilder.BuildPlayerAvatar(context.PlayerAvatarPrompt, gameDef);
 
-            var responseText = await SendWithDiagnosticsAsync(_transport, systemPrompt, prompt, 0.9, _options.MaxTokens, LlmPhase.Steering, null, ct)
+            var responseText = await SendWithDiagnosticsAsync(_transport, systemPrompt, prompt, _temperatures.For(PinderLlmAdapterPhase.SteeringQuestion), _options.MaxTokens, LlmPhase.Steering, null, ct)
                 .ConfigureAwait(false);
 
             // #831: thinking-block stripping moved to
@@ -765,7 +767,7 @@ namespace Pinder.LlmAdapters
 
             string systemPrompt = SessionSystemPromptBuilder.BuildPlayerAvatar(context.PlayerAvatarPrompt, gameDef);
 
-            var responseText = await SendWithDiagnosticsAsync(_transport, systemPrompt, prompt, 0.9, _options.MaxTokens, LlmPhase.HorninessOverlay, null, ct)
+            var responseText = await SendWithDiagnosticsAsync(_transport, systemPrompt, prompt, _temperatures.For(PinderLlmAdapterPhase.HorninessQuestion), _options.MaxTokens, LlmPhase.HorninessOverlay, null, ct)
                 .ConfigureAwait(false);
 
             var question = NormalizeSingleTextOutput(

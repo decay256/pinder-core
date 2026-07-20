@@ -46,7 +46,7 @@ namespace Pinder.Core.Tests.Conversation
 
         private static CharacterProfile BuildProfile(string name, int statVal = 2)
         {
-            return new CharacterProfile(
+            return TestHelpers.MakeCharacterProfile(
                 stats: TestHelpers.MakeStatBlock(statVal),
                 assembledSystemPrompt: $"You are {name}.",
                 displayName: name,
@@ -163,9 +163,9 @@ namespace Pinder.Core.Tests.Conversation
         }
 
         [Fact]
-        public void Execute_HonestySkipped_NoShadowTracker_NoCrash()
+        public void Execute_HonestySkipped_ManuallyNullStageState_NoCrash()
         {
-            // Arrange
+            // This exercises the stage directly, bypassing GameSession's #1322 default tracker.
             var state = new GameSessionState();
             state.CurrentOptions = new[] {
                 new DialogueOption(StatType.Charm, "Charm Option"),

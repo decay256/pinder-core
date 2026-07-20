@@ -188,7 +188,7 @@ namespace Pinder.Core.Tests
         {
             var stats = TestHelpers.MakeStatBlock();
             var timing = new TimingProfile(5, 0.0f, 0.0f, "neutral");
-            return new CharacterProfile(stats, $"You are {name}.", name, timing, 1);
+            return TestHelpers.MakeCharacterProfile(stats, $"You are {name}.", name, timing, 1);
         }
 
         private sealed class ConfigurableClock : IGameClock

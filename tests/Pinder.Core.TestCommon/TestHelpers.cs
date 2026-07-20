@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Pinder.Core.Interfaces;
 using Pinder.Core.Characters;
+using Pinder.Core.Conversation;
 using Pinder.Core.Stats;
 
 namespace Pinder.Core.TestCommon
@@ -54,6 +55,49 @@ namespace Pinder.Core.TestCommon
                 { "derived_feeling", "fear of being overlooked" },
                 { "defense_reaction", "tests sincerity before trusting it" }
             };
+
+        public static CharacterProfile MakeCharacterProfile(
+            StatBlock stats,
+            string assembledSystemPrompt,
+            string displayName,
+            TimingProfile timing,
+            int level,
+            string bio = "",
+            string textingStyleFragment = "",
+            ActiveArchetype? activeArchetype = null,
+            IReadOnlyList<string>? equippedItemDisplayNames = null,
+            IReadOnlyList<TextingStyleFragmentSource>? textingStyleSources = null,
+            string genderIdentity = "",
+            IReadOnlyList<string>? textingStyleLines = null,
+            IReadOnlyDictionary<string, BackstoryFact>? backstory = null,
+            IReadOnlyList<string>? stakeLines = null,
+            IReadOnlyDictionary<string, string>? psychiatricDiagnosis = null,
+            IReadOnlyList<string>? backstoryFragments = null,
+            IReadOnlyList<Pinder.Core.Prompts.TextingStyleAggregator.AttributedTextingStyleLine>? attributedTextingStyleLines = null,
+            string? consolidatedPersonality = null,
+            string? consolidatedBackstory = null,
+            IReadOnlyList<string>? personalityFragments = null)
+            => new CharacterProfile(
+                stats,
+                assembledSystemPrompt,
+                displayName,
+                timing,
+                level,
+                bio,
+                textingStyleFragment,
+                activeArchetype!,
+                equippedItemDisplayNames!,
+                textingStyleSources!,
+                genderIdentity,
+                textingStyleLines!,
+                backstory,
+                stakeLines,
+                psychiatricDiagnosis ?? MakePsychiatricDiagnosis(),
+                backstoryFragments,
+                attributedTextingStyleLines!,
+                consolidatedPersonality,
+                consolidatedBackstory,
+                personalityFragments);
 
         public static IReadOnlyDictionary<string, BackstoryFact> MakeBackstory()
         {

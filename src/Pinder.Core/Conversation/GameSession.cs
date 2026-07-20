@@ -35,12 +35,9 @@ namespace Pinder.Core.Conversation
         private TrapState _traps { get => _state.Traps; set => _state.Traps = value; }
         private List<(string Sender, string Text)> _history { get => _state.History; set => _state.History = value; }
 
-        // #562: outfit / scene description set by SeedSceneEntries so the
-        // dialogue-options call site can surface it to the player as part
-        // of the datee's visible-profile (Tinder-card-equivalent)
-        // payload, replacing the raw equipped-items list. Empty when no
-        // describer was wired or the call failed; renderer then falls
-        // back to the items list.
+        // #562: legacy outfit state retained for snapshot/replay compatibility.
+        // New sessions do not populate it during SeedSceneEntries; the visible
+        // profile is now derived from the character's equipped items instead.
         private string _dateeOutfitDescription { get => _state.DateeOutfitDescription; set => _state.DateeOutfitDescription = value; }
 
         // #788: datee LLM conversation history lives here, not in the adapter.
@@ -183,7 +180,7 @@ namespace Pinder.Core.Conversation
 
             // Store config fields early (needed by ResolveThresholdLevel below)
             _clock = config.Clock;
-            _playerShadows = config.PlayerShadows;
+            _playerShadows = config.PlayerShadows ?? new SessionShadowTracker(_player.Stats);
             _dateeShadows = config.DateeShadows;
             _rules = config.Rules;
             _globalDcBias = config.GlobalDcBias;
@@ -210,9 +207,8 @@ namespace Pinder.Core.Conversation
             {
                 _interest = new InterestMeter(config.StartingInterest.Value);
             }
-            else if (config.PlayerShadows != null
-                && ResolveThresholdLevel(
-                    config.PlayerShadows.GetEffectiveShadow(ShadowStatType.Dread)) >= 3)
+            else if (ResolveThresholdLevel(
+                    _playerShadows.GetEffectiveShadow(ShadowStatType.Dread)) >= 3)
             {
                 _interest = new InterestMeter(8);
             }

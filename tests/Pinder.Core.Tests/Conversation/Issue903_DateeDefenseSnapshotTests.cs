@@ -29,7 +29,7 @@ namespace Pinder.Core.Tests.Conversation
         private static CharacterProfile MakeProfile(string name, StatBlock? stats = null)
         {
             stats ??= TestHelpers.MakeStatBlock(2);
-            return new CharacterProfile(
+            return TestHelpers.MakeCharacterProfile(
                 stats: stats,
                 assembledSystemPrompt: $"You are {name}.",
                 displayName: name,

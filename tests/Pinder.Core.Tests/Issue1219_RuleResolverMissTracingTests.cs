@@ -4,6 +4,7 @@ using System.Reflection;
 using Pinder.Core.Conversation;
 using Pinder.Core.Interfaces;
 using Pinder.Core.Rolls;
+using Pinder.Core.Stats;
 using Xunit;
 
 namespace Pinder.Core.Tests
@@ -45,8 +46,8 @@ namespace Pinder.Core.Tests
 
             public int? GetProgressionCurrencyPerXp() => 10;
 
-            // Behaves like a production resolver: unresolved rules fall back to defaults.
-            public bool AllowDefaultFallback => true;
+            // Partial dev/test resolvers can explicitly allow embedded defaults.
+            public bool AllowDefaultFallback { get; set; } = true;
         }
 
         [Fact]
@@ -149,6 +150,49 @@ namespace Pinder.Core.Tests
             Assert.False(trace.ResolverConfigured);
             Assert.Equal(3, trace.NumericValue);
             Assert.Null(trace.StateValue);
+        }
+
+        [Fact]
+        public void Test7_ResolverMiss_DisallowsHardcodedFallback_WhenResolverPolicyIsFailClosed()
+        {
+            var resolver = new FakeRuleResolver { AllowDefaultFallback = false };
+
+            AssertRuleMissFails(
+                () => TurnOrchestratorHelpers.GetMomentumBonus(3, resolver),
+                "momentum_bonus",
+                "streak=3");
+
+            var failureRoll = new RollResult(
+                10, null, 10, StatType.Charm, 0, 0, 15, FailureTier.Misfire);
+            AssertRuleMissFails(
+                () => TurnOrchestratorHelpers.ResolveFailureInterestDelta(failureRoll, resolver),
+                "failure_interest_delta",
+                "missMargin=5");
+
+            var successRoll = new RollResult(
+                15, null, 15, StatType.Charm, 0, 0, 10, FailureTier.Success);
+            AssertRuleMissFails(
+                () => TurnOrchestratorHelpers.ResolveSuccessInterestDelta(successRoll, resolver),
+                "success_interest_delta",
+                "beatMargin=5");
+
+            AssertRuleMissFails(
+                () => TurnOrchestratorHelpers.ResolveInterestState(new GameSessionState(), resolver),
+                "interest_state",
+                "interest=10");
+
+            AssertRuleMissFails(
+                () => TurnOrchestratorHelpers.ResolveThresholdLevel(12, resolver),
+                "shadow_threshold_level",
+                "shadowValue=12");
+        }
+
+        private static void AssertRuleMissFails(Action action, string ruleKey, string input)
+        {
+            var ex = Assert.Throws<InvalidOperationException>(action);
+            Assert.Contains(ruleKey, ex.Message);
+            Assert.Contains(input, ex.Message);
+            Assert.Contains("AllowDefaultFallback is false", ex.Message);
         }
     }
 }

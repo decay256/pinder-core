@@ -128,9 +128,9 @@ namespace Pinder.Core.Tests
         [Fact]
         public void Snapshot_AttachesDiffsToCorrectPlayerEntry_WhenSceneEntriesPrefixHistory()
         {
-            // Mirrors the post-#333 reality: three [scene] entries at
-            // the front (player bio, datee bio, outfit description),
-            // then real turns. The buggy pair-math (i % 2 == 0) would
+            // Mirrors legacy scene-prefixed history: multiple [scene]
+            // entries at the front, then real turns. The buggy
+            // pair-math (i % 2 == 0) would
             // identify indices 0, 2, 4 as "player" — but indices 0 and
             // 2 are scenes, and index 4 is the DATEE's turn-1 entry.
             // So turn-1's diffs would attach to scene entries, never

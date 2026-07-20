@@ -1,4 +1,8 @@
 using Pinder.LlmAdapters.Anthropic;
+using System.Net;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Pinder.LlmAdapters.Tests.Anthropic
@@ -21,28 +25,45 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         }
 
         [Fact]
-        public void Properties_AreSettable()
+        public async Task Options_AreConsumedByAnthropicTransportRequest()
         {
+            var handler = new CapturingHandler();
+            using var http = new HttpClient(handler);
             var options = new AnthropicOptions
             {
                 ApiKey = "sk-test",
                 Model = "claude-opus-4-20250514",
                 MaxTokens = 2048,
-                Temperature = 0.7,
-                DialogueOptionsTemperature = 1.0,
-                DeliveryTemperature = 0.5,
-                DateeResponseTemperature = 0.8,
-                InterestChangeBeatTemperature = 0.6
+                Temperature = 0.7
             };
+            using var transport = new AnthropicTransport(options, http);
 
-            Assert.Equal("sk-test", options.ApiKey);
-            Assert.Equal("claude-opus-4-20250514", options.Model);
-            Assert.Equal(2048, options.MaxTokens);
-            Assert.Equal(0.7, options.Temperature);
-            Assert.Equal(1.0, options.DialogueOptionsTemperature);
-            Assert.Equal(0.5, options.DeliveryTemperature);
-            Assert.Equal(0.8, options.DateeResponseTemperature);
-            Assert.Equal(0.6, options.InterestChangeBeatTemperature);
+            await transport.SendAsync("system", "user", options.Temperature, options.MaxTokens);
+
+            Assert.Contains("\"model\":\"claude-opus-4-20250514\"", handler.LastRequestBody);
+            Assert.Contains("\"max_tokens\":2048", handler.LastRequestBody);
+            Assert.Contains("\"temperature\":0.7", handler.LastRequestBody);
+        }
+
+        private sealed class CapturingHandler : HttpMessageHandler
+        {
+            public string LastRequestBody { get; private set; } = "";
+
+            protected override async Task<HttpResponseMessage> SendAsync(
+                HttpRequestMessage request,
+                System.Threading.CancellationToken cancellationToken)
+            {
+                LastRequestBody = request.Content == null
+                    ? ""
+                    : await request.Content.ReadAsStringAsync().ConfigureAwait(false);
+                return new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(
+                        "{\"id\":\"msg_01\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"ok\"}]}",
+                        Encoding.UTF8,
+                        "application/json")
+                };
+            }
         }
     }
 }

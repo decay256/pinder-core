@@ -9,9 +9,9 @@ namespace Pinder.Core.Conversation
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Issue #333: turn-0 scene entries (player bio, datee bio,
-    /// LLM-generated outfit description) are appended to the conversation
-    /// log with <see cref="Scene"/> as their sender. The frontend renders
+    /// Issue #333: turn-0 scene entries (player bio and datee bio) are
+    /// appended to the conversation log with <see cref="Scene"/> as
+    /// their sender. The frontend renders
     /// these distinctly (italics / indented / different tint) — that's
     /// frontend-side polish, separate from the engine work — and the
     /// engine deliberately filters them out of the conversation history

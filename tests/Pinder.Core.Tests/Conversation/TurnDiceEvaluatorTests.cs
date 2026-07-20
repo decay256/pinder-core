@@ -33,7 +33,7 @@ namespace Pinder.Core.Tests.Conversation
             var state = new GameSessionState();
             state.CurrentDicePools = new PerOptionDicePool[1];
             
-            var player = new CharacterProfile(
+            var player = TestHelpers.MakeCharacterProfile(
                 stats: TestHelpers.MakeStatBlock(10), // All stats = 10
                 assembledSystemPrompt: "Player",
                 displayName: "Player",
@@ -41,7 +41,7 @@ namespace Pinder.Core.Tests.Conversation
                 level: 1
             );
             
-            var datee = new CharacterProfile(
+            var datee = TestHelpers.MakeCharacterProfile(
                 stats: TestHelpers.MakeStatBlock(10),
                 assembledSystemPrompt: "Datee",
                 displayName: "Datee",
@@ -89,7 +89,7 @@ namespace Pinder.Core.Tests.Conversation
             var injectedPool = new PerOptionDicePool(0, new[] { 20, 50 });
             state.InjectedNextPool = injectedPool;
 
-            var player = new CharacterProfile(
+            var player = TestHelpers.MakeCharacterProfile(
                 stats: TestHelpers.MakeStatBlock(10),
                 assembledSystemPrompt: "Player",
                 displayName: "Player",
@@ -97,7 +97,7 @@ namespace Pinder.Core.Tests.Conversation
                 level: 1
             );
             
-            var datee = new CharacterProfile(
+            var datee = TestHelpers.MakeCharacterProfile(
                 stats: TestHelpers.MakeStatBlock(10),
                 assembledSystemPrompt: "Datee",
                 displayName: "Datee",

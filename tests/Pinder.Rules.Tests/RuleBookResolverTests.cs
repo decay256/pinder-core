@@ -425,5 +425,89 @@ namespace Pinder.Rules.Tests
         {
             Assert.Throws<System.FormatException>(() => RuleBookResolver.FromYaml("not: valid: yaml: ["));
         }
+
+        [Fact]
+        public void NumericCoercion_AcceptsStringValuesInResolvedRuleBookOutcomes()
+        {
+            var yaml = @"
+- id: §7.success-scale.1-4
+  section: §7
+  title: Success
+  type: rule
+  description: ''
+  condition: { beat_range: [""1"", ""4""] }
+  outcome: { interest_delta: ""2"" }
+";
+            var resolver = RuleBookResolver.FromYaml(yaml);
+
+            Assert.Equal(2, resolver.GetSuccessInterestDelta(3, 10));
+        }
+
+        [Fact]
+        public void NumericCoercion_RejectsFractionalRuleBookCondition()
+        {
+            var yaml = @"
+- id: §7.success-scale.1-4
+  section: §7
+  title: Success
+  type: rule
+  description: ''
+  condition: { beat_range: [1.5, 4] }
+  outcome: { interest_delta: 2 }
+";
+            var resolver = RuleBookResolver.FromYaml(yaml);
+
+            var ex = Assert.Throws<System.FormatException>(() =>
+                resolver.GetSuccessInterestDelta(3, 10));
+
+            Assert.Contains("range lower bound", ex.Message);
+            Assert.Contains("whole number", ex.Message);
+        }
+
+        [Fact]
+        public void NumericCoercion_RejectsOutOfRangeRuleBookOutcome()
+        {
+            var yaml = @"
+- id: §7.success-scale.1-4
+  section: §7
+  title: Success
+  type: rule
+  description: ''
+  condition: { beat_range: [1, 4] }
+  outcome: { interest_delta: 2147483648 }
+";
+            var resolver = RuleBookResolver.FromYaml(yaml);
+
+            var ex = Assert.Throws<System.FormatException>(() =>
+                resolver.GetSuccessInterestDelta(3, 10));
+
+            Assert.Contains("outcome.interest_delta", ex.Message);
+            Assert.Contains("Int32", ex.Message);
+        }
+
+        [Theory]
+        [InlineData("NaN")]
+        [InlineData("Infinity")]
+        [InlineData("-Infinity")]
+        public void NumericCoercion_RejectsNonFiniteRuleBookMultiplier(string value)
+        {
+            var section = "\u00A7";
+            var yaml = $@"
+- id: {section}2.risk-tier.safe
+  section: {section}2
+  title: Safe
+  type: rule
+  description: ''
+  condition: {{ need_range: [1, 4] }}
+  outcome: {{ xp_multiplier: ""{value}"" }}
+";
+            var resolver = RuleBookResolver.FromYaml(yaml);
+
+            var ex = Assert.Throws<System.FormatException>(() =>
+                resolver.GetRiskTierXpMultiplier(RiskTier.Safe));
+
+            Assert.Contains("outcome.xp_multiplier", ex.Message);
+            Assert.Contains("finite", ex.Message);
+        }
     }
 }

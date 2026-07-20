@@ -113,7 +113,7 @@ character_prompt_structure:
         {
             var gd = GameDefinition.LoadFrom(ValidYamlWithProgression);
 
-            Assert.False(gd.AllowDefaultFallback);
+            Assert.True(gd.AllowDefaultFallback);
 
             // 1. xp_flat_awards
             Assert.NotNull(gd.XpFlatAwards);

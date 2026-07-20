@@ -8,6 +8,7 @@ using Pinder.Core.Interfaces;
 using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
 using Pinder.Core.Traps;
+using Pinder.LlmAdapters;
 using Xunit;
 
 namespace Pinder.Core.Tests
@@ -47,7 +48,15 @@ namespace Pinder.Core.Tests
         private static CharacterProfile MakeProfile(string name, StatBlock stats)
         {
             var timing = new TimingProfile(5, 1.0f, 0.0f, "neutral");
-            return new CharacterProfile(stats, "system prompt", name, timing, 1);
+            return TestHelpers.MakeCharacterProfile(
+                stats,
+                "system prompt",
+                name,
+                timing,
+                1,
+                backstory: TestHelpers.MakeBackstory(),
+                stakeLines: TestHelpers.MakeStakeLines(),
+                psychiatricDiagnosis: TestHelpers.MakePsychiatricDiagnosis());
         }
 
         private static GameSession MakeSession(
@@ -62,9 +71,12 @@ namespace Pinder.Core.Tests
             playerStats = playerStats ?? MakeStatBlock();
             dateeStats = dateeStats ?? MakeStatBlock();
 
-            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: shadows,
+            var config = new GameSessionConfig(
+                clock: TestHelpers.MakeClock(),
+                playerShadows: shadows,
                 previousOpener: previousOpener,
-                startingInterest: startingInterest);
+                startingInterest: startingInterest,
+                rules: GameDefinition.PinderDefaults);
 
             var llm = llmOptions != null ? (ILlmAdapter)new CustomLlmAdapter(llmOptions) : new NullLlmAdapter();
 
@@ -94,9 +106,12 @@ namespace Pinder.Core.Tests
             playerStats = playerStats ?? MakeStatBlock();
             dateeStats = dateeStats ?? MakeStatBlock();
 
-            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: shadows,
+            var config = new GameSessionConfig(
+                clock: TestHelpers.MakeClock(),
+                playerShadows: shadows,
                 previousOpener: previousOpener,
-                startingInterest: startingInterest);
+                startingInterest: startingInterest,
+                rules: GameDefinition.PinderDefaults);
 
             var llm = llmOptions != null ? (ILlmAdapter)new CustomLlmAdapter(llmOptions) : new NullLlmAdapter();
 

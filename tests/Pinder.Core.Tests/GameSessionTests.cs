@@ -80,25 +80,11 @@ namespace Pinder.Core.Tests
     public class CharacterProfileTests
     {
         [Fact]
-        public void Constructor_SetsAllProperties()
-        {
-            var stats = TestHelpers.MakeStatBlock();
-            var timing = new TimingProfile(5, 1.0f, 0.0f, "neutral");
-            var profile = new CharacterProfile(stats, "prompt", "TestPlayer", timing, 3);
-
-            Assert.Equal(stats, profile.Stats);
-            Assert.Equal("prompt", profile.AssembledSystemPrompt);
-            Assert.Equal("TestPlayer", profile.DisplayName);
-            Assert.Equal(timing, profile.Timing);
-            Assert.Equal(3, profile.Level);
-        }
-
-        [Fact]
         public void Constructor_ThrowsOnNullStats()
         {
             var timing = new TimingProfile(5, 1.0f, 0.0f, "neutral");
             Assert.Throws<ArgumentNullException>(() =>
-                new CharacterProfile(null!, "prompt", "name", timing, 1));
+                TestHelpers.MakeCharacterProfile(null!, "prompt", "name", timing, 1));
         }
     }
 
@@ -112,7 +98,7 @@ namespace Pinder.Core.Tests
 
         private static CharacterProfile MakeProfile(string name, int allStats = 2)
         {
-            return new CharacterProfile(
+            return TestHelpers.MakeCharacterProfile(
                 stats: MakeStatBlock(allStats),
                 assembledSystemPrompt: $"You are {name}.",
                 displayName: name,

@@ -50,7 +50,7 @@ namespace Pinder.Core.Tests
         {
             var stats = MakeStatBlock(madness: 0, dread: 0, overthinking: 0);
             var timing = new TimingProfile(5, 1.0f, 0.0f, "neutral");
-            return new CharacterProfile(stats, "system prompt", name, timing, 1);
+            return TestHelpers.MakeCharacterProfile(stats, "system prompt", name, timing, 1);
         }
 
         private sealed class FixedDice : IDiceRoller

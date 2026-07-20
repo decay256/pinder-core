@@ -9,6 +9,7 @@ using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
 using Pinder.Core.Traps;
 using Pinder.Core.TestCommon;
+using Pinder.LlmAdapters;
 using Xunit;
 
 namespace Pinder.Core.Tests
@@ -42,7 +43,7 @@ namespace Pinder.Core.Tests
         }
 
         private static CharacterProfile MakeProfile(string name, StatBlock stats)
-            => new CharacterProfile(
+            => TestHelpers.MakeCharacterProfile(
                 stats,
                 "system prompt",
                 name,
@@ -86,9 +87,12 @@ namespace Pinder.Core.Tests
             dateeStats ??= Stats();
             llm ??= new NullLlmAdapter();
 
-            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: shadows,
+            var config = new GameSessionConfig(
+                clock: TestHelpers.MakeClock(),
+                playerShadows: shadows,
                 previousOpener: previousOpener,
-                startingInterest: startingInterest);
+                startingInterest: startingInterest,
+                rules: GameDefinition.PinderDefaults);
 
             var wrappedDice = new PrependedDice(5, dice);
 

@@ -235,25 +235,22 @@ namespace Pinder.Core.Tests
         }
 
         // =====================================================================
-        // AC6/AC9: No effects when SessionShadowTracker is null (backward compat)
+        // AC6/AC9: Omitted tracker is synthesized from player stats
         // =====================================================================
 
-        // Mutation: would catch if null tracker causes crash or changes interest
         [Fact]
-        public async Task AC9_NoShadowTracker_InterestStartsAt10()
+        public async Task AC9_OmittedShadowTracker_UsesPlayerStatsForStartingInterest()
         {
-            // What: No tracker → default interest 10 (spec §7.1, Example 9)
             var session = MakeSession(diceValues: new[] { 15, 50 }, shadows: null);
 
             var turn = await session.StartTurnAsync();
             Assert.Equal(10, turn.State.Interest);
+            Assert.NotNull(session.State.PlayerShadows);
         }
 
-        // Mutation: would catch if null tracker doesn't set ShadowThresholds to null
         [Fact]
-        public async Task AC9_NoShadowTracker_ThresholdsAreNull()
+        public async Task AC9_OmittedShadowTracker_ThresholdsComeFromPlayerStats()
         {
-            // What: No tracker → ShadowThresholds is null in DialogueContext (spec §7.1)
             Dictionary<ShadowStatType, int>? captured = null;
             bool checked_ = false;
             var llm = new CapturingLlmAdapter(ctx =>
@@ -266,14 +263,14 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
 
             Assert.True(checked_);
-            Assert.Null(captured);
+            Assert.NotNull(captured);
+            Assert.All(Enum.GetValues<ShadowStatType>(), shadow =>
+                Assert.Equal(0, captured![shadow]));
         }
 
-        // Mutation: would catch if null tracker still triggers option filtering
         [Fact]
-        public async Task AC9_NoShadowTracker_AllOptionsReturned()
+        public async Task AC9_OmittedShadowTracker_WithLowPlayerShadows_ReturnsAllOptions()
         {
-            // What: No tracker → no option filtering (spec §7.1)
             var session = MakeSession(diceValues: new[] { 15, 50 }, shadows: null);
 
             var turn = await session.StartTurnAsync();
@@ -281,12 +278,9 @@ namespace Pinder.Core.Tests
             Assert.Equal(4, turn.Options.Length);
         }
 
-        // Error condition 7.4: config is non-null but tracker is null
-        // Mutation: would catch if config.PlayerShadows being null is not handled
         [Fact]
-        public async Task AC9_ConfigWithNullTracker_BehavesLikeNoTracker()
+        public async Task AC9_ConfigWithNullTracker_CreatesDefaultTracker()
         {
-            // What: GameSessionConfig exists but PlayerShadows is null → skip all (spec §7.4)
             var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: null);
             var session = new GameSession(
                 MakeProfile("player"),
@@ -298,6 +292,7 @@ namespace Pinder.Core.Tests
 
             var turn = await session.StartTurnAsync();
             Assert.Equal(10, turn.State.Interest);
+            Assert.NotNull(session.State.PlayerShadows);
         }
 
         // =====================================================================

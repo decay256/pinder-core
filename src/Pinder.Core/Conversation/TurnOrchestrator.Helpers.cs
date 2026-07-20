@@ -20,6 +20,7 @@ namespace Pinder.Core.Conversation
                     onRuleResolution?.Invoke(new RuleResolutionTraceEvent("momentum_bonus", "resolver", resolverConfigured: true, numericValue: resolved.Value, stateValue: null));
                     return resolved.Value;
                 }
+                ThrowIfFallbackDisallowed(rules, "momentum_bonus", $"streak={streak}");
             }
             int fallback = 0;
             if (streak >= 5) fallback = 3;
@@ -38,6 +39,7 @@ namespace Pinder.Core.Conversation
                     onRuleResolution?.Invoke(new RuleResolutionTraceEvent("failure_interest_delta", "resolver", resolverConfigured: true, numericValue: resolved.Value, stateValue: null));
                     return resolved.Value;
                 }
+                ThrowIfFallbackDisallowed(rules, "failure_interest_delta", $"missMargin={rollResult.MissMargin}, naturalRoll={rollResult.UsedDieRoll}");
             }
             int fallback = FailureScale.GetInterestDelta(rollResult);
             onRuleResolution?.Invoke(new RuleResolutionTraceEvent("failure_interest_delta", "hardcoded_fallback", resolverConfigured: rules != null, numericValue: fallback, stateValue: null));
@@ -55,6 +57,7 @@ namespace Pinder.Core.Conversation
                     onRuleResolution?.Invoke(new RuleResolutionTraceEvent("success_interest_delta", "resolver", resolverConfigured: true, numericValue: resolved.Value, stateValue: null));
                     return resolved.Value;
                 }
+                ThrowIfFallbackDisallowed(rules, "success_interest_delta", $"beatMargin={beatMargin}, naturalRoll={rollResult.UsedDieRoll}");
             }
             int fallback = SuccessScale.GetInterestDelta(rollResult);
             onRuleResolution?.Invoke(new RuleResolutionTraceEvent("success_interest_delta", "hardcoded_fallback", resolverConfigured: rules != null, numericValue: fallback, stateValue: null));
@@ -71,6 +74,7 @@ namespace Pinder.Core.Conversation
                     onRuleResolution?.Invoke(new RuleResolutionTraceEvent("interest_state", "resolver", resolverConfigured: true, numericValue: null, stateValue: resolved.Value.ToString()));
                     return resolved.Value;
                 }
+                ThrowIfFallbackDisallowed(rules, "interest_state", $"interest={state.Interest.Current}");
             }
             InterestState fallback = state.Interest.GetState();
             onRuleResolution?.Invoke(new RuleResolutionTraceEvent("interest_state", "hardcoded_fallback", resolverConfigured: rules != null, numericValue: null, stateValue: fallback.ToString()));
@@ -87,10 +91,20 @@ namespace Pinder.Core.Conversation
                     onRuleResolution?.Invoke(new RuleResolutionTraceEvent("shadow_threshold_level", "resolver", resolverConfigured: true, numericValue: resolved.Value, stateValue: null));
                     return resolved.Value;
                 }
+                ThrowIfFallbackDisallowed(rules, "shadow_threshold_level", $"shadowValue={shadowValue}");
             }
             int fallback = ShadowThresholdEvaluator.GetThresholdLevel(shadowValue);
             onRuleResolution?.Invoke(new RuleResolutionTraceEvent("shadow_threshold_level", "hardcoded_fallback", resolverConfigured: rules != null, numericValue: fallback, stateValue: null));
             return fallback;
+        }
+
+        private static void ThrowIfFallbackDisallowed(IRuleResolver rules, string ruleKey, string inputs)
+        {
+            if (rules.AllowDefaultFallback)
+                return;
+
+            throw new InvalidOperationException(
+                $"Configured rule resolver returned no value for '{ruleKey}' ({inputs}) and AllowDefaultFallback is false.");
         }
 
         internal static GameStateSnapshot CreateSnapshot(GameSessionState state, IRuleResolver? rules)
@@ -103,7 +117,8 @@ namespace Pinder.Core.Conversation
                 state.TurnNumber,
                 state.ComboTracker.HasTripleBonus,
                 state.DateeHistory,
-                state.AvatarHistory);
+                state.AvatarHistory,
+                state.PlayerShadows);
         }
 
         internal static System.Collections.Generic.IReadOnlyList<(string Sender, string Text)> BuildHistoryForLlmContext(GameSessionState state)

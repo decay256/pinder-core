@@ -207,7 +207,7 @@ namespace Pinder.Core.Tests
 
         private static CharacterProfile MakeProfile(string name, int allStats = 2, ActiveArchetype? activeArchetype = null)
         {
-            return new CharacterProfile(
+            return TestHelpers.MakeCharacterProfile(
                 stats: TestHelpers.MakeStatBlock(allStats),
                 assembledSystemPrompt: $"You are {name}.",
                 displayName: name,

@@ -44,19 +44,20 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public async Task SessionWithoutPlayerShadows_NoShadowGrowthEvents()
+        public async Task SessionWithoutExplicitPlayerShadows_UsesDefaultTrackerForGrowth()
         {
-            // Same scenario but NO config — shadow events should be empty
             var stats = MakeStatBlock(charm: 3);
             var session = MakeSession(
                 diceValues: new[] { 1, 50 }, // d20=1 (Nat 1)
                 playerStats: stats,
-                shadows: null); // No shadow tracking
+                shadows: null);
 
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
-            Assert.Empty(result.ShadowGrowthEvents);
+            Assert.Contains(result.ShadowGrowthEvents, e => e.Contains("Madness"));
+            Assert.NotNull(session.State.PlayerShadows);
+            Assert.Equal(1, session.State.PlayerShadows!.GetDelta(ShadowStatType.Madness));
         }
 
         // ── AC3: Shadow delta table correctness ──
@@ -178,7 +179,15 @@ namespace Pinder.Core.Tests
         private static CharacterProfile MakeProfile(string name, StatBlock stats)
         {
             var timing = new TimingProfile(5, 1.0f, 0.0f, "neutral");
-            return new CharacterProfile(stats, "system prompt", name, timing, 1);
+            return TestHelpers.MakeCharacterProfile(
+                stats,
+                "system prompt",
+                name,
+                timing,
+                1,
+                backstory: TestHelpers.MakeBackstory(),
+                stakeLines: TestHelpers.MakeStakeLines(),
+                psychiatricDiagnosis: TestHelpers.MakePsychiatricDiagnosis());
         }
 
         private static GameSession MakeSession(

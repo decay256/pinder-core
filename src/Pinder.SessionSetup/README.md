@@ -6,11 +6,14 @@ first turn:
 - **`IStakeGenerator` / `LlmStakeGenerator`** — novelist-style
   "psychological stake" character bible per character, appended to the
   character's assembled system prompt.
-- **`IOutfitDescriber` / `LlmOutfitDescriber`** — short visual scene
-  description used as the turn-0 scene-setting entry. Runs in parallel
-  with stake generation.
 - **`CharacterDefinitionLoader`** — reads the shared character JSONs from
   disk.
+
+> **Setup-trim phase 4 (#1132):** `ActiveSession` no longer wires
+> `IOutfitDescriber` / `LlmOutfitDescriber` during session setup. Turn-0
+> history is seeded with exactly the two bio scene entries. The
+> dialogue-options profile renderer falls back to equipped-item display
+> names for outfit context.
 
 > **Setup-trim phase 1 (#827):** The `IMatchupAnalyzer` /
 > `LlmMatchupAnalyzer` and `IMatchupSummarizer` / `LlmMatchupSummarizer`
@@ -26,10 +29,12 @@ calls them from `ActiveSession.SetupAsync`.
 
 ## Output Contracts
 
-### Outfit description — plain prose
+### Outfit description — legacy plain prose
 
-**The outfit description MUST be emitted as plain prose. No markdown
-markers.**
+The production session setup path no longer generates outfit descriptions.
+The legacy `LlmOutfitDescriber` helper remains provider-agnostic test /
+tooling code; when used manually its output MUST be emitted as plain
+prose. No markdown markers.
 
 Forbidden:
 

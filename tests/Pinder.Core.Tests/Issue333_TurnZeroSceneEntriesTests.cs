@@ -12,8 +12,8 @@ using Xunit;
 namespace Pinder.Core.Tests
 {
     /// <summary>
-    /// Issue #333: regression tests for the turn-0 scene-setting entries
-    /// (player bio, datee bio, LLM-generated outfit description) seeded
+    /// Issue #333: regression tests for the turn-0 bio scene-setting entries
+    /// (player bio, datee bio) seeded
     /// onto <see cref="GameSession.ConversationHistory"/> via
     /// <see cref="GameSession.SeedSceneEntries"/>.
     /// </summary>
@@ -21,7 +21,7 @@ namespace Pinder.Core.Tests
     public class Issue333_TurnZeroSceneEntriesTests
     {
         [Fact]
-        public void SeedSceneEntries_appends_three_scene_entries_to_history()
+        public void SeedSceneEntries_appends_two_bio_scene_entries_to_history()
         {
             var session = MakeSession(out _);
 
@@ -31,18 +31,18 @@ namespace Pinder.Core.Tests
                 "Both wear something quietly out of fashion.");
 
             var history = session.ConversationHistory;
-            Assert.Equal(3, history.Count);
+            Assert.Equal(2, history.Count);
             Assert.All(history, e => Assert.True(Senders.IsScene(e.Sender)));
             Assert.Equal("Player bio text.",                                history[0].Text);
             Assert.Equal("Datee bio text.",                              history[1].Text);
-            Assert.Equal("Both wear something quietly out of fashion.",    history[2].Text);
+            Assert.DoesNotContain(history, e => e.Text.Contains("out of fashion"));
         }
 
         [Theory]
-        [InlineData(null,    "B", "C", new[] { "B", "C" })]
-        [InlineData("",      "B", "C", new[] { "B", "C" })]
-        [InlineData("   ",   "B", "C", new[] { "B", "C" })]
-        [InlineData("A",     null, "C", new[] { "A", "C" })]
+        [InlineData(null,    "B", "C", new[] { "B" })]
+        [InlineData("",      "B", "C", new[] { "B" })]
+        [InlineData("   ",   "B", "C", new[] { "B" })]
+        [InlineData("A",     null, "C", new[] { "A" })]
         [InlineData("A",     "B", "",   new[] { "A", "B" })]
         public void SeedSceneEntries_skips_empty_entries(string a, string b, string c, string[] expected)
         {
@@ -53,6 +53,26 @@ namespace Pinder.Core.Tests
             Assert.Equal(
                 expected,
                 session.ConversationHistory.Select(e => e.Text).ToArray());
+        }
+
+        [Fact]
+        public void SeedSceneEntries_ignores_legacy_outfit_description_and_uses_profile_fallback()
+        {
+            var session = MakeSession(out _);
+
+            session.SeedSceneEntries("Player bio.", "Datee bio.", "Outfit prose.");
+
+            Assert.Equal(2, session.ConversationHistory.Count);
+            Assert.DoesNotContain(session.ConversationHistory, e => e.Text == "Outfit prose.");
+
+            var visible = new DateeVisibleProfile(
+                "Datee",
+                "they/them",
+                "Datee bio.",
+                outfitDescription: string.Empty,
+                equippedItemDisplayNamesFallback: new[] { "Vintage Jacket" });
+            Assert.Contains("Wearing:", visible.Render());
+            Assert.Equal(string.Empty, visible.OutfitDescription);
         }
 
         [Fact]
@@ -107,7 +127,7 @@ namespace Pinder.Core.Tests
             var freshSession = MakeSession(out _);
             freshSession.RestoreState(resim, new NullTrapRegistry());
 
-            Assert.Equal(3, freshSession.ConversationHistory.Count);
+            Assert.Equal(2, freshSession.ConversationHistory.Count);
             Assert.All(freshSession.ConversationHistory,
                 e => Assert.True(Senders.IsScene(e.Sender)));
         }
@@ -126,12 +146,17 @@ namespace Pinder.Core.Tests
 
         private static CharacterProfile MakeProfile(string name)
         {
-            return new CharacterProfile(
+            return TestHelpers.MakeCharacterProfile(
                 stats: TestHelpers.MakeStatBlock(2),
                 assembledSystemPrompt: $"You are {name}.",
                 displayName: name,
                 timing: new TimingProfile(5, 0.0f, 0.0f, "neutral"),
-                level: 1);
+                level: 1,
+                psychiatricDiagnosis: new Dictionary<string, string>
+                {
+                    ["derived_feeling"] = "guarded",
+                    ["defense_reaction"] = "deflects",
+                });
         }
 
         private sealed class FixedDice : IDiceRoller

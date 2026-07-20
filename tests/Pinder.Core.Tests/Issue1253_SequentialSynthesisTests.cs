@@ -273,7 +273,7 @@ namespace Pinder.Core.Tests
             Assert.Contains("Stake line", def.StakeLines);
             Assert.Equal("angst", def.PsychiatricDiagnosis["derived_feeling"]);
 
-            var profile = new CharacterProfile(
+            var profile = TestHelpers.MakeCharacterProfile(
                 stats: new StatBlock(new Dictionary<StatType, int>(), new Dictionary<ShadowStatType, int>()),
                 assembledSystemPrompt: "prompt",
                 displayName: "Test",

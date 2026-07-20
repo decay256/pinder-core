@@ -78,9 +78,8 @@ namespace Pinder.LlmAdapters
             if (history == null) throw new ArgumentNullException(nameof(history));
 
             // #951: skip scene entries (sender == "[scene]") before computing
-            // the last-6 window so turn-0 bios and outfit descriptions never
-            // appear as [DATEE] lines that confuse the LLM about the
-            // datee's character name.
+            // the last-6 window so turn-0 bios never appear as [DATEE]
+            // lines that confuse the LLM about the datee's character name.
             var filtered = new List<(string Sender, string Text)>(history.Count);
             foreach (var e in history)
             {

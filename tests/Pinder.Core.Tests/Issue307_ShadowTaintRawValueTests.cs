@@ -154,11 +154,10 @@ namespace Pinder.Core.Tests
             Assert.Contains(turn.Options, o => o.Stat == StatType.Honesty);
         }
 
-        // ============== AC: No shadow tracker → null thresholds ==============
+        // ============== AC: Omitted tracker → player-stat thresholds ==============
 
-        // Mutation: would catch if null shadow tracker produces empty dict instead of null
         [Fact]
-        public async Task NoShadowTracker_ContextThresholdsAreNull()
+        public async Task OmittedShadowTracker_ContextThresholdsComeFromPlayerStats()
         {
             Dictionary<ShadowStatType, int>? captured = null;
             bool called = false;
@@ -172,7 +171,10 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
 
             Assert.True(called);
-            Assert.Null(captured);
+            Assert.NotNull(captured);
+            Assert.All(Enum.GetValues<ShadowStatType>(), shadow =>
+                Assert.Equal(0, captured![shadow]));
+            Assert.NotNull(session.State.PlayerShadows);
         }
 
         // ============ Helpers ============
@@ -180,7 +182,7 @@ namespace Pinder.Core.Tests
         private static CharacterProfile MakeProfile(string name)
         {
             var timing = new TimingProfile(5, 1.0f, 0.0f, "neutral");
-            return new CharacterProfile(
+            return TestHelpers.MakeCharacterProfile(
                 TestHelpers.MakeStatBlock(),
                 "system prompt",
                 name,

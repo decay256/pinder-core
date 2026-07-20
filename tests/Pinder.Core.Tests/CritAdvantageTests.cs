@@ -183,8 +183,8 @@ namespace Pinder.Core.Tests
                 });
 
             var timing = new TimingProfile(5, 1.0f, 0.0f, "neutral");
-            var player = new CharacterProfile(stats, "system prompt", "Player", timing, 1);
-            var datee = new CharacterProfile(dateeStats, "system prompt", "Datee", timing, 1);
+            var player = TestHelpers.MakeCharacterProfile(stats, "system prompt", "Player", timing, 1);
+            var datee = TestHelpers.MakeCharacterProfile(dateeStats, "system prompt", "Datee", timing, 1);
             var llm = new ScriptedLlm();
             var trapRegistry = new NullTrapRegistry();
 

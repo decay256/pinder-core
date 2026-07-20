@@ -168,12 +168,11 @@ namespace Pinder.Core.Tests
         }
 
         // =====================================================================
-        // Edge: Null shadow tracker — no crash
+        // Edge: Omitted tracker is synthesized from player stats
         // =====================================================================
 
-        // Mutation: would catch if null guard on _playerShadows is missing
         [Fact]
-        public async Task Edge_NullShadowTracker_DoesNotThrow()
+        public async Task Edge_OmittedShadowTracker_TracksSkippedHonesty()
         {
             var options = new[]
             {
@@ -183,9 +182,10 @@ namespace Pinder.Core.Tests
             var session = BuildSession(dice: Dice(15, 50), shadows: null, options: options);
 
             await session.StartTurnAsync();
-            var ex = await Record.ExceptionAsync(() => session.ResolveTurnAsync(0));
+            await session.ResolveTurnAsync(0);
 
-            Assert.Null(ex);
+            Assert.NotNull(session.State.PlayerShadows);
+            Assert.Equal(1, session.State.PlayerShadows!.GetDelta(ShadowStatType.Denial));
         }
 
         // =====================================================================
@@ -243,12 +243,15 @@ namespace Pinder.Core.Tests
         }
 
         private static CharacterProfile MakeProfile(string name, StatBlock? stats = null)
-            => new CharacterProfile(
+            => TestHelpers.MakeCharacterProfile(
                 stats ?? MakeStats(),
                 "system prompt",
                 name,
                 new TimingProfile(5, 1.0f, 0.0f, "neutral"),
-                1);
+                1,
+                backstory: TestHelpers.MakeBackstory(),
+                stakeLines: TestHelpers.MakeStakeLines(),
+                psychiatricDiagnosis: TestHelpers.MakePsychiatricDiagnosis());
 
         private static TestDice Dice(params int[] values) => new TestDice(values);
 

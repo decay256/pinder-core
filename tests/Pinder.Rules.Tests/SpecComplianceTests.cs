@@ -164,32 +164,39 @@ namespace Pinder.Rules.Tests
 
         // Mutation: would catch if GameState constructor doesn't store values
         [Fact]
-        public void GameState_Constructor_StoresAllValues()
+        public void GameState_ValuesDriveCompositeRuleConditions()
         {
-            var shadows = new Dictionary<string, int> { { "Dread", 10 } };
+            var cond = new Dictionary<string, object>
+            {
+                ["interest_range"] = new List<object> { 10, 20 },
+                ["beat_range"] = new List<object> { 5, 9 },
+                ["natural_roll"] = 20,
+                ["need_range"] = new List<object> { 10, 15 },
+                ["level_range"] = new List<object> { 5, 7 },
+                ["streak_minimum"] = 3,
+                ["action"] = "read",
+                ["conversation_start"] = true
+            };
             var state = new GameState(
                 interest: 15,
-                missMargin: 3,
                 beatMargin: 5,
                 naturalRoll: 20,
                 needToHit: 12,
                 level: 5,
                 streak: 3,
                 action: "Read",
-                isConversationStart: true,
-                shadowValues: shadows);
+                isConversationStart: true);
 
-            Assert.Equal(15, state.Interest);
-            Assert.Equal(3, state.MissMargin);
-            Assert.Equal(5, state.BeatMargin);
-            Assert.Equal(20, state.NaturalRoll);
-            Assert.Equal(12, state.NeedToHit);
-            Assert.Equal(5, state.Level);
-            Assert.Equal(3, state.Streak);
-            Assert.Equal("Read", state.Action);
-            Assert.True(state.IsConversationStart);
-            Assert.NotNull(state.ShadowValues);
-            Assert.Equal(10, state.ShadowValues!["Dread"]);
+            Assert.True(ConditionEvaluator.Evaluate(cond, state));
+            Assert.False(ConditionEvaluator.Evaluate(cond, new GameState(
+                interest: 15,
+                beatMargin: 5,
+                naturalRoll: 19,
+                needToHit: 12,
+                level: 5,
+                streak: 3,
+                action: "Read",
+                isConversationStart: true)));
         }
 
         // ============================================================

@@ -25,7 +25,7 @@ namespace Pinder.Core.Tests.Phase0
         /// </summary>
         public static CharacterProfile MakeProfile(string name, int allStats = 2, int level = 1)
         {
-            return new CharacterProfile(
+            return TestHelpers.MakeCharacterProfile(
                 stats: TestHelpers.MakeStatBlock(allStats),
                 assembledSystemPrompt: $"You are {name}.",
                 displayName: name,

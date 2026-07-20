@@ -125,9 +125,8 @@ namespace Pinder.Core.Tests
             Assert.DoesNotContain(result2.ShadowGrowthEvents, e => e.Contains("Nat 1"));
         }
 
-        // Mutation: would catch if no shadow tracker meant null instead of empty events
         [Fact]
-        public async Task AC3_NoTracker_EmptyEvents()
+        public async Task AC3_OmittedTracker_UsesDefaultTrackerForGrowthEvents()
         {
             var session = BuildSession(dice: Dice(1, 50), shadows: null);
 
@@ -135,7 +134,9 @@ namespace Pinder.Core.Tests
             var result = await session.ResolveTurnAsync(0);
 
             Assert.NotNull(result.ShadowGrowthEvents);
-            Assert.Empty(result.ShadowGrowthEvents);
+            Assert.Contains(result.ShadowGrowthEvents, e => e.Contains("Madness"));
+            Assert.NotNull(session.State.PlayerShadows);
+            Assert.Equal(1, session.State.PlayerShadows!.GetDelta(ShadowStatType.Madness));
         }
 
         // =====================================================================

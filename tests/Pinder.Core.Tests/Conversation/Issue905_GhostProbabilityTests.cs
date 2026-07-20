@@ -13,7 +13,7 @@ namespace Pinder.Core.Tests.Conversation
     {
         private static CharacterProfile MakeProfile(string name)
         {
-            return new CharacterProfile(
+            return TestHelpers.MakeCharacterProfile(
                 stats: TestHelpers.MakeStatBlock(2),
                 assembledSystemPrompt: $"You are {name}.",
                 displayName: name,

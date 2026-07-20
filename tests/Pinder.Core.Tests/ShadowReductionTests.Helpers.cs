@@ -42,7 +42,7 @@ namespace Pinder.Core.Tests
         }
 
         private static CharacterProfile MakeProfile(string name, StatBlock stats)
-            => new CharacterProfile(stats, "system prompt", name, new TimingProfile(5, 1.0f, 0.0f, "neutral"), 1);
+            => TestHelpers.MakeCharacterProfile(stats, "system prompt", name, new TimingProfile(5, 1.0f, 0.0f, "neutral"), 1);
 
         private static TestDice Dice(params int[] values) => new TestDice(values);
 

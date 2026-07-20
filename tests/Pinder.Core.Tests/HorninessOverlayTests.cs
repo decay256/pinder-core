@@ -120,10 +120,10 @@ namespace Pinder.Core.Tests
         }
 
         /// <summary>
-        /// When no shadow tracker is present, no horniness check is performed.
+        /// An omitted tracker is synthesized and participates in the horniness check.
         /// </summary>
         [Fact]
-        public async Task NoCheck_WhenNoShadowTracker()
+        public async Task OmittedShadowTracker_UsesPlayerStatsForHorninessCheck()
         {
             var dice = new FixedDice(5, 15, 50);
             var config = new GameSessionConfig(clock: new TestClock(horninessModifier: 0));
@@ -137,8 +137,9 @@ namespace Pinder.Core.Tests
             var turn = await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
-            // No shadows → NotPerformed
-            Assert.Equal(0, result.HorninessCheck.DC);
+            Assert.NotNull(session.State.PlayerShadows);
+            Assert.Equal(5, result.HorninessCheck.DC);
+            Assert.NotNull(result.HorninessCheck.Check);
         }
 
         /// <summary>
@@ -215,7 +216,15 @@ namespace Pinder.Core.Tests
         {
             var stats = TestHelpers.MakeStatBlock();
             var timing = new TimingProfile(5, 0.0f, 0.0f, "neutral");
-            return new CharacterProfile(stats, $"You are {name}.", name, timing, 1);
+            return TestHelpers.MakeCharacterProfile(
+                stats,
+                $"You are {name}.",
+                name,
+                timing,
+                1,
+                backstory: TestHelpers.MakeBackstory(),
+                stakeLines: TestHelpers.MakeStakeLines(),
+                psychiatricDiagnosis: TestHelpers.MakePsychiatricDiagnosis());
         }
 
         private sealed class TestClock : IGameClock

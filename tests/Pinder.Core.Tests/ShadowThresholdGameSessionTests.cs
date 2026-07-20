@@ -293,12 +293,11 @@ namespace Pinder.Core.Tests
             Assert.Equal(0, capturedThresholds[ShadowStatType.Fixation]);    // raw value 0
         }
 
-        // ============== AC9: No effects when SessionShadowTracker is null ==============
+        // ============== AC9: Omitted tracker is synthesized from player stats ==============
 
         [Fact]
-        public async Task NoShadowTracker_DefaultBehavior()
+        public async Task OmittedShadowTracker_UsesPlayerStatsWithDefaultBehavior()
         {
-            // No shadows configured → interest starts at 10, no disadvantage, no filtering
             var session = MakeSession(
                 diceValues: new[] { 15, 50 },
                 shadows: null);
@@ -306,12 +305,13 @@ namespace Pinder.Core.Tests
             var turn = await session.StartTurnAsync();
 
             Assert.Equal(10, turn.State.Interest);
-            // NullLlmAdapter returns 4 options
             Assert.Equal(4, turn.Options.Length);
+            Assert.NotNull(session.State.PlayerShadows);
+            Assert.Equal(0, session.State.PlayerShadows!.GetEffectiveShadow(ShadowStatType.Dread));
         }
 
         [Fact]
-        public async Task NoShadowTracker_DialogueContextHasNullThresholds()
+        public async Task OmittedShadowTracker_DialogueContextHasPlayerThresholds()
         {
             Dictionary<ShadowStatType, int>? capturedThresholds = null;
             bool contextChecked = false;
@@ -330,7 +330,9 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
 
             Assert.True(contextChecked);
-            Assert.Null(capturedThresholds);
+            Assert.NotNull(capturedThresholds);
+            Assert.Equal(0, capturedThresholds![ShadowStatType.Dread]);
+            Assert.Equal(0, capturedThresholds[ShadowStatType.Denial]);
         }
     }
 }

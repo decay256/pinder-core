@@ -89,7 +89,7 @@ namespace Pinder.Core.Tests
     {
         private static CharacterProfile MakeProfile(string name, int allStats = 2)
         {
-            return new CharacterProfile(
+            return TestHelpers.MakeCharacterProfile(
                 stats: TestHelpers.MakeStatBlock(allStats),
                 assembledSystemPrompt: $"You are {name}.",
                 displayName: name,
@@ -101,18 +101,17 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public void GameSessionConfig_AcceptsNullRules()
+        public async Task GameSession_WithoutResolver_StartsTurnUsingBuiltInRules()
         {
-            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), rules: null);
-            Assert.Null(config.Rules);
-        }
+            var session = new GameSession(
+                MakeProfile("Player"), MakeProfile("Datee"),
+                new NullLlmAdapter(), new FixedDice(1, 4), new NullTrapRegistry(),
+                new GameSessionConfig(clock: TestHelpers.MakeClock(), rules: null));
 
-        [Fact]
-        public void GameSessionConfig_AcceptsMockRules()
-        {
-            var resolver = new MockRuleResolver();
-            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), rules: resolver);
-            Assert.Same(resolver, config.Rules);
+            var start = await session.StartTurnAsync();
+
+            Assert.NotEmpty(start.Options);
+            Assert.Equal(InterestState.Interested, start.State.State);
         }
 
         [Fact]
@@ -140,7 +139,7 @@ namespace Pinder.Core.Tests
             // Return a custom success delta of +10
             var resolver = new MockRuleResolver { SuccessDelta = 10 };
             var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), rules: resolver,
-                startingInterest: 10);
+                startingInterest: 1);
 
             // Dice: horniness (1d10)=1, d20 roll = 20 (auto-success, nat 20),
             // then extra dice for timing delay, datee response, etc.
